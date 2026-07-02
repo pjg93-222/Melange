@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import sys
+sys.exit('SUPERSEDED (2026-07-02 architecture review): restores a PRISTINE backup OVER the live workbook, wiping every later model edit — use sync_stance_g.py. Remove this guard only if you are certain.')
+
 """Clean stance sync: restore the pristine pre-edit workbook (PRE-STANCEGUARD), then write ONLY the
 Stance Tier column (G) with Excel calculation set to MANUAL so nothing downstream recalculates. Guarantees
 the Blended Model (ranks/scores) stays byte-identical to the original; only col G changes."""

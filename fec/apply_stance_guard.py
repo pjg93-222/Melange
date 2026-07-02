@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import sys
+sys.exit('SUPERSEDED (2026-07-02 architecture review): overwrites col G with the superseded activity-based formula, clobbering per-category tiers — use sync_stance_g.py. Remove this guard only if you are certain.')
+
 """Root fix: update the Rank & Allocation 'Stance Tier' formula in the master workbook so a member who
 actively cosponsors CU bills (Legislative >= ally dial L8) is NOT tagged Opponent/Skeptic on press alone.
 Done via Excel COM so Tables/LET formulas are preserved and the workbook recalculates (openpyxl can't).
