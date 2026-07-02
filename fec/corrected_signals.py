@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
-import moneyball_core as MC
 """Rebuild corrected per-member PRESS and LEGISLATIVE leans from ONE consistent, direction-aware source —
 the Press Release Articles sheet (real articles + the billstatus bill-cosponsorship entries, each carrying a
 CU-direction = sign of its score). Fixes: (A) press normalization/mislabels, (B) per-bill legislative direction
