@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
 import pandas as pd,glob,json,sys,collections,csv,re
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 A=pd.read_excel(sorted(glob.glob(MB_ROOT+r'\congress_bills_archive_*.xlsx'))[-1],sheet_name='All Bills')
@@ -66,6 +67,6 @@ for _,r in A.iterrows():
     leg[mm][cat]+=sign*w*dw
 print('matched model members with >=1 archive bill: %d / %d'%(len(leg),len(model)))
 um=sum(unmatched.values()); print('unmatched archive rows: %d ; top unmatched names:'%um,[n for n,_ in unmatched.most_common(6)])
-json.dump({m:dict(leg[m]) for m in leg},open(MB_ROOT+r'\archive_leg.json','w'))
+dump_atomic({m:dict(leg[m]) for m in leg},MB_ROOT+r'\archive_leg.json')
 print('\nVALIDATION — Durbin per-category (signed role-weighted):')
 for c,v in sorted(leg['Richard Durbin'].items(),key=lambda x:-abs(x[1])): print('   %-26s %+.1f'%(c,v))

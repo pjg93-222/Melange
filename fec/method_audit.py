@@ -1,6 +1,6 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import moneyball_core as MBC
-import json,sys,math,collections,glob,os,random,statistics,openpyxl
+import json, sys, math, collections, random, statistics, openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 random.seed(3)
 WM,WP=0.6,0.4; CAP=50000

@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
 import json,sys,csv,os,collections,statistics,openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
@@ -39,7 +40,7 @@ for m in members:
                   'value':round(max(primary,general),3),'comp':comp,'party':p,'overall':ov,'elavg':EL.get(m,{}).get('elavg')}
     else:
         plays[m]={'play':'none','value':0,'comp':comp,'party':p,'overall':ov}
-json.dump(plays,open(B+r'\electoral_plays.json','w'))
+dump_atomic(plays,B+r'\electoral_plays.json')
 def show(kind,key,n=8):
     xs=[(m,plays[m]) for m in members if plays[m]['play']==kind]
     xs=sorted(xs,key=lambda x:-x[1].get(key,x[1]['value']))[:n]

@@ -16,7 +16,7 @@ images to press text.  Two of their instruments transplant directly:
     Ours: chi-squared press CATEGORIES against party, and distinctive title TERMS per party within the
     corpus — a data-driven read on how each party FRAMES credit-union issues, before any theory.
 Writes frame_alignment.json."""
-import csv,json,sys,re,math,collections
+import csv, json, sys, re, collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 SRC=MB_DRAFT+r'\cu_press_stance_tone.csv'

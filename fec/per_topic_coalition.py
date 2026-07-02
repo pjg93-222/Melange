@@ -1,6 +1,6 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import moneyball_core as MBC
-import json,sys,math,random,collections,glob,os,csv,openpyxl
+import json, sys, random, os, openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 SEED=int(os.environ.get('SEED','7')); random.seed(SEED)   # fixed seed -> reproducible; scenarios use SAME seed so deltas aren't MC noise
 BUDGET=2_000_000; CAP=50_000; MC=int(os.environ.get('MC','20')); BSCALE=400000
@@ -72,5 +72,5 @@ for sc in blocks:
     summ.append((labels[sc],sum(al.values()),len(top),base,joint,top[:4]))
     print('%-30s base %.0f -> %.0f (+%.1f joint; naive-additive +%.1f) | $%s, %d seeds: %s'%(labels[sc][:30],base,joint,joint-base,sum(pos.values()),f'{sum(al.values()):,}',len(top),', '.join('%s $%dk'%(n.split()[-1],a//1000) for n,a in top[:4])))
 tag='' if (SEED==7 and os.environ.get('MC','20')=='20') else '_seed%d_mc%d'%(SEED,MC)
-json.dump(ALL,open(MB_ROOT+r'\per_topic_coalition%s.json'%tag,'w'))
+MBC.dump_atomic(ALL,MB_ROOT+r'\per_topic_coalition%s.json'%tag)
 print('\nwrote per_topic_coalition%s.json (seed %d, MC %d, %d sub-categories)'%(tag,SEED,MC,len(ALL)))

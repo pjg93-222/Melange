@@ -7,7 +7,7 @@ Winnability of a member on a topic:  pflip(n) = a/(a+b),
 CU money raises a (with sqrt-diminishing returns), competitor money raises b.
 Expected flips on a topic = sum_n tgt(n)*pflip(n).  Faithful to per_topic_flip.py.
 """
-import json,math,collections,glob,os,csv,openpyxl
+import json, os, openpyxl
 B=MB_ROOT
 WM,WP=0.35,0.65; CAP=50000; BASE=0.15   # CALIBRATED: money is the minority partner to peer/network influence (money buys access/effort > votes — Ansolabehere; Hall&Wayman; Kalla&Broockman)
 # M5: '—' = member has taken NO recorded position on THIS issue, which is 59.8% of matrix cells.

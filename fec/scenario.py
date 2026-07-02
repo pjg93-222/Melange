@@ -16,7 +16,7 @@ Usage (any number of moves):
     defect Member                  (force a money-style defection regardless of threshold)
     stance Member:Issue:Tier       (hand-set a per-category stance)
 """
-import json,sys,os,math,random,collections,glob,openpyxl,importlib.util,argparse
+import json, sys, os, random, importlib.util, argparse
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 spec=importlib.util.spec_from_file_location('mr',B+r'\fec\money_response.py'); mr=importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
@@ -28,7 +28,6 @@ CSJ=json.load(open(B+r'\category_stance.json')); MAT0=CSJ['matrix']; cats=CSJ['c
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=[m['member'] for m in C.values()]
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 bpf=MBC.bpf()
-import csv
 prt=MBC.party()
 cpf=MBC.cpf_diffusion
 adj=MBC.load_network()

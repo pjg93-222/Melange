@@ -20,6 +20,17 @@ ok('sm64 in [0,1)',all(0<=x<1 for x in xs))
 ok('sm64 deterministic',all(MC.sm64(i)==xs[i] for i in range(0,5000,97)))
 ok('sm64 well-spread (mean ~0.5)',abs(sum(xs)/len(xs)-0.5)<0.02,sum(xs)/len(xs))
 ok('sm64 key-independent (no order effect)',MC.sm64(12345)==MC.sm64(12345) and MC.sm64(1)!=MC.sm64(2))
+print('[core: atomic dump]')
+import tempfile,json as _json
+_tf=os.path.join(tempfile.gettempdir(),'mb_atomic_test.json')
+MC.dump_atomic({'a':1,'b':[2,3]},_tf,separators=(',',':'))
+ok('dump_atomic writes valid json',_json.load(open(_tf))=={'a':1,'b':[2,3]})
+_pre=set(os.listdir(tempfile.gettempdir()))
+try: MC.dump_atomic({'x':object()},_tf)   # unserializable -> must raise and leave NO temp behind
+except TypeError: pass
+_leaked=[f for f in os.listdir(tempfile.gettempdir()) if f.endswith('.tmp') and f not in _pre]
+ok('dump_atomic leaves original intact + no temp on failure',_json.load(open(_tf))=={'a':1,'b':[2,3]} and not _leaked)
+os.remove(_tf)
 print('[core: constants]')
 ok('IMP has all 18 categories incl. CU Tax Status',len(MC.IMP)==18 and MC.IMP.get('CU Tax Status')==3.0)
 ok('PERS silence == Ally parity (user-ratified 0.45)',MC.PERS['—']==0.45 and MC.PERS['—']<=MC.PERS['Highly Persuadable'])

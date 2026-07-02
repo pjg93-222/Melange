@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
 """ADAPTIVE BUDGET OPTIMIZER (Golovin & Krause, "Adaptive Submodularity").
 Greedily allocates a CU budget across members to maximize total Linear-Threshold winnability
 (sum over topics of expected weighted flips).  The objective is monotone & submodular in the
@@ -11,7 +12,7 @@ Usage:  python optimize.py            (default $2M, all issues)
         BUDGET=1000000 INC=25000 python optimize.py
         TOPIC=Interchange python optimize.py     (optimize one issue's winnability)
 """
-import sys,os,math,heapq,collections,importlib.util
+import sys, os, heapq, collections, importlib.util
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 def imp(n,f): s=importlib.util.spec_from_file_location(n,B+r'\fec\%s'%f); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); return m
@@ -113,5 +114,5 @@ for m,v in top[:14]: print('   %-24s $%-9s%s'%(m,f'{v:,}','  [CONVERTED->coaliti
 print('\nADAPTIVE CONVERSIONS observed (cumulative CU crossed their defection threshold -> joined coalition):')
 for m,a,nv,mv in conversions[:12]: print('   %-22s at $%-8s -> %s (improved on %d issues)'%(m,f'{int(a):,}',nv,len(mv)))
 if not conversions: print('   (none at this budget)')
-import json; json.dump({'budget':BUDGET,'base':base,'final':cur,'opt_bound':round(opt_bound,3),'knee':knee,'alloc':dict(alloc),'conversions':[(m,a,nv) for m,a,nv,_ in conversions],'path':path},open(OUTF,'w'))
+dump_atomic({'budget':BUDGET,'base':base,'final':cur,'opt_bound':round(opt_bound,3),'knee':knee,'alloc':dict(alloc),'conversions':[(m,a,nv) for m,a,nv,_ in conversions],'path':path},OUTF)
 print('\nwrote %s (frontier + allocation + conversions)'%os.path.basename(OUTF))

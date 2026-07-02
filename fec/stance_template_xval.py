@@ -22,7 +22,7 @@ Checks:
 Also emits stance_template_variants.csv — Burnham-style SYNONYMOUS HYPOTHESIS templates (3 paraphrases
 per class) for the S3 NLI layer; template robustness = agreement across paraphrases (his validation).
 Outputs: stance_templates_review.md + stance_template_variants.csv."""
-import csv,io,json,sys,collections,os
+import csv, io, json, sys, collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 DS=MB_DRAFT

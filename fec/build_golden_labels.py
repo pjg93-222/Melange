@@ -18,7 +18,7 @@ Merge key: URL.  Conflict policy (the 95 overlap articles): if the two user labe
   and EVERY conflict is flagged in `conflict` for the user's eyes — nothing is silently resolved.
 Split assignment: augmented rows keep the user's split; queue-only rows get split='goldeval' so the
 balanced eval set can never contaminate training.  Writes cu_golden_labels.csv."""
-import csv,io,json,sys,collections
+import csv, io, sys, collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl
 B=MB_ROOT
@@ -89,5 +89,6 @@ print('  splits %s  (goldeval = balanced queue, firewalled from training)'%dict(
 print('  queue overlay: %d articles enriched with factorization fields, %d new eval rows added'%(enriched,added))
 print('  CONFLICTS flagged for your review: %d'%len(conflicts))
 for u,c in conflicts[:8]: print('    - %s | %s'%(u[:60],c))
-json.dump({'rows':len(out),'classes':dict(lb),'splits':dict(sp),'conflicts':len(conflicts)},
-          open(B+r'\cu_golden_labels_stats.json','w'),indent=1)
+from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
+dump_atomic({'rows':len(out),'classes':dict(lb),'splits':dict(sp),'conflicts':len(conflicts)},
+          B+r'\cu_golden_labels_stats.json',indent=1)

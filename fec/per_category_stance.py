@@ -1,5 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
-import openpyxl,sys,json,collections,statistics,math
+import openpyxl, sys, json, collections, math
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 M=MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
 wb=openpyxl.load_workbook(M,data_only=True)

@@ -1,4 +1,4 @@
-import json,sys,math,collections,openpyxl
+import json, sys, openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 P=[]; F=[]
 def ok(c,m): (P if c else F).append(m)

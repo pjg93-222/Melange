@@ -49,6 +49,20 @@ def receptivity():
         except FileNotFoundError: _c['rec']={}
     return _c['rec']
 def rc(m,k,d=1.0): return receptivity().get(m,{}).get(k,d)
+def dump_atomic(obj,path,**kw):
+    """S2-03 (audit 2026-07-02): write JSON to a temp sibling then os.replace() — atomic on NTFS, so a
+    crash/kill mid-write (Excel force-kill, OneDrive contention) can never leave a truncated artifact.
+    Drop-in for json.dump(obj, open(path,'w'), **kw)."""
+    import json as _j,tempfile as _t
+    d=os.path.dirname(path) or '.'
+    fd,tmp=_t.mkstemp(dir=d,suffix='.tmp')
+    try:
+        with os.fdopen(fd,'w',encoding='utf-8') as fh: _j.dump(obj,fh,**kw)
+        os.replace(tmp,path)
+    except BaseException:
+        try: os.remove(tmp)
+        except OSError: pass
+        raise
 def load_network():
     """Newest congress_cosponsor_network_*.xlsx by mtime (AUG picked up automatically),
     mean-symmetrized (D2: 41 reverse-dup asymmetric pairs), name-keyed adjacency dict."""

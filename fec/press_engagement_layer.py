@@ -21,7 +21,7 @@ Mention extraction is PRECISION-FIRST (headline case makes bare surnames toxic: 
   * never the author him/herself, never a surname that is a token of the author's own name, never
     surnames shared by two members (ambiguous), never surnames < 4 chars.
 Writes press_engagement.json (directed probs + symmetrized layer + overlap diagnostics)."""
-import csv,json,sys,re,collections,glob,os,math
+import csv, json, sys, re, collections, glob, os
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 SRC=MB_DRAFT+r'\cu_press_stance_tone.csv'

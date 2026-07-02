@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
 import openpyxl,json,sys,glob,os,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
@@ -38,7 +39,7 @@ for m in members:
         sec=pct(elavg[m]); lev=round(1+LELEV*(1-sec),3); elec[m]={'elavg':round(elavg[m],1),'security':round(sec,3),'leverage':lev}
     else:
         elec[m]={'elavg':None,'security':0.5,'leverage':round(1+LELEV*0.5,3)}   # unmatched -> neutral
-json.dump(elec,open(B+r'\electoral.json','w'))
+dump_atomic(elec,B+r'\electoral.json')
 matched=sum(1 for m in members if elec[m]['elavg'] is not None)
 print('electoral.json: %d/533 matched, LELEV=%.2f'%(matched,LELEV))
 hi=sorted([m for m in members if elec[m]['elavg'] is not None],key=lambda m:-elec[m]['leverage'])[:6]

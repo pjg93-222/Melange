@@ -1,5 +1,6 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
-import pandas as pd,csv,sys,re,glob,collections,json
+from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
+import pandas as pd, csv, sys, re, glob, collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 ARCH=sorted(glob.glob(MB_ROOT+r'\congress_bills_archive_*.xlsx'))[-1]
 a=pd.read_excel(ARCH,sheet_name='All Bills')
@@ -66,7 +67,7 @@ for c in range(1,18):
 out=collections.defaultdict(dict)
 for (bio,cat),(ssum,cnt) in agg.items():
     out[bio][CATLAB[cat]]={'lean':ssum/cnt,'n':cnt}
-json.dump({'name_of':name_of,'votes':out},open(MB_ROOT+r'\vote_category_lean.json','w'))
+dump_atomic({'name_of':name_of,'votes':out},MB_ROOT+r'\vote_category_lean.json')
 nm=len(out); print('\nmembers with >=1 categorized vote:',nm)
 # sanity: Durbin (interchange author) and a known CFPB opponent
 b2n={v:k for k,v in name_of.items()}

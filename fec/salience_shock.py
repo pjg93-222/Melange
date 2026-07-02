@@ -36,7 +36,7 @@ not hand-set.  Usage:
   python salience_shock.py --advise            # rank ALL issues: where does going public help vs hurt?
   actor pro  = a CU-side champion goes public FOR the CU position (exec-party via --party, default R)
   actor anti = an executive/industry campaign goes public AGAINST the CU position"""
-import json,sys,os,math,random,collections,glob,csv,argparse,importlib.util
+import json, sys, os, math, random, collections, argparse, importlib.util
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 spec=importlib.util.spec_from_file_location('mr',B+r'\fec\money_response.py'); mr=importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)

@@ -190,9 +190,16 @@ if os.path.exists(B+r'\member_receptivity.json'):
 # W1 guard 2026-07-02: the press-pillar SUMPRODUCT weight row once held stray LET-formula remnants that
 # evaluated to 0 on the three TOP-tier categories — every weight must be a positive literal number.
 import openpyxl as _px
-_w535=[_px.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True,read_only=True)['Press Release - Normalized'].cell(535,c).value for c in range(5,24)]
+_wb=_px.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True,read_only=True)
+_w535=[_wb['Press Release - Normalized'].cell(535,c).value for c in range(5,24)]
 ck('press-pillar weight row 535: 19 numeric positive weights (no formula remnants)',
    all(isinstance(v,(int,float)) and v>0 for v in _w535),str(_w535))
+# S2-04 guard (audit 2026-07-02): every workbook reader hardcodes range(3,536) for the 533-member roster.
+# If a member row is ever added/removed, those readers silently truncate or NUL the tail. Assert the
+# workbook's Blended Model member column matches the congestion roster the engines load.
+_roster=len(json.load(open(B+r'\congestion.json')))
+_bm=_wb['Blended Model']; _wbrows=sum(1 for r in range(3,536) if _bm.cell(r,1).value)
+ck('workbook member rows == roster size (no silent row drift)', _wbrows==_roster, 'workbook %d vs roster %d'%(_wbrows,_roster))
 
 if os.path.exists(B+r'\stance_training.jsonl'):
     import hashlib as _hl, json as _js

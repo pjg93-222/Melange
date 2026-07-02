@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
 """CONGRESSIONAL SOCIAL-MEDIA COLLECTOR + DATABASE (user-directed 2026-07-01: "was the data collector
 for politicians tweets included? We need a very robust database").
 
@@ -311,7 +312,7 @@ def cmd_classify():
     preds=clf.predict(['target: Credit Unions (direct). speaker: member. '+tx for *_,tx in rel])
     out=[{'platform':p,'post_id':pid,'bioguide':bg,'date':dt,'stance':st,'text':tx[:280]}
          for (p,pid,bg,dt,tx),st in zip(rel,preds)]
-    json.dump(out,open(B+r'\social_stance_signals.json','w'),indent=1)
+    dump_atomic(out,B+r'\social_stance_signals.json',indent=1)
     agg=collections.Counter((r['bioguide'],r['stance']) for r in out if r['bioguide'])
     print('wrote social_stance_signals.json (%d scored posts, %d member-stance cells) — a NEW evidence'%(len(out),len(agg)))
     print('channel for the press pillar / stance_dynamics, provenance=social (user adjudicates adoption)')

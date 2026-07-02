@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
 """Build im_allocation.json from the CURRENT 17-topic live model (M4 fix).
 
 The legacy fec/im_allocate2.py produced im_allocation.json from a SUPERSEDED single-channel model:
@@ -17,7 +18,7 @@ per-topic coalition row-sum -- both straight from the current model, no legacy t
 
 Run per_topic_flip.py and per_topic_coalition.py first (they write the inputs), then this, then write_im_sheet.py.
 """
-import json,sys,collections,os
+import json, sys, collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 pta=json.load(open(B+r'\per_topic_alloc.json'))
@@ -28,7 +29,7 @@ for t,d in pta.items():
 for t,d in ptc.items():
     for n,a in d.items(): coal[n]+=a
 out={'flip':{n:int(v) for n,v in flip.items() if v>0},'coalition':{n:int(v) for n,v in coal.items() if v>0}}
-json.dump(out,open(B+r'\im_allocation.json','w'))
+dump_atomic(out,B+r'\im_allocation.json')
 print('build_im_allocation — regenerated im_allocation.json from the LIVE per-topic model')
 print('  FLIP: %d members funded (sum across %d topics)'%(len(out['flip']),len(pta)))
 print('  COALITION: %d members funded (sum across %d topics)'%(len(out['coalition']),len(ptc)))

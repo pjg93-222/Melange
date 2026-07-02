@@ -16,7 +16,7 @@ Usage:
   python train_stance_domain.py --task hop1
   python train_stance_domain.py --transformer        # fine-tuned RoBERTa (needs: pip install transformers torch)
   python train_stance_domain.py --transformer --model roberta-base   # paper-exact (distilroberta default: CPU-practical)"""
-import json,sys,os,argparse,collections
+import json, sys, argparse
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 ap=argparse.ArgumentParser()

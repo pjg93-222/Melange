@@ -10,7 +10,7 @@ across all issues, covering all stances"). Stratification:
 Output gold_label_queue.csv carries the richer Burnham-factorization schema; the api_* columns are
 filled by fec/api_prelabel.py (Claude API pre-label pass) and the gold_* columns are the USER'S to
 adjudicate (pre-seeded from the API pass for correction-in-place)."""
-import csv, io, os, sys, hashlib, collections, random
+import csv, io, sys, hashlib, collections, random
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 random.seed(7)
 B = MB_ROOT

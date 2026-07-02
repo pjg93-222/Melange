@@ -40,9 +40,11 @@ B=MB_ROOT
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(C)
 try: T=json.load(open(B+r'\big5_traits.json'))['traits']
 except FileNotFoundError: T={}
+if not T: print('  !! big5_traits.json MISSING/EMPTY — every member falls to trait-neutral (personality layer OFF). Run big5_traits.py.')
 EL=json.load(open(B+r'\electoral.json'))
 try: EP=json.load(open(B+r'\electoral_plays.json'))
 except FileNotFoundError: EP={}
+if not EP: print('  !! electoral_plays.json MISSING/EMPTY — prospect-theory loss domain falls back to security<0.45 only. Run build_electoral_plays.py.')
 RETF=B+r'\fec\retiring_members.txt'
 RET=set()
 if os.path.exists(RETF):

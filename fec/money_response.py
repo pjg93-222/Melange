@@ -3,7 +3,7 @@ import moneyball_core as MC
 """Money-response + defection mechanic (roadmap step 2).
 A donation shifts a member's money lean with diminishing returns, scaled by how movable they are
 (small relative to big fundraising = small move). Big enough competitor shock can trigger a defection."""
-import json,sys,os,openpyxl,math
+import json, sys, os, openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}

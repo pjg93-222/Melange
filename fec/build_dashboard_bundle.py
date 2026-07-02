@@ -1,5 +1,6 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
-import json,sys,glob,os,collections,csv,openpyxl,networkx as nx,math,random,re,unicodedata,zlib
+from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
+import json, sys, glob, os, csv, openpyxl, networkx as nx, math, random, re, unicodedata, zlib
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 C=json.load(open(MB_ROOT+r'\congestion.json'))
 cong={m['member']:m for m in C}
@@ -87,14 +88,31 @@ x0,x1,y0,y1=min(xs),max(xs),min(ys),max(ys)
 def sx(v):return round(40+920*(v-x0)/(x1-x0))
 def sy(v):return round(40+920*(v-y0)/(y1-y0))
 TC={'Champion':'C','Defender':'F','Ally':'A','Highly Persuadable':'H','Persuadable':'P','Lean Persuadable':'G','True Neutral':'T','Lean Skeptic':'L','Neutral':'N','Skeptic':'S','Highly Skeptical':'K','Opponent':'O','—':'-'}
-# bipartisanship = weighted fraction of cosponsorship ties crossing party, shrunk toward the global rate (low-degree members aren't 0/100)
+# bipartisanship = weighted fraction of COSPONSORSHIP ties crossing party, shrunk toward the global
+# rate (low-degree members aren't 0/100).
+# S2-01 fix (audit 2026-07-02): the display graph G above deliberately uses the AUG network (the live
+# cascade reality incl. social/press layers), but BP is DEFINED on cosponsorship — cross-party reposts
+# are not cosponsorship, and letting them in both redefined bipartisanship unratified AND fed back into
+# cpf_diffusion/tgt/coalition boosts via bipartisan.json. BP therefore uses the newest NON-AUG file.
+# BP_SRC=aug restores the augmented definition if the user ever ratifies it.
+if os.environ.get('BP_SRC','cosponsor')=='cosponsor':
+    _n0=max([q for q in glob.glob(MB_ROOT+r'\congress_cosponsor_network_*.xlsx') if 'AUG' not in os.path.basename(q)],key=os.path.getmtime)
+    _e0=openpyxl.load_workbook(_n0,data_only=True)['Edges']
+    G0=nx.Graph(); G0.add_nodes_from(members)
+    for r in range(2,_e0.max_row+1):
+        a,b,w=_e0.cell(r,1).value,_e0.cell(r,2).value,_e0.cell(r,3).value
+        a=bio2name.get(a); b=bio2name.get(b)
+        if a in idx and b in idx and a!=b and isinstance(w,(int,float)):
+            w=(G0[a][b]['weight']+w)/2 if G0.has_edge(a,b) else w   # D2 mean-symmetrize
+            G0.add_edge(a,b,weight=w)
+else: G0=G
 raw={}; gs=gc=0.0
 for n in members:
     pn=party.get(cong[n].get('bioguide',''),'?'); same=cross=0.0
-    for nb in G.neighbors(n):
+    for nb in G0.neighbors(n):
         pnb=party.get(cong[nb].get('bioguide',''),'?')
         if pn in ('D','R') and pnb in ('D','R'):
-            w=G[n][nb].get('weight',1.0)
+            w=G0[n][nb].get('weight',1.0)
             if pnb==pn: same+=w
             else: cross+=w
     raw[n]=(same,cross); gs+=same; gc+=cross
@@ -225,7 +243,7 @@ bundle={'issues':issues,'name':name,'x':X,'y':Y,'party':''.join(PARTY),'gen':''.
         'rank':RANK,'nl':NL,'bp':BP,'cf':CF,'stance':STANCE,'edges':E,'flip':flip,'coal':coal,'stats':stats,
         'play':PLAY,'epval':EPVAL,'frontier':frontier,'opt':opt,'engine':engine,
         'cx':CX,'cy':CY,'comms':COMMS,'cmi':CMI}   # committee-cluster layout (Porter): positions + anchors + per-member primary committee
-json.dump({name[i]:BP[i] for i in range(len(name))},open(MB_ROOT+r'\bipartisan.json','w'))
+dump_atomic({name[i]:BP[i] for i in range(len(name))},MB_ROOT+r'\bipartisan.json')
 out=MB_ROOT+r'\dashboard_data.json'
-json.dump(bundle,open(out,'w'),separators=(',',':'))
+dump_atomic(bundle,out,separators=(',',':'))
 print('wrote %s  (%.1f KB)  nodes=%d edges=%d issues=%d'%(out,os.path.getsize(out)/1024,len(name),len(E),len(issues)))

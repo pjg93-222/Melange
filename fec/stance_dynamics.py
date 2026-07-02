@@ -19,7 +19,7 @@ the CU press corpus.  Their contributions we transplant (sans the GNN — our co
     USER'S; proposals go to stance_imputation_proposals.csv with provenance, the matrix is untouched.
     Where the matrix already HAS a stance we score the imputation against it (their masking validation).
 Writes stance_dynamics.json + stance_imputation_proposals.csv."""
-import csv,json,sys,math,collections,datetime,glob,os
+import csv, json, sys, collections, datetime, glob, os
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 SRC=MB_DRAFT+r'\cu_press_stance_tone.csv'

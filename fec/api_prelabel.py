@@ -6,7 +6,7 @@ JSON output) once per queue row and fills the api_* columns; the gold_* columns 
 the API verdicts so the USER can correct in place. stance_eval.py can then score BOTH the legacy
 DEBATE column (model_stance) and this pass (api_cu_alignment) against the corrected gold.
 Resume-safe: rows that already have api_cu_alignment are skipped. Requires ANTHROPIC_API_KEY."""
-import csv, io, json, os, sys, threading, collections
+import csv, io, json, sys, threading, collections
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import anthropic
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')

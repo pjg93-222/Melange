@@ -5,7 +5,7 @@ A member co-sponsors / flips when their PRO-influence clears their threshold:
     pressure(active pro neighbors) + money-influence  >=  theta(resistance)   [Linear Threshold]
 For each persuadable target we solve for the CHEAPEST balance of network pressure (which neighbors to
 recruit) and direct money (diminishing returns) that tips them over."""
-import json,sys,os,glob,collections,openpyxl,heapq,csv,math
+import json, sys, os
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 TOPIC=os.environ.get('TOPIC','Mortgage')
@@ -65,7 +65,7 @@ res=[r for r in (prime(v) for v in members) if r and r['cost']>0]
 res.sort(key=lambda r:r['cost'])
 print('LT PRIMING — issue: %s | %d pro, %d primeable targets'%(cat,len(proset),len(res)))
 print('Cheapest members to tip into co-sponsoring (pressure + money balance):')
-json.dump(res,open(B+r'\lt_priming.json','w'))
+MBC.dump_atomic(res,B+r'\lt_priming.json')
 print('%-22s %-18s %5s %5s   %10s = %9s money + pressure(recruit)'%('member','tier','gap','press','TOTAL$',''))
 for r in res[:14]:
     rc=', '.join('%s'%u.split()[-1] for u,a in r['recruits'][:3]) or '—'

@@ -21,7 +21,7 @@ Their pipeline, kept step for step:
      trait z-scores toward 0 (uncertainty -> neutral, never a fabricated personality).
 Emotional Stability (ES) is reported Ramey-style; Neuroticism N = -ES.
 Output: big5_traits.json  {member: {O,C,E,A,ES,N (z-scores), tokens, nposts, lowconf}}"""
-import sys,os,json,re,math,collections
+import sys, os, json, re, collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl,pandas as pd
 B=MB_ROOT

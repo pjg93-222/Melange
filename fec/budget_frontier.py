@@ -1,6 +1,6 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import moneyball_core as MBC
-import json,sys,math,random,collections,glob,os,csv,openpyxl,heapq
+import json, sys, random, os, openpyxl, heapq
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 SEED=int(os.environ.get('SEED','7')); random.seed(SEED)

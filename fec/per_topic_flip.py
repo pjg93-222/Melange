@@ -1,6 +1,6 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import moneyball_core as MC
-import json,sys,math,heapq,collections,glob,os,csv,openpyxl
+import json, sys, heapq, os, openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 WM,WP=0.35,0.65; CAP=50000; BUDGET=2_000_000; INC=1000; BASE=0.15
 # per-CATEGORY persuadability (same scale as overall PERS; '—' = no position on this issue)
@@ -80,6 +80,6 @@ def main():   # L3: guarded so importing this module for its functions doesn't r
         print('%-30s ($%s, %d funded | %d pro/%d anti here): %s'%(labels[sc][:30],f'{sp:,}',len(top),nch,nop,
             ', '.join('%s $%dk'%(n.split()[-1],a//1000) for n,a in top[:4])))
     outf=MB_ROOT+r'\per_topic_alloc_bridge.json' if DIRECT else MB_ROOT+r'\per_topic_alloc.json'
-    json.dump(ALL,open(outf,'w'))
+    MC.dump_atomic(ALL,outf)
     print('\nwrote %s  (mode: %s, %d sub-categories)'%(os.path.basename(outf),'BRIDGE-BOOST' if DIRECT else 'baseline',len(ALL)))
 if __name__=='__main__': main()

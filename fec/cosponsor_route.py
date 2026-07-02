@@ -3,7 +3,7 @@ import moneyball_core as MBC
 """Multi-objective co-sponsor recruitment route finder (roadmap step 3, RELINK + MOPBD*).
 Edge-activation IM: champions are seeds; each recruiter whips <=K colleagues (out-degree budget).
 Builds recruitment ROUTES and returns the Pareto front over (co-sponsors gained, money, cascade-failure risk)."""
-import json,sys,os,glob,collections,openpyxl,heapq,random,csv,math
+import json, sys, os, collections, heapq, random
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 K=int(os.environ.get('K','5'))               # recruitment bandwidth: a member personally whips <=K colleagues
