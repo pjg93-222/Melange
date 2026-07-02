@@ -10,7 +10,6 @@ Expected flips on a topic = sum_n tgt(n)*pflip(n).  Faithful to per_topic_flip.p
 import json,math,collections,glob,os,csv,openpyxl
 B=MB_ROOT
 WM,WP=0.35,0.65; CAP=50000; BASE=0.15   # CALIBRATED: money is the minority partner to peer/network influence (money buys access/effort > votes — Ansolabehere; Hall&Wayman; Kalla&Broockman)
-import os as _os
 # M5: '—' = member has taken NO recorded position on THIS issue, which is 59.8% of matrix cells.
 # At the old 0.55 a silent member ranked as MORE persuadable than a known 'Ally' (0.45) -- conceptually
 # backwards: a declared Ally has already signaled sympathy, whereas silence is honest uncertainty, not
