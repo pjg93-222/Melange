@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """TWEET GOLD QUEUE (user-directed 2026-07-02: "a diverse 400 sample... similar in practice to the
 other target-aware sentiment analysis").  Mirrors build_gold_queue.py v2, adapted to tweet form:
 
@@ -20,7 +21,7 @@ import sys,csv,io,json,re,random,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import pandas as pd
 random.seed(7)
-M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+M=MB_ROOT
 N_TOTAL=400; MEMBER_CAP=2
 Q_FB=100; Q_ANTIBANK=100; Q_LOWMARGIN=60
 ANTIBANK=re.compile(r'big bank|wall street|megabank|junk fee|price goug|\bcfpb\b|consumer financial|'

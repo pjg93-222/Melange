@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Capped, graduated allocator: distribute the Pot ($AB$6) across the top-N (=$AB$7) ranked members,
 proportional to Score but with a hard per-member Cap ($AB$8). Water-fill: alloc = MIN(cap, score*lambda),
 lambda solved so the funded allocations sum to the pot (capped members give their excess to the rest).
@@ -7,7 +8,7 @@ it stays live; re-run this if Score or N/Cap change (it re-solves lambda). COM +
 import openpyxl, sys, shutil, os, datetime
 import win32com.client as win32
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B  = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B  = MB_ROOT
 WB = B + r'\Moneyball Main Version - Blended.xlsx'
 POT = 2_000_000          # $AB$6 Pot
 CAP = 10_000             # $AB$8 Cap ($) per member   <-- edit here

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Raw/MAX normalization fix (2026-07-01). Make the pillar percentages SIGNED MAGNITUDE (value / MAX)
 instead of PERCENTRANK, so stance-signed negatives (leg-stance opponents, anti-CU press) actually pull the
 score DOWN instead of being floored back up by the percentile rank. Sets, on 'Blended Model':
@@ -11,7 +12,7 @@ Backs up first; idempotent (safe to re-run)."""
 import sys, shutil, os, datetime, time
 import win32com.client as win32
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B = MB_ROOT
 WB = B + r'\Moneyball Main Version - Blended.xlsx'
 FORMS = {'R': '=E3/MAX($E$3:$E$535)', 'I': '=C3/MAX($C$3:$C$535)'}
 bk = WB.replace('.xlsx', '.PRE-RAWMAXNORM-%s.xlsx' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))

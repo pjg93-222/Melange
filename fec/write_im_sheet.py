@@ -1,16 +1,17 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import shutil,os,json,sys,subprocess
 import win32com.client as w
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-src=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
-bak=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.PRE-IM-20260626.xlsx'
+src=MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+bak=MB_ROOT+r'\Moneyball Main Version - Blended.PRE-IM-20260626.xlsx'
 tmp=r'C:\Temp\mb_im.xlsx'
 # M4: regenerate im_allocation.json from the LIVE per-topic model before writing, so the sheet can never
 # fall back to the stale legacy im_allocate2.py output (old taxonomy, Dan Sullivan/Shaheen top picks).
 # build_im_allocation.py sums per_topic_alloc.json (FLIP) + per_topic_coalition.json (COALITION) per member.
 subprocess.run([sys.executable,os.path.join(os.path.dirname(os.path.abspath(__file__)),'build_im_allocation.py')],check=True)
 shutil.copy(src,bak); os.makedirs(r'C:\Temp',exist_ok=True); shutil.copy(src,tmp)
-IM=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\im_allocation.json'))
-PT=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\per_topic_alloc.json'))
+IM=json.load(open(MB_ROOT+r'\im_allocation.json'))
+PT=json.load(open(MB_ROOT+r'\per_topic_alloc.json'))
 flip=IM['flip']; coal=IM['coalition']; topics=list(PT.keys())
 import openpyxl
 bm=openpyxl.load_workbook(src,data_only=True)['Blended Model']

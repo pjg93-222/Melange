@@ -1,11 +1,12 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import json,sys,math,collections,glob,os,random,statistics,openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 random.seed(3)
 WM,WP=0.6,0.4; CAP=50000
 PRO={'Champion','Ally'}; ANTI={'Opponent','Skeptic'}
-C={m['member']:m for m in json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congestion.json'))}
+C={m['member']:m for m in json.load(open(MB_ROOT+r'\congestion.json'))}
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
-wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 bm=wb['Blended Model']; ra=wb['Rank & Allocation']
 stance={ra.cell(r,1).value:ra.cell(r,7).value for r in range(3,536) if ra.cell(r,1).value}
 rank={bm.cell(r,1).value:bm.cell(r,20).value for r in range(3,536) if bm.cell(r,1).value}
@@ -13,7 +14,7 @@ members=[m['member'] for m in C.values()]
 ind={n:(C[n]['banks'] or 0)+(C[n]['finserv'] or 0) for n in members}; cu={n:(C[n]['cu'] or 0) for n in members}
 st={n:stance.get(n,'Neutral') for n in members}
 camp={n:('pro' if st[n] in PRO else 'anti' if st[n] in ANTI else 'neu') for n in members}
-net=max(glob.glob(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
+net=max(glob.glob(MB_ROOT+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
 ne=openpyxl.load_workbook(net,data_only=True)['Edges']
 adj=collections.defaultdict(dict); mem=set(members)
 for r in range(2,ne.max_row+1):

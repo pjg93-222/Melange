@@ -1,6 +1,7 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import pandas as pd,csv,sys,re,glob,collections,json
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-ARCH=sorted(glob.glob(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congress_bills_archive_*.xlsx'))[-1]
+ARCH=sorted(glob.glob(MB_ROOT+r'\congress_bills_archive_*.xlsx'))[-1]
 a=pd.read_excel(ARCH,sheet_name='All Bills')
 def billkey(name,cong):
     if not isinstance(name,str) or pd.isna(cong): return None
@@ -23,7 +24,7 @@ for _,r in a.iterrows():
 print('bills mapped to a Section:',len(bill2cat))
 # CFPB (section 13) per-bill direction: Direction 1=Reduce/Restrain(pro), else Reach/Expand(anti)
 cfpb={}
-with open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\cfpb_bill_directions.csv',encoding='utf-8-sig') as fh:
+with open(MB_ROOT+r'\cfpb_bill_directions.csv',encoding='utf-8-sig') as fh:
     for row in csv.DictReader(fh):
         b=row['Bill']; m=re.match(r'\s*([HS])\.?\s*([RJ]?\.?\s*(?:Res\.?)?)\s*(\d+)',b,re.I)
         if m: cfpb[('H' if m.group(1).upper()=='H' else 'S',int(m.group(3)))]=row['Direction'].strip()
@@ -37,7 +38,7 @@ def rc_bill(s):
     return ('H' if m.group(1).upper()=='H' else 'S',int(m.group(3))) if m else None
 # accumulate signed CU-aligned vote per (bioguide,cat)
 agg=collections.defaultdict(lambda:[0.0,0]); name_of={}; covered=collections.Counter(); skip=0
-v=pd.read_csv(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\votes\cu_rollcall_votes_clean.csv')
+v=pd.read_csv(MB_ROOT+r'\votes\cu_rollcall_votes_clean.csv')
 def passage(s): return isinstance(s,str) and re.search(r'passage|suspend the rules and pass|concur',s,re.I) and not re.search(r'recommit|amendment',s,re.I)
 for _,r in v.iterrows():
     if not passage(r['vote_question']): skip+=1; continue   # final-passage only (drop amendment/procedural noise)
@@ -65,7 +66,7 @@ for c in range(1,18):
 out=collections.defaultdict(dict)
 for (bio,cat),(ssum,cnt) in agg.items():
     out[bio][CATLAB[cat]]={'lean':ssum/cnt,'n':cnt}
-json.dump({'name_of':name_of,'votes':out},open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\vote_category_lean.json','w'))
+json.dump({'name_of':name_of,'votes':out},open(MB_ROOT+r'\vote_category_lean.json','w'))
 nm=len(out); print('\nmembers with >=1 categorized vote:',nm)
 # sanity: Durbin (interchange author) and a known CFPB opponent
 b2n={v:k for k,v in name_of.items()}

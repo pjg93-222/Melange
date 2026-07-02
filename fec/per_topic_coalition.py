@@ -1,21 +1,22 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import json,sys,math,random,collections,glob,os,csv,openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 SEED=int(os.environ.get('SEED','7')); random.seed(SEED)   # fixed seed -> reproducible; scenarios use SAME seed so deltas aren't MC noise
 BUDGET=2_000_000; CAP=50_000; MC=int(os.environ.get('MC','20')); BSCALE=400000
 PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Skeptic'}
-C={m['member']:m for m in json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congestion.json'))}
+C={m['member']:m for m in json.load(open(MB_ROOT+r'\congestion.json'))}
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
-wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 bm=wb['Blended Model']; nrm=wb['Legislative Score - Normalized']
 score={bm.cell(r,1).value:(bm.cell(r,19).value or 0) for r in range(3,536) if bm.cell(r,1).value}
 members=[m['member'] for m in C.values()]
 ind={n:(C[n]['banks'] or 0)+(C[n]['finserv'] or 0) for n in members}
-CS=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\category_stance.json'))['matrix']
-BP=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\bipartisan.json')); bpf={m['member']:BP.get(m['member'],24)/100.0 for m in C.values()}
+CS=json.load(open(MB_ROOT+r'\category_stance.json'))['matrix']
+BP=json.load(open(MB_ROOT+r'\bipartisan.json')); bpf={m['member']:BP.get(m['member'],24)/100.0 for m in C.values()}
 BETA_C=0.8   # bipartisan members get a coalition-seed boost (natural cross-aisle bridges)
 party={}
 for congN in (119,118,117):
-    pth=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\votes\HS%d_members.csv'%congN
+    pth=MB_ROOT+r'\votes\HS%d_members.csv'%congN
     if os.path.exists(pth):
         for row in csv.DictReader(open(pth,encoding='utf-8')):
             b=row.get('bioguide_id'); pc=str(row.get('party_code'))
@@ -23,7 +24,7 @@ for congN in (119,118,117):
 prt={m['member']:party.get(m.get('bioguide',''),'?') for m in C.values()}
 def cpf(n,u):   # bridges spread further across the aisle in the cascade
     return 0.4+0.6*math.sqrt(bpf.get(n,0.24)*bpf.get(u,0.24)) if (prt.get(n)!=prt.get(u) and prt.get(n) in 'DR' and prt.get(u) in 'DR') else 1.0
-net=max(glob.glob(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
+net=max(glob.glob(MB_ROOT+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
 ne=openpyxl.load_workbook(net,data_only=True)['Edges']
 adj=collections.defaultdict(dict); mem=set(members)
 for r in range(2,ne.max_row+1):
@@ -34,7 +35,7 @@ for r in range(2,ne.max_row+1):
         adj[a][b]=w; adj[b][a]=w
 # RECEPTIVITY LAYER (2026-07-02): receiver susceptibility on edges + contingency-aware seed activation.
 try:
-    REC=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\member_receptivity.json'))['members'] if os.environ.get('RECEPT_LAYER','1')!='0' else {}
+    REC=json.load(open(MB_ROOT+r'\member_receptivity.json'))['members'] if os.environ.get('RECEPT_LAYER','1')!='0' else {}
 except FileNotFoundError: REC={}
 def rc(m,k,d=1.0): return REC.get(m,{}).get(k,d)
 # stance-graded contingency gate (matches budget_frontier: allies ungated core; take-rate falls down the ladder)
@@ -100,5 +101,5 @@ for sc in blocks:
     summ.append((labels[sc],sum(al.values()),len(top),base,joint,top[:4]))
     print('%-30s base %.0f -> %.0f (+%.1f joint; naive-additive +%.1f) | $%s, %d seeds: %s'%(labels[sc][:30],base,joint,joint-base,sum(pos.values()),f'{sum(al.values()):,}',len(top),', '.join('%s $%dk'%(n.split()[-1],a//1000) for n,a in top[:4])))
 tag='' if (SEED==7 and os.environ.get('MC','20')=='20') else '_seed%d_mc%d'%(SEED,MC)
-json.dump(ALL,open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\per_topic_coalition%s.json'%tag,'w'))
+json.dump(ALL,open(MB_ROOT+r'\per_topic_coalition%s.json'%tag,'w'))
 print('\nwrote per_topic_coalition%s.json (seed %d, MC %d, %d sub-categories)'%(tag,SEED,MC,len(ALL)))

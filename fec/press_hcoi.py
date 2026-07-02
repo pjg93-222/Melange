@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT,DRAFT as MB_DRAFT  # centralized root (arch review 2026-07-02)
 """PRESS HCoI — Malaterre & Lareau (2024, Data & Policy) "hidden communities of interest" mapped onto
 the CU policy domain.  Their pipeline: actor topic profiles (from an LDA over actor texts) -> Pearson
 correlation between profiles -> threshold 0.6 -> Louvain -> communities with directly interpretable
@@ -15,8 +16,8 @@ Writes press_hcoi.json: communities, profiles, correlation edges (candidate 2nd 
 import csv,json,sys,math,collections,datetime,glob,os
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import networkx as nx
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-SRC=r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems\cu_press_stance_tone.csv'
+B=MB_ROOT
+SRC=MB_DRAFT+r'\cu_press_stance_tone.csv'
 CORR_T=float(os.environ.get('HCOI_CORR','0.6'))     # their correlation threshold
 MIN_W=float(os.environ.get('HCOI_MINW','3.0'))      # their transient-author filter (weighted pubs > 2)
 rows=list(csv.DictReader(open(SRC,encoding='utf-8-sig')))

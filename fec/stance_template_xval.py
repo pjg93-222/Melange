@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT,DRAFT as MB_DRAFT  # centralized root (arch review 2026-07-02)
 """STANCE TEMPLATE CROSS-VALIDATION (user-directed 2026-07-01: "I will need to look at and cross
 validate the stance templates used").  Collates every stance template/label artifact in the system,
 cross-checks them against each other, and writes a review document the user can adjudicate from.
@@ -23,8 +24,8 @@ per class) for the S3 NLI layer; template robustness = agreement across paraphra
 Outputs: stance_templates_review.md + stance_template_variants.csv."""
 import csv,io,json,sys,collections,os
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-DS=r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems'
+B=MB_ROOT
+DS=MB_DRAFT
 def kappa(pairs):
     n=len(pairs)
     if not n: return 0.0,0.0

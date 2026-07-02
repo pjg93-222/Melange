@@ -1,9 +1,10 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """FULL-BODY AUDIT — every module in one report.
 Consolidates the integrity (22) + frontier (11) audits and adds correctness checks for the
 new modules: money-response, electoral plays, co-sponsor routes, LT-priming, stance, determinism."""
 import json,sys,os,subprocess,re,collections,importlib.util
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'; FE=B+r'\fec'
+B=MB_ROOT; FE=B+r'\fec'
 P,F=[],[]
 def ck(name,cond,detail=''):
     (P if cond else F).append(name); print(('  OK   ' if cond else 'FAIL  ')+name+((' :: '+detail) if (detail and not cond) else ''))

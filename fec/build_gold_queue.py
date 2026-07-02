@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT,DRAFT as MB_DRAFT  # centralized root (arch review 2026-07-02)
 """S1 v2 — BALANCED gold-label queue (user spec 2026-07-01: "a well balanced mix from many members
 across all issues, covering all stances"). Stratification:
   * per-CATEGORY quota across ALL 19 press category labels (incl. Credit Union Tax Status and
@@ -12,8 +13,8 @@ adjudicate (pre-seeded from the API pass for correction-in-place)."""
 import csv, io, os, sys, hashlib, collections, random
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 random.seed(7)
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-SRC = r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems\cu_press_stance_tone.csv'
+B = MB_ROOT
+SRC = MB_DRAFT+r'\cu_press_stance_tone.csv'
 rows = list(csv.DictReader(open(SRC, encoding='utf-8-sig')))
 print('source rows:', len(rows))
 

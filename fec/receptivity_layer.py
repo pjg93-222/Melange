@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """RECEPTIVITY & INCENTIVE LAYER — personality/incentive-aware lobbying receptivity (user 2026-07-02).
 Fuses four literatures into per-member multipliers consumed by the influence engines:
 
@@ -35,7 +36,7 @@ Output: member_receptivity.json {member: {big5, susc_z, susc_mult, edge_mult, in
 pt_domain, pt_mult, pressure_mult, seed_prob, lowconf}}"""
 import sys,os,json
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(C)
 try: T=json.load(open(B+r'\big5_traits.json'))['traits']
 except FileNotFoundError: T={}

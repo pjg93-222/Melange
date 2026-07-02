@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """S1 — API pre-label pass over gold_label_queue.csv (user-directed 2026-07-01: "you review once with
 an API, and then I will go over it"). Calls Claude (claude-opus-4-8, adaptive thinking, structured
 JSON output) once per queue row and fills the api_* columns; the gold_* columns are pre-seeded with
@@ -9,7 +10,7 @@ import csv, io, json, os, sys, threading, collections
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import anthropic
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B = MB_ROOT
 QUEUE = B + r'\gold_label_queue.csv'
 MODEL = "claude-opus-4-8"
 WORKERS = 8

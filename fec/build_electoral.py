@@ -1,6 +1,7 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import openpyxl,json,sys,glob,os,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 LELEV=float(os.environ.get('LELEV','0.8'))   # electoral-leverage strength (competitive seats are cheaper to move)
 members=[m['member'] for m in json.load(open(B+r'\congestion.json'))]
 mset=set(members); bylast=collections.defaultdict(list)

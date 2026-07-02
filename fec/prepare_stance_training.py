@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT,DRAFT as MB_DRAFT  # centralized root (arch review 2026-07-02)
 """PREPARE STANCE TRAINING DATA — fuses the user's cu_stance_label_set_AUGMENTED.xlsx (two-hop labels,
 train/test splits, targets, stance spans, speaker attribution) with the full text_snippets from
 cu_stance_label_set.csv into one training-ready jsonl, following the dataset-construction discipline of
@@ -13,8 +14,8 @@ Writes stance_training.jsonl + class/split stats."""
 import csv,json,io,sys,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-DS=r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems'
+B=MB_ROOT
+DS=MB_DRAFT
 XLSX=r'C:\Users\pgoff\Downloads\cu_stance_label_set_AUGMENTED.xlsx'
 snip={}
 for r in csv.DictReader(open(DS+r'\cu_stance_label_set.csv',encoding='utf-8-sig')):

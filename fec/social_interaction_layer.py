@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """SOCIAL INTERACTION LAYER — member<->member reposts & mentions as NETWORK data (user 2026-07-02:
 "everything we designed, including the posts and re-posts, incorporated as both edge weights and
 network linkages").
@@ -20,7 +21,7 @@ Output: social_interactions.json {'symmetric':[{a,b,w,rt,men}...]} consumed by b
 import sys,os,re,json,sqlite3,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 VOLFLOOR=int(os.environ.get('SOC_VOLFLOOR','25')); MEN_W=float(os.environ.get('SOC_MEN_W','0.4')); PCAP=0.25
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}
 bio2name={C[m]['bioguide']:m for m in C if C[m].get('bioguide')}

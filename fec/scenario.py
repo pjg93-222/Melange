@@ -1,3 +1,4 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """END-TO-END SCENARIO RUNNER (Melange Systems).
 Apply a scenario -> propagate through the competitive cascade + money curve -> report the change in
 CU coalition influence vs the frozen baseline, topic by topic.  Grounded in the research library:
@@ -16,7 +17,7 @@ Usage (any number of moves):
 """
 import json,sys,os,math,random,collections,glob,openpyxl,importlib.util,argparse
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 spec=importlib.util.spec_from_file_location('mr',B+r'\fec\money_response.py'); mr=importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
 _fs=importlib.util.spec_from_file_location('fm',B+r'\fec\flip_model.py'); fm=importlib.util.module_from_spec(_fs); _fs.loader.exec_module(fm)   # Linear-Threshold winnability channel
 SEED=7; MC=int(os.environ.get('MC','40')); BSCALE=400000

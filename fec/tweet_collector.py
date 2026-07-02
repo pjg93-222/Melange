@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """CONGRESSIONAL SOCIAL-MEDIA COLLECTOR + DATABASE (user-directed 2026-07-01: "was the data collector
 for politicians tweets included? We need a very robust database").
 
@@ -24,7 +25,7 @@ Usage:
 """
 import json,sys,os,sqlite3,time,argparse,datetime,collections,urllib.request,urllib.parse
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 DB=B+r'\social_media.db'
 UA={'User-Agent':'MelangeSystems-collector/1.0 (research)'}
 def db():

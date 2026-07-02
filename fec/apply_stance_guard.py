@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import sys
 sys.exit('SUPERSEDED (2026-07-02 architecture review): overwrites col G with the superseded activity-based formula, clobbering per-category tiers — use sync_stance_g.py. Remove this guard only if you are certain.')
 
@@ -8,7 +9,7 @@ Done via Excel COM so Tables/LET formulas are preserved and the workbook recalcu
 Backs the workbook up first."""
 import win32com.client as win32, shutil, datetime, sys
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
 bak = WB.replace('.xlsx', '.PRE-STANCEGUARD-%s.xlsx' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
 shutil.copy2(WB, bak); print('backup ->', bak)
 

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT,DRAFT as MB_DRAFT  # centralized root (arch review 2026-07-02)
 """PRESS ENGAGEMENT LAYER — Fink et al. (2023, Data in Brief) Congressional Twitter influence network +
 Danowski & Cepela (2010) named-entity mention networks, transplanted to the press corpus.
 
@@ -22,8 +23,8 @@ Mention extraction is PRECISION-FIRST (headline case makes bare surnames toxic: 
 Writes press_engagement.json (directed probs + symmetrized layer + overlap diagnostics)."""
 import csv,json,sys,re,collections,glob,os,math
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-SRC=r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems\cu_press_stance_tone.csv'
+B=MB_ROOT
+SRC=MB_DRAFT+r'\cu_press_stance_tone.csv'
 rows=list(csv.DictReader(open(SRC,encoding='utf-8-sig')))
 members=sorted(set(r['member'] for r in rows))
 # surname map: last token, plus two-token surnames (Van Hollen etc.)

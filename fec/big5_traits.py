@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """BIG FIVE TRAIT ESTIMATION FROM MEMBER TEXT — Ramey, Klingler & Hollibaugh (PSRM 2016)
 "Measuring Elite Personality Using Speech", synthesized (user 2026-07-02: "copy what these articles
 did bar for bar in a synthesized manner, it does not have to be domain specific").
@@ -23,7 +24,7 @@ Output: big5_traits.json  {member: {O,C,E,A,ES,N (z-scores), tokens, nposts, low
 import sys,os,json,re,math,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl,pandas as pd
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 LOWCONF_TOKENS=int(os.environ.get('LOWCONF_TOKENS','1500'))
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(C)
 # ---------------- corpus: posts (ALL topics; RTs EXCLUDED — an RT is someone else's words) + floor

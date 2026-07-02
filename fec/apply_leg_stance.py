@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Make the legislative pillar STANCE-AWARE: gate each member's per-topic cosponsorship activity (Sponsor +
 Co-Sponsorship counts) by their per-category stance, weighted by issue importance. Anti-CU members' activity
 now counts against them instead of inflating them. Writes the new leg raw to Blended Model col4 (overriding
@@ -6,8 +7,8 @@ the =R&A!D3 activity-only value) via COM + recalc -> Leg% -> Score -> Rank. Back
 import openpyxl, json, io, sys, shutil, os, datetime, unicodedata
 import win32com.client as win32
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
-CS = json.load(io.open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\category_stance.json', encoding='utf-8'))['matrix']
+WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+CS = json.load(io.open(MB_ROOT+r'\category_stance.json', encoding='utf-8'))['matrix']
 # IMP anchored to the ABB26 handout (America's Credit Unions 2026 Advocacy Priorities, applied 2026-07-01):
 # Protect flagships 2.0-3.0 (Tax Status, Credit Card Mandates, Interchange); named priorities 0.75-1.0
 # (NCUA/regulatory regime, FOM/expand-access, Charter, Data Privacy, CFPB, Fraud, Tech/innovation, Payments);

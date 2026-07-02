@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Col-G-ONLY stance sync (SAFE variant of sync_stance_clean.py, 2026-07-01): recompute the overall
 stance ladder from the category_stance matrix with the CURRENT IMP weights and write ONLY Rank &
 Allocation col G, calc=MANUAL. Unlike sync_stance_clean, this does NOT restore the pristine
@@ -7,7 +8,7 @@ Run after any IMP change or Category Stance sheet edit."""
 import json, io, sys, collections
 import win32com.client as win32
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B = MB_ROOT
 WB = B + r'\Moneyball Main Version - Blended.xlsx'
 M = json.load(io.open(B + r'\category_stance.json', encoding='utf-8'))['matrix']
 TORD = {'Champion':4,'Defender':4,'Ally':2,'Highly Persuadable':1,'True Neutral':0,'Neutral':0,'Lean Skeptic':-1,'Skeptic':-2,'Opponent':-4}

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """MC-budget stability check (motivated by Almazaydeh et al., Sci Rep 2026, s41598-026-47299-8):
 noisy Monte-Carlo marginal estimates can corrupt lazy-greedy seed selection (their CELF++ at 50
 sims/estimate captured only 11.2%% of the sampling-based spread). Moneyball's frontier runs MC=20 but
@@ -9,7 +10,7 @@ that directly: rebuild a single-topic frontier under a higher MC budget and unde
 then compare the picked seed sequences.  Usage:  [TOPIC=Interchange] python mc_stability_check.py"""
 import json, os, sys, subprocess
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'; FE = B + r'\fec'
+B = MB_ROOT; FE = B + r'\fec'
 TOPIC = os.environ.get('TOPIC', 'Interchange')
 RUNS = [('MC=20  SEED=7 (production)', {'MC':'20','SEED':'7'}),
         ('MC=100 SEED=7 (5x MC budget)', {'MC':'100','SEED':'7'}),

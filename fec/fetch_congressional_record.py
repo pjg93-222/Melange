@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT,DRAFT as MB_DRAFT  # centralized root (arch review 2026-07-02)
 """CONGRESSIONAL RECORD + HEARING TRANSCRIPT COLLECTOR (GovInfo) — the trait-corpus upgrade the
 Ramey pipeline actually calls for: floor speeches (CREC) and committee hearing transcripts (CHRG),
 attributed to members by the Record's speaker headers ("Mr. DURBIN.", "Ms. WARREN of Massachusetts.",
@@ -26,7 +27,7 @@ Usage:
 import sys,os,re,json,io,csv,zipfile,sqlite3,datetime,time,argparse,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import urllib.request
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 KEY=os.environ.get('GOVINFO_KEY') or (open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'govinfo_key.txt')).read().strip()
      if os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)),'govinfo_key.txt')) else 'DEMO_KEY')
 DB=B+r'\social_media.db'
@@ -51,7 +52,7 @@ def get(url,binary=False,tries=3):
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}
 state={}
 try:
-    for r in csv.DictReader(open(r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems\cu_press_stance_tone.csv',encoding='utf-8')):
+    for r in csv.DictReader(open(MB_DRAFT+r'\cu_press_stance_tone.csv',encoding='utf-8')):
         if r['member'] in C and r.get('state'): state[r['member']]=r['state'].strip()
 except FileNotFoundError: pass
 SFIX={'jr','sr','ii','iii','iv'}

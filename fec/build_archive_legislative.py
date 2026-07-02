@@ -1,7 +1,8 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import pandas as pd,glob,json,sys,collections,csv,re
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-A=pd.read_excel(sorted(glob.glob(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congress_bills_archive_*.xlsx'))[-1],sheet_name='All Bills')
-model=[m['member'] for m in json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congestion.json'))]
+A=pd.read_excel(sorted(glob.glob(MB_ROOT+r'\congress_bills_archive_*.xlsx'))[-1],sheet_name='All Bills')
+model=[m['member'] for m in json.load(open(MB_ROOT+r'\congestion.json'))]
 mset=set(model)
 SECKW=[('Examination & Supervision','examination'),('CU Capital Requirements','capital'),('NCUA Budget & Insurance','ncua'),
 ('Interchange','interchange'),('Payments','payments'),('Technology & Emerging','technology'),('Fraud Prevention','fraud'),
@@ -21,7 +22,7 @@ def billkey(name):
 # Direction: 1 = pro-CU, -1 = anti-CU, 0 = neutral (excluded). Registry beats every section default,
 # so a pro-CU Interchange bill can finally score positive. User-editable; seeded from cfpb_bill_directions.csv.
 bdir={}
-for row in csv.DictReader(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\bill_directions.csv',encoding='utf-8-sig')):
+for row in csv.DictReader(open(MB_ROOT+r'\bill_directions.csv',encoding='utf-8-sig')):
     bk=billkey(row['Bill'])
     if bk: bdir[bk]=row['Direction'].strip()
 def rolewt(role):
@@ -65,6 +66,6 @@ for _,r in A.iterrows():
     leg[mm][cat]+=sign*w*dw
 print('matched model members with >=1 archive bill: %d / %d'%(len(leg),len(model)))
 um=sum(unmatched.values()); print('unmatched archive rows: %d ; top unmatched names:'%um,[n for n,_ in unmatched.most_common(6)])
-json.dump({m:dict(leg[m]) for m in leg},open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\archive_leg.json','w'))
+json.dump({m:dict(leg[m]) for m in leg},open(MB_ROOT+r'\archive_leg.json','w'))
 print('\nVALIDATION — Durbin per-category (signed role-weighted):')
 for c,v in sorted(leg['Richard Durbin'].items(),key=lambda x:-abs(x[1])): print('   %-26s %+.1f'%(c,v))

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT,DRAFT as MB_DRAFT  # centralized root (arch review 2026-07-02)
 """GOLDEN LABEL SET (user-directed 2026-07-01: "give me the most cohesive and golden label set based
 off MY labels").  Consolidates every USER-labeled artifact into one authoritative csv.  Machine labels
 (DEBATE pre_label, API api_*) are NEVER the label here — they appear only as context columns.
@@ -20,8 +21,8 @@ balanced eval set can never contaminate training.  Writes cu_golden_labels.csv."
 import csv,io,json,sys,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-DS=r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems'
+B=MB_ROOT
+DS=MB_DRAFT
 def norm(x): return (str(x) if x is not None else '').strip()
 snip={}
 for r in csv.DictReader(open(DS+r'\cu_stance_label_set.csv',encoding='utf-8-sig')):

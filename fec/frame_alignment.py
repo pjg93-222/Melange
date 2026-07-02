@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT,DRAFT as MB_DRAFT  # centralized root (arch review 2026-07-02)
 """FRAME ALIGNMENT — Joo & Steinert-Threlkeld (2022, Computational Communication Research) mapped from
 images to press text.  Two of their instruments transplant directly:
 
@@ -17,8 +18,8 @@ images to press text.  Two of their instruments transplant directly:
 Writes frame_alignment.json."""
 import csv,json,sys,re,math,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-SRC=r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems\cu_press_stance_tone.csv'
+B=MB_ROOT
+SRC=MB_DRAFT+r'\cu_press_stance_tone.csv'
 rows=list(csv.DictReader(open(SRC,encoding='utf-8-sig')))
 def cats_of(r):
     c=(r.get('categories') or '').strip()

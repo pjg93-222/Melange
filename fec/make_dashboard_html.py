@@ -1,5 +1,6 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import json,os
-D=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\dashboard_data.json'))
+D=json.load(open(MB_ROOT+r'\dashboard_data.json'))
 HTML=r'''<!DOCTYPE html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>Moneyball — Per-Issue Influence Dashboard</title>
@@ -579,6 +580,6 @@ document.querySelectorAll('#pmode button').forEach(b=>b.onclick=()=>{document.qu
 addEventListener('resize',resize);
 legend();optCard();resize();refresh();
 </script></body></html>'''
-out=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Dashboard.html'
+out=MB_ROOT+r'\Moneyball Dashboard.html'
 open(out,'w',encoding='utf-8').write(HTML.replace('__DATA__',json.dumps(D,separators=(',',':'))))
 print('wrote',out,'(%.0f KB)'%(os.path.getsize(out)/1024))

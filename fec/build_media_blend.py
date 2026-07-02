@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """MEDIA BLEND (user-directed 2026-07-02): the press pillar becomes MEDIA = 50% press releases +
 50% social media, at the pillar's existing weight.  Insertion point = 'Press Release - Raw' (Table10):
 its LET-normalized sheet and the Rank & Allocation SUMPRODUCT consume whatever sits there, so writing
@@ -17,7 +18,7 @@ Safety: timestamped backup copy of the workbook is written FIRST; only raw VALUE
 import sys,os,json,re,csv,math,shutil,datetime,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import pandas as pd, openpyxl
-M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+M=MB_ROOT
 WBP=M+r'\Moneyball Main Version - Blended.xlsx'
 HL=float(os.environ.get('SOCIAL_HL_YEARS','0.5')); PRESS_W=0.5; SOCIAL_W=0.5
 # DEEP-AUDIT DIALS — USER-RATIFIED 2026-07-02 (both now ON by default; env-overridable):

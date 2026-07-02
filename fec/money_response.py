@@ -1,11 +1,12 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Money-response + defection mechanic (roadmap step 2).
 A donation shifts a member's money lean with diminishing returns, scaled by how movable they are
 (small relative to big fundraising = small move). Big enough competitor shock can trigger a defection."""
 import json,sys,os,openpyxl,math
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}
-ra=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)['Rank & Allocation']
+ra=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)['Rank & Allocation']
 OV={ra.cell(r,1).value:ra.cell(r,7).value for r in range(3,536) if ra.cell(r,1).value}
 # --- dials ---
 MAXSHIFT=float(os.environ.get('MAXSHIFT','18'))   # CALIBRATED 40->18: money moves POSITIONS little (buys access/effort, not votes — Ansolabehere; Fowler-Garro-Spenkuch null vote-buying); defections now rare/niche

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """
 Combines the SNA network dashboard (Moneyball Dashboard.html) and the member desk
 (cu-member-desk.html) into ONE self-contained file: Moneyball.html.
@@ -16,7 +17,7 @@ Design for a clean merge + minimal antivirus false-positives:
 Run:  python fec/make_combined.py     (after make_dashboard_html.py + make_member_desk.py)
 """
 import re, io, os
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B = MB_ROOT
 def read(p): return io.open(os.path.join(B, p), encoding='utf-8').read()
 
 sna = read('Moneyball Dashboard.html')

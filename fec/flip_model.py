@@ -1,3 +1,4 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Shared Linear-Threshold flip model (imported by scenario.py and optimize.py).
 Winnability of a member on a topic:  pflip(n) = a/(a+b),
   a = WM*sqrt(cu+alloc)/scale + WP*(bridge-amplified proximity to THIS issue's champions)
@@ -6,7 +7,7 @@ CU money raises a (with sqrt-diminishing returns), competitor money raises b.
 Expected flips on a topic = sum_n tgt(n)*pflip(n).  Faithful to per_topic_flip.py.
 """
 import json,math,collections,glob,os,csv,openpyxl
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 WM,WP=0.35,0.65; CAP=50000; BASE=0.15   # CALIBRATED: money is the minority partner to peer/network influence (money buys access/effort > votes — Ansolabehere; Hall&Wayman; Kalla&Broockman)
 import os as _os
 # M5: '—' = member has taken NO recorded position on THIS issue, which is 59.8% of matrix cells.

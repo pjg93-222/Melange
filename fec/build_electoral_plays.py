@@ -1,6 +1,7 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import json,sys,csv,os,collections,statistics,openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 CS=json.load(open(B+r'\category_stance.json')); SCO=CS['scores']; cats=CS['cats']
 EL=json.load(open(B+r'\electoral.json'))
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(C.keys())
@@ -17,7 +18,7 @@ for c in cats:
     for p in ('D','R'):
         vals=[SCO[m][c] for m in members if prt[m]==p and m in SCO]
         avgP[(p,c)]=statistics.mean(vals) if vals else 0.0
-ra=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)['Rank & Allocation']
+ra=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)['Rank & Allocation']
 OV={ra.cell(r,1).value:ra.cell(r,7).value for r in range(3,536) if ra.cell(r,1).value}
 PROO={'Champion','Defender','Ally'}
 plays={}

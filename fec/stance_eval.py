@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """S1 — stance evaluation harness. Scores ANY prediction column against the adjudicated gold labels in
 gold_label_queue.csv (rows where gold_cu_alignment is filled). Reports per-class precision/recall/F1,
 macro-F1 (the headline number -- classes are imbalanced, per ICCK/TACS.2025.928069 practice), and the
@@ -7,7 +8,7 @@ new model layers come online (nli / stanceformer / llm columns can be appended t
 Usage: python stance_eval.py [pred_column]        (default: model_stance)"""
 import csv, sys, collections
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B = MB_ROOT
 PRED = sys.argv[1] if len(sys.argv) > 1 else 'model_stance'
 rows = [r for r in csv.DictReader(open(B + r'\gold_label_queue.csv', encoding='utf-8-sig'))
         if (r.get('gold_cu_alignment') or '').strip()]

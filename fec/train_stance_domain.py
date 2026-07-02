@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """DOMAIN STANCE CLASSIFIER — Khan et al. (IECE TACS 2025, doi 10.62762/TACS.2025.928069) pipeline
 adjusted from Roman Urdu political tweets to the CU press/social domain.  Their recipe, kept faithfully:
   * TF-IDF features -> classical classifiers (Logistic Regression 93%, Decision Tree 92%, SVM 94%,
@@ -17,7 +18,7 @@ Usage:
   python train_stance_domain.py --transformer --model roberta-base   # paper-exact (distilroberta default: CPU-practical)"""
 import json,sys,os,argparse,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 ap=argparse.ArgumentParser()
 ap.add_argument('--task',default='composed',choices=['composed','hop1'])
 ap.add_argument('--transformer',action='store_true'); ap.add_argument('--model',default='distilroberta-base')

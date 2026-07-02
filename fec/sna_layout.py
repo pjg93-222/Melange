@@ -1,11 +1,12 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import json,glob,os,sys,openpyxl
 import networkx as nx
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-M={m['bioguide']:m for m in json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congestion.json')) if m['bioguide']}
-wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+M={m['bioguide']:m for m in json.load(open(MB_ROOT+r'\congestion.json')) if m['bioguide']}
+wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 cen=wb['Centrality']
 infl={cen.cell(r,1).value:(cen.cell(r,3).value or 0) for r in range(2,cen.max_row+1) if cen.cell(r,1).value}
-net=max(glob.glob(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
+net=max(glob.glob(MB_ROOT+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
 ne=openpyxl.load_workbook(net,data_only=True)['Edges']
 keep=set(M)
 G=nx.Graph(); G.add_nodes_from(keep)
@@ -29,9 +30,9 @@ for b in G.nodes():
     nodes.append([m['member'],int(round(sx(pos[b][0]))),int(round(sy(pos[b][1]))),r,m['net_lean'],m['total']])
 ew=sorted(G.edges(data=True),key=lambda e:-e[2].get('weight',0))[:650]
 edges=[[idx[a],idx[b]] for a,b,_ in ew]
-json.dump({'n':nodes,'e':edges,'W':W,'H':Hh},open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\sna_compact.json','w'),separators=(',',':'),ensure_ascii=False)
+json.dump({'n':nodes,'e':edges,'W':W,'H':Hh},open(MB_ROOT+r'\sna_compact.json','w'),separators=(',',':'),ensure_ascii=False)
 import os
-print('wrote sna_compact.json:',len(nodes),'nodes',len(edges),'edges,',os.path.getsize(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\sna_compact.json'),'bytes')
+print('wrote sna_compact.json:',len(nodes),'nodes',len(edges),'edges,',os.path.getsize(MB_ROOT+r'\sna_compact.json'),'bytes')
 # quick stats
 lean=[n[4] for n in nodes if n[4] is not None]
 print('net_lean: CU-leaning(>0) %d | captured(<0) %d | neutral/none %d'%(sum(1 for l in lean if l>0),sum(1 for l in lean if l<0),len(nodes)-len(lean)))

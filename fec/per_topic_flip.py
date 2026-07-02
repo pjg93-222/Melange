@@ -1,3 +1,4 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import json,sys,math,heapq,collections,glob,os,csv,openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 WM,WP=0.35,0.65; CAP=50000; BUDGET=2_000_000; INC=1000; BASE=0.15
@@ -8,9 +9,9 @@ WM,WP=0.35,0.65; CAP=50000; BUDGET=2_000_000; INC=1000; BASE=0.15
 _PNONE=float(os.environ.get('PERS_NONE','0.45'))   # USER-RATIFIED 2026-07-02: Ally parity (matches flip_model)
 PERS={'Champion':0.10,'Defender':0.12,'Ally':0.40,'Highly Persuadable':0.55,'True Neutral':0.50,'Lean Skeptic':0.40,'Neutral':0.50,'Skeptic':0.25,'Opponent':0.08,'—':_PNONE}
 PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Skeptic'}
-C={m['member']:m for m in json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congestion.json'))}
+C={m['member']:m for m in json.load(open(MB_ROOT+r'\congestion.json'))}
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
-wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 bm=wb['Blended Model']; ra=wb['Rank & Allocation']; nrm=wb['Legislative Score - Normalized']
 score={bm.cell(r,1).value:(bm.cell(r,19).value or 0) for r in range(3,536) if bm.cell(r,1).value}
 members=[m['member'] for m in C.values()]
@@ -26,9 +27,9 @@ HALFF=float(os.environ.get('HALFF','0.10'))   # capacity scale: money == HALFF*r
 _rv=sorted((C[n].get('receipts') or 0) for n in members if (C[n].get('receipts') or 0)>0); _RMED=_rv[len(_rv)//2] if _rv else 200000
 Rcap={n:(max((C[n].get('receipts') or 0),200000) if (C[n].get('receipts') or 0)>0 else _RMED) for n in members}   # HIGH-2: receipts=0 = MISSING -> impute median (not floor to $200k, which made no-record members cheapest to convert); matches money_response + flip_model
 # PER-CATEGORY stance matrix (the 3rd dimension) -- drives camp/persuadability/proximity per issue
-CS=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\category_stance.json'))['matrix']
+CS=json.load(open(MB_ROOT+r'\category_stance.json'))['matrix']
 # network proximity
-net=max(glob.glob(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
+net=max(glob.glob(MB_ROOT+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
 ne=openpyxl.load_workbook(net,data_only=True)['Edges']
 adj=collections.defaultdict(dict); mem=set(members)
 for r in range(2,ne.max_row+1):
@@ -41,19 +42,19 @@ for r in range(2,ne.max_row+1):
 # bipartisanship: a cross-party tie carries more flip-influence when BOTH ends are bridge-builders (taken seriously across the aisle)
 party={}
 for congN in (119,118,117):
-    pth=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\votes\HS%d_members.csv'%congN
+    pth=MB_ROOT+r'\votes\HS%d_members.csv'%congN
     if os.path.exists(pth):
         for row in csv.DictReader(open(pth,encoding='utf-8')):
             b=row.get('bioguide_id'); pc=str(row.get('party_code'))
             if b and b not in party: party[b]={'100':'D','200':'R'}.get(pc,'I')
 prt={n:party.get(C[n].get('bioguide',''),'?') for n in members}
-BP=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\bipartisan.json')); bpf={n:BP.get(n,24)/100.0 for n in members}
+BP=json.load(open(MB_ROOT+r'\bipartisan.json')); bpf={n:BP.get(n,24)/100.0 for n in members}
 DIRECT=('--bridge' in sys.argv) or os.environ.get('BRIDGE')=='1'; GAMMA=1.2   # toggleable mode: directly prioritize bridge-builders in flip targeting
 def cpf(n,u):   # cross-party bridge amplifier
     return 0.5 if (prt[n]!=prt[u] and prt[n] in 'DR' and prt[u] in 'DR') else (1.7 if (prt[n]==prt[u] and prt[n] in 'DR') else 1.0)   # SOURCE-ALIGNMENT: co-partisan x1.7, out-partisan x0.5 (Furnas/Bakker)
 # RECEPTIVITY LAYER (2026-07-02): money pressure scaled by pressure_mult (matches flip_model).
 try:
-    REC=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\member_receptivity.json'))['members'] if os.environ.get('RECEPT_LAYER','1')!='0' else {}
+    REC=json.load(open(MB_ROOT+r'\member_receptivity.json'))['members'] if os.environ.get('RECEPT_LAYER','1')!='0' else {}
 except FileNotFoundError: REC={}
 def rc(m,k,d=1.0): return REC.get(m,{}).get(k,d)
 def pflip(n,al,nA,nB,mAt,mBt):
@@ -101,7 +102,7 @@ def main():   # L3: guarded so importing this module for its functions doesn't r
         nch=sum(1 for n in members if cs[n] in PRO); nop=sum(1 for n in members if cs[n] in ANTI)
         print('%-30s ($%s, %d funded | %d pro/%d anti here): %s'%(labels[sc][:30],f'{sp:,}',len(top),nch,nop,
             ', '.join('%s $%dk'%(n.split()[-1],a//1000) for n,a in top[:4])))
-    outf=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\per_topic_alloc_bridge.json' if DIRECT else r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\per_topic_alloc.json'
+    outf=MB_ROOT+r'\per_topic_alloc_bridge.json' if DIRECT else MB_ROOT+r'\per_topic_alloc.json'
     json.dump(ALL,open(outf,'w'))
     print('\nwrote %s  (mode: %s, %d sub-categories)'%(os.path.basename(outf),'BRIDGE-BOOST' if DIRECT else 'baseline',len(ALL)))
 if __name__=='__main__': main()

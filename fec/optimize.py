@@ -1,3 +1,4 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """ADAPTIVE BUDGET OPTIMIZER (Golovin & Krause, "Adaptive Submodularity").
 Greedily allocates a CU budget across members to maximize total Linear-Threshold winnability
 (sum over topics of expected weighted flips).  The objective is monotone & submodular in the
@@ -12,7 +13,7 @@ Usage:  python optimize.py            (default $2M, all issues)
 """
 import sys,os,math,heapq,collections,importlib.util
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 def imp(n,f): s=importlib.util.spec_from_file_location(n,B+r'\fec\%s'%f); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); return m
 fm=imp('fm','flip_model.py'); mr=imp('mr','money_response.py')
 BUDGET=int(os.environ.get('BUDGET','2500000')); INC=int(os.environ.get('INC','500'))   # TOTAL pot ~$2.5M (user 2026-07-01) -- THE joint allocation across all 17 issues (per-topic tools are per-issue diagnostics, not additive budgets). INC = allocation granularity ($500 = realistic contribution step)

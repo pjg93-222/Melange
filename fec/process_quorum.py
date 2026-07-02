@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """QUORUM MASTER PIPELINE (user spec 2026-07-01, confirmed step by step):
   1. CU-domain RELEVANCE filter (same CU_TERMS the collector uses).
   2. TRUE-duplicate removal ONLY: key = (Source, normalized Content, Date).  Retweets are KEPT —
@@ -14,7 +15,7 @@ quorum_member_tweets.csv for downstream pipeline use."""
 import re,json,sys,collections,unicodedata,pickle
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import pandas as pd
-M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+M=MB_ROOT
 # full vocabulary of the corrected Quorum query (quorum_query.txt) — keep in sync with it
 CU_TERMS=re.compile(r'credit union|\bncua\b|national credit union|share insurance|ncusif|central liquidity|'
     r'tax.?exempt|tax exemption|tax status|field of membership|common bond|federal charter|charter modernization|'

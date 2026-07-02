@@ -1,13 +1,14 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import openpyxl,sys,json,collections,statistics,math
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+M=MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
 wb=openpyxl.load_workbook(M,data_only=True)
 pr=wb['Press Release - Normalized']; ra=wb['Rank & Allocation']
 gen={ra.cell(r,1).value:ra.cell(r,7).value for r in range(3,536) if ra.cell(r,1).value}
 members=[ra.cell(r,1).value for r in range(3,536) if ra.cell(r,1).value]
 prow={pr.cell(r,1).value:r for r in range(2,535) if pr.cell(r,1).value}
-LEG=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\archive_leg.json'))
-VC=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\vote_category_lean.json'))
+LEG=json.load(open(MB_ROOT+r'\archive_leg.json'))
+VC=json.load(open(MB_ROOT+r'\vote_category_lean.json'))
 n2b={v:k for k,v in VC['name_of'].items()}; votes=VC['votes']
 cats=[('Examination & Supervision',5),('CU Capital Requirements',6),('NCUA Budget & Insurance',7),('Interchange',8),
 ('Payments',9),('Technology & Emerging',10),('Fraud Prevention',11),('Data Privacy & Cyber',12),('Charter Modernization',13),
@@ -112,7 +113,7 @@ for lab,pc in cats:
             matrix[m][lab]='Highly Persuadable' if c>=t67 else ('Lean Skeptic' if c<t33 else 'True Neutral')
 cnt=collections.Counter(matrix[m][lab] for m in members for lab,_ in cats)
 json.dump({'cats':[c[0] for c in cats],'defensive':list(DEFENSIVE),'matrix':{m:matrix[m] for m in members},
-           'scores':{m:scores[m] for m in members}},open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\category_stance.json','w'))
+           'scores':{m:scores[m] for m in members}},open(MB_ROOT+r'\category_stance.json','w'))
 print('tier distribution:',dict(cnt))
 persu=cnt['Highly Persuadable']+cnt['True Neutral']+cnt['Lean Skeptic']+cnt['Skeptic']
 print('persuadable middle: HighlyPersuadable %d | TrueNeutral %d | LeanSkeptic %d | Skeptic %d  (total %d) | Champions+Defenders %d'%(

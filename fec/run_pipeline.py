@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """CANONICAL PIPELINE RUNNER (deep-audit fix 2026-07-02: the stale-electoral-frontier failure class).
 One command regenerates everything in the right order — no more hand-typed chains that forget a pass.
 Steps marked [wb] read the workbook: if you have just WRITTEN to the workbook (media blend, tier sync),
@@ -26,7 +27,7 @@ CHAIN=[('receptivity_layer.py',[]),            # personality/incentive receptivi
        ('make_member_desk.py',[]),
        ('make_combined.py',[]),
        ('audit_full.py',[])]
-WBP=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+WBP=MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
 def _wb_ready():
     """Workbook readable AND a structurally valid xlsx with stable size (2026-07-02 incidents:
     a PermissionError lock race, then a TRUNCATED save — Excel/OneDrive contention left a 2.2MB
@@ -41,7 +42,7 @@ def _wb_ready():
 def recalc():
     ps=('Get-Process EXCEL -ErrorAction SilentlyContinue | Stop-Process -Force -Confirm:$false; Start-Sleep -Seconds 2; '
         '$xl = New-Object -ComObject Excel.Application; $xl.Visible=$false; $xl.DisplayAlerts=$false; '
-        '$wb = $xl.Workbooks.Open("C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\Moneyball Main Version - Blended.xlsx"); '
+        '$wb = $xl.Workbooks.Open("'+WBP+'"); '
         '$xl.CalculateFullRebuild(); $wb.Save(); $wb.Close($true); $xl.Quit(); Write-Output "recalc ok"')
     for attempt in (1,2):
         r=subprocess.run(['powershell','-NoProfile','-Command',ps],capture_output=True,text=True)

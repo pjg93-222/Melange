@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Committee re-weight (reproducible port of the 2026-06-30 manual Excel edit). Recomputes Committee Data
 Membership (C), Leadership (D) and Committee score (B) from the Seats-held text (E), applying:
   * ALL 'Small Business' seats -> [Highly]
@@ -9,7 +10,7 @@ Default = VALIDATE (read-only): recompute from the live workbook and confirm it 
 --apply = also rewrite E (SB->Highly) + B/C/D via Excel COM + full recalc (idempotent on the current workbook)."""
 import openpyxl, re, sys, shutil, os, datetime, time
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r"C:\Users\pgoff\OneDrive\Desktop\Melange Systems"
+B = MB_ROOT
 WB = B + r"\Moneyball Main Version - Blended.xlsx"
 BASE = {'Highly': 3.0, 'Moderately': 1.8, 'Slightly': 0.9}; SUBF = 1.0 / 6.0
 KLEAD = {'Chair': {'full': 3.0, 'sub': 7.5}, 'Ranking': {'full': 2.0, 'sub': 4.5}, 'Vice': {'full': 1.0, 'sub': 2.0}}

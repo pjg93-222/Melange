@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """MULTILAYER NETWORK BUILDER — integrates the press-derived layers into the live cascade network.
 
 Writes `congress_cosponsor_network_AUG<date>.xlsx` in the exact Edges format the NINE existing loaders
@@ -21,7 +22,7 @@ After building, run audit_full.py — the whole 40-check suite then validates th
 import json,sys,os,glob,collections,datetime
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 ENG_CAP=float(os.environ.get('ENG_CAP','2.0')); HCOI_W=float(os.environ.get('HCOI_W','0.2'))
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}
 name2bio={m:C[m]['bioguide'] for m in C if C[m].get('bioguide')}

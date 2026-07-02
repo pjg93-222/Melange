@@ -1,13 +1,14 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import json,sys,math,collections,glob,os,openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 WM,WP=0.6,0.4; CAP=50000
 PERS={'Neutral':1.0,'Skeptic':0.85,'Unengaged':0.55,'Ally':0.45,'Champion':0.20,'Opponent':0.10}
 PRO={'Champion','Ally'}; ANTI={'Opponent','Skeptic'}
-C={m['member']:m for m in json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congestion.json'))}
+C={m['member']:m for m in json.load(open(MB_ROOT+r'\congestion.json'))}
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
-AL=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\im_allocation.json'))
+AL=json.load(open(MB_ROOT+r'\im_allocation.json'))
 flip=AL['flip']; coal=AL['coalition']
-wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 ra=wb['Rank & Allocation']
 stance={ra.cell(r,1).value:ra.cell(r,7).value for r in range(3,536) if ra.cell(r,1).value}
 members=[m['member'] for m in C.values()]
@@ -15,7 +16,7 @@ ind={n:(C[n]['banks'] or 0)+(C[n]['finserv'] or 0) for n in members}
 cu={n:(C[n]['cu'] or 0) for n in members}
 st={n:stance.get(n,'Neutral') for n in members}
 camp={n:('pro' if st[n] in PRO else 'anti' if st[n] in ANTI else 'neu') for n in members}
-net=max(glob.glob(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
+net=max(glob.glob(MB_ROOT+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
 ne=openpyxl.load_workbook(net,data_only=True)['Edges']
 adj=collections.defaultdict(dict); mem=set(members)
 for r in range(2,ne.max_row+1):
@@ -37,5 +38,5 @@ for n in members:
     if fa<=0 and ca<=0: continue
     rows.append([n,st[n][:4],fa,ca,round(pf(n,0),2),round(pf(n,fa),2),C[n]['net_lean']])
 json.dump({'rows':rows,'flipTot':sum(flip.values()),'coalTot':sum(coal.values()),'flipN':len(flip),'coalN':len(coal)},
-          open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\imviz.json','w'),separators=(',',':'),ensure_ascii=False)
-print('rows',len(rows),'| flip $%s / %d  coal $%s / %d'%(f"{sum(flip.values()):,}",len(flip),f"{sum(coal.values()):,}",len(coal)),'| bytes',os.path.getsize(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\imviz.json'))
+          open(MB_ROOT+r'\imviz.json','w'),separators=(',',':'),ensure_ascii=False)
+print('rows',len(rows),'| flip $%s / %d  coal $%s / %d'%(f"{sum(flip.values()):,}",len(flip),f"{sum(coal.values()):,}",len(coal)),'| bytes',os.path.getsize(MB_ROOT+r'\imviz.json'))

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT,DRAFT as MB_DRAFT  # centralized root (arch review 2026-07-02)
 """STANCE DYNAMICS — Zhou & Elejalde (2026, Information Processing & Management, TWLGCN) mapped onto
 the CU press corpus.  Their contributions we transplant (sans the GNN — our corpus is 2.4k items, not
 1.2M tweets; the DESIGN transfers, the deep model does not):
@@ -20,8 +21,8 @@ the CU press corpus.  Their contributions we transplant (sans the GNN — our co
 Writes stance_dynamics.json + stance_imputation_proposals.csv."""
 import csv,json,sys,math,collections,datetime,glob,os
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-SRC=r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems\cu_press_stance_tone.csv'
+B=MB_ROOT
+SRC=MB_DRAFT+r'\cu_press_stance_tone.csv'
 WIN=int(os.environ.get('SD_WINDOW','91'))    # days/window; their 28d resolved granularity-vs-sparsity for tweets, quarters do for press
 rows=list(csv.DictReader(open(SRC,encoding='utf-8-sig')))
 def pdate(r):

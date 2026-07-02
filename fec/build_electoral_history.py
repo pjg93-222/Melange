@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT,DRAFT as MB_DRAFT  # centralized root (arch review 2026-07-02)
 """Per-member electoral history for the member desk: FEC primary + general vote share (2016-2022,
 member-level, from the FEC 'Federal Elections' books in ~/Downloads) + 2024 general from MEDSL.
 Matched with build_electoral's exact name formula, state+chamber scoped. Writes electoral_history.json.
 Run: python fec/build_electoral_history.py"""
 import json, openpyxl, collections, glob, os, csv, sys
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r"C:\Users\pgoff\OneDrive\Desktop\Melange Systems"
-DL = r"C:\Users\pgoff\Downloads"; DS = r"C:\Users\pgoff\OneDrive\Desktop\Draft Systems"
+B = MB_ROOT
+DL = r"C:\Users\pgoff\Downloads"; DS = MB_DRAFT
 
 members = [m['member'] for m in json.load(open(B+r"\congestion.json"))]
 mset = set(members); bylast = collections.defaultdict(list)

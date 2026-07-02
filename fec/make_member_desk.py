@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """
 Builds  cu-member-desk.html  — the integrated, dark-themed individual-member side
 of the Moneyball dashboard. Linked from the SNA network dashboard (Moneyball Dashboard.html).
@@ -15,8 +16,8 @@ Run:  python fec/make_member_desk.py            (writes bundle JSON + HTML)
 import json, os, csv, re, sys, unicodedata
 import openpyxl
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+B = MB_ROOT
 def L(p):
     for fp in ([p] if os.path.isabs(p) else [os.path.join(B, p), os.path.join(B, 'fec', p)]):
         if os.path.exists(fp):

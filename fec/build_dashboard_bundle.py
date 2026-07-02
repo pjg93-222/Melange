@@ -1,10 +1,11 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import json,sys,glob,os,collections,csv,openpyxl,networkx as nx,math,random,re,unicodedata,zlib
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-C=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congestion.json'))
+C=json.load(open(MB_ROOT+r'\congestion.json'))
 cong={m['member']:m for m in C}
-CS=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\category_stance.json'))['matrix']
-FL=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\per_topic_alloc.json'))
-CO=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\per_topic_coalition.json'))
+CS=json.load(open(MB_ROOT+r'\category_stance.json'))['matrix']
+FL=json.load(open(MB_ROOT+r'\per_topic_alloc.json'))
+CO=json.load(open(MB_ROOT+r'\per_topic_coalition.json'))
 issues=list(FL.keys())            # 18 labels, blocks order
 # label -> matrix category (CFPB Restrain/Reach share combined CFPB stance)
 LBLCAT={'Examination & Supervision':'Examination & Supervision','Credit Union Capital Requirements':'CU Capital Requirements',
@@ -16,7 +17,7 @@ LBLCAT={'Examination & Supervision':'Examination & Supervision','Credit Union Ca
 'Credit Card & Consumer-Fee Mandates':'Credit Card Mandates','Member Business Lending':'Member Business Lending',
 'Mortgage Lending & Housing':'Mortgage & Housing'}
 issue_cat=[LBLCAT.get(lb,lb) for lb in issues]
-wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 ra=wb['Rank & Allocation']
 # authoritative rank = Blended Model col20 (was erroneously reading Rank & Allocation col2 = District/State)
 bm=wb['Blended Model']; rank={bm.cell(r,1).value:bm.cell(r,20).value for r in range(3,536) if bm.cell(r,1).value}
@@ -66,7 +67,7 @@ members=[m['member'] for m in C]; idx={n:i for i,n in enumerate(members)}
 # party from voteview members (party_code 100=D,200=R,else I); prefer most recent congress
 party={}
 for congN in (119,118,117):
-    p=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\votes\HS%d_members.csv'%congN
+    p=MB_ROOT+r'\votes\HS%d_members.csv'%congN
     if os.path.exists(p):
         with open(p,encoding='utf-8') as fh:
             for row in csv.DictReader(fh):
@@ -74,7 +75,7 @@ for congN in (119,118,117):
                 if b and b not in party: party[b]={'100':'D','200':'R'}.get(pc,'I')
 bio2name={cong[n]['bioguide']:n for n in members if cong[n].get('bioguide')}
 # network
-net=max(glob.glob(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
+net=max(glob.glob(MB_ROOT+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
 ne=openpyxl.load_workbook(net,data_only=True)['Edges']
 G=nx.Graph(); G.add_nodes_from(members); ew={}
 for r in range(2,ne.max_row+1):
@@ -102,7 +103,7 @@ for n in members:
     raw[n]=(same,cross); gs+=same; gc+=cross
 prior=gc/(gs+gc) if (gs+gc)>0 else 0.12; ALPHA=6.0
 bp={n:(raw[n][1]+ALPHA*prior)/(raw[n][0]+raw[n][1]+ALPHA) for n in members}
-cfp=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\confidence.json'; CONF=json.load(open(cfp)) if os.path.exists(cfp) else {}
+cfp=MB_ROOT+r'\confidence.json'; CONF=json.load(open(cfp)) if os.path.exists(cfp) else {}
 name=[];X=[];Y=[];PARTY=[];GEN=[];RANK=[];NL=[];STANCE=[];BP=[];CF=[]   # columnar to drop repeated JSON keys
 for n in members:
     sm=''.join(TC.get(CS.get(n,{}).get(issue_cat[i],'—'),'-') for i in range(len(issues)))
@@ -148,7 +149,7 @@ for i,lb in enumerate(issues):
     col=[STANCE[k][i] for k in range(len(name))]
     stats.append({'champ':col.count('C')+col.count('F'),'ally':col.count('A'),'opp':col.count('O'),'skep':col.count('S'),
                   'flip':sum(FL[lb].values()),'coal':sum(CO[lb].values()),'coalN':len(coal[i])})
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 # --- electoral contest/defend plays (per member) ---
 EP=json.load(open(B+r'\electoral_plays.json')) if os.path.exists(B+r'\electoral_plays.json') else {}
 def _playcode(n):   # c = contest via PRIMARY (same-party), g = contest via GENERAL (cross-party flip), d = defend, n = none
@@ -174,7 +175,7 @@ if OPT:
          'conv':[idx[c[0]] for c in OPT['conversions'] if c[0] in idx]}
 # ====== LIVE SCENARIO ENGINE DATA (faithful in-browser port of flip_model + competitive cascade + lt_priming) ======
 import importlib.util
-_es=importlib.util.spec_from_file_location('fmE',r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\flip_model.py');fmE=importlib.util.module_from_spec(_es);_es.loader.exec_module(fmE)
+_es=importlib.util.spec_from_file_location('fmE',MB_ROOT+r'\fec\flip_model.py');fmE=importlib.util.module_from_spec(_es);_es.loader.exec_module(fmE)
 ADJ=[[idx[a],idx[b],round(w,3)] for (a,b),w in ew.items() if a in idx and b in idx]   # FULL network (engine cascade uses all edges, not just the top-420 drawn)
 ENG=[[round(fmE.eng[fmE.cat2sc[issue_cat[i]]][n],3) for n in members] for i in range(len(issues))]   # legislative engagement per issue x member
 engine={'adj':ADJ,
@@ -191,7 +192,7 @@ engine={'adj':ADJ,
 # P(rally)=(1-b)(1-z/3), P(retreat)=(1-b)(z/3), b = 0.05+0.10*psi backfire.  Estimation identical to
 # fec/salience_shock.py (KEEP IN SYNC).  Feeds the party-asymmetric exec-cue multipliers in the JS.
 _TS={'C':3,'F':2.5,'A':2,'H':1,'T':0,'L':-1,'S':-2,'O':-3}
-_DEF=set(json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\category_stance.json'))['defensive'])
+_DEF=set(json.load(open(MB_ROOT+r'\category_stance.json'))['defensive'])
 engine['sal']=[]
 for i in range(len(issues)):
     sd=[_TS[STANCE[k][i]] for k in range(len(name)) if PARTY[k]=='D' and STANCE[k][i] in _TS]
@@ -205,7 +206,7 @@ engine['const']['EXECP']='R'   # executive party for the going-public cue (119th
 # go-public advisory verdicts (salience_shock.py --advise), surfaced in the System-shocks panel
 _advmap={}
 try:
-    _advl=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\salience_advisory.json'))['advisory']
+    _advl=json.load(open(MB_ROOT+r'\salience_advisory.json'))['advisory']
     _cut=sorted((a['value'] for a in _advl),reverse=True)[max(0,len(_advl)//4-1)]
     for a in _advl:
         v='GO PUBLIC' if (a['value']>=_cut and a['value']>0) else 'quiet work'
@@ -227,7 +228,7 @@ bundle={'issues':issues,'name':name,'x':X,'y':Y,'party':''.join(PARTY),'gen':''.
         'rank':RANK,'nl':NL,'bp':BP,'cf':CF,'stance':STANCE,'edges':E,'flip':flip,'coal':coal,'stats':stats,
         'play':PLAY,'epval':EPVAL,'frontier':frontier,'opt':opt,'engine':engine,
         'cx':CX,'cy':CY,'comms':COMMS,'cmi':CMI}   # committee-cluster layout (Porter): positions + anchors + per-member primary committee
-json.dump({name[i]:BP[i] for i in range(len(name))},open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\bipartisan.json','w'))
-out=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\dashboard_data.json'
+json.dump({name[i]:BP[i] for i in range(len(name))},open(MB_ROOT+r'\bipartisan.json','w'))
+out=MB_ROOT+r'\dashboard_data.json'
 json.dump(bundle,open(out,'w'),separators=(',',':'))
 print('wrote %s  (%.1f KB)  nodes=%d edges=%d issues=%d'%(out,os.path.getsize(out)/1024,len(name),len(E),len(issues)))

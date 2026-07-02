@@ -1,6 +1,7 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import json,sys,math,random,collections,glob,os,csv,openpyxl,heapq
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 SEED=int(os.environ.get('SEED','7')); random.seed(SEED)
 MC=int(os.environ.get('MC','20')); CAP=50_000; BSCALE=400000; MAXSEEDS=int(os.environ.get('MAXSEEDS','60'))
 LEVON=os.environ.get('LEV','1')!='0'   # electoral leverage on (competitive seats cheaper to move)
@@ -8,7 +9,7 @@ ONLY=os.environ.get('TOPIC')           # optional single-topic filter (substring
 PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Skeptic'}
 C={m['member']:m for m in json.load(open(os.environ.get('CONGEST',B+r'\congestion.json')))}   # scenario can override money state
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
-wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 bm=wb['Blended Model']; nrm=wb['Legislative Score - Normalized']
 score={bm.cell(r,1).value:(bm.cell(r,19).value or 0) for r in range(3,536) if bm.cell(r,1).value}
 members=[m['member'] for m in C.values()]

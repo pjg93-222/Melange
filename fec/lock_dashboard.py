@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Lock the Moneyball dashboard behind ONE password.
 AES-256-GCM encrypts the entire self-contained HTML (key = PBKDF2-SHA256 of the password, 250k iters) and
 wraps it in a self-decrypting page using the browser's built-in Web Crypto (no external libs). Safe to host
@@ -7,7 +8,7 @@ Usage:  python fec/lock_dashboard.py "your-password"     (omit to auto-generate 
 """
 import sys, os, base64, hashlib, secrets
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B = MB_ROOT
 SRC = B + r'\Moneyball.html'
 OUT = B + r'\deploy\index.html'
 ITERS = 250000

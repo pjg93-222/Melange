@@ -1,9 +1,10 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Multi-objective co-sponsor recruitment route finder (roadmap step 3, RELINK + MOPBD*).
 Edge-activation IM: champions are seeds; each recruiter whips <=K colleagues (out-degree budget).
 Builds recruitment ROUTES and returns the Pareto front over (co-sponsors gained, money, cascade-failure risk)."""
 import json,sys,os,glob,collections,openpyxl,heapq,random,csv,math
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 K=int(os.environ.get('K','5'))               # recruitment bandwidth: a member personally whips <=K colleagues
 CEDGE=float(os.environ.get('CEDGE','10000')) # base $ per recruitment ask
 TOPIC=os.environ.get('TOPIC','Interchange')

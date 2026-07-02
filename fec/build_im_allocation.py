@@ -1,3 +1,4 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Build im_allocation.json from the CURRENT 17-topic live model (M4 fix).
 
 The legacy fec/im_allocate2.py produced im_allocation.json from a SUPERSEDED single-channel model:
@@ -18,7 +19,7 @@ Run per_topic_flip.py and per_topic_coalition.py first (they write the inputs), 
 """
 import json,sys,collections,os
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 pta=json.load(open(B+r'\per_topic_alloc.json'))
 ptc=json.load(open(B+r'\per_topic_coalition.json'))
 flip=collections.Counter(); coal=collections.Counter()

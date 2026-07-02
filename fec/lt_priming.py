@@ -1,3 +1,4 @@
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Linear-Threshold priming (roadmap step 3, the flip/join side of the two models).
 A member co-sponsors / flips when their PRO-influence clears their threshold:
     pressure(active pro neighbors) + money-influence  >=  theta(resistance)   [Linear Threshold]
@@ -5,7 +6,7 @@ For each persuadable target we solve for the CHEAPEST balance of network pressur
 recruit) and direct money (diminishing returns) that tips them over."""
 import json,sys,os,glob,collections,openpyxl,heapq,csv,math
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 TOPIC=os.environ.get('TOPIC','Mortgage')
 CEDGE=float(os.environ.get('CEDGE','10000'))
 MAXSHIFT=18.0; HALF=0.10; RFLOOR=200000          # money curve (shared with money_response.py)

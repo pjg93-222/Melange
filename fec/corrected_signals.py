@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """Rebuild corrected per-member PRESS and LEGISLATIVE leans from ONE consistent, direction-aware source —
 the Press Release Articles sheet (real articles + the billstatus bill-cosponsorship entries, each carrying a
 CU-direction = sign of its score). Fixes: (A) press normalization/mislabels, (B) per-bill legislative direction
@@ -7,7 +8,7 @@ disjoint Legislative-Score sheet). Writes corrected_signals.json {name:{press,le
 distributions + key members; --write also writes the JSON."""
 import openpyxl, sys, io, json, collections, statistics
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
 def fs(x):
     try: x = float(x)
     except (TypeError, ValueError): return 0
@@ -75,5 +76,5 @@ for n in ['Bill Foster','Thom Tillis','Sean Casten','Tina Smith','Roger Wicker',
     if n in members: print('  %-18s %-9s -> %-9s | press %+.2f leg %+.2f (old %+.2f)'%(n,members[n],new[n],P[n],Lg[n],oldleg[n]))
 if '--write' in sys.argv:
     json.dump({n:{'press':round(P[n],4),'leg':Lg[n],'stance':new[n]} for n in members},
-              io.open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\corrected_signals.json','w',encoding='utf-8'))
+              io.open(MB_ROOT+r'\corrected_signals.json','w',encoding='utf-8'))
     print('\nwrote corrected_signals.json')

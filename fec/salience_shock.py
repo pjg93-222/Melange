@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """SALIENCE SHOCK — Noble & Turner (2024) "Presidential Leadership and Legislative Polarization"
 mapped onto the CU policy domain (user-directed 2026-07-01: "use the Noble article to enhance the
 system shock within the system").
@@ -36,7 +37,7 @@ not hand-set.  Usage:
   actor anti = an executive/industry campaign goes public AGAINST the CU position"""
 import json,sys,os,math,random,collections,glob,csv,argparse,importlib.util
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 spec=importlib.util.spec_from_file_location('mr',B+r'\fec\money_response.py'); mr=importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
 _fs=importlib.util.spec_from_file_location('fm',B+r'\fec\flip_model.py'); fm=importlib.util.module_from_spec(_fs); _fs.loader.exec_module(fm)
 SEED=7; MC=int(os.environ.get('MC','20'))   # MC=20 validated vs MC=100 (mc_stability_check: 100% seed overlap)

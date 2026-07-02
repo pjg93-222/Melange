@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """SOCIAL MASTER — the bow.  Unifies every social channel into one scored corpus + per-member rollup:
   * Quorum (licensed): X tweets, Facebook posts, Truth Social posts — from quorum_member_tweets.csv
     (already member-attributed, CU-relevant, stance-scored by process_quorum.py).
@@ -12,7 +13,7 @@ remains the user's decision)."""
 import json,sys,sqlite3,re,collections,pickle
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import pandas as pd
-M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+M=MB_ROOT
 sys.path.insert(0,M+r'\fec')
 from process_quorum import CU_TERMS   # single relevance vocabulary, kept in sync with quorum_query.txt
 DOCMAP={'Tweet':'x','Facebook Post':'facebook','Truth Social Post':'truthsocial'}
