@@ -138,6 +138,15 @@ dial registry omits SOC_VOLFLOOR / SOC_MEN_W.
 
 ---
 
+## APPLIED STATUS (2026-07-02, post-report — user: "Continue and apply these changes")
+ALL S2 remedies applied and verified (commit bf4a703): S2-01 cosponsor-only BP (BP_SRC dial;
+19 optimizer allocations shifted, 17/17 frontier paths adjusted, ranks untouched), S2-02 loud
+missing-input guards, S2-03 dump_atomic at all 14 sites (+2 kernel tests -> 30), S2-04 row-drift
+audit check, S2-05 rebuild_press_cache.py. S3: 58 unused imports pruned across 28 files.
+Verification: kernel 30/30 twice, full pipeline twice, audit ALL CLEAN twice, rank delta ZERO.
+Still report-only: S3-04 (gold-queue staleness — one-shot tool), S3-05 (write-only artifacts —
+awaiting user confirmation as diagnostics), S3-07 README refresh (doc-rot; low priority).
+
 ## §5 Fix lane (executed after report completion)
 Branch: `audit/fixes-2026-07-02`. Scope: five provably-inert unused-import removals (name appears
 nowhere else in file text; AST + grep verified): the four unused `import moneyball_core as MC`
