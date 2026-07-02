@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+import moneyball_core as MBC
 """Multi-objective co-sponsor recruitment route finder (roadmap step 3, RELINK + MOPBD*).
 Edge-activation IM: champions are seeds; each recruiter whips <=K colleagues (out-degree budget).
 Builds recruitment ROUTES and returns the Pareto front over (co-sponsors gained, money, cascade-failure risk)."""
@@ -13,31 +14,15 @@ C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 CS=json.load(open(B+r'\category_stance.json')); MAT=CS['matrix']; cats=CS['cats']
 cat=[c for c in cats if TOPIC.lower() in c.lower()][0]
-net=max(glob.glob(B+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
-ne=openpyxl.load_workbook(net,data_only=True)['Edges']
-adj=collections.defaultdict(dict); mem=set(members)
-for r in range(2,ne.max_row+1):
-    a,b,w=ne.cell(r,1).value,ne.cell(r,2).value,ne.cell(r,3).value
-    a=bio2name.get(a); b=bio2name.get(b)
-    if a in mem and b in mem and a!=b and isinstance(w,(int,float)):
-        w=(adj[a][b]+w)/2 if b in adj[a] else w   # D2 2026-07-01: 41 reverse-dup pairs carry ASYMMETRIC directed weights (up to 3x) -- mean-symmetrize (was silent last-write-wins)
-        adj[a][b]=w; adj[b][a]=w
+adj=MBC.load_network()
 # L4: unify the diffusion kernel with the rest of the system. The coalition/scenario/frontier modules use a
 # BRIDGE-AMPLIFIED edge prob P=(w*cpf)/(w*cpf+4); this module previously used the un-amplified P=w/(w+4),
 # so a cross-party recruitment between two bridge-builders spread LESS here than in the cascade -- one model,
 # two kernels. Adopt the amplified kernel here too so co-sponsor recruitment shares the single diffusion law.
-BP=json.load(open(B+r'\bipartisan.json')); bpf={n:BP.get(n,24)/100.0 for n in members}
-party={}
-for cn in (119,118,117):
-    pth=B+r'\votes\HS%d_members.csv'%cn
-    if os.path.exists(pth):
-        for row in csv.DictReader(open(pth,encoding='utf-8')):
-            b=row.get('bioguide_id'); pc=str(row.get('party_code'))
-            if b and b not in party: party[b]={'100':'D','200':'R'}.get(pc,'I')
-prt={n:party.get(C[n].get('bioguide',''),'?') for n in members}
+bpf=MBC.bpf()
+prt=MBC.party()
 BETA=1.5
-def cpf(n,u):   # cross-party bridge amplifier (identical to scenario/coalition/frontier)
-    return 0.4+0.6*math.sqrt(bpf.get(n,0.24)*bpf.get(u,0.24)) if (prt.get(n)!=prt.get(u) and prt.get(n) in 'DR' and prt.get(u) in 'DR') else 1.0
+cpf=MBC.cpf_diffusion
 P={u:{v:(w*cpf(u,v))/(w*cpf(u,v)+6.0) for v,w in adj[u].items()} for u in members}     # activation prob if u whips v (bridge-amplified)
 seeds=[m for m in members if MAT.get(m,{}).get(cat) in PRO]
 MCMODE=os.environ.get('MCMODE','0')=='1'; MC=int(os.environ.get('MC','40'))

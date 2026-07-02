@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+import moneyball_core as MBC
 import json,sys,math,collections,glob,os,openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 WM,WP=0.6,0.4; CAP=50000
@@ -16,15 +17,7 @@ ind={n:(C[n]['banks'] or 0)+(C[n]['finserv'] or 0) for n in members}
 cu={n:(C[n]['cu'] or 0) for n in members}
 st={n:stance.get(n,'Neutral') for n in members}
 camp={n:('pro' if st[n] in PRO else 'anti' if st[n] in ANTI else 'neu') for n in members}
-net=max(glob.glob(MB_ROOT+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
-ne=openpyxl.load_workbook(net,data_only=True)['Edges']
-adj=collections.defaultdict(dict); mem=set(members)
-for r in range(2,ne.max_row+1):
-    a,b,w=ne.cell(r,1).value,ne.cell(r,2).value,ne.cell(r,3).value
-    a=bio2name.get(a); b=bio2name.get(b)
-    if a in mem and b in mem and a!=b and isinstance(w,(int,float)):
-        w=(adj[a][b]+w)/2 if b in adj[a] else w   # D2 2026-07-01: 41 reverse-dup pairs carry ASYMMETRIC directed weights (up to 3x) -- mean-symmetrize (was silent last-write-wins)
-        adj[a][b]=w; adj[b][a]=w
+adj=MBC.load_network()
 nbrA={n:sum(w for u,w in adj[n].items() if camp[u]=='pro') for n in members}
 nbrB={n:sum(w for u,w in adj[n].items() if camp[u]=='anti') for n in members}
 mA=max(nbrA.values()) or 1; mB=max(nbrB.values()) or 1

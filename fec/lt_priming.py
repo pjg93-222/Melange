@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+import moneyball_core as MBC
 """Linear-Threshold priming (roadmap step 3, the flip/join side of the two models).
 A member co-sponsors / flips when their PRO-influence clears their threshold:
     pressure(active pro neighbors) + money-influence  >=  theta(resistance)   [Linear Threshold]
@@ -17,31 +18,15 @@ C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 CS=json.load(open(B+r'\category_stance.json')); MAT=CS['matrix']; cats=CS['cats']
 cat=[c for c in cats if TOPIC.lower() in c.lower()][0]
-net=max(glob.glob(B+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
-ne=openpyxl.load_workbook(net,data_only=True)['Edges']
-adj=collections.defaultdict(dict); mem=set(members)
-for r in range(2,ne.max_row+1):
-    a,b,w=ne.cell(r,1).value,ne.cell(r,2).value,ne.cell(r,3).value
-    a=bio2name.get(a); b=bio2name.get(b)
-    if a in mem and b in mem and a!=b and isinstance(w,(int,float)):
-        w=(adj[a][b]+w)/2 if b in adj[a] else w   # D2 2026-07-01: 41 reverse-dup pairs carry ASYMMETRIC directed weights (up to 3x) -- mean-symmetrize (was silent last-write-wins)
-        adj[a][b]=w; adj[b][a]=w
+adj=MBC.load_network()
 # L4: unify the diffusion kernel with the rest of the system (coalition/scenario/frontier use the
 # bridge-amplified P=(w*cpf)/(w*cpf+4); this module previously used the un-amplified P=w/(w+4)). Adopt the
 # amplified kernel so the pressure a primeable target feels from cross-party bridge neighbors matches the
 # cascade -- one diffusion law everywhere.
-BP=json.load(open(B+r'\bipartisan.json')); bpf={n:BP.get(n,24)/100.0 for n in members}
-party={}
-for cn in (119,118,117):
-    pth=B+r'\votes\HS%d_members.csv'%cn
-    if os.path.exists(pth):
-        for row in csv.DictReader(open(pth,encoding='utf-8')):
-            b=row.get('bioguide_id'); pc=str(row.get('party_code'))
-            if b and b not in party: party[b]={'100':'D','200':'R'}.get(pc,'I')
-prt={n:party.get(C[n].get('bioguide',''),'?') for n in members}
+bpf=MBC.bpf()
+prt=MBC.party()
 BETA=1.5
-def cpf(n,u):   # cross-party bridge amplifier (identical to scenario/coalition/frontier)
-    return 0.4+0.6*math.sqrt(bpf.get(n,0.24)*bpf.get(u,0.24)) if (prt.get(n)!=prt.get(u) and prt.get(n) in 'DR' and prt.get(u) in 'DR') else 1.0
+cpf=MBC.cpf_diffusion
 P={u:{v:(w*cpf(u,v))/(w*cpf(u,v)+6.0) for v,w in adj[u].items()} for u in members}   # bridge-amplified (L4)
 _rvals=sorted((C[m].get('receipts') or 0) for m in C if (C[m].get('receipts') or 0)>0); _RMED=_rvals[len(_rvals)//2] if _rvals else RFLOOR
 def receipts(m):

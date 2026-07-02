@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+import moneyball_core as MBC
 """END-TO-END SCENARIO RUNNER (Melange Systems).
 Apply a scenario -> propagate through the competitive cascade + money curve -> report the change in
 CU coalition influence vs the frozen baseline, topic by topic.  Grounded in the research library:
@@ -26,31 +27,14 @@ CTORD=['Champion','Defender','Ally','Highly Persuadable','True Neutral','Lean Sk
 CSJ=json.load(open(B+r'\category_stance.json')); MAT0=CSJ['matrix']; cats=CSJ['cats']; DEFENSIVE=set(CSJ['defensive'])
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=[m['member'] for m in C.values()]
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
-BP=json.load(open(B+r'\bipartisan.json')); bpf={m:BP.get(m,24)/100.0 for m in members}
+bpf=MBC.bpf()
 import csv
-party={}
-for cn in (119,118,117):
-    p=B+r'\votes\HS%d_members.csv'%cn
-    if os.path.exists(p):
-        for row in csv.DictReader(open(p,encoding='utf-8')):
-            b=row.get('bioguide_id'); pc=str(row.get('party_code'))
-            if b and b not in party: party[b]={'100':'D','200':'R'}.get(pc,'I')
-prt={m:party.get(C[m].get('bioguide',''),'?') for m in members}
-def cpf(n,u): return 0.4+0.6*math.sqrt(bpf.get(n,0.24)*bpf.get(u,0.24)) if (prt.get(n)!=prt.get(u) and prt.get(n) in 'DR' and prt.get(u) in 'DR') else 1.0
-net=max(glob.glob(B+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
-ne=openpyxl.load_workbook(net,data_only=True)['Edges']; adj=collections.defaultdict(dict); mem=set(members)
-for r in range(2,ne.max_row+1):
-    a,b,w=ne.cell(r,1).value,ne.cell(r,2).value,ne.cell(r,3).value; a=bio2name.get(a); b=bio2name.get(b)
-    if a in mem and b in mem and a!=b and isinstance(w,(int,float)):
-        w=(adj[a][b]+w)/2 if b in adj[a] else w   # D2 2026-07-01: 41 reverse-dup pairs carry ASYMMETRIC directed weights (up to 3x) -- mean-symmetrize (was silent last-write-wins)
-        adj[a][b]=w; adj[b][a]=w
+prt=MBC.party()
+cpf=MBC.cpf_diffusion
+adj=MBC.load_network()
 P={u:{v:(w*cpf(u,v))/(w*cpf(u,v)+6.0) for v,w in adj[u].items()} for u in members}
 idx={m:i for i,m in enumerate(members)}; NM=len(members)
-def _sm(x):   # splitmix64 -> [0,1): a deterministic draw per (iteration,edge), independent of activation order
-    x=(x+0x9E3779B97F4A7C15)&0xFFFFFFFFFFFFFFFF
-    x=((x^(x>>30))*0xBF58476D1CE4E5B9)&0xFFFFFFFFFFFFFFFF
-    x=((x^(x>>27))*0x94D049BB133111EB)&0xFFFFFFFFFFFFFFFF
-    return ((x^(x>>31))&0xFFFFFFFFFFFFFFFF)/0x10000000000000000
+_sm=MBC.sm64
 def cascade(A,Bs,it):
     # H2 fix: TRUE common random numbers -- edge (u,v) at iteration `it` always draws the SAME value, regardless of
     # which seeds/bystanders changed.  So baseline vs scenario differ ONLY by the real perturbation, not RNG desync.
