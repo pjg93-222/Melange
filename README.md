@@ -33,10 +33,14 @@ Credit-union legislative-influence modeling & money-allocation system (the "Mone
 
 ## Running
 ```
-python fec/run_pipeline.py [--recalc] [--from <step>]   # the whole chain, audited at the end
-python fec/tests/run_tests.py                            # 30 kernel checks (run after ANY code change)
-python fec/audit_full.py                                 # full-body audit (expect ALL MODULES CLEAN)
+python fec/run_pipeline.py [--from <step>]   # the whole chain, audited at the end (NO Excel/COM involved)
+python fec/tests/run_tests.py                # 30 kernel checks (run after ANY code change)
+python fec/audit_full.py                     # full-body audit, 52 checks (expect ALL MODULES CLEAN)
 ```
+**Rank authority = `ranks_python.json`** (phase 2): Python computes the entire rank chain;
+the workbook is a view that recalculates itself when opened in Excel (fullCalcOnLoad). Edit dials
+(Topic Weights / Category Stance / AB weights) in Excel as always — saving in Excel refreshes
+everything the pipeline reads.
 Verification protocol for code changes: kernel tests → pipeline → **zero rank delta** vs the last
 `ranks_*.json` (unless the change is supposed to move ranks) → audit clean.
 Data refresh order: collectors (`fetch_congressional_record.py`, `tweet_collector.py`, Quorum) →

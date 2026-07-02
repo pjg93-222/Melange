@@ -48,9 +48,20 @@ becomes (or +30%-reinforces) a network edge (Fink author-volume-normalized, kern
 (iteration, edge-or-member) — draws are evaluation-order-independent so marginals isolate true
 effects. Any NEW random draw must claim a dedicated key range (seed gating uses offset 2^62).
 
-**Workbook contract:** Python writes VALUES only (never formulas), backup-first into `backups/`,
-Excel-COM recalc (zip-validated, retried once) before any data_only read. The workbook is the rank's
-system of record; everything else is Python.
+**Workbook contract (PHASE 2, 2026-07-02 — system of record INVERTED):** Python owns ALL derived
+math; **ranks_python.json is the rank authority** (`compute_pillars --write`, engines read it via
+`moneyball_core.scores()/ranks()`). The workbook is a self-refreshing **VIEW**: every Python writer
+sets `fullCalcOnLoad`, so Excel recalculates the formulas whenever the user opens it. There is NO
+COM anywhere. Physics of the file: **openpyxl saves strip cached formula values** — after a
+sync/blend save, `data_only` reads of FORMULA cells return None until the next user Excel open;
+TYPED cells always survive (R&A names + col G, AB2:AB5 dials, Press Raw, row-535 weights). Pillar
+inputs O/E/F are formula-backed → `pillar_inputs_snapshot.json` (auto-refreshed while the view
+cache is alive, auto-bootstrapped from the newest cache-alive backup; correct because O/E/F change
+only through user Excel edits, which revive the cache). Python still writes VALUES only,
+backup-first into `backups/`. Chain order: authority is computed BEFORE the cache-killing sync.
+User dial edits (Topic Weights, Category Stance, AB weights) happen in Excel as always — an Excel
+save restores every cache. Full-pipeline runtime on a cache-dead workbook is ~19 min (slower
+openpyxl parses; optimization candidate: cache the frozen Legislative-Normalized sheet).
 
 ## Standing dials (env; defaults = the ratified state)
 `PERS_NONE=0.45 · SOCIAL_SHRINK=1 · RT_W=0.5 · LOSSFRAME=1.10 · SOC_REINF=0.3 · SOC_CAP=2.0 ·
