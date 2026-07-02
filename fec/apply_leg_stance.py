@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
-import moneyball_core as MC
 """Make the legislative pillar STANCE-AWARE: gate each member's per-topic cosponsorship activity (Sponsor +
 Co-Sponsorship counts) by their per-category stance, weighted by issue importance. Anti-CU members' activity
 now counts against them instead of inflating them. Writes the new leg raw to Blended Model col4 (overriding
