@@ -58,7 +58,7 @@ def press_matrix():
     Returns (norm {col:{member:val}}, w535 {col:weight}, headers {col:name})."""
     if 'pressM' not in _c:
         import openpyxl
-        wb=openpyxl.load_workbook(WORKBOOK,data_only=True,read_only=True)
+        wb=openpyxl.load_workbook(WORKBOOK,data_only=True)   # NOT read_only: streamed sheets make random .cell() O(sheet) per call (640s pathology) and misread openpyxl-saved files
         rw=wb['Press Release - Raw']; pn=wb['Press Release - Normalized']
         rrow={rw.cell(r,1).value:r for r in range(2,535) if rw.cell(r,1).value}
         COLS=list(range(5,24))

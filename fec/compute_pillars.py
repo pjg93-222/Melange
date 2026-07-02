@@ -27,13 +27,12 @@ import openpyxl
 import moneyball_core as MC
 B=MB_ROOT
 WRITE='--write' in sys.argv
-wb=openpyxl.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True,read_only=True)
+wb=openpyxl.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True)   # NOT read_only (random-access pathology; empty reads on openpyxl-saved files)
 pn=wb['Press Release - Normalized']; ra=wb['Rank & Allocation']; bm=wb['Blended Model']
-bmrows={}
-for r in range(3,536):
-    n=bm.cell(r,1).value
-    if n: bmrows[n]=r
-members=list(bmrows)
+# Member roster from R&A col A (TYPED values — survives openpyxl saves; Blended col A is formula-backed
+# and its cache dies whenever sync/blend save the workbook: the openpyxl-save/cached-value dragon).
+members=[ra.cell(r,1).value for r in range(3,536) if ra.cell(r,1).value]
+bmrows={m:i+3 for i,m in enumerate(members)}   # Blended rows mirror R&A row order (asserted in fallback path)
 prow={pn.cell(r,1).value:r for r in range(2,535) if pn.cell(r,1).value}
 norm,w535,hdrs=MC.press_matrix()
 COLS=list(norm)
@@ -45,10 +44,41 @@ def percentrank(vals,x):
     # (empirically pinned 2026-07-02: 'significance' behaves as decimal places, not sig digits).
     below=sum(1 for v in vals if v<x)
     return math.floor(below/(len(vals)-1)*1e5)/1e5
-O={m:(bm.cell(bmrows[m],15).value or 0.0) for m in members}   # Leg pillar (raw)
-E={m:(bm.cell(bmrows[m],5).value or 0.0)  for m in members}   # Committee (raw)
-F={m:(bm.cell(bmrows[m],6).value or 0.0)  for m in members}   # Demographic (raw)
-AB={r:(bm.cell(r,28).value or 0.0) for r in (2,3,4,5)}        # pillar weights (user dials)
+# O/E/F are FORMULA-backed in Blended -> their caches die after any openpyxl save (sync/blend) and
+# only revive when the user opens+saves in Excel. They change ONLY via user edits in Excel (which
+# restores caches), so: read live when alive (+ refresh the snapshot), else fall back to the snapshot.
+# Bootstrap: newest cache-alive workbook in backups/ (pre-write copies are Excel-saved).
+SNAP=B+r'\pillar_inputs_snapshot.json'
+def _read_OEF(bmx,rows):
+    o={m:bmx.cell(rows[m],15).value for m in members}
+    e={m:bmx.cell(rows[m],5).value  for m in members}
+    fv={m:bmx.cell(rows[m],6).value for m in members}
+    alive=sum(1 for m in members if o[m] is not None)>=len(members)*0.9
+    return alive,{m:(o[m] or 0.0) for m in members},{m:(e[m] or 0.0) for m in members},{m:(fv[m] or 0.0) for m in members}
+_names_alive=sum(1 for m in members if bm.cell(bmrows[m],1).value==m)
+alive,O,E,F=_read_OEF(bm,bmrows) if _names_alive>=len(members)*0.9 else (False,{},{},{})
+if alive:
+    MC.dump_atomic({'O':O,'E':E,'F':F,'note':'pillar formula-cell snapshot (auto-refreshed while view cache alive)'},SNAP)
+else:
+    try:
+        _sn=json.load(open(SNAP)); O,E,F=_sn['O'],_sn['E'],_sn['F']
+        print('  (view cache dead -> O/E/F from snapshot; they change only via user Excel edits, which revive the cache)')
+    except FileNotFoundError:
+        import glob as _g
+        cands=sorted(_g.glob(B+r'\backups\*.xlsx'),key=os.path.getmtime,reverse=True)
+        for cb in cands:
+            try:
+                _wb2=openpyxl.load_workbook(cb,data_only=True); _bm2=_wb2['Blended Model']
+                rows2={_bm2.cell(r,1).value:r for r in range(3,536) if _bm2.cell(r,1).value}
+                if len(rows2)<len(members)*0.9: continue
+                a2,O,E,F=_read_OEF(_bm2,rows2)
+                if a2:
+                    MC.dump_atomic({'O':O,'E':E,'F':F,'note':'bootstrapped from %s'%os.path.basename(cb)},SNAP)
+                    print('  (bootstrapped O/E/F snapshot from cache-alive backup: %s)'%os.path.basename(cb)); break
+            except Exception: continue
+        else:
+            print('FATAL: no O/E/F source (view dead, no snapshot, no cache-alive backup)'); sys.exit(1)
+AB={r:(bm.cell(r,28).value or 0.0) for r in (2,3,4,5)}        # pillar weights (TYPED user dials — always alive)
 Ov=list(O.values()); Fv=list(F.values())
 pmaxC=max(pillar.values()) or 1.0; emax=max(E.values()) or 1.0
 score={}; pcts={}

@@ -18,8 +18,8 @@ sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 FE=os.path.dirname(os.path.abspath(__file__))
 CHAIN=[('receptivity_layer.py',[]),            # personality/incentive receptivity (big5_traits.py = manual, corpus-driven)
        ('per_category_stance.py',[]),          # stance matrix (press normalization computed in Python from raw)
-       ('sync_stance_g.py',[]),                # col-G tier sync (openpyxl values write; view self-heals on open)
-       ('compute_pillars.py',['--write']),     # THE RANK AUTHORITY: ranks_python.json (replaces the COM RECALC step)
+       ('compute_pillars.py',['--write']),     # THE RANK AUTHORITY (before sync: reads O/E/F while the view cache is alive; falls back to its snapshot otherwise)
+       ('sync_stance_g.py',[]),                # col-G tier sync (openpyxl values write; kills formula caches — view self-heals on open)
        ('per_topic_flip.py',[]),
        ('per_topic_coalition.py',[]),
        ('budget_frontier.py',[]),
