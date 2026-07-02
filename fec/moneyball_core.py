@@ -49,6 +49,42 @@ def receptivity():
         except FileNotFoundError: _c['rec']={}
     return _c['rec']
 def rc(m,k,d=1.0): return receptivity().get(m,{}).get(k,d)
+def press_matrix():
+    """PHASE-2 (system-of-record inversion, user sign-off 2026-07-02): Python-owned press
+    normalization. Reads 'Press Release - Raw' VALUES (always fresh — the blend writes literals)
+    and the row-535 tiered weights (user-edited literals on the Normalized sheet), applies the
+    pos/neg-max normalization in Python. No dependency on the sheet's cached formula results,
+    hence no COM recalc needed anywhere in the pipeline.
+    Returns (norm {col:{member:val}}, w535 {col:weight}, headers {col:name})."""
+    if 'pressM' not in _c:
+        import openpyxl
+        wb=openpyxl.load_workbook(WORKBOOK,data_only=True,read_only=True)
+        rw=wb['Press Release - Raw']; pn=wb['Press Release - Normalized']
+        rrow={rw.cell(r,1).value:r for r in range(2,535) if rw.cell(r,1).value}
+        COLS=list(range(5,24))
+        raw={c:{m:(rw.cell(rrow[m],c).value or 0.0) for m in rrow} for c in COLS}
+        norm={}
+        for c in COLS:
+            vals=list(raw[c].values())
+            pmax=max(0.0,max(vals,default=0.0)); nmax=abs(min(0.0,min(vals,default=0.0)))
+            norm[c]={m:(0.0 if x==0 else (x/pmax if (x>0 and pmax) else (x/nmax if (x<0 and nmax) else 0.0)))
+                     for m,x in raw[c].items()}
+        _c['pressM']=(norm,{c:(pn.cell(535,c).value or 0.0) for c in COLS},
+                      {c:rw.cell(1,c).value for c in COLS})
+        wb.close()
+    return _c['pressM']
+def pillar_scores():
+    """The Python rank authority (ranks_python.json, written by compute_pillars --write in the
+    pipeline). Loud failure if missing — engines must not run on a stale/absent authority."""
+    if 'pillars' not in _c:
+        f=p('ranks_python.json')
+        if not os.path.exists(f):
+            raise FileNotFoundError('ranks_python.json missing — run `python fec/compute_pillars.py --write` '
+                                    '(or the full pipeline); the workbook is a VIEW, not the score source.')
+        _c['pillars']=json.load(open(f))
+    return _c['pillars']
+def scores(): return pillar_scores()['score']
+def ranks():  return pillar_scores()['rank']
 def dump_atomic(obj,path,**kw):
     """S2-03 (audit 2026-07-02): write JSON to a temp sibling then os.replace() — atomic on NTFS, so a
     crash/kill mid-write (Excel force-kill, OneDrive contention) can never leave a truncated artifact.

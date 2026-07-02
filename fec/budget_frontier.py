@@ -12,7 +12,7 @@ C={m['member']:m for m in json.load(open(os.environ.get('CONGEST',B+r'\congestio
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 bm=wb['Blended Model']; nrm=wb['Legislative Score - Normalized']
-score={bm.cell(r,1).value:(bm.cell(r,19).value or 0) for r in range(3,536) if bm.cell(r,1).value}
+score=MBC.scores()   # PHASE-2: Python rank authority
 members=[m['member'] for m in C.values()]
 ind={n:(C[n]['banks'] or 0)+(C[n]['finserv'] or 0) for n in members}
 # M6 fix 2026-07-02: align with flip_model's H3 — members with NO FEC record (receipts=0) get the MEDIAN

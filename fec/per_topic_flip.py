@@ -13,7 +13,7 @@ C={m['member']:m for m in json.load(open(MB_ROOT+r'\congestion.json'))}
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 bm=wb['Blended Model']; ra=wb['Rank & Allocation']; nrm=wb['Legislative Score - Normalized']
-score={bm.cell(r,1).value:(bm.cell(r,19).value or 0) for r in range(3,536) if bm.cell(r,1).value}
+score=MC.scores()   # PHASE-2: Python rank authority
 members=[m['member'] for m in C.values()]
 ind={n:(C[n]['banks'] or 0)+(C[n]['finserv'] or 0) for n in members}
 _iv=sorted(v for v in ind.values() if v>0); _imed=_iv[len(_iv)//2] if _iv else 0

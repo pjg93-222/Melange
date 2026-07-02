@@ -3,10 +3,11 @@ import openpyxl, sys, json, collections, math
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 M=MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
 wb=openpyxl.load_workbook(M,data_only=True)
-pr=wb['Press Release - Normalized']; ra=wb['Rank & Allocation']
+ra=wb['Rank & Allocation']
+import moneyball_core as MC
+_normM,_w535,_=MC.press_matrix()   # PHASE-2: Python-owned press normalization (raw values + row-535 dial literals; no recalc dependency)
 gen={ra.cell(r,1).value:ra.cell(r,7).value for r in range(3,536) if ra.cell(r,1).value}
 members=[ra.cell(r,1).value for r in range(3,536) if ra.cell(r,1).value]
-prow={pr.cell(r,1).value:r for r in range(2,535) if pr.cell(r,1).value}
 LEG=json.load(open(MB_ROOT+r'\archive_leg.json'))
 VC=json.load(open(MB_ROOT+r'\vote_category_lean.json'))
 n2b={v:k for k,v in VC['name_of'].items()}; votes=VC['votes']
@@ -20,11 +21,11 @@ cats=[('Examination & Supervision',5),('CU Capital Requirements',6),('NCUA Budge
 # NOT added to DEFENSIVE (weighting change = user's call; it is a defend-type fight — flag standing).
 DEFENSIVE={'Interchange','Credit Card Mandates'}
 def weights(cat): return (0.55,0.70,0.20) if cat in DEFENSIVE else (0.55,0.35,0.10)
-pw=[pr.cell(535,pc).value or 0 for _,pc in cats]
+pw=[_w535[pc] for _,pc in cats]
 def p80(vals):
     a=sorted(abs(x) for x in vals if abs(x)>1e-9); return a[int(0.8*len(a))] if a else 1.0
 def clip(x): return max(-1.0,min(1.0,x))
-press={(m,lab):((pr.cell(prow[m],pc).value or 0) if m in prow else 0) for m in members for lab,pc in cats}
+press={(m,lab):_normM[pc].get(m,0.0) for m in members for lab,pc in cats}
 opl={m:sum(press[(m,lab)]*pw[i] for i,(lab,pc) in enumerate(cats)) for m in members}
 neg=sorted(v for v in opl.values() if v<0); ascale=abs(neg[int(0.08*len(neg))]) if neg else 1.0
 ANTI_STANCE={'Opponent':1.0,'Skeptic':0.5}

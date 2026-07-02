@@ -40,7 +40,7 @@ ind0={n:(_imed if n in ind_imputed else ind0[n]) for n in members}
 nodata=set(ind_imputed)   # truly-blind members (no FEC record): winnability is imputed, not measured
 wb=openpyxl.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 bm=wb['Blended Model']; nrm=wb['Legislative Score - Normalized']
-score={bm.cell(r,1).value:(bm.cell(r,19).value or 0) for r in range(3,536) if bm.cell(r,1).value}; smax=max(score.values()) or 1
+score=MC.scores(); smax=max(score.values()) or 1   # PHASE-2: Python rank authority (ranks_python.json), not the workbook view
 CS0=json.load(open(B+r'\category_stance.json'))['matrix']
 adj=MC.load_network()
 # (moneyscale removed -- dead since the capacity-aware pflip rewrite; CU pull is now receipts-relative, not /moneyscale)

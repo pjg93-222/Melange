@@ -21,7 +21,9 @@ issue_cat=[LBLCAT.get(lb,lb) for lb in issues]
 wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 ra=wb['Rank & Allocation']
 # authoritative rank = Blended Model col20 (was erroneously reading Rank & Allocation col2 = District/State)
-bm=wb['Blended Model']; rank={bm.cell(r,1).value:bm.cell(r,20).value for r in range(3,536) if bm.cell(r,1).value}
+bm=wb['Blended Model']
+from moneyball_core import ranks as _pyranks
+rank=_pyranks()   # PHASE-2: Python rank authority
 # committee memberships (base committee per member, subcommittees folded into parent) from the Committee Data
 # sheet -> drives the committee-cluster layout (Porter et al. bipartite member-committee structure).
 def _nfc(s): return unicodedata.normalize('NFC',str(s)) if s else s

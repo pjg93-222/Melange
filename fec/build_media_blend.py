@@ -105,5 +105,6 @@ for kwcat,hname in HDRMAP.items():
         rw.cell(mrow[m],col).value=round(nv,6)
         if abs(nv-old)>1e-9: changed+=1
 rw['Z1']='MEDIA BLEND %s: cells = press(p80-scaled)+social(p80-scaled, half-life %.2fy) at 50/50 (thin-cat shrink %s, RT weight %.2f). Backup: %s'%(TODAY,HL,'ON' if SHRINK else 'off',RT_W,os.path.basename(bak))
+wb.calculation.fullCalcOnLoad=True   # PHASE-2: the workbook is a VIEW — Excel recalcs it on open; no COM recalc anywhere
 wb.save(WBP)
 print('wrote media blend into Press Release - Raw: %d cells changed (formulas untouched)'%changed)
