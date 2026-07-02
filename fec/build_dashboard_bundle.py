@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+import moneyball_core as MC
 import json,sys,glob,os,collections,csv,openpyxl,networkx as nx,math,random,re,unicodedata,zlib
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 C=json.load(open(MB_ROOT+r'\congestion.json'))
@@ -43,10 +44,7 @@ for r in range(2,cd.max_row+1):
 # Lean Skeptic/Skeptic/Highly Skeptical > Opponent. (Replaces the coarse press/leg formula; ranks unaffected.)
 _TORD={'Champion':4,'Defender':4,'Ally':2,'Highly Persuadable':1,'True Neutral':0,'Neutral':0,
        'Lean Skeptic':-1,'Skeptic':-2,'Opponent':-4}
-_IMP={'Examination & Supervision':0.75,'CU Capital Requirements':0.25,'NCUA Budget & Insurance':1.0,'Interchange':2.0,
- 'Payments':0.75,'Technology & Emerging':0.75,'Fraud Prevention':0.75,'Data Privacy & Cyber':1.0,'Charter Modernization':1.0,
- 'Defense CU Issues':0.2,'Field of Membership':1.0,'CDFI Fund':0.1,'CFPB':1.0,'Credit Card Mandates':3.0,'TCPA':0.2,
- 'Member Business Lending':0.3,'Mortgage & Housing':0.4,'CU Tax Status':3.0}   # ABB26-anchored (2026-07-01)
+from moneyball_core import IMP as _IMP
 def _agg_stance(n):
     cm=CS.get(n,{}); sw=si=0.0
     for c,t in cm.items():

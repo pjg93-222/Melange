@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+import moneyball_core as MC
 """Shared Linear-Threshold flip model (imported by scenario.py and optimize.py).
 Winnability of a member on a topic:  pflip(n) = a/(a+b),
   a = WM*sqrt(cu+alloc)/scale + WP*(bridge-amplified proximity to THIS issue's champions)
@@ -18,9 +19,7 @@ import os as _os
 # the extremes (esp. 0.95) pulled record-less freshmen up the board. We set 0.45 so a silent member sits
 # at PARITY with a known Ally (uncertain, not presumed eager) and never outranks one. Judgment dial,
 # env-overridable via PERS_NONE.
-_PNONE=float(_os.environ.get('PERS_NONE','0.45'))   # USER-RATIFIED 2026-07-02: Ally parity per the M5 note above — a silent member never outranks a declared Ally
-# CALIBRATED: persuadability compressed from a ~10:1 to a ~3:1 spread (real persuasion is small & bounded — Coppock "parallel"; Kalla&Broockman minimal-effects; Bakker asymmetry)
-PERS={'Champion':0.10,'Defender':0.12,'Ally':0.40,'Highly Persuadable':0.55,'True Neutral':0.50,'Lean Skeptic':0.40,'Neutral':0.50,'Skeptic':0.25,'Opponent':0.08,'—':_PNONE}
+from moneyball_core import PERS   # single copy (was drift-prone x5)
 PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Skeptic'}
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}
 members=[m['member'] for m in C.values()]
@@ -44,28 +43,12 @@ wb=openpyxl.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=
 bm=wb['Blended Model']; nrm=wb['Legislative Score - Normalized']
 score={bm.cell(r,1).value:(bm.cell(r,19).value or 0) for r in range(3,536) if bm.cell(r,1).value}; smax=max(score.values()) or 1
 CS0=json.load(open(B+r'\category_stance.json'))['matrix']
-net=max(glob.glob(B+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
-ne=openpyxl.load_workbook(net,data_only=True)['Edges']; adj=collections.defaultdict(dict); mem=set(members)
-for r in range(2,ne.max_row+1):
-    a,b,w=ne.cell(r,1).value,ne.cell(r,2).value,ne.cell(r,3).value; a=bio2name.get(a); b=bio2name.get(b)
-    if a in mem and b in mem and a!=b and isinstance(w,(int,float)):
-        w=(adj[a][b]+w)/2 if b in adj[a] else w   # D2 2026-07-01: 41 reverse-dup pairs carry ASYMMETRIC directed weights (up to 3x) -- mean-symmetrize (was silent last-write-wins)
-        adj[a][b]=w; adj[b][a]=w
+adj=MC.load_network()
 # (moneyscale removed -- dead since the capacity-aware pflip rewrite; CU pull is now receipts-relative, not /moneyscale)
-party={}
-for cn in (119,118,117):
-    pth=B+r'\votes\HS%d_members.csv'%cn
-    if os.path.exists(pth):
-        for row in csv.DictReader(open(pth,encoding='utf-8')):
-            b=row.get('bioguide_id'); pc=str(row.get('party_code'))
-            if b and b not in party: party[b]={'100':'D','200':'R'}.get(pc,'I')
-prt={n:party.get(C[n].get('bioguide',''),'?') for n in members}
-BP=json.load(open(B+r'\bipartisan.json')); bpf={n:BP.get(n,24)/100.0 for n in members}
-def cpf(n,u): return 0.5 if (prt[n]!=prt[u] and prt[n] in 'DR' and prt[u] in 'DR') else (1.7 if (prt[n]==prt[u] and prt[n] in 'DR') else 1.0)   # SOURCE-ALIGNMENT (Furnas/Bakker): co-partisan pressure x1.7, out-partisan x0.5 — the largest documented elite-influence effect
-blocks=[3,11,19,27,35,43,51,59,67,75,83,91,99,145,115,107,123,131]
-BLOCKCAT={3:'Examination & Supervision',11:'CU Capital Requirements',19:'NCUA Budget & Insurance',27:'Interchange',35:'Payments',
-43:'Technology & Emerging',51:'Fraud Prevention',59:'Data Privacy & Cyber',67:'Charter Modernization',75:'Defense CU Issues',
-83:'Field of Membership',91:'CDFI Fund',99:'CFPB',145:'CFPB',115:'TCPA',107:'Credit Card Mandates',123:'Member Business Lending',131:'Mortgage & Housing'}
+prt=MC.party()
+bpf=MC.bpf()
+cpf=MC.cpf_pressure   # named physics (was ambiguous 'cpf' x8)
+from moneyball_core import blocks,BLOCKCAT
 cat2sc={}
 for sc in blocks: cat2sc.setdefault(BLOCKCAT[sc],sc)
 # M3: two legislative blocks map to the single 'CFPB' category -- 99 (CFPB Restrain) and 145 (CFPB Reach).
@@ -88,10 +71,7 @@ def camp(t): return 'pro' if t in PRO else 'anti' if t in ANTI else 'neu'
 # RECEPTIVITY LAYER (2026-07-02): pressure_mult scales how hard MONEY pressure lands on this member
 # (Byrne susceptibility x F&H electoral incentive x Linde-Vis PT domain); peer channel is handled by
 # edge_mult inside the cascade engines. Neutral fallback = legacy.
-try:
-    REC=json.load(open(B+r'\member_receptivity.json'))['members'] if os.environ.get('RECEPT_LAYER','1')!='0' else {}
-except FileNotFoundError: REC={}
-def rc(m,k,d=1.0): return REC.get(m,{}).get(k,d)
+rc=MC.rc
 def pflip(cu_n,ind_n,R_n,nA_n,nB_n,mAt,mBt,pm=1.0):
     # capacity-aware saturating money pull (Michaelis-Menten form): $X moves a big-receipts member less,
     # diminishes within a member, and matches money_response's curve -> one consistent diminishing-returns model.

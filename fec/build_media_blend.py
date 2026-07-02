@@ -78,8 +78,9 @@ for _,r in corp.iterrows():
     for c in hits: soc[r['member']][c]+=sg*inten*decay/len(hits)
 print('social: %d scored posts -> %d category-assigned | %d members | half-life %.2f yr (press: 2.0 yr)'%(len(corp),nassigned,len(soc),HL))
 # ---- workbook surgery ----
-bak=M+r'\Moneyball Main Version - Blended.BACKUP-%s.xlsx'%datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
-shutil.copy2(WBP,bak); print('backup:',os.path.basename(bak))
+os.makedirs(M+r'\backups',exist_ok=True)
+bak=M+r'\backups\Moneyball Main Version - Blended.BACKUP-%s.xlsx'%datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+shutil.copy2(WBP,bak); print('backup:','backups/'+os.path.basename(bak))
 wb=openpyxl.load_workbook(WBP)             # formulas preserved
 rw=wb['Press Release - Raw']
 hdr={rw.cell(1,c).value:c for c in range(1,30) if rw.cell(1,c).value}

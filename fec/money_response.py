@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+import moneyball_core as MC
 """Money-response + defection mechanic (roadmap step 2).
 A donation shifts a member's money lean with diminishing returns, scaled by how movable they are
 (small relative to big fundraising = small move). Big enough competitor shock can trigger a defection."""
@@ -25,10 +26,7 @@ DTHRESH=float(os.environ.get('DTHRESH','11.25'))  # net_lean shift needed to ris
 # (loss frame) moves lean more than an equal CU gift (K&T loss aversion, elite-attenuated per Linde-Vis).
 # Fallback = neutral (legacy) when the json is absent or RECEPT_LAYER=0.
 LOSSFRAME=float(os.environ.get('LOSSFRAME','1.10'))
-try:
-    REC=json.load(open(B+r'\member_receptivity.json'))['members'] if os.environ.get('RECEPT_LAYER','1')!='0' else {}
-except FileNotFoundError: REC={}
-def rc(m,k,d=1.0): return REC.get(m,{}).get(k,d)
+rc=MC.rc
 COMMITTED={'Champion','Opponent'}                 # only the TERMINAL rungs are immune to money defection
 # defection() walks the FULL overall ladder (R&A col G vocabulary, pro -> anti; same 10-rung order as
 # sync_stance_clean / build_dashboard_bundle). One DTHRESH crossing = ONE fine rung -- now consistent with

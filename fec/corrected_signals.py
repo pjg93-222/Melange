@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+import moneyball_core as MC
 """Rebuild corrected per-member PRESS and LEGISLATIVE leans from ONE consistent, direction-aware source —
 the Press Release Articles sheet (real articles + the billstatus bill-cosponsorship entries, each carrying a
 CU-direction = sign of its score). Fixes: (A) press normalization/mislabels, (B) per-bill legislative direction
@@ -20,10 +21,7 @@ LBL2CAT = {'CFPB Issues & Structural Reform':'CFPB','Charter Modernization & Gov
  'Mortgage Lending & Housing':'Mortgage & Housing','NCUA Budget & Share Insurance Fund':'NCUA Budget & Insurance',
  'Technology & Emerging Issues':'Technology & Emerging','Telephone Consumer Protection Act':'TCPA',
  'Telephone Consumer Protection Act Issues':'TCPA'}
-AREA_IMP = {'Examination & Supervision':0.75,'CU Capital Requirements':0.25,'NCUA Budget & Insurance':1.0,'Interchange':2.0,
- 'Payments':0.75,'Technology & Emerging':0.75,'Fraud Prevention':0.75,'Data Privacy & Cyber':1.0,'Charter Modernization':1.0,
- 'Defense CU Issues':0.2,'Field of Membership':1.0,'CDFI Fund':0.1,'CFPB':1.0,'Credit Card Mandates':3.0,'TCPA':0.2,
- 'Member Business Lending':0.3,'Mortgage & Housing':0.4,'CU Tax Status':3.0}   # ABB26-anchored (2026-07-01)
+from moneyball_core import IMP as AREA_IMP
 def norm(c):
     c=(c or '').strip(); return LBL2CAT.get(c,c)
 

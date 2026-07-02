@@ -52,7 +52,7 @@ def recalc():
                 if _wb_ready(): return
                 time.sleep(2)
         print('  !! workbook not valid/stable after recalc attempt %d'%attempt)
-    print('  !! recalc failed twice — restore the newest BACKUP-*.xlsx and rerun'); sys.exit(2)
+    print('  !! recalc failed twice — restore the newest backups\\*.BACKUP-*.xlsx and rerun'); sys.exit(2)
 ap=argparse.ArgumentParser(); ap.add_argument('--recalc',action='store_true'); ap.add_argument('--from',dest='frm',default=None)
 a=ap.parse_args()
 if a.recalc: recalc()

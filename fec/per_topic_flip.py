@@ -1,4 +1,5 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+import moneyball_core as MC
 import json,sys,math,heapq,collections,glob,os,csv,openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 WM,WP=0.35,0.65; CAP=50000; BUDGET=2_000_000; INC=1000; BASE=0.15
@@ -6,8 +7,7 @@ WM,WP=0.35,0.65; CAP=50000; BUDGET=2_000_000; INC=1000; BASE=0.15
 # M5: '—' (no recorded position on this issue, ~60% of cells) lowered 0.55->0.45 so a silent member sits
 # at PARITY with a known 'Ally' rather than ranking ABOVE one (silence is uncertainty, not enthusiasm).
 # Kept identical to flip_model.py for grain consistency; env-overridable via PERS_NONE.
-_PNONE=float(os.environ.get('PERS_NONE','0.45'))   # USER-RATIFIED 2026-07-02: Ally parity (matches flip_model)
-PERS={'Champion':0.10,'Defender':0.12,'Ally':0.40,'Highly Persuadable':0.55,'True Neutral':0.50,'Lean Skeptic':0.40,'Neutral':0.50,'Skeptic':0.25,'Opponent':0.08,'—':_PNONE}
+from moneyball_core import PERS
 PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Skeptic'}
 C={m['member']:m for m in json.load(open(MB_ROOT+r'\congestion.json'))}
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
@@ -29,46 +29,23 @@ Rcap={n:(max((C[n].get('receipts') or 0),200000) if (C[n].get('receipts') or 0)>
 # PER-CATEGORY stance matrix (the 3rd dimension) -- drives camp/persuadability/proximity per issue
 CS=json.load(open(MB_ROOT+r'\category_stance.json'))['matrix']
 # network proximity
-net=max(glob.glob(MB_ROOT+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
-ne=openpyxl.load_workbook(net,data_only=True)['Edges']
-adj=collections.defaultdict(dict); mem=set(members)
-for r in range(2,ne.max_row+1):
-    a,b,w=ne.cell(r,1).value,ne.cell(r,2).value,ne.cell(r,3).value
-    a=bio2name.get(a); b=bio2name.get(b)
-    if a in mem and b in mem and a!=b and isinstance(w,(int,float)):
-        w=(adj[a][b]+w)/2 if b in adj[a] else w   # D2 2026-07-01: 41 reverse-dup pairs carry ASYMMETRIC directed weights (up to 3x) -- mean-symmetrize (was silent last-write-wins)
-        adj[a][b]=w; adj[b][a]=w
+adj=MC.load_network()
 # (moneyscale removed -- dead since the capacity-aware pflip rewrite)
 # bipartisanship: a cross-party tie carries more flip-influence when BOTH ends are bridge-builders (taken seriously across the aisle)
-party={}
-for congN in (119,118,117):
-    pth=MB_ROOT+r'\votes\HS%d_members.csv'%congN
-    if os.path.exists(pth):
-        for row in csv.DictReader(open(pth,encoding='utf-8')):
-            b=row.get('bioguide_id'); pc=str(row.get('party_code'))
-            if b and b not in party: party[b]={'100':'D','200':'R'}.get(pc,'I')
-prt={n:party.get(C[n].get('bioguide',''),'?') for n in members}
-BP=json.load(open(MB_ROOT+r'\bipartisan.json')); bpf={n:BP.get(n,24)/100.0 for n in members}
+prt=MC.party()
+bpf=MC.bpf()
 DIRECT=('--bridge' in sys.argv) or os.environ.get('BRIDGE')=='1'; GAMMA=1.2   # toggleable mode: directly prioritize bridge-builders in flip targeting
-def cpf(n,u):   # cross-party bridge amplifier
-    return 0.5 if (prt[n]!=prt[u] and prt[n] in 'DR' and prt[u] in 'DR') else (1.7 if (prt[n]==prt[u] and prt[n] in 'DR') else 1.0)   # SOURCE-ALIGNMENT: co-partisan x1.7, out-partisan x0.5 (Furnas/Bakker)
+cpf=MC.cpf_pressure
 # RECEPTIVITY LAYER (2026-07-02): money pressure scaled by pressure_mult (matches flip_model).
-try:
-    REC=json.load(open(MB_ROOT+r'\member_receptivity.json'))['members'] if os.environ.get('RECEPT_LAYER','1')!='0' else {}
-except FileNotFoundError: REC={}
-def rc(m,k,d=1.0): return REC.get(m,{}).get(k,d)
+rc=MC.rc
 def pflip(n,al,nA,nB,mAt,mBt):
     pm=rc(n,'pressure_mult')
     a=WM*pm*(cu[n]+al+1)/((cu[n]+al+1)+HALFF*Rcap[n])+WP*nA[n]/mAt   # capacity-aware saturating CU pull
     b=WM*pm*(ind[n]+1)/((ind[n]+1)+HALFF*Rcap[n])+WP*nB[n]/mBt        # ... and industry pull
     return a/(a+b) if a+b>0 else 0
 # 18 legislative topic blocks -> the 17 matrix categories (CFPB Restrain+Reach share the combined CFPB stance)
-blocks=[3,11,19,27,35,43,51,59,67,75,83,91,99,145,115,107,123,131]
+from moneyball_core import blocks,BLOCKCAT
 labels={sc:str(nrm.cell(1,sc).value).replace(' - Sponsor','').replace(' Sponsor','').strip() for sc in blocks}
-BLOCKCAT={3:'Examination & Supervision',11:'CU Capital Requirements',19:'NCUA Budget & Insurance',27:'Interchange',
-35:'Payments',43:'Technology & Emerging',51:'Fraud Prevention',59:'Data Privacy & Cyber',67:'Charter Modernization',
-75:'Defense CU Issues',83:'Field of Membership',91:'CDFI Fund',99:'CFPB',145:'CFPB',115:'TCPA',
-107:'Credit Card Mandates',123:'Member Business Lending',131:'Mortgage & Housing'}
 nrow={nrm.cell(r,1).value:r for r in range(3,536) if nrm.cell(r,1).value}
 eng={}
 for sc in blocks:

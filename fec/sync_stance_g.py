@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+import moneyball_core as MC
 """Col-G-ONLY stance sync (SAFE variant of sync_stance_clean.py, 2026-07-01): recompute the overall
 stance ladder from the category_stance matrix with the CURRENT IMP weights and write ONLY Rank &
 Allocation col G, calc=MANUAL. Unlike sync_stance_clean, this does NOT restore the pristine
@@ -14,10 +15,7 @@ M = json.load(io.open(B + r'\category_stance.json', encoding='utf-8'))['matrix']
 TORD = {'Champion':4,'Defender':4,'Ally':2,'Highly Persuadable':1,'True Neutral':0,'Neutral':0,'Lean Skeptic':-1,'Skeptic':-2,'Opponent':-4}
 # IMP anchored to the ABB26 handout (America's Credit Unions 2026 Advocacy Priorities) -- keep in sync with
 # apply_leg_stance / sync_stance(.clean) / build_dashboard_bundle / corrected_signals.
-IMP = {'Examination & Supervision':0.75,'CU Capital Requirements':0.25,'NCUA Budget & Insurance':1.0,'Interchange':2.0,
- 'Payments':0.75,'Technology & Emerging':0.75,'Fraud Prevention':0.75,'Data Privacy & Cyber':1.0,'Charter Modernization':1.0,
- 'Defense CU Issues':0.2,'Field of Membership':1.0,'CDFI Fund':0.1,'CFPB':1.0,'Credit Card Mandates':3.0,'TCPA':0.2,
- 'Member Business Lending':0.3,'Mortgage & Housing':0.4,'CU Tax Status':3.0}
+from moneyball_core import IMP   # single copy (was x6, one drifted)
 def agg(n):
     cm = M.get(n, {}); sw = si = 0.0
     for c, t in cm.items():
