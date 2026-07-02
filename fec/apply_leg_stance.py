@@ -1,0 +1,61 @@
+# -*- coding: utf-8 -*-
+"""Make the legislative pillar STANCE-AWARE: gate each member's per-topic cosponsorship activity (Sponsor +
+Co-Sponsorship counts) by their per-category stance, weighted by issue importance. Anti-CU members' activity
+now counts against them instead of inflating them. Writes the new leg raw to Blended Model col4 (overriding
+the =R&A!D3 activity-only value) via COM + recalc -> Leg% -> Score -> Rank. Backs up first."""
+import openpyxl, json, io, sys, shutil, os, datetime, unicodedata
+import win32com.client as win32
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+CS = json.load(io.open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\category_stance.json', encoding='utf-8'))['matrix']
+# IMP anchored to the ABB26 handout (America's Credit Unions 2026 Advocacy Priorities, applied 2026-07-01):
+# Protect flagships 2.0-3.0 (Tax Status, Credit Card Mandates, Interchange); named priorities 0.75-1.0
+# (NCUA/regulatory regime, FOM/expand-access, Charter, Data Privacy, CFPB, Fraud, Tech/innovation, Payments);
+# unlisted categories unchanged. NOTE: this dict is duplicated in build_dashboard_bundle/_IMP,
+# sync_stance(.clean), corrected_signals -- keep all copies in sync.
+IMP = {'Examination & Supervision':0.75,'CU Capital Requirements':0.25,'NCUA Budget & Insurance':1.0,'Interchange':2.0,'Payments':0.75,'Technology & Emerging':0.75,'Fraud Prevention':0.75,'Data Privacy & Cyber':1.0,'Charter Modernization':1.0,'Defense CU Issues':0.2,'Field of Membership':1.0,'CDFI Fund':0.1,'CFPB':1.0,'Credit Card Mandates':3.0,'TCPA':0.2,'Member Business Lending':0.3,'Mortgage & Housing':0.4,'CU Tax Status':3.0}
+LEGPRE = {'Examination & Supervision':'examination & supervision','CU Capital Requirements':'credit union capital requirements','NCUA Budget & Insurance':'ncua budget','Interchange':'interchange','Payments':'payments','Technology & Emerging':'technology','Fraud Prevention':'fraud prevention','Data Privacy & Cyber':'data privacy','Charter Modernization':'charter modernization','Defense CU Issues':'defense credit union','Field of Membership':'field of membership','CDFI Fund':'cdfi fund','CFPB':'cfpb','Credit Card Mandates':'credit card & consumer-fee','TCPA':'telephone consumer','Member Business Lending':'member business lending','Mortgage & Housing':'mortgage lending','CU Tax Status':'credit union tax status'}
+SM = {'Champion':1.0,'Defender':1.0,'Ally':0.6,'Highly Persuadable':0.25,'Persuadable':0.1,'Lean Persuadable':0.0,'True Neutral':0.0,'Neutral':0.0,'Lean Skeptic':-0.3,'Skeptic':-0.6,'Highly Skeptical':-0.8,'Opponent':-1.0,'—':0.0}
+def norm(s): return str(s).lower().replace(' and ',' & ').strip()
+def nfc(s): return unicodedata.normalize('NFC', str(s)) if s is not None else s
+
+# ---- compute stance-gated leg raw per member ----
+wb = openpyxl.load_workbook(WB, read_only=True, data_only=True)
+ls = wb['Legislative Score - Raw']; lh = [ls.cell(1, c).value for c in range(1, ls.max_column + 1)]
+topcols = {t: [] for t in IMP}
+for ci, h in enumerate(lh):
+    if not h: continue
+    hn = norm(h)
+    if 'original' in hn or 'average' in hn or 'success' in hn or 'sponsor' not in hn: continue
+    for t, pre in LEGPRE.items():
+        if hn.startswith(norm(pre)): topcols[t].append(ci); break
+legst = {}
+for row in ls.iter_rows(min_row=2, values_only=True):
+    nm = row[0]
+    if not nm: continue
+    cm = CS.get(nm, {}); s = 0.0
+    for t in IMP:
+        act = sum((row[ci] or 0) for ci in topcols[t] if isinstance(row[ci], (int, float)))
+        s += IMP[t] * act * SM.get(cm.get(t, '—'), 0.0)
+    legst[nfc(nm)] = round(s, 4)
+wb.close()
+print('computed stance-gated leg for %d members | range %.2f..%.2f' % (len(legst), min(legst.values()), max(legst.values())))
+
+# ---- backup + COM write to Blended Model col4 + recalc ----
+bk = WB.replace('.xlsx', '.PRE-LEGSTANCE-%s.xlsx' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
+shutil.copy2(WB, bk); print('backup ->', os.path.basename(bk))
+xl = win32.DispatchEx('Excel.Application'); xl.Visible = False; xl.DisplayAlerts = False
+try:
+    wb2 = xl.Workbooks.Open(WB); ws = wb2.Worksheets('Blended Model')
+    n = 0; miss = 0
+    for r in range(3, 536):
+        nm = ws.Cells(r, 1).Value
+        if not nm: continue
+        key = nfc(nm)
+        if key in legst: ws.Cells(r, 4).Value = legst[key]; n += 1
+        else: miss += 1
+    print('wrote leg-stance to %d rows (col4) | unmatched: %d' % (n, miss))
+    xl.CalculateFull()
+    wb2.Save(); wb2.Close(SaveChanges=True); print('SAVED + recalculated (Leg% / Score / Rank updated)')
+finally:
+    xl.Quit()

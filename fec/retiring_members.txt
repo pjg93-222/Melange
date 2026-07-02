@@ -1,0 +1,3 @@
+# RETIRING / NOT SEEKING REELECTION — one canonical member name per line (exactly as in congestion.json).
+# Fouirnaies-Hall final-term effect: these members get incent_mult 0.60 (less responsive to pressure —
+# "nothing to lose politically"). Populate as 2026 retirements are announced; lines starting with # ignored.

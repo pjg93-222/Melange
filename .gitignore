@@ -1,0 +1,28 @@
+# --- secrets (never track) ---
+fec/govinfo_key.txt
+*.key
+
+# --- data artifacts: generated/derived, regenerable from pipeline ---
+*.json
+*.jsonl
+*.csv
+*.db
+*.db-wal
+*.db-shm
+*.pkl
+*.xlsx
+*.html
+*.txt
+_stance_ft/
+stance_ft_composed/
+backups/
+archive/
+baseline/
+deploy/
+.claude/
+
+# --- keep: code, docs, config, small source-of-truth text ---
+!*.md
+!quorum_query.txt
+!fec/retiring_members.txt
+!.claude/launch.json
