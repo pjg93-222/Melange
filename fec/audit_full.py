@@ -200,6 +200,11 @@ ck('press-pillar weight row 535: 19 numeric positive weights (no formula remnant
 _roster=len(json.load(open(B+r'\congestion.json')))
 _bm=_wb['Blended Model']; _wbrows=sum(1 for r in range(3,536) if _bm.cell(r,1).value)
 ck('workbook member rows == roster size (no silent row drift)', _wbrows==_roster, 'workbook %d vs roster %d'%(_wbrows,_roster))
+# Roadmap-#9 phase 1 (2026-07-02): the whole raw->normalized->pillar->score->rank chain is reproduced
+# in Python (compute_pillars.py) and must match the sheet EXACTLY — catches any silent formula edit.
+_pp=run('compute_pillars.py')
+ck('python pillar shadow-compute parity (rank math reproducible, 533/533)','PARITY: CLEAN' in _pp,
+   _pp.strip().splitlines()[-1] if _pp else 'no output')
 
 if os.path.exists(B+r'\stance_training.jsonl'):
     import hashlib as _hl, json as _js

@@ -30,8 +30,9 @@ DISAGREE_MEMBERS={'Sylvia Garcia','Shontel Brown','Gwen Moore','Anna Luna','Shel
 corp=pd.read_excel(M+r'\Social Master.xlsx',sheet_name='Corpus',dtype=str)
 corp=corp[(corp['stance'].fillna('')!='')&(corp['verified_handle'].astype(str)=='1')].reset_index(drop=True)
 corp['margin']=pd.to_numeric(corp['stance_margin'],errors='coerce').fillna(0)
-dd=json.load(open(M+r'\dashboard_data.json',encoding='utf-8'))
-party=dict(zip(dd['name'],dd['party']))
+# S3-04 fix (audit 2026-07-02): party from the SOURCE roster, not the previous cycle's dashboard bundle
+import moneyball_core as MC
+party=MC.party()
 mlow=corp['margin'].quantile(0.25)
 def slices(r):
     s=[]

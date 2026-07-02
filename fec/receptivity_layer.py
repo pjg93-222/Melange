@@ -29,8 +29,9 @@ Fuses four literatures into per-member multipliers consumed by the influence eng
    open/extraverted members take meetings and act; committed allies are never gated (they are
    already active, not lobbied contingent seeds).
 
-Low-confidence trait members (tokens < floor) have trait z shrunk to 0 — uncertainty maps to
-NEUTRAL multipliers, never an invented personality.  All engine wiring reads member_receptivity.json
+Trait uncertainty uses GRADED shrinkage sh=sqrt(tokens/1500) capped at 1 (Ramey Fig 3: CI width
+scales ~1/sqrt(words)) — thin corpora keep partial signal, zero text maps to fully NEUTRAL
+multipliers, never an invented personality.  All engine wiring reads member_receptivity.json
 and falls back to neutral (=legacy behavior) if the file is absent or RECEPT_LAYER=0.
 Output: member_receptivity.json {member: {big5, susc_z, susc_mult, edge_mult, incent_mult,
 pt_domain, pt_mult, pressure_mult, seed_prob, lowconf}}"""
@@ -71,7 +72,7 @@ for m in members:
         'pressure_mult':round(clip(susc_mult*incent*pt,0.50,1.60),3),
         'seed_prob':round(seed_prob,3),'lowconf':low,'retiring':m in RET}
 json.dump({'members':out,'LOSSFRAME':1.10,
-  'provenance':'Byrne2015 choking (susc), Fouirnaies-Hall (incent), Linde-Vis prospect theory (pt), Chen/SNAM contingency (seed_prob); lowconf traits shrunk to neutral'},
+  'provenance':'Byrne2015 choking (susc), Fouirnaies-Hall (incent), Linde-Vis prospect theory (pt), Chen/SNAM contingency (seed_prob); graded sqrt(tokens/1500) trait shrinkage toward neutral'},
   open(B+r'\member_receptivity.json','w'))
 import collections
 d=collections.Counter(out[m]['pt_domain'] for m in out)

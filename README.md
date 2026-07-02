@@ -1,48 +1,63 @@
 # Melange Systems
 
 Credit-union legislative-influence modeling & money-allocation system (the "Moneyball" project).
-Everything needed to run the system lives in this folder; paths are self-contained here.
+533 members × **18 issue categories**; rank lives in the workbook, influence engines in Python.
+*(Refreshed 2026-07-02 — the previous README predated the architecture refactor; see git history.)*
 
 ## Layout
-- `fec/` — all Python modules (the engine + scenario tools + audits)
-- `*.json` — derived data the modules read/write (stance matrix, frontiers, electoral plays, etc.)
-- `Moneyball Main Version - Blended.xlsx` — the master workbook (stances, money, allocations, the `Melange - Live` tab)
-- `Moneyball Dashboard.html` — standalone interactive network dashboard
-- `votes/` — voteview member files (party lookup)
-- `baseline/` — frozen baseline snapshot for scenario diffs
-- `research/` — the two papers the pathfinding work is built on
+- `fec/` — the engine. Entry points: **`run_pipeline.py`** (canonical chain), **`moneyball_core.py`**
+  (shared kernel: rosters, network loader, the TWO partisan physics, CRN, constants),
+  **`paths.py`** (roots; `MONEYBALL_ROOT`/`MONEYBALL_DRAFT` env overrides).
+- `fec/tests/run_tests.py` — kernel invariant checks (currently 30). `fec/attic/` — retired scripts.
+- `fec/templates/` — dashboard HTML/JS templates. `backups/` — workbook backups (auto, pre-write).
+- `Moneyball Main Version - Blended.xlsx` — the rank workbook (system of record; user dial sheets:
+  Topic Weights, Category Stance). `votes/` — voteview rosters. `research/` — the source papers.
+- Root `*.json` — derived artifacts (regenerable; all writes are atomic via `MC.dump_atomic`).
+- `social_media.db` — posts, member↔member interactions, floor speeches + hearing transcripts.
 
-## The model (three layers)
-1. **Per-category stance** (`per_category_stance.py` → `category_stance.json`): each of 533 members scored on 17 issues, self-calibrating thresholds (median+IQR, rate-bounded). Legislative pillar rebuilt from the bills archive (not the frozen sheet); offensive issues use Champion tiers, defensive issues (Interchange, Credit Card) use **Defender** tiers (press-led). Neutral split into Highly-Persuadable / True-Neutral / Lean-Skeptic.
-2. **Influence allocation** — two competitive models:
-   - **Coalition (Independent Cascade)** — `budget_frontier.py`: nested CELF greedy, core champions free then cautious expansion; `--electoral` mode adds **contest** (primary a hostile incumbent) and **defend** (insure a competitive ally) plays. Pareto-style multi-objective routing in `cosponsor_route.py` (RELINK edge-activation + MOPBD* fronts).
-   - **Flip (Linear Threshold)** — `per_topic_flip.py` + `lt_priming.py`: the cheapest balance of network pressure + money to tip a member over their co-sponsor/flip threshold.
-3. **Scenario layer** — `money_response.py` (saturation/capacity-aware money curve + money-triggered defections), `cosponsor_route.py` (multi-objective recruitment routes), `lt_priming.py`, `sheet_sync.py` (live workbook tab + D*-Lite incremental replanning).
-
-## Research basis (`research/`)
-- **RELINK (Closed-Network IM, CIKM'25)** — edge-activation IM under a per-member out-degree budget → the co-sponsor route finder.
-- **Multi-Objective Path-Based D\* Lite** — incremental multi-objective path planning → the Pareto routes + the incremental sheet sync (recompute only changed slices).
-
-## Key modules (`fec/`)
-| Script | Produces | Notes |
-|---|---|---|
-| `per_category_stance.py` | `category_stance.json` | the 533×17 stance matrix |
-| `build_archive_legislative.py` | `archive_leg.json` | legislative pillar from bills archive |
-| `budget_frontier.py` | `budget_frontier[_electoral].json` | nested coalition frontier; `--electoral` toggles contest/defend |
-| `build_electoral.py` / `build_electoral_plays.py` | `electoral.json` / `electoral_plays.json` | competitiveness + non-partisan contest/defend plays |
-| `flip_model.py` | (shared module) | capacity-aware Linear-Threshold winnability `pflip`; imported by scenario + optimize |
-| `money_response.py` | (callable) | money→lean curve + defection rule (same receipts-saturating curve as flip_model) |
-| `cosponsor_route.py` | (stdout/Pareto) | multi-objective recruitment routes; `MCMODE=1` for exact reach |
-| `lt_priming.py` | `lt_priming.json` | cheapest pressure+money to flip each target |
-| **`scenario.py`** | (stdout) | **end-to-end scenario runner** — `--money/--defect/--stance`; reports BOTH coalition + flip influence change vs baseline |
-| **`optimize.py`** | `optimize_result.json` | **adaptive budget optimizer** (Golovin-Krause) — greedily allocates a CU budget; observes conversions and re-optimizes. `INC`=min chunk, `PMAX`=per-member cap |
-| `sheet_sync.py` | `Melange - Live` tab | COM write-back + incremental change detection |
-| `make_baseline.py` / `scenario_diff.py` | `baseline/` | freeze + diff scenarios |
-| `audit.py` / `audit_frontier.py` / `audit_full.py` | reports | integrity (22) / frontier (11) / **full-body (29)** |
+## The model (five layers)
+1. **Stance** (`per_category_stance.py` → category_stance.json): 533×18 self-calibrating matrix;
+   defensive issues (Interchange, Credit Card Mandates) are Defender-tiered. `sync_stance_g.py`
+   aggregates to the workbook's overall tier (col G) with the ABB26 IMP weights.
+2. **Media** (`build_media_blend.py`): press pillar = 50% press + 50% social (p80-scaled, tiered
+   category weights from the Topic Weights sheet, exp decay 2.0y/0.5y, RT×0.5, thin-cat shrink).
+3. **Network** (`build_multilayer_network.py`): cosponsorship + press engagement + HCoI + social
+   repost/mention edges (Fink-normalized; new links AND +30%-capped reinforcement).
+4. **Receptivity** (`big5_traits.py` → `receptivity_layer.py`): Big Five from 6.6M words of floor
+   speech/hearings/posts → susceptibility (Byrne), electoral incentive (Fouirnaies-Hall), prospect-
+   theory domain (Linde-Vis), contingency seed-gates (stance-graded).
+5. **Influence engines**: coalition cascades (`budget_frontier.py` [+`--electoral`],
+   `per_topic_coalition.py`), Linear-Threshold flips (`flip_model.py`, `per_topic_flip.py`,
+   `lt_priming.py`), adaptive $ optimizer (`optimize.py`, Golovin-Krause), going-public advisory
+   (`salience_shock.py`, Noble-Turner), scenario runner (`scenario.py`), routes (`cosponsor_route.py`).
 
 ## Running
-- Determinism: coalition/route use a fixed seed + CRN + sorted cascade — same-seed runs are identical, so a scenario vs baseline at the same seed isolates the real effect.
-- Full audit: `python fec/audit_full.py` (should report **29 passed, 0 FAILED**).
-- Key dials (env vars): `MAXSEEDS`, `REPFAC`, `LELEV`, `LEV`, `MC`, `MCMODE`, `K`, `CEDGE`, `MAXSHIFT`, `HALF`, `DTHRESH`, `SEED`.
+```
+python fec/run_pipeline.py [--recalc] [--from <step>]   # the whole chain, audited at the end
+python fec/tests/run_tests.py                            # 30 kernel checks (run after ANY code change)
+python fec/audit_full.py                                 # full-body audit (expect ALL MODULES CLEAN)
+```
+Verification protocol for code changes: kernel tests → pipeline → **zero rank delta** vs the last
+`ranks_*.json` (unless the change is supposed to move ranks) → audit clean.
+Data refresh order: collectors (`fetch_congressional_record.py`, `tweet_collector.py`, Quorum) →
+`big5_traits` → `social_interaction_layer` → `build_multilayer_network` → `build_media_blend` →
+`run_pipeline --recalc`. Determinism: SEED=7, MC=20, splitmix64 CRN — same-seed runs are identical.
 
-_Note: the upstream raw data (FEC source files, press indexes, fine-tuned debate models, old workbook versions) was left in the original `Draft Systems` folder — it's only needed to regenerate base data, not to run the system, and includes large/irreplaceable files._
+## Data collectors
+- `fetch_congressional_record.py` — CREC floor speeches (keyless date-driven) + CHRG finance
+  hearings (GovInfo key in `fec/govinfo_key.txt`); resumable; witness-collision-safe attribution.
+- `tweet_collector.py` — X/Bluesky/Truth Social handles, posts, interactions.
+- `process_quorum.py` / `build_social_master.py` — Quorum export pipeline → Social Master.
+- `rebuild_press_cache.py` — recovery path for the media-blend press cache (refuses post-blend sources).
+
+## Diagnostics-only artifacts (confirmed 2026-07-02)
+`stance_dynamics.json`, `social_stance_signals.json`, `tweet_influence.json`, `imviz.json`,
+`corrected_signals.json`, `social_member_summary.json`, `cu_golden_labels_stats.json` are
+human-inspection outputs with no live consumer — safe to regenerate anytime, never load-bearing.
+
+## Canonical docs
+`MATHEMATICAL_SPECIFICATION.md` (law of the system: authoritative-code table, conventions, dials) ·
+`ARCHITECTURE_REVIEW_2026-07-02.md` · `AUDIT_FINDINGS_2026-07-02.md` · `INDEX.md`.
+
+_Upstream raw data (FEC source files, press indexes, old workbooks) lives in the original
+`Draft Systems` folder — needed only to regenerate base data, includes irreplaceable files._

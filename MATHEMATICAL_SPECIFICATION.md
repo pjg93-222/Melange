@@ -20,6 +20,7 @@ always hold.***
 | Receptivity layer | `fec/receptivity_layer.py` — susc = .40A+.30N−.20C−.10E (Byrne); pressure_mult = clip(susc·incent·pt, 0.50, 1.60) (F&H incentive · Linde-Vis PT domain); seed_prob = clip(.60+.10A+.06O+.04E, .30, .90) | audit_full caps; kernel tests |
 | Big Five traits | `fec/big5_traits.py` — Ramey-synth closed-vocab on tweets+floor+hearings; z relative to THIS corpus; shrinkage √(tokens/1500); O flagged low-validity | party-validation printout every build |
 | Network layers | `fec/build_multilayer_network.py` — cosponsor verbatim (mean-symmetrized) + press engagement w=6p/(1−p) + HCoI isolated-incident + social new-edge/reinforcement (+30% cap) | structural audit; provenance sheet |
+| Pillar shadow-compute | `fec/compute_pillars.py` — Python reproduction of the ENTIRE raw→normalized→pillar→score→rank chain; Excel PERCENTRANK = truncate to 5 DECIMAL digits (empirically pinned) | audit_full parity check (533/533 exact) |
 | Shared kernel | `fec/moneyball_core.py` — rosters, network loader (every member has an entry), TWO named cpf physics, sm64, PERS/IMP/BLOCKCAT/SGATE | `fec/tests/run_tests.py` (28 checks) |
 
 ## Cross-module conventions (the parts that used to drift)
@@ -53,6 +54,7 @@ system of record; everything else is Python.
 
 ## Standing dials (env; defaults = the ratified state)
 `PERS_NONE=0.45 · SOCIAL_SHRINK=1 · RT_W=0.5 · LOSSFRAME=1.10 · SOC_REINF=0.3 · SOC_CAP=2.0 ·
+SOC_VOLFLOOR=25 · SOC_MEN_W=0.4 · BP_SRC=cosponsor (aug = unratified augmented definition) ·
 RECEPT_LAYER=1 · IMPUTE_IND0=1 · SAL_PSI_DAMP=0 (off) · DTHRESH=11.25 · MAXSHIFT=18 · HALFF=0.10 ·
 MC=20 · SEED=7 · MONEYBALL_ROOT / MONEYBALL_DRAFT (paths.py)`
 

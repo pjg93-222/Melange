@@ -64,7 +64,7 @@ def add_medsl(path, cham):
         m=match(str(r.get('candidate','')).strip()); st=str(r.get('state_po','')).strip().upper()
         if not m or mstate.get(m)!=st or mcham.get(m)!=cham: continue
         try: cv=float(r.get('candidatevotes')); tv=float(r.get('totalvotes'))
-        except: continue
+        except (TypeError,ValueError): continue   # S3-02: narrowed from bare except
         cur=hist[m]['general'].get(2024)
         if cur is None or (cur.get('votes') or 0)<cv:
             hist[m]['general'][2024]={'pct':round(100*cv/tv,1) if tv else None,'votes':int(cv),'src':'MEDSL'}
