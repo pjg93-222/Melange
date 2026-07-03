@@ -86,7 +86,7 @@ def classify(sentence, _retry=True):
                            "strength": {"type": "string", "enum": ["strong", "weak", "na"]},
                            "reason": {"type": "string"}},
             "required": ["label", "strength", "reason"], "additionalProperties": False}}},
-        system=SYSTEM,
+        system=[{"type": "text", "text": SYSTEM, "cache_control": {"type": "ephemeral"}}],   # prompt caching: the codebook is ~85% of input tokens; cached reads cost ~10% -> per-sentence cost drops ~60-70%
         messages=[{"role": "user", "content": "Sentence (to classify): " + sentence[:500] + "\n(Keep reason under 12 words.)"}])
     try:
         return json.loads(next(b.text for b in resp.content if b.type == "text"))
@@ -136,9 +136,18 @@ def sentences_for(members):
                 s = s.strip()
                 if 40 <= len(s) <= 350 and SELF.search(s) and not RITUAL.search(s):
                     sents.append(s)
+        # COST GUARD (user 2026-07-03 "I don't have the money"): CACHE-PREFERRING sampling.
+        # A growing corpus used to reshuffle the whole sample each pass -> paying to classify a
+        # shifted sentence set every run. Already-classified sentences now claim sample slots FIRST
+        # (free); new spend only tops up to NSENT.
+        seen = set(); uniq = []
+        for s in sents:
+            if s not in seen: seen.add(s); uniq.append(s)
+        pre = [s for s in uniq if hashlib.md5((m + '||' + s).encode('utf-8')).hexdigest() in CACHED_KEYS]
+        new = [s for s in uniq if hashlib.md5((m + '||' + s).encode('utf-8')).hexdigest() not in CACHED_KEYS]
         rng = random.Random(7)
-        rng.shuffle(sents)
-        out[m] = sents[:NSENT]
+        rng.shuffle(new)
+        out[m] = (pre[:NSENT] + new)[:NSENT]
     return out
 
 C = {m['member']: m for m in json.load(open(B + r'\congestion.json'))}
@@ -163,23 +172,29 @@ else:  # PILOT: RKH-overlap only
     target = {m for m, v in C.items() if b2i.get(v.get('bioguide') or '') in rkh_ic}
     print('PILOT mode: %d RKH-overlap members' % len(target))
 
-corpus = sentences_for(target)
-print('members with sentences: %d | total sentences: %d' % (len(corpus), sum(map(len, corpus.values()))))
-
 cache = {}
 if os.path.exists(CACHE):
     for ln in open(CACHE, encoding='utf-8'):
         try:
             d = json.loads(ln); cache[d['k']] = d
         except Exception: pass
+CACHED_KEYS = set(cache)
 print('cache: %d sentences already classified' % len(cache))
+
+corpus = sentences_for(target)
+print('members with sentences: %d | total sentences: %d' % (len(corpus), sum(map(len, corpus.values()))))
 
 todo = []
 for m, sents in corpus.items():
     for s in sents:
         k = hashlib.md5((m + '||' + s).encode('utf-8')).hexdigest()
         if k not in cache: todo.append((k, m, s))
-print('to classify: %d (model %s)' % (len(todo), MODEL))
+# COST GATE: estimate before spending; require --go to proceed (default = preview only).
+_est = len(todo) * 0.0015   # ~900 cached-prompt input tokens (~10% billed) + ~60 out on sonnet-5
+print('to classify: %d (model %s) | estimated cost ~$%.2f (prompt-cached)' % (len(todo), MODEL, _est))
+if todo and '--go' not in sys.argv:
+    print('COST GATE: add --go to spend. (Cached sentences already cover the sample where possible.)')
+    sys.exit(0)
 
 cf = io.open(CACHE, 'a', encoding='utf-8')
 done = errs = 0
