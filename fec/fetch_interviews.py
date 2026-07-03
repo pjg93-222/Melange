@@ -128,6 +128,7 @@ def run_cnn(since, until):
                     page = get('https://transcripts.cnn.com' + s); time.sleep(PAUSE)
                     rows = parse_turns(strip_tags(page))
                     nd += store(con, rows, d.isoformat(), s.split('/')[2], 'https://transcripts.cnn.com' + s)
+                    con.commit()   # SHORT transactions: a day-long write TX starved the CREC collector's lock (2026-07-03)
                 except Exception:
                     continue
             con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
@@ -167,6 +168,120 @@ def run_mtp():
             print('%s FAIL %s' % (u[-50:], str(e)[:80]), flush=True)
     con.close(); print('MTP done: %d member turns added' % tot)
 
+MIXED_LABEL = re.compile(r'^\s*((?:Sen\.|Rep\.|Del\.|Gov\.|Speaker|Leader|Dr\.)?\s*[A-Z][A-Za-z.\'\-]+(?: [A-Z][A-Za-z.\'\-]+){0,3}(?:\s*\([A-Za-z.\- ]+\))?):\s', re.M)   # PBS: "Rep. Tom Kean (R-NJ):"
+def parse_turns_mixed(text):
+    """PBS-style mixed-case labels ('Rep. Tom Kean:'); same drop-never-guess discipline."""
+    turns = []
+    pos = [(m.start(), m.group(1)) for m in MIXED_LABEL.finditer(text)]
+    out = []
+    for i, (st, lab) in enumerate(pos):
+        end = pos[i + 1][0] if i + 1 < len(pos) else len(text)
+        sp = text[st:end]; sp = sp[sp.index(':') + 1:].strip()
+        m = resolve_full(lab)
+        if m and len(sp.split()) >= 8:
+            out.append((m, re.sub(r'\s+', ' ', sp)))
+    return out
+
+def run_cbs():
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    idx = ['https://www.cbsnews.com/face-the-nation/transcripts/'] + \
+          ['https://www.cbsnews.com/news/face-the-nation-transcripts-%d' % y for y in (2024, 2025, 2026)]
+    arts = set()
+    for u in idx:
+        try:
+            page = get(u); time.sleep(PAUSE)
+            for h in re.findall(r'href="(https?://(?:www\.)?cbsnews\.com/news/[^"]*transcript[^"]*)"', page):
+                arts.add(h.split('?')[0])
+        except Exception as e:
+            print('cbs index FAIL %s %s' % (u[-40:], str(e)[:70]), flush=True)
+    print('CBS transcript articles discovered: %d' % len(arts))
+    tot = 0
+    for u in sorted(arts):
+        key = 'cbs:' + u.rstrip('/').rsplit('/', 1)[-1][:80]
+        if key in done: continue
+        try:
+            page = get(u); time.sleep(PAUSE)
+            md = re.search(r'(\d{2})-(\d{2})-(\d{4})', u)
+            date = '%s-%s-%s' % (md.group(3), md.group(1), md.group(2)) if md else ''
+            rows = parse_turns(strip_tags(page))
+            n = store(con, rows, date, 'face-the-nation', u)
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+            con.commit(); tot += n
+            print('cbs %s: %d turns' % (key[4:60], n), flush=True)
+        except Exception as e:
+            print('cbs %s FAIL %s' % (u[-50:], str(e)[:70]), flush=True)
+    con.close(); print('CBS done: %d member turns' % tot)
+
+def run_abc():
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    try:
+        page = get('https://abcnews.go.com/Politics/week-transcript-archive/story?id=16614108'); time.sleep(PAUSE)
+    except Exception as e:
+        print('abc archive FAIL', str(e)[:80]); return
+    links = set()
+    for h in re.findall(r'href="([^"]*week-transcript[^"]*/story\?id=\d+)"', page):
+        if h.startswith('//'): h = 'https:' + h
+        elif h.startswith('/'): h = 'https://abcnews.go.com' + h
+        elif not h.startswith('http'): h = 'https://' + h
+        links.add(h.replace('abcnews.com', 'abcnews.go.com'))
+    print('ABC transcript stories discovered: %d' % len(links))
+    tot = 0
+    for u in sorted(links):
+        key = 'abc:' + u.rsplit('=', 1)[-1]
+        if key in done: continue
+        try:
+            page = get(u); time.sleep(PAUSE)
+            rows = parse_turns(strip_tags(page))
+            n = store(con, rows, '', 'this-week', u)
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+            con.commit(); tot += n
+            print('abc %s: %d turns' % (key, n), flush=True)
+        except Exception as e:
+            print('abc %s FAIL %s' % (u[-40:], str(e)[:70]), flush=True)
+    con.close(); print('ABC done: %d member turns' % tot)
+
+MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
+def run_pbs(since, until):
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    d = datetime.date.fromisoformat(since); end = datetime.date.fromisoformat(until)
+    tot = 0
+    while d <= end:
+        key = 'pbs:%s' % d.isoformat()
+        if key in done: d += datetime.timedelta(days=1); continue
+        slugs = ['%s-%d-%d-pbs-news-hour-full-episode' % (MONTHS[d.month - 1], d.day, d.year),
+                 '%s-%d-%d-pbs-news-weekend-full-episode' % (MONTHS[d.month - 1], d.day, d.year),
+                 '%s-%d-%d-pbs-newshour-full-episode' % (MONTHS[d.month - 1], d.day, d.year)]
+        nd = 0; found = False
+        for slug in slugs:
+            try:
+                page = get('https://www.pbs.org/newshour/show/' + slug); time.sleep(PAUSE)
+            except Exception:
+                continue
+            found = True
+            segs = sorted(set(re.findall(r'href="(https://www\.pbs\.org/newshour/show/[a-z0-9\-]+)"', page)))
+            segs = [s for s in segs if 'full-episode' not in s][:30]
+            for s in segs:
+                skey = 'pbsseg:' + s.rsplit('/', 1)[-1][:90]
+                if skey in done: continue
+                try:
+                    sp = get(s); time.sleep(PAUSE)
+                    i = sp.find('class="video-transcript')   # probe 2026-07-03: transcript div class (no id anchor)
+                    if i < 0: i = sp.find('id="transcript"')
+                    if i < 0: continue
+                    body = re.sub(r'<[^>]+>', '\n', sp[i:i + 200000])
+                    rows = parse_turns_mixed(body)
+                    nd += store(con, rows, d.isoformat(), 'pbs-newshour', s)
+                    con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (skey, 'ok', datetime.datetime.now().isoformat()))
+                    con.commit()   # short transactions (lock hygiene)
+                except Exception:
+                    continue
+            break
+        con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok' if found else 'noep', datetime.datetime.now().isoformat()))
+        con.commit(); tot += nd
+        if found: print('pbs %s: %d member turns (total %d)' % (d.isoformat(), nd, tot), flush=True)
+        d += datetime.timedelta(days=1)
+    con.close(); print('PBS done: %d member turns' % tot)
+
 if __name__ == '__main__':
     if 'status' in sys.argv:
         con = db()
@@ -178,4 +293,9 @@ if __name__ == '__main__':
     until = next((sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == '--until'), datetime.date.today().isoformat())
     if 'cnn' in sys.argv: run_cnn(since, until)
     elif 'mtp' in sys.argv: run_mtp()
-    else: print('usage: fetch_interviews.py [cnn|mtp|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
+    elif 'cbs' in sys.argv: run_cbs()
+    elif 'abc' in sys.argv: run_abc()
+    elif 'pbs' in sys.argv: run_pbs(since, until)
+    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
+    # NOTE (2026-07-03): Fox News Sunday examined — no public transcript archive exists anymore
+    # (show page + /transcript both empty of transcript links); route later via YouTube captions.
