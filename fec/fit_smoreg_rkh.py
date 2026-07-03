@@ -43,12 +43,26 @@ if not FZ:
     print('!! big5_traits.json has no featz block — rerun big5_traits.py first'); sys.exit(1)
 C = {m['member']: m for m in json.load(open(B + r'\congestion.json'))}
 FEATS = sorted(next(iter(FZ.values())))
+# Birkenmaier-Lechner cue features (agency_communion.json, agency_communion_llm.py): merged as two
+# extra features when available — a member needs >=15 classified sentences to qualify. Promotion of
+# weights referencing these features requires the FULL-roster run first (big5 scoring needs them).
+AC = {}
+_acp = B + r'\agency_communion.json'
+if os.path.exists(_acp):
+    AC = {m: d for m, d in json.load(open(_acp))['members'].items() if d.get('n', 0) >= 15}
+    print('B&L cue features available for %d members -> adding llm_agency/llm_communion' % len(AC))
 rowsX = []; rowsY = []; names = []
 for m, info in C.items():
     ic = b2i.get(info.get('bioguide') or '')
-    if ic in rkh and m in FZ:
-        rowsX.append([FZ[m][f] for f in FEATS]); rowsY.append(rkh[ic]); names.append(m)
+    if ic in rkh and m in FZ and (not AC or m in AC):
+        extra = [AC[m]['agency'], AC[m]['communion']] if AC else []
+        rowsX.append([FZ[m][f] for f in FEATS] + extra); rowsY.append(rkh[ic]); names.append(m)
+if AC: FEATS = FEATS + ['llm_agency', 'llm_communion']
 X = np.array(rowsX)
+if AC:   # z-score the two raw-share columns so they live on the same scale as featz
+    for j in (len(FEATS) - 2, len(FEATS) - 1):
+        sd = X[:, j].std(ddof=1) or 1.0
+        X[:, j] = (X[:, j] - X[:, j].mean()) / sd
 print('overlap training set: %d members x %d features' % (X.shape[0], X.shape[1]))
 
 ACTIVE = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'liwc', 'mairesse_smoreg.json'), encoding='utf-8'))
