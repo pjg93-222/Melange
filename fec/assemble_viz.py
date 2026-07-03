@@ -3,7 +3,7 @@ import moneyball_core as MBC
 import json, sys, math, os, openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 WM,WP=0.6,0.4; CAP=50000
-PRO={'Champion','Ally'}; ANTI={'Opponent','Skeptic'}
+PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Highly Skeptical','Skeptic'}   # user-ratified 2026-07-03: col-G ladder vocabulary (Defender/Highly Skeptical postdate this viz)
 C={m['member']:m for m in json.load(open(MB_ROOT+r'\congestion.json'))}
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 AL=json.load(open(MB_ROOT+r'\im_allocation.json'))
