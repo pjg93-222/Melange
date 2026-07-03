@@ -55,7 +55,15 @@ step('Big Five traits',['big5_traits.py'],timeout=1800)
 step('social interaction layer',['social_interaction_layer.py'],timeout=900)
 step('multilayer network',['build_multilayer_network.py'],timeout=900)
 step('media blend',['build_media_blend.py'],timeout=1200)   # tolerant: Excel lock -> stale press this week, still consistent
-step('FULL PIPELINE + dashboards',['run_pipeline.py'],timeout=3000,hard=True)
+ok=step('FULL PIPELINE + dashboards',['run_pipeline.py'],timeout=3000)
+if not ok:
+    # S3-06 resolution (user-ratified 2026-07-03, "whatever is most optimal"): a locked workbook at the
+    # col-G sync used to hard-abort ALL dashboard regeneration for the week. Fall back to rebuilding the
+    # engines + dashboards from the last CONSISTENT artifact state — '--from per_topic_flip' skips the
+    # workbook-writing steps entirely; the col-G view stays stale until the next unlocked run, which is
+    # the standard view-self-heal contract. If even the fallback fails, THAT is a hard abort.
+    log('pipeline failed — dashboard fallback from last consistent state (--from per_topic_flip)')
+    step('DASHBOARD FALLBACK',['run_pipeline.py','--from','per_topic_flip'],timeout=3000,hard=True)
 try:
     new=json.load(open(os.path.join(MB_ROOT,'ranks_python.json')))['rank']
     if prev:
