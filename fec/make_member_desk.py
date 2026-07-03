@@ -17,6 +17,7 @@ Run:  python fec/make_member_desk.py            (writes bundle JSON + HTML)
 """
 import json, os, csv, re, sys, unicodedata
 import openpyxl
+from moneyball_core import dump_atomic   # S3-01 audit run-2: chain artifacts write atomically
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
 B = MB_ROOT
@@ -500,8 +501,7 @@ if __name__ == '__main__':
     print('   partners:', ', '.join(p['name'] for p in s['partners'][:5]))
     import io
     out = os.path.join(B, 'member_desk_bundle.json')
-    with io.open(out, 'w', encoding='utf-8') as f:
-        json.dump(bundle, f, separators=(',', ':'), ensure_ascii=False)
+    dump_atomic(bundle, out, separators=(',', ':'), ensure_ascii=False)
     print('\nwrote %s (%.0f KB)' % (out, os.path.getsize(out)/1024))
     if '--data' not in sys.argv:
         html_out = os.path.join(B, 'cu-member-desk.html')

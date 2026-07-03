@@ -113,8 +113,8 @@ for lab,pc in cats:
             c=scores[m][lab]
             matrix[m][lab]='Highly Persuadable' if c>=t67 else ('Lean Skeptic' if c<t33 else 'True Neutral')
 cnt=collections.Counter(matrix[m][lab] for m in members for lab,_ in cats)
-json.dump({'cats':[c[0] for c in cats],'defensive':list(DEFENSIVE),'matrix':{m:matrix[m] for m in members},
-           'scores':{m:scores[m] for m in members}},open(MB_ROOT+r'\category_stance.json','w'))
+MC.dump_atomic({'cats':[c[0] for c in cats],'defensive':list(DEFENSIVE),'matrix':{m:matrix[m] for m in members},
+           'scores':{m:scores[m] for m in members}},MB_ROOT+r'\category_stance.json')
 print('tier distribution:',dict(cnt))
 persu=cnt['Highly Persuadable']+cnt['True Neutral']+cnt['Lean Skeptic']+cnt['Skeptic']
 print('persuadable middle: HighlyPersuadable %d | TrueNeutral %d | LeanSkeptic %d | Skeptic %d  (total %d) | Champions+Defenders %d'%(

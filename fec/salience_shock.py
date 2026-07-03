@@ -247,10 +247,10 @@ if a.advise:
         if p_['psi']>=0.8 and 'no stance data' not in verdict: verdict+=' [high-ψ: wait-and-see caution (Prop 5)]'
         print('%-30s %5.2f %5.2f %6.2f %6.2f %+8.2f %+8.2f %8s  %s'%(c[:30],p_['z'],p_['psi'],p_['p'],p_['q'],
               r['E_dspread'],worst,p_['sq'],verdict))
-    json.dump({'advisory':[{'issue':c,'value':round(v,3),'worst_regime_dspread':round(w,2),
+    MBC.dump_atomic({'advisory':[{'issue':c,'value':round(v,3),'worst_regime_dspread':round(w,2),
                **{k:r[k] for k in ('params','E_dspread','E_dwin','E_dmidband')},
                'defections_prevented':r['defections_prevented']} for v,w,c,r in sorted(rows,key=lambda t:-t[0])]},
-              open(B+r'\salience_advisory.json','w'),indent=1)
+              B+r'\salience_advisory.json',indent=1)
     print('\nwrote salience_advisory.json')
 elif a.issue:
     if a.issue not in cats: print('unknown issue; choose from:',cats); sys.exit(1)

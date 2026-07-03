@@ -36,6 +36,7 @@ and falls back to neutral (=legacy behavior) if the file is absent or RECEPT_LAY
 Output: member_receptivity.json {member: {big5, susc_z, susc_mult, edge_mult, incent_mult,
 pt_domain, pt_mult, pressure_mult, seed_prob, lowconf}}"""
 import sys,os,json
+from moneyball_core import dump_atomic   # S3-01 audit run-2: chain artifacts write atomically
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(C)
@@ -71,9 +72,9 @@ for m in members:
         'incent_mult':round(incent,3),'pt_domain':'loss' if loss else 'gain','pt_mult':pt,
         'pressure_mult':round(clip(susc_mult*incent*pt,0.50,1.60),3),
         'seed_prob':round(seed_prob,3),'lowconf':low,'retiring':m in RET}
-json.dump({'members':out,'LOSSFRAME':1.10,
+dump_atomic({'members':out,'LOSSFRAME':1.10,
   'provenance':'Byrne2015 choking (susc), Fouirnaies-Hall (incent), Linde-Vis prospect theory (pt), Chen/SNAM contingency (seed_prob); graded sqrt(tokens/1500) trait shrinkage toward neutral'},
-  open(B+r'\member_receptivity.json','w'))
+  B+r'\member_receptivity.json')
 import collections
 d=collections.Counter(out[m]['pt_domain'] for m in out)
 neu=sum(1 for m in out if out[m]['lowconf'])

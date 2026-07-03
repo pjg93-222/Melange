@@ -12,7 +12,8 @@ Credit-union legislative-influence modeling & money-allocation system (the "Mone
 - `fec/templates/` — dashboard HTML/JS templates. `backups/` — workbook backups (auto, pre-write).
 - `Moneyball Main Version - Blended.xlsx` — the rank workbook (system of record; user dial sheets:
   Topic Weights, Category Stance). `votes/` — voteview rosters. `research/` — the source papers.
-- Root `*.json` — derived artifacts (regenerable; all writes are atomic via `MC.dump_atomic`).
+- Root `*.json` — derived artifacts (regenerable). Every PIPELINE-CHAIN writer is atomic via
+  `MC.dump_atomic`; manual collector/diagnostic scripts may still write raw (audit run-2, S3-01).
 - `social_media.db` — posts, member↔member interactions, floor speeches + hearing transcripts.
 
 ## The model (five layers)
