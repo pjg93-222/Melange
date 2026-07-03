@@ -19,7 +19,7 @@ backups/
 archive/
 baseline/
 deploy/
-.claude/
+.claude/*
 
 # --- keep: code, docs, config, small source-of-truth text ---
 !*.md
@@ -30,3 +30,8 @@ deploy/
 # python bytecode (mistakenly tracked in baseline)
 __pycache__/
 *.pyc
+
+# track project slash commands + exclude logs
+!.claude/commands/
+!.claude/commands/*.md
+*.log
