@@ -539,7 +539,25 @@ function staffHTML(m){
 }
 function psychHTML(m){
   const note=manField(m.name,'psych',m.psychometrics);
-  return `<div id=psych-view>${note?`<div class=savednote>${esc(note)}</div>`:`<div class=empty>No psychometric profile yet. Add disposition, motivations, persuasion notes, communication style.</div>`}
+  const P=m.psy||{};
+  const READS={'agree-susceptible':['Trait & persona AGREE: susceptible','#16a34a'],'agree-resistant':['Trait & persona AGREE: resistant','#ef4444'],'diverge':['Reads DIVERGE — verify in person','#f59e0b'],'mixed':['Mixed reads','#8b949e'],'both-neutral':['Both reads neutral','#8b949e'],'trait-only':['Trait read only — no persona coverage','#6b7280']};
+  const bar=(l,v,c)=>`<div class=mrow><span>${l}</span><b>${Math.round(v*100)}th pct</b></div><div style="height:7px;background:#1b2129;border-radius:4px;overflow:hidden;margin:2px 0 8px"><i style="display:block;height:100%;width:${Math.round(v*100)}%;background:${c}"></i></div>`;
+  let comp='<div class=empty>No computed psychometrics for this member (no text corpus).</div>';
+  if(P.big5_pct){
+    const rad=radar(P.big5_pct,['Open','Consc','Extra','Agree','EmoSt'],'#7dd3fc',82);
+    const persona=(P.communion_pct!=null)?bar('Warmth — communion persona',P.communion_pct,'#2dd4bf')+bar('Dominance — agency persona',P.agency_pct,'#c2862a'):'<div class=empty>No persona cue coverage yet for this member.</div>';
+    const rd=READS[P.susc_read||'trait-only']||READS['trait-only'];
+    const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Pressure multiplier (engines)</span><b>${P.pressure_mult}×</b></div>
+      <div class=mrow><span>Susceptibility — trait read (Byrne)</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
+      ${P.persona_susc_z!=null?`<div class=mrow><span>Susceptibility — persona read (B&amp;L cues)</span><b>${P.persona_susc_z>0?'+':''}${P.persona_susc_z}</b></div>`:''}
+      <div style="font-size:11px;font-weight:700;color:${rd[1]};background:${rd[1]}22;border:1px solid ${rd[1]}55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">${rd[0]}</div>`:'';
+    comp=`<div class=gen style=margin-bottom:12px><div>${rad}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Big-5: low confidence (thin text corpus)</div>':''}</div>
+      <div><div class=eyebrow>Projected persona (Birkenmaier-Lechner cues)</div>${persona}
+      <div class=eyebrow style=margin-top:8px>Susceptibility to pressure</div>${suscRows}</div></div>`;
+  }
+  return `<div id=psych-view>${comp}
+    <div class=eyebrow style=margin-top:6px>Notes</div>
+    ${note?`<div class=savednote>${esc(note)}</div>`:`<div class=empty>No psychometric profile yet. Add disposition, motivations, persuasion notes, communication style.</div>`}
     <button class=btn data-edit=psych>${note?'Edit':'Add'} note</button>
     <div id=psych-edit hidden><textarea class=notebox data-field=psych>${esc(note||'')}</textarea><button class=btn data-save=psych>Save</button><button class="btn ghost" data-cancel=psych>Cancel</button></div></div>`;
 }

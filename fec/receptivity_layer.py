@@ -52,6 +52,27 @@ RET=set()
 if os.path.exists(RETF):
     RET={l.strip() for l in open(RETF,encoding='utf-8') if l.strip() and not l.startswith('#')}
 def clip(x,lo,hi): return max(lo,min(hi,x))
+# ---- PERSONA CHANNEL (user-ratified 2026-07-03: "wire into susceptibility/neuroticism") ----
+# Birkenmaier-Lechner cue shares (agency_communion.json, agency_communion_llm.py): the PROJECTED
+# persona — warm/communal rhetoric reads as approachable-agreeable (Byrne susceptible), dominant/
+# assertive rhetoric resists pressure. persona_susc_z = .60*z(communion) − .40*z(agency), blended
+# into the trait susceptibility at PERSONA_W (default 0.30) for members with >=15 classified
+# sentences; everyone else stays trait-only. The two reads are also CROSS-COMPARED per member
+# ('susc_read': agree-susceptible / agree-resistant / mixed / diverge) — divergence means the
+# trait and persona instruments disagree: verify in person before leaning on either.
+PW=float(os.environ.get('PERSONA_W','0.30'))
+PS={}
+try:
+    _ac={m:d for m,d in json.load(open(B+r'\agency_communion.json'))['members'].items() if d.get('n',0)>=15}
+    if _ac:
+        _ag=[d['agency'] for d in _ac.values()]; _co=[d['communion'] for d in _ac.values()]
+        _ma=sum(_ag)/len(_ag); _sa=(sum((x-_ma)**2 for x in _ag)/max(1,len(_ag)-1))**.5 or 1.0
+        _mc=sum(_co)/len(_co); _sc=(sum((x-_mc)**2 for x in _co)/max(1,len(_co)-1))**.5 or 1.0
+        PS={m:{'z':.60*((d['communion']-_mc)/_sc)-.40*((d['agency']-_ma)/_sa),
+               'agency':d['agency'],'communion':d['communion'],'n':d['n']} for m,d in _ac.items()}
+except FileNotFoundError: pass
+if not PS: print('  !! agency_communion.json MISSING/EMPTY — persona channel OFF (trait-only susceptibility). Run agency_communion_llm.py --all.')
+else: print('  persona channel: %d members with cue coverage (PERSONA_W=%.2f)'%(len(PS),PW))
 out={}
 for m in members:
     t=T.get(m,{}); low=t.get('lowconf',True)
@@ -59,7 +80,15 @@ for m in members:
     # corpora rather than a hard neutral cliff; zero text -> fully neutral.
     sh=min(1.0,(t.get('tokens',0)/1500.0)**0.5)
     A,N,Cc,E,O=(sh*t.get('A',0),sh*t.get('N',0),sh*t.get('C',0),sh*t.get('E',0),sh*t.get('O',0))
-    susc=.40*A+.30*N-.20*Cc-.10*E                       # Byrne et al. choking composite
+    susc_trait=.40*A+.30*N-.20*Cc-.10*E                 # Byrne et al. choking composite (trait read)
+    ps=PS.get(m)
+    susc=(1-PW)*susc_trait+PW*ps['z'] if ps else susc_trait
+    if ps is None: read='trait-only'
+    elif abs(susc_trait)<=0.5 and abs(ps['z'])<=0.5: read='both-neutral'
+    elif susc_trait>0.5 and ps['z']>0.5: read='agree-susceptible'
+    elif susc_trait<-0.5 and ps['z']<-0.5: read='agree-resistant'
+    elif susc_trait*ps['z']<0 and abs(susc_trait-ps['z'])>1.0: read='diverge'
+    else: read='mixed'
     susc_mult=clip(1+.18*susc,0.70,1.30)
     edge_mult=clip(1+.12*susc,0.80,1.20)
     sec=EL.get(m,{}).get('security',0.5); comp=1-sec
@@ -68,7 +97,10 @@ for m in members:
     pt=1.15 if loss else 0.92
     seed_prob=clip(0.60+.10*A+.06*O+.04*E,0.30,0.90)
     out[m]={'A':round(A,3),'N':round(N,3),'C':round(Cc,3),'E':round(E,3),'O':round(O,3),
-        'susc_z':round(susc,3),'susc_mult':round(susc_mult,3),'edge_mult':round(edge_mult,3),
+        'susc_z':round(susc,3),'susc_trait_z':round(susc_trait,3),
+        'persona_susc_z':round(ps['z'],3) if ps else None,'susc_read':read,
+        'agency':ps['agency'] if ps else None,'communion':ps['communion'] if ps else None,
+        'susc_mult':round(susc_mult,3),'edge_mult':round(edge_mult,3),
         'incent_mult':round(incent,3),'pt_domain':'loss' if loss else 'gain','pt_mult':pt,
         'pressure_mult':round(clip(susc_mult*incent*pt,0.50,1.60),3),
         'seed_prob':round(seed_prob,3),'lowconf':low,'retiring':m in RET}
@@ -86,4 +118,9 @@ hi=sorted((m for m in out if not out[m]['lowconf']),key=lambda m:-out[m]['pressu
 lo=sorted((m for m in out if not out[m]['lowconf']),key=lambda m:out[m]['pressure_mult'])[:5]
 print('  most pressure-susceptible:',', '.join('%s %.2f'%(m,out[m]['pressure_mult']) for m in hi))
 print('  most pressure-resistant:  ',', '.join('%s %.2f'%(m,out[m]['pressure_mult']) for m in lo))
+if PS:
+    rd=collections.Counter(out[m]['susc_read'] for m in out if out[m]['persona_susc_z'] is not None)
+    print('  trait-vs-persona cross-comparison:',dict(rd))
+    div=[m for m in out if out[m]['susc_read']=='diverge']
+    if div: print('  DIVERGING (verify in person before leaning on either read):',', '.join(sorted(div)[:8]))
 print('wrote member_receptivity.json')

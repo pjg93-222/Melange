@@ -47,6 +47,29 @@ OPT    = L('optimize_result.json') or {}     # Golovin-Krause adaptive-submodula
 if not OPT: print('  !! optimize_result.json MISSING/empty — desk allocation panels will be blank (run optimize.py)')   # S3-05
 OPT_ALLOC = OPT.get('alloc', {})             # the RESEARCH-GROUNDED suggested allocation (vs score-proportional)
 EH  = L('electoral_history.json') or {}      # per-member FEC primary+general vote-share trend + forecast (build_electoral_history.py)
+# ---- computed psychometrics (user-directed 2026-07-03): Big5 radar + B&L persona + susceptibility cross-read ----
+B5  = (L('big5_traits.json') or {}).get('traits', {})
+RCPT = (L('member_receptivity.json') or {}).get('members', {})
+if not RCPT: print('  !! member_receptivity.json MISSING — psychometrics tab computed section will be empty')
+def _pctrank(vals):
+    s = sorted(vals); n = max(1, len(s) - 1)
+    import bisect
+    return lambda v: round(bisect.bisect_left(s, v) / n, 3)
+_b5have = {m: t for m, t in B5.items() if t.get('tokens', 0) > 0}
+_B5PCT = {tr: _pctrank([t[tr] for t in _b5have.values()]) for tr in ('O', 'C', 'E', 'A', 'ES')} if _b5have else {}
+_achave = {m: r for m, r in RCPT.items() if r.get('agency') is not None}
+_ACPCT = {k: _pctrank([r[k] for r in _achave.values()]) for k in ('agency', 'communion')} if _achave else {}
+def psy_for(name):
+    t = B5.get(name) or {}; r = RCPT.get(name) or {}
+    out = {}
+    if t.get('tokens', 0) > 0 and _B5PCT:
+        out['big5_pct'] = [_B5PCT[tr](t[tr]) for tr in ('O', 'C', 'E', 'A', 'ES')]
+        out['big5_low'] = bool(t.get('lowconf')); out['tokens'] = t.get('tokens')
+    if r.get('agency') is not None and _ACPCT:
+        out['agency_pct'] = _ACPCT['agency'](r['agency']); out['communion_pct'] = _ACPCT['communion'](r['communion'])
+    for k in ('pressure_mult', 'susc_z', 'susc_trait_z', 'persona_susc_z', 'susc_read', 'seed_prob'):
+        if r.get(k) is not None: out[k] = r[k]
+    return out or None
 
 CATS = CS['cats']                            # canonical 17 legislative areas
 DEFENSIVE = set(CS['defensive'])
@@ -408,6 +431,7 @@ def build_bundle():
             'partners': partners,                                  # relational: cosponsor ties
             'demo': m.get('demo'),                                 # demographics
             'psychometrics': MANUAL.get(name, {}).get('psychometrics'),  # manual
+            'psy': psy_for(name),                                  # computed: Big5 pct radar + persona + susceptibility cross-read
             'bills': bills,                                        # legislative actions (role + area)
             'articles': arts,                                      # press & social (full DB, cats normalized)
             'electoral': EH.get(name),                             # FEC primary+general vote-share trend + Ballotpedia forecast
