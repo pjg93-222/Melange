@@ -79,7 +79,7 @@ lock = threading.Lock()
 
 def classify(sentence, _retry=True):
     resp = client.messages.create(
-        model=MODEL, max_tokens=400,
+        model=MODEL, max_tokens=1000,   # QA 2026-07-03: 400 truncated verbose 'reason' strings mid-JSON -> 33% error rate
         output_config={"format": {"type": "json_schema", "schema": {
             "type": "object",
             "properties": {"label": {"type": "string", "enum": ["agency", "communion", "none"]},
@@ -87,7 +87,7 @@ def classify(sentence, _retry=True):
                            "reason": {"type": "string"}},
             "required": ["label", "strength", "reason"], "additionalProperties": False}}},
         system=SYSTEM,
-        messages=[{"role": "user", "content": "Sentence (to classify): " + sentence[:500]}])
+        messages=[{"role": "user", "content": "Sentence (to classify): " + sentence[:500] + "\n(Keep reason under 12 words.)"}])
     try:
         return json.loads(next(b.text for b in resp.content if b.type == "text"))
     except (json.JSONDecodeError, StopIteration):

@@ -43,12 +43,17 @@ def get(url, tries=3):
             if i == tries - 1: raise
             time.sleep(3 * (i + 1))
 
+import html as _html
 def strip_tags(h):
     h = re.sub(r'<script.*?</script>|<style.*?</style>', ' ', h, flags=re.S)
     h = re.sub(r'<br[^>]*>|</p>|</div>', '\n', h, flags=re.I)
     h = re.sub(r'<[^>]+>', ' ', h)
-    h = h.replace('&amp;', '&').replace('&quot;', '"').replace('&#39;', "'").replace('&nbsp;', ' ')
-    return h
+    return _html.unescape(h)   # QA 2026-07-03: full entity decode (54 PBS rows carried &#039; residue)
+
+STAGE = re.compile(r'\((?:END|BEGIN)\s+(?:VIDEO\s+)?(?:CLIP|TAPE|CLIP MONTAGE)\)|\(COMMERCIAL BREAK\)|\(CROSSTALK\)|\(APPLAUSE\)|\(LAUGHTER\)|\(BEGIN VIDEOTAPE\)|\(END VIDEOTAPE\)', re.I)
+def scrub(sp):
+    """Remove broadcast stage directions from a turn (QA: '(END VIDEO CLIP)' rode inside member turns)."""
+    return re.sub(r'\s+', ' ', STAGE.sub(' ', sp)).strip()
 
 # ---------------- roster resolution ----------------
 C = {m['member']: m for m in json.load(open(B + r'\congestion.json'))}
@@ -99,8 +104,10 @@ def parse_turns(text):
         if not m:
             k = norm(base).split()
             m = alias.get(k[-1]) if len(k) == 1 else None
-        if m and len(sp.split()) >= 8:            # drop micro-interjections
-            out.append((m, sp))
+        if m:
+            sp = scrub(sp)
+            if len(sp.split()) >= 8:              # drop micro-interjections
+                out.append((m, sp))
     return out
 
 def store(con, rows, date, show, url):
@@ -178,8 +185,10 @@ def parse_turns_mixed(text):
         end = pos[i + 1][0] if i + 1 < len(pos) else len(text)
         sp = text[st:end]; sp = sp[sp.index(':') + 1:].strip()
         m = resolve_full(lab)
-        if m and len(sp.split()) >= 8:
-            out.append((m, re.sub(r'\s+', ' ', sp)))
+        if m:
+            sp = scrub(sp)
+            if len(sp.split()) >= 8:
+                out.append((m, sp))
     return out
 
 def run_cbs():
@@ -203,6 +212,9 @@ def run_cbs():
             page = get(u); time.sleep(PAUSE)
             md = re.search(r'(\d{2})-(\d{2})-(\d{4})', u)
             date = '%s-%s-%s' % (md.group(3), md.group(1), md.group(2)) if md else ''
+            if not date:   # QA: guest pages without URL dates -> page metadata
+                mp = re.search(r'"datePublished"\s*:\s*"(\d{4}-\d{2}-\d{2})', page)
+                date = mp.group(1) if mp else ''
             rows = parse_turns(strip_tags(page))
             n = store(con, rows, date, 'face-the-nation', u)
             con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
@@ -231,8 +243,9 @@ def run_abc():
         if key in done: continue
         try:
             page = get(u); time.sleep(PAUSE)
+            mp = re.search(r'"datePublished"\s*:\s*"(\d{4}-\d{2}-\d{2})', page)   # QA: ABC stored empty dates
             rows = parse_turns(strip_tags(page))
-            n = store(con, rows, '', 'this-week', u)
+            n = store(con, rows, mp.group(1) if mp else '', 'this-week', u)
             con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
             con.commit(); tot += n
             print('abc %s: %d turns' % (key, n), flush=True)

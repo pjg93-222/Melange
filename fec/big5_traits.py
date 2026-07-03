@@ -40,14 +40,18 @@ for row in ws.iter_rows(min_row=2,values_only=True):
 sm=pd.read_excel(B+r'\Social Master.xlsx',sheet_name='Corpus',dtype=str)
 for _,r in sm[sm['platform']=='bluesky'].iterrows():
     if r['member'] in C and r['text'] and str(r.get('is_rt','')).lower() not in ('1','true'): texts[r['member']].append(str(r['text']))
-import sqlite3
-nsp=0
+import sqlite3,hashlib as _hl
+nsp=0; ndup=0; _seen=set()
 try:
     con=sqlite3.connect(B+r'\social_media.db')
     for m,t in con.execute('SELECT member,text FROM speeches'):
-        if m in C and t: texts[m].append(t); nsp+=1
+        if m in C and t:
+            _h=(m,_hl.md5(t.encode('utf-8','replace')).hexdigest())
+            if _h in _seen: ndup+=1; continue   # QA 2026-07-03: re-aired soundbites + crash-refetch dups must not inflate rates
+            _seen.add(_h)
+            texts[m].append(t); nsp+=1
 except sqlite3.OperationalError: pass
-print('corpus: speeches %d turns folded in'%nsp)
+print('corpus: speeches %d turns folded in (%d duplicates skipped)'%(nsp,ndup))
 # ---------------- closed-vocabulary categories (LIWC-analog; word lists are the published exemplars) ----------------
 CAT={
  'i':"i me my mine myself im ive ill id",
