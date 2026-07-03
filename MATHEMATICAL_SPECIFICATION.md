@@ -66,7 +66,7 @@ openpyxl parses; optimization candidate: cache the frozen Legislative-Normalized
 
 ## Standing dials (env; defaults = the ratified state)
 `PERS_NONE=0.45 · SOCIAL_SHRINK=1 · RT_W=0.5 · LOSSFRAME=1.10 · SOC_REINF=0.3 · SOC_CAP=2.0 ·
-SOC_VOLFLOOR=25 · SOC_MEN_W=0.4 · BP_SRC=cosponsor (aug = unratified augmented definition) ·
+SOC_VOLFLOOR=25 · SOC_MEN_W=0.4 · BP_SRC=cosponsor (user-ratified 2026-07-03: bipartisanship stays a COSPONSORSHIP concept; aug = available but unratified) ·
 RECEPT_LAYER=1 · IMPUTE_IND0=1 · SAL_PSI_DAMP=0 (off) · DTHRESH=11.25 · MAXSHIFT=18 ·
 HALF=0.10 (money_response receipts-fraction) · HALFF=0.10 (flip-family capacity — DISTINCT dial, same default) ·
 MC=20 · SEED=7 · MONEYBALL_ROOT / MONEYBALL_DRAFT (paths.py)`
