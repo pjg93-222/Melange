@@ -60,7 +60,7 @@ try:
     _gr=[max(0.15,_rc[m]['seed_prob']*0.35) for m,d in EP.items() if d.get('play')=='contest' and d.get('party')=='R']
     _gap=abs(sum(_gd)/max(1,len(_gd))-sum(_gr)/max(1,len(_gr)))
     ck('contest gates party-blind (mean D vs R gap <= 0.10)',_gap<=0.10,'gap %.3f'%_gap)
-except FileNotFoundError: pass
+except FileNotFoundError: print('  SKIP contest-gates party-blind check (member_receptivity.json missing)')   # S3-03: skip is now visible AND drops the passed-count below audit_full's floor
 _n=sum(rp.values())
 ck('contest entry mix not partisan-skewed (>80%% enforced only at n>=12)',
    _n<12 or max(rp['D'],rp['R'])<=0.80*_n,'D%d R%d (n=%d)'%(rp['D'],rp['R'],_n))

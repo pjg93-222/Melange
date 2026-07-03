@@ -13,9 +13,9 @@ def run(script):
 
 
 print('========== FULL-BODY AUDIT ==========\n[1] Existing audits')
-for s,nm in [('audit.py','integrity (22)'),('audit_frontier.py','frontier (11)')]:
+for s,nm,exp in [('audit.py','integrity (22)',22),('audit_frontier.py','frontier (11)',11)]:   # S3-03 audit run-2: assert COUNT too — a silently-skipped check must fail here, not vanish
     out=run(s); m=re.search(r'(\d+) passed, (\d+) FAILED',out)
-    ck('%s sub-audit clean'%nm, bool(m) and m.group(2)=='0', out.strip().splitlines()[-1] if out else 'no output')
+    ck('%s sub-audit clean'%nm, bool(m) and m.group(2)=='0' and int(m.group(1))>=exp, out.strip().splitlines()[-1] if out else 'no output')
 print('\n[2] Money-response (diminishing returns + capacity)')
 spec=importlib.util.spec_from_file_location('mr',FE+r'\money_response.py'); mr=importlib.util.module_from_spec(spec); spec.loader.exec_module(mr)
 g='Jared Golden'
