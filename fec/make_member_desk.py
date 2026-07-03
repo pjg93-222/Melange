@@ -44,6 +44,7 @@ def _press_corr(title, url):
             return c
     return None
 OPT    = L('optimize_result.json') or {}     # Golovin-Krause adaptive-submodular optimizer: {alloc:{name:$}, base, final,...}
+if not OPT: print('  !! optimize_result.json MISSING/empty — desk allocation panels will be blank (run optimize.py)')   # S3-05
 OPT_ALLOC = OPT.get('alloc', {})             # the RESEARCH-GROUNDED suggested allocation (vs score-proportional)
 EH  = L('electoral_history.json') or {}      # per-member FEC primary+general vote-share trend + forecast (build_electoral_history.py)
 

@@ -176,6 +176,7 @@ def _playcode(n):   # c = contest via PRIMARY (same-party), g = contest via GENE
 PLAY=''.join(_playcode(n) for n in members)
 EPVAL=[round((EP.get(n) or {}).get('value',0)) for n in members]
 # --- nested budget frontier per issue (slider does a live lookup of the precomputed path) ---
+if not os.path.exists(B+r'\budget_frontier.json'): print('  !! budget_frontier.json MISSING — frontier sliders will be EMPTY (run budget_frontier.py)')   # S3-05: silent-empty sections now announce themselves
 BF=json.load(open(B+r'\budget_frontier.json')) if os.path.exists(B+r'\budget_frontier.json') else {'topics':{}}
 def frontier_for(lb):
     t=BF['topics'].get(lb)
@@ -184,6 +185,7 @@ def frontier_for(lb):
     return {'base':t['base'],'knee':t.get('knee',0),'core':t.get('core_seeds',0),'path':pts}
 frontier=[frontier_for(lb) for lb in issues]
 # --- adaptive optimizer (cross-topic CU allocation) ---
+if not os.path.exists(B+r'\optimize_result.json'): print('  !! optimize_result.json MISSING — optimizer panel will be EMPTY (run optimize.py)')   # S3-05
 OPT=json.load(open(B+r'\optimize_result.json')) if os.path.exists(B+r'\optimize_result.json') else None
 opt=None
 if OPT:
@@ -229,7 +231,7 @@ try:
         v='GO PUBLIC' if (a['value']>=_cut and a['value']>0) else 'quiet work'
         if a.get('defections_prevented'): v+=' · holds %d'%len(a['defections_prevented'])
         _advmap[a['issue']]=v
-except Exception: pass
+except FileNotFoundError: print('  !! salience_advisory.json MISSING — advisory column will be EMPTY (run salience_shock.py --advise)')   # S3-05: was `except Exception: pass`, which also buried schema drift forever
 engine['adv']=[_advmap.get(issue_cat[i],'') for i in range(len(issues))]
 # ===== Overall CU stance as a selectable ISSUE layer (general stance, toggleable like Interchange) =====
 _ovf={str(k):round(sum(FL[lb].get(name[k],0) for lb in FL)/1000) for k in range(len(name)) if sum(FL[lb].get(name[k],0) for lb in FL)>=10000}
