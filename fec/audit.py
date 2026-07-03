@@ -1,14 +1,15 @@
 import json, sys, openpyxl
+from paths import WORKBOOK, p   # S2-02 audit run-2: honor MONEYBALL_ROOT — never audit a hardcoded tree
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 P=[]; F=[]
 def ok(c,m): (P if c else F).append(m)
-M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+M=WORKBOOK
 wb=openpyxl.load_workbook(M,data_only=True); wbf=openpyxl.load_workbook(M,data_only=False)
 bm=wb['Blended Model']; ra=wb['Rank & Allocation']
 # PHASE-2 (2026-07-02): Blended's formula caches DIE after any openpyxl save (sync/blend) and revive
 # on user Excel opens (fullCalcOnLoad). Rank truth = ranks_python.json (the authority). View-dependent
 # checks (allocation col 21) run only while the view cache is alive.
-AUTH=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\ranks_python.json'))
+AUTH=json.load(open(p('ranks_python.json')))
 VIEW_ALIVE=sum(1 for r in range(3,536) if bm.cell(r,1).value) >= 500
 # A integrity
 errs=sum(1 for ws in wb.worksheets for row in ws.iter_rows() for c in row if isinstance(c.value,str) and c.value in {'#REF!','#DIV/0!','#VALUE!','#N/A','#NAME?','#NUM!'})
@@ -45,7 +46,7 @@ ok(oppside>=40 and champside>=40,'D1 stance dist (anti-side=%d pro-side=%d) %s'%
 ok('Congestion' in wb.sheetnames,'E1 Congestion sheet present')
 cg=wb['Congestion']; ncg=sum(1 for r in range(3,cg.max_row+1) if cg.cell(r,1).value)
 ok(ncg==533,'E2 Congestion rows = %d'%ncg)
-CJ=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\congestion.json'))
+CJ=json.load(open(p('congestion.json')))
 TCU=sum(m['cu'] for m in CJ); TBK=sum(m['banks'] for m in CJ); TFS=sum(m['finserv'] for m in CJ)
 ok(abs(TBK-7_795_150)<2000 and abs(TCU-2_670_800)<2000 and abs(TFS-3_363_600)<2000,f'E3 industry totals CU ${TCU:,} Banks ${TBK:,} FinSvc ${TFS:,}')
 # 3-way raw shares sum to 100; capacity-adj sum to 100
@@ -68,9 +69,9 @@ ok(len(neg)==0,'F2 no negative $ buckets (refunds floored): %s'%neg[:3])
 # im_allocate2.py output. G1/G2 updated accordingly: the real invariant is that the IM columns EQUAL the
 # per-topic row-sums (so the workbook sheet can't silently go stale), and the flip total is the 18 topic
 # budgets (18 x $2M = $36M; each topic's $2M is checked by G4).
-IM=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\im_allocation.json'))
-PT=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\per_topic_alloc.json'))
-PTC=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\per_topic_coalition.json'))
+IM=json.load(open(p('im_allocation.json')))
+PT=json.load(open(p('per_topic_alloc.json')))
+PTC=json.load(open(p('per_topic_coalition.json')))
 fs=sum(IM['flip'].values()); cs=sum(IM['coalition'].values())
 pta_tot=sum(sum(d.values()) for d in PT.values()); ptc_tot=sum(sum(d.values()) for d in PTC.values())
 ok(fs==pta_tot and abs(fs-len(PT)*2_000_000)<5000*len(PT),f'G1 flip allocation = live per-topic row-sums ${fs:,} (= {len(PT)} x $2M)')
