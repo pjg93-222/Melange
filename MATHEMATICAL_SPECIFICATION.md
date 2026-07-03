@@ -16,12 +16,12 @@ always hold.***
 | Money response | `fec/money_response.py` — Δlean = MAXSHIFT·(r/(r+HALF))·pressure_mult (·LOSSFRAME if threat); defection ≥ DTHRESH walks ONE rung; Champion/Opponent immune | kernel tests; audit_full [2] |
 | Flip/winnability | `fec/flip_model.py` — pflip = a/(a+b); Michaelis-Menten money terms ×pressure_mult + peer proximity ×cpf_pressure; tgt = engagement·PERS·(1+0.3·bpf) | kernel tests; audit_full [8] G-K bound |
 | Cascades (frontier/coalition/salience) | kernel p = w·cpf_diffusion·edge_mult(receiver)/(…+6); CRN splitmix64 keyed (iteration, edge); contingent seeds gate = seed_prob·SGATE(stance), floor 0.15 | audit_full determinism; frontier sub-audit (12) |
-| Salience shock (Noble-Turner) | `fec/salience_shock.py` — p=(1−b)(1−zn), q=(1−b)zn, b=0.05+0.10ψ (p+q+b≡1); regime-signed party-asymmetric ladder steps ×VULN×susc_mult; defensive-appeal threshold ×(1+DELTA/2) at $250k probe | audit_full [10] |
+| Salience shock (Noble-Turner) | `fec/salience_shock.py` — p=(1−b)(1−zn), q=(1−b)zn, b=min(0.35, 0.05+0.10ψ) (p+q+b≡1); regime-signed party-asymmetric ladder steps ×VULN×susc_mult; defensive-appeal threshold ×(1+DELTA/2) at $250k probe | audit_full [10] |
 | Receptivity layer | `fec/receptivity_layer.py` — susc = .40A+.30N−.20C−.10E (Byrne); pressure_mult = clip(susc·incent·pt, 0.50, 1.60) (F&H incentive · Linde-Vis PT domain); seed_prob = clip(.60+.10A+.06O+.04E, .30, .90) | audit_full caps; kernel tests |
 | Big Five traits | `fec/big5_traits.py` — Ramey-synth closed-vocab on tweets+floor+hearings; z relative to THIS corpus; shrinkage √(tokens/1500); O flagged low-validity | party-validation printout every build |
 | Network layers | `fec/build_multilayer_network.py` — cosponsor verbatim (mean-symmetrized) + press engagement w=6p/(1−p) + HCoI isolated-incident + social new-edge/reinforcement (+30% cap) | structural audit; provenance sheet |
 | Pillar shadow-compute | `fec/compute_pillars.py` — Python reproduction of the ENTIRE raw→normalized→pillar→score→rank chain; Excel PERCENTRANK = truncate to 5 DECIMAL digits (empirically pinned) | audit_full parity check (533/533 exact) |
-| Shared kernel | `fec/moneyball_core.py` — rosters, network loader (every member has an entry), TWO named cpf physics, sm64, PERS/IMP/BLOCKCAT/SGATE | `fec/tests/run_tests.py` (28 checks) |
+| Shared kernel | `fec/moneyball_core.py` — rosters, network loader (every member has an entry), TWO named cpf physics, sm64, PERS/IMP/BLOCKCAT/SGATE | `fec/tests/run_tests.py` (30 checks) |
 
 ## Cross-module conventions (the parts that used to drift)
 
@@ -52,7 +52,8 @@ effects. Any NEW random draw must claim a dedicated key range (seed gating uses 
 math; **ranks_python.json is the rank authority** (`compute_pillars --write`, engines read it via
 `moneyball_core.scores()/ranks()`). The workbook is a self-refreshing **VIEW**: every Python writer
 sets `fullCalcOnLoad`, so Excel recalculates the formulas whenever the user opens it. There is NO
-COM anywhere. Physics of the file: **openpyxl saves strip cached formula values** — after a
+COM anywhere IN THE PIPELINE (the manual `apply_*` / `write_im_sheet` / `sync_stance_clean` tools
+still drive Excel COM — run those with the workbook closed). Physics of the file: **openpyxl saves strip cached formula values** — after a
 sync/blend save, `data_only` reads of FORMULA cells return None until the next user Excel open;
 TYPED cells always survive (R&A names + col G, AB2:AB5 dials, Press Raw, row-535 weights). Pillar
 inputs O/E/F are formula-backed → `pillar_inputs_snapshot.json` (auto-refreshed while the view
@@ -66,12 +67,13 @@ openpyxl parses; optimization candidate: cache the frozen Legislative-Normalized
 ## Standing dials (env; defaults = the ratified state)
 `PERS_NONE=0.45 · SOCIAL_SHRINK=1 · RT_W=0.5 · LOSSFRAME=1.10 · SOC_REINF=0.3 · SOC_CAP=2.0 ·
 SOC_VOLFLOOR=25 · SOC_MEN_W=0.4 · BP_SRC=cosponsor (aug = unratified augmented definition) ·
-RECEPT_LAYER=1 · IMPUTE_IND0=1 · SAL_PSI_DAMP=0 (off) · DTHRESH=11.25 · MAXSHIFT=18 · HALFF=0.10 ·
+RECEPT_LAYER=1 · IMPUTE_IND0=1 · SAL_PSI_DAMP=0 (off) · DTHRESH=11.25 · MAXSHIFT=18 ·
+HALF=0.10 (money_response receipts-fraction) · HALFF=0.10 (flip-family capacity — DISTINCT dial, same default) ·
 MC=20 · SEED=7 · MONEYBALL_ROOT / MONEYBALL_DRAFT (paths.py)`
 
 ## Regeneration & verification protocol
 Data refresh: collectors (`fetch_congressional_record`, `tweet_collector`, Quorum) →
 `big5_traits` → `social_interaction_layer` → `build_multilayer_network` → `build_media_blend` →
 **`run_pipeline.py --recalc`** (chain incl. receptivity, stance, advisory, exports, audit).
-Any code change: `fec/tests/run_tests.py` (28) → `run_pipeline.py` → **zero rank delta** vs the
+Any code change: `fec/tests/run_tests.py` (30) → `run_pipeline.py` → **zero rank delta** vs the
 last ranks_*.json baseline → `audit_full.py` all-clean.
