@@ -33,7 +33,7 @@ allp=[pflip(n) for n in members]
 mono=all(statistics.mean(pf[order[i]])>=statistics.mean(pf[order[i+1]])-0.02 for i in range(len(order)-1))
 print('   monotonic(P): %s | median P %.3f | FIXED common money scale %.1f (was asymmetric 295 vs 422)'%(mono,statistics.median(allp),moneyscale))
 # spearman P vs stance ordinal
-so={s:i for i,s in enumerate(order)}; import math as _m
+so={s:i for i,s in enumerate(order)}
 xs=[so[st[n]] for n in members]; ys=[pflip(n) for n in members]
 def spear(a,b):
     ra_=sorted(range(len(a)),key=lambda i:a[i]); rb=sorted(range(len(b)),key=lambda i:b[i])
