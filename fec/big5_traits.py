@@ -68,6 +68,39 @@ CAT={
  'tentat':"maybe perhaps might may could seems appears possibly somewhat unclear likely probably potential potentially",
 }
 CATW={k:set(v.split()) for k,v in CAT.items()}
+CATPRE={k:tuple() for k in CAT}   # wildcard prefixes (LIWC '.dic' entries like 'happi*')
+# ---- EXACT-ARTICLE PARITY HOOKS (user-ratified 2026-07-03: "yes to LIWC/SMOreg") ----
+# Drop the licensed files into fec/liwc/ and they take over; absent, the published-exemplar lists
+# and correlate weights below stay in force (current behavior, zero output change).
+# * fec/liwc/*.dic — LIWC 2007/2015 dictionary ('%'-delimited header of "id<TAB>name" rows, then
+#   "word<TAB>id id..." rows; trailing '*' = prefix wildcard). LIWC2015 category NAMES map directly
+#   onto our features (i,we,you,article,negate,posemo,negemo,anx,anger,social,family,achieve,work,
+#   insight,certain,tentat); unmatched LIWC categories are ignored. Note: full-dictionary wildcard
+#   matching makes the corpus pass considerably slower (minutes, not seconds) — fine for weekly runs.
+# * fec/liwc/mairesse_smoreg.json — {trait:{feature:weight}} replaces the linear weights W (their
+#   SMOreg model exported as weights).
+import glob as _g
+_dicf=sorted(_g.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)),'liwc','*.dic')))
+if _dicf:
+    _hdr={}; _inh=False; _exact={c:set() for c in CAT}; _pre={c:[] for c in CAT}; _used=set()
+    for _ln in open(_dicf[0],encoding='utf-8',errors='replace'):
+        _ln=_ln.strip()
+        if _ln=='%': _inh=not _inh; continue
+        if not _ln: continue
+        _p=_ln.split('\t') if '\t' in _ln else _ln.split()
+        if _inh:
+            if len(_p)>=2 and _p[0].isdigit(): _hdr[_p[0]]=_p[1].strip().lower()
+        else:
+            _w=_p[0].lower()
+            for _i in (_q for _q in _p[1:] if _q.isdigit()):
+                _c=_hdr.get(_i)
+                if _c in CAT:
+                    _used.add(_c)
+                    (_pre[_c].append(_w[:-1]) if _w.endswith('*') else _exact[_c].add(_w))
+    for _c in _used:
+        CATW[_c]=_exact[_c]; CATPRE[_c]=tuple(sorted(set(_pre[_c])))
+    print('LIWC dictionary ACTIVE: %s -> %d/%d categories replaced (%s)'%(
+          os.path.basename(_dicf[0]),len(_used),len(CAT),', '.join(sorted(_used))))
 FEATS=list(CAT)+['sixltr','exclam','number']
 # ---------------- standardized trait weights (Pennebaker–King / Yarkoni / Mairesse correlates) ----------------
 # Signs are the replicated literature directions; magnitudes are the relative correlate strengths.
@@ -78,6 +111,10 @@ W={
  'C':{'achieve':.35,'work':.20,'certain':.10,'negate':-.20,'negemo':-.15},                   # conscientious: achievement talk, low negations
  'O':{'sixltr':.30,'insight':.25,'article':.20,'i':-.15,'certain':-.10},                     # open: lexical complexity + cognitive words
 }
+_smof=os.path.join(os.path.dirname(os.path.abspath(__file__)),'liwc','mairesse_smoreg.json')
+if os.path.exists(_smof):
+    W=json.load(open(_smof,encoding='utf-8'))
+    print('Mairesse SMOreg weights ACTIVE (liwc/mairesse_smoreg.json) — replacing published-correlate linear weights')
 WORD=re.compile(r"[a-z']+")
 # chamber RITUAL is not lexical behavior — floor-management boilerplate (heavier for the majority that
 # runs procedure) contaminates formality features; strip the fixed phrases before category counting.
@@ -95,7 +132,7 @@ def rates(txts):
             n+=1
             if len(w)>=6: six+=1
             for c,s in CATW.items():
-                if w in s: cnt[c]+=1
+                if w in s or (CATPRE[c] and w.startswith(CATPRE[c])): cnt[c]+=1
     if n==0: return None,0
     r={c:1000.0*cnt[c]/n for c in CAT}; r['sixltr']=1000.0*six/n; r['exclam']=1000.0*excl/n; r['number']=1000.0*num/n
     return r,n
