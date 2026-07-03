@@ -185,7 +185,7 @@ def parse_turns_mixed(text):
 def run_cbs():
     con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
     idx = ['https://www.cbsnews.com/face-the-nation/transcripts/'] + \
-          ['https://www.cbsnews.com/news/face-the-nation-transcripts-%d' % y for y in (2024, 2025, 2026)]
+          ['https://www.cbsnews.com/news/face-the-nation-transcripts-%d' % y for y in range(2019, 2027)]   # probe 2026-07-03: year archives exist back to at least 2019 (~150 eps each)
     arts = set()
     for u in idx:
         try:
@@ -282,6 +282,50 @@ def run_pbs(since, until):
         d += datetime.timedelta(days=1)
     con.close(); print('PBS done: %d member turns' % tot)
 
+NPR_PROGRAMS = ('morning-edition', 'all-things-considered', 'weekend-edition-saturday', 'weekend-edition-sunday')
+def run_npr(since, until):
+    """NPR program archives -> per-story /transcripts/ pages (CAPS labels incl. 'NAME, BYLINE:' —
+    the standard parse_turns handles them; hosts/reporters don't resolve to the roster and drop)."""
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    d = datetime.date.fromisoformat(since); end = datetime.date.fromisoformat(until)
+    tot = 0
+    while d <= end:
+        for prog in NPR_PROGRAMS:
+            key = 'npr:%s:%s' % (prog, d.isoformat())
+            if key in done: continue
+            try:
+                idx = get('https://www.npr.org/programs/%s/archive?date=%s' % (prog, d.strftime('%m-%d-%Y'))); time.sleep(PAUSE)
+                links = sorted(set(re.findall(r'href="(https://www\.npr\.org/transcripts/[^"#?]+)"', idx)))
+                nd = 0
+                for u in links:
+                    tkey = 'nprtx:' + u.rsplit('/', 1)[-1]
+                    if tkey in done: continue
+                    try:
+                        page = get(u); time.sleep(PAUSE)
+                        # NPR wraps labels inline (<b>GONYEA:</b> mid-paragraph) — every tag must
+                        # become a NEWLINE or only the first label sits at a line start.
+                        body = re.sub(r'<script.*?</script>|<style.*?</style>', ' ', page, flags=re.S)
+                        body = re.sub(r'<[^>]+>', '\n', body)
+                        rows = parse_turns(body)
+                        nd += store(con, rows, d.isoformat(), 'npr-' + prog, u)
+                        con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (tkey, 'ok', datetime.datetime.now().isoformat()))
+                        con.commit()
+                        done.add(tkey)
+                    except Exception:
+                        continue
+                con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+                con.commit(); tot += nd
+                if nd: print('npr %s %s: %d member turns (total %d)' % (prog[:14], d.isoformat(), nd, tot), flush=True)
+            except Exception as e:
+                print('npr %s %s FAIL %s' % (prog[:14], d.isoformat(), str(e)[:70]), flush=True)
+        d += datetime.timedelta(days=1)
+    con.close(); print('NPR done: %d member turns' % tot)
+
+# STONES EXAMINED AND CLOSED (2026-07-03): YouTube captions (Fox News Sunday, podcasts) have NO
+# speaker labels — multi-speaker attribution would require diarization; harvesting them would
+# violate the drop-never-guess discipline, so they stay out until a diarization pass exists.
+# C-SPAN transcripts are access-restricted. NPR + deep CBS years close the public-archive set.
+
 if __name__ == '__main__':
     if 'status' in sys.argv:
         con = db()
@@ -296,6 +340,7 @@ if __name__ == '__main__':
     elif 'cbs' in sys.argv: run_cbs()
     elif 'abc' in sys.argv: run_abc()
     elif 'pbs' in sys.argv: run_pbs(since, until)
-    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
+    elif 'npr' in sys.argv: run_npr(since, until)
+    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
     # NOTE (2026-07-03): Fox News Sunday examined — no public transcript archive exists anymore
     # (show page + /transcript both empty of transcript links); route later via YouTube captions.
