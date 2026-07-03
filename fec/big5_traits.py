@@ -167,6 +167,7 @@ for m in members:
         out[m]={'O':0.0,'C':0.0,'E':0.0,'A':0.0,'ES':0.0,'N':0.0,'tokens':0,'nposts':0,'lowconf':True}
 from moneyball_core import dump_atomic   # atomic write: this runs UNATTENDED in weekly_refresh
 dump_atomic({'traits':out,'method':'Ramey-synth closed-vocab standardized linear; Empath lexicons + essays-fitted SMOreg weights when fec/liwc/ files present; z relative to THIS corpus',
+           'featz':{m:{f:round(Z[m][f],4) for f in FEATS} for m in R},   # standardized features (fit_smoreg_rkh.py trains on these — scorer and fitter can never drift)
            'lowconf_tokens':LOWCONF_TOKENS},B+r'\big5_traits.json')
 nm=sum(1 for m in out if out[m]['tokens']>0); lc=sum(1 for m in out if out[m]['lowconf'])
 tk=sorted(TOK.values())
