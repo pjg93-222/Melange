@@ -10,8 +10,9 @@ Flow:
      override, flip its press_value to the chosen stance sign (support=+|v|, oppose=-|v|, neutral=0).
   3. COM write + full recalc so Blended Model ranks update. Backs the workbook up first.
 
-After running:  python fec/make_member_desk.py  then  python fec/make_combined.py   (display picks up the
-same overrides file automatically). Match is by 'url' (exact) OR 'title_contains' (case-insensitive substring).
+After running:  python fec/run_pipeline.py   (press pillar changed -> stance, rank AUTHORITY
+(compute_pillars --write), engines and every dashboard must recompute; the desk alone would render
+STALE pre-override ranks). Match is by 'url' (exact) OR 'title_contains' (case-insensitive substring).
 """
 import csv, json, io, collections, sys, shutil, os, datetime, unicodedata
 import win32com.client as win32
@@ -107,4 +108,4 @@ try:
     print('SAVED + recalculated (Blended Model ranks updated).')
 finally:
     xl.Quit()
-print('\nNEXT: python fec/make_member_desk.py   then   python fec/make_combined.py   (to refresh the dashboard display)')
+print('\nNEXT: python fec/run_pipeline.py   (recomputes stance -> rank authority -> engines -> all dashboards; the desk alone would show stale ranks)')
