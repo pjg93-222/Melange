@@ -57,7 +57,8 @@ prt=MBC.party()
 try:   # M3 fix 2026-07-02: read plays from the SOURCE (electoral_plays.json), not the previous cycle's dashboard bundle
     _ep=json.load(open(B+r'\electoral_plays.json',encoding='utf-8'))
     vuln={m:(1.35 if _ep.get(m,{}).get('play') in ('defend','contest') else 1.0) for m in members}
-except Exception: vuln={}
+except FileNotFoundError: vuln={}   # S2-03 audit run-2: missing file falls to neutral LOUDLY; a corrupt file now crashes instead of silently neutralizing
+if not vuln: print('  !! electoral_plays.json MISSING — electoral-vulnerability amplifier NEUTRAL for all members. Run build_electoral_plays.py.')
 VULN=lambda m: vuln.get(m,1.0)
 cpf=MBC.cpf_diffusion
 # RECEPTIVITY LAYER (2026-07-02): receiver-susceptibility on cascade edges (Byrne choking composite)
