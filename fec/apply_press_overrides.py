@@ -15,6 +15,7 @@ same overrides file automatically). Match is by 'url' (exact) OR 'title_contains
 """
 import csv, json, io, collections, sys, shutil, os, datetime, unicodedata
 import win32com.client as win32
+import moneyball_core as MC   # dump_atomic (S2-01 audit run-2): the overrides registry is user data, never truncate-in-place
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B  = MB_ROOT
 WB = B + r'\Moneyball Main Version - Blended.xlsx'
@@ -40,7 +41,7 @@ if os.path.exists(DASH):
         if u in by_url: corr[by_url[u]] = c; updated += 1
         else: corr.append(c); by_url[u] = len(corr) - 1; added += 1
     doc['corrections'] = corr
-    json.dump(doc, io.open(OVR, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+    MC.dump_atomic(doc, OVR, ensure_ascii=False, indent=2)
     print('merged dashboard export -> press_stance_overrides.json (added %d, updated %d)' % (added, updated))
 else:
     print('no press_overrides_from_dashboard.json found; using existing press_stance_overrides.json only')
