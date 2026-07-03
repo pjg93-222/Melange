@@ -112,7 +112,30 @@ if _dicf:
         CATW[_c]=_exact[_c]; CATPRE[_c]=tuple(sorted(set(_pre[_c])))
     print('LIWC dictionary ACTIVE: %s -> %d/%d categories replaced (%s)'%(
           os.path.basename(_dicf[0]),len(_used),len(CAT),', '.join(sorted(_used))))
-FEATS=list(CAT)+['sixltr','exclam','number']
+# ---- psycholinguistic norms (research 2026-07-03: openness lives in ABSTRACTNESS + lexical
+# diversity — Mairesse/JAIR07, Frontiers 2022). Brysbaert et al. concreteness norms (free, 40k
+# words) in fec/liwc/norms/; guarded like the Empath dic. 'guiraud' (types/sqrt(tokens), the
+# length-robust diversity index) needs no norms and is always computed.
+CONC={}
+_cnf=os.path.join(os.path.dirname(os.path.abspath(__file__)),'liwc','norms','concreteness_brysbaert.txt')
+if os.path.exists(_cnf):
+    for _ln in open(_cnf,encoding='utf-8',errors='replace'):
+        _p=_ln.rstrip('\n').split('\t')
+        if len(_p)>=3 and _p[1]=='0':
+            try: CONC[_p[0].lower()]=float(_p[2])
+            except ValueError: pass
+    print('concreteness norms ACTIVE: %d single words (Brysbaert)'%len(CONC))
+# ---- B&L persona cue features (agency_communion_llm.py): first-class trait features when the
+# artifact exists. Uncovered members get the covered-population MEAN (z=0 after standardization —
+# neutral, never an invented persona). Coverage grows to the full roster with the --all run.
+ACF={}
+_acp=os.path.join(B,'agency_communion.json')
+if os.path.exists(_acp):
+    try:
+        ACF={m:d for m,d in json.load(open(_acp))['members'].items() if d.get('n',0)>=15}
+    except Exception: ACF={}
+    if ACF: print('persona cue features ACTIVE: %d members covered (uncovered -> neutral mean)'%len(ACF))
+FEATS=list(CAT)+['sixltr','exclam','number','guiraud']+(['concrete'] if CONC else [])+(['llm_agency','llm_communion'] if ACF else [])
 # ---------------- standardized trait weights (Pennebaker–King / Yarkoni / Mairesse correlates) ----------------
 # Signs are the replicated literature directions; magnitudes are the relative correlate strengths.
 W={
@@ -135,6 +158,7 @@ RITUAL=re.compile(r'\b(i yield (back|to|the floor|myself)[^.]*|mr\.? (president|
  r'i suggest the absence of a quorum|the balance of my time)\b',re.I)
 def rates(txts):
     cnt=collections.Counter(); n=0; six=0; excl=0; num=0
+    typs=set(); conc=0.0; ncc=0
     for t in txts:
         t=re.sub(r'https?://\S+|\bt\.co/\S+|@\w+','',t.lower())   # URLs + @handles are not lexical behavior
         t=RITUAL.sub(' ',t)
@@ -142,15 +166,27 @@ def rates(txts):
         for w in WORD.findall(t.replace("'","")):
             n+=1
             if len(w)>=6: six+=1
+            typs.add(w)
+            if CONC:
+                cv=CONC.get(w)
+                if cv is not None: conc+=cv; ncc+=1
             for c,s in CATW.items():
                 if w in s or (CATPRE[c] and w.startswith(CATPRE[c])): cnt[c]+=1
     if n==0: return None,0
     r={c:1000.0*cnt[c]/n for c in CAT}; r['sixltr']=1000.0*six/n; r['exclam']=1000.0*excl/n; r['number']=1000.0*num/n
+    r['guiraud']=len(typs)/(n**0.5)                    # length-robust lexical diversity (Guiraud index)
+    if CONC: r['concrete']=(conc/ncc) if ncc else 2.5  # mean Brysbaert concreteness (openness loads NEGATIVE)
     return r,n
 R={}; TOK={}
 for m in members:
     r,n=rates(texts.get(m,[]))
     if r: R[m]=r; TOK[m]=n
+if ACF:
+    _ma=sum(d['agency'] for d in ACF.values())/len(ACF); _mc=sum(d['communion'] for d in ACF.values())/len(ACF)
+    for m in R:
+        d=ACF.get(m)
+        R[m]['llm_agency']=d['agency'] if d else _ma
+        R[m]['llm_communion']=d['communion'] if d else _mc
 # corpus-standardize each feature (Ramey step: standardized features -> standardized model)
 mu={f:sum(R[m][f] for m in R)/len(R) for f in FEATS}
 sd={f:(sum((R[m][f]-mu[f])**2 for m in R)/max(1,len(R)-1))**.5 or 1.0 for f in FEATS}
