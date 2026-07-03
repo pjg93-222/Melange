@@ -118,8 +118,11 @@ if _dicf:
           os.path.basename(_dicf[0]),len(_used),len(CAT),', '.join(sorted(_used))))
 # ---- psycholinguistic norms (research 2026-07-03: openness lives in ABSTRACTNESS + lexical
 # diversity — Mairesse/JAIR07, Frontiers 2022). Brysbaert et al. concreteness norms (free, 40k
-# words) in fec/liwc/norms/; guarded like the Empath dic. 'guiraud' (types/sqrt(tokens), the
-# length-robust diversity index) needs no norms and is always computed.
+# words) in fec/liwc/norms/; guarded like the Empath dic.
+# LEXICAL DIVERSITY = MATTR (moving-average type-token ratio, window 50). QA wave-3 2026-07-03:
+# the Guiraud index (types/sqrt n) was r=0.70 with token count — a VOLUME PROXY, not diversity
+# (it feeds openness, the very trait we're fixing). MATTR averages TTR over fixed-size windows so
+# it is genuinely length-invariant (verified r~0 vs log tokens after the swap).
 CONC={}
 _cnf=os.path.join(os.path.dirname(os.path.abspath(__file__)),'liwc','norms','concreteness_brysbaert.txt')
 if os.path.exists(_cnf):
@@ -139,7 +142,7 @@ if os.path.exists(_acp):
         ACF={m:d for m,d in json.load(open(_acp))['members'].items() if d.get('n',0)>=15}
     except Exception: ACF={}
     if ACF: print('persona cue features ACTIVE: %d members covered (uncovered -> neutral mean)'%len(ACF))
-FEATS=list(CAT)+['sixltr','exclam','number','guiraud']+(['concrete'] if CONC else [])+(['llm_agency','llm_communion'] if ACF else [])
+FEATS=list(CAT)+['sixltr','exclam','number','mattr']+(['concrete'] if CONC else [])+(['llm_agency','llm_communion'] if ACF else [])
 # ---------------- standardized trait weights (Pennebaker–King / Yarkoni / Mairesse correlates) ----------------
 # Signs are the replicated literature directions; magnitudes are the relative correlate strengths.
 W={
@@ -160,9 +163,11 @@ RITUAL=re.compile(r'\b(i yield (back|to|the floor|myself)[^.]*|mr\.? (president|
  r'i ask unanimous consent[^.]*|the (gentleman|gentlewoman|gentlelady) from [a-z ]+|'
  r'i (rise|reserve the balance of my time)|pursuant to [^.]*|the clerk will [^.]*|'
  r'i suggest the absence of a quorum|the balance of my time)\b',re.I)
+MATTR_W=50
 def rates(txts):
     cnt=collections.Counter(); n=0; six=0; excl=0; num=0
-    typs=set(); conc=0.0; ncc=0
+    conc=0.0; ncc=0
+    win=collections.deque(); wc=collections.Counter(); ttr_sum=0.0; ttr_n=0   # MATTR streaming state
     for t in txts:
         t=re.sub(r'https?://\S+|\bt\.co/\S+|@\w+','',t.lower())   # URLs + @handles are not lexical behavior
         t=RITUAL.sub(' ',t)
@@ -170,7 +175,11 @@ def rates(txts):
         for w in WORD.findall(t.replace("'","")):
             n+=1
             if len(w)>=6: six+=1
-            typs.add(w)
+            win.append(w); wc[w]+=1
+            if len(win)>MATTR_W:
+                old=win.popleft(); wc[old]-=1
+                if wc[old]==0: del wc[old]
+            if len(win)==MATTR_W: ttr_sum+=len(wc)/MATTR_W; ttr_n+=1
             if CONC:
                 cv=CONC.get(w)
                 if cv is not None: conc+=cv; ncc+=1
@@ -178,7 +187,7 @@ def rates(txts):
                 if w in s or (CATPRE[c] and w.startswith(CATPRE[c])): cnt[c]+=1
     if n==0: return None,0
     r={c:1000.0*cnt[c]/n for c in CAT}; r['sixltr']=1000.0*six/n; r['exclam']=1000.0*excl/n; r['number']=1000.0*num/n
-    r['guiraud']=len(typs)/(n**0.5)                    # length-robust lexical diversity (Guiraud index)
+    r['mattr']=(ttr_sum/ttr_n) if ttr_n else (len(wc)/max(1,len(win)))   # length-invariant diversity; short corpora -> single-window TTR
     if CONC: r['concrete']=(conc/ncc) if ncc else 2.5  # mean Brysbaert concreteness (openness loads NEGATIVE)
     return r,n
 R={}; TOK={}
