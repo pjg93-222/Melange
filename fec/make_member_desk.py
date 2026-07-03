@@ -340,6 +340,7 @@ def compute_roi():
 ROI = compute_roi()
 
 # ---------- build merged per-member records ----------
+SDIR=L('staff_directory.json') or {}   # Quorum staffer directory (build_staff_directory.py)
 def build_bundle():
     member_names = [m['name'] for m in MD['members']]
     ARTS, BILLS, CMTS, WBM = load_press_and_bills(member_names)
@@ -397,6 +398,7 @@ def build_bundle():
             'committees': CMTS.get(name, {}).get('seats', []),
             'committee_score': CMTS.get(name, {}).get('score'),
             # 7 sections
+            'staffdir': SDIR.get(name, []),                        # Quorum staffer directory (build_staff_directory.py)
             'staff': MANUAL.get(name, {}).get('staff'),            # manual
             'bio': bio_for(name),                                  # model_bio + legislators.csv
             'bio_manual': MANUAL.get(name, {}).get('bio'),         # manual addendum

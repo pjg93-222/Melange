@@ -1,0 +1,95 @@
+# -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root
+"""STAFF DIRECTORY (user 2026-07-02): weave the eight Quorum staffer exports (45-52) into one
+directory and match every staffer to their legislator via the export's own 'Member Works For'
+column ("Rep. John Carter (R-TX-31)") -> canonical roster names.
+
+Matching ladder (never guesses): strip quoted nicknames ("Coach Tuberville", "Dick") ->
+fold-accent full-name match -> first-name nickname expansion (Chris->Christopher...) ->
+surname+chamber match ONLY when unique. Unmatched offices are reported, not dropped silently.
+
+CU-industry star: title regex (banking/financial services/tax/economic/housing/monetary/fintech/
+securities/insurance/treasury/appropriations policy roles). 'Financial Administrator' is office
+bookkeeping, NOT policy — excluded. Portfolios aren't in this export, so the star is a floor;
+the dashboard lets the user toggle stars per staffer.
+
+Output: staff_directory.json {member: [{id,n,t,e,p,star}]} consumed by make_member_desk."""
+import sys,json,re,unicodedata,collections,glob,os
+sys.stdout.reconfigure(encoding='utf-8',errors='replace')
+import openpyxl
+import moneyball_core as MC
+B=MB_ROOT
+SRC=os.environ.get('STAFF_SRC',r'C:\Users\pgoff\Downloads')
+FILES=sorted(glob.glob(SRC+r'\search-results-generated-by-quorum (4[5-9]).xlsx'))+ \
+      sorted(glob.glob(SRC+r'\search-results-generated-by-quorum (5[0-2]).xlsx'))
+def fold(s): return unicodedata.normalize('NFKD',str(s)).encode('ascii','ignore').decode().lower().strip()
+NICKF={'chris':'christopher','ed':'edward','dick':'richard','rich':'richard','dave':'david','bernie':'bernard',
+ 'maggie':'margaret','tommy':'thomas','tom':'thomas','mike':'michael','jim':'james','bob':'robert','bobby':'robert',
+ 'bill':'william','dan':'daniel','danny':'daniel','ben':'benjamin','steve':'steven','tony':'anthony','rob':'robert',
+ 'andy':'andrew','drew':'andrew','ted':'edward','pat':'patrick','joe':'joseph','jerry':'gerald','greg':'gregory',
+ 'ron':'ronald','rick':'richard','jack':'john','jeff':'jeffrey','tim':'timothy','sam':'samuel','nick':'nicholas',
+ 'matt':'matthew','josh':'joshua','abe':'abraham','gabe':'gabriel','buddy':'earl','doc':'roger','coach':'thomas','chuck':'charles','hank':'henry','liz':'elizabeth','beth':'elizabeth','kate':'katherine','katie':'katherine','hal':'harold','don':'donald'}
+C=MC.congestion()
+roster_full={fold(m):m for m in C}
+roster_full['pablo jose hernandez']=roster_full.get('pablo hernandez rivera','Pablo Hernández Rivera')   # PR commissioner name variant
+by_sur=collections.defaultdict(list)
+for m in C:
+    ts=[t for t in fold(m).split() if t not in ('jr','sr','ii','iii','iv')]
+    by_sur[(ts[-1],C[m].get('chamber','').lower())].append(m)
+    if len(ts)>=3: by_sur[(' '.join(ts[-2:]),C[m].get('chamber','').lower())].append(m)
+MRX=re.compile(r'^(Rep|Sen|Del|Resident Commissioner|Commish|Leader|Whip|Speaker|President Pro Tempore)\.?\s+(.+?)\s*\(([A-Z]{1,4})-([A-Z]{2})(-\d+)?\)')
+def resolve(works):
+    m=MRX.match(str(works or ''))
+    if not m: return None
+    base={'Rep':'house','Del':'house','Resident Commissioner':'house','Commish':'house','Sen':'senate'}
+    # leadership prefixes carry no chamber -> infer from the district token: (R-LA-1) house, (D-NY) senate
+    ch=base.get(m.group(1)) or ('house' if m.group(5) else 'senate')
+    nm=re.sub(r'"[^"]*"\s*','',m.group(2))           # strip quoted nicknames
+    f=fold(nm)
+    if f in roster_full: return roster_full[f]
+    toks=f.split()
+    if toks and toks[0] in NICKF:
+        f2=' '.join([NICKF[toks[0]]]+toks[1:])
+        if f2 in roster_full: return roster_full[f2]
+    for k in (' '.join(toks[-2:]),toks[-1]) if len(toks)>=2 else (toks[-1],):
+        cand=[x for x in by_sur.get((k,ch),[])]
+        if len(cand)==1: return cand[0]
+        if len(cand)>1 and toks:
+            fn=NICKF.get(toks[0],toks[0])
+            # reverse-nickname too: the ROSTER may carry the nickname ('Mike Kennedy' vs export 'Michael')
+            hit=[x for x in cand if NICKF.get(fold(x).split()[0],fold(x).split()[0])==fn]
+            if len(hit)==1: return hit[0]
+    return None
+STAR=re.compile(r'banking|financial services|credit union|tax (policy|counsel)|econom|monetary|housing|fintech|securities|insurance|treasur|appropriation|budget',re.I)
+NOSTAR=re.compile(r'financial administrator|office manager',re.I)
+rows={}; unmatched=collections.Counter()
+for f in FILES:
+    ws=openpyxl.load_workbook(f,read_only=True).active
+    it=ws.iter_rows(values_only=True); hdr=[str(x) for x in next(it)]
+    ix={h:i for i,h in enumerate(hdr)}
+    for r in it:
+        q=str(r[ix['Quorum ID']])
+        if q in rows: continue
+        works=r[ix['Member Works For']]
+        mem=resolve(works)
+        if not mem: unmatched[str(works)[:60]]+=1; continue
+        t=str(r[ix['Title']] or '').replace('None','').strip()
+        rows[q]={'id':q,'m':mem,
+                 'n':('%s %s'%(r[ix['First Name']] or '',r[ix['Last Name']] or '')).strip(),
+                 't':t,'e':(str(r[ix['Email']] or '').strip() if r[ix['Email']] not in (None,'None') else ''),
+                 'p':(str(r[ix['Phone Number']] or '').strip() if r[ix['Phone Number']] not in (None,'None') else ''),
+                 'star':1 if (STAR.search(t) and not NOSTAR.search(t)) else 0}
+out=collections.defaultdict(list)
+ORDER={'chief of staff':0,'legislative director':1,'deputy chief of staff':2,'communications director':3,
+       'legislative assistant':4,'senior legislative assistant':4,'legislative counsel':4,'tax policy advisor':4,
+       'scheduler':7,'legislative correspondent':8,'staff assistant':9}
+for s in rows.values():
+    d={k:v for k,v in s.items() if k!='m'}
+    out[s['m']].append(d)
+for m in out:
+    out[m].sort(key=lambda s:(-s['star'],ORDER.get(s['t'].split(';')[0].strip().lower(),5),s['n']))
+MC.dump_atomic(dict(out),B+r'\staff_directory.json')
+tot=sum(len(v) for v in out.values()); stars=sum(s['star'] for v in out.values() for s in v)
+print('STAFF DIRECTORY: %d staffers -> %d members (avg %.1f) | %d industry-starred | %d unmatched office rows'%(
+    tot,len(out),tot/max(1,len(out)),stars,sum(unmatched.values())))
+if unmatched: print('unmatched offices:',unmatched.most_common(8))

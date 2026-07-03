@@ -24,6 +24,26 @@ header{padding:11px 18px;border-bottom:1px solid var(--line);display:flex;align-
 .netlink{border:1px solid var(--line2);border-radius:6px;padding:6px 11px;font-size:12px;color:#9ca3af}
 .view{padding:14px 18px;max-width:1280px;margin:0 auto}
 .view[hidden]{display:none}
+/* ---- staff directory (2026-07-02) ---- */
+.stfcard{border:1px solid var(--line,#2a2f3a);border-radius:10px;padding:8px 10px;margin:6px 0;background:rgba(255,255,255,.02)}
+.stfcard.gold{border:2px solid #d4a017;box-shadow:0 0 6px rgba(212,160,23,.45)}
+.stfhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.stfhead b{font-size:13.5px}
+.stftitle{color:var(--faint);font-size:12px}
+.stfstar{cursor:pointer;font-size:15px;color:#555;user-select:none}
+.stfstar.on{color:#eab308}
+.stfmeta{font-size:12px;margin:3px 0;color:var(--faint)}
+.stfmeta a{color:inherit}
+.stfctl{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.stfctl .mini{font-size:11px;padding:2px 8px;border-radius:6px;border:1px solid var(--line,#2a2f3a);background:transparent;color:var(--faint);cursor:pointer}
+.stfctl .mini.on{border-color:#d4a017;color:#d4a017}
+.stfnote textarea{width:100%;min-height:44px;margin-top:5px;font-size:12px;background:rgba(0,0,0,.25);color:inherit;border:1px solid var(--line,#2a2f3a);border-radius:6px}
+.stfmedia{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.stfmedia .chip{font-size:11px;border:1px solid var(--line,#2a2f3a);border-radius:10px;padding:1px 8px}
+.stfmedia .chip .x{cursor:pointer;margin-left:5px;color:var(--faint)}
+#contactbody .memgrp{margin:12px 0}
+#contactbody .memgrp h3{cursor:pointer;margin:4px 0}
+.stfsearch{width:100%;margin:4px 0 6px;padding:5px 8px;font-size:12px;background:rgba(0,0,0,.25);color:inherit;border:1px solid var(--line,#2a2f3a);border-radius:6px}
 /* ranked */
 .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
 input,select{background:var(--bg);color:var(--ink);border:1px solid var(--line2);border-radius:6px;padding:7px 10px;font-size:13px}
@@ -177,7 +197,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#161b22}
 <header>
   <div class=brand><div class=kick>Advocacy Allocation Model</div><h1>Moneyball — Member Desk</h1></div>
   <div class=topnav>
-    <span class=seg id=viewseg><button data-v=ranked class=on>Ranked list</button><button data-v=efficiency>Investment efficiency</button><button data-v=coalition>Coalition builder</button></span>
+    <span class=seg id=viewseg><button data-v=ranked class=on>Ranked list</button><button data-v=efficiency>Investment efficiency</button><button data-v=coalition>Coalition builder</button><button data-v=contact>In contact</button></span>
     <a class=netlink href="Moneyball Dashboard.html">◀ Network view</a>
     <button class=ghostbtn id=exportbtn>⭳ Export notes</button>
     <label class=ghostbtn for=importfile>⭱ Import notes</label><input id=importfile type=file accept="application/json,.json" hidden>
@@ -204,6 +224,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#161b22}
 </section>
 
 <section id=view-member class=view hidden><div id=memberbody></div></section>
+<section id=view-contact class=view hidden><div id=contactbody></div></section>
 
 <section id=view-coalition class=view hidden>
   <h2 style=font-size:20px;font-weight:800;margin-bottom:4px>Coalition builder</h2>
@@ -280,6 +301,15 @@ function saveMAN(){localStorage.setItem(LSKEY,JSON.stringify(MAN));}
 function manField(name,field,baked){const o=MAN[name]||{}; return (o[field]!=null&&o[field]!=='')?o[field]:(baked||null);}
 function setMan(name,field,val){MAN[name]=MAN[name]||{}; MAN[name][field]=val; saveMAN();}
 function filesOf(name){return (MAN[name]&&MAN[name].files)||[];}
+
+/* ---------- staff-directory state: gold(contacted)/star/meeting/notes/media (localStorage) ---------- */
+const STFKEY='mdesk_staffdir_v1';
+let STF={}; try{STF=JSON.parse(localStorage.getItem(STFKEY))||{}}catch(e){STF={}}
+function saveSTF(){localStorage.setItem(STFKEY,JSON.stringify(STF));}
+function stf(id){return STF[id]||{};}
+function setStf(id,k,v){(STF[id]=STF[id]||{})[k]=v;saveSTF();}
+const STFIDX={};
+D.members.forEach((m,i)=>(m.staffdir||[]).forEach(sf=>STFIDX[sf.id]={s:sf,m:m.name,mi:i}));
 
 /* ---------- manual PRESS-STANCE overrides: localStorage -> press_overrides_from_dashboard.json ---------- */
 const POVKEY='mdesk_pressov_v1';
@@ -479,9 +509,30 @@ function wireTracker(m){
   });
 }
 /* ----- section renderers ----- */
+function stfCard(sf){
+  const st=stf(sf.id);
+  const starred=st.star!=null?st.star:sf.star;
+  const media=(st.media||[]).map((mm,k)=>`<span class=chip><a href="${esc(mm.u)}" target=_blank rel=noopener>${esc(mm.l||mm.u)}</a><span class=x data-act=delmedia data-sid=${sf.id} data-k=${k}>×</span></span>`).join('');
+  return `<div class="stfcard${st.gold?' gold':''}" data-sid=${sf.id}>
+    <div class=stfhead><span class="stfstar${starred?' on':''}" data-act=star data-sid=${sf.id} title="industry-relevant — click to toggle">${starred?'★':'☆'}</span><b>${esc(sf.n)}</b><span class=stftitle>${esc(sf.t)}</span></div>
+    <div class=stfmeta>${sf.e?`<a href="mailto:${esc(sf.e)}">${esc(sf.e)}</a>`:''}${sf.e&&sf.p?' · ':''}${sf.p?`<a href="tel:${esc(sf.p)}">${esc(sf.p)}</a>`:''}</div>
+    <div class=stfctl>
+      <button class="mini${st.gold?' on':''}" data-act=gold data-sid=${sf.id} title="contact established — gold outline">${st.gold?'✓ Contacted':'Mark contacted'}</button>
+      <button class="mini${st.meet?' on':''}" data-act=meet data-sid=${sf.id} title="show in the In-contact panel">${st.meet?'🤝 Meeting set':'Set up meeting'}</button>
+      <button class=mini data-act=note data-sid=${sf.id}>Note</button>
+      <button class=mini data-act=media data-sid=${sf.id}>+ Media</button>
+    </div>
+    <div class=stfnote ${st.note?'':'hidden'}><textarea class=stfnotebox data-sid=${sf.id} placeholder="notes…">${esc(st.note||'')}</textarea></div>
+    <div class=stfmedia>${media}</div>
+  </div>`;
+}
 function staffHTML(m){
   const note=manField(m.name,'staff',m.staff);const files=filesOf(m.name);
-  return `<div id=staff-view>${note?`<div class=savednote>${esc(note)}</div>`:`<div class=empty>No staff notes yet. Add key contacts, schedulers, LAs, or upload a roster.</div>`}
+  const dir=(m.staffdir||[]);
+  const dirHTML=dir.length?`<input class=stfsearch data-stfsearch placeholder="filter ${dir.length} staffers (name/title)…">
+    <div class=stflist>${dir.map(stfCard).join('')}</div>`:`<div class=empty>No staffer directory rows matched for this office.</div>`;
+  return `<div id=staff-view>${dirHTML}<hr style="border-color:var(--line,#2a2f3a);margin:10px 0">
+  ${note?`<div class=savednote>${esc(note)}</div>`:`<div class=empty>No office-level staff notes yet.</div>`}
     ${files.length?`<div class=filelist>`+files.map((f,k)=>`<div class=fileitem><a href="${f.data}" download="${esc(f.name)}">📎 ${esc(f.name)}</a><span class=del data-f=${k} data-field=staff>remove</span></div>`).join('')+`</div>`:''}
     <button class=btn data-edit=staff>${note?'Edit':'Add'} note</button><label class=btn for=file-staff style=cursor:pointer>Upload file</label><input id=file-staff type=file data-field=staff hidden multiple>
     <div id=staff-edit hidden><textarea class=notebox data-field=staff>${esc(note||'')}</textarea><button class=btn data-save=staff>Save</button><button class="btn ghost" data-cancel=staff>Cancel</button></div></div>`;
@@ -702,6 +753,7 @@ function setView(v){
   document.querySelectorAll('#viewseg button').forEach(b=>b.classList.toggle('on',b.dataset.v===v||(v==='member'&&false)));
   if(v==='coalition')renderCoal();
   if(v==='efficiency')renderEff();
+  if(v==='contact')renderContact();
 }
 document.querySelectorAll('#viewseg button').forEach(b=>b.onclick=()=>{setView(b.dataset.v);if(b.dataset.v==='ranked')history.replaceState(null,'','./');});
 $('#exportbtn').onclick=()=>{const blob=new Blob([JSON.stringify(MAN,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='member_desk_manual.json';a.click();};
@@ -713,6 +765,45 @@ $('#povexport').onclick=()=>{
   const b=new Blob([JSON.stringify(out,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="press_overrides_from_dashboard.json";a.click();
 };
 $('#povimport').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);let n=0;(o.corrections||[]).forEach(c=>{if(c.url&&c.stance){POV[c.url]={stance:c.stance,title:c.note||""};n++;}});savePOV();updatePovHint();alert("Imported "+n+" override(s). Reopen a member Press section to see them.");}catch(err){alert("Invalid JSON.");}};rd.readAsText(f);};
+
+/* ======================= STAFF DIRECTORY interactions ======================= */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]'); if(!el)return;
+  const id=el.dataset.sid, act=el.dataset.act, st=stf(id), card=el.closest('.stfcard');
+  if(act==='gold'){setStf(id,'gold',!st.gold); if(card){card.classList.toggle('gold',!st.gold); el.classList.toggle('on',!st.gold); el.textContent=!st.gold?'✓ Contacted':'Mark contacted';} if(!$('#view-contact').hidden)renderContact();}
+  else if(act==='star'){const cur=(st.star!=null?st.star:(STFIDX[id]?STFIDX[id].s.star:0)); setStf(id,'star',cur?0:1); el.classList.toggle('on',!cur); el.textContent=!cur?'★':'☆';}
+  else if(act==='meet'){setStf(id,'meet',!st.meet); if(el.classList){el.classList.toggle('on',!st.meet); el.textContent=!st.meet?'🤝 Meeting set':'Set up meeting';} if(!$('#view-contact').hidden)renderContact();}
+  else if(act==='note'){const box=card.querySelector('.stfnote'); box.hidden=!box.hidden; if(!box.hidden)box.querySelector('textarea').focus();}
+  else if(act==='media'){const u=prompt('Media URL (article, clip, photo, doc link):'); if(!u)return; const l=prompt('Label (optional):')||u.replace(/^https?:\/\//,'').slice(0,40); const md=(st.media||[]).concat([{u:u,l:l}]); setStf(id,'media',md); const wrap=card.querySelector('.stfmedia'); const k=md.length-1; wrap.insertAdjacentHTML('beforeend',`<span class=chip><a href="${esc(u)}" target=_blank rel=noopener>${esc(l)}</a><span class=x data-act=delmedia data-sid=${id} data-k=${k}>×</span></span>`);}
+  else if(act==='delmedia'){const md=(st.media||[]); md.splice(+el.dataset.k,1); setStf(id,'media',md); const wrap=el.closest('.stfmedia'); if(wrap){wrap.innerHTML=md.map((mm,k)=>`<span class=chip><a href="${esc(mm.u)}" target=_blank rel=noopener>${esc(mm.l||mm.u)}</a><span class=x data-act=delmedia data-sid=${id} data-k=${k}>×</span></span>`).join('');}}
+  else if(act==='openmem'){openMember(+el.dataset.mi); setView('member');}
+});
+document.addEventListener('change',e=>{
+  if(e.target.classList&&e.target.classList.contains('stfnotebox')) setStf(e.target.dataset.sid,'note',e.target.value.trim());
+});
+document.addEventListener('input',e=>{
+  if(e.target.hasAttribute&&e.target.hasAttribute('data-stfsearch')){
+    const q=e.target.value.toLowerCase();
+    e.target.parentElement.querySelectorAll('.stfcard').forEach(c=>{
+      const sf=STFIDX[c.dataset.sid]; const hay=sf?(sf.s.n+' '+sf.s.t).toLowerCase():'';
+      c.style.display=hay.includes(q)?'':'none';});
+  }
+});
+function renderContact(){
+  const groups={};
+  Object.keys(STF).forEach(id=>{ if(STF[id].meet&&STFIDX[id]){ (groups[STFIDX[id].m]=groups[STFIDX[id].m]||[]).push(id); } });
+  const mems=Object.keys(groups).sort();
+  const inner=mems.length?mems.map(mn=>{
+    const mi=STFIDX[groups[mn][0]].mi;
+    return `<div class=memgrp><h3 data-act=openmem data-mi=${mi}>${esc(mn)} ▸</h3>`+groups[mn].map(id=>stfCard(STFIDX[id].s)).join('')+`</div>`;
+  }).join(''):`<div class=empty>No meetings set up yet. Open a member's Staff section and hit “Set up meeting”.</div>`;
+  const ngold=Object.keys(STF).filter(id=>STF[id].gold).length;
+  $('#contactbody').innerHTML=`<h2>In contact</h2>
+    <div style="color:var(--faint);font-size:12px;margin-bottom:8px">${mems.length} office(s) · ${Object.keys(groups).reduce((a,m)=>a+groups[m].length,0)} staffer(s) with meetings · ${ngold} contacted overall
+    &nbsp; <button class=ghostbtn id=stfexport>⭳ Export staff state</button> <label class=ghostbtn for=stfimport>⭱ Import</label><input id=stfimport type=file accept=".json" hidden></div>${inner}`;
+  const ex=$('#stfexport'); if(ex)ex.onclick=()=>{const b=new Blob([JSON.stringify(STF,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='staff_state.json';a.click();};
+  const im=$('#stfimport'); if(im)im.onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);Object.keys(o).forEach(k=>{STF[k]=Object.assign(STF[k]||{},o[k]);});saveSTF();renderContact();alert('Imported staff state for '+Object.keys(o).length+' staffer(s).');}catch(err){alert('Invalid JSON.');}};rd.readAsText(f);};
+}
 updatePovHint();
 
 /* ---------- init ---------- */

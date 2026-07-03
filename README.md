@@ -53,6 +53,8 @@ Data refresh order: collectors (`fetch_congressional_record.py`, `tweet_collecto
 - `tweet_collector.py` — X/Bluesky/Truth Social handles, posts, interactions.
 - `process_quorum.py` / `build_social_master.py` — Quorum export pipeline → Social Master.
 - `rebuild_press_cache.py` — recovery path for the media-blend press cache (refuses post-blend sources).
+- `build_staff_directory.py` — weaves the Quorum staffer exports into staff_directory.json (5,773 staffers
+  matched to all 533 offices); feeds the member desk's Staff section + In-contact panel.
 
 ## Diagnostics-only artifacts (confirmed 2026-07-02)
 `stance_dynamics.json`, `social_stance_signals.json`, `tweet_influence.json`, `imviz.json`,
