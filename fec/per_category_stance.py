@@ -142,7 +142,7 @@ else:
     print('gen iteration: no fixed point in 8 iterations -> union-floor damped final pass (S2-04)')
 genF={m:MC.overall_tier(matrix[m]) for m in members}
 cnt=collections.Counter(matrix[m][lab] for m in members for lab,_ in cats)
-MC.dump_atomic({'cats':[c[0] for c in cats],'defensive':list(DEFENSIVE),'matrix':{m:matrix[m] for m in members},
+MC.dump_atomic({'cats':[c[0] for c in cats],'defensive':sorted(DEFENSIVE),'matrix':{m:matrix[m] for m in members},
            'scores':{m:scores[m] for m in members}},MB_ROOT+r'\category_stance.json')
 print('tier distribution:',dict(cnt))
 persu=cnt['Highly Persuadable']+cnt['True Neutral']+cnt['Lean Skeptic']+cnt['Skeptic']
