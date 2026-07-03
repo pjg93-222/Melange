@@ -51,15 +51,33 @@ def strip_tags(h):
     return _html.unescape(h)   # QA 2026-07-03: full entity decode (54 PBS rows carried &#039; residue)
 
 STAGE = re.compile(r'\((?:END|BEGIN)\s+(?:VIDEO\s+)?(?:CLIP|TAPE|CLIP MONTAGE)\)|\(COMMERCIAL BREAK\)|\(CROSSTALK\)|\(APPLAUSE\)|\(LAUGHTER\)|\(BEGIN VIDEOTAPE\)|\(END VIDEOTAPE\)', re.I)
+INLINE_LABEL = re.compile(r'\s([A-Z][A-Z.\'\-]+(?: [A-Z.,\'()\-]+[A-Z.\'\-]*){0,4}):\s')
+_ACRO = {'CIA', 'FBI', 'NATO', 'COVID', 'DOJ', 'DHS', 'ICE', 'IRS', 'GOP', 'US', 'USA', 'U.S.', 'CNN', 'PBS',
+         'NPR', 'CBS', 'ABC', 'NBC', 'VA', 'DC', 'AI', 'EPA', 'FDA', 'CDC', 'HHS', 'SNAP', 'NIH', 'FEMA', 'UN'}
 def scrub(sp):
-    """Remove broadcast stage directions from a turn (QA: '(END VIDEO CLIP)' rode inside member turns)."""
-    return re.sub(r'\s+', ' ', STAGE.sub(' ', sp)).strip()
+    """Remove stage directions AND truncate at a swallowed inline speaker label (QA2: labels not at
+    line starts let the NEXT speaker's words ride inside a member's turn — 'MARK STRASSMANN:').
+    Acronym-colon constructions in real speech ('the CIA: their view is...') never truncate."""
+    sp = STAGE.sub(' ', sp)
+    pos = 1
+    while True:
+        m = INLINE_LABEL.search(sp, pos)
+        if not m: break
+        words = set(m.group(1).replace(',', '').split())
+        if words - _ACRO:                      # at least one non-acronym token -> real speaker label
+            sp = sp[:m.start()]; break
+        pos = m.end()
+    return re.sub(r'\s+', ' ', sp).strip()
 
 # ---------------- roster resolution ----------------
 C = {m['member']: m for m in json.load(open(B + r'\congestion.json'))}
 TITLE = re.compile(r'^(SEN\.|REP\.|SENATOR|REPRESENTATIVE|SPEAKER OF THE HOUSE|SPEAKER|HOUSE MINORITY LEADER|'
                    r'HOUSE MAJORITY LEADER|SENATE (MAJORITY|MINORITY) LEADER|DEL\.|CONGRESSMAN|CONGRESSWOMAN|DR\.)\s+', re.I)
-def norm(s): return re.sub(r"[^a-z ]", '', s.lower()).strip()
+import unicodedata as _ud
+def norm(s):
+    s = _ud.normalize('NFD', s)                       # QA2: 'Raúl' must become 'raul', not 'ral'
+    s = ''.join(c for c in s if not _ud.combining(c))
+    return re.sub(r"[^a-z ]", '', s.lower()).strip()
 FULL = {}
 for m in C:
     p = norm(m).split()
@@ -68,8 +86,16 @@ SUR = collections.defaultdict(list)
 for m in C:
     SUR[norm(m).split()[-1]].append(m)
 
+def _firstname_compatible(a, b):
+    """'tom'~'thomas' yes; 'raul'~'adelita' NO (QA2: succession-seat misattribution guard)."""
+    a, b = a.lower(), b.lower()
+    return a == b or a.startswith(b) or b.startswith(a)
+
 def resolve_full(label):
-    """'SEN. ELIZABETH WARREN' / 'THOM TILLIS' -> roster member or None (never guess)."""
+    """'SEN. ELIZABETH WARREN' / 'THOM TILLIS' -> roster member or None (never guess).
+    QA2 hardening: the unique-surname fallback fires ONLY when the label's first name is
+    COMPATIBLE with the roster member's (nickname/prefix) — a mismatched first name means a
+    DIFFERENT person (predecessor, relative) and must never bind."""
     s = TITLE.sub('', label.strip())
     s = re.sub(r'\(.*?\)', '', s)               # (D-MA)
     p = norm(s).split()
@@ -77,7 +103,8 @@ def resolve_full(label):
         m = FULL.get((p[0], p[-1]))
         if m: return m
         cands = SUR.get(p[-1], [])
-        if len(cands) == 1 and re.match(r'^(SEN|REP|SENATOR|REPRESENTATIVE|CONGRESS)', label.strip(), re.I):
+        if (len(cands) == 1 and re.match(r'^(SEN|REP|SENATOR|REPRESENTATIVE|CONGRESS)', label.strip(), re.I)
+                and _firstname_compatible(p[0], norm(cands[0]).split()[0])):
             return cands[0]
     return None
 
@@ -91,12 +118,15 @@ def parse_turns(text):
         sp = text[st:end]
         sp = sp[sp.index(':') + 1:].strip()
         turns.append((lab.strip(), re.sub(r'\s+', ' ', sp)))
-    alias = {}
+    alias = {}; _ambig = set()
     for lab, _ in turns:
         base = lab.split(',')[0].strip()          # "MARKWAYNE MULLIN, U.S. ...:" -> full-name part
         m = resolve_full(base)
         if m and len(norm(base).split()) >= 2:
-            alias[norm(base).split()[-1]] = m     # surname -> member for continuations
+            sur = norm(base).split()[-1]
+            if sur in alias and alias[sur] != m: _ambig.add(sur)   # QA2: Mike + Ron Johnson in one segment
+            alias[sur] = m
+    for sur in _ambig: alias.pop(sur, None)       # ambiguous surnames never bind continuations
     out = []
     for lab, sp in turns:
         base = lab.split(',')[0].strip()
