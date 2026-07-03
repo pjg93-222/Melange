@@ -24,6 +24,16 @@ MAP = {
     'family':  ['family', 'children'],
     'achieve': ['achievement'],
     'work':    ['work', 'business'],
+    # expansion 2026-07-03 ("optimize as much as possible"): the classic LIWC-family categories from
+    # Mairesse's original feature space that Empath carries — consumed only via FITTED weights
+    'money':   ['money'],
+    'relig':   ['religion'],
+    'swear':   ['swearing_terms'],
+    'leisure': ['leisure'],
+    'body':    ['body'],
+    'health':  ['health'],
+    'death':   ['death'],
+    'sad':     ['sadness'],
 }
 # exemplar seeds copied from big5_traits.CAT (keep in sync — big5_traits has no __main__ guard, so
 # importing it would execute the whole corpus build; duplication is the lesser evil here)
@@ -36,6 +46,14 @@ SEED = {
  'family':"family families mother father mom dad son daughter kids children parents grandmother grandfather wife husband brother sister grandparents",
  'achieve':"work working achieve achieved achievement accomplish accomplished succeed success successful win won effort efforts goal goals deliver delivered results earn earned lead leader leadership fought secured secure passed",
  'work':"job jobs work working business businesses economy economic employment worker workers industry wages career manufacturing farmers",
+ 'money':"money cost costs price prices dollar dollars fund funds funding budget tax taxes pay paid spending afford debt",
+ 'relig':"god faith church prayer pray blessed bless religious christian jewish muslim worship holy",
+ 'swear':"damn hell crap",
+ 'leisure':"vacation game games sports fun play movie music concert hobby travel weekend",
+ 'body':"body hands hand head heart blood eyes feet skin",
+ 'health':"health healthy sick illness disease doctor hospital medicine medical care treatment patient patients",
+ 'death':"death die died dying dead killed kill funeral grief mourn",
+ 'sad':"sad sadness cry crying tears grief heartbroken sorrow disappointed loss",
 }
 TOKEN = re.compile(r"^[a-z']+$")
 

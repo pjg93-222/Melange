@@ -66,6 +66,17 @@ CAT={
  'insight':"think thinking believe know understand consider considered because reason reasons means thus therefore however although question questions idea ideas analysis examine evidence solution solutions",
  'certain':"always never must certainly absolutely definitely clear clearly undeniable undoubtedly every all guarantee fact facts truth proven commit committed",
  'tentat':"maybe perhaps might may could seems appears possibly somewhat unclear likely probably potential potentially",
+ # expansion 2026-07-03: classic LIWC-family categories (Mairesse feature space) — Empath-overlaid via
+ # fec/liwc/empath_categories.dic; consumed only through FITTED weights (mairesse_smoreg.json), so with
+ # the published-correlates fallback they are computed but unweighted (harmless).
+ 'money':"money cost costs price prices dollar dollars fund funds funding budget tax taxes pay paid spending afford debt",
+ 'relig':"god faith church prayer pray blessed bless religious christian jewish muslim worship holy",
+ 'swear':"damn hell crap",
+ 'leisure':"vacation game games sports fun play movie music concert hobby travel weekend",
+ 'body':"body hands hand head heart blood eyes feet skin",
+ 'health':"health healthy sick illness disease doctor hospital medicine medical care treatment patient patients",
+ 'death':"death die died dying dead killed kill funeral grief mourn",
+ 'sad':"sad sadness cry crying tears grief heartbroken sorrow disappointed loss",
 }
 CATW={k:set(v.split()) for k,v in CAT.items()}
 CATPRE={k:tuple() for k in CAT}   # wildcard prefixes (LIWC '.dic' entries like 'happi*')
@@ -154,8 +165,9 @@ for m in members:
         out[m]={**tr,'N':round(-tr['ES'],3),'tokens':TOK[m],'nposts':len(texts.get(m,[])),'lowconf':TOK[m]<LOWCONF_TOKENS}
     else:
         out[m]={'O':0.0,'C':0.0,'E':0.0,'A':0.0,'ES':0.0,'N':0.0,'tokens':0,'nposts':0,'lowconf':True}
-json.dump({'traits':out,'method':'Ramey-synth closed-vocab standardized linear (P&K/Yarkoni/Mairesse correlates); z relative to THIS corpus',
-           'lowconf_tokens':LOWCONF_TOKENS},open(B+r'\big5_traits.json','w'))
+from moneyball_core import dump_atomic   # atomic write: this runs UNATTENDED in weekly_refresh
+dump_atomic({'traits':out,'method':'Ramey-synth closed-vocab standardized linear; Empath lexicons + essays-fitted SMOreg weights when fec/liwc/ files present; z relative to THIS corpus',
+           'lowconf_tokens':LOWCONF_TOKENS},B+r'\big5_traits.json')
 nm=sum(1 for m in out if out[m]['tokens']>0); lc=sum(1 for m in out if out[m]['lowconf'])
 tk=sorted(TOK.values())
 print('BIG5: %d/%d members with text | median tokens %d | lowconf(<%d tok): %d'%(nm,len(members),tk[len(tk)//2] if tk else 0,LOWCONF_TOKENS,lc))

@@ -63,9 +63,10 @@ for (a,b),(p1,p2) in pairs.items():
         sym.append({'a':a,'b':b,'w':round(p,4),
                     'rt':rtc[(a,b)]+rtc[(b,a)],'men':menc[(a,b)]+menc[(b,a)]})
 sym.sort(key=lambda e:-e['w'])
-json.dump({'symmetric':sym,'volfloor':VOLFLOOR,'mention_weight':MEN_W,
+from moneyball_core import dump_atomic   # atomic write: this runs UNATTENDED in weekly_refresh
+dump_atomic({'symmetric':sym,'volfloor':VOLFLOOR,'mention_weight':MEN_W,
            'provenance':'X reposts(1.0)+mentions(%.1f)+bluesky mentions; Fink author-volume normalization; pair=mean dir, cap %.2f'%(MEN_W,PCAP)},
-          open(B+r'\social_interactions.json','w'),indent=1)
+          B+r'\social_interactions.json',indent=1)
 print('social interaction pairs: %d (from %d RT events, %d mention events incl. %d bluesky)'%(
     len(sym),sum(rtc.values()),sum(menc.values()),nbsky))
 print('top ties:',', '.join('%s<->%s %.3f (rt%d)'%(e['a'].split()[-1],e['b'].split()[-1],e['w'],e['rt']) for e in sym[:6]))

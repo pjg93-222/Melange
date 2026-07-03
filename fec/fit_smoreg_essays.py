@@ -54,6 +54,14 @@ CAT={
  'insight':"think thinking believe know understand consider considered because reason reasons means thus therefore however although question questions idea ideas analysis examine evidence solution solutions",
  'certain':"always never must certainly absolutely definitely clear clearly undeniable undoubtedly every all guarantee fact facts truth proven commit committed",
  'tentat':"maybe perhaps might may could seems appears possibly somewhat unclear likely probably potential potentially",
+ 'money':"money cost costs price prices dollar dollars fund funds funding budget tax taxes pay paid spending afford debt",
+ 'relig':"god faith church prayer pray blessed bless religious christian jewish muslim worship holy",
+ 'swear':"damn hell crap",
+ 'leisure':"vacation game games sports fun play movie music concert hobby travel weekend",
+ 'body':"body hands hand head heart blood eyes feet skin",
+ 'health':"health healthy sick illness disease doctor hospital medicine medical care treatment patient patients",
+ 'death':"death die died dying dead killed kill funeral grief mourn",
+ 'sad':"sad sadness cry crying tears grief heartbroken sorrow disappointed loss",
 }
 CATW={k:set(v.split()) for k,v in CAT.items()}
 CATPRE={k:tuple() for k in CAT}
@@ -105,19 +113,25 @@ X=np.array([[f[c] for c in FEATS] for f,_ in rows])
 mu=X.mean(0); sd=X.std(0, ddof=1); sd[sd==0]=1.0
 Z=(X-mu)/sd
 OUT={}
-print('%-3s %-10s %s' % ('', '5-fold acc', 'top standardized weights'))
+GRID=[(C,e) for C in (0.03,0.1,0.3,1.0) for e in (0.0,0.1,0.2)]
+print('%-3s %-16s %-10s %s' % ('', 'best (C,eps)', '5-fold acc', 'top standardized weights'))
 for t in ('E','ES','A','C','O'):
     src='N' if t=='ES' else t
     y=np.array([1.0 if (not d[src] if t=='ES' else d[src]) else 0.0 for _,d in rows])
-    accs=[]
-    for tr,te in KFold(5,shuffle=True,random_state=7).split(Z):
-        m=LinearSVR(C=0.1,epsilon=0.1,max_iter=20000,random_state=7).fit(Z[tr],y[tr])
-        p=m.predict(Z[te]); accs.append((((p>np.median(p)).astype(float))==y[te]).mean())
-    m=LinearSVR(C=0.1,epsilon=0.1,max_iter=20000,random_state=7).fit(Z,y)
+    best=(None,-1.0)
+    for Cc,e in GRID:
+        accs=[]
+        for tr,te in KFold(5,shuffle=True,random_state=7).split(Z):
+            m=LinearSVR(C=Cc,epsilon=e,max_iter=20000,random_state=7).fit(Z[tr],y[tr])
+            p=m.predict(Z[te]); accs.append((((p>np.median(p)).astype(float))==y[te]).mean())
+        cv=float(np.mean(accs))
+        if cv>best[1]: best=((Cc,e),cv)
+    (Cc,e),cv=best
+    m=LinearSVR(C=Cc,epsilon=e,max_iter=20000,random_state=7).fit(Z,y)
     w={FEATS[i]:round(float(m.coef_[i]),4) for i in range(len(FEATS))}
     OUT[t]=w
     top=sorted(w,key=lambda k:-abs(w[k]))[:5]
-    print('%-3s %.3f      %s' % (t,np.mean(accs),', '.join('%s=%+.3f'%(k,w[k]) for k in top)))
+    print('%-3s C=%-5g e=%-5g %.3f      %s' % (t,Cc,e,cv,', '.join('%s=%+.3f'%(k,w[k]) for k in top)))
 cand=os.path.join(LX,'mairesse_smoreg.json.candidate')
 json.dump(OUT,open(cand,'w'),indent=1)
 print('wrote %s — promote by renaming to mairesse_smoreg.json ONLY if party-sign validation improves' % cand)

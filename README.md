@@ -59,8 +59,9 @@ Data refresh order: collectors (`fetch_congressional_record.py`, `tweet_collecto
 
 ## Diagnostics-only artifacts (confirmed 2026-07-02)
 `stance_dynamics.json`, `social_stance_signals.json`, `tweet_influence.json`, `imviz.json`,
-`corrected_signals.json`, `social_member_summary.json`, `cu_golden_labels_stats.json` are
-human-inspection outputs with no live consumer — safe to regenerate anytime, never load-bearing.
+`corrected_signals.json`, `social_member_summary.json`, `cu_golden_labels_stats.json`, and
+`per_topic_alloc_bridge.json` (written only under `--bridge`/`BRIDGE=1`) are human-inspection
+outputs with no live consumer — safe to regenerate anytime, never load-bearing.
 
 ## Canonical docs
 `MATHEMATICAL_SPECIFICATION.md` (law of the system: authoritative-code table, conventions, dials) ·

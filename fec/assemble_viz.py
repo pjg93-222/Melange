@@ -29,6 +29,6 @@ for n in members:
     fa=flip.get(n,0); ca=coal.get(n,0)
     if fa<=0 and ca<=0: continue
     rows.append([n,st[n][:4],fa,ca,round(pf(n,0),2),round(pf(n,fa),2),C[n]['net_lean']])
-json.dump({'rows':rows,'flipTot':sum(flip.values()),'coalTot':sum(coal.values()),'flipN':len(flip),'coalN':len(coal)},
-          open(MB_ROOT+r'\imviz.json','w'),separators=(',',':'),ensure_ascii=False)
+MBC.dump_atomic({'rows':rows,'flipTot':sum(flip.values()),'coalTot':sum(coal.values()),'flipN':len(flip),'coalN':len(coal)},
+          MB_ROOT+r'\imviz.json',separators=(',',':'),ensure_ascii=False)
 print('rows',len(rows),'| flip $%s / %d  coal $%s / %d'%(f"{sum(flip.values()):,}",len(flip),f"{sum(coal.values()):,}",len(coal)),'| bytes',os.path.getsize(MB_ROOT+r'\imviz.json'))
