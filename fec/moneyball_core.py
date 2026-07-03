@@ -151,3 +151,17 @@ CATBLOCKS={sc:[b for b in blocks if BLOCKCAT[b]==BLOCKCAT[sc]] for sc in blocks}
 SGATE={'Highly Persuadable':1.00,'True Neutral':0.90,'Neutral':0.90,'—':0.85,'Lean Skeptic':0.75,
        'Skeptic':0.55,'Opponent':0.35,'Ally':1.0,'Champion':1.0,'Defender':1.0}
 def gate(n,cs): return max(0.15,rc(n,'seed_prob',1.0)*SGATE.get(cs.get(n,'—'),0.85))
+TORD={'Champion':4,'Defender':4,'Ally':2,'Highly Persuadable':1,'True Neutral':0,'Neutral':0,'Lean Skeptic':-1,'Skeptic':-2,'Opponent':-4}
+def overall_tier(cm):
+    """IMP-weighted mean of TORD tier scores -> the 10-rung overall ladder ('—' excluded: silence
+    doesn't dilute earned tiers). SINGLE COPY (S2-04 fix, audit run-2): sync_stance_g writes col G
+    with this law, and per_category_stance's in-run gen iteration derives the SAME law — so col G
+    is a pure OUTPUT/view, never a cross-run input."""
+    sw=si=0.0
+    for c,t in cm.items():
+        if t in TORD: w=IMP.get(c,0.5); sw+=TORD[t]*w; si+=w
+    if si==0: return 'Neutral'
+    x=sw/si
+    return ('Champion' if x>=2.5 else 'Ally' if x>=1.75 else 'Highly Persuadable' if x>=1.25 else
+            'Persuadable' if x>=0.75 else 'Lean Persuadable' if x>=0.25 else 'True Neutral' if x>=-0.25 else
+            'Lean Skeptic' if x>=-0.75 else 'Skeptic' if x>=-1.25 else 'Highly Skeptical' if x>=-1.9 else 'Opponent')
