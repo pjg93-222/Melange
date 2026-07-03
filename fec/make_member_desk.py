@@ -59,6 +59,22 @@ _b5have = {m: t for m, t in B5.items() if t.get('tokens', 0) > 0}
 _B5PCT = {tr: _pctrank([t[tr] for t in _b5have.values()]) for tr in ('O', 'C', 'E', 'A', 'ES')} if _b5have else {}
 _achave = {m: r for m, r in RCPT.items() if r.get('agency') is not None}
 _ACPCT = {k: _pctrank([r[k] for r in _achave.values()]) for k in ('agency', 'communion')} if _achave else {}
+def _approach(ap, cp, read):
+    """IIT-C octant-informed approach note (Interpersonal Influence Tactics Circumplex: tactics
+    arrange on the agency x communion plane; Matz et al. PNAS 2017: matched appeals outperform —
+    treated as a tilt, not a lever, per the 2026 meta-analytic caution)."""
+    hiA, loA = ap >= 0.60, ap <= 0.40
+    hiC, loC = cp >= 0.60, cp <= 0.40
+    if hiA and hiC:   note = "Partnership framing: offer a visible leadership role in the cause; collaborative asks land; let them front the win."
+    elif hiA and loC: note = "Lead with power and outcomes: short, direct, wins-and-numbers brief; credit accrues to them; skip emotional appeals."
+    elif loA and hiC: note = "Relationship-first: constituent stories and empathy framing; patient cadence, strong follow-up; do not open with pressure."
+    elif loA and loC: note = "Technical brief: data, evidence, written material in advance; low-key, no theatrics."
+    elif hiC:         note = "Warmth-forward style: open with shared-community framing, then calibrate assertiveness in the room."
+    elif hiA:         note = "Dominance-forward style: be crisp and outcome-led; defer on stagecraft until their warmth reads."
+    else:             note = "Mixed interpersonal style: calibrate in the room; neither warmth nor dominance dominates their public persona."
+    if read == 'diverge': note += " CAUTION: trait and persona reads disagree — verify in person before leaning on either."
+    return note
+
 def psy_for(name):
     t = B5.get(name) or {}; r = RCPT.get(name) or {}
     out = {}
@@ -67,6 +83,7 @@ def psy_for(name):
         out['big5_low'] = bool(t.get('lowconf')); out['tokens'] = t.get('tokens')
     if r.get('agency') is not None and _ACPCT:
         out['agency_pct'] = _ACPCT['agency'](r['agency']); out['communion_pct'] = _ACPCT['communion'](r['communion'])
+        out['approach'] = _approach(out['agency_pct'], out['communion_pct'], r.get('susc_read'))
     for k in ('pressure_mult', 'susc_z', 'susc_trait_z', 'persona_susc_z', 'susc_read', 'seed_prob'):
         if r.get(k) is not None: out[k] = r[k]
     return out or None

@@ -551,9 +551,10 @@ function psychHTML(m){
       <div class=mrow><span>Susceptibility — trait read (Byrne)</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
       ${P.persona_susc_z!=null?`<div class=mrow><span>Susceptibility — persona read (B&amp;L cues)</span><b>${P.persona_susc_z>0?'+':''}${P.persona_susc_z}</b></div>`:''}
       <div style="font-size:11px;font-weight:700;color:${rd[1]};background:${rd[1]}22;border:1px solid ${rd[1]}55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">${rd[0]}</div>`:'';
+    const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Suggested approach (IIT-C octant)</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';
     comp=`<div class=gen style=margin-bottom:12px><div>${rad}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Big-5: low confidence (thin text corpus)</div>':''}</div>
       <div><div class=eyebrow>Projected persona (Birkenmaier-Lechner cues)</div>${persona}
-      <div class=eyebrow style=margin-top:8px>Susceptibility to pressure</div>${suscRows}</div></div>`;
+      <div class=eyebrow style=margin-top:8px>Susceptibility to pressure</div>${suscRows}${appr}</div></div>`;
   }
   return `<div id=psych-view>${comp}
     <div class=eyebrow style=margin-top:6px>Notes</div>
