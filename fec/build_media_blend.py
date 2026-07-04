@@ -61,14 +61,42 @@ def p80(vals):
 # ---- social aggregates: sign * intensity(margin) * decay(0.5^(age/HL)), multi-cat split evenly ----
 corp=pd.read_excel(M+r'\Social Master.xlsx',sheet_name='Corpus',dtype=str)
 corp=corp[(corp['stance'].fillna('')!='')&(corp['verified_handle'].astype(str)=='1')]
+# ---- STANCE STACK OVERRIDE (user-ratified 2026-07-04 "lets first wire this in"): per-tweet stance
+# from tweet_stance_stack.py (0.855 acc / 0.819 F1 honest OOF vs the user's golds; old transfer
+# model measured 0.481). Join by member+normalized-text (100% match on probe). Intensity becomes
+# tier-weighted confidence (unanimous/majority/review); 'unrelated' maps to sign 0 (excluded) —
+# ~900 noise posts stop polluting the blend. Unmatched rows keep their existing label. Absent file
+# -> legacy behavior (neutral fallback discipline).
+STACK={}
+_sf=M+r'\tweet_stance_final.csv'
+if os.path.exists(_sf):
+    import csv as _csv,io as _io
+    def _nrm(t):
+        t=re.sub(r'https?://\S+','',str(t or '').lower())
+        return re.sub(r'[^a-z0-9]','',t)[:80]
+    for _r in _csv.DictReader(_io.open(_sf,encoding='utf-8-sig',newline='')):
+        STACK[(_r['member'],_nrm(_r['text']))]= _r
+    _TIERW={'unanimous':1.0,'majority':0.7,'review':0.35}
+    print('stance-stack override ACTIVE: %d labeled tweets loaded'%len(STACK))
+else:
+    print('!! tweet_stance_final.csv missing — legacy per-tweet stances in force')
 soc=collections.defaultdict(lambda:collections.defaultdict(float)); nassigned=0
+nover=0
 for _,r in corp.iterrows():
-    sg=SIGN.get(r['stance'],0.0)
+    _st=r['stance']; _inten_override=None
+    if STACK:
+        _s=STACK.get((r['member'],_nrm(r['text'])))
+        if _s:
+            _st=_s['stack_stance']; _inten_override=_TIERW.get(_s['tier'],0.5); nover+=1
+    sg=SIGN.get(_st,0.0)
     if sg==0.0: continue
     try: age=(TODAY-datetime.date.fromisoformat(str(r['date'])[:10])).days/365.25
     except Exception: continue
-    try: inten=max(0.25,min(1.5,float(r['stance_margin'])))
-    except (TypeError,ValueError): inten=0.5
+    if _inten_override is not None:
+        inten=_inten_override
+    else:
+        try: inten=max(0.25,min(1.5,float(r['stance_margin'])))
+        except (TypeError,ValueError): inten=0.5
     if str(r.get('is_rt','')).strip().lower() in ('1','true','yes'): inten*=RT_W
     decay=0.5**(max(0.0,age)/HL)
     hits=[c for c,rx in CATRX.items() if c!='General Credit Union' and rx.search(r['text'] or '')]
