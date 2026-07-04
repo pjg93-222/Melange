@@ -21,10 +21,11 @@ import anthropic
 from moneyball_core import dump_atomic
 
 B = MB_ROOT
-MODEL = os.environ.get('CLAUDE_AC_MODEL', 'claude-sonnet-5')
+MODEL = os.environ.get('CLAUDE_AC_MODEL', 'claude-fable-5' if '--fable' in sys.argv else 'claude-sonnet-5')
+EST_PER_CALL = 0.006 if 'fable' in MODEL else 0.0015   # cost-gate estimate (cached codebook + ~60 in + ~60 out)
 NSENT = int(os.environ.get('AC_NSENT', '40'))
 WORKERS = 8
-CACHE = B + r'\agency_communion_cache.jsonl'
+CACHE = B + (r'\agency_communion_cache_fable.jsonl' if 'fable' in MODEL else r'\agency_communion_cache.jsonl')   # per-model caches: instruments never mix
 OUT = B + r'\agency_communion.json'
 
 SYSTEM = """You classify single sentences spoken or written by U.S. members of Congress into personality-cue
@@ -190,7 +191,7 @@ for m, sents in corpus.items():
         k = hashlib.md5((m + '||' + s).encode('utf-8')).hexdigest()
         if k not in cache: todo.append((k, m, s))
 # COST GATE: estimate before spending; require --go to proceed (default = preview only).
-_est = len(todo) * 0.0015   # ~900 cached-prompt input tokens (~10% billed) + ~60 out on sonnet-5
+_est = len(todo) * EST_PER_CALL   # cached-codebook input + short JSON out, per selected model
 print('to classify: %d (model %s) | estimated cost ~$%.2f (prompt-cached)' % (len(todo), MODEL, _est))
 if todo and '--go' not in sys.argv:
     print('COST GATE: add --go to spend. (Cached sentences already cover the sample where possible.)')
