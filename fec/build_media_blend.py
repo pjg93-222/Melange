@@ -114,9 +114,45 @@ rw=wb['Press Release - Raw']
 hdr={rw.cell(1,c).value:c for c in range(1,30) if rw.cell(1,c).value}
 members=[rw.cell(r,1).value for r in range(2,536) if rw.cell(r,1).value]
 mrow={rw.cell(r,1).value:r for r in range(2,536) if rw.cell(r,1).value}
-# IDEMPOTENCE: press components ALWAYS come from the cached originals (never from the live sheet,
-# which holds the blend after the first run).  Cache is created from the pre-surgery backup.
+# IDEMPOTENCE: press components never come from the live sheet (it holds the blend after run 1).
+# 2026-07-04 INTEGRITY FIX (user-ratified "fix it"): the frozen 07-02 archive meant NO press article
+# collected after 2026-07-02 could ever reach the workbook (197 members, frozen forever). The press
+# component is now DYNAMIC — aggregated from the CURRENT cu_press_stance_tone.csv with the same
+# shape as the social side: sign x intensity(press_value) x decay(0.5^(age/2.0yr press half-life)),
+# category-split. R's exact archive units were not reproducible (best r=0.38; hidden steps), and
+# don't need to be: the blend p80-normalizes press and social, so relative structure is what matters.
+# PRESS_DYNAMIC=0 reverts to the frozen archive.
 ORIG=json.load(open(M+r'\press_raw_original.json',encoding='utf-8'))
+if os.environ.get('PRESS_DYNAMIC','1')!='0':
+    import csv as _csv,io as _io
+    _tone=os.path.join(DRAFT,'cu_press_stance_tone.csv') if 'DRAFT' in dir() else os.path.join(os.path.dirname(M),'Draft Systems','cu_press_stance_tone.csv')
+    _dyn=collections.defaultdict(lambda:collections.defaultdict(float))
+    _n=0; _nm=set()
+    def _pdate(s):
+        for _f in ('%m/%d/%Y','%Y-%m-%d','%m/%d/%y'):
+            try: return datetime.datetime.strptime((s or '').strip(),_f).date()
+            except ValueError: pass
+        return None
+    for _r in _csv.DictReader(_io.open(_tone,encoding='utf-8-sig',newline='')):
+        _m=_r.get('member'); _sg=SIGN.get((_r.get('stance') or '').lower(),0.0)
+        if not _m or _sg==0.0: continue
+        try: _pv=max(0.25,min(3.0,float(_r.get('press_value') or 1.0)))
+        except (TypeError,ValueError): _pv=1.0
+        _d=_pdate(_r.get('date'))
+        if _d is not None: _dec=0.5**(max(0.0,(TODAY-_d).days/365.25)/2.0)
+        else:
+            try: _dec=max(0.0,min(1.0,float(_r.get('recency_weight') or 0.5)))
+            except (TypeError,ValueError): _dec=0.5
+        _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip() and c.strip() in ORIG]
+        if not _cats: continue
+        _n+=1; _nm.add(_m)
+        for _c in _cats: _dyn[_c][_m]+=_sg*_pv*_dec/len(_cats)
+    ORIG={c:dict(_dyn.get(c,{})) for c in ORIG}   # same shape/keys as the archive
+    from moneyball_core import dump_atomic as _da
+    _da({'built_from_csv_mtime':os.path.getmtime(_tone),'articles_used':_n,'members_nonzero':len(_nm),
+         'note':'dynamic press component (PRESS_DYNAMIC); archive fallback with PRESS_DYNAMIC=0'},
+        M+r'\press_component_meta.json')
+    print('DYNAMIC press component: %d signed articles -> %d members (frozen archive had 197)'%(_n,len(_nm)))
 changed=0
 for kwcat,hname in HDRMAP.items():
     col=hdr.get(hname)

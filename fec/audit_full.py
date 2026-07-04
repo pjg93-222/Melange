@@ -194,6 +194,19 @@ _wb=_px.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True
 _w535=[_wb['Press Release - Normalized'].cell(535,c).value for c in range(5,24)]
 ck('press-pillar weight row 535: 19 numeric positive weights (no formula remnants)',
    all(isinstance(v,(int,float)) and v>0 for v in _w535),str(_w535))
+# 2026-07-04 integrity fix guard: the press component must be DYNAMIC (built from the current tone
+# csv), never the frozen 07-02 archive (which silently excluded every post-archive article: 197
+# members frozen forever). Checks the blend's meta artifact is fresh vs the csv and coverage grew.
+_pm_p=B+r'\press_component_meta.json'
+if os.path.exists(_pm_p):
+    _pm=json.load(open(_pm_p))
+    _tone_p=os.path.join(os.path.dirname(B),'Draft Systems','cu_press_stance_tone.csv')
+    _fresh=(os.path.getmtime(_tone_p)-_pm.get('built_from_csv_mtime',0))<8*86400 if os.path.exists(_tone_p) else True   # csv may be up to one weekly cycle newer; beyond that the blend stopped ingesting
+    ck('media-blend press component is DYNAMIC and fresh (not the frozen archive)',
+       _fresh and _pm.get('members_nonzero',0)>=197,
+       'members=%s fresh=%s'%(_pm.get('members_nonzero'),_fresh))
+else:
+    ck('media-blend press component is DYNAMIC (press_component_meta.json present)',False,'meta missing — blend ran pre-fix or PRESS_DYNAMIC=0')
 # S2-04 guard (audit 2026-07-02): every workbook reader hardcodes range(3,536) for the 533-member roster.
 # If a member row is ever added/removed, those readers silently truncate or NUL the tail. Assert on
 # R&A col A — TYPED names, immune to the phase-2 openpyxl-save cache death (Blended col A is
