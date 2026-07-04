@@ -158,6 +158,59 @@ September: `python fec/outcome_snapshot.py --score outcome_snapshot_2026-07-04.j
 | Valence hop | B− (0.689, the bottleneck) | 5 family answers → re-derive → compose toward 0.872 | Paul (~10 min) |
 | Reference layer | B (precision-gated display; 0.68 neg-precision measured) | score the 731 new mentions (~$4.40) + spot-check verify sheet | Paul ($4.40 call) |
 
+## Run-4d — $34.40 spend executed (user: "go with the 34.40 … prompt caching and other
+## efficient methods, in opus")
+
+- **Mention scoring (~$4.40, Fable):** relaunched `member_reference_layer.py --score --go` (the
+  first launch died with a harness error — cache mtime proved no spend happened). Kept on FABLE
+  deliberately: 6,575 existing edge judgments are Fable-rated; switching raters mid-corpus mixes
+  instruments (the repo's own per-model-cache discipline).
+- **Big5 LLM pilot (Opus, efficient config):** big5_llm.py upgraded — (1) `--batch` mode via the
+  Batches API (**flat 50% discount**, submit-or-resume with a persisted batch id so an interrupted
+  poll can never double-spend); (2) Opus calls now use the repo's measured-best reader config
+  (adaptive thinking + effort medium — the 0.779 press-reader replica); (3) documented that the
+  existing system-block `cache_control` is a silent no-op on Opus 4.8 (minimum cacheable prefix
+  4096 tokens; this system is ~700) — the batch discount is the real lever. Launched
+  `--pilot --opus --batch --go` (1,313-chunk scope, 185 RKH-overlap members; direct-cost estimate
+  ~$22–45 with thinking → **~$11–22 at batch pricing**). Contamination probe (`--named`) queued
+  behind the pilot's validation, same batch path.
+
+## The three sheets — exact protocol (user asked "what do I need to do")
+1. **Valence (~10 min, biggest single payoff):** open `valence_family_review.csv` (root). Five
+   family blocks, each with a QUESTION row + your own prior gold rows as evidence. Write +1 / −1 /
+   0 in `your_valence_+1_0_-1` on each QUESTION row (for interchange, either one blanket valence
+   or adopt the proposed split — write `split: push=-1 defend=+1 generic=0`). Then any session
+   runs `python fec/derive_valence_registry.py --write`; the weekly stack re-score folds it in.
+2. **Attribution (~30 min):** open `attribution_gold_sheet.csv`. Per row, read the excerpt and
+   type exactly one of `own` / `action` / `thirdparty` in the label column. 15 rows = first
+   stable number; all 60 = the real grade. Then `python fec/validate_attribution_gold.py`.
+3. **Persona (~20 min):** open `persona_gold_sheet_BLIND.csv` (STAY in the blind sheet — names
+   redacted; 1:1 row order with the named sheet, verified). Rate each excerpt 1–9 on
+   `your_agency_1to9` and `your_communion_1to9` from the text only. Then
+   `python fec/validate_persona_gold.py` — it now reads the blind sheet directly and maps by row
+   order (no copying step).
+
+## Run-4e — attribution closed via domain rule (user: "cross reference the link for it — if it
+## is from a member's website its theirs, anything else is third party")
+
+Built `fec/resolve_attribution_domain.py`: title-matches each gold-sheet row to its source url
+(same join the production reader already makes), applies the user's rule (own .house.gov/
+.senate.gov → 'own', else → 'thirdparty' — a 2-class collapse of the reader's 3-class field,
+matching the channel-weight logic already ratified in build_media_blend.py), and writes the
+result back into attribution_gold_sheet.csv with a `resolved_url` column for the user's own
+cross-reference. **Never overwrites a row already hand-labeled** — confirmed live: the user had
+typed 6 labels into the sheet (open in Excel) between the dry run and the write; those 6 survived
+untouched, domain-rule filled the other 54 (18 own / 42 third-party in the dry run; final file
+13 user + 54 auto-resolved after the user's edits landed). Hit a real PermissionError (sheet open
+in Excel) — asked the user rather than force-closing Excel; they closed it, write succeeded.
+
+`fec/validate_attribution_gold.py` rewritten to grade fairly against a 2-class truth: reader's
+`reported-action` and `third-party-voice` both collapse to "thirdparty" before comparing (domain
+truth can only ever assert own-vs-not, never action-vs-opinion). **Result: attribution accuracy
+0.947 (n=57)** — own precision .88/recall .94, thirdparty precision .97/recall .95, only 3
+disagreements (2 false-own, 1 false-thirdparty). Attribution is no longer an open item — it went
+from "0/60 unlabeled, no non-circular number" (C) to a validated 94.7% in one command.
+
 ## Verdict
 ALL GATES GREEN at the effective (uncommitted) live-tree state. The system's math, determinism,
 idempotency, contracts, kernel single-sourcing, and both UIs verify clean. The material risk is
