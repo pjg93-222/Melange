@@ -244,6 +244,32 @@ re-run needs no new API spend (the stance-hop/valence/confidence fields come fro
 Fable cache) but is a visible, rank-affecting change — held for the user's go-ahead rather than
 cascaded silently, especially with another session's uncommitted campaign live on this same tree.
 
+## Run-4g — valence registry propagated to production (user: "yes, run it now" on both the
+## defense_cu call [+1] and the re-score)
+
+Wrote defense_cu=+1 (16 registry entries: 11 derived, 5 user-confirmed). Then ran the full
+propagation chain live on the shared tree: `tweet_stance_stack.py --score` (9,559 tweets:
+support 3,515 / oppose 3,124 / neutral 1,861 / unrelated 1,059; tiers unanimous 2,567 / majority
+6,211 / review 781) → `press_stance_stack.py` (2,388 articles, 486 changed vs. DEBATE = 20%) →
+`build_media_blend.py` (2,221 workbook cells changed, backup auto-created) → `run_pipeline.py
+--from compute_pillars` (skipped receptivity/category-stance — verified unaffected by media-blend
+inputs; confirmed post-hoc: category_stance.json hash UNCHANGED).
+
+**Gates: 15/15 steps OK, audit tail ALL MODULES CLEAN (326s).** Rank delta: **374/533 members
+moved** — large, but this re-scored the ENTIRE tweet+press corpus against a registry where 5
+families went from skip→flat-fallback to actively-derived, plus the interchange keyword-collision
+fix. Biggest movers: Jack Reed 373→69 (-304), Nicole Malliotakis 21→106 (+85), Chip Roy 477→341
+(-136). Checked a hypothesis that Jack Reed's swing traced to the highway-interchange keyword fix
+specifically — **falsified it** (zero of his 26 press rows contain the literal word
+"interchange") before reporting it, so the per-member driver for the largest individual moves is
+NOT pinned down to a specific family; only the aggregate cause (full corpus re-score across 5
+newly-resolved families) is verified. Available on request: an isolated single-family before/after
+diff for any specific member. Artifacts confirmed changed: tweet_stance_final.csv,
+press_stance_final.csv, press_component_meta.json, budget_frontier(_electoral).json,
+optimize_result.json, dashboard_data.json. category_stance.json confirmed BYTE-UNCHANGED (proves
+the skip of receptivity/per_category_stance was safe — those systems are genuinely independent of
+the media-blend/stance-stack inputs).
+
 ## Verdict
 ALL GATES GREEN at the effective (uncommitted) live-tree state. The system's math, determinism,
 idempotency, contracts, kernel single-sourcing, and both UIs verify clean. The material risk is
