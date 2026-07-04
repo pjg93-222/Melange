@@ -6,6 +6,10 @@ fec/govinfo_key.txt
 *.json
 *.jsonl
 *.csv
+*.tab
+*.bak
+fec/liwc/rkh/
+fec/liwc/bl2025/
 *.db
 *.db-wal
 *.db-shm
