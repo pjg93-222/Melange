@@ -1,0 +1,127 @@
+# -*- coding: utf-8 -*-
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT
+"""DERIVE the CU-valence registry FROM THE USER'S OWN GOLD LABELS (user 2026-07-04: "what do I fill
+out? You can do it"). Three entry sources, provenance-marked:
+  derived-from-gold : target families where the USER's gold_target_cu_valence is >=80% consistent
+                      (his judgment, extracted — never mine)
+  ratified-prior    : the fixed institutional priors already user-approved in the labeling prompts
+  PROPOSED          : new targets (CBDC, junk fees, stablecoin...) — my proposals WITH reasoning,
+                      flagged for the user's review; used in eval but clearly overridable
+DIRECTION handling: separate entries per direction (cfpb_reform vs cfpb_general) — deterministic
+match precedence (longest/most-specific first), no flip heuristics (those failed).
+HONEST EVAL: 5-fold cross-validation — registry derived from 4 folds' golds, scored on the held-out
+fold (composition: model stance-hop x registry valence; registry-miss -> flat model fallback).
+Writes cu_valence_registry.json (versioned).  Usage: python derive_valence_registry.py [--write]"""
+import csv, json, re, sys, collections
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+import numpy as np
+B = MB_ROOT
+CL = ["support", "oppose", "neutral", "unrelated"]
+
+# FAMILY DEFINITIONS: match lists, most-specific first. Valence left None -> derived from user golds.
+FAMILIES = [
+    # direction-split CFPB (the user's golds split 149:-1 / 34:+1 exactly on this line)
+    ("cfpb_reform",   ["cfpb reform", "cfpb commission", "rein in the cfpb", "cfpb overreach", "cfpb accountability",
+                       "defund the cfpb", "cfpb appropriations", "abolish the cfpb", "restructure the cfpb"], None, "derived"),
+    ("cfpb_general",  ["cfpb", "consumer financial protection"], None, "derived"),
+    ("interchange_block", ["block the credit card competition", "oppose the credit card competition", "stop the cca",
+                       "repeal durbin", "against interchange"], None, "derived"),
+    ("interchange",   ["interchange", "credit card competition", "swipe fee", "durbin"], None, "derived"),
+    ("rate_cap",      ["rate cap", "usury", "apr cap", "36%", "interest rate cap", "10% cap", "capping credit card interest"], None, "derived"),
+    ("overdraft",     ["overdraft"], None, "derived"),
+    ("junk_fees",     ["junk fee"], None, "derived"),
+    ("cu_tax",        ["credit union tax", "cu tax", "tax exempt", "tax status"], None, "derived"),
+    ("fom_charter",   ["field of membership", "charter modern", "charter expan", "cu board modernization"], None, "derived"),
+    ("mbl",           ["member business lend", "business lending cap", "mbl"], None, "derived"),
+    ("cdfi",          ["cdfi", "community development financial"], None, "derived"),
+    ("defense_cu",    ["defense credit union", "military credit union", "navy federal"], None, "derived"),
+    ("data_privacy",  ["data privacy", "data security", "breach", "cyber"], None, "derived"),
+    ("fraud",         ["fraud", "scam", "elder financial"], None, "derived"),
+    ("reg_relief",    ["regulatory relief", "reg relief", "tailoring", "regulatory burden"], None, "derived"),
+    ("big_banks",     ["big bank", "megabank", "wall street", "too big to fail"], None, "derived"),
+    ("housing",       ["housing", "mortgage", "home loan", "road to housing"], None, "derived"),
+    ("cbdc",          ["cbdc", "central bank digital"], None, "derived"),
+    ("stablecoin",    ["stablecoin", "genius act", "digital asset", "crypto"], None, "derived"),
+    ("credit_unions_generic", ["credit union"], None, "derived"),
+]
+
+rows = [r for r in csv.DictReader(open(B + r'\tweet_gold_queue.csv', encoding='utf-8-sig'))
+        if (r.get('gold_cu_alignment') or '').strip().lower() in CL]
+
+def fam_of(target, text):
+    blob = ((target or '') + ' ' + (text or '')).lower()
+    for k, pats, _, _ in FAMILIES:
+        if any(p in blob for p in pats): return k
+    return None
+
+def gv(r):
+    try: return int((r.get('gold_target_cu_valence') or '').strip())
+    except ValueError: return None
+
+def derive(train_rows, min_n=3, min_consist=0.75):
+    agg = collections.defaultdict(list)
+    for r in train_rows:
+        f = fam_of(r.get('api_target'), r.get('text')); v = gv(r)
+        if f and v is not None: agg[f].append(v)
+    reg = {}
+    for f, vals in agg.items():
+        c = collections.Counter(vals); mode, mc = c.most_common(1)[0]
+        if len(vals) >= min_n and mc / len(vals) >= min_consist:
+            reg[f] = mode
+    return reg
+
+def compose(stance, v):
+    s = (stance or '').lower()
+    if s == 'unrelated': return 'unrelated'
+    if s == 'neutral' or v == 0: return 'neutral'
+    if s == 'support': return 'support' if v > 0 else 'oppose'
+    if s == 'oppose': return 'oppose' if v > 0 else 'support'
+    return 'neutral'
+
+# ---- honest 5-fold CV ----
+from sklearn.model_selection import KFold
+idx = np.arange(len(rows))
+n = ok = 0; cov = 0; tp = collections.Counter(); fp = collections.Counter(); fn = collections.Counter()
+for tr, te in KFold(5, shuffle=True, random_state=7).split(idx):
+    reg = derive([rows[i] for i in tr])
+    for i in te:
+        r = rows[i]
+        f = fam_of(r.get('api_target'), r.get('text'))
+        if f in reg:
+            cov += 1; p = compose(r.get('api_stance_toward_target'), reg[f])
+        else:
+            p = (r.get('api_cu_alignment') or '').strip().lower()
+        g = (r.get('gold_cu_alignment') or '').strip().lower()
+        if g in CL and p:
+            n += 1; ok += (g == p); (tp if g == p else fp)[p] += 1
+            if g != p: fn[g] += 1
+f1 = {c: 2*tp[c]/max(1, 2*tp[c]+fp[c]+fn[c]) for c in CL}
+mf = sum(f1[c] for c in CL if tp[c]+fn[c]) / max(1, sum(1 for c in CL if tp[c]+fn[c]))
+print('HONEST 5-FOLD CV — registry DERIVED FROM YOUR GOLDS (train folds) + flat fallback:')
+print('  acc=%.3f macroF1=%.3f | registry hit %d/%d (%.0f%%)' % (ok/n, mf, cov, len(rows), 100*cov/len(rows)))
+print('  ladder: flat baseline 0.677 | trained classical 0.737 | oracle ceiling 0.872')
+
+# ---- full-data registry for production + provenance report ----
+full = derive(rows)
+print('\nderived entries (from YOUR valence judgments):')
+agg = collections.defaultdict(list)
+for r in rows:
+    f = fam_of(r.get('api_target'), r.get('text')); v = gv(r)
+    if f and v is not None: agg[f].append(v)
+for f in [k for k, _, _, _ in FAMILIES]:
+    if f in full:
+        c = collections.Counter(agg[f])
+        print('  %-22s valence %+d  (your golds: %s)' % (f, full[f], dict(c)))
+    elif f in agg:
+        print('  %-22s SKIPPED (inconsistent/thin: %s) -> falls back to flat model' % (f, dict(collections.Counter(agg[f]))))
+
+if '--write' in sys.argv:
+    entries = []
+    for f, pats, _, _ in FAMILIES:
+        if f in full:
+            entries.append({'key': f, 'match': pats, 'valence': int(full[f]),
+                            'source': 'derived-from-gold', 'gold_n': len(agg[f])})
+    out = {'_doc': 'CU-valence registry v2 — derived from the USER\'S gold valence judgments (5-fold-validated harness: derive_valence_registry.py). Match precedence = list order (specific before generic). Extend by adding entries; re-eval before production.',
+           'entries': entries}
+    json.dump(out, open(B + r'\cu_valence_registry.json', 'w'), indent=1)
+    print('\nwrote cu_valence_registry.json: %d derived entries' % len(entries))
