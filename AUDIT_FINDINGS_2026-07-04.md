@@ -131,6 +131,33 @@ member_reference_verify.csv — every edge with quotes + a wrong-person/wrong-va
 user's eyeball pass). NICK_SETS added to moneyball_core (kernel tests 30/30 post-edit);
 fetch_interviews.py still carries its inline copy — consolidation note for the campaign owner.
 
+## Run-4c — A-grade drive (user: "get everything to an A")
+
+**Twin radar charts SHIPPED (user directive):** the desk Behavior section now renders TWO radars
+with identical geometry — Behavioral dispositions (Cooperation/Diligence/Floor presence/Visibility/
+Breadth, teal) above Text Big-5 v2 (blue). n/a behavioral axes plot at the 0.5 neutral ring and are
+listed under the chart (never fake-low). Verified live on Crapo: 2 radar SVGs, zero console errors.
+
+**Prospective outcome test ARMED (the receptivity A-path):** fec/outcome_snapshot.py froze
+outcome_snapshot_2026-07-04.json (533 members, 511 with cosponsor baselines) with pre-registered
+hypotheses + bars locked before outcomes are knowable: H1 seed_prob→new cosponsorships, H2
+pressure_mult→|tier movement| (engaged-only variant when In-contact data exists); rho ≥.20 PASS /
+≥.10 directional / ≤−.10 indicted; scorer refuses before 60 days + 150 movers. One command in
+September: `python fec/outcome_snapshot.py --score outcome_snapshot_2026-07-04.json`.
+
+**A-grade matrix — what each item needs, and who holds the pen:**
+| Item | Now | A requires | Owner |
+|---|---|---|---|
+| Behavioral dispositions | A− (valid by construction; visibility interim-guarded) | nickfix reingest lands → rebuild interaction→panel→dispositions (visibility/dominance full-roster) | auto (reingest running) |
+| Receptivity magnitudes | B+ (decision-robust bounded; outcome test armed) | H1/H2 ≥.20 at ≥60 days | time + Sept command |
+| Text Big5 | B+ (v2 right-signed OOS at lexical ceiling) | above-ceiling instrument = $30 LLM pilot, or accept ceiling as method-final | Paul ($30 call) |
+| Persona | C+ (harness ready, bars pre-set) | rate 30 blind rows → validate_persona_gold.py ≥.30 both axes | Paul (~20 min) |
+| Attribution | C (harness ready) | label 60 rows (own/action/thirdparty) → validator | Paul (~30 min) |
+| Tweet stance | A− (0.855/0.819 OOF) | pre-registered confirmation on next fresh adjudication batch | Paul (next batch) |
+| Press stance | B+ (0.837/0.765; wired, guarded) | readjudication queue pass on the adversarial frame | Paul (queue exists) |
+| Valence hop | B− (0.689, the bottleneck) | 5 family answers → re-derive → compose toward 0.872 | Paul (~10 min) |
+| Reference layer | B (precision-gated display; 0.68 neg-precision measured) | score the 731 new mentions (~$4.40) + spot-check verify sheet | Paul ($4.40 call) |
+
 ## Verdict
 ALL GATES GREEN at the effective (uncommitted) live-tree state. The system's math, determinism,
 idempotency, contracts, kernel single-sourcing, and both UIs verify clean. The material risk is
