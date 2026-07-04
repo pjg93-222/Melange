@@ -261,17 +261,24 @@ function flipModel(i,tiers,cu,ind){
 function pflipOf(u,nAu,nBu,mA,mB,cu,ind){const a=K.WM*(cu+1)/((cu+1)+K.HALFF*EG.rcp[u])+K.WP*nAu/mA;const b=K.WM*(ind+1)/((ind+1)+K.HALFF*EG.rcp[u])+K.WP*nBu/mB;return (a+b)>0?a/(a+b):0;}
 function shiftLean(u,dollars){const r=dollars/EG.rcp[u];return K.MAXSHIFT*(r/(r+K.HALF));}
 function dollarsForUnits(u,units){units=Math.min(units,0.98);return K.HALF*EG.rcp[u]*units/(1-units);}
+// stance-integrity gates (2026-07-04, mirrors fec/lt_priming.py; 'Lean Skeptic' carved out of every one):
+// overall Skeptic/Highly-Skeptical/Opponent can be neither target nor recruit; recruit pricing scales by
+// persuadability (True-Neutral-anchored, LS pinned flat); theta grows with declared-Opponent-cell breadth.
+const BLOCKOV={S:1,K:1,O:1};   // DATA.gen overall codes blocked ('L' Lean Skeptic deliberately allowed)
+const nOpp=Array.from({length:N},(_,u)=>{let k=0;const s=DATA.stance[u];for(let j=0;j<s.length-1;j++)if(s[j]==='O')k++;return k;});   // 18 real issues; last char = overall layer
+function rcost(u,i){const t=SCN[DATA.stance[u][i]];return t==='Lean Skeptic'?K.CEDGE:K.CEDGE*0.5/Math.max(0.05,PERS[t]||PERS['—']);}
 function prime(v,i){   // lt_priming: cheapest pressure+money to flip member v on issue i
   const code=DATA.stance[v][i],tier=SCN[code];
   if(!(tier in THETA)||CAMP(code)==='pro')return null;
-  const theta=THETA[tier]+Math.max(0,-(EG.nlraw[v])/120);
+  if(BLOCKOV[DATA.gen[v]])return null;   // one mild topic cell can't make a system-level Skeptic a target
+  const theta=THETA[tier]+Math.max(0,-(EG.nlraw[v])/120)+0.25*nOpp[v];   // money capture + ideological commitment both resist
   let pressure=0;const cand=[];
-  for(const u in PE[v]){const c=CAMP(DATA.stance[+u][i]);if(c==='pro')pressure+=PE[v][u];else if(c!=='anti')cand.push([+u,PE[v][u]]);}
+  for(const u in PE[v]){const c=CAMP(DATA.stance[+u][i]);if(c==='pro')pressure+=PE[v][u];else if(c!=='anti'&&!BLOCKOV[DATA.gen[+u]])cand.push([+u,PE[v][u]]);}
   const gap=theta-pressure;
   if(gap<=1e-6)return {tier,theta,pressure,gap,money:0,recruits:[]};
   const cap=Math.min(0.97,gap),avg=dollarsForUnits(v,cap)/cap;
-  cand.sort((a,b)=>(K.CEDGE/Math.max(0.1,a[1]))/a[1]-(K.CEDGE/Math.max(0.1,b[1]))/b[1]);
-  let got=0;const recruits=[];for(const [u,add] of cand){if(got>=gap)break;if((K.CEDGE/Math.max(0.1,add))/add<avg){got+=add;recruits.push(u);}}
+  cand.sort((a,b)=>(rcost(a[0],i)/Math.max(0.1,a[1]))/a[1]-(rcost(b[0],i)/Math.max(0.1,b[1]))/b[1]);
+  let got=0;const recruits=[];for(const [u,add] of cand){if(got>=gap)break;if((rcost(u,i)/Math.max(0.1,add))/add<avg){got+=add;recruits.push(u);}}
   const resid=Math.max(0,gap-got);if(resid>0.97)return {tier,theta,pressure,gap,money:null,recruits};
   return {tier,theta,pressure,gap,money:resid>1e-6?Math.round(dollarsForUnits(v,resid)):0,recruits};
 }
