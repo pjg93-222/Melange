@@ -20,7 +20,12 @@ import csv, hashlib, io, json, os, sys, threading, collections
 from concurrent.futures import ThreadPoolExecutor, as_completed
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B = MB_ROOT
-MODEL = "claude-sonnet-5"
+# model selection (user 2026-07-04: "I want that running on Fable"): --fable / --opus / default sonnet.
+# Per-model result caches — switching models NEVER mixes labels in one dataset.
+MODELS = {'fable': ('claude-fable-5', 0.0070), 'opus': ('claude-opus-4-8', 0.0090), 'sonnet': ('claude-sonnet-5', 0.0018)}
+_mk = next((k for k in MODELS if '--' + k in sys.argv), 'sonnet')
+MODEL, EST_PER_CALL = MODELS[_mk]
+CACHE_SUFFIX = '' if _mk == 'sonnet' else '_' + _mk
 WORKERS = 8
 
 if not os.environ.get('ANTHROPIC_API_KEY'):
@@ -108,7 +113,7 @@ def run(items, system, sch, cache_path, tag):
                 d = json.loads(ln); cache[d['k']] = d['out']
             except Exception: pass
     todo = [(k, u, m) for k, u, m in items if k not in cache]
-    est = len(todo) * 0.0018
+    est = len(todo) * EST_PER_CALL
     print('%s: %d items | cached %d | to classify %d | est ~$%.2f (prompt-cached)' % (tag, len(items), len(cache), len(todo), est))
     if todo and '--go' not in sys.argv:
         print('COST GATE: add --go to spend.'); sys.exit(0)
@@ -154,7 +159,7 @@ if 'press' in sys.argv:
         user = ("Member: %s (%s)\nDate: %s\nPress categories: %s\nHeadline: %s" %
                 (r.get('member'), r.get('party'), r.get('date'), r.get('categories'), r.get('title')))
         items.append((k, user, r))
-    res = run(items, PRESS_SYSTEM, PRESS_SCHEMA, B + r'\api_press_cache.jsonl', 'PRESS')
+    res = run(items, PRESS_SYSTEM, PRESS_SCHEMA, B + r'\api_press_cache%s.jsonl' % CACHE_SUFFIX, 'PRESS[%s]' % MODEL)
     out = []; agree = dis = 0
     for k, _, r in items:
         o = res.get(k)
@@ -185,7 +190,7 @@ elif 'tweets' in sys.argv:
         rt = 'yes' if t.startswith('RT @') else 'no'
         user = ("Member: %s\nDate: %s\nRetweet/repost: %s\nPost text: %s" % (r.get('member'), r.get('dt'), rt, t[:1200]))
         items.append((k, user, r))
-    res = run(items, TWEET_SYSTEM, TWEET_SCHEMA, B + r'\api_tweet_cache.jsonl', 'TWEETS')
+    res = run(items, TWEET_SYSTEM, TWEET_SCHEMA, B + r'\api_tweet_cache%s.jsonl' % CACHE_SUFFIX, 'TWEETS[%s]' % MODEL)
     out = []
     for k, _, r in items:
         o = res.get(k)
