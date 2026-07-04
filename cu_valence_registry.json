@@ -1,0 +1,19 @@
+{
+  "_doc": "CU-VALENCE REGISTRY (user-directed 2026-07-04). Maps a specific policy TARGET (+ action direction) to its valence FOR CREDIT UNIONS: +1 good, -1 bad, 0 neutral. The stance model reads the member's stance toward the target at 0.915 acc; this registry supplies valence (model's own valence knowledge is only 0.689, esp. weak on pro-CU targets). Two-hop compose(stance, valence) ceiling = 0.872 on the tweet gold. EXTEND THIS: add entries for uncovered high-volume targets (apply_two_hop_stance.py --uncovered surfaces them ranked). Each entry: match=keywords (lowercase, any-hit), dir=optional {rein_in:+/-1 override when reform/oversight/repeal language present}, valence=base.",
+  "entries": [
+    {"key": "cfpb_expansion", "match": ["cfpb", "consumer financial protection bureau"], "valence": -1, "rein_flips": true, "note": "expanding CFPB power/funding/reach = -1; reform/commission/appropriations-oversight/repeal = +1"},
+    {"key": "interchange_cap", "match": ["interchange", "credit card competition act", "cca", "swipe fee", "durbin amendment", "routing mandate"], "valence": -1, "rein_flips": true, "note": "caps/routing mandates = -1; blocking/repealing = +1 (CUs side with banks here)"},
+    {"key": "rate_cap", "match": ["rate cap", "usury", "apr cap", "36% cap", "interest rate cap"], "valence": -1, "rein_flips": true},
+    {"key": "overdraft_rule", "match": ["overdraft"], "valence": -1, "rein_flips": true},
+    {"key": "cu_tax_status", "match": ["credit union tax", "cu tax exemption", "tax exempt status", "tax status of credit union"], "valence": 1, "rein_flips": true, "note": "protecting exemption = +1; attacks on it = -1"},
+    {"key": "field_of_membership", "match": ["field of membership", "fom", "charter modernization", "charter expansion", "expanding membership"], "valence": 1, "rein_flips": false},
+    {"key": "member_business_lending", "match": ["member business lending", "mbl cap", "business lending cap"], "valence": 1, "rein_flips": false, "note": "raising/removing the MBL cap = +1"},
+    {"key": "cdfi_fund", "match": ["cdfi", "community development financial"], "valence": 1, "rein_flips": true, "note": "funding = +1; cuts = -1"},
+    {"key": "defense_cu", "match": ["defense credit union", "military credit union", "on-base access", "morale welfare recreation banking"], "valence": 1, "rein_flips": false},
+    {"key": "reg_relief", "match": ["regulatory relief", "reg relief", "tailoring", "regulatory burden", "right-size regulation"], "valence": 1, "rein_flips": false},
+    {"key": "data_privacy_std", "match": ["data privacy", "data security standard", "national privacy", "breach notification"], "valence": 1, "rein_flips": false, "note": "CU-sought standards = +1; costly mandates on CUs = flag for review"},
+    {"key": "fraud_prevention", "match": ["fraud prevention", "scam", "elder financial abuse", "authorized push payment"], "valence": 1, "rein_flips": false},
+    {"key": "big_bank_favor", "match": ["too big to fail", "megabank bailout", "big bank charter", "wall street bank advantage"], "valence": -1, "rein_flips": true},
+    {"key": "ncua_funding", "match": ["ncua budget", "share insurance fund", "ncua"], "valence": 0, "rein_flips": false, "note": "usually neutral/administrative; set per-context if a target emerges"}
+  ]
+}
