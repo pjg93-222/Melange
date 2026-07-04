@@ -59,6 +59,7 @@ def resolve_ref(text_l, speaker):
     for m in re.finditer(r'\b' + TITLE_RE + r'\s+([a-zÀ-ɏ\'\-]+(?:\s[a-zÀ-ɏ\'\-]+)?)', text_l):
         cand = norm(m.group(1))
         parts = cand.split()
+        if not parts: continue   # accent/punctuation-only capture normalizes to empty
         hit = None
         if len(parts) == 1:
             cs = SUR.get(parts[0], [])
