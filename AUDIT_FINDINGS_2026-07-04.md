@@ -60,6 +60,77 @@ commit (P4 items). Committing any of these from this session would manufacture m
 against live work. The fix lane for this audit is therefore: MERGE + COMMIT actions listed in
 S2-01/S2-02, owned by the user (or the wizardly-jemison session), not auditor-appliable.
 
+## Run-4b — user-directed optimization pass (same day, post-audit; all changes in the LIVE tree)
+
+**1. Big5 "keep it — is it accurate?"** Kept, with honest labeling already in place: the desk radar
+is v2 (behavior-calibrated text instrument; held-out r A+.14 / C+.13 / E+.34 / O+.20 — every trait
+right-signed out-of-sample, at/above the published lexical ceiling ρ .08–.14); v1 survives as the
+N-source (no behavioral criterion for Neuroticism exists) and desk fallback; ES rides the
+genre-general composite (split-half .92). As a *style/persona* read the Big5 is reliable
+(split-half .60–.92) and RKH-convergent (.42–.52); as a *behavior predictor* v1 was indicted —
+which is exactly why engines run on behavioral dispositions while the Big5 stays the human-facing
+context layer. The ceiling-breaker remains the parked ~$30 LLM item-level pilot.
+
+**2. Bottleneck (valence-hop 0.689) — explained + attacked.** The stance model reads WHO a text
+targets and the direction toward that target at 0.915; what it fumbles is whether the TARGET is
+good or bad for CUs (0.689) — fix that and composition hits 0.872. Re-ran the registry derivation:
+11 families carry user-derived valences; the 5 skipped ones fall to the flat model, and the
+biggest is **interchange itself** (user golds split 11 neutral / 11 anti / 1 pro — the family bag
+mixes pushing-the-CCCA with blocking-it with generic swipe-fee chatter). Built
+**valence_family_review.csv** (live root): the 5 family questions with all 38 of the user's own
+prior gold rows as evidence, including a proposed interchange direction-split
+(interchange_push −1 / interchange_defend +1 / swipe_fee_generic 0). Five answers unblock the
+bottleneck; re-derive with `python fec/derive_valence_registry.py --write` after answering.
+
+**3. The three graded gaps ("fix these"):**
+- Persona C+ → **fec/validate_persona_gold.py** built: scores agency_communion.json against the
+  30-member persona gold sheet the moment it's rated (Spearman per axis; pass bars pre-set at
+  .30 PASS / .15 DIRECTIONAL — locked before scores are knowable). Sheet is currently 0/30 rated.
+- Attribution C → **fec/validate_attribution_gold.py** built: scores the production reader's
+  attribution field against attribution_gold_sheet.csv (0/60 labeled); recovers urls via title
+  match; per-class precision/recall + confusion. Filling the sheet is the entire remaining step.
+- Receptivity effect sizes B− → **fec/receptivity_sensitivity.py** built + run. Replication gate
+  533/533 exact. Result: **every pressure_mult constant is decision-ROBUST** — susc scale .18
+  halved/×1.5, PT mild/strong, retiring 0.60→{.45,.80,1.00}, persona weight 0→.45 all leave the
+  top-20 flip-target set at 19–20/20 (rank-ρ ≥ .998). The literature-shaped magnitudes cannot
+  have bought a wrong targeting decision; they are fine-tuning on a decision surface dominated by
+  stance/network/money. The exception with real leverage: **seed_prob coefficients** (~200/533
+  members move cascade gates >0.05 under sweeps) → the pre-registered outcome test that matters
+  first is seed_prob vs NEW next-quarter cosponsorship adoptions; second, pressure_mult vs
+  stance-tier movement among actually-engaged members (In-contact log). Both designs are in the
+  harness docstring.
+
+**4. Committee positions checked.** All spot-checked leadership seats are 119th-correct (Crapo
+Finance Chair + JCT Chair present — an earlier probe truncation, not a data gap; Scott Banking
+Chair, Warren Banking RM, Wyden Finance RM, Hill FS Chair, Barr FS-FI Chair, Ernst SB Chair,
+Markey SB RM, Cantwell Commerce RM). The real finding is COVERAGE: **245/533 members have no
+Committee Data row** — including Durbin (Senate Whip, Judiciary RM — the interchange antagonist),
+Schumer, Collins (Approps CHAIR), Murray, Jeffries, Johnson, Scalise, Clark. Judiciary,
+Appropriations, Rules, Ag and leadership offices are untracked, yet NCUA Budget & Insurance and
+CDFI Fund categories are appropriator-decided, and interchange runs through Judiciary-antitrust
+framing. DECISION MENU for the user (tiers are calibration, not auditor's to set): (a) add
+Appropriations—FSGG [Moderately?] (NCUA/CDFI jurisdiction), (b) add Senate Judiciary [Moderately?]
+(interchange/antitrust), (c) price leadership offices (Speaker/Leaders/Whips) as pseudo-seats,
+(d) leave as-is knowing 245 members carry zero committee pillar by design.
+
+**5. Small Business retier — APPLIED (user directive).** The workbook Committee Data sheet already
+tiers Small Business (full) [Highly] on every row; the desk was overriding it to 'Moderately'
+(make_member_desk.py:351 "UNIFY" line). Override deleted — the desk now displays the sheet's own
+[Highly]. Display-only (committee_score column unchanged), no rank impact.
+
+**6. Mentions person-verification + phrase evidence — APPLIED.** member_reference_layer.py
+resolver upgraded (kernel-single-sourced NICK_SETS nickname classes — bernie~bernard now resolves
+in bare-name form; chamber-scoped title pools — "senator johnson" resolves to Ron Johnson inside
+the Senate surname pool instead of dying on House-Johnson ambiguity; single-alternation bare-name
+scan). Examples now attach to EVERY kept class (pos/neg preferred, neutral fills), and
+make_member_desk.py now passes the evidence quote on ALL reference rows, both directions — the
+tpl already renders it, so every desk reference row shows its phrase. New free modes:
+`--rebuild` (re-extract + re-aggregate from cache, $0 — new resolver recall lands in n_raw; scoring
+new windows stays behind the --score --go cost gate) and `--verify` (writes
+member_reference_verify.csv — every edge with quotes + a wrong-person/wrong-valence column for the
+user's eyeball pass). NICK_SETS added to moneyball_core (kernel tests 30/30 post-edit);
+fetch_interviews.py still carries its inline copy — consolidation note for the campaign owner.
+
 ## Verdict
 ALL GATES GREEN at the effective (uncommitted) live-tree state. The system's math, determinism,
 idempotency, contracts, kernel single-sourcing, and both UIs verify clean. The material risk is
