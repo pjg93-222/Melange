@@ -20,6 +20,16 @@ XLSX=r'C:\Users\pgoff\Downloads\cu_stance_label_set_AUGMENTED.xlsx'
 snip={}
 for r in csv.DictReader(open(DS+r'\cu_stance_label_set.csv',encoding='utf-8-sig')):
     if (r.get('row') or '').strip(): snip[r['row'].strip()]={'text':(r.get('text_snippet') or ''),'url':r.get('url') or ''}
+# USER CONFLICT RESOLUTIONS (2026-07-03, same hook as build_golden_labels): a url decided in the
+# latest conflicts_review_*.csv overrides the workbook label — the corrected label reaches TRAINING.
+import glob as _g
+RES={}
+_rv=sorted(_g.glob(B+r'\conflicts_review_*.csv'))
+if _rv:
+    for _r in csv.DictReader(open(_rv[-1],encoding='utf-8-sig')):
+        _u=(_r.get('url') or '').strip().rstrip('/'); _d=(_r.get('your_decision') or '').strip().lower()
+        if _u and _d in ('support','oppose','neutral','unrelated'): RES[_u]=_d
+    print('user conflict resolutions applied to training labels: %d'%len(RES))
 wb=openpyxl.load_workbook(XLSX,read_only=True,data_only=True)
 out=[]
 for sn in ('Labels (augmented)','Oppose candidates'):
@@ -36,6 +46,9 @@ for sn in ('Labels (augmented)','Oppose candidates'):
              'hop2_acu_position':g(r,'hop2_acu_position'),'speaker_source':g(r,'speaker_source'),
              'stance_span':g(r,'stance_span'),'intensity_r':g(r,'intensity_r'),
              'text':(s.get('text') or g(r,'stance_span') or g(r,'title'))[:4000],'url':s.get('url','')}
+        _ru=(rec['url'] or '').strip().rstrip('/')
+        if _ru in RES and rec['label_composed']!=RES[_ru]:
+            rec['label_composed']=RES[_ru]; rec['review_flag']=(rec['review_flag']+' user-resolved').strip()
         out.append(rec)
 with io.open(B+r'\stance_training.jsonl','w',encoding='utf-8') as f:
     for r in out: f.write(json.dumps(r,ensure_ascii=True)+'\n')
