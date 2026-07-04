@@ -54,6 +54,17 @@ byurl={rec['url']:rec for rec in recs.values() if rec['url']}
 # 2) gold queue overlay
 q=list(csv.DictReader(open(B+r'\gold_label_queue.csv',encoding='utf-8-sig')))
 conflicts=[]; added=0; enriched=0
+# 2b) USER CONFLICT RESOLUTIONS (2026-07-03: user filled `your_decision` in the conflicts review
+# sheet). A decided url is AUTHORITATIVE — it overrides both the aug label and the queue label,
+# and the row is no longer a conflict. Latest conflicts_review_*.csv wins if several exist.
+import glob as _g
+RES={}
+_rv=sorted(_g.glob(B+r'\conflicts_review_*.csv'))
+if _rv:
+    for r in csv.DictReader(open(_rv[-1],encoding='utf-8-sig')):
+        u=norm(r.get('url')); d=norm(r.get('your_decision')).lower()
+        if u and d in ('support','oppose','neutral','unrelated'): RES[u]=d
+    print('  user conflict resolutions loaded: %d (%s)'%(len(RES),_rv[-1].rsplit(chr(92),1)[-1]))
 for r in q:
     u=norm(r.get('url')); gl=norm(r.get('gold_cu_alignment')).lower()
     if not u or not gl: continue
@@ -61,7 +72,11 @@ for r in q:
          'gold_target_cu_valence':norm(r.get('gold_target_cu_valence')),'gold_attribution':norm(r.get('gold_attribution'))}
     if u in byurl:
         rec=byurl[u]; rec.update({k:v for k,v in fac.items() if v}); enriched+=1
-        if rec['label'] and gl!=rec['label']:
+        if u in RES:
+            if rec['label']!=RES[u] or gl!=RES[u]:
+                rec['conflict']='user-resolved: %s (was aug=%s queue=%s)'%(RES[u],rec['label'],gl)
+            rec['label']=RES[u]
+        elif rec['label'] and gl!=rec['label']:
             if gl=='unrelated':
                 rec['conflict']='aug=%s queue=unrelated -> unrelated wins (finer class)'%rec['label']; rec['label']='unrelated'
             else:
