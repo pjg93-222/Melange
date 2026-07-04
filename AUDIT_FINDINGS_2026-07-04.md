@@ -211,6 +211,39 @@ truth can only ever assert own-vs-not, never action-vs-opinion). **Result: attri
 disagreements (2 false-own, 1 false-thirdparty). Attribution is no longer an open item — it went
 from "0/60 unlabeled, no non-circular number" (C) to a validated 94.7% in one command.
 
+## Run-4f — valence review resolved via per-row confirm/correct (user: "it matched up almost
+## perfectly, double check")
+
+The 5 blank family-level QUESTION cells stayed empty — but the 40 evidence rows underneath them
+carried a real signal the user had confirmed row-by-row against their own historical labels:
+**37/40 matched exactly**, and the 3 corrections were the decisive information. Diffed prior vs.
+typed per row to separate signal from noise:
+- **interchange**: 12 on-topic rows, 11/12 unanimously -1 on the CCCA/swipe-fee target (1 outlier).
+  The other 11 rows in the family were pure keyword collision — literal highway interchanges
+  ("I-90 interchange", "SR-210 interchange") false-matching the bare word "interchange". Fixed at
+  the source: dropped that keyword from derive_valence_registry.py's FAMILIES list (the remaining
+  "credit card competition"/"swipe fee"/"durbin" keywords catch every genuine on-topic mention).
+- **overdraft** -1 (1/1), **reg_relief** +1 (2/2): unanimous, ship as-is.
+- **big_banks**: the user's 2 corrections (support→neutral) flipped the family from a 6-way split
+  to 8/9 neutral — resolves cleanly to 0 (orthogonal), one of the three options originally posed.
+- **defense_cu** deliberately left UNWRITTEN: the 3-row sample splits by what looks like a
+  sub-topic difference (CU-access policy, +1, vs. a specific institution's discrimination-
+  investigation coverage, likely off-target "navy federal" keyword noise) rather than genuine
+  inconsistency — a real judgment call on a thin sample, flagged for the user rather than decided.
+
+Added a `CONFIRMED` dict to derive_valence_registry.py (source-tagged `user-confirmed-review`,
+distinct from `derived-from-gold`) and wired it into the 5-fold CV as fixed external knowledge
+(included in every fold, not derived from train — no leakage). **Result: CV accuracy 0.782→0.787,
+macro-F1 →0.759, registry coverage 74%→81% of rows** (296→324/399 hit the registry instead of
+falling to the flat baseline). Registry written (15 entries: 11 derived + 4 user-confirmed).
+
+**Not yet propagated to production**: tweet_stance_stack.py / press_stance_stack.py /
+apply_two_hop_stance.py all consume this registry to build tweet_stance_final.csv /
+press_stance_final.csv, which feed the live media blend and WILL move some ranks if re-run. That
+re-run needs no new API spend (the stance-hop/valence/confidence fields come from an existing
+Fable cache) but is a visible, rank-affecting change — held for the user's go-ahead rather than
+cascaded silently, especially with another session's uncommitted campaign live on this same tree.
+
 ## Verdict
 ALL GATES GREEN at the effective (uncommitted) live-tree state. The system's math, determinism,
 idempotency, contracts, kernel single-sourcing, and both UIs verify clean. The material risk is
