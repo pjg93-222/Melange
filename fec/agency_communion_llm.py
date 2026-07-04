@@ -24,7 +24,7 @@ B = MB_ROOT
 MODEL = os.environ.get('CLAUDE_AC_MODEL', 'claude-fable-5' if '--fable' in sys.argv else 'claude-sonnet-5')
 EST_PER_CALL = 0.006 if 'fable' in MODEL else 0.0015   # cost-gate estimate (cached codebook + ~60 in + ~60 out)
 NSENT = int(os.environ.get('AC_NSENT', '40'))
-WORKERS = 8
+WORKERS = int(os.environ.get('AC_WORKERS', '8'))
 CACHE = B + (r'\agency_communion_cache_fable.jsonl' if 'fable' in MODEL else r'\agency_communion_cache.jsonl')   # per-model caches: instruments never mix
 OUT = B + r'\agency_communion.json'
 
