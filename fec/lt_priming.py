@@ -40,17 +40,38 @@ def money_units(m,dollars):                         # net_lean shift -> pro-infl
 def dollars_for_units(m,u):                         # invert: $ needed for u units of pro-influence (diminishing)
     u=min(u,0.98); return HALF*receipts(m)*u/(1-u)
 proset={m for m in members if MAT.get(m,{}).get(cat) in PRO}
+# ---- stance-integrity gates (user-ratified 2026-07-04; 'Lean Skeptic' explicitly carved out of every one) ----
+# Root cause (the Warren sighting, July-1 artifact): single-cell myopia admitted a system-level Skeptic
+# (overall tier, CFPB/FoM/Tech Opponent) as a True-Neutral Mortgage target AND as a pro-pressure recruit,
+# and the net_lean resistance term only sees money-TAKERS — a PAC-free ideologue priced as CHEAP.
+# Mirrored in the dashboard's in-browser port (make_dashboard_html_00.tpl prime/cheapestFlips).
+BLOCK_OVERALL={'Skeptic','Highly Skeptical','Opponent'}   # kernel overall_tier read; overall 'Lean Skeptic' stays eligible
+BLOCK_RECRUIT_CELL={'Skeptic','Opponent'}                 # topic-cell floor for recruits (the JS port already had this; 'Lean Skeptic' cell stays eligible)
+COMMIT=0.25                                               # +theta per declared Opponent cell anywhere in the matrix — opposition breadth the money term can't see
+OVT={m:MBC.overall_tier(MAT.get(m,{})) for m in members}
+def recruit_cost(u):
+    # CEDGE scaled by persuadability (kernel PERS, anchored so True Neutral == CEDGE exactly);
+    # Lean Skeptic pinned to flat CEDGE — the carve-out: gates/pricing leave LS exactly as before
+    t=MAT.get(u,{}).get(cat)
+    if t=='Lean Skeptic': return CEDGE
+    return CEDGE*0.50/max(0.05,MBC.PERS.get(t,MBC.PERS_NONE))
 def prime(v):
     tier=MAT.get(v,{}).get(cat)
     if tier not in THETA or tier in PRO: return None
+    if OVT.get(v) in BLOCK_OVERALL: return None                      # one mild topic cell can't make a system-level Skeptic a target
     theta=THETA[tier]+max(0,-(C[v].get('net_lean') or 0)/120)        # money-captured members resist more
+    theta+=COMMIT*sum(1 for t in MAT.get(v,{}).values() if t=='Opponent')   # ideological commitment resists too (PAC-free opponents no longer read cheap)
     pressure=sum(P[v].get(u,0) for u in proset if u in P[v])          # current pro pull from already-pro neighbors
     gap=theta-pressure
     if gap<=1e-6: return {'v':v,'tier':tier,'theta':round(theta,2),'pressure':round(pressure,2),'gap':round(gap,2),'cost':0,'money':0,'recruits':[]}
     money_only=dollars_for_units(v,min(0.97,gap))                     # $ to close whole gap with money alone
     avg_rate=money_only/min(0.97,gap)                                 # money's average $ per influence-unit
-    # recruit not-yet-pro neighbors that are cheaper per unit than money; each adds P[u][v]
-    cands=sorted([(P[v][u],u,CEDGE/max(0.1,P[v][u])) for u in P[v] if u not in proset],key=lambda x:x[2]/x[0])
+    # recruit not-yet-pro neighbors that are cheaper per unit than money; each adds P[u][v].
+    # Stance floors (2026-07-04): the model may not enlist as a pro-advocate a member its own stance law
+    # calls opposed — no Skeptic/Opponent topic cell, no Skeptic-or-worse overall read (Lean Skeptic allowed).
+    cands=sorted([(P[v][u],u,recruit_cost(u)/max(0.1,P[v][u])) for u in P[v]
+                  if u not in proset and MAT.get(u,{}).get(cat) not in BLOCK_RECRUIT_CELL
+                  and OVT.get(u) not in BLOCK_OVERALL],key=lambda x:x[2]/x[0])
     got=0.0; cost=0.0; recruits=[]
     for add,u,c in cands:
         if got>=gap: break

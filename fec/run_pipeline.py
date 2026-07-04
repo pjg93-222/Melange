@@ -22,6 +22,7 @@ CHAIN=[('receptivity_layer.py',[]),            # personality/incentive receptivi
        ('sync_stance_g.py',[]),                # col-G tier sync (openpyxl values write; kills formula caches — view self-heals on open)
        ('per_topic_flip.py',[]),
        ('per_topic_coalition.py',[]),
+       ('lt_priming.py',[]),                   # in-chain since 2026-07-04: the artifact fossilized (July-1 file showed a stance the matrix had moved off) — freshness now guaranteed every run
        ('budget_frontier.py',[]),
        ('budget_frontier.py',['--electoral']), # the pass that got forgotten once — never again
        ('optimize.py',[]),
