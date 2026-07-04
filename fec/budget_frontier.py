@@ -117,5 +117,6 @@ defend_ov=sorted([m for m in members if EP.get(m,{}).get('play')=='defend'],key=
 out={'mode':'electoral' if ELECTORAL else 'coalition','leverage':LEVON,
      'defend_overview':[{'m':m,'v':EP[m]['value'],'party':EP[m].get('party'),'elavg':EP[m].get('elavg')} for m in defend_ov],
      'topics':frontier}
-MBC.dump_atomic(out,os.environ.get('FRONTIER_OUT',B+r'\budget_frontier%s.json'%('_electoral' if ELECTORAL else '')))   # FRONTIER_OUT lets the audit test a single topic without clobbering the production all-topics json
-print('\nwrote budget_frontier.json (mode %s, leverage %s, %d topics)'%('ELECTORAL' if ELECTORAL else 'coalition','ON' if LEVON else 'OFF',len(frontier)))
+_outpath=os.environ.get('FRONTIER_OUT',B+r'\budget_frontier%s.json'%('_electoral' if ELECTORAL else ''))   # FRONTIER_OUT lets the audit test a single topic without clobbering the production all-topics json
+MBC.dump_atomic(out,_outpath)
+print('\nwrote %s (mode %s, leverage %s, %d topics)'%(os.path.basename(_outpath),'ELECTORAL' if ELECTORAL else 'coalition','ON' if LEVON else 'OFF',len(frontier)))
