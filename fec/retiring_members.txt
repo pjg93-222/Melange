@@ -1,3 +1,77 @@
-# RETIRING / NOT SEEKING REELECTION — one canonical member name per line (exactly as in congestion.json).
-# Fouirnaies-Hall final-term effect: these members get incent_mult 0.60 (less responsive to pressure —
-# "nothing to lose politically"). Populate as 2026 retirements are announced; lines starting with # ignored.
+# RETIRING / NOT SEEKING RE-ELECTION 2026 — one canonical member name per line (exactly as in
+# congestion.json). Fouirnaies-Hall final-term effect: these members get incent_mult 0.60 (less
+# responsive to pressure — 'nothing to lose politically'). Source: Wikipedia 2026 Senate/House
+# election retirement lists, validated against the 533 roster 2026-07-03.
+# EXCLUDED: Stacey Plaskett (VI delegate, not in 533); Alan Armstrong (only source was a phantom
+# 'Senator Armstrong' — unverifiable, flagged for user). Includes members seeking OTHER office
+# (Golden/Barr/Stefanik etc.) per the 'not running for re-election' definition — user may prune.
+# Lines starting with # ignored.
+Andy Barr
+Andy Biggs
+Angie Craig
+Ashley Hinson
+Barry Loudermilk
+Barry Moore
+Bonnie Watson Coleman
+Burgess Owens
+Byron Donalds
+Chip Roy
+Chris Pappas
+Cynthia Lummis
+Dan Newhouse
+Daniel Webster
+Danny Davis
+Darrell Issa
+David Schweikert
+Don Bacon
+Dusty Johnson
+Dwight Evans
+Earl Carter
+Eleanor Norton
+Elise Stefanik
+Frederica Wilson
+Gary Peters
+Haley Stevens
+Harriet Hageman
+Janice Schakowsky
+Jared Golden
+Jasmine Crockett
+Jeanne Shaheen
+Jerrold Nadler
+Jesús García
+Jodey Arrington
+John James
+John Rose
+Joni Ernst
+Julia Brownley
+Julia Letlow
+Kevin Hern
+Lloyd Doggett
+Marc Veasey
+Mark Amodei
+Michael McCaul
+Mike Collins
+Mitch McConnell
+Morgan Luttrell
+Nancy Mace
+Nancy Pelosi
+Neal Dunn
+Nydia Velázquez
+Raja Krishnamoorthi
+Ralph Norman
+Randy Feenstra
+Richard Durbin
+Robin Kelly
+Ryan Zinke
+Sam Graves
+Seth Moulton
+Steny Hoyer
+Steve Cohen
+Steve Daines
+Thom Tillis
+Thomas Tiffany
+Tina Smith
+Tommy Tuberville
+Troy Nehls
+Vern Buchanan
+Wesley Hunt
