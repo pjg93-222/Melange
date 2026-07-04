@@ -47,6 +47,12 @@ OPT    = L('optimize_result.json') or {}     # Golovin-Krause adaptive-submodula
 if not OPT: print('  !! optimize_result.json MISSING/empty — desk allocation panels will be blank (run optimize.py)')   # S3-05
 OPT_ALLOC = OPT.get('alloc', {})             # the RESEARCH-GROUNDED suggested allocation (vs score-proportional)
 EH  = L('electoral_history.json') or {}      # per-member FEC primary+general vote-share trend + forecast (build_electoral_history.py)
+# BLENDED RANK AUTHORITY (user-directed 2026-07-03 "put in the blended rank"): the desk previously read
+# the workbook Blended Model formula cells (rank/score), which go stale to None after any openpyxl save
+# and disagreed with the phase-2 authority (Scott-vs-Crapo audit finding R2). ranks_python.json is the
+# canonical, always-fresh blended rank — source rank/score from it, workbook only as fallback.
+_RA = L('ranks_python.json') or {}
+RA_RANK = _RA.get('rank', {}); RA_SCORE = _RA.get('score', {})
 # ---- computed psychometrics (user-directed 2026-07-03): Big5 radar + B&L persona + susceptibility cross-read ----
 B5  = (L('big5_traits.json') or {}).get('traits', {})
 RCPT = (L('member_receptivity.json') or {}).get('members', {})
@@ -400,7 +406,7 @@ def build_bundle():
         if i is not None and i in ADJ:
             for v, w in sorted(ADJ[i], key=lambda t: -t[1])[:12]:
                 partners.append({'name': snames[v], 'w': round(w, 2),
-                                 'party': PARTY_SNA[v], 'rank': WBM.get(snames[v], {}).get('rank')})
+                                 'party': PARTY_SNA[v], 'rank': RA_RANK.get(snames[v]) or WBM.get(snames[v], {}).get('rank')})
         arts = ARTS.get(name, [])            # full press DB, grouped by member (every article they're named in)
         bills = BILLS.get(name, [])          # sponsor / original-cosponsor / cosponsor, with subject area
         # chamber/party are often blank in the source -> derive
@@ -414,9 +420,9 @@ def build_bundle():
             'district': dist,
             'chamber': chamber,
             'party': party,
-            # general page  (rank/score from the workbook Blended Model, not the old W&M-blind member_desk_src)
-            'rank': wbr.get('rank', m.get('rank')),
-            'score': wbr.get('score', m.get('score')),
+            # general page  (rank/score from ranks_python.json, the phase-2 BLENDED rank authority; workbook fallback)
+            'rank': RA_RANK.get(name) or wbr.get('rank', m.get('rank')),
+            'score': (RA_SCORE.get(name) if RA_SCORE.get(name) is not None else wbr.get('score', m.get('score'))),
             'alloc': m.get('alloc', 0),            # model-suggested allocation
             'invested': CU_FEC[i] if i is not None else 0,   # ACTUAL FEC credit-union $
             'ind_money': IND_FEC[i] if i is not None else 0, # competing bank/finserv $
