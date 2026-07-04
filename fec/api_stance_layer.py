@@ -172,6 +172,7 @@ if 'press' in sys.argv:
         out.append({'url': r.get('url'), 'member': r.get('member'), 'date': r.get('date'), 'title': r.get('title'),
                     'debate_stance': deb, 'api_stance': a, 'api_target': o['target'], 'api_attribution': o['attribution'],
                     'api_confidence': o['confidence'], 'api_rationale': o['rationale'], 'tier': tier})
+    if not out: print('no press results (credits exhausted?) — sidecars left untouched'); sys.exit(1)
     write_csv(B + r'\api_press_stance.csv', out, list(out[0].keys()))
     rev = [r for r in out if r['tier'] == 'disagree']
     for r in rev: r['your_decision'] = ''
@@ -200,6 +201,7 @@ elif 'tweets' in sys.argv:
                     'api_stance': o['cu_alignment'], 'api_target': o['target'], 'api_attribution': o['attribution'],
                     'api_confidence': o['confidence'], 'api_rationale': o['rationale'],
                     'text': (r.get('Content') or '')[:280]})
+    if not out: print('no tweet results (credits exhausted?) — sidecars left untouched'); sys.exit(1)
     write_csv(B + r'\api_tweet_stance.csv', out, list(out[0].keys()))
     dist = collections.Counter(r['api_stance'] for r in out)
     print('TWEETS done: %d scored | distribution %s -> api_tweet_stance.csv' % (len(out), dict(dist)))
