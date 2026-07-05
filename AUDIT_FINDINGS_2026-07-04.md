@@ -292,6 +292,26 @@ validation attempts, two different methods, zero support. The persona channel ca
 into the actual pressure_mult/susc_z that drives money-targeting decisions is currently
 unsupported by any evidence collected to date.
 
+**Run-4h CALIBRATION (user pushback: "you can't use a human gold label for something like this,
+too subjective unless you get thirty people") — partly sustained, verdict softened but not
+reversed.** What's right in the objection: (1) at n=30, communion rho=−0.245 is NOT statistically
+significant (Fisher 95% CI ≈ [−0.56, +0.13], p≈.19 two-tailed) — my "WRONG SIGN" framing
+over-claimed a point estimate; the honest read is "somewhere between moderately negative and
+weakly positive, centered below zero." (2) A single human rater IS a noisy criterion — published
+observer-rating gold standards aggregate multiple raters precisely because single-rater
+reliability for personality-from-text runs ~.4–.5; attenuation means even a genuinely valid
+instrument would only be EXPECTED to show ~.2–.35 against one rater, so the pre-set .30 PASS bar
+was harsh for this design (the .15 DIRECTIONAL bar was the fair one, and both axes missed it).
+What the objection does NOT touch: the FIRST indictment (nomological battery) had no human rater
+anywhere in it — it correlated persona against roll-call/cosponsorship BEHAVIOR and found all
+5 pre-registered tests |r|<.05. So the evidence state after calibration: one clean method → null;
+one noisy method → uninformative-to-null. Still zero positive support for PERSONA_W=0.30, but
+today's test alone would not justify the dial change — the nomological null is the load-bearing
+evidence. Cheap upgrades if the user wants a decisive test: (a) 3–5 raters on the same 30
+excerpts (Spearman-Brown: 5 raters at single-rater reliability .45 → panel reliability ≈ .80 —
+30 people not needed), or (b) the user re-rates 10 excerpts in a week to measure his own
+test-retest reliability, which lets us disattenuate today's numbers properly.
+
 ## Verdict
 ALL GATES GREEN at the effective (uncommitted) live-tree state. The system's math, determinism,
 idempotency, contracts, kernel single-sourcing, and both UIs verify clean. The material risk is
