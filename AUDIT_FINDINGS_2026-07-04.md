@@ -847,3 +847,35 @@ primary / 19 total** (interchange-antitrust + TCPA adjacency), then HSGAC 4, Ag 
   components (interchange arch-opponent) dominate a [Slightly] seat — the model working as
   designed, not a residual gap.
 
+---
+
+# Run-4o — Opus Big5 pilot: scored, validated, verdict
+
+**Transport switch (user: "Anyway we can speed the API up?"):** the batch sat 4.5h at 0/1,010
+resolved with no priority knob, so it was canceled (unprocessed = unbilled, zero results stranded)
+and the same pilot ran DIRECT through the scorer's built-in 8-worker pool: **1,200/1,200 chunks in
+~25 min, 1 error, 173 members scored** (the corpus had grown 1,010→1,200 under the live re-ingest).
+**Budget honesty:** the script's conservative gate printed est ~$90 — above both the ~$27 I quoted
+and the $30 envelope; realistic actual is $25–50 (no usage fields persisted; the console dashboard
+has the exact number). The miss was mine: I did not re-gate after the corpus grew.
+
+**Validation (validate_big5.py, method-agnostic battery) vs the lexical baseline:**
+
+| Axis | Lexical v1 | **Opus LLM** | Read |
+|---|---|---|---|
+| Convergent vs RKH | .42–.52 *(method-SHARED with RKH's own Mairesse-LIWC → inflated)* | .06–.14 | lexical wins on paper, but the campaign's own pre-registered warning says don't chase this criterion — the LLM number is method-independent and honest |
+| Discriminant (mean off-diag) | .27, **C–E +.68 pathological** | .30, C–E **−.21** (halo gone), new A–ES +.68 | pathology moved, not removed |
+| Known-groups party | 3/5 | 3/5 (C inconsistent in both) | tie |
+| **MTMM cross-genre** | **FAILED** (.21–.28 < halo) — the indictment | **PASSES: .291 > .262; O = .56** | **the LLM instrument is the first text method here with genre-general trait signal** |
+| Split-half | .60–.81 | not computable free (cache keys are hashes; corpus moved under the run) | open axis; MTMM partially covers reliability |
+
+**Verdict: partial win, no promotion tonight.** The Opus instrument passes the exact test that
+indicted the lexical Big5 (MTMM), kills the C–E halo, and shows strong genre-general Openness —
+but absolute signal is modest, a new A–ES halo appears, and **Conscientiousness stays unmeasurable
+from text across every method this campaign tried** (lexical, composite, v2, LLM, and the LEP
+ceremonial criterion — a consistent, publishable null). Recommendation held for the user (the
+promotion-is-a-separate-ratified-step rule): keep v2 on the desk radar and the behavioral basis in
+receptivity; `big5_llm_opus.json` stands as the best construct-valid text read, promotable per-use
+(O/breadth cross-checks) rather than wholesale. A $0 split-half becomes computable once the corpus
+settles (re-derive chunk keys against the frozen post-reingest corpus).
+
