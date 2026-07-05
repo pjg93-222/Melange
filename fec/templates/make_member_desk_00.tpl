@@ -556,7 +556,12 @@ function psychHTML(m){
       <div><div class=eyebrow>Projected persona (Birkenmaier-Lechner cues)</div>${persona}
       <div class=eyebrow style=margin-top:8px>Susceptibility to pressure</div>${suscRows}${appr}</div></div>`;
   }
-  return `<div id=psych-view>${comp}
+  const ext=P.ext?`<div class=eyebrow style=margin-top:8px>External measures (public datasets · weekly diagnostics)</div>
+    ${P.ext.les!=null?`<div class=mrow><span>Lawmaking effectiveness (CEL LES, thru 118th)</span><b>${P.ext.les.toFixed(2)} · ${Math.round(P.ext.les_pct*100)}th pct</b></div>`:''}
+    ${P.ext.dwnom1!=null?`<div class=mrow><span>Ideology (DW-NOMINATE dim 1)</span><b>${P.ext.dwnom1>0?'+':''}${P.ext.dwnom1.toFixed(2)}</b></div>`:''}
+    ${P.ext.kb_pct!=null?`<div class=mrow><span>Network centrality (Katz-Bonacich, cascade kernel)</span><b>${Math.round(P.ext.kb_pct*100)}th pct</b></div>`:''}
+    ${P.ext.antag?`<div style="font-size:11px;font-weight:700;color:#f59e0b;background:#f59e0b22;border:1px solid #f59e0b55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">Signed-mention antagonist set (Aref-Neal splinter)</div>`:''}`:'';
+  return `<div id=psych-view>${comp}${ext}
     <div class=eyebrow style=margin-top:6px>Notes</div>
     ${note?`<div class=savednote>${esc(note)}</div>`:`<div class=empty>No psychometric profile yet. Add disposition, motivations, persuasion notes, communication style.</div>`}
     <button class=btn data-edit=psych>${note?'Edit':'Add'} note</button>

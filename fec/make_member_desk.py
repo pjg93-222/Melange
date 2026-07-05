@@ -65,6 +65,15 @@ _b5have = {m: t for m, t in B5.items() if t.get('tokens', 0) > 0}
 _B5PCT = {tr: _pctrank([t[tr] for t in _b5have.values()]) for tr in ('O', 'C', 'E', 'A', 'ES')} if _b5have else {}
 _achave = {m: r for m, r in RCPT.items() if r.get('agency') is not None}
 _ACPCT = {k: _pctrank([r[k] for r in _achave.values()]) for k in ('agency', 'communion')} if _achave else {}
+# ---- external measures (run-4m wiring): CEL/LES effectiveness + DW-NOMINATE (lep_criterion.py),
+# Katz-Bonacich centrality (kb_benchmark.py), signed-mention antagonist set (signed_coalitions.py).
+# All three are weekly-refresh diagnostics; desk degrades gracefully when any file is absent.
+_LEP = (L('lep_criterion.json') or {}).get('per_member', {})
+_KB = (L('kb_benchmark.json') or {}).get('kb', {})
+_ANT = set((L('signed_coalitions.json') or {}).get('splinter_k2') or [])
+_LESVALS = [v['lesclassic'] for v in _LEP.values() if v.get('lesclassic') is not None]
+_LESPCT = _pctrank(_LESVALS) if _LESVALS else None
+_KBPCT = _pctrank(list(_KB.values())) if _KB else None
 def _approach(ap, cp, read):
     """IIT-C octant-informed approach note (Interpersonal Influence Tactics Circumplex: tactics
     arrange on the agency x communion plane; Matz et al. PNAS 2017: matched appeals outperform —
@@ -92,6 +101,14 @@ def psy_for(name):
         out['approach'] = _approach(out['agency_pct'], out['communion_pct'], r.get('susc_read'))
     for k in ('pressure_mult', 'susc_z', 'susc_trait_z', 'persona_susc_z', 'susc_read', 'seed_prob'):
         if r.get(k) is not None: out[k] = r[k]
+    lep = _LEP.get(name) or {}
+    ext = {}
+    if lep.get('lesclassic') is not None and _LESPCT:
+        ext['les'] = lep['lesclassic']; ext['les_pct'] = _LESPCT(lep['lesclassic'])
+    if lep.get('dwnom1') is not None: ext['dwnom1'] = lep['dwnom1']
+    if name in _KB and _KBPCT: ext['kb_pct'] = _KBPCT(_KB[name])
+    if name in _ANT: ext['antag'] = 1
+    if ext: out['ext'] = ext
     return out or None
 
 CATS = CS['cats']                            # canonical 17 legislative areas

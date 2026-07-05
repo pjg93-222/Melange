@@ -70,4 +70,10 @@ try:
         moved=sum(1 for m in new if prev.get(m)!=new[m])
         log('rank movement this week: %d/%d members'%(moved,len(new)))
 except Exception as e: log('rank compare skipped: %s'%e)
+# post-chain DIAGNOSTIC layers (run-4k/4l lit-audit augmentations): signed-coalition splinter,
+# Battaglini-Patacchini KB benchmark, Volden-Wiseman LEP criterion. Tolerant — the chain consumes
+# none of them and a diagnostic failure never blocks the refresh; they feed the desk External row.
+step('signed coalitions (diag)',['signed_coalitions.py'],timeout=900)
+step('KB benchmark (diag)',['kb_benchmark.py'],timeout=900)
+step('LEP criterion (diag)',['lep_criterion.py'],timeout=900)
 log('===== WEEKLY REFRESH COMPLETE — dashboards regenerated =====')

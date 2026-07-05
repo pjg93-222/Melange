@@ -757,3 +757,31 @@ authority instead, which is the correct source of record anyway. Optional explor
 re-estimating on the RKH-era window (104th–112th) against *those* Congresses' members for a
 method-faithful replication.
 
+---
+
+# Run-4m — Clean + wiring pass (user: "Do a clean… Wire everything in that should be wired in")
+
+**Clean:** deleted `bill_direction_queue.csv.tmp` (the run-4 S3 orphan, session-tooling residue)
+and the worktree `__pycache__`. Worktree git status clean. Live-jobs check before verification:
+only the interview re-ingest (other session; writes social_media.db, which the chain never reads)
+and this session's batch watcher.
+
+**Wired in (all additive, no rank movement):**
+1. **`weekly_refresh.py`** — new post-chain diagnostics stage: `signed_coalitions.py`,
+   `kb_benchmark.py`, `lep_criterion.py` run after the pipeline each week (tolerant — a diagnostic
+   failure never blocks the refresh). The three JSONs stay fresh without manual runs.
+2. **Member desk — "External measures" block** (psychometrics tab, renders even for members with
+   no text corpus): CEL lawmaking effectiveness (LES + percentile), DW-NOMINATE dim-1, Katz-Bonacich
+   network centrality percentile, and the Aref-Neal antagonist-set badge. Data joined in
+   `make_member_desk.py` (`psy_for` → `P.ext`), rendered in the tpl. Rebuilt + verified:
+   **533/533 members carry the ext block** (KB covers all), 454 with LES, 16 antagonist badges;
+   spot-check French Hill = LES 1.91 (90th pct) · DW-NOM +0.44 · KB 99.8th pct — exactly the
+   HFSC-chair profile expected. Desk regenerated (5,236 KB), bundle 5,165 KB.
+
+**Verification at the wired state:** kernel tests **30/30**, committed audit **53/53 — ALL MODULES
+CLEAN** (the 56-check variant includes 3 guards that live with the other session's uncommitted
+campaign). Not wired, deliberately: the RL envelope (the user's declared moat — needs its own
+campaign), Bakker out-party cue signing (lives on the stranded lt_priming branch — merge-time
+item), behavior-panel LEP rows (panel builder belongs to the live-tree campaign; LEP correlations
+already reported by `lep_criterion.py`).
+
