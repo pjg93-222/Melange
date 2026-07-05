@@ -270,6 +270,28 @@ optimize_result.json, dashboard_data.json. category_stance.json confirmed BYTE-U
 the skip of receptivity/per_category_stance was safe — those systems are genuinely independent of
 the media-blend/stance-stack inputs).
 
+## Run-4h — persona gold validation: FAIL, and it strengthens rather than adds a new concern
+
+The user rated all 30 blind excerpts (agency + communion, 1–9, full range used both axes — no
+straight-lining). Pre-set bars (locked before any score was knowable): PASS ≥+0.30 both axes,
+DIRECTIONAL ≥+0.15, else FAIL. **Result: agency rho = +0.035 (n=30, no discernible relationship),
+communion rho = −0.245 (n=30, WRONG SIGN — the model's "warmer" scores correspond to text the user
+rated LESS warm). VERDICT: FAIL on both axes**, communion by sign not just magnitude.
+
+This is not a standalone surprise — it's the SECOND independent validation method landing on
+persona as unreliable, via a completely different design: the label-free nomological battery
+(big5_nomological_prereg.md) found persona "directionally consistent but magnitude-null" (right
+sign, |r|<.05 on all 5 tests); this human-blind-rating test now finds one axis wrong-signed
+outright. Two different methods (behavior-criterion correlation vs. blind human re-rating of the
+same text) agree the channel isn't measuring what it's built to measure.
+
+**Recommendation (not applied — PERSONA_W is the user's calibrated dial, same standing as every
+other dial this campaign): reconsider PERSONA_W=0.30's place in the susceptibility blend.** Two
+validation attempts, two different methods, zero support. The persona channel can still stand as a
+*display-only* projected-persona note on the desk (already labeled as such), but mixing it 30%
+into the actual pressure_mult/susc_z that drives money-targeting decisions is currently
+unsupported by any evidence collected to date.
+
 ## Verdict
 ALL GATES GREEN at the effective (uncommitted) live-tree state. The system's math, determinism,
 idempotency, contracts, kernel single-sourcing, and both UIs verify clean. The material risk is
