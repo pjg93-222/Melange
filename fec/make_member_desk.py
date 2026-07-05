@@ -65,7 +65,12 @@ def refs_for(name):
              'pos': e.get('pos', 0), 'neg': e.get('neg', 0)}
         if want_quote:
             ex = e.get('examples') or []
-            if ex and ex[0].get('w'): d['q'] = re.sub(r'\s+', ' ', ex[0]['w'])[:130]
+            if ex and ex[0].get('w'):
+                # run-4q (user: "display the full quotes or to where the name is mentioned"): the layer
+                # stores a 200-char window CENTERED ON THE MENTION — the old [:130] head-cut could chop
+                # the mentioned name out of its own evidence. Ship the full window + its source.
+                d['q'] = re.sub(r'\s+', ' ', ex[0]['w']).strip()
+                d['src'] = ex[0].get('src') or ''
         return d
     # 2026-07-04 user directive ("have a toggle where the phrase is mentioned"): evidence quote on
     # EVERY reference row, both directions — the user can verify the person/mention himself.

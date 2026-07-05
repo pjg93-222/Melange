@@ -613,11 +613,12 @@ function relHTML(m){
   const smHTML=sm.length?sm.map(x=>`<div class=partner data-i=${byName[x.name]}><span class=pn>${x.name}</span><span style=color:var(--muted)>${x.chamber}</span><span style=color:var(--muted);text-align:right>#${x.rank??'—'}</span></div>`).join(''):'<div class=empty>No other members parsed for this state.</div>';
   const rf=m.refs||{};
   const rfRow=(r,arrow)=>{const col=r.net>0.15?'#34d399':(r.net<-0.15?'#ef4444':'#8b949e');
-    return `<div class=partner data-i=${byName[r.who]??-1}><span class=pn>${arrow} ${r.who}</span><span style="color:${col};font-weight:700">${r.net>0?'+':''}${r.net}</span><span style=color:var(--muted);text-align:right>${r.pos}+ / ${r.neg}&minus; · n=${r.n}</span></div>${r.q?`<div style="color:var(--faint);font-size:11px;margin:-2px 0 6px 4px">“${esc(r.q)}…”</div>`:''}`;};
+    const SRCL={CREC:'floor',CHRG:'hearing',INTERVIEW:'interview',PRESS:'press',X:'X'};
+    return `<div class=partner data-i=${byName[r.who]??-1}><span class=pn>${arrow} ${r.who}</span><span style="color:${col};font-weight:700">${r.net>0?'+':''}${r.net}</span><span style=color:var(--muted);text-align:right>${r.pos}+ / ${r.neg}&minus; · n=${r.n}</span></div>${r.q?`<div style="color:var(--faint);font-size:11px;margin:-2px 0 6px 4px">“…${esc(r.q)}…”${r.src?` <span style="color:var(--muted)">(${SRCL[r.src]||r.src})</span>`:''}</div>`:''}`;};
   const rofHTML=(rf.out||[]).map(r=>rfRow(r,'→')).join('')||'<div class=empty>No scored references by this member in the speech/interview/social corpus.</div>';
   const rifHTML=(rf['in']||[]).map(r=>rfRow(r,'←')).join('')||'<div class=empty>No scored references to this member.</div>';
   return `<div class=eyebrow>Top cosponsorship partners</div>${ptHTML}
-    <div class=eyebrow style=margin-top:14px>Cross-media references — makes <span style=color:var(--faint)>· green +, red −, from speeches/interviews/reposts</span></div>${rofHTML}
+    <div class=eyebrow style=margin-top:14px>Cross-media references — makes <span style=color:var(--faint)>· green +, red − · quote window centered on the mention · floor speeches, hearings, interviews, press, X</span></div>${rofHTML}
     <div class=eyebrow style=margin-top:14px>Cross-media references — receives</div>${rifHTML}
     <div class=eyebrow style=margin-top:14px>Same-state delegation — ${st||'?'}</div>${smHTML}`;
 }
