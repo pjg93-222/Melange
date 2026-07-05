@@ -524,3 +524,111 @@ completed. Safe to delete once today's session closes.
    tier-exclusion), post-journey social formula, determinism contract (SEED 7 / MC 20 / sm64),
    workbook phase-2 contract, IMP/BLOCKCAT/CATBLOCKS tables, DTHRESH/MAXSHIFT/LOSSFRAME values.
 
+---
+
+# Run-4j — Literature-conformance audit (user: "full access to all my research articles… audit both them and then my model, and make sure everything is up-to-code")
+
+**Method.** Cataloged every research PDF on the machine (repo `research/` ×2, Downloads ×76,
+Desktop ×7; the three *Journal 3* PDFs are personal journals — excluded). Extracted 39 paper texts
+to a scratchpad library (pypdf; image-only PDFs rasterized via PyMuPDF), identified every unknown
+by page-1 text, then ran 4 verification agents (money/persuasion · salience/incentive ·
+IM/cascade/route · text/network), each briefed with the exact code claims. **Every agent verdict
+was re-checked against the actual code wording before acceptance — all four agents over-claimed at
+least once** (calibration ledger below), so this matrix is the calibrated result, not raw agent output.
+
+## Verdict: the model is up to code, with 3 sentences of over-attribution (now fixed)
+
+Zero formula or constant changes are required by the literature. The citation practice is
+overwhelmingly **honest-analogical** — papers are cited for settings, principles, and directions;
+magnitudes are local calibration (and after run-4b, decision-robustness-bounded). The audit found
+**3 comment-level over-attributions** and **1 venue error**, all fixed this run (comment-only,
+compile-checked, no behavior change):
+
+1. **Byrne attribution** (`receptivity_layer.py` docstring) — the code credited all four
+   susceptibility trait directions to Byrne, Silasi-Mansat & Worthy (PAID 2015). The paper actually
+   supports **N+ (replicated core result)** and **A+ (Exp-2 social-pressure interaction)** only;
+   their E effect was **null** and their lone C signal was weak, unreplicated, and **opposite-signed**
+   vs our −.20. The C−/E− dampeners are design priors; A-above-N ordering is the user's directive.
+   Docstring now states exactly this and points to `receptivity_sensitivity.py` (9/9 variants
+   top-20-stable, ρ≥.998) as the magnitude bound. Constants untouched. *Mirror note:* the live-tree
+   behavioral-basis campaign (other session, uncommitted — see S2) analogizes the same composite to
+   cooperation/diligence/dominance; the same attribution note belongs there when it commits.
+2. **(1−1/e) guarantee scope** (`scenario.py` header) — the old sentence could be read as claiming
+   the greedy guarantee for the *competitive cascade*. Calibrated truth: the guarantee covers the
+   **allocator** objective (`optimize.py` — separable-concave money curve; G-K explicitly supports
+   item costs + the data-dependent bound) and the **COALITION** side (follower-vs-fixed-opponent
+   competitive IC **is** submodular — Bharathi-Kempe-Salek, the exact first-to-reach model the
+   kernel implements). **FLIP** (competitive LT) has **no** general guarantee — Borodin et al.
+   prove submodularity fails there — and the code never claimed one; `audit_frontier.py:18` already
+   checks marginal non-increase empirically each run. Header now scoped.
+3. **Chen venue** (`receptivity_layer.py`, `budget_frontier.py`) — "Chen et al. (ICML 2021)" →
+   **UAI 2021** (arXiv 2106.07039, PMLR v161). The substantive use is honest as written: the code
+   cites Chen for the contingency **setting** ("a lobbied seed takes with probability") and openly
+   implements a simpler gate, not their RL solution. The committed-allies carve-out is a documented
+   domain rule (ally parity), not presented as Chen's.
+4. **Library hygiene** — scratchpad extract `rkh_book_excerpt.txt` renamed
+   `steinert_threlkeld_twitter_as_data_excerpt.txt`: the Cambridge excerpt on disk (9781108438339)
+   is Steinert-Threlkeld *Twitter as Data*, **not** the RKH book (my extraction mislabel; it briefly
+   produced a false "fabricated citation" agent verdict — see calibration ledger).
+
+## Conformance matrix (paper ↔ mechanism, calibrated)
+
+| Source | Where used | Verdict | Note |
+|---|---|---|---|
+| Fink et al. 2023 (Data in Brief) | cascade kernel `build_P` + social-layer normalization | **SUPPORTED** | inverse map w=6p/(1−p) is exact algebra on their probability-of-influence; floor 25 / cap 0.25 are local calibration of their normalize-by-volume discipline (their 100-tweet floor was a membership filter) |
+| Golovin & Krause (JAIR) | `optimize.py` adaptive allocator + bound | **SUPPORTED** | framework explicitly covers item costs (§2.4, §6) and the data-dependent bound (Lemma 5.3) the code prints |
+| Bharathi-Kempe-Salek | COALITION competitive IC | **SUPPORTED** | follower's spread vs fixed opponent seeds is monotone-submodular — their theorem is the load-bearing one, and the kernel's first-to-reach coloring is their model |
+| Borodin et al. | FLIP competitive LT | **SUPPORTED (as scoped)** | cited for the model, not a guarantee; no guarantee exists (Thms 1-2, hardness Thm 7) and none is claimed; empirical marginal check in `audit_frontier.py` |
+| Chen et al. UAI'21 + Zareie-Sakellariou | contingency seed gate | **PARTIAL-ANALOGICAL (honest)** | setting adopted, RL solution not; venue fixed |
+| Byrne et al. PAID 2015 | susceptibility composite | **PARTIAL: N+ A+ supported; C−/E− design priors** | comment fixed; magnitudes bounded by run-4b sensitivity |
+| Fouirnaies & Hall (APSR) | incent_mult 0.60 retiring | **DIRECTION SUPPORTED** | their result is *effort/responsiveness*, not roll-call position change (their Table 5 = no position change); 0.60 magnitude is local |
+| Linde & Vis (Pol.Psych) | pt_domain 1.15/0.92, LOSSFRAME 1.10 | **DIRECTION SUPPORTED** | reflection effect strongly found (39%→76% risky under loss framing) = pt_domain's basis; their loss-aversion test was inconclusive — LOSSFRAME leans on K&T attenuated per their elite-scale finding; magnitudes local |
+| Noble-Turner 2024 | going-public shock engine | **STRUCTURE SUPPORTED** | defensive-appeals-hold finding is theirs (CCM holds 8); the b-formula numerics are calibrated-on-structure |
+| Kalla & Broockman 2016 (on disk as `Hertel-Fernandez-2.pdf`) | money→access dampening | **SUPPORTED (as skeptic-for-low-weight)** | the model *encodes* "money buys access, not votes": MAXSHIFT 40→18, WM=0.35 minority partner; in user's bib (line 414) |
+| Bakker-Lelkes-Malka (JOP) | cue receptivity (lt_priming branch) | **REPORT NOTE** | out-party cues can *backfire* (negative effect), not merely run weaker — when the stranded lt_priming branch merges, its cue channel should treat out-party cues as ≤0, not attenuated-positive |
+| Furnas-LaPira-Hertel-Fernandez (PRQ) | messenger-alignment logic | **SUPPORTED (concept)** | "epistemic closure among partisan staffers" grounds persona-homophily gating; the user's own annotation names this application |
+| Ramey-Klingler-Hollibaugh PSRM 2016 | `big5_traits.py`, `fit_smoreg_rkh.py`, shrinkage | **SUPPORTED** | all repo cites point to the correct 2016 article; the RKH *book* (committee-leader C criterion's source) is not on disk — cite-by-memory, and the criterion already did its job (it indicted lexical C) |
+| Mairesse et al. JAIR | essays-fitted SMOreg Big5 | **SUPPORTED (canonical method)** | domain shift addressed by congress recalibration (`fit_smoreg_rkh.py`) |
+| Birkenmaier & Lechner PA 2025 | persona channel (PERSONA_W=0.30, ratified) | **SUPPORTED (construct = projected persona)** | run-4i: both failed validations were scope-mismatched; functional gate 18/18 + party signature passed; user annotation: "highly relevant to the design of nodes" |
+| Porter et al. PNAS 2005 | committee-cluster layout | **SUPPORTED** | normalized-interlock formula exact; centroid+jitter is implementation detail |
+| Malaterre & Lareau 2024 | press HCoI | **SUPPORTED** | curated 19-cat in place of LDA is explicitly permitted ("the methods are agnostic as to which topic model is chosen"); D4 recovery test is an *added* validation |
+| Zhou & Elejalde 2026 | stance_dynamics | **SUPPORTED (label-free port)** | trajectories, persistence, 7-way taxonomy, mirror flip-curves, masking protocol all faithful; no GNN and none claimed |
+| Joo & Steinert-Threlkeld 2022 | frame_alignment | **PARTIAL-ANALOGICAL (labeled)** | image-duplication→title-duplication transposition is flagged in-code as an analog; the chi-squared party-association part is a direct port |
+| Sotoudeh-Porter-Krishnagopal | dashboard pathfinder framing | **CONCEPT CITE** | "influence, not count, drives passage" is their thesis; their pass-weighted edge metric is not implemented (edges = curated network) — fine as concept attribution |
+| Ren et al. MOPBD* / RELINK | `cosponsor_route.py`, scenario recompute | **CONCEPT CITE (honest)** | code self-describes as "Greedy"; "provably-optimal" appears only on the max-product Dijkstra path (tpl:311), where it is mathematically true |
+| Ringe-Victor-Gross BJPS 2013 (*Friends/Enemies* — identified this run) | signed mention layer | **SUPPORTED (concept)** | legislators keep information ties with adversaries → the 449 negative reference edges are signal, not noise — exactly the layer's design |
+| ABB26 Advocacy Priorities handout | kernel `IMP` weights | **SUPPORTED** | Protect tier (tax status, interchange, regulator) ↔ top weights 3.0/3.0–2.0/1.0; headline Advance/Empower asks at 1.0; unlisted specialties 0.1–0.75. One judgment note: Fraud Prevention (a headline Empower item) sits at 0.75 while Data Privacy holds 1.0 — defensible, user may want parity |
+| Rice & Zorn PSRM | *(uncited)* | **LIBRARY-ONLY / opportunity** | their warning (off-the-shelf dictionaries fail specialized vocabularies) was independently *confirmed* by this project (lexical Big5 indicted; stance moved to trained stack + curated registry); their GloVe+seed induction pairs naturally with the Park 2025 direction-aware lexicon plan |
+| Park, Lee & Cho 2025 | *(planned)* | **NOT YET IMPLEMENTED** | direction-aware lexicon remains the ratified upgrade path for valence v2 |
+| Merkley-Stecula, Pritoni et al. (coalitions), Huneeus-Kim, Kim-Kunisky, Bacik et al., Jacoby et al., Alexander et al. 2009, Bickmore et al. 2025 (identified this run), Kim (Jiseon) et al., Kamarthi et al., Taherdoost | *(uncited / roadmap)* | **LIBRARY-ONLY** | present in the user's bib with intended roles (data pipelines, ROI anchors, coalition theory); nothing to conform to yet |
+
+## Agent-calibration ledger (raw verdicts I overruled, and why)
+
+- **Agent B "CRITICAL: Borodin contradiction"** → *dismissed as stated.* No module claims (1−1/e)
+  on competitive LT. The submodularity claims live on the allocator (separable-concave) and the
+  IC follower side (B-K-S theorem). Residue kept: the scenario.py wording ambiguity — fixed.
+- **Agent B "D\*Lite misattribution / PROVABLY-OPTIMAL over-claim"** → *dismissed.* The phrase is
+  attached to the max-product Dijkstra path (a true claim), not the greedy route builder, which
+  self-describes as greedy. D\*Lite/MOPBD\*/RELINK are principle-level roadmap cites.
+- **Agent B "Chen solution decoupling"** → *downgraded to a venue fix.* The code never claims
+  Chen's RL mechanism — it cites the setting and documents its own gate.
+- **Agent D "CRITICAL: RKH citation fabricated"** → *dismissed; my fault upstream.* The agent was
+  handed a mislabeled excerpt (Twitter-as-Data filed as rkh_book_excerpt). All repo cites point to
+  the correct PSRM 2016 article. Residue: the RKH book itself is not on disk (noted above).
+- **Agent D "0.55 bar undervalidated vs their κ≈.84"** → *dismissed as category confusion.* κ is
+  human-annotator agreement on labels; 0.55 is a barely-above-chance *screen* that prints
+  "null: no homophily" when co-movement fails it. It gates a diagnostic line, not the pipeline.
+- **Agent D "Rice-Zorn dismissed by the model"** → *reframed.* Rice-Zorn is uncited; nothing is
+  misused. Logged as an opportunity (matrix row above).
+- **Agent A "model contradicts money-buys-access-not-votes"** (prior round) → *inverted.* The model
+  *implements* the skepticism as dampening (MAXSHIFT 18, WM=0.35).
+- **Agent C "loss aversion unsupported"** (prior round) → *split.* Linde-Vis couldn't validly test
+  loss aversion (null ≠ absent); the *reflection effect* was strongly found and is what pt_domain
+  encodes.
+
+**Bottom line:** after calibration, the literature audit produces **no S1/S2 findings**. The three
+over-attribution sentences are fixed; magnitudes everywhere are labeled local calibration and are
+either sensitivity-bounded (receptivity, run-4b) or pre-registered for outcome scoring (snapshot,
+run-4c). One forward-looking item for the user: **when the lt_priming branch merges, sign the
+out-party cue channel per Bakker-Lelkes-Malka (backfire, not attenuation).**
+

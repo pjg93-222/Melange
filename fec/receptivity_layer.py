@@ -4,10 +4,13 @@ import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__fil
 Fuses four literatures into per-member multipliers consumed by the influence engines:
 
 1. SUSCEPTIBILITY TO PRESSURE — Byrne, Silasi-Mansat & Worthy (PAID 2015) "Who chokes under
-   pressure?": HIGH AGREEABLENESS degrades decisions under social pressure (their headline result),
-   NEUROTICISM adds to it; deliberative CONSCIENTIOUSNESS is protective and EXTRAVERSION
-   (dominance) resists. The user's framing: "very agreeable, or submissive to authority ... should
-   be very susceptible."   SUSC_z = .40*A + .30*N − .20*C − .10*E   (relative correlate strengths)
+   pressure?": NEUROTICISM degrades decision-making under pressure (their replicated core result);
+   HIGH AGREEABLENESS adds to it under *social* pressure (their Exp-2 interaction). Attribution
+   honesty (lit-audit 2026-07-04): the C−/E− dampeners are OUR design priors, NOT Byrne findings
+   (their E effect was null; their lone C signal was weak, unreplicated, and opposite-signed);
+   A ranked above N per the user's framing: "very agreeable, or submissive to authority ... should
+   be very susceptible."   SUSC_z = .40*A + .30*N − .20*C − .10*E   (weights = local calibration,
+   decision-robust per receptivity_sensitivity.py: 9/9 variants keep the top-20, rho>=.998)
    -> susc_mult (pressure & diffusion), edge_mult (cascade receiver susceptibility).
 2. ELECTORAL INCENTIVE — Fouirnaies & Hall (APSR): legislators WITHOUT a reelection incentive
    (final term) systematically reduce effort/responsiveness — "nothing to lose politically."
@@ -22,7 +25,7 @@ Fuses four literatures into per-member multipliers consumed by the influence eng
    status quo).  LOSSFRAME = 1.10: a competitor THREAT (loss frame) moves lean more than an
    equally-sized CU gift (gain frame) — K&T loss aversion (lambda~2.25) attenuated to elite scale
    per Linde & Vis's finding that MPs' framing effects are real but smaller than students'.
-4. CONTINGENCY-AWARE SEEDING — Chen et al. (ICML 2021) + the behaviour-aware IM survey (Zareie &
+4. CONTINGENCY-AWARE SEEDING — Chen et al. (UAI 2021) + the behaviour-aware IM survey (Zareie &
    Sakellariou SNAM 2023): a CONTACTED seed activates only with its receptivity probability —
    "legislators know they are being lobbied" (user), so lobbying contact != guaranteed activation.
    seed_prob = clip(0.60 + .10*A + .06*O + .04*E, 0.30, 0.90): baseline 60% take-rate, agreeable/
