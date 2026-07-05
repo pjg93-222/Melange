@@ -30,7 +30,7 @@ prt=MBC.party()
 cpf=MBC.cpf_diffusion
 adj=MBC.load_network()
 # RECEPTIVITY LAYER (2026-07-02): edge_mult = receiver susceptibility (Byrne); seed_prob = contingency-
-# aware activation (Chen ICML'21 / SNAM behaviour-aware IM: a lobbied seed takes with probability, it is
+# aware activation (Chen UAI'21 / SNAM behaviour-aware IM: a lobbied seed takes with probability, it is
 # not a guaranteed activation). Neutral fallback = legacy behavior.
 rc=MBC.rc
 from moneyball_core import gate

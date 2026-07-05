@@ -3,8 +3,8 @@ from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
 """ADAPTIVE BUDGET OPTIMIZER (Golovin & Krause, "Adaptive Submodularity").
 Greedily allocates a CU budget across members to maximize total Linear-Threshold winnability
 (sum over topics of expected weighted flips).  The objective is monotone & submodular in the
-allocation (pflip has sqrt-diminishing returns), so a LAZY (CELF) greedy is near-optimal — the
-(1-1/e) guarantee.  ADAPTIVE: as we spend, a member whose cumulative CU crosses their money-response
+allocation (pflip has sqrt-diminishing returns), so a LAZY (CELF, Leskovec et al. KDD'07) greedy
+is near-optimal — the (1-1/e) guarantee.  ADAPTIVE: as we spend, a member whose cumulative CU crosses their money-response
 defection threshold CONVERTS (joins the pro coalition); we observe that, update the stance, and
 re-optimize the remaining budget (an adaptive policy, not a fixed plan).
 

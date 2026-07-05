@@ -6,7 +6,10 @@ CU coalition influence vs the frozen baseline, topic by topic.  Grounded in the 
   - Bharathi, Kempe & Salek, "Competitive Influence Maximization" (viral-competitive): the A(pro)/B(anti)
     first-to-reach cascade a shock perturbs is exactly their competing-diffusion model.
   - Golovin & Krause, "Adaptive Submodularity": a scenario is an adaptive policy (apply -> observe realized
-    outcome -> re-optimize); the lazy/CELF greedy carries the (1-1/e) guarantee into that setting.
+    outcome -> re-optimize). Guarantee scope (lit-audit 2026-07-04): the (1-1/e) bound covers the ALLOCATOR
+    objective (optimize.py's separable-concave money curve) and the coalition side (follower-vs-fixed-opponent
+    IC is submodular per Bharathi-Kempe-Salek); competitive LT (FLIP) has NO general guarantee — Borodin et al.
+    prove submodularity can fail there — so it runs as a heuristic, marginals checked empirically by audit_frontier.py.
   - Ren et al., "Multi-Objective Path-Based D* Lite": recompute only what the scenario actually touches.
   - money_response.py: saturation/capacity-aware money->lean curve + defection threshold.
 
