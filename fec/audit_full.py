@@ -161,7 +161,10 @@ if os.path.exists(B+'\\cu_golden_labels.csv'):
     _du=collections.Counter(r['url'] for r in _gl if r['url'])
     ck('golden set has no duplicate URLs', max(_du.values())==1 if _du else False)
     _cf=[r for r in _gl if r['conflict']]
-    ck('label conflicts are flagged, not silently resolved', all(('->' in r['conflict']) or r['conflict'].startswith('user-resolved:') for r in _cf), '%d flagged (user-resolved carries its trail inline)'%len(_cf))
+    # two provenance formats are compliant: the arrow ('aug=X->queue=Y', unresolved flag) and the
+    # user-adjudicated form 'user-resolved: <label> (was aug=X queue=Y)' (2026-07-03 overnight pass, 36 rows)
+    ck('label conflicts are flagged, not silently resolved',
+       all(('->' in r['conflict']) or r['conflict'].startswith('user-resolved:') for r in _cf), '%d flagged (user-resolved carries its trail inline)'%len(_cf))
 else: ck('golden label set present (run build_golden_labels.py)', False)
 if os.path.exists(B+'\\stance_clf_composed.pkl'):
     try:
