@@ -52,8 +52,14 @@ except Exception: pass
 step('CREC floor speeches',['fetch_congressional_record.py','crec','--since',str(today-datetime.timedelta(days=14))],timeout=3000)
 step('CHRG finance hearings',['fetch_congressional_record.py','chrg','--since',str(today-datetime.timedelta(days=60))],timeout=3000)
 step('Big Five traits',['big5_traits.py'],timeout=1800)
+step('interaction features',['interaction_features.py'],timeout=900)      # conversational dynamics (feeds dominance disposition)
+step('behavior panel',['behavior_panel.py'],timeout=900)                  # nomological fix 2026-07-04: dispositions measured from behavior
+step('behavioral dispositions',['behavioral_dispositions.py'],timeout=900)  # must precede receptivity (run_pipeline chain)
+step('Big5 v2 (behavior-calibrated)',['big5_lexcal_v2.py'],timeout=900)     # text instrument, honest held-out; desk radar source
+step('Big5 v3 (hybrid)',['big5_hybrid.py'],timeout=900)                     # lexical+interaction+persona; wins expected post-nickfix corpus
 step('social interaction layer',['social_interaction_layer.py'],timeout=900)
 step('multilayer network',['build_multilayer_network.py'],timeout=900)
+step('press stance stack',['press_stance_stack.py'],timeout=1800)   # re-score the (grown) corpus so the sidecar never goes stale (frozen-archive lesson); new articles missing Fable cache fields degrade gracefully to reader+DEBATE features
 step('media blend',['build_media_blend.py'],timeout=1200)   # tolerant: Excel lock -> stale press this week, still consistent
 ok=step('FULL PIPELINE + dashboards',['run_pipeline.py'],timeout=3000)
 if not ok:

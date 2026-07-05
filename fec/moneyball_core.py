@@ -165,3 +165,21 @@ def overall_tier(cm):
     return ('Champion' if x>=2.5 else 'Ally' if x>=1.75 else 'Highly Persuadable' if x>=1.25 else
             'Persuadable' if x>=0.75 else 'Lean Persuadable' if x>=0.25 else 'True Neutral' if x>=-0.25 else
             'Lean Skeptic' if x>=-0.75 else 'Skeptic' if x>=-1.25 else 'Highly Skeptical' if x>=-1.9 else 'Opponent')
+# Nickname equivalence classes (QA3 2026-07-04, Bernie/Bernard-class resolver misses) — SINGLE COPY.
+# fetch_interviews.py carries the original inline; consolidate it to this import at next touch.
+NICK_SETS=[{'bernard','bernie'},{'charles','chuck','charlie'},{'christopher','chris'},{'richard','dick','rich','rick'},
+ {'michael','mike'},{'james','jim','jimmy'},{'robert','bob','rob','bobby'},{'thomas','tom','tommy'},{'daniel','dan','danny'},
+ {'joseph','joe','joey'},{'timothy','tim'},{'patrick','pat'},{'william','bill','will','billy'},{'edward','ed','ted','eddie'},
+ {'theodore','ted'},{'elizabeth','liz','beth','betty'},{'katherine','kathryn','katie','kate','kathy'},{'margaret','maggie','meg'},
+ {'benjamin','ben'},{'alexander','alex'},{'anthony','tony'},{'andrew','andy','drew'},{'matthew','matt'},{'jonathan','jon'},
+ {'nicholas','nick'},{'gregory','greg'},{'lawrence','larry'},{'gerald','jerry'},{'ronald','ron','ronny'},{'donald','don'},
+ {'kenneth','ken'},{'stephen','steven','steve'},{'david','dave'},{'samuel','sam'},{'frederick','fred'},{'susan','sue','suzy'},
+ {'deborah','debbie','deb'},{'cynthia','cindy'},{'jacquelyn','jacqueline','jackie'},{'raphael','rafael','raffi'},
+ {'joshua','josh'},{'zachary','zach','zack'},{'abigail','abby'},{'rebecca','becca','becky'},{'jefferson','jeff'},
+ {'jeffrey','jeff'},{'mitchell','mitch'},{'randall','randy'},{'terrence','terri','terry'},{'vincent','vince'}]
+_NICK={}
+for _ns in NICK_SETS:
+    for _a in _ns: _NICK.setdefault(_a,set()).update(_ns)
+def name_variants(first):
+    """All nickname-equivalent first names for `first` (incl. itself)."""
+    return _NICK.get(first,set())|{first}

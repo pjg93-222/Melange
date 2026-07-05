@@ -53,8 +53,27 @@ EH  = L('electoral_history.json') or {}      # per-member FEC primary+general vo
 # canonical, always-fresh blended rank — source rank/score from it, workbook only as fallback.
 _RA = L('ranks_python.json') or {}
 RA_RANK = _RA.get('rank', {}); RA_SCORE = _RA.get('score', {})
+# ---- signed cross-media reference layer (user-ratified 2026-07-04): who this member references
+# (out) / is referenced by (in), Fable-valenced, from member_references.json (directed a->b) ----
+_REFS = (L('member_references.json') or {}).get('edges', [])
+_ROUT = {}; _RIN = {}
+for _e in _REFS:
+    _ROUT.setdefault(_e['a'], []).append(_e); _RIN.setdefault(_e['b'], []).append(_e)
+def refs_for(name):
+    def pack(e, other, want_quote):
+        d = {'who': other, 'net': round(e.get('net', 0), 2), 'n': e.get('n_scored', 0),
+             'pos': e.get('pos', 0), 'neg': e.get('neg', 0)}
+        if want_quote:
+            ex = e.get('examples') or []
+            if ex and ex[0].get('w'): d['q'] = re.sub(r'\s+', ' ', ex[0]['w'])[:130]
+        return d
+    # 2026-07-04 user directive ("have a toggle where the phrase is mentioned"): evidence quote on
+    # EVERY reference row, both directions — the user can verify the person/mention himself.
+    out = [pack(e, e['b'], True) for e in sorted(_ROUT.get(name, []), key=lambda e: -e.get('n_scored', 0))[:8]]
+    inn = [pack(e, e['a'], True) for e in sorted(_RIN.get(name, []), key=lambda e: -e.get('n_scored', 0))[:8]]
+    return {'out': out, 'in': inn} if (out or inn) else None
 # ---- computed psychometrics (user-directed 2026-07-03): Big5 radar + B&L persona + susceptibility cross-read ----
-B5  = (L('big5_traits.json') or {}).get('traits', {})
+B5  = (L('big5_v2.json') or L('big5_traits.json') or {}).get('traits', {})   # v2 = behavior-calibrated text instrument (2026-07-04); falls back to v1 if absent
 RCPT = (L('member_receptivity.json') or {}).get('members', {})
 if not RCPT: print('  !! member_receptivity.json MISSING — psychometrics tab computed section will be empty')
 def _pctrank(vals):
@@ -71,26 +90,36 @@ def _approach(ap, cp, read):
     treated as a tilt, not a lever, per the 2026 meta-analytic caution)."""
     hiA, loA = ap >= 0.60, ap <= 0.40
     hiC, loC = cp >= 0.60, cp <= 0.40
-    if hiA and hiC:   note = "Partnership framing: offer a visible leadership role in the cause; collaborative asks land; let them front the win."
-    elif hiA and loC: note = "Lead with power and outcomes: short, direct, wins-and-numbers brief; credit accrues to them; skip emotional appeals."
-    elif loA and hiC: note = "Relationship-first: constituent stories and empathy framing; patient cadence, strong follow-up; do not open with pressure."
-    elif loA and loC: note = "Technical brief: data, evidence, written material in advance; low-key, no theatrics."
-    elif hiC:         note = "Warmth-forward style: open with shared-community framing, then calibrate assertiveness in the room."
-    elif hiA:         note = "Dominance-forward style: be crisp and outcome-led; defer on stagecraft until their warmth reads."
-    else:             note = "Mixed interpersonal style: calibrate in the room; neither warmth nor dominance dominates their public persona."
-    if read == 'diverge': note += " CAUTION: trait and persona reads disagree — verify in person before leaning on either."
+    if hiA and hiC:   note = "Partnership framing: offer a visible leadership role in the cause; collaborative asks land well; let them front the win."
+    elif hiA and loC: note = "Lead with outcomes: a short, direct, results-focused brief; let the credit accrue to them; data and wins land better than sentiment."
+    elif loA and hiC: note = "Relationship-first: constituent stories and community framing; patient cadence and strong follow-up; open with connection before the ask."
+    elif loA and loC: note = "Technical brief: data, evidence, and written material shared in advance; a calm, well-prepared conversation works best."
+    elif hiC:         note = "Warmth-forward style: open with shared-community framing, then match their energy in the room."
+    elif hiA:         note = "Direct style: be crisp and outcome-led; let the conversation set the tone."
+    else:             note = "Mixed interpersonal style: read the room; neither warmth nor directness clearly leads their public persona."
+    if read == 'diverge': note += " Note: the behavioral and persona reads differ — best confirmed in person."
     return note
+
+# behavioral dispositions (nomological fix 2026-07-04): the PRIMARY psychometric display —
+# measured from behavior (validated by construction), replacing the indicted lexical Big5 radar
+# as the headline. Percentile-ranked across covered members per axis.
+BDISP = (L('behavioral_dispositions.json') or {}).get('members', {})
+_BD_AX = ['cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z']
+_BDPCT = {ax: _pctrank([d[ax] for d in BDISP.values() if ax in d]) for ax in _BD_AX} if BDISP else {}
 
 def psy_for(name):
     t = B5.get(name) or {}; r = RCPT.get(name) or {}
     out = {}
+    bd = BDISP.get(name) or {}
+    if bd and _BDPCT:
+        out['behav_pct'] = [(_BDPCT[ax](bd[ax]) if ax in bd else None) for ax in _BD_AX]
     if t.get('tokens', 0) > 0 and _B5PCT:
         out['big5_pct'] = [_B5PCT[tr](t[tr]) for tr in ('O', 'C', 'E', 'A', 'ES')]
         out['big5_low'] = bool(t.get('lowconf')); out['tokens'] = t.get('tokens')
     if r.get('agency') is not None and _ACPCT:
         out['agency_pct'] = _ACPCT['agency'](r['agency']); out['communion_pct'] = _ACPCT['communion'](r['communion'])
         out['approach'] = _approach(out['agency_pct'], out['communion_pct'], r.get('susc_read'))
-    for k in ('pressure_mult', 'susc_z', 'susc_trait_z', 'persona_susc_z', 'susc_read', 'seed_prob'):
+    for k in ('pressure_mult', 'susc_z', 'susc_trait_z', 'persona_susc_z', 'susc_read', 'seed_prob', 'basis'):
         if r.get(k) is not None: out[k] = r[k]
     return out or None
 
@@ -321,7 +350,8 @@ def load_press_and_bills(member_names):
             m = re.match(r'^(.*?)\s*\[([^\]]+)\]$', part)
             if not m: continue
             tag = m.group(2).strip().split('/'); nme = m.group(1).strip(); rel = tag[0]
-            if nme == 'Small Business (full)': rel = 'Moderately'   # UNIFY: was Senate [Highly] / House [Moderately]; SB is a secondary CU committee (MBL)
+            # 2026-07-04 user directive: Small Business IS a highly relevant committee (SBA lending,
+            # MBL) — display the sheet's own [Highly] tier verbatim; the old 'Moderately' unify-override is retired.
             seats.append({'name': nme, 'rel': rel, 'role': (tag[1] if len(tag) > 1 else '')})
         cmts[nm] = {'score': r[1], 'seats': seats}
     # --- authoritative rank/score/pillars from the workbook Blended Model (counts W&M via the Committee
@@ -452,6 +482,7 @@ def build_bundle():
             'bio_manual': MANUAL.get(name, {}).get('bio'),         # manual addendum
             'state': state_of(m),
             'partners': partners,                                  # relational: cosponsor ties
+            'refs': refs_for(name),                                # signed cross-media references (out/in, Fable-valenced)
             'demo': m.get('demo'),                                 # demographics
             'psychometrics': MANUAL.get(name, {}).get('psychometrics'),  # manual
             'psy': psy_for(name),                                  # computed: Big5 pct radar + persona + susceptibility cross-read

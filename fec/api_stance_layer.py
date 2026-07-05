@@ -22,7 +22,10 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B = MB_ROOT
 # model selection (user 2026-07-04: "I want that running on Fable"): --fable / --opus / default sonnet.
 # Per-model result caches — switching models NEVER mixes labels in one dataset.
-MODELS = {'fable': ('claude-fable-5', 0.0070), 'opus': ('claude-opus-4-8', 0.0090), 'sonnet': ('claude-sonnet-5', 0.0018)}
+# 2026-07-04 measured ladder on goldeval (identical inputs): Opus+original-prompt 0.779 > Fable 0.608-0.618
+# > DEBATE 0.571 -> production reader = OPUS REPLICA (original prelabel prompts verbatim + adaptive
+# thinking + effort medium, the exact 0.779 configuration). Estimates include thinking tokens.
+MODELS = {'fable': ('claude-fable-5', 0.0070), 'opus': ('claude-opus-4-8', 0.0055), 'sonnet': ('claude-sonnet-5', 0.0018)}
 _mk = next((k for k in MODELS if '--' + k in sys.argv), 'sonnet')
 MODEL, EST_PER_CALL = MODELS[_mk]
 CACHE_SUFFIX = '' if _mk == 'sonnet' else '_' + _mk
@@ -53,11 +56,20 @@ Work through the factorization, in order:
    * Measures favoring large banks over CUs, or attacks on the CU tax status = -1;
      reinforcing the CU tax status, CU charter/field-of-membership expansion = +1.
    * Fraud prevention, data-privacy standards CUs seek, CDFI funding, defense-CU access = +1.
-4. CU ALIGNMENT — stance(actor toward target) x valence(target for CUs). Supporting an anti-CU target =
-   oppose. Opposing an anti-CU target = support. Neutral stance or neutral target = neutral.
-5. ATTRIBUTION — member-own / reported-action / third-party-voice (if the member's own position cannot
-   be inferred, alignment=unrelated).
-Confidence: high/medium/low (prefer neutral/unrelated + low over a guessed direction). One-sentence rationale."""
+4. CU ALIGNMENT — the member's alignment as evidenced by THIS item:
+   stance(actor toward target) x valence(target for CUs). Supporting an anti-CU target = oppose.
+   Opposing an anti-CU target = support. Neutral stance or neutral target = neutral.
+5. ATTRIBUTION — whose position does this item evidence?
+   * member-own: the member's own press release / their quoted words.
+   * reported-action: a third party (e.g. America's Credit Unions) reporting an ACTION the member took
+     (sponsored, voted, withdrew an amendment). The alignment is about the member's ACTION, not the
+     article's tone. E.g. "Advocacy win: Senator X will not offer the amendment" = the member withdrew
+     an anti-CU amendment -> weak support, NOT the article's celebratory tone.
+   * third-party-voice: the text's stance belongs to someone other than the member (an advocacy group's
+     opinion, an opponent's attack). If the member's own position cannot be inferred, alignment=unrelated.
+Confidence: high = headline clearly establishes actor, target, and direction; medium = probable but one
+element inferred; low = headline insufficient (prefer neutral/unrelated + low over a guessed direction).
+Keep rationale to one sentence."""
 
 TWEET_SYSTEM = """You label social-media posts by members of Congress for a credit-union (CU) legislative-stance
 model. You see the full post text. Work through the factorization, in order:
@@ -93,11 +105,15 @@ PRESS_SCHEMA = schema(["member-own", "reported-action", "third-party-voice"])
 TWEET_SCHEMA = schema(["member-own", "rt-endorsement", "third-party-voice"])
 
 def classify(system, sch, user, _retry=True):
+    kw = {}
+    if _mk == 'opus':   # REPLICA of the measured 0.779 configuration: adaptive thinking + effort medium
+        kw = {"thinking": {"type": "adaptive"}}
     resp = client.messages.create(
-        model=MODEL, max_tokens=1000,
-        output_config={"format": {"type": "json_schema", "schema": sch}},
+        model=MODEL, max_tokens=3000 if _mk == 'opus' else 1000,
+        output_config=({"effort": "medium", "format": {"type": "json_schema", "schema": sch}} if _mk == 'opus'
+                       else {"format": {"type": "json_schema", "schema": sch}}),
         system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
-        messages=[{"role": "user", "content": user + "\n(Keep rationale under 12 words.)"}])
+        messages=[{"role": "user", "content": user + "\n(Keep rationale under 12 words.)"}], **kw)
     try:
         return json.loads(next(b.text for b in resp.content if b.type == "text"))
     except (json.JSONDecodeError, StopIteration):
@@ -156,8 +172,11 @@ if 'press' in sys.argv:
         u = (r.get('url') or '').strip()
         if not u: continue
         k = hashlib.md5(u.encode('utf-8')).hexdigest()
-        user = ("Member: %s (%s)\nDate: %s\nPress categories: %s\nHeadline: %s" %
-                (r.get('member'), r.get('party'), r.get('date'), r.get('categories'), r.get('title')))
+        ul = u.lower()   # source channel derived from url (replica of the original prelabel's source line)
+        dom = ('americascreditunions.org (the CU trade association itself)' if 'americascreditunions' in ul
+               else ("the member's own congressional website" if ('.house.gov' in ul or '.senate.gov' in ul) else 'a third-party outlet'))
+        user = ("Member: %s (%s, source: %s)\nDate: %s\nPress categories: %s\nHeadline: %s" %
+                (r.get('member'), r.get('party'), dom, r.get('date'), r.get('categories'), r.get('title')))
         items.append((k, user, r))
     res = run(items, PRESS_SYSTEM, PRESS_SCHEMA, B + r'\api_press_cache%s.jsonl' % CACHE_SUFFIX, 'PRESS[%s]' % MODEL)
     out = []; agree = dis = 0

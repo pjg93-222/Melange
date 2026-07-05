@@ -205,6 +205,34 @@ if os.path.exists(_pm_p):
     ck('media-blend press component is DYNAMIC and fresh (not the frozen archive)',
        _fresh and _pm.get('members_nonzero',0)>=197,
        'members=%s fresh=%s'%(_pm.get('members_nonzero'),_fresh))
+    # 2026-07-04: intensity must be NON-DEGENERATE. The first dynamic build clipped |press_value|
+    # to a 0.25 floor that 100% of articles saturated -> the component silently became a pure
+    # article-count measure (flipped Warren +310 ranks). Guard: recorded pv stats must show real
+    # spread (many distinct values, median strictly inside (0, max)).
+    _pvs=_pm.get('pv_stats') or {}
+    ck('press component intensity non-degenerate (no clip saturation / constant weights)',
+       _pvs.get('n_distinct',0)>=20 and 0<_pvs.get('median',0)<_pvs.get('max',0),
+       'pv_stats=%s'%_pvs)
+    # 2026-07-04 stack wiring guard: when the press_stance_final.csv sidecar exists, the stack must
+    # actually drive the signs (>=90% stack vs DEBATE-fallback) and the unrelated->0 mention-noise
+    # kill must be active. A silent fall-back to DEBATE (0.571 adversarial-frame) is a regression.
+    _sk=_pm.get('stack') or {}
+    if _sk.get('sidecar'):
+        _tot=_sk.get('stack_signed',0)+_sk.get('debate_fallback',0)
+        ck('press stack drives the dynamic component (not silently on DEBATE fallback)',
+           _tot>0 and _sk.get('stack_signed',0)/_tot>=0.9 and _sk.get('unrelated_zeroed',0)>0,
+           'stack=%s'%_sk)
+# 2026-07-04 nomological fix guard: receptivity must run on the BEHAVIORAL basis (the lexical Big5
+# was INDICTED by the pre-registered label-free validation — big5_nomological_prereg.md). A silent
+# fall-back to lexical (missing dispositions artifact) is a regression to an indicted instrument.
+_rc_p=B+r'\member_receptivity.json'
+if os.path.exists(_rc_p):
+    _rc=json.load(open(_rc_p))
+    _bd_p=B+r'\behavioral_dispositions.json'
+    _bd_ok=os.path.exists(_bd_p) and len((json.load(open(_bd_p)) or {}).get('members',{}))>=450
+    ck('receptivity runs on the behavioral basis (lexical Big5 indicted 2026-07-04)',
+       _rc.get('basis')=='behavioral' and _bd_ok,
+       'basis=%s dispositions_ok=%s'%(_rc.get('basis'),_bd_ok))
 else:
     ck('media-blend press component is DYNAMIC (press_component_meta.json present)',False,'meta missing — blend ran pre-fix or PRESS_DYNAMIC=0')
 # S2-04 guard (audit 2026-07-02): every workbook reader hardcodes range(3,536) for the 533-member roster.

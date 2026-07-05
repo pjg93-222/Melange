@@ -127,17 +127,49 @@ if os.environ.get('PRESS_DYNAMIC','1')!='0':
     import csv as _csv,io as _io
     _tone=os.path.join(DRAFT,'cu_press_stance_tone.csv') if 'DRAFT' in dir() else os.path.join(os.path.dirname(M),'Draft Systems','cu_press_stance_tone.csv')
     _dyn=collections.defaultdict(lambda:collections.defaultdict(float))
-    _n=0; _nm=set()
+    _n=0; _nm=set(); _pvs=[]
+    # STACK OVERRIDE (user-ratified 2026-07-04 "wire in the most accurate stack"): press_stance_final.csv
+    # (press_stance_stack.py, 760-gold meta: 0.837 all-gold frame / 0.765 adversarial frame; DEBATE alone
+    # 0.796/0.571). Stack label replaces DEBATE sign; UNRELATED -> 0 (kills ACU trade-digest mention
+    # noise, the Warren #103 driver); tier-weighted trust (measured: unan .955 / maj .776 / rev .638).
+    # Missing sidecar or unmatched url -> DEBATE fallback (legacy behavior, never silently empty).
+    _stk={}
+    _sfp=M+r'\press_stance_final.csv'
+    if os.path.exists(_sfp):
+        for _r in _csv.DictReader(_io.open(_sfp,encoding='utf-8-sig',newline='')):
+            _stk[(_r.get('url') or '').strip().rstrip('/')]=((_r.get('stack_label') or '').strip().lower(),(_r.get('tier') or '').strip().lower())
+    _TW={'unanimous':1.0,'majority':0.7,'review':0.35}
+    # ATTRIBUTION-STRENGTH channel weight (user 2026-07-04 "that is such a regression" — Warren
+    # pulled to #83 by trade-press tagging): a member's OWN .gov press release is member-authored
+    # evidence (attribution-clean, like tweets); trade/third-party coverage that merely tags the
+    # member is weaker. His golds label trade coverage support (41/65 third-party = support) — the
+    # LABELS stand; this dial reduces the CREDIT such articles contribute to the 40%-weight pillar.
+    # PRESS_THIRD_W env reverts (1.0 = old behavior).
+    _W3=float(os.environ.get('PRESS_THIRD_W','0.5'))
+    _n_stack=0; _n_fallback=0; _n_unrel=0; _n_own=0; _n_third=0
     def _pdate(s):
         for _f in ('%m/%d/%Y','%Y-%m-%d','%m/%d/%y'):
             try: return datetime.datetime.strptime((s or '').strip(),_f).date()
             except ValueError: pass
         return None
     for _r in _csv.DictReader(_io.open(_tone,encoding='utf-8-sig',newline='')):
-        _m=_r.get('member'); _sg=SIGN.get((_r.get('stance') or '').lower(),0.0)
+        _m=_r.get('member')
+        _hit=_stk.get((_r.get('url') or '').strip().rstrip('/'))
+        if _hit is not None:
+            _lab,_tier=_hit
+            if _lab=='unrelated': _n_unrel+=1; continue   # mention noise -> zero contribution
+            _sg=SIGN.get(_lab,0.0)*_TW.get(_tier,0.7)
+            if _sg!=0.0: _n_stack+=1
+        else:
+            _sg=SIGN.get((_r.get('stance') or '').lower(),0.0)
+            if _sg!=0.0: _n_fallback+=1
         if not _m or _sg==0.0: continue
-        try: _pv=max(0.25,min(3.0,float(_r.get('press_value') or 1.0)))
-        except (TypeError,ValueError): _pv=1.0
+        # intensity = |press_value| (column embeds sign; stance supplies sign here). NO floor:
+        # the csv's units are tiny (~0.03 scale) and a 0.25 floor saturated 100% of articles,
+        # erasing intensity into a pure count measure. Top clip 3.0 = outlier guard only.
+        try: _pv=min(3.0,abs(float(_r.get('press_value'))))
+        except (TypeError,ValueError): _pv=0.0
+        if _pv==0.0: continue   # no intensity evidence -> no contribution
         _d=_pdate(_r.get('date'))
         if _d is not None: _dec=0.5**(max(0.0,(TODAY-_d).days/365.25)/2.0)
         else:
@@ -145,14 +177,23 @@ if os.environ.get('PRESS_DYNAMIC','1')!='0':
             except (TypeError,ValueError): _dec=0.5
         _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip() and c.strip() in ORIG]
         if not _cats: continue
-        _n+=1; _nm.add(_m)
-        for _c in _cats: _dyn[_c][_m]+=_sg*_pv*_dec/len(_cats)
+        _ul=(_r.get('url') or '').lower()
+        if '.house.gov' in _ul or '.senate.gov' in _ul: _cw=1.0; _n_own+=1
+        else: _cw=_W3; _n_third+=1
+        _n+=1; _nm.add(_m); _pvs.append(_pv)
+        for _c in _cats: _dyn[_c][_m]+=_sg*_pv*_dec*_cw/len(_cats)
     ORIG={c:dict(_dyn.get(c,{})) for c in ORIG}   # same shape/keys as the archive
     from moneyball_core import dump_atomic as _da
+    _pvs.sort()
     _da({'built_from_csv_mtime':os.path.getmtime(_tone),'articles_used':_n,'members_nonzero':len(_nm),
+         'pv_stats':{'min':_pvs[0] if _pvs else 0.0,'median':_pvs[len(_pvs)//2] if _pvs else 0.0,
+                     'max':_pvs[-1] if _pvs else 0.0,'n_distinct':len(set(_pvs))},
+         'stack':{'sidecar':os.path.exists(_sfp),'stack_signed':_n_stack,'debate_fallback':_n_fallback,
+                  'unrelated_zeroed':_n_unrel},
+         'channel_weight':{'third_w':_W3,'own_domain':_n_own,'third_party':_n_third},
          'note':'dynamic press component (PRESS_DYNAMIC); archive fallback with PRESS_DYNAMIC=0'},
         M+r'\press_component_meta.json')
-    print('DYNAMIC press component: %d signed articles -> %d members (frozen archive had 197)'%(_n,len(_nm)))
+    print('DYNAMIC press component: %d signed articles -> %d members (stack-signed %d, DEBATE fallback %d, unrelated zeroed %d; own-domain %d @1.0, third-party %d @%.2f)'%(_n,len(_nm),_n_stack,_n_fallback,_n_unrel,_n_own,_n_third,_W3))
 changed=0
 for kwcat,hname in HDRMAP.items():
     col=hdr.get(hname)

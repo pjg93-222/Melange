@@ -289,7 +289,7 @@ const n0=n=>n==null?'—':Number(n).toLocaleString();
 const last=n=>n.split(' ').slice(-1)[0];
 /* ---- stance system (Champion..Opponent), per legislative area ---- */
 const STANCE_ORDER=['C','F','A','H','P','G','T','N','L','S','K','O'];      // champion -> opponent (symmetric middle)
-const POSTURE={C:'activate',F:'reinforce',A:'reinforce',H:'persuade',P:'persuade',G:'nurture',T:'qualify',N:'qualify',L:'monitor',S:'defend',K:'defend',O:'defend / avoid','-':'qualify'};
+const POSTURE={C:'activate',F:'reinforce',A:'reinforce',H:'persuade',P:'persuade',G:'nurture',T:'qualify',N:'qualify',L:'monitor',S:'steward',K:'steward',O:'steward','-':'qualify'};
 const stanceName=t=>(D.tiername&&D.tiername[t])||'—';
 function stanceAt(m,area){ if(!area) return m.overall_stance||'-'; const i=CATS.indexOf(area); return (i>=0&&m.stances)?(m.stances[i]||'-'):'-'; }
 function stanceBadge(t){const col=STCOL[t]||'#6b7280';return `<span class=tier style="color:${col};background:${col}1A"><span class=d></span>${stanceName(t)}</span>`;}
@@ -476,7 +476,7 @@ function openMember(i){
   h+=section('Relational','rel',relHTML(m));
   h+=section('Committee positions','cttee',committeeHTML(m));
   h+=section('Demographics','demo',demoHTML(m));
-  h+=section('Psychometrics','psych',psychHTML(m));
+  h+=section('Behavior','psych',psychHTML(m));
   h+=section('Legislative actions','leg',legHTML(m));
   h+=section('Press & social media','press',pressHTML(m));
   $('#memberbody').innerHTML=h;
@@ -540,21 +540,35 @@ function staffHTML(m){
 function psychHTML(m){
   const note=manField(m.name,'psych',m.psychometrics);
   const P=m.psy||{};
-  const READS={'agree-susceptible':['Trait & persona AGREE: susceptible','#16a34a'],'agree-resistant':['Trait & persona AGREE: resistant','#ef4444'],'diverge':['Reads DIVERGE — verify in person','#f59e0b'],'mixed':['Mixed reads','#8b949e'],'both-neutral':['Both reads neutral','#8b949e'],'trait-only':['Trait read only — no persona coverage','#6b7280']};
+  const READS={'agree-susceptible':['Both reads agree: highly receptive','#16a34a'],'agree-resistant':['Both reads agree: independent-minded','#ef4444'],'diverge':['Reads differ — best confirmed in person','#f59e0b'],'mixed':['Mixed reads','#8b949e'],'both-neutral':['Both reads neutral','#8b949e'],'trait-only':['Behavioral read only — no persona coverage','#6b7280']};
   const bar=(l,v,c)=>`<div class=mrow><span>${l}</span><b>${Math.round(v*100)}th pct</b></div><div style="height:7px;background:#1b2129;border-radius:4px;overflow:hidden;margin:2px 0 8px"><i style="display:block;height:100%;width:${Math.round(v*100)}%;background:${c}"></i></div>`;
   let comp='<div class=empty>No computed psychometrics for this member (no text corpus).</div>';
-  if(P.big5_pct){
-    const rad=radar(P.big5_pct,['Open','Consc','Extra','Agree','EmoSt'],'#7dd3fc',82);
-    const persona=(P.communion_pct!=null)?bar('Warmth — communion persona',P.communion_pct,'#2dd4bf')+bar('Dominance — agency persona',P.agency_pct,'#c2862a'):'<div class=empty>No persona cue coverage yet for this member.</div>';
+  if(P.big5_pct||P.behav_pct){
+    // PRIMARY: behavioral dispositions (measured from what the member DOES — cosponsorship,
+    // roll-call participation, floor dynamics, media engagement, portfolio breadth; nomological
+    // fix 2026-07-04). These drive the engines' receptivity. null axis = insufficient coverage.
+    const BLAB=['Cooperation','Diligence','Floor presence','Visibility','Breadth'];
+    /* 2026-07-04 user directive: TWO radar charts — Behavior and Big-5, same geometry. n/a axes plot
+       at the 0.5 neutral ring (never fake-low) and are listed under the chart. */
+    const bna=P.behav_pct?BLAB.filter((_,i)=>P.behav_pct[i]==null):[];
+    const behav=P.behav_pct
+      ?radar(P.behav_pct.map(v=>v==null?0.5:v),BLAB,'#2dd4bf',82)
+        +(bna.length?`<div style="font-size:10px;color:var(--faint)">n/a (plotted at neutral): ${bna.join(', ')}</div>`:'')
+      :'<div class=empty>No behavioral coverage.</div>';
+    const rad=P.big5_pct?radar(P.big5_pct,['Open','Consc','Extra','Agree','EmoSt'],'#7dd3fc',82):'';
+    const persona=(P.communion_pct!=null)?bar('Warmth — communion persona',P.communion_pct,'#2dd4bf')+bar('Assertiveness — agency persona',P.agency_pct,'#c2862a'):'<div class=empty>No persona cue coverage yet for this member.</div>';
     const rd=READS[P.susc_read||'trait-only']||READS['trait-only'];
-    const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Pressure multiplier (engines)</span><b>${P.pressure_mult}×</b></div>
-      <div class=mrow><span>Susceptibility — trait read (Byrne)</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
-      ${P.persona_susc_z!=null?`<div class=mrow><span>Susceptibility — persona read (B&amp;L cues)</span><b>${P.persona_susc_z>0?'+':''}${P.persona_susc_z}</b></div>`:''}
+    const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Engagement responsiveness (engines)</span><b>${P.pressure_mult}×</b></div>
+      <div class=mrow><span>Meeting take-rate (seed prob.)</span><b>${P.seed_prob!=null?Math.round(P.seed_prob*100)+'%':'—'}</b></div>
+      <div class=mrow><span>Receptivity — ${P.basis==='behavioral'?'behavioral read':'trait read'}</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
+      ${P.persona_susc_z!=null?`<div class=mrow><span>Receptivity — persona read</span><b>${P.persona_susc_z>0?'+':''}${P.persona_susc_z}</b></div>`:''}
       <div style="font-size:11px;font-weight:700;color:${rd[1]};background:${rd[1]}22;border:1px solid ${rd[1]}55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">${rd[0]}</div>`:'';
     const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Suggested approach (IIT-C octant)</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';
-    comp=`<div class=gen style=margin-bottom:12px><div>${rad}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Big-5: low confidence (thin text corpus)</div>':''}</div>
+    comp=`<div class=gen style=margin-bottom:12px>
+      <div><div class=eyebrow>Behavioral profile <span style=color:var(--faint)>· measured from what the member does (floor presence = discussion dynamics + leadership) — drives the engines</span></div>${behav}
+      ${rad?`<div class=eyebrow style=margin-top:8px>Text Big-5 v2 <span style=color:var(--faint)>· behavior-calibrated (held-out validated); E strongest, A/C/O at the lexical-method ceiling</span></div>${rad}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Big-5: low confidence (thin text corpus)</div>':''}`:''}</div>
       <div><div class=eyebrow>Projected persona (Birkenmaier-Lechner cues)</div>${persona}
-      <div class=eyebrow style=margin-top:8px>Susceptibility to pressure</div>${suscRows}${appr}</div></div>`;
+      <div class=eyebrow style=margin-top:8px>Engagement &amp; receptivity</div>${suscRows}${appr}</div></div>`;
   }
   return `<div id=psych-view>${comp}
     <div class=eyebrow style=margin-top:6px>Notes</div>
@@ -587,7 +601,14 @@ function relHTML(m){
     return `<div class=partner data-i=${byName[p.name]??-1}><span class=pn>${p.name}</span><span class=track style="height:8px;background:#1b2129;border-radius:4px;overflow:hidden"><i style="display:block;height:100%;width:${(p.w/maxw)*100}%;background:${col}"></i></span><span style=color:var(--muted);text-align:right>#${p.rank} · ${p.w}</span></div>`;}).join(''):'<div class=empty>No cosponsorship ties in the network for this member.</div>';
   const st=m.state;const sm=st?M.filter(x=>x.state===st&&x.name!==m.name).sort((a,b)=>(a.rank||9999)-(b.rank||9999)):[];
   const smHTML=sm.length?sm.map(x=>`<div class=partner data-i=${byName[x.name]}><span class=pn>${x.name}</span><span style=color:var(--muted)>${x.chamber}</span><span style=color:var(--muted);text-align:right>#${x.rank??'—'}</span></div>`).join(''):'<div class=empty>No other members parsed for this state.</div>';
+  const rf=m.refs||{};
+  const rfRow=(r,arrow)=>{const col=r.net>0.15?'#34d399':(r.net<-0.15?'#ef4444':'#8b949e');
+    return `<div class=partner data-i=${byName[r.who]??-1}><span class=pn>${arrow} ${r.who}</span><span style="color:${col};font-weight:700">${r.net>0?'+':''}${r.net}</span><span style=color:var(--muted);text-align:right>${r.pos}+ / ${r.neg}&minus; · n=${r.n}</span></div>${r.q?`<div style="color:var(--faint);font-size:11px;margin:-2px 0 6px 4px">“${esc(r.q)}…”</div>`:''}`;};
+  const rofHTML=(rf.out||[]).map(r=>rfRow(r,'→')).join('')||'<div class=empty>No scored references by this member in the speech/interview/social corpus.</div>';
+  const rifHTML=(rf['in']||[]).map(r=>rfRow(r,'←')).join('')||'<div class=empty>No scored references to this member.</div>';
   return `<div class=eyebrow>Top cosponsorship partners</div>${ptHTML}
+    <div class=eyebrow style=margin-top:14px>Cross-media references — makes <span style=color:var(--faint)>· green +, red −, from speeches/interviews/reposts</span></div>${rofHTML}
+    <div class=eyebrow style=margin-top:14px>Cross-media references — receives</div>${rifHTML}
     <div class=eyebrow style=margin-top:14px>Same-state delegation — ${st||'?'}</div>${smHTML}`;
 }
 const RELCOL={Highly:'#16a34a',Moderately:'#f59e0b',Slightly:'#8b949e'};

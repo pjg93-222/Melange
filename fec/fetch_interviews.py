@@ -78,18 +78,46 @@ def norm(s):
     s = _ud.normalize('NFD', s)                       # QA2: 'Raúl' must become 'raul', not 'ral'
     s = ''.join(c for c in s if not _ud.combining(c))
     return re.sub(r"[^a-z ]", '', s.lower()).strip()
+# QA3 2026-07-04 (nomological-fix session): nickname equivalence classes. 'BERNIE SANDERS' failed
+# to resolve to roster 'Bernard Sanders' (prefix test covers tom~thomas but not bernie~bernard) —
+# Sanders/Murphy had 1 interview row each while dominating cable news. Equivalence is applied BOTH
+# directions (roster stores 'Chuck Grassley'; transcripts may say 'CHARLES GRASSLEY').
+NICK_SETS = [
+    {'bernard', 'bernie'}, {'charles', 'chuck', 'charlie'}, {'christopher', 'chris'},
+    {'richard', 'dick', 'rich', 'rick'}, {'michael', 'mike'}, {'james', 'jim', 'jimmy'},
+    {'robert', 'bob', 'rob', 'bobby'}, {'thomas', 'tom', 'tommy'}, {'daniel', 'dan', 'danny'},
+    {'joseph', 'joe', 'joey'}, {'timothy', 'tim'}, {'patrick', 'pat'},
+    {'william', 'bill', 'will', 'billy'}, {'edward', 'ed', 'ted', 'eddie'},
+    {'theodore', 'ted'}, {'elizabeth', 'liz', 'beth', 'betty'}, {'katherine', 'kathryn', 'katie', 'kate', 'kathy'},
+    {'margaret', 'maggie', 'meg'}, {'benjamin', 'ben'}, {'alexander', 'alex'},
+    {'anthony', 'tony'}, {'andrew', 'andy', 'drew'}, {'matthew', 'matt'}, {'jonathan', 'jon'},
+    {'nicholas', 'nick'}, {'gregory', 'greg'}, {'lawrence', 'larry'}, {'gerald', 'jerry'},
+    {'ronald', 'ron', 'ronny'}, {'donald', 'don'}, {'kenneth', 'ken'}, {'stephen', 'steven', 'steve'},
+    {'david', 'dave'}, {'samuel', 'sam'}, {'frederick', 'fred'}, {'susan', 'sue', 'suzy'},
+    {'deborah', 'debbie', 'deb'}, {'cynthia', 'cindy'}, {'jacquelyn', 'jacqueline', 'jackie'},
+    {'raphael', 'rafael', 'raffi'}, {'joshua', 'josh'}, {'zachary', 'zach', 'zack'},
+    {'abigail', 'abby'}, {'rebecca', 'becca', 'becky'}, {'jefferson', 'jeff'}, {'jeffrey', 'jeff'},
+    {'mitchell', 'mitch'}, {'randall', 'randy'}, {'terrence', 'terri', 'terry'}, {'vincent', 'vince'},
+]
+NICK = {}
+for s in NICK_SETS:
+    for a in s: NICK.setdefault(a, set()).update(s)
+def _variants(first):
+    return NICK.get(first, set()) | {first}
 FULL = {}
 for m in C:
     p = norm(m).split()
-    if len(p) >= 2: FULL[(p[0], p[-1])] = m
+    if len(p) >= 2:
+        for v in _variants(p[0]): FULL.setdefault((v, p[-1]), m)
 SUR = collections.defaultdict(list)
 for m in C:
     SUR[norm(m).split()[-1]].append(m)
 
 def _firstname_compatible(a, b):
-    """'tom'~'thomas' yes; 'raul'~'adelita' NO (QA2: succession-seat misattribution guard)."""
+    """'tom'~'thomas' yes; nickname classes (bernie~bernard) yes; 'raul'~'adelita' NO
+    (QA2: succession-seat misattribution guard)."""
     a, b = a.lower(), b.lower()
-    return a == b or a.startswith(b) or b.startswith(a)
+    return a == b or a.startswith(b) or b.startswith(a) or bool(_variants(a) & _variants(b))
 
 def resolve_full(label):
     """'SEN. ELIZABETH WARREN' / 'THOM TILLIS' -> roster member or None (never guess).

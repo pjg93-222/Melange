@@ -30,21 +30,32 @@ C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(
 # ---------------- corpus: posts (ALL topics; RTs EXCLUDED — an RT is someone else's words) + floor
 # speeches / hearing transcripts (speeches table, fetch_congressional_record.py — the papers' native
 # medium; Ramey used the Congressional Record itself) ----------------
+# validation hooks (validate_big5.py MTMM/test-retest axes; guarded, default = full corpus, no change):
+#   BIG5_SOURCES  csv subset of {social, CREC, INTERVIEW, CHRG} — genre-restricted scoring
+#   BIG5_BEFORE / BIG5_AFTER  ISO date — time-sliced SPEECHES (social rows carry no usable date here)
+_SRC=set(s.strip() for s in os.environ.get('BIG5_SOURCES','').split(',') if s.strip()) or None
+_BEF=os.environ.get('BIG5_BEFORE',''); _AFT=os.environ.get('BIG5_AFTER','')
+if _SRC or _BEF or _AFT: print('CORPUS FILTER: sources=%s before=%s after=%s'%(sorted(_SRC) if _SRC else 'all',_BEF or '-',_AFT or '-'))
 texts=collections.defaultdict(list)
-ws=openpyxl.load_workbook(B+r'\Quorum Processed.xlsx',read_only=True)['Members']
-hdr=[c.value for c in next(ws.iter_rows(min_row=1,max_row=1))]
-im,ic,irt=hdr.index('member'),hdr.index('Content'),hdr.index('is_rt')
-for row in ws.iter_rows(min_row=2,values_only=True):
-    m,t=row[im],row[ic]
-    if m in C and t and str(row[irt]).lower() not in ('1','true'): texts[m].append(str(t))
-sm=pd.read_excel(B+r'\Social Master.xlsx',sheet_name='Corpus',dtype=str)
-for _,r in sm[sm['platform']=='bluesky'].iterrows():
-    if r['member'] in C and r['text'] and str(r.get('is_rt','')).lower() not in ('1','true'): texts[r['member']].append(str(r['text']))
+if _SRC is None or 'social' in _SRC:
+    ws=openpyxl.load_workbook(B+r'\Quorum Processed.xlsx',read_only=True)['Members']
+    hdr=[c.value for c in next(ws.iter_rows(min_row=1,max_row=1))]
+    im,ic,irt=hdr.index('member'),hdr.index('Content'),hdr.index('is_rt')
+    for row in ws.iter_rows(min_row=2,values_only=True):
+        m,t=row[im],row[ic]
+        if m in C and t and str(row[irt]).lower() not in ('1','true'): texts[m].append(str(t))
+    sm=pd.read_excel(B+r'\Social Master.xlsx',sheet_name='Corpus',dtype=str)
+    for _,r in sm[sm['platform']=='bluesky'].iterrows():
+        if r['member'] in C and r['text'] and str(r.get('is_rt','')).lower() not in ('1','true'): texts[r['member']].append(str(r['text']))
 import sqlite3,hashlib as _hl
 nsp=0; ndup=0; _seen=set()
 try:
     con=sqlite3.connect(B+r'\social_media.db')
-    for m,t in con.execute('SELECT member,text FROM speeches'):
+    for m,t,src,dt in con.execute('SELECT member,text,source,date FROM speeches'):
+        if _SRC is not None and src not in _SRC: continue
+        d=str(dt or '')[:10]
+        if _BEF and (not d or d>=_BEF): continue
+        if _AFT and (not d or d<_AFT): continue
         if m in C and t:
             _h=(m,_hl.md5(t.encode('utf-8','replace')).hexdigest())
             if _h in _seen: ndup+=1; continue   # QA 2026-07-03: re-aired soundbites + crash-refetch dups must not inflate rates
@@ -190,6 +201,12 @@ def rates(txts):
     r['mattr']=(ttr_sum/ttr_n) if ttr_n else (len(wc)/max(1,len(win)))   # length-invariant diversity; short corpora -> single-window TTR
     if CONC: r['concrete']=(conc/ncc) if ncc else 2.5  # mean Brysbaert concreteness (openness loads NEGATIVE)
     return r,n
+# split-half hook (validate_big5.py reliability axis): BIG5_HALF=1|2 scores alternating documents
+# only; BIG5_OUT redirects the artifact so halves never clobber production. Default: unchanged.
+_HALF=os.environ.get('BIG5_HALF','')
+if _HALF in ('1','2'):
+    texts={m:v[int(_HALF)-1::2] for m,v in texts.items()}
+    print('SPLIT-HALF mode: half %s (alternating documents)'%_HALF)
 R={}; TOK={}
 for m in members:
     r,n=rates(texts.get(m,[]))
@@ -217,7 +234,7 @@ for m in members:
 from moneyball_core import dump_atomic   # atomic write: this runs UNATTENDED in weekly_refresh
 dump_atomic({'traits':out,'method':'Ramey-synth closed-vocab standardized linear; Empath lexicons + essays-fitted SMOreg weights when fec/liwc/ files present; z relative to THIS corpus',
            'featz':{m:{f:round(Z[m][f],4) for f in FEATS} for m in R},   # standardized features (fit_smoreg_rkh.py trains on these — scorer and fitter can never drift)
-           'lowconf_tokens':LOWCONF_TOKENS},B+r'\big5_traits.json')
+           'lowconf_tokens':LOWCONF_TOKENS},os.environ.get('BIG5_OUT') or B+r'\big5_traits.json')
 nm=sum(1 for m in out if out[m]['tokens']>0); lc=sum(1 for m in out if out[m]['lowconf'])
 tk=sorted(TOK.values())
 print('BIG5: %d/%d members with text | median tokens %d | lowconf(<%d tok): %d'%(nm,len(members),tk[len(tk)//2] if tk else 0,LOWCONF_TOKENS,lc))
@@ -246,4 +263,4 @@ for t in ('O','C','E','A','ES'):
     r=sum((x-mx)*(y-my) for x,y in zip(xs,ys))/max(1e-9,sx*sy)
     ok='OK' if r*EXP[t]>0 else 'REVERSED'
     print('  %-2s r=%+.3f [%+d expected]  %s'%(t,r,EXP[t],ok))
-print('wrote big5_traits.json')
+print('wrote %s'%(os.environ.get('BIG5_OUT') or 'big5_traits.json'))

@@ -18,8 +18,17 @@ Cost control: per-dyad-per-source cap (newest first) for the scored pass; raw co
 Modes:
   python member_reference_layer.py --probe          # free: extraction + prefilter volume + cost estimate
   python member_reference_layer.py --score [--go]   # Fable valence pass (cost-gated), writes member_references.json
-Output: member_references.json {edges:[{a,b,n_raw,n_scored,pos,neg,neu,net,sources{},examples[]}]}"""
+  python member_reference_layer.py --rebuild        # FREE: re-extract + re-aggregate from the existing cache only
+                                                    # (new/uncached mentions count in n_raw, never spend)
+  python member_reference_layer.py --verify         # write member_reference_verify.csv — every edge with its
+                                                    # evidence quotes, for the user's person/valence eyeball pass
+Output: member_references.json {edges:[{a,b,n_raw,n_scored,pos,neg,neu,net,sources{},examples[]}]}
+2026-07-04 resolver upgrade (user: "make sure the person is being mentioned"): nickname classes
+(kernel NICK_SETS: bernie~bernard), chamber-scoped title pools ("senator johnson" resolves in the
+SENATE surname pool), single-alternation bare-name scan; examples now attach to EVERY scored class
+(pos/neg preferred, neutral fills) so the desk can show the phrase on every reference row."""
 import csv, hashlib, io, json, os, re, sqlite3, sys, time, collections, unicodedata
+import moneyball_core as MBC   # kernel: name_variants (nickname classes), dump_atomic later
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B = MB_ROOT
 DYAD_CAP = int(os.environ.get('REF_DYAD_CAP', '4'))     # scored contexts per (a->b, source)
@@ -32,13 +41,22 @@ def norm(s):
     s = unicodedata.normalize('NFD', s); s = ''.join(c for c in s if not unicodedata.combining(c))
     return re.sub(r"[^a-z ]", '', s.lower()).strip()
 
-# reference patterns: title+surname (any roster surname, resolved only if unique) OR full first+last
+# reference patterns: title+surname (resolved only if unique IN THE TITLE'S CHAMBER) OR full
+# first+last (nickname-variant aware: 'bernie sanders' -> Bernard Sanders)
 SUR = collections.defaultdict(list)
 for m in C: SUR[norm(m).split()[-1]].append(m)
+SUR_SEN = collections.defaultdict(list); SUR_HOU = collections.defaultdict(list)
+for m in C:
+    (SUR_SEN if (C[m].get('chamber') == 'Senate') else SUR_HOU)[norm(m).split()[-1]].append(m)
 FULLSET = {}
 for m in C:
     p = norm(m).split()
-    if len(p) >= 2: FULLSET[(p[0], p[-1])] = m
+    if len(p) >= 2:
+        for v in MBC.name_variants(p[0]): FULLSET.setdefault((v, p[-1]), m)
+# one-pass bare-name scan: single alternation over every (variant-first, last) pair
+BARE2MEM = {fn + ' ' + ln: mem for (fn, ln), mem in FULLSET.items()}
+BARE_RE = re.compile(r'\b(?:' + '|'.join(sorted((re.escape(fn) + r'\s+' + re.escape(ln)
+                     for fn, ln in FULLSET), key=len, reverse=True)) + r')\b')
 TITLE_RE = r'(?:senator|sen\.|representative|rep\.|congressman|congresswoman|speaker|leader|chairman|chairwoman|ranking member)'
 SURNAMES = sorted({norm(m).split()[-1] for m in C}, key=len, reverse=True)
 REF_RE = re.compile(r'\b(' + TITLE_RE + r')\s+([a-z]+(?:\s[a-z]+)?)|\b([a-z]+)\s([a-z\'\-]+)\b', re.I)
@@ -52,30 +70,35 @@ EVALUATIVE = re.compile(r'\b(wrong|right|great|dangerous|disastrous|brilliant|le
                         r'protect|reckless|smart|effective|partner|friend|mentor|extremis|radical|principled|bipartisan)\b', re.I)
 
 def resolve_ref(text_l, speaker):
-    """Yield (member, char_pos) references found in lowercase text. Conservative: title+unique-surname
-    or full first+last (first-name-compatible)."""
+    """Yield (member, char_pos) references found in lowercase text. Conservative: title+surname
+    unique WITHIN THE TITLE'S CHAMBER ('senator johnson' -> Ron Johnson even though the House has
+    more Johnsons), or full first+last (nickname-variant compatible). Never bare-surname guessing."""
     out = []
-    # title + name form
-    for m in re.finditer(r'\b' + TITLE_RE + r'\s+([a-zÀ-ɏ\'\-]+(?:\s[a-zÀ-ɏ\'\-]+)?)', text_l):
-        cand = norm(m.group(1))
+    # title + name form (chamber-scoped pool when the title implies one)
+    for m in re.finditer(r'\b(' + TITLE_RE + r')\s+([a-zÀ-ɏ\'\-]+(?:\s[a-zÀ-ɏ\'\-]+)?)', text_l):
+        ttl = m.group(1)
+        cand = norm(m.group(2))
         parts = cand.split()
         if not parts: continue   # accent/punctuation-only capture normalizes to empty
+        pool = (SUR_SEN if ttl.startswith('sen') else
+                SUR_HOU if ttl.startswith(('rep', 'congress')) else SUR)
         hit = None
         if len(parts) == 1:
-            cs = SUR.get(parts[0], [])
+            cs = pool.get(parts[0], [])
             if len(cs) == 1: hit = cs[0]
         else:
             hit = FULLSET.get((parts[0], parts[-1]))
             if not hit:
-                cs = SUR.get(parts[-1], [])
-                if len(cs) == 1 and (norm(cs[0]).split()[0].startswith(parts[0]) or parts[0].startswith(norm(cs[0]).split()[0])):
-                    hit = cs[0]
+                cs = pool.get(parts[-1], [])
+                if len(cs) == 1:
+                    rf = norm(cs[0]).split()[0]
+                    if rf.startswith(parts[0]) or parts[0].startswith(rf) or (MBC.name_variants(parts[0]) & MBC.name_variants(rf)):
+                        hit = cs[0]
         if hit and hit != speaker: out.append((hit, m.start()))
-    # bare full-name form (First Last exact)
-    for (fn, ln), mem in FULLSET.items():
-        if mem == speaker: continue
-        for m in re.finditer(r'\b' + re.escape(fn) + r'\s+' + re.escape(ln) + r'\b', text_l):
-            out.append((mem, m.start()))
+    # bare full-name form — one alternation pass over all (variant-first, last) pairs
+    for m in BARE_RE.finditer(text_l):
+        mem = BARE2MEM.get(re.sub(r'\s+', ' ', m.group(0)))
+        if mem and mem != speaker: out.append((mem, m.start()))
     # dedupe by (member, pos//80)
     seen = set(); res = []
     for mem, pos in out:
@@ -160,13 +183,16 @@ if '--probe' in sys.argv:
         print('  eg [%s] %s -> %s | %s...' % (r['src'], r['a'].split()[-1], r['b'].split()[-1], r['w'][:90]))
     sys.exit(0)
 
-if '--score' in sys.argv:
-    if not os.environ.get('ANTHROPIC_API_KEY'):
-        _kf = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'anthropic_key.txt')
-        if os.path.exists(_kf): os.environ['ANTHROPIC_API_KEY'] = open(_kf).read().strip()
-    import anthropic, threading
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-    client = anthropic.Anthropic(); lock = threading.Lock()
+if '--score' in sys.argv or '--rebuild' in sys.argv:
+    REBUILD = '--rebuild' in sys.argv   # free path: aggregate from the existing cache, never call the API
+    lock = None
+    if not REBUILD:
+        if not os.environ.get('ANTHROPIC_API_KEY'):
+            _kf = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'anthropic_key.txt')
+            if os.path.exists(_kf): os.environ['ANTHROPIC_API_KEY'] = open(_kf).read().strip()
+        import anthropic, threading
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        client = anthropic.Anthropic(); lock = threading.Lock()
     refs = extract()
     bykey = collections.defaultdict(list)
     for r in refs: bykey[(r['a'], r['b'], r['src'])].append(r)
@@ -180,8 +206,13 @@ if '--score' in sys.argv:
             try: d = json.loads(ln); cache[d['k']] = d['out']
             except Exception: pass
     def key(r): return hashlib.md5((r['a'] + '|' + r['b'] + '|' + r['w'][:200]).encode('utf-8', 'replace')).hexdigest()
-    todo = [r for r in todo_all if key(r) not in cache]
-    print('scored set: %d | cached %d | to classify %d | est ~$%.2f' % (len(todo_all), len(todo_all) - len(todo), len(todo), len(todo) * 0.006))
+    todo = [] if REBUILD else [r for r in todo_all if key(r) not in cache]
+    if REBUILD:
+        _unc = sum(1 for r in todo_all if key(r) not in cache)
+        print('REBUILD (cache-only, $0): scored set %d | cached %d | uncached (counted in n_raw only) %d'
+              % (len(todo_all), len(todo_all) - _unc, _unc))
+    else:
+        print('scored set: %d | cached %d | to classify %d | est ~$%.2f' % (len(todo_all), len(todo_all) - len(todo), len(todo), len(todo) * 0.006))
     if todo and '--go' not in sys.argv: print('COST GATE: add --go to spend.'); sys.exit(0)
     def work(r):
         try:
@@ -205,7 +236,7 @@ if '--score' in sys.argv:
                     if done % 500 == 0 or done == len(todo): print('  %d/%d (%d errors)' % (done, len(todo), errs), flush=True)
         cf.close()
     edges = collections.defaultdict(lambda: {'n_raw': 0, 'n_scored': 0, 'pos': 0, 'neg': 0, 'neu': 0, 'form': 0,
-                                             'sources': collections.Counter(), 'examples': []})
+                                             'sources': collections.Counter(), 'examples': [], '_neu_ex': []})
     for r in refs: edges[(r['a'], r['b'])]['n_raw'] += 1; edges[(r['a'], r['b'])]['sources'][r['src']] += 1
     for r in todo_all:
         o = cache.get(key(r))
@@ -216,8 +247,14 @@ if '--score' in sys.argv:
         elif c == 'negative': e['neg'] += 1
         elif c == 'neutral-substantive': e['neu'] += 1
         else: e['form'] += 1
+        # evidence for EVERY class the layer keeps (user 2026-07-04: the phrase must be showable):
+        # pos/neg preferred, neutral-substantive fills remaining slots after the loop
         if c in ('positive', 'negative') and len(e['examples']) < 2:
             e['examples'].append({'cls': c, 'w': r['w'][:200], 'src': r['src']})
+        elif c == 'neutral-substantive' and len(e['_neu_ex']) < 2:
+            e['_neu_ex'].append({'cls': c, 'w': r['w'][:200], 'src': r['src']})
+    for e in edges.values():
+        while len(e['examples']) < 2 and e['_neu_ex']: e['examples'].append(e['_neu_ex'].pop(0))
     out_edges = []
     for (a, b), e in edges.items():
         sub = e['pos'] + e['neg'] + e['neu']
@@ -235,4 +272,20 @@ if '--score' in sys.argv:
     print('member_references.json: %d substantive directed edges | positive %d | negative %d' % (len(out_edges), npos, nneg))
     sys.exit(0)
 
-print('usage: member_reference_layer.py [--probe | --score [--go]]')
+if '--verify' in sys.argv:
+    # the user's eyeball sheet: every edge with its evidence quotes (person-check + valence-check)
+    d = json.load(open(B + r'\member_references.json', encoding='utf-8'))
+    outp = B + r'\member_reference_verify.csv'
+    with io.open(outp, 'w', encoding='utf-8-sig', newline='') as f:
+        w = csv.writer(f)
+        w.writerow(['speaker', 'about', 'net', 'pos', 'neg', 'neu', 'n_raw', 'sources',
+                    'evidence_1', 'evidence_2', 'wrong_person_or_wrong_valence?'])
+        for e in sorted(d['edges'], key=lambda x: -x['n_scored'])[:500]:
+            ex = e.get('examples') or []
+            w.writerow([e['a'], e['b'], e['net'], e['pos'], e['neg'], e['neu'], e['n_raw'],
+                        ' '.join('%s:%d' % kv for kv in sorted((e.get('sources') or {}).items())),
+                        (ex[0]['w'] if ex else ''), (ex[1]['w'] if len(ex) > 1 else ''), ''])
+    print('wrote %s (%d edges, capped 500)' % (outp, min(500, len(d['edges']))))
+    sys.exit(0)
+
+print('usage: member_reference_layer.py [--probe | --score [--go] | --rebuild | --verify]')

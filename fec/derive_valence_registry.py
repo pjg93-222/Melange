@@ -26,7 +26,10 @@ FAMILIES = [
     ("cfpb_general",  ["cfpb", "consumer financial protection"], None, "derived"),
     ("interchange_block", ["block the credit card competition", "oppose the credit card competition", "stop the cca",
                        "repeal durbin", "against interchange"], None, "derived"),
-    ("interchange",   ["interchange", "credit card competition", "swipe fee", "durbin"], None, "derived"),
+    # bare 'interchange' DROPPED 2026-07-04 (user review sheet): 11/23 evidence rows were highway
+    # interchanges (I-90, SR-210 ramp projects) false-matching the bare word; the remaining
+    # keywords catch every genuine on-topic mention (confirmed 11/12 unanimous -1 on the CCCA).
+    ("interchange",   ["credit card competition", "swipe fee", "durbin"], None, "derived"),
     ("rate_cap",      ["rate cap", "usury", "apr cap", "36%", "interest rate cap", "10% cap", "capping credit card interest"], None, "derived"),
     ("overdraft",     ["overdraft"], None, "derived"),
     ("junk_fees",     ["junk fee"], None, "derived"),
@@ -47,6 +50,24 @@ FAMILIES = [
 
 rows = [r for r in csv.DictReader(open(B + r'\tweet_gold_queue.csv', encoding='utf-8-sig'))
         if (r.get('gold_cu_alignment') or '').strip().lower() in CL]
+
+# USER-CONFIRMED (valence_family_review.csv, 2026-07-04): direct per-row confirm/correct pass on
+# the 5 families the auto-derive() below judged thin/inconsistent. 37/40 evidence rows matched the
+# original per-row gold exactly; the 3 corrections resolved big_banks from split to decisive.
+# These are FIXED external knowledge (not fit to any data split), so the CV loop includes them in
+# every fold rather than deriving them — no leakage risk, they're not learned from train rows.
+# defense_cu intentionally excluded: the 3-row sample splits by a sub-topic distinction (CU-access
+# policy +1 vs a specific institution's discrimination-investigation rows, likely off-target
+# keyword noise on 'navy federal') that needs one more user confirmation before it ships.
+CONFIRMED = {
+    'interchange': (-1, '12 on-topic rows, 11/12 unanimous on the CCCA target'),
+    'overdraft':   (-1, '1/1 confirmed'),
+    'reg_relief':  (+1, '2/2 confirmed'),
+    'big_banks':   (0,  '2 user corrections (support->neutral) resolved 8/9 neutral'),
+    # user-ratified 2026-07-04: CU-access policy is the target (+1); the 2 discrimination-
+    # investigation rows are off-target 'navy federal' keyword noise, not counted against it.
+    'defense_cu':  (+1, 'CU-access policy target; investigation rows are off-target keyword noise'),
+}
 
 def fam_of(target, text):
     blob = ((target or '') + ' ' + (text or '')).lower()
@@ -84,6 +105,7 @@ idx = np.arange(len(rows))
 n = ok = 0; cov = 0; tp = collections.Counter(); fp = collections.Counter(); fn = collections.Counter()
 for tr, te in KFold(5, shuffle=True, random_state=7).split(idx):
     reg = derive([rows[i] for i in tr])
+    reg.update({f: v for f, (v, _) in CONFIRMED.items()})   # fixed external knowledge, safe in every fold
     for i in te:
         r = rows[i]
         f = fam_of(r.get('api_target'), r.get('text'))
@@ -109,7 +131,12 @@ for r in rows:
     f = fam_of(r.get('api_target'), r.get('text')); v = gv(r)
     if f and v is not None: agg[f].append(v)
 for f in [k for k, _, _, _ in FAMILIES]:
-    if f in full:
+    if f in CONFIRMED:
+        v, note = CONFIRMED[f]
+        print('  %-22s valence %+d  USER-CONFIRMED (%s)%s' % (f, v, note,
+              '' if f not in full else ' [auto-derive agreed: %+d]' % full[f] if full[f] == v else
+              ' [!! auto-derive disagreed: %+d — kept the confirmed value]' % full[f]))
+    elif f in full:
         c = collections.Counter(agg[f])
         print('  %-22s valence %+d  (your golds: %s)' % (f, full[f], dict(c)))
     elif f in agg:
@@ -118,10 +145,15 @@ for f in [k for k, _, _, _ in FAMILIES]:
 if '--write' in sys.argv:
     entries = []
     for f, pats, _, _ in FAMILIES:
-        if f in full:
+        if f in CONFIRMED:
+            v, note = CONFIRMED[f]
+            entries.append({'key': f, 'match': pats, 'valence': int(v),
+                            'source': 'user-confirmed-review', 'note': note})
+        elif f in full:
             entries.append({'key': f, 'match': pats, 'valence': int(full[f]),
                             'source': 'derived-from-gold', 'gold_n': len(agg[f])})
-    out = {'_doc': 'CU-valence registry v2 — derived from the USER\'S gold valence judgments (5-fold-validated harness: derive_valence_registry.py). Match precedence = list order (specific before generic). Extend by adding entries; re-eval before production.',
+    out = {'_doc': 'CU-valence registry v2 — derived from the USER\'S gold valence judgments (5-fold-validated harness: derive_valence_registry.py) plus user-confirmed-review entries (valence_family_review.csv). Match precedence = list order (specific before generic). Extend by adding entries; re-eval before production.',
            'entries': entries}
     json.dump(out, open(B + r'\cu_valence_registry.json', 'w'), indent=1)
-    print('\nwrote cu_valence_registry.json: %d derived entries' % len(entries))
+    print('\nwrote cu_valence_registry.json: %d entries (%d derived, %d user-confirmed)' %
+          (len(entries), sum(1 for e in entries if e['source'] == 'derived-from-gold'), len(CONFIRMED)))

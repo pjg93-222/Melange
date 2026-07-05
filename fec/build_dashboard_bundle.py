@@ -121,6 +121,9 @@ for n in members:
 prior=gc/(gs+gc) if (gs+gc)>0 else 0.12; ALPHA=6.0
 bp={n:(raw[n][1]+ALPHA*prior)/(raw[n][0]+raw[n][1]+ALPHA) for n in members}
 cfp=MB_ROOT+r'\confidence.json'; CONF=json.load(open(cfp)) if os.path.exists(cfp) else {}
+# receptivity color layer (2026-07-04): pressure_mult per member (behavioral basis) for colorBy=recept
+_rcp=MB_ROOT+r'\member_receptivity.json'
+_RC=(json.load(open(_rcp)).get('members',{}) if os.path.exists(_rcp) else {})
 name=[];X=[];Y=[];PARTY=[];GEN=[];RANK=[];NL=[];STANCE=[];BP=[];CF=[]   # columnar to drop repeated JSON keys
 for n in members:
     sm=''.join(TC.get(CS.get(n,{}).get(issue_cat[i],'—'),'-') for i in range(len(issues)))
@@ -159,6 +162,27 @@ COMMS=[[c,csx(canc[c][0]),csy(canc[c][1]),csize[c]] for c in comms]   # committe
 CMI=[ (comms.index(sorted(mc(n))[0]) if mc(n) else -1) for n in members]  # primary committee index per member (tint)
 edges=sorted(ew.items(),key=lambda kv:-kv[1])[:420]
 E=[[idx[a],idx[b]] for (a,b),w in edges]
+# --- layer toggles (user-ratified 2026-07-04): per-drawn-edge provenance code + signed reference layer ---
+# Provenance sheet (AUG builder) maps bioguide pairs -> layer; drawn edges get 1 char each:
+# c=cosponsor s=social h=hcoi e=engagement m=mixed (missing -> c, the dominant layer).
+_prov={}
+try:
+    _pv=openpyxl.load_workbook(net,data_only=True)['Provenance']
+    for r in range(2,_pv.max_row+1):
+        a,b,ly=bio2name.get(_pv.cell(r,1).value),bio2name.get(_pv.cell(r,2).value),str(_pv.cell(r,4).value or '')
+        if a and b and ly: _prov[frozenset((a,b))]=('m' if '+' in ly else {'cosponsor':'c','social':'s','hcoi':'h','engagement':'e'}.get(ly,'c'))
+except KeyError: pass   # non-AUG file without a Provenance sheet -> all edges default to 'c'
+ELAY=''.join(_prov.get(frozenset(ab),'c') for ab,w in edges)
+# signed cross-media reference layer (member_references.json: CREC/interview/X mentions, Fable-valenced,
+# dyad-capped at build time). n_scored>=2 keeps one-off mentions out of the drawing.
+REFE=[]
+_rfp=MB_ROOT+r'\member_references.json'
+if os.path.exists(_rfp):
+    for _e in json.load(open(_rfp,encoding='utf-8'))['edges']:
+        if _e['a'] in idx and _e['b'] in idx and _e.get('n_scored',0)>=2:
+            REFE.append([idx[_e['a']],idx[_e['b']],round(_e.get('net',0),2),_e['n_scored']])
+print('layer provenance: %s | reference layer: %d dyads (n_scored>=2)'%(
+    {c:ELAY.count(c) for c in 'cshem' if ELAY.count(c)},len(REFE)))
 flip=[{str(idx[n]):round(v/1000) for n,v in FL[lb].items() if v>=10000} for lb in issues]
 coal=[{str(idx[n]):round(v/1000) for n,v in CO[lb].items() if v>0} for lb in issues]
 stats=[]
@@ -246,7 +270,9 @@ stats.append({'champ':GEN.count('C')+GEN.count('F'),'ally':GEN.count('A'),'opp':
 bundle={'issues':issues,'name':name,'x':X,'y':Y,'party':''.join(PARTY),'gen':''.join(GEN),
         'rank':RANK,'nl':NL,'bp':BP,'cf':CF,'stance':STANCE,'edges':E,'flip':flip,'coal':coal,'stats':stats,
         'play':PLAY,'epval':EPVAL,'frontier':frontier,'opt':opt,'engine':engine,
-        'cx':CX,'cy':CY,'comms':COMMS,'cmi':CMI}   # committee-cluster layout (Porter): positions + anchors + per-member primary committee
+        'cx':CX,'cy':CY,'comms':COMMS,'cmi':CMI,   # committee-cluster layout (Porter): positions + anchors + per-member primary committee
+        'elay':ELAY,'refs':REFE,   # layer toggles: per-drawn-edge provenance code + signed reference dyads
+        'recept':[round((_RC.get(n) or {}).get('pressure_mult',1.0),2) for n in members]}   # behavioral receptivity (colorBy=recept)
 dump_atomic({name[i]:BP[i] for i in range(len(name))},MB_ROOT+r'\bipartisan.json')
 out=MB_ROOT+r'\dashboard_data.json'
 dump_atomic(bundle,out,separators=(',',':'))

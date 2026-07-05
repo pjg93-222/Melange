@@ -43,6 +43,23 @@ C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(
 try: T=json.load(open(B+r'\big5_traits.json'))['traits']
 except FileNotFoundError: T={}
 if not T: print('  !! big5_traits.json MISSING/EMPTY — every member falls to trait-neutral (personality layer OFF). Run big5_traits.py.')
+# ---- BEHAVIORAL BASIS (nomological fix 2026-07-04, user: 'fix it — do whatever it takes') ----
+# The pre-registered label-free validation (big5_nomological_prereg.md) INDICTED the lexical Big5
+# for behavioral prediction (C REVERSED on participation, E = broadcast talkativeness, r_alerting
+# -0.76). Dispositions are now measured FROM BEHAVIOR (behavioral_dispositions.py): cooperation
+# (A-role, the one corner lexical A validated on, now measured directly), diligence (C-role,
+# roll-call participation — RKH's own C criterion), dominance (E-resistance role, interview turn
+# stats + leadership), visibility/breadth (seed-prob roles). N stays TEXT-based (no behavioral
+# criterion exists for it) with the same graded shrinkage. RECEPT_TRAITS=lexical reverts wholesale.
+BASIS=os.environ.get('RECEPT_TRAITS','behavioral')
+BD={}
+if BASIS=='behavioral':
+    try: BD=json.load(open(B+r'\behavioral_dispositions.json'))['members']
+    except FileNotFoundError: pass
+    if not BD:
+        print('  !! behavioral_dispositions.json MISSING — falling back to LEXICAL basis (run behavioral_dispositions.py)')
+        BASIS='lexical'
+    else: print('  BEHAVIORAL basis: %d members with measured dispositions (RECEPT_TRAITS=lexical reverts)'%len(BD))
 EL=json.load(open(B+r'\electoral.json'))
 try: EP=json.load(open(B+r'\electoral_plays.json'))
 except FileNotFoundError: EP={}
@@ -80,7 +97,16 @@ for m in members:
     # corpora rather than a hard neutral cliff; zero text -> fully neutral.
     sh=min(1.0,(t.get('tokens',0)/1500.0)**0.5)
     A,N,Cc,E,O=(sh*t.get('A',0),sh*t.get('N',0),sh*t.get('C',0),sh*t.get('E',0),sh*t.get('O',0))
-    susc_trait=.40*A+.30*N-.20*Cc-.10*E                 # Byrne et al. choking composite (trait read)
+    if BASIS=='behavioral':
+        bd=BD.get(m,{})
+        coop=bd.get('cooperation_z',0.0) or 0.0; dil=bd.get('diligence_z',0.0) or 0.0
+        dom=bd.get('dominance_z',0.0) or 0.0
+        # Byrne composite, same structure/weights, behavioral inputs (missing component -> 0 neutral);
+        # N stays the shrunken text read (no behavioral criterion for neuroticism).
+        susc_trait=.40*coop+.30*N-.20*dil-.10*dom
+        low=not bd   # lowconf now = no behavioral coverage at all
+    else:
+        susc_trait=.40*A+.30*N-.20*Cc-.10*E             # Byrne et al. choking composite (lexical read)
     ps=PS.get(m)
     susc=(1-PW)*susc_trait+PW*ps['z'] if ps else susc_trait
     if ps is None: read='trait-only'
@@ -95,8 +121,15 @@ for m in members:
     incent=0.60 if m in RET else clip(1+.30*(comp-0.5),0.85,1.15)
     loss=(EP.get(m,{}).get('play') in ('defend','contest')) or sec<0.45
     pt=1.15 if loss else 0.92
-    seed_prob=clip(0.60+.10*A+.06*O+.04*E,0.30,0.90)
+    if BASIS=='behavioral':
+        bd=BD.get(m,{})
+        seed_prob=clip(0.60+.10*(bd.get('cooperation_z',0.0) or 0.0)
+                           +.06*(bd.get('breadth_z',0.0) or 0.0)
+                           +.04*(bd.get('visibility_z',0.0) or 0.0),0.30,0.90)
+    else:
+        seed_prob=clip(0.60+.10*A+.06*O+.04*E,0.30,0.90)
     out[m]={'A':round(A,3),'N':round(N,3),'C':round(Cc,3),'E':round(E,3),'O':round(O,3),
+        'basis':BASIS,**({k:BD[m][k] for k in BD.get(m,{})} if BASIS=='behavioral' and m in BD else {}),
         'susc_z':round(susc,3),'susc_trait_z':round(susc_trait,3),
         'persona_susc_z':round(ps['z'],3) if ps else None,'susc_read':read,
         'agency':ps['agency'] if ps else None,'communion':ps['communion'] if ps else None,
@@ -104,8 +137,10 @@ for m in members:
         'incent_mult':round(incent,3),'pt_domain':'loss' if loss else 'gain','pt_mult':pt,
         'pressure_mult':round(clip(susc_mult*incent*pt,0.50,1.60),3),
         'seed_prob':round(seed_prob,3),'lowconf':low,'retiring':m in RET}
-dump_atomic({'members':out,'LOSSFRAME':1.10,
-  'provenance':'Byrne2015 choking (susc), Fouirnaies-Hall (incent), Linde-Vis prospect theory (pt), Chen/SNAM contingency (seed_prob); graded sqrt(tokens/1500) trait shrinkage toward neutral'},
+dump_atomic({'members':out,'LOSSFRAME':1.10,'basis':BASIS,
+  'provenance':'Byrne2015 choking (susc), Fouirnaies-Hall (incent), Linde-Vis prospect theory (pt), Chen/SNAM contingency (seed_prob); '
+    +('BEHAVIORAL basis (nomological fix 2026-07-04): cooperation/diligence/dominance/visibility/breadth measured from behavior_panel; N text-based with sqrt shrinkage'
+      if BASIS=='behavioral' else 'LEXICAL basis; graded sqrt(tokens/1500) trait shrinkage toward neutral')},
   B+r'\member_receptivity.json')
 import collections
 d=collections.Counter(out[m]['pt_domain'] for m in out)

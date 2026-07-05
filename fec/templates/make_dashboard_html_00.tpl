@@ -84,9 +84,16 @@ canvas{touch-action:none}
 <a id=desklink class=desklink href="cu-member-desk.html">Member desk ▸</a></header>
 <div id=bar>
 <span><label>Issue</label><select id=issue></select></span>
-<span><label>Mode</label><span class=seg id=mode><button data-m=coal class=on>Coalition (build)</button><button data-m=flip>Flip (persuade)</button></span></span>
-<span><label>Color</label><span class=seg id=color><button data-c=issue class=on>Issue stance</button><button data-c=party>Party</button><button data-c=gen>Overall</button><button data-c=elec>Electoral</button></span></span>
+<span><label>Mode</label><span class=seg id=mode><button data-m=coal class=on>Coalition (build)</button><button data-m=flip>Persuade</button></span></span>
+<span><label>Color</label><span class=seg id=color><button data-c=issue class=on>Issue stance</button><button data-c=party>Party</button><button data-c=gen>Overall</button><button data-c=elec>Electoral</button><button data-c=recept>Receptivity</button></span></span>
 <span><label>Layout</label><span class=seg id=ltog><button data-l=cosp class=on>Cosponsorship</button><button data-l=committee>Committees</button></span></span>
+<span><label>Layers</label><span id=lybar style="display:inline-flex;gap:8px;align-items:center;font-size:11px;color:#9ca3af">
+ <label style=cursor:pointer><input type=checkbox id=ly_c checked> cosponsor</label>
+ <label style=cursor:pointer><input type=checkbox id=ly_s checked> social</label>
+ <label style=cursor:pointer><input type=checkbox id=ly_h checked> committee</label>
+ <label style=cursor:pointer><input type=checkbox id=ly_e checked> engagement</label>
+ <label style=cursor:pointer title="cross-media references (speeches/interviews/reposts), green=positive red=negative"><input type=checkbox id=ly_r> references ±</label>
+</span></span>
 <span><label>Find</label><input id=search placeholder="member name…" list=names><datalist id=names></datalist></span>
 </div>
 <div id=main>
@@ -111,11 +118,11 @@ canvas{touch-action:none}
  </div>
  <div id=right>
    <div id=tpanel><h3>Targets <span id=tgtmode style=color:#6e7681></span> <span style=float:right;color:#6e7681;font-weight:400;text-transform:none>click a node →</span></h3>
-     <span class=seg id=rtog><button data-r=alloc class=on>Allocation</button><button data-r=flip>Cheapest to flip</button></span>
+     <span class=seg id=rtog><button data-r=alloc class=on>Allocation</button><button data-r=flip>Most persuadable</button></span>
      <div id=targets style=margin-top:8px></div></div>
    <div id=mpanel>
      <h3 id=mname></h3><div id=mstance></div>
-     <h3 style=margin-top:14px>Flip this member <span style=color:#6e7681;font-weight:400;text-transform:none>· internal pressure</span></h3>
+     <h3 style=margin-top:14px>Persuasion path <span style=color:#6e7681;font-weight:400;text-transform:none>· colleague influence</span></h3>
      <div id=mprime class=recipe></div>
      <h3 style=margin-top:14px>Scenario <span style=color:#6e7681;font-weight:400;text-transform:none>· live what-if</span></h3>
      <div class=scc>
@@ -182,13 +189,29 @@ function fundedOrdered(){
 function frontierSpread(){const f=DATA.frontier[issue];if(!f)return null;let sp=f.base;for(const [b,s,si] of f.path){if(b<=budget)sp=s;}return sp;}
 function computeFund(){ORD=fundedOrdered();FUND={};ORD.forEach(([i,v])=>FUND[i]=(mode==='flip'?v:50));SPREAD=(mode==='coal'&&DATA.frontier[issue])?frontierSpread():null;}
 function allocOf(i){return FUND[i]||0;}
-function colOf(i){if(colorBy==='party')return PTCOL[DATA.party[i]];if(colorBy==='gen')return STCOL[DATA.gen[i]];if(colorBy==='elec')return ELCOL[DATA.play[i]];return STCOL[DATA.stance[i][issue]];}
+function receptCol(v){ // pressure_mult 0.50 (resistant, blue) .. 1.0 (grey) .. 1.60 (susceptible, red)
+  const t=Math.max(0,Math.min(1,(v-0.5)/1.1));
+  const lerp=(a,b,k)=>Math.round(a+(b-a)*k);
+  const c=t<0.455?[lerp(96,139,t/0.455),lerp(165,148,t/0.455),lerp(250,158,t/0.455)]
+                 :[lerp(139,239,(t-0.455)/0.545),lerp(148,68,(t-0.455)/0.545),lerp(158,68,(t-0.455)/0.545)];
+  return `rgb(${c[0]},${c[1]},${c[2]})`;}
+function colOf(i){if(colorBy==='party')return PTCOL[DATA.party[i]];if(colorBy==='gen')return STCOL[DATA.gen[i]];if(colorBy==='elec')return ELCOL[DATA.play[i]];if(colorBy==='recept')return receptCol(DATA.recept?DATA.recept[i]:1);return STCOL[DATA.stance[i][issue]];}
 function radOf(i){const a=allocOf(i);return 2.0+(a>0?Math.min(Math.sqrt(a)*0.8,7):0);}   // capped so outsized-influence nodes don't swamp smaller ones
 function draw(){
  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);
- if(layout==='cosp'){ctx.lineWidth=0.5;ctx.strokeStyle='rgba(139,148,158,0.10)';ctx.beginPath();   // cosponsorship ties hidden in committee view (they'd crisscross the clusters)
- for(const [a,b] of DATA.edges){const A=toScreen(LX[a],LY[a]),B=toScreen(LX[b],LY[b]);ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);}
+ if(layout==='cosp'){const _on=id=>{const el=document.getElementById(id);return !el||el.checked;};
+ const LYON={c:_on('ly_c'),s:_on('ly_s'),h:_on('ly_h'),e:_on('ly_e')};LYON.m=LYON.c||LYON.s;   // mixed edges show if either parent layer is on
+ ctx.lineWidth=0.5;ctx.strokeStyle='rgba(139,148,158,0.10)';ctx.beginPath();   // ties hidden in committee view (they'd crisscross the clusters)
+ for(let k=0;k<DATA.edges.length;k++){if(DATA.elay&&!LYON[DATA.elay[k]])continue;
+   const [a,b]=DATA.edges[k];const A=toScreen(LX[a],LY[a]),B=toScreen(LX[b],LY[b]);ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);}
  ctx.stroke();}
+ const _lyr=document.getElementById('ly_r');
+ if(_lyr&&_lyr.checked&&DATA.refs){   // signed reference layer: green=net positive, red=net negative, alpha by evidence count
+   for(const [a,b,net,n] of DATA.refs){const A=toScreen(LX[a],LY[a]),B=toScreen(LX[b],LY[b]);
+     ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);
+     ctx.lineWidth=net<0?1.3:0.9;ctx.globalAlpha=Math.min(0.75,0.18+n*0.09);
+     ctx.strokeStyle=net>0.15?'#34d399':(net<-0.4?'#ef4444':'#8b949e');ctx.stroke();}   /* red gated at -0.4: gold check 2026-07-04 measured negative-class precision 0.68, all errors over-signed neutrals (0 inversions in 50) */
+   ctx.globalAlpha=1;}
  const order=[...Array(N).keys()].sort((p,q)=>allocOf(p)-allocOf(q));
  for(const i of order){const [sx,sy]=toScreen(LX[i],LY[i]);const r=radOf(i)*Math.max(1,cam.s*1);
    ctx.beginPath();ctx.arc(sx,sy,r,0,7);ctx.fillStyle=colOf(i);
@@ -220,7 +243,7 @@ cv.addEventListener('mousemove',e=>{
  hi=best;const tip=document.getElementById('tip');
  if(best>=0){const i=best,a=allocOf(i);const pl=PLAYLBL[DATA.play[i]];
   tip.style.display='block';tip.style.left=Math.min(e.clientX+14,innerWidth-260)+'px';tip.style.top=(e.clientY+14)+'px';
-  tip.innerHTML=`<b>${DATA.name[i]}</b> (${DATA.party[i]}) · rank ${DATA.rank[i]} · <b>${DATA.bp[i]}%</b> bipartisan · conf <b>${DATA.cf?DATA.cf[i]:'-'}</b><br>On <b>${DATA.issues[issue]}</b>: <b style=color:${STCOL[DATA.stance[i][issue]]}>${SC[DATA.stance[i][issue]]}</b><br>Overall: ${SC[DATA.gen[i]]} · electoral: <b style=color:${ELCOL[DATA.play[i]]}>${pl}</b><br>${mode==='coal'?'Coalition seed':'Flip target'}: <b>${a?(mode==='coal'?'enters @ $'+a+'k':'$'+a+'k'):'—'}</b>`;}
+  tip.innerHTML=`<b>${DATA.name[i]}</b> (${DATA.party[i]}) · rank ${DATA.rank[i]} · <b>${DATA.bp[i]}%</b> bipartisan · conf <b>${DATA.cf?DATA.cf[i]:'-'}</b><br>On <b>${DATA.issues[issue]}</b>: <b style=color:${STCOL[DATA.stance[i][issue]]}>${SC[DATA.stance[i][issue]]}</b><br>Overall: ${SC[DATA.gen[i]]} · electoral: <b style=color:${ELCOL[DATA.play[i]]}>${pl}</b><br>${mode==='coal'?'Coalition seed':'Persuasion target'}: <b>${a?(mode==='coal'?'enters @ $'+a+'k':'$'+a+'k'):'—'}</b>`;}
  else tip.style.display='none';
  draw();
 });
@@ -390,7 +413,7 @@ function selectMember(v){
 function renderPrime(){
   const r=prime(sel,issue),el=document.getElementById('mprime');
   if(!r){el.innerHTML=`<span style=color:#6e7681>Already pro / committed on this issue — no flip needed.</span>`;return;}
-  if(r.money===null){el.innerHTML=`<b style=color:#f59e0b>Hard to flip</b> on ${DATA.issues[issue]}: gap <b>${r.gap.toFixed(2)}</b> exceeds what pressure+money can close.`;return;}
+  if(r.money===null){el.innerHTML=`<b style=color:#f59e0b>A longer journey</b> on ${DATA.issues[issue]}: gap <b>${r.gap.toFixed(2)}</b> is beyond what colleague influence and engagement can close this cycle.`;return;}
   const rc=r.recruits.slice(0,6).map(u=>`<span class=recruit data-i=${u}>${DATA.name[u].split(' ').slice(-1)[0]}</span>`).join('');
   el.innerHTML=`Tier <b>${r.tier}</b> · resistance θ <b>${r.theta.toFixed(2)}</b>, current pro-pressure <b>${r.pressure.toFixed(2)}</b> → gap <b>${r.gap.toFixed(2)}</b>.<br>`
    +`Cheapest tip: <b>$${(r.money/1000).toFixed(0)}k</b> CU money${r.recruits.length?` + activate <b>${r.recruits.length}</b> already-pro / neutral neighbors`:''}.`
@@ -515,7 +538,7 @@ function refresh(){
      `<div class=tgt data-i=${v}><span><span class=pill style=background:${STCOL[DATA.stance[v][issue]]}></span>${DATA.name[v]}</span><small>$${Math.round(m/1000)}k${nr?' +'+nr:''}</small></div>`).join('')||'<div class=hint>none primeable with money on this issue</div>';
  }else{
    flipHi=null;
-   document.getElementById('tgtmode').textContent='· '+(mode==='coal'?'coalition (entry order)':'flip ($)');
+   document.getElementById('tgtmode').textContent='· '+(mode==='coal'?'coalition (entry order)':'persuasion ($)');
    const arr=ORD.slice(0,16);
    document.getElementById('targets').innerHTML=arr.map(([i,v])=>
      `<div class=tgt data-i=${i}><span><span class=pill style=background:${STCOL[DATA.stance[i][issue]]}></span>${DATA.name[i]}</span><small>${mode==='coal'&&useSlider?'@$'+v+'k':'$'+v+'k'}</small></div>`).join('')||'<div class=hint>no funded targets</div>';
@@ -538,7 +561,8 @@ function optCard(){
 // legend
 function legend(){
  let items;
- if(colorBy==='elec')items=[['c','Contest · primary'],['g','Contest · general'],['d','Defend'],['n','No play']].map(([k,lb])=>`<span><span class=pill style=background:${ELCOL[k]}></span>${lb}</span>`).join('');
+ if(colorBy==='recept')items=[[0.55,'Independent-minded'],[0.8,''],[1.0,'Neutral'],[1.3,''],[1.55,'Highly receptive']].map(([v,lb])=>`<span><span class=pill style=background:${receptCol(v)}></span>${lb}</span>`).join('')+'<span style=color:#6e7681> · behavioral receptivity (cosponsorship, participation, floor dynamics × electoral incentive × outlook)</span>';
+ else if(colorBy==='elec')items=[['c','Contest · primary'],['g','Contest · general'],['d','Defend'],['n','No play']].map(([k,lb])=>`<span><span class=pill style=background:${ELCOL[k]}></span>${lb}</span>`).join('');
  else if(colorBy==='party')items=[['D','Democrat'],['R','Republican'],['I','Independent']].map(([k,lb])=>`<span><span class=pill style=background:${PTCOL[k]}></span>${lb}</span>`).join('');
  else items=[['C','Champion'],['A','Ally'],['H','Hi-Persuad'],['P','Persuad'],['G','Lean-Pers'],['T','Neutral'],['L','Lean-Skep'],['S','Skeptic'],['K','Hi-Skeptic'],['O','Opponent']].map(([k,lb])=>`<span><span class=pill style=background:${STCOL[k]}></span>${lb}</span>`).join('');
  document.getElementById('legend').innerHTML=items+'<br><span style=color:#6e7681>○ white ring = funded · size = $ · scroll to zoom, drag to pan</span>';
@@ -548,6 +572,7 @@ isel.onchange=()=>{issue=+isel.value;slider.value=100;refresh();};
 slider.oninput=()=>refresh();
 document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#mode button').forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;refresh();});
 document.querySelectorAll('#color button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#color button').forEach(x=>x.classList.remove('on'));b.classList.add('on');colorBy=b.dataset.c;legend();draw();});
+document.querySelectorAll('#lybar input').forEach(cb=>cb.onchange=()=>draw());   // layer toggles redraw only
 // LAYOUT toggle: animate node positions between the cosponsorship layout (DATA.x/y) and the committee-cluster
 // layout (DATA.cx/cy, Porter committee-interlock anchors). Members glide into committee clusters.
 function setLayout(L){

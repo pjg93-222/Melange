@@ -1,5 +1,5 @@
 {
- "_doc": "CU-valence registry v2 \u2014 derived from the USER'S gold valence judgments (5-fold-validated harness: derive_valence_registry.py). Match precedence = list order (specific before generic). Extend by adding entries; re-eval before production.",
+ "_doc": "CU-valence registry v2 \u2014 derived from the USER'S gold valence judgments (5-fold-validated harness: derive_valence_registry.py) plus user-confirmed-review entries (valence_family_review.csv). Match precedence = list order (specific before generic). Extend by adding entries; re-eval before production.",
  "entries": [
   {
    "key": "cfpb_reform",
@@ -29,6 +29,17 @@
    "gold_n": 181
   },
   {
+   "key": "interchange",
+   "match": [
+    "credit card competition",
+    "swipe fee",
+    "durbin"
+   ],
+   "valence": -1,
+   "source": "user-confirmed-review",
+   "note": "12 on-topic rows, 11/12 unanimous on the CCCA target"
+  },
+  {
    "key": "rate_cap",
    "match": [
     "rate cap",
@@ -44,13 +55,22 @@
    "gold_n": 3
   },
   {
+   "key": "overdraft",
+   "match": [
+    "overdraft"
+   ],
+   "valence": -1,
+   "source": "user-confirmed-review",
+   "note": "1/1 confirmed"
+  },
+  {
    "key": "junk_fees",
    "match": [
     "junk fee"
    ],
    "valence": -1,
    "source": "derived-from-gold",
-   "gold_n": 34
+   "gold_n": 35
   },
   {
    "key": "cu_tax",
@@ -75,6 +95,17 @@
    "gold_n": 5
   },
   {
+   "key": "defense_cu",
+   "match": [
+    "defense credit union",
+    "military credit union",
+    "navy federal"
+   ],
+   "valence": 1,
+   "source": "user-confirmed-review",
+   "note": "CU-access policy target; investigation rows are off-target keyword noise"
+  },
+  {
    "key": "fraud",
    "match": [
     "fraud",
@@ -84,6 +115,30 @@
    "valence": 1,
    "source": "derived-from-gold",
    "gold_n": 11
+  },
+  {
+   "key": "reg_relief",
+   "match": [
+    "regulatory relief",
+    "reg relief",
+    "tailoring",
+    "regulatory burden"
+   ],
+   "valence": 1,
+   "source": "user-confirmed-review",
+   "note": "2/2 confirmed"
+  },
+  {
+   "key": "big_banks",
+   "match": [
+    "big bank",
+    "megabank",
+    "wall street",
+    "too big to fail"
+   ],
+   "valence": 0,
+   "source": "user-confirmed-review",
+   "note": "2 user corrections (support->neutral) resolved 8/9 neutral"
   },
   {
    "key": "housing",
