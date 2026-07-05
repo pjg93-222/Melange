@@ -311,7 +311,8 @@ function distToTarget(t){const d=new Float64Array(N);d[t]=1;const done=new Uint8
 // PROVABLY-OPTIMAL recruitment chain: max-product path = the single MOST-RELIABLE chain (Dijkstra on -log p).
 // Reliability = product of per-ask success probs = P(the whole chain holds). This is the "mathematical certainty":
 // not a guarantee the bill passes, but the exact, maximal probability of the optimal recruitment route.
-// Grounded in Sotoudeh-Porter-Krishnagopal (cosponsorship *influence*, not count, drives passage) + reliability theory.
+// Grounded in Sotoudeh-Porter-Krishnagopal (cosponsorship *influence*, not count, drives passage) + most-reliable-
+// path theory (Chen, Shi, Zhang & Lam, Transportmetrica B 2016: maximize the probability the whole chain holds).
 function tracePath(sponsor,target,dT){const path=[sponsor],seen=new Set([sponsor]);let cur=sponsor,g=0;while(cur!==target&&g++<N){let nx=-1,bn=-1;for(const v in PE[cur]){const vi=+v;if(seen.has(vi)||dropped.has(vi))continue;const sc=PE[cur][v]*dT[vi];if(sc>bn){bn=sc;nx=vi;}}if(nx<0)break;path.push(nx);seen.add(nx);cur=nx;}return {path,reached:cur===target};}
 // FEC-realistic recruitment cost: a PAC -> candidate is capped at ~$5k/election ($10k/cycle); harder asks cost
 // MORE relationship/information (Furnas et al.: money is capped, info is the lever) but the DOLLARS never exceed

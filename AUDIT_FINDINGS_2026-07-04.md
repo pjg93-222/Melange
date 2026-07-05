@@ -632,3 +632,87 @@ either sensitivity-bounded (receptivity, run-4b) or pre-registered for outcome s
 run-4c). One forward-looking item for the user: **when the lt_priming branch merges, sign the
 out-party cue channel per Bakker-Lelkes-Malka (backfire, not attenuation).**
 
+---
+
+# Run-4k — Annotated-bibliography zip: gap sweep + immediate augmentations (user: "See if you missed anything else, implement immediate augmentations")
+
+**The zip** (`Annotated Bibliographies & Literature Synthesis…zip`, 70 files) is the structured
+library-of-record: 10 topic folders, 12 annotation DOCX files (all extracted and read), ~24 papers
+NOT in the run-4j sweep. It closes run-4j's open cites — **RKH PSRM 2016 is now on disk**
+(`MeasuringElitePersonalityUsingSpeech.pdf`) and was read in full; Alexander 2009 and Ardekani 2026
+likewise. No personal documents in scope (zip is research-only).
+
+## The Addendum ratifies the architecture (and my venue fix)
+
+`Melange Annotated Bibliography — Addendum` lays out the three-layer spine: **one-shot greedy →
+adaptive greedy (G-K + CELF, "the single most load-bearing reference for the operational layer") →
+RL envelope** (S2V-DQN, GCOMB, Geometric-DQN, RL4CCIM). Mapping to code: layer 1 ✓ (greedy IM +
+GCOMB already cited in the dashboard), layer 2 ✓ (`optimize.py` IS lazy-CELF adaptive greedy with
+the G-K bound; CELF now carries its Leskovec KDD'07 cite), layer 3 = declared roadmap ("where the
+durable competitive moat lives" — not yet built, correctly so). The Addendum independently dates
+Chen to **UAI '21** (run-4j's venue fix) and flags that **coalition formation is plausibly a complex
+contagion** (non-submodular) — the model already spans both regimes (COALITION = competitive IC,
+FLIP = threshold LT run guarantee-free per the run-4j scoping), and the RL envelope is the
+acknowledged upgrade path for the cross-campaign layer.
+
+## RKH criterion correction (now verifiable on disk)
+
+RKH's Table 3 (read in full this run): their strongest Conscientiousness criterion is
+**ceremonial-bill avoidance** — C −0.39\*\*\*…−0.58\*\*\* on the share of a member's proposals that
+are ceremonial/symbolic (Volden-Wiseman title keywords), with O+ and ES+ significant positive,
+effect concentrated in the minority (Majority×C +0.27\*\*). **Committee Chair (−0.29\*\*) is a
+CONTROL in that table, not a personality criterion** — so the Big5 battery's "C→committee_leader
+(RKH)" mapping is mis-sourced against the on-disk paper (the RKH *book* remains a possible source
+but is still not on disk). The paper-exact criterion (per-member ceremonial share) is **one data
+pull away**: it needs full sponsorship records, not our CU-topical bills archive — and the user's
+own Causal-doc note "Look at Washington University in St. Louis" points at the Volden-Wiseman
+Legislative Effectiveness Project data, which carries exactly this. Roadmap, user-gated.
+
+## Implemented this run (all additive diagnostics — the chain consumes none of them)
+
+1. **`fec/signed_coalitions.py`** — Aref-Neal 2021 generalized-balance frustration minimization on
+   the signed mention layer (user's own annotation: "an alternative layer that can be substituted
+   or added into future network models"). Result: 498 members, 3,446 signed edges (2,997+/449−,
+   87% positive weight) → the layer is near-single-bloc balanced (F(2)=11.7% vs F(1)=12.7%), and
+   the payoff is the **16-member antagonist splinter**: Schiff, Goldman, Crockett, Friedman,
+   Julie Johnson (D) + Clyde, Luna, Mills, Van Orden, Schmitt, Evans, Gooden, McClain, Rulli,
+   Zinke, Nehls (R) — the partisan-combat set whose signed ties frustrate the main bloc. k=3 third
+   cluster comes back EMPTY (honest null: their House substrate was vote/cosponsor-signed; ours is
+   collegial mentions). Writes `signed_coalitions.json`.
+2. **`fec/kb_benchmark.py`** — Battaglini-Patacchini (NBER w22739) equilibrium benchmark:
+   Katz-Bonacich centrality on the live `build_P` kernel vs money flows. Findings: KB↔legislative
+   score ρ=+0.62 (network pillar already prices centrality); **industry money tracks KB (+0.24)
+   more than CU money does (+0.14)** — the opposition plays closer to the B-P equilibrium; the
+   G-K allocator **anti-correlates with KB (−0.21)**, and the top-decile-KB-yet-$0 list reads
+   Barr, Hill, Emmer, Meuser, Scott… = committed allies priced out by ally-parity + gates. That is
+   the model *knowingly* deviating from B-P: it buys marginal persuasion, not access-to-centrality
+   — a defensible design choice, now measured. Writes `kb_benchmark.json`. (Also answers the
+   user's Ardekani note: "additional research into different forms of centrality is needed.")
+3. **Comment cites (inert):** CELF → Leskovec et al. KDD'07 (`optimize.py`, Addendum-sanctioned);
+   dashboard pathfinder reliability comment → Chen-Shi-Zhang-Lam, Transportmetrica B 2016
+   most-reliable-path (the user's own Path-Finding bib anchor for exactly this construct).
+
+## User-intent conformance (his annotations ask for X; the model already does X)
+
+- Fink weaknesses ("is a mention negative? temporal weighting?") → valenced mention layer + recency ✓
+- **Oropeza-Martínez** ("personality as EDGE parameters = the crucial missing link") → `edge_mult`
+  receiver-susceptibility on cascade edges IS that methodology ✓
+- Porter/Mucha ("can members and committees share one graph?") → committee-centroid layout ✓
+- Bacik augmentation route ("news/social/press sentiment as determinants") → the stance stacks ✓
+- B&L ("highly relevant to the design of nodes") → persona channel, ratified ✓
+
+## New roadmap items surfaced by the zip (user decisions, none implemented)
+
+- **Gaynor (LSQ 2022)**: member→member **leadership-PAC donation edges** (directed, FEC-derivable)
+  — a genuinely missing edge type; her "leadership insulation" finding would inform gate design.
+- **Volden-Wiseman LEP pull** → paper-exact ceremonial C criterion + an external effectiveness
+  check on the legislative-score pillar.
+- **Kim-Stuckatz-Wolters (JOP 2026)**: donations and lobbying are *sequentially* linked — sequencing
+  nuance for the money channel. **Furnas-LaPira-Brock (PS 2025)**: PAC money and lobbying barely
+  overlap organizationally — construct note: our `ind` pressure proxy is PAC-only; LobbyView-style
+  lobbying presence is the complementary half.
+- RL envelope (Addendum layer 3), Kumar GNN-IM, Baptista MultiXrank multilayer RWR.
+- Unresolved pointers (left as-is): Optimization doc = one FAIA URL; Neural-Networks doc = 3 URLs
+  (incl. Zhou-Elejalde, already conformed); `v8b253…` blob (Campaign Politics); knowledge-brokers
+  ABM PDF extracts empty (image-based).
+
