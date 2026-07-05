@@ -322,7 +322,7 @@ function povCount(){return Object.keys(POV).length;}
 function updatePovHint(){const h=$('#povhint');if(h)h.textContent=povCount()?('✎ '+povCount()+' pending override'+(povCount()>1?'s':'')+' — Export to apply'):'';}
 
 /* ---------- radar chart (SVG) ---------- */
-function radar(vals,labels,color,R){
+function radar(vals,labels,color,R,vals2,color2){
   const n=vals.length, padX=96, padY=44, cx=R+padX, cy=R+padY, W=2*cx, H=2*cy;
   const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n; return [cx+Math.cos(a)*r*R, cy+Math.sin(a)*r*R];};
   // FIXED pixel height + fully-QUOTED attributes + explicit closing tags. (Unquoted attrs ending in "…1/>"
@@ -334,6 +334,11 @@ function radar(vals,labels,color,R){
   let p='';for(let i=0;i<n;i++){const[x,y]=pt(i,Math.max(0.02,vals[i]||0));p+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);}
   s+=`<path d="${p}Z" fill="${color}33" stroke="${color}" stroke-width="2" stroke-linejoin="round"></path>`;
   for(let i=0;i<n;i++){const[x,y]=pt(i,Math.max(0.02,vals[i]||0));s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.4" fill="${color}"></circle>`;}
+  if(vals2&&color2){  // overlay series (run-4p: LLM item-read vs v2, same axes) — dashed, unfilled
+    let q='';for(let i=0;i<n;i++){const[x,y]=pt(i,Math.max(0.02,vals2[i]||0));q+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);}
+    s+=`<path d="${q}Z" fill="none" stroke="${color2}" stroke-width="2" stroke-dasharray="5 3" stroke-linejoin="round"></path>`;
+    for(let i=0;i<n;i++){const[x,y]=pt(i,Math.max(0.02,vals2[i]||0));s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="${color2}"></circle>`;}
+  }
   for(let i=0;i<n;i++){const[x,y]=pt(i,1.14);const c=Math.cos(-Math.PI/2+i*2*Math.PI/n);const anch=Math.abs(c)<0.34?'middle':(c>0?'start':'end');
     s+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="9" fill="#8b949e" text-anchor="${anch}" dominant-baseline="middle">${esc(labels[i]||'')}</text>`;}
   return s+'</svg>';
@@ -555,7 +560,7 @@ function psychHTML(m){
       ?radar(P.behav_pct.map(v=>v==null?0.5:v),BLAB,'#2dd4bf',82)
         +(bna.length?`<div style="font-size:10px;color:var(--faint)">n/a (plotted at neutral): ${bna.join(', ')}</div>`:'')
       :'<div class=empty>No behavioral coverage.</div>';
-    const rad=P.big5_pct?radar(P.big5_pct,['Open','Consc','Extra','Agree','EmoSt'],'#7dd3fc',82):'';
+    const rad=P.big5_pct?radar(P.big5_pct,['Open','Consc','Extra','Agree','EmoSt'],'#7dd3fc',82,P.llm_pct,'#e879f9'):'';
     const persona=(P.communion_pct!=null)?bar('Warmth — communion persona',P.communion_pct,'#2dd4bf')+bar('Assertiveness — agency persona',P.agency_pct,'#c2862a'):'<div class=empty>No persona cue coverage yet for this member.</div>';
     const rd=READS[P.susc_read||'trait-only']||READS['trait-only'];
     const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Engagement responsiveness (engines)</span><b>${P.pressure_mult}×</b></div>
@@ -566,7 +571,7 @@ function psychHTML(m){
     const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Suggested approach (IIT-C octant)</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';
     comp=`<div class=gen style=margin-bottom:12px>
       <div><div class=eyebrow>Behavioral profile <span style=color:var(--faint)>· measured from what the member does (floor presence = discussion dynamics + leadership) — drives the engines</span></div>${behav}
-      ${rad?`<div class=eyebrow style=margin-top:8px>Text Big-5 v2 <span style=color:var(--faint)>· behavior-calibrated (held-out validated); E strongest, A/C/O at the lexical-method ceiling</span></div>${rad}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Big-5: low confidence (thin text corpus)</div>':''}`:''}</div>
+      ${rad?`<div class=eyebrow style=margin-top:8px>Text Big-5 v2 <span style=color:var(--faint)>· behavior-calibrated (held-out validated)</span>${P.llm_pct?` <span style="color:#e879f9">--- LLM item-read (Opus, MTMM-passing, ${P.llm_chunks} chunks)</span>`:''}</div>${rad}${P.llm_pct?'':'<div style="font-size:10px;color:var(--faint)">LLM read: not in pilot coverage (173-member RKH-overlap pilot)</div>'}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Big-5: low confidence (thin text corpus)</div>':''}`:''}</div>
       <div><div class=eyebrow>Projected persona (Birkenmaier-Lechner cues)</div>${persona}
       <div class=eyebrow style=margin-top:8px>Engagement &amp; receptivity</div>${suscRows}${appr}</div></div>`;
   }

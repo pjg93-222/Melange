@@ -82,6 +82,12 @@ def _pctrank(vals):
     return lambda v: round(bisect.bisect_left(s, v) / n, 3)
 _b5have = {m: t for m, t in B5.items() if t.get('tokens', 0) > 0}
 _B5PCT = {tr: _pctrank([t[tr] for t in _b5have.values()]) for tr in ('O', 'C', 'E', 'A', 'ES')} if _b5have else {}
+# LLM item-read overlay (run-4p, user: "Wire it in"): big5_llm_opus.json — the MTMM-passing Opus
+# pilot (173 RKH-overlap members). Display overlay ONLY (dashed polygon on the v2 radar); engines
+# untouched — promotion into receptivity stays a separate ratified step.
+B5L = (L('big5_llm_opus.json') or {}).get('traits', {})
+_llmhave = {m: t for m, t in B5L.items() if t.get('n_chunks', 0) > 0}
+_LLMPCT = {tr: _pctrank([t[tr] for t in _llmhave.values()]) for tr in ('O', 'C', 'E', 'A', 'ES')} if _llmhave else {}
 _achave = {m: r for m, r in RCPT.items() if r.get('agency') is not None}
 _ACPCT = {k: _pctrank([r[k] for r in _achave.values()]) for k in ('agency', 'communion')} if _achave else {}
 # ---- external measures (run-4m wiring): CEL/LES effectiveness + DW-NOMINATE (lep_criterion.py),
@@ -125,6 +131,10 @@ def psy_for(name):
     if t.get('tokens', 0) > 0 and _B5PCT:
         out['big5_pct'] = [_B5PCT[tr](t[tr]) for tr in ('O', 'C', 'E', 'A', 'ES')]
         out['big5_low'] = bool(t.get('lowconf')); out['tokens'] = t.get('tokens')
+    lm = _llmhave.get(name)
+    if lm and _LLMPCT:
+        out['llm_pct'] = [_LLMPCT[tr](lm[tr]) for tr in ('O', 'C', 'E', 'A', 'ES')]
+        out['llm_chunks'] = lm.get('n_chunks')
     if r.get('agency') is not None and _ACPCT:
         out['agency_pct'] = _ACPCT['agency'](r['agency']); out['communion_pct'] = _ACPCT['communion'](r['communion'])
         out['approach'] = _approach(out['agency_pct'], out['communion_pct'], r.get('susc_read'))
