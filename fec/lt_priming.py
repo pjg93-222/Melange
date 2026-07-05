@@ -28,6 +28,15 @@ prt=MBC.party()
 BETA=1.5
 cpf=MBC.cpf_diffusion
 P={u:{v:(w*cpf(u,v))/(w*cpf(u,v)+6.0) for v,w in adj[u].items()} for u in members}   # bridge-amplified (L4)
+# BAKKER CROSS-CUE SIGNING (lit-audit run-4j forward item, applied at the 2026-07-05 merge; BAKKER_XCUE=0
+# reverts). Bakker-Lelkes-Malka (JOP): out-party cues do NOT persuade (null-to-backfire) — the kernel's
+# unconditional 0.4 cross-party floor is exactly an attenuated-positive out-party cue. In the PRIMING
+# pressure/recruit terms ONLY (kernel untouched): a cross-party pro-cue passes through sqrt(bpf_u*bpf_v),
+# so perfect bridge pairs keep full influence (the kernel's own philosophy at cpf=1.0) and non-bridge
+# out-party cues fall to ~0 (clamped at 0, never negative — backfire magnitude not invented). Mirrored in
+# the dashboard JS port (make_dashboard_html_00.tpl prime()).
+XCUE=os.environ.get('BAKKER_XCUE','1')!='0'
+def xf(u,v): return 1.0 if (not XCUE or prt.get(u)==prt.get(v)) else (bpf.get(u,0.0)*bpf.get(v,0.0))**0.5
 _rvals=sorted((C[m].get('receipts') or 0) for m in C if (C[m].get('receipts') or 0)>0); _RMED=_rvals[len(_rvals)//2] if _rvals else RFLOOR
 def receipts(m):
     # HIGH-2 (ported 2026-07-01; the fix landed in money_response/flip_model/per_topic_flip but was missed here):
@@ -61,7 +70,7 @@ def prime(v):
     if OVT.get(v) in BLOCK_OVERALL: return None                      # one mild topic cell can't make a system-level Skeptic a target
     theta=THETA[tier]+max(0,-(C[v].get('net_lean') or 0)/120)        # money-captured members resist more
     theta+=COMMIT*sum(1 for t in MAT.get(v,{}).values() if t=='Opponent')   # ideological commitment resists too (PAC-free opponents no longer read cheap)
-    pressure=sum(P[v].get(u,0) for u in proset if u in P[v])          # current pro pull from already-pro neighbors
+    pressure=sum(P[v].get(u,0)*xf(u,v) for u in proset if u in P[v])  # pro pull; cross-party cues bridge-gated (Bakker)
     gap=theta-pressure
     if gap<=1e-6: return {'v':v,'tier':tier,'theta':round(theta,2),'pressure':round(pressure,2),'gap':round(gap,2),'cost':0,'money':0,'recruits':[]}
     money_only=dollars_for_units(v,min(0.97,gap))                     # $ to close whole gap with money alone
@@ -69,9 +78,9 @@ def prime(v):
     # recruit not-yet-pro neighbors that are cheaper per unit than money; each adds P[u][v].
     # Stance floors (2026-07-04): the model may not enlist as a pro-advocate a member its own stance law
     # calls opposed — no Skeptic/Opponent topic cell, no Skeptic-or-worse overall read (Lean Skeptic allowed).
-    cands=sorted([(P[v][u],u,recruit_cost(u)/max(0.1,P[v][u])) for u in P[v]
+    cands=sorted([(P[v][u]*xf(u,v),u,recruit_cost(u)/max(0.1,P[v][u]*xf(u,v))) for u in P[v]
                   if u not in proset and MAT.get(u,{}).get(cat) not in BLOCK_RECRUIT_CELL
-                  and OVT.get(u) not in BLOCK_OVERALL],key=lambda x:x[2]/x[0])
+                  and OVT.get(u) not in BLOCK_OVERALL and P[v][u]*xf(u,v)>1e-6],key=lambda x:x[2]/x[0])
     got=0.0; cost=0.0; recruits=[]
     for add,u,c in cands:
         if got>=gap: break

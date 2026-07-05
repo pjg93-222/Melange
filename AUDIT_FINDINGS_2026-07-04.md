@@ -785,3 +785,65 @@ campaign), Bakker out-party cue signing (lives on the stranded lt_priming branch
 item), behavior-panel LEP rows (panel builder belongs to the live-tree campaign; LEP correlations
 already reported by `lep_criterion.py`).
 
+---
+
+# Run-4n — THE MERGES (user: "Start the merges") + Bakker signing + Judiciary coverage
+
+## S2-01 and S2-02 are RESOLVED — the standing top finding of the run-4 series is closed
+
+Sequence executed on `main` (live tree; code quiesced 2.5h, only data-writers running):
+1. **@57e4cf9 campaign commit** — the certified live-tree state (34 files, +2,829/−106): both
+   sessions' work that run-4 audited ALL-GREEN. A clean checkout of main no longer regresses the
+   press floor, DEBATE signs, or behavioral receptivity. **S2-02 closed.**
+2. **@1894b65 audit/fixes-2026-07-03 merged** — the last run-3 fix-lane straggler.
+3. **@b66c1f3 eager-wright merged** — lt_priming gates + **17-step chain** + audit GOLD format on
+   main. One trivial conflict (both sides wrote the identical GOLD check), resolved as the union.
+   **S2-01 closed** — and structurally: the chain now regenerates lt_priming.json fresh every run,
+   so the stale-artifact masking can never recur.
+4. **Session branch merged with ZERO conflicts** (mirrored commits were byte-identical); combined
+   weekly_refresh = campaign's dispositions pre-chain + run-4m diagnostics post-chain. 103/103
+   compile.
+
+## Bakker out-party cue signing (run-4j forward item — applied at merge, as specified)
+
+`lt_priming.py` + the mirrored dashboard JS: cross-party pro-cues in the priming pressure/recruit
+terms now pass through **√(bpf_u·bpf_v)** instead of inheriting the kernel's unconditional 0.4
+cross-party floor (Bakker-Lelkes-Malka: out-party cues are null-to-backfire; we clamp at 0 rather
+than invent a backfire magnitude; perfect bridge pairs keep full influence — the kernel's own
+philosophy at cpf=1.0). No new constants; kernel untouched; `BAKKER_XCUE=0` reverts. Measured vs a
+fresh pre-Bakker baseline: cheap actionable head unchanged (Norman/Scott/Moran identical), 79/110
+deep-tail targets repriced upward, 1 dropped (Finstad), Warren-class pushed further into never-buy
+($3.8M→$8.0M) — the signing reinforces the gates.
+
+## Full-chain verification on merged main
+
+17/17 steps OK in 12.8 min (fresh lt_priming.json in-chain), audit **ALL MODULES CLEAN**, rank
+delta **0/533** (merges + Bakker move targeting artifacts, not ranks). Desk regenerated: **both
+psychometrics radars restored** (behavioral teal + "Text Big-5 v2") *plus* the External-measures
+block — the missing-radar regression the user spotted was run-4m's rebuild using the branch
+template that predated the behavioral radar; the merge fixed it at the source.
+
+## Committee coverage (user: "on purpose, unless there are committees where tracked legislation is introduced that I missed. If so, add those committees and adjust")
+
+Referral evidence, 481 distinct tracked bills (primary referral = introduction venue): the 8
+tracked committees carry every venue with ≥7 primary referrals. Untracked tail: **Judiciary 10
+primary / 19 total** (interchange-antitrust + TCPA adjacency), then HSGAC 4, Ag 3, Armed Services 3
+(defense_cu, IMP 0.2), everything else ≤1 — noise floor, confirming the deliberate scope.
+**Judiciary added per the user's rule** (`fec/add_judiciary_seats.py`, reproducible-port pattern):
+- Tier **[Slightly]** by the sheet's own precedent — Energy & Commerce holds 30 primary referrals
+  at [Slightly]; ranking Judiciary (10) above it would contradict the evidence ordering. One text
+  edit + `apply_committee_reweight.py --apply` bumps it if the user prefers [Moderately].
+- 26 rows edited, **38 new rows** (roster: congress-legislators, 64/64 bioguide-matched) —
+  **Richard Durbin enters the Committee Data sheet (Judiciary Ranking)**, closing the run-4b
+  Durbin question. Committee-coverage gap 245→207, all remaining = genuinely no seat on any
+  CU-relevant committee.
+- R&A INDEX ranges extended $320→$360 (326 rows exceeded the old cap); scorer validation
+  **326/326 reproduced**; COM CalculateFull applied (caches fresh for compute_pillars); workbook
+  backed up twice (.PRE-JUDICIARY-, .PRE-CMTEREWEIGHT-).
+- Propagation chain (--from compute_pillars): 5.6 min, audit **ALL CLEAN**. Rank movement
+  (expected, the point of the change): **494/533 moved; 434 by ≤5 spots (renormalization); the 60
+  risers are the Judiciary cohort** — Jim Jordan (chair) #496→#407, Raskin #257→#178, Grassley
+  #87→#54. **Durbin #532→#531**: his new seat contributes correctly, but his stance-signed
+  components (interchange arch-opponent) dominate a [Slightly] seat — the model working as
+  designed, not a residual gap.
+

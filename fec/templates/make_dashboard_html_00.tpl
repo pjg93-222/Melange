@@ -295,8 +295,10 @@ function prime(v,i){   // lt_priming: cheapest pressure+money to flip member v o
   if(!(tier in THETA)||CAMP(code)==='pro')return null;
   if(BLOCKOV[DATA.gen[v]])return null;   // one mild topic cell can't make a system-level Skeptic a target
   const theta=THETA[tier]+Math.max(0,-(EG.nlraw[v])/120)+0.25*nOpp[v];   // money capture + ideological commitment both resist
-  let pressure=0;const cand=[];
-  for(const u in PE[v]){const c=CAMP(DATA.stance[+u][i]);if(c==='pro')pressure+=PE[v][u];else if(c!=='anti'&&!BLOCKOV[DATA.gen[+u]])cand.push([+u,PE[v][u]]);}
+  // Bakker cross-cue signing (mirrors fec/lt_priming.py xf(), default-on): cross-party pro-cues pass
+  // through sqrt(bpf_u*bpf_v) — non-bridge out-party cues ~0, bridge pairs keep full influence.
+  let pressure=0;const cand=[];const pv=PTY[v];
+  for(const u in PE[v]){const uu=+u;const pe=PE[v][u]*((PTY[uu]===pv)?1:Math.sqrt((BPF[uu]||0)*(BPF[v]||0)));const c=CAMP(DATA.stance[uu][i]);if(c==='pro')pressure+=pe;else if(c!=='anti'&&!BLOCKOV[DATA.gen[uu]]&&pe>1e-6)cand.push([uu,pe]);}
   const gap=theta-pressure;
   if(gap<=1e-6)return {tier,theta,pressure,gap,money:0,recruits:[]};
   const cap=Math.min(0.97,gap),avg=dollarsForUnits(v,cap)/cap;
