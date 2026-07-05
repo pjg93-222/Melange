@@ -39,3 +39,4 @@ __pycache__/
 !.claude/commands/
 !.claude/commands/*.md
 *.log
+fec/lep/

@@ -716,3 +716,44 @@ Legislative Effectiveness Project data, which carries exactly this. Roadmap, use
   (incl. Zhou-Elejalde, already conformed); `v8b253…` blob (Campaign Politics); knowledge-brokers
   ABM PDF extracts empty (image-based).
 
+---
+
+# Run-4l — Volden-Wiseman LEP pull (user: "Lets go with that effectiveness project")
+
+**Data:** CEL House + Senate Reduced files, 93rd–118th Congresses (thelawmakers.org, June 2025
+revision), downloaded to `fec/lep/` (gitignored, like `fec/liwc/rkh/`). Both files carry
+`bioguide_id` — matched **454/533 current members** (2,608 member-Congress rows; the 79 unmatched
+are 119th freshmen with no LEP history). New diagnostic: `fec/lep_criterion.py` →
+`lep_criterion.json` (chain consumes nothing). **Bars pre-registered in the script header before
+the first scoring run.**
+
+**[A] The paper-exact RKH C criterion — NULL on all three instruments (pre-registered bars).**
+Ceremonial share of sponsored bills (classic-methodology counts, pooled 115th–118th, ≥8 bills,
+n=440): diligence_z ρ=−0.023, lexical C v1 ρ=−0.039, behavior-calibrated C v2 ρ=−0.028 — all three
+right-SIGNED, none clears even the −0.10 directional bar. **Attenuation caveat (documented in
+output):** the modern criterion is thin — 33% of members have zero V-W ceremonial bills (the House
+banned commemorative legislation in 1995; RKH estimated on the 104th–112th with binomial
+trial-weighting), so a rank test here is much weaker than their design. Verdict: the paper-exact
+criterion **replaces** the mis-sourced committee_leader row in the C battery going forward, and at
+this window it neither validates nor indicts any C instrument. It does close run-4k's criterion
+correction with a measured number instead of an open question.
+
+**[B] LES vs the model — null vs the +0.30 bar, and the interpretation is construct, not defect.**
+lesclassic (117–118 mean) vs blended score ρ=+0.102 (n=454); vs the legislative pillar
+(ranks_python `pcts.leg`) ρ=+0.098. By the pre-registered bar: null. What it means: the model's
+legislative pillar prices **CU-topical** engagement (the 18-category corpus), while LES prices
+**general** lawmaking effectiveness across all issues — near-orthogonality says the pillar is
+domain-specific, not that it is broken (a +0.7 here would have meant the pillar was redundant with
+a free public score). The productive use of LES is therefore as an **orthogonal covariate**, and
+the artifact enables exactly that: `lep_criterion.json` now stores per-member `lesclassic`,
+`les2_latest`, and `dwnom1` (the DW-NOMINATE node attribute the Gaynor/Bonica bib notes asked for)
+— e.g., a general-effectiveness × CU-silence interaction is now one join away if the user wants
+"effective lawmaker, CU-quiet" as a targeting lens.
+
+Implementation notes: workbook pillar columns were unreadable (live INDEX/MATCH formulas with
+empty caches until Excel next opens the file) — the pillar was taken from the Python rank
+authority instead, which is the correct source of record anyway. Optional exploratory follow-up
+(NOT run, to keep the pre-registered result clean): a binary any-ceremonial-vs-none contrast, and
+re-estimating on the RKH-era window (104th–112th) against *those* Congresses' members for a
+method-faithful replication.
+
