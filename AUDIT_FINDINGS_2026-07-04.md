@@ -312,6 +312,50 @@ excerpts (Spearman-Brown: 5 raters at single-rater reliability .45 → panel rel
 30 people not needed), or (b) the user re-rates 10 excerpts in a week to measure his own
 test-retest reliability, which lets us disattenuate today's numbers properly.
 
+## Run-4i — PERSONA_W: user-ratified KEEP at 0.30; removal recommendation WITHDRAWN after
+## reading the three source papers the user provided (B&L PA'25, RKH PSRM'16, Yang ISR'23)
+
+The user rejected the removal recommendation and directed a return to the original literature.
+Read in full. The papers do not merely support keeping the channel — they show BOTH of this
+session's validation tests applied the wrong standard, and that the channel already passed the
+construct-appropriate validations at build time.
+
+**What the papers establish.** (1) B&L 2025 (Political Analysis): agency/communion are PUBLIC
+persona constructs under Brunswik's lens model — the paper explicitly states intrinsic-vs-
+strategic influence on cues "cannot be determined" and that the measurement target is the
+judgments observers form from cues. Its validation standard: trained-coder agreement (3 coders +
+codebook + consensus loops reached only Krippendorff α .70–.78 on a TERNARY task), 18-unit
+functional tests, and GROUP-LEVEL external patterns (party-level communion tracks CHES left-
+right; Trump-Harris agency/communion reversal). No model exceeded F1 .80; the paper itself
+says cues are fuzzy and "not all observers will use the same available cues in the same way."
+(2) RKH 2016 (PSRM): elite personality is measurable from speech; surveys are infeasible and
+selection-biased (response rate itself correlates with personality). (3) Yang 2023 (ISR):
+measurement quality is the bottleneck, and text-based personality features materially improve
+downstream forecasting — the utility warrant for personality channels in predictive engines.
+
+**Why both of this session's tests were scope-mismatched.** The blind single-rater gold test:
+one untrained rater doing 1–9 holistic ratings is far below B&L's own measurement floor (their
+trained multi-coder consensus process topped out at α≈.72 on an easier task) — a near-zero
+correlation was PREDICTABLE from the paper's framework; the user's "too subjective unless you
+get thirty people" is functionally B&L's own multi-coder position. The nomological battery's
+persona hypotheses (Agency→committee_leader, Communion→bipartisanship) imported INTRINSIC-trait
+precedents; a projected-persona measure failing intrinsic-behavior criteria does not contradict
+a construct that explicitly disclaims measuring intrinsic disposition. Meanwhile the channel's
+construct-appropriate validations — the B&L 18/18 functional-gate replication and the party-
+signature replication (communion D>R, matching the paper's own external-validity design) —
+PASSED at build time and were under-weighted in this session's "zero positive evidence" framing.
+That framing was the auditor's error: it demanded evidence of a kind the construct doesn't
+claim, while discounting the evidence of the kind it does.
+
+**What stands on the record.** The two test RESULTS remain as scoped facts: projected persona
+did not predict those behavior criteria here (right-signed 4/5, magnitudes null), and one
+untrained rater's blind readings did not correlate with the instrument. Neither is evidence
+against the channel as designed and used (approach-styling + a 0.30 share of susceptibility,
+where the persona IS what an approaching lobbyist meets). **PERSONA_W=0.30 is USER-RATIFIED
+2026-07-04. Do not re-litigate absent new construct-appropriate evidence** (i.e., a multi-rater
+panel run to B&L standards — 3+ raters, codebook, consensus — failing to converge with the
+instrument).
+
 ## Verdict
 ALL GATES GREEN at the effective (uncommitted) live-tree state. The system's math, determinism,
 idempotency, contracts, kernel single-sourcing, and both UIs verify clean. The material risk is
