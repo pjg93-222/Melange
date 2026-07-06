@@ -24,7 +24,11 @@ import sys, os, re, json, sqlite3, datetime, time, urllib.request, collections
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B = MB_ROOT
 DB = B + r'\social_media.db'
-UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36 (research collector)'}
+UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36 (research collector)',
+      # cbsnews.com 406s requests with no Accept header (content-negotiation WAF, verified 2026-07-05);
+      # standard browser Accept headers unblock it and are inert for every other leg.
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.9'}
 PAUSE = 0.7
 
 def db():

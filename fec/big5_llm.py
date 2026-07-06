@@ -41,6 +41,12 @@ CACHE = B + r'\big5_llm_cache_%s%s%s.jsonl' % (_mk, '_named' if NAMED else '', '
 OUT = B + r'\big5_llm_%s%s%s.json' % (_mk, '_named' if NAMED else '', '_rep%d' % REP if REP else '')
 WORKERS = int(os.environ.get('B5_WORKERS', '8'))
 EST_PER_CALL = {'sonnet': 0.014, 'opus': 0.075, 'haiku': 0.004}[_mk]   # x1.4 safety included
+# Fast mode (user-enabled 2026-07-05): opus-only research preview, 2.5x OTPS at exactly 2x price
+# ($10/$50 vs $5/$25 per MTok). Direct path only — the Batch API does not support it. B5_FAST=0
+# reverts. If the org lacks preview access, classify() flips this off after the first rejection
+# and the whole run continues at standard speed.
+FAST = os.environ.get('B5_FAST', '1') != '0' and _mk == 'opus'
+SPEED_N = collections.Counter()   # usage.speed served, for the end-of-run cost readout
 CHUNK_WORDS = 1200; CHUNKS_PER_GENRE = 6; MIN_WORDS = 2000
 lock = threading.Lock()
 
@@ -100,7 +106,43 @@ def _params(user):
     return p
 
 def classify(user, _retry=True):
-    resp = client.messages.create(**_params(user))
+    global FAST
+    p = _params(user)
+    if FAST:
+        # max_retries=0 on the fast attempt: fail over immediately instead of burning
+        # retry-after waits against the dedicated fast pool (doc-recommended pattern).
+        try:
+            resp = client.with_options(max_retries=0).beta.messages.create(
+                speed='fast', betas=['fast-mode-2026-02-01'], **p)
+        except anthropic.RateLimitError as e:
+            # "limit of 0 fast mode input tokens" = org not yet granted the preview -> permanent
+            # standard for this run; any other 429 = pool momentarily busy -> keep trying fast.
+            if '0 fast mode' in str(e):
+                with lock:
+                    if FAST:
+                        print('  fast-mode limit is 0 for this org (preview not enabled) — standard speed', flush=True)
+                        FAST = False
+            resp = client.messages.create(**p)
+        except anthropic.BadRequestError as e:
+            if 'speed' in str(e).lower() or 'fast' in str(e).lower():
+                with lock:
+                    if FAST:
+                        print('  fast mode rejected — continuing at standard speed:', str(e)[:100], flush=True)
+                        FAST = False
+                resp = client.messages.create(**p)
+            else:
+                raise   # unrelated 400 (e.g. grammar timeout) — surface exactly as before
+        except anthropic.PermissionDeniedError:
+            with lock:
+                if FAST:
+                    print('  fast mode not enabled for this org (research preview) — standard speed', flush=True)
+                    FAST = False
+            resp = client.messages.create(**p)
+        except (anthropic.APIStatusError, anthropic.APIConnectionError):
+            resp = client.messages.create(**p)   # transient 5xx/conn with retries off -> standard path retries
+    else:
+        resp = client.messages.create(**p)
+    with lock: SPEED_N[getattr(resp.usage, 'speed', None) or 'standard'] += 1
     try:
         return json.loads(next(b.text for b in resp.content if b.type == "text"))
     except (json.JSONDecodeError, StopIteration):
@@ -201,9 +243,10 @@ if os.path.exists(CACHE):
         except Exception: pass
 todo = [it for it in items if it[0] not in cache]
 BATCH = '--batch' in sys.argv   # Batches API: 50% off, <=1h turnaround — the efficient path for bulk scoring
-_est = len(todo) * EST_PER_CALL * (0.5 if BATCH else 1.0)
-print('BIG5-LLM[%s%s%s]: %d chunks | cached %d | to score %d | est ~$%.2f' % (
-    MODEL, ' NAMED' if NAMED else '', ' BATCH(-50%)' if BATCH else '', len(items), len(items) - len(todo), len(todo), _est))
+_est = len(todo) * EST_PER_CALL * (0.5 if BATCH else 1.0) * (2.0 if FAST and not BATCH else 1.0)
+print('BIG5-LLM[%s%s%s%s]: %d chunks | cached %d | to score %d | est ~$%.2f' % (
+    MODEL, ' NAMED' if NAMED else '', ' BATCH(-50%)' if BATCH else '', ' FAST(x2)' if FAST and not BATCH else '',
+    len(items), len(items) - len(todo), len(todo), _est))
 if todo and '--go' not in sys.argv:
     print('COST GATE: add --go to spend.'); sys.exit(0)
 
@@ -267,6 +310,7 @@ if todo:
                     if done % 200 == 0: cf.flush()
                 if done % 200 == 0 or done == len(todo): print('  %d/%d (%d errors)' % (done, len(todo), errs), flush=True)
     cf.close()
+    if SPEED_N: print('  served: %s' % dict(SPEED_N), flush=True)   # fast-vs-standard split = actual price multiplier
     if errs > len(todo) * 0.1: print('!! high error rate — check credits before trusting coverage')
 
 # ---- aggregate: item -> chunk trait -> genre -> member -> z ----
