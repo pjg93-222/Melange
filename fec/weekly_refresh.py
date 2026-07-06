@@ -44,6 +44,12 @@ def step(name,args,timeout=3600,hard=False):
         log('%-28s ERROR %s'%(name,str(e)[:120]))
         if hard: sys.exit(1)
         return False
+try:   # user directive 2026-07-06: hold a system wake lock for the refresh's lifetime (the 01:10
+    import ctypes   # machine sleep stalled collectors 5h; a mid-refresh sleep would do the same)
+    ctypes.windll.kernel32.SetThreadExecutionState(0x80000000 | 0x00000001)
+    log('keep-awake: system wake lock held for this refresh')
+except Exception as _e:
+    log('keep-awake unavailable: %s' % str(_e)[:60])
 log('===== WEEKLY REFRESH START =====')
 today=datetime.date.today()
 prev=None

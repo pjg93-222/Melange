@@ -580,7 +580,22 @@ def run_hewitt():
 # Newsmax/OANN/Fox Business publish no transcripts (verified 07-05); MSNBC's transcript section
 # exists but is JS-rendered — sitemap-enumeration candidate if the user wants the L-flank.
 
+def _keep_awake():
+    """User directive 2026-07-06 ('put in checks so it doesn't fall asleep'): the 01:10 machine
+    sleep suspended NPR+Fox mid-crawl for 5h. Hold a SYSTEM wake lock for the life of the leg —
+    the OS clears it automatically when the process exits, and the display may still sleep
+    (ES_SYSTEM_REQUIRED only). Non-Windows / failure degrades to a printed warning."""
+    try:
+        import ctypes
+        ES_CONTINUOUS, ES_SYSTEM_REQUIRED = 0x80000000, 0x00000001
+        r = ctypes.windll.kernel32.SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED)
+        print('keep-awake: system wake lock held for this crawl' if r else 'keep-awake: call returned 0 (no lock)', flush=True)
+    except Exception as e:
+        print('keep-awake unavailable (%s) — machine may sleep mid-crawl' % str(e)[:60], flush=True)
+
 if __name__ == '__main__':
+    if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt')):
+        _keep_awake()
     if 'status' in sys.argv:
         con = db()
         for src, n, dm, w in con.execute("SELECT source, COUNT(*), COUNT(DISTINCT member), SUM(nwords) FROM speeches GROUP BY source"):
