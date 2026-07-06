@@ -59,6 +59,8 @@ step('Big5 v2 (behavior-calibrated)',['big5_lexcal_v2.py'],timeout=900)     # te
 step('Big5 v3 (hybrid)',['big5_hybrid.py'],timeout=900)                     # lexical+interaction+persona; wins expected post-nickfix corpus
 step('social interaction layer',['social_interaction_layer.py'],timeout=900)
 step('multilayer network',['build_multilayer_network.py'],timeout=900)
+step('co-appearance layer',['co_appearance_layer.py'],timeout=600)                 # joint interview-episode pairings (user 2026-07-05)
+step('reference layer (rebuild)',['member_reference_layer.py','--rebuild'],timeout=900)  # FREE cache-only re-aggregation; paid --score passes stay manual
 step('press stance stack',['press_stance_stack.py'],timeout=1800)   # re-score the (grown) corpus so the sidecar never goes stale (frozen-archive lesson); new articles missing Fable cache fields degrade gracefully to reader+DEBATE features
 step('media blend',['build_media_blend.py'],timeout=1200)   # tolerant: Excel lock -> stale press this week, still consistent
 ok=step('FULL PIPELINE + dashboards',['run_pipeline.py'],timeout=3000)

@@ -181,8 +181,16 @@ if os.path.exists(_rfp):
     for _e in json.load(open(_rfp,encoding='utf-8'))['edges']:
         if _e['a'] in idx and _e['b'] in idx and _e.get('n_scored',0)>=2:
             REFE.append([idx[_e['a']],idx[_e['b']],round(_e.get('net',0),2),_e['n_scored']])
-print('layer provenance: %s | reference layer: %d dyads (n_scored>=2)'%(
-    {c:ELAY.count(c) for c in 'cshem' if ELAY.count(c)},len(REFE)))
+# co-appearance layer (co_appearance.json: substantial joint interview-episode appearances,
+# floors + segment-merge at build time). n>=2 keeps one-off co-bookings out of the drawing.
+COAP=[]
+_cap=MB_ROOT+r'\co_appearance.json'
+if os.path.exists(_cap):
+    for _e in json.load(open(_cap,encoding='utf-8'))['edges']:
+        if _e['a'] in idx and _e['b'] in idx and _e.get('n',0)>=2:
+            COAP.append([idx[_e['a']],idx[_e['b']],_e['n'],1 if _e.get('bipartisan') else 0])
+print('layer provenance: %s | reference layer: %d dyads (n_scored>=2) | co-appearance: %d pairs (n>=2)'%(
+    {c:ELAY.count(c) for c in 'cshem' if ELAY.count(c)},len(REFE),len(COAP)))
 flip=[{str(idx[n]):round(v/1000) for n,v in FL[lb].items() if v>=10000} for lb in issues]
 coal=[{str(idx[n]):round(v/1000) for n,v in CO[lb].items() if v>0} for lb in issues]
 stats=[]
@@ -271,7 +279,7 @@ bundle={'issues':issues,'name':name,'x':X,'y':Y,'party':''.join(PARTY),'gen':''.
         'rank':RANK,'nl':NL,'bp':BP,'cf':CF,'stance':STANCE,'edges':E,'flip':flip,'coal':coal,'stats':stats,
         'play':PLAY,'epval':EPVAL,'frontier':frontier,'opt':opt,'engine':engine,
         'cx':CX,'cy':CY,'comms':COMMS,'cmi':CMI,   # committee-cluster layout (Porter): positions + anchors + per-member primary committee
-        'elay':ELAY,'refs':REFE,   # layer toggles: per-drawn-edge provenance code + signed reference dyads
+        'elay':ELAY,'refs':REFE,'coap':COAP,   # layer toggles: per-drawn-edge provenance code + signed reference dyads + joint-appearance pairs
         'recept':[round((_RC.get(n) or {}).get('pressure_mult',1.0),2) for n in members]}   # behavioral receptivity (colorBy=recept)
 dump_atomic({name[i]:BP[i] for i in range(len(name))},MB_ROOT+r'\bipartisan.json')
 out=MB_ROOT+r'\dashboard_data.json'

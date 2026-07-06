@@ -93,6 +93,7 @@ canvas{touch-action:none}
  <label style=cursor:pointer><input type=checkbox id=ly_h checked> committee</label>
  <label style=cursor:pointer><input type=checkbox id=ly_e checked> engagement</label>
  <label style=cursor:pointer title="cross-media references (speeches/interviews/reposts), green=positive red=negative"><input type=checkbox id=ly_r> references ±</label>
+ <label style=cursor:pointer title="appeared together on the same broadcast (substantial joint interview-episode appearances, 2+ shared episodes); violet=cross-party"><input type=checkbox id=ly_a> appeared together</label>
 </span></span>
 <span><label>Find</label><input id=search placeholder="member name…" list=names><datalist id=names></datalist></span>
 </div>
@@ -205,6 +206,13 @@ function draw(){
  for(let k=0;k<DATA.edges.length;k++){if(DATA.elay&&!LYON[DATA.elay[k]])continue;
    const [a,b]=DATA.edges[k];const A=toScreen(LX[a],LY[a]),B=toScreen(LX[b],LY[b]);ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);}
  ctx.stroke();}
+ const _lya=document.getElementById('ly_a');
+ if(_lya&&_lya.checked&&DATA.coap){   // co-appearance layer: shared broadcasts; violet = cross-party pairing, teal = same-party
+   for(const [a,b,n,bip] of DATA.coap){const A=toScreen(LX[a],LY[a]),B=toScreen(LX[b],LY[b]);
+     ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);
+     ctx.lineWidth=bip?1.4:0.9;ctx.globalAlpha=Math.min(0.8,0.22+n*0.1);
+     ctx.strokeStyle=bip?'#a78bfa':'#2dd4bf';ctx.stroke();}
+   ctx.globalAlpha=1;}
  const _lyr=document.getElementById('ly_r');
  if(_lyr&&_lyr.checked&&DATA.refs){   // signed reference layer: green=net positive, red=net negative, alpha by evidence count
    for(const [a,b,net,n] of DATA.refs){const A=toScreen(LX[a],LY[a]),B=toScreen(LX[b],LY[b]);
