@@ -200,6 +200,7 @@ def run_cnn(since, until, verify=False):
     --verify re-walks EVERY day in range (index fetch each, segments only where missing) to
     repair the historical ok-on-partial losses the old code could not see."""
     con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    done_seg = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE key LIKE 'cnnseg:%'")}
     d = datetime.date.fromisoformat(since); end = datetime.date.fromisoformat(until)
     tot = repaired = 0
     while d <= end:
@@ -209,13 +210,18 @@ def run_cnn(since, until, verify=False):
             idx = get('https://transcripts.cnn.com/date/%s' % d.isoformat()); time.sleep(PAUSE)
             segs = sorted(set(re.findall(r'href="(/show/[^"]+/date/%s/segment/[^"]+)"' % d.isoformat(), idx)))
             have = {p for (p,) in con.execute("SELECT DISTINCT package FROM speeches WHERE package LIKE 'https://transcripts.cnn.com%' AND date=?", (d.isoformat(),))}
-            new = [s for s in segs if ('https://transcripts.cnn.com' + s) not in have]
+            new = [s for s in segs if ('https://transcripts.cnn.com' + s) not in have and ('cnnseg:' + s) not in done_seg]
             nd = fails = 0
             for s in new:
                 try:
                     page = get('https://transcripts.cnn.com' + s); time.sleep(PAUSE)
                     rows = parse_turns(strip_tags(page))
-                    nd += store(con, rows, d.isoformat(), s.split('/')[2], 'https://transcripts.cnn.com' + s)
+                    n0 = store(con, rows, d.isoformat(), s.split('/')[2], 'https://transcripts.cnn.com' + s)
+                    if n0 == 0:   # zero-yield marker (verify lesson 2026-07-06: 21k historically-empty
+                        # segments were refetched because 'stored nothing' looked like 'never fetched')
+                        con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)',
+                                    ('cnnseg:' + s, 'empty', datetime.datetime.now().isoformat()))
+                    nd += n0
                     con.commit()   # SHORT transactions: a day-long write TX starved the CREC collector's lock (2026-07-03)
                 except Exception:
                     fails += 1
