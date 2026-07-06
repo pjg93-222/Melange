@@ -442,11 +442,70 @@ def run_fox():
             print('fox %s FAIL %s' % (slug[:50], str(e)[:80]), flush=True)
     con.close(); print('fox done: %d member turns' % tot)
 
+def run_hewitt():
+    """Hugh Hewitt Show (user 2026-07-05: 'we need some other Republican leaning news sources') —
+    R-leaning radio, senator-dense, and CURRENT (unlike Fox's archive, Hewitt still posts full
+    transcripts). FORMAT: host turns 'HH:', guest turns labeled by INITIALS ('JT:' = John Thune),
+    guest named in the post title. ATTRIBUTION RULE (drop-never-guess): the title/slug must
+    resolve to exactly ONE roster member via the full-name scan, AND the body label must match
+    that member's initials (or caps surname / full name); everything else drops — multi-guest,
+    surname-only-title, and non-member posts yield zero rows by design.
+    Enumeration: the on-site interview archive page (~2k posts); dates from WP post-sitemaps."""
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    dates = {}
+    for i in ('', '2', '3', '4'):
+        try:
+            sm = get('https://hughhewitt.com/post-sitemap%s.xml' % i); time.sleep(PAUSE)
+            for mu, md in re.findall(r'<url>\s*<loc>([^<]+)</loc>\s*<lastmod>([^<]+)</lastmod>', sm):
+                dates[mu.rstrip('/')] = md[:10]
+        except Exception:
+            if i in ('', '2'): print('hh post-sitemap%s FAIL (dates degrade to blank)' % i, flush=True)
+    try:
+        idx = get('https://hughhewitt.com/hugh-hewitt-show-interview-archive'); time.sleep(PAUSE)
+    except Exception as e:
+        print('hh archive index FAIL %s' % str(e)[:80]); con.close(); return
+    posts = [u.rstrip('/') for u in dict.fromkeys(re.findall(r'href="(https://hughhewitt\.com/[^"#?]+)"', idx))
+             if not re.search(r'/(category|tag|page|author|about|shows?|transcripts|wp-)', u)]
+    print('hewitt: %d candidate posts from the interview archive' % len(posts), flush=True)
+    tot = 0
+    for u in posts:
+        slug = u.rsplit('/', 1)[-1]
+        key = 'hh:%s' % slug[:180]
+        if key in done: continue
+        try:
+            page = get(u); time.sleep(PAUSE)
+            title = (re.search(r'<title>([^<]+)</title>', page) or [None, ''])[1]
+            probe = ' ' + re.sub(r'\s+', ' ', norm(slug.replace('-', ' ') + ' ' + title)) + ' '
+            guests = {mem for (fn, ln), mem in FULL.items() if (' %s %s ' % (fn, ln)) in probe}
+            if len(guests) != 1:
+                con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+                con.commit(); continue   # zero or ambiguous guest -> drop, never guess
+            guest = next(iter(guests)); parts = norm(guest).split()
+            accept = {(parts[0][0] + parts[-1][0]).upper(), parts[-1].upper(),
+                      (parts[0] + ' ' + parts[-1]).upper()}
+            text = strip_tags(page)
+            pos = [(m.start(), m.group(1)) for m in LABEL.finditer(text)]
+            rows = []
+            for i2, (st, lab) in enumerate(pos):
+                if lab.split(',')[0].strip() not in accept: continue
+                end = pos[i2 + 1][0] if i2 + 1 < len(pos) else len(text)
+                sp = text[st:end]; sp = scrub(re.sub(r'\s+', ' ', sp[sp.index(':') + 1:].strip()))
+                if len(sp.split()) >= 8: rows.append((guest, sp))
+            n = store(con, rows, dates.get(u, ''), 'hugh-hewitt', u)
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+            con.commit(); tot += n
+            if n: print('hh %s: %d turns (total %d)' % (slug[:55], n, tot), flush=True)
+        except Exception as e:
+            print('hh %s FAIL %s' % (slug[:50], str(e)[:80]), flush=True)
+    con.close(); print('hewitt done: %d member turns' % tot)
+
 # STONES EXAMINED AND CLOSED (2026-07-03, REVISED 07-05): YouTube captions (post-2024-10 Fox,
 # podcasts) have NO speaker labels — multi-speaker attribution would require diarization;
 # harvesting them would violate the drop-never-guess discipline, so they stay out until a
 # diarization pass exists. C-SPAN transcripts are access-restricted. Fox's PUBLISHED archive
-# (through ~2024-10) is now covered by run_fox above.
+# (through ~2024-10) is now covered by run_fox above; Hewitt (current, R) by run_hewitt.
+# Newsmax/OANN/Fox Business publish no transcripts (verified 07-05); MSNBC's transcript section
+# exists but is JS-rendered — sitemap-enumeration candidate if the user wants the L-flank.
 
 if __name__ == '__main__':
     if 'status' in sys.argv:
@@ -464,4 +523,5 @@ if __name__ == '__main__':
     elif 'pbs' in sys.argv: run_pbs(since, until)
     elif 'npr' in sys.argv: run_npr(since, until)
     elif 'fox' in sys.argv: run_fox()
-    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
+    elif 'hewitt' in sys.argv: run_hewitt()
+    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
