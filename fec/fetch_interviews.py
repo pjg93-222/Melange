@@ -396,10 +396,57 @@ def run_npr(since, until):
         d += datetime.timedelta(days=1)
     con.close(); print('NPR done: %d member turns' % tot)
 
-# STONES EXAMINED AND CLOSED (2026-07-03): YouTube captions (Fox News Sunday, podcasts) have NO
-# speaker labels — multi-speaker attribution would require diarization; harvesting them would
-# violate the drop-never-guess discipline, so they stay out until a diarization pass exists.
-# C-SPAN transcripts are access-restricted. NPR + deep CBS years close the public-archive set.
+def run_fox():
+    """Fox News transcript archive (foxnews.com/transcript/...). REVISED FINDING 2026-07-05 (the
+    2026-07-03 'no public archive' note was wrong — the category page is JS-rendered, which made
+    it LOOK empty): full-episode transcripts exist back to ~2018 but Fox STOPPED POSTING them
+    ~2024-10, and the article-search API no longer honors its offset param. Enumeration therefore
+    walks the article SITEMAPS (~166 pages, one fetch each) and filters /transcript/ URLs — the
+    archive is historical; if Fox resumes publishing, re-runs pick new URLs up automatically.
+    Old interviews of CURRENT members are valid personality/relational text (RKH used 1996-2014);
+    non-roster guests drop at parse_turns (drop-never-guess). Post-2024-10 Fox stays unavailable
+    until a YouTube-caption diarization build exists (captions carry no speaker labels)."""
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    MONTHS = {m: i for i, m in enumerate(('january', 'february', 'march', 'april', 'may', 'june', 'july',
+                                          'august', 'september', 'october', 'november', 'december'), 1)}
+    try:
+        idx = get('https://www.foxnews.com/sitemap.xml'); time.sleep(PAUSE)
+    except Exception as e:
+        print('fox sitemap index FAIL %s' % str(e)[:80]); con.close(); return
+    pages = [u.replace('&amp;', '&') for u in re.findall(r'<loc>([^<]+type=articles[^<]*)</loc>', idx)]
+    urls = []
+    for i, p in enumerate(pages):
+        try:
+            urls += re.findall(r'<loc>(https://www\.foxnews\.com/transcript/[^<]+)</loc>', get(p))
+        except Exception as e:
+            print('fox sitemap page %d FAIL %s' % (i, str(e)[:60]), flush=True)
+        time.sleep(PAUSE)
+    urls = sorted(set(urls))
+    print('fox: %d transcript urls enumerated from %d sitemap pages' % (len(urls), len(pages)), flush=True)
+    tot = 0
+    for u in urls:
+        slug = u.rstrip('/').rsplit('/', 1)[-1]
+        if 'local-air-times' in slug: continue
+        key = 'fox:%s' % slug[:180]
+        if key in done: continue
+        try:
+            page = get(u); time.sleep(PAUSE)
+            md = re.search(r'(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})-(\d{4})', slug)
+            date = '%04d-%02d-%02d' % (int(md.group(3)), MONTHS[md.group(1)], int(md.group(2))) if md else ''
+            show = (slug[:md.start()].rstrip('-') if md else re.sub(r'-\d.*$', '', slug)) or 'fox'
+            n = store(con, parse_turns(strip_tags(page)), date, show, u)
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+            con.commit(); tot += n
+            if n: print('fox %s: %d turns (total %d)' % (slug[:60], n, tot), flush=True)
+        except Exception as e:
+            print('fox %s FAIL %s' % (slug[:50], str(e)[:80]), flush=True)
+    con.close(); print('fox done: %d member turns' % tot)
+
+# STONES EXAMINED AND CLOSED (2026-07-03, REVISED 07-05): YouTube captions (post-2024-10 Fox,
+# podcasts) have NO speaker labels — multi-speaker attribution would require diarization;
+# harvesting them would violate the drop-never-guess discipline, so they stay out until a
+# diarization pass exists. C-SPAN transcripts are access-restricted. Fox's PUBLISHED archive
+# (through ~2024-10) is now covered by run_fox above.
 
 if __name__ == '__main__':
     if 'status' in sys.argv:
@@ -416,6 +463,5 @@ if __name__ == '__main__':
     elif 'abc' in sys.argv: run_abc()
     elif 'pbs' in sys.argv: run_pbs(since, until)
     elif 'npr' in sys.argv: run_npr(since, until)
-    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
-    # NOTE (2026-07-03): Fox News Sunday examined — no public transcript archive exists anymore
-    # (show page + /transcript both empty of transcript links); route later via YouTube captions.
+    elif 'fox' in sys.argv: run_fox()
+    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
