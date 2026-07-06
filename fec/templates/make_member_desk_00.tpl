@@ -335,6 +335,24 @@ function radar(vals,labels,color,R,vals2,color2,labelColors){
   s+=`<path d="${p}Z" fill="${color}33" stroke="${color}" stroke-width="2" stroke-linejoin="round"></path>`;
   for(let i=0;i<n;i++){const[x,y]=pt(i,Math.max(0.02,vals[i]||0));s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.4" fill="${color}"></circle>`;}
   if(vals2&&color2){  // overlay series (run-4p: LLM item-read vs v2, same axes) — dashed, unfilled
+    // OVERLAP REGION (run-4y, user: 'their overlapping space highlighted in light green'): both
+    // polygons are star-shaped about the center, so the intersection boundary at angle t is
+    // min(rA(t), rB(t)), sampled via ray-segment intersection. Wedges around radar.skipGreen axes
+    // collapse to center (Consc: the API read can't measure it). try/catch: the region is
+    // decoration — the two polygons must NEVER vanish because of it.
+    try{
+      const rad_at=(vv,th)=>{const sec=2*Math.PI/n;let i0=Math.floor((th+Math.PI/2)/sec);i0=((i0%n)+n)%n;const i1=(i0+1)%n;
+        const a0=-Math.PI/2+i0*sec;const r0=Math.max(0.02,vv[i0]||0),r1=Math.max(0.02,vv[i1]||0);
+        const A=[Math.cos(a0)*r0,Math.sin(a0)*r0],Bq=[Math.cos(a0+sec)*r1,Math.sin(a0+sec)*r1];
+        const d=[Math.cos(th),Math.sin(th)];const cr=(u,v)=>u[0]*v[1]-u[1]*v[0];
+        const den=cr(d,[Bq[0]-A[0],Bq[1]-A[1]]);return den?Math.abs(cr(A,Bq)/den):0;};
+      const SK=radar.skipGreen||[];const sec=2*Math.PI/n;let g='';const STEPS=n*24;
+      for(let k=0;k<=STEPS;k++){const th=-Math.PI/2+k*2*Math.PI/STEPS;
+        const near=SK.some(si=>{let dd=Math.abs(th-(-Math.PI/2+si*sec));dd=Math.min(dd,2*Math.PI-dd);return dd<sec/2;});
+        const rr=near?0:Math.max(0,Math.min(rad_at(vals,th),rad_at(vals2,th)));
+        g+=(k?'L':'M')+(cx+Math.cos(th)*rr*R).toFixed(1)+' '+(cy+Math.sin(th)*rr*R).toFixed(1);}
+      s+=`<path d="${g}Z" fill="#86efac" fill-opacity="0.30" stroke="#86efac" stroke-opacity="0.5" stroke-width="1"></path>`;
+    }catch(e){}
     let q='';for(let i=0;i<n;i++){const[x,y]=pt(i,Math.max(0.02,vals2[i]||0));q+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);}
     s+=`<path d="${q}Z" fill="none" stroke="${color2}" stroke-width="2" stroke-dasharray="5 3" stroke-linejoin="round"></path>`;
     for(let i=0;i<n;i++){const[x,y]=pt(i,Math.max(0.02,vals2[i]||0));s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="${color2}"></circle>`;}
@@ -570,11 +588,15 @@ function psychHTML(m){
     // highlight LIGHT GREEN. (Consc included per user 2026-07-05; the behavioral radar's Diligence
     // axis remains the load-bearing C measure — see legend.)
     const B5AX=['Open','Consc','Extra','Agree','EmoSt'];
-    const agree=(P.big5_pct&&P.llm_pct)?B5AX.map((ax,i)=>Math.abs(P.big5_pct[i]-P.llm_pct[i])<=0.15):null;
+    // Consc excluded from the green zone (user 2026-07-05 evening: 'the API doesn't measure
+    // conscientiousness') — the wedge collapses and the label never greens; Diligence is the C read.
+    const agree=(P.big5_pct&&P.llm_pct)?B5AX.map((ax,i)=>ax!=='Consc'&&Math.abs(P.big5_pct[i]-P.llm_pct[i])<=0.15):null;
     const axcol=agree?agree.map(a=>a?'#86efac':null):null;
     const agList=agree?B5AX.filter((_,i)=>agree[i]):[];
+    radar.skipGreen=[1];   // Consc axis index — green overlap region collapses in its wedge
     const rad=P.big5_pct?radar(P.big5_pct,B5AX,'#7dd3fc',82,P.llm_pct,'#e879f9',axcol):'';
-    const agLine=agree?`<div style="font-size:10px;margin-top:2px"><span style="color:#86efac;font-weight:700">✓ light green</span> <span style="color:var(--faint)">= both instruments agree within 15 pts (independent methods converging — read as high-confidence): ${agList.length?agList.join(', '):'none on this member'}. For Consc, the measured read is Diligence on the behavioral radar above.</span></div>`:'';
+    radar.skipGreen=null;
+    const agLine=agree?`<div style="font-size:10px;margin-top:2px"><span style="color:#86efac;font-weight:700">light-green region</span> <span style="color:var(--faint)">= where the two instruments overlap (their agreement zone; ✓ label = within 15 pts on that axis${agList.length?': '+agList.join(', '):''}). The Consc wedge never greens — the API read can't measure it; the measured C is Diligence on the behavioral radar above.</span></div>`:'';
     const persona=(P.communion_pct!=null)?bar('Warmth — communion persona',P.communion_pct,'#2dd4bf')+bar('Assertiveness — agency persona',P.agency_pct,'#c2862a'):'<div class=empty>No persona cue coverage yet for this member.</div>';
     const rd=READS[P.susc_read||'trait-only']||READS['trait-only'];
     const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Engagement responsiveness (engines)</span><b>${P.pressure_mult}×</b></div>
@@ -585,7 +607,7 @@ function psychHTML(m){
     const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Suggested approach (IIT-C octant)</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';
     comp=`<div class=gen style=margin-bottom:12px>
       <div><div class=eyebrow>Behavioral profile <span style=color:var(--faint)>· measured from what the member does (floor presence = discussion dynamics + leadership) — drives the engines</span></div>${behav}
-      ${rad?`<div class=eyebrow style=margin-top:8px>Text Big-5 v2 <span style=color:var(--faint)>· behavior-calibrated (held-out validated)</span>${P.llm_pct?` <span style="color:#e879f9">--- LLM item-read (Opus, MTMM-passing, ${P.llm_chunks} chunks)</span>`:''}</div>${rad}${agLine}${P.llm_pct?'':'<div style="font-size:10px;color:var(--faint)">LLM read: not in pilot coverage (173-member RKH-overlap pilot)</div>'}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Big-5: low confidence (thin text corpus)</div>':''}`:''}</div>
+      ${rad?`<div class=eyebrow style=margin-top:8px>Text Big-5 v2 <span style=color:var(--faint)>· behavior-calibrated (held-out validated)</span>${P.llm_pct?` <span style="color:#e879f9">--- LLM item-read (Opus, MTMM-passing, ${P.llm_chunks} chunks)</span>`:''}</div>${rad}${agLine}${P.llm_pct?'':'<div style="font-size:10px;color:var(--faint)">API/LLM read (pink dashed) not available for this member — the pilot covered the 173 members with RKH-era comparison data; full-roster scoring extends it to everyone.</div>'}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Big-5: low confidence (thin text corpus)</div>':''}`:''}</div>
       <div><div class=eyebrow>Projected persona (Birkenmaier-Lechner cues)</div>${persona}
       <div class=eyebrow style=margin-top:8px>Engagement &amp; receptivity</div>${suscRows}${appr}</div></div>`;
   }
