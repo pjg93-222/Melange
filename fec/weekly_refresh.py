@@ -56,7 +56,7 @@ prev=None
 try: prev=json.load(open(os.path.join(MB_ROOT,'ranks_python.json')))['rank']
 except Exception: pass
 step('CREC floor speeches',['fetch_congressional_record.py','crec','--since',str(today-datetime.timedelta(days=14))],timeout=3000)
-step('CHRG finance hearings',['fetch_congressional_record.py','chrg','--since',str(today-datetime.timedelta(days=60))],timeout=3000)
+step('CHRG finance hearings',['fetch_congressional_record.py','chrg','--since',str(today-datetime.timedelta(days=400))],timeout=3000)   # coverage audit 2026-07-06: hearing transcripts publish MONTHS late — a 60-day window structurally missed most of them forever ('ok' markers keep the wide window cheap)
 step('Big Five traits',['big5_traits.py'],timeout=1800)
 step('interaction features',['interaction_features.py'],timeout=900)      # conversational dynamics (feeds dominance disposition)
 step('behavior panel',['behavior_panel.py'],timeout=900)                  # nomological fix 2026-07-04: dispositions measured from behavior

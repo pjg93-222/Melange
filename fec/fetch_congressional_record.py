@@ -200,9 +200,19 @@ def status():
         print('%s: %d turns | %d members | %s words | %s..%s'%(src,r[0],r[1],f'{r[2]:,}',r[3],r[4]))
     t=con.execute("SELECT member,SUM(nwords) w FROM speeches GROUP BY member ORDER BY w DESC LIMIT 5").fetchall()
     print('top speakers:',', '.join('%s %s'%(m,f'{w:,}') for m,w in t))
+def _keep_awake():
+    """User directive 2026-07-06 ('put in checks so it doesn't fall asleep'): hold a system wake
+    lock while a backfill runs; the OS clears it on process exit; display may still sleep."""
+    try:
+        import ctypes
+        ctypes.windll.kernel32.SetThreadExecutionState(0x80000000 | 0x00000001)
+        print('keep-awake: system wake lock held')
+    except Exception as e:
+        print('keep-awake unavailable (%s)' % str(e)[:60])
+
 ap=argparse.ArgumentParser(); ap.add_argument('cmd',choices=['crec','chrg','status'])
 ap.add_argument('--since',default='2025-07-01'); ap.add_argument('--until',default=str(datetime.date.today()))
 a=ap.parse_args()
-if a.cmd=='crec': run_crec(a.since,a.until); status()
-elif a.cmd=='chrg': run_chrg(a.since,a.until); status()
+if a.cmd=='crec': _keep_awake(); run_crec(a.since,a.until); status()
+elif a.cmd=='chrg': _keep_awake(); run_chrg(a.since,a.until); status()
 else: status()
