@@ -879,3 +879,54 @@ receptivity; `big5_llm_opus.json` stands as the best construct-valid text read, 
 (O/breadth cross-checks) rather than wholesale. A $0 split-half becomes computable once the corpus
 settles (re-derive chunk keys against the frozen post-reingest corpus).
 
+
+---
+
+# Run-4t — DATA INTEGRITY AUDIT (2026-07-05, user: "Be brutal")
+
+Read-only sweep (roster spine · chain freshness · value ranges · referential integrity · DB ·
+caches · workbook · hygiene) + kernel 30/30 + **audit_full 56/56 ALL CLEAN on merged main** (first
+full-56 standalone run since the merges). Raw sweep: 1 FAIL + 7 WARN; every finding interrogated
+before reporting — final ledger:
+
+**D1 [S2 — THE finding]: premature behavioral rebuild at 23:20 on the 60% corpus.** Someone
+(the re-ingest session, most likely) ran interaction→panel→dispositions→receptivity→v2 at 07-04
+23:20 while the interview corpus sat mid-wipe-rebuild: interaction_features collapsed **176→111
+members**; every downstream behavioral artifact inherits the hole. Production ranks (22:13)
+PREDATE it — ranks are clean but now inconsistent with the on-disk receptivity artifact.
+**Risk window: any chain run before the re-ingest completes bakes the degraded receptivity into
+ranks.** Containment: dispositions degrade gracefully (322/533 still carry all 5 axes; non-
+interview sources fill most), and the armed post-re-ingest monitor runs weekly_refresh — which
+rebuilds interaction→dispositions→receptivity BEFORE the pipeline — so the window closes itself.
+Owner action: just don't run the chain manually until the collector exits.
+
+**D2 [S3]: 129 exact-duplicate speech rows** (same member/date/source/package/TEXT) of 72,351 —
+0.18%, CREC re-fetch overlap; marginal feature inflation. (The scarier-looking 9,290 same-key
+groups are LEGITIMATE — multiple same-day speeches share a key.) Dedup = one user-gated DELETE.
+
+**D3 [doc note]: press pillar % is stance-SIGNED and can be negative** (120 members < 0, min
+−1.10 via p80 normalization of signed values; leg/inf/dem are all ≥0). Design, not corruption —
+the sweep's [0,1] invariant was wrong for press. Spec should state the press% range explicitly.
+
+**D4 [S4]: lexical-C z outliers** (Rulli −6.5, Kelly −6.1) in v1 — v1 feeds only N + fallback;
+the C axis is 5-method dead; cosmetic.
+
+**D5 [CLOSED in-run]: kb_benchmark predated the Judiciary chain** — refreshed against the 22:16
+allocation (unbought-centrality list unchanged: Barr/Hill/Emmer…). **lep_criterion deliberately
+NOT refreshed** — its diligence input is the degraded 23:20 artifact; refreshing now would launder
+bad inputs under a fresh timestamp. Re-runs post-re-ingest via weekly_refresh.
+
+**D6 [user]: staff_state.json absent** — staffer interaction log stays browser-only until the
+first ⭳ Export lands in the folder.
+
+**D7 [transitional]: INTERVIEW corpus mid-rebuild** (20.9k of 31.2k+ and growing; collector
+active, iv_fetch_log advancing) — all text artifacts intentionally pinned to the pre-wipe snapshot
+until the post-re-ingest rebuild.
+
+**The green spine (verified, not assumed):** 533-member roster with zero duplicate names and
+zero duplicate bioguides; rank = clean permutation 1..533 matching the roster everywhere; stance
+matrix 18 cats all-vocabulary; receptivity 533/533 inside documented caps; all 3,743 signed
+reference edges roster-clean and internally consistent (pos+neg+neu ≤ n_scored); 5,773 staffer
+ids unique; sqlite integrity_check ok; Opus cache 1,199 rows unique-keyed all-parse; Committee
+Data 326 rows scorer-reproduced; all 533 R&A committee formulas migrated to the $360 range (zero
+stragglers); no orphan tmp files; both workbook backups present.
