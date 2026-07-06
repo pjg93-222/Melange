@@ -20,7 +20,7 @@ Each tick:
 Targets are read from collector_targets.json (written by the launcher) so the schedule can be
 re-pointed without editing code. Spend note: GATE-2 runs big5_llm --go (approved); the script's
 own cost gate prints first and a dry account stops cleanly (cache preserves paid work)."""
-import json, subprocess, datetime, time, glob
+import os, sys, json, subprocess, datetime, time, glob
 
 B = MB_ROOT
 FE = os.path.join(B, 'fec')
@@ -55,6 +55,8 @@ def launch_detached(args, tag):
 
 def gate_step(name, script, args, timeout=6000):
     t = time.time()
+    try: os.utime(os.path.join(B, 'collector_supervisor.lock'), None)   # heartbeat: keep the lock fresh across long gate steps
+    except Exception: pass
     r = subprocess.run([sys.executable, os.path.join(FE, script)] + args,
                        capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=timeout, cwd=FE)
     tail = (r.stdout or '').strip().splitlines()[-1:] or ['']
@@ -90,9 +92,27 @@ def run_gates():
         open(os.path.join(B, 'gate2.done'), 'w').write(datetime.datetime.now().isoformat())
         log('GATE-2 complete (audit clean=%s)' % ('ALL MODULES CLEAN' in out))
 
+LOCK = os.path.join(B, 'collector_supervisor.lock')
+
 def main():
     if not os.path.exists(TARGETS_F):
         log('no collector_targets.json — nothing to supervise'); return
+    # SINGLE-TICK LOCK (critical: gates run 30-60 min but the schedule fires every 10 — without
+    # this a second tick would start a PARALLEL big5 re-score and DOUBLE-SPEND). Stale after 90
+    # min so a crashed tick never wedges the loop forever.
+    if os.path.exists(LOCK):
+        age = time.time() - os.path.getmtime(LOCK)
+        if age < 5400:
+            log('another supervisor tick active (%.0f min) — skipping' % (age / 60)); return
+        log('stale lock (%.0f min) — taking over' % (age / 60))
+    open(LOCK, 'w').write(str(datetime.datetime.now()))
+    try:
+        _tick()
+    finally:
+        try: os.remove(LOCK)
+        except Exception: pass
+
+def _tick():
     targets = json.load(open(TARGETS_F, encoding='utf-8'))   # {tag: [args...]}
     os.makedirs(SENT, exist_ok=True)
     done = {t for t in targets if os.path.exists(os.path.join(SENT, t + '.done'))}
