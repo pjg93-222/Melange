@@ -487,10 +487,43 @@ def run_hewitt():
     try:
         idx = get('https://hughhewitt.com/hugh-hewitt-show-interview-archive'); time.sleep(PAUSE)
     except Exception as e:
-        print('hh archive index FAIL %s' % str(e)[:80]); con.close(); return
+        print('hh archive index FAIL %s' % str(e)[:80]); idx = ''
     posts = [u.rstrip('/') for u in dict.fromkeys(re.findall(r'href="(https://hughhewitt\.com/[^"#?]+)"', idx))
              if not re.search(r'/(category|tag|page|author|about|shows?|transcripts|wp-)', u)]
-    print('hewitt: %d candidate posts from the interview archive' % len(posts), flush=True)
+    # LIVE STREAM (audit run-5b S2-02 fix): the interview-archive page above is a HISTORICAL
+    # snapshot — every post it yielded dated 2011-2014, and the 2026 Thune post had 0 stored
+    # rows. The paginated /transcripts listing is the live index (~360 pages x 23 posts,
+    # 2005->today); walk it and union with the archive page.
+    try:
+        first = get('https://hughhewitt.com/transcripts'); time.sleep(PAUSE)
+        maxp = max([int(x) for x in re.findall(r'/transcripts/page/(\d+)', first)] or [1])
+        stream = re.findall(r'href="(https://hughhewitt\.com/[^"#?]+)"', first)
+        for pn in range(2, maxp + 1):
+            try:
+                stream += re.findall(r'href="(https://hughhewitt\.com/[^"#?]+)"',
+                                     get('https://hughhewitt.com/transcripts/page/%d/' % pn))
+            except Exception:
+                print('hh transcripts page %d FAIL (continuing)' % pn, flush=True)
+            time.sleep(PAUSE)
+        posts += [u.rstrip('/') for u in dict.fromkeys(stream)
+                  if not re.search(r'/(category|tag|page|author|about|shows?|transcripts|wp-|video|podcasts)', u)]
+    except Exception as e:
+        print('hh transcripts stream FAIL %s (archive-page set only)' % str(e)[:60], flush=True)
+    posts = list(dict.fromkeys(posts))
+    # SLUG PREFILTER: only fetch posts whose slug already points at a roster member (full name,
+    # or rank word + known surname). Hewitt names the guest in the slug as the norm; fetching all
+    # ~8k stream posts blind would take hours. Final attribution still runs the strict slug+title
+    # resolution + body-label gate after the fetch — the prefilter only saves fetches.
+    def _slug_hits(slug):
+        pr = ' ' + re.sub(r'\s+', ' ', norm(slug.replace('-', ' '))) + ' '
+        if any((' %s %s ' % (fn, ln)) in pr for (fn, ln) in FULL): return True
+        for tm in re.finditer(r'\b(?:senator|sen|congressman|congresswoman|representative|rep|speaker|'
+                              r'majority leader|minority leader|leader|whip|chairman|chairwoman)\s+([a-z]+)', pr):
+            if tm.group(1) in SUR: return True
+        return False
+    pre = len(posts)
+    posts = [u for u in posts if _slug_hits(u.rsplit('/', 1)[-1])]
+    print('hewitt: %d member-candidate posts (of %d enumerated, archive+stream)' % (len(posts), pre), flush=True)
     tot = 0
     for u in posts:
         slug = u.rsplit('/', 1)[-1]

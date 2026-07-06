@@ -31,12 +31,20 @@ Credit-union legislative-influence modeling & money-allocation system (the "Mone
    `per_topic_coalition.py`), Linear-Threshold flips (`flip_model.py`, `per_topic_flip.py`,
    `lt_priming.py`), adaptive $ optimizer (`optimize.py`, Golovin-Krause), going-public advisory
    (`salience_shock.py`, Noble-Turner), scenario runner (`scenario.py`), routes (`cosponsor_route.py`).
+6. **Media & psychology layer** (2026-07-04/06): interview collectors (`fetch_interviews.py` —
+   cnn/mtp/cbs/abc/pbs/npr/fox/hewitt legs, iv_fetch_log-resumable, drop-never-guess attribution)
+   → behavioral dispositions (`behavior_panel.py` → `behavioral_dispositions.py`, receptivity's
+   basis) + LLM Big-5 (`big5_llm.py` → big5_llm_opus.json, desk overlay; cost-gated) + signed
+   reference layer (`member_reference_layer.py` → member_references.json, Fable-valenced,
+   --rebuild is free / --score is gated) + co-appearances (`co_appearance_layer.py` →
+   co_appearance.json). All are chain-independent inputs/diagnostics; audit_full guards their
+   schemas (run-5b).
 
 ## Running
 ```
 python fec/run_pipeline.py [--from <step>]   # the whole chain, audited at the end (NO Excel/COM involved)
 python fec/tests/run_tests.py                # 30 kernel checks (run after ANY code change)
-python fec/audit_full.py                     # full-body audit, 52 checks (expect ALL MODULES CLEAN)
+python fec/audit_full.py                     # full-body audit, 59 checks (expect ALL MODULES CLEAN)
 ```
 **Rank authority = `ranks_python.json`** (phase 2): Python computes the entire rank chain;
 the workbook is a view that recalculates itself when opened in Excel (fullCalcOnLoad). Edit dials

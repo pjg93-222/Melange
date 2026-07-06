@@ -264,6 +264,25 @@ if os.path.exists(B+r'\stance_training.jsonl'):
     ck('train/test split-leak (text-hash, incl. augment views) within known bound', _ov<=4,
        '%d collisions (4 known: same-ACU-article rows 75/214; fix = same-text same-split on next label refresh)'%_ov)
 
+# run-5b guards (audit 2026-07-06): the psychology/media-layer artifacts had ZERO audit coverage —
+# a truncated big5_llm_opus.json or malformed reference/co-appearance edges would sail through.
+# Schema + sanity floors only (freshness is meaningless mid-collector-crawl); each skips if absent.
+if os.path.exists(B+r'\big5_llm_opus.json'):
+    _b5=json.load(open(B+r'\big5_llm_opus.json',encoding='utf-8')).get('traits',{})
+    _bad=sum(1 for d in _b5.values() if not all(k in d for k in ('O','C','E','A','ES')) or not d.get('n_chunks'))
+    ck('big5_llm artifact schema (5 traits + n_chunks per member, coverage >=400)',
+       len(_b5)>=400 and _bad==0, '%d members, %d malformed'%(len(_b5),_bad))
+if os.path.exists(B+r'\member_references.json'):
+    _re_=json.load(open(B+r'\member_references.json',encoding='utf-8')).get('edges',[])
+    _bad=sum(1 for e in _re_ if not all(k in e for k in ('a','b','n_raw','n_scored','pos','neg','net')) or e['n_scored']<(e['pos']+e['neg']))
+    ck('reference-layer edge schema (keys present, scored>=pos+neg, >=1000 edges)',
+       len(_re_)>=1000 and _bad==0, '%d edges, %d malformed'%(len(_re_),_bad))
+if os.path.exists(B+r'\co_appearance.json'):
+    _co=json.load(open(B+r'\co_appearance.json',encoding='utf-8')).get('edges',[])
+    _bad=sum(1 for e in _co if not all(k in e for k in ('a','b','n','last','bipartisan')) or e['n']<1)
+    ck('co-appearance edge schema (keys present, n>=1, non-empty)', len(_co)>=100 and _bad==0,
+       '%d pairs, %d malformed'%(len(_co),_bad))
+
 print('FULL-BODY AUDIT — %d passed, %d FAILED'%(len(P),len(F)))
 if F: print('  FAILURES:',F)
 else: print('  ALL MODULES CLEAN.')

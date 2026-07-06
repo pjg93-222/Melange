@@ -26,7 +26,91 @@ dashboard tpl coap toggle, weekly_refresh two new steps, member_references re-sc
   "52" predates the run-4k/4l/4m additions)
 
 ## Phase 2 — true run-through gates
-(to be appended)
+- (a) chain steps: **17/17 OK, exit 0, 5.9 min** ✓
+- (b) audit tail: **ALL MODULES CLEAN** ✓
+- (c) rank delta vs pre-state: **0/533 moved** ✓
+- (d) artifact hashes vs pre-state: **7/7 byte-identical** (budget_frontier, electoral,
+  optimize_result, per_topic_coalition, salience_advisory, dashboard_data incl. refs+coap,
+  lt_priming fresh-regenerated) ✓ — pipeline idempotent at current inputs
+- determinism: budget_frontier double-run (TOPIC=Interchange, scratchpad FRONTIER_OUT) —
+  **identical hashes** ✓
+
+## Phase 2.5 — P5 UI smoke (port 8802; 8801 is the user's server)
+- cu-member-desk.html: 537 rows render; member view opens; 8 SVG charts; green overlap markup
+  present with the new all-axes rule + Consc legend note; staff content present; **zero console
+  errors/warnings** ✓
+- Moneyball Dashboard.html: renders; `ly_r` + `ly_a` toggles present; DATA.refs=1,641,
+  DATA.coap=111; co-appearance layer toggled + drawn live; **zero console errors/warnings** ✓
+- No test state written to localStorage.
+
+## S2-01 remediation verification (same session)
+- run_hewitt: full sitemap-index enumeration → date map 19,099 posts / 20 sitemaps (was 4
+  hardcoded). run_fox: JSON-LD datePublished fallback.
+- Backfill: hewitt 48 packages dated → **0 rows dateless**; fox 192/192 packages dated (every
+  page carried datePublished) → **0 rows dateless**.
+- Kernel 30/30 after the fixes; both collectors relaunched (resume log = free interruption).
+- Fix commit: @962959d on main.
+
+## Known-benign additions
+- make_combined "id collisions: ['backbtn']" — deliberate merge-warning print, display-only.
+- Fox transcript pages that 404 during the archive walk (dead URLs in old sitemaps) print FAIL
+  and are retried next run by design — not data loss.
+
+## Verdict (run-5a)
+ALL GATES GREEN at @1a9ee41→@962959d. One S2 caught-and-remedied in the collector layer
+(never reached any chain artifact); two S3 hygiene notes report-only. The chain remains
+idempotent, deterministic, and rank-stable while three collectors crawl concurrently.
+
+---
+
+# RUN-5B — EXTENSIVE PASS (same night, user: "Extense audit")
+
+## Baselines re-confirmed
+kernel 30/30 ✓; audit 56/56 → **59/59 after the new guards** (below) ✓.
+
+## New-corpus forensics (~8k rows landed tonight)
+- Exact duplicates: **tonight's four legs are clean** (fox/hewitt/npr 0; cbs 2 prefix-collisions,
+  not exact dups). The 27 INTERVIEW dup rows are LEGACY ABC/CNN packages from the older ingest era
+  → they join the standing user-gated D2 dedup ledger (CREC 299 + INTERVIEW 27). No action without
+  the user's gate.
+- Attribution eyeball (2 random turns/leg): all read as genuine first-person member speech,
+  era-consistent (Sanders–Brennan 2019 CBS; Jeffries Oct-2025 shutdown; Graham 2009 Afghanistan).
+  Observed-and-benign: NPR pieces sometimes quote members' clips from other networks — still the
+  member's words; the co-appearance substantial-appearance floor absorbs clip-level noise.
+- **[S2-02] run_hewitt enumeration walked ONLY the historical archive page** — every stored post
+  dated 2011–2014 and the smoke-tested 2026 Thune post had 0 rows (the smoke test fetched pages
+  directly, masking the gap). The paginated /transcripts listing (360 pages ≈ 8.3k posts,
+  2005→today) is the live index. **FIXED same pass:** enumeration = archive page ∪ /transcripts
+  pagination, with a slug-level member prefilter (full name or rank+known-surname) so the walk
+  fetches ~hundreds of member posts instead of 8.3k blind; strict slug+title resolution + body-
+  label gate unchanged after fetch. Collector relaunched.
+- [S3-04] Old Hewitt pages emit U+FFFD mojibake for smart quotes (utf-8 replace on likely
+  cp1252 pages) — cosmetic in desk quotes, words intact for scoring. Report-only (a latin-1
+  fallback in get() would touch every leg; not worth the risk unratified).
+- Fox date range 2004→2022 at check time reflects the alphabetical walk position, not a defect;
+  the JSON-LD fallback dates every page from here on.
+
+## Coverage & documentation
+- **[S3-05→FIXED] audit_full had ZERO guards on the psychology/media artifacts** — three schema/
+  sanity checks added (big5_llm_opus traits+n_chunks+coverage floor; member_references edge keys
+  + scored-count consistency + floor; co_appearance edge keys + n>=1 + floor). Audit is now
+  **59 checks**; all pass on live artifacts.
+- **[S3-06→FIXED] README documented none of the media/psychology layer** — module table gains
+  section 6 (collectors → dispositions → LLM Big-5 → reference layer → co-appearances) and the
+  audit count is corrected 52→59.
+- Tree-wide: **zero true bare excepts**; direct json.dump users are legacy/non-chain writers
+  (noted, no new ones tonight); spec constants spot-verified in the kernel (PERS_NONE=0.45
+  user-ratified line, SGATE ladder incl. '—'=0.85); DTHRESH/LOSSFRAME covered by kernel tests.
+
+## Deep UI (French Hill — a non-pilot member)
+Member view renders 8 SVG charts; all-axes green legend + Consc→Diligence note visible; External
+measures row (follow-through) present; LLM overlay markup present; refs panel markup present;
+In-contact clean; **zero console errors across the entire click-through**.
+
+## Verdict (run-5b)
+ALL CLEAN after remediation: one S2 enumeration hole (Hewitt live stream) fixed + collector
+relaunched; audit coverage extended to the new layer (56→59); README brought current; legacy
+dup ledger updated (user-gated as before). Kernel 30/30 and audit 59/59 at close.
 
 ## Phase 3 — deep sweeps (tonight's changed surface prioritized)
 - P2 silent-failure: big5_llm broad excepts are the two by-design patterns (cache-line parse
