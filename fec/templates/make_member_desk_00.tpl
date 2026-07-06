@@ -338,7 +338,8 @@ function radar(vals,labels,color,R,vals2,color2,labelColors){
     // OVERLAP REGION (run-4y, user: 'their overlapping space highlighted in light green'): both
     // polygons are star-shaped about the center, so the intersection boundary at angle t is
     // min(rA(t), rB(t)), sampled via ray-segment intersection. Wedges around radar.skipGreen axes
-    // collapse to center (Consc: the API read can't measure it). try/catch: the region is
+    // collapse to center (mechanism kept for reuse; no axis skipped since 2026-07-06 — user rule:
+    // the overlap spans all five, Consc included). try/catch: the region is
     // decoration — the two polygons must NEVER vanish because of it.
     try{
       const rad_at=(vv,th)=>{const sec=2*Math.PI/n;let i0=Math.floor((th+Math.PI/2)/sec);i0=((i0%n)+n)%n;const i1=(i0+1)%n;
@@ -583,20 +584,18 @@ function psychHTML(m){
       ?radar(P.behav_pct.map(v=>v==null?0.5:v),BLAB,'#2dd4bf',82)
         +(bna.length?`<div style="font-size:10px;color:var(--faint)">n/a (plotted at neutral): ${bna.join(', ')}</div>`:'')
       :'<div class=empty>No behavioral coverage.</div>';
-    // instrument agreement (2026-07-05 user rule, all five axes): where v2 and the LLM read land
-    // within 15 pts on the same axis, that's convergence from two independent method families ->
-    // highlight LIGHT GREEN. (Consc included per user 2026-07-05; the behavioral radar's Diligence
-    // axis remains the load-bearing C measure — see legend.)
+    // instrument agreement (user rule, final 2026-07-06: ALL FIVE axes, Consc included): where v2
+    // and the LLM read land within 15 pts on the same axis, that's convergence from two independent
+    // method families -> highlight LIGHT GREEN. Display decision only — the measurement-side C
+    // incorporation (genre-weighting toward interviews) stays gated on the pre-registered retest;
+    // the behavioral radar's Diligence axis remains the strongest C measure (see legend).
     const B5AX=['Open','Consc','Extra','Agree','EmoSt'];
-    // Consc excluded from the green zone (user 2026-07-05 evening: 'the API doesn't measure
-    // conscientiousness') — the wedge collapses and the label never greens; Diligence is the C read.
-    const agree=(P.big5_pct&&P.llm_pct)?B5AX.map((ax,i)=>ax!=='Consc'&&Math.abs(P.big5_pct[i]-P.llm_pct[i])<=0.15):null;
+    const agree=(P.big5_pct&&P.llm_pct)?B5AX.map((ax,i)=>Math.abs(P.big5_pct[i]-P.llm_pct[i])<=0.15):null;
     const axcol=agree?agree.map(a=>a?'#86efac':null):null;
     const agList=agree?B5AX.filter((_,i)=>agree[i]):[];
-    radar.skipGreen=[1];   // Consc axis index — green overlap region collapses in its wedge
+    radar.skipGreen=null;   // no collapsed wedges — the overlap region spans all five axes
     const rad=P.big5_pct?radar(P.big5_pct,B5AX,'#7dd3fc',82,P.llm_pct,'#e879f9',axcol):'';
-    radar.skipGreen=null;
-    const agLine=agree?`<div style="font-size:10px;margin-top:2px"><span style="color:#86efac;font-weight:700">light-green region</span> <span style="color:var(--faint)">= where the two instruments overlap (their agreement zone; ✓ label = within 15 pts on that axis${agList.length?': '+agList.join(', '):''}). The Consc wedge never greens — the API read can't measure it; the measured C is Diligence on the behavioral radar above.</span></div>`:'';
+    const agLine=agree?`<div style="font-size:10px;margin-top:2px"><span style="color:#86efac;font-weight:700">light-green region</span> <span style="color:var(--faint)">= where the two instruments overlap (their agreement zone; ✓ label = within 15 pts on that axis${agList.length?': '+agList.join(', '):''}). On Consc the strongest measure remains Diligence on the behavioral radar above; text-instrument agreement shows here like every other axis.</span></div>`:'';
     const persona=(P.communion_pct!=null)?bar('Warmth — communion persona',P.communion_pct,'#2dd4bf')+bar('Assertiveness — agency persona',P.agency_pct,'#c2862a'):'<div class=empty>No persona cue coverage yet for this member.</div>';
     const rd=READS[P.susc_read||'trait-only']||READS['trait-only'];
     const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Engagement responsiveness (engines)</span><b>${P.pressure_mult}×</b></div>
