@@ -451,9 +451,34 @@ ROI = compute_roi()
 
 # ---------- build merged per-member records ----------
 SDIR=L('staff_directory.json') or {}   # Quorum staffer directory (build_staff_directory.py)
+# run-4r (user: "have the interactions been logged... industry-relevant highlighted... I am not
+# seeing anything"): (1) DURABLE interaction state — the desk's "Export staff state" button downloads
+# staff_state.json; drop it in the Melange Systems folder and every build bakes it in (gold/contacted,
+# meeting, notes, star toggles survive browsers, regenerations, machines; localStorage still overlays
+# for live edits). (2) Committee-aware relevance: the title-regex star covered only 1% of staffers, so
+# policy-role staff (LD/LA/counsel/policy) in offices holding a TRACKED-COMMITTEE seat now star too.
+STFSTATE = L('staff_state.json') or L('staff_interactions.json') or {}
+if STFSTATE: print('  staff interaction state: %d staffers baked from staff_state.json' % len(STFSTATE))
+_POLICY_RE = re.compile(r'legislative (director|assistant|counsel|aide)|deputy legislative|senior policy'
+                        r'|policy (advisor|adviser|director|counsel|analyst)|chief counsel|general counsel|tax counsel', re.I)
 def build_bundle():
     member_names = [m['name'] for m in MD['members']]
     ARTS, BILLS, CMTS, WBM = load_press_and_bills(member_names)
+    def staff_pack(name):
+        oncmte = bool((CMTS.get(name) or {}).get('seats'))
+        lst = []
+        for sf in SDIR.get(name, []):
+            sf = dict(sf)
+            st = STFSTATE.get(str(sf.get('id')))
+            if st: sf['st'] = st
+            if sf.get('star'):
+                sf['why'] = 'portfolio title (banking/financial/tax/housing/econ)'
+            elif oncmte and _POLICY_RE.search(sf.get('t') or ''):
+                sf['star'] = 1; sf['why'] = 'policy staff in a tracked-committee office'
+            lst.append(sf)
+        # industry-relevant first, then contacted, then the rest
+        lst.sort(key=lambda s: (not s.get('star'), not (s.get('st') or {}).get('gold'), s.get('n') or ''))
+        return lst
     members = []
     for m in MD['members']:
         name = m['name']
@@ -508,7 +533,7 @@ def build_bundle():
             'committees': CMTS.get(name, {}).get('seats', []),
             'committee_score': CMTS.get(name, {}).get('score'),
             # 7 sections
-            'staffdir': SDIR.get(name, []),                        # Quorum staffer directory (build_staff_directory.py)
+            'staffdir': staff_pack(name),                          # Quorum directory + baked interaction state + committee-aware stars (run-4r)
             'staff': MANUAL.get(name, {}).get('staff'),            # manual
             'bio': bio_for(name),                                  # model_bio + legislators.csv
             'bio_manual': MANUAL.get(name, {}).get('bio'),         # manual addendum

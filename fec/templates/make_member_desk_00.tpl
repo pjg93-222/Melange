@@ -515,11 +515,11 @@ function wireTracker(m){
 }
 /* ----- section renderers ----- */
 function stfCard(sf){
-  const st=stf(sf.id);
+  const st=Object.assign({},sf.st||{},stf(sf.id));   // baked file state (staff_state.json) under localStorage overlay (run-4r)
   const starred=st.star!=null?st.star:sf.star;
   const media=(st.media||[]).map((mm,k)=>`<span class=chip><a href="${esc(mm.u)}" target=_blank rel=noopener>${esc(mm.l||mm.u)}</a><span class=x data-act=delmedia data-sid=${sf.id} data-k=${k}>×</span></span>`).join('');
   return `<div class="stfcard${st.gold?' gold':''}" data-sid=${sf.id}>
-    <div class=stfhead><span class="stfstar${starred?' on':''}" data-act=star data-sid=${sf.id} title="industry-relevant — click to toggle">${starred?'★':'☆'}</span><b>${esc(sf.n)}</b><span class=stftitle>${esc(sf.t)}</span></div>
+    <div class=stfhead><span class="stfstar${starred?' on':''}" data-act=star data-sid=${sf.id} title="${esc(sf.why||'industry-relevant')} — click to toggle">${starred?'★':'☆'}</span><b>${esc(sf.n)}</b><span class=stftitle>${esc(sf.t)}</span>${starred?'<span style="font-size:9px;font-weight:700;color:#c2862a;border:1px solid #c2862a66;border-radius:8px;padding:0 5px;margin-left:6px">CU-relevant</span>':''}</div>
     <div class=stfmeta>${sf.e?`<a href="mailto:${esc(sf.e)}">${esc(sf.e)}</a>`:''}${sf.e&&sf.p?' · ':''}${sf.p?`<a href="tel:${esc(sf.p)}">${esc(sf.p)}</a>`:''}</div>
     <div class=stfctl>
       <button class="mini${st.gold?' on':''}" data-act=gold data-sid=${sf.id} title="contact established — gold outline">${st.gold?'✓ Contacted':'Mark contacted'}</button>
@@ -534,7 +534,10 @@ function stfCard(sf){
 function staffHTML(m){
   const note=manField(m.name,'staff',m.staff);const files=filesOf(m.name);
   const dir=(m.staffdir||[]);
-  const dirHTML=dir.length?`<input class=stfsearch data-stfsearch placeholder="filter ${dir.length} staffers (name/title)…">
+  const nrel=dir.filter(s=>{const t=Object.assign({},s.st||{},stf(s.id));return t.star!=null?t.star:s.star;}).length;
+  const ncon=dir.filter(s=>Object.assign({},s.st||{},stf(s.id)).gold).length;
+  const dirHTML=dir.length?`<div style="font-size:11px;color:var(--faint);margin-bottom:4px">${dir.length} staffers · <b style="color:#c2862a">${nrel} CU-relevant</b> · ${ncon} contacted <span style="float:right">interaction marks save on this device — use ⭳ Export staff state (In-contact panel), drop <b>staff_state.json</b> in the Melange Systems folder to make them permanent</span></div>
+    <input class=stfsearch data-stfsearch placeholder="filter ${dir.length} staffers (name/title)…">
     <div class=stflist>${dir.map(stfCard).join('')}</div>`:`<div class=empty>No staffer directory rows matched for this office.</div>`;
   return `<div id=staff-view>${dirHTML}<hr style="border-color:var(--line,#2a2f3a);margin:10px 0">
   ${note?`<div class=savednote>${esc(note)}</div>`:`<div class=empty>No office-level staff notes yet.</div>`}
