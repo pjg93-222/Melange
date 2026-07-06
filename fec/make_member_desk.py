@@ -51,8 +51,19 @@ EH  = L('electoral_history.json') or {}      # per-member FEC primary+general vo
 # the workbook Blended Model formula cells (rank/score), which go stale to None after any openpyxl save
 # and disagreed with the phase-2 authority (Scott-vs-Crapo audit finding R2). ranks_python.json is the
 # canonical, always-fresh blended rank — source rank/score from it, workbook only as fallback.
+# 2026-07-06 (user: 'make sure the displays are entirely accurate'): the R2 fix corrected rank/score
+# but LEFT the pillar percentiles + weights on the stale workbook — they diverged from (and inverted)
+# the authority (Crapo influence 1.000 in the authority showed as 0.222 on the desk; weights were the
+# old 0.40/0.20/0.35/0.05 vs the live 0.25/0.30/0.40/0.05). Now the FOUR pillar bars, their raw
+# inputs, AND the displayed weights all come from ranks_python.json — one source of truth, workbook
+# only as last-resort fallback. RA_PCTS keys map: leg/press/inf/dem -> desk leg_n/press_n/comm_n/demo_n.
 _RA = L('ranks_python.json') or {}
 RA_RANK = _RA.get('rank', {}); RA_SCORE = _RA.get('score', {})
+RA_PCTS = _RA.get('pcts', {}); RA_PRESSP = _RA.get('press_pillar', {})
+_AB = _RA.get('ab_weights', {})   # {2:leg,3:press,4:inf,5:dem} — the live user dials
+RA_W = {'leg': _AB.get('2'), 'press': _AB.get('3'), 'comm': _AB.get('4'), 'demo': _AB.get('5')} if _AB else {}
+_SNAP = L('pillar_inputs_snapshot.json') or {}   # O=leg raw, E=influence raw (committee_score), F=demo raw
+RA_OEF = {'leg': _SNAP.get('O', {}), 'comm': _SNAP.get('E', {}), 'demo': _SNAP.get('F', {})}
 # ---- signed cross-media reference layer (user-ratified 2026-07-04): who this member references
 # (out) / is referenced by (in), Fable-valenced, from member_references.json (directed a->b) ----
 _REFS = (L('member_references.json') or {}).get('edges', [])
@@ -387,9 +398,11 @@ def load_press_and_bills(member_names):
             # MBL) — display the sheet's own [Highly] tier verbatim; the old 'Moderately' unify-override is retired.
             seats.append({'name': nme, 'rel': rel, 'role': (tag[1] if len(tag) > 1 else '')})
         cmts[nm] = {'score': r[1], 'seats': seats}
-    # --- authoritative rank/score/pillars from the workbook Blended Model (counts W&M via the Committee
-    #     input to the Influence pillar). Score = .40*Press% + .20*Legislative% + .35*Influence% + .05*Demo%.
-    #     Replaces the older member_desk_src values whose committee pillar was W&M-blind. ---
+    # --- workbook Blended Model rank/score/pillars — kept ONLY as the last-resort fallback (2026-07-06):
+    #     the desk now sources rank/score/pillars/weights from ranks_python.json (the authority). These
+    #     workbook cells go stale to None after any openpyxl save and used a different normalization than
+    #     the Python authority, which is exactly what made Crapo's #1 look unjustified on the desk. The
+    #     live weighting is 0.25*Leg% + 0.30*Press% + 0.40*Influence% + 0.05*Demo% (ab_weights). ---
     wbm = {}
     bmsh = wb['Blended Model']
     for r in bmsh.iter_rows(min_row=3, max_row=535, values_only=True):
@@ -521,11 +534,18 @@ def build_bundle():
             'radar': radar,
             'adjrank': adjr,
             'sna_idx': i,
-            # pillars (Blended Model percentiles: comm_n = Influence%, committee-driven & W&M-aware)
-            'press_n': wbr.get('press_n', m.get('press_n')), 'leg_n': wbr.get('leg_n', m.get('leg_n')),
-            'comm_n': wbr.get('comm_n', m.get('comm_n')), 'demo_n': wbr.get('demo_n', m.get('demo_n')),
-            'press_raw': wbr.get('press_raw', m.get('press_raw')), 'leg_raw': wbr.get('leg_raw', m.get('leg_raw')),
-            'comm_raw': wbr.get('comm_raw', m.get('comm_raw')), 'demo_raw': wbr.get('demo_raw', m.get('demo_raw')),
+            # pillars — FROM THE RANK AUTHORITY (ranks_python.json pcts), the exact percentiles that
+            # compute the score; comm_n = Influence% (E/max, committee_score, W&M-aware). Workbook
+            # value only if the authority is missing this member (should never happen post-chain).
+            'press_n': (RA_PCTS.get(name) or {}).get('press', wbr.get('press_n', m.get('press_n'))),
+            'leg_n':   (RA_PCTS.get(name) or {}).get('leg',   wbr.get('leg_n',   m.get('leg_n'))),
+            'comm_n':  (RA_PCTS.get(name) or {}).get('inf',   wbr.get('comm_n',  m.get('comm_n'))),
+            'demo_n':  (RA_PCTS.get(name) or {}).get('dem',   wbr.get('demo_n',  m.get('demo_n'))),
+            # raw inputs behind each percentile (press pillar value; O/E/F snapshot for leg/inf/demo)
+            'press_raw': RA_PRESSP.get(name, wbr.get('press_raw', m.get('press_raw'))),
+            'leg_raw':   RA_OEF['leg'].get(name,  wbr.get('leg_raw',  m.get('leg_raw'))),
+            'comm_raw':  RA_OEF['comm'].get(name, wbr.get('comm_raw', m.get('comm_raw'))),
+            'demo_raw':  RA_OEF['demo'].get(name, wbr.get('demo_raw', m.get('demo_raw'))),
             'coalition': m.get('coalition'),
             # per-legislative-area stance tiers (Champion..Opponent), aligned to CATS; '-' = no position
             'stances': ''.join(NAME2LETTER.get((CS['matrix'].get(name, {}) or {}).get(cat, '—'), '-') for cat in CATS),
@@ -599,7 +619,11 @@ def build_bundle():
         'art_extra_cats': ['Credit Union Tax Status','CU-Bank Competitive Dynamics','General Credit Union'],
         'demo_axes': [lbl for _,lbl in DEMO_AXES],
         'demo_short': [DEMO_SHORT.get(lbl, lbl) for _,lbl in DEMO_AXES],
-        'weights': {**MD['weights'], 'press': 0.40, 'leg': 0.20, 'comm': 0.35, 'demo': 0.05},   # matches workbook AB2:AB5
+        # pillar weights FROM THE AUTHORITY (ranks_python.json ab_weights = live user dials AB2:AB5);
+        # hardcoded 0.40/0.20/0.35/0.05 removed 2026-07-06 — it was stale vs the live 0.25/0.30/0.40/0.05
+        # and mislabeled the composition bars. Fallback to the old literals only if the authority is absent.
+        'weights': {**MD['weights'], 'press': RA_W.get('press', 0.30), 'leg': RA_W.get('leg', 0.25),
+                    'comm': RA_W.get('comm', 0.40), 'demo': RA_W.get('demo', 0.05)},
         'coalitions': MD['coalitions'],
         'tiername': TIERNAME,
         'adj': adj_out,

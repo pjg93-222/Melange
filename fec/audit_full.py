@@ -277,6 +277,26 @@ if os.path.exists(B+r'\member_references.json'):
     _bad=sum(1 for e in _re_ if not all(k in e for k in ('a','b','n_raw','n_scored','pos','neg','net')) or e['n_scored']<(e['pos']+e['neg']))
     ck('reference-layer edge schema (keys present, scored>=pos+neg, >=1000 edges)',
        len(_re_)>=1000 and _bad==0, '%d edges, %d malformed'%(len(_re_),_bad))
+# run-5h guard (user 2026-07-06 'make sure the displays are entirely accurate'): the member-desk
+# pillar bars + weights MUST match the rank authority (ranks_python.json) — they silently drifted
+# (Crapo influence 1.000 in the authority displayed as 0.222 from a stale workbook column; weights
+# 0.40/0.20/0.35/0.05 vs the live 0.25/0.30/0.40/0.05), making the #1 rank look unjustified on the
+# desk. This asserts the DISPLAYED decomposition reconstructs the DISPLAYED score for every member.
+if os.path.exists(B+r'\member_desk_bundle.json') and os.path.exists(B+r'\ranks_python.json'):
+    _bun=json.load(open(B+r'\member_desk_bundle.json',encoding='utf-8')); _ra=json.load(open(B+r'\ranks_python.json',encoding='utf-8'))
+    _W=_bun.get('weights',{}); _pcts=_ra.get('pcts',{})
+    _bad=[]; _nomatch=0
+    for _m in _bun.get('members',[]):
+        _nm=_m.get('name'); _p=_pcts.get(_nm)
+        if not _p: continue
+        # displayed pillars == authority pcts
+        if any(abs((_m.get(_dk) or 0)-_p[_ak])>1e-4 for _dk,_ak in (('press_n','press'),('leg_n','leg'),('comm_n','inf'),('demo_n','dem'))):
+            _nomatch+=1
+        # displayed weights*displayed pillars reconstruct displayed score
+        _rc=_W.get('leg',0)*(_m.get('leg_n') or 0)+_W.get('press',0)*(_m.get('press_n') or 0)+_W.get('comm',0)*(_m.get('comm_n') or 0)+_W.get('demo',0)*(_m.get('demo_n') or 0)
+        if abs(_rc-(_m.get('score') or 0))>0.003: _bad.append(_nm)
+    ck('desk pillar bars match rank authority (no stale-workbook drift)', _nomatch==0, '%d members mismatch authority pcts'%_nomatch)
+    ck('desk displayed pillars*weights reconstruct displayed score', len(_bad)==0, '%d members fail reconstruction: %s'%(len(_bad),_bad[:3]))
 if os.path.exists(B+r'\co_appearance.json'):
     _co=json.load(open(B+r'\co_appearance.json',encoding='utf-8')).get('edges',[])
     _bad=sum(1 for e in _co if not all(k in e for k in ('a','b','n','last','bipartisan')) or e['n']<1)

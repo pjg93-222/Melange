@@ -279,7 +279,7 @@ const ADJ={}; D.adj.forEach(([a,b,w])=>{(ADJ[a]=ADJ[a]||[]).push([b,w]);(ADJ[b]=
 const PE=w=>w/(w+6);
 const STCOL={C:'#16a34a',F:'#2dd4bf',A:'#86efac',H:'#38bdf8',P:'#7dd3fc',G:'#bae6fd',T:'#9ca3af',N:'#8b949e',L:'#fde3c0',S:'#f59e0b',K:'#f97316',O:'#ef4444','-':'#3a414b'};
 const PTCOL={Democrat:'#3b82f6',Republican:'#ef4444',Independent:'#a855f7','':'#6b7280'};
-const PILL={press:{c:'#2f6f9f',l:'Press',w:WT.press},comm:{c:'#8458ae',l:'Committee',w:WT.comm},leg:{c:'#0e7c66',l:'Legislative',w:WT.leg},demo:{c:'#c2862a',l:'Demographic',w:WT.demo}};
+const PILL={press:{c:'#2f6f9f',l:'Press',w:WT.press},comm:{c:'#8458ae',l:'Influence',w:WT.comm},leg:{c:'#0e7c66',l:'Legislative',w:WT.leg},demo:{c:'#c2862a',l:'Demographic',w:WT.demo}};
 const $=s=>document.querySelector(s);
 const money=n=>(n&&n>0)?'$'+Math.round(n).toLocaleString():'—';
 const f2=v=>v==null?'—':Number(v).toFixed(2);
