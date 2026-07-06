@@ -637,12 +637,23 @@ if __name__ == '__main__':
     ap = {a.split('=')[0]: a for a in sys.argv}
     since = next((sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == '--since'), '2025-01-01')
     until = next((sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == '--until'), datetime.date.today().isoformat())
-    if 'cnn' in sys.argv: run_cnn(since, until, verify='--verify' in sys.argv)
-    elif 'mtp' in sys.argv: run_mtp()
-    elif 'cbs' in sys.argv: run_cbs()
-    elif 'abc' in sys.argv: run_abc()
-    elif 'pbs' in sys.argv: run_pbs(since, until)
-    elif 'npr' in sys.argv: run_npr(since, until)
-    elif 'fox' in sys.argv: run_fox()
-    elif 'hewitt' in sys.argv: run_hewitt()
+    # completion sentinel (2026-07-06, 'do whatever is best for the data collection'): the
+    # collector_supervisor scheduled task distinguishes 'finished cleanly' from 'died' by this
+    # flag — a leg only writes it if run_* returns without exception. Deep CNN backfill gets its
+    # own sentinel (cnn-deep) so it doesn't collide with the incremental daily cnn leg.
+    _leg = next((l for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt') if l in sys.argv), None)
+    if _leg == 'cnn' and until <= '2024-06-01' and '--verify' not in sys.argv: _leg = 'cnn-deep'
+    def _sentinel():
+        try:
+            sd = os.path.join(B, 'collector_sentinels'); os.makedirs(sd, exist_ok=True)
+            open(os.path.join(sd, _leg + '.done'), 'w').write(datetime.datetime.now().isoformat())
+        except Exception: pass
+    if 'cnn' in sys.argv: run_cnn(since, until, verify='--verify' in sys.argv); _sentinel()
+    elif 'mtp' in sys.argv: run_mtp(); _sentinel()
+    elif 'cbs' in sys.argv: run_cbs(); _sentinel()
+    elif 'abc' in sys.argv: run_abc(); _sentinel()
+    elif 'pbs' in sys.argv: run_pbs(since, until); _sentinel()
+    elif 'npr' in sys.argv: run_npr(since, until); _sentinel()
+    elif 'fox' in sys.argv: run_fox(); _sentinel()
+    elif 'hewitt' in sys.argv: run_hewitt(); _sentinel()
     else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
