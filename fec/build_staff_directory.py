@@ -62,23 +62,52 @@ def resolve(works):
     return None
 STAR=re.compile(r'banking|financial services|credit union|tax (policy|counsel)|econom|monetary|housing|fintech|securities|insurance|treasur|appropriation|budget',re.I)
 NOSTAR=re.compile(r'financial administrator|office manager',re.I)
-rows={}; unmatched=collections.Counter()
+# ---- policy domains (run-4s, user: "it should say their policy domains") ----
+# Ground truth = a Quorum 'Issues'/'Issue Areas' column, ingested automatically when the staffer
+# exports are re-pulled with it included. Until then: title-derived domains (portfolio words in the
+# title) as a labeled fallback. CU-relevant domains drive the star with a portfolio 'why'.
+DOMV=[('Banking',r'banking'),('Financial Services',r'financial services'),('Credit Unions',r'credit union'),
+ ('Tax',r'\btax'),('Economy',r'econom|monetary'),('Housing',r'housing'),('Fintech',r'fintech'),
+ ('Securities',r'securities'),('Insurance',r'insurance'),('Treasury',r'treasur'),
+ ('Appropriations',r'appropriation'),('Budget',r'budget'),('Small Business',r'small business'),
+ ('Consumer Protection',r'consumer'),('Trade',r'\btrade'),('Defense',r'defense|armed services'),
+ ('Energy',r'energy'),('Health',r'health'),('Agriculture',r'agricult'),('Judiciary',r'judiciary'),
+ ('Immigration',r'immigration'),('Education',r'education'),('Labor',r'labor|workforce'),
+ ('Transportation',r'transport|infrastructure'),('Telecom',r'telecom'),('Veterans',r'veteran'),
+ ('Technology',r'technolog|cyber|\bai\b')]
+DOMRX=[(lbl,re.compile(p,re.I)) for lbl,p in DOMV]
+CUDOM={'Banking','Financial Services','Credit Unions','Tax','Economy','Housing','Fintech','Securities',
+ 'Insurance','Treasury','Small Business','Consumer Protection'}
+def title_domains(t):
+    return [lbl for lbl,rx in DOMRX if rx.search(t)][:8]
+rows={}; unmatched=collections.Counter(); n_qdom=0
 for f in FILES:
     ws=openpyxl.load_workbook(f,read_only=True).active
     it=ws.iter_rows(values_only=True); hdr=[str(x) for x in next(it)]
     ix={h:i for i,h in enumerate(hdr)}
+    iss_col=next((i for h,i in ix.items() if h.strip().lower() in ('issues','issue areas')),None)
     for r in it:
         q=str(r[ix['Quorum ID']])
-        if q in rows: continue
+        qdom=[]
+        if iss_col is not None and r[iss_col] not in (None,'None',''):
+            qdom=[x.strip() for x in re.split(r'[;,]',str(r[iss_col])) if x.strip()][:10]
+        if q in rows:
+            if qdom and not rows[q].get('dom'): rows[q]['dom']=qdom; rows[q]['dsrc']='quorum'; n_qdom+=1
+            continue
         works=r[ix['Member Works For']]
         mem=resolve(works)
         if not mem: unmatched[str(works)[:60]]+=1; continue
         t=str(r[ix['Title']] or '').replace('None','').strip()
-        rows[q]={'id':q,'m':mem,
-                 'n':('%s %s'%(r[ix['First Name']] or '',r[ix['Last Name']] or '')).strip(),
-                 't':t,'e':(str(r[ix['Email']] or '').strip() if r[ix['Email']] not in (None,'None') else ''),
-                 'p':(str(r[ix['Phone Number']] or '').strip() if r[ix['Phone Number']] not in (None,'None') else ''),
-                 'star':1 if (STAR.search(t) and not NOSTAR.search(t)) else 0}
+        dom=qdom or title_domains(t)
+        d={'id':q,'m':mem,
+           'n':('%s %s'%(r[ix['First Name']] or '',r[ix['Last Name']] or '')).strip(),
+           't':t,'e':(str(r[ix['Email']] or '').strip() if r[ix['Email']] not in (None,'None') else ''),
+           'p':(str(r[ix['Phone Number']] or '').strip() if r[ix['Phone Number']] not in (None,'None') else ''),
+           'star':1 if ((STAR.search(t) and not NOSTAR.search(t)) or (set(dom)&CUDOM)) else 0}
+        if dom:
+            d['dom']=dom; d['dsrc']='quorum' if qdom else 'title'
+            if qdom: n_qdom+=1
+        rows[q]=d
 out=collections.defaultdict(list)
 ORDER={'chief of staff':0,'legislative director':1,'deputy chief of staff':2,'communications director':3,
        'legislative assistant':4,'senior legislative assistant':4,'legislative counsel':4,'tax policy advisor':4,
@@ -90,6 +119,8 @@ for m in out:
     out[m].sort(key=lambda s:(-s['star'],ORDER.get(s['t'].split(';')[0].strip().lower(),5),s['n']))
 MC.dump_atomic(dict(out),B+r'\staff_directory.json')
 tot=sum(len(v) for v in out.values()); stars=sum(s['star'] for v in out.values() for s in v)
-print('STAFF DIRECTORY: %d staffers -> %d members (avg %.1f) | %d industry-starred | %d unmatched office rows'%(
-    tot,len(out),tot/max(1,len(out)),stars,sum(unmatched.values())))
+ndom=sum(1 for v in out.values() for s in v if s.get('dom'))
+print('STAFF DIRECTORY: %d staffers -> %d members (avg %.1f) | %d industry-starred | %d with policy domains (%d from Quorum Issues col) | %d unmatched office rows'%(
+    tot,len(out),tot/max(1,len(out)),stars,ndom,n_qdom,sum(unmatched.values())))
+if not n_qdom: print('  (no Issues column in these exports — re-export the staffer searches WITH the Issues field for ground-truth domains; title-derived fallback active)')
 if unmatched: print('unmatched offices:',unmatched.most_common(8))
