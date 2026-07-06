@@ -297,6 +297,16 @@ if os.path.exists(B+r'\member_desk_bundle.json') and os.path.exists(B+r'\ranks_p
         if abs(_rc-(_m.get('score') or 0))>0.003: _bad.append(_nm)
     ck('desk pillar bars match rank authority (no stale-workbook drift)', _nomatch==0, '%d members mismatch authority pcts'%_nomatch)
     ck('desk displayed pillars*weights reconstruct displayed score', len(_bad)==0, '%d members fail reconstruction: %s'%(len(_bad),_bad[:3]))
+# run-5j guard (2026-07-06): exact-duplicate speech rows (same member+package+text) inflate word
+# counts + big5 chunk sampling. The CREC backfill introduced 922 (no pre-insert dedup); collector
+# legs now carry stored-package guards. Assert the corpus stays exact-dup-clean (threshold covers
+# the small user-gated legacy ABC/CNN set, currently 0 post-dedup).
+if os.path.exists(B+r'\social_media.db'):
+    import sqlite3 as _sq
+    _c=_sq.connect(B+r'\social_media.db',timeout=60); _c.execute('PRAGMA query_only=1')
+    _ex=_c.execute("SELECT COALESCE(SUM(c-1),0) FROM (SELECT COUNT(*) c FROM speeches GROUP BY member,package,text HAVING c>1)").fetchone()[0]
+    _c.close()
+    ck('speech corpus exact-duplicate free (member+package+text)', _ex<=50, '%d exact-dup surplus rows'%_ex)
 if os.path.exists(B+r'\co_appearance.json'):
     _co=json.load(open(B+r'\co_appearance.json',encoding='utf-8')).get('edges',[])
     _bad=sum(1 for e in _co if not all(k in e for k in ('a','b','n','last','bipartisan')) or e['n']<1)

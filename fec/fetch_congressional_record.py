@@ -148,10 +148,18 @@ def run_crec(since,until):
     d0=datetime.date.fromisoformat(since); d1=datetime.date.fromisoformat(until)
     dates=[(d0+datetime.timedelta(days=i)).isoformat() for i in range((d1-d0).days+1)]
     done={r[0] for r in cur.execute("SELECT key FROM cr_fetch_log WHERE status IN ('ok','nosession')")}
+    # STORED-PACKAGE GUARD (integrity fix 2026-07-06: the 4-year backfill re-inserted 922 exact-dup
+    # rows because a date whose rows were committed but whose cr_fetch_log 'ok' mark was lost — a kill
+    # in the commit->mark window, or an overlap with the original ingest — got re-processed. A CREC
+    # package is atomic per date, so if ANY row for it is already stored, don't re-insert; just mark done).
+    have_pkg={p for (p,) in cur.execute("SELECT DISTINCT package FROM speeches WHERE source='CREC'")}
     todo=[d for d in dates if 'crec:CREC-'+d not in done]
     print('CREC: %d candidate dates %s..%s, %d to try'%(len(dates),since,until,len(todo)))
     for date in todo:
         pid='CREC-'+date
+        if pid in have_pkg:   # already stored -> mark done, never duplicate
+            cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)",('crec:'+pid,'ok',datetime.datetime.now().isoformat()))
+            con.commit(); continue
         try:
             try:
                 z=zipfile.ZipFile(io.BytesIO(get('https://www.govinfo.gov/content/pkg/%s.zip'%pid,binary=True,tries=1)))
@@ -179,10 +187,14 @@ def run_chrg(since,until):
     con=db(); cur=con.cursor()
     pkgs=[p for p in list_packages('CHRG',since) if since<=p['dateIssued']<=until and FINRX.search(p.get('title') or '')]
     done={r[0] for r in cur.execute("SELECT key FROM cr_fetch_log WHERE status='ok'")}
+    have_pkg={p for (p,) in cur.execute("SELECT DISTINCT package FROM speeches WHERE source='CHRG'")}   # stored-package guard (2026-07-06)
     todo=[p for p in sorted(pkgs,key=lambda p:p['dateIssued']) if 'chrg:'+p['packageId'] not in done]
     print('CHRG: %d finance-relevant hearings since %s, %d to ingest'%(len(pkgs),since,len(todo)))
     for p in todo:
         pid=p['packageId']; date=p['dateIssued']
+        if pid in have_pkg:   # already stored -> mark done, never duplicate
+            cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)",('chrg:'+pid,'ok',datetime.datetime.now().isoformat()))
+            con.commit(); continue
         try:
             z=zipfile.ZipFile(io.BytesIO(get('https://www.govinfo.gov/content/pkg/%s.zip'%pid,binary=True)))
             texts=[(os.path.basename(n),z.read(n).decode('utf-8','replace')) for n in z.namelist() if n.endswith('.htm')]
