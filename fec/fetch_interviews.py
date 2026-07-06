@@ -445,6 +445,9 @@ def run_fox():
             page = get(u); time.sleep(PAUSE)
             md = re.search(r'(january|february|march|april|may|june|july|august|september|october|november|december)-(\d{1,2})-(\d{4})', slug)
             date = '%04d-%02d-%02d' % (int(md.group(3)), MONTHS[md.group(1)], int(md.group(2))) if md else ''
+            if not date:   # audit 2026-07-06: most Fox slugs carry no date — the page's JSON-LD does
+                mp = re.search(r'"datePublished"\s*:\s*"(\d{4}-\d{2}-\d{2})', page)
+                if mp: date = mp.group(1)
             show = (slug[:md.start()].rstrip('-') if md else re.sub(r'-\d.*$', '', slug)) or 'fox'
             n = store(con, parse_turns(strip_tags(page)), date, show, u)
             con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
@@ -464,14 +467,23 @@ def run_hewitt():
     surname-only-title, and non-member posts yield zero rows by design.
     Enumeration: the on-site interview archive page (~2k posts); dates from WP post-sitemaps."""
     con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    # dates: enumerate ALL post-sitemaps from the WP index (audit 2026-07-06 S2 fix: the first
+    # build hardcoded post-sitemap 1-4, which cover 2005-era posts — every RECENT interview post
+    # missed the map and 559/559 rows stored dateless, starving co-appearance/recency consumers).
     dates = {}
-    for i in ('', '2', '3', '4'):
+    try:
+        wpidx = get('https://hughhewitt.com/wp-sitemap.xml'); time.sleep(PAUSE)
+        smaps = [u for u in re.findall(r'<loc>([^<]+)</loc>', wpidx) if 'post-sitemap' in u]
+    except Exception as e:
+        smaps = []; print('hh wp-sitemap index FAIL (%s) — dates degrade to blank' % str(e)[:60], flush=True)
+    for su in smaps:
         try:
-            sm = get('https://hughhewitt.com/post-sitemap%s.xml' % i); time.sleep(PAUSE)
+            sm = get(su); time.sleep(PAUSE)
             for mu, md in re.findall(r'<url>\s*<loc>([^<]+)</loc>\s*<lastmod>([^<]+)</lastmod>', sm):
                 dates[mu.rstrip('/')] = md[:10]
         except Exception:
-            if i in ('', '2'): print('hh post-sitemap%s FAIL (dates degrade to blank)' % i, flush=True)
+            print('hh %s FAIL (some dates blank)' % su.rsplit('/', 1)[-1], flush=True)
+    print('hewitt: date map covers %d posts from %d sitemaps' % (len(dates), len(smaps)), flush=True)
     try:
         idx = get('https://hughhewitt.com/hugh-hewitt-show-interview-archive'); time.sleep(PAUSE)
     except Exception as e:
