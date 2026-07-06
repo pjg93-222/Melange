@@ -477,6 +477,15 @@ def run_hewitt():
             title = (re.search(r'<title>([^<]+)</title>', page) or [None, ''])[1]
             probe = ' ' + re.sub(r'\s+', ' ', norm(slug.replace('-', ' ') + ' ' + title)) + ' '
             guests = {mem for (fn, ln), mem in FULL.items() if (' %s %s ' % (fn, ln)) in probe}
+            # rank+surname titles ('majority leader thune on...') — run-4z4 extension: the first
+            # pass required a FULL name in the title and yielded only 17 members from 653 posts.
+            # Globally-unique surname after a congressional rank word resolves deterministically;
+            # ambiguous surnames (johnson, scott) never bind, and the body-label conjunction below
+            # still gates every stored turn (wrong guest -> labels don't match -> zero rows).
+            for tm in re.finditer(r'\b(?:senator|sen|congressman|congresswoman|representative|rep|speaker|'
+                                  r'(?:majority |minority )?leader|whip|chairman|chairwoman)\s+([a-z]+)', probe):
+                cands = SUR.get(tm.group(1), [])
+                if len(cands) == 1: guests.add(cands[0])
             if len(guests) != 1:
                 con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
                 con.commit(); continue   # zero or ambiguous guest -> drop, never guess
