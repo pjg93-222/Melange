@@ -20,8 +20,13 @@ Usage:
   python fetch_interviews.py mtp
   python fetch_interviews.py status
 Politeness: ~0.7s between requests, honest UA. Internal research use."""
-import sys, os, re, json, sqlite3, datetime, time, urllib.request, collections
+import sys, os, re, json, sqlite3, datetime, time, urllib.request, collections, socket
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+# GLOBAL socket timeout (2026-07-06: fox wedged with 0 CPU for hours on a hung request — the
+# per-call urlopen(timeout=60) did NOT fire, so a bad socket blocked indefinitely and froze the
+# leg while cnn-deep carried on. A process-wide default forces EVERY socket op to time out,
+# catching the cases the per-request timeout misses). The leg's own retry/skip then continues.
+socket.setdefaulttimeout(90)
 B = MB_ROOT
 DB = B + r'\social_media.db'
 UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36 (research collector)',
