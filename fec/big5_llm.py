@@ -132,7 +132,10 @@ print('scope: %d members (%s%s)' % (len(members), 'pilot=RKH-overlap' if '--pilo
                                     ', NAMED contamination probe' if NAMED else ''))
 
 # ---- corpus: CREC + INTERVIEW turns from social_media.db ----
-GENRES = ('CREC', 'INTERVIEW')
+# B5_GENRES env (run-4z, cache front-loading): scope scoring to stable genres while the interview
+# corpus rebuilds — 'CREC,INTERVIEW' default is byte-identical to the original tuple. Cache keys
+# embed the genre, so a CREC-only warm pass now + full pass later = identical final results.
+GENRES = tuple(g.strip() for g in (os.environ.get('B5_GENRES') or 'CREC,INTERVIEW').split(',') if g.strip())
 RITUAL = re.compile(r'\b(i yield (back|to|the floor|myself)[^.]*|mr\.? (president|speaker)|madam (president|speaker)|'
  r'i ask unanimous consent[^.]*|the (gentleman|gentlewoman|gentlelady) from [a-z ]+|'
  r'i (rise|reserve the balance of my time)|pursuant to [^.]*|the clerk will [^.]*|'
@@ -287,6 +290,8 @@ if raw:
     traits = {m: {**{t: round((raw[m][t] - mu[t]) / sd[t], 3) for t in TR},
                   'N': round(-(raw[m]['ES'] - mu['ES']) / sd['ES'], 3),
                   'n_chunks': sum(len(gm[m][g]) for g in gm[m])} for m in raw}
+    if os.environ.get('B5_NO_DUMP')=='1':
+        print('B5_NO_DUMP=1: cache warmed (%d rows), artifact untouched' % len(cache)); sys.exit(0)
     from moneyball_core import dump_atomic
     dump_atomic({'traits': traits, 'genre_scores': genre_scores,
                  'method': 'LLM item-level (%s, itemset %s, %s), 3-pt observer-keyed IPIP-style, '
