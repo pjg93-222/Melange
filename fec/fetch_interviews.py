@@ -116,6 +116,18 @@ for m in C:
 SUR = collections.defaultdict(list)
 for m in C:
     SUR[norm(m).split()[-1]].append(m)
+# rank-scoped surname pools (user rule 2026-07-06: 'Speaker Johnson refers to only one person' —
+# the rank word carries disambiguating information the flat pool discards). Verified on the live
+# roster: 'senator johnson' -> Ron Johnson uniquely (the 4 other Johnsons are House); 'senator
+# scott' stays ambiguous (Rick+Tim) and correctly never binds.
+SUR_SEN = collections.defaultdict(list); SUR_HOU = collections.defaultdict(list)
+for m in C:
+    (SUR_SEN if (C[m].get('chamber') == 'Senate') else SUR_HOU)[norm(m).split()[-1]].append(m)
+# 119th-Congress floor-leadership singletons (role data isn't in the roster; these constants are
+# exactly as current as the roster file itself — refresh alongside it at the next Congress).
+LEADERSHIP = ['Mike Johnson', 'John Thune', 'Charles Schumer', 'Steve Scalise', 'Hakeem Jeffries',
+              'John Barrasso', 'Richard Durbin', 'Tom Emmer', 'Katherine Clark']
+LEAD_SUR = {norm(m).split()[-1]: [m] for m in LEADERSHIP if m in C}
 
 def _firstname_compatible(a, b):
     """'tom'~'thomas' yes; nickname classes (bernie~bernard) yes; 'raul'~'adelita' NO
@@ -477,14 +489,21 @@ def run_hewitt():
             title = (re.search(r'<title>([^<]+)</title>', page) or [None, ''])[1]
             probe = ' ' + re.sub(r'\s+', ' ', norm(slug.replace('-', ' ') + ' ' + title)) + ' '
             guests = {mem for (fn, ln), mem in FULL.items() if (' %s %s ' % (fn, ln)) in probe}
-            # rank+surname titles ('majority leader thune on...') — run-4z4 extension: the first
-            # pass required a FULL name in the title and yielded only 17 members from 653 posts.
-            # Globally-unique surname after a congressional rank word resolves deterministically;
-            # ambiguous surnames (johnson, scott) never bind, and the body-label conjunction below
-            # still gates every stored turn (wrong guest -> labels don't match -> zero rows).
-            for tm in re.finditer(r'\b(?:senator|sen|congressman|congresswoman|representative|rep|speaker|'
-                                  r'(?:majority |minority )?leader|whip|chairman|chairwoman)\s+([a-z]+)', probe):
-                cands = SUR.get(tm.group(1), [])
+            # rank+surname titles ('majority leader thune on...', 'speaker johnson...') — run-4z4/4z5:
+            # pass 1 required a FULL name in the title (17 members from 653 posts). The rank word
+            # scopes the surname pool (user 2026-07-06: 'Speaker Johnson refers to only one person'):
+            # senator->Senate pool, congressman/rep->House pool, speaker/leader/whip->119th floor-
+            # leadership singletons, chair->global. Ambiguous-within-pool never binds ('senator
+            # scott'), and the body-label conjunction below still gates every stored turn (a wrong
+            # title-guess finds no matching initials/surname labels -> zero rows).
+            for tm in re.finditer(r'\b(senator|sen|congressman|congresswoman|representative|rep|speaker|'
+                                  r'majority leader|minority leader|leader|whip|chairman|chairwoman)\s+([a-z]+)', probe):
+                rank, cand = tm.group(1), tm.group(2)
+                pool = (SUR_SEN if rank in ('senator', 'sen') else
+                        SUR_HOU if rank in ('congressman', 'congresswoman', 'representative', 'rep') else
+                        LEAD_SUR if rank in ('speaker', 'majority leader', 'minority leader', 'leader', 'whip') else
+                        SUR)
+                cands = pool.get(cand, []) if hasattr(pool, 'get') else []
                 if len(cands) == 1: guests.add(cands[0])
             if len(guests) != 1:
                 con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
