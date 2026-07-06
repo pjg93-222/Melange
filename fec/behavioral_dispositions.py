@@ -55,15 +55,29 @@ coop = mean_z([zscore({m: d.get('bipartisanship') for m, d in PANEL.items() if d
                zscore({m: d.get('cosponsor_degree') for m, d in PANEL.items() if d.get('cosponsor_degree') is not None}, log=True),
                zscore({m: d.get('n_cosponsored') for m, d in PANEL.items() if d.get('n_cosponsored') is not None}, log=True)], need=2)
 
-# diligence: roll-call participation volume. Volume only signals diligence for FULL-TERM voting
-# members: non-voting delegates and mid-term entrants (special elections) sit far below chamber
-# median through no disposition of their own -> neutral (None), never scored. z clipped +/-3.
+# diligence (run-4w, user-ratified 3-component upgrade — "do A, B and C"): mean of available
+# C-behaviors, need=1, each z within its covered population; missing components never penalize.
+#   1. roll-call participation (original component; full-term guard + clip as before)
+#   2. LEP follow-through: committee-action+ stage events per bill introduced (lep_criterion.json;
+#      static CEL data through the 118th, so reading last cycle's diagnostic file is exact)
+#   3. CHRG hearing participation: distinct fetched finance hearings spoken at — ranked among
+#      PARTICIPANTS only (coverage = fetched hearings; absent members stay neutral)
 _vc = {m: d.get('votes_cast') for m, d in PANEL.items() if d.get('votes_cast')}
 _med = {}
 for _ch in ('House', 'Senate'):
     _vs = sorted(v for m, v in _vc.items() if chamber.get(m) == _ch)
     if _vs: _med[_ch] = _vs[len(_vs) // 2]
-dil = zscore({m: v for m, v in _vc.items() if v >= 0.25 * _med.get(chamber.get(m), 1e9)}, log=True)
+_dil_votes = zscore({m: v for m, v in _vc.items() if v >= 0.25 * _med.get(chamber.get(m), 1e9)}, log=True)
+_dil_votes = {m: max(-3.0, min(3.0, v)) for m, v in _dil_votes.items()}
+_dil_parts = [_dil_votes]
+_lcp = B + r'\lep_criterion.json'
+if os.path.exists(_lcp):
+    _ftv = {m: d.get('followthrough') for m, d in json.load(open(_lcp))['per_member'].items()
+            if d.get('followthrough') is not None}
+    if _ftv: _dil_parts.append(zscore(_ftv))
+_chg = {m: d.get('chrg_hearings') for m, d in PANEL.items() if (d.get('chrg_hearings') or 0) >= 1}
+if _chg: _dil_parts.append(zscore(_chg, log=True))
+dil = mean_z(_dil_parts, need=1)
 dil = {m: max(-3.0, min(3.0, v)) for m, v in dil.items()}
 
 # dominance: interaction channel + committee leadership
@@ -103,9 +117,10 @@ for m in C:
 cov = {k: sum(1 for m in out if k in out[m]) for k in
        ('cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z')}
 dump_atomic({'members': out, 'coverage': cov,
-             'method': 'dispositions measured from behavior (nomological fix 2026-07-04): cooperation='
-                       'bipartisanship+cosponsor embedding; diligence=roll-call participation; dominance='
-                       'interaction turn-stats+leadership; visibility=broadcast engagement; breadth='
+             'method': 'dispositions measured from behavior (nomological fix 2026-07-04; diligence 3-component '
+                       'run-4w): cooperation=bipartisanship+cosponsor embedding; diligence=roll-call participation'
+                       '+LEP follow-through+CHRG hearing participation (mean of available, participants-only z); '
+                       'dominance=interaction turn-stats+leadership; visibility=broadcast engagement; breadth='
                        'legislative portfolio sections; z within chamber; missing -> neutral downstream'},
             B + r'\behavioral_dispositions.json')
 print('behavioral dispositions: %d members | coverage %s' % (len(out), cov))

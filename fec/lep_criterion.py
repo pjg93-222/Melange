@@ -50,8 +50,14 @@ for m, g in lep.groupby('member'):
     lc = float(g1718['lesclassic'].mean()) if len(g1718) else None
     gl = g.sort_values('congress').iloc[-1]
     if lc is None or lc != lc: lc = float(gl['lesclassic']) if gl['lesclassic'] == gl['lesclassic'] else None
+    # follow-through (run-4w, user-ratified diligence input): committee-action-and-beyond stage
+    # events per bill introduced (allaic1+allabc1)/allbill1 — the shepherd-vs-introduce-and-forget
+    # C-behavior. Can exceed 1 (a bill advancing through both stages counts twice). None under 5 bills.
+    acted = float(gw['allaic1'].fillna(0).sum()) + float(gw['allabc1'].fillna(0).sum())
+    ft = (acted / tot) if tot >= 5 else None
     per[m] = {'ceremonial_share': (round(share, 4) if share is not None else None),
-              'bills_115_118': int(tot), 'lesclassic': (round(lc, 4) if lc is not None and lc == lc else None),
+              'bills_115_118': int(tot), 'followthrough': (round(ft, 4) if ft is not None else None),
+              'lesclassic': (round(lc, 4) if lc is not None and lc == lc else None),
               'les2_latest': (round(float(gl['les2']), 4) if gl['les2'] == gl['les2'] else None),
               'dwnom1': (round(float(gl['dwnom1']), 4) if gl['dwnom1'] == gl['dwnom1'] else None),
               'latest_congress': int(gl['congress'])}
