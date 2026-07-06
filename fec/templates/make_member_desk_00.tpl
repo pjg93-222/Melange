@@ -565,15 +565,16 @@ function psychHTML(m){
       ?radar(P.behav_pct.map(v=>v==null?0.5:v),BLAB,'#2dd4bf',82)
         +(bna.length?`<div style="font-size:10px;color:var(--faint)">n/a (plotted at neutral): ${bna.join(', ')}</div>`:'')
       :'<div class=empty>No behavioral coverage.</div>';
-    // instrument agreement (2026-07-05 user rule): where v2 and the LLM read land within 15 pts on the
-    // same axis, that's convergence from two independent method families -> highlight LIGHT GREEN.
-    // Consc carved out: two text methods agreeing on the 5-method-null trait is shared blindness, not strength.
+    // instrument agreement (2026-07-05 user rule, all five axes): where v2 and the LLM read land
+    // within 15 pts on the same axis, that's convergence from two independent method families ->
+    // highlight LIGHT GREEN. (Consc included per user 2026-07-05; the behavioral radar's Diligence
+    // axis remains the load-bearing C measure — see legend.)
     const B5AX=['Open','Consc','Extra','Agree','EmoSt'];
-    const agree=(P.big5_pct&&P.llm_pct)?B5AX.map((ax,i)=>ax!=='Consc'&&Math.abs(P.big5_pct[i]-P.llm_pct[i])<=0.15):null;
+    const agree=(P.big5_pct&&P.llm_pct)?B5AX.map((ax,i)=>Math.abs(P.big5_pct[i]-P.llm_pct[i])<=0.15):null;
     const axcol=agree?agree.map(a=>a?'#86efac':null):null;
     const agList=agree?B5AX.filter((_,i)=>agree[i]):[];
     const rad=P.big5_pct?radar(P.big5_pct,B5AX,'#7dd3fc',82,P.llm_pct,'#e879f9',axcol):'';
-    const agLine=agree?`<div style="font-size:10px;margin-top:2px"><span style="color:#86efac;font-weight:700">✓ light green</span> <span style="color:var(--faint)">= both instruments agree within 15 pts (independent methods converging — read as high-confidence): ${agList.length?agList.join(', '):'none on this member'}${agList.length?'':' — treat single-instrument readings with care'}. Consc never greens (text can\'t measure it — 5-method null).</span></div>`:'';
+    const agLine=agree?`<div style="font-size:10px;margin-top:2px"><span style="color:#86efac;font-weight:700">✓ light green</span> <span style="color:var(--faint)">= both instruments agree within 15 pts (independent methods converging — read as high-confidence): ${agList.length?agList.join(', '):'none on this member'}. For Consc, the measured read is Diligence on the behavioral radar above.</span></div>`:'';
     const persona=(P.communion_pct!=null)?bar('Warmth — communion persona',P.communion_pct,'#2dd4bf')+bar('Assertiveness — agency persona',P.agency_pct,'#c2862a'):'<div class=empty>No persona cue coverage yet for this member.</div>';
     const rd=READS[P.susc_read||'trait-only']||READS['trait-only'];
     const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Engagement responsiveness (engines)</span><b>${P.pressure_mult}×</b></div>
