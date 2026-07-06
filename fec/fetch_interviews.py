@@ -193,32 +193,44 @@ def store(con, rows, date, show, url):
     return n
 
 # ---------------- adapters ----------------
-def run_cnn(since, until):
+def run_cnn(since, until, verify=False):
+    """Coverage-audit hardening 2026-07-06: (1) a failed SEGMENT no longer poisons coverage
+    silently — the day is marked 'partial' (not 'ok') so future runs revisit it; (2) day re-walks
+    are idempotent — segments already stored for that day are skipped, never duplicated; (3)
+    --verify re-walks EVERY day in range (index fetch each, segments only where missing) to
+    repair the historical ok-on-partial losses the old code could not see."""
     con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
     d = datetime.date.fromisoformat(since); end = datetime.date.fromisoformat(until)
-    tot = 0
+    tot = repaired = 0
     while d <= end:
         key = 'cnn:%s' % d.isoformat()
-        if key in done: d += datetime.timedelta(days=1); continue
+        if key in done and not verify: d += datetime.timedelta(days=1); continue
         try:
             idx = get('https://transcripts.cnn.com/date/%s' % d.isoformat()); time.sleep(PAUSE)
             segs = sorted(set(re.findall(r'href="(/show/[^"]+/date/%s/segment/[^"]+)"' % d.isoformat(), idx)))
-            nd = 0
-            for s in segs:
+            have = {p for (p,) in con.execute("SELECT DISTINCT package FROM speeches WHERE package LIKE 'https://transcripts.cnn.com%' AND date=?", (d.isoformat(),))}
+            new = [s for s in segs if ('https://transcripts.cnn.com' + s) not in have]
+            nd = fails = 0
+            for s in new:
                 try:
                     page = get('https://transcripts.cnn.com' + s); time.sleep(PAUSE)
                     rows = parse_turns(strip_tags(page))
                     nd += store(con, rows, d.isoformat(), s.split('/')[2], 'https://transcripts.cnn.com' + s)
                     con.commit()   # SHORT transactions: a day-long write TX starved the CREC collector's lock (2026-07-03)
                 except Exception:
-                    continue
-            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+                    fails += 1
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)',
+                        (key, 'ok' if fails == 0 else 'partial', datetime.datetime.now().isoformat()))
             con.commit(); tot += nd
-            print('%s: %d segments, %d member turns (total %d)' % (d.isoformat(), len(segs), nd, tot), flush=True)
+            if verify and new: repaired += len(new) - fails
+            if new or not verify:
+                print('%s: %d segments (%d new, %d failed), %d member turns (total %d)' % (
+                    d.isoformat(), len(segs), len(new), fails, nd, tot), flush=True)
         except Exception as e:
             print('%s: FAIL %s' % (d.isoformat(), str(e)[:90]), flush=True)
         d += datetime.timedelta(days=1)
-    con.close(); print('CNN done: %d member turns added' % tot)
+    con.close()
+    print('CNN done: %d member turns added%s' % (tot, (' | verify repaired %d segments' % repaired) if verify else ''))
 
 def run_mtp():
     con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
@@ -231,7 +243,22 @@ def run_mtp():
             links |= set(re.findall(r'href="(https://www\.nbcnews\.com/meet-the-press/transcripts/[^"]+)"', page))
         except Exception as e:
             print('hub FAIL %s %s' % (h, str(e)[:80]))
-    print('MTP transcript pages discovered: %d' % len(links))
+    # DEEP enumeration (coverage audit 2026-07-06: the hubs only expose RECENT transcripts — the
+    # stored corpus was 19 pages / Jan-Jun 2026 only). NBC's monthly article sitemaps carry every
+    # episode page under TWO patterns: legacy 'meet-the-press/meet-press-<date>-nID' (verified
+    # parseable: Sanders 5 turns on 2024-10-27) and current 'meet-the-press/transcripts/<slug>'.
+    today = datetime.date.today()
+    y, m = 2014, 1
+    while (y, m) <= (today.year, today.month):
+        try:
+            sm = get('https://www.nbcnews.com/sitemap/nbcnews/sitemap-%04d-%02d-article.xml' % (y, m))
+            links |= set(re.findall(r'<loc>(https://www\.nbcnews\.com/meet-the-press/(?:transcripts/|meet-press-)[^<]+)</loc>', sm))
+        except Exception:
+            pass   # months with no sitemap (pre-CMS) are expected
+        time.sleep(PAUSE)
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    links = {u for u in links if 'transcripts-n51976' not in u and 'transcripts-archive' not in u}
+    print('MTP transcript pages discovered: %d (hubs + 2014->now monthly sitemaps)' % len(links))
     tot = 0
     for u in sorted(links):
         key = 'mtp:' + u.rsplit('/', 1)[-1]
@@ -604,7 +631,7 @@ if __name__ == '__main__':
     ap = {a.split('=')[0]: a for a in sys.argv}
     since = next((sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == '--since'), '2025-01-01')
     until = next((sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == '--until'), datetime.date.today().isoformat())
-    if 'cnn' in sys.argv: run_cnn(since, until)
+    if 'cnn' in sys.argv: run_cnn(since, until, verify='--verify' in sys.argv)
     elif 'mtp' in sys.argv: run_mtp()
     elif 'cbs' in sys.argv: run_cbs()
     elif 'abc' in sys.argv: run_abc()
