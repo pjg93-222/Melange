@@ -147,6 +147,7 @@ def psy_for(name):
         if r.get(k) is not None: out[k] = r[k]
     lep = _LEP.get(name) or {}
     ext = {}
+    if lep.get('followthrough') is not None: ext['ft'] = lep['followthrough']
     if lep.get('lesclassic') is not None and _LESPCT:
         ext['les'] = lep['lesclassic']; ext['les_pct'] = _LESPCT(lep['lesclassic'])
     if lep.get('dwnom1') is not None: ext['dwnom1'] = lep['dwnom1']
