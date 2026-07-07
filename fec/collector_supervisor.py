@@ -23,7 +23,7 @@ Each tick:
 Targets are read from collector_targets.json (written by the launcher) so the schedule can be
 re-pointed without editing code. Spend note: GATE-2 runs big5_llm --go (approved); the script's
 own cost gate prints first and a dry account stops cleanly (cache preserves paid work)."""
-import os, sys, json, subprocess, datetime, time, glob
+import os, sys, json, re, subprocess, datetime, time, glob, threading
 
 B = MB_ROOT
 FE = os.path.join(B, 'fec')
@@ -45,12 +45,15 @@ def log(m):
 
 def running_procs():
     """List of {pid, cpu, cmd} for running python processes (Windows CIM). cpu = cumulative CPU seconds.
-    A rare multi-char delimiter avoids collisions with the many separators inside command lines."""
+    A rare multi-char delimiter avoids collisions with the many separators inside command lines.
+    CPU is emitted as RAW INTEGER 100ns ticks and divided here — review 2026-07-07: PowerShell's -f
+    formats floats with the LOCALE decimal separator (comma on non-US), which float() rejects,
+    silently emptying the scan and making every live leg look dead (mass false-relaunch)."""
     try:
         out = subprocess.run(['powershell', '-NoProfile', '-Command',
                               "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | "
                               "ForEach-Object { '{0}~@~{1}~@~{2}' -f $_.ProcessId, "
-                              "([math]::Round(($_.KernelModeTime + $_.UserModeTime)/1e7,2)), $_.CommandLine }"],
+                              "($_.KernelModeTime + $_.UserModeTime), $_.CommandLine }"],
                              capture_output=True, text=True, timeout=60).stdout or ''
     except Exception as e:
         log('process scan failed (%s) — assuming none running' % str(e)[:60]); return []
@@ -58,7 +61,7 @@ def running_procs():
     for ln in out.splitlines():
         parts = ln.split('~@~', 2)
         if len(parts) == 3 and parts[0].strip().isdigit():
-            try: procs.append({'pid': int(parts[0]), 'cpu': float(parts[1]), 'cmd': parts[2]})
+            try: procs.append({'pid': int(parts[0]), 'cpu': int(parts[1]) / 1e7, 'cmd': parts[2]})
             except Exception: pass
     return procs
 
@@ -100,37 +103,81 @@ def launch_detached(args, tag):
     log('RELAUNCHED %s detached: %s' % (tag, ' '.join(args)))
 
 def gate_step(name, script, args, timeout=6000):
+    """Run one gate step. Accepts absolute script paths (review 2026-07-07: c_prereg_test.py lives at
+    the repo ROOT — the old FE-join launched a nonexistent path and the prereg retest silently skipped).
+    Never lets a step exception kill the tick: a timeout/crash returns (False, output) so run_gates can
+    abort-or-continue deliberately instead of leaving the gate half-fired."""
     t = time.time()
-    try: os.utime(os.path.join(B, 'collector_supervisor.lock'), None)   # heartbeat: keep the lock fresh across long gate steps
-    except Exception: pass
-    r = subprocess.run([sys.executable, os.path.join(FE, script)] + args,
-                       capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=timeout, cwd=FE)
-    tail = (r.stdout or '').strip().splitlines()[-1:] or ['']
-    log('  %-26s %s %5.0fs  %s' % (name, 'OK' if r.returncode == 0 else '!!', time.time() - t, tail[0][:120]))
-    return r.returncode == 0, (r.stdout or '')
+    spath = script if os.path.isabs(script) else os.path.join(FE, script)
+    try:
+        r = subprocess.run([sys.executable, spath] + args,
+                           capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=timeout, cwd=FE)
+        ok, out = r.returncode == 0, (r.stdout or '')
+    except subprocess.TimeoutExpired as e:
+        ok, out = False, (e.stdout or '' if isinstance(e.stdout, str) else '')
+        log('  %-26s !! TIMEOUT after %ds' % (name, timeout))
+    except Exception as e:
+        ok, out = False, ''
+        log('  %-26s !! %s' % (name, str(e)[:100]))
+    tail = out.strip().splitlines()[-1:] or ['']
+    log('  %-26s %s %5.0fs  %s' % (name, 'OK' if ok else '!!', time.time() - t, tail[0][:120]))
+    return ok, out
+
+def spend_guard(name, script, base_args, cap_env, cap_default, timeout=3600):
+    """Two-phase spend control (review 2026-07-07): run the script WITHOUT --go so its own cost gate
+    prints 'est ~$X' and exits unspent; parse X; proceed with --go only if X <= cap. An unparseable
+    estimate fails CLOSED (no spend). Both big5_llm and member_reference_layer print this format."""
+    cap = float(os.environ.get(cap_env, cap_default))
+    ok, out = gate_step(name + ' (dry est)', script, base_args, timeout=timeout)
+    m = re.findall(r'est ~\$([0-9][0-9.,]*)', out)
+    if not m:
+        log('  %s: no est line found — failing CLOSED (no spend)' % name); return False, 0.0
+    est = float(m[-1].replace(',', ''))
+    if est > cap:
+        log('  %s: est $%.2f EXCEEDS cap $%.0f (%s) — skipping spend; raise the env cap to proceed'
+            % (name, est, cap, cap_env))
+        return False, est
+    log('  %s: est $%.2f within cap $%.0f — proceeding' % (name, est, cap))
+    return True, est
 
 def run_gates():
-    # GATE-1: free corpus absorption + audit (checkpoint task #1)
+    # GATE-1: free corpus absorption + audit (checkpoint task #1). reference --rebuild inside
+    # weekly_refresh is the FREE cache-only path (member_reference_layer.py:187) — GATE-1 spends $0.
     if not os.path.exists(os.path.join(B, 'gate1.done')):
         log('===== GATE-1 (free refresh + audit) =====')
         gate_step('weekly_refresh', 'weekly_refresh.py', [], timeout=6000)
         ok, out = gate_step('audit_full', 'audit_full.py', [], timeout=6000)
         open(os.path.join(B, 'gate1.done'), 'w').write(datetime.datetime.now().isoformat())
         log('GATE-1 complete (audit clean=%s)' % ('ALL MODULES CLEAN' in out))
-    # GATE-2: everything-done — approved full re-score + the ONE pre-registered C retest
+    # GATE-2: everything-done — approved full re-score + the ONE pre-registered C retest.
+    # Review 2026-07-07 hardening: (a) --batch = flat 50% off, the right mode unattended (fresh-cache
+    # est ~$158 batch vs ~$316 standard vs ~$632 if fast-mode ever activates); (b) B5_FAST pinned off;
+    # (c) spend guards with env caps fail CLOSED; (d) if the re-score fails or the artifact is not
+    # fresh, ABORT before validate/C-retest — the one-look prereg test must never run on stale data
+    # (gate2.done stays absent, so the next tick retries; big5's cache/PEND make retries cheap).
     if not os.path.exists(os.path.join(B, 'gate2.done')):
         log('===== GATE-2 (everything-done: re-score + C retest) =====')
-        # full artifact dump (CREC re-score APPROVED + interviews). big5_llm prints its own cost
-        # gate; --go spends; cache preserves paid work if the account runs dry mid-run.
-        gate_step('big5 full re-score', 'big5_llm.py', ['--all', '--opus', '--go'], timeout=36000)
-        gate_step('validate_big5', 'validate_big5.py', ['big5_llm_opus.json', '--traits-key', 'traits'], timeout=1200)
-        # THE pre-registered C retest (same bars) — scratchpad script if present, else skip-note
+        os.environ['B5_FAST'] = '0'   # bulk batch job: never pay the 2x fast-mode premium unattended
+        art = os.path.join(B, 'big5_llm_opus.json')
+        t_gate = time.time()
+        go, est = spend_guard('big5 re-score', 'big5_llm.py', ['--opus', '--batch'], 'B5_GATE_CAP', '200')
+        if not go:
+            log('GATE-2 HALTED at big5 spend guard — nothing spent, retest untouched; will retry next tick'); return
+        ok, out = gate_step('big5 full re-score', 'big5_llm.py', ['--opus', '--batch', '--go'], timeout=36000)
+        fresh = os.path.exists(art) and os.path.getmtime(art) >= t_gate - 60
+        if not (ok and fresh):
+            log('GATE-2 ABORTED: big5 step ok=%s artifact-fresh=%s — retest NOT run (no stale-data look); '
+                'will retry next tick (batch PEND/cache resume, no double-spend)' % (ok, fresh)); return
+        gate_step('validate_big5', 'validate_big5.py', [art, '--traits-key', 'traits'], timeout=1200)
+        # THE pre-registered C retest (bars locked 2026-07-05) — absolute path: it lives at repo ROOT
         cpath = os.path.join(B, 'c_prereg_test.py')
         if os.path.exists(cpath):
-            gate_step('C retest (prereg)', os.path.basename(cpath), [], timeout=1200)
+            gate_step('C retest (prereg)', cpath, [], timeout=1200)
         else:
             log('  C retest: c_prereg_test.py not in repo root — run manually from scratchpad')
-        gate_step('reference --score', 'member_reference_layer.py', ['--score', '--go'], timeout=6000)
+        go, est = spend_guard('reference --score', 'member_reference_layer.py', ['--score'], 'REF_GATE_CAP', '100')
+        if go:
+            gate_step('reference --score', 'member_reference_layer.py', ['--score', '--go'], timeout=6000)
         gate_step('co_appearance', 'co_appearance_layer.py', [], timeout=1200)
         gate_step('member desk', 'make_member_desk.py', [], timeout=1200)
         gate_step('combined', 'make_combined.py', [], timeout=1200)
@@ -152,9 +199,21 @@ def main():
             log('another supervisor tick active (%.0f min) — skipping' % (age / 60)); return
         log('stale lock (%.0f min) — taking over' % (age / 60))
     open(LOCK, 'w').write(str(datetime.datetime.now()))
+    # Review 2026-07-07 (S1 double-spend): the old design heartbeat the lock only BETWEEN gate steps,
+    # so any single step longer than the 90-min stale window (the batch re-score certainly) had its
+    # lock stolen by the next tick MID-STEP -> a second concurrent gate -> double batch submission.
+    # A daemon thread now refreshes the lock every 60s for the life of the tick; it dies with us, so
+    # a genuinely crashed tick still goes stale and recovers as before.
+    _hb_stop = threading.Event()
+    def _hb():
+        while not _hb_stop.wait(60):
+            try: os.utime(LOCK, None)
+            except Exception: pass
+    threading.Thread(target=_hb, daemon=True).start()
     try:
         _tick()
     finally:
+        _hb_stop.set()
         try: os.remove(LOCK)
         except Exception: pass
 

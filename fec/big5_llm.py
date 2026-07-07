@@ -21,7 +21,8 @@ INTERVIEW. Full roster with --all. Validation: fec/validate_big5.py.
 Usage:
   python big5_llm.py --pilot [--sonnet|--opus|--haiku] [--limit N] [--go] [--named]
   python big5_llm.py --all   [--sonnet|...] [--go]
-Cache: big5_llm_cache_<model>[_named].jsonl, key md5(member|genre|chunk_idx|dei|itemset-v1).
+Cache: big5_llm_cache_<model>[_named].jsonl, key md5(member|genre|chunk_idx|dei|itemset-v1|texthash16)
+(text hash added 2026-07-07: corpus growth re-samples chunks, so identical text = hit, changed = re-score).
 Output: big5_llm_<model>.json (never overwrites big5_traits.json)."""
 import csv, hashlib, io, json, os, re, sqlite3, sys, threading, collections
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -204,7 +205,7 @@ def deidentify(text, member):
 
 def chunks_for(member, genre, con):
     docs = [t for (t,) in con.execute(
-        'select text from speeches where member=? and source=? order by date', (member, genre)) if t]
+        'select text from speeches where member=? and source=? order by date, rowid', (member, genre)) if t]
     words = []
     for t in docs:
         t = RITUAL.sub(' ', t)
@@ -227,8 +228,13 @@ for m in members:
     for g in GENRES:
         for ci, ch in enumerate(chunks_for(m, g, con)):
             txt = deidentify(ch, m)
-            k = hashlib.md5(('%s|%s|%d|%s|%s|%s%s' % (m, g, ci, 'named' if NAMED else 'dei', ITEMSET_V, _mk,
-                                                      '|rep%d' % REP if REP else '')).encode()).hexdigest()
+            # QA 2026-07-07 (pre-GATE-2): cache key now includes a hash of the CHUNK TEXT. Without it,
+            # a corpus rebuild re-samples different text at the same (member,genre,idx) but hits the
+            # OLD cached judgment — the post-collector "re-score" would silently return stale scores.
+            # Same text = cache hit (paid work preserved); changed text = honest re-score.
+            th = hashlib.md5(txt.encode('utf-8', 'replace')).hexdigest()[:16]
+            k = hashlib.md5(('%s|%s|%d|%s|%s|%s%s|%s' % (m, g, ci, 'named' if NAMED else 'dei', ITEMSET_V, _mk,
+                                                      '|rep%d' % REP if REP else '', th)).encode()).hexdigest()
             items.append((k, 'Text sample:\n"""\n%s\n"""' % txt, (m, g, ci)))
 print('chunks to score: %d (%d members with any genre coverage)' % (
     len(items), len(set(m for _, _, (m, g, c) in items))))
@@ -262,11 +268,16 @@ if todo and BATCH:
     else:
         reqs = [Request(custom_id=k, params=MessageCreateParamsNonStreaming(**_params(u))) for k, u, _ in todo]
         bid = client.messages.batches.create(requests=reqs).id
-        json.dump({'batch_id': bid, 'n': len(reqs)}, open(PEND, 'w'))
+        with open(PEND, 'w') as _pf:   # QA 2026-07-07: closed handle — a truncated PEND made resume crash
+            json.dump({'batch_id': bid, 'n': len(reqs)}, _pf)
         print('submitted batch %s (%d requests)' % (bid, len(reqs)))
+    _poll_t0 = time.time()
     while True:
         b = client.messages.batches.retrieve(bid)
         if b.processing_status == 'ended': break
+        if time.time() - _poll_t0 > 8.5 * 3600:   # QA 2026-07-07: bounded poll — PEND survives, a rerun resumes
+            print('batch %s still %s after 8.5h — exiting; rerun resumes it (PEND kept)' % (bid, b.processing_status))
+            sys.exit(1)
         print('  batch %s: %s (processing %d, succeeded %d)' % (
             bid, b.processing_status, b.request_counts.processing, b.request_counts.succeeded), flush=True)
         time.sleep(60)
@@ -320,6 +331,8 @@ gm = collections.defaultdict(lambda: collections.defaultdict(list))   # (member)
 for k, u, (m, g, ci) in items:
     o = cache.get(k)
     if not o: continue
+    if not isinstance(o, dict) or len(o) < 15:   # QA 2026-07-07: a truncated/corrupt cache line must not
+        continue                                 # silently score as all-neutral (missing keys read as 0)
     ct = {t: sum(s * o.get(i, 0) for i, s in bytr[t]) / len(bytr[t]) for t in TR}
     gm[m][g].append(ct)
 raw = {}; genre_scores = {}
