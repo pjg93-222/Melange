@@ -48,6 +48,13 @@ def get(url, tries=3):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
                 return r.read().decode('utf-8', 'replace')
+        except urllib.error.HTTPError as e:
+            # QA 2026-07-07: a hard 404/410 is PERMANENT — retrying (with 3s+6s backoff) can't make a
+            # deleted page exist, it just cost ~18.7s/URL grinding the Fox archive's thousands of dead
+            # links. Fail fast on 404/410 (one request, no backoff); still retry transient 5xx/429/etc.
+            if e.code in (404, 410): raise
+            if i == tries - 1: raise
+            time.sleep(3 * (i + 1))
         except Exception:
             if i == tries - 1: raise
             time.sleep(3 * (i + 1))
