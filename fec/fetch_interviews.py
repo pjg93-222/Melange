@@ -20,7 +20,7 @@ Usage:
   python fetch_interviews.py mtp
   python fetch_interviews.py status
 Politeness: ~0.7s between requests, honest UA. Internal research use."""
-import sys, os, re, json, sqlite3, datetime, time, urllib.request, collections, socket
+import sys, os, re, json, sqlite3, datetime, time, urllib.request, urllib.error, collections, socket
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 # GLOBAL socket timeout (2026-07-06: fox wedged with 0 CPU for hours on a hung request — the
 # per-call urlopen(timeout=60) did NOT fire, so a bad socket blocked indefinitely and froze the
@@ -464,7 +464,12 @@ def run_fox():
     Old interviews of CURRENT members are valid personality/relational text (RKH used 1996-2014);
     non-roster guests drop at parse_turns (drop-never-guess). Post-2024-10 Fox stays unavailable
     until a YouTube-caption diarization build exists (captions carry no speaker labels)."""
-    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    # QA 2026-07-07 (user-approved): the Fox archive holds thousands of long-removed transcript URLs
+    # that now 404 (dead 2004-era campaign posts); with no skip-marker each run re-fetched every one.
+    # Skip keys marked 'ok' (collected) OR 'gone' (a CONFIRMED hard 404/410 — see the except below).
+    # 'gone' is written ONLY for HTTP 404/410; a timeout / connection error / 5xx / 429 is NEVER
+    # marked, so a slow-loading article that times out stays retryable and is re-attempted next run.
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status IN ('ok','gone')")}
     MONTHS = {m: i for i, m in enumerate(('january', 'february', 'march', 'april', 'may', 'june', 'july',
                                           'august', 'september', 'october', 'november', 'december'), 1)}
     try:
@@ -500,6 +505,14 @@ def run_fox():
             con.commit(); tot += n
             if n: print('fox %s: %d turns (total %d)' % (slug[:60], n, tot), flush=True)
         except Exception as e:
+            # Mark PERMANENT-absence only: a hard 404 (Not Found) or 410 (Gone) after get()'s 3 retries.
+            # Everything else (socket/read timeout on a slow page, connection reset, 5xx, 429, 403) is
+            # transient -> left UNmarked so the next run retries it. This is the safety the user asked for:
+            # a slow-to-load article is never mistaken for a dead one.
+            if isinstance(e, urllib.error.HTTPError) and e.code in (404, 410):
+                con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)',
+                            (key, 'gone', datetime.datetime.now().isoformat()))
+                con.commit()
             print('fox %s FAIL %s' % (slug[:50], str(e)[:80]), flush=True)
     con.close(); print('fox done: %d member turns' % tot)
 
