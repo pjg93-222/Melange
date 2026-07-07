@@ -190,8 +190,16 @@ def parse_turns(text):
     return out
 
 def store(con, rows, date, show, url):
-    n = 0
+    # QA 2026-07-07: some source pages embed the transcript body TWICE in one document (observed on
+    # Fox, e.g. .../why-do-we-still-not-know-... carried the whole Carlson show verbatim twice) ->
+    # parse_turns faithfully returned every turn twice -> store double-inserted. Dedup within the
+    # page on (member, exact text): a real interview never has one member repeat a turn verbatim,
+    # so this only ever removes source-side duplication. Shared by all 8 legs, so it hardens each.
+    n = 0; seen = set()
     for m, sp in rows:
+        k = (m, sp)
+        if k in seen: continue
+        seen.add(k)
         con.execute('INSERT INTO speeches VALUES (?,?,?,?,?,?,?)',
                     (m, date, 'INTERVIEW', show, url, len(sp.split()), sp))
         n += 1

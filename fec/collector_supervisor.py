@@ -9,7 +9,10 @@ runs under Windows Task Scheduler (every 10 min), which survives session death, 
 Each tick:
   1. For every target leg not yet done (no sentinel): if no live process is running it, relaunch
      it DETACHED (survives THIS supervisor's exit). Collectors are resumable via iv_fetch_log, so
-     a relaunch never repeats paid/finished work.
+     a relaunch never repeats paid/finished work. A leg that IS running but has made no progress
+     (neither its collector-log rows NOR its process CPU have advanced) for STALL_SECONDS is
+     treated as WEDGED and killed+relaunched -- the process-exists check alone cannot see a hung
+     socket that the 90s timeout never fired on (observed twice on the Fox leg, 2026-07-06).
   2. When ALL targets have completion sentinels -> run the execution-queue gates ONCE:
        GATE-1 (free): weekly_refresh (corpus absorption + audit_full at the chain tail).
        GATE-2 (everything-done): the USER-APPROVED full big5 re-score (CREC + interviews) +
@@ -27,6 +30,10 @@ FE = os.path.join(B, 'fec')
 SENT = os.path.join(B, 'collector_sentinels')
 LOG = os.path.join(B, 'collector_supervisor.log')
 TARGETS_F = os.path.join(B, 'collector_targets.json')
+PROG_F = os.path.join(B, 'collector_progress.json')  # per-leg progress snapshot for wedge detection
+DBF = os.path.join(B, 'social_media.db')
+STALL_SECONDS = 2700   # 45 min flat on BOTH db-progress AND CPU on a LIVE leg = wedged -> kill+relaunch
+CPU_EPS = 1.0          # CPU-seconds; a healthy leg clears this in a tick, a wedged one accrues ~0.003
 DETACHED = 0x00000008 | 0x00000200   # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
 
 def log(m):
@@ -36,16 +43,55 @@ def log(m):
         with open(LOG, 'a', encoding='utf-8') as f: f.write(line + '\n')
     except Exception: pass
 
-def running_cmdlines():
-    """Best-effort set of python command lines currently running (Windows WMIC/CIM)."""
+def running_procs():
+    """List of {pid, cpu, cmd} for running python processes (Windows CIM). cpu = cumulative CPU seconds.
+    A rare multi-char delimiter avoids collisions with the many separators inside command lines."""
     try:
         out = subprocess.run(['powershell', '-NoProfile', '-Command',
                               "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | "
-                              "Select-Object -ExpandProperty CommandLine"],
-                             capture_output=True, text=True, timeout=60).stdout
-        return out or ''
+                              "ForEach-Object { '{0}~@~{1}~@~{2}' -f $_.ProcessId, "
+                              "([math]::Round(($_.KernelModeTime + $_.UserModeTime)/1e7,2)), $_.CommandLine }"],
+                             capture_output=True, text=True, timeout=60).stdout or ''
     except Exception as e:
-        log('process scan failed (%s) — assuming none running' % str(e)[:60]); return ''
+        log('process scan failed (%s) — assuming none running' % str(e)[:60]); return []
+    procs = []
+    for ln in out.splitlines():
+        parts = ln.split('~@~', 2)
+        if len(parts) == 3 and parts[0].strip().isdigit():
+            try: procs.append({'pid': int(parts[0]), 'cpu': float(parts[1]), 'cmd': parts[2]})
+            except Exception: pass
+    return procs
+
+def leg_db_metric(args):
+    """A monotonically-increasing progress scalar for a leg, from its collector-log keys. CNN also
+    commits cnnseg markers constantly (fast signal); Fox in resume-skip mode commits nothing while
+    it legitimately walks already-done transcripts -- that case is caught by CPU, not this. -1 on error."""
+    leg = args[0]
+    try:
+        import sqlite3
+        c = sqlite3.connect(DBF, timeout=30); cur = c.cursor()
+        n = cur.execute("SELECT count(*) FROM iv_fetch_log WHERE key LIKE ?", (leg + ':%',)).fetchone()[0]
+        if leg == 'cnn':
+            n += cur.execute("SELECT count(*) FROM iv_fetch_log WHERE key LIKE 'cnnseg:%'").fetchone()[0]
+        c.close(); return n
+    except Exception as e:
+        log('db metric failed for %s (%s)' % (leg, str(e)[:50])); return -1
+
+def kill_leg(match, token):
+    for p in match:
+        try:
+            subprocess.run(['taskkill', '/PID', str(p['pid']), '/F', '/T'], capture_output=True, text=True, timeout=30)
+            log('  KILLED wedged pid %d (%s)' % (p['pid'], token))
+        except Exception as e:
+            log('  kill failed pid %d (%s)' % (p['pid'], str(e)[:40]))
+
+def _load_prog():
+    try: return json.load(open(PROG_F, encoding='utf-8'))
+    except Exception: return {}
+
+def _save_prog(p):
+    try: json.dump(p, open(PROG_F, 'w', encoding='utf-8'))
+    except Exception: pass
 
 def launch_detached(args, tag):
     logf = open(os.path.join(B, 'collector_%s.out' % tag), 'a', encoding='utf-8')
@@ -119,17 +165,41 @@ def _tick():
     pending = [t for t in targets if t not in done]
     log('tick: %d targets, %d done (%s), %d pending' % (len(targets), len(done), ','.join(sorted(done)) or '-', len(pending)))
     if pending:
-        cmds = running_cmdlines()
+        procs = running_procs()
+        prog = _load_prog()
+        now = time.time()
         for tag in pending:
             args = targets[tag]
             # liveness = a python fetch_interviews process whose command line carries this leg's
             # distinguishing token (the --until date for the deep backfill, else the leg name)
             token = args[args.index('--until') + 1] if '--until' in args else args[0]
-            alive = ('fetch_interviews' in cmds) and (token in cmds)
-            if alive:
-                log('  %s alive' % tag)
-            else:
+            match = [p for p in procs if 'fetch_interviews' in p['cmd'] and token in p['cmd']]
+            if not match:                                    # dead -> relaunch (original behavior)
                 launch_detached(args, tag)
+                prog[tag] = {'pid': 0, 'db': leg_db_metric(args), 'cpu': 0.0, 'since': now}
+                continue
+            # ALIVE -> wedge detection. Progress = collector-log rows grew OR the process burned CPU.
+            pid = max(match, key=lambda p: p['cpu'])['pid']
+            cpu = sum(p['cpu'] for p in match)
+            db = leg_db_metric(args)
+            prev = prog.get(tag)
+            if (not prev) or prev.get('pid') != pid:         # first sight / restarted -> fresh baseline+timer
+                prog[tag] = {'pid': pid, 'db': db, 'cpu': cpu, 'since': now}
+                log('  %s alive (pid %d) — baseline set' % (tag, pid)); continue
+            advanced = (db >= 0 and prev.get('db', -1) >= 0 and db > prev['db']) \
+                       or (cpu - prev.get('cpu', 0.0) >= CPU_EPS)
+            if advanced:
+                log('  %s alive, progressing (db %s->%s, cpu +%.1f)' % (tag, prev.get('db'), db, cpu - prev.get('cpu', 0.0)))
+                prog[tag] = {'pid': pid, 'db': db, 'cpu': cpu, 'since': now}   # reset the stall timer
+            else:
+                stalled = now - prev.get('since', now)
+                if stalled >= STALL_SECONDS:
+                    log('  %s WEDGED: flat %.0f min (db %s, cpu %.1f) — kill+relaunch' % (tag, stalled / 60, db, cpu))
+                    kill_leg(match, token); time.sleep(2); launch_detached(args, tag)
+                    prog[tag] = {'pid': 0, 'db': db, 'cpu': 0.0, 'since': now}
+                else:                                        # keep baseline so the timer accumulates
+                    log('  %s alive but flat %.0f/%.0f min (watching)' % (tag, stalled / 60, STALL_SECONDS / 60))
+        _save_prog(prog)
         return   # gates only after everything is done
     # all collectors done -> gates
     run_gates()
