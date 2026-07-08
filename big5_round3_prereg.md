@@ -61,3 +61,24 @@ failed). **On MISS:** v2 stands; B6 documented; further blue work requires a dif
 One look per configuration; misses revert; bars never move after data is seen; blue-on-pink
 calibration PROHIBITED. Iteration across ROUNDS is legitimate (each failure licenses a new
 design with a new prereg); iteration within a look is not.
+
+## P7 addendum — within-chunk ipsatization (locked 2026-07-07 before evaluation, after P5 MISS)
+**External benchmark motivating the design:** RKH lifetime means show A-ES r = +.443 (House,
+n=916) / +.393 (Senate, n=179): roughly .44 of our .653 is population-real covariance; the ~.21
+excess is chunk-tone halo. P5 proved item surgery cannot reach it; P2 proved member-level
+component removal destroys valid variance. Ipsatization targets the remaining suspect precisely:
+per chunk, subtract the chunk's mean keyed-item score from every item (removing that chunk's
+overall tone), then score traits and aggregate as shipped. Chunk-level profile SHAPE survives;
+chunk mood does not.
+**Bars (frozen snapshot, ONE look, absolute):**
+- A-ES |r| <= 0.50   (externally anchored: RKH .443)
+- discriminant mean off-diag |r| <= 0.30
+- MTMM mean >= 0.450
+- split-half SB mean >= 0.72
+- known-groups >= 4/5
+- C(INT) vs votes >= +0.126 and vs follow-through >= +0.081 (control - 0.03)
+**On PASS:** promote ipsatized scoring into big5_llm aggregation (composes with P6 gating).
+**On MISS:** the scoring layer is EXHAUSTED (four design families: reweight, component removal,
+item surgery, ipsatization). A-ES is then documented as substantive covariance plus judge-level
+halo with the RKH benchmark cited, and the remaining lever is itemset v3 (changed item TEXT =
+full re-score, a funding decision for the user), not further scoring arithmetic.
