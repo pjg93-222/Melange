@@ -777,7 +777,7 @@ let coal=new Set(), cbArea='';
 $('#cbsearch').onchange=e=>{const i=byName[e.target.value.trim()];if(i!=null){coal.add(i);e.target.value='';renderCoal();}};
 $('#cbarea').onchange=e=>{cbArea=e.target.value;renderCoal();};
 $('#cbclear').onclick=()=>{coal.clear();renderCoal();};
-$('#cbnet').onclick=()=>{if(!coal.size)return;const names=[...coal].map(i=>M[i].name);if(window.gotoNetworkCoalition)window.gotoNetworkCoalition(names);else alert('Network view is available in the combined dashboard.');};
+$('#cbnet').onclick=()=>{if(!coal.size)return;const names=[...coal].map(i=>M[i].name);if(window.gotoNetworkCoalition)window.gotoNetworkCoalition(names);else window.open('Moneyball Dashboard.html?coal='+encodeURIComponent(names.join(',')),'_blank');};   // combined: in-page bridge · standalone: open the network with the group preloaded
 function suggest(){
   const sc={};
   coal.forEach(s=>{(ADJ[s]||[]).forEach(([v,w])=>{if(!coal.has(v))sc[v]=(sc[v]||0)+PE(w);});});
