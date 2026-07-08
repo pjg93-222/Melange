@@ -78,6 +78,21 @@ canvas{touch-action:none}
 .desklink{align-self:center;flex-shrink:0;border:1px solid #30363d;border-radius:6px;padding:7px 13px;font-size:12px;font-weight:600;color:#c9d1d9;text-decoration:none;white-space:nowrap}
 .desklink:hover{border-color:#1f6feb;color:#fff;background:#1b2230}
 :where(button,select,input,a,.tgt,.oa) :focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #1f6feb;outline-offset:1px}
+/* --- pressure-to-flip gauge (member panel) : how much pro-pressure exists vs. the flip line --- */
+.pgwrap{margin:6px 0 2px}
+.pgcap{display:flex;justify-content:space-between;font-size:11px;color:#8b949e;margin-bottom:4px}
+.pgcap b{color:#e6edf3;font-variant-numeric:tabular-nums}
+.pgauge{position:relative;height:20px;border:1px solid #30363d;border-radius:6px;background:#0d1117;overflow:hidden}
+.pg-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#15803d,#22c55e)}
+.pg-need{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(45deg,#7f1d1d 0,#7f1d1d 5px,#b91c1c 5px,#b91c1c 10px);opacity:.9}
+.pg-line{position:absolute;top:-3px;bottom:-3px;right:0;width:2px;background:#fbbf24;box-shadow:0 0 6px #fbbf24}
+.pglab{display:flex;justify-content:space-between;font-size:10px;color:#8b949e;margin-top:3px}
+.pgnote{font-size:12px;color:#c9d1d9;margin-top:7px;line-height:1.55}.pgnote b{color:#fff}
+/* --- cascade overlay: red->green who-joins map --- */
+#cascbar{position:absolute;left:50%;top:10px;transform:translateX(-50%);display:none;background:#0d1117ee;border:1px solid #30363d;border-radius:9px;padding:7px 13px;font-size:12px;box-shadow:0 6px 24px #000a;z-index:8;text-align:center;max-width:92%;white-space:nowrap}
+#cascbar b{color:#fff}
+#cascbar .scale{display:inline-block;width:110px;height:9px;border-radius:5px;vertical-align:middle;margin:0 7px;background:linear-gradient(90deg,#ef4444,#f59e0b,#16a34a)}
+#cascbar .lo,#cascbar .hi{font-size:10px;color:#8b949e;vertical-align:middle}
 </style></head><body><div id=app>
 <header><h1>Moneyball — Per-Issue Influence Dashboard</h1>
 <span class=sub>533 members · cosponsorship network · per-category stance × competitive influence-maximization</span>
@@ -114,6 +129,7 @@ canvas{touch-action:none}
    </div>
  </div>
  <div id=netwrap><canvas id=cv></canvas><a id=mdlink href=#></a>
+   <div id=cascbar></div>
    <div id=legend></div>
    <div id=engchk>engine —</div>
  </div>
@@ -136,7 +152,7 @@ canvas{touch-action:none}
      </div>
      <h3 style=margin-top:14px>Co-sponsor pathfinder <span style=color:#6e7681;font-weight:400;text-transform:none>· provably-optimal routes</span></h3>
      <div class=scc>
-       <span class=seg id=pmode style=margin-bottom:5px><button data-p=path class=on>Path</button><button data-p=best>Best</button><button data-p=multi>Multi</button><button data-p=budget>Budget</button></span>
+       <span class=seg id=pmode style=margin-bottom:5px><button data-p=path class=on title="Most-reliable recruitment chain from this member to a target vote">Path</button><button data-p=best title="Which pro member should introduce the bill to best reach a target">Best</button><button data-p=multi title="Reach several targets at once from this member (shared recruitment tree)">Multi</button><button data-p=budget title="Spend $X to recruit the widest diversified set of members">Budget</button><button data-p=cascade title="Seed this member as a co-sponsor and watch who is likely to join the cascade">Cascade</button></span>
        <label id=plabel>bill sponsor <b id=seednm style=color:#16a34a></b> → reach target:</label>
        <input id=tgtsearch placeholder="target member…" list=names style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:5px 8px;width:100%;margin:5px 0;font-size:12px">
        <button class=abtn id=pathbtn>Build</button>
@@ -165,6 +181,7 @@ const ELCOL={c:'#f97316',g:'#d946ef',d:'#22d3ee',n:'#3a414b'};   // contest·pri
 const PLAYLBL={c:'contest · primary',g:'contest · general',d:'defend',n:'none'};
 let issue=3, mode='coal', colorBy='issue', hi=-1, sel=-1, budget=1000000, rmode='alloc', flipHi=null, pmodeVal='path';
 let ORD=[], FUND={}, SPREAD=null;
+let cascadeOn=false, cascP=null, cascSeeds=null;   // cascade mode: per-member P(joins) + seed set (feature: explicit cascade, red->green)
 // build issue dropdown
 const isel=document.getElementById('issue');
 DATA.issues.forEach((s,i)=>{let o=document.createElement('option');o.value=i;o.textContent=s;isel.appendChild(o);});
@@ -197,9 +214,19 @@ function receptCol(v){ // pressure_mult 0.50 (resistant, blue) .. 1.0 (grey) .. 
                  :[lerp(139,239,(t-0.455)/0.545),lerp(148,68,(t-0.455)/0.545),lerp(158,68,(t-0.455)/0.545)];
   return `rgb(${c[0]},${c[1]},${c[2]})`;}
 function colOf(i){if(colorBy==='party')return PTCOL[DATA.party[i]];if(colorBy==='gen')return STCOL[DATA.gen[i]];if(colorBy==='elec')return ELCOL[DATA.play[i]];if(colorBy==='recept')return receptCol(DATA.recept?DATA.recept[i]:1);return STCOL[DATA.stance[i][issue]];}
+function cascCol(p){ // cascade join-likelihood: red #ef4444 (won't join) -> amber #f59e0b -> green #16a34a (near-certain)
+  p=Math.max(0,Math.min(1,p));const lerp=(a,b,k)=>Math.round(a+(b-a)*k);
+  return p<0.5?`rgb(${lerp(239,245,p/0.5)},${lerp(68,158,p/0.5)},${lerp(68,11,p/0.5)})`
+              :`rgb(${lerp(245,22,(p-0.5)/0.5)},${lerp(158,163,(p-0.5)/0.5)},${lerp(11,74,(p-0.5)/0.5)})`;}
 function radOf(i){const a=allocOf(i);return 2.0+(a>0?Math.min(Math.sqrt(a)*0.8,7):0);}   // capped so outsized-influence nodes don't swamp smaller ones
 function draw(){
  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);
+ const CASC=cascadeOn&&cascP;                                   // cascade mode: color every node red->green by P(joins)
+ const RT=(!CASC&&route&&route.nodes&&route.nodes.length)?route:null;   // an active pathfinder route lights up its members
+ let focus=-1, fset=null;
+ if(!CASC){ if(RT){fset=new Set(RT.nodes);focus=(RT.seed!=null?RT.seed:RT.nodes[0]);} else focus=(hi>=0?hi:sel); }
+ const dimming=!CASC&&(fset||focus>=0);                          // spotlight/route: fade everyone not in focus
+ const inFoc=i=>fset?fset.has(i):(i===focus);
  if(layout==='cosp'){const _on=id=>{const el=document.getElementById(id);return !el||el.checked;};
  const LYON={c:_on('ly_c'),s:_on('ly_s'),h:_on('ly_h'),e:_on('ly_e')};LYON.m=LYON.c||LYON.s;   // mixed edges show if either parent layer is on
  ctx.lineWidth=0.5;ctx.strokeStyle='rgba(139,148,158,0.10)';ctx.beginPath();   // ties hidden in committee view (they'd crisscross the clusters)
@@ -220,24 +247,35 @@ function draw(){
      ctx.lineWidth=net<0?1.3:0.9;ctx.globalAlpha=Math.min(0.75,0.18+n*0.09);
      ctx.strokeStyle=net>0.15?'#34d399':(net<-0.4?'#ef4444':'#8b949e');ctx.stroke();}   /* red gated at -0.4: gold check 2026-07-04 measured negative-class precision 0.68, all errors over-signed neutrals (0 inversions in 50) */
    ctx.globalAlpha=1;}
+ if(CASC){   // cascade spread structure: light up the ties that carry the cascade, tinted by the weaker endpoint's join-likelihood
+   ctx.lineWidth=1.2;for(let k=0;k<DATA.edges.length;k++){const [a,b]=DATA.edges[k];const pm=Math.min(cascP[a],cascP[b]);if(pm<0.08)continue;
+     const A=toScreen(LX[a],LY[a]),B=toScreen(LX[b],LY[b]);ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);
+     ctx.globalAlpha=Math.min(0.7,0.14+pm*0.7);ctx.strokeStyle=cascCol(pm);ctx.stroke();}
+   ctx.globalAlpha=1;}
+ else if(focus>=0&&!fset&&PE[focus]){   // single-member spotlight: draw its influence ties so its reach is legible over the dimmed field
+   ctx.lineWidth=1.1;for(const v in PE[focus]){const p=PE[focus][v];const A=toScreen(LX[focus],LY[focus]),B=toScreen(LX[+v],LY[+v]);
+     ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.globalAlpha=Math.min(0.9,0.22+p*1.5);ctx.strokeStyle='#58a6ff';ctx.stroke();}
+   ctx.globalAlpha=1;}
  const order=[...Array(N).keys()].sort((p,q)=>allocOf(p)-allocOf(q));
  for(const i of order){const [sx,sy]=toScreen(LX[i],LY[i]);const r=radOf(i)*Math.max(1,cam.s*1);
-   ctx.beginPath();ctx.arc(sx,sy,r,0,7);ctx.fillStyle=colOf(i);
-   let al=(colorBy==='issue'&&DATA.stance[i][issue]==='-')?0.45:(colorBy==='elec'&&DATA.play[i]==='n')?0.3:1;
-   if(r>4.5)al*=0.78;   // big (funded/high-influence) nodes go translucent so smaller ones underneath show through
+   const dim=dimming&&!inFoc(i);                                // fade everyone not in the focused member / route
+   ctx.beginPath();ctx.arc(sx,sy,r,0,7);ctx.fillStyle=CASC?cascCol(cascP[i]):(dim?'#3b424c':colOf(i));
+   let al=CASC?1:(dim?0.16:((colorBy==='issue'&&DATA.stance[i][issue]==='-')?0.45:(colorBy==='elec'&&DATA.play[i]==='n')?0.3:1));
+   if(!CASC&&!dim&&r>4.5)al*=0.78;   // big (funded/high-influence) nodes go translucent so smaller ones underneath show through
    ctx.globalAlpha=al;ctx.fill();ctx.globalAlpha=1;
-   if(allocOf(i)>0){ctx.lineWidth=1.1;ctx.strokeStyle='#fff';ctx.stroke();}
-   if(i===hi||i===sel){ctx.lineWidth=2;ctx.strokeStyle='#fbbf24';ctx.beginPath();ctx.arc(sx,sy,r+3,0,7);ctx.stroke();}
+   if(!CASC&&!dim&&allocOf(i)>0){ctx.lineWidth=1.1;ctx.strokeStyle='#fff';ctx.stroke();}
+   if(CASC&&cascSeeds&&cascSeeds.has(i)){ctx.lineWidth=2.4;ctx.strokeStyle='#fff';ctx.beginPath();ctx.arc(sx,sy,r+3,0,7);ctx.stroke();}   // seed = the source co-sponsor
+   if(!dim&&!RT&&(i===hi||i===sel)){ctx.lineWidth=2;ctx.strokeStyle='#fbbf24';ctx.beginPath();ctx.arc(sx,sy,r+3,0,7);ctx.stroke();}
  }
- if(flipHi){ctx.lineWidth=1.6;ctx.strokeStyle='#a78bfa';for(const i of flipHi){const [sx,sy]=toScreen(LX[i],LY[i]);const r=radOf(i)*Math.max(1,cam.s);ctx.beginPath();ctx.arc(sx,sy,r+3,0,7);ctx.stroke();}}
- if(route&&route.edges){   // recruitment route (chain or shared tree): green edges + dots, green sponsor ring, gold target rings
-   ctx.strokeStyle='#34d399';ctx.lineWidth=2.2;ctx.beginPath();
-   for(const [u,v] of route.edges){const A=toScreen(LX[u],LY[u]),Bp=toScreen(LX[v],LY[v]);ctx.moveTo(A[0],A[1]);ctx.lineTo(Bp[0],Bp[1]);}
-   ctx.stroke();ctx.fillStyle='#34d399';
-   for(const i of route.nodes){const [sx,sy]=toScreen(LX[i],LY[i]);ctx.beginPath();ctx.arc(sx,sy,3.5,0,7);ctx.fill();}
-   const ring=(idx,col)=>{const [sx,sy]=toScreen(LX[idx],LY[idx]);ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();ctx.arc(sx,sy,7,0,7);ctx.stroke();};
-   if(route.seed!=null)ring(route.seed,'#16a34a');for(const t of (route.targets||[]))ring(t,'#fbbf24');
- }
+ if(focus>=0&&!fset){   // redraw the focused member ON TOP so it stands out above the dimmed field: glow + ring + name
+   const [sx,sy]=toScreen(LX[focus],LY[focus]),r=radOf(focus)*Math.max(1,cam.s);
+   ctx.globalAlpha=0.16;ctx.fillStyle='#fbbf24';ctx.beginPath();ctx.arc(sx,sy,r+11,0,7);ctx.fill();ctx.globalAlpha=1;
+   ctx.beginPath();ctx.arc(sx,sy,r,0,7);ctx.fillStyle=colOf(focus);ctx.fill();
+   ctx.lineWidth=2.5;ctx.strokeStyle='#fbbf24';ctx.beginPath();ctx.arc(sx,sy,r+3,0,7);ctx.stroke();
+   ctx.fillStyle='#fff';ctx.font='700 11px system-ui,Segoe UI,sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';
+   ctx.fillText(DATA.name[focus].split(' ').slice(-1)[0],sx,sy-r-6);}
+ if(flipHi&&sel<0){ctx.lineWidth=1.6;ctx.strokeStyle='#a78bfa';for(const i of flipHi){const [sx,sy]=toScreen(LX[i],LY[i]);const r=radOf(i)*Math.max(1,cam.s);ctx.beginPath();ctx.arc(sx,sy,r+3,0,7);ctx.stroke();}}
+ if(RT)drawRoute(RT);   // animated Google-Maps-style path: draws itself in, glows, lights up members, labels start/target
  if(dropped.size){ctx.strokeStyle='#ef4444';ctx.lineWidth=2;for(const i of dropped){const [sx,sy]=toScreen(LX[i],LY[i]);ctx.beginPath();ctx.moveTo(sx-5,sy-5);ctx.lineTo(sx+5,sy+5);ctx.moveTo(sx+5,sy-5);ctx.lineTo(sx-5,sy+5);ctx.stroke();}}
  if(layout==='committee'&&DATA.comms){ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 13px system-ui,Segoe UI,sans-serif';
    for(const c of DATA.comms){const [lx,ly]=toScreen(c[1],c[2]);ctx.lineWidth=3.5;ctx.strokeStyle='rgba(13,17,23,0.85)';ctx.fillStyle='rgba(255,255,255,0.96)';
@@ -251,7 +289,11 @@ cv.addEventListener('mousemove',e=>{
  hi=best;const tip=document.getElementById('tip');
  if(best>=0){const i=best,a=allocOf(i);const pl=PLAYLBL[DATA.play[i]];
   tip.style.display='block';tip.style.left=Math.min(e.clientX+14,innerWidth-260)+'px';tip.style.top=(e.clientY+14)+'px';
-  tip.innerHTML=`<b>${DATA.name[i]}</b> (${DATA.party[i]}) · rank ${DATA.rank[i]} · <b>${DATA.bp[i]}%</b> bipartisan · conf <b>${DATA.cf?DATA.cf[i]:'-'}</b><br>On <b>${DATA.issues[issue]}</b>: <b style=color:${STCOL[DATA.stance[i][issue]]}>${SC[DATA.stance[i][issue]]}</b><br>Overall: ${SC[DATA.gen[i]]} · electoral: <b style=color:${ELCOL[DATA.play[i]]}>${pl}</b><br>${mode==='coal'?'Coalition seed':'Persuasion target'}: <b>${a?(mode==='coal'?'enters @ $'+a+'k':'$'+a+'k'):'—'}</b>`;}
+  const pr=prime(i,issue);   // explicit flip pressure on hover (or join-likelihood while cascading)
+  const flipLine=(cascadeOn&&cascP)?`<br>Joins cascade: <b style=color:${cascCol(cascP[i])}>${Math.round(cascP[i]*100)}%</b>`
+    :pr?(pr.money===null?`<br>Flip: <b style=color:#f59e0b>beyond reach</b> (${flipPct(pr.pressure,pr.theta)}% of the way)`
+        :`<br>Flip pressure: <b>${flipPct(pr.pressure,pr.theta)}%</b> of the way · <b style=color:#fbbf24>${Math.max(0,100-flipPct(pr.pressure,pr.theta))}%</b> to go`):'';
+  tip.innerHTML=`<b>${DATA.name[i]}</b> (${DATA.party[i]}) · rank ${DATA.rank[i]} · <b>${DATA.bp[i]}%</b> bipartisan · conf <b>${DATA.cf?DATA.cf[i]:'-'}</b><br>On <b>${DATA.issues[issue]}</b>: <b style=color:${STCOL[DATA.stance[i][issue]]}>${SC[DATA.stance[i][issue]]}</b>${flipLine}<br>Overall: ${SC[DATA.gen[i]]} · electoral: <b style=color:${ELCOL[DATA.play[i]]}>${pl}</b><br>${mode==='coal'?'Coalition seed':'Persuasion target'}: <b>${a?(mode==='coal'?'enters @ $'+a+'k':'$'+a+'k'):'—'}</b>`;}
  else tip.style.display='none';
  draw();
 });
@@ -321,7 +363,7 @@ function cheapestFlips(i,n){   // batch: cheapest members to tip into co-sponsor
 }
 function sm(n){var lo=n>>>0,hi=(n/4294967296)>>>0,h=Math.imul(lo^hi,2654435761)>>>0;h=Math.imul(h^(h>>>15),2246822519)>>>0;h=Math.imul(h^(h>>>13),3266489917)>>>0;h^=h>>>16;return (h>>>0)/4294967296;}   // deterministic integer hash -> [0,1); plain 32-bit math (keys fit in 2^53)
 const NMb=N;
-function spread(tiers,ind){   // competitive cascade, edge-keyed CRN; SHOCKS (Noble-Turner 2024 going public): the exec cue is
+function spread(tiers,ind,tally){   // competitive cascade, edge-keyed CRN; optional `tally` out-param accumulates per-node pro-activation counts (presentation only; return value + math unchanged, mirror holds). SHOCKS (Noble-Turner 2024 going public): the exec cue is
   // PARTY-ASYMMETRIC and ISSUE-DEPENDENT, not a flat dial.  Per-issue regime mixture EG.sal[issue]: P(rally)=p,
   // P(retreat)=q, P(backfire)=b, estimated from the D-R stance gap z.  Co-partisans of the exec always respond MORE
   // (beta_co > beta_out); on polarized issues (q high) an exec SUPPORT cue makes out-party bystanders COUNTER-mobilize
@@ -340,13 +382,64 @@ function spread(tiers,ind){   // competitive cascade, edge-keyed CRN; SHOCKS (No
     let fr=[];for(const s of A)fr.push(s*2);for(const s of B)fr.push(s*2+1);
     const itb=it*NMb*NMb;
     while(fr.length){const nf=[];for(const e of fr){const u=e>>1,c=(e&1)?2:1;const ub=u*NMb;for(const v in PE[u]){if(col[v]===0&&sm(itb+ub+(+v))<PE[u][v]){col[v]=c;nf.push((+v)*2+(c-1));}}}fr=nf;}
-    for(let k=0;k<N;k++)if(col[k]===1)tot++;
+    for(let k=0;k<N;k++)if(col[k]===1){tot++;if(tally)tally[k]++;}
   }
   return tot/K.MC;
 }
 // ---- multi-objective co-sponsor pathfinder (RELINK-style): grow a recruitment TREE from ONE seed that
 // maximizes co-sponsor spread (recruitability x onward reach) while steering toward a key persuadable target ----
 const DEG=PE.map(o=>Object.keys(o).length);let route=null,dropped=new Set(),execMode='none';
+// ---- route presentation: fit the camera to the whole path, then draw it in like a map route (animated) ----
+let routeAnim=null,routeRAF=null;
+function fitCam(nodes){   // camera that frames all route members with padding (so a path to a far target is never off-screen)
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const i of nodes){x0=Math.min(x0,LX[i]);y0=Math.min(y0,LY[i]);x1=Math.max(x1,LX[i]);y1=Math.max(y1,LY[i]);}
+  const pad=80,bw=Math.max(60,x1-x0),bh=Math.max(60,y1-y0),s=Math.min((W-2*pad)/bw,(H-2*pad)/bh,5.5),cx=(x0+x1)/2,cy=(y0+y1)/2;
+  return {s,tx:W/2-cx*s,ty:H/2-cy*s};
+}
+function startRoute(){   // frame the whole route immediately (robust — always visible), then animate the line drawing itself in
+  if(route&&route.nodes&&route.nodes.length){const f=fitCam(route.nodes);cam.s=f.s;cam.tx=f.tx;cam.ty=f.ty;}
+  routeAnim={t0:performance.now()};
+  if(!routeRAF)routeRAF=requestAnimationFrame(routeTick);
+  draw();
+}
+function routeTick(){   // redraw each frame while a route is shown -> the draw-in + the flowing pulse animate (rAF auto-pauses on hidden tabs)
+  if(!route){routeRAF=null;return;}
+  draw();
+  routeRAF=requestAnimationFrame(routeTick);
+}
+function routeProgress(){if(!routeAnim)return 1;return Math.max(0,Math.min(1,(performance.now()-routeAnim.t0-120)/820));}   // 0..1 line draw-in
+function drawRoute(RT){
+  const nodes=RT.nodes,P=nodes.map(i=>toScreen(LX[i],LY[i])),prog=routeProgress(),GRN='#34d399';
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  if(RT.unreachable){   // no reliable chain -> dashed red connector between the two endpoints, nothing green
+    if(P.length>=2){ctx.setLineDash([7,6]);ctx.strokeStyle='#ef4444';ctx.lineWidth=2;ctx.globalAlpha=0.85;
+      ctx.beginPath();ctx.moveTo(P[0][0],P[0][1]);ctx.lineTo(P[P.length-1][0],P[P.length-1][1]);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;}
+  } else if(RT.ordered&&P.length>1){   // ordered chain -> reveal the polyline sequentially (map-style), with a comet head
+    const seg=[];let tot=0;for(let k=1;k<P.length;k++){const d=Math.hypot(P[k][0]-P[k-1][0],P[k][1]-P[k-1][1]);seg.push(d);tot+=d;}
+    const drawLen=prog*tot;let acc=0,hx=P[0][0],hy=P[0][1];
+    ctx.strokeStyle=GRN;ctx.lineWidth=3.2;ctx.shadowColor=GRN;ctx.shadowBlur=13;ctx.beginPath();ctx.moveTo(P[0][0],P[0][1]);
+    for(let k=1;k<P.length;k++){const d=seg[k-1];if(acc+d<=drawLen){ctx.lineTo(P[k][0],P[k][1]);acc+=d;hx=P[k][0];hy=P[k][1];}
+      else{const f=d>0?(drawLen-acc)/d:0;hx=P[k-1][0]+(P[k][0]-P[k-1][0])*f;hy=P[k-1][1]+(P[k][1]-P[k-1][1])*f;ctx.lineTo(hx,hy);break;}}
+    ctx.stroke();
+    let cum=0;for(let k=0;k<P.length;k++){if(k)cum+=seg[k-1];if(drawLen>=cum-0.5){ctx.fillStyle=GRN;ctx.beginPath();ctx.arc(P[k][0],P[k][1],Math.max(4,radOf(nodes[k])*Math.max(1,cam.s)*0.5),0,7);ctx.fill();}}
+    if(prog<1){ctx.fillStyle='#eafff4';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(hx,hy,5.5,0,7);ctx.fill();}   // comet head while drawing
+    else if(tot>0){const ph=(performance.now()/1500)%1;let pl=ph*tot,a2=0,px=P[0][0],py=P[0][1];   // gentle flowing pulse once drawn
+      for(let k=1;k<P.length;k++){const d=seg[k-1];if(a2+d>=pl){const f=d>0?(pl-a2)/d:0;px=P[k-1][0]+(P[k][0]-P[k-1][0])*f;py=P[k-1][1]+(P[k][1]-P[k-1][1])*f;break;}a2+=d;}
+      ctx.fillStyle='#eafff4';ctx.shadowBlur=16;ctx.beginPath();ctx.arc(px,py,4.5,0,7);ctx.fill();}
+    ctx.shadowBlur=0;
+  }else{   // tree / diversified set -> glow the edges + light the members (fade in)
+    ctx.globalAlpha=prog;ctx.strokeStyle=GRN;ctx.lineWidth=2.6;ctx.shadowColor=GRN;ctx.shadowBlur=11;ctx.beginPath();
+    for(const [u,v] of (RT.edges||[])){const A=toScreen(LX[u],LY[u]),B=toScreen(LX[v],LY[v]);ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);}
+    ctx.stroke();ctx.shadowBlur=0;ctx.globalAlpha=1;
+    for(const i of nodes){const [sx,sy]=toScreen(LX[i],LY[i]);ctx.fillStyle=GRN;ctx.beginPath();ctx.arc(sx,sy,Math.max(4,radOf(i)*Math.max(1,cam.s)*0.5),0,7);ctx.fill();}
+  }
+  const ringLabel=(idx,col,txt)=>{const [sx,sy]=toScreen(LX[idx],LY[idx]),r=radOf(idx)*Math.max(1,cam.s)+6;
+    ctx.strokeStyle=col;ctx.lineWidth=2.6;ctx.shadowColor=col;ctx.shadowBlur=9;ctx.beginPath();ctx.arc(sx,sy,r,0,7);ctx.stroke();ctx.shadowBlur=0;
+    ctx.fillStyle=col;ctx.font='700 11px system-ui,Segoe UI,sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(txt,sx,sy-r-3);};
+  if(RT.seed!=null)ringLabel(RT.seed,'#22c55e',DATA.name[RT.seed].split(' ').pop()+' · start');
+  for(const t of (RT.targets||[]))if(t!==RT.seed)ringLabel(t,'#fbbf24',DATA.name[t].split(' ').pop()+' · target');
+  ctx.restore();
+}
 function distToTarget(t){const d=new Float64Array(N);d[t]=1;const done=new Uint8Array(N);while(true){let u=-1,bu=0;for(let k=0;k<N;k++)if(!done[k]&&d[k]>bu){bu=d[k];u=k;}if(u<0)break;done[u]=1;for(const v in PE[u]){const np=d[u]*PE[u][v];if(np>d[+v])d[+v]=np;}}return d;}   // max-product proximity to target
 // PROVABLY-OPTIMAL recruitment chain: max-product path = the single MOST-RELIABLE chain (Dijkstra on -log p).
 // Reliability = product of per-ask success probs = P(the whole chain holds). This is the "mathematical certainty":
@@ -409,11 +502,40 @@ function cascadeReach(seedArr){   // influence cascade: seed the recruited chain
   for(let u=0;u<N;u++){if(CAMP(tiers[u])==='anti')continue;tiers[u]=S.has(u)?'C':'N';}
   return spread(tiers,EG.ind);
 }
+// ---- CASCADE MODE: per-member P(joins the cascade) from a seed set. Same seeding as cascadeReach()
+// (all non-opposition reset to Neutral except the seeds), same competitive-cascade CRN, but tallies each
+// member's activation frequency over the MC runs -> a probability that drives the red->green node coloring.
+function cascadeProbs(seedArr){
+  const S=new Set(seedArr),tiers=baseTiers(issue);
+  for(let u=0;u<N;u++){if(CAMP(tiers[u])==='anti')continue;tiers[u]=S.has(u)?'C':'N';}
+  const tally=new Float64Array(N);spread(tiers,EG.ind,tally);
+  const p=new Float64Array(N);for(let k=0;k<N;k++)p[k]=tally[k]/K.MC;
+  for(const s of S)p[s]=1;   // seeds are the source -> certain
+  return {p,seeds:S};
+}
+function cascadeRun(){   // seed the cascade from the selected member; recolor the graph + list the likely joiners
+  if(sel<0)return;
+  const cp=cascadeProbs([sel]);cascP=cp.p;cascSeeds=cp.seeds;cascadeOn=true;
+  const bt=baseTiers(issue);let reach=0;const joiners=[];
+  for(let i=0;i<N;i++){if(cascSeeds.has(i))continue;reach+=cascP[i];if(cascP[i]>=0.03&&CAMP(bt[i])==='neu')joiners.push([i,cascP[i]]);}
+  joiners.sort((a,b)=>b[1]-a[1]);
+  const po=document.getElementById('pathout'),last=i=>DATA.name[i].split(' ').slice(-1)[0];
+  po.innerHTML=`<div class=mrow><span>Cascade seed</span><b>${DATA.name[sel]}</b></div>`
+   +`<div class=mrow><span>Expected to join on</span><b class="delta up">~${reach.toFixed(0)} members</b></div>`
+   +`<div class=hint style="margin:6px 0">graph is colored <b style=color:#16a34a>green</b>=likely → <b style=color:#ef4444>red</b>=unlikely to activate · most likely first</div>`
+   +`<div style="font-size:11px;color:#c9d1d9;line-height:1.75">`+(joiners.length?joiners.slice(0,14).map(([i,p])=>`<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${cascCol(p)};margin-right:6px;vertical-align:middle"></span><span class=lnk data-i=${i} style="cursor:pointer;text-decoration:underline">${DATA.name[i]}</span> <span style=color:#8b949e>${Math.round(p*100)}%</span>`).join('<br>'):'<span style=color:#6e7681>no neutral members are meaningfully reachable from this seed.</span>')+(joiners.length>14?`<br><span style=color:#6e7681>+${joiners.length-14} more (see the greener nodes)</span>`:'')+`</div>`;
+  po.querySelectorAll('.lnk').forEach(el=>el.onclick=()=>selectMember(+el.dataset.i));
+  const cb=document.getElementById('cascbar');cb.style.display='block';
+  cb.innerHTML=`⚡ <b>Cascade</b> from <b>${last(sel)}</b> · ~<b>${reach.toFixed(0)}</b> likely to join &nbsp;<span class=lo>unlikely</span><span class=scale></span><span class=hi>likely</span>`;
+  legend();draw();
+}
+function cascadeExit(){if(!cascadeOn)return;cascadeOn=false;cascP=null;cascSeeds=null;const cb=document.getElementById('cascbar');if(cb)cb.style.display='none';legend();draw();}
 // ---- member panel + live scenario ----
 const cusl=document.getElementById('cusl'),cosl=document.getElementById('cosl');
 let baseCache=null,cascStr='';
 function cacheBaseline(v){baseCache=[];for(let i=0;i<DATA.issues.length;i++){const m=flipModel(i,baseTiers(i),EG.cu,EG.ind);baseCache.push({nAsel:m.nA[v],nBsel:m.nB[v],mA:m.mA,mB:m.mB,tgsel:m.tg[v],pfbase:m.pf[v]});}}
 function selectMember(v){
+  cascadeExit();   // selecting a member = inspect it (spotlight + pressure gauge); re-press Cascade to re-seed from here
   sel=v;document.getElementById('tpanel').style.display='none';document.getElementById('mpanel').style.display='block';
   document.getElementById('mname').textContent=DATA.name[v];
   const code=DATA.stance[v][issue],pl=PLAYLBL[DATA.play[v]];
@@ -428,13 +550,27 @@ function selectMember(v){
   const _md=document.getElementById('mdlink');_md.href='cu-member-desk.html?m='+encodeURIComponent(DATA.name[v]);_md.innerHTML='▤ Member details <small>· '+DATA.name[v]+'</small>';_md.style.display='block';
   cacheBaseline(v);renderPrime();runScenario();flyTo(v);draw();
 }
+// visual "pressure to flip" meter: green = pro-pressure already present, hatched red = the gap still needed,
+// gold line at the right edge = the flip line (resistance threshold theta). Makes the ask explicit at a glance.
+function flipPct(pressure,theta){return theta>0?Math.round(Math.max(0,Math.min(100,pressure/theta*100))):0;}
+function pgauge(pressure,theta){
+  const pf=theta>0?Math.max(0,Math.min(100,pressure/theta*100)):0;
+  return `<div class=pgwrap><div class=pgcap><span>Pressure to flip</span><span><b>${Math.round(pf)}%</b> of the way</span></div>`
+   +`<div class=pgauge><div class=pg-fill style="width:${pf.toFixed(1)}%"></div>`
+   +`<div class=pg-need style="left:${pf.toFixed(1)}%;width:${(100-pf).toFixed(1)}%"></div>`
+   +`<div class=pg-line></div></div>`
+   +`<div class=pglab><span style=color:#22c55e>0%</span><span style=color:#fbbf24>100% = flips ◀</span></div></div>`;
+}
 function renderPrime(){
   const r=prime(sel,issue),el=document.getElementById('mprime');
   if(!r){el.innerHTML=`<span style=color:#6e7681>Already pro / committed on this issue — no flip needed.</span>`;return;}
-  if(r.money===null){el.innerHTML=`<b style=color:#f59e0b>A longer journey</b> on ${DATA.issues[issue]}: gap <b>${r.gap.toFixed(2)}</b> is beyond what colleague influence and engagement can close this cycle.`;return;}
+  const pct=flipPct(r.pressure,r.theta),togo=Math.max(0,100-pct);
+  if(r.money===null){el.innerHTML=pgauge(r.pressure,r.theta)
+     +`<div class=pgnote><b style=color:#f59e0b>A longer journey.</b> At <b>${pct}%</b> of the flip line — the remaining <b>${togo}%</b> is beyond what colleague pressure and money can close this cycle.</div>`;return;}
   const rc=r.recruits.slice(0,6).map(u=>`<span class=recruit data-i=${u}>${DATA.name[u].split(' ').slice(-1)[0]}</span>`).join('');
-  el.innerHTML=`Tier <b>${r.tier}</b> · resistance θ <b>${r.theta.toFixed(2)}</b>, current pro-pressure <b>${r.pressure.toFixed(2)}</b> → gap <b>${r.gap.toFixed(2)}</b>.<br>`
-   +`Cheapest tip: <b>$${(r.money/1000).toFixed(0)}k</b> CU money${r.recruits.length?` + activate <b>${r.recruits.length}</b> already-pro / neutral neighbors`:''}.`
+  el.innerHTML=pgauge(r.pressure,r.theta)
+   +`<div class=pgnote>Tier <b>${r.tier}</b> — <b>${pct}%</b> of the way to the flip line, <b>${togo}%</b> to go.<br>`
+   +`Cheapest way across: <b>$${(r.money/1000).toFixed(0)}k</b> CU money${r.recruits.length?` + activate <b>${r.recruits.length}</b> already-pro / neutral neighbor${r.recruits.length>1?'s':''}`:''}.</div>`
    +(rc?`<div style=margin-top:5px>recruit: ${rc}</div>`:'');
   el.querySelectorAll('.recruit').forEach(s=>{s.onmouseenter=()=>{hi=+s.dataset.i;draw();};s.onclick=()=>selectMember(+s.dataset.i);});
 }
@@ -466,16 +602,17 @@ function runScenario(){
 const pedges=p=>p.slice(1).map((v,k)=>[p[k],v]);
 function runPath(){
   const po=document.getElementById('pathout'),tv=document.getElementById('tgtsearch').value.trim(),last=i=>DATA.name[i].split(' ').slice(-1)[0];
+  if(pmodeVal==='cascade'){if(sel<0){po.innerHTML='<span style=color:#f59e0b>Select a member first — they seed the cascade.</span>';return;}cascadeRun();return;}
   if(pmodeVal==='best'){   // who should introduce the bill to reach this target? (paper 04)
     const t=DATA.name.indexOf(tv);
     if(t<0){po.innerHTML='<span style=color:#f59e0b>Type the target vote you need, then Build.</span>';route=null;draw();return;}
     const bs=bestSponsors(t,8);
     if(!bs.length){po.innerHTML='<span style=color:#f59e0b>No pro member can reach this target on this issue.</span>';route=null;draw();return;}
-    const b0=bs[0];route={edges:pedges(b0.path),nodes:b0.path,seed:b0.sponsor,targets:[t]};
+    const b0=bs[0];route={edges:pedges(b0.path),nodes:b0.path,seed:b0.sponsor,targets:[t],ordered:true};
     po.innerHTML=`<div class=mrow><span>Best sponsor → ${last(t)}</span><b>${last(b0.sponsor)}</b></div>`
      +`<div class=mrow><span>Whole chain holds · cost</span><b>${(b0.ch*100).toFixed(0)}% · $${(b0.cost/1000).toFixed(0)}k</b></div>`
      +`<div style=margin-top:6px;font-size:11px;color:#c9d1d9;line-height:1.6>`+bs.map((s,i)=>`<span style=color:#6e7681>${i+1}.</span> <span class=lnk data-i=${s.sponsor} style=cursor:pointer;text-decoration:underline>${DATA.name[s.sponsor]}</span> <span style=color:#8b949e>${(s.ch*100).toFixed(0)}% · $${Math.round(s.cost/1000)}k · ${s.hops}h</span>`).join('<br>')+`</div>`;
-    po.querySelectorAll('.lnk').forEach(el=>el.onclick=()=>selectMember(+el.dataset.i));draw();return;
+    po.querySelectorAll('.lnk').forEach(el=>el.onclick=()=>selectMember(+el.dataset.i));startRoute();return;
   }
   if(pmodeVal==='budget'){   // GCOMB budget-constrained max-coverage recruitment (diversified set)
     const bk=parseFloat(tv)||0;
@@ -485,7 +622,7 @@ function runPath(){
     po.innerHTML=`<div class=mrow><span>Budget · recruits</span><b>$${bk}k · ${br.sel.length}</b></div>`
      +`<div class=mrow><span>Expected reach (coverage)</span><b>~${br.reach.toFixed(0)} members</b></div>`
      +`<div style=margin-top:6px;font-size:11px;color:#c9d1d9;line-height:1.6>`+br.sel.slice(1,13).map((v,k)=>`<span style=color:#6e7681>${k+1}.</span> ${DATA.name[v]}`).join('<br>')+(br.sel.length>13?`<br><span style=color:#6e7681>+${br.sel.length-13} more</span>`:'')+`</div>`;
-    draw();return;
+    startRoute();return;
   }
   if(pmodeVal==='multi'){   // reach several targets from one sponsor (shared tree; paper 06 coalitions)
     const ts=tv.split(',').map(s=>DATA.name.indexOf(s.trim())).filter(i=>i>=0&&i!==sel);
@@ -494,22 +631,29 @@ function runPath(){
     po.innerHTML=`<div class=mrow><span>Reached</span><b class="delta ${mt.reached===mt.n?'up':'down'}">${mt.reached}/${mt.n} targets</b></div>`
      +`<div class=mrow><span>Shared tree · cost</span><b>${mt.tree.size} members · $${(mt.total/1000).toFixed(0)}k</b></div>`
      +`<div style=margin-top:6px;font-size:11px;color:#c9d1d9;line-height:1.6>`+mt.paths.map(p=>`${DATA.name[p.t]} <span style=color:${p.reached?'#16a34a':'#ef4444'}>${p.reached?(chainHold(p.path)*100).toFixed(0)+'% holds':'unreachable'}</span>`).join('<br>')+`</div>`;
-    draw();return;
+    startRoute();return;
   }
   // sponsor -> target
   const t=DATA.name.indexOf(tv);
   if(t<0){po.innerHTML='<span style=color:#f59e0b>Type a target member to build the path toward.</span>';route=null;draw();return;}
   if(t===sel){po.innerHTML='<span style=color:#f59e0b>Sponsor and target are the same member.</span>';route=null;draw();return;}
-  const r=buildPath(sel,t);r.reach=cascadeReach(r.path);route={edges:pedges(r.path),nodes:r.path,seed:sel,targets:[t]};
+  const r=buildPath(sel,t);
+  if(!r.reached){   // greedy max-product walk never lands on the target -> don't draw the meaningless wander; show it honestly
+    route={nodes:[sel,t],edges:[],seed:sel,targets:[t],ordered:false,unreachable:true};
+    po.innerHTML=`<div class=mrow><span>Path to ${last(t)}</span><b class="delta down">no reliable route</b></div>`
+     +`<div class=hint style=margin-top:6px>No high-probability cosponsorship chain connects <b>${last(sel)}</b> to <b>${last(t)}</b> on this issue. Try <b>Best</b> to find a sponsor who can reach them, or pick a closer target.</div>`;
+    startRoute();return;
+  }
+  r.reach=cascadeReach(r.path);route={edges:pedges(r.path),nodes:r.path,seed:sel,targets:[t],ordered:true};
   po.innerHTML=`<div class=mrow><span>Path · <b>${r.path.length}</b> members</span><b class="delta ${r.reached?'up':'down'}">${r.reached?'reaches target':'unreachable'}</b></div>`
    +`<div class=mrow><span>Whole chain holds · weakest ask</span><b>${(chainHold(r.path)*100).toFixed(0)}% · ${(chainWeak(r.path)*100).toFixed(0)}%</b></div>`
    +`<div class=mrow><span>Direct recruitment</span><b>$${(r.total/1000).toFixed(0)}k</b></div>`
    +`<div class=mrow><span>Influence cascade</span><b>~${r.reach.toFixed(0)} co-sponsors</b></div>`
    +`<div style=margin-top:7px;font-size:11px;color:#c9d1d9;line-height:1.65>`
    +r.path.map((v,k)=>`<span style=color:#6e7681>${k+1}.</span> ${DATA.name[v]}`+(k===0?' <span style=color:#16a34a>· sponsor</span>':` <span style=color:#8b949e>+$${Math.round(r.hops[k-1].cost/1000)}k · ${(activeP(r.hops[k-1].p)*100).toFixed(0)}% ask</span>`)+(v===t?' <span style=color:#fbbf24>· target</span>':'')).join('<br>')+`</div>`;
-  draw();
+  startRoute();
 }
-function backToTargets(){sel=-1;route=null;document.getElementById('mpanel').style.display='none';document.getElementById('tpanel').style.display='block';document.getElementById('mdlink').style.display='none';draw();}
+function backToTargets(){cascadeExit();sel=-1;route=null;document.getElementById('mpanel').style.display='none';document.getElementById('tpanel').style.display='block';document.getElementById('mdlink').style.display='none';draw();}
 function applyShocks(){
   const ds=document.getElementById('dropsearch').value.trim();
   dropped=new Set(ds?ds.split(',').map(x=>DATA.name.indexOf(x.trim())).filter(i=>i>=0):[]);
@@ -520,6 +664,7 @@ function applyShocks(){
    if(EG.adv&&EG.adv[issue])parts.push('CU advisory: <b>'+EG.adv[issue]+'</b>');}
   document.getElementById('shockout').innerHTML=parts.length?('shock active \u2014 '+parts.join(' \u00b7 ')):'';
   if(sel>=0&&document.getElementById('tgtsearch').value.trim())runPath();
+  if(cascadeOn&&sel>=0)cascadeRun();   // keep the cascade map live under dropouts / exec cue
   draw();
 }
 function updateEngChk(){const r=DATA.engine.refflip[issue];if(!r){document.getElementById('engchk').innerHTML='engine — aggregate layer';return;}const t=flipModel(issue,baseTiers(issue),EG.cu,EG.ind).total,ok=Math.abs(t-r)<=Math.max(0.2,0.03*r);document.getElementById('engchk').innerHTML=`engine ${ok?'✓':'⚠'} flip ${t.toFixed(2)} = py ${r.toFixed(2)}`;}
@@ -562,7 +707,7 @@ function refresh(){
      `<div class=tgt data-i=${i}><span><span class=pill style=background:${STCOL[DATA.stance[i][issue]]}></span>${DATA.name[i]}</span><small>${mode==='coal'&&useSlider?'@$'+v+'k':'$'+v+'k'}</small></div>`).join('')||'<div class=hint>no funded targets</div>';
  }
  document.querySelectorAll('.tgt').forEach(el=>el.onclick=()=>selectMember(+el.dataset.i));
- if(sel>=0){cacheBaseline(sel);renderPrime();runScenario();}   // keep member panel in sync with issue/mode
+ if(sel>=0){cacheBaseline(sel);renderPrime();runScenario();if(cascadeOn)cascadeRun();}   // keep member panel in sync with issue/mode
  updateEngChk();
  draw();
 }
@@ -578,6 +723,10 @@ function optCard(){
 }
 // legend
 function legend(){
+ if(cascadeOn){document.getElementById('legend').innerHTML=
+   '<span style="color:#e6edf3;font-weight:600">Likelihood to join the cascade</span><br>'
+   +[[0,"won't"],[0.35,'maybe'],[0.65,'likely'],[1,'near-certain']].map(([v,lb])=>`<span><span class=pill style="background:${cascCol(v)}"></span>${lb}</span>`).join('')
+   +`<br><span style=color:#6e7681>P(activates) across ${K.MC} competitive-cascade runs · ○ white ring = seed</span>`;return;}
  let items;
  if(colorBy==='recept')items=[[0.55,'Independent-minded'],[0.8,''],[1.0,'Neutral'],[1.3,''],[1.55,'Highly receptive']].map(([v,lb])=>`<span><span class=pill style=background:${receptCol(v)}></span>${lb}</span>`).join('')+'<span style=color:#6e7681> · behavioral receptivity (cosponsorship, participation, floor dynamics × electoral incentive × outlook)</span>';
  else if(colorBy==='elec')items=[['c','Contest · primary'],['g','Contest · general'],['d','Defend'],['n','No play']].map(([k,lb])=>`<span><span class=pill style=background:${ELCOL[k]}></span>${lb}</span>`).join('');
@@ -589,7 +738,7 @@ function legend(){
 isel.onchange=()=>{issue=+isel.value;slider.value=100;refresh();};
 slider.oninput=()=>refresh();
 document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#mode button').forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;refresh();});
-document.querySelectorAll('#color button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#color button').forEach(x=>x.classList.remove('on'));b.classList.add('on');colorBy=b.dataset.c;legend();draw();});
+document.querySelectorAll('#color button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#color button').forEach(x=>x.classList.remove('on'));b.classList.add('on');colorBy=b.dataset.c;cascadeExit();legend();draw();});
 document.querySelectorAll('#lybar input').forEach(cb=>cb.onchange=()=>draw());   // layer toggles redraw only
 // LAYOUT toggle: animate node positions between the cosponsorship layout (DATA.x/y) and the committee-cluster
 // layout (DATA.cx/cy, Porter committee-interlock anchors). Members glide into committee clusters.
@@ -612,11 +761,15 @@ document.querySelectorAll('#execseg button').forEach(b=>b.onclick=()=>{document.
 document.getElementById('backbtn').onclick=backToTargets;
 document.querySelectorAll('#pmode button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#pmode button').forEach(x=>x.classList.remove('on'));b.classList.add('on');pmodeVal=b.dataset.p;
   const lab=document.getElementById('plabel'),inp=document.getElementById('tgtsearch');
+  inp.style.display='';
   if(pmodeVal==='best'){lab.textContent='find the best sponsor to reach:';inp.placeholder='target vote…';}
   else if(pmodeVal==='multi'){lab.textContent='reach targets (from this member):';inp.placeholder='target1, target2, …';}
   else if(pmodeVal==='budget'){lab.textContent='budget $k from this member (diversified recruits):';inp.placeholder='e.g. 300';}
+  else if(pmodeVal==='cascade'){lab.innerHTML='cascade from <b id=seednm style=color:#16a34a></b> — colors the map by who joins on:';inp.style.display='none';if(sel>=0)document.getElementById('seednm').textContent=DATA.name[sel].split(' ').slice(-1)[0];}
   else{lab.innerHTML='bill sponsor <b id=seednm style=color:#16a34a></b> → reach target:';inp.placeholder='target member…';if(sel>=0)document.getElementById('seednm').textContent=DATA.name[sel].split(' ').slice(-1)[0];}
-  document.getElementById('pathout').innerHTML='';route=null;draw();});
+  document.getElementById('pathout').innerHTML='';route=null;
+  if(pmodeVal==='cascade'){if(sel>=0)cascadeRun();else{document.getElementById('pathout').innerHTML='<span style=color:#f59e0b>Select a member first — they seed the cascade.</span>';draw();}}
+  else{cascadeExit();draw();}});
 addEventListener('resize',resize);
 legend();optCard();resize();refresh();
 </script></body></html>
