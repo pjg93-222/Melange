@@ -10,7 +10,7 @@ genre-restricted featz (BIG5_SOURCES artifacts) scored with the REFIT weights; p
 same-trait cross-genre r > mean cross-trait within-genre |r| (the test the parent family failed).
 Bars (locked): held-out r  A >= +0.12, C >= +0.11, O >= +0.18, E >= +0.29;  AND family MTMM pass.
 On miss: current v2 stands; the failure is documented in big5_methods.md."""
-import json, math, sqlite3, collections
+import json, math, sqlite3, collections, sys
 import numpy as np
 from sklearn.linear_model import Ridge, LinearRegression
 from sklearn.model_selection import KFold, GridSearchCV
@@ -101,3 +101,51 @@ for t, h in barhits: print('  BAR %s held-out >= %+.2f: %s (%+.3f)' % (t, BARS[t
 print('  BAR family MTMM (same > cross): %s' % ('CLEAR' if mt_same > mt_cross else 'MISS'))
 print('B5 VERDICT: %s' % ('PASS — promote genre-residualized refit'
                           if ok else 'MISS — current v2 stands; failure documented (lexical signal may be inseparable from genre)'))
+
+# ---- ROUND 2 (--r2): composed family per big5_round2_prereg.md @54d0f7c — ONE look ----
+if '--r2' in sys.argv:
+    print('\n===== ROUND 2: composed family (resid A/C/O + v2 E) =====')
+    BT2 = json.load(open(B + r'\big5_v2.json'))['traits']
+    comp = {}   # member -> {A,C,O from residualized refit; E from v2}
+    for tr in ('A', 'C', 'O'):
+        pred = models[tr].predict(Xr)
+        mu, sd = float(pred.mean()), float(pred.std()) or 1.0
+        for i, m in enumerate(ms_all): comp.setdefault(m, {})[tr] = (pred[i] - mu) / sd
+    for m in ms_all:
+        if m in BT2: comp[m]['E'] = BT2[m].get('E', 0.0)
+    common = [m for m in ms_all if m in comp and 'E' in comp[m]]
+    trs4 = ['A', 'C', 'E', 'O']
+    Zc = np.array([[comp[m][t] for t in trs4] for m in common])
+    # R2-1 discriminant
+    offs = [abs(float(np.corrcoef(Zc[:, i], Zc[:, j])[0, 1])) for i in range(4) for j in range(i + 1, 4)]
+    disc = sum(offs) / len(offs)
+    # R2-2 known-groups (O-, C+, E-, A-)
+    import moneyball_core as MC
+    P = MC.party()
+    EXP = {'O': -1, 'C': +1, 'E': -1, 'A': -1}
+    kg = 0
+    for ti, t in enumerate(trs4):
+        rs = [Zc[i][ti] for i, m in enumerate(common) if P.get(m) == 'R']
+        ds = [Zc[i][ti] for i, m in enumerate(common) if P.get(m) == 'D']
+        if rs and ds and ((sum(rs)/len(rs) - sum(ds)/len(ds)) > 0) == (EXP[t] > 0): kg += 1
+    # R2-3 A/C/O-subfamily MTMM with refit weights on per-genre featz
+    same, cross = [], []
+    aco = ['A', 'C', 'O']
+    for g1, g2 in pairs:
+        cm = [m for m in ms_all if m in GEN[g1] and m in GEN[g2]]
+        for t in aco:
+            a = np.array([gscore(t, g1, m) for m in cm]); b = np.array([gscore(t, g2, m) for m in cm])
+            if a.std() > 0 and b.std() > 0: same.append(float(np.corrcoef(a, b)[0, 1]))
+    for gsrc in GEN:
+        cm = [m for m in ms_all if m in GEN[gsrc]]
+        for i, t1 in enumerate(aco):
+            for t2 in aco[i + 1:]:
+                a = np.array([gscore(t1, gsrc, m) for m in cm]); b = np.array([gscore(t2, gsrc, m) for m in cm])
+                if a.std() > 0 and b.std() > 0: cross.append(abs(float(np.corrcoef(a, b)[0, 1])))
+    mts, mtc = float(np.mean(same)), float(np.mean(cross))
+    bars = [('R2-1 discriminant <= 0.30', disc <= 0.30, '%.3f (worst pair check: %s)' % (disc, max(offs))),
+            ('R2-2 known-groups >= 3/4', kg >= 3, '%d/4' % kg),
+            ('R2-3 ACO MTMM same > cross', mts > mtc, 'same %.3f vs cross %.3f' % (mts, mtc))]
+    ok = all(b[1] for b in bars)
+    for nm, hit, det in bars: print('  BAR %-32s %s (%s)' % (nm, 'CLEAR' if hit else 'MISS', det))
+    print('R2 VERDICT: %s' % ('PASS — promote composed family' if ok else 'MISS — v2 stands, documented'))

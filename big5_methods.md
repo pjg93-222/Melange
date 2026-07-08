@@ -178,3 +178,13 @@ the weight is the pilot's observed signal ratio, documented, not tuned against o
 member carries c_basis: 'interview-weighted' (294 members) or 'crec-only' (215). The desk's C wedge
 was already un-collapsed for all axes by the 2026-07-06 user rule, which satisfies the display half
 of the consequence.
+
+## 8. Round 2 (blue composed family) — MISS; v2 stands (2026-07-07, prereg @54d0f7c)
+One look at the composed configuration (residualized A/C/O + v2-E). R2-2 known-groups CLEARED
+(4/4) but R2-1 discriminant MISSED (0.402 vs bar 0.30; worst pair 0.90) and R2-3 A/C/O-subfamily
+MTMM MISSED (same-trait cross-genre .113 vs cross-trait within-genre .591). Reading: ridge fits
+of three correlated behavioral targets on the same 31 residualized features yield one
+behavioral-proxy factor wearing three trait labels, not three genre-stable traits. The
+lexical family's honest ceiling stands: per-trait criterion validity as a display-layer second
+opinion; multi-trait genre-stable structure is beyond it. v2 unchanged. Evaluator:
+fec/b5_residual_eval.py --r2.
