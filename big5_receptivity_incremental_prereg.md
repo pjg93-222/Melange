@@ -132,3 +132,60 @@ essentially no member has a reliably-sampled multi-window press trajectory.
   movement criterion (CU-relevant roll-call switches / cosponsorship timing). This press-movement
   screen is too noisy (n=1 survives reliability filtering) and too confounded (breadth/volume) to
   license any engine change. No engine change ships from this result.
+
+---
+## SUCCESSOR-CRITERION DESIGN (2026-07-08, ultracode workflow) — NOT YET LOCKED. Awaits user ratification.
+Two independent findings reframe the confirmatory path:
+1. **CMC precedent (big5_methods §13) is decisive and was re-reproduced.** Pink × behavioral-
+   dispositions (the one clean non-text method) same-trait diagonal mean{A,E,O} = +0.064 (< the
+   +0.12 bar), MTMM fails; only A×cooperation ~+0.14 survives — and the susc `.40` slot already
+   uses **behavioral** cooperation_z, so text-A there would be a downgrade. ⇒ Making the *text*
+   psychology (lexical-N, Pink-N, persona) more load-bearing is **affirmatively unsupported**, not
+   merely undemonstrated. Recommendation to the user: extend the §13 ruling to explicitly cover the
+   N-swap, edge_mult, and seed_prob routes (forecloses re-exploration).
+2. **A materially better MOVEMENT criterion exists in-repo, text-uncontaminated.** `votes/HS117|118|
+   119_members.csv` carry per-congress **Nokken-Poole** ideal points. DW-NOMINATE dim1 is frozen
+   (common space, |Δ|=0 for all 391 three-window members) but Nokken-Poole dim1/dim2 are
+   re-estimated per congress and drift (|Δdim1| median 0.065, p90 0.175; dim2 more). Because drift
+   derives from **roll-call votes** and the trait candidates derive from **text**, they are
+   generatively independent — the contamination + coverage/volume confound that sank the press
+   screen is absent.
+
+### TIER-1 gate (Nokken-Poole ideological-drift) — DESIGN, ready to lock on ratification
+- **Criterion Y** = Euclidean per-member drift of Nokken-Poole (dim1,dim2) across 117→119 (or
+  adjacent-pair for 2-window members). **Analyzable n = 418** (≥2 windows ∩ dispositions ∩ both N),
+  **99% nonzero** (no reliability collapse). MDE r = 0.121 (n=418) / 0.134 (n=345 at ≥3 windows);
+  permutation floor 95th ≈ 0.098 — **inside** the Funder-Ozer elite band (|r|~.10–.25), where the
+  press screen's 0.155 floor sat at its ceiling. ⇒ 2.6× the press-screen power, clean source.
+- **Predictors/controls/statistic/discipline**: identical to the press gate above (candidates
+  lexical-N, Pink-N, persona; controls coop/dil/dom; semipartial; one-tailed positive [more
+  susceptible ⇒ more drift]; permutation null 3000 shuffles; one look; bars locked pre-look).
+- **Join**: use `bioguide_id` (already in the CSVs) → engine panel, lifting the join from 354
+  (name+initial) to the full ~418.
+- **RATIFICATION REQUIRED before this is locked/run** (user's domain):
+  (a) Is **general ideological drift an acceptable proxy** for CU-lobbying susceptibility? Tier-1 is
+      honestly CU-*agnostic*. If not, hold for Tier-2.
+  (b) Confirm the control set (coop/dil/dom) and whether `nominate_extremity` enters as a covariate
+      (note: diligence_z = roll-call participation shares a source with the Nokken outcome — this is
+      fine for a *control* absorbing variance; the *candidates* stay text-independent, which is the
+      load-bearing property).
+  (c) Lock the effect bands (e.g. semipartial ≥ +0.15 PASS / +0.10 directional / |·|<0.10 null).
+- **Expectation (honest)**: given the CMC refutation, a MISS is the likely outcome even here; the
+  value of running it is a *powered, clean* verdict rather than a noise-limited one.
+
+### TIER-2 gate (CU-specific vote-SWITCH) — the ideal, needs acquisition
+Position change (pro→anti / anti→pro) on the **63 CU bills** in `cu_bill_directions.json`, using the
+user's pre-set directions. Requires acquiring the member×roll-call matrix + roll-call dates
+(Voteview HSall_votes / Congress API) keyed by icpsr/bioguide — **not in-repo**. Likely smaller n
+than Tier-1 but each observation is a hard CU-relevant binary; run as a confirmatory refinement, do
+not gate the unblock on it.
+
+### AVENUE 3 (persona-approach → conversion multiplier) — DESIGN-ONLY, NO-BUILD
+`optimize.py`'s only lever is dollars/member (`cu[m]`, `INC`, `PMAX`) → `pflip(...,pressure_mult)`;
+there is **no approach/framing decision variable**, and persona is already inside `pressure_mult`
+via susc (PW=0.30) as a *susceptibility* dial. A match→conversion coefficient β cannot be calibrated
+(no legislator matched-vs-unmatched outcome exists; the r~.17 evidence is voters/consumers seeing
+ads — double transfer risk: population + channel). Minimal viable form if ever pursued:
+`conv_mult(m,approach)=1+β·match(m,approach)`, β pre-registered small + transfer-discounted, env
+kill-switch default OFF, and a **hard gate: ships only after a legislator-level matched/unmatched
+criterion exists and passes a pre-registered validation.** Absent that criterion, design-only.
