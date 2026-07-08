@@ -18,14 +18,25 @@ TARGET = {'A': 'cooperation_z', 'C': 'diligence_z', 'E': 'visibility_z', 'O': 'b
 ES_FEATS = ['F0semitoneFrom27.5Hz_sma3nz_stddevNorm', 'jitterLocal_sma3nz_amean',
             'shimmerLocaldB_sma3nz_amean', 'loudness_sma3_stddevNorm']
 ALPHAS = [1, 3, 10, 30, 100, 300, 1000]
+SEEDS = [7, 17, 29, 43, 61]   # repeated 5-fold CV: at n~40/p=88 a single split is high-variance
+                              # (audit smoke: random features cleared +0.15 on one seed) -> average to stabilize.
 
-def heldout_r(X, y):
+def heldout_r(X, y, seeds=SEEDS):
     rs = []
-    for tr, te in KFold(5, shuffle=True, random_state=7).split(X):
-        g = GridSearchCV(Ridge(), {'alpha': ALPHAS}, cv=3, scoring='neg_mean_squared_error')
-        g.fit(X[tr], y[tr]); p = g.predict(X[te])
-        rs.append(0.0 if p.std() < 1e-9 else float(np.corrcoef(p, y[te])[0, 1]))
+    for s in seeds:
+        for tr, te in KFold(5, shuffle=True, random_state=s).split(X):
+            g = GridSearchCV(Ridge(), {'alpha': ALPHAS}, cv=3, scoring='neg_mean_squared_error')
+            g.fit(X[tr], y[tr]); p = g.predict(X[te])
+            rs.append(0.0 if p.std() < 1e-9 else float(np.corrcoef(p, y[te])[0, 1]))
     return float(np.mean(rs))
+
+def perm_null(X, y, K=40):
+    """95th-pct held-out r under label shuffling, using the SAME repeated-CV estimator as the observed
+    statistic = the fair noise floor at this n/p. Printed next to the primary bar as a diagnostic;
+    does NOT change the locked bar (the P6 re-derivation is the gate)."""
+    rng = np.random.RandomState(0)
+    null = [heldout_r(X, rng.permutation(y)) for _ in range(K)]
+    return float(np.percentile(null, 95))
 
 def cv_pred(X, y):
     g = GridSearchCV(Ridge(), {'alpha': ALPHAS}, cv=3, scoring='neg_mean_squared_error')
@@ -42,29 +53,34 @@ def run(cache):
     print('=== AUDIO PILOT — ONE LOOK (n=%d members) ===' % len(members))
 
     # ---- BAR 1: incremental validity on E ----
-    def yvec(tr): return np.array([BD.get(m, {}).get(TARGET[tr]) for m in members], dtype=float)
-    def with_text(tr):
-        te = np.array([[ (V2.get(m, {}) or {}).get(tr, 0.0) ] for m in members], dtype=float)
-        return te
-    res = {}
+    def yvec(tr): return np.array([(BD.get(m, {}) or {}).get(TARGET[tr]) for m in members], dtype=float)
+    def textcol(tr): return np.array([(V2[m].get(tr) if m in V2 else None) for m in members], dtype=float)
+    def zc(v): s = v.std(ddof=1); return (v - v.mean()) / (s if s > 1e-9 else 1.0)
+    res = {}                                              # audio-alone held-out r per trait (pilot slice)
     for tr in ('E', 'A', 'C', 'O'):
         y = yvec(tr); ok = ~np.isnan(y)
-        if ok.sum() < 20: res[tr] = None; continue
-        res[tr] = heldout_r(A[ok], y[ok])
-    yE = yvec('E'); ok = ~np.isnan(yE)
-    tE = with_text('E')
-    text_only = heldout_r(tE[ok], yE[ok])
-    fused = heldout_r(np.hstack([tE, A])[ok], yE[ok])
+        res[tr] = heldout_r(A[ok], y[ok]) if ok.sum() >= 20 else None
     audio_E = res['E']
+    yE = yvec('E'); okE = ~np.isnan(yE); tE = textcol('E')
+    nullE = perm_null(A[okE], yE[okE]) if audio_E is not None else None   # noise floor at this n/p
+    okF = okE & ~np.isnan(tE)                             # audio + text + E-criterion: the fair incremental set
+    if okF.sum() >= 20:
+        tz = zc(tE[okF])[:, None]                         # z the text col -> commensurate w/ z-audio (fair ridge penalty)
+        text_only = heldout_r(tz, yE[okF]); fused = heldout_r(np.hstack([tz, A[okF]]), yE[okF])
+    else:
+        text_only = fused = float('nan')
     b1a = (audio_E is not None and audio_E >= 0.15)
     b1b = (fused - text_only) >= 0.03
+    above = (audio_E is not None and nullE is not None and audio_E > nullE)
     print('BAR 1 incremental validity (E vs visibility_z):')
-    print('  audio-alone E held-out r = %+.3f  (bar >= +0.15) -> %s' % (audio_E or 0, 'CLEAR' if b1a else 'MISS'))
-    print('  text-alone E %+.3f | text+audio fused %+.3f | delta %+.3f  (bar >= +0.03) -> %s'
-          % (text_only, fused, fused - text_only, 'CLEAR' if b1b else 'MISS'))
-    print('  secondary (no bar): audio-alone A%+.3f C%+.3f O%+.3f'
+    print('  audio-alone E held-out r = %+.3f  (n=%d, bar >= +0.15; perm-null 95%%=%+.3f -> %s) -> %s'
+          % (audio_E or 0, int(okE.sum()), nullE or 0, 'above noise' if above else 'WITHIN NOISE',
+             'CLEAR' if b1a else 'MISS'))
+    print('  text-alone E %+.3f | text+audio fused %+.3f | delta %+.3f  (n=%d, bar >= +0.03) -> %s'
+          % (text_only, fused, fused - text_only, int(okF.sum()), 'CLEAR' if b1b else 'MISS'))
+    print('  secondary audio-alone (no bar): A%+.3f C%+.3f O%+.3f'
           % (res.get('A') or 0, res.get('C') or 0, res.get('O') or 0))
-    print('  (dimensionality caveat: fused adds 88 features vs 1; nested-CV ridge shrinkage guards it)')
+    print('  (n~40 vs 88 eGeMAPS features: ridge alpha grid to 1000 regularizes; text col z-scored for fair fusion)')
     bar1 = b1a and b1b
 
     # ---- BAR 2: within-audio A-ES halo ----
@@ -85,28 +101,17 @@ def run(cache):
     verdict = bar1 and bar2
     print('\nAUDIO PILOT VERDICT: %s' % ('PASS — adversarially re-derive before recording (P6 doctrine)'
                                          if verdict else 'MISS — text terminus stands; documented, no number moves'))
-    return {'n': len(members), 'audio_E': audio_E, 'text_E': text_only, 'fused_E': fused,
+    return {'n': len(members), 'audio_E': audio_E, 'perm_null_E': nullE, 'text_E': text_only, 'fused_E': fused,
             'audio_ACO': {t: res.get(t) for t in ('A', 'C', 'O')}, 'a_es': aes, 'bar1': bar1, 'bar2': bar2, 'pass': verdict}
 
 if __name__ == '__main__':
     if '--synth' in sys.argv:
         rng = np.random.RandomState(0); n = 60
-        names = ['f%d' % i for i in range(88)]
-        for j, f in enumerate(ES_FEATS): names[j] = f
-        Z = {'m%d' % i: rng.randn(88).round(5).tolist() for i in range(n)}
-        cache = {'members': list(Z), 'feature_names': names, 'z': Z}
-        # monkeypatch behavioral/text loads via a synthetic in-memory shim
-        import types
-        _orig = json.load
-        class _F:  # not used; run() reads files — so synth writes nothing, just proves import/exec on real-shaped random data is skipped
-            pass
-        print('--synth: exercising heldout_r / cv_pred / bar logic on random features')
-        Aarr = np.array([Z[m] for m in cache['members']])
-        y = rng.randn(len(cache['members']))
-        print('  heldout_r(random) = %+.3f (expect ~0)' % heldout_r(Aarr, y))
-        es = -np.array([[Z[m][i] for i in range(4)] for m in cache['members']]).mean(1)
-        ap = cv_pred(Aarr, y)
-        print('  A-ES(random) = %.3f (expect ~0)' % abs(np.corrcoef(ap, es)[0, 1]))
+        Aarr = rng.randn(n, 88); y = rng.randn(n)
+        print('--synth: exercising heldout_r / cv_pred / bar helpers on random features (expect ~0)')
+        print('  heldout_r(random) = %+.3f' % heldout_r(Aarr, y))
+        es = -Aarr[:, :4].mean(1); ap = cv_pred(Aarr, y)
+        print('  A-ES(random) = %.3f' % abs(np.corrcoef(ap, es)[0, 1]))
         print('  math + bar helpers execute cleanly.')
     else:
         cache = json.load(open(B + r'\b5_audio_cache.json', encoding='utf-8'))

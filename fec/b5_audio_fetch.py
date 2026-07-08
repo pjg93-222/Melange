@@ -10,7 +10,7 @@ Modes:
   --eligible [N]   rank pilot-eligible members (have Pink+Blue+behavioral) by visibility (proxy for
                    public-audio availability); print top N (default 40) + seed b5_audio_sources.json
   (default)        fetch audio for every member with URLs in b5_audio_sources.json"""
-import os, json, subprocess, glob
+import os, json, subprocess
 sys = _s; sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B = MB_ROOT
 ADIR = os.path.join(B, 'audio_pilot'); LOG = os.path.join(B, 'b5_audio_fetch_log.json')

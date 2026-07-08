@@ -18,7 +18,10 @@ def clip_seconds(path):
         with contextlib.closing(wave.open(path, 'rb')) as w:
             return w.getnframes() / float(w.getframerate() or 1)
     except Exception:
-        return 0.0
+        try:                                            # non-PCM wav -> soundfile handles more codecs
+            import soundfile as sf; i = sf.info(path); return i.frames / float(i.samplerate or 1)
+        except Exception:
+            return 0.0
 
 def build(members_dirs):
     import opensmile
@@ -46,7 +49,9 @@ def build(members_dirs):
     if not feats:
         print('no members cleared the audio minimum — nothing written'); return
     # z-within-source (single pilot source): standardize each functional across members
-    M = np.array([feats[m] for m in feats]); mu = M.mean(0); sd = M.std(0, ddof=1); sd[sd == 0] = 1
+    M = np.array([feats[m] for m in feats]); mu = M.mean(0)
+    sd = M.std(0, ddof=1) if len(feats) > 1 else np.ones(M.shape[1])
+    sd = np.where(sd < 1e-12, 1.0, sd)                  # guard: <2 members or zero-variance feature -> no NaN
     Z = {m: ((feats[m] - mu) / sd).round(5).tolist() for m in feats}
     from moneyball_core import dump_atomic
     dump_atomic({'members': sorted(feats), 'feature_names': names,

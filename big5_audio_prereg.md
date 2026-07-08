@@ -79,3 +79,28 @@ fetch + storage); eGeMAPS extraction (openSMILE) and the ridge/MTMM math are lig
 download is unavailable in-session, the pipeline + this prereg are handed off to run as a background/
 overnight job (the established collector pattern), with the ONE look taken only after the full slice's
 features exist. The build spike (one member, end-to-end) gates the full run.
+
+## Addendum 1 (2026-07-08, external confirmation — NO bar changed, no outcome seen)
+User-provided references CONFIRM the design: Rubio et al. 2024 Sensors (voice->Big5 r.3-.5;
+Extraversion the most voice-externalized trait self-report .47/expert .48 — validates the E-primary
+endpoint; openSMILE; observer-criterion; O weakest); Marrero et al. 2022 Acta Psych (vocal 6.24% var
+> text-LIWC 3.13%, joint 10.67% SUPER-ADDITIVE — audio complements text; A carried MORE by voice than
+text = halo-relevant; E/C/N best, O worst); Simchon et al. 2024 PNAS Nexus (personality-MATCHED
+persuasion works r~.17 — the case for making psychology load-bearing IF the pilot proves fruitful).
+Citations only; every bar stands.
+
+## Addendum 2 (2026-07-08, code audit + integration smoke — NO bar changed)
+Self-audit (7 fixes: dead code, scale-unfair fused ridge -> z the text col, 0-imputed missing text ->
+restrict to text-having members, z-score NaN <2 members, non-PCM wav duration, dead imports) + a full
+`run()` integration smoke on the 40 real members with RANDOM audio. **Pre-look robustness fixes to how
+the LOCKED quantity is measured (not the bar): (1) repeated 5-seed CV** (a single split at n~40 is
+high-variance — random cleared +0.15 on one seed; repeated CV -> ~0); **(2) a permutation noise-floor
+diagnostic** printed beside the primary bar.
+**POWER FINDING (material): at N=40 with 88 eGeMAPS features the fair permutation noise floor (95th
+pct, repeated-CV) = r +0.267 — ABOVE the locked audio-alone bar (+0.15), and the expected real effect
+(Marrero/Rubio r~.25-.33) sits AT that floor.** The pilot as pre-registered is UNDERPOWERED: a genuine
+signal could not be separated from chance, and noise can clear +0.15. **RECOMMENDED pre-look amendment
+(pending user ratification; acquisition has NOT run): (A) PCA-reduce eGeMAPS 88 -> ~10-15 components
+before ridge (standard for n<<p; sharply lowers the floor so +0.15 is meaningful at N=40), and/or
+(B) raise N to ~90+.** The three BARS are unchanged; only the design's dimensionality/N is under review.
+Until ratified, the perm-null diagnostic + the P6 re-derivation guard against a within-noise false pass.
