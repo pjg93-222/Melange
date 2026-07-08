@@ -43,7 +43,11 @@ CATKW={
  'Defense Credit Union Issues':r'military lending|defense credit union|military banking|military installation|servicemember',
  'Field of Membership':r'field of membership|common bond|underserved area',
  'CDFI Fund':r'\bcdfi\b|community development financial',
- 'CFPB Issues & Structural Reform':r'\bcfpb\b|consumer financial protection|section 1071|section 1033|small business lending rule|open banking|junk fee|late fee|overdraft',
+ # 2026-07-07 (user CFPB-axis directive, off-target-noise precedent = bare 'interchange' matching
+ # highway ramps): bare 'junk fee'/'late fee' routed concert/ticket/airline fee POPULISM into the
+ # CFPB column with oppose signs and zero CFPB content (AOC/Adams class). Fee terms now require a
+ # financial-context word within 80 chars; 'overdraft' stays bare (intrinsically financial).
+ 'CFPB Issues & Structural Reform':r'\bcfpb\b|consumer financial protection|section 1071|section 1033|small business lending rule|open banking|overdraft|(?:bank|card|cfpb|financial|lender|account|deposit)[\s\S]{0,80}(?:junk|late) fees?|(?:junk|late) fees?[\s\S]{0,80}(?:bank|card|cfpb|financial|lender|account|deposit)',
  'Credit Card & Consumer-Fee Mandates':r'credit card competition|\bccca\b|credit card fee|credit card mandate|card late fee',
  'Telephone Consumer Protection Act':r'\btcpa\b|telephone consumer protection|robocall',
  'Member Business Lending':r'member business lending|mbl cap|small.?dollar loan|business loan',

@@ -38,10 +38,16 @@ for _cp in (B + r"\press_text_cache.jsonl", B + r"\press_text_cache_priority.jso
             if d.get("text"): FT[u] = d["text"]
         except Exception: pass
 
+POLICY_KEYS = {e["key"] for e in REG if e.get("policy_force")}   # user-legislated axes bind the final label
 def reg_lookup(target, text):
     blob = ((target or "") + " " + (text or "")).lower()
     for e in REG:
         if any(m in blob for m in e["match"]): return e["valence"]
+    return None
+def reg_key(target, text):
+    blob = ((target or "") + " " + (text or "")).lower()
+    for e in REG:
+        if any(m in blob for m in e["match"]): return e["key"]
     return None
 def compose(s, v):
     s = (s or "").lower()
@@ -113,6 +119,11 @@ for i, r in enumerate([t for t in tone_rows if (t.get("url") or "").strip()]):
     f_flat = (fable.get(k, {}).get("cu_alignment") or "").strip().lower()
     deb = (r.get("stance") or "").strip().lower()
     s = pred[i]
+    # POLICY-FORCE override (user-directed 2026-07-07): registry entries flagged policy_force BIND
+    # the composed label; learned readers trained on superseded golds cannot outvote a legislated
+    # axis. Currently: CFPB agency-existence axis + bare mentions -> neutral.
+    if reg_key(fable.get(k, {}).get("target"), r.get("title")) in POLICY_KEYS and s in ("support", "oppose"):
+        s = "neutral"
     tier = "unanimous" if (s == f_flat == deb) else ("majority" if (s == f_flat or s == deb) else "review")
     tiern[tier] += 1
     out.append({"url": r.get("url"), "member": r.get("member"), "date": r.get("date"),

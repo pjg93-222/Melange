@@ -82,3 +82,25 @@ chunk mood does not.
 item surgery, ipsatization). A-ES is then documented as substantive covariance plus judge-level
 halo with the RKH benchmark cited, and the remaining lever is itemset v3 (changed item TEXT =
 full re-score, a funding decision for the user), not further scoring arithmetic.
+
+## Addendum 2 — v3 judge-level pilot + CT-CM capstone (locked 2026-07-07 before either runs)
+**V3P (pink, the A-ES source fix).** P2/P7 proved halo and C-signal are inseparable in the SCORES;
+the fix must act at the JUDGE. v3 changes: (a) the SYSTEM prompt gains an independence
+instruction ("rate each item strictly on its own evidence; a person can be warm but volatile, or
+cold but calm — do not let an overall impression color unrelated items"); (b) ES items S1/S4
+rewritten to composure-under-challenge framing (explicitly warmth-independent); A/O/C/E items and
+scale unchanged. PILOT before any full spend: 50 highest-coverage members with both genres,
+up to 8 chunks each (~400 chunks, ~$25 standard). Bars (pilot, one look, paired against the SAME
+members' v2 scores from the production cache): pilot A-ES |r| <= 0.50 AND at least 0.10 BELOW the
+same-members v2 A-ES; SB(A) and SB(ES) >= 0.55 on pilot halves; C(INT) vs votes_cast Spearman
+>= +0.10 directional. PASS -> the full v3 re-score (~$158 batch) is surfaced to the user as a
+funded go/no-go with the pilot evidence. MISS -> itemset v2 stands; judge-level lever documented.
+**CTCM (the capstone, $0).** Latent trait model over the EXISTING instruments: per Big-5 dimension,
+a latent trait indicated by pink (item-parcel), blue v2, and the behavioral disposition, with a
+PINK METHOD factor absorbing shared judge variance across the five pink indicators. Instruments'
+own scores are untouched (independence prohibition intact: nothing recalibrates anything); the
+model estimates latent scores as a THIRD artifact. Bars (one look): latent A-ES |r| <= 0.50
+(RKH-anchored); latent C vs votes_cast >= +0.15 (must not lose the earned criterion); latent
+discriminant mean <= 0.30; loadings all positive on-trait (Heywood-free). PASS -> latent scores
+ship as a desk overlay artifact (big5_latent.json) with its own audit guard. MISS -> documented;
+psychology campaign closes with the P6+retest gains and the halo documented against RKH.

@@ -202,3 +202,11 @@ RKH inter-trait mean off-diag .275 (House n=916; A-ES .443, C-A .590) vs ours .3
 Scoring-layer verdict: EXHAUSTED after four design families (P1 reweight, P2 bifactor, P5 item
 surgery, P7 ipsatization), one look each. Remaining lever: itemset v3 + judge-level independence
 instruction (source-level halo fix), which requires re-scoring.
+
+## 10. B6 stylometry — MISS; lexical modality closed (2026-07-07)
+New 57-feature stylometric basis (function words, sentence-length distribution, hedging/certainty,
+punctuation, MATTR, within-genre standardized): A +.141 C +.160 E +.341 cleared their bars; O
+collapsed (+.021 — breadth is not carried by prose style) and family MTMM still inverts (.140 vs
+.269, improved from category-features' .096/.383 but failing). v2 stands. Three lexical bases now
+exhausted (category rates, genre-residualized, stylometric); remaining blue lever = CT-CM latent
+capstone (own prereg, Addendum 2).

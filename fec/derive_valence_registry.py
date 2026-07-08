@@ -20,9 +20,30 @@ CL = ["support", "oppose", "neutral", "unrelated"]
 
 # FAMILY DEFINITIONS: match lists, most-specific first. Valence left None -> derived from user golds.
 FAMILIES = [
-    # direction-split CFPB (the user's golds split 149:-1 / 34:+1 exactly on this line)
-    ("cfpb_reform",   ["cfpb reform", "cfpb commission", "rein in the cfpb", "cfpb overreach", "cfpb accountability",
-                       "defund the cfpb", "cfpb appropriations", "abolish the cfpb", "restructure the cfpb"], None, "derived"),
+    # CFPB AXIS SPLIT (user-directed 2026-07-07: "we are a little too harsh on CFPB, mainly as it
+    # pertains to Trump admin cuts... isolate CFPB to only consider efforts to expand"). The old
+    # two-way split (reform +1 / general -1, golds 149:-1 / 34:+1) coded the AGENCY-DEFENSE axis
+    # as anti-CU and made the category a party proxy (123 D vs 7 R in negative tiers). New axes,
+    # precedence most-specific-first:
+    #   cfpb_reform      +1  restraint of the CFPB's REACH (reform/commission/rein-in/overreach)
+    #   cfpb_expansion   -1  efforts to EXPAND reach: rules, supervision, authority over CUs
+    #   cfpb_institution  0  the agency's EXISTENCE axis (cuts/defund/defend/staffing) - both
+    #                        directions carry no CU valence under the user's isolation rule
+    #                        (defund-cheering moved here FROM reform: symmetric, not pro-CU)
+    #   cfpb_general      0  bare mention without axis context = no signal
+    ("cfpb_reform",   ["cfpb reform", "cfpb commission", "rein in the cfpb", "cfpb overreach", "cfpb accountability"], None, "derived"),
+    ("cfpb_expansion", ["cfpb rule", "cfpb's rule", "cfpb overdraft", "cfpb late fee", "cfpb supervision",
+                       "cfpb oversight", "cfpb authority", "expand the cfpb", "expanding the cfpb", "strengthen the cfpb",
+                       "empower the cfpb", "cfpb jurisdiction", "cfpb enforcement", "section 1071", "1071 rule",
+                       "section 1033", "1033 rule", "open banking rule", "larger participant", "cfpb medical debt",
+                       "cfpb data broker"], None, "derived"),
+    ("cfpb_institution", ["save the cfpb", "protect the cfpb", "defend the cfpb", "we need the cfpb", "keep the cfpb",
+                       "preserve the cfpb", "without the cfpb", "gut the cfpb", "gutting the cfpb", "dismantle the cfpb",
+                       "dismantling the cfpb", "defund the cfpb", "abolish the cfpb", "eliminate the cfpb",
+                       "shut down the cfpb", "shutting down the cfpb", "cfpb funding", "cfpb budget", "cfpb staff",
+                       "cfpb workers", "cfpb employees", "cfpb layoffs", "fire cfpb", "cfpb firings", "vought",
+                       "cfpb stop-work", "stop work order", "cfpb appropriations", "restructure the cfpb",
+                       "attack on the cfpb", "attacks on the cfpb", "war on the cfpb"], None, "derived"),
     ("cfpb_general",  ["cfpb", "consumer financial protection"], None, "derived"),
     ("interchange_block", ["block the credit card competition", "oppose the credit card competition", "stop the cca",
                        "repeal durbin", "against interchange"], None, "derived"),
@@ -67,6 +88,12 @@ CONFIRMED = {
     # user-ratified 2026-07-04: CU-access policy is the target (+1); the 2 discrimination-
     # investigation rows are off-target 'navy federal' keyword noise, not counted against it.
     'defense_cu':  (+1, 'CU-access policy target; investigation rows are off-target keyword noise'),
+    # USER-DIRECTED POLICY 2026-07-07 ("isolate CFPB to only consider efforts to expand"): the
+    # agency-EXISTENCE axis carries no CU valence in either direction, and bare mentions carry no
+    # signal. These deliberately override the historical golds' -1 coding on such items (the user's
+    # explicit call this session); they are policy, not derivation - hence CONFIRMED, not derived.
+    'cfpb_institution': (0, 'user-directed 2026-07-07: agency-existence axis (cuts/defense/staffing) = no CU valence'),
+    'cfpb_general':     (0, 'user-directed 2026-07-07: bare CFPB mention without axis context = no signal'),
 }
 
 def fam_of(target, text):
@@ -143,12 +170,20 @@ for f in [k for k, _, _, _ in FAMILIES]:
         print('  %-22s SKIPPED (inconsistent/thin: %s) -> falls back to flat model' % (f, dict(collections.Counter(agg[f]))))
 
 if '--write' in sys.argv:
+    # POLICY-FORCE families (user-directed 2026-07-07): the composed label is BINDING when these
+    # match, overriding the learned stack readers post-meta. Rationale: the stack's classical/API
+    # channels were trained on golds that encode the OLD policy (institution items coded -1), so a
+    # soft registry feature gets outvoted by models faithfully reproducing superseded labels. A
+    # legislated axis must bind the pipeline, not advise it.
+    POLICY_FORCE = {'cfpb_institution', 'cfpb_general'}
     entries = []
     for f, pats, _, _ in FAMILIES:
         if f in CONFIRMED:
             v, note = CONFIRMED[f]
-            entries.append({'key': f, 'match': pats, 'valence': int(v),
-                            'source': 'user-confirmed-review', 'note': note})
+            e = {'key': f, 'match': pats, 'valence': int(v),
+                 'source': 'user-confirmed-review', 'note': note}
+            if f in POLICY_FORCE: e['policy_force'] = True
+            entries.append(e)
         elif f in full:
             entries.append({'key': f, 'match': pats, 'valence': int(full[f]),
                             'source': 'derived-from-gold', 'gold_n': len(agg[f])})

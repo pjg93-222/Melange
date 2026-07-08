@@ -25,6 +25,7 @@ from sklearn.model_selection import KFold
 B = MB_ROOT
 CL = ["support", "oppose", "neutral", "unrelated"]
 REG = json.load(open(B + r'\cu_valence_registry.json'))['entries']
+POLICY_KEYS = {e['key'] for e in REG if e.get('policy_force')}   # user-legislated axes bind the final label
 
 def fam_lookup(target, text):
     blob = ((target or '') + ' ' + (text or '')).lower()
@@ -118,6 +119,11 @@ if '--score' in sys.argv:
                              o.get('target_cu_valence'), o.get('cu_alignment'), o.get('confidence'),
                              t.startswith('RT @'), pr)
         lbl = meta.predict([f])[0]
+        # POLICY-FORCE override (user-directed 2026-07-07, registry entries flagged policy_force):
+        # a legislated axis BINDS the composed label; learned readers trained on superseded golds
+        # cannot outvote it. Currently: CFPB agency-existence axis + bare mentions -> neutral.
+        _, _fkey = fam_lookup(o.get('target'), t)
+        if _fkey in POLICY_KEYS and lbl in ('support', 'oppose'): lbl = 'neutral'
         clab = CL[int(np.argmax(pr))]
         alab = (o.get('cu_alignment') or '').strip().lower()
         tier = 'unanimous' if (alab and A == clab == alab) else ('review' if (alab and A != clab and A != alab and clab != alab) else 'majority')
