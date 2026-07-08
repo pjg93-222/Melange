@@ -188,3 +188,17 @@ behavioral-proxy factor wearing three trait labels, not three genre-stable trait
 lexical family's honest ceiling stands: per-trait criterion validity as a display-layer second
 opinion; multi-trait genre-stable structure is beyond it. v2 unchanged. Evaluator:
 fec/b5_residual_eval.py --r2.
+
+## 9. Round 3 (pink scoring layer) — P5 MISS, P6 PASS (promoted), P7 MISS; scoring layer exhausted (2026-07-07, prereg @1967b15 + @cfc9119)
+P5 split-sample item surgery (select even-half, test odd-half): best drop moved A-ES only .674->.653
+on the test half; all validity bars held but both halo bars missed. P6 coverage-GATED EB shrinkage:
+PASS — SB .748 -> .831 with n>=8 members untouched by construction; PROMOTED into big5_llm
+aggregation (252/509 thin members shrink; raw_z retained; k: O 2.1 C 2.8 E 3.1 A 2.7 ES 3.1).
+P7 within-chunk ipsatization: A-ES CRUSHED to .269 (RKH benchmark .443) proving the excess halo is
+chunk tone — but C-criterion collapsed (+.156 -> +.010) and discriminant rose (.371, the classic
+ipsative negative-sum artifact). CONVERGENT FINDING (P2 + P7): C's criterion validity lives in the
+tone/level component; scoring arithmetic cannot separate halo from C-signal. External benchmark:
+RKH inter-trait mean off-diag .275 (House n=916; A-ES .443, C-A .590) vs ours .308/.653.
+Scoring-layer verdict: EXHAUSTED after four design families (P1 reweight, P2 bifactor, P5 item
+surgery, P7 ipsatization), one look each. Remaining lever: itemset v3 + judge-level independence
+instruction (source-level halo fix), which requires re-scoring.

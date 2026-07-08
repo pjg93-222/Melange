@@ -351,10 +351,35 @@ for m, gs in gm.items():
 if raw:
     mu = {t: sum(d[t] for d in raw.values()) / len(raw) for t in TR}
     sd = {t: (sum((d[t] - mu[t]) ** 2 for d in raw.values()) / max(1, len(raw) - 1)) ** .5 or 1.0 for t in TR}
-    traits = {m: {**{t: round((raw[m][t] - mu[t]) / sd[t], 3) for t in TR},
-                  'N': round(-(raw[m]['ES'] - mu['ES']) / sd['ES'], 3),
+    # P6 coverage-GATED empirical-Bayes shrinkage — PASSED round-3 prereg @1967b15 (2026-07-07):
+    # SB mean .748 -> .831 on the frozen snapshot with n>=8 members untouched BY CONSTRUCTION
+    # (P4's ungated version failed exactly there). k per trait = method-of-moments from
+    # within-member between-chunk variance; only n_chunks<8 members shrink toward 0; raw z kept.
+    _ks = {}
+    for _t in TR:
+        _w, _mn, _ns = [], [], []
+        for _m, _gs in gm.items():
+            _a = [c[_t] for _g in _gs for c in gm[_m][_g]]
+            if len(_a) >= 2:
+                _mu2 = sum(_a) / len(_a)
+                _w.append(sum((x - _mu2) ** 2 for x in _a) / (len(_a) - 1))
+            _mn.append(sum(_a) / len(_a)); _ns.append(len(_a))
+        _s2w = sum(_w) / max(1, len(_w)); _nbar = sum(_ns) / max(1, len(_ns))
+        _mm = sum(_mn) / len(_mn)
+        _s2b = max(1e-9, sum((x - _mm) ** 2 for x in _mn) / max(1, len(_mn) - 1) - _s2w / _nbar)
+        _ks[_t] = _s2w / _s2b
+    def _shrink(m, t, z):
+        n = sum(len(gm[m][g]) for g in gm[m])
+        return z * (n / (n + _ks[t])) if n < 8 else z
+    traits = {m: {**{t: round(_shrink(m, t, (raw[m][t] - mu[t]) / sd[t]), 3) for t in TR},
+                  'N': round(-_shrink(m, 'ES', (raw[m]['ES'] - mu['ES']) / sd['ES']), 3),
+                  'raw_z': {t: round((raw[m][t] - mu[t]) / sd[t], 3) for t in TR},
+                  'shrunk': sum(len(gm[m][g]) for g in gm[m]) < 8,
                   'n_chunks': sum(len(gm[m][g]) for g in gm[m]),
                   'c_basis': 'interview-weighted' if 'INTERVIEW' in genre_scores.get(m, {}) else 'crec-only'} for m in raw}
+    print('P6 gated shrinkage: %d of %d members shrunk (n<8) | k: %s' % (
+        sum(1 for m in raw if sum(len(gm[m][g]) for g in gm[m]) < 8), len(raw),
+        ' '.join('%s %.1f' % (t, _ks[t]) for t in TR)))
     if os.environ.get('B5_NO_DUMP')=='1':
         print('B5_NO_DUMP=1: cache warmed (%d rows), artifact untouched' % len(cache)); sys.exit(0)
     from moneyball_core import dump_atomic

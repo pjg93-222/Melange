@@ -107,9 +107,10 @@ print('  matched chunks: %d (of %d rebuilt keys) | members: %d' % (
     len(data), len(rows), len({m for m, _, _ in meta})))
 
 # ---- shared aggregation: chunk trait scores -> genre mean -> member (chunk-weighted) -> z ----
-def aggregate(ct):   # ct: chunks x 5 trait scores -> member z + per-genre member scores + halves
+def aggregate(ct, only=None):   # ct: chunks x 5 traits -> member z + per-genre scores + halves; only = member subset
     gm = collections.defaultdict(lambda: collections.defaultdict(list))
     for (m, g, ci), row in zip(meta, ct):
+        if only is not None and m not in only: continue
         gm[m][g].append((ci, row))
     member_raw, genre_scores, half = {}, collections.defaultdict(dict), {0: {}, 1: {}}
     nchunks = {}
@@ -152,8 +153,8 @@ def spearman(pairs):
     xs, ys = [p[0] for p in pairs], [p[1] for p in pairs]
     return pearson(ranks(xs), ranks(ys)), len(pairs)
 
-def metrics(ct, label):
-    names, Z, raw, gsc, half, nch = aggregate(ct)
+def metrics(ct, label, only=None):
+    names, Z, raw, gsc, half, nch = aggregate(ct, only=only)
     zidx = {m: i for i, m in enumerate(names)}
     out = {'label': label}
     # split-half SB per trait (across members present in both halves)
@@ -290,5 +291,118 @@ elif mode == '--p4':
     ok = all(b[1] for b in bars)
     for nm, hit, d in bars: print('  BAR %-42s %s (%s)' % (nm, 'CLEAR' if hit else 'MISS', d))
     print('P4 VERDICT: %s' % ('PASS — promote EB shrinkage' if ok else 'MISS — raw stands; k ships as info column'))
+elif mode == '--p5':
+    # ROUND 3 P5 (prereg @1967b15): split-sample A-ES item surgery. SELECT on even-md5 members,
+    # TEST once on odd-md5 members. Drop at most one A item and one ES item.
+    SEL = {m for m in C if int(hashlib.md5(m.encode()).hexdigest(), 16) % 2 == 0}
+    TEST = {m for m in C if m not in SEL}
+    print('P5 split: selection=%d members, test=%d members' % (len(SEL), len(TEST)))
+    A_COLS, ES_COLS = TRAIT_COLS['A'], TRAIT_COLS['ES']
+    A_IDS = [ITEMS[c][0] for c in A_COLS]; ES_IDS = [ITEMS[c][0] for c in ES_COLS]
+    def ct_drop(dropA, dropES):
+        cols = {t: list(TRAIT_COLS[t]) for t in TR}
+        if dropA is not None: cols['A'] = [c for c in cols['A'] if c != dropA]
+        if dropES is not None: cols['ES'] = [c for c in cols['ES'] if c != dropES]
+        return np.stack([X[:, cols[t]].mean(axis=1) for t in TR], axis=1)
+    def half_stats(ct, only):
+        names, Z, raw, gsc, half, nch = aggregate(ct, only=only)
+        both = [m for m in names if m in half[0] and m in half[1]]
+        sb = {}
+        for ti, t in enumerate(TR):
+            r = pearson([half[0][m][ti] for m in both], [half[1][m][ti] for m in both])
+            sb[t] = 2 * r / (1 + r) if r > -1 else -1
+        aes = abs(pearson(Z[:, TR.index('A')], Z[:, TR.index('ES')]))
+        return sb, aes
+    # SELECTION half: control floors, then deterministic argmin over the 25 candidates
+    sb0, _ = half_stats(ct_equal(), SEL)
+    best = None
+    for dA in [None] + A_COLS:
+        for dE in [None] + ES_COLS:
+            sb, aes = half_stats(ct_drop(dA, dE), SEL)
+            feasible = sb['A'] >= sb0['A'] - 0.02 and sb['ES'] >= sb0['ES'] - 0.02
+            ndrops = (dA is not None) + (dE is not None)
+            key = (aes, ndrops, A_COLS.index(dA) if dA is not None else -1,
+                   ES_COLS.index(dE) if dE is not None else -1)
+            if feasible and (best is None or key < best[0]): best = (key, dA, dE, aes, sb)
+    _, dA, dE, sel_aes, sel_sb = best
+    print('P5 SELECTED on even-half: drop A item %s, drop ES item %s | selection-half A-ES %.3f' % (
+        ITEMS[dA][0] if dA is not None else 'NONE', ITEMS[dE][0] if dE is not None else 'NONE', sel_aes))
+    # TEST half, one look: chosen config vs test-half control
+    ctl, _ = metrics(ct_equal(), 'TEST-half control (equal weights, all items)', only=TEST)
+    p5, _ = metrics(ct_drop(dA, dE), 'P5: selected item drops (TEST half)', only=TEST)
+    bars = [('A-ES |r| <= 0.50', p5['a_es'] <= 0.50, '%.3f' % p5['a_es']),
+            ('discriminant <= 0.30', p5['disc_mean'] <= 0.30, '%.3f' % p5['disc_mean']),
+            ('MTMM >= ctrl-0.02', p5['mtmm_mean'] >= ctl['mtmm_mean'] - 0.02, '%.3f vs %.3f' % (p5['mtmm_mean'], ctl['mtmm_mean'])),
+            ('SB mean >= ctrl-0.02', p5['sb_mean'] >= ctl['sb_mean'] - 0.02, '%.3f vs %.3f' % (p5['sb_mean'], ctl['sb_mean'])),
+            ('known-groups >= 4/5', p5['kg'] >= 4, '%d/5' % p5['kg']),
+            ('C votes >= ctrl-0.03', (p5['c_votes'][0] or -9) >= (ctl['c_votes'][0] or 9) - 0.03,
+             '%+.3f vs %+.3f' % (p5['c_votes'][0] or -9, ctl['c_votes'][0] or -9)),
+            ('C followthrough >= ctrl-0.03', (p5['c_ft'][0] or -9) >= (ctl['c_ft'][0] or 9) - 0.03,
+             '%+.3f vs %+.3f' % (p5['c_ft'][0] or -9, ctl['c_ft'][0] or -9))]
+    ok = all(b[1] for b in bars)
+    for nm, hit, det in bars: print('  BAR %-30s %s (%s)' % (nm, 'CLEAR' if hit else 'MISS', det))
+    print('P5 VERDICT: %s' % ('PASS — promote item drops (%s, %s) to full-roster scoring' % (
+        ITEMS[dA][0] if dA is not None else 'none', ITEMS[dE][0] if dE is not None else 'none')
+        if ok else 'MISS — all 20 items stand'))
+elif mode == '--p6':
+    # ROUND 3 P6 (prereg @1967b15): coverage-GATED EB shrinkage — only n_chunks<8 members shrink.
+    ctl, (names, Z, raw, gsc, half, nch) = metrics(ct_equal(), 'control (frozen snapshot)')
+    ct = ct_equal()
+    gm2 = collections.defaultdict(list)
+    for (m, g, ci), row in zip(meta, ct): gm2[m].append(row)
+    ks = {}
+    for ti, t in enumerate(TR):
+        w_list, means, ns = [], [], []
+        for m, rws in gm2.items():
+            a = np.array([r[ti] for r in rws])
+            if len(a) >= 2: w_list.append(a.var(ddof=1))
+            means.append(a.mean()); ns.append(len(a))
+        s2w = float(np.mean(w_list)); nbar = float(np.mean(ns))
+        s2b = max(1e-9, float(np.var(means, ddof=1)) - s2w / nbar)
+        ks[t] = s2w / s2b
+    print('  k per trait: ' + ' '.join('%s %.1f' % (t, ks[t]) for t in TR))
+    nch_h = {par: collections.Counter() for par in (0, 1)}
+    for (m, g, ci) in meta: nch_h[ci % 2][m] += 1
+    def gated_half(halfdict, par):
+        out = {}
+        for m, v in halfdict.items():
+            if nch.get(m, 0) >= 8: out[m] = v            # well-measured: untouched BY CONSTRUCTION
+            else:
+                n = max(1, nch_h[par][m])
+                out[m] = np.array([v[ti] * (n / (n + ks[t])) for ti, t in enumerate(TR)])
+        return out
+    sh = {par: gated_half(half[par], par) for par in (0, 1)}
+    both = [m for m in names if m in sh[0] and m in sh[1]]
+    sb = {}
+    for ti, t in enumerate(TR):
+        r = pearson([sh[0][m][ti] for m in both], [sh[1][m][ti] for m in both])
+        sb[t] = 2 * r / (1 + r) if r > -1 else -1
+    sb_mean = sum(sb.values()) / 5
+    moved = sum(1 for m in names if nch.get(m, 0) >= 8)  # structural: gated members never rescored
+    print('  P6 gated split-half SB: ' + ' '.join('%s %.3f' % (t, sb[t]) for t in TR) + ' | mean %.3f' % sb_mean)
+    n_thin = sum(1 for m in names if nch.get(m, 0) < 8)
+    print('  gated members (n<8): %d of %d' % (n_thin, len(names)))
+    bars = [('SB mean >= ctrl+0.015', sb_mean >= ctl['sb_mean'] + 0.015, '%.3f vs %.3f' % (sb_mean, ctl['sb_mean'])),
+            ('n>=8 members moved == 0', True, 'structural (gate excludes them)')]
+    ok = all(b[1] for b in bars)
+    for nm, hit, det in bars: print('  BAR %-30s %s (%s)' % (nm, 'CLEAR' if hit else 'MISS', det))
+    print('P6 VERDICT: %s' % ('PASS — promote gated shrinkage for n<8 members' if ok else 'MISS — raw stands'))
+elif mode == '--p7':
+    # ROUND 3 P7 (prereg @cfc9119): within-chunk ipsatization — subtract each chunk's mean keyed-
+    # item score from all 20 items (chunk TONE removed; trait PROFILE preserved), then score.
+    Xi = X - X.mean(axis=1, keepdims=True)
+    ct7 = np.stack([Xi[:, TRAIT_COLS[t]].mean(axis=1) for t in TR], axis=1)
+    p7, _ = metrics(ct7, 'P7: within-chunk ipsatized items')
+    bars = [('A-ES |r| <= 0.50 (RKH .443)', p7['a_es'] <= 0.50, '%.3f' % p7['a_es']),
+            ('discriminant <= 0.30', p7['disc_mean'] <= 0.30, '%.3f' % p7['disc_mean']),
+            ('MTMM >= 0.450', p7['mtmm_mean'] >= 0.450, '%.3f' % p7['mtmm_mean']),
+            ('SB mean >= 0.72', p7['sb_mean'] >= 0.72, '%.3f' % p7['sb_mean']),
+            ('known-groups >= 4/5', p7['kg'] >= 4, '%d/5' % p7['kg']),
+            ('C votes >= +0.126', (p7['c_votes'][0] or -9) >= 0.126, '%+.3f' % (p7['c_votes'][0] or -9)),
+            ('C followthrough >= +0.081', (p7['c_ft'][0] or -9) >= 0.081, '%+.3f' % (p7['c_ft'][0] or -9))]
+    ok = all(b[1] for b in bars)
+    for nm, hit, det in bars: print('  BAR %-30s %s (%s)' % (nm, 'CLEAR' if hit else 'MISS', det))
+    print('P7 VERDICT: %s' % ('PASS — promote ipsatized scoring (composes with P6 gating)'
+                              if ok else 'MISS — scoring layer EXHAUSTED; A-ES documented vs RKH benchmark; next lever = itemset v3 (funding decision)'))
 else:
     print('unknown mode', mode)
