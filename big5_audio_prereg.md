@@ -118,3 +118,18 @@ Marrero/Rubio becomes detectable above the floor; fetch --eligible now defaults 
 numeric bars (+0.15, +0.03, <=0.45) are UNCHANGED; the significance gate + N are added rigor. The
 incremental-delta and A-ES tests remain higher-variance and are best read at the larger N. Net: the
 pilot is now honestly powered; a within-noise result cannot register as PASS.
+
+## Addendum 4 (2026-07-08, acquisition UNBLOCKED + Bar-2 gate + test run — NO bar changed)
+**In-sandbox acquisition is no longer a handoff:** the YouTube CDN 403 is bypassed with the
+ios/web_safari/android player-client fallback (format 18 -> extract wav). b5_audio_fetch gained an
+autonomous `--search` mode (ytsearch floor-speech clips per member, solo-biased/C-SPAN-dominant,
+resumable via yt-dlp download-archive, rate-limited). **SOLO caveat (honest):** search-fetched floor
+clips are single-speaker by the nature of floor speech but are NOT own-channel-verified — a pilot
+limitation vs the own-channel guarantee (news/panel clips would contaminate the acoustic sample);
+documented, not hidden. **Bar-2 rigor gate (stricter, pre-look):** halo-separation now REQUIRES audio-A
+to be a VALID measure (audio-A held-out r > its permutation null) before a low A-ES counts — else the
+separation is vacuous (random audio 'separates' trivially). **TEST RUN (--search 3) PASSED the
+machinery check:** real C-SPAN floor audio (Pelosi 2319s / M.Johnson 920s / AOC 2026s) -> b5_audio_build
+produced real eGeMAPS (88 feat, all non-zero). Fetch+build now proven on REAL audio; eval machinery was
+already validated. **FULL RUN in progress: --search 90 (buffer over N>=80) -> build -> the ONE look.**
+No bar changed; a PASS still gets adversarial P6 re-derivation before it is recorded.
