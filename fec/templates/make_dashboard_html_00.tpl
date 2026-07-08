@@ -223,6 +223,7 @@ function draw(){
  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);
  const CASC=cascadeOn&&cascP;                                   // cascade mode: color every node red->green by P(joins)
  const RT=(!CASC&&route&&route.nodes&&route.nodes.length)?route:null;   // an active pathfinder route lights up its members
+ const RC=RT&&routeCasc;                                         // route + per-member activation likelihood -> tint the field red->green
  let focus=-1, fset=null;
  if(!CASC){ if(RT){fset=new Set(RT.nodes);focus=(RT.seed!=null?RT.seed:RT.nodes[0]);} else focus=(hi>=0?hi:sel); }
  const dimming=!CASC&&(fset||focus>=0);                          // spotlight/route: fade everyone not in focus
@@ -259,9 +260,12 @@ function draw(){
  const order=[...Array(N).keys()].sort((p,q)=>allocOf(p)-allocOf(q));
  for(const i of order){const [sx,sy]=toScreen(LX[i],LY[i]);const r=radOf(i)*Math.max(1,cam.s*1);
    const dim=dimming&&!inFoc(i);                                // fade everyone not in the focused member / route
-   ctx.beginPath();ctx.arc(sx,sy,r,0,7);ctx.fillStyle=CASC?cascCol(cascP[i]):(dim?'#3b424c':colOf(i));
-   let al=CASC?1:(dim?0.16:((colorBy==='issue'&&DATA.stance[i][issue]==='-')?0.45:(colorBy==='elec'&&DATA.play[i]==='n')?0.3:1));
-   if(!CASC&&!dim&&r>4.5)al*=0.78;   // big (funded/high-influence) nodes go translucent so smaller ones underneath show through
+   let fill,al;
+   if(CASC){fill=cascCol(cascP[i]);al=1;}
+   else if(RC&&dim){fill=cascCol(routeCasc[i]);al=0.6;}         // pathfinder: tint the background by who's likely to activate from the route
+   else if(dim){fill='#3b424c';al=0.16;}
+   else{fill=colOf(i);al=(colorBy==='issue'&&DATA.stance[i][issue]==='-')?0.45:(colorBy==='elec'&&DATA.play[i]==='n')?0.3:1;if(r>4.5)al*=0.78;}
+   ctx.beginPath();ctx.arc(sx,sy,r,0,7);ctx.fillStyle=fill;
    ctx.globalAlpha=al;ctx.fill();ctx.globalAlpha=1;
    if(!CASC&&!dim&&allocOf(i)>0){ctx.lineWidth=1.1;ctx.strokeStyle='#fff';ctx.stroke();}
    if(CASC&&cascSeeds&&cascSeeds.has(i)){ctx.lineWidth=2.4;ctx.strokeStyle='#fff';ctx.beginPath();ctx.arc(sx,sy,r+3,0,7);ctx.stroke();}   // seed = the source co-sponsor
@@ -289,8 +293,9 @@ cv.addEventListener('mousemove',e=>{
  hi=best;const tip=document.getElementById('tip');
  if(best>=0){const i=best,a=allocOf(i);const pl=PLAYLBL[DATA.play[i]];
   tip.style.display='block';tip.style.left=Math.min(e.clientX+14,innerWidth-260)+'px';tip.style.top=(e.clientY+14)+'px';
-  const pr=prime(i,issue);   // explicit flip pressure on hover (or join-likelihood while cascading)
+  const pr=prime(i,issue);   // explicit flip pressure on hover (or activation-likelihood while cascading / diagramming)
   const flipLine=(cascadeOn&&cascP)?`<br>Joins cascade: <b style=color:${cascCol(cascP[i])}>${Math.round(cascP[i]*100)}%</b>`
+    :(route&&routeCasc)?`<br>Activates: <b style=color:${cascCol(routeCasc[i])}>${Math.round(routeCasc[i]*100)}%</b>`
     :pr?(pr.money===null?`<br>Flip: <b style=color:#f59e0b>beyond reach</b> (${flipPct(pr.pressure,pr.theta)}% of the way)`
         :`<br>Flip pressure: <b>${flipPct(pr.pressure,pr.theta)}%</b> of the way · <b style=color:#fbbf24>${Math.max(0,100-flipPct(pr.pressure,pr.theta))}%</b> to go`):'';
   tip.innerHTML=`<b>${DATA.name[i]}</b> (${DATA.party[i]}) · rank ${DATA.rank[i]} · <b>${DATA.bp[i]}%</b> bipartisan · conf <b>${DATA.cf?DATA.cf[i]:'-'}</b><br>On <b>${DATA.issues[issue]}</b>: <b style=color:${STCOL[DATA.stance[i][issue]]}>${SC[DATA.stance[i][issue]]}</b>${flipLine}<br>Overall: ${SC[DATA.gen[i]]} · electoral: <b style=color:${ELCOL[DATA.play[i]]}>${pl}</b><br>${mode==='coal'?'Coalition seed':'Persuasion target'}: <b>${a?(mode==='coal'?'enters @ $'+a+'k':'$'+a+'k'):'—'}</b>`;}
@@ -390,15 +395,18 @@ function spread(tiers,ind,tally){   // competitive cascade, edge-keyed CRN; opti
 // maximizes co-sponsor spread (recruitability x onward reach) while steering toward a key persuadable target ----
 const DEG=PE.map(o=>Object.keys(o).length);let route=null,dropped=new Set(),execMode='none';
 // ---- route presentation: fit the camera to the whole path, then draw it in like a map route (animated) ----
-let routeAnim=null,routeRAF=null;
+let routeAnim=null,routeRAF=null,routeCasc=null;   // routeCasc[i] = P(member i activates) with the whole recruited route as the cascade seed
+function noRoute(){route=null;routeCasc=null;legend();}   // clear an active route diagram + restore the normal legend
 function fitCam(nodes){   // camera that frames all route members with padding (so a path to a far target is never off-screen)
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const i of nodes){x0=Math.min(x0,LX[i]);y0=Math.min(y0,LY[i]);x1=Math.max(x1,LX[i]);y1=Math.max(y1,LY[i]);}
   const pad=80,bw=Math.max(60,x1-x0),bh=Math.max(60,y1-y0),s=Math.min((W-2*pad)/bw,(H-2*pad)/bh,5.5),cx=(x0+x1)/2,cy=(y0+y1)/2;
   return {s,tx:W/2-cx*s,ty:H/2-cy*s};
 }
 function startRoute(){   // frame the whole route immediately (robust — always visible), then animate the line drawing itself in
-  if(route&&route.nodes&&route.nodes.length){const f=fitCam(route.nodes);cam.s=f.s;cam.tx=f.tx;cam.ty=f.ty;}
-  routeAnim={t0:performance.now()};
+  routeCasc=null;
+  if(route&&route.nodes&&route.nodes.length){const f=fitCam(route.nodes);cam.s=f.s;cam.tx=f.tx;cam.ty=f.ty;
+    routeCasc=cascadeProbs(route.unreachable?[route.seed]:route.nodes).p;}   // seed the cascade from the recruited set -> who's likely to activate
+  routeAnim={t0:performance.now()};legend();
   if(!routeRAF)routeRAF=requestAnimationFrame(routeTick);
   draw();
 }
@@ -544,7 +552,7 @@ function selectMember(v){
     `<div class=mrow><span>Overall · party</span><b>${SC[DATA.gen[v]]} · ${DATA.party[v]}</b></div>`+
     `<div class=mrow><span>Bipartisan · conf · rank</span><b>${DATA.bp[v]}% · ${DATA.cf[v]} · #${DATA.rank[v]}</b></div>`+
     `<div class=mrow><span>Electoral play</span><b style=color:${ELCOL[DATA.play[v]]}>${pl}</b></div>`;
-  cusl.value=0;cosl.value=0;cascStr='';route=null;
+  cusl.value=0;cosl.value=0;cascStr='';noRoute();
   const _sn=document.getElementById('seednm');if(_sn)_sn.textContent=DATA.name[v].split(' ').slice(-1)[0];
   document.getElementById('tgtsearch').value='';document.getElementById('pathout').innerHTML='';
   const _md=document.getElementById('mdlink');_md.href='cu-member-desk.html?m='+encodeURIComponent(DATA.name[v]);_md.innerHTML='▤ Member details <small>· '+DATA.name[v]+'</small>';_md.style.display='block';
@@ -605,9 +613,9 @@ function runPath(){
   if(pmodeVal==='cascade'){if(sel<0){po.innerHTML='<span style=color:#f59e0b>Select a member first — they seed the cascade.</span>';return;}cascadeRun();return;}
   if(pmodeVal==='best'){   // who should introduce the bill to reach this target? (paper 04)
     const t=DATA.name.indexOf(tv);
-    if(t<0){po.innerHTML='<span style=color:#f59e0b>Type the target vote you need, then Build.</span>';route=null;draw();return;}
+    if(t<0){po.innerHTML='<span style=color:#f59e0b>Type the target vote you need, then Build.</span>';noRoute();draw();return;}
     const bs=bestSponsors(t,8);
-    if(!bs.length){po.innerHTML='<span style=color:#f59e0b>No pro member can reach this target on this issue.</span>';route=null;draw();return;}
+    if(!bs.length){po.innerHTML='<span style=color:#f59e0b>No pro member can reach this target on this issue.</span>';noRoute();draw();return;}
     const b0=bs[0];route={edges:pedges(b0.path),nodes:b0.path,seed:b0.sponsor,targets:[t],ordered:true};
     po.innerHTML=`<div class=mrow><span>Best sponsor → ${last(t)}</span><b>${last(b0.sponsor)}</b></div>`
      +`<div class=mrow><span>Whole chain holds · cost</span><b>${(b0.ch*100).toFixed(0)}% · $${(b0.cost/1000).toFixed(0)}k</b></div>`
@@ -616,7 +624,7 @@ function runPath(){
   }
   if(pmodeVal==='budget'){   // GCOMB budget-constrained max-coverage recruitment (diversified set)
     const bk=parseFloat(tv)||0;
-    if(bk<=0){po.innerHTML='<span style=color:#f59e0b>Enter a budget in $k (e.g. 300).</span>';route=null;draw();return;}
+    if(bk<=0){po.innerHTML='<span style=color:#f59e0b>Enter a budget in $k (e.g. 300).</span>';noRoute();draw();return;}
     const ns=Math.max(2,Math.round(bk*1000/K.CEDGE)),br=budgetRecruit(sel,ns,-1);
     route={edges:[],nodes:br.sel,seed:sel,targets:[]};
     po.innerHTML=`<div class=mrow><span>Budget · recruits</span><b>$${bk}k · ${br.sel.length}</b></div>`
@@ -626,7 +634,7 @@ function runPath(){
   }
   if(pmodeVal==='multi'){   // reach several targets from one sponsor (shared tree; paper 06 coalitions)
     const ts=tv.split(',').map(s=>DATA.name.indexOf(s.trim())).filter(i=>i>=0&&i!==sel);
-    if(!ts.length){po.innerHTML='<span style=color:#f59e0b>Type targets separated by commas.</span>';route=null;draw();return;}
+    if(!ts.length){po.innerHTML='<span style=color:#f59e0b>Type targets separated by commas.</span>';noRoute();draw();return;}
     const mt=multiTarget(sel,ts);route={edges:mt.edges,nodes:[...mt.tree],seed:sel,targets:ts};
     po.innerHTML=`<div class=mrow><span>Reached</span><b class="delta ${mt.reached===mt.n?'up':'down'}">${mt.reached}/${mt.n} targets</b></div>`
      +`<div class=mrow><span>Shared tree · cost</span><b>${mt.tree.size} members · $${(mt.total/1000).toFixed(0)}k</b></div>`
@@ -635,8 +643,8 @@ function runPath(){
   }
   // sponsor -> target
   const t=DATA.name.indexOf(tv);
-  if(t<0){po.innerHTML='<span style=color:#f59e0b>Type a target member to build the path toward.</span>';route=null;draw();return;}
-  if(t===sel){po.innerHTML='<span style=color:#f59e0b>Sponsor and target are the same member.</span>';route=null;draw();return;}
+  if(t<0){po.innerHTML='<span style=color:#f59e0b>Type a target member to build the path toward.</span>';noRoute();draw();return;}
+  if(t===sel){po.innerHTML='<span style=color:#f59e0b>Sponsor and target are the same member.</span>';noRoute();draw();return;}
   const r=buildPath(sel,t);
   if(!r.reached){   // greedy max-product walk never lands on the target -> don't draw the meaningless wander; show it honestly
     route={nodes:[sel,t],edges:[],seed:sel,targets:[t],ordered:false,unreachable:true};
@@ -653,7 +661,7 @@ function runPath(){
    +r.path.map((v,k)=>`<span style=color:#6e7681>${k+1}.</span> ${DATA.name[v]}`+(k===0?' <span style=color:#16a34a>· sponsor</span>':` <span style=color:#8b949e>+$${Math.round(r.hops[k-1].cost/1000)}k · ${(activeP(r.hops[k-1].p)*100).toFixed(0)}% ask</span>`)+(v===t?' <span style=color:#fbbf24>· target</span>':'')).join('<br>')+`</div>`;
   startRoute();
 }
-function backToTargets(){cascadeExit();sel=-1;route=null;document.getElementById('mpanel').style.display='none';document.getElementById('tpanel').style.display='block';document.getElementById('mdlink').style.display='none';draw();}
+function backToTargets(){cascadeExit();sel=-1;noRoute();document.getElementById('mpanel').style.display='none';document.getElementById('tpanel').style.display='block';document.getElementById('mdlink').style.display='none';draw();}
 function applyShocks(){
   const ds=document.getElementById('dropsearch').value.trim();
   dropped=new Set(ds?ds.split(',').map(x=>DATA.name.indexOf(x.trim())).filter(i=>i>=0):[]);
@@ -723,10 +731,14 @@ function optCard(){
 }
 // legend
 function legend(){
- if(cascadeOn){document.getElementById('legend').innerHTML=
-   '<span style="color:#e6edf3;font-weight:600">Likelihood to join the cascade</span><br>'
+ if(cascadeOn||(route&&routeCasc)){let note;
+   if(cascadeOn){note=`P(activates) across ${K.MC} competitive-cascade runs · ○ white ring = seed`;}
+   else{let rc=0;const st=new Set(route.nodes);for(let i=0;i<N;i++)if(!st.has(i))rc+=routeCasc[i];
+     note=`<b style=color:#34d399>green path</b> = your ${route.nodes.length} recruits · field = <b>~${rc.toFixed(0)}</b> more likely to activate`;}
+   document.getElementById('legend').innerHTML=
+   '<span style="color:#e6edf3;font-weight:600">Likelihood to activate</span><br>'
    +[[0,"won't"],[0.35,'maybe'],[0.65,'likely'],[1,'near-certain']].map(([v,lb])=>`<span><span class=pill style="background:${cascCol(v)}"></span>${lb}</span>`).join('')
-   +`<br><span style=color:#6e7681>P(activates) across ${K.MC} competitive-cascade runs · ○ white ring = seed</span>`;return;}
+   +`<br><span style=color:#6e7681>${note}</span>`;return;}
  let items;
  if(colorBy==='recept')items=[[0.55,'Independent-minded'],[0.8,''],[1.0,'Neutral'],[1.3,''],[1.55,'Highly receptive']].map(([v,lb])=>`<span><span class=pill style=background:${receptCol(v)}></span>${lb}</span>`).join('')+'<span style=color:#6e7681> · behavioral receptivity (cosponsorship, participation, floor dynamics × electoral incentive × outlook)</span>';
  else if(colorBy==='elec')items=[['c','Contest · primary'],['g','Contest · general'],['d','Defend'],['n','No play']].map(([k,lb])=>`<span><span class=pill style=background:${ELCOL[k]}></span>${lb}</span>`).join('');
@@ -767,7 +779,7 @@ document.querySelectorAll('#pmode button').forEach(b=>b.onclick=()=>{document.qu
   else if(pmodeVal==='budget'){lab.textContent='budget $k from this member (diversified recruits):';inp.placeholder='e.g. 300';}
   else if(pmodeVal==='cascade'){lab.innerHTML='cascade from <b id=seednm style=color:#16a34a></b> — colors the map by who joins on:';inp.style.display='none';if(sel>=0)document.getElementById('seednm').textContent=DATA.name[sel].split(' ').slice(-1)[0];}
   else{lab.innerHTML='bill sponsor <b id=seednm style=color:#16a34a></b> → reach target:';inp.placeholder='target member…';if(sel>=0)document.getElementById('seednm').textContent=DATA.name[sel].split(' ').slice(-1)[0];}
-  document.getElementById('pathout').innerHTML='';route=null;
+  document.getElementById('pathout').innerHTML='';noRoute();
   if(pmodeVal==='cascade'){if(sel>=0)cascadeRun();else{document.getElementById('pathout').innerHTML='<span style=color:#f59e0b>Select a member first — they seed the cascade.</span>';draw();}}
   else{cascadeExit();draw();}});
 addEventListener('resize',resize);
