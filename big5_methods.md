@@ -189,11 +189,21 @@ lexical family's honest ceiling stands: per-trait criterion validity as a displa
 opinion; multi-trait genre-stable structure is beyond it. v2 unchanged. Evaluator:
 fec/b5_residual_eval.py --r2.
 
-## 9. Round 3 (pink scoring layer) — P5 MISS, P6 PASS (promoted), P7 MISS; scoring layer exhausted (2026-07-07, prereg @1967b15 + @cfc9119)
+## 9. Round 3 (pink scoring layer) — P5 MISS, P6 shipped-on-corrected-grounds, P7 MISS; scoring layer exhausted (2026-07-07, prereg @1967b15 + @cfc9119; CORRECTED by audit same day)
 P5 split-sample item surgery (select even-half, test odd-half): best drop moved A-ES only .674->.653
 on the test half; all validity bars held but both halo bars missed. P6 coverage-GATED EB shrinkage:
-PASS — SB .748 -> .831 with n>=8 members untouched by construction; PROMOTED into big5_llm
-aggregation (252/509 thin members shrink; raw_z retained; k: O 2.1 C 2.8 E 3.1 A 2.7 ES 3.1).
+its pre-registered split-half bar (SB .748 -> .831) was CLEARED but that number is an ARTIFACT
+(**audit 2026-07-07 correction**): shrinking BOTH halves toward 0 mechanically inflates their
+correlation. The shrinkage-decomposition (fec/big5_improvements_eval.py --p6diag) shows raw-raw
+.748, shrunk-shrunk .831, but shrunk-vs-RAW cross only .704 -> +0.127 of the apparent gain is
+double-shrink artifact, ~0 is real. The split-half bar was the WRONG instrument to judge a
+shrinkage method (prereg design error). P6 IS shipped anyway, on the CORRECTED and independent
+justification of SHRINKAGE-NEUTRAL external-criterion validity (C->votes raw +.125 -> shrunk +.138,
+A->cooperation +.129 -> +.138, C->follow-through +.067 -> +.069, O->breadth ~null both) plus the
+display-sanity argument (a 2-chunk member should not render an extreme personality reading);
+n>=8 members untouched by construction; 252/509 thin members shrink; raw_z retained; k: O 2.1 C 2.8
+E 3.1 A 2.7 ES 3.1. Net: a modest, defensible regularization, NOT the reliability leap the headline
+number implied.
 P7 within-chunk ipsatization: A-ES CRUSHED to .269 (RKH benchmark .443) proving the excess halo is
 chunk tone — but C-criterion collapsed (+.156 -> +.010) and discriminant rose (.371, the classic
 ipsative negative-sum artifact). CONVERGENT FINDING (P2 + P7): C's criterion validity lives in the
@@ -221,7 +231,7 @@ method factor): boundary-degenerate (F_ES variance 0, blue_A uniqueness 0, negat
 loadings) — empirically underidentified because blue v2's near-collinear A/C/O fits cannot anchor
 distinct trait factors; MISS on the Heywood/loadings bar.
 CAMPAIGN CLOSE. Passes: the pre-registered interview-C retest (consequence wired, C_INT_W=2x) and
-P6 gated shrinkage (SB .748 -> .831, promoted). Corpus growth delivered SB .674->.748 and MTMM
+P6 gated shrinkage (shipped on corrected external-criterion grounds, not the artifact split-half number). Corpus growth delivered SB .674->.748 and MTMM
 .410->.493. The A-ES finding, fully characterized: ~.44 is population-real (RKH benchmark .443
 House / .393 Senate), the ~.21 excess is TEXT-TONE halo that is information-theoretically
 entangled with C's criterion signal at the text level (proven twice: P2 member-level and P7

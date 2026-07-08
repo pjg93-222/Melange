@@ -41,12 +41,15 @@ from collections import Counter
 sd=Counter(ra.cell(r,7).value for r in range(3,536) if ra.cell(r,1).value)
 oppside=sd.get('Opponent',0)+sd.get('Highly Skeptical',0)+sd.get('Skeptic',0)
 champside=sd.get('Champion',0)+sd.get('Ally',0)
-# Floor 40->35 (2026-07-07): the user-directed CFPB axis isolation (registry policy_force) removed
-# pro-CU credit formerly earned by anti-CFPB-institution rhetoric (defund/abolish cheering), which
-# faithfully moved 2 knife-edge members off the pro side (Lankford: CFPB Champion cell WAS
-# institution-axis; Crapo: 0.025 score jitter across a recomputed quantile cut) -> 39. This check
-# exists to catch DEGENERATE distributions, not to pin a headcount; 39/61 is healthily two-sided.
-ok(oppside>=35 and champside>=35,'D1 stance dist (anti-side=%d pro-side=%d) %s'%(oppside,champside,dict(sd)))
+# TUNING-FREE non-degeneracy check (audit 2026-07-07, replacing a hand-nudged 40->35 headcount that
+# had been lowered to accommodate the CFPB axis split -- honesty-ledger H-3). The check's real
+# purpose is to catch a DEGENERATE distribution (one side empty/tiny), which no magic number should
+# need re-tuning for as legitimate stance edits shift the counts. Invariant: each side holds >= 15
+# members AND >= 15% of the clear-sided population. Passes 39/61 today; fails only true collapse
+# (e.g. a side dropping below ~10). Never needs editing when a user-directed relabel moves a handful.
+_clear = oppside + champside
+_nondegen = min(oppside, champside) >= 15 and min(oppside, champside) >= 0.15 * max(1, _clear)
+ok(_nondegen,'D1 stance dist non-degenerate (anti-side=%d pro-side=%d, min>=15 and >=15%% of %d) %s'%(oppside,champside,_clear,dict(sd)))
 # E congestion sheet
 ok('Congestion' in wb.sheetnames,'E1 Congestion sheet present')
 cg=wb['Congestion']; ncg=sum(1 for r in range(3,cg.max_row+1) if cg.cell(r,1).value)

@@ -387,6 +387,44 @@ elif mode == '--p6':
     ok = all(b[1] for b in bars)
     for nm, hit, det in bars: print('  BAR %-30s %s (%s)' % (nm, 'CLEAR' if hit else 'MISS', det))
     print('P6 VERDICT: %s' % ('PASS — promote gated shrinkage for n<8 members' if ok else 'MISS — raw stands'))
+elif mode == '--p6diag':
+    # HONESTY DIAGNOSTIC (audit 2026-07-07): decompose P6's SB gain into REAL vs shrinkage artifact.
+    # Shrinking BOTH halves toward 0 mechanically inflates their correlation. The clean test: shrink
+    # ONE half only (cross). If cross-SB ~= raw-raw SB, the double-shrink gain was artifact; if
+    # cross-SB is elevated, some gain is real regularization.
+    names, Z, raw, gsc, half, nch = aggregate(ct_equal())
+    ct = ct_equal(); gm2 = collections.defaultdict(list)
+    for (m, g, ci), row in zip(meta, ct): gm2[m].append(row)
+    ks = {}
+    for ti, t in enumerate(TR):
+        wl, mn, ns = [], [], []
+        for m, r in gm2.items():
+            a = np.array([x[ti] for x in r])
+            if len(a) >= 2: wl.append(a.var(ddof=1))
+            mn.append(a.mean()); ns.append(len(a))
+        s2w = float(np.mean(wl)); nbar = float(np.mean(ns))
+        s2b = max(1e-9, float(np.var(mn, ddof=1)) - s2w / nbar); ks[t] = s2w / s2b
+    nch_h = {p: collections.Counter() for p in (0, 1)}
+    for (m, g, ci) in meta: nch_h[ci % 2][m] += 1
+    def sh(v, m, par):
+        n = max(1, nch_h[par][m])
+        return np.array([v[ti] * (n / (n + ks[t])) if nch.get(m, 0) < 8 else v[ti] for ti, t in enumerate(TR)])
+    both = [m for m in names if m in half[0] and m in half[1]]
+    def sbmean(A, Bd):
+        out = []
+        for ti, t in enumerate(TR):
+            r = pearson([A[m][ti] for m in both], [Bd[m][ti] for m in both])
+            out.append(2 * r / (1 + r) if r > -1 else -1)
+        return sum(out) / 5
+    rawraw = sbmean(half[0], half[1])
+    shsh = sbmean({m: sh(half[0][m], m, 0) for m in both}, {m: sh(half[1][m], m, 1) for m in both})
+    crossA = sbmean({m: sh(half[0][m], m, 0) for m in both}, half[1])
+    print('P6 SB decomposition (mean over 5 traits):')
+    print('  raw-raw (control, shipped comparison) : %.3f' % rawraw)
+    print('  shrunk-shrunk (the P6 headline number): %.3f' % shsh)
+    print('  shrunk-RAW cross (one side only)      : %.3f' % crossA)
+    print('  => artifact share (shsh-cross) = %.3f | real-ish (cross-rawraw) = %.3f'
+          % (shsh - crossA, crossA - rawraw))
 elif mode == '--p7':
     # ROUND 3 P7 (prereg @cfc9119): within-chunk ipsatization — subtract each chunk's mean keyed-
     # item score from all 20 items (chunk TONE removed; trait PROFILE preserved), then score.

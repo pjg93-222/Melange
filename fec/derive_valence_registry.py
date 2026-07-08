@@ -187,7 +187,13 @@ if '--write' in sys.argv:
         elif f in full:
             entries.append({'key': f, 'match': pats, 'valence': int(full[f]),
                             'source': 'derived-from-gold', 'gold_n': len(agg[f])})
-    out = {'_doc': 'CU-valence registry v2 — derived from the USER\'S gold valence judgments (5-fold-validated harness: derive_valence_registry.py) plus user-confirmed-review entries (valence_family_review.csv). Match precedence = list order (specific before generic). Extend by adding entries; re-eval before production.',
+    out = {'_doc': 'CU-valence registry v2 — MOST families derived from the USER\'S gold valence judgments '
+                   '(5-fold-validated harness: derive_valence_registry.py); a few are user-confirmed-review priors '
+                   '(valence_family_review.csv). HONESTY NOTE (2026-07-07): the policy_force families (cfpb_institution, '
+                   'cfpb_general) are USER-DIRECTED POLICY that OVERRIDES the historical golds (they encode the pre-CFPB-'
+                   'split harshness), so the whole-registry CV vs those golds drops (~0.52) BY DESIGN — the split reflects '
+                   'the user\'s directed axis, it is NOT claimed to be validated-more-accurate until a fresh gold sample '
+                   'is adjudicated on the new axis. Match precedence = list order (specific before generic). Re-eval before production.',
            'entries': entries}
     json.dump(out, open(B + r'\cu_valence_registry.json', 'w'), indent=1)
     print('\nwrote cu_valence_registry.json: %d entries (%d derived, %d user-confirmed)' %
