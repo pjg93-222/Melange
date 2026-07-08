@@ -323,6 +323,16 @@ if _g:
     ck('say-do gate coherent (capped->Ally w/ raw C/D preserved; proven are C/D cells)', _b1==0 and _b2==0,
        '%d capped cells / %d proven cells; %d+%d incoherent'%(sum(len(v) for v in _cap.values()),
        sum(len(v) for v in _prov.values()),_b1,_b2))
+    # corroboration paths A/V/J (2026-07-08): every corroborated cell must BE Champion/Defender in the
+    # matrix (it survived the cap) and must NOT also be listed capped for the same member; every J path
+    # must belong to a gatekeep category.
+    _cor=_g.get('corrob') or {}; _gk=set(_g.get('gatekeep') or [])
+    _b3=sum(1 for m,cc in _cor.items() for c,pth in cc.items()
+            if MAT.get(m,{}).get(c) not in ('Champion','Defender') or c in (_cap.get(m) or {})
+            or pth not in ('A','V','J') or (pth=='J' and c not in _gk))
+    _cbp=collections.Counter(pth for cc in _cor.values() for pth in cc.values())
+    ck('say-do corroboration paths coherent (A/V/J cells are C/D, un-capped; J in gatekeep set)', _b3==0,
+       'corroborated A%d V%d J%d; %d incoherent'%(_cbp['A'],_cbp['V'],_cbp['J'],_b3))
 else:
     ck('say-do gate block present in category_stance.json', False, 'gate key missing — producer predates 2026-07-07 landing')
 

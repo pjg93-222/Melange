@@ -84,18 +84,23 @@ ok('industry money lowers pflip',p2<p0)
 ok('receptivity scales money channel (pm=2 amplifies CU effect)',fm.pflip(50000,0,pm=2.0,**kw)>p1)
 
 print('[say-do gate + delivery discount]')
-# cap law invariants on a synthetic member (no workbook dependency: inject the corroboration cache)
+# cap law invariants on a synthetic member (no workbook/file dependency: inject all three caches).
+# CFPB=authored+advanced (A); Payments=recorded vote (V); CU Tax Status=Finance chair -> jurisdiction (J);
+# Interchange=no signal -> caps.
 MC._CORR={'__test__':{'sponsored':{'CFPB'},'advanced':{'CFPB'}}}
-_cm={'CFPB':'Champion','Payments':'Champion','Interchange':'Defender','CU Tax Status':'Ally','TCPA':'Skeptic'}
-_g,_cap,_prov=MC.cap_uncorroborated('__test__',_cm)
-ok('uncorroborated Champion/Defender cap to Ally',_g['Payments']=='Ally' and _g['Interchange']=='Ally')
-ok('corroborated Champion survives + earns proven',_g['CFPB']=='Champion' and _prov==['CFPB'])
-ok('cap preserves raw tier and touches nothing else',_cap=={'Payments':'Champion','Interchange':'Defender'}
-   and _g['CU Tax Status']=='Ally' and _g['TCPA']=='Skeptic')
-MC._CORR={}   # empty evidence source -> fail-open (no caps)
-_g2,_cap2,_=MC.cap_uncorroborated('__test__',_cm)
+MC._VOTECORR={'__test__':{'Payments'}}
+MC._JURISCORR={'__test__':{'finance (full)'}}
+_cm={'CFPB':'Champion','Payments':'Champion','Interchange':'Defender','CU Tax Status':'Champion','TCPA':'Skeptic'}
+_g,_cap,_prov,_cor=MC.cap_uncorroborated('__test__',_cm)
+ok('authored Champion survives + earns proven (Path A)',_g['CFPB']=='Champion' and _prov==['CFPB'] and _cor.get('CFPB')=='A')
+ok('recorded floor vote corroborates (Path V)',_g['Payments']=='Champion' and _cor.get('Payments')=='V')
+ok('jurisdiction corroborates a gatekeep cell (Path J)',_g['CU Tax Status']=='Champion' and _cor.get('CU Tax Status')=='J')
+ok('uncorroborated Defender caps to Ally, raw preserved',_g['Interchange']=='Ally' and _cap=={'Interchange':'Defender'})
+ok('cap touches nothing else',_g['TCPA']=='Skeptic')
+MC._CORR={}   # empty authorship source -> fail-open (no caps), regardless of V/J
+_g2,_cap2,_,_=MC.cap_uncorroborated('__test__',_cm)
 ok('missing evidence source fails OPEN (no caps)',_g2==_cm and not _cap2)
-MC._CORR=None   # restore lazy loader
+MC._CORR=None; MC._VOTECORR=None; MC._JURISCORR=None   # restore lazy loaders
 MC._DELIV={'talker':4.0,'mild':1.5,'doer':-2.0}
 ok('delivery_mult bounds [0.70,1.00] + neutral fallback',
    MC.delivery_mult('talker')==0.70 and abs(MC.delivery_mult('mild')-0.925)<1e-9

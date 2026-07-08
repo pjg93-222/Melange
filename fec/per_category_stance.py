@@ -146,20 +146,25 @@ genF={m:MC.overall_tier(matrix[m]) for m in members}
 # the cap only lowers Champion/Defender toward Ally (+2), which can never create the Opponent/
 # Skeptic overalls the ANTI_STANCE floors key on, so convergence and idempotence are untouched.
 # Raw tiers preserved in the 'gate' block; single law lives in MC.cap_uncorroborated.
-gate_capped={}; gate_proven={}
+gate_capped={}; gate_proven={}; gate_corrob={}
 for m in members:
-    matrix[m],_cap,_prov=MC.cap_uncorroborated(m,matrix[m])
+    matrix[m],_cap,_prov,_cor=MC.cap_uncorroborated(m,matrix[m])
     if _cap: gate_capped[m]=_cap
     if _prov: gate_proven[m]=_prov
-print('say-do gate: %d cells capped across %d members | %d members carry proven badges'%(
-      sum(len(v) for v in gate_capped.values()),len(gate_capped),len(gate_proven)))
+    if _cor: gate_corrob[m]=_cor
+_cbp=collections.Counter(pth for cc in gate_corrob.values() for pth in cc.values())
+print('say-do gate: %d cells capped across %d members | %d proven badges | corroborated A%d V%d J%d'%(
+      sum(len(v) for v in gate_capped.values()),len(gate_capped),len(gate_proven),_cbp['A'],_cbp['V'],_cbp['J']))
 cnt=collections.Counter(matrix[m][lab] for m in members for lab,_ in cats)
 MC.dump_atomic({'cats':[c[0] for c in cats],'defensive':sorted(DEFENSIVE),'matrix':{m:matrix[m] for m in members},
            'scores':{m:scores[m] for m in members},
-           'gate':{'rule':'A: Champion/Defender cell requires a sponsored/original-cosponsored bill '
-                          'in the category, else capped to Ally (raw preserved here); proven = '
-                          'sponsored bill in category advanced past introduction',
-                   'capped':gate_capped,'proven':gate_proven}},MB_ROOT+r'\category_stance.json')
+           'gate':{'rule':'A Champion/Defender cell keeps its tier if the member (A) authored/orig-'
+                          'cosponsored an in-category bill, (V) has a recorded CU-aligned final-passage '
+                          'vote in it, or (J) chairs/ranks a committee of jurisdiction over a gatekeep '
+                          'category; else capped to Ally (raw preserved here). proven = authored bill '
+                          'in category advanced past introduction.',
+                   'gatekeep':sorted(MC.GATEKEEP_JURIS),
+                   'capped':gate_capped,'proven':gate_proven,'corrob':gate_corrob}},MB_ROOT+r'\category_stance.json')
 print('tier distribution:',dict(cnt))
 persu=cnt['Highly Persuadable']+cnt['True Neutral']+cnt['Lean Skeptic']+cnt['Skeptic']
 print('persuadable middle: HighlyPersuadable %d | TrueNeutral %d | LeanSkeptic %d | Skeptic %d  (total %d) | Champions+Defenders %d'%(

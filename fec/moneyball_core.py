@@ -169,12 +169,19 @@ def overall_tier(cm):
 # ---- SAY-DO gate + delivery discount (user-ratified 2026-07-07, boss review: "Hill says a lot,
 # doesn't follow through") — SINGLE COPY, applied where category_stance.json is WRITTEN so every
 # consumer (engines, desk, dashboard, col G, audit) inherits it identically. Cheap-talk vs costly
-# signals: the top stance rungs require legislative backing. Rule A (cap): a Champion/Defender CELL
-# requires a sponsored/original-cosponsored bill in that category, else it displays Ally (raw tier
-# preserved in the artifact's gate block). Rule C (badge, never a cap): 'proven' = sponsored bill in
-# the category that ADVANCED past introduction. Simulated pre-landing: 58 cells / 23 members change
-# under Rule A; French Hill Champion->Ally; Tim Scott and Mike Crapo untouched; ranks unaffected
-# (stances never feed the pillars).
+# signals: the top stance rungs (Champion/Defender) must be backed by a COSTLY, RECORDED action.
+# A cell keeps its top tier if ANY of three paths holds; else it displays Ally (raw preserved in the
+# gate block). The three paths match how a category is actually contested (2026-07-08, boss review of
+# Crapo: a defensive champion defends by gatekeeping, not authoring):
+#   A  Authored     — sponsored/original-cosponsored an in-category bill (offense: you write reform).
+#   V  Voted line   — a recorded final-passage CU-aligned vote in the category (vote_category_lean).
+#   J  Jurisdiction — Chair/Ranking of a committee of primary jurisdiction over a GATEKEEP (defend-
+#                     by-blocking) category (CU Tax Status / Interchange / Credit Card Mandates): the
+#                     gavel IS the follow-through where threats never reach a bill or a floor vote.
+# Rule C (badge, never a cap): 'proven' = an AUTHORED bill in the category that advanced past
+# introduction. Impact at landing (user-ratified list): 14 of 58 caps reversed (11 via V, 3 via J),
+# 4 overall tiers rise (Crapo Highly Persuadable->Ally via Finance/JCT chairs; Britt Ally->Champion);
+# ranks unaffected (stances never feed the pillars).
 _ADV_ACTIONS={'Passed House','Passed Senate','Agreed to in Senate','Resolving Differences','Became Law',
               'Failed to pass over veto'}
 # label->canonical map + curated non-CU drop list: kept in lockstep with make_member_desk's copies
@@ -216,18 +223,74 @@ def bill_corroboration():
               'missing evidence source, never fail-capped)'%str(e)[:80])
         _CORR={}; return _CORR
     _CORR=dict(out); return _CORR
+# GATEKEEP categories (defend-by-blocking; Path J jurisdiction committees). USER-RATIFIED 2026-07-08
+# = the model's own DEFENSIVE set {Interchange, Credit Card Mandates} + CU Tax Status (the standing
+# 'defend-type fight' flag in per_category_stance). Editing this table is a stance-domain decision.
+GATEKEEP_JURIS={'CU Tax Status':{'finance','ways and means','ways & means','joint committee on taxation'},
+                'Interchange':{'banking','financial services','judiciary'},
+                'Credit Card Mandates':{'banking','financial services','judiciary'}}
+_VOTECORR=None
+def vote_corroboration():
+    """{name: set(cats with a recorded net-CU-aligned final-passage vote, lean>=0.5, n>=1)} from
+    vote_category_lean.json (Path V — a floor vote is on the record, more than talk). Lazy+cached;
+    missing file -> {} (Path V simply contributes nothing; never fail-caps)."""
+    global _VOTECORR
+    if _VOTECORR is not None: return _VOTECORR
+    try:
+        VL=json.load(open(p('vote_category_lean.json'),encoding='utf-8')); nof=VL['name_of']
+        out=collections.defaultdict(set)
+        for bio,cats in VL['votes'].items():
+            nm=nof.get(bio)
+            if not nm: continue
+            for c,d in cats.items():
+                if (d.get('lean',0) or 0)>=0.5 and (d.get('n',0) or 0)>=1: out[nm].add(c)
+        _VOTECORR=dict(out)
+    except Exception: _VOTECORR={}
+    return _VOTECORR
+_JURISCORR=None
+def juris_corroboration():
+    """{name: set(lowercased committee names where the member is Chair/Ranking)} from the workbook
+    'Committee Data' sheet ('Seats held' -> '<committee> [<intensity>/<role>]'). Lazy+cached; workbook
+    unavailable -> {} (Path J off; the bill-corroboration fail-open already governs missing-workbook)."""
+    global _JURISCORR
+    if _JURISCORR is not None: return _JURISCORR
+    import openpyxl,re,collections as _c
+    out=_c.defaultdict(set)
+    try:
+        wb=openpyxl.load_workbook(WORKBOOK,read_only=True,data_only=True)
+        for r in wb['Committee Data'].iter_rows(min_row=2,values_only=True):
+            nm=r[0]; seats=str(r[4] or '')
+            if not nm: continue
+            for piece in seats.split('|'):
+                mr=re.search(r'\[([^\]]*)\]',piece)
+                if not mr: continue
+                if 'chair' in mr.group(1).lower() or 'ranking' in mr.group(1).lower():
+                    out[nm].add(piece[:piece.find('[')].lower().strip())
+        wb.close(); _JURISCORR=dict(out)
+    except Exception: _JURISCORR={}
+    return _JURISCORR
+def _has_juris(member,cat):
+    kws=GATEKEEP_JURIS.get(cat)
+    if not kws: return False
+    return any(any(kw in cn for kw in kws) for cn in juris_corroboration().get(member,set()))
 def cap_uncorroborated(member,cm):
-    """Rule A on one member's category map. Returns (gated_cm, capped{cat:raw_tier}, proven[cats]).
-    Only ever LOWERS Champion/Defender to Ally; all other tiers pass through untouched."""
+    """Say-do gate on one member's category map (paths A/V/J — see header). Returns (gated_cm,
+    capped{cat:raw_tier}, proven[cats], corrob{cat:'A'|'V'|'J'}). Only ever LOWERS Champion/Defender
+    to Ally; all other tiers pass through untouched."""
     corr=bill_corroboration()
+    cm2=dict(cm); capped={}; proven=[]; corrob={}
+    if not corr: return cm2,capped,proven,corrob   # authorship source missing -> fail-open (no caps)
     spon=corr.get(member,{}).get('sponsored',set()); adv=corr.get(member,{}).get('advanced',set())
-    cm2=dict(cm); capped={}; proven=[]
-    if not corr: return cm2,capped,proven   # evidence source missing -> no caps (fail-open)
+    vcats=vote_corroboration().get(member,set())
     for c,t in cm.items():
         if t in ('Champion','Defender'):
-            if c not in spon: capped[c]=t; cm2[c]='Ally'
-            elif c in adv: proven.append(c)
-    return cm2,capped,sorted(proven)
+            if c in spon:
+                corrob[c]='A'
+                if c in adv: proven.append(c)
+            elif c in vcats: corrob[c]='V'
+            elif _has_juris(member,c): corrob[c]='J'
+            else: capped[c]=t; cm2[c]='Ally'
+    return cm2,capped,sorted(proven),corrob
 _DELIV=None
 def delivery_mult(m):
     """Say-do talker discount on engine TARGET VALUE (never on rank): clip(1-0.15*max(0,gap-1),
