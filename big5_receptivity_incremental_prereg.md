@@ -173,6 +173,46 @@ Two independent findings reframe the confirmatory path:
 - **Expectation (honest)**: given the CMC refutation, a MISS is the likely outcome even here; the
   value of running it is a *powered, clean* verdict rather than a noise-limited one.
 
+### TIER-1 LOCKED 2026-07-08 (user ratified "let's try Nokken"; general-drift proxy accepted). ONE look, bars below do not move.
+- **Criterion Y (PRIMARY)** = total cumulative Euclidean Nokken-Poole drift = Σ over consecutive
+  available congress-pairs of √(Δdim1²+Δdim2²), for members present in ≥2 of {117,118,119} (drop
+  President/no-bioguide rows). Standardized within the analyzable roster. **ROBUSTNESS Y**: (a) net
+  endpoint drift √(Δ over first→last); (b) dim1-only |Δ|; (c) the ≥3-window (all-three-congress)
+  subset.
+- **Analyzable set** = members with valid Nokken in ≥2 congresses ∩ engine-panel join (bioguide_id →
+  congestion.json name) ∩ behavioral_dispositions.json ∩ big5_traits.json ∩ big5_llm_opus.json
+  (expected n≈418 at ≥2, ≈345 at ≥3, per the pre-look power probe).
+- **Candidates**: lexical-N (shrunk, as in engine), Pink-N (−raw_z.ES, re-standardized), persona
+  (.60·z(communion)−.40·z(agency)).
+- **Controls (LOCKED)**: cooperation_z, diligence_z, dominance_z **+ a drift-PRECISION covariate**
+  = log(min nominate_number_of_votes across the member's congresses) — fewer votes ⇒ noisier
+  ideal-point ⇒ spurious drift; this is the Nokken analog of the press coverage/volume confound,
+  and it is netted out of Y (see statistic).
+- **Statistic (LOCKED)**: **partial correlation** of candidate with Y, controlling
+  {coop, dil, dom, log_min_votes} (both candidate and Y residualized on the controls — nets the
+  precision confound out of Y; a more conservative variant of the press gate's semipartial, chosen
+  because of the confound). **One-tailed positive** (higher susceptibility ⇒ more repositioning).
+  Permutation null: 3000 shuffles, seed=20260708, same partial-r statistic; report 95th/99th |r|.
+  BH-FDR across the family.
+- **Hypothesis family (LOCKED)**: H1 lexical-N (main), H2 Pink-N (main), H3 Pink-N | +lexical-N,
+  H4 persona (main), **H5 Pink-N × loss-domain interaction** (loss = pt_domain ∈ {defend,contest}
+  play OR security<0.45; test the N×loss product controlling {coop,dil,dom,precision,N-main,
+  loss-main}) — **Byrne's actual mechanism (N bites UNDER pressure); this is N's strongest
+  theoretical shot.** Caveat locked in advance: the interaction is under-powered vs a main effect
+  (split ~50/50, interaction MDE ≈2× the main MDE), so **only a PASS on H5 is informative; a miss
+  is inconclusive**, not evidence against N. (lexical-N×loss reported as exploratory robustness.)
+- **PASS (LOCKED)**: partial r > permutation 95th floor AND partial r ≥ **+0.15** AND same-sign on
+  BOTH robustness Y defs (net-endpoint, dim1-only) AND BH-FDR q<.05. Reporting bands: ≥+0.15 PASS /
+  +0.10..+0.15 directional-suggestive / (−0.10,+0.10) null / ≤−0.10 contrary.
+- **Null-validation (pre-specified)**: confirm the pipeline detects real structure on Y (some
+  control / nominate_extremity correlates with drift) so a candidate null is genuine, not a dead
+  pipeline (controls are not the pre-registered trait hypotheses, so this is not a protected look).
+- **Consequence**: a PASS for an N candidate ⇒ N/that-instrument earns a validated susceptibility
+  role (then: engine-swap or re-weight is a SEPARATE user-ratified step with the full ship gate).
+  A MISS across H1–H5 ⇒ **on the best powered, text-clean criterion available, N does not earn more
+  weight** — a real verdict (not a criterion artifact this time); N stays as-is, unverified, do not
+  drop. This is a proxy (general drift, CU-agnostic); a CU-specific confirmation still needs Tier-2.
+
 ### TIER-2 gate (CU-specific vote-SWITCH) — the ideal, needs acquisition
 Position change (pro→anti / anti→pro) on the **63 CU bills** in `cu_bill_directions.json`, using the
 user's pre-set directions. Requires acquiring the member×roll-call matrix + roll-call dates
