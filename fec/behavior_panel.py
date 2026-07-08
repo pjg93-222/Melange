@@ -96,8 +96,13 @@ for cn in (119,):
     for r in csv.DictReader(open(p, encoding='utf-8')):
         m = b2n.get((r.get('bioguide_id') or '').strip())
         if not m: continue
-        try: P[m]['votes_cast'] = int(float(r.get('nominate_number_of_votes') or 0))
-        except ValueError: pass
+        # Voteview HS119 can list a bioguide twice (party-switch pseudo-record party_code=328, or a
+        # bicameral split). Keep the row with the MOST votes so a low-vote phantom copy can't clobber
+        # the real member (e.g. K000401 Kiley: real 386-vote row vs a 109-vote 328 phantom).
+        try: v = int(float(r.get('nominate_number_of_votes') or 0))
+        except ValueError: continue
+        if v <= P[m].get('votes_cast', -1): continue
+        P[m]['votes_cast'] = v
         try: P[m]['nominate_extremity'] = round(abs(float(r.get('nominate_dim1') or 0)), 3)
         except ValueError: pass
 
@@ -105,7 +110,9 @@ for cn in (119,):
 eh = json.load(open(B + r'\electoral_history.json', encoding='utf-8')) if os.path.exists(B + r'\electoral_history.json') else {}
 for m, d in eh.items():
     if m in C and isinstance(d, dict):
-        gen = [g for g in (d.get('general') or []) if isinstance(g, dict) and g.get('pct') is not None]
+        # guard the pct range so a corrupt electoral_history row (e.g. a -100 or 119 MEDSL artifact)
+        # can't leak into the vote_share_last validation criterion.
+        gen = [g for g in (d.get('general') or []) if isinstance(g, dict) and isinstance(g.get('pct'), (int, float)) and 0 <= g['pct'] <= 100]
         if gen:
             try: P[m]['vote_share_last'] = round(float(gen[-1]['pct']), 2)
             except (ValueError, TypeError, KeyError): pass

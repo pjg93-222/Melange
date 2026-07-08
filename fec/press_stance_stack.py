@@ -13,7 +13,7 @@ Output: press_stance_final.csv sidecar (url, member, stack_label, tier). build_m
 consumes it: sign from stack label (UNRELATED -> 0 — kills trade-digest mention noise), intensity
 x tier weight, DEBATE fallback when a url is missing.
 Usage: python press_stance_stack.py            (train on golds + score full corpus + write sidecar)"""
-import csv, hashlib, io, json, os, re, sys, collections
+import csv, hashlib, html, io, json, os, re, sys, collections
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -127,7 +127,7 @@ for i, r in enumerate([t for t in tone_rows if (t.get("url") or "").strip()]):
     tier = "unanimous" if (s == f_flat == deb) else ("majority" if (s == f_flat or s == deb) else "review")
     tiern[tier] += 1
     out.append({"url": r.get("url"), "member": r.get("member"), "date": r.get("date"),
-                "title": r.get("title"), "stack_label": s, "tier": tier, "debate_stance": deb})
+                "title": html.unescape(r.get("title") or ""), "stack_label": s, "tier": tier, "debate_stance": deb})
 tmp = B + r"\press_stance_final.csv.tmp"
 with io.open(tmp, "w", encoding="utf-8-sig", newline="") as f:
     w = csv.DictWriter(f, fieldnames=list(out[0].keys()))

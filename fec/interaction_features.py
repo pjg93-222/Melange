@@ -52,7 +52,10 @@ app = collections.defaultdict(list)
 for m, pkg, t, rid in con.execute("select member, package, text, rowid from speeches where source='INTERVIEW' order by rowid"):
     if t and t.strip(): app[(m, program_of(pkg), pkg)].append(t.strip())
 
-FEATS = ["wpt_mean", "wpt_p90", "gini", "cutoff", "burst", "defense", "discmark", "agree"]
+# 'agree' dropped: the ^...$ end-anchored AGREE regex never matches a substantive transcript turn, so
+# the raw count is 0 for every member and the z-scored column is a dead 0-for-all — no consumer reads it
+# (big5_hybrid IXF and behavioral_dispositions both exclude it). Removed rather than ship a zero-variance feature.
+FEATS = ["wpt_mean", "wpt_p90", "gini", "cutoff", "burst", "defense", "discmark"]
 mp = collections.defaultdict(lambda: collections.defaultdict(list))   # (program) -> feature -> [(member, value, nturns)]
 raw_by_member_prog = collections.defaultdict(dict)
 prog_members = collections.defaultdict(set)
