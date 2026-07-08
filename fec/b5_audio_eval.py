@@ -94,9 +94,14 @@ def run(cache):
         audioA = cv_pred(A[okA], yA[okA])                       # criterion-fit audio-A (cross-validated)
         esA = ES_acoustic[okA]
         aes = abs(float(np.corrcoef(audioA, esA)[0, 1])) if audioA.std() and esA.std() else 9
-        bar2 = aes <= 0.45
-        print('BAR 2 halo separation: within-audio A-ES |r| = %.3f  (bar <= 0.45; text halo .65) -> %s'
-              % (aes, 'CLEAR' if bar2 else 'MISS'))
+        # separation is interpretable ONLY if audio-A is a VALID A measure — else low A-ES is vacuous
+        # (random audio has no A signal, so it 'separates' trivially). Gate on audio-A significance.
+        audio_A = res.get('A'); nullA = perm_null(A[okA], yA[okA]) if audio_A is not None else None
+        a_valid = (audio_A is not None and nullA is not None and audio_A > nullA)
+        bar2 = (aes <= 0.45) and a_valid
+        print('BAR 2 halo separation: within-audio A-ES |r| = %.3f (bar <= 0.45; text halo .65) | '
+              'audio-A valid = %s (r %+.3f vs null %+.3f) -> %s'
+              % (aes, a_valid, audio_A or 0, nullA or 0, 'CLEAR' if bar2 else 'MISS'))
 
     verdict = bar1 and bar2
     print('\nAUDIO PILOT VERDICT: %s' % ('PASS — adversarially re-derive before recording (P6 doctrine)'
