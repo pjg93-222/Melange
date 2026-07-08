@@ -93,3 +93,42 @@ N-swap decision (lexical→Pink) — only meaningful if it also ships later:
 `fec/tests/run_tests.py` (37) green · `fec/audit_full.py` (64) ALL CLEAN · full `run_pipeline.py`
 chain · **zero rank delta /533**. Re-standardization, PW, susc weights, and the two cpf physics
 are calibrated/user-ratified constants — **no change ships without explicit user ratification.**
+
+---
+## OUTCOME — ONE LOOK TAKEN 2026-07-08 (locked; bars above NOT moved). RESULT: MISS (all candidates).
+Script: `scratchpad/onelook_incremental.py`. Perm floor (primary, n=161): 95th=0.151, 99th=0.200.
+
+| Hypothesis | PRIMARY (range, n=161) | absmove (n=161) | range ≥2win (n=232) | Verdict |
+|---|---|---|---|---|
+| H1 lexical-N \| ctrl | −0.020 | −0.014 | −0.028 | **MISS** (wrong sign, ≈0) |
+| H2 Pink-N \| ctrl | +0.013 | −0.057 | +0.066 | **MISS** (≪0.151 floor) |
+| H3 Pink-N \| ctrl+lexN | +0.016 | −0.056 | +0.068 | **MISS** |
+| H4 persona \| ctrl | +0.076 | −0.037 | +0.065 | **MISS** (largest, but <½ floor; sign inconsistent) |
+
+Simple r(Y=range): lexical-N = −0.035, Pink-N = −0.007 (raw, no residualization — the signal is
+absent before any modeling, so the null is not a residualization artifact).
+
+**Adversarial validation of the null (not a code bug):** the same pipeline DOES detect effects on
+this criterion — `breadth_z` r=+0.217 (clears the floor), `cooperation_z` r=+0.106 — while N and
+persona do not. This also exposes a **volume/breadth confound**: members who publish more/broader
+show more measured "movement" (partly a sampling artifact of more windows/topics), not position
+lability. **Reliability-filtered set (≥2 items in every contributing window, ≥3 windows): n=1** —
+essentially no member has a reliably-sampled multi-window press trajectory.
+
+### Consequences under the locked rules
+- **N-swap (lexical→Pink): NOT justified.** Requires H2 AND H3 to PASS; both MISS. Keep the
+  existing lexical-N channel unchanged. (The measurement-quality argument for Pink remains, but this
+  criterion provides no predictive support for the swap.)
+- **Making N MORE load-bearing: NOT supported** on this criterion. Neither N flavor shows detectable
+  incremental validity for press-stance movement.
+- **Do NOT drop N either.** The locked "drop N" trigger (neither H1 nor H2 clears rule 1) is met,
+  but it is a candidate action for the USER only, and this criterion is explicitly
+  necessary-not-sufficient + noise-attenuated + confounded — it cannot carry a drop verdict against
+  a theory-grounded (Byrne) channel. N stays; its engine contribution remains **unverified**, as it
+  was before.
+- **Persona (PW=0.30): unchanged** (locked regardless of outcome). H4 is the largest signal
+  (+0.076 primary) and right-signed in 2/3 sets but sub-threshold; nothing to act on.
+- **Binding next step = avenue 4:** the confirmatory gate needs a *non-text, reliably-sampled*
+  movement criterion (CU-relevant roll-call switches / cosponsorship timing). This press-movement
+  screen is too noisy (n=1 survives reliability filtering) and too confounded (breadth/volume) to
+  license any engine change. No engine change ships from this result.
