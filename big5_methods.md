@@ -168,3 +168,13 @@ the round's biggest gains (SB .674->.748, MTMM .410->.493).
 Conclusion: the shipped configuration (pink equal-weight items + blue v2) SURVIVED all four
 pre-registered challengers on the doubled corpus. Evaluators: fec/big5_improvements_eval.py
 (--control/--p1/--p2/--p4) and fec/b5_residual_eval.py; genre featz via BIG5_SOURCES hooks.
+
+## 7. C genre-weighting — earned consequence of the pre-registered retest PASS (2026-07-07)
+The interview-C retest (bars locked 2026-07-05: rho >= +0.15 vs votes_cast AND >= +0.10 vs
+follow-through, ONE look) PASSED on the full post-gate artifact: +0.155 (n=293) and +0.112 (n=266),
+with the CREC contrast (+0.106/+0.051) confirming the genre mechanism. Per the pre-declared
+consequence, member-level C now aggregates INTERVIEW chunks at 2x weight (C_INT_W in big5_llm.py;
+the weight is the pilot's observed signal ratio, documented, not tuned against outcomes). Each
+member carries c_basis: 'interview-weighted' (294 members) or 'crec-only' (215). The desk's C wedge
+was already un-collapsed for all axes by the 2026-07-06 user rule, which satisfies the display half
+of the consequence.

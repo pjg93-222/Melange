@@ -336,17 +336,25 @@ for k, u, (m, g, ci) in items:
     ct = {t: sum(s * o.get(i, 0) for i, s in bytr[t]) / len(bytr[t]) for t in TR}
     gm[m][g].append(ct)
 raw = {}; genre_scores = {}
+# C genre-weighting — EARNED by the pre-registered interview-C retest PASS (2026-07-07: rho +0.155
+# vs votes_cast bar +0.15, +0.112 vs follow-through bar +0.10, n=293; CREC contrast +0.106/+0.051).
+# INTERVIEW carries the C criterion signal (the pilot's ~2x mechanism finding), so C aggregates
+# interview chunks at 2x weight. The weight is the pilot's observed signal ratio, documented, NOT
+# tuned against outcomes. Other traits keep plain chunk-count weighting. c_basis records the basis.
+C_INT_W = 2.0
+def _gw(gs, g, t): return len(gs[g]) * (C_INT_W if (t == 'C' and g == 'INTERVIEW') else 1.0)
 for m, gs in gm.items():
     pergenre = {g: {t: sum(c[t] for c in cl) / len(cl) for t in TR} for g, cl in gs.items() if cl}
     genre_scores[m] = {g: {**v, 'n_chunks': len(gs[g])} for g, v in pergenre.items()}
-    wsum = sum(len(gs[g]) for g in pergenre)
-    raw[m] = {t: sum(pergenre[g][t] * len(gs[g]) for g in pergenre) / wsum for t in TR}
+    raw[m] = {t: sum(pergenre[g][t] * _gw(gs, g, t) for g in pergenre) /
+                 sum(_gw(gs, g, t) for g in pergenre) for t in TR}
 if raw:
     mu = {t: sum(d[t] for d in raw.values()) / len(raw) for t in TR}
     sd = {t: (sum((d[t] - mu[t]) ** 2 for d in raw.values()) / max(1, len(raw) - 1)) ** .5 or 1.0 for t in TR}
     traits = {m: {**{t: round((raw[m][t] - mu[t]) / sd[t], 3) for t in TR},
                   'N': round(-(raw[m]['ES'] - mu['ES']) / sd['ES'], 3),
-                  'n_chunks': sum(len(gm[m][g]) for g in gm[m])} for m in raw}
+                  'n_chunks': sum(len(gm[m][g]) for g in gm[m]),
+                  'c_basis': 'interview-weighted' if 'INTERVIEW' in genre_scores.get(m, {}) else 'crec-only'} for m in raw}
     if os.environ.get('B5_NO_DUMP')=='1':
         print('B5_NO_DUMP=1: cache warmed (%d rows), artifact untouched' % len(cache)); sys.exit(0)
     from moneyball_core import dump_atomic
