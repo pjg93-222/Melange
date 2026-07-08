@@ -549,6 +549,11 @@ def build_bundle():
             'coalition': m.get('coalition'),
             # per-legislative-area stance tiers (Champion..Opponent), aligned to CATS; '-' = no position
             'stances': ''.join(NAME2LETTER.get((CS['matrix'].get(name, {}) or {}).get(cat, '—'), '-') for cat in CATS),
+            # say-do gate (2026-07-07): CATS indices with a 'Proven' badge (sponsored bill in the
+            # category advanced past introduction) and indices capped Champion/Defender->Ally for
+            # lacking a sponsored bill (raw tier preserved in category_stance.json's gate block)
+            'proven': [i for i, cat in enumerate(CATS) if cat in ((CS.get('gate') or {}).get('proven', {}).get(name) or [])],
+            'gcap':   [i for i, cat in enumerate(CATS) if cat in ((CS.get('gate') or {}).get('capped', {}).get(name) or {})],
             'committee': m.get('committee'),
             # full committee positions (incl Ways & Means / Finance / JCT) from the workbook Committee Data sheet
             'committees': CMTS.get(name, {}).get('seats', []),

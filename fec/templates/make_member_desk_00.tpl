@@ -461,9 +461,12 @@ function openMember(i){
   history.replaceState(null,'','?m='+encodeURIComponent(m.name));
   const os=m.overall_stance||'-', col=STCOL[os]||'#6b7280';   // overall stance tier drives the verdict
   // per-area stance, sorted champion -> opponent (then by score)
+  // say-do gate (2026-07-07): ★ = Proven (sponsored bill in this area advanced past introduction);
+  // ° = tier capped Champion/Defender->Ally for lacking a sponsored bill in the area (talk without paper)
+  const provSet=new Set(m.proven||[]), gcapSet=new Set(m.gcap||[]);
   const areaRows=CATS.map((cat,ix)=>({cat,ix,st:(m.stances&&m.stances[ix])||'-',score:m.radar[ix],rank:m.adjrank[cat],def:DEF.has(cat)}))
     .sort((a,b)=>{const na=STANCE_ORDER.indexOf(a.st),nb=STANCE_ORDER.indexOf(b.st);return (na<0?99:na)-(nb<0?99:nb)||(b.score-a.score);});
-  const stanceByArea=areaRows.map(a=>`<div class=arow><span class=aname>${a.cat}${a.def?' <span style=color:var(--faint)>(def)</span>':''}</span>${stanceBadge(a.st)}<span class=arank>#${a.rank||'—'} · ${f2(a.score)}</span></div>`).join('');
+  const stanceByArea=areaRows.map(a=>`<div class=arow><span class=aname>${a.cat}${a.def?' <span style=color:var(--faint)>(def)</span>':''}${provSet.has(a.ix)?' <span title="Proven: sponsored bill in this area advanced past introduction" style=color:#f59e0b>★</span>':''}${gcapSet.has(a.ix)?' <span title="Capped from Champion: no sponsored bill in this area backs the rhetoric" style=color:var(--faint)>°</span>':''}</span>${stanceBadge(a.st)}<span class=arank>#${a.rank||'—'} · ${f2(a.score)}</span></div>`).join('');
   const legRadar=radar(m.radar,D.cats_short,'#34d399',90);
   const evLbl=m.ev_play, evVal=m.ev_value;
   // pillars

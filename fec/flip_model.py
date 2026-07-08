@@ -86,7 +86,7 @@ def topic_setup(cat,MAT):
     nA={n:sum(w*cpf(n,u) for u,w in adj[n].items() if campT[u]=='pro') for n in members}
     nB={n:sum(w*cpf(n,u) for u,w in adj[n].items() if campT[u]=='anti') for n in members}
     mAt=max(nA.values()) or 1; mBt=max(nB.values()) or 1
-    tgt={n:(eng[sc][n]+BASE*score[n]/smax)*PERS[cs[n]]*(1+0.3*bpf[n]) for n in members}   # +PASSAGE bonus: bipartisan members advance bills more (Volden-Wiseman +8-14%) -> higher strategic value
+    tgt={n:(eng[sc][n]+BASE*score[n]/smax)*PERS[cs[n]]*(1+0.3*bpf[n])*MC.delivery_mult(n) for n in members}   # +PASSAGE bonus (Volden-Wiseman +8-14%); x say-do delivery discount (2026-07-07): a talker's expected value priced down up to 30%
     r=(cs,campT,nA,nB,mAt,mBt,tgt); _cache[sig]=r; return r
 def flip_value(cat,MAT,cu_state,ind_state):
     """Expected weighted flips on a topic = sum tgt*pflip, given a money state."""

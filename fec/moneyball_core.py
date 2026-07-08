@@ -165,6 +165,83 @@ def overall_tier(cm):
     return ('Champion' if x>=2.5 else 'Ally' if x>=1.75 else 'Highly Persuadable' if x>=1.25 else
             'Persuadable' if x>=0.75 else 'Lean Persuadable' if x>=0.25 else 'True Neutral' if x>=-0.25 else
             'Lean Skeptic' if x>=-0.75 else 'Skeptic' if x>=-1.25 else 'Highly Skeptical' if x>=-1.9 else 'Opponent')
+
+# ---- SAY-DO gate + delivery discount (user-ratified 2026-07-07, boss review: "Hill says a lot,
+# doesn't follow through") — SINGLE COPY, applied where category_stance.json is WRITTEN so every
+# consumer (engines, desk, dashboard, col G, audit) inherits it identically. Cheap-talk vs costly
+# signals: the top stance rungs require legislative backing. Rule A (cap): a Champion/Defender CELL
+# requires a sponsored/original-cosponsored bill in that category, else it displays Ally (raw tier
+# preserved in the artifact's gate block). Rule C (badge, never a cap): 'proven' = sponsored bill in
+# the category that ADVANCED past introduction. Simulated pre-landing: 58 cells / 23 members change
+# under Rule A; French Hill Champion->Ally; Tim Scott and Mike Crapo untouched; ranks unaffected
+# (stances never feed the pillars).
+_ADV_ACTIONS={'Passed House','Passed Senate','Agreed to in Senate','Resolving Differences','Became Law',
+              'Failed to pass over veto'}
+# label->canonical map + curated non-CU drop list: kept in lockstep with make_member_desk's copies
+# (the desk parses the same role sheets for display; consolidate to this import at next touch).
+_LBL2CAT={'CFPB Issues & Structural Reform':'CFPB','Charter Modernization & Governance':'Charter Modernization',
+ 'Credit Union Capital Requirements':'CU Capital Requirements','Credit Card & Consumer-Fee Mandates':'Credit Card Mandates',
+ 'Data Privacy & Cybersecurity':'Data Privacy & Cyber','Defense Credit Union Issues':'Defense CU Issues',
+ 'Mortgage Lending & Housing':'Mortgage & Housing','NCUA Budget & Share Insurance Fund':'NCUA Budget & Insurance',
+ 'Technology & Emerging Issues':'Technology & Emerging','Telephone Consumer Protection Act Issues':'TCPA'}
+_DROP_BILLS=('george floyd','save money on auto repair','auto repair transportation','accessible, affordable internet',
+ 'affordable internet for all','national defense authorization','health and location data',
+ 'fourth amendment is not for sale','app store accountability','safer gaming','protecting military servicemembers',
+ 'data from foreign adversaries','cease orwellian surveillance')
+_CORR=None
+def bill_corroboration():
+    """{member: {'sponsored': set(canonical cats), 'advanced': set(...)}} from the workbook role
+    sheets ('Sponsor Interactions' + 'Original Co-Sponsor Interaction'; plain cosponsorship does NOT
+    corroborate under Rule A). Lazy + cached; NFC-casefold name match against the roster."""
+    global _CORR
+    if _CORR is not None: return _CORR
+    import openpyxl,unicodedata
+    nrm=lambda s:unicodedata.normalize('NFC',str(s or '')).strip().lower()
+    roster={nrm(m):m for m in congestion()}
+    out=collections.defaultdict(lambda:{'sponsored':set(),'advanced':set()})
+    try:
+        wb=openpyxl.load_workbook(WORKBOOK,read_only=True,data_only=True)
+        for sheet in ('Sponsor Interactions','Original Co-Sponsor Interaction'):
+            for r in wb[sheet].iter_rows(min_row=2,values_only=True):
+                m=roster.get(nrm(r[2]))
+                if not m: continue
+                if any(d in (str(r[4] or '')+' '+str(r[12] or '')).lower() for d in _DROP_BILLS): continue
+                cat=_LBL2CAT.get(r[0],r[0]) if r[0] else ''
+                if not cat: continue
+                out[m]['sponsored'].add(cat)
+                if str(r[8] or '') in _ADV_ACTIONS: out[m]['advanced'].add(cat)
+        wb.close()
+    except Exception as e:
+        print('  !! bill_corroboration unavailable (%s) — gate degrades to NO caps (fail-open on '
+              'missing evidence source, never fail-capped)'%str(e)[:80])
+        _CORR={}; return _CORR
+    _CORR=dict(out); return _CORR
+def cap_uncorroborated(member,cm):
+    """Rule A on one member's category map. Returns (gated_cm, capped{cat:raw_tier}, proven[cats]).
+    Only ever LOWERS Champion/Defender to Ally; all other tiers pass through untouched."""
+    corr=bill_corroboration()
+    spon=corr.get(member,{}).get('sponsored',set()); adv=corr.get(member,{}).get('advanced',set())
+    cm2=dict(cm); capped={}; proven=[]
+    if not corr: return cm2,capped,proven   # evidence source missing -> no caps (fail-open)
+    for c,t in cm.items():
+        if t in ('Champion','Defender'):
+            if c not in spon: capped[c]=t; cm2[c]='Ally'
+            elif c in adv: proven.append(c)
+    return cm2,capped,sorted(proven)
+_DELIV=None
+def delivery_mult(m):
+    """Say-do talker discount on engine TARGET VALUE (never on rank): clip(1-0.15*max(0,gap-1),
+    0.70,1.00). gap from say_do_gap.json (weekly diagnostic); missing artifact or member -> neutral
+    1.0 (the receptivity layer's fallback pattern)."""
+    global _DELIV
+    if _DELIV is None:
+        try:
+            g=json.load(open(p('say_do_gap.json'),encoding='utf-8'))['members']
+            _DELIV={n:(v.get('gap') or 0.0) for n,v in g.items()}   # raw gaps; clip computed per call (testable)
+        except Exception:
+            _DELIV={}
+    return max(0.70,min(1.00,1-0.15*max(0.0,_DELIV.get(m,0.0)-1.0)))
+
 # Nickname equivalence classes (QA3 2026-07-04, Bernie/Bernard-class resolver misses) — SINGLE COPY.
 # fetch_interviews.py carries the original inline; consolidate it to this import at next touch.
 NICK_SETS=[{'bernard','bernie'},{'charles','chuck','charlie'},{'christopher','chris'},{'richard','dick','rich','rick'},

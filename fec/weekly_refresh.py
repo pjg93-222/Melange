@@ -90,4 +90,5 @@ except Exception as e: log('rank compare skipped: %s'%e)
 step('signed coalitions (diag)',['signed_coalitions.py'],timeout=900)
 step('KB benchmark (diag)',['kb_benchmark.py'],timeout=900)
 step('LEP criterion (diag)',['lep_criterion.py'],timeout=900)
+step('say-do gap (diag)',['say_do_gap.py'],timeout=900)   # 2026-07-07: feeds delivery_mult (engine talker discount); runs AFTER desks so it reads the fresh bundle
 log('===== WEEKLY REFRESH COMPLETE — dashboards regenerated =====')

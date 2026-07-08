@@ -57,7 +57,7 @@ for sc in blocks:
             bx=[n for n in members if random.random()<min(0.9,ind[n]/BSCALE) and campT[n]=='neu' and n not in s]   # 5.A FIX: roll for EVERY member FIRST (CRN-stable -- base & spread({n}) share draws), THEN filter. The old order gated the draw behind `n not in s`, so adding a seed changed how many draws fired -> stream desync -> MC noise in the marginal.
             tot+=cascade(s,set(anti)|set(bx),it)
         return tot/MC
-    ev={n:eng(sc,n)+0.15*score[n]/smax for n in members}
+    ev={n:(eng(sc,n)+0.15*score[n]/smax)*MBC.delivery_mult(n) for n in members}   # x say-do delivery discount (2026-07-07): don't court talkers at list price
     cand=sorted([n for n in members if campT[n] in ('neu',) or cs[n]=='Ally'],key=lambda n:-ev[n])[:45]
     base=spread(set()); mg={n:max(0.0,spread({n})-base) for n in cand}
     pos={n:v for n,v in mg.items() if v>0}

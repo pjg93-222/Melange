@@ -312,6 +312,19 @@ if os.path.exists(B+r'\co_appearance.json'):
     _bad=sum(1 for e in _co if not all(k in e for k in ('a','b','n','last','bipartisan')) or e['n']<1)
     ck('co-appearance edge schema (keys present, n>=1, non-empty)', len(_co)>=100 and _bad==0,
        '%d pairs, %d malformed'%(len(_co),_bad))
+# say-do corroboration gate coherence (2026-07-07): every capped cell must DISPLAY Ally with its raw
+# tier preserved as Champion/Defender; every proven cell must BE Champion/Defender in the matrix.
+_g=(CS.get('gate') or {})
+if _g:
+    _cap=_g.get('capped') or {}; _prov=_g.get('proven') or {}
+    _b1=sum(1 for m,cc in _cap.items() for c,raw in cc.items()
+            if MAT.get(m,{}).get(c)!='Ally' or raw not in ('Champion','Defender'))
+    _b2=sum(1 for m,cs_ in _prov.items() for c in cs_ if MAT.get(m,{}).get(c) not in ('Champion','Defender'))
+    ck('say-do gate coherent (capped->Ally w/ raw C/D preserved; proven are C/D cells)', _b1==0 and _b2==0,
+       '%d capped cells / %d proven cells; %d+%d incoherent'%(sum(len(v) for v in _cap.values()),
+       sum(len(v) for v in _prov.values()),_b1,_b2))
+else:
+    ck('say-do gate block present in category_stance.json', False, 'gate key missing — producer predates 2026-07-07 landing')
 
 print('FULL-BODY AUDIT — %d passed, %d FAILED'%(len(P),len(F)))
 if F: print('  FAILURES:',F)

@@ -61,7 +61,7 @@ def alloc_topic(sc):
     nA={n:sum(w*cpf(n,u) for u,w in adj[n].items() if campT[u]=='pro') for n in members}   # bridge-amplified proximity to THIS issue's champions
     nB={n:sum(w*cpf(n,u) for u,w in adj[n].items() if campT[u]=='anti') for n in members}  # ... and opponents
     mAt=max(nA.values()) or 1; mBt=max(nB.values()) or 1
-    tgt={n:(eng[sc][n]+BASE*score[n]/smax)*PERS[cs[n]]*((1+GAMMA*bpf[n]) if DIRECT else (1+0.3*bpf[n])) for n in members}  # strategic value x persuadability (x bridge boost when --bridge)
+    tgt={n:(eng[sc][n]+BASE*score[n]/smax)*PERS[cs[n]]*((1+GAMMA*bpf[n]) if DIRECT else (1+0.3*bpf[n]))*MC.delivery_mult(n) for n in members}  # strategic value x persuadability (x bridge boost when --bridge) x say-do delivery discount (2026-07-07)
     al={n:0 for n in members}
     def marg(n): return 0.0 if al[n]>=CAP else tgt[n]*(pflip(n,al[n]+INC,nA,nB,mAt,mBt)-pflip(n,al[n],nA,nB,mAt,mBt))
     h=[(-marg(n),n) for n in members if tgt[n]>0]; heapq.heapify(h); spent=0

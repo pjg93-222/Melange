@@ -141,9 +141,25 @@ else:
     matrix,scores,rep=classify(anti)
     print('gen iteration: no fixed point in 8 iterations -> union-floor damped final pass (S2-04)')
 genF={m:MC.overall_tier(matrix[m]) for m in members}
+# ---- SAY-DO corroboration gate (user-ratified 2026-07-07): Rule A cap + Rule C 'proven' badge,
+# applied AFTER the S2-04 fixed point converges, as a pure OUTPUT transform. Safe by construction:
+# the cap only lowers Champion/Defender toward Ally (+2), which can never create the Opponent/
+# Skeptic overalls the ANTI_STANCE floors key on, so convergence and idempotence are untouched.
+# Raw tiers preserved in the 'gate' block; single law lives in MC.cap_uncorroborated.
+gate_capped={}; gate_proven={}
+for m in members:
+    matrix[m],_cap,_prov=MC.cap_uncorroborated(m,matrix[m])
+    if _cap: gate_capped[m]=_cap
+    if _prov: gate_proven[m]=_prov
+print('say-do gate: %d cells capped across %d members | %d members carry proven badges'%(
+      sum(len(v) for v in gate_capped.values()),len(gate_capped),len(gate_proven)))
 cnt=collections.Counter(matrix[m][lab] for m in members for lab,_ in cats)
 MC.dump_atomic({'cats':[c[0] for c in cats],'defensive':sorted(DEFENSIVE),'matrix':{m:matrix[m] for m in members},
-           'scores':{m:scores[m] for m in members}},MB_ROOT+r'\category_stance.json')
+           'scores':{m:scores[m] for m in members},
+           'gate':{'rule':'A: Champion/Defender cell requires a sponsored/original-cosponsored bill '
+                          'in the category, else capped to Ally (raw preserved here); proven = '
+                          'sponsored bill in category advanced past introduction',
+                   'capped':gate_capped,'proven':gate_proven}},MB_ROOT+r'\category_stance.json')
 print('tier distribution:',dict(cnt))
 persu=cnt['Highly Persuadable']+cnt['True Neutral']+cnt['Lean Skeptic']+cnt['Skeptic']
 print('persuadable middle: HighlyPersuadable %d | TrueNeutral %d | LeanSkeptic %d | Skeptic %d  (total %d) | Champions+Defenders %d'%(

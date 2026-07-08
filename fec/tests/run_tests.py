@@ -83,5 +83,24 @@ ok('CU money raises pflip',p1>p0)
 ok('industry money lowers pflip',p2<p0)
 ok('receptivity scales money channel (pm=2 amplifies CU effect)',fm.pflip(50000,0,pm=2.0,**kw)>p1)
 
+print('[say-do gate + delivery discount]')
+# cap law invariants on a synthetic member (no workbook dependency: inject the corroboration cache)
+MC._CORR={'__test__':{'sponsored':{'CFPB'},'advanced':{'CFPB'}}}
+_cm={'CFPB':'Champion','Payments':'Champion','Interchange':'Defender','CU Tax Status':'Ally','TCPA':'Skeptic'}
+_g,_cap,_prov=MC.cap_uncorroborated('__test__',_cm)
+ok('uncorroborated Champion/Defender cap to Ally',_g['Payments']=='Ally' and _g['Interchange']=='Ally')
+ok('corroborated Champion survives + earns proven',_g['CFPB']=='Champion' and _prov==['CFPB'])
+ok('cap preserves raw tier and touches nothing else',_cap=={'Payments':'Champion','Interchange':'Defender'}
+   and _g['CU Tax Status']=='Ally' and _g['TCPA']=='Skeptic')
+MC._CORR={}   # empty evidence source -> fail-open (no caps)
+_g2,_cap2,_=MC.cap_uncorroborated('__test__',_cm)
+ok('missing evidence source fails OPEN (no caps)',_g2==_cm and not _cap2)
+MC._CORR=None   # restore lazy loader
+MC._DELIV={'talker':4.0,'mild':1.5,'doer':-2.0}
+ok('delivery_mult bounds [0.70,1.00] + neutral fallback',
+   MC.delivery_mult('talker')==0.70 and abs(MC.delivery_mult('mild')-0.925)<1e-9
+   and MC.delivery_mult('doer')==1.0 and MC.delivery_mult('unknown-member')==1.0)
+MC._DELIV=None
+
 print('\nKERNEL TESTS — %d passed, %d FAILED'%(P,F))
 sys.exit(1 if F else 0)
