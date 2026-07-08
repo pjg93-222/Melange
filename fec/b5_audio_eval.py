@@ -69,13 +69,13 @@ def run(cache):
         text_only = heldout_r(tz, yE[okF]); fused = heldout_r(np.hstack([tz, A[okF]]), yE[okF])
     else:
         text_only = fused = float('nan')
-    b1a = (audio_E is not None and audio_E >= 0.15)
+    above = (audio_E is not None and nullE is not None and audio_E > nullE)   # one-sided permutation p<.05
+    b1a = (audio_E is not None and audio_E >= 0.15 and above)                 # bar AND significant vs the n-aware noise floor
     b1b = (fused - text_only) >= 0.03
-    above = (audio_E is not None and nullE is not None and audio_E > nullE)
     print('BAR 1 incremental validity (E vs visibility_z):')
-    print('  audio-alone E held-out r = %+.3f  (n=%d, bar >= +0.15; perm-null 95%%=%+.3f -> %s) -> %s'
-          % (audio_E or 0, int(okE.sum()), nullE or 0, 'above noise' if above else 'WITHIN NOISE',
-             'CLEAR' if b1a else 'MISS'))
+    print('  audio-alone E held-out r = %+.3f  (n=%d, needs >= +0.15 AND > perm-null 95%%=%+.3f) -> %s (%s)'
+          % (audio_E or 0, int(okE.sum()), nullE or 0, 'CLEAR' if b1a else 'MISS',
+             'above noise' if above else 'WITHIN NOISE'))
     print('  text-alone E %+.3f | text+audio fused %+.3f | delta %+.3f  (n=%d, bar >= +0.03) -> %s'
           % (text_only, fused, fused - text_only, int(okF.sum()), 'CLEAR' if b1b else 'MISS'))
     print('  secondary audio-alone (no bar): A%+.3f C%+.3f O%+.3f'

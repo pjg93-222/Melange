@@ -8,7 +8,8 @@ each via yt-dlp -> wav (duration-capped), resumable via b5_audio_fetch_log.json,
 audio_pilot/<member>/. Then run b5_audio_build.py -> b5_audio_eval.py (the one look).
 Modes:
   --eligible [N]   rank pilot-eligible members (have Pink+Blue+behavioral) by visibility (proxy for
-                   public-audio availability); print top N (default 40) + seed b5_audio_sources.json
+                   public-audio availability); print top N (default 80 — power fix, prereg Addendum 3;
+                   n=40 was underpowered) + seed b5_audio_sources.json
   (default)        fetch audio for every member with URLs in b5_audio_sources.json"""
 import os, json, subprocess
 sys = _s; sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -21,7 +22,7 @@ def _ff():
         import imageio_ffmpeg; return imageio_ffmpeg.get_ffmpeg_exe()
     except Exception: return None
 
-def eligible(topn=40):
+def eligible(topn=80):
     pink = (json.load(open(B + r'\big5_llm_opus.json', encoding='utf-8')).get('traits') or {})
     v2 = (json.load(open(B + r'\big5_v2.json', encoding='utf-8')).get('traits') or {})
     bd = (json.load(open(B + r'\behavioral_dispositions.json')).get('members') or {})
@@ -71,7 +72,7 @@ def fetch():
 
 if __name__ == '__main__':
     if '--eligible' in sys.argv:
-        n = 40
+        n = 80
         for a in sys.argv:
             if a.isdigit(): n = int(a)
         eligible(n)

@@ -104,3 +104,17 @@ signal could not be separated from chance, and noise can clear +0.15. **RECOMMEN
 before ridge (standard for n<<p; sharply lowers the floor so +0.15 is meaningful at N=40), and/or
 (B) raise N to ~90+.** The three BARS are unchanged; only the design's dimensionality/N is under review.
 Until ratified, the perm-null diagnostic + the P6 re-derivation guard against a within-noise false pass.
+
+## Addendum 3 (2026-07-08, user "pursue the most optimal adjustment" — PCA REFUTED; N + significance fix)
+Addendum 2's recommended PCA fix was TESTED on the random-audio harness and **REFUTED**: at N=40 the
+permutation noise floor is +0.267 with no PCA but +0.34-0.36 with PCA k=5/8/10/15 (PCA let ridge
+under-regularize the few noise components). **Diagnosis: the +0.267 floor = 1.645/sqrt(40) = the
+sampling limit of a correlation at n=40 — an N problem, not a dimensionality problem. Feature
+engineering cannot fix it; only samples can.** RATIFIED adjustment (stricter than the original, both
+pre-look): **(1) the audio-E pass now REQUIRES clearing +0.15 AND exceeding the permutation-null 95th
+pct (one-sided p<.05) — an N-aware significance gate wired into `pass` (b1a), not just the fixed bar;
+(2) target N raised to >=80** (r_crit ~= 1.645/sqrt(80) ~= .18, so the expected .25-.33 effect from
+Marrero/Rubio becomes detectable above the floor; fetch --eligible now defaults to 80). The three
+numeric bars (+0.15, +0.03, <=0.45) are UNCHANGED; the significance gate + N are added rigor. The
+incremental-delta and A-ES tests remain higher-variance and are best read at the larger N. Net: the
+pilot is now honestly powered; a within-noise result cannot register as PASS.
