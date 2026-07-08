@@ -150,3 +150,21 @@ labeling session can clear all three.
 All artifacts regenerate from: `big5_traits.py` (env: BIG5_SOURCES / BIG5_BEFORE / BIG5_AFTER / BIG5_HALF / BIG5_OUT),
 `interaction_features.py`, `validate_big5.py <artifact> [--half2 <other>]`, scratchpad `big5_composite.py` +
 `composite_splithalf.py`. RKH data: `fec/liwc/rkh/` (Dataverse DVN/JDH6KR, DVN/CORRXG).
+
+## 6. Improvement round 1 — pre-registered, ONE look each (2026-07-07, bars @a61820e)
+Frozen snapshot: 4,217 chunks / 509 members (big5_snapshot_freeze.json, artifact md5 67af4451).
+Control (equal weights, new corpus): SB mean .748 (O .79 C .71 E .73 A .77 ES .74), MTMM .493,
+disc .308, A-ES .653, KG 4/5, C(INT) vs votes +.156 / FT +.111. The corpus doubling alone delivered
+the round's biggest gains (SB .674->.748, MTMM .410->.493).
+
+| Test | Result | Verdict | Why |
+|---|---|---|---|
+| P1 item discrimination weights | SB .754 (4/5 improved), MTMM .496, disc .317 | **MISS** | disc bar (<=.30): reweighting concentrates on halo-loaded items (A-ES .653->.669). Equal weights stand. |
+| P2 bifactor halo removal | A-ES .727 (worse), C-crit +.049/+.018 (collapsed) | **MISS** | PC1 carries criterion-VALID variance: the 'halo' is partly real trait covariance, exactly the miss-clause reading. Halo stays; A-ES caveat remains on the desk. |
+| P4 EB shrinkage (k: O 2.1 C 2.8 E 3.1 A 2.7 ES 3.1) | SB .786 (clears +.02) but worst n>=8 move .73 SD | **MISS** | shrinkage reshuffles well-measured extremes (bar .5 SD). Raw stands; k ships as info. |
+| B5 blue genre-residualized refit | A +.181 C +.224 O +.228 CLEAR; E -.033 MISS; family MTMM .096 vs .383 MISS | **MISS** | v2's E was genre variance (broadcast talkativeness) — residualizing kills it; lexical family still fails MTMM. v2 stands. A/C/O gains logged as a round-2 candidate (own prereg required). |
+| P-ALL composition | — | vacuous | nothing passed to compose. |
+
+Conclusion: the shipped configuration (pink equal-weight items + blue v2) SURVIVED all four
+pre-registered challengers on the doubled corpus. Evaluators: fec/big5_improvements_eval.py
+(--control/--p1/--p2/--p4) and fec/b5_residual_eval.py; genre featz via BIG5_SOURCES hooks.
