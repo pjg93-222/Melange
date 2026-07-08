@@ -598,7 +598,7 @@ function psychHTML(m){
     const agList=agree?B5AX.filter((_,i)=>agree[i]):[];
     radar.skipGreen=null;   // no collapsed wedges — the overlap region spans all five axes
     const rad=P.big5_pct?radar(P.big5_pct,B5AX,'#7dd3fc',82,P.llm_pct,'#e879f9',axcol):'';
-    const agLine=agree?`<div style="font-size:10px;margin-top:2px"><span style="color:#86efac;font-weight:700">light-green region</span> <span style="color:var(--faint)">= where the two instruments overlap (their agreement zone; ✓ label = within 15 pts on that axis${agList.length?': '+agList.join(', '):''}). On Consc the strongest measure remains Diligence on the behavioral radar above; text-instrument agreement shows here like every other axis.</span></div>`:'';
+    const agLine=agree?`<div style="font-size:10px;margin-top:2px"><span style="color:#86efac;font-weight:700">light-green region</span> <span style="color:var(--faint)">= where Blue and Pink overlap (agreement of two independent method families; ✓ = within 15 pts on that axis${agList.length?': '+agList.join(', '):''}).</span></div>`:'';
     const persona=(P.communion_pct!=null)?bar('Warmth — communion persona',P.communion_pct,'#2dd4bf')+bar('Assertiveness — agency persona',P.agency_pct,'#c2862a'):'<div class=empty>No persona cue coverage yet for this member.</div>';
     const rd=READS[P.susc_read||'trait-only']||READS['trait-only'];
     const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Engagement responsiveness (engines)</span><b>${P.pressure_mult}×</b></div>
@@ -608,9 +608,13 @@ function psychHTML(m){
       <div style="font-size:11px;font-weight:700;color:${rd[1]};background:${rd[1]}22;border:1px solid ${rd[1]}55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">${rd[0]}</div>`:'';
     const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Suggested approach (IIT-C octant)</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';
     comp=`<div class=gen style=margin-bottom:12px>
-      <div><div class=eyebrow>Behavioral profile <span style=color:var(--faint)>· measured from what the member does (floor presence = discussion dynamics + leadership) — drives the engines</span></div>${behav}
-      ${rad?`<div class=eyebrow style=margin-top:8px>Text Big-5 v2 <span style=color:var(--faint)>· behavior-calibrated (held-out validated)</span>${P.llm_pct?` <span style="color:#e879f9">--- LLM item-read (Opus, MTMM-passing, ${P.llm_chunks} chunks)</span>`:''}</div>${rad}${agLine}${P.llm_pct?'':'<div style="font-size:10px;color:var(--faint)">API/LLM read (pink dashed) not available for this member — the pilot covered the 173 members with RKH-era comparison data; full-roster scoring extends it to everyone.</div>'}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Big-5: low confidence (thin text corpus)</div>':''}`:''}</div>
-      <div><div class=eyebrow>Projected persona (Birkenmaier-Lechner cues)</div>${persona}
+      <div><div class=eyebrow>Behavioral profile <span style="color:#86efac;font-weight:700">· validated by construction</span> <span style=color:var(--faint)>· measured from what the member does (floor presence = discussion dynamics + leadership) — the only psychology that drives targeting</span></div>${behav}
+      ${rad?`<div class=eyebrow style=margin-top:8px>Text Big-5 <span style="color:#fbbf24;font-weight:700">· grade A-</span> <span style=color:var(--faint)>· cross-check only — does NOT drive ranks or engines</span></div>
+      <div style="font-size:10px;color:var(--faint);margin:1px 0 3px"><span style="color:#7dd3fc;font-weight:700">Blue</span> = behavior-calibrated text model; <span style="color:#e879f9;font-weight:700">Pink dashed</span> = LLM item-read (Opus${P.llm_pct?', '+P.llm_chunks+' chunks':''}). Independent literature benchmark (2026-07-08): A-/high-A within the elite-speech class — convergent r .42-.52 vs a .38 field ceiling, passes cross-genre MTMM.</div>
+      ${rad}${agLine}
+      <div style="font-size:10px;color:#e0a020;margin-top:2px">Read with care: Conscientiousness is the least-reliable trait (split-half .62), and Agreeableness / Emotional-Stability share a tone-halo — treat the gap between those two cautiously. The strongest C signal remains Diligence on the behavioral radar above.</div>
+      ${P.llm_pct?'':'<div style="font-size:10px;color:var(--faint)">Pink (LLM) read not yet available for this member.</div>'}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Blue: low confidence (thin text corpus)</div>':''}`:''}</div>
+      <div><div class=eyebrow>Projected persona <span style=color:var(--faint)>· public / presented persona (Birkenmaier-Lechner cues) — how they come across, not intrinsic traits</span></div>${persona}
       <div class=eyebrow style=margin-top:8px>Engagement &amp; receptivity</div>${suscRows}${appr}</div></div>`;
   }
   const ext=P.ext?`<div class=eyebrow style=margin-top:8px>External measures (public datasets · weekly diagnostics)</div>
