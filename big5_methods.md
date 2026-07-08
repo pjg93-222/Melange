@@ -210,3 +210,21 @@ collapsed (+.021 — breadth is not carried by prose style) and family MTMM stil
 .269, improved from category-features' .096/.383 but failing). v2 stands. Three lexical bases now
 exhausted (category rates, genre-residualized, stylometric); remaining blue lever = CT-CM latent
 capstone (own prereg, Addendum 2).
+
+## 11. V3P judge pilot + CT-CM capstone — both MISS; the campaign's honest terminus (2026-07-07)
+V3P (400 chunks, 50 members, $30, paired vs the same members' v2): the anti-halo independence
+instruction WORKS — A-ES fell .585 -> .508 paired (-0.077) — but missed the -0.10 requirement and
+the .50 absolute by .008, while the rewritten ES items cost reliability (SB .488) and C dipped
+(+.074). Extrapolated to the full roster (.653 - .077 = ~.58), a funded full v3 would NOT clear
+the .50 bar: not recommended. CT-CM (semopy, pink raw_z + blue v2 + behavioral indicators, pink
+method factor): boundary-degenerate (F_ES variance 0, blue_A uniqueness 0, negative on-trait
+loadings) — empirically underidentified because blue v2's near-collinear A/C/O fits cannot anchor
+distinct trait factors; MISS on the Heywood/loadings bar.
+CAMPAIGN CLOSE. Passes: the pre-registered interview-C retest (consequence wired, C_INT_W=2x) and
+P6 gated shrinkage (SB .748 -> .831, promoted). Corpus growth delivered SB .674->.748 and MTMM
+.410->.493. The A-ES finding, fully characterized: ~.44 is population-real (RKH benchmark .443
+House / .393 Senate), the ~.21 excess is TEXT-TONE halo that is information-theoretically
+entangled with C's criterion signal at the text level (proven twice: P2 member-level and P7
+chunk-level removal both crush A-ES AND the C criterion together; V3P shows judge instructions
+recover only ~a third of it). The desk carries the caveat with the RKH benchmark. Eleven designs,
+one look each, two promotions, zero bars moved.
