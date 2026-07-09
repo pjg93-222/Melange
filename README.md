@@ -39,6 +39,16 @@ Credit-union legislative-influence modeling & money-allocation system (the "Mone
    --rebuild is free / --score is gated) + co-appearances (`co_appearance_layer.py` →
    co_appearance.json). All are chain-independent inputs/diagnostics; audit_full guards their
    schemas (run-5b).
+7. **Clean-audio & narrative layer** (2026-07-09): audio fetch (`b5_audio_fetch.py --search`, yt-dlp
+   floor clips) → caption speaker/identity verification (`b5_audio_verify.py` → b5_audio_verify.json
+   + b5_caption_cache.json; Haiku, HARD-signal identity, keep = solo & not-mismatch) → verified
+   eGeMAPS voiceprints (`b5_audio_build.py` → b5_audio_cache.json, 395 members, gate drops
+   contaminated clips) → ES cross-modal validation (`b5_es_crossmodal.py`, pre-registered PASS
+   +0.208; per-member display read b5_es_voice.json) + 3-paragraph "Suggested approach" briefs
+   (`b5_narratives.py` → member_narratives.json, 533/533; Fable w/ Opus refusal-fallback,
+   de-identified inputs; renders on the desk psych tab). Expert-panel infrastructure
+   (`b5_panel_{items,build,score}.py`) is DORMANT (prereg CANCELED; scorer refuses the look).
+   All display-only — no engine/rank consumer.
 
 ## Running
 ```

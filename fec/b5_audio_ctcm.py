@@ -5,7 +5,17 @@ INDEPENDENT acoustic-ES indicator. ES previously had only pink_ES (1 indicator, 
 inseparable); the pure acoustic-ES composite (steady/dynamic-voice markers, r=-.249 w/ Pink-ES, p=.018,
 NEVER fit to Pink) gives ES its independent 2nd indicator. Behavioral cooperation anchors A. The Pink
 METHOD factor absorbs the judge halo. Instruments' own scores UNTOUCHED. ONE LOOK.
-Bars: latent A-ES |r| <= 0.50 (vs Pink .65); latent C vs votes_cast Spearman >= +0.15; no Heywood."""
+Bars: latent A-ES |r| <= 0.50 (vs Pink .65); latent C vs votes_cast Spearman >= +0.15; no Heywood.
+
+!! DEPRECATED / MIS-SIGNED (2026-07-09, es-voice-recheck workflow + clean-audio re-test): the SIGN
+!! dict below encodes a folk 'steady/clean-toned voice = calm' model. On the 395 identity-verified
+!! clean voiceprints its significant features track ES the OPPOSITE way (F0stddevNorm +.14, jitter
+!! +.15, shimmer +.15, HNR -.18 vs big5_v2-ES, all p<.01) -- a monotone/flat/clean voice is the
+!! depression/withdrawal (instability) signature, not stability. This composite's -0.165 was real
+!! signal read upside-down, and the latent MISS above inherited the inverted anchor. The result is
+!! kept UNCHANGED as the historical one-look record; do NOT re-run or trust this composite's signs.
+!! Authoritative ES cross-modal test = fec/b5_es_crossmodal.py (sign-choice-free ridge, held-out
+!! r=+0.208 perm-p=.0002 ES-specific; big5_es_crossmodal_prereg.md RESULT)."""
 import json
 sys = _s; sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import numpy as np, pandas as pd, semopy

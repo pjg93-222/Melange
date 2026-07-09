@@ -312,6 +312,28 @@ if os.path.exists(B+r'\co_appearance.json'):
     _bad=sum(1 for e in _co if not all(k in e for k in ('a','b','n','last','bipartisan')) or e['n']<1)
     ck('co-appearance edge schema (keys present, n>=1, non-empty)', len(_co)>=100 and _bad==0,
        '%d pairs, %d malformed'%(len(_co),_bad))
+# 2026-07-09 guards: clean-audio/narrative layer (same rationale as run-5b — display artifacts with
+# zero coverage would silently truncate/malform). Skip-if-absent; all display-only.
+if os.path.exists(B+r'\member_narratives.json'):
+    _na=json.load(open(B+r'\member_narratives.json',encoding='utf-8'))
+    _nbad=sum(1 for v in _na.values() if v.get('ok') and not (v.get('p1') and v.get('p2') and v.get('p3')))
+    _nok=sum(1 for v in _na.values() if v.get('ok'))
+    ck('narrative artifact schema (ok => 3 non-empty paragraphs; coverage >=500)', _nok>=500 and _nbad==0,
+       '%d ok, %d malformed'%(_nok,_nbad))
+if os.path.exists(B+r'\b5_audio_cache.json') and os.path.exists(B+r'\b5_audio_verify.json'):
+    _au=json.load(open(B+r'\b5_audio_cache.json',encoding='utf-8'))
+    _vf=json.load(open(B+r'\b5_audio_verify.json',encoding='utf-8'))
+    _keep={k.split('/')[0] for k,v in _vf.items() if isinstance(v,dict) and v.get('keep')}
+    _stray=[m for m in _au.get('members',[]) if m not in _keep]   # voiceprint with zero kept clips = gate breach
+    ck('clean-audio voiceprints verification-gated (every cached member has a keep-clip; 88 eGeMAPS)',
+       _au.get('n_features')==88 and len(_au.get('members',[]))>=300 and not _stray,
+       '%d members, %d stray'%(len(_au.get('members',[])),len(_stray)))
+if os.path.exists(B+r'\b5_es_voice.json'):
+    _ev=json.load(open(B+r'\b5_es_voice.json',encoding='utf-8'))
+    _evm=_ev.get('members',{}); _ebad=sum(1 for v in _evm.values() if v.get('voice_es_z') is None or v.get('gap') is None)
+    ck('voice-ES display artifact schema (z+gap per member; matches the recorded look r=+0.208)',
+       len(_evm)>=300 and _ebad==0 and abs((_ev.get('heldout_r') or 0)-0.208)<1e-9,
+       '%d members, %d malformed, r=%s'%(len(_evm),_ebad,_ev.get('heldout_r')))
 # say-do corroboration gate coherence (2026-07-07): every capped cell must DISPLAY Ally with its raw
 # tier preserved as Champion/Defender; every proven cell must BE Champion/Defender in the matrix.
 _g=(CS.get('gate') or {})

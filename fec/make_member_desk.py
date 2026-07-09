@@ -138,6 +138,7 @@ BDISP = (L('behavioral_dispositions.json') or {}).get('members', {})
 _BD_AX = ['cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z']
 _BDPCT = {ax: _pctrank([d[ax] for d in BDISP.values() if ax in d]) for ax in _BD_AX} if BDISP else {}
 NARR = L('member_narratives.json') or {}   # 3-paragraph 'Suggested approach' brief (Fable, Opus rescues refusals); display-only
+VES = (L('b5_es_voice.json') or {}).get('members', {})   # voice-ES OOF read (b5_es_crossmodal, validated +0.208); display-only
 
 def psy_for(name):
     t = B5.get(name) or {}; r = RCPT.get(name) or {}
@@ -170,6 +171,9 @@ def psy_for(name):
     if nar and nar.get('ok'):
         out['narrative'] = {'p1': nar.get('p1', ''), 'p2': nar.get('p2', ''), 'p3': nar.get('p3', ''),
                             'audio': bool((nar.get('has') or {}).get('audio'))}
+    v = VES.get(name)
+    if v and v.get('voice_es_z') is not None:
+        out['ves'] = {'z': v['voice_es_z'], 'gap': v.get('gap')}
     return out or None
 
 CATS = CS['cats']                            # canonical 17 legislative areas

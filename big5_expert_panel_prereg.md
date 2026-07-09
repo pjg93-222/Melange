@@ -1,8 +1,10 @@
 # Multi-rater expert gold panel — the independent-TRAIT anchor (pre-registration)
 
-**STATUS: DRAFT — locks when 'STATUS: LOCKED' replaces this line, which happens ONLY after (a) item text
-is verified verbatim (b5_panel_items.PROVISIONAL_TEXT=False) and (b) Paul finalizes rater count/sample.
-The scorer (fec/b5_panel_score.py) hard-refuses THE LOOK until locked. Drafted 2026-07-09.**
+**STATUS: CANCELED (user decision 2026-07-09 — "We aren't doing this actually, let us just augment
+what we have"). No raters will be recruited; the A- grade STANDS as final absent this anchor. The
+infrastructure (items/build/scorer/rater HTML) is retained committed and dormant — if the panel is
+ever revived, re-open this prereg, finalize rater count, and replace this line with 'STATUS: LOCKED'.
+The scorer hard-refuses THE LOOK while not locked, so the dormant state is safe. Drafted 2026-07-09.**
 
 ## Why this exists (the A-path)
 The formal re-grade (2026-07-09, 32-agent judge panel) ratified **A-** and was explicit: the ONLY path

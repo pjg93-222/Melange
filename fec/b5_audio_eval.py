@@ -7,7 +7,12 @@ behavioral_dispositions + big5_v2 (text). Enforces the two LOCKED bars:
   BAR 2 (halo separation): within-audio A-ES |r| <= 0.45 (audio-A criterion-fit to cooperation_z;
         ES_acoustic = -z(F0stddev)-z(jitter)-z(shimmer)-z(loudness_stddev), theory-driven/unsupervised).
 PASS = both. A pass is adversarially re-derived before it is recorded (P6 doctrine). --synth tests
-the math offline on a random cache (proves the code + bar logic run; NOT a result)."""
+the math offline on a random cache (proves the code + bar logic run; NOT a result).
+
+!! NOTE (2026-07-09): the BAR-2 ES_acoustic composite above is MIS-SIGNED (folk 'steady voice = calm';
+!! clean-data + literature show flat/monotone tracks INSTABILITY -- see b5_audio_ctcm.py header note).
+!! The recorded MISS stands as the historical one-look; do not reuse this composite's signs. The
+!! authoritative ES cross-modal result = fec/b5_es_crossmodal.py (held-out r=+0.208, perm-p=.0002)."""
 import json
 import numpy as np
 from sklearn.linear_model import Ridge

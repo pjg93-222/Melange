@@ -42,9 +42,6 @@ n=len(yES); t=rES*np.sqrt((n-2)/max(1e-9,1-rES*rES)); param_p=float(stats.t.sf(t
 pe=[(i,pinkES(m)) for i,m in enumerate(mem) if pinkES(m) is not None]
 rP=None
 if len(pe)>50:
-    idx=[i for i,_ in pe]; yP=np.array([v for _,v in pe])
-    predP=oof(np.array([yES[i] for i in range(len(mem))]))  # placeholder not used
-    # proper: predict Pink-ES directly
     yPfull=np.array([pinkES(m) if pinkES(m) is not None else np.nan for m in mem])
     keep=~np.isnan(yPfull)
     # oof over the kept subset would change folds; simplest honest secondary: corr of the big5_v2-ES model's preds vs Pink-ES
@@ -59,3 +56,14 @@ print('\n  BAR 1 held-out r >= +0.15 & right-signed: %s (%+.3f)'%('CLEAR' if b1 
 print('  BAR 2 permutation p < 0.01: %s (%.4f)'%('CLEAR' if b2 else 'MISS',perm_p))
 print('  BAR 3 discriminant r_ES > r_A: %s'%('CLEAR' if b3 else 'MISS'))
 print('\nVERDICT: %s'%('PASS — voice carries ES-specific signal out-of-fold (cross-modal ES validated)' if (b1 and b2 and b3) else 'MISS — ES stays measured-but-unvalidated (documented)'))
+# ---- display artifact (added POST-LOOK 2026-07-09, user 'augment what we have'): per-member voice-ES
+# read for the desk. Deterministic (fixed KFold seeds) -> byte-stable re-derivation of the recorded
+# look; the artifact adds NO new inference, it persists the same OOF predictions. DISPLAY-ONLY.
+from moneyball_core import dump_atomic
+zp=(predES-predES.mean())/max(1e-12,predES.std(ddof=1)); zt=(yES-yES.mean())/max(1e-12,yES.std(ddof=1))
+dump_atomic({'members':{m:{'voice_es_z':round(float(zp[i]),3),'text_es_z':round(float(zt[i]),3),
+                           'gap':round(float(zp[i]-zt[i]),3)} for i,m in enumerate(mem)},
+             'heldout_r':round(rES,3),'perm_p':perm_p,'n':len(mem),
+             'note':'voice->ES OOF ridge preds (b5_es_crossmodal one-look, prereg RESULT r=+0.208); display-only'},
+            B+r'\b5_es_voice.json')
+print('wrote b5_es_voice.json (%d members; display-only voice-ES read)'%len(mem))

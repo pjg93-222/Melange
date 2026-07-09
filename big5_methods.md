@@ -318,3 +318,47 @@ plus two direct tests reframed the whole thing:
   Only genuine gap: no behavioral ES criterion (ES-side discriminant untested; Voteview/NPAT would close
   it; low priority). B&L reframe on the shelf: A and ES both project onto the COMMUNION pole — an
   agency/communion per-sentence cue-share would decorrelate them at the display level by construction.
+
+## 16. Clean-audio program: speaker verification, ES cross-modal validation, formal re-grade (2026-07-09)
+The search-fetched audio pilot (§14) was ~38% contaminated (multi-speaker panels, wrong-speaker,
+name collisions — "Adam Smith" clips carrying Adam Schiff). Fix (user-directed): caption-based
+speaker verification — `b5_audio_verify.py` pulls each clip's auto-captions and a Haiku classifier
+judges (a) speaker structure and (b) identity vs a member card on a **HARD signal only**
+(self-naming, chair recognition, "my bill the __ Act"; topic is nuance, never identity).
+1,700/2,119 clips kept; **142 wrong-member clips caught**; `b5_audio_build.py` gained a verification
+gate → **395 members with ≥180 s verified-clean voiceprints** (median ~17 min).
+
+**ES cross-modal validation — the three-turn honest record:**
+1. The remembered "+0.223 text-affect↔voice-prosody" was an uncommitted scratchpad one-off on the
+   CONTAMINATED N=90 (Empath neg-affect ↔ 3-feature prosody composite) — provisional, never a result
+   of record.
+2. On clean audio the committed acoustic-ES composite gave −0.165 — but a 32-agent literature
+   workflow established the composite was **MIS-SIGNED** (folk "steady voice = calm"; per the
+   depression-voice literature flat/monotone marks INSTABILITY; per-feature clean-data correlations
+   all run opposite the composite's signs). §14's Bar-2 composite and the CT-CM audio anchor carry
+   deprecation notes; their recorded MISSes stand as history.
+3. **The authoritative test** (`big5_es_crossmodal_prereg.md` → `fec/b5_es_crossmodal.py`, locked
+   pre-look): ridge nested-CV, ALL 88 eGeMAPS → big5_v2-ES, out-of-fold, analyst chooses NO signs.
+   **PASS: held-out r = +0.208, permutation p = .0002 (5000), ES-specific (r_A = −0.030), N = 395.**
+   Modest by construction (~4% variance = the N-from-voice ceiling); voice↔text-MODEL convergence,
+   not ground truth. Per-member OOF reads persisted display-only (`b5_es_voice.json`, desk line).
+   **All five traits now carry independent validation: A/C/E/O behavioral (v2 held-out A +.14 /
+   C +.13 / E +.34 / O +.20) + ES cross-modal.**
+
+**Formal re-grade (32-agent judge panel + adversarial skeptics + fact-check): A− RATIFIED** —
+panel B+/A−/A−/A−, skeptics floored B− (non-fatal), final A− as top-of-class. Held below A by:
+method-shared RKH convergence; the pooled-lexical MTMM failure (firewalled — no engine reads trait
+scores); the modest ES effect. The fact-check corrected the property sheet: **shipped v2 C = +.13
+(a +.24 claim was ~2× inflated); the "full-roster Empath→diligence +.24/perm-p .003" has no repo
+record (the real number is the N=90 exploratory +.355); Pink's MTMM .41/halo .653 must not be
+attributed to the lexical composite; the Pink×behavioral matrix was 0/5 diagonal-dominant (§13),
+so "validates 4/5" always carries that caveat.** Path to A = an independent-TRAIT anchor only.
+The multi-rater expert panel for that anchor was BUILT (`big5_expert_panel_prereg.md`,
+`fec/b5_panel_{items,build,score}.py`; verified BFI-2-XS observer items; 98 leak-scanned packets;
+gated one-look scorer) and then **CANCELED by user decision — A− stands as the final grade**; the
+infrastructure is dormant and safe (scorer refuses the look while unlocked).
+
+Companion display layer shipped the same day: 3-paragraph "Suggested approach" briefs for all 533
+members (`fec/b5_narratives.py` → `member_narratives.json`; de-identified measured profiles → Fable,
+Opus 4.8 rescuing its ~74% refusal rate; vocal descriptors from the clean voiceprints feed P2).
+Display-only throughout; engines/ranks untouched (kernel 37/37, audit ALL CLEAN, ranks 0/533).

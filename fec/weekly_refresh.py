@@ -91,4 +91,19 @@ step('signed coalitions (diag)',['signed_coalitions.py'],timeout=900)
 step('KB benchmark (diag)',['kb_benchmark.py'],timeout=900)
 step('LEP criterion (diag)',['lep_criterion.py'],timeout=900)
 step('say-do gap (diag)',['say_do_gap.py'],timeout=900)   # 2026-07-07: feeds delivery_mult (engine talker discount); runs AFTER desks so it reads the fresh bundle
+# clean-audio / narrative layer, INCREMENTAL (2026-07-09 'update everything'). Display-only +
+# tolerant. Costs are bounded by the caches: fetch skips members >=180s (dlarchive-resumable);
+# verify classifies only NEW clips (caption+verdict caches; Haiku ~$0.004/clip); build featurizes
+# only new keep-clips; narratives generate only members MISSING an ok brief (typically 0-2/week,
+# Fable w/ Opus refusal-fallback ~$0.10/member). Steady state = four fast no-ops. NARR_MAX caps the
+# worst-case narrative bill (artifact loss); NARR_MAX=0 disables that step entirely.
+step('audio fetch (incr)',['b5_audio_fetch.py','--search','999'],timeout=3600)
+step('audio verify (incr)',['b5_audio_verify.py'],timeout=3600)
+step('audio voiceprints (incr)',['b5_audio_build.py'],timeout=1800)
+_nmax=os.environ.get('NARR_MAX','15')
+if _nmax!='0':
+    step('narratives (incr, cap %s)'%_nmax,['b5_narratives.py','--limit',_nmax],timeout=1800)
+    # re-embed so fresh briefs/voice-reads land THIS week (desks were built inside run_pipeline, before this layer)
+    step('desk re-embed (narratives)',['make_member_desk.py'],timeout=900)
+    step('combined re-embed',['make_combined.py'],timeout=600)
 log('===== WEEKLY REFRESH COMPLETE — dashboards regenerated =====')
