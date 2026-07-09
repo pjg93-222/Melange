@@ -129,7 +129,7 @@ def a_matrix(feats, BD, VV, P, gm):
     return MEM, X
 
 def look_a():
-    if '## RESULT-A' in open(PREREG, encoding='utf-8').read():
+    if '\n## RESULT-A' in open(PREREG, encoding='utf-8').read():   # newline-anchored: prose QUOTES of the heading must not trip the gate
         print('!! LOOK-A REFUSED: RESULT-A already recorded.'); return
     BD, VV, P = criteria_pack(); gm = gender_map()
     feats = build_a_features(); MEM, X = a_matrix(feats, BD, VV, P, gm)
@@ -172,7 +172,7 @@ def e1_data():
     yES = rez(resid(np.array([V2[m]['ES'] for m in mem]), Z)); yA = rez(resid(np.array([V2[m]['A'] for m in mem]), Z))
     return mem, Xr, yES, yA, gv
 def look_e1():
-    if '## RESULT-E1' in open(PREREG, encoding='utf-8').read():
+    if '\n## RESULT-E1' in open(PREREG, encoding='utf-8').read():   # newline-anchored: prose QUOTES of the heading must not trip the gate
         print('!! LOOK-E1 REFUSED: RESULT-E1 already recorded.'); return
     mem, Xr, yES, yA, gv = e1_data()
     print('TEST E1 — THE LOOK | N=%d (F=%d M=%d) | 88 sex-residualized eGeMAPS -> sex/party-residualized v2-ES' % (len(mem), int(gv.sum()), int(len(mem) - gv.sum())))
@@ -214,7 +214,7 @@ def e2_data():
     mem = [m for m in sorted(resp) if V2.get(m) and all(V2[m].get(t) is not None for t in 'OCEA') and V2[m].get('ES') is not None and m in gm]
     return mem, resp, V2, PK, gm, P, added
 def look_e2():
-    if '## RESULT-E2' in open(PREREG, encoding='utf-8').read():
+    if '\n## RESULT-E2' in open(PREREG, encoding='utf-8').read():   # newline-anchored: prose QUOTES of the heading must not trip the gate
         print('!! LOOK-E2 REFUSED: RESULT-E2 already recorded.'); return
     mem, resp, V2, PK, gm, P, added = e2_data()
     y = np.array([resp[m] for m in mem], float)
@@ -287,4 +287,4 @@ if __name__ == '__main__':
     else:
         pre = open(PREREG, encoding='utf-8').read() if _o.path.exists(PREREG) else ''
         for tag in ('A', 'E1', 'E2'):
-            print('TEST %-3s look: %s' % (tag, 'TAKEN' if ('## RESULT-%s' % tag) in pre else 'not yet taken'))
+            print('TEST %-3s look: %s' % (tag, 'TAKEN' if ('\n## RESULT-%s' % tag) in pre else 'not yet taken'))
