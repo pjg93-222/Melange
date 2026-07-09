@@ -48,3 +48,16 @@ collapses out-of-fold. The analyst chooses NO signs. One look; misses revert; ba
 Locked + committed BEFORE the look. Method = the repo's existing CV protocol (no new degrees of freedom).
 Any PASS adversarially re-derived. The pressure (user believes ES was validated) makes these guards MORE
 binding, not less. big5_v2 targets are never fit to audio (they ARE the independent criteria).
+
+## RESULT — THE ONE LOOK (2026-07-09, N=395)
+**PASS on all three bars.**
+- BAR 1: held-out r(ridge_pred, big5_v2-ES) = **+0.208**, right-signed. CLEAR (>= +0.15).
+- BAR 2: permutation p (5000 label perms, one-sided) = **0.0002**; parametric p = 0.0000. CLEAR (< 0.01).
+- BAR 3: discriminant r(pred, ES)=+0.208 **>** r(pred, A)=-0.030. CLEAR — ES-specific, not an A-halo.
+- Secondary: the big5_v2-ES model's held-out preds vs Pink-ES = +0.170 (same sign as the contaminated
+  ridge->Pink-ES +0.298, weaker & clean).
+**VERDICT: ES is cross-modally VALIDATED** — clean-audio voice predicts the text-ES read out-of-fold,
+ES-specifically. Effect is modest (~4% variance) = the literature's true N-from-voice ceiling, not
+inflated. This SUPERSEDES the mis-signed acoustic-ES composite in b5_audio_ctcm.py / b5_audio_eval.py
+(whose -0.165 was real signal read upside-down). All five traits now validated: A/C/E/O behaviorally +
+ES cross-modally. Caveats: voice<->text-MODEL convergence (not ground truth); minor C-overlap.
