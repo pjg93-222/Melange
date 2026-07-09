@@ -35,3 +35,18 @@ diagnostic BEFORE the latent read.
 ## Discipline
 Locked + committed BEFORE the look. One look; misses revert; bars never move after data seen. Engine
 untouched (display-only latent). Any PASS adversarially re-derived before it is recorded (P6 lesson).
+
+## RESULT — THE ONE LOOK (2026-07-08, N=265): MISS. STOPPING RULE INVOKED.
+- **VIABILITY: corr(interaction_ES, pink_ES) = +0.013 — NULL.** The tone-free conversational-dynamics N
+  composite carries essentially NO ES/N information that converges with the text read. (Consistent with
+  interaction_features' earlier honest-null validation.) So the anchor is empty before the model runs.
+- latent A-ES |r| = **0.928** (worse than Pink's .65, same degeneracy as the audio anchor); latent C vs
+  votes +0.122 (< .15); behav_O negative loading. **MISS all three bars.**
+- **This is the 4th CT-CM failure across every derivable independent signal: lexical Blue (collinear),
+  embedding Blue (collinear), audio-ES (too weak, r=-.25), conversational-dynamics N (null, +.01).**
+- **STOPPING RULE HONORED (pre-declared): the derived-measure route is EXHAUSTED. The A-ES(=-N) halo is
+  IRREDUCIBLE without NEW DATA.** The only remaining paths, both data-collection: (1) a Voteview
+  roll-call voting-consistency pull (a behavioral ES anchor not derivable from the current corpus), or
+  (2) a multi-rater human gold panel (the independent trait read the whole campaign has lacked). No
+  more CT-CM re-specification. Pink's A-ES stays at its RKH-anchored characterization (~.44 real,
+  ~.21 tone-halo); the psychology instrument's honest ceiling remains A-, display-only.
