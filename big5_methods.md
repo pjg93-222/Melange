@@ -298,3 +298,23 @@ Audio is NOT the lever to straight-A or load-bearing. Text terminus stands; psyc
 no number moved. Pipeline (fec/b5_audio_fetch|build|eval.py) retained; scale-up not pursued (same-kind
 audio is redundant). Real load-bearing avenues live elsewhere (N-channel upgrade to Pink; incremental
 validity vs observed movement — separate session).
+
+## 15. The A-ES halo was LARGELY A NON-PROBLEM (2026-07-08; 5-paper mine + 2 tests)
+After FOUR failed CT-CM halo-separation attempts (lexical Blue, embedding Blue, audio-ES, conversational
+N — all collinear/weak/null), a 5-paper re-read (Yang-ISR, RKH, Birkenmaier-Lechner, Marrero, Simchon)
+plus two direct tests reframed the whole thing:
+- **Not load-bearing:** NO engine reads big5_llm_opus.json (Pink). It is DISPLAY-ONLY (desk + audit +
+  analysis scripts only) — the A-ES halo drives ZERO decisions.
+- **Traits functionally distinct:** despite Pink A-ES r=.653, only Pink-A predicts the A-criterion
+  (cooperation): partial r=+.100 p=.034 controlling ES; Pink-ES does NOT (partial +.049 p=.30). The
+  correlation is shared-METHOD TONE, not shared meaning. Discriminant CRITERION validity holds (A-side).
+- **The ".44 population-real floor" was mislabeled:** it is corr(lifeAgree,lifeEmoti)=+0.443 (n=916)
+  computed from RKH's OWN estimates — but RKH is also text-derived (tone-influenced, not halo-free), and
+  RKH NEVER uses trait-trait correlation as a validity criterion (per-trait nomological validation only).
+- **Conclusion:** the 4 CT-CM attempts optimized a self-invented quantity. The field-correct bar (RKH's
+  logic, and tonight's C win) is PER-TRAIT EXTERNAL CRITERION VALIDITY, not A-ES discriminant correlation.
+  The .653 stays as a documented shared-method-tone caveat on the DISPLAY read (you can't cleanly read one
+  member's raw A-vs-ES from tone alone) — NOT a validity crisis, NOT operational. DO NOT re-run CT-CM.
+  Only genuine gap: no behavioral ES criterion (ES-side discriminant untested; Voteview/NPAT would close
+  it; low priority). B&L reframe on the shelf: A and ES both project onto the COMMUNION pole — an
+  agency/communion per-sentence cue-share would decorrelate them at the display level by construction.
