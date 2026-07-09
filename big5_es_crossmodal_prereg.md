@@ -61,3 +61,12 @@ ES-specifically. Effect is modest (~4% variance) = the literature's true N-from-
 inflated. This SUPERSEDES the mis-signed acoustic-ES composite in b5_audio_ctcm.py / b5_audio_eval.py
 (whose -0.165 was real signal read upside-down). All five traits now validated: A/C/E/O behaviorally +
 ES cross-modally. Caveats: voice<->text-MODEL convergence (not ground truth); minor C-overlap.
+
+**ADDENDUM 2026-07-09 (post-look robustness — big5_es_robustness_prereg.md RESULT, pre-declared
+consequence applied):** the pass above STANDS as the historical one-look, but the locked gender/party
+robustness test found it **CONFOUNDED**: partial r(pred, ES | gender, party) = **-0.029** (perm-p
+.7151); within-gender r = -0.016 (M, n=282) / -0.036 (F, n=113). The voice model was predominantly
+reading speaker sex (F0-family functionals), and text-ES differs by sex in this roster. Cite this
+validation only WITH that caveat; the "all five traits validated" sentence above is superseded — see
+big5_behavioral_instrument_prereg.md RESULT (O/C/E diagonal-dominant, 3/5) for the current per-trait
+state.

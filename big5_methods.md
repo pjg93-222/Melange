@@ -342,8 +342,12 @@ gate → **395 members with ≥180 s verified-clean voiceprints** (median ~17 mi
    **PASS: held-out r = +0.208, permutation p = .0002 (5000), ES-specific (r_A = −0.030), N = 395.**
    Modest by construction (~4% variance = the N-from-voice ceiling); voice↔text-MODEL convergence,
    not ground truth. Per-member OOF reads persisted display-only (`b5_es_voice.json`, desk line).
-   **All five traits now carry independent validation: A/C/E/O behavioral (v2 held-out A +.14 /
-   C +.13 / E +.34 / O +.20) + ES cross-modal.**
+   **[ANNOTATION 2026-07-09, pre-registered robustness (big5_es_robustness_prereg.md): the pass is
+   GENDER-CONFOUNDED — partial r(| gender, party) = −0.029, perm-p .715, within-gender null in both
+   sexes. It stands as history; the validation claim carries the caveat everywhere it is cited.]**
+   The former "all five traits validated" summary is superseded → A/C/E/O behavioral (v2 held-out
+   A +.14 / C +.13 / E +.34 / O +.20; **O/C/E now diagonal-dominant per §17**); ES measured but
+   without a clean independent validation (text +.149 near-miss; voice confounded).
 
 **Formal re-grade (32-agent judge panel + adversarial skeptics + fact-check): A− RATIFIED** —
 panel B+/A−/A−/A−, skeptics floored B− (non-fatal), final A− as top-of-class. Held below A by:
@@ -362,3 +366,40 @@ Companion display layer shipped the same day: 3-paragraph "Suggested approach" b
 members (`fec/b5_narratives.py` → `member_narratives.json`; de-identified measured profiles → Fable,
 Opus 4.8 rescuing its ~74% refusal rate; vocal descriptors from the clean voiceprints feed P2).
 Display-only throughout; engines/ranks untouched (kernel 37/37, audit ALL CLEAN, ranks 0/533).
+
+## 17. Psych-audit augment round: instrument LOOK 3/5, ES robustness CONFOUNDED, JS psych parity (2026-07-09)
+User-directed augments ("simulate, see what that does, and then if it checks out run"); every look was
+preceded by machinery validation on planted/null synthetic targets; preregs locked + committed
+pre-look (@fd963ab).
+- **Behavior-anchored per-trait instrument (prereg @d630fe3) — LOOK TAKEN: 3/5** (bars exactly as
+  locked). Empath-194 → ridge nested-CV, held-out, exact perm-p, full matrix in the prereg RESULT.
+  **O +.198 PASS · C +.277 PASS · E +.552 PASS** — all three diagonal-dominant, perm-p .0002. The C
+  cell is the full-roster confirmation §16's fact-check demanded (retires the "no repo record" caveat;
+  subsumes big5_textC_prereg). E carries a genre-composition caveat (corpus and criterion share the
+  interview modality). **A +.183 MISS on dominance only** (real signal, perm-p .0004, but reads C/O
+  criteria slightly higher). **ES +.149 MISS** (0.001 under bar; anti-reads E at −.303; the
+  affect-lability fallback computed and INVALID as criterion). Pre-look hardening, bars untouched:
+  exact permutation p restored (the committed script had substituted a parametric p — a prereg
+  deviation caught in audit), a __main__ one-look gate added (the file formerly ran THE LOOK at
+  import), Empath features cached.
+- **ES cross-modal robustness (locked prereg) — LOOK TAKEN: CONFOUNDED.** Raw +0.208 reproduces
+  exactly; partial r(| gender, party) = **−0.029**, perm-p .7151; within-gender M −.016 / F −.036.
+  Pre-declared consequence applied: §16 annotated, desk voice-ES lines caveated, crossmodal prereg
+  carries a dated addendum; the original RESULT text left unmodified (history is not rewritten).
+- **Honest per-trait state after today: O, C, E criterion-valid AND diagonal-dominant (supervised
+  text); A criterion-valid, not discriminant; ES measured, no clean independent validation.**
+  Grade **A− UNCHANGED**: the ES leg weakened, the discriminant leg strengthened (Pink trait-score
+  0/5 → supervised-instrument 3/5 — the first genuinely diagonal-dominant per-trait text evidence in
+  the program); the firewall (no engine reads trait scores) and process discipline carry it, exactly
+  as §13/§16 priced. The receptivity layer is unaffected (behavioral basis; N enters shrunken at
+  0.30 weight inside clipped multipliers).
+- **JS psych parity (dashboard):** the in-browser live-scenario engine consumed NONE of the
+  receptivity multipliers the Python engine applies → bundle now ships engine.pmult/emult/dmult;
+  the tpl applies pressure_mult (both pflip money terms + shiftLean), delivery_mult (target value),
+  edge_mult (cascade kernel PE), and LOSSFRAME (competitor defection leg). Numeric parity harness:
+  JS totals within 0.15% of Python flip_value on all 18 real issues (psych-blind drift was up to
+  2.08%); in-browser engchk exact (flip 4.43 = py 4.43); 0 console errors. Closes the JS half of
+  audit finding N-1.
+- Hygiene: narratives ordinal + roster-union fixes; ledger-referenced campaign scripts tracked
+  (b5_textc_confirm, b5_round4_eval, big5_ctcm2, b5_emb_build); one-look gates heading-matched
+  ('## RESULT') after the ES gate false-tripped on its own prereg prose.

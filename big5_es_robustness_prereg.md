@@ -36,3 +36,22 @@ test ANNOTATES the recorded pass; it does not re-litigate that test's own locked
 Locked + committed BEFORE the look. One look; no re-runs with different controls after unblinding.
 `--simulate` validates the machinery on planted confound-only and true-signal synthetic cases without
 touching the real pairing. Any outcome is recorded verbatim under RESULT below.
+
+## RESULT — THE ONE LOOK (2026-07-09, N=395, dropped 0 without gender; F=113 M=282)
+**CONFOUNDED** (pre-declared outcome 3). Machinery pre-validated via --simulate (planted confound
+correctly detected, planted true signal correctly survives).
+- Raw r reproduction: **+0.208** (exact match to the recorded pass — deterministic protocol confirmed).
+- **Partial r(pred, big5_v2-ES | gender, party) = -0.029, perm-p = 0.7151** (5000 perms, seed 20260710).
+- Within-gender (reported, non-gating): **M (n=282) r = -0.016; F (n=113) r = -0.036** — the
+  voice->text-ES convergence is essentially ZERO within each sex.
+**Interpretation (per the pre-declared consequence):** the recorded +0.208 pass STANDS as history —
+its own locked bars were met and are not retro-moved — but the VALIDATION CLAIM carries the explicit
+caveat: the cross-modal ES effect is **not demonstrably gender-independent**; controlling gender and
+party removes it entirely, and it is null within both sexes. The voice model was predominantly
+reading speaker sex (F0-family features), and text-ES differs by sex in this roster. "All five
+traits validated" must therefore be cited as: A/C/E/O behaviorally validated (O/C/E now
+diagonal-dominant per big5_behavioral_instrument_prereg RESULT); **ES measured but without a clean
+independent validation** (text: +.149 near-miss, not dominant; voice: gender-confounded).
+Consequences applied: big5_methods §16 annotation + §17 record; desk voice-ES line caveated;
+big5_es_crossmodal_prereg.md carries a dated addendum pointing here. The original result text is
+left unmodified (history is not rewritten).

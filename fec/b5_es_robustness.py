@@ -99,7 +99,7 @@ if __name__=='__main__':
         simulate()
     elif a.look:
         pre=open(PREREG,encoding='utf-8').read()
-        if 'RESULT' in pre:
+        if '## RESULT' in pre:   # heading match — the prereg PROSE mentions the word RESULT, which false-tripped the plain substring gate
             print('!! LOOK REFUSED: prereg already contains a RESULT section (one look only).'); sys.exit(1)
         mem,X,yES,gvec,pvec,dropped=load()
         print('ES robustness — THE ONE LOOK | N=%d (dropped %d w/o gender) | F=%d M=%d'%(len(mem),dropped,int(gvec.sum()),int((1-gvec).sum())))
