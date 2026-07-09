@@ -53,3 +53,25 @@ JOINT model, and report the vocal/linguistic/joint variance decomposition (their
 Locked + committed BEFORE the look. One look; misses revert; bars never move after data is seen.
 Vocal block never sees Pink at fit time except as the ridge target (that IS the convergent test).
 Any PASS is adversarially re-derived (independent recomputation) before it is recorded (the P6 lesson).
+
+## RESULT — THE ONE LOOK (2026-07-08, N=90)
+- **BAR 1a (a-priori acoustic-E composite -> Pink-E), PRIMARY: MISS.** r=+0.085, one-sided p=0.21. The
+  6 classic Mairesse markers (loudness/pitch-var/tempo) do NOT carry Pink-E; the signal is not where
+  theory predicts.
+- **BAR 1b (full eGeMAPS-88 -> Pink-E): CLEAR, adversarially confirmed.** held-out r=+0.284, exact
+  perm-p=**0.030** (K=300). ES also +0.298, perm-p=**0.017**. A -0.043 (p=.69), C +0.090 (p=.33),
+  O +0.094 (p=.27) all NULL. **-> Vocal prosody is a VALIDATED independent (cross-modal) measure of
+  the AROUSAL traits E and ES — a genuine partial Marrero replication. (The first pilot's strawman —
+  behavioral criterion + single-scalar fusion — buried this; the method correction surfaced it.)**
+- **BAR 2 (super-additivity): MISS.** vocal adds +0.001 over linguistic for E (negative for A/C).
+  CAVEAT: the linguistic (Empath) block is shared-method-inflated vs Pink (E ling +0.607), so this is
+  conservative-against-vocal, not a clean refutation of Marrero's interaction.
+- **BAR 3 (halo, audio's own A-ES): MISS.** vocal A-ES |r|=0.819 (worse than Pink's .65); vocal-A
+  NULL (-0.043 < perm-null .216). Audio reads only the ES/arousal side; its "A" is recycled arousal
+  features -> cannot separate A from ES via its own A read.
+**SYNTHESIS:** Faithfully tested, audio VALIDLY measures E & ES (arousal) as an independent modality,
+but is redundant with text for measurement and cannot crack the A-ES halo through an A read (it has
+none). **REMAINING avenue (enabled, NOT yet tried):** audio-E/audio-ES are exactly the INDEPENDENT
+indicators CT-CM lacked (big5_ctcm2 failed ONLY because lexical Blue was collinear). Anchoring the
+latent ES factor with the validated audio-ES (perm-p .017) could separate the A-ES variance in a
+CT-CM — the halo attack uses **audio-ES**, not audio-A. That is the honest next step toward the goal.
