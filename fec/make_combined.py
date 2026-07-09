@@ -95,16 +95,10 @@ shell_css = (
 # ---- wrap each script in an IIFE + export cross-app hooks ----
 snajs_wrapped = ("(function(){\n" + snajs +
   "\nwindow.__netResize=resize;"
-  "window.__netSelect=function(n){var i=DATA.name.indexOf(n);if(i>=0)selectMember(i);};"
-  # coalition handoff: ring the coalition members on the graph + frame the camera on them
-  "window.__netCoalition=function(names){"
-  "var idx=names.map(function(n){return DATA.name.indexOf(n);}).filter(function(i){return i>=0;});"
-  "if(!idx.length)return;"
-  "route={edges:[],nodes:idx,seed:idx[0],targets:idx};sel=-1;"
-  "var xs=idx.map(function(i){return DATA.x[i];}),ys=idx.map(function(i){return DATA.y[i];});"
-  "var mnx=Math.min.apply(null,xs),mxx=Math.max.apply(null,xs),mny=Math.min.apply(null,ys),mxy=Math.max.apply(null,ys);"
-  "var pad=90,bw=(mxx-mnx)+pad*2,bh=(mxy-mny)+pad*2;"
-  "cam.s=Math.min(W/bw,H/bh,3);cam.tx=W/2-((mnx+mxx)/2)*cam.s;cam.ty=H/2-((mny+mxy)/2)*cam.s;draw();};\n})();")
+  "window.__netSelect=function(n){var i=DATA.name.indexOf(n);if(i>=0)selectMember(i);};\n})();")
+# window.__netCoalition is now defined inside the SNA dashboard template itself (loadCoalition): it highlights the
+# coalition members (white ring), frames the camera, and colors the field by who's likely to join. gotoNetworkCoalition
+# below calls it. (The old inline version here predated the route/cascade rewrite and is intentionally removed.)
 mdjs_wrapped = ("(function(){\n" + mdjs +
   "\nwindow.__deskOpen=function(n){var i=byName[n];if(i!=null)openMember(i);};"
   "window.__deskShow=function(v){setView(v||'ranked');};\n})();")
