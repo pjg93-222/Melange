@@ -114,3 +114,38 @@ matching '## RESULT-A' / '## RESULT-E1' / '## RESULT-E2' heading (heading-match,
 Each test's outcome is recorded verbatim under its RESULT heading, MISSes included. Any PASS is
 adversarially re-derived before promotion of any claim. Fable/Haiku cost rule: no LLM calls anywhere
 in this round (lexicon + arithmetic only).
+
+## RESULT-A — THE ONE LOOK (2026-07-09, N=242; machinery pre-validated: planted r=+.52 recovered, null 0-pass, confound killed)
+**MISS on all three bars.** Row: cooperation **−0.231** | diligence −0.080 | visibility +0.052 |
+breadth −0.256 | residGMP −0.025; exact perm-p = 1.0000 (the negative OOF r is the standard CV-null
+artifact — there is no recoverable linear signal). A3 partial −0.242 (p 1.0). Secondary:
+pred vs bipartisan-RATIO −0.044. **Per-feature diagnostics (the informative part):** turn-initial
+assent is RIGHT-SIGNED vs cooperation (+0.074) — Paul's directional hypothesis has a trace — but
+assent_phrases sit at +0.003 and nothing exceeds |.08| vs cooperation; llm_communion's largest
+correlate is diligence (−0.170), not cooperation. **Dialogic-assent route CLOSED** (matches the
+pre-lock probe: RKH floor-speech Assent was also null vs cooperation, +.013). A's honest label is
+unchanged: criterion-valid (+.183, Empath instrument) but NOT discriminant; the assent mechanism is
+now tested-and-closed rather than open speculation.
+
+## RESULT-E1 — THE ONE LOOK (2026-07-09, N=395, F=113/M=282; sex-residualization exact to 1e-6)
+**MISS.** Held-out r(pred, ES_resid) = **−0.024**, exact perm-p = 0.6767 (E1c vacuously CLEAR:
+−0.024 > −0.041). Training on sex-relative features against a sex/party-residualized target finds
+NOTHING — confirming the robustness look's within-sex nulls were the true state, not an artifact of
+sex-confounded training. **The voice-ES route is CLOSED PERMANENTLY** (pre-declared: this was the
+final voice attempt). The full voice-ES record: raw +.208 (gender-confounded) → within-sex null →
+sex-relative retrain null.
+
+## RESULT-E2 — THE ONE LOOK (2026-07-09, N=171 current members, 67 responders, +16 from the sidecar)
+**MISS on all three bars.** r(v2-ES, respond) = **−0.042** (wrong-signed vs the pre-fixed + sign;
+perm-p .70); ES-specificity FAILS (v2-E carries the largest |r|, −0.072; O +.010, C +.011, A −.017);
+partial +0.008 (p .47). Secondary: Pink-ES −0.062 (p .80, n=167). **The NPAT route is closed for the
+current roster.** Context: RKH's own in-sample Emoti↔respond was only +.063 (n=997), so even perfect
+transfer was below our bar at n=171 — the pre-lock power warning realized. The one remaining powered
+ES path is a fresh full-roster Vote Smart PCT pull (533 members via legislators.csv votesmart_id) —
+external data collection, user-gated, NOT attempted here.
+
+**Round-2 net: 0/3 — both user-proposed mechanisms (dialogic assent for A, sex-relative inflection
+for ES) were the right untested configurations and are now closed with recorded evidence. ES has
+exhausted every in-repo route (text near-miss, GMP invalid, residual-GMP not dominant, affect
+lability invalid, voice confounded→null, NPAT null/underpowered). Grade A− unaffected (these were
+candidate ADDITIONS that did not pass; nothing shipped changes).**

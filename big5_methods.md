@@ -403,3 +403,32 @@ pre-look (@fd963ab).
 - Hygiene: narratives ordinal + roster-union fixes; ledger-referenced campaign scripts tracked
   (b5_textc_confirm, b5_round4_eval, big5_ctcm2, b5_emb_build); one-look gates heading-matched
   ('## RESULT') after the ES gate false-tripped on its own prereg prose.
+
+## 18. A & ES round 2 — Paul's mechanisms, 0/3, both routes closed with evidence (2026-07-09, prereg @d276254)
+User-directed ("Fix A and ES"): (a) dialogic ASSENT language ("that makes sense", "sure!",
+"I understand") as the A-specific act; (b) sex-RELATIVE vocal inflection for ES; (c) the NPAT
+survey-response criterion (RKH's own; the .tab files were found ON DISK, unconsumed). Pre-lock $0
+probes: RKH hou114 floor-speech Assent null vs cooperation (+.013) → design restricted to dialogue;
+NPAT pre-check PASSED on RKH's traits (Emoti strongest, +.063, sign fixed +); criterion structure
+corr(coop, breadth)=+.708 documented. The repo's existing 'agree' feature was found DEAD BY MECHANISM
+(whole-turn regex vs the ≥8-word ingest floor — it can never fire). Machinery simulated + validated
+per test before looks (@d276254; gates newline-anchored @72690c9 after prose quotes false-tripped
+them — no look consumed).
+- **TEST A (assent instrument, N=242, 8 fixed lexicon/persona features, interview turns): MISS** —
+  own r −.231 (CV-null artifact; perm-p 1.0). Informative trace: turn-initial assent RIGHT-SIGNED vs
+  cooperation (+.074) but an order of magnitude under criterion strength; assent phrases +.003.
+  Dialogic-assent route CLOSED. A stays: criterion-valid (+.183) / not discriminant.
+- **TEST E1 (sex-relative voice, N=395; features AND target residualized on gender): MISS** —
+  held-out r −.024, perm-p .68. The within-sex nulls were the true state, not a training artifact.
+  **Voice-ES CLOSED PERMANENTLY** (pre-declared final attempt): raw +.208 gender-confounded →
+  within-sex null → sex-relative retrain null.
+- **TEST E2 (NPAT respond, current-roster N=171): MISS** — v2-ES −.042 wrong-signed (perm .70), not
+  ES-specific (v2-E largest |r| −.072), partial null; Pink-ES −.062. NPAT closed for the current
+  roster (RKH's own effect was +.063 in-sample — under our bar even at perfect transfer; the pre-lock
+  power warning realized). **The one remaining powered ES path: a fresh full-roster Vote Smart PCT
+  pull (votesmart_id available for all 533) — external collection, user-gated.**
+**Post-round-2 honest state: O/C/E criterion-valid + diagonal-dominant; A criterion-valid, not
+discriminant (assent route now closed with evidence); ES measured, NOT validated, ALL in-repo routes
+exhausted.** Grade A− unaffected (candidate additions that did not pass; nothing shipped changed).
+Value of the round: both proposed mechanisms were the genuinely untested configurations; they are
+now closed with recorded one-looks instead of open speculation — no future session re-runs them.
