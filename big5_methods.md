@@ -469,3 +469,36 @@ construct role (Byrne pressure-reactivity) — valid by construction for its ROL
 to fail. The Big-5 DISPLAY layer is untouched (text ES/N stays, caveats intact); this is an engine
 input. burst was probed and REJECTED (SB .04) — do not re-add. Text-N remains available via
 RECEPT_N=text.
+
+## 20. Psych-audit round 4 — N-anchored per-trait look: RETIRED WITHOUT A LOOK, data-gated (2026-07-09, prereg big5_n_matrix_prereg.md @e4aea1e)
+
+User directive ("switch over to Neuroticism… fix everything else") + the round-3 reservation
+("text-N × cutoff = a look; prereg if ever wanted") → a locked prereg to test the SUPERVISED Empath
+text read of N against the behavioral criterion reactivity_z, with the full masked 6-model matrix
+(the §17 machinery imported verbatim; MEM=456, MEM_N=201, fingerprints pinned). Adversarially
+panel-reviewed pre-lock (4 lenses): adverse prior disclosed (halo-look composite +0.013 null),
+bar-5 partial volume-hardened (gender/party/log-turns/shrinkage-weight, ≥+0.10 AND perm<.05),
+pred_ES added as bar-4 competitor, Williams-guarded demotion rule wholly on MEM_N, a core-matrix
+NO-STATUS-CHANGE clause (drift cannot promote A or ES), noiv ship-gate, secondaries firewall.
+Honest prior: LOW.
+
+**The look was NEVER taken.** The in-process simulate battery refused it twice (both runs verbatim
+in the prereg addenda): run #1 exposed a sim-design artifact (correlated random plants; corrected by
+Gram–Schmidt orthogonalization, Addendum 1); run #2, honest plants, showed the real constraint —
+a TRUE r=.40 planted signal recovers only +0.129 held-out at n=201 (fails bar 1). Power study
+(synthetic, 5 reps/cell): true .40 passes 3/5 at n=201 with extreme draw variance (+0.015…+0.372)
+but 5/5 from n≈250; true .50 passes 5/5 even at 201. The bars are sound; the SAMPLE is the
+constraint — a look today would be machinery-noise roulette, exactly what the one-look discipline
+exists to prevent.
+
+**State: the Empath-text→reactivity route is neither validated nor closed — DATA-GATED.** Successor
+prereg permitted only at reactivity coverage MEM_N ≥ 250 within the §17-eligible roster (grows with
+weekly interview collection; 201 today). Nothing else moves: fifth text axis stays ES-framed with
+its recorded caveats (§16 annotation intact), A stays criterion-valid/not-discriminant (the prereg's
+no-status-change clause forecloses drift-promotion), §17's 3/5 and §18's closures stand verbatim,
+and round-3's reactivity_z engine slot is untouched (valid by construction for its role, §19).
+Look-independent hygiene shipped alongside: reactivity joined the desk behavioral radar (6th axis) +
+N-slot source line, dashboard receptivity legend names it, audit gained the N-slot guard
+(n_slot=behavioral, coverage ≥150, |z|≤5 — a silent RECEPT_N=text revert can no longer sail through)
++ the mislabeled missing-receptivity check name fixed, b5_behavioral_instrument gates
+newline-anchored, stale voice-ES "validated +0.208" comment corrected (audit now 69 checks).

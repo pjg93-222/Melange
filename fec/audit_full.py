@@ -236,8 +236,19 @@ if os.path.exists(_rc_p):
     ck('receptivity runs on the behavioral basis (lexical Big5 indicted 2026-07-04)',
        _rc.get('basis')=='behavioral' and _bd_ok,
        'basis=%s dispositions_ok=%s'%(_rc.get('basis'),_bd_ok))
+    # ROUND-3 N-slot guard (2026-07-09): the susceptibility N-slot must be the behavioral reactivity
+    # read (n_slot='behavioral'); a silent RECEPT_N=text revert or a reactivity-coverage collapse
+    # would sail through the basis gate above. Coverage floor 150 (currently 207/533).
+    _nsl=_rc.get('n_slot'); _nsrc=sum(1 for v in _rc.get('members',{}).values() if v.get('n_source')=='reactivity')
+    ck('receptivity N-slot = behavioral reactivity (round-3; no silent text revert)',
+       _nsl=='behavioral' and _nsrc>=150,'n_slot=%s reactivity_members=%d'%(_nsl,_nsrc))
+    if _bd_ok:
+        _rv=[d['reactivity_z'] for d in json.load(open(_bd_p))['members'].values() if d.get('reactivity_z') is not None]
+        ck('reactivity_z disposition sane (coverage >=150, |z|<=5)',
+           len(_rv)>=150 and all(abs(v)<=5.0 for v in _rv),'%d covered'%len(_rv))
 else:
-    ck('media-blend press component is DYNAMIC (press_component_meta.json present)',False,'meta missing — blend ran pre-fix or PRESS_DYNAMIC=0')
+    # (2026-07-09 fix: this branch previously fired a MISLABELED press-component check name)
+    ck('receptivity artifact present (member_receptivity.json)',False,'missing — chain step 1 (receptivity_layer.py) did not run')
 # S2-04 guard (audit 2026-07-02): every workbook reader hardcodes range(3,536) for the 533-member roster.
 # If a member row is ever added/removed, those readers silently truncate or NUL the tail. Assert on
 # R&A col A — TYPED names, immune to the phase-2 openpyxl-save cache death (Blended col A is

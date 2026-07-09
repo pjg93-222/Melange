@@ -32,7 +32,8 @@ INDEX.md → README.md → MATHEMATICAL_SPECIFICATION.md (the law-of-the-system 
 - `python fec/tests/run_tests.py`  → expect **30 passed, 0 FAILED**
 - py_compile sweep of fec/*.py (skip attic/; use a scratchpad temp .pyc target, NOT os.devnull —
   invalid on Windows) → expect all clean
-- `python fec/audit_full.py` → expect **52 passed, ALL MODULES CLEAN** (view-stale SKIP notes in
+- `python fec/audit_full.py` → expect **ALL passed, ALL MODULES CLEAN** (69 checks as of 2026-07-09;
+  the count grows as guards are added — any FAILED is the finding, not a count mismatch) (view-stale SKIP notes in
   audit.py's A2/A3 are NORMAL when the workbook cache is dead — see Known-benign below)
 A failing baseline is finding #1 — diagnose it before anything else.
 

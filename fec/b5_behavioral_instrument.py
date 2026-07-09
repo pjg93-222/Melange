@@ -179,7 +179,7 @@ def simulate(X, CRIT_real):
 
 def the_look(X, CRIT, MEM):
     pre = open(PREREG, encoding='utf-8').read()
-    if '## RESULT' in pre:   # heading match (aligned w/ b5_es_robustness.py: prose mentions of the word must not trip the gate)
+    if '\n## RESULT' in pre:   # NEWLINE-anchored heading match (@72690c9 lesson: prose quotes of the heading must not trip the gate)
         print('!! LOOK REFUSED: prereg already contains a RESULT section (one look only).'); return
     print('THE LOOK (one look, bars locked @d630fe3): N=%d' % len(MEM))
     PRED, M, npass, det = run_matrix(X, CRIT, 'LOOK: ES=residual-GMP')
@@ -220,4 +220,4 @@ if __name__ == '__main__':
         pre = open(PREREG, encoding='utf-8').read() if _o.path.exists(PREREG) else ''
         print('status: prereg %s | look %s | run --simulate first, then --look' %
               ('LOCKED @d630fe3' if 'Locked' in pre or 'locked' in pre else 'MISSING',
-               'ALREADY TAKEN' if 'RESULT' in pre else 'not yet taken'))
+               'ALREADY TAKEN' if '\n## RESULT' in pre else 'not yet taken'))

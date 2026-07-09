@@ -577,9 +577,10 @@ function psychHTML(m){
   let comp='<div class=empty>No computed psychometrics for this member (no text corpus).</div>';
   if(P.big5_pct||P.behav_pct){
     // PRIMARY: behavioral dispositions (measured from what the member DOES — cosponsorship,
-    // roll-call participation, floor dynamics, media engagement, portfolio breadth; nomological
-    // fix 2026-07-04). These drive the engines' receptivity. null axis = insufficient coverage.
-    const BLAB=['Cooperation','Diligence','Floor presence','Visibility','Breadth'];
+    // roll-call participation, floor dynamics, media engagement, portfolio breadth, live-interview
+    // reactivity [round-3 N-slot, 2026-07-09]; nomological fix 2026-07-04). These drive the engines'
+    // receptivity. null axis = insufficient coverage.
+    const BLAB=['Cooperation','Diligence','Floor presence','Visibility','Breadth','Reactivity'];
     /* 2026-07-04 user directive: TWO radar charts — Behavior and Big-5, same geometry. n/a axes plot
        at the 0.5 neutral ring (never fake-low) and are listed under the chart. */
     const bna=P.behav_pct?BLAB.filter((_,i)=>P.behav_pct[i]==null):[];
@@ -603,7 +604,7 @@ function psychHTML(m){
     const rd=READS[P.susc_read||'trait-only']||READS['trait-only'];
     const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Engagement responsiveness (engines)</span><b>${P.pressure_mult}×</b></div>
       <div class=mrow><span>Meeting take-rate (seed prob.)</span><b>${P.seed_prob!=null?Math.round(P.seed_prob*100)+'%':'—'}</b></div>
-      <div class=mrow><span>Receptivity — ${P.basis==='behavioral'?'behavioral read':'trait read'}</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
+      <div class=mrow><span>Receptivity — ${P.basis==='behavioral'?('behavioral read'+(P.n_source==='reactivity'?' · N-slot: interview reactivity':P.n_source==='neutral'?' · N-slot: neutral':'')):'trait read'}</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
       ${P.persona_susc_z!=null?`<div class=mrow><span>Receptivity — persona read</span><b>${P.persona_susc_z>0?'+':''}${P.persona_susc_z}</b></div>`:''}
       <div style="font-size:11px;font-weight:700;color:${rd[1]};background:${rd[1]}22;border:1px solid ${rd[1]}55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">${rd[0]}</div>`:'';
     const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Quick read (IIT-C octant)</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';

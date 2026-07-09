@@ -580,7 +580,7 @@ function optCard(){
 // legend
 function legend(){
  let items;
- if(colorBy==='recept')items=[[0.55,'Independent-minded'],[0.8,''],[1.0,'Neutral'],[1.3,''],[1.55,'Highly receptive']].map(([v,lb])=>`<span><span class=pill style=background:${receptCol(v)}></span>${lb}</span>`).join('')+'<span style=color:#6e7681> · behavioral receptivity (cosponsorship, participation, floor dynamics × electoral incentive × outlook)</span>';
+ if(colorBy==='recept')items=[[0.55,'Independent-minded'],[0.8,''],[1.0,'Neutral'],[1.3,''],[1.55,'Highly receptive']].map(([v,lb])=>`<span><span class=pill style=background:${receptCol(v)}></span>${lb}</span>`).join('')+'<span style=color:#6e7681> · behavioral receptivity (cosponsorship, participation, floor dynamics, live-interview reactivity × electoral incentive × outlook)</span>';
  else if(colorBy==='elec')items=[['c','Contest · primary'],['g','Contest · general'],['d','Defend'],['n','No play']].map(([k,lb])=>`<span><span class=pill style=background:${ELCOL[k]}></span>${lb}</span>`).join('');
  else if(colorBy==='party')items=[['D','Democrat'],['R','Republican'],['I','Independent']].map(([k,lb])=>`<span><span class=pill style=background:${PTCOL[k]}></span>${lb}</span>`).join('');
  else items=[['C','Champion'],['A','Ally'],['H','Hi-Persuad'],['P','Persuad'],['G','Lean-Pers'],['T','Neutral'],['L','Lean-Skep'],['S','Skeptic'],['K','Hi-Skeptic'],['O','Opponent']].map(([k,lb])=>`<span><span class=pill style=background:${STCOL[k]}></span>${lb}</span>`).join('');

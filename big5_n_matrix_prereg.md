@@ -242,3 +242,35 @@ draw order under the pinned seed necessarily changes with the constructor; the c
 the same-commit code. **The five bars for the look, roster, criteria, input fingerprints, and every
 consequence clause are byte-identical to the lock** — this addendum amends machinery validation only,
 per the §17 precedent ("pre-look hardening, bars untouched") and the audio-prereg Addendum pattern.
+
+## ADDENDUM 2 (2026-07-09) — battery run #2 FAILED; RETIRED WITHOUT A LOOK (data-gated; no look consumed)
+
+Battery run #2 (orthogonalized plants, `--look` invocation), recorded verbatim: sim(a) PLANTED core
+4/5 (clears the ≥4 floor) | **N own +0.129 p .0320 row FALSE col FALSE → FAIL** (the masked-N plant
+must clear bars 1–4); sim(b) NULL OK; sim(c) CONFOUND-ONLY OK (partial −0.112 refused); sim(d)
+TRUE+CONFOUND OK (+0.528 admitted). The in-process gate held: **"LOOK REFUSED (not consumed):
+simulate battery failure." The one look was NEVER taken.**
+
+Power study (synthetic only, seeds 9001–9005, 5 reps/cell, orthogonalized plants mirroring the
+battery; no real pairing computed):
+- TRUE r=.40 vs coverage n — bar-1 pass rate: n=201 **3/5** (own r range **+0.015…+0.372** — extreme
+  draw variance), n=250 **5/5**, n=300 4/5, n=350 5/5, n=400 5/5, n=456 5/5.
+- At n=201 vs TRUE planted r: .40 → 3/5; **.50 → 5/5**; .60 → 5/5; .70 → 5/5.
+
+Interpretation: the machinery and bars are sound (a true r=.50 signal passes reliably even at n=201;
+a true r=.40 passes reliably from n≈250), but at the CURRENT reactivity coverage (MEM_N=201) recovery
+of a realistic signal is draw-unstable — a look taken today would be a coin flip on machinery noise,
+not a measurement, in exactly the regime the honest-prior paragraph anticipated. The battery did its
+job: it prevented an uninformative closure.
+
+**Disposition: this prereg is RETIRED WITHOUT A LOOK (2026-07-09).** No RESULT-N exists; no MISS is
+recorded; the Empath-text→reactivity route is neither validated nor closed — it is **DATA-GATED**.
+The fingerprint pinning makes this document single-vintage by design (any future data = refused).
+**Successor condition, pinned now: a NEW prereg (fresh fingerprints, same five-bar structure, same
+one-look discipline) may be locked only when reactivity coverage within the §17-eligible roster
+reaches MEM_N ≥ 250** (the power-study reliability threshold for a true r=.40 signal). Reactivity
+coverage grows as interview collection accrues (criterion: ≥30 attributed live-interview turns);
+current 201/456. Until then: the fifth text axis stays ES-framed with its recorded caveats; round-3's
+reactivity_z engine slot is unaffected (valid by construction for its ROLE, §19); every §17/§18
+record stands as written. No claim of any kind is derived from the two battery runs or the power
+study — they are machinery validation, not looks.

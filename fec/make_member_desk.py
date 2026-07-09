@@ -135,10 +135,10 @@ def _approach(ap, cp, read):
 # measured from behavior (validated by construction), replacing the indicted lexical Big5 radar
 # as the headline. Percentile-ranked across covered members per axis.
 BDISP = (L('behavioral_dispositions.json') or {}).get('members', {})
-_BD_AX = ['cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z']
+_BD_AX = ['cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z', 'reactivity_z']
 _BDPCT = {ax: _pctrank([d[ax] for d in BDISP.values() if ax in d]) for ax in _BD_AX} if BDISP else {}
 NARR = L('member_narratives.json') or {}   # 3-paragraph 'Suggested approach' brief (Fable, Opus rescues refusals); display-only
-VES = (L('b5_es_voice.json') or {}).get('members', {})   # voice-ES OOF read (b5_es_crossmodal, validated +0.208); display-only
+VES = (L('b5_es_voice.json') or {}).get('members', {})   # voice-ES OOF read; display-only — the +0.208 pass is GENDER-CONFOUNDED on the locked retest (partial r −0.03, 2026-07-09): weak tiebreaker at most
 
 def psy_for(name):
     t = B5.get(name) or {}; r = RCPT.get(name) or {}
@@ -156,7 +156,7 @@ def psy_for(name):
     if r.get('agency') is not None and _ACPCT:
         out['agency_pct'] = _ACPCT['agency'](r['agency']); out['communion_pct'] = _ACPCT['communion'](r['communion'])
         out['approach'] = _approach(out['agency_pct'], out['communion_pct'], r.get('susc_read'))
-    for k in ('pressure_mult', 'susc_z', 'susc_trait_z', 'persona_susc_z', 'susc_read', 'seed_prob', 'basis'):
+    for k in ('pressure_mult', 'susc_z', 'susc_trait_z', 'persona_susc_z', 'susc_read', 'seed_prob', 'basis', 'n_source'):
         if r.get(k) is not None: out[k] = r[k]
     lep = _LEP.get(name) or {}
     ext = {}
