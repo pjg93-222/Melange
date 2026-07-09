@@ -218,3 +218,27 @@ all new numerics enumerated above, none discretionary. ONE look. No LLM calls (E
 arithmetic only). No audio. No bar/seed/roster/wording changes after this commit. The pressure to "make
 N pass" makes these guards MORE binding, not less. Honest prior: LOW — and a MISS closes the route
 permanently, recorded with the same care as a pass.
+
+## ADDENDUM 1 (2026-07-09, PRE-LOOK; bars/roster/criteria/consequences UNTOUCHED) — simulate battery run #1 FAILED; sim(a) plant design corrected
+
+Battery run #1, recorded verbatim: sim(a) PLANTED core 5/5 | N own +0.187 p .0034 row FALSE col TRUE
+→ FAIL; sim(b) NULL OK (core 0/5, N 5-bar MISS); sim(c) CONFOUND-ONLY OK (gating partial −0.112,
+correctly refused); sim(d) TRUE+CONFOUND OK (partial +0.528 p .0002, correctly admitted). **No look
+consumed** — the in-process gate held ("look forbidden").
+
+Diagnosis (synthetic-only; no real trait × criterion pairing computed): random plant directions over
+the low-effective-rank Empath matrix share signal-space variance, and the OOF prediction AMPLIFIES the
+shared X-span component — pred of the N-plant read the E-plant at −.224 (raw plant overlap only −.146),
+beating its own weak n=201 recovery (+.187). This is a SIM-DESIGN artifact, not a machinery defect:
+the real criteria do not share this property (reactivity_z is empirically orthogonal to every
+disposition, worst |r|=.15 — §19), so run #1's plant set tested a harder, DIFFERENT property than the
+machinery must prove (recovery + distinctness of genuinely distinct signals).
+
+Correction, scoped to sim(a) only: planted signal components are now orthogonal by construction —
+the five core signals sequentially Gram–Schmidt-orthogonalized in signal space on the full roster; the
+N signal orthogonalized against the four core signals on the subset rows; same seed (424242), same
+target r = .4, same noise model, same pass requirements (core ≥4/5; masked-N clears bars 1–4). The RNG
+draw order under the pinned seed necessarily changes with the constructor; the constructor is pinned by
+the same-commit code. **The five bars for the look, roster, criteria, input fingerprints, and every
+consequence clause are byte-identical to the lock** — this addendum amends machinery validation only,
+per the §17 precedent ("pre-look hardening, bars untouched") and the audio-prereg Addendum pattern.

@@ -125,6 +125,26 @@ def plant(Xm, rng, target=0.4):
     w = rng.standard_normal(Xm.shape[1]); raw = zz(Xm @ w)
     return target * raw + math.sqrt(max(1e-9, 1 - target ** 2)) * rng.standard_normal(Xm.shape[0])
 
+def plant_set(X, Xs, mask, rng, target=0.4):
+    """ADDENDUM 1: sim(a) plants with ORTHOGONALIZED signal components (Gram-Schmidt in signal space) —
+    battery run #1 showed random directions over the low-effective-rank Empath matrix share X-span
+    variance that OOF predictions amplify (pred_N read the E-plant at -.224 vs own +.187); the real
+    criteria are empirically near-orthogonal (reactivity worst |r|=.15), so distinct plants must be
+    distinct by construction. Same seed/target/noise model; pass requirements unchanged."""
+    S = []
+    for _ in CORE:
+        s = zz(X @ rng.standard_normal(X.shape[1]))
+        for s0 in S: s = s - rr(s, s0) * s0
+        S.append(zz(s))
+    yc = {t: target * S[i] + math.sqrt(max(1e-9, 1 - target ** 2)) * rng.standard_normal(X.shape[0])
+          for i, t in enumerate(CORE)}
+    sn = zz(Xs @ rng.standard_normal(Xs.shape[1]))
+    for s0 in S:
+        s0s = zz(s0[mask]); sn = sn - rr(sn, s0s) * s0s
+    sn = zz(sn)
+    yn = target * sn + math.sqrt(max(1e-9, 1 - target ** 2)) * rng.standard_normal(Xs.shape[0])
+    return yc, yn
+
 def simulate_battery(X, D):
     """Pinned battery (a)-(d) per the prereg. NO real trait x criterion pairing is ever computed."""
     mask = D['mask']; Xs = X[mask]
@@ -134,15 +154,15 @@ def simulate_battery(X, D):
     Zvol = np.column_stack([gen_s, party_s, lt_s, sh_s])
     green = True
     # (a) PLANTED (seed 424242): distinct core signals >=4/5; masked-N plant clears bars 1-4 (5 reported)
+    # ADDENDUM 1: orthogonalized plant set (run #1 recorded verbatim in the prereg addendum)
     rng = np.random.default_rng(424242)
-    yc = {t: plant(X, rng) for t in CORE}
+    yc, yn = plant_set(X, Xs, mask, rng)
     pc = {t: BI.oof(X, yc[t]) for t in CORE}
     npass = 0
     for t in CORE:
         o, p, _ = BI.exact_perm_p(pc[t], yc[t])
         dom = all(abs(o) >= abs(rr(pc[t], yc[c])) for c in CORE if c != t) and o > 0
         npass += (o >= 0.15 and p < .05 and dom)
-    yn = plant(Xs, rng)
     pn = BI.oof(Xs, yn)
     o, p, _ = BI.exact_perm_p(pn, yn)
     rown = all(abs(o) >= abs(rr(pn, yc[c][mask])) for c in ['O', 'C', 'E', 'A']) and o > 0
