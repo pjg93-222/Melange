@@ -213,6 +213,40 @@ Two independent findings reframe the confirmatory path:
   weight** — a real verdict (not a criterion artifact this time); N stays as-is, unverified, do not
   drop. This is a proxy (general drift, CU-agnostic); a CU-specific confirmation still needs Tier-2.
 
+### TIER-1 OUTCOME — ONE LOOK TAKEN 2026-07-08 (bars above NOT moved). RESULT: MISS (all candidates, incl. N's interaction shot).
+Script: `scratchpad/nokken_onelook.py`. Analyzable **n=441** (≥2 windows; 366 at ≥3), 99% nonzero
+drift. Permutation floor (primary): 95th=0.094, 99th≈0.123 — the test IS well-powered (floor well
+below the +0.15 bar and below the Funder-Ozer band ceiling), unlike the press screen.
+
+| Hypothesis | PRIMARY (cum, n=441) | net-endpoint | dim1-only | ≥3-win | one-tailed p | Verdict |
+|---|---|---|---|---|---|---|
+| H1 lexical-N | −0.039 | +0.042 | +0.034 | −0.001 | 0.779 | **MISS** (sign-unstable ~0) |
+| H2 Pink-N | −0.088 | −0.011 | +0.072 | −0.030 | 0.969 | **MISS** (mildly WRONG-signed on primary) |
+| H3 Pink-N \| +lexical-N | −0.085 | −0.015 | +0.069 | −0.030 | — | **MISS** |
+| H4 persona | +0.067 | +0.050 | +0.096 | +0.086 | — | **MISS** (only right-signed candidate across all 4 Ys, but always < floor/bar) |
+| H5 Pink-N × loss (Byrne) | +0.036 | −0.018 | +0.023 | +0.042 | 0.235 | **MISS** (interaction null — N's best theoretical shot fails) |
+
+Adversarial check (precision not masking N): N's SIMPLE r with drift (no controls) is already
+lexN −0.038 / Pink-N −0.087; partialling vote-count-precision alone barely moves it (−0.044 /
+−0.092); r(N, log-votes) ≈ −0.03, so the precision control removes no real N variance. The null is
+robust to the modeling. **Null-validation:** the pipeline detects real structure on the same Y —
+r(coop, drift)=+0.103 and r(precision, drift)=−0.159 (the confound my pre-registered control was
+built for) — so the N/persona nulls are genuine signal-absence, not a dead pipeline.
+
+### Consequence (this is now a real verdict, not a criterion artifact)
+On the best powered, text-uncontaminated movement criterion available in-repo, **N does not earn
+more weight**: neither instrument predicts ideological repositioning (Pink-N is mildly *wrong*-
+signed), and the Byrne N×pressure interaction — N's strongest theoretical shot — is null. Combined
+with the press MISS and the CMC §13 refutation, the honest position is that the **text-based N has
+no demonstrable susceptibility signal** on any observed criterion tried. **N stays in susc as-is,
+unchanged and unverified (theory-grounded Byrne channel; do NOT drop it on a proxy null). Nothing
+ships. No engine change.** persona is the only directionally-stable signal (weakly +, both criteria)
+but sub-threshold; PW=0.30 unchanged. Remaining genuine paths to "make N fit": (1) Tier-2 CU-specific
+vote-switch (a sharper, CU-relevant criterion — needs roll-call acquisition); (2) BETTER N
+MEASUREMENT (the audio-prosody pilot's F0/jitter neuroticism channel); (3) a vignette mechanism-check
+on a proxy population (validates N→susceptibility generically, with transfer risk). Not more looks on
+this criterion.
+
 ### TIER-2 gate (CU-specific vote-SWITCH) — the ideal, needs acquisition
 Position change (pro→anti / anti→pro) on the **63 CU bills** in `cu_bill_directions.json`, using the
 user's pre-set directions. Requires acquiring the member×roll-call matrix + roll-call dates
