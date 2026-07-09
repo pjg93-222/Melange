@@ -432,3 +432,40 @@ discriminant (assent route now closed with evidence); ES measured, NOT validated
 exhausted.** Grade A− unaffected (candidate additions that did not pass; nothing shipped changed).
 Value of the round: both proposed mechanisms were the genuinely untested configurations; they are
 now closed with recorded one-looks instead of open speculation — no future session re-runs them.
+
+## 19. Round 3 — N reframed as BEHAVIOR: the reactivity disposition ships (2026-07-09, user-ratified)
+User: "Reset. Maybe we need to separate text from audio... examine [Celli & Rossi, EACL-W 2012]...
+see if Neuroticism is a better variable... no more dead-ends." Probe-first discipline, ZERO looks burned.
+**Paper interrogation:** the Celli-Rossi labeler is weak and partly circular (follower counts were
+input features; .625 acc on 8 users) — NOT imported. What survives: (a) the N-pole DETECTION
+ASYMMETRY (their precision .80 neurotic vs .375 secure — N produces visible behavioral EVENTS; calm
+is the absence of events); (b) personality expressed in interaction STRUCTURE — a third channel that
+is neither text content nor audio acoustics.
+**Kill-ledger (probes, each with cause of death):** retweet share (0 stored); reply chains (no
+threading); reference-graph reciprocity (edges undirected); mention table (392 rows); Bluesky
+reply-share (party_R +.46 confound) and posting-burstiness (party +.28) on a 134-member
+self-selected platform sample — the posts table is BLUESKY-ONLY; and iv_burst = situational noise
+(program-split-half SB .04 — its face-valid ranking was the show, not the member).
+**Survivor → shipped:** `reactivity_z` = live-interview CUTOFF PRONENESS (interruption/trail-off
+share, per-program z, turn-weighted; interaction_features channel). Evidence card: orthogonal to
+all five dispositions (worst |r|=.15 dominance), party −.09 / gender +.02 clean, not
+long-windedness (+.07 wpt) or floor-defense (−.09), gini +.27 coherent; program-split-half SB=.43
+(real, modest) → graded shrinkage sqrt(min(1, turns/REACT_TURNS=150)); <30 turns → None (neutral);
+unstaffable (live speech). Wired as the N-SLOT of the Byrne susceptibility composite
+(`RECEPT_N=behavioral` default; `RECEPT_N=text` reverts wholesale) — retiring the engine's LAST
+text-derived leg, completing the 2026-07-04 behavioral basis. Coverage 207/533 (rest neutral).
+**Stress battery (all gates):** determinism byte-identical ×2; RECEPT_N=text reproduces legacy math
+(438/533 susc identical; residual ≤.006 = input freshness); bounds all within caps; rank stability
+rho .9805, top-20 overlap 14/20; dial variants (REACT_TURNS 100/250, w_N .25/.35, gate 20/45) all
+rho ≥.9988, top-20 ≥19/20 — decision-robust at the receptivity_sensitivity standard. **Fairness
+finding: the swap REDUCES demographic tilt in targeting** — susc gender loading +.327 → +.198,
+pressure_mult +.137 → +.090 (lexical N carried the SAME gender-language artifact the ES robustness
+look exposed; women read as more pressure-susceptible by word-style, not behavior); party loading
+mildly improved (−.381 → −.361 susc; −.130 → −.103 pressure). Biggest movers = corrections of
+extreme lexical-N artifacts (Joe Wilson N +3.17 → react +0.01; Mike Rogers text −1.76 → react
++1.91, the most interrupted member — face-valid flip).
+**Epistemics:** like every behavioral disposition, reactivity is a measured behavior serving a
+construct role (Byrne pressure-reactivity) — valid by construction for its ROLE, no criterion look
+to fail. The Big-5 DISPLAY layer is untouched (text ES/N stays, caveats intact); this is an engine
+input. burst was probed and REJECTED (SB .04) — do not re-add. Text-N remains available via
+RECEPT_N=text.

@@ -89,6 +89,25 @@ if os.path.exists(ixp):
 dom_parts.append(zscore({m: d.get('committee_leader', 0) for m, d in PANEL.items()}))
 dom = mean_z(dom_parts, need=1)
 
+# reactivity (N-role, round-3 2026-07-09, user-ratified build — "can you safely create it? proceed"):
+# interruption/trail-off proneness in LIVE interviews = the cutoff share from interaction_features.py
+# (per-program z, >=12 turns/program, >=8 members/program, turn-weighted) — the Byrne
+# 'pressure-reactivity' behavior, Celli-Rossi round-3 survivor. Probe record (methods §19):
+# orthogonal to all five dispositions (worst |r|=.15 dom), party -.09 / gender +.02 clean, NOT
+# long-windedness (+.07 wpt) or floor-defense (-.09); program-split-half SB=.43 (real but modest) ->
+# GRADED SHRINKAGE sh=sqrt(min(1, turns/REACT_TURNS)) (the Ramey token-shrinkage pattern; default
+# 150, env dial) so thin-coverage members shrink toward neutral instead of carrying noise. Members
+# with <30 turns -> None (neutral downstream). Live speech = unstaffable; interaction STRUCTURE,
+# neither text content nor audio acoustics. Note burst was PROBED AND REJECTED (split-half SB=.04 =
+# situational noise) — do not add it back.
+REACT_TURNS = float(os.environ.get('REACT_TURNS', '150'))
+rea = {}
+if os.path.exists(ixp):
+    for m, d in json.load(open(ixp))['members'].items():
+        t = d.get('turns', 0)
+        if t >= 30 and d.get('cutoff') is not None:
+            rea[m] = d['cutoff'] * math.sqrt(min(1.0, t / REACT_TURNS))
+
 # visibility: broadcast engagement. INTERIM GUARD (until the nickname-fixed re-ingest lands):
 # members with <3 attributed interviews are indistinguishable from alias-dropped members
 # (Bernie/Bernard-class) — neutral (None), never penalized for a resolver gap.
@@ -111,17 +130,19 @@ out = {}
 for m in C:
     d = {}
     for k, src in (('cooperation_z', coop), ('diligence_z', dil), ('dominance_z', dom),
-                   ('visibility_z', vis), ('breadth_z', bre)):
+                   ('visibility_z', vis), ('breadth_z', bre), ('reactivity_z', rea)):
         if m in src: d[k] = round(src[m], 3)
     if d: out[m] = d
 cov = {k: sum(1 for m in out if k in out[m]) for k in
-       ('cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z')}
+       ('cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z', 'reactivity_z')}
 dump_atomic({'members': out, 'coverage': cov,
              'method': 'dispositions measured from behavior (nomological fix 2026-07-04; diligence 3-component '
-                       'run-4w): cooperation=bipartisanship+cosponsor embedding; diligence=roll-call participation'
-                       '+LEP follow-through+CHRG hearing participation (mean of available, participants-only z); '
-                       'dominance=interaction turn-stats+leadership; visibility=broadcast engagement; breadth='
-                       'legislative portfolio sections; z within chamber; missing -> neutral downstream'},
+                       'run-4w; reactivity round-3 2026-07-09): cooperation=bipartisanship+cosponsor embedding; '
+                       'diligence=roll-call participation+LEP follow-through+CHRG hearing participation (mean of '
+                       'available, participants-only z); dominance=interaction turn-stats+leadership; visibility='
+                       'broadcast engagement; breadth=legislative portfolio sections; reactivity=live-interview '
+                       'cutoff proneness (per-program z, sqrt(turns/%g) shrinkage, N-role); z within chamber; '
+                       'missing -> neutral downstream' % REACT_TURNS},
             B + r'\behavioral_dispositions.json')
 print('behavioral dispositions: %d members | coverage %s' % (len(out), cov))
 for k in cov:

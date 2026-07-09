@@ -55,6 +55,15 @@ if not T: print('  !! big5_traits.json MISSING/EMPTY — every member falls to t
 # stats + leadership), visibility/breadth (seed-prob roles). N stays TEXT-based (no behavioral
 # criterion exists for it) with the same graded shrinkage. RECEPT_TRAITS=lexical reverts wholesale.
 BASIS=os.environ.get('RECEPT_TRAITS','behavioral')
+# ---- N-SLOT (round-3 2026-07-09, user-ratified: "can you safely create it? proceed") ----
+# The Byrne composite's N was the engine's LAST text-derived leg ("no behavioral criterion exists"),
+# and the 07-09 psych-audit closed every ES/N validation route for text and voice. The behavioral
+# operationalization (Celli-Rossi round-3 survivor): reactivity_z = live-interview cutoff proneness
+# (behavioral_dispositions.py; orthogonal to all dispositions, party/gender-clean, program-split-half
+# SB .43 w/ graded shrinkage). RECEPT_N=behavioral (default) uses it, missing -> neutral 0 (same rule
+# as every other behavioral component — never a text fallback, never an invented disposition);
+# RECEPT_N=text reverts the slot to the shrunken lexical N wholesale (the pre-round-3 legacy math).
+RECEPT_N=os.environ.get('RECEPT_N','behavioral')
 BD={}
 if BASIS=='behavioral':
     try: BD=json.load(open(B+r'\behavioral_dispositions.json'))['members']
@@ -105,8 +114,11 @@ for m in members:
         coop=bd.get('cooperation_z',0.0) or 0.0; dil=bd.get('diligence_z',0.0) or 0.0
         dom=bd.get('dominance_z',0.0) or 0.0
         # Byrne composite, same structure/weights, behavioral inputs (missing component -> 0 neutral);
-        # N stays the shrunken text read (no behavioral criterion for neuroticism).
-        susc_trait=.40*coop+.30*N-.20*dil-.10*dom
+        # N-slot: behavioral reactivity (RECEPT_N=behavioral, round-3 default) or shrunken text N
+        # (RECEPT_N=text, pre-round-3 legacy).
+        rea=bd.get('reactivity_z')
+        Nn=(rea if rea is not None else 0.0) if RECEPT_N!='text' else N
+        susc_trait=.40*coop+.30*Nn-.20*dil-.10*dom
         low=not bd   # lowconf now = no behavioral coverage at all
     else:
         susc_trait=.40*A+.30*N-.20*Cc-.10*E             # Byrne et al. choking composite (lexical read)
@@ -132,7 +144,8 @@ for m in members:
     else:
         seed_prob=clip(0.60+.10*A+.06*O+.04*E,0.30,0.90)
     out[m]={'A':round(A,3),'N':round(N,3),'C':round(Cc,3),'E':round(E,3),'O':round(O,3),
-        'basis':BASIS,**({k:BD[m][k] for k in BD.get(m,{})} if BASIS=='behavioral' and m in BD else {}),
+        'basis':BASIS,'n_source':('text' if (BASIS!='behavioral' or RECEPT_N=='text') else ('reactivity' if BD.get(m,{}).get('reactivity_z') is not None else 'neutral')),
+        **({k:BD[m][k] for k in BD.get(m,{})} if BASIS=='behavioral' and m in BD else {}),
         'susc_z':round(susc,3),'susc_trait_z':round(susc_trait,3),
         'persona_susc_z':round(ps['z'],3) if ps else None,'susc_read':read,
         'agency':ps['agency'] if ps else None,'communion':ps['communion'] if ps else None,
@@ -140,9 +153,11 @@ for m in members:
         'incent_mult':round(incent,3),'pt_domain':'loss' if loss else 'gain','pt_mult':pt,
         'pressure_mult':round(clip(susc_mult*incent*pt,0.50,1.60),3),
         'seed_prob':round(seed_prob,3),'lowconf':low,'retiring':m in RET}
-dump_atomic({'members':out,'LOSSFRAME':1.10,'basis':BASIS,
+dump_atomic({'members':out,'LOSSFRAME':1.10,'basis':BASIS,'n_slot':(RECEPT_N if BASIS=='behavioral' else 'text'),
   'provenance':'Byrne2015 choking (susc), Fouirnaies-Hall (incent), Linde-Vis prospect theory (pt), Chen/SNAM contingency (seed_prob); '
-    +('BEHAVIORAL basis (nomological fix 2026-07-04): cooperation/diligence/dominance/visibility/breadth measured from behavior_panel; N text-based with sqrt shrinkage'
+    +(('BEHAVIORAL basis (nomological fix 2026-07-04): cooperation/diligence/dominance/visibility/breadth measured from behavior_panel; '
+       +('N-slot = behavioral reactivity (live-interview cutoff proneness, round-3 2026-07-09; missing -> neutral; RECEPT_N=text reverts)' if RECEPT_N!='text'
+         else 'N-slot = text N with sqrt shrinkage (RECEPT_N=text legacy)'))
       if BASIS=='behavioral' else 'LEXICAL basis; graded sqrt(tokens/1500) trait shrinkage toward neutral')},
   B+r'\member_receptivity.json')
 import collections
