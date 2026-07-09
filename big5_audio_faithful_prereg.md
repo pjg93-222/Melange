@@ -23,9 +23,15 @@ JOINT model, and report the vocal/linguistic/joint variance decomposition (their
   N-aware significance floor. Report vocal / linguistic / joint held-out r (and r²) for all 5 traits.
 
 ## Bars (ONE look, locked; all 5 traits reported regardless)
-- **BAR 1 — PRIMARY (clean cross-modal convergent):** VOCAL-alone predicts **Pink-E** with held-out
-  r **≥ +0.15 AND > permutation-null 95th** (significant). E is pre-specified primary (prosody's
-  strongest trait: Mairesse/Rubio acoustic-E .47–.54). Marrero vocal-alone ≈ 6.24% var ≈ r .25.
+- **BAR 1a — PRIMARY, POWERED (pre-look amendment for power; theory-driven, NOT data-snooped):** an
+  a-priori acoustic-EXTRAVERSION composite index — mean of z(+loudness_amean, +loudness_stddevNorm,
+  +F0semitone_stddevNorm, +spectralFlux_amean, +loudnessPeaksPerSec, +VoicedSegmentsPerSec), the 6
+  eGeMAPS markers Mairesse(2007)/Scherer/Rubio link to extraversion (louder, more dynamic, more pitch
+  variation, faster) — correlated with **Pink-E**: r **≥ +0.15 AND one-sided p<.05** (a 6-feature
+  a-priori index has a clean N=90 null r_crit≈.17, unlike the 88-feature ridge whose fitting floor is
+  ~.23 — this is the powered test, so N=90 can actually detect Marrero's ~.25 effect).
+- **BAR 1b — FAITHFUL DIMENSIONALITY (secondary):** full eGeMAPS-88 ridge → Pink-E, repeated-CV
+  held-out r, reported with its permutation-null (near the power edge at N=90/88-feat; honest).
 - **BAR 2 — SUPER-ADDITIVITY (Marrero's headline, caveated):** JOINT (vocal+linguistic) held-out r
   for E **> LINGUISTIC-alone by ≥ +0.03** — does vocal ADD beyond language. Reported WITH the
   shared-method caveat (linguistic is inflated vs Pink, so this bar is conservative-against-vocal).
