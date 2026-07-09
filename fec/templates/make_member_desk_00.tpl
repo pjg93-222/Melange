@@ -606,7 +606,14 @@ function psychHTML(m){
       <div class=mrow><span>Receptivity — ${P.basis==='behavioral'?'behavioral read':'trait read'}</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
       ${P.persona_susc_z!=null?`<div class=mrow><span>Receptivity — persona read</span><b>${P.persona_susc_z>0?'+':''}${P.persona_susc_z}</b></div>`:''}
       <div style="font-size:11px;font-weight:700;color:${rd[1]};background:${rd[1]}22;border:1px solid ${rd[1]}55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">${rd[0]}</div>`:'';
-    const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Suggested approach (IIT-C octant)</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';
+    const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Quick read (IIT-C octant)</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';
+    const NAR=P.narrative;
+    const narr=NAR?`<div class=eyebrow style=margin-top:10px>Suggested approach <span style=color:var(--faint)>· 3-paragraph brief${NAR.audio?' · incl. voice read':''}</span></div>
+      <div style="font-size:12px;line-height:1.52;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:10px 12px">
+        <div style="color:#7dd3fc;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Overall personality</div><div style=margin-bottom:8px>${NAR.p1}</div>
+        <div style="color:#7dd3fc;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Manner of speech &amp; landmines</div><div style=margin-bottom:8px>${NAR.p2}</div>
+        <div style="color:#7dd3fc;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Persuasive approach</div><div>${NAR.p3}</div>
+      </div>`:'';
     comp=`<div class=gen style=margin-bottom:12px>
       <div><div class=eyebrow>Behavioral profile <span style="color:#86efac;font-weight:700">· validated by construction</span> <span style=color:var(--faint)>· measured from what the member does (floor presence = discussion dynamics + leadership) — the only psychology that drives targeting</span></div>${behav}
       ${rad?`<div class=eyebrow style=margin-top:8px>Text Big-5 <span style="color:#fbbf24;font-weight:700">· grade A-</span> <span style=color:var(--faint)>· cross-check only — does NOT drive ranks or engines</span></div>
@@ -615,7 +622,7 @@ function psychHTML(m){
       <div style="font-size:10px;color:#e0a020;margin-top:2px">Read with care: Conscientiousness is the least-reliable trait (split-half .62), and Agreeableness / Emotional-Stability share a tone-halo — treat the gap between those two cautiously. The strongest C signal remains Diligence on the behavioral radar above.</div>
       ${P.llm_pct?'':'<div style="font-size:10px;color:var(--faint)">Pink (LLM) read not yet available for this member.</div>'}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Blue: low confidence (thin text corpus)</div>':''}`:''}</div>
       <div><div class=eyebrow>Projected persona <span style=color:var(--faint)>· public / presented persona (Birkenmaier-Lechner cues) — how they come across, not intrinsic traits</span></div>${persona}
-      <div class=eyebrow style=margin-top:8px>Engagement &amp; receptivity</div>${suscRows}${appr}</div></div>`;
+      <div class=eyebrow style=margin-top:8px>Engagement &amp; receptivity</div>${suscRows}${appr}</div></div>${narr}`;
   }
   const ext=P.ext?`<div class=eyebrow style=margin-top:8px>External measures (public datasets · weekly diagnostics)</div>
     ${P.ext.les!=null?`<div class=mrow><span>Lawmaking effectiveness (CEL LES, thru 118th)</span><b>${P.ext.les.toFixed(2)} · ${Math.round(P.ext.les_pct*100)}th pct</b></div>`:''}

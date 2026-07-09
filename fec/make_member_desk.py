@@ -137,6 +137,7 @@ def _approach(ap, cp, read):
 BDISP = (L('behavioral_dispositions.json') or {}).get('members', {})
 _BD_AX = ['cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z']
 _BDPCT = {ax: _pctrank([d[ax] for d in BDISP.values() if ax in d]) for ax in _BD_AX} if BDISP else {}
+NARR = L('member_narratives.json') or {}   # 3-paragraph 'Suggested approach' brief (Fable, Opus rescues refusals); display-only
 
 def psy_for(name):
     t = B5.get(name) or {}; r = RCPT.get(name) or {}
@@ -165,6 +166,10 @@ def psy_for(name):
     if name in _KB and _KBPCT: ext['kb_pct'] = _KBPCT(_KB[name])
     if name in _ANT: ext['antag'] = 1
     if ext: out['ext'] = ext
+    nar = NARR.get(name)
+    if nar and nar.get('ok'):
+        out['narrative'] = {'p1': nar.get('p1', ''), 'p2': nar.get('p2', ''), 'p3': nar.get('p3', ''),
+                            'audio': bool((nar.get('has') or {}).get('audio'))}
     return out or None
 
 CATS = CS['cats']                            # canonical 17 legislative areas

@@ -56,6 +56,18 @@ def build(jobs=DEF_JOBS):
     cache = json.load(open(CLIPCACHE, encoding='utf-8')) if os.path.exists(CLIPCACHE) else {'names': None, 'clips': {}}
     clips = sorted(glob.glob(os.path.join(ADIR, '*', '*.wav')))
     rel = lambda c: os.path.relpath(c, ADIR).replace('\\', '/')
+    # identity-verification gate: only clips verified SOLO_TARGET & identity != MISMATCH
+    # (b5_audio_verify.json; captions + Haiku hard-signal speaker/identity check). No verify file
+    # -> behave as before (keep all). This is what makes the voiceprints clean (no multi-speaker,
+    # no-caption, or wrong-member contamination) without touching the featurizer or aggregation math.
+    VER = {}
+    _vp = os.path.join(B, 'b5_audio_verify.json')
+    if os.path.exists(_vp):
+        VER = {k: v for k, v in json.load(open(_vp, encoding='utf-8')).items() if isinstance(v, dict)}
+    _keep = lambda r: (not VER) or bool(VER.get(r, {}).get('keep'))
+    if VER:
+        _b = len(clips); clips = [c for c in clips if _keep(rel(c))]
+        print('  verification gate: %d/%d clips verified-clean (dropped %d multi/no-caption/wrong-member)' % (len(clips), _b, _b - len(clips)))
     todo = [c for c in clips if rel(c) not in cache['clips']]
     print('clips on disk: %d | cached: %d | to featurize: %d (jobs=%d)' % (len(clips), len(clips) - len(todo), len(todo), jobs))
     if todo:
@@ -69,6 +81,7 @@ def build(jobs=DEF_JOBS):
     if not names: print('no features yet — nothing to aggregate'); return
     bym = {}
     for r, d in cache['clips'].items():
+        if not _keep(r): continue                                 # identity-verification gate (ignore any cached non-clean clip)
         v = np.array(d['v'], float)
         if d['sec'] < 1.0 or not np.isfinite(v).all(): continue   # drop degenerate/NaN clips (0-length downloads,
         bym.setdefault(r.split('/')[0], []).append((v, d['sec']))  # too-short segments) -> else 1 NaN row poisons all z
