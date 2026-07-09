@@ -1,86 +1,110 @@
 # -*- coding: utf-8 -*-
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT
 """Audio-prosody feature builder (big5_audio_prereg.md @3c94fc7). Scans audio_pilot/<member>/*.wav
-(solo clips; single-speaker by construction — see prereg), extracts eGeMAPS v02 (88 functionals,
-openSMILE) per clip, duration-weighted mean-pool per member, z-within-source across members, writes
-b5_audio_cache.json. Mirrors b5_emb_build.py. No download here (acquisition = b5_audio_fetch.py, a
-handoff/background job); this stage is deterministic + offline-testable.
-Usage: python b5_audio_build.py            (--test injects a synthetic member to prove the pipeline)"""
-import os, json, glob, wave, contextlib
+(solo clips), extracts eGeMAPS v02 (88 functionals, openSMILE) per clip, duration-weighted mean-pool
+per member, z-within-source, writes b5_audio_cache.json. PARALLEL (multiprocessing) + INCREMENTAL
+(per-clip cache b5_audio_clipcache.json) so it can be PRE-BUILT while the fetch is still running:
+re-running only featurizes new clips, then re-aggregates. Safe against concurrent fetch writes
+(partial/failed wavs are skipped and retried next run). Mirrors b5_emb_build.py.
+Usage: python b5_audio_build.py [--jobs N]      (--test = synthetic member end-to-end)"""
+import os, json, glob, wave, contextlib, multiprocessing as mp
 import numpy as np
 sys = _s; sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B = MB_ROOT
-ADIR = os.path.join(B, 'audio_pilot')
+ADIR = os.path.join(B, 'audio_pilot'); CLIPCACHE = os.path.join(B, 'b5_audio_clipcache.json')
 MIN_SEC = 180.0   # prereg: >= 3 minutes of solo audio per member
+DEF_JOBS = max(1, min(8, (os.cpu_count() or 2) - 2))
 
 def clip_seconds(path):
     try:
         with contextlib.closing(wave.open(path, 'rb')) as w:
             return w.getnframes() / float(w.getframerate() or 1)
     except Exception:
-        try:                                            # non-PCM wav -> soundfile handles more codecs
+        try:
             import soundfile as sf; i = sf.info(path); return i.frames / float(i.samplerate or 1)
         except Exception:
             return 0.0
 
-def build(members_dirs):
+_SMILE = None
+def _winit():
+    global _SMILE
     import opensmile
-    smile = opensmile.Smile(feature_set=opensmile.FeatureSet.eGeMAPSv02,
-                            feature_level=opensmile.FeatureLevel.Functionals)
-    feats = {}; secs = {}; names = None
-    for member, wavs in members_dirs.items():
-        vecs = []; ws = []; tot = 0.0
-        for wv in wavs:
-            d = clip_seconds(wv)
-            if d < 1.0: continue
-            try:
-                df = smile.process_file(wv)
-            except Exception as e:
-                print('  !! %s: eGeMAPS fail on %s (%s)' % (member, os.path.basename(wv), str(e)[:50])); continue
-            if names is None: names = list(df.columns)
-            vecs.append(df.values[0].astype(float)); ws.append(d); tot += d
-        if not vecs:
-            print('  skip %s: no usable audio' % member); continue
-        if tot < MIN_SEC:
-            print('  skip %s: %.0fs < %.0fs minimum' % (member, tot, MIN_SEC)); continue
-        w = np.array(ws); V = np.array(vecs)
-        feats[member] = (V * w[:, None]).sum(0) / w.sum()   # duration-weighted mean
-        secs[member] = tot
-    if not feats:
-        print('no members cleared the audio minimum — nothing written'); return
-    # z-within-source (single pilot source): standardize each functional across members
+    _SMILE = opensmile.Smile(feature_set=opensmile.FeatureSet.eGeMAPSv02, feature_level=opensmile.FeatureLevel.Functionals)
+def _wfeat(path):
+    try:
+        df = _SMILE.process_file(path)
+        return (path, df.values[0].astype(float).tolist(), list(df.columns), None)
+    except Exception as e:
+        return (path, None, None, str(e)[:80])
+
+def featurize(paths, jobs):
+    out = {}; names = None
+    if jobs <= 1 or len(paths) <= 1:
+        _winit()
+        for p in paths:
+            _, v, n, err = _wfeat(p)
+            if v: out[p] = v; names = names or n
+            else: print('  !! eGeMAPS fail %s (%s)' % (os.path.basename(p), err))
+    else:
+        with mp.Pool(jobs, initializer=_winit) as pool:
+            for p, v, n, err in pool.imap_unordered(_wfeat, paths, chunksize=1):
+                if v: out[p] = v; names = names or n
+                else: print('  !! eGeMAPS fail %s (%s)' % (os.path.basename(p), err))
+    return out, names
+
+def build(jobs=DEF_JOBS):
+    cache = json.load(open(CLIPCACHE, encoding='utf-8')) if os.path.exists(CLIPCACHE) else {'names': None, 'clips': {}}
+    clips = sorted(glob.glob(os.path.join(ADIR, '*', '*.wav')))
+    rel = lambda c: os.path.relpath(c, ADIR).replace('\\', '/')
+    todo = [c for c in clips if rel(c) not in cache['clips']]
+    print('clips on disk: %d | cached: %d | to featurize: %d (jobs=%d)' % (len(clips), len(clips) - len(todo), len(todo), jobs))
+    if todo:
+        feats, names = featurize(todo, jobs)
+        if names and not cache['names']: cache['names'] = names
+        for p, v in feats.items():
+            cache['clips'][rel(p)] = {'v': [round(x, 5) for x in v], 'sec': round(clip_seconds(p), 1)}
+        json.dump(cache, open(CLIPCACHE, 'w'))
+        print('  featurized %d clips -> %s' % (len(feats), os.path.basename(CLIPCACHE)))
+    names = cache['names']
+    if not names: print('no features yet — nothing to aggregate'); return
+    bym = {}
+    for r, d in cache['clips'].items():
+        v = np.array(d['v'], float)
+        if d['sec'] < 1.0 or not np.isfinite(v).all(): continue   # drop degenerate/NaN clips (0-length downloads,
+        bym.setdefault(r.split('/')[0], []).append((v, d['sec']))  # too-short segments) -> else 1 NaN row poisons all z
+    feats = {}; secs = {}
+    for m, cl in bym.items():
+        tot = sum(s for _, s in cl)
+        if tot < MIN_SEC: continue
+        V = np.array([v for v, _ in cl]); w = np.array([s for _, s in cl])
+        agg = (V * w[:, None]).sum(0) / w.sum()
+        if not np.isfinite(agg).all(): continue                   # belt-and-suspenders member guard
+        feats[m] = agg; secs[m] = tot
+    if not feats: print('no members >= %ds yet (largest short of floor)' % int(MIN_SEC)); return
     M = np.array([feats[m] for m in feats]); mu = M.mean(0)
     sd = M.std(0, ddof=1) if len(feats) > 1 else np.ones(M.shape[1])
-    sd = np.where(sd < 1e-12, 1.0, sd)                  # guard: <2 members or zero-variance feature -> no NaN
-    Z = {m: ((feats[m] - mu) / sd).round(5).tolist() for m in feats}
+    sd = np.where(sd < 1e-12, 1.0, sd)
+    Z = {m: np.clip((feats[m] - mu) / sd, -5.0, 5.0).round(5).tolist() for m in feats}  # winsorize: eGeMAPS heavy tails -> cap high-leverage outliers
     from moneyball_core import dump_atomic
-    dump_atomic({'members': sorted(feats), 'feature_names': names,
-                 'z': Z, 'seconds': {m: round(secs[m], 1) for m in secs},
-                 'feature_set': 'eGeMAPSv02', 'n_features': len(names), 'min_sec': MIN_SEC,
-                 'note': 'audio-prosody pilot; solo clips; duration-weighted mean, z-within-source. prereg @3c94fc7'},
+    dump_atomic({'members': sorted(feats), 'feature_names': names, 'z': Z,
+                 'seconds': {m: round(secs[m], 1) for m in secs}, 'feature_set': 'eGeMAPSv02',
+                 'n_features': len(names), 'min_sec': MIN_SEC,
+                 'note': 'audio-prosody pilot; parallel+incremental clip cache; duration-weighted mean, z-within-source. prereg @3c94fc7'},
                 os.path.join(B, 'b5_audio_cache.json'))
-    print('wrote b5_audio_cache.json: %d members, %d features (eGeMAPSv02)' % (len(feats), len(names)))
-
-def scan():
-    md = {}
-    for d in sorted(glob.glob(os.path.join(ADIR, '*'))):
-        if os.path.isdir(d):
-            wavs = sorted(glob.glob(os.path.join(d, '*.wav')))
-            if wavs: md[os.path.basename(d)] = wavs
-    return md
+    print('wrote b5_audio_cache.json: %d members >= %ds, %d features (eGeMAPSv02)' % (len(feats), int(MIN_SEC), len(names)))
 
 if __name__ == '__main__':
+    jobs = DEF_JOBS
+    for a in sys.argv:
+        if a.startswith('--jobs='): jobs = int(a.split('=')[1])
     if '--test' in sys.argv:
-        # synthetic solo clip -> prove eGeMAPS -> cache end to end, offline
         import soundfile as sf
         td = os.path.join(ADIR, '__test__'); os.makedirs(td, exist_ok=True)
-        sr = 16000; import numpy as _np
+        sr = 16000
         for i in range(2):
-            t = _np.linspace(0, 100, 100 * sr, endpoint=False)
-            sig = 0.3 * _np.sin(2 * _np.pi * (120 + 15 * i) * t) * (1 + 0.25 * _np.sin(2 * _np.pi * 3 * t))
+            t = np.linspace(0, 100, 100 * sr, endpoint=False)
+            sig = 0.3 * np.sin(2 * np.pi * (120 + 15 * i) * t) * (1 + 0.25 * np.sin(2 * np.pi * 3 * t))
             sf.write(os.path.join(td, 'clip%d.wav' % i), sig.astype('float32'), sr)
-        build({'__test__': sorted(glob.glob(os.path.join(td, '*.wav')))})
+        build(jobs=1)
     else:
-        md = scan()
-        print('audio_pilot members with wav: %d' % len(md))
-        build(md)
+        build(jobs)
