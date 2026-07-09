@@ -178,10 +178,22 @@ def run_gates():
         go, est = spend_guard('reference --score', 'member_reference_layer.py', ['--score'], 'REF_GATE_CAP', '100')
         if go:
             gate_step('reference --score', 'member_reference_layer.py', ['--score', '--go'], timeout=6000)
-        gate_step('co_appearance', 'co_appearance_layer.py', [], timeout=1200)
-        gate_step('member desk', 'make_member_desk.py', [], timeout=1200)
-        gate_step('combined', 'make_combined.py', [], timeout=1200)
+        okco, _ = gate_step('co_appearance', 'co_appearance_layer.py', [], timeout=1200)
+        okmd, _ = gate_step('member desk', 'make_member_desk.py', [], timeout=1200)
+        okcb, _ = gate_step('combined', 'make_combined.py', [], timeout=1200)
         ok, out = gate_step('audit_full', 'audit_full.py', [], timeout=6000)
+        # C-1 (audit 2026-07-08): only mark GATE-2 done (which makes _tick self-unregister the scheduled
+        # task) when the dashboard-producing chain AND the audit actually succeeded. gate_step never raises
+        # -- it returns ok=False on crash/timeout -- so the old UNCONDITIONAL write shipped a half-
+        # regenerated / stale dashboard and unregistered the task even when make_combined/make_member_desk/
+        # co_appearance/audit_full failed. On failure, return WITHOUT the done-flag so the next tick retries;
+        # big5 --batch resumes from cache/PEND (no double-spend) and the freshness guard above prevents any
+        # stale-data re-look.
+        required = {'co_appearance': okco, 'member desk': okmd, 'combined': okcb, 'audit_full': ok}
+        failed = [k for k, v in required.items() if not v]
+        if failed:
+            log('GATE-2 INCOMPLETE: %s failed -- gate2.done NOT written, self-unregister deferred, will retry next tick' % ', '.join(failed))
+            return
         open(os.path.join(B, 'gate2.done'), 'w').write(datetime.datetime.now().isoformat())
         log('GATE-2 complete (audit clean=%s)' % ('ALL MODULES CLEAN' in out))
 

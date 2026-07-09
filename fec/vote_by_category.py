@@ -18,10 +18,12 @@ def secnum(s):
     for i,kw in SECKW:
         if kw in s: return i
     return None
-bill2cat={}
+bill2cat=collections.defaultdict(set)
 for _,r in a.iterrows():
     bk=billkey(r['Name'],r['Congress']); sn=secnum(r['Section'])
-    if bk and sn: bill2cat[bk]=sn
+    if bk and sn: bill2cat[bk].add(sn)   # V-2 (audit 2026-07-08): a bill can carry >1 Section category (107/468 do) --
+                                          # accumulate the SET; the old bill2cat[bk]=sn last-write-wins clobber credited
+                                          # each multi-category bill to one arbitrary (row-order) category and dropped it from the rest
 print('bills mapped to a Section:',len(bill2cat))
 # CFPB (section 13) per-bill direction: Direction 1=Reduce/Restrain(pro), else Reach/Expand(anti)
 cfpb={}
@@ -35,31 +37,53 @@ CATLAB={1:'Examination & Supervision',2:'CU Capital Requirements',3:'NCUA Budget
 11:'Field of Membership',12:'CDFI Fund',13:'CFPB',14:'Credit Card Mandates',15:'TCPA',16:'Member Business Lending',17:'Mortgage & Housing'}
 def rc_bill(s):
     if not isinstance(s,str): return None
-    m=re.match(r'\s*([HS])\s*([RJ]?)\s*(\d+)',s.replace('.',' '),re.I)
+    # V-3 (audit 2026-07-08): use the SAME bill-id grammar as billkey() above so J.Res/H.J.Res roll-call rows
+    # parse instead of returning None. The old r'([HS])\s*([RJ]?)\s*(\d+)' lacked the (?:Res\.?)? group, so
+    # every S.J.Res/H.J.Res final-passage vote (incl. e.g. S.J.Res.32, pro-CU) was silently skipped even
+    # though the bill is present in bill2cat and cfpb. (Both parsers still key on (chamber,number) only, so
+    # an H.R.N vs H.J.Res.N collision remains possible -- a rarer, pre-existing issue left for a keyed refactor.)
+    m=re.match(r'\s*([HS])\.?\s*([RJ]?\.?\s*(?:Res\.?)?)\s*(\d+)',s.replace('  ',' '),re.I)
     return ('H' if m.group(1).upper()=='H' else 'S',int(m.group(3))) if m else None
 # accumulate signed CU-aligned vote per (bioguide,cat)
-agg=collections.defaultdict(lambda:[0.0,0]); name_of={}; covered=collections.Counter(); skip=0
-v=pd.read_csv(MB_ROOT+r'\votes\cu_rollcall_votes_clean.csv')
+agg=collections.defaultdict(lambda:[0.0,0]); name_of={}; covered=collections.Counter(); skip=0; unmapped=0   # V-6: count non-yea/nay rows instead of dropping them silently
+# V-1 (audit 2026-07-08): cu_rollcall_votes_clean.csv is an EXTERNAL, manually-cleaned roll-call export --
+# NO script in this repo produces it, and it is currently ABSENT from votes/. Fail with an actionable message
+# instead of a cryptic pandas error. This script is deliberately NOT wired into run_pipeline/weekly_refresh;
+# its output vote_category_lean.json is a FROZEN, manually-refreshed input still consumed live by
+# moneyball_core Path V and per_category_stance (audit_full carries a freshness check on it). To refresh the
+# vote signal: drop the cleaned roll-call CSV at _RC, run this by hand, then verify vote_category_lean.json.
+_RC=MB_ROOT+r'\votes\cu_rollcall_votes_clean.csv'
+if not _o.path.exists(_RC):
+    sys.exit('vote_by_category: missing input %s -- external cleaned roll-call export with no in-repo producer; '
+             'restore it (or repoint _RC) before regenerating vote_category_lean.json (a frozen input consumed '
+             'live by moneyball_core Path V + per_category_stance).' % _RC)
+v=pd.read_csv(_RC)
 def passage(s): return isinstance(s,str) and re.search(r'passage|suspend the rules and pass|concur',s,re.I) and not re.search(r'recommit|amendment',s,re.I)
 for _,r in v.iterrows():
     if not passage(r['vote_question']): skip+=1; continue   # final-passage only (drop amendment/procedural noise)
     bk=rc_bill(r['bill_number'])
     if not bk: skip+=1; continue
-    key=(int(r['congress']),bk[0],bk[1]); cat=bill2cat.get(key)
-    if not cat: skip+=1; continue
+    key=(int(r['congress']),bk[0],bk[1]); cats_hit=bill2cat.get(key)
+    if not cats_hit: skip+=1; continue
     vote=str(r['vote']).strip().lower()
     if vote in ('yea','yes','aye'): yv=1
     elif vote in ('nay','no'): yv=-1
-    else: continue
-    # CU-aligned sign
-    if cat==13:
-        d=cfpb.get(bk); sign=+1 if d=='1' else -1 if d is not None else +1
-    else:
-        sign=-1 if cat in ANTI else +1
-    aligned=yv*sign
-    bio=r['bioguide']; name_of[bio]=r['member']; covered[CATLAB[cat]]+=1
-    s=agg[(bio,cat)]; s[0]+=aligned; s[1]+=1
-print('votes skipped (no bill/category match):',skip,'of',len(v))
+    else: unmapped+=1; continue   # V-6: Present/Not-Voting/blank -- correctly excluded, now counted (was a silent drop)
+    bio=r['bioguide']; name_of[bio]=r['member']
+    for cat in cats_hit:          # V-2: aggregate the vote into EVERY category the bill belongs to
+        # CU-aligned sign
+        if cat==13:
+            # V-4 (audit 2026-07-08): Direction '1'=Restrain(pro CU), '-1'=Expand(anti); '0'=Neutral and any
+            # bill missing from cfpb_bill_directions.csv -> 0 = skip (uncounted). The old
+            # `-1 if d is not None else +1` scored the 6 Neutral bills as anti-CU and unknown bills as pro-CU.
+            d=cfpb.get(bk); sign=+1 if d=='1' else -1 if d=='-1' else 0
+            if sign==0: continue
+        else:
+            sign=-1 if cat in ANTI else +1
+        aligned=yv*sign
+        covered[CATLAB[cat]]+=1
+        s=agg[(bio,cat)]; s[0]+=aligned; s[1]+=1
+print('votes skipped (no bill/category match):',skip,'of',len(v),'| non-yea/nay rows excluded:',unmapped)
 print('\nvote coverage by category (roll-call votes landing in each):')
 for c in range(1,18):
     print('   %-26s %5d votes'%(CATLAB[c],covered[CATLAB[c]]))

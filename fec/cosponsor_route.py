@@ -11,19 +11,16 @@ CEDGE=float(os.environ.get('CEDGE','10000')) # base $ per recruitment ask
 TOPIC=os.environ.get('TOPIC','Interchange')
 PRO={'Champion','Defender','Ally'}
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(C.keys())
-bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 CS=json.load(open(B+r'\category_stance.json')); MAT=CS['matrix']; cats=CS['cats']
 cat=[c for c in cats if TOPIC.lower() in c.lower()][0]
 adj=MBC.load_network()
-# L4: unify the diffusion kernel with the rest of the system. The coalition/scenario/frontier modules use a
-# BRIDGE-AMPLIFIED edge prob P=(w*cpf)/(w*cpf+4); this module previously used the un-amplified P=w/(w+4),
-# so a cross-party recruitment between two bridge-builders spread LESS here than in the cascade -- one model,
-# two kernels. Adopt the amplified kernel here too so co-sponsor recruitment shares the single diffusion law.
-bpf=MBC.bpf()
-prt=MBC.party()
-BETA=1.5
-cpf=MBC.cpf_diffusion
-P={u:{v:(w*cpf(u,v))/(w*cpf(u,v)+6.0) for v,w in adj[u].items()} for u in members}     # activation prob if u whips v (bridge-amplified)
+# N-1 (audit 2026-07-08): use the ONE shared cascade kernel. MBC.build_P applies bridge-amplified
+# cpf_diffusion AND the receiver-susceptibility factor em(v)=edge_mult that this inline copy silently
+# dropped -- the old P=(w*cpf)/(w*cpf+6) diverged from the live kernel by up to ~13%/edge for the
+# 530/533 members with edge_mult!=1, so co-sponsor route-finding used a different diffusion law than the
+# cascade/coalition/frontier. build_P is exactly what budget_frontier/per_topic_coalition/salience_shock
+# use. (Also removed the dead BETA/bpf/prt/bio2name loads that falsely implied a local kernel knob.)
+P=MBC.build_P(adj)     # activation prob if u whips v (bridge-amplified + susceptibility-aware)
 seeds=[m for m in members if MAT.get(m,{}).get(cat) in PRO]
 MCMODE=os.environ.get('MCMODE','0')=='1'; MC=int(os.environ.get('MC','40'))
 def mc_spread(R):

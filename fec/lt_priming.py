@@ -25,9 +25,11 @@ adj=MBC.load_network()
 # cascade -- one diffusion law everywhere.
 bpf=MBC.bpf()
 prt=MBC.party()
-BETA=1.5
-cpf=MBC.cpf_diffusion
-P={u:{v:(w*cpf(u,v))/(w*cpf(u,v)+6.0) for v,w in adj[u].items()} for u in members}   # bridge-amplified (L4)
+# N-1 (audit 2026-07-08): the ONE shared cascade kernel. build_P adds the receiver-susceptibility factor
+# em(v)=edge_mult that this inline copy dropped -- the old P=(w*cpf)/(w*cpf+6) diverged from the live
+# kernel by up to ~13%/edge (530/533 members have edge_mult!=1), silently feeding a divergent kernel into
+# lt_priming.json despite this module's "one diffusion law everywhere" intent. (BETA was dead.)
+P=MBC.build_P(adj)   # bridge-amplified (L4) + susceptibility-aware
 # BAKKER CROSS-CUE SIGNING (lit-audit run-4j forward item, applied at the 2026-07-05 merge; BAKKER_XCUE=0
 # reverts). Bakker-Lelkes-Malka (JOP): out-party cues do NOT persuade (null-to-backfire) — the kernel's
 # unconditional 0.4 cross-party floor is exactly an attenuated-positive out-party cue. In the PRIMING

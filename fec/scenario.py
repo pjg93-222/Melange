@@ -32,9 +32,10 @@ C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=[m['m
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 bpf=MBC.bpf()
 prt=MBC.party()
-cpf=MBC.cpf_diffusion
 adj=MBC.load_network()
-P={u:{v:(w*cpf(u,v))/(w*cpf(u,v)+6.0) for v,w in adj[u].items()} for u in members}
+# N-1 (audit 2026-07-08): the ONE shared cascade kernel. build_P adds the receiver-susceptibility factor
+# em(v)=edge_mult the old inline P=(w*cpf)/(w*cpf+6) dropped (diverged up to ~13%/edge from the live kernel).
+P=MBC.build_P(adj)
 idx={m:i for i,m in enumerate(members)}; NM=len(members)
 _sm=MBC.sm64
 def cascade(A,Bs,it):
