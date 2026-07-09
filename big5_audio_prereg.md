@@ -133,3 +133,21 @@ machinery check:** real C-SPAN floor audio (Pelosi 2319s / M.Johnson 920s / AOC 
 produced real eGeMAPS (88 feat, all non-zero). Fetch+build now proven on REAL audio; eval machinery was
 already validated. **FULL RUN in progress: --search 90 (buffer over N>=80) -> build -> the ONE look.**
 No bar changed; a PASS still gets adversarial P6 re-derivation before it is recorded.
+
+## RESULT — THE ONE LOOK (2026-07-08, N=90, MISS; pilot CLOSED)
+Full run: --search 90 -> 90 members cleared the 180s floor -> parallel eGeMAPS build (NaN-clip drop +
+z winsorized to +/-5) -> b5_audio_eval, one look. **MISS on both bars:**
+- BAR 1: audio-alone E held-out r = **+0.228** (real-ish, in the Marrero/Rubio band) BUT permutation
+  noise floor 95% = **+0.234** -> WITHIN NOISE (not significant at N=90/88-feat). And text-alone E .258
+  vs fused .254 -> **delta -0.004**: audio adds NOTHING incremental over text. Audio-E is REDUNDANT
+  with the text instrument, not complementary (Marrero super-additivity was self-report; did not
+  transfer to our behavioral criterion / legislators). Secondary audio-alone: A +0.129, C -0.081, O -0.059.
+- BAR 2: within-audio A-ES |r| = 0.100 (low) BUT audio-A NOT valid (+0.129 < its null +0.165) ->
+  separation VACUOUS (no A signal to entangle). The Bar-2 validity gate correctly caught this.
+**Discipline note:** audio-E +0.228 WOULD have cleared the original naive +0.15 bar; the significance
+gate (Addendum 3) flagged it within-noise, the incremental bar showed no lift over text, and the NaN/
+winsorization fixes kept it real -> an honest NEGATIVE, not a false positive. **Text terminus stands;
+psychology unchanged; DISPLAY-ONLY; no number moves.** Pilot CLOSED. Audio is NOT the lever to a
+straight-A or to load-bearing. Scale-up (interview audio + diarization) NOT pursued — the pilot's own
+E signal is redundant with text, so more audio of the same kind won't add. Real load-bearing avenues
+live elsewhere (N-channel upgrade to Pink; incremental-validity gate vs observed movement).

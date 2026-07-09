@@ -281,3 +281,20 @@ target); E/O do not travel to behavior. **Grade unchanged at A-** (A- already pr
 caveat; this neither lowers nor raises it). The ONLY remaining path from A- to a straight A is an
 independent TRAIT comparator — a multi-rater expert gold panel or a self-report anchor (data
 collection, not a code change). Reverted per doctrine; documented so no future session re-runs it.
+
+## 14. Audio-prosody pilot — MISS; the one untried modality closed (2026-07-08, prereg big5_audio_prereg.md @3c94fc7)
+The one modality never tried: acoustic prosody (eGeMAPS v02, 88 functionals, openSMILE), targeting the
+volume-bound E and the A-ES text-tone halo. Real C-SPAN floor audio for 90 members (>=180s each,
+solo-biased search; YouTube CDN 403 bypassed via ios/web_safari/android yt-dlp client). Pre-registered
+two bars + a significance gate + N>=80 (after the empirical finding that PCA can't fix an N-problem and
+the +0.267 floor at N=40 = the correlation sampling limit). **ONE LOOK, N=90: MISS both bars.**
+audio-alone E held-out r **+0.228** (real-ish, Marrero/Rubio band) but < permutation noise floor +0.234
+(WITHIN NOISE), and text+audio fused (.254) does NOT beat text-alone (.258) -> **audio-E is REDUNDANT
+with the text instrument, adds nothing** (Marrero super-additivity was self-report; didn't transfer to
+our behavioral criterion / legislators). Halo separation VACUOUS (audio-A invalid, +0.129 < null +0.165).
+**Honest-negative, not false-positive: +0.228 would have cleared the naive +0.15 bar — the significance
+gate + incremental bar + Bar-2 validity gate + NaN-drop/winsorization together prevented a false pass.**
+Audio is NOT the lever to straight-A or load-bearing. Text terminus stands; psychology DISPLAY-ONLY;
+no number moved. Pipeline (fec/b5_audio_fetch|build|eval.py) retained; scale-up not pursued (same-kind
+audio is redundant). Real load-bearing avenues live elsewhere (N-channel upgrade to Pink; incremental
+validity vs observed movement — separate session).
