@@ -273,10 +273,11 @@ cv.addEventListener('touchend',e=>{if(e.touches.length===0){if(tdrag&&!panMoved)
 function flyTo(i){cam.s=2.4;cam.tx=W/2-LX[i]*cam.s;cam.ty=H/2-LY[i]*cam.s;draw();}
 // ============ LIVE SCENARIO/PATHFINDER ENGINE (faithful port of flip_model + competitive cascade + lt_priming) ============
 const EG=DATA.engine,K=EG.const,BPF=EG.bpf,PTY=DATA.party;
+const PM=EG.pmult||null,EMU=EG.emult||null,DM=EG.dmult||null;   // receptivity psych parity (2026-07-09): pressure/edge/delivery multipliers mirrored from the Python engine (old bundles -> neutral 1.0)
 const ADJ=Array.from({length:N},()=>({}));for(const [u,v,w] of EG.adj){ADJ[u][v]=w;ADJ[v][u]=w;}
 function cpf(u,v){return (PTY[u]!==PTY[v]&&'DR'.indexOf(PTY[u])>=0&&'DR'.indexOf(PTY[v])>=0)?(K.DCROSS+(1-K.DCROSS)*Math.sqrt(BPF[u]*BPF[v])):1;}   // CALIBRATED: cross-party DIFFUSION damped 0.4-1.0x (homophily: Harmon; Andris; cross<within)
 function align(u,v){if(PTY[u]===PTY[v]&&'DR'.indexOf(PTY[u])>=0)return K.SRCPRO;if(PTY[u]!==PTY[v]&&'DR'.indexOf(PTY[u])>=0&&'DR'.indexOf(PTY[v])>=0)return K.SRCANTI;return 1;}   // SOURCE-ALIGNMENT for persuasion: co-partisan x1.7 / out x0.5 (Furnas/Bakker)
-const PE=Array.from({length:N},()=>({}));for(let u=0;u<N;u++)for(const v in ADJ[u]){const wc=ADJ[u][v]*cpf(u,+v);PE[u][v]=wc/(wc+6);}
+const PE=Array.from({length:N},()=>({}));for(let u=0;u<N;u++)for(const v in ADJ[u]){const wc=ADJ[u][v]*cpf(u,+v)*(EMU?EMU[+v]:1);PE[u][v]=wc/(wc+6);}   // = moneyball_core.build_P incl. edge_mult receiver susceptibility (psych parity 2026-07-09; closes audit N-1 JS half)
 const SCN={C:'Champion',F:'Defender',A:'Ally',H:'Highly Persuadable',T:'True Neutral',L:'Lean Skeptic',N:'Neutral',S:'Skeptic',O:'Opponent','-':'—'};
 const CAMP=t=>('CFA'.indexOf(t)>=0?'pro':'OS'.indexOf(t)>=0?'anti':'neu');
 const PERS=EG.pers,THETA=EG.theta;
@@ -286,11 +287,11 @@ function flipModel(i,tiers,cu,ind){
   for(let u=0;u<N;u++){let a=0,b=0;const nb=ADJ[u];for(const v in nb){const c=CAMP(tiers[v]);if(c==='neu')continue;const wc=nb[v]*align(u,+v);if(c==='pro')a+=wc;else b+=wc;}nA[u]=a;nB[u]=b;}   // persuasion proximity uses SOURCE-ALIGNMENT
   let mA=1,mB=1;for(let u=0;u<N;u++){if(nA[u]>mA)mA=nA[u];if(nB[u]>mB)mB=nB[u];}
   const eng=EG.eng[i];let total=0;const pf=new Float64Array(N),tg=new Float64Array(N);
-  for(let u=0;u<N;u++){const a=K.WM*(cu[u]+1)/((cu[u]+1)+K.HALFF*EG.rcp[u])+K.WP*nA[u]/mA;const b=K.WM*(ind[u]+1)/((ind[u]+1)+K.HALFF*EG.rcp[u])+K.WP*nB[u]/mB;const p=(a+b)>0?a/(a+b):0;pf[u]=p;tg[u]=(eng[u]+K.BASE*EG.sco[u]/K.smax)*(PERS[SCN[tiers[u]]]||0)*(1+0.3*BPF[u]);total+=tg[u]*p;}   // +PASSAGE bonus (Volden-Wiseman)
+  for(let u=0;u<N;u++){const pm=PM?PM[u]:1;const a=K.WM*pm*(cu[u]+1)/((cu[u]+1)+K.HALFF*EG.rcp[u])+K.WP*nA[u]/mA;const b=K.WM*pm*(ind[u]+1)/((ind[u]+1)+K.HALFF*EG.rcp[u])+K.WP*nB[u]/mB;const p=(a+b)>0?a/(a+b):0;pf[u]=p;tg[u]=(eng[u]+K.BASE*EG.sco[u]/K.smax)*(PERS[SCN[tiers[u]]]||0)*(1+0.3*BPF[u])*(DM?DM[u]:1);total+=tg[u]*p;}   // +PASSAGE bonus (Volden-Wiseman); x pressure_mult on both money terms + x delivery_mult on target value (psych parity 2026-07-09 = flip_model.pflip/topic_setup)
   return {pf,tg,nA,nB,mA,mB,total};
 }
-function pflipOf(u,nAu,nBu,mA,mB,cu,ind){const a=K.WM*(cu+1)/((cu+1)+K.HALFF*EG.rcp[u])+K.WP*nAu/mA;const b=K.WM*(ind+1)/((ind+1)+K.HALFF*EG.rcp[u])+K.WP*nBu/mB;return (a+b)>0?a/(a+b):0;}
-function shiftLean(u,dollars){const r=dollars/EG.rcp[u];return K.MAXSHIFT*(r/(r+K.HALF));}
+function pflipOf(u,nAu,nBu,mA,mB,cu,ind){const pm=PM?PM[u]:1;const a=K.WM*pm*(cu+1)/((cu+1)+K.HALFF*EG.rcp[u])+K.WP*nAu/mA;const b=K.WM*pm*(ind+1)/((ind+1)+K.HALFF*EG.rcp[u])+K.WP*nBu/mB;return (a+b)>0?a/(a+b):0;}
+function shiftLean(u,dollars){const r=dollars/EG.rcp[u];return K.MAXSHIFT*(r/(r+K.HALF))*(PM?PM[u]:1);}   // x pressure_mult (psych parity 2026-07-09 = money_response.shift_lean)
 function dollarsForUnits(u,units){units=Math.min(units,0.98);return K.HALF*EG.rcp[u]*units/(1-units);}
 // stance-integrity gates (2026-07-04, mirrors fec/lt_priming.py; 'Lean Skeptic' carved out of every one):
 // overall Skeptic/Highly-Skeptical/Opponent can be neither target nor recruit; recruit pricing scales by
@@ -443,7 +444,7 @@ function runScenario(){
   document.getElementById('culab').textContent='$'+cusl.value+'k';document.getElementById('colab').textContent='$'+cosl.value+'k';
   let dThis=0,dAll=0;
   for(let i=0;i<DATA.issues.length;i++){const c=baseCache[i],pfn=pflipOf(sel,c.nAsel,c.nBsel,c.mA,c.mB,EG.cu[sel]+cu,EG.ind[sel]+co);const d=c.tgsel*(pfn-c.pfbase);dAll+=d;if(i===issue)dThis=d;}
-  const lean=shiftLean(sel,cu)-shiftLean(sel,co),defects=Math.abs(lean)>=K.DTHRESH;
+  const lean=shiftLean(sel,cu)-shiftLean(sel,co)*(K.LOSSFRAME||1),defects=Math.abs(lean)>=K.DTHRESH;   // competitor leg x LOSSFRAME (psych parity 2026-07-09 = money_response loss-frame asymmetry)
   const sg=x=>(x>=0?'up':'down'),ar=x=>(x>=0?'+':'');
   document.getElementById('scout').innerHTML=
     `<div class=mrow><span>Winnability · this issue</span><b class="delta ${sg(dThis)}">${ar(dThis)}${dThis.toFixed(3)}</b></div>`

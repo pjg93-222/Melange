@@ -235,9 +235,16 @@ engine={'adj':ADJ,
  'nlraw':[round(cong[n].get('net_lean') or 0,1) for n in members],'bpf':[round(bp[n],4) for n in members],
  'eng':ENG,
  'const':{'WM':fmE.WM,'WP':fmE.WP,'HALFF':fmE.HALFF,'BASE':fmE.BASE,'smax':round(fmE.smax,4),
-          'MAXSHIFT':18,'HALF':0.10,'DTHRESH':11.25,'BSCALE':400000,'SRCPRO':1.7,'SRCANTI':0.5,'DCROSS':0.4,'CEDGE':10000,'RFLOOR':200000,'MC':40,'SEED':7},
+          'MAXSHIFT':18,'HALF':0.10,'DTHRESH':11.25,'LOSSFRAME':1.10,'BSCALE':400000,'SRCPRO':1.7,'SRCANTI':0.5,'DCROSS':0.4,'CEDGE':10000,'RFLOOR':200000,'MC':40,'SEED':7},
  'pers':fmE.PERS,'theta':{'Highly Persuadable':0.6,'True Neutral':1.0,'Neutral':1.0,'Lean Skeptic':1.5,'Skeptic':2.0,'Opponent':3.0,'Ally':0.0},
  'refflip':[round(fmE.flip_value(issue_cat[i],fmE.CS0,fmE.cu0,fmE.ind0),3) for i in range(len(issues))]}   # Python baseline per issue -> in-browser self-check
+# psych parity for the in-browser engine (2026-07-09, closes the audit N-1 JS half): the JS mirror
+# previously consumed NONE of the receptivity multipliers the Python engine applies (pressure_mult on
+# money terms, delivery_mult on target value, edge_mult in the cascade kernel) -> ship all three
+# (neutral 1.0 fallback keeps old bundles working).
+engine['pmult']=[round(fmE.rc(n,'pressure_mult',1.0),3) for n in members]
+engine['emult']=[round(fmE.rc(n,'edge_mult',1.0),3) for n in members]
+engine['dmult']=[round(fmE.MC.delivery_mult(n),3) for n in members]
 # ---- Noble & Turner (2024) going-public parameters per issue -> System-shocks exec cue ----
 # z = sincere polarization (D-R stance gap on the issue); psi = share w/o an established posture;
 # P(rally)=(1-b)(1-z/3), P(retreat)=(1-b)(z/3), b = 0.05+0.10*psi backfire.  Estimation identical to

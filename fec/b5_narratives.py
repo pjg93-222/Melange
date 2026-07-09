@@ -25,11 +25,12 @@ RC=L('member_receptivity.json'); RC=RC.get('members',RC) if isinstance(RC,dict) 
 AU=L('b5_audio_cache.json'); AZ={m:dict(zip(AU['feature_names'],AU['z'][m])) for m in AU['members']}
 OUT=B+r'\member_narratives.json'
 
+def _ord(n): return '%d%s'%(n,'th' if 10<=n%100<=20 else {1:'st',2:'nd',3:'rd'}.get(n%10,'th'))
 def band(z):
     if z is None: return None
     p=norm.cdf(float(z))*100
     lab='very high' if p>=90 else 'high' if p>=70 else 'average' if p>=30 else 'low' if p>=10 else 'very low'
-    return '%s (%dth pct)'%(lab,round(p))
+    return '%s (%s pct)'%(lab,_ord(round(p)))
 def line(lbl,mean,z):
     b=band(z);  return ('  - %s — %s: %s'%(lbl,mean,b)) if b else None
 
@@ -139,7 +140,7 @@ def gen(name):
 if __name__=='__main__':
     args=sys.argv
     res=json.load(open(OUT,encoding='utf-8')) if _o.path.exists(OUT) else {}
-    roster=[m for m in BD if m in V2 or m in BD]   # everyone with a behavioral record (all 533)
+    roster=sorted(set(BD)|set(V2))   # union: behavioral record OR text instrument (the old `m in BD or ...` over BD keys was a tautology that silently excluded V2-only members)
     only=next((a.split('=',1)[1] for a in args if a.startswith('--only=')),None)
     if '--only' in args and not only:
         only=args[args.index('--only')+1]
