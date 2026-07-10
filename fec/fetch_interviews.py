@@ -163,6 +163,13 @@ def resolve_full(label):
         if (len(cands) == 1 and re.match(r'^(SEN|REP|SENATOR|REPRESENTATIVE|CONGRESS)', label.strip(), re.I)
                 and _firstname_compatible(p[0], norm(cands[0]).split()[0])):
             return cands[0]
+    elif len(p) == 1:
+        # QA 2026-07-10 (CSIS leg): 'Senator Shaheen:' = honorific + BARE surname — no first name
+        # exists to check. Resolve ONLY with an explicit honorific AND a roster-unique surname
+        # (the same uniqueness standard as above, minus the impossible firstname test).
+        cands = SUR.get(p[0], [])
+        if len(cands) == 1 and re.match(r'^(SEN|REP|SENATOR|REPRESENTATIVE|CONGRESS)', label.strip(), re.I):
+            return cands[0]
     return None
 
 LABEL = re.compile(r'^\s*([A-Z][A-Z .,\'()\-]{1,70}?):\s', re.M)
@@ -756,6 +763,149 @@ def run_axefiles():
         if n: print('axefiles %s: %d member turns (total %d)' % (dt, n, tot), flush=True)
     con.close(); print('AXEFILES done: %d member turns' % tot)
 
+def run_csis():
+    """CSIS event transcripts (csis.org — recon workflow wf_d6b68694 GO, adversarially verified w/
+    member sample; user-directed think-tank sweep 2026-07-10). Institutions publish what podcasts
+    don't: full HTML transcripts of moderated member conversations — the booking profile skews to
+    committee workhorses, not cable regulars. Enumeration: Drupal Simple-XML-Sitemap index
+    csis.org/sitemap.xml?page=1..N (robots: '*' disallows Drupal internals + '/*?' with an
+    explicit 'Allow: /*?page=' carve-out — the sitemap route is the sanctioned one; politeness
+    0.7s). PREFILTER: only URLs whose slug carries a member-ish token (senator|sen-|rep-|
+    congressman|congresswoman|speaker-|roster surname) are fetched — false positives cost one
+    fetch and parse to zero (drop-never-guess). Labels: Title-case honorific + name + colon at
+    paragraph start ('Senator Shaheen:') -> parse_turns_mixed; CAPS fallback. Date: page meta
+    datePublished, else sitemap lastmod (dateless rows never stored). Resume: csis:<slug>."""
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    # roster surname tokens (len>4 to dodge stopword-ish surnames)
+    surn = set()
+    for name in C:
+        parts = norm(name).split()
+        if parts and len(parts[-1]) > 4: surn.add(parts[-1])
+    urls = {}
+    for pg in range(1, 40):
+        try:
+            x = get('https://www.csis.org/sitemap.xml?page=%d' % pg); time.sleep(PAUSE)
+        except Exception:
+            break
+        locs = re.findall(r'<loc>([^<]+)</loc>\s*(?:<lastmod>([^<]+)</lastmod>)?', x)
+        if not locs: break
+        n0 = len(urls)
+        for u, lm in locs:
+            if '/analysis/' not in u and '/events/' not in u: continue
+            slug = u.rsplit('/', 1)[-1].lower()
+            toks = set(re.split(r'[-_.]', slug))
+            if (toks & {'senator', 'sen', 'rep', 'congressman', 'congresswoman', 'representative'}
+                    or (toks & surn)):
+                urls[u] = (lm or '')[:10]
+        if len(urls) == n0 and pg > 21: break
+    print('csis: %d candidate transcript pages from sitemaps' % len(urls), flush=True)
+    tot = 0
+    for u, lm in sorted(urls.items()):
+        key = 'csis:' + u.rsplit('/', 1)[-1][:120]
+        if key in done: continue
+        try:
+            page = get(u); time.sleep(PAUSE)
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 410):
+                con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'nopage', datetime.datetime.now().isoformat()))
+                con.commit(); done.add(key)
+            continue
+        except Exception:
+            continue
+        dm = re.search(r'"datePublished"\s*:\s*"(\d{4}-\d{2}-\d{2})', page)
+        date = dm.group(1) if dm else (lm if re.match(r'\d{4}-\d{2}-\d{2}', lm or '') else None)
+        if not date:
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'nodate', datetime.datetime.now().isoformat()))
+            con.commit(); done.add(key); continue
+        body = re.sub(r'<script.*?</script>|<style.*?</style>', ' ', page, flags=re.S)
+        body = _html.unescape(re.sub(r'<[^>]+>', '\n', body))
+        rows = parse_turns_mixed(body)
+        if not rows: rows = parse_turns(body)
+        n = store(con, rows, date, 'csis', u)
+        con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+        con.commit(); done.add(key); tot += n
+        if n: print('csis %s: %d member turns (total %d) %s' % (date, n, tot, u.rsplit("/",1)[-1][:50]), flush=True)
+    con.close(); print('CSIS done: %d member turns' % tot)
+
+def run_cfr():
+    """CFR event transcripts (cfr.org — recon workflow wf_4317698d GO, adversarially verified w/
+    member sample; user opt-in 2026-07-10). Server-rendered HTML transcripts; robots: single '*'
+    section, /event paths clean, no AI-bot blocks, no Crawl-Delay. Enumeration: ONE sitemap file
+    cfr.org/events/sitemap.xml (3,986 events, 2009->now). Labels are ALL-CAPS BARE SURNAMES
+    ('VAN HOLLEN:') with full names only in the page's speaker metadata -> resolution uses a
+    PAGE-LOCAL alias: a member binds only if their full roster name appears in the page text AND
+    their surname is unique among page-present members (drop-never-guess, page-scoped). Prefilter:
+    member-ish slug tokens or roster surnames. Resume: cfr:<slug>."""
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    surn = {}
+    for name in C:
+        parts = norm(name).split()
+        if parts: surn.setdefault(parts[-1], []).append(name)
+    try:
+        x = get('https://www.cfr.org/events/sitemap.xml'); time.sleep(PAUSE)
+    except Exception as e:
+        print('cfr sitemap FAIL %s' % str(e)[:80]); con.close(); return
+    locs = re.findall(r'<loc>([^<]+)</loc>', x)
+    cands = []
+    for u in locs:
+        slug = u.rsplit('/', 1)[-1].lower()
+        toks = set(re.split(r'[-_.]', slug))
+        if (toks & {'senator', 'representative', 'congressman', 'congresswoman', 'speaker', 'congressional'}
+                or any(t in surn and len(t) > 4 for t in toks)):
+            cands.append(u)
+    print('cfr: %d candidate event pages of %d in sitemap' % (len(cands), len(locs)), flush=True)
+    tot = 0
+    for u in sorted(cands):
+        key = 'cfr:' + u.rsplit('/', 1)[-1][:120]
+        if key in done: continue
+        try:
+            page = get(u); time.sleep(PAUSE)
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 410):
+                con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'nopage', datetime.datetime.now().isoformat()))
+                con.commit(); done.add(key)
+            continue
+        except Exception:
+            continue
+        dm = re.search(r'"datePublished"\s*:\s*"(\d{4}-\d{2}-\d{2})', page) or re.search(r'datetime="(\d{4}-\d{2}-\d{2})', page)
+        date = dm.group(1) if dm else None
+        body = re.sub(r'<script.*?</script>|<style.*?</style>', ' ', page, flags=re.S)
+        body = _html.unescape(re.sub(r'<[^>]+>', '\n', body))
+        if not date:
+            dm = re.search(r'\b(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}), (\d{4})\b', body)
+            if dm:
+                MO = ['January','February','March','April','May','June','July','August','September','October','November','December']
+                date = '%s-%02d-%02d' % (dm.group(3), MO.index(dm.group(1)) + 1, int(dm.group(2)))
+        if not date:
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'nodate', datetime.datetime.now().isoformat()))
+            con.commit(); done.add(key); continue
+        # page-local alias: members whose FULL name appears in the page text, surname-unique on page
+        nb = norm(body)
+        present = [m for m in C if norm(m) in nb]
+        palias = {}
+        for m in present:
+            s = norm(m).split()[-1]
+            palias[s] = None if s in palias else m
+        rows = []
+        pos = [(mm.start(), mm.group(1)) for mm in LABEL.finditer(body)]
+        for i, (st, lab) in enumerate(pos):
+            end = pos[i + 1][0] if i + 1 < len(pos) else len(body)
+            sp = body[st:end]; sp = sp[sp.index(':') + 1:].strip()
+            m = resolve_full(lab)
+            if not m:
+                k = norm(TITLE.sub('', lab.strip())).split()
+                m = palias.get(k[-1]) if k else None
+                if m and len(k) > 2: m = None            # 'JOHN Q PUBLIC' shapes never bind via alias
+            if m:
+                sp = scrub(re.sub(r'\s+', ' ', sp))
+                if len(sp.split()) >= 8:
+                    rows.append((m, sp))
+        n = store(con, rows, date, 'cfr', u)
+        con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+        con.commit(); done.add(key); tot += n
+        if n: print('cfr %s: %d member turns (total %d) %s' % (date, n, tot, u.rsplit("/",1)[-1][:48]), flush=True)
+    con.close(); print('CFR done: %d member turns' % tot)
+
 NPRFEED_SHOWS = {'1a': '510316', 'here-now': '510051'}
 def run_nprfeed():
     """1A + Here & Now via NPR's public RSS feeds (user-directed 2026-07-10 'Chase 1A hard').
@@ -824,7 +974,7 @@ def _keep_awake():
         print('keep-awake unavailable (%s) — machine may sleep mid-crawl' % str(e)[:60], flush=True)
 
 if __name__ == '__main__':
-    if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed', 'axefiles')):
+    if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed', 'axefiles', 'csis', 'cfr')):
         _keep_awake()
     if 'status' in sys.argv:
         con = db()
@@ -838,7 +988,7 @@ if __name__ == '__main__':
     # collector_supervisor scheduled task distinguishes 'finished cleanly' from 'died' by this
     # flag — a leg only writes it if run_* returns without exception. Deep CNN backfill gets its
     # own sentinel (cnn-deep) so it doesn't collide with the incremental daily cnn leg.
-    _leg = next((l for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed', 'axefiles') if l in sys.argv), None)
+    _leg = next((l for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed', 'axefiles', 'csis', 'cfr') if l in sys.argv), None)
     if _leg == 'cnn' and until <= '2024-06-01' and '--verify' not in sys.argv: _leg = 'cnn-deep'
     def _sentinel():
         try:
@@ -856,4 +1006,6 @@ if __name__ == '__main__':
     elif 'msnow' in sys.argv: run_msnow(); _sentinel()
     elif 'nprfeed' in sys.argv: run_nprfeed(); _sentinel()
     elif 'axefiles' in sys.argv: run_axefiles(); _sentinel()
-    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|msnow|nprfeed|axefiles|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
+    elif 'csis' in sys.argv: run_csis(); _sentinel()
+    elif 'cfr' in sys.argv: run_cfr(); _sentinel()
+    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|msnow|nprfeed|axefiles|csis|cfr|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
