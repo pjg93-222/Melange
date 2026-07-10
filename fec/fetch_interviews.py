@@ -689,6 +689,73 @@ def run_msnow():
         page += 1
     con.close(); print('MSNOW done: %d member turns' % tot)
 
+def run_axefiles():
+    """The Axe Files with David Axelrod (CNN Audio) — one-time backfill (show concluded Dec 2024;
+    user-directed 2026-07-10, recon workflow wf_d6b68694 GO + adversarially verified w/ member
+    sample). Enumeration: the megaphone RSS (642 items) — each item's <guid> IS the CNN episode
+    URL uuid (verified via data-guid attributes on the archive page): episode page =
+    cnn.com/audio/podcasts/axe-files/episodes/<guid>. Transcripts are SERVER-RENDERED as
+    <div class='transcript-clip-container'><div class='speaker-name'>NAME</div>...
+    <div class='clip-script'>TEXT</div></div> with real turns, HH:MM:SS stamps, terminal
+    punctuation (interruptions end '-' — real cutoff semantics). ~49 sitting-member episodes
+    (longform hours). Fetch ALL episodes (0.7s pace ~8 min): pages without the transcript
+    container (older back-catalog, coverage unverified pre-2023) SKIP-not-error; non-member
+    speakers drop via resolve_full. robots: '*' allowed on /audio (named AI bots blocked at /,
+    same posture as our legs); the JS pagination /api/ endpoint is robots-disallowed and UNUSED.
+    Resume: axf:<guid>. Packages are cnn.com/audio URLs -> program_of 'other' (pools)."""
+    import email.utils as _eut
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    try:
+        rss = get('https://feeds.megaphone.fm/WMHY9284588779'); time.sleep(PAUSE)
+    except Exception as e:
+        print('axefiles RSS FAIL %s' % str(e)[:80]); con.close(); return
+    items = rss.split('<item>')[1:]
+    print('axefiles: %d RSS items' % len(items), flush=True)
+    tot = 0
+    CLIP = re.compile(r'transcript-clip-container.*?speaker-name[^>]*>\s*(.*?)\s*<.*?clip-script[^>]*>\s*(.*?)\s*</div>', re.S)
+    for it in items:
+        g = re.search(r'<guid[^>]*>(?:<!\[CDATA\[)?\s*([a-f0-9\-]{20,})\s*(?:\]\]>)?</guid>', it)   # QA 07-10: megaphone wraps guid in CDATA
+        if not g: continue
+        guid = g.group(1); key = 'axf:' + guid
+        if key in done: continue
+        pd = re.search(r'<pubDate>([^<]+)</pubDate>', it)
+        try:
+            dt = _eut.parsedate_to_datetime(pd.group(1)).date().isoformat() if pd else None
+        except Exception:
+            dt = None
+        if not dt:
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'nodate', datetime.datetime.now().isoformat()))
+            continue
+        url = 'https://www.cnn.com/audio/podcasts/axe-files/episodes/' + guid
+        try:
+            page = get(url); time.sleep(PAUSE)
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 410):
+                con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'nopage', datetime.datetime.now().isoformat()))
+                con.commit(); done.add(key)
+            continue
+        except Exception:
+            continue
+        clips = CLIP.findall(page)
+        # merge consecutive same-speaker clips into turns, resolve members, drop the rest
+        turns = []
+        for name, script in clips:
+            name = re.sub(r'<[^>]+>', ' ', name).strip()
+            text = re.sub(r'\s+', ' ', _html.unescape(re.sub(r'<[^>]+>', ' ', script))).strip()
+            if turns and turns[-1][0] == name: turns[-1][1] += ' ' + text
+            else: turns.append([name, text])
+        rows = []
+        for name, text in turns:
+            m = resolve_full(name.upper())
+            if m and len(text.split()) >= 8:
+                rows.append((m, scrub(text)))
+        n = store(con, rows, dt, 'axefiles', url)
+        con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)',
+                    (key, 'ok' if clips else 'notx', datetime.datetime.now().isoformat()))
+        con.commit(); done.add(key); tot += n
+        if n: print('axefiles %s: %d member turns (total %d)' % (dt, n, tot), flush=True)
+    con.close(); print('AXEFILES done: %d member turns' % tot)
+
 NPRFEED_SHOWS = {'1a': '510316', 'here-now': '510051'}
 def run_nprfeed():
     """1A + Here & Now via NPR's public RSS feeds (user-directed 2026-07-10 'Chase 1A hard').
@@ -757,7 +824,7 @@ def _keep_awake():
         print('keep-awake unavailable (%s) — machine may sleep mid-crawl' % str(e)[:60], flush=True)
 
 if __name__ == '__main__':
-    if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed')):
+    if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed', 'axefiles')):
         _keep_awake()
     if 'status' in sys.argv:
         con = db()
@@ -771,7 +838,7 @@ if __name__ == '__main__':
     # collector_supervisor scheduled task distinguishes 'finished cleanly' from 'died' by this
     # flag — a leg only writes it if run_* returns without exception. Deep CNN backfill gets its
     # own sentinel (cnn-deep) so it doesn't collide with the incremental daily cnn leg.
-    _leg = next((l for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed') if l in sys.argv), None)
+    _leg = next((l for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed', 'axefiles') if l in sys.argv), None)
     if _leg == 'cnn' and until <= '2024-06-01' and '--verify' not in sys.argv: _leg = 'cnn-deep'
     def _sentinel():
         try:
@@ -788,4 +855,5 @@ if __name__ == '__main__':
     elif 'hewitt' in sys.argv: run_hewitt(); _sentinel()
     elif 'msnow' in sys.argv: run_msnow(); _sentinel()
     elif 'nprfeed' in sys.argv: run_nprfeed(); _sentinel()
-    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|msnow|nprfeed|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
+    elif 'axefiles' in sys.argv: run_axefiles(); _sentinel()
+    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|msnow|nprfeed|axefiles|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
