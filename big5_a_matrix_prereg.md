@@ -173,3 +173,33 @@ One look, same session as the lock. No LLM calls. No audio. No bar/seed/roster/c
 after this commit; the composition was frozen on criterion-side evidence before this lock and may
 not be revisited after the look. Machinery imported from rounds 3–4; all new numerics enumerated
 above. The RESULT-A section appends verbatim (MISSes included), committed same session.
+
+## ADDENDUM 1 (2026-07-09) — battery refused; stratum-power diagnostic; RETIRED WITHOUT A LOOK (diagnostic-gated)
+
+Battery run (the `--look` invocation), recorded verbatim: sim(a) PLANTED core 4/5 (clears ≥4) |
+**A own +0.105 p .0392 row FALSE col TRUE → FAIL**; sim(b) NULL OK; sim(c) CONFOUND-ONLY incl.
+volume OK (partial −0.051 refused); sim(d) TRUE+CONFOUND incl. volume OK (+0.532 admitted). The
+in-process gate held: **"LOOK REFUSED (not consumed): simulate battery failure." No look was taken;
+no real trait × criterion pairing has ever been computed in this round.**
+
+Stratum-power diagnostic (SYNTHETIC ONLY, the battery's exact constructor, 5 seeds
+424242/515151/616161/717171/818181, on the actual MEM_A=290 stratum): own r = +0.105, +0.119,
++0.132, +0.190, +0.251 — **median +0.132 < the +0.15 bar; bars 1–2 pass 2/5; bars 1–4 pass 2/5.**
+Interpretation: this is NOT single-draw flakiness (the round-4 power study's random-roster draws at
+n≈290–300 recover ~.14–.24, median ≈.195). **The MEM_A stratum itself — members with ≥10
+known-party cosponsorships in the finance-scoped archive — carries genuinely less recoverable text
+signal at this n** (more homogeneous Empath profiles). A true r=.40 signal would MISS ~60% of the
+time; taking the look would have been a coin flip on machinery noise, exactly what the battery
+exists to refuse. A multi-rep battery re-spec was considered and REJECTED: it would also have
+refused (2/5 < any honest threshold), so no battery amendment can license this look today.
+
+**Disposition: RETIRED WITHOUT A LOOK.** No RESULT-A exists; no MISS is recorded; text-A vs the
+de-entangled criterion is neither validated nor closed — **DIAGNOSTIC-GATED**. Successor condition,
+pinned now: a new prereg (same five-bar structure, fresh fingerprints) may be locked only when the
+SAME diagnostic (this constructor, these five seeds, run on the then-current MEM_A stratum) passes
+**≥3/5 on bars 1–4**. Both coverage growth (more members reaching c2's ≥10-cosponsorship floor as
+the bills archive accrues) and corpus growth (richer member text) feed that gate; it is
+synthetic-only, so checking it never risks a look. The criterion work stands on its own record:
+cooperation_v2 (SB .873/.821 components, breadth entanglement +.708→−.140, volume +.739→−.159,
+gender −.021) remains the candidate for the SEPARATE, user-gated engine-promotion decision — which
+never depended on this look (criterion hygiene ≠ text validity, per the lock).

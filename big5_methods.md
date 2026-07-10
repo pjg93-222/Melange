@@ -502,3 +502,36 @@ N-slot source line, dashboard receptivity legend names it, audit gained the N-sl
 (n_slot=behavioral, coverage ≥150, |z|≤5 — a silent RECEPT_N=text revert can no longer sail through)
 + the mislabeled missing-receptivity check name fixed, b5_behavioral_instrument gates
 newline-anchored, stale voice-ES "validated +0.208" comment corrected (audit now 69 checks).
+
+## 21. Psych-audit round 5 — A vs the de-entangled cooperation criterion: RETIRED WITHOUT A LOOK, diagnostic-gated (2026-07-09, prereg big5_a_matrix_prereg.md @28914b3)
+
+User directive ("De-entangle A criterion" — gate opened alongside the Vote Smart pull). The §17 A
+verdict traced to a criterion defect: cooperation_z was 2/3 cosponsorship volume (breadth
+entanglement +.708). **Criterion work (stands on its own record): cooperation_v2 =
+mean_z(bipartisan tie share, directional cross-party cosponsorship share), both required, built in
+fec/coop_v2_candidate.py** — SB .873 (c2) / .821 (c3 facet), entanglement old→new: breadth
++.708→−.140, log-volume +.739→−.159, gender −.021; reciprocity (c3) proved a DISTINCT anticorrelated
+facet (bonding vs bridging) and is reported, never composited. Coverage 315/533; MEM_A = 290 of the
+§17 roster. Prereg locked @28914b3 after adversarial review (same-commit machinery, slicing
+semantics pinned, A_v1 as a bar-4 rival, volume in the gating partial AND in sim(c)/(d), closure
+over any {c1,c2,c3} recomposition).
+
+**The look was never taken.** The in-process battery refused it (planted-A +0.105 at n=290, row
+FALSE — verbatim in the prereg Addendum 1), and the follow-up 5-seed stratum diagnostic showed the
+refusal was NOT draw luck: **median recovery of a true r=.40 orthogonalized signal on the actual
+MEM_A stratum = +0.132 < the +0.15 bar (2/5 pass)** — vs ~.195 for random rosters of the same size
+(round-4 power study). The finance-active stratum that has cooperation-v2 coverage carries genuinely
+less recoverable Empath signal (homogeneous profiles). A multi-rep battery re-spec was considered
+and rejected: it would also have refused. **Disposition: RETIRED WITHOUT A LOOK — text-A vs the
+de-entangled criterion is neither validated nor closed; DIAGNOSTIC-GATED** (successor prereg
+permitted when the pinned 5-seed diagnostic passes ≥3/5 on bars 1–4 on the then-current stratum;
+synthetic-only, safe to check any time). Program-level lesson, now twice replicated (rounds 4 and
+5): masked-stratum looks at n≈200–300 cannot see signals below the E-class with the §17 bar — the
+battery/diagnostic discipline is what stops those looks from burning as false MISSes.
+
+**Open, user-gated (unchanged by this retirement):** (a) ENGINE promotion of cooperation_v2 over
+the volume-entangled cooperation_z (susceptibility .40 slot, seed_prob .10 slot, desk radar axis) —
+a product decision on the criterion-side record; coverage trade-off: 315/533 vs old 513/533, the
+218 uncovered members would fall to neutral; sandboxed stability report available on request.
+(b) The Vote Smart ES corroboration look (prereg locked pre-collection @28914b3, §22 reserved for
+its RESULT) — awaiting the user's API key; collector + look script committed and gated.
