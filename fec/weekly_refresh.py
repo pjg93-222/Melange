@@ -74,6 +74,14 @@ step('behavioral dispositions',['behavioral_dispositions.py'],timeout=900)  # mu
 step('Big5 v2 (behavior-calibrated)',['big5_lexcal_v2.py'],timeout=900)     # text instrument, honest held-out; desk radar source
 step('Big5 v3 (hybrid)',['big5_hybrid.py'],timeout=900)                     # lexical+interaction+persona; wins expected post-nickfix corpus
 step('social interaction layer',['social_interaction_layer.py'],timeout=900)
+# C-2 (audit 2026-07-08): refresh the press-derived engagement + HCoI edge layers BEFORE build_multilayer
+# folds them into the weekly AUG network. Previously neither producer was in the weekly chain, so a frozen
+# (days-stale) press_engagement.json / press_hcoi.json got re-baked into every otherwise-fresh AUG, silently
+# mixing provenance. Both read the external R tone CSV (Draft Systems\cu_press_stance_tone.csv), so they are
+# order-independent of the other Python steps; step() is tolerant, so a missing/locked CSV just leaves the
+# prior layer in place (same graceful degradation as before, now refreshed when the CSV is present).
+step('press engagement layer',['press_engagement_layer.py'],timeout=600)
+step('press HCoI layer',['press_hcoi.py'],timeout=600)
 step('multilayer network',['build_multilayer_network.py'],timeout=900)
 step('co-appearance layer',['co_appearance_layer.py'],timeout=600)                 # joint interview-episode pairings (user 2026-07-05)
 step('reference layer (rebuild)',['member_reference_layer.py','--rebuild'],timeout=900)  # FREE cache-only re-aggregation; paid --score passes stay manual

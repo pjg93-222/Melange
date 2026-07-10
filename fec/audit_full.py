@@ -353,6 +353,17 @@ if os.path.exists(B+r'\b5_es_voice.json'):
     ck('voice-ES display artifact schema (z+gap per member; matches the recorded look r=+0.208)',
        len(_evm)>=300 and _ebad==0 and abs((_ev.get('heldout_r') or 0)-0.208)<1e-9,
        '%d members, %d malformed, r=%s'%(len(_evm),_ebad,_ev.get('heldout_r')))
+# V-1 (audit 2026-07-08): vote_category_lean.json is a manually-maintained FROZEN input -- its producer
+# vote_by_category.py is in no orchestrator and its cleaned-roll-call CSV is an external file with no in-repo
+# producer. Surface the frozen-ness: warn if the vote leans fall >30d behind the newest bills archive, so a
+# silently-stale Path V / per_category_stance signal is visible instead of aging unnoticed.
+_vcl=B+r'\vote_category_lean.json'
+if os.path.exists(_vcl):
+    import glob as _g2
+    _arch=sorted(_g2.glob(B+r'\congress_bills_archive_*.xlsx'))
+    _stale=bool(_arch) and os.path.getmtime(_vcl) < os.path.getmtime(_arch[-1])-30*86400
+    ck('vote_category_lean.json fresh vs bills archive (manual frozen input; see V-1)', not _stale,
+       'vote leans %s'%(('STALE >30d behind '+os.path.basename(_arch[-1])) if _stale else 'current'))
 # say-do corroboration gate coherence (2026-07-07): every capped cell must DISPLAY Ally with its raw
 # tier preserved as Champion/Defender; every proven cell must BE Champion/Defender in the matrix.
 _g=(CS.get('gate') or {})

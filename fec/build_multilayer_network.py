@@ -58,7 +58,7 @@ try:
         if k in have: continue
         w=min(ENG_CAP,6*e['w']/max(1e-6,1-e['w']))
         if w<0.01: continue
-        edges[(a,b)]=('engagement',round(w,4)); have.add(k); neweng+=1
+        edges[k]=('engagement',round(w,4)); have.add(k); neweng+=1   # N-2 (audit 2026-07-08): key by sorted k (not raw a,b) so the social branch's `k in edges` reinforcement lookup matches instead of double-writing the pair
 except FileNotFoundError: print('  (press_engagement.json missing — run press_engagement_layer.py)')
 # 3) HCoI layer — ONLY edges touching a cosponsor-isolated member (the D4 surgical fix)
 newhc=0; reconnected=set()
@@ -70,7 +70,7 @@ try:
         if not a or not b: continue
         k=(min(a,b),max(a,b))
         if k in have: continue
-        edges[(a,b)]=('hcoi',round(0.6*e['r']*HCOI_W,4)); have.add(k); newhc+=1
+        edges[k]=('hcoi',round(0.6*e['r']*HCOI_W,4)); have.add(k); newhc+=1   # N-2 (audit 2026-07-08): key by sorted k (see engagement branch)
         for m in (e['a'],e['b']):
             if m in isolated: reconnected.add(m)
 except FileNotFoundError: print('  (press_hcoi.json missing — run press_hcoi.py)')
