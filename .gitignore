@@ -40,6 +40,10 @@ __pycache__/
 # track project slash commands + exclude logs
 !.claude/commands/
 !.claude/commands/*.md
+
+# track the skill library (16-skill handoff library, 2026-07-10)
+!.claude/skills/
+!.claude/skills/**
 *.log
 fec/lep/
 fec/votesmart_api_key.txt
