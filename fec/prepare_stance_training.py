@@ -39,9 +39,10 @@ for sn in ('Labels (augmented)','Oppose candidates'):
     for r in rows[1:]:
         if not g(r,'member'): continue
         rid=g(r,'row'); s=snip.get(rid,{})
+        hop1s=g(r,'hop1_stance').lower(); hop1s='support' if hop1s=='suppoer' else hop1s   # fix source typo
         rec={'row':rid,'sheet':sn,'split':g(r,'split'),'review_flag':g(r,'review_flag'),
              'member':g(r,'member'),'date':g(r,'date'),'title':g(r,'title'),
-             'label_composed':g(r,'human_label').lower(),'hop1_stance':g(r,'hop1_stance').lower(),
+             'label_composed':g(r,'human_label').lower(),'hop1_stance':hop1s,
              'hop1_proposed':g(r,'hop1_stance_proposed'),'target':g(r,'target'),
              'hop2_acu_position':g(r,'hop2_acu_position'),'speaker_source':g(r,'speaker_source'),
              'stance_span':g(r,'stance_span'),'intensity_r':g(r,'intensity_r'),

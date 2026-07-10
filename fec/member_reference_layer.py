@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root
+import html as _html
 """SIGNED MEMBER-REFERENCE LAYER (user-directed 2026-07-04: "see who they are referencing... in press
 articles and transcripts or re-tweet their colleagues... either negatively or positively" + "not
 formalities, like actual substantive mentions").
@@ -203,7 +204,11 @@ if '--score' in sys.argv or '--rebuild' in sys.argv:
     cache = {}
     if os.path.exists(CACHE):
         for ln in open(CACHE, encoding='utf-8'):
-            try: d = json.loads(ln); cache[d['k']] = d['out']
+            # first-wins: the append-only cache can hold duplicate keys with conflicting LLM 'cls'
+            # labels; keep the earliest so classification is deterministic (not append-order dependent).
+            try:
+                d = json.loads(ln)
+                if d['k'] not in cache: cache[d['k']] = d['out']
             except Exception: pass
     def key(r): return hashlib.md5((r['a'] + '|' + r['b'] + '|' + r['w'][:200]).encode('utf-8', 'replace')).hexdigest()
     todo = [] if REBUILD else [r for r in todo_all if key(r) not in cache]
@@ -250,9 +255,9 @@ if '--score' in sys.argv or '--rebuild' in sys.argv:
         # evidence for EVERY class the layer keeps (user 2026-07-04: the phrase must be showable):
         # pos/neg preferred, neutral-substantive fills remaining slots after the loop
         if c in ('positive', 'negative') and len(e['examples']) < 2:
-            e['examples'].append({'cls': c, 'w': r['w'][:200], 'src': r['src']})
+            e['examples'].append({'cls': c, 'w': _html.unescape(r['w'])[:200], 'src': r['src']})
         elif c == 'neutral-substantive' and len(e['_neu_ex']) < 2:
-            e['_neu_ex'].append({'cls': c, 'w': r['w'][:200], 'src': r['src']})
+            e['_neu_ex'].append({'cls': c, 'w': _html.unescape(r['w'])[:200], 'src': r['src']})
     for e in edges.values():
         while len(e['examples']) < 2 and e['_neu_ex']: e['examples'].append(e['_neu_ex'].pop(0))
     out_edges = []

@@ -30,7 +30,7 @@ for b in G.nodes():
     nodes.append([m['member'],int(round(sx(pos[b][0]))),int(round(sy(pos[b][1]))),r,m['net_lean'],m['total']])
 ew=sorted(G.edges(data=True),key=lambda e:-e[2].get('weight',0))[:650]
 edges=[[idx[a],idx[b]] for a,b,_ in ew]
-json.dump({'n':nodes,'e':edges,'W':W,'H':Hh},open(MB_ROOT+r'\sna_compact.json','w'),separators=(',',':'),ensure_ascii=False)
+json.dump({'n':nodes,'e':edges,'W':W,'H':Hh},open(MB_ROOT+r'\sna_compact.json','w',encoding='utf-8'),separators=(',',':'),ensure_ascii=False)
 import os
 print('wrote sna_compact.json:',len(nodes),'nodes',len(edges),'edges,',os.path.getsize(MB_ROOT+r'\sna_compact.json'),'bytes')
 # quick stats

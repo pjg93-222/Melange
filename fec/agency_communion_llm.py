@@ -177,7 +177,10 @@ cache = {}
 if os.path.exists(CACHE):
     for ln in open(CACHE, encoding='utf-8'):
         try:
-            d = json.loads(ln); cache[d['k']] = d
+            # first-wins: append-only cache can hold a duplicate key with a conflicting label;
+            # keep the earliest so the result is deterministic (not append-order dependent).
+            d = json.loads(ln)
+            if d['k'] not in cache: cache[d['k']] = d
         except Exception: pass
 CACHED_KEYS = set(cache)
 print('cache: %d sentences already classified' % len(cache))

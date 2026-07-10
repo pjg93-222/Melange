@@ -65,9 +65,11 @@ def add_medsl(path, cham):
         if not m or mstate.get(m)!=st or mcham.get(m)!=cham: continue
         try: cv=float(r.get('candidatevotes')); tv=float(r.get('totalvotes'))
         except (TypeError,ValueError): continue   # S3-02: narrowed from bare except
+        if cv<0 or tv<=0 or cv>tv: continue       # drop corrupt MEDSL rows: neg cand, zero/neg total,
+                                                  # or cand>total (the -100 / 119% artifacts). pct now in [0,100].
         cur=hist[m]['general'].get(2024)
         if cur is None or (cur.get('votes') or 0)<cv:
-            hist[m]['general'][2024]={'pct':round(100*cv/tv,1) if tv else None,'votes':int(cv),'src':'MEDSL'}
+            hist[m]['general'][2024]={'pct':round(100*cv/tv,1),'votes':int(cv),'src':'MEDSL'}
 add_medsl(DS+r"\medsl_house.csv",'House'); add_medsl(DS+r"\medsl_senate.csv",'Senate')
 
 out={}
