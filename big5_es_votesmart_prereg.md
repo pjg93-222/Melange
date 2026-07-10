@@ -168,3 +168,33 @@ criterion definition, roster, coverage/degeneracy guards, conditioning set, tier
 fingerprints, gates — stands verbatim. The COLLECTION RECORD (SHA, joined N, base rate, mapping
 confirmation) follows collection as originally pinned; fec/votesmart_npat_fetch.py remains the
 API-route collector should the key ever arrive (unused in this collection).
+
+## COLLECTION RECORD (2026-07-09 — collection complete; artifact frozen; written BEFORE the look)
+
+artifact_sha = 8b16c6812bccea0e9eb8d75876470992fb6afced0747846b1c84365c3ab41385
+joined_n = 517
+base_rate = 0.3133
+fetch_failed = 1 (Lance Gooden, vsid 177282: full-size 112k-char page variant that failed the
+proof-of-render check on repeated retries; retries exhausted under renderer throttling; excluded
+from the base rate per the pinned taxonomy — never guessed)
+
+Marker→responded mapping: BYTE-IDENTICAL to Amendment 1 (prev OR tookCount≥2 → 1; rendered page
+with neither → 0; raw markers prev/took/refusedCycle/cycles stored per member in the artifact, so
+the mapping is auditable from the artifact alone).
+
+Full-page test resolution (recorded honestly, decided DURING collection, before any base-rate or
+instrument computation): the pilot's ">5,000 chars = full page" proxy conflated two cases at
+production scale — true load-shed SPA shells (~2–4k HTML, no member content; appeared only under
+concurrent fetch load) versus sparse-but-real pages of members with NO test content (75–112k HTML
+whose VISIBLE text after script-stripping is <5k). Ground truth: Lankford (vsid 124938) live-DOM
+rendered 2,274 visible chars yet is a genuine member page ("James Lankford's Issue Positions…
+Office: U.S. Senate (OK)"). Operationalization used: full page ⇔ proof-of-render — stripped DOM
+text contains "Issue Positions (Political Courage Test)" AND "Office:" — strictly more accurate
+than any char threshold; shells fail it, sparse-real pages pass it. Collection ran serial/low
+concurrency (0.45–1.2s spacing, cache:no-store) after concurrent pools triggered server-side
+load-shedding (SPA shell fallback) — 517/518 classified, zero shells in the final pass.
+
+Roster note: joinable = 518 (533-roster ∩ votesmart_id in legislators.csv); artifact rows with
+responded ∈ {0,1} = 517 of 518 (responded=1: 162, responded=0: 355). Coverage floor 517 ≥ 450
+PASS; degeneracy guard .05 ≤ .3133 ≤ .95 PASS. Collected via the Amendment-1 browser-session
+route, single pass + straggler retries, 2026-07-09 evening.
