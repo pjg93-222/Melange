@@ -639,13 +639,65 @@ def run_hewitt():
             print('hh %s FAIL %s' % (slug[:50], str(e)[:80]), flush=True)
     con.close(); print('hewitt done: %d member turns' % tot)
 
-# STONES EXAMINED AND CLOSED (2026-07-03, REVISED 07-05): YouTube captions (post-2024-10 Fox,
+def run_msnow():
+    """MS NOW (ex-MSNBC) transcript archive via the site's PUBLIC WordPress REST API (user-directed
+    2026-07-10, 'Get MS NOW, more data the better'). Discovery: ms.now pages are JS-rendered, but
+    the platform exposes the standard WP REST surface (apiRoot https://www.ms.now/wp-json/ is
+    printed in the page's own jetpack state) with a DEDICATED custom post type: /wp/v2/transcript —
+    10,744 posts, 2010->2024, full content.rendered INSIDE the list responses (one request per
+    page of 50 = the whole archive in ~215 requests). robots.txt: 'User-agent: *' allows all but
+    /search? (the named-AI-bot blocks target training crawlers, same posture as our other legs).
+    The type MIXES real show transcripts (CAPS labels, 'SEN. BERNIE SANDERS (I), VERMONT:') with
+    maddowblog essays — parse_turns yields zero member rows on essays, so they drop naturally
+    (drop-never-guess). Resume: per-post keys msnow:<id>; page walk is date-ASC so the id set is
+    stable under new publications. D-side skew acknowledged: this is the L-flank archive; Fox
+    (run_fox) was the R mirror until their transcripts ended ~2022."""
+    import json as _json
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    tot = 0; page = 1
+    while True:
+        url = ('https://www.ms.now/wp-json/wp/v2/transcript?per_page=50&orderby=date&order=asc&page=%d' % page)
+        try:
+            raw = get(url); time.sleep(PAUSE)
+        except urllib.error.HTTPError as e:
+            if e.code in (400, 404): break              # past the last page (WP returns 400 rest_post_invalid_page_number)
+            print('msnow page %d FAIL %s' % (page, e.code), flush=True); page += 1; continue
+        except Exception as e:
+            print('msnow page %d FAIL %s' % (page, str(e)[:70]), flush=True); page += 1; continue
+        try:
+            posts = _json.loads(raw)
+        except ValueError:
+            print('msnow page %d unparseable' % page, flush=True); page += 1; continue
+        if not posts: break
+        nd = 0
+        for p in posts:
+            key = 'msnow:%s' % p.get('id')
+            if key in done: continue
+            date = (p.get('date') or '')[:10]
+            link = p.get('link') or url
+            if not date:                                 # run-5 lesson: NEVER store dateless rows
+                con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'nodate', datetime.datetime.now().isoformat()))
+                continue
+            body = re.sub(r'<script.*?</script>|<style.*?</style>', ' ', (p.get('content') or {}).get('rendered') or '', flags=re.S)
+            body = re.sub(r'<[^>]+>', '\n', body)
+            rows = parse_turns(_html.unescape(body))
+            nd += store(con, rows, date, 'msnow', link)
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+            done.add(key)
+        con.commit(); tot += nd
+        if nd: print('msnow page %d: %d member turns (total %d)' % (page, nd, tot), flush=True)
+        page += 1
+    con.close(); print('MSNOW done: %d member turns' % tot)
+
+# STONES EXAMINED AND CLOSED (2026-07-03, REVISED 07-05, 07-10): YouTube captions (post-2024-10 Fox,
 # podcasts) have NO speaker labels — multi-speaker attribution would require diarization;
 # harvesting them would violate the drop-never-guess discipline, so they stay out until a
-# diarization pass exists. C-SPAN transcripts are access-restricted. Fox's PUBLISHED archive
-# (through ~2024-10) is now covered by run_fox above; Hewitt (current, R) by run_hewitt.
-# Newsmax/OANN/Fox Business publish no transcripts (verified 07-05); MSNBC's transcript section
-# exists but is JS-rendered — sitemap-enumeration candidate if the user wants the L-flank.
+# diarization pass exists. C-SPAN transcripts: robots.txt disallows /transcript for ALL user
+# agents (07-10 recon) — excluded on policy, not technology; the WJ format itself is ideal
+# (single-guest member segments, punctuated captions) if licensed access ever exists.
+# Fox's PUBLISHED archive (through ~2024-10) is covered by run_fox; Hewitt (current, R) by
+# run_hewitt; the MSNBC/MS-NOW L-flank is now covered by run_msnow above (WP REST, 2010-2024).
+# Newsmax/OANN/Fox Business publish no transcripts (verified 07-05).
 
 def _keep_awake():
     """User directive 2026-07-06 ('put in checks so it doesn't fall asleep'): the 01:10 machine
@@ -661,7 +713,7 @@ def _keep_awake():
         print('keep-awake unavailable (%s) — machine may sleep mid-crawl' % str(e)[:60], flush=True)
 
 if __name__ == '__main__':
-    if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt')):
+    if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow')):
         _keep_awake()
     if 'status' in sys.argv:
         con = db()
@@ -675,7 +727,7 @@ if __name__ == '__main__':
     # collector_supervisor scheduled task distinguishes 'finished cleanly' from 'died' by this
     # flag — a leg only writes it if run_* returns without exception. Deep CNN backfill gets its
     # own sentinel (cnn-deep) so it doesn't collide with the incremental daily cnn leg.
-    _leg = next((l for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt') if l in sys.argv), None)
+    _leg = next((l for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow') if l in sys.argv), None)
     if _leg == 'cnn' and until <= '2024-06-01' and '--verify' not in sys.argv: _leg = 'cnn-deep'
     def _sentinel():
         try:
@@ -690,4 +742,5 @@ if __name__ == '__main__':
     elif 'npr' in sys.argv: run_npr(since, until); _sentinel()
     elif 'fox' in sys.argv: run_fox(); _sentinel()
     elif 'hewitt' in sys.argv: run_hewitt(); _sentinel()
-    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
+    elif 'msnow' in sys.argv: run_msnow(); _sentinel()
+    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|msnow|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
