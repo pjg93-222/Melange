@@ -565,3 +565,51 @@ any-cycle external criterion NULL at n=517. The display axis stays measured-with
 engine-side ever depended on it (the engine's N-slot is behavioral reactivity, §19). Honest-prior
 accounting: the prereg's LOW/VERY-LOW prior and disclosed adverse prior pointed exactly here; the
 value of the look is that ES's status is no longer a data gap but an evidenced negative record.
+
+## 23. Psych-audit round 6 — A vs cooperation_v2 via the st_mean instrument: MISS, route closed (2026-07-10, prereg big5_a_matrix2_prereg.md @25c0a19 + Addendum 1 @9a55ca8)
+
+(§22 is occupied by the Vote Smart ES RESULT recorded on main, 2026-07-09 late evening, parallel
+session — this branch's methods jumps 21→23 by design; see the prereg's branch-hygiene note.)
+
+**Setup.** Round 5 (§21) retired without a look: supervised Empath cannot recover a planted true
+r=.40 on the MEM_A stratum (median +0.132, 2/5). A multi-basis stratum-power diagnostic
+(b5_a_stratum_diag_record.md, SYNTHETIC ONLY, 7 bases screened on the pinned Addendum-1 seeds
+with a pre-pinned fresh-seed confirmation) found the refusal was EMPATH-SPECIFIC: st_mean
+(all-MiniLM-L6-v2, rebuilt on the post-expansion corpus) recovers the same plants at ~2× Empath
+(selection 4/5 median +0.236; fresh-seed confirmed 3/5 median +0.192); the guard demonstrably
+bound (lsa256 cleared selection then refuted 1/5). User authorized a FRESH lock ("Lock it in") —
+explicitly NOT a derivation of round-5's successor gate (its "SAME diagnostic" clause belongs to
+the Empath data-growth path, which stays open). Two-lens adversarial review pre-lock (stats: 0
+CRIT / 0 MAJOR / 1 MINOR; discipline: 1 CRIT + 4 MAJOR, all incorporated: fresh-lock reframing,
+round-5-scope closure + anti-basis-shopping clause with mandatory screening ledger,
+grounds-no-claim context-matrix ban, pinned desk wording, restored isolated A_v1 repro secondary,
+branch-hygiene note). Addendum 1 (pre-look): collector drift moved the speeches count mid-session;
+counts demoted to reported, replaced by STRICTLY STRONGER roster content-hash gates.
+
+**Battery (the machinery validation Empath failed twice): ALL GREEN on st_mean** — planted core
+5/5, masked-A plant +0.312 p .0002 row/col True; null 0/5 + stack MISS; confound-only bar-5
+refused (−0.072); true+confound admitted (+0.514). The look was therefore licensed — first time
+an A-vs-coop_v2 look has ever been licensed.
+
+**THE LOOK: MISS on all five bars.** own r = +0.033, perm-p .2961, row-dominant False,
+column-specific False (max rival |r| = .120), volume-hardened partial +0.036 p .2685. Facets
++0.010/+0.052/−0.099; within-party D +0.087 / R −0.001; gender +0.061, party +0.042 (fairness
+clean). Declared repro secondary: Empath A_v1 × coop_v1 on MEM = **+0.183, the §17 recorded value
+EXACTLY** — the criterion re-specification broke nothing.
+
+**Consequences applied (pre-declared).** "st_mean-A vs de-entangled cooperation: not distinct —
+route CLOSED for this instrument-basis"; closure covers ANY composite over {c1, c2, c3} (round-5
+scope verbatim) for ANY st-family basis. A stays criterion-valid / not-discriminant; §17/§21
+unchanged. NO desk change; NO engine change; round-5's Empath data-growth gate remains OPEN; the
+ANTI-BASIS-SHOPPING CLAUSE binds all future bases (own diagnostic + fresh-seed confirmation +
+full screening ledger + adversarial prereg, before any pairing). The coop_v2 ENGINE-promotion
+decision (user-gated) is untouched.
+
+**Honest reading.** The battery proved the instrument CAN see a true r=.40 on this exact stratum;
+the MISS is therefore informative about the world, not the machinery: supervised open-vocabulary
+semantic text carries no distinct cooperation-v2 signal on the finance-active stratum. Combined
+with §21 (Empath power-refused) and this round, the discriminant-A question is now EVIDENCE-BOUND
+on the text side: the remaining honest paths are non-text behavioral criteria growth (MEM_A
+coverage via the bills archive) or the Empath data-growth gate — both slow, neither urgent. A's
+standing claim stays exactly what §15/§17 earned: criterion-valid (text-side, +.183 v1;
++.100 partial §15), not discriminant.
