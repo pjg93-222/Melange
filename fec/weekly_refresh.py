@@ -57,6 +57,16 @@ try: prev=json.load(open(os.path.join(MB_ROOT,'ranks_python.json')))['rank']
 except Exception: pass
 step('CREC floor speeches',['fetch_congressional_record.py','crec','--since',str(today-datetime.timedelta(days=14))],timeout=3000)
 step('CHRG finance hearings',['fetch_congressional_record.py','chrg','--since',str(today-datetime.timedelta(days=400))],timeout=3000)   # coverage audit 2026-07-06: hearing transcripts publish MONTHS late — a 60-day window structurally missed most of them forever ('ok' markers keep the wide window cheap)
+# interview accrual (N-gate audit 2026-07-10): the refresh re-DERIVED interaction features every
+# week but nothing GREW the interview corpus — reactivity coverage (round-4 gate: MEM_N>=250,
+# now 203) was frozen forever. Incremental resumes, all cheap (per-URL 'ok' cache); fox excluded
+# (transcripts ended ~2022, archive fully walked); soft-fail keeps the refresh alive.
+step('interviews: CNN (14d)',['fetch_interviews.py','cnn','--since',str(today-datetime.timedelta(days=14))],timeout=1800)
+step('interviews: MTP',['fetch_interviews.py','mtp'],timeout=1200)
+step('interviews: CBS',['fetch_interviews.py','cbs'],timeout=1200)
+step('interviews: ABC',['fetch_interviews.py','abc'],timeout=1200)
+step('interviews: PBS (21d)',['fetch_interviews.py','pbs','--since',str(today-datetime.timedelta(days=21))],timeout=1800)
+step('interviews: NPR (14d)',['fetch_interviews.py','npr','--since',str(today-datetime.timedelta(days=14))],timeout=1800)
 step('Big Five traits',['big5_traits.py'],timeout=1800)
 step('interaction features',['interaction_features.py'],timeout=900)      # conversational dynamics (feeds dominance disposition)
 step('behavior panel',['behavior_panel.py'],timeout=900)                  # nomological fix 2026-07-04: dispositions measured from behavior
