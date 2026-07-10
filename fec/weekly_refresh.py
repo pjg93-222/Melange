@@ -67,6 +67,7 @@ step('interviews: CBS',['fetch_interviews.py','cbs'],timeout=1200)
 step('interviews: ABC',['fetch_interviews.py','abc'],timeout=1200)
 step('interviews: PBS (21d)',['fetch_interviews.py','pbs','--since',str(today-datetime.timedelta(days=21))],timeout=1800)
 step('interviews: NPR (14d)',['fetch_interviews.py','npr','--since',str(today-datetime.timedelta(days=14))],timeout=1800)
+step('interviews: MS NOW',['fetch_interviews.py','msnow'],timeout=1800)   # WP REST resume; per-post keys make re-runs cheap (archive may be dead post-2024 -> no-op)
 step('Big Five traits',['big5_traits.py'],timeout=1800)
 step('interaction features',['interaction_features.py'],timeout=900)      # conversational dynamics (feeds dominance disposition)
 step('behavior panel',['behavior_panel.py'],timeout=900)                  # nomological fix 2026-07-04: dispositions measured from behavior
