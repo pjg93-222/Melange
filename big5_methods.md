@@ -613,3 +613,31 @@ on the text side: the remaining honest paths are non-text behavioral criteria gr
 coverage via the bills archive) or the Empath data-growth gate — both slow, neither urgent. A's
 standing claim stays exactly what §15/§17 earned: criterion-valid (text-side, +.183 v1;
 +.100 partial §15), not discriminant.
+
+
+## 24. Reactivity criterion variant study — the shipped per-show spec UPHELD by a pre-stated rule (2026-07-10, criterion-side only, NO look)
+
+Context: the N-gate sprint (round-4 successor, MEM_N >= 250) found near-miss members carry
+abundant RAW interview turns discarded by fragmentation (CNN splits per show under the
+>=12-turns/program floor). Collection alone moved MEM_N 201 -> 216 (+5.4k PBS/NPR turns, +16.1k
+MS NOW turns). The user directed a criterion-side comparison ("Start tier b... Whatever is most
+optimal") under the coop_v2 playbook: measurement evidence first, no spec change without it.
+
+Method (fec/reactivity_v2_study.py + fec/reactivity_v2b_study.py, identical machinery per
+variant; SELECTION RULE STATED IN THE SCRIPT BEFORE ANY VARIANT RESULT: MEM_N>=250 AND
+appearance-split-half SB>=.45 AND no fairness regression vs V0 AND agreement>=.85; winner = max
+SB; none => HOLD V0, V1 explicitly not adoptable as fallback). Corpus at study: 139.6k INTERVIEW
+turns, 91.8k appearances.
+
+Results: V0 per-show 12/8 (shipped) = MEM_N 216, SB .507, g -.097/p +.087. V1 per-network =
+MEM_N 271 but SB .301 (~23% signal attenuation for any true text-N effect - crossing the n-gate
+while shrinking the detectable signal violates the gate's purpose; the >=250 pin derives from a
+power study that assumed V0-class reliability). Variants: 12/5 = no change (that floor never
+binds); 8/8 = SB .441 + fairness REGRESSION (g -.143, p +.122); 12/8+network-fallback-pool
+(the principled orphan-turn recovery) = MEM_N 273 but SB .343; 10/6 = trivial. **NO QUALIFIER ->
+V0 HELD.** Interpretation: the fragmented turns are genuinely noisier measurement, not discarded
+treasure - show-level interruption cultures are real, and every admission scheme pays
+reliability. The round-3 spec is now evidence-backed against its five most tempting relaxations.
+Records: reactivity_v2_study.json / reactivity_v2b_study.json (untracked, regenerable from the
+committed scripts). The round-4 successor gate stays data-gated at MEM_N 216/250, now accruing
+weekly (interview legs wired into weekly_refresh incl. the new msnow leg).
