@@ -33,9 +33,15 @@ def pressure(m, k_susc=0.18, pt_loss=1.15, pt_gain=0.92, ret=0.60, pw=PW):
     pt = pt_loss if d['pt_domain'] == 'loss' else pt_gain
     return clip(susc_mult * incent * pt, 0.50, 1.60)
 
+CSLOT = RJ.get('coop_slot', 'v1')   # A-slot basis (audit 2026-07-10 S3-03): mirror the engine's
+                                    # promoted slot — v2 reads cooperation_v2_z (missing -> neutral 0,
+                                    # never a v1 fallback), v1 reads the legacy cooperation_z.
+def _coop(d):
+    return ((d.get('cooperation_v2_z') if CSLOT == 'v2' else d.get('cooperation_z')) or 0.0)
+
 def seed(m, kc=0.10, kb=0.06, kv=0.04):
     d = M[m]
-    return clip(0.60 + kc * (d.get('cooperation_z') or 0.0)
+    return clip(0.60 + kc * _coop(d)
                      + kb * (d.get('breadth_z') or 0.0)
                      + kv * (d.get('visibility_z') or 0.0), 0.30, 0.90)
 
