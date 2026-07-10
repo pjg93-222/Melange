@@ -135,15 +135,23 @@ def _approach(ap, cp, read):
 # measured from behavior (validated by construction), replacing the indicted lexical Big5 radar
 # as the headline. Percentile-ranked across covered members per axis.
 BDISP = (L('behavioral_dispositions.json') or {}).get('members', {})
+# Radar cooperation axis = share-based cooperation_v2 (round-6 engine promotion 2026-07-10,
+# matching the engine's A-slot); members without v2 coverage render neutral-with-note, the same
+# convention as reactivity — never a silent fallback to the volume-entangled raw-count v1.
+_CV2 = {m: (d or {}).get('cooperation_v2_z') for m, d in ((L('coop_v2_candidate.json') or {}).get('members', {})).items()}
+BDR = {m: dict(d) for m, d in BDISP.items()}
+for _m, _d in BDR.items():
+    if _CV2.get(_m) is not None: _d['cooperation_z'] = _CV2[_m]
+    else: _d.pop('cooperation_z', None)
 _BD_AX = ['cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z', 'reactivity_z']
-_BDPCT = {ax: _pctrank([d[ax] for d in BDISP.values() if ax in d]) for ax in _BD_AX} if BDISP else {}
+_BDPCT = {ax: _pctrank([d[ax] for d in BDR.values() if ax in d]) for ax in _BD_AX} if BDR else {}
 NARR = L('member_narratives.json') or {}   # 3-paragraph 'Suggested approach' brief (Fable, Opus rescues refusals); display-only
 VES = (L('b5_es_voice.json') or {}).get('members', {})   # voice-ES OOF read; display-only — the +0.208 pass is GENDER-CONFOUNDED on the locked retest (partial r −0.03, 2026-07-09): weak tiebreaker at most
 
 def psy_for(name):
     t = B5.get(name) or {}; r = RCPT.get(name) or {}
     out = {}
-    bd = BDISP.get(name) or {}
+    bd = BDR.get(name) or {}
     if bd and _BDPCT:
         out['behav_pct'] = [(_BDPCT[ax](bd[ax]) if ax in bd else None) for ax in _BD_AX]
     if t.get('tokens', 0) > 0 and _B5PCT:

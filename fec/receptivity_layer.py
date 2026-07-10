@@ -64,6 +64,23 @@ BASIS=os.environ.get('RECEPT_TRAITS','behavioral')
 # as every other behavioral component — never a text fallback, never an invented disposition);
 # RECEPT_N=text reverts the slot to the shrunken lexical N wholesale (the pre-round-3 legacy math).
 RECEPT_N=os.environ.get('RECEPT_N','behavioral')
+# ---- A-SLOT (round-6 engine promotion 2026-07-10, user: "Fine promote it") ----
+# cooperation_z (behavior_panel raw-count basis) was the dependability audit's "volume proxy"
+# indictment: entangled +.708 with breadth, +.739 with log-volume. cooperation_v2 (share-based,
+# coop_v2_candidate.py, composition frozen @28914b3) de-entangles it (breadth -.140, volume -.159,
+# gender -.021; SB .873/.821). RECEPT_COOP=v2 (default) sources BOTH cooperation slots (susc .40 +
+# seed_prob .10) and the desk radar axis from cooperation_v2_z; members without v2 coverage
+# (218/533, below c2's >=10-cosponsorship floor) fall to NEUTRAL 0 per the missing-disposition
+# rule — NEVER a silent v1 fallback, never a mixed basis. RECEPT_COOP=v1 reverts wholesale.
+# Round-6's text-A look (MISS, methods sec-23) is orthogonal: criterion hygiene != text validity.
+RECEPT_COOP=os.environ.get('RECEPT_COOP','v2')
+CV2={}
+if RECEPT_COOP!='v1':
+    try: CV2={m:(d or {}).get('cooperation_v2_z') for m,d in json.load(open(B+r'\coop_v2_candidate.json'))['members'].items()}
+    except FileNotFoundError: pass
+    if not CV2:
+        print('  !! coop_v2_candidate.json MISSING — reverting to RECEPT_COOP=v1 (run coop_v2_candidate.py)')
+        RECEPT_COOP='v1'
 BD={}
 if BASIS=='behavioral':
     try: BD=json.load(open(B+r'\behavioral_dispositions.json'))['members']
@@ -111,7 +128,11 @@ for m in members:
     A,N,Cc,E,O=(sh*t.get('A',0),sh*t.get('N',0),sh*t.get('C',0),sh*t.get('E',0),sh*t.get('O',0))
     if BASIS=='behavioral':
         bd=BD.get(m,{})
-        coop=bd.get('cooperation_z',0.0) or 0.0; dil=bd.get('diligence_z',0.0) or 0.0
+        # A-slot: share-based cooperation_v2 (round-6 promotion; missing coverage -> neutral 0,
+        # never a v1 fallback) or the legacy raw-count cooperation_z (RECEPT_COOP=v1).
+        cv=CV2.get(m) if RECEPT_COOP!='v1' else None
+        coop=(cv if cv is not None else 0.0) if RECEPT_COOP!='v1' else (bd.get('cooperation_z',0.0) or 0.0)
+        dil=bd.get('diligence_z',0.0) or 0.0
         dom=bd.get('dominance_z',0.0) or 0.0
         # Byrne composite, same structure/weights, behavioral inputs (missing component -> 0 neutral);
         # N-slot: behavioral reactivity (RECEPT_N=behavioral, round-3 default) or shrunken text N
@@ -138,13 +159,15 @@ for m in members:
     pt=1.15 if loss else 0.92
     if BASIS=='behavioral':
         bd=BD.get(m,{})
-        seed_prob=clip(0.60+.10*(bd.get('cooperation_z',0.0) or 0.0)
+        seed_prob=clip(0.60+.10*coop
                            +.06*(bd.get('breadth_z',0.0) or 0.0)
                            +.04*(bd.get('visibility_z',0.0) or 0.0),0.30,0.90)
     else:
         seed_prob=clip(0.60+.10*A+.06*O+.04*E,0.30,0.90)
     out[m]={'A':round(A,3),'N':round(N,3),'C':round(Cc,3),'E':round(E,3),'O':round(O,3),
         'basis':BASIS,'n_source':('text' if (BASIS!='behavioral' or RECEPT_N=='text') else ('reactivity' if BD.get(m,{}).get('reactivity_z') is not None else 'neutral')),
+        'coop_source':('coop_v1' if (BASIS!='behavioral' or RECEPT_COOP=='v1') else ('coop_v2' if CV2.get(m) is not None else 'neutral')),
+        'cooperation_v2_z':(round(CV2[m],4) if CV2.get(m) is not None else None) if BASIS=='behavioral' else None,
         **({k:BD[m][k] for k in BD.get(m,{})} if BASIS=='behavioral' and m in BD else {}),
         'susc_z':round(susc,3),'susc_trait_z':round(susc_trait,3),
         'persona_susc_z':round(ps['z'],3) if ps else None,'susc_read':read,
@@ -154,10 +177,13 @@ for m in members:
         'pressure_mult':round(clip(susc_mult*incent*pt,0.50,1.60),3),
         'seed_prob':round(seed_prob,3),'lowconf':low,'retiring':m in RET}
 dump_atomic({'members':out,'LOSSFRAME':1.10,'basis':BASIS,'n_slot':(RECEPT_N if BASIS=='behavioral' else 'text'),
+  'coop_slot':(RECEPT_COOP if BASIS=='behavioral' else 'v1'),
   'provenance':'Byrne2015 choking (susc), Fouirnaies-Hall (incent), Linde-Vis prospect theory (pt), Chen/SNAM contingency (seed_prob); '
     +(('BEHAVIORAL basis (nomological fix 2026-07-04): cooperation/diligence/dominance/visibility/breadth measured from behavior_panel; '
        +('N-slot = behavioral reactivity (live-interview cutoff proneness, round-3 2026-07-09; missing -> neutral; RECEPT_N=text reverts)' if RECEPT_N!='text'
-         else 'N-slot = text N with sqrt shrinkage (RECEPT_N=text legacy)'))
+         else 'N-slot = text N with sqrt shrinkage (RECEPT_N=text legacy)')
+       +('; A-slot = share-based cooperation_v2 (round-6 promotion 2026-07-10, composition frozen @28914b3; missing coverage -> neutral; RECEPT_COOP=v1 reverts)' if RECEPT_COOP!='v1'
+         else '; A-slot = raw-count cooperation_z (RECEPT_COOP=v1 legacy)'))
       if BASIS=='behavioral' else 'LEXICAL basis; graded sqrt(tokens/1500) trait shrinkage toward neutral')},
   B+r'\member_receptivity.json')
 import collections
