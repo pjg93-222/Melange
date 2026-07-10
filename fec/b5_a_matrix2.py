@@ -19,7 +19,7 @@ demote it — prereg §"No demotion events"). The ONLY permitted Empath computat
 A_v1×coop_v1 REPRODUCTION secondary, isolated in empath_a1_repro() which returns two floats and
 never sees cooperation_v2. Adversarially reviewed pre-lock (statistics + discipline lenses), all
 required changes incorporated. Honest prior: MODERATE-LOW. No LLM calls. No audio."""
-import sys, os, json, argparse
+import sys, os, json, argparse, hashlib
 import numpy as np
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import b5_behavioral_instrument as BI     # import-safe: exact_perm_p/SEEDS/ALPHAS (oof replaced below)
@@ -38,7 +38,10 @@ PIN = {'MEM': 456, 'MEM_A': 290, 'ST_DIM': 384,
        'pn_sha': 'f47b9b045357cad2c5644f551fc934e8a0aa793a22d98272632547a276d22a50',
        'stz_sha': '69b1da00ebcc7bf4ecdbb07676630f39f6bbb01591ad8e8f8a83f6f4edd17619',
        'stm_sha': 'e3189a7a4fcc5d13c4815da65481e5393ff0804d50cb2169f3a14a74ea0f2ea8',
-       'speeches': 234856, 'posts': 29098}
+       # ADDENDUM 1: counts moved to REPORTED (features frozen in the SHA-pinned npz; live corpus
+       # only feeds MEM eligibility + the reported Empath repro); the gate that replaces them is
+       # STRICTLY STRONGER — roster CONTENT hashes, not row counts:
+       'mem_md5': '374fa4a44d64b7de3d468913a0297c6d', 'mema_md5': '3346d05a720f58bb5c46198fae1d1048'}
 rr = NM.rr
 BI.oof = DIAG.oof                         # disclosed in the prereg: identical recipe, n_jobs only
 
@@ -65,6 +68,11 @@ def run(simulate_only, jobs):
     print('rosters: MEM=%d (pinned %d) | MEM_A=%d (pinned %d)' % (nM, PIN['MEM'], nS, PIN['MEM_A']))
     if not simulate_only and (nM != PIN['MEM'] or nS != PIN['MEM_A']):
         print('!! LOOK REFUSED (not consumed): roster drift vs pinned lock values'); return
+    mem_md5 = hashlib.md5('|'.join(MEM).encode()).hexdigest()
+    mema_md5 = hashlib.md5('|'.join(m for m, k in zip(MEM, mask) if k).encode()).hexdigest()
+    print('roster content: MEM md5 %s | MEM_A md5 %s' % (mem_md5, mema_md5))
+    if not simulate_only and (mem_md5 != PIN['mem_md5'] or mema_md5 != PIN['mema_md5']):
+        print('!! LOOK REFUSED (not consumed): roster CONTENT drift vs Addendum-1 hashes'); return
     X, keep = DIAG.member_matrix('st_mean', MEM)
     if keep != MEM or X.shape[1] != PIN['ST_DIM']:
         print('!! LOOK REFUSED (not consumed): st_mean coverage/dims mismatch (keep %d, dims %d)'
@@ -145,9 +153,9 @@ def main():
     locked = 'STATUS: LOCKED' in pre
     taken = '\n## RESULT-A2' in pre       # newline-anchored heading match (@72690c9 lesson)
     fp = fingerprints()
-    fp_ok = all(fp[k] == PIN[k] for k in ('cv_sha', 'bd_sha', 'vv_sha', 'pn_sha', 'stz_sha', 'stm_sha', 'speeches', 'posts'))
-    print('  lock: %s | look: %s | input fingerprints: %s' % (locked, 'TAKEN' if taken else 'not yet taken',
-                                                              'MATCH' if fp_ok else 'DRIFT'))
+    fp_ok = all(fp[k] == PIN[k] for k in ('cv_sha', 'bd_sha', 'vv_sha', 'pn_sha', 'stz_sha', 'stm_sha'))
+    print('  lock: %s | look: %s | artifact fingerprints: %s | corpus (REPORTED, Addendum 1): speeches %d posts %d'
+          % (locked, 'TAKEN' if taken else 'not yet taken', 'MATCH' if fp_ok else 'DRIFT', fp['speeches'], fp['posts']))
     if not (args.simulate or args.look): return
     if args.look:
         if not locked: print('!! LOOK REFUSED: prereg not LOCKED'); return

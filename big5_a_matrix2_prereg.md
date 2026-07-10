@@ -194,6 +194,35 @@ discipline held both times).
 - **Separable, either way**: the coop_v2 ENGINE-promotion decision (round-5 lock language) remains
   open and Paul's alone; ranks_python.json stays byte-identical regardless.
 
+## ADDENDUM 1 (2026-07-10, PRE-LOOK) — corpus-count drift; gate REPLACED by a strictly stronger one
+
+Recorded BEFORE the look; no look was attempted against a drifted gate (the battery ran ALL GREEN
+under --simulate: sim(a) core 5/5, A plant +0.312 row/col True; sim(b) 0/5 + stack MISS; sim(c)
+partial −0.072 refused; sim(d) +0.514 admitted — the machinery validation the Empath instrument
+failed twice). The --look gate then reported fingerprint DRIFT. Diagnosis (fec/_pin_round6.py
+re-run): **speeches row count 234856 → 234878 (+22; a live collector tick — the count also moved
+234827→234856 earlier this session); ALL SIX artifact SHAs identical, posts identical, MEM=456,
+MEM_A=290, st coverage == MEM, dims 384 — all identical.**
+
+Why the count pin was the wrong proxy HERE (and right in rounds 4–5): rounds 4–5 computed their
+features LIVE from the corpus, so corpus drift = feature drift and the count pin guarded the
+instrument itself. Round 6's features are FROZEN in the SHA-pinned b5_emb_cache_r6_st.npz; the
+live corpus's only remaining roles are (i) MEM eligibility (len(alltext)>2000) and (ii) the
+declared Empath repro secondary (reported, non-gating). A raw row count is a WEAKER identity
+proxy for (i) than the roster's actual content.
+
+Amendment (bar-neutral; no bar/seed/roster/composition/consequence change; STRENGTHENS the gate):
+- speeches/posts counts move from GATING to REPORTED-AT-LOOK (the RESULT records them).
+- New HARD gates added: **MEM roster content-hash md5 = `374fa4a44d64b7de3d468913a0297c6d`
+  (456 members, exact membership not just count) and MEM_A roster content-hash md5 =
+  `3346d05a720f58bb5c46198fae1d1048` (290 members)** — strictly stronger than the counts they
+  replace: a one-in-one-out eligibility flip under a stable count would now refuse the look.
+- All six artifact SHA gates, roster-size gates, st coverage == MEM, and dims == 384 unchanged.
+- The Empath repro secondary inherits an input-freshness caveat: it featurizes live text
+  (text-hash cached), so its value may differ from §17's +.183 by input drift; it remains
+  reported-only.
+This addendum + the matching script change ride one commit, look taken immediately after.
+
 ## Discipline
 
 One look, same session as the lock. No LLM calls. No audio. No bar/seed/roster/composition changes
