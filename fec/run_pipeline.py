@@ -16,7 +16,12 @@ Usage:
 import subprocess,sys,os,argparse,time
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 FE=os.path.dirname(os.path.abspath(__file__))
-CHAIN=[('receptivity_layer.py',[]),            # personality/incentive receptivity (big5_traits.py = manual, corpus-driven)
+CHAIN=[('coop_v2_candidate.py',[]),            # A-slot criterion values (audit 2026-07-10 S2-02: became an engine input at the
+                                               # @94f09cf promotion with no chain producer — the lt_priming fossilization class).
+                                               # Composition frozen @28914b3; this refreshes VALUES + coverage only. Reads the
+                                               # PREVIOUS run's bipartisan.json (produced late in chain) — same two-run
+                                               # convergence semantics as col-G (Known-benign).
+       ('receptivity_layer.py',[]),            # personality/incentive receptivity (big5_traits.py = manual, corpus-driven)
        ('per_category_stance.py',[]),          # stance matrix (press normalization computed in Python from raw)
        ('compute_pillars.py',['--write']),     # THE RANK AUTHORITY (before sync: reads O/E/F while the view cache is alive; falls back to its snapshot otherwise)
        ('sync_stance_g.py',[]),                # col-G tier sync (openpyxl values write; kills formula caches — view self-heals on open)
