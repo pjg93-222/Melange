@@ -154,6 +154,7 @@ def resolve_full(label):
     DIFFERENT person (predecessor, relative) and must never bind."""
     s = TITLE.sub('', label.strip())
     s = re.sub(r'\(.*?\)', '', s)               # (D-MA)
+    s = re.sub(r',\s*[DRI]\.?\s*-\s*[A-Za-z][A-Za-z.\- ]{0,20}\s*$', '', s)   # ", D-Va." (pre-2020 PBS form)
     p = norm(s).split()
     if len(p) >= 2:
         m = FULL.get((p[0], p[-1]))
@@ -302,7 +303,7 @@ def run_mtp():
             print('%s FAIL %s' % (u[-50:], str(e)[:80]), flush=True)
     con.close(); print('MTP done: %d member turns added' % tot)
 
-MIXED_LABEL = re.compile(r'^\s*((?:Sen\.|Rep\.|Del\.|Gov\.|Speaker|Leader|Dr\.)?\s*[A-Z][A-Za-z.\'\-]+(?: [A-Z][A-Za-z.\'\-]+){0,3}(?:\s*\([A-Za-z.\- ]+\))?):\s', re.M)   # PBS: "Rep. Tom Kean (R-NJ):"
+MIXED_LABEL = re.compile(r'^\s*((?:Sen\.|Rep\.|Del\.|Gov\.|Speaker|Leader|Dr\.)?\s*[A-Z][A-Za-z.\'\-]+(?: [A-Z][A-Za-z.\'\-]+){0,3}(?:\s*\([A-Za-z.\- ]+\)|,\s*[DRI]\.?\s*-\s*[A-Za-z][A-Za-z.\- ]{0,20})?):\s', re.M)   # PBS: "Rep. Tom Kean (R-NJ):" AND the pre-2020 comma form "Sen. Mark Warner, D-Va.:" (QA 2026-07-10: the 2019 backfill walked 29 shutdown-era days with ZERO member rows — the comma suffix made every member label unmatchable while hosts resolved to None; both suffix forms now admitted, resolve_full strips both)
 def parse_turns_mixed(text):
     """PBS-style mixed-case labels ('Rep. Tom Kean:'); same drop-never-guess discipline."""
     turns = []
