@@ -156,7 +156,9 @@ dump_atomic({'members': out,
                        'c1=bipartisan tie share, c2=directional cross-party cosponsorship share '
                        '(>=10 known-party cosponsorships), c3=reciprocity share (>=5 out-partners); '
                        'z within chamber; composite=mean of z(c1),z(c2) BOTH REQUIRED (c3 = distinct '
-                       'anticorrelated facet, reported never composited). CANDIDATE — consumed '
-                       'by nothing until user-ratified promotion.'},
+                       'anticorrelated facet, reported never composited). PROMOTED 2026-07-10 '
+                       '(@94f09cf, user-ratified): the engine A-slot (receptivity susc .40 + '
+                       'seed .10) and desk radar consume cooperation_v2_z; in-chain since the '
+                       '2026-07-10 audit (values refresh every run; composition stays frozen).'},
             B + r'\coop_v2_candidate.json')
-print('wrote coop_v2_candidate.json (candidate; consumed by nothing)')
+print('wrote coop_v2_candidate.json (A-slot criterion values; consumed by receptivity_layer + desk radar)')
