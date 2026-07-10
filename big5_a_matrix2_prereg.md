@@ -237,3 +237,52 @@ by the Vote Smart ES RESULT recorded on main (2026-07-09 late evening, parallel 
 round's RESULT writes methods §23. If a merge lands additional sections before the RESULT commit,
 the section number shifts to the next free integer — the CONTENT is pinned, the number is not;
 the RESULT records which number it landed at.**
+
+## RESULT-A2 (2026-07-10, the one look, appended verbatim)
+
+Gates at look: lock True | look not yet taken | artifact fingerprints MATCH (cv 03418fd1d9… bd
+6b9bb9d2a1… vv 0bf7c461e9… pn f47b9b0453… stz 69b1da00eb…) | corpus REPORTED per Addendum 1:
+speeches 234878 posts 29098 | rosters MEM=456 MEM_A=290 | roster content MEM md5
+374fa4a44d64b7de3d468913a0297c6d, MEM_A md5 3346d05a720f58bb5c46198fae1d1048 (both match
+Addendum-1 pins) | non-finite events: 0.
+
+In-process battery (re-run at look): sim(a) PLANTED core 5/5, A own +0.312 p .0002 row True col
+True -> OK; sim(b) NULL core 0/5, stack MISS -> OK; sim(c) CONFOUND-ONLY bar5 partial −0.072
+refused -> OK; sim(d) TRUE+CONFOUND bar5 partial +0.514 p .0002 admitted -> OK. ALL GREEN.
+
+Masked discriminant matrix (st_mean instrument; CONTEXT ONLY per the lock — grounds no claim, no
+cell may be cited as evidence anywhere):
+
+    model\crit         O        C        E        A       ES      CV2
+    pred_O       +0.190   +0.096   +0.056   +0.156   +0.047   +0.006
+    pred_C       +0.085   +0.159   -0.146   +0.083   +0.123   -0.041
+    pred_E       +0.036   -0.098   +0.460   -0.020   -0.123   -0.120
+    pred_A       +0.161   +0.103   -0.048   +0.142   +0.078   -0.049
+    pred_ES      +0.043   +0.139   -0.217   +0.076   +0.191   +0.056
+    pred_A2      +0.044   -0.018   -0.204   -0.030   +0.013   +0.033
+
+The five locked bars for A_v2 (st_mean):
+  [primary] bar1 own r=+0.033 | bar2 perm-p=0.2961 | bar3 row-dom=False | bar4 col-specific=False
+  (max rival |r|=0.120) | bar5 partial=+0.036 p=0.2685  =>  **MISS** (all five bars failed; no
+  re-derivation runs on a primary MISS).
+
+Secondaries (reported, non-gating, firewalled):
+  facet r(pred_A_v2, c1 bipartisan share)  = +0.010 (n=290)
+  facet r(pred_A_v2, c2 cross-party share) = +0.052 (n=290)
+  facet r(pred_A_v2, c3 reciprocity)       = −0.099 (n=253)
+  r(pred_A_v2, coop_v1) on MEM_A           = −0.030
+  within-party own r: D-only +0.087 (n=155) | R-only −0.001 (n=135)
+  raw corr: gender +0.061 | party +0.042 (fairness record: clean)
+  REPRO (Empath A_v1 × coop_v1, declared accountability check): MEM **+0.183 — the §17 recorded
+  value EXACTLY** (7/456 members re-featurized for input drift) | MEM_A +0.227. The criterion
+  re-specification did not break the old model's recorded signal.
+
+**VERDICT: A_v2 MISS — "st_mean-A vs de-entangled cooperation: not distinct — route CLOSED for
+this instrument-basis (any composite over {c1, c2, c3}, any st-family basis per the lock)." A
+stays criterion-valid / not-discriminant (§17/§21 unchanged). Consequences applied: methods §23 +
+memory; NO desk change (PASS-only consequence); NO engine change; round-5's Empath data-growth
+gate remains OPEN; the anti-basis-shopping clause is binding for any future basis. Honest
+reading: the battery proved this instrument CAN recover a true r=.40 signal on this exact stratum
+(+0.312 planted), so this MISS is informative about the WORLD, not the machinery — the
+MODERATE-LOW prior was right; supervised open-vocabulary semantic text carries no distinct
+cooperation-v2 signal on the finance-active stratum.**
