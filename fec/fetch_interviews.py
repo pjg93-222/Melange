@@ -689,6 +689,50 @@ def run_msnow():
         page += 1
     con.close(); print('MSNOW done: %d member turns' % tot)
 
+NPRFEED_SHOWS = {'1a': '510316', 'here-now': '510051'}
+def run_nprfeed():
+    """1A + Here & Now via NPR's public RSS feeds (user-directed 2026-07-10 'Chase 1A hard').
+    Their npr.org ARCHIVE pages are JS-rendered (unlike the four run_npr programs), but (a) the
+    podcast feeds enumerate episodes (1A ~300 items, H&N ~50), and (b) transcript pages EXIST at
+    the derived URL npr.org/transcripts/<story-id> even though episode pages don't link them
+    (verified 07-10: 200, ~140KB). Both are call-in formats that book rank-and-file members from
+    BOTH parties — the power-law-inverting booking profile. Packages are npr.org URLs, so turns
+    pool into the same single 'npr' program cell as the run_npr legs. Resume: nprfeed:<story-id>.
+    RSS covers the recent window only; the weekly step keeps it accruing from here forward."""
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    tot = 0
+    for feed, fid in NPRFEED_SHOWS.items():
+        try:
+            x = get('https://feeds.npr.org/%s/podcast.xml' % fid); time.sleep(PAUSE)
+        except Exception as e:
+            print('nprfeed %s feed FAIL %s' % (feed, str(e)[:70]), flush=True); continue
+        links = [l for l in re.findall(r'<link>([^<]+)</link>', x) if re.search(r'/\d{4}/\d{2}/\d{2}/', l)]
+        print('nprfeed %s: %d feed episodes' % (feed, len(links)), flush=True)
+        for link in links:
+            m = re.search(r'/((?:nx-[a-z0-9]+-)?\d{6,})(?:/|$)', link)
+            dm = re.search(r'/(\d{4})/(\d{2})/(\d{2})/', link)
+            if not m or not dm: continue
+            sid = m.group(1); key = 'nprfeed:' + sid
+            if key in done: continue
+            date = '%s-%s-%s' % dm.groups()
+            try:
+                page = get('https://www.npr.org/transcripts/' + sid); time.sleep(PAUSE)
+            except urllib.error.HTTPError as e:
+                if e.code in (404, 410):   # no transcript published for this episode — permanent
+                    con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'notx', datetime.datetime.now().isoformat()))
+                    con.commit(); done.add(key)
+                continue
+            except Exception:
+                continue
+            body = re.sub(r'<script.*?</script>|<style.*?</style>', ' ', page, flags=re.S)
+            body = re.sub(r'<[^>]+>', '\n', body)
+            rows = parse_turns(_html.unescape(body))
+            n = store(con, rows, date, 'npr-' + feed, 'https://www.npr.org/transcripts/' + sid)
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+            con.commit(); done.add(key); tot += n
+            if n: print('nprfeed %s %s: %d member turns (total %d)' % (feed, date, n, tot), flush=True)
+    con.close(); print('NPRFEED done: %d member turns' % tot)
+
 # STONES EXAMINED AND CLOSED (2026-07-03, REVISED 07-05, 07-10): YouTube captions (post-2024-10 Fox,
 # podcasts) have NO speaker labels — multi-speaker attribution would require diarization;
 # harvesting them would violate the drop-never-guess discipline, so they stay out until a
@@ -713,7 +757,7 @@ def _keep_awake():
         print('keep-awake unavailable (%s) — machine may sleep mid-crawl' % str(e)[:60], flush=True)
 
 if __name__ == '__main__':
-    if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow')):
+    if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed')):
         _keep_awake()
     if 'status' in sys.argv:
         con = db()
@@ -727,7 +771,7 @@ if __name__ == '__main__':
     # collector_supervisor scheduled task distinguishes 'finished cleanly' from 'died' by this
     # flag — a leg only writes it if run_* returns without exception. Deep CNN backfill gets its
     # own sentinel (cnn-deep) so it doesn't collide with the incremental daily cnn leg.
-    _leg = next((l for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow') if l in sys.argv), None)
+    _leg = next((l for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed') if l in sys.argv), None)
     if _leg == 'cnn' and until <= '2024-06-01' and '--verify' not in sys.argv: _leg = 'cnn-deep'
     def _sentinel():
         try:
@@ -743,4 +787,5 @@ if __name__ == '__main__':
     elif 'fox' in sys.argv: run_fox(); _sentinel()
     elif 'hewitt' in sys.argv: run_hewitt(); _sentinel()
     elif 'msnow' in sys.argv: run_msnow(); _sentinel()
-    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|msnow|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
+    elif 'nprfeed' in sys.argv: run_nprfeed(); _sentinel()
+    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|msnow|nprfeed|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
