@@ -134,3 +134,37 @@ mode = status. No LLM calls. Secondaries (Pink-ES, extra partials, Williams-t) f
 claim derives from them. §21 (round 5) and §22 (this look) serialize in that order — both preregs
 lock in the same commit. The RESULT-VS section appends verbatim (MISSes included), committed same
 session as the look.
+
+## COLLECTION PROTOCOL AMENDMENT 1 (2026-07-09, PRE-COLLECTION — before any member's data exists)
+
+Scope acknowledgment: the lock permitted only the COLLECTION RECORD as a post-lock edit. This
+amendment nonetheless changes the COLLECTION METHOD — and is recorded openly rather than laundered
+through a false record — because the API-key route is contact-gated with no timeline while the same
+public data is readable today, and because the edit-restriction exists to protect the criterion,
+roster, bars, tiers, and wordings, ALL OF WHICH ARE BYTE-UNTOUCHED. No collection data existed at
+the time of this amendment; collection is not a look and is not consumable.
+
+Method: the user's own Chrome session (claude-in-chrome), user-directed (Paul supplied the PCT URL
+after the API's "Book Demo" gate), reading the PUBLIC per-candidate PCT pages
+`justfacts.votesmart.org/candidate/political-courage-test/<votesmart_id>` (id-only; the site
+redirects to the canonical slug), same-origin fetch, 0.8s politeness delay, single pass + retry of
+failures, batches of ~20/call. Server-side routes (WebFetch, urllib with browser headers) return
+403; the user's browser session renders the same pages any voter can read.
+
+Responded mapping, PINNED BEFORE COLLECTION (raw markers stored per member so the mapping is
+auditable from the artifact alone):
+- `prev` = page contains "has responded to a Political Courage Test in a previous election"
+- `tookCount` = occurrences of "addressed this issue directly by taking the Political Courage Test"
+  (legend contributes ~1; a completed CURRENT test contributes one per answered item)
+- `refusedCycle` = year in "did not provide voters with positions on key issues covered by the
+  <YYYY> Political Courage Test"
+- **responded = 1 iff prev OR tookCount ≥ 2; responded = 0 on a full page (>5,000 chars) with
+  neither; fetch_failed (retryable, excluded from base rate) on non-200 or shell page (≤5,000
+  chars — the SPA fallback observed during the pilot).**
+- cycles = distinct years in "<YYYY> Political Courage Test" mentions (informational).
+Pilot validation (recorded): Bean prev→1; Sanders prev+refused-2024→1 (the any-cycle trait
+reading); Cruz refused-2024-only→0; Harrigan no-markers→0. Everything else in this document —
+criterion definition, roster, coverage/degeneracy guards, conditioning set, tiers, wordings,
+fingerprints, gates — stands verbatim. The COLLECTION RECORD (SHA, joined N, base rate, mapping
+confirmation) follows collection as originally pinned; fec/votesmart_npat_fetch.py remains the
+API-route collector should the key ever arrive (unused in this collection).
