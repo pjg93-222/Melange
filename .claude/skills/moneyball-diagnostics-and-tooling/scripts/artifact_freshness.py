@@ -15,8 +15,9 @@ The table lists only PURE FILE-READ dependencies verified against producer sourc
     their consumers by one chain run.
 
 A STALE flag is a lead, not a verdict — confirm with the producer's docstring before
-re-running anything (several producers are user-gated; electoral_plays.json staleness
-in particular is a KNOWN, user-gated condition as of 2026-07-09).
+re-running anything (several producers are user-gated; electoral_plays.json in
+particular is user-gated, and its 2026-07-09 STALE flag proved mtime-only on
+2026-07-10 — the authorized rebuild was byte-identical).
 
 Usage:
   python artifact_freshness.py "<live root>" [--tol SECONDS]

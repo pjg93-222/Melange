@@ -217,7 +217,7 @@ Values below read from live artifacts **as of 2026-07-09** (they change every re
 - **Neutral fallbacks hide breakage** — a deleted `member_receptivity.json` or `say_do_gap.json` doesn't error; engines silently go legacy (moneyball_core.py:45-51,294-306). Check artifact presence before interpreting a run.
 - **Two P-matrix builds** — `build_P` (with edge_mult) vs the inline receptivity-blind copies in lt_priming/cosponsor_route/scenario (Section 2).
 - **`lt_priming.json` is single-topic and always written to the production name** (lt_priming.py:98).
-- **Stale `electoral_plays.json`** (47 members, as of 2026-07-09) feeds frontier electoral mode and salience VULN; its regeneration is **user-gated** — never run the fix chain unprompted (session-ratified, 2026-07).
+- **`electoral_plays.json`** feeds frontier electoral mode and salience VULN; its regeneration is **user-gated** — never run the fix chain unprompted (session-ratified, 2026-07). The 2026-07-09 staleness flag resolved 2026-07-10: the authorized rebuild was byte-identical (mtime-only flag).
 - **JS mirror**: any change to flip_model terms, build_P physics, lt_priming gates/pricing, salience estimation, or engine constants requires a matching `make_dashboard_html_00.tpl` edit; the audit does not check the template (see `moneyball-architecture-contract`).
 
 ## Provenance and maintenance

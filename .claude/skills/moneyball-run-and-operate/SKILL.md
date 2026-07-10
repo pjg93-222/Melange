@@ -266,7 +266,7 @@ If anything is live: wait, or ask. Run baselines SERIALLY, never concurrently wi
 
 | Gated action | Status as of 2026-07-09 |
 |---|---|
-| `build_electoral_plays.py` → `build_dashboard_bundle.py` → `make_dashboard_html.py` | The staleness is REAL (~47 members' electoral plays, e.g. Frank Lucas showing 'defend' that should be 'none') but the rerun reclassifies members - Paul's call. Never run unprompted (session-ratified, 2026-07) |
+| `build_electoral_plays.py` → `build_dashboard_bundle.py` → `make_dashboard_html.py` | User-gated, standing (session-ratified, 2026-07). The 2026-07-09 staleness flag resolved 2026-07-10: authorized rebuild was byte-identical - content already current, mtime-only flag. Never run unprompted |
 | Any dedup DELETE from the D2/legacy duplicate ledgers | user-gated (session-ratified, 2026-07) |
 | Vote Smart collection (`votesmart_npat_fetch.py`) | CONCLUDED and merged to main 2026-07-10: collection COMPLETED (517/518) via a user-directed browser-session amendment and the one look CONSUMED (TIER 5 UNCORROBORATED, methods §22); never re-collect or re-take |
 | coop_v2 engine promotion | DECIDED: granted, SHIPPED and merged to main 2026-07-10 (@94f09cf) — `RECEPT_COOP=v2` default, `v1` = wholesale revert; `coop_v2_candidate.py` is now an in-chained pipeline step. Reverting to v1 is a user decision |
