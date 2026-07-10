@@ -198,3 +198,47 @@ Roster note: joinable = 518 (533-roster ∩ votesmart_id in legislators.csv); ar
 responded ∈ {0,1} = 517 of 518 (responded=1: 162, responded=0: 355). Coverage floor 517 ≥ 450
 PASS; degeneracy guard .05 ≤ .3133 ≤ .95 PASS. Collected via the Amendment-1 browser-session
 route, single pass + straggler retries, 2026-07-09 evening.
+
+## RESULT-VS (2026-07-09 — the one look; recorded verbatim, same session)
+
+Gate state at the look: lock TRUE | look not yet taken | instrument fingerprints MATCH |
+collection artifact present, sha/joined_n/base_rate MATCH the COLLECTION RECORD | coverage and
+degeneracy guards PASS. (Denominator note: the script prints fetch_failed=0 because Gooden is
+absent from the artifact entirely — the RECORD's fetch_failed=1 counts him at collection; same
+fact, two denominators, nothing gated on it.)
+
+Look transcript (verbatim):
+
+    criterion-side join: votesmart_id members=518 | responded-in-{0,1}=517 | fetch_failed=0 | base rate=0.313
+    analysis roster (∩ v2-ES non-null ∩ gender M/F ∩ tenure computable): n=517
+
+    === PRIMARY: v2-ES vs pct_respond ===
+      [v2-ES] point-biserial r=+0.0550 exact perm-p=0.1080 (param 0.1057) | FW partial (gender,party,chamber,log-tenure) = -0.0075 p=0.5751
+        specificity rival v2-O: r=+0.0857
+        specificity rival v2-C: r=+0.0692
+        specificity rival v2-E: r=+0.0633
+        specificity rival v2-A: r=+0.0572
+        Williams-t ES vs nearest rival (O): t=-0.57 p=0.5667 (reported)
+
+    === SECONDARY (reported, firewalled): Pink-ES ===
+      [Pink-ES] point-biserial r=+0.0886 exact perm-p=0.0242 (param 0.0242) | FW partial (gender,party,chamber,log-tenure) = +0.0464 p=0.1554
+      extra reported partial (| vote_share_last): +0.0684 p=0.0620 (n=489)
+
+    === VERDICT (nested tiers, highest met; wordings fixed by the prereg) ===
+      TIER 5: "ES text read externally UNCORROBORATED — the §18 limbo closes with evidence"
+
+    artifact sha at look: 8b16c6812bcc… | joined n=517 | base rate=0.313 | non-finite events: 0
+
+**OUTCOME: TIER 5 (fixed wording): "ES text read externally UNCORROBORATED — the §18 limbo
+closes with evidence."** S fails (r=+.0550, exact perm-p=.1080 ≥ .05); had S passed, SPEC would
+also have failed — v2-ES is the WEAKEST of the five axes against this criterion (O +.0857,
+C +.0692, E +.0633, A +.0572 all exceed it), and the FW partial is signless (−.0075, p=.575).
+The Pink-ES secondary (raw +.0886, perm-p .0242; partial +.0464, p .155 — confound-attributable)
+is REPORTED under the firewall: no claim derives from it. Tier 5's pre-declared consequences
+apply: the desk ES caveat gains "PCT-respond null (2026-07-09)"; methods §22; the respond-
+criterion route is CLOSED (one look). Richer PCT content (issue-position volatility etc.) remains
+a new construct requiring its own prereg. Honest-prior accounting: the LOW/VERY-LOW prior and the
+§18 RESULT-E2 adverse prior (−.042 wrong-signed at N=171) pointed here; the any-cycle criterion
+at full power (n=517, base rate .313) settles it — the §18 limbo ("measured, no clean independent
+validation") is no longer a data gap; it is an evidenced null on the one powered external
+criterion available.

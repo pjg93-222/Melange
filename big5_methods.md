@@ -535,3 +535,33 @@ a product decision on the criterion-side record; coverage trade-off: 315/533 vs 
 218 uncovered members would fall to neutral; sandboxed stability report available on request.
 (b) The Vote Smart ES corroboration look (prereg locked pre-collection @28914b3, §22 reserved for
 its RESULT) — awaiting the user's API key; collector + look script committed and gated.
+
+## 22. ES external corroboration — Vote Smart PCT respond: TIER 5, UNCORROBORATED (2026-07-09, one look, prereg big5_es_votesmart_prereg.md)
+
+The user opened the gate and, after the API key proved demo-gated, authorized the browser-session
+collection route (prereg Amendment 1, recorded PRE-collection; server-side fetches 403, the user's
+own Chrome session reads the same public pages any voter can). Collection: 517/518 joinable members
+classified (Gooden = the 1 fetch_failed, excluded per the pinned taxonomy), responded=1: 162, base
+rate .3133 — coverage (≥450) and degeneracy (.05–.95) guards PASS. The pilot's char-threshold
+full-page test was operationalized during collection as PROOF-OF-RENDER (heading + Office line in
+stripped DOM text) after production scale surfaced sparse-but-real pages (75–112k HTML, <5k visible
+text — ground-truthed live on Lankford); the marker→responded mapping itself is byte-identical to
+the pinned amendment. Artifact frozen in the COLLECTION RECORD (sha 8b16c681…, committed BEFORE the
+look @ae458cd).
+
+**The look (one, gated, verify-pass agreed statistic-for-statistic): TIER 5 — "ES text read
+externally UNCORROBORATED — the §18 limbo closes with evidence."** v2-ES vs pct_respond on n=517:
+point-biserial r=+0.0550, exact perm-p=.1080 (S FAILS); FW partial (gender, party, chamber,
+log-tenure) = −0.0075 p=.575; and v2-ES is the WEAKEST of the five axes against this criterion
+(O +.0857, C +.0692, E +.0633, A +.0572) — SPEC would have failed too. Secondary (firewalled,
+reported only): Pink-ES raw +.0886 perm-p .0242, but confound-attributable (partial +.0464,
+p=.155). Pre-declared consequences applied: desk ES caveat gains "externally uncorroborated
+(PCT-respond null, 2026-07-09, n=517)"; the respond-criterion route is CLOSED (one look; closure
+covers the criterion, not richer PCT content, which would be a new construct + prereg).
+
+**Program state for ES after §22: every route is now exhausted-with-evidence** — text halo (§15/§16
+caveats), voice CLOSED PERMANENTLY (§16/§18), NPAT-precheck adverse (§18 E2), and now the full-power
+any-cycle external criterion NULL at n=517. The display axis stays measured-with-caveats; nothing
+engine-side ever depended on it (the engine's N-slot is behavioral reactivity, §19). Honest-prior
+accounting: the prereg's LOW/VERY-LOW prior and disclosed adverse prior pointed exactly here; the
+value of the look is that ES's status is no longer a data gap but an evidenced negative record.
