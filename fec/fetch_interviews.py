@@ -906,6 +906,145 @@ def run_cfr():
         if n: print('cfr %s: %d member turns (total %d) %s' % (date, n, tot, u.rsplit("/",1)[-1][:48]), flush=True)
     con.close(); print('CFR done: %d member turns' % tot)
 
+def _pdf_text(data):
+    """PDF bytes -> text via pypdf in LAYOUT mode (AEI/Aspen legs). QA 2026-07-10: DEFAULT mode
+    rendered the whole Aspen Van Hollen PDF word-per-line ('bummer/we/have/to/wear/ties') — labels
+    never assembled, 0 rows from a verifier-confirmed 18-turn transcript. extraction_mode='layout'
+    reflows correctly ('Chris Van Hollen:' at line start); per-page fallback to plain mode."""
+    import io
+    from pypdf import PdfReader
+    try:
+        rd = PdfReader(io.BytesIO(data))
+    except Exception:
+        return ''
+    out = []
+    for p in rd.pages:
+        try:
+            out.append(p.extract_text(extraction_mode='layout') or '')
+        except Exception:
+            try:
+                out.append(p.extract_text() or '')
+            except Exception:
+                pass
+    return '\n'.join(out)
+
+def get_bytes(url, tries=3):
+    for i in range(tries):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=90) as r:
+                return r.read()
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 410): raise
+            if i == tries - 1: raise
+            time.sleep(3 * (i + 1))
+        except Exception:
+            if i == tries - 1: raise
+            time.sleep(3 * (i + 1))
+
+def run_aei():
+    """AEI event transcripts (aei.org — recon workflow wf_d6b68694 GO, adversarially verified w/
+    member sample; user think-tank sweep 2026-07-10). Transcripts are PDFs linked from event
+    pages; robots '*' allows event paths with **Crawl-Delay 45** — HONORED (45s between aei.org
+    requests; ~146 member-slug events x2 requests ≈ 4h, an overnight leg). Enumeration: Yoast
+    sitemap_index.xml -> event-sitemap*.xml (4,557 events). Labels: sentence-case honorific +
+    full name + colon ('Senator Todd Young:') inside the PDF -> parse_turns_mixed + the
+    honorific-surname resolver extension. Resume: aei:<slug>."""
+    AEI_DELAY = 45.0
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    surn = set()
+    for name in C:
+        parts = norm(name).split()
+        if parts and len(parts[-1]) > 4: surn.add(parts[-1])
+    urls = []
+    try:
+        idx = get('https://www.aei.org/sitemap_index.xml'); time.sleep(AEI_DELAY)
+    except Exception as e:
+        print('aei sitemap index FAIL %s' % str(e)[:80]); con.close(); return
+    for sm in re.findall(r'<loc>([^<]*event-sitemap[^<]*)</loc>', idx):
+        try:
+            x = get(sm); time.sleep(AEI_DELAY)
+        except Exception:
+            continue
+        for u in re.findall(r'<loc>([^<]+)</loc>', x):
+            slug = u.rstrip('/').rsplit('/', 1)[-1].lower()
+            toks = set(re.split(r'[-_.]', slug))
+            if (toks & {'senator', 'sen', 'rep', 'representative', 'congressman', 'congresswoman', 'speaker'}
+                    or (toks & surn)):
+                urls.append(u)
+    print('aei: %d candidate events (Crawl-Delay 45 honored — overnight leg)' % len(urls), flush=True)
+    tot = 0
+    for u in sorted(set(urls)):
+        key = 'aei:' + u.rstrip('/').rsplit('/', 1)[-1][:120]
+        if key in done: continue
+        try:
+            page = get(u); time.sleep(AEI_DELAY)
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 410):
+                con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'nopage', datetime.datetime.now().isoformat()))
+                con.commit(); done.add(key)
+            continue
+        except Exception:
+            continue
+        pdfs = re.findall(r'href="(https://www\.aei\.org/wp-content/uploads/[^"]+\.pdf)"', page)
+        dm = re.search(r'"datePublished"\s*:\s*"(\d{4}-\d{2}-\d{2})', page)
+        date = dm.group(1) if dm else None
+        if not pdfs or not date:
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)',
+                        (key, 'notx' if date else 'nodate', datetime.datetime.now().isoformat()))
+            con.commit(); done.add(key); continue
+        rows = []
+        for pu in pdfs[:2]:
+            try:
+                data = get_bytes(pu); time.sleep(AEI_DELAY)
+            except Exception:
+                continue
+            txt = _pdf_text(data)
+            r = parse_turns_mixed(txt) or parse_turns(txt)
+            if len(r) > len(rows): rows = r
+        n = store(con, rows, date, 'aei', u)
+        con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+        con.commit(); done.add(key); tot += n
+        if n: print('aei %s: %d member turns (total %d) %s' % (date, n, tot, u.rstrip("/").rsplit("/",1)[-1][:48]), flush=True)
+    con.close(); print('AEI done: %d member turns' % tot)
+
+def run_aspen():
+    """Aspen Security Forum transcript PDFs (aspensecurityforum.org — recon wf_4317698d GO,
+    verified w/ Van Hollen sample). WP REST media API enumerates the transcript PDFs directly
+    (12 known; sweep ALL application attachments to catch unlabeled ones). ASR-derived ('may
+    contain inaccuracies' header) -> acceptable for turn STRUCTURE; labels 'Chris Van Hollen:'
+    full-name sentence-case -> parse_turns_mixed. No Crawl-Delay; 0.7s politeness. Resume: asf:<id>."""
+    import json as _json
+    con = db(); done = {k for (k,) in con.execute("SELECT key FROM iv_fetch_log WHERE status='ok'")}
+    tot = 0; page = 1
+    while True:
+        u = 'https://www.aspensecurityforum.org/wp-json/wp/v2/media?media_type=application&per_page=100&page=%d' % page
+        try:
+            raw = get(u); time.sleep(PAUSE)
+            posts = _json.loads(raw)
+        except Exception:
+            break
+        if not posts: break
+        for p in posts:
+            src = (p.get('source_url') or '')
+            if not src.lower().endswith('.pdf'): continue
+            key = 'asf:%s' % p.get('id')
+            if key in done: continue
+            date = (p.get('date') or '')[:10]
+            if not date:
+                con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'nodate', datetime.datetime.now().isoformat()))
+                continue
+            try:
+                data = get_bytes(src); time.sleep(PAUSE)
+            except Exception:
+                continue
+            rows = parse_turns_mixed(_pdf_text(data))
+            n = store(con, rows, date, 'aspensf', src)
+            con.execute('INSERT OR REPLACE INTO iv_fetch_log VALUES (?,?,?)', (key, 'ok', datetime.datetime.now().isoformat()))
+            con.commit(); done.add(key); tot += n
+            if n: print('aspen %s: %d member turns (total %d)' % (date, n, tot), flush=True)
+        page += 1
+    con.close(); print('ASPEN done: %d member turns' % tot)
+
 NPRFEED_SHOWS = {'1a': '510316', 'here-now': '510051'}
 def run_nprfeed():
     """1A + Here & Now via NPR's public RSS feeds (user-directed 2026-07-10 'Chase 1A hard').
@@ -974,7 +1113,7 @@ def _keep_awake():
         print('keep-awake unavailable (%s) — machine may sleep mid-crawl' % str(e)[:60], flush=True)
 
 if __name__ == '__main__':
-    if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed', 'axefiles', 'csis', 'cfr')):
+    if any(l in sys.argv for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed', 'axefiles', 'csis', 'cfr', 'aei', 'aspen')):
         _keep_awake()
     if 'status' in sys.argv:
         con = db()
@@ -988,7 +1127,7 @@ if __name__ == '__main__':
     # collector_supervisor scheduled task distinguishes 'finished cleanly' from 'died' by this
     # flag — a leg only writes it if run_* returns without exception. Deep CNN backfill gets its
     # own sentinel (cnn-deep) so it doesn't collide with the incremental daily cnn leg.
-    _leg = next((l for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed', 'axefiles', 'csis', 'cfr') if l in sys.argv), None)
+    _leg = next((l for l in ('cnn', 'mtp', 'cbs', 'abc', 'pbs', 'npr', 'fox', 'hewitt', 'msnow', 'nprfeed', 'axefiles', 'csis', 'cfr', 'aei', 'aspen') if l in sys.argv), None)
     if _leg == 'cnn' and until <= '2024-06-01' and '--verify' not in sys.argv: _leg = 'cnn-deep'
     def _sentinel():
         try:
@@ -1008,4 +1147,6 @@ if __name__ == '__main__':
     elif 'axefiles' in sys.argv: run_axefiles(); _sentinel()
     elif 'csis' in sys.argv: run_csis(); _sentinel()
     elif 'cfr' in sys.argv: run_cfr(); _sentinel()
-    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|msnow|nprfeed|axefiles|csis|cfr|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
+    elif 'aei' in sys.argv: run_aei(); _sentinel()
+    elif 'aspen' in sys.argv: run_aspen(); _sentinel()
+    else: print('usage: fetch_interviews.py [cnn|mtp|cbs|abc|pbs|npr|fox|hewitt|msnow|nprfeed|axefiles|csis|cfr|aei|aspen|status] [--since YYYY-MM-DD] [--until YYYY-MM-DD]')
