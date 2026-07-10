@@ -20,6 +20,14 @@ cl=anthropic.Anthropic(api_key=open(B+r'\fec\anthropic_key.txt').read().strip())
 L=lambda f: json.load(open(B+'\\'+f,encoding='utf-8'))
 V2=(L('big5_v2.json').get('traits') or {})
 BD=(L('behavioral_dispositions.json').get('members') or {})
+# Cooperation descriptor = share-based cooperation_v2 (audit 2026-07-10 S3-04, matching the
+# promoted engine A-slot + desk radar @94f09cf): overlay v2 into the narrative view; members
+# without v2 coverage get None -> the descriptor line is omitted (line() returns None), never a
+# silent fallback to the volume-entangled raw-count read.
+try:
+    _cv2={m:(d or {}).get('cooperation_v2_z') for m,d in L('coop_v2_candidate.json').get('members',{}).items()}
+    BD={m:{**d,'cooperation_z':_cv2.get(m)} for m,d in BD.items()}
+except FileNotFoundError: pass
 IF=L('interaction_features.json'); IF=IF.get('members',IF) if isinstance(IF,dict) else {}
 RC=L('member_receptivity.json'); RC=RC.get('members',RC) if isinstance(RC,dict) else {}
 AU=L('b5_audio_cache.json'); AZ={m:dict(zip(AU['feature_names'],AU['z'][m])) for m in AU['members']}
