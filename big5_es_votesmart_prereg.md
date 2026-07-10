@@ -1,0 +1,136 @@
+# ES external corroboration — Vote Smart PCT respond (the recorded sole remaining ES path)
+
+STATUS: LOCKED (2026-07-09, committed BEFORE the data exists in-repo — the collection is pending an
+API key only the user can obtain; locking pre-collection is the strongest possible ordering;
+adversarially reviewed pre-lock, all required changes incorporated). User opened the gate 2026-07-09
+("Vote Smart ES pull" selected). This is the §18-recorded path: "the one remaining powered ES path:
+a fresh full-roster Vote Smart PCT pull — external collection, user-gated." (Roster correction in
+passing: §18 said votesmart_id was "available for all 533"; the verified number is **518 of the 533
+joinable** — 520/537 legislators.csv rows carry an id.) The lock commit contains the collector
+(fec/votesmart_npat_fetch.py) and the look script (fec/b5_es_votesmart_look.py).
+
+## Adverse prior, disclosed (the round-4 standard)
+
+§18's RESULT-E2 already tested v2-ES against an NPAT-respond criterion and returned **−.042
+WRONG-SIGNED (perm .70), not ES-specific (v2-E carried the largest |r| −.072), partial null** — at
+N=171 current-roster members from the on-disk 2013-14 .tab snapshot. The criterion here ("≥1
+completed PCT/NPAT in ANY cycle") INCLUDES those same NPATs, so this look is not independent of
+that record. Load-bearing differences, stated: N≈518 vs 171 (3× the roster, both chambers); the
+Vote Smart record covers ALL cycles per member, not one historical snapshot (many members' response
+behavior post-dates the snapshot); and E2's power warning was pre-declared as the likely cause of
+its null ("RKH's own effect +.063 — under our bar even at perfect transfer"). Still, a wrong-signed
+prior at N=171 is a wrong-signed prior: **honest prior for the CORROBORATION tier is LOW**
+(lowered from LOW-MODERATE by this disclosure), **and VERY LOW for the validity tier.**
+
+## What this look is — and is not (expectations pinned up front)
+
+RKH's own in-sample ES→NPAT-respond effect was +.063. At N≈518 that is *detectable* (one-sided .05
+threshold ≈ .072; power vs true .063 ≈ 40%) but can never clear the +.15 validity bar. This is
+pre-declared as a **CORROBORATION look, not a validation look**. A corroboration MISS at ~40%
+power is recorded as "uncorroborated," never "disproven" — wording fixed here.
+
+## Criterion & roster
+
+- **pct_respond ∈ {0,1}** per member: 1 iff Vote Smart records ≥1 completed Political Courage
+  Test / NPAT in ANY cycle for the member's votesmart_id (the trait-like RKH reading). The exact
+  API field mapping is pinned in the COLLECTION RECORD addendum (below) before the look.
+  Known limitation, stated: members with multiple Vote Smart candidate records (chamber switchers)
+  are read via the legislators.csv id-of-record; an undercount there biases toward 0, reported not
+  corrected.
+- **Analysis roster, exact**: 533-roster ∩ votesmart_id = **518** (verified pre-lock) ∩ v2-ES
+  non-null ∩ gender M/F (both verified 518 pre-lock) ∩ responded ∈ {0,1} (fetch_failed EXCLUDED,
+  count reported). **Coverage floor: joined N < 450 ⇒ VOID-FOR-COVERAGE — no look consumed;
+  collection may be completed/retried and the check re-run.**
+- **Degeneracy guard**: base rate computed from the collection artifact ALONE, before any
+  instrument file is opened; base rate <5% or >95% ⇒ **VOID-FOR-DEGENERACY — no look consumed**
+  (criterion degeneracy is observable without any instrument pairing; the ordering makes the
+  no-consumption claim true).
+- Sign pre-declared: **higher ES → more likely to respond** (RKH direction).
+
+## Collection protocol (collector committed in this lock; may run before or after lock, never after the look)
+
+`fec/votesmart_npat_fetch.py`: Vote Smart API Npat.getNpat per candidateId (JSON), key from
+fec/votesmart_api_key.txt (gitignored — the ignore entry rides this lock commit), 0.5s politeness
+delay, resume cache. **Error taxonomy (pinned): responded=0 ONLY on a recognized no-NPAT/empty-npat
+response; auth/quota/transport/unparseable ⇒ fetch_failed — retryable, never cached as done, never
+counted in the base rate.** fetch_failed members may be retried until the COLLECTION RECORD is
+written; the record freezes the artifact. Output votesmart_npat.json with per-member
+{votesmart_id, responded, cycles (as extractable from the npat payload), note}; failures recorded,
+never guessed.
+
+## COLLECTION RECORD addendum (the ONLY permitted post-lock edit before the RESULT)
+
+When collection completes, ONE scoped addendum is appended to this file containing exactly:
+votesmart_npat.json SHA-256, joined analysis N, base rate, fetch_failed count, and the exact API
+field mapping used for responded. Nothing else in this document may be touched. The look is gated
+on this addendum existing and matching the artifact.
+
+## Instruments under test (existing display reads only — nothing is trained on this criterion)
+
+- PRIMARY: **v2-ES** (big5_v2.json). SECONDARY (reported): Pink-ES (big5_llm_opus.json).
+- Excluded: voice-ES (CLOSED PERMANENTLY); any newly supervised model (would be a new route).
+- Statistics: point-biserial r; exact permutation p imported from b5_behavioral_instrument
+  (K=5000, seed 20260708); Frisch–Waugh partial imported from b5_n_matrix.fw_partial (K=5000,
+  seed 20260710 — permutes the residualized criterion, the locked repo idiom). Unstratified
+  permutation is deliberate and adequate for a rare binary: every replicate preserves the base
+  rate exactly, and the exact-p construction carries the variance (on record to preempt the
+  stratification attack).
+- Deterministic pipeline (no folds): adversarial re-derivation of any non-MISS outcome =
+  independent recomputation of the join and every statistic from the raw artifacts in a fresh
+  process; **a mismatch is a DEFECT HALT — nothing is recorded until both computations agree, and
+  the resolution is recorded.**
+
+## Conditioning set for partials
+
+[gender, party, chamber, log(1 + years since first election)] — tenure because PCT response rates
+collapsed secularly. **Tenure source pinned**: first_congress = min(congress) for the member's
+bioguide_id in votes/HSall_members.csv (SHA-256
+`7f7b41cfec668961587c8902963b2ab491d811bd8841707e436e58ad7709553a`); years since first election =
+2026 − (1789 + 2·(first_congress − 1) − 1). Verified computable for all 518 joinable members.
+vote_share_last (behavior_panel.json members[m].vote_share_last) = one REPORTED extra partial,
+non-gating.
+
+## Input pinning (recorded at lock; the look aborts, not consumed, on mismatch)
+
+- big5_v2.json `aed97ffa7c5cabf933bb7924b9c01d80c076452a137d4ebecf6b64c5c217fd7b`
+- big5_llm_opus.json `4b462228f5445dec43d66fc04e801cbd1974d31d569908938150604c8ec19632`
+- fec/legislators.csv `c5a6cbdbaae0bb19faa89852c29922809ececc70b97c149b4709588087e5e391`
+- votes/HSall_members.csv `7f7b41cfec668961587c8902963b2ab491d811bd8841707e436e58ad7709553a`
+- behavior_panel.json `f47b9b045357cad2c5644f551fc934e8a0aa793a22d98272632547a276d22a50`
+- votesmart_npat.json: SHA deferred to the COLLECTION RECORD (the artifact does not exist at lock).
+
+## Outcome space (nested tiers; the HIGHEST tier met is recorded; wordings fixed; exhaustive)
+
+Let: S = right-signed r with exact perm-p < .05; SPEC = |r(v2-ES, criterion)| STRICTLY greatest
+among the five v2 axes (tie = not specific; a Williams-t between ES and its nearest rival axis is
+REPORTED so a knife-edge call is legible); PART-C = FW partial right-signed with perm-p < .05;
+PART-M = FW partial ≥ +0.10 with perm-p < .05.
+
+1. **VALIDITY** (expected UNMET): r ≥ +0.15 AND S AND SPEC AND PART-M AND re-derivation agreement
+   → "ES text read externally validated (PCT respond)"; desk caveat updated; all prior caveats
+   stand in history.
+2. **CORROBORATION**: S AND SPEC AND PART-C → fixed wording: **"ES text read WEAKLY CORROBORATED
+   by PCT-respond (r=…, under the validity bar; annotation only)"** — methods §22 + one desk
+   caveat clause; no promotion, no un-caveating.
+3. **SIGNAL, NOT SPECIFIC**: S AND NOT SPEC → fixed wording: **"corroboration signal present but
+   not ES-specific — closed"** (an observed signal is never denied; given the v2 E-ES axis
+   correlation of +.445 and a true effect ~.06, this branch is the likely one under an RKH-true
+   world — stated now so its wording cannot be composed post-look).
+4. **SIGNAL, CONFOUND-ATTRIBUTABLE**: S AND SPEC AND NOT PART-C → fixed wording: **"signal
+   present, confound-attributable (fails the conditioning set) — closed, no corroboration claim."**
+5. **UNCORROBORATED**: NOT S (wrong-signed or n.s.) → fixed wording: **"ES text read externally
+   UNCORROBORATED — the §18 limbo closes with evidence"**; desk caveat gains "PCT-respond null
+   (2026-07-09)."
+Tiers 2–5 all CLOSE the respond-criterion route (one look). Any richer use of PCT content
+(issue-position volatility etc.) is a new construct needing its own prereg — not a re-spec.
+
+## Look gate (complete refusal conditions — fec/b5_es_votesmart_look.py, same commit)
+
+REFUSES if: (a) this file is absent; (b) the literal line `STATUS: LOCKED` is absent; (c) a
+newline-anchored `RESULT-VS` H2 heading exists (look consumed); (d) the COLLECTION RECORD addendum
+is absent, or votesmart_npat.json's SHA / joined N / base rate mismatch it; (e) any instrument/join
+fingerprint above mismatches; (f) VOID-FOR-COVERAGE or VOID-FOR-DEGENERACY fired. Default no-arg
+mode = status. No LLM calls. Secondaries (Pink-ES, extra partials, Williams-t) firewalled — no
+claim derives from them. §21 (round 5) and §22 (this look) serialize in that order — both preregs
+lock in the same commit. The RESULT-VS section appends verbatim (MISSes included), committed same
+session as the look.
