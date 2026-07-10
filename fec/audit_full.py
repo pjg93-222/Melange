@@ -242,6 +242,14 @@ if os.path.exists(_rc_p):
     _nsl=_rc.get('n_slot'); _nsrc=sum(1 for v in _rc.get('members',{}).values() if v.get('n_source')=='reactivity')
     ck('receptivity N-slot = behavioral reactivity (round-3; no silent text revert)',
        _nsl=='behavioral' and _nsrc>=150,'n_slot=%s reactivity_members=%d'%(_nsl,_nsrc))
+    # COOP-SLOT guard (audit 2026-07-10, mirrors the N-slot guard): the A-slot must be the promoted
+    # share-based cooperation_v2 (@94f09cf); a silent RECEPT_COOP=v1 revert or a coverage collapse
+    # (coop_v2_candidate staleness / c2-floor starvation) would sail through the basis gate above.
+    _csl=_rc.get('coop_slot'); _csrc=sum(1 for v in _rc.get('members',{}).values() if v.get('coop_source')=='coop_v2')
+    _cv=[v.get('cooperation_v2_z') for v in _rc.get('members',{}).values() if v.get('cooperation_v2_z') is not None]
+    ck('receptivity A-slot = cooperation_v2 (promotion @94f09cf; coverage>=250, |z|<=5, no silent v1 revert)',
+       _csl=='v2' and _csrc>=250 and len(_cv)>=250 and all(abs(x)<=5.0 for x in _cv),
+       'coop_slot=%s coop_v2_members=%d'%(_csl,_csrc))
     if _bd_ok:
         _rv=[d['reactivity_z'] for d in json.load(open(_bd_p))['members'].values() if d.get('reactivity_z') is not None]
         ck('reactivity_z disposition sane (coverage >=150, |z|<=5)',
