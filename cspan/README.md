@@ -151,6 +151,36 @@ to be filtered later.
 Text is C-SPAN closed-caption **UPPERCASE**; whitespace is collapsed but casing
 is preserved verbatim (no lossy normalization).
 
+---
+
+## Downstream: load into the model (`fec/load_cspan.py`)
+
+The scraper only produces JSON. To digest it into the model, run the Python
+loader, which resolves each turn's speaker to the 533-member roster with the
+same `resolve_full` drop-never-guess resolver as the broadcast-interview
+collectors (host/callers/mis-captioned clips don't resolve and drop; credential
+suffixes like "M.D." are stripped first):
+
+```sh
+python fec/load_cspan.py --dir <cspan_out>          # -> speeches rows, source='INTERVIEW'
+python fec/load_cspan.py status                     # counts + cspan_fetch_log
+python fec/load_cspan.py --dir <cspan_out> --db X   # load into an alternate DB (testing)
+```
+
+**Source tag = `INTERVIEW`** (user decision 2026-07-11): C-SPAN Washington Journal
+is treated as the same broadcast-interview genre as the CNN/MTP/CBS/etc. legs, so
+it feeds **every** consumer — `big5_traits`, the member reference layer,
+`co_appearance_layer`, the volume dispositions (`behavior_panel` →
+`behavioral_dispositions`), and the reactivity **MEM_N** gate — with no consumer
+edits (C-SPAN packages bucket into `program_of()`'s `"other"` cell exactly like
+the existing CBS/ABC/Fox/Hewitt/MSNOW legs). Pass `--source CSPAN` to keep it a
+distinct, separately-auditable genre instead. Loading is resumable
+(`cspan_fetch_log`, key `cspan:<id>`) and refuses dateless rows. Re-run the
+analysis chain afterward to propagate into traits/features/ranks; expect MEM_N
+to rise (was 216; gate 250).
+
+---
+
 ### Known edge cases
 
 * **No transcript**: recent airings often have no transcript yet → `n_turns:0`.
