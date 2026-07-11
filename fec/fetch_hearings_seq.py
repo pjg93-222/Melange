@@ -140,6 +140,44 @@ def parse_seq(txt):
     chair = chair_ct.most_common(1)[0][0] if chair_ct else None
     return out, chair
 
+REPAIR_HON = (r'Mr|Mrs|Ms|Miss|Senator|Representative|Chairman|Chairwoman|Chair|Admiral|General|Secretary|'
+              r'Colonel|Governor|Dr|Professor|Ambassador|Lieutenant|Captain|Major|Commander|Commissioner|'
+              r'Administrator|Director|Justice|Judge|Honorable|Hon')
+def repair_pdf(t):
+    """119th (2025+) hearings are PDF-only: pypdf DEFAULT-mode splits the small-caps surname's drop-cap
+    initial off its remainder ('Mr. C\\nROW.' = Mr. CROW; 'Admiral H OLSEY.' = Admiral HOLSEY). Rejoin
+    those, and de-hyphenate words broken across line-wraps, so the HTML-era parse_seq works unchanged."""
+    t = re.sub(r'\b(%s)\.[ ]+([A-Z])[ \t]*\n?[ \t]*([A-Z][A-Z\'\-]+)' % REPAIR_HON,
+               lambda m: '%s. %s%s' % (m.group(1), m.group(2), m.group(3).title()), t)
+    t = re.sub(r'([a-z])-\n([a-z])', r'\1\2', t)      # de-hyphenate line-wrapped words
+    return t
+
+def fetch_one_pdf(p):
+    """2025+ path: api zip endpoint -> pdf/*.pdf -> pypdf -> repair -> same parse_seq."""
+    pid, date = p['packageId'], p['dateIssued']
+    try:
+        raw = get('https://api.govinfo.gov/packages/%s/zip?api_key=%s' % (pid, KEY), True)
+    except urllib.error.HTTPError as e:
+        return {'pid': pid, 'status': 'nopage' if e.code in (404, 410) else 'err:%d' % e.code}
+    except Exception as e:
+        return {'pid': pid, 'status': 'err:%s' % str(e)[:40]}
+    try:
+        import pypdf
+        z = zipfile.ZipFile(io.BytesIO(raw))
+        pdfs = [n for n in z.namelist() if n.lower().endswith('.pdf')]
+        if not pdfs:
+            return {'pid': pid, 'status': 'nopdf'}
+        r = pypdf.PdfReader(io.BytesIO(z.read(pdfs[0])))
+        txt = '\n'.join(pg.extract_text() for pg in r.pages)
+        seq, chair = parse_seq(repair_pdf(txt))
+        named = sum(1 for t in seq if t[0] not in ('W', 'C', 'O'))
+        if named < 3:
+            return {'pid': pid, 'status': 'err:pdf:%d-named' % named}   # bad extraction -> flag, don't cache junk
+        return {'pid': pid, 'date': date, 'title': (p.get('title') or '')[:200], 'status': 'ok',
+                'seq': seq, 'chair': chair, 'named': named}
+    except Exception as e:
+        return {'pid': pid, 'status': 'err:pdf:%s' % str(e)[:40]}
+
 def fetch_one(p):
     pid, date = p['packageId'], p['dateIssued']
     try:
@@ -189,11 +227,21 @@ def run(since, until, workers=6):
     sc = seqdb(); mc = maindb()
     done = {r[0] for r in sc.execute("SELECT package FROM seq_log WHERE status IN ('ok','nopage')")}
     pkgs = [p for p in list_packages(since) if since <= p['dateIssued'] <= until]
-    todo = [p for p in sorted(pkgs, key=lambda p: p['dateIssued']) if p['packageId'] not in done]
+    # EXPEDITE-THE-VERDICT (2026-07-10): the substance-shaped antagonism signal (personal hostility)
+    # lives in CONTENTIOUS hearings; genial approps/noms contribute ~0. Front-load likely-contentious
+    # titles so the signal-bearing data lands first (full collection still completes -- reorder, not skip).
+    CONTENTIOUS = re.compile(r'oversight|judiciar|weaponi|border|afghan|censor|\bfbi\b|department of justice|'
+                             r'big tech|social media|radical|accountab|failure|crisis|scandal|hunter|impeach|'
+                             r'testimony of|examining|threat|extremis|antisemit|fentanyl|cartel|hamas|'
+                             r'\bccp\b|homeland|whistleblow|misconduct|abuse|corrupt', re.I)
+    def prio(p): return (0 if CONTENTIOUS.search(p.get('title') or '') else 1, p['dateIssued'])
+    todo = [p for p in sorted(pkgs, key=prio) if p['packageId'] not in done]
+    ncont = sum(1 for p in todo if CONTENTIOUS.search(p.get('title') or ''))
+    print('  (%d likely-contentious hearings front-loaded)' % ncont, flush=True)
     print('SEQ-CACHE: %d hearings %s..%s, %d to cache (%d workers)' % (len(pkgs), since, until, len(todo), workers), flush=True)
     k = 0
     with ThreadPoolExecutor(max_workers=workers) as ex:
-        futs = [ex.submit(fetch_one, p) for p in todo]
+        futs = [ex.submit(fetch_one_pdf if p['dateIssued'] >= '2025-01-01' else fetch_one, p) for p in todo]
         for fut in as_completed(futs):
             r = fut.result(); k += 1; pid = r['pid']
             if r['status'] != 'ok':
