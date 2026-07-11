@@ -236,12 +236,13 @@ if os.path.exists(_rc_p):
     ck('receptivity runs on the behavioral basis (lexical Big5 indicted 2026-07-04)',
        _rc.get('basis')=='behavioral' and _bd_ok,
        'basis=%s dispositions_ok=%s'%(_rc.get('basis'),_bd_ok))
-    # ROUND-3 N-slot guard (2026-07-09): the susceptibility N-slot must be the behavioral reactivity
-    # read (n_slot='behavioral'); a silent RECEPT_N=text revert or a reactivity-coverage collapse
-    # would sail through the basis gate above. Coverage floor 150 (currently 207/533).
-    _nsl=_rc.get('n_slot'); _nsrc=sum(1 for v in _rc.get('members',{}).values() if v.get('n_source')=='reactivity')
-    ck('receptivity N-slot = behavioral reactivity (round-3; no silent text revert)',
-       _nsl=='behavioral' and _nsrc>=150,'n_slot=%s reactivity_members=%d'%(_nsl,_nsrc))
+    # ROUND-7 N-slot guard (2026-07-11 promotion, pre-registered gate 5/5 affective_n_validate.py): the
+    # susceptibility N-slot must be the affective-content N (n_slot='affective'); reactivity_z was retired
+    # as Extraversion-contaminated (+.185 w/ big5-E, negative w/ N). A silent RECEPT_N=behavioral/text
+    # revert or an affective_n-coverage collapse would sail through the basis gate above. Coverage floor 150.
+    _nsl=_rc.get('n_slot'); _nsrc=sum(1 for v in _rc.get('members',{}).values() if v.get('n_source')=='affective')
+    ck('receptivity N-slot = affective-content N (round-7; no silent behavioral/text revert)',
+       _nsl=='affective' and _nsrc>=150,'n_slot=%s affective_members=%d'%(_nsl,_nsrc))
     # COOP-SLOT guard (audit 2026-07-10, mirrors the N-slot guard): the A-slot must be the promoted
     # share-based cooperation_v2 (@94f09cf); a silent RECEPT_COOP=v1 revert or a coverage collapse
     # (coop_v2_candidate staleness / c2-floor starvation) would sail through the basis gate above.
