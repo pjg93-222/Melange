@@ -77,11 +77,17 @@ ROOT <- Sys.getenv("MONEYBALL_ROOT", unset = "C:/Users/pgoff/OneDrive/Desktop/Me
 OUT  <- flag("out", file.path(ROOT, "cspan_out"))
 DELAY <- as.numeric(flag("delay", "4"))          # seconds between distinct page loads (robots Crawl-delay:4)
 LOADMORE_DELAY <- as.numeric(flag("loaddelay", "2"))  # seconds between #loadmore clicks (same page, XHR append)
+# How many ~0.4s polls of an EMPTY transcript table before concluding "no
+# transcript" (vs a slow render). MUST be generous: under CPU contention (many
+# parallel workers) the transcript JS can take >10s to populate, and too-short a
+# bail silently records a populated transcript as 0 turns. 35 -> ~14s.
+ZERO_BAIL <- as.integer(flag("zerobail", "35"))
 MAXN <- suppressWarnings(as.integer(flag("max", NA)))
 FFMPEG <- flag("ffmpeg", "ffmpeg")
 
 dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
 dir.create(file.path(OUT, "transcripts"), showWarnings = FALSE)
+TURNS_CSV <- NULL   # per-run flat-turns path; set in run_scrape (shard-suffixed when parallel)
 
 log_msg <- function(...) cat(sprintf("[%s] ", format(Sys.time(), "%H:%M:%S")), ..., "\n", sep = "")
 `%||%` <- function(a, b) if (is.null(a) || length(a) == 0 || (length(a) == 1 && is.na(a))) b else a
@@ -310,10 +316,10 @@ scrape_program <- function(b, url, title = "", date = "", want_audio = FALSE) {
   # airings have no transcript published yet), bail after ~5s instead of waiting.
   js_val(b, "(function(){var s=document.querySelector('#video-transcript-wrapper'); if(s) s.scrollIntoView();})()")
   last <- -1L; stable <- 0L; zero <- 0L
-  for (i in 1:60) {
+  for (i in 1:(ZERO_BAIL + 55L)) {
     n <- tryCatch(as.integer(js_val(b, "document.querySelectorAll('#video-transcript-table tr').length")), error = function(e) 0L)
     if (is.na(n)) n <- 0L
-    if (n == 0L) { zero <- zero + 1L; if (zero >= 12L) break }        # no transcript -> stop waiting
+    if (n == 0L) { zero <- zero + 1L; if (zero >= ZERO_BAIL) break }  # no transcript (patient) -> stop
     else { zero <- 0L; if (n == last) { stable <- stable + 1L; if (stable >= 3L) break } else stable <- 0L }
     js_val(b, "window.scrollBy(0, 3000)")
     last <- n; Sys.sleep(0.4)
@@ -342,7 +348,7 @@ scrape_program <- function(b, url, title = "", date = "", want_audio = FALSE) {
                  nwords = lengths(strsplit(t$text %||% "", "\\s+")), text = t$text %||% "",
                  stringsAsFactors = FALSE)
     }))
-    csv_append(file.path(OUT, "turns.csv"), rows)
+    csv_append(if (!is.null(TURNS_CSV)) TURNS_CSV else file.path(OUT, "turns.csv"), rows)
   }
   if (want_audio) download_audio(id, media)
   list(id = id, n_turns = length(turns), media = media)
@@ -355,6 +361,17 @@ run_scrape <- function() {
   v <- read.csv(vpath, stringsAsFactors = FALSE, colClasses = "character")
   if (has_flag("members-only")) v <- v[as.logical(v$member_guess) %in% TRUE, ]
   if (!is.na(MAXN)) v <- head(v, MAXN)
+  # --shard k/n : process every n-th program (0-indexed k). Launch n processes
+  # (k=0..n-1) to the SAME --out for n-way parallelism; the skip-if-exists check
+  # keeps them from redoing each other's work, and per-shard turns_k.csv avoids
+  # concurrent-append races on the flat file.
+  shard <- flag("shard", NA)
+  if (!is.na(shard)) {
+    pr <- as.integer(strsplit(shard, "/")[[1]]); k <- pr[1]; nsh <- pr[2]
+    v <- v[(seq_len(nrow(v)) - 1L) %% nsh == k, ]
+    TURNS_CSV <<- file.path(OUT, sprintf("turns_%d.csv", k))
+    log_msg(sprintf("shard %d/%d -> %d programs", k, nsh, nrow(v)))
+  }
   log_msg(sprintf("scrape: %d programs (%s)", nrow(v), if (has_flag("members-only")) "members-only" else "all"))
 
   b <- new_session(); on.exit(try(b$close(), silent = TRUE), add = TRUE)
