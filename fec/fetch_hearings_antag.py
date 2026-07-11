@@ -192,6 +192,16 @@ def list_packages(since):
         time.sleep(0.3)
     return out
 
+def commit_retry(con, tries=8):
+    """social_media.db is shared with other live collectors -- a >60s writer lock must back off,
+    not kill an hours-long run."""
+    for t in range(tries):
+        try:
+            con.commit(); return
+        except sqlite3.OperationalError:
+            if t == tries - 1: raise
+            time.sleep(20 * (t + 1))
+
 def run(since, until):
     con = db(); cur = con.cursor()
     done = {r[0] for r in cur.execute("SELECT key FROM cr_fetch_log WHERE status IN ('ok','nopage')")}
@@ -202,35 +212,45 @@ def run(since, until):
     for k, p in enumerate(todo):
         pid, date = p['packageId'], p['dateIssued']
         try:
-            z = zipfile.ZipFile(io.BytesIO(get('https://www.govinfo.gov/content/pkg/%s.zip' % pid, True)))
-            time.sleep(PAUSE)
-        except urllib.error.HTTPError as e:
-            if e.code in (404, 410):
-                cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)", ('antag2:' + pid, 'nopage', datetime.datetime.now().isoformat())); con.commit()
-            continue
+            try:
+                z = zipfile.ZipFile(io.BytesIO(get('https://www.govinfo.gov/content/pkg/%s.zip' % pid, True)))
+                time.sleep(PAUSE)
+            except urllib.error.HTTPError as e:
+                if e.code in (404, 410):
+                    cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)", ('antag2:' + pid, 'nopage', datetime.datetime.now().isoformat())); commit_retry(con)
+                continue
+            except Exception as e:
+                cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)", ('antag2:' + pid, 'err:%s' % str(e)[:60], datetime.datetime.now().isoformat())); commit_retry(con)
+                continue
+            agg = collections.defaultdict(lambda: collections.Counter()); chair = None; named = 0
+            pl = pid.lower()
+            chamber = 'house' if 'hhrg' in pl else ('senate' if 'shrg' in pl else None)
+            for n in z.namelist():
+                if not n.endswith('.htm'): continue
+                seq = parse_sequence(z.read(n).decode('utf-8', 'replace'), chamber)
+                ev, ch = hearing_events(seq)
+                if ch and not chair: chair = ch
+                for m, c in ev.items():
+                    for kk, vv in c.items(): agg[m][kk] += vv
+                named += sum(1 for s in seq if s[0])
+            for m, c in agg.items():
+                cur.execute("INSERT INTO hearing_antag2 VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                            (pid, date, m, c['turns'], c['chair_turns'], c['intr'], c['xparty'], c['friction'],
+                             c['defiance'], c['yieldback'], c['chair_enforce'], c['chair_relent'], c['chair_blowup']))
+                tot_ev += c['intr'] + c['friction'] + c['defiance'] + c['chair_blowup']
+            cur.execute("INSERT OR REPLACE INTO hearing_meta2 VALUES(?,?,?,?,?,?,?)",
+                        (pid, date, (p.get('title') or '')[:200], chair, party_of(chair) if chair else '?', named, len(agg)))
+            cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)", ('antag2:' + pid, 'ok', datetime.datetime.now().isoformat()))
+            commit_retry(con)
         except Exception as e:
-            cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)", ('antag2:' + pid, 'err:%s' % str(e)[:60], datetime.datetime.now().isoformat())); con.commit()
+            # ANY per-package failure (bad zip member, transient sqlite lock past retries, parse
+            # surprise) is logged and skipped -- a multi-hour walk must never die on one package
+            print('  !! %s: %s: %s' % (pid, type(e).__name__, str(e)[:120]), flush=True)
+            try:
+                cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)", ('antag2:' + pid, 'err:%s' % str(e)[:60], datetime.datetime.now().isoformat())); commit_retry(con)
+            except Exception:
+                pass
             continue
-        agg = collections.defaultdict(lambda: collections.Counter()); chair = None; named = 0
-        pl = pid.lower()
-        chamber = 'house' if 'hhrg' in pl else ('senate' if 'shrg' in pl else None)
-        for n in z.namelist():
-            if not n.endswith('.htm'): continue
-            seq = parse_sequence(z.read(n).decode('utf-8', 'replace'), chamber)
-            ev, ch = hearing_events(seq)
-            if ch and not chair: chair = ch
-            for m, c in ev.items():
-                for kk, vv in c.items(): agg[m][kk] += vv
-            named += sum(1 for s in seq if s[0])
-        for m, c in agg.items():
-            cur.execute("INSERT INTO hearing_antag2 VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                        (pid, date, m, c['turns'], c['chair_turns'], c['intr'], c['xparty'], c['friction'],
-                         c['defiance'], c['yieldback'], c['chair_enforce'], c['chair_relent'], c['chair_blowup']))
-            tot_ev += c['intr'] + c['friction'] + c['defiance'] + c['chair_blowup']
-        cur.execute("INSERT OR REPLACE INTO hearing_meta2 VALUES(?,?,?,?,?,?,?)",
-                    (pid, date, (p.get('title') or '')[:200], chair, party_of(chair) if chair else '?', named, len(agg)))
-        cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)", ('antag2:' + pid, 'ok', datetime.datetime.now().isoformat()))
-        con.commit()
         if k % 50 == 0 or len(agg) > 0:
             print('  [%d/%d] %s %s: %d members, %d antag-events (running %d)' % (k + 1, len(todo), date, pid[:20], len(agg), sum(c['intr'] + c['friction'] + c['defiance'] + c['chair_blowup'] for c in agg.values()), tot_ev), flush=True)
     con.close(); print('HEARINGS(antag2) done: %d antagonism events across hearings' % tot_ev)
