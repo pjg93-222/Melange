@@ -10,13 +10,19 @@ Confound controls (DW-NOMINATE ideology+extremity, party, minority-fraction, cha
 Emits diagnostics: confound checks, split-half reliability, orthogonality to dominance/visibility/
 cooperation, face validity, and an AUDIT DUMP of flagged hostile turns so the lexicon can be judged.
 Iterate the lexicon here and re-run in seconds -- no re-download (cache is the point)."""
-import sys, os, sqlite3, json, collections, re
+import sys, os, sqlite3, json, collections, re, hashlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import numpy as np
 from dw_control import load_dw
 
 B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+# Haiku substance labels (content-read frames) override the frame_of lexicon when present.
+_SCRATCH = r'C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-clever-elbakyan-15fa11\2599f411-20b5-4e43-adc2-5e1137079745\scratchpad'
+_LABP = os.path.join(_SCRATCH, 'substance_labels.json')
+HLAB = json.load(open(_LABP, encoding='utf-8')) if os.path.exists(_LABP) else {}
+def exch_id(pkg, m, text):
+    return hashlib.md5(('%s|%s|%s' % (pkg, m, text[:80])).encode('utf-8', 'replace')).hexdigest()[:16]
 
 # ---- HOSTILITY LEXICON (pre-specified; member-vs-witness hostility only) ----
 INTERROGATE = re.compile(r"\b(yes or no|answer the question|just answer|did you or did you not|"
@@ -130,7 +136,15 @@ def build():
                 grp = 'off' if wtype in ('G', 'S', 'M', 'J') else 'biz' if wtype == 'B' else 'exp' if wtype == 'E' else 'priv'
                 per[m]['wh_' + grp] += 1                      # by witness type (control for business/officials)
                 fr = frame_of(text)
-                per[m]['fr_' + fr] += 1                       # by substance frame (shapes the curve)
+                per[m]['fr_' + fr] += 1                       # lexicon frame (interim)
+                # HAIKU content-read label (overrides lexicon when present): dispositional = genuinely
+                # hostile AND personal/aggressive-interrogation AND not partisan-framed
+                hl = HLAB.get(exch_id(pkg, m, text))
+                if hl:
+                    per[m]['h_labeled'] += 1
+                    per[m]['h_' + hl.get('frame', 'na')] += 1
+                    if hl.get('hostile') and hl.get('frame') in ('personal_attack', 'aggressive_interrogation') and not hl.get('partisan'):
+                        per[m]['h_disp'] += 1
                 if ap != '?' and pty in ('D', 'R'):
                     per[m]['wh_opp' if pty != ap else 'wh_aligned'] += 1
                 if len(audit[m]) < 3: audit[m].append('[%s/%s] %s' % (grp, fr, text[:150]))
@@ -200,7 +214,27 @@ def main():
     print('  orthogonality: dominance %+.3f | cooperation %+.3f | reactivity %+.3f'
           % (corr(antag, bdv('dominance_z')), corr(antag, bdv('cooperation_z')), corr(antag, bdv('reactivity_z'))))
     ao = sorted(range(len(mem)), key=lambda i: -antag[i])
-    print('  top antagonists (personal-hostility, controlled): %s' % ', '.join('%s(%s)' % (mem[i], PTY.get(mem[i])) for i in ao[:8]))
+    print('  top antagonists (lexicon personal-hostility, controlled): %s' % ', '.join('%s(%s)' % (mem[i], PTY.get(mem[i])) for i in ao[:8]))
+
+    # ---------- HAIKU content-read antagonism (activates once substance_labels.json exists) ----------
+    tot_lab = sum(agg[m]['h_labeled'] for m in mem)
+    if tot_lab > 100:
+        hframes = {k: sum(agg[m].get('h_' + k, 0) for m in mem) for k in
+                   ('personal_attack', 'aggressive_interrogation', 'substantive_accountability', 'partisan_ideological', 'populist_grilling', 'neutral_questioning')}
+        print('\n### AXIS 2b -- HAIKU content-read antagonism (%d exchanges labeled) ###' % tot_lab)
+        print('  Haiku frames: %s' % {k: '%d(%.0f%%)' % (v, 100 * v / max(tot_lab, 1)) for k, v in hframes.items()})
+        hd = rate('h_disp')                        # dispositional = hostile & personal/aggressive & not partisan
+        antag_h = z(rate('mm_intr')) + z(rate('mm_xparty')) + z(hd)
+        antag_hc = resid(antag_h, [sen, ext, d1, pty, minf, oppf])
+        print('  Haiku-dispositional vs opp-admin %+.3f | extremity %+.3f (should be low = not political)' % (corr(hd, oppf), corr(hd, ext)))
+        print('  orthogonality: dominance %+.3f | cooperation %+.3f (want negative) | reactivity %+.3f'
+              % (corr(antag_hc, bdv('dominance_z')), corr(antag_hc, bdv('cooperation_z')), corr(antag_hc, bdv('reactivity_z'))))
+        ah = sorted(range(len(mem)), key=lambda i: -antag_hc[i])
+        print('  TOP ANTAGONISTS (Haiku content-read, controlled): %s'
+              % ', '.join('%s(%s)' % (mem[i], PTY.get(mem[i])) for i in ah[:10]))
+        print('  vs lexicon ranking corr: %+.3f' % corr(antag, antag_hc))
+    else:
+        print('\n  (Haiku labels: %d exchanges -- run hearing_substance_prep + classify workflow to activate AXIS 2b)' % tot_lab)
 
     print('\n### the two axes are distinct: corr(grandstand, antagonism_controlled) = %+.3f ###' % corr(grand, antag))
     print('\n--- reliability (split-half >=4 hearings) ---')
