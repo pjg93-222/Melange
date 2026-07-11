@@ -100,7 +100,7 @@ canvas{touch-action:none}
 <div id=bar>
 <span><label>Issue</label><select id=issue></select></span>
 <span><label>Mode</label><span class=seg id=mode><button data-m=coal class=on>Coalition (build)</button><button data-m=flip>Persuade</button></span></span>
-<span><label>Color</label><span class=seg id=color><button data-c=issue class=on>Issue stance</button><button data-c=party>Party</button><button data-c=gen>Overall</button><button data-c=elec>Electoral</button><button data-c=recept>Receptivity</button></span></span>
+<span><label>Color</label><span class=seg id=color><button data-c=issue class=on>Issue stance</button><button data-c=party>Party</button><button data-c=gen>Overall</button><button data-c=elec>Electoral</button><button data-c=recept>Receptivity</button><button data-c=antag>Antagonism</button></span></span>
 <span><label>Layout</label><span class=seg id=ltog><button data-l=cosp class=on>Cosponsorship</button><button data-l=committee>Committees</button></span></span>
 <span><label>Layers</label><span id=lybar style="display:inline-flex;gap:8px;align-items:center;font-size:11px;color:#9ca3af">
  <label style=cursor:pointer><input type=checkbox id=ly_c checked> cosponsor</label>
@@ -215,7 +215,13 @@ function receptCol(v){ // pressure_mult 0.50 (resistant, blue) .. 1.0 (grey) .. 
   const c=t<0.455?[lerp(96,139,t/0.455),lerp(165,148,t/0.455),lerp(250,158,t/0.455)]
                  :[lerp(139,239,(t-0.455)/0.545),lerp(148,68,(t-0.455)/0.545),lerp(158,68,(t-0.455)/0.545)];
   return `rgb(${c[0]},${c[1]},${c[2]})`;}
-function colOf(i){if(colorBy==='party')return PTCOL[DATA.party[i]];if(colorBy==='gen')return STCOL[DATA.gen[i]];if(colorBy==='elec')return ELCOL[DATA.play[i]];if(colorBy==='recept')return receptCol(DATA.recept?DATA.recept[i]:1);return STCOL[DATA.stance[i][issue]];}
+function antagCol(v){ // ratified hearing-antagonism facet: null (no hearing data) grey, z<=0 neutral, z>0 grey->red
+  if(v==null)return '#30363d';
+  if(v<=0)return '#8b949e';
+  const t=Math.min(v/3,1);
+  return `rgb(${Math.round(139+109*t)},${Math.round(148-67*t)},${Math.round(158-85*t)})`;
+}
+function colOf(i){if(colorBy==='party')return PTCOL[DATA.party[i]];if(colorBy==='gen')return STCOL[DATA.gen[i]];if(colorBy==='elec')return ELCOL[DATA.play[i]];if(colorBy==='recept')return receptCol(DATA.recept?DATA.recept[i]:1);if(colorBy==='antag')return antagCol(DATA.antag?DATA.antag[i]:null);return STCOL[DATA.stance[i][issue]];}
 function cascCol(p){ // cascade join-likelihood: red #ef4444 (won't join) -> amber #f59e0b -> green #16a34a (near-certain)
   p=Math.max(0,Math.min(1,p));const lerp=(a,b,k)=>Math.round(a+(b-a)*k);
   return p<0.5?`rgb(${lerp(239,245,p/0.5)},${lerp(68,158,p/0.5)},${lerp(68,11,p/0.5)})`
@@ -266,7 +272,7 @@ function draw(){
    if(CASC){fill=cascCol(cascP[i]);al=1;}
    else if(RC&&dim){if(route.fliproute&&routeCasc[i]<=0.001){fill='#3b424c';al=0.16;}else{fill=cascCol(routeCasc[i]);al=0.6;}}   // tint by activation likelihood (cascade) or leverage-on-target (flip); zero-leverage members stay grey
    else if(dim){fill='#3b424c';al=0.16;}
-   else{fill=colOf(i);al=(colorBy==='issue'&&DATA.stance[i][issue]==='-')?0.45:(colorBy==='elec'&&DATA.play[i]==='n')?0.3:1;if(r>4.5)al*=0.78;}
+   else{fill=colOf(i);al=(colorBy==='issue'&&DATA.stance[i][issue]==='-')?0.45:(colorBy==='elec'&&DATA.play[i]==='n')?0.3:(colorBy==='antag'&&(!DATA.antag||DATA.antag[i]==null))?0.3:1;if(r>4.5)al*=0.78;}
    ctx.beginPath();ctx.arc(sx,sy,r,0,7);ctx.fillStyle=fill;
    ctx.globalAlpha=al;ctx.fill();ctx.globalAlpha=1;
    if(!CASC&&!dim&&allocOf(i)>0){ctx.lineWidth=1.1;ctx.strokeStyle='#fff';ctx.stroke();}
@@ -829,6 +835,7 @@ function legend(){
    +`<br><span style=color:#6e7681>${note}</span>`;return;}
  let items;
  if(colorBy==='recept')items=[[0.55,'Independent-minded'],[0.8,''],[1.0,'Neutral'],[1.3,''],[1.55,'Highly receptive']].map(([v,lb])=>`<span><span class=pill style=background:${receptCol(v)}></span>${lb}</span>`).join('')+'<span style=color:#6e7681> · behavioral receptivity (cosponsorship, participation, floor dynamics, live-interview reactivity × electoral incentive × outlook)</span>';
+ else if(colorBy==='antag')items=[[0,'Even-keeled'],[1.2,''],[2.4,'Highly antagonistic']].map(([v,lb])=>`<span><span class=pill style=background:${antagCol(v)}></span>${lb}</span>`).join('')+'<span><span class=pill style=background:#30363d></span>no hearing data</span><span style=color:#6e7681> · hearing-antagonism facet (member-vs-member interrupts + Haiku-verified hostile-witness questioning; ideology/seniority/party/minority-controlled; display-only, rank-independent)</span>';
  else if(colorBy==='elec')items=[['c','Contest · primary'],['g','Contest · general'],['d','Defend'],['n','No play']].map(([k,lb])=>`<span><span class=pill style=background:${ELCOL[k]}></span>${lb}</span>`).join('');
  else if(colorBy==='party')items=[['D','Democrat'],['R','Republican'],['I','Independent']].map(([k,lb])=>`<span><span class=pill style=background:${PTCOL[k]}></span>${lb}</span>`).join('');
  else items=[['C','Champion'],['A','Ally'],['H','Hi-Persuad'],['P','Persuad'],['G','Lean-Pers'],['T','Neutral'],['L','Lean-Skep'],['S','Skeptic'],['K','Hi-Skeptic'],['O','Opponent']].map(([k,lb])=>`<span><span class=pill style=background:${STCOL[k]}></span>${lb}</span>`).join('');

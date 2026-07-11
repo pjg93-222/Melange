@@ -124,13 +124,17 @@ cfp=MB_ROOT+r'\confidence.json'; CONF=json.load(open(cfp)) if os.path.exists(cfp
 # receptivity color layer (2026-07-04): pressure_mult per member (behavioral basis) for colorBy=recept
 _rcp=MB_ROOT+r'\member_receptivity.json'
 _RC=(json.load(open(_rcp)).get('members',{}) if os.path.exists(_rcp) else {})
-name=[];X=[];Y=[];PARTY=[];GEN=[];RANK=[];NL=[];STANCE=[];BP=[];CF=[]   # columnar to drop repeated JSON keys
+# ratified hearing-antagonism facet (gate 5/5 2026-07-11): DISPLAY-ONLY, does NOT feed rank/engine
+_hap=MB_ROOT+r'\hearing_antagonism.json'
+_HA=(json.load(open(_hap)).get('members',{}) if os.path.exists(_hap) else {})
+name=[];X=[];Y=[];PARTY=[];GEN=[];RANK=[];NL=[];STANCE=[];BP=[];CF=[];ANTAG=[];GRAND=[]   # columnar to drop repeated JSON keys
 for n in members:
     sm=''.join(TC.get(CS.get(n,{}).get(issue_cat[i],'—'),'-') for i in range(len(issues)))
     c=cong[n]
     name.append(n);X.append(sx(pos[n][0]));Y.append(sy(pos[n][1]))
     PARTY.append(party.get(c.get('bioguide',''),'?'));GEN.append(TC.get(gen.get(n,'Neutral'),'N'))
     RANK.append(rank.get(n,0) or 0);NL.append(round((c.get('net_lean') or 0)*10));STANCE.append(sm);BP.append(round(bp[n]*100));CF.append(CONF.get(n,50))
+    ANTAG.append(_HA[n]['antagonism_z'] if n in _HA else None);GRAND.append(_HA[n]['grandstand_z'] if n in _HA else None)
 # ---------- COMMITTEE-CLUSTER LAYOUT (Porter et al. 2005): a second set of node positions where members
 # cluster by committee. Committees are positioned by NORMALIZED INTERLOCK (shared members / expected-by-chance)
 # via a spring layout, then each member sits at the centroid of their committees' anchors (+ deterministic
@@ -287,7 +291,8 @@ bundle={'issues':issues,'name':name,'x':X,'y':Y,'party':''.join(PARTY),'gen':''.
         'play':PLAY,'epval':EPVAL,'frontier':frontier,'opt':opt,'engine':engine,
         'cx':CX,'cy':CY,'comms':COMMS,'cmi':CMI,   # committee-cluster layout (Porter): positions + anchors + per-member primary committee
         'elay':ELAY,'refs':REFE,'coap':COAP,   # layer toggles: per-drawn-edge provenance code + signed reference dyads + joint-appearance pairs
-        'recept':[round((_RC.get(n) or {}).get('pressure_mult',1.0),2) for n in members]}   # behavioral receptivity (colorBy=recept)
+        'recept':[round((_RC.get(n) or {}).get('pressure_mult',1.0),2) for n in members],   # behavioral receptivity (colorBy=recept)
+        'antag':ANTAG,'grand':GRAND}   # ratified hearing-antagonism facet (colorBy=antag/grand); DISPLAY-ONLY, rank-independent
 dump_atomic({name[i]:BP[i] for i in range(len(name))},MB_ROOT+r'\bipartisan.json')
 out=MB_ROOT+r'\dashboard_data.json'
 dump_atomic(bundle,out,separators=(',',':'))
