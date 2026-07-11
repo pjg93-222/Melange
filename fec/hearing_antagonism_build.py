@@ -31,6 +31,26 @@ AGGRESSIVE = re.compile(r"\b(how dare you|shame on you|you should be ashamed|dis
 def is_hostile(t):
     return bool(INTERROGATE.search(t) or CORRECT.search(t) or AGGRESSIVE.search(t))
 
+# SUBSTANCE frame (interim lexicon proxy; the faithful version is a Haiku pass over cached exchanges --
+# see hearing_substance_llm.py). The substance of the member's words shapes BOTH the partisan read and
+# the antagonism curve: substantive-accountability & partisan-ideological & populist aggression are
+# role/context-driven (down-weighted); PERSONAL hostility is the dispositional residual (weighted full).
+SUBSTANTIVE = re.compile(r"\b(misled|lied to (congress|us|this committee)|failed to|fraud|wast(e|ed|ing)|"
+                         r"abuse|safety|harm(ed|ful)?|illegal|unlawful|violat|cover(ed)? up|coverup|negligen|"
+                         r"mismanaged|deceiv|breach|wrongdoing|malfeasance|taxpayer dollars|billion|accountab|"
+                         r"under oath|perjur|falsif|misrepresent)\b", re.I)
+PARTISAN_FRAME = re.compile(r"\b(radical|socialist|marxist|woke|left-wing|right-wing|extremist|your party|"
+                            r"the (left|right)|partisan|ideolog|agenda|weaponiz|witch hunt|hoax|sham)\b", re.I)
+PERSONAL = re.compile(r"\b(disgrace|how dare you|shame on you|you should be ashamed|reprehensible|"
+                      r"you have no business|despicable|you people|pathetic|coward|liar)\b", re.I)
+def frame_of(t):
+    """Interim frame classification of a hostile turn (Haiku pass overrides). Priority: personal >
+    substantive > partisan > (bare interrogation = procedural-populist)."""
+    if PERSONAL.search(t): return 'personal'        # dispositional antagonism
+    if SUBSTANTIVE.search(t): return 'substantive'  # accountability (grounded) -> not disposition
+    if PARTISAN_FRAME.search(t): return 'partisan'  # ideological attack -> partisan axis
+    return 'procedural'                              # bare interrogation/correction w/o substance or ideology
+
 # GRANDSTAND / procedural-dominance markers (axis 1, KEPT per user: senior members command the floor).
 # 'reclaiming my time' lives HERE (procedural, not antagonism) -- the phrase that inflated Collins is
 # the RIGHT signal for a dominance/status axis, wrong for the disagreeableness axis.
@@ -104,12 +124,16 @@ def build():
                 if prev[1] in ('D', 'R') and pty in ('D', 'R') and prev[1] != pty:
                     per[m]['mm_xparty'] += 1
             # --- ANTAGONISM axis: member-vs-witness HOSTILE (adjacent to witness + hostile language) ---
-            adj_wit = (prev and prev[0] == 'W') or (nxt and nxt[0] == 'W')
-            if adj_wit and is_hostile(text):
+            wtype = (prev[1] if (prev and prev[0] == 'W') else nxt[1] if (nxt and nxt[0] == 'W') else None)
+            if wtype is not None and is_hostile(text):
                 per[m]['wit_hostile'] += 1
+                grp = 'off' if wtype in ('G', 'S', 'M', 'J') else 'biz' if wtype == 'B' else 'exp' if wtype == 'E' else 'priv'
+                per[m]['wh_' + grp] += 1                      # by witness type (control for business/officials)
+                fr = frame_of(text)
+                per[m]['fr_' + fr] += 1                       # by substance frame (shapes the curve)
                 if ap != '?' and pty in ('D', 'R'):
-                    per[m]['wh_opp' if pty != ap else 'wh_aligned'] += 1   # political split
-                if len(audit[m]) < 3: audit[m].append(text[:160])
+                    per[m]['wh_opp' if pty != ap else 'wh_aligned'] += 1
+                if len(audit[m]) < 3: audit[m].append('[%s/%s] %s' % (grp, fr, text[:150]))
         for m, c in per.items():
             for k, v in c.items(): agg[m][k] += v
             agg[m]['hearings'] += 1
@@ -153,25 +177,30 @@ def main():
     go = sorted(range(len(mem)), key=lambda i: -grand[i])
     print('  top grandstanders: %s' % ', '.join('%s(%s,%dy)' % (mem[i], PTY.get(mem[i]), sen[i]) for i in go[:8]))
 
-    # ---------- AXIS 2: ANTAGONISM (disagreeableness; refined + politically & seniority controlled) ----------
-    wh_rate = rate('wit_hostile')
-    antag_raw = z(rate('mm_intr')) + z(rate('mm_xparty')) + z(wh_rate)
-    print('\n### AXIS 2 -- ANTAGONISM / disagreeableness (member-vs-member + hostile-witness) ###')
-    print('  raw confounds: seniority %+.3f | extremity %+.3f | party %+.3f | minority %+.3f | opp-admin %+.3f'
-          % (corr(antag_raw, sen), corr(antag_raw, ext), corr(antag_raw, pty), corr(antag_raw, minf), corr(antag_raw, oppf)))
-    antag = resid(antag_raw, [sen, ext, d1, pty, minf, oppf])   # controlled disagreeableness
-    print('  CONTROLLED (partial seniority+ideology+party+minority+opp-admin):')
-    print('    resid vs seniority %+.3f | vs extremity %+.3f | vs opp-admin %+.3f  (all -> ~0 = controls work)'
-          % (corr(antag, sen), corr(antag, ext), corr(antag, oppf)))
-    print('  --- hostile-witness POLITICAL control (your point 2) ---')
-    print('    wit_hostile vs opp-admin fraction: %+.3f (higher = more political/grievance-airing)' % corr(wh_rate, oppf))
-    wh_ctrl = resid(wh_rate, [oppf, ext, pty])
-    print('    dispositional residual: members hostile ACROSS administrations (top): %s'
-          % ', '.join('%s(%s)' % (mem[i], PTY.get(mem[i])) for i in sorted(range(len(mem)), key=lambda i: -wh_ctrl[i])[:6]))
+    # ---------- AXIS 2: ANTAGONISM (disagreeableness; substance-shaped + witness-type + politically controlled) ----------
+    tot_wh = sum(agg[m]['wit_hostile'] for m in mem)
+    fr = {k: sum(agg[m]['fr_' + k] for m in mem) for k in ('personal', 'substantive', 'partisan', 'procedural')}
+    wg = {k: sum(agg[m]['wh_' + k] for m in mem) for k in ('off', 'biz', 'exp', 'priv')}
+    print('\n### AXIS 2 -- ANTAGONISM (substance-shaped) ###')
+    print('  hostile-witness by TARGET: officials %d | business %d | expert %d | private %d' % (wg['off'], wg['biz'], wg['exp'], wg['priv']))
+    print('  hostile-witness by SUBSTANCE frame: %s' % {k: '%d(%.0f%%)' % (v, 100 * v / max(tot_wh, 1)) for k, v in fr.items()})
+    # substance shapes the curve: PERSONAL = dispositional; substantive/partisan down-weighted; populist(biz) discounted
+    personal = rate('fr_personal')
+    antag_raw = z(rate('mm_intr')) + z(rate('mm_xparty')) + z(personal)   # dispositional hostile signal only
+    antag = resid(antag_raw, [sen, ext, d1, pty, minf, oppf])
+    print('  antag(personal-hostility) raw confounds: senior %+.3f | extremity %+.3f | opp-admin %+.3f'
+          % (corr(antag_raw, sen), corr(antag_raw, ext), corr(antag_raw, oppf)))
+    print('  --- your point: SUBSTANCE bends the curve ---')
+    for k, v in fr.items():
+        vec = rate('fr_' + k)
+        print('    %-11s hostility vs opp-admin %+.3f | vs extremity %+.3f' % (k, corr(vec, oppf), corr(vec, ext)))
+    print('  --- witness-type: is officials-hostility more political than business-hostility? ---')
+    print('    officials-hostility vs opp-admin %+.3f (partisan) | business-hostility vs opp-admin %+.3f (populist, should be ~0)'
+          % (corr(rate('wh_off'), oppf), corr(rate('wh_biz'), oppf)))
     print('  orthogonality: dominance %+.3f | cooperation %+.3f | reactivity %+.3f'
           % (corr(antag, bdv('dominance_z')), corr(antag, bdv('cooperation_z')), corr(antag, bdv('reactivity_z'))))
     ao = sorted(range(len(mem)), key=lambda i: -antag[i])
-    print('  top antagonists (controlled): %s' % ', '.join('%s(%s)' % (mem[i], PTY.get(mem[i])) for i in ao[:8]))
+    print('  top antagonists (personal-hostility, controlled): %s' % ', '.join('%s(%s)' % (mem[i], PTY.get(mem[i])) for i in ao[:8]))
 
     print('\n### the two axes are distinct: corr(grandstand, antagonism_controlled) = %+.3f ###' % corr(grand, antag))
     print('\n--- reliability (split-half >=4 hearings) ---')

@@ -60,37 +60,83 @@ for r in csv.DictReader(open(B + r'\fec\legislators.csv', encoding='utf-8')):
 BIO = {m: C[m].get('bioguide') for m in C}
 def party_of(m): return PARTY.get(BIO.get(m), '?')
 
-TURN = re.compile(r'(?m)^ {0,6}(?:The )?(Mr|Mrs|Ms|Miss|Senator|Chairman|Chairwoman|Chair)\.?[ ]+'
-                  r"([A-Z][A-Za-z'\-]+(?:[ \-][A-Za-z'\-]+){0,2}?)"
-                  r'(?: of ([A-Z][a-z]+(?: [A-Z][a-z]+)?))?[.,] ')
-NONSPK = {'SPEAKER', 'PRESIDENT', 'PRESIDING', 'CLERK', 'ACTING', 'VICE', 'CHAIR', 'CHAIRMAN', 'SECRETARY'}
+# Broadened speaker capture: members AND witnesses (govt/military/state/expert/judicial honorifics) so
+# a member grilling 'Secretary Driscoll' or 'General George' is no longer INVISIBLE. Witness turns get a
+# TYPE code (user 2026-07-10: control for business execs vs state/govt officials; substance shapes the
+# partisan/antagonism read). Type from honorific + the 'STATEMENT OF ..., <title>' header.
+MEMBER_HON = r'Mr|Mrs|Ms|Miss|Senator|Representative|Congressman|Congresswoman|Chairman|Chairwoman|Chair'
+WIT_HON = (r'Secretary|Under Secretary|Deputy Secretary|Administrator|Deputy Administrator|Acting Administrator|'
+           r'Director|Deputy Director|Acting Director|Commissioner|Ambassador|Comptroller|Inspector General|'
+           r'General|Lieutenant General|Major General|Brigadier General|Admiral|Vice Admiral|Rear Admiral|'
+           r'Colonel|Lieutenant Colonel|Lieutenant|Captain|Major|Commander|Sergeant|'
+           r'Governor|Lieutenant Governor|Mayor|Dr|Professor|Justice|Judge|Chief|Sheriff|Honorable')
+SPEAKER = re.compile(r'(?m)^ {0,6}(?:The )?(%s|%s)\.?[ ]+'
+                     r"([A-Z][A-Za-z'\-]+(?:[ \-][A-Za-z'\-]+){0,2}?)"
+                     r'(?: of ([A-Z][a-z]+(?: [A-Z][a-z]+)?))?[.,] ' % (MEMBER_HON, WIT_HON))
+MEMBER_RE = re.compile(r'^(Mr|Mrs|Ms|Miss|Senator|Representative|Congressman|Congresswoman|Chairman|Chairwoman|Chair)$')
+NONSPK = {'SPEAKER', 'PRESIDING', 'CLERK', 'VICE'}
 ENDDASH = re.compile(r'-{2,}\s*$')
 
+def hon_type(pre):
+    """Witness TYPE from honorific alone (strong for non-Mr/Ms)."""
+    p = pre.lower()
+    if re.search(r'general|admiral|colonel|lieutenant|captain|major|commander|sergeant', p): return 'M'   # military
+    if re.search(r'governor|mayor|sheriff', p): return 'S'                                                # state/local
+    if re.search(r'dr|professor', p): return 'E'                                                          # expert/academic
+    if re.search(r'justice|judge', p): return 'J'                                                         # judicial
+    if re.search(r'secretary|administrator|director|commissioner|ambassador|comptroller|inspector|chief|honorable', p): return 'G'  # federal govt
+    return '?'   # Mr/Ms witness -> resolve via STATEMENT OF title
+
+def title_type(t):
+    """Witness TYPE from a STATEMENT OF title/org string (for Mr/Ms witnesses)."""
+    t = t.lower()
+    if re.search(r'chief executive|c\.?e\.?o|chief financial|chief operating|chief technology|founder|'
+                 r'president and ceo|chairman and ceo|executive vice president|\b(inc|corp|corporation|company|'
+                 r'llc|holdings|bank|industries|motors|technologies|pharmaceutic|capital|partners|group)\b', t): return 'B'
+    if re.search(r'governor|mayor|state (senator|representative|treasurer|attorney)|county|sheriff|city of', t): return 'S'
+    if re.search(r'general|admiral|colonel|army|navy|air force|marine|joint chiefs', t): return 'M'
+    if re.search(r'professor|ph\.?d|fellow|scholar|economist|university\b', t): return 'E'
+    if (re.search(r'president|executive director|director|chair', t) and
+            re.search(r'associat|union|coalition|federat|alliance|society|council|foundation|institut|'
+                      r'center for|committee for|advocat|project|network|league|conference', t)): return 'A'
+    if re.search(r'secretary|administrator|commissioner|inspector general|comptroller|department of|'
+                 r'\bu\.?s\.?\b|federal|bureau|agency|office of', t): return 'G'
+    return '?'
+
 def parse_seq(txt):
-    """Compact ordered turns [kind, party, dash01, text]. kind: member-name | W | C | O. Text member-only."""
+    """Compact ordered turns. member: [name, party, dash, text, 'M'/'C']; witness: ['W', typecode, dash, '']."""
     txt = re.sub(r'<[^>]+>', ' ', txt)
-    wit = set()
-    for w in re.findall(r'(?:STATEMENT|TESTIMONY) OF ([A-Z][A-Z .,\'\-]{3,60})', txt):
-        toks = [t.strip('.,') for t in w.split() if t.strip('.,').isalpha()]
-        if toks: wit.add(toks[-1].upper())
-    ms = list(TURN.finditer(txt)); out = []; chair_ct = collections.Counter()
+    wit_type = {}   # witness surname -> type, from any 'Name, <title/org>' witness-intro span (format-robust)
+    for hd in re.findall(r'(?:STATEMENT|TESTIMONY|PREPARED STATEMENT) OF ([A-Z][A-Za-z .,\'\-]{3,120})', txt):
+        toks = [t.strip('.,') for t in hd.split(',')[0].split() if t.strip('.,').isalpha()]
+        if toks:
+            sur = toks[-1].upper(); t = title_type(hd[len(hd.split(',')[0]):])
+            if t != '?': wit_type[sur] = t
+    # document-wide 'Mr./Ms./Dr. First Last, <title>' scan (catches witness lists + in-line intros; the
+    # 'STATEMENT OF' anchor is absent in many hearings, so this is the primary business/advocate signal)
+    for nm, title in re.findall(r'\b(?:Mr|Ms|Mrs|Dr)\.?\s+([A-Z][a-z]+(?:\s+[A-Z][a-zA-Z\'\-\.]+){1,2}),\s+([^,\n]{4,90})', txt):
+        sur = nm.split()[-1].upper(); t = title_type(title)
+        if t != '?' and sur not in wit_type: wit_type[sur] = t
+    ms = list(SPEAKER.finditer(txt)); out = []; chair_ct = collections.Counter()
     for i, mt in enumerate(ms):
         pre, sur = mt.group(1), mt.group(2)
+        is_member_hon = bool(MEMBER_RE.match(pre))
         is_chair = bool(re.match(r'Chair', pre, re.I))
         seg = txt[mt.end():ms[i + 1].start() if i + 1 < len(ms) else min(len(txt), mt.end() + 20000)]
         segc = re.sub(r'\s+', ' ', re.sub(r'\[\[Page [^\]]+\]\]', '', seg)).strip()
         dash = 1 if ENDDASH.search(seg.strip()) else 0
-        surU = sur.upper()
-        if surU.split()[-1] in wit:
-            out.append(['W', '?', dash, '']); continue
-        who = resolve(sur)
+        surU = sur.upper(); surlast = surU.split()[-1]
+        who = resolve(sur) if is_member_hon else None
         if who:
             if is_chair: chair_ct[who] += 1
             out.append([who, party_of(who), dash, segc[:TEXTCAP], 'C' if is_chair else 'M'])
         elif is_chair or surU.split()[0] in NONSPK:
             out.append(['C' if is_chair else 'O', '?', dash, ''])
         else:
-            out.append(['W', '?', dash, ''])   # unresolved named speaker w/o honorific-member match ~ witness
+            # witness: type from honorific, else STATEMENT OF title, else '?'
+            t = hon_type(pre)
+            if t == '?': t = wit_type.get(surlast, '?')
+            out.append(['W', t, dash, ''])
     chair = chair_ct.most_common(1)[0][0] if chair_ct else None
     return out, chair
 
