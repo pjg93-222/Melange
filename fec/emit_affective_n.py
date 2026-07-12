@@ -34,20 +34,27 @@ def run():
     lm = [m for m in ag if ag[m][3] >= 800]
     fps = z([ag[m][0] / ag[m][3] for m in lm]); neg = z([ag[m][1] / ag[m][3] for m in lm]); pos = z([ag[m][2] / ag[m][3] for m in lm])
     liwc = {m: float(fps[i] + neg[i] - pos[i]) for i, m in enumerate(lm)}
+    # round-7b (2026-07-11 airtight review): MEASURE = E-residualized LLM affective-N, party-controlled.
+    # The context-aware LLM is the accurate instrument; E-residualization removes its E-contamination
+    # (rather than the crude LIWC doing it, which dragged in false positives like Jack Bergman #1->#412).
+    # LIWC stays the independent convergent-validity ANCHOR (r=+.24, gate G3), no longer a component.
+    # SB .742->.911, face validity fixed, E −.02, party .00, C −.15. liwc computed above for the gate.
+    A5 = json.load(open(B + r'\big5_v3_hybrid.json'))['traits']
     llm = {m: S[m]['pessimism'] + S[m]['anxiety'] + S[m]['depression'] + S[m]['volatility'] for m in S}
     Cj = {m['member']: m for m in json.load(open(B + r'\congestion.json'))}; bio = {m: Cj[m].get('bioguide') for m in Cj}
     PP = {}
     for r in csv.DictReader(open(B + r'\fec\legislators.csv', encoding='utf-8')):
         if r.get('bioguide_id'): PP[r['bioguide_id']] = (r.get('party') or '')[:1]
     pty = {m: PP.get(bio.get(m), '?') for m in Cj}
-    mem = [m for m in S if m in liwc]
-    comb = z([llm[m] for m in mem]) + z([liwc[m] for m in mem])   # LIWC + LLM affective, equal weight
+    mem = [m for m in S if A5.get(m, {}).get('E') is not None]
+    def resid(y, x):
+        X = np.column_stack([np.ones(len(y)), x]); return y - X @ np.linalg.lstsq(X, y, rcond=None)[0]
+    la = np.array([llm[m] for m in mem], float); Ea = np.array([A5[m]['E'] for m in mem], float)
     Rp = np.array([1.0 if pty.get(m) == 'R' else 0.0 for m in mem])
-    X = np.column_stack([np.ones(len(comb)), Rp]); combc = comb - X @ np.linalg.lstsq(X, comb, rcond=None)[0]   # party-controlled
-    combc = z(combc)
+    combc = z(resid(resid(la, Ea), Rp))   # E-residualized LLM affective-N, then party-controlled
     out = {m: round(float(combc[i]), 3) for i, m in enumerate(mem)}
-    json.dump({'members': out, 'n': len(out), 'basis': 'affective-content N: Pennebaker LIWC + LLM facets, party-controlled, z-scored',
-               'promotion': 'round-7 2026-07-11 gate 5/5; retired E-contaminated reactivity_z'}, open(B + r'\affective_n.json', 'w'), indent=0)
+    json.dump({'members': out, 'n': len(out), 'basis': 'affective-content N: E-residualized LLM affective facets (pess/anx/dep/vol), party-controlled, z-scored; LIWC = convergent-validity anchor',
+               'promotion': 'round-7b 2026-07-11 gate 5/5 (airtight-review refinement); retired E-contaminated reactivity_z'}, open(B + r'\affective_n.json', 'w'), indent=0)
     print('affective_n.json: %d members' % len(out))
     o = sorted(mem, key=lambda m: -out[m])
     print('highest N:', ', '.join('%s(%s)' % (m, pty.get(m)) for m in o[:6]))
