@@ -129,3 +129,71 @@ psych-audit N-anchored matrix (prereg: big5_n2_prereg.md)
   lock: True | look: not yet taken | input fingerprints: DRIFT
 LOOK REFUSED (not consumed): input fingerprint drift vs pinned lock values
 ```
+
+## RESULT-N2 — CONSUMED 2026-07-12: PASS on the interview stratum; no-interview ship gate failed
+
+**Locked verdict.** The primary N model passed all five bars and the fresh-seed re-derivation
+passed all five again. The no-interview ship gate failed (`r=+0.098`, permutation `p=0.0562`).
+Per the pre-declared consequences: **text-N is criterion-valid and distinct against behavioral
+reactivity on the MEM_N=263 interview-covered stratum, but is shared-source-dependent; no artifact,
+no desk reframe, no engine change, and the route is closed.** This is not a full-corpus fifth-trait
+promotion.
+
+Verbatim transcript:
+
+```text
+psych-audit N-anchored matrix (prereg: big5_n2_prereg.md)
+  lock: True | look: not yet taken | input fingerprints: MATCH
+rosters: MEM=470 (pinned 470) | MEM_N=263 (pinned 263) | no-gender drops=0 (pinned 0)
+features: 470 members x 194 Empath cats (0 re-featurized, rest cached)
+  sim(a) seed 424242: core 4/5 | N own +0.166 p 0.0044 row False col True -> miss
+  sim(a) seed 515151: core 4/5 | N own +0.212 p 0.0002 row True col True -> PASS
+  sim(a) seed 616161: core 5/5 | N own +0.092 p 0.0650 row False col False -> miss
+  sim(a) seed 717171: core 5/5 | N own +0.317 p 0.0002 row True col True -> PASS
+  sim(a) seed 818181: core 5/5 | N own +0.316 p 0.0002 row True col True -> PASS
+  sim(a) PLANTED SUMMARY: seed-424242 core 4/5 (need>=4) | N bars1-4 3/5 (need>=3) -> OK
+  sim(b) NULL: core 0/5 (need 0) | N 5-bar stack pass=False (need MISS) -> OK
+  sim(c) CONFOUND-ONLY: bars1-2 own +0.540 p 0.0002 (may pass) | bar5 partial -0.029 (must be <.10) -> OK
+  sim(d) TRUE+CONFOUND: bar5 partial +0.604 p 0.0002 (must pass >=.10) -> OK
+  SIMULATE BATTERY: ALL GREEN
+
+=== LOOK: masked discriminant matrix corr(held-out pred_row, criterion_col) ===
+    cells involving N: n=263; all other cells: n=470
+  model\crit         O        C        E        A       ES        N
+  pred_O       +0.236   +0.149   +0.069   +0.162   +0.102   -0.126
+  pred_C       +0.114   +0.282   -0.195   +0.136   +0.143   -0.032
+  pred_E       +0.044   -0.118   +0.556   -0.045   -0.117   +0.108
+  pred_A       +0.193   +0.203   -0.121   +0.158   +0.090   -0.053
+  pred_ES      +0.109   +0.195   -0.280   +0.087   +0.139   -0.053
+  pred_N       -0.090   -0.020   +0.178   -0.056   +0.056   +0.188
+  input-drift note: O diagonal +0.236 vs §17 +0.198 (Δ+0.038) — drift only, no status change
+  input-drift note: A diagonal +0.158 vs §17 +0.183 (Δ-0.025) — drift only, no status change
+
+=== LOOK: the five locked bars for N ===
+  [primary] bar1 own r=+0.188 | bar2 perm-p=0.0014 | bar3 row-dom=True | bar4 col-specific=True (max rival |r|=0.126) | bar5 partial=+0.152 p=0.0078  =>  PASS
+
+=== LOOK: demotion checks (§17-passing traits, on MEM_N) ===
+  O: |r_react|=0.126 <= |r_own|=0.269 -> no inversion
+  C: |r_react|=0.032 <= |r_own|=0.338 -> no inversion
+  E: |r_react|=0.108 <= |r_own|=0.501 -> no inversion
+
+=== LOOK: secondaries (reported, non-gating) ===
+  r(pred_N, unshrunken cutoff) = +0.187
+  gender/party-only partial   = +0.184 p=0.0026 (round-2 continuity)
+  log-turns-only partial      = +0.156 p=0.0068
+  raw corr: gender -0.189 | party +0.042
+  own r on n_programs>=2 subset (n=217) = +0.133
+  interview share of corpus (uncapped approx): median 0.31 | p75 0.58
+
+=== LOOK: noiv ship-gate (CREC+CHRG+posts, interview text excluded) ===
+features: 470 members x 194 Empath cats (470 re-featurized, rest cached)
+  noiv n=260 (dropped 3) | r=+0.098 perm-p=0.0562 -> ship-gate FAIL
+
+=== LOOK: adversarial re-derivation (fresh OOF seeds [101, 113, 127, 139, 151]; perm seeds stay pinned) ===
+  [re-derivation] bar1 own r=+0.179 | bar2 perm-p=0.0030 | bar3 row-dom=True | bar4 col-specific=True (max rival |r|=0.124) | bar5 partial=+0.146 p=0.0098  =>  PASS
+
+=== VERDICT ===
+  N PASS — interview-stratum text only (shared-source-dependent): NO artifact, NO desk reframe; methods+memory record; route CLOSED
+
+  fingerprints at look: bd 57ca1e2b1731… ix b79632d88d18… vv 0bf7c461e9ec… panel 491761ea130f… speeches 268173 posts 29098 | non-finite events: 0
+```
