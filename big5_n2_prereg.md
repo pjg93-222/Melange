@@ -107,3 +107,25 @@ sim(d) TRUE+CONFOUND -> OK
 SIMULATE BATTERY: FAILURE — look forbidden
 LOOK REFUSED (not consumed): simulate battery failure
 ```
+
+## LOCK ADDENDUM 2 — thin-runner pin installation, before any look
+
+The first invocation after Addendum 1 was also **REFUSED BEFORE THE LOOK** with `input
+fingerprints: DRIFT`; no real pairing was computed. A read-only comparison immediately showed
+that every locked hash, database count, and roster still matched exactly. The cause was an
+indentation error in the thin runner: the branch that assigned `NM.PIN = PIN2` and the five-seed
+gate was attached to `if __name__ == '__main__'` instead of its inner `if any(None)` check, so a
+normal script invocation retained the historical round-4 pins.
+
+Repair, committed before trying again: indent the existing successor-pin and synthetic-gate
+assignments under the inner `else`, then call `NM.main()` inside the main guard, restoring the
+control flow present in the original thin runner. No input, model, statistic, threshold, seed,
+consequence, or result code changes.
+
+Refusal transcript:
+
+```text
+psych-audit N-anchored matrix (prereg: big5_n2_prereg.md)
+  lock: True | look: not yet taken | input fingerprints: DRIFT
+LOOK REFUSED (not consumed): input fingerprint drift vs pinned lock values
+```
