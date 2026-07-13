@@ -133,7 +133,7 @@ def build(group):
         print('  st bases built', flush=True)
     write_group(group, feats, pairs, toks)
 
-def member_matrix(base, MEM):
+def member_matrix(base, MEM, genres=GENRES):
     """b5_round4_eval composition verbatim: within-genre z, token-weighted cross-genre average."""
     group = 'lsa' if base.startswith('lsa') else 'st'
     npzf, metaf = EMB[group]
@@ -142,7 +142,7 @@ def member_matrix(base, MEM):
     TOK = {tuple(k.split('|')): v for k, v in meta['toks'].items()}
     pairs = [tuple(p.split('|')) for p in meta['pairs']]
     Z = {}
-    for g in GENRES:
+    for g in genres:
         ms = [m for (m, gg) in pairs if gg == g and ('%s|%s|%s' % (base, m, g)) in npz.files]
         if len(ms) < 20: continue
         X = np.array([npz['%s|%s|%s' % (base, m, g)] for m in ms])
@@ -204,6 +204,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--build', choices=['lsa', 'st'], help='build one cache group and exit')
     ap.add_argument('--basis', help='sweep one basis: empath | lsa128 | lsa256 | lsa512 | st_mean | st_volctrl | empath+lsa256')
+    ap.add_argument('--criterion', choices=['coop_v2', 'interview_antagonism'], default='coop_v2',
+                    help='coverage mask only; criterion values are never loaded')
     ap.add_argument('--fresh', action='store_true', help='use the pinned FRESH confirmation seeds')
     ap.add_argument('--jobs', type=int, default=1, help='GridSearchCV n_jobs (identical numerics)')
     ap.add_argument('--out', default='')
@@ -215,12 +217,19 @@ def main():
         print('nothing to do: pass --build lsa|st or --basis NAME'); return
     seeds = FRESH5 if args.fresh else PIN5
     print('round-5 successor-gate diagnostic (SYNTHETIC ONLY — no look, no real pairing)', flush=True)
-    print('basis=%s seeds=%s jobs=%d' % (args.basis, 'FRESH5 (confirmation)' if args.fresh else 'PIN5 (Addendum-1)', args.jobs), flush=True)
+    print('basis=%s criterion-mask=%s seeds=%s jobs=%d' %
+          (args.basis, args.criterion, 'FRESH5 (confirmation)' if args.fresh else 'PIN5 (Addendum-1)', args.jobs), flush=True)
     BD, VV, P, MEM, alltext = BI.load_corpus()
-    CV = json.load(open(B + r'\coop_v2_candidate.json'))['members']
-    mask = np.array([(CV.get(m) or {}).get('cooperation_v2_z') is not None for m in MEM])
-    del CV                                              # coverage mask retained; values never used
-    print('rosters: MEM=%d | MEM_A=%d (Addendum-1 lock: 456/290)' % (len(MEM), int(mask.sum())), flush=True)
+    if args.criterion == 'coop_v2':
+        CV = json.load(open(B + r'\coop_v2_candidate.json'))['members']
+        covered = set(m for m, v in CV.items() if (v or {}).get('cooperation_v2_z') is not None)
+        del CV
+    else:
+        from interview_antagonism_score import load_halves
+        covered = set(load_halves())
+    mask = np.array([m in covered for m in MEM])
+    print('rosters: MEM=%d | MEM_A=%d | mask=%s' %
+          (len(MEM), int(mask.sum()), args.criterion), flush=True)
     X, kmask, n = basis_matrix(args.basis, MEM, alltext, mask)
     print('--- basis: %s (n=%d, stratum n=%d) ---' % (args.basis, n, int(kmask.sum())), flush=True)
     r = diag(args.basis + (' [FRESH]' if args.fresh else ''), X, kmask, seeds)
