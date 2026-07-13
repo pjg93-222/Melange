@@ -52,7 +52,10 @@ def fingerprints():
     npo = con.execute('select count(*) from posts').fetchone()[0]
     con.close()
     return {'bd_sha': sha(B + r'\behavioral_dispositions.json'),
-            'ix_sha': sha(B + r'\interaction_features.json'), 'speeches': ns, 'posts': npo}
+            'ix_sha': sha(B + r'\interaction_features.json'),
+            'vv_sha': sha(B + r'\voteview_consistency.json'),
+            'bp_sha': sha(B + r'\behavior_panel.json'),
+            'speeches': ns, 'posts': npo}
 
 def load_all():
     BD, VV, P, MEM, alltext = BI.load_corpus()
@@ -342,22 +345,27 @@ def run(simulate_only):
     else:
         print('  N MISS: the Empath-text->reactivity route is CLOSED (one look; closure covers the secondary variants)')
     fp = fingerprints()
-    print('\n  fingerprints at look: bd %s… ix %s… speeches %d posts %d | non-finite events: %d'
-          % (fp['bd_sha'][:12], fp['ix_sha'][:12], fp['speeches'], fp['posts'], NONFIN[0]))
-    print('\nAppend the RESULT-N section to big5_n_matrix_prereg.md verbatim (MISSes included) and commit same session.')
+    print('\n  fingerprints at look: bd %s… ix %s… vv %s… panel %s… speeches %d posts %d | non-finite events: %d'
+          % (fp['bd_sha'][:12], fp['ix_sha'][:12], fp['vv_sha'][:12], fp['bp_sha'][:12],
+             fp['speeches'], fp['posts'], NONFIN[0]))
+    print('\nAppend the RESULT-N section to %s verbatim (MISSes included) and commit same session.'
+          % os.path.basename(PREREG))
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--simulate', action='store_true'); ap.add_argument('--look', action='store_true')
     args = ap.parse_args()
-    print('psych-audit round 4 — N-anchored matrix (prereg: big5_n_matrix_prereg.md)')
+    print('psych-audit N-anchored matrix (prereg: %s)' % os.path.basename(PREREG))
     pre = open(PREREG, encoding='utf-8').read() if os.path.exists(PREREG) else ''
     if not pre: print('!! prereg ABSENT — nothing can run'); return
     locked = 'STATUS: LOCKED' in pre
     taken = '\n## RESULT-N' in pre        # newline-anchored heading match (the @72690c9 lesson)
     fp = fingerprints()
-    fp_ok = (fp['bd_sha'] == PIN['bd_sha'] and fp['ix_sha'] == PIN['ix_sha']
-             and fp['speeches'] == PIN['speeches'] and fp['posts'] == PIN['posts'])
+    # Successor locks also pin Voteview + behavior-panel inputs. The optional-key shape preserves the
+    # historical round-4 lock while allowing b5_n2_matrix.py to harden its fresh lock without changing
+    # any statistical machinery.
+    fp_keys = ['bd_sha', 'ix_sha', 'vv_sha', 'bp_sha', 'speeches', 'posts']
+    fp_ok = all(fp[k] == PIN[k] for k in fp_keys if k in PIN)
     print('  lock: %s | look: %s | input fingerprints: %s'
           % (locked, 'TAKEN' if taken else 'not yet taken', 'MATCH' if fp_ok else 'DRIFT'))
     if not (args.simulate or args.look): return

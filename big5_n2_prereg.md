@@ -1,7 +1,6 @@
-# Psych-audit round 6 — text-N vs behavioral reactivity, SUCCESSOR to round 4 (coverage-gated re-attempt)
+# Psych-audit round 8 — text-N vs behavioral reactivity, SUCCESSOR to round 4 (coverage-gated re-attempt)
 
-STATUS: DRAFT — LOCKS ONLY WHEN ALL LOCK-TIME FIELDS BELOW ARE FILLED AND THE PINNED
-DIAGNOSTIC PASSES. This is the successor prereg round 4 pinned: "successor prereg only at
+STATUS: LOCKED 2026-07-12 — one look not yet taken. This is the successor prereg round 4 pinned: "successor prereg only at
 reactivity coverage MEM_N ≥ 250 within the §17-eligible roster (same five-bar structure, fresh
 fingerprints)" (big5_n_matrix_prereg.md Addendum 2; methods §20). Round 4 was RETIRED WITHOUT A
 LOOK (battery refused twice at MEM_N=201; power study: a true r=.40 recovers 5/5 only from
@@ -24,14 +23,30 @@ stand as written.
 
 ## LOCK-TIME FIELDS (filled at lock, before any look; the look ABORTS on any mismatch)
 
-- MEM = [LOCK: n]; MEM_N = [LOCK: n ≥ 250]
-- behavioral_dispositions.json SHA-256 = [LOCK]   (fresh post-backfill regeneration)
-- interaction_features.json SHA-256 = [LOCK]      (fresh post-backfill regeneration)
-- voteview_consistency.json SHA-256 = [LOCK]
-- behavior_panel.json SHA-256 = [LOCK]
-- social_media.db speeches rows = [LOCK] / posts rows = [LOCK] (collectors QUIET at lock; lock
+- MEM = **470**; MEM_N = **263** (≥250 gate cleared)
+- behavioral_dispositions.json SHA-256 = `57ca1e2b1731cbeed4411645c2b527a8db0136362c2d3d4654dda8faaa852e03`
+- interaction_features.json SHA-256 = `b79632d88d183c3e88093378aa427d416f540579b4d4bf0c6185cfe6f1328d94`
+- voteview_consistency.json SHA-256 = `0bf7c461e9eca440535484bf325c5b90d423daf0573e984a1b8691a242194751`
+- behavior_panel.json SHA-256 = `491761ea130f8458ae0d09d15be20619b31011ab14e56e6a05bfbdf3d703a4cb`
+- social_media.db speeches rows = **268173** / posts rows = **29098** (collectors QUIET at lock; lock
   and look same session)
-- 5-seed diagnostic transcript = [LOCK: appended verbatim, ≥3/5 bars 1–4]
+- 5-seed diagnostic transcript (synthetic only; `fec/b5_n_stratum_diag.py --jobs 2`):
+
+```text
+N successor diagnostic: SYNTHETIC ONLY — no real trait×criterion pairing
+rosters: MEM=470 | MEM_N=263 | gate=250 | jobs=2
+features: 470 members x 194 Empath cats (0 re-featurized, rest cached)
+  seed 424242: own +0.166 p 0.0044 row False col True -> bars1-4 miss
+  seed 515151: own +0.212 p 0.0002 row True col True -> bars1-4 PASS
+  seed 616161: own +0.092 p 0.0650 row False col False -> bars1-4 miss
+  seed 717171: own +0.317 p 0.0002 row True col True -> bars1-4 PASS
+  seed 818181: own +0.316 p 0.0002 row True col True -> bars1-4 PASS
+N SUCCESSOR SUMMARY: median own +0.212 | bars1-4 3/5 -> GATE CLEARED; prereg may lock
+```
+
+Lock hardening: the thin runner additionally fingerprints Voteview and the behavior panel named
+above. This changes no model, feature, criterion, seed, bar, or statistic; it only makes the input
+gate match the prereg's complete dependency list.
 
 ## Everything else: round 4 verbatim, imported not restated
 
@@ -54,8 +69,8 @@ any trait; an apparent A/ES pass in the reproduction is drift, not evidence.
 - PASS bars 1–5 → fresh-seed re-derivation (OOF seeds [101,113,127,139,151]) must re-clear ALL
   FIVE; failure = FRAGILE = MISS. On re-derived PASS: "text-N criterion-valid AND distinct
   against behavioral reactivity (MEM_N=[LOCK] stratum)" — methods §23, memory, ONE desk wording
-  change on the N-slot line; NO engine change (RECEPT_N stays behavioral; a passing text-N is
-  display-side corroboration only).
+  change on the N-slot line; NO engine change (`RECEPT_N` stays affective; a passing text-N is
+  display-side behavioral-criterion corroboration only).
 - MISS any bar: "text-N vs reactivity: not distinct — route CLOSED" (one look, no re-spec;
   closure covers this instrument class vs this criterion; a new construct needs its own prereg).
 - Battery refusal: RETIRE WITHOUT A LOOK, successor condition = the same diagnostic at the

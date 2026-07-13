@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Round-6 thin runner — text-N vs behavioral reactivity, SUCCESSOR to round 4 at MEM_N>=250
+"""Round-8 thin runner — text-N vs behavioral reactivity, SUCCESSOR to round 4 at MEM_N>=250
 (prereg big5_n2_prereg.md; round-4 pin: 'successor prereg only at reactivity coverage MEM_N>=250,
 same five-bar structure, fresh fingerprints'). ZERO re-implementation: every model, bar, seed,
 gate, battery sim, demotion rule, noiv ship-gate, and the non-finite rule execute inside
@@ -15,10 +15,12 @@ NM.PREREG = _o.path.join(_o.path.dirname(_o.path.dirname(_o.path.abspath(__file_
 
 # LOCK-TIME PINS (filled at lock; None = unlockable, the gate below refuses)
 PIN2 = {
-    'MEM': None, 'MEM_N': None,
-    'bd_sha': None,        # behavioral_dispositions.json (fresh post-backfill)
-    'ix_sha': None,        # interaction_features.json (fresh post-backfill)
-    'speeches': None, 'posts': None,   # social_media.db row counts (collectors quiet)
+    'MEM': 470, 'MEM_N': 263,
+    'bd_sha': '57ca1e2b1731cbeed4411645c2b527a8db0136362c2d3d4654dda8faaa852e03',
+    'ix_sha': 'b79632d88d183c3e88093378aa427d416f540579b4d4bf0c6185cfe6f1328d94',
+    'vv_sha': '0bf7c461e9eca440535484bf325c5b90d423daf0573e984a1b8691a242194751',
+    'bp_sha': '491761ea130f8458ae0d09d15be20619b31011ab14e56e6a05bfbdf3d703a4cb',
+    'speeches': 268173, 'posts': 29098,
 }
 
 if __name__ == '__main__':
