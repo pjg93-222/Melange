@@ -130,9 +130,10 @@ verbatim and committed in the same session.
 
 ## PRE-COLLECTION AMENDMENT PC-1 — prompt-cache coding manual (2026-07-13)
 
-After the lock commit and before any rating existed, the first API attempt returned 72 billing errors
-and zero member ratings. The user restored API funds and explicitly required prompt caching. Haiku 4.5
-has a 4,096-token minimum cacheable prefix, while the original short rubric was below that floor.
+After the lock commit, the first API attempt returned billing errors. The user restored API funds and
+explicitly required prompt caching. Haiku 4.5 has a 4,096-token minimum cacheable prefix, while the
+original short rubric was below that floor. See PC-2 for the subsequently discovered orphan-process
+correction; no old-rubric rating is admissible in this round.
 
 The six fields, positive/reverse composite, model, two salts, 1,000-word halves, eligibility, sample,
 criterion gates, behavior formula, acceptance bars, and one-look rule remain unchanged. The coding
@@ -147,3 +148,15 @@ amendment is committed.
 `RUBRIC_SHA256: 51fceb122ec5463b80026301fb7676a39d909f062b75285d9d08ba182b28306c`
 
 `SCORER_SHA256: 01f93eb38175bdce195de5e1a157dd2d9641b87b329337fb7965f008c30cc642`
+
+## PRE-COLLECTION CORRECTION PC-2 — orphan output quarantined (2026-07-13)
+
+The shell cancellation of the unfunded first attempt did not initially terminate its Python child.
+After funds returned, that orphan wrote 10 member-partition ratings under rubric version
+`observed-interview-e-v1-locked-2026-07-13` before exiting; it also retained 180 request errors. The
+precommit check inspected counts and version only, never rating values. The complete artifact was
+moved to `interview_e_persona_halves.precache_short_rubric.CANCELED.json`, SHA-256
+`f98a6134029bcc0c3cb40bc17b397069ed734490f4ca564a78a7d5df74f2cb64`. It is excluded from every
+criterion and trait calculation. The active candidate path was absent before the cached-manual run.
+The validator requires the new rubric version and hash and therefore also hard-refuses this quarantined
+artifact. This correction is committed before collection under the cached manual begins.
