@@ -156,6 +156,18 @@ def score_one(client, member, split_name, halves):
     return member, split_name, None, error
 
 
+def dump_resilient(payload):
+    """Preserve the identical atomic payload while tolerating transient OneDrive replace locks."""
+    for attempt in range(12):
+        try:
+            dump_atomic(payload, OUT, indent=1)
+            return
+        except PermissionError:
+            if attempt == 11:
+                raise
+            time.sleep(min(5.0, 0.25 * (2 ** attempt)))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--go", action="store_true", help="cost gate: collect Haiku ratings")
@@ -212,7 +224,7 @@ def main():
                 errors.pop(key_name, None)
             else:
                 errors[key_name] = error
-            dump_atomic(
+            dump_resilient(
                 {
                     "model": MODEL,
                     "rubric_version": RUBRIC_VERSION,
@@ -224,8 +236,6 @@ def main():
                     "members": members,
                     "errors": errors,
                 },
-                OUT,
-                indent=1,
             )
             if index % 25 == 0 or index == len(futures):
                 complete = sum(len(row) for row in members.values())

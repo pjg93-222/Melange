@@ -160,3 +160,13 @@ moved to `interview_e_persona_halves.precache_short_rubric.CANCELED.json`, SHA-2
 criterion and trait calculation. The active candidate path was absent before the cached-manual run.
 The validator requires the new rubric version and hash and therefore also hard-refuses this quarantined
 artifact. This correction is committed before collection under the cached manual begins.
+
+## OPERATIONAL ADDENDUM PC-3 — resilient atomic persistence (2026-07-13)
+
+The cached-manual scorer wrote 227 ratings with zero scoring errors, then OneDrive transiently denied
+the atomic file replacement for the second time. No rating values or criterion associations were
+inspected. The scorer now retries the identical `dump_atomic` payload on `PermissionError`; model,
+prompt, cache prefix, excerpts, parsing, fields, composite, and member order are byte-for-byte
+unchanged. The resumed collection therefore repeats only unsaved API work and cannot alter any saved
+rating. Updated scorer SHA-256:
+`53eb7787167ba87a27dee5372441e525637eaf70a47a0487d652d43ff102c182`.

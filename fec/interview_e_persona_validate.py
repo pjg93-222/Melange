@@ -32,7 +32,7 @@ PINS = {
     "interview_antagonism.json": "20752950b908e8b0ac5b79c06ccfae687fe6a486057e53e1915f361d58672c29",
     "big5_blue_validated.json": "876bc2ecf8672477d586f3db34472cdb2cf61ee0573e30c4b909448cd0970a8f",
     _o.path.join("fec", "interview_e_persona_rubric.md"): "51fceb122ec5463b80026301fb7676a39d909f062b75285d9d08ba182b28306c",
-    _o.path.join("fec", "interview_e_persona_score.py"): "01f93eb38175bdce195de5e1a157dd2d9641b87b329337fb7965f008c30cc642",
+    _o.path.join("fec", "interview_e_persona_score.py"): "53eb7787167ba87a27dee5372441e525637eaf70a47a0487d652d43ff102c182",
 }
 RUBRIC_VERSION = "observed-interview-e-v1-cache-manual-2026-07-13"
 RUBRIC_SHA256 = "51fceb122ec5463b80026301fb7676a39d909f062b75285d9d08ba182b28306c"
