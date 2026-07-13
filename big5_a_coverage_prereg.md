@@ -1,6 +1,6 @@
 # A-facet coverage / sampling-frame audit - LOCKED 2026-07-12
 
-**STATUS: LOCKED - coverage look not yet taken.** This is a sampling-frame robustness audit of
+**STATUS: RESULT CONSUMED - DEMOGRAPHICALLY SELECTED MEDIA-COVERED STRATUM.** This is a sampling-frame robustness audit of
 the already-qualified Round-9 inverse-interview-antagonism A facet. It does not reopen the
 consumed text-A look, change the 5/5 criterion-quality result, or authorize score fitting.
 
@@ -62,3 +62,22 @@ For each metric compute included/excluded means, coverage, and standardized mean
   Blue/Pink A, or ranks. No weighting/IPW may be added after seeing the result; that would require
   a new preregistered robustness study.
 
+## RESULT - consumed 2026-07-12 (`fec/b5_a_coverage_audit.py --look`)
+
+All frozen inputs matched. Coverage was 322/533. The preregistered verdict is
+**DEMOGRAPHICALLY SELECTED MEDIA-COVERED STRATUM**:
+
+- Demographic max `|SMD|=.620` - MATERIAL FAILURE: Republican `-.322`, female `-.001`,
+  Senate `+.620`. Coverage was D 176/259 (68.0%), R 144/272 (52.9%), House 232/433
+  (53.6%), Senate 90/100 (90.0%), female 60.7%, male 60.8%. The large party max-gap print
+  includes the two Independents (2/2); the D-R comparison is the decision-relevant one.
+- Model-position max `|SMD|=.378` - CAUTION: composite `+.219`, legislative `+.080`,
+  influence `+.320`, demographic pillar `+.378`.
+- Media/activity max `|SMD|=1.877` - FAIL: log articles `+.381`, press pillar `+.028`,
+  visibility `+1.877`, log Blue tokens `+1.195`.
+
+**Binding consequence applied:** approved wording is "validated inverse-antagonism A facet on
+the interview/media-covered stratum." The displayed percentile is relative only to the 322 covered
+members and must be labeled as such. No missing-member imputation, score/rubric/residualization
+change, weighting, engine change, Blue/Pink change, or rank change is authorized. The original
+criterion-quality result (5/5 on its observed stratum) stands; full-roster generalizability does not.
