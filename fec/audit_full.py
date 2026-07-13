@@ -359,7 +359,7 @@ if os.path.exists(B+r'\member_desk_bundle.json') and os.path.exists(B+r'\ranks_p
     _pink=B+r'\big5_llm_opus.json'
     if os.path.exists(_blue) and os.path.exists(_pink) and os.path.getmtime(_pink)<os.path.getmtime(_blue):
         _unflag=sum(1 for p in _bp if not ((p.get('big5_vintage') or {}).get('pink_older_days')>0))
-        ck('desk discloses mixed Blue/Pink corpus vintages when Pink predates Blue',
+        ck('desk preserves mixed Blue/Pink corpus-vintage metadata for archived diagnostics',
            _unflag==0, '%d/%d paired members lack the stale-vintage disclosure metadata'%(_unflag,len(_bp)))
     # Source-primary Blue is the completed Round-4 promotion, not the pooled lexical v2 draft.
     # Guard the frozen TEST result, venue provenance, affective-N fifth slot, and coherent coverage.
@@ -500,6 +500,16 @@ ck('desk attaches the new 5/5 evidence to the validated multimethod Blue',
                                 'Package overlap is zero',
                                 'A .699, N .680')),
    'display must identify the promoted multimethod artifact and its package-disjoint gates')
+ck('desk default radar excludes the archived Pink/Opus item-read',
+   "radar(P.big5_pct.map(_ns),B5AX,'#7dd3fc',82)" in _desk_tpl and
+   'P.llm_pct.map(_ns)' not in _desk_tpl and 'Pink dashed' not in _desk_tpl,
+   'Pink may remain archived in the bundle but must not be passed to the default radar')
+ck('desk suppresses synthetic/default-only dominance values and labels shared-source N',
+   all(s in _desk_tpl for s in ('Interaction dominance','at least 30 observed interview turns',
+                                'Affective N*','shared with Blue N')) and
+   "if ((_IX.get(_m) or {}).get('turns') or 0) < 30:" in
+       open(B+r'\fec\make_member_desk.py',encoding='utf-8').read(),
+   'person-facing behavior display must expose coverage rather than plot roster constants')
 ck('desk preserves missing-A behavior and the separately qualified A-facet scope',
    all(s in _desk_tpl for s in ('covered-stratum percentile','Senate 90.0% vs House 53.6%',
                                 'insufficient package-disjoint interview coverage')),

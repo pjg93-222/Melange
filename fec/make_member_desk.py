@@ -159,9 +159,16 @@ BDISP = (L('behavioral_dispositions.json') or {}).get('members', {})
 # convention as reactivity — never a silent fallback to the volume-entangled raw-count v1.
 _CV2 = {m: (d or {}).get('cooperation_v2_z') for m, d in ((L('coop_v2_candidate.json') or {}).get('members', {})).items()}
 BDR = {m: dict(d) for m, d in BDISP.items()}
+_IX = (L('interaction_features.json') or {}).get('members', {})
 for _m, _d in BDR.items():
     if _CV2.get(_m) is not None: _d['cooperation_z'] = _CV2[_m]
     else: _d.pop('cooperation_z', None)
+    # The producer combines interview dynamics with a binary committee-leadership indicator.
+    # Without a qualifying interaction record this creates roster-wide constants that look like
+    # person-specific measurements. Keep the engine artifact unchanged, but suppress those
+    # synthetic/default-only values from the person-facing display.
+    if ((_IX.get(_m) or {}).get('turns') or 0) < 30:
+        _d.pop('dominance_z', None)
 _BD_AX = ['cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z']
 _BDPCT = {ax: _pctrank([d[ax] for d in BDR.values() if ax in d]) for ax in _BD_AX} if BDR else {}
 _AFFN = (L('affective_n.json') or {}).get('members', {})
@@ -196,6 +203,11 @@ def psy_for(name):
     bd = BDR.get(name) or {}
     if bd and _BDPCT:
         out['behav_pct'] = [(_BDPCT[ax](bd[ax]) if ax in bd else None) for ax in _BD_AX] + [(_AFFNPCT(_AFFN[name]) if _AFFNPCT and name in _AFFN else None)]
+        out['behavior_scope'] = {
+            'dominance_observed': 'dominance_z' in bd,
+            'interaction_turns': int(((_IX.get(name) or {}).get('turns') or 0)),
+            'affective_n_shared_with_blue': bool(name in _AFFN and t.get('N') is not None),
+        }
     if name in _AVAL and _AVALPCT and _AVAL[name].get('agreeableness_z') is not None:
         out['a_validated_pct'] = _AVALPCT(_AVAL[name]['agreeableness_z'])
         out['a_antagonism_z'] = _AVAL[name].get('antagonism_z')
