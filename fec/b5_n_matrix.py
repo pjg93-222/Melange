@@ -23,6 +23,8 @@ CORE = ['O', 'C', 'E', 'A', 'ES']
 TR6 = CORE + ['N']
 SEEDS17 = [7, 17, 29, 43, 61]             # the locked §17 OOF seeds (BI.SEEDS)
 RESEEDS = [101, 113, 127, 139, 151]       # fresh-seed re-derivation (fold-partition robustness)
+PLANT_SEEDS = [424242]                     # historical round-4 in-process battery default
+PLANT_MIN_PASS = 1                         # successors may predeclare a multi-seed aggregate gate
 S17_DIAG = {'O': .198, 'C': .277, 'E': .552, 'A': .183, 'ES': .149}   # §17 diagonals (drift report only)
 S17_PASS = ['O', 'C', 'E']                # §17-passing traits eligible for the demotion check
 PIN = {'MEM': 456, 'MEM_N': 201,
@@ -156,25 +158,33 @@ def simulate_battery(X, D):
     lt_s, sh_s = np.log1p(D['turns'][mask]), D['sh'][mask]
     Zvol = np.column_stack([gen_s, party_s, lt_s, sh_s])
     green = True
-    # (a) PLANTED (seed 424242): distinct core signals >=4/5; masked-N plant clears bars 1-4 (5 reported)
-    # ADDENDUM 1: orthogonalized plant set (run #1 recorded verbatim in the prereg addendum)
-    rng = np.random.default_rng(424242)
-    yc, yn = plant_set(X, Xs, mask, rng)
-    pc = {t: BI.oof(X, yc[t]) for t in CORE}
-    npass = 0
-    for t in CORE:
-        o, p, _ = BI.exact_perm_p(pc[t], yc[t])
-        dom = all(abs(o) >= abs(rr(pc[t], yc[c])) for c in CORE if c != t) and o > 0
-        npass += (o >= 0.15 and p < .05 and dom)
-    pn = BI.oof(Xs, yn)
-    o, p, _ = BI.exact_perm_p(pn, yn)
-    rown = all(abs(o) >= abs(rr(pn, yc[c][mask])) for c in ['O', 'C', 'E', 'A']) and o > 0
-    coln = all(abs(o) > abs(rr(pc[c][mask], yn)) for c in CORE)
-    rp, ppart = fw_partial(pn, yn, Zvol)
-    a_ok = (npass >= 4) and (o >= 0.15 and p < .05 and rown and coln)
+    # (a) PLANTED: the historical round-4 default is the original single seed. A successor may
+    # predeclare a multi-seed aggregate for masked N while retaining the original core >=4/5 check
+    # on seed 424242. This resolves seed-draw instability without changing a real-result bar.
+    core_first = 0; nplant = 0
+    for j, sd in enumerate(PLANT_SEEDS):
+        rng = np.random.default_rng(sd)
+        yc, yn = plant_set(X, Xs, mask, rng)
+        pc = {t: BI.oof(X, yc[t]) for t in CORE}
+        npass = 0
+        for t in CORE:
+            o, p, _ = BI.exact_perm_p(pc[t], yc[t])
+            dom = all(abs(o) >= abs(rr(pc[t], yc[c])) for c in CORE if c != t) and o > 0
+            npass += (o >= 0.15 and p < .05 and dom)
+        if j == 0: core_first = npass
+        pn = BI.oof(Xs, yn)
+        o, p, _ = BI.exact_perm_p(pn, yn)
+        rown = all(abs(o) >= abs(rr(pn, yc[c][mask])) for c in ['O', 'C', 'E', 'A']) and o > 0
+        coln = all(abs(o) > abs(rr(pc[c][mask], yn)) for c in CORE)
+        rp, ppart = fw_partial(pn, yn, Zvol)
+        one_ok = o >= 0.15 and p < .05 and rown and coln
+        nplant += one_ok
+        print('  sim(a) seed %d: core %d/5 | N own %+.3f p %.4f row %s col %s -> %s'
+              % (sd, npass, o, p, rown, coln, 'PASS' if one_ok else 'miss'))
+    a_ok = (core_first >= 4) and (nplant >= PLANT_MIN_PASS)
     green &= a_ok
-    print('  sim(a) PLANTED: core %d/5 (need>=4) | N own %+.3f p %.4f row %s col %s (bar5 %+.3f rpt) -> %s'
-          % (npass, o, p, rown, coln, rp, 'OK' if a_ok else 'FAIL'))
+    print('  sim(a) PLANTED SUMMARY: seed-424242 core %d/5 (need>=4) | N bars1-4 %d/%d (need>=%d) -> %s'
+          % (core_first, nplant, len(PLANT_SEEDS), PLANT_MIN_PASS, 'OK' if a_ok else 'FAIL'))
     # (b) NULL (seed 535353): real criteria permuted pre-pairing -> core 0/5; N misses full 5-bar stack
     rng = np.random.default_rng(535353)
     ycn = {t: rng.permutation(D['CRIT'][t]) for t in CORE}

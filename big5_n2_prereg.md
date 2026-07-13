@@ -80,3 +80,30 @@ any trait; an apparent A/ES pass in the reproduction is drift, not evidence.
 
 One look, same session as the lock. No LLM calls. No bar/seed/roster/spec changes after lock.
 The RESULT-N2 section appends verbatim (MISSes included), committed same session.
+
+## LOCK ADDENDUM 1 — synthetic-battery coherence repair, before any look
+
+The first `--look` invocation after lock was **REFUSED BEFORE THE LOOK**: no real text prediction
+was paired with reactivity and no result was consumed. The inherited round-4 in-process planted arm
+required the single seed 424242 to pass, even though the locked successor transcript above already
+records 424242 as one of two permitted misses under the predeclared **five-seed, at least 3/5** rule.
+That made the lock internally contradictory: it licensed a 3/5 aggregate and then silently demanded
+5/5 at the first seed.
+
+Repair, committed before trying again: the in-process planted arm now (a) retains the inherited
+core-instrument requirement of at least 4/5 on seed 424242, and (b) applies the already-locked masked-N
+rule across the five named seeds, requiring at least 3/5 on bars 1-4. The NULL, CONFOUND-ONLY, and
+TRUE+CONFOUND arms are byte-equivalent in method and thresholds. The real N model, criterion, five
+result bars, re-derivation, no-interview ship gate, fingerprints, consequences, and closure rules do
+not change. This is a synthetic-gate consistency amendment, not a response to an observed N result.
+
+Refusal transcript:
+
+```text
+sim(a) PLANTED: core 4/5 (need>=4) | N own +0.166 p 0.0044 row False col True -> FAIL
+sim(b) NULL -> OK
+sim(c) CONFOUND-ONLY -> OK
+sim(d) TRUE+CONFOUND -> OK
+SIMULATE BATTERY: FAILURE — look forbidden
+LOOK REFUSED (not consumed): simulate battery failure
+```

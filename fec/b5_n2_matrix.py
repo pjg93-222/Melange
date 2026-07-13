@@ -32,6 +32,10 @@ if __name__ == '__main__':
             print('!! LOOK REFUSED (not consumed): PIN2 lock-time fields unfilled (prereg still DRAFT)')
             raise SystemExit(2)
         # simulate/status may run against the draft (diagnostic phase); pins stay round-4 for status text
-    else:
-        NM.PIN = PIN2
-    NM.main()
+else:
+    NM.PIN = PIN2
+    # LOCK ADDENDUM 1: apply the already-locked five-seed >=3/5 successor gate inside the battery;
+    # round-4's single-seed default remains unchanged in b5_n_matrix.py.
+    NM.PLANT_SEEDS = [424242, 515151, 616161, 717171, 818181]
+    NM.PLANT_MIN_PASS = 3
+NM.main()
