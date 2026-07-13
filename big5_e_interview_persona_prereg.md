@@ -128,3 +128,22 @@ newline-anchored RESULT-EI heading, matching pins, a green in-process planted/nu
 and a fresh Stage-1 PASS. One real look, consumed whether PASS or MISS. Result stdout is appended
 verbatim and committed in the same session.
 
+## PRE-COLLECTION AMENDMENT PC-1 — prompt-cache coding manual (2026-07-13)
+
+After the lock commit and before any rating existed, the first API attempt returned 72 billing errors
+and zero member ratings. The user restored API funds and explicitly required prompt caching. Haiku 4.5
+has a 4,096-token minimum cacheable prefix, while the original short rubric was below that floor.
+
+The six fields, positive/reverse composite, model, two salts, 1,000-word halves, eligibility, sample,
+criterion gates, behavior formula, acceptance bars, and one-look rule remain unchanged. The coding
+instructions are expanded into the member-independent manual
+`fec/interview_e_persona_rubric.md`: it supplies fixed score anchors and explicit separation from
+dominance, Agreeableness, affective N, Openness, Conscientiousness, ideology, identity, and volume.
+The manual is the cached system prefix; it is pre-warmed before parallel scoring and uses a 5-minute
+ephemeral cache refreshed by hits. This is a pre-collection measurement clarification, not a
+post-result rubric substitution. Its SHA-256 is pinned in the collection artifact and below when the
+amendment is committed.
+
+`RUBRIC_SHA256: 51fceb122ec5463b80026301fb7676a39d909f062b75285d9d08ba182b28306c`
+
+`SCORER_SHA256: 01f93eb38175bdce195de5e1a157dd2d9641b87b329337fb7965f008c30cc642`

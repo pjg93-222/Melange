@@ -31,7 +31,11 @@ PINS = {
     "affective_n.json": "f3601ce9338dcbe5d222a10429fd7092c13ffcda020586ecc5f91fc484cde3ce",
     "interview_antagonism.json": "20752950b908e8b0ac5b79c06ccfae687fe6a486057e53e1915f361d58672c29",
     "big5_blue_validated.json": "876bc2ecf8672477d586f3db34472cdb2cf61ee0573e30c4b909448cd0970a8f",
+    _o.path.join("fec", "interview_e_persona_rubric.md"): "51fceb122ec5463b80026301fb7676a39d909f062b75285d9d08ba182b28306c",
+    _o.path.join("fec", "interview_e_persona_score.py"): "01f93eb38175bdce195de5e1a157dd2d9641b87b329337fb7965f008c30cc642",
 }
+RUBRIC_VERSION = "observed-interview-e-v1-cache-manual-2026-07-13"
+RUBRIC_SHA256 = "51fceb122ec5463b80026301fb7676a39d909f062b75285d9d08ba182b28306c"
 
 
 def sha(path):
@@ -370,6 +374,8 @@ def main():
     if not _o.path.exists(LABELS):
         raise SystemExit("label artifact absent; collect after prereg lock")
     labels = json.load(open(LABELS, encoding="utf-8"))
+    if labels.get("rubric_version") != RUBRIC_VERSION or labels.get("rubric_sha256") != RUBRIC_SHA256:
+        raise SystemExit("label rubric/version drift")
     label_hash = sha(LABELS)
     if args.criterion:
         print_criterion(criterion_metrics(labels), label_hash)

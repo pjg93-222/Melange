@@ -24,6 +24,8 @@ _s.stdout.reconfigure(encoding="utf-8", errors="replace")
 B = MB_ROOT
 OUT = _o.path.join(B, "interview_e_persona_halves.json.candidate")
 MODEL = "claude-haiku-4-5"
+RUBRIC_PATH = _o.path.join(B, "fec", "interview_e_persona_rubric.md")
+RUBRIC_VERSION = "observed-interview-e-v1-cache-manual-2026-07-13"
 SALTS = {
     "primary": "e-persona-primary-v1",
     "rederive": "e-persona-rederive-v1",
@@ -40,26 +42,8 @@ FIELDS = (
     "reserved_flatness",
 )
 
-RUBRIC = r"""You are rating OBSERVED EXPRESSIVE-INTERPERSONAL EXTRAVERSION from de-identified
-interview responses by one public official. Every sample is exactly the same length and contains
-only the official's responses from multiple appearances. Score halves A and B separately.
-
-For each half return integer 0-100 scores for:
-- social_energy: lively, socially energized presence in the response content;
-- enthusiastic_engagement: active enthusiasm and engaged interpersonal tone;
-- expressive_affect: visible emotional animation and vivid personal expression;
-- spontaneous_self_disclosure: natural personal revelation, anecdote, humor, or unscripted candor;
-- conversational_responsiveness: directly engages the implied other person rather than delivering a detached statement;
-- reserved_flatness: restrained, impersonal, emotionally flat, or socially withdrawn presentation.
-
-Judge only cues present in the supplied words. Do not infer identity or use outside political
-knowledge, ideology, office, confidence, toughness, aggression, policy position, or polished
-professional speaking. Do not score from the amount of text or response length alone; all samples
-are equal-length and content-based interpersonal cues are required. Absence of evidence is low, not
-average. Output JSON only:
-{"A":{"social_energy":0,"enthusiastic_engagement":0,"expressive_affect":0,"spontaneous_self_disclosure":0,"conversational_responsiveness":0,"reserved_flatness":0,"confidence":"low|medium|high"},
- "B":{"social_energy":0,"enthusiastic_engagement":0,"expressive_affect":0,"spontaneous_self_disclosure":0,"conversational_responsiveness":0,"reserved_flatness":0,"confidence":"low|medium|high"}}
-"""
+RUBRIC = open(RUBRIC_PATH, encoding="utf-8").read()
+SYSTEM = [{"type": "text", "text": RUBRIC, "cache_control": {"type": "ephemeral", "ttl": "5m"}}]
 
 
 def stable_half(package, salt):
@@ -147,13 +131,14 @@ def parse_json(text):
 
 
 def score_one(client, member, split_name, halves):
-    prompt = RUBRIC + "\n\nHALF A:\n" + halves[0]["text"] + "\n\nHALF B:\n" + halves[1]["text"]
+    prompt = "HALF A:\n" + halves[0]["text"] + "\n\nHALF B:\n" + halves[1]["text"]
     error = None
     for attempt in range(5):
         try:
             message = client.messages.create(
                 model=MODEL,
                 max_tokens=500,
+                system=SYSTEM,
                 messages=[{"role": "user", "content": prompt}],
             )
             parsed = parse_json(message.content[0].text)
@@ -162,6 +147,8 @@ def score_one(client, member, split_name, halves):
                 "packages": [halves[0]["packages"], halves[1]["packages"]],
                 "available_words": [halves[0]["available_words"], halves[1]["available_words"]],
                 "sample_words": SAMPLE_WORDS,
+                "cache_read_input_tokens": int(getattr(message.usage, "cache_read_input_tokens", 0) or 0),
+                "cache_creation_input_tokens": int(getattr(message.usage, "cache_creation_input_tokens", 0) or 0),
             }, None
         except Exception as exc:
             error = "%s: %s" % (type(exc).__name__, exc)
@@ -190,8 +177,10 @@ def main():
 
     client = anthropic.Anthropic(api_key=key)
     prior = json.load(open(OUT, encoding="utf-8")) if _o.path.exists(OUT) else {}
+    if prior.get("members") and prior.get("rubric_version") != RUBRIC_VERSION:
+        raise SystemExit("existing ratings use a different rubric; refusing mixed collection")
     members = prior.get("members", {})
-    errors = prior.get("errors", {})
+    errors = {} if not members else prior.get("errors", {})
     todo = []
     for split_name, rows in samples.items():
         for member in sorted(rows):
@@ -199,6 +188,20 @@ def main():
                 todo.append((member, split_name, rows[member]))
     if args.limit:
         todo = todo[: args.limit]
+    warm = client.messages.create(
+        model=MODEL,
+        max_tokens=0,
+        system=SYSTEM,
+        messages=[{"role": "user", "content": "warmup"}],
+    )
+    print(
+        "  prompt cache prewarm: created=%d read=%d"
+        % (
+            int(getattr(warm.usage, "cache_creation_input_tokens", 0) or 0),
+            int(getattr(warm.usage, "cache_read_input_tokens", 0) or 0),
+        ),
+        flush=True,
+    )
     with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as pool:
         futures = [pool.submit(score_one, client, *item) for item in todo]
         for index, future in enumerate(as_completed(futures), 1):
@@ -212,7 +215,9 @@ def main():
             dump_atomic(
                 {
                     "model": MODEL,
-                    "rubric_version": "observed-interview-e-v1-locked-2026-07-13",
+                    "rubric_version": RUBRIC_VERSION,
+                    "rubric_sha256": hashlib.sha256(RUBRIC.encode("utf-8")).hexdigest(),
+                    "prompt_cache": {"type": "ephemeral", "ttl": "5m", "prewarmed": True},
                     "split_salts": SALTS,
                     "sample_words": SAMPLE_WORDS,
                     "eligible": {name: len(rows) for name, rows in samples.items()},
