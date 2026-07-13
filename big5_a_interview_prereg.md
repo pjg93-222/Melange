@@ -99,3 +99,33 @@ The prompt, model, halves, numeric fields, score formula, roster, gates, and tra
 
 Stage 2 is now armed under the fingerprints above. No trait prediction was paired with this
 criterion during Stage 1.
+
+## RESULT-AI — CONSUMED 2026-07-12: MISS; route closed
+
+The fresh interview-antagonism criterion remained qualified 5/5 and every input fingerprint
+matched. The primary A model missed four substantive requirements: effect/threshold, permutation
+significance, row dominance, column specificity, and the partial threshold/significance. The
+fresh-seed re-derivation was correctly not triggered. Per the locked consequence, the
+cooperation-trained `st_mean` A prediction does not generalize distinctly to fresh interview
+antagonism; this criterion/basis route is closed and the Blue instrument's A status does not change.
+
+After the gating MISS was already printed, the non-gating no-interview code raised a member-order/
+coverage assertion because CREC+social embeddings do not cover all 470 members. That engineering
+exception cannot rescue or alter the consumed primary MISS and does not authorize a rerun.
+
+Verbatim result transcript:
+
+```text
+=== INTERVIEW-ANTAGONISM CRITERION GATE ===
+  G1 coverage/reliability: n=322 half-r=+0.537 SB=0.699 (n>=250, SB>=.60) -> PASS
+  G2 raw confounds: party=+0.109 gender=-0.032 log_words=-0.005 -> PASS
+  G3 cross-venue hearing convergence: r=+0.160 n=282 -> PASS
+  G4 cooperation direction: r=-0.072 n=207 (must <0) -> PASS
+  G5 excluded-content discriminant max|r|=0.242 (<.50) -> PASS
+  CRITERION VERDICT: 5/5 -> QUALIFIED
+features: 470 members x 194 Empath cats (0 re-featurized, rest cached)
+input fingerprints: MATCH | MEM=470 | fresh-A n=309
+=== LOOK: fresh interview-antagonism A matrix | n=309 ===
+  [primary] own=+0.084 p=0.0782 row=False col=False max-rival=0.193 partial=+0.087 p=0.0652 -> MISS
+RuntimeError: no-interview st_mean coverage/order drift
+```
