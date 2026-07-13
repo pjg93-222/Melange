@@ -67,7 +67,9 @@ def key():
 def parse_json(text):
     text = text.strip()
     text = re.sub(r'^```(?:json)?\s*|\s*```$', '', text, flags=re.I | re.S)
-    obj = json.loads(text)
+    # Haiku sometimes appends a second fenced rendering or a one-line note after a valid object.
+    # Accept the first complete JSON value; the locked rubric and numeric fields remain unchanged.
+    obj, _end = json.JSONDecoder().raw_decode(text.lstrip())
     for half in ('A', 'B'):
         d = obj[half]
         for field in ('reporter_hostility', 'personal_contempt', 'gratuitous_cruelty',
@@ -121,7 +123,9 @@ def main():
         futs = [pool.submit(score_one, client, m, halves[m]) for m in todo]
         for i, fut in enumerate(as_completed(futs), 1):
             member, rec, err = fut.result()
-            if rec is not None: members[member] = rec
+            if rec is not None:
+                members[member] = rec
+                errors.pop(member, None)
             else: errors[member] = err
             dump_atomic({'model': MODEL, 'rubric_version': 'locked-2026-07-12-v1',
                          'eligible_n': len(halves), 'members': members, 'errors': errors}, OUT, indent=1)

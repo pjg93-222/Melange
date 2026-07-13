@@ -66,3 +66,12 @@ no production promotion. Any five-bar or re-derivation miss closes this criterio
 LABEL_SHA256: `[AFTER-STAGE-1]`
 
 No result bar, threshold, basis, prompt, exclusion, seed, or consequence changes after label generation.
+
+## Collection addendum 1 — parser-only repair before criterion inspection
+
+The first operational scoring launch was stopped after 9 accepted members and 18 parse failures.
+Only completion/error counts and exception strings were inspected; no accepted score, member ranking,
+correlation, reliability, or gate statistic was viewed. The failures were valid JSON followed by
+trailing model text (`JSONDecodeError: Extra data`). The parser now accepts the first complete JSON
+object with `JSONDecoder.raw_decode`, and a successful retry removes that member's stale error entry.
+The prompt, model, halves, numeric fields, score formula, roster, gates, and trait protocol are unchanged.
