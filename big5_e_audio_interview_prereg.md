@@ -119,3 +119,38 @@ criterion and final result stdout are recorded verbatim. No artifact produced he
 consumer.
 
 `AUDIO_CRITERION_SHA256: PENDING_STAGE1`
+
+## RESULT-AUDIO-E — STAGE 1 REJECTED; INTERVIEW LOOK NOT TAKEN (2026-07-13)
+
+The cross-fitted audio criterion was cleanly separated from Blue O/C/A/N, remained within all raw
+party/gender/duration bounds, and replicated strongly across the two outer-CV panels. The primary
+panel missed the held-out convergence magnitude by .007, and neither panel cleared the predeclared
+clip-half reliability floor. Under the locked gate, the audio criterion is rejected and the interview
+behavior files remain unopened. No score averaging change, clip floor change, feature subset,
+residualization change, or threshold repair is permitted.
+
+```text
+=== AUDIO/INTERVIEW SYNTHETIC BATTERY ===
+  planted partial r=+0.675 p=0.0002
+  null raw        r=-0.015 p=0.5931
+  gender-only partial r=-0.015 p=0.5933
+  planted_admitted             PASS
+  null_refused                 PASS
+  gender_only_refused          PASS
+BATTERY PASS
+=== CLEAN-AUDIO E CRITERION GATE ===
+  primary n=391 raw=+0.193 p=0.0002 partial=+0.151 p=0.0020
+    heterotrait: O=-0.020(n=391) | C=-0.155(n=391) | A=-0.092(n=284) | N=+0.099(n=391)
+    reliability: primary SB=0.540(n=291) | rederive SB=0.536(n=285)
+    contamination: party_R=-0.039 | female=-0.113 | log_audio_seconds=+0.178
+    gates: coverage=PASS, convergent=MISS, partial=PASS, diagonal=PASS, reliability=MISS, contamination=PASS -> MISS
+  rederive n=391 raw=+0.225 p=0.0002 partial=+0.184 p=0.0002
+    heterotrait: O=-0.009(n=391) | C=-0.160(n=391) | A=-0.082(n=284) | N=+0.101(n=391)
+    reliability: primary SB=0.567(n=291) | rederive SB=0.537(n=285)
+    contamination: party_R=-0.041 | female=-0.120 | log_audio_seconds=+0.179
+    gates: coverage=PASS, convergent=PASS, partial=PASS, diagonal=PASS, reliability=MISS, contamination=PASS -> MISS
+  panel-repeat r=+0.964 -> PASS
+  CRITERION VERDICT: REJECTED
+  AUDIO_CRITERION_SHA256: 47dcd6b3eb155f587f35f01bbf94da28f82c291a59f232e17ab7daf90fc7c978
+wrote audio_e_oof_criterion.json.candidate (consumed by nothing)
+```

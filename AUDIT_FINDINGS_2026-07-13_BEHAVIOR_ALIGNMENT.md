@@ -85,6 +85,16 @@ was not admissible: independent-partition repeatability was .696 (<.70), party c
 criterion before any expressiveness pairing. This leaves the interview role operational but prevents
 same-venue observer ratings from being used as an E validation substitute.
 
+## Clean-audio E follow-up — criterion rejected before behavior look
+
+The follow-up used an entirely source-disjoint criterion: two independent nested-CV panels over all
+88 verified acoustic features. The criterion was not party/gender contaminated, was
+diagonal-dominant over Blue O/C/A/N, and replicated across panels at r=.964. It still failed the
+locked qualification gate. Primary held-out E convergence was .193 (<.20), and clip-half
+Spearman-Brown reliability was .536–.567 (<.60) in all four panel/partition checks. The interview
+expressiveness pairing was not opened. Audio therefore does not rescue expressiveness-v2 as a
+validated E behavior on the current evidence.
+
 ## Verification
 
 - Kernel tests: 37 passed, 0 failed.
@@ -94,5 +104,6 @@ same-venue observer ratings from being used as an E validation substitute.
 - Pink default-overlay checks: no Pink radar call and no dashed-Pink legend in the rendered desk.
 - Behavioral-roles v2: synthetic battery passed; locked one-look completed; dominance candidate PASS, expressiveness operational-role PASS, independent-E criterion MISS.
 - Interview-observer E: 630 cached-manual ratings completed with zero errors; Stage-1 criterion REJECTED; behavior look not taken.
+- Clean-audio E: two independent outer-CV panels completed; Stage-1 criterion REJECTED on magnitude/reliability; interview look not taken.
 - Candidate consumer scan: the two v2 JSON paths occur only in the candidate study and its preregistration; no engine or dashboard consumer exists.
 - Rank authority SHA-256 remained `797a6490ca0c0f63496f76ac9f030c0a8b538d5f46dbc18e39092bbbc74b00c6`.

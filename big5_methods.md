@@ -842,3 +842,19 @@ small (-.023). The criterion was therefore rejected before expressiveness or Blu
 the same-venue observer route cannot validate E. No residualization, subgroup scoring, or threshold
 repair was attempted. The stable expressiveness-v2 role remains operational only pending a genuinely
 source-disjoint criterion.
+
+## 32. Clean-audio E criterion for interview expressiveness — rejected before behavior look (2026-07-13)
+
+A second locked route moved the criterion entirely out of interview text. Two independent five-seed
+nested-CV panels used all 88 verified eGeMAPS features to predict promoted Blue E out of fold on 391
+members. Demographic contamination was bounded (party about -.04, gender -.11/-.12), duration stayed
+within the .20 limit (+.178/.179), and the panels replicated at r=.964. Both panels were
+diagonal-dominant over Blue O/C/A/N and retained positive controlled convergence (.151/.184).
+
+The audio read did not qualify. Primary held-out convergence was .193 against the locked .20 bar
+(re-derivation .225), and predicted clip-half reliability was only SB=.536–.567 across the two clip
+partitions, below .60 in every panel/partition combination. Stage 1 therefore rejected the acoustic
+criterion before the interview candidate or behavioral rivals were opened. Expressiveness-v2 remains
+a reliable operational speaking-style role, not a validated E behavior. The result also prevents the
+older N=90 audio-E finding from being treated as a stable member-level criterion on the expanded clean
+voiceprint corpus.
