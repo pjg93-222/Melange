@@ -144,3 +144,133 @@ On PASS only, the harness writes `behavioral_extraversion_v1.json.candidate`. Th
 candidate-only and consumed by nothing until explicit user review. On MISS, no E candidate is
 written and profile-generation code must continue to report behavioral E as unavailable rather
 than fall back to visibility.
+
+## RESULT-E-BEHAVIORAL
+
+Look consumed: 2026-07-13
+
+Outcome: **MISS**. No candidate artifact was written and no Extraversion score was activated.
+The preregistered adversarial re-derivation was correctly not run because the main bars did not
+all pass.
+
+```text
+prereg: LOCKED | look: AVAILABLE | fingerprints: MATCH
+  OK   residualization_removes_confounds
+  OK   synthetic_signal_recovered
+  OK   warmth_lexicon_operates
+  OK   excitement_lexicon_operates
+  OK   stable_split_is_deterministic
+SIMULATE BATTERY: ALL GREEN
+coverage: E=241 | RKH joined=93
+reliability score              median SB=+0.567 pass>=.50 5/5 median-n=220
+reliability enthusiasm         median SB=+0.531 pass>=.50 5/5 median-n=220
+reliability assertive_energy   median SB=+0.608 pass>=.50 5/5 median-n=220
+reliability warmth             median SB=+0.636 pass>=.50 5/5 median-n=232
+reliability excitement         median SB=+0.453 pass>=.50 2/5 median-n=232
+reliability gregariousness     median SB=+0.444 pass>=.50 1/5 median-n=220
+reliability assertiveness      median SB=+0.648 pass>=.50 4/5 median-n=232
+reliability activity           median SB=+0.734 pass>=.50 5/5 median-n=232
+RKH E partial: r=-0.070 p=0.7534 n=93
+visibility partial: r=-0.016 p=0.6163 n=241
+aspect coherence: r=-0.071 n=241
+discriminant: O=-0.012 C=+0.149 A=+0.162 N=-0.046
+confounds: party=+0.007 gender=-0.034 leader=+0.034 log_turns=+0.037 log_substantial=+0.032 program_breadth=+0.063
+BAR coverage                     PASS
+BAR overall_reliability          MISS
+BAR aspect_reliability           PASS
+BAR facet_reliability            PASS
+BAR rkh_convergence              MISS
+BAR visibility_corroboration     MISS
+BAR aspect_coherence             MISS
+BAR discriminant                 PASS
+BAR confound_control             PASS
+BAR facet_distinctness           PASS
+FINAL VERDICT: MISS
+```
+
+Interpretation fixed at the look: warmth, conversational assertiveness, and activity were the
+most repeatable individual facets. Excitement and gregariousness were weaker. More importantly,
+Enthusiasm and Assertive-energy did not show the positive coherence required of one Extraversion
+construct, and the composite did not converge with the locked historical criterion. The near-zero
+controlled visibility correlation confirms that spotlight exposure was successfully removed; it
+does not rescue construct validity.
+
+## Post-result literature audit (not part of the locked test)
+
+Added after the result at the user's direction. This review informs interpretation and any future
+v2; it does not alter the preregistered bars or reclassify the MISS.
+
+### Ramey, Klingler, and Hollibaugh (2016)
+
+`Measuring Elite Personality Using Speech` is the provenance of the RKH criterion used above. It
+applies the Mairesse et al. observer-trained SMOreg personality recognizer to Congressional Record
+floor speeches from 1996-2014. The paper is explicit that its estimates need not be sincere or
+intrinsic personality; they may reflect revealed and strategic public presentation (PDF p. 5). It
+also says more stringent validation was not then possible (p. 6), uses indirect face-validity tests,
+and warns that its corpus-normalized scores are only relatively comparable within the Congressional
+Record rather than to ordinary inventories or other corpora (p. 4).
+
+Most importantly for this test, RKH's displayed Extraversion feature is **total words** (Figure 4,
+p. 10), and the authors interpret greater speaking volume as Extraversion face validity (p. 11),
+citing prior correlations above .60 between Extraversion and total word count. Floor access,
+leadership, agenda role, and public visibility can all affect total words. RKH is therefore not an
+independent construct-validity target for an E measure deliberately purged of exposure and volume.
+The locked RKH MISS remains a MISS, but it cannot be interpreted as proof that the candidate failed
+to recover intrinsic Extraversion.
+
+### Yang, Lau, and Abbasi (2023)
+
+`Getting Personal: A Deep Learning Artifact for Text-Based Measurement of Personality` validates
+DeepPerson against survey-labeled PANDORA/Reddit, myPersonality/Facebook, and Essays data, with
+user-disjoint train/validation/test splits repeated ten times (PDF pp. 14-16). That is a materially
+stronger target than a visibility or word-count proxy. Its learned psycholinguistic, syntactic,
+semantic, and person-level representations also outperform hand-feature baselines. For
+Extraversion, reported document-level F1 is .649 on PANDORA and .674 on myPersonality; overall AUC
+is .750 and .707 respectively (Table 4/5, p. 17). These are useful but not accurate enough to treat an
+individual politician score as a fact without domain-specific validation.
+
+The model was trained on social posts and student essays, not congressional interviews, and its
+method depends on substantial labeled and unlabeled training corpora. The paper supports replacing
+the v1 regex composite with a learned, self-report-anchored representation; it does not validate
+transferring DeepPerson scores directly to members of Congress. Reproduction could avoid paid API
+spending if code, labels, weights, and sufficient local compute are available, but that feasibility
+must be established before a v2 is registered.
+
+### Birkenmaier and Lechner (2025)
+
+`Measuring Politicians' Public Personality Traits Using Computational Text Analysis` supplies the
+most appropriate claim boundary. Its lens model states that researchers do not directly observe a
+politician's intrinsic personality: public cues jointly reflect intrinsic disposition and strategic
+self-presentation (PDF pp. 3-4). It specifically critiques the RKH approach for lacking validation
+against human-annotated political text and argues for domain-specific constructs and codebooks
+(p. 5).
+
+Their workflow starts from a validated political-personality inventory, distinguishes strong from
+weak cues, and obtains human labels from three coders. Agreement was only alpha .70-.78 even with a
+purpose-built codebook (pp. 8-9). The best models reached macro-F1 .76-.77, while no method exceeded
+.80 (pp. 10 and 14). Strong cues were easier to recover. A local Llama-3-8B reached only about
+.55-.60 and the compact supervised/fine-tuned models failed several functional tests (pp. 10-12), so
+"runs locally" is not itself adequate validation. The paper measured public agency/communion cues,
+not intrinsic Big Five traits or member-level Extraversion.
+
+### Consequence for v1 and a possible v2
+
+The three papers strengthen the decision not to activate v1. Its hand-built excitement and
+gregariousness facets were weak, the two aspects did not cohere, and the only external criterion was
+itself substantially volume-laden. A defensible next test would:
+
+1. target **publicly expressed Extraversion cues**, not claim unobservable intrinsic Extraversion;
+2. build a congressional-interview codebook for strong warmth, excitement/positive energy,
+   gregariousness, activity, and assertiveness cues, including a large `none` class and explicit
+   separation of warmth from Agreeableness;
+3. require independent human labels and interrater agreement before model training;
+4. use speaker/episode-disjoint validation and source/venue holdouts, with visibility, office,
+   leadership, appearance opportunity, party, gender, and transcript source controlled;
+5. compare a locally trainable model against the lexical baseline and require human-label,
+   functional, reliability, discriminant, and venue-robustness bars; and
+6. retain RKH and visibility only as diagnosed secondary comparisons, never score inputs or decisive
+   construct-validity criteria.
+
+This route can be designed with zero paid-API use. It requires a human-labeled political-speech
+criterion or an openly reproducible equivalent; the three papers do not supply a ready-to-use,
+validated current-Congress Extraversion score.
