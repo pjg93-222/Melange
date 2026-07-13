@@ -6,7 +6,7 @@ import os as _o, sys as _s; _s.path.insert(0, _o.path.dirname(_o.path.abspath(__
 after that transcript and the label/input fingerprints are committed into the prereg. No artifact
 is consumed by production; every result is printed for verbatim append to the prereg.
 """
-import argparse, csv, hashlib, json, math, re
+import argparse, csv, hashlib, json, math, re, sqlite3
 import numpy as np
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import GridSearchCV, KFold
@@ -21,6 +21,18 @@ PREREG = _o.path.join(_o.path.dirname(_o.path.dirname(_o.path.abspath(__file__))
                       'big5_a_interview_prereg.md')
 LABEL = B + r'\interview_antagonism_halves.json.candidate'
 RESEEDS = [101, 113, 127, 139, 151]
+PINS = {
+    'label': '15ffb00ba199708c17733260205e0580ce766f3b37e0c69a74965b35b4ab0575',
+    'coop': 'f0f958dfd35e89f7ab08e73e4f4aab59f762e50558803da4f6dec3a455ff224c',
+    'hearing': '7eb389593de20dd555fb3d23ffffa3e7fc48d6cbf2611434548ec06b5d282206',
+    'bd': '57ca1e2b1731cbeed4411645c2b527a8db0136362c2d3d4654dda8faaa852e03',
+    'vv': '0bf7c461e9eca440535484bf325c5b90d423daf0573e984a1b8691a242194751',
+    'panel': '491761ea130f8458ae0d09d15be20619b31011ab14e56e6a05bfbdf3d703a4cb',
+    'st_npz': '69b1da00ebcc7bf4ecdbb07676630f39f6bbb01591ad8e8f8a83f6f4edd17619',
+    'st_meta': 'e3189a7a4fcc5d13c4815da65481e5393ff0804d50cb2169f3a14a74ea0f2ea8',
+    'empath': 'fd5ff76d59f59ed67889d1dd6a2e2f9d42ca596122bf831ae1a126b5d9d7383f',
+    'speeches': 268173, 'posts': 29098,
+}
 
 def sha(path):
     h = hashlib.sha256()
@@ -127,9 +139,18 @@ def look():
     pre = open(PREREG, encoding='utf-8').read()
     if 'STATUS: LOOK LOCKED' not in pre or '\n## RESULT-AI' in pre:
         print('LOOK REFUSED: prereg not armed or result already consumed'); return
-    pin = re.search(r'LABEL_SHA256:\s*`([0-9a-f]{64})`', pre)
-    if not pin or sha(LABEL) != pin.group(1):
-        print('LOOK REFUSED (not consumed): label fingerprint mismatch'); return
+    paths = {'label': LABEL, 'coop': B + r'\coop_v2_candidate.json',
+             'hearing': B + r'\hearing_antagonism.json', 'bd': B + r'\behavioral_dispositions.json',
+             'vv': B + r'\voteview_consistency.json', 'panel': B + r'\behavior_panel.json',
+             'st_npz': B + r'\b5_emb_cache_r6_st.npz', 'st_meta': B + r'\b5_emb_meta_r6_st.json',
+             'empath': B + r'\b5_empath_cache.json'}
+    current = {k: sha(p) for k, p in paths.items()}
+    con = sqlite3.connect(B + r'\social_media.db'); con.execute('PRAGMA query_only=1')
+    current['speeches'] = con.execute('select count(*) from speeches').fetchone()[0]
+    current['posts'] = con.execute('select count(*) from posts').fetchone()[0]; con.close()
+    bad = [k for k in PINS if current.get(k) != PINS[k]]
+    if bad:
+        print('LOOK REFUSED (not consumed): fingerprint drift in %s' % ','.join(bad)); return
     ok, names, ant, party, female, logw = criterion_report()
     if not ok:
         print('LOOK REFUSED (not consumed): criterion gate no longer qualifies'); return
@@ -148,6 +169,7 @@ def look():
     predA = oof_all(Xst, cy, cmask, BI.SEEDS)
     Xemp = BI.featurize(MEM, alltext); crit = BI.criteria(BD, VV, P, MEM)
     core = {t: BI.oof(Xemp, crit[t]) for t in ['O', 'C', 'E', 'ES']}
+    print('input fingerprints: MATCH | MEM=%d | fresh-A n=%d' % (len(MEM), len(keep)))
     print('=== LOOK: fresh interview-antagonism A matrix | n=%d ===' % len(keep))
     primary, own = eval_bars(predA, yA, core, crit, mask, Z, 'primary')
     robust = False

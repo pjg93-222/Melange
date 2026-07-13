@@ -1,6 +1,6 @@
 # Psych-audit round 9 — fresh interview-antagonism criterion for Agreeableness
 
-STATUS: CRITERION LOCKED 2026-07-12 — no labels generated; A look not armed.
+STATUS: LOOK LOCKED 2026-07-12 — criterion qualified 5/5; A look not yet taken.
 
 ## Rationale and independence
 
@@ -63,7 +63,16 @@ no production promotion. Any five-bar or re-derivation miss closes this criterio
 
 ## Lock-time fields for Stage 2
 
-LABEL_SHA256: `[AFTER-STAGE-1]`
+LABEL_SHA256: `15ffb00ba199708c17733260205e0580ce766f3b37e0c69a74965b35b4ab0575`
+
+- cooperation_v2: `f0f958dfd35e89f7ab08e73e4f4aab59f762e50558803da4f6dec3a455ff224c`
+- hearing antagonism: `7eb389593de20dd555fb3d23ffffa3e7fc48d6cbf2611434548ec06b5d282206`
+- behavioral dispositions: `57ca1e2b1731cbeed4411645c2b527a8db0136362c2d3d4654dda8faaa852e03`
+- Voteview consistency: `0bf7c461e9eca440535484bf325c5b90d423daf0573e984a1b8691a242194751`
+- behavior panel: `491761ea130f8458ae0d09d15be20619b31011ab14e56e6a05bfbdf3d703a4cb`
+- st_mean NPZ/meta: `69b1da00ebcc7bf4ecdbb07676630f39f6bbb01591ad8e8f8a83f6f4edd17619` / `e3189a7a4fcc5d13c4815da65481e5393ff0804d50cb2169f3a14a74ea0f2ea8`
+- Empath cache: `fd5ff76d59f59ed67889d1dd6a2e2f9d42ca596122bf831ae1a126b5d9d7383f`
+- social_media.db rows: speeches **268173**, posts **29098**
 
 No result bar, threshold, basis, prompt, exclusion, seed, or consequence changes after label generation.
 
@@ -75,3 +84,18 @@ correlation, reliability, or gate statistic was viewed. The failures were valid 
 trailing model text (`JSONDecodeError: Extra data`). The parser now accepts the first complete JSON
 object with `JSONDecoder.raw_decode`, and a successful retry removes that member's stale error entry.
 The prompt, model, halves, numeric fields, score formula, roster, gates, and trait protocol are unchanged.
+
+## STAGE-1 RESULT — CONSUMED 2026-07-12: criterion QUALIFIED 5/5
+
+```text
+=== INTERVIEW-ANTAGONISM CRITERION GATE ===
+  G1 coverage/reliability: n=322 half-r=+0.537 SB=0.699 (n>=250, SB>=.60) -> PASS
+  G2 raw confounds: party=+0.109 gender=-0.032 log_words=-0.005 -> PASS
+  G3 cross-venue hearing convergence: r=+0.160 n=282 -> PASS
+  G4 cooperation direction: r=-0.072 n=207 (must <0) -> PASS
+  G5 excluded-content discriminant max|r|=0.242 (<.50) -> PASS
+  CRITERION VERDICT: 5/5 -> QUALIFIED
+```
+
+Stage 2 is now armed under the fingerprints above. No trait prediction was paired with this
+criterion during Stage 1.
