@@ -826,3 +826,19 @@ The carried cutoff-reactivity measure retains five-split median SB=.555 at curre
 No N pairing was reopened: promoted Big-Five N already has independent LIWC convergence, and the
 historical behavioral-reactivity text-N look was previously consumed. Cooperation-v2 remains the
 coalition-behavior input; inverse antagonism remains the validated A facet.
+
+## 31. Interview-observer E criterion — rejected before behavior look (2026-07-13)
+
+A fresh package-disjoint observer test asked whether equal-length, de-identified interview responses
+could supply a criterion for expressiveness-v2. Haiku 4.5 rated six fixed expressive-interpersonal
+facets under a 4,097-token cached coding manual with explicit A/N/dominance controls. Two independent
+SHA-256 package partitions produced 314 and 316 complete ratings; no package crossed halves.
+
+The criterion was internally reliable (Spearman-Brown .695/.744) and stayed separated from the
+validated inverse-antagonism A facet (-.143) and affective N (+.067). It nevertheless failed its
+pre-behavior qualification: partition repeatability was .696 against a .70 bar, party association
+was -.347 against |.20|, and gender association was +.288 against |.15|. Volume contamination was
+small (-.023). The criterion was therefore rejected before expressiveness or Blue E was opened, and
+the same-venue observer route cannot validate E. No residualization, subgroup scoring, or threshold
+repair was attempted. The stable expressiveness-v2 role remains operational only pending a genuinely
+source-disjoint criterion.

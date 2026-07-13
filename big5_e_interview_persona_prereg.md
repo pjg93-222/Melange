@@ -170,3 +170,26 @@ prompt, cache prefix, excerpts, parsing, fields, composite, and member order are
 unchanged. The resumed collection therefore repeats only unsaved API work and cannot alter any saved
 rating. Updated scorer SHA-256:
 `53eb7787167ba87a27dee5372441e525637eaf70a47a0487d652d43ff102c182`.
+
+## RESULT-EI — STAGE 1 REJECTED; EXPRESSIVENESS LOOK NOT TAKEN (2026-07-13)
+
+The observer criterion cleared split-half reliability and separation from inverse-antagonism A and
+affective N. It missed the independent-partition repeat bar by .004 and materially exceeded both the
+party and gender contamination limits. Under the locked rule, the criterion is rejected and the
+expressiveness file remains unopened. The same-venue interview-observer route is closed without
+residualization, subgroup repair, rubric change, threshold movement, or trait look.
+
+```text
+=== OBSERVED INTERVIEW-E CRITERION GATE ===
+  primary coverage=314 half-r=+0.532 SB=0.695
+  rederive coverage=316 half-r=+0.592 SB=0.744
+  partition-repeat r=+0.696 n=300
+  contamination: party_R=-0.347(n=298) | female=+0.288(n=300) | log_source_packages=-0.023(n=300) | inverse_antagonism_A=-0.143(n=290) | affective_N=+0.067(n=300)
+  coverage                     PASS
+  reliability                  PASS
+  partition_repeat             MISS
+  demographic_volume           MISS
+  construct_separation         PASS
+  CRITERION VERDICT: REJECTED
+  COLLECTION_SHA256: cb387405e38d04760863bfec9be508c1d77ea6995c9c79f8cab1a1d8943aad3a
+```

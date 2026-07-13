@@ -75,6 +75,16 @@ Those repeated values are roster coding artifacts, not person-specific dominance
 3. **Cooperation/A separation preserved.** Cooperation-v2 remains the coalition-behavior input; the validated inverse-antagonism facet remains the Big-Five A measure. Dominance-v2 has essentially zero partial association with cooperation-v2 (r=.002), while expressiveness is modestly associated (r=.167); neither is substituted for A.
 4. **No N re-look was needed or taken.** The promoted Big-Five N already has independent LIWC convergence in the 5/5 multimethod instrument. The existing behavioral cutoff-reactivity measure now has 272 covered members and fresh five-split median SB=.555. Its previously consumed text-N criterion test remains historical; current affective N was not paired with a duplicate/shared-source criterion.
 
+## Interview-observer E follow-up — criterion rejected before behavior look
+
+The requested off-script interview route was tested with 1,000-word package-disjoint halves and a
+blinded cached observer rubric. Criterion reliability cleared (SB=.695/.744), as did separation from
+inverse-antagonism A (-.143), affective N (+.067), and source volume (-.023). The observer read itself
+was not admissible: independent-partition repeatability was .696 (<.70), party contamination was
+-.347 (limit |.20|), and gender contamination was +.288 (limit |.15|). The locked gate rejected the
+criterion before any expressiveness pairing. This leaves the interview role operational but prevents
+same-venue observer ratings from being used as an E validation substitute.
+
 ## Verification
 
 - Kernel tests: 37 passed, 0 failed.
@@ -83,5 +93,6 @@ Those repeated values are roster coding artifacts, not person-specific dominance
 - Person-facing dominance: 272 observed values shown, 260 unavailable values hidden, 0 coverage mismatches.
 - Pink default-overlay checks: no Pink radar call and no dashed-Pink legend in the rendered desk.
 - Behavioral-roles v2: synthetic battery passed; locked one-look completed; dominance candidate PASS, expressiveness operational-role PASS, independent-E criterion MISS.
+- Interview-observer E: 630 cached-manual ratings completed with zero errors; Stage-1 criterion REJECTED; behavior look not taken.
 - Candidate consumer scan: the two v2 JSON paths occur only in the candidate study and its preregistration; no engine or dashboard consumer exists.
 - Rank authority SHA-256 remained `797a6490ca0c0f63496f76ac9f030c0a8b538d5f46dbc18e39092bbbc74b00c6`.
