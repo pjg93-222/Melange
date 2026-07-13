@@ -119,3 +119,52 @@ Before the real look, `python fec/behavioral_roles_v2_study.py --simulate` must 
 statistical gates admit a planted signal, reject a null, compute split-half correction correctly,
 and enforce missingness. The real look is exactly one invocation with `--look`. Its stdout and
 machine-readable result are appended after this lock without rewriting the rules above.
+
+## RESULT — consumed 2026-07-13 after prereg lock `9b6074b`
+
+The synthetic battery passed before the real invocation. The one look was then consumed against the
+pinned inputs. No input or production artifact changed. Candidate SHA-256 is
+`d6b7bd35e330549b40a1820b0709c9bf7e2768e3dd8456a3293b6793fec9f755`; result SHA-256 is
+`94b61f0c97ffd91411ea42a856105b88c4ac00ff1d7646bf1864e8710e8ce62b`.
+
+```text
+BEHAVIORAL ROLES v2 — THE ONE LOOK
+coverage: dominance 272 | expressiveness 272
+reliability dominance_v2       median SB=0.564 | >=.40 5/5 | 0.438, 0.478, 0.657, 0.660, 0.564
+reliability expressiveness_v2  median SB=0.749 | >=.40 5/5 | 0.761, 0.724, 0.753, 0.749, 0.720
+reliability reactivity_raw     median SB=0.555 | >=.40 5/5 | 0.498, 0.555, 0.534, 0.597, 0.594
+criterion dominance~leadership partial r=-0.003 p=0.5075 n=270 (descriptive)
+criterion expressiveness~floor-elaboration partial r=-0.023 p=0.6425 n=257
+partial contamination:
+  dominance~expressiveness -0.074
+  visibility     dominance +0.099 | expressiveness -0.175
+  breadth        dominance +0.081 | expressiveness +0.054
+  diligence      dominance +0.033 | expressiveness +0.010
+  cooperation_v2 dominance +0.002 | expressiveness +0.167
+  reactivity     dominance +0.245 | expressiveness +0.027
+shared-interview Blue E (descriptive): dominance +0.052 | expressiveness +0.060
+rank sensitivity: rho 0.999980 | top20 20/20 | top50 50/50
+gates:
+  coverage                                 PASS
+  missingness                              PASS
+  dominance_reliability                    PASS
+  expressiveness_reliability               PASS
+  reactivity_reliability                   PASS
+  dominance_contamination                  PASS
+  expressiveness_visibility                PASS
+  expressiveness_other_contamination       PASS
+  expressiveness_floor_criterion           MISS
+  rank_sensitivity                         PASS
+verdicts:
+  dominance_v2_qualified_candidate                 PASS
+  expressiveness_v2_qualified_role                 PASS
+  expressiveness_v2_independent_E_indicator        MISS
+wrote behavioral_roles_v2_candidate.json and behavioral_roles_v2_study.json (consumed by nothing)
+```
+
+Interpretation fixed by the prereg: dominance_v2 is a qualified candidate for observed
+conversational dominance. Its near-zero leadership correlation confirms that committee office and
+observed floor behavior are separate rather than interchangeable. Expressiveness_v2 is stable and
+distinct from interview exposure, but it misses the source-disjoint criterion and therefore cannot
+be called an independent E indicator. The frozen specification is closed without feature shopping.
+Reactivity retains acceptable current-corpus reliability; no N trait look was reopened.

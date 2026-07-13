@@ -794,3 +794,35 @@ unchanged at `797a6490ca0c0f63496f76ac9f030c0a8b538d5f46dbc18e39092bbbc74b00c6`.
 1,761/2,192 clips are identity-clean, 410 members clear 180 seconds, and all 88 features were cache
 hits. Previously consumed audio trait experiments remain historical misses and are not injected into
 the promoted Big Five; the retired gender-confounded voice-ES artifact remains disconnected.
+
+## 30. Behavioral roles v2 — dominance candidate qualifies; expressiveness is not E (2026-07-13; prereg `9b6074b`)
+
+The behavioral-alignment audit exposed one production defect and one labeling gap: dominance mixed
+observed interaction behavior with a binary committee-office flag, while visibility measured media
+exposure rather than turn-level expression. A locked, package-disjoint candidate study separated the
+roles before computing any outcomes (`behavioral_roles_v2_prereg.md`).
+
+**Frozen measures.** Dominance-v2 is the mean of within-program turn-length Gini and explicit
+floor-defense rate; committee leadership and response length are excluded. Expressiveness-v2 is the
+mean of within-program mean and p90 words per turn; interview count is excluded. Both require 30
+qualifying turns, are z-scored within chamber, and remain missing otherwise. Five SHA-256 package
+splits reran all cell floors and program standardization independently.
+
+**Result.** Both operational roles are reliable on 272 members: dominance median SB=.564 (all five
+splits >=.40) and expressiveness median SB=.749 (all five >=.40). Dominance's largest preregistered
+partial cross-role correlation is .245 (reactivity); dominance-expressiveness is -.074 and
+dominance-cooperation_v2 is .002. Replacing the old dominance slot in memory only leaves the
+flip-model decision surface effectively unchanged (rho=.999980, top-20 20/20, top-50 50/50).
+Therefore dominance-v2 is a **qualified candidate**, consumed by nothing until a separate promotion.
+
+Expressiveness is distinct from visibility after controls (r=-.175) and qualifies as a stable
+speaking-style role, but it fails its source-disjoint CREC floor-elaboration criterion (partial
+r=-.023, p=.6425) and has only descriptive shared-interview alignment with Blue E (+.060). It is
+therefore **not an independent behavioral E indicator**; the specification is closed without feature
+shopping. Committee leadership is also unrelated to pure conversational dominance (partial r=-.003),
+so formal office and observed floor behavior remain separate constructs.
+
+The carried cutoff-reactivity measure retains five-split median SB=.555 at current coverage 272.
+No N pairing was reopened: promoted Big-Five N already has independent LIWC convergence, and the
+historical behavioral-reactivity text-N look was previously consumed. Cooperation-v2 remains the
+coalition-behavior input; inverse antagonism remains the validated A facet.

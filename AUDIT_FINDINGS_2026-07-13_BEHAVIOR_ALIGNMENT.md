@@ -68,12 +68,12 @@ Those repeated values are roster coding artifacts, not person-specific dominance
 - Kept cooperation and validated low-antagonism A side by side with no substitution.
 - Added audit guards so Pink cannot silently return to the default radar and synthetic dominance cannot silently return as a person-specific display value.
 
-## Behavioral improvements still worth pursuing
+## Behavioral improvement disposition — completed 2026-07-13
 
-1. Build a dominance-v2 candidate that separates observed conversational dominance from formal leadership and represents missing interaction evidence as missing/neutral. Test rank sensitivity and criterion behavior before any engine promotion.
-2. Preserve interview visibility as an operational exposure variable, while developing a separate turn-level expressiveness/engagement measure if an independent behavioral E indicator is needed.
-3. Keep cooperation and Agreeableness separate. Use the validated low-antagonism facet for A and cooperation for coalition behavior.
-4. If independent N corroboration is required, validate a source-disjoint affect/pressure measure; the current duplicate source cannot supply that evidence.
+1. **Dominance-v2 candidate qualified.** The locked candidate excludes formal leadership and verbal-output length, requires at least 30 qualifying interaction turns, and leaves everyone else missing. Coverage is 272; five-split median SB is .564; maximum preregistered partial contamination is .245; offline targeting sensitivity is rho .999980 with 20/20 and 50/50 overlap. Committee leadership is unrelated after controls (r=-.003), confirming the two roles should stay separate. The candidate is consumed by nothing pending a distinct engine-promotion decision.
+2. **Turn-level expressiveness measured, but not validated as E.** The visibility role remains an exposure variable. Expressiveness-v2 is stable (median SB=.749), minimally related to visibility after controls (r=-.175), and qualifies as a distinct operational role. It misses the source-disjoint CREC floor-elaboration criterion (partial r=-.023, p=.6425), so it is not an independent behavioral Extraversion indicator and the frozen route is closed without feature substitution.
+3. **Cooperation/A separation preserved.** Cooperation-v2 remains the coalition-behavior input; the validated inverse-antagonism facet remains the Big-Five A measure. Dominance-v2 has essentially zero partial association with cooperation-v2 (r=.002), while expressiveness is modestly associated (r=.167); neither is substituted for A.
+4. **No N re-look was needed or taken.** The promoted Big-Five N already has independent LIWC convergence in the 5/5 multimethod instrument. The existing behavioral cutoff-reactivity measure now has 272 covered members and fresh five-split median SB=.555. Its previously consumed text-N criterion test remains historical; current affective N was not paired with a duplicate/shared-source criterion.
 
 ## Verification
 
@@ -82,4 +82,6 @@ Those repeated values are roster coding artifacts, not person-specific dominance
 - Dashboard and combined member desk regenerated successfully for all 533 members.
 - Person-facing dominance: 272 observed values shown, 260 unavailable values hidden, 0 coverage mismatches.
 - Pink default-overlay checks: no Pink radar call and no dashed-Pink legend in the rendered desk.
+- Behavioral-roles v2: synthetic battery passed; locked one-look completed; dominance candidate PASS, expressiveness operational-role PASS, independent-E criterion MISS.
+- Candidate consumer scan: the two v2 JSON paths occur only in the candidate study and its preregistration; no engine or dashboard consumer exists.
 - Rank authority SHA-256 remained `797a6490ca0c0f63496f76ac9f030c0a8b538d5f46dbc18e39092bbbc74b00c6`.
