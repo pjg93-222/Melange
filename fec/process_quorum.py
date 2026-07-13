@@ -44,7 +44,35 @@ def fold(s):   # accent-fold for matching (Quorum ships ASCII 'Velazquez'; conge
 byfold={fold(m):m for m in cong}
 sur2mem=collections.defaultdict(list)
 for m in cong: sur2mem[fold(m.split()[-1])].append(m)
-NICK={'buddy carter':'Earl Carter','bobby scott':'Robert Scott'}   # Quorum uses nicknames; congestion is canonical
+NICK={
+    'buddy carter':'Earl Carter','bobby scott':'Robert Scott',
+    'dick durbin':'Richard Durbin','zach nunn':'Zachary Nunn',
+    'jan schakowsky':'Janice Schakowsky','bernie sanders':'Bernard Sanders',
+    'jerry nadler':'Jerrold Nadler','jen kiggans':'Jennifer Kiggans',
+    'eli crane':'Elijah Crane','hank johnson':'Henry Johnson',
+    'brad schneider':'Bradley Schneider','bill keating':'William Keating',
+    'lou correa':'Luis Correa',
+}   # Quorum uses nicknames; congestion is canonical
+FIRST_EQUIV=[
+    {'richard','dick','rick','rich'}, {'charles','chuck'}, {'william','bill','billy'},
+    {'michael','mike'}, {'robert','bob','bobby','rob'}, {'edward','ed','eddie'},
+    {'james','jim','jimmy'}, {'thomas','tom','tommy'}, {'john','jack','johnny'},
+    {'joseph','joe'}, {'gerald','jerry'}, {'jerrold','jerry'}, {'daniel','dan'},
+    {'donald','don'}, {'ronald','ron'}, {'andrew','andy'}, {'kenneth','ken'},
+    {'benjamin','ben'}, {'nicholas','nick'}, {'christopher','chris'},
+    {'stephen','steve'}, {'timothy','tim'}, {'matthew','matt'}, {'david','dave'},
+    {'samuel','sam'}, {'patrick','pat'}, {'anthony','tony'}, {'alexander','alex'},
+    {'katherine','katie','kate'}, {'elizabeth','liz','beth'}, {'margaret','maggie'},
+    {'cynthia','cindy'}, {'earl','buddy'}, {'addison','mitch'}, {'rafael','ted'},
+    {'louis','lou'}, {'luis','lou'}, {'francis','frank'}, {'rebecca','becca'},
+    {'abraham','abe'}, {'gregory','greg'}, {'douglas','doug'}, {'raymond','ray'},
+    {'harold','hal'}, {'zachary','zach'}, {'janice','jan'}, {'bernard','bernie'},
+    {'jennifer','jen'}, {'elijah','eli'}, {'henry','hank'}, {'bradley','brad'},
+]
+FIRST_CANON={n:i for i,g in enumerate(FIRST_EQUIV) for n in g}
+def same_first(a,b):
+    a,b=fold(a),fold(b)
+    return a==b or (a in FIRST_CANON and FIRST_CANON.get(a)==FIRST_CANON.get(b))
 def matchname(nm):
     nm=nfc(nm.strip())
     nm=NICK.get(fold(nm),nm)
@@ -53,9 +81,12 @@ def matchname(nm):
     ts=nm.split()
     if len(ts)>=2:
         cands=sur2mem.get(fold(ts[-1]),[])
-        if len(cands)==1: return cands[0]                       # unique surname
-        for c in cands:                                          # first-name initial tiebreak
-            if fold(c.split()[0])[:1]==fold(ts[0])[:1]: return c
+        # Never infer identity from surname alone.  Quorum contains unrelated people and
+        # candidates who share a legislator's surname (Rick/Susie Lee, Randy/Yvette Clarke,
+        # Sherrod/Shontel Brown, Dan/Sanford Bishop, etc.).  Exact or explicit nickname-
+        # equivalent first+last names are required; ambiguity is segregated for review.
+        hits=[c for c in cands if same_first(c.split()[0],ts[0])]
+        if len(hits)==1: return hits[0]
     return None
 def classify(src):
     """-> (bucket, member_name_or_None, principal_member_or_None)"""
@@ -67,7 +98,7 @@ def classify(src):
         if mm: principal=matchname(re.sub(r'\((R|D|I)[-)][^)]*\)?','',mm.group(1)).strip())
         return ('staffer',None,principal)
     if re.match(r'^\s*Former\b',pre): return ('former_member',None,None)
-    m=re.match(r'^\s*(?:Rep|Sen|Del|Resident Commissioner)\.?\s+(.+)$',pre)
+    m=re.match(r'^\s*(?:Rep|Sen|Del|Resident Commissioner|Whip|Leader|Speaker)\.?\s+(.+)$',pre)
     if m:
         nm=re.sub(r'\((R|D|I)[^)]*\)\s*$','',m.group(1)).strip()
         hit=matchname(nm)

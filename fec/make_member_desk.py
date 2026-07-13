@@ -16,6 +16,7 @@ Run:  python fec/make_member_desk.py            (writes bundle JSON + HTML)
       python fec/make_member_desk.py --data      (writes/validates the bundle only)
 """
 import json, os, csv, re, sys, unicodedata
+from datetime import datetime
 import openpyxl
 from moneyball_core import dump_atomic   # S3-01 audit run-2: chain artifacts write atomically
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -89,7 +90,9 @@ def refs_for(name):
     inn = [pack(e, e['a'], True) for e in sorted(_RIN.get(name, []), key=lambda e: -e.get('n_scored', 0))[:8]]
     return {'out': out, 'in': inn} if (out or inn) else None
 # ---- computed psychometrics (user-directed 2026-07-03): Big5 radar + B&L persona + susceptibility cross-read ----
-B5  = (L('big5_v2.json') or L('big5_traits.json') or {}).get('traits', {})   # v2 = behavior-calibrated text instrument (2026-07-04); falls back to v1 if absent
+B5  = (L('big5_blue_validated.json') or L('big5_blue_emb.json') or L('big5_v2.json') or L('big5_traits.json') or {}).get('traits', {})
+# Preferred Blue is the 5/5 multimethod promotion: source-primary O/C/E, qualified package-split
+# inverse-antagonism A, and independently promoted affective-content N.
 RCPT = (L('member_receptivity.json') or {}).get('members', {})
 if not RCPT: print('  !! member_receptivity.json MISSING — psychometrics tab computed section will be empty')
 def _pctrank(vals):
@@ -97,13 +100,28 @@ def _pctrank(vals):
     import bisect
     return lambda v: round(bisect.bisect_left(s, v) / n, 3)
 _b5have = {m: t for m, t in B5.items() if t.get('tokens', 0) > 0}
-_B5PCT = {tr: _pctrank([t[tr] for t in _b5have.values()]) for tr in ('O', 'C', 'E', 'A', 'ES')} if _b5have else {}
+_B5PCT = {tr: _pctrank([t[tr] for t in _b5have.values() if t.get(tr) is not None])
+           for tr in ('O', 'C', 'E', 'A', 'ES')} if _b5have else {}
 # LLM item-read overlay (run-4p, user: "Wire it in"): big5_llm_opus.json — the MTMM-passing Opus
 # pilot (173 RKH-overlap members). Display overlay ONLY (dashed polygon on the v2 radar); engines
 # untouched — promotion into receptivity stays a separate ratified step.
 B5L = (L('big5_llm_opus.json') or {}).get('traits', {})
 _llmhave = {m: t for m, t in B5L.items() if t.get('n_chunks', 0) > 0}
 _LLMPCT = {tr: _pctrank([t[tr] for t in _llmhave.values()]) for tr in ('O', 'C', 'E', 'A', 'ES')} if _llmhave else {}
+# ES retired 2026-07-12 (user: redundant with N — ES=-N r=-1.00 — + voice-ES gender-confounded).
+# Preserve instrument independence on the replacement Neuroticism axis: Blue-N and Pink-N are ranked
+# from their OWN text-family scores. The round-7 affective-content score remains a separate,
+# text-derived diagnostic candidate; copying it into both polygons would manufacture agreement.
+_B5NPCT = _pctrank([t['N'] for t in _b5have.values()]) if _b5have else None
+_LLMNPCT = _pctrank([t['N'] for t in _llmhave.values()]) if _llmhave else None
+_BLUE_FILE = next((os.path.join(B, f) for f in ('big5_blue_validated.json','big5_blue_emb.json','big5_v2.json')
+                   if os.path.exists(os.path.join(B, f))), os.path.join(B, 'big5_v2.json'))
+_PINK_FILE = os.path.join(B, 'big5_llm_opus.json')
+_BLUE_TS = os.path.getmtime(_BLUE_FILE) if os.path.exists(_BLUE_FILE) else None
+_PINK_TS = os.path.getmtime(_PINK_FILE) if os.path.exists(_PINK_FILE) else None
+_PINK_OLDER_DAYS = round(max(0.0, (_BLUE_TS - _PINK_TS) / 86400.0), 1) if _BLUE_TS and _PINK_TS else None
+_BLUE_DATE = datetime.fromtimestamp(_BLUE_TS).strftime('%Y-%m-%d') if _BLUE_TS else None
+_PINK_DATE = datetime.fromtimestamp(_PINK_TS).strftime('%Y-%m-%d') if _PINK_TS else None
 _achave = {m: r for m, r in RCPT.items() if r.get('agency') is not None}
 _ACPCT = {k: _pctrank([r[k] for r in _achave.values()]) for k in ('agency', 'communion')} if _achave else {}
 # ---- external measures (run-4m wiring): CEL/LES effectiveness + DW-NOMINATE (lep_criterion.py),
@@ -143,24 +161,57 @@ BDR = {m: dict(d) for m, d in BDISP.items()}
 for _m, _d in BDR.items():
     if _CV2.get(_m) is not None: _d['cooperation_z'] = _CV2[_m]
     else: _d.pop('cooperation_z', None)
-_BD_AX = ['cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z', 'reactivity_z']
+_BD_AX = ['cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z']
 _BDPCT = {ax: _pctrank([d[ax] for d in BDR.values() if ax in d]) for ax in _BD_AX} if BDR else {}
+_AFFN = (L('affective_n.json') or {}).get('members', {})
+_AFFNPCT = _pctrank(list(_AFFN.values())) if _AFFN else None
+# Round-9 validated A facet: inverse of controlled, package-split interview antagonism.
+# This is display-only and deliberately separate from both the cooperation engine role and
+# the two text Big-Five polygons; neither text-A instrument cleared diagonal dominance.
+_AVAL_ART = L('interview_antagonism.json') or {}
+_AVAL = _AVAL_ART.get('members', {})
+_AVALPCT = _pctrank([d['agreeableness_z'] for d in _AVAL.values()
+                     if d.get('agreeableness_z') is not None]) if _AVAL else None
 NARR = L('member_narratives.json') or {}   # 3-paragraph 'Suggested approach' brief (Fable, Opus rescues refusals); display-only
-VES = (L('b5_es_voice.json') or {}).get('members', {})   # voice-ES OOF read; display-only — the +0.208 pass is GENDER-CONFOUNDED on the locked retest (partial r −0.03, 2026-07-09): weak tiebreaker at most
+# voice-ES RETIRED 2026-07-12 (user): the +0.208 look was gender-confounded (locked retest partial r −0.03).
+# The text radar uses independently ranked N=-ES. The decision radar's sixth axis shows the separately
+# promoted affective-N engine input; it is never copied into either text polygon.
+
+_NARR_TRAIT_TERMS = ('agreeableness', 'agreeable', 'emotional stability', 'neuroticism', 'neurotic')
+def _narrative_without_unvalidated_an(text):
+    """Block legacy prose claims sourced from the non-discriminant text A/N axes.
+
+    The generated narratives predate the validated antagonism facet and affective-N promotion.
+    Keep their operational observations, but never let old text-A/ES prose overrule the qualified
+    measures now shown alongside it.
+    """
+    sentences = re.split(r'(?<=[.!?])\s+', text or '')
+    kept = [s for s in sentences if not any(term in s.lower() for term in _NARR_TRAIT_TERMS)]
+    return ' '.join(kept).strip() or 'Trait-specific narrative withheld pending qualified-source regeneration.'
 
 def psy_for(name):
     t = B5.get(name) or {}; r = RCPT.get(name) or {}
     out = {}
     bd = BDR.get(name) or {}
     if bd and _BDPCT:
-        out['behav_pct'] = [(_BDPCT[ax](bd[ax]) if ax in bd else None) for ax in _BD_AX]
+        out['behav_pct'] = [(_BDPCT[ax](bd[ax]) if ax in bd else None) for ax in _BD_AX] + [(_AFFNPCT(_AFFN[name]) if _AFFNPCT and name in _AFFN else None)]
+    if name in _AVAL and _AVALPCT and _AVAL[name].get('agreeableness_z') is not None:
+        out['a_validated_pct'] = _AVALPCT(_AVAL[name]['agreeableness_z'])
+        out['a_antagonism_z'] = _AVAL[name].get('antagonism_z')
+        out['a_validated_scope'] = (_AVAL_ART.get('scope') or {}).get('label')
+        out['a_coverage_n'] = (_AVAL_ART.get('scope') or {}).get('covered_n')
     if t.get('tokens', 0) > 0 and _B5PCT:
-        out['big5_pct'] = [_B5PCT[tr](t[tr]) for tr in ('O', 'C', 'E', 'A', 'ES')]
+        out['big5_pct'] = [(_B5PCT[tr](t[tr]) if t.get(tr) is not None else None)
+                           for tr in ('O', 'C', 'E', 'A')] + [(_B5NPCT(t['N']) if _B5NPCT else None)]
         out['big5_low'] = bool(t.get('lowconf')); out['tokens'] = t.get('tokens')
     lm = _llmhave.get(name)
     if lm and _LLMPCT:
-        out['llm_pct'] = [_LLMPCT[tr](lm[tr]) for tr in ('O', 'C', 'E', 'A', 'ES')]
+        out['llm_pct'] = [_LLMPCT[tr](lm[tr]) for tr in ('O', 'C', 'E', 'A')] + [(_LLMNPCT(lm['N']) if _LLMNPCT else None)]
         out['llm_chunks'] = lm.get('n_chunks')
+    if out.get('big5_pct') or out.get('llm_pct'):
+        out['big5_vintage'] = {'blue': _BLUE_DATE, 'pink': _PINK_DATE,
+                               'pink_older_days': _PINK_OLDER_DAYS,
+                               'blue_n': len(_b5have), 'pink_n': len(_llmhave)}
     if r.get('agency') is not None and _ACPCT:
         out['agency_pct'] = _ACPCT['agency'](r['agency']); out['communion_pct'] = _ACPCT['communion'](r['communion'])
         out['approach'] = _approach(out['agency_pct'], out['communion_pct'], r.get('susc_read'))
@@ -177,11 +228,11 @@ def psy_for(name):
     if ext: out['ext'] = ext
     nar = NARR.get(name)
     if nar and nar.get('ok'):
-        out['narrative'] = {'p1': nar.get('p1', ''), 'p2': nar.get('p2', ''), 'p3': nar.get('p3', ''),
+        out['narrative'] = {'p1': _narrative_without_unvalidated_an(nar.get('p1', '')),
+                            'p2': _narrative_without_unvalidated_an(nar.get('p2', '')),
+                            'p3': _narrative_without_unvalidated_an(nar.get('p3', '')),
+                            'measurement_note': 'Legacy text-A/N claims removed; use the validated A facet and affective-N fields above.',
                             'audio': bool((nar.get('has') or {}).get('audio'))}
-    v = VES.get(name)
-    if v and v.get('voice_es_z') is not None:
-        out['ves'] = {'z': v['voice_es_z'], 'gap': v.get('gap')}
     return out or None
 
 CATS = CS['cats']                            # canonical 17 legislative areas

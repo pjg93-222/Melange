@@ -236,12 +236,12 @@ if os.path.exists(_rc_p):
     ck('receptivity runs on the behavioral basis (lexical Big5 indicted 2026-07-04)',
        _rc.get('basis')=='behavioral' and _bd_ok,
        'basis=%s dispositions_ok=%s'%(_rc.get('basis'),_bd_ok))
-    # ROUND-7 N-slot guard (2026-07-11 promotion, pre-registered gate 5/5 affective_n_validate.py): the
-    # susceptibility N-slot must be the affective-content N (n_slot='affective'); reactivity_z was retired
-    # as Extraversion-contaminated (+.185 w/ big5-E, negative w/ N). A silent RECEPT_N=behavioral/text
-    # revert or an affective_n-coverage collapse would sail through the basis gate above. Coverage floor 150.
+    # ROUND-7/7b N-slot guard (2026-07-11 promotion, user-ratified, pre-registered gate 5/5): the
+    # susceptibility N-slot must remain affective-content N. The 2026-07-12 criterion audit clarifies
+    # that E/party residualization is a confound control rather than independent validity evidence; it
+    # does not silently overturn the locked promotion. Coverage floor 150.
     _nsl=_rc.get('n_slot'); _nsrc=sum(1 for v in _rc.get('members',{}).values() if v.get('n_source')=='affective')
-    ck('receptivity N-slot = affective-content N (round-7; no silent behavioral/text revert)',
+    ck('receptivity N-slot = affective-content N (round-7/7b; no silent behavioral/text revert)',
        _nsl=='affective' and _nsrc>=150,'n_slot=%s affective_members=%d'%(_nsl,_nsrc))
     # COOP-SLOT guard (audit 2026-07-10, mirrors the N-slot guard): the A-slot must be the promoted
     # share-based cooperation_v2 (@94f09cf); a silent RECEPT_COOP=v1 revert or a coverage collapse
@@ -317,6 +317,85 @@ if os.path.exists(B+r'\member_desk_bundle.json') and os.path.exists(B+r'\ranks_p
         if abs(_rc-(_m.get('score') or 0))>0.003: _bad.append(_nm)
     ck('desk pillar bars match rank authority (no stale-workbook drift)', _nomatch==0, '%d members mismatch authority pcts'%_nomatch)
     ck('desk displayed pillars*weights reconstruct displayed score', len(_bad)==0, '%d members fail reconstruction: %s'%(len(_bad),_bad[:3]))
+    # 2026-07-12 behavioral-overlay audit: Blue/Pink are evidentially useful only while independently
+    # constructed. A desk draft copied the SAME affective-N percentile into both text polygons,
+    # manufacturing fifth-axis agreement. Also require mixed artifact vintages to be disclosed.
+    _psy=[m.get('psy') or {} for m in _bun.get('members',[])]
+    _bp=[p for p in _psy if len(p.get('big5_pct') or [])==5 and len(p.get('llm_pct') or [])==5]
+    _same_n=sum(1 for p in _bp if p['big5_pct'][4]==p['llm_pct'][4])
+    ck('desk Blue/Pink Neuroticism reads remain independent (no shared-value collapse)',
+       len(_bp)>=400 and _same_n<len(_bp), '%d paired members, %d identical N percentiles'%(len(_bp),_same_n))
+    _blue=next((_p for _p in (B+r'\big5_blue_validated.json',B+r'\big5_blue_emb.json',B+r'\big5_v2.json') if os.path.exists(_p)),B+r'\big5_v2.json')
+    _pink=B+r'\big5_llm_opus.json'
+    if os.path.exists(_blue) and os.path.exists(_pink) and os.path.getmtime(_pink)<os.path.getmtime(_blue):
+        _unflag=sum(1 for p in _bp if not ((p.get('big5_vintage') or {}).get('pink_older_days')>0))
+        ck('desk discloses mixed Blue/Pink corpus vintages when Pink predates Blue',
+           _unflag==0, '%d/%d paired members lack the stale-vintage disclosure metadata'%(_unflag,len(_bp)))
+    # Source-primary Blue is the completed Round-4 promotion, not the pooled lexical v2 draft.
+    # Guard the frozen TEST result, venue provenance, affective-N fifth slot, and coherent coverage.
+    _bep=B+r'\big5_blue_emb.json'
+    if os.path.exists(_bep):
+        _be=json.load(open(_bep,encoding='utf-8')); _bem=_be.get('traits',{}); _bev=_be.get('validation') or {}
+        _bars=_bev.get('bars') or {}; _bad=sum(1 for d in _bem.values() if
+             not all(k in d for k in ('O','C','E','A','ES','N','tokens','n_source')) or
+             abs(float(d['ES'])+float(d['N']))>.002 or d.get('n_source')!='affective_n')
+        ck('source-primary Blue promotion preserves frozen MTMM/criterion gate and affective-N slot',
+           _bev.get('verdict')=='PASS' and all(_bars.values()) and
+           _bev.get('mtmm_same_trait_cross_genre',0)>1.15*_bev.get('mtmm_cross_trait_within_genre',1) and
+           set(_be.get('source_genres') or [])=={'CREC','INTERVIEW','social'} and
+           len(_bem)>=450 and _bad==0,
+           '%d members, %d malformed, verdict=%s, MTMM=%s/%s'%
+           (len(_bem),_bad,_bev.get('verdict'),_bev.get('mtmm_same_trait_cross_genre'),
+            _bev.get('mtmm_cross_trait_within_genre')))
+    _bvp=B+r'\big5_blue_validated.json'
+    if os.path.exists(_bvp):
+        _bv=json.load(open(_bvp,encoding='utf-8')); _bvm=_bv.get('traits',{}); _vv=_bv.get('validation') or {}; _rr=_bv.get('reliability') or {}
+        _diag=_vv.get('diagonal') or {}; _known=_vv.get('known_groups') or {}; _rt=_rr.get('traits') or {}
+        _bad=sum(1 for d in _bvm.values() if not all(k in d for k in ('O','C','E','A','N','ES','tokens')) or
+                 (d.get('N') is not None and abs(float(d['ES'])+float(d['N']))>.002))
+        ck('validated multimethod Big Five preserves all 5 reliability/known-group/discriminant gates',
+           len(_bvm)>=450 and _bad==0 and _vv.get('diagonal_pass_n')==5 and _vv.get('known_groups_pass_n')==5 and
+           len(_diag)==5 and all(d.get('pass') for d in _diag.values()) and
+           len(_known)==5 and all(d.get('pass') for d in _known.values()) and
+           _rr.get('pass_n')==5 and _rr.get('package_overlap')==0 and len(_rt)==5 and all(d.get('pass') for d in _rt.values()),
+           '%d members, %d malformed, reliability=%s, known=%s, diagonal=%s, package overlap=%s'%
+           (len(_bvm),_bad,_rr.get('pass_n'),_vv.get('known_groups_pass_n'),_vv.get('diagonal_pass_n'),_rr.get('package_overlap')))
+    # Round-9 validated A facet is an independently qualified, display-only measure. Require both
+    # the locked measurement metadata and exact desk propagation; it must never overwrite text A
+    # or cooperation_v2 (those remain separate constructs with separate ownership).
+    _avp=B+r'\interview_antagonism.json'
+    if os.path.exists(_avp):
+        _av=json.load(open(_avp,encoding='utf-8')); _avm=_av.get('members',{})
+        _mal=sum(1 for d in _avm.values() if not all(k in d for k in
+                 ('antagonism_z','agreeableness_z','raw_antagonism','half_a','half_b','words'))
+                 or abs(d['agreeableness_z']+d['antagonism_z'])>.002)
+        ck('validated A-antagonism facet preserves qualified schema and inverse pole',
+           _av.get('n')==len(_avm) and len(_avm)>=300 and _av.get('reliability_sb',0)>=.65 and _mal==0
+           and (_av.get('source') or {}).get('sha256')=='15FFB00BA199708C17733260205E0580CE766F3B37E0C69A74965B35B4AB0575'
+           and 'residualization-only' in ((_av.get('controls') or {}).get('role') or ''),
+           '%d members, SB=%s, %d malformed/non-inverse'%
+           (len(_avm),_av.get('reliability_sb'),_mal))
+        _desk_av={m.get('name'):(m.get('psy') or {}).get('a_validated_pct')
+                  for m in _bun.get('members',[]) if (m.get('psy') or {}).get('a_validated_pct') is not None}
+        ck('validated A facet propagates to desk without replacing engine/text A',
+           len(_desk_av)==len(_avm) and all(0<=v<=1 for v in _desk_av.values())
+           and all((m.get('psy') or {}).get('a_validated_scope')=='interview/media-covered stratum only'
+                   for m in _bun.get('members',[]) if (m.get('psy') or {}).get('a_validated_pct') is not None),
+           '%d artifact members, %d desk values'%(len(_avm),len(_desk_av)))
+        _scope=_av.get('scope') or {}; _sel=_av.get('selection_audit') or {}
+        ck('validated A claim is sampling-frame scoped (no full-roster percentile/imputation)',
+           _scope.get('covered_n')==322 and _scope.get('roster_n')==533
+           and _scope.get('imputation')=='forbidden'
+           and _sel.get('verdict')=='DEMOGRAPHICALLY SELECTED MEDIA-COVERED STRATUM',
+           'scope=%s selection=%s'%(_scope,_sel.get('verdict')))
+        _legacy_terms=('agreeableness','agreeable','emotional stability','neuroticism','neurotic')
+        _nar=[(m.get('psy') or {}).get('narrative') or {} for m in _bun.get('members',[])]
+        _legacy=sum(1 for n in _nar for k in ('p1','p2','p3')
+                    if any(t in (n.get(k) or '').lower() for t in _legacy_terms))
+        _unnoted=sum(1 for n in _nar if n and not n.get('measurement_note'))
+        ck('legacy narratives cannot re-import unvalidated text-A/N claims',
+           _legacy==0 and _unnoted==0,
+           '%d banned trait sentences remain, %d narratives lack provenance note'%(_legacy,_unnoted))
 # run-5j guard (2026-07-06): exact-duplicate speech rows (same member+package+text) inflate word
 # counts + big5 chunk sampling. The CREC backfill introduced 922 (no pre-insert dedup); collector
 # legs now carry stored-package guards. Assert the corpus stays exact-dup-clean (threshold covers
@@ -348,12 +427,28 @@ if os.path.exists(B+r'\b5_audio_cache.json') and os.path.exists(B+r'\b5_audio_ve
     ck('clean-audio voiceprints verification-gated (every cached member has a keep-clip; 88 eGeMAPS)',
        _au.get('n_features')==88 and len(_au.get('members',[]))>=300 and not _stray,
        '%d members, %d stray'%(len(_au.get('members',[])),len(_stray)))
-if os.path.exists(B+r'\b5_es_voice.json'):
-    _ev=json.load(open(B+r'\b5_es_voice.json',encoding='utf-8'))
-    _evm=_ev.get('members',{}); _ebad=sum(1 for v in _evm.values() if v.get('voice_es_z') is None or v.get('gap') is None)
-    ck('voice-ES display artifact schema (z+gap per member; matches the recorded look r=+0.208)',
-       len(_evm)>=300 and _ebad==0 and abs((_ev.get('heldout_r') or 0)-0.208)<1e-9,
-       '%d members, %d malformed, r=%s'%(len(_evm),_ebad,_ev.get('heldout_r')))
+# voice-ES display artifact RETIRED 2026-07-12 (user): the +0.208 look was gender-confounded (locked retest
+# partial r -0.03). The desk shows behavioral reactivity on the role radar and independently ranked
+# Blue/Pink N=-ES on the text radar; no voice-ES schema check remains. Guard against a silent
+# regression to the retired artifact:
+ck('voice-ES retired from display (b5_es_voice not re-wired into the desk)',
+   'b5_es_voice' not in open(B+r'\fec\make_member_desk.py',encoding='utf-8').read().split('RETIRED')[-1],
+   'desk must not consume the gender-confounded voice-ES artifact')
+_desk_tpl=open(B+r'\fec\templates\make_member_desk_00.tpl',encoding='utf-8').read()
+ck('desk attaches the new 5/5 evidence to the validated multimethod Blue',
+   all(s in _desk_tpl for s in ('validated multimethod instrument',
+                                'reliability 5/5 · known-groups 5/5 · discriminant 5/5',
+                                'Package overlap is zero',
+                                'A .699, N .680')),
+   'display must identify the promoted multimethod artifact and its package-disjoint gates')
+ck('desk preserves missing-A behavior and the separately qualified A-facet scope',
+   all(s in _desk_tpl for s in ('covered-stratum percentile','Senate 90.0% vs House 53.6%',
+                                'insufficient package-disjoint interview coverage')),
+   'A must remain missing outside the package-qualified stratum, never imputed')
+_qproc=open(B+r'\fec\process_quorum.py',encoding='utf-8').read()
+ck('Quorum member resolver refuses surname-only identity guesses',
+   'Never infer identity from surname alone' in _qproc and 'if len(cands)==1: return cands[0]' not in _qproc,
+   'same-surname outsiders must be segregated, not inserted into a legislator corpus')
 # V-1 (audit 2026-07-08): vote_category_lean.json is a manually-maintained FROZEN input -- its producer
 # vote_by_category.py is in no orchestrator and its cleaned-roll-call CSV is an external file with no in-repo
 # producer. Surface the frozen-ness: warn if the vote leans fall >30d behind the newest bills archive, so a

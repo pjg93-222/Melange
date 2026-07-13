@@ -641,3 +641,156 @@ reliability. The round-3 spec is now evidence-backed against its five most tempt
 Records: reactivity_v2_study.json / reactivity_v2b_study.json (untracked, regenerable from the
 committed scripts). The round-4 successor gate stays data-gated at MEM_N 216/250, now accruing
 weekly (interview legs wired into weekly_refresh incl. the new msnow leg).
+
+## 25. Psych-audit round 8 — text-N clears the interview stratum; no-interview ship gate MISS (2026-07-12, prereg `big5_n2_prereg.md` @297964e, addenda @d76857f/@6ddb232, RESULT @fb5a529)
+
+Corpus growth changed the criterion-side state without relaxing the shipped per-show floors:
+MEM_N reached **263** and appearance-split reliability improved to **SB=.596**. The pinned
+five-seed planted diagnostic cleared exactly 3/5 (median +.212), authorizing the successor. Two
+pre-look harness refusals were recorded and repaired before any real pairing: the inherited
+single-seed battery contradicted the locked 3/5 aggregate rule, then a thin-runner indentation
+error failed to install the successor pins. Both refusals occurred before the matrix and are
+preserved verbatim in the prereg.
+
+**Consumed look:** all five N bars PASS on MEM_N=263: own held-out **r=+.188**, exact
+perm-p **.0014**, row-dominant True, column-specific True (max rival |r|=.126), and
+volume/gender/party-controlled partial **r=+.152**, p=.0078. The fresh OOF-seed re-derivation
+passed again (r=+.179, perm-p=.0030, partial +.146, p=.0098). No O/C/E demotion inversion.
+
+**Ship gate MISS:** excluding interview text left r=+.098, perm-p=.0562. Predeclared verdict:
+**text-N is criterion-valid and distinct on the interview-covered stratum, but shared-source-
+dependent; no artifact, no desk reframe, no engine change, route closed.** This is meaningful
+fourth-trait evidence under a stated stratum caveat, not a full-corpus 4/5 or 5/5 promotion.
+The engine remains on the separately ratified affective-N slot (Round 7/7b).
+
+## 26. Psych-audit round 9 — fresh interview-antagonism criterion 5/5; st_mean text-A MISS (2026-07-12, prereg @1f4ace9, criterion lock @45a3430, RESULT @513f2b9)
+
+To avoid recycling the already-observed hearing-antagonism relation, a new criterion was frozen
+before labels: blinded Haiku 4.5 ratings of reporter hostility, personal contempt, and gratuitous
+cruelty on two deterministic package-disjoint interview halves. Policy conflict and principled
+dissent were scored separately and excluded. The screening ledger rejected Empath (2/5 pinned,
+2/5 fresh) and licensed `st_mean` on a genuinely different criterion (3/5 pinned, **5/5 fresh**).
+
+**Criterion look: QUALIFIED 5/5.** n=322; split-half r=+.537 / SB=.699; raw contamination
+party +.109, gender -.032, log-words -.005; cross-venue convergence with the ratified hearing
+facet +.160 (n=282); cooperation direction -.072 (n=207); excluded-content max |r|=.242.
+This is a valid secondary antagonism criterion and an independently useful measurement result.
+
+**Trait look: MISS.** On the fresh criterion roster n=309, the predeclared cooperation-trained
+`st_mean` A prediction produced own r=+.084, perm-p=.0782, row-dominant False, column-specific
+False (max rival |r|=.193), and partial r=+.087, p=.0652. The re-derivation was not triggered.
+A later no-interview coverage assertion cannot change the already-consumed gating MISS. Declared
+consequence: this criterion/basis route is CLOSED; Blue A remains criterion-related against the
+historical cooperation measure but not discriminant. The full-roster Blue instrument therefore
+remains **3/5 (O/C/E)**, with the new conditional N evidence reported separately.
+
+**Post-result deployment (user-ratified 2026-07-12).** The qualified criterion is promoted as a
+separate, display-only **validated A-antagonism facet**: package-split interview antagonism,
+controlled for party, gender, and log words, with its inverse displayed as Agreeableness. This
+does not reopen or relabel the missed text-A look, does not replace cooperation_v2 in the engine,
+and does not affect ranks. The approved claim is facet-specific: "validated inverse-antagonism A
+facet (Round-9 criterion 5/5)," never "Blue A validated" or "the full text Big Five is 5/5."
+
+**Three-leg status (display wording correction, 2026-07-12).** Reliability remains **5/5**
+(O .92, C .81, E .77, A .80, ES .92) and the directional known-groups sign test remains **5/5**.
+The **3/5** status applies only to the stricter discriminant/diagonal-dominance leg (O/C/E).
+Dashboard language must state the leg whenever reporting 3/5; an unqualified “Text Big-5 3/5”
+incorrectly implies the first two legs failed.
+
+## 27. Article-guided sampling-frame audit - A facet scoped to interview/media coverage (2026-07-12; prereg @9e9c34d, harness @9c2fd05, RESULT @ab5a4db)
+
+Three user-supplied papers exposed a validity layer not tested by the Round-9 criterion gate.
+Azucar et al. (2018, DOI 10.1016/j.paid.2017.12.018) report A as the weakest digital-footprint
+trait (meta-analytic r=.29) and show demographic inputs can raise apparent A/N accuracy; Celli et
+al. (2026, DOI 10.1145/3806009) separate traits from situated states and ecological validity from
+observer/model representation validity; Hargittai (2015, DOI 10.1177/0002716215570866) shows
+that large trace samples can remain non-random and require sampling-frame scope plus triangulation.
+
+The locked coverage look used criterion membership only—never A values—against the 533-member
+roster. Result: demographic max |SMD|=.620 (Senate; party -.322, gender -.001), model-position
+max=.378, and media/activity max=1.877 (visibility; log Blue tokens +1.195). Coverage was Senate
+90.0% vs House 53.6%, D 68.0% vs R 52.9%, while female/male coverage was 60.7%/60.8%.
+
+**Binding scope:** the result remains a validated inverse-antagonism A facet **on the
+interview/media-covered stratum**. Its percentile is relative only to the 322 covered members;
+missing members are not imputed. Demographics remain residualization-only controls, never A
+features. The score, Round-9 5/5 criterion result, cooperation_v2 engine role, Blue/Pink reads,
+and ranks are unchanged. Pink is explicitly labeled a model-perception channel with possible LLM
+response-prior contamination, not independent ground truth.
+
+## 28. Citation-chain + source-integrity re-audit (2026-07-12)
+
+Forward/transitive review of Azucar/Celli/Hargittai located the decisive method contrast. Hinds &
+Joinson (2024, `10.1037/bul0000430`) confirm heterogeneous, platform-moderated passive-trace
+prediction. Peters & Matz (2024, `10.1093/pnasnexus/pgae231`) and Marengo et al. (2025,
+`10.1111/jopy.70019`) improve reliability by repeated/model/time aggregation but retain modest
+self-report convergence and demographic/model bias. Härtel et al. (2025,
+`10.1007/s10869-025-10087-8`) find public LinkedIn profiles recover O/E but not A/C/N and fail MTMM.
+Wright et al. (2026, `10.1038/s41562-025-02389-x`) obtain all-five convergence by averaging seven
+LLMs answering the exact inventory item-by-item from unconstrained first-person narratives **and**
+testing against real questionnaire scores. Public Sample-1 reproduction: N .472, E .434, O .397,
+A .546, C .531 (n=60). This is the strongest next-method template, but its questionnaire anchor is
+not present for Congress.
+
+Independent local audit found the former three-leg slogan combined different instruments. The
+reliability vector O .92/C .81/E .77/A .80/ES .92 belongs to the legacy genre composite, not all
+displayed Blue-v2 axes. Its documented alternating-document split leaks 21.3% of speech packages
+across halves (CREC 33.4%, interview 12.6%, CHRG 95.0%). The artifact is also loaded from a
+hard-coded temp path, has no in-repo generator, and covers a selected 259-member stratum (Senate
+82.0%/House 40.9%; D 54.1%/R 42.8%); the other 273 v2 ES values use a different fallback. Therefore
+**current-Blue reliability is re-audit required**, not 5/5.
+
+The cleaned current v2 known-groups directions remain 5/5, but A is R-D=-.0009, 95% CI
+[-.1709,+.1690], p=.9914, and reverses/zeros in 204/530 leave-one-out deletions. Report only
+`five signs, A null`. Discriminant remains 3/5 O/C/E.
+
+The corpus is nominally multimodal but operationally pooled: CREC 75.17% of characters,
+interviews 19.82%, hearings 3.53%, social 1.49%; median dominant-venue share per member 80.3%.
+Pink excludes social and hearings entirely. A source resolver defect compounded this: surname-only
+matching inserted unrelated accounts into member text. `process_quorum.py` now requires exact or
+explicit nickname-equivalent first+last names and segregates ambiguity. This is a data-integrity fix;
+it does not create new trait validity.
+
+## 29. Source-primary multimethod Big Five — promoted 5/5 (2026-07-12; prereg @cd75732)
+
+The user directed that the five-trait instrument be fixed by composing the strongest independent
+behavioral channels rather than preserving the failed pooled text-A definition. This section
+supersedes the production-status conclusions in Sections 26–28; those sections remain the audit
+history of the pooled lexical/text-only instrument.
+
+**Instrument.** O/C/E are Ridge reads over LSA-256 features computed separately within CREC,
+interview, and social venues, then standardized within venue and combined. A is inverse raw
+interview antagonism (reporter hostility + personal contempt + gratuitous cruelty; policy conflict
+and principled dissent excluded), averaged over two package-disjoint halves. N is the promoted
+affective-content measure; ES is exactly `-N`. A remains missing outside its 322 package-qualified
+members; there is no text-A fallback or imputation. O/C/E/N cover 469 members.
+
+**Fresh reliability.** A common full-corpus LSA basis transformed two SHA-256 package halves; every
+CREC/interview package and social post was indivisible. Across 172,262 packages, overlap was exactly
+zero. Spearman-Brown reliability passed 5/5: O .940 (n=530), C .934 (n=530), E .968 (n=530),
+A .699 (n=322), N .680 (n=383).
+
+**Independent-criterion matrix.** O/C/E rows are nested out-of-fold predictions against behavioral
+breadth/diligence/visibility; A uses one package half against the other; N uses the LLM affect
+channel against independent LIWC affect. All five diagonals were positive, exact-permutation
+`p=.0002`, and larger in absolute value than every other cell in both row and column:
+
+| row \ criterion | O | C | E | A | N |
+|---|---:|---:|---:|---:|---:|
+| O | **.294** | .045 | .144 | .068 | .016 |
+| C | .074 | **.253** | -.188 | .130 | -.083 |
+| E | .073 | -.136 | **.731** | -.064 | -.027 |
+| A | .134 | .055 | -.103 | **.537** | -.029 |
+| N | -.043 | -.126 | .089 | -.148 | **.253** |
+
+Known-groups also passed 5/5 on trait-specific available coverage: R-D O -.593, C +.412,
+E -.371, A -.218, N -.013 (equivalent ES +.013). The production artifact is
+`big5_blue_validated.json`; `fec/b5_multimethod_validate.py` reproduces the package cache,
+reliability, exact permutations, matrix, and guarded promotion. Blue on the member desk now reads
+this artifact. It remains display-only and rank-independent; the pre/post rank-authority SHA-256 is
+unchanged at `797a6490ca0c0f63496f76ac9f030c0a8b538d5f46dbc18e39092bbbc74b00c6`.
+
+**Audio.** The verified eGeMAPS cache was refreshed without acquisition or re-featurization:
+1,761/2,192 clips are identity-clean, 410 members clear 180 seconds, and all 88 features were cache
+hits. Previously consumed audio trait experiments remain historical misses and are not injected into
+the promoted Big Five; the retired gender-confounded voice-ES artifact remains disconnected.

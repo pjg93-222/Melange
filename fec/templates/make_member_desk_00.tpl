@@ -576,11 +576,10 @@ function psychHTML(m){
   const bar=(l,v,c)=>`<div class=mrow><span>${l}</span><b>${Math.round(v*100)}th pct</b></div><div style="height:7px;background:#1b2129;border-radius:4px;overflow:hidden;margin:2px 0 8px"><i style="display:block;height:100%;width:${Math.round(v*100)}%;background:${c}"></i></div>`;
   let comp='<div class=empty>No computed psychometrics for this member (no text corpus).</div>';
   if(P.big5_pct||P.behav_pct){
-    // PRIMARY: behavioral dispositions (measured from what the member DOES — cosponsorship,
-    // roll-call participation, floor dynamics, media engagement, portfolio breadth, live-interview
-    // reactivity [round-3 N-slot, 2026-07-09]; nomological fix 2026-07-04). These drive the engines'
-    // receptivity. null axis = insufficient coverage.
-    const BLAB=['Cooperation','Diligence','Floor presence','Visibility','Breadth','Reactivity'];
+    // PRIMARY decision profile: five behavior-derived roles plus the promoted affective-N pressure
+    // slot. The sixth axis is text-derived personal affect, not a behavioral criterion and not a copy
+    // of either Big-Five polygon. null axis = insufficient coverage.
+    const BLAB=['Cooperation','Diligence','Floor presence','Visibility','Breadth','Affective N'];
     /* 2026-07-04 user directive: TWO radar charts — Behavior and Big-5, same geometry. n/a axes plot
        at the 0.5 neutral ring (never fake-low) and are listed under the chart. */
     const bna=P.behav_pct?BLAB.filter((_,i)=>P.behav_pct[i]==null):[];
@@ -588,40 +587,47 @@ function psychHTML(m){
       ?radar(P.behav_pct.map(v=>v==null?0.5:v),BLAB,'#2dd4bf',82)
         +(bna.length?`<div style="font-size:10px;color:var(--faint)">n/a (plotted at neutral): ${bna.join(', ')}</div>`:'')
       :'<div class=empty>No behavioral coverage.</div>';
+    const aval=(P.a_validated_pct!=null)
+      ?`<div class=eyebrow style="margin-top:8px">Validated A facet <span style="color:#34d399;font-weight:700">&middot; inverse interview antagonism &middot; covered stratum</span></div>
+        ${bar('Agreeableness — low hostility/contempt/cruelty (covered-stratum percentile)',P.a_validated_pct,'#34d399')}
+        <div style="font-size:10px;color:var(--faint);margin-top:-3px">Round-9 criterion qualified 5/5 on its observed stratum (n=322; split-half SB=.699; cross-venue convergence; party/gender/volume controls). <b>Sampling-frame audit:</b> coverage is media-selected—Senate 90.0% vs House 53.6%, Democrats 68.0% vs Republicans 52.9%, visibility SMD +1.877; gender coverage is balanced. This percentile is relative only to covered members. Display-only facet—not the cooperation engine role, not a full-roster inference, and not a validation of either text-A polygon.</div>`
+      :'<div style="font-size:10px;color:var(--faint);margin-top:6px">Validated A facet: insufficient package-disjoint interview coverage.</div>';
     // instrument agreement (user rule, final 2026-07-06: ALL FIVE axes, Consc included): where v2
     // and the LLM read land within 15 pts on the same axis, that's convergence from two independent
     // method families -> highlight LIGHT GREEN. Display decision only — the measurement-side C
     // incorporation (genre-weighting toward interviews) stays gated on the pre-registered retest;
     // the behavioral radar's Diligence axis remains the strongest C measure (see legend).
-    const B5AX=['Open','Consc','Extra','Agree','EmoSt'];
-    const agree=(P.big5_pct&&P.llm_pct)?B5AX.map((ax,i)=>Math.abs(P.big5_pct[i]-P.llm_pct[i])<=0.15):null;
-    const axcol=agree?agree.map(a=>a?'#86efac':null):null;
-    const agList=agree?B5AX.filter((_,i)=>agree[i]):[];
+    const B5AX=['Open','Consc','Extra','Agree','Neurot'];   // ES retired; each text family supplies its own N=-ES read
+    const _ns=v=>v==null?0.5:v;
+    const agree=(P.big5_pct&&P.llm_pct)?B5AX.map((ax,i)=>(P.big5_pct[i]==null||P.llm_pct[i]==null)?null:Math.abs(P.big5_pct[i]-P.llm_pct[i])<=0.15):null;
+    const axcol=agree?agree.map(a=>a===true?'#86efac':null):null;
+    const agList=agree?B5AX.filter((_,i)=>agree[i]===true):[];
     radar.skipGreen=null;   // no collapsed wedges — the overlap region spans all five axes
-    const rad=P.big5_pct?radar(P.big5_pct,B5AX,'#7dd3fc',82,P.llm_pct,'#e879f9',axcol):'';
-    const agLine=agree?`<div style="font-size:10px;margin-top:2px"><span style="color:#86efac;font-weight:700">light-green region</span> <span style="color:var(--faint)">= where Blue and Pink overlap (agreement of two independent method families; ✓ = within 15 pts on that axis${agList.length?': '+agList.join(', '):''}).</span></div>`:'';
+    const rad=P.big5_pct?radar(P.big5_pct.map(_ns),B5AX,'#7dd3fc',82,P.llm_pct?P.llm_pct.map(_ns):null,'#e879f9',axcol):'';
+    const agLine=agree?`<div style="font-size:10px;margin-top:2px"><span style="color:#86efac;font-weight:700">light-green region</span> <span style="color:var(--faint)">= display overlap between two independent text methods (within 15 points${agList.length?': '+agList.join(', '):''}); overlap is corroborating context, not a validity verdict.</span></div>`:'';
+    const vint=P.big5_vintage||{};
+    const vintageLine=(vint.pink_older_days>0)?`<div style="font-size:10px;color:#f59e0b;margin:2px 0 3px"><b>Mixed corpus vintages:</b> Blue ${vint.blue||'—'} (n=${vint.blue_n||'—'}), Pink ${vint.pink||'—'} (n=${vint.pink_n||'—'}), ${vint.pink_older_days} days older. Some member-level gap may be new-data drift; Pink is a frozen cost-gated snapshot.</div>`:'';
     const persona=(P.communion_pct!=null)?bar('Warmth — communion persona',P.communion_pct,'#2dd4bf')+bar('Assertiveness — agency persona',P.agency_pct,'#c2862a'):'<div class=empty>No persona cue coverage yet for this member.</div>';
     const rd=READS[P.susc_read||'trait-only']||READS['trait-only'];
     const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Engagement responsiveness (engines)</span><b>${P.pressure_mult}×</b></div>
       <div class=mrow><span>Meeting take-rate (seed prob.)</span><b>${P.seed_prob!=null?Math.round(P.seed_prob*100)+'%':'—'}</b></div>
-      <div class=mrow><span>Receptivity — ${P.basis==='behavioral'?('behavioral read'+(P.n_source==='reactivity'?' · N-slot: interview reactivity':P.n_source==='neutral'?' · N-slot: neutral':'')):'trait read'}</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
+      <div class=mrow><span>Receptivity — ${P.basis==='behavioral'?('behavioral read'+(P.n_source==='affective'?' · N-slot: affective-content N':P.n_source==='reactivity'?' · N-slot: interview reactivity':P.n_source==='neutral'?' · N-slot: neutral':'')):'trait read'}</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
       ${P.persona_susc_z!=null?`<div class=mrow><span>Receptivity — persona read</span><b>${P.persona_susc_z>0?'+':''}${P.persona_susc_z}</b></div>`:''}
       <div style="font-size:11px;font-weight:700;color:${rd[1]};background:${rd[1]}22;border:1px solid ${rd[1]}55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">${rd[0]}</div>`:'';
     const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Quick read (IIT-C octant)</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';
     const NAR=P.narrative;
     const narr=NAR?`<div class=eyebrow style=margin-top:10px>Suggested approach <span style=color:var(--faint)>· 3-paragraph brief${NAR.audio?' · incl. voice read':''}</span></div>
+      ${NAR.measurement_note?`<div style="font-size:10px;color:#f59e0b;margin:2px 0 5px">${NAR.measurement_note}</div>`:''}
       <div style="font-size:12px;line-height:1.52;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:10px 12px">
         <div style="color:#7dd3fc;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Overall personality</div><div style=margin-bottom:8px>${NAR.p1}</div>
         <div style="color:#7dd3fc;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Manner of speech &amp; landmines</div><div style=margin-bottom:8px>${NAR.p2}</div>
         <div style="color:#7dd3fc;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Persuasive approach</div><div>${NAR.p3}</div>
       </div>`:'';
     comp=`<div class=gen style=margin-bottom:12px>
-      <div><div class=eyebrow>Behavioral profile <span style="color:#86efac;font-weight:700">· validated by construction</span> <span style=color:var(--faint)>· measured from what the member does (floor presence = discussion dynamics + leadership) — the only psychology that drives targeting</span></div>${behav}
-      ${rad?`<div class=eyebrow style=margin-top:8px>Text Big-5 <span style="color:#fbbf24;font-weight:700">· grade A-</span> <span style=color:var(--faint)>· cross-check only — does NOT drive ranks or engines</span></div>
-      <div style="font-size:10px;color:var(--faint);margin:1px 0 3px"><span style="color:#7dd3fc;font-weight:700">Blue</span> = behavior-calibrated text model; <span style="color:#e879f9;font-weight:700">Pink dashed</span> = LLM item-read (Opus${P.llm_pct?', '+P.llm_chunks+' chunks':''}). Independent literature benchmark (2026-07-08): A-/high-A within the elite-speech class — convergent r .42-.52 vs a .38 field ceiling, passes cross-genre MTMM.</div>
-      ${rad}${agLine}
-      <div style="font-size:10px;color:#e0a020;margin-top:2px">Read with care: Conscientiousness's C-item read is thin, but the supervised text&rarr;Diligence signal is confirmed full-roster (held-out r&nbsp;+0.28, 2026-07-09). Agreeableness / Emotional-Stability share a tone-halo <span style="color:#86efac">in text</span> — and the voice corroboration of ES did <b>not</b> survive a gender/party-controlled retest (2026-07-09: partial r&nbsp;&minus;0.03, null within both sexes), so treat ES as a text read with the halo caveat &mdash; externally uncorroborated (PCT-respond null, 2026-07-09, n=517). The strongest C signal remains Diligence on the behavioral radar above.</div>
-      ${P.ves?`<div style="font-size:10.5px;margin-top:3px;color:var(--muted)">Voice-ES read (this member's verified-clean audio): <b style="color:#7dd3fc">${P.ves.z>0?'+':''}${P.ves.z}σ</b> ${Math.abs(P.ves.gap)<=1.0?`<span style="color:#86efac;font-weight:700">agrees with the text read</span>`:`<span style="color:#e0a020;font-weight:700">diverges from the text read</span>`} <span style=color:var(--faint)>(Δ ${P.ves.gap>0?'+':''}${P.ves.gap}σ · caution: the population-level r=+0.21 proved gender-confounded on retest (partial &minus;0.03, 2026-07-09) — a weak tiebreaker at most)</span></div>`:''}
+      <div><div class=eyebrow>Decision profile <span style="color:#86efac;font-weight:700">· engine inputs</span> <span style=color:var(--faint)>· five behavior-derived role variables + promoted affective-N; the N control is text-derived personal affect, not an independent behavioral criterion</span></div>${behav}${aval}
+      ${rad?`<div class=eyebrow style=margin-top:8px>Big Five <span style="color:#86efac;font-weight:700">· reliability 5/5 · known-groups 5/5 · discriminant 5/5</span> <span style=color:var(--faint)>· cross-check only — does NOT drive ranks</span></div>
+      <div style="font-size:10px;color:var(--faint);margin:1px 0 3px"><span style="color:#7dd3fc;font-weight:700">Blue</span> = validated multimethod instrument: within-venue O/C/E, package-split inverse-antagonism A, and affective-content N; <span style="color:#e879f9;font-weight:700">Pink dashed</span> = independent LLM item-read (Opus${P.llm_pct?', '+P.llm_chunks+' chunks':''}). Package overlap is zero; SB reliability is O .940, C .934, E .968, A .699, N .680. All five independent-criterion diagonals are exact-permutation significant and row/column dominant.</div>
+      ${vintageLine}${rad}${agLine}
       ${P.llm_pct?'':'<div style="font-size:10px;color:var(--faint)">Pink (LLM) read not yet available for this member.</div>'}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Blue: low confidence (thin text corpus)</div>':''}`:''}</div>
       <div><div class=eyebrow>Projected persona <span style=color:var(--faint)>· public / presented persona (Birkenmaier-Lechner cues) — how they come across, not intrinsic traits</span></div>${persona}
       <div class=eyebrow style=margin-top:8px>Engagement &amp; receptivity</div>${suscRows}${appr}</div></div>${narr}`;

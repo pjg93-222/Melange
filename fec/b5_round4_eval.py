@@ -137,7 +137,18 @@ def test_look(winner):
     core = all(b[1] for b in bars[:4])
     print('BEMB VERDICT: %s' % ('PASS — promote embedding Blue (E %s)' % ('robust' if (ev_ctrl is None or abs(ev_raw - ev_ctrl) <= 0.05) else 'carried from v2: volume-bound')
                                 if core else 'MISS — lexical v2 stands'))
-    return core
+    return core, {
+        'winner': winner,
+        'test_n': len(TEST),
+        'heldout_r': {t: round(float(ho[t]), 3) for t in TARGET},
+        'mtmm_same_trait_cross_genre': round(float(s), 3),
+        'mtmm_cross_trait_within_genre': round(float(c), 3),
+        'mtmm_required_margin': 1.15,
+        'e_volume_control_r': None if ev_ctrl is None else round(float(ev_ctrl), 3),
+        'e_raw_r': round(float(ev_raw), 3),
+        'bars': {name: bool(hit) for name, hit, _detail in bars},
+        'verdict': 'PASS' if core else 'MISS',
+    }
 
 if __name__ == '__main__':
     if '--select' in sys.argv:
@@ -150,6 +161,9 @@ if __name__ == '__main__':
         # criterion). Same {'traits':{m:{O,C,E,A,ES,N}}} schema as big5_v2.json so make_member_desk
         # can switch source with no shape change.
         w = selection_search()
+        passed, validation = test_look(w)
+        if not passed:
+            raise SystemExit('BEMB promotion refused: frozen TEST gate did not pass')
         Z = Zc(w); ho, models, _ = fit_models(w, Z, set(MEMBERS))   # full-roster refit for production scores
         Xm, keep = member_matrix(w, Z, set(MEMBERS)); midx = {m: i for i, m in enumerate(keep)}
         emb = {}
@@ -157,17 +171,33 @@ if __name__ == '__main__':
             pred = models[t].predict(Xm); mu, sd = pred.mean(), pred.std() or 1
             for i, m in enumerate(keep): emb.setdefault(m, {})[t] = round(float((pred[i] - mu) / sd), 3)
         V2 = json.load(open(B + r'\big5_v2.json', encoding='utf-8'))['traits']
+        # The N slot was independently promoted after Round 4. Keep that decision: Blue's fifth
+        # axis is the affective-content N measure, not the leaky legacy lexical ES composite.
+        # A coherent five-axis row is emitted only where affective-N exists; no v1/v2 N fallback
+        # is mixed into the promoted instrument.
+        AN = json.load(open(B + r'\affective_n.json', encoding='utf-8'))['members']
         out = {}
         for m in emb:
+            if m not in AN:
+                continue
             v2 = V2.get(m, {})
+            n = float(AN[m])
             out[m] = {'A': emb[m]['A'], 'C': emb[m]['C'], 'O': emb[m]['O'],
-                      'E': v2.get('E', 0.0), 'ES': v2.get('ES', 0.0), 'N': v2.get('N', 0.0)}
+                      'E': v2.get('E', 0.0), 'ES': round(-n, 3), 'N': round(n, 3),
+                      'tokens': v2.get('tokens', 0), 'nposts': v2.get('nposts', 0),
+                      'lowconf': bool(v2.get('lowconf', False)), 'n_source': 'affective_n'}
         from moneyball_core import dump_atomic
         dump_atomic({'traits': out,
-                     'method': 'Blue v3 = open-vocab embedding (base=%s) for A/C/O [MTMM-passing, round-4 prereg @d59bde5]; '
-                               'E+ES carried from lexical v2 (embedding-E volume-bound, ES has no behavioral criterion)' % w,
-                     'heldout': {t: round(ho[t], 3) for t in TARGET}, 'base': w, 'aco_from': 'embedding', 'e_es_from': 'v2'},
+                     'method': 'Blue source-primary = within-genre open-vocabulary embedding (base=%s) for A/C/O '
+                               '[frozen TEST MTMM/criterion gate passed]; E carried from lexical v2 because embedding-E '
+                               'was volume-bound; N/ES from promoted affective_n (ES=-N)' % w,
+                     'heldout_full_refit_cv': {t: round(ho[t], 3) for t in TARGET},
+                     'validation': validation,
+                     'base': w, 'aco_from': 'within-genre embedding', 'e_from': 'v2',
+                     'n_es_from': 'affective_n', 'coverage_n': len(out),
+                     'source_genres': list(GEN),
+                     'preregistration': 'big5_round4_prereg.md'},
                     B + r'\big5_blue_emb.json')
-        print('wrote big5_blue_emb.json (A/C/O=embedding %s, E/ES=v2, %d members)' % (w, len(out)))
+        print('wrote big5_blue_emb.json (A/C/O=embedding %s, E=v2, N/ES=affective-N, %d members)' % (w, len(out)))
     else:
         print('modes: --select | --test | --promote')
