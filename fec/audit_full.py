@@ -243,14 +243,44 @@ if os.path.exists(_rc_p):
     _nsl=_rc.get('n_slot'); _nsrc=sum(1 for v in _rc.get('members',{}).values() if v.get('n_source')=='affective')
     ck('receptivity N-slot = affective-content N (round-7/7b; no silent behavioral/text revert)',
        _nsl=='affective' and _nsrc>=150,'n_slot=%s affective_members=%d'%(_nsl,_nsrc))
-    # COOP-SLOT guard (audit 2026-07-10, mirrors the N-slot guard): the A-slot must be the promoted
+    # COOP-SLOT guard (audit 2026-07-10, mirrors the N-slot guard): the cooperation-role slot must be the promoted
     # share-based cooperation_v2 (@94f09cf); a silent RECEPT_COOP=v1 revert or a coverage collapse
     # (coop_v2_candidate staleness / c2-floor starvation) would sail through the basis gate above.
     _csl=_rc.get('coop_slot'); _csrc=sum(1 for v in _rc.get('members',{}).values() if v.get('coop_source')=='coop_v2')
     _cv=[v.get('cooperation_v2_z') for v in _rc.get('members',{}).values() if v.get('cooperation_v2_z') is not None]
-    ck('receptivity A-slot = cooperation_v2 (promotion @94f09cf; coverage>=250, |z|<=5, no silent v1 revert)',
+    ck('receptivity cooperation-role slot = cooperation_v2 (promotion @94f09cf; coverage>=250, |z|<=5, no silent v1 revert)',
        _csl=='v2' and _csrc>=250 and len(_cv)>=250 and all(abs(x)<=5.0 for x in _cv),
        'coop_slot=%s coop_v2_members=%d'%(_csl,_csrc))
+    # 2026-07-13 construct-contamination audit (user observed cooperation/A friction): cooperation_v2
+    # is a cross-party cosponsorship SHARE; qualified Big-Five A is a package-disjoint low-antagonism
+    # interview facet. They must remain separately sourced and must not collapse into one score. The
+    # |r|<.30 diagnostic is a contamination alarm (<9% shared variance), not a validity claim.
+    _cvp=B+r'\coop_v2_candidate.json'; _avp=B+r'\interview_antagonism.json'
+    if os.path.exists(_cvp) and os.path.exists(_avp):
+        import numpy as _np, math as _math, csv as _csv
+        _cvm=json.load(open(_cvp,encoding='utf-8')).get('members',{}); _avm=json.load(open(_avp,encoding='utf-8')).get('members',{})
+        _co_bad=sum(1 for m,d in _cvm.items() if d.get('cooperation_v2_z') is not None and
+                    ((_rc.get('members',{}).get(m) or {}).get('coop_source')!='coop_v2' or
+                     abs(((_rc.get('members',{}).get(m) or {}).get('cooperation_v2_z') or 0)-d['cooperation_v2_z'])>.002))
+        ck('cooperation and low-antagonism A remain separately sourced (zero substitutions)',
+           _co_bad==0, '%d cooperation_v2 values substituted/mismatched'%_co_bad)
+        _con={d['member']:d for d in json.load(open(B+r'\congestion.json',encoding='utf-8'))}
+        _g={d.get('full_name'):d.get('gender') for d in _csv.DictReader(open(FE+r'\legislators.csv',encoding='utf-8-sig'))}
+        _rows=[]
+        for _m in set(_cvm)&set(_avm)&set(_con):
+            _x=(_cvm.get(_m) or {}).get('cooperation_v2_z')
+            if _x is None: continue
+            _c=_con[_m]; _p=str(_c.get('party') or '').lower()
+            _rows.append([_x,_avm[_m]['agreeableness_z'],1.0 if _p.startswith('r') else 0.0,
+                          1.0 if _g.get(_m)=='F' else 0.0,1.0 if _c.get('chamber')=='Senate' else 0.0,
+                          _math.log1p(_avm[_m].get('words') or 0)])
+        _z=_np.asarray(_rows,float); _raw=float(_np.corrcoef(_z[:,0],_z[:,1])[0,1]) if len(_z)>5 else 9
+        _X=_np.c_[_np.ones(len(_z)),_z[:,2:]]
+        _rx=_z[:,0]-_X@_np.linalg.lstsq(_X,_z[:,0],rcond=None)[0]; _ry=_z[:,1]-_X@_np.linalg.lstsq(_X,_z[:,1],rcond=None)[0]
+        _part=float(_np.corrcoef(_rx,_ry)[0,1]) if len(_z)>5 else 9
+        ck('cooperation vs low-antagonism A cross-contamination below alarm threshold',
+           len(_z)>=180 and abs(_raw)<.30 and abs(_part)<.30,
+           'n=%d raw_r=%+.3f partial_r(party,gender,chamber,interview-volume)=%+.3f'%(len(_z),_raw,_part))
     if _bd_ok:
         _rv=[d['reactivity_z'] for d in json.load(open(_bd_p))['members'].values() if d.get('reactivity_z') is not None]
         ck('reactivity_z disposition sane (coverage >=150, |z|<=5)',
@@ -396,6 +426,35 @@ if os.path.exists(B+r'\member_desk_bundle.json') and os.path.exists(B+r'\ranks_p
         ck('legacy narratives cannot re-import unvalidated text-A/N claims',
            _legacy==0 and _unnoted==0,
            '%d banned trait sentences remain, %d narratives lack provenance note'%(_legacy,_unnoted))
+# 2026-07-13 personal-texture catch-net: this display-only artifact must cover every member for whom
+# explicit autobiographical evidence was found, retain exact provenance, and propagate byte-for-field
+# into the member desk. Coverage must retain explicit evidence for >=90% of candidate-bearing members;
+# this ratio gate rewards precision without forcing false positives merely to hit a roster count.
+# No low-confidence or source-less inference may enter a profile.
+_ptp=B+r'\member_personal_texture.json'
+if os.path.exists(_ptp):
+    _pt=json.load(open(_ptp,encoding='utf-8')); _ptm=_pt.get('members',{}); _pp=_pt.get('provenance') or {}
+    _bad=0; _ni=0
+    for _m,_d in _ptm.items():
+        _it=_d.get('items') or []; _ni+=len(_it)
+        if _d.get('n_items')!=len(_it): _bad+=1
+        _bad+=sum(1 for x in _it if not all(x.get(k) not in (None,'') for k in
+                 ('category','claim','confidence','evidence','source','classifier')) or x.get('confidence')=='low')
+    ck('personal-texture artifact coverage/schema/provenance (full-corpus catch-net)',
+       len(_ptm)>=.90*_pp.get('candidate_member_count',9999) and _ni>=3000 and _bad==0 and
+       _pp.get('candidate_count',0)>=_pp.get('semantic_gate_count',1) and
+       _pp.get('classified_count',0)>=_pp.get('semantic_gate_count',1),
+       '%d members, %d details, %d malformed, candidates=%s classified=%s gate=%s'%
+       (len(_ptm),_ni,_bad,_pp.get('candidate_count'),_pp.get('classified_count'),_pp.get('semantic_gate_count')))
+    if os.path.exists(B+r'\member_desk_bundle.json'):
+        _dm={m.get('name'):m.get('personal') for m in json.load(open(B+r'\member_desk_bundle.json',encoding='utf-8')).get('members',[])}
+        _mis=sum(1 for m,d in _ptm.items() if _dm.get(m)!=d)
+        ck('personal-texture layer propagates exactly to member profiles (display-only)',
+           _mis==0 and sum(1 for d in _dm.values() if d)==len(_ptm),
+           '%d payload mismatches; artifact=%d desk=%d'%(_mis,len(_ptm),sum(1 for d in _dm.values() if d)))
+else:
+    ck('personal-texture artifact present (member_personal_texture.json)',False,
+       'missing — run personal_texture_layer.py --score --go or --local, then rebuild the desk')
 # run-5j guard (2026-07-06): exact-duplicate speech rows (same member+package+text) inflate word
 # counts + big5 chunk sampling. The CREC backfill introduced 922 (no pre-insert dedup); collector
 # legs now carry stored-package guards. Assert the corpus stays exact-dup-clean (threshold covers

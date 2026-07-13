@@ -35,6 +35,7 @@ CHAIN=[('coop_v2_candidate.py',[]),            # A-slot criterion values (audit 
        ('salience_shock.py',['--advise']),    # advisory must be fresh BEFORE the bundle exports engine.adv
        ('build_dashboard_bundle.py',[]),
        ('make_dashboard_html.py',[]),
+       ('personal_texture_layer.py',['--rebuild']), # provenance-first personal detail layer; cache-only ($0) in chain
        ('make_member_desk.py',[]),
        ('make_combined.py',[]),
        ('audit_full.py',[])]

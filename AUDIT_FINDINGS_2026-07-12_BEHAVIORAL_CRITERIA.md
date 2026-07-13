@@ -191,3 +191,28 @@ full audit has a dedicated gate over all reliability, known-group, discriminant,
 conditions. Ranks remain byte-identical. Audio was expedited through its existing cache: 1,761
 verified-clean clips, 410 members, 88 eGeMAPS features, and 0 clips requiring re-featurization;
 previously failed voice-trait models were not allowed to contaminate the new instrument.
+
+## 2026-07-13 follow-up — personal texture and cooperation/A separation
+
+The member desk now has a provenance-first personal-texture layer. The producer scans every local
+member-attributed floor, hearing, interview, Bluesky, Quorum social, and press-title row for explicit
+family, favorite, media, food, quotation, inspiration, hobby, faith, pet, formative, place, and
+routine disclosures. It found 8,178 candidates across 492 members. The semantic gate retained 3,806
+details for 479 members (97.4% of candidate-bearing members); every item carries its exact evidence,
+source, date, locator/URL, confidence, and classifier. Reposts are excluded. The layer is display-only
+and is rebuilt cache-only in the production chain.
+
+The cooperation/Agreeableness friction is real divergence, not cross-contamination:
+
+- `cooperation_v2_z` measures observed cross-party cosponsorship shares and is the engine role.
+- promoted A measures a low-antagonism facet from package-disjoint interview behavior and remains
+  display-only.
+- On their shared n=207 stratum, raw r(cooperation, A)=+.061 (p=.382); partial r=+.063 after party,
+  gender, chamber, and log interview-volume controls (p=.369). They share less than 0.4% variance.
+- The audit found zero value substitutions/mismatches between the cooperation producer and the
+  receptivity artifact. The desk now labels the axes “Cross-party cooperation” and “Low-antag A,”
+  explains legitimate divergence, and preserves A as missing outside its qualified stratum.
+
+The complete verification protocol passed after these changes: kernel 37/37, full chain complete,
+full-body audit 86/86, and zero members changed rank (rank artifact SHA-256 remains
+`797a6490ca0c0f63496f76ac9f030c0a8b538d5f46dbc18e39092bbbc74b00c6`).

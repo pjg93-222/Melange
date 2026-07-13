@@ -68,6 +68,7 @@ RA_OEF = {'leg': _SNAP.get('O', {}), 'comm': _SNAP.get('E', {}), 'demo': _SNAP.g
 # ---- signed cross-media reference layer (user-ratified 2026-07-04): who this member references
 # (out) / is referenced by (in), Fable-valenced, from member_references.json (directed a->b) ----
 _REFS = (L('member_references.json') or {}).get('edges', [])
+_PERSONAL = (L('member_personal_texture.json') or {}).get('members', {})
 _ROUT = {}; _RIN = {}
 for _e in _REFS:
     _ROUT.setdefault(_e['a'], []).append(_e); _RIN.setdefault(_e['b'], []).append(_e)
@@ -631,6 +632,7 @@ def build_bundle():
             'staff': MANUAL.get(name, {}).get('staff'),            # manual
             'bio': bio_for(name),                                  # model_bio + legislators.csv
             'bio_manual': MANUAL.get(name, {}).get('bio'),         # manual addendum
+            'personal': _PERSONAL.get(name),                       # source-grounded human details catch-net
             'state': state_of(m),
             'partners': partners,                                  # relational: cosponsor ties
             'refs': refs_for(name),                                # signed cross-media references (out/in, Fable-valenced)

@@ -501,6 +501,7 @@ function openMember(i){
   // sections
   h+=section('Staff','staff',staffHTML(m));
   h+=section('Biographical','bio',bioHTML(m));
+  h+=section('Personal texture','personal',personalHTML(m));
   h+=section('Relational','rel',relHTML(m));
   h+=section('Committee positions','cttee',committeeHTML(m));
   h+=section('Demographics','demo',demoHTML(m));
@@ -579,7 +580,7 @@ function psychHTML(m){
     // PRIMARY decision profile: five behavior-derived roles plus the promoted affective-N pressure
     // slot. The sixth axis is text-derived personal affect, not a behavioral criterion and not a copy
     // of either Big-Five polygon. null axis = insufficient coverage.
-    const BLAB=['Cooperation','Diligence','Floor presence','Visibility','Breadth','Affective N'];
+    const BLAB=['Cross-party cooperation','Diligence','Floor presence','Visibility','Breadth','Affective N'];
     /* 2026-07-04 user directive: TWO radar charts — Behavior and Big-5, same geometry. n/a axes plot
        at the 0.5 neutral ring (never fake-low) and are listed under the chart. */
     const bna=P.behav_pct?BLAB.filter((_,i)=>P.behav_pct[i]==null):[];
@@ -588,16 +589,18 @@ function psychHTML(m){
         +(bna.length?`<div style="font-size:10px;color:var(--faint)">n/a (plotted at neutral): ${bna.join(', ')}</div>`:'')
       :'<div class=empty>No behavioral coverage.</div>';
     const aval=(P.a_validated_pct!=null)
-      ?`<div class=eyebrow style="margin-top:8px">Validated A facet <span style="color:#34d399;font-weight:700">&middot; inverse interview antagonism &middot; covered stratum</span></div>
-        ${bar('Agreeableness — low hostility/contempt/cruelty (covered-stratum percentile)',P.a_validated_pct,'#34d399')}
-        <div style="font-size:10px;color:var(--faint);margin-top:-3px">Round-9 criterion qualified 5/5 on its observed stratum (n=322; split-half SB=.699; cross-venue convergence; party/gender/volume controls). <b>Sampling-frame audit:</b> coverage is media-selected—Senate 90.0% vs House 53.6%, Democrats 68.0% vs Republicans 52.9%, visibility SMD +1.877; gender coverage is balanced. This percentile is relative only to covered members. Display-only facet—not the cooperation engine role, not a full-roster inference, and not a validation of either text-A polygon.</div>`
-      :'<div style="font-size:10px;color:var(--faint);margin-top:6px">Validated A facet: insufficient package-disjoint interview coverage.</div>';
+      ?`<div class=eyebrow style="margin-top:8px">Construct separation <span style="color:#f59e0b;font-weight:700">&middot; cooperation is not Agreeableness</span></div>
+        <div style="font-size:11px;line-height:1.5;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">
+        <b>Cross-party cooperation:</b> ${P.behav_pct&&P.behav_pct[0]!=null?Math.round(P.behav_pct[0]*100)+'th pct':'n/a'} — share of observable bipartisan cosponsorship behavior; engine role.<br>
+        <b>Low-antagonism A facet:</b> ${Math.round(P.a_validated_pct*100)}th pct — absence of hostility/contempt in package-disjoint interviews; display instrument.<br>
+        <span style="color:var(--faint)">They may diverge legitimately: strategic bipartisan action and interpersonal hostility are different behaviors. Neither value is substituted for the other. A is a covered-stratum percentile (media coverage: Senate 90.0% vs House 53.6%); it is never imputed outside that stratum.</span></div>`
+      :'<div style="font-size:10px;color:var(--faint);margin-top:6px">Low-antagonism A facet: insufficient package-disjoint interview coverage; cross-party cooperation remains a separate observed behavior.</div>';
     // instrument agreement (user rule, final 2026-07-06: ALL FIVE axes, Consc included): where v2
     // and the LLM read land within 15 pts on the same axis, that's convergence from two independent
     // method families -> highlight LIGHT GREEN. Display decision only — the measurement-side C
     // incorporation (genre-weighting toward interviews) stays gated on the pre-registered retest;
     // the behavioral radar's Diligence axis remains the strongest C measure (see legend).
-    const B5AX=['Open','Consc','Extra','Agree','Neurot'];   // ES retired; each text family supplies its own N=-ES read
+    const B5AX=['Open','Consc','Extra','Low-antag A','Neurot'];   // A is the qualified low-antagonism facet, not cooperation
     const _ns=v=>v==null?0.5:v;
     const agree=(P.big5_pct&&P.llm_pct)?B5AX.map((ax,i)=>(P.big5_pct[i]==null||P.llm_pct[i]==null)?null:Math.abs(P.big5_pct[i]-P.llm_pct[i])<=0.15):null;
     const axcol=agree?agree.map(a=>a===true?'#86efac':null):null;
@@ -661,6 +664,23 @@ function bioHTML(m){
     <div style=margin-top:12px><div class=eyebrow>Notes</div><div id=bio-view>${note?`<div class=savednote>${esc(note)}</div>`:'<div class=empty>Add background, career, district history, prior interactions.</div>'}
     <button class=btn data-edit=bio>${note?'Edit':'Add'} note</button>
     <div id=bio-edit hidden><textarea class=notebox data-field=bio>${esc(note||'')}</textarea><button class=btn data-save=bio>Save</button><button class="btn ghost" data-cancel=bio>Cancel</button></div></div></div>`;
+}
+const PERSCAT={family:'Family',favorite:'Favorites',books_media:'Books, film, TV & music',food:'Food & drink',
+  inspiration:'Inspirations & mentors',quotes_values:'Quotes & guiding words',hobbies_sports:'Hobbies, sports & fandom',
+  formative:'Formative experiences',faith:'Faith & practice',pets:'Pets',places_travel:'Places & travel',
+  personal_routine:'Personal routines',other:'Other personal details'};
+function personalHTML(m){
+  const p=m.personal||{}, items=p.items||[];
+  if(!items.length) return '<div class=empty>No source-qualified personal details found in the current corpus.</div>';
+  const groups={};items.forEach(x=>(groups[x.category]||(groups[x.category]=[])).push(x));
+  const src=x=>{const bits=[x.source,x.date].filter(Boolean).map(esc);const lab=bits.join(' · ')||'source';
+    return x.url?`<a href="${esc(x.url)}" target=_blank rel=noopener>${lab} ↗</a>`:`<span>${lab}${x.locator?' · '+esc(x.locator):''}</span>`;};
+  const cards=Object.keys(groups).sort((a,b)=>(PERSCAT[a]||a).localeCompare(PERSCAT[b]||b)).map(cat=>
+    `<div class=eyebrow style="margin-top:12px">${esc(PERSCAT[cat]||cat)} <span style=color:var(--faint)>· ${groups[cat].length}</span></div>`+
+    groups[cat].map(x=>`<div style="background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:8px 10px;margin:5px 0">
+      <div style="font-size:12px;font-weight:650;color:var(--ink,#dbe2ea)">${esc(x.claim)}</div>
+      <details class=methnote style="margin:4px 0 0"><summary>View exact evidence</summary><div class=methbody>“${esc(x.evidence)}”<div style="margin-top:5px;color:var(--faint)">${src(x)} · ${esc(x.confidence)} confidence</div></div></details></div>`).join('')).join('');
+  return `<div style="font-size:11px;color:var(--muted);margin-bottom:5px">${items.length} public, member-attributed details · exact excerpt and locator retained · observations only; never fed into ranks or traits</div>${cards}`;
 }
 function relHTML(m){
   const partners=m.partners||[];
