@@ -64,8 +64,10 @@ def freeze(out_path):
         psy = m.get('psy') or {}
         big5 = psy.get('big5_pct') or []
         beh = psy.get('behav_pct') or []
+        # The locked sample is never redrawn for missing coverage. A member without a display row
+        # remains in the evidence collection and contributes no model-direction comparisons.
         if len(big5) != 5:
-            raise RuntimeError('%s has no five-axis Big Five display' % m['name'])
+            big5 = [None] * 5
         comm = psy.get('communication_style') or {}
         sample.append({
             'name': m['name'], 'chamber': m['chamber'], 'party': m.get('party'),

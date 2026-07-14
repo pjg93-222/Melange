@@ -138,3 +138,13 @@ Then `python fec/official_persona_perception_audit.py --score` is run once. Its 
 verbatim under a newline-anchored `RESULT-PERCEPTION` heading in this file during the same session.
 Any malformed evidence or fingerprint mismatch refuses the look without consuming it. Exploratory
 secondary summaries are labeled as such and cannot change the frozen outcome.
+
+## ADDENDUM 1 (2026-07-13, PRE-LOOK; sample, bars, source protocol, and consequences untouched)
+
+The first freeze attempt refused before writing an artifact because one locked random-draw member,
+Randy Feenstra, has no five-axis Big Five display row. No score was printed or inspected and no
+external evidence had been collected. The sample's no-replacement rule controls: the freeze utility
+now retains any such member with five explicit null model values. The member remains in the 40-person
+source audit but contributes no directional comparison unless a pinned model value exists. This is
+a machinery/coverage correction only; no sample member, threshold, rubric, outcome tier, input
+fingerprint, or one-look consequence changed.
