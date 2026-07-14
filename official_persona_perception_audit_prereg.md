@@ -148,3 +148,7 @@ now retains any such member with five explicit null model values. The member rem
 source audit but contributes no directional comparison unless a pinned model value exists. This is
 a machinery/coverage correction only; no sample member, threshold, rubric, outcome tier, input
 fingerprint, or one-look consequence changed.
+
+## RESULT-PERCEPTION
+
+official_persona_perception_result_v1.json.candidate: INSUFFICIENT EXTERNAL EVIDENCE; 18 claims across 13 members; micro 0.833 macro 0.808

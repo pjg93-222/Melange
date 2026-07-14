@@ -1,0 +1,1498 @@
+{
+ "schema": "official-persona-perception-result-v1",
+ "status": "ONE_LOOK_CONSUMED_RESULT_RECORDED",
+ "verdict": "INSUFFICIENT EXTERNAL EVIDENCE",
+ "scope": "descriptive external-perception corroboration; not psychometric validation",
+ "input_fingerprints": {
+  "frozen_sha256": "BEC1598F12CF1482A591A692291EB154B173C7863D93DB45145790A24C9AD99C",
+  "evidence_sha256": "D0F0EEEC1ACAE48B46DD934E356D24B7B947A830883FD31A553A826E28C179FE"
+ },
+ "coverage": {
+  "sample_n": 40,
+  "evaluable_member_n": 13,
+  "evaluable_claim_n": 18,
+  "decided_member_n": 5
+ },
+ "overall": {
+  "micro_agreement": 0.8333,
+  "micro_wilson_95": [
+   0.6078,
+   0.9416
+  ],
+  "member_macro_agreement": 0.8077,
+  "member_mismatch_rate": 0.0
+ },
+ "per_trait": {
+  "E": {
+   "agree": 4,
+   "disagree": 1,
+   "evaluable": 5,
+   "agreement_rate": 0.8,
+   "wilson_95": [
+    0.3755,
+    0.9638
+   ]
+  },
+  "O": {
+   "agree": 3,
+   "disagree": 0,
+   "evaluable": 3,
+   "agreement_rate": 1.0,
+   "wilson_95": [
+    0.4385,
+    1.0
+   ]
+  },
+  "C": {
+   "agree": 1,
+   "disagree": 1,
+   "evaluable": 2,
+   "agreement_rate": 0.5,
+   "wilson_95": [
+    0.0945,
+    0.9055
+   ]
+  },
+  "A": {
+   "agree": 5,
+   "disagree": 0,
+   "evaluable": 5,
+   "agreement_rate": 1.0,
+   "wilson_95": [
+    0.5655,
+    1.0
+   ]
+  },
+  "N": {
+   "agree": 2,
+   "disagree": 1,
+   "evaluable": 3,
+   "agreement_rate": 0.6667,
+   "wilson_95": [
+    0.2077,
+    0.9385
+   ]
+  }
+ },
+ "members": {
+  "Randy Feenstra": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://feenstra.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography records completion of a Ph.D. while serving in Congress."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/Randy_Feenstra",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent biography corroborates the multi-stage professional and academic record."
+    }
+   ],
+   "external_summary": "Clear long-horizon follow-through; this member has no model Big Five display row in the frozen artifact."
+  },
+  "Celeste Maloy": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://maloy.house.gov/about/",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.deseret.com/2023/7/24/23791698/celeste-maloy-the-country-girl-running-for-congress/",
+     "publisher": "Deseret News",
+     "date": "2023-07-24",
+     "independent": true,
+     "summary": "Long-form candidate profile emphasizing rural background and constituent assistance, but not a stable temperament judgment."
+    }
+   ],
+   "external_summary": "Insufficient dispositional description."
+  },
+  "Mary Scanlon": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 1,
+   "agree": 0,
+   "disagree": 1,
+   "agreement_rate": 0.0,
+   "verdict": "thin_external_overlap",
+   "comparisons": [
+    {
+     "trait": "C",
+     "model_percentile": 0.179,
+     "model_direction": -1,
+     "external_direction": 1,
+     "agree": false,
+     "basis": "The profile presents sustained, organized responsibility across large-scale pro bono and public-interest work.",
+     "source_ids": [
+      "s2"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://scanlon.house.gov/about/default.aspx",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography documents leadership of a 600-lawyer pro bono program."
+    },
+    {
+     "id": "s2",
+     "url": "https://news.colgate.edu/magazine/2023/08/08/u-s-congresswoman-mary-gay-scanlon-80-is-not-afraid-to-speak-up/",
+     "publisher": "Colgate Magazine",
+     "date": "2023-08-08",
+     "independent": true,
+     "summary": "Profile describes Scanlon's poise and long, organized public-interest career."
+    }
+   ],
+   "external_summary": "Organized and notably poised; no E inference from willingness to speak."
+  },
+  "Shomari Figures": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://figures.house.gov/about/about-shomari",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://spectrumlocalnews.com/sc/south-carolina/news/2025/08/13/shomari-figures-time-in-congress",
+     "publisher": "Spectrum News",
+     "date": "2025-08-13",
+     "independent": true,
+     "summary": "Freshman-office profile; insufficient explicit temperament description for a directional code."
+    }
+   ],
+   "external_summary": "Source-sparse for professional personality."
+  },
+  "Morgan Griffith": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://morgangriffith.house.gov/biography/default.aspx",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://rollcall.com/2025/07/21/in-the-spotlight-morgan-griffith/",
+     "publisher": "Roll Call",
+     "date": "2025-07-21",
+     "independent": true,
+     "summary": "Profile describes a history buff who uses eighteenth-century political texts in contemporary argument."
+    }
+   ],
+   "external_summary": "Intellectually curious, history-oriented public style."
+  },
+  "Aaron Bean": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://bean.house.gov/",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official office biography and public record."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/Aaron_Bean",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent biographical overview; no clear professional-temperament description surfaced."
+    }
+   ],
+   "external_summary": "Available profiles were biographical rather than dispositional."
+  },
+  "Delia Ramirez": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://ramirez.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/Delia_Ramirez",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent career overview; organizing and issue advocacy were not treated as personality by themselves."
+    }
+   ],
+   "external_summary": "No directional external code."
+  },
+  "Marcy Kaptur": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://kaptur.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://apnews.com/article/adac4970af806c7eb9ea4fb529d12432",
+     "publisher": "Associated Press",
+     "date": "2023-01-02",
+     "independent": true,
+     "summary": "Profile presents Kaptur as a long-serving outsider willing to challenge party leadership and focused on working-class representation."
+    }
+   ],
+   "external_summary": "Strong independent political identity, but no clean Big Five direction under the locked rubric."
+  },
+  "Alma Adams": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 1,
+   "agree": 1,
+   "disagree": 0,
+   "agreement_rate": 1.0,
+   "verdict": "thin_external_overlap",
+   "comparisons": [
+    {
+     "trait": "O",
+     "model_percentile": 0.882,
+     "model_direction": 1,
+     "external_direction": 1,
+     "agree": true,
+     "basis": "Sustained practice as an artist, curator, and art educator plus a deliberately distinctive visual style support aesthetic and expressive breadth.",
+     "source_ids": [
+      "s2",
+      "s3"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://adams.house.gov/",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official public biography and issue record."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/Alma_Adams",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent biography covering her four-decade art career, gallery leadership, and distinctive visual style."
+    },
+    {
+     "id": "s3",
+     "url": "https://www.arts.gov/stories/blog/2016/art-talk-us-representative-alma-adams",
+     "publisher": "National Endowment for the Arts",
+     "date": "2016-02-25",
+     "independent": true,
+     "summary": "Profile of Adams as a practicing printmaker, art educator, curator, and advocate for artistic expression."
+    }
+   ],
+   "external_summary": "Strong aesthetic and expressive breadth; no clear demeanor direction."
+  },
+  "John Garamendi": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://garamendi.house.gov/about/",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/John_Garamendi",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent biographical overview."
+    }
+   ],
+   "external_summary": "Biography did not yield a reliable temperament direction."
+  },
+  "Erin Houchin": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://houchin.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://rollcall.com/2023/04/27/not-all-bosses-are-created-equally-houchin-remembers-coats-as-among-the-best/",
+     "publisher": "Roll Call",
+     "date": "2023-04-27",
+     "independent": true,
+     "summary": "Interview focuses primarily on Dan Coats and Houchin's career memories, not independent ratings of her own temperament."
+    }
+   ],
+   "external_summary": "No directional external code."
+  },
+  "Sam Graves": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 2,
+   "agree": 2,
+   "disagree": 0,
+   "agreement_rate": 1.0,
+   "verdict": "match",
+   "comparisons": [
+    {
+     "trait": "E",
+     "model_percentile": 0.285,
+     "model_direction": -1,
+     "external_direction": -1,
+     "agree": true,
+     "basis": "He explicitly avoids the limelight and prefers closed-door negotiation despite holding a visible chair.",
+     "source_ids": [
+      "s2"
+     ]
+    },
+    {
+     "trait": "N",
+     "model_percentile": 0.182,
+     "model_direction": -1,
+     "external_direction": -1,
+     "agree": true,
+     "basis": "A long-serving neighboring colleague says Graves has never lost control in two decades and remains cordial under conflict.",
+     "source_ids": [
+      "s2"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://graves.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://rollcall.com/2024/12/10/in-a-party-of-firebrands-graves-sidesteps-limelight/",
+     "publisher": "Roll Call",
+     "date": "2024-12-10",
+     "independent": true,
+     "summary": "Colleagues describe Graves as all-work/no-show, cordial, calm, tough, expert, and oriented toward closed-door partnership."
+    }
+   ],
+   "external_summary": "Reserved, industrious, cooperative, and notably even-tempered professional style."
+  },
+  "Lloyd Smucker": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://smucker.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography describes a solution-seeking reputation."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/Lloyd_Smucker",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent biography without a clear public-temperament assessment."
+    }
+   ],
+   "external_summary": "No independently corroborated directional code."
+  },
+  "Greg Landsman": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 1,
+   "agree": 1,
+   "disagree": 0,
+   "agreement_rate": 1.0,
+   "verdict": "thin_external_overlap",
+   "comparisons": [
+    {
+     "trait": "A",
+     "model_percentile": 0.829,
+     "model_direction": 1,
+     "external_direction": 1,
+     "agree": true,
+     "basis": "Independent reporting describes him as a partner and peacemaker who works with colleagues to complete legislation.",
+     "source_ids": [
+      "s2"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://landsman.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.wlwt.com/article/greg-landsman-cincinnati-congress-second-term-interview/63860192",
+     "publisher": "WLWT",
+     "date": "2025-02",
+     "independent": true,
+     "summary": "Profile reports colleagues calling Landsman a strong partner and highlights his role moving bipartisan work to completion."
+    }
+   ],
+   "external_summary": "Clear cooperative professional reputation."
+  },
+  "Robin Kelly": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://robinkelly.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.cbsnews.com/chicago/news/senate-candidate-profile-illinois-congresswoman-robin-kelly/",
+     "publisher": "CBS Chicago",
+     "date": "2026-02-12",
+     "independent": true,
+     "summary": "Candidate profile presents Kelly's workhorse-not-show-horse self-description and her claim of working across the aisle."
+    }
+   ],
+   "external_summary": "Low-showmanship, work-oriented, cross-group public presentation; evidence is partly self-description."
+  },
+  "Gus Bilirakis": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://bilirakis.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://hellenicnews.com/2026/04/09/congressman-gus-bilirakis-on-legacy-leadership-and-the-heart-of-public-service/",
+     "publisher": "Hellenic News of America",
+     "date": "2026-04-09",
+     "independent": true,
+     "summary": "Service-oriented profile, but its favorable framing did not provide a strong enough directional personality judgment."
+    }
+   ],
+   "external_summary": "No sufficiently independent directional code."
+  },
+  "Blake Moore": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://blakemoore.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.sltrib.com/news/politics/2020/07/13/how-utahn-blake-moore/",
+     "publisher": "Salt Lake Tribune",
+     "date": "2020-07-13",
+     "independent": true,
+     "summary": "Candidate profile and career background; no unambiguous trait description used here."
+    }
+   ],
+   "external_summary": "No independent directional code."
+  },
+  "David Taylor": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://taylor.house.gov/",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official office site."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/David_Taylor_(Ohio_politician)",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent biography; no clear public-temperament description."
+    }
+   ],
+   "external_summary": "No directional external code."
+  },
+  "Virginia Foxx": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://foxx.house.gov/about/default.aspx",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/Virginia_Foxx",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent biographical context."
+    },
+    {
+     "id": "s3",
+     "url": "https://foxx.house.gov/news/documentsingle.aspx?DocumentID=398989",
+     "publisher": "The Chronicle of Higher Education (republished by official office)",
+     "date": "2016",
+     "independent": true,
+     "summary": "Independent day-in-the-life profile portrays constant work, preparation, and an explicit work-smarter/work-harder norm."
+    }
+   ],
+   "external_summary": "Strongly work- and preparation-oriented."
+  },
+  "Sean Casten": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 2,
+   "agree": 2,
+   "disagree": 0,
+   "agreement_rate": 1.0,
+   "verdict": "match",
+   "comparisons": [
+    {
+     "trait": "E",
+     "model_percentile": 0.758,
+     "model_direction": 1,
+     "external_direction": 1,
+     "agree": true,
+     "basis": "No-holds-barred commentary and an assertive public voice support an outward, forceful communication style, not merely title visibility.",
+     "source_ids": [
+      "s2"
+     ]
+    },
+    {
+     "trait": "O",
+     "model_percentile": 0.968,
+     "model_direction": 1,
+     "external_direction": 1,
+     "agree": true,
+     "basis": "Independent description emphasizes wonkery and technically broad, science-driven engagement.",
+     "source_ids": [
+      "s2"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://casten.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official scientific and business biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.axios.com/2021/10/19/rep-casten-manchin-climate-cuts-cop26",
+     "publisher": "Axios",
+     "date": "2021-10-19",
+     "independent": true,
+     "summary": "Profile describes a prominent climate voice combining policy wonkery with no-holds-barred commentary."
+    }
+   ],
+   "external_summary": "Technically curious and publicly forceful."
+  },
+  "Brandon Gill": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://gill.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.texastribune.org/2025/06/09/representative-brandon-gill-texas-freshman-republican/",
+     "publisher": "Texas Tribune",
+     "date": "2025-06-09",
+     "independent": true,
+     "summary": "Profile describes a media-forward freshman who deliberately attracts attention and uses combative characterizations of opponents."
+    }
+   ],
+   "external_summary": "High public-facing assertiveness and low conciliatoriness; no N inference from ideology or rhetoric alone."
+  },
+  "Terri Sewell": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://sewell.house.gov/biography/",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/Terri_Sewell",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent biography documents extensive scholarship across law, politics, and comparative representation, including a long thesis later published as a book."
+    }
+   ],
+   "external_summary": "Strong evidence of intellectual breadth; no clean demeanor code."
+  },
+  "Yvette Clarke": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://clarke.house.gov/about/",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.marieclaire.com/politics/congressional-pact-lamonica-mciver-ilhan-omar-alexandria-ocasio-cortez-nancy-pelosi/",
+     "publisher": "Marie Claire",
+     "date": "2026-05",
+     "independent": true,
+     "summary": "Reported account documents Clarke joining colleagues to support a member under legal and political pressure."
+    }
+   ],
+   "external_summary": "Concrete evidence of supportive colleague behavior."
+  },
+  "Gregory Meeks": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://www.as-coa.org/speakers/gregory-meeks",
+     "publisher": "AS/COA",
+     "date": "n.d.",
+     "independent": true,
+     "summary": "Professional biography describes an effective, common-sense legislator respected across party lines."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.cityandstateny.com/personality/2019/04/meet-gregory-meeks-queens-new-boss/177518/",
+     "publisher": "City & State New York",
+     "date": "2019-04",
+     "independent": true,
+     "summary": "Profile emphasizes team protection and working together after elections."
+    }
+   ],
+   "external_summary": "Cooperative, team-oriented official persona."
+  },
+  "Gwen Moore": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://gwenmoore.house.gov/news/documentsingle.aspx?DocumentID=1473",
+     "publisher": "Milwaukee Magazine (republished by official office)",
+     "date": "n.d.",
+     "independent": true,
+     "summary": "Independent profile describes dancing, audience connection, off-script passion, eccentric speeches, singing, and distinctive expression."
+    },
+    {
+     "id": "s2",
+     "url": "https://womeninwisconsin.org/profile/gwen-moore/",
+     "publisher": "Wisconsin Women Making History",
+     "date": "n.d.",
+     "independent": true,
+     "summary": "Biographical profile providing independent context."
+    }
+   ],
+   "external_summary": "Expressive, audience-engaging, and unconventional public style."
+  },
+  "Scott Fitzgerald": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://fitzgerald.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/Scott_Fitzgerald_(politician)",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent career overview; no clean temperament description."
+    }
+   ],
+   "external_summary": "No directional external code."
+  },
+  "James McGovern": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://mcgovern.house.gov/",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official office site."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.newyorker.com/magazine/1997/01/20/mr-mcgovern-goes-to-washington",
+     "publisher": "The New Yorker",
+     "date": "1997-01-20",
+     "independent": true,
+     "summary": "Long-form early-career profile; available evidence was not converted into a current directional temperament code."
+    }
+   ],
+   "external_summary": "No current directional external code."
+  },
+  "Michael Simpson": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://simpson.house.gov/biography/",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.idahostatesman.com/opinion/article220050405.html",
+     "publisher": "Idaho Statesman",
+     "date": "2018",
+     "independent": true,
+     "summary": "Editorial profile says Simpson recognized the value of working across the aisle and building allies."
+    }
+   ],
+   "external_summary": "Cooperative, alliance-building legislative style."
+  },
+  "Mike Quigley": {
+   "chamber": "House",
+   "party": "Democrat",
+   "evaluable": 2,
+   "agree": 1,
+   "disagree": 1,
+   "agreement_rate": 0.5,
+   "verdict": "mixed",
+   "comparisons": [
+    {
+     "trait": "E",
+     "model_percentile": 0.919,
+     "model_direction": 1,
+     "external_direction": -1,
+     "agree": false,
+     "basis": "Independent description explicitly characterizes his demeanor as soft-spoken and academic.",
+     "source_ids": [
+      "s2"
+     ]
+    },
+    {
+     "trait": "O",
+     "model_percentile": 0.917,
+     "model_direction": 1,
+     "external_direction": 1,
+     "agree": true,
+     "basis": "A professor describes him as repeatedly rethinking policy problems creatively.",
+     "source_ids": [
+      "s2"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://quigley.house.gov/",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official office site."
+    },
+    {
+     "id": "s2",
+     "url": "https://harris.uchicago.edu/news-events/news/alumni-spotlight-congressman-mike-quigley-am85",
+     "publisher": "University of Chicago Harris School",
+     "date": "2013",
+     "independent": true,
+     "summary": "Profile calls Quigley soft-spoken and almost academic, says he rethought policy problems creatively, and reports an 80-hour work schedule."
+    }
+   ],
+   "external_summary": "Quietly presented, intellectually creative, and highly industrious."
+  },
+  "James Comer": {
+   "chamber": "House",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://comer.house.gov/about",
+     "publisher": "U.S. House",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://apnews.com/article/b88f48e1d87aef2c07f64fb3af7054fb",
+     "publisher": "Associated Press",
+     "date": "2023",
+     "independent": true,
+     "summary": "Profile reports members of both parties describing Comer as even-keeled and approachable."
+    },
+    {
+     "id": "s3",
+     "url": "https://apnews.com/article/d68267048aa4f42d244130e81d3e9c30",
+     "publisher": "Associated Press",
+     "date": "2024",
+     "independent": true,
+     "summary": "Later profile contains conflicting descriptions of a former common-ground style and a sharper partisan persona."
+    }
+   ],
+   "external_summary": "Generally even-keeled in one cross-party profile; agreeableness evidence is internally conflicting."
+  },
+  "Susan Collins": {
+   "chamber": "Senate",
+   "party": "Republican",
+   "evaluable": 2,
+   "agree": 2,
+   "disagree": 0,
+   "agreement_rate": 1.0,
+   "verdict": "match",
+   "comparisons": [
+    {
+     "trait": "C",
+     "model_percentile": 0.827,
+     "model_direction": 1,
+     "external_direction": 1,
+     "agree": true,
+     "basis": "The profile explicitly emphasizes tenacity, knowledge, sustained time and energy, and careful work.",
+     "source_ids": [
+      "s2"
+     ]
+    },
+    {
+     "trait": "A",
+     "model_percentile": 0.829,
+     "model_direction": 1,
+     "external_direction": 1,
+     "agree": true,
+     "basis": "Independent reporting portrays her as an earnest, trusted broker focused on compromise rather than grandstanding.",
+     "source_ids": [
+      "s2"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://www.collins.senate.gov/about/susan-collins",
+     "publisher": "U.S. Senate",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.washingtonpost.com/politics/2013/10/11/ff2d29e0-32c0-11e3-8627-c5d7de0a046b_story.html",
+     "publisher": "Washington Post",
+     "date": "2013-10-11",
+     "independent": true,
+     "summary": "Profile describes careful language, earnest brokering, tenacity, expertise, time investment, and refusal to grandstand."
+    }
+   ],
+   "external_summary": "Tenacious, careful, and cooperation-oriented professional persona."
+  },
+  "Richard Blumenthal": {
+   "chamber": "Senate",
+   "party": "Democrat",
+   "evaluable": 1,
+   "agree": 1,
+   "disagree": 0,
+   "agreement_rate": 1.0,
+   "verdict": "thin_external_overlap",
+   "comparisons": [
+    {
+     "trait": "E",
+     "model_percentile": 0.907,
+     "model_direction": 1,
+     "external_direction": 1,
+     "agree": true,
+     "basis": "Independent observers explicitly call him high-energy and unusually peripatetic, with a dense public schedule.",
+     "source_ids": [
+      "s2"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://www.blumenthal.senate.gov/about/biography",
+     "publisher": "U.S. Senate",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://ctmirror.org/2013/08/07/blumenthal-brings-high-energy-style-senate/",
+     "publisher": "CT Mirror",
+     "date": "2013-08-07",
+     "independent": true,
+     "summary": "Detailed profile describes a high-energy, peripatetic, overbooked, broad-issue senator whose help colleagues appreciate."
+    }
+   ],
+   "external_summary": "High-energy, broad, industrious, and helpful professional persona."
+  },
+  "John Thune": {
+   "chamber": "Senate",
+   "party": "Republican",
+   "evaluable": 1,
+   "agree": 1,
+   "disagree": 0,
+   "agreement_rate": 1.0,
+   "verdict": "thin_external_overlap",
+   "comparisons": [
+    {
+     "trait": "A",
+     "model_percentile": 0.829,
+     "model_direction": 1,
+     "external_direction": 1,
+     "agree": true,
+     "basis": "A cross-party colleague specifically identifies him as fundamental to bipartisan work.",
+     "source_ids": [
+      "s2"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://www.thune.senate.gov/about/?p=biography",
+     "publisher": "U.S. Senate",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.newyorker.com/magazine/2025/04/07/john-thune-profile-senate-majority-leader",
+     "publisher": "The New Yorker",
+     "date": "2025-04-07",
+     "independent": true,
+     "summary": "Profile includes a Democratic senator's description of Thune as fundamental to bipartisan work."
+    },
+    {
+     "id": "s3",
+     "url": "https://apnews.com/article/44a4b7ce90c1f8eb02567762906f6f56",
+     "publisher": "Associated Press",
+     "date": "2025-04",
+     "independent": true,
+     "summary": "Profile describes an old-fashioned, work-oriented leadership approach."
+    }
+   ],
+   "external_summary": "Strong cooperative reputation; role-obligated visibility and workload were controlled."
+  },
+  "John Kennedy": {
+   "chamber": "Senate",
+   "party": "Republican",
+   "evaluable": 2,
+   "agree": 2,
+   "disagree": 0,
+   "agreement_rate": 1.0,
+   "verdict": "match",
+   "comparisons": [
+    {
+     "trait": "E",
+     "model_percentile": 0.86,
+     "model_direction": 1,
+     "external_direction": 1,
+     "agree": true,
+     "basis": "Garrulousness and habitual engagement with reporters support high public sociability and talkativeness.",
+     "source_ids": [
+      "s2",
+      "s3"
+     ]
+    },
+    {
+     "trait": "A",
+     "model_percentile": 0.174,
+     "model_direction": -1,
+     "external_direction": -1,
+     "agree": true,
+     "basis": "The established persona pairs charm with sharp barbs, venomous quips, and demeaning comparisons.",
+     "source_ids": [
+      "s3"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://www.kennedy.senate.gov/public/biography",
+     "publisher": "U.S. Senate",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://rollcall.com/2018/08/06/kennedy-on-kennedyisms-i-try-not-to-talk-like-a-senator-is-supposed-to-talk/",
+     "publisher": "Roll Call",
+     "date": "2018-08-06",
+     "independent": true,
+     "summary": "Profile emphasizes his unusual verbal style and willingness to stop and engage reporters."
+    },
+    {
+     "id": "s3",
+     "url": "https://en.wikipedia.org/wiki/John_Kennedy_(Louisiana_politician)",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent public-image synthesis documents a garrulous, folksy, sharp, quip-heavy persona that admirers and critics both see as distinctive."
+    }
+   ],
+   "external_summary": "Garrulous, unconventional, and sharp-edged; dramatic language was not automatically coded as N."
+  },
+  "Ted Budd": {
+   "chamber": "Senate",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://www.budd.senate.gov/about-senator-ted-budd/",
+     "publisher": "U.S. Senate",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.theassemblync.com/news/politics/elections/ted-budd-paper-elephant/",
+     "publisher": "The Assembly",
+     "date": "2022-09-01",
+     "independent": true,
+     "summary": "Long-form profile describes Budd as a humble good listener with nice-guy charm and documents calm, helpful behavior during the January 6 evacuation."
+    }
+   ],
+   "external_summary": "Warm, grounded, and calm under acute stress; low media exposure was not coded as introversion."
+  },
+  "Steve Daines": {
+   "chamber": "Senate",
+   "party": "Republican",
+   "evaluable": 1,
+   "agree": 1,
+   "disagree": 0,
+   "agreement_rate": 1.0,
+   "verdict": "thin_external_overlap",
+   "comparisons": [
+    {
+     "trait": "N",
+     "model_percentile": 0.241,
+     "model_direction": -1,
+     "external_direction": -1,
+     "agree": true,
+     "basis": "His reported noncombative, temperature-lowering style supports professional composure.",
+     "source_ids": [
+      "s2"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://www.daines.senate.gov/",
+     "publisher": "U.S. Senate",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official office site."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.washingtonpost.com/politics/2023/03/06/steve-daines-senate-republicans/",
+     "publisher": "Washington Post",
+     "date": "2023-03-06",
+     "independent": true,
+     "summary": "Profile describes Daines balancing Republican factions, earning trust without copying combative styles."
+    }
+   ],
+   "external_summary": "Trusted faction-bridger with a controlled, noncombative style."
+  },
+  "Roger Wicker": {
+   "chamber": "Senate",
+   "party": "Republican",
+   "evaluable": 1,
+   "agree": 0,
+   "disagree": 1,
+   "agreement_rate": 0.0,
+   "verdict": "thin_external_overlap",
+   "comparisons": [
+    {
+     "trait": "N",
+     "model_percentile": 0.051,
+     "model_direction": -1,
+     "external_direction": 1,
+     "agree": false,
+     "basis": "The reported intensity and escalation over a conference-location dispute appears disproportionate to the triggering administrative disagreement; this is a one-incident, low-confidence code.",
+     "source_ids": [
+      "s2"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://www.wicker.senate.gov/biography",
+     "publisher": "U.S. Senate",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://www.thedailybeast.com/republicans-raging-texts-to-maga-colleague-are-leaked-stop-embarrassing-yourself/",
+     "publisher": "Daily Beast",
+     "date": "2026-07-07",
+     "independent": true,
+     "summary": "Reports a furious text exchange and attempt to remove a colleague from a shared return flight after a dispute about a conference location."
+    }
+   ],
+   "external_summary": "One recent episode suggests disproportionate reactivity, but it is not treated as a holistic or high-confidence judgment."
+  },
+  "Ron Johnson": {
+   "chamber": "Senate",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://www.ronjohnson.senate.gov/biography/",
+     "publisher": "U.S. Senate",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/Ron_Johnson",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent biography documents contrarian policy positions but lacks a clean professional-temperament synthesis."
+    }
+   ],
+   "external_summary": "No clean directional code after separating ideology and controversy from personality."
+  },
+  "James Risch": {
+   "chamber": "Senate",
+   "party": "Republican",
+   "evaluable": 0,
+   "agree": 0,
+   "disagree": 0,
+   "agreement_rate": null,
+   "verdict": "thin_external_overlap",
+   "comparisons": [],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://www.risch.senate.gov/about/about-jim/",
+     "publisher": "U.S. Senate",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/Jim_Risch",
+     "publisher": "Wikipedia",
+     "date": "2026-07",
+     "independent": true,
+     "summary": "Independent career overview; isolated parliamentary conflict was not generalized into temperament."
+    }
+   ],
+   "external_summary": "No directional external code."
+  },
+  "Katie Britt": {
+   "chamber": "Senate",
+   "party": "Republican",
+   "evaluable": 1,
+   "agree": 1,
+   "disagree": 0,
+   "agreement_rate": 1.0,
+   "verdict": "thin_external_overlap",
+   "comparisons": [
+    {
+     "trait": "A",
+     "model_percentile": 0.745,
+     "model_direction": 1,
+     "external_direction": 1,
+     "agree": true,
+     "basis": "The profile documents deliberate relationship building and genuine cross-party friendship and support.",
+     "source_ids": [
+      "s2"
+     ]
+    }
+   ],
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://www.britt.senate.gov/about/",
+     "publisher": "U.S. Senate",
+     "date": "n.d.",
+     "independent": false,
+     "summary": "Official biography."
+    },
+    {
+     "id": "s2",
+     "url": "https://apnews.com/article/4babe2d11e03365515d388d4a167648c",
+     "publisher": "Associated Press",
+     "date": "2024-03",
+     "independent": true,
+     "summary": "Profile describes behind-the-scenes relationship building, close friendships across the aisle, and visits during a colleague's hospitalization."
+    }
+   ],
+   "external_summary": "Relationship-oriented and cross-party warm; E remains unclear after controlling for national exposure."
+  }
+ },
+ "limitations": [
+  "external descriptions are selective public narratives, not self-report or informant ratings",
+  "the E slot is role-adjusted public exposure, not intrinsic Extraversion",
+  "middle 30th-70th percentile model values make no directional claim and are not scored",
+  "source-sparse members are never replaced"
+ ]
+}

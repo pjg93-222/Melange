@@ -1,0 +1,1681 @@
+{
+ "schema": "official-persona-perception-batch-v1",
+ "status": "FROZEN_BLIND_PRE_EVIDENCE",
+ "seed": "official-persona-perception-audit-v1|20260713",
+ "sample_method": "smallest SHA-256 lottery hashes within chamber; no replacement",
+ "sample_n": 40,
+ "house_n": 30,
+ "senate_n": 10,
+ "source_bundle_sha256": "33F0C4305F07FCA24AEF3098FEB47633E1AEC3FD7880617D5FE7180EA367147A",
+ "sample_fingerprint": "3A3E609C8DC9C19F4BE4762D397902C8C5BFD251F2BBB622863943DD740D4700",
+ "model_claim_thresholds": {
+  "low_max": 0.3,
+  "high_min": 0.7
+ },
+ "sample": [
+  {
+   "name": "Randy Feenstra",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Iowa",
+   "lottery_hash": "004A22BA4ED0A83E2847A164ABF9E7E8DBCD85F0BA7B1061EBB22BDABA5B4076",
+   "model": {
+    "big5_EOCAN": {
+     "E": null,
+     "O": null,
+     "C": null,
+     "A": null,
+     "N": null
+    },
+    "behavior": {
+     "cooperation": 0.701,
+     "follow_through": 0.375,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.345
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Celeste Maloy",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Utah",
+   "lottery_hash": "021448261EA726E75A420CEBFE7033E28AF3202B02DE96A606FBBC728396F29B",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.136,
+     "O": 0.064,
+     "C": 0.972,
+     "A": null,
+     "N": 0.216
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.992,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.261
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Mary Scanlon",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "Pennsylvania",
+   "lottery_hash": "02218EF8A09B1498478D366BF6AD2A9CF730143230CEC29FE1251D1F759ACACE",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.726,
+     "O": 0.823,
+     "C": 0.179,
+     "A": 0.318,
+     "N": 0.513
+    },
+    "behavior": {
+     "cooperation": 0.15,
+     "follow_through": 0.311,
+     "dominance": 0.395,
+     "activity": 0.011,
+     "breadth": 0.584
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.258749,
+      "percentile": 0.472,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -1.259858,
+      "percentile": 0.022,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -1.912113,
+      "percentile": 0.011,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 1.013774,
+      "percentile": 0.938,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.181378,
+      "percentile": 0.483,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Shomari Figures",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "Alabama",
+   "lottery_hash": "02790E702334D0CCD494167D8ABC6E6986ED1DDB62552CBC4B86C3C32CD6DB97",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.108,
+     "O": 0.179,
+     "C": 0.509,
+     "A": null,
+     "N": 0.026
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.244,
+     "dominance": null,
+     "activity": null,
+     "breadth": null
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Morgan Griffith",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Virginia",
+   "lottery_hash": "035DE3F5BFF170A58E7CEB7078289A0BC0E483E2421250020A1F3F24D960B6DC",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.22,
+     "O": 0.571,
+     "C": 0.72,
+     "A": null,
+     "N": 0.643
+    },
+    "behavior": {
+     "cooperation": 0.955,
+     "follow_through": 0.492,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.345
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Aaron Bean",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Florida",
+   "lottery_hash": "0364EE8317A626EF57C250F2DA999D80A6BB8AD0A0A5F4E45FB440AB4D708CF7",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.157,
+     "O": 0.378,
+     "C": 0.669,
+     "A": null,
+     "N": 0.812
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.92,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.261
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Delia Ramirez",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "Illinois",
+   "lottery_hash": "03BF6701E0080F5816D80D1F9A939E2233879245057C85E4E738C231E958022B",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.364,
+     "O": 0.84,
+     "C": 0.677,
+     "A": 0.112,
+     "N": 0.998
+    },
+    "behavior": {
+     "cooperation": 0.478,
+     "follow_through": 0.227,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.345
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Marcy Kaptur",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "Ohio",
+   "lottery_hash": "03C2E47213EBE122A0E439A4B32E5E1F8E4D6B004DE7DF20D6B4EF3528B02CDD",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.394,
+     "O": 0.447,
+     "C": 0.344,
+     "A": 0.829,
+     "N": 0.848
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.369,
+     "dominance": 0.044,
+     "activity": 0.315,
+     "breadth": 0.345
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.638624,
+      "percentile": 0.221,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.405216,
+      "percentile": 0.378,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.511833,
+      "percentile": 0.315,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "assertiveness": {
+      "z": -0.861358,
+      "percentile": 0.127,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Alma Adams",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "North Carolina",
+   "lottery_hash": "048870780F5232B8F54D664266B0E0A345776BE13D448E4067A5A216994E5A5C",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.386,
+     "O": 0.882,
+     "C": 0.167,
+     "A": null,
+     "N": 0.712
+    },
+    "behavior": {
+     "cooperation": 0.271,
+     "follow_through": 0.765,
+     "dominance": 0.712,
+     "activity": 0.094,
+     "breadth": 0.818
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": 1.138671,
+      "percentile": 0.906,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -1.274615,
+      "percentile": 0.015,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -1.137378,
+      "percentile": 0.094,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "assertiveness": {
+      "z": 0.731674,
+      "percentile": 0.865,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "John Garamendi",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "California",
+   "lottery_hash": "0577D38FBBCA0B8B8CFE8791FDE3A350230B7E073C19B5B27E93C481D477495B",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.909,
+     "O": 0.782,
+     "C": 0.297,
+     "A": 0.393,
+     "N": 0.094
+    },
+    "behavior": {
+     "cooperation": 0.379,
+     "follow_through": 0.044,
+     "dominance": 0.509,
+     "activity": 0.386,
+     "breadth": 0.718
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -1.130983,
+      "percentile": 0.049,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.145277,
+      "percentile": 0.547,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.351108,
+      "percentile": 0.386,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.745853,
+      "percentile": 0.858,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.279013,
+      "percentile": 0.404,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Erin Houchin",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Indiana",
+   "lottery_hash": "077A58D57F12A52CD5AF958ADB1C39DA026CF43018D3FFAC59D8951AE10EFBF8",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.087,
+     "O": 0.763,
+     "C": 0.868,
+     "A": null,
+     "N": 0.314
+    },
+    "behavior": {
+     "cooperation": 0.061,
+     "follow_through": 0.939,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.818
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Sam Graves",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Missouri",
+   "lottery_hash": "0893514C354F5CCBEAA52CCF7DDEEB4F514A2AC8E5D7A0BFEB6811AB0882F264",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.285,
+     "O": 0.509,
+     "C": 0.577,
+     "A": 0.601,
+     "N": 0.182
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.795,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.345
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Lloyd Smucker",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Pennsylvania",
+   "lottery_hash": "08A4F6EE1BE30F6AFD440ED6671C466B12D5170810D96F3A5B232A9ACF66C642",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.1,
+     "O": 0.707,
+     "C": 0.436,
+     "A": null,
+     "N": 0.331
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.163,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.261
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Greg Landsman",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "Ohio",
+   "lottery_hash": "093F2591006EBB7F12CC2CBD5D6332C25ED4CE99EBFFA4E88D8C84CEF04DD269",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.675,
+     "O": 0.118,
+     "C": 0.214,
+     "A": 0.829,
+     "N": 0.438
+    },
+    "behavior": {
+     "cooperation": 0.799,
+     "follow_through": 0.297,
+     "dominance": 0.166,
+     "activity": 0.933,
+     "breadth": 0.584
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.583548,
+      "percentile": 0.243,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.574932,
+      "percentile": 0.247,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": 1.590858,
+      "percentile": 0.933,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.121988,
+      "percentile": 0.492,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.515885,
+      "percentile": 0.281,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Robin Kelly",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "Illinois",
+   "lottery_hash": "09CAF2CDE4FDDE14F29BD3D8AF2F3014C94B0A3BB36125CE03B56B97505FFAEA",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.333,
+     "O": 0.643,
+     "C": 0.513,
+     "A": null,
+     "N": 0.917
+    },
+    "behavior": {
+     "cooperation": 0.672,
+     "follow_through": 0.498,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.718
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Gus Bilirakis",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Florida",
+   "lottery_hash": "0A546D6B3E2716EFB25C89197EC758800A957C0EAB9B26674F179F916F17EB5A",
+   "model": {
+    "big5_EOCAN": {
+     "E": null,
+     "O": null,
+     "C": null,
+     "A": null,
+     "N": null
+    },
+    "behavior": {
+     "cooperation": 0.93,
+     "follow_through": 0.479,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.584
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Blake Moore",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Utah",
+   "lottery_hash": "0B5B16B20BA2981D2735296DBDCC68E7ADC70E81518F9503BDC7C9EC754752D7",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.484,
+     "O": 0.541,
+     "C": 0.976,
+     "A": 0.829,
+     "N": 0.769
+    },
+    "behavior": {
+     "cooperation": 0.908,
+     "follow_through": 0.934,
+     "dominance": 0.055,
+     "activity": 0.846,
+     "breadth": 0.261
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": 0.598543,
+      "percentile": 0.813,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": 1.027568,
+      "percentile": 0.906,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": 0.804014,
+      "percentile": 0.846,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "assertiveness": {
+      "z": -0.942594,
+      "percentile": 0.097,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "David Taylor",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Ohio",
+   "lottery_hash": "0BA9EC7B0DA28297260D68F472BB15A9DD76A840A414E69D8003DB6D1A34841F",
+   "model": {
+    "big5_EOCAN": {
+     "E": null,
+     "O": null,
+     "C": null,
+     "A": null,
+     "N": null
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.86,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.149
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Virginia Foxx",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "North Carolina",
+   "lottery_hash": "0C6950725B8B2D4C8D24A7EB5084960F111FD7B428ACCED63FA26F9633DBB962",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.476,
+     "O": 0.363,
+     "C": 0.521,
+     "A": null,
+     "N": 0.496
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.555,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.149
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Sean Casten",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "Illinois",
+   "lottery_hash": "0D14E06D4E25D7FC6267854E33C103EAF6532466A1A00E33366073B9CBBCAF06",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.758,
+     "O": 0.968,
+     "C": 0.532,
+     "A": 0.318,
+     "N": 0.271
+    },
+    "behavior": {
+     "cooperation": 0.519,
+     "follow_through": 0.83,
+     "dominance": 0.262,
+     "activity": 0.734,
+     "breadth": 0.718
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.173302,
+      "percentile": 0.528,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": 3.423188,
+      "percentile": 0.989,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": 0.402244,
+      "percentile": 0.734,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.926767,
+      "percentile": 0.933,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.062792,
+      "percentile": 0.562,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Brandon Gill",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Texas",
+   "lottery_hash": "0E3E22CF69D011635495834E13FC36534136D28288590DC407E3182AC26245AC",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.317,
+     "O": 0.212,
+     "C": 0.885,
+     "A": null,
+     "N": 0.088
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.657,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.149
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Terri Sewell",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "Alabama",
+   "lottery_hash": "0E6C250BFF7AAC57A032B1E2E4EF0A044EA91E75ADAD86FD4BA8EDB11F46CE79",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.618,
+     "O": 0.417,
+     "C": 0.374,
+     "A": 0.601,
+     "N": 0.878
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.347,
+     "dominance": 0.343,
+     "activity": 0.39,
+     "breadth": 0.261
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -1.396391,
+      "percentile": 0.022,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.502695,
+      "percentile": 0.307,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.348782,
+      "percentile": 0.39,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.388562,
+      "percentile": 0.654,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.326801,
+      "percentile": 0.375,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Yvette Clarke",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "New York",
+   "lottery_hash": "0F511A552514DBC1B47DF56A259FB262B08DB97098B0E6F4C6E571955D6C3BC8",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.256,
+     "O": 0.75,
+     "C": 0.53,
+     "A": null,
+     "N": 0.752
+    },
+    "behavior": {
+     "cooperation": 0.373,
+     "follow_through": 0.231,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.718
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Gregory Meeks",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "New York",
+   "lottery_hash": "0F62E0BAC4B1F8F771910C10AC80C2F7316E10FD7F6C7D02EA9DD72FC01B1F4B",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.911,
+     "O": 0.63,
+     "C": 0.925,
+     "A": 0.364,
+     "N": 0.902
+    },
+    "behavior": {
+     "cooperation": 0.347,
+     "follow_through": 0.972,
+     "dominance": 0.62,
+     "activity": 0.423,
+     "breadth": 0.718
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.440212,
+      "percentile": 0.36,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.431214,
+      "percentile": 0.36,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.251106,
+      "percentile": 0.423,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.166122,
+      "percentile": 0.529,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.128549,
+      "percentile": 0.521,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Gwen Moore",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "Wisconsin",
+   "lottery_hash": "0F761E49B59A2E8D36B329E898E3B8F1A1FF365694D4A506AABD1D115719755A",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.589,
+     "O": 0.481,
+     "C": 0.361,
+     "A": 0.393,
+     "N": 0.844
+    },
+    "behavior": {
+     "cooperation": 0.452,
+     "follow_through": 0.123,
+     "dominance": 0.454,
+     "activity": 0.494,
+     "breadth": 0.584
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.144138,
+      "percentile": 0.536,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": 0.077683,
+      "percentile": 0.67,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.082864,
+      "percentile": 0.494,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": -1.613524,
+      "percentile": 0.054,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": 0.497408,
+      "percentile": 0.798,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Scott Fitzgerald",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Wisconsin",
+   "lottery_hash": "101F6BBEDD16349A19E2D011666C8802EBFC32089B0A6C0E4B43079DAA78FE85",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.411,
+     "O": 0.944,
+     "C": 0.904,
+     "A": null,
+     "N": 0.205
+    },
+    "behavior": {
+     "cooperation": 0.71,
+     "follow_through": 0.962,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.818
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "James McGovern",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "Massachusetts",
+   "lottery_hash": "106321E3C9EDAA02B684EA09ECA3821055730D72FD5D91B14BE41311E4781065",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.862,
+     "O": 0.397,
+     "C": 0.222,
+     "A": 0.209,
+     "N": 0.59
+    },
+    "behavior": {
+     "cooperation": 0.713,
+     "follow_through": 0.445,
+     "dominance": 0.708,
+     "activity": 0.03,
+     "breadth": 0.957
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.289365,
+      "percentile": 0.453,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.362356,
+      "percentile": 0.404,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -1.589874,
+      "percentile": 0.03,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.467197,
+      "percentile": 0.721,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": 1.685779,
+      "percentile": 0.955,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Michael Simpson",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Idaho",
+   "lottery_hash": "11A3570F40251358DFB95220731E7E2C106A47103BE687CFBF1A2070BCA8AE70",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.165,
+     "O": 0.248,
+     "C": 0.647,
+     "A": null,
+     "N": 0.707
+    },
+    "behavior": {
+     "cooperation": 0.758,
+     "follow_through": 0.42,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.261
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Mike Quigley",
+   "chamber": "House",
+   "party": "Democrat",
+   "state": "Illinois",
+   "lottery_hash": "1211CD173E9801B00E6A84BD8790E37A924112EBCCC494F3BEE07389E2D2327E",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.919,
+     "O": 0.917,
+     "C": 0.397,
+     "A": 0.215,
+     "N": 0.842
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.508,
+     "dominance": 0.24,
+     "activity": 0.539,
+     "breadth": 0.457
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": 0.475731,
+      "percentile": 0.779,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.196765,
+      "percentile": 0.509,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.015965,
+      "percentile": 0.539,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.391683,
+      "percentile": 0.658,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.615417,
+      "percentile": 0.228,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "James Comer",
+   "chamber": "House",
+   "party": "Republican",
+   "state": "Kentucky",
+   "lottery_hash": "129D3FB254BA38123A683F2AA74E69F197F453BF7DF82F77269A7991BCFB29EA",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.951,
+     "O": 0.654,
+     "C": 0.718,
+     "A": 0.486,
+     "N": 0.374
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.975,
+     "dominance": 0.679,
+     "activity": 0.502,
+     "breadth": 0.345
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": 0.200842,
+      "percentile": 0.685,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.340803,
+      "percentile": 0.423,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.073477,
+      "percentile": 0.502,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": -0.044043,
+      "percentile": 0.362,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.239361,
+      "percentile": 0.434,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Susan Collins",
+   "chamber": "Senate",
+   "party": "Republican",
+   "state": "Maine",
+   "lottery_hash": "05941AF49A852DAB75766DE8EBA66DB1841AF87C381F3DAC9B612C3394E3968A",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.837,
+     "O": 0.774,
+     "C": 0.827,
+     "A": 0.829,
+     "N": 0.425
+    },
+    "behavior": {
+     "cooperation": 0.911,
+     "follow_through": 0.898,
+     "dominance": 0.524,
+     "activity": 0.412,
+     "breadth": 0.547
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.629531,
+      "percentile": 0.232,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -1.186086,
+      "percentile": 0.037,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.294973,
+      "percentile": 0.412,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.23359,
+      "percentile": 0.562,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.104925,
+      "percentile": 0.543,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Richard Blumenthal",
+   "chamber": "Senate",
+   "party": "Democrat",
+   "state": "Connecticut",
+   "lottery_hash": "064AEB2129D546D2C5D6B9759DC67B9574C8EE88FF3F587CAC867AA7F11F0142",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.907,
+     "O": 0.532,
+     "C": 0.447,
+     "A": 0.548,
+     "N": 0.049
+    },
+    "behavior": {
+     "cooperation": 0.385,
+     "follow_through": 0.277,
+     "dominance": 0.494,
+     "activity": 0.483,
+     "breadth": 0.89
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": 0.22582,
+      "percentile": 0.7,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.040219,
+      "percentile": 0.622,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.103005,
+      "percentile": 0.483,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.169117,
+      "percentile": 0.533,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": 0.580776,
+      "percentile": 0.839,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "John Thune",
+   "chamber": "Senate",
+   "party": "Republican",
+   "state": "South Dakota",
+   "lottery_hash": "07B14F51444B83E95A0D3A720E9F6BC554E5E6864E8CFF634249758EDF425174",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.339,
+     "O": 0.141,
+     "C": 0.774,
+     "A": 0.829,
+     "N": 0.128
+    },
+    "behavior": {
+     "cooperation": 0.344,
+     "follow_through": 0.767,
+     "dominance": 0.244,
+     "activity": 0.622,
+     "breadth": 0.233
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.521337,
+      "percentile": 0.303,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": 0.251766,
+      "percentile": 0.734,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": 0.202894,
+      "percentile": 0.622,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": -0.363756,
+      "percentile": 0.2,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -1.04754,
+      "percentile": 0.071,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "John Kennedy",
+   "chamber": "Senate",
+   "party": "Republican",
+   "state": "Louisiana",
+   "lottery_hash": "080EEAE4BACC5584FE2C57C9748E13AE6221B176784D1CC475F3DDAB056FF3E9",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.86,
+     "O": 0.415,
+     "C": 0.162,
+     "A": 0.174,
+     "N": 0.686
+    },
+    "behavior": {
+     "cooperation": 0.248,
+     "follow_through": 0.833,
+     "dominance": 0.819,
+     "activity": 0.416,
+     "breadth": 0.233
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": 0.798101,
+      "percentile": 0.858,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.547016,
+      "percentile": 0.262,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.285486,
+      "percentile": 0.416,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": -0.308241,
+      "percentile": 0.221,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": 1.567563,
+      "percentile": 0.944,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Ted Budd",
+   "chamber": "Senate",
+   "party": "Republican",
+   "state": "North Carolina",
+   "lottery_hash": "0C468E3AE0C806F94B104A9F9918D35B6D0C7C6F026387CED19B29F15EE91267",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.063,
+     "O": 0.553,
+     "C": 0.476,
+     "A": null,
+     "N": 0.346
+    },
+    "behavior": {
+     "cooperation": 0.459,
+     "follow_through": 0.47,
+     "dominance": null,
+     "activity": null,
+     "breadth": 0.547
+    },
+    "communication_facets": {},
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Steve Daines",
+   "chamber": "Senate",
+   "party": "Republican",
+   "state": "Montana",
+   "lottery_hash": "1215F6417ADD58B444DF915C6B1B1AB028755D9FC3049674DDA3266196585083",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.384,
+     "O": 0.536,
+     "C": 0.618,
+     "A": 0.486,
+     "N": 0.241
+    },
+    "behavior": {
+     "cooperation": 0.901,
+     "follow_through": 0.854,
+     "dominance": 0.328,
+     "activity": 0.022,
+     "breadth": 0.89
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.798952,
+      "percentile": 0.139,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.186316,
+      "percentile": 0.517,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -1.745092,
+      "percentile": 0.022,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": -0.289588,
+      "percentile": 0.233,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": 0.013398,
+      "percentile": 0.622,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Roger Wicker",
+   "chamber": "Senate",
+   "party": "Republican",
+   "state": "Mississippi",
+   "lottery_hash": "14875E0644DD4AFCBAE2BA31204395DF31407E3E2AF8E146A59B603F91B7EA20",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.421,
+     "O": 0.368,
+     "C": 0.746,
+     "A": 0.467,
+     "N": 0.051
+    },
+    "behavior": {
+     "cooperation": 0.475,
+     "follow_through": 0.665,
+     "dominance": 0.299,
+     "activity": 0.232,
+     "breadth": 0.433
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": 0.988259,
+      "percentile": 0.884,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -1.178735,
+      "percentile": 0.041,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.623869,
+      "percentile": 0.232,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.630809,
+      "percentile": 0.812,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.022106,
+      "percentile": 0.596,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Ron Johnson",
+   "chamber": "Senate",
+   "party": "Republican",
+   "state": "Wisconsin",
+   "lottery_hash": "15C5F71FD762EF76F7C6F9BDFEE24A9782F1AD210718FF50A04D85980F42F8FA",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.886,
+     "O": 0.288,
+     "C": 0.801,
+     "A": 0.143,
+     "N": 0.62
+    },
+    "behavior": {
+     "cooperation": null,
+     "follow_through": 0.991,
+     "dominance": 0.347,
+     "activity": 0.787,
+     "breadth": 0.0
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.243268,
+      "percentile": 0.494,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -0.550325,
+      "percentile": 0.258,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": 0.497256,
+      "percentile": 0.787,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": -0.456975,
+      "percentile": 0.167,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.871807,
+      "percentile": 0.116,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "James Risch",
+   "chamber": "Senate",
+   "party": "Republican",
+   "state": "Idaho",
+   "lottery_hash": "1B1A26BA021C7239724EE894BAB69F2495FB8127898D024DEF9EB187E296303A",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.39,
+     "O": 0.365,
+     "C": 0.934,
+     "A": 0.268,
+     "N": 0.156
+    },
+    "behavior": {
+     "cooperation": 0.65,
+     "follow_through": 0.949,
+     "dominance": 0.613,
+     "activity": 0.112,
+     "breadth": 0.433
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": 0.294097,
+      "percentile": 0.723,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -1.366491,
+      "percentile": 0.007,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -1.043707,
+      "percentile": 0.112,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.500055,
+      "percentile": 0.729,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": 2.572169,
+      "percentile": 0.978,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  },
+  {
+   "name": "Katie Britt",
+   "chamber": "Senate",
+   "party": "Republican",
+   "state": "Alabama",
+   "lottery_hash": "1C2029C2CFFA1A5CC360343860530B073B4799F5E7B3AD9DB0649B2B84FF4DEA",
+   "model": {
+    "big5_EOCAN": {
+     "E": 0.305,
+     "O": 0.436,
+     "C": 0.838,
+     "A": 0.745,
+     "N": 0.78
+    },
+    "behavior": {
+     "cooperation": 0.357,
+     "follow_through": 0.511,
+     "dominance": 0.288,
+     "activity": 0.464,
+     "breadth": 0.682
+    },
+    "communication_facets": {
+     "warmth": {
+      "z": -0.293997,
+      "percentile": 0.446,
+      "median_split_half_sb": 0.636,
+      "grade": "repeatable"
+     },
+     "excitement": {
+      "z": -1.018988,
+      "percentile": 0.067,
+      "median_split_half_sb": 0.453,
+      "grade": "modest"
+     },
+     "activity": {
+      "z": -0.140507,
+      "percentile": 0.464,
+      "median_split_half_sb": 0.734,
+      "grade": "repeatable"
+     },
+     "gregariousness": {
+      "z": 0.436536,
+      "percentile": 0.7,
+      "median_split_half_sb": 0.444,
+      "grade": "modest"
+     },
+     "assertiveness": {
+      "z": -0.272037,
+      "percentile": 0.416,
+      "median_split_half_sb": 0.648,
+      "grade": "repeatable"
+     }
+    },
+    "e_scope": "role-adjusted public exposure cue; operational E-slot proxy only, not an intrinsic or validated Extraversion score"
+   }
+  }
+ ]
+}
