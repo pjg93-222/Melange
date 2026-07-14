@@ -132,3 +132,46 @@ N, profiles, ranks, UI, or narratives without a separate explicit user decision.
 
 After the look, the complete result summary is appended below. No expert panel, paid API, audio
 feature, interview-burst proxy, or private-personality claim may be introduced as a rescue route.
+
+## RESULT-N-TARGET-TONE
+
+Look consumed: 2026-07-13
+
+Outcome: **subject/target separation PASS; 0/7 N-relevant facets eligible.** The diagnostic
+candidate artifact was written as preregistered and remains consumed by nothing. `n_composite` is
+null. No live score, profile, narrative, UI field, or rank changed.
+
+```text
+SELF-TEST: PASS (13/13)
+corpus: 290720 sentences | 32574 episodes | 307 qualified members
+subject/tone separation: raw r=0.074 residual r=0.004 => PASS
+owned_anxiety                  SB=0.564 split=5/5 chrono= 0.109 conf=0.122  UNAVAILABLE
+owned_sadness                  SB=0.141 split=0/5 chrono= 0.064 conf=0.091  UNAVAILABLE
+owned_irritability             SB=0.139 split=0/5 chrono= 0.029 conf=0.102  UNAVAILABLE
+dramatic_disproportionality    SB=0.669 split=5/5 chrono= 0.323 conf=0.223  UNAVAILABLE
+challenge_reactivity           SB=0.531 split=3/5 chrono=-0.010 conf=0.108  UNAVAILABLE
+composure_under_pressure       SB=0.402 split=1/5 chrono= 0.158 conf=0.121  UNAVAILABLE
+emotional_volatility           SB=0.549 split=5/5 chrono= 0.317 conf=0.215  UNAVAILABLE
+external_negative_tone         SB=0.659 split=5/5 chrono= 0.197 conf=0.245  CONTEXT ONLY
+empathic_concern               SB=0.003 split=0/5 chrono= 0.005 conf=0.159  CONTEXT ONLY
+n_composite: null (by design)
+CANDIDATE QA: PASS
+```
+
+The important positive result is that the frozen contextual model almost eliminated the direct
+sentence-level association between subject severity and negative tone. The decisive negative result
+is that none of the observable N-relevant facets met every repetition, future-stability, and
+confound bar. Dramatic disproportionality was repeatable and chronologically stable, but its maximum
+confound correlation was .223, driven mainly by residual member-level subject severity (.223) and
+party (-.187). Emotional volatility also retained member-level subject-severity contamination
+(.215). These values cannot be relabeled as validated N.
+
+The old affective-content N artifact did not strongly converge with any new facet: absolute
+correlations ranged from .005 to .105 for the seven N-relevant facets. This is a nonvalidation
+comparison, but it confirms that the two instruments are measuring materially different public
+language behavior.
+
+At the user's direction after this result, a narrower operational score may be explored under the
+label **official-facing negative emotional reactivity**. That work must be versioned separately,
+cannot retroactively change this result, and cannot be described as a fresh confirmatory validation
+on the already-inspected corpus.
