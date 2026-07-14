@@ -101,6 +101,7 @@ canvas{touch-action:none}
 <span><label>Issue</label><select id=issue></select></span>
 <span><label>Mode</label><span class=seg id=mode><button data-m=coal class=on>Coalition (build)</button><button data-m=flip>Persuade</button></span></span>
 <span><label>Color</label><span class=seg id=color><button data-c=issue class=on>Issue stance</button><button data-c=party>Party</button><button data-c=gen>Overall</button><button data-c=elec>Electoral</button><button data-c=recept>Receptivity</button><button data-c=antag>Antagonism</button></span></span>
+<span><label>Tier</label><span class=seg id=tierseg title="Legislative + press only (drops the committee & demographic pillars). Tier 1 = top 12, Tier 2 = next 24, Tier 3 = next 48; the rest are untiered."><button data-t=0 class=on>All</button><button data-t=1>T1</button><button data-t=2>T2</button><button data-t=3>T3</button></span></span>
 <span><label>Layout</label><span class=seg id=ltog><button data-l=cosp class=on>Cosponsorship</button><button data-l=committee>Committees</button></span></span>
 <span><label>Layers</label><span id=lybar style="display:inline-flex;gap:8px;align-items:center;font-size:11px;color:#9ca3af">
  <label style=cursor:pointer><input type=checkbox id=ly_c checked> cosponsor</label>
@@ -138,7 +139,7 @@ canvas{touch-action:none}
      <span class=seg id=rtog><button data-r=alloc class=on>Allocation</button><button data-r=flip>Most persuadable</button></span>
      <div id=targets style=margin-top:8px></div></div>
    <div id=mpanel>
-     <h3 id=mname></h3><div id=mstance></div>
+     <h3 id=mname></h3><div id=mtier></div><div id=mstance></div>
      <h3 style=margin-top:14px>Persuasion path <span style=color:#6e7681;font-weight:400;text-transform:none>· colleague influence</span></h3>
      <div id=mprime class=recipe></div>
      <h3 style=margin-top:14px>Scenario <span style=color:#6e7681;font-weight:400;text-transform:none>· live what-if</span></h3>
@@ -184,6 +185,11 @@ let issue=3, mode='coal', colorBy='issue', hi=-1, sel=-1, budget=1000000, rmode=
 let ORD=[], FUND={}, SPREAD=null;
 let cascadeOn=false, cascP=null, cascSeeds=null;   // cascade mode: per-member P(joins) + seed set (feature: explicit cascade, red->green)
 let cascSub='who';   // cascade sub-mode: 'who' = single-seed activation map · 'max' = influence-max recruitment route
+// --- Legislative+Press TIER (display filter; precomputed in Python, JS only READS it — no mirror math) ---
+let tierFilter=0;   // 0 = all shown; 1/2/3 = show only that tier
+const TIERS=DATA.tier||null, TRANK=DATA.tierrank||null, TIERCOL={1:'#fbbf24',2:'#93c5fd',3:'#d6a86a'};
+const tierCounts=TIERS?TIERS.reduce((a,t)=>(a[t]=(a[t]||0)+1,a),{}):{};
+function tierHidden(i){return tierFilter>0&&TIERS&&TIERS[i]!==tierFilter;}
 // build issue dropdown
 const isel=document.getElementById('issue');
 DATA.issues.forEach((s,i)=>{let o=document.createElement('option');o.value=i;o.textContent=s;isel.appendChild(o);});
@@ -240,7 +246,7 @@ function draw(){
  const LYON={c:_on('ly_c'),s:_on('ly_s'),h:_on('ly_h'),e:_on('ly_e')};LYON.m=LYON.c||LYON.s;   // mixed edges show if either parent layer is on
  ctx.lineWidth=0.5;ctx.strokeStyle='rgba(139,148,158,0.10)';ctx.beginPath();   // ties hidden in committee view (they'd crisscross the clusters)
  for(let k=0;k<DATA.edges.length;k++){if(DATA.elay&&!LYON[DATA.elay[k]])continue;
-   const [a,b]=DATA.edges[k];const A=toScreen(LX[a],LY[a]),B=toScreen(LX[b],LY[b]);ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);}
+   const [a,b]=DATA.edges[k];if(tierFilter>0&&(tierHidden(a)||tierHidden(b)))continue;const A=toScreen(LX[a],LY[a]),B=toScreen(LX[b],LY[b]);ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);}
  ctx.stroke();}
  const _lya=document.getElementById('ly_a');
  if(_lya&&_lya.checked&&DATA.coap){   // co-appearance layer: shared broadcasts; violet = cross-party pairing, teal = same-party
@@ -267,6 +273,7 @@ function draw(){
    ctx.globalAlpha=1;}
  const order=[...Array(N).keys()].sort((p,q)=>allocOf(p)-allocOf(q));
  for(const i of order){const [sx,sy]=toScreen(LX[i],LY[i]);const r=radOf(i)*Math.max(1,cam.s*1);
+   if(tierHidden(i)){ctx.beginPath();ctx.arc(sx,sy,r,0,7);ctx.fillStyle='#2a2f37';ctx.globalAlpha=0.12;ctx.fill();ctx.globalAlpha=1;continue;}   // tier filter: non-tier members = faint backdrop
    const dim=dimming&&!inFoc(i);                                // fade everyone not in the focused member / route
    let fill,al;
    if(CASC){fill=cascCol(cascP[i]);al=1;}
@@ -297,7 +304,7 @@ function draw(){
 cv.addEventListener('mousemove',e=>{
  const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
  if(drag){cam.tx+=mx-drag.x;cam.ty+=my-drag.y;drag.x=mx;drag.y=my;panMoved=true;draw();return;}
- let best=-1,bd=99;for(let i=0;i<N;i++){const [sx,sy]=toScreen(LX[i],LY[i]);const d=Math.hypot(sx-mx,sy-my);if(d<Math.max(6,radOf(i)+3)&&d<bd){bd=d;best=i;}}
+ let best=-1,bd=99;for(let i=0;i<N;i++){if(tierHidden(i))continue;const [sx,sy]=toScreen(LX[i],LY[i]);const d=Math.hypot(sx-mx,sy-my);if(d<Math.max(6,radOf(i)+3)&&d<bd){bd=d;best=i;}}
  hi=best;const tip=document.getElementById('tip');
  if(best>=0){const i=best,a=allocOf(i);const pl=PLAYLBL[DATA.play[i]];
   tip.style.display='block';tip.style.left=Math.min(e.clientX+14,innerWidth-260)+'px';tip.style.top=(e.clientY+14)+'px';
@@ -325,7 +332,7 @@ cv.addEventListener('touchmove',e=>{e.preventDefault();const r=cv.getBoundingCli
  if(pinch&&e.touches.length>=2){const a=e.touches[0],b=e.touches[1],nd=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),cx=(a.clientX+b.clientX)/2-r.left,cy=(a.clientY+b.clientY)/2-r.top,f=nd/(pinch.d||nd);
   cam.tx+=cx-pinch.cx;cam.ty+=cy-pinch.cy;cam.tx=cx-(cx-cam.tx)*f;cam.ty=cy-(cy-cam.ty)*f;cam.s*=f;pinch={d:nd,cx:cx,cy:cy};panMoved=true;draw();}
  else if(tdrag&&e.touches.length===1){const t=e.touches[0],mx=t.clientX-r.left,my=t.clientY-r.top;cam.tx+=mx-tdrag.x;cam.ty+=my-tdrag.y;tdrag.x=mx;tdrag.y=my;panMoved=true;draw();}},{passive:false});
-cv.addEventListener('touchend',e=>{if(e.touches.length===0){if(tdrag&&!panMoved){const mx=tdrag.x,my=tdrag.y;let best=-1,bd=99;for(let i=0;i<N;i++){const [sx,sy]=toScreen(LX[i],LY[i]);const d=Math.hypot(sx-mx,sy-my);if(d<Math.max(12,radOf(i)+8)&&d<bd){bd=d;best=i;}}if(best>=0){selectMember(best);if(window.innerWidth<=640){const rp=document.getElementById('right');if(rp)setTimeout(function(){rp.scrollIntoView({behavior:'smooth',block:'start'});},70);}}}tdrag=null;pinch=null;}},{passive:true});
+cv.addEventListener('touchend',e=>{if(e.touches.length===0){if(tdrag&&!panMoved){const mx=tdrag.x,my=tdrag.y;let best=-1,bd=99;for(let i=0;i<N;i++){if(tierHidden(i))continue;const [sx,sy]=toScreen(LX[i],LY[i]);const d=Math.hypot(sx-mx,sy-my);if(d<Math.max(12,radOf(i)+8)&&d<bd){bd=d;best=i;}}if(best>=0){selectMember(best);if(window.innerWidth<=640){const rp=document.getElementById('right');if(rp)setTimeout(function(){rp.scrollIntoView({behavior:'smooth',block:'start'});},70);}}}tdrag=null;pinch=null;}},{passive:true});
 function flyTo(i){cam.s=2.4;cam.tx=W/2-LX[i]*cam.s;cam.ty=H/2-LY[i]*cam.s;draw();}
 // ============ LIVE SCENARIO/PATHFINDER ENGINE (faithful port of flip_model + competitive cascade + lt_priming) ============
 const EG=DATA.engine,K=EG.const,BPF=EG.bpf,PTY=DATA.party;
@@ -633,6 +640,12 @@ function selectMember(v){
   cascadeExit();   // selecting a member = inspect it (spotlight + pressure gauge); re-press Cascade to re-seed from here
   sel=v;document.getElementById('tpanel').style.display='none';document.getElementById('mpanel').style.display='block';
   document.getElementById('mname').textContent=DATA.name[v];
+  const _mt=document.getElementById('mtier');   // Legislative+Press tier badge
+  if(_mt){if(TIERS){const _tv=TIERS[v],_tr=TRANK?TRANK[v]:0;
+    _mt.innerHTML=(_tv?`<span style="display:inline-block;background:${TIERCOL[_tv]};color:#0d1117;font-weight:800;font-size:11px;letter-spacing:.5px;padding:3px 10px;border-radius:11px">TIER ${_tv}</span>`
+      :`<span style="display:inline-block;border:1px solid #30363d;color:#8b949e;font-weight:700;font-size:11px;letter-spacing:.5px;padding:2px 9px;border-radius:11px">UNTIERED</span>`)
+      +` <span style="color:#8b949e;font-size:11px">Legislative + Press${_tr?` · rank #${_tr}`:''}</span>`;
+    _mt.style.margin='3px 0 9px';}else _mt.innerHTML='';}
   const code=DATA.stance[v][issue],pl=PLAYLBL[DATA.play[v]];
   document.getElementById('mstance').innerHTML=
     `<div class=mrow><span>On ${DATA.issues[issue]}</span><b style=color:${STCOL[code]}>${SC[code]}</b></div>`+
@@ -839,7 +852,8 @@ function legend(){
  else if(colorBy==='elec')items=[['c','Contest · primary'],['g','Contest · general'],['d','Defend'],['n','No play']].map(([k,lb])=>`<span><span class=pill style=background:${ELCOL[k]}></span>${lb}</span>`).join('');
  else if(colorBy==='party')items=[['D','Democrat'],['R','Republican'],['I','Independent']].map(([k,lb])=>`<span><span class=pill style=background:${PTCOL[k]}></span>${lb}</span>`).join('');
  else items=[['C','Champion'],['A','Ally'],['H','Hi-Persuad'],['P','Persuad'],['G','Lean-Pers'],['T','Neutral'],['L','Lean-Skep'],['S','Skeptic'],['K','Hi-Skeptic'],['O','Opponent']].map(([k,lb])=>`<span><span class=pill style=background:${STCOL[k]}></span>${lb}</span>`).join('');
- document.getElementById('legend').innerHTML=items+'<br><span style=color:#6e7681>○ white ring = funded · size = $ · scroll to zoom, drag to pan</span>';
+ const _tn=tierFilter?`<span style="color:${TIERCOL[tierFilter]};font-weight:700">● Tier ${tierFilter} only</span> <span style=color:#6e7681>· legislative + press · ${tierCounts[tierFilter]||0} members</span><br>`:'';
+ document.getElementById('legend').innerHTML=_tn+items+'<br><span style=color:#6e7681>○ white ring = funded · size = $ · scroll to zoom, drag to pan</span>';
 }
 // controls
 isel.onchange=()=>{issue=+isel.value;slider.value=100;refresh();if(pmodeVal==='cascade'&&sel>=0)runCascadeMode();};   // recompute the cascade / max-route for the new issue
@@ -847,6 +861,7 @@ slider.oninput=()=>refresh();
 document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#mode button').forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m;refresh();
   if(pmodeVal==='cascade'&&sel>=0){cascSub=(mode==='flip')?'flip':(cascSub==='flip'?'who':cascSub);document.querySelectorAll('#cascsub button').forEach(x=>x.classList.toggle('on',x.dataset.cs===cascSub));runCascadeMode();}});   // Persuade<->Coalition swaps the cascade sub-mode default (Flip route <-> Who joins)
 document.querySelectorAll('#color button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#color button').forEach(x=>x.classList.remove('on'));b.classList.add('on');colorBy=b.dataset.c;cascadeExit();legend();draw();});
+document.querySelectorAll('#tierseg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tierseg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');tierFilter=+b.dataset.t;legend();draw();});   // Legislative+Press tier filter (display only)
 document.querySelectorAll('#lybar input').forEach(cb=>cb.onchange=()=>draw());   // layer toggles redraw only
 // LAYOUT toggle: animate node positions between the cosponsorship layout (DATA.x/y) and the committee-cluster
 // layout (DATA.cx/cy, Porter committee-interlock anchors). Members glide into committee clusters.

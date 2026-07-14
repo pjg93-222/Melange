@@ -286,14 +286,27 @@ engine['eng'].append([round(sum(engine['eng'][i][k] for i in range(len(engine['e
 engine['refflip'].append(0)                                                              # synthetic layer -> engchk self-check skips it
 engine['sal'].append({'z':0,'p':0.6,'q':0.3,'b':0.1,'def':0})                            # neutral going-public params for the aggregate layer
 stats.append({'champ':GEN.count('C')+GEN.count('F'),'ally':GEN.count('A'),'opp':GEN.count('O'),'skep':GEN.count('S'),'flip':sum(_ovf.values())*1000,'coal':sum(_ovc.values())*1000,'coalN':len(_ovc)})
+# ===== TIER (legislative + press ONLY) — DISPLAY-ONLY re-rank on 2 of the 4 pillars; definition in fec/tier_util.py =====
+# Overall rank blends four pillars (Leg 30 / Press 25 / Committee 40 / Demo 5); a tier drops Committee + Demo and
+# re-ranks on legislative + press alone, bucketing top 12 / next 24 / next 48 (Tier 1/2/3; rest untiered). Fed to no
+# engine, moves no rank. Shared with the Member Desk producer via tier_util so the tier is defined in ONE place.
+from tier_util import legislative_press_tiers as _lptiers
+_tier,_trank=_lptiers(members)
+TIER=[_tier.get(n,0) for n in members]; TIERRANK=[_trank.get(n,0) for n in members]   # aligned to members/name order
+print('tier (legislative+press, common-percentile blend): T1=%d T2=%d T3=%d untiered=%d'%(
+    TIER.count(1),TIER.count(2),TIER.count(3),TIER.count(0)))
 bundle={'issues':issues,'name':name,'x':X,'y':Y,'party':''.join(PARTY),'gen':''.join(GEN),
         'rank':RANK,'nl':NL,'bp':BP,'cf':CF,'stance':STANCE,'edges':E,'flip':flip,'coal':coal,'stats':stats,
         'play':PLAY,'epval':EPVAL,'frontier':frontier,'opt':opt,'engine':engine,
         'cx':CX,'cy':CY,'comms':COMMS,'cmi':CMI,   # committee-cluster layout (Porter): positions + anchors + per-member primary committee
         'elay':ELAY,'refs':REFE,'coap':COAP,   # layer toggles: per-drawn-edge provenance code + signed reference dyads + joint-appearance pairs
         'recept':[round((_RC.get(n) or {}).get('pressure_mult',1.0),2) for n in members],   # behavioral receptivity (colorBy=recept)
-        'antag':ANTAG,'grand':GRAND}   # ratified hearing-antagonism facet (colorBy=antag/grand); DISPLAY-ONLY, rank-independent
-dump_atomic({name[i]:BP[i] for i in range(len(name))},MB_ROOT+r'\bipartisan.json')
-out=MB_ROOT+r'\dashboard_data.json'
+        'antag':ANTAG,'grand':GRAND,   # ratified hearing-antagonism facet (colorBy=antag/grand); DISPLAY-ONLY, rank-independent
+        'tier':TIER,'tierrank':TIERRANK}   # Legislative+Press tier (1/2/3, 0=untiered) + its leg+press rank; DISPLAY-ONLY, rank-independent
+out=MB_ROOT+r'\dashboard_data.json'; _bp=MB_ROOT+r'\bipartisan.json'
+_dashout=os.environ.get('DASH_OUT')   # no-clobber redirect for preview/test runs (matches FRONTIER_OUT/OPT_OUT); prod = unset -> live tree
+if _dashout:
+    out=_dashout; _bp=os.path.join(os.path.dirname(os.path.abspath(_dashout)) or '.','bipartisan.json')
+dump_atomic({name[i]:BP[i] for i in range(len(name))},_bp)
 dump_atomic(bundle,out,separators=(',',':'))
 print('wrote %s  (%.1f KB)  nodes=%d edges=%d issues=%d'%(out,os.path.getsize(out)/1024,len(name),len(E),len(issues)))
