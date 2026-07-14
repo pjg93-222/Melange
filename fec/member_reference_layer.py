@@ -197,10 +197,10 @@ if '--score' in sys.argv or '--rebuild' in sys.argv:
     refs = extract()
     bykey = collections.defaultdict(list)
     for r in refs: bykey[(r['a'], r['b'], r['src'])].append(r)
-    todo_all = []
+    target_all = []
     for k, v in bykey.items():
         v.sort(key=lambda r: r['date'], reverse=True)
-        todo_all.extend(v[:DYAD_CAP])
+        target_all.extend(v[:DYAD_CAP])
     cache = {}
     if os.path.exists(CACHE):
         for ln in open(CACHE, encoding='utf-8'):
@@ -211,11 +211,25 @@ if '--score' in sys.argv or '--rebuild' in sys.argv:
                 if d['k'] not in cache: cache[d['k']] = d['out']
             except Exception: pass
     def key(r): return hashlib.md5((r['a'] + '|' + r['b'] + '|' + r['w'][:200]).encode('utf-8', 'replace')).hexdigest()
-    todo = [] if REBUILD else [r for r in todo_all if key(r) not in cache]
+    # Cache-only rebuilds must not let a new, uncached window consume the cap and
+    # evict an older classified window.  Keep n_raw on the full fresh corpus,
+    # report uncached windows from the intended newest-first target, but
+    # aggregate the newest DYAD_CAP *cached* windows per dyad/source until a paid
+    # scoring pass is explicitly authorized.
     if REBUILD:
-        _unc = sum(1 for r in todo_all if key(r) not in cache)
-        print('REBUILD (cache-only, $0): scored set %d | cached %d | uncached (counted in n_raw only) %d'
-              % (len(todo_all), len(todo_all) - _unc, _unc))
+        todo_all = []
+        for v in bykey.values():
+            todo_all.extend([r for r in v if key(r) in cache][:DYAD_CAP])
+    else:
+        todo_all = target_all
+    todo = [] if REBUILD else [r for r in target_all if key(r) not in cache]
+    if REBUILD:
+        _unc = sum(1 for r in target_all if key(r) not in cache)
+        _target_keys = {key(r) for r in target_all}
+        _fallback = sum(1 for r in todo_all if key(r) not in _target_keys)
+        print('REBUILD (cache-only, $0): target set %d | cached target %d | uncached target '
+              '(counted in n_raw only) %d | cached fallback contexts %d'
+              % (len(target_all), len(target_all) - _unc, _unc, _fallback))
     else:
         print('scored set: %d | cached %d | to classify %d | est ~$%.2f' % (len(todo_all), len(todo_all) - len(todo), len(todo), len(todo) * 0.006))
     if todo and '--go' not in sys.argv: print('COST GATE: add --go to spend.'); sys.exit(0)

@@ -37,6 +37,9 @@ def program_of(pkg):
     if "nbcnews" in p: return "mtp"
     if "pbs.org" in p: return "pbs"
     if "npr.org" in p: return "npr"
+    if "c-span.org/program/" in p:
+        m = re.search(r"c-span\.org/program/([^/]+)/", p)
+        return "cspan:" + (m.group(1) if m else "?")
     return "other"
 
 def cutoff(t):
