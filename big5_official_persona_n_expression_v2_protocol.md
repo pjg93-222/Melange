@@ -68,3 +68,31 @@ The output is `official_persona_n_expression_v2.json.candidate`. It is consumed 
 not replace live N, alter a profile, appear in the UI, or move a rank without the user's explicit
 approval after reviewing the result. Weakness is reported as `NOT READY`; no post-result tuning is
 permitted under this protocol.
+
+## RESULT-N-EXPRESSION-V2
+
+Build completed: 2026-07-13
+
+Outcome: **NOT READY**. Seven of eight frozen engineering bars passed. The sole miss was
+chronological score stability, r=.266 against the frozen .30 floor. The threshold was not relaxed.
+
+```text
+SELF-TEST: PASS (6/6)
+corpus: 290720 sentences | 32574 episodes | 210 scored members
+score                         SB=0.645 split=5/5 chrono=0.266 n=175
+residual_tone_level           SB=0.648 split=4/5 chrono=0.173 n=175
+disproportionate_intensity    SB=0.700 split=5/5 chrono=0.312 n=175
+emotional_volatility          SB=0.532 split=3/5 chrono=0.250 n=175
+coherence: tone-intensity=.616 tone-volatility=.613 intensity-volatility=.216
+score confounds: party=.016 gender=-.014 current-role=-.026 log-sentences=.008
+                 subject-severity=.007 chamber=.000
+ENGINEERING RESULT: NOT READY
+CANDIDATE QA: PASS
+```
+
+The candidate artifact SHA-256 is
+`f5085d1edfb65857c69d001a6df254e06b4c14e66c154b9d854f44764090abd6`.
+It remains disconnected. Reliability, coherence, coverage, subject separation, and held-out
+confound control all passed, but the score did not meet the predeclared across-time stability
+requirement. This is consistent with an official presentation that may move with role, events, and
+time; it is not permission to redefine the bar after seeing the result.
