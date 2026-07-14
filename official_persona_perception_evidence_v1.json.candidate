@@ -1,0 +1,333 @@
+{
+  "schema": "official-persona-perception-evidence-v1",
+  "coding_status": "FROZEN_BEFORE_MODEL_UNBLINDING",
+  "scope": "Independent descriptions of the public professional persona; title visibility, ideology, subject matter, and private-life facts are not trait evidence by themselves.",
+  "coding_scale": {"high": 1, "unclear": 0, "low": -1},
+  "members": {
+    "Aaron Bean": {
+      "sources": [
+        {"id":"s1","url":"https://bean.house.gov/","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official office biography and public record."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/Aaron_Bean","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent biographical overview; no clear professional-temperament description surfaced."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Unclear."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Available profiles were biographical rather than dispositional."
+    },
+    "Alma Adams": {
+      "sources": [
+        {"id":"s1","url":"https://adams.house.gov/","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official public biography and issue record."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/Alma_Adams","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent biography covering her four-decade art career, gallery leadership, and distinctive visual style."},
+        {"id":"s3","url":"https://www.arts.gov/stories/blog/2016/art-talk-us-representative-alma-adams","publisher":"National Endowment for the Arts","date":"2016-02-25","independent":true,"summary":"Profile of Adams as a practicing printmaker, art educator, curator, and advocate for artistic expression."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Unclear."},"O":{"direction":1,"source_ids":["s2","s3"],"basis":"Sustained practice as an artist, curator, and art educator plus a deliberately distinctive visual style support aesthetic and expressive breadth."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Strong aesthetic and expressive breadth; no clear demeanor direction."
+    },
+    "Blake Moore": {
+      "sources": [
+        {"id":"s1","url":"https://blakemoore.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://www.sltrib.com/news/politics/2020/07/13/how-utahn-blake-moore/","publisher":"Salt Lake Tribune","date":"2020-07-13","independent":true,"summary":"Candidate profile and career background; no unambiguous trait description used here."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Unclear."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Self-presented willingness to work with everyone was not enough."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "No independent directional code."
+    },
+    "Brandon Gill": {
+      "sources": [
+        {"id":"s1","url":"https://gill.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://www.texastribune.org/2025/06/09/representative-brandon-gill-texas-freshman-republican/","publisher":"Texas Tribune","date":"2025-06-09","independent":true,"summary":"Profile describes a media-forward freshman who deliberately attracts attention and uses combative characterizations of opponents."}
+      ],
+      "traits": {"E":{"direction":1,"source_ids":["s2"],"basis":"Regular television and podcast appearances, viral hearing clips, and a reported ability to attract attention support an assertive, outward public style."},"O":{"direction":0,"source_ids":[],"basis":"Ideology was excluded."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":-1,"source_ids":["s2"],"basis":"The profile documents a deliberately combative public style and demeaning descriptions of opponents."},"N":{"direction":0,"source_ids":[],"basis":"Provocative rhetoric alone was not treated as reactivity."}},
+      "external_summary": "High public-facing assertiveness and low conciliatoriness; no N inference from ideology or rhetoric alone."
+    },
+    "Celeste Maloy": {
+      "sources": [
+        {"id":"s1","url":"https://maloy.house.gov/about/","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://www.deseret.com/2023/7/24/23791698/celeste-maloy-the-country-girl-running-for-congress/","publisher":"Deseret News","date":"2023-07-24","independent":true,"summary":"Long-form candidate profile emphasizing rural background and constituent assistance, but not a stable temperament judgment."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Unclear."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Helping constituents was not converted into a broad warmth score."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Insufficient dispositional description."
+    },
+    "David Taylor": {
+      "sources": [
+        {"id":"s1","url":"https://taylor.house.gov/","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official office site."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/David_Taylor_(Ohio_politician)","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent biography; no clear public-temperament description."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Unclear."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "No directional external code."
+    },
+    "Delia Ramirez": {
+      "sources": [
+        {"id":"s1","url":"https://ramirez.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/Delia_Ramirez","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent career overview; organizing and issue advocacy were not treated as personality by themselves."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Role activity was excluded."},"O":{"direction":0,"source_ids":[],"basis":"Ideology was excluded."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "No directional external code."
+    },
+    "Erin Houchin": {
+      "sources": [
+        {"id":"s1","url":"https://houchin.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://rollcall.com/2023/04/27/not-all-bosses-are-created-equally-houchin-remembers-coats-as-among-the-best/","publisher":"Roll Call","date":"2023-04-27","independent":true,"summary":"Interview focuses primarily on Dan Coats and Houchin's career memories, not independent ratings of her own temperament."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Unclear."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Praise of another person's kindness was not projected onto Houchin."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "No directional external code."
+    },
+    "Greg Landsman": {
+      "sources": [
+        {"id":"s1","url":"https://landsman.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://www.wlwt.com/article/greg-landsman-cincinnati-congress-second-term-interview/63860192","publisher":"WLWT","date":"2025-02","independent":true,"summary":"Profile reports colleagues calling Landsman a strong partner and highlights his role moving bipartisan work to completion."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Unclear."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":1,"source_ids":["s2"],"basis":"Independent reporting describes him as a partner and peacemaker who works with colleagues to complete legislation."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Clear cooperative professional reputation."
+    },
+    "Gregory Meeks": {
+      "sources": [
+        {"id":"s1","url":"https://www.as-coa.org/speakers/gregory-meeks","publisher":"AS/COA","date":"n.d.","independent":true,"summary":"Professional biography describes an effective, common-sense legislator respected across party lines."},
+        {"id":"s2","url":"https://www.cityandstateny.com/personality/2019/04/meet-gregory-meeks-queens-new-boss/177518/","publisher":"City & State New York","date":"2019-04","independent":true,"summary":"Profile emphasizes team protection and working together after elections."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Leadership visibility was excluded."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":1,"source_ids":["s1","s2"],"basis":"Profiles converge on team orientation, practical cooperation, and respect across factions."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Cooperative, team-oriented official persona."
+    },
+    "Gus Bilirakis": {
+      "sources": [
+        {"id":"s1","url":"https://bilirakis.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://hellenicnews.com/2026/04/09/congressman-gus-bilirakis-on-legacy-leadership-and-the-heart-of-public-service/","publisher":"Hellenic News of America","date":"2026-04-09","independent":true,"summary":"Service-oriented profile, but its favorable framing did not provide a strong enough directional personality judgment."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Preference for results over recognition was not treated as introversion."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "No sufficiently independent directional code."
+    },
+    "Gwen Moore": {
+      "sources": [
+        {"id":"s1","url":"https://gwenmoore.house.gov/news/documentsingle.aspx?DocumentID=1473","publisher":"Milwaukee Magazine (republished by official office)","date":"n.d.","independent":true,"summary":"Independent profile describes dancing, audience connection, off-script passion, eccentric speeches, singing, and distinctive expression."},
+        {"id":"s2","url":"https://womeninwisconsin.org/profile/gwen-moore/","publisher":"Wisconsin Women Making History","date":"n.d.","independent":true,"summary":"Biographical profile providing independent context."}
+      ],
+      "traits": {"E":{"direction":1,"source_ids":["s1"],"basis":"Energetic audience engagement, dancing, off-script delivery, and passionate public speaking indicate an outward, expressive official persona."},"O":{"direction":1,"source_ids":["s1"],"basis":"The profile explicitly emphasizes unconventional, artistic, and distinctive public expression."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Passion and sarcasm were not converted into low A."},"N":{"direction":0,"source_ids":[],"basis":"Emotional expressiveness alone was not converted into N."}},
+      "external_summary": "Expressive, audience-engaging, and unconventional public style."
+    },
+    "James Comer": {
+      "sources": [
+        {"id":"s1","url":"https://comer.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://apnews.com/article/b88f48e1d87aef2c07f64fb3af7054fb","publisher":"Associated Press","date":"2023","independent":true,"summary":"Profile reports members of both parties describing Comer as even-keeled and approachable."},
+        {"id":"s3","url":"https://apnews.com/article/d68267048aa4f42d244130e81d3e9c30","publisher":"Associated Press","date":"2024","independent":true,"summary":"Later profile contains conflicting descriptions of a former common-ground style and a sharper partisan persona."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Committee exposure was excluded."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Independent profiles conflict directly on approachable/common-ground versus sharply partisan style."},"N":{"direction":-1,"source_ids":["s2"],"basis":"Cross-party descriptions of an even-keeled professional demeanor support low public reactivity, with temporal conflict noted."}},
+      "external_summary": "Generally even-keeled in one cross-party profile; agreeableness evidence is internally conflicting."
+    },
+    "James McGovern": {
+      "sources": [
+        {"id":"s1","url":"https://mcgovern.house.gov/","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official office site."},
+        {"id":"s2","url":"https://www.newyorker.com/magazine/1997/01/20/mr-mcgovern-goes-to-washington","publisher":"The New Yorker","date":"1997-01-20","independent":true,"summary":"Long-form early-career profile; available evidence was not converted into a current directional temperament code."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Unclear."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "No current directional external code."
+    },
+    "John Garamendi": {
+      "sources": [
+        {"id":"s1","url":"https://garamendi.house.gov/about/","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/John_Garamendi","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent biographical overview."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Long tenure and many roles were excluded as visibility."},"O":{"direction":0,"source_ids":[],"basis":"Official claims of outside-the-box thinking lacked independent professional-style corroboration."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Biography did not yield a reliable temperament direction."
+    },
+    "Lloyd Smucker": {
+      "sources": [
+        {"id":"s1","url":"https://smucker.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography describes a solution-seeking reputation."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/Lloyd_Smucker","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent biography without a clear public-temperament assessment."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Unclear."},"O":{"direction":0,"source_ids":[],"basis":"Official self-description was not enough for a directional code."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "No independently corroborated directional code."
+    },
+    "Marcy Kaptur": {
+      "sources": [
+        {"id":"s1","url":"https://kaptur.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://apnews.com/article/adac4970af806c7eb9ea4fb529d12432","publisher":"Associated Press","date":"2023-01-02","independent":true,"summary":"Profile presents Kaptur as a long-serving outsider willing to challenge party leadership and focused on working-class representation."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Public advocacy and tenure were excluded as visibility."},"O":{"direction":0,"source_ids":[],"basis":"Political independence was not equated with Openness."},"C":{"direction":0,"source_ids":[],"basis":"Longevity alone was not treated as C."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Strong independent political identity, but no clean Big Five direction under the locked rubric."
+    },
+    "Mary Scanlon": {
+      "sources": [
+        {"id":"s1","url":"https://scanlon.house.gov/about/default.aspx","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography documents leadership of a 600-lawyer pro bono program."},
+        {"id":"s2","url":"https://news.colgate.edu/magazine/2023/08/08/u-s-congresswoman-mary-gay-scanlon-80-is-not-afraid-to-speak-up/","publisher":"Colgate Magazine","date":"2023-08-08","independent":true,"summary":"Profile describes Scanlon's poise and long, organized public-interest career."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Speaking up was not equated with broad extraversion."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":1,"source_ids":["s2"],"basis":"The profile presents sustained, organized responsibility across large-scale pro bono and public-interest work."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":-1,"source_ids":["s2"],"basis":"An independent colleague description of genuine poise supports a composed official persona."}},
+      "external_summary": "Organized and notably poised; no E inference from willingness to speak."
+    },
+    "Michael Simpson": {
+      "sources": [
+        {"id":"s1","url":"https://simpson.house.gov/biography/","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://www.idahostatesman.com/opinion/article220050405.html","publisher":"Idaho Statesman","date":"2018","independent":true,"summary":"Editorial profile says Simpson recognized the value of working across the aisle and building allies."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Leadership roles were excluded."},"O":{"direction":0,"source_ids":[],"basis":"Policy heterodoxy was not converted into personality."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":1,"source_ids":["s2"],"basis":"The profile specifically describes relationship-building and ally formation as his working method."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Cooperative, alliance-building legislative style."
+    },
+    "Mike Quigley": {
+      "sources": [
+        {"id":"s1","url":"https://quigley.house.gov/","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official office site."},
+        {"id":"s2","url":"https://harris.uchicago.edu/news-events/news/alumni-spotlight-congressman-mike-quigley-am85","publisher":"University of Chicago Harris School","date":"2013","independent":true,"summary":"Profile calls Quigley soft-spoken and almost academic, says he rethought policy problems creatively, and reports an 80-hour work schedule."}
+      ],
+      "traits": {"E":{"direction":-1,"source_ids":["s2"],"basis":"Independent description explicitly characterizes his demeanor as soft-spoken and academic."},"O":{"direction":1,"source_ids":["s2"],"basis":"A professor describes him as repeatedly rethinking policy problems creatively."},"C":{"direction":1,"source_ids":["s2"],"basis":"The profile reports sustained 80-hour workweeks and a persistent head-on approach."},"A":{"direction":0,"source_ids":[],"basis":"Confrontation on policy was not treated as low A."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Quietly presented, intellectually creative, and highly industrious."
+    },
+    "Morgan Griffith": {
+      "sources": [
+        {"id":"s1","url":"https://morgangriffith.house.gov/biography/default.aspx","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://rollcall.com/2025/07/21/in-the-spotlight-morgan-griffith/","publisher":"Roll Call","date":"2025-07-21","independent":true,"summary":"Profile describes a history buff who uses eighteenth-century political texts in contemporary argument."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Unclear."},"O":{"direction":1,"source_ids":["s2"],"basis":"Documented historical curiosity and use of old political texts support intellectual breadth in the official persona."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Intellectually curious, history-oriented public style."
+    },
+    "Randy Feenstra": {
+      "sources": [
+        {"id":"s1","url":"https://feenstra.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography records completion of a Ph.D. while serving in Congress."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/Randy_Feenstra","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent biography corroborates the multi-stage professional and academic record."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Campaigning and office were excluded."},"O":{"direction":0,"source_ids":[],"basis":"Education alone was not treated as broad Openness."},"C":{"direction":1,"source_ids":["s2"],"basis":"Completion of a doctoral program alongside sustained public and professional responsibilities is direct evidence of long-horizon follow-through."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Clear long-horizon follow-through; this member has no model Big Five display row in the frozen artifact."
+    },
+    "Robin Kelly": {
+      "sources": [
+        {"id":"s1","url":"https://robinkelly.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://www.cbsnews.com/chicago/news/senate-candidate-profile-illinois-congresswoman-robin-kelly/","publisher":"CBS Chicago","date":"2026-02-12","independent":true,"summary":"Candidate profile presents Kelly's workhorse-not-show-horse self-description and her claim of working across the aisle."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Avoiding showmanship was not equated with introversion."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":1,"source_ids":["s2"],"basis":"The independent profile's central professional framing is sustained workhorse behavior, though the phrase is self-attributed."},"A":{"direction":1,"source_ids":["s2"],"basis":"The profile presents working across the aisle and communicating across a varied district as her professional style; evidence is partly self-attributed."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Low-showmanship, work-oriented, cross-group public presentation; evidence is partly self-description."
+    },
+    "Sam Graves": {
+      "sources": [
+        {"id":"s1","url":"https://graves.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://rollcall.com/2024/12/10/in-a-party-of-firebrands-graves-sidesteps-limelight/","publisher":"Roll Call","date":"2024-12-10","independent":true,"summary":"Colleagues describe Graves as all-work/no-show, cordial, calm, tough, expert, and oriented toward closed-door partnership."}
+      ],
+      "traits": {"E":{"direction":-1,"source_ids":["s2"],"basis":"He explicitly avoids the limelight and prefers closed-door negotiation despite holding a visible chair."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":1,"source_ids":["s2"],"basis":"Multiple colleagues converge on an all-work/no-show mentality and substantive expertise."},"A":{"direction":1,"source_ids":["s2"],"basis":"Long-term colleagues describe him as always cordial and committed to partnership and compromise."},"N":{"direction":-1,"source_ids":["s2"],"basis":"A long-serving neighboring colleague says Graves has never lost control in two decades and remains cordial under conflict."}},
+      "external_summary": "Reserved, industrious, cooperative, and notably even-tempered professional style."
+    },
+    "Scott Fitzgerald": {
+      "sources": [
+        {"id":"s1","url":"https://fitzgerald.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/Scott_Fitzgerald_(politician)","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent career overview; no clean temperament description."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Leadership posts were excluded."},"O":{"direction":0,"source_ids":[],"basis":"Ideology was excluded."},"C":{"direction":0,"source_ids":[],"basis":"Military and office rank were not treated as personality by themselves."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "No directional external code."
+    },
+    "Sean Casten": {
+      "sources": [
+        {"id":"s1","url":"https://casten.house.gov/about","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official scientific and business biography."},
+        {"id":"s2","url":"https://www.axios.com/2021/10/19/rep-casten-manchin-climate-cuts-cop26","publisher":"Axios","date":"2021-10-19","independent":true,"summary":"Profile describes a prominent climate voice combining policy wonkery with no-holds-barred commentary."}
+      ],
+      "traits": {"E":{"direction":1,"source_ids":["s2"],"basis":"No-holds-barred commentary and an assertive public voice support an outward, forceful communication style, not merely title visibility."},"O":{"direction":1,"source_ids":["s2"],"basis":"Independent description emphasizes wonkery and technically broad, science-driven engagement."},"C":{"direction":0,"source_ids":[],"basis":"Official diligence claims were not enough."},"A":{"direction":0,"source_ids":[],"basis":"Cross-aisle policy language alone was not enough."},"N":{"direction":0,"source_ids":[],"basis":"Concern about climate outcomes was subject-matter appropriate and not coded as N."}},
+      "external_summary": "Technically curious and publicly forceful."
+    },
+    "Shomari Figures": {
+      "sources": [
+        {"id":"s1","url":"https://figures.house.gov/about/about-shomari","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://spectrumlocalnews.com/sc/south-carolina/news/2025/08/13/shomari-figures-time-in-congress","publisher":"Spectrum News","date":"2025-08-13","independent":true,"summary":"Freshman-office profile; insufficient explicit temperament description for a directional code."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Unclear."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Resume breadth was not scored as personality."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Source-sparse for professional personality."
+    },
+    "Terri Sewell": {
+      "sources": [
+        {"id":"s1","url":"https://sewell.house.gov/biography/","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/Terri_Sewell","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent biography documents extensive scholarship across law, politics, and comparative representation, including a long thesis later published as a book."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Whip and advocacy visibility were excluded."},"O":{"direction":1,"source_ids":["s2"],"basis":"Sustained intellectual work across institutions and comparative political topics supports breadth and curiosity."},"C":{"direction":0,"source_ids":[],"basis":"Achievement alone was not separately double-coded as C."},"A":{"direction":0,"source_ids":[],"basis":"A low-quality generic collaboration label was not used."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Strong evidence of intellectual breadth; no clean demeanor code."
+    },
+    "Virginia Foxx": {
+      "sources": [
+        {"id":"s1","url":"https://foxx.house.gov/about/default.aspx","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/Virginia_Foxx","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent biographical context."},
+        {"id":"s3","url":"https://foxx.house.gov/news/documentsingle.aspx?DocumentID=398989","publisher":"The Chronicle of Higher Education (republished by official office)","date":"2016","independent":true,"summary":"Independent day-in-the-life profile portrays constant work, preparation, and an explicit work-smarter/work-harder norm."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Visible leadership was excluded."},"O":{"direction":0,"source_ids":[],"basis":"Ideology was excluded."},"C":{"direction":1,"source_ids":["s3"],"basis":"The day-in-the-life profile explicitly describes continual tasks, preparation, and a work-harder norm."},"A":{"direction":0,"source_ids":[],"basis":"Directness without strong independent relational evidence was not scored."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Strongly work- and preparation-oriented."
+    },
+    "Yvette Clarke": {
+      "sources": [
+        {"id":"s1","url":"https://clarke.house.gov/about/","publisher":"U.S. House","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://www.marieclaire.com/politics/congressional-pact-lamonica-mciver-ilhan-omar-alexandria-ocasio-cortez-nancy-pelosi/","publisher":"Marie Claire","date":"2026-05","independent":true,"summary":"Reported account documents Clarke joining colleagues to support a member under legal and political pressure."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Caucus leadership was excluded."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":1,"source_ids":["s2"],"basis":"A concrete, independently reported act of colleague support and solidarity supports cooperative warmth in the official persona."},"N":{"direction":0,"source_ids":[],"basis":"Unclear."}},
+      "external_summary": "Concrete evidence of supportive colleague behavior."
+    },
+    "James Risch": {
+      "sources": [
+        {"id":"s1","url":"https://www.risch.senate.gov/about/about-jim/","publisher":"U.S. Senate","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/Jim_Risch","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent career overview; isolated parliamentary conflict was not generalized into temperament."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Committee visibility was excluded."},"O":{"direction":0,"source_ids":[],"basis":"Ideology was excluded."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Unclear."},"N":{"direction":0,"source_ids":[],"basis":"A single procedural dispute was insufficient."}},
+      "external_summary": "No directional external code."
+    },
+    "John Kennedy": {
+      "sources": [
+        {"id":"s1","url":"https://www.kennedy.senate.gov/public/biography","publisher":"U.S. Senate","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://rollcall.com/2018/08/06/kennedy-on-kennedyisms-i-try-not-to-talk-like-a-senator-is-supposed-to-talk/","publisher":"Roll Call","date":"2018-08-06","independent":true,"summary":"Profile emphasizes his unusual verbal style and willingness to stop and engage reporters."},
+        {"id":"s3","url":"https://en.wikipedia.org/wiki/John_Kennedy_(Louisiana_politician)","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent public-image synthesis documents a garrulous, folksy, sharp, quip-heavy persona that admirers and critics both see as distinctive."}
+      ],
+      "traits": {"E":{"direction":1,"source_ids":["s2","s3"],"basis":"Garrulousness and habitual engagement with reporters support high public sociability and talkativeness."},"O":{"direction":1,"source_ids":["s2","s3"],"basis":"A highly distinctive, metaphor-rich and unconventional speaking style supports creative public expression."},"C":{"direction":0,"source_ids":[],"basis":"Legislative output was not enough."},"A":{"direction":-1,"source_ids":["s3"],"basis":"The established persona pairs charm with sharp barbs, venomous quips, and demeaning comparisons."},"N":{"direction":0,"source_ids":[],"basis":"Dramatic metaphors were treated as a rhetorical style unless disproportionate reactivity was shown."}},
+      "external_summary": "Garrulous, unconventional, and sharp-edged; dramatic language was not automatically coded as N."
+    },
+    "John Thune": {
+      "sources": [
+        {"id":"s1","url":"https://www.thune.senate.gov/about/?p=biography","publisher":"U.S. Senate","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://www.newyorker.com/magazine/2025/04/07/john-thune-profile-senate-majority-leader","publisher":"The New Yorker","date":"2025-04-07","independent":true,"summary":"Profile includes a Democratic senator's description of Thune as fundamental to bipartisan work."},
+        {"id":"s3","url":"https://apnews.com/article/44a4b7ce90c1f8eb02567762906f6f56","publisher":"Associated Press","date":"2025-04","independent":true,"summary":"Profile describes an old-fashioned, work-oriented leadership approach."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Majority-leader exposure was excluded."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Long hours tied directly to the leader role were not used as principal evidence."},"A":{"direction":1,"source_ids":["s2"],"basis":"A cross-party colleague specifically identifies him as fundamental to bipartisan work."},"N":{"direction":0,"source_ids":[],"basis":"Visible stress during an 18-hour voting session was treated as situational."}},
+      "external_summary": "Strong cooperative reputation; role-obligated visibility and workload were controlled."
+    },
+    "Katie Britt": {
+      "sources": [
+        {"id":"s1","url":"https://www.britt.senate.gov/about/","publisher":"U.S. Senate","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://apnews.com/article/4babe2d11e03365515d388d4a167648c","publisher":"Associated Press","date":"2024-03","independent":true,"summary":"Profile describes behind-the-scenes relationship building, close friendships across the aisle, and visits during a colleague's hospitalization."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"National-stage selection and behind-the-scenes work point in different directions; title visibility was excluded."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Official grit language was not enough."},"A":{"direction":1,"source_ids":["s2"],"basis":"The profile documents deliberate relationship building and genuine cross-party friendship and support."},"N":{"direction":0,"source_ids":[],"basis":"An emotional speech on a grave subject was treated as subject-appropriate."}},
+      "external_summary": "Relationship-oriented and cross-party warm; E remains unclear after controlling for national exposure."
+    },
+    "Richard Blumenthal": {
+      "sources": [
+        {"id":"s1","url":"https://www.blumenthal.senate.gov/about/biography","publisher":"U.S. Senate","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://ctmirror.org/2013/08/07/blumenthal-brings-high-energy-style-senate/","publisher":"CT Mirror","date":"2013-08-07","independent":true,"summary":"Detailed profile describes a high-energy, peripatetic, overbooked, broad-issue senator whose help colleagues appreciate."}
+      ],
+      "traits": {"E":{"direction":1,"source_ids":["s2"],"basis":"Independent observers explicitly call him high-energy and unusually peripatetic, with a dense public schedule."},"O":{"direction":1,"source_ids":["s2"],"basis":"The profile emphasizes unusually broad engagement across many distinct issues."},"C":{"direction":1,"source_ids":["s2"],"basis":"Very high sustained bill activity and an overbooked work schedule support industry and follow-through."},"A":{"direction":1,"source_ids":["s2"],"basis":"Colleagues reportedly like him and regard his help as substantive rather than superficial."},"N":{"direction":0,"source_ids":[],"basis":"Energy and issue urgency were not treated as emotional instability."}},
+      "external_summary": "High-energy, broad, industrious, and helpful professional persona."
+    },
+    "Roger Wicker": {
+      "sources": [
+        {"id":"s1","url":"https://www.wicker.senate.gov/biography","publisher":"U.S. Senate","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://www.thedailybeast.com/republicans-raging-texts-to-maga-colleague-are-leaked-stop-embarrassing-yourself/","publisher":"Daily Beast","date":"2026-07-07","independent":true,"summary":"Reports a furious text exchange and attempt to remove a colleague from a shared return flight after a dispute about a conference location."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Committee chair visibility was excluded."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"One conflict was not generalized to broad disagreeableness."},"N":{"direction":1,"source_ids":["s2"],"basis":"The reported intensity and escalation over a conference-location dispute appears disproportionate to the triggering administrative disagreement; this is a one-incident, low-confidence code."}},
+      "external_summary": "One recent episode suggests disproportionate reactivity, but it is not treated as a holistic or high-confidence judgment."
+    },
+    "Ron Johnson": {
+      "sources": [
+        {"id":"s1","url":"https://www.ronjohnson.senate.gov/biography/","publisher":"U.S. Senate","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://en.wikipedia.org/wiki/Ron_Johnson","publisher":"Wikipedia","date":"2026-07","independent":true,"summary":"Independent biography documents contrarian policy positions but lacks a clean professional-temperament synthesis."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Media and office exposure were excluded."},"O":{"direction":0,"source_ids":[],"basis":"Contrarian or unconventional policy beliefs were not equated with Openness."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":0,"source_ids":[],"basis":"Partisanship was excluded."},"N":{"direction":0,"source_ids":[],"basis":"Rhetorical controversy was not enough without target-tone proportionality evidence."}},
+      "external_summary": "No clean directional code after separating ideology and controversy from personality."
+    },
+    "Steve Daines": {
+      "sources": [
+        {"id":"s1","url":"https://www.daines.senate.gov/","publisher":"U.S. Senate","date":"n.d.","independent":false,"summary":"Official office site."},
+        {"id":"s2","url":"https://www.washingtonpost.com/politics/2023/03/06/steve-daines-senate-republicans/","publisher":"Washington Post","date":"2023-03-06","independent":true,"summary":"Profile describes Daines balancing Republican factions, earning trust without copying combative styles."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Network centrality and campaign role were excluded."},"O":{"direction":0,"source_ids":[],"basis":"International experience alone was not enough."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":1,"source_ids":["s2"],"basis":"The profile centers his ability to earn trust across competing internal factions without adopting combative behavior."},"N":{"direction":-1,"source_ids":["s2"],"basis":"His reported noncombative, temperature-lowering style supports professional composure."}},
+      "external_summary": "Trusted faction-bridger with a controlled, noncombative style."
+    },
+    "Susan Collins": {
+      "sources": [
+        {"id":"s1","url":"https://www.collins.senate.gov/about/susan-collins","publisher":"U.S. Senate","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://www.washingtonpost.com/politics/2013/10/11/ff2d29e0-32c0-11e3-8627-c5d7de0a046b_story.html","publisher":"Washington Post","date":"2013-10-11","independent":true,"summary":"Profile describes careful language, earnest brokering, tenacity, expertise, time investment, and refusal to grandstand."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Low grandstanding was not equated with introversion."},"O":{"direction":0,"source_ids":[],"basis":"Moderation was not equated with Openness."},"C":{"direction":1,"source_ids":["s2"],"basis":"The profile explicitly emphasizes tenacity, knowledge, sustained time and energy, and careful work."},"A":{"direction":1,"source_ids":["s2"],"basis":"Independent reporting portrays her as an earnest, trusted broker focused on compromise rather than grandstanding."},"N":{"direction":0,"source_ids":[],"basis":"Careful language suggests control but was not enough for a separate N code."}},
+      "external_summary": "Tenacious, careful, and cooperation-oriented professional persona."
+    },
+    "Ted Budd": {
+      "sources": [
+        {"id":"s1","url":"https://www.budd.senate.gov/about-senator-ted-budd/","publisher":"U.S. Senate","date":"n.d.","independent":false,"summary":"Official biography."},
+        {"id":"s2","url":"https://www.theassemblync.com/news/politics/elections/ted-budd-paper-elephant/","publisher":"The Assembly","date":"2022-09-01","independent":true,"summary":"Long-form profile describes Budd as a humble good listener with nice-guy charm and documents calm, helpful behavior during the January 6 evacuation."}
+      ],
+      "traits": {"E":{"direction":0,"source_ids":[],"basis":"Low media use and name recognition could reflect strategy, so were not treated as introversion."},"O":{"direction":0,"source_ids":[],"basis":"Unclear."},"C":{"direction":0,"source_ids":[],"basis":"Unclear."},"A":{"direction":1,"source_ids":["s2"],"basis":"A longtime acquaintance describes a humble, grounded good listener; the profile also notes nice-guy charm."},"N":{"direction":-1,"source_ids":["s2"],"basis":"The profile documents deliberate calm and assistance to colleagues during the Capitol evacuation, a high-stress context."}},
+      "external_summary": "Warm, grounded, and calm under acute stress; low media exposure was not coded as introversion."
+    }
+  }
+}
