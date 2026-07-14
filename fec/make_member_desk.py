@@ -19,6 +19,7 @@ import json, os, csv, re, sys, unicodedata
 from datetime import datetime
 import openpyxl
 from moneyball_core import dump_atomic   # S3-01 audit run-2: chain artifacts write atomically
+from tier_util import legislative_press_tiers   # Legislative+Press tier (display-only; shared with the dashboard producer)
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
 B = MB_ROOT
@@ -113,8 +114,8 @@ _LLMPCT = {tr: _pctrank([t[tr] for t in _llmhave.values()]) for tr in ('O', 'C',
 # Preserve instrument independence on the replacement Neuroticism axis: Blue-N and Pink-N are ranked
 # from their OWN text-family scores. The round-7 affective-content score remains a separate,
 # text-derived diagnostic candidate; copying it into both polygons would manufacture agreement.
-_B5NPCT = _pctrank([t['N'] for t in _b5have.values()]) if _b5have else None
-_LLMNPCT = _pctrank([t['N'] for t in _llmhave.values()]) if _llmhave else None
+_B5NPCT = _pctrank([t['N'] for t in _b5have.values() if t.get('N') is not None]) if _b5have else None   # filter None (mirrors line 105); thin-data members legitimately lack an N score
+_LLMNPCT = _pctrank([t['N'] for t in _llmhave.values() if t.get('N') is not None]) if _llmhave else None
 _BLUE_FILE = next((os.path.join(B, f) for f in ('big5_blue_validated.json','big5_blue_emb.json','big5_v2.json')
                    if os.path.exists(os.path.join(B, f))), os.path.join(B, 'big5_v2.json'))
 _PINK_FILE = os.path.join(B, 'big5_llm_opus.json')
@@ -215,11 +216,11 @@ def psy_for(name):
         out['a_coverage_n'] = (_AVAL_ART.get('scope') or {}).get('covered_n')
     if t.get('tokens', 0) > 0 and _B5PCT:
         out['big5_pct'] = [(_B5PCT[tr](t[tr]) if t.get(tr) is not None else None)
-                           for tr in ('O', 'C', 'E', 'A')] + [(_B5NPCT(t['N']) if _B5NPCT else None)]
+                           for tr in ('O', 'C', 'E', 'A')] + [(_B5NPCT(t['N']) if (_B5NPCT and t.get('N') is not None) else None)]
         out['big5_low'] = bool(t.get('lowconf')); out['tokens'] = t.get('tokens')
     lm = _llmhave.get(name)
     if lm and _LLMPCT:
-        out['llm_pct'] = [_LLMPCT[tr](lm[tr]) for tr in ('O', 'C', 'E', 'A')] + [(_LLMNPCT(lm['N']) if _LLMNPCT else None)]
+        out['llm_pct'] = [_LLMPCT[tr](lm[tr]) for tr in ('O', 'C', 'E', 'A')] + [(_LLMNPCT(lm['N']) if (_LLMNPCT and lm.get('N') is not None) else None)]
         out['llm_chunks'] = lm.get('n_chunks')
     if out.get('big5_pct') or out.get('llm_pct'):
         out['big5_vintage'] = {'blue': _BLUE_DATE, 'pink': _PINK_DATE,
@@ -558,6 +559,7 @@ _POLICY_RE = re.compile(r'legislative (director|assistant|counsel|aide)|deputy l
                         r'|policy (advisor|adviser|director|counsel|analyst)|chief counsel|general counsel|tax counsel', re.I)
 def build_bundle():
     member_names = [m['name'] for m in MD['members']]
+    _tier, _trank = legislative_press_tiers(member_names)   # tier 1/2/3 (0=untiered) + leg+press rank, per member
     ARTS, BILLS, CMTS, WBM = load_press_and_bills(member_names)
     def staff_pack(name):
         oncmte = bool((CMTS.get(name) or {}).get('seats'))
@@ -605,6 +607,8 @@ def build_bundle():
             # general page  (rank/score from ranks_python.json, the phase-2 BLENDED rank authority; workbook fallback)
             'rank': RA_RANK.get(name) or wbr.get('rank', m.get('rank')),
             'score': (RA_SCORE.get(name) if RA_SCORE.get(name) is not None else wbr.get('score', m.get('score'))),
+            'tier': _tier.get(name, 0),          # Legislative+Press tier (1/2/3, 0=untiered); DISPLAY-ONLY, rank-independent
+            'tierrank': _trank.get(name, 0),     # 1-based legislative+press rank
             'alloc': m.get('alloc', 0),            # model-suggested allocation
             'invested': CU_FEC[i] if i is not None else 0,   # ACTUAL FEC credit-union $
             'ind_money': IND_FEC[i] if i is not None else 0, # competing bank/finserv $
@@ -748,11 +752,12 @@ if __name__ == '__main__':
         print('   %-30s score %.3f  adj-rank #%s' % (c, s['radar'][bundle['cats'].index(c)], s['adjrank'][c]))
     print('   partners:', ', '.join(p['name'] for p in s['partners'][:5]))
     import io
-    out = os.path.join(B, 'member_desk_bundle.json')
+    _dir = os.environ.get('DESK_OUT') or B   # no-clobber redirect (a directory) for preview/test runs; prod = unset -> live tree
+    out = os.path.join(_dir, 'member_desk_bundle.json')
     dump_atomic(bundle, out, separators=(',', ':'), ensure_ascii=False)
     print('\nwrote %s (%.0f KB)' % (out, os.path.getsize(out)/1024))
     if '--data' not in sys.argv:
-        html_out = os.path.join(B, 'cu-member-desk.html')
+        html_out = os.path.join(_dir, 'cu-member-desk.html')
         payload = json.dumps(bundle, separators=(',', ':'), ensure_ascii=False)
         with io.open(html_out, 'w', encoding='utf-8') as f:
             f.write(HTML.replace('__BUNDLE__', payload))

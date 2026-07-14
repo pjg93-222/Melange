@@ -213,7 +213,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#161b22}
     <span class=seg id=chamber><button data-v=all class=on>All</button><button data-v=House>House</button><button data-v=Senate>Senate</button></span>
     <select id=area><option value="">All legislative areas</option></select>
     <select id=stancefilter><option value="">All stances</option></select>
-    <select id=sort><option value=rank>Sort: Rank</option><option value=score>Sort: Score</option><option value=invested>Sort: Invested ($)</option><option value=name>Sort: Name</option></select>
+    <select id=sort><option value=rank>Sort: Rank</option><option value=tier>Sort: Tier</option><option value=score>Sort: Score</option><option value=invested>Sort: Invested ($)</option><option value=name>Sort: Name</option></select>
     <label class=toggle><input type=checkbox id=fundedOnly> Funded only</label>
   </div>
   <div class=countline><span id=count></span><span id=stancehint style=color:var(--faint)>Click any member for the full profile</span></div>
@@ -425,6 +425,8 @@ $('#area').onchange=e=>{rstate.area=e.target.value;renderRanked();};
 $('#stancefilter').onchange=e=>{rstate.stance=e.target.value;renderRanked();};
 document.querySelectorAll('#chamber button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#chamber button').forEach(x=>x.classList.remove('on'));b.classList.add('on');rstate.chamber=b.dataset.v;renderRanked();});
 function sparkHTML(m){return `<div class=spark>`+['press','comm','leg','demo'].map(k=>{const v=m[k+'_n']||0;return `<i style="height:${Math.max(12,v*100)}%;background:${PILL[k].c}"></i>`;}).join('')+`</div>`;}
+const TIERCOL={1:'#fbbf24',2:'#93c5fd',3:'#d6a86a'};   // Legislative+Press tier: gold / ice-blue / bronze
+function tierChip(m){const t=m.tier||0;return t?`<span title="Legislative + Press · Tier ${t}${m.tierrank?' · rank #'+m.tierrank:''}" style="display:inline-block;background:${TIERCOL[t]};color:#0d1117;font-weight:800;font-size:9px;line-height:1;letter-spacing:.3px;padding:2px 4px;border-radius:5px;vertical-align:middle;margin-left:6px">T${t}</span>`:'';}
 function renderRanked(){
   const area=rstate.area, ai=area?CATS.indexOf(area):-1;
   let r=M.filter(m=>{
@@ -435,7 +437,7 @@ function renderRanked(){
     return true;
   });
   if(area){r.sort((a,b)=>(b.radar[ai]||0)-(a.radar[ai]||0));}
-  else{const s=rstate.sort;r.sort((a,b)=>s==='score'?(b.score||0)-(a.score||0):s==='invested'?(b.invested||0)-(a.invested||0):s==='name'?a.name.localeCompare(b.name):(a.rank||9999)-(b.rank||9999));}
+  else{const s=rstate.sort;r.sort((a,b)=>s==='tier'?((a.tier||99)-(b.tier||99)||(a.tierrank||9999)-(b.tierrank||9999)):s==='score'?(b.score||0)-(a.score||0):s==='invested'?(b.invested||0)-(a.invested||0):s==='name'?a.name.localeCompare(b.name):(a.rank||9999)-(b.rank||9999));}   // 'tier': T1->T2->T3->untiered, then by leg+press rank
   $('#count').textContent=`Showing ${r.length} of ${M.length} members`+(area?` · ${area}`:'');
   $('#th-stance').textContent=area?('Stance · '+area):'Stance · overall';
   $('#th-score').textContent=area?area:'Score';
@@ -446,7 +448,7 @@ function renderRanked(){
     const rk=area?('#'+(m.adjrank[area]||'—')):(m.rank??'—');
     return `<tr data-i=${byName[m.name]}>
       <td class=num><span class=rk>${rk}</span></td>
-      <td><div class=nm>${m.name}</div><div class=dist>${m.chamber} · ${m.party||'—'} · ${m.district||''}</div></td>
+      <td><div class=nm>${m.name}${tierChip(m)}</div><div class=dist>${m.chamber} · ${m.party||'—'} · ${m.district||''}</div></td>
       <td>${stanceBadge(stanceAt(m,area))}</td>
       <td>${sparkHTML(m)}</td>
       <td>${scoreCell}</td></tr>`;
@@ -485,6 +487,7 @@ function openMember(i){
   </div>
   <div class=figs style=margin-bottom:14px>
     <div class=fig><div class=v>#${m.rank??'—'}</div><div class=l>Overall rank</div></div>
+    <div class=fig><div class=v>${m.tier?('Tier '+m.tier):'—'}</div><div class=l>Leg+Press tier${m.tier&&m.tierrank?' · #'+m.tierrank:''}</div></div>
     <div class=fig><div class=v>${f2(m.score)}</div><div class=l>Composite score</div></div>
     <div class=fig accent><div class=v>${money(m.invested)}</div><div class=l>Invested · FEC</div></div>
     <div class=fig><div class=v>${money(m.ind_money)}</div><div class=l>Opposing $</div></div>
