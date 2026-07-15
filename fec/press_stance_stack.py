@@ -54,12 +54,13 @@ try:
     _POV = json.load(open(B + r"\press_stance_overrides.json", encoding="utf-8")).get("corrections", [])
 except Exception:
     _POV = []
-_POV_URL = {(c.get("url") or "").strip(): (c.get("stance") or "").strip().lower() for c in _POV
+def _uurl(u): return (u or "").strip().rstrip("/")   # BUG-F fix: match the pipeline's URL canonicalization
+_POV_URL = {_uurl(c.get("url")): (c.get("stance") or "").strip().lower() for c in _POV
             if c.get("url") and (c.get("stance") or "").strip().lower() in ("support", "oppose", "neutral")}
 _POV_TITLE = [((c.get("title_contains") or "").lower(), (c.get("stance") or "").strip().lower()) for c in _POV
               if c.get("title_contains") and (c.get("stance") or "").strip().lower() in ("support", "oppose", "neutral")]
 def press_override(url, title):
-    if url and url.strip() in _POV_URL: return _POV_URL[url.strip()]
+    if url and _uurl(url) in _POV_URL: return _POV_URL[_uurl(url)]
     t = (title or "").lower()
     for sub, st in _POV_TITLE:
         if sub and sub in t: return st
@@ -139,10 +140,12 @@ for i, r in enumerate([t for t in tone_rows if (t.get("url") or "").strip()]):
     # neutral ONLY when the composed Fable read (f_flat) is itself non-directional; else trust the direction.
     if reg_key(fable.get(k, {}).get("target"), r.get("title")) in POLICY_KEYS and s in ("support", "oppose"):
         s = f_flat if f_flat in ("support", "oppose") else "neutral"
+    # tier reflects MODEL reader agreement (pre-override) so a hand label changes the label but NOT the
+    # blend weight (BUG-C fix: mirror the tweet stack, which sets tier from readers not the override).
+    tier = "unanimous" if (s == f_flat == deb) else ("majority" if (s == f_flat or s == deb) else "review")
     # Paul's hand press labels are ground truth -- applied LAST, beat stack + registry + pin.
     _pov = press_override(r.get("url"), r.get("title"))
     if _pov is not None: s = _pov
-    tier = "unanimous" if (s == f_flat == deb) else ("majority" if (s == f_flat or s == deb) else "review")
     tiern[tier] += 1
     out.append({"url": r.get("url"), "member": r.get("member"), "date": r.get("date"),
                 "title": html.unescape(r.get("title") or ""), "stack_label": s, "tier": tier, "debate_stance": deb})

@@ -24,57 +24,57 @@
     {
       "title_contains": "senator tim scott releases 2025 year in review",
       "stance": "support",
-      "note": "Paul gold 2026-07-15: neutral->positive"
+      "note": "Paul gold 2026-07-15"
     },
     {
-      "title_contains": "senator tim scott highlights major legislative wins during j",
+      "title_contains": "senator tim scott highlights major legislative wins during july work p",
       "stance": "support",
-      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+      "note": "Paul gold 2026-07-15"
     },
     {
       "title_contains": "Industry win: Judge vacates CFPB credit card late fee rule",
       "stance": "neutral",
-      "note": "Paul gold 2026-07-15: neutral->neutral"
+      "note": "Paul gold 2026-07-15"
     },
     {
-      "title_contains": "scott presses cfpb director on resignation calls out midnigh",
+      "title_contains": "scott presses cfpb director on resignation calls out midnight rulemaki",
       "stance": "support",
-      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+      "note": "Paul gold 2026-07-15"
     },
     {
-      "title_contains": "CFPB credit card late fee rule will harm consumers that pay ",
+      "title_contains": "CFPB credit card late fee rule will harm consumers that pay on time",
       "stance": "support",
-      "note": "Paul gold 2026-07-15: weakly negative->positive"
+      "note": "Paul gold 2026-07-15"
     },
     {
-      "title_contains": "House, Senate resolutions would void CFPB credit card late f",
+      "title_contains": "House, Senate resolutions would void CFPB credit card late fees rule",
       "stance": "neutral",
-      "note": "Paul gold 2026-07-15: weakly negative->neutral"
+      "note": "Paul gold 2026-07-15"
     },
     {
-      "title_contains": "SBA direct lending would harm small businesses, community fi",
+      "title_contains": "SBA direct lending would harm small businesses, community financial in",
       "stance": "support",
-      "note": "Paul gold 2026-07-15: neutral->positive"
+      "note": "Paul gold 2026-07-15"
     },
     {
-      "title_contains": "Simpson: ‘Credit unions are the original consumer protectors",
+      "title_contains": "Simpson: ‘Credit unions are the original consumer protectors’",
       "stance": "oppose",
-      "note": "Paul gold 2026-07-15: positive->negative"
+      "note": "Paul gold 2026-07-15"
     },
     {
       "title_contains": "Leagues, credit unions reinforce importance of tax status",
       "stance": "support",
-      "note": "Paul gold 2026-07-15: weakly negative->weakly positive"
+      "note": "Paul gold 2026-07-15"
     },
     {
-      "title_contains": "Credit union priorities addressed during community banking h",
+      "title_contains": "Credit union priorities addressed during community banking hearing",
       "stance": "support",
-      "note": "Paul gold 2026-07-15: neutral->positive"
+      "note": "Paul gold 2026-07-15"
     },
     {
       "title_contains": "Rep. Waters introduces CLF, field of membership bills",
       "stance": "support",
-      "note": "Paul gold 2026-07-15: weakly positive->positive"
+      "note": "Paul gold 2026-07-15"
     }
   ]
 }

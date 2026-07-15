@@ -127,6 +127,18 @@ if '--score' in sys.argv:
             d = json.loads(ln); cache[d['k']] = d['out']
         except Exception: pass
     tw = list(csv.DictReader(io.open(B + r'\quorum_member_tweets.csv', encoding='utf-8-sig', newline='')))
+    # BUG-A GUARD (2026-07-15): a text_contains override must uniquely identify ONE tweet. The first
+    # cut keyed on norm(text)[:45], which for one tweet was the CFPB's spelled-out name -> matched 149
+    # tweets and mass-forced 'support'. Overrides now key by quorum_id; any residual non-unique
+    # text_contains rule is DROPPED here (not silently applied) so a generic phrase can never mass-relabel.
+    if _TOV_TXT:
+        _cn = [_norm_ov(r.get('Content')) for r in tw]
+        _keep = []
+        for _sub, _st in _TOV_TXT:
+            _c = sum(1 for x in _cn if _sub and _sub in x)
+            if _c == 1: _keep.append((_sub, _st))
+            else: print('  !! override text_contains DROPPED (matches %d tweets, not unique): %r' % (_c, _sub[:50]))
+        _TOV_TXT[:] = _keep
     texts = [(r.get('Content') or '').strip() or '.' for r in tw]
     probs = pc.predict_proba(texts)
     out = []
