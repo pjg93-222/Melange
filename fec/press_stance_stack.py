@@ -49,6 +49,21 @@ def reg_key(target, text):
     for e in REG:
         if any(m in blob for m in e["match"]): return e["key"]
     return None
+# Paul's hand press-stance overrides (ground truth; applied LAST). Same file the desk display uses.
+try:
+    _POV = json.load(open(B + r"\press_stance_overrides.json", encoding="utf-8")).get("corrections", [])
+except Exception:
+    _POV = []
+_POV_URL = {(c.get("url") or "").strip(): (c.get("stance") or "").strip().lower() for c in _POV
+            if c.get("url") and (c.get("stance") or "").strip().lower() in ("support", "oppose", "neutral")}
+_POV_TITLE = [((c.get("title_contains") or "").lower(), (c.get("stance") or "").strip().lower()) for c in _POV
+              if c.get("title_contains") and (c.get("stance") or "").strip().lower() in ("support", "oppose", "neutral")]
+def press_override(url, title):
+    if url and url.strip() in _POV_URL: return _POV_URL[url.strip()]
+    t = (title or "").lower()
+    for sub, st in _POV_TITLE:
+        if sub and sub in t: return st
+    return None
 def compose(s, v):
     s = (s or "").lower()
     if s == "unrelated": return "unrelated"
@@ -119,11 +134,14 @@ for i, r in enumerate([t for t in tone_rows if (t.get("url") or "").strip()]):
     f_flat = (fable.get(k, {}).get("cu_alignment") or "").strip().lower()
     deb = (r.get("stance") or "").strip().lower()
     s = pred[i]
-    # POLICY-FORCE override (user-directed 2026-07-07): registry entries flagged policy_force BIND
-    # the composed label; learned readers trained on superseded golds cannot outvote a legislated
-    # axis. Currently: CFPB agency-existence axis + bare mentions -> neutral.
+    # POLICY-FORCE, RELAXED 2026-07-15 (Paul's fresh CFPB gold re-adjudicated the agency-existence axis
+    # as DIRECTIONAL: attacking/defunding CFPB = pro-CU/support, defending CFPB = anti-CU/oppose). Keep
+    # neutral ONLY when the composed Fable read (f_flat) is itself non-directional; else trust the direction.
     if reg_key(fable.get(k, {}).get("target"), r.get("title")) in POLICY_KEYS and s in ("support", "oppose"):
-        s = "neutral"
+        s = f_flat if f_flat in ("support", "oppose") else "neutral"
+    # Paul's hand press labels are ground truth -- applied LAST, beat stack + registry + pin.
+    _pov = press_override(r.get("url"), r.get("title"))
+    if _pov is not None: s = _pov
     tier = "unanimous" if (s == f_flat == deb) else ("majority" if (s == f_flat or s == deb) else "review")
     tiern[tier] += 1
     out.append({"url": r.get("url"), "member": r.get("member"), "date": r.get("date"),
