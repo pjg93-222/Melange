@@ -1,0 +1,80 @@
+{
+  "_README": "Manual corrections for DEBATE press-sentiment mislabels. Applied in make_member_desk press loading: overrides the displayed stance/label/direction for matching articles. Match each correction by 'url' (exact) OR 'title_contains' (case-insensitive substring). 'stance' is one of: support | oppose | neutral (support=pro-CU/+, oppose=anti-CU/-, neutral=0). Add entries to 'corrections' and regenerate (make_member_desk.py -> make_combined.py) to apply. NOTE: this corrects the member-desk DISPLAY; correcting the press PILLAR/ranks additionally needs the upstream press_value re-flowed (cu_press_stance_tone.csv -> Press Release - Raw).",
+  "corrections": [
+    {
+      "title_contains": "prohibit SBA from making direct 7(a) loans",
+      "stance": "support",
+      "note": "CUs support limiting government direct-lending competition; DEBATE read 'prohibit' as negative"
+    },
+    {
+      "title_contains": "Senate bill would prohibit SBA from making direct 7(a) loans",
+      "stance": "support",
+      "note": "same bill, full headline"
+    },
+    {
+      "title_contains": "resolution of disapproval for CFPB overdraft",
+      "stance": "neutral",
+      "note": "CRA disapproval of a CFPB rule is deregulatory; neutral-to-pro-CU, not 'oppose'"
+    },
+    {
+      "title_contains": "support for bill to prohibit SBA direct lending",
+      "stance": "support",
+      "note": "Nussle/CUNA supports prohibiting SBA direct lending"
+    },
+    {
+      "title_contains": "senator tim scott releases 2025 year in review",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->positive"
+    },
+    {
+      "title_contains": "senator tim scott highlights major legislative wins during j",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "title_contains": "Industry win: Judge vacates CFPB credit card late fee rule",
+      "stance": "neutral",
+      "note": "Paul gold 2026-07-15: neutral->neutral"
+    },
+    {
+      "title_contains": "scott presses cfpb director on resignation calls out midnigh",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "title_contains": "CFPB credit card late fee rule will harm consumers that pay ",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: weakly negative->positive"
+    },
+    {
+      "title_contains": "House, Senate resolutions would void CFPB credit card late f",
+      "stance": "neutral",
+      "note": "Paul gold 2026-07-15: weakly negative->neutral"
+    },
+    {
+      "title_contains": "SBA direct lending would harm small businesses, community fi",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->positive"
+    },
+    {
+      "title_contains": "Simpson: ‘Credit unions are the original consumer protectors",
+      "stance": "oppose",
+      "note": "Paul gold 2026-07-15: positive->negative"
+    },
+    {
+      "title_contains": "Leagues, credit unions reinforce importance of tax status",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: weakly negative->weakly positive"
+    },
+    {
+      "title_contains": "Credit union priorities addressed during community banking h",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->positive"
+    },
+    {
+      "title_contains": "Rep. Waters introduces CLF, field of membership bills",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: weakly positive->positive"
+    }
+  ]
+}

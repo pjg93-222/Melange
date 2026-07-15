@@ -1,0 +1,135 @@
+{
+  "_README": "Manual tweet-stance corrections (Paul's gold). Applied LAST in tweet_stance_stack.py --score, beating the stack + policy-force pin. Match by 'quorum_id' (exact) OR 'text_contains' (case-insensitive substring of tweet text). stance in {support|oppose|neutral} (support=pro-CU/+, oppose=anti-CU/-).",
+  "corrections": [
+    {
+      "text_contains": "congress can put consumer protection laws bac",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "text_contains": "the cfpb has long been a rogue agency notorio",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "text_contains": "rt financialcmte watch fi subcommittee chairm",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: weakly negative->positive"
+    },
+    {
+      "text_contains": "great conversation with treasury secretary sc",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "text_contains": "thank you to present trump for clearing the w",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "text_contains": "thank you to realdonaldtrump for clearing the",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "text_contains": "rohit chopra s days at the cfpb are numbered ",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "text_contains": "1 2 the senate s passage of the one big beaut",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "text_contains": "despite voters clear message on election day ",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: negative->weakly positive"
+    },
+    {
+      "text_contains": "rt bankinggop senatortimscott s statement on ",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "text_contains": "the consumer financial protection bureau cfpb",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "text_contains": "despite president biden s claims the cfpb s c",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->positive"
+    },
+    {
+      "text_contains": "proud to partner with senjohnkennedy to save ",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: weakly negative->strongly positive"
+    },
+    {
+      "text_contains": "the cfpb s overreach and abuse of power stifl",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: weakly negative->positive"
+    },
+    {
+      "text_contains": "i m incredibly relieved cfpb which congressio",
+      "stance": "oppose",
+      "note": "Paul gold 2026-07-15: neutral->weakly negative"
+    },
+    {
+      "text_contains": "for far too long credit card companies have p",
+      "stance": "oppose",
+      "note": "Paul gold 2026-07-15: neutral->negative"
+    },
+    {
+      "text_contains": "thank you for repyoungkim s leadership on thi",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: weakly negative->weakly positive"
+    },
+    {
+      "text_contains": "regulators are disconnected from the impact t",
+      "stance": "neutral",
+      "note": "Paul gold 2026-07-15: weakly negative->neutral"
+    },
+    {
+      "text_contains": "after hearing from federalreserve chair jerom",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15: neutral->weakly positive"
+    },
+    {
+      "text_contains": "no one better than rohit chopra to lead a new",
+      "stance": "oppose",
+      "note": "Paul gold 2026-07-15: neutral->weakly negative"
+    },
+    {
+      "text_contains": "donald trump says he wants to cap credit card",
+      "stance": "oppose",
+      "note": "Paul gold 2026-07-15: neutral->weakly negative"
+    },
+    {
+      "text_contains": "trump and republicans got rid of the cfpb s r",
+      "stance": "oppose",
+      "note": "Paul gold 2026-07-15: neutral->weakly negative"
+    },
+    {
+      "text_contains": "under trump the national credit union associa",
+      "stance": "oppose",
+      "note": "Paul gold 2026-07-15: positive->negative"
+    },
+    {
+      "text_contains": "360 million that s how much americans who wer",
+      "stance": "oppose",
+      "note": "Paul gold 2026-07-15: positive->weakly negative"
+    },
+    {
+      "text_contains": "walmart and navy federal credit union were in",
+      "stance": "oppose",
+      "note": "Paul gold 2026-07-15: positive->strongly negative"
+    },
+    {
+      "text_contains": "rt senschumer the gop in congress actually ha",
+      "stance": "oppose",
+      "note": "Paul gold 2026-07-15: Positive->negative"
+    }
+  ]
+}

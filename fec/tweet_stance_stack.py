@@ -41,6 +41,25 @@ def compose(s, v):
     if s == 'oppose': return 'oppose' if v > 0 else 'support'
     return 'neutral'
 
+def _norm_ov(s):
+    s = (s or '').lower(); s = re.sub(r'https?://\S+', '', s)
+    s = re.sub(r'[^a-z0-9 ]', ' ', s); return re.sub(r'\s+', ' ', s).strip()
+# Paul's hand-labeled tweet stance overrides (ground truth; applied LAST, beats stack + policy-force). 2026-07-15.
+try:
+    _TOV = json.load(open(B + r'\tweet_stance_overrides.json', encoding='utf-8')).get('corrections', [])
+except Exception:
+    _TOV = []
+_TOV_TXT = [(_norm_ov(c.get('text_contains', '')), (c.get('stance') or '').strip().lower()) for c in _TOV
+            if c.get('text_contains') and (c.get('stance') or '').strip().lower() in ('support', 'oppose', 'neutral')]
+_TOV_QID = {str(c['quorum_id']): (c.get('stance') or '').strip().lower() for c in _TOV
+            if c.get('quorum_id') and (c.get('stance') or '').strip().lower() in ('support', 'oppose', 'neutral')}
+def tweet_override(qid, text):
+    if qid and str(qid) in _TOV_QID: return _TOV_QID[str(qid)]
+    tn = _norm_ov(text)
+    for sub, st in _TOV_TXT:
+        if sub and sub in tn: return st
+    return None
+
 def clf():
     return Pipeline([("f", FeatureUnion([("w", TfidfVectorizer(ngram_range=(1, 2), min_df=2, sublinear_tf=True)),
                                          ("c", TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5), min_df=2, sublinear_tf=True))])),
@@ -119,13 +138,19 @@ if '--score' in sys.argv:
                              o.get('target_cu_valence'), o.get('cu_alignment'), o.get('confidence'),
                              t.startswith('RT @'), pr)
         lbl = meta.predict([f])[0]
-        # POLICY-FORCE override (user-directed 2026-07-07, registry entries flagged policy_force):
-        # a legislated axis BINDS the composed label; learned readers trained on superseded golds
-        # cannot outvote it. Currently: CFPB agency-existence axis + bare mentions -> neutral.
-        _, _fkey = fam_lookup(o.get('target'), t)
-        if _fkey in POLICY_KEYS and lbl in ('support', 'oppose'): lbl = 'neutral'
         clab = CL[int(np.argmax(pr))]
         alab = (o.get('cu_alignment') or '').strip().lower()
+        # POLICY-FORCE, RELAXED 2026-07-15 (Paul's fresh CFPB gold re-adjudicated the agency-existence
+        # axis as DIRECTIONAL: attacking/defunding CFPB = pro-CU/support, defending CFPB = anti-CU/oppose).
+        # The 2026-07-07 blanket neutral-pin over-neutralized ~1,582 tweets (tweet-gold sign acc 0.54).
+        # Relaxation: keep neutral ONLY when the composed API read is itself non-directional; otherwise
+        # trust the composed direction. Validated vs 400 tweet gold: 0.54 -> ~0.75, ~0 overcorrection.
+        _, _fkey = fam_lookup(o.get('target'), t)
+        if _fkey in POLICY_KEYS and lbl in ('support', 'oppose'):
+            lbl = alab if alab in ('support', 'oppose') else 'neutral'
+        # Paul's hand labels are ground truth -- applied LAST, beat stack + registry + pin alike.
+        _ov = tweet_override(r.get('Quorum ID'), t)
+        if _ov is not None: lbl = _ov
         tier = 'unanimous' if (alab and A == clab == alab) else ('review' if (alab and A != clab and A != alab and clab != alab) else 'majority')
         out.append({'quorum_id': r.get('Quorum ID'), 'member': r.get('member'), 'date': r.get('dt'),
                     'stack_stance': lbl, 'registry_read': A, 'classical_read': clab, 'api_read': alab,
