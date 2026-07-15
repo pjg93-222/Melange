@@ -24,9 +24,10 @@ Usage:
   python fetch_congressional_record.py crec --since 2025-07-01 [--until 2026-07-02]
   python fetch_congressional_record.py chrg --since 2025-01-01
   python fetch_congressional_record.py status"""
-import sys,os,re,json,io,csv,zipfile,sqlite3,datetime,time,argparse,collections
+import sys,os,re,json,io,csv,zipfile,sqlite3,datetime,time,argparse,collections,html
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import urllib.request
+import urllib.parse
 B=MB_ROOT
 KEY=os.environ.get('GOVINFO_KEY') or (open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'govinfo_key.txt')).read().strip()
      if os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)),'govinfo_key.txt')) else 'DEMO_KEY')
@@ -39,14 +40,29 @@ def db():
     c.execute('CREATE INDEX IF NOT EXISTS ix_sp_m ON speeches(member)')
     c.execute('''CREATE TABLE IF NOT EXISTS cr_fetch_log(key TEXT PRIMARY KEY,status TEXT,ts TEXT)''')
     return c
-def get(url,binary=False,tries=3):
+def _redact_url(url):
+    parts=urllib.parse.urlsplit(url); query=urllib.parse.parse_qsl(parts.query,keep_blank_values=True)
+    clean=urllib.parse.urlencode([(k,'REDACTED' if k.lower() in {'api_key','key','token'} else v) for k,v in query])
+    return urllib.parse.urlunsplit((parts.scheme,parts.netloc,parts.path,clean,parts.fragment))
+def _strip_api_key(url):
+    parts=urllib.parse.urlsplit(url); query=urllib.parse.parse_qsl(parts.query,keep_blank_values=True)
+    clean=urllib.parse.urlencode([(k,v) for k,v in query if k.lower() not in {'api_key','key','token'}])
+    return urllib.parse.urlunsplit((parts.scheme,parts.netloc,parts.path,clean,parts.fragment))
+def get(url,binary=False,tries=3,api_key=None):
     for i in range(tries):
         try:
-            with urllib.request.urlopen(urllib.request.Request(url,headers=UA),timeout=120) as r:
+            headers=dict(UA)
+            if api_key: headers['X-Api-Key']=api_key
+            with urllib.request.urlopen(urllib.request.Request(_strip_api_key(url),headers=headers),timeout=120) as r:
                 d=r.read()
-                return d if binary else d.decode('utf-8','replace')
+                if binary: return d
+                charset=r.headers.get_content_charset() or 'utf-8'
+                try: return d.decode(charset,'strict')
+                except UnicodeDecodeError as exc:
+                    raise ValueError('response is not valid %s: %s'%(charset,_redact_url(url))) from exc
         except Exception as e:
-            if i==tries-1: raise
+            if i==tries-1:
+                raise RuntimeError('request failed: '+_redact_url(url)) from e
             time.sleep(3*(i+1))
 # ---------------- roster: SURNAME(+state) -> canonical member ----------------
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}
@@ -62,10 +78,23 @@ def surkeys(m):
     if len(ts)>=3: ks.add((ts[-2]+' '+ts[-1]).upper())          # VAN ORDEN, DE LA CRUZ...
     if len(ts)>=4: ks.add((ts[-3]+' '+ts[-2]+' '+ts[-1]).upper())
     return {re.sub(r"[^A-Z\- ']",'',k) for k in ks}
-ROSTER=collections.defaultdict(list)   # (surname_key, chamber) -> [member]
+ROSTER=collections.defaultdict(list)   # (surname_key, chamber) -> [current-roster member]
+SERVICE=set()                          # (member, Congress, chamber), including prior chamber service
+_bio2member={r.get('bioguide'):m for m,r in C.items() if r.get('bioguide')}
+try:
+    for r in csv.DictReader(open(B+r'\votes\HSall_members.csv',encoding='utf-8-sig')):
+        member=_bio2member.get(r.get('bioguide_id')); chamber=(r.get('chamber') or '').lower()
+        if not member or chamber not in ('house','senate'): continue
+        try: congress=int(float(r.get('congress') or ''))
+        except ValueError: continue
+        SERVICE.add((member,congress,chamber))
+except FileNotFoundError:
+    pass
 for m in C:
-    ch=(C[m].get('chamber') or '').lower()
-    for k in surkeys(m): ROSTER[(k,ch)].append(m)
+    chambers={ch for member,_congress,ch in SERVICE if member==m}
+    if not chambers: chambers={(C[m].get('chamber') or '').lower()}
+    for ch in chambers:
+        for k in surkeys(m): ROSTER[(k,ch)].append(m)
 # CREC says "of California"; the roster carries two-letter codes -> full-name map for disambiguation
 ST2AB={'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA','colorado':'CO',
 'connecticut':'CT','delaware':'DE','florida':'FL','georgia':'GA','hawaii':'HI','idaho':'ID','illinois':'IL',
@@ -77,39 +106,117 @@ ST2AB={'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':
 'vermont':'VT','virginia':'VA','washington':'WA','west virginia':'WV','wisconsin':'WI','wyoming':'WY',
 'puerto rico':'PR','guam':'GU','american samoa':'AS','virgin islands':'VI','district of columbia':'DC',
 'northern mariana islands':'MP'}
-def resolve(sur,st,chamber):
+def resolve(sur,st,chamber,congress=None):
     sur=re.sub(r"[^A-Z\- ']",'',sur.upper()).strip()
     ab=ST2AB.get((st or '').lower(),st)
-    for ch in ([chamber] if chamber else ['senate','house']):
-        cand=ROSTER.get((sur,ch),[])
-        if not cand: continue
-        if len(cand)==1 and not st: return cand[0]
-        if ab:
-            hit=[m for m in cand if state.get(m,'').upper()==str(ab).upper()]
-            if len(hit)==1: return hit[0]
-        if len(cand)==1: return cand[0]
+    # A joint hearing can contain members from both chambers.  Resolve across the combined candidate
+    # set and require uniqueness; never restore the legacy Senate-first guess.
+    chambers=[chamber] if chamber in ('house','senate') else ['house','senate']
+    cand=[]
+    for ch in chambers:
+        for member in ROSTER.get((sur,ch),[]):
+            if congress and SERVICE and (member,congress,ch) not in SERVICE: continue
+            if member not in cand: cand.append(member)
+    if ab:
+        hit=[m for m in cand if state.get(m,'').upper()==str(ab).upper()]
+        if len(hit)==1: return hit[0]
+        if hit: cand=hit
+    if len(cand)==1: return cand[0]
     return None
 # ---------------- speaker-turn parser ----------------
 TURN=re.compile(r'(?m)^ {0,6}(?:The )?(Mr|Mrs|Ms|Miss|Senator|Chairman|Chairwoman|Chair)\.?[ ]+'
                 r"([A-Z][A-Za-z'\-]+(?:[ \-][A-Za-z'\-]+){0,2}?)"
-                r'(?: of ([A-Z][a-z]+(?: [A-Z][a-z]+)?))?[.,] ')
+                # A transcript speaker label ends in a period.  Accepting a comma caused direct
+                # address ("Ms. Rainey, what do you think?") to become a false speaker turn.
+                r'(?: of ([A-Z][a-z]+(?: [A-Z][a-z]+)?))?\. ')
 NONSPK={'SPEAKER','PRESIDENT','PRESIDING','CLERK','ACTING','VICE','CHAIR','CHAIRMAN','SECRETARY'}
 def upperish(s):
     letters=[c for c in s if c.isalpha()]
     return letters and sum(1 for c in letters if c.isupper())/len(letters)>=0.6
-def parse_pages(texts,chamber_of,date,source,pkg,cur):
+def congress_for_date(date):
+    try:
+        d=datetime.date.fromisoformat(str(date)[:10])
+        congress=(d.year-1789)//2+1
+        return congress-1 if d.year%2==1 and (d.month,d.day)<(1,3) else congress
+    except (TypeError,ValueError): return None
+
+WITNESS_HEAD=re.compile(r'(?im)^\s*(?:STATEMENT|TESTIMONY)\s+OF\s+([^,\n\r]{3,100}),')
+PREPARED_FOLLOWS=re.compile(r'(?i)\[(?:the\s+)?prepared\s+statement\s+of\s+[^\]\r\n]{1,120}?\s+follows:?\]')
+HEARING_END_HEAD=re.compile(
+    r'(?im)^\s*(?:APPENDIX|QUESTIONS\s+SUBMITTED\s+BY\s+MEMBERS\s+POST\s+HEARING|'
+    r'RESPONSES\s+TO\s+QUESTIONS\s+FOR\s+THE\s+RECORD|QUESTIONS\s+FOR\s+THE\s+RECORD|'
+    r'POST[- ]HEARING\s+QUESTIONS)\s*:?[ \t]*$')
+
+_PERSON_NOISE={'THE','HON','HONORABLE','DR','MR','MRS','MS','PROFESSOR','JR','SR','II','III','IV',
+               'MG','BG','LTG','GEN','COL','LTC','USA','USAF','USN','USMC','RET'}
+
+def _person_tokens(name):
+    return [t.upper() for t in re.findall(r"[A-Za-z][A-Za-z'\-]+",name) if t.upper() not in _PERSON_NOISE]
+
+def _header_is_serving_member(head,chamber,congress):
+    toks=_person_tokens(head)
+    if len(toks)<2: return False
+    first,surname=toks[0],toks[-1]
+    chambers=[chamber] if chamber in ('house','senate') else ['house','senate']
+    for ch in chambers:
+        for member in ROSTER.get((surname,ch),[]):
+            if congress and SERVICE and (member,congress,ch) not in SERVICE: continue
+            mt=_person_tokens(member)
+            if len(mt)>=2 and mt[-1]==surname and (mt[0]==first or mt[0][:1]==first[:1] and len(first)==1):
+                return True
+    return False
+
+def witness_surnames(text,chamber=None,congress=None):
+    """Conservative CHRG witness blocklist from standalone testimony headers.
+
+    Anchoring the header matters: ``OPENING STATEMENT OF`` belongs to committee members, while a
+    standalone ``STATEMENT OF NAME, TITLE`` identifies a witness.
+    """
+    out=set()
+    bounds=hearing_qa_bounds(text)
+    pre_q_and_a=text[:bounds[0]] if bounds else text
+    for head in WITNESS_HEAD.findall(pre_q_and_a):
+        toks=_person_tokens(head)
+        # Members sometimes testify briefly before the outside panel (for example, bill sponsors).
+        # The pre-Q&A span already removes that statement; do not block their later live questions.
+        if toks and not _header_is_serving_member(head,chamber,congress): out.add(toks[-1])
+    return out
+
+def hearing_qa_bounds(text):
+    """Return the main ordinary-questioning span, or ``None`` when it cannot be isolated.
+
+    GovInfo hearing HTML contains a front matter/table of contents, opening statements, sequential
+    witness statements, the live question period, and then a written appendix.  We start after the
+    last witness's prepared-statement marker (falling back to the final witness header) and stop at
+    the first appendix heading after that point.  Missing witness structure fails closed.
+    """
+    heads=list(WITNESS_HEAD.finditer(text))
+    if not heads: return None
+    last=heads[-1]
+    follows=[m for m in PREPARED_FOLLOWS.finditer(text,last.start(),min(len(text),last.start()+40000))]
+    start=follows[-1].end() if follows else last.end()
+    ends=[m.start() for m in HEARING_END_HEAD.finditer(text,start)]
+    end=min(ends) if ends else len(text)
+    return (start,end) if end>start else None
+
+def member_service_chamber(member,congress,fallback):
+    if fallback in ('house','senate'): return fallback
+    chambers=sorted({ch for m,c,ch in SERVICE if m==member and c==congress})
+    return chambers[0] if len(chambers)==1 else ''
+
+def parse_pages(texts,chamber_of,date,source,pkg,cur,congress=None):
     rows=0; agg=collections.Counter()
     for fname,txt in texts:
         ch=chamber_of(fname)
-        txt=re.sub(r'<[^>]+>',' ',txt)
+        txt=html.unescape(re.sub(r'<[^>]+>',' ',txt))
         # CHRG-only: hearing witnesses can share a member's surname (Gov. Michael Barr before Rep. Andy
         # Barr) — harvest witness surnames from the STATEMENT OF/TESTIMONY OF headers and EXCLUDE those
         # surnames for this hearing entirely (honest drop beats mis-attribution).
-        wit=set()
+        wit=witness_surnames(txt,ch,congress or congress_for_date(date)) if source=='CHRG' else set()
         if source=='CHRG':
-            for w in re.findall(r'(?:STATEMENT|TESTIMONY) OF ([A-Z][A-Z .,\'\-]{3,60})',txt):
-                toks=[t.strip('.,') for t in w.split() if t.strip('.,').isalpha()]
-                if toks: wit.add(toks[-1].upper())
+            bounds=hearing_qa_bounds(txt)
+            if not bounds: continue
+            txt=txt[bounds[0]:bounds[1]]
         ms=list(TURN.finditer(txt))
         for i,mt in enumerate(ms):
             sur=mt.group(2)
@@ -117,7 +224,7 @@ def parse_pages(texts,chamber_of,date,source,pkg,cur):
             if source!='CHRG' and not upperish(sur): continue
             if sur.upper().split()[0] in NONSPK: continue
             if source=='CHRG' and sur.upper().split()[-1] in wit: continue
-            who=resolve(sur,mt.group(3),ch)
+            who=resolve(sur,mt.group(3),ch,congress or congress_for_date(date))
             if not who: continue
             seg=txt[mt.end():ms[i+1].start() if i+1<len(ms) else min(len(txt),mt.end()+20000)]
             # presiding-officer/clerk interjections aren't the member's words — cut the segment there
@@ -125,18 +232,19 @@ def parse_pages(texts,chamber_of,date,source,pkg,cur):
             seg=re.sub(r'\s+',' ',seg).strip()
             seg=re.sub(r'\[\[Page [^\]]+\]\]','',seg); seg=seg.replace('____________________',' ')
             if len(seg)<150: continue                     # procedural one-liners
+            row_chamber=member_service_chamber(who,congress or congress_for_date(date),ch)
             cur.execute('INSERT INTO speeches VALUES(?,?,?,?,?,?,?)',
-                        (who,date,source,ch or '',pkg,len(seg.split()),seg))
+                        (who,date,source,row_chamber,pkg,len(seg.split()),seg))
             rows+=1; agg[who]+=len(seg.split())
     return rows,agg
 # ---------------- CREC ----------------
 def list_packages(coll,since):
     # offsetMark cursor pagination — plain offset paging 500s on large collections (CHRG)
-    url='https://api.govinfo.gov/collections/%s/%sT00:00:00Z?offsetMark=*&pageSize=1000&api_key=%s'%(coll,since,KEY)
+    url='https://api.govinfo.gov/collections/%s/%sT00:00:00Z?offsetMark=*&pageSize=1000'%(coll,since)
     out=[]
     while url:
-        j=json.loads(get(url)); out+=j.get('packages',[])
-        url=j.get('nextPage'); url=url+'&api_key='+KEY if url and 'api_key' not in url else url
+        j=json.loads(get(url,api_key=KEY)); out+=j.get('packages',[])
+        url=_strip_api_key(j.get('nextPage')) if j.get('nextPage') else None
         time.sleep(0.3)
     return out
 def run_crec(since,until):
@@ -172,7 +280,7 @@ def run_crec(since,until):
             for n in z.namelist():
                 b=os.path.basename(n)
                 if b.endswith('.htm') and ('-PgH' in b or '-PgS' in b):
-                    texts.append((b,z.read(n).decode('utf-8','replace')))
+                    texts.append((b,z.read(n).decode('utf-8','strict')))
             cham=lambda f:'house' if '-PgH' in f else 'senate'
             rows,agg=parse_pages(texts,cham,date,'CREC',pid,cur)
             cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)",('crec:'+pid,'ok',datetime.datetime.now().isoformat()))
@@ -183,6 +291,16 @@ def run_crec(since,until):
             con.commit(); print('  !!',pid,str(e)[:100])
 # ---------------- CHRG (hearings) ----------------
 FINRX=re.compile(r'banking|financial (service|institution|stability)|credit union|monetary|housing|securities|consumer (financial|credit)|capital market|fintech|digital asset|insurance fund',re.I)
+def chrg_scope(pid):
+    m=re.search(r'CHRG-(\d+)([hsj])hrg',pid,re.I)
+    if not m: raise ValueError('unrecognized CHRG package chamber: '+pid)
+    return int(m.group(1)),{'h':'house','s':'senate','j':'joint'}[m.group(2).lower()]
+
+def fetch_chrg_html(pid):
+    """Fetch the original GovInfo HTML directly; the PDF-heavy package zip is unnecessary."""
+    url='https://www.govinfo.gov/content/pkg/%s/html/%s.htm'%(pid,pid)
+    return get(url)
+
 def run_chrg(since,until):
     con=db(); cur=con.cursor()
     pkgs=[p for p in list_packages('CHRG',since) if since<=p['dateIssued']<=until and FINRX.search(p.get('title') or '')]
@@ -196,9 +314,9 @@ def run_chrg(since,until):
             cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)",('chrg:'+pid,'ok',datetime.datetime.now().isoformat()))
             con.commit(); continue
         try:
-            z=zipfile.ZipFile(io.BytesIO(get('https://www.govinfo.gov/content/pkg/%s.zip'%pid,binary=True)))
-            texts=[(os.path.basename(n),z.read(n).decode('utf-8','replace')) for n in z.namelist() if n.endswith('.htm')]
-            rows,agg=parse_pages(texts,lambda f:'',date,'CHRG',pid,cur)
+            congress,hearing_chamber=chrg_scope(pid)
+            texts=[(pid+'.htm',fetch_chrg_html(pid))]
+            rows,agg=parse_pages(texts,lambda f:hearing_chamber,date,'CHRG',pid,cur,congress=congress)
             cur.execute("INSERT OR REPLACE INTO cr_fetch_log VALUES(?,?,?)",('chrg:'+pid,'ok',datetime.datetime.now().isoformat()))
             con.commit()
             print('  %s [%s]: %d member turns'%(pid,(p.get('title') or '')[:60],rows))
@@ -222,9 +340,12 @@ def _keep_awake():
     except Exception as e:
         print('keep-awake unavailable (%s)' % str(e)[:60])
 
-ap=argparse.ArgumentParser(); ap.add_argument('cmd',choices=['crec','chrg','status'])
-ap.add_argument('--since',default='2025-07-01'); ap.add_argument('--until',default=str(datetime.date.today()))
-a=ap.parse_args()
-if a.cmd=='crec': _keep_awake(); run_crec(a.since,a.until); status()
-elif a.cmd=='chrg': _keep_awake(); run_chrg(a.since,a.until); status()
-else: status()
+def main():
+    ap=argparse.ArgumentParser(); ap.add_argument('cmd',choices=['crec','chrg','status'])
+    ap.add_argument('--since',default='2025-07-01'); ap.add_argument('--until',default=str(datetime.date.today()))
+    a=ap.parse_args()
+    if a.cmd=='crec': _keep_awake(); run_crec(a.since,a.until); status()
+    elif a.cmd=='chrg': _keep_awake(); run_chrg(a.since,a.until); status()
+    else: status()
+
+if __name__=='__main__': main()

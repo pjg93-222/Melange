@@ -34,11 +34,10 @@ for m, n in con.execute("select member, count(*) from speeches where source='INT
     if m in C: P[m]['n_interviews'] = n
 for m, n in con.execute("select member, count(distinct package) from speeches where source='INTERVIEW' group by member"):
     if m in C: P[m]['n_interview_programs'] = n
-# CHRG hearing participation (run-4w, user-ratified diligence input): distinct finance-committee
-# hearings the member SPOKE at. Coverage = fetched finance hearings only, so downstream z-scores
-# rank participants among participants; members with zero rows stay ABSENT (neutral), never penalized.
-for m, n in con.execute("select member, count(distinct package) from speeches where source='CHRG' group by member"):
-    if m in C: P[m]['chrg_hearings'] = n
+# CHRG is deliberately absent from the behavioral panel. The legacy collector assigned some
+# witness and wrong-chamber testimony to current members; corpus_integrity_audit.py inventories the
+# quarantined rows. Do not restore hearing participation until CHRG is rebuilt from
+# chamber/tenure-constrained speaker attribution and independently verified.
 
 # tweet volume (labeled corpus)
 tw = collections.Counter()
@@ -120,11 +119,12 @@ for m, d in eh.items():
 from moneyball_core import dump_atomic
 OUTS = ['n_floor_speeches', 'floor_words', 'n_interviews', 'n_interview_programs', 'n_tweets',
         'n_sponsored', 'n_cosponsored', 'cosponsor_degree', 'bipartisanship', 'committee_leader',
-        'votes_cast', 'nominate_extremity', 'vote_share_last', 'chrg_hearings']
+        'votes_cast', 'nominate_extremity', 'vote_share_last']
 cov = {o: sum(1 for m in P if o in P[m]) for o in OUTS}
 dump_atomic({'members': dict(P), 'outcomes': OUTS, 'coverage': cov,
              'note': 'behavioral criterion panel for nomological validation; assembled read-only from '
-                     'existing artifacts; sign predictions pre-registered separately before testing'},
+                     'existing artifacts; sign predictions pre-registered separately before testing; '
+                     'legacy CHRG hearing counts quarantined after attribution-integrity failure'},
             B + r'\behavior_panel.json')
 print('behavior panel: %d members' % len(P))
 for o in OUTS: print('  %-22s coverage %d' % (o, cov[o]))

@@ -19,6 +19,7 @@ import argparse
 import collections
 import csv
 import hashlib
+import html
 import json
 import math
 import os
@@ -46,10 +47,12 @@ TARGET = {'O': 'breadth_z', 'C': 'diligence_z', 'E': 'visibility_z'}
 ALPHAS = [1, 3, 10, 30, 100, 300, 1000]
 SEED = 20260712
 PERMUTATIONS = 4999
+LOWCONF_TOKENS = 1500
 CACHE = os.path.join(B, 'b5_lsa256_package_halves.npz')
 META = os.path.join(B, 'b5_lsa256_package_halves.meta.json')
 REL_OUT = os.path.join(B, 'big5_multimethod_reliability.json')
 OUT = os.path.join(B, 'big5_blue_validated.json')
+INCLUDE_ARCHIVE_SOCIAL = False
 
 RITUAL = re.compile(
     r'\b(i yield (back|to|the floor|myself)[^.]*|mr\.? (president|speaker)|madam (president|speaker)|'
@@ -76,6 +79,63 @@ def package_half(kind, package):
     return 1 + (int(hashlib.sha256(key).hexdigest(), 16) & 1)
 
 
+def _clean_social(text):
+    text = re.sub(r'\s+', ' ', html.unescape(str(text or ''))).strip()
+    return '' if '\ufffd' in text else text
+
+
+def archive_social_packages(con, b2n):
+    """Yield a deduplicated member-authored social stream for the social-v2 candidate.
+
+    The accepted v1 path remains DB Bluesky only.  This opt-in path adds non-repost DB posts plus
+    Quorum Tweet/Facebook rows and direct verified Social Master rows.  It excludes press releases,
+    newsletters, floor/committee statements, letters, and corrupt replacement-character rows.
+    """
+    seen = set()
+    for bg, text in con.execute(
+            "SELECT bioguide,text FROM posts WHERE repost_of IS NULL AND text IS NOT NULL"):
+        member = b2n.get(bg); cleaned = _clean_social(text)
+        if not member or not cleaned: continue
+        digest = hashlib.sha256(cleaned.casefold().encode('utf-8', 'replace')).hexdigest()
+        key = (member, digest)
+        if key in seen: continue
+        seen.add(key); yield member, 'social-text-' + digest, cleaned, 'db_post'
+
+    import openpyxl
+    qp = os.path.join(B, 'Quorum Processed.xlsx')
+    if os.path.exists(qp):
+        wb = openpyxl.load_workbook(qp, read_only=True, data_only=True); ws = wb['Members']
+        rows = ws.iter_rows(values_only=True); hdr = list(next(rows)); ix = {str(v): i for i, v in enumerate(hdr)}
+        for row in rows:
+            member = row[ix['member']]; dtype = str(row[ix['Document Type']] or '')
+            is_rt = str(row[ix['is_rt']] or '').lower()
+            cleaned = _clean_social(row[ix['Content']])
+            if member not in b2n.values() or dtype not in ('Tweet', 'Facebook Post') or is_rt in ('1', 'true') or not cleaned:
+                continue
+            digest = hashlib.sha256(cleaned.casefold().encode('utf-8', 'replace')).hexdigest()
+            key = (member, digest)
+            if key in seen: continue
+            seen.add(key); yield member, 'social-text-' + digest, cleaned, 'quorum_social'
+        wb.close()
+
+    sm = os.path.join(B, 'Social Master.xlsx')
+    if os.path.exists(sm):
+        wb = openpyxl.load_workbook(sm, read_only=True, data_only=True); ws = wb['Corpus']
+        rows = ws.iter_rows(values_only=True); hdr = list(next(rows)); ix = {str(v): i for i, v in enumerate(hdr)}
+        for row in rows:
+            member = row[ix['member']]; source = str(row[ix['source']] or '').lower()
+            platform = str(row[ix['platform']] or '').lower(); verified = str(row[ix['verified_handle']] or '').lower()
+            is_rt = str(row[ix['is_rt']] or '').lower(); cleaned = _clean_social(row[ix['text']])
+            if (member not in b2n.values() or source != 'direct' or platform not in ('x', 'facebook', 'bluesky') or
+                    verified not in ('1', 'true') or is_rt in ('1', 'true') or not cleaned):
+                continue
+            digest = hashlib.sha256(cleaned.casefold().encode('utf-8', 'replace')).hexdigest()
+            key = (member, digest)
+            if key in seen: continue
+            seen.add(key); yield member, 'social-text-' + digest, cleaned, 'social_master_direct'
+        wb.close()
+
+
 def build_package_cache():
     """Build full/h1/h2 LSA-256 vectors with indivisible source packages."""
     b2n = MC.bio2name()
@@ -84,6 +144,10 @@ def build_package_cache():
     # SQLite groups turns by package; each grouped package is appended to exactly one half.
     parts = collections.defaultdict(lambda: {'h1': [], 'h2': []})
     package_counts = {'full': 0, 'h1': 0, 'h2': 0, 'overlap': 0}
+    content_fingerprint = hashlib.sha256()
+    def fingerprint(member, source, package, text):
+        row = json.dumps([member, source, str(package or ''), text], ensure_ascii=False, separators=(',', ':'))
+        content_fingerprint.update(row.encode('utf-8', 'replace')); content_fingerprint.update(b'\n')
     con = sqlite3.connect(os.path.join(B, 'social_media.db'), timeout=60)
     con.execute('PRAGMA query_only=1')
     for member, source, package, text in con.execute(
@@ -92,18 +156,34 @@ def build_package_cache():
             "GROUP BY member,source,package ORDER BY member,source,package"):
         if member and text:
             pkg = str(package)
-            cleaned = RITUAL.sub(' ', text) if source == 'CREC' else text
+            decoded = html.unescape(text)
+            fingerprint(member, source, pkg, decoded)
+            cleaned = RITUAL.sub(' ', decoded) if source == 'CREC' else decoded
             half = package_half(source, pkg)
             parts[(member, source)]['h%d' % half].append(cleaned)
             package_counts['full'] += 1; package_counts['h%d' % half] += 1
-    for bg, post_id, text in con.execute(
-            "SELECT bioguide,post_id,text FROM posts WHERE repost_of IS NULL AND text IS NOT NULL"):
-        member = b2n.get(bg)
-        if member and text:
-            pkg = post_id or hashlib.sha256(text.encode('utf-8', 'replace')).hexdigest()
+    social_sources = collections.Counter()
+    if INCLUDE_ARCHIVE_SOCIAL:
+        social_rows = archive_social_packages(con, b2n)
+        for member, pkg, text, source_name in social_rows:
+            fingerprint(member, 'social', pkg, text)
             half = package_half('social', pkg)
             parts[(member, 'social')]['h%d' % half].append(text)
             package_counts['full'] += 1; package_counts['h%d' % half] += 1
+            social_sources[source_name] += 1
+    else:
+        for bg, post_id, text in con.execute(
+                "SELECT bioguide,post_id,text FROM posts WHERE repost_of IS NULL AND text IS NOT NULL "
+                "ORDER BY bioguide,post_id"):
+            member = b2n.get(bg)
+            cleaned = _clean_social(text)
+            if member and cleaned:
+                pkg = post_id or hashlib.sha256(cleaned.encode('utf-8', 'replace')).hexdigest()
+                fingerprint(member, 'social', pkg, cleaned)
+                half = package_half('social', pkg)
+                parts[(member, 'social')]['h%d' % half].append(cleaned)
+                package_counts['full'] += 1; package_counts['h%d' % half] += 1
+                social_sources['db_post'] += 1
     con.close()
 
     docs = {}
@@ -141,6 +221,10 @@ def build_package_cache():
         'package_assignment': 'SHA256(source|package) parity; package indivisible',
         'package_counts': package_counts, 'shared_packages': 0,
         'social_unit': 'post_id', 'speech_unit': 'source package', 'seed': 7,
+        'archive_social_enabled': INCLUDE_ARCHIVE_SOCIAL,
+        'social_source_counts': dict(social_sources),
+        'builder_version': 'source-primary-v2-html-decoded',
+        'selected_content_sha256': content_fingerprint.hexdigest(),
     }
     dump_atomic(meta, META, indent=1)
     print('package cache: %d member-venue documents | %d source packages | overlap 0' %
@@ -269,19 +353,32 @@ def validation_result():
 
     models, prod_oce = fit_full_models(X, members)
     affective = json.load(open(os.path.join(B, 'affective_n.json'), encoding='utf-8'))['members']
-    v2 = json.load(open(os.path.join(B, 'big5_v2.json'), encoding='utf-8'))['traits']
+    meta = json.load(open(META, encoding='utf-8'))
+    basis_tokens = {
+        member: sum(int(meta['tokens'].get('full|%s|%s' % (member, genre), 0))
+                    for genre in GENRES)
+        for member in members
+    }
+    # O/C/E are available for every member in the common text basis.  A and N have their own,
+    # narrower evidence floors.  Do not intersect the whole five-axis artifact with affective-N:
+    # doing so used to erase otherwise valid O/C/E rows for members whose interview corpus was too
+    # small for N (64 current members in the 2026-07-12 vintage).
     traits = {}
-    for member in sorted(set(members) & set(affective)):
-        n = float(affective[member]); a = prod_a.get(member)
+    for member in sorted(members):
+        n = None if affective.get(member) is None else float(affective[member])
+        a = prod_a.get(member)
         traits[member] = {'O': round(float(prod_oce['O'][member]), 3),
                           'C': round(float(prod_oce['C'][member]), 3),
                           'E': round(float(prod_oce['E'][member]), 3),
                           'A': None if a is None else round(float(a), 3),
-                          'N': round(n, 3), 'ES': round(-n, 3),
-                          'tokens': int(v2.get(member, {}).get('tokens', 0)),
-                          'lowconf': bool(v2.get(member, {}).get('lowconf', False)),
+                          'N': None if n is None else round(n, 3),
+                          'ES': None if n is None else round(-n, 3),
+                          # Coverage metadata must describe the same selected source packages that
+                          # generated this score, not the older pooled lexical-v2 artifact.
+                          'tokens': basis_tokens[member],
+                          'lowconf': basis_tokens[member] < LOWCONF_TOKENS,
                           'a_source': None if a is None else 'inverse_interview_antagonism',
-                          'n_source': 'affective_n'}
+                          'n_source': None if n is None else 'affective_n'}
 
     party = MC.party(); expected = {'O': -1, 'C': 1, 'E': -1, 'A': -1, 'N': -1}
     known = {}

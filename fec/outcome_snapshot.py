@@ -27,14 +27,15 @@ B = MB_ROOT
 def state():
     R = json.load(open(B + r'\member_receptivity.json'))['members']
     P = json.load(open(B + r'\behavior_panel.json'))['members']
-    CS = json.load(open(B + r'\category_stance.json'))['matrix']
+    CS_DOC = json.load(open(B + r'\category_stance.json'))
+    CS = CS_DOC['matrix']; overall_caps=(CS_DOC.get('gate') or {}).get('overall_capped') or {}
     out = {}
     for m in R:
         d = R[m]; p = P.get(m, {})
         out[m] = {'seed_prob': d['seed_prob'], 'pressure_mult': d['pressure_mult'],
                   'retiring': bool(d.get('retiring')),
                   'n_cosponsored': p.get('n_cosponsored'), 'cosponsor_degree': p.get('cosponsor_degree'),
-                  'overall': MC.overall_tier(CS.get(m, {}))}
+                  'overall': MC.overall_tier(CS.get(m, {}),m,overall_caps)}
     return out
 
 def spearman(pairs):
@@ -53,9 +54,7 @@ def spearman(pairs):
     dx = (sum((a - mx) ** 2 for a in rx)) ** 0.5; dy = (sum((b - my) ** 2 for b in ry)) ** 0.5
     return num / (dx * dy) if dx and dy else 0.0
 
-TORDN = {'Champion': 4, 'Defender': 4, 'Ally': 2, 'Highly Persuadable': 1, 'Persuadable': 0.75,
-         'Lean Persuadable': 0.5, 'True Neutral': 0, 'Neutral': 0, 'Lean Skeptic': -1, 'Skeptic': -2,
-         'Highly Skeptical': -3, 'Opponent': -4}
+TORDN = dict(MC.TORD)
 
 if '--freeze' in sys.argv:
     today = datetime.date.today().isoformat()

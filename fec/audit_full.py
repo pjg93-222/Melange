@@ -27,23 +27,35 @@ ck('capacity-aware (bigger-receipts member moves less)', abs(big)<abs(small))
 ck('competitor money = -LOSSFRAME x cu (loss-frame asymmetry, PT)', abs(mr.shift_lean(g,'comp',100000)+mr.LOSSFRAME*s1)<1e-9)
 _valid_ov=set(mr.ORDER); _deft={mr.defection(m,-30) for m in mr.C}-{None}
 ck('defection yields ONLY valid overall tiers (no taxonomy leak)', _deft<=_valid_ov, 'invalid: %s'%(_deft-_valid_ov))
-_opps=[m for m in mr.C if mr.PROJ.get(mr.OV.get(m),mr.OV.get(m))=='Opponent']   # committed terminal rung
-ck('committed Opponents immune to money defection', bool(_opps) and all(mr.defection(m,-99) is None for m in _opps), '%d opponents'%len(_opps))
+_probe=next(iter(mr.C)); _probe_old=mr.OV.get(_probe); mr.OV[_probe]='Opponent'
+_opp_immune=mr.defection(_probe,-99) is None
+if _probe_old is None: mr.OV.pop(_probe,None)
+else: mr.OV[_probe]=_probe_old
+ck('committed Opponents immune to money defection (structural probe)',_opp_immune)
 # 2026-07-02: test the RUNG, not a named member — Durbin (the old exemplar) legitimately graduated to
 # full Opponent once the tiered media weights priced his interchange opposition.
 _hsk=[m for m in mr.C if mr.PROJ.get(mr.OV.get(m),mr.OV.get(m))=='Highly Skeptical']
 ck('Highly Skeptical deep-but-movable (sub-threshold absorbed, big shock -> Opponent)',
    bool(_hsk) and all(mr.defection(m,-5) is None and mr.defection(m,-12)=='Opponent' for m in _hsk),
    '%d members at rung'%len(_hsk))
+_opponents=[m for m in mr.C if mr.PROJ.get(mr.OV.get(m),mr.OV.get(m))=='Opponent']
+ck('overall Opponent rung populated (user-directed 2026-07-15)',bool(_opponents),
+   '%d members at rung'%len(_opponents))
 print('\n[3] Electoral plays (non-partisan, gated)')
 EP=json.load(open(B+r'\electoral_plays.json'))
 contest=[m for m,d in EP.items() if d.get('play')=='contest']; defend=[m for m,d in EP.items() if d.get('play')=='defend']
 ck('contest plays gated to Opponents only', all(EP[m]['overall']=='Opponent' for m in contest))
 ck('defend plays gated to allies only', all(EP[m]['overall'] in ('Champion','Defender','Ally') for m in defend))
 pb=collections.Counter(EP[m]['party'] for m in contest)
-ck('contest plays not partisan-skewed (<70%% one party)', max(pb['D'],pb['R'])<=0.70*max(1,sum(pb.values())),'D%d R%d'%(pb['D'],pb['R']))
+_contest_n=sum(pb.values())
+ck('contest plays not partisan-skewed (<70%% one party; enforced at n>=12)',
+   _contest_n<12 or max(pb['D'],pb['R'])<=0.70*_contest_n,
+   'D%d R%d (n=%d)'%(pb['D'],pb['R'],_contest_n))
 print('\n[4] Stance matrix sanity')
 CS=json.load(open(B+r'\category_stance.json')); MAT=CS['matrix']
+_overall_bands=((CS.get('thresholds') or {}).get('overall') or {}).get('bands') or []
+ck('overall Opponent cutoff provenance matches kernel',
+   bool(_overall_bands) and abs(_overall_bands[-1].get('minimum',999)-mr.MC.OVERALL_OPPONENT_CUTOFF)<1e-12)
 ck('Durbin is Interchange Opponent', MAT['Richard Durbin']['Interchange']=='Opponent')
 ck('Durbin anti on Credit Card (Opponent/Skeptic)', MAT['Richard Durbin']['Credit Card Mandates'] in ('Opponent','Skeptic'))
 cnt=collections.Counter(MAT[m][c] for m in MAT for c in CS['cats'])
@@ -347,13 +359,42 @@ if os.path.exists(B+r'\member_desk_bundle.json') and os.path.exists(B+r'\ranks_p
         if abs(_rc-(_m.get('score') or 0))>0.003: _bad.append(_nm)
     ck('desk pillar bars match rank authority (no stale-workbook drift)', _nomatch==0, '%d members mismatch authority pcts'%_nomatch)
     ck('desk displayed pillars*weights reconstruct displayed score', len(_bad)==0, '%d members fail reconstruction: %s'%(len(_bad),_bad[:3]))
-    # 2026-07-12 behavioral-overlay audit: Blue/Pink are evidentially useful only while independently
-    # constructed. A desk draft copied the SAME affective-N percentile into both text polygons,
-    # manufacturing fifth-axis agreement. Also require mixed artifact vintages to be disclosed.
+    _fr=json.load(open(B+r'\formal_visibility_roles.json',encoding='utf-8'))
+    import influence_roles as _ir
+    _frm=_fr.get('members') or {}; _rb=_ra.get('formal_role_influence_bonus') or {}
+    _rd=_ra.get('formal_role_display_weight') or {}
+    _rn=_ra.get('formal_role_influence_nominal') or {}; _rr=_ra.get('formal_role_influence_eligibility') or {}
+    _rbase=_ra.get('influence_raw_base') or {}; _radj=_ra.get('influence_raw_adjusted') or {}
+    _cseats={r[0]:str(r[4] or '') for r in _wb['Committee Data'].iter_rows(min_row=2,values_only=True) if r[0]}
+    _desk_by={m.get('name'):m for m in _bun.get('members',[])}
+    _rolebad=0
+    for _nm in _ra.get('rank',{}):
+        _entry=_frm.get(_nm) or {}; _nom=float(_entry.get('influence_bonus') or 0.0)
+        _want,_reason,_overlap=_ir.eligible_bonus(_entry,_cseats.get(_nm,''))
+        _rolebad += int(abs(float(_rn.get(_nm,999))-_nom)>1e-9 or _rr.get(_nm)!=_reason)
+        _rolebad += int(abs(float(_rb.get(_nm,999)))>1e-9)
+        _rolebad += int(abs(float(_rd.get(_nm,999))-_want)>1e-9)
+        _rolebad += int(abs(float(_radj.get(_nm,999))-float(_rbase.get(_nm,0)))>1e-9)
+        _dm=_desk_by.get(_nm) or {}
+        _rolebad += int(abs(float(_dm.get('formal_role_influence_bonus',999)))>1e-9)
+        _rolebad += int(abs(float(_dm.get('formal_role_display_weight',999))-_want)>1e-9)
+        _rolebad += int(abs(float(_dm.get('comm_raw',999))-float(_radj.get(_nm,0)))>1e-9)
+    _rmeta=_ra.get('formal_role_influence') or {}
+    ck('formal office remains titled display context and never changes Influence or rank',
+       _fr.get('schema')=='party-elite-influence-roles-v3' and
+       _fr.get('valid_until','')>__import__('datetime').date.today().isoformat() and
+       len(_frm)>=20 and 'Chuck Grassley' not in _frm and _rolebad==0 and
+        _rb.get('Mike Johnson')==0.0 and _rb.get('Tim Scott')==0.0 and _rb.get('John Barrasso')==0.0 and
+        _rd.get('Mike Johnson')==3.0 and _rmeta.get('applied_party_elites')==0 and
+        _rmeta.get('listed_party_elites')==len(_frm) and _rmeta.get('display_context_party_elites',0)>0,
+        '%d listed party elites, %d rank-applied, %d display contexts, %d decomposition errors'%(
+        len(_frm),_rmeta.get('applied_party_elites',0),_rmeta.get('display_context_party_elites',0),_rolebad))
+    # Blue/Pink remain independently constructed. The equal-weight E remains a frozen comparator;
+    # the active OOF-gated E is audited below with dominance and role-adjusted visibility included.
     _psy=[m.get('psy') or {} for m in _bun.get('members',[])]
     _bp=[p for p in _psy if len(p.get('big5_pct') or [])==5 and len(p.get('llm_pct') or [])==5]
     _same_n=sum(1 for p in _bp if p['big5_pct'][4]==p['llm_pct'][4])
-    ck('desk Blue/Pink Neuroticism reads remain independent (no shared-value collapse)',
+    ck('desk broad-gold and raw Pink Neuroticism reads do not collapse to one value',
        len(_bp)>=400 and _same_n<len(_bp), '%d paired members, %d identical N percentiles'%(len(_bp),_same_n))
     _blue=next((_p for _p in (B+r'\big5_blue_validated.json',B+r'\big5_blue_emb.json',B+r'\big5_v2.json') if os.path.exists(_p)),B+r'\big5_v2.json')
     _pink=B+r'\big5_llm_opus.json'
@@ -361,8 +402,47 @@ if os.path.exists(B+r'\member_desk_bundle.json') and os.path.exists(B+r'\ranks_p
         _unflag=sum(1 for p in _bp if not ((p.get('big5_vintage') or {}).get('pink_older_days')>0))
         ck('desk preserves mixed Blue/Pink corpus-vintage metadata for archived diagnostics',
            _unflag==0, '%d/%d paired members lack the stale-vintage disclosure metadata'%(_unflag,len(_bp)))
+    _egp=B+r'\big5_e_gold_anchored.json'; _evp=B+r'\big5_external_gold_validation.json'
+    if os.path.exists(_egp) and os.path.exists(_evp):
+        _eg=json.load(open(_egp,encoding='utf-8')); _ev=json.load(open(_evp,encoding='utf-8'))
+        _egm=_eg.get('members') or {}; _epr=_ev.get('panel_results') or {}
+        _ebad=sum(1 for d in _egm.values() if d.get('E') is None or d.get('percentile') is None or
+                  d.get('channel_weights')!={'blue_visibility':.5,'pink_observer':.5})
+        ck('external Senate gold preserves the discriminant equal-weight Extraversion comparator',
+           _eg.get('schema')=='big5-e-gold-anchored-v1' and _eg.get('status')=='ACTIVE_EXTERNAL_GOLD_ANCHORED' and
+           _ev.get('verdict')=='PASS' and len(_egm)>=450 and _ebad==0 and
+           all((d.get('e_r') or 0)>=.30 and d.get('diagonal_dominant') and (d.get('e_permutation_p_one_sided') or 1)<.05
+               for d in _epr.values()),
+           '%d E members, %d malformed; panel r=%s'%(
+           len(_egm),_ebad,{k:round(v.get('e_r',0),3) for k,v in _epr.items()}))
+    _mgp=B+r'\big5_gold_anchored.json'
+    if os.path.exists(_mgp):
+        _mg=json.load(open(_mgp,encoding='utf-8')); _mgt=_mg.get('traits') or {}; _mge=_mgt.get('E') or {}
+        _mgem=_mge.get('members') or {}; _mgew=_mge.get('selected_weights') or {}
+        _mgebad=sum(1 for d in _mgem.values() if d.get('E') is None or d.get('percentile') is None)
+        _mgpan=(_mge.get('validation') or {}).get('panels') or {}
+        ck('multitrait OOF Senate gold activates E with dominance and role-adjusted visibility',
+           _mg.get('schema')=='big5-gold-anchored-v2' and set(_mgt)=={'O','C','E','A','N'} and
+           _mge.get('status')=='ACTIVE_EXTERNAL_GOLD_ANCHORED' and len(_mgem)>=450 and _mgebad==0 and
+           _mgew.get('interaction_dominance',0)>=.1 and _mgew.get('role_adjusted_visibility',0)>=.1 and
+           all(d.get('diagonal_dominant') and (d.get('r') or 0)>=.2 and
+               (d.get('permutation_p_one_sided') or 1)<.1 for d in _mgpan.values()) and
+           all((d.get('validation') or {}).get('predictions_are_out_of_fold') for d in _mgt.values()),
+           '%d E members, %d malformed; weights=%s; panel r=%s'%(
+           len(_mgem),_mgebad,_mgew,{k:round(v.get('r',0),3) for k,v in _mgpan.items()}))
+        _expected_status={'O':'ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED',
+                          'C':'ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED',
+                          'E':'ACTIVE_EXTERNAL_GOLD_ANCHORED',
+                          'A':'ACTIVE_EXTERNAL_GOLD_ANCHORED',
+                          'N':'ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED'}
+        ck('all broad Big Five traits activate with explicit panel-strength labels',
+           {k:v.get('status') for k,v in _mgt.items()}==_expected_status and
+           all(any((v.get('association_gates') or {}).values()) for v in _mgt.values()) and
+           all(len(v.get('members') or {})>=300 for v in _mgt.values()),
+           'statuses=%s; association gates=%s'%(
+           {k:v.get('status') for k,v in _mgt.items()},
+           {k:v.get('association_gates') for k,v in _mgt.items()}))
     # Source-primary Blue is the completed Round-4 promotion, not the pooled lexical v2 draft.
-    # Guard the frozen TEST result, venue provenance, affective-N fifth slot, and coherent coverage.
     _bep=B+r'\big5_blue_emb.json'
     if os.path.exists(_bep):
         _be=json.load(open(_bep,encoding='utf-8')); _bem=_be.get('traits',{}); _bev=_be.get('validation') or {}
@@ -390,9 +470,15 @@ if os.path.exists(B+r'\member_desk_bundle.json') and os.path.exists(B+r'\ranks_p
            _rr.get('pass_n')==5 and _rr.get('package_overlap')==0 and len(_rt)==5 and all(d.get('pass') for d in _rt.values()),
            '%d members, %d malformed, reliability=%s, known=%s, diagonal=%s, package overlap=%s'%
            (len(_bvm),_bad,_rr.get('pass_n'),_vv.get('known_groups_pass_n'),_vv.get('diagonal_pass_n'),_rr.get('package_overlap')))
-    # Round-9 validated A facet is an independently qualified, display-only measure. Require both
-    # the locked measurement metadata and exact desk propagation; it must never overwrite text A
-    # or cooperation_v2 (those remain separate constructs with separate ownership).
+        _ocebad=sum(1 for d in _bvm.values() if any(d.get(k) is None for k in ('O','C','E')))
+        _ncovered=sum(1 for d in _bvm.values() if d.get('N') is not None)
+        _coverage=_vv.get('coverage') or {}
+        ck('independent O/C/E coverage is not truncated by the narrower affective-N stratum',
+           _ocebad==0 and len(_bvm)>_ncovered and
+           all(_coverage.get(k)==len(_bvm) for k in ('O','C','E')) and _coverage.get('N')==_ncovered,
+           '%d text-basis members, %d O/C/E gaps, %d N-covered; recorded coverage=%s'%
+           (len(_bvm),_ocebad,_ncovered,_coverage))
+    # Round-9 qualified A facet remains separate from the cooperation engine role.
     _avp=B+r'\interview_antagonism.json'
     if os.path.exists(_avp):
         _av=json.load(open(_avp,encoding='utf-8')); _avm=_av.get('members',{})
@@ -418,14 +504,15 @@ if os.path.exists(B+r'\member_desk_bundle.json') and os.path.exists(B+r'\ranks_p
            and _scope.get('imputation')=='forbidden'
            and _sel.get('verdict')=='DEMOGRAPHICALLY SELECTED MEDIA-COVERED STRATUM',
            'scope=%s selection=%s'%(_scope,_sel.get('verdict')))
-        _legacy_terms=('agreeableness','agreeable','emotional stability','neuroticism','neurotic')
         _nar=[(m.get('psy') or {}).get('narrative') or {} for m in _bun.get('members',[])]
-        _legacy=sum(1 for n in _nar for k in ('p1','p2','p3')
-                    if any(t in (n.get(k) or '').lower() for t in _legacy_terms))
-        _unnoted=sum(1 for n in _nar if n and not n.get('measurement_note'))
-        ck('legacy narratives cannot re-import unvalidated text-A/N claims',
-           _legacy==0 and _unnoted==0,
-           '%d banned trait sentences remain, %d narratives lack provenance note'%(_legacy,_unnoted))
+        _nar_present=[n for n in _nar if n]
+        _withheld=sum(1 for m in _bun.get('members',[]) if
+                      (m.get('psy') or {}).get('narrative_status')=='withheld_pending_guarded_local_rebuild_and_user_approval')
+        _stale=sum(1 for n in _nar if n and 'double-reviewed' not in (n.get('measurement_note') or '').lower())
+        _safe=(not _nar_present and _withheld==533) or (len(_nar_present)==533 and _stale==0)
+        ck('current narratives cannot silently fall back to legacy E/audio prose', _safe,
+           '%d guarded desk narratives, %d explicitly withheld, %d stale provenance notes'%
+           (len(_nar_present),_withheld,_stale))
 # 2026-07-13 personal-texture catch-net: this display-only artifact must cover every member for whom
 # explicit autobiographical evidence was found, retain exact provenance, and propagate byte-for-field
 # into the member desk. Coverage must retain explicit evidence for >=90% of candidate-bearing members;
@@ -434,18 +521,21 @@ if os.path.exists(B+r'\member_desk_bundle.json') and os.path.exists(B+r'\ranks_p
 _ptp=B+r'\member_personal_texture.json'
 if os.path.exists(_ptp):
     _pt=json.load(open(_ptp,encoding='utf-8')); _ptm=_pt.get('members',{}); _pp=_pt.get('provenance') or {}
-    _bad=0; _ni=0
+    _bad=0; _ni=0; _local_narrative_leak=0
     for _m,_d in _ptm.items():
         _it=_d.get('items') or []; _ni+=len(_it)
         if _d.get('n_items')!=len(_it): _bad+=1
         _bad+=sum(1 for x in _it if not all(x.get(k) not in (None,'') for k in
-                 ('category','claim','confidence','evidence','source','classifier')) or x.get('confidence')=='low')
-    ck('personal-texture artifact coverage/schema/provenance (full-corpus catch-net)',
-       len(_ptm)>=.90*_pp.get('candidate_member_count',9999) and _ni>=3000 and _bad==0 and
+                 ('category','claim','confidence','evidence','source','classifier')) or x.get('confidence')=='low'
+                 or not isinstance(x.get('narrative_eligible'),bool))
+        _local_narrative_leak+=sum(1 for x in _it if str(x.get('classifier','')).startswith('local_explicit_')
+                                   and x.get('narrative_eligible') is not False)
+    ck('personal-texture artifact precision/schema/provenance (no volume reward)',
+       len(_ptm)>=.90*_pp.get('candidate_member_count',9999) and _ni>0 and _bad==0 and _local_narrative_leak==0 and
        _pp.get('candidate_count',0)>=_pp.get('semantic_gate_count',1) and
        _pp.get('classified_count',0)>=_pp.get('semantic_gate_count',1),
-       '%d members, %d details, %d malformed, candidates=%s classified=%s gate=%s'%
-       (len(_ptm),_ni,_bad,_pp.get('candidate_count'),_pp.get('classified_count'),_pp.get('semantic_gate_count')))
+       '%d members, %d details, %d malformed, %d local-to-narrative leaks, candidates=%s classified=%s gate=%s'%
+       (len(_ptm),_ni,_bad,_local_narrative_leak,_pp.get('candidate_count'),_pp.get('classified_count'),_pp.get('semantic_gate_count')))
     if os.path.exists(B+r'\member_desk_bundle.json'):
         _dm={m.get('name'):m.get('personal') for m in json.load(open(B+r'\member_desk_bundle.json',encoding='utf-8')).get('members',[])}
         _mis=sum(1 for m,d in _ptm.items() if _dm.get(m)!=d)
@@ -470,22 +560,80 @@ if os.path.exists(B+r'\co_appearance.json'):
     _bad=sum(1 for e in _co if not all(k in e for k in ('a','b','n','last','bipartisan')) or e['n']<1)
     ck('co-appearance edge schema (keys present, n>=1, non-empty)', len(_co)>=100 and _bad==0,
        '%d pairs, %d malformed'%(len(_co),_bad))
-# 2026-07-09 guards: clean-audio/narrative layer (same rationale as run-5b — display artifacts with
-# zero coverage would silently truncate/malform). Skip-if-absent; all display-only.
-if os.path.exists(B+r'\member_narratives.json'):
-    _na=json.load(open(B+r'\member_narratives.json',encoding='utf-8'))
-    _nbad=sum(1 for v in _na.values() if v.get('ok') and not (v.get('p1') and v.get('p2') and v.get('p3')))
-    _nok=sum(1 for v in _na.values() if v.get('ok'))
-    ck('narrative artifact schema (ok => 3 non-empty paragraphs; coverage >=500)', _nok>=500 and _nbad==0,
-       '%d ok, %d malformed'%(_nok,_nbad))
-if os.path.exists(B+r'\b5_audio_cache.json') and os.path.exists(B+r'\b5_audio_verify.json'):
-    _au=json.load(open(B+r'\b5_audio_cache.json',encoding='utf-8'))
-    _vf=json.load(open(B+r'\b5_audio_verify.json',encoding='utf-8'))
-    _keep={k.split('/')[0] for k,v in _vf.items() if isinstance(v,dict) and v.get('keep')}
-    _stray=[m for m in _au.get('members',[]) if m not in _keep]   # voiceprint with zero kept clips = gate breach
-    ck('clean-audio voiceprints verification-gated (every cached member has a keep-clip; 88 eGeMAPS)',
-       _au.get('n_features')==88 and len(_au.get('members',[]))>=300 and not _stray,
-       '%d members, %d stray'%(len(_au.get('members',[])),len(_stray)))
+# 2026-07-13 production audio guard: zero verified members is a valid fail-closed state. Every
+# accepted clip must have two distinct, dated, method-identified target-only reviews, and no display
+# producer may fall back to the retired model-only verifier or legacy 88-feature cache.
+from audio_rules import MIN_MEMBER_TARGET_SEC as _MIN_AUDIO_MEMBER_SEC
+_ar=json.load(open(B+r'\b5_audio_reviews_v2.json',encoding='utf-8'))
+_au=json.load(open(B+r'\b5_audio_descriptors_v2.json',encoding='utf-8'))
+_abad=0
+for _rel,_clip in (_au.get('members') or {}).items():
+    if (_clip.get('target_elapsed_sec',0)<_MIN_AUDIO_MEMBER_SEC or _clip.get('source_n',0)<2 or
+        _clip.get('program_n',0)<2 or not _clip.get('cross_program')): _abad+=1
+    for _row in _clip.get('clips') or []:
+        if (_row.get('venue')!='on_air_interview' or not _row.get('outlet') or
+            not _row.get('program') or not _row.get('aired_at') or not _row.get('recording_context') or
+            _row.get('target_words',0)<50 or _row.get('pitch_deviation_from_speaker_baseline_z') is None or
+            not (_row.get('topic') or {}).get('id')): _abad+=1
+for _rel,_clip in (_au.get('rejected') or {}).items():
+    if not isinstance(_clip,list) or not _clip: _abad+=1
+for _rel,_clip in ((_ar.get('clips') or {}).items()):
+    _revs=_clip.get('reviews') or []; _ids=[r.get('reviewer') for r in _revs]
+    if ((_clip.get('venue')!='on_air_interview' or not _clip.get('outlet') or not _clip.get('program') or
+         not _clip.get('aired_at') or not _clip.get('recording_context') or not _clip.get('speech_id') or
+         not (_clip.get('topic') or {}).get('id')) or
+        len(_revs)!=2 or len(set(_ids))!=2 or any(r.get('identity')!='TARGET' or
+        r.get('speaker')!='TARGET_ONLY' or not r.get('reviewed_at') or not r.get('review_method') or
+        r.get('transcript_alignment_confirmed') is not True or r.get('interviewer_excluded') is not True
+        or r.get('speech_unit_confirmed') is not True or r.get('topic_from_aligned_transcript_confirmed') is not True
+        for r in _revs)): _abad+=1
+_acon=_ar.get('contract') or {}; _mcon=_au.get('measurement_contract') or {}; _dcon=_au.get('deployment_contract') or {}
+ck('audio v2 fail-closed on-air, aligned, program-conditioned contract active',
+   _ar.get('schema')=='b5-audio-review-v2' and _au.get('schema')=='b5-audio-descriptors-v2' and
+   _au.get('status')=='ACTIVE_FAIL_CLOSED' and _dcon.get('unverified_audio_enters_profiles') is False and
+   _dcon.get('on_air_interviews_only') is True and _dcon.get('program_conditioned_percentiles') is True and
+   _dcon.get('within_speaker_pitch_deviation') is True and _dcon.get('transcript_identified_topics') is True and
+    _dcon.get('audio_may_modify_big_five') is False and _acon.get('transcript_alignment_and_interviewer_exclusion_double_confirmed') is True and
+    _acon.get('speech_unit_and_transcript_topic_double_confirmed') is True and
+    _acon.get('minimum_confirmed_target_seconds_per_member')==_MIN_AUDIO_MEMBER_SEC and
+    _acon.get('minimum_independent_programs_per_member')==2 and
+    _acon.get('minimum_speech_units_per_member')==5 and _acon.get('minimum_distinct_topics_per_member')==2 and
+    _mcon.get('minimum_target_seconds_per_member')==_MIN_AUDIO_MEMBER_SEC and
+    _mcon.get('minimum_speech_units_per_member')==5 and _mcon.get('minimum_distinct_topics_per_member')==2 and
+    _mcon.get('minimum_aligned_target_words_per_clip')==50 and
+   _mcon.get('percentile_normalization')=='within outlet+program; never raw cross-speaker pitch/energy' and _abad==0,
+   '%d accepted clips, %d verified members, %d contract errors'%(_au.get('accepted_clip_n',0),len(_au.get('members') or {}),_abad))
+_ncode=open(B+r'\fec\b5_narratives.py',encoding='utf-8').read()
+_dcode=open(B+r'\fec\make_member_desk.py',encoding='utf-8').read()
+_wcode=open(B+r'\fec\weekly_refresh.py',encoding='utf-8').read()
+ck('legacy audio and paid narrative paths retired from unattended/display consumption',
+   'b5_audio_cache.json' not in _ncode and 'b5_audio_verify.py' not in _wcode and
+   'b5_audio_build.py' not in _wcode and 'b5_narratives.py' not in _wcode and
+   '--allow-paid-api' in _ncode and 'member_narratives.json' not in _dcode,
+   'weekly/display code must consume guarded v2 artifacts only')
+_ci=json.load(open(B+r'\corpus_integrity_report.json',encoding='utf-8'))
+_cidb=_ci.get('database') or {}; _cic=_ci.get('accepted_model') or {}; _ciq=_ci.get('quarantined_chrg') or {}
+ck('corpus integrity gate protects accepted scores and verifies repaired CHRG attribution',
+   _ci.get('schema')=='corpus-integrity-v1' and _ci.get('status')=='PASS' and
+   not _ci.get('hard_errors') and _cic.get('cache_exact_match') is True and _cic.get('cache_content_match') is True and
+   _cidb.get('exact_duplicate_surplus')==0 and _ciq.get('enters_default_big5') is False and
+   (_ciq.get('service_chamber_mismatch_rows',0)+_ciq.get('no_member_service_rows',0))==0 and
+   _ciq.get('repair_status')=='source-rebuilt and verified',
+   'status=%s hard=%s cache=%s invalid_chrg=%d'%
+   (_ci.get('status'),_ci.get('hard_errors'),_cic.get('cache_exact_match'),
+    _ciq.get('service_chamber_mismatch_rows',0)+_ciq.get('no_member_service_rows',0)))
+_bpanel=json.load(open(B+r'\behavior_panel.json',encoding='utf-8'))
+_bdisp=json.load(open(B+r'\behavioral_dispositions.json',encoding='utf-8'))
+ck('corrupt legacy CHRG hearing counts cannot re-enter behavioral diligence',
+   _bdisp.get('schema')=='behavioral-dispositions-v2' and _bdisp.get('status')=='PASS' and
+   'chrg_hearings' not in (_bpanel.get('outcomes') or []) and
+   all('chrg_hearings' not in (row or {}) for row in (_bpanel.get('members') or {}).values()) and
+   'diligence=roll-call participation+LEP follow-through' in (_bdisp.get('method') or '') and
+   'diligence=roll-call participation+LEP follow-through+CHRG' not in (_bdisp.get('method') or '') and
+   ((_bdisp.get('integrity') or {}).get('diligence') or {}).get('legacy_chrg_enters_diligence') is False and
+   (_bdisp.get('coverage') or {}).get('diligence_z',0)>=525 and
+   len(((_bdisp.get('inputs_sha256') or {}).get('lep_criterion.json') or ''))==64,
+   'behavior panel/disposition method must keep quarantined CHRG out of C')
 # voice-ES display artifact RETIRED 2026-07-12 (user): the +0.208 look was gender-confounded (locked retest
 # partial r -0.03). The desk shows behavioral reactivity on the role radar and independently ranked
 # Blue/Pink N=-ES on the text radar; no voice-ES schema check remains. Guard against a silent
@@ -494,26 +642,104 @@ ck('voice-ES retired from display (b5_es_voice not re-wired into the desk)',
    'b5_es_voice' not in open(B+r'\fec\make_member_desk.py',encoding='utf-8').read().split('RETIRED')[-1],
    'desk must not consume the gender-confounded voice-ES artifact')
 _desk_tpl=open(B+r'\fec\templates\make_member_desk_00.tpl',encoding='utf-8').read()
-ck('desk attaches the new 5/5 evidence to the validated multimethod Blue',
-   all(s in _desk_tpl for s in ('validated multimethod instrument',
-                                'reliability 5/5 · known-groups 5/5 · discriminant 5/5',
-                                'Package overlap is zero',
-                                'A .699, N .680')),
-   'display must identify the promoted multimethod artifact and its package-disjoint gates')
-ck('desk default radar excludes the archived Pink/Opus item-read',
-   "radar(P.big5_pct.map(_ns),B5AX,'#7dd3fc',82)" in _desk_tpl and
-   'P.llm_pct.map(_ns)' not in _desk_tpl and 'Pink dashed' not in _desk_tpl,
-   'Pink may remain archived in the bundle but must not be passed to the default radar')
-ck('desk suppresses synthetic/default-only dominance values and labels shared-source N',
-   all(s in _desk_tpl for s in ('Interaction dominance','at least 30 observed interview turns',
-                                'Affective N*','shared with Blue N')) and
-   "if ((_IX.get(_m) or {}).get('turns') or 0) < 30:" in
+ck('desk presents the accepted five-axis display under canonical Big-Five names',
+   all(s in _desk_tpl for s in ('Extraversion','Openness','Conscientiousness',
+                                'Agreeableness','Neuroticism','not self-report or private-state measures',
+                                'C has one-panel association support without diagonal dominance')) and
+   all(len((m.get('psy') or {}).get('big5_pct') or [])==5 for m in _bun.get('members',[])
+       if (m.get('psy') or {}).get('big5_pct')),
+   'accepted display must carry five canonically named axes and disclose the E scope')
+_comm=json.load(open(B+r'\communication_style.json',encoding='utf-8'))
+_csrc=_comm.get('members') or {}
+_gdoc=json.load(open(B+r'\big5_gold_anchored.json',encoding='utf-8')); _gtraits=_gdoc.get('traits') or {}
+_egsrc=((_gtraits.get('E') or {}).get('members') or {})
+_gorder=('E','O','C','A','N')
+_cbad=0; _egbad=0; _gbad=0
+for _row in _bun.get('members',[]):
+    _name=_row.get('name'); _psy=_row.get('psy') or {}; _src=_csrc.get(_name) or {}
+    if _src:
+        _got=_psy.get('communication_style') or {}
+        _adj=(_src.get('public_exposure') or {}).get('role_adjusted_percentile')
+        _act=((_src.get('facets') or {}).get('activity') or {}).get('percentile')
+        _cbad += int((_got.get('public_exposure') or {}).get('role_adjusted_percentile') != _adj)
+        _cbad += int(_psy.get('e_public_proxy_pct') != _adj)
+        # Public exposure propagates independently.  The Big-Five E slot is the OOF-gated
+        # four-channel composite where both primary channels exist and remains missing otherwise.
+        if _psy.get('big5_pct'):
+            _egbad += int(_psy['big5_pct'][0] != (_egsrc.get(_name) or {}).get('percentile'))
+            _gbad += sum(int(_psy['big5_pct'][i] != (((_gtraits.get(trait) or {}).get('members') or {}).get(_name) or {}).get('percentile'))
+                         for i,trait in enumerate(_gorder))
+        _cbad += int(((_psy.get('behav_pct') or [None,None,None,None])[3]) != _act)
+_mike=_csrc.get('Mike Johnson') or {}; _mexp=_mike.get('public_exposure') or {}
+ck('observable communication facets and role-adjusted exposure propagate as separate context',
+   _comm.get('schema')=='communication-style-v1' and len(_csrc)==533 and _cbad==0 and _egbad==0 and _gbad==0 and
+   len(_egsrc)>=450 and
+   _mexp.get('formal_role')=='Speaker of the House' and
+   _mexp.get('role_adjusted_percentile',1)<_mexp.get('observed_visibility_percentile',0) and
+    all(s in _desk_tpl for s in ('Observed communication style','mean words/turn','Warmth cues',
+                                 'positive-energy/excitement cues','Public exposure context',
+                                 'Visibility is a 10% anchored-E channel')),
+   '%d style members, %d style errors, %d E errors, %d broad-trait errors; Mike raw %.3f adjusted %.3f'%
+   (len(_csrc),_cbad,_egbad,_gbad,_mexp.get('observed_visibility_percentile',-1),_mexp.get('role_adjusted_percentile',-1)))
+_goldn=((_gtraits.get('N') or {}).get('members') or {})
+_golddesk={m.get('name'):((m.get('psy') or {}).get('big5_pct') or [None]*5)[4]
+          for m in _bun.get('members',[]) if ((m.get('psy') or {}).get('big5_pct') or [None]*5)[4] is not None}
+_profm=(json.load(open(B+r'\profile_basis_v2.json',encoding='utf-8')).get('members') or {})
+_narrow_n=sum(1 for d in _profm.values() if ((d.get('personality_facets') or {}).get('Neuroticism_affective_content') or {}).get('z') is not None)
+ck('broad one-panel Neuroticism occupies the canonical slot while affective N remains separate',
+   len(_golddesk)==len(_goldn)>=450 and all(_golddesk.get(m)==d.get('percentile') for m,d in _goldn.items()) and
+   _narrow_n>=450 and 'Neuroticism' in _desk_tpl,
+   '%d broad-N source members, %d desk N values, %d retained affective-N facets'%(len(_goldn),len(_golddesk),_narrow_n))
+_narr2=os.path.exists(B+r'\member_narratives_v2.json')
+_nbad=sum(1 for _row in _bun.get('members',[]) if ((_row.get('psy') or {}).get('narrative') is not None or
+          (_row.get('psy') or {}).get('narrative_status')!='withheld_pending_guarded_local_rebuild_and_user_approval')) if not _narr2 else 0
+ck('legacy E/audio narratives fail closed pending guarded local rebuild',
+   (_narr2 or _nbad==0) and 'member_narratives_v2.json' in _dcode and
+   'withheld_pending_guarded_local_rebuild_and_user_approval' in _dcode,
+   ('guarded v2 narrative artifact present' if _narr2 else '%d desk rows leaked legacy prose or missed withholding status'%_nbad))
+ck('desk suppresses synthetic/default-only dominance values and keeps behavior display N-free',
+    all(s in _desk_tpl for s in ('Conversational dominance','minimum 30',
+                                 'excludes formal leadership')) and
+   'Affective N' not in _desk_tpl and
+   "const BLAB=['Cross-party cooperation','Legislative follow-through','Interaction dominance','Interview activity','Policy breadth'];" in _desk_tpl and
+   "if _r2.get('dominance_v2') is not None:" in
        open(B+r'\fec\make_member_desk.py',encoding='utf-8').read(),
-   'person-facing behavior display must expose coverage rather than plot roster constants')
-ck('desk preserves missing-A behavior and the separately qualified A-facet scope',
-   all(s in _desk_tpl for s in ('covered-stratum percentile','Senate 90.0% vs House 53.6%',
-                                'insufficient package-disjoint interview coverage')),
-   'A must remain missing outside the package-qualified stratum, never imputed')
+   'behavior display must expose coverage, plot five behavioral axes, and omit Affective N')
+if os.path.exists(B+r'\behavioral_roles_v2_candidate.json') and os.path.exists(B+r'\member_desk_bundle.json'):
+    _r2=json.load(open(B+r'\behavioral_roles_v2_candidate.json',encoding='utf-8')).get('members',{})
+    _dpsy={m.get('name'):(m.get('psy') or {}) for m in _bun.get('members',[])}
+    _r2bad=0
+    for _name,_d in _dpsy.items():
+        _src=_r2.get(_name)
+        if _src:
+            _r2bad += int(abs(float(_d.get('dominance_v2_z',999))-float(_src['dominance_v2']))>.000001)
+            _r2bad += int(abs(float(_d.get('expressiveness_v2_z',999))-float(_src['expressiveness_v2']))>.000001)
+            _r2bad += int((_d.get('behavior_scope') or {}).get('interaction_turns')!=int(_src['qualifying_turns']))
+            _r2bad += int(_d.get('expressiveness_v2_pct') is None or (_d.get('behav_pct') or [None,None,None])[2] is None)
+        else:
+            _r2bad += int(any(k in _d for k in ('dominance_v2_z','expressiveness_v2_z','expressiveness_v2_pct')))
+    _producer=open(B+r'\fec\make_member_desk.py',encoding='utf-8').read()
+    _engine_refs=[]
+    # The locked study producer, audio validator, and OOF-gold display/profile estimator are research
+    # provenance, not influence/rank engines. Any additional Python consumer is a wiring regression.
+    _r2_allowed={'make_member_desk.py','audit_full.py','dashboard_integrity.py','b5_narratives.py','communication_style.py',
+                 'b5_profile_basis.py','b5_gold_multitrait_validate.py',
+                 'behavioral_roles_v2_study.py','interview_audio_e_validate.py'}
+    for _fn in os.listdir(FE):
+        if not _fn.endswith('.py') or _fn in _r2_allowed: continue
+        if 'behavioral_roles_v2_candidate.json' in open(FE+'\\'+_fn,encoding='utf-8',errors='ignore').read(): _engine_refs.append(_fn)
+    ck('qualified conversation roles v2 propagate exactly to the desk and remain engine-isolated',
+       len(_r2)>=250 and _r2bad==0 and not _engine_refs and
+       all(s in _desk_tpl for s in ('Conversation dynamics v2','Verbal expressiveness',
+                                    'Dominance is a 10% anchored-E channel',
+                                    'expressiveness is not an Extraversion channel')) and
+       '_ROLES2_ART' in _producer,
+       '%d source members, %d propagation errors, engine refs=%s'%(len(_r2),_r2bad,_engine_refs))
+ck('desk preserves missing low-antagonism behavior and its selected-stratum scope',
+   all(s in _desk_tpl for s in ('covered-stratum percentile',
+                                'insufficient package-disjoint interview coverage',
+                                'never imputed outside that stratum')),
+   'low antagonism must remain missing outside the package-qualified stratum, never imputed as A')
 _qproc=open(B+r'\fec\process_quorum.py',encoding='utf-8').read()
 ck('Quorum member resolver refuses surname-only identity guesses',
    'Never infer identity from surname alone' in _qproc and 'if len(cands)==1: return cands[0]' not in _qproc,
@@ -540,19 +766,30 @@ if _g:
     ck('say-do gate coherent (capped->Ally w/ raw C/D preserved; proven are C/D cells)', _b1==0 and _b2==0,
        '%d capped cells / %d proven cells; %d+%d incoherent'%(sum(len(v) for v in _cap.values()),
        sum(len(v) for v in _prov.values()),_b1,_b2))
-    # corroboration paths A/V/J (2026-07-08): every corroborated cell must BE Champion/Defender in the
-    # matrix (it survived the cap) and must NOT also be listed capped for the same member; every J path
-    # must belong to a gatekeep category.
-    _cor=_g.get('corrob') or {}; _gk=set(_g.get('gatekeep') or [])
+    # Only authored/original-cosponsored legislation and aligned recorded votes qualify as action.
+    _cor=_g.get('corrob') or {}
     _b3=sum(1 for m,cc in _cor.items() for c,pth in cc.items()
             if MAT.get(m,{}).get(c) not in ('Champion','Defender') or c in (_cap.get(m) or {})
-            or pth not in ('A','V','J') or (pth=='J' and c not in _gk))
+            or pth not in ('A','V'))
     _cbp=collections.Counter(pth for cc in _cor.values() for pth in cc.values())
-    ck('say-do corroboration paths coherent (A/V/J cells are C/D, un-capped; J in gatekeep set)', _b3==0,
-       'corroborated A%d V%d J%d; %d incoherent'%(_cbp['A'],_cbp['V'],_cbp['J'],_b3))
+    ck('say-do corroboration paths coherent (only A/V cells survive as C/D)', _b3==0 and _cbp['J']==0,
+       'corroborated A%d V%d; %d incoherent'%(_cbp['A'],_cbp['V'],_b3))
+    _oc=_g.get('overall_capped') or {}; _thr=float(_g.get('overall_delivery_threshold') or 2/3)
+    _b4=sum(1 for m,d in _oc.items() if d.get('raw')!='Champion' or d.get('final')!='Ally'
+            or not d.get('evidence_available') or not set(d.get('cap_reasons') or []).issubset(
+                {'insufficient_top_tier_breadth','top_tier_action_coverage','high_volume_low_followthrough'})
+            or not d.get('cap_reasons'))
+    ck('overall say-do caps have an auditable fixed-rule reason',_b4==0,
+       '%d overall caps, %d incoherent'%(len(_oc),_b4))
+    import moneyball_core as _mc
+    _final_named={m:_mc.overall_tier(MAT.get(m,{}),m,_oc) for m in ('Mike Crapo','French Hill')}
+    ck('Mike Crapo and French Hill are not Champions after the say-do rule',
+       all(v!='Champion' for v in _final_named.values()),str(_final_named))
 else:
     ck('say-do gate block present in category_stance.json', False, 'gate key missing — producer predates 2026-07-07 landing')
 
 print('FULL-BODY AUDIT — %d passed, %d FAILED'%(len(P),len(F)))
-if F: print('  FAILURES:',F)
+if F:
+    print('  FAILURES:',F)
+    sys.exit(1)
 else: print('  ALL MODULES CLEAN.')

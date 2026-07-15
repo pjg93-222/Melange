@@ -26,7 +26,8 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import numpy as np
 import hearing_antagonism_build as HB
 
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+from paths import ROOT
+B = ROOT
 GATE = {'G1_SB': 0.55, 'G2_R2': 0.15, 'G3_maxr': 0.50, 'G5_disp_n': 150, 'G5_corr': 0.50}
 
 def r2_multi(y, Xcols):

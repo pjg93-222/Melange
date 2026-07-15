@@ -9,8 +9,9 @@ WJ-only agreement). Prompt focuses the LLM on how the member handles being PRESS
 their interviews, so a friendly-venue corpus doesn't just read as 'calm'. NO engine change here."""
 import os, sys, json, sqlite3, collections
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-SCRATCH = r'C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-clever-elbakyan-15fa11\4551680e-cf3a-40bd-ba1a-4c2b67b144b0\scratchpad'
+from paths import ROOT
+B = ROOT
+SCRATCH = os.environ.get('MONEYBALL_RESEARCH_DIR',os.path.join(B,'outputs','research'))
 CAP = 12000
 
 def run():

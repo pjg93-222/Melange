@@ -18,7 +18,7 @@ Merge key: URL.  Conflict policy (the 95 overlap articles): if the two user labe
   and EVERY conflict is flagged in `conflict` for the user's eyes — nothing is silently resolved.
 Split assignment: augmented rows keep the user's split; queue-only rows get split='goldeval' so the
 balanced eval set can never contaminate training.  Writes cu_golden_labels.csv."""
-import csv, io, sys, collections
+import csv, io, sys, collections, os
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl
 B=MB_ROOT
@@ -29,7 +29,9 @@ for r in csv.DictReader(open(DS+r'\cu_stance_label_set.csv',encoding='utf-8-sig'
     u=norm(r.get('url'))
     if u: snip[u]=r.get('text_snippet') or ''
 # 1) AUGMENTED workbook
-wb=openpyxl.load_workbook(r'C:\Users\pgoff\Downloads\cu_stance_label_set_AUGMENTED.xlsx',read_only=True,data_only=True)
+from paths import ROOT
+source=os.environ.get('STANCE_LABEL_SET',os.path.join(ROOT,'source_data','cu_stance_label_set_AUGMENTED.xlsx'))
+wb=openpyxl.load_workbook(source,read_only=True,data_only=True)
 ws=wb['Labels (augmented)']; rows=list(ws.iter_rows(values_only=True))
 ix={str(h):i for i,h in enumerate(rows[0])}
 g=lambda r,k: norm(r[ix[k]]) if k in ix else ''

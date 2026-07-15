@@ -18,7 +18,8 @@ PRE-REGISTERED BARS (locked before first scoring run; Spearman):
   A: rho <= -0.20 PASS | (-0.20,-0.10] directional | (-0.10,+0.10) null | >= +0.10 CONTRARY
   B: rho >= +0.30 convergent PASS | [+0.15,+0.30) weak | < +0.15 null
 Bonus (no hypothesis): stores dwnom1 per member — the DW-NOMINATE node attribute the user's
-Gaynor/Bonica bib notes ask for. Diagnostic only: writes lep_criterion.json; chain consumes nothing.
+Gaynor/Bonica bib notes ask for. The static follow-through component is consumed by
+behavioral_dispositions.py; it never enters rank directly.
 Data: fec/lep/*.dta (gitignored, like fec/liwc/rkh/); refresh via thelawmakers.org data page."""
 import json, sys, os
 import moneyball_core as MBC
@@ -125,12 +126,16 @@ print('\nceremonial-share distribution: %d members, %.0f%% zeros, median %.1f%%,
       % (nshare, zpct, 100 * (dist['median'] or 0), 100 * (dist['p90'] or 0)))
 print('  carry few V-W ceremonial bills (House banned commemoratives in 1995), so rank tests are ATTENUATED')
 print("  vs RKH's 104th-112th binomial setting — a null here is informative but not decisive.")
-dump_atomic({'window': list(WINDOW), 'min_bills': MINBILLS, 'members_matched': len(per),
+dump_atomic({'schema': 'lep-criterion-v2', 'status': 'ACTIVE_STATIC_CRITERION',
+    'window': list(WINDOW), 'min_bills': MINBILLS, 'members_matched': len(per),
     'members_with_share': nshare,
     'prereg_bars': {'A': 'rho<=-0.20 PASS | <=-0.10 directional | (-0.10,0.10) null | >=+0.10 contrary',
                     'B': 'rho>=+0.30 PASS | >=+0.15 weak | else null'},
     'share_distribution': dist,
     'results_A_ceremonial_vs_C': resA, 'results_B_les_vs_score': resB, 'per_member': per,
-    'provenance': 'CEL/Volden-Wiseman LES 93-118 (classic counts, methodology-1); RKH PSRM 2016 Table-3 paper-exact C criterion; diagnostic layer, chain does NOT consume'},
+    'consumers': ['behavioral_dispositions.py', 'make_member_desk.py', 'say_do_gap.py'],
+    'provenance': ('CEL/Volden-Wiseman LES 93-118 (classic counts, methodology-1); RKH PSRM 2016 '
+                   'Table-3 paper-exact C criterion; static through the 118th; consumed as one '
+                   'legislative-follow-through component but never directly as a rank input')},
     B + r'\lep_criterion.json')
 print('\nwrote lep_criterion.json (%d members matched, %d with ceremonial share; dwnom1 stored per member as node-attribute bonus)' % (len(per), nshare))

@@ -1,23 +1,13 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
 import openpyxl,json,sys,glob,os,collections
+from member_identity import Resolver
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 LELEV=float(os.environ.get('LELEV','0.8'))   # electoral-leverage strength (competitive seats are cheaper to move)
 members=[m['member'] for m in json.load(open(B+r'\congestion.json'))]
-mset=set(members); bylast=collections.defaultdict(list)
-for n in members: bylast[n.split()[-1].lower()].append(n)
-def match(nm):
-    if nm in mset: return nm
-    t=str(nm).replace(',',' ').replace('.',' ').split()
-    if not t: return None
-    c=bylast.get(t[-1].lower())
-    if not c: return None
-    if len(c)==1: return c[0]
-    fi=t[0][0].lower()
-    for cand in c:
-        if cand.split()[0][0].lower()==fi: return cand
-    return c[0]
+_resolver=Resolver(members)
+def match(nm): return _resolver.resolve(nm)
 _bpc=glob.glob(B+r'\Ballotpedia_119th_CU_Influence_*.xlsx')+glob.glob(B+r'\archive\Ballotpedia_119th_CU_Influence_*.xlsx')
 bp=sorted(_bpc,key=os.path.basename)[-1]   # newest by filename timestamp (file may live in archive/ after cleanup)
 ws=openpyxl.load_workbook(bp,data_only=True,read_only=True)['Members']

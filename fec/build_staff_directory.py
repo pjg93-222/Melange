@@ -19,7 +19,7 @@ sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl
 import moneyball_core as MC
 B=MB_ROOT
-SRC=os.environ.get('STAFF_SRC',r'C:\Users\pgoff\Downloads')
+SRC=os.environ.get('STAFF_SRC',os.path.join(MB_ROOT,'source_data','staff'))
 FILES=sorted(glob.glob(SRC+r'\search-results-generated-by-quorum (4[5-9]).xlsx'))+ \
       sorted(glob.glob(SRC+r'\search-results-generated-by-quorum (5[0-2]).xlsx'))
 def fold(s): return unicodedata.normalize('NFKD',str(s)).encode('ascii','ignore').decode().lower().strip()
@@ -80,6 +80,13 @@ CUDOM={'Banking','Financial Services','Credit Unions','Tax','Economy','Housing',
  'Insurance','Treasury','Small Business','Consumer Protection'}
 def title_domains(t):
     return [lbl for lbl,rx in DOMRX if rx.search(t)][:8]
+def validate_staff_rows(staff_rows):
+    """Reject incomplete identity rows; a staffer title is required, never fabricated."""
+    if not staff_rows:
+        raise ValueError('no staff rows loaded; refusing to overwrite the existing directory')
+    missing=[str(q) for q,s in staff_rows.items() if not str(s.get('t') or '').strip()]
+    if missing:
+        raise ValueError('staff directory row(s) missing title: '+', '.join(missing[:20]))
 rows={}; unmatched=collections.Counter(); n_qdom=0
 for f in FILES:
     ws=openpyxl.load_workbook(f,read_only=True).active
@@ -108,6 +115,7 @@ for f in FILES:
             d['dom']=dom; d['dsrc']='quorum' if qdom else 'title'
             if qdom: n_qdom+=1
         rows[q]=d
+validate_staff_rows(rows)
 out=collections.defaultdict(list)
 ORDER={'chief of staff':0,'legislative director':1,'deputy chief of staff':2,'communications director':3,
        'legislative assistant':4,'senior legislative assistant':4,'legislative counsel':4,'tax policy advisor':4,

@@ -76,6 +76,7 @@ if __name__=='__main__':
     cnt=0
     for m in sorted(C,key=lambda x:-(C[x].get('receipts') or 0),reverse=True):
         d=shift_lean(m,'comp',250000); nw=defection(m,d)
-        if nw and OV.get(m) in ('Ally','Highly Persuadable','True Neutral','Neutral','Lean Skeptic'):
+        if nw and OV.get(m) in ('Ally','Highly Persuadable','Persuadable','Lean Persuadable',
+                                'True Neutral','Neutral','Lean Skeptic'):
             print('   %-24s [%s] comp+$250k (lean %+.1f) -> defects to %s'%(m,OV.get(m),d,nw)); cnt+=1
         if cnt>=8: break

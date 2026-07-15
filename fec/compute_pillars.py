@@ -7,7 +7,7 @@ Python computes the ENTIRE rank chain from raw inputs; the workbook is a self-re
 
   Press Release - Raw ──(pos/neg-max normalization, Python: moneyball_core.press_matrix)──> normalized
   normalized × row-535 tiered weights (user dial literals) ──> press pillar
-  Press% = pillar/max · Influence% = E/max · Leg% = PERCENTRANK(O,5) · Demo% = PERCENTRANK(F,5)
+  Press% = pillar/max · Influence% = committee E/max · Leg% = PERCENTRANK(O,5) · Demo% = PERCENTRANK(F,5)
   Score  = AB2·Leg% + AB3·Press% + AB4·Influence% + AB5·Demo%   (AB weights read live — user dials)
   Rank   = descending competition rank
 
@@ -18,13 +18,15 @@ MODES
             (moneyball_core.scores()/ranks()); also reports view coherence informationally.
   (none)  : audit mode. If the workbook's cached formula results are COHERENT with its raw inputs
             (i.e. Excel recalculated since the last raw write), enforce EXACT parity — the
-            formula-drift tripwire. If the view is stale (expected between pipeline runs and user
-            opens), verify the authority file matches a fresh recompute instead. Exit 1 only on
-            real drift or a stale AUTHORITY (rerun pipeline)."""
-import sys,math,json,os
+            formula drift tripwire. Formal office is retained as display-only public-exposure
+            context; it is not an unratified additive term in the rank authority. If
+            the view is stale, verify the authority against a fresh recompute instead. Exit 1 only
+            on real drift or a stale AUTHORITY (rerun pipeline)."""
+import sys,math,json,os,datetime,statistics
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl
 import moneyball_core as MC
+import influence_roles as IR
 B=MB_ROOT
 WRITE='--write' in sys.argv
 wb=openpyxl.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True)   # NOT read_only (random-access pathology; empty reads on openpyxl-saved files)
@@ -78,18 +80,72 @@ else:
             except Exception: continue
         else:
             print('FATAL: no O/E/F source (view dead, no snapshot, no cache-alive backup)'); sys.exit(1)
+# Formal chamber/party office is display-only public-exposure context. The registry is validated and
+# shipped beside the rank decomposition, but its hand-entered weights do not modify Influence or rank.
+ROLE_PATH=B+r'\formal_visibility_roles.json'
+try:
+    _roles=json.load(open(ROLE_PATH,encoding='utf-8'))
+    if _roles.get('schema')!='party-elite-influence-roles-v3': raise ValueError('schema mismatch')
+    if datetime.date.today()>=datetime.date.fromisoformat(_roles['valid_until']): raise ValueError('registry expired')
+    _unknown=sorted(set((_roles.get('members') or {}))-set(members))
+    if _unknown: raise ValueError('unknown roster names: %s'%_unknown[:3])
+    _not_elite=sorted(m for m,v in (_roles.get('members') or {}).items() if v.get('role_type')!='party_elite')
+    if _not_elite: raise ValueError('non-party-elite registry entries: %s'%_not_elite[:3])
+except (FileNotFoundError,KeyError,ValueError) as _e:
+    print('FATAL: formal role influence registry invalid: %s'%_e); sys.exit(1)
+Ebase=dict(E)
+_cd=wb['Committee Data']
+COMMITTEE_SEATS={r[0]:str(r[4] or '') for r in _cd.iter_rows(min_row=2,values_only=True) if r[0]}
+ROLE_NOMINAL={m:float(((_roles.get('members') or {}).get(m) or {}).get('influence_bonus') or 0.0) for m in members}
+ROLE_BONUS={}; ROLE_REASON={}; ROLE_COMMITTEE={}; ROLE_OFFICE={}
+for m in members:
+    _entry=(_roles.get('members') or {}).get(m) or {}
+    ROLE_BONUS[m],ROLE_REASON[m],ROLE_COMMITTEE[m]=IR.eligible_bonus(_entry,COMMITTEE_SEATS.get(m,''))
+    ROLE_OFFICE[m]=_entry.get('office') or ''
+ROLE_DISPLAY_WEIGHT=dict(ROLE_BONUS)
+ROLE_BONUS={m:0.0 for m in members}
+E=dict(Ebase)
 AB={r:(bm.cell(r,28).value or 0.0) for r in (2,3,4,5)}        # pillar weights (TYPED user dials — always alive)
 Ov=list(O.values()); Fv=list(F.values())
 pmaxC=max(pillar.values()) or 1.0; emax=max(E.values()) or 1.0
-score={}; pcts={}
+score={}; pcts={}; base_score={}
 for m in members:
     legp=percentrank(Ov,O[m]); pressp=pillar[m]/pmaxC; infp=E[m]/emax; demp=percentrank(Fv,F[m])
     pcts[m]={'leg':legp,'press':round(pressp,9),'inf':round(infp,9),'dem':demp}
     score[m]=AB[2]*legp+AB[3]*pressp+AB[4]*infp+AB[5]*demp
-order=sorted(members,key=lambda m:-score[m])
-rank={}
-for i,m in enumerate(order):
-    rank[m]=rank[order[i-1]] if i and score[m]==score[order[i-1]] else i+1
+    base_score[m]=score[m]
+def _ranks(values):
+    order=sorted(members,key=lambda m:-values[m]); out={}
+    for i,m in enumerate(order): out[m]=out[order[i-1]] if i and values[m]==values[order[i-1]] else i+1
+    return out
+rank=_ranks(score); base_rank=_ranks(base_score)
+
+# Nominal weights alone do not describe realized model influence: a heavily weighted
+# pillar with little cross-member dispersion can move ranks less than a lighter but
+# widely dispersed pillar. Publish both so the UI/audit never mistakes one for the
+# other. This is diagnostic only; it does not alter the ratified AB2:AB5 dials.
+_pillar_series={
+    'leg': [pcts[m]['leg'] for m in members],
+    'press': [pcts[m]['press'] for m in members],
+    'inf': [pcts[m]['inf'] for m in members],
+    'dem': [pcts[m]['dem'] for m in members],
+}
+_pillar_weights={'leg':float(AB[2]),'press':float(AB[3]),'inf':float(AB[4]),'dem':float(AB[5])}
+_weighted_spread={k:_pillar_weights[k]*statistics.pstdev(v) for k,v in _pillar_series.items()}
+_spread_total=sum(_weighted_spread.values()) or 1.0
+effective_weight_diagnostics={
+    'contract':'diagnostic only; realized spread is nominal weight times population standard deviation',
+    'nominal_weights':_pillar_weights,
+    'normalization':{
+        'leg':'Excel PERCENTRANK.INC, truncated to 5 decimal places',
+        'press':'pillar divided by cross-member maximum',
+        'inf':'committee influence divided by cross-member maximum; formal office is display-only',
+        'dem':'Excel PERCENTRANK.INC, truncated to 5 decimal places',
+    },
+    'pillar_stddev':{k:round(statistics.pstdev(v),9) for k,v in _pillar_series.items()},
+    'weighted_spread':{k:round(v,9) for k,v in _weighted_spread.items()},
+    'realized_spread_share':{k:round(v/_spread_total,9) for k,v in _weighted_spread.items()},
+}
 # ---- view coherence: does the sheet's normalized CACHE match Python's normalization of raw? ----
 coherent=True
 for c in list(COLS)[::4]:
@@ -97,28 +153,53 @@ for c in list(COLS)[::4]:
         if m in prow and abs((pn.cell(prow[m],c).value or 0.0)-norm[c][m])>1e-9: coherent=False; break
     if not coherent: break
 if WRITE:
-    MC.dump_atomic({'score':score,'rank':rank,'press_pillar':{m:round(v,9) for m,v in pillar.items()},
-        'pcts':pcts,'ab_weights':AB,'provenance':'python rank authority (compute_pillars --write); workbook = view'},
+    MC.dump_atomic({'score':score,'rank':rank,'base_score':base_score,'base_rank':base_rank,
+        'press_pillar':{m:round(v,9) for m,v in pillar.items()},
+        'pcts':pcts,'ab_weights':AB,
+        'effective_weight_diagnostics':effective_weight_diagnostics,
+        'influence_raw_base':{m:round(Ebase[m],6) for m in members},
+        'formal_role_influence_nominal':{m:round(ROLE_NOMINAL[m],6) for m in members},
+        'formal_role_influence_bonus':{m:round(ROLE_BONUS[m],6) for m in members},
+        'formal_role_display_weight':{m:round(ROLE_DISPLAY_WEIGHT[m],6) for m in members},
+        'formal_role_influence_office':ROLE_OFFICE,
+        'formal_role_influence_eligibility':ROLE_REASON,
+        'formal_role_influence_committee_overlap':ROLE_COMMITTEE,
+        'influence_raw_adjusted':{m:round(E[m],6) for m in members},
+        'formal_role_influence':{'schema':_roles['schema'],'verified_on':_roles['verified_on'],
+                                 'valid_until':_roles['valid_until'],
+                                 'listed_party_elites':sum(v>0 for v in ROLE_NOMINAL.values()),
+                                 'applied_party_elites':sum(v>0 for v in ROLE_BONUS.values()),
+                                 'display_context_party_elites':sum(v>0 for v in ROLE_DISPLAY_WEIGHT.values()),
+                                 'committee_overlap_excluded':sum(ROLE_REASON[m]=='committee_leadership_already_in_base' for m in members),
+                                 'contract':'formal office is display-only public-exposure context; no office weight modifies Influence or rank'},
+        'provenance':'python rank authority (compute_pillars --write); influence = workbook committee score only; formal office is display-only context and does not modify rank'},
         B+r'\ranks_python.json')
-    print('wrote ranks_python.json (rank authority): %d members | view cache %s'%(
-        len(members),'coherent' if coherent else 'stale (self-heals on next Excel open — fullCalcOnLoad)'))
+    print('wrote ranks_python.json (rank authority): %d members | %d formal-office contexts display-only | %d committee overlaps noted | workbook view %s'%(
+        len(members),sum(v>0 for v in ROLE_DISPLAY_WEIGHT.values()),
+        sum(ROLE_REASON[m]=='committee_leadership_already_in_base' for m in members),
+        'coherent' if coherent else 'stale'))
     sys.exit(0)
 # ---- audit mode ----
 if coherent:
+    # Rank authority and workbook implement the same committee formula; office context is not a
+    # hidden Python-only overlay.
     smis=[m for m in members if bm.cell(bmrows[m],19).value is None or abs(score[m]-bm.cell(bmrows[m],19).value)>1e-7]
     rmis=[m for m in members if bm.cell(bmrows[m],20).value!=rank[m]]
-    print('view COHERENT -> exact-parity tripwire: score %s | rank %s'%(
+    print('WORKBOOK FORMULA: score %s | rank %s'%(
         'OK' if not smis else '%d MISMATCH'%len(smis),'EXACT %d/%d'%(len(members)-len(rmis),len(members))))
     if smis or rmis:
-        print('PARITY: DRIFT DETECTED — a workbook formula no longer matches the spec math (e.g. %s)'%(smis or rmis)[:3]); sys.exit(1)
+        print('WORKBOOK FORMULA: DRIFT DETECTED — a workbook formula no longer matches the spec math (e.g. %s)'%(smis or rmis)[:3]); sys.exit(1)
+    print('WORKBOOK FORMULA: CLEAN')
 else:
     print('view STALE (expected between pipeline runs and Excel opens) -> verifying the AUTHORITY instead')
 try:
     auth=json.load(open(B+r'\ranks_python.json'))
     amis=[m for m in members if abs(auth['score'].get(m,-1)-score[m])>1e-12 or auth['rank'].get(m)!=rank[m]]
     if amis:
-        print('PARITY: AUTHORITY STALE — ranks_python.json does not match current inputs (%d members, e.g. %s). Rerun the pipeline.'%(len(amis),amis[:3])); sys.exit(1)
+        print('SHIPPED AUTHORITY PARITY: AUTHORITY STALE — ranks_python.json does not match current inputs (%d members, e.g. %s). Rerun the pipeline.'%(len(amis),amis[:3])); sys.exit(1)
 except FileNotFoundError:
-    print('PARITY: AUTHORITY MISSING — run `python fec/compute_pillars.py --write` / the pipeline.'); sys.exit(1)
-print('PARITY: CLEAN — Python authority verified against a fresh recompute%s'%(' + exact sheet parity' if coherent else ' (view will self-heal on open)'))
+    print('SHIPPED AUTHORITY PARITY: AUTHORITY MISSING — run `python fec/compute_pillars.py --write` / the pipeline.'); sys.exit(1)
+print('SHIPPED AUTHORITY PARITY: CLEAN — ranks_python.json matches recomputed scores and ranks')
+print('PARITY: CLEAN — Python authority excludes unratified formal-office weights%s'%
+      (' + exact workbook formula parity' if coherent else ' (workbook view stale)'))
 sys.exit(0)

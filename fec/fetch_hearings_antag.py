@@ -17,7 +17,8 @@ stored so the builder can residualize. Resume: cr_fetch_log key 'antag:<pid>'.
 """
 import sys, os, re, io, time, json, csv, zipfile, sqlite3, datetime, urllib.request, collections
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+from paths import ROOT
+B = ROOT
 _KF = B + r'\fec\govinfo_key.txt'   # live tree; the key is gitignored so it is not in the worktree checkout
 KEY = os.environ.get('GOVINFO_KEY') or (open(_KF).read().strip() if os.path.exists(_KF) else 'DEMO_KEY')
 UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) research collector'}

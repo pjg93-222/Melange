@@ -4,8 +4,9 @@ Override with the MONEYBALL_ROOT environment variable — every script resolves
 its paths from here, so relocating the project (or escaping OneDrive) is a
 one-variable change instead of a 95-file edit."""
 import os
-ROOT=os.environ.get('MONEYBALL_ROOT',r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems')
-DRAFT=os.environ.get('MONEYBALL_DRAFT',r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems')   # R press-pipeline root
+_HERE=os.path.dirname(os.path.abspath(__file__))
+ROOT=os.path.abspath(os.environ.get('MONEYBALL_ROOT',os.path.join(_HERE,os.pardir)))
+DRAFT=os.path.abspath(os.environ.get('MONEYBALL_DRAFT',os.path.join(ROOT,os.pardir,'Draft Systems')))   # R press-pipeline root
 FEC=os.path.join(ROOT,'fec')
 WORKBOOK=os.path.join(ROOT,'Moneyball Main Version - Blended.xlsx')
 BACKUPS=os.path.join(ROOT,'backups')

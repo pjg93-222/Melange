@@ -22,7 +22,7 @@ behavior) plus the interaction channel where the literature grounds it:
 
 All z within chamber where the raw scale differs by chamber. Missing data -> None (consumers fall
 back to neutral 0 — never an invented disposition). Output: behavioral_dispositions.json."""
-import csv, glob, json, math, os, sys, collections
+import csv, glob, hashlib, json, math, os, sys, collections
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import openpyxl
 B = MB_ROOT
@@ -55,13 +55,14 @@ coop = mean_z([zscore({m: d.get('bipartisanship') for m, d in PANEL.items() if d
                zscore({m: d.get('cosponsor_degree') for m, d in PANEL.items() if d.get('cosponsor_degree') is not None}, log=True),
                zscore({m: d.get('n_cosponsored') for m, d in PANEL.items() if d.get('n_cosponsored') is not None}, log=True)], need=2)
 
-# diligence (run-4w, user-ratified 3-component upgrade — "do A, B and C"): mean of available
+# diligence: mean of the two independently observed, verified legislative-execution components
 # C-behaviors, need=1, each z within its covered population; missing components never penalize.
 #   1. roll-call participation (original component; full-term guard + clip as before)
 #   2. LEP follow-through: committee-action+ stage events per bill introduced (lep_criterion.json;
 #      static CEL data through the 118th, so reading last cycle's diagnostic file is exact)
-#   3. CHRG hearing participation: distinct fetched finance hearings spoken at — ranked among
-#      PARTICIPANTS only (coverage = fetched hearings; absent members stay neutral)
+# The former CHRG hearing-participation component is quarantined: the legacy collector contains
+# verified witness/wrong-chamber attribution errors. It may return only after a clean re-ingest and
+# independent attribution audit.
 _vc = {m: d.get('votes_cast') for m, d in PANEL.items() if d.get('votes_cast')}
 _med = {}
 for _ch in ('House', 'Senate'):
@@ -71,12 +72,11 @@ _dil_votes = zscore({m: v for m, v in _vc.items() if v >= 0.25 * _med.get(chambe
 _dil_votes = {m: max(-3.0, min(3.0, v)) for m, v in _dil_votes.items()}
 _dil_parts = [_dil_votes]
 _lcp = B + r'\lep_criterion.json'
+_ftv = {}
 if os.path.exists(_lcp):
     _ftv = {m: d.get('followthrough') for m, d in json.load(open(_lcp))['per_member'].items()
             if d.get('followthrough') is not None}
     if _ftv: _dil_parts.append(zscore(_ftv))
-_chg = {m: d.get('chrg_hearings') for m, d in PANEL.items() if (d.get('chrg_hearings') or 0) >= 1}
-if _chg: _dil_parts.append(zscore(_chg, log=True))
 dil = mean_z(_dil_parts, need=1)
 dil = {m: max(-3.0, min(3.0, v)) for m, v in dil.items()}
 
@@ -135,11 +135,36 @@ for m in C:
     if d: out[m] = d
 cov = {k: sum(1 for m in out if k in out[m]) for k in
        ('cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z', 'reactivity_z')}
-dump_atomic({'members': out, 'coverage': cov,
-             'method': 'dispositions measured from behavior (nomological fix 2026-07-04; diligence 3-component '
+if cov['diligence_z'] < 525 or any(not math.isfinite(row['diligence_z']) or not -3 <= row['diligence_z'] <= 3
+                                  for row in out.values() if row.get('diligence_z') is not None):
+    raise ValueError('diligence integrity gate failed')
+
+def _sha256(path):
+    h = hashlib.sha256()
+    with open(path, 'rb') as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b''): h.update(block)
+    return h.hexdigest()
+
+_inputs = {'behavior_panel.json': _sha256(B + r'\behavior_panel.json')}
+if os.path.exists(_lcp): _inputs['lep_criterion.json'] = _sha256(_lcp)
+dump_atomic({'schema': 'behavioral-dispositions-v2', 'status': 'PASS',
+             'members': out, 'coverage': cov,
+             'inputs_sha256': _inputs,
+             'integrity': {'diligence': {
+                 'roll_call_member_n': len(_dil_votes),
+                 'lep_followthrough_member_n': len(_ftv),
+                 'both_components_member_n': len(set(_dil_votes) & set(_ftv)),
+                 'combined_member_n': len(dil),
+                 'component_rule': 'mean of available within-chamber z scores; need at least one',
+                 'missing_components_never_penalized': True,
+                 'legacy_chrg_enters_diligence': False,
+                 'output_clip': [-3.0, 3.0],
+             }},
+             'method': 'dispositions measured from behavior (nomological fix 2026-07-04; diligence verified 2-component '
                        'run-4w; reactivity round-3 2026-07-09): cooperation=bipartisanship+cosponsor embedding; '
-                       'diligence=roll-call participation+LEP follow-through+CHRG hearing participation (mean of '
-                       'available, participants-only z); dominance=interaction turn-stats+leadership; visibility='
+                       'diligence=roll-call participation+LEP follow-through (mean of available; legacy CHRG '
+                       'hearing counts quarantined after attribution-integrity failure); dominance=interaction '
+                       'turn-stats+leadership; visibility='
                        'broadcast engagement; breadth=legislative portfolio sections; reactivity=live-interview '
                        'cutoff proneness (per-program z, sqrt(turns/%g) shrinkage, N-role); z within chamber; '
                        'missing -> neutral downstream' % REACT_TURNS},

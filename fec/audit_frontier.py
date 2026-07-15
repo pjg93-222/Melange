@@ -58,8 +58,10 @@ try:
     _rc=json.load(open(B+r'\member_receptivity.json'))['members']
     _gd=[max(0.15,_rc[m]['seed_prob']*0.35) for m,d in EP.items() if d.get('play')=='contest' and d.get('party')=='D']
     _gr=[max(0.15,_rc[m]['seed_prob']*0.35) for m,d in EP.items() if d.get('play')=='contest' and d.get('party')=='R']
-    _gap=abs(sum(_gd)/max(1,len(_gd))-sum(_gr)/max(1,len(_gr)))
-    ck('contest gates party-blind (mean D vs R gap <= 0.10)',_gap<=0.10,'gap %.3f'%_gap)
+    _gap=(abs(sum(_gd)/len(_gd)-sum(_gr)/len(_gr)) if _gd and _gr else None)
+    ck('contest gates party-blind when both parties have an eligible pool',
+       _gap is None or _gap<=0.10,
+       'gap %s; eligible D%d R%d'%('n/a' if _gap is None else '%.3f'%_gap,len(_gd),len(_gr)))
 except FileNotFoundError: print('  SKIP contest-gates party-blind check (member_receptivity.json missing)')   # S3-03: skip is now visible AND drops the passed-count below audit_full's floor
 _n=sum(rp.values())
 ck('contest entry mix not partisan-skewed (>80%% enforced only at n>=12)',

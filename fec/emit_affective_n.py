@@ -5,11 +5,13 @@ affective facets (scratchpad/interview_n_affective.json — Haiku pessimism/anxi
 policy-stripped), averaged and party-controlled. reactivity_z retired as Extraversion-contaminated.
 LIWC is deterministic; the LLM labels are the one non-deterministic input (regenerate via
 interview_llm_n_prep.py + the interview-n-affective-facets workflow if absent)."""
-import os, sys, json, re, collections, sqlite3, csv
+import os, sys, json, re, collections, sqlite3, csv, hashlib
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import numpy as np
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-SC = r'C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-clever-elbakyan-15fa11\4551680e-cf3a-40bd-ba1a-4c2b67b144b0\scratchpad'
+sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
+from paths import ROOT as B
+from moneyball_core import dump_atomic
+AFFECTIVE_N_INPUT=os.environ.get('AFFECTIVE_N_INPUT',os.path.join(B,'source_data','interview_n_affective.json'))
 FPS = re.compile(r'\b(i|me|my|mine|myself)\b', re.I)
 NEG = re.compile(r'\b(worri\w+|afraid|anxi\w+|scared|nervous|fear\w*|dread|panic|hopeless|helpless|overwhelm\w+|exhaust\w+|struggl\w+|suffer\w+|sad\w*|depress\w+|miserable|upset|frustrat\w+|hurt|alone|lonely|devastat\w+|painful)\b', re.I)
 POS = re.compile(r'\b(happy|glad|great|wonderful|excited|hopeful|optimis\w+|proud|grateful|thrilled|fantastic|excellent|enjoy\w+|confident|encourag\w+|thank\w+|appreciat\w+|fortunate)\b', re.I)
@@ -19,9 +21,9 @@ def z(x):
     x = np.array(x, float); s = np.nanstd(x); return (x - np.nanmean(x)) / (s or 1)
 
 def run():
-    llmp = os.path.join(SC, 'interview_n_affective.json')
+    llmp = AFFECTIVE_N_INPUT
     if not os.path.exists(llmp):
-        print('  !! interview_n_affective.json missing — run interview_llm_n_prep.py + the affective-facets workflow first'); return
+        raise FileNotFoundError('required affective-facet input missing: %s (set AFFECTIVE_N_INPUT)'%llmp)
     S = json.load(open(llmp, encoding='utf-8'))
     con = sqlite3.connect(B + r'\social_media.db', timeout=60); con.execute('PRAGMA query_only=1')
     ag = collections.defaultdict(lambda: [0, 0, 0, 0])
@@ -53,8 +55,10 @@ def run():
     Rp = np.array([1.0 if pty.get(m) == 'R' else 0.0 for m in mem])
     combc = z(resid(resid(la, Ea), Rp))   # E-residualized LLM affective-N, then party-controlled
     out = {m: round(float(combc[i]), 3) for i, m in enumerate(mem)}
-    json.dump({'members': out, 'n': len(out), 'basis': 'affective-content N: E-residualized LLM affective facets (pess/anx/dep/vol), party-controlled, z-scored; LIWC = convergent-validity anchor',
-               'promotion': 'round-7b 2026-07-11 gate 5/5 (airtight-review refinement); retired E-contaminated reactivity_z'}, open(B + r'\affective_n.json', 'w'), indent=0)
+    input_sha=hashlib.sha256(open(llmp,'rb').read()).hexdigest()
+    dump_atomic({'members': out, 'n': len(out), 'basis': 'affective-content N: E-residualized LLM affective facets (pess/anx/dep/vol), party-controlled, z-scored; LIWC = convergent-validity anchor',
+               'promotion': 'round-7b 2026-07-11 gate 5/5 (airtight-review refinement); retired E-contaminated reactivity_z',
+               'inputs_sha256':{os.path.basename(llmp):input_sha}},B+r'\affective_n.json',indent=0)
     print('affective_n.json: %d members' % len(out))
     o = sorted(mem, key=lambda m: -out[m])
     print('highest N:', ', '.join('%s(%s)' % (m, pty.get(m)) for m in o[:6]))

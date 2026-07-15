@@ -24,8 +24,9 @@ import os, sys, json, re, collections, sqlite3, csv
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import numpy as np
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-SC = r'C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-clever-elbakyan-15fa11\4551680e-cf3a-40bd-ba1a-4c2b67b144b0\scratchpad'
+from paths import ROOT
+B = ROOT
+AFF_INPUT = os.environ.get('AFFECTIVE_N_INPUT',os.path.join(B,'source_data','interview_n_affective.json'))
 FPS = re.compile(r'\b(i|me|my|mine|myself)\b', re.I)
 NEG = re.compile(r'\b(worri\w+|afraid|anxi\w+|scared|nervous|fear\w*|dread|panic|hopeless|helpless|overwhelm\w+|exhaust\w+|struggl\w+|suffer\w+|sad\w*|depress\w+|miserable|upset|frustrat\w+|hurt|alone|lonely|devastat\w+|painful)\b', re.I)
 POS = re.compile(r'\b(happy|glad|great|wonderful|excited|hopeful|optimis\w+|proud|grateful|thrilled|fantastic|excellent|enjoy\w+|confident|encourag\w+|thank\w+|appreciat\w+|fortunate)\b', re.I)
@@ -58,7 +59,9 @@ def liwc_n(ag, floor=400):
 def main():
     A5 = json.load(open(B + r'\big5_v3_hybrid.json'))['traits']
     BD = json.load(open(B + r'\behavioral_dispositions.json'))['members']
-    S = json.load(open(os.path.join(SC, 'interview_n_affective.json')))
+    if not os.path.isfile(AFF_INPUT):
+        raise FileNotFoundError('required affective-N criterion input missing: '+AFF_INPUT)
+    S = json.load(open(AFF_INPUT,encoding='utf-8'))
     AN = json.load(open(B + r'\affective_n.json'))['members']   # combined party-controlled affective-N
     Cj = {m['member']: m for m in json.load(open(B + r'\congestion.json'))}; bio = {m: Cj[m].get('bioguide') for m in Cj}
     PP = {}

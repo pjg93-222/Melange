@@ -25,7 +25,8 @@ cats=[c for c in fm.cats if (not ONLY or ONLY.lower() in c.lower())]
 members=fm.members
 MAT={m:dict(fm.CS0[m]) for m in members}; cu=dict(fm.cu0); ind=dict(fm.ind0)
 won=set(); secured=0.0      # H1: members WON via conversion are realized (their flip banked in `secured`) and leave the flippable pool
-CTORD=['Champion','Defender','Ally','Highly Persuadable','True Neutral','Lean Skeptic','Skeptic','Opponent']
+CTORD=['Champion','Defender','Ally','Highly Persuadable','Persuadable','Lean Persuadable',
+       'True Neutral','Lean Skeptic','Skeptic','Highly Skeptical','Opponent']
 def marg(m):                                      # marginal winnability from +INC CU on m (only m's pflip moves), across topics where m is a target
     if m in won or cu[m]+INC>fm.cu0[m]+PMAX: return 0.0   # a won member is realized (no more spend); per-member cap requires room for a FULL chunk (never overshoot the FEC limit when INC does not divide PMAX)
     g=0.0; pm=fm.rc(m,'pressure_mult')

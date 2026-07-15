@@ -15,7 +15,7 @@ import numpy as np
 from sklearn.linear_model import Ridge, LinearRegression
 from sklearn.model_selection import KFold, GridSearchCV
 B = MB_ROOT
-SCR = r'C:\Users\pgoff\AppData\Local\Temp\claude\b5eval'
+SCR = os.environ.get('B5_EVAL_DIR',os.path.join(B,'outputs','research','b5eval'))
 
 BT = json.load(open(B + r'\big5_traits.json'))
 FZ = BT['featz']; FEATS = sorted(next(iter(FZ.values())))

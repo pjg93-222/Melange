@@ -19,7 +19,7 @@ WM,WP=0.35,0.65; CAP=50000; BASE=0.15   # CALIBRATED: money is the minority part
 # at PARITY with a known Ally (uncertain, not presumed eager) and never outranks one. Judgment dial,
 # env-overridable via PERS_NONE.
 from moneyball_core import PERS   # single copy (was drift-prone x5)
-PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Skeptic'}
+PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Highly Skeptical','Skeptic'}
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}
 members=[m['member'] for m in C.values()]
 HALFF=float(os.environ.get('HALFF','0.10'))   # capacity scale: money == HALFF*receipts -> half the max money-pull (reconciles with money_response)

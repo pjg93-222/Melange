@@ -71,8 +71,7 @@ for tr, tgt in TARGET.items():
     for i, m in enumerate(allm):
         out_traits.setdefault(m, {})[tr] = round((pred[i] - mu) / sd, 3)
 
-SP = os.environ.get("B5_SCRATCH", r"C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-wizardly-jemison-171391\1b194f81-91fc-4e4c-a071-65a2ad26f89a\scratchpad")
-comp_p = os.path.join(SP, "big5_composite.json")
+comp_p = os.environ.get("B5_COMPOSITE",os.path.join(B,"source_data","big5_composite.json"))
 COMP = json.load(open(comp_p))["traits"] if os.path.exists(comp_p) else {}
 for m in out_traits:
     es = COMP.get(m, {}).get("ES", BT["traits"].get(m, {}).get("ES", 0.0))

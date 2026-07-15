@@ -55,6 +55,7 @@ Class legend used in the tables: **P** = production-ratified calibration · **R*
 | `LOSSFRAME` | `1.10` | `fec/money_response.py:28` | A competitor threat (loss frame) moves lean more than an equal gift (loss aversion) |
 | `HALFF` | `0.10` | `fec/flip_model.py:25`, `fec/per_topic_flip.py:26` | Same capacity scale mirrored in the flip engines — **see the HALF vs HALFF warning below** |
 | `PERS_NONE` | `0.45` | `fec/moneyball_core.py:138` | Persuadability of a blank (`—`) stance cell; USER-RATIFIED 2026-07-02: silence never outranks a declared Ally (0.40) |
+| `OVERALL_OPPONENT_CUTOFF` | `-1.60` | `fec/moneyball_core.py:214` | Overall scores below this cutoff are Opponents; USER-RATIFIED 2026-07-15 to populate the previously empty rung. Higher values create more Opponents; `-2.50` reverts |
 | `CONV_MAXSTEP` | `1` | `fec/optimize.py:50`, `fec/scenario.py:84` | Max stance-ladder rungs one money shock converts (caps cross-taxonomy magnitude) |
 | `CEDGE` | `10000` | `fec/lt_priming.py:12`, `fec/cosponsor_route.py:10` | Base $ per peer-recruitment ask |
 | `K` | `5` | `fec/cosponsor_route.py:9` | Recruitment bandwidth: one member personally whips ≤K colleagues |
@@ -190,7 +191,7 @@ These live in source and change only through change control. Listed so you don't
 | `PERS` persuadability map | :139–140 | Champion .10, Defender .12, Ally .40, Highly Persuadable .55, True Neutral/Neutral .50, Lean Skeptic .40, Skeptic .25, Opponent .08, `—` = PERS_NONE (env, .45) |
 | `IMP` category importance | :141–144 | 18 categories, ABB26-handout-anchored; heaviest: Credit Card Mandates 3.0, CU Tax Status 3.0, Interchange 2.0 |
 | `SGATE` seed gates | :151–153 | Per-stance seeding gate; floor 0.15 via `gate()` |
-| `TORD` + `overall_tier()` cutoffs | :154, :165–167 | IMP-weighted tier score → the 10-rung overall ladder (Champion ≥2.5 … Opponent <−1.9) |
+| `TORD` + `OVERALL_BANDS` + `overall_tier()` | :207–237 | IMP-weighted ten-rung overall ladder with bounded ±0.05 rounding: Champion ≥2.85; Highly Skeptical ≥`OVERALL_OPPONENT_CUTOFF` (default −1.60); below that is Opponent |
 | `cpf_diffusion` | :120–122 | Cross-party diffusion factor `0.4+0.6·√(bpf_u·bpf_v)` (bpf = bipartisanship fraction) |
 | `cpf_pressure` | :123–125 | Cross-party 0.5 / same-party 1.7 / else 1.0 — the kernel's TWO deliberate partisan physics |
 | `build_P` cascade kernel | :132–136 | Edge activation `p = w·cpf·σ_v/(w·cpf·σ_v + 6.0)`; σ_v = receiver `edge_mult` |

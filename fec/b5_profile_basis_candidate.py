@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import os as _o, sys as _s; _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__))); from paths import ROOT as MB_ROOT
-"""Build a display-only, construct-honest profile basis candidate (2026-07-13 user directive).
+"""Build a display-only guarded profile basis candidate (2026-07-13 user directive).
 
 The promoted Blue E score is trained on visibility_z and is therefore a public-exposure proxy, not
 an independent Extraversion measure.  This candidate never exposes that score as personality: it
-keeps visibility under PUBLIC ROLE / EXPOSURE and emits Extraversion as explicitly unknown.  Audio
+keeps visibility under PUBLIC ROLE / EXPOSURE and emits intrinsic Extraversion as explicitly unknown.
+Qualified low-antagonism A and affective-content N remain available under scoped labels. Audio
 is admitted only from the separately verified v2 candidate artifact.  The output is consumed by
 NOTHING until user-ratified promotion.
 
@@ -44,7 +45,6 @@ def member_basis(name, blue, dispositions, roles, audio):
     a = audio.get(name) or None
     return {
         'personality_facets': {
-            # These remain current Blue reads, but every value carries its actual criterion scope.
             'Openness': {
                 'z': b.get('O'),
                 'scope': 'text read anchored to legislative issue breadth; not private curiosity',
@@ -53,19 +53,18 @@ def member_basis(name, blue, dispositions, roles, audio):
                 'z': b.get('C'),
                 'scope': 'text read anchored to legislative diligence; not general reliability',
             },
-            'Agreeableness_low_antagonism': {
-                'z': b.get('A'),
-                'scope': 'low-antagonism interview language; not warmth or bipartisan cooperation',
-            },
-            'Neuroticism_affective_content': {
-                'z': b.get('N'),
-                'scope': 'negative-affect/stress language; not private vulnerability or diagnosis',
-            },
-            # Never substitute visibility, interview count, dominance, or expressiveness here.
             'Extraversion': {
                 'z': None,
                 'status': 'unknown_no_independent_measure',
-                'scope': 'visibility and speaking-role measures are explicitly excluded',
+                'scope': 'intrinsic Extraversion remains unknown; public exposure is carried separately',
+            },
+            'Agreeableness_low_antagonism': {
+                'z': b.get('A'),
+                'scope': 'qualified low-antagonism public-language facet; not legislative cooperation',
+            },
+            'Neuroticism_affective_content': {
+                'z': b.get('N'),
+                'scope': 'qualified affective-content public-language read; not a diagnosis',
             },
         },
         'public_role_exposure': {
@@ -123,6 +122,8 @@ def build(only=None):
             'legacy_blue_E': 'retired from personality display because it predicts visibility_z',
             'visibility': 'public/media exposure and activity only',
             'Extraversion': 'unknown unless a future independent, role-controlled measure passes',
+            'Agreeableness': 'qualified low-antagonism facet; cooperation remains separate',
+            'Neuroticism': 'qualified affective-content public-language read; not diagnosis/private state',
             'dominance': 'observed floor-holding/defense only',
             'expressiveness': 'observed turn elaboration only',
             'audio': 'direct delivery observations only; absent unless audio-v2 verification passes',
@@ -142,13 +143,15 @@ def self_test():
     )
     assert row['personality_facets']['Extraversion']['z'] is None
     assert row['personality_facets']['Extraversion']['status'] == 'unknown_no_independent_measure'
+    assert row['personality_facets']['Agreeableness_low_antagonism']['z'] == 0.3
+    assert row['personality_facets']['Neuroticism_affective_content']['z'] == -0.4
     assert row['public_role_exposure']['visibility_z'] == 3.2
     assert row['observed_conversation']['dominance_z'] == 1.1
     assert 'E' not in row['personality_facets']
     raw = json.dumps(row, sort_keys=True)
     assert '4.9' not in raw                       # legacy Blue E cannot leak into the payload
     assert row['verified_audio_v2'] is None       # missing candidate audio stays missing
-    print('b5_profile_basis_candidate self-test: 7 passed, 0 FAILED')
+    print('b5_profile_basis_candidate self-test: 9 passed, 0 FAILED')
 
 
 def main():

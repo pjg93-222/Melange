@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
+import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT,DRAFT  # centralized roots
 """MEDIA BLEND (user-directed 2026-07-02): the press pillar becomes MEDIA = 50% press releases +
 50% social media, at the pillar's existing weight.  Insertion point = 'Press Release - Raw' (Table10):
 its LET-normalized sheet and the Rank & Allocation SUMPRODUCT consume whatever sits there, so writing
@@ -18,8 +18,13 @@ Safety: timestamped backup copy of the workbook is written FIRST; only raw VALUE
 import sys, os, json, re, shutil, datetime, collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import pandas as pd, openpyxl
+import media_rules as MR
+from moneyball_core import save_workbook_atomic
+from member_identity import Resolver
 M=MB_ROOT
 WBP=M+r'\Moneyball Main Version - Blended.xlsx'
+_roster=json.load(open(M+r'\congestion.json',encoding='utf-8'))
+_resolver=Resolver([x['member'] for x in _roster],{x['member']:x.get('bioguide') for x in _roster})
 HL=float(os.environ.get('SOCIAL_HL_YEARS','0.5')); PRESS_W=0.5; SOCIAL_W=0.5
 # DEEP-AUDIT DIALS — USER-RATIFIED 2026-07-02 (both now ON by default; env-overridable):
 #  SOCIAL_SHRINK=1 (default) -> in categories where <15 members carry social signal, the social share
@@ -28,34 +33,9 @@ HL=float(os.environ.get('SOCIAL_HL_YEARS','0.5')); PRESS_W=0.5; SOCIAL_W=0.5
 #  RT_W (default 0.5) -> retweets count at half the stance weight of an original post (finding B2:
 #                      an RT is amplification, not authorship; hostile-quote-RT damage halved).
 SHRINK=os.environ.get('SOCIAL_SHRINK','1')=='1'; RT_W=float(os.environ.get('RT_W','0.5'))
-TODAY=datetime.date(2026,7,2)
+TODAY=datetime.date.today()
 # category keyword map -> the raw sheet's own headers (built from quorum_query.txt vocabulary groups)
-CATKW={
- 'Examination & Supervision':r'\bncua\b|examination|supervis|regulatory burden|call report',
- 'Credit Union Capital Requirements':r'capital requirement|risk.?based capital|net worth ratio',
- 'NCUA Budget & Share Insurance Fund':r'share insurance|ncusif|ncua budget|central liquidity',
- 'Interchange':r'interchange|swipe fee|routing mandate|durbin',
- 'Payments':r'fednow|real.?time payments|faster payments|payments system|stablecoin|digital dollar|\bcbdc\b|earned wage',
- 'Technology & Emerging Issues':r'fintech|artificial intelligence|\bai\b|crypto|digital asset|innovation',
- 'Fraud Prevention':r'fraud|scam|elder financial|regulation e\b|zelle|p2p payment',
- 'Data Privacy & Cybersecurity':r'data breach|data privacy|data security|cyber|gramm.?leach',
- 'Charter Modernization & Governance':r'charter|de novo|governance',
- 'Defense Credit Union Issues':r'military lending|defense credit union|military banking|military installation|servicemember',
- 'Field of Membership':r'field of membership|common bond|underserved area',
- 'CDFI Fund':r'\bcdfi\b|community development financial',
- # 2026-07-07 (user CFPB-axis directive, off-target-noise precedent = bare 'interchange' matching
- # highway ramps): bare 'junk fee'/'late fee' routed concert/ticket/airline fee POPULISM into the
- # CFPB column with oppose signs and zero CFPB content (AOC/Adams class). Fee terms now require a
- # financial-context word within 80 chars; 'overdraft' stays bare (intrinsically financial).
- 'CFPB Issues & Structural Reform':r'\bcfpb\b|consumer financial protection|section 1071|section 1033|small business lending rule|open banking|overdraft|(?:bank|card|cfpb|financial|lender|account|deposit)[\s\S]{0,80}(?:junk|late) fees?|(?:junk|late) fees?[\s\S]{0,80}(?:bank|card|cfpb|financial|lender|account|deposit)',
- 'Credit Card & Consumer-Fee Mandates':r'credit card competition|\bccca\b|credit card fee|credit card mandate|card late fee',
- 'Telephone Consumer Protection Act':r'\btcpa\b|telephone consumer protection|robocall',
- 'Member Business Lending':r'member business lending|mbl cap|small.?dollar loan|business loan',
- 'Mortgage Lending & Housing':r'mortgage|housing|trigger lead|\bhmda\b|federal home loan bank|gse',
- 'Credit Union Tax Status':r'tax.?exempt|tax exemption|tax status|credit union tax|don.?t tax my credit union',
- 'CU-Bank Competitive Dynamics':r'big bank|megabank|wall street bank|community bank|bank consolidation|industrial loan|de novo charter|bank lobby',
- 'General Credit Union':r'credit union',   # fallback only: assigned when NO specific category hits (see below)
-}
+CATKW=MR.RAW_PATTERNS
 CATRX={k:re.compile(v,re.I) for k,v in CATKW.items()}
 # keyword-cats == the RAW sheet's own header names (all 20 category columns E..X)
 HDRMAP={k:k for k in CATKW}
@@ -75,9 +55,7 @@ STACK={}
 _sf=M+r'\tweet_stance_final.csv'
 if os.path.exists(_sf):
     import csv as _csv,io as _io
-    def _nrm(t):
-        t=re.sub(r'https?://\S+','',str(t or '').lower())
-        return re.sub(r'[^a-z0-9]','',t)[:80]
+    def _nrm(t): return MR.normalized_text(t)
     for _r in _csv.DictReader(_io.open(_sf,encoding='utf-8-sig',newline='')):
         STACK[(_r['member'],_nrm(_r['text']))]= _r
     _TIERW={'unanimous':1.0,'majority':0.7,'review':0.35}
@@ -85,7 +63,7 @@ if os.path.exists(_sf):
 else:
     print('!! tweet_stance_final.csv missing — legacy per-tweet stances in force')
 soc=collections.defaultdict(lambda:collections.defaultdict(float)); nassigned=0
-nover=0
+nover=0; ndupe=0; nunknown=0; _seen=set()
 for _,r in corp.iterrows():
     _st=r['stance']; _inten_override=None
     if STACK:
@@ -94,6 +72,11 @@ for _,r in corp.iterrows():
             _st=_s['stack_stance']; _inten_override=_TIERW.get(_s['tier'],0.5); nover+=1
     sg=SIGN.get(_st,0.0)
     if sg==0.0: continue
+    _member=_resolver.resolve(r['member'])
+    if not _member: nunknown+=1; continue
+    _event=(_member,MR.normalized_text(r['text']))
+    if _event in _seen: ndupe+=1; continue
+    _seen.add(_event)
     try: age=(TODAY-datetime.date.fromisoformat(str(r['date'])[:10])).days/365.25
     except Exception: continue
     if _inten_override is not None:
@@ -103,12 +86,11 @@ for _,r in corp.iterrows():
         except (TypeError,ValueError): inten=0.5
     if str(r.get('is_rt','')).strip().lower() in ('1','true','yes'): inten*=RT_W
     decay=0.5**(max(0.0,age)/HL)
-    hits=[c for c,rx in CATRX.items() if c!='General Credit Union' and rx.search(r['text'] or '')]
-    if not hits and CATRX['General Credit Union'].search(r['text'] or ''): hits=['General Credit Union']
+    hits=MR.route_raw_categories(r['text'] or '')
     if not hits: continue
     nassigned+=1
-    for c in hits: soc[r['member']][c]+=sg*inten*decay/len(hits)
-print('social: %d scored posts -> %d category-assigned | %d members | half-life %.2f yr (press: 2.0 yr)'%(len(corp),nassigned,len(soc),HL))
+    for c in hits: soc[_member][c]+=sg*inten*decay/len(hits)
+print('social: %d source rows -> %d unique scored/category-assigned | %d exact cross-post duplicates removed | %d unresolved identities excluded | %d members | half-life %.2f yr (press: 2.0 yr)'%(len(corp),nassigned,ndupe,nunknown,len(soc),HL))
 # ---- workbook surgery ----
 os.makedirs(M+r'\backups',exist_ok=True)
 bak=M+r'\backups\Moneyball Main Version - Blended.BACKUP-%s.xlsx'%datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
@@ -129,7 +111,7 @@ mrow={rw.cell(r,1).value:r for r in range(2,536) if rw.cell(r,1).value}
 ORIG=json.load(open(M+r'\press_raw_original.json',encoding='utf-8'))
 if os.environ.get('PRESS_DYNAMIC','1')!='0':
     import csv as _csv,io as _io
-    _tone=os.path.join(DRAFT,'cu_press_stance_tone.csv') if 'DRAFT' in dir() else os.path.join(os.path.dirname(M),'Draft Systems','cu_press_stance_tone.csv')
+    _tone=os.path.join(DRAFT,'cu_press_stance_tone.csv')
     _dyn=collections.defaultdict(lambda:collections.defaultdict(float))
     _n=0; _nm=set(); _pvs=[]
     # STACK OVERRIDE (user-ratified 2026-07-04 "wire in the most accurate stack"): press_stance_final.csv
@@ -157,7 +139,7 @@ if os.environ.get('PRESS_DYNAMIC','1')!='0':
             except ValueError: pass
         return None
     for _r in _csv.DictReader(_io.open(_tone,encoding='utf-8-sig',newline='')):
-        _m=_r.get('member')
+        _m=_resolver.resolve(_r.get('member'),_r.get('bioguide'))
         _hit=_stk.get((_r.get('url') or '').strip().rstrip('/'))
         if _hit is not None:
             _lab,_tier=_hit
@@ -179,7 +161,8 @@ if os.environ.get('PRESS_DYNAMIC','1')!='0':
         else:
             try: _dec=max(0.0,min(1.0,float(_r.get('recency_weight') or 0.5)))
             except (TypeError,ValueError): _dec=0.5
-        _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip() and c.strip() in ORIG]
+        _declared=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
+        _cats=[c for c in MR.route_raw_categories(_r.get('title') or '',_declared) if c in ORIG]
         if not _cats: continue
         _ul=(_r.get('url') or '').lower()
         if '.house.gov' in _ul or '.senate.gov' in _ul: _cw=1.0; _n_own+=1
@@ -215,5 +198,5 @@ for kwcat,hname in HDRMAP.items():
         if abs(nv-old)>1e-9: changed+=1
 rw['Z1']='MEDIA BLEND %s: cells = press(p80-scaled)+social(p80-scaled, half-life %.2fy) at 50/50 (thin-cat shrink %s, RT weight %.2f). Backup: %s'%(TODAY,HL,'ON' if SHRINK else 'off',RT_W,os.path.basename(bak))
 wb.calculation.fullCalcOnLoad=True   # PHASE-2: the workbook is a VIEW — Excel recalcs it on open; no COM recalc anywhere
-wb.save(WBP)
+save_workbook_atomic(wb,WBP)
 print('wrote media blend into Press Release - Raw: %d cells changed (formulas untouched)'%changed)

@@ -4,7 +4,7 @@ import json, sys, random, os, openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 SEED=int(os.environ.get('SEED','7')); random.seed(SEED)   # fixed seed -> reproducible; scenarios use SAME seed so deltas aren't MC noise
 BUDGET=2_000_000; CAP=50_000; MC=int(os.environ.get('MC','20')); BSCALE=400000
-PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Skeptic'}
+PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Highly Skeptical','Skeptic'}
 C={m['member']:m for m in json.load(open(MB_ROOT+r'\congestion.json'))}
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)

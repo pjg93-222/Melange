@@ -21,7 +21,8 @@ collinearity trap when party is omitted)."""
 import os, csv, json
 import numpy as np
 
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+from paths import ROOT
+B = ROOT
 
 def load_dw(roster=None):
     """member -> {dim1, dim2, extremity}. roster: optional iterable of member names to restrict to;

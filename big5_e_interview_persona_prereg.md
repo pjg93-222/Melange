@@ -155,7 +155,7 @@ The shell cancellation of the unfunded first attempt did not initially terminate
 After funds returned, that orphan wrote 10 member-partition ratings under rubric version
 `observed-interview-e-v1-locked-2026-07-13` before exiting; it also retained 180 request errors. The
 precommit check inspected counts and version only, never rating values. The complete artifact was
-moved to `interview_e_persona_halves.precache_short_rubric.CANCELED.json`, SHA-256
+moved to `orphan/snapshots/interview_e_persona_halves.precache_short_rubric.CANCELED.json`, SHA-256
 `f98a6134029bcc0c3cb40bc17b397069ed734490f4ca564a78a7d5df74f2cb64`. It is excluded from every
 criterion and trait calculation. The active candidate path was absent before the cached-manual run.
 The validator requires the new rubric version and hash and therefore also hard-refuses this quarantined

@@ -10,7 +10,8 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import numpy as np
 import hearing_antagonism_build as HB
 
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+from paths import ROOT
+B = ROOT
 
 def run():
     DW, PTY, agg, byhear, minority, opp, audit, nh = HB.build()

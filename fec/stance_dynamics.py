@@ -121,7 +121,9 @@ try:
 except Exception as e: print('(HCoI co-movement skipped: %s)'%e)
 # silent-member imputation proposals (collaborative filtering over the cosponsor graph; USER ADJUDICATES)
 CSJ=json.load(open(B+r'\category_stance.json')); MAT=CSJ['matrix']; cats=CSJ['cats']
-TSCORE={'Champion':3,'Defender':2.5,'Ally':2,'Highly Persuadable':1,'True Neutral':0,'Lean Skeptic':-1,'Skeptic':-2,'Opponent':-3}
+TSCORE={'Champion':3,'Defender':2.5,'Ally':2,'Highly Persuadable':1.25,'Persuadable':0.75,
+        'Lean Persuadable':0.25,'True Neutral':0,'Lean Skeptic':-0.5,'Skeptic':-1,
+        'Highly Skeptical':-2,'Opponent':-3}
 def nearest_tier(x):
     return min(TSCORE.items(),key=lambda kv:abs(kv[1]-x))[0]
 BP=json.load(open(B+r'\bipartisan.json'))

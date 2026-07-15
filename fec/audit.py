@@ -33,23 +33,25 @@ ok(rk.get('Richard Durbin',0)>=380,'C2 Durbin rank = %s (expect >=380, opponent)
 nrm=wb['Legislative Score - Normalized']
 bmoore=[nrm.cell(r,3).value for r in range(3,536) if nrm.cell(r,1).value=='Barry Moore']
 ok(bmoore and bmoore[0] and bmoore[0]>0.5,'C3 legislative is curated/frozen (Barry Moore Exam-norm=%s>0.5 confirms NOT refreshed)'%(bmoore[0] if bmoore else None))
-# D stance dist sane -- col G is the 10-tier overall-stance ladder (sync_stance_clean: importance-weighted
-# per-category aggregate). 'Opponent' is the EXTREME bucket, so the sane invariant is that the anti-CU SIDE
-# (Opponent+Highly Skeptical+Skeptic) and pro-CU SIDE (Champion+Ally) are each non-trivially populated --
-# NOT the obsolete 6-tier 'Opponent>=40' guard threshold (that scheme conflated leg activity with alignment).
+# D stance bands are fixed across domains.  Do not require a target population
+# share on either side: that is grading on a curve and can reject a valid roster.
 from collections import Counter
 sd=Counter(ra.cell(r,7).value for r in range(3,536) if ra.cell(r,1).value)
 oppside=sd.get('Opponent',0)+sd.get('Highly Skeptical',0)+sd.get('Skeptic',0)
 champside=sd.get('Champion',0)+sd.get('Ally',0)
-# TUNING-FREE non-degeneracy check (audit 2026-07-07, replacing a hand-nudged 40->35 headcount that
-# had been lowered to accommodate the CFPB axis split -- honesty-ledger H-3). The check's real
-# purpose is to catch a DEGENERATE distribution (one side empty/tiny), which no magic number should
-# need re-tuning for as legitimate stance edits shift the counts. Invariant: each side holds >= 15
-# members AND >= 15% of the clear-sided population. Passes 39/61 today; fails only true collapse
-# (e.g. a side dropping below ~10). Never needs editing when a user-directed relabel moves a handful.
-_clear = oppside + champside
-_nondegen = min(oppside, champside) >= 15 and min(oppside, champside) >= 0.15 * max(1, _clear)
-ok(_nondegen,'D1 stance dist non-degenerate (anti-side=%d pro-side=%d, min>=15 and >=15%% of %d) %s'%(oppside,champside,_clear,dict(sd)))
+_stance=json.load(open(p('category_stance.json')))
+_th=_stance.get('thresholds',{})
+_fixed=(
+    _th.get('scale')=='fixed-ten-tier-across-all-domains-v2' and
+    _th.get('champion_or_defender')==0.70 and _th.get('ally')==0.35 and
+    _th.get('highly_persuadable')==0.25 and _th.get('persuadable')==0.15 and
+    _th.get('lean_persuadable')==0.05 and _th.get('true_neutral')==[-0.05,0.05] and
+    _th.get('lean_skeptic')==-0.05 and _th.get('skeptic')==-0.15 and
+    _th.get('highly_skeptical')==-0.35 and _th.get('opponent')==-0.70 and
+    (_th.get('overall') or {}).get('normalization')=='fixed-not-roster-percentile' and
+    _th.get('evidence_scales',{}).get('normalization')=='fixed-not-domain-percentile'
+)
+ok(_fixed,'D1 stance bands fixed across all domains (not population-curved); observed overall sides anti=%d pro=%d %s'%(oppside,champside,dict(sd)))
 # E congestion sheet
 ok('Congestion' in wb.sheetnames,'E1 Congestion sheet present')
 cg=wb['Congestion']; ncg=sum(1 for r in range(3,cg.max_row+1) if cg.cell(r,1).value)

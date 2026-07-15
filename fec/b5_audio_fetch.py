@@ -9,16 +9,16 @@ caveat vs the own-channel guarantee (attic/fetch_youtube_interviews). Then b5_au
 Modes:
   --eligible [N]      rank pilot-eligible members (Pink+Blue+behavioral) by visibility; print top N
                       (default 80 — power fix, prereg Addendum 3) + seed b5_audio_sources.json
-  --search [N]        AUTONOMOUS: for the top-N eligible, ytsearch floor-speech clips until >=180 s each
+  --search [N]        AUTONOMOUS: for the top-N eligible, ytsearch floor-speech clips until >=60 s each
   (default)           fetch the explicit URLs in b5_audio_sources.json {member:[urls]}"""
 import os, json, subprocess, glob, wave, contextlib
 sys = _s; sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+from audio_rules import MIN_MEMBER_TARGET_SEC as MIN_SEC
 B = MB_ROOT
 ADIR = os.path.join(B, 'audio_pilot')
 SRC = os.path.join(B, 'b5_audio_sources.json'); ARCH = os.path.join(B, 'b5_audio_dlarchive.txt')
 YCLIENT = 'youtube:player_client=ios,web_safari,android'   # bypasses the sandbox CDN 403
 PER_CLIP_SEC = 600     # cap any single clip at 10 min
-MIN_SEC = 180.0        # prereg per-member minimum (build re-enforces)
 SEARCH_N = 6           # search hits to pull per member
 def _ff():
     try:

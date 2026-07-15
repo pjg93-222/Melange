@@ -52,8 +52,7 @@ if not T: print('  !! big5_traits.json MISSING/EMPTY — every member falls to t
 # -0.76). Dispositions are now measured FROM BEHAVIOR (behavioral_dispositions.py): cooperation
 # (A-role, the one corner lexical A validated on, now measured directly), diligence (C-role,
 # roll-call participation — RKH's own C criterion), dominance (E-resistance role, interview turn
-# stats + leadership), visibility/breadth (seed-prob roles). N stays TEXT-based (no behavioral
-# criterion exists for it) with the same graded shrinkage. RECEPT_TRAITS=lexical reverts wholesale.
+# stats + leadership), visibility/breadth (seed-prob roles). RECEPT_TRAITS=lexical reverts wholesale.
 BASIS=os.environ.get('RECEPT_TRAITS','behavioral')
 # ---- N-SLOT (round-3 2026-07-09, user-ratified: "can you safely create it? proceed") ----
 # The Byrne composite's N was the engine's LAST text-derived leg ("no behavioral criterion exists"),
@@ -64,13 +63,14 @@ BASIS=os.environ.get('RECEPT_TRAITS','behavioral')
 # as every other behavioral component — never a text fallback, never an invented disposition);
 # RECEPT_N=text reverts the slot to the shrunken lexical N wholesale (the pre-round-3 legacy math).
 RECEPT_N=os.environ.get('RECEPT_N','affective')
-# N-SLOT ROUND-7 PROMOTION (2026-07-11, pre-registered gate 5/5, affective_n_validate.py): reactivity_z was
-# Extraversion-CONTAMINATED (r=+.185 w/ big5-E on 272; NEGATIVE w/ N) — it measured conversational
-# engagement, not Neuroticism. affective_n.json (Pennebaker LIWC base +first-person +neg-emotion
-# -pos-emotion, augmented by LLM affective facets pessimism/anxiety/depression/volatility policy-stripped,
-# averaged + party-controlled) is E-clean (+.04), party-clean (.00), LIWC↔LLM convergent (.24), split-half
-# SB .742. RECEPT_N=affective (default) uses it (z-scored); =behavioral reverts to reactivity_z (round-3);
-# =text to shrunken lexical N. Missing artifact -> revert to behavioral (never silent, never text fallback).
+# ROUND-7/7b AFFECTIVE-N PROMOTION (2026-07-11, user-ratified, pre-registered gate 5/5): affective_n
+# replaces the E-contaminated reactivity_z in the engine pressure slot. Airtight-audit interpretation:
+# E- and party-residualization are confound CONTROLS, not independent criterion-validity evidence; the
+# clean correlations cannot be counted twice. Independent support comes from the locked LIWC convergence,
+# fresh reliability test, face validity, and improvement over the incumbent. The LLM-label scratchpad is
+# also a reproducibility weakness to cure, but neither point invalidates the completed promotion gate.
+# RECEPT_N=behavioral reverts to reactivity_z; =text is the pre-round-3 lexical N. Missing affective
+# artifact is required for the ratified default; only an explicit RECEPT_N override may use a legacy slot.
 AN={}
 if RECEPT_N=='affective':
     try:
@@ -78,10 +78,10 @@ if RECEPT_N=='affective':
         _AN=json.load(open(B+r'\affective_n.json'))['members']; _v=list(_AN.values())
         _mu=_st.mean(_v); _sd=_st.pstdev(_v) or 1.0
         AN={m:(x-_mu)/_sd for m,x in _AN.items()}
-    except FileNotFoundError: pass
+    except FileNotFoundError as exc:
+        raise FileNotFoundError('required ratified N-slot input affective_n.json is missing; rebuild it with emit_affective_n.py') from exc
     if not AN:
-        print('  !! affective_n.json MISSING — reverting RECEPT_N to behavioral (round-3 reactivity_z)')
-        RECEPT_N='behavioral'
+        raise ValueError('required ratified N-slot input affective_n.json has no members')
 # ---- A-SLOT (round-6 engine promotion 2026-07-10, user: "Fine promote it") ----
 # cooperation_z (behavior_panel raw-count basis) was the dependability audit's "volume proxy"
 # indictment: entangled +.708 with breadth, +.739 with log-volume. cooperation_v2 (share-based,
@@ -95,17 +95,17 @@ RECEPT_COOP=os.environ.get('RECEPT_COOP','v2')
 CV2={}
 if RECEPT_COOP!='v1':
     try: CV2={m:(d or {}).get('cooperation_v2_z') for m,d in json.load(open(B+r'\coop_v2_candidate.json'))['members'].items()}
-    except FileNotFoundError: pass
+    except FileNotFoundError as exc:
+        raise FileNotFoundError('required ratified A-slot input coop_v2_candidate.json is missing; run coop_v2_candidate.py') from exc
     if not CV2:
-        print('  !! coop_v2_candidate.json MISSING — reverting to RECEPT_COOP=v1 (run coop_v2_candidate.py)')
-        RECEPT_COOP='v1'
+        raise ValueError('required ratified A-slot input coop_v2_candidate.json has no members')
 BD={}
 if BASIS=='behavioral':
     try: BD=json.load(open(B+r'\behavioral_dispositions.json'))['members']
-    except FileNotFoundError: pass
+    except FileNotFoundError as exc:
+        raise FileNotFoundError('required ratified behavioral basis behavioral_dispositions.json is missing') from exc
     if not BD:
-        print('  !! behavioral_dispositions.json MISSING — falling back to LEXICAL basis (run behavioral_dispositions.py)')
-        BASIS='lexical'
+        raise ValueError('required ratified behavioral basis has no members')
     else: print('  BEHAVIORAL basis: %d members with measured dispositions (RECEPT_TRAITS=lexical reverts)'%len(BD))
 EL=json.load(open(B+r'\electoral.json'))
 try: EP=json.load(open(B+r'\electoral_plays.json'))
@@ -156,7 +156,7 @@ for m in members:
         # N-slot: behavioral reactivity (RECEPT_N=behavioral, round-3 default) or shrunken text N
         # (RECEPT_N=text, pre-round-3 legacy).
         rea=bd.get('reactivity_z')
-        if RECEPT_N=='affective': Nn=AN.get(m,0.0)          # round-7: affective-content N (missing -> neutral 0)
+        if RECEPT_N=='affective': Nn=AN.get(m,0.0)          # round-7 default: affective-content N (missing -> neutral 0)
         elif RECEPT_N=='text': Nn=N                          # pre-round-3 lexical N
         else: Nn=rea if rea is not None else 0.0             # round-3 behavioral reactivity_z
         susc_trait=.40*coop+.30*Nn-.20*dil-.10*dom
@@ -200,7 +200,7 @@ dump_atomic({'members':out,'LOSSFRAME':1.10,'basis':BASIS,'n_slot':(RECEPT_N if 
   'coop_slot':(RECEPT_COOP if BASIS=='behavioral' else 'v1'),
   'provenance':'Byrne2015 choking (susc), Fouirnaies-Hall (incent), Linde-Vis prospect theory (pt), Chen/SNAM contingency (seed_prob); '
     +(('BEHAVIORAL basis (nomological fix 2026-07-04): cooperation/diligence/dominance/visibility/breadth measured from behavior_panel; '
-       +('N-slot = affective-content N (Pennebaker LIWC +first-person +neg -pos, + LLM facets pessimism/anxiety/depression/volatility policy-stripped, party-controlled; round-7 promotion 2026-07-11 gate 5/5; E-clean +.04 vs reactivity_z E-contaminated +.185; missing -> neutral)' if RECEPT_N=='affective'
+       +('N-slot = affective-content N (LLM pessimism/anxiety/depression/volatility, residualized on text-E + party; round-7/7b promotion gate 5/5; missing -> neutral; residualization is a confound control, not independent criterion evidence)' if RECEPT_N=='affective'
          else 'N-slot = behavioral reactivity (live-interview cutoff proneness, round-3 2026-07-09; missing -> neutral; RECEPT_N=text reverts)' if RECEPT_N!='text'
          else 'N-slot = text N with sqrt shrinkage (RECEPT_N=text legacy)')
        +('; A-slot = share-based cooperation_v2 (round-6 promotion 2026-07-10, composition frozen @28914b3; missing coverage -> neutral; RECEPT_COOP=v1 reverts)' if RECEPT_COOP!='v1'

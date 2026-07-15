@@ -813,7 +813,16 @@ splits >=.40) and expressiveness median SB=.749 (all five >=.40). Dominance's la
 partial cross-role correlation is .245 (reactivity); dominance-expressiveness is -.074 and
 dominance-cooperation_v2 is .002. Replacing the old dominance slot in memory only leaves the
 flip-model decision surface effectively unchanged (rho=.999980, top-20 20/20, top-50 50/50).
-Therefore dominance-v2 is a **qualified candidate**, consumed by nothing until a separate promotion.
+Therefore, at the locked result, dominance-v2 was a **qualified candidate**, consumed by nothing
+until a separate promotion.
+
+**Display-only promotion (2026-07-13).** The subsequent instruction to optimize the remaining
+behavior layer promoted both qualified roles to the member desk only. Dominance-v2 replaces the
+legacy leadership-contaminated dominance display; expressiveness-v2 appears as a separately labeled
+verbal-expression role. Members below 30 qualifying turns remain missing. Neither value is read by
+an engine, neither is substituted for Big-Five E, and the promotion moved 0/533 ranks. The expanded
+full-body audit independently checks exact member-level propagation and rejects any unapproved
+production-engine consumer.
 
 Expressiveness is distinct from visibility after controls (r=-.175) and qualifies as a stable
 speaking-style role, but it fails its source-disjoint CREC floor-elaboration criterion (partial
@@ -858,3 +867,261 @@ criterion before the interview candidate or behavioral rivals were opened. Expre
 a reliable operational speaking-style role, not a validated E behavior. The result also prevents the
 older N=90 audio-E finding from being treated as a stable member-level criterion on the expanded clean
 voiceprint corpus.
+
+## 33. Fable suggested-approach refresh (2026-07-13)
+
+The member-desk three-paragraph brief is a display-only communication aid, not a validation channel
+and not an engine input. Its current evidence packet uses the promoted multimethod Blue traits,
+conversation-role v2 observations, verified eGeMAPS voice features, and source-grounded personal
+texture. The static interpretation rubric is prompt-cached; each member's dynamic packet is hashed
+and stored with prompt and basis versions so stale or mixed-vintage prose fails the full audit.
+
+The roster refresh produced 533/533 complete briefs: 473 direct Fable results, 59 Opus
+refusal-fallback results, and one deterministic neutral non-inference brief for a member with fewer
+than two supplied evidence channels. Coverage at generation was 410 verified voice profiles, 272
+conversation-role profiles, and 479 members with at least one source-qualified personal detail. The
+personal layer may supply at most one natural rapport detail; it may not be used as leverage or to
+infer an unstated preference. Affective-content N is labeled as such, low-antagonism A remains
+separate from cooperation, visibility is not treated as Extraversion, and missing behavioral evidence
+remains unknown rather than neutral-scored.
+
+Promotion regenerated only the dashboard tail and changed 0/533 ranks. The production audit requires
+all 533 desk narratives, current version/hash metadata, at least 400 direct Fable reads, at most five
+evidence-insufficient rules, and substantial cache-read use. This refresh consumed 1,117,755 cached
+input tokens after a 2,105-token cache creation and passed the 89-check full-body audit.
+
+## 34. Sonnet 5 narrative cost/quality promotion (2026-07-13)
+
+The narrative writer moved from Fable 5 to Sonnet 5 after a source-identical 12-member comparison
+and a second six-member no-thinking pilot. Sonnet preserved the three-paragraph structure and supplied
+evidence, eliminated all model fallbacks in the full roster run, and showed no gender-pronoun leakage,
+raw percentile text, z-score language, stale versions, or malformed rows. The rubric was tightened so
+visibility cannot determine meeting format and projected persona cannot substitute for observed turn
+behavior. Sonnet adaptive thinking is disabled because this is a bounded evidence-to-prose transform;
+the pilot showed it consumed roughly 1,500 hidden output tokens per member without improving the
+visible brief.
+
+The promoted artifact contains 532 direct Sonnet briefs plus the unchanged deterministic neutral brief
+for the single evidence-insufficient member. Prompt caching recorded 2,332 cache-creation tokens and
+1,238,292 cache-read tokens. Total first-party API cost at the introductory Sonnet 5 rate in effect on
+2026-07-13 was approximately $5.39, compared with more than $32.52 of recorded successful-call cost
+for the superseded Fable/Opus run (excluding the unrecorded Fable attempts that ended in refusal).
+This is a display-writer substitution only: evidence inputs, trait values, engines, and ranks are
+unchanged.
+
+## 35. Construct-audit reset — O/C retained; E/A/N withheld (2026-07-13)
+
+This section supersedes the product and claim implications of sections 29, 30, 33, and 34. Their
+recorded experiments and artifacts remain historical evidence; they no longer authorize a five-trait
+display or a generated profile. The reset follows the measurement definitions and validity standards
+in the supplied Big Five, elite-speech, public-personality, digital-trace, and PoliPers literature:
+reliability is necessary but not validity, an external-role correlate is not automatically a trait,
+and a narrow public-language facet cannot be relabeled as a holistic Big Five construct.
+
+The five-trait promotion did not survive re-audit for three specific reasons:
+
+1. **Extraversion:** its criterion channel is `visibility_z`. Visibility is partly an outcome of
+   institutional office, media demand, and communication strategy. The locked role-controlled
+   warmth/excitement/activity/gregariousness/assertiveness candidate missed reliability and construct
+   gates (overall SB=.567; controlled RKH r=-.070; aspect coherence r=-.071). Interview-observer and
+   clean-audio alternatives also failed their preregistered qualification gates. Extraversion is
+   therefore unavailable. Raw and role-adjusted public exposure remain context only.
+2. **Agreeableness:** the promoted A diagonal (r=.5367369729603486) is exactly the same package-half
+   correlation used to compute its SB reliability (.699). It is repeatability, not an independent
+   criterion, and cannot be counted a second time as convergent validity. The controlled
+   low-antagonism measure remains a reliable, media-stratum-scoped public-language observation; the
+   separately validated cross-party cooperation measure remains revealed legislative behavior.
+   Neither is holistic Agreeableness, and their divergence is not an error.
+3. **Neuroticism:** the reported SB=.680 belongs to package-split LIWC anchor scores, while the
+   production score is the separate LLM/residualized `affective_n` measure. The available convergence
+   (about r=.253) supports a narrow negative-affect-expression interpretation, not reliable holistic
+   Neuroticism. Behavioral reactivity is also kept separate. Neither is a diagnosis, private-trait
+   estimate, or complete composure measure.
+
+The active product contract is now: qualified public-text **Openness** and **Conscientiousness** are
+shown with their criterion scope; **Extraversion**, **Agreeableness**, and **Neuroticism** are shown as
+unavailable. Co-operation, diligence, breadth, activity, conversational dominance, verbal
+expressiveness, warmth, excitement, gregariousness, assertiveness, low antagonism, negative-affect
+expression, reactivity, and public exposure may be shown only under those literal labels. Supporting
+measurement details live in a psychology disclosure rather than the headline trait panel. The
+archived Pink overlay is not rendered.
+
+The reset is display/claim-only. It does not alter the influence model, the formal
+Speaker/leader/whip contribution, the ratified cooperation-v2 engine role, or any rank. The active
+audio layer remains fail-closed: no vocal descriptor enters a profile unless target identity,
+source independence, and cross-source stability clear the v2 guards. Legacy paid narratives remain
+withheld. A deterministic local three-paragraph renderer exists at zero API cost, but roster-wide
+activation remains an explicit user decision after this reset is verified.
+
+## 36. User-directed restoration of the accepted product state (2026-07-13)
+
+Section 35 recorded a stricter post-hoc reinterpretation of already accepted validation artifacts; it
+did not record a new failed replication. The product implications of that reinterpretation were not
+ratified and are superseded by this restoration. The accepted display contract is restored without
+rewriting the underlying historical results: source-primary O/C, a role-adjusted public-exposure cue
+in the operational E slot, package-split low-antagonism A, and affective-content N. The E cue must stay
+explicitly labeled as exposure rather than intrinsic Extraversion; cooperation remains separate from
+A; N remains public affective-content rather than a diagnosis or private-state claim.
+
+The restoration preserves the 2026-07-13 formal Speaker/leader/whip influence decomposition and the
+fail-closed audio-v2 guards. It does not activate legacy paid narratives or spend through an API. The
+zero-API local three-paragraph renderer remains withheld pending explicit user approval. No influence
+rank is changed by this personality-display restoration.
+
+## 37. Source-integrity diagnosis, CHRG source rebuild, and model quarantine (2026-07-14)
+
+The accepted source-primary corpus now uses attributed `CREC`, attributed `INTERVIEW`, and non-repost
+database social posts only. A full inventory found 757 legacy CHRG rows that fail current-service or
+chamber attribution constraints, including witness-name and same-surname collisions. The cause was
+not damaged GovInfo content: the first backfill discarded package chamber and Congress, guessed
+Senate before House against the current roster, accepted comma-terminated direct address as a new
+speaker, and did not isolate live questions from testimony/opening/written material.
+
+All 206 previously successful packages were then re-fetched from the original GovInfo HTML. A
+backup-first transaction replaced 12,873 legacy rows with 9,763 verified ordinary-question rows
+(1,507,370 words, 185 packages with qualifying rows, 190 current members). Every stored row now has
+matching service, Congress, and chamber; exact duplicates, invalid rows, Roger Marshall rows from
+House hearings, and the Susannah-Marshall collision are all zero. The pre-repair database is retained
+as `backups/social_media.PRE-CHRG-REPAIR-20260714_013342.db`.
+
+CHRG remains excluded both from the accepted personality text basis and from behavioral diligence.
+The rebuild establishes attribution integrity, not psychometric validity, so re-entry requires a
+separate locked validation. The collector now applies the same chamber/tenure, witness, live-Q&A,
+post-hearing, and joint-hearing guards to future ingestion.
+
+After CHRG removal, diligence consists of verified roll-call participation plus CEL/LEP bill
+follow-through. The accepted source-primary model passed all locked gates again: package overlap 0;
+five of five reliability gates; five of five criterion/discriminant gates; five of five known-group
+directions. C reliability improved from `.934` to `.941`, and the independent C-criterion diagonal
+improved from `.247` to `.269`. O/C/E coverage is 533/533; A remains 322 and affective N 469 because
+their independent evidence floors are narrower. The repair changed no influence rank.
+
+The corpus cache contains 172,262 selected packages and is content-fingerprinted against the live
+database. HTML entities were decoded under a backup-first transaction. The audit reports zero hard
+errors and explicitly records that current evidence is not full-tenure for every member. A locked
+expansion using deduplicated verified X/Facebook/Bluesky text passed reliability but missed C
+discriminant dominance by .002; it remains an unconsumed candidate. Press releases, newsletters,
+letters, prepared committee statements, and unverified social rows are excluded.
+
+## 38. Advocacy-persistence as Conscientiousness — reliable but invalid, retired (2026-07-14)
+
+A locked, interpretable candidate tested the proposed official-persona cues directly: concrete
+first-person action, constituent-linked action, bill/agency/number specificity, and recurrence of an
+issue across at least three packages spanning 30 days. It used only CREC and interviews, controlled
+chamber, party, committee leadership, and package volume, and was never connected to production.
+
+The cue was stable (Spearman-Brown `.713`, `n=391`) and covered 484 members, but it did not measure
+behavioral diligence (rho `+.015`, permutation `p=.372`; controlled `r=+.044`). It correlated more
+with public visibility (`+.158`) and policy breadth (`+.096`) than with diligence, failing both
+criterion and discriminant gates. Its shared-source correlation with accepted text C was `-.035`.
+The fixed lexical route is therefore retired as a C measure. Repeated advocacy may be a useful
+observable communication/activity descriptor, but it is not evidence of Conscientiousness or actual
+follow-through and will not be tuned or relabeled to force a pass.
+
+## 39. Social-format, intrinsic-E, and audio evidence update (2026-07-14)
+
+Azucar, Marengo, and Settanni's digital-footprint meta-analysis reports useful average prediction but
+extreme between-study heterogeneity. Multiple *types* of digital footprint improved C prediction;
+text by itself did not reliably outperform other inputs, and posting activity primarily helped E.
+Accordingly, the accepted C construct and criterion remain frozen. Social text must be treated as a
+separately normalized format-transfer channel, while demographics, office visibility, and posting
+volume cannot be imported as C cues. The prior pooled social-text candidate remains a MISS and is not
+rescored or tuned from its `.002` discriminant failure.
+
+Smith et al.'s concise-inventory study supports a four-indicator survey measure of E after factor,
+structural-equation, and criterion checks. It does not turn tone, verbosity, or appearance frequency
+into an intrinsic-Extraversion estimator. The existing role-controlled interview composite already
+tested warmth, excitement, activity, gregariousness, and assertiveness and failed aspect coherence.
+No new E score is activated from the same looked-at data. Public-adjusted exposure remains the
+operational E-slot cue, explicitly distinct from intrinsic Extraversion; a new intrinsic-E route must
+first obtain an independent multi-indicator criterion and then test within-setting and cross-setting
+generalization.
+
+Marrero et al. found modest out-of-sample personality prediction from combined voice/language in a
+student sample (joint R-squared .16 E, .11 C, .15 N, .04 O, .07 A), with complex spectral features and
+greater voice than language contribution for most traits. The same audio also predicted gender above
+90%, making unguarded transfer a serious confound. Hayat et al.'s CNN chapter predicts *apparent*
+personality from short YouTube clips, not self-reported or political Big Five. Therefore audio still
+cannot modify Big Five. The active on-air guard now additionally requires at least 50 aligned target
+words per clip and explicitly rejects absolute-F0/gender, apparent-personality CNN, and unvalidated
+MFCC/chroma/spectral trait inference. The existing two-review, target-only, two-program, program-
+conditioned, 180-second member floor remains active and fail-closed.
+
+## 40. External Senate gold anchor, reconstructed E, and topic-conditioned pitch (2026-07-15)
+
+Three supplied sources changed the criterion design without rewriting any prior result. The frozen
+online appendix to *Personality on the Hill* supplies 254 senator-level ratings: 129 Senate-insider
+rows (PDF pp. 2-4) and 125 academic-expert rows (pp. 5-7), each on the same 1-7 O/C/E/A/Emotional-
+Stability scale with the number of raters preserved. The extractor pins the exact source PDF at
+SHA-256 `43c989262fde0b5b806c316e54147474fb4c0d34d05ba819d49e37921aef731a` and refuses any page,
+table-shape, range, count, or duplicate mismatch. Current-roster overlap is 46 insider-rated and 52
+academic-rated members, with 40 shared; cross-panel E agreement is `r=.426`.
+
+Amsalem et al., *The Effect of Politicians' Personality on Their Media Visibility* (2018), treats
+media appearances as an outcome, not an Extraversion questionnaire. The study uses self-reported
+TIPI traits (PDF pp. 11-12) and finds that, with institutional and activity controls, higher E and
+lower A predict more visibility; O and emotional stability also predict aggregate visibility, while
+C is inconsistent (Table 1, pp. 14-17). The new gold audit reproduces the central warning in this
+roster: raw visibility correlates positively with expert E (`+.377` insiders, `+.215` academics) but
+also negatively with expert A (`-.345`, `-.251`). Therefore visibility cannot be the sole E
+criterion. Role adjustment remains useful public-exposure context, but in this overlap it weakens the
+E association and does not remove the multi-trait interpretation.
+
+The equal-weight E axis remains the fixed, no-gold-fitted control: equal weight on
+(1) roster-standardized source-primary Blue E, the visibility-calibrated channel, and (2)
+roster-standardized Pink raw observer-item E, followed by one final standardization. The expert
+values are used only after construction. The estimate clears both independent panels: insiders
+`r=.529`, `n=46`, one-sided permutation `p=.0001`; academics `r=.484`, `n=52`, `p=.0002`. Its E
+diagonal exceeds every absolute heterotrait correlation in both panels. Coverage is 509/533; the 24
+members without the observer-item channel remain missing, with no visibility-only fallback. This
+establishes that both primary methods carry real E signal, but it is no longer the active profile
+estimate.
+
+The active `big5-gold-anchored-v2` estimator answers the requested optimization with leave-one-member-
+out weight selection: the held-out senator's label never enters that senator's score, both panels are
+evaluated independently, weights are nonnegative on a 0.10 grid, and full-sample weights are fit only
+after the OOF gates pass. E selects 20% Blue, 60% Pink, 10% interaction dominance-v2, and 10% role-
+adjusted visibility. It clears insiders at `r=.493` and academics at `r=.505`, with diagonal
+dominance in both. E therefore includes both requested behavioral channels, while each remains
+separately labeled context and is not E by itself.
+
+The same audit is deliberately trait-specific. Broad public-personality A clears both panels
+(`r=.431/.400`, coverage 317; 10% qualified Blue low-antagonism + 90% Pink observer A). Per the
+2026-07-15 user activation rule, O/C/N also enter the canonical profile when at least one independent
+panel clears the n/r/p association gate, but their status is explicitly weaker:
+`ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED`. O is supported by academics (`r=.492`) but not insiders
+(`.192`); N, the reverse of appendix Emotional Stability, is supported by insiders (`.374`) but not
+academics (`.123`); C has a significant insider association (`r=.262`, `p=.040`) but lacks diagonal
+dominance and has academic `r=-.039`. C therefore enters only as one-panel association-supported,
+not as discriminantly validated. The canonical profile uses broad O/C/E/A/N wherever each composite
+has member coverage. Qualified text O/C, low-antagonism A, and affective-content N remain alongside
+the broad axes under narrower labels; missing member evidence stays null rather than being imputed.
+
+Dietrich, Hayes, and O'Brien, *Pitch Perfect* (2019), changes the active audio quantity. Its HouseLive
+workflow is the operationally important addition: official Clerk broadcast events pair HLS/DASH
+video with WebVTT captions, while the transcript API supplies speaker labels and archive-relative
+offsets. The unit is a confirmed speech, not a member-level pooled voiceprint. Mean F0 is measured on concatenated
+target-only segments for each speech unit, converted from the eGeMAPS semitone representation to Hz,
+and standardized within speaker as `(speech mean F0 - speaker mean F0) / speaker speech-unit SD`
+(methods PDF p. 5). Absolute pitch and cross-speaker pitch never enter a personality score. Topics
+must come from the aligned transcript/closed captions, using a pinned dictionary or structural topic
+model, never the video title or editable Congressional Record text (pp. 5-6). A member needs at least
+five confirmed speech units, two independent sources/programs, and two distinct transcript-identified
+topics; a topic summary needs at least two speeches. Output is literal topic-conditioned emotional
+intensity relative to that speaker's baseline. It does not modify Big Five.
+
+The first dated smoke on 2025-07-15 succeeded for Chip Roy: five 35-second intervals, 216 day-level
+caption units, 199 named-caption units, 33 unambiguously resolved members, two identified policy
+topics plus other speech, finite mean F0, and finite within-speaker deviations. It is research-only
+because caption identity has not received two independent reviews. WJ has 7,746 timed member turns
+but its remote media binding remains blocked; CNN has 66,450 transcript units but no deterministic
+audio binding; the CREC/floor corpus has 104,632 transcript units and 2,192 legacy WAVs but no
+transcript-unit hash/time plus two-review binding. The active reviewed queue therefore remains at
+zero production profiles rather than publishing legacy pooled eGeMAPS values.
+
+Behavioral integrity is now explicit and hash-pinned. Diligence covers 528 members from 527 eligible
+roll-call records and 447 LEP follow-through records (446 have both), averages available within-
+chamber z scores, clips only after combination to `[-3,3]`, and never penalizes a missing component.
+The LEP criterion is static through the 118th and is one behavior component, not a direct rank input.
+Corrupted legacy CHRG hearing counts are contractually excluded. The RKH ceremonial-bill criterion
+remains null and is reported as such; it is not used to claim successful validation.

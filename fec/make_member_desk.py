@@ -15,11 +15,16 @@ Member Desk) + dashboard_data.json (SNA: rank, stance, electoral, FEC CU $, cosp
 Run:  python fec/make_member_desk.py            (writes bundle JSON + HTML)
       python fec/make_member_desk.py --data      (writes/validates the bundle only)
 """
-import json, os, csv, re, sys, unicodedata
+import json, os, csv, re, sys, unicodedata, hashlib
 from datetime import datetime
 import openpyxl
-from moneyball_core import dump_atomic   # S3-01 audit run-2: chain artifacts write atomically
+import moneyball_core as MBC
+from moneyball_core import dump_atomic, write_text_atomic   # crash-safe generated artifacts
 from tier_util import legislative_press_tiers   # Legislative+Press tier (display-only; shared with the dashboard producer)
+import bill_rules as BR
+import media_rules as MR
+import dashboard_integrity as DI
+from member_identity import Resolver
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
 B = MB_ROOT
@@ -62,10 +67,19 @@ EH  = L('electoral_history.json') or {}      # per-member FEC primary+general vo
 _RA = L('ranks_python.json') or {}
 RA_RANK = _RA.get('rank', {}); RA_SCORE = _RA.get('score', {})
 RA_PCTS = _RA.get('pcts', {}); RA_PRESSP = _RA.get('press_pillar', {})
+RA_INF_BASE = _RA.get('influence_raw_base', {})
+RA_ROLE_NOMINAL = _RA.get('formal_role_influence_nominal', {})
+RA_ROLE_BONUS = _RA.get('formal_role_influence_bonus', {})
+RA_ROLE_DISPLAY = _RA.get('formal_role_display_weight', {})
+RA_ROLE_OFFICE = _RA.get('formal_role_influence_office', {})
+RA_ROLE_ELIGIBILITY = _RA.get('formal_role_influence_eligibility', {})
+RA_INF_ADJ = _RA.get('influence_raw_adjusted', {})
 _AB = _RA.get('ab_weights', {})   # {2:leg,3:press,4:inf,5:dem} — the live user dials
 RA_W = {'leg': _AB.get('2'), 'press': _AB.get('3'), 'comm': _AB.get('4'), 'demo': _AB.get('5')} if _AB else {}
 _SNAP = L('pillar_inputs_snapshot.json') or {}   # O=leg raw, E=influence raw (committee_score), F=demo raw
-RA_OEF = {'leg': _SNAP.get('O', {}), 'comm': _SNAP.get('E', {}), 'demo': _SNAP.get('F', {})}
+RA_OEF = {'leg': _SNAP.get('O', {}),
+          'comm': RA_INF_ADJ or _SNAP.get('E', {}),
+          'demo': _SNAP.get('F', {})}
 # ---- signed cross-media reference layer (user-ratified 2026-07-04): who this member references
 # (out) / is referenced by (in), Fable-valenced, from member_references.json (directed a->b) ----
 _REFS = (L('member_references.json') or {}).get('edges', [])
@@ -93,8 +107,9 @@ def refs_for(name):
     return {'out': out, 'in': inn} if (out or inn) else None
 # ---- computed psychometrics (user-directed 2026-07-03): Big5 radar + B&L persona + susceptibility cross-read ----
 B5  = (L('big5_blue_validated.json') or L('big5_blue_emb.json') or L('big5_v2.json') or L('big5_traits.json') or {}).get('traits', {})
-# Preferred Blue is the 5/5 multimethod promotion: source-primary O/C/E, qualified package-split
-# inverse-antagonism A, and independently promoted affective-content N.
+# Preferred Blue supplies source-primary O/C, package-split inverse-antagonism A, the accepted
+# text-N criterion, and one half of the externally anchored E estimate.  Public exposure is still
+# shown separately and is no longer substituted directly onto the Extraversion axis.
 RCPT = (L('member_receptivity.json') or {}).get('members', {})
 if not RCPT: print('  !! member_receptivity.json MISSING — psychometrics tab computed section will be empty')
 def _pctrank(vals):
@@ -104,22 +119,21 @@ def _pctrank(vals):
 _b5have = {m: t for m, t in B5.items() if t.get('tokens', 0) > 0}
 _B5PCT = {tr: _pctrank([t[tr] for t in _b5have.values() if t.get(tr) is not None])
            for tr in ('O', 'C', 'E', 'A', 'ES')} if _b5have else {}
-# LLM item-read overlay (run-4p, user: "Wire it in"): big5_llm_opus.json — the MTMM-passing Opus
-# pilot (173 RKH-overlap members). Display overlay ONLY (dashed polygon on the v2 radar); engines
-# untouched — promotion into receptivity stays a separate ratified step.
+# Archived Pink item-read overlay. It remains display/diagnostic only and never enters an engine.
 B5L = (L('big5_llm_opus.json') or {}).get('traits', {})
 _llmhave = {m: t for m, t in B5L.items() if t.get('n_chunks', 0) > 0}
-_LLMPCT = {tr: _pctrank([t[tr] for t in _llmhave.values()]) for tr in ('O', 'C', 'E', 'A', 'ES')} if _llmhave else {}
 # ES retired 2026-07-12 (user: redundant with N — ES=-N r=-1.00 — + voice-ES gender-confounded).
 # Preserve instrument independence on the replacement Neuroticism axis: Blue-N and Pink-N are ranked
 # from their OWN text-family scores. The round-7 affective-content score remains a separate,
 # text-derived diagnostic candidate; copying it into both polygons would manufacture agreement.
-_B5NPCT = _pctrank([t['N'] for t in _b5have.values() if t.get('N') is not None]) if _b5have else None   # filter None (mirrors line 105); thin-data members legitimately lack an N score
+_LLMPCT = {tr: _pctrank([t[tr] for t in _llmhave.values() if t.get(tr) is not None])
+           for tr in ('O', 'C', 'E', 'A', 'ES')} if _llmhave else {}
+_B5NPCT = _pctrank([t['N'] for t in _b5have.values() if t.get('N') is not None]) if _b5have else None
 _LLMNPCT = _pctrank([t['N'] for t in _llmhave.values() if t.get('N') is not None]) if _llmhave else None
 _BLUE_FILE = next((os.path.join(B, f) for f in ('big5_blue_validated.json','big5_blue_emb.json','big5_v2.json')
                    if os.path.exists(os.path.join(B, f))), os.path.join(B, 'big5_v2.json'))
-_PINK_FILE = os.path.join(B, 'big5_llm_opus.json')
 _BLUE_TS = os.path.getmtime(_BLUE_FILE) if os.path.exists(_BLUE_FILE) else None
+_PINK_FILE = os.path.join(B, 'big5_llm_opus.json')
 _PINK_TS = os.path.getmtime(_PINK_FILE) if os.path.exists(_PINK_FILE) else None
 _PINK_OLDER_DAYS = round(max(0.0, (_BLUE_TS - _PINK_TS) / 86400.0), 1) if _BLUE_TS and _PINK_TS else None
 _BLUE_DATE = datetime.fromtimestamp(_BLUE_TS).strftime('%Y-%m-%d') if _BLUE_TS else None
@@ -159,21 +173,34 @@ BDISP = (L('behavioral_dispositions.json') or {}).get('members', {})
 # matching the engine's A-slot); members without v2 coverage render neutral-with-note, the same
 # convention as reactivity — never a silent fallback to the volume-entangled raw-count v1.
 _CV2 = {m: (d or {}).get('cooperation_v2_z') for m, d in ((L('coop_v2_candidate.json') or {}).get('members', {})).items()}
+# User-promoted display-only conversation roles (2026-07-13). The locked study qualified
+# dominance-v2 and expressiveness-v2 as observable roles. They remain barred from every influence/rank
+# engine: dominance is also a 10% display-profile E channel, while expressiveness remains speaking style.
+_ROLES2_ART = L('behavioral_roles_v2_candidate.json') or {}
+_ROLES2 = _ROLES2_ART.get('members', {})
+_COMM_ART = L('communication_style.json') or {}
+_COMM = _COMM_ART.get('members', {}) if _COMM_ART.get('schema') == 'communication-style-v1' else {}
+_PROFILE_ART = L('profile_basis_v2.json') or {}
+_PROFILE = _PROFILE_ART.get('members', {}) if _PROFILE_ART.get('schema') == 'profile-basis-v2' else {}
+_GOLD_ART = L('big5_gold_anchored.json') or {}
+_GOLD_TRAITS = _GOLD_ART.get('traits') or {}
+_GOLD_MEMBERS = {trait: ((row.get('members') or {}) if str(row.get('status') or '').startswith('ACTIVE_') else {})
+                 for trait, row in _GOLD_TRAITS.items()}
+_E_ART = (_GOLD_TRAITS.get('E') or {})
+_E_GOLD = (_E_ART.get('members') or {}) if _E_ART.get('status') == 'ACTIVE_EXTERNAL_GOLD_ANCHORED' else {}
 BDR = {m: dict(d) for m, d in BDISP.items()}
-_IX = (L('interaction_features.json') or {}).get('members', {})
 for _m, _d in BDR.items():
     if _CV2.get(_m) is not None: _d['cooperation_z'] = _CV2[_m]
     else: _d.pop('cooperation_z', None)
-    # The producer combines interview dynamics with a binary committee-leadership indicator.
-    # Without a qualifying interaction record this creates roster-wide constants that look like
-    # person-specific measurements. Keep the engine artifact unchanged, but suppress those
-    # synthetic/default-only values from the person-facing display.
-    if ((_IX.get(_m) or {}).get('turns') or 0) < 30:
-        _d.pop('dominance_z', None)
+    # Replace the display-only legacy hybrid (interaction + formal leadership) with the qualified
+    # conversational measure. Missing interaction evidence remains missing, never neutral/imputed.
+    _r2 = _ROLES2.get(_m) or {}
+    if _r2.get('dominance_v2') is not None: _d['dominance_z'] = _r2['dominance_v2']
+    else: _d.pop('dominance_z', None)
 _BD_AX = ['cooperation_z', 'diligence_z', 'dominance_z', 'visibility_z', 'breadth_z']
 _BDPCT = {ax: _pctrank([d[ax] for d in BDR.values() if ax in d]) for ax in _BD_AX} if BDR else {}
-_AFFN = (L('affective_n.json') or {}).get('members', {})
-_AFFNPCT = _pctrank(list(_AFFN.values())) if _AFFN else None
+_EXP2PCT = _pctrank([d['expressiveness_v2'] for d in _ROLES2.values()
+                     if d.get('expressiveness_v2') is not None]) if _ROLES2 else None
 # Round-9 validated A facet: inverse of controlled, package-split interview antagonism.
 # This is display-only and deliberately separate from both the cooperation engine role and
 # the two text Big-Five polygons; neither text-A instrument cleared diagonal dominance.
@@ -181,51 +208,75 @@ _AVAL_ART = L('interview_antagonism.json') or {}
 _AVAL = _AVAL_ART.get('members', {})
 _AVALPCT = _pctrank([d['agreeableness_z'] for d in _AVAL.values()
                      if d.get('agreeableness_z') is not None]) if _AVAL else None
-NARR = L('member_narratives.json') or {}   # 3-paragraph 'Suggested approach' brief (Fable, Opus rescues refusals); display-only
-# voice-ES RETIRED 2026-07-12 (user): the +0.208 look was gender-confounded (locked retest partial r −0.03).
-# The text radar uses independently ranked N=-ES. The decision radar's sixth axis shows the separately
-# promoted affective-N engine input; it is never copied into either text polygon.
-
-_NARR_TRAIT_TERMS = ('agreeableness', 'agreeable', 'emotional stability', 'neuroticism', 'neurotic')
-def _narrative_without_unvalidated_an(text):
-    """Block legacy prose claims sourced from the non-discriminant text A/N axes.
-
-    The generated narratives predate the validated antagonism facet and affective-N promotion.
-    Keep their operational observations, but never let old text-A/ES prose overrule the qualified
-    measures now shown alongside it.
-    """
-    sentences = re.split(r'(?<=[.!?])\s+', text or '')
-    kept = [s for s in sentences if not any(term in s.lower() for term in _NARR_TRAIT_TERMS)]
-    return ' '.join(kept).strip() or 'Trait-specific narrative withheld pending qualified-source regeneration.'
+_NARR_DOC = L('member_narratives_v2.json') or {}
+_BASIS_PATH = os.path.join(B, 'profile_basis_v2.json')
+_BASIS_SHA = hashlib.sha256(open(_BASIS_PATH, 'rb').read()).hexdigest() if os.path.exists(_BASIS_PATH) else None
+_NARR_ACTIVE = (_NARR_DOC.get('schema') == 'member-narratives-v2-local' and
+                _NARR_DOC.get('status') == 'ACTIVE_LOCAL_ZERO_API' and
+                _NARR_DOC.get('basis_sha256') == _BASIS_SHA)
+NARR = (_NARR_DOC.get('members') or {}) if _NARR_ACTIVE else {}
+# Voice-ES remains retired. Negative-affect expression is retained below as a literal public-text
+# measure and is never presented as holistic Neuroticism or as an independent composure measure.
 
 def psy_for(name):
     t = B5.get(name) or {}; r = RCPT.get(name) or {}
     out = {}
     bd = BDR.get(name) or {}
+    r2 = _ROLES2.get(name) or {}
+    comm = _COMM.get(name) or {}
+    exposure = comm.get('public_exposure') or {}
+    e_public_proxy = exposure.get('role_adjusted_percentile')
+    gold = {trait: (_GOLD_MEMBERS.get(trait) or {}).get(name) or {} for trait in ('O','C','E','A','N')}
+    e_anchored = gold['E']
     if bd and _BDPCT:
-        out['behav_pct'] = [(_BDPCT[ax](bd[ax]) if ax in bd else None) for ax in _BD_AX] + [(_AFFNPCT(_AFFN[name]) if _AFFNPCT and name in _AFFN else None)]
+        out['behav_pct'] = [(_BDPCT[ax](bd[ax]) if ax in bd else None) for ax in _BD_AX]
+        out['behav_pct'][3] = ((comm.get('facets') or {}).get('activity') or {}).get('percentile')
         out['behavior_scope'] = {
             'dominance_observed': 'dominance_z' in bd,
-            'interaction_turns': int(((_IX.get(name) or {}).get('turns') or 0)),
-            'affective_n_shared_with_blue': bool(name in _AFFN and t.get('N') is not None),
+            'interaction_turns': int(r2.get('qualifying_turns') or 0),
+            'roles_v2_display_only': bool(r2),
+            'raw_visibility_percentile': exposure.get('observed_visibility_percentile'),
+            'role_adjusted_visibility': exposure.get('role_adjusted_percentile'),
         }
+        if r2.get('dominance_v2') is not None and r2.get('expressiveness_v2') is not None:
+            out['dominance_v2_z'] = r2['dominance_v2']
+            out['expressiveness_v2_z'] = r2['expressiveness_v2']
+            out['expressiveness_v2_pct'] = _EXP2PCT(r2['expressiveness_v2']) if _EXP2PCT else None
+    if comm:
+        out['communication_style'] = comm
+        out['e_public_proxy_pct'] = e_public_proxy
+        out['e_public_proxy_scope'] = ('role-adjusted public exposure context; one 10% anchored-E channel, '
+                                       'not the Extraversion score by itself')
+    if e_anchored:
+        out['e_gold_anchored_pct'] = e_anchored.get('percentile')
+        out['e_gold_anchored_scope'] = _E_ART.get('scope')
+    out['gold_trait_status'] = {trait: {
+        'status': (_GOLD_TRAITS.get(trait) or {}).get('status'),
+        'supporting_panels': (_GOLD_TRAITS.get(trait) or {}).get('supporting_panels') or [],
+        'strict_discriminant_panels': (_GOLD_TRAITS.get(trait) or {}).get('strict_discriminant_panels') or [],
+    } for trait in ('O','C','E','A','N')}
     if name in _AVAL and _AVALPCT and _AVAL[name].get('agreeableness_z') is not None:
         out['a_validated_pct'] = _AVALPCT(_AVAL[name]['agreeableness_z'])
         out['a_antagonism_z'] = _AVAL[name].get('antagonism_z')
         out['a_validated_scope'] = (_AVAL_ART.get('scope') or {}).get('label')
         out['a_coverage_n'] = (_AVAL_ART.get('scope') or {}).get('covered_n')
-    if t.get('tokens', 0) > 0 and _B5PCT:
-        out['big5_pct'] = [(_B5PCT[tr](t[tr]) if t.get(tr) is not None else None)
-                           for tr in ('O', 'C', 'E', 'A')] + [(_B5NPCT(t['N']) if (_B5NPCT and t.get('N') is not None) else None)]
+    if any(gold[trait] for trait in gold):
+        # Product contract: canonical broad Big-Five order E, O, C, A, N. Every slot now uses the
+        # OOF gold artifact; one-panel O/C/N carry their explicit weaker support status.
+        out['big5_pct'] = [gold[trait].get('percentile') for trait in ('E','O','C','A','N')]
         out['big5_low'] = bool(t.get('lowconf')); out['tokens'] = t.get('tokens')
     lm = _llmhave.get(name)
     if lm and _LLMPCT:
-        out['llm_pct'] = [_LLMPCT[tr](lm[tr]) for tr in ('O', 'C', 'E', 'A')] + [(_LLMNPCT(lm['N']) if (_LLMNPCT and lm.get('N') is not None) else None)]
+        out['llm_pct'] = [None] + [_LLMPCT[tr](lm[tr]) for tr in ('O', 'C')] + [
+                          _LLMPCT['A'](lm['A']),
+                          (_LLMNPCT(lm['N']) if _LLMNPCT and lm.get('N') is not None else None)]
         out['llm_chunks'] = lm.get('n_chunks')
     if out.get('big5_pct') or out.get('llm_pct'):
         out['big5_vintage'] = {'blue': _BLUE_DATE, 'pink': _PINK_DATE,
                                'pink_older_days': _PINK_OLDER_DAYS,
-                               'blue_n': len(_b5have), 'pink_n': len(_llmhave)}
+                               'blue_n': len(_b5have), 'pink_n': len(_llmhave),
+                               'gold_anchored_n':{trait:len(_GOLD_MEMBERS.get(trait) or {})
+                                                  for trait in ('O','C','E','A','N')}}
     if r.get('agency') is not None and _ACPCT:
         out['agency_pct'] = _ACPCT['agency'](r['agency']); out['communion_pct'] = _ACPCT['communion'](r['communion'])
         out['approach'] = _approach(out['agency_pct'], out['communion_pct'], r.get('susc_read'))
@@ -242,14 +293,16 @@ def psy_for(name):
     if ext: out['ext'] = ext
     nar = NARR.get(name)
     if nar and nar.get('ok'):
-        out['narrative'] = {'p1': _narrative_without_unvalidated_an(nar.get('p1', '')),
-                            'p2': _narrative_without_unvalidated_an(nar.get('p2', '')),
-                            'p3': _narrative_without_unvalidated_an(nar.get('p3', '')),
-                            'measurement_note': 'Legacy text-A/N claims removed; use the validated A facet and affective-N fields above.',
-                            'audio': bool((nar.get('has') or {}).get('audio'))}
+        out['narrative'] = {'p1': nar.get('p1', ''),
+                            'p2': nar.get('p2', ''),
+                            'p3': nar.get('p3', ''),
+                            'measurement_note': nar.get('measurement_note'),
+                            'audio': bool((_PROFILE.get(name) or {}).get('verified_audio_v2'))}
+    else:
+        out['narrative_status'] = 'withheld_pending_guarded_local_rebuild_and_user_approval'
     return out or None
 
-CATS = CS['cats']                            # canonical 17 legislative areas
+CATS = CS['cats']                            # canonical 18 legislative areas
 DEFENSIVE = set(CS['defensive'])
 SCORES = CS['scores']                        # name -> {cat: 0..1}
 
@@ -262,7 +315,7 @@ PLAY_STR = SNA['play']                        # one char per member: c/g/d/n
 EPVAL    = SNA['epval']                       # electoral play value ($)
 RANK_SNA = SNA['rank']
 PARTY_SNA= SNA['party']                       # one char per member D/R/I/?
-ISSUES   = SNA['issues']                      # 18 issue labels (incl 'Overall CU stance')
+ISSUES   = SNA['issues']                      # network issue labels (incl 'Overall CU stance')
 STANCE   = SNA['stance']                      # per member, string of tier letters (len == len(ISSUES))
 PLAYLBL  = {'c':'Contest · primary','g':'Contest · general','d':'Defend','n':'No active play'}
 TIERNAME = {'C':'Champion','F':'Defender','A':'Ally','H':'Highly Persuadable','P':'Persuadable',
@@ -322,9 +375,10 @@ LBL2CAT = {
     'Credit Union Capital Requirements':'CU Capital Requirements','Credit Card & Consumer-Fee Mandates':'Credit Card Mandates',
     'Data Privacy & Cybersecurity':'Data Privacy & Cyber','Defense Credit Union Issues':'Defense CU Issues',
     'Mortgage Lending & Housing':'Mortgage & Housing','NCUA Budget & Share Insurance Fund':'NCUA Budget & Insurance',
-    'Technology & Emerging Issues':'Technology & Emerging','Telephone Consumer Protection Act Issues':'TCPA',
+    'Technology & Emerging Issues':'Technology & Emerging','Telephone Consumer Protection Act':'TCPA',
+    'Telephone Consumer Protection Act Issues':'TCPA',
     # press-only extras (no canonical equivalent — kept as their own bucket):
-    'Credit Union Tax Status':'Credit Union Tax Status','CU-Bank Competitive Dynamics':'CU-Bank Competitive Dynamics',
+    'Credit Union Tax Status':'CU Tax Status','CU-Bank Competitive Dynamics':'CU-Bank Competitive Dynamics',
     'General Credit Union':'General Credit Union',
 }
 def norm_cats(s):
@@ -371,14 +425,9 @@ def _fsign(x):
 # ---------- press articles (by bioguide) + bills with roles (by name), from the Blended workbook ----------
 def load_press_and_bills(member_names):
     wb = openpyxl.load_workbook(WB, read_only=True, data_only=True)
-    nfc2name = {nrm(n): n for n in member_names}                    # NFC(name) -> our canonical member name
-    bg2name = {}                                                    # bioguide -> our canonical member name
-    for nb, bg in BIO.items():
-        md = nfc2name.get(nrm(nb))
-        if md: bg2name[bg] = md
+    resolver = Resolver(member_names, BIO)
     def canon(name, bioguide):
-        if bioguide and bioguide in bg2name: return bg2name[bioguide]
-        return nfc2name.get(nrm(name))
+        return resolver.resolve(name, bioguide)
     def fdate(d):
         if d is None: return ''
         s = str(d)
@@ -388,12 +437,20 @@ def load_press_and_bills(member_names):
     ph = {h: i for i, h in enumerate(next(pw.iter_rows(min_row=1, max_row=1, values_only=True)))}
     def pv(r, k): return r[ph[k]] if k in ph else None
     arts = {}
+    press_source_rows=press_unknown_member=press_billstatus_excluded=0
+    exclusion_samples={'press_unknown_member':[],'social_unknown_member':[],
+                       'bill_unknown_member':[],'bill_manual_excluded':[]}
     for r in pw.iter_rows(min_row=2, values_only=True):
+        press_source_rows += 1
         nm = canon(pv(r, 'member'), pv(r, 'bioguide'))
-        if not nm: continue
+        if not nm:
+            if len(exclusion_samples['press_unknown_member'])<20:
+                exclusion_samples['press_unknown_member'].append({'member':pv(r,'member'),'bioguide':pv(r,'bioguide')})
+            press_unknown_member += 1; continue
         # SKIP billstatus bill-cosponsorship rows: these are legislation (shown in Legislative actions, from the
         # role sheets), not press — folding them in here gave fake "articles" with dead billstatus: links.
-        if str(pv(r, 'url') or '').startswith('billstatus:'): continue
+        if str(pv(r, 'url') or '').startswith('billstatus:'):
+            press_billstatus_excluded += 1; continue
         # REDESIGNED direction = run_stage5 final_sign: tracked-bill CU-direction if bill-sourced, else DEBATE stance.
         # (The legacy score_label was an orphaned rule-based column; final_sign is what the model's press_value uses.)
         src = pv(r, 'stance_src')
@@ -417,40 +474,135 @@ def load_press_and_bills(member_names):
             'date': date, 'dest': dest, 'title': title, 'url': url,
             'cats': norm_cats(pv(r, 'categories')), 'pol': fsign, 'label': graded_label(grd),
             'stance': stance_disp, 'sconf': sconf, 'ssrc': ('corrected' if _c else (src or '')),
-            'corr': bool(_c), 'rel': pv(r, 'relevance') or ''})    # basis fields for the card
+            'corr': bool(_c), 'rel': pv(r, 'relevance') or '', 'source': 'press',
+            'scored': True, 'exclusion': ''})                     # basis fields for the card
+    # --- social (the old desk said "press & social" but loaded press only) ---
+    media_audit = {'press_source_rows':press_source_rows,
+                   'press_displayed': sum(len(v) for v in arts.values()),
+                   'press_unknown_member_excluded':press_unknown_member,
+                   'press_billstatus_rows_routed_to_legislation':press_billstatus_excluded,
+                   'social_source_rows': 0, 'social_displayed': 0,
+                   'social_scored_unique': 0, 'social_duplicate_visible': 0,
+                   'social_unverified_handle_excluded': 0,
+                   'social_unrelated_excluded': 0, 'social_offtopic_excluded': 0,
+                   'social_unknown_member_excluded': 0,
+                   'social_exclusions_by_member': {},
+                   'bill_source_rows': 0, 'bill_unknown_member_excluded': 0,
+                   'bill_rules_excluded': 0, 'bill_override_excluded': 0,
+                   'bill_manual_rows': 0, 'bill_manual_excluded': 0,
+                   'bill_duplicate_rows_collapsed': 0,
+                   'exclusion_samples':exclusion_samples}
+    social_path = os.path.join(B, 'Social Master.xlsx')
+    stack_path = os.path.join(B, 'tweet_stance_final.csv')
+    stack = {}
+    if os.path.exists(stack_path):
+        for sr in csv.DictReader(open(stack_path, encoding='utf-8-sig', newline='')):
+            stack[(sr.get('member') or '', MR.normalized_text(sr.get('text')))] = sr
+    if os.path.exists(social_path):
+        swb = openpyxl.load_workbook(social_path, read_only=True, data_only=True)
+        sw = swb['Corpus']
+        sh = {h: i for i, h in enumerate(next(sw.iter_rows(min_row=1, max_row=1, values_only=True)))}
+        seen = set(); tierw = {'unanimous': 1.0, 'majority': 0.7, 'review': 0.35}
+        def sv(row, key): return row[sh[key]] if key in sh else None
+        for row in sw.iter_rows(min_row=2, values_only=True):
+            media_audit['social_source_rows'] += 1
+            if str(sv(row, 'verified_handle') or '').strip() != '1':
+                media_audit['social_unverified_handle_excluded'] += 1; continue
+            nm = canon(sv(row, 'member'), None)
+            if not nm:
+                if len(exclusion_samples['social_unknown_member'])<20:
+                    exclusion_samples['social_unknown_member'].append(str(sv(row,'member') or ''))
+                media_audit['social_unknown_member_excluded'] += 1; continue
+            text = str(sv(row, 'text') or '').strip()
+            hit = stack.get((str(sv(row, 'member') or ''), MR.normalized_text(text)))
+            stance = str((hit or {}).get('stack_stance') or sv(row, 'stance') or 'neutral').lower()
+            if stance == 'unrelated':
+                media_audit['social_unrelated_excluded'] += 1
+                by_member = media_audit['social_exclusions_by_member'].setdefault(nm, {'unrelated': 0, 'offtopic': 0})
+                by_member['unrelated'] += 1
+                continue
+            raw_cats = MR.route_raw_categories(text)
+            if not raw_cats:
+                media_audit['social_offtopic_excluded'] += 1
+                by_member = media_audit['social_exclusions_by_member'].setdefault(nm, {'unrelated': 0, 'offtopic': 0})
+                by_member['offtopic'] += 1
+                continue
+            key = (nm, MR.normalized_text(text)); duplicate = key in seen; seen.add(key)
+            weight = tierw.get(str((hit or {}).get('tier') or '').lower(), 0.5)
+            sign = {'support': 1, 'oppose': -1, 'neutral': 0}.get(stance, 0)
+            if duplicate: media_audit['social_duplicate_visible'] += 1
+            elif sign: media_audit['social_scored_unique'] += 1
+            arts.setdefault(nm, []).append({
+                'date': fdate(sv(row, 'date')), 'dest': '', 'title': text,
+                'url': str(sv(row, 'url') or ''), 'cats': norm_cats(';'.join(raw_cats)),
+                'pol': sign, 'label': graded_label(sign * weight), 'stance': stance,
+                'sconf': weight, 'ssrc': 'stack-social' if hit else 'social-source',
+                'corr': False, 'rel': str(sv(row, 'platform') or 'social'),
+                'source': 'social', 'scored': bool(sign and not duplicate),
+                'exclusion': ('exact cross-post duplicate' if duplicate else ('' if sign else 'neutral'))})
+            media_audit['social_displayed'] += 1
+        swb.close()
     for nm in arts: arts[nm].sort(key=lambda a: a['date'], reverse=True)
     # --- bills (sponsor / original-cosponsor / cosponsor) ---
     # DROP non-CU bills the keyword scraper miscategorised (audit 2026-06-29). Curated by SUBJECT, not acronym:
     # the financial "SMART Act" (Supervisory Modifications…) and CLARITY/crypto bills are KEPT; the auto-repair
-    # "SMART Act" (Save Money on Auto Repair…) and policing/broadband/defense/general-tech bills are dropped.
-    DROP_BILLS = ('george floyd', 'save money on auto repair', 'auto repair transportation',
-        'accessible, affordable internet', 'affordable internet for all', 'national defense authorization',
-        'health and location data', 'fourth amendment is not for sale', 'app store accountability',
-        'safer gaming', 'protecting military servicemembers', 'data from foreign adversaries',
-        'cease orwellian surveillance')
+    # "SMART Act" (Save Money on Auto Repair…) and policing/broadband/general-tech false positives are dropped.
+    # NDAA bills are intentionally restored; ambiguous SMART rows are pinned by bill + Congress in bill_rules.py.
+    DROP_BILLS = BR.EXCLUDED_TITLE_PHRASES
     ROLEMAP = {'Sponsor Interactions': 'sponsor', 'Original Co-Sponsor Interaction': 'original',
                'Co-Sponsor Interactions': 'cosponsor'}
+    BILL_OVERRIDES = BR.load_overrides(os.path.join(B, 'bill_overrides.csv'))
     bills = {}
     for sheet, role in ROLEMAP.items():
         for r in wb[sheet].iter_rows(min_row=2, values_only=True):
+            media_audit['bill_source_rows'] += 1
             nm = canon(r[2], None)
-            if not nm: continue
+            if not nm:
+                if len(exclusion_samples['bill_unknown_member'])<20:
+                    exclusion_samples['bill_unknown_member'].append(str(r[2] or ''))
+                media_audit['bill_unknown_member_excluded'] += 1; continue
             title = str(r[4] or '')
             sm = str(r[12] or '')
             # match title AND summary: e.g. the auto-repair bill's short title is just "SMART Act" (collides with
             # the financial SMART Act) — only its summary "Save Money on Auto Repair…" disambiguates it.
-            if any(d in (title + ' ' + sm).lower() for d in DROP_BILLS): continue
+            if BR.excluded_bill(r[3],r[9],title,sm):
+                media_audit['bill_rules_excluded'] += 1; continue
+            ov = BR.override_for(BILL_OVERRIDES,r[3],r[9])
+            if ov and not BR.override_included(ov):
+                media_audit['bill_override_excluded'] += 1; continue
+            area = (LBL2CAT.get(r[0], r[0]) if r[0] else '')
+            if ov and ov.get('Category'): area = BR.canonical_category(ov['Category']) or area
             bills.setdefault(nm, []).append({
-                'role': role, 'area': (LBL2CAT.get(r[0], r[0]) if r[0] else ''),
+                'role': role, 'area': area,
                 'bill': r[3] or '', 'title': r[4] or '', 'sponsor': r[5] or '',
                 'ncos': r[6] or 0, 'congress': r[9] or '', 'action': r[8] or '',
                 'summary': sm[:220] + ('…' if len(sm) > 220 else ''),
                 'url': bill_url(r[3], r[9])})
+    manual_bills = os.path.join(B, 'manual_bill_evidence.csv')
+    if os.path.exists(manual_bills):
+        for r in csv.DictReader(open(manual_bills, encoding='utf-8-sig')):
+            media_audit['bill_manual_rows'] += 1
+            nm = canon(r.get('Member'), None)
+            if not nm or BR.excluded_bill(r.get('Bill'),r.get('Congress'),r.get('Title'),r.get('Summary')):
+                media_audit['bill_manual_excluded'] += 1
+                if len(exclusion_samples['bill_manual_excluded'])<20:
+                    exclusion_samples['bill_manual_excluded'].append({'member':r.get('Member'),'bill':r.get('Bill')})
+                continue
+            raw_role = str(r.get('Role') or '').lower()
+            role = 'sponsor' if raw_role == 'sponsor' else ('original' if 'original' in raw_role else 'cosponsor')
+            area = BR.canonical_category(r.get('Category')) or str(r.get('Category') or '')
+            sm = str(r.get('Summary') or '')
+            bills.setdefault(nm, []).append({
+                'role': role, 'area': area, 'bill': r.get('Bill') or '', 'title': r.get('Title') or '',
+                'sponsor': r.get('Sponsor') or '', 'ncos': 0, 'congress': r.get('Congress') or '',
+                'action': r.get('LastAction') or '', 'summary': sm[:220] + ('…' if len(sm) > 220 else ''),
+                'url': r.get('DetailLink') or bill_url(r.get('Bill'), r.get('Congress'))})
     # collapse duplicate rows: an original cosponsor is ALSO listed as a plain cosponsor (1890 cases), and a bill
     # can map to several CU topics (1455) -> one row per (bill, congress) with the most specific role
     # (sponsor>original>cosponsor) and all its topic areas merged into a tag list. Distinct bill numbers (incl.
     # genuine same-session re-introductions, e.g. S.2545/S.3575) stay separate.
     order = {'sponsor': 0, 'original': 1, 'cosponsor': 2}
+    before_collapse = sum(len(v) for v in bills.values())
     for nm in list(bills):
         groups = {}
         for b in bills[nm]:
@@ -463,6 +615,7 @@ def load_press_and_bills(member_names):
         for g in groups.values(): g['areas'].sort()
         bills[nm] = sorted(groups.values(),
             key=lambda b: (order.get(b['role'], 9), str(b['congress']), b['areas'][0] if b['areas'] else ''))
+    media_audit['bill_duplicate_rows_collapsed'] = before_collapse - sum(len(v) for v in bills.values())
     # --- committee positions (FULL set incl Ways & Means / Finance / JCT, from the Committee Data sheet;
     #     the old member-desk committee field only had Financial Services/Small Business/Banking) ---
     cmts = {}
@@ -494,7 +647,8 @@ def load_press_and_bills(member_names):
                    'press_n': r[8], 'leg_n': r[15], 'comm_n': r[17], 'demo_n': r[12],   # Press%, Legislative%, Influence%, Demo%
                    'press_raw': r[2], 'leg_raw': r[14], 'comm_raw': r[4], 'demo_raw': r[5]}  # raw inputs
     wb.close()
-    return arts, bills, cmts, wbm
+    media_audit['bills_displayed_unique'] = sum(len(v) for v in bills.values())
+    return arts, bills, cmts, wbm, media_audit
 
 # ---------- marginal winnability ROI: expected flips gained from the NEXT $10k (one PAC cycle-max) ----------
 # Faithful port of the in-browser flip engine. A member's winnability contribution on issue i is tg_i[u]*pf_i[u],
@@ -507,6 +661,7 @@ CHUNK = 10000.0
 def compute_roi():
     K = eng['const']; PERS = eng['pers']
     cu, ind, rcp, sco, bpf, ENG = eng['cu'], eng['ind'], eng['rcp'], eng['sco'], eng['bpf'], eng['eng']
+    pmult=eng.get('pmult') or [1.0]*len(cu); dmult=eng.get('dmult') or [1.0]*len(cu)
     WM, WP, HALFF, BASE, smax = K['WM'], K['WP'], K['HALFF'], K['BASE'], K['smax']
     SRCPRO, SRCANTI = K['SRCPRO'], K['SRCANTI']
     Nn = len(snames)
@@ -516,9 +671,9 @@ def compute_roi():
         if pu != pv and pu in 'DR' and pv in 'DR': return SRCANTI
         return 1.0
     def camp(t): return 'pro' if t in 'CFA' else ('anti' if t in 'OS' else 'neu')
-    def pf(cuA, indA, nAu, mA, nBu, mB, c):
-        au = WM * (cuA + 1) / ((cuA + 1) + c) + WP * nAu / mA
-        bu = WM * (indA + 1) / ((indA + 1) + c) + WP * nBu / mB
+    def pf(cuA, indA, nAu, mA, nBu, mB, c, pm):
+        au = WM * pm * (cuA + 1) / ((cuA + 1) + c) + WP * nAu / mA
+        bu = WM * pm * (indA + 1) / ((indA + 1) + c) + WP * nBu / mB
         return au / (au + bu) if (au + bu) > 0 else 0.0
     roi = [0.0] * Nn
     for i in range(len(ENG) - 1):                              # 17 real issues (exclude appended 'Overall')
@@ -539,8 +694,8 @@ def compute_roi():
             c = HALFF * rcp[u]
             pers = PERS.get(TIERNAME.get(tiers[u], '—'), 0) or 0
             if pers <= 0: continue                             # no persuadability weight -> no winnability to move
-            tg = (engi[u] + BASE * sco[u] / smax) * pers * (1 + 0.3 * bpf[u])
-            d = pf(cu[u] + CHUNK, ind[u], nA[u], mA, nB[u], mB, c) - pf(cu[u], ind[u], nA[u], mA, nB[u], mB, c)
+            tg = (engi[u] + BASE * sco[u] / smax) * pers * (1 + 0.3 * bpf[u]) * dmult[u]
+            d = pf(cu[u] + CHUNK, ind[u], nA[u], mA, nB[u], mB, c, pmult[u]) - pf(cu[u], ind[u], nA[u], mA, nB[u], mB, c, pmult[u])
             roi[u] += tg * d
     return roi                                                 # expected flips gained from the next $10k
 ROI = compute_roi()
@@ -560,7 +715,8 @@ _POLICY_RE = re.compile(r'legislative (director|assistant|counsel|aide)|deputy l
 def build_bundle():
     member_names = [m['name'] for m in MD['members']]
     _tier, _trank = legislative_press_tiers(member_names)   # tier 1/2/3 (0=untiered) + leg+press rank, per member
-    ARTS, BILLS, CMTS, WBM = load_press_and_bills(member_names)
+    preflight = DI.preflight(member_names, CS, SNA, ARCH)
+    ARTS, BILLS, CMTS, WBM, LOAD_AUDIT = load_press_and_bills(member_names)
     def staff_pack(name):
         oncmte = bool((CMTS.get(name) or {}).get('seats'))
         lst = []
@@ -630,6 +786,12 @@ def build_bundle():
             'press_raw': RA_PRESSP.get(name, wbr.get('press_raw', m.get('press_raw'))),
             'leg_raw':   RA_OEF['leg'].get(name,  wbr.get('leg_raw',  m.get('leg_raw'))),
             'comm_raw':  RA_OEF['comm'].get(name, wbr.get('comm_raw', m.get('comm_raw'))),
+            'comm_base_raw': RA_INF_BASE.get(name, RA_OEF['comm'].get(name, wbr.get('comm_raw', m.get('comm_raw')))),
+            'formal_role_influence_nominal': RA_ROLE_NOMINAL.get(name, 0.0),
+            'formal_role_influence_bonus': RA_ROLE_BONUS.get(name, 0.0),
+            'formal_role_display_weight': RA_ROLE_DISPLAY.get(name, 0.0),
+            'formal_role_influence_office': RA_ROLE_OFFICE.get(name, ''),
+            'formal_role_influence_eligibility': RA_ROLE_ELIGIBILITY.get(name, 'not_listed'),
             'demo_raw':  RA_OEF['demo'].get(name, wbr.get('demo_raw', m.get('demo_raw'))),
             'coalition': m.get('coalition'),
             # per-legislative-area stance tiers (Champion..Opponent), aligned to CATS; '-' = no position
@@ -639,6 +801,7 @@ def build_bundle():
             # lacking a sponsored bill (raw tier preserved in category_stance.json's gate block)
             'proven': [i for i, cat in enumerate(CATS) if cat in ((CS.get('gate') or {}).get('proven', {}).get(name) or [])],
             'gcap':   [i for i, cat in enumerate(CATS) if cat in ((CS.get('gate') or {}).get('capped', {}).get(name) or {})],
+            'overall_say_do': ((CS.get('gate') or {}).get('overall_capped', {}).get(name) or None),
             'committee': m.get('committee'),
             # full committee positions (incl Ways & Means / Finance / JCT) from the workbook Committee Data sheet
             'committees': CMTS.get(name, {}).get('seats', []),
@@ -657,6 +820,8 @@ def build_bundle():
             'psy': psy_for(name),                                  # computed: Big5 pct radar + persona + susceptibility cross-read
             'bills': bills,                                        # legislative actions (role + area)
             'articles': arts,                                      # press & social (full DB, cats normalized)
+            'media_exclusions': LOAD_AUDIT.get('social_exclusions_by_member', {}).get(
+                name, {'unrelated': 0, 'offtopic': 0}),
             'electoral': EH.get(name),                             # FEC primary+general vote-share trend + Ballotpedia forecast
         }
         members.append(rec)
@@ -696,10 +861,15 @@ def build_bundle():
     # ----- self-contained cosponsor graph (member-array indices) for the coalition builder -----
     midx = {m['name']: k for k, m in enumerate(members)}
     adj_out = []
+    dcross=float((eng.get('const') or {}).get('DCROSS',0.4)); emult=eng.get('emult') or [1.0]*len(snames)
+    bpf=eng.get('bpf') or [0.24]*len(snames)
     for u, v, w in eng['adj']:
         a = midx.get(snames[u]); b = midx.get(snames[v])
         if a is not None and b is not None and a != b:
-            adj_out.append([a, b, round(w, 2)])
+            cross=(PARTY_SNA[u]!=PARTY_SNA[v] and PARTY_SNA[u] in 'DR' and PARTY_SNA[v] in 'DR')
+            cpf=dcross+(1-dcross)*(bpf[u]*bpf[v])**0.5 if cross else 1.0
+            wc=w*cpf*emult[v]; probability=wc/(wc+6.0)
+            adj_out.append([a, b, round(w, 2), round(probability, 6)])
 
     DEMO_SHORT = {'Median income':'Income','Finance / RE workforce':'Finance','Owner-occ. mortgage':'Mortgages',
                   'Cost-burdened HHs':'Cost-burd.','Business density':'Business','Population':'Population'}
@@ -707,7 +877,7 @@ def build_bundle():
         'cats': CATS,
         'cats_short': [CATS_SHORT.get(c, c) for c in CATS],
         'defensive': sorted(DEFENSIVE),
-        'art_extra_cats': ['Credit Union Tax Status','CU-Bank Competitive Dynamics','General Credit Union'],
+        'art_extra_cats': ['CU-Bank Competitive Dynamics','General Credit Union'],
         'demo_axes': [lbl for _,lbl in DEMO_AXES],
         'demo_short': [DEMO_SHORT.get(lbl, lbl) for _,lbl in DEMO_AXES],
         # pillar weights FROM THE AUTHORITY (ranks_python.json ab_weights = live user dials AB2:AB5);
@@ -718,8 +888,16 @@ def build_bundle():
         'coalitions': MD['coalitions'],
         'tiername': TIERNAME,
         'adj': adj_out,
+        'integrity': {'source_display': LOAD_AUDIT},
+        'freshness': {
+            'generated_at': datetime.now().astimezone().isoformat(timespec='seconds'),
+            'sources': {rel:datetime.fromtimestamp(os.path.getmtime(os.path.join(B,rel))).astimezone().isoformat(timespec='seconds')
+                        for rel in ('ranks_python.json','category_stance.json','dashboard_data.json','communication_style.json')
+                        if os.path.exists(os.path.join(B,rel))},
+        },
         'members': members,
     }
+    bundle['integrity']['validation'] = DI.postflight(bundle, preflight)
     return bundle
 
 HTML = _tpl('make_member_desk_00.tpl')
@@ -758,7 +936,6 @@ if __name__ == '__main__':
     print('\nwrote %s (%.0f KB)' % (out, os.path.getsize(out)/1024))
     if '--data' not in sys.argv:
         html_out = os.path.join(_dir, 'cu-member-desk.html')
-        payload = json.dumps(bundle, separators=(',', ':'), ensure_ascii=False)
-        with io.open(html_out, 'w', encoding='utf-8') as f:
-            f.write(HTML.replace('__BUNDLE__', payload))
+        payload = MBC.json_for_script(bundle, separators=(',', ':'), ensure_ascii=False)
+        write_text_atomic(HTML.replace('__BUNDLE__', payload), html_out)
         print('wrote %s (%.0f KB)' % (html_out, os.path.getsize(html_out)/1024))

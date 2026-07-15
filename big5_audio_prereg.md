@@ -151,3 +151,44 @@ psychology unchanged; DISPLAY-ONLY; no number moves.** Pilot CLOSED. Audio is NO
 straight-A or to load-bearing. Scale-up (interview audio + diarization) NOT pursued — the pilot's own
 E signal is redundant with text, so more audio of the same kind won't add. Real load-bearing avenues
 live elsewhere (N-channel upgrade to Pink; incremental-validity gate vs observed movement).
+
+## Addendum 5 (2026-07-15, operational profile gate only — historical result unchanged)
+The later fail-closed audio-v2 profile contract now requires **60 confirmed target seconds per
+member**, not 180: two independent programs are mandatory and every accepted clip already requires
+at least 30 confirmed target seconds, so 60 is the internally coherent minimum. The previous
+180-second literal over-selected long clips and therefore particular cadences. This does **not**
+reinterpret or rerun the closed N=90 study above; every 180-second count and result in the historical
+record remains accurate for that study. Audio-v2 still requires two independent reviewers,
+target-only segments, aligned words, two sources, two programs, and program-conditioned percentiles,
+and it still fails closed at zero accepted profile members.
+
+## Addendum 6 (2026-07-15, supplied congressional-pitch method redesign)
+The active profile measurement is now speech-level and topic-conditioned, following the supplied
+Dietrich, Hayes, and O'Brien *Pitch Perfect* methods section. Each accepted record must represent one
+double-confirmed target-speaker speech unit and carry a topic derived from the aligned transcript or
+closed captions by a pinned dictionary or structural topic model. The video title and post-hoc
+Congressional Record text are not topic evidence. Mean F0 is computed for each speech unit, converted
+to Hz, and expressed only as a within-speaker deviation: `(speech F0 - speaker baseline mean F0) /
+speaker speech-unit SD`. Absolute F0 and cross-speaker pitch comparisons remain prohibited.
+
+The active floor now also requires five speech units and at least two transcript-identified topics;
+topic-level summaries require at least two speech units. The prior 60-second, two-source, two-program,
+two-review, aligned-word, and target-only requirements all remain. The output is a direct observation
+of topic-conditioned vocal emotional intensity, not Extraversion, Neuroticism, mood, sincerity, or
+health, and it cannot modify Big Five. With an empty manual review queue the correct active state
+remains zero audio profiles.
+
+## Addendum 7 (2026-07-15, HouseLive source-binding smoke)
+The supplied *Pitch Perfect* article identifies HouseLive as the correct floor source. The current
+Office of the Clerk service exposes a dated transcript route with `speaker`, `text`, `timestamp`, and
+archive-relative `offsettime`, plus a dated broadcast-event route whose event pairs HLS/DASH video
+with WebVTT captions. This is the deterministic floor video/caption binding missing from the legacy
+YouTube/CREC path.
+
+The first bounded smoke used 2025-07-15 and selected Chip Roy fail-closed through the current roster
+resolver. Five 35-second caption-aligned intervals spanning two identified policy topics plus other
+speech produced finite eGeMAPS mean-F0 values and within-speaker z deviations. The day contained 216
+caption units, 199 with non-`UNIDENTIFIED SPEAKER` labels, and 33 unambiguously resolved members.
+This proves the machinery, not profile eligibility: caption identity is unreviewed, the active
+contract still requires two independent reviews and two programs/sources, and current live feeds can
+contain only `UNIDENTIFIED SPEAKER` labels. `production_profile_n` remains zero.

@@ -5,24 +5,15 @@ member-level, from the FEC 'Federal Elections' books in ~/Downloads) + 2024 gene
 Matched with build_electoral's exact name formula, state+chamber scoped. Writes electoral_history.json.
 Run: python fec/build_electoral_history.py"""
 import json, openpyxl, collections, glob, os, csv, sys
+from member_identity import Resolver
+from moneyball_core import dump_atomic
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B = MB_ROOT
-DL = r"C:\Users\pgoff\Downloads"; DS = MB_DRAFT
+DL = os.environ.get('ELECTORAL_SOURCE_DIR',os.path.join(MB_ROOT,'source_data','electoral')); DS = MB_DRAFT
 
 members = [m['member'] for m in json.load(open(B+r"\congestion.json"))]
-mset = set(members); bylast = collections.defaultdict(list)
-for n in members: bylast[n.split()[-1].lower()].append(n)
-def match(nm):
-    if nm in mset: return nm
-    t = str(nm).replace(',',' ').replace('.',' ').split()
-    if not t: return None
-    c = bylast.get(t[-1].lower())
-    if not c: return None
-    if len(c)==1: return c[0]
-    fi = t[0][0].lower()
-    for cand in c:
-        if cand.split()[0][0].lower()==fi: return cand
-    return c[0]
+_resolver = Resolver(members)
+def match(nm): return _resolver.resolve(nm)
 def isnum(x): return isinstance(x,(int,float)) and not isinstance(x,bool)
 
 bp = sorted(glob.glob(B+r"\archive\Ballotpedia_119th_CU_Influence_*.xlsx"), key=os.path.basename)[-1]
@@ -78,5 +69,5 @@ for m,d in hist.items():
     out[m]={'chamber':d['chamber'],'state':d['state'],'forecast':d['forecast'],
             'primary':[dict(year=y,**d['primary'][y]) for y in sorted(d['primary'])],
             'general':[dict(year=y,**d['general'][y]) for y in sorted(d['general'])]}
-json.dump(out, open(B+r"\electoral_history.json","w"), separators=(',',':'))
+dump_atomic(out,B+r"\electoral_history.json",separators=(',',':'))
 print("wrote electoral_history.json — %d members with history"%len(out))

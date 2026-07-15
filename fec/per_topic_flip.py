@@ -8,7 +8,7 @@ WM,WP=0.35,0.65; CAP=50000; BUDGET=2_000_000; INC=1000; BASE=0.15
 # at PARITY with a known 'Ally' rather than ranking ABOVE one (silence is uncertainty, not enthusiasm).
 # Kept identical to flip_model.py for grain consistency; env-overridable via PERS_NONE.
 from moneyball_core import PERS
-PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Skeptic'}
+PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Highly Skeptical','Skeptic'}
 C={m['member']:m for m in json.load(open(MB_ROOT+r'\congestion.json'))}
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)

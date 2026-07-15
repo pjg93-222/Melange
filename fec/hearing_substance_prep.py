@@ -10,9 +10,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 from hearing_antagonism_build import is_hostile   # same candidate net as the builder
 
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scratchpad')  # fallback
-SCRATCH = r'C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-clever-elbakyan-15fa11\2599f411-20b5-4e43-adc2-5e1137079745\scratchpad'
+from paths import ROOT
+B = ROOT
+SCRATCH = os.environ.get('HEARING_SUBSTANCE_DIR',os.path.join(B,'outputs','research','hearing_substance'))
 WT = {'G': 'government official', 'S': 'state/local official', 'M': 'military officer',
       'E': 'expert/academic', 'J': 'judge', 'B': 'business executive', 'A': 'advocate/association', '?': 'private witness'}
 

@@ -16,7 +16,8 @@ text stored ONLY for members (what the hostility lexicon reads), capped; party f
 Resume: hearings_seq.db seq_log 'seq:<pid>'. Era: 2019-2024 full HTML (2025+ PDF deferred)."""
 import sys, os, re, io, time, json, csv, zipfile, sqlite3, datetime, urllib.request, collections
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+from paths import ROOT
+B = ROOT
 SEQDB = B + r'\hearings_seq.db'
 _KF = B + r'\fec\govinfo_key.txt'
 KEY = os.environ.get('GOVINFO_KEY') or (open(_KF).read().strip() if os.path.exists(_KF) else 'DEMO_KEY')

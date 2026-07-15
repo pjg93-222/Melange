@@ -40,17 +40,21 @@ def _behavior_z(block, group, key):
 
 
 def _working_style(block):
-    vis = _state(_behavior_z(block, 'public_role_exposure', 'visibility_z'))
+    raw_vis = _state(_behavior_z(block, 'public_role_exposure', 'visibility_z'))
+    adjusted_vis = _state(_behavior_z(block, 'public_role_exposure', 'role_adjusted_visibility_z'))
     dom = _state(_behavior_z(block, 'observed_conversation', 'dominance_z'))
     exp = _state(_behavior_z(block, 'observed_conversation', 'expressiveness_z'))
     o = _state(_z(block, 'Openness')); c = _state(_z(block, 'Conscientiousness'))
     a = _state(_z(block, 'Agreeableness_low_antagonism'))
     n = _state(_z(block, 'Neuroticism_affective_content'))
 
-    if vis == 'high':
-        s1 = ('This member operates under a high public spotlight, with frequent media or public-facing '
-              'exposure; that describes the role they occupy, not whether they are personally outgoing.')
-    elif vis == 'low':
+    if raw_vis == 'high' and adjusted_vis == 'high':
+        s1 = ('This member has high public exposure even after accounting for formal office obligations; '
+              'that residual may reflect newsworthiness or strategy and still does not establish that they are personally outgoing.')
+    elif raw_vis == 'high':
+        s1 = ('This member operates under a high public spotlight, but the exposure is not unusually high once formal office '
+              'obligations are considered; neither the title nor its visibility establishes a personally outgoing disposition.')
+    elif raw_vis == 'low':
         s1 = ('This member appears less often in the available public and media record, but lower exposure '
               'does not establish a private or introverted disposition.')
     else:
@@ -191,13 +195,14 @@ def render_member(block):
         raise AssertionError('forbidden legacy claim leaked into local narrative')
     return {'p1': p1, 'p2': p2, 'p3': p3, 'model': 'local-deterministic-fable-style',
             'usage': {'input_tokens': 0, 'output_tokens': 0}, 'ok': True,
-            'measurement_note': 'Candidate v2: visibility is role exposure; E unknown; audio double-reviewed.'}
+            'measurement_note': ('Candidate v2: visibility is role exposure and intrinsic E remains unknown; '
+                                 'A is low-antagonism, N is affective-content, and audio is double-reviewed.')}
 
 
 def build(basis_path, only=None):
     with open(basis_path, encoding='utf-8') as f: basis = json.load(f)
-    if basis.get('schema') != 'profile-basis-v2-candidate':
-        raise ValueError('basis schema must be profile-basis-v2-candidate')
+    if basis.get('schema') not in ('profile-basis-v2-candidate','profile-basis-v2'):
+        raise ValueError('basis schema must be profile-basis-v2 or profile-basis-v2-candidate')
     wanted = {x.strip() for x in (only or '').split(',') if x.strip()}
     members = {m: render_member(v) for m, v in sorted((basis.get('members') or {}).items())
                if not wanted or m in wanted}
@@ -213,9 +218,9 @@ def self_test():
     block = {
         'personality_facets': {
             'Openness': {'z': -1.2}, 'Conscientiousness': {'z': -0.8},
+            'Extraversion': {'z': None, 'status': 'unknown_no_independent_measure'},
             'Agreeableness_low_antagonism': {'z': -0.9},
             'Neuroticism_affective_content': {'z': 0.1},
-            'Extraversion': {'z': None, 'status': 'unknown_no_independent_measure'},
         },
         'public_role_exposure': {'visibility_z': 2.8},
         'observed_conversation': {'dominance_z': 1.1, 'expressiveness_z': -0.9},
@@ -231,7 +236,7 @@ def self_test():
     out = render_member(block)
     assert all(out[k] for k in ('p1', 'p2', 'p3'))
     joined = ' '.join(out[k] for k in ('p1', 'p2', 'p3')).lower()
-    assert 'role they occupy' in joined and 'not whether they are personally outgoing' in joined
+    assert 'public spotlight' in joined and 'personally outgoing disposition' in joined
     assert '108 to 173' in joined and 'not a stable personal label' in joined
     assert 'extrovert' not in joined and 'introvert' not in joined
     assert out['usage']['input_tokens'] == 0 and out['usage']['output_tokens'] == 0

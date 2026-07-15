@@ -13,7 +13,9 @@ CEDGE=float(os.environ.get('CEDGE','10000'))
 MAXSHIFT=18.0; HALF=0.10; RFLOOR=200000          # money curve (shared with money_response.py)
 PRO={'Champion','Defender','Ally'}
 # requirement to flip, by current tier (units of pro-influence); committed opponents excluded
-THETA={'Highly Persuadable':0.6,'True Neutral':1.0,'Neutral':1.0,'Lean Skeptic':1.5,'Skeptic':2.0,'Opponent':3.0,'Ally':0.0}   # CALIBRATED: widen resistance at the committed/opposed end (Bakker asymmetry; Kalla-Broockman ~0 on the opposed)
+THETA={'Highly Persuadable':0.6,'Persuadable':0.8,'Lean Persuadable':0.9,
+       'True Neutral':1.0,'Neutral':1.0,'Lean Skeptic':1.5,'Skeptic':2.0,
+       'Highly Skeptical':2.5,'Opponent':3.0,'Ally':0.0}   # fixed ladder resistance
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(C.keys())
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 CS=json.load(open(B+r'\category_stance.json')); MAT=CS['matrix']; cats=CS['cats']
@@ -57,9 +59,10 @@ proset={m for m in members if MAT.get(m,{}).get(cat) in PRO}
 # and the net_lean resistance term only sees money-TAKERS — a PAC-free ideologue priced as CHEAP.
 # Mirrored in the dashboard's in-browser port (make_dashboard_html_00.tpl prime/cheapestFlips).
 BLOCK_OVERALL={'Skeptic','Highly Skeptical','Opponent'}   # kernel overall_tier read; overall 'Lean Skeptic' stays eligible
-BLOCK_RECRUIT_CELL={'Skeptic','Opponent'}                 # topic-cell floor for recruits (the JS port already had this; 'Lean Skeptic' cell stays eligible)
+BLOCK_RECRUIT_CELL={'Skeptic','Highly Skeptical','Opponent'}  # committed cells cannot be recruited as pressure sources
 COMMIT=0.25                                               # +theta per declared Opponent cell anywhere in the matrix — opposition breadth the money term can't see
-OVT={m:MBC.overall_tier(MAT.get(m,{})) for m in members}
+OVERALL_CAPS=(CS.get('gate') or {}).get('overall_capped') or {}
+OVT={m:MBC.overall_tier(MAT.get(m,{}),m,OVERALL_CAPS) for m in members}
 def recruit_cost(u):
     # CEDGE scaled by persuadability (kernel PERS, anchored so True Neutral == CEDGE exactly);
     # Lean Skeptic pinned to flat CEDGE — the carve-out: gates/pricing leave LS exactly as before
@@ -86,7 +89,7 @@ def prime(v):
     got=0.0; cost=0.0; recruits=[]
     for add,u,c in cands:
         if got>=gap: break
-        if c/add<avg_rate: got+=add; cost+=c; recruits.append((u,round(add,2)))
+        if c/add<avg_rate: got+=add; cost+=c*add; recruits.append((u,round(add,2)))
     resid=max(0.0,gap-got)
     if resid>0.97: return None                                       # money can't close (>1 unit residual) -> not primeable on money alone
     money=round(dollars_for_units(v,resid)) if resid>1e-6 else 0

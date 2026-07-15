@@ -43,10 +43,13 @@ spec=importlib.util.spec_from_file_location('mr',B+r'\fec\money_response.py'); m
 _fs=importlib.util.spec_from_file_location('fm',B+r'\fec\flip_model.py'); fm=importlib.util.module_from_spec(_fs); _fs.loader.exec_module(fm)
 SEED=7; MC=int(os.environ.get('MC','20'))   # MC=20 validated vs MC=100 (mc_stability_check: 100% seed overlap)
 BSCALE=400000
-PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Skeptic'}
-CTORD=['Champion','Defender','Ally','Highly Persuadable','True Neutral','Lean Skeptic','Skeptic','Opponent']
-TSCORE={'Champion':3,'Defender':2.5,'Ally':2,'Highly Persuadable':1,'True Neutral':0,'Lean Skeptic':-1,'Skeptic':-2,'Opponent':-3}
-MIDBAND={'Highly Persuadable','True Neutral','Lean Skeptic'}    # the gridlock-sensitive persuadable middle
+PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Highly Skeptical','Skeptic'}
+CTORD=['Champion','Defender','Ally','Highly Persuadable','Persuadable','Lean Persuadable',
+       'True Neutral','Lean Skeptic','Skeptic','Highly Skeptical','Opponent']
+TSCORE={'Champion':3,'Defender':2.5,'Ally':2,'Highly Persuadable':1.25,'Persuadable':0.75,
+        'Lean Persuadable':0.25,'True Neutral':0,'Lean Skeptic':-0.5,'Skeptic':-1,
+        'Highly Skeptical':-2,'Opponent':-3}
+MIDBAND={'Highly Persuadable','Persuadable','Lean Persuadable','True Neutral','Lean Skeptic'}
 CSJ=json.load(open(B+r'\category_stance.json')); MAT0=CSJ['matrix']; cats=CSJ['cats']; DEFENSIVE=set(CSJ['defensive'])
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=[m['member'] for m in C.values()]
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}

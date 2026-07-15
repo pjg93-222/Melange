@@ -30,7 +30,7 @@ import openpyxl
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B = MB_ROOT
 WB = B + r"\Moneyball Main Version - Blended.xlsx"
-ROSTER = os.environ.get('CMTE_ROSTER', r"C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-epic-aryabhata-7aa1e1\b23225d8-d66c-4b05-a090-dc0e4c539537\scratchpad\committee_membership.json")
+ROSTER = os.environ.get('CMTE_ROSTER',os.path.join(B,'source_data','committee_membership.json'))
 TIER = 'Slightly'
 # ---- formula mirror (apply_committee_reweight.py — keep byte-consistent) ----
 BASE = {'Highly': 3.0, 'Moderately': 1.8, 'Slightly': 0.9}; SUBF = 1.0 / 6.0

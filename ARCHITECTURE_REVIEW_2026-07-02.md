@@ -2,6 +2,10 @@
 *Lead Enterprise Systems Architect pass: code quality, logical integrity, refactoring, maintainability.
 Analysis only — no code was changed. Every number below was measured, not estimated.*
 
+> **Historical snapshot, not current state.** This review records the repository as it existed on
+> 2026-07-02. Version control, centralized paths, shared kernels, writer locks, and expanded test/audit
+> gates were added later; retain the measurements below as provenance rather than a live runbook.
+
 ## Executive verdict
 
 This is a **research codebase that has outgrown its skeleton**. The scientific machinery is genuinely
@@ -148,5 +152,5 @@ and joins prefer bioguide where present. Full migration only if a name collision
 | 9 | (Long-term) Python-native pillar compute; workbook demoted to view | multi-day | the Excel/OneDrive failure class at its root |
 
 Safety protocol for #2/#3 (the invasive ones): refactor → pytest → `run_pipeline.py` → assert
-**zero rank delta** vs `ranks_AFTER_fixes.json` → audit 50/50. The harness you already built is
+**zero rank delta** vs `orphan/snapshots/ranks_AFTER_fixes.json` → audit 50/50. The harness you already built is
 exactly what makes this refactor low-risk; most codebases have to earn that first.

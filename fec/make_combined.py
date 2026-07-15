@@ -148,5 +148,6 @@ HTML = (
 )
 
 out = os.path.join(B, 'Moneyball.html')
-io.open(out, 'w', encoding='utf-8').write(HTML)
+from moneyball_core import write_text_atomic
+write_text_atomic(HTML,out)
 print('wrote %s (%.0f KB)' % (out, os.path.getsize(out)/1024))

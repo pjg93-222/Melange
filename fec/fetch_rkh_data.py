@@ -1,7 +1,8 @@
 import os, urllib.request
 
 UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) research-replication-lookup'}
-OUT = r"C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\liwc\rkh"
+from paths import ROOT
+OUT = os.path.join(ROOT,'fec','liwc','rkh')
 os.makedirs(OUT, exist_ok=True)
 FILES = {
     2732477: 'LifetimeMeansHouse.tab',          # JDH6KR: House lifetime OCEAN means

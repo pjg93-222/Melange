@@ -16,10 +16,10 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import numpy as np
 from dw_control import load_dw
 
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+from paths import ROOT
+B = ROOT
 # Haiku substance labels (content-read frames) override the frame_of lexicon when present.
-_SCRATCH = r'C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-clever-elbakyan-15fa11\2599f411-20b5-4e43-adc2-5e1137079745\scratchpad'
-_LABP = os.path.join(_SCRATCH, 'substance_labels.json')
+_LABP = os.environ.get('HEARING_SUBSTANCE_LABELS',os.path.join(B,'outputs','research','hearing_substance','substance_labels.json'))
 HLAB = json.load(open(_LABP, encoding='utf-8')) if os.path.exists(_LABP) else {}
 def exch_id(pkg, m, text):
     return hashlib.md5(('%s|%s|%s' % (pkg, m, text[:80])).encode('utf-8', 'replace')).hexdigest()[:16]

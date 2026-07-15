@@ -5,6 +5,7 @@ M=MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
 wb=openpyxl.load_workbook(M,data_only=True)
 ra=wb['Rank & Allocation']
 import moneyball_core as MC
+import stance_rules as SR
 _normM,_w535,_=MC.press_matrix()   # PHASE-2: Python-owned press normalization (raw values + row-535 dial literals; no recalc dependency)
 # S2-04 (audit run-2, user-ratified): col G is NOT read here anymore. It was the previous run's
 # sync_stance_g output, which made stance_N+1=F(stance_N) — a cross-run recurrence that orbited a
@@ -25,8 +26,6 @@ cats=[('Examination & Supervision',5),('CU Capital Requirements',6),('NCUA Budge
 DEFENSIVE={'Interchange','Credit Card Mandates'}
 def weights(cat): return (0.55,0.70,0.20) if cat in DEFENSIVE else (0.55,0.35,0.10)
 pw=[_w535[pc] for _,pc in cats]
-def p80(vals):
-    a=sorted(abs(x) for x in vals if abs(x)>1e-9); return a[int(0.8*len(a))] if a else 1.0
 def clip(x): return max(-1.0,min(1.0,x))
 press={(m,lab):_normM[pc].get(m,0.0) for m in members for lab,pc in cats}
 opl={m:sum(press[(m,lab)]*pw[i] for i,(lab,pc) in enumerate(cats)) for m in members}
@@ -34,91 +33,34 @@ neg=sorted(v for v in opl.values() if v<0); ascale=abs(neg[int(0.08*len(neg))]) 
 ANTI_STANCE={'Opponent':1.0,'Skeptic':0.5}   # floors keyed on the OVERALL ladder — resolved in-run below (S2-04)
 anti0={m:clip(-opl[m]/(ascale or 1)) for m in members}   # data-driven base; overall-tier floors join inside the gen iteration
 PRIOR=0.70
-# ---- self-calibrating threshold engine: median + k*IQR, rate clamped to a sane band ----
-K=1.25; RFLOOR,RCAP=0.10,0.40; MINN=8
-def qtile(s,q):
-    return s[min(len(s)-1,max(0,int(round(q*(len(s)-1)))))] if s else None
-def shaped_cut(vals,hi,rfloor=RFLOOR,rcap=RCAP,k=K):
-    s=sorted(vals); n=len(s)
-    if n<MINN: return None,None
-    q1=qtile(s,0.25); med=qtile(s,0.5); q3=qtile(s,0.75); iqr=max(q3-q1,1e-9)
-    if hi:
-        c=med+k*iqr; rate=min(rcap,max(rfloor,sum(1 for x in s if x>=c)/n)); return qtile(s,1-rate),rate
-    c=med-k*iqr; rate=min(rcap,max(rfloor,sum(1 for x in s if x<=c)/n)); return qtile(s,rate),rate
 def classify(anti):
-    """Full stance classification for a given anti-prior vector (PASS 1 comb -> pooled fallbacks ->
-    PASS 2 cuts -> Neutral-band tertile split). Pure function of module data + anti (S2-04)."""
-    # PASS 1: combined score + raw leg/press
-    comb={}; hassig={}; legR={}; prR={}
+    """Score and classify every cell with one fixed scale across every domain."""
+    raw_scores=collections.defaultdict(dict); signal=collections.defaultdict(dict)
     for lab,pc in cats:
         WL,WP,WV=weights(lab)
         legraw={m:LEG.get(m,{}).get(lab,0.0) for m in members}; prraw={m:press[(m,lab)] for m in members}
         legc={m:math.copysign(math.sqrt(abs(legraw[m])),legraw[m]) for m in members}   # sqrt-compress heavy tail -> reduce ceiling saturation
-        sl=p80(legc.values()); sp=p80(prraw.values())
         for m in members:
-            ln=clip(legc[m]/sl); pn=clip(prraw[m]/sp)
+            has_leg=abs(legraw[m])>1e-9; has_press=abs(prraw[m])>1e-9
+            ln=clip(legc[m]/SR.LEGISLATION_SQRT_SCALE); pn=clip(prraw[m]/SR.MEDIA_SCALE)
             vinfo=votes.get(n2b.get(m,''),{}).get(lab); vn=vinfo['n'] if vinfo else 0; hv=bool(vinfo) and vn>=5
-            vc=WV*clip(vinfo['lean']) if hv else 0
-            c=clip(WL*ln+WP*pn+vc) if lab in DEFENSIVE else (WL*ln+WP*pn+vc)/(WL+WP+(WV if hv else 0))
+            c=SR.combine_evidence(
+                {'legislation':ln if has_leg else None,'media':pn if has_press else None,
+                 'vote':clip(vinfo['lean']) if hv else None},
+                {'legislation':WL,'media':WP,'vote':WV})
             if c>0 and prraw[m]<=0.02 and anti[m]>0: c*=(1-PRIOR*anti[m])
-            comb[(lab,m)]=c; legR[(lab,m)]=legraw[m]; prR[(lab,m)]=prraw[m]
-            hassig[(lab,m)]=abs(legraw[m])>1e-9 or abs(prraw[m])>1e-9 or hv
-    # pooled fallbacks for thin categories (no global constants -> pooled empirical)
-    OFF=[lab for lab,_ in cats if lab not in DEFENSIVE]
-    POOLp=sorted(comb[(lab,m)] for lab in OFF for m in members if hassig[(lab,m)] and comb[(lab,m)]>0)
-    POOLn=sorted(comb[(lab,m)] for lab in OFF for m in members if hassig[(lab,m)] and comb[(lab,m)]<0)
-    pooled_champ=qtile(POOLp,0.88); pooled_opp=qtile(POOLn,0.12); pooled_ally=qtile(POOLp,0.55); pooled_skep=qtile(POOLn,0.45)
-    POOLlegneg=sorted(legR[(lab,m)] for lab in DEFENSIVE for m in members if legR[(lab,m)]<0)
-    POOLprspos=sorted(prR[(lab,m)] for lab in DEFENSIVE for m in members if prR[(lab,m)]>0)
-    # PASS 2: classify
-    matrix=collections.defaultdict(dict); scores=collections.defaultdict(dict); cnt=collections.Counter(); rep=[]
-    for lab,pc in cats:
-        nt=0
-        if lab in DEFENSIVE:
-            oppc,_=shaped_cut([legR[(lab,m)] for m in members if legR[(lab,m)]<0],hi=False,rfloor=0.15,rcap=0.6)
-            defl,_=shaped_cut([legR[(lab,m)] for m in members if legR[(lab,m)]>0],hi=True)
-            defp,_=shaped_cut([prR[(lab,m)] for m in members if prR[(lab,m)]>0],hi=True,rfloor=0.15,rcap=0.5)
-            oppc=oppc if oppc is not None else qtile(POOLlegneg,0.5); defl=defl if defl is not None else qtile(POOLlegneg,0.0) and 2.0
-            defp=defp if defp is not None else qtile(POOLprspos,0.6) or 0.03
-            defl=defl or 2.0
-            for m in members:
-                leg=legR[(lab,m)]; prs=prR[(lab,m)]
-                if not hassig[(lab,m)]: s='—'
-                elif leg<=oppc: s='Opponent'
-                elif leg<0: s='Skeptic'
-                elif leg>=defl or prs>=defp: s='Defender'; nt+=1
-                elif leg>0 or prs>=0.4*defp: s='Ally'
-                elif prs<=-0.4*defp: s='Skeptic'
-                else: s='Neutral'
-                matrix[m][lab]=s; scores[m][lab]=round(comb[(lab,m)],3); cnt[s]+=1
-            rep.append((lab,'DEF',oppc,defp,nt))
-        else:
-            P=sorted(comb[(lab,m)] for m in members if hassig[(lab,m)] and comb[(lab,m)]>0)
-            Ng=sorted(comb[(lab,m)] for m in members if hassig[(lab,m)] and comb[(lab,m)]<0)
-            cc,cr=shaped_cut(P,hi=True,rfloor=0.03,rcap=0.12)     # Champion: very tight elite band (<=12% of positives)
-            ac,_=shaped_cut(P,hi=True,rfloor=0.30,rcap=0.60)      # champ+Ally boundary; below -> persuadable Neutral
-            oc,_=shaped_cut(Ng,hi=False,rfloor=0.05,rcap=0.25)    # Opponent
-            sc,_=shaped_cut(Ng,hi=False,rfloor=0.30,rcap=0.60)    # opp+Skeptic boundary (persuadable edge)
-            cc=cc if cc is not None else pooled_champ; ac=ac if ac is not None else pooled_ally
-            oc=oc if oc is not None else pooled_opp; sc=sc if sc is not None else pooled_skep
-            for m in members:
-                c=comb[(lab,m)]
-                if not hassig[(lab,m)]: s='—'
-                elif c>0: s='Champion' if c>=cc else ('Ally' if c>=ac else 'Neutral')
-                elif c<0: s='Opponent' if c<=oc else ('Skeptic' if c<=sc else 'Neutral')
-                else: s='Neutral'
-                if s=='Champion': nt+=1
-                matrix[m][lab]=s; scores[m][lab]=round(c,3); cnt[s]+=1
-            rep.append((lab,'off',cc,cr,nt))
-    # split each category's Neutral band into Highly Persuadable / True Neutral / Lean Skeptic by its OWN tertiles of lean
-    for lab,pc in cats:
-        nz=sorted(scores[m][lab] for m in members if matrix[m][lab]=='Neutral')
-        t33=qtile(nz,0.34) if len(nz)>=6 else -0.0001; t67=qtile(nz,0.67) if len(nz)>=6 else 0.0001
-        for m in members:
-            if matrix[m][lab]=='Neutral':
-                c=scores[m][lab]
-                matrix[m][lab]='Highly Persuadable' if c>=t67 else ('Lean Skeptic' if c<t33 else 'True Neutral')
-    return matrix,scores,rep
+            raw_scores[m][lab]=clip(c)
+            signal[m][lab]=has_leg or has_press or hv
+    matrix=collections.defaultdict(dict); scores=collections.defaultdict(dict)
+    raw_out=collections.defaultdict(dict); rounding=collections.defaultdict(dict)
+    for m in members:
+        adjusted,factors=SR.exceptional_rounding(raw_scores[m],signal[m])
+        for lab,_ in cats:
+            raw_out[m][lab]=round(raw_scores[m][lab],6)
+            rounding[m][lab]=round(factors[lab],6)
+            scores[m][lab]=round(adjusted[lab],3)
+            matrix[m][lab]=SR.classify(adjusted[lab],signal[m][lab],lab in DEFENSIVE)
+    return matrix,scores,raw_out,rounding
 # ---- S2-04 gen iteration (user-ratified "whatever optimizes it the most"): resolve the overall-tier
 # feedback IN-RUN from a canonical start (gen={}), instead of consuming last run's col G. The overall
 # ladder is MC.overall_tier — the exact law sync_stance_g writes to col G afterwards. Fixed point ->
@@ -127,51 +69,73 @@ def classify(anti):
 gen_in={}; prev_in=None
 for _it in range(1,9):
     anti={m:max(anti0[m],ANTI_STANCE.get(gen_in.get(m),0.0)) for m in members}
-    matrix,scores,rep=classify(anti)
+    matrix,scores,raw_scores,rounding=classify(anti)
     gen_out={m:MC.overall_tier(matrix[m]) for m in members}
     if gen_out==gen_in:
         print('gen iteration: self-consistent fixed point at iteration %d'%_it); break
     if prev_in is not None and gen_out==prev_in:
         anti={m:max(anti0[m],ANTI_STANCE.get(gen_in.get(m),0.0),ANTI_STANCE.get(gen_out.get(m),0.0)) for m in members}
-        matrix,scores,rep=classify(anti)
+        matrix,scores,raw_scores,rounding=classify(anti)
         print('gen iteration: period-2 cycle at iteration %d -> union-floor damped final pass (S2-04)'%_it); break
     prev_in,gen_in=gen_in,gen_out
 else:
     anti={m:max(anti0[m],ANTI_STANCE.get(gen_in.get(m),0.0),ANTI_STANCE.get(prev_in.get(m),0.0)) for m in members}
-    matrix,scores,rep=classify(anti)
+    matrix,scores,raw_scores,rounding=classify(anti)
     print('gen iteration: no fixed point in 8 iterations -> union-floor damped final pass (S2-04)')
 genF={m:MC.overall_tier(matrix[m]) for m in members}
-# ---- SAY-DO corroboration gate (user-ratified 2026-07-07): Rule A cap + Rule C 'proven' badge,
+# ---- SAY-DO corroboration gate: recorded action (A/V) + Rule C 'proven' badge,
 # applied AFTER the S2-04 fixed point converges, as a pure OUTPUT transform. Safe by construction:
 # the cap only lowers Champion/Defender toward Ally (+2), which can never create the Opponent/
 # Skeptic overalls the ANTI_STANCE floors key on, so convergence and idempotence are untouched.
 # Raw tiers preserved in the 'gate' block; single law lives in MC.cap_uncorroborated.
+raw_matrix={m:dict(matrix[m]) for m in members}
 gate_capped={}; gate_proven={}; gate_corrob={}
 for m in members:
     matrix[m],_cap,_prov,_cor=MC.cap_uncorroborated(m,matrix[m])
     if _cap: gate_capped[m]=_cap
     if _prov: gate_proven[m]=_prov
     if _cor: gate_corrob[m]=_cor
+gate_overall={}
+for m in members:
+    _final,_detail=MC.overall_say_do_gate(m,matrix[m],raw_matrix[m],gate_corrob.get(m,{}))
+    if _detail['raw']!=_final: gate_overall[m]=_detail
 _cbp=collections.Counter(pth for cc in gate_corrob.values() for pth in cc.values())
-print('say-do gate: %d cells capped across %d members | %d proven badges | corroborated A%d V%d J%d'%(
-      sum(len(v) for v in gate_capped.values()),len(gate_capped),len(gate_proven),_cbp['A'],_cbp['V'],_cbp['J']))
+print('say-do gate: %d cells capped across %d members | %d overall Champions capped | '
+      '%d proven badges | corroborated A%d V%d'%(
+      sum(len(v) for v in gate_capped.values()),len(gate_capped),len(gate_overall),
+      len(gate_proven),_cbp['A'],_cbp['V']))
 cnt=collections.Counter(matrix[m][lab] for m in members for lab,_ in cats)
 MC.dump_atomic({'cats':[c[0] for c in cats],'defensive':sorted(DEFENSIVE),'matrix':{m:matrix[m] for m in members},
            'scores':{m:scores[m] for m in members},
-           'gate':{'rule':'A Champion/Defender cell keeps its tier if the member (A) authored/orig-'
-                          'cosponsored an in-category bill, (V) has a recorded CU-aligned final-passage '
-                          'vote in it, or (J) chairs/ranks a committee of jurisdiction over a gatekeep '
-                          'category; else capped to Ally (raw preserved here). proven = authored bill '
-                          'in category advanced past introduction.',
-                   'gatekeep':sorted(MC.GATEKEEP_JURIS),
-                   'capped':gate_capped,'proven':gate_proven,'corrob':gate_corrob}},MB_ROOT+r'\category_stance.json')
+           'raw_scores':{m:raw_scores[m] for m in members},
+           'rounding':{'rule':SR.thresholds()['exceptional_rounding'],
+                       'factors':{m:rounding[m] for m in members},
+                       'overall_factor':{m:round(MC.overall_rounding(matrix[m]),6) for m in members}},
+           'thresholds':{**SR.thresholds(),'overall':MC.overall_thresholds()},
+            'media':{'general_credit_union_exclusions':MC.press_general_exclusions()},
+           'gate':{'rule':'A Champion/Defender cell keeps its tier only if the member (A) authored/orig-'
+                          'cosponsored an in-category bill or (V) has a recorded CU-aligned final-passage '
+                          'vote in it; committee office is not action. An overall Champion additionally '
+                          'requires A/V evidence in at least two-thirds of its raw top-tier cells and '
+                          'at least six raw top-tier domains; it also caps a 10+ direct-sponsorship paper '
+                          'trail when no more than 20% advanced, unless 20+ direct sponsored bills '
+                          'corroborate every raw top-tier domain. Cells '
+                          'and overalls otherwise cap to Ally; raw values are preserved here. proven = '
+                          'authored bill in category advanced past introduction.',
+                   'overall_delivery_threshold':round(MC.SAY_DO_OVERALL_RATIO,6),
+                   'overall_minimum_top_tier_cells':MC.SAY_DO_MIN_TOP_CELLS,
+                   'high_volume_followthrough':{'direct_sponsored_bills_at_least':MC.SAY_DO_DIRECT_VOLUME_MIN,
+                                                'advancement_rate_at_most':MC.SAY_DO_MAX_ADVANCEMENT_RATE,
+                                                'exceptional_authorship_bills_at_least':MC.SAY_DO_EXCEPTIONAL_AUTHORSHIP_MIN,
+                                                'exception_requires_full_top_domain_coverage':True},
+                   'capped':gate_capped,'overall_capped':gate_overall,
+                   'proven':gate_proven,'corrob':gate_corrob}},MB_ROOT+r'\category_stance.json')
 print('tier distribution:',dict(cnt))
-persu=cnt['Highly Persuadable']+cnt['True Neutral']+cnt['Lean Skeptic']+cnt['Skeptic']
-print('persuadable middle: HighlyPersuadable %d | TrueNeutral %d | LeanSkeptic %d | Skeptic %d  (total %d) | Champions+Defenders %d'%(
-      cnt['Highly Persuadable'],cnt['True Neutral'],cnt['Lean Skeptic'],cnt['Skeptic'],persu,cnt['Champion']+cnt['Defender']))
-print('\nSELF-CALIBRATED thresholds per category (derived from its own median+IQR, rate-bounded):')
-for lab,ty,cut,rate,nt in rep:
-    print('   %-26s %-3s champ/def cut %+.3f  rate %4s%%  n=%3d'%(lab,ty,cut if cut is not None else 0,('%2d'%round(100*rate)) if rate else ' -',nt))
+persu=sum(cnt[t] for t in ('Highly Persuadable','Persuadable','Lean Persuadable','True Neutral','Lean Skeptic','Skeptic','Highly Skeptical'))
+print('middle tiers: HP %d | P %d | LP %d | TN %d | LS %d | S %d | HS %d (total %d) | Champions+Defenders %d'%(
+      cnt['Highly Persuadable'],cnt['Persuadable'],cnt['Lean Persuadable'],cnt['True Neutral'],
+      cnt['Lean Skeptic'],cnt['Skeptic'],cnt['Highly Skeptical'],persu,cnt['Champion']+cnt['Defender']))
+print('\nFIXED thresholds (identical in all 18 domains):',SR.thresholds())
 def prof(m): return ([c for c,_ in cats if matrix[m][c] in ('Champion','Defender')],[c for c,_ in cats if matrix[m][c]=='Opponent'])
 print('\nVALIDATION:')
 for who in ['Richard Durbin','Tim Scott','Andy Barr','Maxine Waters']:

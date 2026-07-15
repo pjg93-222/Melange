@@ -76,7 +76,30 @@ MARKER_WORDS = {
 
 def norm_space(s): return re.sub(r'\s+', ' ', s or '').strip()
 
-ROSTER_NAMES={d['member'] for d in json.load(open(os.path.join(B,'congestion.json'),encoding='utf-8'))}
+with open(os.path.join(B,'congestion.json'),encoding='utf-8') as _roster_handle:
+    ROSTER_NAMES={d['member'] for d in json.load(_roster_handle)}
+
+def claim_fingerprint(claim):
+    """Order-insensitive near-duplicate key for short autobiographical claims."""
+    number={'one':'1','two':'2','three':'3','four':'4','five':'5','six':'6','seven':'7','eight':'8','nine':'9','ten':'10'}
+    stop={'a','an','the','and','or','i','we','my','our','me','to','of','in','on','at','for','during','those','these'}
+    tokens=[]
+    for token in re.findall(r'[a-z0-9]+',norm_space(claim).lower()):
+        token=number.get(token,token)
+        if token.startswith('travel'): token='travel'
+        elif token.endswith('ies') and len(token)>4: token=token[:-3]+'y'
+        elif token.endswith('s') and len(token)>4: token=token[:-1]
+        if token not in stop: tokens.append(token)
+    return ' '.join(sorted(set(tokens)))
+
+def attributed_first_person(sent):
+    """True when first-person language is introduced as somebody else's quote/story."""
+    match=re.search(r'\b(?:i|me|my|mine|myself|we|us|our|ours|ourselves)\b',sent,re.I)
+    if not match: return False
+    prefix=sent[:match.start()]
+    speaker=r'(?:constituent|resident|witness|speaker|guest|caller|jodie|he|she|they|[A-Z][a-z]{2,})'
+    attribution=r'(?:said|says|wrote|writes|told|recalled|shared|stated|testified|noted|explained|added|continued)'
+    return bool(re.search(speaker+r'.{0,120}\b'+attribution+r'\b',prefix,re.S))
 
 def windows(text):
     """Return category-anchored windows; merge nearby hits to avoid duplicate spend."""
@@ -188,7 +211,7 @@ def cache_key(r): return r['key']
 def load_cache():
     out = {}
     if os.path.exists(CACHE):
-        for ln in io.open(CACHE, encoding='utf-8'):
+        for line_no,ln in enumerate(io.open(CACHE, encoding='utf-8'),1):
             try:
                 d=json.loads(ln); k=d['k']; new=d['out']; old=out.get(k)
                 # LLM judgments are immutable first-wins. Deterministic local rules are versioned:
@@ -196,7 +219,8 @@ def load_cache():
                 if old is None or (str((old or {}).get('classifier','')).startswith('local_explicit_') and
                                    str((new or {}).get('classifier','')).startswith('local_explicit_')):
                     out[k]=new
-            except Exception: pass
+            except (json.JSONDecodeError,KeyError,TypeError) as exc:
+                raise RuntimeError('malformed personal-texture cache at line %d'%line_no) from exc
     return out
 
 def local_explicit(r):
@@ -210,7 +234,7 @@ def local_explicit(r):
     for cat in r['hints']:
         m=RX[cat].search(ev)
         if m: matches.append((m.start(),m.end(),cat))
-    if not matches: return {'keep':False,'category':'other','claim':'','confidence':'low','reason':'no explicit self-reference','classifier':'local_explicit_v3'}
+    if not matches: return {'keep':False,'category':'other','claim':'','confidence':'low','reason':'no explicit self-reference','classifier':'local_explicit_v5'}
     # Prefer the narrow taste/biographical families over a broad family match in the same window.
     order={'favorite':0,'food':1,'books_media':2,'quotes_values':3,'inspiration':4,'hobbies_sports':5,
            'pets':6,'places_travel':7,'personal_routine':8,'formative':9,'faith':10,'family':11}
@@ -221,6 +245,15 @@ def local_explicit(r):
     reject=False
     # Reject attributed quotations whose "my" belongs to someone other than the member.
     if re.search(r'\b(?:said|says|wrote|writes|calls?|recalled)\b.{0,100}\bmy\b',sent,re.I): reject=True
+    if attributed_first_person(sent): reject=True
+    # Memorial/tribute companion anecdotes describe the honored third party, not a stable member
+    # preference.  Likewise, an office-holder explicitly assigning a favorite/quote to somebody
+    # else is not revealing their own favorite.
+    if (re.search(r'\b(?:he|she)\b.{0,140}\b(?:passed|died|taken from us)\b',ev,re.I) and
+        re.search(r'\b[A-Z][a-z]+\s+and\s+I\b|\bwe\b',sent)):
+        reject=True
+    if re.search(r'\b(?:our|the)\s+(?:speaker|leader|chair|president|senator|representative)\b.{0,100}\b(?:favou?rite|quote)\b',sent,re.I):
+        reject=True
     # Congressional courtesy frequently uses "my brother/sister" metaphorically for colleagues.
     if cat=='family' and re.search(r'\bmy\s+(?:brother|sister)\b',sent,re.I):
         others=[n for n in ROSTER_NAMES if n!=r['member'] and n.lower() in sent.lower()]
@@ -231,36 +264,37 @@ def local_explicit(r):
                      r"grow|grew|take|took|get|got|go|went|read|watch|listen|play|played|[a-z]+ed|[a-z]+ing)\b",sent,re.I): reject=True
     if len(sent)<12 or reject:
         return {'keep':False,'category':cat,'claim':'','confidence':'low',
-                'reason':'fragment/quotation/metaphorical kinship rejected','classifier':'local_explicit_v3'}
+                'reason':'fragment/quotation/metaphorical kinship rejected','classifier':'local_explicit_v5'}
     if len(sent)>360: sent=sent[:357].rstrip()+'...'
     return {'keep':True,'category':cat,'claim':sent,'confidence':'medium',
-            'reason':'explicit first-person phrase; verbatim fallback','classifier':'local_explicit_v3'}
+            'reason':'explicit first-person phrase; verbatim fallback','classifier':'local_explicit_v5'}
 
 def write_artifact(rows, cache, selected_count=None):
     by = collections.defaultdict(list); rejected = 0
     for r in rows:
         o = cache.get(cache_key(r))
-        stale_local=str((o or {}).get('classifier','')).startswith('local_explicit_') and (o or {}).get('classifier')!='local_explicit_v3'
+        stale_local=str((o or {}).get('classifier','')).startswith('local_explicit_') and (o or {}).get('classifier')!='local_explicit_v5'
         if not o or not o.get('keep') or o.get('confidence') == 'low' or stale_local:
             if o: rejected += 1
             continue
         item = {'category':o['category'], 'claim':norm_space(o['claim']), 'confidence':o['confidence'],
                 'evidence':r['evidence'], 'source':r['source'], 'date':r['date'],
-                'locator':r['locator'], 'url':r['url'], 'classifier':o.get('classifier','fable')}
+                'locator':r['locator'], 'url':r['url'], 'classifier':o.get('classifier','fable'),
+                'narrative_eligible':o.get('classifier','fable')=='fable'}
         by[r['member']].append(item)
     # Exact claim duplicates collapse, keeping the strongest/newest sourced instance.
     members = {}
     for member, items in by.items():
         uniq = {}
         for x in sorted(items, key=lambda q: (q['confidence']=='high', q['date']), reverse=True):
-            k = re.sub(r'[^a-z0-9]+',' ',x['claim'].lower()).strip()
+            k = claim_fingerprint(x['claim'])
             uniq.setdefault(k, x)
         vals = sorted(uniq.values(), key=lambda q: (q['category'], q['date']), reverse=True)
         members[member] = {'items':vals, 'n_items':len(vals),
                            'categories':dict(collections.Counter(x['category'] for x in vals)),
                            'sources':dict(collections.Counter(x['source'] for x in vals))}
     provenance = {'method':'wide regex catch-net; cached Fable semantic judgments plus conservative verbatim local-explicit fallback',
-                  'model':'mixed: %s + local_explicit_v3'%MODEL,
+                  'model':'mixed: %s + local_explicit_v5'%MODEL,
                   'candidate_count':len(rows), 'classified_count':sum(cache_key(r) in cache for r in rows),
                   'candidate_member_count':len({r['member'] for r in rows}),
                   'semantic_gate_count':selected_count, 'semantic_cap_per_member_category':SEMANTIC_CAP,
@@ -292,13 +326,13 @@ if __name__ == '__main__':
         print('LOCAL EXPLICIT FALLBACK: classified %d previously uncached semantic-gate windows'%len(todo))
         write_artifact(rows,cache,len(selected));sys.exit(0)
     if '--refresh-local' in sys.argv:
-        todo=[r for r in selected if (cache.get(cache_key(r)) or {}).get('classifier')!='fable' and
-              'classifier' in (cache.get(cache_key(r)) or {})]
+        todo=[r for r in selected if str((cache.get(cache_key(r)) or {}).get('classifier','')).startswith('local_explicit_') and
+              (cache.get(cache_key(r)) or {}).get('classifier')!='local_explicit_v5']
         with io.open(CACHE,'a',encoding='utf-8') as cf:
             for r in todo:
                 o=local_explicit(r);cache[cache_key(r)]=o
                 cf.write(json.dumps({'k':cache_key(r),'out':o},ensure_ascii=True)+'\n')
-        print('LOCAL EXPLICIT REFRESH v3: reclassified %d deterministic windows'%len(todo))
+        print('LOCAL EXPLICIT REFRESH v5: reclassified %d deterministic windows'%len(todo))
         write_artifact(rows,cache,len(selected));sys.exit(0)
     if '--score' not in sys.argv:
         print('usage: personal_texture_layer.py [--probe | --score --go | --local | --refresh-local | --rebuild]'); sys.exit(0)

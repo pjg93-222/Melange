@@ -7,7 +7,7 @@ requirements, r_alerting pattern statistic. Read-only; prints the verdict table.
 import csv, json, math, os, sys, collections
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B = MB_ROOT
-SP = os.environ.get('B5_SCRATCH', r"C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-wizardly-jemison-171391\1b194f81-91fc-4e4c-a071-65a2ad26f89a\scratchpad")
+COMPOSITE = os.environ.get('B5_COMPOSITE',os.path.join(B,'source_data','big5_composite.json'))
 
 PANEL = json.load(open(B + r"\behavior_panel.json"))["members"]
 C = {m['member']: m for m in json.load(open(B + r'\congestion.json'))}
@@ -54,7 +54,7 @@ def criterion(name):
 INSTR = {}
 INSTR['L'] = {m: d for m, d in json.load(open(B + r"\big5_traits.json"))['traits'].items()
               if d.get('tokens', 0) >= 1500}
-gp = os.path.join(SP, 'big5_composite.json')
+gp = COMPOSITE
 if os.path.exists(gp): INSTR['G'] = json.load(open(gp))['traits']
 INSTR['P'] = {m: d for m, d in json.load(open(B + r"\agency_communion.json"))['members'].items()
               if d.get('n', 0) >= 15}

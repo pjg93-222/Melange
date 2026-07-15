@@ -29,6 +29,8 @@ deploy/
 
 # --- keep: code, docs, config, small source-of-truth text ---
 !*.md
+!formal_visibility_roles.json
+!requirements*.txt
 !quorum_query.txt
 !fec/retiring_members.txt
 !.claude/launch.json

@@ -10,9 +10,9 @@ Usage: python b5_audio_build.py [--jobs N]      (--test = synthetic member end-t
 import os, json, glob, wave, contextlib, multiprocessing as mp
 import numpy as np
 sys = _s; sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+from audio_rules import MIN_MEMBER_TARGET_SEC as MIN_SEC
 B = MB_ROOT
 ADIR = os.path.join(B, 'audio_pilot'); CLIPCACHE = os.path.join(B, 'b5_audio_clipcache.json')
-MIN_SEC = 180.0   # prereg: >= 3 minutes of solo audio per member
 DEF_JOBS = max(1, min(8, (os.cpu_count() or 2) - 2))
 
 def clip_seconds(path):

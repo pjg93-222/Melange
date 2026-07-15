@@ -98,20 +98,20 @@ canvas{touch-action:none}
 <span class=sub>533 members · cosponsorship network · per-category stance × competitive influence-maximization</span>
 <a id=desklink class=desklink href="cu-member-desk.html">Member desk ▸</a></header>
 <div id=bar>
-<span><label>Issue</label><select id=issue></select></span>
+<span><label>Issue</label><select id=issue aria-label="Select policy issue"></select><span title="CU advocacy frame: positive means aligned with credit-union priorities; CFPB positive means restrain CFPB reach" style="color:#8b949e;font-size:10px;margin-left:5px">CU frame ⓘ</span></span>
 <span><label>Mode</label><span class=seg id=mode><button data-m=coal class=on>Coalition (build)</button><button data-m=flip>Persuade</button></span></span>
 <span><label>Color</label><span class=seg id=color><button data-c=issue class=on>Issue stance</button><button data-c=party>Party</button><button data-c=gen>Overall</button><button data-c=elec>Electoral</button><button data-c=recept>Receptivity</button><button data-c=antag>Antagonism</button></span></span>
 <span><label>Tier</label><span class=seg id=tierseg title="Legislative + press only (drops the committee & demographic pillars). Tier 1 = top 12, Tier 2 = next 24, Tier 3 = next 48; the rest are untiered."><button data-t=0 class=on>All</button><button data-t=1>T1</button><button data-t=2>T2</button><button data-t=3>T3</button></span></span>
 <span><label>Layout</label><span class=seg id=ltog><button data-l=cosp class=on>Cosponsorship</button><button data-l=committee>Committees</button></span></span>
 <span><label>Layers</label><span id=lybar style="display:inline-flex;gap:8px;align-items:center;font-size:11px;color:#9ca3af">
- <label style=cursor:pointer><input type=checkbox id=ly_c checked> cosponsor</label>
- <label style=cursor:pointer><input type=checkbox id=ly_s checked> social</label>
- <label style=cursor:pointer><input type=checkbox id=ly_h checked> committee</label>
- <label style=cursor:pointer><input type=checkbox id=ly_e checked> engagement</label>
- <label style=cursor:pointer title="cross-media references (speeches/interviews/reposts), green=positive red=negative"><input type=checkbox id=ly_r> references ±</label>
- <label style=cursor:pointer title="appeared together on the same broadcast (substantial joint interview-episode appearances, 2+ shared episodes); violet=cross-party"><input type=checkbox id=ly_a> appeared together</label>
+ <label style=cursor:pointer><input type=checkbox id=ly_c aria-label="Show cosponsor layer" checked> cosponsor</label>
+ <label style=cursor:pointer><input type=checkbox id=ly_s aria-label="Show social layer" checked> social</label>
+ <label style=cursor:pointer><input type=checkbox id=ly_h aria-label="Show committee layer" checked> committee</label>
+ <label style=cursor:pointer><input type=checkbox id=ly_e aria-label="Show engagement layer" checked> engagement</label>
+ <label style=cursor:pointer title="cross-media references (speeches/interviews/reposts), green=positive red=negative"><input type=checkbox id=ly_r aria-label="Show signed reference layer"> references ±</label>
+ <label style=cursor:pointer title="appeared together on the same broadcast (substantial joint interview-episode appearances, 2+ shared episodes); violet=cross-party"><input type=checkbox id=ly_a aria-label="Show co-appearance layer"> appeared together</label>
 </span></span>
-<span><label>Find</label><input id=search placeholder="member name…" list=names><datalist id=names></datalist></span>
+<span><label>Find</label><input id=search aria-label="Find member" placeholder="member name…" list=names><datalist id=names></datalist></span>
 </div>
 <div id=main>
  <div id=left>
@@ -119,7 +119,7 @@ canvas{touch-action:none}
    <div id=istats></div>
    <div id=budgetwrap>
      <h3 style=margin-top:16px id=bhdr>Budget frontier</h3>
-     <input type=range id=slider min=0 max=100 value=100>
+     <input type=range id=slider aria-label="Issue budget" min=0 max=100 value=100>
      <div class=frow><span>$0</span><span id=bmax>$2M</span></div>
      <div class=big id=money>$0</div>
      <div id=mdetail class=hint></div>
@@ -144,8 +144,8 @@ canvas{touch-action:none}
      <div id=mprime class=recipe></div>
      <h3 style=margin-top:14px>Scenario <span style=color:#6e7681;font-weight:400;text-transform:none>· live what-if</span></h3>
      <div class=scc>
-       <label>CU money &nbsp;<b id=culab style=color:#16a34a>$0k</b></label><input type=range id=cusl min=0 max=20 step=1 value=0>
-       <label>Competitor money &nbsp;<b id=colab style=color:#ef4444>$0k</b></label><input type=range id=cosl class=comp min=0 max=30 step=1 value=0>
+       <label>CU money &nbsp;<b id=culab style=color:#16a34a>$0k</b></label><input type=range id=cusl aria-label="Credit union scenario money" min=0 max=20 step=1 value=0>
+       <label>Competitor money &nbsp;<b id=colab style=color:#ef4444>$0k</b></label><input type=range id=cosl class=comp aria-label="Competitor scenario money" min=0 max=30 step=1 value=0>
        <div id=scout class=scout></div>
        <div style=margin-top:10px><div class=h2hlab><span style=color:#16a34a>CU pull</span><span>flip odds <b id=h2hpct style=color:#e6edf3>50%</b></span><span style=color:#ef4444>industry</span></div>
          <div class=h2h><span class=cu id=h2hcu style=width:50%></span><span class=ind id=h2hind style=width:50%></span></div>
@@ -156,13 +156,13 @@ canvas{touch-action:none}
        <span class=seg id=pmode style=margin-bottom:5px><button data-p=path class=on title="Most-reliable recruitment chain from this member to a target vote">Path</button><button data-p=best title="Which pro member should introduce the bill to best reach a target">Best</button><button data-p=multi title="Reach several targets at once from this member (shared recruitment tree)">Multi</button><button data-p=budget title="Spend $X to recruit the widest diversified set of members">Budget</button><button data-p=cascade title="Seed this member as a co-sponsor and watch who is likely to join the cascade">Cascade</button></span>
        <span class=seg id=cascsub style="display:none;margin:0 0 5px"><button data-cs=who class=on title="Color the map by who activates if this one member co-sponsors">Who joins</button><button data-cs=max title="Find the recruitment route from this member that maximizes the cascade">Max route</button><button data-cs=flip title="Which members to recruit to flip THIS member — maximize the likelihood they join (Persuade)">Flip route</button></span>
        <label id=plabel>bill sponsor <b id=seednm style=color:#16a34a></b> → reach target:</label>
-       <input id=tgtsearch placeholder="target member…" list=names style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:5px 8px;width:100%;margin:5px 0;font-size:12px">
+       <input id=tgtsearch aria-label="Target member" placeholder="target member…" list=names style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:5px 8px;width:100%;margin:5px 0;font-size:12px">
        <button class=abtn id=pathbtn>Build</button>
        <button class=abtn ghost id=backbtn>← Targets</button>
        <div id=pathout class=scout></div>
        <h3 style=margin-top:13px;border-top:1px solid #21262d;padding-top:11px>System shocks <span style=color:#6e7681;font-weight:400;text-transform:none>structural what-ifs</span></h3>
        <label>members drop out of the bill:</label>
-       <input id=dropsearch placeholder="who backs out (comma-sep)" list=names style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:5px 8px;width:100%;margin:5px 0;font-size:12px">
+       <input id=dropsearch aria-label="Members who drop out" placeholder="who backs out (comma-sep)" list=names style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:5px 8px;width:100%;margin:5px 0;font-size:12px">
        <label style=margin-top:4px>executive branch:</label>
        <span class=seg id=execseg style=margin-top:3px><button data-e=none class=on>neutral</button><button data-e=oppose>opposes</button><button data-e=support>supports</button></span>
        <div id=shockout class=scout></div>
@@ -341,8 +341,8 @@ const ADJ=Array.from({length:N},()=>({}));for(const [u,v,w] of EG.adj){ADJ[u][v]
 function cpf(u,v){return (PTY[u]!==PTY[v]&&'DR'.indexOf(PTY[u])>=0&&'DR'.indexOf(PTY[v])>=0)?(K.DCROSS+(1-K.DCROSS)*Math.sqrt(BPF[u]*BPF[v])):1;}   // CALIBRATED: cross-party DIFFUSION damped 0.4-1.0x (homophily: Harmon; Andris; cross<within)
 function align(u,v){if(PTY[u]===PTY[v]&&'DR'.indexOf(PTY[u])>=0)return K.SRCPRO;if(PTY[u]!==PTY[v]&&'DR'.indexOf(PTY[u])>=0&&'DR'.indexOf(PTY[v])>=0)return K.SRCANTI;return 1;}   // SOURCE-ALIGNMENT for persuasion: co-partisan x1.7 / out x0.5 (Furnas/Bakker)
 const PE=Array.from({length:N},()=>({}));for(let u=0;u<N;u++)for(const v in ADJ[u]){const wc=ADJ[u][v]*cpf(u,+v)*(EMU?EMU[+v]:1);PE[u][v]=wc/(wc+6);}   // = moneyball_core.build_P incl. edge_mult receiver susceptibility (psych parity 2026-07-09; closes audit N-1 JS half)
-const SCN={C:'Champion',F:'Defender',A:'Ally',H:'Highly Persuadable',T:'True Neutral',L:'Lean Skeptic',N:'Neutral',S:'Skeptic',O:'Opponent','-':'—'};
-const CAMP=t=>('CFA'.indexOf(t)>=0?'pro':'OS'.indexOf(t)>=0?'anti':'neu');
+const SCN={C:'Champion',F:'Defender',A:'Ally',H:'Highly Persuadable',P:'Persuadable',G:'Lean Persuadable',T:'True Neutral',L:'Lean Skeptic',N:'Neutral',S:'Skeptic',K:'Highly Skeptical',O:'Opponent','-':'—'};
+const CAMP=t=>('CFA'.indexOf(t)>=0?'pro':'OSK'.indexOf(t)>=0?'anti':'neu');
 const PERS=EG.pers,THETA=EG.theta;
 function baseTiers(i){const t=new Array(N);for(let u=0;u<N;u++)t[u]=DATA.stance[u][i];return t;}
 function flipModel(i,tiers,cu,ind){
@@ -399,7 +399,7 @@ function spread(tiers,ind,tally){   // competitive cascade, edge-keyed CRN; opti
   let tot=0;
   for(let it=0;it<K.MC;it++){
     const B=anti.slice(),bk=(700000000+it)*NMb;
-    for(let u=0;u<N;u++)if(!dropped.has(u)&&CAMP(tiers[u])==='neu'&&sm(bk+u)<Math.min(0.95,(ind[u]||0)*efm(u)/K.BSCALE))B.push(u);
+    for(let u=0;u<N;u++)if(!dropped.has(u)&&CAMP(tiers[u])==='neu'&&sm(bk+u)<Math.min(0.9,(ind[u]||0)*efm(u)/K.BSCALE))B.push(u);
     const col=new Int8Array(N);for(const dz of dropped)col[dz]=3;for(const s of A)col[s]=1;for(const s of B)col[s]=2;
     let fr=[];for(const s of A)fr.push(s*2);for(const s of B)fr.push(s*2+1);
     const itb=it*NMb*NMb;
@@ -720,7 +720,7 @@ function runPath(){
     if(!bs.length){po.innerHTML='<span style=color:#f59e0b>No pro member can reach this target on this issue.</span>';noRoute();draw();return;}
     const b0=bs[0];route={edges:pedges(b0.path),nodes:b0.path,seed:b0.sponsor,targets:[t],ordered:true};
     po.innerHTML=`<div class=mrow><span>Best sponsor → ${last(t)}</span><b>${last(b0.sponsor)}</b></div>`
-     +`<div class=mrow><span>Whole chain holds · cost</span><b>${(b0.ch*100).toFixed(0)}% · $${(b0.cost/1000).toFixed(0)}k</b></div>`
+     +`<div class=mrow><span title="Scenario output from the ASKM dial; not an empirical probability">Modeled chain holds (ASKM=${ASKM.toFixed(2)}) · cost</span><b>${(b0.ch*100).toFixed(0)}% · $${(b0.cost/1000).toFixed(0)}k</b></div>`
      +`<div style=margin-top:6px;font-size:11px;color:#c9d1d9;line-height:1.6>`+bs.map((s,i)=>`<span style=color:#6e7681>${i+1}.</span> <span class=lnk data-i=${s.sponsor} style=cursor:pointer;text-decoration:underline>${DATA.name[s.sponsor]}</span> <span style=color:#8b949e>${(s.ch*100).toFixed(0)}% · $${Math.round(s.cost/1000)}k · ${s.hops}h</span>`).join('<br>')+`</div>`;
     po.querySelectorAll('.lnk').forEach(el=>el.onclick=()=>selectMember(+el.dataset.i));startRoute();return;
   }
@@ -756,7 +756,7 @@ function runPath(){
   }
   r.reach=cascadeReach(r.path);route={edges:pedges(r.path),nodes:r.path,seed:sel,targets:[t],ordered:true};
   po.innerHTML=`<div class=mrow><span>Path · <b>${r.path.length}</b> members</span><b class="delta ${r.reached?'up':'down'}">${r.reached?'reaches target':'unreachable'}</b></div>`
-   +`<div class=mrow><span>Whole chain holds · weakest ask</span><b>${(chainHold(r.path)*100).toFixed(0)}% · ${(chainWeak(r.path)*100).toFixed(0)}%</b></div>`
+   +`<div class=mrow><span title="Scenario output from the ASKM dial; not an empirical probability">Modeled chain holds (ASKM=${ASKM.toFixed(2)}) · weakest ask</span><b>${(chainHold(r.path)*100).toFixed(0)}% · ${(chainWeak(r.path)*100).toFixed(0)}%</b></div>`
    +`<div class=mrow><span>Direct recruitment</span><b>$${(r.total/1000).toFixed(0)}k</b></div>`
    +`<div class=mrow><span>Influence cascade</span><b>~${r.reach.toFixed(0)} co-sponsors</b></div>`
    +`<div style=margin-top:7px;font-size:11px;color:#c9d1d9;line-height:1.65>`
@@ -783,11 +783,14 @@ function fmt(n){return '$'+Math.round(n).toLocaleString();}
 function refresh(){
  const f=DATA.frontier[issue], useSlider=(mode==='coal'&&!!f);
  const st=DATA.stats[issue];
- document.getElementById('istats').innerHTML=
-   `<div class=stat><span><span class=pill style=background:${STCOL.C}></span>Champions</span><b>${st.champ}</b></div>`+
-   `<div class=stat><span><span class=pill style=background:${STCOL.A}></span>Allies</span><b>${st.ally}</b></div>`+
-   `<div class=stat><span><span class=pill style=background:${STCOL.S}></span>Skeptics</span><b>${st.skep}</b></div>`+
-   `<div class=stat><span><span class=pill style=background:${STCOL.O}></span>Opponents</span><b>${st.opp}</b></div>`;
+ const tc={C:0,F:0,A:0,H:0,P:0,G:0,T:0,N:0,L:0,S:0,K:0,O:0,'-':0};
+ for(let i=0;i<N;i++){const c=DATA.stance[i][issue];tc[c]=(tc[c]||0)+1;}
+ const tierRows=[['C','Champion',tc.C],['F','Defender',tc.F],['A','Ally',tc.A],
+   ['H','Highly Persuadable',tc.H],['P','Persuadable',tc.P],['G','Lean Persuadable',tc.G],
+   ['T','True Neutral',tc.T+tc.N],['L','Lean Skeptic',tc.L],['S','Skeptic',tc.S],
+   ['K','Highly Skeptical',tc.K],['O','Opponent',tc.O],['-','No evidence',tc['-']]];
+ document.getElementById('istats').innerHTML=tierRows.filter(x=>x[2]>0).map(([c,label,n])=>
+   `<div class=stat><span><span class=pill style=background:${STCOL[c]}></span>${label}</span><b>${n}</b></div>`).join('');
  document.getElementById('bhdr').textContent=useSlider?'Budget frontier':(mode==='coal'?'Money deployed':'Money deployed');
  slider.style.display=useSlider?'block':'none';
  document.querySelector('#budgetwrap .frow').style.display=useSlider?'flex':'none';

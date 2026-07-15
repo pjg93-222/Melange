@@ -16,7 +16,7 @@ sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl
 B=MB_ROOT
 DS=MB_DRAFT
-XLSX=r'C:\Users\pgoff\Downloads\cu_stance_label_set_AUGMENTED.xlsx'
+XLSX=os.environ.get('STANCE_LABEL_SET',os.path.join(MB_ROOT,'source_data','cu_stance_label_set_AUGMENTED.xlsx'))
 snip={}
 for r in csv.DictReader(open(DS+r'\cu_stance_label_set.csv',encoding='utf-8-sig')):
     if (r.get('row') or '').strip(): snip[r['row'].strip()]={'text':(r.get('text_snippet') or ''),'url':r.get('url') or ''}

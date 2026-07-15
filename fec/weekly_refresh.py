@@ -25,18 +25,28 @@ def log(msg):
     print(line)
     with open(LOG,'a',encoding='utf-8') as f: f.write(line+'\n')
 def step(name,args,timeout=3600,hard=False):
-    t=time.time()
+    t=time.time(); proc=None
     try:
-        r=subprocess.run([sys.executable,os.path.join(FE,args[0])]+args[1:],capture_output=True,
-                         text=True,encoding='utf-8',errors='replace',timeout=timeout,cwd=FE)
-        tail=(r.stdout or '').strip().splitlines()[-1:] or ['']
-        ok=r.returncode==0
+        flags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name=='nt' else 0
+        proc=subprocess.Popen([sys.executable,os.path.join(FE,args[0])]+args[1:],stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE,text=True,encoding='utf-8',errors='replace',cwd=FE,
+                              creationflags=flags,start_new_session=os.name!='nt')
+        stdout,stderr=proc.communicate(timeout=timeout)
+        tail=(stdout or '').strip().splitlines()[-1:] or ['']
+        ok=proc.returncode==0
         log('%-28s %s %5.0fs  %s'%(name,'OK' if ok else '!!',time.time()-t,tail[0][:110]))
         if not ok:
-            log('   stderr: '+(r.stderr or '')[-300:].replace('\n',' | '))
+            log('   stderr: '+(stderr or '')[-300:].replace('\n',' | '))
             if hard: log('HARD FAILURE — aborting refresh'); sys.exit(1)
         return ok
     except subprocess.TimeoutExpired:
+        if proc is not None:
+            if os.name=='nt':
+                subprocess.run(['taskkill','/PID',str(proc.pid),'/T','/F'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+            else:
+                try: os.killpg(proc.pid,9)
+                except ProcessLookupError: pass
+            proc.wait()
         log('%-28s TIMEOUT after %ds%s'%(name,timeout,' — aborting' if hard else ' — continuing'))
         if hard: sys.exit(1)
         return False
@@ -87,16 +97,7 @@ step('multilayer network',['build_multilayer_network.py'],timeout=900)
 step('co-appearance layer',['co_appearance_layer.py'],timeout=600)                 # joint interview-episode pairings (user 2026-07-05)
 step('reference layer (rebuild)',['member_reference_layer.py','--rebuild'],timeout=900)  # FREE cache-only re-aggregation; paid --score passes stay manual
 step('press stance stack',['press_stance_stack.py'],timeout=1800)   # re-score the (grown) corpus so the sidecar never goes stale (frozen-archive lesson); new articles missing Fable cache fields degrade gracefully to reader+DEBATE features
-step('media blend',['build_media_blend.py'],timeout=1200)   # tolerant: Excel lock -> stale press this week, still consistent
-ok=step('FULL PIPELINE + dashboards',['run_pipeline.py'],timeout=3000)
-if not ok:
-    # S3-06 resolution (user-ratified 2026-07-03, "whatever is most optimal"): a locked workbook at the
-    # col-G sync used to hard-abort ALL dashboard regeneration for the week. Fall back to rebuilding the
-    # engines + dashboards from the last CONSISTENT artifact state — '--from per_topic_flip' skips the
-    # workbook-writing steps entirely; the col-G view stays stale until the next unlocked run, which is
-    # the standard view-self-heal contract. If even the fallback fails, THAT is a hard abort.
-    log('pipeline failed — dashboard fallback from last consistent state (--from per_topic_flip)')
-    step('DASHBOARD FALLBACK',['run_pipeline.py','--from','per_topic_flip'],timeout=3000,hard=True)
+step('FULL PIPELINE + dashboards',['run_pipeline.py'],timeout=3000,hard=True)
 try:
     new=json.load(open(os.path.join(MB_ROOT,'ranks_python.json')))['rank']
     if prev:
@@ -110,19 +111,9 @@ step('signed coalitions (diag)',['signed_coalitions.py'],timeout=900)
 step('KB benchmark (diag)',['kb_benchmark.py'],timeout=900)
 step('LEP criterion (diag)',['lep_criterion.py'],timeout=900)
 step('say-do gap (diag)',['say_do_gap.py'],timeout=900)   # 2026-07-07: feeds delivery_mult (engine talker discount); runs AFTER desks so it reads the fresh bundle
-# clean-audio / narrative layer, INCREMENTAL (2026-07-09 'update everything'). Display-only +
-# tolerant. Costs are bounded by the caches: fetch skips members >=180s (dlarchive-resumable);
-# verify classifies only NEW clips (caption+verdict caches; Haiku ~$0.004/clip); build featurizes
-# only new keep-clips; narratives generate only members MISSING an ok brief (typically 0-2/week,
-# Fable w/ Opus refusal-fallback ~$0.10/member). Steady state = four fast no-ops. NARR_MAX caps the
-# worst-case narrative bill (artifact loss); NARR_MAX=0 disables that step entirely.
-step('audio fetch (incr)',['b5_audio_fetch.py','--search','999'],timeout=3600)
-step('audio verify (incr)',['b5_audio_verify.py'],timeout=3600)
-step('audio voiceprints (incr)',['b5_audio_build.py'],timeout=1800)
-_nmax=os.environ.get('NARR_MAX','15')
-if _nmax!='0':
-    step('narratives (incr, cap %s)'%_nmax,['b5_narratives.py','--limit',_nmax],timeout=1800)
-    # re-embed so fresh briefs/voice-reads land THIS week (desks were built inside run_pipeline, before this layer)
-    step('desk re-embed (narratives)',['make_member_desk.py'],timeout=900)
-    step('combined re-embed',['make_combined.py'],timeout=600)
+# Audio/narrative safety deployment (2026-07-13): run_pipeline now rebuilds the guarded audio
+# descriptor and construct-honest profile basis before the desk. The old unattended fetch ->
+# single-model verification -> voiceprint -> paid narrative chain is retired. Audio remains absent
+# until two distinct target-speaker reviews satisfy b5_audio_reviews_v2.json. Narrative regeneration
+# is manual through b5_narratives_local.py after explicit user approval; it costs $0.
 log('===== WEEKLY REFRESH COMPLETE — dashboards regenerated =====')

@@ -4,7 +4,7 @@
 > (all 19 row-535 weights are literals sourced from your dial sheet; flagships at 0.30). PERS_NONE
 > 0.45 · SOCIAL_SHRINK on · RT_W 0.5 · H2/H3/M1/M2/M3/M6/M7 fixed · ψ-caution tag added
 > (SAL_PSI_DAMP dial off). GroupKFold verdict: all classifier configs statistically tied (~0.78 CV);
-> incumbent SVM retained in production at 83.9%/0.816. New ranks: ranks_AFTER_fixes.json (318 members
+> incumbent SVM retained in production at 83.9%/0.816. New ranks: orphan/snapshots/ranks_AFTER_fixes.json (318 members
 > moved ≥5; top 5 = Crapo, Barr, Roger Williams, Hill, Britt; Durbin 531 — his col-G tier is now full
 > Opponent, and the audit's deep-but-movable check was repointed to the rung rather than the man).
 > One incident during application: an Excel-save/OneDrive collision truncated the workbook; restored

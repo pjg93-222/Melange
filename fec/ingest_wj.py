@@ -16,7 +16,8 @@ Files may be (a) the 'Download Transcript' text ('00:00:16 GUEST text...') or (b
 """
 import os, re, sys, csv, glob, html as _html, sqlite3, datetime, json, collections
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+from paths import ROOT
+B = ROOT
 WJ_DIR = os.path.join(B, 'wj_transcripts')
 
 # ---- roster resolve (inlined; member from filename slug or manifest) ----

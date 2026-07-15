@@ -21,7 +21,7 @@ Their pipeline, kept step for step:
      trait z-scores toward 0 (uncertainty -> neutral, never a fabricated personality).
 Emotional Stability (ES) is reported Ramey-style; Neuroticism N = -ES.
 Output: big5_traits.json  {member: {O,C,E,A,ES,N (z-scores), tokens, nposts, lowconf}}"""
-import sys, os, json, re, collections
+import sys, os, json, re, collections, math
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl,pandas as pd
 B=MB_ROOT
@@ -34,25 +34,35 @@ C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=list(
 #   BIG5_SOURCES  csv subset of {social, CREC, INTERVIEW, CHRG} — genre-restricted scoring
 #   BIG5_BEFORE / BIG5_AFTER  ISO date — time-sliced SPEECHES (social rows carry no usable date here)
 _SRC=set(s.strip() for s in os.environ.get('BIG5_SOURCES','').split(',') if s.strip()) or None
+# Legacy CHRG rows are not safe default personality evidence: historical surname resolution attached
+# some witness turns to same-surname members, and prepared committee statements are outside the
+# user-approved ordinary-questioning scope.  A caller may still request CHRG explicitly for an audit.
+_SPEECH_SRC=_SRC or {'CREC','INTERVIEW'}
 _BEF=os.environ.get('BIG5_BEFORE',''); _AFT=os.environ.get('BIG5_AFTER','')
 if _SRC or _BEF or _AFT: print('CORPUS FILTER: sources=%s before=%s after=%s'%(sorted(_SRC) if _SRC else 'all',_BEF or '-',_AFT or '-'))
 texts=collections.defaultdict(list)
+def clean_social_text(value):
+    """Return usable authored text, never pandas' missing-value sentinel as corpus language."""
+    if value is None or (isinstance(value,float) and math.isnan(value)): return None
+    text=str(value).strip()
+    return None if not text or text.lower() in {'nan','none','<na>','nat'} else text
 if _SRC is None or 'social' in _SRC:
     ws=openpyxl.load_workbook(B+r'\Quorum Processed.xlsx',read_only=True)['Members']
     hdr=[c.value for c in next(ws.iter_rows(min_row=1,max_row=1))]
     im,ic,irt=hdr.index('member'),hdr.index('Content'),hdr.index('is_rt')
     for row in ws.iter_rows(min_row=2,values_only=True):
-        m,t=row[im],row[ic]
-        if m in C and t and str(row[irt]).lower() not in ('1','true'): texts[m].append(str(t))
+        m,t=row[im],clean_social_text(row[ic])
+        if m in C and t and str(row[irt]).lower() not in ('1','true'): texts[m].append(t)
     sm=pd.read_excel(B+r'\Social Master.xlsx',sheet_name='Corpus',dtype=str)
     for _,r in sm[sm['platform']=='bluesky'].iterrows():
-        if r['member'] in C and r['text'] and str(r.get('is_rt','')).lower() not in ('1','true'): texts[r['member']].append(str(r['text']))
+        t=clean_social_text(r.get('text'))
+        if r['member'] in C and t and str(r.get('is_rt','')).lower() not in ('1','true'): texts[r['member']].append(t)
 import sqlite3,hashlib as _hl
 nsp=0; ndup=0; _seen=set()
 try:
     con=sqlite3.connect(B+r'\social_media.db')
     for m,t,src,dt in con.execute('SELECT member,text,source,date FROM speeches'):
-        if _SRC is not None and src not in _SRC: continue
+        if src not in _SPEECH_SRC: continue
         d=str(dt or '')[:10]
         if _BEF and (not d or d>=_BEF): continue
         if _AFT and (not d or d<_AFT): continue
@@ -149,9 +159,18 @@ if os.path.exists(_cnf):
 ACF={}
 _acp=os.path.join(B,'agency_communion.json')
 if os.path.exists(_acp):
-    try:
-        ACF={m:d for m,d in json.load(open(_acp))['members'].items() if d.get('n',0)>=15}
-    except Exception: ACF={}
+    with open(_acp,encoding='utf-8') as _af:
+        _ac=json.load(_af)
+    if not isinstance(_ac.get('members'),dict):
+        raise ValueError('agency_communion.json: required members mapping is missing')
+    ACF={}
+    for m,d in _ac['members'].items():
+        if not isinstance(d,dict):
+            raise ValueError('agency_communion.json: malformed member record for %s'%m)
+        if (d.get('n') or 0)>=15:
+            if not all(isinstance(d.get(k),(int,float)) for k in ('agency','communion')):
+                raise ValueError('agency_communion.json: covered member %s lacks numeric features'%m)
+            ACF[m]=d
     if ACF: print('persona cue features ACTIVE: %d members covered (uncovered -> neutral mean)'%len(ACF))
 FEATS=list(CAT)+['sixltr','exclam','number','mattr']+(['concrete'] if CONC else [])+(['llm_agency','llm_communion'] if ACF else [])
 # ---------------- standardized trait weights (Pennebaker–King / Yarkoni / Mairesse correlates) ----------------

@@ -1,0 +1,24 @@
+{
+  "schema": "moneyball-orphan-files-v1",
+  "moved_on": "2026-07-14",
+  "destination": "orphan/snapshots",
+  "files": [
+    {"path": ".Rhistory", "reason": "empty local R session history"},
+    {"path": "archive_leg.PRE-D3.json", "reason": "superseded legislative archive snapshot"},
+    {"path": "big5_llm_batch_opus.CANCELED.json", "reason": "canceled run marker"},
+    {"path": "fp_before.json", "reason": "input for superseded fec/attic utilities"},
+    {"path": "interview_e_persona_halves.precache_short_rubric.CANCELED.json", "reason": "canceled preregistration-era artifact"},
+    {"path": "Moneyball Main Version - Blended.PRE-CMTEREWEIGHT-20260704_221322.xlsx", "reason": "historical workbook snapshot"},
+    {"path": "Moneyball Main Version - Blended.PRE-DEMOJIBAKE-20260708_143414.xlsx", "reason": "historical workbook snapshot"},
+    {"path": "Moneyball Main Version - Blended.PRE-JUDICIARY-20260704_221226.xlsx", "reason": "historical workbook snapshot"},
+    {"path": "ranks_AFTER_fixes.json", "reason": "historical rank comparison snapshot"},
+    {"path": "ranks_AFTER_media.json", "reason": "historical rank comparison snapshot"},
+    {"path": "ranks_AFTER_taxfix.json", "reason": "historical rank comparison snapshot"},
+    {"path": "ranks_before_cspan.json", "reason": "historical rank comparison snapshot"},
+    {"path": "ranks_BEFORE_media.json", "reason": "historical rank comparison snapshot"},
+    {"path": "social_media.PRE-IVENTITY-20260708_143932.db", "reason": "historical database snapshot"},
+    {"path": "social_media.PRE-SPEECHDEDUP-20260708_143532.db", "reason": "historical database snapshot"},
+    {"path": "_leg_before.json", "reason": "superseded scratch comparison"},
+    {"path": "_leg_clean_cols.json", "reason": "superseded scratch comparison"}
+  ]
+}

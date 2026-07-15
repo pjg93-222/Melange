@@ -7,8 +7,9 @@ power gate said we need. Extracts each member's GUEST turns -> capped sample -> 
 each) for a Haiku scoring workflow. Incremental: skips members already in wj_n_labels.json."""
 import os, sys, json, sqlite3, collections
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-B = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
-SCRATCH = r'C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-clever-elbakyan-15fa11\4551680e-cf3a-40bd-ba1a-4c2b67b144b0\scratchpad'
+from paths import ROOT
+B = ROOT
+SCRATCH = os.environ.get('MONEYBALL_RESEARCH_DIR',os.path.join(B,'outputs','research'))
 CAP = 11000   # chars per member (a representative sample of their hot-seat responses)
 
 def run():

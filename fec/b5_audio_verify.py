@@ -11,6 +11,7 @@ Model = Haiku 4.5 (mechanical classification; Fable is reserved for the per-memb
 Usage: python b5_audio_verify.py"""
 import subprocess, re, json, glob
 sys=_s; sys.stdout.reconfigure(encoding='utf-8',errors='replace')
+from audio_rules import MIN_MEMBER_TARGET_SEC
 B=MB_ROOT; import anthropic
 KEY=open(B+r'\fec\anthropic_key.txt').read().strip(); cl=anthropic.Anthropic(api_key=KEY)
 ADIR=B+r'\audio_pilot'; OUT=B+r'\b5_audio_verify.json'; CAPC=B+r'\b5_caption_cache.json'
@@ -104,5 +105,6 @@ for md in mems:
             try:
                 with contextlib.closing(wave.open(w,'rb')) as wv: s+=wv.getnframes()/float(wv.getframerate() or 1)
             except:pass
-    if s>=180: ok.append(member)
-print('members with >=180s VERIFIED-SOLO + identity-OK audio: %d / %d'%(len(ok),len(mems)))
+    if s>=MIN_MEMBER_TARGET_SEC: ok.append(member)
+print('members with >=%ds VERIFIED-SOLO + identity-OK audio: %d / %d'%(
+    int(MIN_MEMBER_TARGET_SEC),len(ok),len(mems)))

@@ -1,14 +1,15 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
-from moneyball_core import dump_atomic   # S2-03: crash-safe artifact write
+from moneyball_core import dump_atomic, overall_tier   # shared artifact + stance authorities
 import json, sys, glob, os, csv, openpyxl, networkx as nx, math, random, re, unicodedata, zlib
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 C=json.load(open(MB_ROOT+r'\congestion.json'))
 cong={m['member']:m for m in C}
-CS=json.load(open(MB_ROOT+r'\category_stance.json'))['matrix']
+CS_DOC=json.load(open(MB_ROOT+r'\category_stance.json'))
+CS=CS_DOC['matrix']; OVERALL_CAPS=(CS_DOC.get('gate') or {}).get('overall_capped') or {}
 FL=json.load(open(MB_ROOT+r'\per_topic_alloc.json'))
 CO=json.load(open(MB_ROOT+r'\per_topic_coalition.json'))
-issues=list(FL.keys())            # 18 labels, blocks order
-# label -> matrix category (CFPB Restrain/Reach share combined CFPB stance)
+# label -> matrix category.  CFPB is exposed once under the ratified pro-CU frame; the former
+# "Reach (-)" duplicate presented the same bytes as an apparent opposite policy axis.
 LBLCAT={'Examination & Supervision':'Examination & Supervision','Credit Union Capital Requirements':'CU Capital Requirements',
 'NCUA Budget & Share Insurance Fund':'NCUA Budget & Insurance','Interchange':'Interchange','Payments':'Payments',
 'Technology & Emerging Issues':'Technology & Emerging','Fraud Prevention':'Fraud Prevention',
@@ -17,7 +18,21 @@ LBLCAT={'Examination & Supervision':'Examination & Supervision','Credit Union Ca
 'CFPB Restrain':'CFPB','CFPB Reach (-)':'CFPB','Telephone Consumer Protection Act Issues':'TCPA',
 'Credit Card & Consumer-Fee Mandates':'Credit Card Mandates','Member Business Lending':'Member Business Lending',
 'Mortgage Lending & Housing':'Mortgage & Housing'}
-issue_cat=[LBLCAT.get(lb,lb) for lb in issues]
+DISPLAY_LABEL={'CFPB Restrain':'CFPB Restrain (pro-CU; limits agency reach)'}
+DROPPED_DISPLAY_CLONES={'CFPB Reach (-)'}
+
+
+def dashboard_issue_contract(labels):
+    """Separate source keys, human labels, and canonical engine/stance categories."""
+    source=[label for label in labels if label not in DROPPED_DISPLAY_CLONES]
+    display=[DISPLAY_LABEL.get(label,label) for label in source]
+    categories=[LBLCAT.get(label,label) for label in source]
+    if not (len(source)==len(display)==len(categories)) or len(categories)!=len(set(categories)):
+        raise RuntimeError('dashboard issue mapping is not one-to-one after display-clone removal')
+    return source,display,categories
+
+
+source_issues,issues,issue_cat=dashboard_issue_contract(list(FL.keys()))
 wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
 ra=wb['Rank & Allocation']
 # authoritative rank = Blended Model col20 (was erroneously reading Rank & Allocation col2 = District/State)
@@ -38,31 +53,10 @@ for r in range(2,cd.max_row+1):
             base=re.split(r' - | \(full\)',mm.group(1).strip())[0].strip()
             if base: bases.add(base)
     if bases: MEM_COMM[_nfc(nm)]=bases
-# Overall stance = IMPORTANCE-WEIGHTED aggregate of the per-category tiers (category_stance matrix). The
-# per-category classifier is self-calibrated; we weight each area by its CU stakes (Credit Card Mandates x3,
-# Interchange x2, CFPB x1, rest 0.2-0.75) so a member who is anti-CU on the defensive flagship issues (e.g.
-# Marshall on the Credit Card Competition Act) reads Opponent, not diluted to mild-skeptic. Bucketed into a
-# symmetric 10-tier ladder: Champion > Ally > Highly/Persuadable/Lean Persuadable > True Neutral >
-# Lean Skeptic/Skeptic/Highly Skeptical > Opponent. (Replaces the coarse press/leg formula; ranks unaffected.)
-_TORD={'Champion':4,'Defender':4,'Ally':2,'Highly Persuadable':1,'True Neutral':0,'Neutral':0,
-       'Lean Skeptic':-1,'Skeptic':-2,'Opponent':-4}
-from moneyball_core import IMP as _IMP
-def _agg_stance(n):
-    cm=CS.get(n,{}); sw=si=0.0
-    for c,t in cm.items():
-        if t in _TORD: w=_IMP.get(c,0.5); sw+=_TORD[t]*w; si+=w
-    if si==0: return 'Neutral'
-    x=sw/si
-    # Defender = holds the line on a flagship defensive fight (Champion/Defender on Interchange or Credit Card
-    # Mandates) without being a broad across-the-board Champion -> carved from the Ally band, ranks just below
-    # Champion (matches the per-category Defender tier, which only appears on the two defensive flagships).
-    defends=any(cm.get(c) in ('Champion','Defender') for c in ('Interchange','Credit Card Mandates'))
-    if x>=2.5: return 'Champion'
-    if x>=1.75: return 'Defender' if defends else 'Ally'
-    return ('Highly Persuadable' if x>=1.25 else
-            'Persuadable' if x>=0.75 else 'Lean Persuadable' if x>=0.25 else 'True Neutral' if x>=-0.25 else
-            'Lean Skeptic' if x>=-0.75 else 'Skeptic' if x>=-1.25 else 'Highly Skeptical' if x>=-1.9 else 'Opponent')
-gen={ra.cell(r,1).value:_agg_stance(ra.cell(r,1).value) for r in range(3,536) if ra.cell(r,1).value}
+# One overall-tier implementation across stance JSON, workbook col G, network dashboard, and member desk.
+# In particular, a member with no domain evidence remains em dash rather than being manufactured as Neutral.
+gen={ra.cell(r,1).value:overall_tier(CS.get(ra.cell(r,1).value,{}),ra.cell(r,1).value,OVERALL_CAPS)
+     for r in range(3,536) if ra.cell(r,1).value}
 members=[m['member'] for m in C]; idx={n:i for i,n in enumerate(members)}
 # party from voteview members (party_code 100=D,200=R,else I); prefer most recent congress
 party={}
@@ -132,7 +126,7 @@ for n in members:
     sm=''.join(TC.get(CS.get(n,{}).get(issue_cat[i],'—'),'-') for i in range(len(issues)))
     c=cong[n]
     name.append(n);X.append(sx(pos[n][0]));Y.append(sy(pos[n][1]))
-    PARTY.append(party.get(c.get('bioguide',''),'?'));GEN.append(TC.get(gen.get(n,'Neutral'),'N'))
+    PARTY.append(party.get(c.get('bioguide',''),'?'));GEN.append(TC.get(gen.get(n,'—'),'-'))
     RANK.append(rank.get(n,0) or 0);NL.append(round((c.get('net_lean') or 0)*10));STANCE.append(sm);BP.append(round(bp[n]*100));CF.append(CONF.get(n,50))
     ANTAG.append(_HA[n]['antagonism_z'] if n in _HA else None);GRAND.append(_HA[n]['grandstand_z'] if n in _HA else None)
 # ---------- COMMITTEE-CLUSTER LAYOUT (Porter et al. 2005): a second set of node positions where members
@@ -195,10 +189,10 @@ if os.path.exists(_cap):
             COAP.append([idx[_e['a']],idx[_e['b']],_e['n'],1 if _e.get('bipartisan') else 0])
 print('layer provenance: %s | reference layer: %d dyads (n_scored>=2) | co-appearance: %d pairs (n>=2)'%(
     {c:ELAY.count(c) for c in 'cshem' if ELAY.count(c)},len(REFE),len(COAP)))
-flip=[{str(idx[n]):round(v/1000) for n,v in FL[lb].items() if v>=10000} for lb in issues]
-coal=[{str(idx[n]):round(v/1000) for n,v in CO[lb].items() if v>0} for lb in issues]
+flip=[{str(idx[n]):round(v/1000) for n,v in FL[lb].items() if v>=10000} for lb in source_issues]
+coal=[{str(idx[n]):round(v/1000) for n,v in CO[lb].items() if v>0} for lb in source_issues]
 stats=[]
-for i,lb in enumerate(issues):
+for i,lb in enumerate(source_issues):
     col=[STANCE[k][i] for k in range(len(name))]
     stats.append({'champ':col.count('C')+col.count('F'),'ally':col.count('A'),'opp':col.count('O'),'skep':col.count('S'),
                   'flip':sum(FL[lb].values()),'coal':sum(CO[lb].values()),'coalN':len(coal[i])})
@@ -219,7 +213,7 @@ def frontier_for(lb):
     if not t: return None
     pts=[[p['b'],p['spread'],(idx.get(p['seed']) if p.get('seed') else -1),(p.get('type','') or '')[:1]] for p in t['path']]
     return {'base':t['base'],'knee':t.get('knee',0),'core':t.get('core_seeds',0),'path':pts}
-frontier=[frontier_for(lb) for lb in issues]
+frontier=[frontier_for(lb) for lb in source_issues]
 # --- adaptive optimizer (cross-topic CU allocation) ---
 if not os.path.exists(B+r'\optimize_result.json'): print('  !! optimize_result.json MISSING — optimizer panel will be EMPTY (run optimize.py)')   # S3-05
 OPT=json.load(open(B+r'\optimize_result.json')) if os.path.exists(B+r'\optimize_result.json') else None
@@ -239,8 +233,10 @@ engine={'adj':ADJ,
  'nlraw':[round(cong[n].get('net_lean') or 0,1) for n in members],'bpf':[round(bp[n],4) for n in members],
  'eng':ENG,
  'const':{'WM':fmE.WM,'WP':fmE.WP,'HALFF':fmE.HALFF,'BASE':fmE.BASE,'smax':round(fmE.smax,4),
-          'MAXSHIFT':18,'HALF':0.10,'DTHRESH':11.25,'LOSSFRAME':1.10,'BSCALE':400000,'SRCPRO':1.7,'SRCANTI':0.5,'DCROSS':0.4,'CEDGE':10000,'RFLOOR':200000,'MC':40,'SEED':7},
- 'pers':fmE.PERS,'theta':{'Highly Persuadable':0.6,'True Neutral':1.0,'Neutral':1.0,'Lean Skeptic':1.5,'Skeptic':2.0,'Opponent':3.0,'Ally':0.0},
+          'MAXSHIFT':18,'HALF':0.10,'DTHRESH':11.25,'LOSSFRAME':1.10,'BSCALE':400000,'SRCPRO':1.7,'SRCANTI':0.5,'DCROSS':0.4,'CEDGE':10000,'RFLOOR':200000,'MC':20,'SEED':7},
+ 'pers':fmE.PERS,'theta':{'Highly Persuadable':0.6,'Persuadable':0.8,'Lean Persuadable':0.9,
+                          'True Neutral':1.0,'Neutral':1.0,'Lean Skeptic':1.5,'Skeptic':2.0,
+                          'Highly Skeptical':2.5,'Opponent':3.0,'Ally':0.0},
  'refflip':[round(fmE.flip_value(issue_cat[i],fmE.CS0,fmE.cu0,fmE.ind0),3) for i in range(len(issues))]}   # Python baseline per issue -> in-browser self-check
 # psych parity for the in-browser engine (2026-07-09, closes the audit N-1 JS half): the JS mirror
 # previously consumed NONE of the receptivity multipliers the Python engine applies (pressure_mult on
@@ -277,8 +273,8 @@ try:
 except FileNotFoundError: print('  !! salience_advisory.json MISSING — advisory column will be EMPTY (run salience_shock.py --advise)')   # S3-05: was `except Exception: pass`, which also buried schema drift forever
 engine['adv']=[_advmap.get(issue_cat[i],'') for i in range(len(issues))]
 # ===== Overall CU stance as a selectable ISSUE layer (general stance, toggleable like Interchange) =====
-_ovf={str(k):round(sum(FL[lb].get(name[k],0) for lb in FL)/1000) for k in range(len(name)) if sum(FL[lb].get(name[k],0) for lb in FL)>=10000}
-_ovc={str(k):round(sum(CO[lb].get(name[k],0) for lb in CO)/1000) for k in range(len(name)) if sum(CO[lb].get(name[k],0) for lb in CO)>0}
+_ovf={str(k):round(sum(FL[lb].get(name[k],0) for lb in source_issues)/1000) for k in range(len(name)) if sum(FL[lb].get(name[k],0) for lb in source_issues)>=10000}
+_ovc={str(k):round(sum(CO[lb].get(name[k],0) for lb in source_issues)/1000) for k in range(len(name)) if sum(CO[lb].get(name[k],0) for lb in source_issues)>0}
 issues.append('Overall CU stance')
 for k in range(len(name)): STANCE[k]=STANCE[k]+GEN[k]                                   # this issue's stance = overall (R&A col 7) tier
 flip.append(_ovf); coal.append(_ovc); frontier.append(None)                              # no single-topic frontier for the aggregate layer
