@@ -1,0 +1,50 @@
+{
+  "schema": "moneyball-active-files-v1",
+  "generated_on": "2026-07-15",
+  "canonical_paths_remain_in_place": true,
+  "entrypoints": [
+    "fec/run_pipeline.py",
+    "fec/weekly_refresh.py",
+    "fec/make_member_desk.py",
+    "fec/make_dashboard_html.py",
+    "fec/audit_full.py",
+    "bill_audit_terminal.ps1"
+  ],
+  "stance_and_identity_rules": [
+    "fec/stance_rules.py",
+    "fec/moneyball_core.py",
+    "fec/per_category_stance.py",
+    "fec/bill_rules.py",
+    "fec/media_rules.py",
+    "fec/member_identity.py"
+  ],
+  "influence_rules": [
+    "formal_visibility_roles.json",
+    "fec/influence_roles.py",
+    "fec/compute_pillars.py"
+  ],
+  "primary_inputs": [
+    "Moneyball Main Version - Blended.xlsx",
+    "Social Master.xlsx",
+    "tweet_stance_final.csv",
+    "manual_bill_evidence.csv",
+    "bill_overrides.csv",
+    "vote_category_lean.json",
+    "press_stance_final.csv"
+  ],
+  "production_outputs": [
+    "category_stance.json",
+    "ranks_python.json",
+    "dashboard_data.json",
+    "member_desk_bundle.json",
+    "Moneyball.html",
+    "cu-member-desk.html",
+    "dashboard_integrity_report.json",
+    "dashboard_exclusion_reconciliation.json"
+  ],
+  "ground_truth_overrides": [
+    "press_stance_overrides.json",
+    "tweet_stance_overrides.json"
+  ],
+  "ground_truth_overrides_note": "Hand labels applied LAST in press_stance_stack.py / tweet_stance_stack.py — beat stack + registry + policy-force pin. Highest-authority stance inputs."
+}

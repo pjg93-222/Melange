@@ -54,8 +54,10 @@ ck('contest plays not partisan-skewed (<70%% one party; enforced at n>=12)',
 print('\n[4] Stance matrix sanity')
 CS=json.load(open(B+r'\category_stance.json')); MAT=CS['matrix']
 _overall_bands=((CS.get('thresholds') or {}).get('overall') or {}).get('bands') or []
-ck('overall Opponent cutoff provenance matches kernel',
-   bool(_overall_bands) and abs(_overall_bands[-1].get('minimum',999)-mr.MC.OVERALL_OPPONENT_CUTOFF)<1e-12)
+ck('overall band table matches kernel (all cutoffs + tiers, provenance)',
+   len(_overall_bands)==len(mr.MC.OVERALL_BANDS) and
+   all(abs((_overall_bands[_i].get('minimum') or 0)-_cut)<1e-12 and _overall_bands[_i].get('tier')==_tier
+       for _i,(_cut,_tier) in enumerate(mr.MC.OVERALL_BANDS)))
 ck('Durbin is Interchange Opponent', MAT['Richard Durbin']['Interchange']=='Opponent')
 ck('Durbin anti on Credit Card (Opponent/Skeptic)', MAT['Richard Durbin']['Credit Card Mandates'] in ('Opponent','Skeptic'))
 cnt=collections.Counter(MAT[m][c] for m in MAT for c in CS['cats'])

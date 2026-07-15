@@ -297,10 +297,13 @@ class IngestionContracts(unittest.TestCase):
         self.assertNotIn("decode('utf-8','replace')", text.replace('"', "'"))
 
     def test_govinfo_key_is_sent_in_a_header_not_the_url(self):
-        text = source("fetch_congressional_record.py")
-        self.assertIn("X-Api-Key", text)
-        self.assertNotIn("api_key=%s", text)
-        self.assertNotIn("'&api_key='", text)
+        # EVERY govinfo collector must send the key in the X-Api-Key HEADER, never the URL query string
+        # (secret-hygiene: URL query leaks into logs/proxies). 2026-07-15: extended to the hearings collectors.
+        for fn in ("fetch_congressional_record.py", "fetch_hearings_antag.py", "fetch_hearings_seq.py"):
+            text = source(fn)
+            self.assertIn("X-Api-Key", text, fn)
+            self.assertNotIn("api_key=%s", text, fn)
+            self.assertNotIn("&api_key=", text, fn)
 
     def test_empty_social_cells_never_become_literal_nan_tokens(self):
         import math

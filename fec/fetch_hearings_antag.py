@@ -24,10 +24,17 @@ KEY = os.environ.get('GOVINFO_KEY') or (open(_KF).read().strip() if os.path.exis
 UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) research collector'}
 PAUSE = 1.0
 
-def get(url, binary=False, tries=4):
+def _strip_api_key(url):   # keep the secret OUT of the request URL (logs/proxies) — mirrors CREC collector
+    import urllib.parse as _up
+    p = _up.urlsplit(url or '')
+    q = [(k, v) for k, v in _up.parse_qsl(p.query, keep_blank_values=True) if k.lower() not in ('api_key', 'key', 'token')]
+    return _up.urlunsplit((p.scheme, p.netloc, p.path, _up.urlencode(q), p.fragment))
+def get(url, binary=False, tries=4, api_key=None):
+    headers = dict(UA)
+    if api_key: headers['X-Api-Key'] = api_key       # govinfo key in HEADER, never the URL
     for i in range(tries):
         try:
-            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=120) as r:
+            with urllib.request.urlopen(urllib.request.Request(_strip_api_key(url), headers=headers), timeout=120) as r:
                 d = r.read(); return d if binary else d.decode('utf-8', 'replace')
         except urllib.error.HTTPError as e:
             if e.code in (404, 410): raise
@@ -119,11 +126,11 @@ def db():
     return con
 
 def list_packages(since):
-    url = 'https://api.govinfo.gov/collections/CHRG/%sT00:00:00Z?offsetMark=*&pageSize=1000&api_key=%s' % (since, KEY)
+    url = 'https://api.govinfo.gov/collections/CHRG/%sT00:00:00Z?offsetMark=*&pageSize=1000' % since
     out = []
     while url:
-        j = json.loads(get(url)); out += j.get('packages', [])
-        url = j.get('nextPage'); url = url + '&api_key=' + KEY if url and 'api_key' not in url else url
+        j = json.loads(get(url, api_key=KEY)); out += j.get('packages', [])
+        url = _strip_api_key(j.get('nextPage')) if j.get('nextPage') else None
         time.sleep(0.3)
     return out
 
