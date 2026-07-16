@@ -82,7 +82,7 @@ def parse_sequence(txt):
     txt = re.sub(r'<[^>]+>', ' ', txt)
     wit = set()
     for w in re.findall(r'(?:STATEMENT|TESTIMONY) OF ([A-Z][A-Z .,\'\-]{3,60})', txt):
-        toks = [t.strip('.,') for t in w.split() if t.strip('.,').isalpha()]
+        toks = [t.strip('.,') for t in w.split(',')[0].split() if t.strip('.,').isalpha()]   # 3rd-pass S3 fix: split on comma FIRST so the surname (not a trailing title/org word like BANK) is captured, mirroring fetch_hearings_seq.py
         if toks: wit.add(toks[-1].upper())
     ms = list(TURN.finditer(txt)); seq = []
     for i, mt in enumerate(ms):

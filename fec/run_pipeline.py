@@ -27,6 +27,8 @@ CHAIN=[
     ('build_electoral.py',[]),
     ('receptivity_layer.py',[]),
     ('build_archive_legislative.py',[]),
+    ('extract_cu_speeches.py',[]),
+    ('speech_stance_stack.py',[]),
     ('build_media_blend.py',[]),
     ('per_category_stance.py',[]),
     ('compute_pillars.py',['--write']),
@@ -53,6 +55,15 @@ CHAIN=[
     ('make_combined.py',[]),
     ('audit_full.py',[]),
 ]
+
+# Steps whose input artifact may be absent in a fresh / data-isolated worktree.  When the input is
+# missing we SKIP the step cleanly (no-op) instead of aborting the whole chain.  Both entries feed the
+# CU floor-speech channel (Paul-approved 2026-07-15), which is gated OFF downstream (CU_SPEECH_CHANNEL),
+# so skipping them can never move ranks.
+OPTIONAL_INPUTS={
+    'extract_cu_speeches.py':'social_media.db',   # sqlite source of the CREC floor speeches
+    'speech_stance_stack.py':'speeches_cu.csv',   # produced by extract_cu_speeches.py
+}
 
 CANONICAL_DEPENDENCIES={
     'networkx':'networkx',
@@ -150,6 +161,11 @@ def main(argv=None):
         with pipeline_run_lock():
             for script,script_args in CHAIN[first:]:
                 started=time.time()
+                req=OPTIONAL_INPUTS.get(script)
+                if req and not os.path.exists(os.path.join(MB_ROOT,req)):
+                    print('  %-28s %s %5.1fs  %s'%(
+                        script+' '+' '.join(script_args),'--',time.time()-started,'skip: %s absent'%req))
+                    continue
                 run=subprocess.run(
                     [sys.executable,os.path.join(FE,script)]+script_args,
                     capture_output=True,text=True,encoding='utf-8',errors='replace',

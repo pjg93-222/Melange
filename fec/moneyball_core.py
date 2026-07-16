@@ -211,7 +211,7 @@ TORD={'Champion':4,'Defender':4,'Ally':3,'Highly Persuadable':2,'Persuadable':1,
 # cutoff sat below the observed roster minimum and produced zero Opponents; -1.60 creates
 # the first committed Opponent while retaining a distinct Highly Skeptical band. Higher
 # values create more Opponents. Revert: OVERALL_OPPONENT_CUTOFF=-2.50.
-OVERALL_OPPONENT_CUTOFF=float(os.environ.get('OVERALL_OPPONENT_CUTOFF','-1.60'))
+OVERALL_OPPONENT_CUTOFF=float(os.environ.get('OVERALL_OPPONENT_CUTOFF','-1.20'))   # Paul 2026-07-15: raised -1.60 -> -1.20 (the CFPB re-correction shifted scores up and emptied the rung at -1.60)
 OVERALL_BANDS=((2.85,'Champion'),(2.25,'Ally'),(1.50,'Highly Persuadable'),
                (0.75,'Persuadable'),(0.25,'Lean Persuadable'),(-0.25,'True Neutral'),
                (-0.75,'Lean Skeptic'),(-1.50,'Skeptic'),(OVERALL_OPPONENT_CUTOFF,'Highly Skeptical'))

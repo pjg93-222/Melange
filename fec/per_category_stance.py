@@ -22,8 +22,8 @@ cats=[('Examination & Supervision',5),('CU Capital Requirements',6),('NCUA Budge
 # deep-audit fix 2026-07-02: 'CU Tax Status' (Normalized col 16) was added to category_stance.json by hand
 # on 2026-07-01 but never to THIS producer list — the next regeneration silently dropped the 18th category
 # while the ABB26 IMP dicts (weight 3.0!) kept expecting it. Data now exists (190 press rows + social).
-# NOT added to DEFENSIVE (weighting change = user's call; it is a defend-type fight — flag standing).
-DEFENSIVE={'Interchange','Credit Card Mandates'}
+# Paul 2026-07-15: CU Tax Status IS a defend-type fight -> added to DEFENSIVE (weighting is the user's call, now made).
+DEFENSIVE={'Interchange','Credit Card Mandates','CU Tax Status'}
 def weights(cat): return (0.55,0.70,0.20) if cat in DEFENSIVE else (0.55,0.35,0.10)
 pw=[_w535[pc] for _,pc in cats]
 def clip(x): return max(-1.0,min(1.0,x))

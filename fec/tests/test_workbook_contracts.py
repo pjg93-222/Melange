@@ -2,16 +2,32 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 import unittest
 
 import openpyxl
 
 ROOT=Path(__file__).resolve().parents[2]
+FEC=ROOT/'fec'
 WORKBOOK=Path(os.environ.get('MONEYBALL_WORKBOOK',ROOT/'outputs'/'workbook_repair'/'Moneyball Audit Workbook.xlsx'))
 
 
-@unittest.skipUnless(WORKBOOK.exists(),'generated Moneyball Audit Workbook.xlsx is not present')
+def setUpModule():
+    """No silent skip (TDD 2026-07-15): build the review workbook with the shipped Python
+    builder so the four contracts below actually RUN.  ``build_audit_workbook.build_default``
+    runs the read-only extractor when its JSON handoff is absent, then writes the workbook —
+    it needs only the local source workbook and JSON authorities (no network, no pipeline run).
+    If the builder is missing or fails, this raises (the module errors) rather than skipping."""
+    sys.path.insert(0,str(FEC))
+    import build_audit_workbook as builder
+    builder.build_default(out_path=str(WORKBOOK))
+    if not WORKBOOK.exists():
+        raise AssertionError(
+            '%s was not produced; regenerate it with `python fec/build_audit_workbook.py` '
+            '(openpyxl port of build_audit_workbook.mjs).' % WORKBOOK)
+
+
 class WorkbookContracts(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

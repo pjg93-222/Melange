@@ -56,8 +56,19 @@ _sf=M+r'\tweet_stance_final.csv'
 if os.path.exists(_sf):
     import csv as _csv,io as _io
     def _nrm(t): return MR.normalized_text(t)
+    # 3rd-pass S2 fix: distinct tweets can share a (member, normalized-text) key; last-write-wins made the
+    # sign order-dependent (~46 keys). Collapse DETERMINISTICALLY by majority vote of stack_stance (tie->neutral),
+    # keeping a representative row with the winning label at its highest tier.
+    _grp=collections.defaultdict(list)
     for _r in _csv.DictReader(_io.open(_sf,encoding='utf-8-sig',newline='')):
-        STACK[(_r['member'],_nrm(_r['text']))]= _r
+        _grp[(_r['member'],_nrm(_r['text']))].append(_r)
+    _TR={'unanimous':3,'majority':2,'review':1}
+    for _k,_rows in _grp.items():
+        if len(_rows)==1: STACK[_k]=_rows[0]; continue
+        _top=collections.Counter(_x['stack_stance'] for _x in _rows).most_common()
+        _lab=_top[0][0] if (len(_top)==1 or _top[0][1]>_top[1][1]) else 'neutral'   # genuine tie -> neutral
+        _cands=[_x for _x in _rows if _x['stack_stance']==_lab] or _rows
+        STACK[_k]=max(_cands,key=lambda _x:_TR.get(_x.get('tier',''),0))
     _TIERW={'unanimous':1.0,'majority':0.7,'review':0.35}
     print('stance-stack override ACTIVE: %d labeled tweets loaded'%len(STACK))
 else:
@@ -91,6 +102,39 @@ for _,r in corp.iterrows():
     nassigned+=1
     for c in hits: soc[_member][c]+=sg*inten*decay/len(hits)
 print('social: %d source rows -> %d unique scored/category-assigned | %d exact cross-post duplicates removed | %d unresolved identities excluded | %d members | half-life %.2f yr (press: 2.0 yr)'%(len(corp),nassigned,ndupe,nunknown,len(soc),HL))
+# ---- CU FLOOR-SPEECH CHANNEL (GATED, default OFF; Paul-approved 2026-07-15) --------------------------
+# A THIRD own-source channel: speech_stance_final.csv (speech_stance_stack.py) — the member's own CREC
+# floor words on CU/CFPB/interchange topics.  SIGN{support:+1,oppose:-1,neutral:0}, category-split,
+# decay 0.5^(age/2.0yr) like press, tier-weighted intensity (gold 1.0 / review 0.35 — the API-free
+# heuristic is a WEAK prior until Paul's gold lands), own-source weight 1.0 (floor speeches are
+# member-authored, attribution-clean like a .gov press release).  It rides the press side of the 50/50
+# mix, each channel p80-scaled for commensurability.
+# GATE: CU_SPEECH_CHANNEL=1 turns it on.  DEFAULT OFF => this block reads nothing and the workbook math
+# below is byte-identical to today (zero rank movement) until Paul validates the channel.
+SPEECH_ON=os.environ.get('CU_SPEECH_CHANNEL','0')=='1'
+spc=collections.defaultdict(lambda:collections.defaultdict(float))
+if SPEECH_ON:
+    import csv as _csv2,io as _io2
+    _spf=M+r'\speech_stance_final.csv'
+    _STW={'gold':1.0,'review':0.35}   # tier -> intensity (mirrors the stacks' trust weighting)
+    _sn=0; _snm=set()
+    if os.path.exists(_spf):
+        for _r in _csv2.DictReader(_io2.open(_spf,encoding='utf-8-sig',newline='')):
+            _sg=SIGN.get((_r.get('stance') or '').strip().lower(),0.0)
+            if _sg==0.0: continue                                  # neutral / unrelated -> no signal
+            _m=_resolver.resolve(_r.get('member'),_r.get('bioguide'))
+            if not _m: continue                                    # fail-closed on unresolved identity
+            try: _age=(TODAY-datetime.date.fromisoformat((_r.get('date') or '')[:10])).days/365.25
+            except Exception: continue
+            _inten=_STW.get((_r.get('tier') or '').strip().lower(),0.35)
+            _dec=0.5**(max(0.0,_age)/2.0)                          # press-like 2.0yr half-life
+            _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
+            if not _cats: continue
+            _sn+=1; _snm.add(_m)
+            for _c in _cats: spc[_m][_c]+=_sg*_inten*_dec/len(_cats)
+        print('CU speech channel ACTIVE (CU_SPEECH_CHANNEL=1): %d signed floor speeches -> %d members (own-source weight 1.0, half-life 2.0yr)'%(_sn,len(_snm)))
+    else:
+        print('!! CU_SPEECH_CHANNEL=1 but speech_stance_final.csv missing — no speech signal added')
 # ---- workbook surgery ----
 os.makedirs(M+r'\backups',exist_ok=True)
 bak=M+r'\backups\Moneyball Main Version - Blended.BACKUP-%s.xlsx'%datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
@@ -190,13 +234,20 @@ for kwcat,hname in HDRMAP.items():
     sp=p80(pressvals.values()); ss=p80(socvals.values())
     nz=sum(1 for v in socvals.values() if abs(v)>1e-12)
     f=min(1.0,nz/15.0) if SHRINK else 1.0   # SOCIAL_SHRINK: thin-category social share scales with signal breadth
+    # GATED speech channel: own p80 so it is commensurable with press before it rides the press side.
+    speechvals={m:spc.get(m,{}).get(kwcat,0.0) for m in members} if SPEECH_ON else None
+    ssp=p80(speechvals.values()) if SPEECH_ON else 0.0
     for m in members:
         pv=pressvals[m]/sp if sp else 0.0; sv=socvals[m]/ss if ss else 0.0
+        if SPEECH_ON and ssp:
+            pv=pv+(speechvals[m]/ssp)   # own-source floor speeches ride the press side at weight 1.0
         nv=(1.0-SOCIAL_W*f)*pv+SOCIAL_W*f*sv
         old=rw.cell(mrow[m],col).value or 0.0
         rw.cell(mrow[m],col).value=round(nv,6)
         if abs(nv-old)>1e-9: changed+=1
 rw['Z1']='MEDIA BLEND %s: cells = press(p80-scaled)+social(p80-scaled, half-life %.2fy) at 50/50 (thin-cat shrink %s, RT weight %.2f). Backup: %s'%(TODAY,HL,'ON' if SHRINK else 'off',RT_W,os.path.basename(bak))
+if SPEECH_ON:   # gated marker only; OFF leaves Z1 byte-identical to today
+    rw['Z1']=str(rw['Z1'] or '')+' | +CU floor-speech channel (own-source, half-life 2.0y, gold 1.0/review 0.35)'
 wb.calculation.fullCalcOnLoad=True   # PHASE-2: the workbook is a VIEW — Excel recalcs it on open; no COM recalc anywhere
 save_workbook_atomic(wb,WBP)
 print('wrote media blend into Press Release - Raw: %d cells changed (formulas untouched)'%changed)

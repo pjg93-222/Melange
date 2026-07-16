@@ -150,7 +150,7 @@ if '--score' in sys.argv:
                              o.get('target_cu_valence'), o.get('cu_alignment'), o.get('confidence'),
                              t.startswith('RT @'), pr)
         lbl = meta.predict([f])[0]
-        clab = CL[int(np.argmax(pr))]
+        clab = pc.classes_[int(np.argmax(pr))]   # 3rd-pass S2 fix: index the classifier's OWN class order (sklearn is alphabetical), not CL — was swapping neutral<->support in the tier weight
         alab = (o.get('cu_alignment') or '').strip().lower()
         # POLICY-FORCE, RELAXED 2026-07-15 (Paul's fresh CFPB gold re-adjudicated the agency-existence
         # axis as DIRECTIONAL: attacking/defunding CFPB = pro-CU/support, defending CFPB = anti-CU/oppose).

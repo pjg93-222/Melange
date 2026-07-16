@@ -13,9 +13,15 @@ influence engines are Python-owned.
   bug-report contracts; `fec/attic/` is retired code.
 - `fec/templates/` — dashboard HTML/JS templates. `backups/` — workbook backups (auto, pre-write).
 - `Moneyball Main Version - Blended.xlsx` — legacy inputs and Excel formula view, not live-rank or
-  live-stance authority. `fec/build_audit_workbook.mjs` produces the compact review workbook with
-  current category stance, same-row normalization, and workbook-coherent ranks. `votes/` contains voteview
-  rosters; `research/` contains source papers.
+  live-stance authority. **`fec/build_audit_workbook.py`** (openpyxl) produces the compact review
+  workbook `outputs/workbook_repair/Moneyball Audit Workbook.xlsx` with current category stance,
+  same-row normalization, and workbook-coherent ranks — run `python fec/build_audit_workbook.py`
+  (it runs the read-only `extract_workbook_audit_inputs.py` first if the JSON handoff is absent; no
+  network, no pipeline run). Its contracts are enforced by `fec/tests/test_workbook_contracts.py`.
+  The older `fec/build_audit_workbook.mjs`/`verify_audit_workbook.mjs` require the OpenAI
+  code-interpreter package `@oai/artifact-tool` and do **not** run on the workstation (no Node, no
+  `node_modules`); they are kept only as the original reference for the value contract. `votes/`
+  contains voteview rosters; `research/` contains source papers.
 - Root `*.json` — derived artifacts (regenerable). Every PIPELINE-CHAIN writer is atomic via
   `MC.dump_atomic`; manual collector/diagnostic scripts may still write raw (audit run-2, S3-01).
 - `social_media.db` — posts, member↔member interactions, floor speeches + hearing transcripts.
