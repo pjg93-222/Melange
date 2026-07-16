@@ -97,3 +97,24 @@ full audit is reported honestly; unrelated pre-existing failures cannot be relab
 After `## RESULT-O-RECOVERY`, no threshold, factor, weight, subset, seed, or same-input O successor
 may be tried. Merge or production promotion requires an actual dual-panel pass, a clean relevant
 gate, and explicit user ratification.
+
+## CRITERIA FREEZE ADDENDUM (2026-07-16)
+
+RED boundary: `2f36484` (`LOCK O coverage recovery in RED`). Panel-blind implementation commit:
+`a7740d3` (`BUILD primary-250 O coverage criterion`). The focused contract was observed RED on the
+missing implementation, then passed 10/10 after construction.
+
+criteria_sha256: `879f21fafc064eeacdb778c5d021897ce6227c29734edb2c686ad056b751c5bd`
+
+All locked inputs matched: `social_media.db`
+`a5c0b191f94fa721f752bf9d89d63af56f79aab7a70629347a69719e8681c93b`;
+`congestion.json` `ddc9d746600dbdfc60b76c54537662e19c758cbfb9d7a478a71b7bf90cd727a6`;
+`fec/legislators.csv` `c5a6cbdbaae0bb19faa89852c29922809ececc70b97c149b4709588087e5e391`;
+the 18-domain lexicon `6966ab49de88da5fc4e2405b1f20bcca48a7f378d08777cd249558b677aebd70`;
+and stopped criterion `eb16cde3c160f7fc14280a3c6b0ae4754a913606fcd2e78fa7a4fd1c8dea8e12`.
+
+The criterion cleared **PRIMARY_250** without invoking the guarded lower floor: total 279 (House
+193, Senate 86); full INTERVIEW-vs-CREC r=.1520279096; Spearman-Brown=.2639309487; added-member
+n=81 with cross-source r=.0998588003; stopped-core overlap n=198 with recovered-vs-stopped
+r=.9934574724. Every primary readiness bar passes. The artifact records zero production consumers
+and has not opened, imported, or named either panel. Exactly one frozen O look is now licensed.
