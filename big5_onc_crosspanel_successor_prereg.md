@@ -147,3 +147,27 @@ The degeneracy check applies to those two binary covariates only (>=5 zeros and 
 is reported as constant Senate context and is not entered into the panel design matrix. Nothing
 else changes: the criteria, fixed weights, r/p/dominance/partial bars, seeds, stopping rule, and
 preservation contract remain byte-substantively identical.
+
+## CRITERIA FREEZE ADDENDUM (2026-07-16)
+
+Implementation commit: `1a67192` (`BUILD frozen O N C successor criteria`). RED boundary:
+`6612530`; pre-implementation chamber correction: `cf378b1`. Contract suite: 12/12 passing;
+complete kernel after registration: 74 passed, 0 failed.
+
+criteria_sha256: `eb16cde3c160f7fc14280a3c6b0ae4754a913606fcd2e78fa7a4fd1c8dea8e12`
+
+All six raw-input hashes and the policy-domain lexicon hash matched the artifact. Criterion build
+opened `social_media.db` in URI read-only mode and did not open or name either preserved panel
+artifact.
+
+- O: coverage 198 (House 122, Senate 76); INTERVIEW-vs-CREC r=.1597526627, Spearman-Brown
+  reliability=.2754943667. Reliability bars pass, but total coverage 198<250 and House coverage
+  122<150. `CRITERION_STOP_BAR_MISS`; O is retired before gold exposure and may not be evaluated.
+- N: coverage 234 (House 154, Senate 80); deterministic package-half r=.3539899662,
+  Spearman-Brown reliability=.5228841794. Every pre-look bar passes;
+  `CRITERION_READY_FOR_ONE_LOOK`.
+- C: coverage 447 (House 355, Senate 92); vote-participation vs LEP-followthrough component
+  r=.0391933354 (nonnegative). Every pre-look bar passes; `CRITERION_READY_FOR_ONE_LOOK`.
+
+Only N and C are licensed for the one look. O's original one-panel status and copied score remain
+unchanged regardless of the later N/C outcome.
