@@ -26,13 +26,21 @@ ok(nmem==533,'A4 members = %d'%nmem)
 # B influence = committee-only
 ab12=bm.cell(12,28).value; ab13=bm.cell(13,28).value
 ok(ab12==1.0 and ab13==0.0,'B1 influence weights committee=%s centrality=%s (expect 1.0/0.0)'%(ab12,ab13))
-# C legislative = restored curated (NOT the failed refresh): Tim Scott high, Durbin low; Barry Moore Exam-norm high (curated artifact)
+# C legislative = restored curated (NOT the failed refresh): Tim Scott high, Durbin low.
+# C3 updated 2026-07-15: the Normalized sheet was one-row-misaligned (each member carried their
+# alphabetical predecessor's record); repaired so NRM[member]=RAW[member]/colmax. The old canary
+# (Barry Moore Exam-norm >0.5) was asserting his predecessor's value -- his OWN Exam raw is 0. New
+# canary: the Examination-column max member must normalize to ~1.0, which confirms curated data is
+# present AND own-row-aligned (the max/max=1 identity only holds when name and value share a row).
 rk=AUTH['rank']   # rank truth = the python authority (phase 2), not the view's cache
 ok(rk.get('Tim Scott',999)<=15,'C1 Tim Scott rank = %s (expect <=15, champion)'%rk.get('Tim Scott'))
 ok(rk.get('Richard Durbin',0)>=380,'C2 Durbin rank = %s (expect >=380, opponent)'%rk.get('Richard Durbin'))
-nrm=wb['Legislative Score - Normalized']
-bmoore=[nrm.cell(r,3).value for r in range(3,536) if nrm.cell(r,1).value=='Barry Moore']
-ok(bmoore and bmoore[0] and bmoore[0]>0.5,'C3 legislative is curated/frozen (Barry Moore Exam-norm=%s>0.5 confirms NOT refreshed)'%(bmoore[0] if bmoore else None))
+nrm=wb['Legislative Score - Normalized']; _lraw=wb['Legislative Score - Raw']
+_ex=[(nrm.cell(r,3).value,_lraw.cell(r,3).value) for r in range(3,536)]
+_mxr=max((rr for nn,rr in _ex if isinstance(rr,(int,float)) and rr>0), default=0)
+_topn=[nn for nn,rr in _ex if rr==_mxr]
+ok(_mxr>0 and bool(_topn) and isinstance(_topn[0],(int,float)) and abs(_topn[0]-1.0)<1e-6,
+   'C3 legislative curated + own-row-aligned (Examination-max normalizes to %s ~1.0)'%(_topn[0] if _topn else None))
 # D stance bands are fixed across domains.  Do not require a target population
 # share on either side: that is grading on a curve and can reject a valid roster.
 from collections import Counter

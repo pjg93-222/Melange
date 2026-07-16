@@ -211,10 +211,10 @@ TORD={'Champion':4,'Defender':4,'Ally':3,'Highly Persuadable':2,'Persuadable':1,
 # cutoff sat below the observed roster minimum and produced zero Opponents; -1.60 creates
 # the first committed Opponent while retaining a distinct Highly Skeptical band. Higher
 # values create more Opponents. Revert: OVERALL_OPPONENT_CUTOFF=-2.50.
-OVERALL_OPPONENT_CUTOFF=float(os.environ.get('OVERALL_OPPONENT_CUTOFF','-1.20'))   # Paul 2026-07-15: raised -1.60 -> -1.20 (the CFPB re-correction shifted scores up and emptied the rung at -1.60)
-OVERALL_BANDS=((2.85,'Champion'),(2.25,'Ally'),(1.50,'Highly Persuadable'),
-               (0.75,'Persuadable'),(0.25,'Lean Persuadable'),(-0.25,'True Neutral'),
-               (-0.75,'Lean Skeptic'),(-1.50,'Skeptic'),(OVERALL_OPPONENT_CUTOFF,'Highly Skeptical'))
+OVERALL_OPPONENT_CUTOFF=float(os.environ.get('OVERALL_OPPONENT_CUTOFF','-1.10'))   # Paul 2026-07-15: SHIFTED THE WHOLE OVERALL SCALE UP. The roster skews pro-CU (overall score median ~2.38 on a [-4,4] TORD mean), so the old 0-centered bands starved the bottom rungs (0 Opponents). Top cutoffs raised (Champion 2.85->3.65) so members spread down; bottom rebalanced + widened so BOTH Highly Skeptical + Opponent populate with a valid monotonic ladder. This is the Highly Skeptical FLOOR (< Skeptic -0.70). Revert: git.
+OVERALL_BANDS=((3.65,'Champion'),(3.05,'Ally'),(2.30,'Highly Persuadable'),
+               (1.55,'Persuadable'),(1.05,'Lean Persuadable'),(0.55,'True Neutral'),
+               (0.05,'Lean Skeptic'),(-0.70,'Skeptic'),(OVERALL_OPPONENT_CUTOFF,'Highly Skeptical'))
 def overall_thresholds():
     return {'scale':'fixed-ten-tier-overall-v2','bands':[{'minimum':cut,'tier':tier} for cut,tier in OVERALL_BANDS],
             'below_last':'Opponent','missing':'—','normalization':'fixed-not-roster-percentile'}

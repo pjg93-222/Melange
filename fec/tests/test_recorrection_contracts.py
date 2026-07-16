@@ -12,12 +12,20 @@ def source(name: str) -> str:
 
 
 class DialContracts(unittest.TestCase):
-    def test_opponent_cutoff_default_is_minus_1_2(self):
-        # Paul-directed 2026-07-15: raise OVERALL_OPPONENT_CUTOFF from -1.60 to -1.20.
-        txt = source("moneyball_core.py")
-        m = re.search(r"OVERALL_OPPONENT_CUTOFF\s*=\s*float\(os\.environ\.get\('OVERALL_OPPONENT_CUTOFF','([^']+)'\)\)", txt)
-        self.assertIsNotNone(m, "OVERALL_OPPONENT_CUTOFF env-default line not found")
-        self.assertEqual(float(m.group(1)), -1.20)
+    def test_overall_scale_shifted_and_ladder_monotonic(self):
+        # Paul-directed 2026-07-15: SHIFT THE WHOLE OVERALL SCALE UP so the bottom rungs populate.
+        # Contract: (1) Opponent cutoff = -1.10; (2) the band ladder is STRICTLY DESCENDING (a monotonic
+        # ladder) so no tier is unreachable -- the bug where cutoff -1.20 sat ABOVE Skeptic -1.50 and
+        # collapsed the Highly Skeptical band must never recur.
+        import importlib
+        MC = importlib.import_module("moneyball_core")
+        self.assertEqual(MC.OVERALL_OPPONENT_CUTOFF, -1.10)
+        cuts = [c for c, _ in MC.OVERALL_BANDS]
+        self.assertEqual(cuts, sorted(cuts, reverse=True), "OVERALL_BANDS cutoffs must strictly descend")
+        self.assertEqual(len(cuts), len(set(cuts)), "OVERALL_BANDS cutoffs must be distinct")
+        # Highly Skeptical floor (== opponent cutoff) must sit BELOW the Skeptic floor
+        skeptic = dict((t, c) for c, t in MC.OVERALL_BANDS)['Skeptic']
+        self.assertLess(MC.OVERALL_OPPONENT_CUTOFF, skeptic)
 
     def test_cu_tax_status_is_defensive(self):
         # Paul-directed 2026-07-15: CU Tax Status is a defend-type fight -> DEFENSIVE weighting.
