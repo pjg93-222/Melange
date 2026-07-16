@@ -1181,3 +1181,48 @@ turns>=30/non-null-cutoff construction (fec/b5_gold_criterion_probes.py section 
 prereg on the reactivity criterion is available whenever Paul initiates it; nothing here took or
 licensed that look. (4) All five one-panel/two-panel statuses stand exactly as §40 recorded them;
 these rounds changed no status, no engine input, and no shipped artifact.
+
+## 42. Audio speaker-identity layer built (TDD, research-only, awaiting pilot + user gates) (2026-07-16)
+
+The zero-production-profiles blocker (#40: two independent identity reviews) now has executable
+machinery, user-directed and built tests-first (51 assertions across five suites, all green at
+commit; no LLM in any identity path; no network or model download exists in code — the ECAPA and
+whisper loaders hard-refuse without explicitly named local weights). Design provenance: Dietrich,
+Hayes & O'Brien 2019 (within-speaker F0, caption-timestamp speech units, >=50-word floor) and
+Mestre & Ryan 2026, Political Analysis (embeddings-over-MFCC for speaker identity at scale —
+their Table 3: MFCC+CNN collapses to .08-.13 accuracy over many identities while pretrained
+embeddings hold >=.91; forced-alignment-over-ASR when good transcripts exist; short-utterance
+alignment failures; channel normalization; gender-bias probes). The ECAPA-VoxCeleb verification
+protocol, EER<=5% bars, and whisper-DTW-primary alignment are engineering adaptations labeled as
+such, not paper methods.
+
+The contract: a speech unit is attributable iff CHECK-T (transcript/caption speaker identity,
+roster-resolved fail-closed; cspan_identity for WJ; hearings_seq turns time-anchored by local
+token-DTW with word-match floors 80%/turn and 70%/hearing) and CHECK-A (speaker-embedding
+verification against an enrollment bank — verification never identification; ALL segments must
+clear the calibrated cosine threshold with top-2 margin >=.10 and >=85% duration coverage) name
+the SAME member; any disagreement excludes the unit fail-closed into a rejects ledger, with
+check-T-vs-check-A hard disagreements feeding a mismatch ledger (successor of the 148 caption-
+caught wrong-member clips). Witnesses are unenrolled by design and double as in-situ negative
+controls: a witness turn acoustically matching an enrolled member excludes the ENTIRE hearing.
+Enrollment floors: >=3 clips from >=2 events totaling >=180 s, leave-one-clip-out integrity gate;
+legacy feedstock identity must be RE-DERIVED by deterministic hard-signal regex (the retired
+Haiku labels are never identity evidence). Cosine thresholds live only in
+b5_audio_identity_thresholds.json.candidate (written by a future calibration run); every consumer
+refuses without it; audio_rules.py carries the structural constants. Every output is .candidate,
+consumed by nothing; audit_full gained SKIP-while-absent checks; a source guard makes writing
+b5_audio_reviews_v2.json or b5_audio_descriptors_v2.json unrepresentable in the attribution
+module. Coverage reconnaissance: 354 members already clear the enrollment floors from legacy
+clips on keep-based identity (301 on strict hard-signal MATCH), before any HouseLive enrollment.
+
+NOT done, deliberately: no model weights downloaded (SpeechBrain spkrec-ecapa-voxceleb, silero-
+vad, faster-whisper small — named in the DRAFT prereg with sources; their SHA-256s get pinned at
+lock); big5_audio_identity_prereg.md is DRAFT, explicitly not locked, and the pilot ladder P0-P5
+(synthetic battery -> DET/EER calibration on the 148 negatives + impostor trials -> Chip Roy
+cross-channel hard gate -> 100-unit human listen-check -> 3 hand-labeled hearings -> WJ smoke)
+runs only after Paul rules on: contract mode A/B (machine checks AS reviews vs pre-filter-only
+default), the venue amendment beside on_air_interview, hearings scope + the curated media map,
+thresholds/floors ratification, topic dictionary vs STM, the floor second-source rule, legacy
+corpus write-off, Senate source, storage root, the 60s-vs-180s member floor, enrollment
+ratification workload, and promotion itself. Until then the shipped fail-closed state (zero
+profiles) remains the correct active state.
