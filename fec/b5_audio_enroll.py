@@ -11,9 +11,8 @@ surviving clip embeddings.  Everything is deterministic - no RNG anywhere.
 
 Identity evidence strings are caller-supplied hard signals (chyron/roll-call regex hits, reviewer
 confirmations); they are NEVER LLM labels.  This module only records them and hard-refuses empty
-evidence.  theta_enroll is NEVER a code literal here: the CLI requires --theta-enroll explicitly,
-and the calibrated default lives in b5_audio_identity_thresholds.json.candidate (see
-b5_audio_verify2.load_thresholds).
+evidence.  theta_enroll is NEVER a code literal or free CLI parameter: the CLI loads it from the
+passing b5_audio_identity_thresholds.json.candidate and records that artifact's SHA-256.
 
 Output is a .json.candidate artifact consumed by NOTHING until user ratification.
 """
@@ -135,7 +134,7 @@ def _loo_gate(metas, embeddings, theta_enroll):
     return survivors, quarantined
 
 
-def build_bank(clips_by_member, backend, theta_enroll):
+def build_bank(clips_by_member, backend, theta_enroll, thresholds_sha256=None):
     """Build the enrollment bank. Deterministic; fail-closed on malformed clips."""
     theta_enroll = float(theta_enroll)
     members, refused, quarantined_all = {}, {}, []
@@ -169,6 +168,7 @@ def build_bank(clips_by_member, backend, theta_enroll):
         }
     return {"schema": SCHEMA, "status": STATUS, "backend": backend.name,
             "theta_enroll": theta_enroll, "members": members,
+            "thresholds_sha256": thresholds_sha256,
             "refused": refused, "quarantined": quarantined_all}
 
 
@@ -177,12 +177,19 @@ def main(argv=None):
         description="Build the speaker-enrollment bank (research candidate; consumed by nothing).")
     parser.add_argument("--manifest", required=True,
                         help="JSON: {member: [{path|samples, sr, event_id, seconds, identity_evidence}]}")
-    parser.add_argument("--backend", required=True, choices=["spectral-test", "ecapa"])
+    parser.add_argument("--backend", required=True, choices=["spectral-test", "wav2vec2", "ecapa"])
     parser.add_argument("--model-dir", default=None,
-                        help="local model directory (required by the ecapa backend; never downloaded)")
-    parser.add_argument("--theta-enroll", required=True, type=float,
-                        help="LOO cosine floor; the calibrated value comes from "
-                             "b5_audio_identity_thresholds.json.candidate, never a code literal")
+                        help="local model directory (required by real backends; never downloaded)")
+    parser.add_argument("--model-manifest", default=None,
+                        help="hash manifest covering every local model file; required by real backends")
+    try:
+        from paths import ROOT
+    except ImportError:
+        ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    parser.add_argument(
+        "--thresholds",
+        default=os.path.join(ROOT, "b5_audio_identity_thresholds.json.candidate"),
+        help="passing calibrated thresholds artifact; enrollment refuses without it")
     parser.add_argument("--out", required=True,
                         help="explicit output path; must end in .json.candidate")
     args = parser.parse_args(argv)
@@ -190,10 +197,15 @@ def main(argv=None):
         raise SystemExit("REFUSED: --out must end in .json.candidate (research artifact, "
                          "consumed by nothing until ratified): %s" % args.out)
     from moneyball_core import dump_atomic
-    backend = get_backend(args.backend, args.model_dir)
+    from b5_audio_calibrate import sha256_file
+    from b5_audio_verify2 import load_thresholds
+    thresholds = load_thresholds(args.thresholds)
+    backend = get_backend(args.backend, args.model_dir, args.model_manifest)
     with open(args.manifest, encoding="utf-8") as handle:
         clips_by_member = json.load(handle)
-    bank = build_bank(clips_by_member, backend, args.theta_enroll)
+    bank = build_bank(
+        clips_by_member, backend, thresholds["theta_enroll"],
+        thresholds_sha256=sha256_file(args.thresholds))
     dump_atomic(bank, args.out, indent=1)
     print("enroll bank: %d member(s) enrolled, %d refused, %d clip(s) quarantined"
           % (len(bank["members"]), len(bank["refused"]), len(bank["quarantined"])))

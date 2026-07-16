@@ -234,6 +234,8 @@ def _main(argv=None):
     parser.add_argument("--backend", default="spectral-test",
                         help="embedding backend name (see b5_audio_embed.get_backend)")
     parser.add_argument("--model-dir", default=None, help="local model dir for the ecapa backend")
+    parser.add_argument("--model-manifest", default=None,
+                        help="hash manifest covering every local model file")
     parser.add_argument("--out", required=True,
                         help="explicit output path; must end in .json.candidate")
     parser.add_argument("--window-sec", type=float, default=1.5)
@@ -250,7 +252,7 @@ def _main(argv=None):
     from moneyball_core import dump_atomic
 
     samples, sr = soundfile.read(args.wav, dtype="float64", always_2d=False)
-    backend = get_backend(args.backend, args.model_dir)
+    backend = get_backend(args.backend, args.model_dir, args.model_manifest)
     segments = diarize(samples, sr, backend, window_sec=args.window_sec, hop_sec=args.hop_sec,
                        n_speakers=args.n_speakers, seed=args.seed,
                        distance_threshold=args.distance_threshold)

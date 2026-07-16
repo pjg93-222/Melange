@@ -7,15 +7,21 @@ audio-identity design 2026-07-16 (user-directed build). No pilot below (P1 onwar
 three of the following happen, in order:
 
 1. **The user approves the one-time model downloads.** No network access, no model download, and
-   no LLM call exists anywhere in the identity code path today; the ecapa backend and the whisper
+   no LLM call exists anywhere in the identity code path today; the real embedding backends and whisper
    aligner hard-refuse (`BackendRefused`) without a complete LOCAL model directory. The three
    downloads awaiting approval, with sources and approximate sizes:
-   - **SpeechBrain spkrec-ecapa-voxceleb** (ECAPA-TDNN speaker embedding, VoxCeleb-trained) —
-     Hugging Face `speechbrain/spkrec-ecapa-voxceleb`, approx. 85 MB.
+   - **facebook/wav2vec2-base** (the exact 768-dimensional embedding family used by Mestre and
+     Ryan for speaker classification) — Hugging Face `facebook/wav2vec2-base`, approx. 360 MB.
    - **silero-vad** (voice-activity model, replaces the interim RMS gate in the diarizer) —
      GitHub `snakers4/silero-vad` (JIT export), approx. 2 MB.
    - **faster-whisper small** (CTranslate2 Whisper for word-level timestamps) — Hugging Face
      `Systran/faster-whisper-small`, approx. 465 MB.
+   - **Aeneas + eSpeak local toolchain** (paper-faithful MFCC/dynamic-time-warp transcript
+     boundaries) — exact package/binary versions and every executable hash must be pinned before
+     a real sync map is generated; the alignment module only ingests the resulting JSON and never
+     discovers or downloads this toolchain at runtime.
+   ECAPA-VoxCeleb remains implemented only as a separately labeled engineering comparator; it is
+   not the paper-faithful primary and may not silently replace Wav2Vec2.
    At lock time the SHA-256 of every downloaded model file gets pinned HERE, in this section, and
    the backends run `local_files_only` against those pinned files forever after.
 2. **Input fingerprints are taken at a quiescent moment** (no live pipeline/collector jobs): the
@@ -37,10 +43,15 @@ Do not add a lock line to this file until all three are satisfied and the user s
 - **Research candidates only.** Every artifact ends in `.json.candidate` with
   `status: RESEARCH_CANDIDATE_NOT_CONSUMED` and is consumed by nothing (traits, narratives,
   weekly refresh, receptivity) until user ratification; `fec/audit_full.py` enforces this.
-- **The cosine threshold is never a code literal.** theta_accept / theta_enroll / EER live only in
+- **The cosine threshold is never a code literal.** theta_accept, theta_enroll, and theta_eer live only in
   `b5_audio_identity_thresholds.json.candidate` (schema `b5-audio-identity-thresholds-v1`);
-  every consumer refuses to run (SystemExit code 2, message containing "thresholds artifact")
-  when it is absent.
+  EER itself is separately stored as the error-rate field `eer_rate`. Every consumer refuses to
+  run (SystemExit code 2, message containing "thresholds artifact") when the artifact is absent,
+  malformed, above the 5% stop bar, or not status `CALIBRATION_PASS`. Enrollment reads
+  theta_enroll from this artifact and records its SHA-256; it has no free threshold CLI parameter.
+- **Local model files are hash-pinned.** A real Wav2Vec2 or ECAPA backend refuses unless a
+  `b5-audio-model-manifest-v1` with status `PINNED_LOCAL_MODEL` names the backend and matches every
+  file in the local model directory byte-for-byte. Unlisted and modified files both refuse.
 - **Enrollment floors** (from `fec/audio_rules.py`, the single source): ENROLL_MIN_CLIPS=3,
   ENROLL_MIN_EVENTS=2 (a voiceprint never rests on one recording's channel), ENROLL_MIN_SEC=180.0,
   plus a leave-one-clip-out integrity gate at theta_enroll; floors re-checked after quarantine.
@@ -70,7 +81,8 @@ Do not add a lock line to this file until all three are satisfied and the user s
   (above = stop-and-report, never tune past); **>= 99 percent of the 148 negatives rejected at
   theta_accept**; a sex-parity FAR/FRR ratio **> 2x is a reported red flag, never silently
   recalibrated**; the thresholds artifact (`b5_audio_identity_thresholds.json.candidate`) is
-  written. (Producer script: NOT YET BUILT — see Open items.)
+  written. `fec/b5_audio_calibrate.py` is the deterministic score-level producer; it writes a
+  non-consumable stop-bar artifact on a miss and never uses sex labels to tune thresholds.
 - **P2 — cross-channel hard gate:** the **5 SHA-pinned Chip Roy HouseLive units** verified against
   a YouTube-legacy-enrolled print; bar **5/5 accepted**. Pre-declared remedy on failure:
   per-channel z-norm, then re-run P1. No other remedy may be invented after the look.
@@ -95,7 +107,8 @@ Do not add a lock line to this file until all three are satisfied and the user s
 - **D4** — Enrollment evidence standard: which identity_evidence classes qualify (chyron regex,
   roll-call, human reviewer) and who ratifies each member's bank entry (the bank's `ratified`
   field stays empty until then).
-- **D5** — Thresholds ratification: accept the P1-calibrated theta_accept/theta_enroll/EER or
+- **D5** — Thresholds ratification: accept the P1-calibrated theta_accept/theta_enroll/theta_eer
+  and the separately reported EER rate, or
   order recalibration; disposition when a corpus EER exceeds the 5 percent stop-bar.
 - **D6** — Cross-channel remedy: if P2 fails, apply the pre-declared per-channel z-norm (then
   re-run P1) or drop the cross-channel corpus.
@@ -113,38 +126,48 @@ Do not add a lock line to this file until all three are satisfied and the user s
 - **D12** — WJ scope: whether the P5 smoke expands into a scored WJ corpus or remains a recorded
   smoke only.
 
-## Module inventory (built 2026-07-16, TDD; all suites pass without torch/speechbrain/faster-whisper)
+## Module inventory (built 2026-07-16, TDD; all suites pass without torch/transformers/speechbrain/faster-whisper)
 
-- `fec/b5_audio_embed.py` — embedding backend contract (`get_backend(name, model_dir)`,
-  `cosine`, `BackendRefused`; `spectral-test` deterministic test backend; `ecapa` refuses without
-  a complete local model dir).
+- `fec/b5_audio_embed.py` — embedding backend contract (`get_backend(name, model_dir,
+  model_manifest)`, `cosine`, `BackendRefused`; `spectral-test` deterministic test backend;
+  paper-faithful `wav2vec2` plus separately labeled `ecapa` comparator; both real backends refuse
+  without a complete hash-pinned local model directory).
+- `fec/b5_audio_calibrate.py` — deterministic labeled-score DET/EER calibration; separates
+  `theta_eer` from `eer_rate`, applies the 148-negative/99% and per-corpus 5% bars, reports
+  sex-parity diagnostics without retuning, and writes the only thresholds artifact consumers use.
 - `fec/b5_audio_enroll.py` — enrollment bank builder (floors + leave-one-out gate) ->
   `b5_audio_enroll_bank.json.candidate` (schema `b5-audio-enroll-bank-v1`).
 - `fec/b5_audio_verify2.py` — verification-only decisions (ACCEPT/REJECT/INDETERMINATE, margin,
-  coverage; thresholds-artifact refusal, SystemExit 2).
+  coverage; thresholds-artifact refusal, SystemExit 2); unratified enrollment entries are absent
+  by default and require an explicit pilot-only override.
 - `fec/b5_audio_diarize.py` — VAD + windowed embeddings + agglomerative clustering ->
   `{start,end,cluster,overlap}` segments; overlap = excluded, drop-never-repair.
-- `fec/b5_audio_align_turns.py` — monotonic word alignment -> per-turn
-  `{turn_index,start,end,word_match,usable}` + hearing-level word-match gate.
+- `fec/b5_audio_align_turns.py` — standard Aeneas fragment JSON supplies the primary MFCC/DTW
+  per-turn boundaries, while an independently aligned local-ASR word stream supplies word-match;
+  fragment count/text/time mismatch fails the whole hearing closed. The ASR-only monotonic path is
+  retained as an explicitly labeled fallback/test route.
 - `fec/b5_audio_attrib.py` — dual-check attribution verdicts (check T + check A must agree;
   fail-closed precedence) -> `b5_audio_attrib_<corpus>.json.candidate` + rejects/mismatch ledgers;
   runtime + source guards against the protected live artifacts.
 - `fec/fetch_hearings_media.py` + `hearings_media_map.csv` (worktree root) — hearings media
   acquisition, fail-closed: the shipped map holds placeholder rows only (empty video_url), rows
   must be hand-curated by the user, packages are verified against the hearings db, `--dry-run` is
-  the default, and real fetching requires the explicit `--fetch` flag (user-gated; yt-dlp
-  download-archive prevents re-download/overwrite).
-- Tests: `fec/tests/test_audio_identity.py` (19), `fec/tests/test_audio_diarize.py` (5),
-  `fec/tests/test_audio_align.py` (6), `fec/tests/test_audio_attrib.py` (17),
-  `fec/tests/test_hearings_media.py` (4) — all registered in `fec/tests/run_tests.py`; audit
+  the default, and real fetching requires the explicit `--fetch` flag (user-gated; verified
+  packages only; yt-dlp download-archive plus `--no-overwrites` prevents replacement).
+- Tests: `fec/tests/test_audio_calibrate.py` (5), `fec/tests/test_audio_identity.py` (23),
+  `fec/tests/test_audio_diarize.py` (5),
+  `fec/tests/test_audio_align.py` (8), `fec/tests/test_audio_attrib.py` (17),
+  `fec/tests/test_hearings_media.py` (5) — all registered in `fec/tests/run_tests.py`; audit
   guards live in `fec/audit_full.py`.
 
 ## Open items
 
-- The **P1 calibration/thresholds producer script is not yet built**;
-  `b5_audio_identity_thresholds.json.candidate` therefore has no producer, and every consumer
-  correctly refuses (SystemExit 2) until it exists. Build it before P1; it may not run until this
-  document is locked.
+- The real **P1 labeled-trial artifact is not yet assembled**. The calibration producer exists,
+  but it may not see the 148 negatives or any real embedding score until this document is locked
+  with the input fingerprint manifest.
 - silero-VAD swap-in for the diarizer's interim RMS gate is documented behind the same
   `(samples, sr) -> bool-mask` interface; blocked on D3.
+- The Aeneas sync-map adapter is wired and tested, but the local Aeneas/eSpeak toolchain is not yet
+  version/hash-pinned and no real sync map has been generated. That toolchain pin plus the
+  preregistered human boundary-validation pilot remain mandatory before scoring.
 - Input fingerprint manifest: to be inserted at a quiescent moment (pre-lock requirement 2).

@@ -1226,3 +1226,42 @@ thresholds/floors ratification, topic dictionary vs STM, the floor second-source
 corpus write-off, Senate source, storage root, the 60s-vs-180s member floor, enrollment
 ratification workload, and promotion itself. Until then the shipped fail-closed state (zero
 profiles) remains the correct active state.
+
+## 43. Audio identity audit hardening — paper-faithful embeddings and calibrated gates (2026-07-16)
+
+A tests-first audit of §42 found four merge-blocking contract defects despite its original
+synthetic suites passing: the field named `eer` was used as a cosine threshold even though EER is
+an error rate; enrollment accepted a free `--theta-enroll` value instead of the calibration
+artifact; empty `ratified` enrollment entries were usable by default; and any attempted acoustic
+comparison on a witness could poison an entire hearing even when the acoustic decision was
+REJECT. All four are corrected without taking a real calibration look or changing the active
+zero-profile state.
+
+`fec/b5_audio_calibrate.py` now deterministically separates `theta_eer` (score boundary) from
+`eer_rate` (the <=.05 stop-bar quantity), requires all corpus EER bars plus at least 148
+caption-mismatch negatives and >=.99 rejection, reports sex-specific FAR/FRR ratios without
+retuning, and writes either `CALIBRATION_PASS` or a permanently non-consumable
+`CALIBRATION_STOP_BAR_MISS`. Enrollment has no free threshold parameter: it loads theta_enroll
+from a passing artifact and records its SHA-256. Verification refuses non-passing/malformed
+thresholds and treats unratified voiceprints as absent unless an explicit pilot-only override is
+present.
+
+The speaker representation now includes the paper's actual `facebook/wav2vec2-base` family:
+mean-pooled 768-dimensional utterance embeddings, used inside the project's safer
+verification-never-identification rule. ECAPA remains a separately labeled engineering
+comparator, not a silent substitute. Both real backends require a complete
+`b5-audio-model-manifest-v1`; every local model file must match its pinned SHA-256 and unlisted
+files refuse. Hearing acquisition now adds `--no-overwrites` and forbids combining real `--fetch`
+with the unverified-package dry-run override. A witness poisons its hearing only when CHECK-A
+actually ACCEPTS a member match; ordinary witness turns remain excluded but do not destroy valid
+member turns.
+
+Engineering verification after the hardening: calibration 5/5, enrollment/verification 23/23,
+diarization 5/5, alignment 8/8, attribution 17/17, hearing acquisition 5/5. Standard Aeneas fragment
+JSON is now the primary MFCC/dynamic-time-warp boundary proposal when supplied; exact fragment
+count, normalized transcript text, finite time, and non-overlap are mandatory. Local Whisper word
+timestamps remain only the independent word-recovery cross-check, and any Aeneas mismatch fails
+the hearing closed instead of falling back silently. The local Aeneas/eSpeak toolchain and real
+human boundary pilot remain user-gated. No model was downloaded, no real thresholds were fit, no
+candidate entered the active review/descriptor artifacts, and no Big Five or influence number
+moved.

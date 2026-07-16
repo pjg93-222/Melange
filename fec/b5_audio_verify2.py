@@ -12,9 +12,10 @@ INDETERMINATE; any floor failure is REJECT with the failing field evident in "re
 NEVER reassigned to a better-matching member - there is no winner-picking over members anywhere in
 this module; competitors exist only to compute the margin.
 
-theta_accept and eer are NEVER code literals: they load exclusively from the calibrated thresholds
+theta_accept and theta_eer are NEVER code literals: they load exclusively from the calibrated thresholds
 artifact b5_audio_identity_thresholds.json.candidate, and every consumer refuses to run (exit code
-2) when that artifact is missing or malformed.
+2) when that artifact is missing, malformed, or records a calibration stop-bar miss. ``eer_rate``
+is the observed error rate; it is never used as a cosine boundary.
 """
 from __future__ import annotations
 
@@ -28,6 +29,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from audio_rules import IDENTITY_MIN_COVERAGE, IDENTITY_MIN_MARGIN  # noqa: E402
+from b5_audio_calibrate import sha256_file  # noqa: E402
 from b5_audio_embed import cosine  # noqa: E402
 
 THRESHOLDS_SCHEMA = "b5-audio-identity-thresholds-v1"
@@ -52,19 +54,44 @@ def load_thresholds(path):
                 "threshold is never a code literal" % path)
     with open(path, encoding="utf-8") as handle:
         doc = json.load(handle)
+    return validate_thresholds_doc(doc, path)
+
+
+def validate_thresholds_doc(doc, source="<memory>"):
+    """Validate a thresholds object and return it; only CALIBRATION_PASS is consumable."""
     if not isinstance(doc, dict) or doc.get("schema") != THRESHOLDS_SCHEMA:
-        _refuse("REFUSED: thresholds artifact at %s has schema %r, expected %r"
-                % (path, doc.get("schema") if isinstance(doc, dict) else None, THRESHOLDS_SCHEMA))
-    for key in ("theta_accept", "eer"):
+        _refuse("REFUSED: thresholds artifact at %s has schema %r, expected %r" %
+                (source, doc.get("schema") if isinstance(doc, dict) else None,
+                 THRESHOLDS_SCHEMA))
+    if doc.get("status") != "CALIBRATION_PASS":
+        _refuse("REFUSED: thresholds artifact at %s has non-passing status %r" %
+                (source, doc.get("status")))
+    for key in ("theta_accept", "theta_enroll", "theta_eer", "eer_rate"):
         if not isinstance(doc.get(key), (int, float)):
-            _refuse("REFUSED: thresholds artifact at %s lacks numeric %r" % (path, key))
+            _refuse("REFUSED: thresholds artifact at %s lacks numeric %r" % (source, key))
+    theta_eer = float(doc["theta_eer"])
+    theta_accept = float(doc["theta_accept"])
+    theta_enroll = float(doc["theta_enroll"])
+    eer_rate = float(doc["eer_rate"])
+    if not (-1.0 <= theta_eer <= theta_accept <= 1.0):
+        _refuse("REFUSED: thresholds artifact at %s violates "
+                "-1 <= theta_eer <= theta_accept <= 1" % source)
+    if not (-1.0 <= theta_enroll <= 1.0):
+        _refuse("REFUSED: thresholds artifact at %s has theta_enroll outside [-1,1]" %
+                source)
+    if not (0.0 <= eer_rate <= 1.0):
+        _refuse("REFUSED: thresholds artifact at %s has eer_rate outside [0,1]" % source)
+    if eer_rate > 0.05:
+        _refuse("REFUSED: thresholds artifact at %s exceeds the 5%% EER stop bar" % source)
     return doc
 
 
-def member_embedding(bank, member):
-    """Enrollment embedding for a member, or None when the member is not enrolled."""
+def member_embedding(bank, member, allow_unratified=False):
+    """Enrollment embedding, or None when absent/unratified under the fail-closed default."""
     row = (bank.get("members") or {}).get(member)
     if not row or not row.get("embedding"):
+        return None
+    if not allow_unratified and not (row.get("ratified") or []):
         return None
     return np.asarray(row["embedding"], dtype=np.float64)
 
@@ -84,7 +111,7 @@ def verify_unit(target_embedding, segment_embeddings, thresholds,
      "margin": float|None, "coverage": float, "reasons": [str, ...]}
     """
     theta_accept = float(thresholds["theta_accept"])
-    eer = float(thresholds["eer"])
+    theta_eer = float(thresholds["theta_eer"])
     reasons = []
     segments = [np.asarray(seg, dtype=np.float64) for seg in (segment_embeddings or [])]
     if not segments:
@@ -108,14 +135,14 @@ def verify_unit(target_embedding, segment_embeddings, thresholds,
                            % (coverage_value, IDENTITY_MIN_COVERAGE))
     if margin is not None and margin < IDENTITY_MIN_MARGIN:
         reasons.append("margin %.3f < IDENTITY_MIN_MARGIN %.3f" % (margin, IDENTITY_MIN_MARGIN))
-    if min_cosine < eer:
-        reasons.append("min_cosine %.3f < eer %.3f" % (min_cosine, eer))
+    if min_cosine < theta_eer:
+        reasons.append("min_cosine %.3f < theta_eer %.3f" % (min_cosine, theta_eer))
     if reasons:
         decision = "REJECT"
     elif min_cosine < theta_accept:
         decision = "INDETERMINATE"
-        reasons.append("min_cosine %.3f in [eer %.3f, theta_accept %.3f)"
-                       % (min_cosine, eer, theta_accept))
+        reasons.append("min_cosine %.3f in [theta_eer %.3f, theta_accept %.3f)"
+                       % (min_cosine, theta_eer, theta_accept))
     else:
         decision = "ACCEPT"
     return {"decision": decision, "min_cosine": float(min_cosine),
@@ -139,20 +166,29 @@ def main(argv=None):
                              "competitor_members?}]")
     parser.add_argument("--out", required=True,
                         help="explicit output path; must end in .json.candidate")
+    parser.add_argument("--allow-unratified-candidate", action="store_true",
+                        help="pilot-only override; default refuses enrollment entries whose "
+                             "ratified list is empty")
     args = parser.parse_args(argv)
     if not args.out.endswith(".json.candidate"):
         raise SystemExit("REFUSED: --out must end in .json.candidate: %s" % args.out)
     from moneyball_core import dump_atomic
     thresholds = load_thresholds(args.thresholds)
+    thresholds_sha256 = sha256_file(args.thresholds)
     with open(args.bank, encoding="utf-8") as handle:
         bank = json.load(handle)
+    if bank.get("thresholds_sha256") != thresholds_sha256:
+        _refuse("REFUSED: enrollment bank thresholds_sha256 does not match the exact "
+                "calibrated thresholds artifact supplied to verification")
+    bank_sha256 = sha256_file(args.bank)
     with open(args.units, encoding="utf-8") as handle:
         units = json.load(handle)
     records = []
     for unit in units:
         unit_id = unit["unit_id"]
         member = unit["member"]
-        target = member_embedding(bank, member)
+        target = member_embedding(
+            bank, member, allow_unratified=args.allow_unratified_candidate)
         if target is None:
             records.append(exclusion_record(unit_id, member, REASON_NO_ENROLLMENT))
             continue
@@ -160,8 +196,12 @@ def main(argv=None):
         if competitor_names is None:
             competitor_names = [name for name in sorted(bank.get("members") or {})
                                 if name != member]
-        competitors = [member_embedding(bank, name) for name in competitor_names
-                       if member_embedding(bank, name) is not None]
+        competitors = [
+            member_embedding(bank, name, allow_unratified=args.allow_unratified_candidate)
+            for name in competitor_names
+            if member_embedding(
+                bank, name, allow_unratified=args.allow_unratified_candidate) is not None
+        ]
         check_a = verify_unit(target, unit.get("segment_embeddings") or [], thresholds,
                               competitor_embeddings=competitors or None,
                               coverage=unit.get("coverage"))
@@ -175,7 +215,11 @@ def main(argv=None):
                             "reason_code": reason, "check_t": None, "check_a": check_a})
     out_doc = {"schema": "b5-audio-identity-verdicts-v1",
                "status": "RESEARCH_CANDIDATE_NOT_CONSUMED",
-               "thresholds_path": args.thresholds, "verdicts": records}
+               "thresholds_path": args.thresholds,
+               "thresholds_sha256": thresholds_sha256,
+               "bank_sha256": bank_sha256,
+               "allow_unratified_candidate": args.allow_unratified_candidate,
+               "verdicts": records}
     dump_atomic(out_doc, args.out, indent=1)
     eligible = sum(1 for row in records if row["status"] == "ELIGIBLE")
     print("verify: %d unit(s), %d ELIGIBLE, %d EXCLUDED"

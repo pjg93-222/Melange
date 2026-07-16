@@ -81,11 +81,8 @@ ok('no-signal stance remains em dash',SR.classify(.99,False)=='—' and MC.overa
 ok('missing media does not dilute present sponsored-legislation evidence',
    SR.combine_evidence({'legislation':.86,'media':None,'vote':None},
                        {'legislation':.55,'media':.35,'vote':.10})==.86)
-_near={'Examination & Supervision':'Champion','CU Capital Requirements':'Champion',
-       'Technology & Emerging':'Champion','Fraud Prevention':'Champion','Charter Modernization':'Champion',
-       'CFPB':'Champion','Member Business Lending':'Champion','Data Privacy & Cyber':'Ally',
-       'Credit Card Mandates':'Ally','Mortgage & Housing':'Ally','Interchange':'Highly Persuadable',
-       'Defense CU Issues':'Highly Persuadable','Payments':'True Neutral'}
+# Equal-weight synthetic domains: base mean = 3.60, exceptional nudge = +0.05, current Champion floor = 3.65.
+_near={'top1':'Champion','top2':'Champion','top3':'Champion','ally1':'Ally','ally2':'Ally'}
 ok('overall exceptional-performance rounding is bounded and can resolve a near boundary',
    MC.overall_rounding(_near)==.05 and MC.overall_tier(_near)=='Champion')
 _opp_probe={'hs%d'%i:'Highly Skeptical' for i in range(4)}; _opp_probe['opp']='Opponent'
@@ -170,12 +167,19 @@ ok('committee title does not substitute for action',_g['CU Tax Status']=='Ally' 
 ok('uncorroborated top cells cap to Ally, raw preserved',
    _g['Interchange']=='Ally' and _cap=={'Interchange':'Defender','CU Tax Status':'Champion'})
 ok('cap touches nothing else',_g['TCPA']=='Skeptic')
-_ov,_od=MC.overall_say_do_gate('__test__',_g,_cm,_cor)
+# Current overall Champion floor is 3.65. Use equal-weight synthetic domains so the gated mix remains
+# a Champion while the aggregate delivery coverage is below 2/3 (5/8): this isolates the overall cap.
+MC._CORR['__test__']={'sponsored':{'top%d'%i for i in range(1,6)},'advanced':set()}
+MC._VOTECORR['__test__']=set()
+_raw8={'top%d'%i:'Champion' for i in range(1,9)}
+_g8,_c8,_p8,_r8=MC.cap_uncorroborated('__test__',_raw8)
+_ov,_od=MC.overall_say_do_gate('__test__',_g8,_raw8,_r8)
 ok('overall Champion requires delivery in at least two-thirds of raw top cells',
-   _od['raw']=='Champion' and _ov=='Ally' and _od['delivery_ratio']==.5)
-MC._CORR['__test__']['sponsored'].update({'Technology & Emerging','Fraud Prevention'})
-_raw6={'CFPB':'Champion','Payments':'Champion','Technology & Emerging':'Champion',
-       'Fraud Prevention':'Champion','Interchange':'Defender','CU Tax Status':'Champion'}
+   _od['raw']=='Champion' and _ov=='Ally' and _od['delivery_ratio']==.625)
+# Four of six equal-weight top domains delivered: gated mean remains above the current Champion floor
+# and the exact 2/3 aggregate coverage clears.
+MC._CORR['__test__']={'sponsored':{'top%d'%i for i in range(1,5)},'advanced':set()}
+_raw6={'top%d'%i:'Champion' for i in range(1,7)}
 _g3,_c3,_p3,_r3=MC.cap_uncorroborated('__test__',_raw6)
 _ov3,_od3=MC.overall_say_do_gate('__test__',_g3,_raw6,_r3)
 ok('six top domains with two-thirds delivered clear the aggregate say-do rule',
@@ -235,7 +239,8 @@ print('[audio speaker-identity layer: module suites (design 2026-07-16, user-dir
 # without importing optional deps (torch/speechbrain/faster-whisper are absent by design; the
 # suites use the deterministic spectral-test backend and must stay runnable on this box).
 import subprocess as _sp,re as _re
-for _t in ('test_audio_identity','test_audio_diarize','test_audio_align','test_audio_attrib','test_hearings_media'):
+for _t in ('test_audio_calibrate','test_audio_identity','test_audio_diarize','test_audio_align',
+           'test_audio_attrib','test_hearings_media'):
     _r=_sp.run([sys.executable,os.path.join(FEC,'tests',_t+'.py')],capture_output=True,text=True,encoding='utf-8',errors='replace')
     _m=_re.search(r'(\d+) passed, (\d+) failed',_r.stdout or '')
     ok('%s suite clean'%_t,_r.returncode==0 and bool(_m) and _m.group(2)=='0' and int(_m.group(1))>0,

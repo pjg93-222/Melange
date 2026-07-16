@@ -14,7 +14,9 @@ about this path is fail-closed:
     created.  Real fetching requires the explicit --fetch flag and prints a user-approval reminder
     banner first;
   * downloads can never overwrite existing files: yt-dlp's --download-archive skips completed ids
-    and its default output semantics never clobber finished files.
+    and --no-overwrites is explicit;
+  * --allow-unverified-packages is a dry-run planning aid only and can never be combined with
+    --fetch.
 
 The planned command per fetchable row (built, and in dry-run only printed):
   python -m yt_dlp --download-archive <archive> -f bestaudio -x --audio-format wav
@@ -94,6 +96,7 @@ def build_command(url, package, out_dir, archive):
     return [
         sys.executable, "-m", "yt_dlp",
         "--download-archive", archive,
+        "--no-overwrites",
         "-f", "bestaudio",
         "-x", "--audio-format", "wav",
         "--postprocessor-args", "-ar 16000 -ac 1",
@@ -139,6 +142,10 @@ def main(argv=None):
                     help="admit rows whose package cannot be verified against hearings_seq.db")
     args = ap.parse_args(argv)
     dry_run = not args.fetch
+    if args.fetch and args.allow_unverified_packages:
+        raise SystemExit(
+            "REFUSED: --fetch cannot be combined with --allow-unverified-packages; "
+            "real downloads require package verification against hearings_seq.db")
 
     rows = read_map(args.map)
     known = load_known_packages(args.db)

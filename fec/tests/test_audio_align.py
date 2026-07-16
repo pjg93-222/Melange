@@ -18,7 +18,11 @@ sys.path.insert(0, FEC)
 
 from audio_rules import ALIGN_MIN_HEARING_WORD_MATCH, ALIGN_MIN_TURN_WORD_MATCH  # noqa: E402
 from b5_audio_embed import BackendRefused  # noqa: E402
-from b5_audio_align_turns import align_turns, asr_words_from_whisper  # noqa: E402
+from b5_audio_align_turns import (  # noqa: E402
+    align_turns,
+    align_turns_aeneas,
+    asr_words_from_whisper,
+)
 
 
 # ---------------------------------------------------------------- fixtures
@@ -143,6 +147,45 @@ def test_whisper_refuses_without_model_dir():
     assert "faster_whisper" not in sys.modules, "refusal must precede the faster_whisper import"
 
 
+def make_aeneas_syncmap():
+    fragments = []
+    for index, text in enumerate(TURN_TEXTS):
+        fragments.append({
+            "id": "f%06d" % index,
+            "begin": "%.3f" % (index * 20.0),
+            "end": "%.3f" % (index * 20.0 + 18.0),
+            "lines": [text],
+        })
+    return {"fragments": fragments}
+
+
+def test_aeneas_boundaries_are_primary_but_asr_word_match_is_independent():
+    result = align_turns_aeneas(TURN_TEXTS, make_aeneas_syncmap(), make_asr_words())
+    assert result["hearing_usable"] is True, result
+    assert result["boundary_source"] == "aeneas_mfcc_dtw"
+    assert result["crosscheck_source"] == "local_asr_word_match"
+    assert result["validation_errors"] == []
+    for index, rec in enumerate(result["turns"]):
+        assert rec["start"] == index * 20.0, rec
+        assert rec["end"] == index * 20.0 + 18.0, rec
+        assert rec["word_match"] == 1.0 and rec["usable"] is True, rec
+
+
+def test_aeneas_text_or_time_mismatch_fails_the_hearing_closed():
+    for corrupt in ("text", "overlap", "count"):
+        syncmap = make_aeneas_syncmap()
+        if corrupt == "text":
+            syncmap["fragments"][1]["lines"] = ["unrelated words from another speaker"]
+        elif corrupt == "overlap":
+            syncmap["fragments"][1]["begin"] = "10.000"
+        else:
+            syncmap["fragments"].pop()
+        result = align_turns_aeneas(TURN_TEXTS, syncmap, make_asr_words())
+        assert result["hearing_usable"] is False, (corrupt, result)
+        assert result["validation_errors"], (corrupt, result)
+        assert not any(rec["usable"] for rec in result["turns"]), (corrupt, result)
+
+
 def test_determinism_two_runs_identical():
     words = garble(make_asr_words(), [7, 9, 11, 13])
     first = align_turns(TURN_TEXTS, words)
@@ -157,6 +200,8 @@ def main():
         test_hearing_level_garbling_fails_hearing_gate,
         test_turn_boundaries_monotonic_never_overlap,
         test_whisper_refuses_without_model_dir,
+        test_aeneas_boundaries_are_primary_but_asr_word_match_is_independent,
+        test_aeneas_text_or_time_mismatch_fails_the_hearing_closed,
         test_determinism_two_runs_identical,
     ]
     failed = 0

@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import hashlib
 import sys
 import tempfile
 import traceback
@@ -34,9 +35,11 @@ EVIDENCE = "chyron-regex:REP. TEST MEMBER (R-XX)"
 THETA_ENROLL = 0.90
 THRESHOLDS_DOC = {
     "schema": "b5-audio-identity-thresholds-v1",
+    "status": "CALIBRATION_PASS",
     "theta_accept": 0.90,
     "theta_enroll": THETA_ENROLL,
-    "eer": 0.80,
+    "theta_eer": 0.80,
+    "eer_rate": 0.03,
     "far_at_theta_accept": 0.0,
     "calibration": {"method": "synthetic-fixture", "note": "test-only, not a real calibration"},
 }
@@ -185,16 +188,19 @@ def test_enroll_cli_writes_candidate_artifact_and_guards_out_suffix():
         man_path = os.path.join(tmp, "manifest.json")
         with open(man_path, "w", encoding="utf-8") as handle:
             json.dump(manifest, handle)
+        thresholds_path = write_thresholds(tmp)
         out = os.path.join(tmp, "b5_audio_enroll_bank.json.candidate")
         enroll.main(["--manifest", man_path, "--backend", "spectral-test",
-                     "--theta-enroll", str(THETA_ENROLL), "--out", out])
+                     "--thresholds", thresholds_path, "--out", out])
         with open(out, encoding="utf-8") as handle:
             bank = json.load(handle)
         assert bank["schema"] == "b5-audio-enroll-bank-v1"
         assert "Test Member A" in bank["members"]
+        assert bank["theta_enroll"] == THETA_ENROLL
+        assert len(bank["thresholds_sha256"]) == 64
         try:
             enroll.main(["--manifest", man_path, "--backend", "spectral-test",
-                         "--theta-enroll", str(THETA_ENROLL),
+                         "--thresholds", thresholds_path,
                          "--out", os.path.join(tmp, "bank.json")])
         except SystemExit as exc:
             assert ".json.candidate" in str(exc.args[0] if exc.args else "")
@@ -209,6 +215,55 @@ def test_ecapa_backend_refuses_without_model_dir():
         pass
     else:
         raise AssertionError("ecapa without model dir did not raise BackendRefused")
+
+
+def test_wav2vec2_backend_refuses_without_model_dir():
+    try:
+        get_backend("wav2vec2", None)
+    except BackendRefused:
+        pass
+    else:
+        raise AssertionError("wav2vec2 without model dir did not raise BackendRefused")
+
+
+def test_real_backends_require_and_verify_complete_hash_manifest():
+    with tempfile.TemporaryDirectory() as tmp:
+        model_dir = os.path.join(tmp, "wav2vec2")
+        os.makedirs(model_dir)
+        files = {
+            "config.json": b"{}",
+            "preprocessor_config.json": b"{}",
+            "model.safetensors": b"test-only-model-bytes",
+        }
+        for name, content in files.items():
+            with open(os.path.join(model_dir, name), "wb") as handle:
+                handle.write(content)
+        manifest = {
+            "schema": "b5-audio-model-manifest-v1",
+            "status": "PINNED_LOCAL_MODEL",
+            "backend": "wav2vec2",
+            "files": {name: hashlib.sha256(content).hexdigest()
+                      for name, content in sorted(files.items())},
+        }
+        manifest_path = os.path.join(tmp, "model_manifest.json")
+        with open(manifest_path, "w", encoding="utf-8") as handle:
+            json.dump(manifest, handle)
+        try:
+            get_backend("wav2vec2", model_dir)
+        except BackendRefused:
+            pass
+        else:
+            raise AssertionError("real backend accepted no model manifest")
+        backend = get_backend("wav2vec2", model_dir, manifest_path)
+        assert backend.file_hashes() == manifest["files"]
+        with open(os.path.join(model_dir, "config.json"), "wb") as handle:
+            handle.write(b'{"changed":true}')
+        try:
+            get_backend("wav2vec2", model_dir, manifest_path)
+        except BackendRefused as exc:
+            assert "hash" in str(exc).lower()
+        else:
+            raise AssertionError("corrupted model file passed the hash manifest")
 
 
 # -------------------------------------------------------------- verification
@@ -276,11 +331,11 @@ def _blend(target, other, wanted_cosine):
     return wanted_cosine * target + math.sqrt(1.0 - wanted_cosine ** 2) * ortho
 
 
-def test_verify_indeterminate_band_and_reject_below_eer():
+def test_verify_indeterminate_band_and_reject_below_theta_eer():
     target, _, competitor = _target_and_segments()
     with tempfile.TemporaryDirectory() as tmp:
         thresholds = verify.load_thresholds(write_thresholds(tmp))
-    mid = _blend(target, competitor, 0.85)  # eer 0.80 <= 0.85 < theta_accept 0.90
+    mid = _blend(target, competitor, 0.85)  # theta_eer 0.80 <= 0.85 < theta_accept 0.90
     record = verify.verify_unit(target, [mid], thresholds, coverage=0.95)
     assert record["decision"] == "INDETERMINATE", record
     low = _blend(target, competitor, 0.50)
@@ -313,15 +368,79 @@ def test_missing_thresholds_artifact_is_systemexit_2():
         raise AssertionError("missing thresholds artifact did not refuse")
 
 
+def test_thresholds_refuse_failed_or_malformed_calibration():
+    with tempfile.TemporaryDirectory() as tmp:
+        for name, patch in (
+            ("failed", {"status": "CALIBRATION_STOP_BAR_MISS"}),
+            ("reversed", {"theta_eer": 0.95}),
+            ("bad_rate", {"eer_rate": 1.5}),
+        ):
+            doc = dict(THRESHOLDS_DOC)
+            doc.update(patch)
+            path = os.path.join(tmp, name + ".json.candidate")
+            with open(path, "w", encoding="utf-8") as handle:
+                json.dump(doc, handle)
+            try:
+                verify.load_thresholds(path)
+            except SystemExit as exc:
+                assert exc.code == 2, (name, exc.code)
+            else:
+                raise AssertionError("%s thresholds were accepted" % name)
+
+
 def test_missing_enrollment_yields_excluded_no_enrollment():
     bank = bank_a()
-    assert verify.member_embedding(bank, "Test Member A") is not None
+    assert verify.member_embedding(bank, "Test Member A") is None
+    assert verify.member_embedding(bank, "Test Member A", allow_unratified=True) is not None
     assert verify.member_embedding(bank, "Rep. Nobody") is None
+    bank["members"]["Test Member A"]["ratified"] = ["reviewer-1"]
+    assert verify.member_embedding(bank, "Test Member A") is not None
     record = verify.exclusion_record("unit-77", "Rep. Nobody", verify.REASON_NO_ENROLLMENT)
     assert record["unit_id"] == "unit-77"
     assert record["status"] == "EXCLUDED"
     assert record["reason_code"] == "EXCLUDED_NO_ENROLLMENT"
     assert record["check_t"] is None and record["check_a"] is None
+
+
+def test_verify_cli_pins_bank_to_the_same_thresholds_artifact():
+    with tempfile.TemporaryDirectory() as tmp:
+        thresholds_path = write_thresholds(tmp)
+        threshold_sha = hashlib.sha256(open(thresholds_path, "rb").read()).hexdigest()
+        bank = {
+            "schema": "b5-audio-enroll-bank-v1",
+            "status": "RESEARCH_CANDIDATE_NOT_CONSUMED",
+            "thresholds_sha256": "0" * 64,
+            "members": {
+                "Test Member A": {
+                    "embedding": [1.0, 0.0],
+                    "ratified": ["reviewer-1"],
+                },
+            },
+        }
+        bank_path = os.path.join(tmp, "bank.json.candidate")
+        units_path = os.path.join(tmp, "units.json")
+        out_path = os.path.join(tmp, "verdicts.json.candidate")
+        with open(bank_path, "w", encoding="utf-8") as handle:
+            json.dump(bank, handle)
+        with open(units_path, "w", encoding="utf-8") as handle:
+            json.dump([{"unit_id": "u1", "member": "Test Member A", "coverage": 1.0,
+                        "segment_embeddings": [[1.0, 0.0]]}], handle)
+        try:
+            verify.main(["--thresholds", thresholds_path, "--bank", bank_path,
+                         "--units", units_path, "--out", out_path])
+        except SystemExit as exc:
+            assert exc.code == 2
+        else:
+            raise AssertionError("verification accepted a bank calibrated to another threshold file")
+        bank["thresholds_sha256"] = threshold_sha
+        with open(bank_path, "w", encoding="utf-8") as handle:
+            json.dump(bank, handle)
+        verify.main(["--thresholds", thresholds_path, "--bank", bank_path,
+                     "--units", units_path, "--out", out_path])
+        out = json.load(open(out_path, encoding="utf-8"))
+        assert out["thresholds_sha256"] == threshold_sha
+        assert len(out["bank_sha256"]) == 64
+        assert out["verdicts"][0]["status"] == "ELIGIBLE"
 
 
 def test_verify_module_has_no_member_argmax():

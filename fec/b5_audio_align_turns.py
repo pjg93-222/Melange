@@ -4,10 +4,12 @@
 audio-identity design 2026-07-16 (user-directed build).  Research-only: the argparse main writes a
 .candidate artifact consumed by NOTHING until ratified.
 
-Purpose: given the ordered turn texts of one hearing (hearings_seq.db) and the word-level output of
-a LOCAL ASR pass over that hearing's audio, locate each transcript turn inside the audio timeline
-and grade how much of it the ASR actually recovered.  Downstream identity checks (verification,
-attribution) only trust a turn's [start, end] window when its word_match clears
+Purpose: given the ordered turn texts of one hearing (hearings_seq.db), an Aeneas sync map, and the
+word-level output of a LOCAL ASR pass over that hearing's audio, locate each transcript turn inside
+the audio timeline and independently grade how much of it the ASR recovered. Aeneas supplies the
+paper-faithful MFCC/dynamic-time-warp boundary proposal; ASR supplies a separate content-recovery
+cross-check. Downstream identity checks (verification, attribution) only trust a turn's [start, end]
+window when its word_match clears
 ALIGN_MIN_TURN_WORD_MATCH, and only trust the hearing at all when the overall matched fraction
 clears ALIGN_MIN_HEARING_WORD_MATCH -- both constants live in audio_rules.py, never here.
 
@@ -24,9 +26,12 @@ Method
    ASR indices never regress across turns and turn windows cannot overlap.  (Sole caveat: a single
    ASR "word" that normalizes to multiple tokens spanning a turn boundary can make two adjacent
    turns share that word's timestamps; synthetic and CHRG-scale inputs do not exhibit this.)
-3. Per turn: [start, end] = the start of the first and the end of the last MATCHED ASR word inside
-   the turn's token span (None/None when nothing matched); word_match = exactly-matched token
-   fraction of the turn's tokens; usable = word_match >= ALIGN_MIN_TURN_WORD_MATCH.
+3. Preferred path: Aeneas fragment [begin, end] values become the boundaries only when fragment
+   count, normalized text, finite timestamps, and monotonic non-overlap all validate exactly.
+   The independently aligned ASR stream supplies word_match. Any Aeneas structural mismatch fails
+   the entire hearing closed; ASR never silently substitutes its own boundaries on that path.
+4. Fallback/test path without a sync map: [start, end] = the first/last matched ASR word inside the
+   turn's token span. word_match = exactly-matched token fraction of the turn's tokens.
    Hearing level: hearing_word_match = matched fraction over all turn tokens; hearing_usable =
    hearing_word_match >= ALIGN_MIN_HEARING_WORD_MATCH.
 
@@ -35,14 +40,13 @@ model directory with greedy decoding pinned (temperature=0.0, beam_size=1, best_
 reproducible.  It hard-refuses (BackendRefused) when the directory is missing or incomplete and
 never downloads weights -- model acquisition is a separate, user-approved step.
 
-Fallback aligner (documented, never imported): aeneas, a forced aligner tested as the backup when
-whisper word timestamps are unavailable.  It is invoked EXTERNALLY as a subprocess per house
-convention with explicit --espeak and --ffmpeg executable paths (no PATH discovery, no Python
-import of aeneas anywhere in the identity layer); its fragment JSON is converted to the same
-asr_words = [{"word", "start", "end"}] shape before align_turns() sees it.
+Aeneas is invoked EXTERNALLY with a pinned local toolchain; this module never imports it or permits
+runtime downloads. Its standard fragment JSON is ingested directly by align_turns_aeneas().
 """
 from __future__ import annotations
 
+import hashlib
+import math
 import os
 import re
 
@@ -162,6 +166,83 @@ def align_turns(turn_texts, asr_words):
     }
 
 
+def align_turns_aeneas(turn_texts, syncmap, asr_words):
+    """Use Aeneas fragments as boundaries and local ASR only as a word-recovery cross-check.
+
+    ``syncmap`` is the standard Aeneas JSON object with ``fragments`` containing ``begin``, ``end``,
+    and ``lines``. Fragment count and normalized text must match the transcript turns exactly.
+    Any malformed, regressing, overlapping, or mismatched fragment fails the whole hearing closed.
+    """
+    crosscheck = align_turns(turn_texts, asr_words)
+    errors = []
+    fragments = syncmap.get("fragments") if isinstance(syncmap, dict) else None
+    if not isinstance(fragments, list):
+        errors.append("aeneas fragments must be a list")
+        fragments = []
+    if len(fragments) != len(turn_texts):
+        errors.append("aeneas fragment count %d != turn count %d" %
+                      (len(fragments), len(turn_texts)))
+
+    boundaries = []
+    previous_end = None
+    for index, turn_text in enumerate(turn_texts):
+        if index >= len(fragments) or not isinstance(fragments[index], dict):
+            boundaries.append((None, None))
+            if index < len(fragments):
+                errors.append("aeneas fragment %d is not an object" % index)
+            continue
+        fragment = fragments[index]
+        lines = fragment.get("lines")
+        if isinstance(lines, list):
+            fragment_text = " ".join(str(line) for line in lines)
+        else:
+            fragment_text = str(lines or "")
+        if normalize_tokens(fragment_text) != normalize_tokens(turn_text):
+            errors.append("aeneas fragment %d text does not match transcript turn" % index)
+        try:
+            begin = float(fragment.get("begin"))
+            end = float(fragment.get("end"))
+        except (TypeError, ValueError):
+            errors.append("aeneas fragment %d has non-numeric timestamps" % index)
+            boundaries.append((None, None))
+            continue
+        if not (math.isfinite(begin) and math.isfinite(end) and 0.0 <= begin <= end):
+            errors.append("aeneas fragment %d has invalid timestamps" % index)
+        if previous_end is not None and begin < previous_end:
+            errors.append("aeneas fragment %d overlaps or regresses" % index)
+        previous_end = end
+        boundaries.append((begin, end))
+
+    if errors:
+        records = []
+        for index, turn in enumerate(crosscheck["turns"]):
+            records.append({
+                "turn_index": index,
+                "start": None,
+                "end": None,
+                "word_match": turn["word_match"],
+                "usable": False,
+            })
+    else:
+        records = []
+        for index, (turn, boundary) in enumerate(zip(crosscheck["turns"], boundaries)):
+            records.append({
+                "turn_index": index,
+                "start": boundary[0],
+                "end": boundary[1],
+                "word_match": turn["word_match"],
+                "usable": turn["usable"],
+            })
+    return {
+        "turns": records,
+        "hearing_word_match": crosscheck["hearing_word_match"],
+        "hearing_usable": crosscheck["hearing_usable"] and not errors,
+        "boundary_source": "aeneas_mfcc_dtw",
+        "crosscheck_source": "local_asr_word_match",
+        "validation_errors": errors,
+    }
+
+
 def asr_words_from_whisper(wav_path, model_dir):
     """Word-timestamped ASR via faster-whisper from an explicit LOCAL model directory.
 
@@ -198,7 +279,15 @@ def asr_words_from_whisper(wav_path, model_dir):
     return words
 
 
-def main():
+def _sha256_file(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def main(argv=None):
     import argparse
     import json
 
@@ -208,9 +297,12 @@ def main():
                         help="JSON file: ordered list of turn text strings")
     parser.add_argument("--asr-json", required=True,
                         help="JSON file: list of {word,start,end} from a local ASR pass")
+    parser.add_argument("--aeneas-json",
+                        help="optional standard Aeneas sync-map JSON; when present its fragments "
+                             "are the only boundary source and ASR is an independent cross-check")
     parser.add_argument("--out", required=True,
                         help="explicit output path; must end in .json.candidate")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if not args.out.endswith(".json.candidate"):
         print("REFUSE: --out must end in .json.candidate (research artifact, consumed by nothing)")
         raise SystemExit(2)
@@ -218,13 +310,25 @@ def main():
         turn_texts = json.load(handle)
     with open(args.asr_json, encoding="utf-8-sig") as handle:
         asr_words = json.load(handle)
-    result = align_turns(turn_texts, asr_words)
+    if args.aeneas_json:
+        with open(args.aeneas_json, encoding="utf-8-sig") as handle:
+            syncmap = json.load(handle)
+        result = align_turns_aeneas(turn_texts, syncmap, asr_words)
+        alignment_method = "aeneas_mfcc_dtw_with_local_asr_crosscheck"
+        aeneas_sha256 = _sha256_file(args.aeneas_json)
+    else:
+        result = align_turns(turn_texts, asr_words)
+        alignment_method = "local_asr_monotonic_fallback"
+        aeneas_sha256 = None
     artifact = {
         "schema": "b5-audio-align-v1",
         "status": "RESEARCH_CANDIDATE_NOT_CONSUMED",
+        "alignment_method": alignment_method,
+        "aeneas_syncmap_sha256": aeneas_sha256,
         "turns": result["turns"],
         "hearing_word_match": result["hearing_word_match"],
         "hearing_usable": result["hearing_usable"],
+        "validation_errors": result.get("validation_errors", []),
         "thresholds": {
             "align_min_turn_word_match": ALIGN_MIN_TURN_WORD_MATCH,
             "align_min_hearing_word_match": ALIGN_MIN_HEARING_WORD_MATCH,

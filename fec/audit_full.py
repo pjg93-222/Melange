@@ -4,7 +4,11 @@ Consolidates the integrity (22) + frontier (11) audits and adds correctness chec
 new modules: money-response, electoral plays, co-sponsor routes, LT-priming, stance, determinism."""
 import json,sys,os,subprocess,re,collections,importlib.util
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=MB_ROOT; FE=B+r'\fec'
+B=MB_ROOT
+# Data may come from MONEYBALL_ROOT, but code must come from the checkout being audited.
+# This keeps linked-worktree validation honest instead of silently executing the root branch.
+FE=_o.path.dirname(_o.path.abspath(__file__))
+DATA_FE=_o.path.join(B, 'fec')
 P,F=[],[]
 def ck(name,cond,detail=''):
     (P if cond else F).append(name); print(('  OK   ' if cond else 'FAIL  ')+name+((' :: '+detail) if (detail and not cond) else ''))
@@ -279,7 +283,8 @@ if os.path.exists(_rc_p):
         ck('cooperation and low-antagonism A remain separately sourced (zero substitutions)',
            _co_bad==0, '%d cooperation_v2 values substituted/mismatched'%_co_bad)
         _con={d['member']:d for d in json.load(open(B+r'\congestion.json',encoding='utf-8'))}
-        _g={d.get('full_name'):d.get('gender') for d in _csv.DictReader(open(FE+r'\legislators.csv',encoding='utf-8-sig'))}
+        _g={d.get('full_name'):d.get('gender') for d in
+            _csv.DictReader(open(_o.path.join(DATA_FE, 'legislators.csv'),encoding='utf-8-sig'))}
         _rows=[]
         for _m in set(_cvm)&set(_avm)&set(_con):
             _x=(_cvm.get(_m) or {}).get('cooperation_v2_z')
@@ -797,6 +802,7 @@ else:
 print('\n[AUDIO-ID] Speaker-identity layer candidates (research-only)')
 import glob as _gid
 _idb=B+r'\b5_audio_enroll_bank.json.candidate'
+_idt=B+r'\b5_audio_identity_thresholds.json.candidate'
 _ida=sorted(_gid.glob(B+r'\b5_audio_attrib_*.json.candidate'))
 # Main per-corpus verdict artifacts = everything that is not a rejects/mismatch ledger (suffix
 # rule, not a corpus whitelist, so a new corpus can never silently escape the pairing check).
@@ -805,7 +811,15 @@ if os.path.exists(_idb) or _ida:
     _idbad=[]
     if os.path.exists(_idb):
         _idd=json.load(open(_idb,encoding='utf-8'))
-        if _idd.get('schema')!='b5-audio-enroll-bank-v1' or _idd.get('status')!='RESEARCH_CANDIDATE_NOT_CONSUMED':
+        _idbank_ok=(_idd.get('schema')=='b5-audio-enroll-bank-v1' and
+                    _idd.get('status')=='RESEARCH_CANDIDATE_NOT_CONSUMED' and
+                    isinstance(_idd.get('theta_enroll'),(int,float)) and
+                    len(str(_idd.get('thresholds_sha256') or ''))==64)
+        if os.path.exists(_idt):
+            import hashlib as _idh
+            _hh=_idh.sha256(open(_idt,'rb').read()).hexdigest()
+            _idbank_ok=(_idbank_ok and _idd.get('thresholds_sha256')==_hh)
+        if not _idbank_ok:
             _idbad.append(os.path.basename(_idb))
     for _f in _ida:
         _idd=json.load(open(_f,encoding='utf-8'))
@@ -826,14 +840,21 @@ if os.path.exists(_idb) or _ida:
        not _idrefs, str(_idrefs))
 else:
     print('  SKIP  identity enroll-bank/attribution candidates absent (layer not yet run)')
-_idt=B+r'\b5_audio_identity_thresholds.json.candidate'
 if os.path.exists(_idt):
     _idd=json.load(open(_idt,encoding='utf-8'))
     _th=_idd.get('theta_accept')
-    ck('identity thresholds calibrated (schema, 0<theta_accept<1, EER recorded)',
-       _idd.get('schema')=='b5-audio-identity-thresholds-v1' and isinstance(_th,(int,float)) and 0<_th<1
-       and isinstance(_idd.get('eer'),(int,float)),
-       'theta_accept=%s eer=%s'%(_idd.get('theta_accept'),_idd.get('eer')))
+    _te=_idd.get('theta_eer'); _tr=_idd.get('eer_rate')
+    ck('identity thresholds calibrated (passing status, score/rate distinction, stop bars)',
+       _idd.get('schema')=='b5-audio-identity-thresholds-v1' and
+       _idd.get('status')=='CALIBRATION_PASS' and
+       isinstance(_th,(int,float)) and isinstance(_te,(int,float)) and
+       -1<=_te<=_th<=1 and isinstance(_idd.get('theta_enroll'),(int,float)) and
+       -1<=_idd.get('theta_enroll')<=1 and isinstance(_tr,(int,float)) and 0<=_tr<=.05 and
+       _idd.get('caption_mismatch_n',0)>=148 and
+       _idd.get('caption_mismatch_rejection_rate',0)>=.99 and
+       (_idd.get('sex_parity') or {}).get('threshold_was_retuned_for_parity') is False,
+       'theta_accept=%s theta_eer=%s eer_rate=%s caption=%s/%s'%(
+       _th,_te,_tr,_idd.get('caption_mismatch_n'),_idd.get('caption_mismatch_rejection_rate')))
 else:
     print('  SKIP  identity thresholds candidate absent (calibration not yet run)')
 if _ida_main:

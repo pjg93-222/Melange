@@ -140,14 +140,21 @@ def test_witness_member_collision_excludes_and_outranks_overlap():
     verdict = ATTRIB.attribute_unit(unit)
     assert verdict["status"] == "EXCLUDED", verdict
     assert verdict["reason_code"] == "witness_member_collision", verdict
-    # a witness turn NOT matching any enrolled member is only a plain witness turn -> the other
-    # gates decide (here everything else passes, but a witness turn can never be ELIGIBLE for a
-    # member because check_t must then be the witness, not a member -- model as no identity)
+    # A witness only poisons the hearing when the acoustic verifier ACCEPTS a member match.
+    rejected_match = make_unit(
+        witness_turn=True,
+        acoustic={"decision": "REJECT", "min_cosine": 0.21, "margin": 0.02, "coverage": 0.95},
+    )
+    verdict = ATTRIB.attribute_unit(rejected_match)
+    assert verdict["status"] == "EXCLUDED", verdict
+    assert verdict["reason_code"] == "nonmember_witness", verdict
+    # A witness turn never becomes member-eligible, even if malformed upstream fields still name
+    # a member. It is excluded locally without poisoning the whole hearing unless CHECK-A accepts.
     plain_witness = make_unit(witness_turn=True, acoustic_member=None, acoustic=None,
-                              check_t_member=None, enrolled=False)
+                              check_t_member="WITNESS Jane Doe", enrolled=False)
     verdict = ATTRIB.attribute_unit(plain_witness)
     assert verdict["status"] == "EXCLUDED", verdict
-    assert verdict["reason_code"] != "witness_member_collision", verdict
+    assert verdict["reason_code"] == "nonmember_witness", verdict
 
 
 # ---------------------------------------------------------------- whole-hearing exclusion

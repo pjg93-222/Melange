@@ -10,7 +10,7 @@ code.  Verification, never identification: an acoustic REJECT (or an ACCEPT agai
 enrollment) excludes the unit and appends it to the mismatch ledger for human review -- the unit is
 never reassigned to a better-matching member.
 
-A witness turn whose voice matches an enrolled member poisons the WHOLE hearing (the diarization/
+A witness turn whose voice is ACCEPTED as an enrolled member poisons the WHOLE hearing (the diarization/
 alignment for that event can no longer be trusted), so ``hearing_excluded`` and ``attribute_units``
 propagate that exclusion across every unit sharing the hearing.
 
@@ -75,9 +75,15 @@ def attribute_unit(unit):
     Precedence (most poisonous first): witness-member collision, overlap/dash-interrupt,
     missing transcript identity, missing enrollment, then the acoustic decision.
     """
-    if unit.get("witness_turn") and unit.get("acoustic_member"):
+    acoustic = unit.get("acoustic")
+    if (unit.get("witness_turn") and unit.get("acoustic_member")
+            and acoustic and acoustic.get("decision") == "ACCEPT"):
         # A witness voice matching an enrolled member: the event's speaker labels are suspect.
         return _verdict(unit, "EXCLUDED", "witness_member_collision")
+    if unit.get("witness_turn"):
+        # Witnesses are explicit nonmembers for this measurement. A rejected/indeterminate
+        # comparison is not a collision and must not poison otherwise valid member turns.
+        return _verdict(unit, "EXCLUDED", "nonmember_witness")
     if unit.get("dash_interrupt") or unit.get("overlap"):
         return _verdict(unit, "EXCLUDED", "overlap_or_interrupt")
     if _no_transcript_identity(unit.get("check_t_member")):
@@ -85,7 +91,6 @@ def attribute_unit(unit):
     if not unit.get("enrolled"):
         return _verdict(unit, "EXCLUDED", "no_enrollment")
 
-    acoustic = unit.get("acoustic")
     if not acoustic:
         return _verdict(unit, "EXCLUDED", "acoustic_indeterminate")
     decision = acoustic.get("decision")
