@@ -229,5 +229,17 @@ ok('only live member questioning survives hearing parser',
    'written question' not in _rows[0][2].lower(),_rows)
 ok('joint package scope is explicit',cr.chrg_scope('CHRG-117jhrg12345')==(117,'joint'))
 
+print('[audio speaker-identity layer: module suites (design 2026-07-16, user-directed)]')
+# Each identity module ships its own plain-assert suite (enroll+verify2, diarize, align, attrib,
+# hearings-media map). They are registered here as subprocesses so the kernel gate covers them
+# without importing optional deps (torch/speechbrain/faster-whisper are absent by design; the
+# suites use the deterministic spectral-test backend and must stay runnable on this box).
+import subprocess as _sp,re as _re
+for _t in ('test_audio_identity','test_audio_diarize','test_audio_align','test_audio_attrib','test_hearings_media'):
+    _r=_sp.run([sys.executable,os.path.join(FEC,'tests',_t+'.py')],capture_output=True,text=True,encoding='utf-8',errors='replace')
+    _m=_re.search(r'(\d+) passed, (\d+) failed',_r.stdout or '')
+    ok('%s suite clean'%_t,_r.returncode==0 and bool(_m) and _m.group(2)=='0' and int(_m.group(1))>0,
+       ((_r.stdout or _r.stderr or '').strip() or 'no output').splitlines()[-1])
+
 print('\nKERNEL TESTS — %d passed, %d FAILED'%(P,F))
 sys.exit(1 if F else 0)

@@ -49,3 +49,6 @@ __pycache__/
 *.log
 fec/lep/
 fec/votesmart_api_key.txt
+
+# hand-curated hearings media map (config, not data)
+!hearings_media_map.csv

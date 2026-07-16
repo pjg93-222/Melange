@@ -790,6 +790,70 @@ if _g:
 else:
     ck('say-do gate block present in category_stance.json', False, 'gate key missing — producer predates 2026-07-07 landing')
 
+# ---- Speaker-identity layer candidates (audio-identity design 2026-07-16, user-directed build) ----
+# Research-only .json.candidate artifacts consumed by NOTHING until user ratification. Every check
+# below SKIPs (informational line, no P/F entry) while its artifact/source is absent, so the live
+# audit is unaffected until the layer actually produces candidates.
+print('\n[AUDIO-ID] Speaker-identity layer candidates (research-only)')
+import glob as _gid
+_idb=B+r'\b5_audio_enroll_bank.json.candidate'
+_ida=sorted(_gid.glob(B+r'\b5_audio_attrib_*.json.candidate'))
+# Main per-corpus verdict artifacts = everything that is not a rejects/mismatch ledger (suffix
+# rule, not a corpus whitelist, so a new corpus can never silently escape the pairing check).
+_ida_main=[f for f in _ida if not os.path.basename(f).endswith('_ledger.json.candidate')]
+if os.path.exists(_idb) or _ida:
+    _idbad=[]
+    if os.path.exists(_idb):
+        _idd=json.load(open(_idb,encoding='utf-8'))
+        if _idd.get('schema')!='b5-audio-enroll-bank-v1' or _idd.get('status')!='RESEARCH_CANDIDATE_NOT_CONSUMED':
+            _idbad.append(os.path.basename(_idb))
+    for _f in _ida:
+        _idd=json.load(open(_f,encoding='utf-8'))
+        _base=os.path.basename(_f)[:-len('.json.candidate')]
+        _want=('b5-audio-attrib-rejects-v1' if _base.endswith('rejects_ledger') else
+               'b5-audio-attrib-mismatch-v1' if _base.endswith('mismatch_ledger') else 'b5-audio-attrib-v1')
+        if _idd.get('schema')!=_want or _idd.get('status')!='RESEARCH_CANDIDATE_NOT_CONSUMED':
+            _idbad.append(os.path.basename(_f))
+    ck('identity candidates schema-tagged + status RESEARCH_CANDIDATE_NOT_CONSUMED', not _idbad,
+       'bad: %s'%_idbad)
+    # No trait/narrative/refresh/receptivity consumer may reference the candidate artifacts.
+    _idrefs=[_fn for _fn in os.listdir(FE)
+             if _fn.endswith('.py') and (_fn.startswith(('b5_traits','big5_traits')) or
+                _fn in ('b5_narratives.py','weekly_refresh.py','receptivity_layer.py'))
+             and any(_s in open(FE+'\\'+_fn,encoding='utf-8',errors='ignore').read()
+                     for _s in ('b5_audio_enroll_bank','b5_audio_attrib_'))]
+    ck('no engine/display consumer references identity candidates (traits/narratives/weekly/receptivity)',
+       not _idrefs, str(_idrefs))
+else:
+    print('  SKIP  identity enroll-bank/attribution candidates absent (layer not yet run)')
+_idt=B+r'\b5_audio_identity_thresholds.json.candidate'
+if os.path.exists(_idt):
+    _idd=json.load(open(_idt,encoding='utf-8'))
+    _th=_idd.get('theta_accept')
+    ck('identity thresholds calibrated (schema, 0<theta_accept<1, EER recorded)',
+       _idd.get('schema')=='b5-audio-identity-thresholds-v1' and isinstance(_th,(int,float)) and 0<_th<1
+       and isinstance(_idd.get('eer'),(int,float)),
+       'theta_accept=%s eer=%s'%(_idd.get('theta_accept'),_idd.get('eer')))
+else:
+    print('  SKIP  identity thresholds candidate absent (calibration not yet run)')
+if _ida_main:
+    _idmiss=[os.path.basename(_f) for _f in _ida_main
+             if not os.path.exists(os.path.join(os.path.dirname(_f),
+                os.path.basename(_f)[:-len('.json.candidate')].rsplit('_',1)[0]+'_rejects_ledger.json.candidate'))]
+    ck('every attribution candidate ships its rejects ledger beside it', not _idmiss,
+       'missing ledger for: %s'%_idmiss)
+else:
+    print('  SKIP  no per-corpus attribution candidates (rejects-ledger pairing not applicable)')
+_idsrc=FE+r'\b5_audio_attrib.py'
+if os.path.exists(_idsrc):
+    _badw=[_ln for _ln,_line in enumerate(open(_idsrc,encoding='utf-8',errors='ignore').read().splitlines(),1)
+           if ('b5_audio_reviews_v2.json' in _line or 'b5_audio_descriptors_v2.json' in _line)
+           and ('dump_atomic' in _line or 'open(' in _line)]
+    ck('attribution module has no write reference to live review/descriptor artifacts', not _badw,
+       'lines %s'%_badw)
+else:
+    print('  SKIP  b5_audio_attrib.py absent (identity layer not yet merged)')
+
 print('FULL-BODY AUDIT — %d passed, %d FAILED'%(len(P),len(F)))
 if F:
     print('  FAILURES:',F)
