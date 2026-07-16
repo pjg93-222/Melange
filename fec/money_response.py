@@ -3,12 +3,16 @@ import moneyball_core as MC
 """Money-response + defection mechanic (roadmap step 2).
 A donation shifts a member's money lean with diminishing returns, scaled by how movable they are
 (small relative to big fundraising = small move). Big enough competitor shock can trigger a defection."""
-import json, sys, os, openpyxl
+import json, sys, os
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}
-ra=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)['Rank & Allocation']
-OV={ra.cell(r,1).value:ra.cell(r,7).value for r in range(3,536) if ra.cell(r,1).value}
+# Python owns the stance authority.  Rank & Allocation col G is only a synchronized display and can
+# be stale while Excel is open, so scenario engines derive the exact same overall tier directly from
+# category_stance.json instead of consuming the workbook view.
+CS=json.load(open(B+r'\category_stance.json',encoding='utf-8'))
+_OVERALL_CAPS=(CS.get('gate') or {}).get('overall_capped') or {}
+OV={m:MC.overall_tier(cm,m,_OVERALL_CAPS) for m,cm in (CS.get('matrix') or {}).items()}
 # --- dials ---
 MAXSHIFT=float(os.environ.get('MAXSHIFT','18'))   # CALIBRATED 40->18: money moves POSITIONS little (buys access/effort, not votes — Ansolabehere; Fowler-Garro-Spenkuch null vote-buying); defections now rare/niche
 HALF=float(os.environ.get('HALF','0.10'))         # donation = HALF*receipts -> half of MAXSHIFT (diminishing-returns scale)

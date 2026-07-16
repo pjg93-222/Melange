@@ -6,12 +6,14 @@ audio-identity design 2026-07-16 (user-directed build). No pilot below (P1 onwar
 "look" and no bar may be judged until this document is locked. It **must not be locked** until all
 three of the following happen, in order:
 
-1. **The user approves the one-time model downloads.** No network access, no model download, and
-   no LLM call exists anywhere in the identity code path today; the real embedding backends and whisper
-   aligner hard-refuse (`BackendRefused`) without a complete LOCAL model directory. The three
-   downloads awaiting approval, with sources and approximate sizes:
-   - **facebook/wav2vec2-base** (the exact 768-dimensional embedding family used by Mestre and
-     Ryan for speaker classification) — Hugging Face `facebook/wav2vec2-base`, approx. 360 MB.
+1. **The user approves any one-time model downloads and ratifies locally discovered weights.**
+   No network access, model download, or LLM call occurred during this implementation. The real
+   embedding backends and whisper aligner hard-refuse (`BackendRefused`) without a complete LOCAL
+   model directory. A previously present **facebook/wav2vec2-base** snapshot (the exact
+   768-dimensional embedding family used by Mestre and Ryan for speaker classification) was
+   discovered locally and hash-pinned in `b5_audio_wav2vec2_model_manifest.json.candidate`;
+   production ratification remains open. The downloads still awaiting approval, with sources and
+   approximate sizes:
    - **silero-vad** (voice-activity model, replaces the interim RMS gate in the diarizer) —
      GitHub `snakers4/silero-vad` (JIT export), approx. 2 MB.
    - **faster-whisper small** (CTranslate2 Whisper for word-level timestamps) — Hugging Face
@@ -102,8 +104,8 @@ Do not add a lock line to this file until all three are satisfied and the user s
   (additive exclusion gate — the fail-closed default in force)**.
 - **D2** — Venue amendment: whether the audio v2 contract's `on_air_interview`-only venue
   restriction is amended to admit identity-verified floor/HouseLive/hearing units.
-- **D3** — Approval of the three one-time model downloads (names/sources/sizes above) and the
-  SHA-256 pinning that follows.
+- **D3** — Ratification of the already local, SHA-pinned Wav2Vec2 snapshot and approval of the
+  remaining one-time model/tool downloads (names/sources/sizes above) plus SHA-256 pinning.
 - **D4** — Enrollment evidence standard: which identity_evidence classes qualify (chyron regex,
   roll-call, human reviewer) and who ratifies each member's bank entry (the bank's `ratified`
   field stays empty until then).
@@ -126,7 +128,7 @@ Do not add a lock line to this file until all three are satisfied and the user s
 - **D12** — WJ scope: whether the P5 smoke expands into a scored WJ corpus or remains a recorded
   smoke only.
 
-## Module inventory (built 2026-07-16, TDD; all suites pass without torch/transformers/speechbrain/faster-whisper)
+## Module inventory (built 2026-07-16, TDD; no network or external model service)
 
 - `fec/b5_audio_embed.py` — embedding backend contract (`get_backend(name, model_dir,
   model_manifest)`, `cosine`, `BackendRefused`; `spectral-test` deterministic test backend;
@@ -134,7 +136,8 @@ Do not add a lock line to this file until all three are satisfied and the user s
   without a complete hash-pinned local model directory).
 - `fec/b5_audio_calibrate.py` — deterministic labeled-score DET/EER calibration; separates
   `theta_eer` from `eer_rate`, applies the 148-negative/99% and per-corpus 5% bars, reports
-  sex-parity diagnostics without retuning, and writes the only thresholds artifact consumers use.
+  sex-parity diagnostics without retuning, records score kind and label provenance, and writes
+  the only thresholds artifact consumers use. Machine-label calibration is always non-consumable.
 - `fec/b5_audio_enroll.py` — enrollment bank builder (floors + leave-one-out gate) ->
   `b5_audio_enroll_bank.json.candidate` (schema `b5-audio-enroll-bank-v1`).
 - `fec/b5_audio_verify2.py` — verification-only decisions (ACCEPT/REJECT/INDETERMINATE, margin,
@@ -149,12 +152,19 @@ Do not add a lock line to this file until all three are satisfied and the user s
 - `fec/b5_audio_attrib.py` — dual-check attribution verdicts (check T + check A must agree;
   fail-closed precedence) -> `b5_audio_attrib_<corpus>.json.candidate` + rejects/mismatch ledgers;
   runtime + source guards against the protected live artifacts.
+- `fec/b5_audio_linear_head.py` + `fec/b5_audio_linear_pilot.py` — deterministic,
+  source-disjoint multinomial-logistic Wav2Vec candidate and weak-label pilot; claim-only
+  probabilities, never identification.
+- `fec/b5_audio_neural_head.py` + `fec/b5_audio_neural_pilot.py` — the article's exact
+  single-linear-layer/Adam/cross-entropy/batch-8/early-stop-3 candidate and a fresh-member,
+  six-source split pilot; claim-only probabilities, never identification.
 - `fec/fetch_hearings_media.py` + `hearings_media_map.csv` (worktree root) — hearings media
   acquisition, fail-closed: the shipped map holds placeholder rows only (empty video_url), rows
   must be hand-curated by the user, packages are verified against the hearings db, `--dry-run` is
   the default, and real fetching requires the explicit `--fetch` flag (user-gated; verified
   packages only; yt-dlp download-archive plus `--no-overwrites` prevents replacement).
-- Tests: `fec/tests/test_audio_calibrate.py` (5), `fec/tests/test_audio_identity.py` (23),
+- Tests: `fec/tests/test_audio_calibrate.py` (7), `fec/tests/test_audio_identity.py` (26),
+  `fec/tests/test_audio_linear_head.py` (9), `fec/tests/test_audio_neural_head.py` (6),
   `fec/tests/test_audio_diarize.py` (5),
   `fec/tests/test_audio_align.py` (8), `fec/tests/test_audio_attrib.py` (17),
   `fec/tests/test_hearings_media.py` (5) — all registered in `fec/tests/run_tests.py`; audit
@@ -162,12 +172,33 @@ Do not add a lock line to this file until all three are satisfied and the user s
 
 ## Open items
 
-- The real **P1 labeled-trial artifact is not yet assembled**. The calibration producer exists,
-  but it may not see the 148 negatives or any real embedding score until this document is locked
-  with the input fingerprint manifest.
+- The formal **P1 human-ratified labeled-trial artifact is not assembled**. The pre-lock
+  weak-label laboratory addendum below is not P1, did not use the required 148 negatives, did
+  not create a consumable threshold, and does not relax the fingerprint/lock requirement.
 - silero-VAD swap-in for the diarizer's interim RMS gate is documented behind the same
   `(samples, sr) -> bool-mask` interface; blocked on D3.
 - The Aeneas sync-map adapter is wired and tested, but the local Aeneas/eSpeak toolchain is not yet
   version/hash-pinned and no real sync map has been generated. That toolchain pin plus the
   preregistered human boundary-validation pilot remain mandatory before scoring.
 - Input fingerprint manifest: to be inserted at a quiescent moment (pre-lock requirement 2).
+
+## Pre-lock weak-label laboratory addendum (2026-07-16; NOT P1, NOT CONSUMABLE)
+
+The user's instruction to experiment authorized a method audit, not a preregistration lock or
+production promotion. Two source-disjoint candidates were therefore run with
+`label_provenance: MACHINE_CAPTION_HARD_SIGNAL`; calibration enforces
+`human_ratified_labels: false`, and both artifacts have `production_consumers: 0`.
+
+- A 30-member multinomial-logistic head produced calibration EER .317 and held-out
+  all-windows genuine acceptance .100 (impostor rejection 1.000). It had 12
+  caption-mismatch negatives, below the required 148.
+- An exact-method fresh-cohort head excluded those 30 members and used 21 new members with six
+  distinct sources each. Raw 768-dimensional mean-pooled Wav2Vec representations fed one linear
+  layer trained with Adam .001, cross-entropy, batch 8, and early-stopping patience 3.
+  Calibration EER was .226; held-out all-windows genuine acceptance was .095 and impostor
+  rejection .998. With zero caption-mismatch negatives, its held-out diagnostic used
+  calibration `theta_eer`, explicitly research-only; no `theta_accept` was available.
+
+Both results are `FAILED_WEAK_LABEL_SMOKE`. The test partitions are consumed and may not be
+tuned against. Formal P1 remains blocked on human ratification, the complete 148-negative set,
+quiescent fingerprints, document lock, and the standing user decisions.

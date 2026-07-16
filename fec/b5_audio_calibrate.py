@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """Deterministic threshold calibration for the research-only speaker identity layer.
 
-This module consumes pre-computed, labeled cosine trials. It does not load audio, models, or
-network resources, so building and testing it does not consume the draft preregistration's real
-calibration look. The real trial artifact remains user-gated and SHA-pinned before use.
+This module consumes pre-computed, labeled similarity trials. It supports either cosine scores
+from the enrollment-centroid verifier or claimed-class probabilities from the paper-faithful
+linear-head candidate. It does not load audio, models, or network resources, so building and
+testing it does not consume the draft preregistration's real calibration look. The real trial
+artifact remains user-gated and SHA-pinned before use.
 
 The important distinction is explicit:
 
@@ -29,6 +31,11 @@ SCHEMA = "b5-audio-identity-thresholds-v1"
 TRIALS_SCHEMA = "b5-audio-identity-trials-v1"
 STATUS_PASS = "CALIBRATION_PASS"
 STATUS_MISS = "CALIBRATION_STOP_BAR_MISS"
+STATUS_WEAK_LABEL = "CALIBRATION_WEAK_LABEL_SMOKE"
+HUMAN_LABEL_PROVENANCE = "HUMAN_RATIFIED"
+SCORE_COSINE = "cosine"
+SCORE_CLAIM_PROBABILITY = "claimed_class_probability"
+SCORE_KINDS = (SCORE_COSINE, SCORE_CLAIM_PROBABILITY)
 MAX_EER_RATE = 0.05
 MIN_CAPTION_MISMATCH_N = 148
 MIN_CAPTION_MISMATCH_REJECTION = 0.99
@@ -42,7 +49,9 @@ def sha256_file(path):
     return digest.hexdigest()
 
 
-def _validated_trials(rows):
+def _validated_trials(rows, score_kind):
+    if score_kind not in SCORE_KINDS:
+        raise ValueError("score_kind must be one of %r" % (SCORE_KINDS,))
     if not isinstance(rows, list) or not rows:
         raise ValueError("trials must be a non-empty list")
     seen = set()
@@ -65,9 +74,10 @@ def _validated_trials(rows):
             score = float(raw.get("score"))
         except (TypeError, ValueError):
             raise ValueError("trial %s score is not numeric" % trial_id)
-        if not math.isfinite(score) or not -1.0 <= score <= 1.0:
-            raise ValueError("trial %s score %.6r is outside cosine range [-1,1]" %
-                             (trial_id, score))
+        low = -1.0 if score_kind == SCORE_COSINE else 0.0
+        if not math.isfinite(score) or not low <= score <= 1.0:
+            raise ValueError("trial %s score %.6r is outside %s range [%.0f,1]" %
+                             (trial_id, score, score_kind, low))
         caption_mismatch = bool(raw.get("caption_mismatch"))
         if caption_mismatch and label != "impostor":
             raise ValueError("trial %s caption_mismatch must be an impostor" % trial_id)
@@ -148,11 +158,15 @@ def _sex_parity(rows, threshold):
     }
 
 
-def calibrate(rows, source_sha256):
-    """Return the complete deterministic thresholds artifact from labeled cosine trials."""
+def calibrate(rows, source_sha256, label_provenance, score_kind=SCORE_COSINE):
+    """Return the complete deterministic thresholds artifact from labeled similarity trials."""
     if not isinstance(source_sha256, str) or len(source_sha256) != 64:
         raise ValueError("source_sha256 must be a 64-character SHA-256")
-    trials = _validated_trials(rows)
+    label_provenance = str(label_provenance or "").strip()
+    if not label_provenance:
+        raise ValueError("label_provenance is required")
+    score_kind = str(score_kind or "").strip()
+    trials = _validated_trials(rows, score_kind)
     by_corpus = defaultdict(list)
     for row in trials:
         by_corpus[row["corpus"]].append(row)
@@ -183,10 +197,20 @@ def calibrate(rows, source_sha256):
         "caption_mismatch_n_gte_148": len(caption) >= MIN_CAPTION_MISMATCH_N,
         "caption_mismatch_rejection_gte_0_99":
             caption_rejection_rate >= MIN_CAPTION_MISMATCH_REJECTION,
+        "human_ratified_labels": label_provenance == HUMAN_LABEL_PROVENANCE,
     }
-    status = STATUS_PASS if all(bars.values()) else STATUS_MISS
+    measurement_bars = [value for key, value in bars.items()
+                        if key != "human_ratified_labels"]
+    if not all(measurement_bars):
+        status = STATUS_MISS
+    elif bars["human_ratified_labels"]:
+        status = STATUS_PASS
+    else:
+        status = STATUS_WEAK_LABEL
     return {
         "schema": SCHEMA, "status": status,
+        "score_kind": score_kind,
+        "label_provenance": label_provenance,
         "theta_accept": theta_accept,
         "theta_enroll": theta_accept,
         "theta_eer": theta_eer,
@@ -199,7 +223,7 @@ def calibrate(rows, source_sha256):
         "sex_parity": _sex_parity(trials, theta_accept),
         "bars": bars,
         "calibration": {
-            "method": "deterministic labeled cosine DET/EER calibration",
+            "method": "deterministic labeled %s DET/EER calibration" % score_kind,
             "accept_rule": "score >= theta_accept",
             "theta_accept_selection":
                 "lowest candidate >= max corpus theta_eer that rejects >=99% caption mismatches",
@@ -231,7 +255,12 @@ def main(argv=None):
     if (source.get("schema") != TRIALS_SCHEMA or
             source.get("status") != "RESEARCH_CANDIDATE_NOT_CONSUMED"):
         raise SystemExit("REFUSED: trials artifact schema/status mismatch")
-    doc = calibrate(source.get("trials"), sha256_file(args.trials))
+    doc = calibrate(
+        source.get("trials"),
+        sha256_file(args.trials),
+        source.get("label_provenance"),
+        source.get("score_kind") or SCORE_COSINE,
+    )
     from moneyball_core import dump_atomic
     dump_atomic(doc, args.out, sort_keys=True, indent=1)
     print("audio identity calibration: %s | max EER %.4f | caption reject %.4f" %

@@ -55,7 +55,8 @@ def good_trials():
 
 
 def test_calibration_separates_eer_rate_from_score_threshold():
-    doc = CAL.calibrate(good_trials(), source_sha256="a" * 64)
+    doc = CAL.calibrate(
+        good_trials(), source_sha256="a" * 64, label_provenance="HUMAN_RATIFIED")
     assert doc["schema"] == "b5-audio-identity-thresholds-v1", doc
     assert doc["status"] == "CALIBRATION_PASS", doc
     assert 0 <= doc["eer_rate"] <= 0.05, doc
@@ -75,7 +76,8 @@ def test_overlap_hits_stop_bar_and_is_not_consumable():
                      "score": score, "sex": "M", "caption_mismatch": False})
         rows.append({"trial_id": "i%02d" % i, "corpus": "bad", "label": "impostor",
                      "score": score, "sex": "F", "caption_mismatch": i < 2})
-    doc = CAL.calibrate(rows, source_sha256="b" * 64)
+    doc = CAL.calibrate(
+        rows, source_sha256="b" * 64, label_provenance="HUMAN_RATIFIED")
     assert doc["status"] == "CALIBRATION_STOP_BAR_MISS", doc
     assert doc["eer_rate"] > 0.05 or doc["caption_mismatch_rejection_rate"] < 0.99
     try:
@@ -91,7 +93,8 @@ def test_sex_parity_red_flag_is_reported_without_threshold_retuning():
     # One female genuine sits below the otherwise clean accept threshold. Male FRR remains zero;
     # the raw error-rate ratio is therefore infinite and must be reported as a red flag.
     rows[2]["score"] = 0.50
-    doc = CAL.calibrate(rows, source_sha256="c" * 64)
+    doc = CAL.calibrate(
+        rows, source_sha256="c" * 64, label_provenance="HUMAN_RATIFIED")
     assert doc["status"] == "CALIBRATION_PASS", doc
     assert doc["sex_parity"]["red_flag"] is True, doc["sex_parity"]
     assert doc["sex_parity"]["threshold_was_retuned_for_parity"] is False
@@ -105,6 +108,7 @@ def test_cli_is_deterministic_and_requires_candidate_paths():
             json.dump({
                 "schema": "b5-audio-identity-trials-v1",
                 "status": "RESEARCH_CANDIDATE_NOT_CONSUMED",
+                "label_provenance": "HUMAN_RATIFIED",
                 "trials": good_trials(),
             }, handle)
         out = os.path.join(tmp, "b5_audio_identity_thresholds.json.candidate")
@@ -125,11 +129,61 @@ def test_malformed_trials_fail_closed():
     bad = good_trials()
     bad[0] = dict(bad[0], score=2.0)
     try:
-        CAL.calibrate(bad, source_sha256="d" * 64)
+        CAL.calibrate(
+            bad, source_sha256="d" * 64, label_provenance="HUMAN_RATIFIED")
     except ValueError as exc:
         assert "score" in str(exc)
     else:
         raise AssertionError("out-of-range cosine score was accepted")
+
+
+def test_machine_labeled_trials_can_smoke_but_never_be_consumed():
+    doc = CAL.calibrate(
+        good_trials(),
+        source_sha256="e" * 64,
+        label_provenance="MACHINE_CAPTION_HARD_SIGNAL",
+    )
+    assert doc["status"] == "CALIBRATION_WEAK_LABEL_SMOKE", doc
+    assert doc["bars"]["human_ratified_labels"] is False
+    assert doc["label_provenance"] == "MACHINE_CAPTION_HARD_SIGNAL"
+    try:
+        VERIFY.validate_thresholds_doc(doc, "weak-label smoke")
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("weak machine labels produced consumable thresholds")
+
+
+def test_claim_probability_calibration_is_typed_and_cosine_verifier_refuses_it():
+    doc = CAL.calibrate(
+        good_trials(),
+        source_sha256="f" * 64,
+        label_provenance="HUMAN_RATIFIED",
+        score_kind="claimed_class_probability",
+    )
+    assert doc["status"] == "CALIBRATION_PASS", doc
+    assert doc["score_kind"] == "claimed_class_probability"
+    try:
+        VERIFY.validate_thresholds_doc(doc, "linear-head probability thresholds")
+    except SystemExit as exc:
+        assert exc.code == 2
+        assert "score_kind" in str(exc)
+    else:
+        raise AssertionError("probability thresholds were accepted by the cosine verifier")
+
+    bad = good_trials()
+    bad[0] = dict(bad[0], score=-0.01)
+    try:
+        CAL.calibrate(
+            bad,
+            source_sha256="f" * 64,
+            label_provenance="HUMAN_RATIFIED",
+            score_kind="claimed_class_probability",
+        )
+    except ValueError as exc:
+        assert "score" in str(exc)
+    else:
+        raise AssertionError("negative claimed-class probability was accepted")
 
 
 def main():

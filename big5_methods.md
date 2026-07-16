@@ -1265,3 +1265,55 @@ the hearing closed instead of falling back silently. The local Aeneas/eSpeak too
 human boundary pilot remain user-gated. No model was downloaded, no real thresholds were fit, no
 candidate entered the active review/descriptor artifacts, and no Big Five or influence number
 moved.
+
+## 44. Source-disjoint Wav2Vec identity experiments - negative result, production remains closed (2026-07-16)
+
+The paper-faithful path in section 43 was exercised as a pre-lock, weak-label laboratory study,
+not as P1 and not as evidence licensed for production. A locally present
+`facebook/wav2vec2-base` snapshot was discovered without a network call and pinned in
+`b5_audio_wav2vec2_model_manifest.json.candidate`: config, preprocessor, and model-weight
+SHA-256s are complete, and the backend still runs local-only. The embedding contract was split
+tests-first: `embed_raw` returns the paper's unnormalized 768-dimensional mean-pooled
+representation for a classifier, while `embed` unit-normalizes the same representation for
+cosine verification. Deterministic 20-second chunking bounds memory without changing the
+claim-only decision rule. Calibration now types its score space (`cosine` versus
+`claimed_class_probability`), requires explicit label provenance, and makes every
+machine-labeled artifact non-consumable even if its numeric bars happen to clear.
+
+Three results close the present Wav2Vec route without post-test tuning:
+
+1. Failure archaeology on 30 members found only 11/30 correct top-1 raw-cosine matches and only
+   9/30 passing the identity guard. These scores were never accepted as profile evidence.
+2. A deterministic multinomial logistic head used four hard-signal sources per member, with
+   source-disjoint train/calibration/test partitions and four fixed five-second windows per
+   source. Calibration EER was .317. On untouched sources, segment genuine acceptance was .267
+   and all-windows unit acceptance was .100; segment impostor rejection was .992 and unit
+   impostor rejection was 1.000. Only 12 caption-mismatch negatives were available, far below
+   the 148 bar.
+3. A fresh cohort of 21 members excluded every member in result 1 and used six distinct sources
+   per member (three train, one early-stop validation, one calibration, one untouched test).
+   This run used the article's exact reported classifier recipe: one linear neural layer over
+   raw 768-dimensional Wav2Vec representations, Adam at .001, cross-entropy, batch size 8, and
+   early stopping after three unimproved epochs. Calibration EER was .226. On untouched sources,
+   segment genuine acceptance was .333 and all-windows unit acceptance was .095; segment
+   impostor rejection was .988 and unit impostor rejection was .998. This fresh cohort had zero
+   caption-mismatch negatives, so `theta_accept` was unavailable; its held-out diagnostic used
+   calibration `theta_eer` and labels that threshold research-only.
+
+Both fitted studies have `status: FAILED_WEAK_LABEL_SMOKE`, `human_ratified_labels: false`,
+`calibration_artifact_consumable: false`, and `production_consumers: 0`. Their split, trial,
+threshold, model, and fitted-head hashes are recorded under `outputs/audio_linear_30member/` and
+`outputs/audio_neural_fresh21/`. The convergence of a failed cosine baseline, a failed linear
+head, and a failed exact-method fresh-cohort head rules out an optimizer or one-cohort accident.
+It does not show that the article's random-utterance classification result is wrong; it shows
+that the method does not transfer at the required error rates to this harder
+source/event-disjoint congressional verification contract with sparse, weak machine labels.
+
+No more fitting is permitted on either consumed test split. The production design therefore
+remains: roster-resolved CHECK-T; Aeneas transcript boundaries with an independent ASR
+word-recovery check; trim/VAD/diarization and overlap exclusion; human-ratified multi-event
+enrollment; claim-only CHECK-A as a veto; and the unchanged two-human-review admission gate.
+Topic-conditioned within-speaker F0 is computed only after identity passes. Any future acoustic
+route needs a new preregistration, human-ratified enrollment/calibration clips, all 148
+caption-mismatch negatives, and a speaker-specialized verification comparator; it cannot be
+presented as a continuation that tunes these Wav2Vec test results.

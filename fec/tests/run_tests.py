@@ -236,11 +236,12 @@ ok('joint package scope is explicit',cr.chrg_scope('CHRG-117jhrg12345')==(117,'j
 print('[audio speaker-identity layer: module suites (design 2026-07-16, user-directed)]')
 # Each identity module ships its own plain-assert suite (enroll+verify2, diarize, align, attrib,
 # hearings-media map). They are registered here as subprocesses so the kernel gate covers them
-# without importing optional deps (torch/speechbrain/faster-whisper are absent by design; the
-# suites use the deterministic spectral-test backend and must stay runnable on this box).
+# without loading external model weights or touching the network. The Wav2Vec stream mocks and
+# paper-exact neural-head fixture use local CPU torch; speechbrain/faster-whisper remain unnecessary.
 import subprocess as _sp,re as _re
-for _t in ('test_audio_calibrate','test_audio_identity','test_audio_diarize','test_audio_align',
-           'test_audio_attrib','test_hearings_media'):
+for _t in ('test_audio_calibrate','test_audio_identity','test_audio_linear_head',
+           'test_audio_neural_head',
+           'test_audio_diarize','test_audio_align','test_audio_attrib','test_hearings_media'):
     _r=_sp.run([sys.executable,os.path.join(FEC,'tests',_t+'.py')],capture_output=True,text=True,encoding='utf-8',errors='replace')
     _m=_re.search(r'(\d+) passed, (\d+) failed',_r.stdout or '')
     ok('%s suite clean'%_t,_r.returncode==0 and bool(_m) and _m.group(2)=='0' and int(_m.group(1))>0,

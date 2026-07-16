@@ -26,7 +26,13 @@ sys.path.insert(0, FEC)
 
 from audio_rules import (ENROLL_MIN_CLIPS, ENROLL_MIN_EVENTS, ENROLL_MIN_SEC,
                          IDENTITY_MIN_COVERAGE, IDENTITY_MIN_MARGIN)  # noqa: E402
-from b5_audio_embed import BackendRefused, cosine, get_backend  # noqa: E402
+from b5_audio_embed import (  # noqa: E402
+    BackendRefused,
+    Wav2Vec2Backend,
+    _chunk_bounds,
+    cosine,
+    get_backend,
+)
 import b5_audio_enroll as enroll  # noqa: E402
 import b5_audio_verify2 as verify  # noqa: E402
 
@@ -224,6 +230,73 @@ def test_wav2vec2_backend_refuses_without_model_dir():
         pass
     else:
         raise AssertionError("wav2vec2 without model dir did not raise BackendRefused")
+
+
+def test_wav2vec2_chunk_plan_covers_audio_without_a_tiny_tail():
+    bounds = _chunk_bounds(451, sr=10, chunk_seconds=20.0, min_seconds=1.0)
+    assert bounds == [(0, 200), (200, 400), (400, 451)], bounds
+    merged = _chunk_bounds(405, sr=10, chunk_seconds=20.0, min_seconds=1.0)
+    assert merged == [(0, 200), (200, 405)], merged
+    assert sum(end - start for start, end in merged) == 405
+
+
+def test_wav2vec2_embedding_streams_chunks_and_pools_deterministically():
+    import types
+    import torch
+
+    class FakeExtractor:
+        def __call__(self, samples, sampling_rate, return_tensors):
+            assert sampling_rate == 16000 and return_tensors == "pt"
+            return {"input_values": torch.tensor(samples, dtype=torch.float32).unsqueeze(0)}
+
+    class FakeModel:
+        def __init__(self):
+            self.calls = 0
+
+        def __call__(self, input_values):
+            self.calls += 1
+            mean = input_values.mean(dim=1)
+            energy = input_values.square().mean(dim=1)
+            hidden = torch.stack((mean, energy), dim=1).unsqueeze(1)
+            return types.SimpleNamespace(last_hidden_state=hidden)
+
+    backend = object.__new__(Wav2Vec2Backend)
+    backend._extractor = FakeExtractor()
+    backend._model = FakeModel()
+    samples = np.linspace(-1.0, 1.0, 45 * 16000, dtype=np.float32)
+    first = backend.embed(samples, 16000)
+    assert backend._model.calls == 3
+    backend._model.calls = 0
+    second = backend.embed(samples.copy(), 16000)
+    assert backend._model.calls == 3
+    assert np.allclose(first, second)
+    assert abs(float(np.linalg.norm(first)) - 1.0) < 1e-12
+
+
+def test_wav2vec2_raw_embedding_preserves_the_paper_classifier_input():
+    import types
+    import torch
+
+    class FakeExtractor:
+        def __call__(self, samples, sampling_rate, return_tensors):
+            return {"input_values": torch.tensor(samples, dtype=torch.float32).unsqueeze(0)}
+
+    class FakeModel:
+        def __call__(self, input_values):
+            mean = input_values.mean(dim=1)
+            energy = input_values.square().mean(dim=1)
+            hidden = torch.stack((mean + 2.0, energy + 3.0), dim=1).unsqueeze(1)
+            return types.SimpleNamespace(last_hidden_state=hidden)
+
+    backend = object.__new__(Wav2Vec2Backend)
+    backend._extractor = FakeExtractor()
+    backend._model = FakeModel()
+    samples = np.linspace(-1.0, 1.0, 5 * 16000, dtype=np.float32)
+    raw = backend.embed_raw(samples, 16000)
+    normalized = backend.embed(samples, 16000)
+    assert raw.shape == normalized.shape == (2,)
+    assert not np.isclose(np.linalg.norm(raw), 1.0)
+    assert np.allclose(normalized, raw / np.linalg.norm(raw))
 
 
 def test_real_backends_require_and_verify_complete_hash_manifest():

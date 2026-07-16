@@ -66,6 +66,10 @@ def validate_thresholds_doc(doc, source="<memory>"):
     if doc.get("status") != "CALIBRATION_PASS":
         _refuse("REFUSED: thresholds artifact at %s has non-passing status %r" %
                 (source, doc.get("status")))
+    score_kind = doc.get("score_kind") or "cosine"
+    if score_kind != "cosine":
+        _refuse("REFUSED: thresholds artifact at %s has score_kind %r; the centroid "
+                "verifier requires cosine thresholds" % (source, score_kind))
     for key in ("theta_accept", "theta_enroll", "theta_eer", "eer_rate"):
         if not isinstance(doc.get(key), (int, float)):
             _refuse("REFUSED: thresholds artifact at %s lacks numeric %r" % (source, key))

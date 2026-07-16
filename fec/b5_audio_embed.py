@@ -31,6 +31,8 @@ class BackendRefused(RuntimeError):
 
 
 MODEL_MANIFEST_SCHEMA = "b5-audio-model-manifest-v1"
+WAV2VEC2_CHUNK_SECONDS = 20.0
+WAV2VEC2_MIN_SECONDS = 0.2
 
 
 def _model_hashes(model_dir, skip_path=None):
@@ -94,6 +96,23 @@ def _unit(vector):
     vector = np.asarray(vector, dtype=np.float64)
     norm = float(np.linalg.norm(vector))
     return vector / norm if norm else vector
+
+
+def _chunk_bounds(n_samples, sr, chunk_seconds=WAV2VEC2_CHUNK_SECONDS,
+                  min_seconds=WAV2VEC2_MIN_SECONDS):
+    """Contiguous streaming chunks; merge a tiny tail into the preceding chunk."""
+    n_samples = int(n_samples)
+    sr = int(sr)
+    chunk = int(round(float(chunk_seconds) * sr))
+    minimum = int(round(float(min_seconds) * sr))
+    if n_samples < minimum or sr <= 0 or chunk <= 0:
+        raise BackendRefused("audio segment is shorter than the minimum embedding window")
+    bounds = [(start, min(start + chunk, n_samples))
+              for start in range(0, n_samples, chunk)]
+    if len(bounds) > 1 and bounds[-1][1] - bounds[-1][0] < minimum:
+        bounds[-2] = (bounds[-2][0], bounds[-1][1])
+        bounds.pop()
+    return bounds
 
 
 class SpectralTestBackend:
@@ -226,21 +245,29 @@ class Wav2Vec2Backend:
             self._model.eval()
         return self._extractor, self._model
 
-    def embed(self, samples, sr):
+    def embed_raw(self, samples, sr):
+        """Raw mean-pooled representation used by the paper's trained classification layer."""
         if sr != 16000:
             raise BackendRefused(
                 "wav2vec2: expects 16 kHz mono input; resample upstream via ffmpeg")
         import torch
         extractor, model = self._load()
-        inputs = extractor(
-            np.asarray(samples, dtype=np.float32),
-            sampling_rate=sr,
-            return_tensors="pt",
-        )
-        with torch.no_grad():
-            hidden = model(**inputs).last_hidden_state
-            vector = hidden.mean(dim=1).squeeze(0).cpu().numpy()
-        return _unit(vector)
+        samples = np.asarray(samples, dtype=np.float32).reshape(-1)
+        vectors = []
+        for start, end in _chunk_bounds(samples.size, sr):
+            inputs = extractor(
+                samples[start:end],
+                sampling_rate=sr,
+                return_tensors="pt",
+            )
+            with torch.no_grad():
+                hidden = model(**inputs).last_hidden_state
+                vectors.append(hidden.mean(dim=1).squeeze(0).cpu().numpy())
+        return np.mean(np.asarray(vectors), axis=0)
+
+    def embed(self, samples, sr):
+        """Unit-normalized representation used by cosine enrollment and verification."""
+        return _unit(self.embed_raw(samples, sr))
 
 
 def get_backend(name, model_dir=None, model_manifest=None):
