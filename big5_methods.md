@@ -1125,3 +1125,59 @@ chamber z scores, clips only after combination to `[-3,3]`, and never penalizes 
 The LEP criterion is static through the 118th and is one behavior component, not a direct rank input.
 Corrupted legacy CHRG hearing counts are contractually excluded. The RKH ceremonial-bill criterion
 remains null and is reported as such; it is not used to claim successful validation.
+
+## 41. Two-panel congruence rounds — O criterion-weighting MISS, N variant-parity MISS, C documented (2026-07-16)
+
+Paul's question — E and A clear both expert panels while O/N/C clear one; are the one-panel
+results fundamentally incongruent? — was answered NO on criterion-side evidence, then two
+user-authorized one-look rounds were locked (@66f9772, both adversarially reviewed pre-lock,
+batteries green) and both MISSED, each informatively. The look-free diagnostics live in
+fec/b5_gold_criterion_probes.py: cross-panel agreement stratified by insider rater count shows
+single-rater insider rows are noise (roster-overlap, insider k=1 vs k>=2: O -.05 -> +.49,
+C +.14 -> +.48, E -.04 -> +.59, A +.25 -> +.69, ES +.38 -> +.48); range restriction is
+negligible (SD ratios .86-1.15); a 4,000-draw null simulation puts a random measure's chance of
+clearing both association gates at 1.5-2.1% (<1% with dual dominance). One mechanism carries all
+seven trait-by-panel outcomes: trait observability crossed with rater vantage, plus single-rater
+criterion noise.
+
+The O round (big5_o_panel_reliability_prereg.md, RESULT-OW) evaluated the FROZEN 0.5/0.5
+composite against rater-count-reliability-weighted panels (SB weights, rho1=.25 pinned).
+Weighting lifted the insider association (.192 OOF -> .247, p=.051, dominance holding in BOTH
+panels; academics re-cleared at .525 including dominance) but the gating confound partial
+exposed the substance: weighted partial r(composite, insider gold-O | female, party) = +.028
+(p=.42) versus the academics' +.231 (p=.043). The insider O column's association with our
+composite is gender/party-shared variance, not O-specific signal. MISS; the criterion-weighting
+route is CLOSED under this gold (any rho1, sqrt(k), subsetting, pooling), terminal per the lock.
+
+The N round (big5_n_variant_parity_prereg.md, RESULT-NV) gave N the constrained-variant
+treatment E received: two pre-declared weight-floor variants through the shipped LOO-OOF
+machinery. The selected variant (30% affective-content N / 70% Pink observer N) improved BOTH
+panels over the shipped 10/90 baseline — insiders .374 -> .416 (p=.003, dominant, above even the
+stricter .30 bar), academics .123 -> .147 — but .147 sits under the .20 association gate without
+dominance. MISS; the N-composite variant space over {affective_content_n, pink_observer_n,
+behavioral_reactivity} is FROZEN under this gold, terminal per the lock. Two recorded readings:
+the affective channel carries real insider-visible N signal, and the academic panel cannot read
+N from the public record at gate strength — the observability mechanism, measured twice. A
+firewalled suppression note (academic partial .389 EXCEEDS its raw .147) is recorded in the
+RESULT for any future Paul-initiated criterion round; it grounds nothing.
+
+C gets the documentation path, no round: it has the weakest cross-panel gold agreement of all
+five traits (.155 all-senators / .357 roster-overlap), its insider association is halo-caveated
+(insider heterotrait |r| with gold N .384 and E .317 exceed the own-trait .262), and the academic
+C column is signal-poor at that vantage (within-panel academic C-ES r=.589). Per the ceiling
+arithmetic a both-panel C pass would need a tone-free C measure 2-3x stronger than anything five
+prior methods produced. ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED is the honest terminus; the
+engine's C role remains behaviorally anchored (diligence_z), firewalled from this display
+composite.
+
+Housekeeping recorded with the rounds: (1) provenance — Downloads/Eran.pdf is Amsalem et al.
+2018 (hash-mismatched to the gold pin and containing no senator ratings); the TRUE pinned
+appendix source is Downloads/online_appendix.pdf, SHA-256 verified equal to the §40 pin
+43c98926... (2) A 2026-07-16 session probe computed a VOID look-fragment (a Steiger test pairing
+shipped fitted scores with gold on a 38-senator subset); it was ruled void under the pre-lock
+pairing prohibition, disclosed in both preregs, and none of its numbers are load-bearing
+anywhere. (3) The round-4 N successor's DATA-GATE (MEM_N >= 250) now reads ~270 eligible by the
+turns>=30/non-null-cutoff construction (fec/b5_gold_criterion_probes.py section 6) — a successor
+prereg on the reactivity criterion is available whenever Paul initiates it; nothing here took or
+licensed that look. (4) All five one-panel/two-panel statuses stand exactly as §40 recorded them;
+these rounds changed no status, no engine input, and no shipped artifact.
