@@ -243,3 +243,102 @@ lock commit; permitted addenda are battery records, the RESULT, and dated annota
 look script and this prereg ride the same lock commit. Data inputs are read from the LIVE tree
 root via MONEYBALL_ROOT; the script writes NOTHING except stdout (the RESULT block is appended to
 this file manually, verbatim, and committed the same session).
+
+
+## RESULT-OW (2026-07-16)
+
+One look, taken 2026-07-16 by fec/b5_o_weighted_look.py --look at prereg lock 66f9772; battery
+green in-process; fresh-process bar-6 re-derivation matched the entire flattened RESULT.
+
+BATTERY (verbatim): PASS {"planted": [true, true, true, true, true], "null_pass_count": 0,
+"confound_resid_max": 8.256869432236553e-15, "confound_only_refusals": [true, true, true, true,
+true], "true_confound": [true, true, true, true, true]}
+
+RESULT (verbatim, sort_keys JSON):
+{
+ "bars": {
+  "bar1_ins_r": true,
+  "bar2_ins_p": true,
+  "bar3_ins_dominance": true,
+  "bar4_aca_reclear": true,
+  "bar5_partial_aca": true,
+  "bar5_partial_ins": false,
+  "bar6_rederivation": true
+ },
+ "panels": {
+  "academic_experts": {
+   "dominant": true,
+   "hetero": {
+    "A": 0.4336433563958177,
+    "C": 0.3946705350928072,
+    "E": 0.18710481102303667,
+    "ES": 0.2533502685599472
+   },
+   "max_abs_heterotrait": 0.4336433563958177,
+   "n": 52,
+   "p": 0.0001,
+   "partial": 0.2311886989627171,
+   "partial_p": 0.04299140171965607,
+   "r": 0.5254337016563814
+  },
+  "senate_insiders": {
+   "dominant": true,
+   "hetero": {
+    "A": 0.1743440933601336,
+    "C": -0.14634677248910033,
+    "E": 0.1631117831501428,
+    "ES": -0.07130517204584053
+   },
+   "max_abs_heterotrait": 0.1743440933601336,
+   "n": 45,
+   "p": 0.0514,
+   "partial": 0.027611723775300828,
+   "partial_p": 0.42071585682863427,
+   "r": 0.2465320942617313
+  }
+ },
+ "partial_k": 5000,
+ "pass": false,
+ "perm_k": 9999,
+ "rho1": 0.25,
+ "secondary_firewalled": {
+  "k2_unweighted_senate_insiders": {
+   "n": 34,
+   "r": 0.36535309995705795
+  },
+  "sqrtk_academic_experts": {
+   "dominant": true,
+   "p": 0.0004997501249375312,
+   "r": 0.5345693420537321
+  },
+  "sqrtk_senate_insiders": {
+   "dominant": true,
+   "p": 0.0559720139930035,
+   "r": 0.23644894605444255
+  },
+  "unweighted_academic_experts": {
+   "recomputed_r": 0.5296565739859248,
+   "shipped_r": 0.4923810707414479
+  },
+  "unweighted_senate_insiders": {
+   "recomputed_r": 0.22427801405195802,
+   "shipped_r": 0.1918859517781483
+  }
+ },
+ "seed": 20260716
+}
+
+VERDICT: MISS (bars 1-4 and 5-academic cleared; bar 5-insider FAILED: weighted partial
+r(composite, gold-O | female, party_R) = +0.028, perm p = .421).
+
+Pre-declared consequence fires with fixed wording: "the criterion-weighting route for O is CLOSED
+under this gold" — the closure covers ANY senator re-weighting scheme over the preserved rater
+counts (SB weights at any rho1, sqrt(k), k-thresholded subsetting, pooled-panel reweighting) and
+any re-anchoring of the same idea. O remains ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED with the
+academic panel. Reading (interpretation, not consequence): reliability weighting DID lift the
+insider association (.192 OOF -> .247 weighted, dominance holding in both panels) but the gating
+confound partial shows the insider O column's association with the composite is almost entirely
+gender/party-shared variance; the academic panel's association survives the same partial (.231,
+p=.043). The firewalled unweighted "drift check" rows compare the FROZEN full-fit composite
+(.224/.530) against the shipped OOF r's (.192/.492) — an expected OOF-vs-full-fit gap, not
+artifact drift (all input SHAs matched the pins). Secondaries ground nothing.
