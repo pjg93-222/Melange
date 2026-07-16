@@ -71,7 +71,7 @@ rows = cur.execute(q, [MINDATE, 'CHRG'] + params).fetchall()
 con.close()
 
 total = len(rows)
-kept = drop_unresolved = drop_nocat = drop_dup = drop_insert = drop_offtopic = 0
+kept = drop_unresolved = drop_nocat = drop_dup = drop_insert = drop_offtopic = drop_tailonly = 0
 members = set()
 catdist = collections.Counter()
 out_rows = []
@@ -97,6 +97,9 @@ for member, date, source, chamber, package, nwords, text in rows:
     if _interchange_only_offtopic(text.lower()):   # F3: drop off-topic bare-'interchange' rows
         drop_offtopic += 1
         continue
+    if not any(k in text[:TEXTCAP].lower() for k in KEYWORDS):   # A3: keyword only past the stored-text cutoff
+        drop_tailonly += 1
+        continue
     canon = resolver.resolve(name=member)          # fail-closed: None if not uniquely resolved
     bio = NAME2BIO.get(canon) if canon else None
     if not canon or not bio:
@@ -105,7 +108,7 @@ for member, date, source, chamber, package, nwords, text in rows:
     if INSERT_RX.search(text[:220]):               # BUG-E: pure insert-into-the-Record request, not speech
         drop_insert += 1
         continue
-    h = (bio, hashlib.md5(text.encode('utf-8', 'replace')).hexdigest())   # BUG-E: exact-dup collapse
+    h = (bio, hashlib.md5(text[:TEXTCAP].encode('utf-8', 'replace')).hexdigest())   # BUG-E + B1: dedup on the STORED (truncated) text
     if h in seen:
         drop_dup += 1
         continue
@@ -139,6 +142,7 @@ print('dropped - insert-into-Record        : %d' % drop_insert)
 print('dropped - exact duplicate          : %d' % drop_dup)
 print('dropped - no routed category       : %d' % drop_nocat)
 print('dropped - interchange off-topic    : %d' % drop_offtopic)
+print('dropped - keyword past cutoff      : %d' % drop_tailonly)
 print('distinct members (bioguide)        : %d' % len(members))
 print('wrote                              : %s' % OUT)
 print('--- category distribution (kept rows, multi-cat counted per category) ---')

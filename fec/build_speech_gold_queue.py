@@ -44,7 +44,7 @@ DIRECTIONAL = {k for k, _m, v in REG_ENTRIES
 
 # attack CFPB -> pro-CU -> support ; defend CFPB -> anti-CU -> oppose (task-specified cue lists).
 # word-boundaries so 'gut' (attack/support) does not fire on 'gutting' (defend/oppose).
-SUPPORT_CUES = [r'\brein in\b', r'\bdefund', r'\bgut\b', r'\babolish', r'\boverreach',
+SUPPORT_CUES = [r'\brein (?:it |them )?in\b', r'\bdefund', r'\bgut\b', r'\babolish', r'\boverreach',
                 r'\bunaccountable\b', r'\brogue\b']
 OPPOSE_CUES  = [r'\bprotect', r'\bdefend', r'\bsave\b', r'\bstrengthen', r'\bexpand',
                 r'\bgutting\b', r'\battack on\b']

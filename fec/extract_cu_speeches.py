@@ -66,7 +66,7 @@ for member, date, source, chamber, package, nwords, text in rows:
     if INSERT_RX.search(text[:220]):               # BUG-E: pure insert-into-the-Record request, not speech
         drop_insert += 1
         continue
-    h = (bio, hashlib.md5(text.encode('utf-8', 'replace')).hexdigest())   # BUG-E: exact-dup collapse
+    h = (bio, hashlib.md5(text[:TEXTCAP].encode('utf-8', 'replace')).hexdigest())   # BUG-E + B1: dedup on the STORED (truncated) text
     if h in seen:
         drop_dup += 1
         continue
