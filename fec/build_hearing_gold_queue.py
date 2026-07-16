@@ -33,7 +33,7 @@ REG   = os.path.join(MB_ROOT, 'cu_valence_registry.json')
 OUT   = os.path.join(MB_ROOT, 'hearing_gold_queue.csv')
 TARGET     = 300
 MEMBER_CAP = 4
-SNIPPET    = 400
+SNIPPET    = 1200
 CFPB_CAT   = 'CFPB Issues & Structural Reform'
 PRIORITY_N = 10
 
@@ -54,18 +54,6 @@ OPPOSE_CUES  = [r'\bprotect', r'\bdefend', r'\bsave\b', r'\bstrengthen', r'\bexp
                 r'\bgutting\b', r'\battack on\b']
 _SUP_RX = [re.compile(p) for p in SUPPORT_CUES]
 _OPP_RX = [re.compile(p) for p in OPPOSE_CUES]
-# A1: center the labeling snippet on the first CU mention (many rows open with 'Thank you, Mr.
-# Chairman' before the CFPB substance). Does NOT affect the content-hash id (that hashes the FULL
-# text) — only the human-read text_snippet column.
-_SNIP_ANCHOR_RX = re.compile(r'cfpb|consumer financial protection|financial protection|consumer bureau|credit union|interchange|swipe fee|credit card competition|ncua|durbin|field of membership|member business lending|overdraft|junk fee|chopra|payday|medical debt', re.I)
-def _center_snippet(text, width):
-    t = text or ''
-    m = _SNIP_ANCHOR_RX.search(t)
-    if not m:
-        return t[:width]
-    start = max(0, m.start() - 100)
-    seg = t[start:start + width]
-    return ('\u2026' + seg) if start > 0 else seg
 
 
 def registry_match(text_low):
@@ -187,7 +175,7 @@ for r in sel_rows:
         'registry_valence': val,
         'prelabel_stance': guess,
         'gold_stance': '',                         # BLANK — Paul fills support/oppose/neutral
-        'text_snippet': _center_snippet(r['text'], SNIPPET),
+        'text_snippet': r['text'][:SNIPPET],
     })
 
 cols = ['id', 'bioguide', 'member', 'date', 'source', 'chamber', 'categories', 'registry_target',

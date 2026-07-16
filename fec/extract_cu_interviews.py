@@ -61,7 +61,7 @@ rows = cur.execute(q, [MINDATE, 'INTERVIEW'] + params).fetchall()
 con.close()
 
 total = len(rows)
-kept = drop_unresolved = drop_nocat = drop_dup = drop_insert = drop_offtopic = drop_tailonly = drop_narration = 0
+kept = drop_unresolved = drop_nocat = drop_dup = drop_insert = drop_offtopic = 0
 members = set()
 catdist = collections.Counter()
 out_rows = []
@@ -82,26 +82,10 @@ def _interchange_only_offtopic(tl):
     if not idxs:
         return False                      # not an interchange-driven match at all
     return not any(_FINCTX_RX.search(tl[max(0, i - 60):i + 70]) for i in idxs)
-# A2: interview transcripts embed interviewer/narrator turns in the member's text field; a CU keyword
-# that appears ONLY within a narration lead-in (e.g. 'WALLACE (voice over): ...credit union...') is not
-# the member's own stance. Drop only when EVERY keyword hit is downstream of a narration marker.
-_NARRATOR_RX = re.compile(r'\(voice\s*over\)|voice-over|voiceover|\bannouncer\b|\bnarrator\b', re.I)
-def _keyword_only_in_narration(text):
-    tl = text.lower()
-    hits = [i for k in KEYWORDS for i in [tl.find(k)] if i >= 0]
-    if not hits:
-        return False
-    return all(_NARRATOR_RX.search(text[max(0, i - 200):i]) for i in hits)
 for member, date, source, chamber, package, nwords, text in rows:
     text = str(text or '')
     if _interchange_only_offtopic(text.lower()):   # F3: drop off-topic bare-'interchange' rows
         drop_offtopic += 1
-        continue
-    if not any(k in text[:TEXTCAP].lower() for k in KEYWORDS):   # A3: keyword only past the stored-text cutoff
-        drop_tailonly += 1
-        continue
-    if _keyword_only_in_narration(text[:TEXTCAP]):   # A2: CU mention only inside an interviewer/narrator turn
-        drop_narration += 1
         continue
     canon = resolver.resolve(name=member)          # fail-closed: None if not uniquely resolved
     bio = NAME2BIO.get(canon) if canon else None
@@ -145,8 +129,6 @@ print('dropped - insert-into-Record        : %d' % drop_insert)
 print('dropped - exact duplicate          : %d' % drop_dup)
 print('dropped - no routed category       : %d' % drop_nocat)
 print('dropped - interchange off-topic    : %d' % drop_offtopic)
-print('dropped - keyword past cutoff      : %d' % drop_tailonly)
-print('dropped - narrator-only mention    : %d' % drop_narration)
 print('distinct members (bioguide)        : %d' % len(members))
 print('wrote                              : %s' % OUT)
 print('--- category distribution (kept rows, multi-cat counted per category) ---')
