@@ -133,3 +133,17 @@ script refuses without that addendum, on any mismatch, or if `## RESULT-ONC` alr
 - Criterion pre-look failure: retire that trait's criterion without exposing it to the gold.
 - No result may overwrite `big5_gold_anchored.json`, the copied originals, E/A, or any profile.
 - One look only. After `## RESULT-ONC`, no tuning or successor variant on these inputs is allowed.
+
+## ADDENDUM 1 — PRE-IMPLEMENTATION COVARIATE CORRECTION (2026-07-16)
+
+Recorded after the RED lock commit `6612530`, before either implementation module existed, before
+any new criterion was constructed, and before any new criterion/candidate was paired with either
+gold panel. The dual-panel sample is Senate-only by construction; chamber is therefore constant
+and the locked instruction to control chamber inside each gold panel is rank-deficient by design.
+
+Correction: criterion construction still residualizes chamber over the full House+Senate roster
+exactly as locked. In one-look gate 5, the panel partial residualizes **female and Republican only**.
+The degeneracy check applies to those two binary covariates only (>=5 zeros and >=5 ones). Chamber
+is reported as constant Senate context and is not entered into the panel design matrix. Nothing
+else changes: the criteria, fixed weights, r/p/dominance/partial bars, seeds, stopping rule, and
+preservation contract remain byte-substantively identical.
