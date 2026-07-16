@@ -219,3 +219,195 @@ permitted addenda: battery records, the RESULT, dated annotations. The look scri
 prereg ride the same lock commit. Data reads via MONEYBALL_ROOT from the live tree; the script
 writes NOTHING except stdout; the RESULT block is appended manually, verbatim, committed the same
 session.
+
+
+## RESULT-NV (2026-07-16)
+
+One look, taken 2026-07-16 by fec/b5_n_variant_look.py --look at prereg lock 66f9772; battery
+green in-process (planted 5/5 recovered through the full two-variant + selection machinery; NULL
+0/50; confound-removal residual max 2.1e-14; reported-only refusal counts 4/5; true+confound
+5/5); fresh-process bar-4 re-derivation matched the entire flattened RESULT.
+
+BATTERY (verbatim): PASS {"planted": [{"selected": "blue_pink_affective_min_30pct", "pass": true}, {"selected": "blue_pink_affective_min_30pct", "pass": true}, {"selected": "all_channels_reactivity_min_10pct", "pass": true}, {"selected": "all_channels_reactivity_min_10pct", "pass": true}, {"selected": "all_channels_reactivity_min_10pct", "pass": true}], "null_pass_count": 0, "confound_resid_max": 2.085282198198128e-14, "confound_only_refusals": [true, true, false, true, true], "true_confound": [true, true, true, true, true]}
+
+RESULT (verbatim, sort_keys JSON):
+{
+ "bars": {
+  "bar1_aca": false,
+  "bar2_ins": true,
+  "bar3_partial_aca": true,
+  "bar3_partial_ins": true,
+  "bar4_rederivation": true
+ },
+ "confound_partials": {
+  "academic_experts": {
+   "partial": 0.38850603335669925,
+   "perm_p": 0.002999400119976005
+  },
+  "senate_insiders": {
+   "partial": 0.37116016523204587,
+   "perm_p": 0.0065986802639472104
+  }
+ },
+ "pass": false,
+ "secondary_firewalled": {
+  "non_selected": {
+   "channels": [
+    "affective_content_n",
+    "pink_observer_n",
+    "behavioral_reactivity"
+   ],
+   "fold_weight_mode": {
+    "affective_content_n": 0.1,
+    "behavioral_reactivity": 0.1,
+    "pink_observer_n": 0.8
+   },
+   "full_gold_fit_n": 58,
+   "full_gold_fit_r": 0.26023743100606356,
+   "mean_panel_r": 0.249214500398138,
+   "panels": {
+    "academic_experts": {
+     "diagonal_dominant": false,
+     "gold_row": {
+      "A": -0.03840449868585803,
+      "C": 0.09875694765309682,
+      "E": 0.353688982351961,
+      "N": 0.12106476968429296,
+      "O": 0.36231591789414336
+     },
+     "max_abs_heterotrait": 0.36231591789414336,
+     "n": 52,
+     "permutation_p_one_sided": 0.1978,
+     "r": 0.12106476968429296
+    },
+    "senate_insiders": {
+     "diagonal_dominant": true,
+     "gold_row": {
+      "A": -0.3206669232708377,
+      "C": -0.3563757418033169,
+      "E": 0.34483033018935855,
+      "N": 0.37736423111198303,
+      "O": 0.27335546522694115
+     },
+     "max_abs_heterotrait": 0.3563757418033169,
+     "n": 45,
+     "permutation_p_one_sided": 0.006,
+     "r": 0.37736423111198303
+    }
+   },
+   "predictions_are_out_of_fold": true,
+   "selected_weights": {
+    "affective_content_n": 0.1,
+    "behavioral_reactivity": 0.1,
+    "pink_observer_n": 0.8
+   },
+   "worst_panel_r": 0.12106476968429296
+  },
+  "non_selected_variant": "all_channels_reactivity_min_10pct",
+  "shipped_baseline_drift_check": {
+   "panels": {
+    "academic_experts": {
+     "diagonal_dominant": false,
+     "gold_row": {
+      "A": -0.03461554952986817,
+      "C": 0.10360329470811956,
+      "E": 0.32717268828242757,
+      "N": 0.12335202461832823,
+      "O": 0.3603774809260636
+     },
+     "max_abs_heterotrait": 0.3603774809260636,
+     "n": 52,
+     "permutation_p_one_sided": 0.1951,
+     "r": 0.12335202461832823
+    },
+    "senate_insiders": {
+     "diagonal_dominant": true,
+     "gold_row": {
+      "A": -0.3276432523848186,
+      "C": -0.36799755313213184,
+      "E": 0.3595736714128829,
+      "N": 0.3743223439345636,
+      "O": 0.2851631924795709
+     },
+     "max_abs_heterotrait": 0.36799755313213184,
+     "n": 45,
+     "permutation_p_one_sided": 0.0066,
+     "r": 0.3743223439345636
+    }
+   },
+   "selected_weights": {
+    "affective_content_n": 0.1,
+    "pink_observer_n": 0.9
+   },
+   "variant": "blue_pink_baseline (reported only; outside selection and bars)"
+  }
+ },
+ "selected": {
+  "channels": [
+   "affective_content_n",
+   "pink_observer_n"
+  ],
+  "fold_weight_mode": {
+   "affective_content_n": 0.3,
+   "pink_observer_n": 0.7
+  },
+  "full_gold_fit_n": 58,
+  "full_gold_fit_r": 0.26133507340982065,
+  "mean_panel_r": 0.28114187726405504,
+  "panels": {
+   "academic_experts": {
+    "diagonal_dominant": false,
+    "gold_row": {
+     "A": -0.029359012093419484,
+     "C": 0.09739792085553788,
+     "E": 0.34159652703920584,
+     "N": 0.14663573145609954,
+     "O": 0.3520616445736171
+    },
+    "max_abs_heterotrait": 0.3520616445736171,
+    "n": 52,
+    "permutation_p_one_sided": 0.1505,
+    "r": 0.14663573145609954
+   },
+   "senate_insiders": {
+    "diagonal_dominant": true,
+    "gold_row": {
+     "A": -0.31596323206133115,
+     "C": -0.3732577930750679,
+     "E": 0.3817259934081569,
+     "N": 0.4156480230720105,
+     "O": 0.3485891152182507
+    },
+    "max_abs_heterotrait": 0.3817259934081569,
+    "n": 45,
+    "permutation_p_one_sided": 0.0031,
+    "r": 0.4156480230720105
+   }
+  },
+  "predictions_are_out_of_fold": true,
+  "selected_weights": {
+   "affective_content_n": 0.3,
+   "pink_observer_n": 0.7
+  },
+  "worst_panel_r": 0.14663573145609954
+ },
+ "selected_variant": "blue_pink_affective_min_30pct"
+}
+
+VERDICT: MISS (bar 2 insiders PASSED at OOF r=.4156, p=.0031, dominant — above even the stricter
+.30 bar; bars 3 both PASSED, partials .371/.389; bar 1 academics FAILED: OOF r=.1466, p=.1505,
+not dominant, under the .20 gate).
+
+Pre-declared consequence fires with fixed wording: "the N-composite variant space is FROZEN under
+this gold" — the closure covers ANY composite over {affective_content_n, pink_observer_n,
+behavioral_reactivity}: any subset, any weights, any minima, any re-anchoring. N remains
+ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED with the insider panel. Reading (interpretation, not
+consequence): the selected constrained variant (30% affective-content N / 70% Pink observer N)
+IMPROVED both panels over the shipped baseline (insiders .374 -> .416; academics .123 -> .147) —
+the affective channel carries real insider-visible N signal — but the academic panel still cannot
+see N from the public record at gate strength, exactly the observability mechanism the prereg
+hypothesized against. Notable firewalled context: the academic confound partial (.389, p=.003)
+EXCEEDS the raw academic r (.147) — a suppression pattern (gender/party mask the academic N
+association) recorded here for any future Paul-initiated criterion round; it grounds nothing. The
+drift check reproduced the shipped baseline exactly (.3743/.1234; selected weights .1/.9) — no
+artifact drift. Secondaries ground nothing.
