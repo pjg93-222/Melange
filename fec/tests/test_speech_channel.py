@@ -70,7 +70,7 @@ class SpeechScorerContracts(unittest.TestCase):
         # row_id must reproduce build_speech_gold_queue.py's content-hash id so labels bind by content.
         import hashlib
         bio, date, text = "A000001", "2024-03-03", "some floor speech about the cfpb"
-        expected = hashlib.md5(("%s|%s|%s" % (bio, date, text)).encode("utf-8", "replace")).hexdigest()[:12]
+        expected = "x" + hashlib.md5(("%s|%s|%s" % (bio, date, text)).encode("utf-8", "replace")).hexdigest()[:12]   # x-hardened (Excel-proof) id, 2026-07-15
         self.assertEqual(self.sss.row_id(bio, date, text), expected)
 
 

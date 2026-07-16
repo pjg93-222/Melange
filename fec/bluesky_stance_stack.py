@@ -24,9 +24,11 @@ default 0) and why Paul's gold (precedence a) is the correction path.
 Output: bluesky_stance_final.csv (bioguide, member, date, categories, stance, tier).  build_media_blend.py
 would consume it ONLY when CU_BLUESKY_CHANNEL=1 (default OFF): SIGN{support:+1,oppose:-1,neutral:0},
 category route, 2.0yr half-life, own-source weight 0.7 (short social, like Quorum tweets), tier weights
-gold 1.0 / review 0.35.  INTEGRATE MEMO: Bluesky is collected-but-UNSCORED and is NOT in the social
-corpus today (build_media_blend's social = Quorum tweets via tweet_stance_final.csv) — verify no overlap
-before wiring so the blend does not double-count member social posts.
+gold 1.0 / review 0.35.  INTEGRATE FINDING (corrected 2026-07-15): Bluesky IS already in the blend's
+social corpus — Social Master.xlsx 'Corpus' carries 74 bluesky rows (35 pass the stance+verified filter
+and score into `soc` today), and bluesky_cu.csv is a SUBSET of them.  That is exactly why
+build_media_blend.py exposes CU_BLUESKY_CHANNEL but REFUSES to inject this file (double-count
+quarantine); wiring it first requires de-duplicating Bluesky OUT of the social corpus.
 
 Usage: python bluesky_stance_stack.py     (score bluesky_cu.csv -> bluesky_stance_final.csv)
 """
@@ -91,7 +93,7 @@ def cue_stance_toward_target(text_low):
         return 'neutral'
     W = 120
     windows = ' '.join(text_low[max(0, a - W):a + W] for a in anchors)
-    windows = re.sub(r'consumer financial protection( bureau| board| agency)?', ' cfpb ', windows)  # F2: mask the agency's own name so the \bprotect DEFEND cue does not self-fire on '...Financial PROTECTION Bureau'
+    windows = re.sub(r'(?:consumer )?financial protection( bureau| board| agency)?', ' cfpb ', windows)  # F2: mask the agency's own name so the \bprotect DEFEND cue does not self-fire on '...Financial PROTECTION Bureau'
     atk = any(rx.search(windows) for rx in _ATK_RX)
     dfd = any(rx.search(windows) for rx in _DFD_RX)
     if atk and not dfd:
@@ -170,6 +172,17 @@ def main():
     gold = load_gold()
     with io.open(SRC, encoding='utf-8-sig', newline='') as fh:
         rows = list(csv.DictReader(fh))
+    # GATE-SAFETY (audit 2026-07-15, Paul-approved): gold labels must BIND. If corpus drift orphans any
+    # hand label (its content-hash id no longer matches a corpus row), fail LOUD instead of silently
+    # degrading those rows to the weak 'review' heuristic. CU_GOLD_ORPHAN_OK=1 overrides (labels ignored).
+    _ids = {row_id(r.get('bioguide'), r.get('date'), r.get('text')) for r in rows}
+    _orph = set(gold) - _ids
+    if _orph:
+        print('!! GOLD ORPHANS: %d of %d hand labels no longer bind to any corpus row (corpus drift): %s'
+              % (len(_orph), len(gold), sorted(_orph)[:8]))
+        if os.environ.get('CU_GOLD_ORPHAN_OK', '0') != '1':
+            print('!! failing loud — re-run the extract+builder chain or set CU_GOLD_ORPHAN_OK=1')
+            return 3
     out = []
     dist = collections.Counter()
     tiers = collections.Counter()

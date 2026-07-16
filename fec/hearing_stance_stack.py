@@ -93,7 +93,7 @@ def cue_stance_toward_target(text_low):
         return 'neutral'
     W = 120
     windows = ' '.join(text_low[max(0, a - W):a + W] for a in anchors)
-    windows = re.sub(r'consumer financial protection( bureau| board| agency)?', ' cfpb ', windows)  # F2: mask the agency's own name so the \bprotect DEFEND cue does not self-fire on '...Financial PROTECTION Bureau'
+    windows = re.sub(r'(?:consumer )?financial protection( bureau| board| agency)?', ' cfpb ', windows)  # F2: mask the agency's own name so the \bprotect DEFEND cue does not self-fire on '...Financial PROTECTION Bureau'
     atk = any(rx.search(windows) for rx in _ATK_RX)
     dfd = any(rx.search(windows) for rx in _DFD_RX)
     if atk and not dfd:
@@ -172,6 +172,17 @@ def main():
     gold = load_gold()
     with io.open(SRC, encoding='utf-8-sig', newline='') as fh:
         rows = list(csv.DictReader(fh))
+    # GATE-SAFETY (audit 2026-07-15, Paul-approved): gold labels must BIND. If corpus drift orphans any
+    # hand label (its content-hash id no longer matches a corpus row), fail LOUD instead of silently
+    # degrading those rows to the weak 'review' heuristic. CU_GOLD_ORPHAN_OK=1 overrides (labels ignored).
+    _ids = {row_id(r.get('bioguide'), r.get('date'), r.get('text')) for r in rows}
+    _orph = set(gold) - _ids
+    if _orph:
+        print('!! GOLD ORPHANS: %d of %d hand labels no longer bind to any corpus row (corpus drift): %s'
+              % (len(_orph), len(gold), sorted(_orph)[:8]))
+        if os.environ.get('CU_GOLD_ORPHAN_OK', '0') != '1':
+            print('!! failing loud — re-run the extract+builder chain or set CU_GOLD_ORPHAN_OK=1')
+            return 3
     out = []
     dist = collections.Counter()
     tiers = collections.Counter()

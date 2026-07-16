@@ -112,13 +112,25 @@ print('social: %d source rows -> %d unique scored/category-assigned | %d exact c
 # GATE: CU_SPEECH_CHANNEL=1 turns it on.  DEFAULT OFF => this block reads nothing and the workbook math
 # below is byte-identical to today (zero rank movement) until Paul validates the channel.
 SPEECH_ON=os.environ.get('CU_SPEECH_CHANNEL','0')=='1'
+def _cu_stale(_final,_deps):
+    """GATE-SAFETY (audit 2026-07-15): a channel's stance_final must be NEWER than its corpus+gold inputs.
+    Returns the list of newer inputs (=> stale, skip the channel fail-closed) or [] when fresh/overridden
+    (CU_STALE_OK=1). The channel stacks are NOT in the pipeline chain, so without this a gate flipped on
+    months later would silently consume a stale hand-run file."""
+    if os.environ.get('CU_STALE_OK','0')=='1': return []
+    try: _fm=os.path.getmtime(_final)
+    except OSError: return []
+    return [os.path.basename(_d) for _d in _deps if os.path.exists(_d) and os.path.getmtime(_d)>_fm]
 spc=collections.defaultdict(lambda:collections.defaultdict(float))
 if SPEECH_ON:
     import csv as _csv2,io as _io2
     _spf=M+r'\speech_stance_final.csv'
     _STW={'gold':1.0,'review':0.35}   # tier -> intensity (mirrors the stacks' trust weighting)
     _sn=0; _snm=set()
-    if os.path.exists(_spf):
+    _stl=_cu_stale(_spf,[M+'\\speeches_cu.csv',M+'\\speech_gold_queue.csv'])
+    if _stl:
+        print('!! CU speech channel: speech_stance_final.csv is OLDER than %s — STALE, channel SKIPPED (re-run speech_stance_stack.py; CU_STALE_OK=1 overrides)'%'+'.join(_stl))
+    elif os.path.exists(_spf):
         for _r in _csv2.DictReader(_io2.open(_spf,encoding='utf-8-sig',newline='')):
             _sg=SIGN.get((_r.get('stance') or '').strip().lower(),0.0)
             if _sg==0.0: continue                                  # neutral / unrelated -> no signal
@@ -151,8 +163,16 @@ if HEARING_ON:
     _hf=M+r'\hearing_stance_final.csv'
     _HTW={'gold':1.0,'review':0.35}   # tier -> intensity (mirrors the stacks' trust weighting)
     _hn=0; _hnm=set()
-    if os.path.exists(_hf):
-        for _r in _csvh.DictReader(_ioh.open(_hf,encoding='utf-8-sig',newline='')):
+    _stl=_cu_stale(_hf,[M+'\\hearings_cu.csv',M+'\\hearing_gold_queue.csv'])
+    if _stl:
+        print('!! CU hearing channel: hearing_stance_final.csv is OLDER than %s — STALE, channel SKIPPED (re-run hearing_stance_stack.py; CU_STALE_OK=1 overrides)'%'+'.join(_stl))
+    elif os.path.exists(_hf):
+        _prows=list(_csvh.DictReader(_ioh.open(_hf,encoding='utf-8-sig',newline='')))
+        # C per-event normalization (Paul-delegated audit fix 2026-07-15): the hearing channel is
+        # PASSAGE-level — one appearance can yield several CU passages. Weight each row 1/n so one
+        # EVENT (member,date) contributes one unit of signal regardless of passage count.
+        _ev=collections.Counter((_x.get('member'),(_x.get('date') or '')[:10]) for _x in _prows)
+        for _r in _prows:
             _sg=SIGN.get((_r.get('stance') or '').strip().lower(),0.0)
             if _sg==0.0: continue                                  # neutral / unrelated -> no signal
             _m=_resolver.resolve(_r.get('member'),_r.get('bioguide'))
@@ -164,7 +184,8 @@ if HEARING_ON:
             _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
             if not _cats: continue
             _hn+=1; _hnm.add(_m)
-            for _c in _cats: hrc[_m][_c]+=_sg*_inten*_dec/len(_cats)
+            _evn=max(1,_ev[(_r.get('member'),(_r.get('date') or '')[:10])])
+            for _c in _cats: hrc[_m][_c]+=_sg*_inten*_dec/len(_cats)/_evn
         print('CU hearing channel ACTIVE (CU_HEARING_CHANNEL=1): %d signed hearing rows -> %d members (own-source weight 0.85, half-life 2.0yr)'%(_hn,len(_hnm)))
     else:
         print('!! CU_HEARING_CHANNEL=1 but hearing_stance_final.csv missing — no hearing signal added')
@@ -181,8 +202,16 @@ if INTERVIEW_ON:
     _if=M+r'\interview_stance_final.csv'
     _ITW={'gold':1.0,'review':0.35}   # tier -> intensity (mirrors the stacks' trust weighting)
     _in=0; _inm=set()
-    if os.path.exists(_if):
-        for _r in _csvi.DictReader(_ioi.open(_if,encoding='utf-8-sig',newline='')):
+    _stl=_cu_stale(_if,[M+'\\interviews_cu.csv',M+'\\interview_gold_queue.csv'])
+    if _stl:
+        print('!! CU interview channel: interview_stance_final.csv is OLDER than %s — STALE, channel SKIPPED (re-run interview_stance_stack.py; CU_STALE_OK=1 overrides)'%'+'.join(_stl))
+    elif os.path.exists(_if):
+        _prows=list(_csvi.DictReader(_ioi.open(_if,encoding='utf-8-sig',newline='')))
+        # C per-event normalization (Paul-delegated audit fix 2026-07-15): the interview channel is
+        # PASSAGE-level — one appearance can yield several CU passages. Weight each row 1/n so one
+        # EVENT (member,date) contributes one unit of signal regardless of passage count.
+        _ev=collections.Counter((_x.get('member'),(_x.get('date') or '')[:10]) for _x in _prows)
+        for _r in _prows:
             _sg=SIGN.get((_r.get('stance') or '').strip().lower(),0.0)
             if _sg==0.0: continue                                  # neutral / unrelated -> no signal
             _m=_resolver.resolve(_r.get('member'),_r.get('bioguide'))
@@ -194,7 +223,8 @@ if INTERVIEW_ON:
             _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
             if not _cats: continue
             _in+=1; _inm.add(_m)
-            for _c in _cats: ivc[_m][_c]+=_sg*_inten*_dec/len(_cats)
+            _evn=max(1,_ev[(_r.get('member'),(_r.get('date') or '')[:10])])
+            for _c in _cats: ivc[_m][_c]+=_sg*_inten*_dec/len(_cats)/_evn
         print('CU interview channel ACTIVE (CU_INTERVIEW_CHANNEL=1): %d signed interviews -> %d members (own-source weight 1.0, half-life 2.0yr)'%(_in,len(_inm)))
     else:
         print('!! CU_INTERVIEW_CHANNEL=1 but interview_stance_final.csv missing — no interview signal added')
@@ -335,11 +365,11 @@ for kwcat,hname in HDRMAP.items():
         if abs(nv-old)>1e-9: changed+=1
 rw['Z1']='MEDIA BLEND %s: cells = press(p80-scaled)+social(p80-scaled, half-life %.2fy) at 50/50 (thin-cat shrink %s, RT weight %.2f). Backup: %s'%(TODAY,HL,'ON' if SHRINK else 'off',RT_W,os.path.basename(bak))
 if SPEECH_ON:   # gated marker only; OFF leaves Z1 byte-identical to today
-    rw['Z1']=str(rw['Z1'] or '')+' | +CU floor-speech channel (own-source, half-life 2.0y, gold 1.0/review 0.35)'
+    rw['Z1']=str(rw['Z1'].value or '')+' | +CU floor-speech channel (own-source, half-life 2.0y, gold 1.0/review 0.35)'
 if HEARING_ON:   # gated marker only; OFF leaves Z1 byte-identical to today
-    rw['Z1']=str(rw['Z1'] or '')+' | +CU hearing channel (own-source 0.85, half-life 2.0y, gold 1.0/review 0.35)'
+    rw['Z1']=str(rw['Z1'].value or '')+' | +CU hearing channel (own-source 0.85, half-life 2.0y, gold 1.0/review 0.35)'
 if INTERVIEW_ON:   # gated marker only; OFF leaves Z1 byte-identical to today
-    rw['Z1']=str(rw['Z1'] or '')+' | +CU interview channel (own-source 1.0, half-life 2.0y, gold 1.0/review 0.35)'
+    rw['Z1']=str(rw['Z1'].value or '')+' | +CU interview channel (own-source 1.0, half-life 2.0y, gold 1.0/review 0.35)'
 wb.calculation.fullCalcOnLoad=True   # PHASE-2: the workbook is a VIEW — Excel recalcs it on open; no COM recalc anywhere
 save_workbook_atomic(wb,WBP)
 print('wrote media blend into Press Release - Raw: %d cells changed (formulas untouched)'%changed)

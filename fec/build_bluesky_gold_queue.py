@@ -61,7 +61,7 @@ def registry_match(text_low):
 
 # BUG-G: cues must be NEAR the CFPB/target mention, not anywhere in a long post. Generic verbs
 # like "protect"/"defend" fired target-agnostically before, producing oppose-biased/inverted hints.
-_ANCHOR_RX = re.compile(r'cfpb|consumer financial protection|interchange|swipe fee|overdraft|junk fee|rate cap')
+_ANCHOR_RX = re.compile(r'cfpb|consumer financial protection|interchange|swipe fee|credit card competition|durbin|overdraft|junk fee|rate cap')   # B3 audit fix: mirrors the stack's anchor list exactly
 def prelabel(text_low, family):
     if family not in DIRECTIONAL:
         return 'neutral'
@@ -70,7 +70,7 @@ def prelabel(text_low, family):
         return 'neutral'
     W = 120
     windows = ' '.join(text_low[max(0, a - W):a + W] for a in anchors)
-    windows = re.sub(r'consumer financial protection( bureau| board| agency)?', ' cfpb ', windows)  # F2: mask the agency's own name so the \bprotect DEFEND cue does not self-fire on '...Financial PROTECTION Bureau'   # only text near a target mention
+    windows = re.sub(r'(?:consumer )?financial protection( bureau| board| agency)?', ' cfpb ', windows)  # F2: mask the agency's own name so the \bprotect DEFEND cue does not self-fire on '...Financial PROTECTION Bureau'   # only text near a target mention
     atk = any(rx.search(windows) for rx in _SUP_RX)
     dfd = any(rx.search(windows) for rx in _OPP_RX)
     if atk and not dfd:
@@ -92,6 +92,7 @@ for i, r in enumerate(csv.DictReader(open(SRC, encoding='utf-8-sig'))):
     r['is_prio'] = r['member'] in PRIORITY_SET
     rows.append(r)
 by_id = {r['id']: r for r in rows}
+assert len(by_id) == len(rows), 'content-hash id collision: %d rows -> %d ids' % (len(rows), len(by_id))   # B5 audit fix: a collision must be LOUD
 
 member_count = collections.Counter()
 selected = []            # ordered list of ids
