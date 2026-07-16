@@ -130,6 +130,16 @@ def ranked(pool):
     return pool
 
 
+# 0) NON-CFPB COMPLETE INCLUSION (Paul 2026-07-15: "a lot pertaining to the CFPB but not much
+# pertaining to other credit union domain issues").  The hearing corpus is ~87% CFPB and the inherited
+# CFPB-first ranking pushed the queue to ~95% — backwards for hearings, where CFPB is over-covered and
+# the ~97 non-CFPB passages are the scarce, valuable ones.  Include EVERY passage that carries no CFPB
+# category (force=True bypasses the member cap; the cap still governs the CFPB fill below).
+noncfpb_n = 0
+for r in ranked([r for r in rows if not r['is_cfpb']]):
+    if add(r['id'], force=True):
+        noncfpb_n += 1
+
 # 1) category coverage — every routed category present at least once
 for cat in sorted({c for r in rows for c in r['cats']}):
     if any(cat in by_id[i]['cats'] for i in selected):
@@ -240,6 +250,7 @@ print('wrote                              : %s' % OUT)
 print('--- priority members (derived top-%d, count in sample) ---' % PRIORITY_N)
 for m in PRIORITY:
     print('  %-24s %d  (of %d CU-relevant rows)' % (m, member_count[m], _mcount[m]))
+print('non-CFPB passages force-included   : %d (complete non-CFPB inventory)' % noncfpb_n)
 print('attribution flag (answer-shaped)   : %d rows flagged CHECK-ANSWER-SHAPED' % flag_n)
 print('--- prelabel_stance distribution ---')
 for k in ('support', 'oppose', 'neutral'):
