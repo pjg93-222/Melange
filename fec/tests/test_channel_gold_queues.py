@@ -81,13 +81,23 @@ class GoldQueueColumns(unittest.TestCase):
     """(b) the 12 canonical gold-queue columns appear in order in the builder's column list."""
 
     def test_builder_cols_are_canonical_in_order(self):
+        # 2026-07-15 (Paul "Add 1 for the margin"): the HEARING queue appends a 13th trailing
+        # 'attribution_flag' column (answer-shaped witness-response flag for the CHRG collision margin).
+        # The first 12 columns stay the canonical schema in order for EVERY channel, so gold_stance
+        # keeps its familiar position; only hearing may carry the extra trailing flag.
         for builder, _stackmod, _gate in CHANNELS:
             src = source(builder)
             m = re.search(r"cols\s*=\s*\[(.*?)\]", src, re.S)
             self.assertIsNotNone(m, '%s: cols = [...] list not found' % builder)
             cols = re.findall(r"'([^']*)'", m.group(1))
-            self.assertEqual(cols, CANON_COLS,
-                             '%s: gold-queue columns must be the 12 canonical columns in order' % builder)
+            self.assertEqual(cols[:12], CANON_COLS,
+                             '%s: first 12 gold-queue columns must be the canonical schema in order' % builder)
+            extras = cols[12:]
+            if builder == 'build_hearing_gold_queue.py':
+                self.assertEqual(extras, ['attribution_flag'],
+                                 'hearing queue must carry the trailing attribution_flag column')
+            else:
+                self.assertEqual(extras, [], '%s: no extra columns beyond the canonical 12' % builder)
 
 
 class BlendGates(unittest.TestCase):

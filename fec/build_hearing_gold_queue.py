@@ -158,11 +158,24 @@ sel_rows.sort(key=lambda r: (r['member'], r['date'], r['id']))
 
 out = []
 prelabel_dist = collections.Counter()
+# attribution_flag (Paul 2026-07-15 "Add 1 for the margin"): flag ANSWER-SHAPED passages — turns that
+# open like a WITNESS responding to a member ("Thank you, Senator ...", "Thank you for the question",
+# "Yes/No/Well, Senator") — the residual CHRG witness-collision surface the ingest blocklist can't see.
+# A FLAG for Paul's eye while labeling, never a drop.  "Thank you, Mr. Chairman/Madam Chair" is the
+# classic MEMBER opening and must NOT flag (members thank the chair; witnesses thank the questioner).
+_ANSWER_SHAPED_RX = re.compile(
+    r'thank you(?: very much)?,? (?:senator|congressman|congresswoman|representative)\b'
+    r'|thank you for (?:the|that|your) question'
+    r"|(?:that's|that is) a (?:great|good|fair|excellent) question"
+    r'|^\s*(?:yes|no|well|correct),? senator\b', re.I)
+flag_n = 0
 for r in sel_rows:
     tlow = r['text'].lower()
     fam, val = registry_match(tlow)
     guess = prelabel(tlow, fam)
     prelabel_dist[guess] += 1
+    aflag = 'CHECK-ANSWER-SHAPED' if _ANSWER_SHAPED_RX.search(r['text']) else ''
+    flag_n += 1 if aflag else 0
     out.append({
         'id': r['id'],
         'bioguide': r['bioguide'],
@@ -176,10 +189,13 @@ for r in sel_rows:
         'prelabel_stance': guess,
         'gold_stance': '',                         # BLANK — Paul fills support/oppose/neutral
         'text_snippet': r['text'][:SNIPPET],
+        'attribution_flag': aflag,
     })
 
+# the shared 12-column labeling schema, plus the hearing-only trailing attribution_flag (13th) so
+# gold_stance keeps its familiar position across every channel's queue.
 cols = ['id', 'bioguide', 'member', 'date', 'source', 'chamber', 'categories', 'registry_target',
-        'registry_valence', 'prelabel_stance', 'gold_stance', 'text_snippet']
+        'registry_valence', 'prelabel_stance', 'gold_stance', 'text_snippet', 'attribution_flag']
 # F1 label-preservation: NEVER destroy hand labels on a re-run. Merge any previously-filled
 # gold_stance from the existing OUT file (keyed by the content-hash id), and RE-APPEND any labeled
 # row that fell out of a new sample so no hand label is ever orphaned.
@@ -224,6 +240,7 @@ print('wrote                              : %s' % OUT)
 print('--- priority members (derived top-%d, count in sample) ---' % PRIORITY_N)
 for m in PRIORITY:
     print('  %-24s %d  (of %d CU-relevant rows)' % (m, member_count[m], _mcount[m]))
+print('attribution flag (answer-shaped)   : %d rows flagged CHECK-ANSWER-SHAPED' % flag_n)
 print('--- prelabel_stance distribution ---')
 for k in ('support', 'oppose', 'neutral'):
     print('  %-8s %d' % (k, prelabel_dist[k]))

@@ -34,6 +34,7 @@ import sys, os, sqlite3, csv, json, collections, re, hashlib
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import media_rules as MR
+import cu_passages as CP
 from member_identity import Resolver
 
 DB      = os.path.join(MB_ROOT, 'social_media.db')
@@ -92,35 +93,42 @@ def _interchange_only_offtopic(tl):
     if not idxs:
         return False                      # not an interchange-driven match at all
     return not any(_FINCTX_RX.search(tl[max(0, i - 60):i + 70]) for i in idxs)
+# PASSAGE-LEVEL (Paul 2026-07-15: "multiple entries/sentences from the same interview, not just one"):
+# emit one entry PER ~500-char sentence-snapped CU passage, not one per whole hearing turn — so the
+# labeled snippet is the credit-union exchange, not the "Thank you, Mr. Chairman" opening. Routing + the
+# interchange filter now run on the PASSAGE (a tight window), far more accurate than a whole transcript.
+_NW = re.compile(r'\S+')
+n_src = 0                                           # source hearing turns that yielded >=1 CU passage
 for member, date, source, chamber, package, nwords, text in rows:
     text = str(text or '')
-    if _interchange_only_offtopic(text.lower()):   # F3: drop off-topic bare-'interchange' rows
-        drop_offtopic += 1
-        continue
     canon = resolver.resolve(name=member)          # fail-closed: None if not uniquely resolved
     bio = NAME2BIO.get(canon) if canon else None
     if not canon or not bio:
         drop_unresolved += 1
         continue
-    if INSERT_RX.search(text[:220]):               # BUG-E: pure insert-into-the-Record request, not speech
-        drop_insert += 1
-        continue
-    h = (bio, hashlib.md5(text[:TEXTCAP].encode('utf-8', 'replace')).hexdigest())   # BUG-E + B1: dedup on the STORED (truncated) text
-    if h in seen:
-        drop_dup += 1
-        continue
-    seen.add(h)
-    # route on the full untruncated text (same text the keyword gate matched on)
-    cats = MR.route_raw_categories(text, [])
-    if not cats:
-        drop_nocat += 1
-        continue
-    kept += 1
-    members.add(bio)
-    for c in cats:
-        catdist[c] += 1
-    out_rows.append([bio, canon, date, source, chamber, ';'.join(cats),
-                     nwords if nwords is not None else '', text[:TEXTCAP]])
+    src_kept = 0
+    for passage in CP.passages(text, KEYWORDS, half=250):
+        pl = passage.lower()
+        if _interchange_only_offtopic(pl):         # passage is only a highway / 'interchangeable' interchange
+            drop_offtopic += 1
+            continue
+        cats = MR.route_raw_categories(passage, [])
+        if not cats:
+            drop_nocat += 1
+            continue
+        h = (bio, hashlib.md5(passage.encode('utf-8', 'replace')).hexdigest())   # collapse identical passages
+        if h in seen:
+            drop_dup += 1
+            continue
+        seen.add(h)
+        kept += 1; src_kept += 1
+        members.add(bio)
+        for c in cats:
+            catdist[c] += 1
+        out_rows.append([bio, canon, date, source, chamber, ';'.join(cats),
+                         len(_NW.findall(passage)), passage[:TEXTCAP]])
+    if src_kept:
+        n_src += 1
 
 # ---- write hearings_cu.csv (atomic replace) ----
 tmp = OUT + '.tmp'
@@ -133,7 +141,7 @@ os.replace(tmp, OUT)
 # ---- report ----
 print('=== extract_cu_hearings ===')
 print('total matched (date>=%s + keyword) : %d' % (MINDATE, total))
-print('kept                               : %d' % kept)
+print('CU passages kept                   : %d  (from %d source hearing turns)' % (kept, n_src))
 print('dropped - member unresolved        : %d' % drop_unresolved)
 print('dropped - insert-into-Record        : %d' % drop_insert)
 print('dropped - exact duplicate          : %d' % drop_dup)
