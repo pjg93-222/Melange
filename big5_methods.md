@@ -1317,3 +1317,37 @@ Topic-conditioned within-speaker F0 is computed only after identity passes. Any 
 route needs a new preregistration, human-ratified enrollment/calibration clips, all 148
 caption-mismatch negatives, and a speaker-specialized verification comparator; it cannot be
 presented as a continuation that tunes these Wav2Vec test results.
+
+## 45. O/N/C new-criterion cross-panel successor — no promotions; originals preserved (2026-07-16)
+
+At the user's request, E and A were held fixed and a tests-first successor attempted genuinely new
+behavioral criteria for O, N, and C. Before implementation, the complete original score artifact
+and Senate gold were copied byte-for-byte under `originals/big5_onc_20260716/` (SHA-256s
+`2b351af4...4317c13` and `ff5a9483...7afe7a`). The RED lock at `6612530` fixed construction,
+coverage/reliability stop bars, fusion weights, panel gates, and a one-look rule. The implementation
+never exposed criterion construction to the panels; 12/12 successor contracts and the 74/0 full
+kernel were green before the criterion freeze.
+
+The new O criterion combined cross-context policy-domain entropy and MATTR over deterministic,
+volume-bounded INTERVIEW and CREC samples. Its reliability cleared (source r=.160, SB=.275), but
+coverage was only 198 members (122 House), below the locked 250/150 floors. O therefore stopped
+before any gold pairing; its original academic-panel-supported status remains untouched.
+
+The new N criterion measured within-interview successive affective lability, residualized for
+demographics, chamber, mean affect, turn length, and exposure. Coverage was 234 and deterministic
+package split-half reliability was r=.354 / SB=.523, licensing the one look. The fixed 70% original
+/ 30% lability candidate retained an insider association (r=.299, p=.029, partial=.268) but failed
+dominance; academics missed r/p/dominance (r=.143, p=.176) despite a positive partial (.328). MISS;
+the route is closed and the original insider-supported N remains.
+
+The new C criterion required consistency in both roll-call participation and LEP follow-through:
+the lower of the two within-chamber z-scores, nuisance-residualized. Coverage was 447 and component
+r=.039, clearing its pre-look bars. The fixed 30% original / 70% execution-consistency candidate
+improved insiders from same-roster r=.319 to .393 and passed every insider gate (p=.0036,
+partial=.404, dominant). Academics remained null and non-dominant (r=.066, p=.326,
+partial=.104). MISS; the result strengthens the interpretation of C as insider-visible execution
+behavior but does not license an academic-panel personality claim.
+
+Exact result: `big5_onc_crosspanel_successor.json.candidate`, SHA-256
+`fc3bdbfa59671f61891c34d38e13839f57092c2110d760a12e221e7fc43ba5e9`. Production consumers are
+zero. No original score, status, profile, narrative, engine input, E result, or A result moved.

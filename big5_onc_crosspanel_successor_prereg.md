@@ -171,3 +171,27 @@ artifact.
 
 Only N and C are licensed for the one look. O's original one-panel status and copied score remain
 unchanged regardless of the later N/C outcome.
+
+## RESULT-ONC (2026-07-16 — ONE LOOK CONSUMED)
+
+Result artifact: `big5_onc_crosspanel_successor.json.candidate`, SHA-256
+`fc3bdbfa59671f61891c34d38e13839f57092c2110d760a12e221e7fc43ba5e9`. Exact 9,999-permutation
+look; production consumers 0. The result gate is now permanently closed on these inputs.
+
+- **O: NOT LOOKED.** Its criterion missed the pre-look coverage bars, so no O criterion/panel
+  pairing was computed. Original status remains `ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED`.
+- **N: MISS.** Candidate coverage 232. Insiders: r=.2990, p=.0291, partial=.2681, but
+  max |heterotrait|=.3799 (gold C), so dominance failed. Academics: r=.1428, p=.1757,
+  partial=.3278, max |heterotrait|=.3421 (gold O); r, p, and dominance failed. The same-roster
+  original context was stronger: insiders r=.3533 and academics r=.1973, though neither was
+  dominant and academic r remained below .20. The new lability criterion does not validate N
+  across both panels and this route is closed.
+- **C: MISS.** Candidate coverage 437. Insiders improved from same-roster original r=.3191 to
+  r=.3930 and passed every gate: p=.0036, partial=.4040, dominance over max |heterotrait|=.3127.
+  Academics remained null: r=.0655, p=.3260, partial=.1037, max |heterotrait|=.3986 (gold N);
+  r, p, and dominance failed. The two-mode execution criterion strengthens the insider-visible
+  behavioral C reading but does not create an academic-panel C construct; this route is closed.
+
+Predeclared consequences fire: no trait is promoted, no original score/status changes, nothing
+ships, and no profile or engine artifact is rewritten. E/A remain untouched. The byte-preserved
+originals under `originals/big5_onc_20260716/` remain the production record.

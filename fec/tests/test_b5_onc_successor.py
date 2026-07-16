@@ -201,6 +201,22 @@ def test_look_source_cannot_write_production_artifacts():
     assert "dump_atomic(doc, OUT" not in source
 
 
+def test_recorded_result_is_terminal_candidate_and_originals_remain_held():
+    result_path = ROOT / "big5_onc_crosspanel_successor.json.candidate"
+    assert result_path.is_file()
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["schema"] == "b5-onc-crosspanel-successor-v1"
+    assert result["status"] == "ONE_OR_MORE_TRAITS_MISS"
+    assert result["production_consumers"] == 0
+    assert result["traits"]["O"]["status"] == "NOT_LOOKED_CRITERION_STOP_BAR_MISS"
+    assert result["traits"]["N"]["status"] == "DUAL_PANEL_SUCCESSOR_MISS"
+    assert result["traits"]["C"]["status"] == "DUAL_PANEL_SUCCESSOR_MISS"
+    assert result["original_score_sha256"] == ORIGINAL_SCORE_SHA
+    assert result["gold_sha256"] == ORIGINAL_GOLD_SHA
+    prereg = (ROOT / "big5_onc_crosspanel_successor_prereg.md").read_text(encoding="utf-8")
+    assert "\n## RESULT-ONC" in prereg
+
+
 def main():
     tests = [fn for name, fn in sorted(globals().items())
              if name.startswith("test_") and callable(fn)]
