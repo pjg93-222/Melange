@@ -70,7 +70,8 @@ def prelabel(text_low, family):
     if not anchors:
         return 'neutral'
     W = 120
-    windows = ' '.join(text_low[max(0, a - W):a + W] for a in anchors)   # only text near a target mention
+    windows = ' '.join(text_low[max(0, a - W):a + W] for a in anchors)
+    windows = re.sub(r'consumer financial protection( bureau| board| agency)?', ' cfpb ', windows)  # F2: mask the agency's own name so the \bprotect DEFEND cue does not self-fire on '...Financial PROTECTION Bureau'   # only text near a target mention
     atk = any(rx.search(windows) for rx in _SUP_RX)
     dfd = any(rx.search(windows) for rx in _OPP_RX)
     if atk and not dfd:
@@ -82,10 +83,10 @@ def prelabel(text_low, family):
 
 # ---- load source rows, assign stable id = row index in speeches_cu.csv ----
 rows = []
-for i, r in enumerate(csv.DictReader(open(SRC, encoding='utf-8'))):
+for i, r in enumerate(csv.DictReader(open(SRC, encoding='utf-8-sig'))):
     # BUG-D: content-hash id binds a hand label to the row's content, not its scan position, so labels
     # survive a DB rebuild / re-extraction (the extract is now also deterministically ORDER BY'd).
-    r['id'] = hashlib.md5(('%s|%s|%s' % (r.get('bioguide',''), r.get('date',''), r.get('text',''))).encode('utf-8', 'replace')).hexdigest()[:12]
+    r['id'] = 'x' + hashlib.md5(('%s|%s|%s' % (r.get('bioguide',''), r.get('date',''), r.get('text',''))).encode('utf-8', 'replace')).hexdigest()[:12]
     r['cats'] = r['categories'].split(';') if r['categories'] else []
     r['is_cfpb'] = CFPB_CAT in r['cats']
     r['is_prio'] = r['member'] in PRIORITY_SET
@@ -166,6 +167,26 @@ for r in sel_rows:
 
 cols = ['id', 'bioguide', 'member', 'date', 'source', 'chamber', 'categories', 'registry_target',
         'registry_valence', 'prelabel_stance', 'gold_stance', 'text_snippet']
+# F1 label-preservation: NEVER destroy hand labels on a re-run. Merge any previously-filled
+# gold_stance from the existing OUT file (keyed by the content-hash id), and RE-APPEND any labeled
+# row that fell out of a new sample so no hand label is ever orphaned.
+_prev = {}
+if os.path.exists(OUT):
+    with open(OUT, encoding='utf-8-sig', newline='') as _pf:
+        for _pr in csv.DictReader(_pf):
+            if (_pr.get('gold_stance') or '').strip():
+                _prev[(_pr.get('id') or '').strip()] = _pr
+if _prev:
+    _seen = set()
+    for _row in out:
+        _seen.add(_row['id'])
+        if _row['id'] in _prev:
+            _row['gold_stance'] = (_prev[_row['id']].get('gold_stance') or '').strip()
+    _reapp = [ _id for _id in _prev if _id and _id not in _seen ]
+    for _id in _reapp:
+        out.append({_c: (_prev[_id].get(_c, '') or '') for _c in cols})
+    out.sort(key=lambda r: (r.get('member', ''), r.get('date', ''), r.get('id', '')))
+    print('label-preservation: merged %d prior gold labels (%d re-appended out-of-sample)' % (len(_prev), len(_reapp)))
 tmp = OUT + '.tmp'
 with open(tmp, 'w', encoding='utf-8', newline='') as f:
     w = csv.DictWriter(f, fieldnames=cols)

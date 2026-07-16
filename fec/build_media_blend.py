@@ -135,6 +135,86 @@ if SPEECH_ON:
         print('CU speech channel ACTIVE (CU_SPEECH_CHANNEL=1): %d signed floor speeches -> %d members (own-source weight 1.0, half-life 2.0yr)'%(_sn,len(_snm)))
     else:
         print('!! CU_SPEECH_CHANNEL=1 but speech_stance_final.csv missing — no speech signal added')
+# ---- CU HEARING CHANNEL (GATED, default OFF; integrate phase 2026-07-15) ------------------------------
+# Own-words committee-hearing (source='CHRG') CU stance from hearing_stance_stack.py — an EXACT structural
+# mirror of the CU floor-speech block above: SIGN{support:+1,oppose:-1,neutral:0}, category-split, decay
+# 0.5^(age/2.0yr) like press, tier-weighted intensity (gold 1.0 / review 0.35).  Own-source weight 0.85
+# (below floor speeches' 1.0: CHRG carries a witness/member attribution risk — a witness surname can
+# collide with a member's — so the channel is discounted).  Rides the press side, p80-scaled for parity.
+# GATE: CU_HEARING_CHANNEL=1 turns it on.  DEFAULT OFF => reads nothing and the blend math below is
+# byte-identical to today (zero rank movement) until Paul validates the channel.
+HEARING_ON=os.environ.get('CU_HEARING_CHANNEL','0')=='1'
+HEARING_W=0.85
+hrc=collections.defaultdict(lambda:collections.defaultdict(float))
+if HEARING_ON:
+    import csv as _csvh,io as _ioh
+    _hf=M+r'\hearing_stance_final.csv'
+    _HTW={'gold':1.0,'review':0.35}   # tier -> intensity (mirrors the stacks' trust weighting)
+    _hn=0; _hnm=set()
+    if os.path.exists(_hf):
+        for _r in _csvh.DictReader(_ioh.open(_hf,encoding='utf-8-sig',newline='')):
+            _sg=SIGN.get((_r.get('stance') or '').strip().lower(),0.0)
+            if _sg==0.0: continue                                  # neutral / unrelated -> no signal
+            _m=_resolver.resolve(_r.get('member'),_r.get('bioguide'))
+            if not _m: continue                                    # fail-closed on unresolved identity
+            try: _age=(TODAY-datetime.date.fromisoformat((_r.get('date') or '')[:10])).days/365.25
+            except Exception: continue
+            _inten=_HTW.get((_r.get('tier') or '').strip().lower(),0.35)
+            _dec=0.5**(max(0.0,_age)/2.0)                          # press-like 2.0yr half-life
+            _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
+            if not _cats: continue
+            _hn+=1; _hnm.add(_m)
+            for _c in _cats: hrc[_m][_c]+=_sg*_inten*_dec/len(_cats)
+        print('CU hearing channel ACTIVE (CU_HEARING_CHANNEL=1): %d signed hearing rows -> %d members (own-source weight 0.85, half-life 2.0yr)'%(_hn,len(_hnm)))
+    else:
+        print('!! CU_HEARING_CHANNEL=1 but hearing_stance_final.csv missing — no hearing signal added')
+# ---- CU INTERVIEW CHANNEL (GATED, default OFF; integrate phase 2026-07-15) ----------------------------
+# Own-words broadcast/podcast interview (source='INTERVIEW') CU stance from interview_stance_stack.py —
+# EXACT structural mirror of the speech block.  Own-source weight 1.0 (interviews are the member's own
+# words, attribution-clean like floor speeches).  SIGN / category-split / decay / tier-intensity identical.
+# GATE: CU_INTERVIEW_CHANNEL=1 turns it on.  DEFAULT OFF => reads nothing, blend math byte-identical.
+INTERVIEW_ON=os.environ.get('CU_INTERVIEW_CHANNEL','0')=='1'
+INTERVIEW_W=1.0
+ivc=collections.defaultdict(lambda:collections.defaultdict(float))
+if INTERVIEW_ON:
+    import csv as _csvi,io as _ioi
+    _if=M+r'\interview_stance_final.csv'
+    _ITW={'gold':1.0,'review':0.35}   # tier -> intensity (mirrors the stacks' trust weighting)
+    _in=0; _inm=set()
+    if os.path.exists(_if):
+        for _r in _csvi.DictReader(_ioi.open(_if,encoding='utf-8-sig',newline='')):
+            _sg=SIGN.get((_r.get('stance') or '').strip().lower(),0.0)
+            if _sg==0.0: continue                                  # neutral / unrelated -> no signal
+            _m=_resolver.resolve(_r.get('member'),_r.get('bioguide'))
+            if not _m: continue                                    # fail-closed on unresolved identity
+            try: _age=(TODAY-datetime.date.fromisoformat((_r.get('date') or '')[:10])).days/365.25
+            except Exception: continue
+            _inten=_ITW.get((_r.get('tier') or '').strip().lower(),0.35)
+            _dec=0.5**(max(0.0,_age)/2.0)                          # press-like 2.0yr half-life
+            _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
+            if not _cats: continue
+            _in+=1; _inm.add(_m)
+            for _c in _cats: ivc[_m][_c]+=_sg*_inten*_dec/len(_cats)
+        print('CU interview channel ACTIVE (CU_INTERVIEW_CHANNEL=1): %d signed interviews -> %d members (own-source weight 1.0, half-life 2.0yr)'%(_in,len(_inm)))
+    else:
+        print('!! CU_INTERVIEW_CHANNEL=1 but interview_stance_final.csv missing — no interview signal added')
+# ---- CU BLUESKY CHANNEL (GATED, default OFF) — DOUBLE-COUNT QUARANTINE (integrate 2026-07-15) ---------
+# Structural sibling of the hearing/interview own-source blocks, but DELIBERATELY NOT WIRED into the blend
+# math.  Verified at integrate time: Social Master.xlsx 'Corpus' (the SOCIAL side, variable `corp` above)
+# ALREADY ingests Bluesky posts — 74 rows (source='direct', platform='bluesky'); 35 pass the
+# stance!='' & verified_handle=='1' filter and are already scored into `soc` today.  bluesky_cu.csv
+# (16 rows / 10 members) is a SUBSET of those (16/16 text overlap, all 10 members present), so adding
+# bluesky_stance_final.csv as a second own-source injection would DOUBLE-COUNT the same member posts
+# (once on the social side via `soc`, once on the press side here).  Per the integrate directive we expose
+# the gate for parity/future use but REFUSE to inject; wiring first requires de-duplicating Bluesky OUT of
+# the social corpus.  GATE: CU_BLUESKY_CHANNEL (default 0) — setting it to 1 logs the refusal, adds nothing.
+BLUESKY_ON=os.environ.get('CU_BLUESKY_CHANNEL','0')=='1'
+BLUESKY_W=0.7   # own-source weight that WOULD apply once the double-count is resolved (documented, not applied)
+blc=collections.defaultdict(lambda:collections.defaultdict(float))   # intentionally EMPTY — never injected (see above)
+if BLUESKY_ON:
+    print('!! CU_BLUESKY_CHANNEL=1 IGNORED: Bluesky already rides the SOCIAL corpus (Social Master.xlsx: '
+          '74 posts, 35 scored) and bluesky_cu.csv is a subset of it — injecting bluesky_stance_final.csv '
+          'would double-count. De-duplicate Bluesky out of the social corpus before wiring this channel.')
 # ---- workbook surgery ----
 os.makedirs(M+r'\backups',exist_ok=True)
 bak=M+r'\backups\Moneyball Main Version - Blended.BACKUP-%s.xlsx'%datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
@@ -237,10 +317,18 @@ for kwcat,hname in HDRMAP.items():
     # GATED speech channel: own p80 so it is commensurable with press before it rides the press side.
     speechvals={m:spc.get(m,{}).get(kwcat,0.0) for m in members} if SPEECH_ON else None
     ssp=p80(speechvals.values()) if SPEECH_ON else 0.0
+    hearingvals={m:hrc.get(m,{}).get(kwcat,0.0) for m in members} if HEARING_ON else None
+    hsp=p80(hearingvals.values()) if HEARING_ON else 0.0
+    interviewvals={m:ivc.get(m,{}).get(kwcat,0.0) for m in members} if INTERVIEW_ON else None
+    isp=p80(interviewvals.values()) if INTERVIEW_ON else 0.0
     for m in members:
         pv=pressvals[m]/sp if sp else 0.0; sv=socvals[m]/ss if ss else 0.0
         if SPEECH_ON and ssp:
             pv=pv+(speechvals[m]/ssp)   # own-source floor speeches ride the press side at weight 1.0
+        if HEARING_ON and hsp:
+            pv=pv+HEARING_W*(hearingvals[m]/hsp)   # own-source hearing questioning rides the press side at weight 0.85
+        if INTERVIEW_ON and isp:
+            pv=pv+INTERVIEW_W*(interviewvals[m]/isp)   # own-source interviews ride the press side at weight 1.0
         nv=(1.0-SOCIAL_W*f)*pv+SOCIAL_W*f*sv
         old=rw.cell(mrow[m],col).value or 0.0
         rw.cell(mrow[m],col).value=round(nv,6)
@@ -248,6 +336,10 @@ for kwcat,hname in HDRMAP.items():
 rw['Z1']='MEDIA BLEND %s: cells = press(p80-scaled)+social(p80-scaled, half-life %.2fy) at 50/50 (thin-cat shrink %s, RT weight %.2f). Backup: %s'%(TODAY,HL,'ON' if SHRINK else 'off',RT_W,os.path.basename(bak))
 if SPEECH_ON:   # gated marker only; OFF leaves Z1 byte-identical to today
     rw['Z1']=str(rw['Z1'] or '')+' | +CU floor-speech channel (own-source, half-life 2.0y, gold 1.0/review 0.35)'
+if HEARING_ON:   # gated marker only; OFF leaves Z1 byte-identical to today
+    rw['Z1']=str(rw['Z1'] or '')+' | +CU hearing channel (own-source 0.85, half-life 2.0y, gold 1.0/review 0.35)'
+if INTERVIEW_ON:   # gated marker only; OFF leaves Z1 byte-identical to today
+    rw['Z1']=str(rw['Z1'] or '')+' | +CU interview channel (own-source 1.0, half-life 2.0y, gold 1.0/review 0.35)'
 wb.calculation.fullCalcOnLoad=True   # PHASE-2: the workbook is a VIEW — Excel recalcs it on open; no COM recalc anywhere
 save_workbook_atomic(wb,WBP)
 print('wrote media blend into Press Release - Raw: %d cells changed (formulas untouched)'%changed)

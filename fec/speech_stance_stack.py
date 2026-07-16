@@ -88,6 +88,7 @@ def cue_stance_toward_target(text_low):
         return 'neutral'
     W = 120
     windows = ' '.join(text_low[max(0, a - W):a + W] for a in anchors)
+    windows = re.sub(r'consumer financial protection( bureau| board| agency)?', ' cfpb ', windows)  # F2: mask the agency's own name so the \bprotect DEFEND cue does not self-fire on '...Financial PROTECTION Bureau'
     atk = any(rx.search(windows) for rx in _ATK_RX)
     dfd = any(rx.search(windows) for rx in _DFD_RX)
     if atk and not dfd:
@@ -130,7 +131,7 @@ def score_speech_text(text):
 
 def row_id(bioguide, date, text):
     """Content-hash id, byte-identical to build_speech_gold_queue.py so a gold label binds by content."""
-    return hashlib.md5(('%s|%s|%s' % (bioguide or '', date or '', text or ''))
+    return 'x' + hashlib.md5(('%s|%s|%s' % (bioguide or '', date or '', text or ''))
                        .encode('utf-8', 'replace')).hexdigest()[:12]
 
 
