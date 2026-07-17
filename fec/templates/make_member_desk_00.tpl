@@ -617,13 +617,22 @@ function psychHTML(m){
         ?`<div style="font-size:10px;color:var(--faint);line-height:1.55;margin-top:3px">Actual member-attributed interview text: <b>${raw.mean_words_per_turn}</b> mean words/turn, <b>${raw.median_words_per_turn}</b> median, <b>${raw.p90_words_per_turn}</b> 90th percentile; <b>${raw.mean_words_per_appearance}</b> mean words/appearance. Warmth cues: <b>${raw.warmth_cues_per_1000_words}</b>/1,000 words; positive-energy/excitement cues: <b>${raw.excitement_cues_per_1000_words}</b>/1,000; joint substantial appearances: <b>${raw.joint_appearance_share==null?'n/a':Math.round(raw.joint_appearance_share*100)+'%'}</b>.</div>`:'';
       style=`<div class=eyebrow style="margin-top:9px">Observed communication style <span style="color:#86efac;font-weight:700">&middot; words and interaction behavior</span></div>${exposure}${styleFacet('warmth','Warmth cues','#2dd4bf')}${styleFacet('excitement','Positive energy / excitement cues','#f59e0b')}${styleFacet('activity','Within-appearance activity','#60a5fa')}${styleFacet('gregariousness','Joint-appearance gregariousness','#a78bfa')}${styleFacet('assertiveness','Conversational assertiveness','#fb7185')}${rawline}<div style="font-size:10px;color:#f59e0b;margin-top:4px">These facets are supporting public-speech evidence. Excitement and gregariousness have modest split-half reliability; turn length and verbosity are one evidence family and are not double-counted.</div>`;
     }
+    const hearA=(P.hearing_antag_pct!=null)
+      ?`<b>Hearing low-antagonism (separate facet):</b> ${pctLabel(P.hearing_antag_pct)} — inverse of observed committee-hearing antagonism (interruptions given, chair defiance, friction); its convergence with the interview facet is weak (r=0.16), so it is shown as its own behavioral facet, never as interview-A.<br>`
+      :'';
     const aval=(P.a_validated_pct!=null)
       ?`<div class=eyebrow style="margin-top:8px">Construct separation <span style="color:#f59e0b;font-weight:700">&middot; cooperation is not Agreeableness</span></div>
         <div style="font-size:11px;line-height:1.5;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">
         <b>Cross-party cooperation:</b> ${P.behav_pct&&P.behav_pct[0]!=null?pctLabel(P.behav_pct[0]):'n/a'} — share of observable bipartisan cosponsorship behavior; engine role.<br>
         <b>Low-antagonism A facet:</b> ${pctLabel(P.a_validated_pct)} — absence of hostility/contempt in package-disjoint interviews; display instrument.<br>
-        <span style="color:var(--faint)">They may diverge legitimately: strategic bipartisan action and interpersonal hostility are different behaviors. A is a covered-stratum percentile and is never imputed outside that stratum.</span></div>`
-      :'<div style="font-size:10px;color:var(--faint);margin-top:6px">Low-antagonism A facet: insufficient package-disjoint interview coverage; cross-party cooperation remains separate.</div>';
+        ${hearA}<span style="color:var(--faint)">They may diverge legitimately: strategic bipartisan action and interpersonal hostility are different behaviors. A is a covered-stratum percentile and is never imputed outside that stratum.</span></div>`
+      :(P.hearing_antag_pct!=null
+        ?`<div class=eyebrow style="margin-top:8px">Construct separation <span style="color:#f59e0b;font-weight:700">&middot; cooperation is not Agreeableness</span></div>
+          <div style="font-size:11px;line-height:1.5;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">
+          <b>Cross-party cooperation:</b> ${P.behav_pct&&P.behav_pct[0]!=null?pctLabel(P.behav_pct[0]):'n/a'} — share of observable bipartisan cosponsorship behavior; engine role.<br>
+          <b>Interview low-antagonism A facet:</b> insufficient package-disjoint interview coverage for this member.<br>
+          ${hearA}<span style="color:var(--faint)">Hearing behavior is the closest available observed-interaction read for this member (Paul-directed desert fill 2026-07-17).</span></div>`
+        :'<div style="font-size:10px;color:var(--faint);margin-top:6px">Low-antagonism A facet: insufficient package-disjoint interview coverage; cross-party cooperation remains separate.</div>');
     const B5AX=['Extraversion','Openness','Conscientiousness','Agreeableness','Neuroticism'];
     // Paul-directed fill 2026-07-17: gold-anchored values stay primary; empty slots render the
     // labeled estimate layer (big5_fb_pct) instead of vanishing. Estimates are display-only.

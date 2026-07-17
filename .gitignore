@@ -51,3 +51,5 @@ __pycache__/
 *.log
 fec/lep/
 fec/votesmart_api_key.txt
+!source_data/interview_n_affective.json
+!source_data/wj_n_labels.json

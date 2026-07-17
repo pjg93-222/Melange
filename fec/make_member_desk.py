@@ -210,6 +210,13 @@ _AVAL_ART = L('interview_antagonism.json') or {}
 _AVAL = _AVAL_ART.get('members', {})
 _AVALPCT = _pctrank([d['agreeableness_z'] for d in _AVAL.values()
                      if d.get('agreeableness_z') is not None]) if _AVAL else None
+# Hearing-based antagonism (ratified display facet 2026-07-11; 456 members) surfaced in the desk
+# A-section as ITS OWN labeled facet — fills 174 of the 211 interview-A gaps (Paul desert-fill
+# directive 2026-07-17). NEVER presented as the interview facet: artifact-recorded convergence
+# between the two is r=0.16, and the label says so.
+_HANT = (L('hearing_antagonism.json') or {}).get('members', {})
+_HANTPCT = _pctrank([d['antagonism_z'] for d in _HANT.values()
+                     if d.get('antagonism_z') is not None]) if _HANT else None
 # Paul-directed fill (2026-07-17, "fill them" — e.g. Angie Craig): a GUARDED-FALLBACK display layer
 # so every member's Big-Five panel renders. Gold-anchored values stay primary; where a slot lacks
 # gold coverage the desk shows the full-instrument percentile instead, explicitly captioned as an
@@ -225,6 +232,7 @@ _RAWB5 = (L('big5_traits.json') or {}).get('traits', {})
 # text-N is NEVER displayed (face-invalid per big5_methods; ledger-binding).
 _FB_BLUE_PCT = ({tr: _pctrank([d[tr] for d in B5.values() if d.get(tr) is not None])
                  for tr in ('E', 'O', 'C', 'A', 'N')} if B5 else {})
+_AFFNPCT = _pctrank([v for v in _AFFN.values() if v is not None]) if _AFFN else None
 _FB_RAW_A_PCT = (_pctrank([d['A'] for d in _RAWB5.values() if d.get('A') is not None])
                  if _RAWB5 else None)
 _NARR_DOC = L('member_narratives_v2.json') or {}
@@ -279,6 +287,11 @@ def psy_for(name):
         out['a_antagonism_z'] = _AVAL[name].get('antagonism_z')
         out['a_validated_scope'] = (_AVAL_ART.get('scope') or {}).get('label')
         out['a_coverage_n'] = (_AVAL_ART.get('scope') or {}).get('covered_n')
+    if _HANTPCT and (_HANT.get(name) or {}).get('antagonism_z') is not None:
+        # separate hearing-based facet (inverse read = low antagonism); percentile of antagonism_z,
+        # inverted at display so higher = lower observed hearing antagonism
+        out['hearing_antag_pct'] = round(1.0 - _HANTPCT(_HANT[name]['antagonism_z']), 3)
+        out['hearing_antag_z'] = _HANT[name]['antagonism_z']
     if any(gold[trait] for trait in gold):
         # Product contract: canonical broad Big-Five order E, O, C, A, N. Every slot now uses the
         # OOF gold artifact; one-panel O/C/N carry their explicit weaker support status.
@@ -291,7 +304,11 @@ def psy_for(name):
         bl = B5.get(name) or {}
         _fbv = []; _fbs = []
         for tr in ('E', 'O', 'C', 'A', 'N'):
-            if bl.get(tr) is not None and _FB_BLUE_PCT:
+            if tr == 'N' and _AFFNPCT and _AFFN.get(name) is not None:
+                # canonical source: the promoted affective_n.json itself (blue's N is its downstream
+                # copy and lags until blue rebuilds — e.g. the 2026-07-17 3-member coverage extension)
+                _fbv.append(_AFFNPCT(_AFFN[name])); _fbs.append('affective-content N estimate')
+            elif bl.get(tr) is not None and _FB_BLUE_PCT:
                 _fbv.append(_FB_BLUE_PCT[tr](bl[tr]))
                 _fbs.append('affective-content N estimate' if tr == 'N' else
                             ('validated inverse-antagonism A estimate' if tr == 'A' else 'instrument estimate'))
