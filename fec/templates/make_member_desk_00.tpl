@@ -625,8 +625,16 @@ function psychHTML(m){
         <span style="color:var(--faint)">They may diverge legitimately: strategic bipartisan action and interpersonal hostility are different behaviors. A is a covered-stratum percentile and is never imputed outside that stratum.</span></div>`
       :'<div style="font-size:10px;color:var(--faint);margin-top:6px">Low-antagonism A facet: insufficient package-disjoint interview coverage; cross-party cooperation remains separate.</div>';
     const B5AX=['Extraversion','Openness','Conscientiousness','Agreeableness','Neuroticism'];
-    const b5na=P.big5_pct?B5AX.filter((_,i)=>P.big5_pct[i]==null):[];
-    const rad=P.big5_pct?radar(P.big5_pct,B5AX,'#7dd3fc',82)+(b5na.length?`<div style="font-size:10px;color:var(--faint)">Big Five axes unavailable (not plotted): ${b5na.join(', ')}</div>`:''):'';
+    // Paul-directed fill 2026-07-17: gold-anchored values stay primary; empty slots render the
+    // labeled estimate layer (big5_fb_pct) instead of vanishing. Estimates are display-only.
+    const FB=P.big5_fb_pct||[],FBS=P.big5_fb_src||[];
+    const goldVec=P.big5_pct||[null,null,null,null,null];
+    const merged=goldVec.map((v,i)=>v!=null?v:(FB[i]!=null?FB[i]:null));
+    const est=B5AX.filter((_,i)=>goldVec[i]==null&&FB[i]!=null);
+    const b5na=B5AX.filter((_,i)=>merged[i]==null);
+    const rad=merged.some(v=>v!=null)?radar(merged.map(v=>v==null?0.5:v),B5AX,'#7dd3fc',82)
+      +(est.length?`<div style="font-size:10px;color:#f59e0b">Estimate slots (not gold-anchored): ${est.map(l=>{const i=B5AX.indexOf(l);return l+' — '+esc(FBS[i]||'estimate');}).join('; ')}. Display-only estimate layer; never engine input.</div>`:'')
+      +(b5na.length?`<div style="font-size:10px;color:var(--faint)">Axes with no displayable source (not plotted): ${b5na.join(', ')}</div>`:''):'';
     const persona=(P.communion_pct!=null)?bar('Warmth — communion persona',P.communion_pct,'#2dd4bf')+bar('Assertiveness — agency persona',P.agency_pct,'#c2862a'):'<div class=empty>No persona cue coverage yet for this member.</div>';
     const rd=READS[P.susc_read||'trait-only']||READS['trait-only'];
     const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Engagement responsiveness (engines)</span><b>${P.pressure_mult}×</b></div>
@@ -647,7 +655,7 @@ function psychHTML(m){
       <div><div class=eyebrow>Decision profile <span style="color:#86efac;font-weight:700">· five observable behavioral roles</span></div>${behav}
       <div style="font-size:10px;color:var(--faint);margin:3px 0 6px">Cooperation is cross-party legislative action; follow-through is roll-call/legislative execution; interaction dominance requires at least 30 observed interview turns; interview activity is exposure, not intrinsic Extraversion; breadth is issue coverage.</div>${roles2}${style}${aval}
       ${rad?`<div class=eyebrow style="margin-top:8px">Big Five <span style="color:#86efac;font-weight:700">· accepted multimethod display</span> <span style=color:var(--faint)>· cross-check only — does NOT drive ranks</span></div>
-      <div style="font-size:10px;color:var(--faint);margin:1px 0 3px">All five axes use the OOF Senate-gold composites. E and A clear both independent panels. O and N clear one panel; C has one-panel association support without diagonal dominance. These are public expert-perceived estimates, not self-report or private-state measures; the one-panel axes carry weaker evidence.</div>
+      <div style="font-size:10px;color:var(--faint);margin:1px 0 3px">Gold-anchored axes use the OOF Senate-gold composites; amber-captioned slots are labeled instrument estimates (Paul-directed fill 2026-07-17). E and A clear both independent panels. O and N clear one panel; C has one-panel association support without diagonal dominance. These are public expert-perceived estimates, not self-report or private-state measures; the one-panel axes carry weaker evidence.</div>
       ${rad}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Blue: low confidence (thin text corpus)</div>':''}`:''}</div>
       <div><div class=eyebrow>Projected persona <span style=color:var(--faint)>· public / presented persona (Birkenmaier-Lechner cues) — how they come across, not intrinsic traits</span></div>${persona}
       <div class=eyebrow style=margin-top:8px>Engagement &amp; receptivity</div>${suscRows}${appr}</div></div>${narr}`;

@@ -540,6 +540,23 @@ if os.path.exists(B+r'\member_desk_bundle.json') and os.path.exists(B+r'\ranks_p
         if abs(_rc-(_m.get('score') or 0))>0.003: _bad.append(_nm)
     ck('desk pillar bars match rank authority (no stale-workbook drift)', _nomatch==0, '%d members mismatch authority pcts'%_nomatch)
     ck('desk displayed pillars*weights reconstruct displayed score', len(_bad)==0, '%d members fail reconstruction: %s'%(len(_bad),_bad[:3]))
+    # Paul-directed fill contract (2026-07-17): every member renders a Big-Five panel — gold-anchored
+    # values primary, labeled estimate layer where gold is absent; estimate slots must carry a
+    # provenance label. Guard-only display returns via DESK_B5_FALLBACK=0 (then this check adapts).
+    _fill_on=os.environ.get('DESK_B5_FALLBACK','1')!='0'
+    if _fill_on:
+        _b5empty=[]; _fb_unlabeled=0
+        for _m in _bun.get('members',[]):
+            _p=_m.get('psy') or {}
+            _g=(_p.get('big5_pct') or [None]*5); _f=(_p.get('big5_fb_pct') or [None]*5); _s=(_p.get('big5_fb_src') or [None]*5)
+            _mrg=[(_g[_i] if _i<len(_g) and _g[_i] is not None else (_f[_i] if _i<len(_f) else None)) for _i in range(5)]
+            if not any(_v is not None for _v in _mrg): _b5empty.append(_m.get('name'))
+            for _i in range(5):
+                if (_i>=len(_g) or _g[_i] is None) and _i<len(_f) and _f[_i] is not None and not (_i<len(_s) and _s[_i]):
+                    _fb_unlabeled+=1
+        ck('every member renders a Big-Five panel (gold or labeled estimate; Paul fill 2026-07-17)',
+           not _b5empty, str(_b5empty[:6]))
+        ck('every estimate slot carries a provenance label', _fb_unlabeled==0, '%d unlabeled'%_fb_unlabeled)
     _fr=json.load(open(B+r'\formal_visibility_roles.json',encoding='utf-8'))
     import influence_roles as _ir
     _frm=_fr.get('members') or {}; _rb=_ra.get('formal_role_influence_bonus') or {}

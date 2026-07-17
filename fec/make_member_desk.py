@@ -210,6 +210,23 @@ _AVAL_ART = L('interview_antagonism.json') or {}
 _AVAL = _AVAL_ART.get('members', {})
 _AVALPCT = _pctrank([d['agreeableness_z'] for d in _AVAL.values()
                      if d.get('agreeableness_z') is not None]) if _AVAL else None
+# Paul-directed fill (2026-07-17, "fill them" — e.g. Angie Craig): a GUARDED-FALLBACK display layer
+# so every member's Big-Five panel renders. Gold-anchored values stay primary; where a slot lacks
+# gold coverage the desk shows the full-instrument percentile instead, explicitly captioned as an
+# estimate. Sources: text instrument (big5_traits) for E/O/C/A — NEVER the face-invalid broad
+# text-N — and the promoted affective-content N artifact for the N slot. Display-only; feeds no
+# engine. DESK_B5_FALLBACK=0 is the revert switch (guard-only display, pre-2026-07-17 behavior).
+_B5_FALLBACK_ON = os.environ.get('DESK_B5_FALLBACK', '1') != '0'
+_AFFN = (L('affective_n.json') or {}).get('members', {})
+_RAWB5 = (L('big5_traits.json') or {}).get('traits', {})
+# Percentile pools for the estimate layer. Blue (the desk's accepted instrument) covers E/O/C for
+# all 533, validated package-split A for 322, and the promoted affective-content N for 469. The
+# ONLY deeper fallback used is raw text-A (with its mandatory O-halo caveat) — the retired broad
+# text-N is NEVER displayed (face-invalid per big5_methods; ledger-binding).
+_FB_BLUE_PCT = ({tr: _pctrank([d[tr] for d in B5.values() if d.get(tr) is not None])
+                 for tr in ('E', 'O', 'C', 'A', 'N')} if B5 else {})
+_FB_RAW_A_PCT = (_pctrank([d['A'] for d in _RAWB5.values() if d.get('A') is not None])
+                 if _RAWB5 else None)
 _NARR_DOC = L('member_narratives_v2.json') or {}
 _BASIS_PATH = os.path.join(B, 'profile_basis_v2.json')
 _BASIS_SHA = hashlib.sha256(open(_BASIS_PATH, 'rb').read()).hexdigest() if os.path.exists(_BASIS_PATH) else None
@@ -267,6 +284,26 @@ def psy_for(name):
         # OOF gold artifact; one-panel O/C/N carry their explicit weaker support status.
         out['big5_pct'] = [gold[trait].get('percentile') for trait in ('E','O','C','A','N')]
         out['big5_low'] = bool(t.get('lowconf')); out['tokens'] = t.get('tokens')
+    if _B5_FALLBACK_ON:
+        # Paul-directed estimate layer (2026-07-17 "fill them"): per-slot fallback percentile +
+        # per-slot provenance label; the tpl renders these hatched with an explicit caption and
+        # only where the gold-anchored slot is unavailable. Never engine input.
+        bl = B5.get(name) or {}
+        _fbv = []; _fbs = []
+        for tr in ('E', 'O', 'C', 'A', 'N'):
+            if bl.get(tr) is not None and _FB_BLUE_PCT:
+                _fbv.append(_FB_BLUE_PCT[tr](bl[tr]))
+                _fbs.append('affective-content N estimate' if tr == 'N' else
+                            ('validated inverse-antagonism A estimate' if tr == 'A' else 'instrument estimate'))
+            elif tr == 'A' and _FB_RAW_A_PCT and (_RAWB5.get(name) or {}).get('A') is not None:
+                _fbv.append(_FB_RAW_A_PCT(_RAWB5[name]['A']))
+                _fbs.append('text-A estimate (O-halo caveat; not discriminant-valid)')
+            else:
+                _fbv.append(None); _fbs.append(None)
+        out['big5_fb_pct'] = _fbv
+        out['big5_fb_src'] = _fbs
+        out['big5_fb_scope'] = ('estimate layer, display-only (never engine input): shown only where the '
+                                'gold-anchored slot is unavailable; the retired broad text-N is never displayed')
     lm = _llmhave.get(name)
     if lm and _LLMPCT:
         out['llm_pct'] = [None] + [_LLMPCT[tr](lm[tr]) for tr in ('O', 'C')] + [
