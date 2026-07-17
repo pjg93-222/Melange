@@ -3,6 +3,7 @@ import moneyball_core as MC
 import json, sys, heapq, os, openpyxl
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 WM,WP=0.35,0.65; CAP=50000; BUDGET=2_000_000; INC=1000; BASE=0.15
+if BUDGET<0 or INC<=0: raise ValueError('BUDGET must be nonnegative and INC must be positive')
 # per-CATEGORY persuadability (same scale as overall PERS; '—' = no position on this issue)
 # M5: '—' (no recorded position on this issue, ~60% of cells) lowered 0.55->0.45 so a silent member sits
 # at PARITY with a known 'Ally' rather than ranking ABOVE one (silence is uncertainty, not enthusiasm).
@@ -27,7 +28,12 @@ HALFF=float(os.environ.get('HALFF','0.10'))   # capacity scale: money == HALFF*r
 _rv=sorted((C[n].get('receipts') or 0) for n in members if (C[n].get('receipts') or 0)>0); _RMED=_rv[len(_rv)//2] if _rv else 200000
 Rcap={n:(max((C[n].get('receipts') or 0),200000) if (C[n].get('receipts') or 0)>0 else _RMED) for n in members}   # HIGH-2: receipts=0 = MISSING -> impute median (not floor to $200k, which made no-record members cheapest to convert); matches money_response + flip_model
 # PER-CATEGORY stance matrix (the 3rd dimension) -- drives camp/persuadability/proximity per issue
-CS=json.load(open(MB_ROOT+r'\category_stance.json'))['matrix']
+_CS_DOC=json.load(open(MB_ROOT+r'\category_stance.json')); CS=_CS_DOC['matrix']
+_OVERALL_CAPS=(_CS_DOC.get('gate') or {}).get('overall_capped') or {}
+OVT={n:MC.overall_tier(CS.get(n,{}),n,_OVERALL_CAPS) for n in members}
+# Match the ratified stance-integrity gate in lt_priming/dashboard prime: a system-level Skeptic,
+# Highly Skeptical member, or Opponent is not a money target merely because one topic cell is mild.
+BLOCK_OVERALL={'Skeptic','Highly Skeptical','Opponent'}
 # network proximity
 adj=MC.load_network()
 # (moneyscale removed -- dead since the capacity-aware pflip rewrite)
@@ -61,11 +67,14 @@ def alloc_topic(sc):
     nA={n:sum(w*cpf(n,u) for u,w in adj[n].items() if campT[u]=='pro') for n in members}   # bridge-amplified proximity to THIS issue's champions
     nB={n:sum(w*cpf(n,u) for u,w in adj[n].items() if campT[u]=='anti') for n in members}  # ... and opponents
     mAt=max(nA.values()) or 1; mBt=max(nB.values()) or 1
-    tgt={n:(eng[sc][n]+BASE*score[n]/smax)*PERS[cs[n]]*((1+GAMMA*bpf[n]) if DIRECT else (1+0.3*bpf[n]))*MC.delivery_mult(n) for n in members}  # strategic value x persuadability (x bridge boost when --bridge) x say-do delivery discount (2026-07-07)
+    tgt={n:(0.0 if OVT.get(n) in BLOCK_OVERALL else
+            (eng[sc][n]+BASE*score[n]/smax)*PERS[cs[n]]*
+            ((1+GAMMA*bpf[n]) if DIRECT else (1+0.3*bpf[n]))*MC.delivery_mult(n))
+         for n in members}  # strategic value x persuadability x bridge/delivery, with system-level integrity gate
     al={n:0 for n in members}
     def marg(n): return 0.0 if al[n]>=CAP else tgt[n]*(pflip(n,al[n]+INC,nA,nB,mAt,mBt)-pflip(n,al[n],nA,nB,mAt,mBt))
     h=[(-marg(n),n) for n in members if tgt[n]>0]; heapq.heapify(h); spent=0
-    while spent<BUDGET and h:
+    while spent+INC<=BUDGET and h:
         g,n=heapq.heappop(h)
         if -g<=0: break
         al[n]+=INC; spent+=INC; heapq.heappush(h,(-marg(n),n))

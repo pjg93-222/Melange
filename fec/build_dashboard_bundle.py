@@ -1,5 +1,6 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
-from moneyball_core import dump_atomic, overall_tier   # shared artifact + stance authorities
+from moneyball_core import (dump_atomic, overall_display_tier, salience_issue_params,
+                            select_network_file)   # shared artifact + stance/network authorities
 import json, sys, glob, os, csv, openpyxl, networkx as nx, math, random, re, unicodedata, zlib
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 C=json.load(open(MB_ROOT+r'\congestion.json'))
@@ -53,11 +54,12 @@ for r in range(2,cd.max_row+1):
             base=re.split(r' - | \(full\)',mm.group(1).strip())[0].strip()
             if base: bases.add(base)
     if bases: MEM_COMM[_nfc(nm)]=bases
-# One overall-tier implementation across stance JSON, workbook col G, network dashboard, and member desk.
-# In particular, a member with no domain evidence remains em dash rather than being manufactured as Neutral.
-gen={ra.cell(r,1).value:overall_tier(CS.get(ra.cell(r,1).value,{}),ra.cell(r,1).value,OVERALL_CAPS)
-     for r in range(3,536) if ra.cell(r,1).value}
 members=[m['member'] for m in C]; idx={n:i for i,n in enumerate(members)}
+# One overall display implementation across workbook col G, dashboard, and member desk: Ally is the
+# scored top, while Champion is the Legislative+Press Tier-1 display crown (Tier 1 is sufficient).
+from tier_util import legislative_press_tiers as _lptiers
+_tier,_trank=_lptiers(members)
+gen={n:overall_display_tier(CS.get(n,{}),_tier.get(n,0),n,OVERALL_CAPS) for n in members}
 # party from voteview members (party_code 100=D,200=R,else I); prefer most recent congress
 party={}
 for congN in (119,118,117):
@@ -69,7 +71,7 @@ for congN in (119,118,117):
                 if b and b not in party: party[b]={'100':'D','200':'R'}.get(pc,'I')
 bio2name={cong[n]['bioguide']:n for n in members if cong[n].get('bioguide')}
 # network
-net=max(glob.glob(MB_ROOT+r'\congress_cosponsor_network_*.xlsx'),key=os.path.getmtime)
+net=select_network_file(glob.glob(MB_ROOT+r'\congress_cosponsor_network_*.xlsx'))
 ne=openpyxl.load_workbook(net,data_only=True)['Edges']
 G=nx.Graph(); G.add_nodes_from(members); ew={}
 for r in range(2,ne.max_row+1):
@@ -214,12 +216,15 @@ def frontier_for(lb):
     pts=[[p['b'],p['spread'],(idx.get(p['seed']) if p.get('seed') else -1),(p.get('type','') or '')[:1]] for p in t['path']]
     return {'base':t['base'],'knee':t.get('knee',0),'core':t.get('core_seeds',0),'path':pts}
 frontier=[frontier_for(lb) for lb in source_issues]
-# --- adaptive optimizer (cross-topic CU allocation) ---
+# --- joint optimizer (cross-topic CU allocation; explicit fixed-state/replanning guarantee scope) ---
 if not os.path.exists(B+r'\optimize_result.json'): print('  !! optimize_result.json MISSING — optimizer panel will be EMPTY (run optimize.py)')   # S3-05
 OPT=json.load(open(B+r'\optimize_result.json')) if os.path.exists(B+r'\optimize_result.json') else None
 opt=None
 if OPT:
     opt={'budget':OPT['budget'],'base':round(OPT['base'],1),'final':round(OPT['final'],1),
+         'mode':OPT.get('mode','legacy'),'certificate':bool(OPT.get('certificate_valid')),
+         'bound':OPT.get('opt_bound'),'guarantee':OPT.get('guarantee') or {},
+         'knee':OPT.get('knee',0),'knee_found':bool(OPT.get('knee_found')),
          'alloc':sorted([[idx[n],round(v/1000)] for n,v in OPT['alloc'].items() if n in idx],key=lambda x:-x[1]),
          'conv':[idx[c[0]] for c in OPT['conversions'] if c[0] in idx]}
 # ====== LIVE SCENARIO ENGINE DATA (faithful in-browser port of flip_model + competitive cascade + lt_priming) ======
@@ -246,20 +251,15 @@ engine['pmult']=[round(fmE.rc(n,'pressure_mult',1.0),3) for n in members]
 engine['emult']=[round(fmE.rc(n,'edge_mult',1.0),3) for n in members]
 engine['dmult']=[round(fmE.MC.delivery_mult(n),3) for n in members]
 # ---- Noble & Turner (2024) going-public parameters per issue -> System-shocks exec cue ----
-# z = sincere polarization (D-R stance gap on the issue); psi = share w/o an established posture;
-# P(rally)=(1-b)(1-z/3), P(retreat)=(1-b)(z/3), b = 0.05+0.10*psi backfire.  Estimation identical to
-# fec/salience_shock.py (KEEP IN SYNC).  Feeds the party-asymmetric exec-cue multipliers in the JS.
-_TS={'C':3,'F':2.5,'A':2,'H':1,'T':0,'L':-1,'S':-2,'O':-3}
+# z = sincere polarization (D-R stance gap on the issue); psi = missing posture + True-Neutral
+# uncertainty. The exact estimator is shared with salience_shock.py in moneyball_core.
 _DEF=set(json.load(open(MB_ROOT+r'\category_stance.json'))['defensive'])
 engine['sal']=[]
+_party_by_member={name[k]:PARTY[k] for k in range(len(name))}
 for i in range(len(issues)):
-    sd=[_TS[STANCE[k][i]] for k in range(len(name)) if PARTY[k]=='D' and STANCE[k][i] in _TS]
-    sr=[_TS[STANCE[k][i]] for k in range(len(name)) if PARTY[k]=='R' and STANCE[k][i] in _TS]
-    _z=abs((sum(sd)/max(1,len(sd)))-(sum(sr)/max(1,len(sr)))); _zn=min(1.0,_z/3.0)
-    _psi=1.0-sum(1 for k in range(len(name)) if STANCE[k][i] in _TS)/max(1,len(name))
-    _b=min(0.35,0.05+0.10*_psi)
-    engine['sal'].append({'z':round(_z,2),'p':round((1-_b)*(1-_zn),3),'q':round((1-_b)*_zn,3),'b':round(_b,3),
-                          'def':1 if issue_cat[i] in _DEF else 0})
+    _sp=salience_issue_params(CS,name,_party_by_member,issue_cat[i],_DEF)
+    engine['sal'].append({'z':_sp['z'],'p':_sp['p'],'q':_sp['q'],'b':_sp['b'],
+                          'def':1 if _sp['sq']=='defend' else 0})
 engine['const']['EXECP']='R'   # executive party for the going-public cue (119th Congress)
 # go-public advisory verdicts (salience_shock.py --advise), surfaced in the System-shocks panel
 _advmap={}
@@ -286,8 +286,6 @@ stats.append({'champ':GEN.count('C')+GEN.count('F'),'ally':GEN.count('A'),'opp':
 # Overall rank blends four pillars (Leg 30 / Press 25 / Committee 40 / Demo 5); a tier drops Committee + Demo and
 # re-ranks on legislative + press alone, bucketing top 12 / next 24 / next 48 (Tier 1/2/3; rest untiered). Fed to no
 # engine, moves no rank. Shared with the Member Desk producer via tier_util so the tier is defined in ONE place.
-from tier_util import legislative_press_tiers as _lptiers
-_tier,_trank=_lptiers(members)
 TIER=[_tier.get(n,0) for n in members]; TIERRANK=[_trank.get(n,0) for n in members]   # aligned to members/name order
 print('tier (legislative+press, common-percentile blend): T1=%d T2=%d T3=%d untiered=%d'%(
     TIER.count(1),TIER.count(2),TIER.count(3),TIER.count(0)))

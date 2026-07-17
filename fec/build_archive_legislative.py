@@ -48,20 +48,38 @@ def matchmember(mem): return _resolver.resolve(mem)
 overrides=BR.load_overrides(MB_ROOT+r'\bill_overrides.csv')
 leg=collections.defaultdict(lambda:collections.defaultdict(float)); unmatched=collections.Counter()
 excluded=collections.Counter(); overridden=collections.Counter()
-for _,r in A.iterrows():
+events={}; routing_rows=[]; duplicate_rows=collections.Counter()
+def _clean(value):
+    if value is None or pd.isna(value): return None
+    if isinstance(value,(int,float,str,bool)): return value
+    return str(value)
+for _idx,r in A.iterrows():
+    audit={'source_row':int(_idx)+2,'member_source':_clean(r.get('Member')),
+           'bill':_clean(r.get('Name')),'congress':_clean(r.get('Congress')),
+           'title':_clean(r.get('Title')),'source_section':_clean(r.get('Section')),
+           'source_role':_clean(r.get('Role'))}
     cat=seccat(r['Section'])
-    if not cat: continue
+    if not cat:
+        audit['disposition']='unknown-section'; routing_rows.append(audit); continue
     phrase=BR.excluded_bill(r.get('Name'),r.get('Congress'),r.get('Title'),r.get('bill_summary'))
-    if phrase: excluded[phrase]+=1; continue
+    if phrase:
+        excluded[phrase]+=1; audit.update({'disposition':'excluded-title','reason':phrase})
+        routing_rows.append(audit); continue
     mm=matchmember(r['Member'])
-    if not mm: unmatched[str(r['Member'])]+=1; continue
-    dw=r['DecayWeight'] if pd.notna(r['DecayWeight']) else 1.0; w=rolewt(r['Role'])
+    if not mm:
+        unmatched[str(r['Member'])]+=1; audit['disposition']='unmatched-member'
+        routing_rows.append(audit); continue
+    dw=float(r['DecayWeight']) if pd.notna(r['DecayWeight']) else 1.0
+    role=BR.canonical_role(r['Role']); w=rolewt(role)
     bk=billkey(r['Name'])
     ov=BR.override_for(overrides,r['Name'],r.get('Congress'))
     sign=None
     if ov:
         overridden['rows']+=1
-        if not BR.override_included(ov): overridden['excluded']+=1; continue
+        audit['override_reason']=ov.get('Reason') or ov.get('Notes') or 'bill override'
+        if not BR.override_included(ov):
+            overridden['excluded']+=1; audit['disposition']='excluded-override'
+            routing_rows.append(audit); continue
         if ov.get('Category'):
             ocat=BR.canonical_category(ov['Category'])
             if not ocat: raise ValueError('Unknown override category for %s: %s'%(r['Name'],ov['Category']))
@@ -69,27 +87,63 @@ for _,r in A.iterrows():
         odir=parse_direction(ov.get('Direction',''))
         if odir is not None:
             sign=odir
-            if sign==0: overridden['neutral']+=1; continue
+            if sign==0:
+                overridden['neutral']+=1; audit['disposition']='neutral-override'
+                routing_rows.append(audit); continue
     if sign is None and parse_direction(r.get('ManualDirection')) is not None:
         sign=parse_direction(r.get('ManualDirection'))
-        if sign==0: continue
+        if sign==0:
+            audit['disposition']='neutral-manual'; routing_rows.append(audit); continue
     if sign is not None:
         pass                              # explicit per-bill/per-Congress override wins
     elif bk in bdir:                      # registry beats the section default (any category)
         sign={'1':1,'-1':-1}.get(bdir[bk],0)
-        if sign==0: continue              # '0' = neutral bill, excluded (the old code mis-signed these -1)
+        if sign==0:
+            audit['disposition']='neutral-registry'; routing_rows.append(audit); continue
     elif cat=='CFPB':
         sign=1                            # CFPB default = restrain-side (all 43 archive bills ARE in the registry today; this default covers future pulls)
     elif cat=='Credit Card Mandates':
         sign=1 if 'disapproval' in str(r['Title']).lower() else -1   # CRA disapproval overturns the fee rule = pro-CU; rate/fee caps = anti-CU
     else:
         sign=-1 if cat in NEG else 1
-    leg[mm][cat]+=sign*w*dw
+    contribution=float(sign*w*dw)
+    # The archive repeats many original cosponsors once as "original-cosponsor" and again as
+    # "cosponsor". Score one member/bill/Congress/effective-domain event, preserving the strongest role.
+    event_key=(mm,str(r.get('Name') or '').strip().lower(),BR._congress(r.get('Congress')),cat)
+    audit.update({'member':mm,'effective_category':cat,'effective_role':role,'sign':int(sign),
+                  'decay_weight':dw,'contribution':contribution,'disposition':'selected'})
+    routing_rows.append(audit); ai=len(routing_rows)-1
+    prior=events.get(event_key)
+    if prior is None:
+        events[event_key]={'role':role,'contribution':contribution,'audit_index':ai}
+    else:
+        preferred=BR.preferred_role((prior['role'],role))
+        if preferred==role and role!=prior['role']:
+            routing_rows[prior['audit_index']]['disposition']='duplicate-lower-role'
+            routing_rows[prior['audit_index']]['selected_role']=role
+            duplicate_rows['lower-role-replaced']+=1
+            events[event_key]={'role':role,'contribution':contribution,'audit_index':ai}
+        else:
+            audit['disposition']='duplicate-lower-role' if role!=prior['role'] else 'duplicate-same-role'
+            audit['selected_role']=prior['role']
+            duplicate_rows[audit['disposition']]+=1
+for (mm,_bill,_congress,cat),event in events.items():
+    leg[mm][cat]+=event['contribution']
 print('matched model members with >=1 archive bill: %d / %d'%(len(leg),len(model)))
 print('manual sponsored/original evidence rows loaded: %d'%_manual_n)
 um=sum(unmatched.values()); print('unmatched archive rows: %d ; top unmatched names:'%um,[n for n,_ in unmatched.most_common(6)])
-print('shared false-positive exclusions: %d rows; override rows: %d (excluded %d, neutral %d)'%(
-      sum(excluded.values()),overridden['rows'],overridden['excluded'],overridden['neutral']))
+print('shared false-positive exclusions: %d rows; override rows: %d (excluded %d, neutral %d); deduplicated %d rows'%(
+      sum(excluded.values()),overridden['rows'],overridden['excluded'],overridden['neutral'],
+      sum(duplicate_rows.values())))
 dump_atomic({m:dict(leg[m]) for m in leg},MB_ROOT+r'\archive_leg.json')
+dump_atomic({'schema':'legislation-routing-audit-v1',
+             'source':_o.path.basename(sorted(glob.glob(MB_ROOT+r'\congress_bills_archive_*.xlsx'))[-1]),
+             'source_rows':len(A),'selected_events':len(events),
+             'summary':{'dispositions':dict(collections.Counter(row['disposition'] for row in routing_rows)),
+                        'effective_categories':dict(collections.Counter(
+                            row.get('effective_category') for row in routing_rows if row.get('effective_category'))),
+                        'duplicates':dict(duplicate_rows),'excluded':dict(excluded),
+                        'unmatched_members':dict(unmatched.most_common())},
+             'rows':routing_rows},MB_ROOT+r'\legislation_routing_audit.json')
 print('\nVALIDATION — Durbin per-category (signed role-weighted):')
 for c,v in sorted(leg['Richard Durbin'].items(),key=lambda x:-abs(x[1])): print('   %-26s %+.1f'%(c,v))

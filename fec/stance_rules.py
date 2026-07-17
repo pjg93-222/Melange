@@ -24,10 +24,19 @@ ROUNDING_STRENGTH = 0.05
 ROUNDING_CAP = 0.05
 LEGISLATION_SQRT_SCALE = 2.0
 MEDIA_SCALE = 1.0
+STANCE_LABELS = {'support', 'oppose', 'neutral', 'unrelated'}
 
 
 def clip(value, lo=-1.0, hi=1.0):
     return max(lo, min(hi, float(value)))
+
+
+def enforce_reader_unanimity(meta_label, reader_labels):
+    """A unanimous set of valid base readers beats a contradictory meta prediction."""
+    readers = [str(value or '').strip().lower() for value in reader_labels]
+    if readers and all(value in STANCE_LABELS for value in readers) and len(set(readers)) == 1:
+        return readers[0]
+    return str(meta_label or '').strip().lower()
 
 
 def classify(score, has_signal=True, defensive=False):

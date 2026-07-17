@@ -13,6 +13,7 @@ from pathlib import Path
 
 FEC = Path(__file__).resolve().parents[1]
 ROOT = FEC.parent
+DATA_ROOT = Path(os.environ.get("MONEYBALL_ROOT", ROOT))
 sys.path.insert(0, str(FEC))
 
 
@@ -73,37 +74,54 @@ class SpeechScorerContracts(unittest.TestCase):
         expected = "x" + hashlib.md5(("%s|%s|%s" % (bio, date, text)).encode("utf-8", "replace")).hexdigest()[:12]   # x-hardened (Excel-proof) id, 2026-07-15
         self.assertEqual(self.sss.row_id(bio, date, text), expected)
 
+    def test_precision_negative_neutral_gold_can_retire_without_weak_relabeling(self):
+        road = {
+            "gold_stance": "neutral",
+            "categories": "Interchange",
+            "text_snippet": "The I-74 Mississippi River Bridge won an infrastructure award.",
+        }
+        directional = {
+            "gold_stance": "support",
+            "categories": "Interchange",
+            "text_snippet": "We must rein in the Durbin interchange mandate for credit unions.",
+        }
+        self.assertTrue(self.sss.retired_precision_orphan(road))
+        self.assertFalse(self.sss.retired_precision_orphan(directional))
+
 
 class SpeechCsvEmission(unittest.TestCase):
     """speech_stance_stack must emit speech_stance_final.csv with the contracted schema + valid values."""
 
     def test_main_emits_wellformed_csv(self):
-        if not (ROOT / "speeches_cu.csv").exists():
+        if not (DATA_ROOT / "speeches_cu.csv").exists():
             self.skipTest("speeches_cu.csv absent in this tree")
         import speech_stance_stack as sss
         sss.main()
-        out = ROOT / "speech_stance_final.csv"
+        out = DATA_ROOT / "speech_stance_final.csv"
         self.assertTrue(out.exists(), "speech_stance_final.csv not written")
-        rows = list(csv.DictReader(io.open(out, encoding="utf-8-sig", newline="")))
+        with io.open(out, encoding="utf-8-sig", newline="") as handle:
+            rows = list(csv.DictReader(handle))
         self.assertGreater(len(rows), 0)
         self.assertEqual(list(rows[0].keys()),
-                         ["bioguide", "member", "date", "categories", "stance", "tier"])
+                         ["bioguide", "member", "date", "categories", "stance", "tier",
+                          "model_stance", "rule_read", "local_read", "transfer_read",
+                          "gold_applied"])
         for r in rows:
             self.assertIn(r["stance"], ("support", "oppose", "neutral"))
-            self.assertIn(r["tier"], ("gold", "review"))
+            self.assertIn(r["tier"], ("gold", "unanimous", "majority", "review"))
 
 
 class BlendGateContracts(unittest.TestCase):
-    """The speech channel must be gated OFF by default so ranks are byte-identical until validated."""
+    """Validated speech evidence is part of the press-side media score by default."""
 
     def test_blend_references_speech_sidecar(self):
         txt = source("build_media_blend.py")
         self.assertIn("speech_stance_final", txt)
 
-    def test_blend_gate_defaults_off(self):
+    def test_blend_gate_defaults_on(self):
         txt = source("build_media_blend.py")
-        m = re.search(r"os\.environ\.get\(\s*'CU_SPEECH_CHANNEL'\s*,\s*'0'\s*\)", txt)
-        self.assertIsNotNone(m, "CU_SPEECH_CHANNEL must default to '0' (OFF)")
+        m = re.search(r"os\.environ\.get\(\s*'CU_SPEECH_CHANNEL'\s*,\s*'1'\s*\)", txt)
+        self.assertIsNotNone(m, "CU_SPEECH_CHANNEL must default to '1' (ON)")
         self.assertIn("CU_SPEECH_CHANNEL", txt)
 
     def test_blend_speech_fold_is_gated(self):

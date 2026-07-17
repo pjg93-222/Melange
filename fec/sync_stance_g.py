@@ -11,12 +11,14 @@ Run after any IMP change or Category Stance edit (run_pipeline does this automat
 import json,sys,collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import openpyxl
-from moneyball_core import overall_tier,save_workbook_atomic   # shared stance law + crash-safe workbook replace
+from moneyball_core import overall_display_tier,save_workbook_atomic   # shared stance law + crash-safe workbook replace
+from tier_util import legislative_press_tiers
 B=MB_ROOT
 WB=B+r'\Moneyball Main Version - Blended.xlsx'
 CS=json.load(open(B+r'\category_stance.json',encoding='utf-8'))
 M=CS['matrix']; OVERALL_CAPS=(CS.get('gate') or {}).get('overall_capped') or {}
-def agg(n): return overall_tier(M.get(n,{}),n,OVERALL_CAPS)
+_tier,_trank=legislative_press_tiers(list(M))
+def agg(n): return overall_display_tier(M.get(n,{}),_tier.get(n,0),n,OVERALL_CAPS)
 wb=openpyxl.load_workbook(WB)                       # formulas preserved
 ws=wb['Rank & Allocation']; cnt=collections.Counter(); n=0
 for r in range(3,536):

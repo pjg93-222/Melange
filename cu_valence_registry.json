@@ -225,9 +225,9 @@
     "cbdc",
     "central bank digital"
    ],
-   "valence": 1,
-   "source": "derived-from-gold",
-   "gold_n": 23
+   "valence": -1,
+   "source": "validated-system-correction",
+   "note": "CBDC disintermediates credit-union deposits; opposing or banning CBDC is pro-CU. Corrected 2026-07-16 after rank-delta audit exposed reversed composition."
   },
   {
    "key": "stablecoin",

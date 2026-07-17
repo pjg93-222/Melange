@@ -248,7 +248,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#161b22}
   <div style=color:var(--muted);margin-bottom:10px;max-width:760px>Where the next credit-union dollar moves the most. Sorted by <b style=color:#34d399>ROI</b> — expected co-sponsors gained from the next $10k.</div>
   <details class=methnote><summary>How these are computed</summary><div class=methbody>
     <b style=color:#34d399>ROI</b> — expected flips from the next $10k (one PAC's cycle max), from the capacity- &amp; competition-aware Linear-Threshold flip model. The rigorous metric: it rewards genuinely <i>movable</i> targets.<br>
-    <b>Suggested</b> — the Golovin–Krause adaptive-submodular optimizer's allocation. <b>Gap</b> = suggested − already invested (FEC).<br>
+    <b>Suggested</b> — the joint fixed-state lazy-greedy optimizer's allocation; modeled threshold replans are labeled separately and carry no fixed-state certificate. <b>Gap</b> = suggested − already invested (FEC).<br>
     <b>Value</b> — influence-percentile − spend-percentile: a quick "undervalued" triage heuristic (ordinal; ignores winnability, so it can disagree with ROI).</div></details>
   <div class=controls>
     <div class=search><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg><input id=effq aria-label="Search efficiency table" placeholder="Search member…" autocomplete=off></div>

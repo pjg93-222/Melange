@@ -19,6 +19,7 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
+import config_overlay as CO
 B = MB_ROOT
 CL = ["support", "oppose", "neutral", "unrelated"]
 
@@ -27,7 +28,7 @@ for ln in open(B + r"\api_press_cache_fable.jsonl", encoding="utf-8"):
     try:
         d = json.loads(ln); fable[d["k"]] = d["out"]
     except Exception: pass
-REG = json.load(open(B + r"\cu_valence_registry.json"))["entries"]
+REG = CO.merged_rows("cu_valence_registry.json","entries",("key",),data_root=B)
 FT = {}
 for _cp in (B + r"\press_text_cache.jsonl", B + r"\press_text_cache_priority.jsonl"):
     if not os.path.exists(_cp): continue
@@ -50,10 +51,8 @@ def reg_key(target, text):
         if any(m in blob for m in e["match"]): return e["key"]
     return None
 # Paul's hand press-stance overrides (ground truth; applied LAST). Same file the desk display uses.
-try:
-    _POV = json.load(open(B + r"\press_stance_overrides.json", encoding="utf-8")).get("corrections", [])
-except Exception:
-    _POV = []
+_POV = CO.merged_rows("press_stance_overrides.json","corrections",
+                      ("url","title_contains"),data_root=B)
 def _uurl(u): return (u or "").strip().rstrip("/")   # BUG-F fix: match the pipeline's URL canonicalization
 _POV_URL = {_uurl(c.get("url")): (c.get("stance") or "").strip().lower() for c in _POV
             if c.get("url") and (c.get("stance") or "").strip().lower() in ("support", "oppose", "neutral")}

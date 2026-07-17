@@ -207,39 +207,87 @@ def gate(n,cs): return max(0.15,rc(n,'seed_prob',1.0)*SGATE.get(cs.get(n,'—'),
 TORD={'Champion':4,'Defender':4,'Ally':3,'Highly Persuadable':2,'Persuadable':1,
       'Lean Persuadable':0.5,'True Neutral':0,'Neutral':0,'Lean Skeptic':-0.5,
       'Skeptic':-1,'Highly Skeptical':-2,'Opponent':-4}
-# User-directed 2026-07-15: populate the overall Opponent rung modestly. The prior -2.50
-# cutoff sat below the observed roster minimum and produced zero Opponents; -1.60 creates
-# the first committed Opponent while retaining a distinct Highly Skeptical band. Higher
-# values create more Opponents. Revert: OVERALL_OPPONENT_CUTOFF=-2.50.
-OVERALL_OPPONENT_CUTOFF=float(os.environ.get('OVERALL_OPPONENT_CUTOFF','-1.10'))   # Paul 2026-07-15: SHIFTED THE WHOLE OVERALL SCALE UP. The roster skews pro-CU (overall score median ~2.38 on a [-4,4] TORD mean), so the old 0-centered bands starved the bottom rungs (0 Opponents). Top cutoffs raised (Champion 2.85->3.65) so members spread down; bottom rebalanced + widened so BOTH Highly Skeptical + Opponent populate with a valid monotonic ladder. This is the Highly Skeptical FLOOR (< Skeptic -0.70). Revert: git.
-OVERALL_BANDS=((3.65,'Champion'),(3.05,'Ally'),(2.30,'Highly Persuadable'),
-               (1.55,'Persuadable'),(1.05,'Lean Persuadable'),(0.55,'True Neutral'),
-               (0.05,'Lean Skeptic'),(-0.70,'Skeptic'),(OVERALL_OPPONENT_CUTOFF,'Highly Skeptical'))
+# Overall score rungs are weighted averages of TORD prototypes. Each cutoff is the midpoint between
+# adjacent prototypes; the Highly-Skeptical/Opponent midpoint is -3.0.
+# This prevents positive records from being labeled skeptical and negative records from being labeled
+# persuadable. The env override remains available for controlled sensitivity checks.
+OVERALL_OPPONENT_CUTOFF=float(os.environ.get('OVERALL_OPPONENT_CUTOFF','-3.00'))
+# 2026-07-16/17 overall-label contract: Ally owns the scored top of the ladder. Champion is not a
+# score band; Legislative+Press Tier 1 is the complete and sufficient qualification for the display
+# crown. The Ally/Highly-Persuadable midpoint is 2.50, which keeps a strongly allied mixed record
+# such as Katie Britt's on the Ally side of the semantic boundary. The 3.65 legacy floor is retained solely for the
+# already-ratified aggregate say-do audit below.
+OVERALL_CHAMPION_SCORE_FLOOR=3.65
+OVERALL_BANDS=((2.50,'Ally'),(1.50,'Highly Persuadable'),
+               (0.75,'Persuadable'),(0.25,'Lean Persuadable'),(-0.25,'True Neutral'),
+               (-0.75,'Lean Skeptic'),(-1.50,'Skeptic'),(OVERALL_OPPONENT_CUTOFF,'Highly Skeptical'))
+def validate_overall_bands(bands,opponent_cutoff):
+    """Fail closed when an env override makes the fixed overall ladder non-monotone."""
+    cuts=[float(c) for c,_ in bands]; labels=[t for _,t in bands]
+    if not cuts or any(cuts[i]<=cuts[i+1] for i in range(len(cuts)-1)):
+        raise ValueError('overall band cutoffs must be strictly descending')
+    if len(labels)!=len(set(labels)):
+        raise ValueError('overall band labels must be unique')
+    if labels[-1]!='Highly Skeptical' or abs(cuts[-1]-float(opponent_cutoff))>1e-12:
+        raise ValueError('OVERALL_OPPONENT_CUTOFF must be the Highly Skeptical floor')
+    return tuple(bands)
+validate_overall_bands(OVERALL_BANDS,OVERALL_OPPONENT_CUTOFF)
 def overall_thresholds():
-    return {'scale':'fixed-ten-tier-overall-v2','bands':[{'minimum':cut,'tier':tier} for cut,tier in OVERALL_BANDS],
-            'below_last':'Opponent','missing':'—','normalization':'fixed-not-roster-percentile'}
+    return {'scale':'prototype-midpoint-nine-tier-base-plus-tier1-crown-v5',
+            'bands':[{'minimum':cut,'tier':tier} for cut,tier in OVERALL_BANDS],
+            'below_last':'Opponent','missing':'—','normalization':'fixed-not-roster-percentile',
+            'champion_overlay':{'legislative_press_tier':1,'qualification':'tier1-is-sufficient'}}
 def overall_rounding(cm):
     """Bounded +/-0.05 nudge from exceptional cross-domain performance."""
     earned=[t for t in cm.values() if t in TORD]
     if not earned: return 0.0
     balance=sum(t in ('Champion','Defender') for t in earned)-sum(t=='Opponent' for t in earned)
     return max(-0.05,min(0.05,0.10*balance/len(earned)))
-def overall_tier(cm,member=None,overall_capped=None):
-    """IMP-weighted mean of TORD tier scores -> the 10-rung overall ladder ('—' excluded: silence
-    doesn't dilute earned tiers). SINGLE COPY (S2-04 fix, audit run-2): sync_stance_g writes col G
-    with this law, and per_category_stance's in-run gen iteration derives the SAME law — so col G
-    is a pure OUTPUT/view, never a cross-run input."""
+def _overall_value(cm):
     sw=si=0.0
     for c,t in cm.items():
         if t in TORD: w=IMP.get(c,0.5); sw+=TORD[t]*w; si+=w
-    if si==0: return '—'
-    x=sw/si+overall_rounding(cm)
-    tier=next((label for cut,label in OVERALL_BANDS if x>=cut),'Opponent')
-    # The producer records its evidence-denominator decision in category_stance.json. Consumers pass
-    # that block explicitly, so no hidden read of a stale artifact can influence this shared function.
-    if tier=='Champion' and member and member in (overall_capped or {}):
-        return (overall_capped[member] or {}).get('final','Ally')
-    return tier
+    return None if si==0 else sw/si+overall_rounding(cm)
+def _overall_scored_tier(cm):
+    """Legacy high-score marker used only by the aggregate say-do audit."""
+    x=_overall_value(cm)
+    if x is None: return '—'
+    if x+1e-12>=OVERALL_CHAMPION_SCORE_FLOOR: return 'Champion'
+    return overall_tier_from_value(x)
+def overall_tier_from_value(value):
+    """Map one numeric overall score to the fixed semantic ladder."""
+    if value is None: return '—'
+    x=float(value)
+    return next((label for cut,label in OVERALL_BANDS if x+1e-12>=cut),'Opponent')
+def overall_tier(cm,member=None,overall_capped=None):
+    """IMP-weighted fixed base tier. Champion is deliberately absent; see overall_display_tier."""
+    return overall_tier_from_value(_overall_value(cm))
+def overall_display_tier(cm,legislative_press_tier,member=None,overall_capped=None):
+    """Apply the only overall Champion rule: Legislative+Press Tier 1 is sufficient."""
+    if int(legislative_press_tier or 0)==1:
+        return 'Champion'
+    return overall_tier(cm,member,overall_capped)
+
+# Noble-Turner going-public parameters. Both the Python shock engine and shipped dashboard bundle
+# call this exact implementation so fine stance tiers and the True-Neutral uncertainty term cannot drift.
+SALIENCE_TSCORE={'Champion':3,'Defender':2.5,'Ally':2,'Highly Persuadable':1.25,
+                 'Persuadable':0.75,'Lean Persuadable':0.25,'True Neutral':0,
+                 'Lean Skeptic':-0.5,'Skeptic':-1,'Highly Skeptical':-2,'Opponent':-3}
+def salience_issue_params(matrix,members,party_by_member,cat,defensive=(),backfire0=0.05,backfire_psi=0.10):
+    sD=[SALIENCE_TSCORE[matrix.get(m,{}).get(cat)] for m in members
+        if party_by_member.get(m)=='D' and matrix.get(m,{}).get(cat) in SALIENCE_TSCORE]
+    sR=[SALIENCE_TSCORE[matrix.get(m,{}).get(cat)] for m in members
+        if party_by_member.get(m)=='R' and matrix.get(m,{}).get(cat) in SALIENCE_TSCORE]
+    nall=sum(1 for m in members if matrix.get(m,{}).get(cat) in SALIENCE_TSCORE)
+    z=abs((sum(sD)/max(1,len(sD)))-(sum(sR)/max(1,len(sR))))
+    zn=min(1.0,z/3.0)
+    psi=1.0-nall/max(1,len(members))
+    neutral=sum(1 for m in members if matrix.get(m,{}).get(cat)=='True Neutral')
+    psi=min(1.0,psi+0.3*(neutral/max(1,nall)))
+    b=min(0.35,float(backfire0)+float(backfire_psi)*psi)
+    return {'z':round(z,2),'zn':round(zn,3),'psi':round(psi,3),
+            'p':round((1-b)*(1-zn),3),'q':round((1-b)*zn,3),'b':round(b,3),
+            'sq':'defend' if cat in set(defensive) else 'offense'}
 
 # ---- SAY-DO gate + delivery discount (user-ratified 2026-07-07, boss review: "Hill says a lot,
 # doesn't follow through") — SINGLE COPY, applied where category_stance.json is WRITTEN so every
@@ -372,7 +420,10 @@ def overall_say_do_gate(member,gated_cm,raw_cm,corroborated):
     bill source is the availability sentinel: if it cannot be loaded, the rule fails open instead of
     penalizing an entire roster for a missing input.
     """
-    raw=overall_tier(gated_cm)
+    # The public base ladder now tops out at Ally. Keep the legacy 3.65 high-score marker here so
+    # the aggregate say-do evidence audit remains available as provenance. It no longer vetoes the
+    # Tier-1 display crown: Tier 1 is the complete Champion qualification.
+    raw=_overall_scored_tier(raw_cm)
     top=sorted(c for c,t in raw_cm.items() if t in ('Champion','Defender'))
     corr=bill_corroboration(); member_corr=corr.get(member,{}) or {}
     delivered=sorted(c for c in top if corroborated.get(c) in ('A','V'))

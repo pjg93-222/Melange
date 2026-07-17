@@ -4,20 +4,22 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
 import unittest
 
 
 FEC = Path(__file__).resolve().parents[1]
 ROOT = FEC.parent
+DATA_ROOT = Path(os.environ.get("MONEYBALL_ROOT", ROOT))
 
 
 class GoldMultitraitContracts(unittest.TestCase):
     def setUp(self):
-        self.artifact = json.loads((ROOT / "big5_gold_anchored.json").read_text(encoding="utf-8"))
-        self.profile = json.loads((ROOT / "profile_basis_v2.json").read_text(encoding="utf-8"))
+        self.artifact = json.loads((DATA_ROOT / "big5_gold_anchored.json").read_text(encoding="utf-8"))
+        self.profile = json.loads((DATA_ROOT / "profile_basis_v2.json").read_text(encoding="utf-8"))
         self.desk = {row["name"]: row for row in
-                     json.loads((ROOT / "member_desk_bundle.json").read_text(encoding="utf-8"))["members"]}
+                     json.loads((DATA_ROOT / "member_desk_bundle.json").read_text(encoding="utf-8"))["members"]}
 
     def test_every_big_five_trait_has_out_of_fold_gold_results(self):
         self.assertEqual("big5-gold-anchored-v2", self.artifact["schema"])
@@ -103,7 +105,7 @@ class GoldMultitraitContracts(unittest.TestCase):
 
 class AudioSourcePilotContracts(unittest.TestCase):
     def setUp(self):
-        self.pilot = json.loads((ROOT / "b5_audio_source_pilot.json.candidate").read_text(encoding="utf-8"))
+        self.pilot = json.loads((DATA_ROOT / "b5_audio_source_pilot.json.candidate").read_text(encoding="utf-8"))
 
     def test_pilot_audits_all_requested_source_families(self):
         self.assertEqual("b5-audio-source-pilot-v1", self.pilot["schema"])
@@ -138,8 +140,8 @@ class AudioSourcePilotContracts(unittest.TestCase):
 
 class BehavioralIntegrityContracts(unittest.TestCase):
     def setUp(self):
-        self.behavior = json.loads((ROOT / "behavioral_dispositions.json").read_text(encoding="utf-8"))
-        self.lep = json.loads((ROOT / "lep_criterion.json").read_text(encoding="utf-8"))
+        self.behavior = json.loads((DATA_ROOT / "behavioral_dispositions.json").read_text(encoding="utf-8"))
+        self.lep = json.loads((DATA_ROOT / "lep_criterion.json").read_text(encoding="utf-8"))
 
     def test_diligence_has_pinned_components_and_excludes_chrg(self):
         self.assertEqual("behavioral-dispositions-v2", self.behavior["schema"])

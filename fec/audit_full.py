@@ -2,9 +2,26 @@ import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__fil
 """FULL-BODY AUDIT — every module in one report.
 Consolidates the integrity (22) + frontier (11) audits and adds correctness checks for the
 new modules: money-response, electoral plays, co-sponsor routes, LT-priming, stance, determinism."""
-import json,sys,os,subprocess,re,collections,importlib.util
+import json,sys,os,subprocess,re,collections,importlib.util,csv
+import config_overlay as CO
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
-B=MB_ROOT; FE=B+r'\fec'
+B=MB_ROOT; FE=os.path.dirname(os.path.abspath(__file__)); DATA_FE=B+r'\fec'
+def _pid_alive(pid):
+    try:
+        os.kill(int(pid),0); return True
+    except (OSError,ValueError,TypeError):
+        return False
+def assert_no_foreign_pipeline_writer(lock_path=None,parent_pid=None):
+    """A standalone audit must never read a mixed-generation artifact set."""
+    lock_path=lock_path or os.path.join(B,'.pipeline_run.lock')
+    parent_pid=os.getppid() if parent_pid is None else int(parent_pid)
+    try:
+        with open(lock_path,encoding='utf-8') as handle: owner=json.load(handle).get('pid')
+    except (FileNotFoundError,OSError,ValueError,TypeError):
+        return
+    if owner not in (os.getpid(),parent_pid) and _pid_alive(owner):
+        raise RuntimeError('refusing audit while a foreign Moneyball pipeline owns the artifact set (pid %s)'%owner)
+assert_no_foreign_pipeline_writer()
 P,F=[],[]
 def ck(name,cond,detail=''):
     (P if cond else F).append(name); print(('  OK   ' if cond else 'FAIL  ')+name+((' :: '+detail) if (detail and not cond) else ''))
@@ -38,9 +55,16 @@ _hsk=[m for m in mr.C if mr.PROJ.get(mr.OV.get(m),mr.OV.get(m))=='Highly Skeptic
 ck('Highly Skeptical deep-but-movable (sub-threshold absorbed, big shock -> Opponent)',
    bool(_hsk) and all(mr.defection(m,-5) is None and mr.defection(m,-12)=='Opponent' for m in _hsk),
    '%d members at rung'%len(_hsk))
-_opponents=[m for m in mr.C if mr.PROJ.get(mr.OV.get(m),mr.OV.get(m))=='Opponent']
-ck('overall Opponent rung populated (user-directed 2026-07-15)',bool(_opponents),
-   '%d members at rung'%len(_opponents))
+import moneyball_core as _band_core
+_ob=dict((tier,cut) for cut,tier in _band_core.OVERALL_BANDS)
+ck('overall bends are semantic prototype boundaries, not roster-population quotas',
+   _ob=={'Ally':2.5,'Highly Persuadable':1.5,'Persuadable':.75,
+         'Lean Persuadable':.25,'True Neutral':-.25,'Lean Skeptic':-.75,
+         'Skeptic':-1.5,'Highly Skeptical':-3.0} and
+   _band_core.overall_tier_from_value(0)=='True Neutral' and
+   _band_core.overall_tier_from_value(.01) not in ('Lean Skeptic','Skeptic','Highly Skeptical','Opponent') and
+   _band_core.overall_tier_from_value(-.01) not in ('Highly Persuadable','Persuadable','Lean Persuadable','Ally'),
+   str(_ob))
 print('\n[3] Electoral plays (non-partisan, gated)')
 EP=json.load(open(B+r'\electoral_plays.json'))
 contest=[m for m,d in EP.items() if d.get('play')=='contest']; defend=[m for m,d in EP.items() if d.get('play')=='defend']
@@ -96,7 +120,7 @@ ck('competitor shock reduces winnability too (flip channel, consistent footing)'
 cu_o=subprocess.run([sys.executable,FE+r'\scenario.py','--money','Tim Scott:cu:300000'],capture_output=True,text=True,encoding='utf-8',errors='replace').stdout
 fl=re.search(r'([+-][0-9.]+) expected flips',cu_o)
 ck('CU spend registers gradual flip-value gain (not absorbed)', bool(fl) and float(fl.group(1))>0, fl.group(1) if fl else '?')
-print('\n[8] Adaptive optimizer (Golovin-Krause)')
+print('\n[8] Joint budget optimizer (fixed-state lazy greedy / modeled replanning)')
 def opt(env): return subprocess.run([sys.executable,FE+r'\optimize.py'],capture_output=True,text=True,encoding='utf-8',errors='replace',env=dict(os.environ,**env)).stdout
 # OPT_OUT -> temp json so the test run doesn't clobber the production optimize_result.json (mirrors FRONTIER_OUT below).
 # INC=5000 (divides PMAX=10000): optimize.py's cap check requires room for a FULL chunk, so INC>PMAX allocates nothing.
@@ -110,6 +134,18 @@ ck('optimizer deterministic (same budget -> identical)', oo1==oo2)
 _opt=json.load(open(B+r'\_audit_tmp_optimize.json')); _pp=[v for _,v in _opt['path']]
 _drops=sum(1 for i in range(1,len(_pp)) if _pp[i]<_pp[i-1]-1e-9)
 ck('optimizer path monotone (conversion is a gain, not the old persuadability-loss)', _drops==0, '%d drops; base %.2f final %.2f'%(_drops,_pp[0],_pp[-1]))
+ck('optimizer reports mode, observation status, and guarantee scope honestly',
+   _opt.get('mode') in ('fixed_state_lazy_greedy','modeled_threshold_replanning') and
+   isinstance(_opt.get('observations'),list) and isinstance(_opt.get('guarantee'),dict) and
+   ((_opt.get('certificate_valid') and _opt['guarantee'].get('kind')=='exact_discrete_separable_concave')
+    or (not _opt.get('certificate_valid') and _opt['guarantee'].get('kind')=='none')),
+   str({k:_opt.get(k) for k in ('mode','observations','guarantee','certificate_valid')}))
+ck('optimizer exact fixed-state certificate is internally consistent',
+   (not _opt.get('certificate_valid')) or
+   (_opt.get('fixed_state_concave') and not _opt.get('concavity_violations') and
+    abs(_opt.get('opt_bound',0)-_opt.get('final',1))<=0.001 and
+    _opt['guarantee'].get('certified_gain_ratio')==1.0),
+   str(_opt.get('guarantee')))
 # H3 regression: members with NO FEC data must NOT rank as top flip targets (ind=0 -> pflip~1 was misreading "missing" as "no opposition")
 _s=importlib.util.spec_from_file_location('fmA',FE+r'\flip_model.py'); _fm=importlib.util.module_from_spec(_s); _s.loader.exec_module(_fm)
 _wn=collections.Counter()
@@ -194,6 +230,45 @@ if os.path.exists(B+'\\social_media.db'):
     _ok=_c.execute('PRAGMA integrity_check').fetchone()[0]
     _orph=_c.execute("SELECT COUNT(*) FROM posts WHERE platform IS NULL OR post_id IS NULL").fetchone()[0]
     ck('social_media.db integrity + no orphan posts', _ok=='ok' and _orph==0, '%s / %d orphans'%(_ok,_orph))
+_tif=B+r'\tweet_stance_final.csv'
+if os.path.exists(_tif):
+    with open(_tif,encoding='utf-8-sig',newline='') as _handle:
+        _tir=csv.DictReader(_handle); _tifields=set(_tir.fieldnames or []); _tiout=list(_tir)
+    ck('tweet stance output preserves image-reader provenance as a distinct signal',
+       {'image_read','image_confidence','image_disposition'}.issubset(_tifields),
+       'fields=%s'%sorted(_tifields))
+    _barr_ids={'511658226','511657485','498264314','458365083'}
+    _barr_out={row.get('quorum_id'):row.get('stack_stance') for row in _tiout
+               if row.get('quorum_id') in _barr_ids}
+    ck('Barr credit-card late-fee tweet gold is applied by exact Quorum ID',
+       _barr_out=={qid:'support' for qid in _barr_ids},str(_barr_out))
+    _followup_ids={'559107834','559097784','552715581','552700010','545211528','433093684',
+                   '591392565','591305285','539036369','536549427','536545303','445704177'}
+    _followup_out={row.get('quorum_id'):row.get('stack_stance') for row in _tiout
+                   if row.get('quorum_id') in _followup_ids}
+    ck('Britt/Lummis user-ratified social evidence is support by exact Quorum ID',
+       _followup_out=={qid:'support' for qid in _followup_ids},str(_followup_out))
+    _cbdc_out={row.get('quorum_id'):row.get('stack_stance') for row in _tiout
+               if row.get('quorum_id') in {'620647802','615403327'}}
+    _registry=CO.merged_rows('cu_valence_registry.json','entries',('key',),data_root=B)
+    _cbdc=next((row for row in _registry if row.get('key')=='cbdc'),{})
+    ck('CBDC polarity is anti-CU and anti-CBDC Davidson posts compose to support',
+       _cbdc.get('valence')==-1 and _cbdc_out=={'620647802':'support','615403327':'support'},
+       'registry=%s tweets=%s'%(_cbdc,_cbdc_out))
+_tirows=CO.merged_rows('tweet_image_annotations.json','annotations',('quorum_id',),data_root=B)
+_tibad=sum(1 for row in _tirows if not row.get('quorum_id') or
+           row.get('review_status')!='approved' or
+           row.get('cu_alignment') not in ('support','oppose','neutral','unrelated') or
+           not 0<=float(row.get('confidence',-1))<=1)
+ck('approved tweet-image annotations carry exact ID, stance, confidence, and review status',
+   _tibad==0,'%d invalid annotations'%_tibad)
+_sgr=B+r'\speech_gold_retired.json'
+if os.path.exists(_sgr):
+    _sgdoc=json.load(open(_sgr)); _sgrows=_sgdoc.get('rows') or []
+    ck('retired speech gold is limited to explicit neutral precision negatives',
+       _sgdoc.get('schema')=='speech-gold-retired-v1' and
+       all(row.get('gold_stance')=='neutral' and row.get('reason') for row in _sgrows),
+       '%d retired rows'%len(_sgrows))
 
 print('\n========================================')
 
@@ -239,6 +314,110 @@ if os.path.exists(_pm_p):
         ck('press stack drives the dynamic component (not silently on DEBATE fallback)',
            _tot>0 and _sk.get('stack_signed',0)/_tot>=0.9 and _sk.get('unrelated_zeroed',0)>0,
            'stack=%s'%_sk)
+        ck('user-ratified press gold overrides reach the scoring component',
+           _sk.get('gold_overrides',0)>0,'stack=%s'%_sk)
+    # 2026-07-16 own-source channel gate: speech, hearing, and interview sidecars were
+    # integrity-checked before publication.  Keep those gates observable and fail loud if a
+    # later build silently disables a channel, admits learned hearing rows, or double-counts
+    # Bluesky (which is already represented in the social component).
+    _osc=_pm.get('own_source_channels') or {}
+    _validated=('speech','hearing','interview')
+    ck('validated own-source press channels are enabled and loaded',
+       all((_osc.get(ch) or {}).get('enabled') is True and
+           (_osc.get(ch) or {}).get('loaded') is True and
+           (_osc.get(ch) or {}).get('signed_gold_rows',
+                                    (_osc.get(ch) or {}).get('signed_rows',0))>0
+           for ch in _validated),
+       'own_source_channels=%s'%_osc)
+    _hm=_osc.get('hearing') or {}
+    ck('hearing channel remains gold-only',
+       _hm.get('tier_policy')=='gold only' and _hm.get('signed_gold_rows',0)>0 and
+       _hm.get('non_gold_rows_excluded',0)>0,
+       'hearing=%s'%_hm)
+    _bm=_osc.get('bluesky') or {}
+    ck('Bluesky remains single-counted',
+       _bm.get('enabled') is False and _bm.get('loaded') is False and
+       'no press-side duplicate' in _bm.get('tier_policy',''),
+       'bluesky=%s'%_bm)
+
+    _sidecar_specs=(
+        ('speech','speeches_cu.csv','speech_stance_final.csv','speech_gold_queue.csv'),
+        ('hearing','hearings_cu.csv','hearing_stance_final.csv','hearing_gold_queue.csv'),
+        ('interview','interviews_cu.csv','interview_stance_final.csv','interview_gold_queue.csv'),
+    )
+    _valid_stances={'support','oppose','neutral'}
+    _valid_tiers={'gold','unanimous','majority','review'}
+    _sidecars_ok=True; _sidecar_detail=[]
+    for _ch,_src_name,_final_name,_gold_name in _sidecar_specs:
+        _src_path=os.path.join(B,_src_name); _final_path=os.path.join(B,_final_name)
+        _gold_path=os.path.join(B,_gold_name)
+        _files_present=all(os.path.exists(p) for p in (_src_path,_final_path,_gold_path))
+        _src_rows=[]; _final_rows=[]
+        if _files_present:
+            with open(_src_path,encoding='utf-8-sig',newline='') as _fh:
+                _src_rows=list(csv.DictReader(_fh))
+            with open(_final_path,encoding='utf-8-sig',newline='') as _fh:
+                _final_rows=list(csv.DictReader(_fh))
+        _row_parity=_files_present and len(_src_rows)>0 and len(_src_rows)==len(_final_rows)
+        _identity_ok=_row_parity and all(
+            all((src.get(field) or '')==(final.get(field) or '')
+                for field in ('bioguide','member','date','categories'))
+            for src,final in zip(_src_rows,_final_rows)
+        )
+        _values_ok=_row_parity and all(
+            row.get('stance') in _valid_stances and row.get('tier') in _valid_tiers
+            for row in _final_rows
+        )
+        _fresh=_files_present and os.path.getmtime(_final_path)>=max(
+            os.path.getmtime(_src_path),os.path.getmtime(_gold_path))
+        _channel_ok=_files_present and _row_parity and _identity_ok and _values_ok and _fresh
+        _sidecars_ok=_sidecars_ok and _channel_ok
+        _sidecar_detail.append('%s:%d/%d identity=%s values=%s fresh=%s'%(
+            _ch,len(_src_rows),len(_final_rows),_identity_ok,_values_ok,_fresh))
+    ck('own-source channel sidecars preserve source row identity',
+       _sidecars_ok,'; '.join(_sidecar_detail))
+_pra_p=B+r'\press_domain_routing_audit.json'
+if os.path.exists(_pra_p):
+    _pra=json.load(open(_pra_p)); _prrows=_pra.get('rows') or []
+    _prbad=sum(1 for row in _prrows if not row.get('routing_basis') or
+               not isinstance(row.get('effective_categories'),list) or
+               ('General Credit Union' in row.get('effective_categories',[]) and
+                len(row.get('effective_categories',[]))>1))
+    ck('press domain ledger covers every input row with one auditable disposition',
+       _pra.get('schema')=='press-domain-routing-audit-v1' and len(_prrows)==2388 and _prbad==0,
+       'rows=%d bad=%d'%(len(_prrows),_prbad))
+    ck('press routing rejects unsupported declared tags instead of trusting them blindly',
+       sum(bool(row.get('discarded_declared')) for row in _prrows)>0,
+       'no discarded declared tags recorded')
+    _barr_press=[row for row in _prrows if row.get('member_source')=='Andy Barr' and
+                 row.get('title')=='House, Senate resolutions would void CFPB credit card late fees rule']
+    ck('Barr late-fee CRA press evidence is scored as user-ratified support',
+       bool(_barr_press) and all(row.get('gold_override')=='support' for row in _barr_press),
+       str(_barr_press[:2]))
+else:
+    ck('press domain routing audit present',False,'press_domain_routing_audit.json missing')
+_lra_p=B+r'\legislation_routing_audit.json'
+if os.path.exists(_lra_p):
+    _lra=json.load(open(_lra_p)); _lrrows=_lra.get('rows') or []
+    _target={('H.R.7733','117'):'CDFI Fund',('S.869','118'):'CDFI Fund',
+             ('H.R.7036','118'):'Data Privacy & Cyber',('H.R.7022','117'):'Data Privacy & Cyber',
+             ('S.4698','117'):'Data Privacy & Cyber'}
+    _lrbad=0
+    for (_bill,_congress),_cat in _target.items():
+        _seen={row.get('effective_category') for row in _lrrows
+               if row.get('bill')==_bill and str(row.get('congress')) in (_congress,_congress+'.0')
+               and row.get('effective_category')}
+        _lrbad += int(bool(_seen) and _seen!={_cat})
+    _ldup=sum((_lra.get('summary') or {}).get('duplicates',{}).values())
+    ck('legislation ledger covers every source row and scores one strongest-role event',
+       _lra.get('schema')=='legislation-routing-audit-v1' and
+       len(_lrrows)==_lra.get('source_rows') and _ldup>0,
+       'rows=%d source=%s duplicates=%d'%(len(_lrrows),_lra.get('source_rows'),_ldup))
+    ck('pinned CDFI/privacy bills have exactly one effective policy column',
+       _lrbad==0 and (_lra.get('summary') or {}).get('effective_categories',{}).get('CDFI Fund',0)>0,
+       '%d targeted bill routing errors'%_lrbad)
+else:
+    ck('legislation routing audit present',False,'legislation_routing_audit.json missing')
 # 2026-07-04 nomological fix guard: receptivity must run on the BEHAVIORAL basis (the lexical Big5
 # was INDICTED by the pre-registered label-free validation — big5_nomological_prereg.md). A silent
 # fall-back to lexical (missing dispositions artifact) is a regression to an indicted instrument.
@@ -279,7 +458,7 @@ if os.path.exists(_rc_p):
         ck('cooperation and low-antagonism A remain separately sourced (zero substitutions)',
            _co_bad==0, '%d cooperation_v2 values substituted/mismatched'%_co_bad)
         _con={d['member']:d for d in json.load(open(B+r'\congestion.json',encoding='utf-8'))}
-        _g={d.get('full_name'):d.get('gender') for d in _csv.DictReader(open(FE+r'\legislators.csv',encoding='utf-8-sig'))}
+        _g={d.get('full_name'):d.get('gender') for d in _csv.DictReader(open(DATA_FE+r'\legislators.csv',encoding='utf-8-sig'))}
         _rows=[]
         for _m in set(_cvm)&set(_avm)&set(_con):
             _x=(_cvm.get(_m) or {}).get('cooperation_v2_z')
@@ -307,7 +486,7 @@ else:
 # R&A col A — TYPED names, immune to the phase-2 openpyxl-save cache death (Blended col A is
 # formula-backed and legitimately reads empty between Excel opens).
 _roster=len(json.load(open(B+r'\congestion.json')))
-_ra=_wb['Rank & Allocation']; _wbrows=sum(1 for r in range(3,536) if _ra.cell(r,1).value)
+_ra_ws=_wb['Rank & Allocation']; _wbrows=sum(1 for r in range(3,536) if _ra_ws.cell(r,1).value)
 ck('workbook member rows == roster size (no silent row drift)', _wbrows==_roster, 'workbook %d vs roster %d'%(_wbrows,_roster))
 # Roadmap-#9 phase 1 (2026-07-02): the whole raw->normalized->pillar->score->rank chain is reproduced
 # in Python (compute_pillars.py) and must match the sheet EXACTLY — catches any silent formula edit.
@@ -605,9 +784,9 @@ ck('audio v2 fail-closed on-air, aligned, program-conditioned contract active',
     _mcon.get('minimum_aligned_target_words_per_clip')==50 and
    _mcon.get('percentile_normalization')=='within outlet+program; never raw cross-speaker pitch/energy' and _abad==0,
    '%d accepted clips, %d verified members, %d contract errors'%(_au.get('accepted_clip_n',0),len(_au.get('members') or {}),_abad))
-_ncode=open(B+r'\fec\b5_narratives.py',encoding='utf-8').read()
-_dcode=open(B+r'\fec\make_member_desk.py',encoding='utf-8').read()
-_wcode=open(B+r'\fec\weekly_refresh.py',encoding='utf-8').read()
+_ncode=open(FE+r'\b5_narratives.py',encoding='utf-8').read()
+_dcode=open(FE+r'\make_member_desk.py',encoding='utf-8').read()
+_wcode=open(FE+r'\weekly_refresh.py',encoding='utf-8').read()
 ck('legacy audio and paid narrative paths retired from unattended/display consumption',
    'b5_audio_cache.json' not in _ncode and 'b5_audio_verify.py' not in _wcode and
    'b5_audio_build.py' not in _wcode and 'b5_narratives.py' not in _wcode and
@@ -641,9 +820,9 @@ ck('corrupt legacy CHRG hearing counts cannot re-enter behavioral diligence',
 # Blue/Pink N=-ES on the text radar; no voice-ES schema check remains. Guard against a silent
 # regression to the retired artifact:
 ck('voice-ES retired from display (b5_es_voice not re-wired into the desk)',
-   'b5_es_voice' not in open(B+r'\fec\make_member_desk.py',encoding='utf-8').read().split('RETIRED')[-1],
+   'b5_es_voice' not in open(FE+r'\make_member_desk.py',encoding='utf-8').read().split('RETIRED')[-1],
    'desk must not consume the gender-confounded voice-ES artifact')
-_desk_tpl=open(B+r'\fec\templates\make_member_desk_00.tpl',encoding='utf-8').read()
+_desk_tpl=open(FE+r'\templates\make_member_desk_00.tpl',encoding='utf-8').read()
 ck('desk presents the accepted five-axis display under canonical Big-Five names',
    all(s in _desk_tpl for s in ('Extraversion','Openness','Conscientiousness',
                                 'Agreeableness','Neuroticism','not self-report or private-state measures',
@@ -705,7 +884,7 @@ ck('desk suppresses synthetic/default-only dominance values and keeps behavior d
    'Affective N' not in _desk_tpl and
    "const BLAB=['Cross-party cooperation','Legislative follow-through','Interaction dominance','Interview activity','Policy breadth'];" in _desk_tpl and
    "if _r2.get('dominance_v2') is not None:" in
-       open(B+r'\fec\make_member_desk.py',encoding='utf-8').read(),
+       open(FE+r'\make_member_desk.py',encoding='utf-8').read(),
    'behavior display must expose coverage, plot five behavioral axes, and omit Affective N')
 if os.path.exists(B+r'\behavioral_roles_v2_candidate.json') and os.path.exists(B+r'\member_desk_bundle.json'):
     _r2=json.load(open(B+r'\behavioral_roles_v2_candidate.json',encoding='utf-8')).get('members',{})
@@ -720,7 +899,7 @@ if os.path.exists(B+r'\behavioral_roles_v2_candidate.json') and os.path.exists(B
             _r2bad += int(_d.get('expressiveness_v2_pct') is None or (_d.get('behav_pct') or [None,None,None])[2] is None)
         else:
             _r2bad += int(any(k in _d for k in ('dominance_v2_z','expressiveness_v2_z','expressiveness_v2_pct')))
-    _producer=open(B+r'\fec\make_member_desk.py',encoding='utf-8').read()
+    _producer=open(FE+r'\make_member_desk.py',encoding='utf-8').read()
     _engine_refs=[]
     # The locked study producer, audio validator, and OOF-gold display/profile estimator are research
     # provenance, not influence/rank engines. Any additional Python consumer is a wiring regression.
@@ -742,7 +921,7 @@ ck('desk preserves missing low-antagonism behavior and its selected-stratum scop
                                 'insufficient package-disjoint interview coverage',
                                 'never imputed outside that stratum')),
    'low antagonism must remain missing outside the package-qualified stratum, never imputed as A')
-_qproc=open(B+r'\fec\process_quorum.py',encoding='utf-8').read()
+_qproc=open(FE+r'\process_quorum.py',encoding='utf-8').read()
 ck('Quorum member resolver refuses surname-only identity guesses',
    'Never infer identity from surname alone' in _qproc and 'if len(cands)==1: return cands[0]' not in _qproc,
    'same-surname outsiders must be segregated, not inserted into a legislator corpus')
@@ -784,9 +963,39 @@ if _g:
     ck('overall say-do caps have an auditable fixed-rule reason',_b4==0,
        '%d overall caps, %d incoherent'%(len(_oc),_b4))
     import moneyball_core as _mc
-    _final_named={m:_mc.overall_tier(MAT.get(m,{}),m,_oc) for m in ('Mike Crapo','French Hill')}
-    ck('Mike Crapo and French Hill are not Champions after the say-do rule',
-       all(v!='Champion' for v in _final_named.values()),str(_final_named))
+    from tier_util import legislative_press_tiers as _lpt, load_tier_weights as _ltw
+    _tier_weights=_ltw()
+    ck('user-ratified display-tier weights are 80%% Legislative / 20%% Press',
+       all(abs(a-b)<1e-12 for a,b in zip(_tier_weights,(0.8,0.2))),str(_tier_weights))
+    _tier,_tier_rank=_lpt(list(MAT))
+    _required_tiers={'Brian Fitzpatrick':1,'Roger Williams':1,'Bill Hagerty':1,
+                     'Maxine Waters':2,'Juan Vargas':2,'Nydia Velázquez':2}
+    ck('user-ratified Legislative+Press tier placements are exact',
+       all(_tier.get(m)==t for m,t in _required_tiers.items()),
+       str({m:_tier.get(m) for m in _required_tiers}))
+    _display={m:_mc.overall_display_tier(MAT.get(m,{}),_tier.get(m,0),m,_oc) for m in MAT}
+    _final_named={m:_display.get(m) for m in ('Young Kim','French Hill')}
+    ck('Tier-1 status crowns named legislative/press leaders as Champion',
+       _final_named.get('Young Kim')=='Champion' and _final_named.get('French Hill')=='Champion',
+       str(_final_named))
+    _champ={m for m,v in _display.items() if v=='Champion'}
+    _tier1={m for m,t in _tier.items() if t==1}
+    ck('overall Champion crown exactly equals Legislative+Press Tier 1',
+       _champ==_tier1 and len(_champ)==12,
+       '%d crowns vs %d Tier-1; missing %s; extra %s'%(
+           len(_champ),len(_tier1),sorted(_tier1-_champ),sorted(_champ-_tier1)))
+    if os.path.exists(B+r'\dashboard_data.json'):
+        _dash=json.load(open(B+r'\dashboard_data.json',encoding='utf-8'))
+        _tc={'Champion':'C','Defender':'F','Ally':'A','Highly Persuadable':'H','Persuadable':'P',
+             'Lean Persuadable':'G','True Neutral':'T','Lean Skeptic':'L','Neutral':'N',
+             'Skeptic':'S','Highly Skeptical':'K','Opponent':'O','—':'-'}
+        _expected_gen=''.join(_tc.get(_display.get(m,'—'),'-') for m in _dash.get('name',[]))
+        ck('dashboard overall labels exactly match shared crown law',_dash.get('gen')==_expected_gen,
+           'dashboard and kernel label strings differ')
+    _wb_display={_ra_ws.cell(r,1).value:_ra_ws.cell(r,7).value for r in range(3,536) if _ra_ws.cell(r,1).value}
+    ck('workbook stance column exactly matches shared crown law',
+       all(_wb_display.get(m)==v for m,v in _display.items()) and len(_wb_display)==len(_display),
+       'workbook %d vs matrix %d rows'%(len(_wb_display),len(_display)))
 else:
     ck('say-do gate block present in category_stance.json', False, 'gate key missing — producer predates 2026-07-07 landing')
 

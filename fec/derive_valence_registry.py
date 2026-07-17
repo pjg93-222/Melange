@@ -82,6 +82,7 @@ rows = [r for r in csv.DictReader(open(B + r'\tweet_gold_queue.csv', encoding='u
 # keyword noise on 'navy federal') that needs one more user confirmation before it ships.
 CONFIRMED = {
     'interchange': (-1, '12 on-topic rows, 11/12 unanimous on the CCCA target'),
+    'cbdc':        (-1, 'validated 2026-07-16: CBDC threatens CU deposit intermediation; opposition/ban is pro-CU'),
     'overdraft':   (-1, '1/1 confirmed'),
     'reg_relief':  (+1, '2/2 confirmed'),
     'big_banks':   (0,  '2 user corrections (support->neutral) resolved 8/9 neutral'),

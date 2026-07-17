@@ -1,0 +1,4 @@
+{
+  "_README": "Reviewed tweet-image evidence keyed by exact quorum_id. Keep OCR/caption, target, CU alignment, confidence, source media URL, analyst/model provenance, and review_status. Only review_status=approved is consumed. Image evidence can resolve weak neutral/unrelated text but cannot silently overturn a clear directional text read.",
+  "annotations": []
+}

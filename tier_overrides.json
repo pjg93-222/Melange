@@ -1,0 +1,95 @@
+{
+  "_README": "User-ratified Legislative+Press display-tier policy. Tier score uses the source-controlled weights below. Buckets remain fixed at 12/24/48. Forced members occupy their named bucket; remaining seats are filled by the weighted Legislative+Press score order.",
+  "weights": {
+    "legislation": 0.8,
+    "press": 0.2,
+    "note": "Paul follow-up 2026-07-16: prefer 80% Legislation / 20% Press after testing 60/40 and 70/30"
+  },
+  "placements": [
+    {
+      "member": "Brian Fitzpatrick",
+      "tier": 1,
+      "note": "Paul follow-up 2026-07-16"
+    },
+    {
+      "member": "Roger Williams",
+      "tier": 1,
+      "note": "Paul follow-up 2026-07-16"
+    },
+    {
+      "member": "Bill Hagerty",
+      "tier": 1,
+      "note": "Paul follow-up 2026-07-16"
+    },
+    {
+      "member": "Andy Barr",
+      "tier": 1,
+      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
+    },
+    {
+      "member": "Young Kim",
+      "tier": 1,
+      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
+    },
+    {
+      "member": "Tim Scott",
+      "tier": 1,
+      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1 — answers RUN5's open Tim Scott roster question"
+    },
+    {
+      "member": "Ritchie Torres",
+      "tier": 1,
+      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
+    },
+    {
+      "member": "Catherine Cortez Masto",
+      "tier": 1,
+      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
+    },
+    {
+      "member": "William Timmons",
+      "tier": 1,
+      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
+    },
+    {
+      "member": "Zachary Nunn",
+      "tier": 1,
+      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
+    },
+    {
+      "member": "French Hill",
+      "tier": 2,
+      "note": "Paul directive 2026-07-16 evening (Claude session): 'should all be in tier 2'"
+    },
+    {
+      "member": "Mike Crapo",
+      "tier": 2,
+      "note": "Paul directive 2026-07-16 evening (Claude session): 'should all be in tier 2'"
+    },
+    {
+      "member": "Scott Fitzgerald",
+      "tier": 2,
+      "note": "Paul directive 2026-07-16 evening (Claude session): 'should all be in tier 2'"
+    },
+    {
+      "member": "Tim Moore",
+      "tier": 2,
+      "note": "Paul directive 2026-07-16 evening (Claude session): 'should all be in tier 2'"
+    },
+    {
+      "member": "Maxine Waters",
+      "tier": 2,
+      "note": "Paul follow-up 2026-07-16"
+    },
+    {
+      "member": "Juan Vargas",
+      "tier": 2,
+      "note": "Paul follow-up 2026-07-16"
+    },
+    {
+      "member": "Nydia Velázquez",
+      "tier": 2,
+      "note": "Paul follow-up 2026-07-16"
+    }
+  ]
+}

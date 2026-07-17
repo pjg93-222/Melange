@@ -72,6 +72,31 @@ EXCLUDED_BILL_CONGRESSES = {
     (('H', 1707), '118'): 'auto repair SMART Act',
 }
 
+# Exact, source-controlled corrections for unmistakably misfiled archive records. A live
+# bill_overrides.csv row still wins, so these are safe defaults rather than locks.
+BUILTIN_OVERRIDES = {
+    (('H', 7733), '117'): {
+        'Bill': 'H.R.7733', 'Congress': '117', 'Category': 'CDFI Fund', 'Include': '1',
+        'Reason': 'CDFI Bond Guarantee Program Improvement Act',
+    },
+    (('S', 869), '118'): {
+        'Bill': 'S.869', 'Congress': '118', 'Category': 'CDFI Fund', 'Include': '1',
+        'Reason': 'CDFI Bond Guarantee Program Improvement Act',
+    },
+    (('H', 7036), '118'): {
+        'Bill': 'H.R.7036', 'Congress': '118', 'Category': 'Data Privacy & Cyber', 'Include': '1',
+        'Reason': 'Strengthening Cybersecurity for the Financial Sector',
+    },
+    (('H', 7022), '117'): {
+        'Bill': 'H.R.7022', 'Congress': '117', 'Category': 'Data Privacy & Cyber', 'Include': '1',
+        'Reason': 'Strengthening Cybersecurity for the Financial Sector',
+    },
+    (('S', 4698), '117'): {
+        'Bill': 'S.4698', 'Congress': '117', 'Category': 'Data Privacy & Cyber', 'Include': '1',
+        'Reason': 'Improving Cybersecurity of Credit Unions Act',
+    },
+}
+
 
 def canonical_category(value):
     raw = str(value or '').strip()
@@ -105,14 +130,32 @@ def bill_key(value):
 
 
 def role_weight(role):
-    value = str(role or '').lower()
-    if 'original' in value:
+    value = canonical_role(role)
+    if value == 'original-cosponsor':
         return 2.0
-    if 'cosponsor' in value or 'co-spons' in value:
+    if value == 'cosponsor':
         return 1.0
-    if 'sponsor' in value:
+    if value == 'sponsor':
         return 3.0
     return 1.0
+
+
+def canonical_role(role):
+    value = str(role or '').strip().lower()
+    if 'original' in value:
+        return 'original-cosponsor'
+    if 'cosponsor' in value or 'co-spons' in value:
+        return 'cosponsor'
+    if 'sponsor' in value:
+        return 'sponsor'
+    return value or 'other'
+
+
+def preferred_role(roles):
+    """Return the single strongest role for duplicate member/bill/domain rows."""
+    priority = {'other': 0, 'cosponsor': 1, 'original-cosponsor': 2, 'sponsor': 3}
+    canonical = [canonical_role(role) for role in roles]
+    return max(canonical, key=lambda role: (priority.get(role, 0), role)) if canonical else 'other'
 
 
 def _congress(value):
@@ -141,7 +184,9 @@ def override_for(overrides, bill, congress):
     key = bill_key(bill)
     if not key:
         return None
-    return overrides.get((key, _congress(congress))) or overrides.get((key, '*'))
+    congress_key = _congress(congress)
+    return (overrides.get((key, congress_key)) or overrides.get((key, '*'))
+            or BUILTIN_OVERRIDES.get((key, congress_key)))
 
 
 def override_included(row):

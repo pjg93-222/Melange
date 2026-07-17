@@ -33,13 +33,15 @@ def db():
     c=sqlite3.connect(DB); c.execute('PRAGMA journal_mode=WAL'); c.execute('PRAGMA foreign_keys=ON')
     try: c.execute('ALTER TABLE members ADD COLUMN truth TEXT')   # migration for pre-truth databases
     except sqlite3.OperationalError: pass
+    try: c.execute('ALTER TABLE posts ADD COLUMN media_json TEXT')  # image/video metadata; no binary blobs
+    except sqlite3.OperationalError: pass
     return c
 SCHEMA='''
 CREATE TABLE IF NOT EXISTS members(bioguide TEXT PRIMARY KEY, name TEXT, party TEXT, chamber TEXT,
   twitter TEXT, twitter_id TEXT, bluesky TEXT, truth TEXT, facebook TEXT, youtube TEXT, instagram TEXT, updated TEXT);
 CREATE TABLE IF NOT EXISTS posts(platform TEXT, post_id TEXT, bioguide TEXT, created_at TEXT, text TEXT,
   reply_to TEXT, quote_of TEXT, repost_of TEXT, like_count INT, repost_count INT, reply_count INT,
-  fetched_at TEXT, raw TEXT, PRIMARY KEY(platform,post_id));
+  fetched_at TEXT, raw TEXT, media_json TEXT, PRIMARY KEY(platform,post_id));
 CREATE TABLE IF NOT EXISTS interactions(platform TEXT, kind TEXT, src_bioguide TEXT, dst_bioguide TEXT,
   post_id TEXT, created_at TEXT, PRIMARY KEY(platform,kind,post_id,dst_bioguide));
 CREATE TABLE IF NOT EXISTS fetch_log(platform TEXT, bioguide TEXT, checkpoint TEXT, last_run TEXT,
@@ -84,10 +86,13 @@ def cmd_init():
     print('seeded %d/533 members from the canonical registry: %d twitter handles, %d bluesky handles'%(n,tw,bs))
     if bs==0: print('  (registry carries no bluesky field yet — add handles manually: UPDATE members SET bluesky=? WHERE name=?)')
     print('db: %s'%DB)
-def _upsert_post(c,plat,pid,bg,created,text,reply_to,quote_of,repost_of,likes,reposts,replies,raw):
-    c.execute('INSERT OR IGNORE INTO posts VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',
+def _upsert_post(c,plat,pid,bg,created,text,reply_to,quote_of,repost_of,likes,reposts,replies,raw,media=None):
+    c.execute('INSERT OR IGNORE INTO posts(platform,post_id,bioguide,created_at,text,reply_to,quote_of,'
+              'repost_of,like_count,repost_count,reply_count,fetched_at,raw,media_json) '
+              'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
               (plat,pid,bg,created,text,reply_to,quote_of,repost_of,likes,reposts,replies,
-               datetime.datetime.now().isoformat(),json.dumps(raw,ensure_ascii=True)[:4000]))
+               datetime.datetime.now().isoformat(),json.dumps(raw,ensure_ascii=True)[:4000],
+               json.dumps(media or [],ensure_ascii=True)[:12000]))
 def _log(c,plat,bg,ck,n,status):
     c.execute('INSERT INTO fetch_log VALUES(?,?,?,?,?,?) ON CONFLICT(platform,bioguide) DO UPDATE SET '
               'checkpoint=excluded.checkpoint,last_run=excluded.last_run,n_total=n_total+excluded.n_total,status=excluded.status',
@@ -115,7 +120,8 @@ def fetch_bluesky(limit_members=None,pages=3):
                     reply=rec.get('reply',{}).get('parent',{}).get('uri')
                     quote=(rec.get('embed',{}) or {}).get('record',{}).get('uri')
                     _upsert_post(c,'bluesky',pid,bg,created,text,reply,quote,None,
-                                 p.get('likeCount',0),p.get('repostCount',0),p.get('replyCount',0),{})
+                                 p.get('likeCount',0),p.get('repostCount',0),p.get('replyCount',0),{},
+                                 p.get('embed') or rec.get('embed') or {})
                     # mention edges from facets (handle -> member)
                     for f in rec.get('facets',[]) or []:
                         for feat in f.get('features',[]):
@@ -143,11 +149,14 @@ def fetch_x(limit_members=None):
     for bg,name,uid,handle in rows:
         ck=c.execute('SELECT checkpoint FROM fetch_log WHERE platform=? AND bioguide=?',('x',bg)).fetchone()
         since='&since_id='+ck[0] if ck and ck[0] else ''
-        u=('https://api.twitter.com/2/users/%s/tweets?max_results=100&tweet.fields=created_at,referenced_tweets,entities,public_metrics'
-           '&expansions=referenced_tweets.id.author_id,entities.mentions.username'%uid)+since
+        u=('https://api.twitter.com/2/users/%s/tweets?max_results=100&tweet.fields=created_at,referenced_tweets,entities,public_metrics,attachments'
+           '&expansions=referenced_tweets.id.author_id,entities.mentions.username,attachments.media_keys'
+           '&media.fields=media_key,type,url,preview_image_url,alt_text,width,height,duration_ms,variants'%uid)+since
         got=0; newest=None
         try:
             d=get(u)
+            media_by_key={str(item.get('media_key')):item for item in
+                          (d.get('includes',{}).get('media') or []) if item.get('media_key')}
             for t in d.get('data',[]) or []:
                 pid=t['id']; newest=max(newest or pid,pid)
                 rt=q=rp=None
@@ -156,8 +165,10 @@ def fetch_x(limit_members=None):
                     elif ref['type']=='quoted': q=ref['id']
                     elif ref['type']=='replied_to': rp=ref['id']
                 pm=t.get('public_metrics',{})
+                media=[media_by_key[key] for key in (t.get('attachments',{}).get('media_keys') or [])
+                       if key in media_by_key]
                 _upsert_post(c,'x',pid,bg,t.get('created_at',''),t.get('text',''),rp,q,rt,
-                             pm.get('like_count',0),pm.get('retweet_count',0),pm.get('reply_count',0),t)
+                             pm.get('like_count',0),pm.get('retweet_count',0),pm.get('reply_count',0),t,media)
                 # interaction edges: referenced authors + mentions that are members
                 for iu in (d.get('includes',{}).get('tweets') or []):
                     if iu['id'] in (rt,q,rp) and iu.get('author_id') in id2bg and id2bg[iu['author_id']]!=bg:

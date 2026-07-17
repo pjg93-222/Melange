@@ -22,9 +22,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import KFold
+import tweet_image_evidence as TIE
+import config_overlay as CO
+import stance_rules as SR
 B = MB_ROOT
 CL = ["support", "oppose", "neutral", "unrelated"]
-REG = json.load(open(B + r'\cu_valence_registry.json'))['entries']
+REG = CO.merged_rows('cu_valence_registry.json','entries',('key',),data_root=B)
 POLICY_KEYS = {e['key'] for e in REG if e.get('policy_force')}   # user-legislated axes bind the final label
 
 def fam_lookup(target, text):
@@ -45,10 +48,10 @@ def _norm_ov(s):
     s = (s or '').lower(); s = re.sub(r'https?://\S+', '', s)
     s = re.sub(r'[^a-z0-9 ]', ' ', s); return re.sub(r'\s+', ' ', s).strip()
 # Paul's hand-labeled tweet stance overrides (ground truth; applied LAST, beats stack + policy-force). 2026-07-15.
-try:
-    _TOV = json.load(open(B + r'\tweet_stance_overrides.json', encoding='utf-8')).get('corrections', [])
-except Exception:
-    _TOV = []
+_TOV = CO.merged_rows('tweet_stance_overrides.json','corrections',
+                      ('quorum_id','text_contains'),data_root=B)
+_IMG = TIE.index_annotations(CO.merged_rows('tweet_image_annotations.json','annotations',
+                                            ('quorum_id',),data_root=B))
 _TOV_TXT = [(_norm_ov(c.get('text_contains', '')), (c.get('stance') or '').strip().lower()) for c in _TOV
             if c.get('text_contains') and (c.get('stance') or '').strip().lower() in ('support', 'oppose', 'neutral')]
 _TOV_QID = {str(c['quorum_id']): (c.get('stance') or '').strip().lower() for c in _TOV
@@ -152,6 +155,7 @@ if '--score' in sys.argv:
         lbl = meta.predict([f])[0]
         clab = pc.classes_[int(np.argmax(pr))]   # 3rd-pass S2 fix: index the classifier's OWN class order (sklearn is alphabetical), not CL — was swapping neutral<->support in the tier weight
         alab = (o.get('cu_alignment') or '').strip().lower()
+        lbl = SR.enforce_reader_unanimity(lbl, (A, clab, alab))
         # POLICY-FORCE, RELAXED 2026-07-15 (Paul's fresh CFPB gold re-adjudicated the agency-existence
         # axis as DIRECTIONAL: attacking/defunding CFPB = pro-CU/support, defending CFPB = anti-CU/oppose).
         # The 2026-07-07 blanket neutral-pin over-neutralized ~1,582 tweets (tweet-gold sign acc 0.54).
@@ -160,13 +164,22 @@ if '--score' in sys.argv:
         _, _fkey = fam_lookup(o.get('target'), t)
         if _fkey in POLICY_KEYS and lbl in ('support', 'oppose'):
             lbl = alab if alab in ('support', 'oppose') else 'neutral'
+        tier = 'unanimous' if (alab and A == clab == alab) else ('review' if (alab and A != clab and A != alab and clab != alab) else 'majority')
+        # Reviewed image evidence is a separate reader. It can resolve weak text, while a conflict
+        # with clear directional text remains a review flag instead of silently flipping the label.
+        _im = _IMG.get(str(r.get('Quorum ID') or ''), {})
+        _fused = TIE.fuse_stance(lbl, tier, _im.get('cu_alignment'), _im.get('confidence'))
+        lbl = _fused['stance']
         # Paul's hand labels are ground truth -- applied LAST, beat stack + registry + pin alike.
         _ov = tweet_override(r.get('Quorum ID'), t)
-        if _ov is not None: lbl = _ov
-        tier = 'unanimous' if (alab and A == clab == alab) else ('review' if (alab and A != clab and A != alab and clab != alab) else 'majority')
+        if _ov is not None:
+            lbl = _ov
+            if _fused['image_read']:
+                _fused['image_disposition'] = 'manual-override-after-image'
         out.append({'quorum_id': r.get('Quorum ID'), 'member': r.get('member'), 'date': r.get('dt'),
                     'stack_stance': lbl, 'registry_read': A, 'classical_read': clab, 'api_read': alab,
-                    'tier': tier, 'text': t[:200]})
+                    'image_read': _fused['image_read'], 'image_confidence': _fused['image_confidence'],
+                    'image_disposition': _fused['image_disposition'], 'tier': tier, 'text': t[:200]})
     tmp = B + r'\tweet_stance_final.csv'
     with io.open(tmp + '.tmp', 'w', encoding='utf-8-sig', newline='') as fh:
         w = csv.DictWriter(fh, fieldnames=list(out[0].keys())); w.writeheader(); w.writerows(out)

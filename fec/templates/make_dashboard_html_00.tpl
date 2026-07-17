@@ -125,7 +125,7 @@ canvas{touch-action:none}
      <div id=mdetail class=hint></div>
    </div>
    <div id=optcard>
-     <h3>Adaptive optimizer · $2M</h3>
+     <h3 id=opthdr>Joint optimizer</h3>
      <div id=optbody></div>
    </div>
  </div>
@@ -166,7 +166,7 @@ canvas{touch-action:none}
        <label style=margin-top:4px>executive branch:</label>
        <span class=seg id=execseg style=margin-top:3px><button data-e=none class=on>neutral</button><button data-e=oppose>opposes</button><button data-e=support>supports</button></span>
        <div id=shockout class=scout></div>
-       <div style=font-size:10px;color:#6e7681;margin-top:7px;line-height:1.45>Path = max-product (strongest) chain. "Holds" = P(every ASK lands first-try) using an active-recruitment rate (deliberate, funded ask via an existing tie — odds ~14x passive diffusion; ASKM is a tunable model dial, NOT empirically estimated); a no-reroute floor, rerouting only improves it. Budget = (1−1/e) max-coverage greedy w/ GCOMB locality (Manchanda et&nbsp;al. NeurIPS&nbsp;'20). Influence: Sotoudeh–Porter–Krishnagopal · communities: Porter–Mucha–Newman, Kim–Kunisky · coalitions: Aref–Neal · co-partisan info: Furnas et&nbsp;al.</div>
+       <div style=font-size:10px;color:#6e7681;margin-top:7px;line-height:1.45>Path = max-product (strongest) chain. "Holds" = P(every ASK lands first-try) using an active-recruitment rate (deliberate, funded ask via an existing tie — odds ~14x passive diffusion; ASKM is a tunable model dial, NOT empirically estimated); a no-reroute floor, rerouting only improves it. Max route = sequential closed-network edge activation (RELINK) with a per-recruiter fan-out limit and a weighted-PageRank structural prior; it is a practical heuristic, not a submodular guarantee. Flip route remains target-specific. Budget = (1−1/e) max-coverage greedy w/ GCOMB locality (Manchanda et&nbsp;al. NeurIPS&nbsp;'20). Influence: Sotoudeh–Porter–Krishnagopal · communities: Porter–Mucha–Newman, Kim–Kunisky · coalitions: Aref–Neal · co-partisan info: Furnas et&nbsp;al.</div>
      </div>
    </div>
  </div>
@@ -320,7 +320,7 @@ cv.addEventListener('mousemove',e=>{
 });
 cv.addEventListener('mouseleave',()=>{hi=-1;document.getElementById('tip').style.display='none';draw();});
 cv.addEventListener('mousedown',e=>{const r=cv.getBoundingClientRect();drag={x:e.clientX-r.left,y:e.clientY-r.top};panMoved=false;cv.style.cursor='grabbing';});
-cv.addEventListener('click',()=>{if(!panMoved&&hi>=0)selectMember(hi);});
+cv.addEventListener('click',()=>{if(!panMoved){if(hi>=0)selectMember(hi);else backToTargets();}});
 addEventListener('mouseup',()=>{drag=null;cv.style.cursor='grab';});
 cv.addEventListener('wheel',e=>{e.preventDefault();const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;const f=e.deltaY<0?1.12:0.893;const nx=mx-(mx-cam.tx)*f,ny=my-(my-cam.ty)*f;cam.s*=f;cam.tx=nx;cam.ty=ny;draw();},{passive:false});
 // --- touch (mobile): 1-finger pan + tap-to-select, 2-finger pinch-zoom ---
@@ -332,7 +332,7 @@ cv.addEventListener('touchmove',e=>{e.preventDefault();const r=cv.getBoundingCli
  if(pinch&&e.touches.length>=2){const a=e.touches[0],b=e.touches[1],nd=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),cx=(a.clientX+b.clientX)/2-r.left,cy=(a.clientY+b.clientY)/2-r.top,f=nd/(pinch.d||nd);
   cam.tx+=cx-pinch.cx;cam.ty+=cy-pinch.cy;cam.tx=cx-(cx-cam.tx)*f;cam.ty=cy-(cy-cam.ty)*f;cam.s*=f;pinch={d:nd,cx:cx,cy:cy};panMoved=true;draw();}
  else if(tdrag&&e.touches.length===1){const t=e.touches[0],mx=t.clientX-r.left,my=t.clientY-r.top;cam.tx+=mx-tdrag.x;cam.ty+=my-tdrag.y;tdrag.x=mx;tdrag.y=my;panMoved=true;draw();}},{passive:false});
-cv.addEventListener('touchend',e=>{if(e.touches.length===0){if(tdrag&&!panMoved){const mx=tdrag.x,my=tdrag.y;let best=-1,bd=99;for(let i=0;i<N;i++){if(tierHidden(i))continue;const [sx,sy]=toScreen(LX[i],LY[i]);const d=Math.hypot(sx-mx,sy-my);if(d<Math.max(12,radOf(i)+8)&&d<bd){bd=d;best=i;}}if(best>=0){selectMember(best);if(window.innerWidth<=640){const rp=document.getElementById('right');if(rp)setTimeout(function(){rp.scrollIntoView({behavior:'smooth',block:'start'});},70);}}}tdrag=null;pinch=null;}},{passive:true});
+cv.addEventListener('touchend',e=>{if(e.touches.length===0){if(tdrag&&!panMoved){const mx=tdrag.x,my=tdrag.y;let best=-1,bd=99;for(let i=0;i<N;i++){if(tierHidden(i))continue;const [sx,sy]=toScreen(LX[i],LY[i]);const d=Math.hypot(sx-mx,sy-my);if(d<Math.max(12,radOf(i)+8)&&d<bd){bd=d;best=i;}}if(best>=0){selectMember(best);if(window.innerWidth<=640){const rp=document.getElementById('right');if(rp)setTimeout(function(){rp.scrollIntoView({behavior:'smooth',block:'start'});},70);}}else backToTargets();}tdrag=null;pinch=null;}},{passive:true});
 function flyTo(i){cam.s=2.4;cam.tx=W/2-LX[i]*cam.s;cam.ty=H/2-LY[i]*cam.s;draw();}
 // ============ LIVE SCENARIO/PATHFINDER ENGINE (faithful port of flip_model + competitive cascade + lt_priming) ============
 const EG=DATA.engine,K=EG.const,BPF=EG.bpf,PTY=DATA.party;
@@ -512,17 +512,63 @@ function multiTarget(sponsor,targets){
 // classic greedy keeps the (1-1/e)≈0.63 guarantee (GCOMB matches it: 0.998 vs greedy 0.99 vs optimal 1.0), no ML
 // needed at our scale. cov[v] = prob v is covered = 1-Π(1-p) over selected recruiters; reach = Σ cov.
 const meanDeg=DEG.reduce((a,b)=>a+b,0)/N;
-function budgetRecruit(sponsor,nSeeds,target){
+function budgetRecruit(sponsor,nSeeds,target,opts={}){
   const dT=(target!=null&&target>=0)?distToTarget(target):null,cov=new Float64Array(N),sel=[sponsor],inSel=new Uint8Array(N);
+  const direct=opts.directOnly?new Set(Object.keys(PE[sponsor]).map(Number)):null;
   inSel[sponsor]=1;cov[sponsor]=1;for(const v in PE[sponsor])cov[+v]=1-(1-cov[+v])*(1-PE[sponsor][v]);
   while(sel.length<nSeeds){
     let best=-1,bg=1e-9;
-    for(let c=0;c<N;c++){if(inSel[c]||DEG[c]<Math.max(1,0.1*meanDeg))continue;
+    for(let c=0;c<N;c++){if(inSel[c]||dropped.has(c)||DEG[c]<Math.max(1,0.1*meanDeg))continue;
+      if(direct&&!direct.has(c))continue;
+      if(opts.stanceSafe&&(CAMP(DATA.stance[c][issue])==='anti'||BLOCKOV[DATA.gen[c]]))continue;
       let g=1-cov[c];for(const v in PE[c])g+=PE[c][v]*(1-cov[+v]);if(dT)g*=(1+2*dT[c]);
       if(g>bg){bg=g;best=c;}}
     if(best<0)break;sel.push(best);inSel[best]=1;cov[best]=1;for(const v in PE[best])cov[+v]=1-(1-cov[+v])*(1-PE[best][v]);
   }
   let reach=0;for(let u=0;u<N;u++)reach+=cov[u];return {sel,reach};
+}
+// Weighted PageRank is a cheap global-structure prior for the live dashboard. The 2026 Scientific Reports
+// benchmark found PageRank competitive with much costlier IM methods in time-critical settings. It does not
+// replace the issue/stance/reliability terms below; it breaks local-degree tunnel vision when two edges have
+// similar marginal reach.
+function pageRankScores(iter=18,damp=0.85){
+  let pr=new Float64Array(N);pr.fill(1/N);
+  for(let it=0;it<iter;it++){
+    const nx=new Float64Array(N);nx.fill((1-damp)/N);let sink=0;
+    for(let u=0;u<N;u++){let z=0;for(const v in PE[u])z+=PE[u][v];
+      if(z<=1e-12){sink+=pr[u];continue;}
+      for(const v in PE[u])nx[+v]+=damp*pr[u]*PE[u][v]/z;}
+    const share=damp*sink/N;for(let v=0;v<N;v++)nx[v]+=share;pr=nx;
+  }
+  return pr;
+}
+const PR=pageRankScores(),PRMAX=Math.max(...PR)||1;
+// CLOSED-NETWORK MAX ROUTE (RELINK design): the action is an EDGE, not a target node. Start with the
+// selected member, repeatedly activate the highest-value edge on the current recruitment frontier, and let
+// newly recruited members expose their own outgoing edges. Each recruiter gets at most `fanout` asks.
+// IM-CSN is non-submodular, so this is explicitly a sequential marginal-spread heuristic, not a (1-1/e) claim.
+function closedCascadeRoute(sponsor,edgeBudget=6,fanout=2){
+  const inTree=new Uint8Array(N),outdeg=new Uint8Array(N),pathProb=new Float64Array(N),cov=new Float64Array(N);
+  const nodes=[sponsor],edges=[],steps=[];inTree[sponsor]=1;pathProb[sponsor]=1;cov[sponsor]=1;
+  while(edges.length<edgeBudget){
+    let best=null,bscore=1e-12;
+    for(const u of nodes){if(outdeg[u]>=fanout)continue;
+      for(const sv in PE[u]){const v=+sv;if(inTree[v]||dropped.has(v))continue;
+        if(CAMP(DATA.stance[v][issue])==='anti'||BLOCKOV[DATA.gen[v]])continue;
+        const p=PE[u][v],arrival=pathProb[u]*activeP(p);if(arrival<=1e-9)continue;
+        let marginal=1-cov[v];for(const sw in PE[v])marginal+=PE[v][sw]*(1-cov[+sw]);
+        const structural=0.75+0.25*PR[v]/PRMAX,score=arrival*marginal*structural;
+        if(score>bscore+1e-12||(Math.abs(score-bscore)<=1e-12&&best&&p>best.p)){
+          best={u,v,p,arrival,marginal,score};bscore=score;}}
+    }
+    if(!best)break;
+    const {u,v,p,arrival,marginal,score}=best;outdeg[u]++;inTree[v]=1;pathProb[v]=arrival;
+    nodes.push(v);edges.push([u,v]);steps.push({u,v,p,arrival,marginal,score});
+    cov[v]=1-(1-cov[v])*(1-arrival);
+    for(const sw in PE[v]){const w=+sw;cov[w]=1-(1-cov[w])*(1-arrival*PE[v][sw]);}
+  }
+  let expected=0,hold=1,weak=1;for(const s of steps){expected+=s.arrival;const ap=activeP(s.p);hold*=ap;weak=Math.min(weak,ap);}
+  return {nodes,edges,steps,expected,hold,weak,fanout};
 }
 function cascadeReach(seedArr){   // influence cascade: seed the recruited chain as co-sponsors, spread through the network vs the opposition
   const S=new Set(seedArr),tiers=baseTiers(issue);
@@ -557,25 +603,29 @@ function cascadeRun(){   // seed the cascade from the selected member; recolor t
   cb.innerHTML=`⚡ <b>Cascade</b> from <b>${last(sel)}</b> · ~<b>${reach.toFixed(0)}</b> likely to join &nbsp;<span class=lo>unlikely</span><span class=scale></span><span class=hi>likely</span>`;
   legend();draw();
 }
-// MAX-CASCADE ROUTE: from the picked member, the recruitment route that maximizes the cascade. Greedy
-// influence-maximization (budgetRecruit's GCOMB coverage, ~1-1/e optimal) picks the recruit set; multiTarget
-// wires the seed to each through real cosponsorship ties (the route to take); the field then colors by the
-// activation likelihood of that whole recruited set (routeCasc via startRoute), so you see who it lights up.
+// MAX-CASCADE ROUTE: an outward, multi-hop closed-network edge-activation tree. This is deliberately
+// different from flipRoute(): max route has no target and grows the highest-spread frontier; flip route fixes
+// one target and ranks inward leverage on that target.
 function maxCascadeRoute(){
   if(sel<0)return;
   cascadeExit();   // leave the single-seed activation map — we're drawing a route now
-  const K=6, br=budgetRecruit(sel,K+1,-1), recruits=br.sel;   // ordered, seed first
-  const others=recruits.filter(x=>x!==sel), mt=multiTarget(sel,others);
-  const nodes=[...new Set([...recruits,...mt.tree])];
-  route={edges:mt.edges,nodes,seed:sel,targets:[],ordered:false,maxcasc:true,recruits};
+  const po=document.getElementById('pathout'),last=i=>DATA.name[i].split(' ').slice(-1)[0];
+  if(CAMP(DATA.stance[sel][issue])==='anti'||BLOCKOV[DATA.gen[sel]]){
+    noRoute();po.innerHTML=`<div class=mrow><span>Max-cascade route from</span><b>${last(sel)}</b></div><div class=hint style="margin:6px 0;color:#f59e0b">Not a viable pro-CU cascade seed on this issue. Pick a neutral/pro member without a system-level skeptic gate.</div>`;draw();return;
+  }
+  const plan=closedCascadeRoute(sel,6,2),nodes=plan.nodes,recruits=nodes;
+  if(!plan.edges.length){
+    noRoute();po.innerHTML=`<div class=mrow><span>Max-cascade route from</span><b>${last(sel)}</b></div><div class=hint style="margin:6px 0;color:#f59e0b">No stance-viable recruitment edge is reachable from this member after dropouts and system-level gates.</div>`;draw();return;
+  }
+  route={edges:plan.edges,nodes,seed:sel,targets:[],ordered:false,maxcasc:true,recruits,cascadeSeeds:nodes};
   startRoute();   // frames the route, animates it in, and computes routeCasc = who activates from this recruited set
   const reachAll=cascadeReach(nodes),reachSeed=cascadeReach([sel]),gain=Math.max(0,reachAll-reachSeed);
-  const po=document.getElementById('pathout'),last=i=>DATA.name[i].split(' ').slice(-1)[0];
   po.innerHTML=`<div class=mrow><span>Max-cascade route from</span><b>${last(sel)}</b></div>`
-   +`<div class=mrow><span>Recruit <b>${nodes.length}</b> → activate</span><b class="delta up">~${reachAll.toFixed(0)} members</b></div>`
+   +`<div class=mrow><span>Activate <b>${plan.edges.length}</b> edges → if route lands</span><b class="delta up">~${reachAll.toFixed(0)} members</b></div>`
    +`<div class=mrow><span>vs. ${last(sel)} alone</span><b>~${reachSeed.toFixed(0)} <span class="delta up">(+${gain.toFixed(0)})</span></b></div>`
-   +`<div class=hint style="margin:6px 0">recruit in this priority order to maximize the cascade · field = who it activates</div>`
-   +`<div style="font-size:11px;color:#c9d1d9;line-height:1.75">`+recruits.map((v,k)=>`<span style=color:#6e7681>${k+1}.</span> <span class=lnk data-i=${v} style="cursor:pointer;text-decoration:underline">${DATA.name[v]}</span>${k===0?' <span style=color:#22c55e>· start</span>':''}`).join('<br>')+`</div>`;
+   +`<div class=mrow><span>Expected route recruits · all asks hold</span><b>${plan.expected.toFixed(1)} · ${(plan.hold*100).toFixed(0)}%</b></div>`
+   +`<div class=hint style="margin:6px 0">closed-network edge activation: grow outward one ask at a time, max ${plan.fanout} asks per recruiter · score = route reliability × new coverage × weighted PageRank · no fixed flip target</div>`
+   +`<div style="font-size:11px;color:#c9d1d9;line-height:1.75">`+plan.steps.map(({u,v,p,arrival},k)=>`<span style=color:#6e7681>${k+1}.</span> <span class=lnk data-i=${u} style="cursor:pointer;text-decoration:underline">${DATA.name[u]}</span> → <span class=lnk data-i=${v} style="cursor:pointer;text-decoration:underline">${DATA.name[v]}</span> <span style=color:#8b949e>${Math.round(activeP(p)*100)}% ask · ${Math.round(arrival*100)}% route</span>`).join('<br>')+`</div>`;
   po.querySelectorAll('.lnk').forEach(el=>el.onclick=()=>selectMember(+el.dataset.i));
 }
 // FLIP ROUTE (Persuade): pick a TARGET member; ALWAYS show which colleagues have the most LEVERAGE over them
@@ -698,12 +748,12 @@ function runScenario(){
    +(defects?`<div class=defwarn style=margin-top:6px>⚠ crosses defection threshold (${K.DTHRESH}) — overall stance would shift ${lean>0?'toward pro':'toward anti'}.</div>`:'')
    +cascStr;
   // HEAD-TO-HEAD (this issue): CU pull vs industry pull -> flip odds + break-even spend
-  const c=baseCache[issue];
-  const A=K.WM*(EG.cu[sel]+cu+1)/((EG.cu[sel]+cu+1)+K.HALFF*EG.rcp[sel])+K.WP*c.nAsel/c.mA;
-  const Bv=K.WM*(EG.ind[sel]+co+1)/((EG.ind[sel]+co+1)+K.HALFF*EG.rcp[sel])+K.WP*c.nBsel/c.mB;
+  const c=baseCache[issue],pm=PM?PM[sel]:1;
+  const A=K.WM*pm*(EG.cu[sel]+cu+1)/((EG.cu[sel]+cu+1)+K.HALFF*EG.rcp[sel])+K.WP*c.nAsel/c.mA;
+  const Bv=K.WM*pm*(EG.ind[sel]+co+1)/((EG.ind[sel]+co+1)+K.HALFF*EG.rcp[sel])+K.WP*c.nBsel/c.mB;
   const pct=Math.round(100*A/(A+Bv));
   document.getElementById('h2hcu').style.width=pct+'%';document.getElementById('h2hind').style.width=(100-pct)+'%';document.getElementById('h2hpct').textContent=pct+'%';
-  const tA=c.pfbase*Bv/(1-c.pfbase),q=(tA-K.WP*c.nAsel/c.mA)/K.WM;let be;
+  const tA=c.pfbase*Bv/(1-c.pfbase),q=(tA-K.WP*c.nAsel/c.mA)/(K.WM*pm);let be;
   if(co===0)be='<span style=color:#6e7681>add competitor $ to see the CU break-even</span>';
   else if(q>=1)be='<b style=color:#f59e0b>CU money alone can’t fully offset</b> $'+(co/1000)+'k of competitor spend here';
   else{const need=Math.max(0,Math.round((q*K.HALFF*EG.rcp[sel]/(1-q))-1-EG.cu[sel]));be='to neutralize $'+(co/1000)+'k competitor → <b>$'+Math.round(need/1000)+'k</b> CU money';}
@@ -763,7 +813,7 @@ function runPath(){
    +r.path.map((v,k)=>`<span style=color:#6e7681>${k+1}.</span> ${DATA.name[v]}`+(k===0?' <span style=color:#16a34a>· sponsor</span>':` <span style=color:#8b949e>+$${Math.round(r.hops[k-1].cost/1000)}k · ${(activeP(r.hops[k-1].p)*100).toFixed(0)}% ask</span>`)+(v===t?' <span style=color:#fbbf24>· target</span>':'')).join('<br>')+`</div>`;
   startRoute();
 }
-function backToTargets(){cascadeExit();sel=-1;noRoute();document.getElementById('mpanel').style.display='none';document.getElementById('tpanel').style.display='block';document.getElementById('mdlink').style.display='none';draw();}
+function backToTargets(){cascadeExit();sel=-1;hi=-1;noRoute();document.getElementById('mpanel').style.display='none';document.getElementById('tpanel').style.display='block';document.getElementById('mdlink').style.display='none';document.getElementById('search').value='';document.getElementById('tgtsearch').value='';document.getElementById('pathout').innerHTML='';fit();draw();}
 function applyShocks(){
   const ds=document.getElementById('dropsearch').value.trim();
   dropped=new Set(ds?ds.split(',').map(x=>DATA.name.indexOf(x.trim())).filter(i=>i>=0):[]);
@@ -801,7 +851,8 @@ function refresh(){
    document.getElementById('mdetail').innerHTML=`coalition spread <b>${f.base.toFixed(0)} → ${SPREAD.toFixed(0)}</b> co-sponsors · <b>${ORD.length}</b> seeds funded · knee $${(f.knee/1000).toFixed(0)}k · drag to set budget`;
  }else if(DATA.engine.refflip[issue]===0){   // Overall = aggregate stance layer; summing every issue's budget is meaningless
    document.getElementById('money').textContent='—';
-   document.getElementById('mdetail').innerHTML='aggregate stance view (no single budget) — your <b>$2M total</b> plan is the optimizer card below';
+   const ob=DATA.opt?('$'+(DATA.opt.budget/1e6).toFixed(1)+'M'):'joint';
+   document.getElementById('mdetail').innerHTML=`aggregate stance view (no single issue budget) — your <b>${ob} total</b> plan is the optimizer card below`;
  }else{
    const tot=mode==='coal'?st.coal:st.flip;
    document.getElementById('money').textContent=fmt(tot);
@@ -827,9 +878,12 @@ function refresh(){
 // optimizer card (static cross-topic CU allocation)
 function optCard(){
  const o=DATA.opt;if(!o){document.getElementById('optbody').innerHTML='<div class=hint>not available</div>';return;}
+ document.getElementById('opthdr').textContent=`Joint optimizer · $${(o.budget/1e6).toFixed(1)}M`;
  const top=o.alloc.slice(0,8);
  let h=`<div class=optline>winnability <b>${o.base.toFixed(1)} → ${o.final.toFixed(1)}</b> (<b>+${(o.final-o.base).toFixed(1)}</b> expected flips)</div>`;
  h+=`<div class=optline style=color:#8b949e>$${(o.budget/1e6).toFixed(1)}M across 17 issues · ${o.alloc.length} members${o.conv.length?` · ${o.conv.length} convert`:''}</div>`;
+ const mode=o.mode==='fixed_state_lazy_greedy'?'fixed-state lazy greedy':'modeled threshold replanning';
+ h+=`<div class=optline style=color:#6e7681>${mode}${o.certificate&&o.bound!=null?` · certified OPT ≤ ${Number(o.bound).toFixed(1)}`:' · no fixed-state certificate'}</div>`;
  h+=top.map(([i,v])=>`<div class=oa data-i=${i}><span>${o.conv.includes(i)?'<span class=conv>● </span>':''}${DATA.name[i]}</span><small>$${v}k</small></div>`).join('');
  document.getElementById('optbody').innerHTML=h;
  document.querySelectorAll('.oa').forEach(el=>el.onclick=()=>selectMember(+el.dataset.i));
