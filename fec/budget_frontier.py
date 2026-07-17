@@ -1,12 +1,19 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import moneyball_core as MBC
-import json, sys, random, os, openpyxl, heapq
+import json, sys, random, os, openpyxl, heapq, re
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 SEED=int(os.environ.get('SEED','7')); random.seed(SEED)
 MC=int(os.environ.get('MC','20')); CAP=50_000; BSCALE=400000; MAXSEEDS=int(os.environ.get('MAXSEEDS','60'))
 LEVON=os.environ.get('LEV','1')!='0'   # electoral leverage on (competitive seats cheaper to move)
 ONLY=os.environ.get('TOPIC')           # optional single-topic filter (substring) for fast validation
+def scoped_output_path(explicit,default,selector):
+    """A TOPIC probe gets its own artifact unless the caller explicitly supplies an output path."""
+    if explicit: return explicit
+    if not selector: return default
+    slug=re.sub(r'[^a-z0-9]+','_',selector.lower()).strip('_') or 'topic'
+    stem,ext=os.path.splitext(default)
+    return stem+'_topic_'+slug+ext
 PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Highly Skeptical','Skeptic'}
 C={m['member']:m for m in json.load(open(os.environ.get('CONGEST',B+r'\congestion.json')))}   # scenario can override money state
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
@@ -72,7 +79,7 @@ for sc in blocks:
     atrisk=sorted([n for n in Aseed if ELECTORAL and EP.get(n,{}).get('play')=='defend' and comp[n]>=0.4])  # competitive allies that can be insured
     Asafe=Aseed-set(atrisk); risk={n:comp[n] for n in atrisk}
     def spread(extra,defended=()):
-        defended=set(defended); ex=set(extra); aa=anti-ex; tot=0   # funded contest converts anti->pro; defended allies are forced to hold
+        defended=set(defended); ex=set(extra); tot=0
         for it in range(MC):
             random.seed(1000003*SEED+it)
             held=set()
@@ -81,7 +88,11 @@ for sc in blocks:
                 if m in defended or r<(1-risk[m]): held.add(m)   # always draw (CRN); undefended at-risk ally holds only w.p. 1-risk
             # CONTINGENCY-AWARE seeding: a lobbied seed activates only w.p. personality seed_prob x
             # stance gate (dedicated CRN stream, offset past the edge keys — no draw collisions).
-            s=Asafe|held|{n for n in ex if _sm((1<<62)+it*NM+idx[n])<gate(n,cs)}
+            activated={n for n in ex if _sm((1<<62)+it*NM+idx[n])<gate(n,cs)}
+            # A failed contest activation remains an opponent. The old anti-ex subtraction granted the
+            # conversion even when the seed gate failed, inflating electoral frontier marginals.
+            aa=anti-activated
+            s=Asafe|held|activated
             bx=[n for n in members if random.random()<min(0.9,ind[n]/BSCALE) and campT[n]=='neu' and n not in s]  # roll for every member (CRN-stable), then filter
             tot+=cascade(s,aa|set(bx),it)
         return tot/MC
@@ -98,6 +109,7 @@ for sc in blocks:
     while pq and (len(S)+len(D))<MAXSEEDS:
         negeff,c,liter=heapq.heappop(pq)
         if liter==it:
+            if -negeff<=1e-12: break
             if c in dset: D.add(c); typ='defend'
             else: S.add(c); typ='contest' if c in rset else 'coalition'
             it+=1; cur=spread(S,D); prev=max(prev,cur)   # display curve clamped non-decreasing (dips are MC noise); cur stays true for marginals
@@ -109,14 +121,17 @@ for sc in blocks:
     peak=max(margs) if margs else 0; knee=0
     for i,mg in enumerate(margs):
         if mg>=0.25*peak: knee=(i+1)*CAP
+    knee_found=0<knee<path[-1]['b']
     nrep=sum(1 for p in path[1:] if p.get('type')=='contest'); ndef=sum(1 for p in path[1:] if p.get('type')=='defend')
-    frontier[lab]={'base':round(base,1),'core_seeds':len(Aseed),'knee':knee,'contest_seeds':nrep,'defend_seeds':ndef,'path':path}
+    frontier[lab]={'base':round(base,1),'core_seeds':len(Aseed),'knee':knee,'knee_found':knee_found,
+                   'contest_seeds':nrep,'defend_seeds':ndef,'path':path}
     print('%-26s core %3d (base %.0f) -> +%d (%dR %dD) to %.0f | knee $%dk | first: %s'%(
         lab[:26],len(Aseed),base,len(S)+len(D),nrep,ndef,cur,knee//1000,', '.join(p['seed'].split()[-1]+{'contest':'*','defend':'^'}.get(p.get('type'),'') for p in path[1:4])))
 defend_ov=sorted([m for m in members if EP.get(m,{}).get('play')=='defend'],key=lambda m:-EP[m]['value'])[:20]
-out={'mode':'electoral' if ELECTORAL else 'coalition','leverage':LEVON,
+out={'mode':'electoral' if ELECTORAL else 'coalition','leverage':LEVON,'topic':ONLY,
      'defend_overview':[{'m':m,'v':EP[m]['value'],'party':EP[m].get('party'),'elavg':EP[m].get('elavg')} for m in defend_ov],
      'topics':frontier}
-_outpath=os.environ.get('FRONTIER_OUT',B+r'\budget_frontier%s.json'%('_electoral' if ELECTORAL else ''))   # FRONTIER_OUT lets the audit test a single topic without clobbering the production all-topics json
+_default=B+r'\budget_frontier%s.json'%('_electoral' if ELECTORAL else '')
+_outpath=scoped_output_path(os.environ.get('FRONTIER_OUT'),_default,ONLY)
 MBC.dump_atomic(out,_outpath)
 print('\nwrote %s (mode %s, leverage %s, %d topics)'%(os.path.basename(_outpath),'ELECTORAL' if ELECTORAL else 'coalition','ON' if LEVON else 'OFF',len(frontier)))

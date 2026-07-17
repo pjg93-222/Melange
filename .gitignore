@@ -30,6 +30,8 @@ deploy/
 # --- keep: code, docs, config, small source-of-truth text ---
 !*.md
 !formal_visibility_roles.json
+!tweet_image_annotations.json
+!tier_overrides.json
 !requirements*.txt
 !quorum_query.txt
 !fec/retiring_members.txt

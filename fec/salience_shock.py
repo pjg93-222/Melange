@@ -46,9 +46,7 @@ BSCALE=400000
 PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Highly Skeptical','Skeptic'}
 CTORD=['Champion','Defender','Ally','Highly Persuadable','Persuadable','Lean Persuadable',
        'True Neutral','Lean Skeptic','Skeptic','Highly Skeptical','Opponent']
-TSCORE={'Champion':3,'Defender':2.5,'Ally':2,'Highly Persuadable':1.25,'Persuadable':0.75,
-        'Lean Persuadable':0.25,'True Neutral':0,'Lean Skeptic':-0.5,'Skeptic':-1,
-        'Highly Skeptical':-2,'Opponent':-3}
+TSCORE=MBC.SALIENCE_TSCORE
 MIDBAND={'Highly Persuadable','Persuadable','Lean Persuadable','True Neutral','Lean Skeptic'}
 CSJ=json.load(open(B+r'\category_stance.json')); MAT0=CSJ['matrix']; cats=CSJ['cats']; DEFENSIVE=set(CSJ['defensive'])
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}; members=[m['member'] for m in C.values()]
@@ -95,17 +93,7 @@ BACKFIRE0=float(os.environ.get('SAL_B0','0.05'))     # base backfire probability
 BACKF_PSI=float(os.environ.get('SAL_BPSI','0.10'))   # backfire grows with policy uncertainty (Prop 5 caution)
 DELTA=float(os.environ.get('SAL_DELTA','0.5'))       # White-House/electoral-control payoff -> defensive-appeal DTHRESH lift (Eq. 1: threshold + delta/2)
 def issue_params(cat):
-    sD=[TSCORE[MAT0[m][cat]] for m in members if prt.get(m)=='D' and MAT0[m][cat] in TSCORE]
-    sR=[TSCORE[MAT0[m][cat]] for m in members if prt.get(m)=='R' and MAT0[m][cat] in TSCORE]
-    nall=sum(1 for m in members if MAT0[m].get(cat) in TSCORE)
-    z=abs((sum(sD)/max(1,len(sD)))-(sum(sR)/max(1,len(sR))))     # sincere polarization: D-R gap on THIS issue
-    zn=min(1.0,z/3.0)
-    psi=1.0-nall/max(1,len(members))                              # uncertainty: share with NO established posture
-    psi=min(1.0,psi+0.3*(sum(1 for m in members if MAT0[m].get(cat)=='True Neutral')/max(1,nall)))
-    b=min(0.35,BACKFIRE0+BACKF_PSI*psi)
-    p=(1-b)*(1-zn); q=(1-b)*zn                                    # rally likelier on low-gap issues (their Pew 7-pt vs 46-pt example)
-    sq='defend' if cat in DEFENSIVE else 'offense'                # status quo favorable to CU? (defensive fights: CU wins via gridlock)
-    return {'z':round(z,2),'zn':round(zn,3),'psi':round(psi,3),'p':round(p,3),'q':round(q,3),'b':round(b,3),'sq':sq}
+    return MBC.salience_issue_params(MAT0,members,prt,cat,DEFENSIVE,BACKFIRE0,BACKF_PSI)
 
 # ---------- the shock: regime-signed, party-asymmetric stance perturbation ----------
 def steps_for(member,actorparty,actorside,regime,intensity):

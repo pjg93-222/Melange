@@ -19,6 +19,7 @@ import sys, os, json, re, shutil, datetime, collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 import pandas as pd, openpyxl
 import media_rules as MR
+import config_overlay as CO
 from moneyball_core import save_workbook_atomic
 from member_identity import Resolver
 M=MB_ROOT
@@ -102,35 +103,33 @@ for _,r in corp.iterrows():
     nassigned+=1
     for c in hits: soc[_member][c]+=sg*inten*decay/len(hits)
 print('social: %d source rows -> %d unique scored/category-assigned | %d exact cross-post duplicates removed | %d unresolved identities excluded | %d members | half-life %.2f yr (press: 2.0 yr)'%(len(corp),nassigned,ndupe,nunknown,len(soc),HL))
-# ---- CU FLOOR-SPEECH CHANNEL (GATED, default OFF; Paul-approved 2026-07-15) --------------------------
+# ---- CU FLOOR-SPEECH CHANNEL (VALIDATED; default ON 2026-07-16) -------------------------------------
 # A THIRD own-source channel: speech_stance_final.csv (speech_stance_stack.py) — the member's own CREC
 # floor words on CU/CFPB/interchange topics.  SIGN{support:+1,oppose:-1,neutral:0}, category-split,
 # decay 0.5^(age/2.0yr) like press, tier-weighted intensity (gold 1.0 / review 0.35 — the API-free
 # heuristic is a WEAK prior until Paul's gold lands), own-source weight 1.0 (floor speeches are
 # member-authored, attribution-clean like a .gov press release).  It rides the press side of the 50/50
 # mix, each channel p80-scaled for commensurability.
-# GATE: CU_SPEECH_CHANNEL=1 turns it on.  DEFAULT OFF => this block reads nothing and the workbook math
-# below is byte-identical to today (zero rank movement) until Paul validates the channel.
-SPEECH_ON=os.environ.get('CU_SPEECH_CHANNEL','0')=='1'
+# CU_SPEECH_CHANNEL=0 remains an emergency rollback; validated production default is ON.
+SPEECH_ON=os.environ.get('CU_SPEECH_CHANNEL','1')=='1'
 def _cu_stale(_final,_deps):
     """GATE-SAFETY (audit 2026-07-15): a channel's stance_final must be NEWER than its corpus+gold inputs.
     Returns the list of newer inputs (=> stale, skip the channel fail-closed) or [] when fresh/overridden
-    (CU_STALE_OK=1). The channel stacks are NOT in the pipeline chain, so without this a gate flipped on
-    months later would silently consume a stale hand-run file."""
+    (CU_STALE_OK=1). This also protects direct or partial blend runs that bypass the channel scorers."""
     if os.environ.get('CU_STALE_OK','0')=='1': return []
     try: _fm=os.path.getmtime(_final)
     except OSError: return []
     return [os.path.basename(_d) for _d in _deps if os.path.exists(_d) and os.path.getmtime(_d)>_fm]
 spc=collections.defaultdict(lambda:collections.defaultdict(float))
+_sn=0; _snm=set(); _speech_loaded=False
 if SPEECH_ON:
     import csv as _csv2,io as _io2
     _spf=M+r'\speech_stance_final.csv'
-    _STW={'gold':1.0,'review':0.35}   # tier -> intensity (mirrors the stacks' trust weighting)
-    _sn=0; _snm=set()
     _stl=_cu_stale(_spf,[M+'\\speeches_cu.csv',M+'\\speech_gold_queue.csv'])
     if _stl:
         print('!! CU speech channel: speech_stance_final.csv is OLDER than %s — STALE, channel SKIPPED (re-run speech_stance_stack.py; CU_STALE_OK=1 overrides)'%'+'.join(_stl))
     elif os.path.exists(_spf):
+        _speech_loaded=True
         for _r in _csv2.DictReader(_io2.open(_spf,encoding='utf-8-sig',newline='')):
             _sg=SIGN.get((_r.get('stance') or '').strip().lower(),0.0)
             if _sg==0.0: continue                                  # neutral / unrelated -> no signal
@@ -138,7 +137,8 @@ if SPEECH_ON:
             if not _m: continue                                    # fail-closed on unresolved identity
             try: _age=(TODAY-datetime.date.fromisoformat((_r.get('date') or '')[:10])).days/365.25
             except Exception: continue
-            _inten=_STW.get((_r.get('tier') or '').strip().lower(),0.35)
+            _inten=MR.own_source_tier_weight(_r.get('tier'))
+            if _inten==0.0: continue                               # unknown tier -> fail closed
             _dec=0.5**(max(0.0,_age)/2.0)                          # press-like 2.0yr half-life
             _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
             if not _cats: continue
@@ -147,65 +147,68 @@ if SPEECH_ON:
         print('CU speech channel ACTIVE (CU_SPEECH_CHANNEL=1): %d signed floor speeches -> %d members (own-source weight 1.0, half-life 2.0yr)'%(_sn,len(_snm)))
     else:
         print('!! CU_SPEECH_CHANNEL=1 but speech_stance_final.csv missing — no speech signal added')
-# ---- CU HEARING CHANNEL (GATED, default OFF; integrate phase 2026-07-15) ------------------------------
+# ---- CU HEARING CHANNEL (VALIDATED GOLD-ONLY; default ON 2026-07-16) --------------------------------
 # Own-words committee-hearing (source='CHRG') CU stance from hearing_stance_stack.py — an EXACT structural
 # mirror of the CU floor-speech block above: SIGN{support:+1,oppose:-1,neutral:0}, category-split, decay
 # 0.5^(age/2.0yr) like press, tier-weighted intensity (gold 1.0 / review 0.35).  Own-source weight 0.85
 # (below floor speeches' 1.0: CHRG carries a witness/member attribution risk — a witness surname can
 # collide with a member's — so the channel is discounted).  Rides the press side, p80-scaled for parity.
-# GATE: CU_HEARING_CHANNEL=1 turns it on.  DEFAULT OFF => reads nothing and the blend math below is
-# byte-identical to today (zero rank movement) until Paul validates the channel.
-HEARING_ON=os.environ.get('CU_HEARING_CHANNEL','0')=='1'
+# CU_HEARING_CHANNEL=0 remains an emergency rollback; validated production default is ON.
+HEARING_ON=os.environ.get('CU_HEARING_CHANNEL','1')=='1'
 HEARING_W=0.85
 hrc=collections.defaultdict(lambda:collections.defaultdict(float))
+_hn=0; _hnm=set(); _hreview=0; _hearing_loaded=False
 if HEARING_ON:
     import csv as _csvh,io as _ioh
     _hf=M+r'\hearing_stance_final.csv'
-    _HTW={'gold':1.0,'review':0.35}   # tier -> intensity (mirrors the stacks' trust weighting)
-    _hn=0; _hnm=set()
     _stl=_cu_stale(_hf,[M+'\\hearings_cu.csv',M+'\\hearing_gold_queue.csv'])
     if _stl:
         print('!! CU hearing channel: hearing_stance_final.csv is OLDER than %s — STALE, channel SKIPPED (re-run hearing_stance_stack.py; CU_STALE_OK=1 overrides)'%'+'.join(_stl))
     elif os.path.exists(_hf):
+        _hearing_loaded=True
         _prows=list(_csvh.DictReader(_ioh.open(_hf,encoding='utf-8-sig',newline='')))
+        _eligible=[_r for _r in _prows if MR.hearing_tier_weight(_r.get('tier'))>0.0]
+        _hreview=len(_prows)-len(_eligible)
         # C per-event normalization (Paul-delegated audit fix 2026-07-15): the hearing channel is
         # PASSAGE-level — one appearance can yield several CU passages. Weight each row 1/n so one
         # EVENT (member,date) contributes one unit of signal regardless of passage count.
-        _ev=collections.Counter((_x.get('member'),(_x.get('date') or '')[:10]) for _x in _prows)
-        for _r in _prows:
+        _ev=collections.Counter((_x.get('member'),(_x.get('date') or '')[:10]) for _x in _eligible)
+        for _r in _eligible:
             _sg=SIGN.get((_r.get('stance') or '').strip().lower(),0.0)
             if _sg==0.0: continue                                  # neutral / unrelated -> no signal
             _m=_resolver.resolve(_r.get('member'),_r.get('bioguide'))
             if not _m: continue                                    # fail-closed on unresolved identity
             try: _age=(TODAY-datetime.date.fromisoformat((_r.get('date') or '')[:10])).days/365.25
             except Exception: continue
-            _inten=_HTW.get((_r.get('tier') or '').strip().lower(),0.35)
+            _inten=MR.hearing_tier_weight(_r.get('tier'))           # gold=1.0; every other tier=0.0
             _dec=0.5**(max(0.0,_age)/2.0)                          # press-like 2.0yr half-life
             _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
             if not _cats: continue
             _hn+=1; _hnm.add(_m)
             _evn=max(1,_ev[(_r.get('member'),(_r.get('date') or '')[:10])])
             for _c in _cats: hrc[_m][_c]+=_sg*_inten*_dec/len(_cats)/_evn
-        print('CU hearing channel ACTIVE (CU_HEARING_CHANNEL=1): %d signed hearing rows -> %d members (own-source weight 0.85, half-life 2.0yr)'%(_hn,len(_hnm)))
+        print('CU hearing channel ACTIVE, GOLD ONLY (CU_HEARING_CHANNEL=1): %d signed gold rows -> '
+              '%d members | %d non-gold rows excluded (own-source weight 0.85, half-life 2.0yr)'%
+              (_hn,len(_hnm),_hreview))
     else:
         print('!! CU_HEARING_CHANNEL=1 but hearing_stance_final.csv missing — no hearing signal added')
-# ---- CU INTERVIEW CHANNEL (GATED, default OFF; integrate phase 2026-07-15) ----------------------------
+# ---- CU INTERVIEW CHANNEL (VALIDATED; default ON 2026-07-16) -----------------------------------------
 # Own-words broadcast/podcast interview (source='INTERVIEW') CU stance from interview_stance_stack.py —
 # EXACT structural mirror of the speech block.  Own-source weight 1.0 (interviews are the member's own
 # words, attribution-clean like floor speeches).  SIGN / category-split / decay / tier-intensity identical.
-# GATE: CU_INTERVIEW_CHANNEL=1 turns it on.  DEFAULT OFF => reads nothing, blend math byte-identical.
-INTERVIEW_ON=os.environ.get('CU_INTERVIEW_CHANNEL','0')=='1'
+# CU_INTERVIEW_CHANNEL=0 remains an emergency rollback; validated production default is ON.
+INTERVIEW_ON=os.environ.get('CU_INTERVIEW_CHANNEL','1')=='1'
 INTERVIEW_W=1.0
 ivc=collections.defaultdict(lambda:collections.defaultdict(float))
+_in=0; _inm=set(); _interview_loaded=False
 if INTERVIEW_ON:
     import csv as _csvi,io as _ioi
     _if=M+r'\interview_stance_final.csv'
-    _ITW={'gold':1.0,'review':0.35}   # tier -> intensity (mirrors the stacks' trust weighting)
-    _in=0; _inm=set()
     _stl=_cu_stale(_if,[M+'\\interviews_cu.csv',M+'\\interview_gold_queue.csv'])
     if _stl:
         print('!! CU interview channel: interview_stance_final.csv is OLDER than %s — STALE, channel SKIPPED (re-run interview_stance_stack.py; CU_STALE_OK=1 overrides)'%'+'.join(_stl))
     elif os.path.exists(_if):
+        _interview_loaded=True
         _prows=list(_csvi.DictReader(_ioi.open(_if,encoding='utf-8-sig',newline='')))
         # C per-event normalization (Paul-delegated audit fix 2026-07-15): the interview channel is
         # PASSAGE-level — one appearance can yield several CU passages. Weight each row 1/n so one
@@ -218,7 +221,8 @@ if INTERVIEW_ON:
             if not _m: continue                                    # fail-closed on unresolved identity
             try: _age=(TODAY-datetime.date.fromisoformat((_r.get('date') or '')[:10])).days/365.25
             except Exception: continue
-            _inten=_ITW.get((_r.get('tier') or '').strip().lower(),0.35)
+            _inten=MR.own_source_tier_weight(_r.get('tier'))
+            if _inten==0.0: continue                               # unknown tier -> fail closed
             _dec=0.5**(max(0.0,_age)/2.0)                          # press-like 2.0yr half-life
             _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
             if not _cats: continue
@@ -268,6 +272,21 @@ if os.environ.get('PRESS_DYNAMIC','1')!='0':
     _tone=os.path.join(DRAFT,'cu_press_stance_tone.csv')
     _dyn=collections.defaultdict(lambda:collections.defaultdict(float))
     _n=0; _nm=set(); _pvs=[]
+    _domain_audit=[]
+    _api_target={}
+    _api_path=M+r'\api_press_stance.csv'
+    if os.path.exists(_api_path):
+        for _r in _csv.DictReader(_io.open(_api_path,encoding='utf-8-sig',newline='')):
+            _api_target[(_r.get('url') or '').strip().rstrip('/')]=(_r.get('api_target') or '').strip()
+    _fulltext={}
+    for _cache_path in (M+r'\press_text_cache.jsonl',M+r'\press_text_cache_priority.jsonl'):
+        if not os.path.exists(_cache_path): continue
+        for _line in _io.open(_cache_path,encoding='utf-8'):
+            try:
+                _item=json.loads(_line)
+                _fulltext[(_item.get('url') or '').strip().rstrip('/')]=_item.get('text') or ''
+            except Exception:
+                pass
     # STACK OVERRIDE (user-ratified 2026-07-04 "wire in the most accurate stack"): press_stance_final.csv
     # (press_stance_stack.py, 760-gold meta: 0.837 all-gold frame / 0.765 adversarial frame; DEBATE alone
     # 0.796/0.571). Stack label replaces DEBATE sign; UNRELATED -> 0 (kills ACU trade-digest mention
@@ -278,6 +297,16 @@ if os.environ.get('PRESS_DYNAMIC','1')!='0':
     if os.path.exists(_sfp):
         for _r in _csv.DictReader(_io.open(_sfp,encoding='utf-8-sig',newline='')):
             _stk[(_r.get('url') or '').strip().rstrip('/')]=((_r.get('stack_label') or '').strip().lower(),(_r.get('tier') or '').strip().lower())
+    _pov=CO.merged_rows('press_stance_overrides.json','corrections',
+                        ('url','title_contains'),data_root=M)
+    def _press_gold(_url,_title):
+        _ul=(_url or '').strip().rstrip('/'); _tl=(_title or '').lower()
+        for _g in _pov:
+            _st=(_g.get('stance') or '').strip().lower()
+            if _st not in SIGN: continue
+            if _g.get('url') and (_g.get('url') or '').strip().rstrip('/')==_ul: return _st
+            if _g.get('title_contains') and (_g.get('title_contains') or '').lower() in _tl: return _st
+        return None
     _TW={'unanimous':1.0,'majority':0.7,'review':0.35}
     # ATTRIBUTION-STRENGTH channel weight (user 2026-07-04 "that is such a regression" — Warren
     # pulled to #83 by trade-press tagging): a member's OWN .gov press release is member-authored
@@ -286,41 +315,61 @@ if os.environ.get('PRESS_DYNAMIC','1')!='0':
     # LABELS stand; this dial reduces the CREDIT such articles contribute to the 40%-weight pillar.
     # PRESS_THIRD_W env reverts (1.0 = old behavior).
     _W3=float(os.environ.get('PRESS_THIRD_W','0.5'))
-    _n_stack=0; _n_fallback=0; _n_unrel=0; _n_own=0; _n_third=0
+    _n_stack=0; _n_fallback=0; _n_unrel=0; _n_own=0; _n_third=0; _n_gold=0
     def _pdate(s):
         for _f in ('%m/%d/%Y','%Y-%m-%d','%m/%d/%y'):
             try: return datetime.datetime.strptime((s or '').strip(),_f).date()
             except ValueError: pass
         return None
     for _r in _csv.DictReader(_io.open(_tone,encoding='utf-8-sig',newline='')):
+        _uk=(_r.get('url') or '').strip().rstrip('/')
+        _declared=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
+        _route=MR.press_routing_decision(_api_target.get(_uk,''),_r.get('title') or '',
+                                         _declared,_fulltext.get(_uk,''))
+        _cats=[c for c in _route['categories'] if c in ORIG]
+        _audit={'url':_r.get('url'),'member_source':_r.get('member'),'title':_r.get('title'),
+                'api_target':_api_target.get(_uk,''),'declared_categories':_declared,
+                'effective_categories':_cats,'routing_basis':_route['basis'],
+                'discarded_declared':_route['discarded_declared'],'scoring_disposition':'pending'}
+        _domain_audit.append(_audit)
         _m=_resolver.resolve(_r.get('member'),_r.get('bioguide'))
-        _hit=_stk.get((_r.get('url') or '').strip().rstrip('/'))
+        _hit=_stk.get(_uk)
         if _hit is not None:
             _lab,_tier=_hit
-            if _lab=='unrelated': _n_unrel+=1; continue   # mention noise -> zero contribution
-            _sg=SIGN.get(_lab,0.0)*_TW.get(_tier,0.7)
-            if _sg!=0.0: _n_stack+=1
+            if _lab=='unrelated':
+                _n_unrel+=1; _sg=0.0; _audit['scoring_disposition']='unrelated-zeroed'
+            else:
+                _sg=SIGN.get(_lab,0.0)*_TW.get(_tier,0.7)
+                if _sg!=0.0: _n_stack+=1
         else:
             _sg=SIGN.get((_r.get('stance') or '').lower(),0.0)
             if _sg!=0.0: _n_fallback+=1
-        if not _m or _sg==0.0: continue
+        _gold=_press_gold(_r.get('url'),_r.get('title'))
+        if _gold is not None:
+            _sg=SIGN[_gold]; _n_gold+=1
+            _audit['gold_override']=_gold
+        if not _m:
+            _audit['scoring_disposition']='unresolved-member'; continue
+        if _sg==0.0:
+            _audit['scoring_disposition']='neutral-zeroed'; continue
         # intensity = |press_value| (column embeds sign; stance supplies sign here). NO floor:
         # the csv's units are tiny (~0.03 scale) and a 0.25 floor saturated 100% of articles,
         # erasing intensity into a pure count measure. Top clip 3.0 = outlier guard only.
         try: _pv=min(3.0,abs(float(_r.get('press_value'))))
         except (TypeError,ValueError): _pv=0.0
-        if _pv==0.0: continue   # no intensity evidence -> no contribution
+        if _pv==0.0:
+            _audit['scoring_disposition']='zero-intensity'; continue
         _d=_pdate(_r.get('date'))
         if _d is not None: _dec=0.5**(max(0.0,(TODAY-_d).days/365.25)/2.0)
         else:
             try: _dec=max(0.0,min(1.0,float(_r.get('recency_weight') or 0.5)))
             except (TypeError,ValueError): _dec=0.5
-        _declared=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
-        _cats=[c for c in MR.route_raw_categories(_r.get('title') or '',_declared) if c in ORIG]
-        if not _cats: continue
+        if not _cats:
+            _audit['scoring_disposition']='no-policy-domain'; continue
         _ul=(_r.get('url') or '').lower()
         if '.house.gov' in _ul or '.senate.gov' in _ul: _cw=1.0; _n_own+=1
         else: _cw=_W3; _n_third+=1
+        _audit['scoring_disposition']='used'
         _n+=1; _nm.add(_m); _pvs.append(_pv)
         for _c in _cats: _dyn[_c][_m]+=_sg*_pv*_dec*_cw/len(_cats)
     ORIG={c:dict(_dyn.get(c,{})) for c in ORIG}   # same shape/keys as the archive
@@ -330,11 +379,28 @@ if os.environ.get('PRESS_DYNAMIC','1')!='0':
          'pv_stats':{'min':_pvs[0] if _pvs else 0.0,'median':_pvs[len(_pvs)//2] if _pvs else 0.0,
                      'max':_pvs[-1] if _pvs else 0.0,'n_distinct':len(set(_pvs))},
          'stack':{'sidecar':os.path.exists(_sfp),'stack_signed':_n_stack,'debate_fallback':_n_fallback,
-                  'unrelated_zeroed':_n_unrel},
+                  'unrelated_zeroed':_n_unrel,'gold_overrides':_n_gold},
          'channel_weight':{'third_w':_W3,'own_domain':_n_own,'third_party':_n_third},
+         'own_source_channels':{
+             'speech':{'enabled':SPEECH_ON,'loaded':_speech_loaded,'signed_rows':_sn,
+                       'members':len(_snm),'tier_policy':'gold 1.0 / unanimous 0.9 / majority 0.6 / review 0.35'},
+             'hearing':{'enabled':HEARING_ON,'loaded':_hearing_loaded,'signed_gold_rows':_hn,
+                        'members':len(_hnm),'non_gold_rows_excluded':_hreview,'tier_policy':'gold only'},
+             'interview':{'enabled':INTERVIEW_ON,'loaded':_interview_loaded,'signed_rows':_in,
+                          'members':len(_inm),'tier_policy':'gold 1.0 / unanimous 0.9 / majority 0.6 / review 0.35'},
+             'bluesky':{'enabled':False,'loaded':False,'tier_policy':'existing social event only; no press-side duplicate'}},
+         'routing':{'schema':'press-domain-routing-v1','rows':len(_domain_audit),
+                    'basis':dict(collections.Counter(x['routing_basis'] for x in _domain_audit)),
+                    'dispositions':dict(collections.Counter(x['scoring_disposition'] for x in _domain_audit))},
          'note':'dynamic press component (PRESS_DYNAMIC); archive fallback with PRESS_DYNAMIC=0'},
         M+r'\press_component_meta.json')
-    print('DYNAMIC press component: %d signed articles -> %d members (stack-signed %d, DEBATE fallback %d, unrelated zeroed %d; own-domain %d @1.0, third-party %d @%.2f)'%(_n,len(_nm),_n_stack,_n_fallback,_n_unrel,_n_own,_n_third,_W3))
+    _da({'schema':'press-domain-routing-audit-v1','source':_tone,'rows':_domain_audit,
+         'summary':{'basis':dict(collections.Counter(x['routing_basis'] for x in _domain_audit)),
+                    'dispositions':dict(collections.Counter(x['scoring_disposition'] for x in _domain_audit)),
+                    'effective_categories':dict(collections.Counter(
+                        c for x in _domain_audit for c in x['effective_categories']))}},
+        M+r'\press_domain_routing_audit.json')
+    print('DYNAMIC press component: %d signed articles -> %d members (stack-signed %d, DEBATE fallback %d, gold overrides %d, unrelated zeroed %d; own-domain %d @1.0, third-party %d @%.2f)'%(_n,len(_nm),_n_stack,_n_fallback,_n_gold,_n_unrel,_n_own,_n_third,_W3))
 changed=0
 for kwcat,hname in HDRMAP.items():
     col=hdr.get(hname)
@@ -364,12 +430,12 @@ for kwcat,hname in HDRMAP.items():
         rw.cell(mrow[m],col).value=round(nv,6)
         if abs(nv-old)>1e-9: changed+=1
 rw['Z1']='MEDIA BLEND %s: cells = press(p80-scaled)+social(p80-scaled, half-life %.2fy) at 50/50 (thin-cat shrink %s, RT weight %.2f). Backup: %s'%(TODAY,HL,'ON' if SHRINK else 'off',RT_W,os.path.basename(bak))
-if SPEECH_ON:   # gated marker only; OFF leaves Z1 byte-identical to today
-    rw['Z1']=str(rw['Z1'].value or '')+' | +CU floor-speech channel (own-source, half-life 2.0y, gold 1.0/review 0.35)'
-if HEARING_ON:   # gated marker only; OFF leaves Z1 byte-identical to today
-    rw['Z1']=str(rw['Z1'].value or '')+' | +CU hearing channel (own-source 0.85, half-life 2.0y, gold 1.0/review 0.35)'
-if INTERVIEW_ON:   # gated marker only; OFF leaves Z1 byte-identical to today
-    rw['Z1']=str(rw['Z1'].value or '')+' | +CU interview channel (own-source 1.0, half-life 2.0y, gold 1.0/review 0.35)'
+if _speech_loaded:
+    rw['Z1']=str(rw['Z1'].value or '')+' | +CU floor-speech learned stack (gold 1.0, unanimous 0.9, majority 0.6, review 0.35)'
+if _hearing_loaded:
+    rw['Z1']=str(rw['Z1'].value or '')+' | +CU hearing channel (GOLD ONLY; own-source 0.85, half-life 2.0y; non-gold excluded)'
+if _interview_loaded:
+    rw['Z1']=str(rw['Z1'].value or '')+' | +CU interview learned stack (gold 1.0, unanimous 0.9, majority 0.6, review 0.35)'
 wb.calculation.fullCalcOnLoad=True   # PHASE-2: the workbook is a VIEW — Excel recalcs it on open; no COM recalc anywhere
 save_workbook_atomic(wb,WBP)
 print('wrote media blend into Press Release - Raw: %d cells changed (formulas untouched)'%changed)

@@ -23,6 +23,7 @@ from moneyball_core import dump_atomic, write_text_atomic   # crash-safe generat
 from tier_util import legislative_press_tiers   # Legislative+Press tier (display-only; shared with the dashboard producer)
 import bill_rules as BR
 import media_rules as MR
+import config_overlay as CO
 import dashboard_integrity as DI
 from member_identity import Resolver
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -43,14 +44,15 @@ EP  = L('electoral_plays.json') or {}        # name -> {play,value,route,...}
 ARCH= L('archive_leg.json') or {}            # name -> {cat: legislative score}
 MANUAL = L('member_desk_manual.json') or {}  # name -> {staff, bio, psychometrics, invested_override,...}
 PDATE  = L('press_date_overrides.json') or {}  # full article url -> {date, method} (recovered for the 244 undated)
-PRESSOV = (L('press_stance_overrides.json') or {}).get('corrections', [])  # manual corrections for DEBATE press-sentiment mislabels
+PRESSOV = CO.merged_rows('press_stance_overrides.json','corrections',
+                         ('url','title_contains'),data_root=B)  # live rows + tracked worktree gold
 def _press_corr(title, url):
     t = (title or '').lower()
     for c in PRESSOV:
         if (c.get('url') and c['url'] == url) or (c.get('title_contains') and c['title_contains'].lower() in t):
             return c
     return None
-OPT    = L('optimize_result.json') or {}     # Golovin-Krause adaptive-submodular optimizer: {alloc:{name:$}, base, final,...}
+OPT    = L('optimize_result.json') or {}     # joint lazy-greedy optimizer: {alloc:{name:$}, mode, guarantee, base, final,...}
 if not OPT: print('  !! optimize_result.json MISSING/empty — desk allocation panels will be blank (run optimize.py)')   # S3-05
 OPT_ALLOC = OPT.get('alloc', {})             # the RESEARCH-GROUNDED suggested allocation (vs score-proportional)
 EH  = L('electoral_history.json') or {}      # per-member FEC primary+general vote-share trend + forecast (build_electoral_history.py)

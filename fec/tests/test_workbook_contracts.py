@@ -10,7 +10,8 @@ import openpyxl
 
 ROOT=Path(__file__).resolve().parents[2]
 FEC=ROOT/'fec'
-WORKBOOK=Path(os.environ.get('MONEYBALL_WORKBOOK',ROOT/'outputs'/'workbook_repair'/'Moneyball Audit Workbook.xlsx'))
+DATA_ROOT=Path(os.environ.get('MONEYBALL_ROOT',ROOT))
+WORKBOOK=Path(os.environ.get('MONEYBALL_WORKBOOK',DATA_ROOT/'outputs'/'workbook_repair'/'Moneyball Audit Workbook.xlsx'))
 
 
 def setUpModule():
@@ -32,9 +33,9 @@ class WorkbookContracts(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.book=openpyxl.load_workbook(WORKBOOK,read_only=False,data_only=False)
-        with open(ROOT/'category_stance.json',encoding='utf-8') as handle:
+        with open(DATA_ROOT/'category_stance.json',encoding='utf-8') as handle:
             cls.category=json.load(handle)
-        with open(ROOT/'ranks_python.json',encoding='utf-8') as handle:
+        with open(DATA_ROOT/'ranks_python.json',encoding='utf-8') as handle:
             cls.ranks=json.load(handle)
 
     @classmethod

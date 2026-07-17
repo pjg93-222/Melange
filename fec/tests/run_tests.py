@@ -18,6 +18,8 @@ import bill_rules as BR
 import stance_rules as SR
 import media_rules as MR
 import influence_roles as IR
+import tier_util as TU
+import tweet_image_evidence as TIE
 from member_identity import Resolver
 print('[core: CRN kernel]')
 xs=[MC.sm64(i) for i in range(5000)]
@@ -59,6 +61,13 @@ ok('financial/regulatory SMART Acts remain included',
    not BR.excluded_bill('S.2801',117,'SMART Act of 2022','') and
    not BR.excluded_bill('S.4264',118,'SMART Act of 2024','') and
    not BR.excluded_bill('H.R.4437',119,'Supervisory Modifications for Appropriate Risk-based Testing Act',''))
+ok('misfiled CDFI/privacy bills have source-controlled effective categories',
+   BR.override_for({},'H.R.7733',117).get('Category')=='CDFI Fund' and
+   BR.override_for({},'S.869',118).get('Category')=='CDFI Fund' and
+   BR.override_for({},'H.R.7036',118).get('Category')=='Data Privacy & Cyber')
+ok('duplicate bill roles retain only the strongest role',
+   BR.preferred_role(('cosponsor','original-cosponsor'))=='original-cosponsor' and
+   BR.preferred_role(('cosponsor','sponsor','original-cosponsor'))=='sponsor')
 _elite={'role_type':'party_elite','influence_bonus':1.5}
 ok('Influence bonus is limited to party elites',
    IR.eligible_bonus(_elite,'Banking (full) [Highly]')[0]==1.5 and
@@ -86,25 +95,51 @@ _near={'Examination & Supervision':'Champion','CU Capital Requirements':'Champio
        'CFPB':'Champion','Member Business Lending':'Champion','Data Privacy & Cyber':'Ally',
        'Credit Card Mandates':'Ally','Mortgage & Housing':'Ally','Interchange':'Highly Persuadable',
        'Defense CU Issues':'Highly Persuadable','Payments':'True Neutral'}
-ok('overall exceptional-performance rounding is bounded and can resolve a near boundary',
-   MC.overall_rounding(_near)==.05 and MC.overall_tier(_near)=='Champion')
-_opp_probe={'hs%d'%i:'Highly Skeptical' for i in range(4)}; _opp_probe['opp']='Opponent'
+ok('overall rounding is bounded; Tier 1 is sufficient for the Champion display crown',
+   MC.overall_rounding(_near)==.05 and MC.overall_tier(_near)=='Ally' and
+   MC.overall_display_tier({'x':'True Neutral'},1)=='Champion' and
+   MC.overall_display_tier(_near,2)=='Ally' and
+   dict((tier,cut) for cut,tier in MC.OVERALL_BANDS)['Ally']==2.5)
+_ob=dict((tier,cut) for cut,tier in MC.OVERALL_BANDS)
+ok('overall bands follow adjacent stance-prototype midpoints below the Ally anchor',
+   _ob=={'Ally':2.5,'Highly Persuadable':1.5,'Persuadable':.75,'Lean Persuadable':.25,
+         'True Neutral':-.25,'Lean Skeptic':-.75,'Skeptic':-1.5,'Highly Skeptical':-3.0} and
+   MC.overall_tier_from_value(0)=='True Neutral')
+_opp_probe={'opp%d'%i:'Opponent' for i in range(4)}; _opp_probe['hs']='Highly Skeptical'
 ok('overall Opponent cutoff is ordered, provenance-visible, and reachable',
    MC.OVERALL_BANDS[-2][0]>MC.OVERALL_OPPONENT_CUTOFF and
    MC.overall_thresholds()['bands'][-1]['minimum']==MC.OVERALL_OPPONENT_CUTOFF and
    MC.overall_tier(_opp_probe)=='Opponent')
+_ts=TU.legislative_press_scores(
+    {'French Hill':{'leg':.9,'press':.8},'Daniel Meuser':{'leg':.998,'press':.414}},.30,.25)
+ok('Legislative+Press tier preserves pillar magnitudes (no second percentile transform)',
+   _ts['French Hill']>_ts['Daniel Meuser'] and abs(_ts['French Hill']-.47)<1e-12)
 _adj,_fac=SR.exceptional_rounding({'a':.69,'b':.9,'c':-.8,'empty':0},{'a':1,'b':1,'c':1,'empty':0})
 ok('exceptional rounding is bounded, sign-aware, and never fills empty domains',
    all(abs(v)<=SR.ROUNDING_CAP+1e-12 for v in _fac.values()) and _fac['empty']==0 and _adj['empty']==0)
 print('[media: shared routing + signed normalization + General CU exclusion]')
 ok('General CU subject words route to a real policy domain',
    MR.route_raw_categories('Credit unions help underserved rural communities')==['Field of Membership'])
+ok('press target beats unsupported source tags',
+   MR.press_routing_decision('Bean Social Security simplification bill',
+                             'Bean Bill to Simplify Social Security Moves Forward',
+                             ['Technology & Emerging Issues'],
+                             'Social Security retirement ages')['categories']==[])
+ok('media context guards block road, generic tax-exempt, and community-bank false positives',
+   'Interchange' not in MR.route_raw_categories('new highway interchange and exit ramp') and
+   'Credit Union Tax Status' not in MR.route_raw_categories('tax-exempt nonprofit organization') and
+   MR.COMPETITIVE not in MR.route_raw_categories('visited a local community bank'))
 _norm=MR.normalize_signed_extrema({'A':8,'B':2,'C':-10,'D':-2.5,'E':0})
 ok('domain normalization preserves relative signed magnitude',
    _norm=={'A':1.0,'B':.25,'C':-1.0,'D':-.25,'E':0.0})
 _general=MR.general_exclusion_ledger({'A':.8,'B':0,'C':-.4})
 ok('residual General CU evidence is explicit and never projected into policy domains',
    set(_general)=={'A','C'} and all(not a['applied_to_policy_domains'] for a in _general.values()))
+_if=TIE.fuse_stance('neutral','review','support',.9)
+_ic=TIE.fuse_stance('support','unanimous','oppose',.99)
+ok('image evidence resolves weak text but preserves clear-text conflicts for review',
+   _if['stance']=='support' and _if['image_disposition']=='image-resolved' and
+   _ic['stance']=='support' and _ic['image_disposition']=='conflict-review')
 print('[identity: fail-closed joins]')
 _ir=Resolver(['John Smith','Jane Smith','Tim Scott'],{'Tim Scott':'S001184'})
 ok('identity resolver accepts exact, Last/First, and bioguide matches',

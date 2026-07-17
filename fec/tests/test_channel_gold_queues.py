@@ -101,14 +101,18 @@ class GoldQueueColumns(unittest.TestCase):
 
 
 class BlendGates(unittest.TestCase):
-    """(c) build_media_blend.py contains each channel's env gate name and defaults it to '0'."""
+    """Validated press-side channels default on; Bluesky stays quarantined from duplicate injection."""
 
-    def test_blend_defines_each_gate_off_by_default(self):
+    def test_validated_press_side_gates_default_on(self):
         src = source('build_media_blend.py')
-        for _builder, stackmod, gate in CHANNELS:
-            pat = re.compile(r"os\.environ\.get\(\s*['\"]%s['\"]\s*,\s*['\"]0['\"]\s*\)" % re.escape(gate))
+        for gate in ('CU_HEARING_CHANNEL', 'CU_INTERVIEW_CHANNEL'):
+            pat = re.compile(r"os\.environ\.get\(\s*['\"]%s['\"]\s*,\s*['\"]1['\"]\s*\)" % re.escape(gate))
             self.assertRegex(src, pat,
-                             'build_media_blend.py must read %s defaulting to "0" (gated OFF)' % gate)
+                             'build_media_blend.py must read %s defaulting to "1" (active)' % gate)
+
+    def test_bluesky_duplicate_injection_stays_off(self):
+        src = source('build_media_blend.py')
+        self.assertRegex(src, r"os\.environ\.get\(\s*['\"]CU_BLUESKY_CHANNEL['\"]\s*,\s*['\"]0['\"]\s*\)")
 
 
 class WiringContract(unittest.TestCase):
@@ -121,6 +125,24 @@ class WiringContract(unittest.TestCase):
         self.assertIn('interviewvals[m]/isp', src, 'interview own-source injection missing from the blend loop')
         self.assertIn('HEARING_W', src)
         self.assertIn('INTERVIEW_W', src)
+
+    def test_hearing_production_contract_is_gold_only(self):
+        import media_rules
+        self.assertEqual(media_rules.hearing_tier_weight('gold'), 1.0)
+        for tier in ('review', '', None, 'unanimous', 'majority', 'unexpected'):
+            self.assertEqual(media_rules.hearing_tier_weight(tier), 0.0)
+        src = source('build_media_blend.py')
+        self.assertIn('MR.hearing_tier_weight', src)
+        self.assertIn('_eligible=[_r for _r in _prows if MR.hearing_tier_weight', src)
+        self.assertIn('GOLD ONLY', src)
+
+    def test_speech_and_interview_accept_reader_agreement_tiers(self):
+        import media_rules
+        expected = {'gold': 1.0, 'unanimous': 0.9, 'majority': 0.6, 'review': 0.35}
+        for tier, weight in expected.items():
+            self.assertEqual(media_rules.own_source_tier_weight(tier), weight)
+        self.assertEqual(media_rules.own_source_tier_weight('unexpected'), 0.0)
+        self.assertIn('MR.own_source_tier_weight', source('build_media_blend.py'))
 
     def test_bluesky_gate_present_but_not_injected(self):
         src = source('build_media_blend.py')
@@ -172,6 +194,33 @@ class RelaxedCfpbPinAndGoldPrecedence(unittest.TestCase):
             rid = mod.row_id('B', '2025-01-02', defend)
             self.assertEqual(mod.score_row({'bioguide': 'B', 'date': '2025-01-02', 'text': defend}, {rid: 'support'}),
                              ('support', 'gold'), '%s: gold must override the heuristic' % stackmod)
+
+
+class PipelineWiringContract(unittest.TestCase):
+    """Every API-free sidecar scorer refreshes before the media blend consumes it."""
+
+    def test_all_channel_stacks_precede_media_blend(self):
+        import run_pipeline
+        scripts = [s for s, _a in run_pipeline.CHAIN]
+        blend = scripts.index('build_media_blend.py')
+        for stack in ('speech_stance_stack.py', 'hearing_stance_stack.py',
+                      'interview_stance_stack.py', 'bluesky_stance_stack.py'):
+            self.assertIn(stack, scripts)
+            self.assertLess(scripts.index(stack), blend)
+
+
+class LearnedStackContract(unittest.TestCase):
+    """Own-source outputs come from independent readers with hand gold applied last."""
+
+    def test_shared_model_and_channel_delegation(self):
+        model = source('own_source_stance_model.py')
+        for token in ('TfidfVectorizer', 'FeatureUnion', 'StratifiedGroupKFold',
+                      'local_reader', 'transfer_reader', 'meta_features'):
+            self.assertIn(token, model)
+        for _builder, stackmod, _gate in CHANNELS:
+            self.assertIn("run_channel('%s')" % stackmod.replace('_stance_stack', ''),
+                          source(stackmod + '.py'))
+        self.assertIn("run_channel('speech')", source('speech_stance_stack.py'))
 
 
 if __name__ == '__main__':

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 import os as _o, sys as _s; _s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__))); from paths import ROOT as MB_ROOT
-"""SPEECH STANCE STACK — API-FREE floor-speech CU-stance labeler (Paul-approved 2026-07-15).
+"""SPEECH STANCE STACK â€” API-FREE floor-speech CU-stance labeler (Paul-approved 2026-07-15).
 
 Mirrors tweet_stance_stack.py / press_stance_stack.py: registry two-hop compose + the RELAXED CFPB
 policy_force pin + a hand-label (gold) override applied LAST.  NO API, NO DEBATE, NO network, NO spend.
 
 Precedence per speech (highest wins):
-  (a) GOLD      — Paul's speech_gold_queue.csv gold_stance where filled, matched by the content-hash
+  (a) GOLD      â€” Paul's speech_gold_queue.csv gold_stance where filled, matched by the content-hash
                   id = md5(bioguide|date|text)[:12] (identical to build_speech_gold_queue.py, so a label
                   binds to the row's CONTENT, surviving a DB rebuild).  Ground truth; tier='gold'.
-  (b) COMPOSE   — the matched registry family's CU valence x a stance-toward-target derived from
-  (c) HEURISTIC — a target-scoped attack/defend cue read within +/-120 chars of a CFPB / interchange /
+  (b) COMPOSE   â€” the matched registry family's CU valence x a stance-toward-target derived from
+  (c) HEURISTIC â€” a target-scoped attack/defend cue read within +/-120 chars of a CFPB / interchange /
                   overdraft / swipe-fee / rate-cap anchor (mirrors build_speech_gold_queue.prelabel,
                   BUG-G windows).  RELAXED CFPB directionality: attacking/defunding the CFPB *agency*
                   = support (pro-CU), defending it = oppose (anti-CU); a non-directional cue read keeps
@@ -28,6 +28,9 @@ route, 2.0yr half-life, own-source weight 1.0 (floor speeches are the member's o
 Usage: python speech_stance_stack.py     (score speeches_cu.csv -> speech_stance_final.csv)
 """
 import csv, io, json, os, re, sys, hashlib, collections
+import media_rules as MR
+from moneyball_core import dump_atomic
+import config_overlay as CO
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 B = MB_ROOT
 CL = ["support", "oppose", "neutral", "unrelated"]
@@ -36,10 +39,7 @@ GOLDF = os.path.join(B, 'speech_gold_queue.csv')
 REGF = os.path.join(B, 'cu_valence_registry.json')
 OUT  = os.path.join(B, 'speech_stance_final.csv')
 
-try:
-    REG = json.load(open(REGF, encoding='utf-8'))['entries']
-except Exception:
-    REG = []
+REG = CO.merged_rows('cu_valence_registry.json','entries',('key',),data_root=B)
 POLICY_KEYS = {e['key'] for e in REG if e.get('policy_force')}   # user-legislated CFPB agency axis (valence 0)
 
 
@@ -99,7 +99,7 @@ def cue_stance_toward_target(text_low):
 
 
 def _is_directional(valence, key):
-    """Anti-CU / CFPB-agency families whose direction the windowed cue read can resolve — mirrors the
+    """Anti-CU / CFPB-agency families whose direction the windowed cue read can resolve â€” mirrors the
     gold queue's DIRECTIONAL set: any cfpb* family, the interchange / rate-cap / overdraft / junk-fee
     targets, or any -1-valenced target.  Pro-CU (+1) and no-signal (0, non-CFPB) families stay neutral
     (they rarely carry an anchor, and Paul's gold fills them)."""
@@ -117,7 +117,7 @@ def score_speech_text(text):
     s = cue_stance_toward_target((text or '').lower())
     # (b) base registry compose with the family's own valence
     label = compose(s, valence)
-    # RELAXED CFPB DIRECTIONALITY PIN — mirrors the tweet/press stacks' policy_force relaxation.  The
+    # RELAXED CFPB DIRECTIONALITY PIN â€” mirrors the tweet/press stacks' policy_force relaxation.  The
     # CFPB *agency* axis is anti-CU under Paul's fresh gold (attack/defund = support, defend = oppose).
     # The valence-0 policy_force families (POLICY_KEYS = cfpb_institution/cfpb_general) compose to
     # neutral above; the +1 cfpb_reform family composes with the wrong sign because the windowed cue
@@ -135,19 +135,40 @@ def row_id(bioguide, date, text):
                        .encode('utf-8', 'replace')).hexdigest()[:12]
 
 
-def load_gold(path=GOLDF):
-    """id -> gold stance (support/oppose/neutral) for the FILLED rows of speech_gold_queue.csv.
-    Blank gold_stance (Paul labels later) and any non-{support,oppose,neutral} value are ignored."""
-    g = {}
+def load_gold_rows(path=GOLDF):
+    """id -> full gold row for filled, valid speech labels."""
+    rows = {}
     if not os.path.exists(path):
-        return g
+        return rows
     with io.open(path, encoding='utf-8-sig', newline='') as fh:
         for r in csv.DictReader(fh):
             st = (r.get('gold_stance') or '').strip().lower()
             rid = (r.get('id') or '').strip()
             if rid and st in ('support', 'oppose', 'neutral'):
-                g[rid] = st
-    return g
+                rows[rid] = r
+    return rows
+
+
+def load_gold(path=GOLDF):
+    """id -> gold stance (support/oppose/neutral) for the filled rows."""
+    return {rid:(row.get('gold_stance') or '').strip().lower()
+            for rid,row in load_gold_rows(path).items()}
+
+
+def retired_precision_orphan(row):
+    """True for neutral gold that the current precision router intentionally rejects.
+
+    The row remains in the gold file as a negative example but no longer belongs in the live CU
+    speech corpus (for example a highway/bridge use of "interchange"). Directional gold never
+    auto-retires.
+    """
+    if (row.get('gold_stance') or '').strip().lower() != 'neutral':
+        return False
+    declared={c.strip() for c in (row.get('categories') or '').split(';') if c.strip()}
+    if not declared:
+        return False
+    routed=set(MR.route_raw_categories(row.get('text_snippet') or row.get('text') or ''))
+    return not bool(declared & routed)
 
 
 def score_row(row, gold):
@@ -161,55 +182,8 @@ def score_row(row, gold):
 
 
 def main():
-    if not os.path.exists(SRC):
-        print('speech_stance_stack: speeches_cu.csv absent (%s) — nothing to score, skipping.' % SRC)
-        return 0
-    gold = load_gold()
-    with io.open(SRC, encoding='utf-8-sig', newline='') as fh:
-        rows = list(csv.DictReader(fh))
-    # GATE-SAFETY (audit 2026-07-15, Paul-approved): gold labels must BIND. If corpus drift orphans any
-    # hand label (its content-hash id no longer matches a corpus row), fail LOUD instead of silently
-    # degrading those rows to the weak 'review' heuristic. CU_GOLD_ORPHAN_OK=1 overrides (labels ignored).
-    _ids = {row_id(r.get('bioguide'), r.get('date'), r.get('text')) for r in rows}
-    _orph = set(gold) - _ids
-    if _orph:
-        print('!! GOLD ORPHANS: %d of %d hand labels no longer bind to any corpus row (corpus drift): %s'
-              % (len(_orph), len(gold), sorted(_orph)[:8]))
-        if os.environ.get('CU_GOLD_ORPHAN_OK', '0') != '1':
-            print('!! failing loud — re-run the extract+builder chain or set CU_GOLD_ORPHAN_OK=1')
-            return 3
-    out = []
-    dist = collections.Counter()
-    tiers = collections.Counter()
-    n_gold = 0
-    for r in rows:
-        stance, tier = score_row(r, gold)
-        if tier == 'gold':
-            n_gold += 1
-        dist[stance] += 1
-        tiers[tier] += 1
-        out.append({
-            'bioguide': (r.get('bioguide') or '').strip(),
-            'member': (r.get('member') or '').strip(),
-            'date': (r.get('date') or '').strip(),
-            'categories': (r.get('categories') or '').strip(),
-            'stance': stance,
-            'tier': tier,
-        })
-    cols = ['bioguide', 'member', 'date', 'categories', 'stance', 'tier']
-    tmp = OUT + '.tmp'
-    with io.open(tmp, 'w', encoding='utf-8-sig', newline='') as f:
-        w = csv.DictWriter(f, fieldnames=cols)
-        w.writeheader()
-        w.writerows(out)
-    os.replace(tmp, OUT)
-    print('scored %d floor speeches -> speech_stance_final.csv' % len(out))
-    print('  gold-backed: %d | heuristic (review): %d' % (n_gold, len(out) - n_gold))
-    print('  stance distribution:', dict(dist))
-    print('  tiers:', dict(tiers))
-    print('  policy_force families (relaxed CFPB pin):', sorted(POLICY_KEYS))
-    return 0
-
+    from own_source_stance_model import run_channel
+    return run_channel('speech')
 
 if __name__ == '__main__':
     sys.exit(main())

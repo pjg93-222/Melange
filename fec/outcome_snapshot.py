@@ -22,6 +22,7 @@ Usage:
 import datetime, json, sys, collections
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import moneyball_core as MC
+from tier_util import legislative_press_tiers
 B = MB_ROOT
 
 def state():
@@ -29,13 +30,14 @@ def state():
     P = json.load(open(B + r'\behavior_panel.json'))['members']
     CS_DOC = json.load(open(B + r'\category_stance.json'))
     CS = CS_DOC['matrix']; overall_caps=(CS_DOC.get('gate') or {}).get('overall_capped') or {}
+    tier,_tier_rank=legislative_press_tiers(list(R))
     out = {}
     for m in R:
         d = R[m]; p = P.get(m, {})
         out[m] = {'seed_prob': d['seed_prob'], 'pressure_mult': d['pressure_mult'],
                   'retiring': bool(d.get('retiring')),
                   'n_cosponsored': p.get('n_cosponsored'), 'cosponsor_degree': p.get('cosponsor_degree'),
-                  'overall': MC.overall_tier(CS.get(m, {}),m,overall_caps)}
+                  'overall': MC.overall_display_tier(CS.get(m, {}),tier.get(m,0),m,overall_caps)}
     return out
 
 def spearman(pairs):

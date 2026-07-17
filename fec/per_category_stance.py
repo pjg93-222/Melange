@@ -85,7 +85,7 @@ else:
 genF={m:MC.overall_tier(matrix[m]) for m in members}
 # ---- SAY-DO corroboration gate: recorded action (A/V) + Rule C 'proven' badge,
 # applied AFTER the S2-04 fixed point converges, as a pure OUTPUT transform. Safe by construction:
-# the cap only lowers Champion/Defender toward Ally (+2), which can never create the Opponent/
+# the cell cap only lowers Champion/Defender toward Ally (+2), which can never create the Opponent/
 # Skeptic overalls the ANTI_STANCE floors key on, so convergence and idempotence are untouched.
 # Raw tiers preserved in the 'gate' block; single law lives in MC.cap_uncorroborated.
 raw_matrix={m:dict(matrix[m]) for m in members}
@@ -100,7 +100,7 @@ for m in members:
     _final,_detail=MC.overall_say_do_gate(m,matrix[m],raw_matrix[m],gate_corrob.get(m,{}))
     if _detail['raw']!=_final: gate_overall[m]=_detail
 _cbp=collections.Counter(pth for cc in gate_corrob.values() for pth in cc.values())
-print('say-do gate: %d cells capped across %d members | %d overall Champions capped | '
+print('say-do gate: %d cells capped across %d members | %d high-score crown candidates capped | '
       '%d proven badges | corroborated A%d V%d'%(
       sum(len(v) for v in gate_capped.values()),len(gate_capped),len(gate_overall),
       len(gate_proven),_cbp['A'],_cbp['V']))
@@ -115,13 +115,15 @@ MC.dump_atomic({'cats':[c[0] for c in cats],'defensive':sorted(DEFENSIVE),'matri
             'media':{'general_credit_union_exclusions':MC.press_general_exclusions()},
            'gate':{'rule':'A Champion/Defender cell keeps its tier only if the member (A) authored/orig-'
                           'cosponsored an in-category bill or (V) has a recorded CU-aligned final-passage '
-                          'vote in it; committee office is not action. An overall Champion additionally '
-                          'requires A/V evidence in at least two-thirds of its raw top-tier cells and '
+                          'vote in it; committee office is not action. A legacy high-score candidate for '
+                          'the aggregate say-do provenance audit requires A/V evidence in at least '
+                          'two-thirds of its raw top-tier cells and '
                           'at least six raw top-tier domains; it also caps a 10+ direct-sponsorship paper '
                           'trail when no more than 20% advanced, unless 20+ direct sponsored bills '
                           'corroborate every raw top-tier domain. Cells '
-                          'and overalls otherwise cap to Ally; raw values are preserved here. proven = '
-                          'authored bill in category advanced past introduction.',
+                          'and legacy high-score candidates otherwise cap to Ally; raw values are preserved '
+                          'here. The overall Champion display crown is independent: every Legislative+Press '
+                          'Tier-1 member receives it. proven = authored bill in category advanced past introduction.',
                    'overall_delivery_threshold':round(MC.SAY_DO_OVERALL_RATIO,6),
                    'overall_minimum_top_tier_cells':MC.SAY_DO_MIN_TOP_CELLS,
                    'high_volume_followthrough':{'direct_sponsored_bills_at_least':MC.SAY_DO_DIRECT_VOLUME_MIN,

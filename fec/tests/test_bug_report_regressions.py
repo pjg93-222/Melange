@@ -23,6 +23,7 @@ from unittest import mock
 
 FEC = Path(__file__).resolve().parents[1]
 ROOT = FEC.parent
+DATA_ROOT = Path(os.environ.get("MONEYBALL_ROOT", ROOT))
 sys.path.insert(0, str(FEC))
 
 
@@ -158,8 +159,8 @@ class ValidationContracts(unittest.TestCase):
     def test_active_audio_contract_uses_the_same_duration_floor(self):
         import audio_rules
 
-        artifact = json.loads((ROOT / "b5_audio_descriptors_v2.json").read_text(encoding="utf-8"))
-        reviews = json.loads((ROOT / "b5_audio_reviews_v2.json").read_text(encoding="utf-8"))
+        artifact = json.loads((DATA_ROOT / "b5_audio_descriptors_v2.json").read_text(encoding="utf-8"))
+        reviews = json.loads((DATA_ROOT / "b5_audio_reviews_v2.json").read_text(encoding="utf-8"))
         self.assertEqual(
             audio_rules.MIN_MEMBER_TARGET_SEC,
             artifact["measurement_contract"]["minimum_target_seconds_per_member"],
@@ -178,14 +179,14 @@ class ValidationContracts(unittest.TestCase):
         )
         self.assertIn("pitch_deviation_from_speaker_baseline_z", artifact["measurement_contract"])
         self.assertEqual(
-            hashlib.sha256((ROOT / "b5_audio_reviews_v2.json").read_bytes()).hexdigest(),
+            hashlib.sha256((DATA_ROOT / "b5_audio_reviews_v2.json").read_bytes()).hexdigest(),
             artifact["review_sha256"],
         )
         self.assertIn("--active", source("b5_audio_descriptors_candidate.py"))
 
     def test_external_gold_e_is_equal_weight_and_discriminant(self):
-        artifact = json.loads((ROOT / "big5_e_gold_anchored.json").read_text(encoding="utf-8"))
-        validation = json.loads((ROOT / "big5_external_gold_validation.json").read_text(encoding="utf-8"))
+        artifact = json.loads((DATA_ROOT / "big5_e_gold_anchored.json").read_text(encoding="utf-8"))
+        validation = json.loads((DATA_ROOT / "big5_external_gold_validation.json").read_text(encoding="utf-8"))
         self.assertEqual("ACTIVE_EXTERNAL_GOLD_ANCHORED", artifact["status"])
         self.assertGreaterEqual(len(artifact["members"]), 450)
         for row in validation["panel_results"].values():
@@ -202,7 +203,7 @@ class ValidationContracts(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing title"):
             validate_staff_rows({"Q-1": {"n": "A Staffer", "t": "", "m": "Example Member"}})
         validate_staff_rows({"Q-1": {"n": "A Staffer", "t": "Legislative Director", "m": "Example Member"}})
-        directory = json.loads((ROOT / "staff_directory.json").read_text(encoding="utf-8"))
+        directory = json.loads((DATA_ROOT / "staff_directory.json").read_text(encoding="utf-8"))
         self.assertFalse(
             [(member, row.get("n")) for member, rows in directory.items()
              for row in rows if not str(row.get("t") or "").strip()]

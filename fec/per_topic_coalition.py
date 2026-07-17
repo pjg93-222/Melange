@@ -58,7 +58,9 @@ for sc in blocks:
             tot+=cascade(s,set(anti)|set(bx),it)
         return tot/MC
     ev={n:(eng(sc,n)+0.15*score[n]/smax)*MBC.delivery_mult(n) for n in members}   # x say-do delivery discount (2026-07-07): don't court talkers at list price
-    cand=sorted([n for n in members if campT[n] in ('neu',) or cs[n]=='Ally'],key=lambda n:-ev[n])[:45]
+    # Allies are already unconditional A seeds in every spread() call. Evaluating/funding them has
+    # exactly zero causal effect and used to consume most of the top-45 shortlist on Ally-rich topics.
+    cand=sorted([n for n in members if campT[n]=='neu'],key=lambda n:-ev[n])[:45]
     base=spread(set()); mg={n:max(0.0,spread({n})-base) for n in cand}
     pos={n:v for n,v in mg.items() if v>0}
     boost={n:v*(1+BETA_C*bpf.get(n,0.24)) for n,v in pos.items()}; tot=sum(boost.values()) or 1   # bridges get a larger seed
@@ -68,7 +70,8 @@ for sc in blocks:
     ALL[labels[sc]]={n:a for n,a in top}
     # M2 fix 2026-07-02: spread is submodular, so summing INDIVIDUAL marginals overstates the joint gain.
     # Report the honest joint spread of the funded seed set (one extra MC evaluation per topic).
-    joint=spread(set(pos)) if pos else base
+    funded=set(n for n,a in top if a>0)
+    joint=spread(funded) if funded else base
     summ.append((labels[sc],sum(al.values()),len(top),base,joint,top[:4]))
     print('%-30s base %.0f -> %.0f (+%.1f joint; naive-additive +%.1f) | $%s, %d seeds: %s'%(labels[sc][:30],base,joint,joint-base,sum(pos.values()),f'{sum(al.values()):,}',len(top),', '.join('%s $%dk'%(n.split()[-1],a//1000) for n,a in top[:4])))
 tag='' if (SEED==7 and os.environ.get('MC','20')=='20') else '_seed%d_mc%d'%(SEED,MC)
