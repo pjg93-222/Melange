@@ -15,7 +15,7 @@ Member Desk) + dashboard_data.json (SNA: rank, stance, electoral, FEC CU $, cosp
 Run:  python fec/make_member_desk.py            (writes bundle JSON + HTML)
       python fec/make_member_desk.py --data      (writes/validates the bundle only)
 """
-import json, os, csv, re, sys, unicodedata, hashlib
+import json, os, csv, re, sys, unicodedata, hashlib, sqlite3
 from datetime import datetime
 import openpyxl
 import moneyball_core as MBC
@@ -492,6 +492,7 @@ def load_press_and_bills(member_names):
                    'bill_manual_rows': 0, 'bill_manual_excluded': 0,
                    'bill_duplicate_rows_collapsed': 0,
                    'exclusion_samples':exclusion_samples}
+    seen = set()   # (member, normalized text) of displayed social items — the bluesky footprint dedups against it
     social_path = os.path.join(B, 'Social Master.xlsx')
     stack_path = os.path.join(B, 'tweet_stance_final.csv')
     stack = {}
@@ -502,7 +503,7 @@ def load_press_and_bills(member_names):
         swb = openpyxl.load_workbook(social_path, read_only=True, data_only=True)
         sw = swb['Corpus']
         sh = {h: i for i, h in enumerate(next(sw.iter_rows(min_row=1, max_row=1, values_only=True)))}
-        seen = set(); tierw = {'unanimous': 1.0, 'majority': 0.7, 'review': 0.35}
+        tierw = {'unanimous': 1.0, 'majority': 0.7, 'review': 0.35}
         def sv(row, key): return row[sh[key]] if key in sh else None
         for row in sw.iter_rows(min_row=2, values_only=True):
             media_audit['social_source_rows'] += 1
@@ -542,6 +543,127 @@ def load_press_and_bills(member_names):
                 'exclusion': ('exact cross-post duplicate' if duplicate else ('' if sign else 'neutral'))})
             media_audit['social_displayed'] += 1
         swb.close()
+    # --- media footprint: interviews + hearings + bluesky (user-directed 2026-07-16: include them in
+    # the per-member Press & social media section). DISPLAY-ONLY appearance/post records read from
+    # social_media.db; no CU stance is manufactured for them (stance labels are the user's domain) —
+    # items ship scored=False with an explicit reason, and nothing downstream reads them back into the
+    # press pillar. Per member+source the list is recency-capped at DESK_MEDIA_CAP (default 50, 0=all),
+    # full counts disclosed in the UI + exclusion reconciliation. DESK_FOOTPRINT=0 is the revert
+    # switch (desk renders exactly the pre-footprint content).
+    media_totals = {}
+    FOOTPRINT_ON = os.environ.get('DESK_FOOTPRINT', '1') != '0'
+    try: MEDIA_CAP = max(0, int(os.environ.get('DESK_MEDIA_CAP', '50')))
+    except ValueError: MEDIA_CAP = 50
+    media_audit.update({
+        'footprint_enabled': int(FOOTPRINT_ON), 'footprint_display_cap': MEDIA_CAP,
+        'interview_episode_rows': 0, 'interview_appearances_displayed': 0,
+        'interview_beyond_display_cap': 0, 'interview_unknown_member_excluded': 0,
+        'hearing_appearance_rows': 0, 'hearing_appearances_displayed': 0,
+        'hearing_beyond_display_cap': 0, 'hearing_unknown_member_excluded': 0,
+        'bluesky_post_rows': 0, 'bluesky_footprint_displayed': 0, 'bluesky_beyond_display_cap': 0,
+        'bluesky_unverified_handle_posts_excluded': 0, 'bluesky_unknown_member_excluded': 0,
+        'bluesky_empty_text_excluded': 0, 'bluesky_scored_rows_routed_to_social': 0})
+    if FOOTPRINT_ON and os.path.exists(os.path.join(B, 'social_media.db')):
+        NET = {'transcripts.cnn.com': 'CNN', 'www.cnn.com': 'CNN', 'www.foxnews.com': 'Fox News',
+               'www.ms.now': 'MS NOW', 'www.npr.org': 'NPR', 'www.pbs.org': 'PBS',
+               'www.c-span.org': 'C-SPAN', 'www.nbcnews.com': 'NBC News', 'www.cbsnews.com': 'CBS News',
+               'abcnews.go.com': 'ABC News', 'hughhewitt.com': 'Hugh Hewitt Show', 'www.csis.org': 'CSIS',
+               'www.cfr.org': 'CFR', 'www.aspensecurityforum.org': 'Aspen Security Forum'}
+        def _net(pkg):
+            mm = re.match(r'https?://([^/]+)/', str(pkg or ''))
+            d = mm.group(1).lower() if mm else ''
+            return NET.get(d, d or 'broadcast')
+        def _fp_add(by, key):
+            # newest-first cap per member+source; the uncapped total stays disclosed via media_totals
+            shown_total = 0
+            for nm, lst in by.items():
+                lst.sort(key=lambda a: a['date'], reverse=True)
+                shown = lst[:MEDIA_CAP] if MEDIA_CAP else lst
+                arts.setdefault(nm, []).extend(shown)
+                media_totals.setdefault(nm, {})[key] = [len(shown), len(lst)]
+                shown_total += len(shown)
+            return shown_total
+        fcon = sqlite3.connect(os.path.join(B, 'social_media.db'), timeout=60)
+        # interviews: one item per broadcast episode (member x date x transcript page)
+        iv_by = {}
+        for mem, dt, pkg, turns, words in fcon.execute(
+                "SELECT member, date, package, COUNT(*), COALESCE(SUM(nwords),0) FROM speeches "
+                "WHERE source='INTERVIEW' GROUP BY member, date, package"):
+            media_audit['interview_episode_rows'] += 1
+            nm = canon(mem, None)
+            if not nm:
+                media_audit['interview_unknown_member_excluded'] += 1; continue
+            net = _net(pkg)
+            iv_by.setdefault(nm, []).append({
+                'date': fdate(dt),
+                'title': '%s appearance — %d segment%s · %s words' % (
+                    net, turns, '' if turns == 1 else 's', format(int(words or 0), ',')),
+                'url': pkg if str(pkg or '').startswith('http') else '',
+                'rel': net, 'source': 'interview', 'scored': False, 'exclusion': 'appearance record'})
+        media_audit['interview_appearances_displayed'] = _fp_add(iv_by, 'iv')
+        media_audit['interview_beyond_display_cap'] = (media_audit['interview_episode_rows']
+            - media_audit['interview_unknown_member_excluded'] - media_audit['interview_appearances_displayed'])
+        # hearings: one item per committee-hearing appearance (hearing_antag rows, titled from hearing_meta)
+        hr_by = {}
+        for mem, dt, pkg, title, turns in fcon.execute(
+                "SELECT a.member, a.date, a.package, COALESCE(m.title,''), a.turns "
+                "FROM hearing_antag a LEFT JOIN hearing_meta m ON m.package=a.package"):
+            media_audit['hearing_appearance_rows'] += 1
+            nm = canon(mem, None)
+            if not nm:
+                media_audit['hearing_unknown_member_excluded'] += 1; continue
+            ch = 'Senate' if 'shrg' in str(pkg or '') else ('House' if 'hhrg' in str(pkg or '') else 'Joint')
+            hr_by.setdefault(nm, []).append({
+                'date': fdate(dt), 'title': (title or '').strip() or str(pkg or ''),
+                'url': ('https://www.govinfo.gov/app/details/' + pkg) if pkg else '',
+                'rel': '%s hearing · %d speaking turn%s' % (ch, turns or 0, '' if (turns or 0) == 1 else 's'),
+                'source': 'hearing', 'scored': False, 'exclusion': 'appearance record'})
+        media_audit['hearing_appearances_displayed'] = _fp_add(hr_by, 'hr')
+        media_audit['hearing_beyond_display_cap'] = (media_audit['hearing_appearance_rows']
+            - media_audit['hearing_unknown_member_excluded'] - media_audit['hearing_appearances_displayed'])
+        # bluesky: the member's own posts from USER-VERIFIED handles only (the look-alike rule from
+        # build_social_master stands — unverified-handle posts stay withheld until the user confirms).
+        # CU-relevant scored posts already arrive via Social Master above (deduped here); the
+        # remainder is unscored footprint.
+        _bio2name = {m['bioguide']: m['member'] for m in (L('congestion.json') or []) if m.get('bioguide')}
+        handles = {bg: (h or '') for bg, h in fcon.execute('SELECT bioguide, bluesky FROM members')}
+        bs_by = {}
+        for bg, dt, tx, pid in fcon.execute(
+                "SELECT bioguide, created_at, text, post_id FROM posts WHERE platform='bluesky'"):
+            media_audit['bluesky_post_rows'] += 1
+            h = handles.get(bg, '')
+            if not h or h == 'none-found' or 'UNVERIFIED' in h:
+                media_audit['bluesky_unverified_handle_posts_excluded'] += 1; continue
+            nm = canon(_bio2name.get(bg) or '', bg)
+            if not nm:
+                media_audit['bluesky_unknown_member_excluded'] += 1; continue
+            tx = (tx or '').strip()
+            if not tx:
+                media_audit['bluesky_empty_text_excluded'] += 1; continue
+            if (nm, MR.normalized_text(tx)) in seen:
+                media_audit['bluesky_scored_rows_routed_to_social'] += 1; continue
+            bs_by.setdefault(nm, []).append({
+                'date': fdate(dt), 'title': tx,
+                'url': 'https://bsky.app/profile/%s/post/%s' % (h.split()[0], (pid or '').split('/')[-1]),
+                'rel': 'bluesky', 'source': 'bluesky', 'scored': False,
+                'exclusion': 'no CU relevance detected — footprint only'})
+        media_audit['bluesky_footprint_displayed'] = _fp_add(bs_by, 'bs')
+        media_audit['bluesky_beyond_display_cap'] = (media_audit['bluesky_post_rows']
+            - media_audit['bluesky_unverified_handle_posts_excluded'] - media_audit['bluesky_unknown_member_excluded']
+            - media_audit['bluesky_empty_text_excluded'] - media_audit['bluesky_scored_rows_routed_to_social']
+            - media_audit['bluesky_footprint_displayed'])
+        # a pending (unconfirmed) bluesky handle is itself intel — disclose it on the member's section
+        for bg, h in handles.items():
+            nm = _bio2name.get(bg)
+            if nm and 'UNVERIFIED' in (h or ''):
+                media_totals.setdefault(nm, {})['bs_pending'] = 1
+        fcon.close()
+        print('media footprint: %d interview / %d hearing / %d bluesky items displayed (cap %d/member/source); '
+              'beyond-cap %d/%d/%d; %d bluesky posts excluded pending handle verification' % (
+              media_audit['interview_appearances_displayed'], media_audit['hearing_appearances_displayed'],
+              media_audit['bluesky_footprint_displayed'], MEDIA_CAP,
+              media_audit['interview_beyond_display_cap'], media_audit['hearing_beyond_display_cap'],
+              media_audit['bluesky_beyond_display_cap'], media_audit['bluesky_unverified_handle_posts_excluded']))
     for nm in arts: arts[nm].sort(key=lambda a: a['date'], reverse=True)
     # --- bills (sponsor / original-cosponsor / cosponsor) ---
     # DROP non-CU bills the keyword scraper miscategorised (audit 2026-06-29). Curated by SUBJECT, not acronym:
@@ -648,7 +770,7 @@ def load_press_and_bills(member_names):
                    'press_raw': r[2], 'leg_raw': r[14], 'comm_raw': r[4], 'demo_raw': r[5]}  # raw inputs
     wb.close()
     media_audit['bills_displayed_unique'] = sum(len(v) for v in bills.values())
-    return arts, bills, cmts, wbm, media_audit
+    return arts, bills, cmts, wbm, media_audit, media_totals
 
 # ---------- marginal winnability ROI: expected flips gained from the NEXT $10k (one PAC cycle-max) ----------
 # Faithful port of the in-browser flip engine. A member's winnability contribution on issue i is tg_i[u]*pf_i[u],
@@ -716,7 +838,7 @@ def build_bundle():
     member_names = [m['name'] for m in MD['members']]
     _tier, _trank = legislative_press_tiers(member_names)   # tier 1/2/3 (0=untiered) + leg+press rank, per member
     preflight = DI.preflight(member_names, CS, SNA, ARCH)
-    ARTS, BILLS, CMTS, WBM, LOAD_AUDIT = load_press_and_bills(member_names)
+    ARTS, BILLS, CMTS, WBM, LOAD_AUDIT, MTOT = load_press_and_bills(member_names)
     def staff_pack(name):
         oncmte = bool((CMTS.get(name) or {}).get('seats'))
         lst = []
@@ -822,6 +944,8 @@ def build_bundle():
             'articles': arts,                                      # press & social (full DB, cats normalized)
             'media_exclusions': LOAD_AUDIT.get('social_exclusions_by_member', {}).get(
                 name, {'unrelated': 0, 'offtopic': 0}),
+            'media_totals': MTOT.get(name) or {},                  # footprint (shown, total) per source + pending-handle flag
+
             'electoral': EH.get(name),                             # FEC primary+general vote-share trend + Ballotpedia forecast
         }
         members.append(rec)
@@ -892,7 +1016,7 @@ def build_bundle():
         'freshness': {
             'generated_at': datetime.now().astimezone().isoformat(timespec='seconds'),
             'sources': {rel:datetime.fromtimestamp(os.path.getmtime(os.path.join(B,rel))).astimezone().isoformat(timespec='seconds')
-                        for rel in ('ranks_python.json','category_stance.json','dashboard_data.json','communication_style.json')
+                        for rel in ('ranks_python.json','category_stance.json','dashboard_data.json','communication_style.json','social_media.db')
                         if os.path.exists(os.path.join(B,rel))},
         },
         'members': members,
@@ -916,6 +1040,10 @@ if __name__ == '__main__':
     print('total articles: %d  | members with >=1 article: %d  | max: %d' % (
         sum(len(m['articles']) for m in ms), sum(1 for m in ms if m['articles']),
         max(len(m['articles']) for m in ms)))
+    _sd = bundle['integrity']['source_display']
+    print('footprint displayed: %d interview / %d hearing / %d bluesky (cap=%s, enabled=%s)' % (
+        _sd.get('interview_appearances_displayed', 0), _sd.get('hearing_appearances_displayed', 0),
+        _sd.get('bluesky_footprint_displayed', 0), _sd.get('footprint_display_cap'), _sd.get('footprint_enabled')))
     print('total bills: %d  | members with >=1 bill: %d' % (
         sum(len(m['bills']) for m in ms), sum(1 for m in ms if m['bills'])))
     print('with bioguide: %d  | with birthday: %d' % (

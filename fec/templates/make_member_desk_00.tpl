@@ -766,34 +766,55 @@ function legBody(m,area,role){
 const SENT_ORDER=['Very strongly positive','Strongly positive','Positive','Weakly positive','Very weakly positive','Neutral','Very weakly negative','Weakly negative','Negative','Strongly negative','Very strongly negative'];
 const SENT_NEU=SENT_ORDER.indexOf('Neutral');
 function sentCol(l){const i=SENT_ORDER.indexOf(l);if(i<0||i===SENT_NEU)return '#9ca3af';return i<SENT_NEU?'#34d399':'#ef4444';}
+// source filter: 'bluesky' unifies the scored Social-Master posts (source social, rel bluesky)
+// with the unscored footprint posts (source bluesky); 'social' is the remaining Quorum channels.
+function srcMatch(a,v){
+  if(!v)return true;
+  if(v==='bluesky')return a.source==='bluesky'||(a.source==='social'&&a.rel==='bluesky');
+  if(v==='social')return a.source==='social'&&a.rel!=='bluesky';
+  return a.source===v;
+}
+const FOOTPRINT_SRC={interview:'broadcast appearance',hearing:'committee hearing',bluesky:'Bluesky footprint'};
 function pressHTML(m){
   const arts=m.articles||[];
   const mex=m.media_exclusions||{};
+  const mt=m.media_totals||{};
   const filtered=(mex.unrelated||0)+(mex.offtopic||0);
   const audit=filtered?`<div class=cnt>${filtered} filtered social items (${mex.unrelated||0} unrelated, ${mex.offtopic||0} off-topic)</div>`:'';
-  if(!arts.length)return audit+'<div class=empty>No tracked credit-union press or social items on record for this member. The media pillar reflects this absence.</div>';
+  const fp=[];
+  const fpn=(pair,noun)=>`${pair[1].toLocaleString()} ${noun}${pair[1]===1?'':'s'}${pair[0]<pair[1]?` (showing latest ${pair[0]})`:''}`;
+  if(mt.iv)fp.push(fpn(mt.iv,'interview appearance'));
+  if(mt.hr)fp.push(fpn(mt.hr,'hearing appearance'));
+  if(mt.bs)fp.push(fpn(mt.bs,'Bluesky post'));
+  if(mt.bs_pending)fp.push('Bluesky handle pending verification — posts withheld');
+  const fpline=fp.length?`<div class=cnt>Media footprint (display-only, not in the press pillar): ${fp.join(' · ')}</div>`:'';
+  if(!arts.length)return audit+fpline+'<div class=empty>No tracked credit-union press or social items — and no interview, hearing, or Bluesky footprint — on record for this member. The media pillar reflects the press/social absence.</div>';
   const areas=[...new Set(arts.flatMap(a=>a.cats||[]))].sort();
   const present=[...new Set(arts.map(a=>a.label).filter(Boolean))];
   const ordered=SENT_ORDER.filter(l=>present.includes(l)).concat(present.filter(l=>SENT_ORDER.indexOf(l)<0));
+  const SRC_OPTS=[['press','Press'],['social','Social (X · FB · Truth)'],['bluesky','Bluesky'],['interview','Interviews'],['hearing','Hearings']];
+  const srcSel=`<select class=secsrc data-for=press><option value="">All sources</option>${SRC_OPTS.map(([v,l])=>{const n=arts.filter(a=>srcMatch(a,v)).length;return n?`<option value="${v}">${l} (${n})</option>`:'';}).join('')}</select>`;
   const sentSel=`<select class=secsent data-for=press><option value="">All sentiment</option>${ordered.map(l=>`<option value="${esc(l)}">${esc(l)} (${arts.filter(a=>a.label===l).length})</option>`).join('')}</select>`;
   const areaSel=`<select class=secarea data-for=press><option value="">All areas</option>${areas.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select>`;
-  return audit+`<div class=areasel>${sentSel}${areaSel}</div><div id=press-body></div>`;
+  return audit+fpline+`<div class=areasel>${srcSel}${sentSel}${areaSel}</div><div id=press-body></div>`;
 }
-function pressBody(m,area,sent){
-  const arts=(m.articles||[]).filter(a=>(!area||(a.cats||[]).includes(area))&&(!sent||a.label===sent));
-  if(!arts.length)return '<div class=empty>No '+(sent?esc(sent).toLowerCase()+' ':'')+'media items'+(area?' in '+esc(area):'')+' for this member.</div>';
-  return `<div class=cnt>${arts.length} media item${arts.length>1?'s':''}${sent?' · '+esc(sent):''}${area?' · '+esc(area):''}</div>`+arts.map(a=>{
+function pressBody(m,area,sent,src){
+  const arts=(m.articles||[]).filter(a=>srcMatch(a,src)&&(!area||(a.cats||[]).includes(area))&&(!sent||a.label===sent));
+  if(!arts.length)return '<div class=empty>No '+(sent?esc(sent).toLowerCase()+' ':'')+'media items'+(area?' in '+esc(area):'')+(src?' from '+esc(src):'')+' for this member.</div>';
+  return `<div class=cnt>${arts.length} media item${arts.length>1?'s':''}${src?' · '+esc(src):''}${sent?' · '+esc(sent):''}${area?' · '+esc(area):''}</div>`+arts.map(a=>{
+    const foot=!!FOOTPRINT_SRC[a.source];   // display-only appearance/post record — no CU-stance override UI
     const base=({support:'support',oppose:'oppose',neutral:'neutral'}[a.stance])||'neutral';   // current call (model + any baked file correction)
-    const ov=povOf(a.url); const cur=ov||base; const effPol={support:1,oppose:-1,neutral:0}[cur];
+    const ov=foot?null:povOf(a.url); const cur=ov||base; const effPol={support:1,oppose:-1,neutral:0}[cur];
     const eu=encodeURIComponent(a.url||''), et=encodeURIComponent(a.title||'');
     const opts=['support','oppose','neutral'].map(o=>`<option value="${o}"${cur===o?' selected':''}>${o[0].toUpperCase()+o.slice(1)}</option>`).join('');
     const tag=(ov&&ov!==base)?`<span class=ovtag style="color:${POVCOL[ov]};background:${POVCOL[ov]}1A">✎ edited → ${ov} (was ${base})</span>`:(a.corr?`<span class=ovtag style="color:#a78bfa;background:#a78bfa1A">✎ file-corrected</span>`:'');
+    const basis=FOOTPRINT_SRC[a.source]||(a.source==='social'?('social stance: '+esc(a.stance||'n/a')):(a.ssrc==='bill'?'via tracked-bill direction':('DEBATE stance: '+esc(a.stance||'n/a')+(a.sconf?` (${Math.round(a.sconf*100)}% conf)`:''))));
     return `<div class=ev data-pol="${effPol}">
     <div class=ev-top><span>${a.date||''}${a.dest==='est'?' <span style=color:var(--faint)>(est.)</span>':''}</span><span>${(a.cats||[]).slice(0,3).map(esc).join(' · ')}</span></div>
     <div class=ev-top><span>Source: ${esc(a.source||'press')}</span><span>${a.scored===false?'visible, not scored: '+esc(a.exclusion||'excluded'):'scored evidence'}</span></div>
     <a class=ev-title href="${a.url}" target=_blank rel=noopener title="${esc(a.title||'')}">${esc(clipTitle(a.title||''))}</a>
-    <div class=ev-sig>${a.label?`<b style="color:${sentCol(a.label)}">${esc(a.label)}</b>`:''}<span class=ev-basis> · ${a.source==='social'?('social stance: '+esc(a.stance||'n/a')):(a.ssrc==='bill'?'via tracked-bill direction':('DEBATE stance: '+esc(a.stance||'n/a')+(a.sconf?` (${Math.round(a.sconf*100)}% conf)`:'')))}${a.rel?' · '+esc(a.rel):''}</span></div>
-    <div class=ev-ov>${tag}<span class=ovlabel>CU stance:</span><select class=povsel data-povurl="${eu}" data-povtitle="${et}" data-base="${base}">${opts}</select></div></div>`;
+    <div class=ev-sig>${a.label?`<b style="color:${sentCol(a.label)}">${esc(a.label)}</b>`:''}<span class=ev-basis> · ${basis}${a.rel?' · '+esc(a.rel):''}</span></div>
+    ${foot?'':`<div class=ev-ov>${tag}<span class=ovlabel>CU stance:</span><select class=povsel data-povurl="${eu}" data-povtitle="${et}" data-base="${base}">${opts}</select></div>`}</div>`;
   }).join('');
 }
 function esc(s){return (s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
@@ -801,9 +822,9 @@ function clipTitle(value,limit=220){const text=String(value||'').replace(/\s+/g,
 
 /* ----- wire section area filters + member links ----- */
 function wireSectionFilters(m){
-  const ls={area:'',role:''}, ps={area:'',sent:''};
+  const ls={area:'',role:''}, ps={area:'',sent:'',src:''};
   const renderLeg=()=>{const lb=$('#leg-body');if(lb)lb.innerHTML=legBody(m,ls.area,ls.role);};
-  const renderPress=()=>{const pb=$('#press-body');if(pb)pb.innerHTML=pressBody(m,ps.area,ps.sent);};
+  const renderPress=()=>{const pb=$('#press-body');if(pb)pb.innerHTML=pressBody(m,ps.area,ps.sent,ps.src);};
   renderLeg(); renderPress();
   const _pbox=$('#press-body');
   if(_pbox)_pbox.addEventListener('change',e=>{const s=e.target.closest('.povsel');if(!s)return;
@@ -816,6 +837,8 @@ function wireSectionFilters(m){
   });
   const ssel=document.querySelector('.secsent[data-for=press]');
   if(ssel)ssel.onchange=()=>{ps.sent=ssel.value;renderPress();};
+  const csel=document.querySelector('.secsrc[data-for=press]');
+  if(csel)csel.onchange=()=>{ps.src=csel.value;renderPress();};
   const rseg=document.getElementById('legrole');
   if(rseg)rseg.querySelectorAll('button').forEach(b=>b.onclick=()=>{rseg.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');ls.role=b.dataset.r;renderLeg();});
   document.querySelectorAll('.partner').forEach(el=>el.onclick=()=>{const i=+el.dataset.i;if(i>=0)openMember(i);});

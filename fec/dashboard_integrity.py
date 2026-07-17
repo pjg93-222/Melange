@@ -96,6 +96,11 @@ def postflight(bundle, preflight_report):
         for b in m.get('bills') or []:
             _check(set(b.get('areas') or []).issubset(allowed), 'unknown bill category for '+str(name), errors)
     source_display=((bundle.get('integrity') or {}).get('source_display') or {})
+    # DESK_OUT preview runs (make_member_desk no-clobber redirect) must not overwrite the LIVE
+    # integrity state/report/reconciliation artifacts — route this module's writes (and the
+    # regeneration-state read) to the same directory.
+    _outdir=os.environ.get('DESK_OUT')
+    _op=(lambda rel: os.path.join(_outdir, rel)) if _outdir else p
     _check(source_display.get('social_displayed',0)>0, 'social source loaded zero visible items', errors)
     def _recon(source,parts):
         accounted=sum(int(source_display.get(k,0) or 0) for k in parts)
@@ -112,17 +117,32 @@ def postflight(bundle, preflight_report):
                               (source_display.get('bill_manual_rows',0) or 0),(
             'bills_displayed_unique','bill_duplicate_rows_collapsed','bill_unknown_member_excluded',
             'bill_rules_excluded','bill_override_excluded','bill_manual_excluded')),
+        # media footprint (2026-07-16): every interview episode / hearing appearance / bluesky post is
+        # displayed, summarized beyond the display cap, or carries one explicit exclusion reason.
+        'interview_footprint':_recon(source_display.get('interview_episode_rows',0),(
+            'interview_appearances_displayed','interview_beyond_display_cap',
+            'interview_unknown_member_excluded')),
+        'hearing_footprint':_recon(source_display.get('hearing_appearance_rows',0),(
+            'hearing_appearances_displayed','hearing_beyond_display_cap',
+            'hearing_unknown_member_excluded')),
+        'bluesky_footprint':_recon(source_display.get('bluesky_post_rows',0),(
+            'bluesky_footprint_displayed','bluesky_beyond_display_cap',
+            'bluesky_unverified_handle_posts_excluded','bluesky_unknown_member_excluded',
+            'bluesky_empty_text_excluded','bluesky_scored_rows_routed_to_social')),
     }
     for source,row in reconciliation.items():
         _check(row['status']=='pass','%s source rows are not fully reconciled (%+d)'%(source,row['difference']),errors)
-    _check(article_total==(source_display.get('press_displayed',0) or 0)+(source_display.get('social_displayed',0) or 0),
-           'desk article total does not match reconciled press + social display rows',errors)
+    _check(article_total==(source_display.get('press_displayed',0) or 0)+(source_display.get('social_displayed',0) or 0)
+           +(source_display.get('interview_appearances_displayed',0) or 0)
+           +(source_display.get('hearing_appearances_displayed',0) or 0)
+           +(source_display.get('bluesky_footprint_displayed',0) or 0),
+           'desk article total does not match reconciled press + social + footprint display rows',errors)
     _check(bill_total==(source_display.get('bills_displayed_unique',0) or 0),
            'desk bill total does not match reconciled unique legislation rows',errors)
     MC.dump_atomic({'status':'pass' if all(v['status']=='pass' for v in reconciliation.values()) else 'fail',
                     'rule':'Every source row must be displayed or assigned one explicit exclusion/routing reason.',
                     'sources':reconciliation,'exclusion_samples':source_display.get('exclusion_samples') or {}},
-                   p('dashboard_exclusion_reconciliation.json'),indent=2,ensure_ascii=False)
+                   _op('dashboard_exclusion_reconciliation.json'),indent=2,ensure_ascii=False)
     if missing_bio: warnings.append('%d members lack desk bioguide enrichment (identity not guessed)'%len(missing_bio))
 
     # Strip self-referential validation and volatile freshness metadata before hashing the semantic
@@ -156,9 +176,15 @@ def postflight(bundle, preflight_report):
         os.path.join('fec','per_category_stance.py'),os.path.join('fec','compute_pillars.py'),
         os.path.join('fec','influence_roles.py'),
         os.path.join('fec','templates','make_member_desk_00.tpl'),
+        # media-footprint source (2026-07-16): the DB plus its WAL sidecar — recent commits live in
+        # the -wal until checkpoint, and hashing the main file alone would call changed data "same".
+        'social_media.db','social_media.db-wal',
     ]
     source_state={rel:_file_sha(p(rel)) for rel in source_files}
-    input_hash=_sha(source_state); state_path=p('dashboard_integrity_state.json')
+    # the footprint display dials shape the bundle, so they are inputs to the same-input check
+    source_state['env:DESK_FOOTPRINT']=os.environ.get('DESK_FOOTPRINT','1')
+    source_state['env:DESK_MEDIA_CAP']=os.environ.get('DESK_MEDIA_CAP','50')
+    input_hash=_sha(source_state); state_path=_op('dashboard_integrity_state.json')
     prior=json.load(open(state_path,encoding='utf-8')) if os.path.exists(state_path) else None
     if prior and prior.get('input_fingerprint')==input_hash:
         _check(prior.get('output_semantic_sha256')==output_hash,
@@ -170,6 +196,6 @@ def postflight(bundle, preflight_report):
             'regeneration_match': None if not prior or prior.get('input_fingerprint')!=input_hash else not errors,
             'missing_bioguide_enrichment':missing_bio,'exclusion_reconciliation':reconciliation}
     if errors: raise IntegrityError('; '.join(errors[:8]))
-    MC.dump_atomic(report,p('dashboard_integrity_report.json'),indent=2,ensure_ascii=False)
+    MC.dump_atomic(report,_op('dashboard_integrity_report.json'),indent=2,ensure_ascii=False)
     MC.dump_atomic({'input_fingerprint':input_hash,'output_semantic_sha256':output_hash},state_path,indent=2)
     return report
