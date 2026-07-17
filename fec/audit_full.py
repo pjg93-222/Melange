@@ -490,9 +490,32 @@ _ra_ws=_wb['Rank & Allocation']; _wbrows=sum(1 for r in range(3,536) if _ra_ws.c
 ck('workbook member rows == roster size (no silent row drift)', _wbrows==_roster, 'workbook %d vs roster %d'%(_wbrows,_roster))
 # Roadmap-#9 phase 1 (2026-07-02): the whole raw->normalized->pillar->score->rank chain is reproduced
 # in Python (compute_pillars.py) and must match the sheet EXACTLY — catches any silent formula edit.
-_pp=run('compute_pillars.py')
+os.environ['PILLAR_SNAPSHOT_FREEZE']='1'   # the audit must NEVER advance the pillar snapshot vintage (2026-07-17 guard)
+try:
+    _pp=run('compute_pillars.py')
+finally:
+    os.environ.pop('PILLAR_SNAPSHOT_FREEZE',None)
 ck('python pillar shadow-compute parity (rank math reproducible, 533/533)','PARITY: CLEAN' in _pp,
    _pp.strip().splitlines()[-1] if _pp else 'no output')
+# rank-integrity guards (2026-07-17): (a) the pillar snapshot must not silently serve a stale
+# leg/inf/demo basis (the 2026-07-16 522-rank incident class); (b) the own-source channel inputs
+# must not silently freeze while their channels are ON (extractors are not chain-wired yet —
+# collection runs on Paul's 3-week cadence, so the ceiling is cadence+grace = 28 days).
+_snp=B+r'\pillar_inputs_snapshot.json'
+_sn_stamp=(json.load(open(_snp,encoding='utf-8')).get('stamped') if os.path.exists(_snp) else None)
+if _sn_stamp:
+    import datetime as _dt2
+    _sn_age=(_dt2.datetime.now().astimezone()-_dt2.datetime.fromisoformat(_sn_stamp)).days
+    ck('pillar snapshot vintage <= 14 days (stale-basis tripwire)', _sn_age<=14, 'stamped %s (%dd)'%(_sn_stamp,_sn_age))
+else:
+    ck('pillar snapshot vintage <= 14 days (stale-basis tripwire)', True, 'unstamped pre-guard snapshot (stamps on next compute run)')
+_dbm=os.path.getmtime(B+r'\social_media.db') if os.path.exists(B+r'\social_media.db') else None
+_chstale=[]
+for _cf in ('speeches_cu.csv','hearings_cu.csv','interviews_cu.csv','bluesky_cu.csv'):
+    _p2=B+'\\'+_cf
+    if _dbm and os.path.exists(_p2) and (_dbm-os.path.getmtime(_p2))>28*86400:
+        _chstale.append('%s (%.0fd behind corpus)'%(_cf,(_dbm-os.path.getmtime(_p2))/86400))
+ck('own-source channel inputs within 28 days of the corpus (channels are default-ON)', not _chstale, str(_chstale))
 
 if os.path.exists(B+r'\stance_training.jsonl'):
     import hashlib as _hl, json as _js

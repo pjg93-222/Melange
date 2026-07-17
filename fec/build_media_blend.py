@@ -130,7 +130,13 @@ if SPEECH_ON:
         print('!! CU speech channel: speech_stance_final.csv is OLDER than %s — STALE, channel SKIPPED (re-run speech_stance_stack.py; CU_STALE_OK=1 overrides)'%'+'.join(_stl))
     elif os.path.exists(_spf):
         _speech_loaded=True
-        for _r in _csv2.DictReader(_io2.open(_spf,encoding='utf-8-sig',newline='')):
+        _prows=list(_csv2.DictReader(_io2.open(_spf,encoding='utf-8-sig',newline='')))
+        # C per-event normalization (rank-integrity audit 2026-07-17, refuter-confirmed HIGH): the
+        # hearing + interview blocks gained this on 2026-07-15 but the speech block was missed —
+        # passage-level rows let one EVENT (member,date) multiply its own weight (Ogles ~6x).
+        # Weight each row 1/n so one event contributes one unit, the EXACT sibling-block rule.
+        _ev=collections.Counter((_x.get('member'),(_x.get('date') or '')[:10]) for _x in _prows)
+        for _r in _prows:
             _sg=SIGN.get((_r.get('stance') or '').strip().lower(),0.0)
             if _sg==0.0: continue                                  # neutral / unrelated -> no signal
             _m=_resolver.resolve(_r.get('member'),_r.get('bioguide'))
@@ -143,7 +149,8 @@ if SPEECH_ON:
             _cats=[c.strip() for c in (_r.get('categories') or '').split(';') if c.strip()]
             if not _cats: continue
             _sn+=1; _snm.add(_m)
-            for _c in _cats: spc[_m][_c]+=_sg*_inten*_dec/len(_cats)
+            _evn=max(1,_ev[(_r.get('member'),(_r.get('date') or '')[:10])])
+            for _c in _cats: spc[_m][_c]+=_sg*_inten*_dec/len(_cats)/_evn
         print('CU speech channel ACTIVE (CU_SPEECH_CHANNEL=1): %d signed floor speeches -> %d members (own-source weight 1.0, half-life 2.0yr)'%(_sn,len(_snm)))
     else:
         print('!! CU_SPEECH_CHANNEL=1 but speech_stance_final.csv missing — no speech signal added')

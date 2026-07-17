@@ -35,8 +35,12 @@ def merged_rows(filename, collection, identity_fields, data_root=ROOT, code_root
         try:
             with open(path, encoding='utf-8') as handle:
                 doc = json.load(handle)
-        except Exception:
-            continue
+        except Exception as exc:
+            # FAIL CLOSED (rank-integrity audit 2026-07-17): these files carry Paul's gold
+            # overrides and registry polarities. Silently skipping an unreadable copy reverted
+            # his corrections with zero signal; a missing file is fine, a corrupt one is not.
+            raise RuntimeError('config overlay source unreadable (refusing to silently drop '
+                               'user corrections): %s (%s)' % (path, exc))
         rows = doc.get(collection, []) if isinstance(doc, dict) else []
         for row in rows:
             if not isinstance(row, dict):

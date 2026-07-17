@@ -15,9 +15,22 @@ After running:  python fec/run_pipeline.py   (press pillar changed -> stance, ra
 STALE pre-override ranks). Match is by 'url' (exact) OR 'title_contains' (case-insensitive substring).
 """
 import csv, json, io, collections, sys, shutil, os, datetime, unicodedata
-import win32com.client as win32
-import moneyball_core as MC   # dump_atomic (S2-01 audit run-2): the overrides registry is user data, never truncate-in-place
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+# SUPERSEDED GUARD (2026-07-17, Durbin-canary incident 2026-07-16): the COM re-flow below rebuilds
+# 'Press Release - Raw' from Draft Systems' cu_press_stance_tone.csv, which is FROZEN at 2026-06-30.
+# Running it flattens the live tiered-blend press cells (Durbin Interchange -5.84 -> -0.007 that
+# night; fully reversed from backup). The LIVE press-override path is: the ledger
+# press_stance_overrides.json, read by press_stance_stack.py + build_media_blend.py on the next
+# chain run. Ledger-merge of a dashboard export stays available via --merge-only.
+if '--merge-only' not in sys.argv and os.environ.get('APPLY_PRESS_OVERRIDES_LEGACY') != '1':
+    raise SystemExit('RETIRED RE-FLOW: this script\'s workbook rewrite uses the frozen 2026-06-30 press basis '
+                     'and corrupts the live press pillar (Durbin canary incident 2026-07-16).\n'
+                     'To merge a dashboard export into the ledger:  python fec/apply_press_overrides.py --merge-only\n'
+                     '(the ledger is applied automatically by the next chain run). Set APPLY_PRESS_OVERRIDES_LEGACY=1 '
+                     'only if you truly intend the legacy COM re-flow.')
+if '--merge-only' not in sys.argv:
+    import win32com.client as win32
+import moneyball_core as MC   # dump_atomic (S2-01 audit run-2): the overrides registry is user data, never truncate-in-place
 B  = MB_ROOT
 WB = B + r'\Moneyball Main Version - Blended.xlsx'
 ST = MB_DRAFT+r'\cu_press_stance_tone.csv'
@@ -46,6 +59,9 @@ if os.path.exists(DASH):
     print('merged dashboard export -> press_stance_overrides.json (added %d, updated %d)' % (added, updated))
 else:
     print('no press_overrides_from_dashboard.json found; using existing press_stance_overrides.json only')
+if '--merge-only' in sys.argv:
+    print('merge-only mode: ledger updated; the next chain run applies it (press_stance_stack + build_media_blend). No workbook re-flow.')
+    sys.exit(0)
 
 url_ov   = {c['url']: c['stance'] for c in corr if c.get('url') and c.get('stance') in SIGN}
 title_ov = [(c['title_contains'].lower(), c['stance']) for c in corr

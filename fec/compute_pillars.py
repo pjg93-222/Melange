@@ -59,12 +59,26 @@ def _read_OEF(bmx,rows):
     return alive,{m:(o[m] or 0.0) for m in members},{m:(e[m] or 0.0) for m in members},{m:(fv[m] or 0.0) for m in members}
 _names_alive=sum(1 for m in members if bm.cell(bmrows[m],1).value==m)
 alive,O,E,F=_read_OEF(bm,bmrows) if _names_alive>=len(members)*0.9 else (False,{},{},{})
+import datetime as _dt
+# PILLAR_SNAPSHOT_FREEZE=1 (set by audit_full's shadow-parity run) makes this computation strictly
+# read-only: the audit must never advance the snapshot vintage (rank-integrity audit 2026-07-17).
+_SNAP_FREEZE=os.environ.get('PILLAR_SNAPSHOT_FREEZE')=='1'
 if alive:
-    MC.dump_atomic({'O':O,'E':E,'F':F,'note':'pillar formula-cell snapshot (auto-refreshed while view cache alive)'},SNAP)
+    if not _SNAP_FREEZE:
+        MC.dump_atomic({'O':O,'E':E,'F':F,'stamped':_dt.datetime.now().astimezone().isoformat(timespec='seconds'),
+                        'note':'pillar formula-cell snapshot (auto-refreshed while view cache alive)'},SNAP)
 else:
     try:
         _sn=json.load(open(SNAP)); O,E,F=_sn['O'],_sn['E'],_sn['F']
-        print('  (view cache dead -> O/E/F from snapshot; they change only via user Excel edits, which revive the cache)')
+        _stamp=_sn.get('stamped')
+        _agenote=''
+        if _stamp:
+            _aged=( _dt.datetime.now().astimezone()-_dt.datetime.fromisoformat(_stamp)).days
+            _agenote=' stamped %s (%dd old)'%(_stamp,_aged)
+            if _aged>14: print('  !! WARNING: pillar snapshot is %d days old — the leg/inf/demo basis may be badly stale (2026-07-16 522-rank incident class); open+recalc the workbook in Excel'%_aged)
+        else:
+            _agenote=' (UNSTAMPED pre-2026-07-17 snapshot — vintage unknown)'
+        print('  (view cache dead -> O/E/F from snapshot%s; they change only via user Excel edits, which revive the cache)'%_agenote)
     except FileNotFoundError:
         import glob as _g
         cands=sorted(_g.glob(B+r'\backups\*.xlsx'),key=os.path.getmtime,reverse=True)
@@ -75,7 +89,9 @@ else:
                 if len(rows2)<len(members)*0.9: continue
                 a2,O,E,F=_read_OEF(_bm2,rows2)
                 if a2:
-                    MC.dump_atomic({'O':O,'E':E,'F':F,'note':'bootstrapped from %s'%os.path.basename(cb)},SNAP)
+                    if not _SNAP_FREEZE:
+                        MC.dump_atomic({'O':O,'E':E,'F':F,'stamped':_dt.datetime.now().astimezone().isoformat(timespec='seconds'),
+                                        'note':'bootstrapped from %s'%os.path.basename(cb)},SNAP)
                     print('  (bootstrapped O/E/F snapshot from cache-alive backup: %s)'%os.path.basename(cb)); break
             except Exception: continue
         else:
@@ -106,6 +122,13 @@ ROLE_DISPLAY_WEIGHT=dict(ROLE_BONUS)
 ROLE_BONUS={m:0.0 for m in members}
 E=dict(Ebase)
 AB={r:(bm.cell(r,28).value or 0.0) for r in (2,3,4,5)}        # pillar weights (TYPED user dials — always alive)
+# GUARD (rank-integrity audit 2026-07-17): the four dials are load-bearing user constants
+# (live 30/25/40/5). A cleared/typo'd cell used to become a silent 0.0 and reweight all 533 ranks
+# (the W1 flagship-weights incident class). Fail LOUD instead of computing wrong ranks.
+_abv=[float(AB[r] or 0.0) for r in (2,3,4,5)]
+if any(v<=0.0 for v in _abv) or abs(sum(_abv)-1.0)>1e-6:
+    print('FATAL: pillar weight dials invalid (AB2:AB5=%s; each must be positive and the four must sum to 1.0)'%_abv)
+    sys.exit(1)
 Ov=list(O.values()); Fv=list(F.values())
 pmaxC=max(pillar.values()) or 1.0; emax=max(E.values()) or 1.0
 score={}; pcts={}; base_score={}

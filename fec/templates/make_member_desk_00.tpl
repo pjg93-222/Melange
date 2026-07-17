@@ -201,7 +201,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#161b22}
     <a class=netlink href="Moneyball Dashboard.html">◀ Network view</a>
     <button class=ghostbtn id=exportbtn>⭳ Export notes</button>
     <label class=ghostbtn for=importfile>⭱ Import notes</label><input id=importfile type=file accept="application/json,.json" hidden>
-    <button class=ghostbtn id=povexport title="Download your manual article-stance calls (press_overrides_from_dashboard.json). Apply with: python fec/apply_press_overrides.py">⭳ Export stance overrides</button>
+    <button class=ghostbtn id=povexport title="Download your manual article-stance calls (press_overrides_from_dashboard.json). Merge into the ledger with: python fec/apply_press_overrides.py --merge-only — the next chain run applies it. (The legacy no-flag re-flow is retired: frozen 06-30 basis.)">⭳ Export stance overrides</button>
     <label class=ghostbtn for=povimport>⭱ Import overrides</label><input id=povimport type=file accept="application/json,.json" hidden>
     <span id=povhint style="color:var(--faint);font-size:11px"></span>
   </div>
@@ -952,7 +952,7 @@ $('#importfile').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=ne
 $('#povexport').onclick=()=>{
   const cs=Object.keys(POV).map(u=>({url:u,stance:POV[u].stance,note:"manual override via dashboard"+(POV[u].title?(" — "+POV[u].title):"")}));
   if(!cs.length){alert("No manual overrides set yet. Use the Set-CU-stance dropdown on any press article first.");return;}
-  const out={_README:"Manual press-stance calls from the dashboard. Apply with:  python fec/apply_press_overrides.py  (merges into press_stance_overrides.json, re-flows the press pillar so ranks move; next make_member_desk regen shows them). Match by url (exact). stance: support|oppose|neutral.",corrections:cs};
+  const out={_README:"Manual press-stance calls from the dashboard. Merge with:  python fec/apply_press_overrides.py --merge-only  (into press_stance_overrides.json; the NEXT CHAIN RUN applies it via press_stance_stack + build_media_blend). The legacy no-flag re-flow is retired (frozen 06-30 basis; Durbin canary incident 2026-07-16). Match by url (exact). stance: support|oppose|neutral.",corrections:cs};
   const b=new Blob([JSON.stringify(out,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="press_overrides_from_dashboard.json";a.click();
 };
 $('#povimport').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);let n=0;(o.corrections||[]).forEach(c=>{if(c.url&&c.stance){POV[c.url]={stance:c.stance,title:c.note||""};n++;}});savePOV();updatePovHint();alert("Imported "+n+" override(s). Reopen a member Press section to see them.");}catch(err){alert("Invalid JSON.");}};rd.readAsText(f);};

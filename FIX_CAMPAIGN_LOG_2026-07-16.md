@@ -235,4 +235,29 @@ No spend, no lock-touching until his word.
   0.0000 exactly). Mechanism-attributed movers: Bean #395->#244 (own data, not Hamadeh's),
   Foxx #293->#433 (returned a neighbor's record). Paul's members RECOVER: Barr leg .897->.994
   (tier #1), Scott .765->.914, CCM .778->.936. Tier top-12 = Barr #1 + all 10 pins + Meuser/Wagner
-  organic. Chain's closing audit pending at log time.
+  organic. Chain's closing audit pending at log time (subsequently CLEAN — entry 015).
+
+### 015 — GUARD BATCH + speech-1/n + Vought RT gold; CAMPAIGN CORE COMPLETE (2026-07-17 ~04:3x)
+
+- Guards shipped (kernel 72/72; audit ALL MODULES CLEAN with the new checks live):
+  (1) AB pillar-weight dials fail LOUD on cleared/invalid cells (W1 class fenced);
+  (2) pillar snapshot now STAMPED on every write; consuming a stale one warns >7d and a new audit
+  check FAILS >14d (the 522-rank staleness class fenced);
+  (3) audit_full no longer writes the snapshot it audits (PILLAR_SNAPSHOT_FREEZE);
+  (4) apply_press_overrides.py legacy re-flow RETIRED behind a hard guard (frozen 06-30 basis);
+  --merge-only preserves the ledger-merge; desk UI + export README repointed;
+  (5) tier placements fail LOUD on unresolved names (rollover/typo class);
+  (6) config_overlay fails CLOSED on unreadable user registries;
+  (7) audit check: own-source channel inputs must be within 28d of the corpus (3-week cadence + grace).
+- Speech channel per-event 1/n normalization added (the confirmed sibling-drift; blend rebuilt
+  2,024 cells; chain rerun). DELTA: 230/533 ranks moved, PRESS-PILLAR-ONLY (leg/inf/dem mean |d|
+  = 0.00000 exactly; press mean .0023). Mechanism-attributed; tier holds Barr #1 / Meuser / Wagner.
+- Paul gold: Vought CRA-overdraft RT = support (both retweeters ledgered: Scott 560615705 flipped
+  oppose->support, Hill 560613988 already support; ledger 57 @b456b9d). Desk card verified 'Positive'.
+- Wagner tier-#3 decomposition delivered to Paul: NOT volume (27 bills = #28) — leg-agenda 97.7th
+  pctile x0.7 + efficiency 82.5th pctile x0.3, driven by CFPB norm .927 (roster mean .051) and
+  Exam&Supervision .500 (mean .018); 18 original-cosponsor roles.
+- REMAINING (documented, not silent): Social Master ghost-row rebuild + social staleness gate
+  (lane's blend design, daylight item); tweet meta retrain (needs Paul's corrected golds; queue of
+  64 awaits labels); locked-instrument amendments (round-9 A / comm v1 / roles v2) on Paul's word;
+  mtime-hardening/atomic-writer MED batch; dial-catalog docs pass.

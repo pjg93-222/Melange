@@ -90,8 +90,13 @@ def apply_tier_overrides(order, overrides=None, buckets=BUCKETS):
     """
     order = list(order)
     pos = {member: i for i, member in enumerate(order)}
-    overrides = {member: int(tier) for member, tier in (overrides or {}).items()
-                 if member in pos}
+    # FAIL LOUD on unresolved placement names (rank-integrity audit 2026-07-17): a typo'd or
+    # rolled-over member in tier_overrides.json used to be silently dropped, quietly changing
+    # Tier buckets and the Champion crown. Paul's placement contract must bind exactly.
+    _unknown = sorted(m for m in (overrides or {}) if m not in pos)
+    if _unknown:
+        raise ValueError('tier placement names not in the rankable roster: %s' % _unknown)
+    overrides = {member: int(tier) for member, tier in (overrides or {}).items()}
     if any(tier not in (1, 2, 3) for tier in overrides.values()):
         raise ValueError('tier overrides must be 1, 2, or 3')
     assigned = set()
