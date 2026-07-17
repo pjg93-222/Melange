@@ -1,5 +1,5 @@
 {
-  "_README": "User-ratified Legislative+Press display-tier policy. Tier score uses the source-controlled weights below. Buckets remain fixed at 12/24/48. Forced members occupy their named bucket; remaining seats are filled by the weighted Legislative+Press score order.",
+  "_README": "User-ratified Legislative+Press display-tier policy. Tier score uses the source-controlled weights below. Buckets remain fixed at 12/24/48. Forced members occupy their named bucket; remaining seats are filled by the weighted Legislative+Press score order. 2026-07-17 (Paul, letters integration session): 'adjust to the true tier 1s' — Tier 1 is now MATH-DRIVEN (pure 80/20 order) except two anchors (Barr #1 standing; Young Kim 'stays'). The 2026-07-16 Tier-1 pins for Fitzpatrick/Williams/Hagerty/Scott/Torres/Cortez Masto/Timmons/Nunn and Hill's Tier-2 pin were removed by this directive; Tier-2 pins stand.",
   "weights": {
     "legislation": 0.8,
     "press": 0.2,
@@ -7,59 +7,14 @@
   },
   "placements": [
     {
-      "member": "Brian Fitzpatrick",
-      "tier": 1,
-      "note": "Paul follow-up 2026-07-16"
-    },
-    {
-      "member": "Roger Williams",
-      "tier": 1,
-      "note": "Paul follow-up 2026-07-16"
-    },
-    {
-      "member": "Bill Hagerty",
-      "tier": 1,
-      "note": "Paul follow-up 2026-07-16"
-    },
-    {
       "member": "Andy Barr",
       "tier": 1,
-      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
+      "note": "Paul directive 2026-07-16 evening (kept 2026-07-17 'true tier 1s': standing #1 anchor; also mathematically #1)"
     },
     {
       "member": "Young Kim",
       "tier": 1,
-      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
-    },
-    {
-      "member": "Tim Scott",
-      "tier": 1,
-      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1 — answers RUN5's open Tim Scott roster question"
-    },
-    {
-      "member": "Ritchie Torres",
-      "tier": 1,
-      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
-    },
-    {
-      "member": "Catherine Cortez Masto",
-      "tier": 1,
-      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
-    },
-    {
-      "member": "William Timmons",
-      "tier": 1,
-      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
-    },
-    {
-      "member": "Zachary Nunn",
-      "tier": 1,
-      "note": "Paul directive 2026-07-16 evening (Claude session): top-10 within Tier 1"
-    },
-    {
-      "member": "French Hill",
-      "tier": 2,
-      "note": "Paul directive 2026-07-16 evening (Claude session): 'should all be in tier 2'"
+      "note": "Paul 2026-07-17: 'Young Kim stays' (also mathematically top-12)"
     },
     {
       "member": "Mike Crapo",

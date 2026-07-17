@@ -1008,24 +1008,24 @@ if _g:
     ck('user-ratified display-tier weights are 80%% Legislative / 20%% Press',
        all(abs(a-b)<1e-12 for a,b in zip(_tier_weights,(0.8,0.2))),str(_tier_weights))
     _tier,_tier_rank=_lpt(list(MAT))
-    # Paul's full placement contract as of 2026-07-16 evening (Claude session): the top-10 directive
-    # forced into Tier 1 (incl. Tim Scott, answering RUN5's open roster question) + 'should all be in
-    # tier 2' four. Supersedes the original six-pin list; mirrors tier_overrides.json placements.
-    _required_tiers={'Brian Fitzpatrick':1,'Roger Williams':1,'Bill Hagerty':1,
-                     'Andy Barr':1,'Young Kim':1,'Tim Scott':1,'Ritchie Torres':1,
-                     'Catherine Cortez Masto':1,'William Timmons':1,'Zachary Nunn':1,
+    # Paul's placement contract as of 2026-07-17 (letters-integration session, 'adjust to the true
+    # tier 1s'): Tier 1 is MATH-DRIVEN (pure 80/20 order) except two anchors — Barr (standing #1)
+    # and Young Kim ('stays'). The 2026-07-16 Tier-1 pins (Fitzpatrick/Williams/Hagerty/Scott/
+    # Torres/Cortez Masto/Timmons/Nunn) and Hill's Tier-2 pin were REMOVED by that directive;
+    # the 'should all be in tier 2' pins stand. Mirrors tier_overrides.json placements.
+    _required_tiers={'Andy Barr':1,'Young Kim':1,
                      'Maxine Waters':2,'Juan Vargas':2,'Nydia Velázquez':2,
-                     'French Hill':2,'Mike Crapo':2,'Scott Fitzgerald':2,'Tim Moore':2}
+                     'Mike Crapo':2,'Scott Fitzgerald':2,'Tim Moore':2}
     ck('user-ratified Legislative+Press tier placements are exact',
        all(_tier.get(m)==t for m,t in _required_tiers.items()),
        str({m:_tier.get(m) for m in _required_tiers}))
     _display={m:_mc.overall_display_tier(MAT.get(m,{}),_tier.get(m,0),m,_oc) for m in MAT}
-    # 2026-07-16 evening update: French Hill moved to Tier 2 by Paul's directive -> must NOT be crowned;
-    # Barr (pinned Tier 1, Paul's #1) joins Young Kim as the named crowned leaders.
+    # 2026-07-17 update: Hill's Tier-2 pin removed ('true tier 1s') — he re-enters Tier 1 on pure
+    # math (#2) and MUST be crowned alongside Barr and Young Kim.
     _final_named={m:_display.get(m) for m in ('Young Kim','Andy Barr','French Hill')}
     ck('Tier-1 status crowns named legislative/press leaders as Champion',
        _final_named.get('Young Kim')=='Champion' and _final_named.get('Andy Barr')=='Champion'
-       and _final_named.get('French Hill')!='Champion',
+       and _final_named.get('French Hill')=='Champion',
        str(_final_named))
     _champ={m for m,v in _display.items() if v=='Champion'}
     _tier1={m for m,t in _tier.items() if t==1}
