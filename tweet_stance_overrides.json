@@ -1,227 +1,239 @@
 {
-  "_README": "Tweet-stance hand corrections (Paul gold). Keyed by exact quorum_id (BUG-A fix: text_contains overmatched the CFPB agency name across 149 tweets). Applied LAST in tweet_stance_stack.py --score.",
-  "corrections": [
-    {
-      "quorum_id": "559890929",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "congress can put consumer protection laws back where it belo"
-    },
-    {
-      "quorum_id": "559944295",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "congress can put consumer protection laws back where it belo"
-    },
-    {
-      "quorum_id": "559500411",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "the cfpb has long been a rogue agency notorious for its exce"
-    },
-    {
-      "quorum_id": "559519355",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "the cfpb has long been a rogue agency notorious for its exce"
-    },
-    {
-      "quorum_id": "558857817",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "rt financialcmte watch fi subcommittee chairman repandybarr "
-    },
-    {
-      "quorum_id": "558642786",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "great conversation with treasury secretary scott bessent ton"
-    },
-    {
-      "quorum_id": "558649269",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "great conversation with treasury secretary scott bessent ton"
-    },
-    {
-      "quorum_id": "558437816",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "thank you to present trump for clearing the way for new and "
-    },
-    {
-      "quorum_id": "558398478",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "thank you to realdonaldtrump for clearing the way for new an"
-    },
-    {
-      "quorum_id": "557668424",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "rohit chopra s days at the cfpb are numbered his anti consum"
-    },
-    {
-      "quorum_id": "557745707",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "rohit chopra s days at the cfpb are numbered his anti consum"
-    },
-    {
-      "quorum_id": "577675951",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "1 2 the senate s passage of the one big beautiful bill deliv"
-    },
-    {
-      "quorum_id": "552656700",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "despite voters clear message on election day and my calls to"
-    },
-    {
-      "quorum_id": "552657517",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "despite voters clear message on election day and my calls to"
-    },
-    {
-      "quorum_id": "552659373",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "despite voters clear message on election day and my calls to"
-    },
-    {
-      "quorum_id": "552665613",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "rt bankinggop senatortimscott s statement on the cfpb s fina"
-    },
-    {
-      "quorum_id": "527348427",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "the consumer financial protection bureau cfpb repeatedly bru"
-    },
-    {
-      "quorum_id": "515217986",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "despite president biden s claims the cfpb s cap on credit ca"
-    },
-    {
-      "quorum_id": "513864502",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "proud to partner with senjohnkennedy to save community banks"
-    },
-    {
-      "quorum_id": "494812692",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "the cfpb s overreach and abuse of power stifles economic opp"
-    },
-    {
-      "quorum_id": "522998963",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "i m incredibly relieved cfpb which congressional democrats c"
-    },
-    {
-      "quorum_id": "511248860",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "for far too long credit card companies have piled excessive "
-    },
-    {
-      "quorum_id": "469985748",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "thank you for repyoungkim s leadership on this letter to the"
-    },
-    {
-      "quorum_id": "460578651",
-      "stance": "neutral",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "regulators are disconnected from the impact their onerous ru"
-    },
-    {
-      "quorum_id": "428479113",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "after hearing from federalreserve chair jerome powell it is "
-    },
-    {
-      "quorum_id": "428479860",
-      "stance": "support",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "after hearing from federalreserve chair jerome powell it is "
-    },
-    {
-      "quorum_id": "616752012",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "no one better than rohit chopra to lead a new agency and pro"
-    },
-    {
-      "quorum_id": "601354591",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "donald trump says he wants to cap credit card interest rates"
-    },
-    {
-      "quorum_id": "601392258",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "donald trump says he wants to cap credit card interest rates"
-    },
-    {
-      "quorum_id": "597601672",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "trump and republicans got rid of the cfpb s rule to cap over"
-    },
-    {
-      "quorum_id": "597610933",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "trump and republicans got rid of the cfpb s rule to cap over"
-    },
-    {
-      "quorum_id": "596100221",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "under trump the national credit union association stopped sh"
-    },
-    {
-      "quorum_id": "592338358",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "360 million that s how much americans who were cheated or sc"
-    },
-    {
-      "quorum_id": "592351568",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "360 million that s how much americans who were cheated or sc"
-    },
-    {
-      "quorum_id": "588820229",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "walmart and navy federal credit union were investigated for "
-    },
-    {
-      "quorum_id": "588821881",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "walmart and navy federal credit union were investigated for "
-    },
-    {
-      "quorum_id": "562138525",
-      "stance": "oppose",
-      "note": "Paul gold 2026-07-15",
-      "text_head": "rt senschumer the gop in congress actually has a plan to rai"
-    }
-  ]
+ "_README": "Tweet-stance hand corrections (Paul gold). Keyed by exact quorum_id (BUG-A fix: text_contains overmatched the CFPB agency name across 149 tweets). Applied LAST in tweet_stance_stack.py --score.",
+ "corrections": [
+  {
+   "quorum_id": "559890929",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "congress can put consumer protection laws back where it belo"
+  },
+  {
+   "quorum_id": "559944295",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "congress can put consumer protection laws back where it belo"
+  },
+  {
+   "quorum_id": "559500411",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "the cfpb has long been a rogue agency notorious for its exce"
+  },
+  {
+   "quorum_id": "559519355",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "the cfpb has long been a rogue agency notorious for its exce"
+  },
+  {
+   "quorum_id": "558857817",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "rt financialcmte watch fi subcommittee chairman repandybarr "
+  },
+  {
+   "quorum_id": "558642786",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "great conversation with treasury secretary scott bessent ton"
+  },
+  {
+   "quorum_id": "558649269",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "great conversation with treasury secretary scott bessent ton"
+  },
+  {
+   "quorum_id": "558437816",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "thank you to present trump for clearing the way for new and "
+  },
+  {
+   "quorum_id": "558398478",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "thank you to realdonaldtrump for clearing the way for new an"
+  },
+  {
+   "quorum_id": "557668424",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "rohit chopra s days at the cfpb are numbered his anti consum"
+  },
+  {
+   "quorum_id": "557745707",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "rohit chopra s days at the cfpb are numbered his anti consum"
+  },
+  {
+   "quorum_id": "577675951",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "1 2 the senate s passage of the one big beautiful bill deliv"
+  },
+  {
+   "quorum_id": "552656700",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "despite voters clear message on election day and my calls to"
+  },
+  {
+   "quorum_id": "552657517",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "despite voters clear message on election day and my calls to"
+  },
+  {
+   "quorum_id": "552659373",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "despite voters clear message on election day and my calls to"
+  },
+  {
+   "quorum_id": "552665613",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "rt bankinggop senatortimscott s statement on the cfpb s fina"
+  },
+  {
+   "quorum_id": "527348427",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "the consumer financial protection bureau cfpb repeatedly bru"
+  },
+  {
+   "quorum_id": "515217986",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "despite president biden s claims the cfpb s cap on credit ca"
+  },
+  {
+   "quorum_id": "513864502",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "proud to partner with senjohnkennedy to save community banks"
+  },
+  {
+   "quorum_id": "494812692",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "the cfpb s overreach and abuse of power stifles economic opp"
+  },
+  {
+   "quorum_id": "522998963",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "i m incredibly relieved cfpb which congressional democrats c"
+  },
+  {
+   "quorum_id": "511248860",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "for far too long credit card companies have piled excessive "
+  },
+  {
+   "quorum_id": "469985748",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "thank you for repyoungkim s leadership on this letter to the"
+  },
+  {
+   "quorum_id": "460578651",
+   "stance": "neutral",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "regulators are disconnected from the impact their onerous ru"
+  },
+  {
+   "quorum_id": "428479113",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "after hearing from federalreserve chair jerome powell it is "
+  },
+  {
+   "quorum_id": "428479860",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "after hearing from federalreserve chair jerome powell it is "
+  },
+  {
+   "quorum_id": "616752012",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "no one better than rohit chopra to lead a new agency and pro"
+  },
+  {
+   "quorum_id": "601354591",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "donald trump says he wants to cap credit card interest rates"
+  },
+  {
+   "quorum_id": "601392258",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "donald trump says he wants to cap credit card interest rates"
+  },
+  {
+   "quorum_id": "597601672",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "trump and republicans got rid of the cfpb s rule to cap over"
+  },
+  {
+   "quorum_id": "597610933",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "trump and republicans got rid of the cfpb s rule to cap over"
+  },
+  {
+   "quorum_id": "596100221",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "under trump the national credit union association stopped sh"
+  },
+  {
+   "quorum_id": "592338358",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "360 million that s how much americans who were cheated or sc"
+  },
+  {
+   "quorum_id": "592351568",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "360 million that s how much americans who were cheated or sc"
+  },
+  {
+   "quorum_id": "588820229",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "walmart and navy federal credit union were investigated for "
+  },
+  {
+   "quorum_id": "588821881",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "walmart and navy federal credit union were investigated for "
+  },
+  {
+   "quorum_id": "562138525",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "rt senschumer the gop in congress actually has a plan to rai"
+  },
+  {
+   "quorum_id": "527267129",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 (desk review: anti-CFPB post = pro-CU under the ratified directional frame)",
+   "text_head": "when the cfpb comes knocking on small businesses’ doors, it "
+  },
+  {
+   "quorum_id": "527235593",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 (desk review: anti-CFPB post = pro-CU under the ratified directional frame)",
+   "text_head": "when the cfpb comes knocking on small businesses’ doors, it "
+  }
+ ]
 }
