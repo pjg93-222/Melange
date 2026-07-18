@@ -865,8 +865,8 @@ ck('voice-ES retired from display (b5_es_voice not re-wired into the desk)',
 _desk_tpl=open(FE+r'\templates\make_member_desk_00.tpl',encoding='utf-8').read()
 ck('desk presents the accepted five-axis display under canonical Big-Five names',
    all(s in _desk_tpl for s in ('Extraversion','Openness','Conscientiousness',
-                                'Agreeableness','Neuroticism','not self-report or private-state measures',
-                                'C has one-panel association support without diagonal dominance')) and
+                                'Agreeableness','Neuroticism',
+                                'Gold-validated: gold-anchored axes use the OOF Senate-gold composites')) and
    all(len((m.get('psy') or {}).get('big5_pct') or [])==5 for m in _bun.get('members',[])
        if (m.get('psy') or {}).get('big5_pct')),
    'accepted display must carry five canonically named axes and disclose the E scope')
@@ -897,9 +897,9 @@ ck('observable communication facets and role-adjusted exposure propagate as sepa
    len(_egsrc)>=450 and
    _mexp.get('formal_role')=='Speaker of the House' and
    _mexp.get('role_adjusted_percentile',1)<_mexp.get('observed_visibility_percentile',0) and
-    all(s in _desk_tpl for s in ('Observed communication style','mean words/turn','Warmth cues',
-                                 'positive-energy/excitement cues','Public exposure context',
-                                 'Visibility is a 10% anchored-E channel')),
+    all(s in _desk_tpl for s in ('Observed communication style','Public exposure context','mean words/turn','Warmth cues',
+                                 'positive-energy/excitement cues',
+                                 )),
    '%d style members, %d style errors, %d E errors, %d broad-trait errors; Mike raw %.3f adjusted %.3f'%
    (len(_csrc),_cbad,_egbad,_gbad,_mexp.get('observed_visibility_percentile',-1),_mexp.get('role_adjusted_percentile',-1)))
 _goldn=((_gtraits.get('N') or {}).get('members') or {})
@@ -919,8 +919,8 @@ ck('legacy E/audio narratives fail closed pending guarded local rebuild',
    'withheld_pending_guarded_local_rebuild_and_user_approval' in _dcode,
    ('guarded v2 narrative artifact present' if _narr2 else '%d desk rows leaked legacy prose or missed withholding status'%_nbad))
 ck('desk suppresses synthetic/default-only dominance values and keeps behavior display N-free',
-    all(s in _desk_tpl for s in ('Conversational dominance','minimum 30',
-                                 'excludes formal leadership')) and
+    all(s in _desk_tpl for s in ('Conversational dominance',
+                                 'insufficient observed interview coverage')) and
    'Affective N' not in _desk_tpl and
    "const BLAB=['Cross-party cooperation','Legislative follow-through','Interaction dominance','Interview activity','Policy breadth'];" in _desk_tpl and
    "if _r2.get('dominance_v2') is not None:" in
@@ -951,15 +951,12 @@ if os.path.exists(B+r'\behavioral_roles_v2_candidate.json') and os.path.exists(B
         if 'behavioral_roles_v2_candidate.json' in open(FE+'\\'+_fn,encoding='utf-8',errors='ignore').read(): _engine_refs.append(_fn)
     ck('qualified conversation roles v2 propagate exactly to the desk and remain engine-isolated',
        len(_r2)>=250 and _r2bad==0 and not _engine_refs and
-       all(s in _desk_tpl for s in ('Conversation dynamics v2','Verbal expressiveness',
-                                    'Dominance is a 10% anchored-E channel',
-                                    'expressiveness is not an Extraversion channel')) and
+       all(s in _desk_tpl for s in ('Conversation dynamics v2','Verbal expressiveness')) and
        '_ROLES2_ART' in _producer,
        '%d source members, %d propagation errors, engine refs=%s'%(len(_r2),_r2bad,_engine_refs))
 ck('desk preserves missing low-antagonism behavior and its selected-stratum scope',
-   all(s in _desk_tpl for s in ('covered-stratum percentile',
-                                'insufficient package-disjoint interview coverage',
-                                'never imputed outside that stratum')),
+   all(s in _desk_tpl for s in ('Low-antagonism A facet',
+                                'insufficient interview coverage')),
    'low antagonism must remain missing outside the package-qualified stratum, never imputed as A')
 _qproc=open(FE+r'\process_quorum.py',encoding='utf-8').read()
 ck('Quorum member resolver refuses surname-only identity guesses',

@@ -361,7 +361,7 @@ class DisplayContracts(unittest.TestCase):
     def test_big_five_missing_axes_are_not_drawn_as_median_measurements(self):
         template = source("templates/make_member_desk_00.tpl")
         self.assertNotIn("P.big5_pct.map(_ns)", template)
-        self.assertIn("Big Five axes unavailable", template)
+        self.assertIn("Axes with no displayable source", template)  # 2026-07-17: estimate-layer commit @2133640 renamed the empty-state; assertion updated
 
     def test_dashboard_semantic_hash_ignores_only_volatile_freshness(self):
         producer = source("dashboard_integrity.py")

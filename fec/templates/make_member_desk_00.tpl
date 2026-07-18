@@ -229,7 +229,7 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#161b22}
 
 <section id=view-coalition class=view hidden>
   <h2 style=font-size:20px;font-weight:800;margin-bottom:4px>Coalition builder</h2>
-  <div style=color:var(--muted);margin-bottom:12px>Add cosponsors to a bill, then the cosponsorship network suggests the most likely next cosponsors (propagation probability to your current set). Bias the search toward a legislative area if you like.</div>
+  <div style=color:var(--muted);margin-bottom:12px>Add cosponsors to a bill, then the cosponsorship network suggests the most likely next cosponsors. Bias the search toward a legislative area if you like.</div>
   <div class=areasel>
     <div class=search><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg><input id=cbsearch aria-label="Add a cosponsor" placeholder="Add a cosponsor…" list=allnames autocomplete=off></div>
     <datalist id=allnames></datalist>
@@ -246,10 +246,6 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#161b22}
 <section id=view-efficiency class=view hidden>
   <h2 style=font-size:20px;font-weight:800;margin-bottom:4px>Investment efficiency</h2>
   <div style=color:var(--muted);margin-bottom:10px;max-width:760px>Where the next credit-union dollar moves the most. Sorted by <b style=color:#34d399>ROI</b> — expected co-sponsors gained from the next $10k.</div>
-  <details class=methnote><summary>How these are computed</summary><div class=methbody>
-    <b style=color:#34d399>ROI</b> — expected flips from the next $10k (one PAC's cycle max), from the capacity- &amp; competition-aware Linear-Threshold flip model. The rigorous metric: it rewards genuinely <i>movable</i> targets.<br>
-    <b>Suggested</b> — the joint fixed-state lazy-greedy optimizer's allocation; modeled threshold replans are labeled separately and carry no fixed-state certificate. <b>Gap</b> = suggested − already invested (FEC).<br>
-    <b>Value</b> — influence-percentile − spend-percentile: a quick "undervalued" triage heuristic (ordinal; ignores winnability, so it can disagree with ROI).</div></details>
   <div class=controls>
     <div class=search><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg><input id=effq aria-label="Search efficiency table" placeholder="Search member…" autocomplete=off></div>
     <span class=seg id=effch><button data-v=all class=on>All</button><button data-v=House>House</button><button data-v=Senate>Senate</button></span>
@@ -410,7 +406,7 @@ function evCardHTML(m){
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap">
       <div class=eyebrow style=margin-bottom:0>Electoral history — vote share by cycle</div>${badge}</div>
     ${evChart(h)}${leg}
-    <div style="font-size:10.5px;color:var(--faint);margin-top:7px">Primary &amp; general from the FEC <i>Federal Elections</i> books (2016–2022); 2024 general from MEDSL; 2024 primary pending. Outlook = Ballotpedia competitiveness percentile.</div>
+    <div style="font-size:10.5px;color:var(--faint);margin-top:7px">Primary &amp; general from the FEC <i>Federal Elections</i> books (2016–2022); 2024 general from MEDSL; 2024 primary pending.</div>
   </div>`;
 }
 
@@ -480,7 +476,7 @@ function openMember(i){
   const pillars=['press','comm','leg','demo'].map(k=>{const v=m[k+'_n'],raw=m[k+'_raw'];
     return `<div class=barrow><span class=t><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${PILL[k].c};margin-right:5px"></span>${PILL[k].l} <span style=color:var(--faint)>×${PILL[k].w.toFixed(2)}</span></span><span class=track><i style="width:${(v||0)*100}%;background:${PILL[k].c}"></i></span><span class=val>${f2(v)}</span></div>`;}).join('');
   const roleInfluence=(m.formal_role_influence_nominal||0)>0
-    ?`<div style="font-size:10px;color:var(--faint);margin-top:5px">${esc(m.formal_role_influence_office||'Party leadership office')} is retained as titled public-exposure context only. It does not add to Influence or change rank.</div>`:'';
+    ?`<div style="font-size:10px;color:var(--faint);margin-top:5px">${esc(m.formal_role_influence_office||'Party leadership office')} — titled public-exposure context.</div>`:'';
   let h=`<div class=mhead>
     <div>
       <div class=verdict style="color:${col};background:${col}26"><span class=d></span>${stanceName(os)} · ${POSTURE[os]||'qualify'} <span style=opacity:.7;font-weight:500>· overall${m.overall_say_do?' · say-do capped':''}</span></div>
@@ -602,8 +598,8 @@ function psychHTML(m){
       ?`<div class=eyebrow style="margin-top:8px">Conversation dynamics v2 <span style="color:#86efac;font-weight:700">&middot; observed interviews</span></div>
         ${bar('Conversational dominance',P.behav_pct[2],'#2dd4bf')}
         ${bar('Verbal expressiveness',P.expressiveness_v2_pct,'#a78bfa')}
-        <div style="font-size:10px;color:var(--faint);margin-top:-3px">${P.behavior_scope&&P.behavior_scope.interaction_turns?P.behavior_scope.interaction_turns.toLocaleString():0} qualifying turns. Dominance excludes formal leadership and text length. Dominance is a 10% anchored-E channel, not Extraversion by itself. Expressiveness measures turn-level verbal elaboration; expressiveness is not an Extraversion channel.</div>`
-      :'<div style="font-size:10px;color:var(--faint);margin-top:6px">Conversation dynamics v2: insufficient observed interview turns (minimum 30); no value is imputed.</div>';
+        <div style="font-size:10px;color:var(--faint);margin-top:-3px">${P.behavior_scope&&P.behavior_scope.interaction_turns?P.behavior_scope.interaction_turns.toLocaleString():0} qualifying turns.</div>`
+      :'<div style="font-size:10px;color:var(--faint);margin-top:6px">Conversation dynamics: insufficient observed interview coverage.</div>';
     const CS=P.communication_style||null;
     const styleFacet=(key,label,color)=>CS&&CS.facets&&CS.facets[key]&&CS.facets[key].percentile!=null
       ?bar(label,CS.facets[key].percentile,color):'';
@@ -612,27 +608,27 @@ function psychHTML(m){
       const raw=CS.raw_text||{};const ex=CS.public_exposure||{};
       const role=ex.formal_role||(ex.committee_leader?'committee leadership':'no listed central or committee leadership office');
       const exposure=(ex.observed_visibility_percentile!=null&&ex.role_adjusted_percentile!=null)
-        ?`<div style="font-size:11px;line-height:1.5;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px;margin-bottom:7px"><b>Public exposure context:</b> ${pctLabel(ex.observed_visibility_percentile)} observed; <b>${pctLabel(ex.role_adjusted_percentile)} after formal-role adjustment</b> (${esc(role)}). Visibility is a 10% anchored-E channel, but it is also related to Agreeableness and newsworthiness, so it does not occupy the Extraversion axis by itself.</div>`:'';
+        ?`<div style="font-size:11px;line-height:1.5;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px;margin-bottom:7px"><b>Public exposure context:</b> ${pctLabel(ex.observed_visibility_percentile)} observed; <b>${pctLabel(ex.role_adjusted_percentile)} after formal-role adjustment</b> (${esc(role)}).</div>`:'';
       const rawline=raw.mean_words_per_turn!=null
         ?`<div style="font-size:10px;color:var(--faint);line-height:1.55;margin-top:3px">Actual member-attributed interview text: <b>${raw.mean_words_per_turn}</b> mean words/turn, <b>${raw.median_words_per_turn}</b> median, <b>${raw.p90_words_per_turn}</b> 90th percentile; <b>${raw.mean_words_per_appearance}</b> mean words/appearance. Warmth cues: <b>${raw.warmth_cues_per_1000_words}</b>/1,000 words; positive-energy/excitement cues: <b>${raw.excitement_cues_per_1000_words}</b>/1,000; joint substantial appearances: <b>${raw.joint_appearance_share==null?'n/a':Math.round(raw.joint_appearance_share*100)+'%'}</b>.</div>`:'';
-      style=`<div class=eyebrow style="margin-top:9px">Observed communication style <span style="color:#86efac;font-weight:700">&middot; words and interaction behavior</span></div>${exposure}${styleFacet('warmth','Warmth cues','#2dd4bf')}${styleFacet('excitement','Positive energy / excitement cues','#f59e0b')}${styleFacet('activity','Within-appearance activity','#60a5fa')}${styleFacet('gregariousness','Joint-appearance gregariousness','#a78bfa')}${styleFacet('assertiveness','Conversational assertiveness','#fb7185')}${rawline}<div style="font-size:10px;color:#f59e0b;margin-top:4px">These facets are supporting public-speech evidence. Excitement and gregariousness have modest split-half reliability; turn length and verbosity are one evidence family and are not double-counted.</div>`;
+      style=`<div class=eyebrow style="margin-top:9px">Observed communication style <span style="color:#86efac;font-weight:700">&middot; words and interaction behavior</span></div>${exposure}${styleFacet('warmth','Warmth cues','#2dd4bf')}${styleFacet('excitement','Positive energy / excitement cues','#f59e0b')}${styleFacet('activity','Within-appearance activity','#60a5fa')}${styleFacet('gregariousness','Joint-appearance gregariousness','#a78bfa')}${styleFacet('assertiveness','Conversational assertiveness','#fb7185')}${rawline}`;
     }
     const hearA=(P.hearing_antag_pct!=null)
-      ?`<b>Hearing low-antagonism (separate facet):</b> ${pctLabel(P.hearing_antag_pct)} — inverse of observed committee-hearing antagonism (interruptions given, chair defiance, friction); its convergence with the interview facet is weak (r=0.16), so it is shown as its own behavioral facet, never as interview-A.<br>`
+      ?`<b>Hearing low-antagonism (separate facet):</b> ${pctLabel(P.hearing_antag_pct)} — inverse of observed committee-hearing antagonism (interruptions given, chair defiance, friction).<br>`
       :'';
     const aval=(P.a_validated_pct!=null)
-      ?`<div class=eyebrow style="margin-top:8px">Construct separation <span style="color:#f59e0b;font-weight:700">&middot; cooperation is not Agreeableness</span></div>
+      ?`<div class=eyebrow style="margin-top:8px">Cooperation &amp; low-antagonism</div>
         <div style="font-size:11px;line-height:1.5;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">
-        <b>Cross-party cooperation:</b> ${P.behav_pct&&P.behav_pct[0]!=null?pctLabel(P.behav_pct[0]):'n/a'} — share of observable bipartisan cosponsorship behavior; engine role.<br>
-        <b>Low-antagonism A facet:</b> ${pctLabel(P.a_validated_pct)} — absence of hostility/contempt in package-disjoint interviews; display instrument.<br>
-        ${hearA}<span style="color:var(--faint)">They may diverge legitimately: strategic bipartisan action and interpersonal hostility are different behaviors. A is a covered-stratum percentile and is never imputed outside that stratum.</span></div>`
+        <b>Cross-party cooperation:</b> ${P.behav_pct&&P.behav_pct[0]!=null?pctLabel(P.behav_pct[0]):'n/a'} — share of observable bipartisan cosponsorship behavior.<br>
+        <b>Low-antagonism A facet:</b> ${pctLabel(P.a_validated_pct)} — absence of hostility/contempt in observed interviews.<br>
+        ${hearA}</div>`
       :(P.hearing_antag_pct!=null
-        ?`<div class=eyebrow style="margin-top:8px">Construct separation <span style="color:#f59e0b;font-weight:700">&middot; cooperation is not Agreeableness</span></div>
+        ?`<div class=eyebrow style="margin-top:8px">Cooperation &amp; low-antagonism</div>
           <div style="font-size:11px;line-height:1.5;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">
-          <b>Cross-party cooperation:</b> ${P.behav_pct&&P.behav_pct[0]!=null?pctLabel(P.behav_pct[0]):'n/a'} — share of observable bipartisan cosponsorship behavior; engine role.<br>
-          <b>Interview low-antagonism A facet:</b> insufficient package-disjoint interview coverage for this member.<br>
-          ${hearA}<span style="color:var(--faint)">Hearing behavior is the closest available observed-interaction read for this member (Paul-directed desert fill 2026-07-17).</span></div>`
-        :'<div style="font-size:10px;color:var(--faint);margin-top:6px">Low-antagonism A facet: insufficient package-disjoint interview coverage; cross-party cooperation remains separate.</div>');
+          <b>Cross-party cooperation:</b> ${P.behav_pct&&P.behav_pct[0]!=null?pctLabel(P.behav_pct[0]):'n/a'} — share of observable bipartisan cosponsorship behavior.<br>
+          <b>Interview low-antagonism A facet:</b> insufficient interview coverage for this member.<br>
+          ${hearA}</div>`
+        :'<div style="font-size:10px;color:var(--faint);margin-top:6px">Low-antagonism A facet: insufficient interview coverage.</div>');
     const B5AX=['Extraversion','Openness','Conscientiousness','Agreeableness','Neuroticism'];
     // Paul-directed fill 2026-07-17: gold-anchored values stay primary; empty slots render the
     // labeled estimate layer (big5_fb_pct) instead of vanishing. Estimates are display-only.
@@ -642,38 +638,37 @@ function psychHTML(m){
     const est=B5AX.filter((_,i)=>goldVec[i]==null&&FB[i]!=null);
     const b5na=B5AX.filter((_,i)=>merged[i]==null);
     const rad=merged.some(v=>v!=null)?radar(merged.map(v=>v==null?0.5:v),B5AX,'#7dd3fc',82)
-      +(est.length?`<div style="font-size:10px;color:#f59e0b">Estimate slots (not gold-anchored): ${est.map(l=>{const i=B5AX.indexOf(l);return l+' — '+esc(FBS[i]||'estimate');}).join('; ')}. Display-only estimate layer; never engine input.</div>`:'')
+      +(est.length?`<div style="font-size:10px;color:#f59e0b">Estimate slots (not gold-anchored): ${est.join(', ')}.</div>`:'')
       +(b5na.length?`<div style="font-size:10px;color:var(--faint)">Axes with no displayable source (not plotted): ${b5na.join(', ')}</div>`:''):'';
     const persona=(P.communion_pct!=null)?bar('Warmth — communion persona',P.communion_pct,'#2dd4bf')+bar('Assertiveness — agency persona',P.agency_pct,'#c2862a'):'<div class=empty>No persona cue coverage yet for this member.</div>';
     const rd=READS[P.susc_read||'trait-only']||READS['trait-only'];
     const suscRows=(P.pressure_mult!=null)?`<div class=mrow><span>Engagement responsiveness (engines)</span><b>${P.pressure_mult}×</b></div>
       <div class=mrow><span>Meeting take-rate (seed prob.)</span><b>${P.seed_prob!=null?Math.round(P.seed_prob*100)+'%':'—'}</b></div>
-      <div class=mrow><span>Receptivity — ${P.basis==='behavioral'?('behavioral read'+(P.n_source?' · N-slot: Neuroticism':'')):'trait read'}</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
+      <div class=mrow><span>Receptivity — ${P.basis==='behavioral'?'behavioral read':'trait read'}</span><b>${P.susc_trait_z>0?'+':''}${P.susc_trait_z}</b></div>
       ${P.persona_susc_z!=null?`<div class=mrow><span>Receptivity — persona read</span><b>${P.persona_susc_z>0?'+':''}${P.persona_susc_z}</b></div>`:''}
       <div style="font-size:11px;font-weight:700;color:${rd[1]};background:${rd[1]}22;border:1px solid ${rd[1]}55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">${rd[0]}</div>`:'';
-    const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Quick read (IIT-C octant)</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';
+    const appr=P.approach?`<div class=eyebrow style=margin-top:8px>Quick read</div><div style="font-size:12px;line-height:1.45;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:7px 9px">${P.approach}</div>`:'';
     const NAR=P.narrative;
-    const narr=NAR?`<div class=eyebrow style=margin-top:10px>Suggested approach <span style=color:var(--faint)>· guarded local 3-paragraph brief${NAR.audio?' · incl. reviewed voice read':''}</span></div>
-      ${NAR.measurement_note?`<div style="font-size:10px;color:#f59e0b;margin:2px 0 5px">${NAR.measurement_note}</div>`:''}
+    const narr=NAR?`<div class=eyebrow style=margin-top:10px>Suggested approach</div>
       <div style="font-size:12px;line-height:1.52;color:var(--ink,#dbe2ea);background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:10px 12px">
         <div style="color:#7dd3fc;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Overall personality</div><div style=margin-bottom:8px>${NAR.p1}</div>
         <div style="color:#7dd3fc;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Manner of speech &amp; landmines</div><div style=margin-bottom:8px>${NAR.p2}</div>
         <div style="color:#7dd3fc;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Persuasive approach</div><div>${NAR.p3}</div>
-      </div>`:(P.narrative_status?`<div class=eyebrow style=margin-top:10px>Suggested approach</div><div class=empty>Legacy paid profile withheld. The guarded zero-API three-paragraph renderer is ready, but full regeneration remains pending explicit user approval.</div>`:'');
+      </div>`:(P.narrative_status?`<div class=eyebrow style=margin-top:10px>Suggested approach</div><div class=empty>Approach brief pending.</div>`:'');
     comp=`<div class=gen style=margin-bottom:12px>
       <div><div class=eyebrow>Decision profile <span style="color:#86efac;font-weight:700">· five observable behavioral roles</span></div>${behav}
-      <div style="font-size:10px;color:var(--faint);margin:3px 0 6px">Cooperation is cross-party legislative action; follow-through is roll-call/legislative execution; interaction dominance requires at least 30 observed interview turns; interview activity is exposure, not intrinsic Extraversion; breadth is issue coverage.</div>${roles2}${style}${aval}
-      ${rad?`<div class=eyebrow style="margin-top:8px">Big Five <span style="color:#86efac;font-weight:700">· accepted multimethod display</span> <span style=color:var(--faint)>· cross-check only — does NOT drive ranks</span></div>
-      <div style="font-size:10px;color:var(--faint);margin:1px 0 3px">Gold-anchored axes use the OOF Senate-gold composites; amber-captioned slots are labeled instrument estimates (Paul-directed fill 2026-07-17). E and A clear both independent panels. O and N clear one panel; C has one-panel association support without diagonal dominance. These are public expert-perceived estimates, not self-report or private-state measures; the one-panel axes carry weaker evidence.</div>
-      ${rad}${P.big5_low?'<div style="font-size:10px;color:var(--faint)">Blue: low confidence (thin text corpus)</div>':''}`:''}</div>
-      <div><div class=eyebrow>Projected persona <span style=color:var(--faint)>· public / presented persona (Birkenmaier-Lechner cues) — how they come across, not intrinsic traits</span></div>${persona}
+      <div style="font-size:10px;color:var(--faint);margin:3px 0 6px">Cooperation is cross-party legislative action; follow-through is roll-call/legislative execution; interaction dominance is observed interview behavior; interview activity is exposure; breadth is issue coverage.</div>${roles2}${style}${aval}
+      ${rad?`<div class=eyebrow style="margin-top:8px">Big Five</div>
+      <div style="font-size:10px;color:var(--faint);margin:1px 0 3px">Gold-validated: gold-anchored axes use the OOF Senate-gold composites.</div>
+      ${rad}`:''}</div>
+      <div><div class=eyebrow>Projected persona <span style=color:var(--faint)>· how they come across publicly</span></div>${persona}
       <div class=eyebrow style=margin-top:8px>Engagement &amp; receptivity</div>${suscRows}${appr}</div></div>${narr}`;
   }
-  const ext=P.ext?`<div class=eyebrow style=margin-top:8px>External measures (public datasets · weekly diagnostics)</div>
+  const ext=P.ext?`<div class=eyebrow style=margin-top:8px>External measures (public datasets)</div>
     ${P.ext.les!=null?`<div class=mrow><span>Lawmaking effectiveness (CEL LES, thru 118th)</span><b>${P.ext.les.toFixed(2)} · ${Math.round(P.ext.les_pct*100)}th pct</b></div>`:''}
     ${P.ext.dwnom1!=null?`<div class=mrow><span>Ideology (DW-NOMINATE dim 1)</span><b>${P.ext.dwnom1>0?'+':''}${P.ext.dwnom1.toFixed(2)}</b></div>`:''}
     ${P.ext.kb_pct!=null?`<div class=mrow><span>Network centrality (Katz-Bonacich, cascade kernel)</span><b>${Math.round(P.ext.kb_pct*100)}th pct</b></div>`:''}
-    ${P.ext.ft!=null?`<div class=mrow><span>Bill follow-through (stage events per bill, 115th–118th) <span style="color:var(--muted)">· feeds Diligence</span></span><b>${P.ext.ft.toFixed(2)}</b></div>`:''}
+    ${P.ext.ft!=null?`<div class=mrow><span>Bill follow-through (stage events per bill, 115th–118th)</span><b>${P.ext.ft.toFixed(2)}</b></div>`:''}
     ${P.ext.antag?`<div style="font-size:11px;font-weight:700;color:#f59e0b;background:#f59e0b22;border:1px solid #f59e0b55;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px">Signed-mention antagonist set (Aref-Neal splinter)</div>`:''}`:'';
   return `<div id=psych-view>${comp}${ext}
     <div class=eyebrow style=margin-top:6px>Notes</div>
@@ -714,7 +709,7 @@ function personalHTML(m){
     groups[cat].map(x=>`<div style="background:#161b22;border:1px solid var(--line,#2a2f3a);border-radius:8px;padding:8px 10px;margin:5px 0">
       <div style="font-size:12px;font-weight:650;color:var(--ink,#dbe2ea)">${esc(x.claim)}</div>
       <details class=methnote style="margin:4px 0 0"><summary>View exact evidence</summary><div class=methbody>“${esc(x.evidence)}”<div style="margin-top:5px;color:var(--faint)">${src(x)} · ${esc(x.confidence)} confidence</div></div></details></div>`).join('')).join('');
-  return `<div style="font-size:11px;color:var(--muted);margin-bottom:5px">${items.length} public, member-attributed details · exact excerpt and locator retained · observations only; never fed into ranks or traits</div>${cards}`;
+  return `<div style="font-size:11px;color:var(--muted);margin-bottom:5px">${items.length} public, member-attributed details · exact excerpt and locator retained</div>${cards}`;
 }
 function relHTML(m){
   const partners=m.partners||[];
@@ -804,8 +799,8 @@ function pressHTML(m){
   if(mt.hr)fp.push(fpn(mt.hr,'hearing appearance'));
   if(mt.bs)fp.push(fpn(mt.bs,'Bluesky post'));
   if(mt.bs_pending)fp.push('Bluesky handle pending verification — posts withheld');
-  const fpline=fp.length?`<div class=cnt>Media footprint (display-only, not in the press pillar): ${fp.join(' · ')}</div>`:'';
-  if(!arts.length)return audit+fpline+'<div class=empty>No tracked credit-union press or social items — and no interview, hearing, or Bluesky footprint — on record for this member. The media pillar reflects the press/social absence.</div>';
+  const fpline=fp.length?`<div class=cnt>Media footprint: ${fp.join(' · ')}</div>`:'';
+  if(!arts.length)return audit+fpline+'<div class=empty>No tracked credit-union press or social items — and no interview, hearing, or Bluesky footprint — on record for this member.</div>';
   const areas=[...new Set(arts.flatMap(a=>a.cats||[]))].sort();
   const present=[...new Set(arts.map(a=>a.label).filter(Boolean))];
   const ordered=SENT_ORDER.filter(l=>present.includes(l)).concat(present.filter(l=>SENT_ORDER.indexOf(l)<0));
