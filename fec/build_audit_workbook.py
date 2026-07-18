@@ -40,6 +40,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from paths import ROOT, WORKBOOK as SOURCE_WORKBOOK  # noqa: E402  (SOURCE, not the audit output)
 
 HANDOFF_SCHEMA = "moneyball-workbook-audit-inputs-v1"
+LEGISLATIVE_ROWS = 535
+LEGISLATIVE_COLUMNS = 160
 EMDASH = "—"  # U+2014, matches the stance-matrix no-position glyph exactly
 OUT_DIR = os.path.join(ROOT, "outputs", "workbook_repair")
 OUT_NAME = "Moneyball Audit Workbook.xlsx"
@@ -58,12 +60,29 @@ def _read_json(path):
 
 
 def ensure_inputs(handoff_path, source_workbook_path):
-    """Produce the JSON handoff by running the read-only extractor when it is absent."""
+    """Produce a source-current JSON handoff with the complete legislative grids."""
+    source_workbook_path = os.path.abspath(source_workbook_path)
+    from extract_workbook_audit_inputs import extract, sha256_file
     if os.path.exists(handoff_path):
-        return handoff_path
-    from extract_workbook_audit_inputs import extract
+        try:
+            cached = _read_json(handoff_path)
+            grids = (cached.get("legislative_raw"), cached.get("legislative_normalized"))
+            complete = all(
+                isinstance(grid, list)
+                and len(grid) == LEGISLATIVE_ROWS
+                and all(isinstance(row, list) and len(row) == LEGISLATIVE_COLUMNS for row in grid)
+                for grid in grids
+            )
+            if (
+                cached.get("schema") == HANDOFF_SCHEMA
+                and complete
+                and cached.get("source_workbook_sha256") == sha256_file(source_workbook_path)
+            ):
+                return handoff_path
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            pass
     from moneyball_core import dump_atomic
-    doc = extract(os.path.abspath(source_workbook_path))
+    doc = extract(source_workbook_path)
     os.makedirs(os.path.dirname(handoff_path) or ".", exist_ok=True)
     dump_atomic(doc, handoff_path, indent=1)
     return handoff_path

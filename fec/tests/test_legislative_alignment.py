@@ -31,6 +31,8 @@ COLUMNS DELIBERATELY EXCLUDED (a different or underivable rule -- left unchanged
   * cols 146,148,150,151,152 (CFPB Reach 'Average'/'Success Rate' sub-columns): the normalized
     cells are blank and the raw column is all-zero -- no derivable normalization (0/0), and no
     member is displaced (a shifted blank column is still blank).
+  * cols 153..160 are the CU Tax Status block added 2026-07-17.  They use the standard value/MAX
+    rule and therefore remain inside the guarded range.
 
 This test asserts every value/MAX cell equals the member's OWN-row normalization within 1e-6.
 It is RED before fec/repair_legislative_normalized.py runs and GREEN afterward.
@@ -52,7 +54,7 @@ from paths import WORKBOOK  # noqa: E402
 FIRST_DATA_ROW = 3
 LAST_DATA_ROW = 535           # 533 members, rows 3..535
 FIRST_VALUE_COL = 3           # col A=names, B=district, C.. = category value columns
-LAST_VALUE_COL = 152
+LAST_VALUE_COL = 160           # CU Tax Status block extends the value region through col 160
 TOL = 1e-6
 
 # Columns whose normalization is a different rule or is underivable (all-zero/blank) -- not repaired.

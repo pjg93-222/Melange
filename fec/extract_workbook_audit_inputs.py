@@ -45,14 +45,14 @@ def normalize_columns(rows):
 
 def extract(workbook_path):
     values=openpyxl.load_workbook(workbook_path,read_only=True,data_only=True)
-    raw=list(values['Legislative Score - Raw'].iter_rows(min_row=1,max_row=535,min_col=1,max_col=152,values_only=True))
+    raw=list(values['Legislative Score - Raw'].iter_rows(min_row=1,max_row=535,min_col=1,max_col=160,values_only=True))  # 160: CU Tax Status block cols 153-160 added 2026-07-17
     rank_rows=list(values['Rank & Allocation'].iter_rows(min_row=3,max_row=535,min_col=1,max_col=7,values_only=True))
-    current_norm=list(values['Legislative Score - Normalized'].iter_rows(min_row=3,max_row=535,min_col=1,max_col=152,values_only=True))
+    current_norm=list(values['Legislative Score - Normalized'].iter_rows(min_row=3,max_row=535,min_col=1,max_col=160,values_only=True))
     values.close()
     expected=normalize_columns(raw)
     mismatches=0
     for old,new in zip(current_norm,expected[2:]):
-        for col in range(2,152):
+        for col in range(2,160):
             if abs(number(old[col])-number(new[col]))>1e-10:
                 mismatches+=1
     return {

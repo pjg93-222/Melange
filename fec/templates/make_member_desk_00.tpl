@@ -630,9 +630,9 @@ function psychHTML(m){
           ${hearA}</div>`
         :'<div style="font-size:10px;color:var(--faint);margin-top:6px">Low-antagonism A facet: insufficient interview coverage.</div>');
     const B5AX=['Extraversion','Openness','Conscientiousness','Agreeableness','Neuroticism'];
-    // Paul-directed fill 2026-07-17: gold-anchored values stay primary; empty slots render the
+    // Estimate fill: gold-anchored values stay primary; empty slots render the
     // labeled estimate layer (big5_fb_pct) instead of vanishing. Estimates are display-only.
-    const FB=P.big5_fb_pct||[],FBS=P.big5_fb_src||[];
+    const FB=P.big5_fb_pct||[];
     const goldVec=P.big5_pct||[null,null,null,null,null];
     const merged=goldVec.map((v,i)=>v!=null?v:(FB[i]!=null?FB[i]:null));
     const est=B5AX.filter((_,i)=>goldVec[i]==null&&FB[i]!=null);

@@ -119,7 +119,7 @@ class TierMathContracts(unittest.TestCase):
         roster = json.loads((root / "category_stance.json").read_text(encoding="utf-8"))["matrix"]
         tiers, _ = tier_util.legislative_press_tiers(list(roster), root=str(root))
 
-        tier_one = {"Brian Fitzpatrick", "Roger Williams", "Bill Hagerty"}
+        tier_one = {"Andy Barr", "Young Kim"}  # 2026-07-17 'true tier 1s': pins reduced to the two anchors; others math-driven
         tier_two = {"Maxine Waters", "Juan Vargas", "Nydia Velázquez"}
         self.assertTrue(all(tiers.get(member) == 1 for member in tier_one))
         self.assertTrue(all(tiers.get(member) == 2 for member in tier_two))
