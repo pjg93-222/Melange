@@ -57,10 +57,10 @@ ck('Highly Skeptical deep-but-movable (sub-threshold absorbed, big shock -> Oppo
    '%d members at rung'%len(_hsk))
 import moneyball_core as _band_core
 _ob=dict((tier,cut) for cut,tier in _band_core.OVERALL_BANDS)
-ck('overall bends are semantic prototype boundaries, not roster-population quotas',
-   _ob=={'Ally':2.5,'Highly Persuadable':1.5,'Persuadable':.75,
-         'Lean Persuadable':.25,'True Neutral':-.25,'Lean Skeptic':-.75,
-         'Skeptic':-1.5,'Highly Skeptical':-3.0} and
+ck('overall bends are the strict fixed ladder, not roster-population quotas',
+   _ob=={'Ally':3.0,'Highly Persuadable':2.0,'Persuadable':1.0,
+         'Lean Persuadable':.4,'True Neutral':0.0,'Lean Skeptic':-.3,
+         'Skeptic':-.75,'Highly Skeptical':-1.5} and
    _band_core.overall_tier_from_value(0)=='True Neutral' and
    _band_core.overall_tier_from_value(.01) not in ('Lean Skeptic','Skeptic','Highly Skeptical','Opponent') and
    _band_core.overall_tier_from_value(-.01) not in ('Highly Persuadable','Persuadable','Lean Persuadable','Ally'),

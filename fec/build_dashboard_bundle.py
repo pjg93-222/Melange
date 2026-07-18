@@ -18,7 +18,7 @@ LBLCAT={'Examination & Supervision':'Examination & Supervision','Credit Union Ca
 'Defense Credit Union Issues':'Defense CU Issues','Field of Membership':'Field of Membership','CDFI Fund':'CDFI Fund',
 'CFPB Restrain':'CFPB','CFPB Reach (-)':'CFPB','Telephone Consumer Protection Act Issues':'TCPA',
 'Credit Card & Consumer-Fee Mandates':'Credit Card Mandates','Member Business Lending':'Member Business Lending',
-'Mortgage Lending & Housing':'Mortgage & Housing'}
+'Mortgage Lending & Housing':'Mortgage & Housing','Credit Union Tax Status':'CU Tax Status'}
 DISPLAY_LABEL={'CFPB Restrain':'CFPB Restrain (pro-CU; limits agency reach)'}
 DROPPED_DISPLAY_CLONES={'CFPB Reach (-)'}
 
@@ -228,8 +228,7 @@ if OPT:
          'alloc':sorted([[idx[n],round(v/1000)] for n,v in OPT['alloc'].items() if n in idx],key=lambda x:-x[1]),
          'conv':[idx[c[0]] for c in OPT['conversions'] if c[0] in idx]}
 # ====== LIVE SCENARIO ENGINE DATA (faithful in-browser port of flip_model + competitive cascade + lt_priming) ======
-import importlib.util
-_es=importlib.util.spec_from_file_location('fmE',MB_ROOT+r'\fec\flip_model.py');fmE=importlib.util.module_from_spec(_es);_es.loader.exec_module(fmE)
+import flip_model as fmE   # same code root as this builder; MONEYBALL_ROOT selects data, never code
 ADJ=[[idx[a],idx[b],round(w,3)] for (a,b),w in ew.items() if a in idx and b in idx]   # FULL network (engine cascade uses all edges, not just the top-420 drawn)
 ENG=[[round(fmE.eng[fmE.cat2sc[issue_cat[i]]][n],3) for n in members] for i in range(len(issues))]   # legislative engagement per issue x member
 engine={'adj':ADJ,

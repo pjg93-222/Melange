@@ -12,25 +12,27 @@ Usage: python add_cutax_block.py [--dry-run]
 import io,sys,csv,os,shutil,datetime
 sys.stdout=io.TextIOWrapper(sys.stdout.buffer,encoding='utf-8')
 import openpyxl
-sys.path.insert(0,r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec')
+sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
+from paths import ROOT as MB_ROOT
 from moneyball_core import save_workbook_atomic
+import bill_rules as BR
 
-B=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems'
+B=MB_ROOT
 WB=B+r'\Moneyball Main Version - Blended.xlsx'
-SC=r'C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-moneyball-tier-option-b0ff84\cbbac593-ddc2-4a5d-b67a-4ec1d0df11c6\scratchpad'
 DRY='--dry-run' in sys.argv
 
 lock=os.path.join(os.path.dirname(WB),'~$'+os.path.basename(WB))
 if os.path.exists(lock): sys.exit('REFUSING: Excel lock file present — close the workbook first.')
 
-# ---- letter counts per (member, category) from the live CSV (the artifact of record) ----
+# ---- bill-equivalent decayed letter units per (member, category) from the live CSV ----
 from collections import defaultdict
 agg=defaultdict(lambda:[0,0])  # (member,cat) -> [sponsor, origco]
 for r in csv.DictReader(open(B+r'\manual_bill_evidence.csv',encoding='utf-8-sig')):
     if not r['Bill'].startswith('LTR-'): continue
     k=(r['Member'],r['Category'])
-    if r['Role']=='sponsor': agg[k][0]+=1
-    elif r['Role']=='original-cosponsor': agg[k][1]+=1
+    decay=BR.congress_decay(r['Congress'])
+    if r['Role']=='sponsor': agg[k][0]+=decay
+    elif r['Role']=='original-cosponsor': agg[k][1]+=decay
 
 # category -> (sponsor_col, origco_col) in Legislative Score - Raw; CU Tax = the NEW block
 CATCOLS={'CDFI Fund':(91,93),'CFPB':(99,101),'Credit Card Mandates':(107,109),'CU Tax Status':(153,155)}

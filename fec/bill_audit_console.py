@@ -63,7 +63,9 @@ def load_rows():
                     'Member': manual.get('Member'), 'Name': manual.get('Bill'),
                     'Title': manual.get('Title'), 'Sponsor': manual.get('Sponsor'),
                     'CosponsorCount': 0, 'Committee': '', 'LastAction': manual.get('LastAction'),
-                    'Congress': manual.get('Congress'), 'DecayWeight': manual.get('DecayWeight') or 1.0,
+                    'Congress': manual.get('Congress'),
+                    'DecayWeight': BR.evidence_decay(
+                        manual.get('Bill'), manual.get('Congress'), manual.get('DecayWeight') or 1.0),
                     'DetailLink': manual.get('DetailLink'), 'bill_summary': manual.get('Summary'),
                     'Direction': manual.get('Direction'),
                     '_source_category': BR.canonical_category(manual.get('Category')), '_manual': True,
@@ -133,10 +135,7 @@ def resolved(row, overrides, directions):
     if direction == 0:
         include = False
         reason += '; neutral'
-    try:
-        decay = float(row.get('DecayWeight') or 1.0)
-    except (TypeError, ValueError):
-        decay = 1.0
+    decay = BR.evidence_decay(row.get('Name'), row.get('Congress'), row.get('DecayWeight') or 1.0)
     contribution = direction * BR.role_weight(row.get('Role')) * decay if include else 0.0
     return {
         'category': category or '', 'include': include, 'direction': direction,
@@ -153,12 +152,12 @@ def state():
     legislative = load_json(ARCHIVE_LEG, {})
     by_bill_categories = collections.defaultdict(set)
     for row in rows:
-        key = (BR.bill_key(row.get('Name')), _text(row.get('Congress')))
+        key = (BR.evidence_key(row.get('Name')), _text(row.get('Congress')))
         if row.get('_source_category'):
             by_bill_categories[key].add(row['_source_category'])
     for row in rows:
         row['_resolved'] = resolved(row, overrides, directions)
-        key = (BR.bill_key(row.get('Name')), _text(row.get('Congress')))
+        key = (BR.evidence_key(row.get('Name')), _text(row.get('Congress')))
         row['_all_categories'] = sorted(by_bill_categories[key])
     return {
         'source': source, 'rows': rows, 'overrides': overrides,
@@ -274,8 +273,8 @@ def print_member(data, name):
 
 
 def print_bill(data, query):
-    key = BR.bill_key(query)
-    rows = [row for row in data['rows'] if BR.bill_key(row.get('Name')) == key]
+    key = BR.evidence_key(query)
+    rows = [row for row in data['rows'] if BR.evidence_key(row.get('Name')) == key]
     if not rows:
         print('No archive rows found for', query)
         return
@@ -335,16 +334,16 @@ def save_manual(args):
     replacement = {
         'Member':member, 'Role':'original-cosponsor' if role.lower().startswith('original') else 'sponsor',
         'Bill':bill, 'Title':title, 'Sponsor':'', 'Congress':congress, 'Category':category,
-        'Direction':direction, 'DecayWeight':'1.0', 'LastAction':'Manual evidence',
+        'Direction':direction, 'DecayWeight':str(BR.evidence_decay(bill, congress, 1.0)),
         'DetailLink':url, 'Summary':'', 'Note':note,
     }
     existing=[]
     if os.path.exists(MANUAL):
         with open(MANUAL,encoding='utf-8-sig',newline='') as handle: existing=list(csv.DictReader(handle))
-    key=(member.lower(),BR.bill_key(bill),congress)
+    key=(member.lower(),BR.evidence_key(bill),congress)
     output=[]; replaced=False
     for row in existing:
-        if (_text(row.get('Member')).lower(),BR.bill_key(row.get('Bill')),_text(row.get('Congress'))) == key:
+        if (_text(row.get('Member')).lower(),BR.evidence_key(row.get('Bill')),_text(row.get('Congress'))) == key:
             output.append(replacement); replaced=True
         else: output.append({field:row.get(field,'') for field in MANUAL_FIELDS})
     if not replaced: output.append(replacement)

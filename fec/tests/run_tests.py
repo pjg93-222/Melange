@@ -48,6 +48,8 @@ _tr.close(); os.remove(_xf)
 os.remove(_tf)
 print('[core: constants]')
 ok('IMP has all 18 categories incl. CU Tax Status',len(MC.IMP)==18 and MC.IMP.get('CU Tax Status')==3.0)
+ok('allocation blocks expose CU Tax Status as its own money-engine topic',
+   153 in MC.blocks and MC.BLOCKCAT.get(153)=='CU Tax Status' and MC.CATBLOCKS[153]==[153])
 ok('PERS silence == Ally parity (user-ratified 0.45)',MC.PERS['—']==0.45 and MC.PERS['—']<=MC.PERS['Highly Persuadable'])
 ok('CFPB blocks folded (99+145)',sorted(MC.CATBLOCKS[99])==[99,145])
 ok('SGATE monotone down the full ladder',
@@ -68,6 +70,12 @@ ok('misfiled CDFI/privacy bills have source-controlled effective categories',
 ok('duplicate bill roles retain only the strongest role',
    BR.preferred_role(('cosponsor','original-cosponsor'))=='original-cosponsor' and
    BR.preferred_role(('cosponsor','sponsor','original-cosponsor'))=='sponsor')
+ok('letters use the same per-Congress decay as bills',
+   BR.congress_decay(119)==1.0 and BR.congress_decay(118)==.8 and BR.congress_decay(117)==.64 and
+   BR.evidence_decay('LTR-TEST',117,1.0)==.64)
+ok('manual letter identifiers never collide through the formal-bill parser',
+   BR.evidence_key('LTR-A')!=BR.evidence_key('LTR-B') and
+   BR.evidence_key('H.R. 1')==BR.evidence_key('H.R.1'))
 _elite={'role_type':'party_elite','influence_bonus':1.5}
 ok('Influence bonus is limited to party elites',
    IR.eligible_bonus(_elite,'Banking (full) [Highly]')[0]==1.5 and
@@ -99,11 +107,11 @@ ok('overall rounding is bounded; Tier 1 is sufficient for the Champion display c
    MC.overall_rounding(_near)==.05 and MC.overall_tier(_near)=='Ally' and
    MC.overall_display_tier({'x':'True Neutral'},1)=='Champion' and
    MC.overall_display_tier(_near,2)=='Ally' and
-   dict((tier,cut) for cut,tier in MC.OVERALL_BANDS)['Ally']==2.5)
+   dict((tier,cut) for cut,tier in MC.OVERALL_BANDS)['Ally']==3.0)
 _ob=dict((tier,cut) for cut,tier in MC.OVERALL_BANDS)
-ok('overall bands follow adjacent stance-prototype midpoints below the Ally anchor',
-   _ob=={'Ally':2.5,'Highly Persuadable':1.5,'Persuadable':.75,'Lean Persuadable':.25,
-         'True Neutral':-.25,'Lean Skeptic':-.75,'Skeptic':-1.5,'Highly Skeptical':-3.0} and
+ok('overall bands use the strict 2026-07-18 fixed ladder',
+   _ob=={'Ally':3.0,'Highly Persuadable':2.0,'Persuadable':1.0,'Lean Persuadable':.4,
+         'True Neutral':0.0,'Lean Skeptic':-.3,'Skeptic':-.75,'Highly Skeptical':-1.5} and
    MC.overall_tier_from_value(0)=='True Neutral')
 _opp_probe={'opp%d'%i:'Opponent' for i in range(4)}; _opp_probe['hs']='Highly Skeptical'
 ok('overall Opponent cutoff is ordered, provenance-visible, and reachable',

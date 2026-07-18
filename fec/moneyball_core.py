@@ -193,11 +193,11 @@ IMP={'Examination & Supervision':0.75,'CU Capital Requirements':0.25,'NCUA Budge
  'Payments':0.75,'Technology & Emerging':0.75,'Fraud Prevention':0.75,'Data Privacy & Cyber':1.0,'Charter Modernization':1.0,
  'Defense CU Issues':0.2,'Field of Membership':1.0,'CDFI Fund':0.1,'CFPB':1.0,'Credit Card Mandates':3.0,'TCPA':0.2,
  'Member Business Lending':0.3,'Mortgage & Housing':0.4,'CU Tax Status':3.0}   # ABB26 handout anchoring — 18 categories
-blocks=[3,11,19,27,35,43,51,59,67,75,83,91,99,145,115,107,123,131]
+blocks=[3,11,19,27,35,43,51,59,67,75,83,91,99,145,115,107,123,131,153]
 BLOCKCAT={3:'Examination & Supervision',11:'CU Capital Requirements',19:'NCUA Budget & Insurance',27:'Interchange',
  35:'Payments',43:'Technology & Emerging',51:'Fraud Prevention',59:'Data Privacy & Cyber',67:'Charter Modernization',
  75:'Defense CU Issues',83:'Field of Membership',91:'CDFI Fund',99:'CFPB',145:'CFPB',115:'TCPA',
- 107:'Credit Card Mandates',123:'Member Business Lending',131:'Mortgage & Housing'}
+ 107:'Credit Card Mandates',123:'Member Business Lending',131:'Mortgage & Housing',153:'CU Tax Status'}
 CATBLOCKS={sc:[b for b in blocks if BLOCKCAT[b]==BLOCKCAT[sc]] for sc in blocks}   # M3/H2: CFPB 99+145 fold
 SGATE={'Highly Persuadable':1.00,'Persuadable':0.96,'Lean Persuadable':0.93,
        'True Neutral':0.90,'Neutral':0.90,'—':0.85,'Lean Skeptic':0.75,
@@ -207,20 +207,20 @@ def gate(n,cs): return max(0.15,rc(n,'seed_prob',1.0)*SGATE.get(cs.get(n,'—'),
 TORD={'Champion':4,'Defender':4,'Ally':3,'Highly Persuadable':2,'Persuadable':1,
       'Lean Persuadable':0.5,'True Neutral':0,'Neutral':0,'Lean Skeptic':-0.5,
       'Skeptic':-1,'Highly Skeptical':-2,'Opponent':-4}
-# Overall score rungs are weighted averages of TORD prototypes. Each cutoff is the midpoint between
-# adjacent prototypes; the Highly-Skeptical/Opponent midpoint is -3.0.
-# This prevents positive records from being labeled skeptical and negative records from being labeled
-# persuadable. The env override remains available for controlled sensitivity checks.
-OVERALL_OPPONENT_CUTOFF=float(os.environ.get('OVERALL_OPPONENT_CUTOFF','-3.00'))
-# 2026-07-16/17 overall-label contract: Ally owns the scored top of the ladder. Champion is not a
-# score band; Legislative+Press Tier 1 is the complete and sufficient qualification for the display
-# crown. The Ally/Highly-Persuadable midpoint is 2.50, which keeps a strongly allied mixed record
-# such as Katie Britt's on the Ally side of the semantic boundary. The 3.65 legacy floor is retained solely for the
-# already-ratified aggregate say-do audit below.
+# Overall score rungs are weighted averages of TORD prototypes.  The 2026-07-18 roster calibration
+# deliberately requires a full prototype-strength record for the positive labels and compresses the
+# negative tail so genuinely adverse mixed records no longer disappear into Neutral/persuadable
+# labels.  Zero remains the sign boundary: positive records cannot become skeptical and negative
+# records cannot become persuadable.  The opponent floor remains an env dial for controlled
+# sensitivity checks.
+OVERALL_OPPONENT_CUTOFF=float(os.environ.get('OVERALL_OPPONENT_CUTOFF','-1.50'))
+# Ally owns the scored top of the ladder. Champion is not a score band; Legislative+Press Tier 1 is
+# the complete and sufficient qualification for the display crown.  The 3.65 legacy floor is
+# retained solely for the already-ratified aggregate say-do audit below.
 OVERALL_CHAMPION_SCORE_FLOOR=3.65
-OVERALL_BANDS=((2.50,'Ally'),(1.50,'Highly Persuadable'),
-               (0.75,'Persuadable'),(0.25,'Lean Persuadable'),(-0.25,'True Neutral'),
-               (-0.75,'Lean Skeptic'),(-1.50,'Skeptic'),(OVERALL_OPPONENT_CUTOFF,'Highly Skeptical'))
+OVERALL_BANDS=((3.00,'Ally'),(2.00,'Highly Persuadable'),
+               (1.00,'Persuadable'),(0.40,'Lean Persuadable'),(0.00,'True Neutral'),
+               (-0.30,'Lean Skeptic'),(-0.75,'Skeptic'),(OVERALL_OPPONENT_CUTOFF,'Highly Skeptical'))
 def validate_overall_bands(bands,opponent_cutoff):
     """Fail closed when an env override makes the fixed overall ladder non-monotone."""
     cuts=[float(c) for c,_ in bands]; labels=[t for _,t in bands]
@@ -233,7 +233,7 @@ def validate_overall_bands(bands,opponent_cutoff):
     return tuple(bands)
 validate_overall_bands(OVERALL_BANDS,OVERALL_OPPONENT_CUTOFF)
 def overall_thresholds():
-    return {'scale':'prototype-midpoint-nine-tier-base-plus-tier1-crown-v5',
+    return {'scale':'strict-fixed-nine-tier-base-plus-tier1-crown-v6',
             'bands':[{'minimum':cut,'tier':tier} for cut,tier in OVERALL_BANDS],
             'below_last':'Opponent','missing':'—','normalization':'fixed-not-roster-percentile',
             'champion_overlay':{'legislative_press_tier':1,'qualification':'tier1-is-sufficient'}}
