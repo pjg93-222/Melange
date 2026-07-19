@@ -19,8 +19,8 @@ CS = json.load(io.open(MB_ROOT+r'\category_stance.json', encoding='utf-8'))['mat
 # IMP anchored to the ABB26 handout (America's Credit Unions 2026 Advocacy Priorities, applied 2026-07-01):
 # Protect flagships 2.0-3.0 (Tax Status, Credit Card Mandates, Interchange); named priorities 0.75-1.0
 # (NCUA/regulatory regime, FOM/expand-access, Charter, Data Privacy, CFPB, Fraud, Tech/innovation, Payments);
-# unlisted categories unchanged. NOTE: this dict is duplicated in build_dashboard_bundle/_IMP,
-# sync_stance(.clean), corrected_signals -- keep all copies in sync.
+# unlisted categories unchanged. NOTE: canonical dict = moneyball_core.IMP (imported here); legacy copies remain in
+# sync_stance(.clean)/corrected_signals -- keep those in sync (build_dashboard_bundle now imports it).
 from moneyball_core import IMP
 LEGPRE = {'Examination & Supervision':'examination & supervision','CU Capital Requirements':'credit union capital requirements','NCUA Budget & Insurance':'ncua budget','Interchange':'interchange','Payments':'payments','Technology & Emerging':'technology','Fraud Prevention':'fraud prevention','Data Privacy & Cyber':'data privacy','Charter Modernization':'charter modernization','Defense CU Issues':'defense credit union','Field of Membership':'field of membership','CDFI Fund':'cdfi fund','CFPB':'cfpb','Credit Card Mandates':'credit card & consumer-fee','TCPA':'telephone consumer','Member Business Lending':'member business lending','Mortgage & Housing':'mortgage lending','CU Tax Status':'credit union tax status'}
 SM = {'Champion':1.0,'Defender':1.0,'Ally':0.6,'Highly Persuadable':0.25,'Persuadable':0.1,'Lean Persuadable':0.0,'True Neutral':0.0,'Neutral':0.0,'Lean Skeptic':-0.3,'Skeptic':-0.6,'Highly Skeptical':-0.8,'Opponent':-1.0,'—':0.0}

@@ -13,20 +13,18 @@ def source(name: str) -> str:
 
 class DialContracts(unittest.TestCase):
     def test_overall_scale_shifted_and_ladder_monotonic(self):
-        # Paul-directed 2026-07-16: optimize the bends using adjacent stance-prototype midpoints;
-        # the ladder remains strictly
-        # descending so every tier is reachable without positive skeptic or negative persuadable labels.
+        # User-directed 2026-07-18: tighten the fixed ladder while retaining a zero sign boundary.
         import importlib
         MC = importlib.import_module("moneyball_core")
-        self.assertEqual(MC.OVERALL_OPPONENT_CUTOFF, -3.00)
+        self.assertEqual(MC.OVERALL_OPPONENT_CUTOFF, -1.50)
         cuts = [c for c, _ in MC.OVERALL_BANDS]
         self.assertEqual(cuts, sorted(cuts, reverse=True), "OVERALL_BANDS cutoffs must strictly descend")
         self.assertEqual(len(cuts), len(set(cuts)), "OVERALL_BANDS cutoffs must be distinct")
         self.assertEqual(
             dict((tier, cut) for cut, tier in MC.OVERALL_BANDS),
-            {'Ally':2.5,'Highly Persuadable':1.5,'Persuadable':.75,
-             'Lean Persuadable':.25,'True Neutral':-.25,'Lean Skeptic':-.75,
-             'Skeptic':-1.5,'Highly Skeptical':-3.0},
+            {'Ally':3.0,'Highly Persuadable':2.0,'Persuadable':1.0,
+             'Lean Persuadable':.4,'True Neutral':0.0,'Lean Skeptic':-.3,
+             'Skeptic':-.75,'Highly Skeptical':-1.5},
         )
         # Highly Skeptical floor (== opponent cutoff) must sit BELOW the Skeptic floor
         skeptic = dict((t, c) for c, t in MC.OVERALL_BANDS)['Skeptic']

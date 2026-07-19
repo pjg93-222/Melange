@@ -193,11 +193,11 @@ IMP={'Examination & Supervision':0.75,'CU Capital Requirements':0.25,'NCUA Budge
  'Payments':0.75,'Technology & Emerging':0.75,'Fraud Prevention':0.75,'Data Privacy & Cyber':1.0,'Charter Modernization':1.0,
  'Defense CU Issues':0.2,'Field of Membership':1.0,'CDFI Fund':0.1,'CFPB':1.0,'Credit Card Mandates':3.0,'TCPA':0.2,
  'Member Business Lending':0.3,'Mortgage & Housing':0.4,'CU Tax Status':3.0}   # ABB26 handout anchoring — 18 categories
-blocks=[3,11,19,27,35,43,51,59,67,75,83,91,99,145,115,107,123,131]
+blocks=[3,11,19,27,35,43,51,59,67,75,83,91,99,145,115,107,123,131,153]
 BLOCKCAT={3:'Examination & Supervision',11:'CU Capital Requirements',19:'NCUA Budget & Insurance',27:'Interchange',
  35:'Payments',43:'Technology & Emerging',51:'Fraud Prevention',59:'Data Privacy & Cyber',67:'Charter Modernization',
  75:'Defense CU Issues',83:'Field of Membership',91:'CDFI Fund',99:'CFPB',145:'CFPB',115:'TCPA',
- 107:'Credit Card Mandates',123:'Member Business Lending',131:'Mortgage & Housing'}
+ 107:'Credit Card Mandates',123:'Member Business Lending',131:'Mortgage & Housing',153:'CU Tax Status'}
 CATBLOCKS={sc:[b for b in blocks if BLOCKCAT[b]==BLOCKCAT[sc]] for sc in blocks}   # M3/H2: CFPB 99+145 fold
 SGATE={'Highly Persuadable':1.00,'Persuadable':0.96,'Lean Persuadable':0.93,
        'True Neutral':0.90,'Neutral':0.90,'—':0.85,'Lean Skeptic':0.75,

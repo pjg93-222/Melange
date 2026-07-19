@@ -9,10 +9,10 @@ always hold.***
 
 | Subsystem | Authoritative code | Verified by |
 |---|---|---|
-| Rank (Blended Model) | Workbook: Score = 0.25·Leg% + 0.30·Press% + 0.40·Infl% + 0.05·Demo%; Press% = pillar/max; pillar = SUMPRODUCT(normalized press × row-535 tiered weights per 'Topic Weights' sheet) | audit_full W1 guard; audit-II exact recompute |
+| Rank (Blended Model) | `fec/compute_pillars.py --write` → `ranks_python.json`; the workbook is a view. Score = 0.25·Leg% + 0.30·Press% + 0.40·Infl% + 0.05·Demo% | audit_full authority/parity guards |
 | Media blend (press+social) | `fec/build_media_blend.py` — raw cell = (1−0.5f)·press/p80 + 0.5f·social/p80; f = min(1, nz/15) (SHRINK); RT intensity ×0.5; decay 0.5^(age/HL), HL press 2.0y / social 0.5y; press ALWAYS from press_raw_original.json cache | deep_audit_A exact recompute |
-| Per-category stance tiers | `fec/per_category_stance.py` — self-calibrating median+k·IQR cuts, rate-clamped; DEFENSIVE={Interchange, Credit Card Mandates} weights (0.55,0.70,0.20) vs offensive (0.55,0.35,0.10)/Σ; 18 categories incl. CU Tax Status | audit_full stance sanity + ≥18 guard |
-| Overall tier (col G) | `fec/sync_stance_g.py` — IMP-weighted mean of TORD tier scores → 10-rung ladder | audit_full |
+| Per-category stance tiers | `fec/per_category_stance.py` — self-calibrating median+k·IQR cuts, rate-clamped; DEFENSIVE={Interchange, Credit Card Mandates, CU Tax Status}; 18 categories | audit_full stance sanity + ≥18 guard |
+| Overall tier (col G) | `fec/moneyball_core.py` + `fec/sync_stance_g.py` — IMP-weighted mean of TORD tier scores → strict fixed ladder; Tier 1 overlays Champion | kernel tests; audit_full |
 | Money response | `fec/money_response.py` — Δlean = MAXSHIFT·(r/(r+HALF))·pressure_mult (·LOSSFRAME if threat); defection ≥ DTHRESH walks ONE rung; Champion/Opponent immune | kernel tests; audit_full [2] |
 | Flip/winnability | `fec/flip_model.py` — pflip = a/(a+b); Michaelis-Menten money terms ×pressure_mult + peer proximity ×cpf_pressure; tgt = engagement·PERS·(1+0.3·bpf) | kernel tests; audit_full [8] G-K bound |
 | Cascades (frontier/coalition/salience) | kernel p = w·cpf_diffusion·edge_mult(receiver)/(…+6); CRN splitmix64 keyed (iteration, edge); contingent seeds gate = seed_prob·SGATE(stance), floor 0.15 | audit_full determinism; frontier sub-audit (12) |
@@ -65,12 +65,13 @@ save restores every cache. Full-pipeline runtime on a cache-dead workbook is ~19
 openpyxl parses; optimization candidate: cache the frozen Legislative-Normalized sheet).
 
 ## Standing dials (env; defaults = the ratified state)
-`PERS_NONE=0.45 · OVERALL_OPPONENT_CUTOFF=-1.60 (user-ratified 2026-07-15; higher = more overall Opponents; -2.50 reverts) ·
+`PERS_NONE=0.45 · OVERALL_OPPONENT_CUTOFF=-1.50 (user-ratified 2026-07-18; fixed bands: 3.0/2.0/1.0/0.4/0.0/-0.3/-0.75/-1.5) ·
 SOCIAL_SHRINK=1 · RT_W=0.5 · LOSSFRAME=1.10 · SOC_REINF=0.3 · SOC_CAP=2.0 ·
 SOC_VOLFLOOR=25 · SOC_MEN_W=0.4 · BP_SRC=cosponsor (user-ratified 2026-07-03: bipartisanship stays a COSPONSORSHIP concept; aug = available but unratified) ·
 RECEPT_LAYER=1 · IMPUTE_IND0=1 · SAL_PSI_DAMP=0 (off) · DTHRESH=11.25 · MAXSHIFT=18 ·
 HALF=0.10 (money_response receipts-fraction) · HALFF=0.10 (flip-family capacity — DISTINCT dial, same default) ·
-MC=20 · SEED=7 · MONEYBALL_ROOT / MONEYBALL_DRAFT (paths.py)`
+MC=20 · SEED=7 · LEGSTANCE_ORIGCO=1 (2026-07-17: Original-Co-Sponsor counts included in the leg agenda; 0 reverts to sponsor+plain-cosponsor) ·
+MONEYBALL_ROOT / MONEYBALL_DRAFT (paths.py)`
 
 ## Regeneration & verification protocol
 Data refresh: collectors (`fetch_congressional_record`, `tweet_collector`, Quorum) →

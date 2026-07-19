@@ -9,6 +9,9 @@ import csv
 import os
 import re
 
+CURRENT_CONGRESS = int(os.environ.get('LEGISLATIVE_CURRENT_CONGRESS', '119'))
+CONGRESS_DECAY_FACTOR = 0.8
+
 CATEGORIES = (
     'Examination & Supervision', 'CU Capital Requirements',
     'NCUA Budget & Insurance', 'Interchange', 'Payments',
@@ -127,6 +130,40 @@ def bill_key(value):
     """Return the legacy-compatible (H|S, number) key used by bill_directions.csv."""
     match = re.match(r'\s*([HS])\.?\s*([RJ]?\.?\s*(?:Res\.?)?)\s*(\d+)', str(value or ''), re.I)
     return (match.group(1).upper(), int(match.group(3))) if match else None
+
+
+def evidence_key(value):
+    """Return a collision-free key for either a formal bill or a manual evidence identifier."""
+    parsed = bill_key(value)
+    if parsed:
+        return ('bill',) + parsed
+    return ('manual', str(value or '').strip().casefold())
+
+
+def is_letter_evidence(bill):
+    """Return whether a manual evidence identifier is a sign-on/Dear Colleague letter."""
+    return str(bill or '').strip().upper().startswith('LTR-')
+
+
+def congress_decay(congress, current_congress=None):
+    """Use the canonical bill schedule: 1.0 current, then 0.8 per Congress of age."""
+    current = CURRENT_CONGRESS if current_congress is None else int(current_congress)
+    try:
+        source = int(float(congress))
+    except (TypeError, ValueError):
+        raise ValueError('letter evidence requires a numeric Congress, got %r' % (congress,))
+    age = max(0, current - source)
+    return round(CONGRESS_DECAY_FACTOR ** age, 12)
+
+
+def evidence_decay(bill, congress, stored_weight=1.0):
+    """Letters follow bill decay even if a stale manual row says 1.0."""
+    if is_letter_evidence(bill):
+        return congress_decay(congress)
+    try:
+        return float(stored_weight)
+    except (TypeError, ValueError):
+        return 1.0
 
 
 def role_weight(role):

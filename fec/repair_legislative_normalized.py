@@ -50,7 +50,7 @@ RAW_SHEET = "Legislative Score - Raw"
 NRM_SHEET = "Legislative Score - Normalized"
 
 FIRST_DATA_ROW, LAST_DATA_ROW = 3, 535
-FIRST_VALUE_COL, LAST_VALUE_COL = 3, 152
+FIRST_VALUE_COL, LAST_VALUE_COL = 3, 160  # 160 since 2026-07-17 (CU Tax Status block 153-160)
 WEIGHT_ROW = 2
 EXCLUDED_COLS = frozenset({144, 146, 148, 150, 151, 152})
 

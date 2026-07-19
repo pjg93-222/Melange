@@ -44,7 +44,9 @@ class WorkbookContracts(unittest.TestCase):
 
     def test_legislative_normalization_uses_the_same_member_row(self):
         raw=self.book['Legislative Raw']; normalized=self.book['Legislative Normalized']
-        for col,row in ((3,3),(152,535)):
+        self.assertEqual('Credit Union Tax Status - Sponsor',raw.cell(1,153).value)
+        self.assertEqual('Credit Union Tax Status - Original Co-Sponsor',raw.cell(1,155).value)
+        for col,row in ((3,3),(152,535),(153,3),(155,535),(160,535)):
             values=[float(raw.cell(r,col).value or 0) for r in range(3,536)]
             value=values[row-3]; pos=max([0]+values); neg=abs(min([0]+values))
             expected=0 if value==0 else value/pos if value>0 and pos else value/neg if neg else 0
@@ -75,7 +77,8 @@ class WorkbookContracts(unittest.TestCase):
         fields={ws.cell(r,1).value:ws.cell(r,2).value for r in range(3,11)}
         self.assertIn('not a rank or stance authority',fields['Scope'])
         self.assertIn('formal office is display-only',fields['Rank authority'])
-        self.assertGreater(fields['Legacy displaced normalized cells found'],0)
+        self.assertEqual(0,fields['Legacy displaced normalized cells found'])
+        self.assertIn("same physical source row",fields["Repair"])
 
 
 if __name__=='__main__':

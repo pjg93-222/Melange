@@ -34,12 +34,14 @@ import os
 import sys
 
 import openpyxl
-from openpyxl.styles import Font
+from openpyxl.styles import Alignment, Font, PatternFill
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from paths import ROOT, WORKBOOK as SOURCE_WORKBOOK  # noqa: E402  (SOURCE, not the audit output)
 
 HANDOFF_SCHEMA = "moneyball-workbook-audit-inputs-v1"
+LEGISLATIVE_ROWS = 535
+LEGISLATIVE_COLUMNS = 160
 EMDASH = "—"  # U+2014, matches the stance-matrix no-position glyph exactly
 OUT_DIR = os.path.join(ROOT, "outputs", "workbook_repair")
 OUT_NAME = "Moneyball Audit Workbook.xlsx"
@@ -58,12 +60,29 @@ def _read_json(path):
 
 
 def ensure_inputs(handoff_path, source_workbook_path):
-    """Produce the JSON handoff by running the read-only extractor when it is absent."""
+    """Produce a source-current JSON handoff with the complete legislative grids."""
+    source_workbook_path = os.path.abspath(source_workbook_path)
+    from extract_workbook_audit_inputs import extract, sha256_file
     if os.path.exists(handoff_path):
-        return handoff_path
-    from extract_workbook_audit_inputs import extract
+        try:
+            cached = _read_json(handoff_path)
+            grids = (cached.get("legislative_raw"), cached.get("legislative_normalized"))
+            complete = all(
+                isinstance(grid, list)
+                and len(grid) == LEGISLATIVE_ROWS
+                and all(isinstance(row, list) and len(row) == LEGISLATIVE_COLUMNS for row in grid)
+                for grid in grids
+            )
+            if (
+                cached.get("schema") == HANDOFF_SCHEMA
+                and complete
+                and cached.get("source_workbook_sha256") == sha256_file(source_workbook_path)
+            ):
+                return handoff_path
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            pass
     from moneyball_core import dump_atomic
-    doc = extract(os.path.abspath(source_workbook_path))
+    doc = extract(source_workbook_path)
     os.makedirs(os.path.dirname(handoff_path) or ".", exist_ok=True)
     dump_atomic(doc, handoff_path, indent=1)
     return handoff_path
@@ -74,8 +93,23 @@ def build(handoff, category, ranks, out_path):
     if handoff.get("schema") != HANDOFF_SCHEMA:
         raise ValueError("workbook handoff schema mismatch: %r" % (handoff.get("schema"),))
     bold = Font(bold=True)
-    title_font = Font(bold=True, size=16)
+    title_font = Font(bold=True, size=16, color="FFFFFF")
+    title_fill = PatternFill("solid", fgColor="1F4E78")
+    header_fill = PatternFill("solid", fgColor="D9EAF7")
     italic = Font(italic=True)
+
+    def style_title(sheet, cell_range):
+        for row in sheet[cell_range]:
+            for cell in row:
+                cell.fill = title_fill
+        sheet[cell_range.split(":")[0]].font = title_font
+
+    def style_header(sheet, row_number, first_column, last_column):
+        for column in range(first_column, last_column + 1):
+            cell = sheet.cell(row_number, column)
+            cell.font = bold
+            cell.fill = header_fill
+            cell.alignment = Alignment(wrap_text=True, vertical="center")
 
     wb = openpyxl.Workbook()
 
@@ -83,8 +117,8 @@ def build(handoff, category, ranks, out_path):
     ov = wb.active
     ov.title = "Overview"
     ov["A1"] = "Moneyball Audit Workbook"
-    ov["A1"].font = title_font
-    ov.merge_cells("A1:H1")
+    ov.merge_cells("A1:E1")
+    style_title(ov, "A1:E1")
     overview_rows = [
         ["Scope", "Generated review view; legacy source workbook is not a rank or stance authority"],
         ["Members", len(ranks["rank"])],
@@ -99,10 +133,12 @@ def build(handoff, category, ranks, out_path):
         r = 3 + i
         ov.cell(r, 1, key).font = bold
         ov.cell(r, 2, value)
+        ov.cell(r, 2).alignment = Alignment(wrap_text=True, vertical="top")
     diag = ranks.get("effective_weight_diagnostics", {}) or {}
     nominal = diag.get("nominal_weights", {}) or {}
     for j, head in enumerate(["Pillar", "Nominal weight", "Pillar std. dev.", "Weighted spread", "Realized spread share"]):
-        ov.cell(12, 1 + j, head).font = bold
+        ov.cell(12, 1 + j, head)
+    style_header(ov, 12, 1, 5)
     for i, key in enumerate(nominal):
         r = 13 + i
         ov.cell(r, 1, key)
@@ -110,18 +146,29 @@ def build(handoff, category, ranks, out_path):
         ov.cell(r, 3, (diag.get("pillar_stddev") or {}).get(key))
         ov.cell(r, 4, (diag.get("weighted_spread") or {}).get(key))
         ov.cell(r, 5, (diag.get("realized_spread_share") or {}).get(key))
+        for column in range(2, 6):
+            ov.cell(r, column).number_format = "0.0000"
+    ov.column_dimensions["A"].width = 38
+    ov.column_dimensions["B"].width = 65
+    for column in ("C", "D", "E"):
+        ov.column_dimensions[column].width = 22
+    for row in range(3, 11):
+        ov.row_dimensions[row].height = 30
+    ov.freeze_panes = "A3"
+    ov.sheet_view.showGridLines = False
 
     # -- Rank Authority -----------------------------------------------------------
     ra = wb.create_sheet("Rank Authority")
     ra["A1"] = "Rank Authority"
-    ra["A1"].font = title_font
     ra.merge_cells("A1:O1")
+    style_title(ra, "A1:O1")
     ra["A2"] = ("Shipped Python authority. Formal office is titled display context only and never "
                 "modifies Influence or rank.")
     ra["A2"].font = italic
     ra.merge_cells("A2:O2")
     for j, head in enumerate(RANK_HEADERS):
-        ra.cell(4, 1 + j, head).font = bold
+        ra.cell(4, 1 + j, head)
+    style_header(ra, 4, 1, 15)
     ordered = sorted(ranks["rank"], key=lambda n: (ranks["rank"][n], n))
     pcts = ranks.get("pcts", {}) or {}
     for i, name in enumerate(ordered):
@@ -143,16 +190,24 @@ def build(handoff, category, ranks, out_path):
         ra.cell(r, 14, ranks["formal_role_influence_office"].get(name))
         ra.cell(r, 15, ranks["formal_role_influence_eligibility"].get(name))
     ra.freeze_panes = "A5"
+    ra.auto_filter.ref = "A4:O537"
+    ra.column_dimensions["A"].width = 28
+    for column in range(2, 14):
+        ra.column_dimensions[openpyxl.utils.get_column_letter(column)].width = 16
+    ra.column_dimensions["N"].width = 28
+    ra.column_dimensions["O"].width = 24
+    ra.sheet_view.showGridLines = False
 
     # -- Category Stance ----------------------------------------------------------
     cats = list(category["cats"])
     matrix = category["matrix"]
     cs = wb.create_sheet("Category Stance")
     cs["A1"] = "Current Category Stance " + EMDASH + " CU Advocacy Frame"
-    cs["A1"].font = title_font
     cs.merge_cells("A1:T1")
+    style_title(cs, "A1:T1")
     for j, head in enumerate(["Member", "General Stance"] + cats):
-        cs.cell(2, 1 + j, head).font = bold
+        cs.cell(2, 1 + j, head)
+    style_header(cs, 2, 1, 2 + len(cats))
     general = {row[0]: row[2] for row in handoff["rank_rows"]}
     for i, name in enumerate(sorted(matrix)):
         r = 3 + i
@@ -166,14 +221,20 @@ def build(handoff, category, ranks, out_path):
     cs["A537"].font = italic
     cs.merge_cells("A537:T537")
     cs.freeze_panes = "C3"
+    cs.auto_filter.ref = "A2:T535"
+    cs.column_dimensions["A"].width = 28
+    for column in range(2, 21):
+        cs.column_dimensions[openpyxl.utils.get_column_letter(column)].width = 22
+    cs.sheet_view.showGridLines = False
 
     # -- Legislative Agenda -------------------------------------------------------
     la = wb.create_sheet("Legislative Agenda")
     la["A1"] = "Legislative Agenda " + EMDASH + " Fresh Source View"
-    la["A1"].font = title_font
     la.merge_cells("A1:C1")
+    style_title(la, "A1:C1")
     for j, head in enumerate(["Member", "Legislative agenda raw", "General Stance"]):
-        la.cell(2, 1 + j, head).font = bold
+        la.cell(2, 1 + j, head)
+    style_header(la, 2, 1, 3)
     for i, row in enumerate(handoff["rank_rows"]):
         r = 3 + i
         la.cell(r, 1, row[0])
@@ -183,16 +244,27 @@ def build(handoff, category, ranks, out_path):
     la["A537"].font = italic
     la.merge_cells("A537:C537")
     la.freeze_panes = "A3"
+    la.auto_filter.ref = "A2:C535"
+    la.column_dimensions["A"].width = 28
+    la.column_dimensions["B"].width = 24
+    la.column_dimensions["C"].width = 24
+    la.sheet_view.showGridLines = False
 
     # -- Legislative Raw / Normalized (bulk grids, start at A1) --------------------
     lr = wb.create_sheet("Legislative Raw")
     for row in handoff["legislative_raw"]:
         lr.append(list(row))
     lr.freeze_panes = "C3"
+    style_header(lr, 1, 1, LEGISLATIVE_COLUMNS)
+    lr.column_dimensions["A"].width = 28
+    lr.column_dimensions["B"].width = 36
     ln = wb.create_sheet("Legislative Normalized")
     for row in handoff["legislative_normalized"]:
         ln.append(list(row))
     ln.freeze_panes = "C3"
+    style_header(ln, 1, 1, LEGISLATIVE_COLUMNS)
+    ln.column_dimensions["A"].width = 28
+    ln.column_dimensions["B"].width = 36
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     wb.save(out_path)

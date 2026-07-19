@@ -81,9 +81,9 @@ agenda.getRange("A537:C537").format={fill:pale,font:{italic:true,color:navy},wra
 agenda.getRange("B3:B535").setNumberFormat("0.000000"); agenda.getRange("A1:C537").format.autofitColumns(); agenda.getRange("A1:A535").format.columnWidth=24; agenda.freezePanes.freezeRows(2);
 
 const raw=workbook.worksheets.add("Legislative Raw");
-raw.getRange("A1:EV535").values=handoff.legislative_raw; header(raw.getRange("A1:EV1")); raw.freezePanes.freezeRows(2); raw.freezePanes.freezeColumns(2);
+raw.getRange("A1:FD535").values=handoff.legislative_raw; header(raw.getRange("A1:FD1")); raw.freezePanes.freezeRows(2); raw.freezePanes.freezeColumns(2);
 const norm=workbook.worksheets.add("Legislative Normalized");
-norm.getRange("A1:EV535").values=handoff.legislative_normalized; header(norm.getRange("A1:EV1")); norm.getRange("C3:EV535").setNumberFormat("0.000000"); norm.freezePanes.freezeRows(2); norm.freezePanes.freezeColumns(2);
+norm.getRange("A1:FD535").values=handoff.legislative_normalized; header(norm.getRange("A1:FD1")); norm.getRange("C3:FD535").setNumberFormat("0.000000"); norm.freezePanes.freezeRows(2); norm.freezePanes.freezeColumns(2);
 
 const output=path.join(outputDir,"Moneyball Audit Workbook.xlsx");
 const xlsx=await SpreadsheetFile.exportXlsx(workbook); await xlsx.save(output);

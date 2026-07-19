@@ -42,7 +42,7 @@ class OverallCrownContracts(unittest.TestCase):
         self.assertEqual(base, core.overall_display_tier(matrix, 2, "Someone", cap))
         self.assertEqual(base, core.overall_display_tier(matrix, 0, "Someone", cap))
 
-    def test_ally_floor_includes_katie_britt_and_uses_prototype_hp_floor(self):
+    def test_ally_floor_requires_full_ally_strength(self):
         import moneyball_core as core
 
         bands = dict((tier, cut) for cut, tier in core.OVERALL_BANDS)
@@ -53,7 +53,7 @@ class OverallCrownContracts(unittest.TestCase):
 
         root = data_root()
         matrix = json.loads((root / "category_stance.json").read_text(encoding="utf-8"))["matrix"]
-        self.assertEqual("Ally", core.overall_tier(matrix["Katie Britt"]))
+        self.assertEqual("Highly Persuadable", core.overall_tier(matrix["Katie Britt"]))
 
     def test_invalid_opponent_cutoff_is_rejected(self):
         import moneyball_core as core
@@ -61,20 +61,20 @@ class OverallCrownContracts(unittest.TestCase):
         with self.assertRaises(ValueError):
             core.validate_overall_bands(((0.0, "Skeptic"), (-0.5, "Highly Skeptical")), -0.1)
 
-    def test_overall_bands_are_nearest_rung_boundaries_below_ally(self):
+    def test_overall_bands_are_the_strict_fixed_ladder(self):
         import moneyball_core as core
 
         bands = dict((tier, cut) for cut, tier in core.OVERALL_BANDS)
         self.assertEqual(
             {
-                "Ally": 2.50,
-                "Highly Persuadable": 1.50,
-                "Persuadable": 0.75,
-                "Lean Persuadable": 0.25,
-                "True Neutral": -0.25,
-                "Lean Skeptic": -0.75,
-                "Skeptic": -1.50,
-                "Highly Skeptical": -3.00,
+                "Ally": 3.00,
+                "Highly Persuadable": 2.00,
+                "Persuadable": 1.00,
+                "Lean Persuadable": 0.40,
+                "True Neutral": 0.00,
+                "Lean Skeptic": -0.30,
+                "Skeptic": -0.75,
+                "Highly Skeptical": -1.50,
             },
             bands,
         )

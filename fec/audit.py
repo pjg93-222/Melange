@@ -1,5 +1,6 @@
 import json, sys, openpyxl
 from paths import WORKBOOK, p   # S2-02 audit run-2: honor MONEYBALL_ROOT — never audit a hardcoded tree
+from moneyball_core import BLOCKCAT, blocks
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 P=[]; F=[]
 def ok(c,m): (P if c else F).append(m)
@@ -85,8 +86,8 @@ ok(len(neg)==0,'F2 no negative $ buckets (refunds floored): %s'%neg[:3])
 # G IM allocation -- M4: im_allocation.json is now the LIVE per-topic model (member-level row-sums of
 # per_topic_alloc.json [FLIP] + per_topic_coalition.json [COALITION]), NOT the superseded single-$2M
 # im_allocate2.py output. G1/G2 updated accordingly: the real invariant is that the IM columns EQUAL the
-# per-topic row-sums (so the workbook sheet can't silently go stale), and the flip total is the 18 topic
-# budgets (18 x $2M = $36M; each topic's $2M is checked by G4).
+# per-topic row-sums (so the workbook sheet can't silently go stale), and the flip total is one $2M
+# budget per source block.  CFPB deliberately has two source blocks; CU Tax Status is now block 153.
 IM=json.load(open(p('im_allocation.json')))
 PT=json.load(open(p('per_topic_alloc.json')))
 PTC=json.load(open(p('per_topic_coalition.json')))
@@ -94,7 +95,12 @@ fs=sum(IM['flip'].values()); cs=sum(IM['coalition'].values())
 pta_tot=sum(sum(d.values()) for d in PT.values()); ptc_tot=sum(sum(d.values()) for d in PTC.values())
 ok(fs==pta_tot and abs(fs-len(PT)*2_000_000)<5000*len(PT),f'G1 flip allocation = live per-topic row-sums ${fs:,} (= {len(PT)} x $2M)')
 ok(cs==ptc_tot and 0<cs<=len(PTC)*2_000_000,f'G2 coalition allocation = live per-topic row-sums ${cs:,} (0 < c <= {len(PTC)} x $2M)')
-ok(len(PT)==18,'G3 per-sub-category allocations = %d topics'%len(PT))
+_expected_source_blocks=len(blocks)
+_expected_unique_categories=len(set(BLOCKCAT.values()))
+ok(len(PT)==_expected_source_blocks and 'Credit Union Tax Status' in PT and
+   len({BLOCKCAT[b] for b in blocks})==_expected_unique_categories,
+   'G3 per-sub-category allocations = %d topics (expected %d source blocks / %d unique categories)'%
+   (len(PT),_expected_source_blocks,_expected_unique_categories))
 ptbad=[t for t,a in PT.items() if abs(sum(a.values())-2_000_000)>5000]
 ok(len(ptbad)==0,'G4 each sub-category sums to $2M (bad: %s)'%ptbad)
 # H cross-consistency: congestion.json members == model members

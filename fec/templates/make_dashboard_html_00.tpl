@@ -166,7 +166,7 @@ canvas{touch-action:none}
        <label style=margin-top:4px>executive branch:</label>
        <span class=seg id=execseg style=margin-top:3px><button data-e=none class=on>neutral</button><button data-e=oppose>opposes</button><button data-e=support>supports</button></span>
        <div id=shockout class=scout></div>
-       <div style=font-size:10px;color:#6e7681;margin-top:7px;line-height:1.45>Path = max-product (strongest) chain. "Holds" = P(every ASK lands first-try) using an active-recruitment rate (deliberate, funded ask via an existing tie — odds ~14x passive diffusion; ASKM is a tunable model dial, NOT empirically estimated); a no-reroute floor, rerouting only improves it. Max route = sequential closed-network edge activation (RELINK) with a per-recruiter fan-out limit and a weighted-PageRank structural prior; it is a practical heuristic, not a submodular guarantee. Flip route remains target-specific. Budget = (1−1/e) max-coverage greedy w/ GCOMB locality (Manchanda et&nbsp;al. NeurIPS&nbsp;'20). Influence: Sotoudeh–Porter–Krishnagopal · communities: Porter–Mucha–Newman, Kim–Kunisky · coalitions: Aref–Neal · co-partisan info: Furnas et&nbsp;al.</div>
+       <div style=font-size:10px;color:#6e7681;margin-top:7px;line-height:1.45>Path = strongest chain. "Holds" = chance every ask lands first-try. Max route grows outward one ask at a time; flip route remains target-specific.</div>
      </div>
    </div>
  </div>
@@ -624,7 +624,7 @@ function maxCascadeRoute(){
    +`<div class=mrow><span>Activate <b>${plan.edges.length}</b> edges → if route lands</span><b class="delta up">~${reachAll.toFixed(0)} members</b></div>`
    +`<div class=mrow><span>vs. ${last(sel)} alone</span><b>~${reachSeed.toFixed(0)} <span class="delta up">(+${gain.toFixed(0)})</span></b></div>`
    +`<div class=mrow><span>Expected route recruits · all asks hold</span><b>${plan.expected.toFixed(1)} · ${(plan.hold*100).toFixed(0)}%</b></div>`
-   +`<div class=hint style="margin:6px 0">closed-network edge activation: grow outward one ask at a time, max ${plan.fanout} asks per recruiter · score = route reliability × new coverage × weighted PageRank · no fixed flip target</div>`
+   +`<div class=hint style="margin:6px 0">grow outward one ask at a time, max ${plan.fanout} asks per recruiter · no fixed flip target</div>`
    +`<div style="font-size:11px;color:#c9d1d9;line-height:1.75">`+plan.steps.map(({u,v,p,arrival},k)=>`<span style=color:#6e7681>${k+1}.</span> <span class=lnk data-i=${u} style="cursor:pointer;text-decoration:underline">${DATA.name[u]}</span> → <span class=lnk data-i=${v} style="cursor:pointer;text-decoration:underline">${DATA.name[v]}</span> <span style=color:#8b949e>${Math.round(activeP(p)*100)}% ask · ${Math.round(arrival*100)}% route</span>`).join('<br>')+`</div>`;
   po.querySelectorAll('.lnk').forEach(el=>el.onclick=()=>selectMember(+el.dataset.i));
 }

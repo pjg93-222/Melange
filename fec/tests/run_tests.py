@@ -48,6 +48,8 @@ _tr.close(); os.remove(_xf)
 os.remove(_tf)
 print('[core: constants]')
 ok('IMP has all 18 categories incl. CU Tax Status',len(MC.IMP)==18 and MC.IMP.get('CU Tax Status')==3.0)
+ok('allocation blocks expose CU Tax Status as its own money-engine topic',
+   153 in MC.blocks and MC.BLOCKCAT.get(153)=='CU Tax Status' and MC.CATBLOCKS[153]==[153])
 ok('PERS silence == Ally parity (user-ratified 0.45)',MC.PERS['—']==0.45 and MC.PERS['—']<=MC.PERS['Highly Persuadable'])
 ok('CFPB blocks folded (99+145)',sorted(MC.CATBLOCKS[99])==[99,145])
 ok('SGATE monotone down the full ladder',
@@ -68,6 +70,12 @@ ok('misfiled CDFI/privacy bills have source-controlled effective categories',
 ok('duplicate bill roles retain only the strongest role',
    BR.preferred_role(('cosponsor','original-cosponsor'))=='original-cosponsor' and
    BR.preferred_role(('cosponsor','sponsor','original-cosponsor'))=='sponsor')
+ok('letters use the same per-Congress decay as bills',
+   BR.congress_decay(119)==1.0 and BR.congress_decay(118)==.8 and BR.congress_decay(117)==.64 and
+   BR.evidence_decay('LTR-TEST',117,1.0)==.64)
+ok('manual letter identifiers never collide through the formal-bill parser',
+   BR.evidence_key('LTR-A')!=BR.evidence_key('LTR-B') and
+   BR.evidence_key('H.R. 1')==BR.evidence_key('H.R.1'))
 _elite={'role_type':'party_elite','influence_bonus':1.5}
 ok('Influence bonus is limited to party elites',
    IR.eligible_bonus(_elite,'Banking (full) [Highly]')[0]==1.5 and

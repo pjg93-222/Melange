@@ -69,7 +69,8 @@ for _idx,r in A.iterrows():
     if not mm:
         unmatched[str(r['Member'])]+=1; audit['disposition']='unmatched-member'
         routing_rows.append(audit); continue
-    dw=float(r['DecayWeight']) if pd.notna(r['DecayWeight']) else 1.0
+    dw=BR.evidence_decay(r.get('Name'),r.get('Congress'),
+                         r.get('DecayWeight') if pd.notna(r.get('DecayWeight')) else 1.0)
     role=BR.canonical_role(r['Role']); w=rolewt(role)
     bk=billkey(r['Name'])
     ov=BR.override_for(overrides,r['Name'],r.get('Congress'))
