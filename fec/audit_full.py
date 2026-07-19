@@ -416,6 +416,31 @@ if os.path.exists(_lra_p):
     ck('pinned CDFI/privacy bills have exactly one effective policy column',
        _lrbad==0 and (_lra.get('summary') or {}).get('effective_categories',{}).get('CDFI Fund',0)>0,
        '%d targeted bill routing errors'%_lrbad)
+    # 2026-07-19 coverage gaps found by fec/bill_coverage_audit.py. Row conservation above proves
+    # nothing VANISHED, but nothing asserted that every row reached a SLOT, that all 18 slots
+    # survived (the exact 2026-07-02 dropped-18th-category failure mode), that the unmatched-member
+    # set stayed put across a roster swap, or that two bill ids never collapse to one bill_key
+    # (bill_key discards the R/J/Res segment -- bill_rules.py:129-132).
+    import bill_rules as _BR
+    _lrsum=_lra.get('summary') or {}; _lrdisp=_lrsum.get('dispositions') or {}
+    ck('no bill orphaned without a policy slot',
+       _lrdisp.get('unknown-section',0)==0,
+       'unknown-section=%d'%_lrdisp.get('unknown-section',0))
+    _lrcats=set(_lrsum.get('effective_categories') or {})
+    ck('all 18 canonical categories survive routing',
+       _lrcats==set(_BR.CATEGORIES),
+       'missing=%s stray=%s'%(sorted(set(_BR.CATEGORIES)-_lrcats),sorted(_lrcats-set(_BR.CATEGORIES))))
+    _lrknown={'Stacey Plaskett','James Moylan'}   # non-voting delegates, correctly outside the 533 roster
+    _lrun=set(_lrsum.get('unmatched_members') or {})
+    ck('unmatched members stay the known non-voting delegates',
+       _lrun<=_lrknown,'unexpected=%s'%sorted(_lrun-_lrknown))
+    _lrkey={}
+    for _r in _lrrows:
+        if _r.get('disposition')!='selected': continue
+        _lrkey.setdefault((_BR.bill_key(_r.get('bill')),str(_r.get('congress'))),set()).add(str(_r.get('bill')))
+    _lrcol={k:sorted(v) for k,v in _lrkey.items() if k[0] and len(v)>1}
+    ck('no two scored bill ids collapse to one bill_key',
+       not _lrcol,'%d colliding keys, e.g. %s'%(len(_lrcol),sorted(_lrcol.values())[:2]))
 else:
     ck('legislation routing audit present',False,'legislation_routing_audit.json missing')
 # 2026-07-04 nomological fix guard: receptivity must run on the BEHAVIORAL basis (the lexical Big5
