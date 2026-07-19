@@ -5,8 +5,9 @@ description: >-
   reasoning, priority tier) via the codex MCP tools, with Claude as
   orchestrator and reviewer. Use when Paul asks to run a build task through
   Codex/ChatGPT, says "delegate this to the executor", or invokes
-  /codex-executor. Do NOT use for read-only analysis, data-mutating pipeline
-  runs, or anything Codex is barred from under Hard rules below.
+  /codex-executor. Covers both code changes and data-mutating pipeline runs
+  (regeneration, the chain). Do NOT use for read-only analysis or anything
+  Codex is barred from under Hard rules below.
 ---
 
 # Codex executor protocol
@@ -26,9 +27,8 @@ The executor model is Paul's pick (`gpt-5.6-sol`, `model_reasoning_effort =
 - `mcp__codex__codex-reply` — continue a thread (`threadId` + `prompt`)
   for revision rounds. One task per thread; always keep the threadId.
 
-If these tools are missing, the session predates `.mcp.json` or the server
-was not approved — open a fresh session in the project and approve the
-`codex` MCP server when prompted.
+If these tools are missing, the session predates the user-scope registration
+in ~/.claude.json — restart the app and open a fresh session.
 
 ## Protocol
 
@@ -50,17 +50,28 @@ was not approved — open a fresh session in the project and approve the
    re-review. Repeat until the diff passes.
 5. **Verify (Claude).** Run the project's verification. Moneyball: kernel
    tests, zero-rank-delta unless a rank change is the authorized point of
-   the change, `audit_full` per change-control. Data-dependent runs happen
-   in the live tree, by Claude, per `moneyball-run-and-operate`.
+   the change, `audit_full` per change-control. Codex may run data-dependent
+   steps itself (see Hard rules); Claude still owns the pre-run checks
+   (Excel closed, no live jobs, baseline captured) and reads the result —
+   a run Codex reports as clean is not clean until Claude verifies it.
 6. **Gate (Paul).** Present the diff + verification results. Commit and
    merge only on his go.
 
 ## Hard rules
 
-- Codex never touches `main` or the live tree; it works only in throwaway
-  worktrees on `codex/*` branches.
-- Codex never runs data-mutating pipeline steps: collectors, the chain,
-  workbook writes, anything in the apply class. Code edits only.
+- Codex may run data-mutating pipeline steps (Paul's directive, 2026-07-19):
+  the chain (`run_pipeline.py`), `build_media_blend.py`, regeneration, and
+  workbook writes. Note the architecture: `fec/paths.py` resolves ROOT to the
+  LIVE data tree regardless of cwd, so these runs write live data even when
+  launched from a worktree. Claude does the pre-run checks first (Excel closed,
+  no live jobs, baseline captured for the rank delta).
+- CODE EDITS still land only in throwaway `codex/*` worktrees, never on `main`
+  and never as edits to the live tree's working copy.
+- Still barred, because these are not pipeline steps and are irreversible or
+  cost money: preregistered `--look` runs (a consumed look is gone forever),
+  anything firing GATE-2 / `collector_supervisor.py` (spends real money), the
+  retired `apply_*` COM one-shots (`apply_weights.py` silently overwrites
+  Paul's ratified pillar weights), and D2/legacy dedup DELETEs (user-gated).
 - Codex never commits — Claude owns git, and commits happen only through
   Paul's gate.
 - Never put secrets in prompts to Codex (API keys, auth.json contents,
