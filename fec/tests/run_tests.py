@@ -99,11 +99,11 @@ ok('overall rounding is bounded; Tier 1 is sufficient for the Champion display c
    MC.overall_rounding(_near)==.05 and MC.overall_tier(_near)=='Ally' and
    MC.overall_display_tier({'x':'True Neutral'},1)=='Champion' and
    MC.overall_display_tier(_near,2)=='Ally' and
-   dict((tier,cut) for cut,tier in MC.OVERALL_BANDS)['Ally']==2.5)
+   dict((tier,cut) for cut,tier in MC.OVERALL_BANDS)['Ally']==3.0)
 _ob=dict((tier,cut) for cut,tier in MC.OVERALL_BANDS)
-ok('overall bands follow adjacent stance-prototype midpoints below the Ally anchor',
-   _ob=={'Ally':2.5,'Highly Persuadable':1.5,'Persuadable':.75,'Lean Persuadable':.25,
-         'True Neutral':-.25,'Lean Skeptic':-.75,'Skeptic':-1.5,'Highly Skeptical':-3.0} and
+ok('overall bands use the strict 2026-07-18 fixed ladder',
+   _ob=={'Ally':3.0,'Highly Persuadable':2.0,'Persuadable':1.0,'Lean Persuadable':.4,
+         'True Neutral':0.0,'Lean Skeptic':-.3,'Skeptic':-.75,'Highly Skeptical':-1.5} and
    MC.overall_tier_from_value(0)=='True Neutral')
 _opp_probe={'opp%d'%i:'Opponent' for i in range(4)}; _opp_probe['hs']='Highly Skeptical'
 ok('overall Opponent cutoff is ordered, provenance-visible, and reachable',

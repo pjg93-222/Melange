@@ -46,8 +46,8 @@ class OverallCrownContracts(unittest.TestCase):
         import moneyball_core as core
 
         bands = dict((tier, cut) for cut, tier in core.OVERALL_BANDS)
-        self.assertEqual(2.50, bands["Ally"])
-        self.assertEqual(1.50, bands["Highly Persuadable"])
+        self.assertEqual(3.00, bands["Ally"])
+        self.assertEqual(2.00, bands["Highly Persuadable"])
         self.assertNotIn("Champion", bands)
         self.assertEqual("Ally", core.overall_tier({"a": "Ally", "b": "Ally"}))
 
@@ -119,7 +119,7 @@ class TierMathContracts(unittest.TestCase):
         roster = json.loads((root / "category_stance.json").read_text(encoding="utf-8"))["matrix"]
         tiers, _ = tier_util.legislative_press_tiers(list(roster), root=str(root))
 
-        tier_one = {"Brian Fitzpatrick", "Roger Williams", "Bill Hagerty"}
+        tier_one = {"Andy Barr", "Young Kim"}  # 2026-07-17 'true tier 1s': pins reduced to the two anchors; others math-driven
         tier_two = {"Maxine Waters", "Juan Vargas", "Nydia Velázquez"}
         self.assertTrue(all(tiers.get(member) == 1 for member in tier_one))
         self.assertTrue(all(tiers.get(member) == 2 for member in tier_two))

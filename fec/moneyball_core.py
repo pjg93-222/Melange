@@ -211,16 +211,23 @@ TORD={'Champion':4,'Defender':4,'Ally':3,'Highly Persuadable':2,'Persuadable':1,
 # adjacent prototypes; the Highly-Skeptical/Opponent midpoint is -3.0.
 # This prevents positive records from being labeled skeptical and negative records from being labeled
 # persuadable. The env override remains available for controlled sensitivity checks.
-OVERALL_OPPONENT_CUTOFF=float(os.environ.get('OVERALL_OPPONENT_CUTOFF','-3.00'))
-# 2026-07-16/17 overall-label contract: Ally owns the scored top of the ladder. Champion is not a
-# score band; Legislative+Press Tier 1 is the complete and sufficient qualification for the display
-# crown. The Ally/Highly-Persuadable midpoint is 2.50, which keeps a strongly allied mixed record
-# such as Katie Britt's on the Ally side of the semantic boundary. The 3.65 legacy floor is retained solely for the
-# already-ratified aggregate say-do audit below.
+OVERALL_OPPONENT_CUTOFF=float(os.environ.get('OVERALL_OPPONENT_CUTOFF','-1.50'))
+# 2026-07-18 roster calibration (Paul, "tighten the bands again, too many allies"): the positive
+# labels now require a full prototype-strength record, and the negative tail is compressed so
+# genuinely adverse mixed records no longer disappear into Neutral/persuadable labels. Zero remains
+# the sign boundary: positive records cannot become skeptical, negative records cannot become
+# persuadable. Ally owns the scored top of the ladder; Champion is not a score band -- Legislative+
+# Press Tier 1 is the complete and sufficient qualification for the display crown. The 3.65 legacy
+# floor is retained solely for the already-ratified aggregate say-do audit below.
+# PROVENANCE 2026-07-19: these are the values ratified on lane
+# claude/legislative-letters-import-be42f9 @f6388d9. The live tree was on a branch that never
+# received them, so a regeneration silently rewrote the published ladder back to the older
+# prototype-midpoint values (Ally 2.50) and Ally ballooned to 247/533. Restored here WITHOUT taking
+# that commit's unrelated money-engine and letter-decay repairs, which remain an open merge decision.
 OVERALL_CHAMPION_SCORE_FLOOR=3.65
-OVERALL_BANDS=((2.50,'Ally'),(1.50,'Highly Persuadable'),
-               (0.75,'Persuadable'),(0.25,'Lean Persuadable'),(-0.25,'True Neutral'),
-               (-0.75,'Lean Skeptic'),(-1.50,'Skeptic'),(OVERALL_OPPONENT_CUTOFF,'Highly Skeptical'))
+OVERALL_BANDS=((3.00,'Ally'),(2.00,'Highly Persuadable'),
+               (1.00,'Persuadable'),(0.40,'Lean Persuadable'),(0.00,'True Neutral'),
+               (-0.30,'Lean Skeptic'),(-0.75,'Skeptic'),(OVERALL_OPPONENT_CUTOFF,'Highly Skeptical'))
 def validate_overall_bands(bands,opponent_cutoff):
     """Fail closed when an env override makes the fixed overall ladder non-monotone."""
     cuts=[float(c) for c,_ in bands]; labels=[t for _,t in bands]
@@ -233,7 +240,7 @@ def validate_overall_bands(bands,opponent_cutoff):
     return tuple(bands)
 validate_overall_bands(OVERALL_BANDS,OVERALL_OPPONENT_CUTOFF)
 def overall_thresholds():
-    return {'scale':'prototype-midpoint-nine-tier-base-plus-tier1-crown-v5',
+    return {'scale':'strict-fixed-nine-tier-base-plus-tier1-crown-v6',
             'bands':[{'minimum':cut,'tier':tier} for cut,tier in OVERALL_BANDS],
             'below_last':'Opponent','missing':'—','normalization':'fixed-not-roster-percentile',
             'champion_overlay':{'legislative_press_tier':1,'qualification':'tier1-is-sufficient'}}
