@@ -122,7 +122,12 @@ def postflight(bundle, preflight_report):
         'interview_footprint':_recon(source_display.get('interview_episode_rows',0),(
             'interview_appearances_displayed','interview_beyond_display_cap',
             'interview_unknown_member_excluded')),
-        'hearing_footprint':_recon(source_display.get('hearing_appearance_rows',0),(
+        # hearing footprint draws on TWO declared sources (2026-07-19): the hearing_antag appearance
+        # rows, plus graded CU passages whose hearing has no antag row at all (hearing_antag records
+        # the antagonism pass, not every speaker, so a committee chair can be graded while owning no
+        # antag row). Both are displayed or accounted; DESK_MEDIA_STANCE=0 makes the second term 0.
+        'hearing_footprint':_recon((source_display.get('hearing_appearance_rows',0) or 0)+
+                                   (source_display.get('hearing_graded_rows_added',0) or 0),(
             'hearing_appearances_displayed','hearing_beyond_display_cap',
             'hearing_unknown_member_excluded')),
         'bluesky_footprint':_recon(source_display.get('bluesky_post_rows',0),(
@@ -184,6 +189,7 @@ def postflight(bundle, preflight_report):
     # the footprint display dials shape the bundle, so they are inputs to the same-input check
     source_state['env:DESK_FOOTPRINT']=os.environ.get('DESK_FOOTPRINT','1')
     source_state['env:DESK_MEDIA_CAP']=os.environ.get('DESK_MEDIA_CAP','50')
+    source_state['env:DESK_MEDIA_STANCE']=os.environ.get('DESK_MEDIA_STANCE','1')
     input_hash=_sha(source_state); state_path=_op('dashboard_integrity_state.json')
     prior=json.load(open(state_path,encoding='utf-8')) if os.path.exists(state_path) else None
     if prior and prior.get('input_fingerprint')==input_hash:

@@ -629,17 +629,146 @@ def load_press_and_bills(member_names):
             mm = re.match(r'https?://([^/]+)/', str(pkg or ''))
             d = mm.group(1).lower() if mm else ''
             return NET.get(d, d or 'broadcast')
-        def _fp_add(by, key):
+        def _fp_add(by, key, tag=None):
             # newest-first cap per member+source; the uncapped total stays disclosed via media_totals
+            # A row carrying a graded CU stance is exempt from the cap. The cap bounds routine
+            # appearance noise, but the graded rows ARE the signal this section exists to show —
+            # and they skew old (the CU-relevant interviews run back to 2011), so a plain
+            # newest-N window drops almost all of them. With DESK_MEDIA_STANCE=0 no row carries
+            # a grade, so this reduces to the previous newest-N behaviour exactly.
             shown_total = 0
             for nm, lst in by.items():
                 lst.sort(key=lambda a: a['date'], reverse=True)
-                shown = lst[:MEDIA_CAP] if MEDIA_CAP else lst
+                if MEDIA_CAP:
+                    graded = [a for a in lst if a.get('gstance')]
+                    rest = [a for a in lst if not a.get('gstance')]
+                    shown = graded + rest[:max(0, MEDIA_CAP - len(graded))]
+                    shown.sort(key=lambda a: a['date'], reverse=True)
+                else:
+                    shown = lst
                 arts.setdefault(nm, []).extend(shown)
                 media_totals.setdefault(nm, {})[key] = [len(shown), len(lst)]
                 shown_total += len(shown)
+                if tag and STANCE_ON:
+                    # tally AFTER the cap, so matched can never exceed displayed
+                    media_audit[tag + '_rows_stance_matched'] += sum(1 for a in shown if a.get('gstance'))
+                    media_audit[tag + '_rows_snippet_matched'] += sum(1 for a in shown if a.get('snip'))
             return shown_total
+        # --- graded CU stance + transcript passage on footprint rows (user-directed 2026-07-19).
+        # Interview and hearing appearances are ALREADY stance-graded (interview_stance_final.csv /
+        # hearing_stance_final.csv) and already carry a sentence-snapped CU passage from
+        # cu_passages.py (interviews_cu.csv / hearings_cu.csv); both channels feed the press pillar
+        # via build_media_blend.py. This DISPLAYS those existing labels beside the appearance record —
+        # it never manufactures one (stance labels are the user's domain). A row with no graded
+        # counterpart keeps its prior scored=False + reason verbatim. Coverage is genuinely partial
+        # (interviews 25 members, hearings 72), and hearing footprint rows come from hearing_antag
+        # while hearing stance/text come from speeches source='CHRG' — so most hearing rows will not
+        # match. The match counters below disclose that rather than letting a sparse tab read as
+        # "no stance". DESK_MEDIA_STANCE=0 reverts to the pre-2026-07-19 rendering exactly.
+        STANCE_ON = os.environ.get('DESK_MEDIA_STANCE', '1') != '0'
+        def _grade_index(stance_csv, text_csv, src, con):
+            """(canon member, YYYY-MM-DD, package) -> {stance, tier, snip, n}.
+
+            The stance CSV and the passage CSV are row-aligned 1:1 (verified 2026-07-19:
+            bioguide+member+date+categories agree on every row of both pairs), so each passage is
+            paired with ITS OWN grade. Nothing is aggregated across a date and no label outside the
+            source vocabulary is ever synthesised - the quote and the stance beside it always
+            describe the same words.
+
+            The CU artifacts carry no package column, but a member can have several packages on one
+            date (one interview date carries 40), so a date-level join would paste a passage onto
+            every sibling appearance. The passage text disambiguates: it is a window over one
+            package's transcript, so probing a distinctive slice against each candidate pins the
+            right one (measured 2026-07-19: 775/775 hearing and 36/37 interview passages resolve to
+            exactly one package). The one ambiguous passage attaches to both rather than guessing.
+
+            Returns (index, drops) - drops counts every passage the index refused, by reason.
+            """
+            def rows(fn):
+                fp = os.path.join(B, fn)
+                if not os.path.exists(fp):
+                    print('  desk media stance: %s absent - that channel stays ungraded' % fn)
+                    return []
+                with open(fp, encoding='utf-8-sig', newline='') as fh:
+                    return list(csv.DictReader(fh))
+            def _norm(s): return ' '.join(str(s or '').split()).lower()
+            stance_rows, text_rows = rows(stance_csv), rows(text_csv)
+            drops = {'unaligned': 0, 'ungraded': 0, 'unpinned': 0}
+            if len(stance_rows) != len(text_rows):
+                print('  desk media stance: %s/%s row counts differ (%d vs %d) - channel skipped'
+                      % (stance_csv, text_csv, len(stance_rows), len(text_rows)))
+                return {}, drops
+            out = {}
+            for srow, trow in zip(stance_rows, text_rows):
+                # the pairing is positional, so verify it row by row rather than trusting it
+                if ((srow.get('bioguide') or '') != (trow.get('bioguide') or '')
+                        or fdate(srow.get('date')) != fdate(trow.get('date'))):
+                    drops['unaligned'] += 1
+                    continue
+                stance = (srow.get('stance') or '').strip()
+                text = (trow.get('text') or '').strip()
+                nm = canon(trow.get('member'), trow.get('bioguide'))
+                if not nm or not text or not stance:
+                    drops['ungraded'] += 1
+                    continue
+                day = fdate(trow.get('date'))
+                cands = list(con.execute(
+                    "SELECT package, GROUP_CONCAT(text,' ') FROM speeches "
+                    "WHERE source=? AND member=? AND substr(date,1,10)=? GROUP BY package",
+                    (src, trow.get('member'), day)))
+                norm = _norm(text)
+                probe = norm[len(norm) // 3:len(norm) // 3 + 60]
+                pkgs = [p for p, t in cands if probe and probe in _norm(t)]
+                if not pkgs:
+                    drops['unpinned'] += 1
+                    continue
+                for pkg in pkgs:
+                    slot = out.setdefault((nm, day, pkg),
+                                          {'stance': '', 'tier': '', 'snip': '', 'n': 0})
+                    slot['n'] += 1
+                    # show the longest passage pinned to this package WITH ITS OWN grade, so the
+                    # quote and the label always describe the same words
+                    if len(text) > len(slot['snip']):
+                        slot['snip'] = text
+                        slot['stance'] = stance
+                        slot['tier'] = (srow.get('tier') or '').strip()
+            if any(drops.values()):
+                print('  desk media stance: %s passages dropped - %r' % (src, drops))
+            return out, drops
+        # counters are added ONLY when the feature is on, so DESK_MEDIA_STANCE=0 leaves the
+        # serialized media_audit dict byte-identical to the pre-2026-07-19 bundle
+        if STANCE_ON:
+            media_audit.update({
+                'media_stance_enabled': 1,
+                'interview_rows_stance_matched': 0, 'interview_rows_snippet_matched': 0,
+                'hearing_rows_stance_matched': 0, 'hearing_rows_snippet_matched': 0})
+        _grade_consumed = set()   # (id(index), nm, date, package) actually attached to a display row
+        def _apply_grade(item, index, nm, pkg):
+            """Attach an EXISTING grade/passage to a display row; no-op when none exists.
+            Counting happens in _fp_add, after the per-member display cap."""
+            grade = index.get((nm, item['date'], pkg))
+            if not grade:
+                return item
+            _grade_consumed.add((id(index), nm, item['date'], pkg))
+            item['gstance'], item['gtier'], item['gn'] = grade['stance'], grade['tier'], grade['n']
+            if grade['snip']:
+                item['snip'] = grade['snip']
+            return item
         fcon = sqlite3.connect(os.path.join(B, 'social_media.db'), timeout=60)
+        # built here (not above) because pinning a passage to its package reads the speeches table
+        IV_GRADE, HR_GRADE = {}, {}
+        if STANCE_ON:
+            IV_GRADE, _ivdrop = _grade_index('interview_stance_final.csv', 'interviews_cu.csv',
+                                             'INTERVIEW', fcon)
+            HR_GRADE, _hrdrop = _grade_index('hearing_stance_final.csv', 'hearings_cu.csv',
+                                             'CHRG', fcon)
+            # every drop path is persisted, not just printed - a regression in the pairing or the
+            # package probe must leave a trace in the integrity report, not only in scrollback
+            media_audit.update({'interview_graded_keys': len(IV_GRADE),
+                                'hearing_graded_keys': len(HR_GRADE)})
+            for _tag, _d in (('interview', _ivdrop), ('hearing', _hrdrop)):
+                for _why, _n in _d.items():
+                    media_audit['%s_passages_dropped_%s' % (_tag, _why)] = _n
         # interviews: one item per broadcast episode (member x date x transcript page)
         iv_by = {}
         for mem, dt, pkg, turns, words in fcon.execute(
@@ -650,13 +779,14 @@ def load_press_and_bills(member_names):
             if not nm:
                 media_audit['interview_unknown_member_excluded'] += 1; continue
             net = _net(pkg)
-            iv_by.setdefault(nm, []).append({
+            iv_by.setdefault(nm, []).append(_apply_grade({
                 'date': fdate(dt),
                 'title': '%s appearance — %d segment%s · %s words' % (
                     net, turns, '' if turns == 1 else 's', format(int(words or 0), ',')),
                 'url': pkg if str(pkg or '').startswith('http') else '',
-                'rel': net, 'source': 'interview', 'scored': False, 'exclusion': 'appearance record'})
-        media_audit['interview_appearances_displayed'] = _fp_add(iv_by, 'iv')
+                'rel': net, 'source': 'interview', 'scored': False, 'exclusion': 'appearance record'},
+                IV_GRADE, nm, pkg))
+        media_audit['interview_appearances_displayed'] = _fp_add(iv_by, 'iv', 'interview')
         media_audit['interview_beyond_display_cap'] = (media_audit['interview_episode_rows']
             - media_audit['interview_unknown_member_excluded'] - media_audit['interview_appearances_displayed'])
         # hearings: one item per committee-hearing appearance (hearing_antag rows, titled from hearing_meta)
@@ -669,13 +799,37 @@ def load_press_and_bills(member_names):
             if not nm:
                 media_audit['hearing_unknown_member_excluded'] += 1; continue
             ch = 'Senate' if 'shrg' in str(pkg or '') else ('House' if 'hhrg' in str(pkg or '') else 'Joint')
-            hr_by.setdefault(nm, []).append({
+            hr_by.setdefault(nm, []).append(_apply_grade({
                 'date': fdate(dt), 'title': (title or '').strip() or str(pkg or ''),
                 'url': ('https://www.govinfo.gov/app/details/' + pkg) if pkg else '',
                 'rel': '%s hearing · %d speaking turn%s' % (ch, turns or 0, '' if (turns or 0) == 1 else 's'),
-                'source': 'hearing', 'scored': False, 'exclusion': 'appearance record'})
-        media_audit['hearing_appearances_displayed'] = _fp_add(hr_by, 'hr')
+                'source': 'hearing', 'scored': False, 'exclusion': 'appearance record'},
+                HR_GRADE, nm, pkg))
+        # A graded hearing passage can have NO hearing_antag row to hang on: hearing_antag records
+        # the antagonism pass, not every speaker, so a committee chair (Mike Crapo at Senate Banking
+        # 2019, e.g.) speaks and is graded while owning no antag row. Measured 2026-07-19: 191 of 372
+        # graded hearing keys land this way. Emitting them from the CU side is the only way the
+        # passage reaches the desk; there is no duplicate risk because these packages are precisely
+        # the ones hearing_antag has no row for.
+        if STANCE_ON:
+            media_audit['hearing_graded_rows_added'] = 0
+            _hmeta = dict(fcon.execute("SELECT package, COALESCE(title,'') FROM hearing_meta"))
+            for (_nm, _day, _pkg), _g in HR_GRADE.items():
+                if (id(HR_GRADE), _nm, _day, _pkg) in _grade_consumed:
+                    continue
+                _ch = ('Senate' if 'shrg' in str(_pkg or '') else
+                       'House' if 'hhrg' in str(_pkg or '') else 'Joint')
+                hr_by.setdefault(_nm, []).append({
+                    'date': _day, 'title': (_hmeta.get(_pkg) or '').strip() or str(_pkg or ''),
+                    'url': ('https://www.govinfo.gov/app/details/' + _pkg) if _pkg else '',
+                    'rel': '%s hearing · graded transcript' % _ch,
+                    'source': 'hearing', 'scored': False, 'exclusion': 'appearance record',
+                    'gstance': _g['stance'], 'gtier': _g['tier'], 'gn': _g['n'], 'snip': _g['snip']})
+                _grade_consumed.add((id(HR_GRADE), _nm, _day, _pkg))
+                media_audit['hearing_graded_rows_added'] += 1
+        media_audit['hearing_appearances_displayed'] = _fp_add(hr_by, 'hr', 'hearing')
         media_audit['hearing_beyond_display_cap'] = (media_audit['hearing_appearance_rows']
+            + media_audit.get('hearing_graded_rows_added', 0)
             - media_audit['hearing_unknown_member_excluded'] - media_audit['hearing_appearances_displayed'])
         # bluesky: the member's own posts from USER-VERIFIED handles only (the look-alike rule from
         # build_social_master stands — unverified-handle posts stay withheld until the user confirms).
@@ -720,6 +874,22 @@ def load_press_and_bills(member_names):
               media_audit['bluesky_footprint_displayed'], MEDIA_CAP,
               media_audit['interview_beyond_display_cap'], media_audit['hearing_beyond_display_cap'],
               media_audit['bluesky_beyond_display_cap'], media_audit['bluesky_unverified_handle_posts_excluded']))
+        if STANCE_ON:
+            # coverage is partial by construction - print it so a sparse tab is never mistaken for "no stance"
+            for _tag, _idx in (('interview', IV_GRADE), ('hearing', HR_GRADE)):
+                # a graded passage that reaches no display row would be silently invisible; both
+                # channels currently place every key, and this counter is the tripwire if that changes
+                media_audit[_tag + '_graded_keys_unplaced'] = sum(
+                    1 for k in _idx if (id(_idx),) + k not in _grade_consumed)
+            print('desk media stance: interview %d/%d rows carry a graded stance (%d with passage) '
+                  'from %d graded keys, %d unplaced; hearing %d/%d rows (%d with passage) '
+                  'from %d graded keys, %d unplaced' % (
+                  media_audit['interview_rows_stance_matched'], media_audit['interview_appearances_displayed'],
+                  media_audit['interview_rows_snippet_matched'], media_audit['interview_graded_keys'],
+                  media_audit['interview_graded_keys_unplaced'],
+                  media_audit['hearing_rows_stance_matched'], media_audit['hearing_appearances_displayed'],
+                  media_audit['hearing_rows_snippet_matched'], media_audit['hearing_graded_keys'],
+                  media_audit['hearing_graded_keys_unplaced']))
     for nm in arts: arts[nm].sort(key=lambda a: a['date'], reverse=True)
     # --- bills (sponsor / original-cosponsor / cosponsor) ---
     # DROP non-CU bills the keyword scraper miscategorised (audit 2026-06-29). Curated by SUBJECT, not acronym:

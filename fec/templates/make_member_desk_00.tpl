@@ -140,6 +140,10 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#161b22}
 .billtitle{font-weight:600;font-size:13px;margin-bottom:3px}
 .billmeta{color:var(--muted);font-size:11.5px}
 .billsum{color:var(--muted);font-size:11.5px;margin-top:5px;line-height:1.5}
+/* graded-appearance passage: the CU keyword window from cu_passages.py (display-only) */
+.ev-snip{color:var(--muted);font-size:11.5px;margin-top:6px;line-height:1.55;padding:6px 10px;
+  border-left:2px solid var(--line);border-radius:4px;background:rgba(255,255,255,.02)}
+.ev-grade{margin-top:5px}
 .empty{color:var(--faint);font-size:12.5px;padding:6px 0;font-style:italic}
 .notebox{width:100%;min-height:90px;background:var(--bg);color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:10px;font:13px/1.5 inherit;resize:vertical}
 .filelist{display:flex;flex-direction:column;gap:5px;margin:8px 0}
@@ -184,7 +188,8 @@ tbody tr{cursor:pointer}tbody tr:hover{background:#161b22}
   details.sec>.body{display:block!important}
   .sec[open]>summary,.sec>summary{border:1px solid #ccc!important}
   .card,.sec>summary,.sec .body,.fig,.dcell,.billrow,.ev,.notebox,input,select{background:#fff!important;color:#000!important;border-color:#ccc!important;box-shadow:none!important}
-  .eyebrow,.nm,.dist,.meta,.l,.billmeta,.billsum,.ev-top,.ev-basis,.cnt,.mrow span,.trackgrid label{color:#333!important}
+  .eyebrow,.nm,.dist,.meta,.l,.billmeta,.billsum,.ev-top,.ev-basis,.ev-snip,.cnt,.mrow span,.trackgrid label{color:#333!important}
+  .ev-snip{background:#fafafa!important;border-left-color:#ccc!important}
   h2,.nm,.billtitle,.dcell .v,.fig .v,b{color:#000!important}
   a{color:#000!important;text-decoration:none}
   svg text{fill:#333!important} svg path[stroke="#1f2630"],svg line{stroke:#ccc!important}
@@ -794,7 +799,9 @@ function pressHTML(m){
   const filtered=(mex.unrelated||0)+(mex.offtopic||0);
   const audit=filtered?`<div class=cnt>${filtered} filtered social items (${mex.unrelated||0} unrelated, ${mex.offtopic||0} off-topic)</div>`:'';
   const fp=[];
-  const fpn=(pair,noun)=>`${pair[1].toLocaleString()} ${noun}${pair[1]===1?'':'s'}${pair[0]<pair[1]?` (showing latest ${pair[0]})`:''}`;
+  // "showing N", not "showing latest N": graded rows are exempt from the recency cap (they skew
+  // old), so a capped member's visible set is graded-first-then-latest rather than purely latest.
+  const fpn=(pair,noun)=>`${pair[1].toLocaleString()} ${noun}${pair[1]===1?'':'s'}${pair[0]<pair[1]?` (showing ${pair[0]})`:''}`;
   if(mt.iv)fp.push(fpn(mt.iv,'interview appearance'));
   if(mt.hr)fp.push(fpn(mt.hr,'hearing appearance'));
   if(mt.bs)fp.push(fpn(mt.bs,'Bluesky post'));
@@ -823,14 +830,19 @@ function pressBody(m,area,sent,src){
     const basis=FOOTPRINT_SRC[a.source]||(a.source==='social'?('social stance: '+esc(a.stance||'n/a')):(a.ssrc==='bill'?'via tracked-bill direction':('DEBATE stance: '+esc(a.stance||'n/a')+(a.sconf?` (${Math.round(a.sconf*100)}% conf)`:''))));
     return `<div class=ev data-pol="${effPol}">
     <div class=ev-top><span>${a.date||''}${a.dest==='est'?' <span style=color:var(--faint)>(est.)</span>':''}</span><span>${(a.cats||[]).slice(0,3).map(esc).join(' · ')}</span></div>
-    <div class=ev-top><span>Source: ${esc(a.source||'press')}</span><span>${a.scored===false?'visible, not scored: '+esc(a.exclusion||'excluded'):'scored evidence'}</span></div>
+    <div class=ev-top><span>Source: ${esc(a.source||'press')}</span><span>${a.scored===false?(a.gstance?'appearance record · CU stance graded from transcript':'visible, not scored: '+esc(a.exclusion||'excluded')):'scored evidence'}</span></div>
     <a class=ev-title href="${a.url}" target=_blank rel=noopener title="${esc(a.title||'')}">${esc(clipTitle(a.title||''))}</a>
     <div class=ev-sig>${a.label?`<b style="color:${sentCol(a.label)}">${esc(a.label)}</b>`:''}<span class=ev-basis> · ${basis}${a.rel?' · '+esc(a.rel):''}</span></div>
+    ${a.gstance?`<div class=ev-grade><span class=ovtag style="color:${POVCOL[a.gstance]||'#9ca3af'};background:${POVCOL[a.gstance]||'#9ca3af'}1A">CU stance: ${esc(a.gstance)}${a.gtier?' · '+esc(a.gtier):''}</span>${a.gn>1?`<span class=ev-basis> · longest of ${a.gn} graded passages on this record</span>`:''}</div>`:''}
+    ${a.snip?`<div class=ev-snip>“${esc(clipSnip(a.snip))}”</div>`:''}
     ${foot?'':`<div class=ev-ov>${tag}<span class=ovlabel>CU stance:</span><select class=povsel data-povurl="${eu}" data-povtitle="${et}" data-base="${base}">${opts}</select></div>`}</div>`;
   }).join('');
 }
 function esc(s){return (s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 function clipTitle(value,limit=220){const text=String(value||'').replace(/\s+/g,' ').trim();return text.length>limit?text.slice(0,limit-1).trimEnd()+'…':text;}
+// graded-appearance passage: longer than a title, cut on a word boundary
+function clipSnip(value,limit=400){const text=String(value||'').replace(/\s+/g,' ').trim();
+  return text.length<=limit?text:text.slice(0,limit).replace(/\s+\S*$/,'').trimEnd()+'…';}
 
 /* ----- wire section area filters + member links ----- */
 function wireSectionFilters(m){
