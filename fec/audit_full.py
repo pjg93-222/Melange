@@ -376,6 +376,34 @@ if os.path.exists(_pm_p):
             _ch,len(_src_rows),len(_final_rows),_identity_ok,_values_ok,_fresh))
     ck('own-source channel sidecars preserve source row identity',
        _sidecars_ok,'; '.join(_sidecar_detail))
+    # 2026-07-19: cu_passages merges overlapping ~500-char windows, so a committee chair's final
+    # speaking turn can absorb the transcript APPENDIX (prepared statements, written questions for
+    # the record) into one blob that is then stance-graded as if the member had said it. Measured
+    # today: 27 of 775 hearing passages (3.5%), but only 5 of the 263 GOLD rows -- and gold is the
+    # only tier build_media_blend.py feeds into the press pillar. 4 of those 5 change no outcome
+    # (the member's clean gold rows already agree); the 5th is a tie-break on a 1/1/1 split. So the
+    # contamination is real but immaterial TODAY, and the gold labels are the user's own calls --
+    # nothing is relabelled here. This is a tripwire so it cannot grow silently as the corpus does.
+    _apx_re=re.compile(r'\[whereupon|prepared statements, additional material|'
+                       r'supplied for the record follow|\[additional material|'
+                       r'responses to written questions|\[the following|insert(ed)? for the record',re.I)
+    _qfr_re=re.compile(r'\bQ\.\d+\.|\bA\.\d+\.')
+    def _apx_contaminated(text):
+        return bool(_apx_re.search(text)) or len(_qfr_re.findall(text))>=2 or len(text)>2000
+    _hs_src=os.path.join(B,'hearings_cu.csv'); _hs_fin=os.path.join(B,'hearing_stance_final.csv')
+    if os.path.exists(_hs_src) and os.path.exists(_hs_fin):
+        with open(_hs_src,encoding='utf-8-sig',newline='') as _fh: _hsrc=list(csv.DictReader(_fh))
+        with open(_hs_fin,encoding='utf-8-sig',newline='') as _fh: _hfin=list(csv.DictReader(_fh))
+        if len(_hsrc)==len(_hfin):
+            _apx_gold=sum(1 for s,f in zip(_hsrc,_hfin)
+                          if f.get('tier')=='gold' and _apx_contaminated(s.get('text') or ''))
+            _apx_all=sum(1 for s in _hsrc if _apx_contaminated(s.get('text') or ''))
+            ck('transcript-appendix passages stay a negligible share of pillar-feeding gold hearings',
+               _apx_gold<=10,
+               '%d gold rows contaminated (bound 10); %d/%d overall'%(_apx_gold,_apx_all,len(_hsrc)))
+        else:
+            ck('transcript-appendix passages stay a negligible share of pillar-feeding gold hearings',
+               False,'hearings_cu/hearing_stance_final row counts differ')
 _pra_p=B+r'\press_domain_routing_audit.json'
 if os.path.exists(_pra_p):
     _pra=json.load(open(_pra_p)); _prrows=_pra.get('rows') or []
