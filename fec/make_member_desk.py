@@ -726,9 +726,16 @@ def load_press_and_bills(member_names):
                     slot = out.setdefault((nm, day, pkg),
                                           {'stance': '', 'tier': '', 'snip': '', 'n': 0})
                     slot['n'] += 1
-                    # show the longest passage pinned to this package WITH ITS OWN grade, so the
-                    # quote and the label always describe the same words
-                    if len(text) > len(slot['snip']):
+                    # Keep the FIRST passage pinned to this package, with ITS OWN grade, so the
+                    # quote and the label always describe the same words. First, not longest:
+                    # cu_passages emits ~500-char windows (half=250, median 543) and merges
+                    # overlapping ones, so the longest passage is a merged blob -- for a committee
+                    # chair it is the transcript appendix absorbed into their final turn
+                    # ("This hearing is adjourned. [Whereupon...] [Prepared statements...]").
+                    # Since the template clips to 400 chars, longest-wins displayed the opening of
+                    # the least representative passage. First = the earliest CU mention, which is a
+                    # natural single window of the member actually speaking.
+                    if not slot['snip']:
                         slot['snip'] = text
                         slot['stance'] = stance
                         slot['tier'] = (srow.get('tier') or '').strip()

@@ -833,7 +833,7 @@ function pressBody(m,area,sent,src){
     <div class=ev-top><span>Source: ${esc(a.source||'press')}</span><span>${a.scored===false?(a.gstance?'appearance record · CU stance graded from transcript':'visible, not scored: '+esc(a.exclusion||'excluded')):'scored evidence'}</span></div>
     <a class=ev-title href="${a.url}" target=_blank rel=noopener title="${esc(a.title||'')}">${esc(clipTitle(a.title||''))}</a>
     <div class=ev-sig>${a.label?`<b style="color:${sentCol(a.label)}">${esc(a.label)}</b>`:''}<span class=ev-basis> · ${basis}${a.rel?' · '+esc(a.rel):''}</span></div>
-    ${a.gstance?`<div class=ev-grade><span class=ovtag style="color:${POVCOL[a.gstance]||'#9ca3af'};background:${POVCOL[a.gstance]||'#9ca3af'}1A">CU stance: ${esc(a.gstance)}${a.gtier?' · '+esc(a.gtier):''}</span>${a.gn>1?`<span class=ev-basis> · longest of ${a.gn} graded passages on this record</span>`:''}</div>`:''}
+    ${a.gstance?`<div class=ev-grade><span class=ovtag style="color:${POVCOL[a.gstance]||'#9ca3af'};background:${POVCOL[a.gstance]||'#9ca3af'}1A">CU stance: ${esc(a.gstance)}${a.gtier?' · '+esc(a.gtier):''}</span>${a.gn>1?`<span class=ev-basis> · first of ${a.gn} graded passages on this record</span>`:''}</div>`:''}
     ${a.snip?`<div class=ev-snip>“${esc(clipSnip(a.snip))}”</div>`:''}
     ${foot?'':`<div class=ev-ov>${tag}<span class=ovlabel>CU stance:</span><select class=povsel data-povurl="${eu}" data-povtitle="${et}" data-base="${base}">${opts}</select></div>`}</div>`;
   }).join('');
