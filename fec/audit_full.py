@@ -469,6 +469,18 @@ if os.path.exists(_lra_p):
     _lrcol={k:sorted(v) for k,v in _lrkey.items() if k[0] and len(v)>1}
     ck('no two scored bill ids collapse to one bill_key',
        not _lrcol,'%d colliding keys, e.g. %s'%(len(_lrcol),sorted(_lrcol.values())[:2]))
+    # The 17 uncovered members were individually adjudicated 2026-07-19: 16 absent from the archive
+    # entirely, and Clyburn's rows all user-excluded. The floor exists so a name-resolution regression
+    # or bad archive refresh cannot silently zero out coverage; a legitimate roster change at the
+    # 120th-Congress rollover re-bases this number (see moneyball-congress-rollover-campaign).
+    _lrarch_p=B+r'\archive_leg.json'
+    if os.path.exists(_lrarch_p):
+        with open(_lrarch_p,encoding='utf-8') as _fh: _lrarch=json.load(_fh)
+        ck('legislative evidence coverage holds its floor',
+           len(_lrarch)>=516,
+           '%d members carry >=1 archive bill (floor 516 of 533)'%len(_lrarch))
+    else:
+        ck('legislative evidence coverage holds its floor',False,'archive_leg.json missing')
 else:
     ck('legislation routing audit present',False,'legislation_routing_audit.json missing')
 # 2026-07-04 nomological fix guard: receptivity must run on the BEHAVIORAL basis (the lexical Big5

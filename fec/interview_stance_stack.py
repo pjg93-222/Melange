@@ -19,11 +19,12 @@ Precedence per interview (highest wins):
 
 The heuristic is a deliberately WEAK prior (tier 'review'): keyword cues near a target anchor cannot
 tell a critic quoting "the CFPB's defenders" from an actual defender, so anti-CFPB interviews can
-misfire toward oppose.  That is exactly why the channel is gated OFF in build_media_blend.py
-(CU_INTERVIEW_CHANNEL, default 0) and why Paul's gold (precedence a) is the correction path.
+misfire toward oppose.  The weak prior is exactly why Paul's gold (precedence a) is the correction
+path.  The channel ships ON by default in build_media_blend.py (CU_INTERVIEW_CHANNEL, default 1),
+with gold labels overriding the heuristic.
 
 Output: interview_stance_final.csv (bioguide, member, date, categories, stance, tier).  build_media_blend.py
-consumes it ONLY when CU_INTERVIEW_CHANNEL=1 (default OFF): SIGN{support:+1,oppose:-1,neutral:0}, category
+consumes it ONLY when CU_INTERVIEW_CHANNEL=1 (default ON; set CU_INTERVIEW_CHANNEL=0 to gate the channel off): SIGN{support:+1,oppose:-1,neutral:0}, category
 route, 2.0yr half-life, own-source weight 1.0 (interviews are the member's own words), tier weights
 gold 1.0 / review 0.35.
 

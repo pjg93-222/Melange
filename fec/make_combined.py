@@ -16,8 +16,26 @@ Design for a clean merge + minimal antivirus false-positives:
 
 Run:  python fec/make_combined.py     (after make_dashboard_html.py + make_member_desk.py)
 """
-import re, io, os
+import re, io, os, sys, time
 B = MB_ROOT
+# 2026-07-19 incident: desk postflight raised IntegrityError after its reconciliation write, and
+# make_combined rebuilt Moneyball.html from stale desk HTML with no warning.
+_recon_p = os.path.join(B, 'dashboard_exclusion_reconciliation.json')
+_desk_p = os.path.join(B, 'cu-member-desk.html')
+if not os.path.exists(_desk_p):
+    print('ERROR: cu-member-desk.html is missing; refusing to combine')
+    sys.exit(1)
+if os.environ.get('COMBINED_STALE_OK','0')=='1':
+    print('WARNING: COMBINED_STALE_OK=1; stale-desk-HTML guard bypassed')
+elif os.path.exists(_recon_p):
+    _recon_mtime = os.path.getmtime(_recon_p)
+    _desk_mtime = os.path.getmtime(_desk_p)
+    if _recon_mtime > _desk_mtime + 5:
+        print('ERROR: dashboard_exclusion_reconciliation.json mtime: %s' % time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(_recon_mtime)))
+        print('ERROR: cu-member-desk.html mtime: %s' % time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(_desk_mtime)))
+        print('ERROR: the last make_member_desk.py run failed after its reconciliation write;')
+        print('ERROR: cu-member-desk.html is STALE; refusing to combine')
+        sys.exit(1)
 def read(p): return io.open(os.path.join(B, p), encoding='utf-8').read()
 
 sna = read('Moneyball Dashboard.html')

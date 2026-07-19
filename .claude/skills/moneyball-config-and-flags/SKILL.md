@@ -163,6 +163,17 @@ Class legend used in the tables: **P** = production-ratified calibration · **R*
 | `STAFF_SRC` | `C:\Users\pgoff\Downloads` | `fec/build_staff_directory.py:22` | Machine-local input dir (external, unregenerable source) |
 | `FT_WORKERS` | `6` | `fec/press_reader_ftfix.py:24` | Fine-tune fixer thread pool |
 
+### 1.8 Member-desk display dials (class D — display-only; none can move a rank)
+
+| Var | Default | Read at | Effect (one line) |
+|---|---|---|---|
+| `DESK_FOOTPRINT` | `1` (on) | `fec/make_member_desk.py:610` | `0` reverts the whole interviews+hearings+bluesky media-footprint section (2026-07-16) |
+| `DESK_MEDIA_CAP` | `50` | `fec/make_member_desk.py:611` | Per member+source recency cap on footprint rows; `0` = show all; graded-stance rows are EXEMPT from the cap (they skew old) |
+| `DESK_MEDIA_STANCE` | `1` (on) | `fec/make_member_desk.py` (search `DESK_MEDIA_STANCE`) | `0` reverts the interview/hearing CU-stance chip + transcript-passage display (2026-07-19); fingerprinted by `fec/dashboard_integrity.py`, so flipping it legitimately changes the integrity input hash |
+| `DESK_B5_FALLBACK` | `1` (on) | `fec/make_member_desk.py:226` | `0` disables the Big5 estimate-layer fallback panels (2026-07-17 desert fill) |
+| `DESK_OUT` | unset | `fec/make_member_desk.py` (search `DESK_OUT`) | No-clobber redirect DIRECTORY for preview/test desk builds; unset = write the live tree |
+| `COMBINED_STALE_OK` | `0` | `fec/make_combined.py` (the new guard from item A) | `1` bypasses the stale-desk-HTML refusal — emergency use only |
+
 ---
 
 ## 2. Workbook dials (user-owned — Paul edits these in Excel, code only READS them)

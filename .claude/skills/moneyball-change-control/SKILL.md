@@ -92,7 +92,7 @@ python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\run_pipeline.py"
 ```
 17 steps in fixed order (`fec/run_pipeline.py:19-35`), ending in `audit_full.py`. Each step prints `OK` or `!!` plus its last stdout line; the runner hard-exits 1 on the first failing step. Expected final line: `PIPELINE COMPLETE in N.N min` (~6-19 min depending on the workbook view-cache state). **Trap**: the audit step "passing" at chain level means only that audit_full returned 0 - which it ALWAYS does (see 2.5). Read the audit tail yourself.
 
-`--from <prefix>` resumes mid-chain by script-filename prefix. **Trap**: a typo'd prefix matches nothing, silently skips every step, and still prints `PIPELINE COMPLETE` (`fec/run_pipeline.py:39-51`). `--recalc` is retired and inert.
+`--from <prefix>` resumes mid-chain by script-filename prefix. **Guard (corrected 2026-07-19)**: `start_index()` now rejects unknown or ambiguous `--from` prefixes loudly (`ValueError` → `parser.error`, exit 2; `fec/run_pipeline.py:145-154`). `--recalc` is retired and inert.
 
 ### 2.3 Zero rank delta - how to actually diff ranks
 
