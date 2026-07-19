@@ -23,6 +23,12 @@ sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 FE=os.path.dirname(os.path.abspath(__file__))
 
 CHAIN=[
+    # FIRST, deliberately: halt before ANY artifact is written if this run would change a published
+    # calibration (2026-07-19 incident — a run from a branch missing a ratified ladder silently
+    # reverted Ally 3.00 -> 2.50 with no error and no audit failure). Intended changes pass with
+    # CALIB_ACK=1; the guard prints the exact command. It is a chain STEP rather than an audit_full
+    # ck() because a ck() failure exits 1 and aborts the whole chain — a warning must not do that.
+    ('calibration_guard.py',[]),
     ('coop_v2_candidate.py',[]),
     ('build_electoral.py',[]),
     ('receptivity_layer.py',[]),
