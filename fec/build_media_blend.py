@@ -315,13 +315,17 @@ if os.environ.get('PRESS_DYNAMIC','1')!='0':
             if _g.get('title_contains') and (_g.get('title_contains') or '').lower() in _tl: return _st
         return None
     _TW={'unanimous':1.0,'majority':0.7,'review':0.35}
-    # ATTRIBUTION-STRENGTH channel weight (user 2026-07-04 "that is such a regression" — Warren
-    # pulled to #83 by trade-press tagging): a member's OWN .gov press release is member-authored
-    # evidence (attribution-clean, like tweets); trade/third-party coverage that merely tags the
-    # member is weaker. His golds label trade coverage support (41/65 third-party = support) — the
-    # LABELS stand; this dial reduces the CREDIT such articles contribute to the 40%-weight pillar.
-    # PRESS_THIRD_W env reverts (1.0 = old behavior).
-    _W3=float(os.environ.get('PRESS_THIRD_W','0.5'))
+    # ATTRIBUTION-STRENGTH channel weight. HISTORY: set to 0.5 on 2026-07-04 (user "that is such a
+    # regression" — Warren pulled to #83 by trade-press tagging) to discount trade/third-party
+    # coverage that merely tags a member, versus a member's OWN .gov release. His golds label trade
+    # coverage support (41/65 third-party = support) — the LABELS always stood; only the CREDIT was cut.
+    # REVERSED 2026-07-19 (user: "That coverage should be counted the same, with the decay"): trade
+    # coverage now carries the SAME weight as an own release. Rationale on the record: the mention-noise
+    # the 0.5 was aimed at is now killed upstream by the stack's UNRELATED->0 rule (see STACK OVERRIDE
+    # above), so the flat penalty had become a second, blunter charge for the same problem; recency is
+    # still handled by the 2-year half-life _dec below, which applies to every article regardless of
+    # source. PRESS_THIRD_W=0.5 restores the 2026-07-04 discount.
+    _W3=float(os.environ.get('PRESS_THIRD_W','1.0'))
     _n_stack=0; _n_fallback=0; _n_unrel=0; _n_own=0; _n_third=0; _n_gold=0
     def _pdate(s):
         for _f in ('%m/%d/%Y','%Y-%m-%d','%m/%d/%y'):
