@@ -45,6 +45,16 @@
       "member": "Nydia Velázquez",
       "tier": 2,
       "note": "Paul follow-up 2026-07-16"
+    },
+    {
+      "member": "Brian Fitzpatrick",
+      "tier": 1,
+      "note": "Paul directive 2026-07-18: 'replace Ann Wagner with Brian Fitzpatrick ... in the champion ranks' / 'No, just move him'. Explicit placement, NOT a math result: Fitzpatrick's 80/20 score trails Wagner's on the PRESS pillar only (leg 0.996 vs 0.955; press 0.153 vs 0.500), and his press is understated because CU-positive trade coverage reads neutral in the 2026-06-30-frozen pillar basis. Forcing Wagner to Tier 2 is required: forcing Fitzpatrick alone would have ejected Tim Scott instead."
+    },
+    {
+      "member": "Ann Wagner",
+      "tier": 2,
+      "note": "Paul directive 2026-07-18: 'replace Ann Wagner with Brian Fitzpatrick ... in the champion ranks' / 'No, just move him'. Explicit placement, NOT a math result: Fitzpatrick's 80/20 score trails Wagner's on the PRESS pillar only (leg 0.996 vs 0.955; press 0.153 vs 0.500), and his press is understated because CU-positive trade coverage reads neutral in the 2026-06-30-frozen pillar basis. Forcing Wagner to Tier 2 is required: forcing Fitzpatrick alone would have ejected Tim Scott instead."
     }
   ]
 }
