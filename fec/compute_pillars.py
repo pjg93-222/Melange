@@ -109,6 +109,26 @@ try:
     if _not_elite: raise ValueError('non-party-elite registry entries: %s'%_not_elite[:3])
 except (FileNotFoundError,KeyError,ValueError) as _e:
     print('FATAL: formal role influence registry invalid: %s'%_e); sys.exit(1)
+# LEAD-TIME WARNING (2026-07-19 audit): the expiry above is a HARD chain abort at step ~13 of ~38 —
+# before ranks, dashboards or desks exist — and formal_visibility_roles.json has NO producer script,
+# so nothing regenerates it. valid_until is currently 2027-01-03, the 120th-Congress seating date;
+# the unknown-roster-names check on line 106 trips on the freshman swap independently of the calendar,
+# whichever lands first. This warning is deliberately NOT an audit_full ck(): a failed check exits 1
+# and run_pipeline aborts the chain, so a "warn early" check would itself cause the outage it warns
+# about. It is also appended to this script's FINAL stdout line (see the ranks_python print below),
+# because run_pipeline keeps only that last line, truncated to 90 chars. Owner action = refresh the
+# registry for the new Congress; do NOT just extend valid_until, which hides a stale roster.
+ROLE_EXPIRY_WARN=''
+try:
+    _dleft=(datetime.date.fromisoformat(_roles['valid_until'])-datetime.date.today()).days
+    if _dleft<=120:
+        ROLE_EXPIRY_WARN='!! ROLE REGISTRY EXPIRES IN %d DAYS (%s) - CHAIN WILL FATAL HERE !! '%(_dleft,_roles['valid_until'])
+        print('WARNING: formal_visibility_roles.json expires in %d days (%s). compute_pillars will'
+              ' sys.exit(1) on that date and the whole chain stops. No producer script exists —'
+              ' refresh the registry for the new Congress (see moneyball-congress-rollover-campaign).'
+              %(_dleft,_roles['valid_until']))
+except (KeyError,ValueError):
+    pass
 Ebase=dict(E)
 _cd=wb['Committee Data']
 COMMITTEE_SEATS={r[0]:str(r[4] or '') for r in _cd.iter_rows(min_row=2,values_only=True) if r[0]}
@@ -197,8 +217,10 @@ if WRITE:
                                  'contract':'formal office is display-only public-exposure context; no office weight modifies Influence or rank'},
         'provenance':'python rank authority (compute_pillars --write); influence = workbook committee score only; formal office is display-only context and does not modify rank'},
         B+r'\ranks_python.json')
-    print('wrote ranks_python.json (rank authority): %d members | %d formal-office contexts display-only | %d committee overlaps noted | workbook view %s'%(
-        len(members),sum(v>0 for v in ROLE_DISPLAY_WEIGHT.values()),
+    # NOTE the warning PREFIXES this line: run_pipeline truncates the step's last line at 90 chars
+    # and this line already exceeds that, so a suffix would be silently cut off and never seen.
+    print('%swrote ranks_python.json (rank authority): %d members | %d formal-office contexts display-only | %d committee overlaps noted | workbook view %s'%(
+        ROLE_EXPIRY_WARN,len(members),sum(v>0 for v in ROLE_DISPLAY_WEIGHT.values()),
         sum(ROLE_REASON[m]=='committee_leadership_already_in_base' for m in members),
         'coherent' if coherent else 'stale'))
     sys.exit(0)

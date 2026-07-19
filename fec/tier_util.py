@@ -81,12 +81,44 @@ def load_tier_overrides(path=None):
     return out
 
 
-def apply_tier_overrides(order, overrides=None, buckets=BUCKETS):
+def load_tier_positions(path=None):
+    """Load optional exact within-bucket display slots: {member: 1-based position in its tier}.
+
+    A placement row may carry ``"position": N`` to pin WHERE inside its bucket the member is shown.
+    Rows without ``position`` are unaffected and keep score order.
+    """
+    doc = _load_tier_policy(path)
+    rows = doc if isinstance(doc, list) else doc.get('placements', [])
+    out = {}
+    for row in rows:
+        if row.get('position') is None:
+            continue
+        member = str(row.get('member') or '').strip()
+        try:
+            slot = int(row.get('position'))
+        except (TypeError, ValueError):
+            raise ValueError('invalid tier position row: %r' % row)
+        if not member or slot < 1:
+            raise ValueError('invalid tier position row: %r' % row)
+        if member in out:
+            raise ValueError('duplicate tier position member: %s' % member)
+        out[member] = slot
+    return out
+
+
+def apply_tier_overrides(order, overrides=None, buckets=BUCKETS, positions=None):
     """Return a fixed-size display order honoring exact placements.
 
     Forced members occupy their named bucket. Remaining seats are filled from the unmodified
     score order, excluding members forced into another bucket. Within each bucket, members retain
     their relative score order so the override changes placement, not the underlying score.
+
+    EXCEPTION (Paul directive 2026-07-19, "have Brian take Wagner's former spot, like number 5"):
+    a placement row carrying ``position: N`` pins that member to the Nth slot of its bucket,
+    displacing the score order for that bucket only. This DELIBERATELY breaks the
+    "within a bucket, order == score order" property above, so a pinned bucket's internal order is
+    no longer readable as a ranking. Only pinned members are affected; everyone else keeps their
+    relative score order around them. Pins are display-only and change no score, pillar, or rank.
     """
     order = list(order)
     pos = {member: i for i, member in enumerate(order)}
@@ -110,6 +142,25 @@ def apply_tier_overrides(order, overrides=None, buckets=BUCKETS):
                     if member not in assigned and member not in overrides]
         selected = forced + eligible[:capacity - len(forced)]
         selected.sort(key=pos.__getitem__)
+        # Explicit within-bucket slots (see docstring). Applied lowest-slot-first so the result is
+        # deterministic and independent of dict order; everyone unpinned keeps their relative order.
+        _pins = sorted(((int(s), m) for m, s in (positions or {}).items() if m in selected),
+                       key=lambda kv: (kv[0], pos[kv[1]]))
+        if _pins:
+            for _slot, _m in _pins:
+                if _slot > len(selected):
+                    raise ValueError('tier %d position %d exceeds its %d seats (%s)'
+                                     % (tier, _slot, len(selected), _m))
+            _seen = {}
+            for _slot, _m in _pins:
+                if _slot in _seen:
+                    raise ValueError('duplicate tier position %d: %s and %s'
+                                     % (_slot, _seen[_slot], _m))
+                _seen[_slot] = _m
+            _rest = [m for m in selected if m not in dict(( (m2, s2) for s2, m2 in _pins ))]
+            for _slot, _m in _pins:
+                _rest.insert(_slot - 1, _m)
+            selected = _rest
         assigned.update(selected)
         display_order.extend(selected)
     display_order.extend(member for member in order if member not in assigned)
@@ -131,7 +182,8 @@ def legislative_press_tiers(members, root=None):
     rankable = [m for m in members if m in all_scores]
     tsc = {m: all_scores[m] for m in rankable}
     score_order = sorted(rankable, key=lambda m: (-tsc[m], m))   # score desc; deterministic name tie-break
-    order = apply_tier_overrides(score_order, load_tier_overrides())
+    order = apply_tier_overrides(score_order, load_tier_overrides(),
+                                 positions=load_tier_positions())
     b1, b2, b3 = BUCKETS[0], BUCKETS[0] + BUCKETS[1], BUCKETS[0] + BUCKETS[1] + BUCKETS[2]
     tier = {}; tierrank = {}
     for i, m in enumerate(order):

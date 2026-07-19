@@ -41,7 +41,7 @@ Hard rules embedded in this skill (master list with rationale lives in **moneyba
 
 | Rule | Source |
 |---|---|
-| Worktrees do NOT isolate data: `fec/paths.py:7` hardcodes the live tree as ROOT | `fec/paths.py` (verified) |
+| Worktrees DO isolate data when `MONEYBALL_ROOT` is unset: `fec/paths.py:8` sets `ROOT = MONEYBALL_ROOT` else the PARENT OF THE IMPORTED `paths.py`, so a worktree run resolves ROOT to that worktree. Run data-dependent work with `cwd` = the live tree, or set `MONEYBALL_ROOT` explicitly | `fec/paths.py:7-8` (re-verified 2026-07-19: this row previously claimed the opposite and was marked "verified"; a worktree import resolved ROOT to the worktree, not the live tree) |
 | Import == execution for nearly every `fec/*.py`; never import to inspect | session-ratified, 2026-07 |
 | Only `fec/tests/run_tests.py` and `fec/audit_full.py` are read-only-safe to run casually | session-ratified, 2026-07 |
 | Check for Paul's live jobs before any run; run baselines serially | session-ratified, 2026-07 |

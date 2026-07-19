@@ -61,10 +61,19 @@ in ~/.claude.json — restart the app and open a fresh session.
 
 - Codex may run data-mutating pipeline steps (Paul's directive, 2026-07-19):
   the chain (`run_pipeline.py`), `build_media_blend.py`, regeneration, and
-  workbook writes. Note the architecture: `fec/paths.py` resolves ROOT to the
-  LIVE data tree regardless of cwd, so these runs write live data even when
-  launched from a worktree. Claude does the pre-run checks first (Excel closed,
-  no live jobs, baseline captured for the rank delta).
+  workbook writes.
+- **A pipeline run MUST target the live tree explicitly.** `fec/paths.py` sets
+  `ROOT = MONEYBALL_ROOT` if set, else the PARENT OF THE IMPORTED `paths.py` —
+  so a run launched from a `codex/*` worktree resolves ROOT to that WORKTREE,
+  not to live data. Worktrees DO isolate data. A chain run started there would
+  fail on missing inputs or write throwaway worktree artifacts. So: run with
+  `cwd` = the live tree, or set `MONEYBALL_ROOT` to it, and assert the resolved
+  ROOT before executing. (Corrected 2026-07-19 — this rule and the `RULE` commit
+  `10a5f97` originally asserted the opposite, copied from the ops skill's
+  "worktrees do NOT isolate data" line, which is also wrong. Verified against
+  `fec/paths.py:7-8`, not against the doc.)
+- Claude does the pre-run checks first: Excel closed, no live jobs, baseline
+  captured for the rank delta.
 - CODE EDITS still land only in throwaway `codex/*` worktrees, never on `main`
   and never as edits to the live tree's working copy.
 - Still barred, because these are not pipeline steps and are irreversible or
