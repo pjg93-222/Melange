@@ -1134,3 +1134,229 @@ chamber z scores, clips only after combination to `[-3,3]`, and never penalizes 
 The LEP criterion is static through the 118th and is one behavior component, not a direct rank input.
 Corrupted legacy CHRG hearing counts are contractually excluded. The RKH ceremonial-bill criterion
 remains null and is reported as such; it is not used to claim successful validation.
+
+## 41. Two-panel congruence rounds — O criterion-weighting MISS, N variant-parity MISS, C documented (2026-07-16)
+
+Paul's question — E and A clear both expert panels while O/N/C clear one; are the one-panel
+results fundamentally incongruent? — was answered NO on criterion-side evidence, then two
+user-authorized one-look rounds were locked (@66f9772, both adversarially reviewed pre-lock,
+batteries green) and both MISSED, each informatively. The look-free diagnostics live in
+fec/b5_gold_criterion_probes.py: cross-panel agreement stratified by insider rater count shows
+single-rater insider rows are noise (roster-overlap, insider k=1 vs k>=2: O -.05 -> +.49,
+C +.14 -> +.48, E -.04 -> +.59, A +.25 -> +.69, ES +.38 -> +.48); range restriction is
+negligible (SD ratios .86-1.15); a 4,000-draw null simulation puts a random measure's chance of
+clearing both association gates at 1.5-2.1% (<1% with dual dominance). One mechanism carries all
+seven trait-by-panel outcomes: trait observability crossed with rater vantage, plus single-rater
+criterion noise.
+
+The O round (big5_o_panel_reliability_prereg.md, RESULT-OW) evaluated the FROZEN 0.5/0.5
+composite against rater-count-reliability-weighted panels (SB weights, rho1=.25 pinned).
+Weighting lifted the insider association (.192 OOF -> .247, p=.051, dominance holding in BOTH
+panels; academics re-cleared at .525 including dominance) but the gating confound partial
+exposed the substance: weighted partial r(composite, insider gold-O | female, party) = +.028
+(p=.42) versus the academics' +.231 (p=.043). The insider O column's association with our
+composite is gender/party-shared variance, not O-specific signal. MISS; the criterion-weighting
+route is CLOSED under this gold (any rho1, sqrt(k), subsetting, pooling), terminal per the lock.
+
+The N round (big5_n_variant_parity_prereg.md, RESULT-NV) gave N the constrained-variant
+treatment E received: two pre-declared weight-floor variants through the shipped LOO-OOF
+machinery. The selected variant (30% affective-content N / 70% Pink observer N) improved BOTH
+panels over the shipped 10/90 baseline — insiders .374 -> .416 (p=.003, dominant, above even the
+stricter .30 bar), academics .123 -> .147 — but .147 sits under the .20 association gate without
+dominance. MISS; the N-composite variant space over {affective_content_n, pink_observer_n,
+behavioral_reactivity} is FROZEN under this gold, terminal per the lock. Two recorded readings:
+the affective channel carries real insider-visible N signal, and the academic panel cannot read
+N from the public record at gate strength — the observability mechanism, measured twice. A
+firewalled suppression note (academic partial .389 EXCEEDS its raw .147) is recorded in the
+RESULT for any future Paul-initiated criterion round; it grounds nothing.
+
+C gets the documentation path, no round: it has the weakest cross-panel gold agreement of all
+five traits (.155 all-senators / .357 roster-overlap), its insider association is halo-caveated
+(insider heterotrait |r| with gold N .384 and E .317 exceed the own-trait .262), and the academic
+C column is signal-poor at that vantage (within-panel academic C-ES r=.589). Per the ceiling
+arithmetic a both-panel C pass would need a tone-free C measure 2-3x stronger than anything five
+prior methods produced. ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED is the honest terminus; the
+engine's C role remains behaviorally anchored (diligence_z), firewalled from this display
+composite.
+
+Housekeeping recorded with the rounds: (1) provenance — Downloads/Eran.pdf is Amsalem et al.
+2018 (hash-mismatched to the gold pin and containing no senator ratings); the TRUE pinned
+appendix source is Downloads/online_appendix.pdf, SHA-256 verified equal to the §40 pin
+43c98926... (2) A 2026-07-16 session probe computed a VOID look-fragment (a Steiger test pairing
+shipped fitted scores with gold on a 38-senator subset); it was ruled void under the pre-lock
+pairing prohibition, disclosed in both preregs, and none of its numbers are load-bearing
+anywhere. (3) The round-4 N successor's DATA-GATE (MEM_N >= 250) now reads ~270 eligible by the
+turns>=30/non-null-cutoff construction (fec/b5_gold_criterion_probes.py section 6) — a successor
+prereg on the reactivity criterion is available whenever Paul initiates it; nothing here took or
+licensed that look. (4) All five one-panel/two-panel statuses stand exactly as §40 recorded them;
+these rounds changed no status, no engine input, and no shipped artifact.
+
+## 42. Audio speaker-identity layer built (TDD, research-only, awaiting pilot + user gates) (2026-07-16)
+
+The zero-production-profiles blocker (#40: two independent identity reviews) now has executable
+machinery, user-directed and built tests-first (51 assertions across five suites, all green at
+commit; no LLM in any identity path; no network or model download exists in code — the ECAPA and
+whisper loaders hard-refuse without explicitly named local weights). Design provenance: Dietrich,
+Hayes & O'Brien 2019 (within-speaker F0, caption-timestamp speech units, >=50-word floor) and
+Mestre & Ryan 2026, Political Analysis (embeddings-over-MFCC for speaker identity at scale —
+their Table 3: MFCC+CNN collapses to .08-.13 accuracy over many identities while pretrained
+embeddings hold >=.91; forced-alignment-over-ASR when good transcripts exist; short-utterance
+alignment failures; channel normalization; gender-bias probes). The ECAPA-VoxCeleb verification
+protocol, EER<=5% bars, and whisper-DTW-primary alignment are engineering adaptations labeled as
+such, not paper methods.
+
+The contract: a speech unit is attributable iff CHECK-T (transcript/caption speaker identity,
+roster-resolved fail-closed; cspan_identity for WJ; hearings_seq turns time-anchored by local
+token-DTW with word-match floors 80%/turn and 70%/hearing) and CHECK-A (speaker-embedding
+verification against an enrollment bank — verification never identification; ALL segments must
+clear the calibrated cosine threshold with top-2 margin >=.10 and >=85% duration coverage) name
+the SAME member; any disagreement excludes the unit fail-closed into a rejects ledger, with
+check-T-vs-check-A hard disagreements feeding a mismatch ledger (successor of the 148 caption-
+caught wrong-member clips). Witnesses are unenrolled by design and double as in-situ negative
+controls: a witness turn acoustically matching an enrolled member excludes the ENTIRE hearing.
+Enrollment floors: >=3 clips from >=2 events totaling >=180 s, leave-one-clip-out integrity gate;
+legacy feedstock identity must be RE-DERIVED by deterministic hard-signal regex (the retired
+Haiku labels are never identity evidence). Cosine thresholds live only in
+b5_audio_identity_thresholds.json.candidate (written by a future calibration run); every consumer
+refuses without it; audio_rules.py carries the structural constants. Every output is .candidate,
+consumed by nothing; audit_full gained SKIP-while-absent checks; a source guard makes writing
+b5_audio_reviews_v2.json or b5_audio_descriptors_v2.json unrepresentable in the attribution
+module. Coverage reconnaissance: 354 members already clear the enrollment floors from legacy
+clips on keep-based identity (301 on strict hard-signal MATCH), before any HouseLive enrollment.
+
+NOT done, deliberately: no model weights downloaded (SpeechBrain spkrec-ecapa-voxceleb, silero-
+vad, faster-whisper small — named in the DRAFT prereg with sources; their SHA-256s get pinned at
+lock); big5_audio_identity_prereg.md is DRAFT, explicitly not locked, and the pilot ladder P0-P5
+(synthetic battery -> DET/EER calibration on the 148 negatives + impostor trials -> Chip Roy
+cross-channel hard gate -> 100-unit human listen-check -> 3 hand-labeled hearings -> WJ smoke)
+runs only after Paul rules on: contract mode A/B (machine checks AS reviews vs pre-filter-only
+default), the venue amendment beside on_air_interview, hearings scope + the curated media map,
+thresholds/floors ratification, topic dictionary vs STM, the floor second-source rule, legacy
+corpus write-off, Senate source, storage root, the 60s-vs-180s member floor, enrollment
+ratification workload, and promotion itself. Until then the shipped fail-closed state (zero
+profiles) remains the correct active state.
+
+## 43. Audio identity audit hardening — paper-faithful embeddings and calibrated gates (2026-07-16)
+
+A tests-first audit of §42 found four merge-blocking contract defects despite its original
+synthetic suites passing: the field named `eer` was used as a cosine threshold even though EER is
+an error rate; enrollment accepted a free `--theta-enroll` value instead of the calibration
+artifact; empty `ratified` enrollment entries were usable by default; and any attempted acoustic
+comparison on a witness could poison an entire hearing even when the acoustic decision was
+REJECT. All four are corrected without taking a real calibration look or changing the active
+zero-profile state.
+
+`fec/b5_audio_calibrate.py` now deterministically separates `theta_eer` (score boundary) from
+`eer_rate` (the <=.05 stop-bar quantity), requires all corpus EER bars plus at least 148
+caption-mismatch negatives and >=.99 rejection, reports sex-specific FAR/FRR ratios without
+retuning, and writes either `CALIBRATION_PASS` or a permanently non-consumable
+`CALIBRATION_STOP_BAR_MISS`. Enrollment has no free threshold parameter: it loads theta_enroll
+from a passing artifact and records its SHA-256. Verification refuses non-passing/malformed
+thresholds and treats unratified voiceprints as absent unless an explicit pilot-only override is
+present.
+
+The speaker representation now includes the paper's actual `facebook/wav2vec2-base` family:
+mean-pooled 768-dimensional utterance embeddings, used inside the project's safer
+verification-never-identification rule. ECAPA remains a separately labeled engineering
+comparator, not a silent substitute. Both real backends require a complete
+`b5-audio-model-manifest-v1`; every local model file must match its pinned SHA-256 and unlisted
+files refuse. Hearing acquisition now adds `--no-overwrites` and forbids combining real `--fetch`
+with the unverified-package dry-run override. A witness poisons its hearing only when CHECK-A
+actually ACCEPTS a member match; ordinary witness turns remain excluded but do not destroy valid
+member turns.
+
+Engineering verification after the hardening: calibration 5/5, enrollment/verification 23/23,
+diarization 5/5, alignment 8/8, attribution 17/17, hearing acquisition 5/5. Standard Aeneas fragment
+JSON is now the primary MFCC/dynamic-time-warp boundary proposal when supplied; exact fragment
+count, normalized transcript text, finite time, and non-overlap are mandatory. Local Whisper word
+timestamps remain only the independent word-recovery cross-check, and any Aeneas mismatch fails
+the hearing closed instead of falling back silently. The local Aeneas/eSpeak toolchain and real
+human boundary pilot remain user-gated. No model was downloaded, no real thresholds were fit, no
+candidate entered the active review/descriptor artifacts, and no Big Five or influence number
+moved.
+
+## 44. Source-disjoint Wav2Vec identity experiments - negative result, production remains closed (2026-07-16)
+
+The paper-faithful path in section 43 was exercised as a pre-lock, weak-label laboratory study,
+not as P1 and not as evidence licensed for production. A locally present
+`facebook/wav2vec2-base` snapshot was discovered without a network call and pinned in
+`b5_audio_wav2vec2_model_manifest.json.candidate`: config, preprocessor, and model-weight
+SHA-256s are complete, and the backend still runs local-only. The embedding contract was split
+tests-first: `embed_raw` returns the paper's unnormalized 768-dimensional mean-pooled
+representation for a classifier, while `embed` unit-normalizes the same representation for
+cosine verification. Deterministic 20-second chunking bounds memory without changing the
+claim-only decision rule. Calibration now types its score space (`cosine` versus
+`claimed_class_probability`), requires explicit label provenance, and makes every
+machine-labeled artifact non-consumable even if its numeric bars happen to clear.
+
+Three results close the present Wav2Vec route without post-test tuning:
+
+1. Failure archaeology on 30 members found only 11/30 correct top-1 raw-cosine matches and only
+   9/30 passing the identity guard. These scores were never accepted as profile evidence.
+2. A deterministic multinomial logistic head used four hard-signal sources per member, with
+   source-disjoint train/calibration/test partitions and four fixed five-second windows per
+   source. Calibration EER was .317. On untouched sources, segment genuine acceptance was .267
+   and all-windows unit acceptance was .100; segment impostor rejection was .992 and unit
+   impostor rejection was 1.000. Only 12 caption-mismatch negatives were available, far below
+   the 148 bar.
+3. A fresh cohort of 21 members excluded every member in result 1 and used six distinct sources
+   per member (three train, one early-stop validation, one calibration, one untouched test).
+   This run used the article's exact reported classifier recipe: one linear neural layer over
+   raw 768-dimensional Wav2Vec representations, Adam at .001, cross-entropy, batch size 8, and
+   early stopping after three unimproved epochs. Calibration EER was .226. On untouched sources,
+   segment genuine acceptance was .333 and all-windows unit acceptance was .095; segment
+   impostor rejection was .988 and unit impostor rejection was .998. This fresh cohort had zero
+   caption-mismatch negatives, so `theta_accept` was unavailable; its held-out diagnostic used
+   calibration `theta_eer` and labels that threshold research-only.
+
+Both fitted studies have `status: FAILED_WEAK_LABEL_SMOKE`, `human_ratified_labels: false`,
+`calibration_artifact_consumable: false`, and `production_consumers: 0`. Their split, trial,
+threshold, model, and fitted-head hashes are recorded under `outputs/audio_linear_30member/` and
+`outputs/audio_neural_fresh21/`. The convergence of a failed cosine baseline, a failed linear
+head, and a failed exact-method fresh-cohort head rules out an optimizer or one-cohort accident.
+It does not show that the article's random-utterance classification result is wrong; it shows
+that the method does not transfer at the required error rates to this harder
+source/event-disjoint congressional verification contract with sparse, weak machine labels.
+
+No more fitting is permitted on either consumed test split. The production design therefore
+remains: roster-resolved CHECK-T; Aeneas transcript boundaries with an independent ASR
+word-recovery check; trim/VAD/diarization and overlap exclusion; human-ratified multi-event
+enrollment; claim-only CHECK-A as a veto; and the unchanged two-human-review admission gate.
+Topic-conditioned within-speaker F0 is computed only after identity passes. Any future acoustic
+route needs a new preregistration, human-ratified enrollment/calibration clips, all 148
+caption-mismatch negatives, and a speaker-specialized verification comparator; it cannot be
+presented as a continuation that tunes these Wav2Vec test results.
+
+## 45. O/N/C new-criterion cross-panel successor — no promotions; originals preserved (2026-07-16)
+
+At the user's request, E and A were held fixed and a tests-first successor attempted genuinely new
+behavioral criteria for O, N, and C. Before implementation, the complete original score artifact
+and Senate gold were copied byte-for-byte under `originals/big5_onc_20260716/` (SHA-256s
+`2b351af4...4317c13` and `ff5a9483...7afe7a`). The RED lock at `6612530` fixed construction,
+coverage/reliability stop bars, fusion weights, panel gates, and a one-look rule. The implementation
+never exposed criterion construction to the panels; 12/12 successor contracts and the 74/0 full
+kernel were green before the criterion freeze.
+
+The new O criterion combined cross-context policy-domain entropy and MATTR over deterministic,
+volume-bounded INTERVIEW and CREC samples. Its reliability cleared (source r=.160, SB=.275), but
+coverage was only 198 members (122 House), below the locked 250/150 floors. O therefore stopped
+before any gold pairing; its original academic-panel-supported status remains untouched.
+
+The new N criterion measured within-interview successive affective lability, residualized for
+demographics, chamber, mean affect, turn length, and exposure. Coverage was 234 and deterministic
+package split-half reliability was r=.354 / SB=.523, licensing the one look. The fixed 70% original
+/ 30% lability candidate retained an insider association (r=.299, p=.029, partial=.268) but failed
+dominance; academics missed r/p/dominance (r=.143, p=.176) despite a positive partial (.328). MISS;
+the route is closed and the original insider-supported N remains.
+
+The new C criterion required consistency in both roll-call participation and LEP follow-through:
+the lower of the two within-chamber z-scores, nuisance-residualized. Coverage was 447 and component
+r=.039, clearing its pre-look bars. The fixed 30% original / 70% execution-consistency candidate
+improved insiders from same-roster r=.319 to .393 and passed every insider gate (p=.0036,
+partial=.404, dominant). Academics remained null and non-dominant (r=.066, p=.326,
+partial=.104). MISS; the result strengthens the interpretation of C as insider-visible execution
+behavior but does not license an academic-panel personality claim.
+
+Exact result: `big5_onc_crosspanel_successor.json.candidate`, SHA-256
+`fc3bdbfa59671f61891c34d38e13839f57092c2110d760a12e221e7fc43ba5e9`. Production consumers are
+zero. No original score, status, profile, narrative, engine input, E result, or A result moved.

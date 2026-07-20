@@ -22,3 +22,18 @@ MIN_MEMBER_DISTINCT_TOPICS = 2
 MIN_TOPIC_SPEECH_UNITS = 2
 
 assert MIN_MEMBER_TARGET_SEC == 60.0
+
+# Speaker-identity layer (audio-identity design 2026-07-16, user-directed build; research-only,
+# .candidate outputs consumed by nothing until ratified).  Enrollment demands multiple events so a
+# voiceprint never rests on one recording's channel; the acoustic checks are VERIFICATION only —
+# a unit is excluded on disagreement, never reassigned to a better-matching member.  The cosine
+# acceptance threshold is deliberately NOT a code constant: it lives in the calibrated thresholds
+# artifact (b5_audio_identity_thresholds.json.candidate) and consumers refuse to run without it.
+ENROLL_MIN_CLIPS = 3
+ENROLL_MIN_EVENTS = 2
+ENROLL_MIN_SEC = 180.0
+IDENTITY_MIN_COVERAGE = 0.85
+IDENTITY_MIN_MARGIN = 0.10
+IDENTITY_TURN_TRIM_SEC = 0.5
+ALIGN_MIN_TURN_WORD_MATCH = 0.80
+ALIGN_MIN_HEARING_WORD_MATCH = 0.70

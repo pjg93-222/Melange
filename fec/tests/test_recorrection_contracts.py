@@ -37,6 +37,14 @@ class DialContracts(unittest.TestCase):
         self.assertIsNotNone(m, "DEFENSIVE set literal not found")
         self.assertIn("CU Tax Status", m.group(1))
 
+    def test_money_response_reads_python_stance_authority_not_workbook_view(self):
+        # Col G is a synchronized display.  Consumers must derive the same overall tier directly
+        # from category_stance.json, or an open/stale workbook can erase the Opponent rung.
+        txt = source("money_response.py")
+        self.assertIn("category_stance.json", txt)
+        self.assertIn("MC.overall_tier", txt)
+        self.assertNotIn("openpyxl.load_workbook", txt)
+
 
 class StackContracts(unittest.TestCase):
     def test_tweet_classical_read_uses_classifier_class_order(self):

@@ -54,3 +54,6 @@ fec/lep/
 fec/votesmart_api_key.txt
 !source_data/interview_n_affective.json
 !source_data/wj_n_labels.json
+
+# hand-curated hearings media map (config, not data)
+!hearings_media_map.csv

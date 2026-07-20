@@ -213,12 +213,19 @@ ok('committee title does not substitute for action',_g['CU Tax Status']=='Ally' 
 ok('uncorroborated top cells cap to Ally, raw preserved',
    _g['Interchange']=='Ally' and _cap=={'Interchange':'Defender','CU Tax Status':'Champion'})
 ok('cap touches nothing else',_g['TCPA']=='Skeptic')
-_ov,_od=MC.overall_say_do_gate('__test__',_g,_cm,_cor)
+# Current overall Champion floor is 3.65. Use equal-weight synthetic domains so the gated mix remains
+# a Champion while the aggregate delivery coverage is below 2/3 (5/8): this isolates the overall cap.
+MC._CORR['__test__']={'sponsored':{'top%d'%i for i in range(1,6)},'advanced':set()}
+MC._VOTECORR['__test__']=set()
+_raw8={'top%d'%i:'Champion' for i in range(1,9)}
+_g8,_c8,_p8,_r8=MC.cap_uncorroborated('__test__',_raw8)
+_ov,_od=MC.overall_say_do_gate('__test__',_g8,_raw8,_r8)
 ok('overall Champion requires delivery in at least two-thirds of raw top cells',
-   _od['raw']=='Champion' and _ov=='Ally' and _od['delivery_ratio']==.5)
-MC._CORR['__test__']['sponsored'].update({'Technology & Emerging','Fraud Prevention'})
-_raw6={'CFPB':'Champion','Payments':'Champion','Technology & Emerging':'Champion',
-       'Fraud Prevention':'Champion','Interchange':'Defender','CU Tax Status':'Champion'}
+   _od['raw']=='Champion' and _ov=='Ally' and _od['delivery_ratio']==.625)
+# Four of six equal-weight top domains delivered: gated mean remains above the current Champion floor
+# and the exact 2/3 aggregate coverage clears.
+MC._CORR['__test__']={'sponsored':{'top%d'%i for i in range(1,5)},'advanced':set()}
+_raw6={'top%d'%i:'Champion' for i in range(1,7)}
 _g3,_c3,_p3,_r3=MC.cap_uncorroborated('__test__',_raw6)
 _ov3,_od3=MC.overall_say_do_gate('__test__',_g3,_raw6,_r3)
 ok('six top domains with two-thirds delivered clear the aggregate say-do rule',
@@ -271,6 +278,21 @@ ok('only live member questioning survives hearing parser',
    'live question-period' in _rows[0][2] and 'opening statement' not in _rows[0][2].lower() and
    'written question' not in _rows[0][2].lower(),_rows)
 ok('joint package scope is explicit',cr.chrg_scope('CHRG-117jhrg12345')==(117,'joint'))
+
+print('[audio speaker-identity layer: module suites (design 2026-07-16, user-directed)]')
+# Each identity module ships its own plain-assert suite (enroll+verify2, diarize, align, attrib,
+# hearings-media map). They are registered here as subprocesses so the kernel gate covers them
+# without loading external model weights or touching the network. The Wav2Vec stream mocks and
+# paper-exact neural-head fixture use local CPU torch; speechbrain/faster-whisper remain unnecessary.
+import subprocess as _sp,re as _re
+for _t in ('test_audio_calibrate','test_audio_identity','test_audio_linear_head',
+           'test_audio_neural_head',
+           'test_audio_diarize','test_audio_align','test_audio_attrib','test_hearings_media',
+           'test_b5_onc_successor'):
+    _r=_sp.run([sys.executable,os.path.join(FEC,'tests',_t+'.py')],capture_output=True,text=True,encoding='utf-8',errors='replace')
+    _m=_re.search(r'(\d+) passed, (\d+) failed',_r.stdout or '')
+    ok('%s suite clean'%_t,_r.returncode==0 and bool(_m) and _m.group(2)=='0' and int(_m.group(1))>0,
+       ((_r.stdout or _r.stderr or '').strip() or 'no output').splitlines()[-1])
 
 print('\nKERNEL TESTS — %d passed, %d FAILED'%(P,F))
 sys.exit(1 if F else 0)
