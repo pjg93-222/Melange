@@ -16,8 +16,15 @@ Transcript proxies (member turns only; host speech dropped at ingest; stage mark
 CONFOUND CONTROLS (mandatory per the survey): every feature z-scored WITHIN PROGRAM (format
 manufactures overlap — Canal9; debates != sit-downs), member score = turn-weighted mean of
 per-program z; all rates per-turn or per-1k-words (airtime control). INTERVIEW channel only for
-traits; CHRG hearing cutoff-received kept as a separate CONTEXT covariate (interruptions received
-in hearings are role/target-driven — Miller & Sutherland APSR — not disposition).
+traits; CHRG hearing cutoff-received kept as a separate CONTEXT covariate (being interrupted is
+the interrupter's act, not the member's own conduct). NOTE 2026-07-10: the former blanket doctrine
+here ("interruptions received in hearings are role/target-driven — Miller & Sutherland — not
+disposition") was a session's methodological choice, never a user rule, and is WITHDRAWN by user
+directive: hearing conduct COUNTS under the role-scope rule — within the normal scope of
+chair/ranking-member duties it does not count; beyond it (temperamental escalation, or relenting,
+which signals agreeableness) it does. User's rule of thumb, verbatim: "is this beyond what is
+required of them". The agentic hearing channel lives in fetch_hearings_antag.py (hearing_antag2
+tables; builder pending) — this module stays interview-only for its trait features.
 These estimate REPUTATION (observer-perceived traits) — document as such; validate convergence vs
 lexical Big5 E (expect r~.2-.4 if both channels work; more = suspect overfit).
 Output: interaction_features.json. Read-only on social_media.db; no API."""
@@ -137,7 +144,9 @@ from moneyball_core import dump_atomic
 dump_atomic({"members": out, "hearing_covariate": hear, "feats": FEATS,
              "method": "interview interaction dynamics, per-program z (>=12 turns/program, >=8 members/program), "
                        "turn-weighted member aggregate; measures OBSERVER-PERCEIVED traits (reputation); "
-                       "hearing cutoff-received kept separate (role-driven, not disposition)"},
+                       "hearing cutoff-received kept separate (receiving a cutoff is the interrupter's act; "
+                       "agentic hearing conduct counts via fetch_hearings_antag.py under the 2026-07-10 "
+                       "user role-scope rule)"},
             B + r"\interaction_features.json")
 print("interaction features: %d members (interviews) | hearing covariate: %d members" % (len(out), len(hear)))
 top = sorted(out, key=lambda m: -out[m]["wpt_mean"])[:5]

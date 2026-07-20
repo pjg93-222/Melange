@@ -30,8 +30,17 @@ turn-cutoff rate (transcript "--"/non-terminal endings = interrupted), contested
 discourse markers. Literature basis: turn statistics alone reach ~73% binary accuracy on observer-rated Extraversion
 (Valente Interspeech'12); overlap involvement is the only family recovering Neuroticism; word count is the top
 observed-E feature (Mairesse JAIR'07). All features z-scored WITHIN PROGRAM (broadcast format manufactures overlap),
-turn-weighted member aggregate; hearing cutoff-received kept as a context covariate only (role-driven, Miller &
-Sutherland APSR). Measures observer-perceived traits (reputation), by design.
+turn-weighted member aggregate; hearing cutoff-received kept as a context covariate only (receiving a cutoff is the
+interrupter's act, not the member's). Measures observer-perceived traits (reputation), by design.
+[2026-07-10 amendment: the original wording here justified the covariate quarantine with a blanket "hearing
+interruption behavior is role/target-driven (Miller & Sutherland APSR), not disposition" doctrine. That doctrine was a
+session's methodological choice, never a user rule, and is WITHDRAWN by user directive of 2026-07-10: hearing conduct
+counts under the role-scope rule — conduct within the normal scope of chair/ranking-member duties does not count;
+beyond-role conduct does (temperamental escalation = antagonism; the chair relenting = agreeableness). User's rule of
+thumb, verbatim: "is this beyond what is required of them". Agentic hearing events are collected by
+`fec/fetch_hearings_antag.py` into `hearing_antag2`/`hearing_meta2` (v1 tables superseded); any trait use remains
+gated on a builder with chair/ranking-role, majority/minority, and contentiousness residualization plus the standard
+prereg discipline.]
 
 ### 1.4 LLM item-level scorer (PARKED — `fec/big5_llm.py`, itemset-v2)
 Per the 2023–2026 literature (PsyCoT; Ganesan; Peters & Matz; Marengo; NHB'25 zero-shot consensus ≈ .42–.44, the best
