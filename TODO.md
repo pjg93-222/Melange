@@ -73,10 +73,11 @@ and the audit reports, and the refuted/do-not-reflag lists in those reports stay
 
 - [ ] **One ambiguous interview passage** attaches to 2 sibling packages (36/37 pin
       exactly; the 37th shows on both rather than guessing). Cosmetic duplicate.
-- [ ] **Doc-rot sweep** — two stale lines found this week by cross-checking docs against
-      code (change-control §2.2 `--from` trap [fixed @565136c]; `.claude/commands/`
-      `fable-audit.md:76` still names col-G in the convergence story). A systematic pass of
-      skill/doc claims vs code would likely find more.
+- [ ] **Doc-rot: standing hygiene.** The 2026-07-19 sweep (@b706ec7) corrected 14 files, but
+      doc-rot regenerates every time counts/positions change. Cheapest guard would be an
+      audit check asserting README/INDEX kernel+audit counts match the live harness output —
+      considered, not built (it would couple the audit to doc text). Until then: re-verify
+      counts and chain positions whenever they move.
 - [ ] **`make_combined.py` id-collision note** — build prints `id collisions: ['backbtn']`
       (handled by rename, by design). If a second collision ever appears, the rename map
       needs extending; today it is expected output, not a defect.
@@ -99,6 +100,11 @@ and the audit reports, and the refuted/do-not-reflag lists in those reports stay
       @33b07a9 (item stays open in §1 only as the root-cause extraction decision).
 - [x] 2026-07-19 — Ops hardening via Codex lane @565136c: stale-desk-HTML guard in
       `make_combined.py`, archive_leg floor check, docstring + dial-catalog doc-rot.
+- [x] 2026-07-19 — Doc-rot sweep @b706ec7 (via Codex, 2 rounds): killed the FALSE
+      worktree-isolation law (worktrees DO isolate data — `paths.py:7-8`) that had spread to
+      6 skills + commit 10a5f97; split the audit exit-code claim (audit_full exits 1 on FAIL;
+      audit.py/audit_frontier.py still always 0); fixed TWO verification recipes that
+      confirmed the wrong answer; counts 37→84 / 69→136, chain 17→36 entries.
 - [x] 2026-07-19 — Merge debt CLEARED: data-collection-rules-audit (antag v2 kept over
       main's v1 @290b4b9), cspan-video-scraper (main's 07-14 repair kept @4307515),
       gallant-gates (prereg ledger + audio TDD, 84 kernel tests @18a0ec2). Zero branches
