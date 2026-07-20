@@ -71,6 +71,23 @@ and the audit reports, and the refuted/do-not-reflag lists in those reports stay
 
 ## 4 — Engineering follow-ups (no gate needed, just time)
 
+- [ ] **EXPECTED on the next chain run — money-plane artifacts will move, and that is NOT an
+      S1 finding.** The gallant-gates merge (2026-07-19) brought an unexercised engine change:
+      `fec/money_response.py` no longer reads the workbook's `Rank & Allocation` col G for each
+      member's overall tier; it now derives the same tier from `category_stance.json` via
+      `MC.overall_tier` (rationale in-file: Python owns the stance authority, col G is a
+      synchronized display that can be stale while Excel is open). Introduced upstream @be8f4ad
+      (07-16), merged to main today, and **never run on main** — the deployed
+      `budget_frontier.json` / `optimize_result.json` / `per_topic_*.json` / salience advisory
+      were all produced at ~06:4x today by the OLD code, while the new code landed at 19:27.
+      Six consumers import it: `flip_model`, `lt_priming`, `optimize`, `per_topic_flip`,
+      `salience_shock`, `scenario`. **Ranks are NOT affected** — verified: neither
+      `compute_pillars.py` nor `per_category_stance.py` imports `money_response`, so the rank
+      authority path is independent. The user-ratified dials (`MAXSHIFT` 18 / `HALF` 0.10 /
+      `DTHRESH` 11.25) are untouched. `audit_full` re-runs both engines into its `_audit_tmp_*`
+      files and passes 136/136, so the new code is self-consistent. Action: on the next chain
+      run, expect money/scenario deltas, confirm ranks stay at md5 80fa70d5…, and record the
+      movers — do not treat it as an unexplained delta.
 - [ ] **One ambiguous interview passage** attaches to 2 sibling packages (36/37 pin
       exactly; the 37th shows on both rather than guessing). Cosmetic duplicate.
 - [ ] **Doc-rot: standing hygiene.** The 2026-07-19 sweep (@b706ec7) corrected 14 files, but
