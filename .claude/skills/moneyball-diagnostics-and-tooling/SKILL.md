@@ -18,12 +18,12 @@ This skill is the measurement manual for the Moneyball system — a calibrated P
 
 ## Quick reference
 
-Run everything from any directory unless noted — all fec scripts resolve data paths through `fec/paths.py` to the LIVE tree `C:\Users\pgoff\OneDrive\Desktop\Melange Systems`, **even when the code copy lives in a git worktree**. Quote every path (they contain spaces).
+Run data-dependent tools from the live tree, or invoke the absolute live-tree script paths shown below — `fec/paths.py:7-8` defaults ROOT to the parent of the imported paths.py, so a script run from a git worktree targets that worktree's EMPTY data plane unless `MONEYBALL_ROOT` redirects it. Reads there die on missing inputs and writes land as throwaway worktree artifacts; if `MONEYBALL_ROOT` points at live, writes DO hit live. Quote every path (they contain spaces). (Corrected 2026-07-19; the previous version asserted the opposite. Verified against `fec/paths.py:7-8`.)
 
 | Tool | Command | Proves / measures | Safe to run? |
 |---|---|---|---|
-| Kernel tests | `python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\run_tests.py"` | 37 math-kernel invariants | YES (reads live data; writes+deletes one OS-temp file) |
-| Full-body audit | `python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\audit_full.py"` | 69 checks, whole system | YES-ish (~2.5 min; leaves 2 `_audit_tmp_*.json` at live root; may refresh `pillar_inputs_snapshot.json`) |
+| Kernel tests | `python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\run_tests.py"` | 84 math-kernel invariants as of 2026-07-19 | YES (reads live data; atomic-write checks use and clean OS-temp files) |
+| Full-body audit | `python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\audit_full.py"` | 136 checks as of 2026-07-19, whole system | YES-ish (~2.5 min; leaves 2 `_audit_tmp_*.json` at live root; audit mode does not advance `pillar_inputs_snapshot.json`, `compute_pillars.py:64-69`) |
 | Integrity sub-audit | `python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\audit.py"` | 22 workbook+artifact checks | YES (read-only) |
 | Frontier sub-audit | `python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\audit_frontier.py"` | 11–12 frontier-artifact checks | YES (read-only) |
 | Rank parity | `python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\compute_pillars.py"` | `ranks_python.json` matches a fresh recompute (`PARITY: CLEAN`) | YES (audit mode; may refresh snapshot; exit 1 on drift) |
@@ -46,11 +46,11 @@ Run everything from any directory unless noted — all fec scripts resolve data 
 
 ## 1. The two harnesses
 
-### 1a. Kernel tests — `fec/tests/run_tests.py` (37 checks)
+### 1a. Kernel tests — `fec/tests/run_tests.py` (84 checks as of 2026-07-19)
 
 **What it protects.** The shared math layer every engine imports: `fec/moneyball_core.py` (the "kernel"), `fec/money_response.py`, `fec/flip_model.py`. These hold the calibrated constants and physics that, if silently changed, would move all 533 ranks with no error message. Zero test framework — plain `ok(name, cond, detail)` calls that tally pass/fail (`run_tests.py:11-14`).
 
-Check groups (line refs in `fec/tests/run_tests.py`):
+Long-standing core check groups (newer routing, identity, attribution, and registered module suites follow in `fec/tests/run_tests.py`):
 
 | Group | Checks | What breaks if it fails |
 |---|---|---|
@@ -64,15 +64,15 @@ Check groups (line refs in `fec/tests/run_tests.py`):
 | flip_model (81-84) | 4 | Flip probability in (0,1), CU money raises it, industry money lowers it, receptivity scales it. |
 | Say-do gate (95-107) | 7 | The "cap law": an uncorroborated Champion/Defender stance displays as Ally unless corroborated by Authorship (A), a recorded Vote (V), or committee Jurisdiction (J); missing evidence source fails OPEN (no caps); `delivery_mult` bounded [0.70, 1.00]. |
 
-**How to read output.** Per-check `  OK   name` / `FAIL  name  :: detail` lines (detail prints only on failure), tail line `KERNEL TESTS — 37 passed, 0 FAILED`. Exit code 1 on any failure (`run_tests.py:111`) — this is the ONLY harness whose exit code you can trust.
+**How to read output.** Per-check `  OK   name` / `FAIL  name  :: detail` lines (detail prints only on failure), tail line `KERNEL TESTS — 84 passed, 0 FAILED` as of 2026-07-19. Exit code 1 on any failure (`run_tests.py:298`); `audit_full.py` now also exits 1 on failure, while its standalone sub-audits do not.
 
-**Expected count: 37 as of 2026-07-09.** `README.md:11,56` still says 30 — stale doc, not a regression. The convention (`.claude/commands/fable-audit.md:35-36`): a HIGHER count than documented is fine (guards get added); any FAILED is the finding.
+**Expected count: 84 as of 2026-07-19.** The count only grows — trust the run output. The convention (`.claude/commands/fable-audit.md:35-36`): a HIGHER count than documented is fine (guards get added); any FAILED is the finding.
 
 **Trap for test authors.** The say-do block monkey-patches kernel caches (`MC._CORR/_VOTECORR/_JURISCORR/_DELIV`) and must restore each to `None` (the lazy-loader sentinel) afterward — copy the pattern at `run_tests.py:90-108` or every later check runs against synthetic data.
 
-### 1b. Full-body audit — `fec/audit_full.py` (69 checks as of 2026-07-09)
+### 1b. Full-body audit — `fec/audit_full.py` (136 checks as of 2026-07-19)
 
-The last step of the 17-step production chain (`fec/run_pipeline.py:19-35`), so every pipeline run self-audits. Also runnable standalone.
+The last entry of the 36-step production chain as of 2026-07-19 (`fec/run_pipeline.py:25-67`), so every pipeline run self-audits. Also runnable standalone.
 
 **Module structure** (section headers printed at runtime, line refs in `fec/audit_full.py`):
 
@@ -92,16 +92,16 @@ The last step of the 17-step production chain (`fec/run_pipeline.py:19-35`), so 
 | Psych/media schema | 265-347 | ~12 | Split-leak bound (≤4 known collisions); big5/reference/co-appearance/narrative/audio schema guards; desk-display reconstruction (displayed pillars × weights must rebuild the displayed score); **look-consequence lock** at 345-347: `b5_es_voice.json` must carry the recorded look `r=+0.208` exactly (that number is the recorded history of the ES cross-modal look — when writing about ES elsewhere, it carries a mandatory gender-confounded caveat; see `moneyball-docs-and-claims`). |
 | Say-do gate | 348-370 | 2 | Cap/proven/corroboration-path coherence (A/V/J; J only on gatekeep categories). |
 
-**What ALL CLEAN looks like** (`audit_full.py:372-374`):
+**What ALL CLEAN looks like** (`audit_full.py:1198-1202`):
 
 ```
-FULL-BODY AUDIT — 69 passed, 0 FAILED
+FULL-BODY AUDIT — 136 passed, 0 FAILED
   ALL MODULES CLEAN.
 ```
 
 On failure the tail shows a nonzero FAILED count plus `  FAILURES: [<names>]`, and the per-check line carries the detail.
 
-**Critical trap: exit code is ALWAYS 0.** `audit_full.py`, `audit.py`, and `audit_frontier.py` never call `sys.exit` after reporting — the chain runner prints `OK` for the audit step even when checks FAILED. **Gate on the tail text `ALL MODULES CLEAN.`, never on the return code.**
+**Critical trap: exit-code behavior differs by script.** `audit_full.py` exits 1 when any check fails and 0 when clean; `audit.py` and `audit_frontier.py` have no `sys.exit` calls and still always exit 0. The chain runner therefore registers a failed `audit_full.py` step and aborts. **Gate on the tail text `ALL MODULES CLEAN.` as belt-and-braces because older automation may assume exit 0.** (Corrected 2026-07-19; verified against `fec/audit_full.py:1198-1202` and zero `sys.exit` hits in both sub-audits.)
 
 **Not strictly read-only.** It leaves `_audit_tmp_optimize.json` and `_audit_tmp_frontier.json` at the live root (never cleaned up — no `os.remove` in the file), and its `compute_pillars.py` sub-run refreshes `pillar_inputs_snapshot.json` when the workbook view cache is alive. "Read-only-safe" (project law) means *safe to run autonomously*, not zero-write.
 
@@ -110,7 +110,7 @@ On failure the tail shows a nonzero FAILED count plus `  FAILURES: [<names>]`, a
 - `compute_pillars` printing `view STALE ... verifying the AUTHORITY instead` (`compute_pillars.py:115`) is normal between Excel opens.
 - Deliberately tolerant thresholds in `audit_frontier.py`, each with an inline history comment: defend-skew ≤0.92 (relaxed 0.80→0.85→0.90→0.92 because pro-CU defendable allies genuinely skew Republican — a data fact, verified repeatedly, lines 67-78), electoral-base tolerance 1.5 for Monte-Carlo noise (41-45), contest entry-mix enforced only at n≥12 (52-66). Do not "tighten" these; the comments are the refuted-finding ledger.
 
-**Known accepted failures: none on this tree as of 2026-07-09** — a healthy run is 69/69. One caution: a 2026-07-08 audit on a different branch (`claude/magical-booth-f272da`, report `AUDIT_FINDINGS_2026-07-08_NETWORK_VOTE_CYCLE.md`, not on main) recorded "64/65 with 1 pre-existing electoral_plays fail"; that report is not in this tree, so if you ever see an electoral-plays check fail, read that branch's report before treating it as new.
+**Known accepted failures: none on this tree as of 2026-07-09** — a healthy run is 136/136 as of 2026-07-19. One caution: a 2026-07-08 audit on a different branch (`claude/magical-booth-f272da`, report `AUDIT_FINDINGS_2026-07-08_NETWORK_VOTE_CYCLE.md`, not on main) recorded "64/65 with 1 pre-existing electoral_plays fail"; that report is not in this tree, so if you ever see an electoral-plays check fail, read that branch's report before treating it as new.
 
 **audit.py argument-order trap.** `audit.py` uses `ok(cond, msg)`; `run_tests.py`/`audit_full.py`/`audit_frontier.py` use `(name, cond, detail)`. Copy-pasting a check between files silently inverts it.
 
@@ -205,7 +205,7 @@ Usually consumed via audit_full section [1], but useful alone after frontier wor
 
 ## 4. Mtime-ordering freshness checks
 
-Derived artifacts do not know when their inputs changed — nothing re-runs producers automatically outside the 17-step chain, and several producers are NOT in the chain at all (`build_electoral_plays.py`, `kb_benchmark.py`, `signed_coalitions.py`, the collector-fed layers). The cheap detector is mtime ordering: **an input file newer than its derived artifact means the producer has not seen that input.**
+Derived artifacts do not know when their inputs changed — nothing re-runs producers automatically outside the 36-entry chain as of 2026-07-19 (`fec/run_pipeline.py:25-67`), and several diagnostic/collector producers are NOT in the chain at all (`kb_benchmark.py`, `signed_coalitions.py`, the collectors). The cheap detector is mtime ordering: **an input file newer than its derived artifact means the producer has not seen that input.**
 
 - The audit itself uses this method once: the press-component meta must be fresh vs the tone CSV within one weekly cycle (`audit_full.py:206-210`).
 - The audit CANNOT see the most famous staleness: `electoral_plays.json` internal-consistency checks pass even when the stance matrix has moved (audit_full §[3]). The 2026-07-09 flag resolved 2026-07-10: an authorized rebuild was **byte-identical** (content already current; the flag was mtime-ordering only). The fix chain (`build_electoral_plays.py → build_dashboard_bundle.py → make_dashboard_html.py`) remains **user-gated: never run it unprompted** (session-ratified, 2026-07).
@@ -249,17 +249,17 @@ Regex-scans `<root>/fec/*.py` + `fec/tests/*.py` for `os.environ.get / os.enviro
 
 ## Provenance and maintenance (2026-07-09)
 
-Facts here decay. Re-verify before trusting a number; run these from the repo root (`cd "C:\Users\pgoff\OneDrive\Desktop\Melange Systems"` or the worktree — quote the path).
+Facts here decay. Re-verify before trusting a number; run data-dependent commands from the live repo root (`cd "C:\Users\pgoff\OneDrive\Desktop\Melange Systems"`), or set `MONEYBALL_ROOT` to it — quote the path.
 
 | Volatile fact | Re-verify with |
 |---|---|
-| Kernel test count = 37 | `python "fec\tests\run_tests.py"` → tail `KERNEL TESTS — N passed`; or count: `grep -c "^ok(" fec/tests/run_tests.py` is unreliable (indented calls) — run it. |
-| audit_full = 69 checks, ALL MODULES CLEAN | `python "fec\audit_full.py"` → tail (check live jobs first); count grows as guards are added — any FAILED is the finding, not a count mismatch (`.claude/commands/fable-audit.md:35`). |
-| Harness exit codes (audit always 0) | `Select-String -Path fec\audit_full.py -Pattern "sys.exit"` → expect no hits after the report block (lines 372-374). |
+| Kernel test count = 84 as of 2026-07-19 | `python "fec\tests\run_tests.py"` → tail `KERNEL TESTS — N passed`; or count: `grep -c "^ok(" fec/tests/run_tests.py` is unreliable (indented calls and registered module suites) — run it. |
+| audit_full = 136 checks as of 2026-07-19, ALL MODULES CLEAN | `python "fec\audit_full.py"` → tail (check live jobs first); count grows as guards are added — any FAILED is the finding, not a count mismatch (`.claude/commands/fable-audit.md:35`). |
+| Harness exit codes differ | `Select-String -Path fec\audit_full.py -Pattern "sys.exit"` → expect exactly one hit at line ~1201; `Select-String -Path fec\audit.py,fec\audit_frontier.py -Pattern "sys.exit"` → expect no hits. |
 | Sub-audit floors ≥22 / ≥11 | `Select-String -Path fec\audit_full.py -Pattern "audit.py','integrity"` (line 16). |
 | Temp files left at live root | `Select-String -Path fec\audit_full.py -Pattern "_audit_tmp"` (lines 89, 113); `Get-ChildItem "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\_audit_tmp_*.json"`. |
 | Redirect dials FRONTIER_OUT / OPT_OUT | `Select-String -Path fec\budget_frontier.py,fec\optimize.py -Pattern "FRONTIER_OUT|OPT_OUT"` (budget_frontier.py:120, optimize.py:22). |
-| README counts stale (30/59 vs 37/69) | `Select-String -Path README.md -Pattern "kernel invariant|59 checks"` (README.md:11,56-57) — if README was updated, drop this note. |
+| README counts = 84/136 as of 2026-07-19 | `Select-String -Path README.md -Pattern "84 kernel invariants|136 full-audit checks"` — counts only grow; trust the run output. |
 | stance_eval default column + gold file | `Select-String -Path fec\stance_eval.py -Pattern "model_stance|gold_label_queue"` (lines 12-13). |
 | mc_stability RUNS matrix + 100%-overlap record | `Select-String -Path fec\mc_stability_check.py -Pattern "RUNS ="` (line 15); `Select-String -Path fec\salience_shock.py -Pattern "mc_stability"` (line 44). |
 | receptivity_sensitivity replication gate + variants | `Select-String -Path fec\receptivity_sensitivity.py -Pattern "REPLICATION GATE|VARIANTS"` (lines 43-52, 84). |
@@ -270,4 +270,4 @@ Facts here decay. Re-verify before trusting a number; run these from the repo ro
 | method_audit cwd dependency | `Select-String -Path fec\method_audit.py -Pattern "itpas2"` (line 67); file exists only at the LIVE `fec\itpas2.txt`. |
 | Dial inventory (88 as of 2026-07-09) | `python "...\scripts\env_dials.py" "<root>"` — the number moves; the tool is the source. |
 | Input-purity method codification | `Select-String -Path AUDIT_FINDINGS_2026-07-03.md -Pattern "input-purity"` (lines 33-44). |
-| Live-tree resolution from worktrees | `Select-String -Path fec\paths.py -Pattern "MONEYBALL_ROOT"` (line 7). |
+| Imported-file-relative ROOT / worktree isolation | `Select-String -Path fec\paths.py -Pattern "MONEYBALL_ROOT"` (lines 7-8). |

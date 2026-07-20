@@ -1,6 +1,6 @@
 ---
 name: moneyball-architecture-contract
-description: The Moneyball system's shape contract - the layer stack and data flow, artifact ownership (which script writes which JSON), the load-bearing invariants (two cpf physics, the '-' no-position ontology, SEED=7/MC=20 splitmix64 determinism, atomic writes, rank authority = ranks_python.json with the workbook as a view), paths.py root resolution and why git worktrees do NOT isolate data, known-weak points (congestion.json has no live producer, the hand-maintained Python-to-JS engine mirror, OneDrive locks), and the moneyball_core kernel API a new fec script should import. Triggers - "where does X come from", "which script writes Y", "can I merge these two cpf functions", "why is my run non-deterministic", "why did the workbook read None", "is it safe to run this from a worktree". Does NOT cover day-to-day running (moneyball-run-and-operate), change rules (moneyball-change-control), dials (moneyball-config-and-flags), live-failure triage (moneyball-debugging-playbook), or env setup (moneyball-build-and-env).
+description: The Moneyball system's shape contract - the layer stack and data flow, artifact ownership (which script writes which JSON), the load-bearing invariants (two cpf physics, the '-' no-position ontology, SEED=7/MC=20 splitmix64 determinism, atomic writes, rank authority = ranks_python.json with the workbook as a view), paths.py root resolution and what worktrees do/don't isolate, known-weak points (congestion.json has no live producer, the hand-maintained Python-to-JS engine mirror, OneDrive locks), and the moneyball_core kernel API a new fec script should import. Triggers - "where does X come from", "which script writes Y", "can I merge these two cpf functions", "why is my run non-deterministic", "why did the workbook read None", "is it safe to run this from a worktree". Does NOT cover day-to-day running (moneyball-run-and-operate), change rules (moneyball-change-control), dials (moneyball-config-and-flags), live-failure triage (moneyball-debugging-playbook), or env setup (moneyball-build-and-env).
 ---
 
 # Moneyball architecture contract
@@ -28,7 +28,7 @@ Moneyball is a legislative-influence model: it ranks the 533 members of the U.S.
 | 5 | Rank authority | `ranks_python.json` is THE score/rank source; the workbook is a self-refreshing VIEW | `fec/compute_pillars.py` docstring; `fec/moneyball_core.py:76-87` |
 | 6 | Corpus-relative z | All psych measurements are z-scores relative to THIS roster/corpus, not absolute scales | `fec/big5_traits.py:235`; `fec/behavioral_dispositions.py` |
 | 7 | Engine-input vs display-only | Only ratified artifacts feed the engines; LLM overlays are display-only until promoted (a user-gated step) | `fec/make_member_desk.py:101-104,140-141` |
-| 8 | Worktree ≠ sandbox | `fec/paths.py` hardcodes the live tree; any fec script run anywhere reads/writes production data | `fec/paths.py:7` |
+| 8 | Worktree data isolation | `fec/paths.py:7-8` defaults ROOT to the parent of the imported paths.py; worktree data planes are empty unless `MONEYBALL_ROOT` redirects them | `fec/paths.py:7-8` (corrected 2026-07-19) |
 | 9 | Import == execution | Most fec scripts have no `__main__` guard; importing them runs them | e.g. `fec/per_topic_coalition.py` (whole MC loop at module level) |
 
 ## 1. The system in one page
@@ -74,7 +74,7 @@ LAYER 5 — VIEWS (never inputs)
   make_combined.py -> Moneyball.html                      lock_dashboard.py -> deploy/index.html (AES-encrypted)
 ```
 
-The canonical run order is the 17-step `CHAIN` list in `fec/run_pipeline.py:19-35` (layers 3→2-stance→4→5→audit, in that exact order; collectors and `big5_traits.py` are manual/weekly, outside the chain). One ordering rule is load-bearing: `compute_pillars.py --write` runs BEFORE `sync_stance_g.py` because any openpyxl save destroys the workbook's cached formula values (see invariant 2.5). One feedback edge exists: `bipartisan.json` is written at chain step 13 (`build_dashboard_bundle.py`) but read by the kernel's `bpf()` in steps 5–12 — those steps consume the *previous* run's copy, which is why a stance/network change legitimately shifts engine outputs once more on the NEXT run (two-run convergence, not a bug).
+The canonical run order is the 36-step `CHAIN` list as of 2026-07-19 in `fec/run_pipeline.py:25-67` (layers 3→2-stance→4→5→audit, in that exact order; collectors and `big5_traits.py` are manual/weekly, outside the chain). One ordering rule is load-bearing: `compute_pillars.py --write` runs BEFORE `sync_stance_g.py` because any openpyxl save destroys the workbook's cached formula values (see invariant 2.5). One feedback edge exists: `bipartisan.json` is written late in the chain by `build_dashboard_bundle.py` but read by the kernel's `bpf()` in earlier engine steps — those steps consume the *previous* run's copy, which is why a stance/network change legitimately shifts engine outputs once more on the NEXT run (two-run convergence, not a bug).
 
 ## 2. Invariants — with the why
 
@@ -122,7 +122,7 @@ What openpyxl does to the file — the single most confusing physics in this pro
 
 - Rosters are read from TYPED columns (Rank & Allocation col A), never formula-backed ones (`fec/compute_pillars.py:32-34`).
 - The formula-backed pillar inputs O/E/F are snapshotted to `pillar_inputs_snapshot.json`, auto-refreshed while the cache is alive, bootstrapped from the newest cache-alive backup in `backups/` if missing (`fec/compute_pillars.py:47-50` comments).
-- Chain order: the rank authority is computed BEFORE the cache-killing col-G sync (`fec/run_pipeline.py:21-22`).
+- Chain order: the rank authority is computed BEFORE the cache-killing col-G sync (chain entries 14-15 as of 2026-07-19; `fec/run_pipeline.py:44-45`).
 - Never use `read_only=True` for random `.cell()` access: streamed sheets make each call O(sheet) — a measured 640-second pathology — and misread openpyxl-saved files (`fec/moneyball_core.py:61`).
 - Python writes VALUES only, backup-first into `backups/`; Excel must be CLOSED for any workbook write (PermissionError otherwise).
 
@@ -172,21 +172,24 @@ From the spec's "Authoritative sources by subsystem" table, spot-verified in cod
 | `congress_cosponsor_network_AUG*.xlsx` | `fec/build_multilayer_network.py` | loaders pick newest by mtime; revert = delete the AUG file |
 | `member_references.json` / `co_appearance.json` | `member_reference_layer.py` / `co_appearance_layer.py` | display/diagnostic layers |
 | `cu_valence_registry.json` | `fec/derive_valence_registry.py --write` | the ONLY force-tracked JSON — the user's committed valence judgments |
-| shared math/loaders | `fec/moneyball_core.py` | verified by `fec/tests/run_tests.py` (37 checks as of 2026-07-09) |
+| shared math/loaders | `fec/moneyball_core.py` | verified by `fec/tests/run_tests.py` (84 checks as of 2026-07-19; count only grows — trust the run output) |
 | Rank formula cells, committee pillar | **live Excel formulas — no builder script** | see weak point 5.4 |
 | `congestion.json` | **NO live producer** | see weak point 5.1 |
 
-## 4. paths.py and the worktree-shares-live-tree consequence
+## 4. paths.py and the worktree-isolated-data consequence
 
-`fec/paths.py` is 12 lines and is the whole path story:
+`fec/paths.py:7-12` is the whole default path story:
 
 ```python
-ROOT  = os.environ.get('MONEYBALL_ROOT',  r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems')
-DRAFT = os.environ.get('MONEYBALL_DRAFT', r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems')  # R press-pipeline root
-FEC=ROOT\fec   WORKBOOK=ROOT\Moneyball Main Version - Blended.xlsx   BACKUPS=ROOT\backups
+_HERE=os.path.dirname(os.path.abspath(__file__))
+ROOT=os.path.abspath(os.environ.get('MONEYBALL_ROOT',os.path.join(_HERE,os.pardir)))
+DRAFT=os.path.abspath(os.environ.get('MONEYBALL_DRAFT',os.path.join(ROOT,os.pardir,'Draft Systems')))
+FEC=os.path.join(ROOT,'fec')
+WORKBOOK=os.path.join(ROOT,'Moneyball Main Version - Blended.xlsx')
+BACKUPS=os.path.join(ROOT,'backups')
 ```
 
-Every fec script starts with `sys.path.insert(0, <its own dir>); from paths import ROOT` — so a git-worktree *copy* of paths.py gets imported, but its ROOT default is still the absolute live-tree path. **Consequence: git worktrees isolate CODE, not DATA.** Any fec script run (or merely imported — import == execution for nearly all of them) from any checkout reads and writes the production data tree and workbook. There is no such thing as "trying it in a worktree first". The only redirects are the env vars: set `MONEYBALL_ROOT` (and `MONEYBALL_DRAFT`) to a copied tree if you genuinely need a sandbox — and know that a full sandbox needs the workbook, all root JSONs, `social_media.db`, the `votes/` CSVs, and Draft Systems inputs present at that root. For casual verification, only `fec/tests/run_tests.py` and `fec/audit_full.py` are read-only-safe to run:
+When a fec script inserts its own directory and imports `ROOT` from `paths.py`, a worktree run imports the worktree's copy of paths.py and ROOT defaults to the parent of that imported file (the worktree root). **Consequence: git worktrees isolate DATA — which makes them the WRONG place to run data-dependent work.** A script run from a worktree targets the worktree's EMPTY data plane: reads die on missing inputs and writes land as throwaway worktree artifacts, not in live. To operate on real data from a worktree set `MONEYBALL_ROOT` to the live tree — and then writes DO hit live, so the old caution stands in force either way: never run `fec/*.py` casually. A complete copied sandbox needs the workbook, all root JSONs, `social_media.db`, the `votes/` CSVs, and Draft Systems inputs present at that root. (Corrected 2026-07-19; the previous version asserted the opposite. Verified against `fec/paths.py:7-8`.) For casual verification, only `fec/tests/run_tests.py` and `fec/audit_full.py` are read-only-safe to run:
 
 ```powershell
 cd "C:\Users\pgoff\OneDrive\Desktop\Melange Systems"
@@ -268,8 +271,8 @@ Written 2026-07-09 against the worktree at commit 88a7048 (branch claude/nifty-c
 | 2^62 seed-gating key offset | `git grep -n "1<<62" -- fec/per_topic_coalition.py` |
 | dump_atomic implementation | `git grep -n "def dump_atomic" -- fec/moneyball_core.py` |
 | Rank-authority loud failure | `git grep -n "ranks_python.json missing" -- fec/moneyball_core.py` |
-| 17-step chain order | read `CHAIN` in `fec/run_pipeline.py` (lines ~19-35) |
-| paths.py hardcoded ROOT | `git grep -n "MONEYBALL_ROOT" -- fec/paths.py` |
+| 36-step chain order as of 2026-07-19 | read `CHAIN` in `fec/run_pipeline.py` (lines 25-67) |
+| paths.py imported-file-relative ROOT | `git grep -n "MONEYBALL_ROOT" -- fec/paths.py` |
 | congestion.json still has no live producer | `git grep -ln "congestion.json','w'" -- fec/` and `git grep -ln "congestion.json'" -- fec/attic/` (writers found 2026-07-09 only in fec/attic/: saturation, full_congestion, final, final_table, makeup, makeup2) |
 | FEC zips still attic-only consumers | `git grep -l "weball24" -- fec/` (expect only fec/attic/*) |
 | JS mirror banner + engchk badge | `git grep -n "faithful port" -- fec/templates/make_dashboard_html_00.tpl; git grep -n "updateEngChk" -- fec/templates/make_dashboard_html_00.tpl` |
@@ -278,7 +281,7 @@ Written 2026-07-09 against the worktree at commit 88a7048 (branch claude/nifty-c
 | Committee formula still Excel-only (port doc) | read the docstring of `fec/apply_committee_reweight.py` (lines 3-10); `git grep -ln "Committee Data" -- fec/` for any NEW builder |
 | Corpus-relative z declaration | `git grep -n "z relative to THIS corpus" -- fec/big5_traits.py` |
 | Display-only declarations | `git grep -n "display-only" -- fec/make_member_desk.py; git grep -n "separate ratified step" -- fec/make_member_desk.py` |
-| Kernel test count (37 as of 2026-07-09) | `python "fec\tests\run_tests.py"` and read the final count line |
+| Kernel test count (84 as of 2026-07-19; count only grows) | `python "fec\tests\run_tests.py"` and read the final count line |
 | Susceptibility formula (.40/.30/−.20/−.10) | `git grep -n "susc_trait=" -- fec/receptivity_layer.py` |
 | Force-tracked data whitelist | `git ls-files -- "*.json" "*.zip" "*.txt"` (expect cu_valence_registry.json, launch.json, the fec zips, quorum_query.txt, retiring_members.txt) |
-| Stale doc counts (README says 30/59 vs live 37/69) | compare README.md lines ~56-57 against actual run output — a doc-rot pass was already due 2026-07-09 |
+| Volatile doc counts (README says 84/136 as of 2026-07-19) | compare README.md running commands against actual run output — the counts only grow |

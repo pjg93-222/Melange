@@ -5,7 +5,7 @@ description: Day-to-day operations runbook for the Moneyball system. Load this w
 
 # Moneyball: run and operate
 
-This skill is the operations manual for the Moneyball congressional-influence model: how to run the canonical pipeline chain, refresh the underlying data in the right order, operate the collectors, write safely to the Excel workbook, and build/preview/deploy the dashboards. The system is a set of Python scripts under `fec/` that read and write a LIVE data tree at `C:\Users\pgoff\OneDrive\Desktop\Melange Systems` (JSON artifacts, a SQLite database, an Excel workbook, and generated HTML). Almost every script executes its whole body at import time and writes to that live tree even when run from a git worktree, so "just running it to see what happens" is never safe. Everything below was verified against the repo on 2026-07-09.
+This skill is the operations manual for the Moneyball congressional-influence model: how to run the canonical pipeline chain, refresh the underlying data in the right order, operate the collectors, write safely to the Excel workbook, and build/preview/deploy the dashboards. The system is a set of Python scripts under `fec/` that read and write the data tree resolved by the imported `fec/paths.py` (JSON artifacts, a SQLite database, an Excel workbook, and generated HTML). From the live checkout that is `C:\Users\pgoff\OneDrive\Desktop\Melange Systems`; from a git worktree it is the worktree's EMPTY data plane unless `MONEYBALL_ROOT` points at live. Almost every script executes its whole body at import time, so "just running it to see what happens" is never safe. Path behavior was re-verified 2026-07-19.
 
 ## When NOT to use this skill
 
@@ -19,19 +19,19 @@ This skill is the operations manual for the Moneyball congressional-influence mo
 ## Quick reference
 
 ```powershell
-# ALWAYS operate from the LIVE tree root (paths are resolved there regardless of cwd anyway):
+# ALWAYS operate from the LIVE tree root (the imported live-tree paths.py then resolves ROOT here):
 cd "C:\Users\pgoff\OneDrive\Desktop\Melange Systems"
 
 # BEFORE any run: check for Paul's live jobs (see section 7)
 Get-Process python* -ErrorAction SilentlyContinue | Format-Table Id,StartTime,CPU
 
-# The canonical chain (17 steps + audit; ~6-8 min warm, up to ~19 min if the workbook view cache is dead)
+# The canonical chain (36 steps including audit as of 2026-07-19; ~6-8 min warm, up to ~19 min if the workbook view cache is dead)
 python "fec\run_pipeline.py"
 python "fec\run_pipeline.py" --from optimize     # resume mid-chain (prefix match on script filename)
 
 # Read-only-safe to run casually (session-ratified allowlist, 2026-07):
-python "fec\tests\run_tests.py"    # kernel unit tests (37 as of 2026-07-09; README's "30" is stale)
-python "fec\audit_full.py"         # full-body audit (~69 checks reported as of 2026-07-09; count grows)
+python "fec\tests\run_tests.py"    # kernel unit tests (84 as of 2026-07-19; count grows — trust the run output)
+python "fec\audit_full.py"         # full-body audit (136 checks reported as of 2026-07-19; count grows)
 
 # Safe dashboard preview (8801 is Paul's server - NEVER use it; 8802 is yours):
 python -m http.server 8802 --bind 127.0.0.1 --directory "C:\Users\pgoff\OneDrive\Desktop\Melange Systems"
@@ -57,9 +57,9 @@ Hard rules embedded in this skill (master list with rationale lives in **moneyba
 
 "The chain" is the single sequenced runner that regenerates every derived artifact in dependency order. It exists because hand-typed script sequences kept forgetting passes (`fec/run_pipeline.py:4,27`). Each step runs as a subprocess; the runner prints the step name, OK/!!, elapsed seconds, and the step's LAST stdout line; the first nonzero exit code aborts with 800-char stdout/stderr tails (`run_pipeline.py:41-50`).
 
-The 17 steps in order (CHAIN list at `fec/run_pipeline.py:19-35`), with the artifact each writes:
+The chain has 36 entries as of 2026-07-19 (`CHAIN` list at `fec/run_pipeline.py:25-67`). The artifact-producing core below is a subset, shown in relative order:
 
-| # | Step | Writes |
+| Core # | Step | Writes |
 |---|---|---|
 | 1 | `receptivity_layer.py` | `member_receptivity.json` (per-member psychology multipliers) |
 | 2 | `per_category_stance.py` | `category_stance.json` (533 members x 18 issue stances, incl. say-do gate block) |
@@ -79,21 +79,21 @@ The 17 steps in order (CHAIN list at `fec/run_pipeline.py:19-35`), with the arti
 | 16 | `make_combined.py` | `Moneyball.html` (dashboard + desk in one file) |
 | 17 | `audit_full.py` | nothing - prints the pass/fail ledger, ends `FULL-BODY AUDIT — N passed, N FAILED` |
 
-**Flags** (`run_pipeline.py:36-44`):
+**Flags** (`run_pipeline.py:145-167`):
 
-- `--from <prefix>` - skip steps until one whose FILENAME starts with the prefix, then run to the end. `--from budget_frontier` runs BOTH frontier passes; `--from b` also starts at budget_frontier (first prefix match). **Trap:** a typo'd prefix matches nothing, every step is skipped, and the runner still prints `PIPELINE COMPLETE` with no error. If your run finished in under a second, that is what happened.
-- `--recalc` - accepted but RETIRED. It prints a note and continues. Since "Phase 2" (2026-07-02) Python owns all derived math; there is no Excel recalculation step anywhere (`run_pipeline.py:6-11,38`). Older docs (the README data-refresh line) still say `run_pipeline --recalc`; just run plain `run_pipeline.py`.
+- `--from <prefix>` - resolve one exact/case-sensitive script name or unique prefix, then run from that entry to the end. Unknown or ambiguous targets fail loudly through `parser.error` (exit 2); `budget_frontier` is ambiguous because the script appears twice. (Corrected 2026-07-19; verified against `run_pipeline.py:145-165`.)
+- `--recalc` - accepted but RETIRED. It prints a note and continues. Since "Phase 2" (2026-07-02) Python owns all derived math; there is no Excel recalculation step anywhere (`run_pipeline.py:157-167`). Older docs (the README data-refresh line) still say `run_pipeline --recalc`; just run plain `run_pipeline.py`.
 
 **Ordering is load-bearing - never hand-order the steps:**
-- `compute_pillars` (step 3) runs BEFORE `sync_stance_g` (step 4) because it reads workbook formula cells "while the view cache is alive"; sync's openpyxl save destroys those cached values (`run_pipeline.py:21-22`).
-- `salience_shock --advise` (step 12) must precede the bundle (step 13) so the dashboard exports a fresh advisory (`run_pipeline.py:30`).
-- `bipartisan.json` is written at step 13 but read by the kernel in steps 5-12, so earlier steps consume the PREVIOUS run's copy. Consequence: after a stance/network change, engine outputs legitimately shift once more on the NEXT run ("two-run convergence" - not a determinism bug). `bipartisan.json` is the ONLY remaining feedback edge - col G has been a pure output since @f17dc2c (`fec/per_category_stance.py:9-13`); note `.claude/commands/fable-audit.md:76-77` still also names the col-G sync here, which is stale (doc-rot).
+- `compute_pillars` (core step 3; chain entry 14 as of 2026-07-19) runs BEFORE `sync_stance_g` (core step 4; chain entry 15) because it reads workbook formula cells "while the view cache is alive"; sync's openpyxl save destroys those cached values (`run_pipeline.py:44-45`).
+- `salience_shock --advise` (core step 12; chain entry 24 as of 2026-07-19) must precede the bundle (core step 13; chain entry 25) so the dashboard exports a fresh advisory (`run_pipeline.py:54-55`).
+- `bipartisan.json` is written late in the chain by `build_dashboard_bundle.py` but read by the kernel in earlier engine steps, so those steps consume the PREVIOUS run's copy. Consequence: after a stance/network change, engine outputs legitimately shift once more on the NEXT run ("two-run convergence" - not a determinism bug). `bipartisan.json` is the ONLY remaining feedback edge - col G has been a pure output since @f17dc2c (`fec/per_category_stance.py:9-13`).
 
 **Runtime expectations** (as of 2026-07-09): ~6-8 min warm (7.4 min on 2026-07-04, 5.9 min on 2026-07-06 per the in-repo AUDIT_FINDINGS reports); up to ~19 min when the workbook view cache is dead (`MATHEMATICAL_SPECIFICATION.md:64`; `.claude/commands/fable-audit.md:43` says "6-19 min").
 
 **Determinism:** SEED=7, MC=20 defaults with edge-keyed common random numbers (a splitmix64 hash keyed by iteration+edge, so the same seed gives the same draw regardless of evaluation order). Same-seed reruns with unchanged inputs produce byte-identical artifacts - any no-input hash drift is a real regression. Non-default `SEED`/`MC` change some output FILENAMES (`per_topic_coalition_seed%d_mc%d.json`, `per_topic_coalition.py:74`), so downstream consumers of the unsuffixed name silently won't see your run. CRN machinery details → **moneyball-proof-and-analysis-toolkit**.
 
-**The audit at the end:** step 17 is `audit_full.py` - the full-body audit (~69 checks reported at runtime as of 2026-07-09; the count grows as guards are added, so a FAILED check is the finding, not a count mismatch). Expect the tail `ALL MODULES CLEAN`. It shells out to `audit.py` (workbook integrity) and `audit_frontier.py`, and re-runs engines under `FRONTIER_OUT`/`OPT_OUT` temp redirects so production artifacts are never clobbered. "View-stale SKIP" notes from audit.py checks A2/A3 are NORMAL when the workbook cache is dead.
+**The audit at the end:** the final chain entry is `audit_full.py` - the full-body audit (136 checks reported at runtime as of 2026-07-19; the count grows as guards are added, so a FAILED check is the finding, not a count mismatch). Expect the tail `ALL MODULES CLEAN`. It shells out to `audit.py` (workbook integrity) and `audit_frontier.py`, and re-runs engines under `FRONTIER_OUT`/`OPT_OUT` temp redirects so production artifacts are never clobbered. "View-stale SKIP" notes from audit.py checks A2/A3 are NORMAL when the workbook cache is dead.
 
 **Verification protocol after any code change** (owned by moneyball-change-control; stated here because you will be asked): kernel tests → pipeline → ZERO rank delta vs the previous `ranks_python.json` (unless the change is supposed to move ranks) → audit clean (`README.md:63-64`).
 
@@ -133,7 +133,7 @@ Behaviors to know:
 
 Collectors pull member-of-Congress text into `social_media.db` (SQLite, WAL journal mode - WAL = "write-ahead log", which allows concurrent readers alongside a writer). Shared disciplines: **resumability** (per-key fetch-log tables - rerunning never repeats finished work), **drop-never-guess attribution** (any speaker that cannot be uniquely resolved against the 533-member roster in `congestion.json` is DROPPED, never approximated - `fetch_congressional_record.py:19-20`), and politeness (delays, honest User-Agent).
 
-**May collectors run while the chain runs? YES.** Verified 2026-07-09: none of chain steps 1-16 opens `social_media.db` (grep the CHAIN scripts for `social_media` - zero hits). The final audit (step 17) DOES open it, but strictly read-only (`PRAGMA integrity_check` at `audit_full.py:177-182`; `PRAGMA query_only=1` at `audit_full.py:315-320`), and WAL mode permits a reader during collector writes. The converse also holds: collectors never see chain artifacts mid-write, because chain writes are atomic via `dump_atomic` (temp file + `os.replace`).
+**May collectors run while the chain runs? YES.** Re-verified 2026-07-19: three chain entries open `social_media.db` before the final audit - entry 6 `extract_cu_speeches.py` (explicit `mode=ro` at line 38), entry 27 `personal_texture_layer.py` (line 123), and entry 34 `make_member_desk.py` (media footprint, line 764; guarded by the existence check at line 622) - plus the final audit at entry 36 (`PRAGMA integrity_check` at `audit_full.py:230`; `PRAGMA query_only=1` at `audit_full.py:840`). All four paths are READERS; none writes. WAL mode permits readers concurrently with a collector's writes, so the answer remains YES. Grepping the CHAIN scripts for `social_media` now returns those hits; the check is that every hit is a read (`mode=ro`, `query_only`, or read-only queries), not that there are zero hits. The converse also holds: collectors never see chain artifacts mid-write, because chain writes are atomic via `dump_atomic` (temp file + `os.replace`).
 
 | Collector | Command (from live root) | Source | Key/auth | Resume mechanism |
 |---|---|---|---|---|
@@ -165,7 +165,7 @@ Operating rules:
 2. **`backups/` is the recovery layer, auto-created by writers.** `build_media_blend.py` copies the workbook to `backups\...BACKUP-<ts>.xlsx` FIRST (`build_media_blend.py:113-115`); the one-shot tools back up as `.PRE-<TAG>-<ts>.xlsx`. Exceptions to know: `sync_stance_g.py` makes NO backup (it only touches col G), and `write_im_sheet.py` uses a FIXED backup name (`...PRE-IM-20260626.xlsx`) that overwrites its own previous backup. Treat `backups/` as read-only.
 3. **openpyxl saves strip cached formula values.** After ANY pipeline run (the col-G sync saves the workbook), `data_only=True` reads of FORMULA cells return `None` until the user opens Excel again (typed literal cells always survive). This is the documented self-heal contract, not a bug - do not "fix" it. `compute_pillars` snapshots the formula-backed pillar inputs to `pillar_inputs_snapshot.json` for exactly this reason; its "(view cache dead -> snapshot)" print is normal.
 4. **"Refreshing the view" = the user opens Excel.** If someone reports the workbook "looks stale/blank", the answer is usually: open it in Excel, let fullCalcOnLoad recalculate, save.
-5. **The IM-sheet lag:** the chain refreshes `im_allocation.json` every run (step 11), but the workbook's `IM Allocation` SHEET is rebuilt only by the manual COM tool `write_im_sheet.py` (which regenerates `im_allocation.json` first, then writes the sheet with a B1 FLIP/COALITION switch). The sheet therefore lags the JSON until that tool is deliberately run - with Excel closed.
+5. **The IM-sheet lag:** the chain refreshes `im_allocation.json` every run (core step 11; chain entry 23 as of 2026-07-19), but the workbook's `IM Allocation` SHEET is rebuilt only by the manual COM tool `write_im_sheet.py` (which regenerates `im_allocation.json` first, then writes the sheet with a B1 FLIP/COALITION switch). The sheet therefore lags the JSON until that tool is deliberately run - with Excel closed.
 6. **User dials live in Excel and are Paul's domain**: AB pillar weights (Blended Model AB2:AB5; live-verified 30/25/40/5 via `ranks_python.json['ab_weights']`), row-535 press tier weights, Category Stance / col-G taxonomy. Never change them in code or via a tool run (session-ratified, 2026-07).
 
 ### DANGER table: the `fec/apply_*` one-shot family (+ friends)
@@ -192,7 +192,7 @@ These are COM-era manual workbook mutators ("COM" = `win32com` driving a live Ex
 
 ## 5. Dashboards: build, preview, lock, deploy
 
-**Build** (steps 13-16 of the chain; runnable individually, all MUTATE the live tree):
+**Build** (dashboard-build entries in the chain; runnable individually, all MUTATE the resolved data tree):
 
 ```powershell
 python "fec\build_dashboard_bundle.py"   # -> dashboard_data.json + bipartisan.json (bipartisan.json feeds BACK into engines - a casual run changes engine inputs)
@@ -275,7 +275,7 @@ If anything is live: wait, or ask. Run baselines SERIALLY, never concurrently wi
 
 **Other standing operational rules:**
 - Never hand-edit or hand-extend a generated JSON artifact - its producer silently clobbers it on the next run (the 18th-category incident, recorded at `fec/per_category_stance.py:21-24`). Data artifacts are gitignored: regenerable via the pipeline, NOT via git.
-- Worktrees do not isolate data (`fec/paths.py:7`). To sandbox a run, set `MONEYBALL_ROOT` to a copied tree - and verify the copy is complete before trusting results.
+- Worktrees isolate data by default (`fec/paths.py:7-8`), but their gitignored data plane is empty: data-dependent reads fail and writes are throwaway artifacts. Operate from the live tree, or set `MONEYBALL_ROOT` to a complete copied tree; if it points at live, writes hit live.
 - Import == execution: to inspect a script, READ it (Grep/Read), never `python -c "import ..."`.
 - Defaults ARE the ratified state: never set calibration dials (SEED/MC/MAXSHIFT/DTHRESH/PERS_NONE/...) during verification runs (`.claude/commands/fable-audit.md:18-19`).
 - Stance/press labels and pillar weights are Paul's domain - overrides go through `apply_press_overrides.py` / `press_stance_overrides.json`, never through relabeling.
@@ -320,4 +320,4 @@ schtasks /Query /TN MoneyballWeeklyRefresh; schtasks /Query /TN MoneyballCollect
 Select-String -Path "README.md" -Pattern "Diagnostics-only" -Context 0,5
 ```
 
-Volatile facts to re-check on every major merge: the CHAIN list (steps get added - lt_priming joined 2026-07-04), the audit check count (grows), the kernel test count (grows; README's "30" already lags), the apply_* roster, runtime figures, and every gate status in section 7 (electoral_plays, D2 ledger; the Vote Smart and coop_v2 rows were CONCLUDED/DECIDED and merged to main 2026-07-10).
+Volatile facts to re-check on every major merge: the CHAIN list (steps get added - lt_priming joined 2026-07-04), the audit check count (grows), the kernel test count (grows — trust run output over documented totals), the apply_* roster, runtime figures, and every gate status in section 7 (electoral_plays, D2 ledger; the Vote Smart and coop_v2 rows were CONCLUDED/DECIDED and merged to main 2026-07-10).

@@ -28,11 +28,11 @@ Repo root (live tree, where all data lives): `C:\Users\pgoff\OneDrive\Desktop\Me
 Get-Process python -ErrorAction SilentlyContinue
 Copy-Item "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\ranks_python.json" "$env:TEMP\ranks_before.json"
 
-# 1. Kernel tests (37 checks as of 2026-07-09; exit 1 on failure)
+# 1. Kernel tests (84 checks as of 2026-07-19; exit 1 on failure)
 python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\run_tests.py"
-#    expect tail:  KERNEL TESTS - 37 passed, 0 FAILED
+#    expect tail:  KERNEL TESTS — 84 passed, 0 FAILED  (as of 2026-07-19; count only grows)
 
-# 2. Full 17-step chain (~6-19 min; MUTATES every live artifact + workbook col G)
+# 2. Full 36-step chain (36 entries as of 2026-07-19; ~6-19 min; MUTATES chain-owned live artifacts + workbook col G)
 python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\run_pipeline.py"
 #    expect: every step prints OK, then PIPELINE COMPLETE
 
@@ -40,14 +40,14 @@ python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\run_pipeline.py"
 python -c "import json,os;a=json.load(open(os.environ['TEMP']+r'\ranks_before.json'));b=json.load(open(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\ranks_python.json'));d=[m for m in b['rank'] if a['rank'].get(m)!=b['rank'][m]];print(len(d),'members moved');print(d[:10])"
 #    expect:  0 members moved
 
-# 4. Full-body audit (69 checks as of 2026-07-09; ALWAYS exits 0 - gate on the TEXT)
+# 4. Full-body audit (136 checks as of 2026-07-19; exits 1 on failure / 0 when clean - still gate on the TEXT)
 python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\audit_full.py"
-#    expect tail:  FULL-BODY AUDIT - 69 passed, 0 FAILED   then   ALL MODULES CLEAN.
+#    expect tail:  FULL-BODY AUDIT — 136 passed, 0 FAILED   then   ALL MODULES CLEAN.  (as of 2026-07-19; count only grows)
 ```
 
 **Gating vocabulary in one line each** (formal definitions in section 3): **user-gated** = only Paul may trigger it. **LOCKED** = a prereg's bars are frozen; the one look is armed. **look** = the single permitted evaluation; spent whether PASS or MISS. **RETIRED WITHOUT A LOOK** = experiment withdrawn before evaluation; route neither validated nor closed. **DATA-GATED / DIAGNOSTIC-GATED** = reopening blocked until a data threshold / a pinned synthetic check passes. **`.candidate`** = built but consumed by nothing until Paul promotes it.
 
-**Absolute floor rules** (details in section 5): never run `fec/*.py` casually (import == execution, writes hit the LIVE tree even from a worktree); never hand-edit generated JSON; never relabel stance/press items; never change a user-ratified constant in code; never `git revert`/rebase/squash; Fable model only for the 533 narratives; 8801 is Paul's port, use 8802.
+**Absolute floor rules** (details in section 5): never run `fec/*.py` casually (import == execution; from a worktree, paths resolve to the worktree's EMPTY data plane unless `MONEYBALL_ROOT` points at live — either way casual runs are how artifacts get clobbered); never hand-edit generated JSON; never relabel stance/press items; never change a user-ratified constant in code; never `git revert`/rebase/squash; Fable model only for the 533 narratives; 8801 is Paul's port, use 8802.
 
 ---
 
@@ -57,11 +57,11 @@ Decide the class FIRST. If a change straddles classes, it passes through the gat
 
 | # | Class | Examples | Gate / who decides | Verification required |
 |---|---|---|---|---|
-| 1 | **Kernel / engine code** | `fec/moneyball_core.py`, `money_response.py`, `flip_model.py`, cascade engines, `compute_pillars.py`, any script in the 17-step chain | You may implement; Paul ratifies anything that changes outputs or calibrated behavior | Full protocol (above). Zero rank delta for a pure refactor; ANY unexplained delta = stop, it's an S1 finding |
+| 1 | **Kernel / engine code** | `fec/moneyball_core.py`, `money_response.py`, `flip_model.py`, cascade engines, `compute_pillars.py`, any script in the 36-step chain (36 entries as of 2026-07-19) | You may implement; Paul ratifies anything that changes outputs or calibrated behavior | Full protocol (above). Zero rank delta for a pure refactor; ANY unexplained delta = stop, it's an S1 finding |
 | 2 | **Data refresh** | Collectors, corpus rebuilds, network rebuild, then the chain | Allowed, but check for Paul's live jobs first (law 5); order per `README.md:65-67`: collectors -> `big5_traits` -> `social_interaction_layer` -> `build_multilayer_network` -> `build_media_blend` -> `run_pipeline.py` | Ranks MAY legitimately move (input-driven). Prove it with the input-purity test (section 2.4). Deletions from data (dedup) are user-gated (law 15) |
 | 3 | **Dial / constant change** | Env-dial defaults, kernel constant tables (PERS/IMP/SGATE/TORD), workbook dials (pillar weights, row-535 press weights) | **Paul's alone** for anything user-ratified (law 14). Workbook dials are edited by Paul in Excel, never by code. New dials: default must reproduce current behavior (empty env == production) | If a default changes with ratification: full protocol; rank deltas expected and must be reported to Paul |
 | 4 | **Prereg'd experiment** | Any statistical validity claim, new instrument/criterion, any "does X predict Y" | A `*_prereg.md` with `STATUS: LOCKED` committed BEFORE data is examined; one look; see **moneyball-research-methodology** | The prereg's own pre-declared consequences. No engine wiring until consequences say so and Paul ratifies engine-touching promotions |
-| 5 | **UI / dashboard / desk** | `fec/templates/*.tpl`, `make_dashboard_html.py`, `make_member_desk.py`, `make_combined.py` | You may implement (display-only); anything that reclassifies members (e.g. the electoral_plays chain) is user-gated (law 11) | Full protocol - the HTML builders are chain steps 14-16. Rank delta must be zero (display never feeds engines). **JS-mirror duty**: math duplicated into `make_dashboard_html_00.tpl` (lt_priming `prime()`, cascade kernel) must stay in lockstep with Python - `fec/lt_priming.py:36-37` says so explicitly |
+| 5 | **UI / dashboard / desk** | `fec/templates/*.tpl`, `make_dashboard_html.py`, `make_member_desk.py`, `make_combined.py` | You may implement (display-only); anything that reclassifies members (e.g. the electoral_plays chain) is user-gated (law 11) | Full protocol - the HTML builders are chain entries 26, 34, and 35 as of 2026-07-19. Rank delta must be zero (display never feeds engines). **JS-mirror duty**: math duplicated into `make_dashboard_html_00.tpl` (lt_priming `prime()`, cascade kernel) must stay in lockstep with Python - `fec/lt_priming.py:36-37` says so explicitly |
 | 6 | **Docs (`*.md`)** | README, spec, methods ledger, audit reports | You may write; claims must follow **moneyball-docs-and-claims** and law 12. Nothing may contradict `MATHEMATICAL_SPECIFICATION.md` ("the code is authoritative", spec:5-6). Audit reports are append-only - never overwrite an old report (the `_RUN2` suffix precedent) | None mechanical; a doc-only commit does not need the chain |
 | 7 | **Tests / audit checks** | `fec/tests/run_tests.py`, `fec/audit_full.py` | Adding checks is always welcome. NEVER weaken a floor or count assertion to make your own change pass (incident H-3, `AUDIT_FINDINGS_2026-07-07.md:68-74`) | Run the harness; the check count grows over time - a higher count than documented is normal, any FAILED is the finding (`.claude/commands/fable-audit.md:35-36`) |
 
@@ -74,7 +74,7 @@ The one-line version lives in three docs of record (`README.md:63-64`, `MATHEMAT
 ### 2.0 Before you start
 
 - **Check for Paul's live jobs** (law 5): `Get-Process python`; also eyeball recent artifact mtimes in the live root (`Get-ChildItem "C:\Users\pgoff\OneDrive\Desktop\Melange Systems" -Filter *.json | Sort-Object LastWriteTime -Descending | Select-Object -First 10 Name,LastWriteTime`). Fresh mtimes you didn't cause = someone else is running. Wait.
-- **Ask Paul to close Excel** if the workbook `Moneyball Main Version - Blended.xlsx` is open - chain step 4 (`sync_stance_g.py`) saves it via openpyxl and will PermissionError (law 17).
+- **Ask Paul to close Excel** if the workbook `Moneyball Main Version - Blended.xlsx` is open - chain entry 15 as of 2026-07-19 (`sync_stance_g.py`) saves it via openpyxl and will PermissionError (law 17).
 - **Never set calibration env dials during verification** (`SEED`, `MC`, `MAXSHIFT`, `DTHRESH`, `PERS_NONE`, `RT_W`, `SOCIAL_SHRINK`, `BP_SRC`, ...) - defaults ARE the ratified state (`.claude/commands/fable-audit.md:16-19`).
 - **Snapshot the pre-state**: at minimum copy `ranks_python.json` to a temp location. For a thorough (audit-grade) run also record md5 hashes of `budget_frontier*.json`, `optimize_result.json`, `per_topic_*.json`, `salience_advisory.json`, `dashboard_data.json` (`.claude/commands/fable-audit.md:41-42`).
 
@@ -83,14 +83,14 @@ The one-line version lives in three docs of record (`README.md:63-64`, `MATHEMAT
 ```powershell
 python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\run_tests.py"
 ```
-Expected tail: `KERNEL TESTS - 37 passed, 0 FAILED` (37 as of 2026-07-09; the count only grows). This script is the ONE harness with a real exit code: `sys.exit(1 if F else 0)` (`fec/tests/run_tests.py:111`). It reads live data via the kernel and writes only a self-deleted temp file. Note: `README.md:56` still says "30 kernel checks" - stale doc, trust the run output.
+Expected tail: `KERNEL TESTS — 84 passed, 0 FAILED` (84 checks as of 2026-07-19; the count only grows — trust the run output). This script exits 1 on failure and 0 when clean: `sys.exit(1 if F else 0)` (`fec/tests/run_tests.py:297-298`); `audit_full.py` now does too. It reads live data via the kernel; its core atomic-write checks create and delete OS-temp files (`fec/tests/run_tests.py:31-48`). (Corrected 2026-07-19; verified against `fec/audit_full.py:1198-1202`.)
 
 ### 2.2 The chain
 
 ```powershell
 python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\run_pipeline.py"
 ```
-17 steps in fixed order (`fec/run_pipeline.py:19-35`), ending in `audit_full.py`. Each step prints `OK` or `!!` plus its last stdout line; the runner hard-exits 1 on the first failing step. Expected final line: `PIPELINE COMPLETE in N.N min` (~6-19 min depending on the workbook view-cache state). **Trap**: the audit step "passing" at chain level means only that audit_full returned 0 - which it ALWAYS does (see 2.5). Read the audit tail yourself.
+36 steps in fixed order as of 2026-07-19 (`fec/run_pipeline.py:25-67`), ending in `audit_full.py`. Each step prints `OK` or `!!` plus its last stdout line; the runner hard-exits 1 on the first failing step. Expected final line: `PIPELINE COMPLETE in N.N min` (~6-19 min depending on the workbook view-cache state). **Trap (softened 2026-07-19)**: an audit step "OK" at chain level now means `audit_full.py` returned 0 and reported no FAILs; it exits 1 when any check fails (`fec/audit_full.py:1198-1202`). Still read the audit tail yourself and require `ALL MODULES CLEAN.` as belt-and-braces for older automation that may assume exit 0.
 
 `--from <prefix>` resumes mid-chain by script-filename prefix. **Guard (corrected 2026-07-19)**: `start_index()` now rejects unknown or ambiguous `--from` prefixes loudly (`ValueError` → `parser.error`, exit 2; `fec/run_pipeline.py:145-154`). `--recalc` is retired and inert.
 
@@ -105,7 +105,7 @@ Expected for a pure code change: `0 of 533 members moved`.
 
 If members moved, there are exactly three legitimate explanations before it's a bug (known-benign registry, `.claude/commands/fable-audit.md:45-51,72-77`):
 1. **Real input change** - new collector data landed, or Paul edited a dial in Excel. Prove it with the input-purity test (2.4).
-2. **Two-run convergence** - `bipartisan.json` is the ONLY remaining feedback edge: it is written at chain step 13 but read by the kernel in earlier steps, so the run AFTER a stance/network change legitimately shifts engine outputs once more. A second chain run must then be a fixed point. (Col G is NOT part of this: it has been a pure output since @f17dc2c - `fec/per_category_stance.py:9-13`; accepting a "col-G convergence" story is exactly the wrong excuse that masked the S2-04 limit cycle. Note `.claude/commands/fable-audit.md:76` still names col-G here - stale, needs a doc-rot pass, a class-6 doc edit.)
+2. **Two-run convergence** - `bipartisan.json` is the ONLY remaining feedback edge: it is written late in the chain by `build_dashboard_bundle.py` but read by the kernel in earlier steps, so the run AFTER a stance/network change legitimately shifts engine outputs once more. A second chain run must then be a fixed point. (Col G is NOT part of this: it has been a pure output since @f17dc2c - `fec/per_category_stance.py:9-13`; accepting a "col-G convergence" story is exactly the wrong excuse that masked the S2-04 limit cycle.)
 3. **Another session wrote mid-run** - check `git worktree list` and live processes.
 
 Anything else = **S1 finding** (unexplained rank delta). Stop, do not commit, diagnose. If your change was SUPPOSED to move ranks: enumerate the movers, confirm every one is explained by the intended mechanism, and put the count + examples in the commit message (precedent: "Judiciary seats added, 494/533 ranks moved intentionally", recorded in `AUDIT_FINDINGS_2026-07-04.md`).
@@ -121,16 +121,16 @@ For a deterministic engine whose artifact hash changed: re-run it against curren
 ```powershell
 python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\audit_full.py"
 ```
-Expected tail (verbatim from `fec/audit_full.py:372-374`):
+Expected tail (136 checks as of 2026-07-19; the count only grows; report shape at `fec/audit_full.py:1198-1202`):
 ```
-FULL-BODY AUDIT - 69 passed, 0 FAILED
+FULL-BODY AUDIT — 136 passed, 0 FAILED
   ALL MODULES CLEAN.
 ```
-On failure it prints `FAILURES: [<names>]` instead of the CLEAN line. **Critical trap**: `audit_full.py` has no `sys.exit` after its report - **exit code is ALWAYS 0**. Gate on the text `ALL MODULES CLEAN.`, never on the return code. Known-normal noise: `audit.py` A2/A3 checks self-SKIP (recorded as passes) when the workbook formula cache is dead between Excel opens, and `compute_pillars` prints "(view cache dead -> snapshot)" - both benign (`.claude/commands/fable-audit.md:72-75`). The audit is not zero-write: it leaves `_audit_tmp_optimize.json` / `_audit_tmp_frontier.json` at the live root by design.
+On failure it prints `FAILURES: [<names>]` and exits 1; when clean it prints `ALL MODULES CLEAN.` and exits 0 (`fec/audit_full.py:1198-1202`, corrected 2026-07-19). Treat a nonzero return code as a real failure signal, and still gate on the text tail `ALL MODULES CLEAN.` as belt-and-braces because older automation may assume exit 0. Known-normal noise: `audit.py` A2/A3 checks self-SKIP (recorded as passes) when the workbook formula cache is dead between Excel opens, and `compute_pillars` prints "(view cache dead -> snapshot)" - both benign (`.claude/commands/fable-audit.md:72-75`). The audit is not zero-write: it leaves `_audit_tmp_optimize.json` / `_audit_tmp_frontier.json` at the live root by design.
 
 ### 2.6 What "verified" means for a commit
 
-A change is committable when: kernel tests 37/37 -> chain all-OK -> rank delta zero-or-fully-explained -> audit `ALL MODULES CLEAN.` Record the numbers in the commit body (see section 6). Output-affecting fixes discovered during an audit stay report-only UNLESS this full protocol is re-run after them (`.claude/commands/fable-audit.md:90-94`).
+A change is committable when: kernel tests 84/84 as of 2026-07-19 (count only grows) -> chain all-OK -> rank delta zero-or-fully-explained -> audit `ALL MODULES CLEAN.` Record the numbers in the commit body (see section 6). Output-affecting fixes discovered during an audit stay report-only UNLESS this full protocol is re-run after them (`.claude/commands/fable-audit.md:90-94`).
 
 ## 3. Gating vocabulary - formal definitions
 
@@ -181,7 +181,7 @@ These are project law, user-ratified 2026-07-09. Where the repo documents a rule
 
 **6. NEVER hand-edit or hand-extend a generated JSON artifact.** *Why*: the producer regenerates the artifact and silently clobbers your edit; worse, the producer and artifact then disagree until the next run. *Incident*: the 18th stance category (CU Tax Status) was hand-added to `category_stance.json` on 2026-07-01 but never to the producer's list - the next regeneration silently dropped the category while IMP weights (3.0!) kept expecting it. The fix and the lesson are memorialized in the producer itself: `fec/per_category_stance.py:21-24`. Also `.claude/commands/fable-audit.md:10-11`.
 
-**7. Git worktrees do NOT isolate data.** `fec/paths.py:7` resolves ROOT to the live tree (`C:\Users\pgoff\OneDrive\Desktop\Melange Systems`) unless `MONEYBALL_ROOT` is overridden - anything run "in a worktree" mutates real artifacts. *Why*: worktrees share the data plane by design (data is gitignored); only code is branched. *Repo*: `fec/paths.py:7`.
+**7. Git worktrees isolate DATA — which makes them the WRONG place to run data-dependent work.** `fec/paths.py:7-8` resolves ROOT to the parent of the imported paths.py unless `MONEYBALL_ROOT` overrides it, so a script run from a worktree targets the worktree's EMPTY data plane: reads die on missing inputs and writes land as throwaway worktree artifacts, not in live. To operate on real data from a worktree set `MONEYBALL_ROOT` to the live tree — and then writes DO hit live, so the old caution stands in force either way: never run `fec/*.py` casually. (Corrected 2026-07-19; this law previously asserted the opposite, and the wrong version was copied into other skills and commit 10a5f97. Verified against `fec/paths.py:7-8`.)
 
 **8. Only `fec/tests/run_tests.py` and `fec/audit_full.py` are safe to run casually.** Import == execution for nearly every `fec/*.py` - most scripts execute their whole body (including artifact writes) at import time; almost none have `__main__` guards. *Why*: "just importing to inspect" has run entire Monte-Carlo loops and overwritten production artifacts. Even `audit_full.py` is only *safe*, not zero-write (it drops `_audit_tmp_*.json` at the live root). Never `python -c "import some_fec_module"` to check a value - Grep the source instead (session-ratified, 2026-07; the module-top-level pattern is visible across `fec/`, e.g. `fec/per_topic_coalition.py` runs its whole MC loop at import).
 
@@ -237,16 +237,16 @@ Written 2026-07-09 against the live tree at main @88a7048 (authoring worktree `c
 ```powershell
 cd "C:\Users\pgoff\OneDrive\Desktop\Melange Systems"   # or any worktree of this repo
 
-# Kernel test count (37) and its exit-code behavior
+# Kernel test count (84 as of 2026-07-19) and its exit-code behavior
 Select-String -Path "fec\tests\run_tests.py" -Pattern "KERNEL TESTS|sys.exit"
-# Audit check count (69) + always-exit-0 + expected tail text
+# Audit check count (136 as of 2026-07-19) + nonzero-on-failure behavior + expected tail text
 Select-String -Path "fec\audit_full.py" -Pattern "FULL-BODY AUDIT|ALL MODULES CLEAN"
-Select-String -Path ".claude\commands\fable-audit.md" -Pattern "69 checks|ALL MODULES CLEAN"
-# 17-step chain order and --from/--recalc flags
+Select-String -Path ".claude\commands\fable-audit.md" -Pattern "136 checks|ALL MODULES CLEAN"
+# 36-step chain order as of 2026-07-19 and --from/--recalc flags
 Select-String -Path "fec\run_pipeline.py" -Pattern "CHAIN=|--from|RETIRED"
 # The protocol as documented in the docs of record
 Select-String -Path "README.md","MATHEMATICAL_SPECIFICATION.md","fec\tests\run_tests.py" -Pattern "zero rank delta"
-# paths.py live-tree hardcode (law 7)
+# paths.py root resolution and env override (law 7)
 Select-String -Path "fec\paths.py" -Pattern "MONEYBALL_ROOT"
 # ranks_python.json shape + live pillar weights (law 14) - reads the LIVE artifact
 Select-String -Path "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\ranks_python.json" -Pattern "ab_weights.{0,60}"
@@ -274,4 +274,4 @@ Get-Content ".claude\launch.json"
 Select-String -Path "fec\b5_narratives.py","fec\big5_llm.py" -Pattern "claude-fable-5|claude-haiku-4-5"
 ```
 
-Counts that WILL drift (re-verify, don't trust this file): kernel tests 37, audit checks 69, chain steps 17, attic files 37, the unmerged-branch list, and every "as of 2026-07-09" state in sections 4 and 6. The rules themselves (sections 3, 5, 7) change only by Paul's directive.
+Counts that WILL drift (re-verify, don't trust this file): kernel tests 84, audit checks 136, and chain steps 36 as of 2026-07-19, plus the attic file count, the unmerged-branch list, and every dated state in sections 4 and 6. The rules themselves (sections 3, 5, 7) change only by Paul's directive.

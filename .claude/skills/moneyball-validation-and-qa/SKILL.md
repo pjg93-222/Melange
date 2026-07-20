@@ -22,18 +22,18 @@ This project turns congressional data (press releases, tweets, votes, cosponsors
 # ALWAYS cd to the repo root first (path contains spaces — quote it):
 cd "C:\Users\pgoff\OneDrive\Desktop\Melange Systems"
 
-# Rung 1 — kernel tests (37 checks as of 2026-07-09; exit 1 on failure):
+# Rung 1 — kernel tests (84 checks as of 2026-07-19; exit 1 on failure):
 python fec\tests\run_tests.py
-#   pass tail: KERNEL TESTS — 37 passed, 0 FAILED
+#   pass tail: KERNEL TESTS — 84 passed, 0 FAILED
 
 # Rung 3 — rank-authority parity (read-only audit mode; exit 1 on drift):
 python fec\compute_pillars.py
 #   pass tail: PARITY: CLEAN
 
-# Rung 5 — full-body audit (69 checks as of 2026-07-09; ~2-4 min):
+# Rung 5 — full-body audit (136 checks as of 2026-07-19; ~2-4 min):
 python fec\audit_full.py
-#   pass tail: FULL-BODY AUDIT — 69 passed, 0 FAILED  /  ALL MODULES CLEAN.
-#   WARNING: exit code is ALWAYS 0 — gate on the tail TEXT, never the return code.
+#   pass tail: FULL-BODY AUDIT — 136 passed, 0 FAILED  /  ALL MODULES CLEAN.
+#   audit_full exits 1 on failure, 0 when clean; still gate on the tail TEXT as belt-and-braces.
 
 # Rung 6 — score any prediction column against the user's gold labels (read-only):
 python fec\stance_eval.py model_stance
@@ -41,7 +41,7 @@ python fec\stance_eval.py model_stance
 
 Three standing safety rules before running ANY of the above (details in moneyball-change-control):
 1. **Check for Paul's live jobs first** (running python processes, artifact mtimes in the last few minutes). Run baselines serially, never concurrently with his work.
-2. **Git worktrees do NOT isolate data.** `fec/paths.py` resolves to the live tree `C:\Users\pgoff\OneDrive\Desktop\Melange Systems` — code run "in a worktree" reads and writes real artifacts.
+2. **Git worktrees isolate DATA — which makes them the WRONG place to run data-dependent work.** `fec/paths.py:7-8` defaults ROOT to the parent of the imported paths.py; code run in a worktree targets that worktree's EMPTY data plane, where reads die on missing inputs and writes land as throwaway artifacts. Run data-dependent work from the live tree, or set `MONEYBALL_ROOT` to it — and then writes DO hit live. (Corrected 2026-07-19; the previous version asserted the opposite. Verified against `fec/paths.py:7-8`.)
 3. **Import == execution** for nearly every `fec/*.py`; most write artifacts at module load. Only `fec/tests/run_tests.py` and `fec/audit_full.py` are on the standing casually-runnable allowlist (and even `audit_full.py` drops `_audit_tmp_optimize.json` / `_audit_tmp_frontier.json` at the live root — by design, gitignored). Read any other script before running it.
 
 ---
@@ -53,7 +53,7 @@ The documented protocol (`fec/tests/run_tests.py:5-6`, `README.md:63-64`): **cha
 | Rung | Question it answers | Tool | Pass signal |
 |---|---|---|---|
 | 1. Kernel tests | Do the math invariants still hold? | `python fec\tests\run_tests.py` | `... 0 FAILED`, exit 0 |
-| 2. Chain runs | Does the 17-step pipeline still execute? | `python fec\run_pipeline.py` (MUTATES live tree) | every step prints OK |
+| 2. Chain runs | Does the 36-entry pipeline as of 2026-07-19 still execute? | `python fec\run_pipeline.py` (MUTATES live tree) | every step prints OK |
 | 3. Zero rank delta | Did member rankings move? | diff `ranks_python.json` pre/post; `compute_pillars.py` audit mode | 0/533 deltas; `PARITY: CLEAN` |
 | 4. Byte-identical artifacts | Any hidden nondeterminism or feedback loop? | hash engine artifacts pre/post; double-run | identical hashes, or delta explained by a real input change |
 | 5. Audit clean | Do all module/artifact invariants hold? | `python fec\audit_full.py` | tail `ALL MODULES CLEAN.` |
@@ -71,15 +71,15 @@ The documented protocol (`fec/tests/run_tests.py:5-6`, `README.md:63-64`): **cha
 
 Two legitimate explanations exist for a hash delta, and you must PROVE one before dismissing it:
 - **Real input change** — prove it with the *input-purity test*: re-run the one deterministic engine against current on-disk inputs with output redirected to a temp path (e.g. `FRONTIER_OUT=<scratch>` for `budget_frontier.py`), then byte-compare. A deterministic pure function reproducing the new artifact byte-for-byte means the delta came from inputs, not your code (`AUDIT_FINDINGS_2026-07-03.md:33-44`; recipe in moneyball-proof-and-analysis-toolkit).
-- **Two-run convergence** — `bipartisan.json` (the ONLY remaining feedback edge; written at step 13, read by earlier steps) makes the run *after* a stance/network change legitimately shift engine outputs exactly once more. Col G is NOT part of this — it has been a pure output since the S2-04 fix @f17dc2c (`fec/per_category_stance.py:9-13`); a "col-G convergence" story is the superseded excuse that masked the limit cycle. (`.claude/commands/fable-audit.md:76-77` still names both — stale, needs a doc-rot pass.)
+- **Two-run convergence** — `bipartisan.json` (the ONLY remaining feedback edge; written late in the chain and read by earlier steps) makes the run *after* a stance/network change legitimately shift engine outputs exactly once more. Col G is NOT part of this — it has been a pure output since the S2-04 fix @f17dc2c (`fec/per_category_stance.py:9-13`); a "col-G convergence" story is the superseded excuse that masked the limit cycle.
 
 Four determinism gates also live inside the audit (same seed/scenario → byte-identical stdout: `fec/audit_full.py:64,76,94,115`). If you add a randomized engine, it must use the CRN kernel (`moneyball_core.sm64`) so it gets the same property.
 
-### Rung 5: the audit — read the tail, not the exit code
+### Rung 5: the audit — gate on the tail text
 
-`audit_full.py`, `audit.py`, and `audit_frontier.py` **always exit 0** — there is no `sys.exit` after the report (`fec/audit_full.py:372-374`). The chain gates on return codes, so a FAILED audit still prints `OK` at chain level. The only trustworthy signal is the tail text: `ALL MODULES CLEAN.` vs `FAILURES: [...]`. Any script or gate you write around the audit must parse the tail line.
+`audit_full.py` exits 1 when any check fails and 0 when clean (`fec/audit_full.py:1198-1202`); `audit.py` and `audit_frontier.py` have no `sys.exit` calls and still always exit 0. The chain therefore registers a failed `audit_full.py` step and aborts. Any script or gate you write around the audit must still parse the tail line `ALL MODULES CLEAN.` as belt-and-braces because older automation may assume exit 0. (Corrected 2026-07-19; verified against `fec/audit_full.py:1198-1202` and zero `sys.exit` hits in both sub-audits.)
 
-Documented check counts go stale by design — the suite grows nearly every session (47 → 69 between 2026-07-02 and 2026-07-09; `README.md:11,56` still says 30 kernel checks vs the actual 37). The convention: **any FAILED is the finding; a higher count than documented is not** (`.claude/commands/fable-audit.md:35-36`).
+Documented check counts go stale by design — the suite grows nearly every session (84 kernel / 136 audit as of 2026-07-19; count only grows — trust the run output). The convention: **any FAILED is the finding; a higher count than documented is not** (`.claude/commands/fable-audit.md:35-36`).
 
 ---
 
@@ -182,8 +182,8 @@ Rules distilled from that template:
 1. **`ok(name, cond, detail)`** — `detail` prints only on failure; put the observed value in it.
 2. **Prefer synthetic, file-independent fixtures.** The say-do tests monkey-patch the kernel's lazy caches (`MC._CORR` etc.) and **must restore them to `None`** afterward so later tests reload real data. Follow this pattern exactly when testing anything cache-backed.
 3. Test the **invariant/rung, not a named member** — Durbin legitimately changed rungs once and broke a name-pinned check (comment at `fec/audit_full.py:32-33`).
-4. Verify by running the suite: the tail count should increment and stay `0 FAILED`. Documented expected-counts elsewhere (e.g. `fable-audit.md:32` still says 30) are stale by convention — do not "fix" your test to match an old count.
-5. The suite reads live data (roster, network) via `paths.py` — check for live user jobs first.
+4. Verify by running the suite: the tail count should increment and stay `0 FAILED`. Documented expected-counts are snapshots (84 as of 2026-07-19) — do not "fix" your test to match an old count.
+5. The suite reads its resolved data plane (roster, network) via `paths.py` — run it from the live tree and check for live user jobs first.
 
 ### Adding an audit check (`fec/audit_full.py`)
 
@@ -218,7 +218,7 @@ Rules distilled:
 5. **Never tune a floor to pass your own change.** The 07-07 H-3 incident: a headcount floor was nudged 40→35 to green-light the auditor's own edit. Prefer tuning-free properties (monotonicity, coherence, reconstruction) over magic numbers; when a number is unavoidable, derive it and write the derivation in the comment.
 6. **Argument-order trap:** `run_tests.py`/`audit_full.py`/`audit_frontier.py` use `ok/ck(name, cond, detail)` but `fec/audit.py:5` uses `ok(cond, msg)`. Copy-pasting a check between files silently inverts it.
 7. Some thresholds are **deliberately tolerant after false alarms** (e.g. the frontier defend-skew at 0.92, split-leak ≤4). Check moneyball-failure-archaeology's refuted lists before "tightening" one.
-8. Verify by running `python fec\audit_full.py` and confirming the new check prints `OK` and the tail stays `ALL MODULES CLEAN.` — and remember the exit code is useless (§1, rung 5).
+8. Verify by running `python fec\audit_full.py` and confirming the new check prints `OK` and the tail stays `ALL MODULES CLEAN.` — the exit code now catches `audit_full.py` failures, but the tail remains the belt-and-braces gate (§1, rung 5).
 
 ---
 
@@ -257,10 +257,10 @@ Written 2026-07-09 against the live tree and worktree `claude/nifty-cray-f6d053`
 ```powershell
 cd "C:\Users\pgoff\OneDrive\Desktop\Melange Systems"
 
-# Kernel test count (37 as of 2026-07-09) + pass state — read the tail line:
+# Kernel test count (84 as of 2026-07-19) + pass state — read the tail line:
 python fec\tests\run_tests.py
 
-# Audit check count (69 as of 2026-07-09) + pass state — read the tail line (exit code always 0):
+# Audit check count (136 as of 2026-07-19) + pass state — read the tail line (audit_full exits 1 on failure):
 python fec\audit_full.py
 
 # Protocol wording still documented:

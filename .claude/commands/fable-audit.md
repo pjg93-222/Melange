@@ -29,10 +29,11 @@ INDEX.md → README.md → MATHEMATICAL_SPECIFICATION.md (the law-of-the-system 
 → fec/moneyball_core.py (shared kernel). Create the findings file immediately; append as you go.
 
 ## Phase 1 — Static baselines (record all three in the report header)
-- `python fec/tests/run_tests.py`  → expect **30 passed, 0 FAILED**
+- `python fec/tests/run_tests.py`  → expect **KERNEL TESTS — 84 passed, 0 FAILED** (as of 2026-07-19;
+  the count only grows — trust the run output)
 - py_compile sweep of fec/*.py (skip attic/; use a scratchpad temp .pyc target, NOT os.devnull —
   invalid on Windows) → expect all clean
-- `python fec/audit_full.py` → expect **ALL passed, ALL MODULES CLEAN** (69 checks as of 2026-07-09;
+- `python fec/audit_full.py` → expect **FULL-BODY AUDIT — 136 passed, 0 FAILED**, then **ALL MODULES CLEAN** (136 checks as of 2026-07-19;
   the count grows as guards are added — any FAILED is the finding, not a count mismatch) (view-stale SKIP notes in
   audit.py's A2/A3 are NORMAL when the workbook cache is dead — see Known-benign below)
 A failing baseline is finding #1 — diagnose it before anything else.
@@ -46,8 +47,8 @@ A failing baseline is finding #1 — diagnose it before anything else.
    a. every chain step prints OK; exit 0
    b. audit tail = ALL MODULES CLEAN
    c. rank delta: new ranks_python.json vs pre-state = **ZERO** for all 533 members. ANY delta must
-      be explained by a real input change (new collector data, user dial edit, col-G/bipartisan
-      two-run convergence — see Known-benign) or it is an S1 finding.
+      be explained by a real input change (new collector data, user dial edit) or the
+      `bipartisan.json` two-run convergence (see Known-benign), or it is an S1 finding.
    d. engine artifacts: identical hashes vs pre-state UNLESS (c)'s explanation applies.
 4. Determinism spot-check: run budget_frontier.py twice with TOPIC=Interchange and FRONTIER_OUT
    pointed at two scratchpad temp files → hashes must be identical.
@@ -73,8 +74,11 @@ P5 UI smoke (preview tools): serve the repo, load cu-member-desk.html → ranked
 - View-stale workbook: after any pipeline run, formula cells (Blended names/O/E/F, R&A col C,
   normalized cells) read None until the user opens Excel (fullCalcOnLoad self-heal). compute_pillars
   falls back to pillar_inputs_snapshot.json — its "(view cache dead -> snapshot)" print is normal.
-- Two-run convergence: col-G tier sync and bipartisan.json are produced late in the chain, so a run
-  after a stance/network change legitimately shifts engine outputs once more on the NEXT run.
+- Two-run convergence: `bipartisan.json` is the ONLY feedback edge. It is produced late in the chain
+  but read by earlier engine steps, so a run after a stance/network change legitimately shifts engine
+  outputs once more on the NEXT run. Col-G has been a pure output since @f17dc2c
+  (`fec/per_category_stance.py:9-13`); accepting a "col-G convergence" story is exactly the wrong
+  excuse that masked the S2-04 limit cycle.
 - 4 unmatched staffer offices = AS/GU/VI territorial delegates (not in the 533 roster) — correct.
 - Big-Five O-trait party-validation is REVERSED (documented low-validity; engine weight ~0).
 - `--recalc` prints a retired-notice — intended.
@@ -89,7 +93,7 @@ exists here — don't hunt for one.
 
 ## Fix lane (only after the report is complete)
 Provably-inert fixes only (unused imports, comment/docstring rot) unless the user is present to
-ratify more: branch `audit/fixes-<date>` → fix → rerun kernel tests (must match 30) → one commit
+ratify more: branch `audit/fixes-<date>` → fix → rerun kernel tests (84 as of 2026-07-19; count only grows) → one commit
 per fix. Output-affecting fixes stay report-only UNLESS you re-run the full pipeline + zero-delta
 gate + audit clean afterwards — that is the verification protocol; use it.
 

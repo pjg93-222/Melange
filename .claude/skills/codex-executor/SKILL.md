@@ -70,7 +70,7 @@ in ~/.claude.json — restart the app and open a fresh session.
   `cwd` = the live tree, or set `MONEYBALL_ROOT` to it, and assert the resolved
   ROOT before executing. (Corrected 2026-07-19 — this rule and the `RULE` commit
   `10a5f97` originally asserted the opposite, copied from the ops skill's
-  "worktrees do NOT isolate data" line, which is also wrong. Verified against
+  opposite worktree-isolation line, which is also wrong. Verified against
   `fec/paths.py:7-8`, not against the doc.)
 - Claude does the pre-run checks first: Excel closed, no live jobs, baseline
   captured for the rank delta.

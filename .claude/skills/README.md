@@ -16,7 +16,7 @@ what is Paul's decision alone). Nothing in this library overrides it.
 | moneyball-change-control | Change classes, the 4-step verification protocol, gating vocabulary, all 18 project laws with incidents, user-domain boundaries |
 | moneyball-architecture-contract | The 5-layer system shape, 9 load-bearing invariants (two cpf physics, '—' ontology, CRN determinism…), artifact ownership, known-weak points |
 | moneyball-build-and-env | Recreate the environment from zero; code-vs-data git split; new-script house style; Windows/OneDrive traps |
-| moneyball-run-and-operate | The 17-step chain, refresh order, collectors, workbook discipline (+ apply_* DANGER table), dashboards/preview/deploy |
+| moneyball-run-and-operate | The 36-step chain as of 2026-07-19, refresh order, collectors, workbook discipline (+ apply_* DANGER table), dashboards/preview/deploy |
 | moneyball-config-and-flags | All ~88 env dials + workbook dials + kernel constants, verified per row; add-a-dial checklist |
 | moneyball-debugging-playbook | Symptom→cause→discriminating-experiment→fix for the 12 live failure modes, each with its real incident |
 | moneyball-diagnostics-and-tooling | The test/audit harnesses + 8-tool diagnostic fleet + 3 shipped read-only scripts (rank_delta, artifact_freshness, env_dials) |

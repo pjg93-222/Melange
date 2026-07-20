@@ -9,7 +9,7 @@ influence engines are Python-owned.
 - `fec/` — the engine. Entry points: **`run_pipeline.py`** (canonical chain), **`moneyball_core.py`**
   (shared kernel: rosters, network loader, the TWO partisan physics, CRN, constants),
   **`paths.py`** (roots; `MONEYBALL_ROOT`/`MONEYBALL_DRAFT` env overrides).
-- `fec/tests/run_tests.py` — 64 kernel invariants. `fec/tests/test_bug_report_regressions.py` adds
+- `fec/tests/run_tests.py` — 84 kernel invariants as of 2026-07-19 (count only grows — trust the run output). `fec/tests/test_bug_report_regressions.py` adds
   bug-report contracts; `fec/attic/` is retired code.
 - `fec/templates/` — dashboard HTML/JS templates. `backups/` — workbook backups (auto, pre-write).
 - `Moneyball Main Version - Blended.xlsx` — legacy inputs and Excel formula view, not live-rank or
@@ -79,9 +79,9 @@ influence engines are Python-owned.
 ```
 python -m pip install -r requirements.txt     # canonical Python 3.12 runtime
 python fec/run_pipeline.py [--from <step>]   # the whole chain, audited at the end (NO Excel/COM involved)
-python fec/tests/run_tests.py                # 64 kernel checks (run after ANY code change)
+python fec/tests/run_tests.py                # 84 kernel checks as of 2026-07-19; count only grows
 python -m unittest fec.tests.test_bug_report_regressions -v  # 42 bug-report regressions
-python fec/audit_full.py                     # 97 full-audit checks (expect ALL MODULES CLEAN)
+python fec/audit_full.py                     # 136 full-audit checks as of 2026-07-19; count only grows; expect ALL MODULES CLEAN
 ```
 **Rank authority = `ranks_python.json`** (phase 2): Python computes the entire rank chain;
 the legacy workbook is an input/formula view that recalculates itself when opened in Excel

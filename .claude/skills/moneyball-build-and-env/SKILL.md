@@ -5,7 +5,7 @@ description: Load this skill when setting up or repairing the Moneyball environm
 
 # Moneyball: build the environment + house style for new code
 
-This skill recreates a working Moneyball environment from zero and defines the conventions every new `fec/*.py` script must follow. The single most important fact: **git holds only code and docs — every data file is gitignored, so a fresh clone runs NOTHING.** The real system is the live data tree at `C:\Users\pgoff\OneDrive\Desktop\Melange Systems` (a OneDrive-synced folder that is also the git repo), and every script — even one sitting in a git worktree — resolves its reads and writes back to that live tree via `fec/paths.py`. There is no `requirements.txt`, `pyproject.toml`, or `setup.py`; the dependency list below was derived by grepping imports and is the only one that exists. Follow the from-zero checklist at the end; you are done when the kernel tests print `KERNEL TESTS — 37 passed, 0 FAILED`.
+This skill recreates a working Moneyball environment from zero and defines the conventions every new `fec/*.py` script must follow. The single most important fact: **the production data plane is gitignored, so a fresh clone cannot run data-dependent workflows.** The real system is the live data tree at `C:\Users\pgoff\OneDrive\Desktop\Melange Systems` (a OneDrive-synced folder that is also the git repo); a script run from that checkout resolves there, while a script run from a git worktree resolves to the worktree's EMPTY data plane unless `MONEYBALL_ROOT` overrides it. `requirements.txt` is the canonical production/audit/test manifest; optional research and paid dependencies remain documented below. Follow the from-zero checklist at the end; you are done when the kernel tests print `KERNEL TESTS — 84 passed, 0 FAILED` (as of 2026-07-19; count only grows — trust the run output). (Manifest claim corrected 2026-07-19; verified against `requirements.txt` and `fec/run_pipeline.py:78-95`.)
 
 ## When NOT to use this skill
 
@@ -23,13 +23,13 @@ This skill recreates a working Moneyball environment from zero and defines the c
 | Upstream raw-data folder | `C:\Users\pgoff\OneDrive\Desktop\Draft Systems` (irreplaceable originals) |
 | Path resolver | `fec/paths.py` — env overrides `MONEYBALL_ROOT`, `MONEYBALL_DRAFT` |
 | Python | 3.12.10 (plain `python` on this machine) |
-| Dependency manifest | **None exists.** Table in section 3 is the source of truth |
+| Dependency manifest | `requirements.txt` is canonical for production/audit/tests; section 3 lists optional research/paid packages |
 | Chain-minimum third-party package | `openpyxl` only (everything else is stdlib + the kernel) |
-| Safe-to-run scripts | ONLY `fec/tests/run_tests.py` and `fec/audit_full.py` — everything else mutates live data, often at import time |
-| Done-signal | `python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\run_tests.py"` → `KERNEL TESTS — 37 passed, 0 FAILED` |
+| Safe-to-run scripts | ONLY `fec/tests/run_tests.py` and `fec/audit_full.py` — everything else can mutate its resolved data plane, often at import time |
+| Done-signal | `python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\run_tests.py"` → `KERNEL TESTS — 84 passed, 0 FAILED` (as of 2026-07-19; count only grows) |
 | Ports | 8801 = Paul's own server (hands off); 8802 = preview/audit server (`.claude/launch.json`) |
 
-Vocabulary used below: an **artifact** is a generated data file (JSON/CSV/xlsx/HTML) written by a script; the **kernel** is `fec/moneyball_core.py` (shared loaders + math every engine imports); the **chain** is the 17-step `fec/run_pipeline.py` sequence that regenerates all artifacts; a **worktree** is a secondary git checkout (under `.claude/worktrees/`) that shares the repo's history but has its own working files.
+Vocabulary used below: an **artifact** is a generated data file (JSON/CSV/xlsx/HTML) written by a script; the **kernel** is `fec/moneyball_core.py` (shared loaders + math every engine imports); the **chain** is the 36-step `fec/run_pipeline.py` sequence as of 2026-07-19 (`CHAIN` at lines 25-67) that regenerates its chain-owned artifacts; a **worktree** is a secondary git checkout (under `.claude/worktrees/`) that shares the repo's history but has its own working files and empty gitignored data plane.
 
 ## 1. The code-vs-data split (.gitignore)
 
@@ -54,31 +54,34 @@ Consequences you must internalize:
 
 ## 2. Live tree, worktrees, and paths.py
 
-`fec/paths.py` is the entire path-resolution layer (12 lines):
+`fec/paths.py:7-13` is the entire default path-resolution layer:
 
 ```python
-ROOT  = os.environ.get('MONEYBALL_ROOT',  r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems')
-DRAFT = os.environ.get('MONEYBALL_DRAFT', r'C:\Users\pgoff\OneDrive\Desktop\Draft Systems')
-FEC = ROOT\fec;  WORKBOOK = ROOT\Moneyball Main Version - Blended.xlsx;  BACKUPS = ROOT\backups
-p(*parts)  # join under ROOT
+_HERE=os.path.dirname(os.path.abspath(__file__))
+ROOT=os.path.abspath(os.environ.get('MONEYBALL_ROOT',os.path.join(_HERE,os.pardir)))
+DRAFT=os.path.abspath(os.environ.get('MONEYBALL_DRAFT',os.path.join(ROOT,os.pardir,'Draft Systems')))
+FEC=os.path.join(ROOT,'fec')
+WORKBOOK=os.path.join(ROOT,'Moneyball Main Version - Blended.xlsx')
+BACKUPS=os.path.join(ROOT,'backups')
+def p(*parts): return os.path.join(ROOT,*parts)
 ```
 
-Every fec script begins with `sys.path.insert(0, <its own directory>); from paths import ROOT`. So a script in a worktree imports the **worktree's copy of paths.py** — whose default `ROOT` is the absolute live-tree path. Result, stated as law (session-ratified, 2026-07; PROJECT LAW 7): **git worktrees do NOT isolate data.** Code run "in a worktree" reads and writes the LIVE artifacts, the LIVE workbook, and the LIVE `social_media.db`. The only isolation mechanism is setting `MONEYBALL_ROOT` to a copied tree before launching Python:
+When a fec script inserts its own directory and imports `ROOT` from `paths.py`, a worktree run imports the **worktree's copy of paths.py**, whose default `ROOT` is the parent of that imported file: the worktree root. Result, stated as law (PROJECT LAW 7, corrected 2026-07-19): **git worktrees isolate DATA — which makes them the WRONG place to run data-dependent work.** A worktree run targets the worktree's EMPTY data plane: reads die on missing inputs and writes land as throwaway worktree artifacts, not in live. To operate on real data from a worktree set `MONEYBALL_ROOT` to the live tree — and then writes DO hit live, so the old caution stands in force either way: never run `fec/*.py` casually. To use a populated copied sandbox instead, point `MONEYBALL_ROOT` at that copy before launching Python:
 
 ```powershell
-# PowerShell: redirect one session to a sandbox copy of the data tree
+# PowerShell: redirect one session to a populated sandbox copy of the data tree
 $env:MONEYBALL_ROOT = "C:\sandbox\Melange Systems copy"
 python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\run_tests.py"
 ```
 
 `MONEYBALL_DRAFT` points at **Draft Systems**, the sibling folder holding upstream raw inputs (original FEC files, press indexes, old workbooks) consumed by an external R press pipeline — "needed only to regenerate base data, includes irreplaceable files" (README.md:88–89).
 
-**Preview servers** (`.claude/launch.json`): config `static` serves the current directory on **8801** and `moneyball-ui-audit` serves the **live tree** on **8802**. Port 8801 is Paul's own server — never claim it; use 8802 for previews and audits (session-ratified, 2026-07; PROJECT LAW 3). Note the 8802 config serves the live tree even when launched from a worktree — the same non-isolation as paths.py.
+**Preview servers** (`.claude/launch.json`): config `static` serves the current directory on **8801** and `moneyball-ui-audit` serves the **live tree** on **8802**. Port 8801 is Paul's own server — never claim it; use 8802 for previews and audits (session-ratified, 2026-07; PROJECT LAW 3). Note the 8802 config explicitly serves the live tree even when launched from a worktree; that server setting is independent of `paths.py` root resolution.
 
 ## 3. Python environment
 
 - **Python 3.12.10** is what `python` resolves to on this machine (as of 2026-07-09). No virtualenv is in use; packages are installed into the system interpreter.
-- **There is NO `requirements.txt`, `pyproject.toml`, `setup.py`, `Pipfile`, or `environment.yml`** (verified 2026-07-09). The table below — derived by grepping `import`/`from` lines across all tracked `fec/*.py` — is the only dependency manifest.
+- **`requirements.txt` is the canonical production/audit/test manifest.** No `pyproject.toml`, `setup.py`, `Pipfile`, or `environment.yml` exists. The table below retains the optional research/paid inventory. (Corrected 2026-07-19; verified against `requirements.txt` and `fec/run_pipeline.py:78-95`.)
 - The collectors use **stdlib `urllib` only** — `requests` and `bs4` appear nowhere in the repo. Do not introduce them; HTML is parsed with regex/string ops by design.
 - **Zero use of the `logging` module anywhere** (0 of 175 tracked .py files). Everything prints (see section 6).
 
@@ -86,7 +89,7 @@ Install tiers (file counts = live fec scripts importing the package, excluding `
 
 | Tier | Package (observed version) | Used by | Needed for |
 |---|---|---|---|
-| **Chain minimum** | `openpyxl` (3.1.5) | 44 files incl. the kernel, `compute_pillars`, `sync_stance_g`, `audit.py`, `audit_full.py` | Running the 17-step chain + kernel tests. Everything else in the chain is stdlib. |
+| **Canonical runtime** | `requirements.txt`: `networkx`, `numpy`, `openpyxl`, `pandas`, `scikit-learn`, `scipy`, `soundfile` | production chain, audit, and tests | Install the manifest; `run_pipeline.py:78-95` preflights the first six before any producer runs. |
 | Research / psychometrics | `numpy` (2.5.0), `scikit-learn` (1.9.0), `scipy` (1.18.0), `pandas` (3.0.3), `empath` (0.89), `semopy` (2.3.11) | 34 / 21 / 7 / 12 / 5 / 4 files | Big-Five batteries, prereg harnesses, CT-CM models, stance trainers |
 | LLM steps | `anthropic` (0.115.0) | 10 files | `big5_llm`, `api_prelabel*`, `api_stance_layer`, narratives. Cost rule applies — see moneyball-change-control |
 | Network diagnostics | `networkx` (3.6.1) | 3 files | `press_hcoi`, `sna_layout` |
@@ -98,8 +101,8 @@ Install tiers (file counts = live fec scripts importing the package, excluding `
 ```powershell
 # Full install (one line, safe — installs packages only, touches no project data):
 python -m pip install openpyxl numpy scikit-learn scipy pandas empath semopy anthropic networkx soundfile opensmile imageio-ffmpeg yt-dlp torch transformers sentence-transformers pywin32 cryptography
-# Chain-minimum install:
-python -m pip install openpyxl
+# Canonical production/audit/test runtime:
+python -m pip install -r requirements.txt
 ```
 
 ## 4. Keys and secrets
@@ -158,7 +161,7 @@ Checklist, with the reason each rule exists:
 
 - [ ] **`# -*- coding: utf-8 -*-` header + `sys.stdout.reconfigure(encoding='utf-8', errors='replace')`** immediately after imports. Windows consoles default to cp1252; member names (Velázquez, Jesús García) and em-dashes crash unprotected `print` with `UnicodeEncodeError`.
 - [ ] **Paths only via `paths.py`** (`from paths import ROOT`, or `WORKBOOK`/`BACKUPS`/`p()`), with the standard one-liner bootstrap shown above so the script works regardless of cwd. Never hardcode a tree, a scratchpad, or a session directory — two dials (`B5_SCRATCH`, `CMTE_ROSTER`) still carry dead hardcoded paths of long-gone worktree sessions as their defaults; don't add a third.
-- [ ] **Print-only logging with a FINAL SUMMARY LINE.** There is no `logging` module anywhere. `run_pipeline.py` runs each chain step as a subprocess and displays **only the last stdout line** (run_pipeline.py:46–48; 800-char tails only on failure) — so your last print must summarize the run (artifact name + counts). Exit nonzero on failure; the runner hard-stops the chain on the first nonzero return code.
+- [ ] **Print-only logging with a FINAL SUMMARY LINE.** There is no `logging` module anywhere. `run_pipeline.py` runs each chain step as a subprocess and displays **only the last stdout line** (run_pipeline.py:172–191; 800-char tails only on failure) — so your last print must summarize the run (artifact name + counts). Exit nonzero on failure; the runner hard-stops the chain on the first nonzero return code.
 - [ ] **JSON artifacts via `moneyball_core.dump_atomic(obj, path, **kw)`** (moneyball_core.py:88–101) — temp sibling + `os.replace()`, atomic on NTFS. Motivated by real truncated-artifact incidents under OneDrive/Excel contention. Plain `json.dump(open(...))` is banned for anything another script reads.
 - [ ] **CSV encoding: write `utf-8-sig`, and read `utf-8-sig` for any CSV Excel may have touched** (the BOM-tolerant codec; plain `utf-8` reads choke on Excel's BOM). Established pattern in the adjudication queues and Quorum outputs.
 - [ ] **argparse only when the script actually has flags** (14 scripts do). Flagless scripts take no arguments at all. Some older scripts scan `sys.argv` bare — argparse is the preferred form for new code.
@@ -188,8 +191,8 @@ Recreating a working setup on a (new) machine. Note there is no scenario where g
 1. **Locate or sync the live data tree.** `C:\Users\pgoff\OneDrive\Desktop\Melange Systems` must exist and contain `congestion.json`, `ranks_python.json`, `Moneyball Main Version - Blended.xlsx`, `social_media.db`, and `backups\`. On a new machine this arrives via OneDrive sync of Paul's account — there is no other distribution channel. If any of those five are missing, STOP and consult section 5 (recovery class) before doing anything.
 2. **Confirm `Draft Systems` is present** (sibling folder) if you will ever regenerate base data. Read-only; contains irreplaceable originals.
 3. **Install Python 3.12.x** and the packages: run the pip line in section 3 (full tier if you'll touch research/audio code; `openpyxl` alone runs the chain and tests).
-4. **Set no environment variables.** Empty environment = production behavior by design. Only set `MONEYBALL_ROOT`/`MONEYBALL_DRAFT` if you are deliberately sandboxing on a copied tree.
-5. **Verify the git overlay**: from the live root, `git status` should be clean-ish and `git ls-files | Measure-Object -Line` around 230 files (as of 2026-07-09). Worktrees live under `.claude\worktrees\` — remember they share the live data (section 2).
+4. **From the live data tree, set no environment variables.** Empty environment resolves ROOT to that checkout. Set `MONEYBALL_ROOT`/`MONEYBALL_DRAFT` only if you are deliberately targeting another complete data tree.
+5. **Verify the git overlay**: from the live root, `git status` should be clean-ish and `git ls-files | Measure-Object -Line` around 230 files (as of 2026-07-09). Worktrees live under `.claude\worktrees\` — remember their gitignored data plane is empty unless `MONEYBALL_ROOT` redirects it (section 2).
 6. **Check for Paul's live jobs before running anything** (session-ratified, 2026-07; PROJECT LAW 5): look for running `python` processes and fresh artifact mtimes in the live root. Never run concurrently with his work.
 7. **Run the kernel tests** (read-only: its only write is a temp file in `%TEMP%`):
 
@@ -197,7 +200,7 @@ Recreating a working setup on a (new) machine. Note there is no scenario where g
    python "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\run_tests.py"
    ```
 
-   Expect `KERNEL TESTS — 37 passed, 0 FAILED` (assertion count as of 2026-07-09; the README's "30" is stale). This exercises the kernel against the LIVE artifacts — a pass certifies interpreter + packages + data tree + path resolution all at once. **The environment is now working.** Anything beyond this (running the chain, collectors, audits) is operations: load moneyball-run-and-operate first.
+   Expect `KERNEL TESTS — 84 passed, 0 FAILED` (assertion count as of 2026-07-19; the count only grows — trust the run output). This command uses the live-tree script, so it exercises the kernel against the LIVE artifacts — a pass certifies the interpreter, the imports those tests exercise, their resolved data inputs, and path resolution. **The tested environment is now working.** Anything beyond this (running the chain, collectors, audits) is operations: load moneyball-run-and-operate first.
 
 ## Provenance and maintenance
 
@@ -208,7 +211,7 @@ Written 2026-07-09 against the live tree / worktree `claude/nifty-cray-f6d053` (
 | Ignore rules & whitelist | `git show HEAD:.gitignore` and `git ls-files | grep -vE '\.(py|md)$'` |
 | `cu_valence_registry.json` force-tracked despite `*.json` ignore | `git check-ignore -v --no-index cu_valence_registry.json` (matches `.gitignore:6`) + `git ls-files cu_valence_registry.json` (still listed) |
 | paths.py roots + env overrides | `sed -n '1,12p' fec/paths.py` |
-| No dependency manifest | `ls requirements.txt pyproject.toml setup.py Pipfile environment.yml` (all should fail) |
+| Canonical dependency manifest | read `requirements.txt`; compare its production packages with `CANONICAL_DEPENDENCIES` at `fec/run_pipeline.py:78-95` |
 | Python version | `python --version` |
 | Package usage counts / no `requests`/`bs4`/`logging` | `grep -rlE '^[^#]*\b(import|from) (requests|bs4)\b' fec | wc -l` (expect 0); `grep -rl "^import logging" fec | wc -l` (expect 0); per-package: `grep -lE '^[^#]*\b(import|from) openpyxl\b|^\s*import .*\bopenpyxl\b' fec/*.py | wc -l` |
 | Installed versions | `python -m pip list` |
@@ -219,8 +222,8 @@ Written 2026-07-09 against the live tree / worktree `claude/nifty-cray-f6d053` (
 | Convention counts (reconfigure 158 / coding header 117 / main-guard 20 / argparse 14 / utf-8-sig 33) | `grep -rl "sys.stdout.reconfigure" fec | wc -l`; `grep -rl '^# -\*- coding: utf-8 -\*-' fec | wc -l`; `cd fec && grep -l __main__ *.py tests/*.py | wc -l`; `grep -l "import argparse" fec/*.py | wc -l`; `grep -l "utf-8-sig" fec/*.py | wc -l` |
 | Last-line-only logging contract | `sed -n '46,50p' fec/run_pipeline.py` |
 | dump_atomic semantics | `sed -n '88,101p' fec/moneyball_core.py` |
-| Kernel test count 37 | run the tests, or `grep -c "^ok(\|ok(" fec/tests/run_tests.py` (38 minus the `def ok` line) |
+| Kernel test count 84 as of 2026-07-19 | run the tests and read the final count line (the count only grows) |
 | launch.json ports | `git show HEAD:.claude/launch.json` |
 | retiring_members.txt semantics | `head -10 fec/retiring_members.txt` + `grep -n "retiring_members" fec/receptivity_layer.py` |
 | Draft Systems disclaimer | `sed -n '88,89p' README.md` |
-| Stale README counts (tests "30", audit "59") | `grep -n "30 kernel\|59 checks" README.md` — if those lines changed, recheck this skill's numbers too |
+| Volatile README counts (tests 84, audit 136 as of 2026-07-19) | compare README.md's running-command comments with actual run output — if those lines change, recheck this skill's numbers too |

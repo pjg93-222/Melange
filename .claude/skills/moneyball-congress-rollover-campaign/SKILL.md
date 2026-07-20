@@ -32,7 +32,7 @@ This is the campaign plan for the project's hardest known live problem (designat
 | Workbook roster capacity | member rows 3..535 (exactly 533 rows) on Blended Model / Rank & Allocation; press weights live AT row 535 of the Normalized press sheet | `fec/audit_full.py:252-258`, `fec/moneyball_core.py:63,72` |
 | Electoral forecast input | `Ballotpedia_119th_CU_Influence_*.xlsx` — filename glob hardcodes "119th" | `fec/build_electoral.py:21` |
 | Hardcoded congress tuple `(119,118,117)` | 9 live scripts + kernel (list in Phase 4) | grep, see Provenance |
-| Kernel tests / audit size | 37 kernel tests; audit_full ~69 reported checks | `fec/tests/run_tests.py`; commit d223188 |
+| Kernel tests / audit size | 84 kernel tests; audit_full 136 reported checks as of 2026-07-19 (counts only grow — trust the run output) | `fec/tests/run_tests.py`; `fec/audit_full.py` |
 
 **congestion.json row schema (all 17 keys; every consumer depends on this exact shape):**
 `member` (display name, THE key everything joins on), `bioguide`, `chamber` ("House"/"Senate"), `cu`, `banks`, `finserv` (PAC dollars from tracked committees), `receipts` (total campaign receipts), `total` (cu+banks+finserv), `saturation`, `cu_pct/banks_pct/finserv_pct` (raw shares), `cu_adj/banks_adj/finserv_adj` (capacity-adjusted shares), `industry_adj`, `net_lean` (cu_adj − industry_adj; + = credit-union-leaning, − = bank-captured). Consumed keys across ~40 live scripts: `member`/`bioguide`/`chamber` everywhere; `cu`,`banks`,`finserv` (all flip/frontier/coalition engines, e.g. `fec/flip_model.py:29`), `receipts` (median-imputation logic, `fec/flip_model.py:26-28`), `net_lean` (`fec/build_dashboard_bundle.py:133,235`, `fec/lt_priming.py:71`), `total` + share keys (`fec/audit.py:58-67`, `fec/sna_layout.py:30`).
@@ -65,8 +65,8 @@ python ".claude\skills\moneyball-congress-rollover-campaign\scripts\rollover_gat
 2. **Record the green baseline.** With no live jobs of Paul's running (check running python processes and fresh artifact mtimes first; see moneyball-run-and-operate):
 ```powershell
 cd "C:\Users\pgoff\OneDrive\Desktop\Melange Systems"
-python "fec\tests\run_tests.py"    # expect: KERNEL TESTS — 37 passed, 0 FAILED
-python "fec\audit_full.py"         # expect: FULL-BODY AUDIT — ~69 passed, 0 FAILED (count as of 2026-07-09)
+python "fec\tests\run_tests.py"    # expect: KERNEL TESTS — 84 passed, 0 FAILED (as of 2026-07-19; count only grows)
+python "fec\audit_full.py"         # expect: FULL-BODY AUDIT — 136 passed, 0 FAILED (as of 2026-07-19; count only grows)
 ```
 3. **Copy the current `congestion.json` and `ranks_python.json` somewhere safe** (e.g. your scratch dir) — they are the regression references for Phases 3 and 6.
 4. **Read the fences section** at the bottom before doing anything else.
@@ -213,7 +213,7 @@ Success is measured, never eyeballed. Two distinct bars, because two distinct ch
 - **F3 — NEVER touch the workbook roster rows yourself.** They are Paul's (roster/stance = his domain; session-ratified, 2026-07). Also: Excel must be CLOSED for any scripted workbook write, and the one-shot `apply_*`/COM tools are dangerous by default (see moneyball-run-and-operate).
 - **F4 — NEVER map freshman no-signal cells to 0 or "Neutral".** The ontology forbids it: `'—'` is a distinct value with user-ratified constants (PERS 0.45 = Ally parity — "silence never outranks a declared Ally", `fec/moneyball_core.py:138`). A producer that emits 0/Neutral for freshmen silently corrupts persuadability, seeding, and tier math.
 - **F5 — NEVER "fix" the audit by loosening pins.** A4=533, the E3 dollar pins, coverage floors: every re-pin is a measured, one-line, same-commit-as-cause change with Paul's sign-off (Phase 6). An audit constant that no longer matches reality is a *finding*, not an obstacle.
-- **F6 — The worktree does NOT isolate data.** `fec/paths.py` resolves to the live tree; any fec script run anywhere mutates production. Check for Paul's live jobs before ANY run; port 8802 for previews (8801 is Paul's own server).
+- **F6 — Git worktrees isolate DATA — which makes them the WRONG place to run data-dependent work.** `fec/paths.py:7-8` defaults ROOT to the parent of the imported paths.py, so a script run from a worktree targets its EMPTY data plane: reads die on missing inputs and writes land as throwaway worktree artifacts. Run data-dependent work from the live tree, or set `MONEYBALL_ROOT` to it — and then writes DO hit live. Check for Paul's live jobs before ANY run; port 8802 for previews (8801 is Paul's own server). (Corrected 2026-07-19; the previous version asserted the opposite. Verified against `fec/paths.py:7-8`.)
 - **F7 — NEVER change the 44 PAC committee-ID sets inside the rollover change.** Same-commit set edits confound the money reconciliation (cycle drift becomes indistinguishable from definition drift). New/dead PACs go in a separate, Paul-gated follow-up with its own E3 re-pin.
 - **F8 — NEVER overwrite `fec/legislators.csv` or `votes/HSall_members.csv` while a LOCKED prereg pins their hashes.** The Vote Smart ES look fingerprints both (`fec/b5_es_votesmart_look.py:157`); drift makes the look refuse (safely — no look consumed) and strands a user-gated route. Resolve Phase 1 item 8 first.
 - **F9 — NEVER re-run frozen-roster looks or "refresh" preregs onto the new roster.** Retired-without-a-look routes (DATA-GATED / DIAGNOSTIC-GATED) keep their pinned successor conditions; new-roster work needs NEW preregs (moneyball-research-methodology).
