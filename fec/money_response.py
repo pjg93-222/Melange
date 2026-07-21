@@ -1,5 +1,6 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.abspath(__file__)));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 import moneyball_core as MC
+from tier_util import legislative_press_tiers
 """Money-response + defection mechanic (roadmap step 2).
 A donation shifts a member's money lean with diminishing returns, scaled by how movable they are
 (small relative to big fundraising = small move). Big enough competitor shock can trigger a defection."""
@@ -7,12 +8,19 @@ import json, sys, os
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}
-# Python owns the stance authority.  Rank & Allocation col G is only a synchronized display and can
-# be stale while Excel is open, so scenario engines derive the exact same overall tier directly from
-# category_stance.json instead of consuming the workbook view.
+# The money engine's overall tiers MUST equal Rank & Allocation col G / the shared crown law:
+# COMMITTED immunity depends on Tier-1 Champions actually reading as 'Champion'. Deriving with
+# overall_tier (no crown) silently stripped immunity from all 12 Tier-1 Champions; corrected 2026-07-19.
+# Python still owns the authority: this derives the same value col G displays and does not read the workbook.
 CS=json.load(open(B+r'\category_stance.json',encoding='utf-8'))
 _OVERALL_CAPS=(CS.get('gate') or {}).get('overall_capped') or {}
-OV={m:MC.overall_tier(cm,m,_OVERALL_CAPS) for m,cm in (CS.get('matrix') or {}).items()}
+MAT=CS.get('matrix') or {}
+try:
+    _tier,_trank=legislative_press_tiers(list(MAT))
+except (OSError,ValueError,TypeError,AttributeError,KeyError):
+    _tier={}
+    print('WARNING: Champion crown unavailable; money-defection immunity is degraded.')
+OV={m:MC.overall_display_tier(cm,_tier.get(m,0),m,_OVERALL_CAPS) for m,cm in MAT.items()}
 # --- dials ---
 MAXSHIFT=float(os.environ.get('MAXSHIFT','18'))   # CALIBRATED 40->18: money moves POSITIONS little (buys access/effort, not votes — Ansolabehere; Fowler-Garro-Spenkuch null vote-buying); defections now rare/niche
 HALF=float(os.environ.get('HALF','0.10'))         # donation = HALF*receipts -> half of MAXSHIFT (diminishing-returns scale)
@@ -60,7 +68,8 @@ def shift_lean(m,source,amount):
     return (mag if source=='cu' else -mag)
 def defection(m,dlean):
     """Does this lean shift defect the member, and to what new overall stance? (money-triggered)"""
-    st=OV.get(m,'Neutral'); st=PROJ.get(st,st)     # ladder label -> nearest coarse rung (see PROJ above)
+    # A missing stance is not Neutral: the '-' no-position ontology keeps absent evidence off the movable ladder (pre-merge col G behavior).
+    st=OV.get(m); st=PROJ.get(st,st)               # ladder label -> nearest coarse rung (see PROJ above)
     if st in COMMITTED or abs(dlean)<DTHRESH or st not in ORDER: return None
     steps=int(abs(dlean)//DTHRESH)             # how many LADDER rungs the money drags them (fine-grained)
     i=ORDER.index(st); j=min(len(ORDER)-1,max(0,i+(steps if dlean<0 else -steps)))  # competitor(-)->toward Opponent
