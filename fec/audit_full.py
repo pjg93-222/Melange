@@ -49,17 +49,21 @@ _opp_immune=mr.defection(_probe,-99) is None
 if _probe_old is None: mr.OV.pop(_probe,None)
 else: mr.OV[_probe]=_probe_old
 ck('committed Opponents immune to money defection (structural probe)',_opp_immune)
-_champions=[m for m in mr.OV if mr.OV[m]=='Champion']
-ck('committed Champions immune to money defection (real members, not an injected probe)',
-   bool(_champions) and all(mr.defection(m,-99) is None and mr.defection(m,99) is None for m in _champions),
-   '%d Champions found'%len(_champions))
 import moneyball_core as _crown_core
 import tier_util as _crown_tier_util
 _crown_cs=json.load(open(B+r'\category_stance.json',encoding='utf-8'))
 _crown_matrix=_crown_cs['matrix']; _crown_caps=(_crown_cs.get('gate') or {}).get('overall_capped') or {}
 _crown_tier,_crown_trank=_crown_tier_util.legislative_press_tiers(list(_crown_matrix))
-_crown_mismatches=[m for m in _crown_matrix if mr.OV[m]!=_crown_core.overall_display_tier(_crown_matrix[m],_crown_tier.get(m,0),m,_crown_caps)]
-ck('money engine overall tiers equal shared col G crown law (prevents crown stripping)',
+_crowned=[m for m in _crown_matrix if _crown_tier.get(m,0)==1]
+_crown_floor_mismatches=[m for m in _crowned if mr.OV.get(m)!='Ally']
+ck('Tier-1 display crowns are floored at Ally in money math (crowned remain movable)',
+   bool(_crowned) and not _crown_floor_mismatches,
+   '%d crowned members found; %d mismatched'%(len(_crowned),len(_crown_floor_mismatches)))
+_champion_leaks=[m for m in mr.OV if mr.OV[m]=='Champion']
+ck('Champion display label never leaks into money math',
+   not _champion_leaks,'%d Champion values found'%len(_champion_leaks))
+_crown_mismatches=[m for m,cm in _crown_matrix.items() if mr.OV.get(m)!=('Ally' if _crown_tier.get(m,0)==1 else _crown_core.overall_tier(cm,m,_crown_caps))]
+ck('money engine uses specified crown-floor divergence from col G (not drift)',
    not _crown_mismatches,'%d mismatches'%len(_crown_mismatches))
 # 2026-07-02: test the RUNG, not a named member — Durbin (the old exemplar) legitimately graduated to
 # full Opponent once the tiered media weights priced his interchange opposition.

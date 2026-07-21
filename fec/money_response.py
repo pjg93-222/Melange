@@ -8,10 +8,6 @@ import json, sys, os
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 C={m['member']:m for m in json.load(open(B+r'\congestion.json'))}
-# The money engine's overall tiers MUST equal Rank & Allocation col G / the shared crown law:
-# COMMITTED immunity depends on Tier-1 Champions actually reading as 'Champion'. Deriving with
-# overall_tier (no crown) silently stripped immunity from all 12 Tier-1 Champions; corrected 2026-07-19.
-# Python still owns the authority: this derives the same value col G displays and does not read the workbook.
 CS=json.load(open(B+r'\category_stance.json',encoding='utf-8'))
 _OVERALL_CAPS=(CS.get('gate') or {}).get('overall_capped') or {}
 MAT=CS.get('matrix') or {}
@@ -20,7 +16,6 @@ try:
 except (OSError,ValueError,TypeError,AttributeError,KeyError):
     _tier={}
     print('WARNING: Champion crown unavailable; money-defection immunity is degraded.')
-OV={m:MC.overall_display_tier(cm,_tier.get(m,0),m,_OVERALL_CAPS) for m,cm in MAT.items()}
 # --- dials ---
 MAXSHIFT=float(os.environ.get('MAXSHIFT','18'))   # CALIBRATED 40->18: money moves POSITIONS little (buys access/effort, not votes — Ansolabehere; Fowler-Garro-Spenkuch null vote-buying); defections now rare/niche
 HALF=float(os.environ.get('HALF','0.10'))         # donation = HALF*receipts -> half of MAXSHIFT (diminishing-returns scale)
@@ -49,6 +44,18 @@ COMMITTED={'Champion','Opponent'}                 # only the TERMINAL rungs are 
 # here, no longer flattened to a single Neutral.
 ORDER=['Champion','Ally','Highly Persuadable','Persuadable','Lean Persuadable','True Neutral',
        'Lean Skeptic','Skeptic','Highly Skeptical','Opponent']
+# Paul 2026-07-19: the Legislative+Press Tier-1 crown is a DISPLAY honor. In the money math, a
+# crowned member is promoted to the top of the earned ladder ('Ally') but remains MOVABLE. It is
+# deliberately NOT 'Champion', because immunity would overstate a display crown. This intentionally
+# diverges from col G (sync_stance_g -> overall_display_tier); the specified divergence is guarded,
+# unlike the accidental crown-law divergence corrected earlier today.
+def _money_overall_tier(m,cm):
+    _base=MC.overall_tier(cm,m,_OVERALL_CAPS)
+    if _tier.get(m,0)==1:
+        # Today this floor equals assignment: overall_tier's ceiling is 'Ally' and deliberately omits 'Champion'.
+        return ORDER[min(ORDER.index(_base),ORDER.index('Ally'))]
+    return _base
+OV={m:_money_overall_tier(m,cm) for m,cm in MAT.items()}
 # Aliases only: Defender ~= Champion tier (committed pro, PERS 0.12~=0.10); bare Neutral / legacy Unengaged
 # sit at the True Neutral point of the spectrum.
 PROJ={'Defender':'Champion','Neutral':'True Neutral','Unengaged':'True Neutral'}
