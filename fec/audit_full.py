@@ -1065,10 +1065,13 @@ if _g:
     ck('overall say-do caps have an auditable fixed-rule reason',_b4==0,
        '%d overall caps, %d incoherent'%(len(_oc),_b4))
     import moneyball_core as _mc
-    from tier_util import legislative_press_tiers as _lpt, load_tier_weights as _ltw
+    from tier_util import legislative_press_tiers as _lpt, load_tier_weights as _ltw, load_tier_positions as _ltp
     _tier_weights=_ltw()
-    ck('user-ratified display-tier weights are 80%% Legislative / 20%% Press',
-       all(abs(a-b)<1e-12 for a,b in zip(_tier_weights,(0.8,0.2))),str(_tier_weights))
+    ck('user-ratified display-tier weights are 84%% Legislative / 16%% Press',
+       all(abs(a-b)<1e-12 for a,b in zip(_tier_weights,(0.84,0.16))),str(_tier_weights))
+    _tier_positions=_ltp()
+    ck('no display-tier position pins remain (bucket order == score order)',
+       not _tier_positions,_tier_positions)
     _tier,_tier_rank=_lpt(list(MAT))
     # Paul's placement contract as of 2026-07-17 (letters-integration session, 'adjust to the true
     # tier 1s'): Tier 1 is MATH-DRIVEN (pure 80/20 order) except two anchors — Barr (standing #1)
@@ -1079,10 +1082,22 @@ if _g:
     # 'No, just move him'): an EXPLICIT placement pair, not a math result. Fitzpatrick trails Wagner
     # on the PRESS pillar only (leg .996 vs .955; press .153 vs .500), and his press is understated
     # because CU-positive trade coverage reads neutral in the 2026-06-30-frozen press basis.
-    # Wagner's Tier-2 placement is load-bearing: forcing Fitzpatrick alone ejects Tim Scott instead.
-    _required_tiers={'Andy Barr':1,'Young Kim':1,'Brian Fitzpatrick':1,
+    # The placement contract is Barr (standing #1 anchor) + Young Kim ("stays") +
+    # the six "should all be in tier 2" directives. The 2026-07-18 Fitzpatrick/Wagner
+    # swap and the 2026-07-19 position pin were RETIRED on 2026-07-19 when Paul
+    # ratified 0.84/0.16, because that weighting produces both placements on merit.
+    _required_tiers={'Andy Barr':1,'Young Kim':1,
                      'Maxine Waters':2,'Juan Vargas':2,'Nydia Velázquez':2,
-                     'Mike Crapo':2,'Scott Fitzgerald':2,'Tim Moore':2,'Ann Wagner':2}
+                     'Mike Crapo':2,'Scott Fitzgerald':2,'Tim Moore':2}
+    # Paul 2026-07-19 asked what 95/5 would do, conditional on BOTH men holding Tier 1;
+    # at 95/5 Fitzpatrick reached Tier 1 but Tim Scott fell to slot 26, so that condition
+    # failed. A sweep of 0.50-0.99 found only 0.83/0.84/0.85 satisfy both; 0.84 was chosen.
+    # Both now hold on MATH, with no placement and no pin; this catches weighting drift.
+    ck('0.84/0.16 tier weighting keeps Fitzpatrick and Tim Scott both in Tier 1',
+       _tier.get('Brian Fitzpatrick')==1 and _tier.get('Tim Scott')==1,
+       'Brian Fitzpatrick tier=%s rank=%s; Tim Scott tier=%s rank=%s' %
+       (_tier.get('Brian Fitzpatrick'),_tier_rank.get('Brian Fitzpatrick'),
+        _tier.get('Tim Scott'),_tier_rank.get('Tim Scott')))
     ck('user-ratified Legislative+Press tier placements are exact',
        all(_tier.get(m)==t for m,t in _required_tiers.items()),
        str({m:_tier.get(m) for m in _required_tiers}))
