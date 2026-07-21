@@ -1,9 +1,9 @@
 {
-  "_README": "User-ratified Legislative+Press display-tier policy. Tier score uses the source-controlled weights below. Buckets remain fixed at 12/24/48. Forced members occupy their named bucket; remaining seats are filled by the weighted Legislative+Press score order. 2026-07-17 (Paul, letters integration session): 'adjust to the true tier 1s' — Tier 1 is now MATH-DRIVEN (pure 80/20 order) except two anchors (Barr #1 standing; Young Kim 'stays'). The 2026-07-16 Tier-1 pins for Fitzpatrick/Williams/Hagerty/Scott/Torres/Cortez Masto/Timmons/Nunn and Hill's Tier-2 pin were removed by this directive; Tier-2 pins stand.",
+  "_README": "User-ratified Legislative+Press display-tier policy. Tier score uses the source-controlled 0.84 Legislation / 0.16 Press weights chosen by Paul on 2026-07-19. Buckets remain fixed at 12/24/48. 2026-07-17 (Paul, letters integration session): 'adjust to the true tier 1s' — Tier 1 is MATH-DRIVEN except two standing anchors (Barr #1; Young Kim 'stays'). The 2026-07-18 Fitzpatrick/Wagner swap and the 2026-07-19 Fitzpatrick position pin are retired because 0.84/0.16 places Fitzpatrick in Tier 1 at slot 10 and Wagner at slot 7 on merit. Tier-2 directives stand.",
   "weights": {
-    "legislation": 0.8,
-    "press": 0.2,
-    "note": "Paul follow-up 2026-07-16: prefer 80% Legislation / 20% Press after testing 60/40 and 70/30"
+    "legislation": 0.84,
+    "press": 0.16,
+    "note": "Paul 2026-07-19 chose 0.84 Legislation / 0.16 Press after a 95/5 probe: at 95/5 Fitzpatrick reached Tier 1 but Tim Scott fell to slot 26, so the pin-removal condition failed. A sweep of 0.50–0.99 found only 0.83/0.84/0.85 keep BOTH Fitzpatrick and Scott in Tier 1; 0.84/0.16 chosen. This supersedes the previous ratified 80% / 20% value, preferred after testing 60/40 and 70/30."
   },
   "placements": [
     {
@@ -45,17 +45,6 @@
       "member": "Nydia Velázquez",
       "tier": 2,
       "note": "Paul follow-up 2026-07-16"
-    },
-    {
-      "member": "Brian Fitzpatrick",
-      "tier": 1,
-      "note": "Paul directive 2026-07-18: 'replace Ann Wagner with Brian Fitzpatrick ... in the champion ranks' / 'No, just move him'. Explicit placement, NOT a math result: Fitzpatrick's 80/20 score trails Wagner's on the PRESS pillar only (leg 0.996 vs 0.955; press 0.153 vs 0.500), and his press is understated because CU-positive trade coverage reads neutral in the 2026-06-30-frozen pillar basis. Forcing Wagner to Tier 2 is required: forcing Fitzpatrick alone would have ejected Tim Scott instead. POSITION PIN (Paul 2026-07-19 \"have Brian take Wagners former spot, like number 5 or whatever she was\"): pinned to Tier-1 slot 5, the slot Wagner held before the swap. DISPLAY ONLY - changes no score, pillar or rank. NOTE this breaks the \"within-bucket order == score order\" property for Tier 1.",
-      "position": 5
-    },
-    {
-      "member": "Ann Wagner",
-      "tier": 2,
-      "note": "Paul directive 2026-07-18: 'replace Ann Wagner with Brian Fitzpatrick ... in the champion ranks' / 'No, just move him'. Explicit placement, NOT a math result: Fitzpatrick's 80/20 score trails Wagner's on the PRESS pillar only (leg 0.996 vs 0.955; press 0.153 vs 0.500), and his press is understated because CU-positive trade coverage reads neutral in the 2026-06-30-frozen pillar basis. Forcing Wagner to Tier 2 is required: forcing Fitzpatrick alone would have ejected Tim Scott instead."
     }
   ]
 }
