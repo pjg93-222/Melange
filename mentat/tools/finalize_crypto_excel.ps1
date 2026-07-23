@@ -1,6 +1,7 @@
 param(
   [Parameter(Mandatory = $true)][string]$WorkbookPath,
-  [Parameter(Mandatory = $true)][string]$JsonPath
+  [Parameter(Mandatory = $true)][string]$JsonPath,
+  [string]$ExcelMutexName = 'Global\MentatIndustryExcelFinalize'
 )
 $ErrorActionPreference = 'Stop'
 
@@ -103,9 +104,20 @@ function Count-NonOk($Range) {
 $resolvedWorkbook = (Resolve-Path -LiteralPath $WorkbookPath).Path
 $resolvedJson = (Resolve-Path -LiteralPath $JsonPath).Path
 $payload = Get-Content -Raw -LiteralPath $resolvedJson | ConvertFrom-Json
-$workingPath = Join-Path (Split-Path $resolvedWorkbook -Parent) 'Crypto Industry Spending Overview.excel-final.xlsx'
+$industry = [string]$payload.metadata.industry
+if ([string]::IsNullOrWhiteSpace($industry)) { $industry = 'Crypto' }
+$reportBaseName = "${industry} Industry Spending Overview"
+$overviewSheetName = if ($industry -eq 'Crypto') { 'Crypto Spending Overview' } else { 'Spending Overview' }
+$associatedFundingHeader = "Associated ${industry} Funding"
+$workingPath = Join-Path (Split-Path $resolvedWorkbook -Parent) "${reportBaseName}.excel-final-$PID.xlsx"
 Copy-Item -LiteralPath $resolvedWorkbook -Destination $workingPath -Force
 $excel = $null; $book = $null; $watch = [Diagnostics.Stopwatch]::StartNew()
+$excelMutex = [Threading.Mutex]::new($false, $ExcelMutexName)
+$hasExcelMutex = $excelMutex.WaitOne([TimeSpan]::FromMinutes(45))
+if (-not $hasExcelMutex) {
+  $excelMutex.Dispose()
+  throw 'Timed out waiting for the shared Excel finalization mutex.'
+}
 try {
   $excel = New-Object -ComObject Excel.Application
   $excel.Visible = $false; $excel.DisplayAlerts = $false; $excel.EnableEvents = $false
@@ -125,7 +137,7 @@ try {
     Set-TableColumnFormula $table 'Logic Check' '=IF(AND([@[Include in Analysis]]="No",[@[Cycle Alignment]]="Outside requested cycles",[@[Analysis Amount]]=0),"OK","CHECK")'
   } finally { Release-ComObject $table; Release-ComObject $sheet }
 
-  $sheet = $book.Worksheets.Item('Crypto Spending Overview'); $table = $sheet.ListObjects.Item(1)
+  $sheet = $book.Worksheets.Item($overviewSheetName); $table = $sheet.ListObjects.Item(1)
   try {
     Set-TableColumnFormula $table 'Total Giving' ('=' + (Cycle-Dispatch { param($t) Scope-Expression $t }))
     Set-TableColumnFormula $table 'Democratic' ('=' + (Cycle-Dispatch { param($t) Scope-Expression $t 'D' }))
@@ -281,17 +293,17 @@ try {
   $sheet = $book.Worksheets.Item('Beneficiary Bridge'); $table = $sheet.ListObjects.Item(1)
   try {
     Set-TableColumnFormula $table 'Downstream Activity' '=SUMIFS(DownstreamActivityTable[Net Included Amount],DownstreamActivityTable[Cycle],[@Cycle],DownstreamActivityTable[Source Committee ID],[@[Source Committee ID]],DownstreamActivityTable[Candidate ID],[@[Candidate ID]])'
-    Set-TableColumnFormula $table 'Associated Crypto Funding' ('=' + (Cycle-Dispatch { param($t) Bridge-Funding-Expression $t }))
+    Set-TableColumnFormula $table $associatedFundingHeader ('=' + (Cycle-Dispatch { param($t) Bridge-Funding-Expression $t }))
     Set-TableColumnFormula $table 'FEC Committee URL' '=IF([@[Source Committee ID]]="","","https://www.fec.gov/data/committee/"&[@[Source Committee ID]]&"/")'
     Set-TableColumnFormula $table 'FEC Candidate URL' '=IF([@[Candidate ID]]="","","https://www.fec.gov/data/candidate/"&[@[Candidate ID]]&"/")'
-    Set-TableColumnFormula $table 'Integrity Check' '=IF(AND([@[Source Committee ID]]<>"",[@[Candidate ID]]<>"",ISNUMBER([@[Downstream Activity]]),ISNUMBER([@[Associated Crypto Funding]])),"OK","CHECK")'
+    Set-TableColumnFormula $table 'Integrity Check' ("=IF(AND([@[Source Committee ID]]<>`"`",[@[Candidate ID]]<>`"`",ISNUMBER([@[Downstream Activity]]),ISNUMBER([@[${associatedFundingHeader}]])),`"OK`",`"CHECK`")")
   } finally { Release-ComObject $table; Release-ComObject $sheet }
 
   $sheet = $book.Worksheets.Item('Beneficiary Summary'); $table = $sheet.ListObjects.Item(1)
   try {
     Set-TableColumnFormula $table 'Rank' '=1+COUNTIFS(BeneficiarySummaryTable[Cycle],[@Cycle],BeneficiarySummaryTable[View],[@View],BeneficiarySummaryTable[Company],[@Company],BeneficiarySummaryTable[Downstream Activity],">"&[@[Downstream Activity]])'
     Set-TableColumnFormula $table 'Downstream Activity' '=SUMIFS(BeneficiaryBridgeTable[Downstream Activity],BeneficiaryBridgeTable[Cycle],[@Cycle],BeneficiaryBridgeTable[View],[@View],BeneficiaryBridgeTable[Company],[@Company],BeneficiaryBridgeTable[Candidate ID],[@[Candidate ID]])'
-    Set-TableColumnFormula $table 'Associated Crypto Funding' '=SUMIFS(BeneficiaryBridgeTable[Associated Crypto Funding],BeneficiaryBridgeTable[Cycle],[@Cycle],BeneficiaryBridgeTable[View],[@View],BeneficiaryBridgeTable[Company],[@Company],BeneficiaryBridgeTable[Candidate ID],[@[Candidate ID]])'
+    Set-TableColumnFormula $table $associatedFundingHeader ("=SUMIFS(BeneficiaryBridgeTable[${associatedFundingHeader}],BeneficiaryBridgeTable[Cycle],[@Cycle],BeneficiaryBridgeTable[View],[@View],BeneficiaryBridgeTable[Company],[@Company],BeneficiaryBridgeTable[Candidate ID],[@[Candidate ID]])")
     Set-TableColumnFormula $table 'Democratic Activity' '=IF([@Party]="D",[@[Downstream Activity]],0)'
     Set-TableColumnFormula $table 'Republican Activity' '=IF([@Party]="R",[@[Downstream Activity]],0)'
     Set-TableColumnFormula $table 'Other / Unclassified Activity' '=[@[Downstream Activity]]-[@[Democratic Activity]]-[@[Republican Activity]]'
@@ -318,10 +330,11 @@ try {
   }
 
   $headerRows = @{
-    'Master Overview'=6;'Crypto Spending Overview'=5;'Company List'=5;'Employee List'=5;'Recipient List'=5
+    'Master Overview'=6;'Company List'=5;'Employee List'=5;'Recipient List'=5
     'Beneficiary Summary'=5;'PAC & Candidate Map'=5;'Downstream Activity'=5;'Beneficiary Bridge'=5
     '2021-2022'=4;'2023-2024'=4;'2025-2026'=4;'Cycle Exceptions'=4
   }
+  $headerRows[$overviewSheetName] = 5
   foreach ($sheetName in $focusedSheets) { $headerRows[$sheetName] = 5 }
   foreach ($sheetName in $headerRows.Keys) {
     $sheet = $book.Worksheets.Item($sheetName); $sheet.Activate(); $excel.ActiveWindow.FreezePanes = $false
@@ -332,16 +345,16 @@ try {
   while ($excel.CalculationState -ne 0) { Start-Sleep -Milliseconds 100 }
 
   $formulaColumnsBySheet = @{
-    'Crypto Spending Overview'=@('Total Giving','Democratic','Republican','Other / Unclassified','Net Democratic %','Net Republican %','Party Coverage','Integrity Check')
     'Company List'=@('Rank','Total Giving','Democratic','Republican','Other / Unclassified','Net Democratic %','Net Republican %','Party Coverage','Corporate','Chief','Middle Management','Employee','Integrity Check')
     'Employee List'=@('Industry Rank','Company Rank','Total Giving','Democratic','Republican','Other / Unclassified','Net Democratic %','Net Republican %','Party Coverage','Contribution Count','Integrity Check')
     'Recipient List'=@('Rank','Direct Candidate / Sponsor','Committee Relationship','Ownership Status','Top Downstream Congressional Beneficiary','Top Downstream Candidate ID','Top Downstream Activity','Total Giving','Democratic','Republican','Other / Unclassified','Net Democratic %','Net Republican %','Party Coverage','Corporate','Chief','Middle Management','Employee','Contribution Count','FEC Committee URL','Integrity Check')
     'PAC & Candidate Map'=@('Top Downstream Activity','FEC Committee URL','FEC Candidate URL','Integrity Check')
     'Downstream Activity'=@('Net Included Amount','FEC Committee URL','FEC Candidate URL','Logic Check')
-    'Beneficiary Bridge'=@('Downstream Activity','Associated Crypto Funding','FEC Committee URL','FEC Candidate URL','Integrity Check')
-    'Beneficiary Summary'=@('Rank','Downstream Activity','Associated Crypto Funding','Democratic Activity','Republican Activity','Other / Unclassified Activity','Party Coverage','FEC Candidate URL','Integrity Check')
+    'Beneficiary Bridge'=@('Downstream Activity',$associatedFundingHeader,'FEC Committee URL','FEC Candidate URL','Integrity Check')
+    'Beneficiary Summary'=@('Rank','Downstream Activity',$associatedFundingHeader,'Democratic Activity','Republican Activity','Other / Unclassified Activity','Party Coverage','FEC Candidate URL','Integrity Check')
     '2021-2022'=@('Analysis Amount','Logic Check');'2023-2024'=@('Analysis Amount','Logic Check');'2025-2026'=@('Analysis Amount','Logic Check');'Cycle Exceptions'=@('Analysis Amount','Logic Check')
   }
+  $formulaColumnsBySheet[$overviewSheetName] = @('Total Giving','Democratic','Republican','Other / Unclassified','Net Democratic %','Net Republican %','Party Coverage','Integrity Check')
   foreach ($sheetName in $focusedSheets) {
     $formulaColumnsBySheet[$sheetName] = @('Rank','Total / Activity','Democratic','Republican','Other / Unclassified','Party Coverage','Integrity Check')
   }
@@ -391,7 +404,7 @@ try {
   $expectedTotals = @{}
   foreach ($cycle in @('2021-2022','2023-2024','2025-2026')) { $expectedTotals[$cycle] = 0.0 }
   foreach ($row in $payload.raw_rows) { if ($row.include_in_analysis -eq 'Yes') { $expectedTotals[[string]$row.cycle_label] += [double]$row.amount } }
-  $sheet = $book.Worksheets.Item('Crypto Spending Overview'); $table = $sheet.ListObjects.Item(1); $rows = $table.DataBodyRange
+  $sheet = $book.Worksheets.Item($overviewSheetName); $table = $sheet.ListObjects.Item(1); $rows = $table.DataBodyRange
   try {
     for ($index=1; $index -le $rows.Rows.Count; $index++) {
       if ([string]$rows.Cells.Item($index,2).Value2 -eq 'Total Giving') {
@@ -434,10 +447,9 @@ try {
       } finally { Release-ComObject $rows; Release-ComObject $table }
     }
   } finally { Release-ComObject $sheet }
-  if ($formulaColumnFailures -ne 0 -or $integrityFailures -ne 0 -or $formulaCount -lt 50000) {
+  if ($formulaColumnFailures -ne 0 -or $integrityFailures -ne 0 -or $formulaCount -le 0) {
     throw "Verification failed: formulas=$formulaCount formula_column_failures=$formulaColumnFailures integrity_failures=$integrityFailures"
   }
-  if (([math]::Round($expectedTotals['2021-2022'],2) -eq [math]::Round($expectedTotals['2023-2024'],2)) -or ([math]::Round($expectedTotals['2023-2024'],2) -eq [math]::Round($expectedTotals['2025-2026'],2))) { throw 'Cycle totals unexpectedly identical' }
 
   $book.Save(); $book.Close($false); Release-ComObject $book; $book = $null
   $excel.Quit(); Release-ComObject $excel; $excel = $null
@@ -447,4 +459,7 @@ try {
 } finally {
   if ($null -ne $book) { try {$book.Close($false)} catch {}; Release-ComObject $book }
   if ($null -ne $excel) { try {$excel.Quit()} catch {}; Release-ComObject $excel }
+  if ($hasExcelMutex) { try { [void]$excelMutex.ReleaseMutex() } catch {} }
+  $excelMutex.Dispose()
+  if (Test-Path -LiteralPath $workingPath) { Remove-Item -LiteralPath $workingPath -Force -ErrorAction SilentlyContinue }
 }

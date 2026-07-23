@@ -1,9 +1,10 @@
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) < 2L || length(args) > 4L) {
+if (length(args) < 2L || length(args) > 5L) {
   stop(
     paste(
       "usage: Rscript tools/export_crypto_spending_data.R",
-      "<mentat.db> <output.json> [fec-committee-master-dir] [fec-beneficiary-dir]"
+      "<mentat.db> <output.json> [fec-committee-master-dir]",
+      "[fec-beneficiary-dir] [industry]"
     ),
     call. = FALSE
   )
@@ -31,7 +32,14 @@ script_path <- normalizePath(
   mustWork = TRUE
 )
 MENTAT_PROJECT_ROOT <- dirname(dirname(script_path))
-MENTAT_INDUSTRY <- "Crypto"
+MENTAT_INDUSTRY <- if (length(args) >= 5L && nzchar(trimws(args[[5L]]))) {
+  trimws(args[[5L]])
+} else {
+  trimws(Sys.getenv("MENTAT_INDUSTRY", unset = "Crypto"))
+}
+if (!nzchar(MENTAT_INDUSTRY)) {
+  stop("Industry cannot be empty.", call. = FALSE)
+}
 
 for (module in c(
   "paths.R", "schema.R", "ingest.R", "fec_page.R", "collect.R",
@@ -128,7 +136,7 @@ analysis_rows <- spending_report_rows(
 )
 
 if (!nrow(raw_rows) || !nrow(analysis_rows)) {
-  stop("Crypto report source contains no rows.", call. = FALSE)
+  stop(MENTAT_INDUSTRY, " report source contains no rows.", call. = FALSE)
 }
 
 analysis_rows[, analysis_cycle := contribution_cycle(contribution_receipt_date)]
@@ -198,16 +206,20 @@ executive_keys <- unique(paste(
   vapply(lookups$executives$executive_name, person_identity_key, character(1L)),
   sep = "\r"
 ))
-verified_employee_names <- data.table::data.table(
-  company = rep("Coinbase", 5L),
-  person = c(
-    "POLLAK, JESSE",
-    "TUSAR, GREG",
-    "GREWAL, PAUL",
-    "GUPTA, MANISH",
-    "BAUGUESS, SCOTT"
+verified_employee_names <- if (identical(MENTAT_INDUSTRY, "Crypto")) {
+  data.table::data.table(
+    company = rep("Coinbase", 5L),
+    person = c(
+      "POLLAK, JESSE",
+      "TUSAR, GREG",
+      "GREWAL, PAUL",
+      "GUPTA, MANISH",
+      "BAUGUESS, SCOTT"
+    )
   )
-)
+} else {
+  data.table::data.table(company = character(), person = character())
+}
 verified_employee_keys <- unique(paste(
   verified_employee_names$company,
   vapply(verified_employee_names$person, person_identity_key, character(1L)),
@@ -642,9 +654,10 @@ jsonlite::write_json(
 )
 cat(sprintf(
   paste0(
-    "Crypto workbook export: raw=%d included=%d employee_groups=%d ",
+    "%s workbook export: raw=%d included=%d employee_groups=%d ",
     "identity_review_groups=%d downstream=%d beneficiary_summary=%d output=%s\n"
   ),
+  MENTAT_INDUSTRY,
   payload$metadata$raw_rows,
   payload$metadata$included_rows,
   payload$metadata$employee_groups,

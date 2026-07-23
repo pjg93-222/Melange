@@ -30,6 +30,13 @@ if (!dataPath || !outputDir) {
 
 const payload = JSON.parse(await fs.readFile(dataPath, "utf8"));
 const deferFormulas = process.env.MENTAT_DEFER_FORMULAS === "1";
+const industry = String(payload.metadata?.industry ?? "Crypto").trim() || "Crypto";
+const reportBaseName = `${industry} Industry Spending Overview`;
+const overviewSheetName = industry === "Crypto"
+  ? "Crypto Spending Overview"
+  : "Spending Overview";
+const associatedFundingHeader = `Associated ${industry} Funding`;
+const fundingDescription = `${industry} contributions`;
 await fs.mkdir(outputDir, { recursive: true });
 const diagnosticsDir = path.join(path.dirname(dataPath), "final_diagnostics_v2");
 await fs.mkdir(diagnosticsDir, { recursive: true });
@@ -83,7 +90,7 @@ const companyViewName = (company) => `${company} View`.slice(0, 31);
 const companyViewSheets = payload.companies.map((company) => companyViewName(company));
 const sheetOrder = [
   "Master Overview",
-  "Crypto Spending Overview",
+  overviewSheetName,
   ...payload.cycles.map((cycle) => `${cycle.label} Summary`),
   "Company List",
   ...companyViewSheets,
@@ -442,7 +449,7 @@ for (const cycle of payload.cycles) {
     sheetName: cycle.label,
     data,
     tableName: cycle.table_name,
-    title: `${cycle.label} Crypto Contributions`,
+    title: `${cycle.label} ${industry} Contributions`,
     subtitle:
       "Contribution-date cycle. Analysis Amount is formula-driven; FEC Filing Cycle and Cycle Alignment preserve the original reporting-period provenance.",
     sourceNote: `Source DB SHA-256: ${sourceSha256} | Rows: ${data.length.toLocaleString("en-US")} | Official committee metadata: ${payload.committee_master_sources.join(" | ")}`,
@@ -504,7 +511,7 @@ function buildMasterOverview() {
   const lastColumn = excelColumn(headers.length);
   titleBlock(
     sheet,
-    "Crypto Industry Master Overview",
+    `${industry} Master Overview`,
     "Mentat master-workbook layout: each two-year cycle is a separate Excel table with company totals, industry share, partisan dollars and percentages, recipient channels, contributor roles, and changes versus the prior cycle.",
     `Source DB SHA-256: ${sourceSha256} | All summary values are Excel formulas linked to the cycle tables; zero values display as "-".`,
     lastColumn,
@@ -745,7 +752,7 @@ function buildMasterOverview() {
 }
 
 function buildOverview() {
-  const sheet = workbook.worksheets.getItem("Crypto Spending Overview");
+  const sheet = workbook.worksheets.getItem(overviewSheetName);
   const headers = [
     "Cycle",
     "Scope",
@@ -764,7 +771,7 @@ function buildOverview() {
   }
   titleBlock(
     sheet,
-    "Crypto Industry Spending Overview",
+    reportBaseName,
     "Role rows and recipient-category rows are separate formula-driven views of the same cycle total. Net D/R percentages exclude Other / Unclassified; Party Coverage shows explicit partisan evidence.",
     `Source DB SHA-256: ${sourceSha256} | ${payload.metadata.raw_rows.toLocaleString("en-US")} retained rows | ${payload.metadata.cycle_exception_rows.toLocaleString("en-US")} cycle exceptions retained separately | Zero values display as "-".`,
     "J",
@@ -867,7 +874,7 @@ function buildCompanyList() {
     sheet,
     "Company List",
     "Companies are ranked within each two-year cycle. Totals, role splits, party splits, rank, and integrity checks are Excel formulas over the cycle tables.",
-    `Crypto roster: ${payload.companies.length} companies | Zero values display as “-”.`,
+    `${industry} roster: ${payload.companies.length} companies | Zero values display as “-”.`,
     "O",
   );
   sheet.getRange(`A5:O${5 + rows.length}`).values = [headers, ...rows];
@@ -1309,7 +1316,7 @@ function buildDownstreamActivity() {
   titleBlock(
     sheet,
     "Downstream Committee-to-Candidate Activity",
-    "This is same-cycle activity by committees funded in the crypto dataset; it is not dollar-level pass-through attribution. Reported minus excluded amendment/memo rows equals Net Included Amount.",
+    `This is same-cycle activity by committees funded in the ${industry} dataset; it is not dollar-level pass-through attribution. Reported minus excluded amendment/memo rows equals Net Included Amount.`,
     `${payload.metadata.downstream_rows.toLocaleString("en-US")} exact source rows condensed to ${rows.length.toLocaleString("en-US")} committee-candidate-activity groups | ${payload.metadata.downstream_superseded_rows.toLocaleString("en-US")} superseded and ${payload.metadata.downstream_memo_rows.toLocaleString("en-US")} memo rows excluded.`,
     "AB",
   );
@@ -1338,7 +1345,7 @@ function buildBeneficiaryBridge() {
     "Candidate / Officeholder", "Candidate ID", "Candidate Party", "Office", "State",
     "District", "Activity Relationships", "Directions", "Transaction Count",
     "First Activity Date", "Last Activity Date", "Downstream Activity",
-    "Associated Crypto Funding", "FEC Committee URL", "FEC Candidate URL",
+    associatedFundingHeader, "FEC Committee URL", "FEC Candidate URL",
     "Reference Key", "Integrity Check",
   ];
   const rows = (payload.beneficiary_bridge ?? []).map((row) => [
@@ -1382,7 +1389,7 @@ function buildBeneficiarySummary() {
     "Cycle", "View", "Company", "Rank", "Candidate / Officeholder", "Candidate ID",
     "Party", "Office", "State", "District", "Source Committees", "Committee Count",
     "Activity Relationships", "Directions", "Downstream Activity",
-    "Associated Crypto Funding", "Democratic Activity", "Republican Activity",
+    associatedFundingHeader, "Democratic Activity", "Republican Activity",
     "Other / Unclassified Activity", "Party Coverage", "FEC Candidate URL", "Integrity Check",
   ];
   const rows = (payload.beneficiary_summary ?? []).map((row) => [
@@ -1499,13 +1506,13 @@ function focusedRowsForCycle(cycle) {
   })).sort((a, b) => b.total - a.total || a.company.localeCompare(b.company));
   for (const entry of companyTotals) rows.push([
     label, "Company Total", null, entry.company, entry.company, "", "", "",
-    "Crypto contributions", null, null, null, null, null, "", entry.company, entry.company, "", null,
+    fundingDescription, null, null, null, null, null, "", entry.company, entry.company, "", null,
   ]);
   const employees = (payload.employees ?? []).filter((row) => row.cycle === cycle.cycle)
     .sort((a, b) => Number(b.preliminary_total || 0) - Number(a.preliminary_total || 0) || a.person.localeCompare(b.person)).slice(0, 15);
   for (const entry of employees) rows.push([
     label, "Top Contributor", null, entry.company, entry.person, "", "", entry.identity_basis,
-    "Crypto contributions", null, null, null, null, null, "", entry.company, entry.person_key, "", null,
+    fundingDescription, null, null, null, null, null, "", entry.company, entry.person_key, "", null,
   ]);
   const recipients = industryEntries.filter((row) => row.cycle === label)
     .sort((a, b) => b.total - a.total || a.recipient.localeCompare(b.recipient)).slice(0, 15);
@@ -1513,7 +1520,7 @@ function focusedRowsForCycle(cycle) {
     const map = mapByCommittee.get(entry.committeeId) ?? {};
     rows.push([
       label, "Top Direct Recipient", null, "Industry Total", entry.recipient,
-      map.direct_person ?? "", "", map.relationship ?? "", "Crypto contributions",
+      map.direct_person ?? "", "", map.relationship ?? "", fundingDescription,
       null, null, null, null, null, "Industry", "Industry Total", entry.recipientKey,
       entry.committeeId, null,
     ]);
@@ -1539,14 +1546,14 @@ function focusedRowsForCompany(company) {
       .filter((row) => row.cycle === cycle.cycle)
       .map((row) => [row.committee_id, row]));
     rows.push([
-      label, "Company Total", null, company, company, "", "", "", "Crypto contributions",
+      label, "Company Total", null, company, company, "", "", "", fundingDescription,
       null, null, null, null, null, "", company, company, "", null,
     ]);
     const employees = (payload.employees ?? []).filter((row) => row.cycle === cycle.cycle && row.company === company)
       .sort((a, b) => Number(b.preliminary_total || 0) - Number(a.preliminary_total || 0) || a.person.localeCompare(b.person)).slice(0, 10);
     for (const entry of employees) rows.push([
       label, "Top Contributor", null, company, entry.person, "", "", entry.identity_basis,
-      "Crypto contributions", null, null, null, null, null, "", company, entry.person_key, "", null,
+      fundingDescription, null, null, null, null, null, "", company, entry.person_key, "", null,
     ]);
     const recipients = companyEntries.filter((row) => row.cycle === label && row.company === company)
       .sort((a, b) => b.total - a.total || a.recipient.localeCompare(b.recipient)).slice(0, 10);
@@ -1554,7 +1561,7 @@ function focusedRowsForCompany(company) {
       const map = mapByCommittee.get(entry.committeeId) ?? {};
       rows.push([
         label, "Top Direct Recipient", null, company, entry.recipient, map.direct_person ?? "",
-        "", map.relationship ?? "", "Crypto contributions", null, null, null, null, null,
+        "", map.relationship ?? "", fundingDescription, null, null, null, null, null,
         "Company", company, entry.recipientKey, entry.committeeId, null,
       ]);
     }
@@ -1584,7 +1591,7 @@ for (const cycle of payload.cycles) {
   buildFocusedView(
     `${cycle.label} Summary`,
     `CycleSummary_${cycle.cycle}`,
-    `${cycle.label} Crypto Industry Summary`,
+    `${cycle.label} ${industry} Industry Summary`,
     "Industry-wide company totals, top contributors, direct recipient committees with candidate/sponsor resolution, and downstream congressional beneficiaries.",
     focusedRowsForCycle(cycle),
   );
@@ -1611,7 +1618,7 @@ void bridgeSheet;
 
 const previewRanges = new Map([
   ["Master Overview", "A1:CE45"],
-  ["Crypto Spending Overview", "A1:J52"],
+  [overviewSheetName, "A1:J52"],
   ["Company List", "A1:O36"],
   ["Employee List", "A1:S30"],
   ["Recipient List", "A1:AD30"],
@@ -1626,7 +1633,7 @@ const previewRanges = new Map([
   ["2025-2026", "A1:AI20"],
   ["Cycle Exceptions", "A1:AI20"],
 ]);
-const outputPath = path.join(outputDir, "Crypto Industry Spending Overview.xlsx");
+const outputPath = path.join(outputDir, `${reportBaseName}.xlsx`);
 const output = await SpreadsheetFile.exportXlsx(workbook);
 await output.save(outputPath);
 if (process.env.MENTAT_RENDER_PREVIEWS === "1") {

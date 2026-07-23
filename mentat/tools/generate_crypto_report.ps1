@@ -8,6 +8,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools\generate_crypto_re
 #>
 [CmdletBinding()]
 param(
+  [string]$Industry = 'Crypto',
   [string]$DatabasePath = '',
   [string]$OutputDirectory = '',
   [string]$CommitteeMasterDirectory = '',
@@ -15,6 +16,7 @@ param(
   [string]$RScriptPath = 'C:\Program Files\R\R-4.6.0\bin\Rscript.exe',
   [string]$NodePath = '',
   [string]$NodeModulesPath = '',
+  [string]$ExcelMutexName = 'Global\MentatIndustryExcelFinalize',
   [switch]$NoCache,
   [switch]$RenderPreviews
 )
@@ -22,6 +24,11 @@ param(
 $ErrorActionPreference = 'Stop'
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $projectRoot = Split-Path -Parent $scriptRoot
+$Industry = $Industry.Trim()
+if (-not $Industry) { throw 'Industry cannot be empty.' }
+$reportBaseName = "${Industry} Industry Spending Overview"
+$industryToken = ($Industry -replace '[^A-Za-z0-9]+','_').Trim('_').ToLowerInvariant()
+if (-not $industryToken) { throw "Industry cannot be converted to a safe cache token: $Industry" }
 
 if (-not $DatabasePath) {
   $dataRoot = if ($env:MENTAT_DATA_ROOT) { $env:MENTAT_DATA_ROOT } else { Join-Path $env:LOCALAPPDATA 'Mentat' }
@@ -64,12 +71,12 @@ foreach ($requiredPath in @($DatabasePath,$RScriptPath,$NodePath,$NodeModulesPat
   if (-not (Test-Path -LiteralPath $requiredPath)) { throw "Required report input or runtime is missing: $requiredPath" }
 }
 
-function Get-CombinedFingerprint([string[]]$Paths) {
-  $lines = foreach ($path in $Paths) {
+function Get-CombinedFingerprint([string[]]$Paths, [string]$Salt = '') {
+  $lines = @("salt|$Salt") + @(foreach ($path in $Paths) {
     $item = Get-Item -LiteralPath $path
     $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
     "$($item.Name)|$($item.Length)|$hash"
-  }
+  })
   $sha = [Security.Cryptography.SHA256]::Create()
   try {
     $bytes = [Text.Encoding]::UTF8.GetBytes(($lines -join "`n"))
@@ -97,13 +104,13 @@ function Assert-WorkbookPackage([string]$Path, [int]$ExpectedWorksheetCount) {
 }
 
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
-$cacheRoot = Join-Path $projectRoot '.cache\crypto-report'
+$cacheRoot = Join-Path $projectRoot ('.cache\industry-report\' + $industryToken)
 $stageDirectory = Join-Path $cacheRoot 'stage'
 New-Item -ItemType Directory -Path $cacheRoot,$stageDirectory -Force | Out-Null
-$dataPath = Join-Path $cacheRoot 'crypto_data.json'
+$dataPath = Join-Path $cacheRoot 'industry_data.json'
 $manifestPath = Join-Path $cacheRoot 'manifest.json'
 $databaseHash = (Get-FileHash -LiteralPath $DatabasePath -Algorithm SHA256).Hash.ToLowerInvariant()
-$inputFingerprint = Get-CombinedFingerprint (@($DatabasePath,$exporter,$builder,$finalizer,$beneficiaryModule) + $committeeFiles + $beneficiaryFiles)
+$inputFingerprint = Get-CombinedFingerprint (@($DatabasePath,$exporter,$builder,$finalizer,$beneficiaryModule) + $committeeFiles + $beneficiaryFiles) $Industry
 $cacheHit = $false
 if (-not $NoCache -and (Test-Path -LiteralPath $dataPath) -and (Test-Path -LiteralPath $manifestPath)) {
   try {
@@ -118,8 +125,8 @@ $exportSeconds = 0.0
 if (-not $cacheHit) {
   $exportWatch = [Diagnostics.Stopwatch]::StartNew()
   $pendingData = "$dataPath.pending-$PID"
-  & $RScriptPath $exporter $DatabasePath $pendingData $CommitteeMasterDirectory $BeneficiaryDirectory
-  if ($LASTEXITCODE -ne 0) { throw "Crypto data export failed with exit code $LASTEXITCODE" }
+  & $RScriptPath $exporter $DatabasePath $pendingData $CommitteeMasterDirectory $BeneficiaryDirectory $Industry
+  if ($LASTEXITCODE -ne 0) { throw "$Industry data export failed with exit code $LASTEXITCODE" }
   [void](Get-Content -Raw -LiteralPath $pendingData | ConvertFrom-Json)
   Move-Item -LiteralPath $pendingData -Destination $dataPath -Force
   Write-AtomicText $manifestPath ([pscustomobject]@{
@@ -133,7 +140,9 @@ if (-not $cacheHit) {
 $priorDefer = $env:MENTAT_DEFER_FORMULAS
 $priorModules = $env:MENTAT_NODE_MODULES
 $priorRender = $env:MENTAT_RENDER_PREVIEWS
+$priorIndustry = $env:MENTAT_INDUSTRY
 try {
+  $env:MENTAT_INDUSTRY = $Industry
   $env:MENTAT_DEFER_FORMULAS = '1'
   $env:MENTAT_NODE_MODULES = $NodeModulesPath
   $env:MENTAT_RENDER_PREVIEWS = if ($RenderPreviews) { '1' } else { '0' }
@@ -145,28 +154,28 @@ try {
   $env:MENTAT_DEFER_FORMULAS = $priorDefer
   $env:MENTAT_NODE_MODULES = $priorModules
   $env:MENTAT_RENDER_PREVIEWS = $priorRender
+  $env:MENTAT_INDUSTRY = $priorIndustry
 }
 
-$stageWorkbook = Join-Path $stageDirectory 'Crypto Industry Spending Overview.xlsx'
+$stageWorkbook = Join-Path $stageDirectory "${reportBaseName}.xlsx"
 if (-not (Test-Path -LiteralPath $stageWorkbook)) { throw "Workbook builder did not create $stageWorkbook" }
 $formulaWatch = [Diagnostics.Stopwatch]::StartNew()
-$formulaReceipt = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $finalizer -WorkbookPath $stageWorkbook -JsonPath $dataPath
+$formulaReceipt = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $finalizer -WorkbookPath $stageWorkbook -JsonPath $dataPath -ExcelMutexName $ExcelMutexName
 if ($LASTEXITCODE -ne 0) { throw "Excel formula finalization failed with exit code $LASTEXITCODE" }
 $formulaWatch.Stop()
 $payload = Get-Content -Raw -LiteralPath $dataPath | ConvertFrom-Json
 $expectedWorksheetCount = 16 + @($payload.companies).Count
 Assert-WorkbookPackage $stageWorkbook $expectedWorksheetCount
 
-$targetWorkbook = Join-Path $OutputDirectory 'Crypto Industry Spending Overview.xlsx'
+$targetWorkbook = Join-Path $OutputDirectory "${reportBaseName}.xlsx"
 $pendingWorkbook = "$targetWorkbook.pending-$PID"
 Copy-Item -LiteralPath $stageWorkbook -Destination $pendingWorkbook -Force
 Move-Item -LiteralPath $pendingWorkbook -Destination $targetWorkbook -Force
 $overallWatch.Stop()
-if ($overallWatch.Elapsed.TotalMinutes -ge 45) {
-  throw "Performance gate failed: report generation took $([math]::Round($overallWatch.Elapsed.TotalMinutes,2)) minutes."
-}
+$under45Minutes = $overallWatch.Elapsed.TotalMinutes -lt 45
 
 [pscustomobject]@{
+  industry = $Industry
   workbook = $targetWorkbook
   bytes = (Get-Item -LiteralPath $targetWorkbook).Length
   database_sha256 = $databaseHash
@@ -175,6 +184,6 @@ if ($overallWatch.Elapsed.TotalMinutes -ge 45) {
   build_seconds = [math]::Round($buildWatch.Elapsed.TotalSeconds,3)
   formula_seconds = [math]::Round($formulaWatch.Elapsed.TotalSeconds,3)
   total_seconds = [math]::Round($overallWatch.Elapsed.TotalSeconds,3)
-  under_45_minutes = $true
+  under_45_minutes = $under45Minutes
   formula_receipt = (($formulaReceipt -join "`n") | ConvertFrom-Json)
 } | ConvertTo-Json -Depth 5

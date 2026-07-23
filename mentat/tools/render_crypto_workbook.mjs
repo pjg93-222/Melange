@@ -14,10 +14,12 @@ const { FileBlob, SpreadsheetFile } = await import(pathToFileURL(artifactToolEnt
 
 const [workbookPath, jsonPath, outputDirectory] = process.argv.slice(2);
 if (!workbookPath || !jsonPath || !outputDirectory) {
-  throw new Error("usage: render_crypto_workbook.mjs <workbook.xlsx> <crypto-data.json> <output-dir>");
+  throw new Error("usage: render_crypto_workbook.mjs <workbook.xlsx> <industry-data.json> <output-dir>");
 }
 
 const payload = JSON.parse(await fs.readFile(jsonPath, "utf8"));
+const industry = String(payload.metadata?.industry ?? "Crypto").trim() || "Crypto";
+const overviewSheetName = industry === "Crypto" ? "Crypto Spending Overview" : "Spending Overview";
 const companyViewName = (company) => `${company} View`.slice(0, 31);
 const previews = process.env.MENTAT_RENDER_MASTER_ONLY === "1" ? [
   ["Master Overview", "A1:Q45", "Master_Overview_Summary"],
@@ -25,7 +27,7 @@ const previews = process.env.MENTAT_RENDER_MASTER_ONLY === "1" ? [
   ["Master Overview", "BK1:CE18", "Master_Overview_Contributor_Roles"],
 ] : [
   ["Master Overview", "A1:Q45"],
-  ["Crypto Spending Overview", "A1:J52"],
+  [overviewSheetName, "A1:J52"],
   ...payload.cycles.map((cycle) => [`${cycle.label} Summary`, "A1:S35"]),
   ["Company List", "A1:O36"],
   ...payload.companies.map((company) => [companyViewName(company), "A1:S35"]),
