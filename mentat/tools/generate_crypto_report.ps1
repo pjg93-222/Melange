@@ -73,6 +73,19 @@ foreach ($requiredPath in @($DatabasePath,$RScriptPath,$NodePath,$NodeModulesPat
   if (-not (Test-Path -LiteralPath $requiredPath)) { throw "Required report input or runtime is missing: $requiredPath" }
 }
 
+function Test-JsonFile([string]$Path) {
+  $validationScript = "const fs=require('node:fs');JSON.parse(fs.readFileSync(process.argv[1],'utf8'));"
+  $priorErrorAction = $ErrorActionPreference
+  try {
+    $ErrorActionPreference = 'Continue'
+    & $NodePath '--max-old-space-size=4096' '-e' $validationScript $Path 2>$null | Out-Null
+    $valid = $LASTEXITCODE -eq 0
+  } finally {
+    $ErrorActionPreference = $priorErrorAction
+  }
+  $valid
+}
+
 function Get-CombinedFingerprint([string[]]$Paths, [string]$Salt = '') {
   $lines = @("salt|$Salt") + @(foreach ($path in $Paths) {
     $item = Get-Item -LiteralPath $path
@@ -118,7 +131,7 @@ if (-not $NoCache -and (Test-Path -LiteralPath $dataPath) -and (Test-Path -Liter
   try {
     $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
     $cacheHit = [string]$manifest.input_fingerprint -eq $inputFingerprint
-    if ($cacheHit) { [void](Get-Content -Raw -LiteralPath $dataPath | ConvertFrom-Json) }
+    if ($cacheHit) { $cacheHit = Test-JsonFile $dataPath }
   } catch { $cacheHit = $false }
 }
 
@@ -129,7 +142,9 @@ if (-not $cacheHit) {
   $pendingData = "$dataPath.pending-$PID"
   & $RScriptPath $exporter $DatabasePath $pendingData $CommitteeMasterDirectory $BeneficiaryDirectory $Industry
   if ($LASTEXITCODE -ne 0) { throw "$Industry data export failed with exit code $LASTEXITCODE" }
-  [void](Get-Content -Raw -LiteralPath $pendingData | ConvertFrom-Json)
+  if (-not (Test-JsonFile $pendingData)) {
+    throw "$Industry data export did not produce valid JSON."
+  }
   Move-Item -LiteralPath $pendingData -Destination $dataPath -Force
   Write-AtomicText $manifestPath ([pscustomobject]@{
     input_fingerprint = $inputFingerprint
@@ -161,12 +176,22 @@ try {
 
 $stageWorkbook = Join-Path $stageDirectory "${reportBaseName}.xlsx"
 if (-not (Test-Path -LiteralPath $stageWorkbook)) { throw "Workbook builder did not create $stageWorkbook" }
+$finalizerDataPath = Join-Path $stageDirectory 'finalizer_data.json'
+if (-not (Test-Path -LiteralPath $finalizerDataPath)) {
+  throw "Workbook builder did not create $finalizerDataPath"
+}
+if (-not (Test-JsonFile $finalizerDataPath)) {
+  throw "Workbook builder created invalid finalizer data."
+}
 $formulaWatch = [Diagnostics.Stopwatch]::StartNew()
-$formulaReceipt = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $finalizer -WorkbookPath $stageWorkbook -JsonPath $dataPath -ExcelMutexName $ExcelMutexName
+$formulaReceipt = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $finalizer -WorkbookPath $stageWorkbook -JsonPath $finalizerDataPath -ExcelMutexName $ExcelMutexName
 if ($LASTEXITCODE -ne 0) { throw "Excel formula finalization failed with exit code $LASTEXITCODE" }
 $formulaWatch.Stop()
-$payload = Get-Content -Raw -LiteralPath $dataPath | ConvertFrom-Json
-$expectedWorksheetCount = 16 + @($payload.companies).Count
+$formulaReceiptObject = (($formulaReceipt -join "`n") | ConvertFrom-Json)
+$expectedWorksheetCount = [int]$formulaReceiptObject.expected_worksheet_count
+if ($expectedWorksheetCount -lt 16) {
+  throw "Excel formula finalizer returned an invalid worksheet count."
+}
 Assert-WorkbookPackage $stageWorkbook $expectedWorksheetCount
 
 $targetWorkbook = Join-Path $OutputDirectory "${reportBaseName}.xlsx"
@@ -187,5 +212,5 @@ $under45Minutes = $overallWatch.Elapsed.TotalMinutes -lt 45
   formula_seconds = [math]::Round($formulaWatch.Elapsed.TotalSeconds,3)
   total_seconds = [math]::Round($overallWatch.Elapsed.TotalSeconds,3)
   under_45_minutes = $under45Minutes
-  formula_receipt = (($formulaReceipt -join "`n") | ConvertFrom-Json)
+  formula_receipt = $formulaReceiptObject
 } | ConvertTo-Json -Depth 5

@@ -403,7 +403,17 @@ try {
 
   $expectedTotals = @{}
   foreach ($cycle in @('2021-2022','2023-2024','2025-2026')) { $expectedTotals[$cycle] = 0.0 }
-  foreach ($row in $payload.raw_rows) { if ($row.include_in_analysis -eq 'Yes') { $expectedTotals[[string]$row.cycle_label] += [double]$row.amount } }
+  if ($null -ne $payload.PSObject.Properties['expected_cycle_totals']) {
+    foreach ($property in $payload.expected_cycle_totals.PSObject.Properties) {
+      $expectedTotals[[string]$property.Name] = [double]$property.Value
+    }
+  } else {
+    foreach ($row in $payload.raw_rows) {
+      if ($row.include_in_analysis -eq 'Yes') {
+        $expectedTotals[[string]$row.cycle_label] += [double]$row.amount
+      }
+    }
+  }
   $sheet = $book.Worksheets.Item($overviewSheetName); $table = $sheet.ListObjects.Item(1); $rows = $table.DataBodyRange
   try {
     for ($index=1; $index -le $rows.Rows.Count; $index++) {
@@ -455,7 +465,7 @@ try {
   $excel.Quit(); Release-ComObject $excel; $excel = $null
   Copy-Item -LiteralPath $workingPath -Destination $resolvedWorkbook -Force
   $watch.Stop()
-  [pscustomobject]@{workbook=$resolvedWorkbook;bytes=(Get-Item -LiteralPath $resolvedWorkbook).Length;formulas=$formulaCount;formula_column_failures=$formulaColumnFailures;integrity_failures=$integrityFailures;cycle_totals=$expectedTotals;seconds=[math]::Round($watch.Elapsed.TotalSeconds,3)} | ConvertTo-Json -Depth 3
+  [pscustomobject]@{workbook=$resolvedWorkbook;bytes=(Get-Item -LiteralPath $resolvedWorkbook).Length;expected_worksheet_count=(16 + @($payload.companies).Count);formulas=$formulaCount;formula_column_failures=$formulaColumnFailures;integrity_failures=$integrityFailures;cycle_totals=$expectedTotals;seconds=[math]::Round($watch.Elapsed.TotalSeconds,3)} | ConvertTo-Json -Depth 3
 } finally {
   if ($null -ne $book) { try {$book.Close($false)} catch {}; Release-ComObject $book }
   if ($null -ne $excel) { try {$excel.Quit()} catch {}; Release-ComObject $excel }

@@ -41,6 +41,29 @@ await fs.mkdir(outputDir, { recursive: true });
 const diagnosticsDir = path.join(path.dirname(dataPath), "final_diagnostics_v2");
 await fs.mkdir(diagnosticsDir, { recursive: true });
 
+const expectedCycleTotals = Object.fromEntries(
+  payload.cycles.map((cycle) => [cycle.label, 0]),
+);
+for (const row of payload.raw_rows) {
+  if (
+    row.include_in_analysis === "Yes"
+    && Object.hasOwn(expectedCycleTotals, row.cycle_label)
+  ) {
+    expectedCycleTotals[row.cycle_label] += Number(row.amount || 0);
+  }
+}
+const finalizerDataPath = path.join(outputDir, "finalizer_data.json");
+await fs.writeFile(
+  finalizerDataPath,
+  JSON.stringify({
+    metadata: { industry },
+    cycles: payload.cycles,
+    companies: payload.companies,
+    expected_cycle_totals: expectedCycleTotals,
+  }),
+  "utf8",
+);
+
 const workbook = Workbook.create();
 const colors = {
   navy: "#17365D",
