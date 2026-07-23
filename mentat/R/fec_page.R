@@ -734,6 +734,8 @@ fec_walk_variant_set_api <- function(
         call. = FALSE
       )
     }
+    batch_rows <- list()
+    batch_last_page <- NA_integer_
     for (response in responses) {
       page <- as.integer(response$page %||% NA_integer_)
       status <- as.integer(response$status %||% 0L)
@@ -807,12 +809,16 @@ fec_walk_variant_set_api <- function(
           call. = FALSE
         )
       }
+      batch_rows <- c(batch_rows, rows)
+      batch_last_page <- page_zero
+    }
+    if (length(batch_rows)) {
       page_callback(
-        rows = rows,
-        page = page_zero,
+        rows = batch_rows,
+        page = batch_last_page,
         records_total = records_total
       )
-      processed <- processed + length(rows)
+      processed <- processed + length(batch_rows)
     }
   }
   if (processed != records_total) {
