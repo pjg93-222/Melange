@@ -113,7 +113,16 @@ $workingPath = Join-Path (Split-Path $resolvedWorkbook -Parent) "${reportBaseNam
 Copy-Item -LiteralPath $resolvedWorkbook -Destination $workingPath -Force
 $excel = $null; $book = $null; $watch = [Diagnostics.Stopwatch]::StartNew()
 $excelMutex = [Threading.Mutex]::new($false, $ExcelMutexName)
-$hasExcelMutex = $excelMutex.WaitOne([TimeSpan]::FromMinutes(45))
+$hasExcelMutex = $false
+try {
+  $hasExcelMutex = $excelMutex.WaitOne([TimeSpan]::FromMinutes(45))
+} catch [Threading.AbandonedMutexException] {
+  # WaitOne transfers ownership before raising this exception. Continuing is
+  # safe because the prior Excel process is gone and this run uses its own
+  # isolated working copy.
+  $hasExcelMutex = $true
+  Write-Warning 'Recovered an abandoned Excel finalization mutex.'
+}
 if (-not $hasExcelMutex) {
   $excelMutex.Dispose()
   throw 'Timed out waiting for the shared Excel finalization mutex.'
