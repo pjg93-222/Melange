@@ -289,6 +289,7 @@ for ($index = 0; $index -lt $cleanIndustries.Count; $index++) {
     process_log_path = Join-Path $logDirectory "$slug.process.log"
     transcript_path = Join-Path $logDirectory "$slug.transcript.txt"
     slot_semaphore_name = $slotName
+    slot_capacity = [int]$MaxParallel
     excel_mutex_name = $excelMutexName
     no_cache = [bool]$NoCache
     requested_at = $startedAt.ToString('o')

@@ -132,6 +132,22 @@ if ($null -ne $spec.PSObject.Properties['resume_after']) {
   $resumeAfter = ([string]$spec.resume_after).Trim()
 }
 $resumedCollection = -not [string]::IsNullOrWhiteSpace($resumeAfter)
+$slotCapacity = 1
+if ($null -ne $spec.PSObject.Properties['slot_capacity']) {
+  $parsedSlotCapacity = 0
+  if (
+    [int]::TryParse(
+      [string]$spec.slot_capacity,
+      [ref]$parsedSlotCapacity
+    ) -and
+    $parsedSlotCapacity -ge 1 -and
+    $parsedSlotCapacity -le 64
+  ) {
+    $slotCapacity = $parsedSlotCapacity
+  } else {
+    throw "Worker specification has an invalid slot_capacity: $($spec.slot_capacity)"
+  }
+}
 
 try {
   [IO.Directory]::CreateDirectory([string]$spec.output_directory) | Out-Null
@@ -161,14 +177,14 @@ try {
     if (-not $resumedCollection) { throw }
     $createdResumeSemaphore = $false
     $slotSemaphore = [Threading.Semaphore]::new(
-      1,
-      1,
+      $slotCapacity,
+      $slotCapacity,
       [string]$spec.slot_semaphore_name,
       [ref]$createdResumeSemaphore
     )
     Write-Warning (
       'The original run semaphore was already closed. Created a private ' +
-      'single-worker semaphore for this checkpoint resume.'
+      "$slotCapacity-worker semaphore for this checkpoint resume."
     )
   }
   [void]$slotSemaphore.WaitOne()
