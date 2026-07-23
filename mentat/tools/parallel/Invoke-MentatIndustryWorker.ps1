@@ -127,6 +127,11 @@ $workbookHash = ''
 $generatorSupportsMutex = $false
 $generatorStartedAt = $null
 $collectionExitCode = $null
+$resumeAfter = ''
+if ($null -ne $spec.PSObject.Properties['resume_after']) {
+  $resumeAfter = ([string]$spec.resume_after).Trim()
+}
+$resumedCollection = -not [string]::IsNullOrWhiteSpace($resumeAfter)
 
 try {
   [IO.Directory]::CreateDirectory([string]$spec.output_directory) | Out-Null
@@ -180,11 +185,17 @@ try {
     }
     if (Test-Path -LiteralPath $dataRoot) {
       $existing = @(Get-ChildItem -LiteralPath $dataRoot -Force)
-      if ($existing.Count) {
+      if ($existing.Count -and -not $resumedCollection) {
         throw "From-scratch data root is not empty: $dataRoot"
       }
     } else {
       [IO.Directory]::CreateDirectory($dataRoot) | Out-Null
+    }
+    if (
+      $resumedCollection -and
+      -not (Test-Path -LiteralPath ([string]$spec.database_path) -PathType Leaf)
+    ) {
+      throw "Resume requested without an existing database: $($spec.database_path)"
     }
 
     $rscriptPath = [IO.Path]::GetFullPath([string]$spec.rscript_path)
@@ -197,15 +208,27 @@ try {
       '--engine=chrome',
       '--skip-phase2-names'
     )
+    if ($resumedCollection) {
+      $collectionArguments += "--resume-after=$resumeAfter"
+    }
     Write-Host ''
-    Write-Host 'FROM-SCRATCH COLLECTION COMMAND:' -ForegroundColor Cyan
+    if ($resumedCollection) {
+      Write-Host 'CHECKPOINT-RESUME COLLECTION COMMAND:' -ForegroundColor Cyan
+    } else {
+      Write-Host 'FROM-SCRATCH COLLECTION COMMAND:' -ForegroundColor Cyan
+    }
     Write-Host (
       '  ' + ((@($rscriptPath) + $collectionArguments | ForEach-Object {
         Format-CommandArgument ([string]$_)
       }) -join ' ')
     )
-    Write-WorkerState -Stage 'running_collection' `
-      -Detail "Fresh database: $($spec.database_path)"
+    Write-WorkerState -Stage 'running_collection' -Detail (
+      if ($resumedCollection) {
+        "Checkpoint resume after $resumeAfter using $($spec.database_path)"
+      } else {
+        "Fresh database: $($spec.database_path)"
+      }
+    )
     $collectionWatch.Start()
     $priorErrorAction = $ErrorActionPreference
     try {
@@ -416,6 +439,8 @@ $result = [ordered]@{
     3
   )
   collection_exit_code = $collectionExitCode
+  resumed_collection = $resumedCollection
+  resume_after = $resumeAfter
   generator_elapsed_seconds = [math]::Round(
     $generatorWatch.Elapsed.TotalSeconds,
     3

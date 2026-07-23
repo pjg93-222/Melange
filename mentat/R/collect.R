@@ -1643,44 +1643,69 @@ retag_employer_company_matches <- function(
       person_identity_key,
       character(1L)
     ))
-    first_pass <- lapply(index, function(row_index) {
-      company_employer_match(
-        company = group$company,
-        employer = rows$contributor_employer[[row_index]],
-        contributor_name = rows$contributor_name[[row_index]],
-        variants = company_variants,
-        trusted_name_keys = trusted_keys,
-        overrides = match_overrides,
-        excluded_reason = rows$excluded_reason[[row_index]],
-        contributor_state = rows$contributor_state[[row_index]],
-        contributor_occupation = rows$contributor_occupation[[row_index]],
-        home_states = home_states
-      )
-    })
+    match_context <- company_match_context(
+      group$company,
+      company_variants,
+      home_states
+    )
+    row_match_inputs <- rows[index, .(
+      contributor_employer,
+      contributor_name,
+      excluded_reason,
+      contributor_state,
+      contributor_occupation
+    )]
+    match_inputs <- unique(row_match_inputs)
+    match_inputs[, match_input_id := .I]
+    input_ids <- match_inputs[
+      row_match_inputs,
+      on = .(
+        contributor_employer,
+        contributor_name,
+        excluded_reason,
+        contributor_state,
+        contributor_occupation
+      ),
+      match_input_id
+    ]
+    evaluate_match_inputs <- function(current_trusted_keys) {
+      lapply(seq_len(nrow(match_inputs)), function(match_index) {
+        match_input <- match_inputs[match_index]
+        company_employer_match(
+          company = group$company,
+          employer = match_input$contributor_employer,
+          contributor_name = match_input$contributor_name,
+          variants = company_variants,
+          trusted_name_keys = current_trusted_keys,
+          overrides = match_overrides,
+          excluded_reason = match_input$excluded_reason,
+          contributor_state = match_input$contributor_state,
+          contributor_occupation = match_input$contributor_occupation,
+          home_states = home_states,
+          match_context = match_context
+        )
+      })
+    }
+    first_pass <- evaluate_match_inputs(trusted_keys)
     verified <- index[vapply(first_pass, function(result) {
       identical(result$status, "accepted")
-    }, logical(1L))]
+    }, logical(1L))[input_ids]]
     trusted_keys <- unique(c(
       trusted_keys,
       vapply(rows$contributor_name[verified], person_identity_key, character(1L))
     ))
     trusted_keys <- trusted_keys[nzchar(trusted_keys)]
-    for (row_index in index) {
-      result <- company_employer_match(
-        company = group$company,
-        employer = rows$contributor_employer[[row_index]],
-        contributor_name = rows$contributor_name[[row_index]],
-        variants = company_variants,
-        trusted_name_keys = trusted_keys,
-        overrides = match_overrides,
-        excluded_reason = rows$excluded_reason[[row_index]],
-        contributor_state = rows$contributor_state[[row_index]],
-        contributor_occupation = rows$contributor_occupation[[row_index]],
-        home_states = home_states
-      )
-      rows$company_match_status_new[[row_index]] <- result$status
-      rows$company_match_reason_new[[row_index]] <- result$reason
-    }
+    second_pass <- evaluate_match_inputs(trusted_keys)
+    rows$company_match_status_new[index] <- vapply(
+      second_pass,
+      function(result) result$status,
+      character(1L)
+    )[input_ids]
+    rows$company_match_reason_new[index] <- vapply(
+      second_pass,
+      function(result) result$reason,
+      character(1L)
+    )[input_ids]
   }
   tags <- rows[, .(
     sub_id,
