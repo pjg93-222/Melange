@@ -384,6 +384,7 @@ fec_is_transient_chromote_error <- function(error) {
     # updates. Never accept that page, but replay the complete query through
     # the existing bounded retry path instead of aborting the industry run.
     "fec canary failure",
+    "fec export",
     "websocket",
     "connection closed",
     "target closed",
@@ -399,6 +400,270 @@ fec_is_transient_chromote_error <- function(error) {
 
 fec_query_retry_sleep <- function(attempt) {
   Sys.sleep(min(15, 2 ^ as.integer(attempt)))
+}
+
+fec_url_with_date_range <- function(url, min_date, max_date) {
+  separator <- if (grepl("?", url, fixed = TRUE)) "&" else "?"
+  paste0(
+    url,
+    separator,
+    "min_date=",
+    utils::URLencode(format(as.Date(min_date), "%m/%d/%Y"), reserved = TRUE),
+    "&max_date=",
+    utils::URLencode(format(as.Date(max_date), "%m/%d/%Y"), reserved = TRUE)
+  )
+}
+
+fec_export_current_query <- function(
+  session,
+  expected_rows,
+  timeout_seconds = 300
+) {
+  expected_rows <- as.integer(expected_rows)
+  if (is.na(expected_rows) || expected_rows < 0L || expected_rows > 100000L) {
+    stop("FEC export row count must be between 0 and 100,000.", call. = FALSE)
+  }
+  if (!expected_rows) return(data.table::data.table())
+  clicked <- fec_runtime_value(
+    session,
+    paste0(
+      "(function(){",
+      "document.querySelectorAll('.download .js-close').forEach(",
+      "function(button){button.click();});",
+      "Object.keys(localStorage).filter(function(key){",
+      "return key.indexOf('download-')===0;",
+      "}).forEach(function(key){localStorage.removeItem(key);});",
+      "var button=document.querySelector('.js-export');",
+      "if(!button){return false;} button.click(); return true;",
+      "})()"
+    )
+  )
+  if (!isTRUE(clicked)) {
+    stop("FEC export button was unavailable.", call. = FALSE)
+  }
+  download_url <- ""
+  export_error <- ""
+  deadline <- Sys.time() + timeout_seconds
+  message("FEC export requested for ", expected_rows, " rows.")
+  repeat {
+    status <- fec_runtime_value(
+      session,
+      paste0(
+        "(function(){",
+        "var keys=Object.keys(localStorage).filter(function(key){",
+        "return key.indexOf('download-')===0;",
+        "});",
+        "for(var i=0;i<keys.length;i++){",
+        "try{var value=JSON.parse(localStorage.getItem(keys[i]));",
+        "if(value.downloadUrl){return {url:value.downloadUrl,error:''};}",
+        "}catch(e){}",
+        "}",
+        "var alert=document.querySelector('.message--alert');",
+        "return {url:'',error:alert?(alert.textContent||'').trim():''};",
+        "})()"
+      )
+    )
+    if (is.list(status)) {
+      download_url <- trim_text(status$url %||% "")
+      export_error <- trim_text(status$error %||% "")
+    }
+    if (nzchar(download_url)) break
+    if (nzchar(export_error)) {
+      stop("FEC export server error: ", export_error, call. = FALSE)
+    }
+    if (Sys.time() >= deadline) {
+      stop("Timed out waiting for the FEC export.", call. = FALSE)
+    }
+    Sys.sleep(2)
+  }
+  require_package("data.table")
+  csv_path <- tempfile("mentat-fec-export-", fileext = ".csv")
+  on.exit(unlink(csv_path, force = TRUE), add = TRUE)
+  download_result <- tryCatch(
+    utils::download.file(
+      download_url,
+      csv_path,
+      mode = "wb",
+      quiet = TRUE
+    ),
+    error = function(error) {
+      stop(
+        "FEC export download failed: ",
+        conditionMessage(error),
+        call. = FALSE
+      )
+    }
+  )
+  if (!identical(as.integer(download_result), 0L)) {
+    stop(
+      "FEC export download failed with status ",
+      download_result,
+      ".",
+      call. = FALSE
+    )
+  }
+  rows <- data.table::fread(
+    csv_path,
+    colClasses = "character",
+    na.strings = "NA",
+    showProgress = FALSE,
+    encoding = "UTF-8"
+  )
+  if (nrow(rows) != expected_rows) {
+    stop(
+      "FEC export row-count mismatch: expected=", expected_rows,
+      " downloaded=", nrow(rows),
+      call. = FALSE
+    )
+  }
+  message("FEC export downloaded and verified: ", nrow(rows), " rows.")
+  rows[]
+}
+
+fec_export_partitions <- function(
+  session,
+  url,
+  expected_total,
+  min_date = as.Date("1900-01-01"),
+  max_date = as.Date("2100-12-31")
+) {
+  leaves <- list()
+  visit <- function(left, right) {
+    partition_url <- fec_url_with_date_range(url, left, right)
+    fec_navigate(session, partition_url)
+    payload <- fec_set_page_length(session, 30L)
+    count <- as.integer(payload$info$recordsTotal)
+    if (!count) return(invisible(NULL))
+    if (count <= 100000L) {
+      leaves[[length(leaves) + 1L]] <<- list(
+        url = partition_url,
+        count = count,
+        min_date = left,
+        max_date = right
+      )
+      return(invisible(NULL))
+    }
+    if (left >= right) {
+      stop(
+        "FEC export cannot partition a single date with more than 100,000 rows: ",
+        format(left),
+        call. = FALSE
+      )
+    }
+    midpoint <- left + floor(as.numeric(right - left) / 2)
+    visit(left, midpoint)
+    visit(midpoint + 1, right)
+    invisible(NULL)
+  }
+  visit(as.Date(min_date), as.Date(max_date))
+  partition_total <- sum(vapply(
+    leaves,
+    function(leaf) as.integer(leaf$count),
+    integer(1L)
+  ))
+  if (partition_total != as.integer(expected_total)) {
+    stop(
+      "FEC export date partitions do not cover the query exactly: expected=",
+      expected_total,
+      " partition_total=",
+      partition_total,
+      call. = FALSE
+    )
+  }
+  message(
+    "FEC export partition plan verified: ",
+    length(leaves),
+    " file(s), ",
+    partition_total,
+    " rows."
+  )
+  leaves
+}
+
+fec_walk_variant_set_export <- function(
+  session,
+  url,
+  records_total,
+  page_callback,
+  canary_callback,
+  company,
+  cycle,
+  variant_set,
+  chunk_size = 5000L
+) {
+  require_package("data.table")
+  partitions <- if (records_total <= 100000L) {
+    list(list(url = url, count = as.integer(records_total)))
+  } else {
+    fec_export_partitions(session, url, records_total)
+  }
+  processed <- 0L
+  for (partition_index in seq_along(partitions)) {
+    partition <- partitions[[partition_index]]
+    message(
+      "FEC export file ",
+      partition_index,
+      "/",
+      length(partitions),
+      ": ",
+      partition$count,
+      " rows."
+    )
+    fec_navigate(session, partition$url)
+    payload <- fec_set_page_length(session, 30L)
+    observed <- as.integer(payload$info$recordsTotal)
+    if (observed != as.integer(partition$count)) {
+      stop(
+        "FEC export partition changed before download: expected=",
+        partition$count,
+        " observed=",
+        observed,
+        call. = FALSE
+      )
+    }
+    exported <- fec_export_current_query(session, observed)
+    if (!nrow(exported)) next
+    starts <- seq.int(1L, nrow(exported), by = as.integer(chunk_size))
+    for (start in starts) {
+      end <- min(start + as.integer(chunk_size) - 1L, nrow(exported))
+      chunk <- exported[start:end]
+      rows <- lapply(seq_len(nrow(chunk)), function(index) {
+        as.list(chunk[index])
+      })
+      processed <- processed + length(rows)
+      page_callback(
+        rows = rows,
+        page = floor((processed - 1L) / 100L),
+        records_total = records_total
+      )
+    }
+  }
+  checks <- data.table::data.table(
+    check_name = "export_row_count",
+    passed = as.integer(processed == as.integer(records_total)),
+    detail = paste0("rows=", processed, "; expected=", records_total)
+  )
+  canary_callback(
+    company = company,
+    cycle = cycle,
+    variant_set = variant_set,
+    page = max(0L, ceiling(records_total / 100L) - 1L),
+    checks = checks
+  )
+  if (processed != as.integer(records_total)) {
+    stop(
+      "FEC export processing mismatch: expected=", records_total,
+      " processed=", processed,
+      call. = FALSE
+    )
+  }
+  list(
+    records_total = as.integer(records_total),
+    pages = as.integer(ceiling(records_total / 100L)),
+    retries = 0L,
+    truncated = FALSE,
+    export = TRUE
+  )
 }
 
 fec_walk_variant_set_once <- function(
@@ -434,6 +699,20 @@ fec_walk_variant_set_once <- function(
   )
   initial <- fec_set_page_length(session, 100L)
   records_total <- initial$info$recordsTotal
+  if (records_total >= 5000L && is.infinite(max_pages)) {
+    exported <- fec_walk_variant_set_export(
+      session = session,
+      url = url,
+      records_total = records_total,
+      page_callback = page_callback,
+      canary_callback = canary_callback,
+      company = company,
+      cycle = cycle,
+      variant_set = variant_set
+    )
+    exported$retries <- as.integer(exported$retries) + as.integer(retry_count)
+    return(exported)
+  }
   expected_total <- records_total
   first_payload <- initial
   processed_pages <- 0L
