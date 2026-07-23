@@ -222,13 +222,12 @@ try {
         Format-CommandArgument ([string]$_)
       }) -join ' ')
     )
-    Write-WorkerState -Stage 'running_collection' -Detail (
-      if ($resumedCollection) {
-        "Checkpoint resume after $resumeAfter using $($spec.database_path)"
-      } else {
-        "Fresh database: $($spec.database_path)"
-      }
-    )
+    $collectionDetail = if ($resumedCollection) {
+      "Checkpoint resume after $resumeAfter using $($spec.database_path)"
+    } else {
+      "Fresh database: $($spec.database_path)"
+    }
+    Write-WorkerState -Stage 'running_collection' -Detail $collectionDetail
     $collectionWatch.Start()
     $priorErrorAction = $ErrorActionPreference
     try {
