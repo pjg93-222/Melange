@@ -446,8 +446,8 @@ fec_export_current_query <- function(
   timeout_seconds = 300
 ) {
   expected_rows <- as.integer(expected_rows)
-  if (is.na(expected_rows) || expected_rows < 0L || expected_rows > 100000L) {
-    stop("FEC export row count must be between 0 and 100,000.", call. = FALSE)
+  if (is.na(expected_rows) || expected_rows < 0L) {
+    stop("FEC export row count must be a non-negative integer.", call. = FALSE)
   }
   if (!expected_rows) return(data.table::data.table())
   clicked <- fec_runtime_value(
@@ -618,11 +618,11 @@ fec_walk_variant_set_export <- function(
   chunk_size = 5000L
 ) {
   require_package("data.table")
-  partitions <- if (records_total <= 100000L) {
-    list(list(url = url, count = as.integer(records_total)))
-  } else {
-    fec_export_partitions(session, url, records_total)
-  }
+  # The live FEC exporter was verified on 2026-07-23 to produce a download
+  # for a 151,184-row query. Exporting the authoritative query directly also
+  # retains undated records that disappear when min_date/max_date filters are
+  # applied, so do not impose the obsolete 100,000-row client-side split.
+  partitions <- list(list(url = url, count = as.integer(records_total)))
   processed <- 0L
   for (partition_index in seq_along(partitions)) {
     partition <- partitions[[partition_index]]
