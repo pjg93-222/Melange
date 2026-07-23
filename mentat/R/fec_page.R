@@ -349,14 +349,23 @@ fec_click_next <- function(session, current_page) {
     if (!fec_results_ready(session)) {
       return(FALSE)
     }
-    next_page <- fec_runtime_value(
+    page_is_complete <- fec_runtime_value(
       session,
-      paste0(
-        "(function(){return window.jQuery('#results')",
-        ".DataTable().page.info().page;})()"
+      sprintf(
+        paste0(
+          "(function(){",
+          "var dt=window.jQuery('#results').DataTable();",
+          "var info=dt.page.info();",
+          "var rows=dt.rows().data().toArray().length;",
+          "var expected=(info.page+1<info.pages)",
+          "?info.length:(info.recordsDisplay-info.start);",
+          "return info.page>%d && rows===expected;",
+          "})()"
+        ),
+        as.integer(current_page)
       )
     )
-    !is.null(next_page) && as.integer(next_page) > current_page
+    isTRUE(page_is_complete)
   })
   fec_read_page(session)
 }
