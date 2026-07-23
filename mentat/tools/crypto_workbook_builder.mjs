@@ -1677,8 +1677,24 @@ const previewRanges = new Map([
   ["Cycle Exceptions", "A1:AI20"],
 ]);
 const outputPath = path.join(outputDir, `${reportBaseName}.xlsx`);
-const output = await SpreadsheetFile.exportXlsx(workbook);
-await output.save(outputPath);
+// artifact-tool's XLSX exporter currently performs an unbounded whole-workbook
+// inspect before serialization. Large but valid report workbooks can exceed
+// V8's maximum string length while that diagnostic NDJSON is joined, before
+// the XLSX serializer even runs. The report pipeline performs its own bounded
+// structure/formula/render audits after export, so suppress only this embedded
+// diagnostic and leave the actual workbook serialization unchanged.
+const originalInspect = workbook.inspect;
+workbook.inspect = async () => ({
+  ndjson: "",
+  truncated: false,
+  metadata: { notices: ["Embedded export inspection deferred to report QA."] },
+});
+try {
+  const output = await SpreadsheetFile.exportXlsx(workbook);
+  await output.save(outputPath);
+} finally {
+  workbook.inspect = originalInspect;
+}
 if (process.env.MENTAT_RENDER_PREVIEWS === "1") {
   for (const [sheetName, range] of previewRanges) {
     const preview = await workbook.render({
