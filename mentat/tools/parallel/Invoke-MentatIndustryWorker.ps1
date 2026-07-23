@@ -41,7 +41,14 @@ function Write-AtomicJson {
     $encoding
   )
   if (Test-Path -LiteralPath $Path) {
-    [IO.File]::Replace($temporary, $Path, $null, $true)
+    $backup = "$Path.backup-$PID-$([Guid]::NewGuid().ToString('N'))"
+    try {
+      [IO.File]::Replace($temporary, $Path, $backup, $true)
+    } finally {
+      if (Test-Path -LiteralPath $backup) {
+        [IO.File]::Delete($backup)
+      }
+    }
   } else {
     [IO.File]::Move($temporary, $Path)
   }

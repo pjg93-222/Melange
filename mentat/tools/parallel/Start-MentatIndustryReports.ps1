@@ -107,7 +107,14 @@ function Write-AtomicJson {
     $encoding
   )
   if (Test-Path -LiteralPath $Path) {
-    [IO.File]::Replace($temporary, $Path, $null, $true)
+    $backup = "$Path.backup-$PID-$([Guid]::NewGuid().ToString('N'))"
+    try {
+      [IO.File]::Replace($temporary, $Path, $backup, $true)
+    } finally {
+      if (Test-Path -LiteralPath $backup) {
+        [IO.File]::Delete($backup)
+      }
+    }
   } else {
     [IO.File]::Move($temporary, $Path)
   }
@@ -445,7 +452,19 @@ try {
       -NoTypeInformation -Encoding UTF8
   $pendingSummaryCsv = "$summaryCsvPath.pending-$PID"
   if (Test-Path -LiteralPath $summaryCsvPath) {
-    [IO.File]::Replace($pendingSummaryCsv, $summaryCsvPath, $null, $true)
+    $summaryBackup = "$summaryCsvPath.backup-$PID"
+    try {
+      [IO.File]::Replace(
+        $pendingSummaryCsv,
+        $summaryCsvPath,
+        $summaryBackup,
+        $true
+      )
+    } finally {
+      if (Test-Path -LiteralPath $summaryBackup) {
+        [IO.File]::Delete($summaryBackup)
+      }
+    }
   } else {
     [IO.File]::Move($pendingSummaryCsv, $summaryCsvPath)
   }
