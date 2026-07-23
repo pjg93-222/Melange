@@ -167,7 +167,7 @@ fec_wait_until <- function(predicate, timeout_seconds = 60, interval_seconds = 0
 fec_navigate <- function(
   session,
   url,
-  timeout_seconds = 60,
+  timeout_seconds = 180,
   retries = 3L
 ) {
   retries <- as.integer(retries)
@@ -676,7 +676,7 @@ fec_walk_variant_set_once <- function(
   canary_callback,
   query_field = "contributor_employer",
   query_filters = list(),
-  timeout_seconds = 60,
+  timeout_seconds = 180,
   retries = 3L,
   sleep_range = c(1.5, 3.5),
   max_pages = Inf
