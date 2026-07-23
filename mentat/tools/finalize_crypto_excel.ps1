@@ -103,6 +103,16 @@ function Count-NonOk($Range) {
 
 $resolvedWorkbook = (Resolve-Path -LiteralPath $WorkbookPath).Path
 $resolvedJson = (Resolve-Path -LiteralPath $JsonPath).Path
+$compactJson = Join-Path (
+  Split-Path -Parent $resolvedWorkbook
+) 'finalizer_data.json'
+if (
+  $resolvedJson -ne $compactJson -and
+  (Test-Path -LiteralPath $compactJson -PathType Leaf)
+) {
+  $resolvedJson = (Resolve-Path -LiteralPath $compactJson).Path
+  Write-Host "Using compact finalizer data: $resolvedJson"
+}
 $payload = Get-Content -Raw -LiteralPath $resolvedJson | ConvertFrom-Json
 $industry = [string]$payload.metadata.industry
 if ([string]::IsNullOrWhiteSpace($industry)) { $industry = 'Crypto' }
