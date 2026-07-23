@@ -153,9 +153,24 @@ try {
 
   Write-WorkerState -Stage 'waiting_for_build_slot' `
     -Detail "Waiting on $($spec.slot_semaphore_name)"
-  $slotSemaphore = [Threading.Semaphore]::OpenExisting(
-    [string]$spec.slot_semaphore_name
-  )
+  try {
+    $slotSemaphore = [Threading.Semaphore]::OpenExisting(
+      [string]$spec.slot_semaphore_name
+    )
+  } catch [Threading.WaitHandleCannotBeOpenedException] {
+    if (-not $resumedCollection) { throw }
+    $createdResumeSemaphore = $false
+    $slotSemaphore = [Threading.Semaphore]::new(
+      1,
+      1,
+      [string]$spec.slot_semaphore_name,
+      [ref]$createdResumeSemaphore
+    )
+    Write-Warning (
+      'The original run semaphore was already closed. Created a private ' +
+      'single-worker semaphore for this checkpoint resume.'
+    )
+  }
   [void]$slotSemaphore.WaitOne()
   $slotAcquired = $true
   $slotWatch.Stop()
@@ -305,9 +320,23 @@ try {
   )
   # Keep a worker-owned handle open for the lifetime of the generator so the
   # named mutex survives even if the launcher console is closed.
-  $excelMutex = [Threading.Mutex]::OpenExisting(
-    [string]$spec.excel_mutex_name
-  )
+  try {
+    $excelMutex = [Threading.Mutex]::OpenExisting(
+      [string]$spec.excel_mutex_name
+    )
+  } catch [Threading.WaitHandleCannotBeOpenedException] {
+    if (-not $resumedCollection) { throw }
+    $createdExcelMutex = $false
+    $excelMutex = [Threading.Mutex]::new(
+      $false,
+      [string]$spec.excel_mutex_name,
+      [ref]$createdExcelMutex
+    )
+    Write-Warning (
+      'The shared Excel mutex was already closed. Recreated it for this ' +
+      'checkpoint resume.'
+    )
+  }
   if ($generatorSupportsMutex) {
     $generatorArguments.Add('-ExcelMutexName')
     $generatorArguments.Add([string]$spec.excel_mutex_name)
