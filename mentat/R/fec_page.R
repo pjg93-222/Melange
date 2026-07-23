@@ -1,8 +1,9 @@
-fec_runtime_value <- function(session, expression) {
+fec_runtime_value <- function(session, expression, timeout_seconds = 10) {
   response <- session$Runtime$evaluate(
     expression = expression,
     returnByValue = TRUE,
-    awaitPromise = TRUE
+    awaitPromise = TRUE,
+    timeout_ = timeout_seconds
   )
   value <- response$result$value
   if (is.null(value)) {
@@ -630,6 +631,7 @@ fec_browser_api_batch <- function(
   session,
   api_url,
   pages,
+  cursor = list(),
   per_page = 100L,
   attempts = 4L
 ) {
@@ -642,15 +644,26 @@ fec_browser_api_batch <- function(
       "(async function(){",
       "var base=new URL(%s);",
       "var pages=%s;",
+      "var cursor=%s;",
       "var perPage=%d;",
       "var attempts=%d;",
-      "async function fetchPage(page){",
+      "async function fetchPage(page,cursor){",
       "var last={status:0,error:'request did not start'};",
       "for(var attempt=1;attempt<=attempts;attempt++){",
       "try{",
       "var url=new URL(base.href);",
+      "url.searchParams.delete('page');",
+      "url.searchParams.delete('last_contribution_receipt_date');",
+      "url.searchParams.delete('last_index');",
       "url.searchParams.set('per_page',String(perPage));",
-      "url.searchParams.set('page',String(page));",
+      "if(cursor.last_contribution_receipt_date){",
+      "url.searchParams.set(",
+      "'last_contribution_receipt_date',",
+      "String(cursor.last_contribution_receipt_date));",
+      "}",
+      "if(cursor.last_index){",
+      "url.searchParams.set('last_index',String(cursor.last_index));",
+      "}",
       "var response=await fetch(url.href);",
       "if(response.ok){",
       "return {page:page,status:response.status,body:await response.json()};",
@@ -672,15 +685,23 @@ fec_browser_api_batch <- function(
       "}",
       "return last;",
       "}",
-      "return JSON.stringify(await Promise.all(pages.map(fetchPage)));",
+      "var responses=[];",
+      "for(var index=0;index<pages.length;index++){",
+      "var result=await fetchPage(pages[index],cursor);",
+      "responses.push(result);",
+      "if(result.status!==200 || !result.body){break;}",
+      "cursor=(result.body.pagination&&result.body.pagination.last_indexes)||{};",
+      "}",
+      "return JSON.stringify({responses:responses,cursor:cursor});",
       "})()"
     ),
     jsonlite::toJSON(api_url, auto_unbox = TRUE),
     jsonlite::toJSON(as.list(pages), auto_unbox = TRUE),
+    jsonlite::toJSON(cursor, auto_unbox = TRUE, null = "null"),
     per_page,
     attempts
   )
-  payload <- fec_runtime_value(session, expression)
+  payload <- fec_runtime_value(session, expression, timeout_seconds = 60)
   jsonlite::fromJSON(payload, simplifyVector = FALSE)
 }
 
@@ -693,7 +714,7 @@ fec_walk_variant_set_api <- function(
   cycle,
   variant_set,
   per_page = 100L,
-  batch_pages = 5L
+  batch_pages = 10L
 ) {
   require_package("data.table")
   records_total <- as.integer(records_total)
@@ -714,6 +735,11 @@ fec_walk_variant_set_api <- function(
   } else {
     list()
   }
+  cursor <- list(
+    last_contribution_receipt_date = "",
+    last_index = ""
+  )
+  seen_sub_ids <- new.env(hash = TRUE, parent = emptyenv())
   for (batch_index in seq_along(batches)) {
     batch <- batches[[batch_index]]
     message(
@@ -727,7 +753,15 @@ fec_walk_variant_set_api <- function(
       max(batch),
       "."
     )
-    responses <- fec_browser_api_batch(session, api_url, batch, per_page)
+    batch_result <- fec_browser_api_batch(
+      session,
+      api_url,
+      batch,
+      cursor = cursor,
+      per_page = per_page
+    )
+    responses <- batch_result$responses %||% list()
+    next_cursor <- batch_result$cursor %||% list()
     if (length(responses) != length(batch)) {
       stop(
         "FEC browser API fallback returned the wrong response count.",
@@ -762,6 +796,18 @@ fec_walk_variant_set_api <- function(
         )
       }
       rows <- body$results %||% list()
+      row_ids <- vapply(
+        rows,
+        function(row) trim_text(row$sub_id %||% ""),
+        character(1L)
+      )
+      duplicate_ids <- duplicated(row_ids) | vapply(
+        row_ids,
+        exists,
+        logical(1L),
+        envir = seen_sub_ids,
+        inherits = FALSE
+      )
       page_zero <- page - 1L
       expected_rows <- if (page < length(pages)) {
         per_page
@@ -792,6 +838,14 @@ fec_walk_variant_set_api <- function(
             "; rows=", length(rows),
             "; expected=", expected_rows
           )
+        ),
+        data.table::data.table(
+          check_name = "api_unique_page_ids",
+          passed = as.integer(!any(duplicate_ids)),
+          detail = paste0(
+            "page=", page,
+            "; duplicate_sub_ids=", sum(duplicate_ids)
+          )
         )
       ))
       canary_callback(
@@ -809,9 +863,25 @@ fec_walk_variant_set_api <- function(
           call. = FALSE
         )
       }
+      for (sub_id in row_ids) {
+        assign(sub_id, TRUE, envir = seen_sub_ids)
+      }
       batch_rows <- c(batch_rows, rows)
       batch_last_page <- page_zero
     }
+    if (
+      max(batch) < length(pages) &&
+      (
+        !nzchar(trim_text(next_cursor$last_contribution_receipt_date %||% "")) ||
+          !nzchar(trim_text(next_cursor$last_index %||% ""))
+      )
+    ) {
+      stop(
+        "FEC browser API fallback did not return a continuation cursor.",
+        call. = FALSE
+      )
+    }
+    cursor <- next_cursor
     if (length(batch_rows)) {
       page_callback(
         rows = batch_rows,
