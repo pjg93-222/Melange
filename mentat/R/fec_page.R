@@ -366,6 +366,10 @@ fec_is_transient_chromote_error <- function(error) {
   signatures <- c(
     "chromote: timed out waiting for response",
     "timed out waiting for response to command",
+    # A canary mismatch means the DataTable DOM was read between browser-side
+    # updates. Never accept that page, but replay the complete query through
+    # the existing bounded retry path instead of aborting the industry run.
+    "fec canary failure",
     "websocket",
     "connection closed",
     "target closed",
