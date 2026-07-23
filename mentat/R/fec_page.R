@@ -551,8 +551,13 @@ fec_export_partitions <- function(
   url,
   expected_total,
   min_date = as.Date("1900-01-01"),
-  max_date = as.Date("2100-12-31")
+  max_date = as.Date("2100-12-31"),
+  max_rows = 100000L
 ) {
+  max_rows <- as.integer(max_rows)
+  if (is.na(max_rows) || max_rows < 1L) {
+    stop("FEC export partition size must be positive.", call. = FALSE)
+  }
   leaves <- list()
   visit <- function(left, right) {
     partition_url <- fec_url_with_date_range(url, left, right)
@@ -560,7 +565,7 @@ fec_export_partitions <- function(
     payload <- fec_set_page_length(session, 30L)
     count <- as.integer(payload$info$recordsTotal)
     if (!count) return(invisible(NULL))
-    if (count <= 100000L) {
+    if (count <= max_rows || left >= right) {
       leaves[[length(leaves) + 1L]] <<- list(
         url = partition_url,
         count = count,
@@ -568,13 +573,6 @@ fec_export_partitions <- function(
         max_date = right
       )
       return(invisible(NULL))
-    }
-    if (left >= right) {
-      stop(
-        "FEC export cannot partition a single date with more than 100,000 rows: ",
-        format(left),
-        call. = FALSE
-      )
     }
     midpoint <- left + floor(as.numeric(right - left) / 2)
     visit(left, midpoint)
@@ -622,33 +620,9 @@ fec_walk_variant_set_export <- function(
   # for a 151,184-row query. Exporting the authoritative query directly also
   # retains undated records that disappear when min_date/max_date filters are
   # applied, so do not impose the obsolete 100,000-row client-side split.
-  partitions <- list(list(url = url, count = as.integer(records_total)))
   processed <- 0L
-  for (partition_index in seq_along(partitions)) {
-    partition <- partitions[[partition_index]]
-    message(
-      "FEC export file ",
-      partition_index,
-      "/",
-      length(partitions),
-      ": ",
-      partition$count,
-      " rows."
-    )
-    fec_navigate(session, partition$url)
-    payload <- fec_set_page_length(session, 30L)
-    observed <- as.integer(payload$info$recordsTotal)
-    if (observed != as.integer(partition$count)) {
-      stop(
-        "FEC export partition changed before download: expected=",
-        partition$count,
-        " observed=",
-        observed,
-        call. = FALSE
-      )
-    }
-    exported <- fec_export_current_query(session, observed)
-    if (!nrow(exported)) next
+  consume_export <- function(exported) {
+    if (!nrow(exported)) return(invisible(NULL))
     starts <- seq.int(1L, nrow(exported), by = as.integer(chunk_size))
     for (start in starts) {
       end <- min(start + as.integer(chunk_size) - 1L, nrow(exported))
@@ -656,12 +630,68 @@ fec_walk_variant_set_export <- function(
       rows <- lapply(seq_len(nrow(chunk)), function(index) {
         as.list(chunk[index])
       })
-      processed <- processed + length(rows)
+      processed <<- processed + length(rows)
       page_callback(
         rows = rows,
         page = floor((processed - 1L) / 100L),
         records_total = records_total
       )
+    }
+    invisible(NULL)
+  }
+  direct_error <- NULL
+  message("FEC export file 1/1: ", records_total, " rows.")
+  direct <- tryCatch(
+    fec_export_current_query(session, records_total),
+    error = function(error) {
+      direct_error <<- error
+      NULL
+    }
+  )
+  if (!is.null(direct)) {
+    consume_export(direct)
+  } else {
+    if (!grepl(
+      "fec export server error",
+      tolower(conditionMessage(direct_error)),
+      fixed = TRUE
+    )) {
+      stop(direct_error)
+    }
+    message(
+      "FEC full export failed server-side; retrying exact date partitions: ",
+      conditionMessage(direct_error)
+    )
+    partitions <- fec_export_partitions(
+      session,
+      url,
+      records_total,
+      max_rows = 10000L
+    )
+    for (partition_index in seq_along(partitions)) {
+      partition <- partitions[[partition_index]]
+      message(
+        "FEC export fallback file ",
+        partition_index,
+        "/",
+        length(partitions),
+        ": ",
+        partition$count,
+        " rows."
+      )
+      fec_navigate(session, partition$url)
+      payload <- fec_set_page_length(session, 30L)
+      observed <- as.integer(payload$info$recordsTotal)
+      if (observed != as.integer(partition$count)) {
+        stop(
+          "FEC export partition changed before download: expected=",
+          partition$count,
+          " observed=",
+          observed,
+          call. = FALSE
+        )
+      }
+      consume_export(fec_export_current_query(session, observed))
     }
   }
   checks <- data.table::data.table(
