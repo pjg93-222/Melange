@@ -251,6 +251,16 @@ fec_set_page_length <- function(session, page_length = 100L) {
   if (!is.logical(changed) || length(changed) != 1L || is.na(changed)) {
     stop("Could not set the FEC results page length.", call. = FALSE)
   }
+  if (!isTRUE(changed)) {
+    payload <- fec_read_page(session)
+    if (
+      payload$info$length != page_length &&
+        payload$info$recordsDisplay != 0L
+    ) {
+      stop("Could not verify the FEC results page length.", call. = FALSE)
+    }
+    return(payload)
+  }
   fec_wait_until(function() {
     if (!fec_results_ready(session)) {
       return(FALSE)
@@ -714,13 +724,20 @@ fec_walk_variant_set_api <- function(
   cycle,
   variant_set,
   per_page = 100L,
-  batch_pages = 10L
+  batch_pages = 10L,
+  batch_attempts = 4L
 ) {
   require_package("data.table")
   records_total <- as.integer(records_total)
   per_page <- as.integer(per_page)
   batch_pages <- as.integer(batch_pages)
-  if (records_total < 0L || per_page < 1L || batch_pages < 1L) {
+  batch_attempts <- as.integer(batch_attempts)
+  if (
+    records_total < 0L ||
+      per_page < 1L ||
+      batch_pages < 1L ||
+      batch_attempts < 1L
+  ) {
     stop("Invalid FEC browser API fallback bounds.", call. = FALSE)
   }
   api_url <- fec_browser_api_url(session)
@@ -753,18 +770,71 @@ fec_walk_variant_set_api <- function(
       max(batch),
       "."
     )
-    batch_result <- fec_browser_api_batch(
-      session,
-      api_url,
-      batch,
-      cursor = cursor,
-      per_page = per_page
-    )
-    responses <- batch_result$responses %||% list()
+    batch_result <- NULL
+    responses <- list()
+    batch_error <- ""
+    for (batch_attempt in seq_len(batch_attempts)) {
+      batch_result <- tryCatch(
+        fec_browser_api_batch(
+          session,
+          api_url,
+          batch,
+          cursor = cursor,
+          per_page = per_page
+        ),
+        error = function(error) {
+          batch_error <<- conditionMessage(error)
+          NULL
+        }
+      )
+      responses <- batch_result$responses %||% list()
+      response_ready <- length(responses) == length(batch) && all(vapply(
+        responses,
+        function(response) {
+          identical(as.integer(response$status %||% 0L), 200L) &&
+            !is.null(response$body)
+        },
+        logical(1L)
+      ))
+      if (response_ready) break
+      if (length(responses)) {
+        last_response <- responses[[length(responses)]]
+        batch_error <- paste0(
+          "responses=", length(responses), "/", length(batch),
+          "; last_page=", last_response$page %||% "?",
+          "; last_status=", last_response$status %||% 0L,
+          "; error=", substr(
+            trim_text(last_response$error %||% batch_error),
+            1L,
+            240L
+          )
+        )
+      } else if (!nzchar(batch_error)) {
+        batch_error <- "no responses returned"
+      }
+      if (batch_attempt < batch_attempts) {
+        message(
+          "FEC browser API fallback retry ",
+          batch_attempt,
+          "/",
+          batch_attempts - 1L,
+          " for pages ",
+          min(batch),
+          "-",
+          max(batch),
+          ": ",
+          batch_error
+        )
+        Sys.sleep(min(8, 2^(batch_attempt - 1L)))
+      }
+    }
     next_cursor <- batch_result$cursor %||% list()
     if (length(responses) != length(batch)) {
       stop(
-        "FEC browser API fallback returned the wrong response count.",
+        "FEC browser API fallback returned the wrong response count after ",
+        batch_attempts,
+        " attempts: ",
+        batch_error,
         call. = FALSE
       )
     }

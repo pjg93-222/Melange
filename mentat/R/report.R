@@ -935,19 +935,37 @@ spending_set_xml_cols_block <- function(xml, template_cols) {
   if (!nzchar(template_cols)) {
     return(xml)
   }
-  format_match <- regexpr(
-    "<sheetFormatPr(?:\\s[^>]*)?(?:/>|>[\\s\\S]*?</sheetFormatPr>)",
-    xml,
-    perl = TRUE
-  )
-  if (format_match[[1L]] == -1L) {
+  format_start <- regexpr("<sheetFormatPr", xml, fixed = TRUE)
+  if (format_start[[1L]] == -1L) {
     stop(
       "Could not locate sheetFormatPr while restoring template columns",
       call. = FALSE
     )
   }
-  finish <- as.integer(format_match[[1L]]) +
-    attr(format_match, "match.length") - 1L
+  format_start <- as.integer(format_start[[1L]])
+  format_suffix <- substr(xml, format_start, nchar(xml))
+  opening_end <- regexpr(">", format_suffix, fixed = TRUE)
+  if (opening_end[[1L]] == -1L) {
+    stop(
+      "Could not locate the end of sheetFormatPr while restoring template columns",
+      call. = FALSE
+    )
+  }
+  opening_end <- format_start + as.integer(opening_end[[1L]]) - 1L
+  opening_tag <- substr(xml, format_start, opening_end)
+  finish <- opening_end
+  if (!grepl("/\\s*>$", opening_tag, perl = TRUE)) {
+    closing_suffix <- substr(xml, opening_end + 1L, nchar(xml))
+    closing_start <- regexpr("</sheetFormatPr>", closing_suffix, fixed = TRUE)
+    if (closing_start[[1L]] == -1L) {
+      stop(
+        "Could not locate the sheetFormatPr closing tag while restoring template columns",
+        call. = FALSE
+      )
+    }
+    finish <- opening_end + as.integer(closing_start[[1L]]) - 1L +
+      nchar("</sheetFormatPr>")
+  }
   paste0(
     substr(xml, 1L, finish),
     template_cols,

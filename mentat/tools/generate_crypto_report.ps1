@@ -16,6 +16,8 @@ param(
   [string]$RScriptPath = 'C:\Program Files\R\R-4.6.0\bin\Rscript.exe',
   [string]$NodePath = '',
   [string]$NodeModulesPath = '',
+  [ValidateRange(4096,32768)]
+  [int]$NodeHeapMb = 16384,
   [string]$ExcelMutexName = 'Global\MentatIndustryExcelFinalize',
   [switch]$NoCache,
   [switch]$RenderPreviews
@@ -147,7 +149,7 @@ try {
   $env:MENTAT_NODE_MODULES = $NodeModulesPath
   $env:MENTAT_RENDER_PREVIEWS = if ($RenderPreviews) { '1' } else { '0' }
   $buildWatch = [Diagnostics.Stopwatch]::StartNew()
-  & $NodePath '--max-old-space-size=8192' $builder $dataPath $stageDirectory $databaseHash
+  & $NodePath "--max-old-space-size=$NodeHeapMb" $builder $dataPath $stageDirectory $databaseHash
   if ($LASTEXITCODE -ne 0) { throw "Workbook build failed with exit code $LASTEXITCODE" }
   $buildWatch.Stop()
 } finally {
