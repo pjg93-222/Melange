@@ -770,7 +770,7 @@ fec_walk_variant_set <- function(
   canary_callback,
   query_field = "contributor_employer",
   query_filters = list(),
-  timeout_seconds = 60,
+  timeout_seconds = 180,
   retries = 3L,
   sleep_range = c(1.5, 3.5),
   query_retries = 3L,
