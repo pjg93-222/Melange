@@ -604,6 +604,236 @@ fec_export_partitions <- function(
   leaves
 }
 
+fec_browser_api_url <- function(session) {
+  url <- trim_text(fec_runtime_value(
+    session,
+    paste0(
+      "(function(){",
+      "var urls=performance.getEntriesByType('resource')",
+      ".map(function(entry){return entry.name;})",
+      ".filter(function(value){return value.indexOf(",
+      "'api.open.fec.gov/v1/schedules/schedule_a/')>=0;});",
+      "return urls.length?urls[urls.length-1]:'';",
+      "})()"
+    )
+  ))
+  if (!nzchar(url)) {
+    stop(
+      "FEC browser API fallback could not locate the loaded query.",
+      call. = FALSE
+    )
+  }
+  url
+}
+
+fec_browser_api_batch <- function(
+  session,
+  api_url,
+  pages,
+  per_page = 100L,
+  attempts = 4L
+) {
+  require_package("jsonlite")
+  pages <- as.integer(pages)
+  per_page <- as.integer(per_page)
+  attempts <- as.integer(attempts)
+  expression <- sprintf(
+    paste0(
+      "(async function(){",
+      "var base=new URL(%s);",
+      "var pages=%s;",
+      "var perPage=%d;",
+      "var attempts=%d;",
+      "async function fetchPage(page){",
+      "var last={status:0,error:'request did not start'};",
+      "for(var attempt=1;attempt<=attempts;attempt++){",
+      "try{",
+      "var url=new URL(base.href);",
+      "url.searchParams.set('per_page',String(perPage));",
+      "url.searchParams.set('page',String(page));",
+      "var response=await fetch(url.href);",
+      "if(response.ok){",
+      "return {page:page,status:response.status,body:await response.json()};",
+      "}",
+      "last={page:page,status:response.status,error:await response.text()};",
+      "if(response.status!==429 && response.status<500){return last;}",
+      "var retryAfter=Number(response.headers.get('Retry-After')||'0');",
+      "var delay=retryAfter>0?retryAfter*1000:",
+      "Math.min(8000,Math.pow(2,attempt-1)*1000);",
+      "await new Promise(function(resolve){setTimeout(resolve,delay);});",
+      "}catch(error){",
+      "last={page:page,status:0,error:String(error)};",
+      "if(attempt<attempts){",
+      "await new Promise(function(resolve){",
+      "setTimeout(resolve,Math.min(8000,Math.pow(2,attempt-1)*1000));",
+      "});",
+      "}",
+      "}",
+      "}",
+      "return last;",
+      "}",
+      "return JSON.stringify(await Promise.all(pages.map(fetchPage)));",
+      "})()"
+    ),
+    jsonlite::toJSON(api_url, auto_unbox = TRUE),
+    jsonlite::toJSON(as.list(pages), auto_unbox = TRUE),
+    per_page,
+    attempts
+  )
+  payload <- fec_runtime_value(session, expression)
+  jsonlite::fromJSON(payload, simplifyVector = FALSE)
+}
+
+fec_walk_variant_set_api <- function(
+  session,
+  records_total,
+  page_callback,
+  canary_callback,
+  company,
+  cycle,
+  variant_set,
+  per_page = 100L,
+  batch_pages = 10L
+) {
+  require_package("data.table")
+  records_total <- as.integer(records_total)
+  per_page <- as.integer(per_page)
+  batch_pages <- as.integer(batch_pages)
+  if (records_total < 0L || per_page < 1L || batch_pages < 1L) {
+    stop("Invalid FEC browser API fallback bounds.", call. = FALSE)
+  }
+  api_url <- fec_browser_api_url(session)
+  pages <- if (records_total) {
+    seq_len(as.integer(ceiling(records_total / per_page)))
+  } else {
+    integer()
+  }
+  processed <- 0L
+  batches <- if (length(pages)) {
+    split(pages, ceiling(seq_along(pages) / batch_pages))
+  } else {
+    list()
+  }
+  for (batch_index in seq_along(batches)) {
+    batch <- batches[[batch_index]]
+    message(
+      "FEC browser API fallback batch ",
+      batch_index,
+      "/",
+      length(batches),
+      ": pages ",
+      min(batch),
+      "-",
+      max(batch),
+      "."
+    )
+    responses <- fec_browser_api_batch(session, api_url, batch, per_page)
+    if (length(responses) != length(batch)) {
+      stop(
+        "FEC browser API fallback returned the wrong response count.",
+        call. = FALSE
+      )
+    }
+    for (response in responses) {
+      page <- as.integer(response$page %||% NA_integer_)
+      status <- as.integer(response$status %||% 0L)
+      if (is.na(page) || status != 200L || is.null(response$body)) {
+        stop(
+          "FEC browser API fallback failed on page ",
+          if (is.na(page)) "?" else page,
+          " with status ",
+          status,
+          ".",
+          call. = FALSE
+        )
+      }
+      body <- response$body
+      pagination <- body$pagination %||% list()
+      observed_total <- as.integer(pagination$count %||% NA_integer_)
+      if (!identical(observed_total, records_total)) {
+        stop(
+          "FEC browser API fallback total changed: expected=",
+          records_total,
+          " observed=",
+          observed_total,
+          call. = FALSE
+        )
+      }
+      rows <- body$results %||% list()
+      page_zero <- page - 1L
+      expected_rows <- if (page < length(pages)) {
+        per_page
+      } else {
+        records_total - (page_zero * per_page)
+      }
+      payload <- list(
+        info = list(
+          page = page_zero,
+          pages = length(pages),
+          start = page_zero * per_page,
+          end = page_zero * per_page + length(rows),
+          length = per_page,
+          recordsTotal = records_total,
+          recordsDisplay = records_total,
+          serverSide = TRUE
+        ),
+        rows = rows
+      )
+      checks <- fec_canaries(payload, records_total)
+      checks <- data.table::rbindlist(list(
+        checks,
+        data.table::data.table(
+          check_name = "api_page_row_count",
+          passed = as.integer(length(rows) == expected_rows),
+          detail = paste0(
+            "page=", page,
+            "; rows=", length(rows),
+            "; expected=", expected_rows
+          )
+        )
+      ))
+      canary_callback(
+        company = company,
+        cycle = cycle,
+        variant_set = variant_set,
+        page = page_zero,
+        checks = checks
+      )
+      if (any(checks$passed == 0L)) {
+        stop(
+          "FEC browser API fallback canary failure on page ",
+          page,
+          ".",
+          call. = FALSE
+        )
+      }
+      page_callback(
+        rows = rows,
+        page = page_zero,
+        records_total = records_total
+      )
+      processed <- processed + length(rows)
+    }
+  }
+  if (processed != records_total) {
+    stop(
+      "FEC browser API fallback processing mismatch: expected=",
+      records_total,
+      " processed=",
+      processed,
+      call. = FALSE
+    )
+  }
+  list(
+    records_total = records_total,
+    pages = length(pages),
+    retries = 0L,
+    truncated = FALSE,
+    export = FALSE,
+    api_fallback = TRUE
+  )
+}
+
 fec_walk_variant_set_export <- function(
   session,
   url,
@@ -659,40 +889,17 @@ fec_walk_variant_set_export <- function(
       stop(direct_error)
     }
     message(
-      "FEC full export failed server-side; retrying exact date partitions: ",
-      conditionMessage(direct_error)
+      "FEC full export failed server-side; using verified browser API pages."
     )
-    partitions <- fec_export_partitions(
-      session,
-      url,
-      records_total,
-      max_rows = 10000L
-    )
-    for (partition_index in seq_along(partitions)) {
-      partition <- partitions[[partition_index]]
-      message(
-        "FEC export fallback file ",
-        partition_index,
-        "/",
-        length(partitions),
-        ": ",
-        partition$count,
-        " rows."
-      )
-      fec_navigate(session, partition$url)
-      payload <- fec_set_page_length(session, 30L)
-      observed <- as.integer(payload$info$recordsTotal)
-      if (observed != as.integer(partition$count)) {
-        stop(
-          "FEC export partition changed before download: expected=",
-          partition$count,
-          " observed=",
-          observed,
-          call. = FALSE
-        )
-      }
-      consume_export(fec_export_current_query(session, observed))
-    }
+    return(fec_walk_variant_set_api(
+      session = session,
+      records_total = records_total,
+      page_callback = page_callback,
+      canary_callback = canary_callback,
+      company = company,
+      cycle = cycle,
+      variant_set = variant_set
+    ))
   }
   checks <- data.table::data.table(
     check_name = "export_row_count",
