@@ -18,6 +18,7 @@ param(
   [string]$NodeModulesPath = '',
   [ValidateRange(4096,32768)]
   [int]$NodeHeapMb = 16384,
+  [string]$WorkbookLockPath = '',
   [string]$ExcelMutexName = 'Global\MentatIndustryExcelFinalize',
   [switch]$NoCache,
   [switch]$RenderPreviews
@@ -31,6 +32,9 @@ if (-not $Industry) { throw 'Industry cannot be empty.' }
 $reportBaseName = "${Industry} Industry Spending Overview"
 $industryToken = ($Industry -replace '[^A-Za-z0-9]+','_').Trim('_').ToLowerInvariant()
 if (-not $industryToken) { throw "Industry cannot be converted to a safe cache token: $Industry" }
+if (-not $WorkbookLockPath) {
+  $WorkbookLockPath = Join-Path $projectRoot '.cache\industry-report\workbook-builder.lock'
+}
 
 if (-not $DatabasePath) {
   $dataRoot = if ($env:MENTAT_DATA_ROOT) { $env:MENTAT_DATA_ROOT } else { Join-Path $env:LOCALAPPDATA 'Mentat' }
@@ -54,6 +58,7 @@ $DatabasePath = [IO.Path]::GetFullPath($DatabasePath)
 $OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
 $CommitteeMasterDirectory = [IO.Path]::GetFullPath($CommitteeMasterDirectory)
 $BeneficiaryDirectory = [IO.Path]::GetFullPath($BeneficiaryDirectory)
+$WorkbookLockPath = [IO.Path]::GetFullPath($WorkbookLockPath)
 $exporter = Join-Path $scriptRoot 'export_crypto_spending_data.R'
 $builder = Join-Path $scriptRoot 'crypto_workbook_builder.mjs'
 $finalizer = Join-Path $scriptRoot 'finalize_crypto_excel.ps1'
@@ -158,7 +163,42 @@ $priorDefer = $env:MENTAT_DEFER_FORMULAS
 $priorModules = $env:MENTAT_NODE_MODULES
 $priorRender = $env:MENTAT_RENDER_PREVIEWS
 $priorIndustry = $env:MENTAT_INDUSTRY
+$workbookLockOwned = $false
 try {
+  New-Item -ItemType Directory -Path (
+    Split-Path -Parent $WorkbookLockPath
+  ) -Force | Out-Null
+  Write-Host "Waiting for workbook build slot: $WorkbookLockPath"
+  while (-not $workbookLockOwned) {
+    try {
+      $lockStream = [IO.File]::Open(
+        $WorkbookLockPath,
+        [IO.FileMode]::CreateNew,
+        [IO.FileAccess]::Write,
+        [IO.FileShare]::None
+      )
+      $workbookLockOwned = $true
+      try {
+        $lockText = "pid=$PID`r`ncreated=$([DateTimeOffset]::Now.ToString('o'))`r`n"
+        $lockBytes = [Text.Encoding]::UTF8.GetBytes($lockText)
+        $lockStream.Write($lockBytes, 0, $lockBytes.Length)
+      } finally {
+        $lockStream.Dispose()
+      }
+    } catch [IO.IOException] {
+      if (
+        (Test-Path -LiteralPath $WorkbookLockPath) -and
+        (Get-Item -LiteralPath $WorkbookLockPath).LastWriteTimeUtc -lt
+        [DateTime]::UtcNow.AddMinutes(-90)
+      ) {
+        Write-Warning "Removing stale workbook build lock: $WorkbookLockPath"
+        Remove-Item -LiteralPath $WorkbookLockPath -Force -ErrorAction SilentlyContinue
+        continue
+      }
+      Start-Sleep -Seconds 1
+    }
+  }
+  Write-Host "Workbook build slot acquired: $WorkbookLockPath"
   $env:MENTAT_INDUSTRY = $Industry
   $env:MENTAT_DEFER_FORMULAS = '1'
   $env:MENTAT_NODE_MODULES = $NodeModulesPath
@@ -172,6 +212,9 @@ try {
   $env:MENTAT_NODE_MODULES = $priorModules
   $env:MENTAT_RENDER_PREVIEWS = $priorRender
   $env:MENTAT_INDUSTRY = $priorIndustry
+  if ($workbookLockOwned -and (Test-Path -LiteralPath $WorkbookLockPath)) {
+    Remove-Item -LiteralPath $WorkbookLockPath -Force
+  }
 }
 
 $stageWorkbook = Join-Path $stageDirectory "${reportBaseName}.xlsx"

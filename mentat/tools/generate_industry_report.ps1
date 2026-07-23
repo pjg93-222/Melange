@@ -9,6 +9,7 @@ param(
   [string]$RScriptPath = '',
   [string]$NodePath = '',
   [string]$NodeModulesPath = '',
+  [string]$WorkbookLockPath = '',
   [string]$ExcelMutexName = 'Global\MentatIndustryExcelFinalize',
   [switch]$NoCache,
   [switch]$RenderPreviews
@@ -27,6 +28,7 @@ if ($BeneficiaryDirectory) { $arguments.BeneficiaryDirectory = $BeneficiaryDirec
 if ($RScriptPath) { $arguments.RScriptPath = $RScriptPath }
 if ($NodePath) { $arguments.NodePath = $NodePath }
 if ($NodeModulesPath) { $arguments.NodeModulesPath = $NodeModulesPath }
+if ($WorkbookLockPath) { $arguments.WorkbookLockPath = $WorkbookLockPath }
 if ($NoCache) { $arguments.NoCache = $true }
 if ($RenderPreviews) { $arguments.RenderPreviews = $true }
 
