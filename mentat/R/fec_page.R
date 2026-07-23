@@ -693,7 +693,7 @@ fec_walk_variant_set_api <- function(
   cycle,
   variant_set,
   per_page = 100L,
-  batch_pages = 10L
+  batch_pages = 5L
 ) {
   require_package("data.table")
   records_total <- as.integer(records_total)
