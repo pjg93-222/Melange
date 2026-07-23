@@ -1,0 +1,380 @@
+from __future__ import annotations
+
+import json
+import sys
+import tempfile
+import unittest
+import sqlite3
+from contextlib import closing
+from pathlib import Path
+from unittest import mock
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT / "tools"))
+sys.path.insert(0, str(PROJECT_ROOT / "tests"))
+import api_company_cycle_fanout as fanout  # noqa: E402
+import test_merge_company_shards as merge_fixture  # noqa: E402
+
+
+class ApiCompanyCycleFanoutTest(unittest.TestCase):
+    def test_key_discovery_is_ordered_deduplicated_and_redacted(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-key-fixture-") as temp:
+            keys_file = Path(temp) / "keys.txt"
+            keys_file.write_text(
+                "# one per line\nfile-a\nfile-b\nfile-a\n",
+                encoding="utf-8",
+            )
+            keys = fanout.discover_keys(
+                keys_file,
+                {
+                    "FEC_API_KEYS": "pool-a;pool-b|file-b",
+                    "FEC_API_KEY": "single",
+                    "FEC_API_KEY_2": "numbered-b",
+                    "FEC_API_KEY_1": "numbered-a",
+                },
+            )
+        self.assertEqual(
+            keys,
+            [
+                "file-a",
+                "file-b",
+                "pool-a",
+                "pool-b",
+                "single",
+                "numbered-a",
+                "numbered-b",
+            ],
+        )
+        identifiers = [fanout.key_id(key) for key in keys]
+        self.assertEqual(len(identifiers), len(set(identifiers)))
+        for key, identifier in zip(keys, identifiers):
+            self.assertNotIn(key, identifier)
+            self.assertRegex(identifier, r"^[0-9a-f]{12}$")
+
+    def test_missing_keys_fails_loudly(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "No FEC API keys were found"):
+            fanout.discover_keys(None, {})
+
+    def test_company_cycles_never_cross_lane_ownership(self) -> None:
+        companies = [
+            ("Alpha", 10),
+            ("Beta", 4),
+            ("Gamma", 2),
+            ("Delta", 1),
+        ]
+        first = fanout.schedule_companies(companies, (2022, 2024, 2026), 3)
+        second = fanout.schedule_companies(companies, (2022, 2024, 2026), 3)
+        self.assertEqual(first, second)
+        owner: dict[str, int] = {}
+        task_pairs: set[tuple[str, int]] = set()
+        for lane in first:
+            for task in lane["tasks"]:
+                company = task["company"]
+                owner.setdefault(company, lane["lane"])
+                self.assertEqual(owner[company], lane["lane"])
+                task_pairs.add((company, task["cycle"]))
+        self.assertEqual(
+            task_pairs,
+            {
+                (company, cycle)
+                for company, _ in companies
+                for cycle in (2022, 2024, 2026)
+            },
+        )
+
+    def test_status_is_atomic_has_eta_and_contains_no_key_fields(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-status-fixture-") as temp:
+            root = Path(temp)
+            state = root / "lane-status.json"
+            fanout.atomic_json(
+                state,
+                {
+                    "status": "running",
+                    "lane": 1,
+                    "completed": 1,
+                    "failed": 0,
+                    "current_company": "Beta",
+                    "current_cycle": 2024,
+                    "tasks": [
+                        {
+                            "task_id": "alpha-2022",
+                            "status": "succeeded",
+                            "wall_clock_seconds": 10,
+                        }
+                    ],
+                },
+            )
+            lane_run = fanout.LaneRun(
+                lane=1,
+                database=root / "lane.db",
+                assignments=root / "assignments.json",
+                receipt=root / "receipt.json",
+                state=state,
+                log=root / "process.log",
+                key="must-not-appear",
+                key_id="0123456789ab",
+                tasks=(
+                    {"task_id": "alpha-2022", "company": "Alpha", "cycle": 2022},
+                    {"task_id": "beta-2024", "company": "Beta", "cycle": 2024},
+                ),
+                attempt=1,
+            )
+            status = root / "status.json"
+            fanout.write_status(
+                status,
+                run_id="fixture",
+                industry="Fintech",
+                total=2,
+                lane_runs=[lane_run],
+                stage="collecting",
+                started_monotonic=fanout.time.monotonic() - 5,
+            )
+            payload = json.loads(status.read_text(encoding="utf-8"))
+        self.assertEqual(payload["completed"], 1)
+        self.assertEqual(payload["total"], 2)
+        self.assertEqual(payload["running"], 1)
+        self.assertEqual(payload["failed"], 0)
+        self.assertEqual(payload["estimated_remaining_seconds"], 10)
+        self.assertEqual(
+            payload["current"],
+            [{"lane": 1, "company": "Beta", "cycle": 2024}],
+        )
+        serialized = json.dumps(payload)
+        self.assertNotIn("key", serialized.lower())
+        self.assertNotIn("must-not-appear", serialized)
+
+    def test_lane_key_is_environment_only_and_budget_id_is_redacted(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-lane-fixture-") as temp:
+            root = Path(temp)
+            assignments = root / "assignments.json"
+            receipt = root / "receipt.json"
+            fanout.atomic_json(
+                assignments,
+                {
+                    "industry": "Fintech",
+                    "lane": 1,
+                    "tasks": [
+                        {
+                            "task_id": "alpha-2022",
+                            "company": "Alpha",
+                            "cycle": 2022,
+                        }
+                    ],
+                },
+            )
+            secret = "NEVER-LOG-THIS-FEC-KEY"
+            identifier = fanout.key_id(secret)
+            lane_run = fanout.LaneRun(
+                lane=1,
+                database=root / "lane.db",
+                assignments=assignments,
+                receipt=receipt,
+                state=root / "status.json",
+                log=root / "process.log",
+                key=secret,
+                key_id=identifier,
+                tasks=(
+                    {"task_id": "alpha-2022", "company": "Alpha", "cycle": 2022},
+                ),
+                attempt=1,
+            )
+
+            def fake_run(command, **kwargs):
+                self.assertNotIn(secret, command)
+                self.assertEqual(kwargs["env"]["FEC_API_KEY"], secret)
+                self.assertEqual(
+                    kwargs["env"]["MENTAT_API_BUDGET_ID"],
+                    f"openfec:sha256:{identifier}",
+                )
+                self.assertNotIn("FEC_API_KEYS", kwargs["env"])
+                fanout.atomic_json(
+                    receipt,
+                    {
+                        "status": "succeeded",
+                        "tasks": [
+                            {
+                                "task_id": "alpha-2022",
+                                "company": "Alpha",
+                                "cycle": 2022,
+                                "status": "succeeded",
+                            }
+                        ],
+                    },
+                )
+                return mock.Mock(returncode=0)
+
+            with mock.patch.object(fanout.subprocess, "run", side_effect=fake_run):
+                result = fanout.execute_lane(
+                    lane_run,
+                    rscript_path=root / "Rscript.exe",
+                    lane_script=root / "project" / "tools" / "collect_api_lane.R",
+                    r_library_path=None,
+                    concurrency=8,
+                    sqlite_cache_mb=256,
+                    budget_database=root / "persistent-budget.sqlite",
+                )
+            log_text = lane_run.log.read_text(encoding="utf-8")
+        self.assertEqual(result["exit_code"], 0)
+        self.assertNotIn(secret, log_text)
+        self.assertIn(identifier, log_text)
+
+    def test_resource_cap_honors_cpu_ram_keys_and_merge_limit(self) -> None:
+        with mock.patch.object(
+            fanout, "available_memory_bytes", return_value=6 * 1024**3
+        ), mock.patch.object(fanout.os, "cpu_count", return_value=8):
+            cap = fanout.resource_cap(
+                key_count=12,
+                company_count=20,
+                requested_parallel=0,
+                memory_per_lane_mb=640,
+                memory_reserve_mb=1024,
+            )
+        self.assertEqual(cap["memory_lane_cap"], 8)
+        self.assertEqual(cap["active_lane_cap"], 8)
+        self.assertEqual(cap["sqlite_merge_cap"], 10)
+
+    def test_resume_receipts_select_only_non_success_tasks(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-resume-fixture-") as temp:
+            lane = Path(temp)
+            fanout.atomic_json(
+                lane / "receipt.json",
+                {
+                    "status": "failed",
+                    "tasks": [
+                        {"task_id": "alpha-2022", "status": "succeeded"},
+                        {"task_id": "alpha-2024", "status": "failed"},
+                    ],
+                },
+            )
+            fanout.atomic_json(
+                lane / "receipt.recovery-1.json",
+                {
+                    "status": "succeeded",
+                    "tasks": [
+                        {"task_id": "alpha-2024", "status": "succeeded"},
+                    ],
+                },
+            )
+            attempts = fanout.existing_lane_attempts(lane, 1)
+            latest = fanout.latest_tasks_from_attempts(attempts)
+        self.assertEqual([attempt["attempt"] for attempt in attempts], [1, 2])
+        self.assertEqual(latest["alpha-2022"]["status"], "succeeded")
+        self.assertEqual(latest["alpha-2024"]["status"], "succeeded")
+        planned = [
+            {"task_id": "alpha-2022"},
+            {"task_id": "alpha-2024"},
+            {"task_id": "alpha-2026"},
+        ]
+        pending = [
+            task
+            for task in planned
+            if latest.get(task["task_id"], {}).get("status") != "succeeded"
+        ]
+        self.assertEqual(pending, [{"task_id": "alpha-2026"}])
+
+    def test_disposable_end_to_end_merge_and_restart_guard(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-fanout-e2e-") as temp:
+            root = Path(temp)
+            source = root / "source.db"
+            merge_fixture.create_database(source)
+            with closing(sqlite3.connect(source)) as connection, connection:
+                connection.execute(
+                    """
+                    CREATE TABLE companies (
+                      industry TEXT NOT NULL,
+                      company TEXT NOT NULL,
+                      variant TEXT NOT NULL
+                    )
+                    """
+                )
+                connection.executemany(
+                    "INSERT INTO companies VALUES ('Fintech', ?, ?)",
+                    [("Alpha", "ALPHA"), ("Beta", "BETA")],
+                )
+            run_directory = root / "run"
+            receipt_path = run_directory / "receipt.json"
+
+            def fake_execute(lane_run, **kwargs):
+                with closing(
+                    sqlite3.connect(lane_run.database)
+                ) as connection, connection:
+                    for task in lane_run.tasks:
+                        connection.execute(
+                            "INSERT OR IGNORE INTO contributions VALUES (?, ?, ?)",
+                            (
+                                task["task_id"],
+                                task["company"],
+                                float(task["cycle"]),
+                            ),
+                        )
+                tasks = [
+                    {**task, "status": "succeeded", "wall_clock_seconds": 0.01}
+                    for task in lane_run.tasks
+                ]
+                lane_receipt = {
+                    "status": "succeeded",
+                    "key_id": lane_run.key_id,
+                    "wall_clock_seconds": 0.01,
+                    "tasks": tasks,
+                }
+                fanout.atomic_json(lane_run.receipt, lane_receipt)
+                return {
+                    "lane": lane_run.lane,
+                    "attempt": lane_run.attempt,
+                    "exit_code": 0,
+                    "wall_clock_seconds": 0.01,
+                    "receipt_path": str(lane_run.receipt),
+                    "state_path": str(lane_run.state),
+                    "log_path": str(lane_run.log),
+                    "database": str(lane_run.database),
+                    "key_id": lane_run.key_id,
+                    "receipt": lane_receipt,
+                }
+
+            arguments = [
+                "--source-database",
+                str(source),
+                "--industry",
+                "Fintech",
+                "--cycles",
+                "2022",
+                "--run-directory",
+                str(run_directory),
+                "--output-receipt",
+                str(receipt_path),
+                "--rscript-path",
+                sys.executable,
+                "--budget-database",
+                str(root / "budget.sqlite"),
+                "--max-parallel",
+                "2",
+            ]
+            with mock.patch.dict(
+                fanout.os.environ,
+                {"FEC_API_KEYS": "fixture-key-a|fixture-key-b"},
+                clear=False,
+            ), mock.patch.object(
+                fanout, "execute_lane", side_effect=fake_execute
+            ):
+                self.assertEqual(fanout.main(arguments), 0)
+                with self.assertRaisesRegex(
+                    RuntimeError,
+                    "refusing to recreate lane snapshots",
+                ):
+                    fanout.main(arguments)
+                self.assertEqual(fanout.main([*arguments, "--resume"]), 0)
+
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            with closing(sqlite3.connect(source)) as connection, connection:
+                contribution_count = connection.execute(
+                    "SELECT COUNT(*) FROM contributions"
+                ).fetchone()[0]
+        self.assertEqual(receipt["status"], "succeeded")
+        self.assertTrue(receipt["merged"])
+        self.assertEqual(receipt["succeeded"], 2)
+        self.assertEqual(contribution_count, 2)
+
+
+if __name__ == "__main__":
+    unittest.main()

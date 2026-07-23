@@ -9,6 +9,10 @@ param(
   [string]$RScriptPath = '',
   [string]$NodePath = '',
   [string]$NodeModulesPath = '',
+  [ValidateRange(0,32768)]
+  [int]$NodeHeapMb = 0,
+  [ValidateRange(1,45)]
+  [double]$PerformanceBudgetMinutes = 15,
   [string]$WorkbookLockPath = '',
   [string]$ExcelMutexName = 'Global\MentatIndustryExcelFinalize',
   [ValidateSet('','2021-2022','2023-2024','2025-2026')]
@@ -30,6 +34,8 @@ if ($BeneficiaryDirectory) { $arguments.BeneficiaryDirectory = $BeneficiaryDirec
 if ($RScriptPath) { $arguments.RScriptPath = $RScriptPath }
 if ($NodePath) { $arguments.NodePath = $NodePath }
 if ($NodeModulesPath) { $arguments.NodeModulesPath = $NodeModulesPath }
+$arguments.NodeHeapMb = $NodeHeapMb
+$arguments.PerformanceBudgetMinutes = $PerformanceBudgetMinutes
 if ($WorkbookLockPath) { $arguments.WorkbookLockPath = $WorkbookLockPath }
 if ($CycleLabel) { $arguments.CycleLabel = $CycleLabel }
 if ($NoCache) { $arguments.NoCache = $true }

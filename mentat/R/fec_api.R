@@ -28,7 +28,20 @@ fec_api_key <- function(value = Sys.getenv("FEC_API_KEY", unset = "")) {
 # single hardcoded id collapses every worker onto one shared 1,000/hr bucket,
 # which silently caps an N-key fan-out at 1x. The key is never stored - only a
 # non-reversible polynomial digest of it.
-fec_api_budget_id <- function(api_key = Sys.getenv("FEC_API_KEY", unset = "")) {
+fec_api_budget_id <- function(
+  api_key = Sys.getenv("FEC_API_KEY", unset = ""),
+  configured = Sys.getenv("MENTAT_API_BUDGET_ID", unset = "")
+) {
+  configured <- trimws(configured)
+  if (nzchar(configured)) {
+    if (!grepl("^openfec:sha256:[0-9a-f]{12,64}$", configured, perl = TRUE)) {
+      stop(
+        "MENTAT_API_BUDGET_ID must be an openfec:sha256:<hex> identifier.",
+        call. = FALSE
+      )
+    }
+    return(configured)
+  }
   key <- trimws(api_key)
   if (!nzchar(key)) return("openfec")
   codes <- utf8ToInt(key)
@@ -1015,6 +1028,29 @@ fec_api_run_lookups <- function(connection) {
   )
 }
 
+fec_api_filter_lookups <- function(lookup_cache, company_filter = NULL) {
+  if (is.null(company_filter)) return(lookup_cache)
+  requested <- unique(trim_text(company_filter))
+  requested <- requested[nzchar(requested)]
+  if (!length(requested)) {
+    stop("FEC API company_filter must contain at least one company.", call. = FALSE)
+  }
+  available <- names(lookup_cache$rosters)
+  unknown <- setdiff(requested, available)
+  if (length(unknown)) {
+    stop(
+      "FEC API company_filter contains unknown company names: ",
+      paste(sort(unknown, method = "radix"), collapse = ", "),
+      call. = FALSE
+    )
+  }
+  selected <- available[available %in% requested]
+  lookup_cache$rosters <- lookup_cache$rosters[selected]
+  lookup_cache$trusted_by_company <-
+    lookup_cache$trusted_by_company[selected]
+  lookup_cache
+}
+
 fec_api_roster_exclusions <- function(roster) {
   values <- unique(unlist(strsplit(
     paste(na.omit(roster$exclusions), collapse = "|"),
@@ -1127,6 +1163,7 @@ fec_api_identity_units <- function(connection, cycles, rosters = NULL) {
     )
   ))
   seeds <- seeds[cycle %in% as.integer(cycles)]
+  seeds <- seeds[company %in% names(rosters)]
   seeds <- seeds[vapply(contributor_name, plausible_person_query, logical(1L))]
   data.table::setorder(seeds, company, cycle, contributor_name, sub_id)
   seeds <- unique(
@@ -1398,7 +1435,8 @@ fec_api_bulk_rescue <- function(
   before_request,
   data_root = mentat_default_data_root(),
   cap = fec_api_rescue_cap(),
-  lookup_cache = NULL
+  lookup_cache = NULL,
+  company_filter = NULL
 ) {
   if (!DBI::dbExistsTable(connection, "bulk_candidates")) {
     candidates <- data.frame(
@@ -1418,6 +1456,13 @@ fec_api_bulk_rescue <- function(
       ),
       params = as.list(as.integer(cycles))
     )
+  }
+  if (!is.null(company_filter) && nrow(candidates)) {
+    candidates <- candidates[
+      candidates$company %in% trim_text(company_filter),
+      ,
+      drop = FALSE
+    ]
   }
   if (nrow(candidates)) {
     candidates <- candidates[!duplicated(candidates$sub_id), , drop = FALSE]
@@ -1951,7 +1996,9 @@ collect_crypto_api <- function(
   sleep = Sys.sleep,
   jitter = stats::runif,
   run_id = NULL,
-  data_root = mentat_default_data_root()
+  data_root = mentat_default_data_root(),
+  company_filter = NULL,
+  budget_connection = NULL
 ) {
   require_package("data.table")
   require_package("jsonlite")
@@ -1961,10 +2008,19 @@ collect_crypto_api <- function(
       any(!cycles %in% c(2022L, 2024L, 2026L))) {
     stop("Cycles must be a subset of 2022, 2024, and 2026.", call. = FALSE)
   }
-  lookup_cache <- fec_api_run_lookups(connection)
+  lookup_cache <- fec_api_filter_lookups(
+    fec_api_run_lookups(connection),
+    company_filter
+  )
+  budget_connection <- budget_connection %||% connection
+  budget_id <- fec_api_budget_id(api_key)
   requests_reserved_run <- 0L
   reserve_request <- function(count) {
-    fec_api_budget_reserve(connection, count)
+    fec_api_budget_reserve(
+      budget_connection,
+      count,
+      budget_id = budget_id
+    )
     requests_reserved_run <<- requests_reserved_run + as.integer(count)
     invisible(NULL)
   }
@@ -1993,7 +2049,10 @@ collect_crypto_api <- function(
     )
   }
   pause_result <- function(condition, rows = 0L, retries = 0L) {
-    budget <- fec_api_budget_status(connection)
+    budget <- fec_api_budget_status(
+      budget_connection,
+      budget_id = budget_id
+    )
     requests_run <- requests_reserved_run
     cat(sprintf(
       paste0(
@@ -2053,7 +2112,8 @@ collect_crypto_api <- function(
       jitter = jitter,
       before_request = reserve_request,
       data_root = data_root,
-      lookup_cache = lookup_cache
+      lookup_cache = lookup_cache,
+      company_filter = names(lookup_cache$rosters)
     ),
     mentat_api_budget_exhausted = function(condition) condition,
     mentat_api_quota_exhausted = function(condition) condition
@@ -2140,7 +2200,10 @@ collect_crypto_api <- function(
     wall_clock_seconds = unname(wall_clock_seconds)
   )
   fec_api_record_metric(connection, run_id, "collect_total", total_metric)
-  budget <- fec_api_budget_status(connection)
+  budget <- fec_api_budget_status(
+    budget_connection,
+    budget_id = budget_id
+  )
   requests_used_run <- requests_reserved_run
   cat(sprintf(
     paste0(

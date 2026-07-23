@@ -48,6 +48,175 @@ fec_max_text <- function(values) {
   ordered[[length(ordered)]]
 }
 
+fec_grouped_join_unique <- function(rows, key_columns, value_column, output_column) {
+  values <- rows[, c(key_columns, value_column), with = FALSE]
+  data.table::setnames(values, value_column, ".fec_value")
+  values[, .fec_value := trim_text(.fec_value)]
+  values <- unique(values[nzchar(.fec_value)])
+  if (!nrow(values)) {
+    result <- rows[0L, ..key_columns]
+    result[, (output_column) := character()]
+    return(result[])
+  }
+  data.table::setorderv(values, c(key_columns, ".fec_value"))
+  result <- values[, .(
+    .fec_output = if (.N == 1L) .fec_value[[1L]] else paste(.fec_value, collapse = "; ")
+  ), by = key_columns]
+  data.table::setnames(result, ".fec_output", output_column)
+  result[]
+}
+
+fec_grouped_text_bounds <- function(rows, key_columns, value_column) {
+  values <- rows[, c(key_columns, value_column), with = FALSE]
+  data.table::setnames(values, value_column, ".fec_value")
+  values[, .fec_value := trim_text(.fec_value)]
+  values <- unique(values[nzchar(.fec_value)])
+  if (!nrow(values)) {
+    result <- rows[0L, ..key_columns]
+    result[, `:=`(
+      first_activity_date = character(),
+      last_activity_date = character()
+    )]
+    return(result[])
+  }
+  data.table::setorderv(values, c(key_columns, ".fec_value"))
+  first_rows <- values[!duplicated(values, by = key_columns)]
+  last_rows <- values[!duplicated(values, by = key_columns, fromLast = TRUE)]
+  data.table::setnames(first_rows, ".fec_value", "first_activity_date")
+  data.table::setnames(last_rows, ".fec_value", "last_activity_date")
+  merge(
+    first_rows,
+    last_rows,
+    by = key_columns,
+    all = TRUE,
+    sort = FALSE
+  )[]
+}
+
+fec_grouped_candidate_metadata <- function(rows, key_columns, metadata_columns) {
+  metadata <- unique(rows[, c(key_columns, metadata_columns), with = FALSE])
+  metadata[, (metadata_columns) := lapply(.SD, trim_text), .SDcols = metadata_columns]
+  metadata <- unique(metadata)
+  group_sizes <- metadata[, .N, by = key_columns]
+  stable_keys <- group_sizes[N == 1L, ..key_columns]
+  stable <- metadata[stable_keys, on = key_columns, nomatch = 0L]
+  ambiguous_keys <- group_sizes[N > 1L, ..key_columns]
+  if (!nrow(ambiguous_keys)) return(stable[])
+
+  ambiguous <- rows[ambiguous_keys, on = key_columns, nomatch = 0L]
+  resolved <- ambiguous[, lapply(.SD, fec_mode_text), by = key_columns, .SDcols = metadata_columns]
+  data.table::rbindlist(list(stable, resolved), use.names = TRUE)[]
+}
+
+fec_aggregate_beneficiary_downstream <- function(downstream_activity) {
+  key_columns <- c("cycle", "source_committee_id", "candidate_id")
+  metadata_columns <- c(
+    "candidate_name", "candidate_party", "office", "office_label",
+    "office_state", "district"
+  )
+  included <- downstream_activity[include_in_total == "Yes", c(
+    list(
+      cycle = as.integer(cycle),
+      source_committee_id = trim_text(committee_id),
+      candidate_id = trim_text(candidate_id),
+      transaction_amount = as.numeric(transaction_amount),
+      activity_type = trim_text(activity_type),
+      support_oppose = trim_text(support_oppose),
+      transaction_date = trim_text(transaction_date)
+    ),
+    lapply(.SD, trim_text)
+  ), .SDcols = metadata_columns]
+  if (!nrow(included)) return(data.table::data.table())
+
+  totals <- included[, .(
+    preliminary_downstream_amount = sum(transaction_amount, na.rm = TRUE),
+    transaction_count = .N
+  ), by = key_columns]
+  relationships <- fec_grouped_join_unique(
+    included, key_columns, "activity_type", "activity_relationships"
+  )
+  directions <- fec_grouped_join_unique(
+    included, key_columns, "support_oppose", "directions"
+  )
+  dates <- fec_grouped_text_bounds(
+    included, key_columns, "transaction_date"
+  )
+  metadata <- fec_grouped_candidate_metadata(
+    included, key_columns, metadata_columns
+  )
+  result <- Reduce(
+    function(left, right) merge(
+      left, right,
+      by = key_columns,
+      all.x = TRUE,
+      sort = FALSE
+    ),
+    list(totals, relationships, directions, dates, metadata)
+  )
+  text_columns <- c(
+    "activity_relationships", "directions", "first_activity_date",
+    "last_activity_date", metadata_columns
+  )
+  for (column in text_columns) {
+    data.table::set(result, which(is.na(result[[column]])), column, "")
+  }
+  result[]
+}
+
+fec_aggregate_beneficiary_summary <- function(bridge) {
+  key_columns <- c("cycle", "view", "company", "candidate_id", "candidate_key")
+  metadata_columns <- c(
+    "candidate_name", "candidate_party", "office", "office_label",
+    "office_state", "district"
+  )
+  totals <- bridge[, .(
+    preliminary_downstream_amount = sum(preliminary_downstream_amount, na.rm = TRUE),
+    # Keep base-R summation order identical to the legacy mixed aggregation.
+    # data.table's GForce sum is faster but can differ in the final floating
+    # point bit, which would make formula-cache parity needlessly noisy.
+    preliminary_crypto_funding = sum(preliminary_crypto_funding + 0, na.rm = TRUE)
+  ), by = key_columns]
+  source_rows <- unique(bridge[, c(key_columns, "source_committee_id"), with = FALSE])
+  source_counts <- source_rows[, .(source_committee_count = .N), by = key_columns]
+
+  source_labels <- bridge[, c(key_columns, "source_committee", "source_committee_id"), with = FALSE]
+  source_labels[, source_committee_label := paste0(
+    trim_text(source_committee), " (", trim_text(source_committee_id), ")"
+  )]
+  source_committees <- fec_grouped_join_unique(
+    source_labels, key_columns, "source_committee_label", "source_committees"
+  )
+  relationships <- fec_grouped_join_unique(
+    bridge, key_columns, "activity_relationships", "activity_relationships"
+  )
+  directions <- fec_grouped_join_unique(
+    bridge, key_columns, "directions", "directions"
+  )
+  metadata <- fec_grouped_candidate_metadata(
+    bridge, key_columns, metadata_columns
+  )
+  result <- Reduce(
+    function(left, right) merge(
+      left, right,
+      by = key_columns,
+      all.x = TRUE,
+      sort = FALSE
+    ),
+    list(
+      totals, source_counts, source_committees, relationships, directions,
+      metadata
+    )
+  )
+  text_columns <- c(
+    "source_committees", "activity_relationships", "directions",
+    metadata_columns
+  )
+  for (column in text_columns) {
+    data.table::set(result, which(is.na(result[[column]])), column, "")
+  }
+  result[]
+}
+
 fec_read_candidate_master <- function(directory, cycles = c(2022L, 2024L, 2026L)) {
   headers <- c(
     "candidate_id", "candidate_name", "party_affiliation", "election_year",
@@ -464,20 +633,7 @@ fec_aggregate_downstream_activity <- function(downstream_activity, recipient_uni
 }
 
 fec_build_beneficiary_tables <- function(raw_export, downstream_activity) {
-  downstream <- downstream_activity[include_in_total == "Yes", .(
-    preliminary_downstream_amount = sum(transaction_amount, na.rm = TRUE),
-    transaction_count = .N,
-    activity_relationships = fec_join_unique(activity_type),
-    directions = fec_join_unique(support_oppose),
-    first_activity_date = fec_min_text(transaction_date),
-    last_activity_date = fec_max_text(transaction_date),
-    candidate_name = fec_mode_text(candidate_name),
-    candidate_party = fec_mode_text(candidate_party),
-    office = fec_mode_text(office),
-    office_label = fec_mode_text(office_label),
-    office_state = fec_mode_text(office_state),
-    district = fec_mode_text(district)
-  ), by = .(cycle, source_committee_id = committee_id, candidate_id)]
+  downstream <- fec_aggregate_beneficiary_downstream(downstream_activity)
   if (!nrow(downstream)) return(list(bridge = data.table::data.table(), summary = data.table::data.table()))
   funded <- raw_export[
     include_in_analysis == "Yes" & nzchar(committee_id),
@@ -507,20 +663,7 @@ fec_build_beneficiary_tables <- function(raw_export, downstream_activity) {
   bridge[, bridge_key := paste(cycle, view, company, source_committee_id, candidate_key, sep = "|")]
   data.table::setorder(bridge, cycle, view, company, -preliminary_downstream_amount, candidate_name)
 
-  summary <- bridge[, .(
-    preliminary_downstream_amount = sum(preliminary_downstream_amount, na.rm = TRUE),
-    preliminary_crypto_funding = sum(preliminary_crypto_funding, na.rm = TRUE),
-    source_committee_count = data.table::uniqueN(source_committee_id),
-    source_committees = fec_join_unique(paste0(source_committee, " (", source_committee_id, ")")),
-    activity_relationships = fec_join_unique(activity_relationships),
-    directions = fec_join_unique(directions),
-    candidate_name = fec_mode_text(candidate_name),
-    candidate_party = fec_mode_text(candidate_party),
-    office = fec_mode_text(office),
-    office_label = fec_mode_text(office_label),
-    office_state = fec_mode_text(office_state),
-    district = fec_mode_text(district)
-  ), by = .(cycle, view, company, candidate_id, candidate_key)]
+  summary <- fec_aggregate_beneficiary_summary(bridge)
   data.table::setorder(summary, cycle, view, company, -preliminary_downstream_amount, candidate_name)
   summary[, preliminary_rank := seq_len(.N), by = .(cycle, view, company)]
   summary <- summary[office %in% c("H", "S") & preliminary_rank <= 100L]

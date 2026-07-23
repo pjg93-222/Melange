@@ -566,12 +566,16 @@ try {
     throw "Verification failed: formulas=$formulaCount formula_column_failures=$formulaColumnFailures integrity_failures=$integrityFailures"
   }
 
+  # The workbook builder omits empty company-detail sheets in cycle-filtered
+  # reports. Report the actual post-finalization worksheet count instead of
+  # deriving it from the full roster, which falsely marked valid packages as
+  # corrupt when a company had no rows in the selected cycle.
+  $expectedWorksheetCount = [int]$book.Worksheets.Count
   $book.Save(); $book.Close($false); Release-ComObject $book; $book = $null
   $excel.Quit(); Release-ComObject $excel; $excel = $null
   Copy-Item -LiteralPath $workingPath -Destination $resolvedWorkbook -Force
   $watch.Stop()
-  $formulaFactSheetCount = if ($formulaFacts) { 1 } else { 0 }
-  [pscustomobject]@{workbook=$resolvedWorkbook;bytes=(Get-Item -LiteralPath $resolvedWorkbook).Length;expected_worksheet_count=(16 + @($payload.companies).Count + $formulaFactSheetCount);formulas=$formulaCount;formula_column_failures=$formulaColumnFailures;integrity_failures=$integrityFailures;cycle_totals=$expectedTotals;seconds=[math]::Round($watch.Elapsed.TotalSeconds,3)} | ConvertTo-Json -Depth 3
+  [pscustomobject]@{workbook=$resolvedWorkbook;bytes=(Get-Item -LiteralPath $resolvedWorkbook).Length;expected_worksheet_count=$expectedWorksheetCount;formulas=$formulaCount;formula_column_failures=$formulaColumnFailures;integrity_failures=$integrityFailures;cycle_totals=$expectedTotals;seconds=[math]::Round($watch.Elapsed.TotalSeconds,3)} | ConvertTo-Json -Depth 3
 } finally {
   if ($null -ne $book) { try {$book.Close($false)} catch {}; Release-ComObject $book }
   if ($null -ne $excel) { try {$excel.Quit()} catch {}; Release-ComObject $excel }
