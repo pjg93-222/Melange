@@ -1,0 +1,1647 @@
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
+
+const runtimeNodeModules = process.env.MENTAT_NODE_MODULES ?? path.join(
+  os.homedir(),
+  ".cache",
+  "codex-runtimes",
+  "codex-primary-runtime",
+  "dependencies",
+  "node",
+  "node_modules",
+);
+const require = createRequire(import.meta.url);
+const artifactToolEntry = require.resolve("@oai/artifact-tool", {
+  paths: [runtimeNodeModules],
+});
+const { SpreadsheetFile, Workbook } = await import(
+  pathToFileURL(artifactToolEntry).href
+);
+
+const [dataPath, outputDir, sourceSha256 = "not-recorded"] = process.argv.slice(2);
+if (!dataPath || !outputDir) {
+  throw new Error(
+    "usage: crypto_workbook_builder.mjs <crypto-data.json> <output-dir> [source-sha256]",
+  );
+}
+
+const payload = JSON.parse(await fs.readFile(dataPath, "utf8"));
+const deferFormulas = process.env.MENTAT_DEFER_FORMULAS === "1";
+await fs.mkdir(outputDir, { recursive: true });
+const diagnosticsDir = path.join(path.dirname(dataPath), "final_diagnostics_v2");
+await fs.mkdir(diagnosticsDir, { recursive: true });
+
+const workbook = Workbook.create();
+const colors = {
+  navy: "#17365D",
+  blue: "#2F75B5",
+  teal: "#1F6D72",
+  lightBlue: "#D9EAF7",
+  lightGray: "#F2F2F2",
+  border: "#D9E2F3",
+  white: "#FFFFFF",
+  red: "#C00000",
+  yellow: "#FFF2CC",
+  green: "#E2F0D9",
+  text: "#1F1F1F",
+};
+const currencyFormat = '$#,##0.00;[Red]($#,##0.00);-';
+const percentFormat = '0.0%;[Red](0.0%);-';
+const countFormat = '#,##0;[Red](#,##0);-';
+const scopes = [
+  "Total Giving",
+  "Corporate",
+  "Chief",
+  "Middle Management",
+  "Employee",
+  "Super PAC",
+  "Carey",
+  "Company PAC",
+  "Leadership PAC",
+  "Trade Association",
+  "Candidate",
+  "Party Committee",
+  "JFC",
+  "Unclassified",
+];
+const masterCategories = [
+  "Super PAC",
+  "Carey",
+  "Company PAC",
+  "Leadership PAC",
+  "Trade Association",
+  "Candidate",
+  "Party Committee",
+  "JFC",
+  "Unclassified",
+];
+const masterTiers = ["Corporate", "Chief", "Middle Management", "Employee"];
+const companyViewName = (company) => `${company} View`.slice(0, 31);
+const companyViewSheets = payload.companies.map((company) => companyViewName(company));
+const sheetOrder = [
+  "Master Overview",
+  "Crypto Spending Overview",
+  ...payload.cycles.map((cycle) => `${cycle.label} Summary`),
+  "Company List",
+  ...companyViewSheets,
+  "Employee List",
+  "Recipient List",
+  "Beneficiary Summary",
+  "PAC & Candidate Map",
+  "Downstream Activity",
+  "Beneficiary Bridge",
+  ...payload.cycles.map((cycle) => cycle.label),
+  "Cycle Exceptions",
+];
+for (const sheetName of sheetOrder) workbook.worksheets.add(sheetName);
+const cycleByLabel = new Map(payload.cycles.map((cycle) => [cycle.label, cycle]));
+const cycleLabelByNumber = new Map(payload.cycles.map((cycle) => [cycle.cycle, cycle.label]));
+
+function safeTableToken(value) {
+  const token = String(value).replaceAll(/[^A-Za-z0-9_]+/g, "_").replace(/^([0-9])/, "T_$1");
+  return token || "Table";
+}
+
+function excelColumn(columnNumber) {
+  let result = "";
+  let value = columnNumber;
+  while (value > 0) {
+    const remainder = (value - 1) % 26;
+    result = String.fromCharCode(65 + remainder) + result;
+    value = Math.floor((value - 1) / 26);
+  }
+  return result;
+}
+
+function quoteSheet(name) {
+  return `'${String(name).replaceAll("'", "''")}'`;
+}
+
+function excelString(value) {
+  return `"${String(value).replaceAll('"', '""')}"`;
+}
+
+function titleBlock(sheet, title, subtitle, sourceNote, lastColumn) {
+  sheet.showGridLines = false;
+  sheet.getRange(`A1:${lastColumn}1`).merge();
+  sheet.getRange("A1").values = [[title]];
+  sheet.getRange(`A1:${lastColumn}1`).format = {
+    fill: colors.navy,
+    font: { bold: true, color: colors.white, size: 18 },
+    verticalAlignment: "center",
+    horizontalAlignment: "left",
+  };
+  sheet.getRange(`A1:${lastColumn}1`).format.rowHeight = 30;
+
+  sheet.getRange(`A2:${lastColumn}2`).merge();
+  sheet.getRange("A2").values = [[subtitle]];
+  sheet.getRange(`A2:${lastColumn}2`).format = {
+    fill: colors.lightBlue,
+    font: { italic: true, color: colors.text, size: 10 },
+    wrapText: true,
+    verticalAlignment: "center",
+  };
+  sheet.getRange(`A2:${lastColumn}2`).format.rowHeight = 28;
+
+  sheet.getRange(`A3:${lastColumn}3`).merge();
+  sheet.getRange("A3").values = [[sourceNote]];
+  sheet.getRange(`A3:${lastColumn}3`).format = {
+    fill: colors.lightGray,
+    font: { color: "#666666", size: 9 },
+    wrapText: true,
+    verticalAlignment: "center",
+  };
+  sheet.getRange(`A3:${lastColumn}3`).format.rowHeight = 24;
+}
+
+function styleTable(table) {
+  table.name = table.name;
+  table.style = "TableStyleMedium2";
+  table.showHeaders = true;
+  table.showFilterButton = true;
+}
+
+function applyIntegrityFormatting(range, firstRow, columnLetter) {
+  range.conditionalFormats.addCustom(`=$${columnLetter}${firstRow}<>"OK"`, {
+    fill: colors.yellow,
+    font: { bold: true, color: colors.red },
+  });
+}
+
+function cycleRanges(cycleLabel) {
+  const cycle = cycleByLabel.get(cycleLabel);
+  if (!cycle) throw new Error(`Unknown cycle label: ${cycleLabel}`);
+  const rows = payload.raw_rows.filter((row) => row.cycle === cycle.cycle);
+  const first = 5;
+  const last = first + rows.length - 1;
+  const sheet = quoteSheet(cycle.label);
+  const ref = (column) => `${sheet}!$${column}$${first}:$${column}$${last}`;
+  return {
+    cycle,
+    rows,
+    first,
+    last,
+    sourceIdGuard: `${sheet}!$A$${first}:$A$20004`,
+    company: ref("E"),
+    tier: ref("G"),
+    analysisAmount: ref("I"),
+    party: ref("J"),
+    category: ref("K"),
+    included: ref("Z"),
+    personKey: ref("AB"),
+    recipientKey: ref("P"),
+  };
+}
+
+const cycleRangeMap = new Map(
+  payload.cycles.map((cycle) => [cycle.label, cycleRanges(cycle.label)]),
+);
+
+function sumifs(rangeInfo, criteria = []) {
+  const args = [rangeInfo.analysisAmount];
+  for (const [rangeName, criterion] of criteria) {
+    args.push(rangeInfo[rangeName], criterion);
+  }
+  return `SUMIFS(${args.join(",")})`;
+}
+
+function scopeFormula(rangeInfo, scope, extraCriteria = []) {
+  if (scope === "Total Giving" && extraCriteria.length === 0) {
+    return `SUM(${rangeInfo.analysisAmount})`;
+  }
+  if (scope === "Total Giving") return sumifs(rangeInfo, extraCriteria);
+  if (["Corporate", "Chief", "Middle Management", "Employee"].includes(scope)) {
+    return sumifs(rangeInfo, [["tier", excelString(scope)], ...extraCriteria]);
+  }
+  const categoryMap = {
+    "Super PAC": ["Super PAC"],
+    Carey: ["Carey"],
+    "Company PAC": ["Company PAC"],
+    "Leadership PAC": ["Leadership PAC"],
+    "Trade Association": ["Trade Association"],
+    Candidate: ["Candidate"],
+    "Party Committee": ["Party Committee"],
+    JFC: ["JFC"],
+    Unclassified: ["Unclassified"],
+  };
+  return categoryMap[scope]
+    .map((category) =>
+      sumifs(rangeInfo, [["category", excelString(category)], ...extraCriteria]),
+    )
+    .join("+");
+}
+
+function companyFormula(rangeInfo, companyCell, extraCriteria = []) {
+  return sumifs(rangeInfo, [["company", companyCell], ...extraCriteria]);
+}
+
+function masterCompanyFormula(rangeInfo, companyCell, extraCriteria = []) {
+  const industry = extraCriteria.length === 0
+    ? `SUM(${rangeInfo.analysisAmount})`
+    : sumifs(rangeInfo, extraCriteria);
+  const company = companyFormula(rangeInfo, companyCell, extraCriteria);
+  return `IF(${companyCell}="Industry Total",${industry},${company})`;
+}
+
+function employeeFormula(rangeInfo, personKeyCell, extraCriteria = []) {
+  return sumifs(rangeInfo, [["personKey", personKeyCell], ...extraCriteria]);
+}
+
+function recipientFormula(rangeInfo, recipientKeyCell, extraCriteria = []) {
+  return sumifs(rangeInfo, [["recipientKey", recipientKeyCell], ...extraCriteria]);
+}
+
+function rawRowsForRecords(records) {
+  return records.map((row) => [
+      row.source_id,
+      row.cycle_label,
+      row.source_cycle,
+      row.cycle_alignment,
+      row.company,
+      row.contributor,
+      row.employee_tier,
+      row.amount,
+      deferFormulas ? (row.include_in_analysis === "Yes" ? Number(row.amount || 0) : 0) : null,
+      row.party,
+      row.recipient_category,
+      row.category_source,
+      row.party_source,
+      row.recipient,
+      row.committee_id,
+      row.recipient_key,
+      row.date ? new Date(`${row.date}T00:00:00`) : null,
+      row.city,
+      row.state,
+      row.zipcode,
+      row.employer,
+      row.occupation,
+      row.record_type,
+      row.source_table,
+      row.company_match_status,
+      row.include_in_analysis,
+      row.inclusion_reason,
+      row.person_key,
+      row.identity_basis,
+      row.is_memo_leg,
+      row.is_conduit_leg,
+      row.superseded_by_amendment,
+      row.duplicate_filing_version,
+      row.duplicate_memo,
+      deferFormulas ? "PENDING" : null,
+    ]);
+}
+
+function rawRowsForCycle(cycle) {
+  return rawRowsForRecords(
+    payload.raw_rows.filter((row) => row.cycle === cycle.cycle),
+  );
+}
+
+const rawHeaders = [
+    "Source ID",
+    "Cycle",
+    "FEC Filing Cycle",
+    "Cycle Alignment",
+    "Company",
+    "Contributor",
+    "Employee Tier",
+    "Amount",
+    "Analysis Amount",
+    "Party",
+    "Recipient Category",
+    "Category Source",
+    "Party Source",
+    "Recipient",
+    "Committee ID",
+    "Recipient Key",
+    "Date",
+    "City",
+    "State",
+    "ZIP",
+    "Employer",
+    "Occupation",
+    "Record Type",
+    "Source Table",
+    "Company Match Status",
+    "Include in Analysis",
+    "Inclusion Reason",
+    "Person Key",
+    "Identity Basis",
+    "Memo Leg",
+    "Conduit Leg",
+    "Superseded Amendment",
+    "Duplicate Filing Version",
+    "Duplicate Memo",
+    "Logic Check",
+];
+
+function buildRawSheet({
+  sheetName,
+  data,
+  tableName,
+  title,
+  subtitle,
+  sourceNote,
+  exceptionSheet = false,
+}) {
+  const sheet = workbook.worksheets.getItem(sheetName);
+  const lastColumn = excelColumn(rawHeaders.length);
+  titleBlock(
+    sheet,
+    title,
+    subtitle,
+    sourceNote,
+    lastColumn,
+  );
+
+  sheet.getRange(`A4:${lastColumn}${4 + data.length}`).values = [rawHeaders, ...data];
+  const firstDataRow = 5;
+  const lastDataRow = 4 + data.length;
+  if (!deferFormulas) {
+    sheet.getRange(`I${firstDataRow}`).formulas = [[
+      `=IF(Z${firstDataRow}="Yes",H${firstDataRow},0)`,
+    ]];
+    sheet.getRange(`I${firstDataRow}:I${lastDataRow}`).fillDown();
+    const logicFormula = exceptionSheet
+      ? `=IF(AND(Z${firstDataRow}="No",D${firstDataRow}="Outside requested cycles",I${firstDataRow}=0),"OK","CHECK")`
+      : `=IF(AND(I${firstDataRow}=IF(Z${firstDataRow}="Yes",H${firstDataRow},0),OR(D${firstDataRow}="OK",D${firstDataRow}="Reassigned by contribution date")),"OK","CHECK")`;
+    sheet.getRange(`AI${firstDataRow}`).formulas = [[logicFormula]];
+    sheet.getRange(`AI${firstDataRow}:AI${lastDataRow}`).fillDown();
+  }
+
+  const table = sheet.tables.add(`A4:${lastColumn}${lastDataRow}`, true, tableName);
+  styleTable(table);
+  sheet.freezePanes.freezeRows(4);
+
+  sheet.getRange(`H${firstDataRow}:I${lastDataRow}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`Q${firstDataRow}:Q${lastDataRow}`).format.numberFormat = "yyyy-mm-dd";
+  sheet.getRange(`AD${firstDataRow}:AH${lastDataRow}`).format.numberFormat = "0";
+  applyIntegrityFormatting(
+    sheet.getRange(`AI${firstDataRow}:AI${lastDataRow}`),
+    firstDataRow,
+    "AI",
+  );
+  sheet.getRange(`AC${firstDataRow}:AC${lastDataRow}`).conditionalFormats.add(
+    "beginsWith",
+    {
+      text: "Conservative split",
+      format: { fill: colors.yellow, font: { color: "#7F6000" } },
+    },
+  );
+
+  const widths = {
+    A: 20,
+    B: 12,
+    C: 13,
+    D: 29,
+    E: 16,
+    F: 24,
+    G: 18,
+    H: 14,
+    I: 15,
+    J: 18,
+    K: 20,
+    L: 28,
+    M: 25,
+    N: 34,
+    O: 14,
+    P: 28,
+    Q: 12,
+    R: 18,
+    S: 9,
+    T: 12,
+    U: 26,
+    V: 26,
+    W: 14,
+    X: 18,
+    Y: 20,
+    Z: 17,
+    AA: 38,
+    AB: 36,
+    AC: 48,
+    AD: 10,
+    AE: 11,
+    AF: 18,
+    AG: 20,
+    AH: 13,
+    AI: 13,
+  };
+  for (const [column, width] of Object.entries(widths)) {
+    sheet.getRange(`${column}1:${column}${lastDataRow}`).format.columnWidth = width;
+  }
+  sheet.getRange(`A4:${lastColumn}${lastDataRow}`).format.verticalAlignment = "top";
+  return sheet;
+}
+
+for (const cycle of payload.cycles) {
+  const data = rawRowsForCycle(cycle);
+  buildRawSheet({
+    sheetName: cycle.label,
+    data,
+    tableName: cycle.table_name,
+    title: `${cycle.label} Crypto Contributions`,
+    subtitle:
+      "Contribution-date cycle. Analysis Amount is formula-driven; FEC Filing Cycle and Cycle Alignment preserve the original reporting-period provenance.",
+    sourceNote: `Source DB SHA-256: ${sourceSha256} | Rows: ${data.length.toLocaleString("en-US")} | Official committee metadata: ${payload.committee_master_sources.join(" | ")}`,
+  });
+}
+
+const exceptionData = rawRowsForRecords(payload.cycle_exceptions ?? []);
+buildRawSheet({
+  sheetName: "Cycle Exceptions",
+  data: exceptionData,
+  tableName: "CycleExceptionsTable",
+  title: "Cycle Exceptions",
+  subtitle:
+    "Rows whose contribution dates fall outside 2021-2026 are retained here and excluded from every spending summary.",
+  sourceNote: `Source DB SHA-256: ${sourceSha256} | Exception rows: ${exceptionData.length.toLocaleString("en-US")}`,
+  exceptionSheet: true,
+});
+
+function buildMasterOverview() {
+  const sheet = workbook.worksheets.getItem("Master Overview");
+  const headers = [
+    "Company",
+    "Rank",
+    "Total Giving",
+    "% of Industry",
+    "Democratic",
+    "Republican",
+    "Other / Unclassified",
+    "Net Democratic %",
+    "Net Republican %",
+    "Party Coverage",
+    "Prior Cycle",
+    "$ Change",
+    "% Change",
+    "D $ Change",
+    "R $ Change",
+    "D Share Change",
+    "R Share Change",
+  ];
+  for (const category of masterCategories) {
+    headers.push(
+      category,
+      `${category} %`,
+      `${category} D`,
+      `${category} R`,
+      `${category} R %`,
+    );
+  }
+  for (const tier of masterTiers) {
+    headers.push(
+      tier,
+      `${tier} %`,
+      `${tier} D`,
+      `${tier} R`,
+      `${tier} R %`,
+    );
+  }
+  headers.push("Integrity Check");
+  const lastColumn = excelColumn(headers.length);
+  titleBlock(
+    sheet,
+    "Crypto Industry Master Overview",
+    "Mentat master-workbook layout: each two-year cycle is a separate Excel table with company totals, industry share, partisan dollars and percentages, recipient channels, contributor roles, and changes versus the prior cycle.",
+    `Source DB SHA-256: ${sourceSha256} | All summary values are Excel formulas linked to the cycle tables; zero values display as "-".`,
+    lastColumn,
+  );
+
+  const reversedCycles = [...payload.cycles].reverse();
+  let groupRow = 5;
+  for (const cycle of reversedCycles) {
+    const rangeInfo = cycleRangeMap.get(cycle.label);
+    const priorIndex = payload.cycles.findIndex((entry) => entry.label === cycle.label) - 1;
+    const priorCycle = priorIndex >= 0 ? payload.cycles[priorIndex] : null;
+    const currentTotals = new Map(
+      payload.companies.map((company) => [
+        company,
+        payload.raw_rows
+          .filter(
+            (row) =>
+              row.cycle === cycle.cycle &&
+              row.company === company &&
+              row.include_in_analysis === "Yes",
+          )
+          .reduce((sum, row) => sum + Number(row.amount || 0), 0),
+      ]),
+    );
+    const companies = [...payload.companies].sort(
+      (left, right) =>
+        currentTotals.get(right) - currentTotals.get(left) ||
+        left.localeCompare(right),
+    );
+    const rows = [...companies, "Industry Total"].map((company) => [
+      company,
+      ...Array(headers.length - 1).fill(null),
+    ]);
+    const headerRow = groupRow + 1;
+    const first = headerRow + 1;
+    const last = headerRow + rows.length;
+
+    sheet.getRange(`A${groupRow}:Q${groupRow}`).merge();
+    sheet.getRange(`A${groupRow}`).values = [[`${cycle.label} Company Overview`]];
+    sheet.getRange(`A${groupRow}:Q${groupRow}`).format = {
+      fill: colors.navy,
+      font: { bold: true, color: colors.white, size: 12 },
+      horizontalAlignment: "left",
+      verticalAlignment: "center",
+    };
+    let groupStart = 18;
+    for (const category of masterCategories) {
+      const start = excelColumn(groupStart);
+      const end = excelColumn(groupStart + 4);
+      sheet.getRange(`${start}${groupRow}:${end}${groupRow}`).merge();
+      sheet.getRange(`${start}${groupRow}`).values = [[`${category} Channel`]];
+      sheet.getRange(`${start}${groupRow}:${end}${groupRow}`).format = {
+        fill: colors.blue,
+        font: { bold: true, color: colors.white, size: 10 },
+        horizontalAlignment: "center",
+        verticalAlignment: "center",
+      };
+      groupStart += 5;
+    }
+    for (const tier of masterTiers) {
+      const start = excelColumn(groupStart);
+      const end = excelColumn(groupStart + 4);
+      sheet.getRange(`${start}${groupRow}:${end}${groupRow}`).merge();
+      sheet.getRange(`${start}${groupRow}`).values = [[`${tier} Contributors`]];
+      sheet.getRange(`${start}${groupRow}:${end}${groupRow}`).format = {
+        fill: colors.teal,
+        font: { bold: true, color: colors.white, size: 10 },
+        horizontalAlignment: "center",
+        verticalAlignment: "center",
+      };
+      groupStart += 5;
+    }
+    sheet.getRange(`${lastColumn}${groupRow}`).values = [["Check"]];
+    sheet.getRange(`${lastColumn}${groupRow}`).format = {
+      fill: colors.navy,
+      font: { bold: true, color: colors.white, size: 10 },
+      horizontalAlignment: "center",
+      verticalAlignment: "center",
+    };
+    sheet.getRange(`A${groupRow}:${lastColumn}${groupRow}`).format.rowHeight = 24;
+    sheet.getRange(`A${headerRow}:${lastColumn}${last}`).values = [headers, ...rows];
+    sheet.getRange(`A${headerRow}:${lastColumn}${headerRow}`).format = {
+      wrapText: true,
+      verticalAlignment: "center",
+    };
+    sheet.getRange(`A${headerRow}:${lastColumn}${headerRow}`).format.rowHeight = 32;
+
+    if (!deferFormulas) {
+      const formulas = rows.map((row, index) => {
+        const excelRow = first + index;
+        const companyCell = `$A${excelRow}`;
+        const total = masterCompanyFormula(rangeInfo, companyCell);
+        const democratic = masterCompanyFormula(rangeInfo, companyCell, [
+          ["party", excelString("D")],
+        ]);
+        const republican = masterCompanyFormula(rangeInfo, companyCell, [
+          ["party", excelString("R")],
+        ]);
+        const prior = (metric) => {
+          if (!priorCycle) return "0";
+          const industry = `SUMIFS(CompanyListTable[${metric}],CompanyListTable[Cycle],${excelString(priorCycle.label)})`;
+          const company = `SUMIFS(CompanyListTable[${metric}],CompanyListTable[Cycle],${excelString(priorCycle.label)},CompanyListTable[Company],${companyCell})`;
+          return `IF(${companyCell}="Industry Total",${industry},${company})`;
+        };
+        const priorTotal = prior("Total Giving");
+        const priorDemocratic = prior("Democratic");
+        const priorRepublican = prior("Republican");
+        const result = [
+          `=IF(${companyCell}="Industry Total",0,1+COUNTIFS($A$${first}:$A$${last},"<>Industry Total",$C$${first}:$C$${last},">"&C${excelRow}))`,
+          `=${total}`,
+          `=IF(SUM($C$${first}:$C$${last - 1})=0,0,C${excelRow}/SUM($C$${first}:$C$${last - 1}))`,
+          `=${democratic}`,
+          `=${republican}`,
+          `=C${excelRow}-E${excelRow}-F${excelRow}`,
+          `=IF(E${excelRow}+F${excelRow}=0,0,E${excelRow}/(E${excelRow}+F${excelRow}))`,
+          `=IF(E${excelRow}+F${excelRow}=0,0,F${excelRow}/(E${excelRow}+F${excelRow}))`,
+          `=IF(C${excelRow}=0,0,(E${excelRow}+F${excelRow})/C${excelRow})`,
+          `=${priorTotal}`,
+          priorCycle ? `=C${excelRow}-K${excelRow}` : "=0",
+          priorCycle ? `=IF(K${excelRow}=0,0,L${excelRow}/ABS(K${excelRow}))` : "=0",
+          priorCycle ? `=E${excelRow}-${priorDemocratic}` : "=0",
+          priorCycle ? `=F${excelRow}-${priorRepublican}` : "=0",
+          priorCycle
+            ? `=H${excelRow}-IF((${priorDemocratic})+(${priorRepublican})=0,0,(${priorDemocratic})/((${priorDemocratic})+(${priorRepublican})))`
+            : "=0",
+          priorCycle
+            ? `=I${excelRow}-IF((${priorDemocratic})+(${priorRepublican})=0,0,(${priorRepublican})/((${priorDemocratic})+(${priorRepublican})))`
+            : "=0",
+        ];
+        let metricColumn = 18;
+        for (const category of masterCategories) {
+          const totalColumn = excelColumn(metricColumn);
+          const democraticColumn = excelColumn(metricColumn + 2);
+          const republicanColumn = excelColumn(metricColumn + 3);
+          result.push(
+            `=${masterCompanyFormula(rangeInfo, companyCell, [["category", excelString(category)]])}`,
+            `=IF($C${excelRow}=0,0,${totalColumn}${excelRow}/$C${excelRow})`,
+            `=${masterCompanyFormula(rangeInfo, companyCell, [["category", excelString(category)], ["party", excelString("D")]])}`,
+            `=${masterCompanyFormula(rangeInfo, companyCell, [["category", excelString(category)], ["party", excelString("R")]])}`,
+            `=IF(${democraticColumn}${excelRow}+${republicanColumn}${excelRow}=0,0,${republicanColumn}${excelRow}/(${democraticColumn}${excelRow}+${republicanColumn}${excelRow}))`,
+          );
+          metricColumn += 5;
+        }
+        for (const tier of masterTiers) {
+          const totalColumn = excelColumn(metricColumn);
+          const democraticColumn = excelColumn(metricColumn + 2);
+          const republicanColumn = excelColumn(metricColumn + 3);
+          result.push(
+            `=${masterCompanyFormula(rangeInfo, companyCell, [["tier", excelString(tier)]])}`,
+            `=IF($C${excelRow}=0,0,${totalColumn}${excelRow}/$C${excelRow})`,
+            `=${masterCompanyFormula(rangeInfo, companyCell, [["tier", excelString(tier)], ["party", excelString("D")]])}`,
+            `=${masterCompanyFormula(rangeInfo, companyCell, [["tier", excelString(tier)], ["party", excelString("R")]])}`,
+            `=IF(${democraticColumn}${excelRow}+${republicanColumn}${excelRow}=0,0,${republicanColumn}${excelRow}/(${democraticColumn}${excelRow}+${republicanColumn}${excelRow}))`,
+          );
+          metricColumn += 5;
+        }
+        const categoryTotalColumns = masterCategories.map((_, offset) =>
+          `${excelColumn(18 + offset * 5)}${excelRow}`,
+        );
+        const tierTotalColumns = masterTiers.map((_, offset) =>
+          `${excelColumn(18 + masterCategories.length * 5 + offset * 5)}${excelRow}`,
+        );
+        result.push(
+          `=IF(AND(ABS(C${excelRow}-E${excelRow}-F${excelRow}-G${excelRow})<0.01,ABS(C${excelRow}-(${categoryTotalColumns.join("+")}))<0.01,ABS(C${excelRow}-(${tierTotalColumns.join("+")}))<0.01),"OK","CHECK")`,
+        );
+        return result;
+      });
+      sheet.getRange(`B${first}:${lastColumn}${last}`).formulas = formulas;
+    }
+
+    const tableName = `MasterOverview_${cycle.cycle}`;
+    const table = sheet.tables.add(
+      `A${headerRow}:${lastColumn}${last}`,
+      true,
+      tableName,
+    );
+    styleTable(table);
+    sheet.getRange(`B${first}:B${last}`).format.numberFormat = countFormat;
+    sheet.getRange(`C${first}:C${last}`).format.numberFormat = currencyFormat;
+    sheet.getRange(`D${first}:D${last}`).format.numberFormat = percentFormat;
+    sheet.getRange(`E${first}:G${last}`).format.numberFormat = currencyFormat;
+    sheet.getRange(`H${first}:J${last}`).format.numberFormat = percentFormat;
+    sheet.getRange(`K${first}:L${last}`).format.numberFormat = currencyFormat;
+    sheet.getRange(`M${first}:M${last}`).format.numberFormat = percentFormat;
+    sheet.getRange(`N${first}:O${last}`).format.numberFormat = currencyFormat;
+    sheet.getRange(`P${first}:Q${last}`).format.numberFormat = percentFormat;
+    let metricColumn = 18;
+    for (const _group of [...masterCategories, ...masterTiers]) {
+      sheet.getRange(
+        `${excelColumn(metricColumn)}${first}:${excelColumn(metricColumn)}${last}`,
+      ).format.numberFormat = currencyFormat;
+      sheet.getRange(
+        `${excelColumn(metricColumn + 1)}${first}:${excelColumn(metricColumn + 1)}${last}`,
+      ).format.numberFormat = percentFormat;
+      sheet.getRange(
+        `${excelColumn(metricColumn + 2)}${first}:${excelColumn(metricColumn + 3)}${last}`,
+      ).format.numberFormat = currencyFormat;
+      sheet.getRange(
+        `${excelColumn(metricColumn + 4)}${first}:${excelColumn(metricColumn + 4)}${last}`,
+      ).format.numberFormat = percentFormat;
+      metricColumn += 5;
+    }
+    applyIntegrityFormatting(
+      sheet.getRange(`${lastColumn}${first}:${lastColumn}${last}`),
+      first,
+      lastColumn,
+    );
+    sheet.getRange(`A${last}:Q${last}`).format = {
+      fill: colors.lightBlue,
+      font: { bold: true, color: colors.navy },
+    };
+    groupRow = last + 2;
+  }
+
+  sheet.freezePanes.freezeRows(6);
+  sheet.freezePanes.freezeColumns(1);
+  sheet.getRange(`A1:A${groupRow}`).format.columnWidth = 21;
+  sheet.getRange(`B1:B${groupRow}`).format.columnWidth = 8;
+  for (const column of ["C", "E", "F", "G", "K", "L", "N", "O"]) {
+    sheet.getRange(`${column}1:${column}${groupRow}`).format.columnWidth = 15;
+  }
+  for (const column of ["D", "H", "I", "J", "M", "P", "Q"]) {
+    sheet.getRange(`${column}1:${column}${groupRow}`).format.columnWidth = 14;
+  }
+  let metricColumn = 18;
+  for (const _group of [...masterCategories, ...masterTiers]) {
+    sheet.getRange(
+      `${excelColumn(metricColumn)}1:${excelColumn(metricColumn)}${groupRow}`,
+    ).format.columnWidth = 14;
+    for (let offset = 1; offset <= 4; offset++) {
+      const column = excelColumn(metricColumn + offset);
+      sheet.getRange(`${column}1:${column}${groupRow}`).format.columnWidth = 12;
+    }
+    metricColumn += 5;
+  }
+  sheet.getRange(`${lastColumn}1:${lastColumn}${groupRow}`).format.columnWidth = 13;
+  return sheet;
+}
+
+function buildOverview() {
+  const sheet = workbook.worksheets.getItem("Crypto Spending Overview");
+  const headers = [
+    "Cycle",
+    "Scope",
+    "Total Giving",
+    "Democratic",
+    "Republican",
+    "Other / Unclassified",
+    "Net Democratic %",
+    "Net Republican %",
+    "Party Coverage",
+    "Integrity Check",
+  ];
+  const rows = [];
+  for (const cycle of payload.cycles) {
+    for (const scope of scopes) rows.push([cycle.label, scope, ...Array(8).fill(null)]);
+  }
+  titleBlock(
+    sheet,
+    "Crypto Industry Spending Overview",
+    "Role rows and recipient-category rows are separate formula-driven views of the same cycle total. Net D/R percentages exclude Other / Unclassified; Party Coverage shows explicit partisan evidence.",
+    `Source DB SHA-256: ${sourceSha256} | ${payload.metadata.raw_rows.toLocaleString("en-US")} retained rows | ${payload.metadata.cycle_exception_rows.toLocaleString("en-US")} cycle exceptions retained separately | Zero values display as "-".`,
+    "J",
+  );
+  sheet.getRange(`A5:J${5 + rows.length}`).values = [headers, ...rows];
+  const first = 6;
+  const last = 5 + rows.length;
+  const formulas = rows.map((row, index) => {
+    const excelRow = first + index;
+    const rangeInfo = cycleRangeMap.get(row[0]);
+    const scope = row[1];
+    return [
+      `=${scopeFormula(rangeInfo, scope)}`,
+      `=${scopeFormula(rangeInfo, scope, [["party", excelString("D")]])}`,
+      `=${scopeFormula(rangeInfo, scope, [["party", excelString("R")]])}`,
+      `=C${excelRow}-D${excelRow}-E${excelRow}`,
+      `=IF(D${excelRow}+E${excelRow}=0,0,D${excelRow}/(D${excelRow}+E${excelRow}))`,
+      `=IF(D${excelRow}+E${excelRow}=0,0,E${excelRow}/(D${excelRow}+E${excelRow}))`,
+      `=IF(C${excelRow}=0,0,(D${excelRow}+E${excelRow})/C${excelRow})`,
+      `=IF(AND(ABS(C${excelRow}-D${excelRow}-E${excelRow}-F${excelRow})<0.01,COUNTA(${rangeInfo.sourceIdGuard})=${rangeInfo.rows.length}),"OK","CHECK")`,
+    ];
+  });
+  if (!deferFormulas) sheet.getRange(`C${first}:J${last}`).formulas = formulas;
+  const table = sheet.tables.add(`A5:J${last}`, true, "OverviewTable");
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  sheet.getRange(`C${first}:F${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`G${first}:I${last}`).format.numberFormat = percentFormat;
+  applyIntegrityFormatting(sheet.getRange(`J${first}:J${last}`), first, "J");
+  for (const [column, width] of Object.entries({
+    A: 14,
+    B: 23,
+    C: 16,
+    D: 16,
+    E: 16,
+    F: 20,
+    G: 15,
+    H: 15,
+    I: 15,
+    J: 15,
+  })) sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+
+  const noteRow = last + 3;
+  sheet.getRange(`A${noteRow}:J${noteRow}`).merge();
+  sheet.getRange(`A${noteRow}`).values = [[
+    "Formula integrity: native structured references expand with every Excel table. Each summary row proves Total = Democratic + Republican + Other / Unclassified, and every detail row carries a formula-driven logic check.",
+  ]];
+  sheet.getRange(`A${noteRow}:J${noteRow}`).format = {
+    fill: colors.green,
+    font: { color: "#375623", size: 10 },
+    wrapText: true,
+  };
+  sheet.getRange(`A${noteRow}:J${noteRow}`).format.rowHeight = 34;
+  return sheet;
+}
+
+function buildCompanyList() {
+  const sheet = workbook.worksheets.getItem("Company List");
+  const headers = [
+    "Cycle",
+    "Rank",
+    "Company",
+    "Total Giving",
+    "Democratic",
+    "Republican",
+    "Other / Unclassified",
+    "Net Democratic %",
+    "Net Republican %",
+    "Party Coverage",
+    "Corporate",
+    "Chief",
+    "Middle Management",
+    "Employee",
+    "Integrity Check",
+  ];
+  const currentTotals = new Map();
+  for (const cycle of payload.cycles) {
+    for (const company of payload.companies) {
+      const total = payload.raw_rows
+        .filter(
+          (row) =>
+            row.cycle === cycle.cycle &&
+            row.company === company &&
+            row.include_in_analysis === "Yes",
+        )
+        .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+      currentTotals.set(`${cycle.label}\r${company}`, total);
+    }
+  }
+  const rows = [];
+  for (const cycle of payload.cycles) {
+    const companies = [...payload.companies].sort(
+      (left, right) =>
+        currentTotals.get(`${cycle.label}\r${right}`) -
+          currentTotals.get(`${cycle.label}\r${left}`) || left.localeCompare(right),
+    );
+    for (const company of companies) rows.push([cycle.label, null, company, ...Array(12).fill(null)]);
+  }
+  titleBlock(
+    sheet,
+    "Company List",
+    "Companies are ranked within each two-year cycle. Totals, role splits, party splits, rank, and integrity checks are Excel formulas over the cycle tables.",
+    `Crypto roster: ${payload.companies.length} companies | Zero values display as “-”.`,
+    "O",
+  );
+  sheet.getRange(`A5:O${5 + rows.length}`).values = [headers, ...rows];
+  const first = 6;
+  const last = 5 + rows.length;
+  const formulas = rows.map((row, index) => {
+    const excelRow = first + index;
+    const rangeInfo = cycleRangeMap.get(row[0]);
+    const companyCell = `$C${excelRow}`;
+    return [
+      `=1+COUNTIFS($A$${first}:$A$${last},A${excelRow},$D$${first}:$D$${last},">"&D${excelRow})`,
+      `=${companyFormula(rangeInfo, companyCell)}`,
+      `=${companyFormula(rangeInfo, companyCell, [["party", excelString("D")]])}`,
+      `=${companyFormula(rangeInfo, companyCell, [["party", excelString("R")]])}`,
+      `=D${excelRow}-E${excelRow}-F${excelRow}`,
+      `=IF(E${excelRow}+F${excelRow}=0,0,E${excelRow}/(E${excelRow}+F${excelRow}))`,
+      `=IF(E${excelRow}+F${excelRow}=0,0,F${excelRow}/(E${excelRow}+F${excelRow}))`,
+      `=IF(D${excelRow}=0,0,(E${excelRow}+F${excelRow})/D${excelRow})`,
+      `=${companyFormula(rangeInfo, companyCell, [["tier", excelString("Corporate")]])}`,
+      `=${companyFormula(rangeInfo, companyCell, [["tier", excelString("Chief")]])}`,
+      `=${companyFormula(rangeInfo, companyCell, [["tier", excelString("Middle Management")]])}`,
+      `=${companyFormula(rangeInfo, companyCell, [["tier", excelString("Employee")]])}`,
+      `=IF(AND(ABS(D${excelRow}-E${excelRow}-F${excelRow}-G${excelRow})<0.01,ABS(D${excelRow}-K${excelRow}-L${excelRow}-M${excelRow}-N${excelRow})<0.01),"OK","CHECK")`,
+    ];
+  });
+  if (!deferFormulas) {
+    sheet.getRange(`B${first}:B${last}`).formulas = formulas.map((row) => [row[0]]);
+    sheet.getRange(`D${first}:O${last}`).formulas = formulas.map((row) => row.slice(1));
+  }
+  const table = sheet.tables.add(`A5:O${last}`, true, "CompanyListTable");
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  sheet.getRange(`B${first}:B${last}`).format.numberFormat = countFormat;
+  sheet.getRange(`D${first}:G${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`H${first}:J${last}`).format.numberFormat = percentFormat;
+  sheet.getRange(`K${first}:N${last}`).format.numberFormat = currencyFormat;
+  applyIntegrityFormatting(sheet.getRange(`O${first}:O${last}`), first, "O");
+  for (const [column, width] of Object.entries({
+    A: 14,
+    B: 8,
+    C: 18,
+    D: 16,
+    E: 15,
+    F: 15,
+    G: 20,
+    H: 15,
+    I: 15,
+    J: 15,
+    K: 15,
+    L: 15,
+    M: 20,
+    N: 15,
+    O: 15,
+  })) sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+  return sheet;
+}
+
+function buildEmployeeList() {
+  const sheet = workbook.worksheets.getItem("Employee List");
+  const headers = [
+    "Cycle",
+    "Industry Rank",
+    "Company Rank",
+    "Person",
+    "Company",
+    "Total Giving",
+    "Democratic",
+    "Republican",
+    "Other / Unclassified",
+    "Net Democratic %",
+    "Net Republican %",
+    "Party Coverage",
+    "Contribution Count",
+    "Cities / States",
+    "ZIPs",
+    "Titles",
+    "Identity Basis",
+    "Person Key",
+    "Integrity Check",
+  ];
+  const cycleLabelFor = new Map(payload.cycles.map((cycle) => [cycle.cycle, cycle.label]));
+  const rows = payload.employees.map((employee) => [
+    cycleLabelFor.get(employee.cycle),
+    null,
+    null,
+    employee.person,
+    employee.company,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    employee.locations,
+    employee.zipcodes,
+    employee.titles,
+    employee.identity_basis,
+    employee.person_key,
+    null,
+  ]);
+  titleBlock(
+    sheet,
+    "Employee List",
+    "People carry both an industry-wide cycle rank and a within-company cycle rank. Identities are consolidated only on high-confidence company/name/location/title evidence.",
+    `${payload.metadata.employee_groups} cycle-person groups | ${payload.metadata.identity_review_groups} conservative same-name splits retained rather than guessed together.`,
+    "S",
+  );
+  sheet.getRange(`A5:S${5 + rows.length}`).values = [headers, ...rows];
+  const first = 6;
+  const last = 5 + rows.length;
+  const formulas = rows.map((row, index) => {
+    const excelRow = first + index;
+    const rangeInfo = cycleRangeMap.get(row[0]);
+    const keyCell = `$R${excelRow}`;
+    return [
+      `=1+COUNTIFS($A$${first}:$A$${last},A${excelRow},$F$${first}:$F$${last},">"&F${excelRow})`,
+      `=1+COUNTIFS($A$${first}:$A$${last},A${excelRow},$E$${first}:$E$${last},E${excelRow},$F$${first}:$F$${last},">"&F${excelRow})`,
+      `=${employeeFormula(rangeInfo, keyCell)}`,
+      `=${employeeFormula(rangeInfo, keyCell, [["party", excelString("D")]])}`,
+      `=${employeeFormula(rangeInfo, keyCell, [["party", excelString("R")]])}`,
+      `=F${excelRow}-G${excelRow}-H${excelRow}`,
+      `=IF(G${excelRow}+H${excelRow}=0,0,G${excelRow}/(G${excelRow}+H${excelRow}))`,
+      `=IF(G${excelRow}+H${excelRow}=0,0,H${excelRow}/(G${excelRow}+H${excelRow}))`,
+      `=IF(F${excelRow}=0,0,(G${excelRow}+H${excelRow})/F${excelRow})`,
+      `=COUNTIFS(${rangeInfo.personKey},${keyCell},${rangeInfo.included},"Yes")`,
+      `=IF(ABS(F${excelRow}-G${excelRow}-H${excelRow}-I${excelRow})<0.01,"OK","CHECK")`,
+    ];
+  });
+  if (!deferFormulas) {
+    sheet.getRange(`B${first}:C${last}`).formulas = formulas.map((row) => row.slice(0, 2));
+    sheet.getRange(`F${first}:M${last}`).formulas = formulas.map((row) => row.slice(2, 10));
+    sheet.getRange(`S${first}:S${last}`).formulas = formulas.map((row) => [row[10]]);
+  }
+  const table = sheet.tables.add(`A5:S${last}`, true, "EmployeeListTable");
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  sheet.getRange(`B${first}:C${last}`).format.numberFormat = countFormat;
+  sheet.getRange(`F${first}:I${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`J${first}:L${last}`).format.numberFormat = percentFormat;
+  sheet.getRange(`M${first}:M${last}`).format.numberFormat = countFormat;
+  sheet.getRange(`Q${first}:Q${last}`).conditionalFormats.add("beginsWith", {
+    text: "Conservative split",
+    format: { fill: colors.yellow, font: { color: "#7F6000" } },
+  });
+  applyIntegrityFormatting(sheet.getRange(`S${first}:S${last}`), first, "S");
+  for (const [column, width] of Object.entries({
+    A: 14,
+    B: 8,
+    C: 12,
+    D: 25,
+    E: 18,
+    F: 16,
+    G: 15,
+    H: 15,
+    I: 20,
+    J: 15,
+    K: 15,
+    L: 15,
+    M: 16,
+    N: 36,
+    O: 24,
+    P: 34,
+    Q: 48,
+    R: 42,
+    S: 15,
+  })) sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+  sheet.getRange(`N${first}:R${last}`).format.wrapText = true;
+  return sheet;
+}
+
+function mostCommon(rows, field) {
+  const counts = new Map();
+  for (const row of rows) {
+    const value = String(row[field] ?? "").trim();
+    if (!value) continue;
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  return [...counts.entries()].sort(
+    (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
+  )[0]?.[0] ?? "";
+}
+
+function sourceSet(rows, field) {
+  return [...new Set(rows.map((row) => String(row[field] ?? "").trim()).filter(Boolean))]
+    .sort()
+    .join("; ");
+}
+
+function buildRecipientList() {
+  const sheet = workbook.worksheets.getItem("Recipient List");
+  const headers = [
+    "Cycle",
+    "View",
+    "Company",
+    "Rank",
+    "Recipient",
+    "Committee ID",
+    "Recipient Category",
+    "Direct Candidate / Sponsor",
+    "Committee Relationship",
+    "Ownership Status",
+    "Top Downstream Congressional Beneficiary",
+    "Top Downstream Candidate ID",
+    "Top Downstream Activity",
+    "Total Giving",
+    "Democratic",
+    "Republican",
+    "Other / Unclassified",
+    "Net Democratic %",
+    "Net Republican %",
+    "Party Coverage",
+    "Corporate",
+    "Chief",
+    "Middle Management",
+    "Employee",
+    "Contribution Count",
+    "Category Source",
+    "Party Source",
+    "Recipient Key",
+    "FEC Committee URL",
+    "Integrity Check",
+  ];
+  const industryGroups = new Map();
+  const companyGroups = new Map();
+  for (const row of payload.raw_rows) {
+    if (row.include_in_analysis !== "Yes") continue;
+    const industryKey = `${row.cycle_label}\r${row.recipient_key}`;
+    const companyKey = `${row.cycle_label}\r${row.company}\r${row.recipient_key}`;
+    if (!industryGroups.has(industryKey)) industryGroups.set(industryKey, []);
+    if (!companyGroups.has(companyKey)) companyGroups.set(companyKey, []);
+    industryGroups.get(industryKey).push(row);
+    companyGroups.get(companyKey).push(row);
+  }
+  const makeEntry = (group, view, company) => ({
+    cycleLabel: group[0].cycle_label,
+    view,
+    company,
+    recipientKey: group[0].recipient_key,
+    recipient: mostCommon(group, "recipient"),
+    committeeId: mostCommon(group, "committee_id"),
+    category: mostCommon(group, "recipient_category"),
+    categorySource: sourceSet(group, "category_source"),
+    partySource: sourceSet(group, "party_source"),
+    preliminaryTotal: group.reduce((sum, row) => sum + Number(row.amount || 0), 0),
+  });
+  const entries = [
+    ...[...industryGroups.values()].map((group) => makeEntry(group, "Industry", "Industry Total")),
+    ...[...companyGroups.values()].map((group) => makeEntry(group, "Company", group[0].company)),
+  ];
+  const cycleOrder = new Map(payload.cycles.map((cycle, index) => [cycle.label, index]));
+  entries.sort(
+    (left, right) =>
+      cycleOrder.get(left.cycleLabel) - cycleOrder.get(right.cycleLabel) ||
+      (left.view === "Industry" ? 0 : 1) - (right.view === "Industry" ? 0 : 1) ||
+      left.company.localeCompare(right.company) ||
+      right.preliminaryTotal - left.preliminaryTotal ||
+      left.recipient.localeCompare(right.recipient),
+  );
+  const rows = entries.map((entry) => [
+    entry.cycleLabel,
+    entry.view,
+    entry.company,
+    null,
+    entry.recipient,
+    entry.committeeId,
+    entry.category,
+    ...Array(18).fill(null),
+    entry.categorySource,
+    entry.partySource,
+    entry.recipientKey,
+    null,
+    null,
+  ]);
+  titleBlock(
+    sheet,
+    "Recipient List",
+    "Filter View = Industry for cycle-wide leaders or View = Company plus Company for within-company leaders. Every rank and total is formula-linked to native cycle tables.",
+    `${entries.length.toLocaleString("en-US")} industry/company cycle-recipient groups | Official FEC committee masters: ${payload.committee_master_sources.join(" | ")}`,
+    "AD",
+  );
+  sheet.getRange(`A5:AD${5 + rows.length}`).values = [headers, ...rows];
+  const first = 6;
+  const last = 5 + rows.length;
+  const formulas = rows.map((row, index) => {
+    const excelRow = first + index;
+    const rangeInfo = cycleRangeMap.get(row[0]);
+    const keyCell = `$AB${excelRow}`;
+    const companyCriteria = row[1] === "Company" ? [["company", `$C${excelRow}`]] : [];
+    return {
+      rank: `=1+COUNTIFS($A$${first}:$A$${last},A${excelRow},$B$${first}:$B$${last},B${excelRow},$C$${first}:$C$${last},C${excelRow},$N$${first}:$N$${last},">"&N${excelRow})`,
+      metrics: [
+        `=${recipientFormula(rangeInfo, keyCell, companyCriteria)}`,
+        `=${recipientFormula(rangeInfo, keyCell, [...companyCriteria, ["party", excelString("D")]])}`,
+        `=${recipientFormula(rangeInfo, keyCell, [...companyCriteria, ["party", excelString("R")]])}`,
+        `=N${excelRow}-O${excelRow}-P${excelRow}`,
+        `=IF(O${excelRow}+P${excelRow}=0,0,O${excelRow}/(O${excelRow}+P${excelRow}))`,
+        `=IF(O${excelRow}+P${excelRow}=0,0,P${excelRow}/(O${excelRow}+P${excelRow}))`,
+        `=IF(N${excelRow}=0,0,(O${excelRow}+P${excelRow})/N${excelRow})`,
+        `=${recipientFormula(rangeInfo, keyCell, [...companyCriteria, ["tier", excelString("Corporate")]])}`,
+        `=${recipientFormula(rangeInfo, keyCell, [...companyCriteria, ["tier", excelString("Chief")]])}`,
+        `=${recipientFormula(rangeInfo, keyCell, [...companyCriteria, ["tier", excelString("Middle Management")]])}`,
+        `=${recipientFormula(rangeInfo, keyCell, [...companyCriteria, ["tier", excelString("Employee")]])}`,
+        `=COUNTIFS(${rangeInfo.recipientKey},${keyCell},${rangeInfo.included},"Yes"${row[1] === "Company" ? `,${rangeInfo.company},$C${excelRow}` : ""})`,
+      ],
+      url: `=IF(F${excelRow}="","","https://www.fec.gov/data/committee/"&F${excelRow}&"/")`,
+      integrity: `=IF(AND(ABS(N${excelRow}-O${excelRow}-P${excelRow}-Q${excelRow})<0.01,ABS(N${excelRow}-U${excelRow}-V${excelRow}-W${excelRow}-X${excelRow})<0.01),"OK","CHECK")`,
+    };
+  });
+  if (!deferFormulas) {
+    sheet.getRange(`D${first}:D${last}`).formulas = formulas.map((row) => [row.rank]);
+    sheet.getRange(`N${first}:Y${last}`).formulas = formulas.map((row) => row.metrics);
+    sheet.getRange(`AC${first}:AD${last}`).formulas = formulas.map((row) => [
+      row.url,
+      row.integrity,
+    ]);
+  }
+  const table = sheet.tables.add(`A5:AD${last}`, true, "RecipientListTable");
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  sheet.getRange(`D${first}:D${last}`).format.numberFormat = countFormat;
+  sheet.getRange(`M${first}:Q${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`R${first}:T${last}`).format.numberFormat = percentFormat;
+  sheet.getRange(`U${first}:X${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`Y${first}:Y${last}`).format.numberFormat = countFormat;
+  applyIntegrityFormatting(sheet.getRange(`AD${first}:AD${last}`), first, "AD");
+  const widths = {
+    A: 14, B: 12, C: 20, D: 8, E: 38, F: 15, G: 20, H: 34,
+    I: 34, J: 38, K: 34, L: 15, M: 18, N: 16, O: 15, P: 15,
+    Q: 20, R: 15, S: 15, T: 15, U: 15, V: 15, W: 20, X: 15,
+    Y: 17, Z: 38, AA: 34, AB: 30, AC: 42, AD: 15,
+  };
+  for (const [column, width] of Object.entries(widths)) {
+    sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+  }
+  sheet.getRange(`E${first}:K${last}`).format.wrapText = true;
+  sheet.getRange(`Z${first}:AC${last}`).format.wrapText = true;
+  return sheet;
+}
+
+function buildPacCandidateMap() {
+  const sheet = workbook.worksheets.getItem("PAC & Candidate Map");
+  const headers = [
+    "Cycle", "Recipient Committee", "Committee ID", "Lookup Key",
+    "Recipient Category", "Direct Candidate / Sponsor", "Candidate ID(s)",
+    "Direct Party", "Office(s)", "Relationship", "Ownership Status",
+    "Connected Organization", "Top Downstream Congressional Beneficiary",
+    "Top Downstream Candidate ID", "Top Downstream Activity", "Mapping Source",
+    "FEC Committee URL", "FEC Candidate URL", "Integrity Check",
+  ];
+  const rows = [...(payload.committee_map ?? [])]
+    .sort((left, right) => left.cycle - right.cycle || left.committee_name.localeCompare(right.committee_name))
+    .map((row) => [
+      cycleLabelByNumber.get(row.cycle) ?? String(row.cycle),
+      row.committee_name,
+      row.committee_id,
+      `${cycleLabelByNumber.get(row.cycle) ?? row.cycle}|${row.committee_id}`,
+      row.recipient_category,
+      row.direct_person,
+      row.direct_candidate_ids,
+      row.direct_party,
+      row.direct_offices,
+      row.relationship,
+      row.ownership_status,
+      row.connected_organization,
+      row.top_downstream_person,
+      row.top_downstream_candidate_id,
+      deferFormulas ? Number(row.preliminary_top_downstream_amount || 0) : null,
+      row.mapping_source,
+      null,
+      null,
+      deferFormulas ? "PENDING" : null,
+    ]);
+  titleBlock(
+    sheet,
+    "PAC and Candidate / Officeholder Map",
+    "Candidate and leadership-PAC relationships are direct FEC linkages. Other PACs and organizations correctly show no individual owner; their candidate activity is reported separately.",
+    `${rows.length.toLocaleString("en-US")} recipient committee-cycle groups | Candidate master, candidate-committee linkage, leadership-PAC sponsor, and committee-to-candidate FEC sources.`,
+    "S",
+  );
+  const last = 5 + rows.length;
+  sheet.getRange(`A5:S${last}`).values = [headers, ...rows];
+  const table = sheet.tables.add(`A5:S${last}`, true, "PACMapTable");
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  sheet.getRange(`O6:O${last}`).format.numberFormat = currencyFormat;
+  applyIntegrityFormatting(sheet.getRange(`S6:S${last}`), 6, "S");
+  const widths = [14,38,15,30,20,34,24,16,24,36,42,34,36,18,18,52,42,42,15];
+  widths.forEach((width, index) => {
+    const column = excelColumn(index + 1);
+    sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+  });
+  sheet.getRange(`B6:N${last}`).format.wrapText = true;
+  return sheet;
+}
+
+function buildDownstreamActivity() {
+  const sheet = workbook.worksheets.getItem("Downstream Activity");
+  const headers = [
+    "Cycle", "Source Committee", "Source Committee ID", "Source Recipient Category",
+    "Candidate / Officeholder", "Candidate ID", "Candidate Party", "Office",
+    "State", "District", "Activity Type", "Support / Oppose", "Transaction Type",
+    "First Activity Date", "Last Activity Date", "Source Rows", "Included Rows",
+    "Excluded Rows", "Superseded Rows", "Memo Rows", "Duplicate Rows",
+    "Reported Amount", "Excluded Amount", "Net Included Amount", "FEC Committee URL",
+    "FEC Candidate URL", "Source URL", "Logic Check",
+  ];
+  const rows = (payload.downstream_activity ?? []).map((row) => [
+    cycleLabelByNumber.get(row.cycle) ?? String(row.cycle),
+    row.source_committee,
+    row.source_committee_id,
+    row.source_recipient_category,
+    row.candidate_name,
+    row.candidate_id,
+    row.candidate_party,
+    [row.office_label, [row.office_state, row.district].filter(Boolean).join("-")].filter(Boolean).join(" "),
+    row.office_state,
+    row.district,
+    row.activity_type,
+    row.support_oppose,
+    row.transaction_type,
+    row.first_activity_date,
+    row.last_activity_date,
+    Number(row.source_rows || 0),
+    Number(row.included_rows || 0),
+    Number(row.excluded_rows || 0),
+    Number(row.superseded_rows || 0),
+    Number(row.memo_rows || 0),
+    Number(row.exact_duplicate_rows || 0),
+    Number(row.reported_amount || 0),
+    Number(row.excluded_amount || 0),
+    deferFormulas ? Number(row.preliminary_included_amount || 0) : null,
+    null,
+    null,
+    row.source_url,
+    deferFormulas ? "PENDING" : null,
+  ]);
+  titleBlock(
+    sheet,
+    "Downstream Committee-to-Candidate Activity",
+    "This is same-cycle activity by committees funded in the crypto dataset; it is not dollar-level pass-through attribution. Reported minus excluded amendment/memo rows equals Net Included Amount.",
+    `${payload.metadata.downstream_rows.toLocaleString("en-US")} exact source rows condensed to ${rows.length.toLocaleString("en-US")} committee-candidate-activity groups | ${payload.metadata.downstream_superseded_rows.toLocaleString("en-US")} superseded and ${payload.metadata.downstream_memo_rows.toLocaleString("en-US")} memo rows excluded.`,
+    "AB",
+  );
+  const last = 5 + rows.length;
+  sheet.getRange(`A5:AB${last}`).values = [headers, ...rows];
+  const table = sheet.tables.add(`A5:AB${last}`, true, "DownstreamActivityTable");
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  sheet.getRange(`N6:O${last}`).format.numberFormat = "yyyy-mm-dd";
+  sheet.getRange(`P6:U${last}`).format.numberFormat = countFormat;
+  sheet.getRange(`V6:X${last}`).format.numberFormat = currencyFormat;
+  applyIntegrityFormatting(sheet.getRange(`AB6:AB${last}`), 6, "AB");
+  const widths = [14,38,15,20,34,15,16,22,9,10,34,18,15,14,14,12,12,12,14,10,12,18,18,18,42,42,54,15];
+  widths.forEach((width, index) => {
+    const column = excelColumn(index + 1);
+    sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+  });
+  sheet.getRange(`B6:M${last}`).format.wrapText = true;
+  return sheet;
+}
+
+function buildBeneficiaryBridge() {
+  const sheet = workbook.worksheets.getItem("Beneficiary Bridge");
+  const headers = [
+    "Cycle", "View", "Company", "Source Committee", "Source Committee ID",
+    "Candidate / Officeholder", "Candidate ID", "Candidate Party", "Office", "State",
+    "District", "Activity Relationships", "Directions", "Transaction Count",
+    "First Activity Date", "Last Activity Date", "Downstream Activity",
+    "Associated Crypto Funding", "FEC Committee URL", "FEC Candidate URL",
+    "Reference Key", "Integrity Check",
+  ];
+  const rows = (payload.beneficiary_bridge ?? []).map((row) => [
+    cycleLabelByNumber.get(row.cycle) ?? String(row.cycle), row.view, row.company,
+    row.source_committee, row.source_committee_id, row.candidate_name, row.candidate_id,
+    row.candidate_party, row.office_label, row.office_state, row.district,
+    row.activity_relationships, row.directions, Number(row.transaction_count || 0),
+    row.first_activity_date, row.last_activity_date,
+    deferFormulas ? Number(row.preliminary_downstream_amount || 0) : null,
+    deferFormulas ? Number(row.preliminary_crypto_funding || 0) : null,
+    null, null, row.bridge_key, deferFormulas ? "PENDING" : null,
+  ]);
+  titleBlock(
+    sheet,
+    "Beneficiary Bridge",
+    "Formula bridge connecting each funded recipient committee to its same-cycle congressional candidate activity. Company associations repeat committee activity for context and are explicitly not attributed company dollars.",
+    `${rows.length.toLocaleString("en-US")} company/industry committee-candidate paths | Top 100 congressional beneficiaries retained per cycle and view.`,
+    "V",
+  );
+  const last = 5 + rows.length;
+  sheet.getRange(`A5:V${last}`).values = [headers, ...rows];
+  const table = sheet.tables.add(`A5:V${last}`, true, "BeneficiaryBridgeTable");
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  sheet.getRange(`N6:N${last}`).format.numberFormat = countFormat;
+  sheet.getRange(`O6:P${last}`).format.numberFormat = "yyyy-mm-dd";
+  sheet.getRange(`Q6:R${last}`).format.numberFormat = currencyFormat;
+  applyIntegrityFormatting(sheet.getRange(`V6:V${last}`), 6, "V");
+  const widths = [14,12,18,38,15,34,15,16,18,9,10,48,24,14,14,14,18,20,42,42,42,15];
+  widths.forEach((width, index) => {
+    const column = excelColumn(index + 1);
+    sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+  });
+  sheet.getRange(`D6:M${last}`).format.wrapText = true;
+  return sheet;
+}
+
+function buildBeneficiarySummary() {
+  const sheet = workbook.worksheets.getItem("Beneficiary Summary");
+  const headers = [
+    "Cycle", "View", "Company", "Rank", "Candidate / Officeholder", "Candidate ID",
+    "Party", "Office", "State", "District", "Source Committees", "Committee Count",
+    "Activity Relationships", "Directions", "Downstream Activity",
+    "Associated Crypto Funding", "Democratic Activity", "Republican Activity",
+    "Other / Unclassified Activity", "Party Coverage", "FEC Candidate URL", "Integrity Check",
+  ];
+  const rows = (payload.beneficiary_summary ?? []).map((row) => [
+    cycleLabelByNumber.get(row.cycle) ?? String(row.cycle), row.view, row.company, null,
+    row.candidate_name, row.candidate_id, row.candidate_party, row.office_label,
+    row.office_state, row.district, row.source_committees,
+    Number(row.source_committee_count || 0), row.activity_relationships, row.directions,
+    deferFormulas ? Number(row.preliminary_downstream_amount || 0) : null,
+    deferFormulas ? Number(row.preliminary_crypto_funding || 0) : null,
+    ...Array(4).fill(null), null, deferFormulas ? "PENDING" : null,
+  ]);
+  titleBlock(
+    sheet,
+    "Congressional Beneficiary Summary",
+    "Industry and company views rank actual House and Senate candidates/officeholders reached through funded committees. Downstream activity is committee activity, not attributed company spending.",
+    `${rows.length.toLocaleString("en-US")} top-100 candidate rows across cycles/views | Amounts formula-sum the Beneficiary Bridge; partisan activity follows the candidate's FEC party.`,
+    "V",
+  );
+  const last = 5 + rows.length;
+  sheet.getRange(`A5:V${last}`).values = [headers, ...rows];
+  const table = sheet.tables.add(`A5:V${last}`, true, "BeneficiarySummaryTable");
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  sheet.getRange(`D6:D${last}`).format.numberFormat = countFormat;
+  sheet.getRange(`L6:L${last}`).format.numberFormat = countFormat;
+  sheet.getRange(`O6:S${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`T6:T${last}`).format.numberFormat = percentFormat;
+  applyIntegrityFormatting(sheet.getRange(`V6:V${last}`), 6, "V");
+  const widths = [14,12,18,8,34,15,16,18,9,10,60,14,48,24,18,20,18,18,24,15,42,15];
+  widths.forEach((width, index) => {
+    const column = excelColumn(index + 1);
+    sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+  });
+  sheet.getRange(`E6:N${last}`).format.wrapText = true;
+  return sheet;
+}
+
+function groupedRecipientEntries() {
+  const groups = new Map();
+  for (const row of payload.raw_rows) {
+    if (row.include_in_analysis !== "Yes") continue;
+    const key = `${row.cycle_label}\r${row.company}\r${row.recipient_key}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(row);
+  }
+  const companyEntries = [...groups.values()].map((group) => ({
+    cycle: group[0].cycle_label,
+    company: group[0].company,
+    recipient: mostCommon(group, "recipient"),
+    recipientKey: group[0].recipient_key,
+    committeeId: mostCommon(group, "committee_id"),
+    total: group.reduce((sum, row) => sum + Number(row.amount || 0), 0),
+  }));
+  const industryGroups = new Map();
+  for (const entry of companyEntries) {
+    const key = `${entry.cycle}\r${entry.recipientKey}`;
+    if (!industryGroups.has(key)) industryGroups.set(key, []);
+    industryGroups.get(key).push(entry);
+  }
+  const industryEntries = [...industryGroups.values()].map((group) => ({
+    cycle: group[0].cycle,
+    company: "Industry Total",
+    recipient: group[0].recipient,
+    recipientKey: group[0].recipientKey,
+    committeeId: group[0].committeeId,
+    total: group.reduce((sum, row) => sum + row.total, 0),
+  }));
+  return { companyEntries, industryEntries };
+}
+
+function buildFocusedView(sheetName, tableName, title, subtitle, rows) {
+  const sheet = workbook.worksheets.getItem(sheetName);
+  const headers = [
+    "Cycle", "Section", "Rank", "Company", "Name / Recipient",
+    "Candidate / Officeholder", "Source Committee / Path", "Relationship", "Metric",
+    "Total / Activity", "Democratic", "Republican", "Other / Unclassified",
+    "Party Coverage", "Reference View", "Reference Company", "Reference Key", "FEC ID",
+    "Integrity Check",
+  ];
+  titleBlock(
+    sheet, title, subtitle,
+    "All displayed amounts and ranks are Excel formulas over Company List, Employee List, Recipient List, or Beneficiary Summary. Zero values display as '-'.",
+    "S",
+  );
+  const last = 5 + rows.length;
+  sheet.getRange(`A5:S${last}`).values = [headers, ...rows];
+  const table = sheet.tables.add(`A5:S${last}`, true, tableName);
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  sheet.getRange(`C6:C${last}`).format.numberFormat = countFormat;
+  sheet.getRange(`J6:M${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`N6:N${last}`).format.numberFormat = percentFormat;
+  applyIntegrityFormatting(sheet.getRange(`S6:S${last}`), 6, "S");
+  const widths = [14,26,8,18,34,34,56,42,34,18,16,16,22,15,14,18,34,16,15];
+  widths.forEach((width, index) => {
+    const column = excelColumn(index + 1);
+    sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+  });
+  sheet.getRange(`E6:I${last}`).format.wrapText = true;
+  return sheet;
+}
+
+function focusedRowsForCycle(cycle) {
+  const label = cycle.label;
+  const mapByCommittee = new Map((payload.committee_map ?? [])
+    .filter((row) => row.cycle === cycle.cycle)
+    .map((row) => [row.committee_id, row]));
+  const { industryEntries } = groupedRecipientEntries();
+  const rows = [];
+  const companyTotals = payload.companies.map((company) => ({
+    company,
+    total: payload.raw_rows.filter((row) => row.cycle === cycle.cycle && row.company === company && row.include_in_analysis === "Yes")
+      .reduce((sum, row) => sum + Number(row.amount || 0), 0),
+  })).sort((a, b) => b.total - a.total || a.company.localeCompare(b.company));
+  for (const entry of companyTotals) rows.push([
+    label, "Company Total", null, entry.company, entry.company, "", "", "",
+    "Crypto contributions", null, null, null, null, null, "", entry.company, entry.company, "", null,
+  ]);
+  const employees = (payload.employees ?? []).filter((row) => row.cycle === cycle.cycle)
+    .sort((a, b) => Number(b.preliminary_total || 0) - Number(a.preliminary_total || 0) || a.person.localeCompare(b.person)).slice(0, 15);
+  for (const entry of employees) rows.push([
+    label, "Top Contributor", null, entry.company, entry.person, "", "", entry.identity_basis,
+    "Crypto contributions", null, null, null, null, null, "", entry.company, entry.person_key, "", null,
+  ]);
+  const recipients = industryEntries.filter((row) => row.cycle === label)
+    .sort((a, b) => b.total - a.total || a.recipient.localeCompare(b.recipient)).slice(0, 15);
+  for (const entry of recipients) {
+    const map = mapByCommittee.get(entry.committeeId) ?? {};
+    rows.push([
+      label, "Top Direct Recipient", null, "Industry Total", entry.recipient,
+      map.direct_person ?? "", "", map.relationship ?? "", "Crypto contributions",
+      null, null, null, null, null, "Industry", "Industry Total", entry.recipientKey,
+      entry.committeeId, null,
+    ]);
+  }
+  const beneficiaries = (payload.beneficiary_summary ?? [])
+    .filter((row) => row.cycle === cycle.cycle && row.view === "Industry")
+    .sort((a, b) => Number(b.preliminary_downstream_amount || 0) - Number(a.preliminary_downstream_amount || 0) || a.candidate_name.localeCompare(b.candidate_name)).slice(0, 15);
+  for (const entry of beneficiaries) rows.push([
+    label, "Top Downstream Beneficiary", null, "Industry Total", entry.candidate_name,
+    entry.candidate_name, entry.source_committees, `${entry.activity_relationships}; ${entry.directions}`,
+    "Associated committee activity - not attributed", null, null, null, null, null,
+    "Industry", "Industry Total", entry.candidate_id, entry.candidate_id, null,
+  ]);
+  return rows;
+}
+
+function focusedRowsForCompany(company) {
+  const rows = [];
+  const { companyEntries } = groupedRecipientEntries();
+  for (const cycle of payload.cycles) {
+    const label = cycle.label;
+    const mapByCommittee = new Map((payload.committee_map ?? [])
+      .filter((row) => row.cycle === cycle.cycle)
+      .map((row) => [row.committee_id, row]));
+    rows.push([
+      label, "Company Total", null, company, company, "", "", "", "Crypto contributions",
+      null, null, null, null, null, "", company, company, "", null,
+    ]);
+    const employees = (payload.employees ?? []).filter((row) => row.cycle === cycle.cycle && row.company === company)
+      .sort((a, b) => Number(b.preliminary_total || 0) - Number(a.preliminary_total || 0) || a.person.localeCompare(b.person)).slice(0, 10);
+    for (const entry of employees) rows.push([
+      label, "Top Contributor", null, company, entry.person, "", "", entry.identity_basis,
+      "Crypto contributions", null, null, null, null, null, "", company, entry.person_key, "", null,
+    ]);
+    const recipients = companyEntries.filter((row) => row.cycle === label && row.company === company)
+      .sort((a, b) => b.total - a.total || a.recipient.localeCompare(b.recipient)).slice(0, 10);
+    for (const entry of recipients) {
+      const map = mapByCommittee.get(entry.committeeId) ?? {};
+      rows.push([
+        label, "Top Direct Recipient", null, company, entry.recipient, map.direct_person ?? "",
+        "", map.relationship ?? "", "Crypto contributions", null, null, null, null, null,
+        "Company", company, entry.recipientKey, entry.committeeId, null,
+      ]);
+    }
+    const beneficiaries = (payload.beneficiary_summary ?? [])
+      .filter((row) => row.cycle === cycle.cycle && row.view === "Company" && row.company === company)
+      .sort((a, b) => Number(b.preliminary_downstream_amount || 0) - Number(a.preliminary_downstream_amount || 0) || a.candidate_name.localeCompare(b.candidate_name)).slice(0, 10);
+    for (const entry of beneficiaries) rows.push([
+      label, "Top Downstream Beneficiary", null, company, entry.candidate_name, entry.candidate_name,
+      entry.source_committees, `${entry.activity_relationships}; ${entry.directions}`,
+      "Associated committee activity - not attributed", null, null, null, null, null,
+      "Company", company, entry.candidate_id, entry.candidate_id, null,
+    ]);
+  }
+  return rows;
+}
+
+const masterSheet = buildMasterOverview();
+const overviewSheet = buildOverview();
+const companySheet = buildCompanyList();
+const employeeSheet = buildEmployeeList();
+const recipientSheet = buildRecipientList();
+const beneficiarySummarySheet = buildBeneficiarySummary();
+const pacMapSheet = buildPacCandidateMap();
+const downstreamSheet = buildDownstreamActivity();
+const bridgeSheet = buildBeneficiaryBridge();
+for (const cycle of payload.cycles) {
+  buildFocusedView(
+    `${cycle.label} Summary`,
+    `CycleSummary_${cycle.cycle}`,
+    `${cycle.label} Crypto Industry Summary`,
+    "Industry-wide company totals, top contributors, direct recipient committees with candidate/sponsor resolution, and downstream congressional beneficiaries.",
+    focusedRowsForCycle(cycle),
+  );
+}
+for (const company of payload.companies) {
+  buildFocusedView(
+    companyViewName(company),
+    `CompanyView_${safeTableToken(company)}`,
+    `${company} Cycle-by-Cycle View`,
+    "Each two-year cycle is kept together with the company's top contributors, direct recipient committees, and associated downstream congressional beneficiaries.",
+    focusedRowsForCompany(company),
+  );
+}
+
+void masterSheet;
+void overviewSheet;
+void companySheet;
+void employeeSheet;
+void recipientSheet;
+void beneficiarySummarySheet;
+void pacMapSheet;
+void downstreamSheet;
+void bridgeSheet;
+
+const previewRanges = new Map([
+  ["Master Overview", "A1:CE45"],
+  ["Crypto Spending Overview", "A1:J52"],
+  ["Company List", "A1:O36"],
+  ["Employee List", "A1:S30"],
+  ["Recipient List", "A1:AD30"],
+  ["Beneficiary Summary", "A1:V30"],
+  ["PAC & Candidate Map", "A1:S30"],
+  ["Downstream Activity", "A1:AB25"],
+  ["Beneficiary Bridge", "A1:V25"],
+  ...payload.cycles.map((cycle) => [`${cycle.label} Summary`, "A1:S35"]),
+  ...payload.companies.map((company) => [companyViewName(company), "A1:S35"]),
+  ["2021-2022", "A1:AI20"],
+  ["2023-2024", "A1:AI20"],
+  ["2025-2026", "A1:AI20"],
+  ["Cycle Exceptions", "A1:AI20"],
+]);
+const outputPath = path.join(outputDir, "Crypto Industry Spending Overview.xlsx");
+const output = await SpreadsheetFile.exportXlsx(workbook);
+await output.save(outputPath);
+if (process.env.MENTAT_RENDER_PREVIEWS === "1") {
+  for (const [sheetName, range] of previewRanges) {
+    const preview = await workbook.render({
+      sheetName,
+      range,
+      scale: 0.75,
+      format: "png",
+    });
+    const fileName = `${sheetName.replaceAll(/[^A-Za-z0-9]+/g, "_")}.png`;
+    await fs.writeFile(
+      path.join(diagnosticsDir, fileName),
+      new Uint8Array(await preview.arrayBuffer()),
+    );
+  }
+}
+console.log(`OUTPUT=${outputPath}`);
