@@ -16,25 +16,36 @@ fec_mode_text <- function(values) {
   value <- trim_text(values)
   value <- value[nzchar(value)]
   if (!length(value)) return("")
-  counts <- sort(table(value), decreasing = TRUE)
-  sort(names(counts)[counts == counts[[1L]]])[[1L]]
+  first <- value[[1L]]
+  if (all(value == first)) return(first)
+  ordered <- sort(unique(value))
+  counts <- tabulate(match(value, ordered), nbins = length(ordered))
+  ordered[[which.max(counts)]]
 }
 
 fec_join_unique <- function(values) {
-  value <- sort(unique(trim_text(values)))
-  paste(value[nzchar(value)], collapse = "; ")
+  value <- unique(trim_text(values))
+  value <- value[nzchar(value)]
+  if (!length(value)) return("")
+  if (length(value) == 1L) return(value[[1L]])
+  paste(sort(value), collapse = "; ")
 }
 
 fec_min_text <- function(values) {
-  value <- sort(unique(trim_text(values)))
+  value <- unique(trim_text(values))
   value <- value[nzchar(value)]
-  if (length(value)) value[[1L]] else ""
+  if (!length(value)) return("")
+  if (length(value) == 1L) return(value[[1L]])
+  sort(value)[[1L]]
 }
 
 fec_max_text <- function(values) {
-  value <- sort(unique(trim_text(values)))
+  value <- unique(trim_text(values))
   value <- value[nzchar(value)]
-  if (length(value)) value[[length(value)]] else ""
+  if (!length(value)) return("")
+  if (length(value) == 1L) return(value[[1L]])
+  ordered <- sort(value)
+  ordered[[length(ordered)]]
 }
 
 fec_read_candidate_master <- function(directory, cycles = c(2022L, 2024L, 2026L)) {

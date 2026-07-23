@@ -5,6 +5,8 @@ param(
   [Parameter(Mandatory = $true)][string]$ResumeAfter,
   [Parameter(Mandatory = $true)][string]$Companies,
   [Parameter(Mandatory = $true)][string]$LogPath,
+  [ValidatePattern('^(?:2021-2022|2022|2023-2024|2024|2025-2026|2026)(?:\|(?:2021-2022|2022|2023-2024|2024|2025-2026|2026))*$')]
+  [string]$Cycles = '2022|2024|2026',
   [string]$RScriptPath = 'C:\Program Files\R\R-4.6.0\bin\Rscript.exe',
   [string]$RLibraryPath = 'C:\Users\pgoff\AppData\Local\R\win-library\4.6'
 )
@@ -38,6 +40,7 @@ $LogPath = [IO.Path]::GetFullPath($LogPath)
 Write-Host 'MENTAT COMPANY SHARD' -ForegroundColor Cyan
 Write-Host "Industry:  $Industry"
 Write-Host "Companies: $Companies"
+Write-Host "Cycles:    $Cycles"
 Write-Host "Database:  $DatabasePath"
 Write-Host "Log:       $LogPath"
 
@@ -45,6 +48,7 @@ $priorErrorAction = $ErrorActionPreference
 try {
   $ErrorActionPreference = 'Continue'
   & $RScriptPath $collector $DatabasePath $Industry $ResumeAfter $Companies `
+    $Cycles `
     2>&1 | Tee-Object -LiteralPath $LogPath
   $exitCode = $LASTEXITCODE
 } finally {

@@ -529,15 +529,20 @@ committee_map <- fec_build_committee_map(
   leadership_pacs,
   downstream_activity
 )
+export_phase("committee_map_built", nrow(committee_map))
 beneficiary_tables <- fec_build_beneficiary_tables(
   raw_export,
   downstream_activity
 )
+export_phase("beneficiary_bridge_built", nrow(beneficiary_tables$bridge))
 downstream_activity_export <- fec_aggregate_downstream_activity(
   downstream_activity,
   downstream_universe
 )
-export_phase("beneficiary_tables_built", nrow(beneficiary_tables$bridge))
+export_phase(
+  "downstream_activity_aggregated",
+  nrow(downstream_activity_export)
+)
 
 candidate_link_coverage <- sum(nzchar(committee_map$direct_person))
 downstream_coverage <- sum(nzchar(committee_map$top_downstream_person))

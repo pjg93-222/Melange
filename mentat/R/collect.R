@@ -85,16 +85,17 @@ normalize_variant_key <- function(x) {
 }
 
 strip_legal_suffix <- function(x) {
-  key <- normalize_variant_key(x)
-  if (!nzchar(key)) {
-    return("")
-  }
-  tokens <- strsplit(key, " ", fixed = TRUE)[[1L]]
-  while (length(tokens) > 1L &&
-         tokens[[length(tokens)]] %in% MENTAT_LEGAL_SUFFIX_TOKENS) {
-    tokens <- tokens[-length(tokens)]
-  }
-  paste(tokens, collapse = " ")
+  keys <- normalize_variant_key(x)
+  suffix_pattern <- paste0(
+    "(?:\\s+(?:",
+    paste(MENTAT_LEGAL_SUFFIX_TOKENS, collapse = "|"),
+    "))+$"
+  )
+  stripped <- sub(suffix_pattern, "", keys, perl = TRUE)
+  stripped[!nzchar(stripped) & nzchar(keys)] <- keys[
+    !nzchar(stripped) & nzchar(keys)
+  ]
+  if (length(stripped) == 1L) stripped[[1L]] else stripped
 }
 
 employer_has_token_prefix <- function(employer_key, prefix_key) {
@@ -260,14 +261,10 @@ occupation_is_manual_trade <- function(occupation) {
 company_match_context <- function(company, variants, home_states = NULL) {
   verified_values <- verified_employer_aliases(company)
   variant_values <- unique(c(variants, verified_values))
-  variant_keys <- unique(vapply(variant_values, strip_legal_suffix, character(1L)))
+  variant_keys <- unique(strip_legal_suffix(variant_values))
   variant_keys <- variant_keys[nzchar(variant_keys)]
   list(
-    verified_keys = unique(vapply(
-      verified_values,
-      strip_legal_suffix,
-      character(1L)
-    )),
+    verified_keys = unique(strip_legal_suffix(verified_values)),
     variant_values = variant_values,
     variant_keys = variant_keys,
     company_home_states = company_home_state_values(company, home_states)
@@ -470,18 +467,34 @@ company_employer_match_page <- function(
 
   # Overrides are typically sparse, but their state/regex scopes require
   # per-row evaluation. Everything after this block is page-vectorized.
-  override_results <- if (is.null(overrides) || !nrow(overrides)) {
-    vector("list", count)
-  } else {
-    lapply(seq_len(count), function(index) {
-      company_match_override(
-        company,
-        employer[[index]],
-        overrides,
-        contributor_state[[index]],
-        contributor_occupation[[index]]
+  override_results <- vector("list", count)
+  if (!is.null(overrides) && nrow(overrides)) {
+    override_frame <- as.data.frame(overrides, stringsAsFactors = FALSE)
+    company_key <- mentat_internal_company_name(company)
+    company_overrides <- override_frame[
+      mentat_internal_company_name(override_frame$company) == company_key,
+      ,
+      drop = FALSE
+    ]
+    if (nrow(company_overrides)) {
+      page_employer_keys <- normalize_variant_key(employer)
+      override_employer_keys <- unique(
+        normalize_variant_key(company_overrides$employer_key)
       )
-    })
+      candidate_indexes <- which(page_employer_keys %in% override_employer_keys)
+      override_results[candidate_indexes] <- lapply(
+        candidate_indexes,
+        function(index) {
+          company_match_override(
+            company,
+            employer[[index]],
+            company_overrides,
+            contributor_state[[index]],
+            contributor_occupation[[index]]
+          )
+        }
+      )
+    }
   }
   override_index <- which(!vapply(override_results, is.null, logical(1L)))
   if (length(override_index)) {
@@ -493,7 +506,7 @@ company_employer_match_page <- function(
     )
   }
 
-  employer_keys <- vapply(employer, strip_legal_suffix, character(1L))
+  employer_keys <- strip_legal_suffix(employer)
   unresolved <- is.na(status)
   blank <- unresolved & !nzchar(employer_keys)
   status[blank] <- "rejected"
@@ -542,31 +555,110 @@ company_employer_match_page <- function(
     reason[exact_unambiguous & !verified] <- "verified_roster_alias"
   }
 
-  # Prefix and punctuation-squashed variants are uncommon and retain the
-  # fully defensive scalar matcher as a fallback.
+  # Resolve the same anchored-prefix and punctuation-squashed cases as the
+  # scalar matcher, but do it page-wise. Broad FEC searches can return tens of
+  # thousands of unrelated rows; calling the scalar matcher for each one made
+  # those pages CPU-bound for minutes.
   unresolved_index <- which(is.na(status))
   if (length(unresolved_index)) {
-    fallback <- lapply(unresolved_index, function(index) {
-      company_employer_match(
-        company = company,
-        employer = employer[[index]],
-        contributor_name = contributor_name[[index]],
-        variants = variants,
-        trusted_name_keys = trusted_name_keys,
-        overrides = NULL,
-        excluded_reason = NA_character_,
-        contributor_state = contributor_state[[index]],
-        contributor_occupation = contributor_occupation[[index]],
-        home_states = home_states,
-        match_context = context
+    unresolved_employers <- employer_keys[unresolved_index]
+    token_prefix_key <- rep("", length(unresolved_index))
+    for (key in context$variant_keys) {
+      matches <- unresolved_employers == key |
+        startsWith(unresolved_employers, paste0(key, " "))
+      replace <- matches & nchar(key) > nchar(token_prefix_key)
+      token_prefix_key[replace] <- key
+    }
+    token_prefix <- nzchar(token_prefix_key)
+    if (any(token_prefix)) {
+      page_indexes <- unresolved_index[token_prefix]
+      trailing <- trim_text(substring(
+        unresolved_employers[token_prefix],
+        nchar(token_prefix_key[token_prefix]) + 1L
+      ))
+      qualified <- vapply(strsplit(trailing, " ", fixed = TRUE), function(tokens) {
+        !length(tokens) || all(tokens %in% MENTAT_CORPORATE_QUALIFIER_TOKENS)
+      }, logical(1L))
+      status[page_indexes[qualified]] <- "accepted"
+      reason[page_indexes[qualified]] <- "corporate_qualifier_prefix"
+      review_indexes <- page_indexes[!qualified]
+      status[review_indexes] <- "review"
+      reason[review_indexes] <- paste0(
+        "prefix_with_unverified_trailing_tokens:",
+        trailing[!qualified]
       )
-    })
-    status[unresolved_index] <- vapply(
-      fallback, `[[`, character(1L), "status"
-    )
-    reason[unresolved_index] <- vapply(
-      fallback, `[[`, character(1L), "reason"
-    )
+    }
+
+    unresolved_index <- which(is.na(status))
+    if (length(unresolved_index)) {
+      unresolved_squashed <- gsub(
+        "[^A-Z0-9]",
+        "",
+        toupper(enc2utf8(as.character(employer[unresolved_index]))),
+        perl = TRUE
+      )
+      squashed_variant_keys <- unique(gsub(
+        "[^A-Z0-9]",
+        "",
+        toupper(enc2utf8(as.character(context$variant_values))),
+        perl = TRUE
+      ))
+      squashed_variant_keys <- squashed_variant_keys[nzchar(squashed_variant_keys)]
+      squashed_prefix_key <- rep("", length(unresolved_index))
+      qualified_prefix_key <- rep("", length(unresolved_index))
+      for (key in squashed_variant_keys) {
+        matches <- startsWith(unresolved_squashed, key)
+        replace <- matches & nchar(key) > nchar(squashed_prefix_key)
+        squashed_prefix_key[replace] <- key
+        matched_indexes <- which(matches)
+        if (length(matched_indexes)) {
+          remainders <- substring(
+            unresolved_squashed[matched_indexes],
+            nchar(key) + 1L
+          )
+          qualified <- vapply(
+            remainders,
+            squashed_remainder_is_corporate_qualifiers,
+            logical(1L)
+          )
+          qualified_indexes <- matched_indexes[qualified]
+          replace_qualified <- qualified_indexes[
+            nchar(key) > nchar(qualified_prefix_key[qualified_indexes])
+          ]
+          qualified_prefix_key[replace_qualified] <- key
+        }
+      }
+      squashed_prefix <- nzchar(squashed_prefix_key)
+      if (any(squashed_prefix)) {
+        page_indexes <- unresolved_index[squashed_prefix]
+        selected_key <- ifelse(
+          nzchar(qualified_prefix_key[squashed_prefix]),
+          qualified_prefix_key[squashed_prefix],
+          squashed_prefix_key[squashed_prefix]
+        )
+        remainder <- substring(
+          unresolved_squashed[squashed_prefix],
+          nchar(selected_key) + 1L
+        )
+        qualified <- nzchar(qualified_prefix_key[squashed_prefix])
+        status[page_indexes[qualified]] <- "accepted"
+        reason[page_indexes[qualified]] <- ifelse(
+          nzchar(remainder[qualified]),
+          "squashed_form_corporate_qualifier",
+          "squashed_form_exact"
+        )
+        review_indexes <- page_indexes[!qualified]
+        status[review_indexes] <- "review"
+        reason[review_indexes] <- paste0(
+          "squashed_prefix_unverified_remainder:",
+          remainder[!qualified]
+        )
+      }
+    }
+
+    unresolved_index <- which(is.na(status))
+    status[unresolved_index] <- "rejected"
+    reason[unresolved_index] <- "employer_prefix_not_verified"
   }
 
   excluded <- !seq_len(count) %in% override_index &
@@ -744,11 +836,7 @@ company_home_states_data <- function(connection) {
 company_name_entity_match <- function(contributor_name, company, variants) {
   contributor_key <- strip_legal_suffix(contributor_name)
   if (!nzchar(contributor_key)) return(FALSE)
-  company_keys <- unique(vapply(
-    c(company, variants),
-    strip_legal_suffix,
-    character(1L)
-  ))
+  company_keys <- unique(strip_legal_suffix(c(company, variants)))
   company_keys <- company_keys[nzchar(company_keys)]
   if (contributor_key %in% company_keys) return(TRUE)
   contributor_squashed <- gsub("[^A-Z0-9]", "", contributor_key, perl = TRUE)
@@ -942,16 +1030,8 @@ flatten_fec_rows <- function(
       ))
     }, integer(1L))
   }
-  contributor_entity_keys <- vapply(
-    contributor_names,
-    strip_legal_suffix,
-    character(1L)
-  )
-  company_entity_keys <- unique(vapply(
-    c(company, variants),
-    strip_legal_suffix,
-    character(1L)
-  ))
+  contributor_entity_keys <- strip_legal_suffix(contributor_names)
+  company_entity_keys <- unique(strip_legal_suffix(c(company, variants)))
   company_entity_keys <- company_entity_keys[nzchar(company_entity_keys)]
   contributor_entity_squashed <- gsub(
     "[^A-Z0-9]",
@@ -1112,6 +1192,22 @@ insert_rows_or_ignore <- function(connection, table, rows, columns) {
     )
   )
   DBI::dbAppendTable(connection, stage, as.data.frame(rows[, ..columns]))
+  if ("sub_id" %in% columns) {
+    stage_sub_id_index <- paste0(stage, "_sub_id")
+    quoted_stage_sub_id_index <- as.character(
+      DBI::dbQuoteIdentifier(connection, stage_sub_id_index)
+    )
+    quoted_sub_id <- as.character(
+      DBI::dbQuoteIdentifier(connection, "sub_id")
+    )
+    DBI::dbExecute(
+      connection,
+      paste0(
+        "CREATE INDEX ", quoted_stage_sub_id_index,
+        " ON ", quoted_stage, " (", quoted_sub_id, ")"
+      )
+    )
+  }
   DBI::dbExecute(connection, paste0(sql, quoted_stage))
   inserted <- DBI::dbGetQuery(connection, "SELECT changes() AS n")$n[[1L]]
   if (identical(table, "corporate_giving")) {
@@ -1829,57 +1925,108 @@ retag_corporate_company_matches <- function(
     company_match_reason_new = "corporate_name_not_verified",
     is_entity_contributor_new = 0L
   )]
-  for (row_index in seq_len(nrow(rows))) {
-    row <- rows[row_index]
+  groups <- unique(rows[, .(industry, company)])
+  for (group_index in seq_len(nrow(groups))) {
+    group <- groups[group_index]
+    index <- which(
+      rows$industry == group$industry &
+        rows$company == group$company
+    )
+    group_rows <- rows[index]
     company_variants <- variants[
-      industry == row$industry & company == row$company,
+      industry == group$industry & company == group$company,
       variant
     ]
-    exact_company_entity <- company_name_entity_match(
-      row$contributor_name,
-      row$company,
+    company_entity_keys <- unique(strip_legal_suffix(c(
+      group$company,
       company_variants
+    )))
+    company_entity_keys <- company_entity_keys[nzchar(company_entity_keys)]
+    company_entity_squashed <- unique(gsub(
+      "[^A-Z0-9]",
+      "",
+      company_entity_keys,
+      perl = TRUE
+    ))
+    contributor_entity_keys <- strip_legal_suffix(group_rows$contributor_name)
+    contributor_entity_squashed <- gsub(
+      "[^A-Z0-9]",
+      "",
+      contributor_entity_keys,
+      perl = TRUE
     )
-    qualified_company_entity <- company_employer_match(
-      company = row$company,
-      employer = row$contributor_name,
-      contributor_name = row$contributor_name,
+    exact_company_entity <- nzchar(contributor_entity_keys) & (
+      contributor_entity_keys %in% company_entity_keys |
+        contributor_entity_squashed %in% company_entity_squashed
+    )
+
+    match_inputs <- unique(group_rows[, .(
+      contributor_name,
+      contributor_state,
+      contributor_occupation
+    )])
+    match_inputs[, match_input_id := .I]
+    input_ids <- match_inputs[
+      group_rows,
+      on = .(
+        contributor_name,
+        contributor_state,
+        contributor_occupation
+      ),
+      match_input_id
+    ]
+    qualified_matches <- company_employer_match_page(
+      company = group$company,
+      employer = match_inputs$contributor_name,
+      contributor_name = match_inputs$contributor_name,
       variants = company_variants,
       overrides = match_overrides,
-      contributor_state = row$contributor_state,
-      contributor_occupation = row$contributor_occupation
+      contributor_state = match_inputs$contributor_state,
+      contributor_occupation = match_inputs$contributor_occupation
     )
-    entity_type <- toupper(trim_text(row$entity_type))
-    excluded <- nzchar(trim_text(row$excluded_reason))
-    rows$is_entity_contributor_new[[row_index]] <- as.integer(
-      exact_company_entity || entity_type %in% c("ORG", "COM", "PAC", "CCM")
+    qualified_status <- vapply(
+      qualified_matches,
+      `[[`,
+      character(1L),
+      "status"
+    )[input_ids]
+    qualified_reason <- vapply(
+      qualified_matches,
+      `[[`,
+      character(1L),
+      "reason"
+    )[input_ids]
+
+    entity_type <- toupper(trim_text(group_rows$entity_type))
+    excluded <- nzchar(trim_text(group_rows$excluded_reason))
+    is_entity <- exact_company_entity |
+      entity_type %in% c("ORG", "COM", "PAC", "CCM")
+    status <- rep("review", length(index))
+    reason <- rep("corporate_name_not_verified", length(index))
+    status[excluded] <- "rejected"
+    reason[excluded] <- "corporate_excluded"
+    individual <- !excluded & entity_type == "IND"
+    status[individual] <- "rejected"
+    reason[individual] <- "corporate_query_individual_entity"
+    exact <- !excluded & !individual & exact_company_entity
+    status[exact] <- "accepted"
+    reason[exact] <- "verified_company_name_entity"
+    accepted <- !excluded & !individual & !exact_company_entity &
+      qualified_status == "accepted"
+    status[accepted] <- "accepted"
+    reason[accepted] <- paste0(
+      "verified_company_name:",
+      qualified_reason[accepted]
     )
-    if (excluded) {
-      rows$company_match_status_new[[row_index]] <- "rejected"
-      rows$company_match_reason_new[[row_index]] <- "corporate_excluded"
-    } else if (identical(entity_type, "IND")) {
-      rows$company_match_status_new[[row_index]] <- "rejected"
-      rows$company_match_reason_new[[row_index]] <-
-        "corporate_query_individual_entity"
-    } else if (exact_company_entity) {
-      rows$company_match_status_new[[row_index]] <- "accepted"
-      rows$company_match_reason_new[[row_index]] <-
-        "verified_company_name_entity"
-      rows$is_entity_contributor_new[[row_index]] <- 1L
-    } else if (identical(qualified_company_entity$status, "accepted")) {
-      rows$company_match_status_new[[row_index]] <- "accepted"
-      rows$company_match_reason_new[[row_index]] <- paste0(
-        "verified_company_name:", qualified_company_entity$reason
-      )
-      rows$is_entity_contributor_new[[row_index]] <- 1L
-    } else if (identical(
-      qualified_company_entity$reason,
-      "persistent_override:reject"
-    )) {
-      rows$company_match_status_new[[row_index]] <- "rejected"
-      rows$company_match_reason_new[[row_index]] <-
-        "corporate_name_persistent_override_reject"
-    }
+    is_entity[accepted] <- TRUE
+    override_reject <- !excluded & !individual & !exact_company_entity &
+      qualified_reason == "persistent_override:reject"
+    status[override_reject] <- "rejected"
+    reason[override_reject] <- "corporate_name_persistent_override_reject"
+
+    rows$company_match_status_new[index] <- status
+    rows$company_match_reason_new[index] <- reason
+    rows$is_entity_contributor_new[index] <- as.integer(is_entity)
   }
   tags <- rows[, .(
     sub_id,

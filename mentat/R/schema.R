@@ -503,13 +503,18 @@ mentat_amendment_version_plan <- function(rows) {
 
   parent_candidates <- which(nzchar(sub_id) & nzchar(original))
   parent_map <- setNames(original[parent_candidates], sub_id[parent_candidates])
+  parent_lookup <- list2env(
+    as.list(parent_map),
+    envir = new.env(hash = TRUE, parent = emptyenv())
+  )
   find_root <- function(seed) {
     current <- seed
     seen <- character()
-    while (nzchar(current) && current %in% names(parent_map) &&
+    while (nzchar(current) &&
+           exists(current, envir = parent_lookup, inherits = FALSE) &&
            !current %in% seen) {
       seen <- c(seen, current)
-      next_value <- unname(parent_map[[current]])
+      next_value <- get(current, envir = parent_lookup, inherits = FALSE)
       if (!nzchar(next_value)) break
       current <- next_value
     }
@@ -525,8 +530,13 @@ mentat_amendment_version_plan <- function(rows) {
     paste(company, committee, report_year, report_type, transaction, sep = "|"),
     ""
   )
-  for (key in unique(transaction_key[nzchar(transaction_key)])) {
-    index <- which(transaction_key == key)
+  transaction_index <- which(nzchar(transaction_key))
+  transaction_groups <- split(
+    transaction_index,
+    transaction_key[transaction_index],
+    drop = TRUE
+  )
+  for (index in transaction_groups) {
     roots <- unique(linked_root[index][nzchar(linked_root[index])])
     if (length(roots) == 1L) linked_root[index] <- roots[[1L]]
   }
@@ -554,8 +564,9 @@ mentat_amendment_version_plan <- function(rows) {
   latest_value <- function(value) sort(unique(value), method = "radix")[[
     length(unique(value))
   ]]
-  for (key in unique(version_key)) {
-    index <- which(version_key == key)
+  version_groups <- split(seq_along(version_key), version_key, drop = TRUE)
+  for (index in version_groups) {
+    key <- version_key[[index[[1L]]]]
     if (length(index) < 2L || startsWith(key, "SUB_ID|")) next
     candidates <- index
     if (all(!is.na(file_num[index]))) {
@@ -628,16 +639,21 @@ mentat_filing_link_components <- function(sub_id, transaction_id, original_sub_i
     right_root <- find_root(right)
     if (left_root != right_root) parent[[right_root]] <<- left_root
   }
-  transactions <- unique(transaction_id[nzchar(transaction_id)])
-  for (transaction in transactions) {
-    index <- which(transaction_id == transaction)
+  transaction_index <- which(nzchar(transaction_id))
+  transaction_groups <- split(
+    transaction_index,
+    transaction_id[transaction_index],
+    drop = TRUE
+  )
+  for (index in transaction_groups) {
     if (length(index) > 1L) {
       for (other in index[-1L]) join(index[[1L]], other)
     }
   }
-  for (index in which(nzchar(original_sub_id))) {
-    original_index <- which(sub_id == original_sub_id[[index]])
-    if (length(original_index)) join(index, original_index[[1L]])
+  linked_index <- which(nzchar(original_sub_id))
+  original_index <- match(original_sub_id[linked_index], sub_id)
+  for (position in which(!is.na(original_index))) {
+    join(linked_index[[position]], original_index[[position]])
   }
   vapply(seq_len(count), find_root, integer(1L))
 }
@@ -714,9 +730,49 @@ mentat_filing_version_plan <- function(rows, table) {
     excluded_reason == "DUPLICATE_FILING_VERSION"
   transaction <- mentat_version_text(column("transaction_id"))
   original <- mentat_version_text(column("original_sub_id"))
+  file_num <- suppressWarnings(as.numeric(column("file_num", NA_real_)))
+  amendment <- mentat_version_text(column("amendment_indicator"))
+  amendment_priority <- ifelse(
+    amendment == "N" | !nzchar(amendment),
+    0L,
+    ifelse(amendment == "T", 2L, 1L)
+  )
+  load_date <- mentat_version_text(column("load_date"))
+  winner_for <- function(candidates) {
+    known_file <- candidates[!is.na(file_num[candidates])]
+    if (length(known_file)) {
+      candidates <- known_file[
+        file_num[known_file] == max(file_num[known_file])
+      ]
+    }
+    if (length(candidates) > 1L &&
+        any(amendment_priority[candidates] > 0L)) {
+      candidates <- candidates[
+        amendment_priority[candidates] ==
+          max(amendment_priority[candidates])
+      ]
+    }
+    known_load <- candidates[nzchar(load_date[candidates])]
+    if (length(known_load)) {
+      latest_load <- max(load_date[known_load])
+      candidates <- known_load[load_date[known_load] == latest_load]
+    }
+    candidates[[
+      order(
+        sub_id[candidates],
+        method = "radix",
+        decreasing = TRUE
+      )[[1L]]
+    ]]
+  }
   duplicate <- rep(FALSE, nrow(rows))
-  for (key in unique(identity_key[nzchar(identity_key) & eligible])) {
-    index <- which(identity_key == key & eligible)
+  eligible_index <- which(nzchar(identity_key) & eligible)
+  identity_groups <- split(
+    eligible_index,
+    identity_key[eligible_index],
+    drop = TRUE
+  )
+  for (index in identity_groups) {
     if (length(index) < 2L) next
     groups <- if (identical(table, "corporate_giving")) {
       rep(1L, length(index))
@@ -730,7 +786,7 @@ mentat_filing_version_plan <- function(rows, table) {
     for (group in unique(groups)) {
       candidates <- index[groups == group]
       if (length(candidates) < 2L) next
-      winner <- mentat_filing_version_winner(candidates, rows)
+      winner <- winner_for(candidates)
       duplicate[setdiff(candidates, winner)] <- TRUE
     }
   }
