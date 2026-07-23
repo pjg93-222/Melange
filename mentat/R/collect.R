@@ -470,15 +470,19 @@ company_employer_match_page <- function(
 
   # Overrides are typically sparse, but their state/regex scopes require
   # per-row evaluation. Everything after this block is page-vectorized.
-  override_results <- lapply(seq_len(count), function(index) {
-    company_match_override(
-      company,
-      employer[[index]],
-      overrides,
-      contributor_state[[index]],
-      contributor_occupation[[index]]
-    )
-  })
+  override_results <- if (is.null(overrides) || !nrow(overrides)) {
+    vector("list", count)
+  } else {
+    lapply(seq_len(count), function(index) {
+      company_match_override(
+        company,
+        employer[[index]],
+        overrides,
+        contributor_state[[index]],
+        contributor_occupation[[index]]
+      )
+    })
+  }
   override_index <- which(!vapply(override_results, is.null, logical(1L)))
   if (length(override_index)) {
     status[override_index] <- vapply(
@@ -496,7 +500,10 @@ company_employer_match_page <- function(
   reason[blank] <- "blank_employer"
 
   unresolved <- is.na(status)
-  junk_reasons <- vapply(employer, junk_employer_reason, character(1L))
+  junk_keys <- normalize_variant_key(employer)
+  junk_reasons <- rep(NA_character_, count)
+  is_junk <- nzchar(junk_keys) & junk_keys %in% MENTAT_JUNK_EMPLOYER_KEYS
+  junk_reasons[is_junk] <- paste0("junk_employer:", junk_keys[is_junk])
   junk <- unresolved & !is.na(junk_reasons)
   status[junk] <- "rejected"
   reason[junk] <- junk_reasons[junk]
@@ -790,18 +797,50 @@ flatten_fec_rows <- function(
       trim_text(row_scalar(row, field, default))
     }, character(1L))
   }
+  page_number <- function(field, default = NA_real_) {
+    vapply(rows, function(row) {
+      as_db_number(row_scalar(row, field, default))
+    }, numeric(1L))
+  }
+  page_integer <- function(field, default = NA_integer_) {
+    vapply(rows, function(row) {
+      as_db_integer(row_scalar(row, field, default))
+    }, integer(1L))
+  }
+  page_bool <- function(field, default = FALSE) {
+    vapply(rows, function(row) {
+      as_db_bool(row_scalar(row, field, default))
+    }, integer(1L))
+  }
   employer_values <- page_text("contributor_employer")
   occupation_values <- page_text("contributor_occupation")
   contributor_names <- page_text("contributor_name")
   contributor_states <- page_text("contributor_state")
-  excluded_values <- vapply(seq_along(rows), function(index) {
-    exclusion_reason(
-      employer_values[[index]],
-      occupation_values[[index]],
-      exclusions,
-      contributor_names[[index]]
+  exclusions <- trim_text(exclusions)
+  exclusions <- exclusions[nzchar(exclusions)]
+  excluded_values <- rep(NA_character_, length(rows))
+  if (length(exclusions)) {
+    upper_names <- toupper(contributor_names)
+    upper_employers <- toupper(employer_values)
+    upper_occupations <- toupper(occupation_values)
+    for (pattern in exclusions) {
+      unresolved <- is.na(excluded_values)
+      if (!any(unresolved)) break
+      upper_pattern <- toupper(pattern)
+      matched <- unresolved & (
+        grepl(upper_pattern, upper_names, fixed = TRUE) |
+          grepl(upper_pattern, upper_employers, fixed = TRUE) |
+          grepl(upper_pattern, upper_occupations, fixed = TRUE)
+      )
+      excluded_values[matched] <- paste0("exclusion_pattern:", pattern)
+    }
+    hockey <- is.na(excluded_values) & grepl(
+      "\\bHOCKEY\\b",
+      upper_occupations,
+      perl = TRUE
     )
-  }, character(1L))
+    excluded_values[hockey] <- "occupation:HOCKEY"
+  }
   match_values <- if (identical(phase, "P2_company_name")) {
     contributor_names
   } else {
@@ -822,8 +861,7 @@ flatten_fec_rows <- function(
       "P1_employer", "P2_variant", "P2_company_name", "P3_bulk_rescue"
     )
   )
-  records <- lapply(seq_along(rows), function(index) {
-    row <- rows[[index]]
+  committee_names <- vapply(rows, function(row) {
     committee <- row$committee
     committee_name <- if (is.list(committee)) {
       trim_text(committee$name %||% "")
@@ -833,108 +871,132 @@ flatten_fec_rows <- function(
     if (!nzchar(committee_name)) {
       committee_name <- trim_text(row_scalar(row, "committee_name", ""))
     }
-    memo_code <- trim_text(row_scalar(row, "memo_code", ""))
-    memoed <- as_db_bool(row_scalar(row, "memoed_subtotal", FALSE))
-    committee_id <- trim_text(row_scalar(row, "committee_id", ""))
-    memo_text <- trim_text(row_scalar(row, "memo_text", ""))
-    employer <- employer_values[[index]]
-    occupation <- occupation_values[[index]]
-    contributor_name <- contributor_names[[index]]
-    entity_type <- trim_text(row_scalar(row, "entity_type", ""))
-    amount <- as_db_number(row_scalar(row, "contribution_receipt_amount", NA_real_))
-    original_sub_id <- trim_text(row_scalar(row, "original_sub_id", ""))
-    amendment <- trim_text(row_scalar(row, "amendment_indicator", ""))
-    matched_variant <- matched_variant_for_employer(employer, variants)
-    excluded <- excluded_values[[index]]
-    company_match <- company_matches[[index]]
-    data.table::data.table(
-      sub_id = trim_text(row_scalar(row, "sub_id", "")),
-      transaction_id = trim_text(row_scalar(row, "transaction_id", "")),
-      original_sub_id = original_sub_id,
-      contributor_name = contributor_name,
-      contributor_first_name = trim_text(row_scalar(row, "contributor_first_name", "")),
-      contributor_last_name = trim_text(row_scalar(row, "contributor_last_name", "")),
-      contributor_suffix = trim_text(row_scalar(row, "contributor_suffix", "")),
-      contributor_city = trim_text(row_scalar(row, "contributor_city", "")),
-      contributor_state = contributor_states[[index]],
-      contributor_zip = trim_text(row_scalar(row, "contributor_zip", "")),
-      contributor_employer = employer,
-      contributor_occupation = occupation,
-      contributor_aggregate_ytd = as_db_number(
-        row_scalar(row, "contributor_aggregate_ytd", NA_real_)
-      ),
-      contribution_receipt_amount = amount,
-      contribution_receipt_date = trim_text(
-        row_scalar(row, "contribution_receipt_date", "")
-      ),
-      committee_id = committee_id,
-      committee_name = committee_name,
-      recipient_committee_type = trim_text(
-        row_scalar(row, "recipient_committee_type", "")
-      ),
-      recipient_committee_designation = trim_text(
-        row_scalar(row, "recipient_committee_designation", "")
-      ),
-      entity_type = entity_type,
-      election_type = trim_text(row_scalar(row, "election_type", "")),
-      fec_election_type_desc = trim_text(
-        row_scalar(row, "fec_election_type_desc", "")
-      ),
-      receipt_type_full = trim_text(row_scalar(row, "receipt_type_full", "")),
-      memo_code = memo_code,
-      memoed_subtotal = memoed,
-      memo_text = memo_text,
-      conduit_committee_id = trim_text(
-        row_scalar(row, "conduit_committee_id", "")
-      ),
-      conduit_committee_name = trim_text(
-        row_scalar(row, "conduit_committee_name", "")
-      ),
-      amendment_indicator = amendment,
-      report_year = as_db_integer(row_scalar(row, "report_year", NA_integer_)),
-      report_type = trim_text(row_scalar(row, "report_type", "")),
-      file_num = as_db_integer(row_scalar(
-        row,
-        "file_num",
-        row_scalar(row, "file_number", NA_integer_)
-      )),
-      two_year_transaction_period = as_db_integer(
-        row_scalar(row, "two_year_transaction_period", NA_integer_)
-      ),
-      line_number = trim_text(row_scalar(row, "line_number", "")),
-      pdf_url = trim_text(row_scalar(row, "pdf_url", "")),
-      load_date = trim_text(row_scalar(row, "load_date", "")),
-      industry = industry,
-      company = company,
-      matched_variant = matched_variant,
-      phase = phase,
-      match_confidence = match_confidence,
-      scraped_at = scraped_at,
-      is_conduit_leg = as.integer(
-        committee_id %in% c("C00401224", "C00694323")
-      ),
-      is_memo_leg = as.integer(toupper(memo_code) == "X" || memoed == 1L),
-      is_passthrough_leg = as.integer(is_passthrough_memo(memo_text)),
-      memo_review = as.integer(is_memo_review(memo_text)),
-      possible_amendment = as.integer(
-        nzchar(original_sub_id) || toupper(amendment) %in% c("A", "C", "T")
-      ),
-      superseded_by_amendment = 0L,
-      duplicate_filing_version = 0L,
-      duplicate_memo = 0L,
-      is_refund = as.integer(!is.na(amount) && amount < 0),
-      is_entity_contributor = is_entity_contributor_value(
-        entity_type,
-        contributor_name,
-        company,
-        variants
-      ),
-      company_match_status = company_match$status,
-      company_match_reason = company_match$reason,
-      excluded_reason = excluded
-    )
-  })
-  result <- data.table::rbindlist(records, use.names = TRUE, fill = TRUE)
+    committee_name
+  }, character(1L))
+  memo_codes <- page_text("memo_code")
+  memoed_values <- page_bool("memoed_subtotal")
+  committee_ids <- page_text("committee_id")
+  memo_texts <- page_text("memo_text")
+  entity_types <- page_text("entity_type")
+  amounts <- page_number("contribution_receipt_amount")
+  original_sub_ids <- page_text("original_sub_id")
+  amendments <- page_text("amendment_indicator")
+  employer_keys <- normalize_variant_key(employer_values)
+  variant_keys <- normalize_variant_key(variants)
+  matched_variants <- rep(paste(variants, collapse = " | "), length(rows))
+  matched_variant_width <- rep(-1L, length(rows))
+  for (variant_index in which(nzchar(variant_keys))) {
+    matched <- grepl(variant_keys[[variant_index]], employer_keys, fixed = TRUE)
+    variant_width <- nchar(variants[[variant_index]])
+    replace <- matched & variant_width > matched_variant_width
+    matched_variants[replace] <- variants[[variant_index]]
+    matched_variant_width[replace] <- variant_width
+  }
+  file_nums <- vapply(rows, function(row) {
+    as_db_integer(row_scalar(
+      row,
+      "file_num",
+      row_scalar(row, "file_number", NA_integer_)
+    ))
+  }, integer(1L))
+  contributor_entity_keys <- vapply(
+    contributor_names,
+    strip_legal_suffix,
+    character(1L)
+  )
+  company_entity_keys <- unique(vapply(
+    c(company, variants),
+    strip_legal_suffix,
+    character(1L)
+  ))
+  company_entity_keys <- company_entity_keys[nzchar(company_entity_keys)]
+  contributor_entity_squashed <- gsub(
+    "[^A-Z0-9]",
+    "",
+    contributor_entity_keys,
+    perl = TRUE
+  )
+  company_entity_squashed <- unique(gsub(
+    "[^A-Z0-9]",
+    "",
+    company_entity_keys,
+    perl = TRUE
+  ))
+  entity_contributors <- as.integer(
+    toupper(entity_types) %in% c("ORG", "COM", "PAC", "CCM") |
+      (
+        nzchar(contributor_entity_keys) &
+          (
+            contributor_entity_keys %in% company_entity_keys |
+              contributor_entity_squashed %in% company_entity_squashed
+          )
+      )
+  )
+  result <- data.table::data.table(
+    sub_id = page_text("sub_id"),
+    transaction_id = page_text("transaction_id"),
+    original_sub_id = original_sub_ids,
+    contributor_name = contributor_names,
+    contributor_first_name = page_text("contributor_first_name"),
+    contributor_last_name = page_text("contributor_last_name"),
+    contributor_suffix = page_text("contributor_suffix"),
+    contributor_city = page_text("contributor_city"),
+    contributor_state = contributor_states,
+    contributor_zip = page_text("contributor_zip"),
+    contributor_employer = employer_values,
+    contributor_occupation = occupation_values,
+    contributor_aggregate_ytd = page_number("contributor_aggregate_ytd"),
+    contribution_receipt_amount = amounts,
+    contribution_receipt_date = page_text("contribution_receipt_date"),
+    committee_id = committee_ids,
+    committee_name = committee_names,
+    recipient_committee_type = page_text("recipient_committee_type"),
+    recipient_committee_designation = page_text("recipient_committee_designation"),
+    entity_type = entity_types,
+    election_type = page_text("election_type"),
+    fec_election_type_desc = page_text("fec_election_type_desc"),
+    receipt_type_full = page_text("receipt_type_full"),
+    memo_code = memo_codes,
+    memoed_subtotal = memoed_values,
+    memo_text = memo_texts,
+    conduit_committee_id = page_text("conduit_committee_id"),
+    conduit_committee_name = page_text("conduit_committee_name"),
+    amendment_indicator = amendments,
+    report_year = page_integer("report_year"),
+    report_type = page_text("report_type"),
+    file_num = file_nums,
+    two_year_transaction_period = page_integer("two_year_transaction_period"),
+    line_number = page_text("line_number"),
+    pdf_url = page_text("pdf_url"),
+    load_date = page_text("load_date"),
+    industry = industry,
+    company = company,
+    matched_variant = matched_variants,
+    phase = phase,
+    match_confidence = match_confidence,
+    scraped_at = scraped_at,
+    is_conduit_leg = as.integer(
+      committee_ids %in% c("C00401224", "C00694323")
+    ),
+    is_memo_leg = as.integer(toupper(memo_codes) == "X" | memoed_values == 1L),
+    is_passthrough_leg = as.integer(is_passthrough_memo(memo_texts)),
+    memo_review = as.integer(is_memo_review(memo_texts)),
+    possible_amendment = as.integer(
+      nzchar(original_sub_ids) | toupper(amendments) %in% c("A", "C", "T")
+    ),
+    superseded_by_amendment = 0L,
+    duplicate_filing_version = 0L,
+    duplicate_memo = 0L,
+    is_refund = as.integer(!is.na(amounts) & amounts < 0),
+    is_entity_contributor = entity_contributors,
+    company_match_status = vapply(
+      company_matches, `[[`, character(1L), "status"
+    ),
+    company_match_reason = vapply(
+      company_matches, `[[`, character(1L), "reason"
+    ),
+    excluded_reason = excluded_values
+  )
   if (any(!nzchar(result$sub_id))) {
     stop("A collected row has an empty sub_id.", call. = FALSE)
   }
