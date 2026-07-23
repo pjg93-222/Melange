@@ -64,6 +64,27 @@ await fs.writeFile(
   "utf8",
 );
 
+// The source database remains the complete query audit trail. Rejected rows
+// are verified false-positive employer/name matches and can outnumber actual
+// spending rows by more than 10:1 in broad industries. Keeping accepted and
+// review rows preserves every amount that can affect (or still needs review
+// for) the report while avoiding oversized Excel tables full of known-zero
+// records.
+const omittedRejectedByCycle = new Map(
+  payload.cycles.map((cycle) => [cycle.cycle, 0]),
+);
+const workbookRawRows = payload.raw_rows.filter((row) => {
+  if (row.company_match_status !== "rejected") return true;
+  if (omittedRejectedByCycle.has(row.cycle)) {
+    omittedRejectedByCycle.set(
+      row.cycle,
+      omittedRejectedByCycle.get(row.cycle) + 1,
+    );
+  }
+  return false;
+});
+payload.raw_rows = workbookRawRows;
+
 const workbook = Workbook.create();
 const colors = {
   navy: "#17365D",
@@ -475,7 +496,7 @@ for (const cycle of payload.cycles) {
     title: `${cycle.label} ${industry} Contributions`,
     subtitle:
       "Contribution-date cycle. Analysis Amount is formula-driven; FEC Filing Cycle and Cycle Alignment preserve the original reporting-period provenance.",
-    sourceNote: `Source DB SHA-256: ${sourceSha256} | Rows: ${data.length.toLocaleString("en-US")} | Official committee metadata: ${payload.committee_master_sources.join(" | ")}`,
+    sourceNote: `Source DB SHA-256: ${sourceSha256} | Rows retained: ${data.length.toLocaleString("en-US")} | Rejected query matches omitted: ${(omittedRejectedByCycle.get(cycle.cycle) ?? 0).toLocaleString("en-US")} (retained in source DB) | Official committee metadata: ${payload.committee_master_sources.join(" | ")}`,
   });
 }
 

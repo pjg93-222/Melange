@@ -83,7 +83,7 @@ function Test-JsonFile([string]$Path) {
   $priorErrorAction = $ErrorActionPreference
   try {
     $ErrorActionPreference = 'Continue'
-    & $NodePath '--max-old-space-size=4096' '-e' $validationScript $Path 2>$null | Out-Null
+    & $NodePath '--max-old-space-size=8192' '-e' $validationScript $Path 2>$null | Out-Null
     $valid = $LASTEXITCODE -eq 0
   } finally {
     $ErrorActionPreference = $priorErrorAction
@@ -130,12 +130,32 @@ New-Item -ItemType Directory -Path $cacheRoot,$stageDirectory -Force | Out-Null
 $dataPath = Join-Path $cacheRoot 'industry_data.json'
 $manifestPath = Join-Path $cacheRoot 'manifest.json'
 $databaseHash = (Get-FileHash -LiteralPath $DatabasePath -Algorithm SHA256).Hash.ToLowerInvariant()
-$inputFingerprint = Get-CombinedFingerprint (@($DatabasePath,$exporter,$builder,$finalizer,$beneficiaryModule) + $committeeFiles + $beneficiaryFiles) $Industry
+$dataInputPaths = @(
+  $DatabasePath,
+  $exporter,
+  $beneficiaryModule
+) + $committeeFiles + $beneficiaryFiles
+$inputFingerprint = Get-CombinedFingerprint $dataInputPaths $Industry
 $cacheHit = $false
 if (-not $NoCache -and (Test-Path -LiteralPath $dataPath) -and (Test-Path -LiteralPath $manifestPath)) {
   try {
     $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
     $cacheHit = [string]$manifest.input_fingerprint -eq $inputFingerprint
+    if (
+      -not $cacheHit -and
+      [string]$manifest.database_sha256 -eq $databaseHash
+    ) {
+      $latestInputWrite = (
+        $dataInputPaths |
+          ForEach-Object { (Get-Item -LiteralPath $_).LastWriteTimeUtc } |
+          Measure-Object -Maximum
+      ).Maximum
+      $cacheHit = (Get-Item -LiteralPath $dataPath).LastWriteTimeUtc -ge
+        $latestInputWrite
+      if ($cacheHit) {
+        Write-Host 'Reusing fresh export after report-builder-only changes.'
+      }
+    }
     if ($cacheHit) { $cacheHit = Test-JsonFile $dataPath }
   } catch { $cacheHit = $false }
 }
