@@ -224,24 +224,28 @@ fec_set_page_length <- function(session, page_length = 100L) {
   if (!is.logical(changed) || length(changed) != 1L || is.na(changed)) {
     stop("Could not set the FEC results page length.", call. = FALSE)
   }
-  if (isTRUE(changed)) {
-    fec_wait_until(function() {
-      if (!fec_results_ready(session)) {
-        return(FALSE)
-      }
-      isTRUE(fec_runtime_value(
-        session,
-        sprintf(
-          paste0(
-            "(function(){var i=window.jQuery('#results')",
-            ".DataTable().page.info();",
-            "return i.length===%d || i.recordsDisplay===0;})()"
-          ),
-          page_length
-        )
-      ))
-    })
-  }
+  fec_wait_until(function() {
+    if (!fec_results_ready(session)) {
+      return(FALSE)
+    }
+    isTRUE(fec_runtime_value(
+      session,
+      sprintf(
+        paste0(
+          "(function(){",
+          "var dt=window.jQuery('#results').DataTable();",
+          "var info=dt.page.info();",
+          "var rows=dt.rows().data().toArray().length;",
+          "var expected=(info.page+1<info.pages)",
+          "?info.length:(info.recordsDisplay-info.start);",
+          "return (info.length===%d || info.recordsDisplay===0)",
+          " && rows===expected;",
+          "})()"
+        ),
+        page_length
+      )
+    ))
+  })
   payload <- fec_read_page(session)
   if (payload$info$length != page_length &&
       payload$info$recordsDisplay != 0L) {
