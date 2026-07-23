@@ -703,7 +703,7 @@ fec_walk_variant_set_once <- function(
     timeout_seconds = timeout_seconds,
     retries = retries
   )
-  initial <- fec_set_page_length(session, 100L)
+  initial <- fec_read_page(session)
   records_total <- initial$info$recordsTotal
   if (records_total >= 5000L && is.infinite(max_pages)) {
     exported <- fec_walk_variant_set_export(
@@ -719,6 +719,8 @@ fec_walk_variant_set_once <- function(
     exported$retries <- as.integer(exported$retries) + as.integer(retry_count)
     return(exported)
   }
+  initial <- fec_set_page_length(session, 100L)
+  records_total <- initial$info$recordsTotal
   expected_total <- records_total
   first_payload <- initial
   processed_pages <- 0L
