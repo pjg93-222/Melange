@@ -180,7 +180,19 @@ fec_navigate <- function(
   last_error <- NULL
   for (attempt in seq_len(retries + 1L)) {
     result <- tryCatch({
-      session$Page$navigate(url = url)
+      navigate_url <- url
+      if (attempt > 1L) {
+        separator <- if (grepl("?", navigate_url, fixed = TRUE)) "&" else "?"
+        navigate_url <- paste0(
+          navigate_url,
+          separator,
+          "_mentat_retry=",
+          as.integer(Sys.time()),
+          "-",
+          attempt
+        )
+      }
+      session$Page$navigate(url = navigate_url)
       fec_wait_until(
         function() fec_results_ready(session),
         timeout_seconds = timeout_seconds
