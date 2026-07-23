@@ -2862,17 +2862,21 @@ collect_crypto <- function(
           determinism <- fec_determinism_spot_check(session)
         }
       }
-      retag_employer_company_matches(
-        connection,
-        company = company_name,
-        cycle = cycle
-      )
-      retag_identity_company_matches(
-        connection,
-        company = company_name,
-        cycle = cycle
-      )
       if (isTRUE(phase2_names)) {
+        # The contributor-name phase selects identity seeds from the accepted
+        # employer rows, so it needs current tags before it starts. When that
+        # optional phase is disabled, these per-cycle retags are redundant:
+        # mentat_main performs one authoritative full retag after collection.
+        retag_employer_company_matches(
+          connection,
+          company = company_name,
+          cycle = cycle
+        )
+        retag_identity_company_matches(
+          connection,
+          company = company_name,
+          cycle = cycle
+        )
         names_result <- collect_contributor_name_pass(
           connection,
           session,
