@@ -138,7 +138,9 @@ fec_results_ready <- function(session) {
   # so it cannot mean "ready" by itself (verified live 2026-07-18: reading at
   # that moment yields recordsTotal=0 for employers that have rows). Ready =
   # the fetch overlay is hidden AND either data rows exist or the table shows
-  # its confirmed-empty message row.
+  # its confirmed-empty message row. The current FEC page sometimes leaves
+  # the tbody empty instead of rendering that message, so a completed
+  # schedule_a resource plus a zero/zero DataTables count is also authoritative.
   isTRUE(fec_runtime_value(
     session,
     paste0(
@@ -150,6 +152,12 @@ fec_results_ready <- function(session) {
       "var ov=document.querySelector('.overlay');",
       "if(ov && getComputedStyle(ov).display!=='none'){return false;}",
       "if(dt.rows().data().toArray().length>0){return true;}",
+      "if(info.recordsTotal===0 && info.recordsDisplay===0){",
+      "var apiDone=performance.getEntriesByType('resource').some(function(e){",
+      "return e.name.indexOf('api.open.fec.gov/v1/schedules/schedule_a/')>=0;",
+      "});",
+      "if(apiDone){return true;}",
+      "}",
       "var r=document.querySelector('#results tbody tr');",
       "return !!r && /No data available in table/.test(r.textContent);",
       "}catch(e){return false;}})()"
