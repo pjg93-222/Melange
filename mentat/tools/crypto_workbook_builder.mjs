@@ -64,21 +64,20 @@ await fs.writeFile(
   "utf8",
 );
 
-// The source database remains the complete query audit trail. Rejected rows
-// are verified false-positive employer/name matches and can outnumber actual
-// spending rows by more than 10:1 in broad industries. Keeping accepted and
-// review rows preserves every amount that can affect (or still needs review
-// for) the report while avoiding oversized Excel tables full of known-zero
-// records.
-const omittedRejectedByCycle = new Map(
+// The source database remains the complete query audit trail. Non-accepted
+// employer/name matches cannot affect report totals and can outnumber actual
+// spending rows by more than 10:1 in broad industries. The Excel cycle tables
+// therefore retain accepted records only; review and rejected records stay in
+// the source database, with their omitted counts disclosed on each cycle.
+const omittedNonAcceptedByCycle = new Map(
   payload.cycles.map((cycle) => [cycle.cycle, 0]),
 );
 const workbookRawRows = payload.raw_rows.filter((row) => {
-  if (row.company_match_status !== "rejected") return true;
-  if (omittedRejectedByCycle.has(row.cycle)) {
-    omittedRejectedByCycle.set(
+  if (row.company_match_status === "accepted") return true;
+  if (omittedNonAcceptedByCycle.has(row.cycle)) {
+    omittedNonAcceptedByCycle.set(
       row.cycle,
-      omittedRejectedByCycle.get(row.cycle) + 1,
+      omittedNonAcceptedByCycle.get(row.cycle) + 1,
     );
   }
   return false;
@@ -496,7 +495,7 @@ for (const cycle of payload.cycles) {
     title: `${cycle.label} ${industry} Contributions`,
     subtitle:
       "Contribution-date cycle. Analysis Amount is formula-driven; FEC Filing Cycle and Cycle Alignment preserve the original reporting-period provenance.",
-    sourceNote: `Source DB SHA-256: ${sourceSha256} | Rows retained: ${data.length.toLocaleString("en-US")} | Rejected query matches omitted: ${(omittedRejectedByCycle.get(cycle.cycle) ?? 0).toLocaleString("en-US")} (retained in source DB) | Official committee metadata: ${payload.committee_master_sources.join(" | ")}`,
+    sourceNote: `Source DB SHA-256: ${sourceSha256} | Accepted rows retained: ${data.length.toLocaleString("en-US")} | Review/rejected query matches omitted: ${(omittedNonAcceptedByCycle.get(cycle.cycle) ?? 0).toLocaleString("en-US")} (retained in source DB) | Official committee metadata: ${payload.committee_master_sources.join(" | ")}`,
   });
 }
 
