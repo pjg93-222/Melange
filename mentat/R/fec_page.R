@@ -863,12 +863,9 @@ fec_walk_variant_set_export <- function(
     for (start in starts) {
       end <- min(start + as.integer(chunk_size) - 1L, nrow(exported))
       chunk <- exported[start:end]
-      rows <- lapply(seq_len(nrow(chunk)), function(index) {
-        as.list(chunk[index])
-      })
-      processed <<- processed + length(rows)
+      processed <<- processed + nrow(chunk)
       page_callback(
-        rows = rows,
+        rows = chunk,
         page = floor((processed - 1L) / 100L),
         records_total = records_total
       )

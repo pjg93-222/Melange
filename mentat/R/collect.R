@@ -784,7 +784,9 @@ flatten_fec_rows <- function(
   scraped_at_value = NULL
 ) {
   require_package("data.table")
-  if (!length(rows)) {
+  tabular_rows <- is.data.frame(rows)
+  row_count <- if (tabular_rows) nrow(rows) else length(rows)
+  if (!row_count) {
     empty <- data.table::as.data.table(
       setNames(replicate(length(contribution_columns()), logical(0), simplify = FALSE),
                contribution_columns())
@@ -792,22 +794,51 @@ flatten_fec_rows <- function(
     return(empty)
   }
   scraped_at <- scraped_at_value %||% format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3%z")
+  page_raw <- function(field, default) {
+    if (!tabular_rows) return(NULL)
+    if (!field %in% names(rows)) return(rep(default, row_count))
+    value <- rows[[field]]
+    if (is.list(value)) {
+      return(vapply(value, function(item) {
+        if (is.null(item) || !length(item)) default else item[[1L]]
+      }, FUN.VALUE = default, USE.NAMES = FALSE))
+    }
+    rep_len(value, row_count)
+  }
   page_text <- function(field, default = "") {
+    if (tabular_rows) {
+      return(trim_text(page_raw(field, default)))
+    }
     vapply(rows, function(row) {
       trim_text(row_scalar(row, field, default))
     }, character(1L))
   }
   page_number <- function(field, default = NA_real_) {
+    if (tabular_rows) {
+      return(suppressWarnings(as.numeric(page_raw(field, default))))
+    }
     vapply(rows, function(row) {
       as_db_number(row_scalar(row, field, default))
     }, numeric(1L))
   }
   page_integer <- function(field, default = NA_integer_) {
+    if (tabular_rows) {
+      return(suppressWarnings(as.integer(page_raw(field, default))))
+    }
     vapply(rows, function(row) {
       as_db_integer(row_scalar(row, field, default))
     }, integer(1L))
   }
   page_bool <- function(field, default = FALSE) {
+    if (tabular_rows) {
+      value <- page_raw(field, default)
+      if (is.logical(value)) {
+        return(as.integer(!is.na(value) & value))
+      }
+      return(as.integer(
+        toupper(trim_text(value)) %in% c("1", "TRUE", "T", "Y", "YES", "X")
+      ))
+    }
     vapply(rows, function(row) {
       as_db_bool(row_scalar(row, field, default))
     }, integer(1L))
@@ -818,7 +849,7 @@ flatten_fec_rows <- function(
   contributor_states <- page_text("contributor_state")
   exclusions <- trim_text(exclusions)
   exclusions <- exclusions[nzchar(exclusions)]
-  excluded_values <- rep(NA_character_, length(rows))
+  excluded_values <- rep(NA_character_, row_count)
   if (length(exclusions)) {
     upper_names <- toupper(contributor_names)
     upper_employers <- toupper(employer_values)
@@ -861,18 +892,22 @@ flatten_fec_rows <- function(
       "P1_employer", "P2_variant", "P2_company_name", "P3_bulk_rescue"
     )
   )
-  committee_names <- vapply(rows, function(row) {
-    committee <- row$committee
-    committee_name <- if (is.list(committee)) {
-      trim_text(committee$name %||% "")
-    } else {
-      ""
-    }
-    if (!nzchar(committee_name)) {
-      committee_name <- trim_text(row_scalar(row, "committee_name", ""))
-    }
-    committee_name
-  }, character(1L))
+  committee_names <- if (tabular_rows) {
+    page_text("committee_name")
+  } else {
+    vapply(rows, function(row) {
+      committee <- row$committee
+      committee_name <- if (is.list(committee)) {
+        trim_text(committee$name %||% "")
+      } else {
+        ""
+      }
+      if (!nzchar(committee_name)) {
+        committee_name <- trim_text(row_scalar(row, "committee_name", ""))
+      }
+      committee_name
+    }, character(1L))
+  }
   memo_codes <- page_text("memo_code")
   memoed_values <- page_bool("memoed_subtotal")
   committee_ids <- page_text("committee_id")
@@ -883,8 +918,8 @@ flatten_fec_rows <- function(
   amendments <- page_text("amendment_indicator")
   employer_keys <- normalize_variant_key(employer_values)
   variant_keys <- normalize_variant_key(variants)
-  matched_variants <- rep(paste(variants, collapse = " | "), length(rows))
-  matched_variant_width <- rep(-1L, length(rows))
+  matched_variants <- rep(paste(variants, collapse = " | "), row_count)
+  matched_variant_width <- rep(-1L, row_count)
   for (variant_index in which(nzchar(variant_keys))) {
     matched <- grepl(variant_keys[[variant_index]], employer_keys, fixed = TRUE)
     variant_width <- nchar(variants[[variant_index]])
@@ -892,13 +927,21 @@ flatten_fec_rows <- function(
     matched_variants[replace] <- variants[[variant_index]]
     matched_variant_width[replace] <- variant_width
   }
-  file_nums <- vapply(rows, function(row) {
-    as_db_integer(row_scalar(
-      row,
-      "file_num",
-      row_scalar(row, "file_number", NA_integer_)
-    ))
-  }, integer(1L))
+  file_nums <- if (tabular_rows) {
+    if ("file_num" %in% names(rows)) {
+      page_integer("file_num")
+    } else {
+      page_integer("file_number")
+    }
+  } else {
+    vapply(rows, function(row) {
+      as_db_integer(row_scalar(
+        row,
+        "file_num",
+        row_scalar(row, "file_number", NA_integer_)
+      ))
+    }, integer(1L))
+  }
   contributor_entity_keys <- vapply(
     contributor_names,
     strip_legal_suffix,
