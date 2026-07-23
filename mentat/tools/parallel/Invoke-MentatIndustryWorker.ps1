@@ -20,6 +20,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 2.0
+$lastGoodModulePath = Join-Path $PSScriptRoot 'MentatLastGoodGuard.psm1'
+if (-not (Test-Path -LiteralPath $lastGoodModulePath -PathType Leaf)) {
+  throw "Last-good guard module is missing: $lastGoodModulePath"
+}
+Import-Module -Name $lastGoodModulePath -Force -ErrorAction Stop
 
 function Write-AtomicJson {
   param(
@@ -97,6 +102,36 @@ foreach ($field in @(
   }
 }
 
+$lastGoodRoot = if (
+  $null -ne $spec.PSObject.Properties['last_good_root'] -and
+  -not [string]::IsNullOrWhiteSpace([string]$spec.last_good_root)
+) {
+  [IO.Path]::GetFullPath([string]$spec.last_good_root)
+} else {
+  [IO.Path]::GetFullPath(
+    (Join-Path (Split-Path -Parent ([string]$spec.run_directory)) 'last-good')
+  )
+}
+$availabilityStatePath = if (
+  $null -ne $spec.PSObject.Properties['availability_state_path'] -and
+  -not [string]::IsNullOrWhiteSpace([string]$spec.availability_state_path)
+) {
+  [IO.Path]::GetFullPath([string]$spec.availability_state_path)
+} else {
+  [IO.Path]::GetFullPath(
+    (Join-Path ([string]$spec.run_directory) (
+      'availability\{0}.availability.json' -f [string]$spec.slug
+    ))
+  )
+}
+$initialAvailability = if (
+  $null -ne $spec.PSObject.Properties['initial_availability']
+) {
+  $spec.initial_availability
+} else {
+  $null
+}
+
 try {
   $Host.UI.RawUI.BackgroundColor = 'DarkRed'
   $Host.UI.RawUI.ForegroundColor = 'White'
@@ -123,7 +158,17 @@ $exitCode = 1
 $status = 'failed'
 $errorText = ''
 $outputWorkbook = [string]$spec.expected_workbook_path
+if ($null -eq $initialAvailability) {
+  $initialAvailability = Initialize-MentatReportAvailability `
+    -Industry ([string]$spec.industry) `
+    -TargetPath $outputWorkbook `
+    -LastGoodRoot $lastGoodRoot `
+    -StatePath $availabilityStatePath
+}
 $workbookHash = ''
+$lastGoodState = $null
+$lastGoodError = ''
+$finalAvailability = $null
 $generatorSupportsMutex = $false
 $generatorStartedAt = $null
 $collectionExitCode = $null
@@ -237,7 +282,8 @@ try {
       "--industry=$($spec.industry)",
       "--data-root=$dataRoot",
       '--engine=chrome',
-      '--skip-phase2-names'
+      '--skip-phase2-names',
+      '--defer-report-files'
     )
     if ($resumedCollection) {
       $collectionArguments += "--resume-after=$resumeAfter"
@@ -431,6 +477,44 @@ try {
   $workbookHash = (
     Get-FileHash -LiteralPath $outputWorkbook -Algorithm SHA256
   ).Hash
+  $freshCompletedAt = [DateTimeOffset]::Now
+  try {
+    $lastGoodState = Save-MentatAuditedLastGood `
+      -Industry ([string]$spec.industry) `
+      -SourcePath $outputWorkbook `
+      -ExpectedOutputName ([IO.Path]::GetFileName($outputWorkbook)) `
+      -LastGoodRoot $lastGoodRoot `
+      -GeneratorCompletedAt $freshCompletedAt.ToString('o')
+  } catch {
+    # The freshly audited workbook is already atomically published. A
+    # last-good archive failure must be loud and recorded, but must not relabel
+    # the successfully generated report as failed.
+    $lastGoodError = $_.Exception.Message
+    Write-Warning "Last-good archive failed: $lastGoodError"
+  }
+  $finalAvailability = [ordered]@{
+    schema_version = 1
+    industry = [string]$spec.industry
+    expected_output_name = [IO.Path]::GetFileName($outputWorkbook)
+    target_path = $outputWorkbook
+    checked_at = $freshCompletedAt.ToString('o')
+    availability = 'present'
+    action = 'fresh_audited_report_published'
+    provenance = [ordered]@{
+      kind = 'fresh_generator_output'
+      generator_started_at = $generatorStartedAt.ToString('o')
+      generator_completed_at = $freshCompletedAt.ToString('o')
+      evidence = [ordered]@{
+        path = $workbookItem.FullName
+        bytes = [int64]$workbookItem.Length
+        sha256 = $workbookHash.ToLowerInvariant()
+        last_write_utc = $workbookItem.LastWriteTimeUtc.ToString('o')
+      }
+      last_good = $lastGoodState
+    }
+    error = $lastGoodError
+  }
+  Write-AtomicJson $availabilityStatePath $finalAvailability
   $status = 'succeeded'
   Write-WorkerState -Stage 'completed' -Detail $outputWorkbook
 } catch {
@@ -496,6 +580,12 @@ $result = [ordered]@{
     Test-Path -LiteralPath $outputWorkbook -PathType Leaf
   ) { $outputWorkbook } else { '' }
   workbook_sha256 = $workbookHash
+  initial_availability = $initialAvailability
+  final_availability = $finalAvailability
+  last_good_state = $lastGoodState
+  last_good_error = $lastGoodError
+  last_good_root = $lastGoodRoot
+  availability_state_path = $availabilityStatePath
   process_log = [string]$spec.process_log_path
   transcript = [string]$spec.transcript_path
   error = $errorText

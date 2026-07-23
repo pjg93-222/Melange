@@ -29,9 +29,52 @@ if (!dataPath || !outputDir) {
 }
 
 const payload = JSON.parse(await fs.readFile(dataPath, "utf8"));
+const cycleFilter = String(process.env.MENTAT_CYCLE_FILTER ?? "").trim();
+if (cycleFilter) {
+  const selectedCycle = payload.cycles.find((cycle) =>
+    cycle.label === cycleFilter || String(cycle.cycle) === cycleFilter
+  );
+  if (!selectedCycle) {
+    throw new Error(`Unknown cycle filter: ${cycleFilter}`);
+  }
+  const cycleNumber = selectedCycle.cycle;
+  payload.cycles = [selectedCycle];
+  for (const key of [
+    "raw_rows",
+    "employees",
+    "committee_map",
+    "downstream_activity",
+    "beneficiary_bridge",
+    "beneficiary_summary",
+  ]) {
+    payload[key] = (payload[key] ?? []).filter(
+      (row) => row.cycle === cycleNumber,
+    );
+  }
+  payload.cycle_exceptions = (payload.cycle_exceptions ?? []).filter(
+    (row) => row.source_cycle === cycleNumber,
+  );
+  if (payload.metadata?.expected_cycle_totals != null) {
+    payload.metadata.expected_cycle_totals = {
+      [selectedCycle.label]:
+        payload.metadata.expected_cycle_totals[selectedCycle.label] ?? 0,
+    };
+  }
+  if (payload.metadata?.omitted_non_accepted_by_cycle != null) {
+    payload.metadata.omitted_non_accepted_by_cycle = {
+      [String(cycleNumber)]:
+        payload.metadata.omitted_non_accepted_by_cycle[String(cycleNumber)]
+        ?? 0,
+    };
+  }
+}
 const deferFormulas = process.env.MENTAT_DEFER_FORMULAS === "1";
+const compactRaw = process.env.MENTAT_COMPACT_RAW === "1";
+const aggregateFacts = process.env.MENTAT_FORMULA_FACTS === "1";
 const industry = String(payload.metadata?.industry ?? "Crypto").trim() || "Crypto";
-const reportBaseName = `${industry} Industry Spending Overview`;
+const reportBaseName = cycleFilter
+  ? `${industry} Industry Spending Overview ${payload.cycles[0].label}`
+  : `${industry} Industry Spending Overview`;
 const overviewSheetName = industry === "Crypto"
   ? "Crypto Spending Overview"
   : "Spending Overview";
@@ -42,24 +85,43 @@ const diagnosticsDir = path.join(path.dirname(dataPath), "final_diagnostics_v2")
 await fs.mkdir(diagnosticsDir, { recursive: true });
 
 const expectedCycleTotals = Object.fromEntries(
-  payload.cycles.map((cycle) => [cycle.label, 0]),
+  payload.cycles.map((cycle) => [
+    cycle.label,
+    Number(payload.metadata?.expected_cycle_totals?.[cycle.label] ?? 0),
+  ]),
 );
-for (const row of payload.raw_rows) {
-  if (
-    row.include_in_analysis === "Yes"
-    && Object.hasOwn(expectedCycleTotals, row.cycle_label)
-  ) {
-    expectedCycleTotals[row.cycle_label] += Number(row.amount || 0);
+if (payload.metadata?.expected_cycle_totals == null) {
+  for (const row of payload.raw_rows) {
+    if (
+      row.include_in_analysis === "Yes"
+      && Object.hasOwn(expectedCycleTotals, row.cycle_label)
+    ) {
+      expectedCycleTotals[row.cycle_label] += Number(row.amount || 0);
+    }
   }
 }
 const finalizerDataPath = path.join(outputDir, "finalizer_data.json");
+const finalizerCycleLabels = new Map(
+  payload.cycles.map((cycle) => [cycle.cycle, cycle.label]),
+);
 await fs.writeFile(
   finalizerDataPath,
   JSON.stringify({
-    metadata: { industry },
+    metadata: {
+      industry,
+      formula_facts: aggregateFacts,
+      report_base_name: reportBaseName,
+    },
     cycles: payload.cycles,
     companies: payload.companies,
     expected_cycle_totals: expectedCycleTotals,
+    employee_rank_facts: aggregateFacts
+      ? payload.employees.map((employee) => [
+        finalizerCycleLabels.get(employee.cycle),
+        employee.company,
+        employee.person_key,
+      ])
+      : [],
   }),
   "utf8",
 );
@@ -70,11 +132,20 @@ await fs.writeFile(
 // therefore retain accepted records only; review and rejected records stay in
 // the source database, with their omitted counts disclosed on each cycle.
 const omittedNonAcceptedByCycle = new Map(
-  payload.cycles.map((cycle) => [cycle.cycle, 0]),
+  payload.cycles.map((cycle) => [
+    cycle.cycle,
+    Number(
+      payload.metadata?.omitted_non_accepted_by_cycle?.[String(cycle.cycle)]
+      ?? 0
+    ),
+  ]),
 );
-const workbookRawRows = payload.raw_rows.filter((row) => {
+let workbookRawRows = payload.raw_rows.filter((row) => {
   if (row.company_match_status === "accepted") return true;
-  if (omittedNonAcceptedByCycle.has(row.cycle)) {
+  if (
+    payload.metadata?.omitted_non_accepted_by_cycle == null
+    && omittedNonAcceptedByCycle.has(row.cycle)
+  ) {
     omittedNonAcceptedByCycle.set(
       row.cycle,
       omittedNonAcceptedByCycle.get(row.cycle) + 1,
@@ -82,7 +153,142 @@ const workbookRawRows = payload.raw_rows.filter((row) => {
   }
   return false;
 });
-payload.raw_rows = workbookRawRows;
+
+function buildFormulaFacts(rows) {
+  const master = new Map();
+  const employee = new Map();
+  const recipient = new Map();
+  const accumulate = (map, key, seed, row) => {
+    let entry = map.get(key);
+    if (!entry) {
+      entry = {
+        ...seed,
+        amount: 0,
+        gift_count: 0,
+        include_in_analysis: "Yes",
+        cycle_alignment: "OK",
+      };
+      map.set(key, entry);
+    }
+    entry.amount += Number(row.amount || 0);
+    entry.gift_count += 1;
+  };
+
+  for (const row of rows) {
+    if (row.include_in_analysis !== "Yes") continue;
+    const common = {
+      cycle: row.cycle,
+      cycle_label: row.cycle_label,
+      source_cycle: row.source_cycle,
+      company: row.company,
+    };
+    accumulate(
+      master,
+      [
+        row.cycle_label,
+        row.company,
+        row.employee_tier,
+        row.party,
+        row.recipient_category,
+      ].join("\r"),
+      {
+        ...common,
+        fact_type: "Master",
+        employee_tier: row.employee_tier,
+        party: row.party,
+        recipient_category: row.recipient_category,
+      },
+      row,
+    );
+    accumulate(
+      employee,
+      [
+        row.cycle_label,
+        row.company,
+        row.person_key,
+        row.contributor,
+        row.employee_tier,
+        row.party,
+      ].join("\r"),
+      {
+        ...common,
+        fact_type: "Employee",
+        contributor: row.contributor,
+        employee_tier: row.employee_tier,
+        party: row.party,
+        person_key: row.person_key,
+      },
+      row,
+    );
+    accumulate(
+      recipient,
+      [
+        row.cycle_label,
+        row.company,
+        row.recipient_key,
+        row.recipient,
+        row.committee_id,
+        row.recipient_category,
+        row.employee_tier,
+        row.party,
+      ].join("\r"),
+      {
+        ...common,
+        fact_type: "Recipient",
+        party: row.party,
+        recipient_category: row.recipient_category,
+        category_source: row.category_source,
+        party_source: row.party_source,
+        employee_tier: row.employee_tier,
+        recipient: row.recipient,
+        committee_id: row.committee_id,
+        recipient_key: row.recipient_key,
+      },
+      row,
+    );
+  }
+
+  const facts = [...master.values(), ...employee.values(), ...recipient.values()];
+  facts.forEach((row, index) => {
+    row.source_id = `FACT:${row.fact_type}:${index + 1}`;
+  });
+  return facts;
+}
+
+const acceptedTransactionCount = workbookRawRows.filter(
+  (row) => row.include_in_analysis === "Yes",
+).length;
+const acceptedTransactionsByCycle = new Map(
+  payload.cycles.map((cycle) => [
+    cycle.cycle,
+    workbookRawRows.filter(
+      (row) =>
+        row.cycle === cycle.cycle
+        && row.include_in_analysis === "Yes",
+    ).length,
+  ]),
+);
+let detailRawRows;
+if (aggregateFacts) {
+  payload.raw_rows = buildFormulaFacts(workbookRawRows);
+  detailRawRows = payload.raw_rows;
+  workbookRawRows = null;
+} else {
+  detailRawRows = workbookRawRows;
+}
+const masterDetailRows = aggregateFacts
+  ? detailRawRows.filter((row) => row.fact_type === "Master")
+  : detailRawRows;
+const recipientDetailRows = aggregateFacts
+  ? detailRawRows.filter((row) => row.fact_type === "Recipient")
+  : detailRawRows;
+console.log(
+  `BUILD MODE compact_raw=${compactRaw ? "yes" : "no"} `
+  + `formula_facts=${aggregateFacts ? "yes" : "no"} `
+  + `accepted_rows=${acceptedTransactionCount.toLocaleString("en-US")} `
+  + `workbook_rows=${payload.raw_rows.length.toLocaleString("en-US")} `
+  + `raw_columns=${aggregateFacts ? 18 : compactRaw ? 20 : 35}`,
+);
 
 const workbook = Workbook.create();
 const colors = {
@@ -129,7 +335,8 @@ const masterCategories = [
   "Unclassified",
 ];
 const masterTiers = ["Corporate", "Chief", "Middle Management", "Employee"];
-const companyViewName = (company) => `${company} View`.slice(0, 31);
+const companyViewName = (company) =>
+  `${String(company).trim()} View`.slice(0, 31).trimEnd();
 const companyViewSheets = payload.companies.map((company) => companyViewName(company));
 const sheetOrder = [
   "Master Overview",
@@ -137,6 +344,7 @@ const sheetOrder = [
   ...payload.cycles.map((cycle) => `${cycle.label} Summary`),
   "Company List",
   ...companyViewSheets,
+  ...(aggregateFacts ? ["Employee Rank Facts"] : []),
   "Employee List",
   "Recipient List",
   "Beneficiary Summary",
@@ -240,9 +448,11 @@ function cycleRanges(cycleLabel) {
     analysisAmount: ref("I"),
     party: ref("J"),
     category: ref("K"),
-    included: ref("Z"),
-    personKey: ref("AB"),
-    recipientKey: ref("P"),
+    included: ref(aggregateFacts ? "P" : compactRaw ? "R" : "Z"),
+    personKey: ref(aggregateFacts ? "Q" : compactRaw ? "S" : "AB"),
+    recipientKey: ref(aggregateFacts ? "N" : compactRaw ? "N" : "P"),
+    factType: aggregateFacts ? ref("C") : null,
+    giftCount: aggregateFacts ? ref("O") : null,
   };
 }
 
@@ -250,8 +460,8 @@ const cycleRangeMap = new Map(
   payload.cycles.map((cycle) => [cycle.label, cycleRanges(cycle.label)]),
 );
 
-function sumifs(rangeInfo, criteria = []) {
-  const args = [rangeInfo.analysisAmount];
+function sumifs(rangeInfo, criteria = [], sumRange = "analysisAmount") {
+  const args = [rangeInfo[sumRange]];
   for (const [rangeName, criterion] of criteria) {
     args.push(rangeInfo[rangeName], criterion);
   }
@@ -259,6 +469,9 @@ function sumifs(rangeInfo, criteria = []) {
 }
 
 function scopeFormula(rangeInfo, scope, extraCriteria = []) {
+  if (aggregateFacts) {
+    extraCriteria = [["factType", excelString("Master")], ...extraCriteria];
+  }
   if (scope === "Total Giving" && extraCriteria.length === 0) {
     return `SUM(${rangeInfo.analysisAmount})`;
   }
@@ -285,26 +498,117 @@ function scopeFormula(rangeInfo, scope, extraCriteria = []) {
 }
 
 function companyFormula(rangeInfo, companyCell, extraCriteria = []) {
+  if (aggregateFacts) {
+    extraCriteria = [["factType", excelString("Master")], ...extraCriteria];
+  }
   return sumifs(rangeInfo, [["company", companyCell], ...extraCriteria]);
 }
 
 function masterCompanyFormula(rangeInfo, companyCell, extraCriteria = []) {
+  if (aggregateFacts) {
+    extraCriteria = [["factType", excelString("Master")], ...extraCriteria];
+  }
   const industry = extraCriteria.length === 0
     ? `SUM(${rangeInfo.analysisAmount})`
     : sumifs(rangeInfo, extraCriteria);
-  const company = companyFormula(rangeInfo, companyCell, extraCriteria);
+  const company = sumifs(
+    rangeInfo,
+    [["company", companyCell], ...extraCriteria],
+  );
   return `IF(${companyCell}="Industry Total",${industry},${company})`;
 }
 
 function employeeFormula(rangeInfo, personKeyCell, extraCriteria = []) {
+  if (aggregateFacts) {
+    extraCriteria = [["factType", excelString("Employee")], ...extraCriteria];
+  }
   return sumifs(rangeInfo, [["personKey", personKeyCell], ...extraCriteria]);
 }
 
+function employeeCountFormula(rangeInfo, personKeyCell) {
+  if (!aggregateFacts) {
+    return `COUNTIFS(${rangeInfo.personKey},${personKeyCell},${rangeInfo.included},"Yes")`;
+  }
+  return sumifs(
+    rangeInfo,
+    [
+      ["personKey", personKeyCell],
+      ["included", excelString("Yes")],
+      ["factType", excelString("Employee")],
+    ],
+    "giftCount",
+  );
+}
+
 function recipientFormula(rangeInfo, recipientKeyCell, extraCriteria = []) {
+  if (aggregateFacts) {
+    extraCriteria = [["factType", excelString("Recipient")], ...extraCriteria];
+  }
   return sumifs(rangeInfo, [["recipientKey", recipientKeyCell], ...extraCriteria]);
 }
 
+function recipientCountFormula(rangeInfo, recipientKeyCell, companyCell = null) {
+  if (!aggregateFacts) {
+    return `COUNTIFS(${rangeInfo.recipientKey},${recipientKeyCell},${rangeInfo.included},"Yes"${
+      companyCell ? `,${rangeInfo.company},${companyCell}` : ""
+    })`;
+  }
+  const criteria = [
+    ["recipientKey", recipientKeyCell],
+    ["included", excelString("Yes")],
+    ["factType", excelString("Recipient")],
+  ];
+  if (companyCell) criteria.push(["company", companyCell]);
+  return sumifs(rangeInfo, criteria, "giftCount");
+}
+
 function rawRowsForRecords(records) {
+  if (aggregateFacts) {
+    return records.map((row) => [
+      row.source_id,
+      row.cycle_label,
+      row.fact_type ?? "Exception",
+      row.cycle_alignment,
+      row.company,
+      row.contributor,
+      row.employee_tier,
+      row.amount,
+      deferFormulas ? (row.include_in_analysis === "Yes" ? Number(row.amount || 0) : 0) : null,
+      row.party,
+      row.recipient_category,
+      row.recipient,
+      row.committee_id,
+      row.recipient_key,
+      Number(row.gift_count || 1),
+      row.include_in_analysis,
+      row.person_key,
+      deferFormulas ? "PENDING" : null,
+    ]);
+  }
+  if (compactRaw) {
+    return records.map((row) => [
+      row.source_id,
+      row.cycle_label,
+      row.source_cycle,
+      row.cycle_alignment,
+      row.company,
+      row.contributor,
+      row.employee_tier,
+      row.amount,
+      deferFormulas ? (row.include_in_analysis === "Yes" ? Number(row.amount || 0) : 0) : null,
+      row.party,
+      row.recipient_category,
+      row.recipient,
+      row.committee_id,
+      row.recipient_key,
+      row.date ? new Date(`${row.date}T00:00:00`) : null,
+      row.employer,
+      row.occupation,
+      row.include_in_analysis,
+      row.person_key,
+      deferFormulas ? "PENDING" : null,
+    ]);
+  }
   return records.map((row) => [
       row.source_id,
       row.cycle_label,
@@ -387,6 +691,48 @@ const rawHeaders = [
     "Duplicate Memo",
     "Logic Check",
 ];
+const compactRawHeaders = [
+  "Source ID",
+  "Cycle",
+  "FEC Filing Cycle",
+  "Cycle Alignment",
+  "Company",
+  "Contributor",
+  "Employee Tier",
+  "Amount",
+  "Analysis Amount",
+  "Party",
+  "Recipient Category",
+  "Recipient",
+  "Committee ID",
+  "Recipient Key",
+  "Date",
+  "Employer",
+  "Occupation",
+  "Include in Analysis",
+  "Person Key",
+  "Logic Check",
+];
+const formulaFactHeaders = [
+  "Fact ID",
+  "Cycle",
+  "Fact Type",
+  "Cycle Alignment",
+  "Company",
+  "Contributor",
+  "Employee Tier",
+  "Amount",
+  "Analysis Amount",
+  "Party",
+  "Recipient Category",
+  "Recipient",
+  "Committee ID",
+  "Recipient Key",
+  "Gift Count",
+  "Include in Analysis",
+  "Person Key",
+  "Logic Check",
+];
 
 function buildRawSheet({
   sheetName,
@@ -398,7 +744,12 @@ function buildRawSheet({
   exceptionSheet = false,
 }) {
   const sheet = workbook.worksheets.getItem(sheetName);
-  const lastColumn = excelColumn(rawHeaders.length);
+  const headers = aggregateFacts
+    ? formulaFactHeaders
+    : compactRaw
+      ? compactRawHeaders
+      : rawHeaders;
+  const lastColumn = excelColumn(headers.length);
   titleBlock(
     sheet,
     title,
@@ -407,19 +758,21 @@ function buildRawSheet({
     lastColumn,
   );
 
-  sheet.getRange(`A4:${lastColumn}${4 + data.length}`).values = [rawHeaders, ...data];
+  sheet.getRange(`A4:${lastColumn}${4 + data.length}`).values = [headers, ...data];
   const firstDataRow = 5;
   const lastDataRow = 4 + data.length;
   if (!deferFormulas) {
+    const includeColumn = aggregateFacts ? "P" : compactRaw ? "R" : "Z";
+    const logicColumn = aggregateFacts ? "R" : compactRaw ? "T" : "AI";
     sheet.getRange(`I${firstDataRow}`).formulas = [[
-      `=IF(Z${firstDataRow}="Yes",H${firstDataRow},0)`,
+      `=IF(${includeColumn}${firstDataRow}="Yes",H${firstDataRow},0)`,
     ]];
     sheet.getRange(`I${firstDataRow}:I${lastDataRow}`).fillDown();
     const logicFormula = exceptionSheet
-      ? `=IF(AND(Z${firstDataRow}="No",D${firstDataRow}="Outside requested cycles",I${firstDataRow}=0),"OK","CHECK")`
-      : `=IF(AND(I${firstDataRow}=IF(Z${firstDataRow}="Yes",H${firstDataRow},0),OR(D${firstDataRow}="OK",D${firstDataRow}="Reassigned by contribution date")),"OK","CHECK")`;
-    sheet.getRange(`AI${firstDataRow}`).formulas = [[logicFormula]];
-    sheet.getRange(`AI${firstDataRow}:AI${lastDataRow}`).fillDown();
+      ? `=IF(AND(${includeColumn}${firstDataRow}="No",I${firstDataRow}=0),"OK","CHECK")`
+      : `=IF(AND(I${firstDataRow}=IF(${includeColumn}${firstDataRow}="Yes",H${firstDataRow},0),OR(D${firstDataRow}="OK",D${firstDataRow}="Reassigned by contribution date")),"OK","CHECK")`;
+    sheet.getRange(`${logicColumn}${firstDataRow}`).formulas = [[logicFormula]];
+    sheet.getRange(`${logicColumn}${firstDataRow}:${logicColumn}${lastDataRow}`).fillDown();
   }
 
   const table = sheet.tables.add(`A4:${lastColumn}${lastDataRow}`, true, tableName);
@@ -427,20 +780,31 @@ function buildRawSheet({
   sheet.freezePanes.freezeRows(4);
 
   sheet.getRange(`H${firstDataRow}:I${lastDataRow}`).format.numberFormat = currencyFormat;
-  sheet.getRange(`Q${firstDataRow}:Q${lastDataRow}`).format.numberFormat = "yyyy-mm-dd";
-  sheet.getRange(`AD${firstDataRow}:AH${lastDataRow}`).format.numberFormat = "0";
+  const dateColumn = compactRaw ? "O" : "Q";
+  const logicColumn = aggregateFacts ? "R" : compactRaw ? "T" : "AI";
+  if (!aggregateFacts) {
+    sheet.getRange(`${dateColumn}${firstDataRow}:${dateColumn}${lastDataRow}`).format.numberFormat = "yyyy-mm-dd";
+  }
+  if (!compactRaw && !aggregateFacts) {
+    sheet.getRange(`AD${firstDataRow}:AH${lastDataRow}`).format.numberFormat = "0";
+  }
+  if (aggregateFacts) {
+    sheet.getRange(`O${firstDataRow}:O${lastDataRow}`).format.numberFormat = countFormat;
+  }
   applyIntegrityFormatting(
-    sheet.getRange(`AI${firstDataRow}:AI${lastDataRow}`),
+    sheet.getRange(`${logicColumn}${firstDataRow}:${logicColumn}${lastDataRow}`),
     firstDataRow,
-    "AI",
+    logicColumn,
   );
-  sheet.getRange(`AC${firstDataRow}:AC${lastDataRow}`).conditionalFormats.add(
-    "beginsWith",
-    {
-      text: "Conservative split",
-      format: { fill: colors.yellow, font: { color: "#7F6000" } },
-    },
-  );
+  if (!compactRaw && !aggregateFacts) {
+    sheet.getRange(`AC${firstDataRow}:AC${lastDataRow}`).conditionalFormats.add(
+      "beginsWith",
+      {
+        text: "Conservative split",
+        format: { fill: colors.yellow, font: { color: "#7F6000" } },
+      },
+    );
+  }
 
   const widths = {
     A: 20,
@@ -479,23 +843,78 @@ function buildRawSheet({
     AH: 13,
     AI: 13,
   };
-  for (const [column, width] of Object.entries(widths)) {
-    sheet.getRange(`${column}1:${column}${lastDataRow}`).format.columnWidth = width;
+  const compactWidths = {
+    A: 20,
+    B: 12,
+    C: 13,
+    D: 29,
+    E: 18,
+    F: 26,
+    G: 18,
+    H: 14,
+    I: 15,
+    J: 14,
+    K: 20,
+    L: 34,
+    M: 14,
+    N: 28,
+    O: 12,
+    P: 26,
+    Q: 26,
+    R: 17,
+    S: 36,
+    T: 13,
+  };
+  const factWidths = {
+    A: 22,
+    B: 12,
+    C: 12,
+    D: 29,
+    E: 18,
+    F: 26,
+    G: 18,
+    H: 14,
+    I: 15,
+    J: 14,
+    K: 20,
+    L: 34,
+    M: 14,
+    N: 28,
+    O: 12,
+    P: 17,
+    Q: 36,
+    R: 13,
+  };
+  const selectedWidths = aggregateFacts
+    ? factWidths
+    : compactRaw
+      ? compactWidths
+      : widths;
+  for (const [column, width] of Object.entries(selectedWidths)) {
+    sheet.getRange(`${column}1:${column}5`).format.columnWidth = width;
   }
-  sheet.getRange(`A4:${lastColumn}${lastDataRow}`).format.verticalAlignment = "top";
+  if (!aggregateFacts) {
+    sheet.getRange(`A4:${lastColumn}${lastDataRow}`).format.verticalAlignment = "top";
+  }
   return sheet;
 }
 
 for (const cycle of payload.cycles) {
   const data = rawRowsForCycle(cycle);
+  const acceptedTransactions = acceptedTransactionsByCycle.get(cycle.cycle) ?? 0;
   buildRawSheet({
     sheetName: cycle.label,
     data,
     tableName: cycle.table_name,
-    title: `${cycle.label} ${industry} Contributions`,
-    subtitle:
-      "Contribution-date cycle. Analysis Amount is formula-driven; FEC Filing Cycle and Cycle Alignment preserve the original reporting-period provenance.",
-    sourceNote: `Source DB SHA-256: ${sourceSha256} | Accepted rows retained: ${data.length.toLocaleString("en-US")} | Review/rejected query matches omitted: ${(omittedNonAcceptedByCycle.get(cycle.cycle) ?? 0).toLocaleString("en-US")} (retained in source DB) | Official committee metadata: ${payload.committee_master_sources.join(" | ")}`,
+    title: `${cycle.label} ${industry} ${
+      aggregateFacts ? "Formula Facts" : "Contributions"
+    }`,
+    subtitle: aggregateFacts
+      ? "Exact accepted transactions aggregated into separate Master, Employee, and Recipient facts. Every summary formula uses the matching fact type; gift counts and dollars are preserved."
+      : "Contribution-date cycle. Analysis Amount is formula-driven; FEC Filing Cycle and Cycle Alignment preserve the original reporting-period provenance.",
+    sourceNote: aggregateFacts
+      ? `Source DB SHA-256: ${sourceSha256} | Accepted transactions: ${acceptedTransactions.toLocaleString("en-US")} | Formula facts: ${data.length.toLocaleString("en-US")} | Complete transaction-level audit remains in the cached JSON and SQLite source.`
+      : `Source DB SHA-256: ${sourceSha256} | Accepted rows retained: ${data.length.toLocaleString("en-US")} | Review/rejected query matches omitted: ${(omittedNonAcceptedByCycle.get(cycle.cycle) ?? 0).toLocaleString("en-US")} (retained in source DB) | Official committee metadata: ${payload.committee_master_sources.join(" | ")}`,
   });
 }
 
@@ -569,7 +988,7 @@ function buildMasterOverview() {
     const currentTotals = new Map(
       payload.companies.map((company) => [
         company,
-        payload.raw_rows
+        masterDetailRows
           .filter(
             (row) =>
               row.cycle === cycle.cycle &&
@@ -893,7 +1312,7 @@ function buildCompanyList() {
   const currentTotals = new Map();
   for (const cycle of payload.cycles) {
     for (const company of payload.companies) {
-      const total = payload.raw_rows
+      const total = masterDetailRows
         .filter(
           (row) =>
             row.cycle === cycle.cycle &&
@@ -999,7 +1418,28 @@ function buildEmployeeList() {
     "Integrity Check",
   ];
   const cycleLabelFor = new Map(payload.cycles.map((cycle) => [cycle.cycle, cycle.label]));
-  const rows = payload.employees.map((employee) => [
+  let employeeRows = payload.employees;
+  if (aggregateFacts) {
+    const groups = new Map();
+    for (const employee of payload.employees) {
+      const key = `${employee.cycle}\r${employee.company}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(employee);
+    }
+    employeeRows = [...groups.entries()]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .flatMap(([, group]) =>
+        group
+          .sort(
+            (left, right) =>
+              Number(right.preliminary_total || 0)
+                - Number(left.preliminary_total || 0)
+              || left.person.localeCompare(right.person),
+          )
+          .slice(0, 150),
+      );
+  }
+  const rows = employeeRows.map((employee) => [
     cycleLabelFor.get(employee.cycle),
     null,
     null,
@@ -1024,7 +1464,9 @@ function buildEmployeeList() {
     sheet,
     "Employee List",
     "People carry both an industry-wide cycle rank and a within-company cycle rank. Identities are consolidated only on high-confidence company/name/location/title evidence.",
-    `${payload.metadata.employee_groups} cycle-person groups | ${payload.metadata.identity_review_groups} conservative same-name splits retained rather than guessed together.`,
+    aggregateFacts
+      ? `${rows.length.toLocaleString("en-US")} top-per-company cycle-person groups displayed | All ${payload.metadata.employee_groups.toLocaleString("en-US")} groups remain formula-ranked in Employee Rank Facts and retained in the cycle fact tables.`
+      : `${payload.metadata.employee_groups} cycle-person groups | ${payload.metadata.identity_review_groups} conservative same-name splits retained rather than guessed together.`,
     "S",
   );
   sheet.getRange(`A5:S${5 + rows.length}`).values = [headers, ...rows];
@@ -1035,8 +1477,12 @@ function buildEmployeeList() {
     const rangeInfo = cycleRangeMap.get(row[0]);
     const keyCell = `$R${excelRow}`;
     return [
-      `=1+COUNTIFS($A$${first}:$A$${last},A${excelRow},$F$${first}:$F$${last},">"&F${excelRow})`,
-      `=1+COUNTIFS($A$${first}:$A$${last},A${excelRow},$E$${first}:$E$${last},E${excelRow},$F$${first}:$F$${last},">"&F${excelRow})`,
+      aggregateFacts
+        ? `=1+COUNTIFS(EmployeeRankFactsTable[Cycle],A${excelRow},EmployeeRankFactsTable[Total Giving],">"&F${excelRow})`
+        : `=1+COUNTIFS($A$${first}:$A$${last},A${excelRow},$F$${first}:$F$${last},">"&F${excelRow})`,
+      aggregateFacts
+        ? `=1+COUNTIFS(EmployeeRankFactsTable[Cycle],A${excelRow},EmployeeRankFactsTable[Company],E${excelRow},EmployeeRankFactsTable[Total Giving],">"&F${excelRow})`
+        : `=1+COUNTIFS($A$${first}:$A$${last},A${excelRow},$E$${first}:$E$${last},E${excelRow},$F$${first}:$F$${last},">"&F${excelRow})`,
       `=${employeeFormula(rangeInfo, keyCell)}`,
       `=${employeeFormula(rangeInfo, keyCell, [["party", excelString("D")]])}`,
       `=${employeeFormula(rangeInfo, keyCell, [["party", excelString("R")]])}`,
@@ -1044,7 +1490,7 @@ function buildEmployeeList() {
       `=IF(G${excelRow}+H${excelRow}=0,0,G${excelRow}/(G${excelRow}+H${excelRow}))`,
       `=IF(G${excelRow}+H${excelRow}=0,0,H${excelRow}/(G${excelRow}+H${excelRow}))`,
       `=IF(F${excelRow}=0,0,(G${excelRow}+H${excelRow})/F${excelRow})`,
-      `=COUNTIFS(${rangeInfo.personKey},${keyCell},${rangeInfo.included},"Yes")`,
+      `=${employeeCountFormula(rangeInfo, keyCell)}`,
       `=IF(ABS(F${excelRow}-G${excelRow}-H${excelRow}-I${excelRow})<0.01,"OK","CHECK")`,
     ];
   });
@@ -1087,6 +1533,39 @@ function buildEmployeeList() {
     S: 15,
   })) sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
   sheet.getRange(`N${first}:R${last}`).format.wrapText = true;
+  return sheet;
+}
+
+function buildEmployeeRankFacts() {
+  if (!aggregateFacts) return null;
+  const sheet = workbook.worksheets.getItem("Employee Rank Facts");
+  titleBlock(
+    sheet,
+    "Employee Rank Facts",
+    "Complete cycle-person rank basis for the curated Employee List.",
+    "Excel finalization writes the complete compact cycle-person basis here. Total Giving is an Excel formula over the cycle Employee facts, preserving exact industry and company ranks without duplicating descriptive columns.",
+    "D",
+  );
+  sheet.getRange("A5:D5").values = [[
+    "Cycle",
+    "Company",
+    "Person Key",
+    "Total Giving",
+  ]];
+  sheet.getRange("A5:D5").format.fill = colors.blue;
+  sheet.getRange("A5:D5").format.font = {
+    bold: true,
+    color: colors.white,
+  };
+  sheet.freezePanes.freezeRows(5);
+  for (const [column, width] of Object.entries({
+    A: 14,
+    B: 22,
+    C: 42,
+    D: 18,
+  })) {
+    sheet.getRange(`${column}1:${column}5`).format.columnWidth = width;
+  }
   return sheet;
 }
 
@@ -1144,7 +1623,7 @@ function buildRecipientList() {
   ];
   const industryGroups = new Map();
   const companyGroups = new Map();
-  for (const row of payload.raw_rows) {
+  for (const row of recipientDetailRows) {
     if (row.include_in_analysis !== "Yes") continue;
     const industryKey = `${row.cycle_label}\r${row.recipient_key}`;
     const companyKey = `${row.cycle_label}\r${row.company}\r${row.recipient_key}`;
@@ -1222,7 +1701,11 @@ function buildRecipientList() {
         `=${recipientFormula(rangeInfo, keyCell, [...companyCriteria, ["tier", excelString("Chief")]])}`,
         `=${recipientFormula(rangeInfo, keyCell, [...companyCriteria, ["tier", excelString("Middle Management")]])}`,
         `=${recipientFormula(rangeInfo, keyCell, [...companyCriteria, ["tier", excelString("Employee")]])}`,
-        `=COUNTIFS(${rangeInfo.recipientKey},${keyCell},${rangeInfo.included},"Yes"${row[1] === "Company" ? `,${rangeInfo.company},$C${excelRow}` : ""})`,
+        `=${recipientCountFormula(
+          rangeInfo,
+          keyCell,
+          row[1] === "Company" ? `$C${excelRow}` : null,
+        )}`,
       ],
       url: `=IF(F${excelRow}="","","https://www.fec.gov/data/committee/"&F${excelRow}&"/")`,
       integrity: `=IF(AND(ABS(N${excelRow}-O${excelRow}-P${excelRow}-Q${excelRow})<0.01,ABS(N${excelRow}-U${excelRow}-V${excelRow}-W${excelRow}-X${excelRow})<0.01),"OK","CHECK")`,
@@ -1472,7 +1955,7 @@ function buildBeneficiarySummary() {
 
 function groupedRecipientEntries() {
   const groups = new Map();
-  for (const row of payload.raw_rows) {
+  for (const row of recipientDetailRows) {
     if (row.include_in_analysis !== "Yes") continue;
     const key = `${row.cycle_label}\r${row.company}\r${row.recipient_key}`;
     if (!groups.has(key)) groups.set(key, []);
@@ -1544,7 +2027,7 @@ function focusedRowsForCycle(cycle) {
   const rows = [];
   const companyTotals = payload.companies.map((company) => ({
     company,
-    total: payload.raw_rows.filter((row) => row.cycle === cycle.cycle && row.company === company && row.include_in_analysis === "Yes")
+    total: masterDetailRows.filter((row) => row.cycle === cycle.cycle && row.company === company && row.include_in_analysis === "Yes")
       .reduce((sum, row) => sum + Number(row.amount || 0), 0),
   })).sort((a, b) => b.total - a.total || a.company.localeCompare(b.company));
   for (const entry of companyTotals) rows.push([
@@ -1624,6 +2107,7 @@ function focusedRowsForCompany(company) {
 const masterSheet = buildMasterOverview();
 const overviewSheet = buildOverview();
 const companySheet = buildCompanyList();
+const employeeRankFactsSheet = buildEmployeeRankFacts();
 const employeeSheet = buildEmployeeList();
 const recipientSheet = buildRecipientList();
 const beneficiarySummarySheet = buildBeneficiarySummary();
@@ -1652,6 +2136,7 @@ for (const company of payload.companies) {
 void masterSheet;
 void overviewSheet;
 void companySheet;
+void employeeRankFactsSheet;
 void employeeSheet;
 void recipientSheet;
 void beneficiarySummarySheet;
@@ -1663,6 +2148,7 @@ const previewRanges = new Map([
   ["Master Overview", "A1:CE45"],
   [overviewSheetName, "A1:J52"],
   ["Company List", "A1:O36"],
+  ...(aggregateFacts ? [["Employee Rank Facts", "A1:D25"]] : []),
   ["Employee List", "A1:S30"],
   ["Recipient List", "A1:AD30"],
   ["Beneficiary Summary", "A1:V30"],

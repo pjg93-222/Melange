@@ -36,6 +36,7 @@ param(
   [string]$DatabasePath = '',
   [string]$OutputDirectory = '',
   [string]$RunRoot = '',
+  [string]$LastGoodRoot = '',
   [switch]$SkipCollection,
   [switch]$NoCache,
   [switch]$SkipMonitorConsole,
@@ -53,6 +54,7 @@ $projectRoot = Split-Path -Parent $toolsRoot
 $workspaceRoot = Split-Path -Parent $projectRoot
 $workerPath = Join-Path $parallelRoot 'Invoke-MentatIndustryWorker.ps1'
 $monitorPath = Join-Path $parallelRoot 'Watch-MentatIndustryProcesses.ps1'
+$lastGoodModulePath = Join-Path $parallelRoot 'MentatLastGoodGuard.psm1'
 $powerShellPath = (Get-Command powershell.exe -ErrorAction Stop).Source
 
 function Resolve-FullPath {
@@ -165,6 +167,9 @@ if (-not $OutputDirectory) {
 if (-not $RunRoot) {
   $RunRoot = Join-Path $projectRoot '.cache\industry-report-runs'
 }
+if (-not $LastGoodRoot) {
+  $LastGoodRoot = Join-Path $RunRoot 'last-good'
+}
 
 $GeneratorPath = Resolve-FullPath $GeneratorPath $parallelRoot
 $MentatPath = Resolve-FullPath $MentatPath $projectRoot
@@ -172,17 +177,20 @@ $RScriptPath = Resolve-FullPath $RScriptPath $workspaceRoot
 $RLibraryPath = Resolve-FullPath $RLibraryPath $workspaceRoot
 $OutputDirectory = Resolve-FullPath $OutputDirectory $workspaceRoot
 $RunRoot = Resolve-FullPath $RunRoot $projectRoot
+$LastGoodRoot = Resolve-FullPath $LastGoodRoot $projectRoot
 if ($DatabasePath) {
   $DatabasePath = Resolve-FullPath $DatabasePath $workspaceRoot
 }
 
 foreach ($requiredPath in @(
-  $workerPath, $monitorPath, $GeneratorPath, $MentatPath, $RScriptPath
+  $workerPath, $monitorPath, $lastGoodModulePath, $GeneratorPath, $MentatPath,
+  $RScriptPath
 )) {
   if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
     throw "Required parallel-report script is missing: $requiredPath"
   }
 }
+Import-Module -Name $lastGoodModulePath -Force -ErrorAction Stop
 if ($DatabasePath -and -not (Test-Path -LiteralPath $DatabasePath -PathType Leaf)) {
   throw "Database file is missing: $DatabasePath"
 }
@@ -229,9 +237,10 @@ $stateDirectory = Join-Path $runDirectory 'state'
 $resultDirectory = Join-Path $runDirectory 'results'
 $logDirectory = Join-Path $runDirectory 'logs'
 $dataDirectory = Join-Path $runDirectory 'data'
+$availabilityDirectory = Join-Path $runDirectory 'availability'
 foreach ($directory in @(
   $runDirectory, $specDirectory, $stateDirectory, $resultDirectory,
-  $logDirectory, $dataDirectory
+  $logDirectory, $dataDirectory, $availabilityDirectory
 )) {
   [IO.Directory]::CreateDirectory($directory) | Out-Null
 }
@@ -268,6 +277,23 @@ for ($index = 0; $index -lt $cleanIndustries.Count; $index++) {
   } else {
     Join-Path $industryDataRoot 'mentat.db'
   }
+  $expectedWorkbookPath = Join-Path $OutputDirectory (
+    "$industry Industry Spending Overview.xlsx"
+  )
+  $availabilityStatePath = Join-Path $availabilityDirectory (
+    "$slug.availability.json"
+  )
+  $initialAvailability = Initialize-MentatReportAvailability `
+    -Industry $industry `
+    -TargetPath $expectedWorkbookPath `
+    -LastGoodRoot $LastGoodRoot `
+    -StatePath $availabilityStatePath
+  Write-Host (
+    'Availability {0}: {1} ({2})' -f
+      $industry,
+      [string]$initialAvailability.availability,
+      [string]$initialAvailability.action
+  )
   $spec = [ordered]@{
     run_id = $runId
     industry = $industry
@@ -280,9 +306,10 @@ for ($index = 0; $index -lt $cleanIndustries.Count; $index++) {
     data_root = $industryDataRoot
     database_path = $industryDatabase
     output_directory = $OutputDirectory
-    expected_workbook_path = Join-Path $OutputDirectory (
-      "$industry Industry Spending Overview.xlsx"
-    )
+    expected_workbook_path = $expectedWorkbookPath
+    last_good_root = $LastGoodRoot
+    availability_state_path = $availabilityStatePath
+    initial_availability = $initialAvailability
     run_directory = $runDirectory
     state_path = Join-Path $stateDirectory "$slug.state.json"
     result_path = Join-Path $resultDirectory "$slug.result.json"
@@ -319,6 +346,7 @@ Write-AtomicJson $manifestPath ([ordered]@{
   collect_from_scratch = (-not [bool]$SkipCollection)
   database_path = $DatabasePath
   output_directory = $OutputDirectory
+  last_good_root = $LastGoodRoot
   max_parallel = $MaxParallel
   no_cache = [bool]$NoCache
   slot_semaphore_name = $slotName

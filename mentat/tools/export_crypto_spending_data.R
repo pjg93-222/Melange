@@ -43,7 +43,8 @@ if (!nzchar(MENTAT_INDUSTRY)) {
 
 for (module in c(
   "paths.R", "schema.R", "ingest.R", "fec_page.R", "collect.R",
-  "fec_api.R", "reconcile.R", "report.R", "fec_beneficiary.R"
+  "fec_api.R", "reconcile.R", "report.R", "fec_beneficiary.R",
+  "identity_components.R"
 )) {
   source(file.path(MENTAT_PROJECT_ROOT, "R", module), local = .GlobalEnv)
 }
@@ -52,6 +53,34 @@ require_package("data.table")
 require_package("DBI")
 require_package("RSQLite")
 require_package("jsonlite")
+
+export_started_at <- unname(proc.time()[["elapsed"]])
+export_phase_started_at <- export_started_at
+export_phase <- function(name, rows = NA_integer_) {
+  now <- unname(proc.time()[["elapsed"]])
+  detail <- if (length(rows) == 1L && !is.na(rows)) {
+    paste0(" rows=", format(rows, scientific = FALSE, trim = TRUE))
+  } else {
+    ""
+  }
+  cat(sprintf(
+    "EXPORT PHASE %-32s phase=%.3fs total=%.3fs%s\n",
+    name,
+    now - export_phase_started_at,
+    now - export_started_at,
+    detail
+  ))
+  flush(stdout())
+  export_phase_started_at <<- now
+  invisible(now)
+}
+
+map_unique_text <- function(values, mapper) {
+  values <- as.character(values)
+  unique_values <- unique(values)
+  mapped <- vapply(unique_values, mapper, character(1L))
+  mapped[match(values, unique_values)]
+}
 
 supported_cycles <- c(2022L, 2024L, 2026L)
 
@@ -119,6 +148,7 @@ read_fec_committee_master <- function(directory) {
 }
 
 fec_committee_master <- read_fec_committee_master(committee_master_dir)
+export_phase("committee_master_loaded", nrow(fec_committee_master))
 
 connection <- DBI::dbConnect(
   RSQLite::SQLite(),
@@ -129,11 +159,13 @@ on.exit(DBI::dbDisconnect(connection), add = TRUE)
 
 lookups <- spending_report_lookups(connection)
 raw_rows <- spending_raw_report_rows(connection, versioning_applied = TRUE)
+export_phase("raw_database_rows_loaded", nrow(raw_rows))
 analysis_rows <- spending_report_rows(
   connection,
   lookups = lookups,
   raw_rows = raw_rows
 )
+export_phase("analysis_rows_prepared", nrow(analysis_rows))
 
 if (!nrow(raw_rows) || !nrow(analysis_rows)) {
   stop(MENTAT_INDUSTRY, " report source contains no rows.", call. = FALSE)
@@ -200,10 +232,11 @@ analysis_rows[, party := trim_text(classifications$party)]
 analysis_rows[, category_source := trim_text(classifications$category_source)]
 analysis_rows[, party_source := trim_text(classifications$party_source)]
 analysis_rows[!nzchar(party), party := "Other / Unclassified"]
+export_phase("recipient_classification", nrow(analysis_rows))
 
 executive_keys <- unique(paste(
   spending_report_company_labels(lookups$executives$company),
-  vapply(lookups$executives$executive_name, person_identity_key, character(1L)),
+  map_unique_text(lookups$executives$executive_name, person_identity_key),
   sep = "\r"
 ))
 verified_employee_names <- if (identical(MENTAT_INDUSTRY, "Crypto")) {
@@ -222,14 +255,13 @@ verified_employee_names <- if (identical(MENTAT_INDUSTRY, "Crypto")) {
 }
 verified_employee_keys <- unique(paste(
   verified_employee_names$company,
-  vapply(verified_employee_names$person, person_identity_key, character(1L)),
+  map_unique_text(verified_employee_names$person, person_identity_key),
   sep = "\r"
 ))
 analysis_rows[, display_company := spending_report_company_labels(company)]
-analysis_rows[, canonical_person_key := vapply(
+analysis_rows[, canonical_person_key := map_unique_text(
   contributor_name,
-  person_identity_key,
-  character(1L)
+  person_identity_key
 )]
 analysis_rows[, known_executive := paste(
   display_company,
@@ -241,14 +273,13 @@ analysis_rows[, verified_employee := paste(
   canonical_person_key,
   sep = "\r"
 ) %in% verified_employee_keys]
-analysis_rows[, employee_tier := vapply(seq_len(.N), function(index) {
-  spending_contributor_tier(
-    contributor_occupation[[index]],
-    known_executive[[index]],
-    is_entity_contributor[[index]] == 1L
-  )
-}, character(1L))]
+analysis_rows[, employee_tier := spending_contributor_tiers(
+  contributor_occupation,
+  known_executive,
+  is_entity_contributor == 1L
+)]
 analysis_rows[, included_summary := !recipient_category %in% c("527", "501c")]
+export_phase("person_fields_normalized", nrow(analysis_rows))
 
 person_rows <- analysis_rows[
   is_entity_contributor == 0L,
@@ -263,7 +294,7 @@ person_rows <- analysis_rows[
     state = trim_text(contributor_state),
     zipcode = trim_text(contributor_zip),
     employer = trim_text(contributor_employer),
-    employer_key = vapply(contributor_employer, strip_legal_suffix, character(1L)),
+    employer_key = map_unique_text(contributor_employer, strip_legal_suffix),
     occupation = trim_text(contributor_occupation),
     occupation_key = normalize_occupation(contributor_occupation),
     amount = as.numeric(contribution_receipt_amount),
@@ -274,73 +305,7 @@ person_rows <- analysis_rows[
   )
 ]
 person_rows[!nzchar(base_key), base_key := exact_name_key]
-
-nonblank_equal <- function(left, right) {
-  nzchar(left) && nzchar(right) && identical(left, right)
-}
-
-assign_identity_components <- function(group) {
-  group <- data.table::copy(group)
-  count <- nrow(group)
-  parent <- seq_len(count)
-  root <- function(index) {
-    while (parent[[index]] != index) {
-      parent[[index]] <<- parent[[parent[[index]]]]
-      index <- parent[[index]]
-    }
-    index
-  }
-  unite <- function(left, right) {
-    left_root <- root(left)
-    right_root <- root(right)
-    if (left_root != right_root) parent[[right_root]] <<- left_root
-  }
-
-  if (any(group$known_executive) || any(group$verified_employee)) {
-    if (count > 1L) for (index in 2L:count) unite(1L, index)
-  } else if (count > 1L) {
-    for (left in seq_len(count - 1L)) {
-      for (right in seq.int(left + 1L, count)) {
-        same_exact <- nonblank_equal(
-          group$exact_name_key[[left]],
-          group$exact_name_key[[right]]
-        )
-        same_zip <- nonblank_equal(
-          substr(group$zipcode[[left]], 1L, 5L),
-          substr(group$zipcode[[right]], 1L, 5L)
-        )
-        same_location <- nonblank_equal(
-          paste(group$city[[left]], group$state[[left]], sep = "|"),
-          paste(group$city[[right]], group$state[[right]], sep = "|")
-        ) && nzchar(group$city[[left]]) && nzchar(group$state[[left]])
-        same_occupation <- nonblank_equal(
-          group$occupation_key[[left]],
-          group$occupation_key[[right]]
-        )
-        same_employer <- nonblank_equal(
-          group$employer_key[[left]],
-          group$employer_key[[right]]
-        )
-        merge_exact <- same_exact && (same_zip || same_location || same_occupation)
-        merge_variant <- !same_exact && (
-          same_zip || same_location || (same_occupation && same_employer)
-        )
-        if (merge_exact || merge_variant) unite(left, right)
-      }
-    }
-  }
-
-  roots <- vapply(seq_len(count), root, integer(1L))
-  root_order <- unique(roots[order(
-    group$exact_name_key,
-    group$state,
-    group$zipcode,
-    group$sub_id
-  )])
-  component <- match(roots, root_order)
-  group[, identity_component := component]
-  group
-}
+export_phase("identity_rows_prepared", nrow(person_rows))
 
 identity_groups <- person_rows[, assign_identity_components(.SD), by = .(company, base_key)]
 identity_groups[, component_count := data.table::uniqueN(identity_component), by = .(company, base_key)]
@@ -389,6 +354,7 @@ person_cycle <- identity_groups[
   identity_basis = identity_basis[[1L]]
 ), by = .(cycle, company, person_key)]
 data.table::setorder(person_cycle, cycle, -preliminary_total, company, person)
+export_phase("identity_components", nrow(identity_groups))
 
 analysis_map <- analysis_rows[, .(
   sub_id,
@@ -512,6 +478,7 @@ raw_export <- raw_export[, .(
 raw_export[, sort_date := as.integer(as.Date(date))]
 data.table::setorder(raw_export, cycle, -sort_date, contributor, source_id)
 raw_export[, sort_date := NULL]
+export_phase("raw_export_built", nrow(raw_export))
 
 if (!nzchar(beneficiary_dir)) {
   stop(
@@ -538,6 +505,7 @@ candidate_links <- fec_read_candidate_committee_links(
   supported_cycles
 )
 leadership_pacs <- fec_read_leadership_pacs(beneficiary_dir, supported_cycles)
+export_phase("beneficiary_masters_loaded")
 direct_candidate_keys <- unique(paste(
   candidate_links$cycle[candidate_links$designation %in% c("P", "A")],
   candidate_links$committee_id[candidate_links$designation %in% c("P", "A")],
@@ -552,6 +520,7 @@ downstream_activity <- fec_read_downstream_activity(
   candidate_master,
   supported_cycles
 )
+export_phase("downstream_activity_loaded", nrow(downstream_activity))
 committee_map <- fec_build_committee_map(
   recipient_universe,
   fec_committee_master,
@@ -568,6 +537,7 @@ downstream_activity_export <- fec_aggregate_downstream_activity(
   downstream_activity,
   downstream_universe
 )
+export_phase("beneficiary_tables_built", nrow(beneficiary_tables$bridge))
 
 candidate_link_coverage <- sum(nzchar(committee_map$direct_person))
 downstream_coverage <- sum(nzchar(committee_map$top_downstream_person))
@@ -579,6 +549,31 @@ cycles <- data.frame(
   table_name = c("Cycle_2021_2022", "Cycle_2023_2024", "Cycle_2025_2026"),
   stringsAsFactors = FALSE
 )
+expected_cycle_totals <- setNames(
+  rep(0, nrow(cycles)),
+  cycles$label
+)
+calculated_cycle_totals <- raw_export[
+  include_in_analysis == "Yes" & cycle %in% supported_cycles,
+  .(total = sum(amount, na.rm = TRUE)),
+  by = cycle_label
+]
+expected_cycle_totals[calculated_cycle_totals$cycle_label] <-
+  calculated_cycle_totals$total
+omitted_non_accepted_by_cycle <- setNames(
+  rep(0L, nrow(cycles)),
+  as.character(cycles$cycle)
+)
+calculated_omissions <- raw_export[
+  cycle %in% supported_cycles & company_match_status != "accepted",
+  .(rows = .N),
+  by = cycle
+]
+omitted_non_accepted_by_cycle[as.character(calculated_omissions$cycle)] <-
+  calculated_omissions$rows
+workbook_raw_export <- raw_export[
+  cycle %in% supported_cycles & company_match_status == "accepted"
+]
 
 payload <- list(
   metadata = list(
@@ -586,6 +581,7 @@ payload <- list(
     database_path = database_path,
     database_bytes = file.info(database_path)$size,
     raw_rows = nrow(raw_export),
+    workbook_raw_rows = nrow(workbook_raw_export),
     cycle_table_rows = sum(raw_export$cycle %in% supported_cycles),
     cycle_exception_rows = sum(!raw_export$cycle %in% supported_cycles),
     reassigned_by_date_rows = sum(
@@ -622,11 +618,15 @@ payload <- list(
     beneficiary_bridge_rows = nrow(beneficiary_tables$bridge),
     beneficiary_summary_rows = nrow(beneficiary_tables$summary),
     downstream_aggregate_rows = nrow(downstream_activity_export),
+    expected_cycle_totals = as.list(expected_cycle_totals),
+    omitted_non_accepted_by_cycle = as.list(
+      omitted_non_accepted_by_cycle
+    ),
     generated_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS%z")
   ),
   cycles = cycles,
   companies = companies,
-  raw_rows = raw_export[cycle %in% supported_cycles],
+  raw_rows = workbook_raw_export,
   cycle_exceptions = raw_export[!cycle %in% supported_cycles],
   committee_master_sources = unique(fec_committee_master$source_url),
   beneficiary_sources = unique(c(
@@ -641,17 +641,62 @@ payload <- list(
   beneficiary_bridge = beneficiary_tables$bridge,
   beneficiary_summary = beneficiary_tables$summary
 )
+export_phase("payload_assembled", nrow(workbook_raw_export))
+
+write_payload_json <- function(payload, path, chunk_rows = 10000L) {
+  connection <- file(path, open = "wb")
+  on.exit(close(connection), add = TRUE)
+  write_text <- function(value) {
+    writeBin(charToRaw(enc2utf8(as.character(value))), connection)
+  }
+  encode <- function(value, dataframe = "rows") {
+    jsonlite::toJSON(
+      value,
+      dataframe = dataframe,
+      auto_unbox = TRUE,
+      digits = NA,
+      na = "null",
+      pretty = FALSE
+    )
+  }
+  write_frame <- function(value) {
+    row_count <- nrow(value)
+    write_text("[")
+    if (row_count) {
+      starts <- seq.int(1L, row_count, by = as.integer(chunk_rows))
+      for (chunk_index in seq_along(starts)) {
+        start <- starts[[chunk_index]]
+        finish <- min(start + as.integer(chunk_rows) - 1L, row_count)
+        encoded <- as.character(encode(value[start:finish, , drop = FALSE]))
+        inner <- substr(encoded, 2L, nchar(encoded) - 1L)
+        if (chunk_index > 1L && nzchar(inner)) write_text(",")
+        write_text(inner)
+      }
+    }
+    write_text("]")
+  }
+
+  write_text("{")
+  payload_names <- names(payload)
+  for (index in seq_along(payload_names)) {
+    name <- payload_names[[index]]
+    if (index > 1L) write_text(",")
+    write_text(encode(name))
+    write_text(":")
+    value <- payload[[name]]
+    if (is.data.frame(value)) {
+      write_frame(value)
+    } else {
+      write_text(encode(value))
+    }
+  }
+  write_text("}")
+  invisible(path)
+}
 
 dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
-jsonlite::write_json(
-  payload,
-  output_path,
-  dataframe = "rows",
-  auto_unbox = TRUE,
-  digits = NA,
-  na = "null",
-  pretty = FALSE
-)
+write_payload_json(payload, output_path)
+export_phase("json_written")
 cat(sprintf(
   paste0(
     "%s workbook export: raw=%d included=%d employee_groups=%d ",

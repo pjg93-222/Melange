@@ -1650,14 +1650,7 @@ spending_report_rows <- function(connection, lookups = NULL, raw_rows = NULL) {
   lookups <- lookups %||% spending_report_lookups(connection)
   variants <- lookups$companies
   company_variants <- split(variants$variant, variants$company)
-  entity_flags <- vapply(seq_len(nrow(rows)), function(index) {
-    is_entity_contributor_value(
-      rows$entity_type[[index]],
-      rows$contributor_name[[index]],
-      rows$company[[index]],
-      company_variants[[rows$company[[index]]]] %||% rows$company[[index]]
-    )
-  }, integer(1L))
+  entity_flags <- spending_entity_contributor_flags(rows, company_variants)
   # Reclassification can discover an entity, but it must never downgrade an
   # entity already validated by the source-specific retag pass. In particular,
   # corporate_giving rows whose names use approved corporate qualifiers (for
@@ -1678,6 +1671,81 @@ spending_report_rows <- function(connection, lookups = NULL, raw_rows = NULL) {
   )]
   spending_assert_no_duplicate_kept_tuples(rows)
   rows[]
+}
+
+spending_entity_contributor_flags <- function(rows, company_variants) {
+  require_package("data.table")
+  if (!nrow(rows)) return(integer())
+
+  # The source entity type resolves the common case without any name work.
+  # For the remaining rows, classify each distinct company/name pair once
+  # instead of rebuilding the same company alias set for every contribution.
+  flags <- as.integer(
+    toupper(trim_text(rows$entity_type)) %in% c("ORG", "COM", "PAC", "CCM")
+  )
+  unresolved <- which(flags == 0L)
+  if (!length(unresolved)) return(flags)
+
+  pairs <- unique(rows[unresolved, .(
+    contributor_name = as.character(contributor_name),
+    company = as.character(company)
+  )])
+  pairs[, entity_match := FALSE]
+  for (company_value in unique(pairs$company)) {
+    indices <- which(pairs$company == company_value)
+    variants <- company_variants[[company_value]] %||% company_value
+    company_keys <- unique(vapply(
+      c(company_value, variants),
+      strip_legal_suffix,
+      character(1L)
+    ))
+    company_keys <- company_keys[nzchar(company_keys)]
+    contributor_keys <- vapply(
+      pairs$contributor_name[indices],
+      strip_legal_suffix,
+      character(1L)
+    )
+    contributor_squashed <- gsub(
+      "[^A-Z0-9]",
+      "",
+      contributor_keys,
+      perl = TRUE
+    )
+    company_squashed <- unique(gsub(
+      "[^A-Z0-9]",
+      "",
+      company_keys,
+      perl = TRUE
+    ))
+    pairs$entity_match[indices] <- nzchar(contributor_keys) & (
+      contributor_keys %in% company_keys |
+        (
+          nzchar(contributor_squashed) &
+            contributor_squashed %in% company_squashed
+        )
+    )
+  }
+  pair_keys <- paste0(
+    nchar(pairs$contributor_name),
+    ":",
+    pairs$contributor_name,
+    "\034",
+    nchar(pairs$company),
+    ":",
+    pairs$company
+  )
+  row_keys <- paste0(
+    nchar(rows$contributor_name[unresolved]),
+    ":",
+    rows$contributor_name[unresolved],
+    "\034",
+    nchar(rows$company[unresolved]),
+    ":",
+    rows$company[unresolved]
+  )
+  pair_match <- pairs$entity_match[match(row_keys, pair_keys)]
+  flags[unresolved] <- as.integer(pair_match)
+  flags
 }
 
 spending_ordered_report_rows <- function(
@@ -1959,6 +2027,59 @@ spending_contributor_tier <- function(
   spending_title_role(title, known_executive)
 }
 
+spending_contributor_tiers <- function(
+  title,
+  known_executive = FALSE,
+  is_entity_contributor = FALSE
+) {
+  count <- max(
+    length(title),
+    length(known_executive),
+    length(is_entity_contributor)
+  )
+  if (!count) return(character())
+  title <- rep_len(title, count)
+  known_executive <- rep_len(as.logical(known_executive), count)
+  is_entity_contributor <- rep_len(
+    as.logical(is_entity_contributor),
+    count
+  )
+  known_executive <- !is.na(known_executive) & known_executive
+  is_entity_contributor <-
+    !is.na(is_entity_contributor) & is_entity_contributor
+
+  result <- rep("Employee", count)
+  result[is_entity_contributor] <- "Corporate"
+  person_indices <- which(!is_entity_contributor)
+  if (!length(person_indices)) return(result)
+  executive_indices <- person_indices[known_executive[person_indices]]
+  result[executive_indices] <- "Chief"
+
+  title_indices <- person_indices[!known_executive[person_indices]]
+  if (!length(title_indices)) return(result)
+  values <- normalize_occupation(title[title_indices])
+  chief_pattern <- paste(
+    "\\b(CHIEF (EXECUTIVE|FINANCIAL|OPERATING|TECHNOLOGY|INFORMATION|",
+    "LEGAL|MARKETING|PEOPLE|PRODUCT|RISK|COMPLIANCE|REVENUE|STRATEGY|",
+    "ACCOUNTING) OFFICER|CEO|CFO|COO|CTO|CIO|CLO|CMO|GENERAL COUNSEL|",
+    "FOUNDER|OWNER|CHAIRMAN|CHAIRWOMAN|CHAIRPERSON)\\b",
+    sep = ""
+  )
+  is_chief <- grepl(chief_pattern, values, perl = TRUE) |
+    (
+      grepl("\\bPRESIDENT\\b", values, perl = TRUE) &
+        !grepl("\\bVICE PRESIDENT\\b", values, perl = TRUE)
+    )
+  is_middle <- !is_chief & grepl(
+    "\\b(VICE PRESIDENT|DIRECTOR|PARTNER|HEAD|MANAGER|MANAGEMENT)\\b",
+    values,
+    perl = TRUE
+  )
+  result[title_indices[is_chief]] <- "Chief"
+  result[title_indices[is_middle]] <- "Middle Management"
+  result
+}
+
 spending_company_pac_match <- function(
   company,
   committee_name,
@@ -1977,6 +2098,89 @@ spending_company_pac_match <- function(
     function(key) grepl(key, committee_key, fixed = TRUE),
     logical(1L)
   ))
+}
+
+spending_first_lookup_match <- function(
+  lookup,
+  row_cycle,
+  row_committee_id,
+  row_committee_key,
+  use_cycle = TRUE
+) {
+  row_count <- length(row_committee_id)
+  if (!nrow(lookup) || !row_count) {
+    return(rep(NA_integer_, row_count))
+  }
+  lookup_order <- seq_len(nrow(lookup))
+  lookup_cycle <- if (isTRUE(use_cycle)) {
+    as.integer(lookup$cycle)
+  } else {
+    rep(0L, nrow(lookup))
+  }
+  query_cycle <- if (isTRUE(use_cycle)) {
+    as.integer(row_cycle)
+  } else {
+    rep(0L, row_count)
+  }
+
+  lookup_id_key <- paste(
+    lookup_cycle,
+    lookup$committee_id,
+    sep = "\r"
+  )
+  lookup_name_key <- paste(
+    lookup_cycle,
+    lookup$group_key,
+    sep = "\r"
+  )
+  first_id <- which(
+    nzchar(lookup$committee_id) & !duplicated(lookup_id_key)
+  )
+  first_name <- which(
+    nzchar(lookup$group_key) & !duplicated(lookup_name_key)
+  )
+
+  id_match <- rep(NA_integer_, row_count)
+  valid_id <- !is.na(query_cycle) & nzchar(row_committee_id)
+  if (length(first_id) && any(valid_id)) {
+    positions <- match(
+      paste(
+        query_cycle[valid_id],
+        row_committee_id[valid_id],
+        sep = "\r"
+      ),
+      lookup_id_key[first_id]
+    )
+    found <- !is.na(positions)
+    id_indices <- which(valid_id)
+    id_match[id_indices[found]] <- lookup_order[
+      first_id[positions[found]]
+    ]
+  }
+
+  name_match <- rep(NA_integer_, row_count)
+  valid_name <- !is.na(query_cycle) & nzchar(row_committee_key)
+  if (length(first_name) && any(valid_name)) {
+    positions <- match(
+      paste(
+        query_cycle[valid_name],
+        row_committee_key[valid_name],
+        sep = "\r"
+      ),
+      lookup_name_key[first_name]
+    )
+    found <- !is.na(positions)
+    name_indices <- which(valid_name)
+    name_match[name_indices[found]] <- lookup_order[
+      first_name[positions[found]]
+    ]
+  }
+
+  ifelse(
+    is.na(id_match),
+    name_match,
+    ifelse(is.na(name_match), id_match, pmin(id_match, name_match))
+  )
 }
 
 spending_recipient_classification <- function(connection, rows, lookups = NULL) {
@@ -2002,152 +2206,255 @@ spending_recipient_classification <- function(connection, rows, lookups = NULL) 
   leadership[, group_key := normalize_variant_key(pac_name)]
   leadership[, committee_id := toupper(trim_text(committee_id))]
 
-  records <- lapply(seq_len(nrow(rows)), function(index) {
-    row <- rows[index]
-    row_cycle <- as.integer(row$two_year_transaction_period[[1L]])
-    row_committee_id <- toupper(trim_text(row$committee_id[[1L]]))
-    committee_name <- row$committee_name[[1L]]
-    row_committee_key <- normalize_variant_key(committee_name)
-    category <- "Unclassified"
-    party <- ""
-    category_source <- "unclassified"
-    party_source <- ""
+  row_count <- nrow(rows)
+  row_cycle <- as.integer(rows$two_year_transaction_period)
+  row_committee_id <- toupper(trim_text(rows$committee_id))
+  committee_name <- trim_text(rows$committee_name)
+  row_committee_key <- normalize_variant_key(committee_name)
+  category_match <- spending_first_lookup_match(
+    categories,
+    row_cycle,
+    row_committee_id,
+    row_committee_key
+  )
+  leadership_match <- spending_first_lookup_match(
+    leadership,
+    row_cycle,
+    row_committee_id,
+    row_committee_key
+  )
+  trade_match <- spending_first_lookup_match(
+    trade,
+    row_cycle,
+    row_committee_id,
+    row_committee_key,
+    use_cycle = FALSE
+  )
 
-    is_registered_conduit <- row_committee_id %in%
-      c("C00401224", "C00694323") ||
-      row_committee_key %in% c("ACTBLUE", "WINRED")
-    category_match <- categories[
-      cycle == row_cycle &
-        (
-          (nzchar(row_committee_id) & committee_id == row_committee_id) |
-            (nzchar(row_committee_key) & group_key == row_committee_key)
-        )
-    ]
-    leadership_match <- leadership[
-      cycle == row_cycle &
-        (
-          (nzchar(row_committee_id) & committee_id == row_committee_id) |
-            (nzchar(row_committee_key) & group_key == row_committee_key)
-        )
-    ]
-    if (is_registered_conduit) {
-      category <- "Super PAC"
-      category_source <- "user_rule:registered_conduit_super_pac"
-    } else if (nrow(category_match)) {
-      category <- category_match$category[[1L]]
-      category_source <- if (
-        nzchar(row_committee_id) &&
-          identical(category_match$committee_id[[1L]], row_committee_id)
-      ) {
-        "categories:committee_id"
-      } else {
-        "categories:exact_name"
-      }
-      if (isTRUE(as.integer(category_match$provisional[[1L]]) == 1L)) {
-        category_source <- paste0(
-          category_source,
-          ":provisional_2024_carry_forward"
-        )
-      }
-      if (category_match$lean[[1L]] %in% c("R", "D")) {
-        party <- category_match$lean[[1L]]
-        party_source <- category_source
-      }
-    } else if (nrow(leadership_match)) {
-      category <- "Leadership PAC"
-      category_source <- if (
-        nzchar(row_committee_id) &&
-          identical(leadership_match$committee_id[[1L]], row_committee_id)
-      ) {
-        "leadership:committee_id"
-      } else {
-        "leadership:exact_name"
-      }
-      if (isTRUE(as.integer(leadership_match$provisional[[1L]]) == 1L)) {
-        category_source <- paste0(category_source, ":provisional")
-      }
-      if (leadership_match$lean[[1L]] %in% c("R", "D")) {
-        party <- leadership_match$lean[[1L]]
-        party_source <- category_source
-      }
-    } else if (spending_company_pac_match(
-      row$company[[1L]],
-      committee_name,
-      company_variants
-    )) {
-      category <- "Company PAC"
-      category_source <- "company_pac:company_alias_and_pac"
-    } else {
-      trade_match <- trade[
-        (nzchar(row_committee_id) & committee_id == row_committee_id) |
-          (nzchar(row_committee_key) & group_key == row_committee_key)
-      ]
-      if (nrow(trade_match)) {
-        category <- "Trade Association"
-        category_source <- if (
-          nzchar(row_committee_id) &&
-            identical(trade_match$committee_id[[1L]], row_committee_id)
-        ) {
-          "trade:committee_id"
-        } else {
-          "trade:exact_name"
-        }
-      } else {
-        committee_type <- toupper(trim_text(
-          row$recipient_committee_type[[1L]]
-        ))
-        designation <- toupper(trim_text(
-          row$recipient_committee_designation[[1L]]
-        ))
-        if (designation == "J") {
-          category <- "JFC"
-          category_source <- "fec:joint_fundraising_designation"
-        } else if (designation == "D") {
-          category <- "Leadership PAC"
-          category_source <- "fec:leadership_designation"
-        } else if (committee_type %in% c("X", "Y", "Z", "PARTY")) {
-          category <- "Party Committee"
-          category_source <- "fec:party_committee_type"
-        } else if (committee_type %in% c("O", "U")) {
-          category <- "Super PAC"
-          category_source <- "fec:independent_expenditure_committee_type"
-        } else if (committee_type %in% c("V", "W")) {
-          category <- "Carey"
-          category_source <- "fec:hybrid_committee_type"
-        } else if (
-          committee_type %in% c(
-            "H", "S", "P", "HOUSE", "SENATE", "PRESIDENTIAL"
-          ) ||
-            designation %in% c("A", "P")
-        ) {
-          category <- "Candidate"
-          category_source <- "fec:committee_type_or_designation"
-        }
-      }
-    }
+  category <- rep("Unclassified", row_count)
+  party <- rep("", row_count)
+  category_source <- rep("unclassified", row_count)
+  party_source <- rep("", row_count)
 
-    if (!nzchar(party)) {
-      if (nrow(leadership_match) &&
-          leadership_match$lean[[1L]] %in% c("R", "D")) {
-        party <- leadership_match$lean[[1L]]
-        party_source <- if (
-          nzchar(row_committee_id) &&
-            identical(leadership_match$committee_id[[1L]], row_committee_id)
-        ) {
-          "leadership:committee_id"
-        } else {
-          "leadership:exact_name"
-        }
-      }
-    }
-    data.table::data.table(
-      recipient_category = category,
-      party = party,
-      category_source = category_source,
-      party_source = party_source
+  registered_conduit <- row_committee_id %in%
+    c("C00401224", "C00694323") |
+    row_committee_key %in% c("ACTBLUE", "WINRED")
+  category[registered_conduit] <- "Super PAC"
+  category_source[registered_conduit] <-
+    "user_rule:registered_conduit_super_pac"
+
+  category_rows <- which(!registered_conduit & !is.na(category_match))
+  if (length(category_rows)) {
+    lookup_rows <- category_match[category_rows]
+    category[category_rows] <- categories$category[lookup_rows]
+    matched_by_id <- nzchar(row_committee_id[category_rows]) &
+      categories$committee_id[lookup_rows] ==
+        row_committee_id[category_rows]
+    category_source[category_rows] <- ifelse(
+      matched_by_id,
+      "categories:committee_id",
+      "categories:exact_name"
     )
-  })
-  data.table::rbindlist(records, use.names = TRUE, fill = TRUE)
+    provisional <- !is.na(categories$provisional[lookup_rows]) &
+      as.integer(categories$provisional[lookup_rows]) == 1L
+    category_source[category_rows[provisional]] <- paste0(
+      category_source[category_rows[provisional]],
+      ":provisional_2024_carry_forward"
+    )
+    party_rows <- category_rows[
+      categories$lean[lookup_rows] %in% c("R", "D")
+    ]
+    if (length(party_rows)) {
+      party[party_rows] <- categories$lean[
+        category_match[party_rows]
+      ]
+      party_source[party_rows] <- category_source[party_rows]
+    }
+  }
+
+  leadership_rows <- which(
+    !registered_conduit &
+      is.na(category_match) &
+      !is.na(leadership_match)
+  )
+  if (length(leadership_rows)) {
+    lookup_rows <- leadership_match[leadership_rows]
+    category[leadership_rows] <- "Leadership PAC"
+    matched_by_id <- nzchar(row_committee_id[leadership_rows]) &
+      leadership$committee_id[lookup_rows] ==
+        row_committee_id[leadership_rows]
+    category_source[leadership_rows] <- ifelse(
+      matched_by_id,
+      "leadership:committee_id",
+      "leadership:exact_name"
+    )
+    provisional <- !is.na(leadership$provisional[lookup_rows]) &
+      as.integer(leadership$provisional[lookup_rows]) == 1L
+    category_source[leadership_rows[provisional]] <- paste0(
+      category_source[leadership_rows[provisional]],
+      ":provisional"
+    )
+    party_rows <- leadership_rows[
+      leadership$lean[lookup_rows] %in% c("R", "D")
+    ]
+    if (length(party_rows)) {
+      party[party_rows] <- leadership$lean[
+        leadership_match[party_rows]
+      ]
+      party_source[party_rows] <- category_source[party_rows]
+    }
+  }
+
+  pac_candidates <- which(
+    !registered_conduit &
+      is.na(category_match) &
+      is.na(leadership_match)
+  )
+  company_pac <- rep(FALSE, row_count)
+  if (length(pac_candidates)) {
+    pairs <- unique(data.table::data.table(
+      company = as.character(rows$company[pac_candidates]),
+      committee_name = committee_name[pac_candidates]
+    ))
+    pairs[, is_company_pac := vapply(seq_len(.N), function(index) {
+      spending_company_pac_match(
+        company[[index]],
+        committee_name[[index]],
+        company_variants
+      )
+    }, logical(1L))]
+    pair_keys <- paste0(
+      nchar(pairs$company),
+      ":",
+      pairs$company,
+      "\034",
+      nchar(pairs$committee_name),
+      ":",
+      pairs$committee_name
+    )
+    row_keys <- paste0(
+      nchar(rows$company[pac_candidates]),
+      ":",
+      rows$company[pac_candidates],
+      "\034",
+      nchar(committee_name[pac_candidates]),
+      ":",
+      committee_name[pac_candidates]
+    )
+    company_pac[pac_candidates] <- pairs$is_company_pac[
+      match(row_keys, pair_keys)
+    ]
+  }
+  company_pac_rows <- which(company_pac)
+  category[company_pac_rows] <- "Company PAC"
+  category_source[company_pac_rows] <-
+    "company_pac:company_alias_and_pac"
+
+  trade_rows <- which(
+    !registered_conduit &
+      is.na(category_match) &
+      is.na(leadership_match) &
+      !company_pac &
+      !is.na(trade_match)
+  )
+  if (length(trade_rows)) {
+    lookup_rows <- trade_match[trade_rows]
+    category[trade_rows] <- "Trade Association"
+    matched_by_id <- nzchar(row_committee_id[trade_rows]) &
+      trade$committee_id[lookup_rows] == row_committee_id[trade_rows]
+    category_source[trade_rows] <- ifelse(
+      matched_by_id,
+      "trade:committee_id",
+      "trade:exact_name"
+    )
+  }
+
+  fallback_rows <- which(
+    !registered_conduit &
+      is.na(category_match) &
+      is.na(leadership_match) &
+      !company_pac &
+      is.na(trade_match)
+  )
+  if (length(fallback_rows)) {
+    committee_type <- toupper(trim_text(
+      rows$recipient_committee_type[fallback_rows]
+    ))
+    designation <- toupper(trim_text(
+      rows$recipient_committee_designation[fallback_rows]
+    ))
+    fallback_category <- rep("Unclassified", length(fallback_rows))
+    fallback_source <- rep("unclassified", length(fallback_rows))
+    assign_fallback <- function(condition, value, source) {
+      indices <- which(
+        fallback_category == "Unclassified" & condition
+      )
+      if (length(indices)) {
+        fallback_category[indices] <<- value
+        fallback_source[indices] <<- source
+      }
+      invisible(NULL)
+    }
+    assign_fallback(
+      designation == "J",
+      "JFC",
+      "fec:joint_fundraising_designation"
+    )
+    assign_fallback(
+      designation == "D",
+      "Leadership PAC",
+      "fec:leadership_designation"
+    )
+    assign_fallback(
+      committee_type %in% c("X", "Y", "Z", "PARTY"),
+      "Party Committee",
+      "fec:party_committee_type"
+    )
+    assign_fallback(
+      committee_type %in% c("O", "U"),
+      "Super PAC",
+      "fec:independent_expenditure_committee_type"
+    )
+    assign_fallback(
+      committee_type %in% c("V", "W"),
+      "Carey",
+      "fec:hybrid_committee_type"
+    )
+    assign_fallback(
+      committee_type %in%
+        c("H", "S", "P", "HOUSE", "SENATE", "PRESIDENTIAL") |
+        designation %in% c("A", "P"),
+      "Candidate",
+      "fec:committee_type_or_designation"
+    )
+    category[fallback_rows] <- fallback_category
+    category_source[fallback_rows] <- fallback_source
+  }
+
+  leadership_party_rows <- which(
+    !nzchar(party) &
+      !is.na(leadership_match) &
+      leadership$lean[leadership_match] %in% c("R", "D")
+  )
+  if (length(leadership_party_rows)) {
+    lookup_rows <- leadership_match[leadership_party_rows]
+    party[leadership_party_rows] <- leadership$lean[lookup_rows]
+    matched_by_id <- nzchar(row_committee_id[leadership_party_rows]) &
+      leadership$committee_id[lookup_rows] ==
+        row_committee_id[leadership_party_rows]
+    party_source[leadership_party_rows] <- ifelse(
+      matched_by_id,
+      "leadership:committee_id",
+      "leadership:exact_name"
+    )
+  }
+
+  data.table::data.table(
+    recipient_category = category,
+    party,
+    category_source,
+    party_source
+  )
 }
 
 spending_assert_entity_tiers <- function(facts) {
@@ -2273,13 +2580,11 @@ spending_calculation_support <- function(
       vapply(rows$contributor_name, person_identity_key, character(1L)),
       sep = "\r"
     )
-    roles <- vapply(seq_len(nrow(rows)), function(index) {
-      spending_contributor_tier(
-        rows$contributor_occupation[[index]],
-        row_keys[[index]] %in% executive_keys,
-        rows$is_entity_contributor[[index]] == 1L
-      )
-    }, character(1L))
+    roles <- spending_contributor_tiers(
+      rows$contributor_occupation,
+      row_keys %in% executive_keys,
+      rows$is_entity_contributor == 1L
+    )
     classifications <- spending_recipient_classification(
       connection,
       rows,

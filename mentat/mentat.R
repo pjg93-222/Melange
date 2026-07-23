@@ -12,6 +12,8 @@
 #   --phase2-names            Opt in to contributor-name identity collection.
 #   --skip-phase2-names       Disable contributor-name identity collection (default).
 #   --resume-after=TIMESTAMP  Chrome-only checkpoint floor, YYYY-MM-DDTHH:MM:SS...
+#   --defer-report-files      Prepare final database flags but let a downstream
+#                             report generator write the user-facing files.
 #   --retag-only              Recompute stored leg/company tags and rewrite reports.
 #   --help                    Print this flag list without running the pipeline.
 #
@@ -88,6 +90,7 @@ mentat_parse_arguments <- function(arguments) {
     skip_scrape = FALSE,
     phase2_names = FALSE,
     resume_after = NULL,
+    defer_report_files = FALSE,
     retag_only = FALSE,
     help = FALSE
   )
@@ -126,6 +129,8 @@ mentat_parse_arguments <- function(arguments) {
         stop("--resume-after must begin with YYYY-MM-DDTHH:MM:SS.", call. = FALSE)
       }
       result$resume_after <- value
+    } else if (identical(argument, "--defer-report-files")) {
+      result$defer_report_files <- TRUE
     } else if (identical(argument, "--retag-only")) {
       result$retag_only <- TRUE
     } else if (identical(argument, "--help")) {
@@ -255,8 +260,18 @@ mentat_main <- function(arguments = character()) {
     retag_employer_company_matches(connection)
     retag_identity_company_matches(connection)
     retag_corporate_company_matches(connection)
-    resolve_recipient_register_committee_ids(connection, log = TRUE)
-    reports <- write_reports(connection, data_root, retag = FALSE)
+    reports <- if (isTRUE(options$defer_report_files)) {
+      apply_amendment_versioning(connection, print_summary = TRUE)
+      resolve_recipient_register_committee_ids(connection, log = TRUE)
+      cat(
+        "Native report files deferred; database is prepared for the ",
+        "downstream workbook generator.\n",
+        sep = ""
+      )
+      list()
+    } else {
+      write_reports(connection, data_root, retag = FALSE)
+    }
     cat("Mentat retag-only run: PASS\n")
     return(invisible(list(reports = reports)))
   }
@@ -386,7 +401,18 @@ mentat_main <- function(arguments = character()) {
         call. = FALSE
       )
     }
-    reports <- write_reports(connection, data_root, retag = FALSE)
+    reports <- if (isTRUE(options$defer_report_files)) {
+      apply_amendment_versioning(connection, print_summary = TRUE)
+      resolve_recipient_register_committee_ids(connection, log = TRUE)
+      cat(
+        "Native report files deferred; database is prepared for the ",
+        "downstream workbook generator.\n",
+        sep = ""
+      )
+      list()
+    } else {
+      write_reports(connection, data_root, retag = FALSE)
+    }
     collection_detail <- collection_completion_detail(
       engine = options$engine,
       collection = collection,
@@ -417,7 +443,11 @@ mentat_main <- function(arguments = character()) {
         reconciliation$coverage_percent
       ))
     }
-    cat("Reports written to:", paths$reports, "\n")
+    if (isTRUE(options$defer_report_files)) {
+      cat("Report files deferred to the downstream workbook generator.\n")
+    } else {
+      cat("Reports written to:", paths$reports, "\n")
+    }
     cat("Mentat pipeline: PASS\n")
     invisible(list(
       ingest = ingest,

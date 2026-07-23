@@ -18,29 +18,34 @@ function Set-TableColumnFormula($Table, [string]$ColumnName, [string]$Formula) {
 }
 
 function Cycle-Dispatch([scriptblock]$Builder) {
-  $a = & $Builder 'Cycle_2021_2022'
-  $b = & $Builder 'Cycle_2023_2024'
-  $c = & $Builder 'Cycle_2025_2026'
-  "IF([@Cycle]=`"2021-2022`",${a},IF([@Cycle]=`"2023-2024`",${b},${c}))"
+  $expression = '0'
+  $entries = @($payload.cycles | Sort-Object { [int]$_.cycle } -Descending)
+  foreach ($entry in $entries) {
+    $value = & $Builder ([string]$entry.table_name)
+    $label = [string]$entry.label
+    $expression = "IF([@Cycle]=`"${label}`",${value},${expression})"
+  }
+  $expression
 }
 
 function Scope-Expression([string]$TableName, [string]$Party = '') {
   $partyArgs = if ($Party) { ",${TableName}[Party],`"${Party}`"" } else { '' }
-  $total = if ($Party) { "SUMIFS(${TableName}[Analysis Amount],${TableName}[Party],`"${Party}`")" } else { "SUM(${TableName}[Analysis Amount])" }
-  $role = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Employee Tier],[@Scope]${partyArgs})"
-  $category = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Recipient Category],[@Scope]${partyArgs})"
+  $factArgs = if ($formulaFacts) { ",${TableName}[Fact Type],`"Master`"" } else { '' }
+  $total = if ($Party -or $formulaFacts) { "SUMIFS(${TableName}[Analysis Amount]${partyArgs}${factArgs})" } else { "SUM(${TableName}[Analysis Amount])" }
+  $role = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Employee Tier],[@Scope]${partyArgs}${factArgs})"
+  $category = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Recipient Category],[@Scope]${partyArgs}${factArgs})"
   "IF([@Scope]=`"Total Giving`",${total},IF(OR([@Scope]=`"Corporate`",[@Scope]=`"Chief`",[@Scope]=`"Middle Management`",[@Scope]=`"Employee`"),${role},${category}))"
 }
 
 function Company-Expression([string]$TableName, [string]$Party = '', [string]$Tier = '') {
-  $extra = ''
+  $extra = if ($formulaFacts) { ",${TableName}[Fact Type],`"Master`"" } else { '' }
   if ($Party) { $extra += ",${TableName}[Party],`"${Party}`"" }
   if ($Tier) { $extra += ",${TableName}[Employee Tier],`"${Tier}`"" }
   "SUMIFS(${TableName}[Analysis Amount],${TableName}[Company],[@Company]${extra})"
 }
 
 function Master-Expression([string]$TableName, [string]$Party = '', [string]$Category = '', [string]$Tier = '') {
-  $extra = ''
+  $extra = if ($formulaFacts) { ",${TableName}[Fact Type],`"Master`"" } else { '' }
   if ($Party) { $extra += ",${TableName}[Party],`"${Party}`"" }
   if ($Category) { $extra += ",${TableName}[Recipient Category],`"${Category}`"" }
   if ($Tier) { $extra += ",${TableName}[Employee Tier],`"${Tier}`"" }
@@ -58,17 +63,28 @@ function Master-Prior-Expression([string]$PriorCycle, [string]$Metric) {
 
 function Employee-Expression([string]$TableName, [string]$Party = '', [switch]$Count) {
   $partyArgs = if ($Party) { ",${TableName}[Party],`"${Party}`"" } else { '' }
-  if ($Count) { return "COUNTIFS(${TableName}[Person Key],[@[Person Key]],${TableName}[Include in Analysis],`"Yes`")" }
-  "SUMIFS(${TableName}[Analysis Amount],${TableName}[Person Key],[@[Person Key]]${partyArgs})"
+  $factArgs = if ($formulaFacts) { ",${TableName}[Fact Type],`"Employee`"" } else { '' }
+  if ($Count) {
+    if ($formulaFacts) {
+      return "SUMIFS(${TableName}[Gift Count],${TableName}[Person Key],[@[Person Key]],${TableName}[Include in Analysis],`"Yes`"${factArgs})"
+    }
+    return "COUNTIFS(${TableName}[Person Key],[@[Person Key]],${TableName}[Include in Analysis],`"Yes`")"
+  }
+  "SUMIFS(${TableName}[Analysis Amount],${TableName}[Person Key],[@[Person Key]]${partyArgs}${factArgs})"
 }
 
 function Recipient-Expression([string]$TableName, [string]$Party = '', [string]$Tier = '', [switch]$Count) {
-  $extra = ''
+  $extra = if ($formulaFacts) { ",${TableName}[Fact Type],`"Recipient`"" } else { '' }
   if ($Party) { $extra += ",${TableName}[Party],`"${Party}`"" }
   if ($Tier) { $extra += ",${TableName}[Employee Tier],`"${Tier}`"" }
   if ($Count) {
-    $industry = "COUNTIFS(${TableName}[Recipient Key],[@[Recipient Key]],${TableName}[Include in Analysis],`"Yes`")"
-    $company = "COUNTIFS(${TableName}[Recipient Key],[@[Recipient Key]],${TableName}[Company],[@Company],${TableName}[Include in Analysis],`"Yes`")"
+    if ($formulaFacts) {
+      $industry = "SUMIFS(${TableName}[Gift Count],${TableName}[Recipient Key],[@[Recipient Key]],${TableName}[Include in Analysis],`"Yes`"${extra})"
+      $company = "SUMIFS(${TableName}[Gift Count],${TableName}[Recipient Key],[@[Recipient Key]],${TableName}[Company],[@Company],${TableName}[Include in Analysis],`"Yes`"${extra})"
+    } else {
+      $industry = "COUNTIFS(${TableName}[Recipient Key],[@[Recipient Key]],${TableName}[Include in Analysis],`"Yes`")"
+      $company = "COUNTIFS(${TableName}[Recipient Key],[@[Recipient Key]],${TableName}[Company],[@Company],${TableName}[Include in Analysis],`"Yes`")"
+    }
   } else {
     $industry = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Recipient Key],[@[Recipient Key]]${extra})"
     $company = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Recipient Key],[@[Recipient Key]],${TableName}[Company],[@Company]${extra})"
@@ -77,8 +93,9 @@ function Recipient-Expression([string]$TableName, [string]$Party = '', [string]$
 }
 
 function Bridge-Funding-Expression([string]$TableName) {
-  $industry = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Recipient Key],`"FEC:`"&[@[Source Committee ID]])"
-  $company = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Recipient Key],`"FEC:`"&[@[Source Committee ID]],${TableName}[Company],[@Company])"
+  $factArgs = if ($formulaFacts) { ",${TableName}[Fact Type],`"Recipient`"" } else { '' }
+  $industry = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Recipient Key],`"FEC:`"&[@[Source Committee ID]]${factArgs})"
+  $company = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Recipient Key],`"FEC:`"&[@[Source Committee ID]],${TableName}[Company],[@Company]${factArgs})"
   "IF([@View]=`"Industry`",${industry},${company})"
 }
 
@@ -116,7 +133,16 @@ if (
 $payload = Get-Content -Raw -LiteralPath $resolvedJson | ConvertFrom-Json
 $industry = [string]$payload.metadata.industry
 if ([string]::IsNullOrWhiteSpace($industry)) { $industry = 'Crypto' }
-$reportBaseName = "${industry} Industry Spending Overview"
+$formulaFacts = [bool]$payload.metadata.formula_facts
+$reportBaseName = [string]$payload.metadata.report_base_name
+if ([string]::IsNullOrWhiteSpace($reportBaseName)) {
+  $reportBaseName = "${industry} Industry Spending Overview"
+}
+$cycleSheetNames = @(
+  $payload.cycles |
+    Sort-Object { [int]$_.cycle } |
+    ForEach-Object { [string]$_.label }
+)
 $overviewSheetName = if ($industry -eq 'Crypto') { 'Crypto Spending Overview' } else { 'Spending Overview' }
 $associatedFundingHeader = "Associated ${industry} Funding"
 $workingPath = Join-Path (Split-Path $resolvedWorkbook -Parent) "${reportBaseName}.excel-final-$PID.xlsx"
@@ -143,7 +169,7 @@ try {
   $book = $excel.Workbooks.Open($workingPath, 0, $false)
   $excel.Calculation = -4135
 
-  foreach ($sheetName in @('2021-2022','2023-2024','2025-2026')) {
+  foreach ($sheetName in $cycleSheetNames) {
     $sheet = $book.Worksheets.Item($sheetName); $table = $sheet.ListObjects.Item(1)
     try {
       Set-TableColumnFormula $table 'Analysis Amount' '=IF([@[Include in Analysis]]="Yes",[@Amount],0)'
@@ -254,10 +280,54 @@ try {
     Set-TableColumnFormula $table 'Integrity Check' '=IF(AND(ABS([@[Total Giving]]-[@Democratic]-[@Republican]-[@[Other / Unclassified]])<0.01,ABS([@[Total Giving]]-[@Corporate]-[@Chief]-[@[Middle Management]]-[@Employee])<0.01),"OK","CHECK")'
   } finally { Release-ComObject $table; Release-ComObject $sheet }
 
+  if ($formulaFacts) {
+    $sheet = $book.Worksheets.Item('Employee Rank Facts')
+    try {
+      $rankFacts = @($payload.employee_rank_facts)
+      if ($rankFacts.Count -eq 0) {
+        throw 'Formula-fact mode requires a non-empty employee rank basis.'
+      }
+      $lastRankRow = 5 + $rankFacts.Count
+      $rankValues = New-Object 'object[,]' $rankFacts.Count, 4
+      for ($rankIndex = 0; $rankIndex -lt $rankFacts.Count; $rankIndex++) {
+        $rankFact = @($rankFacts[$rankIndex])
+        $rankValues[$rankIndex, 0] = [string]$rankFact[0]
+        $rankValues[$rankIndex, 1] = [string]$rankFact[1]
+        $rankValues[$rankIndex, 2] = [string]$rankFact[2]
+        $rankValues[$rankIndex, 3] = $null
+      }
+      $rankRange = $sheet.Range('A6').Resize($rankFacts.Count, 4)
+      try {
+        $rankRange.Value2 = $rankValues
+      } finally { Release-ComObject $rankRange }
+      if ($sheet.ListObjects.Count -eq 0) {
+        $tableRange = $sheet.Range("A5:D${lastRankRow}")
+        try {
+          $table = $sheet.ListObjects.Add(1, $tableRange, $null, 1)
+          $table.Name = 'EmployeeRankFactsTable'
+          $table.TableStyle = 'TableStyleMedium2'
+        } finally { Release-ComObject $tableRange }
+      } else {
+        $table = $sheet.ListObjects.Item(1)
+        $resizeRange = $sheet.Range("A5:D${lastRankRow}")
+        try { $table.Resize($resizeRange) } finally { Release-ComObject $resizeRange }
+        $table.Name = 'EmployeeRankFactsTable'
+      }
+      Set-TableColumnFormula $table 'Total Giving' ('=' + (
+        Cycle-Dispatch { param($t) Employee-Expression $t }
+      ))
+    } finally { Release-ComObject $table; Release-ComObject $sheet }
+  }
+
   $sheet = $book.Worksheets.Item('Employee List'); $table = $sheet.ListObjects.Item(1)
   try {
-    Set-TableColumnFormula $table 'Industry Rank' '=1+COUNTIFS(EmployeeListTable[Cycle],[@Cycle],EmployeeListTable[Total Giving],">"&[@[Total Giving]])'
-    Set-TableColumnFormula $table 'Company Rank' '=1+COUNTIFS(EmployeeListTable[Cycle],[@Cycle],EmployeeListTable[Company],[@Company],EmployeeListTable[Total Giving],">"&[@[Total Giving]])'
+    if ($formulaFacts) {
+      Set-TableColumnFormula $table 'Industry Rank' '=1+COUNTIFS(EmployeeRankFactsTable[Cycle],[@Cycle],EmployeeRankFactsTable[Total Giving],">"&[@[Total Giving]])'
+      Set-TableColumnFormula $table 'Company Rank' '=1+COUNTIFS(EmployeeRankFactsTable[Cycle],[@Cycle],EmployeeRankFactsTable[Company],[@Company],EmployeeRankFactsTable[Total Giving],">"&[@[Total Giving]])'
+    } else {
+      Set-TableColumnFormula $table 'Industry Rank' '=1+COUNTIFS(EmployeeListTable[Cycle],[@Cycle],EmployeeListTable[Total Giving],">"&[@[Total Giving]])'
+      Set-TableColumnFormula $table 'Company Rank' '=1+COUNTIFS(EmployeeListTable[Cycle],[@Cycle],EmployeeListTable[Company],[@Company],EmployeeListTable[Total Giving],">"&[@[Total Giving]])'
+    }
     Set-TableColumnFormula $table 'Total Giving' ('=' + (Cycle-Dispatch { param($t) Employee-Expression $t }))
     Set-TableColumnFormula $table 'Democratic' ('=' + (Cycle-Dispatch { param($t) Employee-Expression $t 'D' }))
     Set-TableColumnFormula $table 'Republican' ('=' + (Cycle-Dispatch { param($t) Employee-Expression $t 'R' }))
@@ -333,7 +403,13 @@ try {
 
   $focusedSheets = @()
   foreach ($cycle in $payload.cycles) { $focusedSheets += ([string]$cycle.label + ' Summary') }
-  foreach ($company in $payload.companies) { $focusedSheets += (([string]$company + ' View').Substring(0,[math]::Min(31,([string]$company + ' View').Length))) }
+  foreach ($company in $payload.companies) {
+    $companyViewName = ([string]$company).Trim() + ' View'
+    $focusedSheets += $companyViewName.Substring(
+      0,
+      [math]::Min(31, $companyViewName.Length)
+    ).TrimEnd()
+  }
   foreach ($sheetName in $focusedSheets) {
     $sheet = $book.Worksheets.Item($sheetName); $table = $sheet.ListObjects.Item(1)
     try {
@@ -351,8 +427,10 @@ try {
   $headerRows = @{
     'Master Overview'=6;'Company List'=5;'Employee List'=5;'Recipient List'=5
     'Beneficiary Summary'=5;'PAC & Candidate Map'=5;'Downstream Activity'=5;'Beneficiary Bridge'=5
-    '2021-2022'=4;'2023-2024'=4;'2025-2026'=4;'Cycle Exceptions'=4
+    'Cycle Exceptions'=4
   }
+  foreach ($cycleSheetName in $cycleSheetNames) { $headerRows[$cycleSheetName] = 4 }
+  if ($formulaFacts) { $headerRows['Employee Rank Facts'] = 5 }
   $headerRows[$overviewSheetName] = 5
   foreach ($sheetName in $focusedSheets) { $headerRows[$sheetName] = 5 }
   foreach ($sheetName in $headerRows.Keys) {
@@ -371,7 +449,13 @@ try {
     'Downstream Activity'=@('Net Included Amount','FEC Committee URL','FEC Candidate URL','Logic Check')
     'Beneficiary Bridge'=@('Downstream Activity',$associatedFundingHeader,'FEC Committee URL','FEC Candidate URL','Integrity Check')
     'Beneficiary Summary'=@('Rank','Downstream Activity',$associatedFundingHeader,'Democratic Activity','Republican Activity','Other / Unclassified Activity','Party Coverage','FEC Candidate URL','Integrity Check')
-    '2021-2022'=@('Analysis Amount','Logic Check');'2023-2024'=@('Analysis Amount','Logic Check');'2025-2026'=@('Analysis Amount','Logic Check');'Cycle Exceptions'=@('Analysis Amount','Logic Check')
+    'Cycle Exceptions'=@('Analysis Amount','Logic Check')
+  }
+  foreach ($cycleSheetName in $cycleSheetNames) {
+    $formulaColumnsBySheet[$cycleSheetName] = @('Analysis Amount','Logic Check')
+  }
+  if ($formulaFacts) {
+    $formulaColumnsBySheet['Employee Rank Facts'] = @('Total Giving')
   }
   $formulaColumnsBySheet[$overviewSheetName] = @('Total Giving','Democratic','Republican','Other / Unclassified','Net Democratic %','Net Republican %','Party Coverage','Integrity Check')
   foreach ($sheetName in $focusedSheets) {
@@ -386,9 +470,11 @@ try {
         try { $formulaCount += [long]$range.Rows.Count; if ($range.HasFormula -ne $true) { $formulaColumnFailures++ } }
         finally { Release-ComObject $range; Release-ComObject $column }
       }
-      $checkName = if ($sheetName -in @('2021-2022','2023-2024','2025-2026','Cycle Exceptions','Downstream Activity')) {'Logic Check'} else {'Integrity Check'}
-      $column = $table.ListColumns.Item($checkName); $range = $column.DataBodyRange
-      try { $integrityFailures += Count-NonOk $range } finally { Release-ComObject $range; Release-ComObject $column }
+      if ($sheetName -ne 'Employee Rank Facts') {
+        $checkName = if ($sheetName -in @($cycleSheetNames + @('Cycle Exceptions','Downstream Activity'))) {'Logic Check'} else {'Integrity Check'}
+        $column = $table.ListColumns.Item($checkName); $range = $column.DataBodyRange
+        try { $integrityFailures += Count-NonOk $range } finally { Release-ComObject $range; Release-ComObject $column }
+      }
     } finally { Release-ComObject $table; Release-ComObject $sheet }
   }
 
@@ -421,7 +507,7 @@ try {
   } finally { Release-ComObject $sheet }
 
   $expectedTotals = @{}
-  foreach ($cycle in @('2021-2022','2023-2024','2025-2026')) { $expectedTotals[$cycle] = 0.0 }
+  foreach ($cycle in $cycleSheetNames) { $expectedTotals[$cycle] = 0.0 }
   if ($null -ne $payload.PSObject.Properties['expected_cycle_totals']) {
     foreach ($property in $payload.expected_cycle_totals.PSObject.Properties) {
       $expectedTotals[[string]$property.Name] = [double]$property.Value
@@ -484,7 +570,8 @@ try {
   $excel.Quit(); Release-ComObject $excel; $excel = $null
   Copy-Item -LiteralPath $workingPath -Destination $resolvedWorkbook -Force
   $watch.Stop()
-  [pscustomobject]@{workbook=$resolvedWorkbook;bytes=(Get-Item -LiteralPath $resolvedWorkbook).Length;expected_worksheet_count=(16 + @($payload.companies).Count);formulas=$formulaCount;formula_column_failures=$formulaColumnFailures;integrity_failures=$integrityFailures;cycle_totals=$expectedTotals;seconds=[math]::Round($watch.Elapsed.TotalSeconds,3)} | ConvertTo-Json -Depth 3
+  $formulaFactSheetCount = if ($formulaFacts) { 1 } else { 0 }
+  [pscustomobject]@{workbook=$resolvedWorkbook;bytes=(Get-Item -LiteralPath $resolvedWorkbook).Length;expected_worksheet_count=(16 + @($payload.companies).Count + $formulaFactSheetCount);formulas=$formulaCount;formula_column_failures=$formulaColumnFailures;integrity_failures=$integrityFailures;cycle_totals=$expectedTotals;seconds=[math]::Round($watch.Elapsed.TotalSeconds,3)} | ConvertTo-Json -Depth 3
 } finally {
   if ($null -ne $book) { try {$book.Close($false)} catch {}; Release-ComObject $book }
   if ($null -ne $excel) { try {$excel.Quit()} catch {}; Release-ComObject $excel }

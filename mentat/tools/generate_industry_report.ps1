@@ -11,6 +11,8 @@ param(
   [string]$NodeModulesPath = '',
   [string]$WorkbookLockPath = '',
   [string]$ExcelMutexName = 'Global\MentatIndustryExcelFinalize',
+  [ValidateSet('','2021-2022','2023-2024','2025-2026')]
+  [string]$CycleLabel = '',
   [switch]$NoCache,
   [switch]$RenderPreviews
 )
@@ -29,6 +31,7 @@ if ($RScriptPath) { $arguments.RScriptPath = $RScriptPath }
 if ($NodePath) { $arguments.NodePath = $NodePath }
 if ($NodeModulesPath) { $arguments.NodeModulesPath = $NodeModulesPath }
 if ($WorkbookLockPath) { $arguments.WorkbookLockPath = $WorkbookLockPath }
+if ($CycleLabel) { $arguments.CycleLabel = $CycleLabel }
 if ($NoCache) { $arguments.NoCache = $true }
 if ($RenderPreviews) { $arguments.RenderPreviews = $true }
 

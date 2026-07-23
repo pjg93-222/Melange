@@ -59,7 +59,9 @@ fec_build_url <- function(
   allowed_filters <- c(
     "contributor_zip",
     "contributor_city",
-    "contributor_state"
+    "contributor_state",
+    "min_date",
+    "max_date"
   )
   if (length(query_filters)) {
     if (is.null(names(query_filters)) ||
@@ -989,7 +991,7 @@ fec_walk_variant_set_export <- function(
   company,
   cycle,
   variant_set,
-  chunk_size = 5000L
+  chunk_size = 20000L
 ) {
   require_package("data.table")
   # The live FEC exporter was verified on 2026-07-23 to produce a download
@@ -1013,14 +1015,46 @@ fec_walk_variant_set_export <- function(
     invisible(NULL)
   }
   direct_error <- NULL
-  message("FEC export file 1/1: ", records_total, " rows.")
-  direct <- tryCatch(
-    fec_export_current_query(session, records_total),
-    error = function(error) {
-      direct_error <<- error
-      NULL
+  direct <- NULL
+  export_attempts <- 4L
+  for (export_attempt in seq_len(export_attempts)) {
+    message(
+      "FEC export file attempt ",
+      export_attempt,
+      "/",
+      export_attempts,
+      ": ",
+      records_total,
+      " rows."
+    )
+    direct <- tryCatch(
+      fec_export_current_query(session, records_total),
+      error = function(error) {
+        direct_error <<- error
+        NULL
+      }
+    )
+    if (!is.null(direct)) break
+    if (
+      !grepl(
+        "fec export server error",
+        tolower(conditionMessage(direct_error)),
+        fixed = TRUE
+      ) ||
+      export_attempt >= export_attempts
+    ) {
+      break
     }
-  )
+    message(
+      "FEC export server retry ",
+      export_attempt,
+      "/",
+      export_attempts - 1L,
+      ": ",
+      conditionMessage(direct_error)
+    )
+    Sys.sleep(min(12, export_attempt * 3))
+  }
   if (!is.null(direct)) {
     consume_export(direct)
   } else {

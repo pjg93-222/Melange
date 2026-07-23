@@ -20,6 +20,8 @@ param(
   [int]$NodeHeapMb = 16384,
   [string]$WorkbookLockPath = '',
   [string]$ExcelMutexName = 'Global\MentatIndustryExcelFinalize',
+  [ValidateSet('','2021-2022','2023-2024','2025-2026')]
+  [string]$CycleLabel = '',
   [switch]$NoCache,
   [switch]$RenderPreviews
 )
@@ -29,7 +31,11 @@ $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $projectRoot = Split-Path -Parent $scriptRoot
 $Industry = $Industry.Trim()
 if (-not $Industry) { throw 'Industry cannot be empty.' }
-$reportBaseName = "${Industry} Industry Spending Overview"
+$reportBaseName = if ($CycleLabel) {
+  "${Industry} Industry Spending Overview ${CycleLabel}"
+} else {
+  "${Industry} Industry Spending Overview"
+}
 $industryToken = ($Industry -replace '[^A-Za-z0-9]+','_').Trim('_').ToLowerInvariant()
 if (-not $industryToken) { throw "Industry cannot be converted to a safe cache token: $Industry" }
 if (-not $WorkbookLockPath) {
@@ -61,6 +67,7 @@ $BeneficiaryDirectory = [IO.Path]::GetFullPath($BeneficiaryDirectory)
 $WorkbookLockPath = [IO.Path]::GetFullPath($WorkbookLockPath)
 $exporter = Join-Path $scriptRoot 'export_crypto_spending_data.R'
 $builder = Join-Path $scriptRoot 'crypto_workbook_builder.mjs'
+$cycleFilterScript = Join-Path $scriptRoot 'filter_industry_cycle_data.mjs'
 $finalizer = Join-Path $scriptRoot 'finalize_crypto_excel.ps1'
 $beneficiaryModule = Join-Path $projectRoot 'R\fec_beneficiary.R'
 $committeeFiles = @(
@@ -74,7 +81,7 @@ $beneficiaryFiles = @(
   (Join-Path $BeneficiaryDirectory 'leadership2022.csv'),(Join-Path $BeneficiaryDirectory 'leadership2024.csv'),(Join-Path $BeneficiaryDirectory 'leadership2026.csv'),
   (Join-Path $BeneficiaryDirectory 'pas222\itpas2.txt'),(Join-Path $BeneficiaryDirectory 'pas224\itpas2.txt'),(Join-Path $BeneficiaryDirectory 'pas226\itpas2.txt')
 )
-foreach ($requiredPath in @($DatabasePath,$RScriptPath,$NodePath,$NodeModulesPath,$exporter,$builder,$finalizer,$beneficiaryModule) + $committeeFiles + $beneficiaryFiles) {
+foreach ($requiredPath in @($DatabasePath,$RScriptPath,$NodePath,$NodeModulesPath,$exporter,$builder,$cycleFilterScript,$finalizer,$beneficiaryModule) + $committeeFiles + $beneficiaryFiles) {
   if (-not (Test-Path -LiteralPath $requiredPath)) { throw "Required report input or runtime is missing: $requiredPath" }
 }
 
@@ -120,6 +127,76 @@ function Assert-WorkbookPackage([string]$Path, [int]$ExpectedWorksheetCount) {
     }
     $worksheetCount = @($names | Where-Object { $_ -match '^xl/worksheets/sheet\d+\.xml$' }).Count
     if ($worksheetCount -ne $ExpectedWorksheetCount) { throw "Workbook contains $worksheetCount worksheets; expected $ExpectedWorksheetCount." }
+
+    $tableIds = [Collections.Generic.HashSet[int]]::new()
+    $tableNames = [Collections.Generic.HashSet[string]]::new(
+      [StringComparer]::OrdinalIgnoreCase
+    )
+    foreach ($entry in @($archive.Entries | Where-Object {
+      $_.FullName -match '^xl/tables/table\d+\.xml$'
+    })) {
+      $reader = [IO.StreamReader]::new($entry.Open())
+      try { [xml]$tableXml = $reader.ReadToEnd() } finally { $reader.Dispose() }
+      $table = $tableXml.DocumentElement
+      $tableId = [int]$table.GetAttribute('id')
+      $tableName = $table.GetAttribute('displayName')
+      $tableRef = $table.GetAttribute('ref')
+      if (-not $tableIds.Add($tableId)) {
+        throw "Workbook has duplicate Excel table id $tableId."
+      }
+      if (-not $tableName -or -not $tableNames.Add($tableName)) {
+        throw "Workbook has a blank or duplicate Excel table name '$tableName'."
+      }
+      if ($tableRef -notmatch '^[A-Z]+(\d+):[A-Z]+(\d+)$') {
+        throw "Excel table '$tableName' has invalid range '$tableRef'."
+      }
+      if ([int]$Matches[2] -le [int]$Matches[1]) {
+        throw "Excel table '$tableName' has no data row."
+      }
+      $namespace = [Xml.XmlNamespaceManager]::new($tableXml.NameTable)
+      $namespace.AddNamespace('m', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main')
+      $columns = @($tableXml.SelectNodes('/m:table/m:tableColumns/m:tableColumn', $namespace))
+      $declaredCount = [int]$tableXml.SelectSingleNode(
+        '/m:table/m:tableColumns',
+        $namespace
+      ).GetAttribute('count')
+      if ($columns.Count -ne $declaredCount) {
+        throw "Excel table '$tableName' has a table-column count mismatch."
+      }
+      $columnNames = [Collections.Generic.HashSet[string]]::new(
+        [StringComparer]::OrdinalIgnoreCase
+      )
+      for ($index = 0; $index -lt $columns.Count; $index++) {
+        $columnId = [int]$columns[$index].GetAttribute('id')
+        $columnName = $columns[$index].GetAttribute('name')
+        if ($columnId -ne $index + 1) {
+          throw "Excel table '$tableName' has non-sequential column ids."
+        }
+        if (-not $columnName -or -not $columnNames.Add($columnName)) {
+          throw "Excel table '$tableName' has a blank or duplicate column name '$columnName'."
+        }
+      }
+    }
+
+    foreach ($entry in @($archive.Entries | Where-Object {
+      $_.FullName -match '^xl/worksheets/sheet\d+\.xml$'
+    })) {
+      $reader = [IO.StreamReader]::new($entry.Open())
+      try { [xml]$sheetXml = $reader.ReadToEnd() } finally { $reader.Dispose() }
+      $namespace = [Xml.XmlNamespaceManager]::new($sheetXml.NameTable)
+      $namespace.AddNamespace('m', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main')
+      $hasSheetFilter = $null -ne $sheetXml.SelectSingleNode(
+        '/m:worksheet/m:autoFilter',
+        $namespace
+      )
+      $hasTables = $null -ne $sheetXml.SelectSingleNode(
+        '/m:worksheet/m:tableParts',
+        $namespace
+      )
+      if ($hasSheetFilter -and $hasTables) {
+        throw "Worksheet part '$($entry.FullName)' has an overlapping worksheet AutoFilter and Excel table."
+      }
+    }
   } finally { $archive.Dispose() }
 }
 
@@ -179,10 +256,35 @@ if (-not $cacheHit) {
   $exportWatch.Stop(); $exportSeconds = $exportWatch.Elapsed.TotalSeconds
 }
 
+$buildDataPath = $dataPath
+if ($CycleLabel) {
+  $cycleToken = $CycleLabel -replace '[^0-9]+','_'
+  $cycleDataPath = Join-Path $cacheRoot "industry_data_cycle_${cycleToken}.json"
+  if (
+    -not (Test-Path -LiteralPath $cycleDataPath) -or
+    (Get-Item -LiteralPath $cycleDataPath).LastWriteTimeUtc -lt
+      (Get-Item -LiteralPath $dataPath).LastWriteTimeUtc
+  ) {
+    & $NodePath '--max-old-space-size=4096' $cycleFilterScript $dataPath $cycleDataPath $CycleLabel
+    if ($LASTEXITCODE -ne 0) {
+      throw "Cycle cache build failed with exit code $LASTEXITCODE"
+    }
+  } else {
+    Write-Host "Cycle cache hit: $cycleDataPath"
+  }
+  if (-not (Test-JsonFile $cycleDataPath)) {
+    throw "Cycle cache is not valid JSON: $cycleDataPath"
+  }
+  $buildDataPath = $cycleDataPath
+}
+
 $priorDefer = $env:MENTAT_DEFER_FORMULAS
 $priorModules = $env:MENTAT_NODE_MODULES
 $priorRender = $env:MENTAT_RENDER_PREVIEWS
 $priorIndustry = $env:MENTAT_INDUSTRY
+$priorCompactRaw = $env:MENTAT_COMPACT_RAW
+$priorFormulaFacts = $env:MENTAT_FORMULA_FACTS
+$priorCycleFilter = $env:MENTAT_CYCLE_FILTER
 $workbookLockOwned = $false
 try {
   New-Item -ItemType Directory -Path (
@@ -223,8 +325,30 @@ try {
   $env:MENTAT_DEFER_FORMULAS = '1'
   $env:MENTAT_NODE_MODULES = $NodeModulesPath
   $env:MENTAT_RENDER_PREVIEWS = if ($RenderPreviews) { '1' } else { '0' }
+  # artifact-tool uses an in-memory managed workbook. Preserve every accepted
+  # row but omit audit-only raw columns from large Excel payloads; the complete
+  # audit trail remains in the source database and export JSON.
+  $env:MENTAT_COMPACT_RAW = if (
+    $priorCompactRaw -in @('0', '1')
+  ) {
+    $priorCompactRaw
+  } elseif ((Get-Item -LiteralPath $dataPath).Length -ge 150MB) {
+    '1'
+  } else {
+    '0'
+  }
+  $env:MENTAT_FORMULA_FACTS = if (
+    $priorFormulaFacts -in @('0', '1')
+  ) {
+    $priorFormulaFacts
+  } elseif ((Get-Item -LiteralPath $dataPath).Length -ge 150MB) {
+    '1'
+  } else {
+    '0'
+  }
+  $env:MENTAT_CYCLE_FILTER = $CycleLabel
   $buildWatch = [Diagnostics.Stopwatch]::StartNew()
-  & $NodePath "--max-old-space-size=$NodeHeapMb" $builder $dataPath $stageDirectory $databaseHash
+  & $NodePath "--max-old-space-size=$NodeHeapMb" $builder $buildDataPath $stageDirectory $databaseHash
   if ($LASTEXITCODE -ne 0) { throw "Workbook build failed with exit code $LASTEXITCODE" }
   $buildWatch.Stop()
 } finally {
@@ -232,6 +356,9 @@ try {
   $env:MENTAT_NODE_MODULES = $priorModules
   $env:MENTAT_RENDER_PREVIEWS = $priorRender
   $env:MENTAT_INDUSTRY = $priorIndustry
+  $env:MENTAT_COMPACT_RAW = $priorCompactRaw
+  $env:MENTAT_FORMULA_FACTS = $priorFormulaFacts
+  $env:MENTAT_CYCLE_FILTER = $priorCycleFilter
   if ($workbookLockOwned -and (Test-Path -LiteralPath $WorkbookLockPath)) {
     Remove-Item -LiteralPath $WorkbookLockPath -Force
   }

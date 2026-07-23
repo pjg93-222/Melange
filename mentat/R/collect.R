@@ -1686,11 +1686,6 @@ retag_employer_company_matches <- function(
       person_identity_key,
       character(1L)
     ))
-    match_context <- company_match_context(
-      group$company,
-      company_variants,
-      home_states
-    )
     row_match_inputs <- rows[index, .(
       contributor_employer,
       contributor_name,
@@ -1711,34 +1706,23 @@ retag_employer_company_matches <- function(
       ),
       match_input_id
     ]
-    evaluate_match_inputs <- function(current_trusted_keys) {
-      lapply(seq_len(nrow(match_inputs)), function(match_index) {
-        match_input <- match_inputs[match_index]
-        company_employer_match(
-          company = group$company,
-          employer = match_input$contributor_employer,
-          contributor_name = match_input$contributor_name,
-          variants = company_variants,
-          trusted_name_keys = current_trusted_keys,
-          overrides = match_overrides,
-          excluded_reason = match_input$excluded_reason,
-          contributor_state = match_input$contributor_state,
-          contributor_occupation = match_input$contributor_occupation,
-          home_states = home_states,
-          match_context = match_context
-        )
-      })
-    }
-    first_pass <- evaluate_match_inputs(trusted_keys)
-    verified <- index[vapply(first_pass, function(result) {
-      identical(result$status, "accepted")
-    }, logical(1L))[input_ids]]
-    trusted_keys <- unique(c(
-      trusted_keys,
-      vapply(rows$contributor_name[verified], person_identity_key, character(1L))
-    ))
-    trusted_keys <- trusted_keys[nzchar(trusted_keys)]
-    second_pass <- evaluate_match_inputs(trusted_keys)
+    # The scalar matcher does not currently use trusted_name_keys, so the old
+    # two-pass expansion evaluated every unique row twice without changing a
+    # decision. Reuse the ingestion-time vectorized matcher once here. Its
+    # defensive scalar fallback retains override, prefix, squashed-form, home
+    # state, occupation, and exclusion behavior for unresolved rows.
+    second_pass <- company_employer_match_page(
+      company = group$company,
+      employer = match_inputs$contributor_employer,
+      contributor_name = match_inputs$contributor_name,
+      variants = company_variants,
+      trusted_name_keys = trusted_keys,
+      overrides = match_overrides,
+      excluded_reason = match_inputs$excluded_reason,
+      contributor_state = match_inputs$contributor_state,
+      contributor_occupation = match_inputs$contributor_occupation,
+      home_states = home_states
+    )
     rows$company_match_status_new[index] <- vapply(
       second_pass,
       function(result) result$status,
@@ -2778,7 +2762,8 @@ collect_crypto <- function(
   cycles = c(2022L, 2024L, 2026L),
   phase2_names = FALSE,
   session = NULL,
-  resume_after = NULL
+  resume_after = NULL,
+  company_filter = NULL
 ) {
   require_package("data.table")
   collection_started <- proc.time()[["elapsed"]]
@@ -2796,6 +2781,22 @@ collect_crypto <- function(
   ))
   if (!nrow(companies)) {
     stop("Crypto company register is empty; run Phase 0 ingest first.", call. = FALSE)
+  }
+  if (!is.null(company_filter)) {
+    company_filter <- unique(trim_text(company_filter))
+    company_filter <- company_filter[nzchar(company_filter)]
+    missing_companies <- setdiff(
+      company_filter,
+      unique(companies$company)
+    )
+    if (length(missing_companies)) {
+      stop(
+        "Unknown company filter: ",
+        paste(missing_companies, collapse = ", "),
+        call. = FALSE
+      )
+    }
+    companies <- companies[company %in% company_filter]
   }
   own_session <- is.null(session)
   if (own_session) {
