@@ -86,6 +86,34 @@ class ResilientOrchestratorTests(unittest.TestCase):
             "live_auto_each_industry",
         )
         self.assertIn("workbook generators overlap", plan["strategy"])
+        self.assertTrue(
+            plan["raw_data_directory"].endswith(
+                str(Path("outputs") / "raw-contributions")
+            )
+        )
+        self.assertTrue(
+            plan["raw_data_export"].endswith(
+                str(Path("tools") / "export_raw_contribution_warehouse.py")
+            )
+        )
+
+    def test_raw_data_gate_precedes_generator_release(self) -> None:
+        text = SCRIPT.read_text(encoding="utf-8")
+        export_index = text.index("$state.stage = 'raw_data_gate'")
+        raw_pass_index = text.index(
+            "Write-RunEvent 'raw_data_export_passed'"
+        )
+        generator_index = text.index("$state.stage = 'generator_queued'")
+        self.assertLess(export_index, raw_pass_index)
+        self.assertLess(raw_pass_index, generator_index)
+        self.assertIn(
+            "$rawContributionRows -eq $coverageContributionRows",
+            text,
+        )
+        self.assertIn(
+            "$rawCorporateRows -eq $coverageCorporateRows",
+            text,
+        )
 
     def test_plan_only_rejects_more_than_six_industries(self) -> None:
         environment = os.environ.copy()

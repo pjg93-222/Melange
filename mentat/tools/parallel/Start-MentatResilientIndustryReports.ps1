@@ -9,7 +9,8 @@ This is the failure-isolated production orchestrator. For each industry it:
   2. delegates collection to Start-MentatApiCompanyCycleFanout.ps1;
   3. permits exactly one recovery lane while healthy API lanes continue;
   4. runs deterministic merge and company x cycle coverage gates;
-  5. starts the workbook generator immediately after that industry's gate.
+  5. exports and verifies every raw contribution by industry/cycle/company;
+  6. starts the workbook generator immediately after those gates.
 
 Collection uses every safe API/RAM lane for one industry at a time. Workbook
 generation from completed industries overlaps collection of the next industry,
@@ -17,7 +18,8 @@ so the Excel stage is pipelined rather than held until all industries finish.
 No workbook generator can see or publish a partial collection database.
 
 All state is persistent under one run directory: manifest.json, status.json,
-events.jsonl, per-industry fanout/coverage receipts, and process logs. API keys
+events.jsonl, per-industry fanout/coverage/raw-data receipts, and process logs.
+The content-addressed raw warehouse is durable under RawDataDirectory. API keys
 are inherited from FEC_API_KEY/FEC_API_KEYS or read by the fanout from KeysFile;
 they are never written into a spec, command line, log, or receipt here.
 
@@ -63,6 +65,7 @@ param(
   [double]$GeneratorPerformanceBudgetMinutes = 15,
   [string]$KeysFile = '',
   [string]$OutputDirectory = '',
+  [string]$RawDataDirectory = '',
   [string]$RunRoot = '',
   [string]$GeneratorPath = '',
   [string]$RScriptPath =
@@ -86,6 +89,7 @@ $workspaceRoot = Split-Path -Parent $projectRoot
 $fanoutPath = Join-Path $parallelRoot 'Start-MentatApiCompanyCycleFanout.ps1'
 $mentatEntry = Join-Path $projectRoot 'mentat.R'
 $coverageTool = Join-Path $toolsRoot 'validate_industry_coverage.py'
+$rawExportTool = Join-Path $toolsRoot 'export_raw_contribution_warehouse.py'
 $powerShellPath = (Get-Command powershell.exe -ErrorAction Stop).Source
 
 function Resolve-FullPath {
@@ -340,6 +344,9 @@ function Start-ManagedPowerShell {
 if (-not $OutputDirectory) {
   $OutputDirectory = Join-Path $workspaceRoot 'reports'
 }
+if (-not $RawDataDirectory) {
+  $RawDataDirectory = Join-Path $workspaceRoot 'outputs\raw-contributions'
+}
 if (-not $RunRoot) {
   $RunRoot = Join-Path $projectRoot '.cache\resilient-industry-runs'
 }
@@ -347,6 +354,7 @@ if (-not $GeneratorPath) {
   $GeneratorPath = Join-Path $toolsRoot 'generate_industry_report.ps1'
 }
 $OutputDirectory = Resolve-FullPath $OutputDirectory $workspaceRoot
+$RawDataDirectory = Resolve-FullPath $RawDataDirectory $workspaceRoot
 $RunRoot = Resolve-FullPath $RunRoot $projectRoot
 $GeneratorPath = Resolve-FullPath $GeneratorPath $toolsRoot
 $RScriptPath = Resolve-FullPath $RScriptPath $workspaceRoot
@@ -360,6 +368,7 @@ foreach ($required in @(
   $fanoutPath,
   $mentatEntry,
   $coverageTool,
+  $rawExportTool,
   $GeneratorPath,
   $RScriptPath,
   $RLibraryPath,
@@ -420,7 +429,9 @@ $plan = [ordered]@{
   generator_performance_budget_minutes = $GeneratorPerformanceBudgetMinutes
   fanout_path = $fanoutPath
   coverage_gate = $coverageTool
+  raw_data_export = $rawExportTool
   output_directory = $OutputDirectory
+  raw_data_directory = $RawDataDirectory
 }
 if ($PlanOnly) {
   $plan | ConvertTo-Json -Depth 10
@@ -428,6 +439,7 @@ if ($PlanOnly) {
 }
 
 [IO.Directory]::CreateDirectory($OutputDirectory) | Out-Null
+[IO.Directory]::CreateDirectory($RawDataDirectory) | Out-Null
 [IO.Directory]::CreateDirectory($RunRoot) | Out-Null
 $runId = '{0}-{1}' -f (Get-Date -Format 'yyyyMMddTHHmmss'), $PID
 $runDirectory = Join-Path $RunRoot $runId
@@ -478,6 +490,7 @@ for ($index = 0; $index -lt $cleanIndustries.Count; $index++) {
     finished_at = $null
     collection_seconds = $null
     coverage_seconds = $null
+    raw_data_seconds = $null
     generator_seconds = $null
     total_seconds = $null
     under_15_minutes = $null
@@ -486,7 +499,12 @@ for ($index = 0; $index -lt $cleanIndustries.Count; $index++) {
     fanout_root = $fanoutRoot
     fanout_receipt = Join-Path $root 'fanout-receipt.json'
     coverage_receipt = Join-Path $root 'coverage-receipt.json'
+    raw_data_receipt = Join-Path $root 'raw-data-receipt.json'
     generator_receipt = Join-Path $root 'generator-receipt.json'
+    raw_data_root = $RawDataDirectory
+    raw_snapshot_id = ''
+    raw_current_manifest = ''
+    raw_snapshot_manifest = ''
     output_workbook = $outputWorkbook
     workbook_sha256 = ''
   })
@@ -1088,14 +1106,111 @@ foreach ($state in $industryStates) {
     continue
   }
 
+  $state.stage = 'raw_data_gate'
+  $rawDataWatch = [Diagnostics.Stopwatch]::StartNew()
+  Write-RunEvent 'raw_data_export_started' $state.industry
+  Write-RunLog "Raw-data warehouse export started: $($state.industry)"
+  $rawDataStdout = Join-Path $industryRootPath 'raw-data.stdout.log'
+  $rawDataStderr = Join-Path $industryRootPath 'raw-data.stderr.log'
+  $rawDataCommand = (
+    '& ' + (ConvertTo-PowerShellLiteral $PythonPath) + ' ' +
+    (ConvertTo-PowerShellLiteral $rawExportTool) + ' ' +
+    (ConvertTo-PowerShellLiteral $state.database) + ' ' +
+    (ConvertTo-PowerShellLiteral $state.industry) + ' ' +
+    (ConvertTo-PowerShellLiteral $Cycles) + ' ' +
+    (ConvertTo-PowerShellLiteral '--output-root') + ' ' +
+    (ConvertTo-PowerShellLiteral $RawDataDirectory) + ' ' +
+    (ConvertTo-PowerShellLiteral '--receipt') + ' ' +
+    (ConvertTo-PowerShellLiteral $state.raw_data_receipt) +
+    '; exit $LASTEXITCODE'
+  )
+  $process = Start-ManagedPowerShell `
+    -Command $rawDataCommand `
+    -StdoutPath $rawDataStdout `
+    -StderrPath $rawDataStderr
+  $exitCode = Wait-ManagedProcess $process 'raw_data_gate' $state
+  $rawDataWatch.Stop()
+  $state.raw_data_seconds = [math]::Round(
+    $rawDataWatch.Elapsed.TotalSeconds,
+    3
+  )
+  $rawReceipt = $null
+  $coverageReceipt = $null
+  try {
+    if (Test-Path -LiteralPath $state.raw_data_receipt -PathType Leaf) {
+      $rawReceipt = Get-Content `
+        -LiteralPath $state.raw_data_receipt `
+        -Raw |
+        ConvertFrom-Json -ErrorAction Stop
+    }
+    $coverageReceipt = Get-Content `
+      -LiteralPath $state.coverage_receipt `
+      -Raw |
+      ConvertFrom-Json -ErrorAction Stop
+  } catch {
+    $rawReceipt = $null
+  }
+  $rawReceiptValid = $false
+  $rawContributionRows = [int64]0
+  $rawCorporateRows = [int64]0
+  try {
+    $rawReceiptValid = (
+      $exitCode -eq 0 -and
+      $null -ne $rawReceipt -and
+      [string]$rawReceipt.status -eq 'succeeded' -and
+      -not [string]::IsNullOrWhiteSpace([string]$rawReceipt.snapshot_id) -and
+      (Test-Path -LiteralPath ([string]$rawReceipt.current_manifest) -PathType Leaf) -and
+      (Test-Path -LiteralPath ([string]$rawReceipt.snapshot_manifest) -PathType Leaf)
+    )
+    if ($rawReceiptValid) {
+      $rawContributionRows = [int64]$rawReceipt.rows.contributions
+      $rawCorporateRows = [int64]$rawReceipt.rows.corporate_giving
+      $coverageContributionRows = [int64]$coverageReceipt.contributions.in_scope
+      $coverageCorporateRows = [int64]$coverageReceipt.corporate_giving.in_scope
+      $rawReceiptValid = (
+        $rawContributionRows -eq $coverageContributionRows -and
+        $rawCorporateRows -eq $coverageCorporateRows
+      )
+    }
+  } catch {
+    $rawReceiptValid = $false
+  }
+  if (-not $rawReceiptValid) {
+    $state.stage = 'failed'
+    $state.status = 'failed'
+    $state.finished_at = [DateTimeOffset]::Now.ToString('o')
+    $state.detail = (
+      "Raw-data gate failed: exit=$exitCode; " +
+      "receipt=$($state.raw_data_receipt)"
+    )
+    Write-RunEvent 'industry_failed' $state.industry $state.detail
+    Write-RunLog $state.detail
+    continue
+  }
+  $state.raw_snapshot_id = [string]$rawReceipt.snapshot_id
+  $state.raw_current_manifest = [string]$rawReceipt.current_manifest
+  $state.raw_snapshot_manifest = [string]$rawReceipt.snapshot_manifest
+  Write-RunEvent 'raw_data_export_passed' $state.industry (
+    "snapshot=$($state.raw_snapshot_id); " +
+    "contributions=$rawContributionRows; corporate=$rawCorporateRows"
+  )
+  Write-RunLog (
+    "Raw-data PASS: $($state.industry); " +
+    "snapshot=$($state.raw_snapshot_id); " +
+    "rows=$($rawContributionRows + $rawCorporateRows); " +
+    "seconds=$($state.raw_data_seconds)"
+  )
+
   $state.stage = 'generator_queued'
-  $state.detail = 'Merge and coverage gates passed; workbook generation queued.'
+  $state.detail = (
+    'Merge, coverage, and raw-data gates passed; workbook generation queued.'
+  )
   $job = New-GeneratorJob -IndustryState $state
   [void]$pendingGenerators.Add($job)
   Start-QueuedGenerators
   Write-RunEvent 'industry_gated' $state.industry
   Write-RunLog (
-    "Merge/coverage PASS; generator released: $($state.industry)"
+    "Merge/coverage/raw-data PASS; generator released: $($state.industry)"
   )
   Write-RunStatus 'pipelining' $state.industry
 }
