@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -59,6 +60,85 @@ class ResilientOrchestratorTests(unittest.TestCase):
                     0,
                     result.stderr + result.stdout,
                 )
+
+    def test_managed_fast_process_exit_codes_are_never_null(self) -> None:
+        with tempfile.TemporaryDirectory(
+            prefix="mentat-managed-process-"
+        ) as temporary:
+            script_literal = str(SCRIPT).replace("'", "''")
+            temporary_literal = temporary.replace("'", "''")
+            command = (
+                f"$text=Get-Content -LiteralPath '{script_literal}' -Raw;"
+                "$tokens=$null;$errors=$null;"
+                "$ast=[Management.Automation.Language.Parser]::ParseInput("
+                "$text,[ref]$tokens,[ref]$errors);"
+                "if($errors.Count){exit 1};"
+                "foreach($name in @('Start-ManagedPowerShell',"
+                "'Wait-ManagedProcess','Format-ManagedExitCode')){"
+                "$functionAst=@($ast.FindAll({param($node)"
+                "$node -is "
+                "[Management.Automation.Language.FunctionDefinitionAst] "
+                "-and $node.Name -eq $name},$true));"
+                "if($functionAst.Count -ne 1){exit 2};"
+                ". ([scriptblock]::Create($functionAst[0].Extent.Text))"
+                "};"
+                "$managedProcessNullExitCode=-9999;"
+                "$powerShellPath=(Get-Command powershell.exe "
+                "-ErrorAction Stop).Source;"
+                "$wallWatch=[Diagnostics.Stopwatch]::StartNew();"
+                "function Update-GeneratorJobs {};"
+                "function Write-RunStatus {param($Stage,$Industry,$Live)};"
+                "function Write-RunLog {param($Message)};"
+                "$state=[pscustomobject]@{industry='Fixture'};"
+                f"$root='{temporary_literal}';"
+                "$success=Start-ManagedPowerShell -Command 'exit 0' "
+                "-StdoutPath (Join-Path $root 'success.stdout.log') "
+                "-StderrPath (Join-Path $root 'success.stderr.log');"
+                "Start-Sleep -Milliseconds 250;"
+                "$successExit=Wait-ManagedProcess $success 'test' $state;"
+                "$failure=Start-ManagedPowerShell -Command 'exit 37' "
+                "-StdoutPath (Join-Path $root 'failure.stdout.log') "
+                "-StderrPath (Join-Path $root 'failure.stderr.log');"
+                "Start-Sleep -Milliseconds 250;"
+                "$failureExit=Wait-ManagedProcess $failure 'test' $state;"
+                "$fake=[pscustomobject]@{HasExited=$true;ExitCode=$null};"
+                "$fake|Add-Member ScriptMethod Refresh {};"
+                "$fake|Add-Member ScriptMethod WaitForExit {};"
+                "$nullExit=Wait-ManagedProcess $fake 'test' $state;"
+                "[pscustomobject]@{"
+                "success_exit=$successExit;"
+                "success_type=$successExit.GetType().FullName;"
+                "failure_exit=$failureExit;"
+                "failure_type=$failureExit.GetType().FullName;"
+                "null_exit=$nullExit;"
+                "null_type=$nullExit.GetType().FullName;"
+                "null_description=Format-ManagedExitCode $nullExit"
+                "}|ConvertTo-Json -Compress"
+            )
+            result = subprocess.run(
+                [
+                    str(POWERSHELL),
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    command,
+                ],
+                cwd=PROJECT_ROOT.parent,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        values = json.loads(result.stdout)
+        self.assertEqual(values["success_exit"], 0)
+        self.assertEqual(values["failure_exit"], 37)
+        self.assertEqual(values["null_exit"], -9999)
+        self.assertEqual(values["success_type"], "System.Int32")
+        self.assertEqual(values["failure_type"], "System.Int32")
+        self.assertEqual(values["null_type"], "System.Int32")
+        self.assertIn("ExitCode unavailable", values["null_description"])
+        self.assertIn("sentinel=-9999", values["null_description"])
 
     def test_plan_only_counts_numbered_keys_and_comma_industries(self) -> None:
         environment = os.environ.copy()

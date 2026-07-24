@@ -74,6 +74,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 2.0
+$managedProcessNullExitCode = -9999
 
 $parallelRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $toolsRoot = Split-Path -Parent $parallelRoot
@@ -192,6 +193,17 @@ function Get-LastNonemptyLogLine {
   return ''
 }
 
+function Format-ManagedExitCode {
+  param([Parameter(Mandatory = $true)][int]$ExitCode)
+  if ($ExitCode -eq $managedProcessNullExitCode) {
+    return (
+      'null (PowerShell 5.1 process ExitCode unavailable; ' +
+      "sentinel=$managedProcessNullExitCode)"
+    )
+  }
+  return [string]$ExitCode
+}
+
 function Write-RInvocationReceipt {
   param(
     [Parameter(Mandatory = $true)][string]$Path,
@@ -202,10 +214,12 @@ function Write-RInvocationReceipt {
     [Parameter(Mandatory = $true)][string[]]$LogPaths
   )
   $lastLine = Get-LastNonemptyLogLine $LogPaths
+  $exitCodeDescription = Format-ManagedExitCode $ExitCode
   Write-AtomicJson $Path ([ordered]@{
     industry = $Industry
     unit = $Unit
     exit_code = $ExitCode
+    exit_code_description = $exitCodeDescription
     elapsed_seconds = [math]::Round($ElapsedSeconds, 3)
     last_log_line = $lastLine
     log_paths = $LogPaths
@@ -213,7 +227,7 @@ function Write-RInvocationReceipt {
     recorded_at = [DateTimeOffset]::Now.ToString('o')
   })
   Write-RunEvent 'rscript_invocation_completed' $Industry (
-    "unit=$Unit; exit=$ExitCode; elapsed=" +
+    "unit=$Unit; exit=$exitCodeDescription; elapsed=" +
     "$([math]::Round($ElapsedSeconds,3)); last_log_line=$lastLine"
   )
 }
@@ -366,7 +380,7 @@ function Start-ManagedPowerShell {
   $encoded = [Convert]::ToBase64String(
     [Text.Encoding]::Unicode.GetBytes($Command)
   )
-  return Start-Process `
+  $process = Start-Process `
     -FilePath $powerShellPath `
     -ArgumentList @(
       '-NoLogo',
@@ -379,6 +393,11 @@ function Start-ManagedPowerShell {
     -RedirectStandardOutput $StdoutPath `
     -RedirectStandardError $StderrPath `
     -PassThru
+  # Windows PowerShell 5.1 can return $null from ExitCode for a child that
+  # exits before its Process handle is first accessed. Cache the handle now;
+  # removing this line makes fast managed steps appear to fail with exit=.
+  $null = $process.Handle
+  return $process
 }
 
 if (-not $OutputDirectory) {
@@ -908,7 +927,14 @@ function Complete-GeneratorJob {
   $Job.finished_at = [DateTimeOffset]::Now.ToString('o')
   $elapsed = [double]$Job.stopwatch.Elapsed.TotalSeconds
   $generatorDurations.Add($elapsed)
-  $exitCode = $Job.process.ExitCode
+  $Job.process.WaitForExit()
+  $reportedExitCode = $Job.process.ExitCode
+  $exitCode = if ($null -eq $reportedExitCode) {
+    [int]$managedProcessNullExitCode
+  } else {
+    [int]$reportedExitCode
+  }
+  $exitCodeDescription = Format-ManagedExitCode $exitCode
   $workbookExists = Test-Path -LiteralPath $Job.output_workbook -PathType Leaf
   $generatorReceipt = Read-GeneratorReceipt $Job.stdout
   $receiptValid = (
@@ -982,18 +1008,18 @@ function Complete-GeneratorJob {
       -Lane 'recovery'
     [void]$recoveryQueue.Add($retry)
     Write-RunEvent 'generator_recovery_queued' $Job.industry (
-      "exit=$exitCode; workbook_exists=$workbookExists; " +
+      "exit=$exitCodeDescription; workbook_exists=$workbookExists; " +
       "receipt_valid=$receiptValid"
     )
     Write-RunLog (
       "Generator queued for the single recovery lane: $($Job.industry) " +
-      "exit=$exitCode workbook_exists=$workbookExists " +
+      "exit=$exitCodeDescription workbook_exists=$workbookExists " +
       "receipt_valid=$receiptValid"
     )
   } else {
     $Job.status = 'failed'
     $Job.error = (
-      "generator exit=$exitCode workbook_exists=$workbookExists " +
+      "generator exit=$exitCodeDescription workbook_exists=$workbookExists " +
       "receipt_valid=$receiptValid; " +
       "stderr=$($Job.stderr)"
     )
@@ -1046,7 +1072,14 @@ function Wait-ManagedProcess {
       Get-FanoutLiveState $FanoutRoot
     } else { $null }
     Write-RunStatus $Stage $IndustryState.industry $live
-    if ($Process.HasExited) { return $Process.ExitCode }
+    if ($Process.HasExited) {
+      $Process.WaitForExit()
+      $reportedExitCode = $Process.ExitCode
+      if ($null -eq $reportedExitCode) {
+        return [int]$managedProcessNullExitCode
+      }
+      return [int]$reportedExitCode
+    }
     if (([DateTimeOffset]::Now - $lastHeartbeat).TotalSeconds -ge 15) {
       $etaText = ''
       if ($null -ne $live -and
@@ -1111,6 +1144,7 @@ foreach ($state in $industryStates) {
     -StdoutPath $initStdout `
     -StderrPath $initStderr
   $exitCode = Wait-ManagedProcess $process 'initializing' $state
+  $exitCodeDescription = Format-ManagedExitCode $exitCode
   $initWatch.Stop()
   Write-RInvocationReceipt `
     -Path (Join-Path $industryRootPath 'initialize.invocation.json') `
@@ -1125,7 +1159,7 @@ foreach ($state in $industryStates) {
     $state.status = 'failed'
     $state.finished_at = [DateTimeOffset]::Now.ToString('o')
     $state.detail = (
-      "Initialization failed: exit=$exitCode; stderr=$initStderr"
+      "Initialization failed: exit=$exitCodeDescription; stderr=$initStderr"
     )
     Write-RunEvent 'industry_failed' $state.industry $state.detail
     Write-RunLog $state.detail
@@ -1163,6 +1197,7 @@ foreach ($state in $industryStates) {
     -Stage 'collecting' `
     -IndustryState $state `
     -FanoutRoot $state.fanout_root
+  $exitCodeDescription = Format-ManagedExitCode $exitCode
   $collectionWatch.Stop()
   $fanoutReceiptObject = $null
   if (Test-Path -LiteralPath $state.fanout_receipt -PathType Leaf) {
@@ -1204,7 +1239,7 @@ foreach ($state in $industryStates) {
     $state.status = 'failed'
     $state.finished_at = [DateTimeOffset]::Now.ToString('o')
     $state.detail = (
-      "Fanout failed: exit=$exitCode; stderr=$fanoutStderr"
+      "Fanout failed: exit=$exitCodeDescription; stderr=$fanoutStderr"
     )
     Write-RunEvent 'industry_failed' $state.industry $state.detail
     Write-RunLog $state.detail
@@ -1232,6 +1267,7 @@ foreach ($state in $industryStates) {
     -StdoutPath $retagStdout `
     -StderrPath $retagStderr
   $exitCode = Wait-ManagedProcess $process 'finalizing_database' $state
+  $exitCodeDescription = Format-ManagedExitCode $exitCode
   $retagWatch.Stop()
   Write-RInvocationReceipt `
     -Path (Join-Path $industryRootPath 'retag.invocation.json') `
@@ -1244,7 +1280,9 @@ foreach ($state in $industryStates) {
     $state.stage = 'failed'
     $state.status = 'failed'
     $state.finished_at = [DateTimeOffset]::Now.ToString('o')
-    $state.detail = "Database finalization failed: exit=$exitCode"
+    $state.detail = (
+      "Database finalization failed: exit=$exitCodeDescription"
+    )
     Write-RunEvent 'industry_failed' $state.industry $state.detail
     Write-RunLog $state.detail
     continue
@@ -1272,6 +1310,7 @@ foreach ($state in $industryStates) {
     -StdoutPath $coverageStdout `
     -StderrPath $coverageStderr
   $exitCode = Wait-ManagedProcess $process 'coverage_gate' $state
+  $exitCodeDescription = Format-ManagedExitCode $exitCode
   $coverageWatch.Stop()
   $state.coverage_seconds = [math]::Round(
     $coverageWatch.Elapsed.TotalSeconds,
@@ -1282,7 +1321,7 @@ foreach ($state in $industryStates) {
     $state.status = 'failed'
     $state.finished_at = [DateTimeOffset]::Now.ToString('o')
     $state.detail = (
-      "Coverage gate failed: exit=$exitCode; " +
+      "Coverage gate failed: exit=$exitCodeDescription; " +
       "receipt=$($state.coverage_receipt)"
     )
     Write-RunEvent 'industry_failed' $state.industry $state.detail
@@ -1313,6 +1352,7 @@ foreach ($state in $industryStates) {
     -StdoutPath $rawDataStdout `
     -StderrPath $rawDataStderr
   $exitCode = Wait-ManagedProcess $process 'raw_data_gate' $state
+  $exitCodeDescription = Format-ManagedExitCode $exitCode
   $rawDataWatch.Stop()
   $state.raw_data_seconds = [math]::Round(
     $rawDataWatch.Elapsed.TotalSeconds,
@@ -1365,7 +1405,7 @@ foreach ($state in $industryStates) {
     $state.status = 'failed'
     $state.finished_at = [DateTimeOffset]::Now.ToString('o')
     $state.detail = (
-      "Raw-data gate failed: exit=$exitCode; " +
+      "Raw-data gate failed: exit=$exitCodeDescription; " +
       "receipt=$($state.raw_data_receipt)"
     )
     Write-RunEvent 'industry_failed' $state.industry $state.detail
