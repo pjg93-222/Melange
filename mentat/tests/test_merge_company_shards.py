@@ -5,6 +5,8 @@ import sys
 import tempfile
 import unittest
 from contextlib import closing
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 
 
@@ -17,6 +19,11 @@ SCHEMA = """
 CREATE TABLE contributions (
   sub_id TEXT PRIMARY KEY,
   company TEXT NOT NULL,
+  matched_variant TEXT NOT NULL DEFAULT '',
+  phase TEXT NOT NULL DEFAULT '',
+  match_confidence TEXT,
+  company_match_status TEXT NOT NULL DEFAULT 'accepted',
+  company_match_reason TEXT,
   amount REAL
 );
 CREATE TABLE corporate_giving (
@@ -132,11 +139,17 @@ def seed_shard(
 ) -> None:
     with closing(sqlite3.connect(path)) as connection, connection:
         connection.execute(
-            "INSERT INTO contributions VALUES (?, ?, ?)",
+            """
+            INSERT INTO contributions (sub_id, company, amount)
+            VALUES (?, ?, ?)
+            """,
             (f"contribution-{suffix}", company, 100.0),
         )
         connection.execute(
-            "INSERT INTO contributions VALUES (?, ?, ?)",
+            """
+            INSERT INTO contributions (sub_id, company, amount)
+            VALUES (?, ?, ?)
+            """,
             (f"unselected-{suffix}", other_company, 999.0),
         )
         connection.execute(
@@ -208,6 +221,35 @@ def seed_shard(
         connection.execute(
             "INSERT INTO run_metrics VALUES (?, 'collect', 500)",
             (f"run-{suffix}",),
+        )
+
+
+def seed_attribution(
+    path: Path,
+    *,
+    sub_id: str,
+    company: str,
+    phase: str,
+    amount: float = 100.0,
+) -> None:
+    with closing(sqlite3.connect(path)) as connection, connection:
+        connection.execute(
+            """
+            INSERT INTO contributions (
+              sub_id, company, matched_variant, phase, match_confidence,
+              company_match_status, company_match_reason, amount
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                sub_id,
+                company,
+                f"{company} variant",
+                phase,
+                f"{company} confidence",
+                "accepted",
+                f"{company} reason",
+                amount,
+            ),
         )
 
 
@@ -378,7 +420,120 @@ class MergeCompanyShardsTest(unittest.TestCase):
             }
             self.assertEqual(counts_after, counts_before)
 
-    def test_cross_shard_pk_conflict_fails_before_writes(self) -> None:
+    def test_attribution_collision_uses_canonical_order_in_any_shard_order(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(
+            prefix="mentat-attribution-conflict-"
+        ) as temp:
+            root = Path(temp)
+            first_target = root / "first.db"
+            second_target = root / "second.db"
+            alpha_shard = root / "a.db"
+            zulu_shard = root / "z.db"
+            for path in (
+                first_target,
+                second_target,
+                alpha_shard,
+                zulu_shard,
+            ):
+                create_database(path)
+            seed_attribution(
+                alpha_shard,
+                sub_id="shared-sub-id",
+                company="Alpha",
+                phase="alpha-phase",
+            )
+            seed_attribution(
+                zulu_shard,
+                sub_id="shared-sub-id",
+                company="Zulu",
+                phase="zulu-phase",
+            )
+            company_order = '["Zulu", "Alpha"]'
+            first_output = StringIO()
+            with redirect_stdout(first_output):
+                self.assertEqual(
+                    merger.main(
+                        [
+                            str(first_target),
+                            "--company-order-json",
+                            company_order,
+                            f"{alpha_shard}::Alpha",
+                            f"{zulu_shard}::Zulu",
+                        ]
+                    ),
+                    0,
+                )
+            second_output = StringIO()
+            with redirect_stdout(second_output):
+                self.assertEqual(
+                    merger.main(
+                        [
+                            str(second_target),
+                            "--company-order-json",
+                            company_order,
+                            f"{zulu_shard}::Zulu",
+                            f"{alpha_shard}::Alpha",
+                        ]
+                    ),
+                    0,
+                )
+
+            def merged_rows(path: Path) -> tuple[list[tuple[object, ...]], ...]:
+                with closing(sqlite3.connect(path)) as connection:
+                    contribution = list(
+                        connection.execute(
+                            """
+                            SELECT sub_id, company, matched_variant, phase,
+                                   match_confidence, company_match_status,
+                                   company_match_reason, amount
+                            FROM contributions
+                            ORDER BY sub_id
+                            """
+                        )
+                    )
+                    conflicts = list(
+                        connection.execute(
+                            """
+                            SELECT sub_id, stored_company, incoming_company,
+                                   incoming_phase, created_at
+                            FROM attribution_conflicts
+                            ORDER BY sub_id, incoming_company, incoming_phase
+                            """
+                        )
+                    )
+                return contribution, conflicts
+
+            first_rows = merged_rows(first_target)
+            second_rows = merged_rows(second_target)
+            self.assertEqual(first_rows, second_rows)
+            self.assertEqual(first_target.read_bytes(), second_target.read_bytes())
+            self.assertEqual(first_rows[0][0][1], "Zulu")
+            self.assertEqual(
+                first_rows[1],
+                [
+                    (
+                        "shared-sub-id",
+                        "Zulu",
+                        "Alpha",
+                        "alpha-phase",
+                        merger.DETERMINISTIC_CONFLICT_TIMESTAMP,
+                    )
+                ],
+            )
+            self.assertIn(
+                "attribution_conflicts_recorded=1",
+                first_output.getvalue(),
+            )
+            self.assertEqual(
+                first_output.getvalue().count(
+                    "attribution_conflict key={'sub_id': 'shared-sub-id'}"
+                ),
+                1,
+            )
+
+    def test_cross_shard_raw_pk_conflict_fails_before_writes(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-shard-conflict-") as temp:
             root = Path(temp)
             target = root / "target.db"
@@ -393,7 +548,7 @@ class MergeCompanyShardsTest(unittest.TestCase):
                 connection.execute(
                     """
                     UPDATE contributions
-                    SET sub_id='contribution-A'
+                    SET sub_id='contribution-A', amount=101
                     WHERE sub_id='contribution-B'
                     """
                 )
@@ -416,6 +571,78 @@ class MergeCompanyShardsTest(unittest.TestCase):
             )
             self.assertEqual(scalar(target, "PRAGMA quick_check"), "ok")
 
+    def test_three_way_attribution_collision_records_each_loser(self) -> None:
+        with tempfile.TemporaryDirectory(
+            prefix="mentat-three-way-attribution-"
+        ) as temp:
+            root = Path(temp)
+            target = root / "target.db"
+            create_database(target)
+            specifications: list[str] = []
+            for path_name, company, phase in (
+                ("alpha.db", "Alpha", "alpha-phase"),
+                ("beta.db", "Beta", "beta-phase"),
+                ("gamma.db", "Gamma", "gamma-phase"),
+            ):
+                shard = root / path_name
+                create_database(shard)
+                seed_attribution(
+                    shard,
+                    sub_id="three-way",
+                    company=company,
+                    phase=phase,
+                )
+                specifications.append(f"{shard}::{company}")
+
+            output = StringIO()
+            with redirect_stdout(output):
+                self.assertEqual(
+                    merger.main(
+                        [
+                            str(target),
+                            "--company-order-json",
+                            '["Gamma", "Alpha", "Beta"]',
+                            *reversed(specifications),
+                        ]
+                    ),
+                    0,
+                )
+            self.assertEqual(
+                scalar(
+                    target,
+                    "SELECT company FROM contributions WHERE sub_id='three-way'",
+                ),
+                "Gamma",
+            )
+            with closing(sqlite3.connect(target)) as connection:
+                conflicts = list(
+                    connection.execute(
+                        """
+                        SELECT stored_company, incoming_company, incoming_phase
+                        FROM attribution_conflicts
+                        WHERE sub_id='three-way'
+                        ORDER BY incoming_company
+                        """
+                    )
+                )
+            self.assertEqual(
+                conflicts,
+                [
+                    ("Gamma", "Alpha", "alpha-phase"),
+                    ("Gamma", "Beta", "beta-phase"),
+                ],
+            )
+            self.assertIn(
+                "attribution_conflicts_recorded=2",
+                output.getvalue(),
+            )
+            self.assertEqual(
+                output.getvalue().count(
+                    "attribution_conflict key={'sub_id': 'three-way'}"
+                ),
+                2,
+            )
+
     def test_target_pk_conflict_fails_before_writes(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-target-conflict-") as temp:
             root = Path(temp)
@@ -427,7 +654,7 @@ class MergeCompanyShardsTest(unittest.TestCase):
             with closing(sqlite3.connect(target)) as connection, connection:
                 connection.execute(
                     """
-                    INSERT INTO contributions VALUES
+                    INSERT INTO contributions (sub_id, company, amount) VALUES
                       ('contribution-A', 'Different Company', 999)
                     """
                 )

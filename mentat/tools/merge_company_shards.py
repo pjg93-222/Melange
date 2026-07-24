@@ -2,6 +2,7 @@
 
 Usage:
     python merge_company_shards.py TARGET \
+      --company-order-json '["Company", "Company"]' \
       "SHARD_DB::Company|Company" ["SHARD_DB::Company|Company" ...]
 
 TARGET must already exist. Shards are attached read-only, schemas and
@@ -11,10 +12,12 @@ as one transaction. A company may be assigned to exactly one shard.
 
 from __future__ import annotations
 
+import json
 import sqlite3
 import sys
 from collections import defaultdict
 from contextlib import closing
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -64,6 +67,37 @@ EXACT_PARITY_TABLES = (
     "attribution_conflicts",
     *GLOBAL_APPEND_TABLES,
 )
+
+# Attribution columns are discovered from the live contribution schema. The
+# fixed names are the schema's attribution anchors; the prefixes include any
+# present or future match-confidence/status/flag columns without treating FEC
+# payload columns as mutable provenance.
+ATTRIBUTION_COLUMN_ANCHORS = frozenset(
+    {
+        "company",
+        "matched_variant",
+        "phase",
+        "excluded_reason",
+    }
+)
+ATTRIBUTION_COLUMN_PREFIXES = ("match_", "company_match_")
+DETERMINISTIC_CONFLICT_TIMESTAMP = "1970-01-01T00:00:00.000+0000"
+
+
+@dataclass(frozen=True)
+class AttributionConflict:
+    sub_id: str
+    stored_company: str
+    incoming_company: str
+    incoming_phase: str
+    created_at: str
+
+
+@dataclass(frozen=True)
+class AttributionResolution:
+    sub_id: str
+    winner: tuple[object, ...]
+    conflicts: tuple[AttributionConflict, ...]
 
 
 def quoted(name: str) -> str:
@@ -199,6 +233,21 @@ def null_safe_equal(
     )
 
 
+def contribution_attribution_columns(
+    connection: sqlite3.Connection,
+) -> frozenset[str]:
+    columns = frozenset(table_columns(connection, "main", "contributions"))
+    attribution = frozenset(
+        column
+        for column in columns
+        if column in ATTRIBUTION_COLUMN_ANCHORS
+        or column.startswith(ATTRIBUTION_COLUMN_PREFIXES)
+    )
+    if "company" not in attribution:
+        raise RuntimeError("contributions schema has no company attribution column")
+    return attribution
+
+
 def merge_selection(
     table: str,
     alias: str,
@@ -232,7 +281,8 @@ def audit_exact_pk_pair(
     right_schema: str,
     right_label: str,
     right_companies: Sequence[str] | None,
-) -> None:
+    attribution_columns: frozenset[str],
+) -> list[tuple[tuple[object, ...], tuple[object, ...]]]:
     columns = table_columns(connection, "main", table)
     pk_columns = primary_key_columns(connection, "main", table)
     if not pk_columns:
@@ -255,6 +305,10 @@ def audit_exact_pk_pair(
             *(f"r.{quoted(column)}" for column in columns),
         ]
     )
+    attribution_pairs: list[
+        tuple[tuple[object, ...], tuple[object, ...]]
+    ] = []
+    limit = "" if table == "contributions" else "LIMIT 1"
     with closing(
         connection.execute(
             f"""
@@ -265,38 +319,128 @@ def audit_exact_pk_pair(
             WHERE {left_where}
               AND {right_where}
               AND NOT ({row_match})
-            LIMIT 1
+            {limit}
             """,
             left_parameters + right_parameters,
         )
     ) as cursor:
-        collision = cursor.fetchone()
-    if collision is None:
-        return
+        for collision in cursor:
+            column_count = len(columns)
+            left_values = tuple(collision[:column_count])
+            right_values = tuple(collision[column_count:])
+            key = {
+                column: left_values[columns.index(column)]
+                for column in pk_columns
+            }
+            differing = [
+                column
+                for index, column in enumerate(columns)
+                if left_values[index] != right_values[index]
+            ]
+            if (
+                table == "contributions"
+                and "company" in differing
+                and set(differing).issubset(attribution_columns)
+            ):
+                attribution_pairs.append((left_values, right_values))
+                continue
+            raise RuntimeError(
+                f"Non-identical primary-key collision in {table}: "
+                f"{left_label} vs {right_label}; key={key!r}; "
+                f"differing_columns={differing!r}"
+            )
+    return attribution_pairs
 
-    column_count = len(columns)
-    left_values = collision[:column_count]
-    right_values = collision[column_count:]
-    key = {
-        column: left_values[columns.index(column)]
-        for column in pk_columns
-    }
-    differing = [
-        column
-        for index, column in enumerate(columns)
-        if left_values[index] != right_values[index]
-    ]
-    raise RuntimeError(
-        f"Non-identical primary-key collision in {table}: "
-        f"{left_label} vs {right_label}; key={key!r}; "
-        f"differing_columns={differing!r}"
-    )
+
+def build_attribution_resolutions(
+    connection: sqlite3.Connection,
+    collision_rows: dict[str, set[tuple[object, ...]]],
+    company_order: Sequence[str],
+) -> list[AttributionResolution]:
+    columns = table_columns(connection, "main", "contributions")
+    company_index = columns.index("company")
+    phase_index = columns.index("phase") if "phase" in columns else None
+    scraped_index = columns.index("scraped_at") if "scraped_at" in columns else None
+    load_date_index = columns.index("load_date") if "load_date" in columns else None
+    ranks = {company: index for index, company in enumerate(company_order)}
+
+    def row_order(row: tuple[object, ...]) -> tuple[object, ...]:
+        company = str(row[company_index])
+        return (
+            ranks.get(company, len(ranks)),
+            company.upper(),
+            company,
+            tuple("" if value is None else str(value) for value in row),
+        )
+
+    resolutions: list[AttributionResolution] = []
+    for sub_id in sorted(collision_rows, key=lambda value: (value.upper(), value)):
+        rows = sorted(collision_rows[sub_id], key=row_order)
+        winner = rows[0]
+        stored_company = str(winner[company_index])
+        conflicts: dict[
+            tuple[str, str, str, str], AttributionConflict
+        ] = {}
+        for loser in rows[1:]:
+            incoming_company = str(loser[company_index])
+            if incoming_company == stored_company:
+                continue
+            incoming_phase = (
+                str(loser[phase_index]) if phase_index is not None else ""
+            )
+            timestamp_value = None
+            if scraped_index is not None:
+                timestamp_value = loser[scraped_index]
+            if not timestamp_value and load_date_index is not None:
+                timestamp_value = loser[load_date_index]
+            created_at = (
+                str(timestamp_value)
+                if timestamp_value
+                else DETERMINISTIC_CONFLICT_TIMESTAMP
+            )
+            conflict = AttributionConflict(
+                sub_id=sub_id,
+                stored_company=stored_company,
+                incoming_company=incoming_company,
+                incoming_phase=incoming_phase,
+                created_at=created_at,
+            )
+            conflicts[
+                (
+                    conflict.sub_id,
+                    conflict.stored_company,
+                    conflict.incoming_company,
+                    conflict.incoming_phase,
+                )
+            ] = conflict
+        resolutions.append(
+            AttributionResolution(
+                sub_id=sub_id,
+                winner=winner,
+                conflicts=tuple(
+                    conflicts[key]
+                    for key in sorted(
+                        conflicts,
+                        key=lambda item: (
+                            item[0].upper(),
+                            item[0],
+                            ranks.get(item[2], len(ranks)),
+                            item[2].upper(),
+                            item[2],
+                            item[3],
+                        ),
+                    )
+                ),
+            )
+        )
+    return resolutions
 
 
 def audit_exact_pk_collisions(
     connection: sqlite3.Connection,
     specifications: Sequence[tuple[Path, tuple[str, ...]]],
-) -> None:
+    company_order: Sequence[str],
+) -> list[AttributionResolution]:
     sources: list[tuple[str, str, Sequence[str] | None]] = [
         ("main", "target", None)
     ]
@@ -308,12 +452,16 @@ def audit_exact_pk_collisions(
         )
         for index, (shard, companies) in enumerate(specifications)
     )
+    attribution_columns = contribution_attribution_columns(connection)
+    collision_rows: dict[str, set[tuple[object, ...]]] = defaultdict(set)
+    contribution_columns = table_columns(connection, "main", "contributions")
+    sub_id_index = contribution_columns.index("sub_id")
     for table in EXACT_PARITY_TABLES:
         for right_index in range(1, len(sources)):
             right_schema, right_label, right_companies = sources[right_index]
             for left_index in range(right_index):
                 left_schema, left_label, left_companies = sources[left_index]
-                audit_exact_pk_pair(
+                attribution_pairs = audit_exact_pk_pair(
                     connection,
                     table,
                     left_schema,
@@ -322,7 +470,17 @@ def audit_exact_pk_collisions(
                     right_schema,
                     right_label,
                     right_companies,
+                    attribution_columns,
                 )
+                for left_values, right_values in attribution_pairs:
+                    sub_id = str(left_values[sub_id_index])
+                    collision_rows[sub_id].add(left_values)
+                    collision_rows[sub_id].add(right_values)
+    return build_attribution_resolutions(
+        connection,
+        collision_rows,
+        company_order,
+    )
 
 
 def insert_or_ignore(
@@ -620,6 +778,59 @@ def merge_global_table(
     return insert_or_ignore(connection, schema, table)
 
 
+def apply_attribution_resolutions(
+    connection: sqlite3.Connection,
+    resolutions: Sequence[AttributionResolution],
+) -> int:
+    if not resolutions:
+        return 0
+    columns = table_columns(connection, "main", "contributions")
+    column_sql = ",".join(quoted(column) for column in columns)
+    value_sql = placeholders(columns)
+    inserted_conflicts = 0
+    for resolution in resolutions:
+        current = connection.execute(
+            f"""
+            SELECT {column_sql}
+            FROM main.contributions
+            WHERE sub_id=?
+            """,
+            (resolution.sub_id,),
+        ).fetchone()
+        if current is not None and tuple(current) != resolution.winner:
+            connection.execute(
+                "DELETE FROM main.contributions WHERE sub_id=?",
+                (resolution.sub_id,),
+            )
+        connection.execute(
+            f"""
+            INSERT OR IGNORE INTO main.contributions ({column_sql})
+            VALUES ({value_sql})
+            """,
+            resolution.winner,
+        )
+        for conflict in resolution.conflicts:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO main.attribution_conflicts (
+                  sub_id, stored_company, incoming_company,
+                  incoming_phase, created_at
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    conflict.sub_id,
+                    conflict.stored_company,
+                    conflict.incoming_company,
+                    conflict.incoming_phase,
+                    conflict.created_at,
+                ),
+            )
+            inserted_conflicts += int(
+                connection.execute("SELECT changes()").fetchone()[0]
+            )
+    return inserted_conflicts
+
+
 def merge_shard(
     connection: sqlite3.Connection,
     shard_index: int,
@@ -723,6 +934,39 @@ def parse_specifications(
     return specifications
 
 
+def parse_company_order(
+    encoded: str | None,
+    specifications: Sequence[tuple[Path, tuple[str, ...]]],
+) -> tuple[str, ...]:
+    assigned = {
+        company
+        for _, companies in specifications
+        for company in companies
+    }
+    if encoded is None:
+        return tuple(sorted(assigned, key=lambda value: (value.upper(), value)))
+    try:
+        parsed = json.loads(encoded)
+    except json.JSONDecodeError as error:
+        raise SystemExit(f"Invalid --company-order-json: {error}") from error
+    if (
+        not isinstance(parsed, list)
+        or not all(isinstance(company, str) and company.strip() for company in parsed)
+    ):
+        raise SystemExit("--company-order-json must be a JSON array of company names")
+    order = tuple(company.strip() for company in parsed)
+    if len(set(order)) != len(order):
+        raise SystemExit("--company-order-json contains duplicate company names")
+    if set(order) != assigned:
+        missing = sorted(assigned.difference(order))
+        extra = sorted(set(order).difference(assigned))
+        raise SystemExit(
+            "--company-order-json must name every assigned company exactly once; "
+            f"missing={missing!r}; extra={extra!r}"
+        )
+    return order
+
+
 def target_connection(target: Path) -> sqlite3.Connection:
     if not target.is_file():
         raise SystemExit(f"Target database does not exist: {target}")
@@ -741,10 +985,20 @@ def main(arguments: Sequence[str]) -> int:
     if len(arguments) < 2:
         raise SystemExit(__doc__)
     target = Path(arguments[0]).resolve()
-    specifications = parse_specifications(arguments[1:], target)
+    remaining = list(arguments[1:])
+    encoded_company_order: str | None = None
+    if remaining and remaining[0] == "--company-order-json":
+        if len(remaining) < 3:
+            raise SystemExit(__doc__)
+        encoded_company_order = remaining[1]
+        remaining = remaining[2:]
+    specifications = parse_specifications(remaining, target)
+    company_order = parse_company_order(encoded_company_order, specifications)
     connection = target_connection(target)
     attached: list[str] = []
     all_stats: list[tuple[Path, tuple[str, ...], dict[str, int]]] = []
+    attribution_resolutions: list[AttributionResolution] = []
+    attribution_conflicts_recorded = 0
     try:
         quick_check(connection, "main")
         for index, (shard, companies) in enumerate(specifications):
@@ -760,10 +1014,18 @@ def main(arguments: Sequence[str]) -> int:
 
         # Fail before BEGIN IMMEDIATE or any target write if INSERT OR IGNORE
         # would otherwise make a non-identical duplicate path-order dependent.
-        audit_exact_pk_collisions(connection, specifications)
+        attribution_resolutions = audit_exact_pk_collisions(
+            connection,
+            specifications,
+            company_order,
+        )
 
         connection.execute("BEGIN IMMEDIATE")
         try:
+            attribution_conflicts_recorded = apply_attribution_resolutions(
+                connection,
+                attribution_resolutions,
+            )
             for index, (shard, companies) in enumerate(specifications):
                 schema = f"shard_{index}"
                 stats = merge_shard(
@@ -783,6 +1045,19 @@ def main(arguments: Sequence[str]) -> int:
         # Validate committed bytes, not just the transaction view.
         quick_check(connection, "main")
         print("quick_check=ok")
+        for resolution in attribution_resolutions:
+            for conflict in resolution.conflicts:
+                print(
+                    "attribution_conflict "
+                    f"key={{'sub_id': {conflict.sub_id!r}}} "
+                    f"stored_company={conflict.stored_company!r} "
+                    f"incoming_company={conflict.incoming_company!r} "
+                    f"incoming_phase={conflict.incoming_phase!r}"
+                )
+        print(
+            "attribution_conflicts_recorded="
+            f"{attribution_conflicts_recorded}"
+        )
         for shard, companies, stats in all_stats:
             print(
                 "shard="

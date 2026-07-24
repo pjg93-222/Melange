@@ -448,7 +448,11 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
                 ) as connection, connection:
                     for task in lane_run.tasks:
                         connection.execute(
-                            "INSERT OR IGNORE INTO contributions VALUES (?, ?, ?)",
+                            """
+                            INSERT OR IGNORE INTO contributions
+                              (sub_id, company, amount)
+                            VALUES (?, ?, ?)
+                            """,
                             (
                                 task["task_id"],
                                 task["company"],
@@ -530,6 +534,11 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
         )
         self.assertEqual(receipt["runtimes"], manifest["runtimes"])
         self.assertEqual(receipt["telemetry"]["status_write_failures"], 0)
+        self.assertEqual(manifest["company_order"], ["Alpha", "Beta"])
+        self.assertEqual(
+            receipt["merge"]["attribution_conflicts_recorded"],
+            0,
+        )
 
     def test_failure_ladder_retries_then_splits_company_cycle(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-ladder-e2e-") as temp:
@@ -565,7 +574,11 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
                     ) as connection, connection:
                         for task in lane_run.tasks:
                             connection.execute(
-                                "INSERT OR IGNORE INTO contributions VALUES (?, ?, ?)",
+                                """
+                                INSERT OR IGNORE INTO contributions
+                                  (sub_id, company, amount)
+                                VALUES (?, ?, ?)
+                                """,
                                 (
                                     task["task_id"],
                                     task["company"],

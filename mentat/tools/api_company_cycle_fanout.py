@@ -273,6 +273,18 @@ def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def merge_attribution_conflict_count(path: Path) -> int:
+    prefix = "attribution_conflicts_recorded="
+    for line in reversed(
+        path.read_text(encoding="utf-8", errors="replace").splitlines()
+    ):
+        if line.startswith(prefix):
+            return int(line[len(prefix) :])
+    raise RuntimeError(
+        f"Merge log is missing its attribution-conflict receipt line: {path}"
+    )
+
+
 def last_nonempty_log_line(path: Path, tail_bytes: int = 64 * 1024) -> str:
     if not path.is_file():
         return ""
@@ -775,6 +787,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     verify_database(source_database)
     keys = discover_keys(options.keys_file, dict(os.environ))
     companies = database_companies(source_database, options.industry.strip())
+    canonical_company_order = [company for company, _ in companies]
     resources = resource_cap(
         key_count=len(keys),
         company_count=len(companies),
@@ -806,6 +819,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
             for lane in existing_manifest["lanes"]
         ]
         plans.sort(key=lambda item: item["lane"])
+        canonical_company_order = list(
+            existing_manifest.get("company_order", canonical_company_order)
+        )
         run_id = str(existing_manifest["run_id"])
     else:
         lane_count = resources["active_lane_cap"]
@@ -940,6 +956,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
             "started_at": started_wall,
             "task_count": task_total,
             "company_count": len(companies),
+            "company_order": canonical_company_order,
             "configured_key_count": len(keys),
             "spare_key_count": len(spare_keys),
             "lane_count": lane_count,
@@ -1214,6 +1231,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
             sys.executable,
             str(merge_script),
             str(source_database),
+            "--company-order-json",
+            json.dumps(canonical_company_order, ensure_ascii=False),
             *[
                 f"{run.database}::{'|'.join(plans[run.lane - 1]['companies'])}"
                 for run in merge_runs
@@ -1233,6 +1252,11 @@ def main(arguments: Sequence[str] | None = None) -> int:
             "exit_code": int(merge_process.returncode),
             "wall_clock_seconds": round(time.monotonic() - merge_started, 3),
             "log": str(merge_log),
+            "attribution_conflicts_recorded": (
+                merge_attribution_conflict_count(merge_log)
+                if merge_process.returncode == 0
+                else None
+            ),
         }
         if merge_process.returncode == 0:
             verify_database(source_database)
