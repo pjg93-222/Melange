@@ -142,7 +142,8 @@ function New-ScriptInvocation {
 function Write-AtomicJson {
   param(
     [Parameter(Mandatory = $true)][string]$Path,
-    [Parameter(Mandatory = $true)]$Value
+    [Parameter(Mandatory = $true)]$Value,
+    [switch]$Telemetry
   )
   $directory = Split-Path -Parent $Path
   [IO.Directory]::CreateDirectory($directory) | Out-Null
@@ -158,17 +159,44 @@ function Write-AtomicJson {
     ($Value | ConvertTo-Json -Depth 20),
     $encoding
   )
-  if (Test-Path -LiteralPath $Path) {
-    $backup = "$Path.backup-$PID-$([Guid]::NewGuid().ToString('N'))"
-    try {
-      [IO.File]::Replace($pending, $Path, $backup, $true)
-    } finally {
-      if (Test-Path -LiteralPath $backup) {
-        [IO.File]::Delete($backup)
+  try {
+    for ($attempt = 1; $attempt -le 10; $attempt++) {
+      $backup = $null
+      try {
+        if (Test-Path -LiteralPath $Path) {
+          $backup = "$Path.backup-$PID-$([Guid]::NewGuid().ToString('N'))"
+          [IO.File]::Replace($pending, $Path, $backup, $true)
+        } else {
+          [IO.File]::Move($pending, $Path)
+        }
+        if ($Telemetry) { return $true }
+        return
+      } catch {
+        $exception = $_.Exception
+        $isIoException = (
+          $exception -is [IO.IOException] -or
+          $exception.InnerException -is [IO.IOException]
+        )
+        if (-not $isIoException) { throw }
+        if ($attempt -eq 10) {
+          if ($Telemetry) { return $false }
+          throw
+        }
+        $delayMilliseconds = [int][math]::Min(
+          200,
+          5 * [math]::Pow(2, $attempt - 1)
+        )
+        Start-Sleep -Milliseconds $delayMilliseconds
+      } finally {
+        if ($backup -and (Test-Path -LiteralPath $backup)) {
+          try { [IO.File]::Delete($backup) } catch {}
+        }
       }
     }
-  } else {
-    [IO.File]::Move($pending, $Path)
+  } finally {
+    if (Test-Path -LiteralPath $pending) {
+      try { [IO.File]::Delete($pending) } catch {}
+    }
   }
 }
 
@@ -669,17 +697,53 @@ $runningGenerators = New-Object Collections.ArrayList
 $recoveryQueue = New-Object Collections.ArrayList
 $completedGenerators = New-Object Collections.ArrayList
 $activeRecovery = $null
+$statusWriteFailures = 0
+$eventWriteFailures = 0
+$logWriteFailures = 0
+
+function Write-TelemetryAppend {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][string]$Text
+  )
+  $encoding = New-Object Text.UTF8Encoding($false)
+  for ($attempt = 1; $attempt -le 10; $attempt++) {
+    try {
+      [IO.File]::AppendAllText($Path, $Text, $encoding)
+      return $true
+    } catch {
+      $exception = $_.Exception
+      $isIoException = (
+        $exception -is [IO.IOException] -or
+        $exception.InnerException -is [IO.IOException]
+      )
+      if (-not $isIoException) { throw }
+      if ($attempt -eq 10) { return $false }
+      $delayMilliseconds = [int][math]::Min(
+        200,
+        5 * [math]::Pow(2, $attempt - 1)
+      )
+      Start-Sleep -Milliseconds $delayMilliseconds
+    }
+  }
+  return $false
+}
 
 function Write-RunLog {
   param([Parameter(Mandatory = $true)][string]$Message)
   $line = '[{0}] {1}' -f (
     [DateTimeOffset]::Now.ToString('yyyy-MM-ddTHH:mm:ss.fffzzz')
   ), $Message
-  [IO.File]::AppendAllText(
-    $orchestratorLog,
-    $line + [Environment]::NewLine,
-    (New-Object Text.UTF8Encoding($false))
+  $written = Write-TelemetryAppend $orchestratorLog (
+    $line + [Environment]::NewLine
   )
+  if (-not $written) {
+    $script:logWriteFailures++
+    Write-Warning (
+      "Orchestrator log append remained locked after 10 attempts; " +
+      "continuing run. path=$orchestratorLog"
+    )
+  }
   Write-Host $line
 }
 
@@ -695,11 +759,16 @@ function Write-RunEvent {
     industry = $Industry
     detail = $Detail
   }
-  [IO.File]::AppendAllText(
-    $eventsPath,
-    ($value | ConvertTo-Json -Compress) + [Environment]::NewLine,
-    (New-Object Text.UTF8Encoding($false))
+  $written = Write-TelemetryAppend $eventsPath (
+    ($value | ConvertTo-Json -Compress) + [Environment]::NewLine
   )
+  if (-not $written) {
+    $script:eventWriteFailures++
+    Write-Warning (
+      "Run event append remained locked after 10 attempts; " +
+      "continuing run. path=$eventsPath event=$Event"
+    )
+  }
 }
 
 function Read-LiveTextFile {
@@ -838,7 +907,7 @@ function Write-RunStatus {
   } else {
     $null
   }
-  Write-AtomicJson $statusPath ([ordered]@{
+  $written = Write-AtomicJson $statusPath ([ordered]@{
     run_id = $runId
     updated_at = [DateTimeOffset]::Now.ToString('o')
     stage = $Stage
@@ -855,7 +924,19 @@ function Write-RunStatus {
     fanout = $FanoutState
     industries = $industryStates
     generators = Get-GeneratorView
-  })
+    telemetry = [ordered]@{
+      status_write_failures = $statusWriteFailures
+      event_write_failures = $eventWriteFailures
+      log_write_failures = $logWriteFailures
+    }
+  }) -Telemetry
+  if (-not $written) {
+    $script:statusWriteFailures++
+    Write-Warning (
+      "Run status remained locked after 10 atomic-write attempts; " +
+      "continuing run. path=$statusPath failures=$statusWriteFailures"
+    )
+  }
 }
 
 function New-GeneratorJob {
@@ -1567,9 +1648,15 @@ foreach ($timing in $phaseTimingIndustries) {
       $timing.status
   )
 }
+$finalStatus = if ($failures.Count) { 'failed' } else { 'succeeded' }
+Write-RunStatus 'completed'
+Write-RunEvent 'run_completed' '' (
+  "status=$finalStatus; " +
+  "seconds=$([math]::Round($wallWatch.Elapsed.TotalSeconds, 3))"
+)
 $summary = [ordered]@{
   run_id = $runId
-  status = if ($failures.Count) { 'failed' } else { 'succeeded' }
+  status = $finalStatus
   started_at = $startedAt.ToString('o')
   finished_at = $finishedAt.ToString('o')
   wall_clock_seconds = [math]::Round($wallWatch.Elapsed.TotalSeconds, 3)
@@ -1589,14 +1676,15 @@ $summary = [ordered]@{
   }
   resources = $resourcePlan
   industries = $industryStates
+  telemetry = [ordered]@{
+    status_write_failures = $statusWriteFailures
+    event_write_failures = $eventWriteFailures
+    log_write_failures = $logWriteFailures
+  }
   phase_timings_path = $phaseTimingsPath
   run_directory = $runDirectory
 }
 Write-AtomicJson $summaryPath $summary
-Write-RunStatus 'completed'
-Write-RunEvent 'run_completed' '' (
-  "status=$($summary.status); seconds=$($summary.wall_clock_seconds)"
-)
 Write-RunLog (
   "RUN $($summary.status.ToUpperInvariant()): " +
   "$($summary.succeeded)/$($summary.industry_count) industries; " +

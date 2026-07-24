@@ -185,8 +185,8 @@ run_lane <- function() {
   ))
 
   connection <- DBI::dbConnect(RSQLite::SQLite(), database_path)
-  on.exit(DBI::dbDisconnect(connection), add = TRUE)
   DBI::dbExecute(connection, "PRAGMA busy_timeout=60000")
+  on.exit(DBI::dbDisconnect(connection), add = TRUE)
   journal_mode <- DBI::dbGetQuery(
     connection,
     "PRAGMA journal_mode=WAL"
@@ -209,6 +209,7 @@ run_lane <- function() {
     unset = ""
   ))
   budget_connection <- connection
+  startup_jitter_seconds <- 0
   if (nzchar(budget_database_path)) {
     budget_database_path <- normalizePath(
       budget_database_path,
@@ -227,12 +228,21 @@ run_lane <- function() {
         call. = FALSE
       )
     }
+    lane_index <- if (is.na(lane_number) || lane_number < 1L) {
+      1L
+    } else {
+      lane_number
+    }
+    startup_jitter_seconds <- (lane_index - 1L) * 0.25
+    if (startup_jitter_seconds > 0) {
+      Sys.sleep(startup_jitter_seconds)
+    }
     budget_connection <- DBI::dbConnect(
       RSQLite::SQLite(),
       budget_database_path
     )
-    on.exit(DBI::dbDisconnect(budget_connection), add = TRUE)
     DBI::dbExecute(budget_connection, "PRAGMA busy_timeout=60000")
+    on.exit(DBI::dbDisconnect(budget_connection), add = TRUE)
     budget_journal_mode <- DBI::dbGetQuery(
       budget_connection,
       "PRAGMA journal_mode=WAL"
@@ -263,6 +273,7 @@ run_lane <- function() {
     "| industry=", industry,
     "| tasks=", length(tasks),
     "| concurrency=", concurrency,
+    "| startup_jitter_seconds=", startup_jitter_seconds,
     "| sqlite_cache_mb=", cache_mb,
     "| preflight_quick_check=", preflight,
     "\n",

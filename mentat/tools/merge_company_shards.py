@@ -68,10 +68,10 @@ EXACT_PARITY_TABLES = (
     *GLOBAL_APPEND_TABLES,
 )
 
-# Attribution columns are discovered from the live contribution schema. The
-# fixed names are the schema's attribution anchors; the prefixes include any
-# present or future match-confidence/status/flag columns without treating FEC
-# payload columns as mutable provenance.
+# Non-FEC provenance columns are discovered from the live contribution schema.
+# The attribution prefixes include match-confidence/status/flag columns.
+# `scraped_at` is the only collection stamp in the current contributions DDL;
+# run IDs and lane IDs live in other tables and therefore are not allowed here.
 ATTRIBUTION_COLUMN_ANCHORS = frozenset(
     {
         "company",
@@ -81,6 +81,7 @@ ATTRIBUTION_COLUMN_ANCHORS = frozenset(
     }
 )
 ATTRIBUTION_COLUMN_PREFIXES = ("match_", "company_match_")
+COLLECTION_PROVENANCE_COLUMN_ANCHORS = frozenset({"scraped_at"})
 DETERMINISTIC_CONFLICT_TIMESTAMP = "1970-01-01T00:00:00.000+0000"
 
 
@@ -233,7 +234,7 @@ def null_safe_equal(
     )
 
 
-def contribution_attribution_columns(
+def contribution_provenance_columns(
     connection: sqlite3.Connection,
 ) -> frozenset[str]:
     columns = frozenset(table_columns(connection, "main", "contributions"))
@@ -241,6 +242,7 @@ def contribution_attribution_columns(
         column
         for column in columns
         if column in ATTRIBUTION_COLUMN_ANCHORS
+        or column in COLLECTION_PROVENANCE_COLUMN_ANCHORS
         or column.startswith(ATTRIBUTION_COLUMN_PREFIXES)
     )
     if "company" not in attribution:
@@ -281,7 +283,7 @@ def audit_exact_pk_pair(
     right_schema: str,
     right_label: str,
     right_companies: Sequence[str] | None,
-    attribution_columns: frozenset[str],
+    allowed_provenance_columns: frozenset[str],
 ) -> list[tuple[tuple[object, ...], tuple[object, ...]]]:
     columns = table_columns(connection, "main", table)
     pk_columns = primary_key_columns(connection, "main", table)
@@ -340,7 +342,7 @@ def audit_exact_pk_pair(
             if (
                 table == "contributions"
                 and "company" in differing
-                and set(differing).issubset(attribution_columns)
+                and set(differing).issubset(allowed_provenance_columns)
             ):
                 attribution_pairs.append((left_values, right_values))
                 continue
@@ -452,7 +454,7 @@ def audit_exact_pk_collisions(
         )
         for index, (shard, companies) in enumerate(specifications)
     )
-    attribution_columns = contribution_attribution_columns(connection)
+    allowed_provenance_columns = contribution_provenance_columns(connection)
     collision_rows: dict[str, set[tuple[object, ...]]] = defaultdict(set)
     contribution_columns = table_columns(connection, "main", "contributions")
     sub_id_index = contribution_columns.index("sub_id")
@@ -470,7 +472,7 @@ def audit_exact_pk_collisions(
                     right_schema,
                     right_label,
                     right_companies,
-                    attribution_columns,
+                    allowed_provenance_columns,
                 )
                 for left_values, right_values in attribution_pairs:
                     sub_id = str(left_values[sub_id_index])

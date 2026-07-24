@@ -20,17 +20,39 @@ function Write-MentatAtomicJson {
     ($Value | ConvertTo-Json -Depth 12),
     $encoding
   )
-  if (Test-Path -LiteralPath $Path -PathType Leaf) {
-    $backup = "$Path.backup-$PID-$([Guid]::NewGuid().ToString('N'))"
-    try {
-      [IO.File]::Replace($temporary, $Path, $backup, $true)
-    } finally {
-      if (Test-Path -LiteralPath $backup -PathType Leaf) {
-        [IO.File]::Delete($backup)
+  try {
+    for ($attempt = 1; $attempt -le 10; $attempt++) {
+      $backup = $null
+      try {
+        if (Test-Path -LiteralPath $Path -PathType Leaf) {
+          $backup = "$Path.backup-$PID-$([Guid]::NewGuid().ToString('N'))"
+          [IO.File]::Replace($temporary, $Path, $backup, $true)
+        } else {
+          [IO.File]::Move($temporary, $Path)
+        }
+        return
+      } catch {
+        $exception = $_.Exception
+        $isIoException = (
+          $exception -is [IO.IOException] -or
+          $exception.InnerException -is [IO.IOException]
+        )
+        if (-not $isIoException -or $attempt -eq 10) { throw }
+        $delayMilliseconds = [int][math]::Min(
+          200,
+          5 * [math]::Pow(2, $attempt - 1)
+        )
+        Start-Sleep -Milliseconds $delayMilliseconds
+      } finally {
+        if ($backup -and (Test-Path -LiteralPath $backup -PathType Leaf)) {
+          try { [IO.File]::Delete($backup) } catch {}
+        }
       }
     }
-  } else {
-    [IO.File]::Move($temporary, $Path)
+  } finally {
+    if (Test-Path -LiteralPath $temporary -PathType Leaf) {
+      try { [IO.File]::Delete($temporary) } catch {}
+    }
   }
 }
 

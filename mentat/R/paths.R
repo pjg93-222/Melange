@@ -96,9 +96,9 @@ db_connect <- function(data_root = mentat_default_data_root()) {
   require_package("RSQLite")
   paths <- mentat_bootstrap_dirs(data_root)
   connection <- DBI::dbConnect(RSQLite::SQLite(), dbname = paths$database)
+  DBI::dbExecute(connection, "PRAGMA busy_timeout = 60000")
   ok <- FALSE
   on.exit(if (!ok) DBI::dbDisconnect(connection), add = TRUE)
-  DBI::dbExecute(connection, "PRAGMA busy_timeout = 60000")
   journal_mode <- DBI::dbGetQuery(connection, "PRAGMA journal_mode = WAL")[[1L]]
   if (!identical(tolower(as.character(journal_mode)), "wal")) {
     stop("SQLite refused WAL mode for: ", paths$database, call. = FALSE)

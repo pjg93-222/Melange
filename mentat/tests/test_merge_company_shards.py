@@ -24,6 +24,7 @@ CREATE TABLE contributions (
   match_confidence TEXT,
   company_match_status TEXT NOT NULL DEFAULT 'accepted',
   company_match_reason TEXT,
+  scraped_at TEXT NOT NULL DEFAULT '1970-01-01T00:00:00+0000',
   amount REAL
 );
 CREATE TABLE corporate_giving (
@@ -231,14 +232,15 @@ def seed_attribution(
     company: str,
     phase: str,
     amount: float = 100.0,
+    scraped_at: str = "2026-07-23T00:00:00+0000",
 ) -> None:
     with closing(sqlite3.connect(path)) as connection, connection:
         connection.execute(
             """
             INSERT INTO contributions (
               sub_id, company, matched_variant, phase, match_confidence,
-              company_match_status, company_match_reason, amount
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+              company_match_status, company_match_reason, scraped_at, amount
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 sub_id,
@@ -248,6 +250,7 @@ def seed_attribution(
                 f"{company} confidence",
                 "accepted",
                 f"{company} reason",
+                scraped_at,
                 amount,
             ),
         )
@@ -443,12 +446,14 @@ class MergeCompanyShardsTest(unittest.TestCase):
                 sub_id="shared-sub-id",
                 company="Alpha",
                 phase="alpha-phase",
+                scraped_at="2026-07-23T01:02:03+0000",
             )
             seed_attribution(
                 zulu_shard,
                 sub_id="shared-sub-id",
                 company="Zulu",
                 phase="zulu-phase",
+                scraped_at="2026-07-23T04:05:06+0000",
             )
             company_order = '["Zulu", "Alpha"]'
             first_output = StringIO()
@@ -487,7 +492,7 @@ class MergeCompanyShardsTest(unittest.TestCase):
                             """
                             SELECT sub_id, company, matched_variant, phase,
                                    match_confidence, company_match_status,
-                                   company_match_reason, amount
+                                   company_match_reason, scraped_at, amount
                             FROM contributions
                             ORDER BY sub_id
                             """
@@ -511,6 +516,10 @@ class MergeCompanyShardsTest(unittest.TestCase):
             self.assertEqual(first_target.read_bytes(), second_target.read_bytes())
             self.assertEqual(first_rows[0][0][1], "Zulu")
             self.assertEqual(
+                first_rows[0][0][-2],
+                "2026-07-23T04:05:06+0000",
+            )
+            self.assertEqual(
                 first_rows[1],
                 [
                     (
@@ -518,7 +527,7 @@ class MergeCompanyShardsTest(unittest.TestCase):
                         "Zulu",
                         "Alpha",
                         "alpha-phase",
-                        merger.DETERMINISTIC_CONFLICT_TIMESTAMP,
+                        "2026-07-23T01:02:03+0000",
                     )
                 ],
             )

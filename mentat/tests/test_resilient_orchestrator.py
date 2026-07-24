@@ -266,6 +266,136 @@ class ResilientOrchestratorTests(unittest.TestCase):
         self.assertEqual(value["status"], "collecting")
         self.assertEqual(value["completed"], 3)
 
+    def test_locked_status_write_is_nonfatal_counted_and_load_writes_raise(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(
+            prefix="mentat-locked-status-writer-"
+        ) as temporary:
+            root = Path(temporary)
+            status = root / "status.json"
+            status.write_text('{"stage":"original"}\n', encoding="utf-8")
+            status_literal = str(status).replace("'", "''")
+            root_literal = str(root).replace("'", "''")
+            script_literal = str(SCRIPT).replace("'", "''")
+            holder_command = (
+                "$stream=[IO.File]::Open("
+                f"'{status_literal}',[IO.FileMode]::Open,"
+                "[IO.FileAccess]::Read,[IO.FileShare]::Read);"
+                "try{[Console]::Out.WriteLine('READY');"
+                "[Console]::Out.Flush();"
+                "[void][Console]::In.ReadLine()}"
+                "finally{$stream.Dispose()}"
+            )
+            holder = subprocess.Popen(
+                [
+                    str(POWERSHELL),
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    holder_command,
+                ],
+                cwd=PROJECT_ROOT.parent,
+                text=True,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            try:
+                self.assertEqual(holder.stdout.readline().strip(), "READY")
+                command = (
+                    "$ErrorActionPreference='Stop';"
+                    "$WarningPreference='SilentlyContinue';"
+                    f"$text=Get-Content -LiteralPath '{script_literal}' -Raw;"
+                    "$tokens=$null;$errors=$null;"
+                    "$ast=[Management.Automation.Language.Parser]::ParseInput("
+                    "$text,[ref]$tokens,[ref]$errors);"
+                    "if($errors.Count){exit 1};"
+                    "foreach($name in @("
+                    "'Write-AtomicJson','Write-RunStatus',"
+                    "'Write-TelemetryAppend','Write-RunEvent')){"
+                    "$functionAst=@($ast.FindAll({param($node)"
+                    "$node -is "
+                    "[Management.Automation.Language.FunctionDefinitionAst] "
+                    "-and $node.Name -eq $name},$true));"
+                    "if($functionAst.Count -ne 1){exit 2};"
+                    ". ([scriptblock]::Create($functionAst[0].Extent.Text))"
+                    "};"
+                    "$script:statusWriteFailures=0;"
+                    "$script:eventWriteFailures=0;"
+                    "$script:logWriteFailures=0;"
+                    "$collectionDurations=New-Object "
+                    "'Collections.Generic.List[double]';"
+                    "$generatorDurations=New-Object "
+                    "'Collections.Generic.List[double]';"
+                    "$industryStates=@();$pendingGenerators=@();"
+                    "$runningGenerators=@();$recoveryQueue=@();"
+                    "$activeRecovery=$null;$MaxGeneratorWorkers=1;"
+                    "$runId='fixture';"
+                    "$wallWatch=[Diagnostics.Stopwatch]::StartNew();"
+                    "$resourcePlan=[ordered]@{};"
+                    f"$statusPath='{status_literal}';"
+                    "$eventsPath=$statusPath;"
+                    "function Get-GeneratorView { @() };"
+                    "Write-RunStatus 'collecting';"
+                    "Write-RunEvent 'locked_fixture';"
+                    "$loadBearingRaised=$false;"
+                    "try{Write-AtomicJson $statusPath "
+                    "([ordered]@{stage='load-bearing'})}"
+                    "catch{$loadBearingRaised=$true};"
+                    "[pscustomobject]@{"
+                    "survived=$true;"
+                    "status_write_failures=$statusWriteFailures;"
+                    "event_write_failures=$eventWriteFailures;"
+                    "load_bearing_raised=$loadBearingRaised;"
+                    f"pending_count=@(Get-ChildItem -LiteralPath '{root_literal}' "
+                    "-Filter '*.pending' -File -Force).Count"
+                    "}|ConvertTo-Json -Compress"
+                )
+                result = subprocess.run(
+                    [
+                        str(POWERSHELL),
+                        "-NoProfile",
+                        "-ExecutionPolicy",
+                        "Bypass",
+                        "-Command",
+                        command,
+                    ],
+                    cwd=PROJECT_ROOT.parent,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                    timeout=15,
+                )
+            finally:
+                if holder.stdin:
+                    holder.stdin.write("\n")
+                    holder.stdin.flush()
+                try:
+                    holder.communicate(timeout=5)
+                except subprocess.TimeoutExpired:
+                    holder.kill()
+                    holder.communicate()
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        values = json.loads(result.stdout)
+        self.assertTrue(values["survived"])
+        self.assertEqual(values["status_write_failures"], 1)
+        self.assertEqual(values["event_write_failures"], 1)
+        self.assertTrue(values["load_bearing_raised"])
+        self.assertEqual(values["pending_count"], 0)
+        text = SCRIPT.read_text(encoding="utf-8")
+        summary_start = text.index("$summary = [ordered]@{")
+        summary_end = text.index(
+            "Write-AtomicJson $summaryPath",
+            summary_start,
+        )
+        self.assertIn(
+            "status_write_failures = $statusWriteFailures",
+            text[summary_start:summary_end],
+        )
+
     def test_phase_timing_receipt_and_summary_line_are_always_wired(self) -> None:
         text = SCRIPT.read_text(encoding="utf-8")
         self.assertIn("'phase-timings.json'", text)

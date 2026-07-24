@@ -164,17 +164,39 @@ function Write-AtomicJson {
     ($Value | ConvertTo-Json -Depth 12),
     $encoding
   )
-  if (Test-Path -LiteralPath $Path) {
-    $backup = "$Path.backup-$PID-$([Guid]::NewGuid().ToString('N'))"
-    try {
-      [IO.File]::Replace($temporary, $Path, $backup, $true)
-    } finally {
-      if (Test-Path -LiteralPath $backup) {
-        [IO.File]::Delete($backup)
+  try {
+    for ($attempt = 1; $attempt -le 10; $attempt++) {
+      $backup = $null
+      try {
+        if (Test-Path -LiteralPath $Path) {
+          $backup = "$Path.backup-$PID-$([Guid]::NewGuid().ToString('N'))"
+          [IO.File]::Replace($temporary, $Path, $backup, $true)
+        } else {
+          [IO.File]::Move($temporary, $Path)
+        }
+        return
+      } catch {
+        $exception = $_.Exception
+        $isIoException = (
+          $exception -is [IO.IOException] -or
+          $exception.InnerException -is [IO.IOException]
+        )
+        if (-not $isIoException -or $attempt -eq 10) { throw }
+        $delayMilliseconds = [int][math]::Min(
+          200,
+          5 * [math]::Pow(2, $attempt - 1)
+        )
+        Start-Sleep -Milliseconds $delayMilliseconds
+      } finally {
+        if ($backup -and (Test-Path -LiteralPath $backup)) {
+          try { [IO.File]::Delete($backup) } catch {}
+        }
       }
     }
-  } else {
-    [IO.File]::Move($temporary, $Path)
+  } finally {
+    if (Test-Path -LiteralPath $temporary) {
+      try { [IO.File]::Delete($temporary) } catch {}
+    }
   }
 }
 
@@ -543,22 +565,46 @@ try {
     Export-Csv -LiteralPath "$summaryCsvPath.pending-$PID" `
       -NoTypeInformation -Encoding UTF8
   $pendingSummaryCsv = "$summaryCsvPath.pending-$PID"
-  if (Test-Path -LiteralPath $summaryCsvPath) {
-    $summaryBackup = "$summaryCsvPath.backup-$PID"
-    try {
-      [IO.File]::Replace(
-        $pendingSummaryCsv,
-        $summaryCsvPath,
-        $summaryBackup,
-        $true
-      )
-    } finally {
-      if (Test-Path -LiteralPath $summaryBackup) {
-        [IO.File]::Delete($summaryBackup)
+  try {
+    for ($attempt = 1; $attempt -le 10; $attempt++) {
+      $summaryBackup = $null
+      try {
+        if (Test-Path -LiteralPath $summaryCsvPath) {
+          $summaryBackup = (
+            "$summaryCsvPath.backup-$PID-$([Guid]::NewGuid().ToString('N'))"
+          )
+          [IO.File]::Replace(
+            $pendingSummaryCsv,
+            $summaryCsvPath,
+            $summaryBackup,
+            $true
+          )
+        } else {
+          [IO.File]::Move($pendingSummaryCsv, $summaryCsvPath)
+        }
+        break
+      } catch {
+        $exception = $_.Exception
+        $isIoException = (
+          $exception -is [IO.IOException] -or
+          $exception.InnerException -is [IO.IOException]
+        )
+        if (-not $isIoException -or $attempt -eq 10) { throw }
+        $delayMilliseconds = [int][math]::Min(
+          200,
+          5 * [math]::Pow(2, $attempt - 1)
+        )
+        Start-Sleep -Milliseconds $delayMilliseconds
+      } finally {
+        if ($summaryBackup -and (Test-Path -LiteralPath $summaryBackup)) {
+          try { [IO.File]::Delete($summaryBackup) } catch {}
+        }
       }
     }
-  } else {
-    [IO.File]::Move($pendingSummaryCsv, $summaryCsvPath)
+  } finally {
+    if (Test-Path -LiteralPath $pendingSummaryCsv) {
+      try { [IO.File]::Delete($pendingSummaryCsv) } catch {}
+    }
   }
 
   Write-Host ''

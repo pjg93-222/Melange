@@ -90,45 +90,55 @@ fec_api_budget_reserve <- function(
   if (length(requests) != 1L || is.na(requests) || requests < 0L) {
     stop("FEC API budget reservation must be a nonnegative integer.", call. = FALSE)
   }
-  status <- NULL
-  DBI::dbWithTransaction(connection, {
-    row <- DBI::dbGetQuery(
-      connection,
-      paste(
-        "SELECT window_started_epoch, requests_used FROM api_request_budget",
-        "WHERE budget_id=?"
-      ),
-      params = list(budget_id)
-    )
-    if (!nrow(row) || now - row$window_started_epoch[[1L]] >=
-        FEC_API_BUDGET_WINDOW_SECONDS) {
-      started <- now
-      used <- 0L
-    } else {
-      started <- as.numeric(row$window_started_epoch[[1L]])
-      used <- as.integer(row$requests_used[[1L]])
-    }
-    if (used + requests > as.integer(cap)) {
-      stop(fec_api_budget_exhausted(used, requests, cap))
-    }
-    used <- used + requests
-    DBI::dbExecute(
-      connection,
-      paste(
-        "INSERT INTO api_request_budget",
-        "(budget_id, window_started_epoch, requests_used) VALUES (?, ?, ?)",
-        "ON CONFLICT(budget_id) DO UPDATE SET",
-        "window_started_epoch=excluded.window_started_epoch,",
-        "requests_used=excluded.requests_used"
-      ),
-      params = list(budget_id, started, used)
-    )
-    status <- list(
-      requests_used = used,
-      requests_remaining = as.integer(cap) - used,
-      window_started_epoch = started
-    )
-  })
+  # A deferred transaction lets concurrent readers both reach the later write;
+  # SQLite cannot safely wait while upgrading both read locks, so one lane gets
+  # SQLITE_BUSY immediately despite busy_timeout. BEGIN IMMEDIATE serializes
+  # that upgrade before the read. This transaction contains SQLite work only
+  # and is committed before the caller performs any API request.
+  DBI::dbExecute(connection, "BEGIN IMMEDIATE")
+  transaction_open <- TRUE
+  on.exit(
+    if (transaction_open) try(DBI::dbRollback(connection), silent = TRUE),
+    add = TRUE
+  )
+  row <- DBI::dbGetQuery(
+    connection,
+    paste(
+      "SELECT window_started_epoch, requests_used FROM api_request_budget",
+      "WHERE budget_id=?"
+    ),
+    params = list(budget_id)
+  )
+  if (!nrow(row) || now - row$window_started_epoch[[1L]] >=
+      FEC_API_BUDGET_WINDOW_SECONDS) {
+    started <- now
+    used <- 0L
+  } else {
+    started <- as.numeric(row$window_started_epoch[[1L]])
+    used <- as.integer(row$requests_used[[1L]])
+  }
+  if (used + requests > as.integer(cap)) {
+    stop(fec_api_budget_exhausted(used, requests, cap))
+  }
+  used <- used + requests
+  DBI::dbExecute(
+    connection,
+    paste(
+      "INSERT INTO api_request_budget",
+      "(budget_id, window_started_epoch, requests_used) VALUES (?, ?, ?)",
+      "ON CONFLICT(budget_id) DO UPDATE SET",
+      "window_started_epoch=excluded.window_started_epoch,",
+      "requests_used=excluded.requests_used"
+    ),
+    params = list(budget_id, started, used)
+  )
+  status <- list(
+    requests_used = used,
+    requests_remaining = as.integer(cap) - used,
+    window_started_epoch = started
+  )
+  DBI::dbCommit(connection)
+  transaction_open <- FALSE
   status
 }
 
