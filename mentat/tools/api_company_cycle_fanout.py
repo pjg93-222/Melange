@@ -3,10 +3,12 @@
 The initialized source database is never modified until every company-cycle
 task succeeds. Each company belongs to exactly one lane (the merge invariant),
 all cycles for that company run sequentially in that lane, and lanes run in
-parallel with one API key each. Keys are supplied only through child-process
-environments and are never written to manifests, receipts, command lines, or
-logs. On complete success, the final deterministic merge writes the source
-database in place; on any collection/recovery failure it remains untouched.
+parallel with one API key each. A failed lane is retried in a fresh R process;
+remaining failures are then split into one fresh process per company-cycle.
+Keys are supplied only through child-process environments and are never
+written to manifests, receipts, command lines, or logs. On complete success,
+the final deterministic merge writes the source database in place; on any
+collection/recovery failure it remains untouched.
 """
 
 from __future__ import annotations
@@ -259,6 +261,18 @@ def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def last_nonempty_log_line(path: Path, tail_bytes: int = 64 * 1024) -> str:
+    if not path.is_file():
+        return ""
+    with path.open("rb") as stream:
+        stream.seek(0, os.SEEK_END)
+        size = stream.tell()
+        stream.seek(max(0, size - tail_bytes), os.SEEK_SET)
+        tail = stream.read().decode("utf-8", errors="replace")
+    lines = [line.strip() for line in tail.splitlines() if line.strip()]
+    return lines[-1] if lines else ""
+
+
 def failed_tasks(receipt: dict[str, Any], fallback: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
     tasks = receipt.get("tasks")
     if not isinstance(tasks, list):
@@ -323,6 +337,7 @@ def execute_lane(
         lane_run.key_id,
         str(concurrency),
     ]
+    started_wall = utc_now()
     started = time.monotonic()
     lane_run.log.parent.mkdir(parents=True, exist_ok=True)
     with lane_run.log.open("a", encoding="utf-8", errors="replace") as log:
@@ -339,25 +354,97 @@ def execute_lane(
             stderr=subprocess.STDOUT,
             check=False,
         )
-    receipt = (
-        read_json(lane_run.receipt)
-        if lane_run.receipt.is_file()
-        else {
+    elapsed = round(time.monotonic() - started, 3)
+    last_log_line = last_nonempty_log_line(lane_run.log)
+    receipt: dict[str, Any] = {}
+    if lane_run.receipt.is_file():
+        try:
+            receipt = read_json(lane_run.receipt)
+        except (OSError, ValueError):
+            receipt = {}
+    state = lane_state(lane_run.state)
+    received_tasks = receipt.get("tasks")
+    if not isinstance(received_tasks, list):
+        received_tasks = state.get("tasks", [])
+    latest_tasks = {
+        str(task.get("task_id", "")): dict(task)
+        for task in received_tasks
+        if isinstance(task, dict) and task.get("task_id")
+    }
+    for task in lane_run.tasks:
+        identifier = str(task["task_id"])
+        if identifier in latest_tasks:
+            continue
+        latest_tasks[identifier] = {
+            **task,
             "status": "failed",
-            "tasks": [],
-            "error": "Lane process exited without a receipt.",
+            "wall_clock_seconds": elapsed,
+            "error": (
+                f"Managed Rscript exited with code {int(process.returncode)} "
+                "before producing a task receipt."
+            ),
+        }
+    normalized_tasks = [
+        latest_tasks[str(task["task_id"])]
+        for task in lane_run.tasks
+    ]
+    failed_count = sum(
+        1 for task in normalized_tasks if task.get("status") != "succeeded"
+    )
+    receipt.update(
+        {
+            "status": "failed" if failed_count else "succeeded",
+            "task_count": len(normalized_tasks),
+            "succeeded": len(normalized_tasks) - failed_count,
+            "failed": failed_count,
+            "wall_clock_seconds": elapsed,
+            "exit_code": int(process.returncode),
+            "last_log_line": last_log_line,
+            "tasks": normalized_tasks,
         }
     )
+    if process.returncode and not receipt.get("error"):
+        receipt["error"] = (
+            f"Managed Rscript exited with code {int(process.returncode)}."
+        )
+    atomic_json(lane_run.receipt, receipt)
+    invocation_receipt = lane_run.receipt.with_name(
+        f"{lane_run.receipt.stem}.invocation.json"
+    )
+    invocation = {
+        "lane": lane_run.lane,
+        "attempt": lane_run.attempt,
+        "started_at": started_wall,
+        "ended_at": utc_now(),
+        "exit_code": int(process.returncode),
+        "wall_clock_seconds": elapsed,
+        "last_log_line": last_log_line,
+        "log_path": str(lane_run.log),
+        "database": str(lane_run.database),
+        "key_id": lane_run.key_id,
+        "units": [
+            {
+                "task_id": str(task["task_id"]),
+                "company": str(task["company"]),
+                "cycle": int(task["cycle"]),
+            }
+            for task in lane_run.tasks
+        ],
+    }
+    atomic_json(invocation_receipt, invocation)
     return {
         "lane": lane_run.lane,
         "attempt": lane_run.attempt,
         "exit_code": int(process.returncode),
-        "wall_clock_seconds": round(time.monotonic() - started, 3),
+        "wall_clock_seconds": elapsed,
+        "last_log_line": last_log_line,
         "receipt_path": str(lane_run.receipt),
+        "invocation_receipt_path": str(invocation_receipt),
         "state_path": str(lane_run.state),
         "log_path": str(lane_run.log),
         "database": str(lane_run.database),
         "key_id": lane_run.key_id,
+        "units": invocation["units"],
         "receipt": receipt,
     }
 
@@ -476,9 +563,18 @@ def combine_task_results(
 def receipt_attempt_number(path: Path) -> int:
     if path.name == "receipt.json":
         return 1
-    recovery = re.fullmatch(r"receipt\.recovery-(\d+)\.json", path.name)
+    recovery = re.fullmatch(
+        r"receipt\.recovery-(\d+)(?:-[a-z0-9-]+)?\.json",
+        path.name,
+    )
     if recovery:
         return 1 + int(recovery.group(1))
+    split = re.fullmatch(
+        r"receipt\.split-(\d+)-[a-z0-9-]+\.json",
+        path.name,
+    )
+    if split:
+        return int(split.group(1))
     resume = re.fullmatch(r"receipt\.resume-(\d+)\.json", path.name)
     return int(resume.group(1)) if resume else 1
 
@@ -486,7 +582,11 @@ def receipt_attempt_number(path: Path) -> int:
 def existing_lane_attempts(lane_directory: Path, lane: int) -> list[dict[str, Any]]:
     attempts: list[dict[str, Any]] = []
     for path in sorted(
-        lane_directory.glob("receipt*.json"),
+        (
+            path
+            for path in lane_directory.glob("receipt*.json")
+            if not path.name.endswith(".invocation.json")
+        ),
         key=lambda item: (receipt_attempt_number(item), item.name),
     ):
         try:
@@ -819,6 +919,18 @@ def main(arguments: Sequence[str] | None = None) -> int:
             "resource_cap": resources,
             "concurrency_per_key": options.concurrency_per_key,
             "recovery_workers": options.recovery_workers,
+            "recovery_ladder": [
+                "primary_lane",
+                "fresh_lane_retry",
+                "fresh_company_cycle_split",
+            ],
+            "runtimes": {
+                "python_path": str(Path(sys.executable).resolve()),
+                "rscript_path": str(rscript_path),
+                "r_library_path": (
+                    str(r_library_path) if r_library_path else None
+                ),
+            },
             "budget_database": str(budget_database),
             "lanes": [
                 {
@@ -848,6 +960,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     )
 
     recovery_futures: dict[concurrent.futures.Future[dict[str, Any]], LaneRun] = {}
+    recovery_results: list[tuple[LaneRun, dict[str, Any]]] = []
     with concurrent.futures.ThreadPoolExecutor(
         max_workers=lane_count,
         thread_name_prefix="mentat-api-primary",
@@ -962,6 +1075,89 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 return_when=concurrent.futures.FIRST_COMPLETED,
             )
             for future in done:
+                recovery_run = recovery_futures[future]
+                recovery_result = future.result()
+                attempts.append(recovery_result)
+                recovery_results.append((recovery_run, recovery_result))
+
+        split_futures: dict[
+            concurrent.futures.Future[dict[str, Any]], LaneRun
+        ] = {}
+        for recovery_run, recovery_result in recovery_results:
+            split_tasks = failed_tasks(
+                recovery_result["receipt"],
+                recovery_run.tasks,
+            )
+            for task in split_tasks:
+                identifier = str(task["task_id"])
+                token = re.sub(r"[^a-z0-9-]+", "-", identifier.lower()).strip(
+                    "-"
+                )
+                if not token:
+                    token = f"unit-{recovery_run.lane}"
+                split_attempt = recovery_run.attempt + 1
+                split_assignment = recovery_run.assignments.with_name(
+                    f"assignments.split-{split_attempt}-{token}.json"
+                )
+                split_receipt = recovery_run.receipt.with_name(
+                    f"receipt.split-{split_attempt}-{token}.json"
+                )
+                split_state = recovery_run.state.with_name(
+                    f"status.split-{split_attempt}-{token}.json"
+                )
+                atomic_json(
+                    split_assignment,
+                    {
+                        "run_id": run_id,
+                        "industry": options.industry.strip(),
+                        "lane": recovery_run.lane,
+                        "split_attempt": split_attempt,
+                        "parent_attempt": recovery_run.attempt,
+                        "tasks": [task],
+                    },
+                )
+                split_run = LaneRun(
+                    lane=recovery_run.lane,
+                    database=recovery_run.database,
+                    assignments=split_assignment,
+                    receipt=split_receipt,
+                    state=split_state,
+                    log=recovery_run.log,
+                    key=recovery_run.key,
+                    key_id=recovery_run.key_id,
+                    tasks=(task,),
+                    attempt=split_attempt,
+                )
+                all_lane_runs.append(split_run)
+                split_future = recovery_pool.submit(
+                    execute_lane,
+                    split_run,
+                    rscript_path=rscript_path,
+                    lane_script=lane_script,
+                    r_library_path=r_library_path,
+                    concurrency=options.concurrency_per_key,
+                    sqlite_cache_mb=options.sqlite_cache_mb,
+                    budget_database=budget_database,
+                )
+                split_futures[split_future] = split_run
+
+        split_pending = set(split_futures)
+        while split_pending:
+            write_status(
+                status_path,
+                run_id=run_id,
+                industry=options.industry.strip(),
+                total=task_total,
+                lane_runs=all_lane_runs,
+                stage="splitting",
+                started_monotonic=started_monotonic,
+            )
+            done, split_pending = concurrent.futures.wait(
+                split_pending,
+                timeout=1,
+                return_when=concurrent.futures.FIRST_COMPLETED,
+            )
+            for future in done:
                 attempts.append(future.result())
 
     combined_tasks, final_failed = combine_task_results(plans, attempts)
@@ -1041,6 +1237,18 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "spare_key_count": len(spare_keys),
         "lane_count": lane_count,
         "resource_cap": resources,
+        "recovery_ladder": [
+            "primary_lane",
+            "fresh_lane_retry",
+            "fresh_company_cycle_split",
+        ],
+        "runtimes": {
+            "python_path": str(Path(sys.executable).resolve()),
+            "rscript_path": str(rscript_path),
+            "r_library_path": (
+                str(r_library_path) if r_library_path else None
+            ),
+        },
         "budget_database": str(budget_database),
         "tasks": combined_tasks,
         "failures": final_failed,

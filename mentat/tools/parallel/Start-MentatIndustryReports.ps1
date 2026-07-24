@@ -19,16 +19,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Start-MentatIndustryRe
 #>
 [CmdletBinding()]
 param(
-  [string[]]$Industries = @(
-    'Crypto',
-    'Credit Union',
-    'Community Banks',
-    'Property & Casualty Insurance',
-    'Credit Arms',
-    'Telecom'
-  ),
-  [ValidateRange(1, 32)]
-  [int]$MaxParallel = 3,
+  [string[]]$Industries = @(),
+  [ValidateRange(0, 32)]
+  [int]$MaxParallel = 0,
   [string]$GeneratorPath = '',
   [string]$MentatPath = '',
   [string]$RScriptPath = 'C:\Program Files\R\R-4.6.0\bin\Rscript.exe',
@@ -37,7 +30,9 @@ param(
   [string]$OutputDirectory = '',
   [string]$RunRoot = '',
   [string]$LastGoodRoot = '',
+  [string]$RosterPath = '',
   [switch]$SkipCollection,
+  [switch]$LegacySerialCollection,
   [switch]$NoCache,
   [switch]$SkipMonitorConsole,
   [switch]$ForceStartProcess,
@@ -55,13 +50,74 @@ $workspaceRoot = Split-Path -Parent $projectRoot
 $workerPath = Join-Path $parallelRoot 'Invoke-MentatIndustryWorker.ps1'
 $monitorPath = Join-Path $parallelRoot 'Watch-MentatIndustryProcesses.ps1'
 $lastGoodModulePath = Join-Path $parallelRoot 'MentatLastGoodGuard.psm1'
+$resilientPath = Join-Path $parallelRoot (
+  'Start-MentatResilientIndustryReports.ps1'
+)
 $powerShellPath = (Get-Command powershell.exe -ErrorAction Stop).Source
+if (-not $RosterPath) {
+  $RosterPath = Join-Path $projectRoot 'inputs\Company Name.xlsx'
+}
+
+# Preserve this launcher's report-only and explicitly requested legacy
+# contracts, but route every ordinary from-scratch invocation through the
+# crash-contained company-cycle fanout.
+if (-not $SkipCollection -and -not $LegacySerialCollection) {
+  if (-not (Test-Path -LiteralPath $resilientPath -PathType Leaf)) {
+    throw "Resilient industry runner is missing: $resilientPath"
+  }
+  $resilientArguments = @{
+    MaxParallel = $MaxParallel
+    RScriptPath = $RScriptPath
+    RLibraryPath = $RLibraryPath
+  }
+  if ($Industries.Count) { $resilientArguments.Industries = $Industries }
+  if ($GeneratorPath) { $resilientArguments.GeneratorPath = $GeneratorPath }
+  if ($OutputDirectory) {
+    $resilientArguments.OutputDirectory = $OutputDirectory
+  }
+  if ($RunRoot) { $resilientArguments.RunRoot = $RunRoot }
+  if ($RosterPath) { $resilientArguments.RosterPath = $RosterPath }
+  if ($NoCache) { $resilientArguments.NoCache = $true }
+  & $resilientPath @resilientArguments
+  exit $LASTEXITCODE
+}
+if ($LegacySerialCollection -and $MaxParallel -eq 0) {
+  $MaxParallel = 3
+}
 
 function Resolve-FullPath {
   param([string]$Path, [string]$BasePath)
   if ([string]::IsNullOrWhiteSpace($Path)) { return '' }
   if ([IO.Path]::IsPathRooted($Path)) { return [IO.Path]::GetFullPath($Path) }
   return [IO.Path]::GetFullPath((Join-Path $BasePath $Path))
+}
+
+function Get-WorkbookSheetNames {
+  param([Parameter(Mandatory = $true)][string]$Path)
+  Add-Type -AssemblyName System.IO.Compression.FileSystem
+  $archive = [IO.Compression.ZipFile]::OpenRead($Path)
+  try {
+    $entry = $archive.GetEntry('xl/workbook.xml')
+    if ($null -eq $entry) {
+      throw "Roster workbook is missing xl/workbook.xml: $Path"
+    }
+    $reader = New-Object IO.StreamReader($entry.Open())
+    try {
+      [xml]$workbook = $reader.ReadToEnd()
+    } finally {
+      $reader.Dispose()
+    }
+    return @(
+      $workbook.SelectNodes(
+        '/*[local-name()="workbook"]/*[local-name()="sheets"]/' +
+        '*[local-name()="sheet"]'
+      ) |
+        ForEach-Object { ([string]$_.name).Trim() } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    )
+  } finally {
+    $archive.Dispose()
+  }
 }
 
 function ConvertTo-Slug {
@@ -178,6 +234,7 @@ $RLibraryPath = Resolve-FullPath $RLibraryPath $workspaceRoot
 $OutputDirectory = Resolve-FullPath $OutputDirectory $workspaceRoot
 $RunRoot = Resolve-FullPath $RunRoot $projectRoot
 $LastGoodRoot = Resolve-FullPath $LastGoodRoot $projectRoot
+$RosterPath = Resolve-FullPath $RosterPath $projectRoot
 if ($DatabasePath) {
   $DatabasePath = Resolve-FullPath $DatabasePath $workspaceRoot
 }
@@ -216,6 +273,12 @@ if (-not $generatorCommand.Parameters.ContainsKey('ExcelMutexName')) {
   )
 }
 
+if (-not $Industries.Count) {
+  if (-not (Test-Path -LiteralPath $RosterPath -PathType Leaf)) {
+    throw "Roster workbook is missing: $RosterPath"
+  }
+  $Industries = Get-WorkbookSheetNames $RosterPath
+}
 $cleanIndustries = @(
   $Industries |
     ForEach-Object { if ($null -ne $_) { $_.Trim() } } |

@@ -219,6 +219,77 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
         self.assertNotIn(secret, log_text)
         self.assertIn(identifier, log_text)
 
+    def test_injected_native_crash_writes_complete_invocation_telemetry(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-crash-fixture-") as temp:
+            root = Path(temp)
+            assignments = root / "assignments.json"
+            receipt = root / "receipt.json"
+            task = {
+                "task_id": "stripe-2026",
+                "company": "Stripe",
+                "cycle": 2026,
+            }
+            fanout.atomic_json(
+                assignments,
+                {
+                    "industry": "Fintech",
+                    "lane": 1,
+                    "tasks": [task],
+                },
+            )
+            lane_run = fanout.LaneRun(
+                lane=1,
+                database=root / "lane.db",
+                assignments=assignments,
+                receipt=receipt,
+                state=root / "status.json",
+                log=root / "process.log",
+                key="fixture-key",
+                key_id=fanout.key_id("fixture-key"),
+                tasks=(task,),
+                attempt=1,
+            )
+
+            def injected_crash(command, **kwargs):
+                kwargs["stdout"].write(
+                    "FEC export downloaded and verified: 15907 rows.\n"
+                )
+                kwargs["stdout"].flush()
+                return mock.Mock(returncode=-1)
+
+            with mock.patch.object(
+                fanout.subprocess,
+                "run",
+                side_effect=injected_crash,
+            ):
+                result = fanout.execute_lane(
+                    lane_run,
+                    rscript_path=root / "Rscript.exe",
+                    lane_script=root / "project" / "tools" / "collect_api_lane.R",
+                    r_library_path=None,
+                    concurrency=8,
+                    sqlite_cache_mb=256,
+                    budget_database=root / "budget.sqlite",
+                )
+
+            task_receipt = json.loads(receipt.read_text(encoding="utf-8"))
+            invocation = json.loads(
+                Path(result["invocation_receipt_path"]).read_text(
+                    encoding="utf-8"
+                )
+            )
+        self.assertEqual(result["exit_code"], -1)
+        self.assertEqual(task_receipt["failed"], 1)
+        self.assertEqual(task_receipt["tasks"][0]["company"], "Stripe")
+        self.assertEqual(task_receipt["tasks"][0]["cycle"], 2026)
+        self.assertEqual(invocation["exit_code"], -1)
+        self.assertGreaterEqual(invocation["wall_clock_seconds"], 0)
+        self.assertEqual(invocation["units"], [task])
+        self.assertEqual(
+            invocation["last_log_line"],
+            "FEC export downloaded and verified: 15907 rows.",
+        )
+
     def test_resource_cap_honors_cpu_ram_keys_and_merge_limit(self) -> None:
         with mock.patch.object(
             fanout, "available_memory_bytes", return_value=6 * 1024**3
@@ -254,6 +325,14 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
                     "tasks": [
                         {"task_id": "alpha-2024", "status": "succeeded"},
                     ],
+                },
+            )
+            fanout.atomic_json(
+                lane / "receipt.recovery-1.invocation.json",
+                {
+                    "attempt": 2,
+                    "exit_code": 0,
+                    "units": [{"task_id": "alpha-2024"}],
                 },
             )
             attempts = fanout.existing_lane_attempts(lane, 1)
@@ -366,6 +445,9 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
                 self.assertEqual(fanout.main([*arguments, "--resume"]), 0)
 
             receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            manifest = json.loads(
+                (run_directory / "manifest.json").read_text(encoding="utf-8")
+            )
             with closing(sqlite3.connect(source)) as connection, connection:
                 contribution_count = connection.execute(
                     "SELECT COUNT(*) FROM contributions"
@@ -374,6 +456,128 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
         self.assertTrue(receipt["merged"])
         self.assertEqual(receipt["succeeded"], 2)
         self.assertEqual(contribution_count, 2)
+        self.assertEqual(
+            Path(receipt["runtimes"]["python_path"]).resolve(),
+            Path(sys.executable).resolve(),
+        )
+        self.assertEqual(receipt["runtimes"], manifest["runtimes"])
+
+    def test_failure_ladder_retries_then_splits_company_cycle(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-ladder-e2e-") as temp:
+            root = Path(temp)
+            source = root / "source.db"
+            merge_fixture.create_database(source)
+            with closing(sqlite3.connect(source)) as connection, connection:
+                connection.execute(
+                    """
+                    CREATE TABLE companies (
+                      industry TEXT NOT NULL,
+                      company TEXT NOT NULL,
+                      variant TEXT NOT NULL
+                    )
+                    """
+                )
+                connection.execute(
+                    "INSERT INTO companies VALUES ('Fintech', 'Stripe', 'Stripe')"
+                )
+            run_directory = root / "run"
+            receipt_path = run_directory / "receipt.json"
+            executed: list[tuple[int, tuple[str, ...]]] = []
+
+            def fake_execute(lane_run, **kwargs):
+                task_ids = tuple(
+                    str(task["task_id"]) for task in lane_run.tasks
+                )
+                executed.append((lane_run.attempt, task_ids))
+                succeeded = lane_run.attempt >= 3
+                if succeeded:
+                    with closing(
+                        sqlite3.connect(lane_run.database)
+                    ) as connection, connection:
+                        for task in lane_run.tasks:
+                            connection.execute(
+                                "INSERT OR IGNORE INTO contributions VALUES (?, ?, ?)",
+                                (
+                                    task["task_id"],
+                                    task["company"],
+                                    float(task["cycle"]),
+                                ),
+                            )
+                tasks = [
+                    {
+                        **task,
+                        "status": "succeeded" if succeeded else "failed",
+                        "wall_clock_seconds": 0.01,
+                        "error": "" if succeeded else "injected exit -1",
+                    }
+                    for task in lane_run.tasks
+                ]
+                lane_receipt = {
+                    "status": "succeeded" if succeeded else "failed",
+                    "tasks": tasks,
+                }
+                fanout.atomic_json(lane_run.receipt, lane_receipt)
+                return {
+                    "lane": lane_run.lane,
+                    "attempt": lane_run.attempt,
+                    "exit_code": 0 if succeeded else -1,
+                    "wall_clock_seconds": 0.01,
+                    "last_log_line": (
+                        "TASK SUCCEEDED" if succeeded else "injected exit -1"
+                    ),
+                    "receipt_path": str(lane_run.receipt),
+                    "invocation_receipt_path": str(
+                        lane_run.receipt.with_suffix(".invocation.json")
+                    ),
+                    "state_path": str(lane_run.state),
+                    "log_path": str(lane_run.log),
+                    "database": str(lane_run.database),
+                    "key_id": lane_run.key_id,
+                    "units": list(lane_run.tasks),
+                    "receipt": lane_receipt,
+                }
+
+            arguments = [
+                "--source-database",
+                str(source),
+                "--industry",
+                "Fintech",
+                "--cycles",
+                "2026",
+                "--run-directory",
+                str(run_directory),
+                "--output-receipt",
+                str(receipt_path),
+                "--rscript-path",
+                sys.executable,
+                "--budget-database",
+                str(root / "budget.sqlite"),
+                "--max-parallel",
+                "1",
+            ]
+            with mock.patch.dict(
+                fanout.os.environ,
+                {"FEC_API_KEY": "fixture-key"},
+                clear=False,
+            ), mock.patch.object(
+                fanout,
+                "execute_lane",
+                side_effect=fake_execute,
+            ):
+                self.assertEqual(fanout.main(arguments), 0)
+
+            final = json.loads(receipt_path.read_text(encoding="utf-8"))
+        self.assertEqual(executed, [
+            (1, ("stripe-2026",)),
+            (2, ("stripe-2026",)),
+            (3, ("stripe-2026",)),
+        ])
+        self.assertEqual(final["status"], "succeeded")
+        self.assertEqual(
+            [attempt["exit_code"] for attempt in final["lane_attempts"]],
+            [-1, -1, 0],
+        )
+        self.assertTrue(final["merged"])
 
 
 if __name__ == "__main__":

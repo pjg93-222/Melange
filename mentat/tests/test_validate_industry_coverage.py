@@ -88,6 +88,43 @@ def write_receipt(path: Path, database: Path, **updates: object) -> None:
 
 
 class CoverageGateTests(unittest.TestCase):
+    def test_roster_validation_discovers_industries_and_exclusion_coverage(
+        self,
+    ) -> None:
+        import openpyxl
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workbook = root / "Company Name.xlsx"
+            book = openpyxl.Workbook()
+            crypto = book.active
+            crypto.title = "Crypto"
+            crypto.append(["CryptoCo", "Crypto Co"])
+            fintech = book.create_sheet("Fintech")
+            fintech.append(["Alpha"])
+            fintech.append(["Alpha Inc / Alpha LLC"])
+            fintech.append(["NOT ALPHA SCHOOL"])
+            fintech.append([])
+            fintech.append(["Beta"])
+            book.save(workbook)
+            book.close()
+
+            result = gate.workbook_roster(workbook)
+
+        self.assertEqual(result["status"], "succeeded")
+        self.assertEqual(result["industries"], ["Crypto", "Fintech"])
+        fintech_result = next(
+            item
+            for item in result["readiness"]
+            if item["industry"] == "Fintech"
+        )
+        self.assertTrue(fintech_result["ready"])
+        self.assertEqual(fintech_result["company_count"], 2)
+        self.assertEqual(fintech_result["variant_count"], 4)
+        self.assertEqual(fintech_result["exclusion_pattern_count"], 1)
+        self.assertEqual(fintech_result["companies_with_exclusions"], 1)
+        self.assertEqual(fintech_result["companies_without_exclusions"], 1)
+
     def test_complete_company_cycle_grid_passes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

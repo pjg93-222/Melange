@@ -212,6 +212,54 @@ def seed_shard(
 
 
 class MergeCompanyShardsTest(unittest.TestCase):
+    def test_ten_shard_atomic_batch_matches_serial_reference(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-ten-shard-") as temp:
+            root = Path(temp)
+            batched = root / "batched.db"
+            serial = root / "serial.db"
+            create_database(batched)
+            create_database(serial)
+            specifications: list[str] = []
+            for index in range(10):
+                company = f"Company {index:02d}"
+                other = f"Other {index:02d}"
+                shard = root / f"shard-{index:02d}.db"
+                create_database(shard)
+                seed_shard(shard, company, other, f"{index:02d}")
+                specifications.append(f"{shard}::{company}")
+
+            self.assertEqual(
+                merger.main([str(batched), *reversed(specifications)]),
+                0,
+            )
+            for specification in specifications:
+                self.assertEqual(
+                    merger.main([str(serial), specification]),
+                    0,
+                )
+
+            batched_counts = {
+                table: scalar(batched, f"SELECT COUNT(*) FROM {table}")
+                for table in merger.REQUIRED_COLLECTOR_TABLES
+            }
+            serial_counts = {
+                table: scalar(serial, f"SELECT COUNT(*) FROM {table}")
+                for table in merger.REQUIRED_COLLECTOR_TABLES
+            }
+            batched_sub_ids = scalar(
+                batched,
+                "SELECT COUNT(DISTINCT sub_id) FROM contributions",
+            )
+            serial_sub_ids = scalar(
+                serial,
+                "SELECT COUNT(DISTINCT sub_id) FROM contributions",
+            )
+
+        self.assertEqual(batched_counts, serial_counts)
+        self.assertEqual(batched_sub_ids, serial_sub_ids)
+        self.assertEqual(batched_counts["contributions"], 10)
+        self.assertEqual(batched_sub_ids, 10)
+
     def test_atomic_company_merge_and_idempotency(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-shard-merge-") as temp:
             root = Path(temp)

@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sqlite3
 import sys
 from contextlib import closing
@@ -31,6 +32,232 @@ CYCLE_MAP = {
     "2025-2026": 2026,
     "2026": 2026,
 }
+
+
+def clean_text(value: object) -> str:
+    if value is None:
+        return ""
+    return re.sub(r"\s+", " ", str(value)).strip()
+
+
+def roster_cell(value: object, source_row: int) -> dict[str, Any]:
+    original = clean_text(value)
+    result: dict[str, Any] = {
+        "variants": [],
+        "exclusions": [],
+        "metadata": {},
+    }
+    if not original:
+        return result
+    upper = original.upper()
+    if re.match(r"^NOT\s+", upper):
+        result["exclusions"] = [
+            clean_text(re.sub(r"^NOT\s+", "", original, flags=re.IGNORECASE))
+        ]
+        return result
+    cik = re.fullmatch(r"CIK\s+([0-9]+)", original, flags=re.IGNORECASE)
+    if cik:
+        result["metadata"] = {"cik": cik.group(1)}
+        return result
+    instruction = re.fullmatch(
+        r"""JUST\s+["']?(.+?)["']?""",
+        original,
+        flags=re.IGNORECASE,
+    )
+    if instruction:
+        result["metadata"] = {
+            "search_instruction": clean_text(instruction.group(1))
+        }
+        return result
+    if re.search(
+        r"^(BUT|HOWEVER)\b|\bSO YOU NEED:?$|^THE INSURANCE ACTIVITY\b",
+        upper,
+    ):
+        return result
+    confidence = (
+        "spot_check"
+        if re.search(r"\u26a0|SPOT[- ]?CHECK", upper)
+        else (
+            "safe"
+            if re.search(r"\bSAFE\b|DISTINCTIVE", upper)
+            else "normal"
+        )
+    )
+    for piece in re.split(r"\s+/\s+", original):
+        variant = clean_text(re.sub(r"\s*\([^)]*\)", "", piece))
+        if variant:
+            result["variants"].append(
+                {
+                    "variant": variant,
+                    "confidence": confidence,
+                    "source_row": source_row,
+                }
+            )
+    return result
+
+
+def workbook_roster(path: Path) -> dict[str, Any]:
+    try:
+        import openpyxl
+    except ImportError as error:
+        raise RuntimeError(
+            "Roster validation requires openpyxl, which is already a Mentat "
+            "workbook dependency."
+        ) from error
+
+    resolved = path.resolve(strict=True)
+    book = openpyxl.load_workbook(
+        resolved,
+        read_only=True,
+        data_only=False,
+    )
+    try:
+        industries: list[dict[str, Any]] = []
+        all_checks: list[bool] = []
+        for sheet in book.worksheets:
+            raw_rows = [
+                (row_number, [cell.value for cell in row])
+                for row_number, row in enumerate(
+                    sheet.iter_rows(),
+                    start=1,
+                )
+            ]
+            blocks: list[list[tuple[int, list[object]]]] = []
+            if sheet.title == "Crypto":
+                blocks = [
+                    [(row_number, row)]
+                    for row_number, row in raw_rows
+                    if any(clean_text(value) for value in row)
+                ]
+            else:
+                current: list[tuple[int, list[object]]] = []
+                for row_number, row in raw_rows:
+                    if any(clean_text(value) for value in row):
+                        current.append((row_number, row))
+                    elif current:
+                        blocks.append(current)
+                        current = []
+                if current:
+                    blocks.append(current)
+
+            companies: list[dict[str, Any]] = []
+            parse_errors: list[str] = []
+            for block in blocks:
+                parsed = [
+                    roster_cell(value, row_number)
+                    for row_number, row in block
+                    for value in row
+                    if clean_text(value)
+                ]
+                variants: list[dict[str, Any]] = []
+                seen_variants: set[str] = set()
+                for cell in parsed:
+                    for variant in cell["variants"]:
+                        key = clean_text(variant["variant"])
+                        if key not in seen_variants:
+                            seen_variants.add(key)
+                            variants.append(variant)
+                exclusions = sorted(
+                    {
+                        exclusion
+                        for cell in parsed
+                        for exclusion in cell["exclusions"]
+                        if exclusion
+                    },
+                    key=lambda value: (value.upper(), value),
+                )
+                if not variants:
+                    parse_errors.append(
+                        f"Rows {block[0][0]}-{block[-1][0]} have no usable variants."
+                    )
+                    continue
+                companies.append(
+                    {
+                        "company": variants[0]["variant"],
+                        "variant_count": len(variants),
+                        "variants": variants,
+                        "exclusion_count": len(exclusions),
+                        "exclusions": exclusions,
+                        "source_rows": [item[0] for item in block],
+                    }
+                )
+
+            company_keys = [company["company"].casefold() for company in companies]
+            duplicate_companies = sorted(
+                {
+                    company["company"]
+                    for company in companies
+                    if company_keys.count(company["company"].casefold()) > 1
+                },
+                key=lambda value: (value.upper(), value),
+            )
+            owners: dict[str, set[str]] = {}
+            labels: dict[str, str] = {}
+            for company in companies:
+                for variant in company["variants"]:
+                    key = re.sub(
+                        r"[^A-Z0-9]+",
+                        "",
+                        variant["variant"].upper(),
+                    )
+                    if not key:
+                        continue
+                    labels.setdefault(key, variant["variant"])
+                    owners.setdefault(key, set()).add(company["company"])
+            cross_company_variants = [
+                {
+                    "variant": labels[key],
+                    "companies": sorted(
+                        company_owners,
+                        key=lambda value: (value.upper(), value),
+                    ),
+                }
+                for key, company_owners in sorted(owners.items())
+                if len(company_owners) > 1
+            ]
+            checks = {
+                "has_company_blocks": bool(companies),
+                "all_blocks_parse": not parse_errors,
+                "company_names_unique": not duplicate_companies,
+                "variants_unambiguous": not cross_company_variants,
+            }
+            all_checks.extend(checks.values())
+            industries.append(
+                {
+                    "industry": sheet.title,
+                    "ready": all(checks.values()),
+                    "company_count": len(companies),
+                    "variant_count": sum(
+                        company["variant_count"] for company in companies
+                    ),
+                    "exclusion_pattern_count": sum(
+                        company["exclusion_count"] for company in companies
+                    ),
+                    "companies_with_exclusions": sum(
+                        company["exclusion_count"] > 0
+                        for company in companies
+                    ),
+                    "companies_without_exclusions": sum(
+                        company["exclusion_count"] == 0
+                        for company in companies
+                    ),
+                    "checks": checks,
+                    "parse_errors": parse_errors,
+                    "duplicate_companies": duplicate_companies,
+                    "cross_company_variants": cross_company_variants,
+                    "companies": companies,
+                }
+            )
+    finally:
+        book.close()
+    return {
+        "status": "succeeded" if industries and all(all_checks) else "failed",
+        "mode": "roster",
+        "workbook": str(resolved),
+        "industry_count": len(industries),
+        "industries": [industry["industry"] for industry in industries],
+        "readiness": industries,
+    }
 
 
 def parse_cycles(value: str) -> tuple[int, ...]:
@@ -377,29 +604,72 @@ def validate(
 
 def parse_arguments(arguments: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("database", type=Path)
-    parser.add_argument("industry")
-    parser.add_argument("cycles")
-    parser.add_argument("fanout_receipt", type=Path)
+    parser.add_argument("database", type=Path, nargs="?")
+    parser.add_argument("industry", nargs="?")
+    parser.add_argument("cycles", nargs="?")
+    parser.add_argument("fanout_receipt", type=Path, nargs="?")
+    parser.add_argument(
+        "--roster",
+        type=Path,
+        help=(
+            "Validate and list every industry discovered from Company Name.xlsx."
+        ),
+    )
     parser.add_argument("--output", type=Path)
-    return parser.parse_args(arguments)
+    parsed = parser.parse_args(arguments)
+    if parsed.roster is None and any(
+        value is None
+        for value in (
+            parsed.database,
+            parsed.industry,
+            parsed.cycles,
+            parsed.fanout_receipt,
+        )
+    ):
+        parser.error(
+            "DATABASE INDUSTRY CYCLES FANOUT_RECEIPT are required unless "
+            "--roster is used."
+        )
+    if parsed.roster is not None and any(
+        value is not None
+        for value in (
+            parsed.database,
+            parsed.industry,
+            parsed.cycles,
+            parsed.fanout_receipt,
+        )
+    ):
+        parser.error("--roster cannot be combined with database gate arguments.")
+    return parsed
 
 
 def main(arguments: list[str]) -> int:
     options = parse_arguments(arguments)
     output = options.output
     try:
-        result = validate(
-            options.database,
-            options.industry.strip(),
-            parse_cycles(options.cycles),
-            options.fanout_receipt,
-        )
+        if options.roster is not None:
+            result = workbook_roster(options.roster)
+        else:
+            result = validate(
+                options.database,
+                options.industry.strip(),
+                parse_cycles(options.cycles),
+                options.fanout_receipt,
+            )
     except Exception as error:
         result = {
             "status": "failed",
-            "database": str(options.database.resolve()),
-            "industry": options.industry.strip(),
+            "mode": "roster" if options.roster is not None else "coverage",
+            "database": (
+                str(options.database.resolve())
+                if options.database is not None
+                else None
+            ),
+            "industry": (
+                options.industry.strip()
+                if options.industry is not None
+                else None
+            ),
             "error": f"{type(error).__name__}: {error}",
         }
     if output is not None:

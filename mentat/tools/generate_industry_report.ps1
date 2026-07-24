@@ -22,7 +22,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$generator = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'generate_crypto_report.ps1'
+$generator = Join-Path (
+  Split-Path -Parent $MyInvocation.MyCommand.Path
+) 'build_industry_report.ps1'
 $arguments = @{
   Industry = $Industry
   ExcelMutexName = $ExcelMutexName

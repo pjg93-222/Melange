@@ -4,19 +4,61 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 
-const runtimeNodeModules = process.env.MENTAT_NODE_MODULES ?? path.join(
-  os.homedir(),
-  ".cache",
-  "codex-runtimes",
-  "codex-primary-runtime",
-  "dependencies",
-  "node",
-  "node_modules",
-);
 const require = createRequire(import.meta.url);
-const artifactToolEntry = require.resolve("@oai/artifact-tool", {
-  paths: [runtimeNodeModules],
-});
+const artifactToolPackage = "@oai/artifact-tool";
+
+function resolveArtifactToolEntry() {
+  const configured = process.env.MENTAT_NODE_MODULES?.trim();
+  if (configured) {
+    try {
+      return require.resolve(artifactToolPackage, { paths: [configured] });
+    } catch {
+      throw new Error(
+        `MENTAT_NODE_MODULES cannot resolve ${artifactToolPackage}: ${configured}`,
+      );
+    }
+  }
+
+  try {
+    return require.resolve(artifactToolPackage);
+  } catch {
+    // Continue through NODE_PATH and the optional Codex runtime fallback.
+  }
+
+  const nodePathCandidates = (process.env.NODE_PATH ?? "")
+    .split(path.delimiter)
+    .map((value) => value.trim())
+    .filter(Boolean);
+  for (const candidate of nodePathCandidates) {
+    try {
+      return require.resolve(artifactToolPackage, { paths: [candidate] });
+    } catch {
+      // Try the next configured module directory.
+    }
+  }
+
+  const cachedNodeModules = path.join(
+    os.homedir(),
+    ".cache",
+    "codex-runtimes",
+    "codex-primary-runtime",
+    "dependencies",
+    "node",
+    "node_modules",
+  );
+  try {
+    return require.resolve(artifactToolPackage, {
+      paths: [cachedNodeModules],
+    });
+  } catch {
+    throw new Error(
+      `${artifactToolPackage} was not found. Set MENTAT_NODE_MODULES ` +
+        "to its node_modules directory or install it in the project.",
+    );
+  }
+}
+
+const artifactToolEntry = resolveArtifactToolEntry();
 const { SpreadsheetFile, Workbook } = await import(
   pathToFileURL(artifactToolEntry).href
 );

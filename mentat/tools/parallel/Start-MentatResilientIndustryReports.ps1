@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Run the cookie-cutter Mentat report pipeline for one to six industries.
+Run the cookie-cutter Mentat report pipeline for roster-discovered industries.
 
 .DESCRIPTION
 This is the failure-isolated production orchestrator. For each industry it:
@@ -34,14 +34,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
 #>
 [CmdletBinding()]
 param(
-  [string[]]$Industries = @(
-    'Crypto',
-    'Credit Union',
-    'Community Banks',
-    'Property & Casualty Insurance',
-    'Credit Arms',
-    'Telecom'
-  ),
+  [string[]]$Industries = @(),
   [ValidatePattern(
     '^(?:2021-2022|2022|2023-2024|2024|2025-2026|2026)' +
     '(?:\|(?:2021-2022|2022|2023-2024|2024|2025-2026|2026))*$'
@@ -67,13 +60,13 @@ param(
   [string]$OutputDirectory = '',
   [string]$RawDataDirectory = '',
   [string]$RunRoot = '',
+  [string]$RosterPath = '',
   [string]$GeneratorPath = '',
   [string]$RScriptPath =
     'C:\Program Files\R\R-4.6.0\bin\Rscript.exe',
   [string]$RLibraryPath =
     'C:\Users\pgoff\AppData\Local\R\win-library\4.6',
-  [string]$PythonPath =
-    'C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe',
+  [string]$PythonPath = '',
   [string]$ExcelMutexName = 'Global\MentatIndustryExcelFinalize',
   [switch]$NoCache,
   [switch]$PlanOnly
@@ -176,6 +169,53 @@ function Write-AtomicJson {
   } else {
     [IO.File]::Move($pending, $Path)
   }
+}
+
+function Get-LastNonemptyLogLine {
+  param([string[]]$Paths)
+  $existing = @(
+    $Paths |
+      Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+      Sort-Object { (Get-Item -LiteralPath $_).LastWriteTimeUtc } -Descending
+  )
+  foreach ($path in $existing) {
+    $lines = @(
+      Get-Content -LiteralPath $path -Tail 64 |
+        Where-Object {
+          -not [string]::IsNullOrWhiteSpace([string]$_)
+        }
+    )
+    if ($lines.Count) {
+      return ([string]$lines[$lines.Count - 1]).Trim()
+    }
+  }
+  return ''
+}
+
+function Write-RInvocationReceipt {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][string]$Industry,
+    [Parameter(Mandatory = $true)][string]$Unit,
+    [Parameter(Mandatory = $true)][int]$ExitCode,
+    [Parameter(Mandatory = $true)][double]$ElapsedSeconds,
+    [Parameter(Mandatory = $true)][string[]]$LogPaths
+  )
+  $lastLine = Get-LastNonemptyLogLine $LogPaths
+  Write-AtomicJson $Path ([ordered]@{
+    industry = $Industry
+    unit = $Unit
+    exit_code = $ExitCode
+    elapsed_seconds = [math]::Round($ElapsedSeconds, 3)
+    last_log_line = $lastLine
+    log_paths = $LogPaths
+    rscript_path = $RScriptPath
+    recorded_at = [DateTimeOffset]::Now.ToString('o')
+  })
+  Write-RunEvent 'rscript_invocation_completed' $Industry (
+    "unit=$Unit; exit=$ExitCode; elapsed=" +
+    "$([math]::Round($ElapsedSeconds,3)); last_log_line=$lastLine"
+  )
 }
 
 function Get-KeyCount {
@@ -353,13 +393,49 @@ if (-not $RunRoot) {
 if (-not $GeneratorPath) {
   $GeneratorPath = Join-Path $toolsRoot 'generate_industry_report.ps1'
 }
+if (-not $RosterPath) {
+  $RosterPath = Join-Path $projectRoot 'inputs\Company Name.xlsx'
+}
+if (-not $PythonPath -and $env:MENTAT_PYTHON_PATH) {
+  $PythonPath = $env:MENTAT_PYTHON_PATH
+}
+if (-not $PythonPath) {
+  $pythonCommand = Get-Command python -CommandType Application `
+    -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+  if ($null -ne $pythonCommand) {
+    $PythonPath = $pythonCommand.Source
+  }
+}
+if (-not $PythonPath) {
+  $cachedPython = Join-Path $env:USERPROFILE (
+    '.cache\codex-runtimes\codex-primary-runtime\dependencies\' +
+    'python\python.exe'
+  )
+  if (Test-Path -LiteralPath $cachedPython -PathType Leaf) {
+    $PythonPath = $cachedPython
+  }
+}
+if (-not $PythonPath) {
+  throw (
+    'Python runtime was not found. Pass -PythonPath, set ' +
+    'MENTAT_PYTHON_PATH, or install Python 3 with python on PATH.'
+  )
+}
 $OutputDirectory = Resolve-FullPath $OutputDirectory $workspaceRoot
 $RawDataDirectory = Resolve-FullPath $RawDataDirectory $workspaceRoot
 $RunRoot = Resolve-FullPath $RunRoot $projectRoot
+$RosterPath = Resolve-FullPath $RosterPath $projectRoot
 $GeneratorPath = Resolve-FullPath $GeneratorPath $toolsRoot
 $RScriptPath = Resolve-FullPath $RScriptPath $workspaceRoot
 $RLibraryPath = Resolve-FullPath $RLibraryPath $workspaceRoot
 $PythonPath = Resolve-FullPath $PythonPath $workspaceRoot
+if (-not (Test-Path -LiteralPath $PythonPath -PathType Leaf)) {
+  throw (
+    "Python runtime is missing at '$PythonPath'. Pass -PythonPath, set " +
+    'MENTAT_PYTHON_PATH, or install Python 3 with python on PATH.'
+  )
+}
 if ($KeysFile) {
   $KeysFile = Resolve-FullPath $KeysFile $workspaceRoot
 }
@@ -369,6 +445,7 @@ foreach ($required in @(
   $mentatEntry,
   $coverageTool,
   $rawExportTool,
+  $RosterPath,
   $GeneratorPath,
   $RScriptPath,
   $RLibraryPath,
@@ -377,6 +454,28 @@ foreach ($required in @(
   if (-not (Test-Path -LiteralPath $required)) {
     throw "Required resilient-report input is missing: $required"
   }
+}
+
+$rosterOutput = & $PythonPath $coverageTool --roster $RosterPath
+if ($LASTEXITCODE -ne 0) {
+  throw "Roster readiness validation failed for $RosterPath"
+}
+try {
+  $rosterValidation = ($rosterOutput -join "`n") |
+    ConvertFrom-Json -ErrorAction Stop
+} catch {
+  throw "Roster readiness validation returned invalid JSON: $RosterPath"
+}
+if ([string]$rosterValidation.status -ne 'succeeded') {
+  throw "Roster readiness validation did not pass: $RosterPath"
+}
+$discoveredIndustries = @(
+  $rosterValidation.industries |
+    ForEach-Object { ([string]$_).Trim() } |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+)
+if (-not $Industries.Count) {
+  $Industries = $discoveredIndustries
 }
 
 $cleanIndustries = @(
@@ -392,8 +491,14 @@ $cleanIndustries = @(
 if (-not $cleanIndustries.Count) {
   throw 'At least one industry is required.'
 }
-if ($cleanIndustries.Count -gt 6) {
-  throw 'This cookie-cutter runner accepts at most six industries per run.'
+$unknownIndustries = @(
+  $cleanIndustries | Where-Object { $_ -notin $discoveredIndustries }
+)
+if ($unknownIndustries.Count) {
+  throw (
+    'Requested industries are absent from the roster workbook: ' +
+    ($unknownIndustries -join ', ')
+  )
 }
 $slugs = @($cleanIndustries | ForEach-Object { ConvertTo-Slug $_ })
 if (@($slugs | Select-Object -Unique).Count -ne $slugs.Count) {
@@ -424,12 +529,20 @@ $plan = [ordered]@{
   )
   recovery_workers = $RecoveryWorkers
   resources = $resourcePlan
+  runtimes = [ordered]@{
+    powershell_path = $powerShellPath
+    python_path = $PythonPath
+    rscript_path = $RScriptPath
+    r_library_path = $RLibraryPath
+  }
   generator_path = $GeneratorPath
   node_heap_mb = $NodeHeapMb
   generator_performance_budget_minutes = $GeneratorPerformanceBudgetMinutes
   fanout_path = $fanoutPath
   coverage_gate = $coverageTool
   raw_data_export = $rawExportTool
+  roster_path = $RosterPath
+  discovered_industries = $discoveredIndustries
   output_directory = $OutputDirectory
   raw_data_directory = $RawDataDirectory
 }
@@ -452,6 +565,7 @@ $manifestPath = Join-Path $runDirectory 'manifest.json'
 $statusPath = Join-Path $runDirectory 'status.json'
 $eventsPath = Join-Path $runDirectory 'events.jsonl'
 $summaryPath = Join-Path $runDirectory 'summary.json'
+$phaseTimingsPath = Join-Path $runDirectory 'phase-timings.json'
 $orchestratorLog = Join-Path $logDirectory 'orchestrator.log'
 $startedAt = [DateTimeOffset]::Now
 $wallWatch = [Diagnostics.Stopwatch]::StartNew()
@@ -489,8 +603,15 @@ for ($index = 0; $index -lt $cleanIndustries.Count; $index++) {
     started_at = $null
     finished_at = $null
     collection_seconds = $null
+    fanout_seconds = $null
+    merge_seconds = $null
     coverage_seconds = $null
     raw_data_seconds = $null
+    warehouse_seconds = $null
+    export_seconds = $null
+    workbook_build_seconds = $null
+    formula_seconds = $null
+    finalize_seconds = $null
     generator_seconds = $null
     total_seconds = $null
     under_15_minutes = $null
@@ -519,6 +640,7 @@ Write-AtomicJson $manifestPath ([ordered]@{
   status_path = $statusPath
   events_path = $eventsPath
   summary_path = $summaryPath
+  phase_timings_path = $phaseTimingsPath
 })
 
 $collectionDurations = New-Object Collections.Generic.List[double]
@@ -815,6 +937,18 @@ function Complete-GeneratorJob {
       $priorGeneratorSeconds + $elapsed,
       3
     )
+    if ($null -ne $generatorReceipt.PSObject.Properties['export_seconds']) {
+      $state.export_seconds = [double]$generatorReceipt.export_seconds
+    }
+    if ($null -ne $generatorReceipt.PSObject.Properties['build_seconds']) {
+      $state.workbook_build_seconds = [double]$generatorReceipt.build_seconds
+    }
+    if ($null -ne $generatorReceipt.PSObject.Properties['formula_seconds']) {
+      $state.formula_seconds = [double]$generatorReceipt.formula_seconds
+    }
+    if ($null -ne $generatorReceipt.PSObject.Properties['finalize_seconds']) {
+      $state.finalize_seconds = [double]$generatorReceipt.finalize_seconds
+    }
     $state.detail = (
       'Generator receipt PASS: budget_pass={0}; receipt={1}' -f
         [bool]$generatorReceipt.performance_budget_pass,
@@ -971,11 +1105,20 @@ foreach ($state in $industryStates) {
     (ConvertTo-PowerShellLiteral '--defer-report-files') +
     '; exit $LASTEXITCODE'
   )
+  $initWatch = [Diagnostics.Stopwatch]::StartNew()
   $process = Start-ManagedPowerShell `
     -Command $initCommand `
     -StdoutPath $initStdout `
     -StderrPath $initStderr
   $exitCode = Wait-ManagedProcess $process 'initializing' $state
+  $initWatch.Stop()
+  Write-RInvocationReceipt `
+    -Path (Join-Path $industryRootPath 'initialize.invocation.json') `
+    -Industry $state.industry `
+    -Unit 'initialize' `
+    -ExitCode $exitCode `
+    -ElapsedSeconds $initWatch.Elapsed.TotalSeconds `
+    -LogPaths @($initStdout, $initStderr)
   if ($exitCode -ne 0 -or
       -not (Test-Path -LiteralPath $state.database -PathType Leaf)) {
     $state.stage = 'failed'
@@ -1006,6 +1149,9 @@ foreach ($state in $industryStates) {
     MaxParallel = $resourcePlan.fanout_max_parallel
     RecoveryWorkers = $RecoveryWorkers
     KeysFile = $KeysFile
+    PythonPath = $PythonPath
+    RScriptPath = $RScriptPath
+    RLibraryPath = $RLibraryPath
   }
   $fanoutCommand = New-ScriptInvocation $fanoutPath $fanoutParameters
   $process = Start-ManagedPowerShell `
@@ -1018,8 +1164,37 @@ foreach ($state in $industryStates) {
     -IndustryState $state `
     -FanoutRoot $state.fanout_root
   $collectionWatch.Stop()
+  $fanoutReceiptObject = $null
+  if (Test-Path -LiteralPath $state.fanout_receipt -PathType Leaf) {
+    try {
+      $fanoutReceiptObject = Get-Content `
+        -LiteralPath $state.fanout_receipt `
+        -Raw |
+        ConvertFrom-Json -ErrorAction Stop
+    } catch {
+      $fanoutReceiptObject = $null
+    }
+  }
+  $fanoutSeconds = $collectionWatch.Elapsed.TotalSeconds
+  $mergeSeconds = 0.0
+  if ($null -ne $fanoutReceiptObject) {
+    if ($null -ne $fanoutReceiptObject.PSObject.Properties['wall_clock_seconds']) {
+      $fanoutSeconds = [double]$fanoutReceiptObject.wall_clock_seconds
+    }
+    if (
+      $null -ne $fanoutReceiptObject.PSObject.Properties['merge'] -and
+      $null -ne $fanoutReceiptObject.merge -and
+      $null -ne $fanoutReceiptObject.merge.PSObject.Properties[
+        'wall_clock_seconds'
+      ]
+    ) {
+      $mergeSeconds = [double]$fanoutReceiptObject.merge.wall_clock_seconds
+    }
+  }
+  $state.fanout_seconds = [math]::Round($fanoutSeconds, 3)
+  $state.merge_seconds = [math]::Round($mergeSeconds, 3)
   $state.collection_seconds = [math]::Round(
-    $collectionWatch.Elapsed.TotalSeconds,
+    [math]::Max(0.0, $fanoutSeconds - $mergeSeconds),
     3
   )
   $collectionDurations.Add($collectionWatch.Elapsed.TotalSeconds)
@@ -1051,11 +1226,20 @@ foreach ($state in $industryStates) {
     (ConvertTo-PowerShellLiteral '--defer-report-files') +
     '; exit $LASTEXITCODE'
   )
+  $retagWatch = [Diagnostics.Stopwatch]::StartNew()
   $process = Start-ManagedPowerShell `
     -Command $retagCommand `
     -StdoutPath $retagStdout `
     -StderrPath $retagStderr
   $exitCode = Wait-ManagedProcess $process 'finalizing_database' $state
+  $retagWatch.Stop()
+  Write-RInvocationReceipt `
+    -Path (Join-Path $industryRootPath 'retag.invocation.json') `
+    -Industry $state.industry `
+    -Unit 'retag' `
+    -ExitCode $exitCode `
+    -ElapsedSeconds $retagWatch.Elapsed.TotalSeconds `
+    -LogPaths @($retagStdout, $retagStderr)
   if ($exitCode -ne 0) {
     $state.stage = 'failed'
     $state.status = 'failed'
@@ -1134,6 +1318,7 @@ foreach ($state in $industryStates) {
     $rawDataWatch.Elapsed.TotalSeconds,
     3
   )
+  $state.warehouse_seconds = $state.raw_data_seconds
   $rawReceipt = $null
   $coverageReceipt = $null
   try {
@@ -1248,6 +1433,64 @@ $failures = @($industryStates | Where-Object { $_.status -ne 'succeeded' })
 $under15 = @(
   $industryStates | Where-Object { $_.under_15_minutes -eq $true }
 ).Count
+$phaseTimingIndustries = @(
+  foreach ($state in $industryStates) {
+    $collection = [double]$state.collection_seconds
+    $merge = [double]$state.merge_seconds
+    $warehouse = [double]$state.warehouse_seconds
+    $export = [double]$state.export_seconds
+    $build = [double]$state.workbook_build_seconds
+    $formula = [double]$state.formula_seconds
+    $finalize = [double]$state.finalize_seconds
+    $total = [double]$state.total_seconds
+    $accounted = (
+      $collection + $merge + $warehouse + $export + $build + $formula +
+      $finalize
+    )
+    [ordered]@{
+      industry = $state.industry
+      slug = $state.slug
+      status = if ($state.status -eq 'succeeded') { 'ok' } else { 'degraded' }
+      total_seconds = [math]::Round($total, 3)
+      collection_seconds = [math]::Round($collection, 3)
+      merge_seconds = [math]::Round($merge, 3)
+      warehouse_seconds = [math]::Round($warehouse, 3)
+      export_seconds = [math]::Round($export, 3)
+      workbook_build_seconds = [math]::Round($build, 3)
+      formula_seconds = [math]::Round($formula, 3)
+      finalize_seconds = [math]::Round($finalize, 3)
+      other_seconds = [math]::Round(
+        [math]::Max(0.0, $total - $accounted),
+        3
+      )
+    }
+  }
+)
+Write-AtomicJson $phaseTimingsPath ([ordered]@{
+  run_id = $runId
+  status = if ($failures.Count) { 'degraded' } else { 'ok' }
+  generated_at = [DateTimeOffset]::Now.ToString('o')
+  industries = $phaseTimingIndustries
+})
+foreach ($timing in $phaseTimingIndustries) {
+  Write-RunLog (
+    (
+      'industry={0} total={1:n3}s collection={2:n3}s merge={3:n3}s ' +
+      'warehouse={4:n3}s export={5:n3}s build={6:n3}s formula={7:n3}s ' +
+      'finalize={8:n3}s status={9}'
+    ) -f
+      $timing.slug,
+      $timing.total_seconds,
+      $timing.collection_seconds,
+      $timing.merge_seconds,
+      $timing.warehouse_seconds,
+      $timing.export_seconds,
+      $timing.workbook_build_seconds,
+      $timing.formula_seconds,
+      $timing.finalize_seconds,
+      $timing.status
+  )
+}
 $summary = [ordered]@{
   run_id = $runId
   status = if ($failures.Count) { 'failed' } else { 'succeeded' }
@@ -1270,6 +1513,7 @@ $summary = [ordered]@{
   }
   resources = $resourcePlan
   industries = $industryStates
+  phase_timings_path = $phaseTimingsPath
   run_directory = $runDirectory
 }
 Write-AtomicJson $summaryPath $summary

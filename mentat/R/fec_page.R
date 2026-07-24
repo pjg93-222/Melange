@@ -1011,6 +1011,11 @@ fec_walk_variant_set_export <- function(
         page = floor((processed - 1L) / 100L),
         records_total = records_total
       )
+      # Bound the overlap between the export table, flattened rows, and the
+      # SQLite staging frame. Long-lived Windows sessions have exited natively
+      # at this handoff without raising an R condition.
+      rm(chunk)
+      gc(verbose = FALSE)
     }
     invisible(NULL)
   }
@@ -1057,6 +1062,8 @@ fec_walk_variant_set_export <- function(
   }
   if (!is.null(direct)) {
     consume_export(direct)
+    direct <- NULL
+    gc(verbose = FALSE)
   } else {
     if (!grepl(
       "fec export server error",

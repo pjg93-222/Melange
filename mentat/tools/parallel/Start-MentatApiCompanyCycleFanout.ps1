@@ -15,8 +15,7 @@ param(
   [ValidateRange(256, 16384)][int]$MemoryReserveMB = 1024,
   [ValidateRange(32, 2048)][int]$SQLiteCacheMB = 256,
   [switch]$Resume,
-  [string]$PythonPath =
-    'C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe',
+  [string]$PythonPath = '',
   [string]$RScriptPath = 'C:\Program Files\R\R-4.6.0\bin\Rscript.exe',
   [string]$RLibraryPath =
     'C:\Users\pgoff\AppData\Local\R\win-library\4.6'
@@ -27,6 +26,40 @@ $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $toolsRoot = Split-Path -Parent $scriptRoot
 $projectRoot = Split-Path -Parent $toolsRoot
 $fanout = Join-Path $toolsRoot 'api_company_cycle_fanout.py'
+
+if (-not $PythonPath -and $env:MENTAT_PYTHON_PATH) {
+  $PythonPath = $env:MENTAT_PYTHON_PATH
+}
+if (-not $PythonPath) {
+  $pythonCommand = Get-Command python -CommandType Application `
+    -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+  if ($null -ne $pythonCommand) {
+    $PythonPath = $pythonCommand.Source
+  }
+}
+if (-not $PythonPath) {
+  $cachedPython = Join-Path $env:USERPROFILE (
+    '.cache\codex-runtimes\codex-primary-runtime\dependencies\' +
+    'python\python.exe'
+  )
+  if (Test-Path -LiteralPath $cachedPython -PathType Leaf) {
+    $PythonPath = $cachedPython
+  }
+}
+if (-not $PythonPath) {
+  throw (
+    'Python runtime was not found. Pass -PythonPath, set ' +
+    'MENTAT_PYTHON_PATH, or install Python 3 with python on PATH.'
+  )
+}
+$PythonPath = [IO.Path]::GetFullPath($PythonPath)
+if (-not (Test-Path -LiteralPath $PythonPath -PathType Leaf)) {
+  throw (
+    "Python runtime is missing at '$PythonPath'. Pass -PythonPath, set " +
+    'MENTAT_PYTHON_PATH, or install Python 3 with python on PATH.'
+  )
+}
 
 foreach ($path in @(
   $SourceDatabasePath,
@@ -102,6 +135,7 @@ Write-Host "Industry:         $Industry"
 Write-Host "Cycles:           $Cycles"
 Write-Host "Source database:  $SourceDatabasePath"
 Write-Host "Run directory:    $RunDirectory"
+Write-Host "Python runtime:   $PythonPath"
 Write-Host "Max parallel:     $(if ($MaxParallel) { $MaxParallel } else { 'auto' })"
 Write-Host "Recovery workers: $RecoveryWorkers"
 Write-Host "Resume:            $([bool]$Resume)"

@@ -3057,6 +3057,10 @@ collect_crypto <- function(
         determinism <- fec_determinism_spot_check(session)
       }
       retries <- retries + company_result$retries
+      # Completed company-cycle checkpoints are durable at this boundary.
+      # Reclaim transient export/data.table allocations before the next unit
+      # so a whole-industry Chrome session does not grow without a bound.
+      gc(verbose = FALSE)
     }
   }
   wall_clock_seconds <- unname(proc.time()[["elapsed"]] - collection_started)

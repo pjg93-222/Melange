@@ -11,8 +11,7 @@ param(
   )]
   [string]$Cycles = '2022|2024|2026',
   [string]$ResumeAfter = '1900-01-01T00:00:00',
-  [string]$PythonPath =
-    'C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe',
+  [string]$PythonPath = '',
   [string]$RScriptPath = 'C:\Program Files\R\R-4.6.0\bin\Rscript.exe',
   [string]$RLibraryPath =
     'C:\Users\pgoff\AppData\Local\R\win-library\4.6'
@@ -23,6 +22,40 @@ $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $toolsRoot = Split-Path -Parent $scriptRoot
 $snapshotTool = Join-Path $toolsRoot 'sqlite_snapshot.py'
 $shardRunner = Join-Path $scriptRoot 'Invoke-MentatCompanyShard.ps1'
+
+if (-not $PythonPath -and $env:MENTAT_PYTHON_PATH) {
+  $PythonPath = $env:MENTAT_PYTHON_PATH
+}
+if (-not $PythonPath) {
+  $pythonCommand = Get-Command python -CommandType Application `
+    -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+  if ($null -ne $pythonCommand) {
+    $PythonPath = $pythonCommand.Source
+  }
+}
+if (-not $PythonPath) {
+  $cachedPython = Join-Path $env:USERPROFILE (
+    '.cache\codex-runtimes\codex-primary-runtime\dependencies\' +
+    'python\python.exe'
+  )
+  if (Test-Path -LiteralPath $cachedPython -PathType Leaf) {
+    $PythonPath = $cachedPython
+  }
+}
+if (-not $PythonPath) {
+  throw (
+    'Python runtime was not found. Pass -PythonPath, set ' +
+    'MENTAT_PYTHON_PATH, or install Python 3 with python on PATH.'
+  )
+}
+$PythonPath = [IO.Path]::GetFullPath($PythonPath)
+if (-not (Test-Path -LiteralPath $PythonPath -PathType Leaf)) {
+  throw (
+    "Python runtime is missing at '$PythonPath'. Pass -PythonPath, set " +
+    'MENTAT_PYTHON_PATH, or install Python 3 with python on PATH.'
+  )
+}
 
 foreach ($path in @(
   $SourceDatabasePath,
@@ -52,6 +85,7 @@ $shardParent = Split-Path -Parent $ShardDatabasePath
 $logParent = Split-Path -Parent $LogPath
 [IO.Directory]::CreateDirectory($shardParent) | Out-Null
 [IO.Directory]::CreateDirectory($logParent) | Out-Null
+Write-Host "Python runtime: $PythonPath"
 
 if (-not (Test-Path -LiteralPath $ShardDatabasePath)) {
   Write-Host "Creating consistent private SQLite shard: $ShardDatabasePath"

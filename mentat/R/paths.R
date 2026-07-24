@@ -66,12 +66,12 @@ mentat_bootstrap_dirs <- function(data_root = mentat_default_data_root()) {
 mentat_project_root <- function(start = getwd()) {
   current <- normalizePath(start, winslash = "/", mustWork = TRUE)
   repeat {
-    if (file.exists(file.path(current, "CODEX_TASK.md")) &&
+    if (file.exists(file.path(current, "mentat.R")) &&
         dir.exists(file.path(current, "R"))) {
       return(current)
     }
     nested <- file.path(current, "mentat")
-    if (file.exists(file.path(nested, "CODEX_TASK.md")) &&
+    if (file.exists(file.path(nested, "mentat.R")) &&
         dir.exists(file.path(nested, "R"))) {
       return(normalizePath(nested, winslash = "/", mustWork = TRUE))
     }
