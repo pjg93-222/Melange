@@ -702,6 +702,39 @@ function Write-RunEvent {
   )
 }
 
+function Read-LiveTextFile {
+  param([Parameter(Mandatory = $true)][string]$Path)
+  $stream = $null
+  $reader = $null
+  try {
+    $share = [IO.FileShare](
+      [IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete
+    )
+    $stream = [IO.File]::Open(
+      $Path,
+      [IO.FileMode]::Open,
+      [IO.FileAccess]::Read,
+      $share
+    )
+    $reader = [IO.StreamReader]::new(
+      $stream,
+      [Text.Encoding]::UTF8,
+      $true
+    )
+    return $reader.ReadToEnd()
+  } catch [IO.IOException] {
+    return $null
+  } catch [UnauthorizedAccessException] {
+    return $null
+  } finally {
+    if ($null -ne $reader) {
+      $reader.Dispose()
+    } elseif ($null -ne $stream) {
+      $stream.Dispose()
+    }
+  }
+}
+
 function Get-FanoutLiveState {
   param([string]$FanoutRoot)
   foreach ($candidate in @(
@@ -709,9 +742,12 @@ function Get-FanoutLiveState {
     (Join-Path $FanoutRoot 'state.json')
   )) {
     if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+      $content = Read-LiveTextFile $candidate
+      if ($null -eq $content) { return $null }
       try {
-        return Get-Content -LiteralPath $candidate -Raw | ConvertFrom-Json
+        return $content | ConvertFrom-Json -ErrorAction Stop
       } catch {
+        # Atomic replacement or a short read can make one poll unavailable.
         return $null
       }
     }

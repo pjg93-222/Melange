@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import json
 import sys
 import tempfile
@@ -143,6 +144,73 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
         serialized = json.dumps(payload)
         self.assertNotIn("key", serialized.lower())
         self.assertNotIn("must-not-appear", serialized)
+
+    @unittest.skipUnless(
+        sys.platform == "win32",
+        "Windows delete-sharing behavior is required",
+    )
+    def test_locked_status_is_nonfatal_but_locked_receipt_raises(self) -> None:
+        with tempfile.TemporaryDirectory(
+            prefix="mentat-status-lock-fixture-"
+        ) as temp:
+            root = Path(temp)
+            status = root / "status.json"
+            status.write_text('{"status":"prior"}\n', encoding="utf-8")
+            warning = io.StringIO()
+            with status.open("r", encoding="utf-8"), mock.patch.object(
+                fanout,
+                "ATOMIC_REPLACE_INITIAL_DELAY_SECONDS",
+                0.00001,
+            ), mock.patch.object(
+                fanout.sys,
+                "stderr",
+                warning,
+            ), mock.patch.object(
+                fanout.os,
+                "replace",
+                wraps=fanout.os.replace,
+            ) as replace:
+                written = fanout.write_status(
+                    status,
+                    run_id="fixture",
+                    industry="Fintech",
+                    total=0,
+                    lane_runs=[],
+                    stage="collecting",
+                    started_monotonic=fanout.time.monotonic(),
+                )
+            self.assertFalse(written)
+            self.assertEqual(
+                replace.call_count,
+                fanout.ATOMIC_REPLACE_ATTEMPTS,
+            )
+            self.assertIn(
+                "continuing collection",
+                warning.getvalue(),
+            )
+            self.assertEqual(
+                json.loads(status.read_text(encoding="utf-8")),
+                {"status": "prior"},
+            )
+
+            receipt = root / "receipt.json"
+            receipt.write_text('{"status":"prior"}\n', encoding="utf-8")
+            with receipt.open("r", encoding="utf-8"), mock.patch.object(
+                fanout,
+                "ATOMIC_REPLACE_INITIAL_DELAY_SECONDS",
+                0.00001,
+            ):
+                with self.assertRaises(PermissionError):
+                    fanout.atomic_json(receipt, {"status": "replacement"})
+            self.assertEqual(
+                json.loads(receipt.read_text(encoding="utf-8")),
+                {"status": "prior"},
+            )
+            self.assertFalse(
+                receipt.with_name(
+                    f".{receipt.name}.{fanout.os.getpid()}.pending"
+                ).exists()
+            )
 
     def test_lane_key_is_environment_only_and_budget_id_is_redacted(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-lane-fixture-") as temp:
@@ -461,6 +529,7 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
             Path(sys.executable).resolve(),
         )
         self.assertEqual(receipt["runtimes"], manifest["runtimes"])
+        self.assertEqual(receipt["telemetry"]["status_write_failures"], 0)
 
     def test_failure_ladder_retries_then_splits_company_cycle(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-ladder-e2e-") as temp:

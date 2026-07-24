@@ -209,6 +209,63 @@ class ResilientOrchestratorTests(unittest.TestCase):
             text,
         )
 
+    def test_live_fanout_status_reads_allow_atomic_replacement(self) -> None:
+        text = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("[IO.FileShare]::ReadWrite", text)
+        self.assertIn("[IO.FileShare]::Delete", text)
+        start = text.index("function Get-FanoutLiveState")
+        end = text.index("function Get-GeneratorView", start)
+        live_reader = text[start:end]
+        self.assertIn("Read-LiveTextFile", live_reader)
+        self.assertNotIn("Get-Content", live_reader)
+        with tempfile.TemporaryDirectory(
+            prefix="mentat-live-status-reader-"
+        ) as temporary:
+            status = Path(temporary) / "status.json"
+            status.write_text(
+                '{"status":"collecting","completed":3}\n',
+                encoding="utf-8",
+            )
+            script_literal = str(SCRIPT).replace("'", "''")
+            temporary_literal = temporary.replace("'", "''")
+            command = (
+                f"$text=Get-Content -LiteralPath '{script_literal}' -Raw;"
+                "$tokens=$null;$errors=$null;"
+                "$ast=[Management.Automation.Language.Parser]::ParseInput("
+                "$text,[ref]$tokens,[ref]$errors);"
+                "if($errors.Count){exit 1};"
+                "foreach($name in @('Read-LiveTextFile',"
+                "'Get-FanoutLiveState')){"
+                "$functionAst=@($ast.FindAll({param($node)"
+                "$node -is "
+                "[Management.Automation.Language.FunctionDefinitionAst] "
+                "-and $node.Name -eq $name},$true));"
+                "if($functionAst.Count -ne 1){exit 2};"
+                ". ([scriptblock]::Create($functionAst[0].Extent.Text))"
+                "};"
+                f"$value=Get-FanoutLiveState '{temporary_literal}';"
+                "if($null -eq $value){exit 3};"
+                "$value|ConvertTo-Json -Compress"
+            )
+            result = subprocess.run(
+                [
+                    str(POWERSHELL),
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    command,
+                ],
+                cwd=PROJECT_ROOT.parent,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        value = json.loads(result.stdout)
+        self.assertEqual(value["status"], "collecting")
+        self.assertEqual(value["completed"], 3)
+
     def test_phase_timing_receipt_and_summary_line_are_always_wired(self) -> None:
         text = SCRIPT.read_text(encoding="utf-8")
         self.assertIn("'phase-timings.json'", text)

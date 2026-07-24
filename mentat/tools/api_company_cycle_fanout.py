@@ -36,6 +36,8 @@ SUPPORTED_CYCLES = (2022, 2024, 2026)
 MERGE_ATTACHMENT_LIMIT = 10
 DEFAULT_MEMORY_PER_LANE_MB = 640
 DEFAULT_MEMORY_RESERVE_MB = 1024
+ATOMIC_REPLACE_ATTEMPTS = 10
+ATOMIC_REPLACE_INITIAL_DELAY_SECONDS = 0.002
 
 
 def utc_now() -> str:
@@ -49,7 +51,17 @@ def atomic_json(path: Path, value: object) -> None:
         json.dumps(value, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    os.replace(pending, path)
+    for attempt in range(ATOMIC_REPLACE_ATTEMPTS):
+        try:
+            os.replace(pending, path)
+            return
+        except PermissionError:
+            if attempt + 1 >= ATOMIC_REPLACE_ATTEMPTS:
+                pending.unlink(missing_ok=True)
+                raise
+            time.sleep(
+                ATOMIC_REPLACE_INITIAL_DELAY_SECONDS * (2**attempt)
+            )
 
 
 def split_keys(value: str) -> list[str]:
@@ -468,7 +480,7 @@ def write_status(
     stage: str,
     started_monotonic: float,
     final_failed: int | None = None,
-) -> None:
+) -> bool:
     states = [lane_state(run.state) for run in lane_runs]
     latest_tasks: dict[str, dict[str, Any]] = {}
     for state in states:
@@ -509,22 +521,36 @@ def write_status(
         for state in running_states
         if state.get("current_company")
     ]
-    atomic_json(
-        status_path,
-        {
-            "run_id": run_id,
-            "industry": industry,
-            "status": stage,
-            "updated_at": utc_now(),
-            "elapsed_seconds": round(time.monotonic() - started_monotonic, 3),
-            "completed": completed,
-            "total": total,
-            "running": len(running_states),
-            "failed": int(failed),
-            "estimated_remaining_seconds": estimated,
-            "current": current,
-        },
-    )
+    try:
+        atomic_json(
+            status_path,
+            {
+                "run_id": run_id,
+                "industry": industry,
+                "status": stage,
+                "updated_at": utc_now(),
+                "elapsed_seconds": round(
+                    time.monotonic() - started_monotonic,
+                    3,
+                ),
+                "completed": completed,
+                "total": total,
+                "running": len(running_states),
+                "failed": int(failed),
+                "estimated_remaining_seconds": estimated,
+                "current": current,
+            },
+        )
+        return True
+    except PermissionError as error:
+        print(
+            "WARNING: fanout status telemetry write failed after "
+            f"{ATOMIC_REPLACE_ATTEMPTS} attempts; continuing collection; "
+            f"path={status_path}; error={error}",
+            file=sys.stderr,
+            flush=True,
+        )
+        return False
 
 
 def combine_task_results(
@@ -792,6 +818,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     primary_runs: list[LaneRun] = []
     merge_runs: list[LaneRun] = []
     attempts: list[dict[str, Any]] = []
+    status_write_failures = 0
 
     for index, plan in enumerate(plans):
         lane_number = int(plan["lane"])
@@ -985,7 +1012,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
             primary_futures
         )
         while pending:
-            write_status(
+            if not write_status(
                 status_path,
                 run_id=run_id,
                 industry=options.industry.strip(),
@@ -993,7 +1020,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 lane_runs=all_lane_runs,
                 stage="collecting",
                 started_monotonic=started_monotonic,
-            )
+            ):
+                status_write_failures += 1
             done, pending = concurrent.futures.wait(
                 pending,
                 timeout=1,
@@ -1060,7 +1088,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
 
         recovery_pending = set(recovery_futures)
         while recovery_pending:
-            write_status(
+            if not write_status(
                 status_path,
                 run_id=run_id,
                 industry=options.industry.strip(),
@@ -1068,7 +1096,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 lane_runs=all_lane_runs,
                 stage="recovering",
                 started_monotonic=started_monotonic,
-            )
+            ):
+                status_write_failures += 1
             done, recovery_pending = concurrent.futures.wait(
                 recovery_pending,
                 timeout=1,
@@ -1143,7 +1172,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
 
         split_pending = set(split_futures)
         while split_pending:
-            write_status(
+            if not write_status(
                 status_path,
                 run_id=run_id,
                 industry=options.industry.strip(),
@@ -1151,7 +1180,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 lane_runs=all_lane_runs,
                 stage="splitting",
                 started_monotonic=started_monotonic,
-            )
+            ):
+                status_write_failures += 1
             done, split_pending = concurrent.futures.wait(
                 split_pending,
                 timeout=1,
@@ -1169,7 +1199,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
     }
     merged = False
     if not final_failed:
-        write_status(
+        if not write_status(
             status_path,
             run_id=run_id,
             industry=options.industry.strip(),
@@ -1178,7 +1208,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
             stage="merging",
             started_monotonic=started_monotonic,
             final_failed=0,
-        )
+        ):
+            status_write_failures += 1
         merge_command = [
             sys.executable,
             str(merge_script),
@@ -1217,6 +1248,17 @@ def main(arguments: Sequence[str] | None = None) -> int:
 
     final_status = "succeeded" if merged and not final_failed else "failed"
     ended_wall = utc_now()
+    if not write_status(
+        status_path,
+        run_id=run_id,
+        industry=options.industry.strip(),
+        total=task_total,
+        lane_runs=all_lane_runs,
+        stage=final_status,
+        started_monotonic=started_monotonic,
+        final_failed=len(final_failed),
+    ):
+        status_write_failures += 1
     receipt = {
         "run_id": run_id,
         "status": final_status,
@@ -1250,6 +1292,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
             ),
         },
         "budget_database": str(budget_database),
+        "telemetry": {
+            "status_write_failures": status_write_failures,
+        },
         "tasks": combined_tasks,
         "failures": final_failed,
         "lane_attempts": [
@@ -1263,16 +1308,6 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "merge": merge_result,
     }
     atomic_json(output_receipt, receipt)
-    write_status(
-        status_path,
-        run_id=run_id,
-        industry=options.industry.strip(),
-        total=task_total,
-        lane_runs=all_lane_runs,
-        stage=final_status,
-        started_monotonic=started_monotonic,
-        final_failed=len(final_failed),
-    )
     print(
         f"MENTAT API FANOUT {final_status.upper()} "
         f"succeeded={receipt['succeeded']}/{task_total} merged={merged} "
