@@ -57,3 +57,12 @@ fec/votesmart_api_key.txt
 
 # hand-curated hearings media map (config, not data)
 !hearings_media_map.csv
+
+# RStudio per-user state
+.Rproj.user
+
+# mentat data planes (inputs are 373M of FEC bulk + xlsx; caches/backups regenerable)
+mentat/inputs/
+mentat/.cache/
+mentat-backup-*/
+.agents/
