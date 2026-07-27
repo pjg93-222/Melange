@@ -631,6 +631,27 @@ mentat_run_export_guards(
     mentat_guard_roster_coverage(companies, raw_export, supported_cycles),
     mentat_guard_cell_coverage(companies, raw_export, supported_cycles),
     mentat_guard_category_agreement(guard_category_view_a, guard_category_view_b),
+    # The exporter opens the database SQLITE_RO, so init_schema's migration never
+    # runs here: a database collected before zero_verified existed simply has no
+    # such column, and selecting it by name would abort the whole export. Ask the
+    # schema first and let the guard report the column's absence as "every zero
+    # unverified", which is exactly what it means.
+    mentat_guard_zero_provenance(
+      if ("zero_verified" %in% DBI::dbListFields(connection, "scrape_progress")) {
+        DBI::dbGetQuery(
+          connection,
+          paste(
+            "SELECT company, cycle, records_total, zero_verified",
+            "FROM scrape_progress"
+          )
+        )
+      } else {
+        DBI::dbGetQuery(
+          connection,
+          "SELECT company, cycle, records_total FROM scrape_progress"
+        )
+      }
+    ),
     mentat_guard_direction_integrity(beneficiary_tables$summary),
     mentat_guard_date_sanity(
       downstream_activity_export$first_activity_date, "downstream_activity"

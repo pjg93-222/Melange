@@ -1274,15 +1274,20 @@ checkpoint_contribution_page <- function(
         setdiff(names(reviews), "review_id")
       )
     }
+    # zero_verified=1: this checkpoint was written by the hardened collector,
+    # which only reaches this point after fec_results_ready() confirmed the page
+    # really is empty (see fec_page.R). A rate-limited page never gets here - it
+    # times out and stops the run - so a zero recorded now is a real zero.
     DBI::dbExecute(
       connection,
       paste(
         "INSERT INTO scrape_progress",
-        "(company, cycle, variant_set, last_page, records_total, updated_at)",
-        "VALUES (?, ?, ?, ?, ?, ?)",
+        "(company, cycle, variant_set, last_page, records_total, updated_at,",
+        "zero_verified)",
+        "VALUES (?, ?, ?, ?, ?, ?, 1)",
         "ON CONFLICT(company, cycle, variant_set) DO UPDATE SET",
         "last_page=excluded.last_page, records_total=excluded.records_total,",
-        "updated_at=excluded.updated_at"
+        "updated_at=excluded.updated_at, zero_verified=1"
       ),
       params = list(
         company,
@@ -2756,11 +2761,12 @@ checkpoint_corporate_page <- function(
       connection,
       paste(
         "INSERT INTO scrape_progress",
-        "(company, cycle, variant_set, last_page, records_total, updated_at)",
-        "VALUES (?, ?, ?, ?, ?, ?)",
+        "(company, cycle, variant_set, last_page, records_total, updated_at,",
+        "zero_verified)",
+        "VALUES (?, ?, ?, ?, ?, ?, 1)",
         "ON CONFLICT(company, cycle, variant_set) DO UPDATE SET",
         "last_page=excluded.last_page, records_total=excluded.records_total,",
-        "updated_at=excluded.updated_at"
+        "updated_at=excluded.updated_at, zero_verified=1"
       ),
       params = list(
         company, as.integer(cycle), variant_set, as.integer(page),

@@ -112,6 +112,53 @@ mentat_guard_cell_coverage <- function(roster, rows, cycles) {
 # "conduit leg also appears on its earmark target" is the expected state, not a
 # defect. The guard could only ever fire on correct data. Removed 2026-07-27.
 
+# G3 - unverified zeros.
+# A company-cycle that collected nothing is only trustworthy if the collector
+# CONFIRMED the emptiness. Farmers Insurance recorded 24 variant sets and 0 rows
+# in 16 seconds under an FEC 429 and published as $0.00 in every P&C book;
+# Bitnomial recorded a real 0 at the same ~0.7s per variant set. Nothing stored
+# after the fact separates them, so the collector now stamps zero_verified on
+# every checkpoint it writes under the hardened readiness rule. A zero without
+# that stamp predates the rule and must be recollected before it can be believed.
+# Warn, not fail: it describes provenance of existing data, not a defect in this
+# build, and every affected cell is also visible through G1/G2.
+mentat_guard_zero_provenance <- function(progress) {
+  if (is.null(progress) || !nrow(progress)) {
+    return(mentat_guard_result(
+      "zero_provenance", "warn", TRUE, "no collection checkpoints to inspect"
+    ))
+  }
+  dt <- data.table::as.data.table(progress)
+  if (!"zero_verified" %in% names(dt)) {
+    return(mentat_guard_result(
+      "zero_provenance", "warn", FALSE,
+      "checkpoints predate zero verification entirely; every zero is unverified"
+    ))
+  }
+  dt[, zero_verified := suppressWarnings(as.integer(zero_verified))]
+  dt[is.na(zero_verified), zero_verified := 0L]
+  by_cell <- dt[, .(
+    rows = sum(as.numeric(records_total), na.rm = TRUE),
+    unverified = sum(zero_verified == 0L)
+  ), by = .(company, cycle)]
+  suspect <- by_cell[rows == 0 & unverified > 0]
+  if (!nrow(suspect)) {
+    return(mentat_guard_result(
+      "zero_provenance", "warn", TRUE,
+      sprintf("%d company x cycle checkpoints, every zero verified", nrow(by_cell))
+    ))
+  }
+  mentat_guard_result(
+    "zero_provenance", "warn", FALSE,
+    paste0(
+      "company x cycle cells collected ZERO rows without a verified-empty ",
+      "checkpoint - recollect before treating these as real zeros: ",
+      mentat_guard_summarise(sprintf("%s/%s", suspect$company, suspect$cycle))
+    ),
+    nrow(suspect)
+  )
+}
+
 # G4 - direction integrity.
 # Independent expenditures carry a direction. Summed without a sign, money spent
 # AGAINST a candidate reads as money benefiting them: 89% of one shipped

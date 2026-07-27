@@ -40,10 +40,19 @@ mentat_schema_sql <- function() {
       ")"
     ),
     paste(
+      # zero_verified records HOW a zero was established, because nothing else
+      # can. A rate-limited walk and a genuinely empty one are byte-identical
+      # afterwards: Farmers Insurance recorded 24 variant sets / 0 rows under an
+      # FEC 429, and Bitnomial recorded a real 0 - both at ~0.7s per set, so even
+      # timing cannot separate them. 1 means the walk ran under the hardened
+      # readiness rule, which accepts a zero only after DataTables renders its
+      # confirmed-empty row. Rows collected before that rule keep 0 and are
+      # reported as unverified rather than trusted as real zeros.
       "CREATE TABLE IF NOT EXISTS scrape_progress (",
       "company TEXT NOT NULL, cycle INTEGER NOT NULL, variant_set TEXT NOT NULL,",
       "last_page INTEGER NOT NULL, records_total INTEGER NOT NULL,",
       "updated_at TEXT NOT NULL,",
+      "zero_verified INTEGER NOT NULL DEFAULT 0,",
       "PRIMARY KEY (company, cycle, variant_set)",
       ")"
     ),
@@ -415,6 +424,18 @@ init_schema <- function(connection) {
         paste(
           "UPDATE corporate_giving SET company_match_status='review',",
           "company_match_reason='migration_requires_revalidation'"
+        )
+      )
+    }
+    # Existing checkpoints predate the hardened readiness rule, so their zeros
+    # were never confirmed against the empty-table marker. The DEFAULT 0 is the
+    # honest value for them - do not backfill it to 1.
+    if (!"zero_verified" %in% DBI::dbListFields(connection, "scrape_progress")) {
+      DBI::dbExecute(
+        connection,
+        paste(
+          "ALTER TABLE scrape_progress ADD COLUMN zero_verified",
+          "INTEGER NOT NULL DEFAULT 0 CHECK (zero_verified IN (0,1))"
         )
       )
     }
