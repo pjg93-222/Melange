@@ -410,10 +410,15 @@ try {
     # denominator is support - not the mixed total, which oppose dollars inflate.
     Set-TableColumnFormula $table 'Party Coverage' '=IF([@[Support Activity]]=0,0,([@[Democratic Activity]]+[@[Republican Activity]])/[@[Support Activity]])'
     Set-TableColumnFormula $table 'FEC Candidate URL' '=IF([@[Candidate ID]]="","","https://www.fec.gov/data/candidate/"&[@[Candidate ID]]&"/")'
-    # Two checks: the party split still accounts for the whole total, AND the
-    # direction components (from R) never exceed the SUMIFS total (from Excel).
-    # The second compares two independently computed paths over the same rows.
-    Set-TableColumnFormula $table 'Integrity Check' '=IF(AND(ABS([@[Downstream Activity]]-[@[Democratic Activity]]-[@[Republican Activity]]-[@[Other / Unclassified Activity]])<0.01,[@[Support Activity]]+[@[Oppose Activity]]<=[@[Downstream Activity]]+0.01),"OK","CHECK")'
+    # Only the party-split identity is asserted here. "Support + Oppose must not
+    # exceed Downstream Activity" looks like an invariant and is NOT one: FEC
+    # correction and refund rows are negative and carry neither a support nor an
+    # oppose transaction code, so they sit in the third direction bucket and drag
+    # the unsigned total BELOW support + oppose. Measured on the credit-union
+    # rebuild: 272 of 2,979 candidate rows, every residual negative, down to
+    # -$735,710 (Herschel Walker: $4,913,993 total against $5,649,703 opposition).
+    # Asserting the inequality failed all 272 and blocked the build on correct data.
+    Set-TableColumnFormula $table 'Integrity Check' '=IF(ABS([@[Downstream Activity]]-[@[Democratic Activity]]-[@[Republican Activity]]-[@[Other / Unclassified Activity]])<0.01,"OK","CHECK")'
   } finally { Release-ComObject $table; Release-ComObject $sheet }
 
   $focusedSheets = @()

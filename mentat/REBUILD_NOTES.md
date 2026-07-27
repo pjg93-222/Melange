@@ -256,4 +256,20 @@ Both were bundled into the batch without a finding behind them. Both are R8-comp
 
 All 10 changed R files parse; `crypto_workbook_builder.mjs` passes `node --check`. The full offline suite is **12/12 PASS**, including `test_report.R`, which failed outright before this round on the `trade_overrides` crash. The beneficiary parity test's reference implementation was updated in lockstep with the direction split so the optimized-vs-reference guarantee still means something, and a new regression pins the mixed-direction case: 24E support $1,000 + 24A oppose $250 + 24K neither $40 must report support 1,000, oppose 250, total 1,290.
 
-**No workbook has been regenerated.** Every shipped book still predates these fixes, so the numeric before/after remains outstanding; two stale Excel owner locks (`~$Property & Casualty`, `~$Credit Union`) must be cleared before any write. No live network request, no database mutation, and no commit was made in this round.
+### Regeneration 2026-07-27
+
+Five books rebuilt clean into `reports/r12-regen/`, each **0 formula-column failures, 0 integrity failures**: Credit Union (17.6 MB, 403,908 formulas, 26 sheets), Credit Arms, Community Banks, Crypto, Fintech. Every one passed `roster_coverage`, `category_agreement` (24-27 category x cycle totals agree across both views - F6 confirmed clean on live data), `date_sanity` (12 distinct months, no impossible years - F7 confirmed fixed) and, except Fintech, `category_population`.
+
+**Trade Association went from $0.00 in every book to $129,321.44 across the five**, sourced entirely from `Unclassified`. Verified committee by committee on the Credit Union rebuild: America's Credit Unions PAC of CUNA $24,933.35, CULAC $13,114.56, NAHB BUILDPAC $5,250.00, US Chamber $3,500.00, Mortgage Bankers MORPAC $500.00 - all `type=Q, designation=B`, all previously `Unclassified`, which folds into the Candidate column. The two largest are `PAC OF <ASSOCIATION>` wrappers that only the broad net's containment match reaches.
+
+Opposition exposure, measured by `direction_integrity` across all six books: **86.2%-94.6% of downstream dollars**, roughly $19.3B in total (P&C $6.31B/94.6%, Credit Arms $5.49B/93.0%, Credit Union $2.46B/89.0%, Crypto $2.15B/89.3%, Fintech $2.20B/88.8%, Community Banks $726M/86.2%). The audited $1.87B was one book's slice of it.
+
+**Property & Casualty is BLOCKED and correctly so.** `roster_coverage` fails on Farmers Insurance: zero collected rows in every cycle, and no P&C database on disk contains a single Farmers row (all carry 9 companies, not 10). The shipped book has been publishing Farmers at $0.00 as though it were a real zero - exactly the F1/F4 failure the guard exists to stop. It needs a Farmers collection run, not a code change. Telecom was not rebuilt; it ships as three per-cycle files under a different name and needs its own sharded invocation.
+
+### A false invariant, caught by the build
+
+The first Credit Union rebuild failed with 272 integrity failures - the new `Support + Oppose <= Downstream Activity` assertion. It is not an invariant. FEC correction and refund rows are negative and carry neither a support nor an oppose transaction code, so they land in the third direction bucket and pull the unsigned total BELOW support + oppose. All 272 residuals were negative, to -$735,710 (Herschel Walker: $4,913,993 downstream against $5,649,703 of opposition). The assertion was removed and the behaviour documented on the sheet's own source note; the party-split identity check remains. The Support and Oppose columns are unaffected - only the false assertion about them was wrong.
+
+Two remaining `category_population` warnings are unresolved questions, not failures: Community Banks reports no Company PAC dollars and Fintech no Trade Association dollars. Both may be genuine zeros; both are surfaced rather than silently rendered as $0.00.
+
+The previously shipped books are untouched in `reports/`; the rebuilds are staged in `reports/r12-regen/` for comparison before any promotion.

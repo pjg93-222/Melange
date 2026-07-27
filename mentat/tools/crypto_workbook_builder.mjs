@@ -1981,7 +1981,7 @@ function buildBeneficiarySummary() {
     sheet,
     "Congressional Beneficiary Summary",
     "Industry and company views rank actual House and Senate candidates/officeholders reached through funded committees. Downstream activity is committee activity, not attributed company spending.",
-    `${rows.length.toLocaleString("en-US")} top-100 candidate rows across cycles/views | Amounts formula-sum the Beneficiary Bridge; party columns count SUPPORT dollars only, opposition is reported in its own column.`,
+    `${rows.length.toLocaleString("en-US")} top-100 candidate rows across cycles/views | Amounts formula-sum the Beneficiary Bridge; party columns count SUPPORT dollars only, opposition is reported in its own column. Support + Oppose can exceed Downstream Activity: negative correction and refund rows carry neither direction code, so they reduce the unsigned total without reducing either component.`,
     "X",
   );
   const last = 5 + rows.length;
