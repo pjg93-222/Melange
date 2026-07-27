@@ -88,6 +88,12 @@ if (-not $OutputDirectory) {
 }
 if (-not $CommitteeMasterDirectory) { $CommitteeMasterDirectory = Join-Path $projectRoot 'inputs\fec_committee_master' }
 if (-not $BeneficiaryDirectory) { $BeneficiaryDirectory = Join-Path $projectRoot 'inputs\fec_beneficiary' }
+# Pin the inputs directory for the R side. mentat_input_dir() otherwise walks up
+# from the working directory, which resolves wrongly (and fatally) whenever this
+# script is invoked from outside the project - a git worktree, a scheduled task,
+# another drive. The report path needs inputs\ only for the trade-association
+# committee-ID overrides, so an unpinned cwd silently emptied that category.
+$env:MENTAT_INPUT_DIR = Join-Path $projectRoot 'inputs'
 if (-not $NodePath -and $env:MENTAT_NODE_PATH) {
   $NodePath = $env:MENTAT_NODE_PATH
 }
@@ -321,11 +327,32 @@ New-Item -ItemType Directory -Path $cacheRoot,$stageDirectory -Force | Out-Null
 $dataPath = Join-Path $cacheRoot 'industry_data.json'
 $manifestPath = Join-Path $cacheRoot 'manifest.json'
 $databaseHash = (Get-FileHash -LiteralPath $DatabasePath -Algorithm SHA256).Hash.ToLowerInvariant()
+# Every file whose contents can change export output must be fingerprinted, or a
+# code fix silently republishes the pre-fix artifact as a cache hit. This list
+# previously held only the exporter and fec_beneficiary.R, so edits to report.R
+# (recipient classification), identity_components.R (person grouping) or the
+# trade-association override CSV did not invalidate the cache.
 $dataInputPaths = @(
   $DatabasePath,
   $exporter,
-  $beneficiaryModule
+  $beneficiaryModule,
+  $MyInvocation.MyCommand.Path,
+  (Join-Path $projectRoot 'R\report.R'),
+  (Join-Path $projectRoot 'R\identity_components.R'),
+  (Join-Path $projectRoot 'R\ingest.R'),
+  (Join-Path $projectRoot 'R\collect.R'),
+  (Join-Path $projectRoot 'R\paths.R'),
+  (Join-Path $projectRoot 'R\schema.R'),
+  (Join-Path $projectRoot 'R\reconcile.R'),
+  # export_guards.R gates publication rather than mutating the payload, so on a
+  # cache hit the export never runs and a newly added or tightened guard is
+  # silently skipped. Fingerprinting it forces the re-run that lets it fire.
+  (Join-Path $projectRoot 'R\export_guards.R'),
+  (Join-Path $projectRoot 'tools\crypto_workbook_builder.mjs'),
+  (Join-Path $projectRoot 'tools\finalize_crypto_excel.ps1'),
+  (Join-Path $projectRoot 'inputs\trade_committee_overrides.csv')
 ) + $committeeFiles + $beneficiaryFiles
+$dataInputPaths = $dataInputPaths | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
 $inputFingerprint = Get-CombinedFingerprint $dataInputPaths $Industry
 $cacheHit = $false
 if (-not $NoCache -and (Test-Path -LiteralPath $dataPath) -and (Test-Path -LiteralPath $manifestPath)) {

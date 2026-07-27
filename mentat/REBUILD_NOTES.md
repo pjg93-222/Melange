@@ -191,3 +191,69 @@ The promoted workbook is **2,868,485 bytes** with 35 sheets, a clean ZIP, valid 
 The run exposed a completion-telemetry bug: Chrome collection was recorded as `requests=0` because only the API engine returns an exact request count. Future completion messages now distinguish `engine=api; network_requests=N`, `engine=offline; network_requests=0`, and `engine=chrome; network_requests=n/a` while persisting Chrome row and collection-wall metrics; all three cases have a regression assertion.
 
 One external coverage limitation remains explicit: the optional `indiv22_crypto_superset.psv`, `indiv24_crypto_superset.psv`, and `indiv26_crypto_superset.psv` files are absent from the isolated data root. Browser collection and fixture reconciliation completed, but the independent bulk-candidate/API-capture/rescue audit has no candidate population until those supersets are supplied. The pipeline warned and used roster variants as designed; this is missing optional source coverage, not database or workbook corruption.
+
+## R12 - audit-batch reconciliation (2026-07-27)
+
+A 2026-07-27 audit produced a batch of uncommitted fixes that was never committed or documented, left the report path crashing, and reached no workbook. This round reconciles that batch: sound fixes kept, one policy reversal reverted, one crash fixed, one detector wired, and the largest finding completed at its source.
+
+### Conduit legs keep counting (F5 reverted - policy, not a bug)
+
+The batch added a second de-duplication rule: an ActBlue/WinRed conduit leg whose earmark target already appears as a settled row was flagged `duplicate_memo` and dropped from analysis totals (~$12.4k in the credit-union book). That reverses Paul's standing R5/R8 ruling - recipient-as-shown, a memo/earmark row naming a DIFFERENT committee is a real leg that COUNTS, `is_conduit_leg` is a visible audit flag and never a filter. Ruling re-affirmed 2026-07-27: **conduit legs count**. Reverted `mentat_memo_duplicate_plan()`'s conduit branch and the `apply_amendment_versioning()` column widening that existed only to feed it (the padding was load-bearing for nothing else - the seven base columns exist in both `contributions` and `corporate_giving`, so the rbind binds without it). The same-committee memo dedup and every `duplicate_memo` reader are untouched.
+
+Export guard G3 (`mentat_guard_conduit_double_count`) was deleted with it: under recipient-as-shown a conduit leg pairing with its target is the EXPECTED state, so the guard could only ever fire on correct data - as a fail-severity guard it would have refused to publish every book containing earmarked legs.
+
+### Report path no longer crashes (F8)
+
+`resolve_recipient_register_committee_ids()` had been given a trade-override fold that referenced `trade_overrides` and `trade_override_applied` - neither of which was ever assigned - plus an orphan `input_dir` parameter no caller passes. Every invocation that reached the `trade` register aborted with `object 'trade_overrides' not found`, taking `write_reports()` down with it (all three callers: report.R, fec_api.R, ingest_all). The blocks are removed rather than wired: report.R already folds the same overrides in at read time (`spending_report_lookups()` -> `apply_trade_overrides`), which is the path every consumer uses because the exporter opens the database `SQLITE_RO` and never calls the resolver. One implementation, not two that must stay in sync. `read_trade_committee_overrides()` and the input-file seeding are kept.
+
+### Trade Association resolves, and it is the same defect as F6
+
+The register holds all 335 associations from the trade-groups list, and **every one of them resolved to nothing** in the shipped books - the resolver compared the association's name to the committee's name, and a trade PAC essentially never files under its association's bare name. Hence Trade Association = $0.00 in all six books.
+
+The money did not disappear. A trade PAC is committee_type `Q` with designation `B` or `U`: it matches no fallback rule (not `H/S/P` or `A/P` for Candidate, not `D` for Leadership PAC, not `X/Y/Z` for Party), so it keeps the default `Unclassified` category - and `Unclassified` folds into the **Candidate** Stats column. Verified against the live snapshots: NRA, NAB, NAR, ABA BankPAC, NAHB BUILDPAC, Consumer Bankers, AFSA, USTelecom, AEM and NSSGA all carry type `Q`, designation `B`/`U`, and together account for **$162,458.32** of accepted money across the measurable books.
+
+That is the audit's "~$163k, identical across all six books". It was never a Candidate/Leadership PAC swap - it is trade-association money filed as candidate money, which is why a re-implementation of the classifier found the Candidate and Leadership columns perfectly consistent and could not reproduce a swap anywhere. **F6 and F8 are one defect**, and resolving the trade register moves the money to the column it belongs in: Candidate down ~$163k, Trade Association up ~$163k.
+
+Resolution now happens in two layers, curated first:
+
+1. `inputs/trade_committee_overrides.csv` - 102 curated association-to-committee-ID rows.
+2. **Broad net** (`trade_resolve_broad_net`, report.R) for everything the CSV does not name. The filing pattern is regular - committee name = association name plus a committee suffix, sometimes behind a leading article or a `<BRAND> PAC OF THE <ASSOCIATION>` wrapper - so the association's full normalized name is matched anywhere inside the committee name. Guards: names under 10 characters are never netted (acronym-like, they collide), and an association matching more than one committee ID is left unresolved rather than guessed, per the register's standing rule that ambiguity goes to review. Matching the full name rather than acronyms is what keeps American Bankers Association and American Bar Association apart.
+
+The broad net is what makes the register self-resolving: a newly collected industry picks up its trade PACs without anyone regenerating a CSV. On the current snapshots it adds American Medical Association -> AMA PAC and American Pharmacists Association -> APhA PAC beyond the curated file, with no ambiguous or false hits. Guard G7 still reports any category the template renders that nothing populates.
+
+### Category cross-view agreement wired (F2 + F6)
+
+`mentat_guard_category_agreement` (G6) was defined but never called - it had no call site anywhere, so the only check capable of catching the historical Candidate/Leadership PAC swap never ran, and the shipped `spending_assert_category_reconciliation` remained the tautology it always was (it re-sums its own inputs and cannot fail).
+
+G6 is now wired to two genuinely independent views: `view_a` is post-reshape, the category joined onto raw rows by `sub_id` - the path the per-cycle sheets' SUMIFS actually sum - and `view_b` is the classification frame itself, where category and amount sit on one row and were never joined. A `sub_id` join that multiplies rows, drops a match, or collides on a column suffix moves dollars between categories while leaving the cycle grand total intact; that is the exact F6 signature, and it is invisible to every total-level check.
+
+On the F6 root cause: there is no swap. A read-only re-implementation of the classifier over the live 2026-07-23 snapshots found the data, the classifier and the reference registers **clean** - Candidate exceeds Leadership PAC by 4x-14x in every cycle of every measurable book, no cycle is anomalous, the leadership lookup contains zero candidate committees, and neither the classifier nor the workbook builder changed after those books were built. The "~$163k identical across all six books" reproduces nowhere as a Candidate/Leadership difference (measured spreads are $217k-$7.5M and book-specific).
+
+It reproduces exactly as **trade-association money**: $162,458.32 of type-`Q` trade PACs falling through to `Unclassified` and folding into the Candidate column, the same in every book because they are the same national PACs (NRA, NAB, NAR, ABA, NAHB). See the Trade Association section below - F6 and F8 are one defect, and fixing the register fixes both. No un-swap was applied, because nothing is swapped. G6 remains the standing proof against a real cross-view divergence: if a regeneration disagrees, it fails the build with the exact cycle and category named.
+
+### Opposition spending split at the source (F3)
+
+The batch corrected the party columns in the Excel finalizer only, which reached exactly two cells. The source stayed unsigned: `preliminary_downstream_amount` summed support and oppose together, so the headline Downstream Activity total, Rank (and the top-100 selection itself), the Party Coverage denominator and the Beneficiary Bridge all still presented money spent to DEFEAT a candidate as activity benefiting them. The Excel guard was also all-or-nothing: `[Directions]` is a joined-unique string, so a candidate reached by both support and oppose spending had their genuine SUPPORT dollars discarded as well.
+
+Direction is now split where it still exists as a per-row fact, in `fec_aggregate_beneficiary_downstream()`: `support_amount` and `oppose_amount` are carried as their own components through the bridge and the summary. They are **not netted** - support minus oppose would hide the magnitude of both. The Beneficiary Summary gains `Support Activity` and `Oppose Activity` columns (22 -> 24), party columns count support dollars only, and Party Coverage measures against support rather than the oppose-inflated total. The Integrity Check gained a second assertion: the R-computed direction components must not exceed the Excel-computed SUMIFS total, comparing two independent paths over the same rows.
+
+Ranking and top-100 selection deliberately still use total downstream activity - it measures total money moving at a candidate in either direction - but the sheet now exposes the split behind that number.
+
+### Kept from the batch
+
+- **F1/F4 (429-as-$0)**: `fec_results_ready()` no longer accepts a completed `schedule_a` resource entry as proof of a genuine empty result. A 429 creates one exactly like a 200 does, which published Farmers Insurance at $0.00 across all three cycles. Readiness now requires DataTables' confirmed-empty message row and refuses on an explicit non-2xx; failure times out loudly. The stale header comment that still described the deleted shortcut was corrected.
+- **F7 (fread date corruption)**: `transaction_date` is read as character by column index (`col.names` is applied after type inference, so a named `colClasses` silently no-ops), and `FEC_PAS2_PARSER_VERSION` is folded into the `.rds` cache signature - without that bump the corrected parse would have been served straight back out of the stale cache.
+- **`export_guards.R`** (G1/G2/G4/G5/G6/G7) and its runner, now also fingerprinted by `build_industry_report.ps1`. Guards gate publication rather than mutating the payload, so on a cache hit the export never runs and a newly added or tightened guard is silently skipped.
+
+### Changes that move numbers but map to no audit finding
+
+Both were bundled into the batch without a finding behind them. Both are R8-compliant and reviewed as sound; recorded here so neither is mistaken for an audit fix:
+
+- **`collect.R` `match_variants`**: the FEC *query* variant subset is now decoupled from the *matching* roster, so an employer string equal to a subsumed roster variant matches exactly instead of falling to `review` as an unverified prefix. Shifts employee dollars from `review` to `accepted` (an undercount correction). Brings the scrape lane to parity with the name-pass and API lanes, which already matched on the full roster.
+- **`identity_components.R` business addresses**: an employer-HQ address cluster can now attach to a person's home identity when exactly one personal component remains and a corroborating signal agrees. Purely additive (it only unites, so it cannot fragment an identity) and it changes unique-donor counts, not dollars.
+
+### Verification
+
+All 10 changed R files parse; `crypto_workbook_builder.mjs` passes `node --check`. The full offline suite is **12/12 PASS**, including `test_report.R`, which failed outright before this round on the `trade_overrides` crash. The beneficiary parity test's reference implementation was updated in lockstep with the direction split so the optimized-vs-reference guarantee still means something, and a new regression pins the mixed-direction case: 24E support $1,000 + 24A oppose $250 + 24K neither $40 must report support 1,000, oppose 250, total 1,290.
+
+**No workbook has been regenerated.** Every shipped book still predates these fixes, so the numeric before/after remains outstanding; two stale Excel owner locks (`~$Property & Casualty`, `~$Credit Union`) must be cleared before any write. No live network request, no database mutation, and no commit was made in this round.

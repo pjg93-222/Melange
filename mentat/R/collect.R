@@ -1390,12 +1390,26 @@ collect_employer_set <- function(
   resume_after = NULL,
   trusted_name_keys = NULL,
   match_overrides = NULL,
-  home_states = NULL
+  home_states = NULL,
+  match_variants = NULL
 ) {
   variants <- unique(trim_text(variants))
   variants <- variants[nzchar(variants)]
   if (!length(variants)) {
     return(list(records_total = 0L, pages = 0L, retries = 0L))
+  }
+  # The QUERY runs on this phase's variant subset, but matching must see the
+  # company's FULL roster - partition_company_variants() keeps only the shortest
+  # variant in phase1 and parks subsumed ones in `covered`, which is never
+  # queried. Matching against the subset made an exact roster variant
+  # ("VERIZON WIRELESS" against kept variant "VERIZON") register as a prefix hit
+  # with unverified trailing tokens, sending real employees to `review`.
+  # The API lane already does this correctly - see fec_api.R, flatten_fec_rows(
+  # variants = unit$company_variants). Default preserves the old behaviour.
+  match_variants <- unique(trim_text(match_variants %||% variants))
+  match_variants <- match_variants[nzchar(match_variants)]
+  if (!length(match_variants)) {
+    match_variants <- variants
   }
   variant_set <- paste0(
     phase, ":employer:",
@@ -1439,7 +1453,7 @@ collect_employer_set <- function(
         rows,
         industry = industry,
         company = company,
-        variants = variants,
+        variants = match_variants,
         phase = phase,
         exclusions = exclusions,
         trusted_name_keys = trusted_name_keys,
@@ -2982,7 +2996,8 @@ collect_crypto <- function(
         resume_after,
         trusted_name_keys = trusted_name_keys,
         match_overrides = match_overrides,
-        home_states = home_states
+        home_states = home_states,
+        match_variants = variants
       )
       retries <- retries + phase1$retries
       walked_sets <- walked_sets + 1L
@@ -3002,7 +3017,8 @@ collect_crypto <- function(
           resume_after,
           trusted_name_keys = trusted_name_keys,
           match_overrides = match_overrides,
-          home_states = home_states
+          home_states = home_states,
+          match_variants = variants
         )
         retries <- retries + phase2$retries
         walked_sets <- walked_sets + 1L

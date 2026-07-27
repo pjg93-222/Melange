@@ -1957,15 +1957,23 @@ function buildBeneficiarySummary() {
     "Cycle", "View", "Company", "Rank", "Candidate / Officeholder", "Candidate ID",
     "Party", "Office", "State", "District", "Source Committees", "Committee Count",
     "Activity Relationships", "Directions", "Downstream Activity",
+    "Support Activity", "Oppose Activity",
     associatedFundingHeader, "Democratic Activity", "Republican Activity",
     "Other / Unclassified Activity", "Party Coverage", "FEC Candidate URL", "Integrity Check",
   ];
+  // Support/Oppose are written as values straight from the R aggregation, which
+  // is the only place the per-row direction still exists. Downstream Activity
+  // beside them is an Excel SUMIFS over the bridge, so the two are computed by
+  // different paths and the Integrity Check compares them - a disagreement means
+  // the split and the total were built from different row sets.
   const rows = (payload.beneficiary_summary ?? []).map((row) => [
     cycleLabelByNumber.get(row.cycle) ?? String(row.cycle), row.view, row.company, null,
     row.candidate_name, row.candidate_id, row.candidate_party, row.office_label,
     row.office_state, row.district, row.source_committees,
     Number(row.source_committee_count || 0), row.activity_relationships, row.directions,
     deferFormulas ? Number(row.preliminary_downstream_amount || 0) : null,
+    Number(row.support_amount || 0),
+    Number(row.oppose_amount || 0),
     deferFormulas ? Number(row.preliminary_crypto_funding || 0) : null,
     ...Array(4).fill(null), null, deferFormulas ? "PENDING" : null,
   ]);
@@ -1973,20 +1981,20 @@ function buildBeneficiarySummary() {
     sheet,
     "Congressional Beneficiary Summary",
     "Industry and company views rank actual House and Senate candidates/officeholders reached through funded committees. Downstream activity is committee activity, not attributed company spending.",
-    `${rows.length.toLocaleString("en-US")} top-100 candidate rows across cycles/views | Amounts formula-sum the Beneficiary Bridge; partisan activity follows the candidate's FEC party.`,
-    "V",
+    `${rows.length.toLocaleString("en-US")} top-100 candidate rows across cycles/views | Amounts formula-sum the Beneficiary Bridge; party columns count SUPPORT dollars only, opposition is reported in its own column.`,
+    "X",
   );
   const last = 5 + rows.length;
-  sheet.getRange(`A5:V${last}`).values = [headers, ...rows];
-  const table = sheet.tables.add(`A5:V${last}`, true, "BeneficiarySummaryTable");
+  sheet.getRange(`A5:X${last}`).values = [headers, ...rows];
+  const table = sheet.tables.add(`A5:X${last}`, true, "BeneficiarySummaryTable");
   styleTable(table);
   sheet.freezePanes.freezeRows(5);
   sheet.getRange(`D6:D${last}`).format.numberFormat = countFormat;
   sheet.getRange(`L6:L${last}`).format.numberFormat = countFormat;
-  sheet.getRange(`O6:S${last}`).format.numberFormat = currencyFormat;
-  sheet.getRange(`T6:T${last}`).format.numberFormat = percentFormat;
-  applyIntegrityFormatting(sheet.getRange(`V6:V${last}`), 6, "V");
-  const widths = [14,12,18,8,34,15,16,18,9,10,60,14,48,24,18,20,18,18,24,15,42,15];
+  sheet.getRange(`O6:U${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`V6:V${last}`).format.numberFormat = percentFormat;
+  applyIntegrityFormatting(sheet.getRange(`X6:X${last}`), 6, "X");
+  const widths = [14,12,18,8,34,15,16,18,9,10,60,14,48,24,18,18,18,20,18,18,24,15,42,15];
   widths.forEach((width, index) => {
     const column = excelColumn(index + 1);
     sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
@@ -2193,7 +2201,7 @@ const previewRanges = new Map([
   ...(aggregateFacts ? [["Employee Rank Facts", "A1:D25"]] : []),
   ["Employee List", "A1:S30"],
   ["Recipient List", "A1:AD30"],
-  ["Beneficiary Summary", "A1:V30"],
+  ["Beneficiary Summary", "A1:X30"],
   ["PAC & Candidate Map", "A1:S30"],
   ["Downstream Activity", "A1:AB25"],
   ["Beneficiary Bridge", "A1:V25"],

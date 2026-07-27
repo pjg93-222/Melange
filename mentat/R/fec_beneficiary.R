@@ -128,8 +128,22 @@ fec_aggregate_beneficiary_downstream <- function(downstream_activity) {
   ), .SDcols = metadata_columns]
   if (!nrow(included)) return(data.table::data.table())
 
+  # Direction has to be split HERE, at the only grain where it still exists as a
+  # per-row fact. Every roll-up above this groups rows together and keeps
+  # direction only as the joined text in `directions`, so a single unsigned
+  # amount is all that survives - which is how money spent to DEFEAT a candidate
+  # ended up displayed as activity benefiting their party. Carrying the split as
+  # its own components lets the workbook attribute support to a party and report
+  # opposition separately, instead of inferring direction from a text field.
+  # Not netted: support minus oppose would hide the magnitude of both.
   totals <- included[, .(
     preliminary_downstream_amount = sum(transaction_amount, na.rm = TRUE),
+    support_amount = sum(
+      transaction_amount[support_oppose == "Support"], na.rm = TRUE
+    ),
+    oppose_amount = sum(
+      transaction_amount[support_oppose == "Oppose"], na.rm = TRUE
+    ),
     transaction_count = .N
   ), by = key_columns]
   relationships <- fec_grouped_join_unique(
@@ -171,6 +185,8 @@ fec_aggregate_beneficiary_summary <- function(bridge) {
   )
   totals <- bridge[, .(
     preliminary_downstream_amount = sum(preliminary_downstream_amount, na.rm = TRUE),
+    support_amount = sum(support_amount, na.rm = TRUE),
+    oppose_amount = sum(oppose_amount, na.rm = TRUE),
     # Keep base-R summation order identical to the legacy mixed aggregation.
     # data.table's GForce sum is faster but can differ in the final floating
     # point bit, which would make formula-cache parity needlessly noisy.
@@ -332,6 +348,15 @@ fec_downstream_direction <- function(values) {
   ifelse(codes %in% c("24A", "24N"), "Oppose", ifelse(codes %in% c("24E", "24F"), "Support", "Contribution / Other"))
 }
 
+# Bump whenever the pas2 PARSE changes - column typing, date handling, filtering,
+# derived fields. The cache signature was the md5 of the source files alone, so a
+# parser fix could not invalidate it: the MMDDYYYY date correction had no effect
+# because the corrupted dates were served straight back out of the .rds. Source
+# data changing is not the only reason a cached parse goes stale.
+#   1 = original
+#   2 = transaction_date forced to character (leading zeros preserved)
+FEC_PAS2_PARSER_VERSION <- "2"
+
 fec_pas2_cache_file <- function(directory, cycles) {
   paths <- vapply(cycles, function(cycle) {
     suffix <- substr(as.character(cycle), 3L, 4L)
@@ -339,7 +364,13 @@ fec_pas2_cache_file <- function(directory, cycles) {
   }, character(1L))
   missing <- paths[!file.exists(paths)]
   if (length(missing)) stop("Missing official FEC committee-to-candidate file: ", missing[[1L]], call. = FALSE)
-  signature <- paste(substr(unname(tools::md5sum(paths)), 1L, 10L), collapse = "-")
+  signature <- paste(
+    c(
+      paste0("p", FEC_PAS2_PARSER_VERSION),
+      substr(unname(tools::md5sum(paths)), 1L, 10L)
+    ),
+    collapse = "-"
+  )
   cache_directory <- file.path(directory, "cache")
   if (!dir.exists(cache_directory) && !dir.create(cache_directory, recursive = TRUE, showWarnings = FALSE)) {
     stop("Could not create FEC beneficiary cache directory: ", cache_directory, call. = FALSE)
@@ -358,9 +389,17 @@ fec_build_pas2_index <- function(directory, cycles) {
   output <- lapply(cycles, function(target_cycle) {
     suffix <- substr(as.character(target_cycle), 3L, 4L)
     path <- file.path(directory, paste0("pas2", suffix), "itpas2.txt")
+    # transaction_date MUST be read as character. FEC writes it as MMDDYYYY,
+    # which fread infers as integer and then strips the leading zero from every
+    # January-September date: 01022021 -> 1022021 -> parsed as %m=10 %d=22
+    # %Y=021 -> "0021-10-22". That silently destroyed 1,146,540 of 1,624,528
+    # rows (70.6%), and left no Jan-Sep date anywhere in any shipped workbook.
+    # Indexed, not named: col.names is applied AFTER type inference, so at
+    # colClasses time the columns are still V1..Vn and a name silently no-ops.
     rows <- data.table::fread(
       path, sep = "|", header = FALSE, fill = TRUE, quote = "",
-      col.names = headers, encoding = "UTF-8", showProgress = FALSE
+      col.names = headers, encoding = "UTF-8", showProgress = FALSE,
+      colClasses = list(character = which(headers == "transaction_date"))
     )
     rows <- rows[, .(
       cycle = target_cycle,

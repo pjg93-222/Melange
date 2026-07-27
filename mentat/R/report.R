@@ -1544,6 +1544,140 @@ spending_assert_no_duplicate_kept_tuples <- function(rows) {
 }
 
 spending_report_lookups <- function(connection) {
+  # Trade-association committee IDs are applied HERE, at the point of use, rather
+  # than relying on the copy persisted in the `trade` table. The exporter
+  # (tools/export_crypto_spending_data.R) opens the database SQLITE_RO and never
+  # calls resolve_recipient_register_committee_ids(), so a resolution that only
+  # lived in the database would silently do nothing on the actual report path.
+  # Applying it on read is read-only safe, idempotent, and covers every caller.
+  apply_trade_overrides <- function(trade) {
+    # Must not throw: mentat_input_dir() aborts when the process starts outside
+    # the project, and this runs on the report path where the inputs directory
+    # is otherwise not needed. An unguarded call here killed every export
+    # launched from another working directory.
+    input_dir <- mentat_input_dir_or_na()
+    if (is.na(input_dir)) {
+      warning(
+        "Could not locate the inputs directory; trade-association committee-ID ",
+        "overrides were not applied and the Trade Association category will be ",
+        "empty. Set MENTAT_INPUT_DIR to fix.",
+        call. = FALSE
+      )
+      return(trade)
+    }
+    overrides <- read_trade_committee_overrides(
+      file.path(input_dir, "trade_committee_overrides.csv")
+    )
+    if (!nrow(trade) || !nrow(overrides)) {
+      return(trade)
+    }
+    matched <- match(
+      normalize_register_key(trade$association_name),
+      normalize_register_key(overrides$association_name)
+    )
+    hit <- !is.na(matched)
+    if (any(hit)) {
+      trade[hit, committee_id := overrides$committee_id[matched[hit]]]
+    }
+    trade
+  }
+
+  # Broad-net resolution for associations no curated override names.
+  #
+  # An association's PAC almost never files under the association's exact name,
+  # which is all the register carried - so all 335 rows resolved to nothing and
+  # the Trade Association category read $0.00 in every shipped book. The money
+  # did not vanish: a trade PAC is committee_type Q with designation B or U, so
+  # it matches no fallback rule, keeps the default "Unclassified" category, and
+  # Unclassified folds into the Candidate Stats column. That is the ~$163k
+  # "Candidate" discrepancy - trade money filed as candidate money, not a
+  # Candidate/Leadership swap.
+  #
+  # The filing pattern is regular: committee name = association name + a
+  # committee suffix, sometimes behind a leading article or a "<BRAND> PAC OF
+  # THE <ASSOCIATION>" wrapper. Matching the association's name ANYWHERE in the
+  # committee name resolves those (verified against the live snapshots:
+  # NATIONAL ASSOCIATION OF REALTORS POLITICAL ACTION COMMITTEE,
+  # AMERICAN BANKERS ASSOCIATION PAC (BANKPAC), and
+  # BUILD POLITICAL ACTION COMMITTEE OF THE NATIONAL ASSOCIATION OF HOME
+  # BUILDERS (BUILDPAC) all resolve, with no ambiguous hits).
+  #
+  # Two guards keep the net from over-reaching. Names under 10 characters are
+  # never netted - short ones are acronym-like and would collide. An association
+  # matching MORE than one committee ID is left unresolved rather than guessed,
+  # per the register's standing rule that ambiguity goes to review and is never
+  # auto-resolved. Matching on the full normalized name (not acronyms) is what
+  # keeps American Bankers Association and American Bar Association apart.
+  trade_resolve_broad_net <- function(trade) {
+    if (!nrow(trade)) return(trade)
+    normalize <- function(values) {
+      text <- toupper(as.character(values))
+      text <- gsub("[^A-Z0-9 ]", " ", text)
+      trim_text(gsub("[[:space:]]+", " ", text))
+    }
+    # Strip committee-flavoured words only from the END, so the association's
+    # own words survive (Association of Equipment Manufacturers keeps
+    # "Manufacturers"; only a trailing "PAC"/"COMMITTEE"/"FUND" is removed).
+    suffix <- paste0(
+      "\\b(POLITICAL ACTION COMMITTEE|POLITICAL VICTORY FUND|POLITICAL FUND|",
+      "FEDERAL PAC|PAC|INC|LLC|FUND|COMMITTEE)\\s*$"
+    )
+    strip_suffix <- function(text) {
+      repeat {
+        stripped <- trim_text(sub(suffix, "", text))
+        if (identical(stripped, text)) return(text)
+        text <- stripped
+      }
+    }
+    association <- vapply(normalize(trade$association_name), strip_suffix, character(1L))
+    unresolved <- which(
+      !nzchar(trim_text(trade$committee_id %||% "")) & nchar(association) >= 10L
+    )
+    if (!length(unresolved)) return(trade)
+    observed <- data.table::as.data.table(DBI::dbGetQuery(
+      connection,
+      paste(
+        "SELECT DISTINCT UPPER(TRIM(committee_id)) AS committee_id, committee_name",
+        "FROM contributions",
+        "WHERE committee_id IS NOT NULL AND TRIM(committee_id) <> ''",
+        "AND committee_name IS NOT NULL AND TRIM(committee_name) <> ''"
+      )
+    ))
+    if (!nrow(observed)) return(trade)
+    observed[, match_name := normalize(committee_name)]
+    resolved <- 0L
+    ambiguous <- character(0L)
+    for (index in unresolved) {
+      needle <- association[[index]]
+      found <- observed$committee_id[
+        which(grepl(needle, observed$match_name, fixed = TRUE))
+      ]
+      found <- unique(found[nzchar(found)])
+      if (length(found) == 1L) {
+        data.table::set(trade, index, "committee_id", found)
+        resolved <- resolved + 1L
+      } else if (length(found) > 1L) {
+        ambiguous <- c(ambiguous, trade$association_name[[index]])
+      }
+    }
+    if (resolved || length(ambiguous)) {
+      message(sprintf(
+        "Trade associations resolved by name: %d of %d unresolved%s",
+        resolved,
+        length(unresolved),
+        if (length(ambiguous)) {
+          sprintf(
+            "; %d left unresolved as ambiguous (%s)",
+            length(ambiguous),
+            paste(utils::head(ambiguous, 5L), collapse = "; ")
+          )
+        } else {
+          ""
+        }
+      ))
+    }
+    trade
+  }
   list(
     committee_master = list(
       categories = data.table::as.data.table(DBI::dbGetQuery(
@@ -1553,9 +1687,12 @@ spending_report_lookups <- function(connection) {
           "FROM categories ORDER BY cycle, group_name, category"
         )
       )),
-      trade = data.table::as.data.table(DBI::dbGetQuery(
-        connection,
-        "SELECT association_name, committee_id FROM trade ORDER BY association_name"
+      # Curated overrides win; the broad net only fills what is still unresolved.
+      trade = trade_resolve_broad_net(apply_trade_overrides(
+        data.table::as.data.table(DBI::dbGetQuery(
+          connection,
+          "SELECT association_name, committee_id FROM trade ORDER BY association_name"
+        ))
       )),
       leadership = data.table::as.data.table(DBI::dbGetQuery(
         connection,

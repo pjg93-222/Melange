@@ -393,12 +393,27 @@ try {
     Set-TableColumnFormula $table 'Rank' '=1+COUNTIFS(BeneficiarySummaryTable[Cycle],[@Cycle],BeneficiarySummaryTable[View],[@View],BeneficiarySummaryTable[Company],[@Company],BeneficiarySummaryTable[Downstream Activity],">"&[@[Downstream Activity]])'
     Set-TableColumnFormula $table 'Downstream Activity' '=SUMIFS(BeneficiaryBridgeTable[Downstream Activity],BeneficiaryBridgeTable[Cycle],[@Cycle],BeneficiaryBridgeTable[View],[@View],BeneficiaryBridgeTable[Company],[@Company],BeneficiaryBridgeTable[Candidate ID],[@[Candidate ID]])'
     Set-TableColumnFormula $table $associatedFundingHeader ("=SUMIFS(BeneficiaryBridgeTable[${associatedFundingHeader}],BeneficiaryBridgeTable[Cycle],[@Cycle],BeneficiaryBridgeTable[View],[@View],BeneficiaryBridgeTable[Company],[@Company],BeneficiaryBridgeTable[Candidate ID],[@[Candidate ID]])")
-    Set-TableColumnFormula $table 'Democratic Activity' '=IF([@Party]="D",[@[Downstream Activity]],0)'
-    Set-TableColumnFormula $table 'Republican Activity' '=IF([@Party]="R",[@[Downstream Activity]],0)'
+    # Money spent AGAINST a candidate must not be booked as activity favouring
+    # their party. An independent expenditure opposing a Republican used to land
+    # in "Republican Activity": $1,868,481,242 of anti-Republican spending in the
+    # credit-union book alone, out of a sheet that is 89% oppose dollars.
+    # The party columns now count [Support Activity], a real dollar component
+    # split by direction in fec_beneficiary.R, rather than testing the joined
+    # [Directions] text. Reading that text could only ever be all-or-nothing: a
+    # candidate with both support and oppose legs had their SUPPORT dollars
+    # discarded too, because the string contained the word "Oppose".
+    # Opposition keeps its own column and is never folded into a party total.
+    Set-TableColumnFormula $table 'Democratic Activity' '=IF([@Party]="D",[@[Support Activity]],0)'
+    Set-TableColumnFormula $table 'Republican Activity' '=IF([@Party]="R",[@[Support Activity]],0)'
     Set-TableColumnFormula $table 'Other / Unclassified Activity' '=[@[Downstream Activity]]-[@[Democratic Activity]]-[@[Republican Activity]]'
-    Set-TableColumnFormula $table 'Party Coverage' '=IF([@[Downstream Activity]]=0,0,([@[Democratic Activity]]+[@[Republican Activity]])/[@[Downstream Activity]])'
+    # Coverage measures how much SUPPORT activity carries a party label, so the
+    # denominator is support - not the mixed total, which oppose dollars inflate.
+    Set-TableColumnFormula $table 'Party Coverage' '=IF([@[Support Activity]]=0,0,([@[Democratic Activity]]+[@[Republican Activity]])/[@[Support Activity]])'
     Set-TableColumnFormula $table 'FEC Candidate URL' '=IF([@[Candidate ID]]="","","https://www.fec.gov/data/candidate/"&[@[Candidate ID]]&"/")'
-    Set-TableColumnFormula $table 'Integrity Check' '=IF(ABS([@[Downstream Activity]]-[@[Democratic Activity]]-[@[Republican Activity]]-[@[Other / Unclassified Activity]])<0.01,"OK","CHECK")'
+    # Two checks: the party split still accounts for the whole total, AND the
+    # direction components (from R) never exceed the SUMIFS total (from Excel).
+    # The second compares two independently computed paths over the same rows.
+    Set-TableColumnFormula $table 'Integrity Check' '=IF(AND(ABS([@[Downstream Activity]]-[@[Democratic Activity]]-[@[Republican Activity]]-[@[Other / Unclassified Activity]])<0.01,[@[Support Activity]]+[@[Oppose Activity]]<=[@[Downstream Activity]]+0.01),"OK","CHECK")'
   } finally { Release-ComObject $table; Release-ComObject $sheet }
 
   $focusedSheets = @()

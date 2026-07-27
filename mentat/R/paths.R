@@ -83,12 +83,49 @@ mentat_project_root <- function(start = getwd()) {
   }
 }
 
-mentat_input_dir <- function(project_root = mentat_project_root()) {
+# Resolution order, most explicit first:
+#   1. an explicit project_root argument - the caller knows best
+#   2. MENTAT_INPUT_DIR - set by the orchestrator from its own script path
+#   3. walking up from getwd()
+#
+# Step 2 exists because step 3 is fragile: it aborts whenever the process starts
+# outside the project (a git worktree, a scheduled task, another drive), and this
+# is reached from default arguments in several modules, so the abort surfaces far
+# from its cause. Honouring the variable HERE fixes every call site at once -
+# patching them individually missed `mentat_name_diminutive_register()` and killed
+# six exports at once.
+mentat_input_dir <- function(project_root = NULL) {
+  if (!is.null(project_root) && nzchar(project_root)) {
+    return(normalizePath(
+      file.path(project_root, "inputs"),
+      winslash = "/",
+      mustWork = TRUE
+    ))
+  }
+  configured <- trimws(Sys.getenv("MENTAT_INPUT_DIR", unset = ""))
+  if (nzchar(configured) && dir.exists(configured)) {
+    return(normalizePath(configured, winslash = "/", mustWork = TRUE))
+  }
   normalizePath(
-    file.path(project_root, "inputs"),
+    file.path(mentat_project_root(), "inputs"),
     winslash = "/",
     mustWork = TRUE
   )
+}
+
+# Non-throwing variant. mentat_input_dir() walks up from getwd() with
+# mustWork = TRUE, so it aborts whenever the process starts outside the project
+# - a git worktree, a scheduled task, another drive. That is correct for ingest,
+# which cannot proceed without inputs, but fatal on the REPORT path, which needs
+# inputs only for the optional trade-association overrides. Callers that can
+# degrade should use this and handle NA rather than crash the whole export.
+# MENTAT_INPUT_DIR wins so an orchestrator can pin the directory explicitly.
+mentat_input_dir_or_na <- function() {
+  configured <- trimws(Sys.getenv("MENTAT_INPUT_DIR", unset = ""))
+  if (nzchar(configured) && dir.exists(configured)) {
+    return(normalizePath(configured, winslash = "/", mustWork = FALSE))
+  }
+  tryCatch(mentat_input_dir(), error = function(e) NA_character_)
 }
 
 db_connect <- function(data_root = mentat_default_data_root()) {

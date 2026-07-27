@@ -96,6 +96,77 @@ read_company_match_overrides <- function(path) {
   overrides[]
 }
 
+# Curated association -> PAC committee-ID map for the trade register. Exact-name
+# resolution cannot do this job on its own: a trade association's PAC almost never
+# files under the association's own name (NAR -> RPAC, NAHB -> BUILD PAC,
+# America's Credit Unions -> "AMERICA'S CREDIT UNIONS PAC OF CREDIT UNION NATIONAL
+# ASSOCIATION, INC."), so every trade row stayed unresolved and the Trade
+# Association category was never assigned. Resolving by committee ID is also the
+# only safe route - FEC CONNECTED_ORG_NM is unreliable (state bankers associations
+# list "AMERICAN BANKERS ASSOCIATION PAC" as their connected org) and ORG_TP is not
+# stable across cycles (Consumer Bankers Association PAC is 'T' one cycle, 'C' the
+# next). A missing file is not fatal: report.R and fec_api.R also call the resolver.
+read_trade_committee_overrides <- function(path) {
+  require_package("data.table")
+  empty <- data.table::data.table(
+    association_name = character(),
+    committee_id = character(),
+    source = character(),
+    note = character()
+  )
+  if (length(path) != 1L || is.na(path) || !nzchar(path) || !file.exists(path)) {
+    return(empty)
+  }
+  overrides <- data.table::fread(
+    path,
+    encoding = "UTF-8",
+    na.strings = character(),
+    strip.white = TRUE,
+    colClasses = "character"
+  )
+  if (!nrow(overrides)) {
+    return(empty)
+  }
+  required <- c("association_name", "committee_id")
+  missing <- setdiff(required, names(overrides))
+  if (length(missing)) {
+    stop(
+      "Trade-committee override file is missing columns: ",
+      paste(missing, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  optional <- c("source", "note")
+  for (column in setdiff(optional, names(overrides))) {
+    data.table::set(overrides, j = column, value = rep("", nrow(overrides)))
+  }
+  columns <- c(required, optional)
+  overrides <- overrides[, ..columns]
+  overrides[, (columns) := lapply(.SD, as.character), .SDcols = columns]
+  overrides[, association_name := trim_text(association_name)]
+  overrides[, committee_id := toupper(trim_text(committee_id))]
+  if (any(!nzchar(overrides$association_name))) {
+    stop("Trade-committee override rows must name an association.", call. = FALSE)
+  }
+  invalid <- !grepl("^C[0-9]{8}$", overrides$committee_id, perl = TRUE)
+  if (any(invalid)) {
+    stop(
+      "Trade-committee override committee_id values must look like C########: ",
+      paste(unique(overrides$committee_id[invalid]), collapse = ", "),
+      call. = FALSE
+    )
+  }
+  if (anyDuplicated(overrides$association_name)) {
+    stop(
+      "Trade-committee override rows must be unique per association: ",
+      paste(unique(overrides$association_name[duplicated(overrides$association_name)]),
+            collapse = ", "),
+      call. = FALSE
+    )
+  }
+  overrides[]
+}
+
 read_company_home_states <- function(path) {
   require_package("data.table")
   if (!file.exists(path)) {
@@ -1059,6 +1130,11 @@ validate_ingest_counts <- function(
   invisible(TRUE)
 }
 
+# Trade-association committee-ID overrides are NOT applied here. They are read
+# and folded in at report time by spending_report_lookups()/apply_trade_overrides
+# (report.R), which is the path every consumer actually uses - the exporter opens
+# the database SQLITE_RO and never calls this resolver. Keeping the override in
+# one place stops the two copies from drifting apart.
 resolve_recipient_register_committee_ids <- function(connection, log = TRUE) {
   require_package("data.table")
   observed <- data.table::as.data.table(DBI::dbGetQuery(
@@ -1196,6 +1272,7 @@ ingest_all <- function(
     trade = file.path(input_dir, "Trade Associations.txt"),
     template = file.path(input_dir, "Credit Union Cross Industry Spending.xlsx"),
     overrides = file.path(input_dir, "company_match_overrides.csv"),
+    trade_overrides = file.path(input_dir, "trade_committee_overrides.csv"),
     home_states = file.path(input_dir, "company_home_states.csv"),
     diminutives = file.path(input_dir, "name_diminutives.csv")
   )
@@ -1203,6 +1280,12 @@ ingest_all <- function(
     atomic_write_lines(
       "employer_key,company,decision",
       files$overrides
+    )
+  }
+  if (!file.exists(files$trade_overrides)) {
+    atomic_write_lines(
+      "association_name,committee_id,source,note",
+      files$trade_overrides
     )
   }
   missing <- names(files)[!file.exists(unlist(files, use.names = FALSE))]

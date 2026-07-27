@@ -141,9 +141,9 @@ fec_results_ready <- function(session) {
   # so it cannot mean "ready" by itself (verified live 2026-07-18: reading at
   # that moment yields recordsTotal=0 for employers that have rows). Ready =
   # the fetch overlay is hidden AND either data rows exist or the table shows
-  # its confirmed-empty message row. The current FEC page sometimes leaves
-  # the tbody empty instead of rendering that message, so a completed
-  # schedule_a resource plus a zero/zero DataTables count is also authoritative.
+  # its confirmed-empty message row. A completed schedule_a resource entry is
+  # NOT sufficient on its own - see the note on the zero branch below, which is
+  # where that shortcut published a rate-limited query as a genuine $0.
   isTRUE(fec_runtime_value(
     session,
     paste0(
@@ -155,14 +155,36 @@ fec_results_ready <- function(session) {
       "var ov=document.querySelector('.overlay');",
       "if(ov && getComputedStyle(ov).display!=='none'){return false;}",
       "if(dt.rows().data().toArray().length>0){return true;}",
-      "if(info.recordsTotal===0 && info.recordsDisplay===0){",
-      "var apiDone=performance.getEntriesByType('resource').some(function(e){",
-      "return e.name.indexOf('api.open.fec.gov/v1/schedules/schedule_a/')>=0;",
-      "});",
-      "if(apiDone){return true;}",
-      "}",
+      # A zero result is only believable if the request behind it actually
+      # SUCCEEDED. Any schedule_a resource entry used to satisfy this, but a
+      # 429/500/504 creates one exactly like a 200 does - so a rate-limited
+      # query read as a genuine "0 records". That published Farmers Insurance at
+      # $0.00 for all three cycles: 24 variant sets "completed" in 16 seconds
+      # (versus 8 minutes for a comparable company) minutes after FEC returned
+      # "you have exceeded your maximum downloads for the hour", and every
+      # canary passed because expected_total came from the same empty payload.
+      # The trustworthy signal is DataTables' own "No data available in table"
+      # row, which it renders only after a successful empty response. We require
+      # that, and additionally refuse if any schedule_a entry reports an explicit
+      # non-2xx. responseStatus is 0 for cross-origin entries without a
+      # Timing-Allow-Origin header, so it cannot be relied on alone - it is a
+      # disqualifier when present, never the sole proof of success. Failing to
+      # become ready now times out loudly instead of recording a false zero.
       "var r=document.querySelector('#results tbody tr');",
-      "return !!r && /No data available in table/.test(r.textContent);",
+      "var empty=!!r && /No data available in table/.test(r.textContent);",
+      "if(info.recordsTotal===0 && info.recordsDisplay===0){",
+      "var eps=performance.getEntriesByType('resource').filter(function(e){",
+      "return e && typeof e.name==='string' && ",
+      "e.name.indexOf('api.open.fec.gov/v1/schedules/schedule_a/')>=0;",
+      "});",
+      "if(!eps.length){return false;}",
+      "var last=eps[eps.length-1];",
+      "var lastFailed=typeof last.responseStatus==='number' && ",
+      "last.responseStatus>0 && ",
+      "(last.responseStatus<200||last.responseStatus>=300);",
+      "return !lastFailed && empty;",
+      "}",
+      "return empty;",
       "}catch(e){return false;}})()"
     )
   ))

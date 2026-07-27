@@ -1,0 +1,282 @@
+# Export guards
+#
+# Every bug this file guards against shipped a workbook that looked correct. The
+# common shape is a failure that renders as a plausible number - a rate-limited
+# HTTP 429 becoming "$0.00", money spent AGAINST a candidate becoming activity
+# favouring their party, an earmarked gift counted at both legs. None of them
+# tripped an existing check, because the existing reconciliation re-sums the very
+# rows that produced its total and therefore cannot fail.
+#
+# Rules for anything added here:
+#   * Industry-agnostic. No company, committee or cycle may be named. These run
+#     for every organisation the pipeline is pointed at.
+#   * O(n) aggregate work on data already in memory. The build has a 15-minute
+#     budget dominated by collection and Excel finalisation; guards must cost
+#     seconds. No row-by-row loops, no re-reads, no joins beyond a keyed merge.
+#   * A guard must be able to FAIL. If it cannot express a state that is wrong,
+#     it is decoration.
+#
+# Severity:
+#   "fail"  -> refuse to publish. Reserved for "this artifact would state
+#              something untrue", not "this looks unusual".
+#   "warn"  -> record in the receipt and print, but publish.
+
+# Keep a failure readable. A guard that prints 150 company/cycle pairs buries the
+# one line an operator needs; the full set stays in the returned data frame.
+mentat_guard_summarise <- function(items, limit = 12L) {
+  items <- as.character(items)
+  if (length(items) <= limit) {
+    return(paste(items, collapse = "; "))
+  }
+  paste0(
+    paste(items[seq_len(limit)], collapse = "; "),
+    sprintf(" ... and %d more", length(items) - limit)
+  )
+}
+
+mentat_guard_result <- function(id, severity, passed, detail, metric = NA_real_) {
+  data.frame(
+    id = id,
+    severity = severity,
+    passed = passed,
+    detail = detail,
+    metric = as.numeric(metric),
+    stringsAsFactors = FALSE
+  )
+}
+
+# G1 - roster coverage.
+# A company on the roster with zero collected rows in a cycle is published as
+# $0.00 with a competition rank, arithmetically identical to "gave nothing".
+# Farmers Insurance shipped that way for three cycles while FEC held 16,432 rows
+# for it, because a rate-limited query was accepted as an empty result.
+# Zero rows of ANY status in EVERY cycle means the company was never collected.
+mentat_guard_roster_coverage <- function(roster, rows, cycles) {
+  roster <- unique(roster[nzchar(roster)])
+  if (!length(roster)) {
+    return(mentat_guard_result(
+      "roster_coverage", "warn", TRUE, "roster is empty; nothing to check"
+    ))
+  }
+  seen <- unique(rows$company[rows$cycle %in% cycles])
+  missing <- setdiff(roster, seen)
+  if (!length(missing)) {
+    return(mentat_guard_result(
+      "roster_coverage", "fail", TRUE,
+      sprintf("all %d roster companies have collected rows", length(roster)),
+      length(roster)
+    ))
+  }
+  mentat_guard_result(
+    "roster_coverage", "fail", FALSE,
+    paste0(
+      "roster companies with ZERO collected rows in every cycle - these would ",
+      "publish as $0.00 and be indistinguishable from a real zero: ",
+      mentat_guard_summarise(missing)
+    ),
+    length(missing)
+  )
+}
+
+# G2 - per-cell coverage.
+# Weaker than G1: the company exists but one cycle is empty. Legitimate (a young
+# company, a cycle it sat out) so this warns rather than fails, but it must be
+# visible because the cell renders as $0.00 either way.
+mentat_guard_cell_coverage <- function(roster, rows, cycles) {
+  roster <- unique(roster[nzchar(roster)])
+  if (!length(roster) || !length(cycles)) {
+    return(mentat_guard_result("cell_coverage", "warn", TRUE, "nothing to check"))
+  }
+  present <- unique(rows[cycle %in% cycles, .(company, cycle)])
+  present[, seen := TRUE]
+  grid <- data.table::CJ(company = roster, cycle = cycles, unique = TRUE)
+  grid <- merge(grid, present, by = c("company", "cycle"), all.x = TRUE)
+  empty <- grid[is.na(seen)]
+  if (!nrow(empty)) {
+    return(mentat_guard_result(
+      "cell_coverage", "warn", TRUE, "every company x cycle cell has rows"
+    ))
+  }
+  mentat_guard_result(
+    "cell_coverage", "warn", FALSE,
+    paste0(
+      "company x cycle cells with no collected rows (publish as $0.00): ",
+      mentat_guard_summarise(sprintf("%s/%s", empty$company, empty$cycle))
+    ),
+    nrow(empty)
+  )
+}
+
+# G3 was a conduit double-count guard. It is deliberately absent: under the
+# R5/R8 recipient-as-shown ruling a conduit leg is a real row that COUNTS, so
+# "conduit leg also appears on its earmark target" is the expected state, not a
+# defect. The guard could only ever fire on correct data. Removed 2026-07-27.
+
+# G4 - direction integrity.
+# Independent expenditures carry a direction. Summed without a sign, money spent
+# AGAINST a candidate reads as money benefiting them: 89% of one shipped
+# beneficiary sheet, including $1.87B of anti-Republican spending booked under
+# "Republican Activity". Any row whose direction mentions opposition must be
+# excluded from party-support attribution.
+mentat_guard_direction_integrity <- function(beneficiary) {
+  if (is.null(beneficiary) || !nrow(beneficiary)) {
+    return(mentat_guard_result("direction_integrity", "warn", TRUE, "no beneficiary rows"))
+  }
+  cols <- names(beneficiary)
+  dir_col <- cols[grepl("^direction", cols, ignore.case = TRUE)][1]
+  amt_col <- cols[grepl("downstream_amount|preliminary_downstream_amount", cols)][1]
+  if (is.na(dir_col) || is.na(amt_col)) {
+    return(mentat_guard_result(
+      "direction_integrity", "warn", TRUE, "direction/amount columns unavailable"
+    ))
+  }
+  dt <- data.table::as.data.table(beneficiary)
+  opp <- grepl("oppose", dt[[dir_col]], ignore.case = TRUE)
+  amount <- sum(as.numeric(dt[[amt_col]])[opp], na.rm = TRUE)
+  total <- sum(as.numeric(dt[[amt_col]]), na.rm = TRUE)
+  share <- if (total > 0) amount / total else 0
+  mentat_guard_result(
+    "direction_integrity", "warn", TRUE,
+    sprintf(
+      paste0("%d of %d beneficiary rows carry opposition activity ($%.0f, %.1f%% ",
+             "of downstream dollars). These must not be attributed as party support."),
+      sum(opp), nrow(dt), amount, share * 100
+    ),
+    share
+  )
+}
+
+# G5 - date sanity.
+# FEC writes dates as MMDDYYYY. Read as an integer the leading zero is lost, so
+# every January-September date mis-parses; one shipped set had no Jan-Sep date at
+# all and 30,331 years before 1990. Both symptoms are cheap to detect: a missing
+# month range, or impossible years.
+mentat_guard_date_sanity <- function(dates, label = "dates", min_year = 1990L) {
+  parsed <- suppressWarnings(as.Date(dates))
+  parsed <- parsed[!is.na(parsed)]
+  if (!length(parsed)) {
+    return(mentat_guard_result(
+      paste0("date_sanity:", label), "warn", TRUE, "no parseable dates"
+    ))
+  }
+  years <- as.integer(format(parsed, "%Y"))
+  months <- unique(format(parsed, "%m"))
+  bogus <- sum(years < min_year, na.rm = TRUE)
+  if (bogus > 0L) {
+    return(mentat_guard_result(
+      paste0("date_sanity:", label), "fail", FALSE,
+      sprintf(
+        "%d dates fall before %d - the MMDDYYYY integer-coercion signature",
+        bogus, min_year
+      ),
+      bogus
+    ))
+  }
+  if (length(parsed) >= 1000L && length(months) < 12L) {
+    return(mentat_guard_result(
+      paste0("date_sanity:", label), "fail", FALSE,
+      sprintf(
+        paste0("only %d distinct months across %d dates (present: %s). Leading ",
+               "zeros are being stripped - read the column as character."),
+        length(months), length(parsed), paste(sort(months), collapse = ",")
+      ),
+      length(months)
+    ))
+  }
+  mentat_guard_result(
+    paste0("date_sanity:", label), "fail", TRUE,
+    sprintf("%d dates, %d months, no impossible years", length(parsed), length(months))
+  )
+}
+
+# G6 - category cross-view agreement.
+# The shipped reconciliation re-sums its own inputs and cannot fail. This one
+# can: the same category total is computed from two independent views and they
+# must agree. A real defect showed here - Candidate and Leadership PAC totals
+# were swapped in one cycle of all six books, offsetting exactly so every
+# total-level check still passed.
+mentat_guard_category_agreement <- function(view_a, view_b, tolerance = 0.02) {
+  if (is.null(view_a) || is.null(view_b) || !nrow(view_a) || !nrow(view_b)) {
+    return(mentat_guard_result("category_agreement", "warn", TRUE, "nothing to compare"))
+  }
+  merged <- merge(
+    data.table::as.data.table(view_a),
+    data.table::as.data.table(view_b),
+    by = c("cycle_label", "category"), all = TRUE, suffixes = c("_a", "_b")
+  )
+  merged[is.na(amount_a), amount_a := 0]
+  merged[is.na(amount_b), amount_b := 0]
+  bad <- merged[abs(amount_a - amount_b) > tolerance]
+  if (!nrow(bad)) {
+    return(mentat_guard_result(
+      "category_agreement", "fail", TRUE,
+      sprintf("%d category x cycle totals agree across both views", nrow(merged))
+    ))
+  }
+  mentat_guard_result(
+    "category_agreement", "fail", FALSE,
+    paste0(
+      "category totals disagree between views (same rows, two code paths): ",
+      mentat_guard_summarise(sprintf(
+        "%s/%s %.2f vs %.2f", bad$cycle_label, bad$category, bad$amount_a, bad$amount_b
+      ))
+    ),
+    nrow(bad)
+  )
+}
+
+# G7 - declared-but-empty categories.
+# A category the template renders but nothing ever populates is invisible: the
+# Trade Association row read $0.00 in all six shipped books for months because
+# no committee could ever match it. Warn, because a genuine zero is possible.
+mentat_guard_category_population <- function(declared, populated) {
+  declared <- unique(declared[nzchar(declared)])
+  empty <- setdiff(declared, unique(populated))
+  if (!length(empty)) {
+    return(mentat_guard_result(
+      "category_population", "warn", TRUE, "every declared category is populated"
+    ))
+  }
+  mentat_guard_result(
+    "category_population", "warn", FALSE,
+    paste0(
+      "categories rendered by the template that no row was ever assigned - ",
+      "verify this is a real zero and not an unmatched register: ",
+      mentat_guard_summarise(empty)
+    ),
+    length(empty)
+  )
+}
+
+# Runner. Collects results, prints a compact report, and stops on any failed
+# "fail"-severity guard so a build cannot publish an artifact that would state
+# something untrue.
+mentat_run_export_guards <- function(guards, context = "export") {
+  results <- do.call(rbind, Filter(Negate(is.null), guards))
+  if (is.null(results) || !nrow(results)) {
+    return(invisible(results))
+  }
+  cat(sprintf("\nEXPORT GUARDS (%s)\n", context))
+  for (index in seq_len(nrow(results))) {
+    status <- if (isTRUE(results$passed[[index]])) {
+      "PASS"
+    } else if (identical(results$severity[[index]], "fail")) {
+      "FAIL"
+    } else {
+      "WARN"
+    }
+    cat(sprintf("  [%s] %-26s %s\n", status, results$id[[index]], results$detail[[index]]))
+  }
+  flush(stdout())
+  blocking <- results[!results$passed & results$severity == "fail", , drop = FALSE]
+  if (nrow(blocking)) {
+    stop(
+      paste0(
+        "Export guards failed (", nrow(blocking), "); refusing to publish.\n",
+        paste(sprintf("  - %s: %s", blocking$id, blocking$detail), collapse = "\n")
+      ),
+      call. = FALSE
+    )
+  }
+  invisible(results)
+}

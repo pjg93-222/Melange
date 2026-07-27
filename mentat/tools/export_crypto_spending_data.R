@@ -44,7 +44,7 @@ if (!nzchar(MENTAT_INDUSTRY)) {
 for (module in c(
   "paths.R", "schema.R", "ingest.R", "fec_page.R", "collect.R",
   "fec_api.R", "reconcile.R", "report.R", "fec_beneficiary.R",
-  "identity_components.R"
+  "identity_components.R", "export_guards.R"
 )) {
   source(file.path(MENTAT_PROJECT_ROOT, "R", module), local = .GlobalEnv)
 }
@@ -305,6 +305,15 @@ person_rows <- analysis_rows[
   )
 ]
 person_rows[!nzchar(base_key), base_key := exact_name_key]
+# Company-wide pass: an employer's own address must not split one person into a
+# home identity and a work identity. Computed before the by-person grouping
+# because the signature is only visible across all of a company's contributors.
+person_rows[, business_address := identify_business_addresses(.SD)]
+cat(sprintf(
+  "Business-address rows suppressed as identity evidence: %d of %d\n",
+  sum(person_rows$business_address),
+  nrow(person_rows)
+))
 export_phase("identity_rows_prepared", nrow(person_rows))
 
 identity_groups <- person_rows[, assign_identity_components(.SD), by = .(company, base_key)]
@@ -579,6 +588,70 @@ omitted_non_accepted_by_cycle[as.character(calculated_omissions$cycle)] <-
 workbook_raw_export <- raw_export[
   cycle %in% supported_cycles & company_match_status == "accepted"
 ]
+
+# Guards run HERE because this is the only point where the roster, the complete
+# unfiltered rows (every status, every cycle) and the supported cycles are all in
+# scope. Downstream of this the payload is already filtered, so a company that
+# was never collected is indistinguishable from one that gave nothing.
+# All O(n) aggregates on data already in memory - see R/export_guards.R.
+
+# The two independent category views G6 compares. They must be reached by
+# different code paths or the check is the tautology it replaces:
+#   view_a - what the workbook renders. Post-reshape, post-merge: category comes
+#            from analysis_map joined onto raw_rows by sub_id, amount from
+#            raw_rows. This is the path the per-cycle sheets' SUMIFS sum.
+#   view_b - the classification frame itself. Category and amount sit on the
+#            same row and were never joined, so nothing can misalign them.
+# A sub_id join that multiplies rows, drops a match, or collides on a column
+# suffix moves dollars between categories while leaving the cycle grand total
+# untouched - the exact F6 signature (Candidate/Leadership PAC swapped in one
+# cycle, offsetting to zero) that every total-level check passed straight over.
+guard_category_view_a <- workbook_raw_export[
+  include_in_analysis == "Yes",
+  .(amount = sum(amount, na.rm = TRUE)),
+  by = .(cycle_label, category = recipient_category)
+]
+guard_category_view_b <- analysis_rows[
+  contribution_cycle(contribution_receipt_date) %in% supported_cycles &
+    included_summary == TRUE,
+  .(amount = sum(as.numeric(contribution_receipt_amount), na.rm = TRUE)),
+  by = .(
+    cycle_label = sprintf(
+      "%d-%d",
+      contribution_cycle(contribution_receipt_date) - 1L,
+      contribution_cycle(contribution_receipt_date)
+    ),
+    category = recipient_category
+  )
+]
+
+guard_started_at <- unname(proc.time()[["elapsed"]])
+mentat_run_export_guards(
+  list(
+    mentat_guard_roster_coverage(companies, raw_export, supported_cycles),
+    mentat_guard_cell_coverage(companies, raw_export, supported_cycles),
+    mentat_guard_category_agreement(guard_category_view_a, guard_category_view_b),
+    mentat_guard_direction_integrity(beneficiary_tables$summary),
+    mentat_guard_date_sanity(
+      downstream_activity_export$first_activity_date, "downstream_activity"
+    ),
+    # Mirrors the category list the workbook template renders
+    # (tools/crypto_workbook_builder.mjs masterCategories). Kept here so a
+    # category the template shows but nothing ever populates is reported rather
+    # than silently rendering $0.00, as Trade Association did in six books.
+    mentat_guard_category_population(
+      c("Super PAC", "Carey", "Company PAC", "Leadership PAC",
+        "Trade Association", "Candidate", "Party Committee", "JFC",
+        "Unclassified"),
+      workbook_raw_export$recipient_category
+    )
+  ),
+  context = MENTAT_INDUSTRY
+)
+cat(sprintf(
+  "  guards completed in %.2fs\n",
+  unname(proc.time()[["elapsed"]]) - guard_started_at
+))
 
 payload <- list(
   metadata = list(

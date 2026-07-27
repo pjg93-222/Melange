@@ -827,6 +827,12 @@ mentat_memo_duplicate_plan <- function(rows) {
   is_memo <- suppressWarnings(as.integer(column("is_memo_leg", 0L))) == 1L
   is_memo[is.na(is_memo)] <- FALSE
   non_memo_keys <- unique(memo_key[nzchar(memo_key) & !is_memo])
+  # Conduit (ActBlue / WinRed) legs are deliberately NOT deduped here. Paul's
+  # standing R5/R8 ruling is recipient-as-shown: every current FEC row counts to
+  # the recipient printed on it, and a memo/earmark row naming a DIFFERENT
+  # committee is a real leg that COUNTS. is_conduit_leg stays a visible audit
+  # flag, never a filter. Ratified again 2026-07-27 after an audit proposed
+  # excluding the conduit leg; the exclusion was reverted, not adopted.
   duplicate <- is_memo & nzchar(memo_key) & memo_key %in% non_memo_keys
   data.frame(
     sub_id = as.character(column("sub_id")),

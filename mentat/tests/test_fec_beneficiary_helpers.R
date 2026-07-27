@@ -75,6 +75,12 @@ stopifnot(identical(optimized, reference))
 fec_build_beneficiary_tables_reference <- function(raw_export, downstream_activity) {
   downstream <- downstream_activity[include_in_total == "Yes", .(
     preliminary_downstream_amount = sum(transaction_amount, na.rm = TRUE),
+    support_amount = sum(
+      transaction_amount[support_oppose == "Support"], na.rm = TRUE
+    ),
+    oppose_amount = sum(
+      transaction_amount[support_oppose == "Oppose"], na.rm = TRUE
+    ),
     transaction_count = .N,
     activity_relationships = fec_join_unique_reference(activity_type),
     directions = fec_join_unique_reference(support_oppose),
@@ -123,6 +129,8 @@ fec_build_beneficiary_tables_reference <- function(raw_export, downstream_activi
   )
   summary <- bridge[, .(
     preliminary_downstream_amount = sum(preliminary_downstream_amount, na.rm = TRUE),
+    support_amount = sum(support_amount, na.rm = TRUE),
+    oppose_amount = sum(oppose_amount, na.rm = TRUE),
     preliminary_crypto_funding = sum(preliminary_crypto_funding, na.rm = TRUE),
     source_committee_count = data.table::uniqueN(source_committee_id),
     source_committees = fec_join_unique_reference(paste0(
@@ -191,6 +199,53 @@ optimized_tables <- fec_build_beneficiary_tables(
   raw_fixture, downstream_fixture
 )
 stopifnot(identical(optimized_tables, reference_tables))
+
+# Direction split (F3). A candidate reached by BOTH support and oppose spending
+# is the case the old text-matching guard got wrong: it read "Oppose" in the
+# joined [Directions] string and discarded the support dollars too. The split
+# must report each direction as its own component, and must not net them.
+direction_fixture <- data.table::data.table(
+  cycle = 2024L,
+  committee_id = "C00000001",
+  candidate_id = "H0MIXED001",
+  transaction_amount = c(1000, 250, 40),
+  transaction_type = c("24E", "24A", "24K"),
+  transaction_date = "2024-03-01",
+  activity_type = "Independent expenditure",
+  candidate_name = "MIXED, CANDIDATE",
+  candidate_party = "R",
+  office = "H",
+  office_label = "House",
+  office_state = "MI",
+  district = "01",
+  include_in_total = "Yes"
+)
+direction_fixture[, support_oppose := fec_downstream_direction(transaction_type)]
+direction_raw <- data.table::data.table(
+  cycle = 2024L,
+  committee_id = "C00000001",
+  company = "Company A",
+  include_in_analysis = "Yes",
+  amount = 500,
+  recipient = "Committee C00000001"
+)
+direction_summary <- fec_build_beneficiary_tables(
+  direction_raw, direction_fixture
+)$summary
+stopifnot(nrow(direction_summary) > 0L)
+direction_row <- direction_summary[view == "Company"][1L]
+# 24E support, 24A oppose, 24K neither: each lands in exactly one place and the
+# unsigned total still carries all three, so support+oppose <= total.
+stopifnot(
+  isTRUE(all.equal(direction_row$support_amount, 1000)),
+  isTRUE(all.equal(direction_row$oppose_amount, 250)),
+  isTRUE(all.equal(direction_row$preliminary_downstream_amount, 1290)),
+  direction_row$support_amount + direction_row$oppose_amount <=
+    direction_row$preliminary_downstream_amount + 1e-9,
+  grepl("Support", direction_row$directions),
+  grepl("Oppose", direction_row$directions)
+)
+
 cat(sprintf(
   paste0(
     "test_fec_beneficiary_helpers: randomized=5000 parity_rows=%d groups=%d ",
