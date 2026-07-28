@@ -159,6 +159,59 @@ mentat_guard_zero_provenance <- function(progress) {
   )
 }
 
+# G8 - collection completeness.
+# G1/G2/G3 only see a cell that collected NOTHING. A walk that stopped halfway
+# leaves a cell that looks populated and is quietly short - the failure mode that
+# actually occurred in Property & Casualty, where Chubb and Liberty Mutual each
+# held rows in every cycle while missing tens of thousands of them.
+# scrape_progress.records_total is what FEC itself reported for each query, so
+# comparing it against rows actually stored measures the gap directly.
+# Destination matters: the employer and variant passes land in `contributions`
+# while the company-as-contributor pass (P2_company_name) lands in
+# `corporate_giving`. Comparing a company's whole reported total against
+# `contributions` alone reads a complete Chubb as 65% collected.
+# Stored may sit a little UNDER reported without fault, because separate variant
+# sets return overlapping rows that collapse on sub_id - Farmers legitimately
+# stores 9,516 against a reported 9,520. Only a material gap is reported.
+mentat_guard_collection_completeness <- function(progress, stored, tolerance = 0.02) {
+  if (is.null(progress) || !nrow(progress) || is.null(stored) || !nrow(stored)) {
+    return(mentat_guard_result(
+      "collection_completeness", "warn", TRUE, "no checkpoints to reconcile"
+    ))
+  }
+  p <- data.table::as.data.table(progress)
+  s <- data.table::as.data.table(stored)
+  p[, reported := suppressWarnings(as.numeric(records_total))]
+  p[is.na(reported), reported := 0]
+  merged <- merge(
+    p[, .(reported = sum(reported)), by = .(company, cycle, destination)],
+    s[, .(rows = sum(as.numeric(rows))), by = .(company, cycle, destination)],
+    by = c("company", "cycle", "destination"), all.x = TRUE
+  )
+  merged[is.na(rows), rows := 0]
+  short <- merged[reported > 0 & rows < reported - pmax(10, reported * tolerance)]
+  if (!nrow(short)) {
+    return(mentat_guard_result(
+      "collection_completeness", "warn", TRUE,
+      sprintf("%d company x cycle walks stored what FEC reported", nrow(merged))
+    ))
+  }
+  short[, gap := reported - rows]
+  data.table::setorder(short, -gap)
+  mentat_guard_result(
+    "collection_completeness", "warn", FALSE,
+    paste0(
+      "walks stored materially fewer rows than FEC reported - the cell looks ",
+      "populated but is short, recollect before trusting it: ",
+      mentat_guard_summarise(sprintf(
+        "%s/%s %s %.0f of %.0f", short$company, short$cycle, short$destination,
+        short$rows, short$reported
+      ))
+    ),
+    sum(short$gap)
+  )
+}
+
 # G4 - direction integrity.
 # Independent expenditures carry a direction. Summed without a sign, money spent
 # AGAINST a candidate reads as money benefiting them: 89% of one shipped

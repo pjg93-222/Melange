@@ -670,6 +670,30 @@ mentat_run_export_guards(
     # such column, and selecting it by name would abort the whole export. Ask the
     # schema first and let the guard report the column's absence as "every zero
     # unverified", which is exactly what it means.
+    # Reported-vs-stored, split by destination: the employer/variant passes fill
+    # contributions, the company-as-contributor pass fills corporate_giving.
+    mentat_guard_collection_completeness(
+      DBI::dbGetQuery(
+        connection,
+        paste(
+          "SELECT company, cycle, records_total,",
+          "CASE WHEN variant_set LIKE 'P2_company_name%' THEN 'corporate'",
+          "ELSE 'contributions' END AS destination",
+          "FROM scrape_progress"
+        )
+      ),
+      DBI::dbGetQuery(
+        connection,
+        paste(
+          "SELECT company, two_year_transaction_period AS cycle,",
+          "'contributions' AS destination, COUNT(*) AS rows FROM contributions",
+          "GROUP BY company, two_year_transaction_period",
+          "UNION ALL",
+          "SELECT company, cycle, 'corporate' AS destination, COUNT(*) AS rows",
+          "FROM corporate_giving GROUP BY company, cycle"
+        )
+      )
+    ),
     mentat_guard_zero_provenance(
       if ("zero_verified" %in% DBI::dbListFields(connection, "scrape_progress")) {
         DBI::dbGetQuery(
