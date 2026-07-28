@@ -173,6 +173,12 @@ mentat_guard_zero_provenance <- function(progress) {
 # Stored may sit a little UNDER reported without fault, because separate variant
 # sets return overlapping rows that collapse on sub_id - Farmers legitimately
 # stores 9,516 against a reported 9,520. Only a material gap is reported.
+# The CALLER must exclude identity passes (P2_name / P2_name_state) from the
+# reported side: those search a contributor name, so records_total counts every
+# person nationally with that name. Including them reported a complete Coinbase
+# 2024 as 1,085,852 rows short, because one seed alone returns 1,049,000.
+# A flagged cell is a CANDIDATE for recollection, not proven loss - heavy overlap
+# between variant sets can also depress the ratio. Re-collect to settle it.
 mentat_guard_collection_completeness <- function(progress, stored, tolerance = 0.02) {
   if (is.null(progress) || !nrow(progress) || is.null(stored) || !nrow(stored)) {
     return(mentat_guard_result(

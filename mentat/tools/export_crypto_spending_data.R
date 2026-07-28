@@ -675,11 +675,21 @@ mentat_run_export_guards(
     mentat_guard_collection_completeness(
       DBI::dbGetQuery(
         connection,
+        # Identity passes (P2_name / P2_name_state) are excluded from the
+        # denominator. They search a CONTRIBUTOR NAME, so records_total counts
+        # every person nationally with that name and has no relation to what
+        # should be stored: one Coinbase 2024 seed reports 1,049,000 records
+        # against 2,299 for the employer pass. Counting them made a complete
+        # Coinbase look 1,085,852 rows short. Only the employer and variant
+        # passes define a universe the database is supposed to contain.
         paste(
           "SELECT company, cycle, records_total,",
           "CASE WHEN variant_set LIKE 'P2_company_name%' THEN 'corporate'",
           "ELSE 'contributions' END AS destination",
-          "FROM scrape_progress"
+          "FROM scrape_progress",
+          "WHERE variant_set LIKE 'P1_employer%'",
+          "OR variant_set LIKE 'P2_variant%'",
+          "OR variant_set LIKE 'P2_company_name%'"
         )
       ),
       DBI::dbGetQuery(
