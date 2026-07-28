@@ -2914,6 +2914,36 @@ collect_company_contributor_pass <- function(
   )
 }
 
+collection_company_store_counts <- function(connection, company) {
+  require_package("DBI")
+  counts <- DBI::dbGetQuery(
+    connection,
+    paste(
+      "SELECT",
+      "(SELECT COUNT(*) FROM contributions WHERE company = ?) AS contributions,",
+      "(SELECT COUNT(*) FROM corporate_giving WHERE company = ?) AS corporate_giving"
+    ),
+    params = list(company, company)
+  )
+  contributions <- as.integer(counts$contributions[[1L]] %||% 0L)
+  corporate_giving <- as.integer(counts$corporate_giving[[1L]] %||% 0L)
+  c(
+    contributions = contributions,
+    corporate_giving = corporate_giving,
+    total = contributions + corporate_giving
+  )
+}
+
+collection_receipt_status <- function(outcome, gained) {
+  if (identical(outcome, "error")) {
+    return("ERROR")
+  }
+  if (as.integer(gained[["total"]] %||% 0L) > 0L) {
+    return("GAINED")
+  }
+  "unchanged"
+}
+
 collection_completion_detail <- function(engine, collection, skipped = FALSE) {
   engine <- tolower(trim_text(engine))
   collection <- collection %||% list()

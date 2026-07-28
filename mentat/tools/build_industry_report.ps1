@@ -32,60 +32,15 @@ param(
 $ErrorActionPreference = 'Stop'
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $projectRoot = Split-Path -Parent $scriptRoot
+$heapPlanner = Join-Path $scriptRoot 'node_heap_plan.psm1'
+if (-not (Test-Path -LiteralPath $heapPlanner -PathType Leaf)) {
+  throw "Node heap planner is missing: $heapPlanner"
+}
+Import-Module $heapPlanner -Force
 $templateContract = 'mentat-industry-overview-v1'
 $Industry = $Industry.Trim()
 if (-not $Industry) { throw 'Industry cannot be empty.' }
 
-if ($NodeHeapMb -eq 0) {
-  # Use the machine's RAM aggressively during the single in-memory workbook
-  # build, while retaining enough headroom for Excel and Windows. This is
-  # deliberately visible in the final receipt; there is no silent memory cap.
-  $detectedPhysicalMb = 0
-  try {
-    Add-Type -AssemblyName Microsoft.VisualBasic -ErrorAction Stop
-    $computerInfo = [Microsoft.VisualBasic.Devices.ComputerInfo]::new()
-    $detectedPhysicalMb = [int][math]::Floor(
-      [double]$computerInfo.TotalPhysicalMemory / 1MB
-    )
-  } catch {
-    Write-Warning (
-      'Could not detect physical RAM for the Node heap; using the ' +
-      '16,384 MB compatibility default.'
-    )
-  }
-  # Size against memory that is actually AVAILABLE, not total installed. Taking
-  # 75% of total assumes the machine is idle; it is not during a long night of
-  # builds. Telecom 2025-2026 died with "Garbage collector could not allocate
-  # 65536u bytes of memory for major heap section" while holding a 24GB plan on a
-  # box also running a Chrome collection - and it had the SMALLEST payload of the
-  # three cycles, so the cause was system RAM, not the workbook.
-  $availableMb = 0
-  try {
-    $osInfo = Get-CimInstance Win32_OperatingSystem -ErrorAction Stop
-    # FreePhysicalMemory is in KB.
-    $availableMb = [int][math]::Floor([double]$osInfo.FreePhysicalMemory / 1KB)
-  } catch { $availableMb = 0 }
-  $budgetMb = if ($availableMb -gt 0) {
-    # Leave a real margin for Excel, Windows and anything else still running.
-    [math]::Min([math]::Floor($detectedPhysicalMb * 0.75), [math]::Floor($availableMb * 0.70))
-  } else {
-    [math]::Floor($detectedPhysicalMb * 0.75)
-  }
-  $NodeHeapMb = if ($detectedPhysicalMb -gt 0) {
-    [int][math]::Min(32768, [math]::Max(8192, $budgetMb))
-  } else {
-    16384
-  }
-  Write-Host (
-    'Node heap sizing: total={0}MB available={1}MB -> heap={2}MB' -f
-      $detectedPhysicalMb, $availableMb, $NodeHeapMb
-  )
-}
-Write-Host (
-  'Workbook RAM plan: node_heap_mb={0} performance_budget_minutes={1:n2}' -f
-    $NodeHeapMb,
-    $PerformanceBudgetMinutes
-)
 $reportBaseName = if ($CycleLabel) {
   "${Industry} Industry Spending Overview ${CycleLabel}"
 } else {
@@ -220,7 +175,7 @@ $beneficiaryFiles = @(
   (Join-Path $BeneficiaryDirectory 'leadership2022.csv'),(Join-Path $BeneficiaryDirectory 'leadership2024.csv'),(Join-Path $BeneficiaryDirectory 'leadership2026.csv'),
   (Join-Path $BeneficiaryDirectory 'pas222\itpas2.txt'),(Join-Path $BeneficiaryDirectory 'pas224\itpas2.txt'),(Join-Path $BeneficiaryDirectory 'pas226\itpas2.txt')
 )
-foreach ($requiredPath in @($DatabasePath,$RScriptPath,$NodePath,$NodeModulesPath,$exporter,$builder,$cycleFilterScript,$finalizer,$beneficiaryModule) + $committeeFiles + $beneficiaryFiles) {
+foreach ($requiredPath in @($DatabasePath,$RScriptPath,$NodePath,$NodeModulesPath,$exporter,$builder,$cycleFilterScript,$finalizer,$beneficiaryModule,$heapPlanner) + $committeeFiles + $beneficiaryFiles) {
   if (-not (Test-Path -LiteralPath $requiredPath)) { throw "Required report input or runtime is missing: $requiredPath" }
 }
 
@@ -596,6 +551,51 @@ if (-not $workbookCacheHit) {
       }
     }
     Write-Host "Workbook build slot acquired: $WorkbookLockPath"
+    if ($NodeHeapMb -eq 0) {
+      # Measure immediately before Node starts, after any arbitrarily long lock
+      # wait. Cache hits never need a heap plan at all.
+      $detectedPhysicalMb = 0
+      try {
+        Add-Type -AssemblyName Microsoft.VisualBasic -ErrorAction Stop
+        $computerInfo = [Microsoft.VisualBasic.Devices.ComputerInfo]::new()
+        $detectedPhysicalMb = [int][math]::Floor(
+          [double]$computerInfo.TotalPhysicalMemory / 1MB
+        )
+      } catch { $detectedPhysicalMb = 0 }
+      $availableMb = 0
+      try {
+        $osInfo = Get-CimInstance Win32_OperatingSystem -ErrorAction Stop
+        # FreePhysicalMemory is in KB.
+        $availableMb = [int][math]::Floor(
+          [double]$osInfo.FreePhysicalMemory / 1KB
+        )
+      } catch { $availableMb = 0 }
+      $heapPlan = Get-MentatNodeHeapPlan `
+        -TotalPhysicalMb $detectedPhysicalMb `
+        -AvailableMb $availableMb
+      Write-Host (
+        'Node heap sizing: total={0}MB available={1}MB safe_cap={2}MB status={3}' -f
+          $detectedPhysicalMb,
+          $availableMb,
+          $heapPlan.safe_cap_mb,
+          $heapPlan.reason
+      )
+      if (-not $heapPlan.ready) {
+        throw (
+          'Automatic Node heap sizing cannot safely provide the 8,192 MB ' +
+          "minimum (total=$detectedPhysicalMb MB; available=$availableMb MB; " +
+          "safe cap=$($heapPlan.safe_cap_mb) MB). Wait for collection/build " +
+          'processes to release memory, or pass -NodeHeapMb explicitly only ' +
+          'after verifying that capacity is available.'
+        )
+      }
+      $NodeHeapMb = [int]$heapPlan.heap_mb
+    }
+    Write-Host (
+      'Workbook RAM plan: node_heap_mb={0} performance_budget_minutes={1:n2}' -f
+        $NodeHeapMb,
+        $PerformanceBudgetMinutes
+    )
     $env:MENTAT_INDUSTRY = $Industry
     $env:MENTAT_DEFER_FORMULAS = '1'
     $env:MENTAT_NODE_MODULES = $NodeModulesPath

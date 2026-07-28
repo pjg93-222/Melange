@@ -63,14 +63,14 @@ DBI::dbExecute(connection, "PRAGMA foreign_keys = ON")
 # actually confirmed rather than inherited from a rate-limited walk.
 init_schema(connection)
 
-before <- DBI::dbGetQuery(
-  connection,
-  "SELECT COUNT(*) AS n FROM contributions WHERE company = ?",
-  params = list(company)
-)$n
+before <- collection_company_store_counts(connection, company)
 cat(sprintf(
-  "collect_company: %s / %s / cycles %s | rows before = %d\n",
-  industry, company, paste(cycles, collapse = ","), before
+  paste0(
+    "collect_company: %s / %s / cycles %s | rows before = %d ",
+    "(contributions=%d corporate=%d)\n"
+  ),
+  industry, company, paste(cycles, collapse = ","), before[["total"]],
+  before[["contributions"]], before[["corporate_giving"]]
 ))
 
 collect_crypto(
@@ -79,11 +79,8 @@ collect_crypto(
   company_filter = company
 )
 
-after <- DBI::dbGetQuery(
-  connection,
-  "SELECT COUNT(*) AS n FROM contributions WHERE company = ?",
-  params = list(company)
-)$n
+after <- collection_company_store_counts(connection, company)
+gained <- after - before
 progress <- DBI::dbGetQuery(
   connection,
   paste(
@@ -93,5 +90,12 @@ progress <- DBI::dbGetQuery(
   ),
   params = list(company)
 )
-cat(sprintf("collect_company: rows after = %d (added %d)\n", after, after - before))
+cat(sprintf(
+  paste0(
+    "collect_company: rows after = %d (added %d; ",
+    "contributions=%+d corporate=%+d)\n"
+  ),
+  after[["total"]], gained[["total"]], gained[["contributions"]],
+  gained[["corporate_giving"]]
+))
 print(progress)

@@ -993,6 +993,40 @@ DBI::dbExecute(
   )
 )
 
+store_counts <- collection_company_store_counts(connection, "Coinbase")
+expected_store_counts <- DBI::dbGetQuery(
+  connection,
+  paste(
+    "SELECT",
+    "(SELECT COUNT(*) FROM contributions WHERE company='Coinbase')",
+    "AS contributions,",
+    "(SELECT COUNT(*) FROM corporate_giving WHERE company='Coinbase')",
+    "AS corporate_giving"
+  )
+)
+stopifnot(
+  store_counts[["contributions"]] ==
+    expected_store_counts$contributions[[1L]],
+  store_counts[["corporate_giving"]] ==
+    expected_store_counts$corporate_giving[[1L]],
+  store_counts[["total"]] ==
+    expected_store_counts$contributions[[1L]] +
+      expected_store_counts$corporate_giving[[1L]],
+  store_counts[["corporate_giving"]] > 0L,
+  collection_receipt_status(
+    "ok",
+    c(contributions = 0L, corporate_giving = 1L, total = 1L)
+  ) == "GAINED",
+  collection_receipt_status(
+    "ok",
+    c(contributions = 0L, corporate_giving = 0L, total = 0L)
+  ) == "unchanged",
+  collection_receipt_status(
+    "error",
+    c(contributions = 1L, corporate_giving = 1L, total = 2L)
+  ) == "ERROR"
+)
+
 template_cols_fixture <- '<cols><col min="1" max="1" width="18"/></cols>'
 large_sheet_data <- paste0(
   "<sheetData>",
@@ -1038,6 +1072,7 @@ cat("test_report: legacy corporate exact-match revalidation verified\n")
 cat("test_report: six-sheet Spending Report contract verified\n")
 cat("test_report: exact template column layouts verified\n")
 cat("test_report: large worksheet column restoration verified\n")
+cat("test_report: contribution and corporate receipt counts verified\n")
 cat("test_report: amendment versions and signed redesignation legs verified\n")
 cat("test_report: 6,035 uniform Stats formulas and cross-sheet references verified\n")
 cat("test_report: Stats caches and fast automatic calculation mode verified\n")

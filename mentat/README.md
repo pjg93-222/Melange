@@ -142,3 +142,12 @@ Get-ChildItem tests/test_*.R | ForEach-Object {
   if ($LASTEXITCODE -ne 0) { throw "Test failed: $($_.Name)" }
 }
 ```
+
+PowerShell-specific runtime guards are separate from the R fixture suite:
+
+```powershell
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
+  tests/Test-MentatNodeHeapPlan.ps1
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
+  tests/Test-MentatLastGoodGuard.ps1
+```

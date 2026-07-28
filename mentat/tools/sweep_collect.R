@@ -7,8 +7,8 @@
 # `while read ... done < file` loop, and Rscript inherits and consumes stdin, so
 # the collector ate its own job list and entries were skipped.
 #
-# One R process, one loop, counts taken on the same connection that just wrote:
-# nothing to misreport.
+# One R process, one loop, contribution and corporate counts taken on the same
+# connection that just wrote: nothing to misreport and no destination omitted.
 #
 # Usage:
 #   Rscript tools/sweep_collect.R <jobs.tsv> [report.tsv]
@@ -45,13 +45,6 @@ open_db <- function(path) {
   DBI::dbExecute(connection, "PRAGMA journal_mode = WAL")
   connection
 }
-company_rows <- function(connection, company) {
-  DBI::dbGetQuery(
-    connection,
-    "SELECT COUNT(*) AS n FROM contributions WHERE company = ?",
-    params = list(company)
-  )$n
-}
 
 results <- vector("list", nrow(jobs))
 for (index in seq_len(nrow(jobs))) {
@@ -60,7 +53,7 @@ for (index in seq_len(nrow(jobs))) {
   connection <- open_db(job$database)
   assign("MENTAT_INDUSTRY", job$industry, envir = .GlobalEnv)
   init_schema(connection)
-  before <- company_rows(connection, job$company)
+  before <- collection_company_store_counts(connection, job$company)
   status <- "ok"
   message_text <- ""
   outcome <- tryCatch(
@@ -73,21 +66,34 @@ for (index in seq_len(nrow(jobs))) {
       "error"
     }
   )
-  after <- company_rows(connection, job$company)
+  after <- collection_company_store_counts(connection, job$company)
   DBI::dbDisconnect(connection)
   elapsed <- round(as.numeric(difftime(Sys.time(), started, units = "secs")), 1)
   gained <- after - before
-  status <- if (identical(outcome, "error")) "ERROR" else if (gained > 0) "GAINED" else "unchanged"
+  status <- collection_receipt_status(outcome, gained)
   line <- sprintf(
-    "[%s] %-30s %-32s %-9s before=%d after=%d gained=%d %.1fs %s",
+    paste0(
+      "[%s] %-30s %-32s %-9s before=%d after=%d gained=%d ",
+      "(contributions=%+d corporate=%+d) %.1fs %s"
+    ),
     format(Sys.time(), "%H:%M:%S"), job$industry, job$company, status,
-    before, after, gained, elapsed, substr(message_text, 1, 90)
+    before[["total"]], after[["total"]], gained[["total"]],
+    gained[["contributions"]], gained[["corporate_giving"]], elapsed,
+    substr(message_text, 1, 90)
   )
   cat(line, "\n", sep = "")
   flush.console()
   results[[index]] <- data.frame(
     industry = job$industry, company = job$company, status = status,
-    before = before, after = after, gained = gained, seconds = elapsed,
+    before = before[["total"]], after = after[["total"]],
+    gained = gained[["total"]],
+    contributions_before = before[["contributions"]],
+    contributions_after = after[["contributions"]],
+    contributions_gained = gained[["contributions"]],
+    corporate_before = before[["corporate_giving"]],
+    corporate_after = after[["corporate_giving"]],
+    corporate_gained = gained[["corporate_giving"]],
+    seconds = elapsed,
     error = substr(message_text, 1, 200), stringsAsFactors = FALSE
   )
   utils::write.table(
