@@ -149,5 +149,7 @@ PowerShell-specific runtime guards are separate from the R fixture suite:
 & powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
   tests/Test-MentatNodeHeapPlan.ps1
 & powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
+  tests/Test-MentatWorkbookBuilderGuards.ps1
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
   tests/Test-MentatLastGoodGuard.ps1
 ```

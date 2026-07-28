@@ -281,3 +281,106 @@ The first Credit Union rebuild failed with 272 integrity failures - the new `Sup
 Two remaining `category_population` warnings are unresolved questions, not failures: Community Banks reports no Company PAC dollars and Fintech no Trade Association dollars. Both may be genuine zeros; both are surfaced rather than silently rendered as $0.00.
 
 The previously shipped books are untouched in `reports/`; the rebuilds are staged in `reports/r12-regen/` for comparison before any promotion.
+
+## R13 - final collection, versioning, regeneration, and QA (2026-07-28)
+
+This pass completed the R12 recovery through publication-ready staged artifacts. It
+used six private collection workers, reconciled every shard into the seven canonical
+databases, applied amendment/duplicate versioning, regenerated all nine expected
+workbooks, and validated the published workbook/database fingerprints.
+
+### Collection receipt
+
+- The 70-company inventory is terminal: 20 companies are preserved in the original
+  serial-sweep receipt and the remaining 50/50 private company shards reached
+  `Company shard complete` with `quick_check=ok`.
+- Reconciliation added 1,244 contribution rows and 40 corporate-giving rows
+  (+1,284 total) in this pass. Earlier recovery work in the same run had already
+  restored 84,036 P&C contribution rows and 87,886 Comcast rows.
+- The final canonical databases all return `quick_check=ok`.
+- These receipts prove worker execution and SQLite health. They do not convert an
+  incomplete FEC walk into a complete one. Export guards still report:
+  Zurich Insurance 2024 contributions 2,325/2,434 and 2026 contributions
+  944/984; Lumen Technologies 2024 contributions 24,877/26,754 and 2026
+  contributions 10,354/11,489; Comcast 2026 corporate rows 163/183; and the
+  previously documented Crypto and Fintech completeness gaps.
+- Unverified zeros remain visible rather than silently certified: Berkshire
+  Hathaway 2026, Bitnomial 2022, and Polymarket 2022.
+
+### Versioning receipt
+
+Versioning was applied after reconciliation and before every final export:
+
+| Industry | Superseded by amendment | Duplicate filing version | Duplicate memo | SQLite |
+| --- | ---: | ---: | ---: | --- |
+| Credit Union | 22 | 521 | 56 | `quick_check=ok` |
+| Credit Arms | 0 | 206 | 22 | `quick_check=ok` |
+| Community Banks | 0 | 2 | 0 | `quick_check=ok` |
+| Crypto | 1 | 104 | 16 | `quick_check=ok` |
+| Fintech | 2 | 55 | 9 | `quick_check=ok` |
+| Telecom | 8 | 879 | 92 | `quick_check=ok` |
+| Property & Casualty Insurance | 20 | 581 | 31 | `quick_check=ok` |
+
+### Workbook regeneration receipt
+
+All nine workbooks were regenerated through the guarded wrapper with the final
+builder fingerprint. Every file is under the 45-minute performance budget, every
+manifest matches its published SHA-256, and all 2,851,573 formulas report zero
+formula-column failures and zero integrity failures.
+
+| Workbook | Bytes | Worksheets | Formulas | Workbook SHA-256 | Database SHA-256 |
+| --- | ---: | ---: | ---: | --- | --- |
+| Credit Union | 17,607,431 | 26 | 404,314 | `948c1f02d90e15aeff2f9dd81bc8c2b86a8a6308ee8885ae16a4db38e9958909` | `12deab3410b2735beb15174761d303a8c8ac89d11b043fee22a4d3a21aa8e886` |
+| Credit Arms | 15,273,615 | 27 | 418,234 | `0f025b4072737a352ab186a393bbe979c02bc3a55be95c13b7a4aea5f89c2681` | `57dd4e77781c28c2f90d974e061e380d6088e8a0eb1554bdfccaa0465a9a2de7` |
+| Community Banks | 4,128,173 | 26 | 111,890 | `bf9932ba5bc4e520f3d4d68e18e1060b4c1d56ab2e0d2824dbad9740f23fb74e` | `9d2b397a6cb8fcdcd51a967431cefd59450904402a2c6c577e11b41fe50e624b` |
+| Crypto | 6,197,598 | 26 | 166,633 | `423b5283b5586c39b5b437814a0496eaec044d0a25e81d503d9ef664ffe4ec62` | `9adb494ec77695e8286bfd3d9633fd679921a27f68a26ae3d01de715bfc058bc` |
+| Fintech | 14,186,270 | 26 | 337,356 | `2a14580610ace5eb007da0b0a5b26488007bc88c17fdd1502b551ae6fb3cfe67` | `a821437f75de2825aadbda1788393711607d6a94ecbc3ae20a06b5d5aa062428` |
+| Property & Casualty Insurance | 19,971,582 | 27 | 538,110 | `9cca8e05b62fb61b2670a1a59ff7fbfe27ffe645c84040d0789d5ba4aff4d9e6` | `82d152a197e0bcaa3a882b7425022121fc0231e31151d990da465cebbdcc2c14` |
+| Telecom 2021-2022 | 11,340,228 | 23 | 313,734 | `d7bde8affd0101dd2ed1265eef091ee817eb41b152b8c2243d3921c5e99779db` | `5277eea80472d9a2dc76742c18b71d9915462a1e65de71b724541f97b2cdf11f` |
+| Telecom 2023-2024 | 12,908,037 | 23 | 349,495 | `244e4136292f70ad04b1d285a38c98c1a3926d4113ac26a9390e2508b4755cbd` | `5277eea80472d9a2dc76742c18b71d9915462a1e65de71b724541f97b2cdf11f` |
+| Telecom 2025-2026 | 7,405,681 | 23 | 211,807 | `0849b29060688f1ff90c72809487c964cf63fed08f17f2e62c85fa220ee00f47` | `5277eea80472d9a2dc76742c18b71d9915462a1e65de71b724541f97b2cdf11f` |
+
+The final package audit also opened every workbook as Open XML, matched worksheet
+and table counts to the manifests, rejected header-only tables, and recomputed each
+source-database hash. A read-only Excel render exported all 227 worksheets to PNG;
+the visual receipt matches each workbook SHA and rejects missing or monochrome
+previews. The artifact-tool importer was also attempted at bounded 6 GB and 7 GB
+heaps, but exhausted V8 while materializing even the smallest final workbook, so
+the render pass used isolated Excel after preserving both failure receipts. The
+Telecom build uses compact raw rows plus formula facts because its full JSON
+payload would exceed the safe V8 envelope. The empty
+`CycleExceptionsTable` path now emits one `Include in Analysis = No`, amount-zero
+placeholder so Excel and the fail-closed table guard agree without changing totals.
+
+### Code and test receipt
+
+- Workbook heap planning is measured immediately before Node execution, capped at
+  70% of available memory, and fails closed when the safe cap is below 8,192 MB.
+- Sweep completion counts contribution and corporate checkpoints together; partial
+  resources no longer create a false-complete receipt.
+- The large-payload threshold is named and set to 120 MB so Telecom selects compact
+  mode before a V8 out-of-memory failure.
+- PowerShell runtime guards pass: heap plan, workbook-builder guards, and 15/15
+  last-good guards.
+- The full offline R suite passes 12/12. The Python verification harness passes
+  39 unit tests plus the Telecom regression assertion. Node syntax checks,
+  PowerShell parsing, and `git diff --check` pass.
+
+### F6 disposition
+
+**OPEN - not reproduced.** No Candidate/Leadership PAC swap reproduces in the live
+snapshots. Candidate exceeds Leadership PAC by 4x-14x in every measurable cycle,
+the classifier/reference registers are clean, the workbook mapping is
+transposition-free, and the independent G6 category-agreement guard passes on every
+final regeneration. The $162,458 trade-association total is across books and
+book-specific, so it cannot explain an identical per-book amount near $163k.
+Closure requires either reproduction against the originally audited artifacts or
+an explicit policy decision to close as non-reproduced while retaining G6 as the
+standing detector.
+
+### Promotion status
+
+The regenerated files are structurally and computationally clean and remain staged
+under `reports/r12-regen/`. Data-completeness and zero-provenance warnings above are
+not hidden; promotion is a policy decision about those disclosed source gaps, not
+an assertion that the FEC delivery was complete.
