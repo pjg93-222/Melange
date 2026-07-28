@@ -324,8 +324,17 @@ New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
 $cacheRoot = Join-Path $projectRoot ('.cache\industry-report\' + $industryToken)
 $stageDirectory = Join-Path $cacheRoot 'stage'
 New-Item -ItemType Directory -Path $cacheRoot,$stageDirectory -Force | Out-Null
-$dataPath = Join-Path $cacheRoot 'industry_data.json'
-$manifestPath = Join-Path $cacheRoot 'manifest.json'
+# A per-cycle build exports only that cycle, so it needs its own payload and
+# manifest - sharing one industry_data.json across three -CycleLabel runs would
+# make each run a cache hit on the previous cycle's data.
+$cycleToken = if ($CycleLabel) { '-' + ($CycleLabel -replace '[^0-9]', '') } else { '' }
+$dataPath = Join-Path $cacheRoot ("industry_data$cycleToken.json")
+$manifestPath = Join-Path $cacheRoot ("manifest$cycleToken.json")
+# Set BEFORE the export, not just around the workbook step: the exporter reads it
+# to narrow the payload, which is what keeps a large industry under V8's
+# 536,870,888-byte JSON string limit. Telecom's full payload is 591,338,574 and
+# cannot be parsed by the validator or the builder at all.
+$env:MENTAT_CYCLE_FILTER = $CycleLabel
 $databaseHash = (Get-FileHash -LiteralPath $DatabasePath -Algorithm SHA256).Hash.ToLowerInvariant()
 # Every file whose contents can change export output must be fingerprinted, or a
 # code fix silently republishes the pre-fix artifact as a cache hit. This list

@@ -83,6 +83,40 @@ map_unique_text <- function(values, mapper) {
 }
 
 supported_cycles <- c(2022L, 2024L, 2026L)
+# The cycles the pipeline covers at all, independent of any per-run filter.
+# Cycle exceptions are rows outside THIS set - a row from another supported cycle
+# is not an exception, it simply belongs to a different per-cycle build.
+mentat_all_cycles <- supported_cycles
+
+# MENTAT_CYCLE_FILTER narrows the export to one cycle.
+#
+# Not an optimisation - it is what makes a large industry exportable at all. The
+# payload is read back with JSON.parse(readFileSync(path,"utf8")) by both the
+# build's validator and the workbook builder, and V8 caps a single string at
+# 536,870,888 bytes. Telecom's three-cycle payload is 591,338,574 and fails
+# before anything can look at it. One cycle is roughly a third of that.
+# The build script already sets this variable for -CycleLabel, but only around
+# the workbook step, long after the export has written the full payload.
+mentat_cycle_filter <- trimws(Sys.getenv("MENTAT_CYCLE_FILTER", unset = ""))
+if (nzchar(mentat_cycle_filter)) {
+  # Accepts either the label ("2021-2022") or the cycle year ("2022").
+  requested <- suppressWarnings(as.integer(
+    sub("^\\s*[0-9]{4}\\s*-\\s*", "", mentat_cycle_filter)
+  ))
+  if (is.na(requested) || !requested %in% supported_cycles) {
+    stop(
+      "MENTAT_CYCLE_FILTER must name a supported cycle (2022, 2024, 2026 or a ",
+      "label such as 2021-2022); got: ", mentat_cycle_filter,
+      call. = FALSE
+    )
+  }
+  supported_cycles <- requested
+  cat(sprintf(
+    "cycle filter: exporting %d only (payload split to stay under the 512MB
+JSON string limit)\n",
+    requested
+  ))
+}
 
 contribution_cycle <- function(values) {
   dates <- normalize_reconcile_date(values)
@@ -682,7 +716,7 @@ payload <- list(
     raw_rows = nrow(raw_export),
     workbook_raw_rows = nrow(workbook_raw_export),
     cycle_table_rows = sum(raw_export$cycle %in% supported_cycles),
-    cycle_exception_rows = sum(!raw_export$cycle %in% supported_cycles),
+    cycle_exception_rows = sum(!raw_export$cycle %in% mentat_all_cycles),
     reassigned_by_date_rows = sum(
       raw_export$cycle %in% supported_cycles &
         raw_export$cycle != raw_export$source_cycle
@@ -726,14 +760,22 @@ payload <- list(
   cycles = cycles,
   companies = companies,
   raw_rows = workbook_raw_export,
-  cycle_exceptions = raw_export[!cycle %in% supported_cycles],
-  committee_master_sources = unique(fec_committee_master$source_url),
-  beneficiary_sources = unique(c(
+  # Against every covered cycle, not the filtered one: under a per-cycle build
+  # the other cycles' rows belong to their own build and are not exceptions.
+  # Using supported_cycles here made a filtered Telecom export LARGER than the
+  # unfiltered one (920MB vs 591MB) by re-adding both other cycles as exceptions.
+  cycle_exceptions = raw_export[!cycle %in% mentat_all_cycles],
+  # I() so jsonlite keeps these as ARRAYS. With auto_unbox = TRUE a length-1
+  # vector serialises as a bare string, and the builder calls .join() on it:
+  # "TypeError: payload.committee_master_sources.join is not a function". It only
+  # bit once a per-cycle Telecom export narrowed the sources to a single URL.
+  committee_master_sources = I(unique(fec_committee_master$source_url)),
+  beneficiary_sources = I(unique(c(
     candidate_master$source_url,
     candidate_links$source_url,
     leadership_pacs$source_url,
     downstream_activity$source_url
-  )),
+  ))),
   employees = person_cycle,
   committee_map = committee_map,
   downstream_activity = downstream_activity_export,
