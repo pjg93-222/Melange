@@ -53,14 +53,33 @@ if ($NodeHeapMb -eq 0) {
       '16,384 MB compatibility default.'
     )
   }
+  # Size against memory that is actually AVAILABLE, not total installed. Taking
+  # 75% of total assumes the machine is idle; it is not during a long night of
+  # builds. Telecom 2025-2026 died with "Garbage collector could not allocate
+  # 65536u bytes of memory for major heap section" while holding a 24GB plan on a
+  # box also running a Chrome collection - and it had the SMALLEST payload of the
+  # three cycles, so the cause was system RAM, not the workbook.
+  $availableMb = 0
+  try {
+    $osInfo = Get-CimInstance Win32_OperatingSystem -ErrorAction Stop
+    # FreePhysicalMemory is in KB.
+    $availableMb = [int][math]::Floor([double]$osInfo.FreePhysicalMemory / 1KB)
+  } catch { $availableMb = 0 }
+  $budgetMb = if ($availableMb -gt 0) {
+    # Leave a real margin for Excel, Windows and anything else still running.
+    [math]::Min([math]::Floor($detectedPhysicalMb * 0.75), [math]::Floor($availableMb * 0.70))
+  } else {
+    [math]::Floor($detectedPhysicalMb * 0.75)
+  }
   $NodeHeapMb = if ($detectedPhysicalMb -gt 0) {
-    [int][math]::Min(
-      32768,
-      [math]::Max(8192, [math]::Floor($detectedPhysicalMb * 0.75))
-    )
+    [int][math]::Min(32768, [math]::Max(8192, $budgetMb))
   } else {
     16384
   }
+  Write-Host (
+    'Node heap sizing: total={0}MB available={1}MB -> heap={2}MB' -f
+      $detectedPhysicalMb, $availableMb, $NodeHeapMb
+  )
 }
 Write-Host (
   'Workbook RAM plan: node_heap_mb={0} performance_budget_minutes={1:n2}' -f
