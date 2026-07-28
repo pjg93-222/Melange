@@ -696,6 +696,26 @@ function rawRowsForCycle(cycle) {
   );
 }
 
+function emptyRawTablePlaceholder(headers, sheetName, exceptionSheet) {
+  const values = new Map([
+    ["Source ID", "NO_SOURCE_ROWS"],
+    ["Fact ID", "NO_SOURCE_ROWS"],
+    ["Cycle", sheetName],
+    ["Fact Type", "Placeholder"],
+    [
+      "Cycle Alignment",
+      exceptionSheet ? "Outside requested cycles" : "OK",
+    ],
+    ["Contributor", "No source rows"],
+    ["Amount", 0],
+    ["Analysis Amount", null],
+    ["Gift Count", 0],
+    ["Include in Analysis", "No"],
+    ["Logic Check", deferFormulas ? "PENDING" : null],
+  ]);
+  return headers.map((header) => values.get(header) ?? null);
+}
+
 const rawHeaders = [
     "Source ID",
     "Cycle",
@@ -791,6 +811,9 @@ function buildRawSheet({
     : compactRaw
       ? compactRawHeaders
       : rawHeaders;
+  const tableData = data.length > 0
+    ? data
+    : [emptyRawTablePlaceholder(headers, sheetName, exceptionSheet)];
   const lastColumn = excelColumn(headers.length);
   titleBlock(
     sheet,
@@ -800,9 +823,12 @@ function buildRawSheet({
     lastColumn,
   );
 
-  sheet.getRange(`A4:${lastColumn}${4 + data.length}`).values = [headers, ...data];
+  sheet.getRange(`A4:${lastColumn}${4 + tableData.length}`).values = [
+    headers,
+    ...tableData,
+  ];
   const firstDataRow = 5;
-  const lastDataRow = 4 + data.length;
+  const lastDataRow = 4 + tableData.length;
   if (!deferFormulas) {
     const includeColumn = aggregateFacts ? "P" : compactRaw ? "R" : "Z";
     const logicColumn = aggregateFacts ? "R" : compactRaw ? "T" : "AI";

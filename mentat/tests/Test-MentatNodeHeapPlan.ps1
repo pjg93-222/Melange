@@ -55,4 +55,26 @@ if (
   )
 }
 
+$largePayloadDeclarationCount = [regex]::Matches(
+  $buildText,
+  '(?m)^\$largePayloadThresholdBytes = 120MB\r?$'
+).Count
+$largePayloadGuardCount = [regex]::Matches(
+  $buildText,
+  (
+    '\(Get-Item -LiteralPath \$dataPath\)\.Length -ge\s+' +
+    '\$largePayloadThresholdBytes'
+  )
+).Count
+if (
+  $largePayloadDeclarationCount -ne 1 -or
+  $largePayloadGuardCount -ne 2 -or
+  $buildText.Contains('150MB')
+) {
+  throw (
+    'Compact-raw and formula-facts modes must share the named 120MB ' +
+    'large-payload threshold.'
+  )
+}
+
 Write-Host 'Test-MentatNodeHeapPlan: PASS'

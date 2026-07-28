@@ -412,11 +412,15 @@ $priorIndustry = $env:MENTAT_INDUSTRY
 $priorCompactRaw = $env:MENTAT_COMPACT_RAW
 $priorFormulaFacts = $env:MENTAT_FORMULA_FACTS
 $priorCycleFilter = $env:MENTAT_CYCLE_FILTER
+$largePayloadThresholdBytes = 120MB
 $compactRawMode = if (
   $priorCompactRaw -in @('0', '1')
 ) {
   $priorCompactRaw
-} elseif ((Get-Item -LiteralPath $dataPath).Length -ge 150MB) {
+} elseif (
+  (Get-Item -LiteralPath $dataPath).Length -ge
+    $largePayloadThresholdBytes
+) {
   '1'
 } else {
   '0'
@@ -425,7 +429,10 @@ $formulaFactsMode = if (
   $priorFormulaFacts -in @('0', '1')
 ) {
   $priorFormulaFacts
-} elseif ((Get-Item -LiteralPath $dataPath).Length -ge 150MB) {
+} elseif (
+  (Get-Item -LiteralPath $dataPath).Length -ge
+    $largePayloadThresholdBytes
+) {
   '1'
 } else {
   '0'
