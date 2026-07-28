@@ -403,12 +403,29 @@ try {
     # candidate with both support and oppose legs had their SUPPORT dollars
     # discarded too, because the string contained the word "Oppose".
     # Opposition keeps its own column and is never folded into a party total.
-    Set-TableColumnFormula $table 'Democratic Activity' '=IF([@Party]="D",[@[Support Activity]],0)'
-    Set-TableColumnFormula $table 'Republican Activity' '=IF([@Party]="R",[@[Support Activity]],0)'
-    Set-TableColumnFormula $table 'Other / Unclassified Activity' '=[@[Downstream Activity]]-[@[Democratic Activity]]-[@[Republican Activity]]'
-    # Coverage measures how much SUPPORT activity carries a party label, so the
-    # denominator is support - not the mixed total, which oppose dollars inflate.
-    Set-TableColumnFormula $table 'Party Coverage' '=IF([@[Support Activity]]=0,0,([@[Democratic Activity]]+[@[Republican Activity]])/[@[Support Activity]])'
+    # Four buckets that sum to the total: money FOR a D candidate, money FOR an R
+    # candidate, money for anyone else, and money spent AGAINST whoever the row
+    # names. "For the candidate" is everything that is not opposition, NOT just
+    # the 24E/24F independent expenditures: 24K contributions to a nonaffiliated
+    # committee, 24Z in-kind, 24C coordinated party expenditures, 24P, 24R and
+    # 24H are all unambiguously pro-candidate and are the ORDINARY case for a
+    # corporate PAC. Counting Support alone stripped $151.4M of them out of the
+    # party columns - David Perdue's $2,995,566 of "Contribution / Other" money
+    # in the 2022 Bakkt view read as $0 Republican Activity at 0% coverage.
+    # Opposition keeps its own column and is never folded into a party total,
+    # and it no longer lands in Other / Unclassified either: that column means
+    # "the candidate's party is neither D nor R" on every other sheet, and
+    # $1.99B of anti-D/anti-R spending was being filed under it.
+    Set-TableColumnFormula $table 'Democratic Activity' '=IF([@Party]="D",[@[Downstream Activity]]-[@[Oppose Activity]],0)'
+    Set-TableColumnFormula $table 'Republican Activity' '=IF([@Party]="R",[@[Downstream Activity]]-[@[Oppose Activity]],0)'
+    Set-TableColumnFormula $table 'Other / Unclassified Activity' '=IF(OR([@Party]="D",[@Party]="R"),0,[@[Downstream Activity]]-[@[Oppose Activity]])'
+    # Denominator is the mixed total, matching the focused sheets (Party Coverage
+    # at the bottom of this file). Using [Support Activity] here made the same
+    # candidate report two different coverage numbers on two sheets of one
+    # workbook - Sherrod Brown 100.0% here against 0.6% on the cycle summary -
+    # and exceeded 100% wherever a negative correction pushed support above the
+    # unsigned total.
+    Set-TableColumnFormula $table 'Party Coverage' '=IF([@[Downstream Activity]]=0,0,([@[Democratic Activity]]+[@[Republican Activity]])/[@[Downstream Activity]])'
     Set-TableColumnFormula $table 'FEC Candidate URL' '=IF([@[Candidate ID]]="","","https://www.fec.gov/data/candidate/"&[@[Candidate ID]]&"/")'
     # Only the party-split identity is asserted here. "Support + Oppose must not
     # exceed Downstream Activity" looks like an invariant and is NOT one: FEC
@@ -418,7 +435,12 @@ try {
     # rebuild: 272 of 2,979 candidate rows, every residual negative, down to
     # -$735,710 (Herschel Walker: $4,913,993 total against $5,649,703 opposition).
     # Asserting the inequality failed all 272 and blocked the build on correct data.
-    Set-TableColumnFormula $table 'Integrity Check' '=IF(ABS([@[Downstream Activity]]-[@[Democratic Activity]]-[@[Republican Activity]]-[@[Other / Unclassified Activity]])<0.01,"OK","CHECK")'
+    # The four buckets must account for the whole total. Unlike the version this
+    # replaces, it is not an algebraic tautology: Oppose Activity is computed in
+    # R from per-row transaction codes while Downstream Activity is an Excel
+    # SUMIFS over the bridge, so the identity closes only if those two
+    # independent paths agree about the same rows.
+    Set-TableColumnFormula $table 'Integrity Check' '=IF(ABS([@[Downstream Activity]]-[@[Democratic Activity]]-[@[Republican Activity]]-[@[Other / Unclassified Activity]]-[@[Oppose Activity]])<0.01,"OK","CHECK")'
   } finally { Release-ComObject $table; Release-ComObject $sheet }
 
   $focusedSheets = @()
@@ -440,7 +462,25 @@ try {
       Set-TableColumnFormula $table 'Republican' ('=' + (Focused-Expression 'Republican'))
       Set-TableColumnFormula $table 'Other / Unclassified' ('=' + (Focused-Expression 'Other / Unclassified'))
       Set-TableColumnFormula $table 'Party Coverage' '=IF([@[Total / Activity]]=0,0,([@Democratic]+[@Republican])/[@[Total / Activity]])'
-      Set-TableColumnFormula $table 'Integrity Check' '=IF(ABS([@[Total / Activity]]-[@Democratic]-[@Republican]-[@[Other / Unclassified]])<0.01,"OK","CHECK")'
+      # Beneficiary rows carry a FOURTH bucket the other three sections do not:
+      # opposition. Total / Activity is the mixed downstream figure, while
+      # Democratic/Republican/Other now count only money FOR a candidate, so the
+      # three-way identity leaves the opposition behind and every beneficiary row
+      # reports CHECK (74 of them on the Crypto rebuild). Only the beneficiary
+      # section has an Oppose column to subtract, hence the Section guard - the
+      # company/contributor/recipient tables have no such column.
+      $focusedOppose = (
+        "IF([@Section]=`"Top Downstream Beneficiary`"," +
+        "SUMIFS(BeneficiarySummaryTable[Oppose Activity]," +
+        "BeneficiarySummaryTable[Cycle],[@Cycle]," +
+        "BeneficiarySummaryTable[View],[@[Reference View]]," +
+        "BeneficiarySummaryTable[Company],[@[Reference Company]]," +
+        "BeneficiarySummaryTable[Candidate ID],[@[Reference Key]]),0)"
+      )
+      Set-TableColumnFormula $table 'Integrity Check' (
+        "=IF(ABS([@[Total / Activity]]-[@Democratic]-[@Republican]-" +
+        "[@[Other / Unclassified]]-(${focusedOppose}))<0.01,`"OK`",`"CHECK`")"
+      )
     } finally { Release-ComObject $table; Release-ComObject $sheet }
   }
 

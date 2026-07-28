@@ -66,11 +66,11 @@ const industry = String(payload.metadata?.industry ?? "Crypto").trim() || "Crypt
 const overviewSheetName = industry === "Crypto" ? "Crypto Spending Overview" : "Spending Overview";
 const companyViewName = (company) => `${company} View`.slice(0, 31);
 const previews = process.env.MENTAT_RENDER_MASTER_ONLY === "1" ? [
-  ["Master Overview", "A1:Q45", "Master_Overview_Summary"],
+  ["Master Overview", "A1:Q48", "Master_Overview_Summary"],
   ["Master Overview", "R1:BJ18", "Master_Overview_Recipient_Channels"],
   ["Master Overview", "BK1:CE18", "Master_Overview_Contributor_Roles"],
 ] : [
-  ["Master Overview", "A1:Q45"],
+  ["Master Overview", "A1:Q48"],
   [overviewSheetName, "A1:J52"],
   ...payload.cycles.map((cycle) => [`${cycle.label} Summary`, "A1:S35"]),
   ["Company List", "A1:O36"],

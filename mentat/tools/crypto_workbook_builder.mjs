@@ -1193,33 +1193,91 @@ function buildMasterOverview() {
       tableName,
     );
     styleTable(table);
-    sheet.getRange(`B${first}:B${last}`).format.numberFormat = countFormat;
-    sheet.getRange(`C${first}:C${last}`).format.numberFormat = currencyFormat;
-    sheet.getRange(`D${first}:D${last}`).format.numberFormat = percentFormat;
-    sheet.getRange(`E${first}:G${last}`).format.numberFormat = currencyFormat;
-    sheet.getRange(`H${first}:J${last}`).format.numberFormat = percentFormat;
-    sheet.getRange(`K${first}:L${last}`).format.numberFormat = currencyFormat;
-    sheet.getRange(`M${first}:M${last}`).format.numberFormat = percentFormat;
-    sheet.getRange(`N${first}:O${last}`).format.numberFormat = currencyFormat;
-    sheet.getRange(`P${first}:Q${last}`).format.numberFormat = percentFormat;
+
+    // Per-column average, one row per cycle block.
+    //
+    // It sits immediately BELOW the table and deliberately OUTSIDE the
+    // ListObject. Everything about the sheet's machinery assumes the table
+    // contains only companies plus Industry Total: the finalizer assigns one
+    // formula to a whole column at once (Set-TableColumnFormula), so an in-table
+    // row cannot hold a different formula; and its reconciliation sums every
+    // non-"Industry Total" row and throws "Master Overview company sum mismatch"
+    // if the result misses the industry total, which a mean row would break.
+    // Staying outside the table means the Rank COUNTIFS population, the
+    // "% of Industry" denominator and that reconciliation all keep excluding
+    // this row structurally, with no formula edits anywhere.
+    //
+    // These writes must ALSO stay outside the `if (!deferFormulas)` block above:
+    // production always builds with MENTAT_DEFER_FORMULAS=1, so that block never
+    // runs and anything placed inside it ships blank.
+    const companyFirst = first;
+    const companyLast = last - 1; // last row is Industry Total
+    const averageRow = last + 1;
+    // Mean of the ten company rows, ratios included - the convention already used
+    // for every Stats metric column (report.R) and stated in MENTAT_SEQUENCING_v2
+    // as "Average = arithmetic mean of ten company rows". Averaging the ratios
+    // themselves is also the only version that adds anything: the dollar-weighted
+    // ratio-of-means is precisely what the Industry Total row above already shows.
+    const averageFormulas = [];
+    for (let column = 2; column <= headers.length; column += 1) {
+      const letter = excelColumn(column);
+      if (column === 2) {
+        // Rank: the mean of ranks 1..N is always (N+1)/2, which would render as a
+        // real rank while carrying no information. Left blank on purpose.
+        averageFormulas.push("");
+      } else if (column === headers.length) {
+        averageFormulas.push(
+          `=IF(AND(ABS(C${averageRow}-E${averageRow}-F${averageRow}-G${averageRow})<0.01,` +
+            `ABS(C${averageRow}-(${masterCategories
+              .map((_, offset) => `${excelColumn(18 + offset * 5)}${averageRow}`)
+              .join("+")}))<0.01,` +
+            `ABS(C${averageRow}-(${masterTiers
+              .map((_, offset) =>
+                `${excelColumn(18 + masterCategories.length * 5 + offset * 5)}${averageRow}`,
+              )
+              .join("+")}))<0.01),"OK","CHECK")`,
+        );
+      } else {
+        averageFormulas.push(
+          `=IF(COUNT(${letter}${companyFirst}:${letter}${companyLast})=0,"",` +
+            `AVERAGE(${letter}${companyFirst}:${letter}${companyLast}))`,
+        );
+      }
+    }
+    sheet.getRange(`A${averageRow}`).values = [["Average"]];
+    sheet.getRange(`B${averageRow}:${lastColumn}${averageRow}`).formulas = [
+      averageFormulas,
+    ];
+
+    // Formats run to averageRow, not last: a mean left unformatted renders as a
+    // raw float (0.35 instead of 35.0%).
+    sheet.getRange(`B${first}:B${averageRow}`).format.numberFormat = countFormat;
+    sheet.getRange(`C${first}:C${averageRow}`).format.numberFormat = currencyFormat;
+    sheet.getRange(`D${first}:D${averageRow}`).format.numberFormat = percentFormat;
+    sheet.getRange(`E${first}:G${averageRow}`).format.numberFormat = currencyFormat;
+    sheet.getRange(`H${first}:J${averageRow}`).format.numberFormat = percentFormat;
+    sheet.getRange(`K${first}:L${averageRow}`).format.numberFormat = currencyFormat;
+    sheet.getRange(`M${first}:M${averageRow}`).format.numberFormat = percentFormat;
+    sheet.getRange(`N${first}:O${averageRow}`).format.numberFormat = currencyFormat;
+    sheet.getRange(`P${first}:Q${averageRow}`).format.numberFormat = percentFormat;
     let metricColumn = 18;
     for (const _group of [...masterCategories, ...masterTiers]) {
       sheet.getRange(
-        `${excelColumn(metricColumn)}${first}:${excelColumn(metricColumn)}${last}`,
+        `${excelColumn(metricColumn)}${first}:${excelColumn(metricColumn)}${averageRow}`,
       ).format.numberFormat = currencyFormat;
       sheet.getRange(
-        `${excelColumn(metricColumn + 1)}${first}:${excelColumn(metricColumn + 1)}${last}`,
+        `${excelColumn(metricColumn + 1)}${first}:${excelColumn(metricColumn + 1)}${averageRow}`,
       ).format.numberFormat = percentFormat;
       sheet.getRange(
-        `${excelColumn(metricColumn + 2)}${first}:${excelColumn(metricColumn + 3)}${last}`,
+        `${excelColumn(metricColumn + 2)}${first}:${excelColumn(metricColumn + 3)}${averageRow}`,
       ).format.numberFormat = currencyFormat;
       sheet.getRange(
-        `${excelColumn(metricColumn + 4)}${first}:${excelColumn(metricColumn + 4)}${last}`,
+        `${excelColumn(metricColumn + 4)}${first}:${excelColumn(metricColumn + 4)}${averageRow}`,
       ).format.numberFormat = percentFormat;
       metricColumn += 5;
     }
     applyIntegrityFormatting(
-      sheet.getRange(`${lastColumn}${first}:${lastColumn}${last}`),
+      sheet.getRange(`${lastColumn}${first}:${lastColumn}${averageRow}`),
       first,
       lastColumn,
     );
@@ -1227,7 +1285,13 @@ function buildMasterOverview() {
       fill: colors.lightBlue,
       font: { bold: true, color: colors.navy },
     };
-    groupRow = last + 2;
+    // Distinct from Industry Total's fill so the two summary rows read as
+    // different things at a glance.
+    sheet.getRange(`A${averageRow}:${lastColumn}${averageRow}`).format = {
+      fill: colors.lightGray,
+      font: { bold: true, color: colors.text },
+    };
+    groupRow = averageRow + 2;
   }
 
   sheet.freezePanes.freezeRows(6);
@@ -2195,7 +2259,8 @@ void downstreamSheet;
 void bridgeSheet;
 
 const previewRanges = new Map([
-  ["Master Overview", "A1:CE45"],
+  // Each cycle block gained an Average row, so the third block now ends at 48.
+  ["Master Overview", "A1:CE48"],
   [overviewSheetName, "A1:J52"],
   ["Company List", "A1:O36"],
   ...(aggregateFacts ? [["Employee Rank Facts", "A1:D25"]] : []),
