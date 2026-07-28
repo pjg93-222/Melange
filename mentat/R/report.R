@@ -1649,9 +1649,25 @@ spending_report_lookups <- function(connection) {
     ambiguous <- character(0L)
     for (index in unresolved) {
       needle <- association[[index]]
-      found <- observed$committee_id[
-        which(grepl(needle, observed$match_name, fixed = TRUE))
-      ]
+      # Prefix first, containment second. Containment alone is ambiguous whenever
+      # one association's name is contained in another's: "American Financial
+      # Services Association" is a substring of "Native American Financial
+      # Services Association", so a book holding both PACs matches two IDs and
+      # the ambiguity rule drops AFSA even though its own PAC is named exactly.
+      # A committee whose name STARTS with the association resolves that cleanly,
+      # and only falls back to containment for the wrapper forms the net exists
+      # to catch ("BUILD PAC OF THE NATIONAL ASSOCIATION OF HOME BUILDERS").
+      candidates <- unique(observed$committee_id[
+        which(startsWith(observed$match_name, needle))
+      ])
+      candidates <- candidates[nzchar(candidates)]
+      found <- if (length(candidates) == 1L) {
+        candidates
+      } else {
+        unique(observed$committee_id[
+          which(grepl(needle, observed$match_name, fixed = TRUE))
+        ])
+      }
       found <- unique(found[nzchar(found)])
       if (length(found) == 1L) {
         data.table::set(trade, index, "committee_id", found)
