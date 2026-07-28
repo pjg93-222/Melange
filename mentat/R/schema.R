@@ -855,6 +855,38 @@ mentat_memo_duplicate_plan <- function(rows) {
   # flag, never a filter. Ratified again 2026-07-27 after an audit proposed
   # excluding the conduit leg; the exclusion was reverted, not adopted.
   duplicate <- is_memo & nzchar(memo_key) & memo_key %in% non_memo_keys
+
+  # Second way the SAME committee's memo leg identifies its parent: FEC prints
+  # the parent transaction id in the memo text as "[SA11AI:7772]". The key above
+  # includes the amount, so a memo leg whose amount drifts even slightly from its
+  # parent escapes it - Gemini's 2.692-bitcoin liquidation to MAKE AMERICA GREAT
+  # AGAIN INC. was filed at $176,952.05 on the parent and $176,942.05 on the memo
+  # leg, a $10 difference that counted $176,942.05 twice in the shipped Crypto
+  # book. Matching the back-reference instead of the amount catches it.
+  # This stays inside the R8 rule: same committee, a memo row re-describing a
+  # transaction already counted. It does NOT touch cross-committee earmark legs,
+  # which name a different committee and continue to count.
+  parent_ref <- toupper(mentat_version_text(column("receipt_type_full")))
+  memo_note <- toupper(mentat_version_text(column("memo_text")))
+  combined <- trimws(paste(parent_ref, memo_note))
+  reference <- rep("", length(combined))
+  found <- regexpr("\\[[A-Z0-9]+:[A-Z0-9.]+\\]", combined, perl = TRUE)
+  has_reference <- found > 0L
+  if (any(has_reference)) {
+    token <- regmatches(combined, found)
+    # "[SA11AI:7772]" -> "SA11AI.7772", the transaction_id form on the parent row.
+    reference[has_reference] <- sub(
+      ":", ".", gsub("[][]", "", token), fixed = TRUE
+    )
+    transaction <- toupper(mentat_version_text(column("transaction_id")))
+    parent_keys <- unique(paste(
+      committee, transaction, sep = "|"
+    )[!is_memo & nzchar(transaction)])
+    duplicate <- duplicate | (
+      is_memo & has_reference &
+        paste(committee, reference, sep = "|") %in% parent_keys
+    )
+  }
   data.frame(
     sub_id = as.character(column("sub_id")),
     memo_key = memo_key,
@@ -870,17 +902,30 @@ apply_amendment_versioning <- function(connection, print_summary = FALSE) {
     c("contributions", "corporate_giving"),
     DBI::dbListTables(connection)
   )
+  # transaction_id / receipt_type_full / memo_text feed the parent back-reference
+  # rule in mentat_memo_duplicate_plan(). corporate_giving has transaction_id but
+  # not the two text columns, so each frame is padded to this shape before rbind,
+  # which otherwise fails with "numbers of columns do not match".
+  memo_plan_columns <- c(
+    "sub_id", "company", "committee_id", "contribution_receipt_date",
+    "contribution_receipt_amount", "contributor_name", "is_memo_leg",
+    "transaction_id", "receipt_type_full", "memo_text"
+  )
   DBI::dbWithTransaction(connection, {
     global_memo_rows <- do.call(rbind, lapply(tables, function(table) {
       fields <- DBI::dbListFields(connection, table)
-      wanted <- intersect(c(
-        "sub_id", "company", "committee_id", "contribution_receipt_date",
-        "contribution_receipt_amount", "contributor_name", "is_memo_leg"
-      ), fields)
+      wanted <- intersect(memo_plan_columns, fields)
       rows <- DBI::dbGetQuery(
         connection,
         paste("SELECT", paste(wanted, collapse = ", "), "FROM", table)
       )
+      for (column in setdiff(memo_plan_columns, names(rows))) {
+        rows[[column]] <- rep(
+          if (identical(column, "is_memo_leg")) 0L else "",
+          nrow(rows)
+        )
+      }
+      rows <- rows[, memo_plan_columns, drop = FALSE]
       # rep() not a scalar: assigning a length-1 value to a zero-row frame
       # errors, which an empty corporate_giving table triggers.
       rows$.source_table <- rep(table, nrow(rows))

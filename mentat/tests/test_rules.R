@@ -10,7 +10,7 @@ project_root <- normalizePath(
   winslash = "/",
   mustWork = TRUE
 )
-for (file in c("paths.R", "ingest.R", "fec_page.R", "collect.R", "report.R")) {
+for (file in c("paths.R", "schema.R", "ingest.R", "fec_page.R", "collect.R", "report.R")) {
   source(file.path(project_root, "R", file), local = .GlobalEnv)
 }
 
@@ -287,6 +287,43 @@ stopifnot(
   identical(spending_report_company_labels("Foris Dax Inc"), "Crypto.com"),
   identical(spending_report_company_labels("Coinlist"), "CoinList"),
   identical(spending_report_company_labels("Tzero"), "tZero")
+)
+
+# Memo dedup: a memo leg identifies its parent two ways. The five-key match
+# (company/committee/date/amount/contributor) misses any leg whose amount drifted
+# from its parent, so the parent transaction id printed in the memo text as
+# "[SA11AI:7772]" is matched as well. Real anatomy: Gemini's 2.692-bitcoin
+# liquidation to MAKE AMERICA GREAT AGAIN INC. filed $176,952.05 on the parent
+# and $176,942.05 on the memo leg, and the $10 gap counted it twice.
+# Cross-committee earmark legs must stay countable (R8 recipient-as-shown).
+memo_rows <- data.frame(
+  sub_id = c("PARENT", "MEMO_DRIFT", "MEMO_EXACT", "EARMARK_OTHER_CMTE"),
+  company = "Gemini",
+  committee_id = c("C00825851", "C00825851", "C00825851", "C00401224"),
+  contribution_receipt_date = "2024-07-19",
+  contribution_receipt_amount = c(176952.05, 176942.05, 176952.05, 176952.05),
+  contributor_name = "WINKLEVOSS, TYLER",
+  is_memo_leg = c(0L, 1L, 1L, 1L),
+  transaction_id = c("SA11AI.7772", "SA17.7929.0", "SA17.7930.0", "SA17.7931.0"),
+  receipt_type_full = c(
+    "2.692 BITCOINS LIQUIDATED",
+    "2.692 BITCOINS LIQUIDATED [SA11AI:7772]",
+    "2.692 BITCOINS LIQUIDATED",
+    "EARMARKED FOR SOMEONE ELSE [SA11AI:7772]"
+  ),
+  memo_text = "",
+  stringsAsFactors = FALSE
+)
+memo_plan <- mentat_memo_duplicate_plan(memo_rows)
+memo_flag <- setNames(memo_plan$duplicate_memo, memo_plan$sub_id)
+stopifnot(
+  memo_flag[["PARENT"]] == 0L,
+  # caught by the back-reference despite the amount drift
+  memo_flag[["MEMO_DRIFT"]] == 1L,
+  # still caught by the original five-key match
+  memo_flag[["MEMO_EXACT"]] == 1L,
+  # different committee: a real earmark leg, counts (R8)
+  memo_flag[["EARMARK_OTHER_CMTE"]] == 0L
 )
 
 cat("test_rules: PASS\n")
