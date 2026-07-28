@@ -1246,6 +1246,13 @@ insert_rows_or_ignore <- function(connection, table, rows, columns) {
   invisible(inserted)
 }
 
+# zero_verified defaults to 0 (unverified) and must be passed explicitly by a
+# lane that actually confirms emptiness. Only the browser lane does: its
+# readiness gate (fec_results_ready, fec_page.R) requires DataTables' own
+# confirmed-empty row before a zero is accepted. The API lane reaches this same
+# function and has no equivalent gate - a query that 504s twice is classified
+# unservable, decomposed, and can synthesise a completed page with count=0 - so
+# it leaves the default and its zeros are reported as unverified.
 checkpoint_contribution_page <- function(
   connection,
   rows,
@@ -1255,7 +1262,8 @@ checkpoint_contribution_page <- function(
   page,
   records_total,
   reviews = NULL,
-  use_transaction = TRUE
+  use_transaction = TRUE,
+  zero_verified = 0L
 ) {
   require_package("DBI")
   require_package("data.table")
@@ -1274,20 +1282,19 @@ checkpoint_contribution_page <- function(
         setdiff(names(reviews), "review_id")
       )
     }
-    # zero_verified=1: this checkpoint was written by the hardened collector,
-    # which only reaches this point after fec_results_ready() confirmed the page
-    # really is empty (see fec_page.R). A rate-limited page never gets here - it
-    # times out and stops the run - so a zero recorded now is a real zero.
+    # Never downgrade an already-verified checkpoint: a later unverified write
+    # for the same key keeps the 1 via MAX, so one confirmed walk is enough.
     DBI::dbExecute(
       connection,
       paste(
         "INSERT INTO scrape_progress",
         "(company, cycle, variant_set, last_page, records_total, updated_at,",
         "zero_verified)",
-        "VALUES (?, ?, ?, ?, ?, ?, 1)",
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
         "ON CONFLICT(company, cycle, variant_set) DO UPDATE SET",
         "last_page=excluded.last_page, records_total=excluded.records_total,",
-        "updated_at=excluded.updated_at, zero_verified=1"
+        "updated_at=excluded.updated_at,",
+        "zero_verified=MAX(scrape_progress.zero_verified, excluded.zero_verified)"
       ),
       params = list(
         company,
@@ -1295,7 +1302,8 @@ checkpoint_contribution_page <- function(
         variant_set,
         as.integer(page),
         as.integer(records_total),
-        format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3%z")
+        format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3%z"),
+        as.integer(zero_verified)
       )
     )
   }
@@ -1472,7 +1480,10 @@ collect_employer_set <- function(
         cycle,
         variant_set,
         page,
-        records_total
+        records_total,
+        # Browser lane: fec_results_ready() has already confirmed this page, so a
+        # zero recorded here is a real zero and not a rate-limited one.
+        zero_verified = 1L
       )
     }
   )
@@ -2503,7 +2514,9 @@ checkpoint_identity_query_page <- function(
     page,
     records_total,
     reviews = reviews,
-    use_transaction = use_transaction
+    use_transaction = use_transaction,
+    # Browser lane, same reasoning as the employer pass above.
+    zero_verified = 1L
   )
 }
 
@@ -2739,7 +2752,8 @@ checkpoint_corporate_page <- function(
   variant_set,
   page,
   records_total,
-  use_transaction = TRUE
+  use_transaction = TRUE,
+  zero_verified = 0L
 ) {
   corporate_columns <- c(
     "sub_id", "contributor_name", "contributor_city", "contributor_state",
@@ -2763,14 +2777,16 @@ checkpoint_corporate_page <- function(
         "INSERT INTO scrape_progress",
         "(company, cycle, variant_set, last_page, records_total, updated_at,",
         "zero_verified)",
-        "VALUES (?, ?, ?, ?, ?, ?, 1)",
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
         "ON CONFLICT(company, cycle, variant_set) DO UPDATE SET",
         "last_page=excluded.last_page, records_total=excluded.records_total,",
-        "updated_at=excluded.updated_at, zero_verified=1"
+        "updated_at=excluded.updated_at,",
+        "zero_verified=MAX(scrape_progress.zero_verified, excluded.zero_verified)"
       ),
       params = list(
         company, as.integer(cycle), variant_set, as.integer(page),
-        as.integer(records_total), format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3%z")
+        as.integer(records_total), format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3%z"),
+        as.integer(zero_verified)
       )
     )
   }
@@ -2883,7 +2899,9 @@ collect_company_contributor_pass <- function(
           excluded_reason
         )]
         checkpoint_corporate_page(
-          connection, corporate, company, cycle, variant_set, page, records_total
+          connection, corporate, company, cycle, variant_set, page, records_total,
+          # Browser lane, same reasoning as the employer pass.
+          zero_verified = 1L
         )
       }
     )
