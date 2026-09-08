@@ -3,6 +3,8 @@
 Double-click **MENTAT** on the Desktop or find **MENTAT** in the Start menu.
 It opens Loading in a dedicated app window. The local server starts automatically;
 subsequent launches reuse it. No terminal needs to stay open.
+If the MENTAT window is minimized or behind another window, clicking the shortcut
+restores it and brings it forward.
 
 Closing the app window leaves collection running. Reopen MENTAT to check progress.
 Restarting Windows ends the server; opening MENTAT starts it again. Existing

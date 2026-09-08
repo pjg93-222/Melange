@@ -2,11 +2,11 @@
 param([switch]$NoLaunch)
 $ErrorActionPreference = 'Stop'
 $desktopApp = Join-Path $PSScriptRoot 'app\desktop'
-$pythonPath = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
-if (-not (Test-Path -LiteralPath $pythonPath)) { $pythonPath = (Get-Command python -ErrorAction Stop).Source }
-$effectiveLocalData = & $pythonPath -c "import os; from pathlib import Path; print((Path(os.environ['LOCALAPPDATA']) / 'Mentat').resolve().parent)"
-if ($LASTEXITCODE -ne 0) { throw 'Python could not resolve the local MENTAT data directory.' }
-[IO.File]::WriteAllText((Join-Path $desktopApp 'local-appdata.path'), $effectiveLocalData.Trim())
+$userFolders = Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
+$effectiveLocalData = [Environment]::ExpandEnvironmentVariables([string]$userFolders.'Local AppData')
+if (-not [IO.Path]::IsPathRooted($effectiveLocalData)) { throw 'Windows did not provide a valid local application-data folder.' }
+[IO.Directory]::CreateDirectory($effectiveLocalData) | Out-Null
+[IO.File]::WriteAllText((Join-Path $desktopApp 'local-appdata.path'), $effectiveLocalData)
 & (Join-Path $desktopApp 'Build-Desktop.ps1')
 $target = Join-Path $desktopApp 'MENTAT.exe'
 $shell = New-Object -ComObject WScript.Shell
