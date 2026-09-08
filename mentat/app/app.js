@@ -1,7 +1,7 @@
 const $ = id => document.getElementById(id);
 const renderedHtml = new Map();
 function setHtml(id, html) { if (renderedHtml.get(id) !== html) { $(id).innerHTML = html; renderedHtml.set(id, html); } }
-let token = '', upload = null, selectedRun = '', selectedLane = '', busy = false;
+let token = '', upload = null, selectedRun = '', selectedLane = '', busy = false, warningIds = [];
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number = value => value == null ? '—' : Number(value).toLocaleString();
 const label = value => String(value || '').replaceAll('_', ' ');
@@ -37,6 +37,10 @@ $('file').addEventListener('change', async () => {
 $('save-keys').addEventListener('click', async () => {
   try { const result = await api('/api/keys', {keys:$('api-key').value}); $('api-key').value = ''; $('key-hint').textContent = `${result.active_key_count} enabled keys; ${result.stored_key_count - result.active_key_count} disabled. Saved with Windows encryption.`; } catch (error) { showError(error.message); }
 });
+$('clear-quality').addEventListener('click', async () => {
+  try { await api('/api/quality/acknowledge', {id:selectedRun, warning_ids:warningIds}); await refreshRun(); }
+  catch (error) { showError(error.message); }
+});
 $('start').addEventListener('click', async () => {
   if (!upload) return;
   $('start').disabled = true; $('start').textContent = 'Starting…'; showError('');
@@ -70,7 +74,11 @@ function render(run) {
   const failed = assurance.some(check => check.collection === 'failed');
   const oldReports = run.reports.some(report => report.quality?.direction_columns === false);
   const changedReports = run.reports.some(report => report.quality?.matches_run === false);
-  const warnings = run.reports.flatMap(report => (report.quality?.warnings || []).map(warning => ({...warning, report:report.name})));
+  const allWarnings = run.reports.flatMap(report => (report.quality?.warnings || []).map(warning => ({...warning, report:report.name})));
+  const warnings = allWarnings.filter(warning => !warning.reviewed_at);
+  const reviewed = allWarnings.filter(warning => warning.reviewed_at);
+  warningIds = warnings.filter(warning => warning.severity !== 'fail').map(warning => warning.id);
+  $('clear-quality').hidden = !warningIds.length;
   $('quality-title').textContent = oldReports ? 'Report warning: downstream directions are combined' : failed ? 'Collection coverage checks failed' : passed && passed === assurance.length ? 'Saved collection checks passed · downstream coverage unverified' : 'Collection coverage not yet verified';
   $('quality-detail').textContent = oldReports ? 'An exported workbook lacks separate support and opposition columns. Its party totals may include spending against that party’s candidates.' : changedReports ? 'A workbook has changed since this run. Its current contents do not match the run’s recorded file.' : 'A finished search is not proof that every contribution or downstream transfer was captured.';
   let qualityHtml = assurance.map(check => `<span class="quality-chip">${escapeHtml(check.industry)} · ${escapeHtml(check.collection)}${check.recorded_checks ? ' (' + check.recorded_checks + ' checks)' : ''}</span>`).join('');
@@ -79,7 +87,15 @@ function render(run) {
     $('quality-detail').textContent = 'The repaired workbooks retain unresolved collection and classification warnings. Open Data Quality in each workbook for the evidence.';
     qualityHtml += `<details><summary>Review ${warnings.length} report warnings</summary>` + warnings.map(warning => `<details><summary>${escapeHtml(warning.report)} · ${escapeHtml(label(warning.check))}</summary><p>${escapeHtml(warning.detail)}</p></details>`).join('') + '</details>';
   }
+  if (reviewed.length) {
+    if (!warnings.length && !failed && !oldReports && !changedReports) {
+      $('quality-title').textContent = 'Saved report warnings reviewed';
+      $('quality-detail').textContent = 'The previous notices are cleared. Their evidence remains available below and in each workbook; new or changed report warnings will appear again.';
+    }
+    qualityHtml += `<details><summary>${reviewed.length} reviewed notices</summary>` + reviewed.map(warning => `<details><summary>${escapeHtml(warning.report)} · ${escapeHtml(label(warning.check))}</summary><p>${escapeHtml(warning.detail)}</p></details>`).join('') + '</details>';
+  }
   setHtml('quality-checks', qualityHtml);
+  $('quality-title').closest('.quality-panel').classList.toggle('reviewed', !!reviewed.length && !warnings.length && !failed && !oldReports && !changedReports);
   setHtml('source-snapshots', (run.source_snapshots || []).map(source => `<li>${escapeHtml(source.name)}: local file modified ${escapeHtml(source.modified_at.slice(0,10))} (${source.age_days} days ago). This is not a verified data-through date.</li>`).join('') || '<li>No local source file dates available.</li>');
   if (run.state === 'ready' && run.readiness && (!upload || upload.id !== run.id)) {
     upload = {id:run.id,readiness:run.readiness};
@@ -128,4 +144,53 @@ async function init() {
   catch (error) { showError(error.message); }
   setInterval(poll, 3000);
 }
+let evidence = null;
+const currency = value => value == null ? 'Unresolved' : Number(value).toLocaleString('en-US', {style:'currency', currency:'USD', maximumFractionDigits:2});
+const sourceAnchor = (url, text) => /^https:\/\/(docquery\.fec\.gov|www\.fec\.gov)\//.test(url || '') ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(text)} ↗</a>` : escapeHtml(text);
+function renderEvidence() {
+  if (!evidence) return;
+  const cycle = Number($('evidence-cycle').value), committee = $('evidence-committee').value;
+  const finances = evidence.committee_finances.find(row => row.cycle === cycle && row.committee_id === committee);
+  const names = new Map(evidence.committee_finances.map(row => [row.committee_id, row.committee_name || row.committee_id]));
+  const receipts = evidence.receipts.filter(row => row.cycle === cycle && row.committee_id === committee);
+  const contributions = receipts.filter(row => row.included_company_contribution).reduce((sum,row) => sum + row.amount,0);
+  const conversions = receipts.filter(row => row.role === 'asset_liquidation').reduce((sum,row) => sum + row.amount,0);
+  $('evidence-scope').textContent = `Evidence collected ${evidence.retrieved_at?.slice(0,10) || 'date unavailable'}. ${evidence.scope}`;
+  setHtml('evidence-funding', `<div><span>${escapeHtml(evidence.company)} · direct itemized contributions</span><strong>${currency(contributions)}</strong><small>Includes reported in-kind value; excludes personal donations.</small></div><div><span>Exchange proceeds · excluded from contributions</span><strong>${currency(conversions)}</strong><small>Asset conversions are not another donation by the exchange.</small></div><div><span>Committee ending cash · all donors</span><strong>${currency(finances?.ending_cash_as_reported)}</strong><small>Financial summary through ${escapeHtml(finances?.coverage_end || 'unknown')}.</small></div>`);
+  const transfers = new Map();
+  for (const row of evidence.transfers.filter(row => row.cycle === cycle && row.source === committee)) {
+    const prior = transfers.get(row.destination) || {name:row.destination_name,amount:0}; prior.amount += row.amount; transfers.set(row.destination,prior);
+  }
+  const incoming = new Map();
+  for (const row of evidence.transfers.filter(row => row.cycle === cycle && row.destination === committee)) incoming.set(row.source, (incoming.get(row.source) || 0) + row.amount);
+  const incomingHtml = incoming.size ? '<h3 class="evidence-subheading">Incoming committee transfers</h3>' + [...incoming].map(([id,amount]) => `<p>${escapeHtml(names.get(id) || id)} → ${escapeHtml(names.get(committee) || committee)} <b>${currency(amount)}</b></p>`).join('') : '';
+  setHtml('evidence-transfers', incomingHtml + `<h3 class="evidence-subheading">Outgoing committee transfers</h3>` + ([...transfers].map(([id,row]) => `<p>${escapeHtml(names.get(committee) || committee)} → ${escapeHtml(row.name || names.get(id) || id)} <b>${currency(row.amount)}</b></p>`).join('') || '<p class="muted">No contribution or transfer disbursements found in this snapshot.</p>') + `<p class="muted">${finances?.regular_ie_reconciles ? 'The collected regular-report expenditure total matches the committee financial summary.' : 'The collected regular-report expenditure total differs from the financial summary. Coverage remains unresolved; no donor allocation is calculated.'}</p>`);
+  setHtml('evidence-receipts', receipts.map(row => `<tr><td>${escapeHtml(row.reported_name)}<small>${escapeHtml(label(row.role))} · ${row.included_company_contribution ? 'Included contribution' : 'Excluded from company contribution total'}</small></td><td>${escapeHtml(row.date)}</td><td class="number">${currency(row.amount)}</td><td>${sourceAnchor(row.source_url, row.description || 'Original filing')}<small>Line ${escapeHtml(row.line_number)} · ${escapeHtml(row.sub_id)}</small></td></tr>`).join('') || '<tr><td colspan="4">No matching company receipts in this committee and cycle.</td></tr>');
+  const candidates = evidence.candidate_activity.filter(row => row.cycle === cycle && row.committee_id === committee).sort((a,b) => b.committee_spending - a.committee_spending);
+  setHtml('evidence-candidates', candidates.map(row => `<tr><td><details><summary>${escapeHtml(row.candidate_name_as_filed || 'Candidate name missing')}</summary><p>As-filed ID: ${escapeHtml(row.candidate_id_as_filed)}<br>Register: ${escapeHtml(row.registered_candidate_name || 'Unresolved')}<br>${row.identity_status === 'name_matches_registration' ? 'Name matches the candidate register.' : 'Name / ID needs review. Aliases and filing errors can cause differences; no automatic reassignment.'}</p></details></td><td>${escapeHtml(row.direction)}</td><td class="number">${currency(row.committee_spending)}</td><td>${escapeHtml(row.first_date)}<small>to ${escapeHtml(row.last_date)}</small></td><td>${sourceAnchor(row.source_urls?.[0], 'Filing')}<small>${row.source_rows} records</small></td></tr>`).join(''));
+  const timing = (evidence.temporal_routes || []).filter(row => row.cycle === cycle);
+  const assets = new Set(timing.filter(row => row.status === 'asset_liquidation_link_required').map(row => row.receipt_sub_id)).size;
+  $('evidence-timing').textContent = `${assets} in-kind receipt(s) in this cycle require a documented liquidation link before a cash route can be evaluated. Date-compatible routes are possibilities, not assigned dollars. Transfers outside the ${evidence.committee_finances.filter(row => row.cycle === cycle).length}-committee snapshot remain outside its coverage.`;
+}
+async function loadEvidence() {
+  const id = $('evidence-snapshot').value;
+  if (!id) return;
+  evidence = await api('/api/evidence?id=' + encodeURIComponent(id));
+  $('evidence-cycle').innerHTML = [...new Set(evidence.committee_finances.map(row => row.cycle))].sort().map(cycle => `<option value="${cycle}">${cycle - 1}–${cycle}</option>`).join('');
+  const names = new Map(evidence.committee_finances.map(row => [row.committee_id, row.committee_name || row.committee_id]));
+  $('evidence-committee').innerHTML = [...names].map(([id,name]) => `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`).join('');
+  $('evidence-panel').hidden = false;
+  renderEvidence();
+}
+async function initEvidence() {
+  try {
+    const result = await api('/api/evidence');
+    $('evidence-snapshot').innerHTML = result.snapshots.map(row => `<option value="${escapeHtml(row.id)}">${escapeHtml(row.company)} · ${escapeHtml(row.retrieved_at?.slice(0,10))}</option>`).join('');
+    if (result.snapshots.length) await loadEvidence();
+  } catch (error) { showError(error.message); }
+}
+$('evidence-snapshot').addEventListener('change', () => loadEvidence().catch(error => showError(error.message)));
+$('evidence-cycle').addEventListener('change', renderEvidence);
+$('evidence-committee').addEventListener('change', renderEvidence);
 init();
+initEvidence();

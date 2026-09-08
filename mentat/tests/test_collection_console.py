@@ -223,6 +223,41 @@ class ConsoleTests(unittest.TestCase):
             server.server_close()
             worker.join()
 
+    def test_review_is_bound_to_workbook_and_warning_and_preserves_evidence(self):
+        directory = self.root / 'fixture'
+        directory.mkdir()
+        workbook = self.root / 'report.xlsx'
+        workbook.write_bytes(b'fixture')
+        app.atomic_json(directory / 'status.json', {'industries': [
+            {'industry': 'Test', 'status': 'succeeded', 'output_workbook': str(workbook)}]})
+        run = {'id': 'test', 'name': 'Fixture', 'state': 'completed', 'directory': directory}
+        warning = {'check': 'coverage', 'severity': 'warn', 'detail': 'Old source'}
+        quality = {'sha256': 'first', 'warnings': [warning]}
+        with patch.object(self.console, 'find', return_value=run), patch.object(self.console, 'inspect_report', return_value=quality):
+            first = self.console.snapshot('test')['reports'][0]['quality']['warnings'][0]
+            self.console.acknowledge_quality({'id': 'test', 'warning_ids': [first['id']]})
+            reviewed = self.console.snapshot('test')['reports'][0]['quality']['warnings'][0]
+            self.assertTrue(reviewed['reviewed_at'])
+            self.assertEqual(reviewed['detail'], 'Old source')
+            self.assertEqual(workbook.read_bytes(), b'fixture')
+            # Repeated polling does not mutate cached warnings or their IDs.
+            self.assertEqual(first['id'], reviewed['id'])
+            self.assertEqual(quality['warnings'], [warning])
+            quality['sha256'] = 'new-workbook'
+            changed = self.console.snapshot('test')['reports'][0]['quality']['warnings'][0]
+            self.assertIsNone(changed['reviewed_at'])
+            with self.assertRaisesRegex(ValueError, 'changed'):
+                self.console.acknowledge_quality({'id': 'test', 'warning_ids': [first['id']]})
+            quality['sha256'] = 'first'
+            quality['warnings'] = [{**warning, 'detail': 'New finding'}]
+            self.assertIsNone(self.console.snapshot('test')['reports'][0]['quality']['warnings'][0]['reviewed_at'])
+
+    def test_failed_check_cannot_be_acknowledged_away(self):
+        with patch.object(self.console, 'snapshot', return_value={'reports': [
+            {'quality': {'warnings': [{'id': 'hard-fail', 'severity': 'fail'}]}}]}):
+            with self.assertRaises(ValueError):
+                self.console.acknowledge_quality({'id': 'test', 'warning_ids': ['hard-fail']})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -54,6 +54,34 @@ running for its process exit receipt; underlying runner receipts remain availabl
 if the app restarts. A failed startup's diagnostic is in the upload's
 `launcher.log`. No collection starts until the user presses the start button.
 
+The PAC evidence panel discovers `mentat/.cache/pac-evidence/*/evidence.json`.
+It keeps company receipts, exchange conversions, committee transfers, and
+support/opposition activity separate. Candidate names remain as filed beside
+their registered names; differences go to review rather than automatic merges.
+Changing its cycle or committee only filters a saved snapshot. It does not
+silently start another collection. The dates shown distinguish the evidence
+snapshot from the financial summary's reporting period.
+
+Create an evidence snapshot with the bundled Python runtime:
+
+```powershell
+python mentat/tools/pac_evidence.py --company Coinbase --aliases 'COINBASE COMMERCE (EXCHANGE)' --committees C00835959,C00836221,C00848440 --cycles 2024,2026 --output mentat/.cache/pac-evidence/fairshake-20260908
+```
+
+Use a new output directory for a fresh collection. Existing directories resume
+from hash-verified API responses. The reusable collector verifies exact counts
+and pagination, excludes 24/48-hour notices from regular-report IE totals,
+checks those totals against financial summaries, and preserves unresolved
+coverage. It does not calculate donor-specific dollar allocations. Committee
+IDs explicitly set its network boundary; outgoing destinations beyond that
+boundary are recorded in `unexpanded_committees`.
+
+**Clear reviewed notices** acknowledges only the visible warning IDs. The
+review receipt is stored outside Git in the console data directory. It binds
+the warning text to the run and workbook SHA-256. Changed workbooks or warnings
+require another review; hard failures cannot be dismissed. Workbook Data
+Quality sheets remain intact.
+
 Offline checks:
 
 ```powershell

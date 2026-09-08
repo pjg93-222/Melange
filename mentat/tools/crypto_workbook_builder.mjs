@@ -572,7 +572,7 @@ const sheetOrder = [
   "PAC & Candidate Map",
   "Downstream Activity",
   "Beneficiary Bridge",
-  "Transfer Paths", "Allocation Estimates", "Allocation Coverage", "Source Freshness", "Classification Review", "Data Quality",
+  "Transfer Paths", "Funding Cohorts", "Allocation Estimates", "Allocation Coverage", "Source Freshness", "Classification Review", "Data Quality",
   ...payload.cycles.map((cycle) => cycle.label),
   "Cycle Exceptions",
 ];
@@ -2419,6 +2419,9 @@ for (const company of payload.companies) {
   );
 }
 
+buildAuditTable("Funding Cohorts", payload.funding_cohorts ?? [],
+  [["cycle","Cycle"],["company","Company"],["funding_type","Funding Type"],["committee_id","Recipient Committee"],["receipt_role","Receipt Role"],["amount","Included Net Receipts"],["receipt_count","Receipt Count"],["first_date","First Receipt"],["last_date","Last Receipt"]],
+  "Corporate and personal funding remain separate here. These are receipts, not company-attributed candidate expenditures. Legacy records without filing metadata remain unverified; use dated PAC evidence before estimating donor-specific spending.");
 buildAuditTable("Transfer Paths", payload.transfer_paths ?? [],
   [["cycle","Cycle"],["root","Funded Committee"],["source","Source Committee"],["destination","Destination Committee"],["amount","Reported Net Transfer"],["depth","Depth"],["path","Representative Path"],["status","Traversal Status"]],
   "Observed outgoing 24G/24K cash transfers. Amounts are committee activity, not traced company dollars. A representative shortest path is shown; repeated roots can share the same transfer.");

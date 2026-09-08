@@ -36,5 +36,17 @@ class EnrichmentTests(unittest.TestCase):
         self.assertEqual(rows['H1']['direct_plus_estimated_non_opposition'],0)
         self.assertEqual(rows['H2']['direct_plus_estimated_non_opposition'],40)
 
+    def test_corporate_and_personal_funding_keep_separate_dated_cohorts(self):
+        payload=self.payload()
+        payload['raw_rows']=[{'cycle':2024,'committee_id':'PAC','amount':100,'company':'Acme',
+            'employee_tier':tier,'date':day,'receipt_role':'contribution','include_in_analysis':'Yes'}
+            for tier,day in [('Corporate','2024-12-20'),('Chief','2024-05-01')]]
+        with tempfile.TemporaryDirectory() as directory:result=enrich(payload,Path(directory))
+        self.assertEqual(len(result['funding_cohorts']),2)
+        by_type={row['funding_type']:row for row in result['funding_cohorts']}
+        self.assertEqual(by_type['Corporate']['first_date'],'2024-12-20')
+        self.assertEqual(by_type['Chief']['amount'],100)
+        self.assertFalse(result['metadata']['company_cash_attribution_available'])
+
 
 if __name__=='__main__':unittest.main()

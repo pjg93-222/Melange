@@ -466,6 +466,8 @@ raw_export[, inclusion_reason := ifelse(
     )
   ))
 )]
+raw_export[fec_receipt_role_excluded(receipt_role),
+           inclusion_reason := paste0("Receipt role: ", receipt_role)]
 raw_export[, cycle_alignment := ifelse(
   cycle == source_cycle,
   "OK",
@@ -513,8 +515,18 @@ raw_export <- raw_export[, .(
   record_type = ifelse(is.na(record_type), trim_text(record_type_raw), record_type),
   source_table = trim_text(source_table),
   company_match_status = trim_text(company_match_status),
+  company_match_reason = trim_text(company_match_reason),
+  matched_alias = trim_text(matched_variant),
   include_in_analysis,
   inclusion_reason,
+  receipt_role,
+  receipt_type_full = trim_text(receipt_type_full),
+  filing_form = trim_text(filing_form),
+  line_number = trim_text(line_number),
+  memo_text = trim_text(memo_text),
+  transaction_id = trim_text(transaction_id),
+  back_reference_transaction_id = trim_text(back_reference_transaction_id),
+  source_url = trim_text(pdf_url),
   person_key,
   identity_basis,
   is_memo_leg = as.integer(is_memo_leg),

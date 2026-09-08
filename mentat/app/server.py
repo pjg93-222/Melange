@@ -199,6 +199,26 @@ class Console:
                 return {"direction_columns": None, "warning": "Workbook inspection unavailable."}
         return self.report_cache[key]
 
+    def acknowledge_quality(self, data):
+        identifier = str(data.get('id', ''))
+        requested = data.get('warning_ids', [])
+        if not isinstance(requested, list) or not requested or not all(isinstance(i, str) for i in requested):
+            raise ValueError('Choose the report warnings currently shown.')
+        with self.lock:
+            current = self.snapshot(identifier)
+            eligible = {w['id'] for report in current['reports']
+                        for w in report.get('quality', {}).get('warnings', [])
+                        if str(w.get('severity', '')).lower() != 'fail'}
+            if not set(requested) <= eligible:
+                raise ValueError('The reports changed. Refresh and review their current warnings.')
+            path = self.root / 'quality-reviews.json'
+            reviews = read_json(path)
+            stamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            for warning_id in requested:
+                reviews[warning_id] = {'reviewed_at': stamp, 'run_id': identifier}
+            atomic_json(path, reviews)
+        return {'reviewed': len(set(requested))}
+
     def upload(self, data):
         content = base64.b64decode(data.get("content", ""), validate=True)
         if not content or len(content) > 5_000_000:
@@ -392,6 +412,17 @@ class Console:
             for path, label in ((inputs / "fec_beneficiary/pas226/itpas2.txt", "2025–26 downstream activity"),
                                 (inputs / "fec_committee_master/cm26/cm.txt", "2025–26 committee register")) if path.is_file()
         ]
+        reviews = read_json(self.root / 'quality-reviews.json')
+        for report in result['reports']:
+            quality = report['quality']
+            annotated = []
+            for warning in quality.get('warnings', []):
+                fingerprint = hashlib.sha256(json.dumps(
+                    [identifier, report['name'], quality.get('sha256'), warning],
+                    sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+                annotated.append({**warning, 'id': fingerprint,
+                                  'reviewed_at': reviews.get(fingerprint, {}).get('reviewed_at')})
+            report['quality'] = {**quality, 'warnings': annotated}
         return result
 
 
@@ -424,6 +455,20 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send({"token": app.token, **app.summary()})
             if parsed.path == "/api/runs":
                 return self.send(app.summary())
+            if parsed.path == '/api/evidence':
+                identifier = query.get('id', [''])[0]
+                root = PROJECT / '.cache/pac-evidence'
+                if not identifier:
+                    return self.send({'snapshots': [
+                        {'id': p.parent.name, 'company': value.get('company'), 'retrieved_at': value.get('retrieved_at')}
+                        for p in sorted(root.glob('*/evidence.json'))
+                        if (value := read_json(p)).get('version') == 1]})
+                if not re.fullmatch(r'[a-z0-9][a-z0-9_-]{0,99}', identifier):
+                    raise ValueError('Invalid evidence snapshot.')
+                value = read_json(root / identifier / 'evidence.json')
+                if value.get('version') != 1:
+                    raise ValueError('Evidence snapshot unavailable.')
+                return self.send(value)
             if parsed.path == "/api/run":
                 return self.send(app.snapshot(query.get("id", [""])[0], query.get("lane", [""])[0]))
             if parsed.path == "/api/report":
@@ -466,6 +511,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(key_status())
             if self.path == "/api/start":
                 return self.send(self.server.app.launch(data))
+            if self.path == '/api/quality/acknowledge':
+                return self.send(self.server.app.acknowledge_quality(data))
             return self.send({"error": "Not found."}, 404)
         except RuntimeError:
             return self.send({"error": "The encrypted key store could not be accessed for this Windows user."}, 400)

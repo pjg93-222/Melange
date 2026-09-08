@@ -13,6 +13,8 @@ mentat_schema_sql <- function() {
       "recipient_committee_type TEXT, recipient_committee_designation TEXT,",
       "entity_type TEXT, election_type TEXT, fec_election_type_desc TEXT,",
       "receipt_type_full TEXT, memo_code TEXT, memoed_subtotal INTEGER,",
+      "filing_form TEXT, receipt_type TEXT, line_number_label TEXT,",
+      "back_reference_transaction_id TEXT, back_reference_schedule_name TEXT,",
       "memo_text TEXT, conduit_committee_id TEXT, conduit_committee_name TEXT,",
       "amendment_indicator TEXT, report_year INTEGER, report_type TEXT,",
       "file_num INTEGER,",
@@ -224,6 +226,9 @@ mentat_schema_sql <- function() {
       "matched_variant TEXT NOT NULL, cycle INTEGER NOT NULL, scraped_at TEXT NOT NULL,",
       "transaction_id TEXT, original_sub_id TEXT, amendment_indicator TEXT,",
       "report_year INTEGER, report_type TEXT, file_num INTEGER, pdf_url TEXT, load_date TEXT,",
+      "filing_form TEXT, receipt_type TEXT, receipt_type_full TEXT, line_number TEXT, line_number_label TEXT,",
+      "memo_code TEXT, memoed_subtotal INTEGER, memo_text TEXT,",
+      "back_reference_transaction_id TEXT, back_reference_schedule_name TEXT,",
       "is_conduit_leg INTEGER NOT NULL DEFAULT 0 CHECK (is_conduit_leg IN (0,1)),",
       "is_memo_leg INTEGER NOT NULL DEFAULT 0 CHECK (is_memo_leg IN (0,1)),",
       "is_passthrough_leg INTEGER NOT NULL DEFAULT 0 CHECK (is_passthrough_leg IN (0,1)),",
@@ -303,6 +308,8 @@ init_schema <- function(connection) {
       )
     }
     contribution_migrations <- c(
+      filing_form = "TEXT", receipt_type = "TEXT", line_number_label = "TEXT",
+      back_reference_transaction_id = "TEXT", back_reference_schedule_name = "TEXT",
       file_num = "INTEGER",
       superseded_by_amendment = paste(
         "INTEGER NOT NULL DEFAULT 0",
@@ -383,6 +390,10 @@ init_schema <- function(connection) {
     }
     corporate_fields <- DBI::dbListFields(connection, "corporate_giving")
     corporate_migrations <- c(
+      filing_form = "TEXT", receipt_type = "TEXT", receipt_type_full = "TEXT",
+      line_number = "TEXT", line_number_label = "TEXT", memo_code = "TEXT",
+      memoed_subtotal = "INTEGER", memo_text = "TEXT", back_reference_transaction_id = "TEXT",
+      back_reference_schedule_name = "TEXT",
       contributor_city = "TEXT", contributor_state = "TEXT",
       contributor_zip = "TEXT", contributor_employer = "TEXT",
       contributor_occupation = "TEXT", entity_type = "TEXT",

@@ -1740,15 +1740,26 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
   if (!isTRUE(versioning_applied)) {
     apply_amendment_versioning(connection, print_summary = FALSE)
   }
+  # Exports read immutable snapshots, including pre-migration databases. Missing
+  # source metadata stays blank/unverified instead of inventing receipt roles.
+  receipt_projection <- function(table) {
+    fields <- c("receipt_type_full", "filing_form", "receipt_type", "line_number", "line_number_label",
+                "memo_code", "memoed_subtotal", "memo_text", "back_reference_transaction_id", "back_reference_schedule_name")
+    present <- DBI::dbListFields(connection, table)
+    paste0(paste(vapply(fields, function(field) {
+      if (field %in% present) field else paste0("NULL AS ", field)
+    }, character(1L)), collapse = ", "), ",")
+  }
   people <- data.table::as.data.table(DBI::dbGetQuery(
     connection,
     paste(
       "SELECT contributor_name, committee_name, contribution_receipt_date,",
       "contribution_receipt_amount, contributor_city, contributor_state,",
-      "contributor_zip, contributor_employer, contributor_occupation, company, sub_id,",
+      "contributor_zip, contributor_employer, contributor_occupation, company, sub_id, matched_variant,",
       "committee_id, recipient_committee_type, recipient_committee_designation,",
       "two_year_transaction_period, entity_type, is_entity_contributor,",
-      "receipt_type_full, conduit_committee_id, conduit_committee_name, is_conduit_leg,",
+      receipt_projection("contributions"), "transaction_id, pdf_url,",
+      "conduit_committee_id, conduit_committee_name, is_conduit_leg,",
       "is_memo_leg, is_passthrough_leg, memo_review, possible_amendment, is_refund,",
       "superseded_by_amendment, duplicate_filing_version, duplicate_memo,",
       "company_match_status, company_match_reason, excluded_reason,",
@@ -1763,10 +1774,10 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
     paste(
       "SELECT contributor_name, committee_name, contribution_receipt_date,",
       "contribution_receipt_amount, contributor_city, contributor_state,",
-      "contributor_zip, contributor_employer, contributor_occupation, company, sub_id,",
+      "contributor_zip, contributor_employer, contributor_occupation, company, sub_id, matched_variant,",
       "committee_id, recipient_committee_type, recipient_committee_designation,",
       "cycle AS two_year_transaction_period, entity_type, is_entity_contributor,",
-      "'' AS receipt_type_full, '' AS conduit_committee_id,",
+      receipt_projection("corporate_giving"), "transaction_id, pdf_url, '' AS conduit_committee_id,",
       "'' AS conduit_committee_name, is_conduit_leg, is_memo_leg,",
       "is_passthrough_leg, 0 AS memo_review,",
       "CASE WHEN original_sub_id IS NOT NULL AND TRIM(original_sub_id)<>''",
@@ -1788,6 +1799,7 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
   data.table::setorder(rows, source_priority, sub_id)
   rows <- unique(rows, by = "sub_id")
   rows[, source_priority := NULL]
+  rows[, receipt_role := fec_receipt_role(rows)]
   rows[]
 }
 
@@ -1795,10 +1807,12 @@ spending_report_rows <- function(connection, lookups = NULL, raw_rows = NULL) {
   require_package("data.table")
   rows <- raw_rows %||% spending_raw_report_rows(connection)
   if (!nrow(rows)) return(rows)
+  rows <- data.table::copy(rows)
+  rows[, receipt_role := fec_receipt_role(rows)]
   rows <- rows[
     company_match_status == "accepted" &
       !nzchar(trim_text(excluded_reason)) &
-      duplicate_memo == 0L
+      duplicate_memo == 0L & !fec_receipt_role_excluded(receipt_role)
   ]
   lookups <- lookups %||% spending_report_lookups(connection)
   variants <- lookups$companies
@@ -1807,7 +1821,7 @@ spending_report_rows <- function(connection, lookups = NULL, raw_rows = NULL) {
   # Reclassification can discover an entity, but it must never downgrade an
   # entity already validated by the source-specific retag pass. In particular,
   # corporate_giving rows whose names use approved corporate qualifiers (for
-  # example COINBASE GLOBAL or COINBASE COMMERCE EXCHANGE) are not literal
+  # example COINBASE GLOBAL) are not literal
   # roster aliases, yet the corporate matcher has already verified them.
   persisted_entity_flags <- as.integer(
     rows$source_table == "corporate_giving"

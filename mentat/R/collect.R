@@ -11,7 +11,8 @@ contribution_columns <- function() {
     "election_type", "fec_election_type_desc", "receipt_type_full", "memo_code",
     "memoed_subtotal", "memo_text", "conduit_committee_id",
     "conduit_committee_name", "amendment_indicator", "report_year", "report_type",
-    "file_num",
+    "file_num", "filing_form", "receipt_type", "line_number_label",
+    "back_reference_transaction_id", "back_reference_schedule_name",
     "two_year_transaction_period", "line_number", "pdf_url", "load_date",
     "industry", "company", "matched_variant", "phase", "match_confidence",
     "scraped_at", "is_conduit_leg", "is_memo_leg", "is_passthrough_leg",
@@ -20,6 +21,40 @@ contribution_columns <- function() {
     "is_entity_contributor",
     "company_match_status", "company_match_reason", "excluded_reason"
   )
+}
+
+# A name match identifies the named party, not its role in the transaction.
+# Keep conversions and disclosure-only asset memos in raw evidence, but never
+# add them as another contribution from the exchange or original donor.
+fec_receipt_role <- function(rows) {
+  column <- function(name) {
+    if (!name %in% names(rows)) return(rep("", nrow(rows)))
+    value <- toupper(trim_text(rows[[name]]))
+    value[is.na(value)] <- ""
+    value
+  }
+  description <- paste(column("receipt_type_full"), column("memo_text"))
+  role <- rep("unverified_receipt_role", nrow(rows))
+  contribution_line <- grepl("^11(AI?|B|C)$", column("line_number")) &
+    column("filing_form") %in% c("F3", "F3X")
+  role[contribution_line] <- "contribution"
+  other_line <- (column("filing_form") == "F3X" & column("line_number") %in% c("13", "14", "15", "16", "17")) |
+    (column("filing_form") == "F3" & column("line_number") %in% c("12", "13A", "13B", "14", "15"))
+  role[other_line] <- "other_receipt"
+  # Missing metadata cannot justify treating an exchange alias as a donor.
+  role[role == "unverified_receipt_role" & grepl("\\b(EXCHANGE|PROCESSOR)\\b", column("contributor_name"), perl = TRUE)] <- "intermediary_role_review"
+  sale <- grepl("PURCHASER UNKNOWN", description, fixed = TRUE) &
+    grepl("SOLD|PROCEEDS.*SALE", description, perl = TRUE)
+  role[sale] <- "asset_liquidation"
+  memo <- column("memo_code") == "X" | column("memoed_subtotal") %in% c("1", "TRUE") |
+    column("is_memo_leg") %in% c("1", "TRUE")
+  disclosed_asset <- grepl("PREVIOUSLY DISCLOSED|CONTRIBUTION DISCLOSED", description, perl = TRUE)
+  role[memo & disclosed_asset] <- "previously_disclosed_memo"
+  role
+}
+
+fec_receipt_role_excluded <- function(role) {
+  role %in% c("asset_liquidation", "other_receipt", "previously_disclosed_memo", "intermediary_role_review")
 }
 
 row_scalar <- function(row, field, default = NA_character_) {
@@ -1079,6 +1114,11 @@ flatten_fec_rows <- function(
     election_type = page_text("election_type"),
     fec_election_type_desc = page_text("fec_election_type_desc"),
     receipt_type_full = page_text("receipt_type_full"),
+    filing_form = page_text("filing_form"),
+    receipt_type = page_text("receipt_type"),
+    line_number_label = page_text("line_number_label"),
+    back_reference_transaction_id = page_text("back_reference_transaction_id"),
+    back_reference_schedule_name = page_text("back_reference_schedule_name"),
     memo_code = memo_codes,
     memoed_subtotal = memoed_values,
     memo_text = memo_texts,
@@ -1210,11 +1250,14 @@ insert_rows_or_ignore <- function(connection, table, rows, columns) {
   }
   DBI::dbExecute(connection, paste0(sql, quoted_stage))
   inserted <- DBI::dbGetQuery(connection, "SELECT changes() AS n")$n[[1L]]
-  if (identical(table, "corporate_giving")) {
+  if (table %in% c("contributions", "corporate_giving")) {
     version_fields <- intersect(
       c(
         "transaction_id", "original_sub_id", "amendment_indicator",
-        "report_year", "report_type", "file_num", "pdf_url", "load_date"
+        "report_year", "report_type", "file_num", "pdf_url", "load_date",
+        "filing_form", "receipt_type", "receipt_type_full", "line_number",
+        "line_number_label", "memo_code", "memo_text", "back_reference_transaction_id",
+        "back_reference_schedule_name"
       ),
       columns
     )
@@ -1236,10 +1279,21 @@ insert_rows_or_ignore <- function(connection, table, rows, columns) {
         connection,
         paste0(
           "UPDATE ", quoted_table, " SET ", quoted_field, "=", replacement,
-          " WHERE EXISTS (SELECT 1 FROM ", quoted_stage,
-          " WHERE ", quoted_stage, ".sub_id=", quoted_table, ".sub_id)"
+          " WHERE sub_id IN (SELECT sub_id FROM ", quoted_stage, ")"
         )
       )
+    }
+    # Browser checkpoints historically lost memo status. A hydrated API row
+    # must repair the stored flag too, even when its sub-ID already exists.
+    if (all(c("filing_form", "is_memo_leg", "memoed_subtotal") %in% columns)) {
+      DBI::dbExecute(connection, paste0(
+        "UPDATE ", quoted_table, " SET is_memo_leg=(SELECT is_memo_leg FROM ", quoted_stage,
+        " WHERE ", quoted_stage, ".sub_id=", quoted_table, ".sub_id), ",
+        "memoed_subtotal=(SELECT memoed_subtotal FROM ", quoted_stage,
+        " WHERE ", quoted_stage, ".sub_id=", quoted_table, ".sub_id) ",
+        "WHERE sub_id IN (SELECT sub_id FROM ", quoted_stage,
+        " WHERE COALESCE(filing_form,'')<>'')"
+      ))
     }
   }
   DBI::dbExecute(connection, paste0("DROP TABLE temp.", quoted_stage))
@@ -2763,6 +2817,8 @@ checkpoint_corporate_page <- function(
     "company", "matched_variant", "cycle", "scraped_at", "transaction_id",
     "original_sub_id", "amendment_indicator", "report_year", "report_type",
     "file_num", "pdf_url", "load_date", "is_conduit_leg", "is_memo_leg",
+    "filing_form", "receipt_type", "receipt_type_full", "line_number", "line_number_label",
+    "memo_code", "memoed_subtotal", "memo_text", "back_reference_transaction_id", "back_reference_schedule_name",
     "is_passthrough_leg", "superseded_by_amendment", "duplicate_filing_version",
     "duplicate_memo", "company_match_status",
     "company_match_reason",
@@ -2892,6 +2948,8 @@ collect_company_contributor_pass <- function(
           contribution_receipt_amount, industry, company, matched_variant,
           cycle = as.integer(cycle), scraped_at, transaction_id, original_sub_id,
           amendment_indicator, report_year, report_type, file_num, pdf_url, load_date,
+          filing_form, receipt_type, receipt_type_full, line_number, line_number_label,
+          memo_code, memoed_subtotal, memo_text, back_reference_transaction_id, back_reference_schedule_name,
           is_conduit_leg, is_memo_leg, is_passthrough_leg,
           superseded_by_amendment, duplicate_filing_version, duplicate_memo,
           company_match_status, company_match_reason,

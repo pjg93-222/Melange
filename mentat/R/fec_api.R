@@ -1809,6 +1809,8 @@ fec_api_corporate_records <- function(
     contribution_receipt_amount, industry, company, matched_variant,
     cycle = as.integer(unit$cycle), scraped_at, transaction_id, original_sub_id,
     amendment_indicator, report_year, report_type, file_num, pdf_url, load_date,
+    filing_form, receipt_type, receipt_type_full, line_number, line_number_label,
+    memo_code, memoed_subtotal, memo_text, back_reference_transaction_id, back_reference_schedule_name,
     is_conduit_leg, is_memo_leg, is_passthrough_leg,
     superseded_by_amendment, duplicate_filing_version, duplicate_memo,
     company_match_status, company_match_reason,

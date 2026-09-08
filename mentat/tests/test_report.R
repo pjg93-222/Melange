@@ -370,6 +370,10 @@ DBI::dbExecute(
     "VALUES ('COINBASE COMMERCE EXCHANGE', 'Coinbase', '', '', 'accept')"
   )
 )
+DBI::dbExecute(connection, paste(
+  "UPDATE corporate_giving SET filing_form='F3X', line_number='11AI'",
+  "WHERE sub_id='corporate-qualified-report'"
+))
 corporate_versions <- data.frame(
   sub_id = c("corporate-amend-original", "corporate-amend-current"),
   contributor_name = "COINBASE, INC.",

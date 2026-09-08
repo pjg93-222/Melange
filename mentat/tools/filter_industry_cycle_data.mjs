@@ -25,6 +25,16 @@ for (const key of [
   "downstream_activity",
   "beneficiary_bridge",
   "beneficiary_summary",
+  "candidate_master",
+  "candidate_committee_links",
+  "transfer_edges",
+  "transfer_paths",
+  "funding_cohorts",
+  "allocation_estimates",
+  "allocation_coverage",
+  "attribution_summary",
+  "source_freshness",
+  "classification_review",
 ]) {
   payload[key] = (payload[key] ?? []).filter(
     (row) => row.cycle === cycleNumber,

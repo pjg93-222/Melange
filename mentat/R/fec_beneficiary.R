@@ -501,7 +501,11 @@ fec_read_downstream_activity <- function(directory, recipient_universe, candidat
     activity, candidate_columns, by = c("cycle", "candidate_id"),
     all.x = TRUE, sort = FALSE
   )
-  activity[is.na(candidate_name) | !nzchar(candidate_name), candidate_name := recipient_name]
+  # On Schedule E/PAS2 the recipient can be an advertising vendor. Its name
+  # cannot identify the candidate. Even a historical candidate-master match
+  # may conflict with the name as filed, so do not infer an identity here.
+  activity[is.na(candidate_name) | !nzchar(candidate_name),
+           candidate_name := paste0("Unresolved candidate (", candidate_id, ")")]
   activity[is.na(candidate_party) | !nzchar(candidate_party), candidate_party := "Other / Unclassified"]
   for (column in c("office", "office_label", "office_state", "district", "candidate_source_url")) {
     data.table::set(activity, which(is.na(activity[[column]])), column, "")

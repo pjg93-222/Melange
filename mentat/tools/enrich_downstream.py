@@ -15,8 +15,17 @@ def enrich(payload,directory):
     for row in payload.get('candidate_committee_links',[]):
         if row['designation'] in ('P','A'):links[row['cycle'],row['committee_id']].add(row['candidate_id'])
     grouped=defaultdict(float)
+    cohorts=defaultdict(lambda: {'amount':0., 'receipt_count':0, 'first_date':'', 'last_date':''})
     for row in payload['raw_rows']:
-        if row['include_in_analysis']=='Yes':grouped[row['cycle'],row['committee_id']]+=row['amount']
+        if row['include_in_analysis']=='Yes':
+            grouped[row['cycle'],row['committee_id']]+=row['amount']
+            key=(row['cycle'],row.get('company',''),row.get('employee_tier',''),row['committee_id'],row.get('receipt_role','unverified_receipt_role'))
+            cohort=cohorts[key]
+            cohort['amount']+=row['amount'];cohort['receipt_count']+=1
+            day=row.get('date','')
+            if day:
+                cohort['first_date']=min(cohort['first_date'] or day,day)
+                cohort['last_date']=max(cohort['last_date'],day)
     totals=defaultdict(lambda:{'direct':0.,'estimated_non_opposition':0.,'estimated_opposition':0.})
     for cycle in (c['cycle'] for c in payload['cycles']):
         funding={committee:value for (year,committee),value in grouped.items() if year==cycle and committee}
@@ -58,11 +67,18 @@ def enrich(payload,directory):
         if row['recipient_category']=='Unclassified' and row['preliminary_crypto_funding']:
             review.append({key:row.get(key) for key in ('cycle','committee_id','committee_name','master_committee_type','recipient_category','preliminary_crypto_funding')})
     payload.update(transfer_paths=paths,allocation_estimates=estimates,allocation_coverage=coverage,
+                   funding_cohorts=[dict(cycle=k[0],company=k[1],funding_type=k[2],committee_id=k[3],receipt_role=k[4],**v)
+                                    for k,v in sorted(cohorts.items())],
                    attribution_summary=sorted(summary,key=lambda r:(r['cycle'],-r['direct_plus_estimated_non_opposition'],r['candidate_id'])),
                    source_freshness=source_dates,classification_review=review)
-    payload['metadata']['allocation_method']='Conditional pro-rata allocation of nonnegative net funding across observed candidate activity and 24G/24K cash transfers, maximum 3 transfers. Not traced dollars or a lower bound. Opposition is kept against its named target. Negative activity is excluded from allocation weights. Unobserved operating expenses and retained cash are not modelled.'
+    payload['metadata']['allocation_method']='Conditional industry-level activity allocation across observed candidate activity and 24G/24K transfers, maximum 3 transfers. Not traced dollars, company attribution or a lower bound. Pools corporate and personal funding. Donation timing, in-kind liquidation, all-donor funding, retained cash and operating expenses are not modelled. Opposition stays against its named target; negative activity is excluded from weights. Use funding cohorts and dated PAC evidence for donor-specific review.'
+    payload['metadata']['company_cash_attribution_available']=False
     payload['metadata']['allocation_conservation_verified']=True
     payload['quality_checks']=[*payload['metadata'].get('export_guards',[])]
+    unverified=[row for row in payload['raw_rows'] if row.get('include_in_analysis')=='Yes'
+                and row.get('receipt_role','unverified_receipt_role')=='unverified_receipt_role']
+    payload['quality_checks'].append({'id':'receipt_role_metadata','severity':'warn','passed':not unverified,
+        'detail':f'{len(unverified)} included rows lack sufficient filing-form/line metadata to verify their receipt role. Name matching alone does not verify a contribution; refresh legacy source rows before donor-specific cash attribution.'})
     for source in payload['metadata'].get('transfer_coverage',[]):
         invalid=sum(source.get('counts',{}).get(key,0) for key in
             ('malformed_rows','invalid_transfer_dates','invalid_transfer_amounts'))
@@ -84,8 +100,8 @@ def main():
     if not args.audit_only:value=enrich(value,args.directory)
     if args.audit_directory:
         args.audit_directory.mkdir(parents=True,exist_ok=True)
-        for name in ('transfer_paths','allocation_estimates','allocation_coverage','attribution_summary','source_freshness','classification_review','quality_checks'):
-            rows=value[name]
+        for name in ('transfer_paths','allocation_estimates','allocation_coverage','attribution_summary','funding_cohorts','source_freshness','classification_review','quality_checks'):
+            rows=value.get(name,[])
             fields=list(dict.fromkeys(key for row in rows for key in row)) or ['status']
             path=args.audit_directory/f'{name}.csv'
             temporary=path.with_suffix('.pending')
