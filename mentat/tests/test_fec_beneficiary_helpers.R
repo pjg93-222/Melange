@@ -43,6 +43,10 @@ source(
   file.path(project_root, "R", "fec_beneficiary.R"),
   local = .GlobalEnv
 )
+source(
+  file.path(project_root, "R", "export_guards.R"),
+  local = .GlobalEnv
+)
 require_package("data.table")
 
 set.seed(20260723)
@@ -149,8 +153,9 @@ fec_build_beneficiary_tables_reference <- function(raw_export, downstream_activi
     summary, cycle, view, company, -preliminary_downstream_amount,
     candidate_name
   )
+  summary <- summary[office %in% c("H", "S")]
   summary[, preliminary_rank := seq_len(.N), by = .(cycle, view, company)]
-  summary <- summary[office %in% c("H", "S") & preliminary_rank <= 100L]
+  summary <- summary[preliminary_rank <= 100L]
   retained <- unique(summary[, .(cycle, view, company, candidate_key)])
   bridge <- merge(
     bridge,
@@ -244,6 +249,64 @@ stopifnot(
     direction_row$preliminary_downstream_amount + 1e-9,
   grepl("Support", direction_row$directions),
   grepl("Oppose", direction_row$directions)
+)
+# High-activity presidential candidates must not consume congressional slots.
+rank_fixture <- direction_fixture[rep(1L, 102L)]
+rank_fixture[, `:=`(candidate_id = sprintf("H%08d", .I),
+  candidate_name = sprintf("Candidate %03d", .I), transaction_amount = 103 - .I)]
+rank_fixture[1:2, `:=`(office = "P", candidate_id = sprintf("P%08d", .I))]
+rank_summary <- fec_build_beneficiary_tables(direction_raw, rank_fixture)$summary
+stopifnot(nrow(rank_summary[view == "Industry"]) == 100L,
+          max(rank_summary$preliminary_rank) == 100L,
+          all(rank_summary$office == "H"))
+
+stopifnot(mentat_guard_date_sanity(rep("2026-01-02", 1500))$passed,
+          !mentat_guard_date_sanity("0021-12-12")$passed,
+          !mentat_guard_date_sanity("not-a-date")$passed)
+
+# The same quarterly transaction ID can occur in both years of a cycle.
+pas2_root <- tempfile("pas2-year-scope-")
+dir.create(file.path(pas2_root, "pas224"), recursive = TRUE)
+pas2_row <- function(date, value, file, sub) {
+  fields <- rep("", 22L)
+  fields[c(1,2,3,6,14,15,17,18,19,22)] <-
+    c("C00000001","N","Q1","24K",date,value,"H00000001","T1",file,sub)
+  paste(fields, collapse = "|")
+}
+writeLines(c(pas2_row("01022023","100","1","1"),
+             pas2_row("01022024","100","2","2"),
+             pas2_row("01022024","150","3","3")),
+           file.path(pas2_root,"pas224","itpas2.txt"))
+parsed_fixture <- fec_build_pas2_index(pas2_root, 2024L)
+stopifnot(sum(parsed_fixture[include_in_total == "Yes", transaction_amount]) == 250,
+          all(substr(parsed_fixture$transaction_date,1,4) %in% c("2023","2024")))
+unlink(pas2_root, recursive = TRUE)
+
+direction_guard <- mentat_guard_direction_integrity(direction_summary)
+stopifnot(
+  isTRUE(direction_guard$passed[[1L]]),
+  identical(direction_guard$severity[[1L]], "fail")
+)
+missing_direction_guard <- mentat_guard_direction_integrity(
+  direction_summary[
+    ,
+    setdiff(names(direction_summary), "oppose_amount"),
+    with = FALSE
+  ]
+)
+stopifnot(
+  !isTRUE(missing_direction_guard$passed[[1L]]),
+  identical(missing_direction_guard$severity[[1L]], "fail")
+)
+inconsistent_direction <- data.table::copy(direction_summary)
+inconsistent_direction[, directions := "Support"]
+inconsistent_direction[, oppose_amount := 250]
+inconsistent_direction_guard <- mentat_guard_direction_integrity(
+  inconsistent_direction
+)
+stopifnot(
+  !isTRUE(inconsistent_direction_guard$passed[[1L]]),
+  identical(inconsistent_direction_guard$severity[[1L]], "fail")
 )
 
 cat(sprintf(

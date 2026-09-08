@@ -165,7 +165,7 @@ stopifnot(
     silverberg$sub_id,
     c("silverberg-conduit", "silverberg-earmark", "silverberg-memo")
   ),
-  silverberg[sub_id == "silverberg-conduit", recipient_category] == "Super PAC",
+  silverberg[sub_id == "silverberg-conduit", recipient_category] == "Carey",
   silverberg[sub_id == "silverberg-earmark", recipient_category] == "JFC",
   silverberg[sub_id == "silverberg-memo", recipient_category] == "Super PAC",
   all(silverberg$contribution_receipt_amount == 10.41)

@@ -30,7 +30,20 @@ CREATE TABLE contributions (
 CREATE TABLE corporate_giving (
   sub_id TEXT PRIMARY KEY,
   company TEXT NOT NULL,
-  amount REAL
+  amount REAL,
+  matched_variant TEXT NOT NULL DEFAULT '',
+  scraped_at TEXT NOT NULL DEFAULT '1970-01-01T00:00:00+0000',
+  company_match_status TEXT NOT NULL DEFAULT 'accepted',
+  company_match_reason TEXT,
+  excluded_reason TEXT,
+  transaction_id TEXT,
+  original_sub_id TEXT,
+  amendment_indicator TEXT,
+  report_year INTEGER,
+  report_type TEXT,
+  file_num INTEGER,
+  pdf_url TEXT,
+  load_date TEXT
 );
 CREATE TABLE scrape_progress (
   company TEXT NOT NULL,
@@ -39,6 +52,7 @@ CREATE TABLE scrape_progress (
   last_page INTEGER NOT NULL,
   records_total INTEGER NOT NULL,
   updated_at TEXT NOT NULL,
+  zero_verified INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (company, cycle, variant_set)
 );
 CREATE TABLE api_work_progress (
@@ -154,11 +168,19 @@ def seed_shard(
             (f"unselected-{suffix}", other_company, 999.0),
         )
         connection.execute(
-            "INSERT INTO corporate_giving VALUES (?, ?, ?)",
+            """
+            INSERT INTO corporate_giving (sub_id, company, amount)
+            VALUES (?, ?, ?)
+            """,
             (f"corporate-{suffix}", company, 200.0),
         )
         connection.execute(
-            "INSERT INTO scrape_progress VALUES (?, 2026, 'P1', 9, 10, ?)",
+            """
+            INSERT INTO scrape_progress (
+              company, cycle, variant_set, last_page, records_total,
+              updated_at, zero_verified
+            ) VALUES (?, 2026, 'P1', 9, 10, ?, 1)
+            """,
             (company, f"2026-07-23T00:00:0{suffix}"),
         )
         connection.execute(
@@ -318,7 +340,10 @@ class MergeCompanyShardsTest(unittest.TestCase):
                 connection.execute(
                     """
                     INSERT INTO scrape_progress
-                    VALUES ('Alpha', 2026, 'P1', 1, 10, '2026-07-20')
+                    VALUES (
+                      'Alpha', 2026, 'P1', 1, 10, '2026-07-20',
+                      0
+                    )
                     """
                 )
                 connection.execute(
@@ -712,6 +737,297 @@ class MergeCompanyShardsTest(unittest.TestCase):
                 0,
             )
             self.assertEqual(scalar(target, "PRAGMA quick_check"), "ok")
+
+    def test_scrape_progress_promotes_zero_verification_without_regression(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-zero-progress-") as temp:
+            root = Path(temp)
+            target = root / "target.db"
+            shard = root / "shard.db"
+            create_database(target)
+            create_database(shard)
+            with closing(sqlite3.connect(target)) as connection, connection:
+                connection.execute(
+                    """
+                    INSERT INTO scrape_progress VALUES
+                      ('Alpha', 2026, 'P1', 9, 10, '2026-07-23', 0)
+                    """
+                )
+            with closing(sqlite3.connect(shard)) as connection, connection:
+                connection.execute(
+                    """
+                    INSERT INTO scrape_progress VALUES
+                      ('Alpha', 2026, 'P1', 8, 8, '2026-07-22', 1)
+                    """
+                )
+
+            self.assertEqual(merger.main([str(target), f"{shard}::Alpha"]), 0)
+            with closing(sqlite3.connect(target)) as connection:
+                row = connection.execute(
+                    """
+                    SELECT last_page, records_total, zero_verified
+                    FROM scrape_progress
+                    """
+                ).fetchone()
+            self.assertEqual(row, (9, 10, 1))
+
+    def test_corporate_version_fields_allow_only_blank_enrichment(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-corporate-enrich-") as temp:
+            root = Path(temp)
+            target = root / "target.db"
+            shard = root / "shard.db"
+            conflict = root / "conflict.db"
+            for path in (target, shard, conflict):
+                create_database(path)
+            with closing(sqlite3.connect(target)) as connection, connection:
+                connection.execute(
+                    """
+                    INSERT INTO corporate_giving
+                      (sub_id, company, amount, transaction_id, original_sub_id,
+                       report_year)
+                    VALUES ('C1', 'Alpha', 10, '', NULL, NULL)
+                    """
+                )
+            with closing(sqlite3.connect(shard)) as connection, connection:
+                connection.execute(
+                    """
+                    INSERT INTO corporate_giving
+                      (sub_id, company, amount, transaction_id, original_sub_id,
+                       report_year)
+                    VALUES ('C1', 'Alpha', 10, 'TX-1', '', 2026)
+                    """
+                )
+            self.assertEqual(merger.main([str(target), f"{shard}::Alpha"]), 0)
+            with closing(sqlite3.connect(target)) as connection:
+                row = connection.execute(
+                    """
+                    SELECT transaction_id, report_year
+                    FROM corporate_giving WHERE sub_id='C1'
+                    """
+                ).fetchone()
+            self.assertEqual(row, ("TX-1", 2026))
+
+            with closing(sqlite3.connect(conflict)) as connection, connection:
+                connection.execute(
+                    """
+                    INSERT INTO corporate_giving
+                      (sub_id, company, amount, transaction_id, report_year)
+                    VALUES ('C1', 'Alpha', 10, 'TX-OTHER', 2026)
+                    """
+                )
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "Non-identical primary-key collision in corporate_giving",
+            ):
+                merger.main([str(target), f"{conflict}::Alpha"])
+
+    def test_rejected_corporate_attribution_collision_is_deterministic(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(
+            prefix="mentat-corporate-rejected-attribution-"
+        ) as temp:
+            root = Path(temp)
+            target = root / "target.db"
+            alpha = root / "alpha.db"
+            beta = root / "beta.db"
+            for path in (target, alpha, beta):
+                create_database(path)
+            with closing(sqlite3.connect(alpha)) as connection, connection:
+                connection.execute(
+                    """
+                    INSERT INTO corporate_giving (
+                      sub_id, company, amount, matched_variant, scraped_at,
+                      company_match_status, company_match_reason
+                    ) VALUES (
+                      'C-REJECTED', 'Alpha', 10, 'Alpha Variant',
+                      '2026-07-20T01:00:00+0000', 'rejected',
+                      'employer_prefix_not_verified'
+                    )
+                    """
+                )
+            with closing(sqlite3.connect(beta)) as connection, connection:
+                connection.execute(
+                    """
+                    INSERT INTO corporate_giving (
+                      sub_id, company, amount, matched_variant, scraped_at,
+                      company_match_status, company_match_reason
+                    ) VALUES (
+                      'C-REJECTED', 'Beta', 10, 'Beta Variant',
+                      '2026-07-21T01:00:00+0000', 'rejected',
+                      'employer_prefix_not_verified'
+                    )
+                    """
+                )
+
+            output = StringIO()
+            with redirect_stdout(output):
+                self.assertEqual(
+                    merger.main(
+                        [
+                            str(target),
+                            "--company-order-json",
+                            '["Beta", "Alpha"]',
+                            f"{alpha}::Alpha",
+                            f"{beta}::Beta",
+                        ]
+                    ),
+                    0,
+                )
+            with closing(sqlite3.connect(target)) as connection:
+                winner = connection.execute(
+                    """
+                    SELECT company, matched_variant
+                    FROM corporate_giving
+                    WHERE sub_id='C-REJECTED'
+                    """
+                ).fetchone()
+                conflict = connection.execute(
+                    """
+                    SELECT stored_company, incoming_company, incoming_phase
+                    FROM attribution_conflicts
+                    WHERE sub_id='C-REJECTED'
+                    """
+                ).fetchone()
+            self.assertEqual(winner, ("Beta", "Beta Variant"))
+            self.assertEqual(
+                conflict,
+                ("Beta", "Alpha", "corporate_giving_rejected"),
+            )
+            self.assertIn(
+                "attribution_conflicts_recorded=1",
+                output.getvalue(),
+            )
+
+    def test_corporate_enrichment_does_not_hide_later_conflict(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-corporate-mixed-") as temp:
+            root = Path(temp)
+            target = root / "target.db"
+            shard = root / "shard.db"
+            create_database(target)
+            create_database(shard)
+            with closing(sqlite3.connect(target)) as connection, connection:
+                connection.executemany(
+                    """
+                    INSERT INTO corporate_giving
+                      (sub_id, company, amount, transaction_id)
+                    VALUES (?, 'Alpha', ?, ?)
+                    """,
+                    [
+                        ("C1", 10, ""),
+                        ("C2", 20, "TX-A"),
+                    ],
+                )
+            with closing(sqlite3.connect(shard)) as connection, connection:
+                connection.executemany(
+                    """
+                    INSERT INTO corporate_giving
+                      (sub_id, company, amount, transaction_id)
+                    VALUES (?, 'Alpha', ?, ?)
+                    """,
+                    [
+                        ("C1", 10, "TX-1"),
+                        ("C2", 20, "TX-B"),
+                    ],
+                )
+
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "Non-identical primary-key collision in corporate_giving",
+            ):
+                merger.main([str(target), f"{shard}::Alpha"])
+            with closing(sqlite3.connect(target)) as connection:
+                rows = connection.execute(
+                    """
+                    SELECT sub_id, transaction_id
+                    FROM corporate_giving
+                    ORDER BY sub_id
+                    """
+                ).fetchall()
+            self.assertEqual(rows, [("C1", ""), ("C2", "TX-A")])
+
+    def test_collision_audit_holds_target_write_lease(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-audit-lease-") as temp:
+            root = Path(temp)
+            target = root / "target.db"
+            shard = root / "shard.db"
+            create_database(target)
+            create_database(shard)
+            seed_shard(shard, "Alpha", "Beta", "A")
+            original_audit = merger.audit_exact_pk_collisions
+            audit_transaction_states: list[bool] = []
+
+            def audit_under_lease(connection, *args):
+                audit_transaction_states.append(connection.in_transaction)
+                with closing(
+                    sqlite3.connect(
+                        target,
+                        timeout=0.0,
+                        isolation_level=None,
+                    )
+                ) as contender:
+                    contender.execute("PRAGMA busy_timeout=0")
+                    with self.assertRaisesRegex(
+                        sqlite3.OperationalError,
+                        "database is locked",
+                    ):
+                        contender.execute("BEGIN IMMEDIATE")
+                return original_audit(connection, *args)
+
+            merger.audit_exact_pk_collisions = audit_under_lease
+            try:
+                self.assertEqual(
+                    merger.main([str(target), f"{shard}::Alpha"]),
+                    0,
+                )
+            finally:
+                merger.audit_exact_pk_collisions = original_audit
+            self.assertEqual(audit_transaction_states, [True])
+
+    def test_expected_target_fingerprint_is_checked_under_write_lease(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(prefix="mentat-target-state-") as temp:
+            root = Path(temp)
+            target = root / "target.db"
+            shard = root / "shard.db"
+            create_database(target)
+            create_database(shard)
+            seed_shard(shard, "Alpha", "Beta", "A")
+            expected = merger.file_sha256(target)
+            with closing(sqlite3.connect(target)) as connection, connection:
+                connection.execute(
+                    """
+                    INSERT INTO contributions
+                      (sub_id, company, matched_variant, phase, scraped_at)
+                    VALUES ('external-write', 'Beta', '', '', 'now')
+                    """
+                )
+            original_check = merger.assert_expected_target_state
+            transaction_states: list[bool] = []
+
+            def checked_under_lease(connection, *args):
+                transaction_states.append(connection.in_transaction)
+                return original_check(connection, *args)
+
+            merger.assert_expected_target_state = checked_under_lease
+            try:
+                with self.assertRaisesRegex(
+                    RuntimeError,
+                    "changed before the merge write lease",
+                ):
+                    merger.main(
+                        [
+                            str(target),
+                            "--expected-target-sha256",
+                            expected,
+                            f"{shard}::Alpha",
+                        ]
+                    )
+            finally:
+                merger.assert_expected_target_state = original_check
+            self.assertEqual(transaction_states, [True])
 
 
 if __name__ == "__main__":

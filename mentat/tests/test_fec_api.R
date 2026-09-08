@@ -26,6 +26,69 @@ stopifnot(
   grepl("https://api.data.gov/signup", missing_key, fixed = TRUE)
 )
 
+reset_database <- tempfile(fileext = ".sqlite")
+reset_connection <- DBI::dbConnect(RSQLite::SQLite(), reset_database)
+init_schema(reset_connection)
+DBI::dbExecute(
+  reset_connection,
+  paste(
+    "INSERT INTO scrape_progress",
+    "(company, cycle, variant_set, last_page, records_total, updated_at)",
+    "VALUES ('Alpha', 2026, 'legacy-alpha', 1, 10, 'old'),",
+    "('Beta', 2026, 'legacy-beta', 1, 20, 'old')"
+  )
+)
+DBI::dbExecute(
+  reset_connection,
+  paste(
+    "INSERT INTO api_work_progress",
+    "(unit_id, company, cycle, kind, last_page, rows_seen, records_total,",
+    "fetched_complete, stored_complete, updated_at)",
+    "VALUES ('api-alpha', 'Alpha', 2026, 'employer', 1, 10, 10, 1, 1, 'old'),",
+    "('api-beta', 'Beta', 2026, 'employer', 1, 20, 20, 1, 1, 'old')"
+  )
+)
+DBI::dbExecute(
+  reset_connection,
+  paste(
+    "INSERT INTO api_page_checkpoints (unit_id, page, payload_json)",
+    "VALUES ('api-alpha', 1, '{}'), ('api-beta', 1, '{}')"
+  )
+)
+reset_count <- reset_api_progress(
+  reset_connection,
+  list(list(company = "Alpha", cycle = 2026L))
+)
+stopifnot(
+  reset_count == 1L,
+  DBI::dbGetQuery(
+    reset_connection,
+    "SELECT COUNT(*) AS n FROM scrape_progress WHERE company='Alpha'"
+  )$n[[1L]] == 0L,
+  DBI::dbGetQuery(
+    reset_connection,
+    "SELECT COUNT(*) AS n FROM scrape_progress WHERE company='Beta'"
+  )$n[[1L]] == 1L,
+  DBI::dbGetQuery(
+    reset_connection,
+    "SELECT COUNT(*) AS n FROM api_work_progress WHERE unit_id='api-alpha'"
+  )$n[[1L]] == 0L,
+  DBI::dbGetQuery(
+    reset_connection,
+    "SELECT COUNT(*) AS n FROM api_work_progress WHERE unit_id='api-beta'"
+  )$n[[1L]] == 1L,
+  DBI::dbGetQuery(
+    reset_connection,
+    "SELECT COUNT(*) AS n FROM api_page_checkpoints WHERE unit_id='api-alpha'"
+  )$n[[1L]] == 0L,
+  DBI::dbGetQuery(
+    reset_connection,
+    "SELECT COUNT(*) AS n FROM api_page_checkpoints WHERE unit_id='api-beta'"
+  )$n[[1L]] == 1L
+)
+DBI::dbDisconnect(reset_connection)
+unlink(reset_database)
+
 corporate_database <- tempfile(fileext = ".sqlite")
 corporate_connection <- DBI::dbConnect(RSQLite::SQLite(), corporate_database)
 init_schema(corporate_connection)
@@ -140,6 +203,42 @@ unit <- list(
 )
 stopifnot(identical(eval(formals(collect_crypto_api)$phase2_names), FALSE))
 
+zero_database <- tempfile(fileext = ".sqlite")
+zero_connection <- DBI::dbConnect(RSQLite::SQLite(), zero_database)
+init_schema(zero_connection)
+zero_page <- list(
+  page_number = 0L,
+  count = 0L,
+  rows = list(),
+  rows_collected = 0L,
+  last_indexes = NULL,
+  complete = TRUE
+)
+for (zero_unit in list(unit, corporate_unit)) {
+  fec_api_store_page(
+    zero_connection,
+    state = list(unit = zero_unit, rows_seen = 0L),
+    page = zero_page,
+    match_overrides = company_match_overrides_data(zero_connection),
+    trusted_name_keys = character(),
+    home_states = company_home_states_data(zero_connection)
+  )
+}
+zero_checkpoints <- DBI::dbGetQuery(
+  zero_connection,
+  paste(
+    "SELECT company, cycle, variant_set, records_total, zero_verified",
+    "FROM scrape_progress ORDER BY company, cycle, variant_set"
+  )
+)
+stopifnot(
+  nrow(zero_checkpoints) == 2L,
+  all(zero_checkpoints$records_total == 0L),
+  all(zero_checkpoints$zero_verified == 1L)
+)
+DBI::dbDisconnect(zero_connection)
+unlink(zero_database)
+
 pages <- list(
   list(
     results = list(
@@ -238,6 +337,239 @@ stopifnot(
   null_cursor_calls == 1L,
   grepl("pagination shortfall", null_cursor_failure, fixed = TRUE),
   grepl("collected 1 of 999", null_cursor_failure, fixed = TRUE)
+)
+
+moving_count_pages <- list(
+  list(
+    results = list(list(sub_id = "MOVING-1"), list(sub_id = "MOVING-2")),
+    pagination = list(
+      count = 3L,
+      last_indexes = list(
+        last_index = "moving-cursor",
+        last_contribution_receipt_date = "2024-04-02"
+      )
+    )
+  ),
+  list(
+    results = list(list(sub_id = "MOVING-3")),
+    pagination = list(count = 4L, last_indexes = NULL)
+  )
+)
+moving_count_calls <- 0L
+moving_count_transport <- function(specs, api_key, concurrency) {
+  moving_count_calls <<- moving_count_calls + length(specs)
+  list(list(
+    status = 200L,
+    headers = list(),
+    json = moving_count_pages[[moving_count_calls]]
+  ))
+}
+moving_count_result <- suppressWarnings(fec_api_collect_work_units(
+  list(unit),
+  api_key = "fixture-key",
+  concurrency = 1L,
+  transport = moving_count_transport,
+  sleep = function(seconds) stop("unexpected sleep"),
+  jitter = function(...) 0
+))
+moving_count_state <- moving_count_result$units[[unit$id]]
+stopifnot(
+  moving_count_calls == 2L,
+  moving_count_result$rows == 3L,
+  isTRUE(moving_count_state$complete),
+  moving_count_state$expected_count == 3L
+)
+
+moving_count_cursor_pages <- list(
+  list(
+    results = list(
+      list(sub_id = "MOVING-CURSOR-1"),
+      list(sub_id = "MOVING-CURSOR-2")
+    ),
+    pagination = list(
+      count = 3L,
+      last_indexes = list(
+        last_index = "moving-cursor-1",
+        last_contribution_receipt_date = "2024-04-03"
+      )
+    )
+  ),
+  list(
+    results = list(list(sub_id = "MOVING-CURSOR-3")),
+    pagination = list(
+      count = 4L,
+      last_indexes = list(
+        last_index = "moving-cursor-2",
+        last_contribution_receipt_date = "2024-04-02"
+      )
+    )
+  ),
+  list(
+    results = list(list(sub_id = "MOVING-CURSOR-4")),
+    pagination = list(count = 4L, last_indexes = NULL)
+  )
+)
+moving_count_cursor_calls <- 0L
+moving_count_cursor_transport <- function(specs, api_key, concurrency) {
+  moving_count_cursor_calls <<- moving_count_cursor_calls + length(specs)
+  list(list(
+    status = 200L,
+    headers = list(),
+    json = moving_count_cursor_pages[[moving_count_cursor_calls]]
+  ))
+}
+moving_count_cursor_result <- suppressWarnings(fec_api_collect_work_units(
+  list(unit),
+  api_key = "fixture-key",
+  concurrency = 1L,
+  transport = moving_count_cursor_transport,
+  sleep = function(seconds) stop("unexpected sleep"),
+  jitter = function(...) 0
+))
+moving_count_cursor_state <- moving_count_cursor_result$units[[unit$id]]
+stopifnot(
+  moving_count_cursor_calls == 3L,
+  moving_count_cursor_result$rows == 4L,
+  isTRUE(moving_count_cursor_state$complete),
+  moving_count_cursor_state$expected_count == 4L
+)
+
+downward_count_pages <- list(
+  list(
+    results = list(list(sub_id = "DOWN-1"), list(sub_id = "DOWN-2")),
+    pagination = list(
+      count = 5L,
+      last_indexes = list(
+        last_index = "down-cursor-1",
+        last_contribution_receipt_date = "2024-04-03"
+      )
+    )
+  ),
+  list(
+    results = list(list(sub_id = "DOWN-3")),
+    pagination = list(
+      count = 3L,
+      last_indexes = list(
+        last_index = "down-cursor-2",
+        last_contribution_receipt_date = "2024-04-02"
+      )
+    )
+  ),
+  list(
+    results = list(list(sub_id = "DOWN-4"), list(sub_id = "DOWN-5")),
+    pagination = list(count = 3L, last_indexes = NULL)
+  )
+)
+downward_count_calls <- 0L
+downward_count_transport <- function(specs, api_key, concurrency) {
+  downward_count_calls <<- downward_count_calls + length(specs)
+  list(list(
+    status = 200L,
+    headers = list(),
+    json = downward_count_pages[[downward_count_calls]]
+  ))
+}
+downward_count_result <- suppressWarnings(fec_api_collect_work_units(
+  list(unit),
+  api_key = "fixture-key",
+  concurrency = 1L,
+  transport = downward_count_transport,
+  sleep = function(seconds) stop("unexpected sleep"),
+  jitter = function(...) 0
+))
+downward_count_state <- downward_count_result$units[[unit$id]]
+stopifnot(
+  downward_count_calls == 3L,
+  downward_count_result$rows == 5L,
+  isTRUE(downward_count_state$complete),
+  downward_count_state$expected_count == 5L
+)
+
+terminal_downward_pages <- list(
+  list(
+    results = list(list(sub_id = "TERM-DOWN-1"), list(sub_id = "TERM-DOWN-2")),
+    pagination = list(
+      count = 3L,
+      last_indexes = list(
+        last_index = "terminal-down-cursor",
+        last_contribution_receipt_date = "2024-04-02"
+      )
+    )
+  ),
+  list(
+    results = list(list(sub_id = "TERM-DOWN-3")),
+    pagination = list(count = 2L, last_indexes = NULL)
+  )
+)
+terminal_downward_calls <- 0L
+terminal_downward_transport <- function(specs, api_key, concurrency) {
+  terminal_downward_calls <<- terminal_downward_calls + length(specs)
+  list(list(
+    status = 200L,
+    headers = list(),
+    json = terminal_downward_pages[[terminal_downward_calls]]
+  ))
+}
+terminal_downward_result <- suppressWarnings(fec_api_collect_work_units(
+  list(unit),
+  api_key = "fixture-key",
+  concurrency = 1L,
+  transport = terminal_downward_transport,
+  sleep = function(seconds) stop("unexpected sleep"),
+  jitter = function(...) 0
+))
+terminal_downward_state <- terminal_downward_result$units[[unit$id]]
+stopifnot(
+  terminal_downward_calls == 2L,
+  terminal_downward_result$rows == 3L,
+  isTRUE(terminal_downward_state$complete),
+  terminal_downward_state$expected_count == 3L
+)
+
+terminal_current_count_pages <- list(
+  list(
+    results = list(
+      list(sub_id = "CURRENT-DOWN-1"),
+      list(sub_id = "CURRENT-DOWN-2")
+    ),
+    pagination = list(
+      count = 5L,
+      last_indexes = list(
+        last_index = "current-down-cursor",
+        last_contribution_receipt_date = "2024-04-02"
+      )
+    )
+  ),
+  list(
+    results = list(list(sub_id = "CURRENT-DOWN-3")),
+    pagination = list(count = 3L, last_indexes = NULL)
+  )
+)
+terminal_current_count_calls <- 0L
+terminal_current_count_transport <- function(specs, api_key, concurrency) {
+  terminal_current_count_calls <<- terminal_current_count_calls + length(specs)
+  list(list(
+    status = 200L,
+    headers = list(),
+    json = terminal_current_count_pages[[terminal_current_count_calls]]
+  ))
+}
+terminal_current_count_result <- suppressWarnings(
+  fec_api_collect_work_units(
+    list(unit),
+    api_key = "fixture-key",
+    concurrency = 1L,
+    transport = terminal_current_count_transport,
+    sleep = function(seconds) stop("unexpected sleep"),
+    jitter = function(...) 0
+  )
+)
+terminal_current_count_state <- terminal_current_count_result$units[[unit$id]]
+stopifnot(
+  terminal_current_count_calls == 2L,
+  terminal_current_count_result$rows == 3L,
+  isTRUE(terminal_current_count_state$complete),
+  terminal_current_count_state$expected_count == 3L
 )
 
 partial_cursor_failure <- tryCatch(
@@ -417,6 +749,185 @@ stopifnot(
     c("A", "DUP", "Z")
   )
 )
+
+no_decomposition_unit <- unit
+no_decomposition_unit$company_variants <- no_decomposition_unit$variants
+no_decomposition_unit$decomposition_variants <- character()
+no_decomposition_failure <- tryCatch(
+  {
+    fec_api_collect_work_units(
+      list(no_decomposition_unit),
+      api_key = "fixture-key",
+      concurrency = 1L,
+      transport = function(specs, api_key, concurrency) {
+        lapply(specs, function(spec) list(
+          status = 504L,
+          headers = list(),
+          body = "",
+          elapsed_seconds = 55
+        ))
+      },
+      sleep = function(seconds) NULL,
+      jitter = function(...) 0
+    )
+    ""
+  },
+  error = conditionMessage
+)
+stopifnot(
+  grepl(
+    "Unservable FEC API query has no decomposition spellings",
+    no_decomposition_failure,
+    fixed = TRUE
+  ),
+  grepl("refusing an unverified zero", no_decomposition_failure, fixed = TRUE)
+)
+
+adaptive_page_calls <- list()
+adaptive_page_transport <- function(specs, api_key, concurrency) {
+  lapply(specs, function(spec) {
+    employer <- spec$params$contributor_employer[[1L]]
+    per_page <- as.integer(spec$params$per_page[[1L]])
+    adaptive_page_calls[[length(adaptive_page_calls) + 1L]] <<- list(
+      employer = employer,
+      per_page = per_page
+    )
+    if (identical(employer, "BINANCE") ||
+        (identical(employer, "BINANCE.US") && per_page > 50L)) {
+      return(list(
+        status = 504L,
+        headers = list(),
+        body = "",
+        elapsed_seconds = 0.4
+      ))
+    }
+    id <- if (identical(employer, "BINANCE.US")) "SMALL-PAGE" else "OTHER"
+    list(
+      status = 200L,
+      headers = list(),
+      json = list(
+        results = list(list(sub_id = id)),
+        pagination = list(count = 1L, last_indexes = NULL)
+      )
+    )
+  })
+}
+adaptive_page_result <- fec_api_collect_work_units(
+  list(unservable_unit),
+  api_key = "fixture-key",
+  concurrency = 1L,
+  transport = adaptive_page_transport,
+  sleep = function(seconds) NULL,
+  jitter = function(...) 0
+)
+adaptive_page_rows <- fec_api_state_rows(
+  adaptive_page_result$units[[unservable_unit$id]]
+)
+binance_us_page_sizes <- vapply(
+  adaptive_page_calls[
+    vapply(
+      adaptive_page_calls,
+      function(call) identical(call$employer, "BINANCE.US"),
+      logical(1L)
+    )
+  ],
+  function(call) call$per_page,
+  integer(1L)
+)
+stopifnot(
+  identical(binance_us_page_sizes, c(100L, 100L, 50L)),
+  identical(
+    vapply(adaptive_page_rows, function(row) row$sub_id, character(1L)),
+    c("OTHER", "SMALL-PAGE")
+  )
+)
+
+partial_decomposition_calls <- new.env(parent = emptyenv())
+partial_decomposition_transport <- function(specs, api_key, concurrency) {
+  lapply(specs, function(spec) {
+    employer <- spec$params$contributor_employer[[1L]]
+    count <- partial_decomposition_calls[[employer]] %||% 0L
+    partial_decomposition_calls[[employer]] <- count + 1L
+    if (employer %in% c("BINANCE", "BINANCEUS")) {
+      return(list(
+        status = 504L,
+        headers = list(),
+        body = "",
+        elapsed_seconds = if (count == 0L) 55 else 0.4
+      ))
+    }
+    list(
+      status = 200L,
+      headers = list(),
+      json = list(
+        results = list(list(sub_id = "ONLY-SUCCESSFUL-CHILD")),
+        pagination = list(count = 1L, last_indexes = NULL)
+      )
+    )
+  })
+}
+partial_decomposition_failure <- tryCatch(
+  {
+    fec_api_collect_work_units(
+      list(unservable_unit),
+      api_key = "fixture-key",
+      concurrency = 1L,
+      transport = partial_decomposition_transport,
+      sleep = function(seconds) NULL,
+      jitter = function(...) 0
+    )
+    ""
+  },
+  error = conditionMessage
+)
+stopifnot(grepl(
+  "refusing a partial parent result",
+  partial_decomposition_failure,
+  fixed = TRUE
+))
+
+duplicate_page_calls <- 0L
+duplicate_page_transport <- function(specs, api_key, concurrency) {
+  duplicate_page_calls <<- duplicate_page_calls + 1L
+  id <- if (duplicate_page_calls == 1L) "DUPLICATE" else "DUPLICATE"
+  list(list(
+    status = 200L,
+    headers = list(),
+    json = list(
+      results = list(list(sub_id = id)),
+      pagination = list(
+        count = 2L,
+        last_indexes = if (duplicate_page_calls == 1L) {
+          list(
+            last_index = "next",
+            last_contribution_receipt_date = "2024-01-01"
+          )
+        } else {
+          NULL
+        }
+      )
+    )
+  ))
+}
+duplicate_page_failure <- tryCatch(
+  {
+    fec_api_collect_work_units(
+      list(unit),
+      api_key = "fixture-key",
+      concurrency = 1L,
+      transport = duplicate_page_transport,
+      sleep = function(seconds) NULL,
+      jitter = function(...) 0
+    )
+    ""
+  },
+  error = conditionMessage
+)
+stopifnot(grepl(
+  "repeated sub_id",
+  duplicate_page_failure,
+  fixed = TRUE
+))
 
 partial_batch_sizes <- integer()
 partial_batch_reservations <- integer()

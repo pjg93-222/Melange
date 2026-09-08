@@ -119,7 +119,9 @@ mentat_guard_cell_coverage <- function(roster, rows, cycles) {
 # Bitnomial recorded a real 0 at the same ~0.7s per variant set. Nothing stored
 # after the fact separates them, so the collector now stamps zero_verified on
 # every checkpoint it writes under the hardened readiness rule. A zero without
-# that stamp predates the rule and must be recollected before it can be believed.
+# that stamp predates the source-specific readiness rule (browser confirmed-empty
+# rendering or API HTTP-success plus count/cursor completion) and must be
+# recollected before it can be believed.
 # Warn, not fail: it describes provenance of existing data, not a defect in this
 # build, and every affected cell is also visible through G1/G2.
 mentat_guard_zero_provenance <- function(progress) {
@@ -157,6 +159,40 @@ mentat_guard_zero_provenance <- function(progress) {
     ),
     nrow(suspect)
   )
+}
+
+# Reconcile each modern API search against its own fetched/stored checkpoint.
+# Summing legacy and API query counts against UNIQUE stored rows counts both
+# overlapping aliases and old search generations twice. Keep legacy evidence,
+# but supersede its count comparison only when every corresponding API unit has
+# a successful-response stamp, equal counts, complete storage, and newer dates.
+mentat_guard_progress_views <- function(progress, api) {
+  p <- data.table::as.data.table(data.table::copy(progress))
+  a <- data.table::as.data.table(data.table::copy(api))
+  empty <- list(completeness = p, zero = p, api_guard = NULL)
+  if (!nrow(a) || !all(c("variant_set", "zero_verified", "updated_at") %in% names(p))) return(empty)
+  p[, destination := ifelse(grepl("^P2_company_name", variant_set), "corporate", "contributions")]
+  a <- a[kind %in% c("employer", "corporate")]
+  if (!nrow(a)) return(empty)
+  stamps <- p[, .(company, cycle, unit_id = variant_set, zero_verified)]
+  a <- merge(a, stamps, by = c("company", "cycle", "unit_id"), all.x = TRUE)
+  a[, destination := ifelse(kind == "corporate", "corporate", "contributions")]
+  a[, valid := !is.na(zero_verified) & zero_verified == 1L & fetched_complete == 1L &
+      stored_complete == 1L & rows_seen == records_total & records_total >= 0]
+  a[is.na(valid), valid := FALSE]
+  timestamp <- function(x) as.numeric(as.POSIXct(x, format = "%Y-%m-%dT%H:%M:%OS%z", tz = "UTC"))
+  eligible <- a[, .(valid = all(valid), latest_api = max(timestamp(updated_at))), by = .(company, cycle, destination)]
+  old <- p[, .(latest_legacy = max(timestamp(updated_at))), by = .(company, cycle, destination)]
+  eligible <- merge(eligible, old, by = c("company", "cycle", "destination"))[
+    valid & !is.na(latest_api) & !is.na(latest_legacy) & latest_api >= latest_legacy,
+    .(company, cycle, destination)]
+  legacy <- p[!eligible, on = .(company, cycle, destination)]
+  verified <- a[eligible, on = .(company, cycle, destination), nomatch = 0L]
+  list(completeness = legacy,
+    zero = data.table::rbindlist(list(legacy, verified), fill = TRUE),
+    api_guard = mentat_guard_result("api_checkpoint_integrity", "warn", all(a$valid),
+      sprintf("%d of %d API search checkpoints have a successful-response stamp, matching fetched counts and complete storage; %d legacy cell/destination comparisons superseded. This does not verify unrequested aliases or missing employer data.",
+        sum(a$valid), nrow(a), nrow(eligible))))
 }
 
 # G8 - collection completeness.
@@ -228,25 +264,60 @@ mentat_guard_direction_integrity <- function(beneficiary) {
   if (is.null(beneficiary) || !nrow(beneficiary)) {
     return(mentat_guard_result("direction_integrity", "warn", TRUE, "no beneficiary rows"))
   }
-  cols <- names(beneficiary)
-  dir_col <- cols[grepl("^direction", cols, ignore.case = TRUE)][1]
-  amt_col <- cols[grepl("downstream_amount|preliminary_downstream_amount", cols)][1]
-  if (is.na(dir_col) || is.na(amt_col)) {
+  required <- c(
+    "directions",
+    "preliminary_downstream_amount",
+    "support_amount",
+    "oppose_amount"
+  )
+  missing <- setdiff(required, names(beneficiary))
+  if (length(missing)) {
     return(mentat_guard_result(
-      "direction_integrity", "warn", TRUE, "direction/amount columns unavailable"
+      "direction_integrity", "fail", FALSE,
+      paste0(
+        "beneficiary direction components are missing: ",
+        paste(missing, collapse = ", ")
+      ),
+      length(missing)
     ))
   }
   dt <- data.table::as.data.table(beneficiary)
-  opp <- grepl("oppose", dt[[dir_col]], ignore.case = TRUE)
-  amount <- sum(as.numeric(dt[[amt_col]])[opp], na.rm = TRUE)
-  total <- sum(as.numeric(dt[[amt_col]]), na.rm = TRUE)
+  downstream <- suppressWarnings(as.numeric(dt$preliminary_downstream_amount))
+  support <- suppressWarnings(as.numeric(dt$support_amount))
+  oppose <- suppressWarnings(as.numeric(dt$oppose_amount))
+  invalid_numeric <- !is.finite(downstream) |
+    !is.finite(support) |
+    !is.finite(oppose)
+  has_support <- grepl("support", dt$directions, ignore.case = TRUE)
+  has_oppose <- grepl("oppose", dt$directions, ignore.case = TRUE)
+  tolerance <- 1e-9
+  inconsistent <- invalid_numeric |
+    (abs(support) > tolerance & !has_support) |
+    (abs(oppose) > tolerance & !has_oppose)
+  if (any(inconsistent)) {
+    return(mentat_guard_result(
+      "direction_integrity", "fail", FALSE,
+      paste0(
+        sum(inconsistent),
+        " beneficiary rows have missing/non-finite direction components or ",
+        "nonzero support/oppose dollars without the matching direction"
+      ),
+      sum(inconsistent)
+    ))
+  }
+  opposition_rows <- abs(oppose) > tolerance
+  amount <- sum(abs(oppose[opposition_rows]))
+  total <- sum(abs(downstream))
   share <- if (total > 0) amount / total else 0
   mentat_guard_result(
-    "direction_integrity", "warn", TRUE,
+    "direction_integrity", "fail", TRUE,
     sprintf(
-      paste0("%d of %d beneficiary rows carry opposition activity ($%.0f, %.1f%% ",
-             "of downstream dollars). These must not be attributed as party support."),
-      sum(opp), nrow(dt), amount, share * 100
+      paste0(
+        "%d of %d beneficiary rows carry opposition activity ($%.0f, %.1f%% ",
+        "of absolute downstream dollars); support/oppose components are present ",
+        "and direction-consistent"
+      ),
+      sum(opposition_rows), nrow(dt), amount, share * 100
     ),
     share
   )
@@ -258,7 +329,12 @@ mentat_guard_direction_integrity <- function(beneficiary) {
 # all and 30,331 years before 1990. Both symptoms are cheap to detect: a missing
 # month range, or impossible years.
 mentat_guard_date_sanity <- function(dates, label = "dates", min_year = 1990L) {
-  parsed <- suppressWarnings(as.Date(dates))
+  parsed <- suppressWarnings(as.Date(dates, format = "%Y-%m-%d"))
+  invalid <- sum(nzchar(trimws(dates)) & is.na(parsed), na.rm = TRUE)
+  if (invalid) return(mentat_guard_result(
+    paste0("date_sanity:", label), "fail", FALSE,
+    sprintf("%d nonempty dates cannot be parsed", invalid), invalid
+  ))
   parsed <- parsed[!is.na(parsed)]
   if (!length(parsed)) {
     return(mentat_guard_result(
@@ -280,10 +356,10 @@ mentat_guard_date_sanity <- function(dates, label = "dates", min_year = 1990L) {
   }
   if (length(parsed) >= 1000L && length(months) < 12L) {
     return(mentat_guard_result(
-      paste0("date_sanity:", label), "fail", FALSE,
+      paste0("date_sanity:", label), "info", TRUE,
       sprintf(
-        paste0("only %d distinct months across %d dates (present: %s). Leading ",
-               "zeros are being stripped - read the column as character."),
+        paste0("%d distinct months across %d dates (present: %s); ",
+               "partial-year coverage does not imply date corruption."),
         length(months), length(parsed), paste(sort(months), collapse = ",")
       ),
       length(months)
@@ -302,8 +378,22 @@ mentat_guard_date_sanity <- function(dates, label = "dates", min_year = 1990L) {
 # were swapped in one cycle of all six books, offsetting exactly so every
 # total-level check still passed.
 mentat_guard_category_agreement <- function(view_a, view_b, tolerance = 0.02) {
-  if (is.null(view_a) || is.null(view_b) || !nrow(view_a) || !nrow(view_b)) {
-    return(mentat_guard_result("category_agreement", "warn", TRUE, "nothing to compare"))
+  rows_a <- if (is.null(view_a)) 0L else nrow(view_a)
+  rows_b <- if (is.null(view_b)) 0L else nrow(view_b)
+  if (!rows_a && !rows_b) {
+    return(mentat_guard_result(
+      "category_agreement", "warn", TRUE, "both category views are empty"
+    ))
+  }
+  if (!rows_a || !rows_b) {
+    return(mentat_guard_result(
+      "category_agreement", "fail", FALSE,
+      sprintf(
+        "one independent category view disappeared (view_a=%d, view_b=%d)",
+        rows_a,
+        rows_b
+      )
+    ))
   }
   merged <- merge(
     data.table::as.data.table(view_a),

@@ -52,6 +52,8 @@ param(
   [double]$RamPerApiLaneGB = 0.625,
   [ValidateRange(0.5, 8.0)]
   [double]$RamPerGeneratorGB = 1.5,
+  [ValidateRange(0, 4096)]
+  [int]$FanoutMemoryPerLaneMB = 0,
   [ValidateRange(0, 32768)]
   [int]$NodeHeapMb = 0,
   [ValidateRange(1, 45)]
@@ -310,7 +312,12 @@ function Get-KeyCount {
   if ($numbered.Count) {
     $values = @($values) + $numbered
   }
-  return @($values | Select-Object -Unique).Count
+  $count = @($values | Select-Object -Unique).Count
+  if ($count -eq 0) {
+    $count = & $PythonPath (Join-Path $projectRoot 'tools\fec_key_store.py') --count
+    if ($LASTEXITCODE -ne 0) { throw 'Unable to read the encrypted FEC key store.' }
+  }
+  return [int]$count
 }
 
 function Get-ResourcePlan {
@@ -338,11 +345,10 @@ function Get-ResourcePlan {
   }
   $usedBytes = [math]::Max(0.0, $totalBytes - $freeBytes)
   $targetBytes = $totalBytes * ($BudgetPercent / 100.0)
-  # No generator is running during the first collection phase. Later fanouts
-  # use max-parallel=0 so their worker computes its cap from *live* available
-  # memory, which already reflects only generators that are actually running.
-  # Reserving every configured generator here would strand RAM before those
-  # processes exist and can collapse a multi-key fanout to one lane.
+  # Recompute this plan immediately before every fanout so live available
+  # memory reflects only generators that are actually running. Reserving every
+  # configured generator here would strand RAM before those processes exist
+  # and can collapse a multi-key fanout to one lane.
   $laneHeadroom = $targetBytes - $usedBytes
   $ramCap = if ($totalBytes -gt 0) {
     [math]::Max(1, [math]::Floor($laneHeadroom / ($LaneGB * 1GB)))
@@ -356,6 +362,8 @@ function Get-ResourcePlan {
   }
   $logicalCpu = [math]::Max(1, [Environment]::ProcessorCount)
   $sqliteMergeCap = 10
+  # API lanes are remote-I/O bound. Report logical CPUs as telemetry, but let
+  # the key, RAM, request, and ten-shard SQLite limits govern concurrency.
   $effective = [math]::Max(
     1,
     [math]::Min(
@@ -364,7 +372,7 @@ function Get-ResourcePlan {
         $requested,
         [math]::Min(
           [int]$ramCap,
-          [math]::Min($logicalCpu, $sqliteMergeCap)
+          $sqliteMergeCap
         )
       )
     )
@@ -373,12 +381,8 @@ function Get-ResourcePlan {
     key_count = $KeyCount
     requested_api_lanes = $RequestedParallel
     effective_api_lanes = [int]$effective
-    fanout_max_parallel = if ($RequestedParallel -gt 0) {
-      $RequestedParallel
-    } else { 0 }
-    allocation_mode = if ($RequestedParallel -gt 0) {
-      'explicit_with_live_fanout_ram_cap'
-    } else { 'live_auto_each_industry' }
+    fanout_max_parallel = [int]$effective
+    allocation_mode = 'live_recomputed_enforced'
     ram_budget_percent = $BudgetPercent
     ram_per_api_lane_gb = $LaneGB
     total_ram_gb = if ($totalBytes -gt 0) {
@@ -388,7 +392,8 @@ function Get-ResourcePlan {
       [math]::Round($freeBytes / 1GB, 3)
     } else { $null }
     ram_lane_cap = [int]$ramCap
-    logical_cpu_cap = [int]$logicalCpu
+    logical_cpu_telemetry = [int]$logicalCpu
+    cpu_bound_lane_cap_applied = $false
     sqlite_merge_cap = $sqliteMergeCap
   }
 }
@@ -397,7 +402,8 @@ function Start-ManagedPowerShell {
   param(
     [Parameter(Mandatory = $true)][string]$Command,
     [Parameter(Mandatory = $true)][string]$StdoutPath,
-    [Parameter(Mandatory = $true)][string]$StderrPath
+    [Parameter(Mandatory = $true)][string]$StderrPath,
+    [switch]$InheritFecKeys
   )
   foreach ($path in @($StdoutPath, $StderrPath)) {
     [IO.Directory]::CreateDirectory((Split-Path -Parent $path)) | Out-Null
@@ -408,19 +414,35 @@ function Start-ManagedPowerShell {
   $encoded = [Convert]::ToBase64String(
     [Text.Encoding]::Unicode.GetBytes($Command)
   )
-  $process = Start-Process `
-    -FilePath $powerShellPath `
-    -ArgumentList @(
-      '-NoLogo',
-      '-NoProfile',
-      '-NonInteractive',
-      '-ExecutionPolicy', 'Bypass',
-      '-EncodedCommand', $encoded
-    ) `
-    -WindowStyle Hidden `
-    -RedirectStandardOutput $StdoutPath `
-    -RedirectStandardError $StderrPath `
-    -PassThru
+  $savedFecEnvironment = [ordered]@{}
+  if (-not $InheritFecKeys) {
+    foreach ($item in Get-ChildItem Env:) {
+      if ($item.Name -notmatch '^FEC_API_KEYS?$|^FEC_API_KEY_\d+$') {
+        continue
+      }
+      $savedFecEnvironment[$item.Name] = $item.Value
+      Remove-Item -LiteralPath "Env:$($item.Name)"
+    }
+  }
+  try {
+    $process = Start-Process `
+      -FilePath $powerShellPath `
+      -ArgumentList @(
+        '-NoLogo',
+        '-NoProfile',
+        '-NonInteractive',
+        '-ExecutionPolicy', 'Bypass',
+        '-EncodedCommand', $encoded
+      ) `
+      -WindowStyle Hidden `
+      -RedirectStandardOutput $StdoutPath `
+      -RedirectStandardError $StderrPath `
+      -PassThru
+  } finally {
+    foreach ($name in $savedFecEnvironment.Keys) {
+      Set-Item -LiteralPath "Env:$name" -Value $savedFecEnvironment[$name]
+    }
+  }
   # Windows PowerShell 5.1 can return $null from ExitCode for a child that
   # exits before its Process handle is first accessed. Cache the handle now;
   # removing this line makes fast managed steps appear to fail with exit=.
@@ -559,11 +581,21 @@ if ($keyCount -lt 1) {
     '-KeysFile with one key per line.'
   )
 }
+$canonicalFanoutMemoryPerLaneMB = if ($FanoutMemoryPerLaneMB -gt 0) {
+  $FanoutMemoryPerLaneMB
+} else {
+  [int][math]::Ceiling($RamPerApiLaneGB * 1024)
+}
+if ($canonicalFanoutMemoryPerLaneMB -lt 128) {
+  throw 'FanoutMemoryPerLaneMB must be zero (derived) or at least 128.'
+}
+$canonicalRamPerApiLaneGB = $canonicalFanoutMemoryPerLaneMB / 1024.0
 $resourcePlan = Get-ResourcePlan `
   -KeyCount $keyCount `
   -RequestedParallel $MaxParallel `
   -BudgetPercent $RamBudgetPercent `
-  -LaneGB $RamPerApiLaneGB
+  -LaneGB $canonicalRamPerApiLaneGB
+$resourcePlan.fanout_memory_per_lane_mb = $canonicalFanoutMemoryPerLaneMB
 $resourcePlan.ram_per_generator_gb = $RamPerGeneratorGB
 $resourcePlan.generator_workers = $MaxGeneratorWorkers
 
@@ -1289,16 +1321,25 @@ foreach ($state in $industryStates) {
   Write-RunLog "API company-cycle fanout started: $($state.industry)"
   $fanoutStdout = Join-Path $industryRootPath 'fanout.stdout.log'
   $fanoutStderr = Join-Path $industryRootPath 'fanout.stderr.log'
+  $liveFanoutPlan = Get-ResourcePlan `
+    -KeyCount $keyCount `
+    -RequestedParallel $MaxParallel `
+    -BudgetPercent $RamBudgetPercent `
+    -LaneGB $canonicalRamPerApiLaneGB
+  Write-RunLog (
+    "Live fanout lanes: $($liveFanoutPlan.effective_api_lanes)/$keyCount; " +
+    "memory_per_lane_mb=$canonicalFanoutMemoryPerLaneMB"
+  )
   $fanoutParameters = [ordered]@{
     SourceDatabasePath = $state.database
     Industry = $state.industry
     Cycles = $Cycles
     RunDirectory = $state.fanout_root
     OutputReceiptPath = $state.fanout_receipt
-    # Zero tells the fanout to recompute the lane cap from current free RAM.
-    # That is phase-aware when generators from prior industries overlap.
-    MaxParallel = $resourcePlan.fanout_max_parallel
+    # Recompute the live lane cap as prior-industry generators overlap.
+    MaxParallel = $liveFanoutPlan.effective_api_lanes
     RecoveryWorkers = $RecoveryWorkers
+    MemoryPerLaneMB = $canonicalFanoutMemoryPerLaneMB
     KeysFile = $KeysFile
     PythonPath = $PythonPath
     RScriptPath = $RScriptPath
@@ -1308,7 +1349,8 @@ foreach ($state in $industryStates) {
   $process = Start-ManagedPowerShell `
     -Command $fanoutCommand `
     -StdoutPath $fanoutStdout `
-    -StderrPath $fanoutStderr
+    -StderrPath $fanoutStderr `
+    -InheritFecKeys
   $exitCode = Wait-ManagedProcess `
     -Process $process `
     -Stage 'collecting' `

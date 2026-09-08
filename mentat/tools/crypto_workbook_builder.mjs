@@ -113,6 +113,9 @@ if (cycleFilter) {
 const deferFormulas = process.env.MENTAT_DEFER_FORMULAS === "1";
 const compactRaw = process.env.MENTAT_COMPACT_RAW === "1";
 const aggregateFacts = process.env.MENTAT_FORMULA_FACTS === "1";
+if (payload.metadata?.workbook_projection && (!aggregateFacts || !compactRaw)) {
+  throw new Error("A projected workbook payload requires compact formula-fact mode; use the full payload for raw transaction views.");
+}
 const industry = String(payload.metadata?.industry ?? "Crypto").trim() || "Crypto";
 const reportBaseName = cycleFilter
   ? `${industry} Industry Spending Overview ${payload.cycles[0].label}`
@@ -146,6 +149,138 @@ const finalizerDataPath = path.join(outputDir, "finalizer_data.json");
 const finalizerCycleLabels = new Map(
   payload.cycles.map((cycle) => [cycle.cycle, cycle.label]),
 );
+
+function downstreamActivityValues(row) {
+  return [
+    finalizerCycleLabels.get(row.cycle) ?? String(row.cycle),
+    row.source_committee,
+    row.source_committee_id,
+    row.source_recipient_category,
+    row.candidate_name,
+    row.candidate_id,
+    row.candidate_party,
+    [row.office_label, [row.office_state, row.district].filter(Boolean).join("-")]
+      .filter(Boolean)
+      .join(" "),
+    row.office_state,
+    row.district,
+    row.activity_type,
+    row.support_oppose,
+    row.transaction_type,
+    row.first_activity_date,
+    row.last_activity_date,
+    Number(row.source_rows || 0),
+    Number(row.included_rows || 0),
+    Number(row.excluded_rows || 0),
+    Number(row.superseded_rows || 0),
+    Number(row.memo_rows || 0),
+    Number(row.exact_duplicate_rows || 0),
+    Number(row.reported_amount || 0),
+    Number(row.excluded_amount || 0),
+    deferFormulas ? Number(row.preliminary_included_amount || 0) : null,
+    null,
+    null,
+    row.source_url,
+    deferFormulas ? "PENDING" : null,
+  ];
+}
+
+function beneficiaryBridgeValues(row) {
+  return [
+    finalizerCycleLabels.get(row.cycle) ?? String(row.cycle),
+    row.view,
+    row.company,
+    row.source_committee,
+    row.source_committee_id,
+    row.candidate_name,
+    row.candidate_id,
+    row.candidate_party,
+    row.office_label,
+    row.office_state,
+    row.district,
+    row.activity_relationships,
+    row.directions,
+    Number(row.transaction_count || 0),
+    row.first_activity_date,
+    row.last_activity_date,
+    deferFormulas ? Number(row.preliminary_downstream_amount || 0) : null,
+    deferFormulas ? Number(row.preliminary_crypto_funding || 0) : null,
+    null,
+    null,
+    row.bridge_key,
+    deferFormulas ? "PENDING" : null,
+  ];
+}
+
+async function writeUnitSeparatedRows(filePath, sourceRows, mapper) {
+  const separator = "\u001f";
+  const handle = await fs.open(filePath, "w");
+  try {
+    let lines = [];
+    for (const sourceRow of sourceRows) {
+      const line = mapper(sourceRow)
+        .map((value) => {
+          if (value == null) return "";
+          return String(value).replaceAll(/[\u001f\r\n]/g, " ");
+        })
+        .join(separator);
+      lines.push(line);
+      if (lines.length >= 500) {
+        await handle.write(`${lines.join("\n")}\n`);
+        lines = [];
+      }
+    }
+    if (lines.length > 0) {
+      await handle.write(`${lines.join("\n")}\n`);
+    }
+  } finally {
+    await handle.close();
+  }
+}
+
+// artifact-tool serializes the complete workbook through an in-memory OpenXML
+// stream. A six-figure audit table can exceed that stream's fixed address-space
+// ceiling even when the machine still has ample RAM. For unusually large
+// reports, build one-row table shells here and stream every source row into the
+// shells through Excel COM immediately after export. The final workbook remains
+// complete and formula-driven; only the construction path changes.
+const deferLargeTables =
+  deferFormulas
+  && aggregateFacts
+  && (payload.downstream_activity?.length ?? 0) > 10000;
+let largeTableSidecars = null;
+if (deferLargeTables) {
+  const downstreamPath = path.join(outputDir, "downstream_activity.usv");
+  const bridgePath = path.join(outputDir, "beneficiary_bridge.usv");
+  await writeUnitSeparatedRows(
+    downstreamPath,
+    payload.downstream_activity ?? [],
+    downstreamActivityValues,
+  );
+  await writeUnitSeparatedRows(
+    bridgePath,
+    payload.beneficiary_bridge ?? [],
+    beneficiaryBridgeValues,
+  );
+  largeTableSidecars = {
+    downstream_activity: {
+      path: downstreamPath,
+      sheet: "Downstream Activity",
+      table: "DownstreamActivityTable",
+      row_count: payload.downstream_activity.length,
+      column_count: 28,
+      numeric_columns: [15, 16, 17, 18, 19, 20, 21, 22, 23],
+    },
+    beneficiary_bridge: {
+      path: bridgePath,
+      sheet: "Beneficiary Bridge",
+      table: "BeneficiaryBridgeTable",
+      row_count: payload.beneficiary_bridge.length,
+      column_count: 22,
+      numeric_columns: [13, 16, 17],
+    },
+  };
+}
 await fs.writeFile(
   finalizerDataPath,
   JSON.stringify({
@@ -153,6 +288,7 @@ await fs.writeFile(
       industry,
       formula_facts: aggregateFacts,
       report_base_name: reportBaseName,
+      large_table_sidecars: largeTableSidecars,
     },
     cycles: payload.cycles,
     companies: payload.companies,
@@ -162,6 +298,7 @@ await fs.writeFile(
         finalizerCycleLabels.get(employee.cycle),
         employee.company,
         employee.person_key,
+        Number(employee.preliminary_total || 0),
       ])
       : [],
   }),
@@ -196,7 +333,38 @@ let workbookRawRows = payload.raw_rows.filter((row) => {
   return false;
 });
 
-function buildFormulaFacts(rows) {
+function selectDisplayedEmployees(employees) {
+  const groups = new Map();
+  for (const employee of employees) {
+    const key = `${employee.cycle}\r${employee.company}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(employee);
+  }
+  return [...groups.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .flatMap(([, group]) =>
+      group
+        .sort(
+          (left, right) =>
+            Number(right.preliminary_total || 0)
+              - Number(left.preliminary_total || 0)
+            || left.person.localeCompare(right.person),
+        )
+        .slice(0, 150),
+    );
+}
+
+const displayedEmployeeRows = aggregateFacts
+  ? selectDisplayedEmployees(payload.employees)
+  : payload.employees;
+const displayedEmployeeKeys = new Set(
+  displayedEmployeeRows.map(
+    (employee) =>
+      `${employee.cycle}\r${employee.company}\r${employee.person_key}`,
+  ),
+);
+
+function buildFormulaFacts(rows, employeeKeys) {
   const master = new Map();
   const employee = new Map();
   const recipient = new Map();
@@ -242,26 +410,32 @@ function buildFormulaFacts(rows) {
       },
       row,
     );
-    accumulate(
-      employee,
-      [
-        row.cycle_label,
-        row.company,
-        row.person_key,
-        row.contributor,
-        row.employee_tier,
-        row.party,
-      ].join("\r"),
-      {
-        ...common,
-        fact_type: "Employee",
-        contributor: row.contributor,
-        employee_tier: row.employee_tier,
-        party: row.party,
-        person_key: row.person_key,
-      },
-      row,
-    );
+    if (
+      employeeKeys.has(
+        `${row.cycle}\r${row.company}\r${row.person_key}`,
+      )
+    ) {
+      accumulate(
+        employee,
+        [
+          row.cycle_label,
+          row.company,
+          row.person_key,
+          row.contributor,
+          row.employee_tier,
+          row.party,
+        ].join("\r"),
+        {
+          ...common,
+          fact_type: "Employee",
+          contributor: row.contributor,
+          employee_tier: row.employee_tier,
+          party: row.party,
+          person_key: row.person_key,
+        },
+        row,
+      );
+    }
     accumulate(
       recipient,
       [
@@ -312,7 +486,10 @@ const acceptedTransactionsByCycle = new Map(
 );
 let detailRawRows;
 if (aggregateFacts) {
-  payload.raw_rows = buildFormulaFacts(workbookRawRows);
+  payload.raw_rows = buildFormulaFacts(
+    workbookRawRows,
+    displayedEmployeeKeys,
+  );
   detailRawRows = payload.raw_rows;
   workbookRawRows = null;
 } else {
@@ -329,7 +506,7 @@ console.log(
   + `formula_facts=${aggregateFacts ? "yes" : "no"} `
   + `accepted_rows=${acceptedTransactionCount.toLocaleString("en-US")} `
   + `workbook_rows=${payload.raw_rows.length.toLocaleString("en-US")} `
-  + `raw_columns=${aggregateFacts ? 18 : compactRaw ? 20 : 35}`,
+  + `raw_columns=${aggregateFacts ? 12 : compactRaw ? 20 : 35}`,
 );
 
 const workbook = Workbook.create();
@@ -357,6 +534,7 @@ const scopes = [
   "Employee",
   "Super PAC",
   "Carey",
+  "Other PAC",
   "Company PAC",
   "Leadership PAC",
   "Trade Association",
@@ -368,6 +546,7 @@ const scopes = [
 const masterCategories = [
   "Super PAC",
   "Carey",
+  "Other PAC",
   "Company PAC",
   "Leadership PAC",
   "Trade Association",
@@ -393,6 +572,7 @@ const sheetOrder = [
   "PAC & Candidate Map",
   "Downstream Activity",
   "Beneficiary Bridge",
+  "Transfer Paths", "Allocation Estimates", "Allocation Coverage", "Source Freshness", "Classification Review", "Data Quality",
   ...payload.cycles.map((cycle) => cycle.label),
   "Cycle Exceptions",
 ];
@@ -484,17 +664,17 @@ function cycleRanges(cycleLabel) {
     rows,
     first,
     last,
-    sourceIdGuard: `${sheet}!$A$${first}:$A$20004`,
-    company: ref("E"),
-    tier: ref("G"),
-    analysisAmount: ref("I"),
-    party: ref("J"),
-    category: ref("K"),
-    included: ref(aggregateFacts ? "P" : compactRaw ? "R" : "Z"),
-    personKey: ref(aggregateFacts ? "Q" : compactRaw ? "S" : "AB"),
-    recipientKey: ref(aggregateFacts ? "N" : compactRaw ? "N" : "P"),
-    factType: aggregateFacts ? ref("C") : null,
-    giftCount: aggregateFacts ? ref("O") : null,
+    sourceIdGuard: ref("A"),
+    company: ref(aggregateFacts ? "B" : "E"),
+    tier: ref(aggregateFacts ? "C" : "G"),
+    analysisAmount: ref(aggregateFacts ? "E" : "I"),
+    party: ref(aggregateFacts ? "F" : "J"),
+    category: ref(aggregateFacts ? "G" : "K"),
+    included: ref(aggregateFacts ? "J" : compactRaw ? "R" : "Z"),
+    personKey: ref(aggregateFacts ? "K" : compactRaw ? "S" : "AB"),
+    recipientKey: ref(aggregateFacts ? "H" : compactRaw ? "N" : "P"),
+    factType: aggregateFacts ? ref("A") : null,
+    giftCount: aggregateFacts ? ref("I") : null,
   };
 }
 
@@ -524,6 +704,7 @@ function scopeFormula(rangeInfo, scope, extraCriteria = []) {
   const categoryMap = {
     "Super PAC": ["Super PAC"],
     Carey: ["Carey"],
+    "Other PAC": ["Other PAC"],
     "Company PAC": ["Company PAC"],
     "Leadership PAC": ["Leadership PAC"],
     "Trade Association": ["Trade Association"],
@@ -607,19 +788,13 @@ function recipientCountFormula(rangeInfo, recipientKeyCell, companyCell = null) 
 function rawRowsForRecords(records) {
   if (aggregateFacts) {
     return records.map((row) => [
-      row.source_id,
-      row.cycle_label,
       row.fact_type ?? "Exception",
-      row.cycle_alignment,
       row.company,
-      row.contributor,
       row.employee_tier,
       row.amount,
       deferFormulas ? (row.include_in_analysis === "Yes" ? Number(row.amount || 0) : 0) : null,
       row.party,
       row.recipient_category,
-      row.recipient,
-      row.committee_id,
       row.recipient_key,
       Number(row.gift_count || 1),
       row.include_in_analysis,
@@ -776,19 +951,13 @@ const compactRawHeaders = [
   "Logic Check",
 ];
 const formulaFactHeaders = [
-  "Fact ID",
-  "Cycle",
   "Fact Type",
-  "Cycle Alignment",
   "Company",
-  "Contributor",
   "Employee Tier",
   "Amount",
   "Analysis Amount",
   "Party",
   "Recipient Category",
-  "Recipient",
-  "Committee ID",
   "Recipient Key",
   "Gift Count",
   "Include in Analysis",
@@ -830,15 +999,21 @@ function buildRawSheet({
   const firstDataRow = 5;
   const lastDataRow = 4 + tableData.length;
   if (!deferFormulas) {
-    const includeColumn = aggregateFacts ? "P" : compactRaw ? "R" : "Z";
-    const logicColumn = aggregateFacts ? "R" : compactRaw ? "T" : "AI";
-    sheet.getRange(`I${firstDataRow}`).formulas = [[
-      `=IF(${includeColumn}${firstDataRow}="Yes",H${firstDataRow},0)`,
+    const amountColumn = aggregateFacts ? "D" : "H";
+    const analysisColumn = aggregateFacts ? "E" : "I";
+    const includeColumn = aggregateFacts ? "J" : compactRaw ? "R" : "Z";
+    const logicColumn = aggregateFacts ? "L" : compactRaw ? "T" : "AI";
+    sheet.getRange(`${analysisColumn}${firstDataRow}`).formulas = [[
+      `=IF(${includeColumn}${firstDataRow}="Yes",${amountColumn}${firstDataRow},0)`,
     ]];
-    sheet.getRange(`I${firstDataRow}:I${lastDataRow}`).fillDown();
+    sheet.getRange(
+      `${analysisColumn}${firstDataRow}:${analysisColumn}${lastDataRow}`,
+    ).fillDown();
     const logicFormula = exceptionSheet
-      ? `=IF(AND(${includeColumn}${firstDataRow}="No",I${firstDataRow}=0),"OK","CHECK")`
-      : `=IF(AND(I${firstDataRow}=IF(${includeColumn}${firstDataRow}="Yes",H${firstDataRow},0),OR(D${firstDataRow}="OK",D${firstDataRow}="Reassigned by contribution date")),"OK","CHECK")`;
+      ? `=IF(AND(${includeColumn}${firstDataRow}="No",${analysisColumn}${firstDataRow}=0),"OK","CHECK")`
+      : aggregateFacts
+        ? `=IF(AND(${includeColumn}${firstDataRow}="Yes",${analysisColumn}${firstDataRow}=${amountColumn}${firstDataRow}),"OK","CHECK")`
+        : `=IF(AND(${analysisColumn}${firstDataRow}=IF(${includeColumn}${firstDataRow}="Yes",${amountColumn}${firstDataRow},0),OR(D${firstDataRow}="OK",D${firstDataRow}="Reassigned by contribution date")),"OK","CHECK")`;
     sheet.getRange(`${logicColumn}${firstDataRow}`).formulas = [[logicFormula]];
     sheet.getRange(`${logicColumn}${firstDataRow}:${logicColumn}${lastDataRow}`).fillDown();
   }
@@ -847,9 +1022,13 @@ function buildRawSheet({
   styleTable(table);
   sheet.freezePanes.freezeRows(4);
 
-  sheet.getRange(`H${firstDataRow}:I${lastDataRow}`).format.numberFormat = currencyFormat;
+  const amountColumn = aggregateFacts ? "D" : "H";
+  const analysisColumn = aggregateFacts ? "E" : "I";
+  sheet.getRange(
+    `${amountColumn}${firstDataRow}:${analysisColumn}${lastDataRow}`,
+  ).format.numberFormat = currencyFormat;
   const dateColumn = compactRaw ? "O" : "Q";
-  const logicColumn = aggregateFacts ? "R" : compactRaw ? "T" : "AI";
+  const logicColumn = aggregateFacts ? "L" : compactRaw ? "T" : "AI";
   if (!aggregateFacts) {
     sheet.getRange(`${dateColumn}${firstDataRow}:${dateColumn}${lastDataRow}`).format.numberFormat = "yyyy-mm-dd";
   }
@@ -857,7 +1036,7 @@ function buildRawSheet({
     sheet.getRange(`AD${firstDataRow}:AH${lastDataRow}`).format.numberFormat = "0";
   }
   if (aggregateFacts) {
-    sheet.getRange(`O${firstDataRow}:O${lastDataRow}`).format.numberFormat = countFormat;
+    sheet.getRange(`I${firstDataRow}:I${lastDataRow}`).format.numberFormat = countFormat;
   }
   applyIntegrityFormatting(
     sheet.getRange(`${logicColumn}${firstDataRow}:${logicColumn}${lastDataRow}`),
@@ -934,24 +1113,18 @@ function buildRawSheet({
     T: 13,
   };
   const factWidths = {
-    A: 22,
-    B: 12,
-    C: 12,
-    D: 29,
-    E: 18,
-    F: 26,
-    G: 18,
-    H: 14,
-    I: 15,
-    J: 14,
-    K: 20,
-    L: 34,
-    M: 14,
-    N: 28,
-    O: 12,
-    P: 17,
-    Q: 36,
-    R: 13,
+    A: 14,
+    B: 20,
+    C: 18,
+    D: 14,
+    E: 15,
+    F: 14,
+    G: 20,
+    H: 34,
+    I: 12,
+    J: 17,
+    K: 36,
+    L: 13,
   };
   const selectedWidths = aggregateFacts
     ? factWidths
@@ -1550,27 +1723,7 @@ function buildEmployeeList() {
     "Integrity Check",
   ];
   const cycleLabelFor = new Map(payload.cycles.map((cycle) => [cycle.cycle, cycle.label]));
-  let employeeRows = payload.employees;
-  if (aggregateFacts) {
-    const groups = new Map();
-    for (const employee of payload.employees) {
-      const key = `${employee.cycle}\r${employee.company}`;
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(employee);
-    }
-    employeeRows = [...groups.entries()]
-      .sort(([left], [right]) => left.localeCompare(right))
-      .flatMap(([, group]) =>
-        group
-          .sort(
-            (left, right) =>
-              Number(right.preliminary_total || 0)
-                - Number(left.preliminary_total || 0)
-              || left.person.localeCompare(right.person),
-          )
-          .slice(0, 150),
-      );
-  }
+  const employeeRows = displayedEmployeeRows;
   const rows = employeeRows.map((employee) => [
     cycleLabelFor.get(employee.cycle),
     null,
@@ -1597,7 +1750,7 @@ function buildEmployeeList() {
     "Employee List",
     "People carry both an industry-wide cycle rank and a within-company cycle rank. Identities are consolidated only on high-confidence company/name/location/title evidence.",
     aggregateFacts
-      ? `${rows.length.toLocaleString("en-US")} top-per-company cycle-person groups displayed | All ${payload.metadata.employee_groups.toLocaleString("en-US")} groups remain formula-ranked in Employee Rank Facts and retained in the cycle fact tables.`
+      ? `${rows.length.toLocaleString("en-US")} top-per-company cycle-person groups displayed and formula-driven | All ${payload.metadata.employee_groups.toLocaleString("en-US")} groups remain in the validated Employee Rank Facts basis.`
       : `${payload.metadata.employee_groups} cycle-person groups | ${payload.metadata.identity_review_groups} conservative same-name splits retained rather than guessed together.`,
     "S",
   );
@@ -1675,7 +1828,7 @@ function buildEmployeeRankFacts() {
     sheet,
     "Employee Rank Facts",
     "Complete cycle-person rank basis for the curated Employee List.",
-    "Excel finalization writes the complete compact cycle-person basis here. Total Giving is an Excel formula over the cycle Employee facts, preserving exact industry and company ranks without duplicating descriptive columns.",
+    "Excel finalization writes the complete validated cycle-person basis here. Displayed employee totals remain Excel formulas; the full rank basis uses exporter-verified preliminary totals to avoid duplicating tens of thousands of hidden employee facts.",
     "D",
   );
   sheet.getRange("A5:D5").values = [[
@@ -1930,6 +2083,31 @@ function buildPacCandidateMap() {
   return sheet;
 }
 
+function buildAuditTable(name, sourceRows, fields, explanation) {
+  const sheet = workbook.worksheets.getItem(name);
+  const shown = sourceRows.slice(0, 10000);
+  const headers = fields.map(([key, label]) => label);
+  const values = shown.map(row => fields.map(([key]) => {
+    const value = row[key];
+    return value == null ? "" : typeof value === "object" ? JSON.stringify(value) : value;
+  }));
+  const lastColumn = excelColumn(headers.length);
+  titleBlock(sheet, name, explanation,
+    `${sourceRows.length.toLocaleString("en-US")} records; ${shown.length.toLocaleString("en-US")} shown. Full records are in the accompanying audit CSV files.`, lastColumn);
+  const last = 5 + Math.max(1, values.length);
+  sheet.getRange(`A5:${lastColumn}${last}`).values = [headers, ...(values.length ? values : [headers.map(() => "")])];
+  const table = sheet.tables.add(`A5:${lastColumn}${last}`, true, safeTableToken(name) + "Table");
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  fields.forEach(([key], index) => {
+    const column = excelColumn(index + 1);
+    sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = /amount|funding|unresolved|activity|direct/.test(key) ? 22 : 27;
+    if (/amount|funding|^unresolved$|activity$|^direct$|estimated_non_opposition|estimated_opposition/.test(key)) {
+      sheet.getRange(`${column}6:${column}${last}`).format.numberFormat = currencyFormat;
+    }
+  });
+}
+
 function buildDownstreamActivity() {
   const sheet = workbook.worksheets.getItem("Downstream Activity");
   const headers = [
@@ -1941,41 +2119,15 @@ function buildDownstreamActivity() {
     "Reported Amount", "Excluded Amount", "Net Included Amount", "FEC Committee URL",
     "FEC Candidate URL", "Source URL", "Logic Check",
   ];
-  const rows = (payload.downstream_activity ?? []).map((row) => [
-    cycleLabelByNumber.get(row.cycle) ?? String(row.cycle),
-    row.source_committee,
-    row.source_committee_id,
-    row.source_recipient_category,
-    row.candidate_name,
-    row.candidate_id,
-    row.candidate_party,
-    [row.office_label, [row.office_state, row.district].filter(Boolean).join("-")].filter(Boolean).join(" "),
-    row.office_state,
-    row.district,
-    row.activity_type,
-    row.support_oppose,
-    row.transaction_type,
-    row.first_activity_date,
-    row.last_activity_date,
-    Number(row.source_rows || 0),
-    Number(row.included_rows || 0),
-    Number(row.excluded_rows || 0),
-    Number(row.superseded_rows || 0),
-    Number(row.memo_rows || 0),
-    Number(row.exact_duplicate_rows || 0),
-    Number(row.reported_amount || 0),
-    Number(row.excluded_amount || 0),
-    deferFormulas ? Number(row.preliminary_included_amount || 0) : null,
-    null,
-    null,
-    row.source_url,
-    deferFormulas ? "PENDING" : null,
-  ]);
+  const sourceRows = payload.downstream_activity ?? [];
+  const rows = deferLargeTables
+    ? [downstreamActivityValues(sourceRows[0])]
+    : sourceRows.map(downstreamActivityValues);
   titleBlock(
     sheet,
     "Downstream Committee-to-Candidate Activity",
     `This is same-cycle activity by committees funded in the ${industry} dataset; it is not dollar-level pass-through attribution. Reported minus excluded amendment/memo rows equals Net Included Amount.`,
-    `${payload.metadata.downstream_rows.toLocaleString("en-US")} exact source rows condensed to ${rows.length.toLocaleString("en-US")} committee-candidate-activity groups | ${payload.metadata.downstream_superseded_rows.toLocaleString("en-US")} superseded and ${payload.metadata.downstream_memo_rows.toLocaleString("en-US")} memo rows excluded.`,
+    `${payload.metadata.downstream_rows.toLocaleString("en-US")} exact source rows condensed to ${sourceRows.length.toLocaleString("en-US")} committee-candidate-activity groups | ${payload.metadata.downstream_superseded_rows.toLocaleString("en-US")} superseded and ${payload.metadata.downstream_memo_rows.toLocaleString("en-US")} memo rows excluded.`,
     "AB",
   );
   const last = 5 + rows.length;
@@ -2006,21 +2158,15 @@ function buildBeneficiaryBridge() {
     associatedFundingHeader, "FEC Committee URL", "FEC Candidate URL",
     "Reference Key", "Integrity Check",
   ];
-  const rows = (payload.beneficiary_bridge ?? []).map((row) => [
-    cycleLabelByNumber.get(row.cycle) ?? String(row.cycle), row.view, row.company,
-    row.source_committee, row.source_committee_id, row.candidate_name, row.candidate_id,
-    row.candidate_party, row.office_label, row.office_state, row.district,
-    row.activity_relationships, row.directions, Number(row.transaction_count || 0),
-    row.first_activity_date, row.last_activity_date,
-    deferFormulas ? Number(row.preliminary_downstream_amount || 0) : null,
-    deferFormulas ? Number(row.preliminary_crypto_funding || 0) : null,
-    null, null, row.bridge_key, deferFormulas ? "PENDING" : null,
-  ]);
+  const sourceRows = payload.beneficiary_bridge ?? [];
+  const rows = deferLargeTables
+    ? [beneficiaryBridgeValues(sourceRows[0])]
+    : sourceRows.map(beneficiaryBridgeValues);
   titleBlock(
     sheet,
     "Beneficiary Bridge",
     "Formula bridge connecting each funded recipient committee to its same-cycle congressional candidate activity. Company associations repeat committee activity for context and are explicitly not attributed company dollars.",
-    `${rows.length.toLocaleString("en-US")} company/industry committee-candidate paths | Top 100 congressional beneficiaries retained per cycle and view.`,
+    `${sourceRows.length.toLocaleString("en-US")} company/industry committee-candidate paths | Top 100 congressional beneficiaries retained per cycle and view.`,
     "V",
   );
   const last = 5 + rows.length;
@@ -2071,7 +2217,7 @@ function buildBeneficiarySummary() {
     sheet,
     "Congressional Beneficiary Summary",
     "Industry and company views rank actual House and Senate candidates/officeholders reached through funded committees. Downstream activity is committee activity, not attributed company spending.",
-    `${rows.length.toLocaleString("en-US")} top-100 candidate rows across cycles/views | Amounts formula-sum the Beneficiary Bridge; party columns count SUPPORT dollars only, opposition is reported in its own column. Support + Oppose can exceed Downstream Activity: negative correction and refund rows carry neither direction code, so they reduce the unsigned total without reducing either component.`,
+    `${rows.length.toLocaleString("en-US")} top-100 candidate rows across cycles/views | Amounts formula-sum the Beneficiary Bridge; party columns count non-opposition activity, including contributions and corrections; opposition is reported separately. Support + Oppose can exceed Downstream Activity: negative correction and refund rows carry neither direction code, so they reduce the unsigned total without reducing either component.`,
     "X",
   );
   const last = 5 + rows.length;
@@ -2272,6 +2418,25 @@ for (const company of payload.companies) {
     focusedRowsForCompany(company),
   );
 }
+
+buildAuditTable("Transfer Paths", payload.transfer_paths ?? [],
+  [["cycle","Cycle"],["root","Funded Committee"],["source","Source Committee"],["destination","Destination Committee"],["amount","Reported Net Transfer"],["depth","Depth"],["path","Representative Path"],["status","Traversal Status"]],
+  "Observed outgoing 24G/24K cash transfers. Amounts are committee activity, not traced company dollars. A representative shortest path is shown; repeated roots can share the same transfer.");
+buildAuditTable("Allocation Estimates", payload.allocation_estimates ?? [],
+  [["cycle","Cycle"],["root","Funded Committee"],["candidate_id","Candidate ID"],["candidate_name","Candidate"],["direction","Direction"],["estimated_amount","Conditional Estimate"]],
+  payload.metadata.allocation_method ?? "No allocation model supplied.");
+buildAuditTable("Allocation Coverage", payload.allocation_coverage ?? [],
+  [["cycle","Cycle"],["root","Funded Committee"],["input_net_funding","Net Input Funding"],["model_funding","Nonnegative Model Funding"],["estimated_candidate_activity","Estimated Candidate Activity"],["unresolved","Unresolved"],["negative_net_funding_excluded","Negative Net Funding"],["unresolved_reasons","Unresolved Reasons"]],
+  "Each root's model funding equals estimated candidate activity plus unresolved funding. This checks arithmetic, not causal attribution or complete reporting.");
+buildAuditTable("Source Freshness", payload.source_freshness ?? [],
+  [["cycle","Cycle"],["source","FEC Dataset"],["checked_at","Checked At"],["last_modified","Server Last Modified"],["sha256","SHA-256"],["url","Source URL"]],
+  "Snapshot retrieval and server dates are not transaction coverage end dates. See collection receipts separately for the roster search grid.");
+buildAuditTable("Classification Review", payload.classification_review ?? [],
+  [["cycle","Cycle"],["committee_id","Committee ID"],["committee_name","Committee"],["master_committee_type","Official Type"],["recipient_category","Reporting Category"],["preliminary_crypto_funding","Included Funding"]],
+  "Included contributions with unresolved recipient categories. These dollars remain included in totals and are not silently assigned to Super PACs.");
+buildAuditTable("Data Quality", payload.quality_checks ?? payload.metadata.export_guards ?? [],
+  [["id","Check"],["severity","Severity"],["passed","Passed"],["detail","Detail"]],
+  "Review every false result. Collection warnings remain unresolved until fresh searches and coverage checks pass. A completed workbook build does not establish collection completeness.");
 
 void masterSheet;
 void overviewSheet;

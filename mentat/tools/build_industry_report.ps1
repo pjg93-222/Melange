@@ -17,6 +17,7 @@ param(
   [string]$RScriptPath = 'C:\Program Files\R\R-4.6.0\bin\Rscript.exe',
   [string]$NodePath = '',
   [string]$NodeModulesPath = '',
+  [string]$PythonPath = '',
   [ValidateRange(0,32768)]
   [int]$NodeHeapMb = 0,
   [ValidateRange(1,45)]
@@ -39,6 +40,7 @@ if (-not (Test-Path -LiteralPath $heapPlanner -PathType Leaf)) {
 Import-Module $heapPlanner -Force
 $templateContract = 'mentat-industry-overview-v1'
 $Industry = $Industry.Trim()
+if (-not $PythonPath) { $PythonPath = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' }
 if (-not $Industry) { throw 'Industry cannot be empty.' }
 
 $reportBaseName = if ($CycleLabel) {
@@ -60,8 +62,13 @@ if (-not $OutputDirectory) {
   $workspaceRoot = Split-Path -Parent $projectRoot
   $OutputDirectory = Join-Path $workspaceRoot 'reports'
 }
-if (-not $CommitteeMasterDirectory) { $CommitteeMasterDirectory = Join-Path $projectRoot 'inputs\fec_committee_master' }
-if (-not $BeneficiaryDirectory) { $BeneficiaryDirectory = Join-Path $projectRoot 'inputs\fec_beneficiary' }
+$sourceRoot = Join-Path $projectRoot 'inputs'
+if ($env:MENTAT_FEC_SOURCE_ROOT) { $sourceRoot = $env:MENTAT_FEC_SOURCE_ROOT }
+elseif (Test-Path -LiteralPath (Join-Path $sourceRoot 'active_fec_sources.json')) {
+  $sourceRoot = (Get-Content -Raw -LiteralPath (Join-Path $sourceRoot 'active_fec_sources.json') | ConvertFrom-Json).path
+}
+if (-not $CommitteeMasterDirectory) { $CommitteeMasterDirectory = Join-Path $sourceRoot 'fec_committee_master' }
+if (-not $BeneficiaryDirectory) { $BeneficiaryDirectory = Join-Path $sourceRoot 'fec_beneficiary' }
 # Pin the inputs directory for the R side. mentat_input_dir() otherwise walks up
 # from the working directory, which resolves wrongly (and fatally) whenever this
 # script is invoked from outside the project - a git worktree, a scheduled task,
@@ -184,7 +191,11 @@ function Test-JsonFile([string]$Path) {
   $priorErrorAction = $ErrorActionPreference
   try {
     $ErrorActionPreference = 'Continue'
-    & $NodePath '--max-old-space-size=8192' '-e' $validationScript $Path 2>$null | Out-Null
+    if ((Get-Item -LiteralPath $Path).Length -ge 480MB) {
+      & $PythonPath '-c' 'import json,sys; json.load(open(sys.argv[1],encoding="utf-8-sig"))' $Path 2>$null | Out-Null
+    } else {
+      & $NodePath '--max-old-space-size=8192' '-e' $validationScript $Path 2>$null | Out-Null
+    }
     $valid = $LASTEXITCODE -eq 0
   } finally {
     $ErrorActionPreference = $priorErrorAction
@@ -294,22 +305,54 @@ function Assert-WorkbookPackage([string]$Path, [int]$ExpectedWorksheetCount) {
   } finally { $archive.Dispose() }
 }
 
+function Get-QuiescentDatabaseSha256([string]$Path) {
+  $walPath = "$Path-wal"
+  foreach ($phase in @('before', 'after')) {
+    if (
+      (Test-Path -LiteralPath $walPath -PathType Leaf) -and
+      (Get-Item -LiteralPath $walPath).Length -gt 0
+    ) {
+      throw (
+        "Source database has a nonempty WAL sidecar $phase fingerprinting " +
+        "and is not a quiescent snapshot: $walPath. Stop writers and " +
+        "checkpoint SQLite, or build from a private snapshot."
+      )
+    }
+    if ($phase -eq 'before') {
+      $hash = (
+        Get-FileHash -LiteralPath $Path -Algorithm SHA256
+      ).Hash.ToLowerInvariant()
+    }
+  }
+  $hash
+}
+
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
 $cacheRoot = Join-Path $projectRoot ('.cache\industry-report\' + $industryToken)
-$stageDirectory = Join-Path $cacheRoot 'stage'
-New-Item -ItemType Directory -Path $cacheRoot,$stageDirectory -Force | Out-Null
+$databaseHash = Get-QuiescentDatabaseSha256 $DatabasePath
+$databaseToken = $databaseHash.Substring(0, 16)
 # A per-cycle build exports only that cycle, so it needs its own payload and
 # manifest - sharing one industry_data.json across three -CycleLabel runs would
 # make each run a cache hit on the previous cycle's data.
 $cycleToken = if ($CycleLabel) { '-' + ($CycleLabel -replace '[^0-9]', '') } else { '' }
-$dataPath = Join-Path $cacheRoot ("industry_data$cycleToken.json")
-$manifestPath = Join-Path $cacheRoot ("manifest$cycleToken.json")
+$cacheVariantToken = if ($CycleLabel) {
+  $CycleLabel -replace '[^0-9]+','_'
+} else {
+  'all_cycles'
+}
+$stageDirectory = Join-Path $cacheRoot ("stage-" + $cacheVariantToken)
+New-Item -ItemType Directory -Path $cacheRoot,$stageDirectory -Force | Out-Null
+$dataPath = Join-Path $cacheRoot (
+  "industry_data$cycleToken-$databaseToken.json"
+)
+$manifestPath = Join-Path $cacheRoot (
+  "manifest$cycleToken-$databaseToken.json"
+)
 # Set BEFORE the export, not just around the workbook step: the exporter reads it
 # to narrow the payload, which is what keeps a large industry under V8's
 # 536,870,888-byte JSON string limit. Telecom's full payload is 591,338,574 and
 # cannot be parsed by the validator or the builder at all.
 $env:MENTAT_CYCLE_FILTER = $CycleLabel
-$databaseHash = (Get-FileHash -LiteralPath $DatabasePath -Algorithm SHA256).Hash.ToLowerInvariant()
 # Every file whose contents can change export output must be fingerprinted, or a
 # code fix silently republishes the pre-fix artifact as a cache hit. This list
 # previously held only the exporter and fec_beneficiary.R, so edits to report.R
@@ -331,32 +374,31 @@ $dataInputPaths = @(
   # cache hit the export never runs and a newly added or tightened guard is
   # silently skipped. Fingerprinting it forces the re-run that lets it fire.
   (Join-Path $projectRoot 'R\export_guards.R'),
+  (Join-Path $projectRoot 'R\fec_transfer_graph.R'),
+  (Join-Path $projectRoot 'tools\fec_transfer_graph.py'),
+  (Join-Path $projectRoot 'tools\enrich_downstream.py'),
   (Join-Path $projectRoot 'tools\crypto_workbook_builder.mjs'),
   (Join-Path $projectRoot 'tools\finalize_crypto_excel.ps1'),
   (Join-Path $projectRoot 'inputs\trade_committee_overrides.csv')
-) + $committeeFiles + $beneficiaryFiles
+) + $committeeFiles + $beneficiaryFiles + @(Get-ChildItem -LiteralPath $BeneficiaryDirectory -Recurse -File | Where-Object { $_.Name -in @('transfer-current.json','transfer-info.json','transfer-edges.csv') } | ForEach-Object FullName) + @(Get-ChildItem -LiteralPath $sourceRoot -Recurse -Filter 'source-receipt.json' | ForEach-Object FullName)
 $dataInputPaths = $dataInputPaths | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
-$inputFingerprint = Get-CombinedFingerprint $dataInputPaths $Industry
+$inputFingerprint = Get-CombinedFingerprint $dataInputPaths (
+  "industry=$Industry|cycle=$CycleLabel"
+)
 $cacheHit = $false
 if (-not $NoCache -and (Test-Path -LiteralPath $dataPath) -and (Test-Path -LiteralPath $manifestPath)) {
   try {
     $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
-    $cacheHit = [string]$manifest.input_fingerprint -eq $inputFingerprint
-    if (
-      -not $cacheHit -and
-      [string]$manifest.database_sha256 -eq $databaseHash
-    ) {
-      $latestInputWrite = (
-        $dataInputPaths |
-          ForEach-Object { (Get-Item -LiteralPath $_).LastWriteTimeUtc } |
-          Measure-Object -Maximum
-      ).Maximum
-      $cacheHit = (Get-Item -LiteralPath $dataPath).LastWriteTimeUtc -ge
-        $latestInputWrite
-      if ($cacheHit) {
-        Write-Host 'Reusing fresh export after report-builder-only changes.'
-      }
-    }
+    $actualDataHash = (
+      Get-FileHash -LiteralPath $dataPath -Algorithm SHA256
+    ).Hash.ToLowerInvariant()
+    $cacheHit = (
+      [string]$manifest.input_fingerprint -eq $inputFingerprint -and
+      [string]$manifest.database_sha256 -eq $databaseHash -and
+      [string]$manifest.cycle_label -eq $CycleLabel -and
+      [string]$manifest.data_sha256 -eq $actualDataHash -and
+      [long]$manifest.data_bytes -eq (Get-Item -LiteralPath $dataPath).Length
+    )
     if ($cacheHit) { $cacheHit = Test-JsonFile $dataPath }
   } catch { $cacheHit = $false }
 }
@@ -368,13 +410,35 @@ if (-not $cacheHit) {
   $pendingData = "$dataPath.pending-$PID"
   & $RScriptPath $exporter $DatabasePath $pendingData $CommitteeMasterDirectory $BeneficiaryDirectory $Industry
   if ($LASTEXITCODE -ne 0) { throw "$Industry data export failed with exit code $LASTEXITCODE" }
+  & $PythonPath (Join-Path $projectRoot 'tools\enrich_downstream.py') $pendingData $BeneficiaryDirectory
+  if ($LASTEXITCODE -ne 0) { throw 'Transfer allocation and coverage enrichment failed.' }
   if (-not (Test-JsonFile $pendingData)) {
     throw "$Industry data export did not produce valid JSON."
   }
+  $databaseHashAfterExport = Get-QuiescentDatabaseSha256 $DatabasePath
+  if ($databaseHashAfterExport -ne $databaseHash) {
+    throw (
+      "Source database changed during the $Industry export; refusing to " +
+      "publish data under a stale database fingerprint."
+    )
+  }
+  $afterFingerprint = Get-CombinedFingerprint $dataInputPaths ("industry=$Industry|cycle=$CycleLabel")
+  if ($afterFingerprint -ne $inputFingerprint) {
+    throw 'Report code or source inputs changed during export; refusing to publish mixed inputs.'
+  }
   Move-Item -LiteralPath $pendingData -Destination $dataPath -Force
+  $dataItem = Get-Item -LiteralPath $dataPath
+  $dataHash = (
+    Get-FileHash -LiteralPath $dataPath -Algorithm SHA256
+  ).Hash.ToLowerInvariant()
   Write-AtomicText $manifestPath ([pscustomobject]@{
+    schema_version = 2
     input_fingerprint = $inputFingerprint
     database_sha256 = $databaseHash
+    cycle_label = $CycleLabel
+    data_sha256 = $dataHash
+    data_bytes = [long]$dataItem.Length
+    guard_receipt = 'embedded:metadata.export_guards'
     generated_at = [DateTimeOffset]::Now.ToString('o')
   } | ConvertTo-Json)
   $exportWatch.Stop(); $exportSeconds = $exportWatch.Elapsed.TotalSeconds
@@ -383,19 +447,63 @@ if (-not $cacheHit) {
 $buildDataPath = $dataPath
 if ($CycleLabel) {
   $cycleToken = $CycleLabel -replace '[^0-9]+','_'
-  $cycleDataPath = Join-Path $cacheRoot "industry_data_cycle_${cycleToken}.json"
+  $cycleDataPath = Join-Path $cacheRoot (
+    "industry_data_cycle_${cycleToken}-$databaseToken.json"
+  )
+  $cycleManifestPath = Join-Path $cacheRoot (
+    "industry_data_cycle_${cycleToken}-$databaseToken.manifest.json"
+  )
+  $sourceDataHash = (
+    Get-FileHash -LiteralPath $dataPath -Algorithm SHA256
+  ).Hash.ToLowerInvariant()
+  $filterScriptHash = (
+    Get-FileHash -LiteralPath $cycleFilterScript -Algorithm SHA256
+  ).Hash.ToLowerInvariant()
+  $cycleCacheHit = $false
   if (
-    $NoCache -or
-    -not (Test-Path -LiteralPath $cycleDataPath) -or
-    (Get-Item -LiteralPath $cycleDataPath).LastWriteTimeUtc -lt
-      (Get-Item -LiteralPath $dataPath).LastWriteTimeUtc -or
-    (Get-Item -LiteralPath $cycleDataPath).LastWriteTimeUtc -lt
-      (Get-Item -LiteralPath $cycleFilterScript).LastWriteTimeUtc
+    -not $NoCache -and
+    (Test-Path -LiteralPath $cycleDataPath -PathType Leaf) -and
+    (Test-Path -LiteralPath $cycleManifestPath -PathType Leaf)
   ) {
-    & $NodePath '--max-old-space-size=4096' $cycleFilterScript $dataPath $cycleDataPath $CycleLabel
+    try {
+      $cycleManifest = Get-Content -Raw -LiteralPath (
+        $cycleManifestPath
+      ) | ConvertFrom-Json
+      $actualCycleHash = (
+        Get-FileHash -LiteralPath $cycleDataPath -Algorithm SHA256
+      ).Hash.ToLowerInvariant()
+      $cycleCacheHit = (
+        [string]$cycleManifest.source_data_sha256 -eq $sourceDataHash -and
+        [string]$cycleManifest.filter_script_sha256 -eq $filterScriptHash -and
+        [string]$cycleManifest.cycle_label -eq $CycleLabel -and
+        [string]$cycleManifest.output_sha256 -eq $actualCycleHash -and
+        (Test-JsonFile $cycleDataPath)
+      )
+    } catch { $cycleCacheHit = $false }
+  }
+  if (
+    -not $cycleCacheHit
+  ) {
+    $pendingCycleData = "$cycleDataPath.pending-$PID"
+    & $NodePath '--max-old-space-size=4096' $cycleFilterScript $dataPath $pendingCycleData $CycleLabel
     if ($LASTEXITCODE -ne 0) {
       throw "Cycle cache build failed with exit code $LASTEXITCODE"
     }
+    if (-not (Test-JsonFile $pendingCycleData)) {
+      throw "Cycle cache builder produced invalid JSON: $pendingCycleData"
+    }
+    Move-Item -LiteralPath $pendingCycleData -Destination $cycleDataPath -Force
+    $cycleOutputHash = (
+      Get-FileHash -LiteralPath $cycleDataPath -Algorithm SHA256
+    ).Hash.ToLowerInvariant()
+    Write-AtomicText $cycleManifestPath ([pscustomobject]@{
+      schema_version = 1
+      source_data_sha256 = $sourceDataHash
+      filter_script_sha256 = $filterScriptHash
+      cycle_label = $CycleLabel
+      output_sha256 = $cycleOutputHash
+      generated_at = [DateTimeOffset]::Now.ToString('o')
+    } | ConvertTo-Json)
   } else {
     Write-Host "Cycle cache hit: $cycleDataPath"
   }
@@ -439,12 +547,13 @@ $formulaFactsMode = if (
 }
 
 $stageWorkbook = Join-Path $stageDirectory "${reportBaseName}.xlsx"
-$finalizerDataPath = Join-Path $stageDirectory 'finalizer_data.json'
-$cacheVariantToken = if ($CycleLabel) {
-  $CycleLabel -replace '[^0-9]+','_'
-} else {
-  'all_cycles'
+if ((Get-Item -LiteralPath $buildDataPath).Length -ge 256MB -and $compactRawMode -eq '1' -and $formulaFactsMode -eq '1') {
+  $workbookDataPath = Join-Path $cacheRoot ("workbook_data${cycleToken}-$databaseToken.json")
+  & $PythonPath (Join-Path $projectRoot 'tools\prepare_workbook_payload.py') $buildDataPath $workbookDataPath
+  if ($LASTEXITCODE -ne 0) { throw 'Large workbook payload preparation failed.' }
+  $buildDataPath = $workbookDataPath
 }
+$finalizerDataPath = Join-Path $stageDirectory 'finalizer_data.json'
 $workbookCacheManifestPath = Join-Path $cacheRoot (
   "workbook_manifest_${cacheVariantToken}.json"
 )
@@ -455,6 +564,7 @@ $workbookFingerprintInputs = @(
   $buildDataPath,
   $builder,
   $finalizer,
+  (Join-Path $projectRoot 'tools\prepare_workbook_payload.py'),
   $MyInvocation.MyCommand.Path
 )
 if (Test-Path -LiteralPath $artifactToolModule -PathType Leaf) {
@@ -482,82 +592,119 @@ $expectedWorksheetCount = 0
 $buildWatch = New-Object Diagnostics.Stopwatch
 $formulaWatch = New-Object Diagnostics.Stopwatch
 $finalizeWatch = New-Object Diagnostics.Stopwatch
-if (
-  -not $NoCache -and
-  (Test-Path -LiteralPath $stageWorkbook -PathType Leaf) -and
-  (Test-Path -LiteralPath $workbookCacheManifestPath -PathType Leaf)
-) {
-  $finalizeWatch.Start()
+$workbookLockOwned = $false
+$workbookLockStream = $null
+$workbookLockToken = [Guid]::NewGuid().ToString('N')
+New-Item -ItemType Directory -Path (
+  Split-Path -Parent $WorkbookLockPath
+) -Force | Out-Null
+Write-Host "Waiting for workbook build slot: $WorkbookLockPath"
+while (-not $workbookLockOwned) {
   try {
-    $workbookManifest = Get-Content -Raw -LiteralPath (
-      $workbookCacheManifestPath
-    ) | ConvertFrom-Json
-    $cachedWorkbookSha256 = (
-      Get-FileHash -LiteralPath $stageWorkbook -Algorithm SHA256
-    ).Hash.ToLowerInvariant()
-    $workbookCacheHit = (
-      [string]$workbookManifest.workbook_fingerprint -eq
-        $workbookFingerprint -and
-      [string]$workbookManifest.workbook_sha256 -eq
-        $cachedWorkbookSha256
+    $workbookLockStream = [IO.File]::Open(
+      $WorkbookLockPath,
+      [IO.FileMode]::CreateNew,
+      [IO.FileAccess]::Write,
+      [IO.FileShare]::None
     )
-    if ($workbookCacheHit) {
-      $expectedWorksheetCount = [int](
-        $workbookManifest.expected_worksheet_count
+    try {
+      $lockText = (
+        "pid=$PID`r`ntoken=$workbookLockToken`r`n" +
+        "created=$([DateTimeOffset]::Now.ToString('o'))`r`n"
       )
-      $formulaReceiptObject = $workbookManifest.formula_receipt
-      if ($expectedWorksheetCount -lt 16 -or $null -eq $formulaReceiptObject) {
-        $workbookCacheHit = $false
-      } else {
-        Assert-WorkbookPackage $stageWorkbook $expectedWorksheetCount
+      $lockBytes = [Text.Encoding]::UTF8.GetBytes($lockText)
+      $workbookLockStream.Write($lockBytes, 0, $lockBytes.Length)
+      $workbookLockStream.Flush()
+      $workbookLockOwned = $true
+    } catch {
+      $workbookLockStream.Dispose()
+      $workbookLockStream = $null
+      throw
+    }
+  } catch [IO.IOException] {
+    if (
+      (Test-Path -LiteralPath $WorkbookLockPath) -and
+      (Get-Item -LiteralPath $WorkbookLockPath).LastWriteTimeUtc -lt
+      [DateTime]::UtcNow.AddMinutes(-90)
+    ) {
+      $observedLock = ''
+      try {
+        $observedLock = Get-Content -Raw -LiteralPath $WorkbookLockPath
+      } catch { $observedLock = '' }
+      $ownerPid = 0
+      if ($observedLock -match '(?m)^pid=(\d+)\s*$') {
+        $ownerPid = [int]$Matches[1]
+      }
+      $ownerAlive = $false
+      if ($ownerPid -gt 0) {
+        $ownerAlive = $null -ne (
+          Get-Process -Id $ownerPid -ErrorAction SilentlyContinue
+        )
+      }
+      if (-not $ownerAlive -and $observedLock) {
+        $confirmedLock = ''
+        try {
+          $confirmedLock = Get-Content -Raw -LiteralPath $WorkbookLockPath
+        } catch { $confirmedLock = '' }
+        if ($confirmedLock -eq $observedLock) {
+          try {
+            Write-Warning "Reclaiming abandoned workbook build lock: $WorkbookLockPath"
+            Remove-Item -LiteralPath $WorkbookLockPath -Force -ErrorAction Stop
+            continue
+          } catch {
+            # A contender acquired and opened the lease after our confirmation.
+            # Its FileShare.None handle is the authority; wait rather than steal.
+          }
+        }
       }
     }
-  } catch {
-    $workbookCacheHit = $false
-    $formulaReceiptObject = $null
-    $expectedWorksheetCount = 0
-  } finally {
-    $finalizeWatch.Stop()
+    Start-Sleep -Seconds 1
   }
 }
+Write-Host "Workbook build slot acquired: $WorkbookLockPath"
 
-$workbookLockOwned = $false
-if (-not $workbookCacheHit) {
-  try {
-    New-Item -ItemType Directory -Path (
-      Split-Path -Parent $WorkbookLockPath
-    ) -Force | Out-Null
-    Write-Host "Waiting for workbook build slot: $WorkbookLockPath"
-    while (-not $workbookLockOwned) {
-      try {
-        $lockStream = [IO.File]::Open(
-          $WorkbookLockPath,
-          [IO.FileMode]::CreateNew,
-          [IO.FileAccess]::Write,
-          [IO.FileShare]::None
+try {
+  if (
+    -not $NoCache -and
+    (Test-Path -LiteralPath $stageWorkbook -PathType Leaf) -and
+    (Test-Path -LiteralPath $workbookCacheManifestPath -PathType Leaf)
+  ) {
+    $finalizeWatch.Start()
+    try {
+      $workbookManifest = Get-Content -Raw -LiteralPath (
+        $workbookCacheManifestPath
+      ) | ConvertFrom-Json
+      $cachedWorkbookSha256 = (
+        Get-FileHash -LiteralPath $stageWorkbook -Algorithm SHA256
+      ).Hash.ToLowerInvariant()
+      $workbookCacheHit = (
+        [string]$workbookManifest.workbook_fingerprint -eq
+          $workbookFingerprint -and
+        [string]$workbookManifest.workbook_sha256 -eq
+          $cachedWorkbookSha256
+      )
+      if ($workbookCacheHit) {
+        $expectedWorksheetCount = [int](
+          $workbookManifest.expected_worksheet_count
         )
-        $workbookLockOwned = $true
-        try {
-          $lockText = "pid=$PID`r`ncreated=$([DateTimeOffset]::Now.ToString('o'))`r`n"
-          $lockBytes = [Text.Encoding]::UTF8.GetBytes($lockText)
-          $lockStream.Write($lockBytes, 0, $lockBytes.Length)
-        } finally {
-          $lockStream.Dispose()
+        $formulaReceiptObject = $workbookManifest.formula_receipt
+        if ($expectedWorksheetCount -lt 16 -or $null -eq $formulaReceiptObject) {
+          $workbookCacheHit = $false
+        } else {
+          Assert-WorkbookPackage $stageWorkbook $expectedWorksheetCount
         }
-      } catch [IO.IOException] {
-        if (
-          (Test-Path -LiteralPath $WorkbookLockPath) -and
-          (Get-Item -LiteralPath $WorkbookLockPath).LastWriteTimeUtc -lt
-          [DateTime]::UtcNow.AddMinutes(-90)
-        ) {
-          Write-Warning "Removing stale workbook build lock: $WorkbookLockPath"
-          Remove-Item -LiteralPath $WorkbookLockPath -Force -ErrorAction SilentlyContinue
-          continue
-        }
-        Start-Sleep -Seconds 1
       }
+    } catch {
+      $workbookCacheHit = $false
+      $formulaReceiptObject = $null
+      $expectedWorksheetCount = 0
+    } finally {
+      $finalizeWatch.Stop()
     }
-    Write-Host "Workbook build slot acquired: $WorkbookLockPath"
+  }
+
+  if (-not $workbookCacheHit) {
+    try {
     if ($NodeHeapMb -eq 0) {
       # Measure immediately before Node starts, after any arbitrarily long lock
       # wait. Cache hits never need a heap plan at all.
@@ -617,67 +764,90 @@ if (-not $workbookCacheHit) {
     & $NodePath "--max-old-space-size=$NodeHeapMb" $builder $buildDataPath $stageDirectory $databaseHash
     if ($LASTEXITCODE -ne 0) { throw "Workbook build failed with exit code $LASTEXITCODE" }
     $buildWatch.Stop()
-  } finally {
-    $env:MENTAT_DEFER_FORMULAS = $priorDefer
-    $env:MENTAT_NODE_MODULES = $priorModules
-    $env:MENTAT_RENDER_PREVIEWS = $priorRender
-    $env:MENTAT_INDUSTRY = $priorIndustry
-    $env:MENTAT_COMPACT_RAW = $priorCompactRaw
-    $env:MENTAT_FORMULA_FACTS = $priorFormulaFacts
-    $env:MENTAT_CYCLE_FILTER = $priorCycleFilter
-    if ($workbookLockOwned -and (Test-Path -LiteralPath $WorkbookLockPath)) {
-      Remove-Item -LiteralPath $WorkbookLockPath -Force
+    } finally {
+      $env:MENTAT_DEFER_FORMULAS = $priorDefer
+      $env:MENTAT_NODE_MODULES = $priorModules
+      $env:MENTAT_RENDER_PREVIEWS = $priorRender
+      $env:MENTAT_INDUSTRY = $priorIndustry
+      $env:MENTAT_COMPACT_RAW = $priorCompactRaw
+      $env:MENTAT_FORMULA_FACTS = $priorFormulaFacts
+      $env:MENTAT_CYCLE_FILTER = $priorCycleFilter
     }
+
+    if (-not (Test-Path -LiteralPath $stageWorkbook)) { throw "Workbook builder did not create $stageWorkbook" }
+    if (-not (Test-Path -LiteralPath $finalizerDataPath)) {
+      throw "Workbook builder did not create $finalizerDataPath"
+    }
+    if (-not (Test-JsonFile $finalizerDataPath)) {
+      throw "Workbook builder created invalid finalizer data."
+    }
+    $formulaWatch.Start()
+    $formulaReceipt = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $finalizer -WorkbookPath $stageWorkbook -JsonPath $finalizerDataPath -ExcelMutexName $ExcelMutexName
+    if ($LASTEXITCODE -ne 0) { throw "Excel formula finalization failed with exit code $LASTEXITCODE" }
+    $formulaWatch.Stop()
+    $formulaReceiptObject = (($formulaReceipt -join "`n") | ConvertFrom-Json)
+    $expectedWorksheetCount = [int]$formulaReceiptObject.expected_worksheet_count
+    if ($expectedWorksheetCount -lt 16) {
+      throw "Excel formula finalizer returned an invalid worksheet count."
+    }
+    $finalizeWatch.Start()
+    try {
+      Assert-WorkbookPackage $stageWorkbook $expectedWorksheetCount
+      $workbookSha256 = (
+        Get-FileHash -LiteralPath $stageWorkbook -Algorithm SHA256
+      ).Hash.ToLowerInvariant()
+      Write-AtomicText $workbookCacheManifestPath ([pscustomobject]@{
+        workbook_fingerprint = $workbookFingerprint
+        workbook_sha256 = $workbookSha256
+        template_contract = $templateContract
+        expected_worksheet_count = $expectedWorksheetCount
+        generated_at = [DateTimeOffset]::Now.ToString('o')
+        formula_receipt = $formulaReceiptObject
+      } | ConvertTo-Json -Depth 10)
+    } finally {
+      $finalizeWatch.Stop()
+    }
+  } else {
+    Write-Host (
+      'Workbook cache hit: verified package and SHA-256; skipping Node build ' +
+      'and Excel formula finalization.'
+    )
   }
 
-  if (-not (Test-Path -LiteralPath $stageWorkbook)) { throw "Workbook builder did not create $stageWorkbook" }
-  if (-not (Test-Path -LiteralPath $finalizerDataPath)) {
-    throw "Workbook builder did not create $finalizerDataPath"
-  }
-  if (-not (Test-JsonFile $finalizerDataPath)) {
-    throw "Workbook builder created invalid finalizer data."
-  }
-  $formulaWatch.Start()
-  $formulaReceipt = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $finalizer -WorkbookPath $stageWorkbook -JsonPath $finalizerDataPath -ExcelMutexName $ExcelMutexName
-  if ($LASTEXITCODE -ne 0) { throw "Excel formula finalization failed with exit code $LASTEXITCODE" }
-  $formulaWatch.Stop()
-  $formulaReceiptObject = (($formulaReceipt -join "`n") | ConvertFrom-Json)
-  $expectedWorksheetCount = [int]$formulaReceiptObject.expected_worksheet_count
-  if ($expectedWorksheetCount -lt 16) {
-    throw "Excel formula finalizer returned an invalid worksheet count."
-  }
+  $targetWorkbook = Join-Path $OutputDirectory "${reportBaseName}.xlsx"
+  $pendingWorkbook = "$targetWorkbook.pending-$PID"
   $finalizeWatch.Start()
   try {
-    Assert-WorkbookPackage $stageWorkbook $expectedWorksheetCount
-    $workbookSha256 = (
-      Get-FileHash -LiteralPath $stageWorkbook -Algorithm SHA256
-    ).Hash.ToLowerInvariant()
-    Write-AtomicText $workbookCacheManifestPath ([pscustomobject]@{
-      workbook_fingerprint = $workbookFingerprint
-      workbook_sha256 = $workbookSha256
-      template_contract = $templateContract
-      expected_worksheet_count = $expectedWorksheetCount
-      generated_at = [DateTimeOffset]::Now.ToString('o')
-      formula_receipt = $formulaReceiptObject
-    } | ConvertTo-Json -Depth 10)
+    # Publish companions on cache hits too, binding every CSV to the validated
+    # workbook and exact payload. A bundle reader can reject partial updates.
+    & $PythonPath (Join-Path $projectRoot 'tools\enrich_downstream.py') $buildDataPath $BeneficiaryDirectory --audit-only --workbook $stageWorkbook --audit-directory (Join-Path $OutputDirectory ($reportBaseName + '.audit'))
+    if ($LASTEXITCODE -ne 0) { throw 'Audit companion publication failed.' }
+    Copy-Item -LiteralPath $stageWorkbook -Destination $pendingWorkbook -Force
+    Move-Item -LiteralPath $pendingWorkbook -Destination $targetWorkbook -Force
   } finally {
     $finalizeWatch.Stop()
   }
-} else {
-  Write-Host (
-    'Workbook cache hit: verified package and SHA-256; skipping Node build ' +
-    'and Excel formula finalization.'
-  )
-}
-
-$targetWorkbook = Join-Path $OutputDirectory "${reportBaseName}.xlsx"
-$pendingWorkbook = "$targetWorkbook.pending-$PID"
-$finalizeWatch.Start()
-try {
-  Copy-Item -LiteralPath $stageWorkbook -Destination $pendingWorkbook -Force
-  Move-Item -LiteralPath $pendingWorkbook -Destination $targetWorkbook -Force
 } finally {
-  $finalizeWatch.Stop()
+  if ($null -ne $workbookLockStream) {
+    $workbookLockStream.Dispose()
+    $workbookLockStream = $null
+  }
+  if ($workbookLockOwned -and (Test-Path -LiteralPath $WorkbookLockPath)) {
+    $currentLock = ''
+    try {
+      $currentLock = Get-Content -Raw -LiteralPath $WorkbookLockPath
+    } catch { $currentLock = '' }
+    if ($currentLock -match (
+      '(?m)^token=' + [regex]::Escape($workbookLockToken) + '\s*$'
+    )) {
+      Remove-Item -LiteralPath $WorkbookLockPath -Force
+    } else {
+      Write-Warning (
+        'Workbook lock ownership changed; refusing to remove another ' +
+        "process lease: $WorkbookLockPath"
+      )
+    }
+  }
 }
 $overallWatch.Stop()
 $under45Minutes = $overallWatch.Elapsed.TotalMinutes -lt 45
@@ -690,6 +860,11 @@ $underPerformanceBudget = (
   workbook = $targetWorkbook
   bytes = (Get-Item -LiteralPath $targetWorkbook).Length
   database_sha256 = $databaseHash
+  data_sha256 = (
+    Get-FileHash -LiteralPath $dataPath -Algorithm SHA256
+  ).Hash.ToLowerInvariant()
+  data_manifest = $manifestPath
+  export_guard_receipt = 'embedded:metadata.export_guards'
   template_contract = $templateContract
   cache_hit = $cacheHit
   data_cache_hit = $cacheHit

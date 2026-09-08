@@ -11,7 +11,7 @@ param(
   [ValidateRange(1, 64)][int]$ConcurrencyPerKey = 8,
   [string]$KeysFile = '',
   [string]$BudgetDatabase = '',
-  [ValidateRange(128, 4096)][int]$MemoryPerLaneMB = 640,
+  [ValidateRange(128, 8192)][int]$MemoryPerLaneMB = 640,
   [ValidateRange(256, 16384)][int]$MemoryReserveMB = 1024,
   [ValidateRange(32, 2048)][int]$SQLiteCacheMB = 256,
   [switch]$Resume,

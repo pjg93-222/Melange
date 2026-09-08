@@ -12,6 +12,7 @@ as one transaction. A company may be assigned to exactly one shard.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 import sys
@@ -68,6 +69,30 @@ EXACT_PARITY_TABLES = (
     *GLOBAL_APPEND_TABLES,
 )
 
+CORPORATE_VERSION_FIELDS = frozenset(
+    {
+        "transaction_id",
+        "original_sub_id",
+        "amendment_indicator",
+        "report_year",
+        "report_type",
+        "file_num",
+        "pdf_url",
+        "load_date",
+    }
+)
+
+CORPORATE_REJECTED_ATTRIBUTION_FIELDS = frozenset(
+    {
+        "company",
+        "matched_variant",
+        "scraped_at",
+        "company_match_status",
+        "company_match_reason",
+        "excluded_reason",
+    }
+)
+
 # Non-FEC provenance columns are discovered from the live contribution schema.
 # The attribution prefixes include match-confidence/status/flag columns.
 # `scraped_at` is the only collection stamp in the current contributions DDL;
@@ -96,6 +121,7 @@ class AttributionConflict:
 
 @dataclass(frozen=True)
 class AttributionResolution:
+    table: str
     sub_id: str
     winner: tuple[object, ...]
     conflicts: tuple[AttributionConflict, ...]
@@ -310,7 +336,11 @@ def audit_exact_pk_pair(
     attribution_pairs: list[
         tuple[tuple[object, ...], tuple[object, ...]]
     ] = []
-    limit = "" if table == "contributions" else "LIMIT 1"
+    limit = (
+        ""
+        if table in {"contributions", "corporate_giving"}
+        else "LIMIT 1"
+    )
     with closing(
         connection.execute(
             f"""
@@ -339,6 +369,40 @@ def audit_exact_pk_pair(
                 for index, column in enumerate(columns)
                 if left_values[index] != right_values[index]
             ]
+            if table == "corporate_giving" and set(differing).issubset(
+                CORPORATE_VERSION_FIELDS
+            ):
+                def blank(value: object) -> bool:
+                    return value is None or (
+                        isinstance(value, str) and not value.strip()
+                    )
+
+                if all(
+                    blank(left_values[columns.index(column)])
+                    or blank(right_values[columns.index(column)])
+                    for column in differing
+                ):
+                    # Collection deliberately backfills these fields. A blank
+                    # may be represented as NULL or an empty string and may be
+                    # enriched, but two conflicting nonblank values remain a
+                    # hard parity failure.
+                    continue
+            if (
+                table == "corporate_giving"
+                and "company" in differing
+                and set(differing).issubset(
+                    CORPORATE_REJECTED_ATTRIBUTION_FIELDS
+                )
+                and "company_match_status" in columns
+            ):
+                status_index = columns.index("company_match_status")
+                statuses = {
+                    str(left_values[status_index]).strip().lower(),
+                    str(right_values[status_index]).strip().lower(),
+                }
+                if statuses == {"rejected"}:
+                    attribution_pairs.append((left_values, right_values))
+                    continue
             if (
                 table == "contributions"
                 and "company" in differing
@@ -358,8 +422,9 @@ def build_attribution_resolutions(
     connection: sqlite3.Connection,
     collision_rows: dict[str, set[tuple[object, ...]]],
     company_order: Sequence[str],
+    table: str,
 ) -> list[AttributionResolution]:
-    columns = table_columns(connection, "main", "contributions")
+    columns = table_columns(connection, "main", table)
     company_index = columns.index("company")
     phase_index = columns.index("phase") if "phase" in columns else None
     scraped_index = columns.index("scraped_at") if "scraped_at" in columns else None
@@ -390,6 +455,8 @@ def build_attribution_resolutions(
             incoming_phase = (
                 str(loser[phase_index]) if phase_index is not None else ""
             )
+            if table == "corporate_giving":
+                incoming_phase = "corporate_giving_rejected"
             timestamp_value = None
             if scraped_index is not None:
                 timestamp_value = loser[scraped_index]
@@ -417,6 +484,7 @@ def build_attribution_resolutions(
             ] = conflict
         resolutions.append(
             AttributionResolution(
+                table=table,
                 sub_id=sub_id,
                 winner=winner,
                 conflicts=tuple(
@@ -455,9 +523,13 @@ def audit_exact_pk_collisions(
         for index, (shard, companies) in enumerate(specifications)
     )
     allowed_provenance_columns = contribution_provenance_columns(connection)
-    collision_rows: dict[str, set[tuple[object, ...]]] = defaultdict(set)
-    contribution_columns = table_columns(connection, "main", "contributions")
-    sub_id_index = contribution_columns.index("sub_id")
+    collision_rows: dict[
+        str,
+        dict[str, set[tuple[object, ...]]],
+    ] = {
+        "contributions": defaultdict(set),
+        "corporate_giving": defaultdict(set),
+    }
     for table in EXACT_PARITY_TABLES:
         for right_index in range(1, len(sources)):
             right_schema, right_label, right_companies = sources[right_index]
@@ -474,15 +546,25 @@ def audit_exact_pk_collisions(
                     right_companies,
                     allowed_provenance_columns,
                 )
+                if not attribution_pairs:
+                    continue
+                columns = table_columns(connection, "main", table)
+                sub_id_index = columns.index("sub_id")
                 for left_values, right_values in attribution_pairs:
                     sub_id = str(left_values[sub_id_index])
-                    collision_rows[sub_id].add(left_values)
-                    collision_rows[sub_id].add(right_values)
-    return build_attribution_resolutions(
-        connection,
-        collision_rows,
-        company_order,
-    )
+                    collision_rows[table][sub_id].add(left_values)
+                    collision_rows[table][sub_id].add(right_values)
+    resolutions: list[AttributionResolution] = []
+    for table in ("contributions", "corporate_giving"):
+        resolutions.extend(
+            build_attribution_resolutions(
+                connection,
+                collision_rows[table],
+                company_order,
+                table,
+            )
+        )
+    return resolutions
 
 
 def insert_or_ignore(
@@ -516,7 +598,7 @@ def merge_company_fact_table(
     schema: str,
     table: str,
     companies: Sequence[str],
-) -> tuple[int, int]:
+) -> tuple[int, int, int]:
     company_column = COMPANY_TABLES[table]
     where = (
         f"s.{quoted(company_column)} IN ({placeholders(companies)})"
@@ -546,7 +628,52 @@ def merge_company_fact_table(
         where,
         companies,
     )
-    return inserted, ignored_existing
+    enriched = 0
+    if table == "corporate_giving":
+        columns = set(table_columns(connection, "main", table))
+        for column in sorted(CORPORATE_VERSION_FIELDS.intersection(columns)):
+            incoming = (
+                f"(SELECT s.{quoted(column)} "
+                f"FROM {quoted(schema)}.{quoted(table)} AS s "
+                f"WHERE s.sub_id=main.{quoted(table)}.sub_id)"
+            )
+            if column in {"report_year", "file_num"}:
+                replacement = (
+                    f"COALESCE(main.{quoted(table)}.{quoted(column)}, "
+                    f"{incoming})"
+                )
+                blank_target = (
+                    f"main.{quoted(table)}.{quoted(column)} IS NULL"
+                )
+            else:
+                replacement = (
+                    f"CASE WHEN main.{quoted(table)}.{quoted(column)} IS NULL "
+                    f"OR TRIM(main.{quoted(table)}.{quoted(column)})='' "
+                    f"THEN {incoming} "
+                    f"ELSE main.{quoted(table)}.{quoted(column)} END"
+                )
+                blank_target = (
+                    f"(main.{quoted(table)}.{quoted(column)} IS NULL OR "
+                    f"TRIM(main.{quoted(table)}.{quoted(column)})='')"
+                )
+            connection.execute(
+                f"""
+                UPDATE main.{quoted(table)}
+                SET {quoted(column)}={replacement}
+                WHERE company IN ({placeholders(companies)})
+                  AND {blank_target}
+                  AND EXISTS (
+                    SELECT 1
+                    FROM {quoted(schema)}.{quoted(table)} AS s
+                    WHERE s.sub_id=main.{quoted(table)}.sub_id
+                      AND s.{quoted(column)} IS NOT NULL
+                      AND TRIM(CAST(s.{quoted(column)} AS TEXT))<>''
+                  )
+                """,
+                tuple(companies),
+            )
+            enriched += int(connection.execute("SELECT changes()").fetchone()[0])
+    return inserted, ignored_existing, enriched
 
 
 def merge_scrape_progress(
@@ -563,10 +690,27 @@ def merge_scrape_progress(
         FROM {quoted(schema)}.scrape_progress AS s
         WHERE s.company IN ({placeholders(companies)}) AND 1
         ON CONFLICT(company, cycle, variant_set) DO UPDATE SET
-          last_page=excluded.last_page,
-          records_total=excluded.records_total,
-          updated_at=excluded.updated_at
+          last_page=CASE
+            WHEN excluded.last_page > scrape_progress.last_page
+              OR (
+                excluded.last_page = scrape_progress.last_page
+                AND excluded.updated_at > scrape_progress.updated_at
+              )
+            THEN excluded.last_page ELSE scrape_progress.last_page END,
+          records_total=CASE
+            WHEN excluded.last_page > scrape_progress.last_page
+              OR (
+                excluded.last_page = scrape_progress.last_page
+                AND excluded.updated_at > scrape_progress.updated_at
+              )
+            THEN excluded.records_total ELSE scrape_progress.records_total END,
+          updated_at=MAX(scrape_progress.updated_at, excluded.updated_at),
+          zero_verified=MAX(
+            scrape_progress.zero_verified,
+            excluded.zero_verified
+          )
         WHERE excluded.last_page > scrape_progress.last_page
+           OR excluded.zero_verified > scrape_progress.zero_verified
            OR (
              excluded.last_page = scrape_progress.last_page
              AND excluded.updated_at > scrape_progress.updated_at
@@ -786,27 +930,27 @@ def apply_attribution_resolutions(
 ) -> int:
     if not resolutions:
         return 0
-    columns = table_columns(connection, "main", "contributions")
-    column_sql = ",".join(quoted(column) for column in columns)
-    value_sql = placeholders(columns)
     inserted_conflicts = 0
     for resolution in resolutions:
+        columns = table_columns(connection, "main", resolution.table)
+        column_sql = ",".join(quoted(column) for column in columns)
+        value_sql = placeholders(columns)
         current = connection.execute(
             f"""
             SELECT {column_sql}
-            FROM main.contributions
+            FROM main.{quoted(resolution.table)}
             WHERE sub_id=?
             """,
             (resolution.sub_id,),
         ).fetchone()
         if current is not None and tuple(current) != resolution.winner:
             connection.execute(
-                "DELETE FROM main.contributions WHERE sub_id=?",
+                f"DELETE FROM main.{quoted(resolution.table)} WHERE sub_id=?",
                 (resolution.sub_id,),
             )
         connection.execute(
             f"""
-            INSERT OR IGNORE INTO main.contributions ({column_sql})
+            INSERT OR IGNORE INTO main.{quoted(resolution.table)} ({column_sql})
             VALUES ({value_sql})
             """,
             resolution.winner,
@@ -846,7 +990,7 @@ def merge_shard(
         "corporate_giving",
         "bulk_candidates",
     ):
-        inserted, existing = merge_company_fact_table(
+        inserted, existing, enriched = merge_company_fact_table(
             connection,
             schema,
             table,
@@ -854,6 +998,8 @@ def merge_shard(
         )
         stats[f"{table}_inserted"] = inserted
         stats[f"{table}_pk_existing"] = existing
+        if table == "corporate_giving":
+            stats["corporate_giving_version_fields_enriched"] = enriched
 
     stats["scrape_progress_changed"] = merge_scrape_progress(
         connection,
@@ -983,17 +1129,55 @@ def target_connection(target: Path) -> sqlite3.Connection:
     return connection
 
 
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def assert_expected_target_state(
+    connection: sqlite3.Connection,
+    target: Path,
+    expected_sha256: str | None,
+) -> None:
+    if expected_sha256 is None:
+        return
+    if not connection.in_transaction:
+        raise RuntimeError("Target-state verification requires a write lease.")
+    wal = Path(f"{target}-wal")
+    if wal.is_file() and wal.stat().st_size > 0:
+        raise RuntimeError(
+            "Target database gained a nonempty WAL before merge; refusing "
+            f"moving-target merge: {wal}"
+        )
+    observed = file_sha256(target)
+    if observed.lower() != expected_sha256.lower():
+        raise RuntimeError(
+            "Target database changed before the merge write lease was "
+            "acquired; refusing moving-target merge."
+        )
+
+
 def main(arguments: Sequence[str]) -> int:
     if len(arguments) < 2:
         raise SystemExit(__doc__)
     target = Path(arguments[0]).resolve()
     remaining = list(arguments[1:])
     encoded_company_order: str | None = None
-    if remaining and remaining[0] == "--company-order-json":
-        if len(remaining) < 3:
+    expected_target_sha256: str | None = None
+    while remaining and remaining[0].startswith("--"):
+        option = remaining.pop(0)
+        if not remaining:
             raise SystemExit(__doc__)
-        encoded_company_order = remaining[1]
-        remaining = remaining[2:]
+        value = remaining.pop(0)
+        if option == "--company-order-json":
+            encoded_company_order = value
+        elif option == "--expected-target-sha256":
+            expected_target_sha256 = value
+        else:
+            raise SystemExit(f"Unknown option: {option}")
     specifications = parse_specifications(remaining, target)
     company_order = parse_company_order(encoded_company_order, specifications)
     connection = target_connection(target)
@@ -1014,16 +1198,21 @@ def main(arguments: Sequence[str]) -> int:
             quick_check(connection, schema)
             ensure_schema_compatible(connection, schema, shard)
 
-        # Fail before BEGIN IMMEDIATE or any target write if INSERT OR IGNORE
-        # would otherwise make a non-identical duplicate path-order dependent.
-        attribution_resolutions = audit_exact_pk_collisions(
-            connection,
-            specifications,
-            company_order,
-        )
-
         connection.execute("BEGIN IMMEDIATE")
         try:
+            assert_expected_target_state(
+                connection,
+                target,
+                expected_target_sha256,
+            )
+            # Audit while holding the target write lease. Auditing before
+            # BEGIN IMMEDIATE leaves a TOCTOU gap in which another writer can
+            # introduce a conflicting PK that INSERT OR IGNORE would hide.
+            attribution_resolutions = audit_exact_pk_collisions(
+                connection,
+                specifications,
+                company_order,
+            )
             attribution_conflicts_recorded = apply_attribution_resolutions(
                 connection,
                 attribution_resolutions,

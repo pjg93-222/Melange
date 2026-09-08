@@ -1247,12 +1247,11 @@ insert_rows_or_ignore <- function(connection, table, rows, columns) {
 }
 
 # zero_verified defaults to 0 (unverified) and must be passed explicitly by a
-# lane that actually confirms emptiness. Only the browser lane does: its
-# readiness gate (fec_results_ready, fec_page.R) requires DataTables' own
-# confirmed-empty row before a zero is accepted. The API lane reaches this same
-# function and has no equivalent gate - a query that 504s twice is classified
-# unservable, decomposed, and can synthesise a completed page with count=0 - so
-# it leaves the default and its zeros are reported as unverified.
+# lane that actually confirms emptiness. The browser lane requires DataTables'
+# confirmed-empty row. The API lane requires a successful HTTP response plus
+# count/cursor completion, and fails closed if an unservable query has no safe
+# decomposition. Older collectors left the default and remain visibly
+# unverified.
 checkpoint_contribution_page <- function(
   connection,
   rows,
@@ -1377,7 +1376,7 @@ completed_scrape_checkpoint <- function(
   }
   final_page <- max(
     0L,
-    as.integer(ceiling(progress$records_total[[1L]] / 100)) - 1L
+    as.integer(ceiling(progress$records_total[[1L]] / 100L)) - 1L
   )
   if (progress$last_page[[1L]] < final_page) {
     return(NULL)

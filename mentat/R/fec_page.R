@@ -372,6 +372,13 @@ fec_canaries <- function(payload, expected_total = NULL) {
       passed = !length(rows) || all(nzchar(row_ids)),
       detail = paste0("rows=", length(rows), "; nonempty_sub_id=", sum(nzchar(row_ids)))
     ),
+    unique_sub_id = list(
+      passed = !length(row_ids) || !anyDuplicated(row_ids),
+      detail = paste0(
+        "rows=", length(row_ids),
+        "; unique_sub_id=", data.table::uniqueN(row_ids)
+      )
+    ),
     page_row_count = list(
       passed = length(rows) == if (info$page + 1L < info$pages) {
         info$length
@@ -574,6 +581,17 @@ fec_export_current_query <- function(
     stop(
       "FEC export row-count mismatch: expected=", expected_rows,
       " downloaded=", nrow(rows),
+      call. = FALSE
+    )
+  }
+  if (!"sub_id" %in% names(rows)) {
+    stop("FEC export is missing the required sub_id column.", call. = FALSE)
+  }
+  export_sub_ids <- trim_text(rows$sub_id)
+  if (any(!nzchar(export_sub_ids)) || anyDuplicated(export_sub_ids)) {
+    stop(
+      "FEC export contains blank or repeated sub_id values; refusing ",
+      "row-count-only completion.",
       call. = FALSE
     )
   }
@@ -1166,7 +1184,10 @@ fec_walk_variant_set_once <- function(
     timeout_seconds = timeout_seconds,
     retries = retries
   )
-  initial <- fec_read_page(session)
+  # The durable checkpoint contract is 100 rows/page. Enforce it before the
+  # first callback so resume never has to infer completion from an arbitrary UI
+  # preference left in local storage.
+  initial <- fec_set_page_length(session, 100L)
   records_total <- initial$info$recordsTotal
   if (records_total >= 500L && is.infinite(max_pages)) {
     exported <- fec_walk_variant_set_export(
@@ -1185,6 +1206,7 @@ fec_walk_variant_set_once <- function(
   expected_total <- records_total
   first_payload <- initial
   processed_pages <- 0L
+  seen_sub_ids <- character()
   repeat {
     payload <- first_payload
     first_payload <- NULL
@@ -1208,6 +1230,20 @@ fec_walk_variant_set_once <- function(
         call. = FALSE
       )
     }
+    page_sub_ids <- vapply(
+      payload$rows,
+      function(row) trim_text(row$sub_id %||% ""),
+      character(1L)
+    )
+    repeated_sub_ids <- intersect(page_sub_ids, seen_sub_ids)
+    if (length(repeated_sub_ids)) {
+      stop(
+        "FEC pagination repeated sub_id(s) across pages: ",
+        paste(head(unique(repeated_sub_ids), 5L), collapse = ", "),
+        call. = FALSE
+      )
+    }
+    seen_sub_ids <- c(seen_sub_ids, page_sub_ids)
     page_callback(
       rows = payload$rows,
       page = page,

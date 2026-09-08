@@ -2392,9 +2392,12 @@ spending_recipient_classification <- function(connection, rows, lookups = NULL) 
   registered_conduit <- row_committee_id %in%
     c("C00401224", "C00694323") |
     row_committee_key %in% c("ACTBLUE", "WINRED")
-  category[registered_conduit] <- "Super PAC"
+  # These registered hybrid committees have separate contribution and
+  # non-contribution accounts. Routing receipts through them is not evidence
+  # of independent-expenditure-only Super PAC giving.
+  category[registered_conduit] <- "Carey"
   category_source[registered_conduit] <-
-    "user_rule:registered_conduit_super_pac"
+    "fec:hybrid_committee_type:registered_conduit"
 
   category_rows <- which(!registered_conduit & !is.na(category_match))
   if (length(category_rows)) {

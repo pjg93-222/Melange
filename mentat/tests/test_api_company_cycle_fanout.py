@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import io
 import json
+import concurrent.futures
 import sys
 import tempfile
+import threading
+import time
 import unittest
 import sqlite3
 from contextlib import closing
@@ -54,8 +57,13 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
             self.assertRegex(identifier, r"^[0-9a-f]{12}$")
 
     def test_missing_keys_fails_loudly(self) -> None:
-        with self.assertRaisesRegex(RuntimeError, "No FEC API keys were found"):
+        with mock.patch.object(fanout, 'load_keys', return_value=[]), self.assertRaisesRegex(RuntimeError, "No FEC API keys were found"):
             fanout.discover_keys(None, {})
+
+    def test_encrypted_store_is_fallback_without_expanding_explicit_lane_keys(self):
+        with mock.patch.object(fanout, 'load_keys', return_value=['saved-one','saved-two']):
+            self.assertEqual(fanout.discover_keys(None, {}), ['saved-one','saved-two'])
+            self.assertEqual(fanout.discover_keys(None, {'FEC_API_KEY':'lane-key'}), ['lane-key'])
 
     def test_company_cycles_never_cross_lane_ownership(self) -> None:
         companies = [
@@ -372,6 +380,69 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
         self.assertEqual(cap["memory_lane_cap"], 8)
         self.assertEqual(cap["active_lane_cap"], 8)
         self.assertEqual(cap["sqlite_merge_cap"], 10)
+        self.assertFalse(cap["cpu_bound_lane_cap_applied"])
+
+    def test_resource_cap_allows_one_io_lane_per_company_past_cpu_count(
+        self,
+    ) -> None:
+        with mock.patch.object(
+            fanout, "available_memory_bytes", return_value=32 * 1024**3
+        ), mock.patch.object(fanout.os, "cpu_count", return_value=8):
+            cap = fanout.resource_cap(
+                key_count=10,
+                company_count=10,
+                requested_parallel=10,
+                memory_per_lane_mb=640,
+                memory_reserve_mb=1024,
+            )
+        self.assertEqual(cap["logical_cpu"], 8)
+        self.assertEqual(cap["active_lane_cap"], 10)
+        self.assertFalse(cap["cpu_bound_lane_cap_applied"])
+
+    def test_resume_execution_throttles_persisted_lanes_to_live_cap(
+        self,
+    ) -> None:
+        self.assertEqual(
+            fanout.execution_worker_cap(
+                10,
+                {"active_lane_cap": 2},
+            ),
+            2,
+        )
+
+    def test_primary_and_recovery_share_one_execution_cap(self) -> None:
+        original_execute = fanout.execute_lane
+        lock = threading.Lock()
+        active = 0
+        maximum = 0
+
+        def fake_execute(lane_run, **kwargs):
+            nonlocal active, maximum
+            with lock:
+                active += 1
+                maximum = max(maximum, active)
+            time.sleep(0.03)
+            with lock:
+                active -= 1
+            return {"lane": lane_run}
+
+        fanout.execute_lane = fake_execute
+        try:
+            limiter = threading.BoundedSemaphore(2)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+                futures = [
+                    pool.submit(
+                        fanout.execute_lane_with_limit,
+                        limiter,
+                        lane,
+                    )
+                    for lane in range(3)
+                ]
+                for future in futures:
+                    future.result()
+        finally:
+            fanout.execute_lane = original_execute
+        self.assertEqual(maximum, 2)
 
     def test_resume_receipts_select_only_non_success_tasks(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-resume-fixture-") as temp:
@@ -517,13 +588,24 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
                 self.assertEqual(fanout.main([*arguments, "--resume"]), 0)
 
             receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-            manifest = json.loads(
-                (run_directory / "manifest.json").read_text(encoding="utf-8")
-            )
             with closing(sqlite3.connect(source)) as connection, connection:
                 contribution_count = connection.execute(
                     "SELECT COUNT(*) FROM contributions"
                 ).fetchone()[0]
+                connection.execute(
+                    """
+                    INSERT INTO contributions (sub_id, company, amount)
+                    VALUES ('same-path-mutation', 'Alpha', 1)
+                    """
+                )
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "does not match the current same-path source database",
+            ):
+                fanout.main([*arguments, "--resume"])
+            manifest = json.loads(
+                (run_directory / "manifest.json").read_text(encoding="utf-8")
+            )
         self.assertEqual(receipt["status"], "succeeded")
         self.assertTrue(receipt["merged"])
         self.assertEqual(receipt["succeeded"], 2)
@@ -561,8 +643,12 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
             run_directory = root / "run"
             receipt_path = run_directory / "receipt.json"
             executed: list[tuple[int, tuple[str, ...]]] = []
+            assignment_resumes: list[bool] = []
 
             def fake_execute(lane_run, **kwargs):
+                assignment_resumes.append(
+                    bool(fanout.read_json(lane_run.assignments).get("resume"))
+                )
                 task_ids = tuple(
                     str(task["task_id"]) for task in lane_run.tasks
                 )
@@ -654,6 +740,7 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
             (2, ("stripe-2026",)),
             (3, ("stripe-2026",)),
         ])
+        self.assertEqual(assignment_resumes, [False, True, True])
         self.assertEqual(final["status"], "succeeded")
         self.assertEqual(
             [attempt["exit_code"] for attempt in final["lane_attempts"]],

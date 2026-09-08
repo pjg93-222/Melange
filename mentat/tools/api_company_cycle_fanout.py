@@ -23,6 +23,7 @@ import re
 import sqlite3
 import subprocess
 import sys
+import threading
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -30,6 +31,7 @@ from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 from sqlite_snapshot import create_snapshot, verify_database
+from fec_key_store import load_keys
 
 
 SUPPORTED_CYCLES = (2022, 2024, 2026)
@@ -62,6 +64,21 @@ def atomic_json(path: Path, value: object) -> None:
             time.sleep(
                 ATOMIC_REPLACE_INITIAL_DELAY_SECONDS * (2**attempt)
             )
+
+
+def quiescent_database_fingerprint(path: Path) -> str:
+    resolved = path.resolve(strict=True)
+    wal = Path(f"{resolved}-wal")
+    if wal.is_file() and wal.stat().st_size > 0:
+        raise RuntimeError(
+            "Source database has a nonempty WAL sidecar; stop writers and "
+            f"checkpoint SQLite before fanout: {wal}"
+        )
+    digest = hashlib.sha256()
+    with resolved.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def split_keys(value: str) -> list[str]:
@@ -99,6 +116,8 @@ def discover_keys(keys_file: Path | None, environment: dict[str, str]) -> list[s
         if value not in seen:
             seen.add(value)
             unique.append(value)
+    if not unique:
+        unique = load_keys()
     if not unique:
         raise RuntimeError(
             "No FEC API keys were found. Set FEC_API_KEY, set delimiter-separated "
@@ -213,13 +232,15 @@ def resource_cap(
         else 1
     )
     requested = requested_parallel if requested_parallel > 0 else MERGE_ATTACHMENT_LIMIT
+    # A lane is primarily remote-API and SQLite-I/O bound. Keep CPU count as
+    # telemetry, but do not strand a dedicated key/company pair merely because
+    # there are fewer logical CPUs than independently rate-limited API keys.
     cap = max(
         1,
         min(
             requested,
             key_count,
             company_count,
-            cpu_count,
             memory_cap,
             MERGE_ATTACHMENT_LIMIT,
         ),
@@ -227,6 +248,7 @@ def resource_cap(
     return {
         "requested_parallel": requested_parallel,
         "logical_cpu": cpu_count,
+        "cpu_bound_lane_cap_applied": False,
         "available_memory_mb": int(available_mb),
         "memory_per_lane_mb": memory_per_lane_mb,
         "memory_reserve_mb": memory_reserve_mb,
@@ -236,6 +258,11 @@ def resource_cap(
         "sqlite_merge_cap": MERGE_ATTACHMENT_LIMIT,
         "active_lane_cap": cap,
     }
+
+
+def execution_worker_cap(lane_count: int, resources: dict[str, int]) -> int:
+    """Throttle persisted lane ownership to the current live resource cap."""
+    return max(1, min(lane_count, int(resources["active_lane_cap"])))
 
 
 def schedule_companies(
@@ -471,6 +498,15 @@ def execute_lane(
         "units": invocation["units"],
         "receipt": receipt,
     }
+
+
+def execute_lane_with_limit(
+    limiter: threading.BoundedSemaphore,
+    lane_run: LaneRun,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    with limiter:
+        return execute_lane(lane_run, **kwargs)
 
 
 def lane_state(path: Path) -> dict[str, Any]:
@@ -771,12 +807,31 @@ def main(arguments: Sequence[str] | None = None) -> int:
         raise RuntimeError(
             f"--resume requires an existing manifest: {manifest_path}"
         )
+    verify_database(source_database)
+    current_source_fingerprint = quiescent_database_fingerprint(source_database)
+    existing_manifest: dict[str, Any] | None = None
+    if options.resume:
+        existing_manifest = read_json(manifest_path)
+        if Path(existing_manifest["source_database"]).resolve() != source_database:
+            raise RuntimeError("Resume source database does not match manifest.")
+        if existing_manifest.get("industry") != options.industry.strip():
+            raise RuntimeError("Resume industry does not match manifest.")
+        if tuple(existing_manifest.get("cycles", [])) != tuple(options.cycles):
+            raise RuntimeError("Resume cycles do not match manifest.")
     if options.resume and output_receipt.is_file():
         prior_final = read_json(output_receipt)
         if (
             prior_final.get("status") == "succeeded"
             and prior_final.get("merged") is True
         ):
+            if (
+                prior_final.get("source_state_after_merge")
+                != current_source_fingerprint
+            ):
+                raise RuntimeError(
+                    "Completed fanout receipt does not match the current "
+                    "same-path source database."
+                )
             print(
                 "MENTAT API FANOUT ALREADY COMPLETE "
                 f"receipt={output_receipt}",
@@ -784,7 +839,6 @@ def main(arguments: Sequence[str] | None = None) -> int:
             )
             return 0
 
-    verify_database(source_database)
     keys = discover_keys(options.keys_file, dict(os.environ))
     companies = database_companies(source_database, options.industry.strip())
     canonical_company_order = [company for company, _ in companies]
@@ -796,13 +850,15 @@ def main(arguments: Sequence[str] | None = None) -> int:
         memory_reserve_mb=options.memory_reserve_mb,
     )
     if options.resume:
-        existing_manifest = read_json(manifest_path)
-        if Path(existing_manifest["source_database"]).resolve() != source_database:
-            raise RuntimeError("Resume source database does not match manifest.")
-        if existing_manifest.get("industry") != options.industry.strip():
-            raise RuntimeError("Resume industry does not match manifest.")
-        if tuple(existing_manifest.get("cycles", [])) != tuple(options.cycles):
-            raise RuntimeError("Resume cycles do not match manifest.")
+        assert existing_manifest is not None
+        if (
+            existing_manifest.get("source_state_before")
+            != current_source_fingerprint
+        ):
+            raise RuntimeError(
+                "Resume source database contents do not match the fanout "
+                "manifest; refusing stale lane snapshots."
+            )
         lane_count = int(existing_manifest["lane_count"])
         if len(keys) < lane_count:
             raise RuntimeError(
@@ -952,6 +1008,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
             "run_id": run_id,
             "industry": options.industry.strip(),
             "source_database": str(source_database),
+            "source_state_before": current_source_fingerprint,
             "cycles": list(options.cycles),
             "started_at": started_wall,
             "task_count": task_total,
@@ -994,7 +1051,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
     print(
         "MENTAT API FANOUT "
         f"industry={options.industry.strip()} tasks={task_total} "
-        f"keys={len(keys)} lanes={lane_count} cpu_cap={resources['logical_cpu']} "
+        f"keys={len(keys)} lanes={lane_count} "
+        f"cpu_telemetry={resources['logical_cpu']} "
         f"memory_cap={resources['memory_lane_cap']} "
         f"available_memory_mb={resources['available_memory_mb']} "
         f"merge_cap={resources['sqlite_merge_cap']} "
@@ -1005,8 +1063,10 @@ def main(arguments: Sequence[str] | None = None) -> int:
 
     recovery_futures: dict[concurrent.futures.Future[dict[str, Any]], LaneRun] = {}
     recovery_results: list[tuple[LaneRun, dict[str, Any]]] = []
+    primary_worker_count = execution_worker_cap(lane_count, resources)
+    execution_limiter = threading.BoundedSemaphore(primary_worker_count)
     with concurrent.futures.ThreadPoolExecutor(
-        max_workers=lane_count,
+        max_workers=primary_worker_count,
         thread_name_prefix="mentat-api-primary",
     ) as primary_pool, concurrent.futures.ThreadPoolExecutor(
         max_workers=options.recovery_workers,
@@ -1014,7 +1074,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
     ) as recovery_pool:
         primary_futures = {
             primary_pool.submit(
-                execute_lane,
+                execute_lane_with_limit,
+                execution_limiter,
                 run,
                 rscript_path=rscript_path,
                 lane_script=lane_script,
@@ -1067,6 +1128,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
                         "industry": options.industry.strip(),
                         "lane": run.lane,
                         "recovery_attempt": run.attempt,
+                        "resume": True,
                         "tasks": retry_tasks,
                     },
                 )
@@ -1092,7 +1154,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 )
                 all_lane_runs.append(recovery_run)
                 recovery_future = recovery_pool.submit(
-                    execute_lane,
+                    execute_lane_with_limit,
+                    execution_limiter,
                     recovery_run,
                     rscript_path=rscript_path,
                     lane_script=lane_script,
@@ -1159,6 +1222,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
                         "lane": recovery_run.lane,
                         "split_attempt": split_attempt,
                         "parent_attempt": recovery_run.attempt,
+                        "resume": True,
                         "tasks": [task],
                     },
                 )
@@ -1176,7 +1240,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 )
                 all_lane_runs.append(split_run)
                 split_future = recovery_pool.submit(
-                    execute_lane,
+                    execute_lane_with_limit,
+                    execution_limiter,
                     split_run,
                     rscript_path=rscript_path,
                     lane_script=lane_script,
@@ -1216,6 +1281,14 @@ def main(arguments: Sequence[str] | None = None) -> int:
     }
     merged = False
     if not final_failed:
+        if (
+            quiescent_database_fingerprint(source_database)
+            != current_source_fingerprint
+        ):
+            raise RuntimeError(
+                "Source database changed during fanout; refusing to merge "
+                "lane snapshots into a moving target."
+            )
         if not write_status(
             status_path,
             run_id=run_id,
@@ -1233,6 +1306,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
             str(source_database),
             "--company-order-json",
             json.dumps(canonical_company_order, ensure_ascii=False),
+            "--expected-target-sha256",
+            current_source_fingerprint,
             *[
                 f"{run.database}::{'|'.join(plans[run.lane - 1]['companies'])}"
                 for run in merge_runs
@@ -1271,6 +1346,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
             ]
 
     final_status = "succeeded" if merged and not final_failed else "failed"
+    source_state_after_merge = quiescent_database_fingerprint(source_database)
     ended_wall = utc_now()
     if not write_status(
         status_path,
@@ -1288,6 +1364,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "status": final_status,
         "industry": options.industry.strip(),
         "source_database": str(source_database),
+        "source_state_before": current_source_fingerprint,
+        "source_state_after_merge": source_state_after_merge,
         "run_directory": str(run_directory),
         "manifest": str(manifest_path),
         "status_path": str(status_path),
@@ -1302,6 +1380,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "configured_key_count": len(keys),
         "spare_key_count": len(spare_keys),
         "lane_count": lane_count,
+        "execution_worker_count": primary_worker_count,
         "resource_cap": resources,
         "recovery_ladder": [
             "primary_lane",

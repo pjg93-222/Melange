@@ -236,9 +236,20 @@ fec_api_request_spec <- function(unit, last_indexes = NULL) {
   if (!length(query_values)) {
     stop("FEC API work unit has no normalized query value: ", unit$id, call. = FALSE)
   }
+  per_page <- suppressWarnings(as.integer(
+    unit$per_page %||% FEC_API_PER_PAGE
+  ))
+  if (length(per_page) != 1L || is.na(per_page) ||
+      per_page < 1L || per_page > FEC_API_PER_PAGE) {
+    stop(
+      "FEC API work unit has an invalid per_page value: ",
+      unit$id,
+      call. = FALSE
+    )
+  }
   params <- c(
     list(
-      per_page = as.character(FEC_API_PER_PAGE),
+      per_page = as.character(per_page),
       two_year_transaction_period = as.character(as.integer(unit$cycle)),
       sort = "-contribution_receipt_date"
     ),
@@ -250,6 +261,15 @@ fec_api_request_spec <- function(unit, last_indexes = NULL) {
     params <- c(params, cursor)
   }
   list(id = unit$id, url = FEC_API_ENDPOINT, params = params)
+}
+
+fec_api_smaller_page_size <- function(unit) {
+  current <- suppressWarnings(as.integer(
+    unit$per_page %||% FEC_API_PER_PAGE
+  ))
+  candidates <- c(50L, 20L, 10L, 5L, 1L)
+  smaller <- candidates[candidates < current]
+  if (length(smaller)) smaller[[1L]] else NA_integer_
 }
 
 fec_api_response_header <- function(response, name) {
@@ -696,6 +716,53 @@ fec_api_mark_work_unit_stored <- function(connection, unit_id) {
   invisible(TRUE)
 }
 
+reset_api_progress <- function(connection, tasks) {
+  reset <- 0L
+  DBI::dbWithTransaction(connection, {
+    for (task in tasks) {
+      # A fresh API task covers the entire company-cycle. Remove every older
+      # browser/API progress row for that cell before repopulating it; otherwise
+      # export guards sum historical and current FEC counts and falsely report
+      # a complete refresh as short.
+      DBI::dbExecute(
+        connection,
+        "DELETE FROM scrape_progress WHERE company=? AND cycle=?",
+        params = list(task$company, as.integer(task$cycle))
+      )
+      unit_ids <- DBI::dbGetQuery(
+        connection,
+        paste(
+          "SELECT unit_id FROM api_work_progress",
+          "WHERE company=? AND cycle=?"
+        ),
+        params = list(task$company, as.integer(task$cycle))
+      )$unit_id
+      if (!length(unit_ids)) next
+      placeholders <- paste(rep("?", length(unit_ids)), collapse = ",")
+      DBI::dbExecute(
+        connection,
+        paste0(
+          "DELETE FROM api_page_checkpoints WHERE unit_id IN (",
+          placeholders,
+          ")"
+        ),
+        params = as.list(unit_ids)
+      )
+      DBI::dbExecute(
+        connection,
+        paste0(
+          "DELETE FROM api_work_progress WHERE unit_id IN (",
+          placeholders,
+          ")"
+        ),
+        params = as.list(unit_ids)
+      )
+      reset <- reset + length(unit_ids)
+    }
+  })
+  as.integer(reset)
+}
+
 fec_api_keyset_signature <- function(indexes) {
   if (!length(indexes)) return("")
   names_sorted <- sort(names(indexes), method = "radix")
@@ -776,6 +843,23 @@ fec_api_collect_work_units <- function(
   units <- units[order(unit_ids, method = "radix")]
   states <- lapply(units, function(unit) {
     restored <- initial_states[[unit$id]] %||% list()
+    restored_pages <- restored$pages %||% list()
+    restored_sub_ids <- vapply(
+      fec_api_state_rows(list(pages = restored_pages)),
+      function(row) trim_text(row_scalar(row, "sub_id", "")),
+      character(1L)
+    )
+    if (
+      any(!nzchar(restored_sub_ids)) ||
+      anyDuplicated(restored_sub_ids)
+    ) {
+      stop(
+        "Saved FEC API checkpoints contain blank or repeated sub_id(s) for ",
+        "work unit: ",
+        unit$id,
+        call. = FALSE
+      )
+    }
     list(
       unit = unit,
       last_indexes = restored$last_indexes %||% list(),
@@ -784,7 +868,8 @@ fec_api_collect_work_units <- function(
       page = restored$page %||% 0L,
       rows_seen = restored$rows_seen %||% 0L,
       rows_collected_run = 0L,
-      pages = restored$pages %||% list(),
+      pages = restored_pages,
+      seen_sub_ids = restored_sub_ids,
       complete = isTRUE(restored$complete),
       stored_complete = isTRUE(restored$stored_complete)
     )
@@ -825,18 +910,55 @@ fec_api_collect_work_units <- function(
       state <- states[[index]]
       if (offset %in% fetched$unservable_queries) {
         if (isTRUE(state$unit$is_decomposition)) {
-          # Skip this spelling rather than abort: killing the run discards every
-          # unit already fetched and nothing reaches the store phase.
-          warning(
-            "Observed-spelling FEC API query unservable, skipping: ",
+          current_page_size <- suppressWarnings(as.integer(
+            state$unit$per_page %||% FEC_API_PER_PAGE
+          ))
+          smaller_page_size <- fec_api_smaller_page_size(state$unit)
+          if (!is.na(smaller_page_size)) {
+            cat(sprintf(
+              paste0(
+                "unservable_decomposed_query: %s cycle %d per_page %d",
+                " -> retrying from page 1 at per_page %d\n"
+              ),
+              paste(state$unit$variants, collapse = "|"),
+              as.integer(state$unit$cycle),
+              current_page_size,
+              smaller_page_size
+            ))
+            state$unit$per_page <- smaller_page_size
+            state$last_indexes <- list()
+            state$seen_keysets <- character()
+            state$expected_count <- NA_integer_
+            state$page <- 0L
+            state$rows_seen <- 0L
+            state$rows_collected_run <- 0L
+            state$pages <- list()
+            state$seen_sub_ids <- character()
+            state$complete <- FALSE
+            state$stored_complete <- FALSE
+            states[[index]] <- state
+            unfinished <- c(unfinished, index)
+            next
+          }
+          stop(
+            "Decomposed FEC API query remained unservable; refusing a partial ",
+            "parent result: ",
             paste(state$unit$variants, collapse = "|"),
-            " cycle ", state$unit$cycle, call. = FALSE
+            " cycle ", state$unit$cycle,
+            call. = FALSE
           )
-          state$complete <- TRUE
-          next
         }
         queries <- fec_api_decomposition_queries(state$unit)
         children <- fec_api_decomposition_units(state$unit, queries)
+        if (!length(children)) {
+          stop(
+            "Unservable FEC API query has no decomposition spellings; ",
+            "refusing an unverified zero: ",
+            paste(state$unit$variants, collapse = "|"),
+            " cycle ", state$unit$cycle,
+            call. = FALSE
+          )
+        }
         child_result <- if (length(children)) {
           fec_api_collect_work_units(
             children,
@@ -850,15 +972,7 @@ fec_api_collect_work_units <- function(
             before_request = before_request
           )
         } else {
-          fec_api_collect_work_units(
-            list(),
-            api_key = api_key,
-            concurrency = current_concurrency,
-            transport = transport,
-            sleep = sleep,
-            jitter = jitter,
-            before_request = before_request
-          )
+          stop("unreachable: decomposition children were checked above")
         }
         request_count <- request_count + child_result$request_count
         retry_count <- retry_count + child_result$retry_count
@@ -910,6 +1024,31 @@ fec_api_collect_work_units <- function(
         next
       }
       page <- fec_api_parse_page(fetched$responses[[offset]])
+      page_sub_ids <- vapply(
+        page$rows,
+        function(row) trim_text(row_scalar(row, "sub_id", "")),
+        character(1L)
+      )
+      if (any(!nzchar(page_sub_ids))) {
+        stop(
+          "FEC API page contained a blank sub_id for work unit: ",
+          state$unit$id,
+          call. = FALSE
+        )
+      }
+      duplicate_sub_ids <- unique(c(
+        page_sub_ids[duplicated(page_sub_ids)],
+        intersect(page_sub_ids, state$seen_sub_ids)
+      ))
+      if (length(duplicate_sub_ids)) {
+        stop(
+          "FEC API pagination repeated sub_id(s) for work unit ",
+          state$unit$id, ": ",
+          paste(head(duplicate_sub_ids, 5L), collapse = ", "),
+          call. = FALSE
+        )
+      }
+      state$seen_sub_ids <- c(state$seen_sub_ids, page_sub_ids)
       state$page <- state$page + 1L
       if (state$page > FEC_API_MAX_PAGES_PER_UNIT) {
         stop(
@@ -943,26 +1082,56 @@ fec_api_collect_work_units <- function(
       page$page_number <- state$page - 1L
       page_position <- length(state$pages) + 1L
       state$pages[[page_position]] <- page
-      if (!is.na(state$expected_count) && state$rows_seen > state$expected_count) {
-        stop(
-          "FEC API collected more rows than pagination.count for work unit: ",
-          state$unit$id,
+      observed_counts <- vapply(
+        state$pages,
+        function(saved_page) suppressWarnings(as.integer(
+          saved_page$count %||% NA_integer_
+        )),
+        integer(1L)
+      )
+      observed_counts <- observed_counts[
+        !is.na(observed_counts) & observed_counts >= 0L
+      ]
+      counts_moved <- length(unique(observed_counts)) > 1L
+      terminal_page <- !length(page$rows) || !length(page$last_indexes)
+      count_complete <- if (counts_moved) {
+        terminal_page && state$rows_seen %in% unique(observed_counts)
+      } else {
+        !is.na(state$expected_count) &&
+          state$rows_seen == state$expected_count
+      }
+      if (counts_moved && count_complete) {
+        warning(
+          "FEC API pagination.count moved after a complete previously ",
+          "reported snapshot; accepting ", state$rows_seen,
+          " rows for work unit: ", state$unit$id,
           call. = FALSE
         )
+        state$expected_count <- as.integer(state$rows_seen)
       }
-      count_complete <- !is.na(state$expected_count) &&
-        state$rows_seen == state$expected_count
-      count_shortfall <- !is.na(state$expected_count) &&
-        state$rows_seen < state$expected_count
-      if (count_shortfall &&
-          (!length(page$rows) || !length(page$last_indexes))) {
+      if (!count_complete && terminal_page) {
+        count_detail <- if (length(unique(observed_counts)) == 1L) {
+          paste0(" of ", unique(observed_counts)[[1L]])
+        } else {
+          paste0(
+            " rows; reported counts=",
+            paste(unique(observed_counts), collapse = ",")
+          )
+        }
         stop(
           paste0(
             "FEC API pagination shortfall for ", state$unit$id,
-            ": collected ", state$rows_seen,
-            " of ", state$expected_count,
+            ": collected ", state$rows_seen, count_detail,
             " rows without a continuation cursor."
           ),
+          call. = FALSE
+        )
+      }
+      if (!counts_moved && !is.na(state$expected_count) &&
+          state$rows_seen > state$expected_count) {
+        stop(
+          "FEC API collected more rows than pagination.count for work unit: ",
+          state$unit$id,
           call. = FALSE
         )
       }
@@ -1520,11 +1689,12 @@ fec_api_bulk_rescue <- function(
             records,
             company,
             as.integer(candidate$cycle),
-            variant_set,
-            page = page_index - 1L,
-            records_total = page$count %||% length(page$rows),
-            use_transaction = FALSE
-          )
+             variant_set,
+             page = page_index - 1L,
+             records_total = page$count %||% length(page$rows),
+             zero_verified = 1L,
+             use_transaction = FALSE
+           )
         }
       })
       invisible(TRUE)
@@ -1688,6 +1858,7 @@ fec_api_store_page <- function(
         unit$id,
         page_index,
         records_total,
+        zero_verified = 1L,
         use_transaction = FALSE
       )
     } else if (identical(unit$kind, "identity")) {
@@ -1725,6 +1896,7 @@ fec_api_store_page <- function(
         unit$id,
         page_index,
         records_total,
+        zero_verified = 1L,
         use_transaction = FALSE
       )
     } else {

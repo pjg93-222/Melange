@@ -118,18 +118,104 @@ function Count-NonOk($Range) {
   $bad
 }
 
+function Import-LargeTableSidecar($Book, $Spec) {
+  $sidecarPath = [string]$Spec.path
+  if (-not (Test-Path -LiteralPath $sidecarPath)) {
+    throw "Large-table sidecar is missing: $sidecarPath"
+  }
+  $rowCount = [int]$Spec.row_count
+  $columnCount = [int]$Spec.column_count
+  if ($rowCount -le 0 -or $columnCount -le 0) {
+    throw "Invalid large-table dimensions for $($Spec.sheet): ${rowCount}x${columnCount}"
+  }
+
+  $numericColumns = [Collections.Generic.HashSet[int]]::new()
+  foreach ($columnIndex in @($Spec.numeric_columns)) {
+    [void]$numericColumns.Add([int]$columnIndex)
+  }
+
+  $sheet = $Book.Worksheets.Item([string]$Spec.sheet)
+  $table = $sheet.ListObjects.Item([string]$Spec.table)
+  $resizeRange = $null
+  $reader = $null
+  try {
+    $resizeRange = $sheet.Range(
+      $sheet.Cells.Item(5, 1),
+      $sheet.Cells.Item(5 + $rowCount, $columnCount)
+    )
+    $table.Resize($resizeRange)
+    Release-ComObject $resizeRange
+    $resizeRange = $null
+
+    $reader = [IO.StreamReader]::new(
+      $sidecarPath,
+      [Text.UTF8Encoding]::new($false),
+      $true,
+      1MB
+    )
+    $batchSize = 1000
+    $written = 0
+    while (-not $reader.EndOfStream) {
+      $lines = [Collections.Generic.List[string]]::new($batchSize)
+      while ($lines.Count -lt $batchSize -and -not $reader.EndOfStream) {
+        $line = $reader.ReadLine()
+        if ($null -ne $line) { $lines.Add($line) }
+      }
+      if ($lines.Count -eq 0) { break }
+      $matrix = [Array]::CreateInstance([object], @($lines.Count, $columnCount))
+      for ($rowIndex = 0; $rowIndex -lt $lines.Count; $rowIndex++) {
+        $fields = $lines[$rowIndex].Split([char]31)
+        if ($fields.Count -ne $columnCount) {
+          throw (
+            "Large-table sidecar width mismatch for $($Spec.sheet) at row " +
+            "$($written + $rowIndex + 1): expected=$columnCount actual=$($fields.Count)"
+          )
+        }
+        for ($columnIndex = 0; $columnIndex -lt $columnCount; $columnIndex++) {
+          $value = $fields[$columnIndex]
+          if ($numericColumns.Contains($columnIndex)) {
+            if ([string]::IsNullOrWhiteSpace($value)) {
+              $matrix.SetValue(0.0, $rowIndex, $columnIndex)
+            } else {
+              $number = 0.0
+              if (-not [double]::TryParse(
+                $value,
+                [Globalization.NumberStyles]::Float,
+                [Globalization.CultureInfo]::InvariantCulture,
+                [ref]$number
+              )) {
+                throw (
+                  "Large-table numeric parse failure for $($Spec.sheet) at " +
+                  "row $($written + $rowIndex + 1), column $($columnIndex + 1)"
+                )
+              }
+              $matrix.SetValue($number, $rowIndex, $columnIndex)
+            }
+          } elseif ($value.Length -gt 0) {
+            $matrix.SetValue($value, $rowIndex, $columnIndex)
+          }
+        }
+      }
+      $targetRange = $sheet.Range(
+        $sheet.Cells.Item(6 + $written, 1),
+        $sheet.Cells.Item(5 + $written + $lines.Count, $columnCount)
+      )
+      try { $targetRange.Value2 = $matrix } finally { Release-ComObject $targetRange }
+      $written += $lines.Count
+    }
+    if ($written -ne $rowCount) {
+      throw "Large-table sidecar row mismatch for $($Spec.sheet): expected=$rowCount actual=$written"
+    }
+  } finally {
+    if ($null -ne $reader) { $reader.Dispose() }
+    if ($null -ne $resizeRange) { Release-ComObject $resizeRange }
+    Release-ComObject $table
+    Release-ComObject $sheet
+  }
+}
+
 $resolvedWorkbook = (Resolve-Path -LiteralPath $WorkbookPath).Path
 $resolvedJson = (Resolve-Path -LiteralPath $JsonPath).Path
-$compactJson = Join-Path (
-  Split-Path -Parent $resolvedWorkbook
-) 'finalizer_data.json'
-if (
-  $resolvedJson -ne $compactJson -and
-  (Test-Path -LiteralPath $compactJson -PathType Leaf)
-) {
-  $resolvedJson = (Resolve-Path -LiteralPath $compactJson).Path
-  Write-Host "Using compact finalizer data: $resolvedJson"
-}
 $payload = Get-Content -Raw -LiteralPath $resolvedJson | ConvertFrom-Json
 $industry = [string]$payload.metadata.industry
 if ([string]::IsNullOrWhiteSpace($industry)) { $industry = 'Crypto' }
@@ -169,17 +255,32 @@ try {
   $book = $excel.Workbooks.Open($workingPath, 0, $false)
   $excel.Calculation = -4135
 
+  if ($null -ne $payload.metadata.large_table_sidecars) {
+    foreach ($property in $payload.metadata.large_table_sidecars.PSObject.Properties) {
+      Import-LargeTableSidecar $book $property.Value
+    }
+  }
+
   foreach ($sheetName in $cycleSheetNames) {
     $sheet = $book.Worksheets.Item($sheetName); $table = $sheet.ListObjects.Item(1)
     try {
-      Set-TableColumnFormula $table 'Analysis Amount' '=IF([@[Include in Analysis]]="Yes",[@Amount],0)'
-      Set-TableColumnFormula $table 'Logic Check' '=IF(AND([@[Analysis Amount]]=IF([@[Include in Analysis]]="Yes",[@Amount],0),OR([@[Cycle Alignment]]="OK",[@[Cycle Alignment]]="Reassigned by contribution date")),"OK","CHECK")'
+      if ($formulaFacts) {
+        Set-TableColumnFormula $table 'Analysis Amount' '=IF([@[Include in Analysis]]="Yes",[@Amount],0)'
+        Set-TableColumnFormula $table 'Logic Check' '=IF(AND([@[Include in Analysis]]="Yes",[@[Analysis Amount]]=[@Amount]),"OK","CHECK")'
+      } else {
+        Set-TableColumnFormula $table 'Analysis Amount' '=IF([@[Include in Analysis]]="Yes",[@Amount],0)'
+        Set-TableColumnFormula $table 'Logic Check' '=IF(AND([@[Analysis Amount]]=IF([@[Include in Analysis]]="Yes",[@Amount],0),OR([@[Cycle Alignment]]="OK",[@[Cycle Alignment]]="Reassigned by contribution date")),"OK","CHECK")'
+      }
     } finally { Release-ComObject $table; Release-ComObject $sheet }
   }
   $sheet = $book.Worksheets.Item('Cycle Exceptions'); $table = $sheet.ListObjects.Item(1)
   try {
     Set-TableColumnFormula $table 'Analysis Amount' '=IF([@[Include in Analysis]]="Yes",[@Amount],0)'
-    Set-TableColumnFormula $table 'Logic Check' '=IF(AND([@[Include in Analysis]]="No",[@[Cycle Alignment]]="Outside requested cycles",[@[Analysis Amount]]=0),"OK","CHECK")'
+    if ($formulaFacts) {
+      Set-TableColumnFormula $table 'Logic Check' '=IF(AND([@[Include in Analysis]]="No",[@[Analysis Amount]]=0),"OK","CHECK")'
+    } else {
+      Set-TableColumnFormula $table 'Logic Check' '=IF(AND([@[Include in Analysis]]="No",[@[Cycle Alignment]]="Outside requested cycles",[@[Analysis Amount]]=0),"OK","CHECK")'
+    }
   } finally { Release-ComObject $table; Release-ComObject $sheet }
 
   $sheet = $book.Worksheets.Item($overviewSheetName); $table = $sheet.ListObjects.Item(1)
@@ -194,7 +295,7 @@ try {
     Set-TableColumnFormula $table 'Integrity Check' '=IF(ABS([@[Total Giving]]-[@Democratic]-[@Republican]-[@[Other / Unclassified]])<0.01,"OK","CHECK")'
   } finally { Release-ComObject $table; Release-ComObject $sheet }
 
-  $masterCategories = @('Super PAC','Carey','Company PAC','Leadership PAC','Trade Association','Candidate','Party Committee','JFC','Unclassified')
+  $masterCategories = @('Super PAC','Carey','Other PAC','Company PAC','Leadership PAC','Trade Association','Candidate','Party Committee','JFC','Unclassified')
   $masterTiers = @('Corporate','Chief','Middle Management','Employee')
   $cycleEntries = @($payload.cycles | Sort-Object { [int]$_.cycle })
   $masterSpecs = @()
@@ -294,7 +395,7 @@ try {
         $rankValues[$rankIndex, 0] = [string]$rankFact[0]
         $rankValues[$rankIndex, 1] = [string]$rankFact[1]
         $rankValues[$rankIndex, 2] = [string]$rankFact[2]
-        $rankValues[$rankIndex, 3] = $null
+        $rankValues[$rankIndex, 3] = [double]$rankFact[3]
       }
       $rankRange = $sheet.Range('A6').Resize($rankFacts.Count, 4)
       try {
@@ -313,9 +414,6 @@ try {
         try { $table.Resize($resizeRange) } finally { Release-ComObject $resizeRange }
         $table.Name = 'EmployeeRankFactsTable'
       }
-      Set-TableColumnFormula $table 'Total Giving' ('=' + (
-        Cycle-Dispatch { param($t) Employee-Expression $t }
-      ))
     } finally { Release-ComObject $table; Release-ComObject $sheet }
   }
 
@@ -513,9 +611,6 @@ try {
   }
   foreach ($cycleSheetName in $cycleSheetNames) {
     $formulaColumnsBySheet[$cycleSheetName] = @('Analysis Amount','Logic Check')
-  }
-  if ($formulaFacts) {
-    $formulaColumnsBySheet['Employee Rank Facts'] = @('Total Giving')
   }
   $formulaColumnsBySheet[$overviewSheetName] = @('Total Giving','Democratic','Republican','Other / Unclassified','Net Democratic %','Net Republican %','Party Coverage','Integrity Check')
   foreach ($sheetName in $focusedSheets) {

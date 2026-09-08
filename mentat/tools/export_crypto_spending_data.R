@@ -44,7 +44,7 @@ if (!nzchar(MENTAT_INDUSTRY)) {
 for (module in c(
   "paths.R", "schema.R", "ingest.R", "fec_page.R", "collect.R",
   "fec_api.R", "reconcile.R", "report.R", "fec_beneficiary.R",
-  "identity_components.R", "export_guards.R"
+  "identity_components.R", "export_guards.R", "fec_transfer_graph.R"
 )) {
   source(file.path(MENTAT_PROJECT_ROOT, "R", module), local = .GlobalEnv)
 }
@@ -223,10 +223,8 @@ master_index <- match(
 analysis_rows[, type_filled_from_master := FALSE]
 analysis_rows[, designation_filled_from_master := FALSE]
 type_fill <- !is.na(master_index) &
-  !nzchar(trim_text(analysis_rows$recipient_committee_type)) &
   nzchar(fec_committee_master$committee_type[master_index])
 designation_fill <- !is.na(master_index) &
-  !nzchar(trim_text(analysis_rows$recipient_committee_designation)) &
   nzchar(fec_committee_master$designation[master_index])
 analysis_rows[type_fill, recipient_committee_type :=
   fec_committee_master$committee_type[master_index[type_fill]]]
@@ -240,6 +238,13 @@ classifications <- spending_recipient_classification(
   analysis_rows,
   lookups = lookups
 )
+# Resolve generic registered PACs without pretending they are company PACs.
+# The legacy Stats template keeps its historical grouping; these are the
+# independently rendered industry workbooks with an explicit Other PAC channel.
+other_pac <- classifications$recipient_category == "Unclassified" &
+  analysis_rows$recipient_committee_type %in% c("N", "Q")
+classifications$recipient_category[other_pac] <- "Other PAC"
+classifications$category_source[other_pac] <- "fec:registered_nonparty_pac_type"
 master_party <- ifelse(
   is.na(master_index),
   "",
@@ -557,9 +562,10 @@ direct_candidate_keys <- unique(paste(
 downstream_universe <- recipient_universe[
   !paste(cycle, committee_id, sep = "|") %in% direct_candidate_keys
 ]
+transfer_context <- fec_transfer_context(beneficiary_dir, downstream_universe, candidate_links, supported_cycles)
 downstream_activity <- fec_read_downstream_activity(
   beneficiary_dir,
-  downstream_universe,
+  transfer_context$universe,
   candidate_master,
   supported_cycles
 )
@@ -580,7 +586,7 @@ beneficiary_tables <- fec_build_beneficiary_tables(
 export_phase("beneficiary_bridge_built", nrow(beneficiary_tables$bridge))
 downstream_activity_export <- fec_aggregate_downstream_activity(
   downstream_activity,
-  downstream_universe
+  transfer_context$universe
 )
 export_phase(
   "downstream_activity_aggregated",
@@ -659,8 +665,14 @@ guard_category_view_b <- analysis_rows[
   )
 ]
 
+guard_progress <- data.table::as.data.table(DBI::dbGetQuery(connection,
+  "SELECT * FROM scrape_progress WHERE variant_set LIKE 'P1_employer%' OR variant_set LIKE 'P2_variant%' OR variant_set LIKE 'P2_company_name%'"))
+guard_progress[, destination := ifelse(grepl("^P2_company_name", variant_set), "corporate", "contributions")]
+guard_api <- if (DBI::dbExistsTable(connection, "api_work_progress"))
+  DBI::dbGetQuery(connection, "SELECT * FROM api_work_progress") else data.frame()
+guard_views <- mentat_guard_progress_views(guard_progress, guard_api)
 guard_started_at <- unname(proc.time()[["elapsed"]])
-mentat_run_export_guards(
+guard_results <- mentat_run_export_guards(
   list(
     mentat_guard_roster_coverage(companies, raw_export, supported_cycles),
     mentat_guard_cell_coverage(companies, raw_export, supported_cycles),
@@ -673,25 +685,7 @@ mentat_run_export_guards(
     # Reported-vs-stored, split by destination: the employer/variant passes fill
     # contributions, the company-as-contributor pass fills corporate_giving.
     mentat_guard_collection_completeness(
-      DBI::dbGetQuery(
-        connection,
-        # Identity passes (P2_name / P2_name_state) are excluded from the
-        # denominator. They search a CONTRIBUTOR NAME, so records_total counts
-        # every person nationally with that name and has no relation to what
-        # should be stored: one Coinbase 2024 seed reports 1,049,000 records
-        # against 2,299 for the employer pass. Counting them made a complete
-        # Coinbase look 1,085,852 rows short. Only the employer and variant
-        # passes define a universe the database is supposed to contain.
-        paste(
-          "SELECT company, cycle, records_total,",
-          "CASE WHEN variant_set LIKE 'P2_company_name%' THEN 'corporate'",
-          "ELSE 'contributions' END AS destination",
-          "FROM scrape_progress",
-          "WHERE variant_set LIKE 'P1_employer%'",
-          "OR variant_set LIKE 'P2_variant%'",
-          "OR variant_set LIKE 'P2_company_name%'"
-        )
-      ),
+      guard_views$completeness,
       DBI::dbGetQuery(
         connection,
         paste(
@@ -704,32 +698,21 @@ mentat_run_export_guards(
         )
       )
     ),
-    mentat_guard_zero_provenance(
-      if ("zero_verified" %in% DBI::dbListFields(connection, "scrape_progress")) {
-        DBI::dbGetQuery(
-          connection,
-          paste(
-            "SELECT company, cycle, records_total, zero_verified",
-            "FROM scrape_progress"
-          )
-        )
-      } else {
-        DBI::dbGetQuery(
-          connection,
-          "SELECT company, cycle, records_total FROM scrape_progress"
-        )
-      }
-    ),
+    mentat_guard_zero_provenance(guard_views$zero),
+    guard_views$api_guard,
     mentat_guard_direction_integrity(beneficiary_tables$summary),
     mentat_guard_date_sanity(
       downstream_activity_export$first_activity_date, "downstream_activity"
+    ),
+    mentat_guard_date_sanity(
+      downstream_activity_export$last_activity_date, "downstream_last_activity"
     ),
     # Mirrors the category list the workbook template renders
     # (tools/crypto_workbook_builder.mjs masterCategories). Kept here so a
     # category the template shows but nothing ever populates is reported rather
     # than silently rendering $0.00, as Trade Association did in six books.
     mentat_guard_category_population(
-      c("Super PAC", "Carey", "Company PAC", "Leadership PAC",
+      c("Super PAC", "Carey", "Other PAC", "Company PAC", "Leadership PAC",
         "Trade Association", "Candidate", "Party Committee", "JFC",
         "Unclassified"),
       workbook_raw_export$recipient_category
@@ -744,6 +727,7 @@ cat(sprintf(
 
 payload <- list(
   metadata = list(
+    transfer_coverage = transfer_context$coverage,
     industry = MENTAT_INDUSTRY,
     database_path = database_path,
     database_bytes = file.info(database_path)$size,
@@ -789,6 +773,22 @@ payload <- list(
     omitted_non_accepted_by_cycle = as.list(
       omitted_non_accepted_by_cycle
     ),
+    export_guards = lapply(seq_len(nrow(guard_results)), function(index) {
+      list(
+        id = as.character(guard_results$id[[index]]),
+        severity = as.character(guard_results$severity[[index]]),
+        passed = isTRUE(guard_results$passed[[index]]),
+        detail = as.character(guard_results$detail[[index]]),
+        metric = if (is.na(guard_results$metric[[index]])) {
+          NULL
+        } else {
+          as.numeric(guard_results$metric[[index]])
+        }
+      )
+    }),
+    export_guard_warning_count = sum(
+      !guard_results$passed & guard_results$severity == "warn"
+    ),
     generated_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS%z")
   ),
   cycles = cycles,
@@ -812,6 +812,9 @@ payload <- list(
   ))),
   employees = person_cycle,
   committee_map = committee_map,
+  transfer_edges = transfer_context$edges,
+  candidate_committee_links = candidate_links,
+  candidate_master = candidate_master,
   downstream_activity = downstream_activity_export,
   beneficiary_bridge = beneficiary_tables$bridge,
   beneficiary_summary = beneficiary_tables$summary

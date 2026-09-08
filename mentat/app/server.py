@@ -1,0 +1,490 @@
+"""Local Mentat upload and collection console; no collector runs on import."""
+from __future__ import annotations
+
+import argparse
+import base64
+import csv
+import datetime
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import re
+import secrets
+import shutil
+import sqlite3
+import subprocess
+import sys
+import threading
+import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlparse, parse_qs
+import uuid
+import zipfile
+
+PROJECT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT / "tools"))
+from validate_industry_coverage import workbook_roster
+from fec_key_store import load_keys, save_keys, environment_keys, status as key_status
+
+
+def read_json(path):
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        return {}
+
+
+def atomic_json(path, value):
+    path = Path(path)
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(temporary, path)
+
+
+def normalize_upload(filename, content, target):
+    """Convert a table or legacy roster to the existing collector's input format."""
+    import openpyxl
+    suffix = Path(filename).suffix.lower()
+    rows = []
+    if suffix in (".csv", ".tsv"):
+        text = content.decode("utf-8-sig")
+        rows = list(csv.reader(io.StringIO(text), delimiter="\t" if suffix == ".tsv" else ","))
+    elif suffix == ".xlsx":
+        with zipfile.ZipFile(io.BytesIO(content)) as archive:
+            if sum(item.file_size for item in archive.infolist()) > 30_000_000:
+                raise ValueError("The expanded workbook must be under 30 MB.")
+        book = openpyxl.load_workbook(io.BytesIO(content), read_only=True, data_only=False)
+        try:
+            rows = [list(row) for row in book.active.iter_rows(values_only=True)]
+            header = [str(cell or "").strip().lower() for cell in rows[0]] if rows else []
+            if "canonical_name" not in header:
+                target.write_bytes(content)
+                return workbook_roster(target)
+        finally:
+            book.close()
+    else:
+        raise ValueError("Upload a CSV, TSV, or XLSX file.")
+    if not rows:
+        raise ValueError("The file is empty.")
+    headers = [str(value or "").strip().lower() for value in rows[0]]
+    if "canonical_name" not in headers:
+        raise ValueError("The table needs a canonical_name column and an optional alias column.")
+    if len(headers) != len(set(headers)):
+        raise ValueError("Each column needs a unique header.")
+    if len(rows) > 10001:
+        raise ValueError("Upload up to 10,000 rows at a time.")
+    groups = {}
+    for number, row in enumerate(rows[1:], 2):
+        if not any(str(value or "").strip() for value in row):
+            continue
+        item = dict(zip(headers, [str(value or "").strip() for value in row]))
+        name = item.get("canonical_name", "")
+        industry = item.get("industry") or "Uploaded names"
+        if not name:
+            raise ValueError(f"Row {number}: canonical_name is required.")
+        if any(len(value) > 250 for value in item.values()):
+            raise ValueError(f"Row {number}: names and aliases must be under 250 characters.")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 &()._-]{0,30}", industry):
+            raise ValueError(f"Row {number}: use a short industry name with letters, numbers, spaces, or &()._-.")
+        company = groups.setdefault(industry, {}).setdefault(name, {"aliases": [], "exclusions": []})
+        for alias in (name, item.get("alias", "")):
+            if alias and alias not in company["aliases"]:
+                company["aliases"].append(alias)
+        exclusion = item.get("exclusion", "")
+        if exclusion and exclusion not in company["exclusions"]:
+            company["exclusions"].append(exclusion)
+    if not groups:
+        raise ValueError("The file contains no company names.")
+    book = openpyxl.Workbook()
+    book.remove(book.active)
+    for industry, companies in groups.items():
+        sheet = book.create_sheet(industry)
+        for company in companies.values():
+            values = company["aliases"] + ["NOT " + value for value in company["exclusions"]]
+            if industry == "Crypto":
+                sheet.append(values)
+            else:
+                for value in values:
+                    sheet.append([value])
+                sheet.append([None])
+        # Uploaded text must remain text, even if it begins with '='.
+        for row in sheet:
+            for cell in row:
+                if cell.value is not None:
+                    cell.data_type = "s"
+    book.save(target)
+    book.close()
+    return workbook_roster(target)
+
+
+def lane_preview(database):
+    """Bounded, read-only queries against a single lane; rows remain provisional."""
+    path = Path(database)
+    if not path.is_file():
+        return {"available": False}
+    connection = None
+    try:
+        connection = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True, timeout=0.15)
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA query_only=ON")
+        progress = [dict(row) for row in connection.execute(
+            "SELECT company,cycle,kind,rows_seen,records_total,fetched_complete,stored_complete,updated_at "
+            "FROM api_work_progress ORDER BY updated_at DESC LIMIT 50")]
+        records = [dict(row) for row in connection.execute(
+            "SELECT sub_id,contributor_name,company,matched_variant,contributor_employer,"
+            "committee_name,contribution_receipt_date,contribution_receipt_amount,company_match_status "
+            "FROM contributions ORDER BY rowid DESC LIMIT 25")]
+        return {"available": True, "progress": progress, "records": records}
+    except sqlite3.Error:
+        return {"available": False, "message": "Waiting for a readable collection checkpoint."}
+    finally:
+        if connection:
+            connection.close()
+
+
+def report_quality(path):
+    """Inspect exported headers, not runner exit status, for the direction fix."""
+    import openpyxl
+    book = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    try:
+        warnings = []
+        if 'Data Quality' in book.sheetnames:
+            headers = next(book['Data Quality'].iter_rows(min_row=5, max_row=5, values_only=True), ())
+            for row in book['Data Quality'].iter_rows(min_row=6, values_only=True):
+                values = dict(zip(headers, row))
+                if values.get('Check') and values.get('Passed') is False:
+                    warnings.append({'check': values['Check'], 'severity': values.get('Severity'),
+                                     'detail': values.get('Detail')})
+        quality = {'warnings': warnings, 'transfer_paths': 'Transfer Paths' in book.sheetnames}
+        if 'Candidate Funding' in book.sheetnames:
+            headers = next(book['Candidate Funding'].iter_rows(min_row=5, max_row=5, values_only=True), ())
+            return {**quality, 'direction_columns': all(name in headers for name in
+                ('Conditional Non-opposition', 'Conditional Opposition'))}
+        if "Beneficiary Summary" not in book.sheetnames:
+            return {**quality, "direction_columns": None}
+        headers = next(book["Beneficiary Summary"].iter_rows(min_row=5, max_row=5, values_only=True), ())
+        return {**quality, "direction_columns": all(name in headers for name in ("Support Activity", "Oppose Activity"))}
+    finally:
+        book.close()
+
+
+class Console:
+    def __init__(self, root, keys_file="", rscript=""):
+        self.root = Path(root).resolve()
+        self.root.mkdir(parents=True, exist_ok=True)
+        self.keys_file = keys_file
+        self.rscript = rscript or "C:/Program Files/R/R-4.6.0/bin/Rscript.exe"
+        self.token = secrets.token_urlsafe(32)
+        self.lock = threading.Lock()
+        self.processes = {}
+        self.report_cache = {}
+        configured = environment_keys()
+        if self.keys_file:
+            configured.append(Path(self.keys_file).read_text(encoding="utf-8-sig"))
+        if configured:
+            save_keys(configured)
+
+    def inspect_report(self, path):
+        stat = path.stat()
+        key = (str(path), stat.st_mtime_ns, stat.st_size)
+        if key not in self.report_cache:
+            try:
+                value = report_quality(path)
+                with path.open("rb") as stream:
+                    value["sha256"] = hashlib.file_digest(stream, "sha256").hexdigest()
+                self.report_cache[key] = value
+            except (OSError, ValueError, KeyError, zipfile.BadZipFile):
+                return {"direction_columns": None, "warning": "Workbook inspection unavailable."}
+        return self.report_cache[key]
+
+    def upload(self, data):
+        content = base64.b64decode(data.get("content", ""), validate=True)
+        if not content or len(content) > 5_000_000:
+            raise ValueError("Upload a nonempty file smaller than 5 MB.")
+        identifier = uuid.uuid4().hex
+        directory = self.root / identifier
+        directory.mkdir()
+        readiness = normalize_upload(str(data.get("filename", "")), content, directory / "roster.xlsx")
+        manifest = {"id": identifier, "name": Path(str(data["filename"])).name,
+                    "created_at": time.time(), "state": "ready" if readiness["status"] == "succeeded" else "needs review",
+                    "readiness": readiness}
+        atomic_json(directory / "upload.json", manifest)
+        return manifest
+
+    def launch(self, data):
+        identifier = data.get("id", "")
+        if not re.fullmatch(r"[a-f0-9]{32}", identifier):
+            raise ValueError("Choose a validated upload.")
+        directory = self.root / identifier
+        cycles = data.get("cycles", [])
+        if not cycles or any(type(c) is not int or c not in (2022, 2024, 2026) for c in cycles):
+            raise ValueError("Select at least one supported election cycle.")
+        with self.lock:
+            manifest = read_json(directory / "upload.json")
+            if manifest.get("state") != "ready":
+                raise ValueError("This upload is not ready, or has already been started.")
+            if any(process.poll() is None for process in self.processes.values()):
+                raise ValueError("An app collection is already running. Wait for it to finish.")
+            if not Path(self.rscript).is_file():
+                raise ValueError("Rscript is unavailable. Set -RScriptPath in the launcher.")
+            api_key = str(data.get("api_key", "")).strip()
+            if api_key:
+                save_keys([api_key])
+            stored_keys = load_keys()
+            if not stored_keys:
+                raise ValueError("Enter an FEC API key before starting collection.")
+            runtime = directory / "runtime" / "mentat"
+            runtime.mkdir(parents=True, exist_ok=True)
+            # Pin the current runner and inputs together; R resolves its roster relative to its entry point.
+            for folder in ("R", "tools", "inputs"):
+                shutil.copytree(PROJECT / folder, runtime / folder, dirs_exist_ok=True,
+                                ignore=shutil.ignore_patterns("__pycache__", "node_modules", ".cache"))
+            shutil.copy2(PROJECT / "mentat.R", runtime / "mentat.R")
+            shutil.copy2(directory / "roster.xlsx", runtime / "inputs" / "Company Name.xlsx")
+            active_sources = read_json(PROJECT / 'inputs/active_fec_sources.json')
+            if active_sources.get('path'):
+                for source_folder in ('fec_beneficiary','fec_committee_master'):
+                    shutil.copytree(Path(active_sources['path']) / source_folder,
+                                    runtime / 'inputs' / source_folder, dirs_exist_ok=True,
+                                    ignore=shutil.ignore_patterns('*.sqlite', '*.pending*', 'transfer-index-*', 'cache'))
+            command = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                       str(runtime / "tools/parallel/Start-MentatResilientIndustryReports.ps1"),
+                       "-Cycles", "|".join(str(c) for c in sorted(set(cycles))),
+                       "-RunRoot", str(directory / "runs"), "-OutputDirectory", str(directory / "reports"),
+                       "-RawDataDirectory", str(directory / "raw"), "-PythonPath", sys.executable,
+                       "-RScriptPath", self.rscript, "-NoCache"]
+            environment = os.environ.copy()
+            environment["MENTAT_INPUT_DIR"] = str(runtime / "inputs")
+            environment["MENTAT_CUSTOM_ROSTER"] = "1"
+            environment["MENTAT_FEC_SOURCE_ROOT"] = str(runtime / 'inputs')
+            for name in list(environment):
+                if name == 'FEC_API_KEY' or re.fullmatch(r'FEC_API_KEY_\d+', name):
+                    environment.pop(name)
+            environment["FEC_API_KEYS"] = "|".join(stored_keys)
+            manifest.update(state="starting", cycles=cycles, started_at=time.time())
+            atomic_json(directory / "upload.json", manifest)
+            try:
+                with (directory / "launcher.log").open("wb") as log:
+                    process = subprocess.Popen(command, cwd=runtime, env=environment, stdout=log,
+                                               stderr=subprocess.STDOUT,
+                                               creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            except OSError:
+                manifest["state"] = "launch failed"
+                atomic_json(directory / "upload.json", manifest)
+                raise ValueError("The collection process could not start. Check the local launcher log.")
+            self.processes[identifier] = process
+            manifest["pid"] = process.pid
+            atomic_json(directory / "upload.json", manifest)
+            threading.Thread(target=self.finish, args=(process, directory), daemon=True).start()
+        return {"id": identifier, "state": "starting"}
+
+    def finish(self, process, directory):
+        code = process.wait()
+        manifest = read_json(directory / "upload.json")
+        manifest.update(state="completed" if code == 0 else "failed", exit_code=code, finished_at=time.time())
+        atomic_json(directory / "upload.json", manifest)
+
+    def runs(self):
+        values = []
+        for path in self.root.glob("*/upload.json"):
+            meta = read_json(path)
+            if not meta:
+                continue
+            run_paths = sorted((path.parent / "runs").glob("*/manifest.json"))
+            values.append({"id": meta["id"], "name": meta["name"], "state": meta["state"],
+                           "created_at": meta["created_at"], "directory": run_paths[-1].parent if run_paths else None,
+                           "upload": meta})
+        existing = PROJECT / ".cache/resilient-industry-runs"
+        for path in sorted(existing.glob("*/manifest.json"), reverse=True)[:15]:
+            values.append({"id": "existing-" + path.parent.name, "name": path.parent.name,
+                           "state": "existing run", "created_at": path.stat().st_mtime, "directory": path.parent})
+        for path in (PROJECT / '.cache/report-repairs').glob('*/manifest.json'):
+            meta = read_json(path)
+            values.append({'id': 'repair-' + path.parent.name,
+                           'name': meta.get('name', 'Rebuilt reports'), 'state': 'completed',
+                           'created_at': path.stat().st_mtime, 'directory': path.parent})
+        return sorted(values, key=lambda item: item["created_at"], reverse=True)
+
+    def summary(self):
+        return {"runs": [{key: value for key, value in run.items() if key not in ("directory", "upload")}
+                         for run in self.runs()], "key_configured": bool(load_keys()), **key_status()}
+
+    def find(self, identifier):
+        return next((run for run in self.runs() if run["id"] == identifier), None)
+
+    def snapshot(self, identifier, lane_id=""):
+        run = self.find(identifier)
+        if not run:
+            raise ValueError("Run not found.")
+        directory = run["directory"]
+        result = {"id": identifier, "name": run["name"], "state": run["state"],
+                  "readiness": run.get("upload", {}).get("readiness"), "lanes": [], "events": [], "reports": [], "assurance": []}
+        if not directory:
+            return result
+        status = read_json(directory / "status.json")
+        result["status"] = status
+        result["age_seconds"] = round(time.time() - (directory / "status.json").stat().st_mtime) if status else None
+        lanes = []
+        for fanout_manifest in directory.glob("industries/*/fanout/manifest.json"):
+            fanout = read_json(fanout_manifest)
+            # Recoveries and split tasks have separate status files. Include all latest views.
+            for path in sorted(fanout_manifest.parent.glob("**/status*.json")):
+                if path.parent == fanout_manifest.parent:
+                    continue
+                state = read_json(path)
+                if not state:
+                    continue
+                key = str(path.relative_to(directory))
+                db = path.parent / "mentat.db"
+                for lane in fanout.get("lanes", []):
+                    if Path(lane.get("state", "")) == path:
+                        db = Path(lane["database"])
+                lanes.append({"id": key, "industry": fanout.get("industry"), "label": str(path.parent.name),
+                              "state": state, "database": str(db)})
+        result["lanes"] = [{key: value for key, value in lane.items() if key != "database"} for lane in lanes]
+        selected = next((lane for lane in lanes if lane["id"] == lane_id), lanes[0] if lanes else None)
+        if selected:
+            result["selected_lane"] = selected["id"]
+            result["preview"] = lane_preview(selected["database"])
+        events = directory / "events.jsonl"
+        if events.is_file():
+            with events.open("rb") as stream:
+                stream.seek(max(0, events.stat().st_size - 24000))
+                for line in stream.read().decode("utf-8-sig", errors="replace").splitlines()[-35:]:
+                    try:
+                        result["events"].append(json.loads(line))
+                    except ValueError:
+                        pass
+        finished_collections = []
+        for index, industry in enumerate(status.get("industries", [])):
+            receipt = read_json(industry.get("fanout_receipt") or "__absent__")
+            if receipt.get("task_count") is not None:
+                finished_collections.append(receipt)
+            coverage_path = Path(industry.get("coverage_receipt") or "__absent__")
+            coverage = read_json(coverage_path)
+            check = {"industry": industry.get("industry"), "collection": "unverified"}
+            if coverage:
+                checks = coverage.get("checks", {})
+                check["collection"] = "passed" if coverage.get("status") == "succeeded" and checks and all(value is True for value in checks.values()) else "failed"
+                check["recorded_checks"] = len(checks)
+            result["assurance"].append(check)
+            output = Path(industry.get("output_workbook") or "__absent__")
+            if industry.get("status") == "succeeded" and output.is_file():
+                quality = self.inspect_report(output)
+                expected = industry.get("workbook_sha256")
+                quality = {**quality, "matches_run": quality["sha256"].lower() == expected.lower()
+                           if expected and quality.get("sha256") else None}
+                result["reports"].append({"name": output.name, "index": index, "quality": quality})
+        if (status.get("stage") in ("completed", "failed") and finished_collections
+                and len(finished_collections) == len(status.get("industries", []))):
+            result["completed_collection"] = {
+                "total": sum(item["task_count"] for item in finished_collections),
+                "completed": sum(item.get("succeeded", 0) + item.get("failed", 0) for item in finished_collections),
+                "failed": sum(item.get("failed", 0) for item in finished_collections), "running": 0}
+        inputs = self.root / identifier / "runtime/mentat/inputs" if run.get("upload") else PROJECT / "inputs"
+        if status.get('source_root'):
+            inputs = Path(status['source_root'])
+        result["source_snapshots"] = [
+            {"name": label, "modified_at": datetime.datetime.fromtimestamp(path.stat().st_mtime).isoformat(timespec="seconds"),
+             "age_days": max(0, int((time.time() - path.stat().st_mtime) / 86400))}
+            for path, label in ((inputs / "fec_beneficiary/pas226/itpas2.txt", "2025–26 downstream activity"),
+                                (inputs / "fec_committee_master/cm26/cm.txt", "2025–26 committee register")) if path.is_file()
+        ]
+        return result
+
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *_):
+        pass
+
+    def send(self, value, status=200, content_type="application/json"):
+        content = json.dumps(value, ensure_ascii=False).encode() if content_type == "application/json" else value
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(content)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Content-Security-Policy", "default-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'none'")
+        self.end_headers()
+        self.wfile.write(content)
+
+    def valid_host(self):
+        return self.headers.get("Host") in (f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}")
+
+    def do_GET(self):
+        if not self.valid_host():
+            return self.send({"error": "Local access only."}, 403)
+        parsed = urlparse(self.path)
+        query = parse_qs(parsed.query)
+        app = self.server.app
+        try:
+            if parsed.path == "/api/session":
+                return self.send({"token": app.token, **app.summary()})
+            if parsed.path == "/api/runs":
+                return self.send(app.summary())
+            if parsed.path == "/api/run":
+                return self.send(app.snapshot(query.get("id", [""])[0], query.get("lane", [""])[0]))
+            if parsed.path == "/api/report":
+                run = app.find(query.get("id", [""])[0])
+                if not run or not run["directory"]:
+                    raise ValueError("Report not available.")
+                industries = read_json(run["directory"] / "status.json").get("industries", [])
+                index = int(query.get("index", ["-1"])[0])
+                if index < 0 or index >= len(industries) or industries[index].get("status") != "succeeded":
+                    raise ValueError("Report is not complete.")
+                path = Path(industries[index]["output_workbook"])
+                return self.send(path.read_bytes(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            assets = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript"),
+                      "/style.css": ("style.css", "text/css"), "/template.csv": ("template.csv", "text/csv")}
+            if parsed.path in assets:
+                filename, mime = assets[parsed.path]
+                return self.send((Path(__file__).parent / filename).read_bytes(), content_type=mime)
+            return self.send({"error": "Not found."}, 404)
+        except (ValueError, OSError) as error:
+            return self.send({"error": str(error)}, 400)
+
+    def do_POST(self):
+        if not self.valid_host() or not secrets.compare_digest(self.headers.get("X-Mentat-Token", ""), self.server.app.token):
+            return self.send({"error": "Refresh the app before continuing."}, 403)
+        origin = self.headers.get("Origin")
+        if origin and origin not in (f"http://localhost:{self.server.server_port}", f"http://127.0.0.1:{self.server.server_port}"):
+            return self.send({"error": "Local access only."}, 403)
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+            if length < 1 or length > 7_000_000:
+                raise ValueError("Request is empty or too large.")
+            data = json.loads(self.rfile.read(length))
+            if not isinstance(data, dict):
+                raise ValueError("Expected an upload or run request.")
+            if self.path == "/api/upload":
+                return self.send(self.server.app.upload(data))
+            if self.path == "/api/keys":
+                with self.server.app.lock:
+                    count = save_keys([str(data.get("keys", ""))])
+                return self.send(key_status())
+            if self.path == "/api/start":
+                return self.send(self.server.app.launch(data))
+            return self.send({"error": "Not found."}, 404)
+        except RuntimeError:
+            return self.send({"error": "The encrypted key store could not be accessed for this Windows user."}, 400)
+        except (ValueError, OSError, KeyError, zipfile.BadZipFile) as error:
+            return self.send({"error": str(error)}, 400)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", type=int, default=8802)
+    parser.add_argument("--data-root", default=str(Path(os.environ.get("LOCALAPPDATA", Path.home())) / "Mentat" / "console"))
+    parser.add_argument("--keys-file", default="")
+    parser.add_argument("--rscript", default="")
+    options = parser.parse_args()
+    server = ThreadingHTTPServer(("127.0.0.1", options.port), Handler)
+    server.app = Console(options.data_root, options.keys_file, options.rscript)
+    print(f"Mentat app: http://127.0.0.1:{options.port}", flush=True)
+    server.serve_forever()
+
+
+if __name__ == "__main__":
+    main()

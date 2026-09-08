@@ -355,7 +355,7 @@ fec_downstream_direction <- function(values) {
 # data changing is not the only reason a cached parse goes stale.
 #   1 = original
 #   2 = transaction_date forced to character (leading zeros preserved)
-FEC_PAS2_PARSER_VERSION <- "2"
+FEC_PAS2_PARSER_VERSION <- "3"
 
 fec_pas2_cache_file <- function(directory, cycles) {
   paths <- vapply(cycles, function(cycle) {
@@ -423,7 +423,7 @@ fec_build_pas2_index <- function(directory, cycles) {
     rows[, original_order := .I]
     rows[, version_key := ifelse(
       nzchar(transaction_id),
-      paste(committee_id, report_type, transaction_id, sep = "|"),
+      paste(committee_id, report_type, substr(transaction_date_raw, 5L, 8L), transaction_id, sep = "|"),
       paste0("SUB|", ifelse(nzchar(sub_id), sub_id, original_order))
     )]
     rows[, amendment_priority := ifelse(
@@ -702,10 +702,10 @@ fec_build_beneficiary_tables <- function(raw_export, downstream_activity) {
   bridge[, bridge_key := paste(cycle, view, company, source_committee_id, candidate_key, sep = "|")]
   data.table::setorder(bridge, cycle, view, company, -preliminary_downstream_amount, candidate_name)
 
-  summary <- fec_aggregate_beneficiary_summary(bridge)
+  summary <- fec_aggregate_beneficiary_summary(bridge)[office %in% c("H", "S")]
   data.table::setorder(summary, cycle, view, company, -preliminary_downstream_amount, candidate_name)
   summary[, preliminary_rank := seq_len(.N), by = .(cycle, view, company)]
-  summary <- summary[office %in% c("H", "S") & preliminary_rank <= 100L]
+  summary <- summary[preliminary_rank <= 100L]
   retained <- unique(summary[, .(cycle, view, company, candidate_key)])
   bridge <- merge(
     bridge,

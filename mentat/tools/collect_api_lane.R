@@ -123,6 +123,7 @@ parse_assignments <- function(path) {
   }
   list(
     lane = suppressWarnings(as.integer(payload$lane %||% 0L)),
+    resume = isTRUE(payload$resume),
     tasks = normalized[order(ids, method = "radix")]
   )
 }
@@ -204,6 +205,16 @@ run_lane <- function() {
   )
   DBI::dbExecute(connection, "PRAGMA mmap_size=1073741824")
   init_schema(connection)
+  reset_unit_count <- if (isTRUE(assignment$resume)) {
+    0L
+  } else {
+    reset_api_progress(connection, tasks)
+  }
+  refresh_mode <- if (isTRUE(assignment$resume)) {
+    "resume"
+  } else {
+    "fresh"
+  }
   budget_database_path <- trimws(Sys.getenv(
     "MENTAT_API_BUDGET_DB",
     unset = ""
@@ -272,6 +283,8 @@ run_lane <- function() {
     "FEC API lane:", key_id,
     "| industry=", industry,
     "| tasks=", length(tasks),
+    "| refresh_mode=", refresh_mode,
+    "| reset_units=", reset_unit_count,
     "| concurrency=", concurrency,
     "| startup_jitter_seconds=", startup_jitter_seconds,
     "| sqlite_cache_mb=", cache_mb,
@@ -449,6 +462,8 @@ run_lane <- function() {
     task_count = length(task_receipts),
     succeeded = length(task_receipts) - failed,
     failed = failed,
+    refresh_mode = refresh_mode,
+    reset_unit_count = reset_unit_count,
     concurrency = as.integer(concurrency),
     sqlite_cache_mb = cache_mb,
     quick_check = postflight,

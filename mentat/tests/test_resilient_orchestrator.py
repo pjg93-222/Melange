@@ -174,11 +174,15 @@ class ResilientOrchestratorTests(unittest.TestCase):
         self.assertEqual(plan["resources"]["key_count"], 2)
         self.assertGreaterEqual(plan["resources"]["effective_api_lanes"], 1)
         self.assertLessEqual(plan["resources"]["effective_api_lanes"], 2)
-        self.assertEqual(plan["resources"]["fanout_max_parallel"], 0)
+        self.assertEqual(
+            plan["resources"]["fanout_max_parallel"],
+            plan["resources"]["effective_api_lanes"],
+        )
         self.assertEqual(
             plan["resources"]["allocation_mode"],
-            "live_auto_each_industry",
+            "live_recomputed_enforced",
         )
+        self.assertEqual(plan["resources"]["fanout_memory_per_lane_mb"], 640)
         self.assertIn("workbook generators overlap", plan["strategy"])
         self.assertTrue(
             plan["raw_data_directory"].endswith(

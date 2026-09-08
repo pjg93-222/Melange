@@ -581,7 +581,10 @@ rollup_parent <- function(industry, company) {
   company
 }
 
-parse_company_workbook <- function(path) {
+parse_company_workbook <- function(
+  path,
+  require_legacy_sheets = !identical(Sys.getenv("MENTAT_CUSTOM_ROSTER"), "1")
+) {
   require_package("data.table")
   require_package("jsonlite")
   require_package("readxl")
@@ -595,11 +598,21 @@ parse_company_workbook <- function(path) {
     "Credit Arms"
   )
   actual_sheets <- readxl::excel_sheets(path)
-  missing <- setdiff(required_sheets, actual_sheets)
+  # The upload console uses a run-local roster containing only the requested
+  # industries. Standard pipeline runs keep the original completeness guard.
+  missing <- if (isTRUE(require_legacy_sheets)) {
+    setdiff(required_sheets, actual_sheets)
+  } else {
+    character()
+  }
   if (length(missing)) {
     stop("Company workbook is missing sheets: ", paste(missing, collapse = ", "), call. = FALSE)
   }
-  expected_sheets <- c(required_sheets, setdiff(actual_sheets, required_sheets))
+  expected_sheets <- if (isTRUE(require_legacy_sheets)) {
+    c(required_sheets, setdiff(actual_sheets, required_sheets))
+  } else {
+    actual_sheets
+  }
   output <- list()
   for (sheet in expected_sheets) {
     data <- read_sheet_matrix(path, sheet)
@@ -1072,7 +1085,8 @@ validate_ingest_counts <- function(
   trade,
   executives,
   assets,
-  fixture
+  fixture,
+  require_legacy_roster = !identical(Sys.getenv("MENTAT_CUSTOM_ROSTER"), "1")
 ) {
   # The five original sheets have verified block counts. Additional sheets are
   # new industries (Telecom added 2026-07-19) and only need >= 1 company, so the
@@ -1086,8 +1100,9 @@ validate_ingest_counts <- function(
   )
   company_counts <- companies[, .(companies = data.table::uniqueN(company)), by = industry]
   verified <- company_counts[expected_company_counts, on = "industry"]
-  if (nrow(verified) != 5L || any(is.na(verified$companies)) ||
-      any(verified$companies != verified$expected)) {
+  if (isTRUE(require_legacy_roster) &&
+      (nrow(verified) != 5L || any(is.na(verified$companies)) ||
+       any(verified$companies != verified$expected))) {
     stop("Company workbook block counts do not match the verified five sheets.", call. = FALSE)
   }
   extra <- company_counts[!industry %in% expected_company_counts$industry]
@@ -1095,8 +1110,14 @@ validate_ingest_counts <- function(
     stop("Additional industry sheets must contain at least one company block.", call. = FALSE)
   }
   crypto <- companies[industry == "Crypto"]
-  if (data.table::uniqueN(crypto$company) != 10L || nrow(crypto) != 16L) {
+  if (isTRUE(require_legacy_roster) &&
+      (data.table::uniqueN(crypto$company) != 10L || nrow(crypto) != 16L)) {
     stop("Crypto roster must contain 10 companies and 16 clean variants.", call. = FALSE)
+  }
+  if (!nrow(companies) || any(!nzchar(trim_text(companies$industry))) ||
+      any(!nzchar(trim_text(companies$company))) ||
+      any(!nzchar(trim_text(companies$variant)))) {
+    stop("Company roster must contain nonempty industries, companies, and variants.", call. = FALSE)
   }
   allowed_categories <- c(
     "Super PAC", "Carey", "527", "501c", "Leadership PAC",

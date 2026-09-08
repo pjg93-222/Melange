@@ -44,10 +44,11 @@ mentat_schema_sql <- function() {
       # can. A rate-limited walk and a genuinely empty one are byte-identical
       # afterwards: Farmers Insurance recorded 24 variant sets / 0 rows under an
       # FEC 429, and Bitnomial recorded a real 0 - both at ~0.7s per set, so even
-      # timing cannot separate them. 1 means the walk ran under the hardened
-      # readiness rule, which accepts a zero only after DataTables renders its
-      # confirmed-empty row. Rows collected before that rule keep 0 and are
-      # reported as unverified rather than trusted as real zeros.
+      # timing cannot separate them. 1 means the walk ran under a hardened,
+      # source-specific readiness rule: DataTables rendered a confirmed-empty
+      # row, or the API returned successfully and count/cursor completion was
+      # proven. Rows collected before those rules keep 0 and are reported as
+      # unverified rather than trusted as real zeros.
       "CREATE TABLE IF NOT EXISTS scrape_progress (",
       "company TEXT NOT NULL, cycle INTEGER NOT NULL, variant_set TEXT NOT NULL,",
       "last_page INTEGER NOT NULL, records_total INTEGER NOT NULL,",
