@@ -4,7 +4,7 @@
   const el = id => document.getElementById('chart-' + id);
   const esc = escapeHtml, math = globalThis.MentatCharts;
   let data = null, suggestions = [], revision = 0, chart = null, chartConfig = null;
-  const palette = ['#258b8c','#659eae','#7498bc','#9eabb8','#b19a79','#708b80','#c0cbd3'];
+  const palette = MentatTheme.palette;
   const fmt = n => Number(n).toLocaleString('en-US', {maximumFractionDigits:3});
   function error(message='') { el('error').textContent = message; el('error').hidden = !message; }
   function clearChart() { chart = null; el('image').replaceChildren(); el('values').replaceChildren(); el('export').hidden = true; el('scope').textContent = ''; }
@@ -120,8 +120,8 @@
     const add = (tag,attrs,text) => { const n = svgNode(tag,attrs,text); svg.append(n); return n; };
     add('title',{},el('title').textContent); add('desc',{},el('scope').textContent);
     add('rect',{width:960,height:560,fill:'#fff'});
-    const label = (x,y,text,attrs={}) => add('text',{x,y,fill:'#334f63','font-family':'Segoe UI, Arial, sans-serif','font-size':12,...attrs},text);
-    label(20,25,el('title').textContent,{'font-size':17,'font-weight':600});
+    const label = (x,y,text,attrs={}) => add('text',{x,y,fill:MentatTheme.ink,'font-family':MentatTheme.sans,'font-size':12,...attrs},text);
+    label(20,25,el('title').textContent,{'font-size':20,'font-weight':400,'font-family':MentatTheme.serif});
     label(20,48,`${data.sheet} · ${result.selected - result.excluded} plotted rows`);
     const tooltip = (node,text) => node.append(svgNode('title',{},text));
     if (result.type === 'pie') {
@@ -144,7 +144,7 @@
       if (!isBox && !scatter) { min = Math.min(0,min); max = Math.max(0,max); }
       if (min === max) { min -= Math.abs(min)*.1 || 1; max += Math.abs(max)*.1 || 1; }
       const y = v => 430 - (v-min)/(max-min)*335;
-      for (let i=0;i<=5;i++) { const value=min+(max-min)*i/5; add('line',{x1:100,x2:920,y1:y(value),y2:y(value),stroke:'#e0e8ee'}); label(90,y(value)+4,fmt(value),{'text-anchor':'end'}); }
+      for (let i=0;i<=5;i++) { const value=min+(max-min)*i/5; add('line',{x1:100,x2:920,y1:y(value),y2:y(value),stroke:MentatTheme.grid}); label(90,y(value)+4,fmt(value),{'text-anchor':'end'}); }
       label(100,78,result.type === 'histogram' ? 'Row count' : measure);
       if (scatter) {
         const xs=result.points.map(p=>p.x); let lo=Math.min(...xs),hi=Math.max(...xs); if(lo===hi){lo--;hi++;}

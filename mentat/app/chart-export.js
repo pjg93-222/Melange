@@ -20,7 +20,7 @@
     svg.prepend(background);
     const text = (value,y,bold=false) => {
       const node = document.createElementNS(ns,'text'); node.textContent=value;
-      for (const [k,v] of Object.entries({x:16,y,fill:'#29485e','font-size':12,'font-family':'Segoe UI, Arial, sans-serif','font-weight':bold?600:400})) node.setAttribute(k,v);
+      for (const [k,v] of Object.entries({x:16,y,fill:MentatTheme.ink,'font-size':12,'font-family':MentatTheme.sans,'font-weight':bold?600:400})) node.setAttribute(k,v);
       svg.append(node);
     };
     text(title,height+24,true); lines.forEach((line,i)=>text(line.trim(),height+47+i*17));

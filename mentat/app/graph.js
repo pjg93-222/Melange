@@ -110,19 +110,19 @@
     svg.append(svgNode('title',{},titleFor[name]),svgNode('desc',{},`${get('scope').textContent}. ${shown.length} of ${rows.length} groups. Values in USD.`));
     const positive=Math.max(0,...shown.map(r=>r.amount)),negative=Math.min(0,...shown.map(r=>r.amount));
     const scale=330/(positive-negative||1),zero=205-negative*scale;
-    const colors=['#258b8c','#569cab','#709cbd','#89aac5','#9aabba','#b2bfc9','#c7d0d7'];
+    const colors=MentatTheme.palette;
     shown.forEach((row,i)=>{
       const y=i*(compact?62:52)+26,label=row.label+(row.party?` · ${row.party}`:'');
       const text=label.length>(compact?33:24)?label.slice(0,compact?30:21)+'…':label;
       const group=svgNode('g',{role:'button',tabindex:0,'aria-label':`${label}: ${dollars(row.amount)}`,class:'graph-bar-button'});
       group.append(svgNode('title',{},`${label}: ${dollars(row.amount)}`));
       group.append(svgNode('rect',{x:0,y:y-24,width,height:compact?60:48,fill:'transparent','pointer-events':'all'}));
-      group.append(svgNode('text',{x:compact?4:190,y,fill:'#29485e','text-anchor':compact?'start':'end','font-family':'Segoe UI,Arial,sans-serif','font-size':compact?16:17},text));
+      group.append(svgNode('text',{x:compact?4:190,y,fill:MentatTheme.ink,'text-anchor':compact?'start':'end','font-family':MentatTheme.sans,'font-size':compact?16:17},text));
       if(compact) {
-        group.append(svgNode('line',{x1:4,x2:width-4,y1:y+31,y2:y+31,stroke:'#e3ebf0'}));
-        group.append(svgNode('text',{x:4,y:y+21,fill:'#647b8c','font-family':'Segoe UI,Arial,sans-serif','font-size':12},row.id));
-      } else group.append(svgNode('rect',{x:Math.min(zero,zero+row.amount*scale),y:y-18,width:Math.max(1,Math.abs(row.amount*scale)),height:27,rx:2,fill:row.amount<0?'#b64e49':colors[Math.min(i,colors.length-1)],class:'graph-mark'}));
-      group.append(svgNode('text',{x:width-8,y:compact?y+21:y,fill:'#183c51','text-anchor':'end','font-family':'Segoe UI,Arial,sans-serif','font-size':compact?16:17},dollars(row.amount)));
+        group.append(svgNode('line',{x1:4,x2:width-4,y1:y+31,y2:y+31,stroke:MentatTheme.grid}));
+        group.append(svgNode('text',{x:4,y:y+21,fill:MentatTheme.muted,'font-family':MentatTheme.sans,'font-size':12},row.id));
+      } else group.append(svgNode('rect',{x:Math.min(zero,zero+row.amount*scale),y:y-18,width:Math.max(1,Math.abs(row.amount*scale)),height:27,rx:2,fill:row.amount<0?MentatTheme.negative:colors[Math.min(i,colors.length-1)],class:'graph-mark'}));
+      group.append(svgNode('text',{x:width-8,y:compact?y+21:y,fill:MentatTheme.ink,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':compact?16:17},dollars(row.amount)));
       const select=()=>onClick(row.id);group.addEventListener('click',select);group.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();select();}});
       svg.append(group);
     });container.append(svg);

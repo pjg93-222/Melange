@@ -574,7 +574,9 @@ class Handler(BaseHTTPRequestHandler):
                       '/charts.js': ('charts.js', 'text/javascript'), '/chart-math.js': ('chart-math.js', 'text/javascript'),
                       '/graph.js': ('graph.js', 'text/javascript'),
                       '/chart-export.js': ('chart-export.js', 'text/javascript'),
-                      '/graph.css': ('graph.css', 'text/css')}
+                      '/graph.css': ('graph.css', 'text/css'),
+                      '/acu-theme.css': ('acu-theme.css', 'text/css'),
+                      '/theme.js': ('theme.js', 'text/javascript')}
             if parsed.path in assets:
                 filename, mime = assets[parsed.path]
                 return self.send((Path(__file__).parent / filename).read_bytes(), content_type=mime)

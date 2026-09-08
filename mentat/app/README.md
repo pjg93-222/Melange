@@ -1,5 +1,15 @@
 # Mentat collection app
 
+The console uses the palette and typography pairing from
+[America's Credit Unions](https://www.americascreditunions.org/), inspected on
+September 8, 2026: plum `#342649`, ivory `#F7EDE4`, gold `#ECA91C`, purple
+`#57447B`, and teal `#327A7A` / `#9ED4D5`. The theme is in `acu-theme.css`;
+`theme.js` shares its colors and font stacks with charts and image exports.
+Headings prefer locally installed **Freight Text Pro**, with **Georgia** as the
+offline fallback. Controls, tables and chart labels prefer **Articulat CF**, with
+**Arial** as the offline fallback. No Adobe Fonts kit, remote font download, logo,
+or organization account flow is embedded in the application.
+
 Launch the local console from PowerShell:
 
 ```powershell
