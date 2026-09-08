@@ -177,6 +177,7 @@ def report_quality(path):
 
 class Console:
     def __init__(self, root, keys_file="", rscript=""):
+        self.configured_root = os.path.abspath(root)
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
         self.keys_file = keys_file
@@ -533,6 +534,10 @@ class Handler(BaseHTTPRequestHandler):
         query = parse_qs(parsed.query)
         app = self.server.app
         try:
+            if parsed.path == '/api/health':
+                return self.send({'application': 'MENTAT', 'project': str(PROJECT),
+                                  'data_root': app.configured_root,
+                                  'resolved_data_root': str(app.root), 'pid': os.getpid()})
             if parsed.path == "/api/session":
                 return self.send({"token": app.token, **app.summary()})
             if parsed.path == "/api/runs":
@@ -570,6 +575,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(app.graph(query.get('id',[''])[0], query.get('industry',[''])[0],
                                            {k:v[0] for k,v in query.items()}))
             assets = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript"),
+                      '/mentat-icon.svg': ('mentat-icon.svg', 'image/svg+xml'),
                       "/style.css": ("style.css", "text/css"), "/template.csv": ("template.csv", "text/csv"),
                       '/charts.js': ('charts.js', 'text/javascript'), '/chart-math.js': ('chart-math.js', 'text/javascript'),
                       '/graph.js': ('graph.js', 'text/javascript'),
