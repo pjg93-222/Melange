@@ -1,0 +1,98 @@
+/* Scope, analysis, and tools share a quiet 8px spacing rhythm. */
+:root{--teal:#258b8c;--line:#dce6ed;--navy:#122f48}
+header{height:64px;gap:28px;background:var(--navy)}
+.wordmark{font-size:24px;letter-spacing:1px;flex-shrink:0}
+header .workspace-tabs{margin:0;align-self:stretch;border:0;gap:12px;align-items:stretch}
+header .workspace-tabs button{color:#c5d6e4;background:none;font-weight:400;padding:12px 14px}
+header .workspace-tabs button[aria-selected=true]{color:white;background:none;border-color:#73d2cf;border-radius:0;font-weight:600}
+.local-indicator{margin-left:auto;font-size:13px;white-space:nowrap;color:#d6e5ef}
+#connection{font-size:12px;max-width:190px}
+.workspace{max-width:1760px;padding:28px 32px 40px}
+.workspace-heading{margin-bottom:26px;gap:16px}
+.workspace-heading h1{font-size:32px;margin:0}
+.graph-actions{display:flex;gap:12px;align-items:center}
+.graph-actions .secondary{border-color:#b7ccd9;padding:8px 14px}
+#graph-open-builder{border-color:#428da5;color:#09667c}
+.graph-controls{margin:0;padding:16px 20px;background:white}
+.scope-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px}
+.scope-heading .section-label{font-size:11px;letter-spacing:1px}
+.graph-filter-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+.graph-filter-grid label,.graph-candidate-controls label{font-size:13px;font-weight:400;color:#526e84;min-width:0}
+.graph-filter-grid select{margin:4px 0 0;border-color:var(--line);padding:8px 11px;font-size:14px}
+.graph-chips{display:flex;gap:8px;flex-wrap:wrap}
+.graph-chips:not(:empty){margin-top:12px}
+.graph-chips button{padding:4px 10px;font-size:12px}
+.analysis-tabs{display:flex;gap:16px;border-bottom:1px solid var(--line);margin:24px 0 0;overflow:auto}
+.analysis-tabs button{padding:12px 14px;border:0;border-bottom:3px solid transparent;background:none;color:#38556b;font-size:14px;white-space:nowrap}
+.analysis-tabs button[aria-selected=true]{border-color:var(--teal);color:#087b85;font-weight:600}
+#graph-status{font-size:12px;margin:9px 0 16px;color:#607c8f}
+.graph-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:0 0 24px;background:white;border:1px solid var(--line);border-radius:6px;padding:18px 0}
+.graph-metrics>div{padding:0 24px;border:0;border-right:1px solid var(--line);background:none;border-radius:0}
+.graph-metrics>div:last-child{border:0}
+.graph-metrics span,.graph-metrics small{display:block;font-size:13px;color:#516e83}
+.graph-metrics strong{display:block;font-size:30px;line-height:1.45;font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums}
+.graph-metrics small{font-size:12px}
+.graph-panels{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:24px;align-items:stretch}
+.graph-panels[data-analysis=recipients],.graph-panels[data-analysis=companies]{grid-template-columns:repeat(2,minmax(0,1fr))}
+.graph-panels[data-analysis=candidates]{grid-template-columns:1fr}
+.graph-panels>.panel{margin:0;padding:22px 24px;border-radius:6px;min-width:0}
+.graph-panels .panel-heading{align-items:center;flex-wrap:wrap;gap:8px}
+.graph-panels h2{font-size:20px;margin:0}
+.graph-panels p{margin:8px 0 16px}
+.graph-panels details{margin-top:16px}
+.graph-panels[data-analysis=overview] #graph-categories>details,.graph-panels[data-analysis=overview] #graph-candidates>details{display:none}
+.graph-bars{display:block;min-width:0;width:100%;height:auto}
+#graph-categories,#graph-candidates,#graph-organizations,#graph-companies,#graph-levels{max-width:100%;overflow:auto}
+[data-analysis=candidates] #graph-candidates>.graph-bars{max-width:560px}
+.graph-bar-button{cursor:pointer}
+.graph-bar-button:hover .graph-mark,.graph-bar-button:focus .graph-mark{fill:#145c68}
+.graph-bar-button:focus{outline:2px solid #b48b21}
+.graph-text-button{border:0;padding:0;background:none;color:#087b92;font-size:13px;text-align:left}
+.graph-text-button:hover{text-decoration:underline}
+.chart-note{font-size:12px;line-height:1.6;color:#586f82;overflow-wrap:anywhere}
+.graph-candidate-controls{display:flex;gap:16px;margin-top:16px;max-width:740px}
+.graph-candidate-controls label{flex:1}
+.graph-candidate-controls select{font-size:14px}
+.graph-empty{padding:20px;margin:8px 0;background:#f4f8fa;color:#627888;border-radius:4px;font-size:14px}
+.graph-details-tools{display:flex;align-items:start;justify-content:space-between;gap:24px;margin-top:24px;padding:14px 20px;background:white;border:1px solid var(--line);border-radius:6px}
+.graph-details-tools>details{flex:1;min-width:180px;padding-top:7px}
+.graph-details-tools summary{color:var(--navy);font-weight:500}
+.graph-export-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.graph-export-tools select{width:auto;max-width:190px;font-size:13px;margin:0;padding:7px;border-color:var(--line)}
+.graph-export-tools .secondary{font-size:13px;padding:7px 12px}
+#graph-method{font-size:13px;max-width:640px;margin:12px 0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+dialog{color:var(--navy);background:white;border:1px solid var(--line);border-radius:8px;padding:28px;max-height:calc(100vh - 64px);overflow:auto}
+dialog::backdrop{background:rgba(18,47,72,.18)}
+#graph-builder{width:1440px;max-width:calc(100vw - 64px)}
+#graph-builder>.panel-heading{align-items:center;margin-bottom:16px;position:sticky;top:-28px;background:white;padding:16px 0;z-index:2;border-bottom:1px solid var(--line)}
+#graph-builder h2{margin:4px 0 0}
+#graph-advanced{margin:0;padding:0;border:0}
+#graph-advanced>summary{font-size:14px;color:#526e84}
+#graph-advanced>.view-intro{font-size:14px;margin:16px 0 24px}
+.chart-layout{grid-template-columns:300px minmax(0,1fr);gap:32px}
+.chart-controls{padding-right:24px;border-right:1px solid var(--line)}
+.chart-controls h3{font-size:17px}
+.chart-controls select{font-size:13px;margin:5px 0 12px;padding:8px;border-color:var(--line)}
+.chart-preview{min-width:0}
+.chart-preview h2{font-size:21px}
+.chart-image svg{min-width:0}
+.chart-image:empty{min-height:180px}
+.sources-drawer{position:fixed;inset:0 0 0 auto;margin:0;width:440px;max-width:100vw;max-height:100vh;height:100vh;border-radius:0;border-width:0 0 0 1px;padding:28px 24px}
+.sources-drawer .panel-heading{align-items:center;flex-wrap:nowrap}
+.sources-drawer h2{font-size:21px;margin:0}
+.sources-drawer>p:first-of-type{padding:10px 12px;background:#edf6fb;border:1px solid #d5e8f4;font-size:13px;border-radius:4px;margin:20px 0}
+.sources-drawer>label{font-size:13px}
+.source-receipt{padding:18px 0;border-top:1px solid var(--line);font-size:12px}
+.source-receipt h3{font-size:14px;overflow-wrap:anywhere;margin:0 0 14px}
+.source-receipt .source-receipt{margin-top:16px;padding-bottom:0}
+.source-field{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:12px;margin:10px 0;color:#526e84}
+.source-field>span:last-child{color:var(--navy);overflow-wrap:anywhere}
+.source-field .freshness-unknown{color:#805c11!important}
+#graph-provenance{overflow-wrap:anywhere;margin:12px 0}
+#graph-provenance p{font-size:11px}
+button:disabled{cursor:default}
+@media(min-width:1600px){.graph-panels[data-analysis=overview]{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}}
+@media(max-width:1100px){#connection{display:none}.graph-filter-grid{gap:12px}.graph-panels{gap:16px}.graph-panels>.panel{padding:18px}.graph-details-tools{flex-direction:column;gap:12px}.graph-actions{gap:8px}.graph-actions .secondary{font-size:12px}}
+@media(max-width:850px){header{height:auto;min-height:64px;flex-wrap:wrap;gap:0 12px;padding:14px 20px 0}.local-indicator{order:1}.wordmark{order:0}header .workspace-tabs{order:2;width:100%;margin-top:10px;gap:8px}.workspace{padding:24px 20px}.workspace-heading{flex-wrap:wrap}.graph-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.graph-panels,.graph-panels[data-analysis=recipients],.graph-panels[data-analysis=companies]{grid-template-columns:1fr}.graph-metrics strong{font-size:23px}.graph-metrics>div{padding:0 16px}.chart-layout{grid-template-columns:1fr}.chart-controls{border:0;border-bottom:1px solid var(--line);padding:0 0 24px}#graph-builder{max-width:calc(100vw - 24px);padding:20px}.graph-candidate-controls{flex-wrap:wrap}}
+@media(max-width:500px){header .workspace-tabs{gap:0}header .workspace-tabs button{padding:10px 8px;font-size:13px;flex:1}.workspace{padding:20px 14px}.workspace-heading h1{font-size:28px}.graph-actions{width:100%;justify-content:space-between}.graph-filter-grid{gap:12px}.graph-controls{padding:14px}.analysis-tabs{gap:0}.analysis-tabs button{font-size:13px;padding:12px 10px;flex:1}.graph-metrics{grid-template-columns:1fr;padding:0}.graph-metrics>div{display:block;padding:12px 18px;border:0;border-bottom:1px solid var(--line)}.graph-metrics strong{font-size:25px}.graph-metrics small{font-size:11px}.graph-export-tools{gap:12px;width:100%}.graph-export-tools select{max-width:150px}.graph-details-tools{padding:14px}.sources-drawer{padding:24px 18px}.graph-candidate-controls{flex-direction:column}}

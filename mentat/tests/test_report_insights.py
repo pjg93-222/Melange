@@ -1,0 +1,214 @@
+"""Offline freshness, worksheet scanning and local HTTP regressions."""
+import csv
+from datetime import datetime
+import hashlib
+import json
+import os
+from pathlib import Path
+import sys
+import tempfile
+import threading
+import unittest
+from unittest.mock import patch
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+
+import openpyxl
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'app'))
+import report_insights as insights
+import server as app
+
+
+class ReportInsightsTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.report = self.root / 'Example.xlsx'
+
+    def book(self, sheets):
+        book = openpyxl.Workbook()
+        book.remove(book.active)
+        for name, rows in sheets.items():
+            sheet = book.create_sheet(name)
+            for row in rows:
+                sheet.append(row)
+        book.save(self.report)
+        book.close()
+
+    def test_missing_receipts_do_not_use_mtime_as_coverage(self):
+        self.book({'Data': [['Company','Amount'],['A',12]]})
+        os.utime(self.report, (1800000000,1800000000))
+        result = insights.report_freshness(self.report)
+        self.assertEqual(result['freshness'], 'unknown')
+        self.assertEqual(result['sources'], [])
+        self.assertTrue(result['report_modified_at'].endswith('+00:00'))
+        self.assertIn('No report-bound', result['issues'][0])
+
+    def test_retrieval_check_remote_mtime_and_verified_date_are_distinct(self):
+        self.book({'Source Freshness': [
+            ['Source','Cycle','Downloaded At','Checked At','Server Last Modified','Data Through','Data Through Verified'],
+            ['cm',2026,'2026-08-01T10:00:00Z','2026-09-08T10:00:00Z','Mon, 07 Sep 2026 05:00:00 GMT','2026-07-31',True],
+            ['oth',2026,'bad date','2026-09-08T10:00:00Z','Mon, 07 Sep 2026 05:00:00 GMT','2026-08-31',False]]})
+        result = insights.report_freshness(self.report)
+        first, second = result['sources']
+        self.assertEqual(first['retrieved_at'], '2026-08-01T10:00:00+00:00')
+        self.assertEqual(first['checked_at'], '2026-09-08T10:00:00+00:00')
+        self.assertEqual(first['server_last_modified'], '2026-09-07T05:00:00+00:00')
+        self.assertEqual(first['verified_data_through'], '2026-07-31')
+        self.assertIsNone(first['file_modified_at'])
+        self.assertEqual(first['freshness'], 'verified')
+        self.assertIsNone(second['verified_data_through'])
+        self.assertIsNone(second['retrieved_at'])
+        self.assertEqual(second['freshness'], 'unknown')
+        self.assertEqual(result['freshness'], 'unknown')
+
+    def test_checked_at_and_max_transaction_date_are_not_retrieval_or_coverage(self):
+        self.book({'Source Freshness': [['Source','Checked At','Max Transaction Date','Verified Data Through'],
+                                       ['cm','2026-09-08T01:00:00Z','2026-09-01','2026-02-30']]})
+        row = insights.report_freshness(self.report)['sources'][0]
+        self.assertIsNone(row['retrieved_at'])
+        self.assertIsNone(row['verified_data_through'])
+        self.assertEqual(row['freshness'], 'unknown')
+
+    def test_excel_date_cell_and_malformed_receipt_remain_readable(self):
+        self.book({'Source Freshness': [['Source','Verified Data Through Date'],['cm',datetime(2026,7,31)]]})
+        result = insights.report_freshness(self.report)
+        self.assertEqual(result['sources'][0]['verified_data_through'],'2026-07-31')
+        audit = self.report.with_suffix('.audit')
+        audit.mkdir()
+        (audit / 'audit-manifest.json').write_text('not JSON')
+        result = insights.report_freshness(self.report)
+        self.assertTrue(result['issues'])
+        self.assertEqual(result['sources'][0]['verified_data_through'],'2026-07-31')
+        self.report.write_bytes(b'not a workbook')
+        result = insights.report_freshness(self.report)
+        self.assertEqual(result['freshness'],'unknown')
+        self.assertEqual(result['sources'],[])
+
+    def receipt_csv(self):
+        directory = self.root / 'Example.audit'
+        directory.mkdir(exist_ok=True)
+        receipt = directory / 'source_freshness.csv'
+        receipt.write_text('source,cycle,downloaded_at,verified_data_through\ncm,2026,2026-08-01T00:00:00Z,2026-07-31\n', encoding='utf-8')
+        return receipt
+
+    def test_source_receipts_use_hash_bound_csv_and_invalidate_without_workbook_change(self):
+        receipt = self.receipt_csv()
+        self.book({'Source Receipts': [['Report title'],[],[],[],['Industry','Audit File','SHA-256'],
+                                      ['Test',str(receipt), insights.digest(receipt)]]})
+        first = insights.report_freshness(self.report)
+        self.assertEqual(first['sources'][0]['verified_data_through'],'2026-07-31')
+        receipt.write_text(receipt.read_text().replace('2026-07-31','2026-08-31'))
+        changed = insights.report_freshness(self.report)
+        self.assertEqual(changed['sources'][0]['freshness'], 'unknown')
+        self.assertIn('checksum',changed['issues'][0])
+        receipt.unlink()
+        self.assertEqual(insights.report_freshness(self.report)['sources'][0]['freshness'], 'unknown')
+
+    def test_companion_audit_must_match_workbook_and_csv(self):
+        receipt = self.receipt_csv()
+        self.book({'Data': [['Company','Amount'],['A',12]]})
+        manifest = {'workbook_name':self.report.name, 'workbook_sha256':insights.digest(self.report),
+                    'csv_sha256':{'source_freshness.csv':insights.digest(receipt)}}
+        (receipt.parent / 'audit-manifest.json').write_text(json.dumps(manifest))
+        self.assertEqual(insights.report_freshness(self.report)['verified_source_count'], 1)
+        self.book({'Data': [['Company','Amount'],['B',99]]})
+        result = insights.report_freshness(self.report)
+        self.assertEqual(result['sources'], [])
+        self.assertIn('different workbook',result['issues'][0])
+
+    def test_report_reference_cannot_read_outside_report_directory_or_network(self):
+        for reference in ('../source_freshness.csv','//server/share/source_freshness.csv','https://example.com/source_freshness.csv'):
+            with self.subTest(reference=reference):
+                with self.assertRaises(ValueError):
+                    insights.local_reference(reference,self.root)
+
+    def test_pinned_source_enrichment_requires_the_exact_report_source(self):
+        source = self.root / 'inputs/fec_committee_master/cm26'
+        source.mkdir(parents=True)
+        source_file = source / 'cm.txt'
+        source_file.write_text('old snapshot')
+        signature = insights.digest(source_file)
+        receipt = {'family':'cm','cycle':2026,'file':'cm.txt','sha256':signature,'downloaded_at':'2026-08-01T00:00:00Z',
+                   'checked_at':'2026-09-08T00:00:00Z'}
+        (source / 'source-receipt.json').write_text(json.dumps(receipt))
+        self.book({'Source Freshness': [['FEC Dataset','Cycle','SHA-256','Checked At'],['cm',2026,signature,'2026-08-02T00:00:00Z']]})
+        root = self.root / 'inputs'
+        value = insights.report_freshness(self.report,root)['sources'][0]
+        self.assertIsNotNone(value['file_modified_at'])
+        self.assertEqual(value['checked_at'],'2026-08-02T00:00:00+00:00')
+        self.assertEqual(value['freshness'],'unknown')
+        source_file.write_text('new snapshot')
+        changed = insights.report_freshness(self.report,root)
+        self.assertIsNone(changed['sources'][0]['file_modified_at'])
+        self.assertIn('no longer matches',changed['issues'][0])
+        receipt['sha256'] = insights.digest(source_file)
+        (source / 'source-receipt.json').write_text(json.dumps(receipt))
+        self.assertIsNone(insights.report_freshness(self.report,root)['sources'][0]['retrieved_at'])
+
+    def test_column_scan_types_duplicates_missing_formulas_and_immutability(self):
+        self.book({'Funding': [['Funding by company'],['Explanatory text'],[],[],
+                              ['Company','Amount','Amount','Cycle','Date','Uncalculated'],
+                              ['A',10,'$1,250.50',2026,'2026-01-01','=B6*2'],
+                              ['B',None,'($50.00)',2026,'2026-01-02',None]]})
+        before = self.report.read_bytes()
+        result = insights.worksheet_data(insights.stamp(self.report),'Funding')
+        self.assertEqual(result['header_row'],5)
+        self.assertEqual(result['row_numbers'],[6,7])
+        self.assertEqual([c['type'] for c in result['columns']],['category','number','number','category','date','category'])
+        self.assertEqual(result['columns'][2]['name'],'Amount (2)')
+        self.assertEqual(result['columns'][1]['missing'],1)
+        self.assertIsNone(result['rows'][0][-1])
+        self.assertEqual(self.report.read_bytes(),before)
+
+    def test_row_one_and_manual_subsection_header_and_limits(self):
+        self.book({'Data': [['Name','Value'],['A',4],['B',5],['New group','New value'],['C',9]]})
+        self.assertEqual(insights.worksheet_data(insights.stamp(self.report),'Data')['header_row'],1)
+        self.assertEqual(insights.worksheet_data(insights.stamp(self.report),'Data',4)['rows'],[['C',9]])
+        with self.assertRaises(ValueError): insights.worksheet_data(insights.stamp(self.report),'Data',101)
+        with self.assertRaises(ValueError): insights.worksheet_data(insights.stamp(self.report),'Missing')
+        insights.worksheet_data.cache_clear()
+        with patch.object(insights,'MAX_ROWS',2), self.assertRaisesRegex(ValueError,'no partial chart'):
+            insights.worksheet_data(insights.stamp(self.report),'Data')
+
+    def test_changed_workbook_invalidates_column_cache(self):
+        self.book({'Data': [['Name','Value'],['A',4]]})
+        first = insights.worksheet_data(insights.stamp(self.report),'Data')
+        self.book({'Data': [['Name','Value'],['B',88]]})
+        second = insights.worksheet_data(insights.stamp(self.report),'Data')
+        self.assertNotEqual(first['sha256'],second['sha256'])
+        self.assertEqual(second['rows'],[['B',88]])
+
+    def test_http_report_data_rejects_arbitrary_paths_incomplete_reports_and_hosts(self):
+        self.book({'Data': [['Name','Value'],['A',4]]})
+        directory = self.root / 'run'
+        directory.mkdir()
+        (directory / 'status.json').write_text(json.dumps({'industries':[
+            {'status':'succeeded','output_workbook':str(self.report)},
+            {'status':'running','output_workbook':str(self.report)}]}))
+        console = object.__new__(app.Console)
+        console.find = lambda identifier: {'directory':directory} if identifier == 'test' else None
+        server = app.ThreadingHTTPServer(('127.0.0.1',0),app.Handler)
+        server.app = console
+        worker = threading.Thread(target=server.serve_forever,daemon=True)
+        worker.start()
+        origin = f'http://127.0.0.1:{server.server_port}'
+        try:
+            with urlopen(origin+'/api/report-data?id=test&index=0&sheet=Data') as response:
+                self.assertEqual(json.load(response)['rows'],[['A',4]])
+                self.assertIn("default-src 'self'",response.headers['Content-Security-Policy'])
+            for query in ('id=../test&index=0','id=test&index=1','id=test&index=-1','id=test&index=999','path='+str(self.report)):
+                with self.subTest(query=query), self.assertRaises(HTTPError) as error:
+                    urlopen(origin+'/api/report-data?'+query)
+                self.assertEqual(error.exception.code,400)
+            with self.assertRaises(HTTPError) as error:
+                urlopen(Request(origin+'/api/report-data?id=test&index=0',headers={'Host':'untrusted.example'}))
+            self.assertEqual(error.exception.code,403)
+        finally:
+            server.shutdown(); server.server_close(); worker.join()
+
+
+if __name__ == '__main__':
+    unittest.main()

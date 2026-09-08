@@ -9,15 +9,17 @@ const label = value => String(value || '').replaceAll('_', ' ');
 const duration = value => value == null ? '—' : value < 60 ? '<1 min' : value < 3600 ? Math.ceil(value / 60) + ' min' : (value / 3600).toFixed(1) + ' hr';
 function showError(message) { $('error').textContent = message; $('error').hidden = !message; }
 function showView(view, focus = false) {
-  currentView = ['loading', 'collection', 'evidence'].includes(view) ? view : 'loading';
-  for (const name of ['loading', 'collection', 'evidence']) {
+  if (view === 'charts') view = 'graph';
+  currentView = ['loading', 'collection', 'evidence', 'graph'].includes(view) ? view : 'loading';
+  for (const name of ['loading', 'collection', 'evidence', 'graph']) {
     const active = name === currentView;
     $('view-' + name).hidden = !active;
     $('tab-' + name).setAttribute('aria-selected', String(active));
     $('tab-' + name).tabIndex = active ? 0 : -1;
   }
-  $('workspace-title').textContent = {loading:'Load a sector',collection:'Collection monitor',evidence:'Follow PAC spending'}[currentView];
+  $('workspace-title').textContent = {loading:'Load a sector',collection:'Collection monitor',evidence:'Follow PAC spending',graph:'Graph'}[currentView];
   $('stage').hidden = currentView !== 'collection';
+  $('graph-actions').hidden = currentView !== 'graph';
   history.replaceState(null, '', '#' + currentView);
   if (focus) $('tab-' + currentView).focus();
 }
@@ -26,8 +28,8 @@ document.querySelector('.workspace-tabs').addEventListener('click', event => {
 });
 window.addEventListener('hashchange', () => showView(location.hash.slice(1)));
 document.querySelector('.workspace-tabs').addEventListener('keydown', event => {
-  const names = ['loading','collection','evidence'], index = names.indexOf(currentView);
-  const next = {ArrowRight:(index + 1) % 3, ArrowLeft:(index + 2) % 3, Home:0, End:2}[event.key];
+  const names = ['loading','collection','evidence','graph'], index = names.indexOf(currentView);
+  const next = {ArrowRight:(index + 1) % names.length, ArrowLeft:(index + names.length - 1) % names.length, Home:0, End:names.length - 1}[event.key];
   if (next != null) { event.preventDefault(); showView(names[next], true); }
 });
 function draftData() {
@@ -171,6 +173,14 @@ function render(run) {
   setHtml('quality-checks', qualityHtml);
   $('quality-title').closest('.quality-panel').classList.toggle('reviewed', !!reviewed.length && !warnings.length && !failed && !oldReports && !changedReports);
   setHtml('source-snapshots', (run.source_snapshots || []).map(source => `<li>${escapeHtml(source.name)}: local file modified ${escapeHtml(source.modified_at.slice(0,10))} (${source.age_days} days ago). This is not a verified data-through date.</li>`).join('') || '<li>No local source file dates available.</li>');
+  const dateCell = value => escapeHtml(value || 'Unknown');
+  setHtml('report-freshness', run.reports.map(report => {
+    const fresh = report.freshness || {}, sources = fresh.sources || [];
+    return `<details class="report-freshness-card"><summary><strong>${escapeHtml(report.name)}</strong> · Report freshness unknown · ${fresh.verified_source_count || 0}/${sources.length} sources with verified data-through dates</summary><p>Report file modified: ${dateCell(fresh.report_modified_at)}. ${escapeHtml(fresh.note)}</p>` +
+      (fresh.issues || []).map(issue => `<p class="freshness-unknown">${escapeHtml(issue)}</p>`).join('') +
+      '<div class="table-scroll"><table><thead><tr><th>Source / cycle</th><th>Retrieved</th><th>Local source file modified</th><th>Verified data-through</th><th>Freshness</th><th>Other receipt evidence</th></tr></thead><tbody>' +
+      sources.map(source => `<tr><td>${escapeHtml(source.industry || '')} ${escapeHtml(source.source)}<small>${escapeHtml(source.cycle)}</small></td><td>${dateCell(source.retrieved_at)}</td><td>${dateCell(source.file_modified_at)}</td><td>${dateCell(source.verified_data_through)}</td><td class="${source.freshness === 'verified' ? 'freshness-verified' : 'freshness-unknown'}">${source.freshness === 'verified' ? 'Verified date in receipt' : 'Unknown'}</td><td>Checked: ${dateCell(source.checked_at)}<small>Server last modified: ${dateCell(source.server_last_modified)}</small><details><summary>Receipt</summary><p>${escapeHtml(source.receipt)}<br>${escapeHtml(source.local_receipt)}<br>${escapeHtml(source.sha256)}<br>${escapeHtml(source.note)}<br>${escapeHtml(source.verification_evidence)}</p></details></td></tr>`).join('') + '</tbody></table></div></details>';
+  }).join('') || '<p class="muted">No completed reports available. Freshness is unknown.</p>');
   $('resume-setup').hidden = run.state !== 'ready';
   $('empty').hidden = true; $('monitor').hidden = false;
   if (!run.status) {

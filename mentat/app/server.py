@@ -24,7 +24,10 @@ import uuid
 import zipfile
 
 PROJECT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(PROJECT / "tools"))
+from report_insights import report_freshness, worksheet_data, stamp
+from graph_data import graph_schema, graph_view
 from validate_industry_coverage import workbook_roster
 from fec_key_store import load_keys, save_keys, environment_keys, status as key_status
 
@@ -366,6 +369,51 @@ class Console:
     def find(self, identifier):
         return next((run for run in self.runs() if run["id"] == identifier), None)
 
+    def report_path(self, identifier, index):
+        run = self.find(identifier)
+        if not run or not run['directory']:
+            raise ValueError('Report not available.')
+        industries = read_json(run['directory'] / 'status.json').get('industries', [])
+        if index < 0 or index >= len(industries) or industries[index].get('status') != 'succeeded':
+            raise ValueError('Report is not complete.')
+        path = Path(industries[index].get('output_workbook') or '__absent__')
+        if str(path).startswith(('\\\\', '//')) or not path.is_file():
+            raise ValueError('Local report not available.')
+        return path
+
+    def graph_catalog(self, identifier):
+        run = self.find(identifier)
+        if not run or not run['directory']:
+            return {'industries':[]}
+        industries = read_json(run['directory'] / 'status.json').get('industries', [])
+        groups, unavailable = {}, []
+        for index, industry in enumerate(industries):
+            if industry.get('status') != 'succeeded':
+                continue
+            try:
+                path = self.report_path(identifier,index)
+                if not graph_schema(stamp(path)):
+                    continue
+            except (OSError, ValueError, KeyError, zipfile.BadZipFile):
+                unavailable.append(str(industry.get('industry') or 'Unnamed report'))
+                continue
+            name = re.sub(r'\s+\d{4}[-–]\d{4}$', '', str(industry.get('industry') or path.stem))
+            groups.setdefault(name, []).append(index)
+        return {'industries':[{'name':name,'indices':indices} for name,indices in sorted(groups.items())],
+                'unavailable_reports':unavailable}
+
+    def graph(self, identifier, industry, filters):
+        selected = next((g for g in self.graph_catalog(identifier)['industries'] if g['name'] == industry), None)
+        if not selected:
+            raise ValueError('Choose an industry with completed reports.')
+        paths = [self.report_path(identifier,i) for i in selected['indices']]
+        result = graph_view(paths,filters)
+        run = self.find(identifier)
+        source_root = read_json(run['directory'] / 'status.json').get('source_root')
+        for report, path in zip(result['reports'], paths):
+            report['freshness'] = report_freshness(path, source_root)
+        return result
+
     def snapshot(self, identifier, lane_id=""):
         run = self.find(identifier)
         if not run:
@@ -410,6 +458,7 @@ class Console:
                     except ValueError:
                         pass
         finished_collections = []
+        source_root = status.get('source_root')
         for index, industry in enumerate(status.get("industries", [])):
             receipt = read_json(industry.get("fanout_receipt") or "__absent__")
             if receipt.get("task_count") is not None:
@@ -428,7 +477,8 @@ class Console:
                 expected = industry.get("workbook_sha256")
                 quality = {**quality, "matches_run": quality["sha256"].lower() == expected.lower()
                            if expected and quality.get("sha256") else None}
-                result["reports"].append({"name": output.name, "index": index, "quality": quality})
+                result["reports"].append({"name": output.name, "index": index, "quality": quality,
+                                          "freshness": report_freshness(output, source_root)})
         if (status.get("stage") in ("completed", "failed") and finished_collections
                 and len(finished_collections) == len(status.get("industries", []))):
             result["completed_collection"] = {
@@ -469,7 +519,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(content)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Content-Security-Policy", "default-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'none'")
+        self.send_header("Content-Security-Policy", "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors 'none'")
         self.end_headers()
         self.wfile.write(content)
 
@@ -509,22 +559,27 @@ class Handler(BaseHTTPRequestHandler):
             if parsed.path == "/api/run":
                 return self.send(app.snapshot(query.get("id", [""])[0], query.get("lane", [""])[0]))
             if parsed.path == "/api/report":
-                run = app.find(query.get("id", [""])[0])
-                if not run or not run["directory"]:
-                    raise ValueError("Report not available.")
-                industries = read_json(run["directory"] / "status.json").get("industries", [])
-                index = int(query.get("index", ["-1"])[0])
-                if index < 0 or index >= len(industries) or industries[index].get("status") != "succeeded":
-                    raise ValueError("Report is not complete.")
-                path = Path(industries[index]["output_workbook"])
+                path = app.report_path(query.get('id', [''])[0], int(query.get('index', ['-1'])[0]))
                 return self.send(path.read_bytes(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            if parsed.path == '/api/report-data':
+                path = app.report_path(query.get('id', [''])[0], int(query.get('index', ['-1'])[0]))
+                return self.send(worksheet_data(stamp(path), query.get('sheet', [''])[0], int(query.get('header', ['0'])[0])))
+            if parsed.path == '/api/graph-catalog':
+                return self.send(app.graph_catalog(query.get('id',[''])[0]))
+            if parsed.path == '/api/graph':
+                return self.send(app.graph(query.get('id',[''])[0], query.get('industry',[''])[0],
+                                           {k:v[0] for k,v in query.items()}))
             assets = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript"),
-                      "/style.css": ("style.css", "text/css"), "/template.csv": ("template.csv", "text/csv")}
+                      "/style.css": ("style.css", "text/css"), "/template.csv": ("template.csv", "text/csv"),
+                      '/charts.js': ('charts.js', 'text/javascript'), '/chart-math.js': ('chart-math.js', 'text/javascript'),
+                      '/graph.js': ('graph.js', 'text/javascript'),
+                      '/chart-export.js': ('chart-export.js', 'text/javascript'),
+                      '/graph.css': ('graph.css', 'text/css')}
             if parsed.path in assets:
                 filename, mime = assets[parsed.path]
                 return self.send((Path(__file__).parent / filename).read_bytes(), content_type=mime)
             return self.send({"error": "Not found."}, 404)
-        except (ValueError, OSError) as error:
+        except (ValueError, OSError, KeyError, zipfile.BadZipFile) as error:
             return self.send({"error": str(error)}, 400)
 
     def do_POST(self):

@@ -1,0 +1,175 @@
+"""Guided Graph regressions: scope, unique joins, directions and report bindings."""
+from pathlib import Path
+import json
+import sys
+import tempfile
+import threading
+import unittest
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+
+import openpyxl
+
+sys.path.insert(0,str(Path(__file__).resolve().parents[1] / 'app'))
+from graph_data import graph_view, report_facts
+from report_insights import digest, stamp
+import server as app
+from graph_fixture import add_graph_sheets
+
+
+class GraphTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root=Path(self.tmp.name)
+        self.path=self.root/'Giving.xlsx'
+        book=openpyxl.Workbook()
+        add_graph_sheets(book)
+        book.save(self.path)
+        book.close()
+
+    def view(self,**filters):
+        return graph_view([self.path],filters)
+
+    def edit(self,fn):
+        book=openpyxl.load_workbook(self.path)
+        fn(book)
+        book.save(self.path)
+        book.close()
+
+    def test_industry_totals_use_one_fact_partition(self):
+        before=self.path.read_bytes()
+        value=self.view()
+        self.assertEqual(value['totals']['giving'],1585)
+        self.assertEqual(value['totals']['direct'],90)
+        self.assertEqual(value['totals']['unresolved_candidate_links'],20)
+        self.assertEqual(value['totals']['organizations'],1475)
+        self.assertEqual(sum(r['amount'] for r in value['organizations']),1475)
+        self.assertEqual({r['id']:r['amount'] for r in value['levels']},
+                         {'Chief':370,'Middle-Management':300,'Employees':415})
+        self.assertEqual({r['id']:r['amount'] for r in value['categories']},
+                         {'Super PAC':1200,'JFC':200,'Candidate':110,'Trade Association':50,'Leadership PAC':25})
+        self.assertEqual(sum(r['amount'] for r in value['companies']),1585)
+        self.assertEqual(self.path.read_bytes(),before)
+
+    def test_company_levels_and_corporate_scope_are_distinct(self):
+        self.assertEqual(self.view(company='A',tier='Chief')['totals']['giving'],300)
+        self.assertEqual(self.view(company='A',tier='Chief')['totals']['direct'],100)
+        self.assertEqual(self.view(tier='Middle-Management')['totals']['giving'],300)
+        self.assertEqual(self.view(tier='Employees')['totals']['giving'],415)
+        self.assertEqual(self.view(funding='corporate')['totals']['giving'],500)
+        self.assertEqual(self.view(funding='corporate')['levels'],[])
+        self.assertEqual(self.view(funding='personal')['totals']['giving'],1085)
+        with self.assertRaises(ValueError):self.view(tier='Chief',funding='corporate')
+
+    def test_jfc_leadership_and_unauthorized_links_are_not_direct_candidates(self):
+        for category in ['JFC','Leadership PAC','Super PAC']:
+            result=self.view(category=category)
+            self.assertEqual(result['candidates'],[])
+            self.assertEqual(result['totals']['direct'],0)
+        self.assertEqual(self.view()['candidates'][0]['amount'],90)
+        self.edit(lambda b:b['PAC & Candidate Map'].cell(6,6,'H0CA00001; H0CA00002'))
+        self.assertEqual(self.view()['candidates'],[])
+        self.assertEqual(self.view()['totals']['unresolved_candidate_links'],110)
+
+    def test_pac_activity_is_counted_once_for_industry_and_directions_stay_separate(self):
+        self.assertEqual(self.view(mode='activity')['candidates'][0]['amount'],810)
+        self.assertEqual(self.view(mode='activity',category='Super PAC')['candidates'][0]['amount'],777)
+        self.assertEqual(self.view(mode='activity',direction='Oppose')['candidates'][0]['amount'],999)
+        self.assertEqual(self.view(mode='activity',direction='Contribution / Other')['candidates'][0]['amount'],111)
+        a=self.view(company='A',tier='Middle-Management',mode='activity')
+        b=self.view(company='B',tier='Employees',mode='activity')
+        self.assertEqual(a['candidates'][0]['amount'],777)
+        self.assertEqual(b['candidates'][0]['amount'],777)
+        self.assertIn('not money attributed',a['candidate_note'])
+
+    def test_recipient_filter_and_negative_values_reconcile(self):
+        value=self.view(recipient='C00000003')
+        self.assertEqual(value['totals']['giving'],1200)
+        self.assertEqual({r['id']:r['amount'] for r in value['companies']},{'A':800,'B':400})
+        value=self.view(company='B',tier='Employees',category='Candidate')
+        self.assertEqual(value['totals']['giving'],-10)
+        self.assertEqual(value['candidates'][0]['amount'],-10)
+
+    def test_partial_activity_is_unavailable_not_a_smaller_total(self):
+        self.edit(lambda b:b['Downstream Activity'].cell(3,1,'100 source rows condensed to 8 committee-candidate-activity groups'))
+        value=self.view(mode='activity')
+        self.assertFalse(value['candidate_available'])
+        self.assertEqual(value['candidates'],[])
+        self.assertIn('partial display',value['candidate_note'])
+
+    def test_broken_fact_partition_and_missing_amount_refuse_partial_graph(self):
+        self.edit(lambda b:b['2025-2026'].cell(5,4,101))
+        with self.assertRaisesRegex(ValueError,'reconcile'):self.view()
+        self.edit(lambda b:setattr(b['2025-2026'].cell(5,4),'value',None))
+        with self.assertRaisesRegex(ValueError,'missing or nonnumeric'):self.view()
+
+    def test_unknown_level_is_not_reclassified_as_employee(self):
+        def rename(book):
+            for row in book['2025-2026'].iter_rows(min_row=5):
+                if row[2].value=='Chief':row[2].value='Not classified'
+        self.edit(rename)
+        self.assertTrue(self.view()['options']['unknown_tiers'])
+        self.assertEqual(self.view(tier='Unknown')['totals']['giving'],370)
+        self.assertEqual(self.view(tier='Employees')['totals']['giving'],415)
+
+    def test_overlapping_cycles_and_invalid_filters_rejected(self):
+        with self.assertRaisesRegex(ValueError,'overlap'):graph_view([self.path,self.path],{})
+        for filters in ({'company':'not in roster'},{'cycle':'2024'},{'tier':'CEO'},{'mode':'guess'},{'funding':'guess'}):
+            with self.subTest(filters=filters),self.assertRaises(ValueError):self.view(**filters)
+
+    def test_estimates_require_whole_industry_and_verified_full_csv(self):
+        audit=self.path.with_suffix('.audit');audit.mkdir()
+        csv=audit/'allocation_estimates.csv'
+        csv.write_text('cycle,root,candidate_id,candidate_name,direction,estimated_amount\n2026,C00000003,H0CA00001,Candidate One,Support,123\n2026,C00000003,H0CA00001,Candidate One,Oppose,456\n')
+        manifest={'workbook_name':self.path.name,'workbook_sha256':digest(self.path),
+                  'csv_sha256':{csv.name:digest(csv)}}
+        (audit/'audit-manifest.json').write_text(json.dumps(manifest))
+        self.assertEqual(self.view(mode='estimates')['candidates'][0]['amount'],123)
+        self.assertEqual(self.view(mode='estimates',direction='Oppose')['candidates'][0]['amount'],456)
+        limited=self.view(company='A',mode='estimates')
+        self.assertFalse(limited['candidate_available'])
+        self.assertEqual(limited['candidates'],[])
+        csv.write_text(csv.read_text().replace('123','888'))
+        changed=self.view(mode='estimates')
+        self.assertFalse(changed['candidate_available'])
+        self.assertEqual(changed['candidates'],[])
+
+    def test_raw_receipt_layout_uses_only_included_rows(self):
+        def convert(book):
+            del book['2025-2026']
+            s=book.create_sheet('2025-2026')
+            for row in [['Raw'],[],[],['Company','Employee Tier','Amount','Recipient Category','Committee ID','Include in Analysis'],
+                        ['A','Chief',12,'Candidate','C00000001','Yes'],['A','Chief',200,'Candidate','C00000001','No']]:s.append(row)
+        self.edit(convert)
+        self.assertEqual(self.view()['totals']['direct'],12)
+
+    def test_http_catalog_and_graph_use_completed_local_reports_only(self):
+        directory=self.root/'run';directory.mkdir()
+        (directory/'status.json').write_text(json.dumps({'industries':[
+            {'industry':'Test 2025-2026','status':'succeeded','output_workbook':str(self.path)},
+            {'industry':'Pending','status':'running','output_workbook':str(self.path)}]}))
+        console=object.__new__(app.Console)
+        console.find=lambda identifier:{'directory':directory} if identifier=='fixture' else None
+        server=app.ThreadingHTTPServer(('127.0.0.1',0),app.Handler);server.app=console
+        worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
+        origin=f'http://127.0.0.1:{server.server_port}'
+        try:
+            with urlopen(origin+'/api/graph-catalog?id=fixture') as response:
+                self.assertEqual(json.load(response)['industries'],[{'name':'Test','indices':[0]}])
+            with urlopen(origin+'/api/graph?id=fixture&industry=Test&company=A&tier=Chief') as response:
+                body=json.load(response)
+                self.assertEqual(body['totals']['direct'],100)
+                self.assertEqual(body['reports'][0]['freshness']['freshness'],'unknown')
+                self.assertEqual(body['reports'][0]['freshness']['sources'],[])
+            for query in ['id=fixture&industry=Pending','id=fixture&industry=../../outside','id=other&industry=Test']:
+                with self.assertRaises(HTTPError) as error:urlopen(origin+'/api/graph?'+query)
+                self.assertEqual(error.exception.code,400)
+            with self.assertRaises(HTTPError) as error:
+                urlopen(Request(origin+'/api/graph-catalog?id=fixture',headers={'Host':'untrusted.example'}))
+            self.assertEqual(error.exception.code,403)
+        finally:
+            server.shutdown();server.server_close();worker.join()
+
+
+if __name__=='__main__':unittest.main()

@@ -1,15 +1,16 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mentat · Collection console</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mentat · Collection console</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/graph.css"><script src="/chart-export.js" defer></script><script src="/chart-math.js" defer></script><script src="/app.js" defer></script><script src="/charts.js" defer></script><script src="/graph.js" defer></script></head>
 <body>
-<header><a class="wordmark" href="/">MENTAT<span>COLLECTION CONSOLE</span></a><span id="connection" role="status">Connecting…</span></header>
-<main>
-<section class="workspace" aria-label="Mentat workspace">
-<div class="workspace-heading"><div><div class="section-label">COLLECTION WORKSPACE</div><h1 id="workspace-title">Load a sector</h1></div><span id="stage" class="badge">Ready when you are</span></div>
-<nav class="workspace-tabs" role="tablist" aria-label="Workspace">
+<header><a class="wordmark" href="/">MENTAT</a><nav class="workspace-tabs" role="tablist" aria-label="Workspace">
 <button id="tab-loading" type="button" role="tab" aria-controls="view-loading" aria-selected="true">Loading</button>
 <button id="tab-collection" type="button" role="tab" aria-controls="view-collection" aria-selected="false" tabindex="-1">Collection</button>
 <button id="tab-evidence" type="button" role="tab" aria-controls="view-evidence" aria-selected="false" tabindex="-1">PAC evidence</button>
-</nav>
+<button id="tab-graph" type="button" role="tab" aria-controls="view-graph" aria-selected="false" tabindex="-1">Graph</button>
+</nav><span class="local-indicator">Local only</span><span id="connection" role="status">Connecting…</span></header>
+<main>
+<section class="workspace" aria-label="Mentat workspace">
+<div class="workspace-heading"><div><h1 id="workspace-title">Load a sector</h1></div><div id="graph-actions" class="graph-actions" hidden><button id="graph-open-sources" class="secondary" type="button" aria-haspopup="dialog">Sources &amp; freshness</button><button id="graph-open-builder" class="secondary" type="button" aria-haspopup="dialog">Create chart</button></div><span id="stage" class="badge">Ready when you are</span></div>
+
 <div id="error" class="error" role="alert" hidden></div>
 <section id="view-loading" role="tabpanel" aria-labelledby="tab-loading">
 <p class="view-intro">Choose a sector, list its companies, and add the other names they use. Review the search roster before starting collection.</p>
@@ -49,7 +50,64 @@
 <div id="worker-panel" class="panel"><div class="panel-heading"><h3>Collection workers</h3><label for="lanes">Inspect worker <select id="lanes"><option>No workers yet</option></select></label></div><div id="lane-summary" class="muted">Waiting for collection to start.</div><div class="table-scroll"><table><thead><tr><th>Company</th><th>Cycle</th><th>Search</th><th>Rows fetched</th><th>Source count</th><th>Checkpoint</th></tr></thead><tbody id="checkpoints"></tbody></table></div></div>
 <div id="records-panel" class="panel"><div class="panel-heading"><div><h3>Incoming records</h3><p class="muted">Latest 25 stored records from the selected worker. Provisional until reconciliation and coverage checks finish.</p></div><span class="badge subtle">RAW DATA</span></div><div class="table-scroll"><table><thead><tr><th>Contributor</th><th>Company / matched alias</th><th>Recipient</th><th>Date</th><th class="number">Amount</th><th>Match</th></tr></thead><tbody id="records"></tbody></table></div></div>
 <div class="bottom-grid"><div class="panel"><h3>Activity</h3><div id="events" class="events"></div></div><div class="panel"><h3>Completed reports</h3><div id="reports"><p class="muted">Reports appear after collection and validation succeed.</p></div></div></div>
+<section class="panel" aria-labelledby="report-freshness-title"><h3 id="report-freshness-title">Report freshness</h3><p>Retrieval records when a source was downloaded. Modification records a file change. Only an explicit verified data-through date describes coverage; unknown means the receipts do not establish it.</p><div id="report-freshness"></div></section>
 </div></section>
+<section id="view-graph" role="tabpanel" aria-labelledby="tab-graph" hidden>
+<section class="panel graph-controls" aria-label="Scope">
+<div class="scope-heading"><span class="section-label">SCOPE</span><button id="graph-reset" type="button" class="graph-text-button">Reset</button></div>
+<div class="graph-filter-grid">
+<label for="graph-industry">Industry<select id="graph-industry"></select></label>
+<label for="graph-company">Company<select id="graph-company"><option value="">All companies</option></select></label>
+<label for="graph-tier">Employee level<select id="graph-tier"><option value="">All levels</option><option>Chief</option><option>Middle-Management</option><option>Employees</option></select></label>
+<label for="graph-cycle">Election cycle<select id="graph-cycle"><option value="">All cycles</option></select></label>
+<label for="graph-funding">Giving<select id="graph-funding"><option value="all">All giving</option><option value="personal">Personal</option><option value="corporate">Corporate</option></select></label>
+</div><div id="graph-chips" class="graph-chips"></div></section>
+<nav class="analysis-tabs" role="tablist" aria-label="Graph analysis">
+<button id="graph-tab-overview" role="tab" aria-controls="graph-analysis-panel" aria-selected="true" type="button">Overview</button>
+<button id="graph-tab-recipients" role="tab" aria-controls="graph-analysis-panel" aria-selected="false" tabindex="-1" type="button">Recipients</button>
+<button id="graph-tab-candidates" role="tab" aria-controls="graph-analysis-panel" aria-selected="false" tabindex="-1" type="button">Candidates</button>
+<button id="graph-tab-companies" role="tab" aria-controls="graph-analysis-panel" aria-selected="false" tabindex="-1" type="button">Companies</button>
+</nav>
+<p id="graph-status" class="muted" role="status">Choose a report source.</p>
+<div id="graph-error" class="error" role="alert" hidden></div>
+<div id="graph-results" hidden><span id="graph-scope" hidden></span>
+<div class="graph-metrics"><div><span>Net giving</span><strong id="graph-total">—</strong><small>Contributions less refunds</small></div><div><span>Direct to candidates</span><strong id="graph-direct">—</strong><small id="graph-direct-share"></small></div><div><span>Recipient organizations</span><strong id="graph-recipient-count">—</strong><small id="graph-organization-share"></small></div></div>
+<div id="graph-analysis-panel" role="tabpanel" aria-labelledby="graph-tab-overview" tabindex="0">
+<div class="graph-panels" data-analysis="overview">
+<section id="graph-category-panel" class="panel"><div class="panel-heading"><h2>Giving by recipient type</h2></div><p class="muted">Net contributions · saved receipt categories</p><div id="graph-categories"></div><p class="chart-note">Organization receipts are not attributed to candidates.</p><button class="graph-text-button" data-analysis-tab="recipients" type="button">View recipients →</button></section>
+<section id="graph-organization-panel" class="panel" hidden><div class="panel-heading"><h2>Top organizations</h2><button class="graph-text-button" data-values="organizations" type="button">View all →</button></div><p class="muted">Select a recipient to narrow the scope.</p><div id="graph-organizations"></div></section>
+<section id="graph-candidate-panel" class="panel graph-candidate-panel"><div class="panel-heading"><h2>Top candidates</h2><button id="graph-view-candidates" class="graph-text-button" type="button">View all →</button></div>
+<div id="graph-candidate-controls" class="graph-candidate-controls" hidden><label for="graph-mode">Candidate view<select id="graph-mode"><option value="direct">Direct contributions</option><option value="activity">Downstream PAC activity</option><option value="estimates">Conditional industry estimates</option></select></label><label for="graph-direction" hidden>Direction<select id="graph-direction"><option value="Support">Support</option><option value="Oppose">Opposition</option><option value="Contribution / Other">Contributions / other activity</option><option value="Unknown">Unknown direction</option></select></label></div>
+<p id="graph-candidate-note" class="chart-note"></p><p id="graph-unresolved" class="chart-note"></p><div id="graph-candidates"></div>
+<p id="graph-candidate-separation" class="chart-note">Direct contributions only. Downstream PAC activity and conditional estimates are separate candidate views.</p>
+<details id="graph-candidate-detail" hidden><summary id="graph-candidate-detail-title">Candidate receipt groups</summary><div class="table-scroll"><table><thead><tr><th>Company</th><th>Level</th><th>Recipient / source committee</th><th>Cycle</th><th>Amount</th></tr></thead><tbody id="graph-candidate-rows"></tbody></table></div></details></section>
+<section class="panel" id="graph-company-panel" hidden><div class="panel-heading"><h2>Company comparison</h2><button class="graph-text-button" data-values="companies" type="button">View all →</button></div><p class="muted">Select a company to explore its giving.</p><div id="graph-companies"></div></section>
+<section class="panel" id="graph-level-panel" hidden><div class="panel-heading"><h2>Giving by employee level</h2></div><p class="chart-note">Personal giving in the selected scope. Corporate giving is separate.</p><div id="graph-levels"></div></section>
+</div></div>
+<div class="graph-details-tools"><details id="graph-method-details"><summary>Details &amp; methodology</summary><p id="graph-method" class="muted"></p><p class="muted">Chart images export the displayed preview. CSV includes every value in the selected breakdown.</p></details><div class="graph-export-tools"><label class="sr-only" for="graph-export-target">Chart to export</label><select id="graph-export-target"><option value="categories">Recipient types</option><option value="organizations">Organizations</option><option value="candidates">Candidates</option><option value="companies">Companies</option><option value="levels">Employee levels</option></select><button id="graph-full-table" class="graph-text-button" type="button">Full table</button><label class="sr-only" for="graph-export-format">Export format</label><select id="graph-export-format"><option value="png">PNG image</option><option value="svg">SVG image</option><option value="csv">CSV data</option></select><button id="graph-export" class="secondary" type="button">Export chart</button></div></div>
+</div>
+<dialog id="graph-sources" class="sources-drawer" aria-labelledby="graph-sources-title"><div class="panel-heading"><h2 id="graph-sources-title">Sources &amp; freshness</h2><button id="graph-close-sources" class="graph-text-button" type="button" aria-label="Close sources">✕</button></div><p>Retrieval does not establish data currency.</p><label for="graph-run">Saved run<select id="graph-run"></select></label><p id="graph-source-label" class="muted"></p><div id="graph-freshness"></div><details><summary>Report fingerprints</summary><div id="graph-provenance"></div></details></dialog>
+<dialog id="graph-builder" aria-labelledby="graph-builder-title"><div class="panel-heading"><div><div class="section-label">LOCAL EXPLORER</div><h2 id="graph-builder-title">Create chart</h2></div><button id="graph-close-builder" class="secondary" type="button">Close</button></div>
+<details id="graph-advanced" open><summary>Dataset &amp; chart options</summary>
+<p class="view-intro">Explore a report’s columns, compare groups, or filter to a subsection. Charts use the saved worksheet values and stay on this computer.</p>
+<div class="chart-layout"><section class="chart-controls" aria-label="Graph creation menu">
+<h3>Dataset</h3>
+<label for="chart-run">Collection run<select id="chart-run"></select></label>
+<label for="chart-report">Report<select id="chart-report"></select></label>
+<label for="chart-sheet">Worksheet / subsection<select id="chart-sheet"></select></label>
+<div class="chart-row"><label for="chart-header">Header row<input id="chart-header" type="number" min="1" max="100" value="5"></label><button id="chart-rescan" class="secondary" type="button">Rescan columns</button></div>
+<p id="chart-loading" class="muted" role="status">Choose a report to scan its columns.</p>
+<fieldset id="chart-settings" disabled><legend>Graph options</legend>
+<label for="chart-suggestion">Suggested from columns<select id="chart-suggestion"></select></label>
+<label for="chart-type">Chart type<select id="chart-type"><option value="bar">Bar chart</option><option value="box">Box plot</option><option value="pie">Pie chart</option><option value="line">Line chart</option><option value="scatter">Scatter plot</option><option value="histogram">Histogram</option></select></label>
+<label for="chart-x">Group / X column<select id="chart-x"></select></label>
+<label for="chart-y">Measure / Y column<select id="chart-y"></select></label>
+<label for="chart-aggregation">Aggregation<select id="chart-aggregation"><option value="sum">Sum</option><option value="mean">Mean</option><option value="count">Count rows</option></select></label>
+<details open><summary>Filter a subsection</summary><p class="muted">Filters combine with AND. Row numbers refer to the worksheet.</p><div class="chart-row"><label for="chart-start">First row<input id="chart-start" type="number" min="1"></label><label for="chart-end">Last row<input id="chart-end" type="number" min="1"></label></div><div id="chart-filters"></div><button id="chart-add-filter" class="secondary" type="button">+ Add filter</button></details>
+<button id="chart-create" class="primary" type="button">Create chart</button>
+</fieldset></section>
+<section class="chart-preview" aria-label="Graph preview"><div class="panel-heading"><div><div class="section-label">LOCAL EXPLORER</div><h2 id="chart-title">Your data, in view</h2></div><span class="badge subtle">LOCAL ONLY</span></div><p id="chart-context">Choose a worksheet to begin.</p><div id="chart-error" class="error" role="alert" hidden></div><div id="chart-image" class="chart-image"></div><div id="chart-export" hidden><button id="chart-save-png" class="secondary" type="button">Export PNG</button><button id="chart-save-svg" class="secondary" type="button">Export SVG</button> <button id="chart-save-csv" class="secondary" type="button">Export data CSV</button></div><p id="chart-scope" class="muted"></p><details><summary>Scanned columns</summary><div class="table-scroll"><table><thead><tr><th>Column</th><th>Detected type</th><th>Distinct</th><th>Missing</th></tr></thead><tbody id="chart-columns"></tbody></table></div></details><details><summary>Chart values & statistics</summary><div id="chart-values" class="table-scroll"></div></details></section></div>
+</details></dialog></section>
 <section id="view-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
 <p id="evidence-empty" class="empty" hidden>No PAC evidence snapshot is available yet. Collection reports remain in the Collection tab.</p>
 <section id="evidence-panel" class="panel" hidden aria-label="PAC spending evidence">

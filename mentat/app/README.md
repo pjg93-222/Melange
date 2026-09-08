@@ -136,7 +136,120 @@ in Collection reads the saved coverage receipt, inspects
 workbook headers for support/opposition columns, and compares the report hash
 with the run's receipt. Header presence alone does not validate formulas or
 downstream completeness. Source file modification dates are shown separately
-from data-through dates, which the console cannot currently verify.
+from data-through dates.
+
+**Report freshness** in Collection reads each workbook's `Source Freshness`
+sheet, its companion `.audit/source_freshness.csv` when both workbook and CSV
+hashes match the audit manifest, and hash-bound `source_freshness.csv` references
+in `Source Receipts`. Referenced files must stay inside the report directory.
+Missing, malformed or changed receipts remain visible as unknown. The panel
+separates download/retrieval, last check, local source file modification, server
+last-modified, and report file modification. A check is not a download. The run's
+pinned source receipts can supply download and local file dates only for sources
+whose family, cycle and SHA-256 match the report and the actual source file.
+A newly activated source never upgrades an old report's freshness.
+
+A receipt establishes a displayed verified data-through date only with a valid
+ISO date in `verified_data_through`, or `data_through` together with an explicit
+`data_through_verified: true`. Display headers such as `Verified Data Through`
+are also accepted. This displays the receipt's assertion; it does not independently
+certify completeness. Check timestamps, file dates, election cycles and latest
+transaction dates cannot substitute for it. The panel counts verified source dates
+and keeps overall report freshness unknown because source receipts do not prove
+complete company/employer search coverage.
+
+**Graph** is a peer section of the console; Loading remains the default. Choose
+an industry, company (or all companies), employee level and election cycle.
+The employee labels are **Chief / Middle-Management / Employees**. They map to
+the existing report tiers without changing any classification; Employees retains
+the existing fallback for unrecognized titles. Corporate giving is a separate
+giving scope, not an employee level. Choosing a level selects personal giving.
+
+Graph separates **Scope**, **Analysis**, and **Details & methodology**. The compact
+scope applies across **Overview / Recipients / Candidates / Companies**. Overview
+shows net giving, direct candidate contributions, giving to recipient organizations,
+a recipient-type chart, and a five-entry candidate preview. Recipient organizations
+exclude candidate-category receipts; unresolved candidate links stay visible in the
+candidate note, so the two summary amounts need not exhaust net giving.
+
+Recipients contains the complete type breakdown and a five-entry organization
+preview. JFC stays separate, as do Super PAC, Trade Association, Company PAC,
+Leadership PAC, Carey/hybrid, Other PAC, Candidate, Party Committee and Unclassified
+receipts. Companies shows company comparisons and the selected scope's personal
+giving by Chief, Middle-Management and Employees, retaining unknown levels. A
+single-company selection still shows its amounts and level breakdown without an
+empty comparison placeholder. Click a type, organization, company or level to
+filter; click a candidate for its included receipt groups. These can be aggregates,
+not individual transactions. **View all** and **Full table** expose complete values.
+
+**Sources & freshness** opens a keyboard-accessible drawer containing the selected
+reports' source receipts, retrieval timestamps, file modification timestamps,
+verified data-through dates, unknown states and SHA-256 fingerprints. Retrieval
+never establishes currency. The drawer also selects the saved run. Graph remains
+`#graph`; old `#charts` links redirect to it. Reset restores the latest cycle,
+all companies/levels/giving, and the Overview direct-contribution view.
+
+The contextual **Export chart** control exports a selected breakdown as PNG or SVG,
+or every value as CSV. Images contain the displayed preview (five entries except
+for the complete recipient-type breakdown), with scope, interpretation notes and
+report fingerprints attached. Empty or unavailable views cannot be exported.
+
+Guided graphs read the per-cycle receipt tables, using Recipient facts only in
+workbooks that also contain duplicate Master and Employee summaries. Recipient
+amounts must reconcile to Master totals by company, level, cycle and category.
+Raw layouts use only explicitly included rows. Overlapping report cycles are
+rejected. Direct candidate rankings require a unique candidate ID linked to a
+principal or authorized committee; JFC, leadership and unauthorized links cannot
+be promoted to direct contributions. Unresolved candidate-category amounts remain
+visible outside the rankings.
+
+The candidate-view selector separates **Direct contributions**, **Downstream PAC
+activity**, and **Conditional industry estimates**. Downstream activity shows
+the full reported activity of committees funded within the current selection,
+counting each committee/cycle once regardless of how many selected companies
+funded it. Support, opposition, and contributions/other activity remain separate.
+It is not company-attributed money; company views may overlap. Industry estimates
+require all companies, all levels and all giving, and the full allocation CSV
+bound to the workbook by its audit manifest. Missing or changed receipts withhold
+estimates. Partial downstream worksheet previews cannot produce rankings. These
+views make no new source requests or model runs and do not rewrite reports.
+
+**Create chart** opens an advanced builder that scans completed report worksheets locally and suggests bar,
+box, pie, line, scatter and histogram charts from their columns. Select a run,
+report and worksheet, then choose columns and an aggregation. Change the detected
+header row and use **Rescan columns** for another table within a sheet. Filters
+combine with AND; first/last worksheet row controls isolate subsections. Use
+**Create chart** after changing options. PNG, SVG and chart-data CSV downloads include
+the worksheet, filters, aggregation and report SHA-256 in their provenance.
+
+Missing/non-numeric observations are excluded and counted, never converted to
+zero; Count rows counts selected rows regardless of missing measures. Pie charts
+reject negative values and zero totals. Box plots use linearly interpolated
+quartiles and observed whiskers within 1.5 times the interquartile range. Formula
+cells use their last saved cached results; this explorer does not recalculate
+Excel formulas. Totals and overlapping summary rows can double count, so choose
+the appropriate worksheet subsection. The current local limits are 50,000 rows,
+200 columns, 60 groups, and 5,000 scatter points. Oversized requests require a
+smaller worksheet or filters rather than silently creating a partial chart.
+Graphs do not call Higgsfield, FEC, or any external service; all scripts and
+rendering are served locally, with no CDN dependencies.
+
+Additional offline regression checks (browser checks require local Playwright
+and Chrome; `MENTAT_BROWSER_CHANNEL` can select another installed channel):
+
+```powershell
+python mentat/tests/test_report_insights.py
+python mentat/tests/test_graph_data.py
+node --test mentat/tests/test_chart_math.cjs
+node mentat/tests/test_console_browser.cjs
+```
+
+The browser suite starts a temporary loopback fixture and checks Graph's default
+direct view, company/level/JFC filters, downstream directions, estimate withholding,
+dataset switching, all six chart types, PNG/SVG/CSV exports, escaped labels, narrow layouts,
+keyboard navigation and dialog dismissal/focus restoration, and the
+absence of external requests. `MENTAT_NODE_MODULES` and `MENTAT_PYTHON` override
+the local test dependencies. Neither test suite reads credentials or collects data.
 
 Rebuilt workbooks include committee cash-transfer paths through three transfers,
 coverage, source receipts, and a separate conditional pro-rata estimate. These
