@@ -89,7 +89,7 @@ snapshot from the financial summary's reporting period.
 Create an evidence snapshot with the bundled Python runtime:
 
 ```powershell
-python mentat/tools/pac_evidence.py --company Coinbase --aliases 'COINBASE COMMERCE (EXCHANGE)' --committees C00835959,C00836221,C00848440 --cycles 2024,2026 --output mentat/.cache/pac-evidence/fairshake-20260908
+python mentat/tools/pac_evidence.py --company 'Harborlight Credit Union' --aliases 'HARBORLIGHT CU' --committees '<FEC_COMMITTEE_ID>' --cycles 2024,2026 --output mentat/.cache/pac-evidence/harborlight-credit-union-20260908
 ```
 
 Use a new output directory for a fresh collection. Existing directories resume
@@ -106,7 +106,7 @@ it does not replace the earlier industry allocation in Excel. The sidecar binds
 to both the source snapshot and observed evidence by SHA-256. Rebuild it offline:
 
 ```powershell
-python mentat/tools/pac_cash_model.py --evidence-dir mentat/.cache/pac-evidence/fairshake-20260908
+python mentat/tools/pac_cash_model.py --evidence-dir mentat/.cache/pac-evidence/harborlight-credit-union-20260908
 ```
 
 The dated proportional pool carries funding shares through uniquely paired
@@ -119,8 +119,8 @@ adapter withholds estimates for missing cash dates, financial gaps, unpaired
 transfers, negative adjustments, donor-unresolved opening balances, assets that
 need liquidation/offset links, or refunds that need original-donor links.
 The normalized core supports identified refunds and donor-labeled opening cash;
-the automatic adapter does not guess these labels. Existing Fairshake 2024/2026
-snapshots are withheld with specific reasons. Unknown is displayed as unavailable,
+the automatic adapter does not guess these labels. Incomplete saved snapshots
+are withheld with specific reasons. Unknown is displayed as unavailable,
 not zero. Method, current limitations and validation are documented in
 `audits/mentat_20260908/PAC_CASH_APPROXIMATION.md`.
 

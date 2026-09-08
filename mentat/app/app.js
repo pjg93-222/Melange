@@ -47,7 +47,7 @@ function invalidateRoster() {
 }
 function addCompany(company = {name:'',aliases:[]}) {
   const id = ++companySequence, row = document.createElement('div'); row.className = 'company-entry';
-  row.innerHTML = `<div class="company-entry-heading"><strong>Company</strong><button type="button" class="remove-company" aria-label="Remove company">Remove</button></div><label class="field" for="company-${id}">Company name</label><input id="company-${id}" class="company-name" type="text" required maxlength="250" placeholder="e.g. Coinbase" value="${escapeHtml(company.name)}"><label class="field" for="aliases-${id}">Alternative names <span>One name per line · optional</span></label><textarea id="aliases-${id}" class="company-aliases" rows="3" placeholder="e.g. Coinbase Inc.&#10;Coinbase Global Inc.">${escapeHtml(company.aliases.join('\n'))}</textarea>`;
+  row.innerHTML = `<div class="company-entry-heading"><strong>Company</strong><button type="button" class="remove-company" aria-label="Remove company">Remove</button></div><label class="field" for="company-${id}">Company name</label><input id="company-${id}" class="company-name" type="text" required maxlength="250" placeholder="e.g. Harborlight Credit Union" value="${escapeHtml(company.name)}"><label class="field" for="aliases-${id}">Alternative names <span>One name per line · optional</span></label><textarea id="aliases-${id}" class="company-aliases" rows="3" placeholder="e.g. Harborlight CU&#10;Harborlight Federal Credit Union">${escapeHtml(company.aliases.join('\n'))}</textarea>`;
   $('company-editor').append(row); numberCompanies(); return row;
 }
 function numberCompanies() {

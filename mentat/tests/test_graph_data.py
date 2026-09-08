@@ -53,8 +53,8 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(self.path.read_bytes(),before)
 
     def test_company_levels_and_corporate_scope_are_distinct(self):
-        self.assertEqual(self.view(company='A',tier='Chief')['totals']['giving'],300)
-        self.assertEqual(self.view(company='A',tier='Chief')['totals']['direct'],100)
+        self.assertEqual(self.view(company='Harborlight Credit Union',tier='Chief')['totals']['giving'],300)
+        self.assertEqual(self.view(company='Harborlight Credit Union',tier='Chief')['totals']['direct'],100)
         self.assertEqual(self.view(tier='Middle-Management')['totals']['giving'],300)
         self.assertEqual(self.view(tier='Employees')['totals']['giving'],415)
         self.assertEqual(self.view(funding='corporate')['totals']['giving'],500)
@@ -77,8 +77,8 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(self.view(mode='activity',category='Super PAC')['candidates'][0]['amount'],777)
         self.assertEqual(self.view(mode='activity',direction='Oppose')['candidates'][0]['amount'],999)
         self.assertEqual(self.view(mode='activity',direction='Contribution / Other')['candidates'][0]['amount'],111)
-        a=self.view(company='A',tier='Middle-Management',mode='activity')
-        b=self.view(company='B',tier='Employees',mode='activity')
+        a=self.view(company='Harborlight Credit Union',tier='Middle-Management',mode='activity')
+        b=self.view(company='Civic Horizon Bank',tier='Employees',mode='activity')
         self.assertEqual(a['candidates'][0]['amount'],777)
         self.assertEqual(b['candidates'][0]['amount'],777)
         self.assertIn('not money attributed',a['candidate_note'])
@@ -86,8 +86,8 @@ class GraphTests(unittest.TestCase):
     def test_recipient_filter_and_negative_values_reconcile(self):
         value=self.view(recipient='C00000003')
         self.assertEqual(value['totals']['giving'],1200)
-        self.assertEqual({r['id']:r['amount'] for r in value['companies']},{'A':800,'B':400})
-        value=self.view(company='B',tier='Employees',category='Candidate')
+        self.assertEqual({r['id']:r['amount'] for r in value['companies']},{'Harborlight Credit Union':800,'Civic Horizon Bank':400})
+        value=self.view(company='Civic Horizon Bank',tier='Employees',category='Candidate')
         self.assertEqual(value['totals']['giving'],-10)
         self.assertEqual(value['candidates'][0]['amount'],-10)
 
@@ -127,7 +127,7 @@ class GraphTests(unittest.TestCase):
         (audit/'audit-manifest.json').write_text(json.dumps(manifest))
         self.assertEqual(self.view(mode='estimates')['candidates'][0]['amount'],123)
         self.assertEqual(self.view(mode='estimates',direction='Oppose')['candidates'][0]['amount'],456)
-        limited=self.view(company='A',mode='estimates')
+        limited=self.view(company='Harborlight Credit Union',mode='estimates')
         self.assertFalse(limited['candidate_available'])
         self.assertEqual(limited['candidates'],[])
         csv.write_text(csv.read_text().replace('123','888'))
@@ -140,7 +140,7 @@ class GraphTests(unittest.TestCase):
             del book['2025-2026']
             s=book.create_sheet('2025-2026')
             for row in [['Raw'],[],[],['Company','Employee Tier','Amount','Recipient Category','Committee ID','Include in Analysis'],
-                        ['A','Chief',12,'Candidate','C00000001','Yes'],['A','Chief',200,'Candidate','C00000001','No']]:s.append(row)
+                        ['Harborlight Credit Union','Chief',12,'Candidate','C00000001','Yes'],['Harborlight Credit Union','Chief',200,'Candidate','C00000001','No']]:s.append(row)
         self.edit(convert)
         self.assertEqual(self.view()['totals']['direct'],12)
 
@@ -157,7 +157,7 @@ class GraphTests(unittest.TestCase):
         try:
             with urlopen(origin+'/api/graph-catalog?id=fixture') as response:
                 self.assertEqual(json.load(response)['industries'],[{'name':'Test','indices':[0]}])
-            with urlopen(origin+'/api/graph?id=fixture&industry=Test&company=A&tier=Chief') as response:
+            with urlopen(origin+'/api/graph?id=fixture&industry=Test&company=Harborlight%20Credit%20Union&tier=Chief') as response:
                 body=json.load(response)
                 self.assertEqual(body['totals']['direct'],100)
                 self.assertEqual(body['reports'][0]['freshness']['freshness'],'unknown')

@@ -21,11 +21,11 @@ class FixtureConsole(app.Console):
         self.lock = threading.Lock()
 
     def runs(self):
-        return [{'id':'fixture','name':'Local regression fixture','state':'completed',
+        return [{'id':'fixture','name':'Fictional credit union sample','state':'completed',
                  'created_at':1,'directory':self.root}]
 
     def summary(self):
-        return {'runs':[{'id':'fixture','name':'Local regression fixture','state':'completed'}],
+        return {'runs':[{'id':'fixture','name':'Fictional credit union sample','state':'completed'}],
                 'key_configured':False,'active_key_count':0,'stored_key_count':0}
 
 
@@ -35,10 +35,10 @@ def main():
         book = openpyxl.Workbook()
         sheet = book.active
         sheet.title = 'Candidate Funding'
-        for row in [['Fixture report'],['Temporary values for UI tests'],[],[],
+        for row in [['Credit union sample report'],['Fictional values for UI tests'],[],[],
                     ['Company','Amount','Other Amount','Cycle','Date'],
-                    ['A',10,100,2026,'2026-01-01'],['A',30,120,2026,'2026-01-02'],
-                    ['B',60,200,2024,'2026-01-03'],['B',None,300,2024,'2026-01-04'],
+                    ['Harborlight Credit Union',10,100,2026,'2026-01-01'],['Harborlight Credit Union',30,120,2026,'2026-01-02'],
+                    ['Civic Horizon Bank',60,200,2024,'2026-01-03'],['Civic Horizon Bank',None,300,2024,'2026-01-04'],
                     ['<img src=x onerror=alert(1)>',-5,0,2026,'2026-01-05']]:
             sheet.append(row)
         receipts = book.create_sheet('Source Freshness')
@@ -49,11 +49,11 @@ def main():
         for row in [['Region','Volume','Cost'], ['North',10,20], ['South',15,30], ['East',25,60]]:
             regions.append(row)
         add_graph_sheets(book)
-        report = root / 'Fixture.xlsx'
+        report = root / 'Credit Union Sample.xlsx'
         book.save(report)
         book.close()
         (root / 'status.json').write_text(json.dumps({'stage':'completed','industries':[
-            {'industry':'Fixture','status':'succeeded','output_workbook':str(report)}]}))
+            {'industry':'Credit Unions','status':'succeeded','output_workbook':str(report)}]}))
         server = app.ThreadingHTTPServer(('127.0.0.1',0), app.Handler)
         server.app = FixtureConsole(root)
         worker = threading.Thread(target=server.serve_forever,daemon=True)
