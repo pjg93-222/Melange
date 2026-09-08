@@ -6,12 +6,26 @@ Launch the local console from PowerShell:
 & .\mentat\app\Start-MentatApp.ps1
 ```
 
-Open http://127.0.0.1:8802. Upload CSV, TSV, or XLSX, review the parsed names,
-choose cycles, and click **Start collection**. Uploads alone make no FEC requests.
+Open http://127.0.0.1:8802. The **Loading** tab accepts a sector, companies,
+and alternative names directly, or CSV, TSV, and XLSX uploads. Enter each alias
+on its own line; a comma stays part of a name. Add/remove companies, click
+**Review roster**, choose cycles, and click **Start collection**. Reviewing
+or uploading alone makes no FEC requests. Aliases group under a canonical
+company; they are not subsidiary or ownership relationships.
+
+Manual drafts persist in this browser's local storage, without credentials.
+Editing a draft invalidates its previous review and disables collection until
+it is reviewed again. Validated rosters persist on the server through the same
+readiness checks and isolated runner as uploaded workbooks. In **Collection**,
+select a ready roster and use **Continue collection setup** to resume it.
+The **PAC evidence** tab is independent of the selected collection run.
+
 The table format uses `canonical_name,alias,industry,exclusion`; only
 `canonical_name` is required. Repeat it for every alias. The included template
 contains illustrative names. Existing Mentat roster workbooks are also accepted.
 Ambiguous aliases fail the existing roster readiness check and cannot start.
+`sector` is accepted as an alternative to `industry`; if both are supplied,
+their values must agree. Manual entry rejects duplicate canonical companies.
 
 The console invokes the existing resilient R/PowerShell runner. It snapshots
 `R/`, `tools/`, `inputs/`, and `mentat.R` into a private runtime for each upload,
@@ -72,9 +86,33 @@ Use a new output directory for a fresh collection. Existing directories resume
 from hash-verified API responses. The reusable collector verifies exact counts
 and pagination, excludes 24/48-hour notices from regular-report IE totals,
 checks those totals against financial summaries, and preserves unresolved
-coverage. It does not calculate donor-specific dollar allocations. Committee
+coverage. Observed evidence does not assert donor-specific traced dollars. Committee
 IDs explicitly set its network boundary; outgoing destinations beyond that
 boundary are recorded in `unexpanded_committees`.
+
+The evidence collector also produces `cash-estimates.json` using
+`tools/pac_cash_model.py`. This is a separate conditional company cash estimate;
+it does not replace the earlier industry allocation in Excel. The sidecar binds
+to both the source snapshot and observed evidence by SHA-256. Rebuild it offline:
+
+```powershell
+python mentat/tools/pac_cash_model.py --evidence-dir mentat/.cache/pac-evidence/fairshake-20260908
+```
+
+The dated proportional pool carries funding shares through uniquely paired
+transfers, charges operating costs, keeps unspent balances, and uses payment
+dates for independent expenditures. Same-day arrivals precede outgoing payments;
+this ordering is an explicit modeling assumption. It is not a probability of
+influence or a causal estimate. All-source cash conservation and reported
+closing balances must pass before numbers are returned. The automatic Form 3X
+adapter withholds estimates for missing cash dates, financial gaps, unpaired
+transfers, negative adjustments, donor-unresolved opening balances, assets that
+need liquidation/offset links, or refunds that need original-donor links.
+The normalized core supports identified refunds and donor-labeled opening cash;
+the automatic adapter does not guess these labels. Existing Fairshake 2024/2026
+snapshots are withheld with specific reasons. Unknown is displayed as unavailable,
+not zero. Method, current limitations and validation are documented in
+`audits/mentat_20260908/PAC_CASH_APPROXIMATION.md`.
 
 **Clear reviewed notices** acknowledges only the visible warning IDs. The
 review receipt is stored outside Git in the console data directory. It binds
@@ -92,8 +130,9 @@ The tests use temporary inputs/databases, mock collection launch, and exercise
 the real runner's plan-only mode and R's offline ingest when R is installed.
 They do not call FEC or execute collection.
 
-The monitor appears first at desktop and narrow widths; the upload form expands
-when needed. A separate quality notice reads the saved coverage receipt, inspects
+Loading is the default tab at desktop and narrow widths; each tab has a stable
+URL fragment (`#loading`, `#collection`, `#evidence`). A separate quality notice
+in Collection reads the saved coverage receipt, inspects
 workbook headers for support/opposition columns, and compares the report hash
 with the run's receipt. Header presence alone does not validate formulas or
 downstream completeness. Source file modification dates are shown separately

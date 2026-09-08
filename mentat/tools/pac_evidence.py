@@ -296,6 +296,8 @@ def main():
     result['retrieved_at'] = datetime.now(timezone.utc).isoformat()
     result['source_snapshot_sha256'] = hashlib.sha256((args.output / 'snapshots.json').read_bytes()).hexdigest()
     atomic_json(args.output / 'evidence.json', result)
+    from pac_cash_model import write_estimates
+    write_estimates(args.output)
     print(json.dumps({'committees': committees, 'cycles': cycles, 'receipt_legs': len(result['receipts']),
                       'transfer_legs': len(result['transfers']), 'candidate_activity_rows': len(result['candidate_activity']),
                       'all_regular_ie_totals_reconcile': all(r['regular_ie_reconciles'] for r in result['committee_finances'])}))

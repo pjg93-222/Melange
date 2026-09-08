@@ -49,6 +49,36 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(industry["company_count"], 2)
         self.assertEqual(industry["companies"][0]["variant_count"], 3)
 
+    def test_manual_sector_roster_persists_names_and_commas_without_collecting(self):
+        value = self.console.create_roster({'sector': 'Energy', 'companies': [
+            {'name': 'Acme', 'aliases': ['Acme, Inc.', 'ACME ENERGY', 'ACME ENERGY']},
+            {'name': 'Other', 'aliases': []}]})
+        self.assertEqual(value['state'], 'ready')
+        self.assertEqual(self.console.processes, {})
+        roster = value['readiness']['readiness'][0]
+        self.assertEqual(roster['industry'], 'Energy')
+        self.assertEqual(roster['company_count'], 2)
+        self.assertEqual(roster['companies'][0]['variant_count'], 3)
+        self.assertIn('Acme, Inc.', [v['variant'] for v in roster['companies'][0]['variants']])
+        self.assertEqual(app.read_json(self.root / value['id'] / 'upload.json'), value)
+
+    def test_manual_alias_conflicts_and_bad_input_cannot_start(self):
+        value = self.console.create_roster({'sector': 'Energy', 'companies': [
+            {'name': 'One', 'aliases': ['SHARED']}, {'name': 'Two', 'aliases': ['SHARED']}]})
+        self.assertEqual(value['state'], 'needs review')
+        with self.assertRaises(ValueError):
+            self.console.launch({'id': value['id'], 'cycles': [2026]})
+        for data in ({'sector': '', 'companies': []}, {'sector': 'Energy', 'companies': 'oops'},
+                     {'sector': 'Energy', 'companies': [{'name': 'Acme'}, {'name': ' ACME '}]},
+                     {'sector': 'Energy', 'companies': [{'name': 'Acme', 'aliases': 'wrong'}]}):
+            with self.assertRaises(ValueError): self.console.create_roster(data)
+
+    def test_sector_upload_header_is_supported_and_conflicts_are_rejected(self):
+        value = self.upload('canonical_name,alias,sector\nAcme,Acme Inc,Energy\n')
+        self.assertEqual(value['readiness']['readiness'][0]['industry'], 'Energy')
+        with self.assertRaisesRegex(ValueError, 'must agree'):
+            self.upload('canonical_name,sector,industry\nAcme,Energy,Crypto\n')
+
     def test_cross_company_alias_collision_is_not_ready(self):
         value = self.upload("canonical_name,alias\nOne,SHARED\nTwo,SHARED\n")
         self.assertEqual(value["state"], "needs review")

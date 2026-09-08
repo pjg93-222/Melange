@@ -2,11 +2,88 @@ const $ = id => document.getElementById(id);
 const renderedHtml = new Map();
 function setHtml(id, html) { if (renderedHtml.get(id) !== html) { $(id).innerHTML = html; renderedHtml.set(id, html); } }
 let token = '', upload = null, selectedRun = '', selectedLane = '', busy = false, warningIds = [];
+let rosterRevision = 0, companySequence = 0, currentView = 'loading';
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number = value => value == null ? '—' : Number(value).toLocaleString();
 const label = value => String(value || '').replaceAll('_', ' ');
 const duration = value => value == null ? '—' : value < 60 ? '<1 min' : value < 3600 ? Math.ceil(value / 60) + ' min' : (value / 3600).toFixed(1) + ' hr';
 function showError(message) { $('error').textContent = message; $('error').hidden = !message; }
+function showView(view, focus = false) {
+  currentView = ['loading', 'collection', 'evidence'].includes(view) ? view : 'loading';
+  for (const name of ['loading', 'collection', 'evidence']) {
+    const active = name === currentView;
+    $('view-' + name).hidden = !active;
+    $('tab-' + name).setAttribute('aria-selected', String(active));
+    $('tab-' + name).tabIndex = active ? 0 : -1;
+  }
+  $('workspace-title').textContent = {loading:'Load a sector',collection:'Collection monitor',evidence:'Follow PAC spending'}[currentView];
+  $('stage').hidden = currentView !== 'collection';
+  history.replaceState(null, '', '#' + currentView);
+  if (focus) $('tab-' + currentView).focus();
+}
+document.querySelector('.workspace-tabs').addEventListener('click', event => {
+  const tab = event.target.closest('[role=tab]'); if (tab) showView(tab.id.slice(4));
+});
+window.addEventListener('hashchange', () => showView(location.hash.slice(1)));
+document.querySelector('.workspace-tabs').addEventListener('keydown', event => {
+  const names = ['loading','collection','evidence'], index = names.indexOf(currentView);
+  const next = {ArrowRight:(index + 1) % 3, ArrowLeft:(index + 2) % 3, Home:0, End:2}[event.key];
+  if (next != null) { event.preventDefault(); showView(names[next], true); }
+});
+function draftData() {
+  return {sector:$('sector').value, companies:[...document.querySelectorAll('.company-entry')].map(row => ({
+    name:row.querySelector('.company-name').value,
+    aliases:row.querySelector('.company-aliases').value.split(/\r?\n/).map(value => value.trim()).filter(Boolean)
+  }))};
+}
+function invalidateRoster() {
+  rosterRevision++; upload = null; $('start').disabled = true; $('start').textContent = 'Start collection';
+  $('upload-review').hidden = true; $('review-placeholder').hidden = false;
+  try { localStorage.setItem('mentat-roster-draft-v1', JSON.stringify(draftData()));
+    $('draft-status').textContent = 'Draft saved in this browser. Review it when ready.';
+  } catch { $('draft-status').textContent = 'Browser storage unavailable. Keep this tab open until you review your roster.'; }
+}
+function addCompany(company = {name:'',aliases:[]}) {
+  const id = ++companySequence, row = document.createElement('div'); row.className = 'company-entry';
+  row.innerHTML = `<div class="company-entry-heading"><strong>Company</strong><button type="button" class="remove-company" aria-label="Remove company">Remove</button></div><label class="field" for="company-${id}">Company name</label><input id="company-${id}" class="company-name" type="text" required maxlength="250" placeholder="e.g. Coinbase" value="${escapeHtml(company.name)}"><label class="field" for="aliases-${id}">Alternative names <span>One name per line · optional</span></label><textarea id="aliases-${id}" class="company-aliases" rows="3" placeholder="e.g. Coinbase Inc.&#10;Coinbase Global Inc.">${escapeHtml(company.aliases.join('\n'))}</textarea>`;
+  $('company-editor').append(row); numberCompanies(); return row;
+}
+function numberCompanies() {
+  const rows = [...document.querySelectorAll('.company-entry')];
+  rows.forEach((row,index) => { row.querySelector('strong').textContent = `Company ${index + 1}`;
+    row.querySelector('button').disabled = rows.length === 1;
+    row.querySelector('button').setAttribute('aria-label', `Remove company ${index + 1}`); });
+  $('add-company').disabled = rows.length >= 1000;
+}
+function restoreDraft() {
+  try {
+    const draft = JSON.parse(localStorage.getItem('mentat-roster-draft-v1') || 'null');
+    if (draft && typeof draft.sector === 'string' && Array.isArray(draft.companies) && draft.companies.length <= 1000 && draft.companies.every(c => typeof c.name === 'string' && Array.isArray(c.aliases) && c.aliases.every(a => typeof a === 'string'))) {
+      $('sector').value = draft.sector; draft.companies.forEach(addCompany);
+    }
+  } catch { /* An invalid or unavailable local draft never prevents a fresh roster. */ }
+  if (!$('company-editor').children.length) addCompany();
+}
+$('roster-form').addEventListener('input', invalidateRoster);
+$('add-company').addEventListener('click', () => { const row = addCompany(); invalidateRoster(); row.querySelector('input').focus(); });
+$('company-editor').addEventListener('click', event => {
+  if (!event.target.closest('.remove-company')) return;
+  event.target.closest('.company-entry').remove(); numberCompanies(); invalidateRoster();
+});
+async function acceptRoster(value, revision) {
+  if (revision !== rosterRevision) return;
+  upload = value; roster(value.readiness); selectedRun = value.id; selectedLane = '';
+  $('start').textContent = 'Start collection';
+  $('draft-status').textContent = value.state === 'ready' ? 'Roster validated and saved. Choose cycles, then start collection.' : 'Review the name conflicts before starting.';
+  await refreshRuns(); await refreshRun();
+}
+$('roster-form').addEventListener('submit', async event => {
+  event.preventDefault(); showError(''); const revision = ++rosterRevision;
+  upload = null; $('start').disabled = true; $('review-roster').disabled = true; $('review-roster').textContent = 'Checking names…';
+  try { await acceptRoster(await api('/api/roster', draftData()), revision); }
+  catch (error) { if (revision === rosterRevision) showError(error.message); }
+  finally { $('review-roster').disabled = false; $('review-roster').textContent = 'Review roster'; }
+});
 async function api(path, data) {
   const response = await fetch(path, data === undefined ? {} : {method:'POST', headers:{'Content-Type':'application/json','X-Mentat-Token':token}, body:JSON.stringify(data)});
   const body = await response.json();
@@ -15,24 +92,22 @@ async function api(path, data) {
 }
 function roster(readiness) {
   $('upload-review').hidden = false;
+  $('review-placeholder').hidden = true;
   const groups = readiness.readiness || [];
   const count = groups.reduce((n,g) => n + g.company_count, 0);
   const variants = groups.reduce((n,g) => n + g.variant_count, 0);
-  $('roster-counts').textContent = `${count} companies · ${variants} search names · ${groups.length} industries`;
+  $('roster-counts').textContent = `${count} ${count === 1 ? 'company' : 'companies'} · ${variants} search names · ${groups.length} ${groups.length === 1 ? 'sector' : 'sectors'}`;
   $('roster-list').innerHTML = groups.map(group => `<h3>${escapeHtml(group.industry)}</h3>` + group.companies.map(company => `<div class="roster-company"><b>${escapeHtml(company.company)}</b><small>${company.variants.map(v => escapeHtml(v.variant)).join(' · ')}</small>${company.exclusions.length ? '<small>Exclude: ' + company.exclusions.map(escapeHtml).join(', ') + '</small>' : ''}</div>`).join('') + (group.ready ? '' : `<p class="error">Resolve ambiguous names or invalid blocks: ${escapeHtml(JSON.stringify({duplicates:group.duplicate_companies,ambiguous:group.cross_company_variants,errors:group.parse_errors}))}</p>`)).join('');
   $('start').disabled = readiness.status !== 'succeeded';
 }
 $('file').addEventListener('change', async () => {
   const file = $('file').files[0]; if (!file) return;
-  showError(''); $('start').disabled = true; upload = null;
+  showError(''); $('start').disabled = true; upload = null; const revision = ++rosterRevision;
   try {
     if (file.size > 5000000) throw new Error('Upload a file smaller than 5 MB.');
     const content = await new Promise((resolve,reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
-    upload = await api('/api/upload', {filename:file.name,content});
-    roster(upload.readiness); selectedRun = upload.id; selectedLane = '';
-    $('roster-panel').open = true;
-    await refreshRuns(); await refreshRun();
-  } catch (error) { showError(error.message); }
+    await acceptRoster(await api('/api/upload', {filename:file.name,content}), revision);
+  } catch (error) { if (revision === rosterRevision) showError(error.message); }
 });
 $('save-keys').addEventListener('click', async () => {
   try { const result = await api('/api/keys', {keys:$('api-key').value}); $('api-key').value = ''; $('key-hint').textContent = `${result.active_key_count} enabled keys; ${result.stored_key_count - result.active_key_count} disabled. Saved with Windows encryption.`; } catch (error) { showError(error.message); }
@@ -47,7 +122,7 @@ $('start').addEventListener('click', async () => {
   try {
     await api('/api/start', {id:upload.id, cycles:[...document.querySelectorAll('input[name=cycle]:checked')].map(c => Number(c.value)), api_key:$('api-key').value});
     $('api-key').value = ''; $('start').textContent = 'Collection started'; upload = null;
-    $('roster-panel').open = false;
+    showView('collection');
     await refreshRun();
   } catch (error) { showError(error.message); $('start').disabled = false; $('start').textContent = 'Start collection'; }
 });
@@ -58,7 +133,6 @@ async function refreshRuns(initial) {
   const options = body.runs.map(run => `<option value="${escapeHtml(run.id)}">${escapeHtml(run.name)} · ${escapeHtml(run.state)}</option>`).join('');
   if ($('runs').innerHTML !== options) $('runs').innerHTML = options || '<option value="">No collections yet</option>';
   if (!selectedRun && body.runs.length) selectedRun = body.runs[0].id;
-  if (!body.runs.length) $('roster-panel').open = true;
   $('runs').value = selectedRun;
   $('key-status').textContent = body.key_configured ? `${body.active_key_count} enabled FEC keys saved · ${body.stored_key_count - body.active_key_count} disabled` : 'No enabled FEC keys saved';
   if (body.key_configured) $('key-hint').textContent = `${body.active_key_count} enabled keys; ${body.stored_key_count - body.active_key_count} disabled. Stored with Windows encryption. Leave blank to use them.`;
@@ -97,11 +171,7 @@ function render(run) {
   setHtml('quality-checks', qualityHtml);
   $('quality-title').closest('.quality-panel').classList.toggle('reviewed', !!reviewed.length && !warnings.length && !failed && !oldReports && !changedReports);
   setHtml('source-snapshots', (run.source_snapshots || []).map(source => `<li>${escapeHtml(source.name)}: local file modified ${escapeHtml(source.modified_at.slice(0,10))} (${source.age_days} days ago). This is not a verified data-through date.</li>`).join('') || '<li>No local source file dates available.</li>');
-  if (run.state === 'ready' && run.readiness && (!upload || upload.id !== run.id)) {
-    upload = {id:run.id,readiness:run.readiness};
-    roster(run.readiness);
-    $('start').textContent = 'Start collection';
-  }
+  $('resume-setup').hidden = run.state !== 'ready';
   $('empty').hidden = true; $('monitor').hidden = false;
   if (!run.status) {
     $('freshness').textContent = run.state === 'ready' ? 'Roster validated. Choose cycles and start collection.' : `Run ${label(run.state)}. Waiting for runner status.`;
@@ -144,6 +214,14 @@ async function init() {
   catch (error) { showError(error.message); }
   setInterval(poll, 3000);
 }
+$('resume-setup').addEventListener('click', async () => {
+  try {
+    const value = await api('/api/run?id=' + encodeURIComponent(selectedRun));
+    if (value.state !== 'ready') throw new Error('This roster is no longer awaiting collection.');
+    rosterRevision++; upload = {id:value.id,readiness:value.readiness}; roster(value.readiness);
+    $('start').textContent = 'Start collection'; showView('loading');
+  } catch (error) { showError(error.message); }
+});
 let evidence = null;
 const currency = value => value == null ? 'Unresolved' : Number(value).toLocaleString('en-US', {style:'currency', currency:'USD', maximumFractionDigits:2});
 const sourceAnchor = (url, text) => /^https:\/\/(docquery\.fec\.gov|www\.fec\.gov)\//.test(url || '') ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(text)} ↗</a>` : escapeHtml(text);
@@ -167,7 +245,26 @@ function renderEvidence() {
   setHtml('evidence-transfers', incomingHtml + `<h3 class="evidence-subheading">Outgoing committee transfers</h3>` + ([...transfers].map(([id,row]) => `<p>${escapeHtml(names.get(committee) || committee)} → ${escapeHtml(row.name || names.get(id) || id)} <b>${currency(row.amount)}</b></p>`).join('') || '<p class="muted">No contribution or transfer disbursements found in this snapshot.</p>') + `<p class="muted">${finances?.regular_ie_reconciles ? 'The collected regular-report expenditure total matches the committee financial summary.' : 'The collected regular-report expenditure total differs from the financial summary. Coverage remains unresolved; no donor allocation is calculated.'}</p>`);
   setHtml('evidence-receipts', receipts.map(row => `<tr><td>${escapeHtml(row.reported_name)}<small>${escapeHtml(label(row.role))} · ${row.included_company_contribution ? 'Included contribution' : 'Excluded from company contribution total'}</small></td><td>${escapeHtml(row.date)}</td><td class="number">${currency(row.amount)}</td><td>${sourceAnchor(row.source_url, row.description || 'Original filing')}<small>Line ${escapeHtml(row.line_number)} · ${escapeHtml(row.sub_id)}</small></td></tr>`).join('') || '<tr><td colspan="4">No matching company receipts in this committee and cycle.</td></tr>');
   const candidates = evidence.candidate_activity.filter(row => row.cycle === cycle && row.committee_id === committee).sort((a,b) => b.committee_spending - a.committee_spending);
-  setHtml('evidence-candidates', candidates.map(row => `<tr><td><details><summary>${escapeHtml(row.candidate_name_as_filed || 'Candidate name missing')}</summary><p>As-filed ID: ${escapeHtml(row.candidate_id_as_filed)}<br>Register: ${escapeHtml(row.registered_candidate_name || 'Unresolved')}<br>${row.identity_status === 'name_matches_registration' ? 'Name matches the candidate register.' : 'Name / ID needs review. Aliases and filing errors can cause differences; no automatic reassignment.'}</p></details></td><td>${escapeHtml(row.direction)}</td><td class="number">${currency(row.committee_spending)}</td><td>${escapeHtml(row.first_date)}<small>to ${escapeHtml(row.last_date)}</small></td><td>${sourceAnchor(row.source_urls?.[0], 'Filing')}<small>${row.source_rows} records</small></td></tr>`).join(''));
+  const estimate = evidence.cash_estimates?.cycles?.find(row => row.cycle === cycle);
+  const candidateEstimates = new Map();
+  const candidateKey = row => JSON.stringify([row.candidate_id_as_filed, row.candidate_name_as_filed, row.direction]);
+  if (estimate?.status === 'estimated') {
+    setHtml('allocation-status', '<div class="allocation-status allocation-ready"><strong>Cash ledger reconciled · conditional estimate available</strong><p>Uses proportional pooling and receipts-before-payments ordering within each day. These are modeling assumptions, not verified donor choices.</p></div>');
+    const selected = estimate.allocations.filter(row => row.committee === committee);
+    const values = new Map();
+    for (const row of selected) {
+      const kind = row.kind === 'candidate' ? `candidate · ${row.direction}` : row.kind;
+      const value = row.estimated_funding[evidence.company] || 0;
+      values.set(kind, (values.get(kind) || 0) + value);
+      if (row.kind === 'candidate') candidateEstimates.set(candidateKey(row), (candidateEstimates.get(candidateKey(row)) || 0) + value);
+    }
+    setHtml('allocation-results', [...values].map(([kind,value]) => `<div class="allocation-result"><span>${escapeHtml(evidence.company)} · estimated ${escapeHtml(label(kind))}</span><strong>${currency(value)}</strong></div>`).join('') + `<div class="allocation-result"><span>Estimated company cash retained</span><strong>${currency(estimate.closing_funding?.[committee]?.[evidence.company] || 0)}</strong></div>`);
+  } else {
+    const issues = estimate?.issues || [];
+    setHtml('allocation-status', `<div class="allocation-status"><strong>Company cash estimate awaits reconciliation</strong><p>${estimate ? 'The saved network does not yet support a balanced, dated cash ledger. An unavailable estimate is not zero.' : 'No verified cash-estimation receipt is available for this snapshot.'}</p>${issues.length ? '<details><summary>' + issues.length + ' outstanding checks across the selected cycle’s network</summary><ul>' + issues.map(issue => `<li><b>${escapeHtml(names.get(issue.committee_id) || issue.committee_id || 'Network')}</b> — ${escapeHtml(issue.detail)}</li>`).join('') + '</ul></details>' : ''}</div>`);
+    setHtml('allocation-results', '');
+  }
+  setHtml('evidence-candidates', candidates.map(row => `<tr><td><details><summary>${escapeHtml(row.candidate_name_as_filed || 'Candidate name missing')}</summary><p>As-filed ID: ${escapeHtml(row.candidate_id_as_filed)}<br>Register: ${escapeHtml(row.registered_candidate_name || 'Unresolved')}<br>${row.identity_status === 'name_matches_registration' ? 'Name matches the candidate register.' : 'Name / ID needs review. Aliases and filing errors can cause differences; no automatic reassignment.'}</p></details></td><td>${escapeHtml(row.direction)}</td><td class="number">${currency(row.committee_spending)}</td><td class="number">${estimate?.status === 'estimated' ? currency(candidateEstimates.get(candidateKey(row)) ?? null) : 'Awaiting reconciliation'}</td><td>${escapeHtml(row.first_date)}<small>to ${escapeHtml(row.last_date)}</small></td><td>${sourceAnchor(row.source_urls?.[0], 'Filing')}<small>${row.source_rows} records</small></td></tr>`).join(''));
   const timing = (evidence.temporal_routes || []).filter(row => row.cycle === cycle);
   const assets = new Set(timing.filter(row => row.status === 'asset_liquidation_link_required').map(row => row.receipt_sub_id)).size;
   $('evidence-timing').textContent = `${assets} in-kind receipt(s) in this cycle require a documented liquidation link before a cash route can be evaluated. Date-compatible routes are possibilities, not assigned dollars. Transfers outside the ${evidence.committee_finances.filter(row => row.cycle === cycle).length}-committee snapshot remain outside its coverage.`;
@@ -187,10 +284,13 @@ async function initEvidence() {
     const result = await api('/api/evidence');
     $('evidence-snapshot').innerHTML = result.snapshots.map(row => `<option value="${escapeHtml(row.id)}">${escapeHtml(row.company)} · ${escapeHtml(row.retrieved_at?.slice(0,10))}</option>`).join('');
     if (result.snapshots.length) await loadEvidence();
+    $('evidence-empty').hidden = result.snapshots.length > 0;
   } catch (error) { showError(error.message); }
 }
 $('evidence-snapshot').addEventListener('change', () => loadEvidence().catch(error => showError(error.message)));
 $('evidence-cycle').addEventListener('change', renderEvidence);
 $('evidence-committee').addEventListener('change', renderEvidence);
+restoreDraft();
+showView(location.hash.slice(1));
 init();
 initEvidence();

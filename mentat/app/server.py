@@ -81,7 +81,9 @@ def normalize_upload(filename, content, target):
             continue
         item = dict(zip(headers, [str(value or "").strip() for value in row]))
         name = item.get("canonical_name", "")
-        industry = item.get("industry") or "Uploaded names"
+        if item.get("sector") and item.get("industry") and item['sector'] != item['industry']:
+            raise ValueError(f"Row {number}: sector and industry must agree when both are provided.")
+        industry = item.get("sector") or item.get("industry") or "Uploaded names"
         if not name:
             raise ValueError(f"Row {number}: canonical_name is required.")
         if any(len(value) > 250 for value in item.values()):
@@ -232,6 +234,36 @@ class Console:
                     "readiness": readiness}
         atomic_json(directory / "upload.json", manifest)
         return manifest
+
+    def create_roster(self, data):
+        """Use the same persisted readiness/launch path as file uploads."""
+        sector = data.get('sector')
+        companies = data.get('companies')
+        if not isinstance(sector, str) or not sector.strip():
+            raise ValueError('Enter a sector for this collection.')
+        if not isinstance(companies, list) or not 1 <= len(companies) <= 1000:
+            raise ValueError('Enter between 1 and 1,000 companies.')
+        output = io.StringIO(newline='')
+        writer = csv.writer(output)
+        writer.writerow(('canonical_name', 'alias', 'sector'))
+        seen = set()
+        for index, company in enumerate(companies, 1):
+            if not isinstance(company, dict):
+                raise ValueError(f'Company {index}: enter a company and its alternative names.')
+            name, aliases = company.get('name'), company.get('aliases', [])
+            if not isinstance(name, str) or not name.strip():
+                raise ValueError(f'Company {index}: a canonical name is required.')
+            name = name.strip()
+            normalized = re.sub(r'\s+', ' ', name).casefold()
+            if normalized in seen:
+                raise ValueError(f'{name} appears more than once. Combine its alternative names in one company.')
+            seen.add(normalized)
+            if not isinstance(aliases, list) or len(aliases) > 100 or not all(isinstance(a, str) for a in aliases):
+                raise ValueError(f'{name}: enter up to 100 alternative names, one per line.')
+            for alias in dict.fromkeys(['', *[a.strip() for a in aliases if a.strip()]]):
+                writer.writerow((name, alias, sector.strip()))
+        return self.upload({'filename': sector.strip() + ' roster.csv',
+                            'content': base64.b64encode(output.getvalue().encode('utf-8')).decode('ascii')})
 
     def launch(self, data):
         identifier = data.get("id", "")
@@ -468,6 +500,11 @@ class Handler(BaseHTTPRequestHandler):
                 value = read_json(root / identifier / 'evidence.json')
                 if value.get('version') != 1:
                     raise ValueError('Evidence snapshot unavailable.')
+                estimates = read_json(root / identifier / 'cash-estimates.json')
+                evidence_hash = hashlib.sha256((root / identifier / 'evidence.json').read_bytes()).hexdigest()
+                if (estimates.get('source_snapshot_sha256') == value.get('source_snapshot_sha256')
+                        and estimates.get('evidence_sha256') == evidence_hash):
+                    value['cash_estimates'] = estimates
                 return self.send(value)
             if parsed.path == "/api/run":
                 return self.send(app.snapshot(query.get("id", [""])[0], query.get("lane", [""])[0]))
@@ -505,6 +542,8 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("Expected an upload or run request.")
             if self.path == "/api/upload":
                 return self.send(self.server.app.upload(data))
+            if self.path == '/api/roster':
+                return self.send(self.server.app.create_roster(data))
             if self.path == "/api/keys":
                 with self.server.app.lock:
                     count = save_keys([str(data.get("keys", ""))])
