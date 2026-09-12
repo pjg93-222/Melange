@@ -88,6 +88,8 @@ if (cycleFilter) {
     "downstream_activity",
     "beneficiary_bridge",
     "beneficiary_summary",
+    "recipient_detail",
+    "contributor_detail",
   ]) {
     payload[key] = (payload[key] ?? []).filter(
       (row) => row.cycle === cycleNumber,
@@ -570,6 +572,8 @@ const sheetOrder = [
   "Recipient List",
   "Beneficiary Summary",
   "PAC & Candidate Map",
+  "Recipient Detail",
+  "Contributor Detail",
   "Downstream Activity",
   "Beneficiary Bridge",
   "Transfer Paths", "Funding Cohorts", "Allocation Estimates", "Allocation Coverage", "Source Freshness", "Classification Review", "Data Quality",
@@ -2083,6 +2087,163 @@ function buildPacCandidateMap() {
   return sheet;
 }
 
+// Fine-grain chartable detail sheets.
+//
+// These two sheets are the only published place a chart can group by committee,
+// committee type, designation, ZIP, city, state, employer or occupation. The
+// raw transaction sheet cannot serve that purpose: prepare_workbook_payload.py
+// projects raw_rows onto 18 fields that carry no geography, employer or
+// occupation at all, and formula-fact mode replaces raw_rows outright with
+// aggregates. Both sheets are therefore built from payload.recipient_detail and
+// payload.contributor_detail - their own payload keys, which no compaction mode
+// touches - and never from raw_rows. Dates are published as yyyy-mm-dd TEXT,
+// matching every other date column in this workbook, so the console reads the
+// same string the exporter wrote instead of a locale-dependent serial.
+function detailPlaceholder(headers, numericHeaders) {
+  // build_industry_report.ps1 refuses any Excel table whose ref covers only its
+  // header row, so an empty frame still has to publish one visible row saying
+  // that it is empty.
+  return headers.map((header, index) =>
+    index === 0 ? "No source rows" : numericHeaders.has(header) ? 0 : "");
+}
+
+function detailSourceNote(rows, folded) {
+  return `Source DB SHA-256: ${sourceSha256} | Rows: ${rows.toLocaleString("en-US")} `
+    + `| Folded rows: ${folded.toLocaleString("en-US")} `
+    + `| Row cap: ${Number(payload.metadata?.detail_row_cap ?? 0).toLocaleString("en-US")}`;
+}
+
+function buildRecipientDetail() {
+  const sheet = workbook.worksheets.getItem("Recipient Detail");
+  const headers = [
+    "Cycle", "Company", "Recipient", "Committee ID", "Committee Type",
+    "Committee Type Label", "Designation", "Designation Label",
+    "Recipient Category", "Party", "Direct Candidate / Sponsor", "Relationship",
+    "Connected Organization", "Total Giving", "Gift Count", "Contributors",
+    "First Date", "Last Date", "Rows Folded",
+  ];
+  const numericHeaders = new Set([
+    "Total Giving", "Gift Count", "Contributors", "Rows Folded",
+  ]);
+  // Sponsor identity is joined in as a STATIC value. The console reads cell
+  // values, so a lookup formula would reach it as an empty cache.
+  const sponsors = new Map(
+    (payload.committee_map ?? []).map((row) => [
+      `${row.cycle}|${row.committee_id}`,
+      row,
+    ]),
+  );
+  const source = payload.recipient_detail ?? [];
+  const rows = [...source]
+    .sort((left, right) =>
+      left.cycle - right.cycle
+      || Number(right.total_giving || 0) - Number(left.total_giving || 0)
+      || String(left.recipient ?? "").localeCompare(String(right.recipient ?? "")))
+    .map((row) => {
+      const sponsor = sponsors.get(`${row.cycle}|${row.committee_id}`) ?? {};
+      return [
+        cycleLabelByNumber.get(row.cycle) ?? row.cycle_label ?? String(row.cycle),
+        row.company ?? "",
+        row.recipient ?? "",
+        row.committee_id ?? "",
+        row.committee_type ?? "",
+        row.committee_type_label ?? "",
+        row.designation ?? "",
+        row.designation_label ?? "",
+        row.recipient_category ?? "",
+        row.party ?? "",
+        sponsor.direct_person ?? "",
+        sponsor.relationship ?? "",
+        sponsor.connected_organization ?? "",
+        Number(row.total_giving || 0),
+        Number(row.gift_count || 0),
+        Number(row.contributors || 0),
+        row.first_date ?? "",
+        row.last_date ?? "",
+        Number(row.folded_rows || 0),
+      ];
+    });
+  const folded = rows.reduce((total, row) => total + Number(row[18] || 0), 0);
+  titleBlock(
+    sheet,
+    "Recipient Detail",
+    "One row per recipient committee per company per cycle. Static values: totals reconcile to the cycle totals; smaller rows beyond the row cap are folded into an Other row per company and cycle.",
+    detailSourceNote(rows.length, folded),
+    "S",
+  );
+  const body = rows.length ? rows : [detailPlaceholder(headers, numericHeaders)];
+  const last = 5 + body.length;
+  sheet.getRange(`A5:S${last}`).values = [headers, ...body];
+  const table = sheet.tables.add(`A5:S${last}`, true, "RecipientDetailTable");
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  sheet.getRange(`N6:N${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`O6:P${last}`).format.numberFormat = countFormat;
+  sheet.getRange(`S6:S${last}`).format.numberFormat = countFormat;
+  const widths = [14, 28, 42, 15, 16, 32, 14, 30, 20, 10, 34, 30, 34, 18, 14, 14, 14, 14, 14];
+  widths.forEach((width, index) => {
+    const column = excelColumn(index + 1);
+    sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+  });
+  sheet.getRange(`B6:M${last}`).format.wrapText = true;
+  return sheet;
+}
+
+function buildContributorDetail() {
+  const sheet = workbook.worksheets.getItem("Contributor Detail");
+  const headers = [
+    "Cycle", "Company", "State", "City", "ZIP", "Employer", "Occupation",
+    "Total Giving", "Gift Count", "Contributors", "Rows Folded",
+  ];
+  const numericHeaders = new Set([
+    "Total Giving", "Gift Count", "Contributors", "Rows Folded",
+  ]);
+  const source = payload.contributor_detail ?? [];
+  const rows = [...source]
+    .sort((left, right) =>
+      left.cycle - right.cycle
+      || Number(right.total_giving || 0) - Number(left.total_giving || 0)
+      || String(left.state ?? "").localeCompare(String(right.state ?? ""))
+      || String(left.city ?? "").localeCompare(String(right.city ?? ""))
+      || String(left.zip5 ?? "").localeCompare(String(right.zip5 ?? "")))
+    .map((row) => [
+      cycleLabelByNumber.get(row.cycle) ?? row.cycle_label ?? String(row.cycle),
+      row.company ?? "",
+      row.state ?? "",
+      row.city ?? "",
+      row.zip5 ?? "",
+      row.employer ?? "",
+      row.occupation ?? "",
+      Number(row.total_giving || 0),
+      Number(row.gift_count || 0),
+      Number(row.contributors || 0),
+      Number(row.folded_rows || 0),
+    ]);
+  const folded = rows.reduce((total, row) => total + Number(row[10] || 0), 0);
+  titleBlock(
+    sheet,
+    "Contributor Detail",
+    "One row per contributor state / city / ZIP / employer / occupation per company per cycle. Static values: totals reconcile to the cycle totals; smaller rows beyond the row cap are folded into an Other row per company and cycle. A blank ZIP is a contribution whose filed ZIP is missing or not five digits, not a dropped row.",
+    detailSourceNote(rows.length, folded),
+    "K",
+  );
+  const body = rows.length ? rows : [detailPlaceholder(headers, numericHeaders)];
+  const last = 5 + body.length;
+  sheet.getRange(`A5:K${last}`).values = [headers, ...body];
+  const table = sheet.tables.add(`A5:K${last}`, true, "ContributorDetailTable");
+  styleTable(table);
+  sheet.freezePanes.freezeRows(5);
+  sheet.getRange(`H6:H${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`I6:K${last}`).format.numberFormat = countFormat;
+  const widths = [14, 28, 10, 24, 12, 42, 32, 18, 14, 14, 14];
+  widths.forEach((width, index) => {
+    const column = excelColumn(index + 1);
+    sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
+  });
+  sheet.getRange(`B6:G${last}`).format.wrapText = true;
+  return sheet;
+}
+
 function buildAuditTable(name, sourceRows, fields, explanation) {
   const sheet = workbook.worksheets.getItem(name);
   const shown = sourceRows.slice(0, 10000);
@@ -2398,6 +2559,8 @@ const employeeSheet = buildEmployeeList();
 const recipientSheet = buildRecipientList();
 const beneficiarySummarySheet = buildBeneficiarySummary();
 const pacMapSheet = buildPacCandidateMap();
+const recipientDetailSheet = buildRecipientDetail();
+const contributorDetailSheet = buildContributorDetail();
 const downstreamSheet = buildDownstreamActivity();
 const bridgeSheet = buildBeneficiaryBridge();
 for (const cycle of payload.cycles) {
@@ -2449,6 +2612,8 @@ void employeeSheet;
 void recipientSheet;
 void beneficiarySummarySheet;
 void pacMapSheet;
+void recipientDetailSheet;
+void contributorDetailSheet;
 void downstreamSheet;
 void bridgeSheet;
 
@@ -2462,6 +2627,8 @@ const previewRanges = new Map([
   ["Recipient List", "A1:AD30"],
   ["Beneficiary Summary", "A1:X30"],
   ["PAC & Candidate Map", "A1:S30"],
+  ["Recipient Detail", "A1:S30"],
+  ["Contributor Detail", "A1:K30"],
   ["Downstream Activity", "A1:AB25"],
   ["Beneficiary Bridge", "A1:V25"],
   ...payload.cycles.map((cycle) => [`${cycle.label} Summary`, "A1:S35"]),

@@ -35,6 +35,8 @@ for (const key of [
   "attribution_summary",
   "source_freshness",
   "classification_review",
+  "recipient_detail",
+  "contributor_detail",
 ]) {
   payload[key] = (payload[key] ?? []).filter(
     (row) => row.cycle === cycleNumber,

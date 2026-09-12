@@ -444,6 +444,60 @@ mentat_guard_category_population <- function(declared, populated) {
   )
 }
 
+# G8 - detail sheet reconciliation.
+# The two fine-grain sheets regroup the same accepted rows a third and fourth
+# way (by recipient committee, and by contributor geography/employer), then cap
+# and fold them. A fold that drops a group instead of summing it, a grouping key
+# that splits on an NA, or a cap applied before the fold all publish a chartable
+# sheet whose totals quietly disagree with the cycle totals printed one tab away
+# - and a chart built on the smaller number is wrong in a way no reader can see.
+# Every dollar has to survive both regroupings, in every cycle.
+mentat_guard_detail_reconciliation <- function(frames, expected, tolerance = 0.005) {
+  expected <- unlist(expected)
+  sheet_totals <- function(name) {
+    frame <- data.table::as.data.table(frames[[name]])
+    if (!nrow(frame)) return(stats::setNames(numeric(), character()))
+    totals <- frame[, .(total = sum(total_giving, na.rm = TRUE)), by = cycle_label]
+    stats::setNames(totals$total, as.character(totals$cycle_label))
+  }
+  observed <- list(
+    recipient_detail = sheet_totals("recipient_detail"),
+    contributor_detail = sheet_totals("contributor_detail")
+  )
+  labels <- unique(c(names(expected), unlist(lapply(observed, names))))
+  labels <- labels[!is.na(labels)]
+  bad <- character()
+  for (label in labels) {
+    want <- if (label %in% names(expected)) as.numeric(expected[[label]]) else 0
+    if (is.na(want)) want <- 0
+    for (name in names(observed)) {
+      got <- if (label %in% names(observed[[name]])) unname(observed[[name]][[label]]) else 0
+      if (abs(got - want) > tolerance) {
+        bad <- c(bad, sprintf("%s/%s %.2f vs cycle total %.2f", label, name, got, want))
+      }
+    }
+  }
+  if (!length(bad)) {
+    return(mentat_guard_result(
+      "detail_reconciliation", "fail", TRUE,
+      sprintf(
+        "detail sheets reconcile to the cycle totals in %d cycle(s)",
+        length(labels)
+      ),
+      length(labels)
+    ))
+  }
+  mentat_guard_result(
+    "detail_reconciliation", "fail", FALSE,
+    paste0(
+      "fine-grain detail sheets do not sum to their cycle totals - a chart ",
+      "built on them would understate or overstate the published figure: ",
+      mentat_guard_summarise(bad)
+    ),
+    length(bad)
+  )
+}
+
 # Runner. Collects results, prints a compact report, and stops on any failed
 # "fail"-severity guard so a build cannot publish an artifact that would state
 # something untrue.

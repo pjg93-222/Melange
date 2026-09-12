@@ -413,6 +413,8 @@ analysis_map <- analysis_rows[, .(
   party,
   category_source,
   party_source,
+  recipient_committee_type,
+  recipient_committee_designation,
   included_summary
 )]
 analysis_map <- merge(
@@ -501,6 +503,8 @@ raw_export <- raw_export[, .(
   party_source = trim_text(party_source),
   recipient = trim_text(committee_name),
   committee_id = toupper(trim_text(committee_id)),
+  committee_type = toupper(trim_text(recipient_committee_type)),
+  committee_designation = toupper(trim_text(recipient_committee_designation)),
   recipient_key = ifelse(
     nzchar(toupper(trim_text(committee_id))),
     paste0("FEC:", toupper(trim_text(committee_id))),
@@ -641,6 +645,24 @@ workbook_raw_export <- raw_export[
   cycle %in% supported_cycles & company_match_status == "accepted"
 ]
 
+# app/report_insights.py REFUSES a worksheet over 50,000 rows outright rather
+# than truncating it, so the fine-grain sheets are capped HERE instead of being
+# discovered unchartable after publication. The cap is overridable for tests and
+# for a console whose limit changes; below 100 rows the fold would dominate the
+# sheet and the detail would be meaningless.
+detail_row_cap <- suppressWarnings(as.integer(
+  Sys.getenv("MENTAT_DETAIL_ROW_CAP", "45000")
+))
+if (length(detail_row_cap) != 1L || is.na(detail_row_cap) ||
+  detail_row_cap < 100L) {
+  stop("MENTAT_DETAIL_ROW_CAP must be an integer of at least 100.", call. = FALSE)
+}
+detail_frames <- spending_detail_frames(workbook_raw_export, detail_row_cap)
+export_phase(
+  "detail_frames_built",
+  detail_frames$stats$recipient_rows + detail_frames$stats$contributor_rows
+)
+
 # Guards run HERE because this is the only point where the roster, the complete
 # unfiltered rows (every status, every cycle) and the supported cycles are all in
 # scope. Downstream of this the payload is already filtered, so a company that
@@ -719,6 +741,11 @@ guard_results <- mentat_run_export_guards(
     mentat_guard_date_sanity(
       downstream_activity_export$last_activity_date, "downstream_last_activity"
     ),
+    # The two fine-grain sheets are NEW publication surfaces, not a view of an
+    # existing one: nothing else in the workbook re-sums them, so a fold that
+    # lost a group would ship a chartable sheet that silently understates the
+    # cycle total printed one tab away.
+    mentat_guard_detail_reconciliation(detail_frames, expected_cycle_totals),
     # Mirrors the category list the workbook template renders
     # (tools/crypto_workbook_builder.mjs masterCategories). Kept here so a
     # category the template shows but nothing ever populates is reported rather
@@ -782,6 +809,11 @@ payload <- list(
     beneficiary_summary_rows = nrow(beneficiary_tables$summary),
     downstream_aggregate_rows = nrow(downstream_activity_export),
     expected_cycle_totals = as.list(expected_cycle_totals),
+    detail_row_cap = detail_frames$stats$row_cap,
+    recipient_detail_rows = detail_frames$stats$recipient_rows,
+    recipient_detail_folded_rows = detail_frames$stats$recipient_folded_rows,
+    contributor_detail_rows = detail_frames$stats$contributor_rows,
+    contributor_detail_folded_rows = detail_frames$stats$contributor_folded_rows,
     omitted_non_accepted_by_cycle = as.list(
       omitted_non_accepted_by_cycle
     ),
@@ -822,6 +854,11 @@ payload <- list(
     leadership_pacs$source_url,
     downstream_activity$source_url
   ))),
+  # Their own payload keys, never a view of raw_rows: prepare_workbook_payload.py
+  # strips raw_rows to 18 fields that carry no geography, employer or occupation,
+  # and formula-fact mode replaces raw_rows entirely.
+  recipient_detail = detail_frames$recipient_detail,
+  contributor_detail = detail_frames$contributor_detail,
   employees = person_cycle,
   committee_map = committee_map,
   transfer_edges = transfer_context$edges,
