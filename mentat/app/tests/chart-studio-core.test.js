@@ -196,6 +196,35 @@ test('time analysis forces a bar, line or area mark and drops Colour', () => {
   assert.strictEqual(report.notes.length, 2);
 });
 
+test('time analysis asks for one Subject and filters to it', () => {
+  const SUBJECT = 7;
+  const SUBJECT_COLUMNS = COLUMNS.concat({index: SUBJECT, name: 'Subject', type: 'category', distinct: 2, missing: 0});
+  const timed = patch => sheet(Object.assign({columns: [CYCLE], rows: [AMOUNT],
+    analytics: {transform: 'annual', period: 'cycle', horizon: 2}}, patch || {}));
+
+  const missing = core.compileReport(timed(), SUBJECT_COLUMNS);
+  assert.match(missing.issues.join(' '), /Choose a Subject/);
+  assert.ok(!missing.config.filters.some(f => f.column === SUBJECT), 'nothing is narrowed until the user chooses');
+
+  const chosen = core.compileReport(timed({params: {start: 0, end: 0, limit: 0, subject: 'Company A'}}), SUBJECT_COLUMNS);
+  assert.strictEqual(chosen.issues.length, 0, chosen.issues.join('; '));
+  assert.deepStrictEqual(chosen.config.filters, [{column: SUBJECT, op: 'equals', value: 'Company A'}]);
+
+  const shelved = core.compileReport(timed({filters: [{column: SUBJECT, op: 'equals', value: 'Company B'}],
+    params: {start: 0, end: 0, limit: 0, subject: 'Company A'}}), SUBJECT_COLUMNS);
+  assert.deepStrictEqual(shelved.config.filters, [{column: SUBJECT, op: 'equals', value: 'Company B'}],
+    'a filter on the shelf wins and is not duplicated');
+
+  const untimed = core.compileReport(sheet({columns: [CATEGORY], rows: [AMOUNT],
+    params: {start: 0, end: 0, limit: 0, subject: 'Company A'}}), SUBJECT_COLUMNS);
+  assert.deepStrictEqual(untimed.config.filters, [], 'the subject narrows time analysis only');
+
+  assert.strictEqual(core.compileReport(timed(), COLUMNS).issues.length, 0, 'a worksheet with no Subject column is unaffected');
+  assert.strictEqual(core.subjectField(core.classifyFields(SUBJECT_COLUMNS).fields).index, SUBJECT);
+  assert.strictEqual(core.subjectField(core.classifyFields(COLUMNS).fields), null);
+  assert.strictEqual(core.createSheet('s').params.subject, '', 'a new sheet starts with no subject chosen');
+});
+
 test('an empty sheet compiles to no configuration and says why', () => {
   const report = core.compileReport(sheet({}), COLUMNS);
   assert.strictEqual(report.config, null);
@@ -276,6 +305,34 @@ test('Sort orders the x dimension by the y measure and leaves scatter alone', ()
   assert.strictEqual(core.sortResult(scatter, 'desc'), scatter);
 });
 
+test('a time view keeps chronological order whatever Sort says', () => {
+  const line = core.compileConfig(sheet({columns: [CYCLE], rows: [AMOUNT]}), COLUMNS);
+  const lineResult = math.build(DATA, line);
+  const order = lineResult.groups.map(g => g.label);
+  assert.deepStrictEqual(core.sortResult(lineResult, 'desc').groups.map(g => g.label), order, 'a line keeps its axis order');
+  assert.deepStrictEqual(core.sortResult(lineResult, 'asc').groups.map(g => g.label), order);
+
+  const overTime = core.compileConfig(sheet({columns: [CYCLE], rows: [AMOUNT],
+    analytics: {transform: 'annual', period: 'cycle', horizon: 2}}), COLUMNS);
+  const temporalResult = math.build(DATA, overTime);
+  assert.strictEqual(temporalResult.temporal, true);
+  assert.deepStrictEqual(core.sortResult(temporalResult, 'desc').groups.map(g => g.label),
+    temporalResult.groups.map(g => g.label), 'periods stay in order');
+
+  const bar = core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT]}), COLUMNS);
+  assert.deepStrictEqual(core.sortResult(math.build(DATA, bar), 'desc').groups.map(g => g.value),
+    [6000, 1250, 250], 'a bar view still sorts');
+
+  assert.strictEqual(core.sortLocked(lineResult), true);
+  assert.strictEqual(core.sortLocked(temporalResult), true);
+  assert.strictEqual(core.sortLocked(overTime), true, 'a compiled time configuration locks Sort before the view is built');
+  assert.strictEqual(core.sortLocked(core.compileConfig(sheet({columns: [CYCLE], rows: [AMOUNT],
+    marks: marks({color: TIER})}), COLUMNS)), true, 'separate lines are a time view too');
+  assert.strictEqual(core.sortLocked(bar), false);
+  assert.strictEqual(core.sortLocked(math.build(DATA, bar)), false);
+  assert.strictEqual(core.sortLocked(null), false);
+});
+
 test('rowsToMarksSummary describes the view for the status bar', () => {
   const config = core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT]}), COLUMNS);
   const summary = core.rowsToMarksSummary(math.build(DATA, config), config, COLUMNS);
@@ -305,6 +362,41 @@ test('reference lines average and median the plotted marks', () => {
   assert.strictEqual(lines[0].value, 2500);
   assert.strictEqual(lines[1].value, 1250);
   assert.deepStrictEqual(core.referenceValues(result, {}), []);
+});
+
+test('a grand total is withheld unless the marks are additive parts of one whole', () => {
+  const sum = core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT]}), COLUMNS);
+  const sumResult = math.build(DATA, sum);
+  assert.strictEqual(core.totalNote(sumResult, sum), '');
+  assert.strictEqual(core.grandTotal(sumResult, sum), core.markValues(sumResult).reduce((a, b) => a + b, 0));
+  assert.strictEqual(core.rowsToMarksSummary(sumResult, sum, COLUMNS).total, 7500);
+
+  const grouped = core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({color: TIER})}), COLUMNS);
+  const groupedResult = math.build(DATA, grouped);
+  assert.strictEqual(core.grandTotal(groupedResult, grouped), null, 'independent series have no combined total');
+  assert.match(core.totalNote(groupedResult, grouped), /series are independent/);
+  assert.strictEqual(core.rowsToMarksSummary(groupedResult, grouped, COLUMNS).total, null);
+
+  const histogram = core.compileConfig(sheet({rows: [AMOUNT], marks: marks({type: 'histogram'})}), COLUMNS);
+  const histogramResult = math.build(DATA, histogram);
+  assert.strictEqual(core.grandTotal(histogramResult, histogram), null, 'bin counts are not a total of the measure');
+  assert.match(core.totalNote(histogramResult, histogram), /histogram/);
+
+  const mean = core.compileConfig(sheet({columns: [CATEGORY], rows: [{column: AMOUNT, aggregation: 'mean'}]}), COLUMNS);
+  const meanResult = math.build(DATA, mean);
+  assert.strictEqual(core.grandTotal(meanResult, mean), null, 'a sum of means is not a total');
+  assert.match(core.totalNote(meanResult, mean), /SUM and COUNT/);
+  assert.strictEqual(core.rowsToMarksSummary(meanResult, mean, COLUMNS).total, null);
+
+  const box = core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({type: 'box'})}), COLUMNS);
+  assert.strictEqual(core.grandTotal(math.build(DATA, box), box), null);
+  const scatter = core.compileConfig(sheet({columns: [COUNT], rows: [AMOUNT]}), COLUMNS);
+  assert.strictEqual(core.rowsToMarksSummary(math.build(DATA, scatter), scatter, COLUMNS).total, null);
+});
+
+test('reference lines are withheld from independent series', () => {
+  const grouped = core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({color: TIER})}), COLUMNS);
+  assert.deepStrictEqual(core.referenceValues(math.build(DATA, grouped), {average: true, median: true}), []);
 });
 
 /* --------------------------------------------------------------- show me */
@@ -420,6 +512,19 @@ test('Clear keeps the data source and drops the view', () => {
   assert.deepStrictEqual(cleared.source, state.source);
 });
 
+test('the session key names the worksheet, not just the workbook digest', () => {
+  const fields = {run: 'r1', report: '0', sheet: 'Facts', header: 1};
+  const body = {sheet: 'Facts', header_row: 1, sha256: 'abc'};
+  const facts = core.sourceKey(fields, body);
+  assert.strictEqual(facts, core.sourceKey(fields, {sheet: 'Facts', header_row: 1, sha256: 'abc'}), 'the same worksheet keeps its key');
+  assert.notStrictEqual(facts, core.sourceKey(fields, {sheet: 'Funding Cohorts', header_row: 1, sha256: 'abc'}),
+    'two worksheets of one workbook share a digest and must not share a key');
+  assert.notStrictEqual(facts, core.sourceKey(fields, {sheet: 'Facts', header_row: 4, sha256: 'abc'}), 'the header row participates');
+  assert.notStrictEqual(facts, core.sourceKey(Object.assign({}, fields, {report: '1'}), body), 'the report participates');
+  assert.ok(facts.includes('|'), 'a legacy bare-digest key must be distinguishable');
+  assert.strictEqual(core.sourceKey(fields, {}), 'r1|0|Facts||', 'an unscanned source falls back to the chosen worksheet');
+});
+
 test('pill accepts a bare column index, a numeric string and a full pill', () => {
   assert.deepStrictEqual(core.pill(3), {column: 3, aggregation: 'sum'});
   assert.deepStrictEqual(core.pill('3'), {column: 3, aggregation: 'sum'});
@@ -428,3 +533,252 @@ test('pill accepts a bare column index, a numeric string and a full pill', () =>
   assert.strictEqual(core.pill(null), null);
   assert.strictEqual(core.pill({}), null);
 });
+
+/* ------------------------------------ group limit, Other rollup and cell splitting */
+
+// Seventy recipients: more groups than any chart can show, so the engine folds
+// the tail instead of refusing to draw. Amount i makes the ranking unambiguous.
+const WIDE_COLUMNS = [
+  {index: 0, name: 'Recipient', type: 'category', distinct: 70, missing: 0},
+  {index: 1, name: 'Amount', type: 'number', distinct: 70, missing: 0},
+  {index: 2, name: 'Party', type: 'category', distinct: 2, missing: 0},
+  {index: 3, name: 'ZIPs', type: 'category', distinct: 5, missing: 0}
+];
+// Rows 5 and 6 name two ZIPs, row 7 names three; every other row names one.
+const WIDE_ZIP = i => i === 5 || i === 6 ? '10001; 10002' : i === 7 ? '10001; 10002; 10003' : '10001';
+const WIDE_ROWS = Array.from({length: 70}, (_, n) => {
+  const i = n + 1;
+  return ['R' + i, i, i % 2 ? 'D' : 'R', WIDE_ZIP(i)];
+});
+const WIDE = {sheet: 'Wide', header_row: 1, columns: WIDE_COLUMNS, rows: WIDE_ROWS,
+  row_numbers: WIDE_ROWS.map((_, n) => n + 2), row_count: WIDE_ROWS.length, sha256: 'wide'};
+
+const RECIPIENT = 0, WIDE_AMOUNT = 1, PARTY = 2, ZIPS = 3;
+const wide = patch => Object.assign({type: 'bar', x: RECIPIENT, y: WIDE_AMOUNT, aggregation: 'sum',
+  transform: 'none', series: -1, filters: []}, patch || {});
+const labels = result => result.groups.map(g => g.label);
+const sum = (from, to) => (from + to) * (to - from + 1) / 2;
+
+test('more groups than the limit fold into one Other mark instead of refusing to draw', () => {
+  // No limit in the configuration means the engine's own default, which is the 60
+  // per view the classic dialog and the funding comparison have always allowed.
+  assert.strictEqual(math.DEFAULT_GROUP_LIMIT, 60);
+  const standing = math.build(WIDE, wide());
+  assert.strictEqual(standing.groups.length, 61, '60 kept plus one Other');
+  const tail = standing.groups[60];
+  assert.strictEqual(tail.other, true, 'Other is the last mark');
+  assert.strictEqual(tail.folded, 10);
+  assert.strictEqual(tail.label, 'Other (10 groups)');
+  assert.strictEqual(tail.value, sum(1, 10));
+  assert.strictEqual(tail.value, 55, 'Other totals the 10 smallest amounts');
+  assert.strictEqual(tail.n, 10);
+  assert.deepStrictEqual(labels(standing).slice(0, 60), Array.from({length: 60}, (_, n) => 'R' + (n + 11)),
+    'the 60 largest survive, in the order the rows arrived');
+  assert.match(standing.note, /Top 60 of 70/);
+  assert.match(standing.note, /the other 10 groups are combined into "Other \(10 groups\)"/);
+  assert.match(standing.note, /Raise the group limit in Parameters/);
+
+  // 61 groups against the engine's own 60 is the boundary the legacy callers now
+  // reach, and the one case where the count needs a singular noun and verb.
+  const single = math.build(WIDE, wide({limit: 61}));
+  assert.strictEqual(single.groups.length, 61, '60 kept plus one Other');
+  const one = single.groups[60];
+  assert.strictEqual(one.label, 'Other (1 group)', 'singular at one folded group');
+  assert.strictEqual(one.folded, 1);
+  assert.strictEqual(one.value, 1, 'the single smallest amount');
+  assert.strictEqual(one.n, 1);
+  assert.match(single.note, /Top 60 of 61/);
+  assert.match(single.note, /the other 1 group is combined into "Other \(1 group\)"/);
+
+  // Chart Studio compiles its own tighter limit onto every configuration.
+  const result = math.build(WIDE, wide({maxGroups: 40}));
+  assert.strictEqual(result.groups.length, 41, '40 kept plus one Other');
+  const other = result.groups[result.groups.length - 1];
+  assert.strictEqual(other.other, true, 'Other is the last mark');
+  assert.strictEqual(other.folded, 30);
+  assert.strictEqual(other.label, 'Other (30 groups)');
+  assert.strictEqual(other.value, sum(1, 30), 'Other totals the 30 smallest amounts');
+  assert.strictEqual(other.value, 465);
+  assert.strictEqual(other.n, 30);
+  assert.deepStrictEqual(labels(result).slice(0, 40), Array.from({length: 40}, (_, n) => 'R' + (n + 31)),
+    'the 40 largest survive, in the order the rows arrived');
+  assert.match(result.note, /Top 40 of 70/);
+  assert.match(result.note, /Raise the group limit in Parameters/);
+});
+
+test('the group limit is a parameter, and a high enough one folds nothing', () => {
+  const sixty = math.build(WIDE, wide({maxGroups: 60}));
+  assert.strictEqual(sixty.groups.length, 61);
+  assert.strictEqual(sixty.groups[60].folded, 10);
+  assert.strictEqual(sixty.groups[60].value, sum(1, 10));
+  assert.match(sixty.note, /Top 60 of 70/);
+
+  const all = math.build(WIDE, wide({maxGroups: 100}));
+  assert.strictEqual(all.groups.length, 70);
+  assert.ok(!all.groups.some(g => g.other), 'nothing is folded');
+  assert.ok(!('note' in all), 'an unfolded result keeps the old shape, with no note key');
+  assert.strictEqual(math.DEFAULT_GROUP_LIMIT, 60);
+});
+
+test('folding does not change the grand total', () => {
+  const config = wide();
+  assert.strictEqual(core.grandTotal(math.build(WIDE, config), config), sum(1, 70));
+  assert.strictEqual(core.grandTotal(math.build(WIDE, config), config), 2485);
+  const tight = wide({maxGroups: 40});
+  assert.strictEqual(core.grandTotal(math.build(WIDE, tight), tight), 2485, 'a deeper fold still totals the same');
+  assert.strictEqual(core.grandTotal(math.build(WIDE, wide({maxGroups: 100})), wide({maxGroups: 100})), 2485,
+    'the same total whether or not the tail is folded');
+});
+
+test('Other pools the raw rows, so every aggregation reads the folded rows themselves', () => {
+  const other = aggregation => {
+    const result = math.build(WIDE, wide({aggregation, maxGroups: 40}));
+    const last = result.groups[result.groups.length - 1];
+    assert.strictEqual(last.other, true, aggregation + ' should still fold');
+    return last;
+  };
+  assert.strictEqual(other('mean').value, 15.5, 'the mean of 1..30, not a mean of means');
+  assert.strictEqual(other('median').value, 15.5);
+  assert.strictEqual(other('min').value, 1);
+  assert.strictEqual(other('max').value, 30);
+  const counted = other('count');
+  assert.strictEqual(counted.value, 30, 'counting rows counts every folded row');
+  assert.strictEqual(counted.folded, 30);
+  assert.match(math.build(WIDE, wide({aggregation: 'count', maxGroups: 40})).note, /groups by row count/);
+});
+
+test('a side-by-side comparison folds its grouping field the same way', () => {
+  const result = math.build(WIDE, wide({type: 'grouped', series: PARTY, maxGroups: 40}));
+  assert.deepStrictEqual(result.series, ['D', 'R']);
+  assert.strictEqual(result.groups.length, 41);
+  assert.deepStrictEqual(labels(result).slice(0, 40), Array.from({length: 40}, (_, n) => 'R' + (n + 31)));
+  const other = result.groups[40];
+  assert.strictEqual(other.label, 'Other (30 groups)');
+  assert.strictEqual(other.other, true);
+  assert.strictEqual(other.folded, 30);
+  assert.deepStrictEqual(other.values, [
+    {series: 'D', value: 225, n: 15},
+    {series: 'R', value: 240, n: 15}
+  ], 'each series pools only the folded rows that belong to it');
+  assert.match(result.note, /Top 40 of 70/);
+  assert.match(result.note, /Series are independent/, 'the standing caveat is kept');
+});
+
+test('a group limit that is not a positive whole number is refused', () => {
+  for (const maxGroups of [1.5, -3, 0.5, -1]) {
+    assert.throws(() => math.build(WIDE, wide({maxGroups})), /Group limit must be a positive whole number/,
+      String(maxGroups) + ' is not a group limit');
+    assert.throws(() => math.build(DATA, {type: 'bar', x: CATEGORY, y: AMOUNT, aggregation: 'sum', maxGroups}),
+      /Group limit must be a positive whole number/, 'a small worksheet is checked too');
+  }
+  assert.throws(() => math.build(WIDE, wide({type: 'grouped', series: PARTY, maxGroups: 1.5})),
+    /Group limit must be a positive whole number/);
+});
+
+test('Sort reorders the real groups and leaves Other at the end', () => {
+  const synthetic = {type: 'bar', groups: [
+    {label: 'A', value: 10, n: 1}, {label: 'B', value: 30, n: 1}, {label: 'C', value: 20, n: 1},
+    {label: 'Other (2 groups)', value: 99, n: 2, other: true, folded: 2}], selected: 5, excluded: 0};
+  assert.deepStrictEqual(labels(core.sortResult(synthetic, 'desc')), ['B', 'C', 'A', 'Other (2 groups)']);
+  assert.deepStrictEqual(labels(core.sortResult(synthetic, 'asc')), ['A', 'C', 'B', 'Other (2 groups)']);
+  assert.deepStrictEqual(labels(synthetic), ['A', 'B', 'C', 'Other (2 groups)'], 'the result is not mutated');
+
+  const built = math.build(WIDE, wide({maxGroups: 40}));
+  for (const direction of ['asc', 'desc']) {
+    const sorted = core.sortResult(built, direction);
+    assert.strictEqual(sorted.groups[sorted.groups.length - 1].other, true, direction + ' keeps Other last');
+    assert.strictEqual(sorted.groups.length, 41);
+  }
+});
+
+test('splitting a multi-value cell makes one row per value and leaves the data alone', () => {
+  const exploded = math.explodeRows(WIDE, {splitMulti: true, x: ZIPS, series: -1});
+  assert.strictEqual(exploded.rows.length, 74, '70 rows plus 4 extra parts');
+  assert.deepStrictEqual(exploded.split, {cells: 3, values: 7, columns: ['ZIPs']});
+  assert.strictEqual(exploded.row_numbers.length, 74);
+  assert.strictEqual(exploded.row_numbers.filter(n => n === 6).length, 2, 'worksheet row 6 is named twice');
+  assert.strictEqual(exploded.row_numbers.filter(n => n === 7).length, 2);
+  assert.strictEqual(exploded.row_numbers.filter(n => n === 8).length, 3, 'three ZIPs, three marks, one row');
+  assert.strictEqual(exploded.row_numbers.filter(n => n === 5).length, 1);
+  assert.deepStrictEqual(exploded.rows.slice(4, 11).map(r => [r[0], r[ZIPS]]),
+    [['R5', '10001'], ['R5', '10002'], ['R6', '10001'], ['R6', '10002'],
+     ['R7', '10001'], ['R7', '10002'], ['R7', '10003']]);
+  assert.strictEqual(WIDE.rows.length, 70, 'the worksheet rows are never rewritten');
+  assert.strictEqual(WIDE.rows[6][ZIPS], '10001; 10002; 10003');
+
+  assert.strictEqual(math.explodeRows(WIDE, {splitMulti: false, x: ZIPS, series: -1}), WIDE, 'splitting is opt-in');
+  assert.strictEqual(math.explodeRows(WIDE, {splitMulti: true, x: RECIPIENT, series: -1}), WIDE,
+    'a column with nothing to split is left alone, with no split record');
+  assert.strictEqual(math.explodeRows(WIDE, {splitMulti: true, x: WIDE_AMOUNT, series: -1}), WIDE,
+    'a measure is never split');
+
+  const pair = {columns: [{index: 0, name: 'A', type: 'category'}, {index: 1, name: 'B', type: 'category'}],
+    rows: [['x; y', 'p; q'], ['z', 'r']], row_numbers: [2, 3]};
+  const crossed = math.explodeRows(pair, {splitMulti: true, x: 0, series: 1});
+  assert.deepStrictEqual(crossed.rows, [['x', 'p'], ['x', 'q'], ['y', 'p'], ['y', 'q'], ['z', 'r']]);
+  assert.deepStrictEqual(crossed.row_numbers, [2, 2, 2, 2, 3]);
+  assert.deepStrictEqual(crossed.split, {cells: 2, values: 4, columns: ['A', 'B']});
+});
+
+test('a split view counts a row once per value and says so', () => {
+  const config = wide({x: ZIPS, y: -1, aggregation: 'count', splitMulti: true});
+  const result = math.build(WIDE, config);
+  assert.deepStrictEqual(result.groups.map(g => [g.label, g.value]), [['10001', 70], ['10002', 3], ['10003', 1]]);
+  assert.strictEqual(result.selected, 74, 'the split rows are the rows the view selected');
+  assert.match(result.note, /split on ";"/);
+  assert.match(result.note, /count a split row once per value/);
+
+  const joined = math.build(WIDE, wide({x: ZIPS, y: -1, aggregation: 'count'}));
+  assert.deepStrictEqual(joined.groups.map(g => [g.label, g.value]),
+    [['10001', 67], ['10001; 10002', 2], ['10001; 10002; 10003', 1]], 'without the parameter the joined string is one group');
+  assert.ok(!('note' in joined));
+});
+
+test('a split result carries the split facts, so a reader is told values not rows', () => {
+  const split = math.build(WIDE, wide({x: ZIPS, y: -1, aggregation: 'count', splitMulti: true}));
+  assert.deepStrictEqual(split.split, {cells: 3, values: 7, columns: ['ZIPs']});
+  assert.strictEqual(split.selected, 74, 'selected counts exploded rows');
+  assert.ok(split.selected > WIDE.row_count,
+    'which is why a caller must not print it as a share of the worksheet');
+
+  const joined = math.build(WIDE, wide({x: ZIPS, y: -1, aggregation: 'count'}));
+  assert.ok(!('split' in joined), 'an unsplit result keeps the old shape');
+  assert.strictEqual(joined.selected, 70, 'and selected is a plain row count');
+
+  const compared = math.build(WIDE, wide({type: 'grouped', x: ZIPS, series: PARTY, splitMulti: true}));
+  assert.deepStrictEqual(compared.split, {cells: 3, values: 7, columns: ['ZIPs']},
+    'Party was eligible to split but holds no multi-value cell, so the note does not name it');
+  assert.strictEqual(compared.selected, 74);
+  assert.ok(!('split' in math.build(WIDE, wide({type: 'grouped', x: ZIPS, series: PARTY}))),
+    'a comparison without the parameter carries no split facts');
+});
+
+test('the group limit and the split parameter reach the configuration', () => {
+  const config = core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT],
+    params: {start: 0, end: 0, limit: 0, subject: '', maxGroups: 25, splitMulti: true}}), COLUMNS);
+  assert.strictEqual(config.maxGroups, 25);
+  assert.strictEqual(config.splitMulti, true);
+
+  const blank = core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT],
+    params: {maxGroups: '', splitMulti: false}}), COLUMNS);
+  assert.strictEqual(core.STUDIO_GROUP_LIMIT, 40);
+  assert.strictEqual(blank.maxGroups, 40, 'blank compiles to the Studio default, stated explicitly');
+  assert.strictEqual(blank.splitMulti, false);
+  assert.strictEqual(core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT],
+    params: {maxGroups: 0}}), COLUMNS).maxGroups, 40, 'zero means the same');
+
+  const ungrouped = core.compileReport(sheet({rows: [AMOUNT], params: {splitMulti: true}}), COLUMNS);
+  assert.strictEqual(ungrouped.config.x, -1);
+  assert.strictEqual(ungrouped.config.series, -1);
+  assert.match(ungrouped.notes.join(' '), /Splitting multi-value cells applies to the grouping field/);
+  assert.strictEqual(ungrouped.issues.length, 0, 'it is a note, not a refusal');
+
+  const grouped = core.compileReport(sheet({columns: [CATEGORY], rows: [AMOUNT], params: {splitMulti: true}}), COLUMNS);
+  assert.ok(!grouped.notes.some(n => /Splitting multi-value cells/.test(n)), 'a view with a grouping field is not warned');
+});
+
+test('a new sheet starts with no group limit and splitting off', () => {
+  assert.strictEqual(core.createSheet('s').params.maxGroups, 0);
+  assert.strictEqual(core.createSheet('s').params.splitMulti, false);
+});
+

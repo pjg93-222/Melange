@@ -51,6 +51,10 @@
     if (!sourceKey) return;
     try {
       const store = readStore();
+      // Entries written before the key named the worksheet are keyed by a bare
+      // workbook digest and can never be matched again, so drop them rather
+      // than let them use up the twelve-worksheet cap.
+      for (const key of Object.keys(store)) if (!key.includes('|')) delete store[key];
       store[sourceKey] = {sheets, active};
       const keys = Object.keys(store);
       // Keep the file small: only the twelve most recent worksheets are kept.
@@ -183,15 +187,20 @@
       data = body;
       el('header').value = data.header_row;
       const fields = sourceFields();
-      const key = data.sha256 || [fields.run, fields.report, fields.sheet, data.header_row].join('|');
+      const key = core.sourceKey(fields, data);
       if (key !== sourceKey) {
         sourceKey = key;
         history = []; future = [];
+        // A field picked in the previous worksheet still drives Show Me, so the
+        // selection belongs to the source it was made in.
+        selection = [];
         restore(key);
       }
       const record = {run: fields.run, runName: text(el('run')), report: fields.report, reportName: text(el('report')),
         sheet: data.sheet, header: data.header_row, sha256: data.sha256};
       for (const s of sheets) s.source = Object.assign({}, record);
+      const subject = core.subjectField(core.classifyFields(data.columns).fields);
+      if (subject) for (const s of sheets) defaultSubject(s, subject);
       status(fmt(data.row_count) + ' rows · ' + data.columns.length + ' columns scanned');
       persist();
       renderAll();
@@ -337,6 +346,10 @@
     else if (zone === 'pages') { state.pages = null; state.pageMember = ''; }
     else state.marks[zone] = null;
   }
+  // The one shelf that can refuse a drop: a column carries a single filter.
+  // The drop handler asks before it removes the pill it is moving.
+  const canPlace = (zone, column) => zone !== 'filters' ||
+    !sheet().filters.some(f => Number(f.column) === column);
   function place(zone, column, position, aggregation) {
     const state = sheet();
     const entry = {column, aggregation: aggregation || 'sum'};
@@ -348,9 +361,8 @@
       list.splice(at, 0, entry);
       if (zone === 'columns' || zone === 'rows') state[zone] = list; else state.marks[zone] = list;
     } else if (zone === 'filters') {
-      if (!state.filters.some(f => Number(f.column) === column)) {
-        state.filters = state.filters.concat({column, op: 'equals', value: firstMember(column)});
-      }
+      if (!canPlace(zone, column)) return false;
+      state.filters = state.filters.concat({column, op: 'equals', value: firstMember(column)});
     } else if (zone === 'pages') {
       state.pages = entry;
       state.pageMember = firstMember(column);
@@ -358,6 +370,7 @@
       state.marks[zone] = entry;
       if (zone === 'label') state.showLabels = true;
     }
+    return true;
   }
   function members(column) {
     if (!data) return [];
@@ -386,15 +399,37 @@
       if (!dragging) return;
       dropped = true;
       const move = dragging;
+      dragging = null;
       const before = event.target.closest ? event.target.closest('.studio-pill') : null;
-      const at = before && before.dataset.position != null && before.parentElement === node ? Number(before.dataset.position) : null;
-      if (move.kind === 'analytics') { applyAnalytics(move.id); dragging = null; return; }
+      let at = before && before.dataset.position != null && before.parentElement === node ? Number(before.dataset.position) : null;
+      if (move.kind === 'analytics') { applyAnalytics(move.id); return; }
+      // Filters are ANDed, so their order carries no meaning: a filter pill
+      // dropped back onto the Filters shelf — onto itself, another filter or the
+      // empty shelf — is a silent no-op. Origin is dragging.zone; the live drag
+      // marker on the still-attached pill is a fallback, so this can never fall
+      // through to the "already has a filter" refusal on the pill's own column.
+      // A pill from Columns/Rows/marks is in another shelf, so its column is
+      // still refused with the note below.
+      if (zone === 'filters' && move.kind === 'pill' &&
+          (move.zone === 'filters' || el('filters').querySelector('.studio-pill[data-dragging="true"]'))) return;
+      if (move.kind === 'pill' && move.zone === zone) {
+        if (at === move.position) return; // dropping a pill on itself is not an edit
+        // The target position was read while the pill was still on this shelf,
+        // so everything after it shifts down by one once the pill leaves.
+        if (at != null && move.position < at) at -= 1;
+      }
+      // Decide before removing: a shelf that refuses the drop must not cost the
+      // user the pill they were dragging.
+      if (move.kind === 'pill' && !canPlace(zone, move.column)) {
+        const field = core.fieldAt(core.classifyFields(columns()), move.column);
+        el('note').textContent = (field ? field.name : 'That field') + ' already has a filter.';
+        return;
+      }
       commit(() => {
         const aggregation = move.zone ? (core.shelf(sheet()[move.zone] || (sheet().marks || {})[move.zone])[move.position] || {}).aggregation : 'sum';
         if (move.kind === 'pill') removeFrom(move.zone, move.position);
         place(zone, move.column, at, aggregation);
       });
-      dragging = null;
     });
   }
 
@@ -410,7 +445,8 @@
     into(el('hidden'), meta.hidden);
     el('hidden-block').hidden = !el('show-hidden').checked || !meta.hidden.length;
     el('hidden-note').hidden = !meta.hidden.length;
-    el('hidden-note').textContent = meta.hidden.length + ' identifier field' + (meta.hidden.length === 1 ? '' : 's') + ' hidden';
+    el('hidden-note').textContent = meta.hidden.length + ' identifier field' + (meta.hidden.length === 1 ? '' : 's') +
+      ' hidden (IDs, codes, ZIPs) — tick "Show identifier fields" to chart by them';
   }
 
   function renderShelves() {
@@ -628,7 +664,13 @@
       button.textContent = state.name;
       button.setAttribute('aria-selected', String(!dataSourceTab && index === active));
       button.title = 'Double-click to rename this sheet';
-      button.onclick = () => { dataSourceTab = false; active = index; persist(); renderAll(); };
+      button.onclick = () => {
+        // Selecting the sheet that is already showing changes nothing, and the
+        // re-render would replace this button between the two clicks of a
+        // double-click, leaving the rename to run on a detached node.
+        if (!dataSourceTab && index === active) return;
+        dataSourceTab = false; active = index; persist(); renderAll();
+      };
       button.ondblclick = () => renameSheet(button, index);
       return button;
     }));
@@ -638,7 +680,13 @@
     input.type = 'text';
     input.value = sheets[index].name;
     input.setAttribute('aria-label', 'Sheet name');
+    let done = false;
     const finish = keep => {
+      // Enter commits and then blurs, so the name would otherwise be committed
+      // twice; a detached input means the tab was replaced under us and there
+      // is nothing left to put back.
+      if (done || !input.isConnected) return;
+      done = true;
       const name = input.value.trim();
       input.replaceWith(button);
       if (keep && name) commit(() => { sheets[index].name = name; });
@@ -774,9 +822,13 @@
       return;
     }
     const report = core.compileReport(sheet(), columns());
-    const measureName = report.config ? paint.measureLabel(report.config, null, data) : '';
+    const markName = (core.MARK_TYPES.find(m => m[0] === report.markType) || ['', 'Automatic'])[1];
+    // Provisional only: measureLabel reads the built result to tell an
+    // aggregated view from one that plots individual values, so a box,
+    // histogram or scatter title would read "· Sum" without it. The real title
+    // is set again below, once math.build has produced that result.
     el('title').textContent = report.config
-      ? measureName + ' · ' + (core.MARK_TYPES.find(m => m[0] === report.markType) || ['', 'Automatic'])[1]
+      ? paint.measureLabel(report.config, null, data) + ' · ' + markName
       : 'Build a view';
     if (!report.config || report.issues.length) {
       el('note').textContent = report.issues.join(' ') || 'Drag a field onto Columns or Rows.';
@@ -795,18 +847,22 @@
     result = core.sortResult(result, sheet().sort);
     lastResult = result; lastConfig = report.config;
     const measure = paint.measureLabel(report.config, result, data);
+    el('title').textContent = measure + ' · ' + markName;
     const source = sheet().source;
     const filterText = report.config.filters
       .map(f => (core.fieldAt(report.fields, f.column) || {name: 'field'}).name + ' ' + f.op + ' ' + f.value).join('; ');
     lastTitle = el('title').textContent;
     lastScope = [source.reportName + ' / ' + data.sheet,
-      result.selected + ' of ' + data.row_count + ' rows selected; ' + result.excluded + ' rows excluded for missing or non-numeric values.',
+      (result.split ? fmt(result.selected) + ' values from ' + fmt(data.row_count) + ' worksheet rows selected (' + result.split.cells + ' multi-value cells split); '
+        : result.selected + ' of ' + data.row_count + ' rows selected; ') + result.excluded + ' rows excluded for missing or non-numeric values.',
       'Group/X: ' + (core.fieldAt(report.fields, report.config.x) || {name: 'All rows'}).name + '.',
       ['box', 'scatter', 'histogram'].includes(result.type) ? 'Individual worksheet values.' : 'Aggregation: ' + report.config.aggregation + '.',
       'Worksheet rows: ' + (report.config.start || 'first data row') + '–' + (report.config.end || 'last data row') + '.',
       'Row count limit: ' + (report.config.limit || 'all matching rows') + ' (after filters).',
       'Filters: ' + (filterText || 'none') + '.',
       'Sort: ' + sheet().sort + '.',
+      'Group limit: ' + report.config.maxGroups + '.',
+      'Split multi-value cells: ' + (report.config.splitMulti ? 'on' : 'off') + '.',
       'SHA-256: ' + data.sha256 + '.'].join(' ');
     if (result.note) lastScope += ' ' + result.note;
     const notes = report.notes.slice();
@@ -820,11 +876,18 @@
       el('table').hidden = true;
       const drawn = paint.chartSVG(result, measure, report.config, data, lastTitle, lastScope);
       if (sheet().showLabels && !overlayLabels(drawn.svg, result)) notes.push('Mark labels are unavailable for this view.');
-      const references = core.referenceValues(result, sheet().analytics);
+      const analytics = sheet().analytics;
+      const references = core.referenceValues(result, analytics);
       if (references.length && !drawn.plot) notes.push('Reference lines need a value axis; this view has none.');
+      // Say why a requested overlay is missing, but only when it was requested.
+      if ((analytics.average || analytics.median) && result.series) notes.push('Reference lines need a single series.');
       overlayReference(drawn.svg, drawn.plot, references);
-      if (sheet().analytics.totals && !overlayTotal(drawn.svg, core.grandTotal(result))) {
-        notes.push('A grand total is not defined for this view.');
+      if (analytics.totals) {
+        const refusal = core.totalNote(result, report.config);
+        if (refusal) notes.push(refusal);
+        else if (!overlayTotal(drawn.svg, core.grandTotal(result, report.config))) {
+          notes.push('A grand total is not defined for this view.');
+        }
       }
       el('canvas').className = 'studio-canvas fit-' + sheet().fit;
       el('canvas').replaceChildren(drawn.svg);
@@ -895,20 +958,57 @@
     el('datasource').replaceChildren(list, heading, table);
   }
 
+  // Sort is switched off for a time view: chronological order is the meaning of
+  // the axis, and core.sortResult refuses to reorder one, so a pressed-looking
+  // button would promise something the view never does.
+  const SORT_BUTTONS = [['sort-asc', 'asc', 'Sort the grouping smallest first'],
+    ['sort-desc', 'desc', 'Sort the grouping largest first']];
+  function renderSortButtons(view) {
+    const locked = core.sortLocked(view);
+    for (const [id, direction, hint] of SORT_BUTTONS) {
+      el(id).disabled = locked;
+      el(id).title = locked ? 'Time views keep chronological order' : hint;
+      el(id).setAttribute('aria-pressed', String(!locked && sheet().sort === direction));
+    }
+  }
+
+  // The classic dialog picks the first subject by itself, so the studio settles
+  // on one too. That is a derived default, not a user edit: it is written
+  // straight to the sheet with no commit, so it costs no undo step.
+  function defaultSubject(state, field) {
+    const list = members(field.index);
+    if (!list.includes(String(state.params.subject || ''))) state.params.subject = list[0] || '';
+    return list;
+  }
+
+  // Time analysis adds one subject's periods together and the engine refuses a
+  // worksheet holding several, so the studio offers the same Subject choice the
+  // classic dialog does. The control appears only where that column exists.
+  function renderSubjectParam() {
+    const field = data ? core.subjectField(core.classifyFields(columns()).fields) : null;
+    el('param-subject-label').hidden = !field;
+    if (!field) return;
+    const list = defaultSubject(sheet(), field);
+    fill(el('param-subject'), list.length ? list.map(m => [m, m]) : [['', 'Choose a subject…']]);
+    el('param-subject').value = String(sheet().params.subject || '');
+  }
+
   function renderToolbar() {
     const state = sheet();
     el('undo').disabled = !history.length;
     el('redo').disabled = !future.length;
-    el('sort-asc').setAttribute('aria-pressed', String(state.sort === 'asc'));
-    el('sort-desc').setAttribute('aria-pressed', String(state.sort === 'desc'));
+    renderSortButtons(data ? core.compileReport(state, columns()).config : null);
     el('labels').setAttribute('aria-pressed', String(!!state.showLabels));
     el('fit').value = state.fit;
     el('showme-toggle').setAttribute('aria-pressed', String(!el('showme').hidden));
     el('param-start').value = state.params.start || '';
     el('param-end').value = state.params.end || '';
     el('param-limit').value = state.params.limit || '';
+    el('param-groups').value = state.params.maxGroups || '';
+    el('param-split').checked = !!state.params.splitMulti;
     el('param-horizon').value = state.analytics.horizon || 2;
     el('param-period').value = state.analytics.period || '';
+    renderSubjectParam();
   }
 
   function renderAll() {
@@ -980,20 +1080,31 @@
 
   fill(el('mark'), core.MARK_TYPES);
   for (const [zone] of ZONES) dropTarget(el(zone), zone);
-  // The view itself is a drop target for Analytics objects only.
+  // The view applies Analytics objects dropped on it. It also accepts a pill and
+  // does nothing with it: the drop has to fire so that dragend does not read the
+  // gesture as "dragged off the shelves" and delete the field. The effect stays
+  // 'move' because a dropEffect of 'none' cancels the drop event itself.
   el('canvas-wrap').addEventListener('dragover', event => {
-    if (!dragging || dragging.kind !== 'analytics') return;
+    if (!dragging) return;
+    if (dragging.kind === 'analytics') {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+      el('canvas-wrap').classList.add('is-over');
+      return;
+    }
+    if (dragging.kind !== 'pill') return;
     event.preventDefault();
-    el('canvas-wrap').classList.add('is-over');
+    event.dataTransfer.dropEffect = 'move';
   });
   el('canvas-wrap').addEventListener('dragleave', () => el('canvas-wrap').classList.remove('is-over'));
   el('canvas-wrap').addEventListener('drop', event => {
     el('canvas-wrap').classList.remove('is-over');
-    if (!dragging || dragging.kind !== 'analytics') return;
+    if (!dragging) return;
     event.preventDefault();
     dropped = true;
-    applyAnalytics(dragging.id);
+    const move = dragging;
     dragging = null;
+    if (move.kind === 'analytics') applyAnalytics(move.id);
   });
 
   el('undo').onclick = () => step(history, future);
@@ -1035,7 +1146,12 @@
   };
   el('mark').onchange = () => commit(() => { sheet().marks.type = el('mark').value; });
   el('search').oninput = renderFields;
-  el('show-hidden').onchange = renderFields;
+  el('show-hidden').onchange = () => {
+    // The reveal is a reading habit, not part of the view, so it is remembered
+    // in this browser rather than saved into the sheet.
+    try { localStorage.setItem('mentat-chart-studio-show-identifiers', el('show-hidden').checked ? '1' : '0'); } catch {}
+    renderFields();
+  };
   el('run').onchange = loadReports;
   el('report').onchange = loadSheets;
   el('sheet').onchange = () => scan(false);
@@ -1047,9 +1163,12 @@
     ['param-start', v => { sheet().params.start = v; }],
     ['param-end', v => { sheet().params.end = v; }],
     ['param-limit', v => { sheet().params.limit = v; }],
+    ['param-groups', v => { sheet().params.maxGroups = v; }],
     ['param-horizon', v => { sheet().analytics.horizon = v || 2; }]
   ]) el(id).onchange = () => commit(() => apply(Number(el(id).value) || 0));
   el('param-period').onchange = () => commit(() => { sheet().analytics.period = el('param-period').value; });
+  el('param-subject').onchange = () => commit(() => { sheet().params.subject = el('param-subject').value; });
+  el('param-split').onchange = () => commit(() => { sheet().params.splitMulti = el('param-split').checked; });
   for (const id of ['tab-data', 'tab-analytics']) el(id).onclick = () => {
     const wantData = id === 'tab-data';
     el('tab-data').setAttribute('aria-selected', String(wantData));
@@ -1073,6 +1192,7 @@
   }
   window.addEventListener('mentat:view', activate);
   window.addEventListener('hashchange', activate);
+  try { el('show-hidden').checked = localStorage.getItem('mentat-chart-studio-show-identifiers') === '1'; } catch {}
   renderAll();
   activate();
 })();

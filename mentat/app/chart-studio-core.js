@@ -49,6 +49,11 @@
 
   const fieldAt = (meta, index) => meta.fields.find(f => f.index === index) || null;
 
+  // The classic dialog and the engine both find the subject by an exact
+  // 'Subject' column name (charts.js prepareSubjects, chart-math temporal), so
+  // the studio reads it the same way rather than inventing a looser rule.
+  const subjectField = fields => (fields || []).find(f => f.name === 'Subject') || null;
+
   /* ----------------------------------------------------------------- state */
 
   function pill(value) {
@@ -73,7 +78,7 @@
       pages: null,
       pageMember: '',
       analytics: {transform: 'none', period: '', horizon: 2, totals: false, average: false, median: false},
-      params: {start: 0, end: 0, limit: 0},
+      params: {start: 0, end: 0, limit: 0, subject: '', maxGroups: 0, splitMulti: false},
       sort: 'none',
       showLabels: false,
       fit: 'standard'
@@ -95,12 +100,27 @@
     return next;
   }
 
+  // One worksheet, one saved session. data.sha256 digests the whole workbook,
+  // so it is identical for every sheet in the file and cannot tell them apart;
+  // the run, the report, the worksheet and the header row can.
+  function sourceKey(fields, data) {
+    const source = fields || {}, body = data || {};
+    return [source.run, source.report, body.sheet || source.sheet,
+      String(body.header_row ?? ''), body.sha256 || ''].join('|');
+  }
+
   /* --------------------------------------------------------------- compile */
 
   const positiveInteger = value => {
     const number = Number(value);
     return Number.isFinite(number) && number >= 1 ? Math.trunc(number) : 0;
   };
+
+  // The Studio's own default: forty marks is a view a reader can still take in.
+  // The engine's default is the legacy callers' sixty, so the Studio never leans
+  // on it - every compiled configuration carries its limit explicitly, and the
+  // Group limit box in Parameters raises it.
+  const STUDIO_GROUP_LIMIT = 40;
 
   function compileReport(state, columns) {
     const meta = classifyFields(columns);
@@ -229,6 +249,16 @@
     }
 
     const params = state.params || {};
+    // The engine refuses to add several subjects together over time, and the
+    // classic dialog answers that with its own Subject select; the studio asks
+    // for the same choice in Parameters instead of letting the engine throw.
+    const subject = subjectField(meta.fields);
+    if (subject && transform !== 'none' && !filters.some(f => f.column === subject.index)) {
+      const chosen = params.subject == null ? '' : String(params.subject);
+      if (chosen) filters.push({column: subject.index, op: 'equals', value: chosen});
+      else issues.push('Choose a Subject in Parameters for time analysis.');
+    }
+
     const config = type ? {
       type: type,
       x: x,
@@ -240,12 +270,19 @@
       start: positiveInteger(params.start),
       end: positiveInteger(params.end),
       limit: positiveInteger(params.limit),
+      maxGroups: positiveInteger(params.maxGroups) || STUDIO_GROUP_LIMIT,
+      splitMulti: !!params.splitMulti,
       series: series,
       filters: filters
     } : null;
 
     if (config && transform === 'forecast' && (config.start || config.end || config.limit)) {
       notes.push('The same-phase forecast reads every worksheet row; clear the row range and row limit in Parameters.');
+    }
+    // Splitting rewrites the grouping cell, so a view with nothing on the axis
+    // has no cell to split and the parameter would silently do nothing.
+    if (config && config.splitMulti && config.x < 0 && config.series < 0) {
+      notes.push('Splitting multi-value cells applies to the grouping field; put a dimension on Columns or Rows.');
     }
 
     return {
@@ -416,15 +453,28 @@
 
   const groupValue = group => group.value != null ? group.value : group.median != null ? group.median : 0;
 
+  // Chronological order is the meaning of a time axis, so sorting such a view
+  // by value would destroy it rather than reorder it. A built result and a
+  // compiled configuration both answer this, so the toolbar can switch Sort off
+  // before the view is drawn and sortResult can refuse it afterwards.
+  const TIME_VIEWS = ['line', 'area', 'multiline'];
+  const sortLocked = view => !!view && (!!view.temporal ||
+    (view.transform != null && view.transform !== 'none') || TIME_VIEWS.indexOf(view.type) !== -1);
+
   function sortResult(result, direction) {
     if (!result || !Array.isArray(result.groups)) return result;
     if (['asc', 'desc'].indexOf(direction) === -1) return result;
     if (['scatter', 'histogram'].indexOf(result.type) !== -1) return result;
+    if (sortLocked(result)) return result;
     const size = group => result.series
       ? group.values.reduce((total, v) => total + (v.value == null ? 0 : v.value), 0)
       : groupValue(group);
-    const groups = result.groups.slice().sort((a, b) => direction === 'asc' ? size(a) - size(b) : size(b) - size(a));
-    return Object.assign({}, result, {groups: groups});
+    // An Other rollup is the tail the engine folded away, not a member of the
+    // view, so it keeps the last position however the real groups are ordered.
+    const rollup = result.groups.filter(g => g.other);
+    const groups = result.groups.filter(g => !g.other)
+      .sort((a, b) => direction === 'asc' ? size(a) - size(b) : size(b) - size(a));
+    return Object.assign({}, result, {groups: groups.concat(rollup)});
   }
 
   // Mark values in the order the renderer appends them, so a caller can label
@@ -438,6 +488,9 @@
 
   function referenceValues(result, analytics) {
     const wanted = analytics || {};
+    // One dashed rule cannot stand for several independent series, so a view
+    // separated by Colour has no single average or median of its own.
+    if (result && result.series) return [];
     const values = markValues(result).filter(v => typeof v === 'number' && Number.isFinite(v));
     const lines = [];
     if (!values.length) return lines;
@@ -446,7 +499,23 @@
     return lines;
   }
 
-  function grandTotal(result) {
+  // A grand total only means something when the marks are additive parts of one
+  // whole. Independent series, bin counts, five-number summaries, shares of a
+  // circle and a sum of means are not, so the studio says why instead of
+  // printing a number that reads as money.
+  const UNTOTALLED = ['histogram', 'scatter', 'box', 'pie', 'doughnut', 'radar'];
+
+  function totalNote(result, config) {
+    if (!result) return '';
+    if (result.series) return 'Grand total is not shown: series are independent.';
+    if (result.type === 'histogram') return 'Grand total is not shown for histograms (bins are row counts).';
+    if (UNTOTALLED.indexOf(result.type) !== -1) return 'Grand total is not shown for ' + result.type + ' views.';
+    if (config && ['sum', 'count'].indexOf(config.aggregation) === -1) return 'Grand total is only available for SUM and COUNT.';
+    return '';
+  }
+
+  function grandTotal(result, config) {
+    if (totalNote(result, config)) return null;
     const values = markValues(result).filter(v => typeof v === 'number' && Number.isFinite(v));
     return values.length ? values.reduce((a, b) => a + b, 0) : null;
   }
@@ -462,9 +531,7 @@
       : (result.groups || []).length;
     const viewColumns = result.type === 'scatter' ? 1 : (result.groups || []).length;
     const viewRows = result.series ? result.series.length : 1;
-    const total = result.type === 'scatter'
-      ? (result.points || []).reduce((n, p) => n + p.y, 0)
-      : grandTotal(result);
+    const total = grandTotal(result, config);
     const name = config.aggregation === 'count' && config.y === -1 ? 'rows' : measure ? measure.name : 'value';
     return {
       marks: marks,
@@ -473,16 +540,16 @@
       selected: result.selected == null ? null : result.selected,
       excluded: result.excluded == null ? null : result.excluded,
       measureLabel: AGGREGATION_LABEL[config.aggregation] + '(' + name + ')',
-      total: ['box'].indexOf(result.type) === -1 ? total : null
+      total: total
     };
   }
 
   const api = {
-    AGGREGATIONS, AGGREGATION_IDS, MARK_TYPES, MARK_IDS, TRANSFORMS, SHOW_ME,
-    classifyFields, fieldAt, pill, shelf, createSheet, clearSheet, swapShelves,
+    AGGREGATIONS, AGGREGATION_IDS, MARK_TYPES, MARK_IDS, TRANSFORMS, SHOW_ME, STUDIO_GROUP_LIMIT,
+    classifyFields, fieldAt, subjectField, pill, shelf, createSheet, clearSheet, swapShelves, sourceKey,
     compileConfig, compileReport,
     showMeSelection, showMeEligibility, showMeApply, recommendedTile,
-    sortResult, markValues, referenceValues, grandTotal, rowsToMarksSummary
+    sortResult, sortLocked, markValues, referenceValues, grandTotal, totalNote, rowsToMarksSummary
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MentatStudioCore = api;

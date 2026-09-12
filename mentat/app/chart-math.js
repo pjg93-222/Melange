@@ -47,6 +47,74 @@
   }
   const chartTypes=['bar','pie','line','scatter','box','histogram','area','doughnut','waterfall','radar','horizontal','pareto','grouped','groupedhorizontal','multiline'];
   const aggregations=['sum','mean','count','median','min','max'];
+  // Refusing to draw is worse than showing the head of the distribution: the tail
+  // is pooled into one Other mark, so the grand total still balances. 60 is the
+  // standing per-view contract of the two callers that pass no limit - the classic
+  // dialog in charts.js and funding-comparison.js, whose own control reads "Enter
+  // 1-60 recipients per view". At 60 they draw exactly what they drew before and
+  // only fold, with a note, where they used to throw. Chart Studio passes its own
+  // tighter default from its compiler.
+  const DEFAULT_GROUP_LIMIT = 60;
+  function groupLimit(config) {
+    const n = config.maxGroups;
+    if (n == null || n === 0) return DEFAULT_GROUP_LIMIT;
+    if (!Number.isInteger(n) || n < 1) throw new Error('Group limit must be a positive whole number.');
+    return n;
+  }
+  // The one place a group of raw values becomes its mark's number. The Other
+  // rollup calls it on the pooled raw values and never on already-aggregated
+  // ones, so a pooled mean is the mean of the rows, not a mean of means.
+  function aggregate(values, config, count) {
+    if (count) return values.length;
+    if (config.aggregation === 'median') return quantile(values.slice().sort((a, b) => a - b), .5);
+    // reduce, not Math.min(...values): the Other rollup pools every folded row and
+    // a spread of that many arguments overflows the call stack. Every value here
+    // is a finite number (numeric() already dropped null), so both forms agree.
+    if (config.aggregation === 'min') return values.reduce((low, v) => v < low ? v : low, Infinity);
+    if (config.aggregation === 'max') return values.reduce((high, v) => v > high ? v : high, -Infinity);
+    return values.reduce((a, b) => a + b, 0) / (config.aggregation === 'mean' ? values.length : 1);
+  }
+  // One builder owns the rollup's name, so the mark's label and the sentence that
+  // explains it can never drift apart. The engine's default of 60 puts a one-group
+  // fold within reach of the legacy callers, so the count agrees with its noun and verb.
+  const otherLabel = folded => 'Other (' + folded + (folded === 1 ? ' group)' : ' groups)');
+  const rollupNote = (limit, total, folded, by) => 'Top ' + limit + ' of ' + total + ' groups by ' + by +
+    '; the other ' + folded + (folded === 1 ? ' group is' : ' groups are') + ' combined into "' + otherLabel(folded) +
+    '". Raise the group limit in Parameters to show more.';
+  const splitNote = split => split.cells + ' multi-value ' + split.columns.join(' / ') + ' cells were split on ";" into ' +
+    split.values + ' separate values, each drawn as its own mark. The measure is repeated for every value from one cell, so SUM and COUNT along ' +
+    split.columns.join(' / ') + ' count a split row once per value.';
+  // Some worksheet cells hold several values joined with "; " - one filing that
+  // names three ZIPs. Splitting them is opt-in because it repeats that row's
+  // measure once per value, which answers a coverage question and overstates money.
+  function explodeRows(data, config) {
+    if (!config.splitMulti) return data;
+    // Only grouping fields split: a scatter x is a measure and a histogram has
+    // no x at all. A column named by both x and series is split once.
+    const targets = [config.x, config.series].filter((column, at, all) => column >= 0 && all.indexOf(column) === at &&
+      data.columns[column] && data.columns[column].type !== 'number');
+    if (!targets.length) return data;
+    const rows = [], row_numbers = [];
+    let cells = 0, values = 0;
+    const splitting = new Set(); // Candidates that actually produced a split.
+    data.rows.forEach((row, i) => {
+      let batch = [row];
+      for (const column of targets) {
+        const parts = String(row[column] ?? '').split(';').map(s => s.trim()).filter(Boolean);
+        if (parts.length < 2) continue; // One value or none: the cell is left exactly as it was.
+        cells++; values += parts.length; splitting.add(column);
+        batch = batch.flatMap(current => parts.map(part => {
+          const copy = current.slice(); copy[column] = part; return copy;
+        }));
+      }
+      for (const emitted of batch) { rows.push(emitted); row_numbers.push(data.row_numbers[i]); }
+    });
+    if (!cells) return data;
+    return Object.assign({}, data, {rows, row_numbers,
+      // Name only the columns that actually split. A candidate with no multi-value
+      // cell contributed nothing, and naming it would make the note claim it did.
+      split:{cells, values, columns:targets.filter(column => splitting.has(column)).map(column => data.columns[column].name)}});
+  }
   const timeColumn=c=>c.type==='date'||/\b(year|cycle|date)\b/i.test(c.name);
   const identifierColumn=c=>/(?:^|[\s_])(id|identifier|code|zip|index|row number|filing number|transaction number)(?:$|[\s_])/i.test(c.name);
   function chartColumns(columns) {
@@ -130,11 +198,12 @@
   }
   function build(data, config) {
     if (['grouped','groupedhorizontal','multiline'].includes(config.type)) return grouped(data, config);
-    if (data.independent_series != null && new Set(filterRows(data,config).map(r=>r[data.independent_series])).size > 1) throw new Error('Use side-by-side bars, horizontal comparison or separate lines to keep funding sources and activities separate.');
+    const source = explodeRows(data, config);
+    if (source.independent_series != null && new Set(filterRows(source,config).map(r=>r[source.independent_series])).size > 1) throw new Error('Use side-by-side bars, horizontal comparison or separate lines to keep funding sources and activities separate.');
     if (config.transform && config.transform !== 'none') return temporal(data, config);
     if (!['bar','pie','line','scatter','box','histogram','area','doughnut','waterfall','radar','horizontal','pareto'].includes(config.type)) throw new Error('Choose a chart type.');
     if (!['sum','mean','count','median','min','max'].includes(config.aggregation)) throw new Error('Choose an aggregation.');
-    const rows = filterRows(data, config), points = [], groups = new Map();
+    const rows = filterRows(source, config), points = [], groups = new Map();
     if (!rows.length) throw new Error('No rows match this subsection.');
     const count = config.aggregation === 'count' && !['box','scatter','histogram'].includes(config.type);
     if (!count && !data.columns[config.y]) throw new Error('Choose a numeric measure.');
@@ -165,22 +234,46 @@
       for (const v of values) bins[Math.min(n-1, Math.floor((v-min)/width))].value++;
       return {type:config.type, groups:bins, selected:rows.length, excluded};
     }
-    if (groups.size > 60) throw new Error('Filter to 60 groups or fewer, or choose a different grouping column.');
-    let output = [...groups].map(([label, values]) => config.type === 'box' ? {label, ...box(values)} :
-      {label, value:count ? values.length : config.aggregation==='median'?quantile(values.slice().sort((a,b)=>a-b),.5):config.aggregation==='min'?Math.min(...values):config.aggregation==='max'?Math.max(...values):values.reduce((a,b) => a+b,0) / (config.aggregation === 'mean' ? values.length : 1), n:values.length});
+    const limit = groupLimit(config);
+    let entries = [...groups], rolled = null;
+    if (entries.length > limit) {
+      // Rank by the number the mark itself would show, so the fold keeps the
+      // groups the view is about. Selection is by size; the axis still lists the
+      // survivors in the order the rows arrived, which is what a waterfall means.
+      const key = new Map(entries.map(([label, values]) => [label,
+        config.type === 'box' ? quantile(values.slice().sort((a,b)=>a-b), .5) : aggregate(values, config, count)]));
+      const kept = new Set(entries.slice().sort((a, b) => key.get(b[0]) - key.get(a[0]) ||
+        a[0].localeCompare(b[0], undefined, {numeric:true})).slice(0, limit).map(([label]) => label));
+      const rest = entries.filter(([label]) => !kept.has(label)), pooled = rest.flatMap(([, values]) => values);
+      entries = entries.filter(([label]) => kept.has(label));
+      rolled = Object.assign({label:otherLabel(rest.length)},
+        config.type === 'box' ? box(pooled) : {value:aggregate(pooled, config, count), n:pooled.length},
+        {other:true, folded:rest.length});
+    }
+    let output = entries.map(([label, values]) => config.type === 'box' ? {label, ...box(values)} :
+      {label, value:aggregate(values, config, count), n:values.length});
     if (['line','area'].includes(config.type)) output.sort((a,b) => a.label.localeCompare(b.label, undefined, {numeric:true}));
     if (config.type==='pareto')output.sort((a,b)=>b.value-a.value);
+    if (rolled) output.push(rolled); // Other is the tail of the view, never a member sorted into it.
     if(config.type==='radar'&&output.length<3)throw new Error('Radar charts need at least three groups.');
     if (['pie','doughnut','pareto','radar'].includes(config.type) && !output.some(g => g.value > 0)) throw new Error('This chart needs a positive total.');
-    return {type:config.type, groups:output, selected:rows.length, excluded};
+    const result = {type:config.type, groups:output, selected:rows.length, excluded};
+    const notes = [];
+    // selected counts exploded rows, so it can exceed the worksheet. The caller
+    // needs the split facts to say "values from rows" rather than "7333 of 4500".
+    if (source.split) { result.split = source.split; notes.push(splitNote(source.split)); }
+    if (rolled) notes.push(rollupNote(limit, groups.size, rolled.folded, count ? 'row count' : config.aggregation));
+    if (notes.length) result.note = notes.join(' ');
+    return result;
   }
   function grouped(data, config) {
     if (config.transform && config.transform !== 'none') throw new Error('Choose None for time analysis to compare separate series.');
     if (!data.columns[config.x] || !data.columns[config.series]) throw new Error('Choose a grouping column and a separate series.');
-    if(data.independent_series!=null && config.x!==data.independent_series && config.series!==data.independent_series && new Set(filterRows(data,config).map(r=>r[data.independent_series])).size>1)throw new Error('Keep Source / activity as the grouping or separate series so independent amounts are not combined.');
+    const source=explodeRows(data,config);
+    if(source.independent_series!=null && config.x!==source.independent_series && config.series!==source.independent_series && new Set(filterRows(source,config).map(r=>r[source.independent_series])).size>1)throw new Error('Keep Source / activity as the grouping or separate series so independent amounts are not combined.');
     if (!['sum','mean','count','median','min','max'].includes(config.aggregation)) throw new Error('Choose an aggregation.');
-    const order=data.independent_series==null || config.series===data.independent_series ? data.series_order||[] : [];
-    const rows=filterRows(data,config), groups=new Map(), series=new Set(order);let excluded=0;
+    const order=source.independent_series==null || config.series===source.independent_series ? source.series_order||[] : [];
+    const rows=filterRows(source,config), groups=new Map(), series=new Set(order);let excluded=0;
     for(const row of rows) {
       const label=String(row[config.x]??'(Missing)'), name=String(row[config.series]??'(Missing)');
       if(!groups.has(label))groups.set(label,new Map());series.add(name);
@@ -190,11 +283,32 @@
       groups.get(label).get(name).push(value);
     }
     if(!rows.length)throw new Error('No rows match this subsection.');
-    if(groups.size>60)throw new Error('Choose 60 recipients per view or fewer.');
-    const output=[...groups].map(([label,values])=>({label,values:[...series].map(name=>{
-      const a=values.get(name);return {series:name,value:!a?null:config.aggregation==='count'?a.length:config.aggregation==='median'?quantile(a.slice().sort((a,b)=>a-b),.5):config.aggregation==='min'?Math.min(...a):config.aggregation==='max'?Math.max(...a):a.reduce((n,v)=>n+v,0)/(config.aggregation==='mean'?a.length:1),n:a?.length||0};
-    })}));
-    return {type:config.type,groups:output,series:[...series],selected:rows.length,excluded,note:'Series are independent; no combined total. Gaps mean unavailable observations, not zero.'};
+    const limit=groupLimit(config), countMode=config.aggregation==='count';
+    let entries=[...groups], rolled=null;
+    if(entries.length>limit){
+      // A label is ranked by everything drawn under it, across every series.
+      const key=new Map(entries.map(([label,byName])=>[label,aggregate([...byName.values()].flat(),config,countMode)]));
+      const kept=new Set(entries.slice().sort((a,b)=>key.get(b[0])-key.get(a[0])||
+        a[0].localeCompare(b[0],undefined,{numeric:true})).slice(0,limit).map(([label])=>label));
+      const rest=entries.filter(([label])=>!kept.has(label)), pooled=new Map();
+      entries=entries.filter(([label])=>kept.has(label));
+      for(const [,byName] of rest)for(const [name,values] of byName){
+        if(!pooled.has(name))pooled.set(name,[]);
+        const into=pooled.get(name);for(const v of values)into.push(v); // push(...values) overflows on a large fold.
+      }
+      rolled={label:otherLabel(rest.length),members:pooled,folded:rest.length};
+    }
+    const mark=(label,byName)=>({label,values:[...series].map(name=>{
+      const a=byName.get(name);return {series:name,value:!a?null:aggregate(a,config,countMode),n:a?.length||0};
+    })});
+    const output=entries.map(([label,byName])=>mark(label,byName));
+    if(rolled)output.push(Object.assign(mark(rolled.label,rolled.members),{other:true,folded:rolled.folded}));
+    let note='Series are independent; no combined total. Gaps mean unavailable observations, not zero.';
+    if(source.split)note+=' '+splitNote(source.split);
+    if(rolled)note+=' '+rollupNote(limit,groups.size,rolled.folded,countMode?'row count':config.aggregation);
+    const result={type:config.type,groups:output,series:[...series],selected:rows.length,excluded,note};
+    if(source.split)result.split=source.split; // selected counts exploded rows; the caller says so.
+    return result;
   }
   function temporal(data, config) {
     if(!['annual','yoy','change','forecast'].includes(config.transform))throw new Error('Choose a time analysis.');
@@ -276,7 +390,7 @@
   // chartColumns / timeColumn / identifierColumn are exported so Chart Studio
   // classifies fields through this module instead of forking the rules.
   const api = {numeric, quantile, box, filterRows, recommend, quickConfig, build, temporal,
-    chartColumns, timeColumn, identifierColumn, measureScore,
+    chartColumns, timeColumn, identifierColumn, measureScore, explodeRows, groupLimit, DEFAULT_GROUP_LIMIT,
     chartTypes:Object.freeze(chartTypes.slice()), aggregations:Object.freeze(aggregations.slice())};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MentatCharts = api;
