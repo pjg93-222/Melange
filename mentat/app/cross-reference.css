@@ -1,0 +1,34 @@
+/* The reconciliation view is scoped so existing charts keep their layout. */
+#view-cross-reference { max-width: 1260px; }
+#view-cross-reference .xref-intro { max-width: 850px; margin: 0 0 1.2rem; }
+#view-cross-reference .xref-toolbar, #view-cross-reference .xref-run { display: flex; align-items: center; flex-wrap: wrap; gap: .7rem 1.2rem; margin-bottom: 1rem; }
+#view-cross-reference .xref-toolbar span, #view-cross-reference .xref-run>span:last-child { font-size: .8rem; color: var(--muted); overflow-wrap: anywhere; }
+#view-cross-reference .xref-steps { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; margin: 1.2rem 0; }
+#view-cross-reference .xref-step { display: flex; gap: .8rem; border: 1px solid var(--line); border-top: 3px solid var(--line); border-radius: 6px; padding: 1rem; background: white; min-width: 0; }
+#view-cross-reference .xref-step h3 { font-size: 1rem; margin: 0 0 .5rem; }
+#view-cross-reference .xref-step p { font-size: .85rem; line-height: 1.5; margin: .5rem 0; }
+#view-cross-reference .xref-step-number { color: var(--muted); font-size: .8rem; padding-top: .15rem; }
+#view-cross-reference .xref-step-state { font-size: .8rem; display: inline-block; margin-top: .5rem; }
+#view-cross-reference .xref-step-detail { color: var(--muted); overflow-wrap: anywhere; }
+#view-cross-reference .xref-step-completed { border-top-color: #327a7a; }
+#view-cross-reference .xref-step-review { border-top-color: #b77b0b; }
+#view-cross-reference .xref-step-running { border-top-color: #57447b; }
+#view-cross-reference .xref-step-failed { border-top-color: #a92d44; }
+#view-cross-reference .xref-warning { background: #fff5e3; border: 1px solid #d6b26d; border-left: 4px solid #b77b0b; padding: .7rem 1rem; border-radius: 5px; margin: 1rem 0; }
+#view-cross-reference .xref-warning p { margin: .5rem 0; }
+#view-cross-reference .xref-metrics, #view-cross-reference .xref-money-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 1.2rem 0; }
+#view-cross-reference .xref-money-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#view-cross-reference .xref-metric { background: #fcf7f4; border: 1px solid var(--line); border-radius: 6px; padding: 1.2rem; min-width: 0; }
+#view-cross-reference .xref-metric span, #view-cross-reference .xref-metric strong, #view-cross-reference .xref-metric small { display: block; }
+#view-cross-reference .xref-metric strong { font-size: clamp(1.35rem, 2.4vw, 2rem); font-weight: 500; margin: .65rem 0; overflow-wrap: anywhere; }
+#view-cross-reference .xref-metric small, #view-cross-reference .xref-caption { color: var(--muted); font-size: .8rem; line-height: 1.5; }
+#view-cross-reference .xref-breakdown { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+#view-cross-reference .xref-breakdown>div { border-top: 1px solid var(--line); padding-top: .7rem; }
+#view-cross-reference .xref-breakdown dt { color: var(--muted); font-size: .85rem; }
+#view-cross-reference .xref-breakdown dd { margin: .5rem 0; font-size: 1.1rem; }
+#view-cross-reference th { white-space: normal; }
+#view-cross-reference td small { display: block; color: var(--muted); margin-top: .35rem; }
+#view-cross-reference li { overflow-wrap: anywhere; }
+#view-cross-reference .panel h2 { font-size: 1.5rem; }
+@media (max-width: 900px) { #view-cross-reference .xref-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 650px) { #view-cross-reference .xref-steps, #view-cross-reference .xref-metrics, #view-cross-reference .xref-money-grid, #view-cross-reference .xref-breakdown { grid-template-columns: 1fr; } }

@@ -55,13 +55,44 @@ def crypt(value, decrypt=False):
         kernel.LocalFree(output.data)
 
 
+def key_id(value):
+    """Non-secret fingerprint. The only key identifier safe to print or log."""
+    return hashlib.sha256(value.encode()).hexdigest()[:12]
+
+
 def load_keys(path=None, include_disabled=False):
     path=Path(path) if path else key_path()
     if not path.exists():return []
     data=json.loads(crypt(path.read_bytes(),decrypt=True))
     disabled=data.get('disabled',{})
     return [key for key in normalize(data['keys']) if include_disabled or
-            hashlib.sha256(key.encode()).hexdigest()[:12] not in disabled]
+            key_id(key) not in disabled]
+
+
+def inventory(path=None):
+    """Every key on file with its fingerprint and status. Never returns key values."""
+    path=Path(path) if path else key_path()
+    if not path.exists():return []
+    data=json.loads(crypt(path.read_bytes(),decrypt=True))
+    disabled=data.get('disabled',{})
+    return [{'key_id':key_id(key),'active':key_id(key) not in disabled,
+             'status':disabled.get(key_id(key),'active')}
+            for key in normalize(data['keys'])]
+
+
+def set_disabled(identifiers,reason=None,path=None):
+    """Recycle (reason=None) or quarantine keys already on file, by fingerprint."""
+    path=Path(path) if path else key_path()
+    with store_lock(path):
+        data=json.loads(crypt(path.read_bytes(),decrypt=True))
+        disabled=data.setdefault('disabled',{})
+        known={entry['key_id'] for entry in inventory(path)}
+        for value in identifiers:
+            if value not in known:continue
+            if reason is None:disabled.pop(value,None)
+            else:disabled[value]=reason
+        write_store(path,data)
+    return [value for value in identifiers if value not in known]
 
 
 @contextmanager
@@ -130,8 +161,9 @@ def record_validation_locked(results,path):
 
 
 def status():
-    return {'stored_key_count':len(load_keys(include_disabled=True)),
-            'active_key_count':len(load_keys()),'encrypted':True}
+    keys=inventory()
+    return {'stored_key_count':len(keys),
+            'active_key_count':sum(entry['active'] for entry in keys),'encrypted':True}
 
 
 def main():
@@ -139,13 +171,26 @@ def main():
     parser.add_argument('--import-file',type=Path)
     parser.add_argument('--import-environment',action='store_true')
     parser.add_argument('--count',action='store_true')
+    parser.add_argument('--list',action='store_true')
+    parser.add_argument('--enable',nargs='+',metavar='ID',default=[])
+    parser.add_argument('--enable-all',action='store_true')
+    parser.add_argument('--disable',nargs='+',metavar='ID',default=[])
     args=parser.parse_args()
     values=[]
     if args.import_file:values.append(args.import_file.read_text(encoding='utf-8-sig'))
     if args.import_environment:values.extend(environment_keys())
     if values:save_keys(values)
+    unknown=[]
+    if args.enable_all:
+        unknown+=set_disabled([entry['key_id'] for entry in inventory() if not entry['active']])
+    if args.enable:unknown+=set_disabled(args.enable)
+    if args.disable:unknown+=set_disabled(args.disable,reason='manual')
     count=len(load_keys())
-    print(count if args.count else json.dumps({**status(),'path':str(key_path())}))
+    if args.count:print(count)
+    elif args.list or args.enable_all or args.enable or args.disable:
+        print(json.dumps({**status(),'path':str(key_path()),
+                          'keys':inventory(),'unknown':unknown},indent=2))
+    else:print(json.dumps({**status(),'path':str(key_path())}))
 
 
 if __name__=='__main__':main()
