@@ -1,0 +1,70 @@
+diff --git a/mentat/app/chart-comparison.js b/mentat/app/chart-comparison.js
+index ffd7973..5e87ae8 100644
+--- a/mentat/app/chart-comparison.js
++++ b/mentat/app/chart-comparison.js
+@@ -3,15 +3,22 @@
+ (()=>{
+   'use strict';
+   const root=document.getElementById('view-chart-studio'),studio=root.querySelector('.studio');
+-  const embedded=/^[BCD]$/.test(new URLSearchParams(location.search).get('studioPane')||'');
++  // A pane only behaves as a pane while it really is framed. Opened as a
++  // top-level tab it keeps the whole console, so there is always a way back.
++  const paneId=new URLSearchParams(location.search).get('studioPane')||'';
++  const framed=(()=>{try{return window.top!==window.self;}catch{return true;}})();
++  const embedded=/^[BCD]$/.test(paneId)&&framed;
+   const button=(label,action)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=action;return b;};
+   let hidden=false;
+   const quick=document.createElement('div');quick.className='studio-quick-tools';
+-  const name=document.createElement('strong');name.textContent='Chart '+(embedded?new URLSearchParams(location.search).get('studioPane'):'A');quick.append(name);
++  const name=document.createElement('strong');name.textContent='Chart '+(embedded?paneId:'A');quick.append(name);
+   const mark=document.getElementById('studio-mark').closest('label');mark.firstChild.textContent='Chart variant';quick.append(mark);
+-  const toggle=button('Hide options',()=>setOptions(!hidden));toggle.setAttribute('aria-expanded','true');quick.append(toggle);
++  const toggle=button('Hide chart options',()=>setOptions(!hidden));toggle.setAttribute('aria-expanded','true');
++  toggle.className='studio-options-restore';toggle.id='studio-options-toggle';quick.append(toggle);
+   document.getElementById('studio-canvas-wrap').before(quick);
+-  function setOptions(value){hidden=!!value;studio.classList.toggle('studio-options-hidden',hidden);toggle.textContent=hidden?'Show options':'Hide options';toggle.setAttribute('aria-expanded',String(!hidden));window.dispatchEvent(new Event('mentat:studio-options'));}
++  function setOptions(value){hidden=!!value;studio.classList.toggle('studio-options-hidden',hidden);
++    toggle.textContent=hidden?'Show chart options':'Hide chart options';toggle.setAttribute('aria-expanded',String(!hidden));
++    window.dispatchEvent(new Event('mentat:studio-options'));}
+   const pane=window.MentatStudioPane;if(pane)pane.options=setOptions;
+   if(embedded){
+     document.body.classList.add('studio-embedded');
+@@ -32,7 +39,12 @@
+   }toolbar.append(links);
+   const note=document.createElement('span');note.className='studio-link-status';note.setAttribute('role','status');toolbar.append(note);
+   const grid=document.createElement('div');grid.id='studio-comparison-grid';grid.className='studio-comparison-grid';studio.before(toolbar,grid);grid.append(studio);
+-  const frames=new Map(),windows=()=>[window,...[...frames.values()].filter(f=>!f.hidden).map(f=>f.contentWindow)];let syncing=false;
++  const frames=new Map(),blocked=new Set();
++  // Reading any property of a frame the browser refused to load throws a
++  // SecurityError, so every pane access goes through here.
++  const paneOf=frame=>{try{return frame.contentWindow?.MentatStudioPane||null;}catch{blocked.add(frame.dataset.pane);return null;}};
++  const windows=()=>[window,...[...frames.values()].filter(f=>!f.hidden&&!blocked.has(f.dataset.pane)).map(f=>{try{return f.contentWindow;}catch{return null;}}).filter(Boolean)];
++  let syncing=false;
+   function sync(source,fields=state.links){
+     if(syncing||!source.MentatStudioPane?.ready()||!windows().includes(source))return;syncing=true;const missed=new Set();
+     try{for(const target of windows())if(target!==source&&target.MentatStudioPane?.ready())for(const f of target.MentatStudioPane.applyFilters(source.MentatStudioPane.filters(),fields))missed.add(f);}
+@@ -48,13 +60,21 @@
+       const id='BCD'[i-1];let frame=frames.get(id);
+       if(i<state.count&&!frame){frame=document.createElement('iframe');frame.title='Chart '+id;frame.className='studio-comparison-frame';frame.dataset.pane=id;
+         const url=new URL(location.href);url.searchParams.set('studioPane',id);url.hash='chart-studio';frame.src=url.href;
+-        frame.onload=()=>{const win=frame.contentWindow;win.MentatStudioPane?.options(state.hidden);listen(win);sync(window);
++        frame.onload=()=>{const pane=paneOf(frame);
++          if(!pane){report();return;}
++          blocked.delete(id);const win=frame.contentWindow;pane.options(state.hidden);listen(win);sync(window);
+           const content=win.document.querySelector('.studio');if(content){const resize=new win.ResizeObserver(()=>{if(!frame.hidden)frame.style.height=Math.max(420,Math.ceil(content.getBoundingClientRect().height)+4)+'px';});resize.observe(content);}
+         };frames.set(id,frame);grid.append(frame);
+       }
+-      if(frame){frame.hidden=i>=state.count;frame.contentWindow.MentatStudioPane?.options(state.hidden);}
++      if(frame){frame.hidden=i>=state.count;paneOf(frame)?.options(state.hidden);}
+     }
+-    sync(window);
++    sync(window);report();
++  }
++  function report(){
++    const names=[...blocked].sort();
++    note.textContent=names.length
++      ? 'Chart '+names.join(', ')+' could not open in this page. The console is refusing to embed itself; restart the console so it allows its own comparison panes.'
++      : note.textContent;
+   }
+   render();
+ })();

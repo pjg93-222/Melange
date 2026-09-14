@@ -1,0 +1,16 @@
+diff --git a/mentat/app/chart-studio.css b/mentat/app/chart-studio.css
+index cd42fa5..13d60b0 100644
+--- a/mentat/app/chart-studio.css
++++ b/mentat/app/chart-studio.css
+@@ -47,6 +47,11 @@
+ .studio-multi .studio-side,.studio-multi .studio-cards,.studio-embedded .studio-side,.studio-embedded .studio-cards {max-height:300px;overflow:auto}
+ .studio-multi .studio-showme,.studio-embedded .studio-showme {width:auto}
+ .studio-options-hidden .studio-side,.studio-options-hidden .studio-cards,.studio-options-hidden .studio-showme,.studio-options-hidden .studio-shelf,.studio-options-hidden .studio-toolbar,.studio-options-hidden .studio-quick-tools label {display:none!important}
++/* The control that put the builder away is the only way to bring it back,
++   so it can never be part of what is put away. */
++.studio-quick-tools {position:sticky;top:0;z-index:3}
++.studio-options-hidden .studio-quick-tools,.studio-options-hidden .studio-options-restore {display:flex!important}
++.studio-options-restore {font-weight:600;border-color:var(--acu-purple)!important}
+ .studio-embedded .app-navigation,.studio-embedded .workspace-heading,.studio-embedded .skip-link,.studio-embedded #workspace-main>.workspace>section:not(#view-chart-studio) {display:none!important}
+ .studio-embedded #workspace-main,.studio-embedded .workspace {margin:0;padding:0;max-width:none;width:100%;border:0}
+ .studio-embedded .studio {border:0;border-radius:0}

@@ -28,8 +28,11 @@
     if (config.limit != null && config.limit !== 0 && (!Number.isInteger(config.limit) || config.limit < 1)) throw new Error('Row count must be a positive whole number.');
     for (const f of config.filters || []) {
       if (!data.columns[f.column]) throw new Error('Choose a valid filter column.');
-      if (!['equals','contains','gte','lte'].includes(f.op)) throw new Error('Choose a filter operation.');
+      if (!['equals','contains','gte','lte','in','notin','between'].includes(f.op)) throw new Error('Choose a filter operation.');
       if (['gte','lte'].includes(f.op) && numeric(f.value) === null) throw new Error('A numeric filter needs a number.');
+      // A member list and a range are the filter shapes that are not scalars.
+      if (['in','notin'].includes(f.op) && (!Array.isArray(f.value) || !f.value.length)) throw new Error('A member filter needs at least one chosen value.');
+      if (f.op === 'between' && (!Array.isArray(f.value) || f.value.every(bound => bound === '' || bound == null))) throw new Error('A range filter needs a lower or an upper bound.');
     }
     if (config.start && config.end && config.start > config.end) throw new Error('First worksheet row must precede the last.');
     const matching = data.rows.filter((row, i) => {
@@ -37,6 +40,18 @@
       if (config.start && number < config.start || config.end && number > config.end) return false;
       return (config.filters || []).every(f => {
         const v = row[f.column], text = String(v ?? '').toLocaleLowerCase(), wanted = String(f.value).toLocaleLowerCase();
+        if (f.op === 'between') {
+          const [low, high] = f.value;
+          const inclusive = (bound, test) => bound === '' || bound == null || test(bound);
+          const n = numeric(v);
+          if (n !== null) return inclusive(low, b => n >= numeric(b)) && inclusive(high, b => n <= numeric(b));
+          const raw = String(v ?? '');
+          return raw !== '' && inclusive(low, b => raw >= String(b)) && inclusive(high, b => raw <= String(b));
+        }
+        if (f.op === 'in' || f.op === 'notin') {
+          const chosen = f.value.some(member => String(member).toLocaleLowerCase() === text);
+          return f.op === 'in' ? chosen : !chosen;
+        }
         if (f.op === 'equals') return text === wanted;
         if (f.op === 'contains') return text.includes(wanted);
         const n = numeric(v), threshold = numeric(f.value);
@@ -44,6 +59,54 @@
       });
     });
     return config.limit ? matching.slice(0, config.limit) : matching;
+  }
+  const present = value => value != null && !(typeof value === 'string' && !value.trim());
+  const observation = (row, config) => config.aggregation === 'count'
+    ? (config.y == null || config.y < 0 || present(row[config.y]) ? 1 : null) : numeric(row[config.y]);
+  function dimensions(config) {
+    return [...new Set(Array.isArray(config.dimensions) ? config.dimensions : config.x >= 0 ? [config.x] : [])];
+  }
+  function groupName(row, config) {
+    const fields = dimensions(config);
+    if (!fields.length) return 'All rows';
+    const values = fields.map(column => row[column] == null ? null : String(row[column]));
+    // JSON tuples are unambiguous even when members contain the display separator.
+    return values.length === 1 ? values[0] ?? '(Missing)' : JSON.stringify(values);
+  }
+  function validateGrain(data, config, rows) {
+    const accounting = data.accounting || {};
+    const summing = config.aggregation === 'sum';
+    const measureAccounting = data.columns[config.y]?.accounting || {};
+    if (summing && measureAccounting.safe_to_sum === false) throw new Error(measureAccounting.reason || 'This raw measure is not safe to sum. Choose the analysis amount.');
+    if (summing && accounting.safe_to_sum === false) throw new Error(accounting.reason || 'This worksheet is not an additive fact table. Choose a reconciled contribution table or a safe subsection.');
+    const roles = accounting.row_role_column;
+    if (summing && Number.isInteger(roles) && rows.some(row => !(accounting.included_row_roles || ['fact']).includes(row[roles]))) {
+      throw new Error('Summary and detail rows cannot be summed together. Filter to one declared fact-row role.');
+    }
+    const groupedBy = new Set([...dimensions(config), config.series]);
+    for (const column of accounting.independent_dimensions || []) {
+      if (summing && !groupedBy.has(column) && new Set(rows.map(row => row[column])).size > 1) {
+        throw new Error('Keep ' + (data.columns[column]?.name || 'the accounting basis') + ' in the grouping or filter to one value; these amounts can overlap.');
+      }
+    }
+  }
+  function describeResult(result, data, config) {
+    const fields = dimensions(config);
+    if (fields.length > 1) result.groupingLabel = fields.map(column => data.columns[column]?.name || 'Field').join(' × ');
+    if (data.note) result.note = [result.note, data.note].filter(Boolean).join(' ');
+    if (data.accounting) result.accounting = data.accounting;
+    const independent = [...(data.accounting?.independent_dimensions || []), ...(data.independent_series == null ? [] : [data.independent_series])];
+    if (independent.some(column => new Set(filterRows(data, config).map(row => row[column])).size > 1)) {
+      result.totalRefusal = 'Grand total is not shown: the displayed accounting groups can overlap.';
+    }
+    return result;
+  }
+  function validateRollup(data, config) {
+    const independent = [...(data.accounting?.independent_dimensions || []), ...(data.independent_series == null ? [] : [data.independent_series])];
+    if (config.aggregation === 'sum' && independent.some(column => column !== config.series &&
+      new Set(filterRows(data,config).map(row => row[column])).size > 1)) {
+      throw new Error('Other cannot combine overlapping accounting groups. Raise the group limit or put the accounting basis on Colour.');
+    }
   }
   const chartTypes=['bar','pie','line','scatter','box','histogram','area','doughnut','waterfall','radar','horizontal','pareto','grouped','groupedhorizontal','multiline'];
   const aggregations=['sum','mean','count','median','min','max'];
@@ -82,8 +145,7 @@
     '; the other ' + folded + (folded === 1 ? ' group is' : ' groups are') + ' combined into "' + otherLabel(folded) +
     '". Raise the group limit in Parameters to show more.';
   const splitNote = split => split.cells + ' multi-value ' + split.columns.join(' / ') + ' cells were split on ";" into ' +
-    split.values + ' separate values, each drawn as its own mark. The measure is repeated for every value from one cell, so SUM and COUNT along ' +
-    split.columns.join(' / ') + ' count a split row once per value.';
+    split.values + ' distinct values. Coverage counts count a split row once per value; they are not additive across groups and do not allocate money.';
   // Some worksheet cells hold several values joined with "; " - one filing that
   // names three ZIPs. Splitting them is opt-in because it repeats that row's
   // measure once per value, which answers a coverage question and overstates money.
@@ -91,7 +153,7 @@
     if (!config.splitMulti) return data;
     // Only grouping fields split: a scatter x is a measure and a histogram has
     // no x at all. A column named by both x and series is split once.
-    const targets = [config.x, config.series].filter((column, at, all) => column >= 0 && all.indexOf(column) === at &&
+    const targets = [...dimensions(config), config.series].filter((column, at, all) => column >= 0 && all.indexOf(column) === at &&
       data.columns[column] && data.columns[column].type !== 'number');
     if (!targets.length) return data;
     const rows = [], row_numbers = [];
@@ -100,8 +162,10 @@
     data.rows.forEach((row, i) => {
       let batch = [row];
       for (const column of targets) {
-        const parts = String(row[column] ?? '').split(';').map(s => s.trim()).filter(Boolean);
-        if (parts.length < 2) continue; // One value or none: the cell is left exactly as it was.
+        const tokens = String(row[column] ?? '').split(';').map(s => s.trim()).filter(Boolean);
+        if (tokens.length < 2) continue;
+        const parts = [...new Set(tokens)];
+        if (parts.length > 1 && batch.length > 1) throw new Error('Do not split multiple fields together: their pairings are unknown. Choose one coverage dimension.');
         cells++; values += parts.length; splitting.add(column);
         batch = batch.flatMap(current => parts.map(part => {
           const copy = current.slice(); copy[column] = part; return copy;
@@ -116,10 +180,10 @@
       split:{cells, values, columns:targets.filter(column => splitting.has(column)).map(column => data.columns[column].name)}});
   }
   const timeColumn=c=>c.type==='date'||/\b(year|cycle|date)\b/i.test(c.name);
-  const identifierColumn=c=>/(?:^|[\s_])(id|identifier|code|zip|index|row number|filing number|transaction number)(?:$|[\s_])/i.test(c.name);
+  const identifierColumn=c=>/(?:^|[\s_])(ids?(?:\(s\))?|identifier|codes?|zip(?:s|5|9)?|zipcode|postal|district|index|row number|filing number|transaction number)(?:$|[\s_()])/i.test(c.name);
   function chartColumns(columns) {
     const indexed=columns.map((c,index)=>({...c,index:c.index??index}));
-    const measures=indexed.filter(c=>c.type==='number'&&!timeColumn(c)&&!identifierColumn(c)).sort((a,b)=>measureScore(b)-measureScore(a));
+    const measures=indexed.filter(c=>c.type==='number'&&!timeColumn(c)&&!identifierColumn(c)&&c.accounting?.safe_to_sum!==false).sort((a,b)=>measureScore(b)-measureScore(a));
     const categories=indexed.filter(c=>c.type==='category'&&!identifierColumn(c)&&!timeColumn(c)&&(c.distinct==null||c.distinct>1&&c.distinct<=60));
     const times=indexed.filter(timeColumn);
     return {indexed,measures,categories,times};
@@ -197,20 +261,27 @@
     return next;
   }
   function build(data, config) {
-    if (['grouped','groupedhorizontal','multiline'].includes(config.type)) return grouped(data, config);
+    for (const column of dimensions(config)) if (!Number.isInteger(column) || !data.columns[column]) throw new Error('Choose valid grouping fields.');
+    validateGrain(data, config, filterRows(data, config));
+    if (config.splitMulti && config.aggregation !== 'count') throw new Error('Split multi-value cells is coverage-only. Choose Count, or use transaction-level ZIP data for money.');
+    if (config.splitMulti && ['scatter','box','histogram'].includes(config.type)) throw new Error('Split multi-value cells is available only for grouped coverage counts.');
+    if (['grouped','groupedhorizontal','multiline'].includes(config.type)) return describeResult(grouped(data, config), data, config);
     const source = explodeRows(data, config);
-    if (source.independent_series != null && new Set(filterRows(source,config).map(r=>r[source.independent_series])).size > 1) throw new Error('Use side-by-side bars, horizontal comparison or separate lines to keep funding sources and activities separate.');
-    if (config.transform && config.transform !== 'none') return temporal(data, config);
+    if (source.independent_series != null && !dimensions(config).includes(source.independent_series) && new Set(filterRows(source,config).map(r=>r[source.independent_series])).size > 1) throw new Error('Use side-by-side bars, horizontal comparison or separate lines to keep funding sources and activities separate.');
+    if (config.transform && config.transform !== 'none') return describeResult(temporal(data, config), data, config);
     if (!['bar','pie','line','scatter','box','histogram','area','doughnut','waterfall','radar','horizontal','pareto'].includes(config.type)) throw new Error('Choose a chart type.');
     if (!['sum','mean','count','median','min','max'].includes(config.aggregation)) throw new Error('Choose an aggregation.');
     const rows = filterRows(source, config), points = [], groups = new Map();
     if (!rows.length) throw new Error('No rows match this subsection.');
     const count = config.aggregation === 'count' && !['box','scatter','histogram'].includes(config.type);
+    if (count && config.y >= 0 && !data.columns[config.y]) throw new Error('Choose a valid field to count.');
     if (!count && !data.columns[config.y]) throw new Error('Choose a numeric measure.');
     if (config.type === 'scatter' && !data.columns[config.x]) throw new Error('Choose an X measure.');
     let excluded = 0;
     for (const row of rows) {
-      const y = count ? 1 : numeric(row[config.y]);
+      const group = config.type === 'histogram' ? 'All rows' : groupName(row, config);
+      if (count && !groups.has(group)) groups.set(group, []);
+      const y = count ? observation(row, config) : numeric(row[config.y]);
       if (y === null) { excluded++; continue; }
       if (['pie','doughnut','pareto','radar'].includes(config.type) && y < 0) throw new Error('This chart requires nonnegative values. Use a bar chart for signed amounts.');
       if (config.type === 'scatter') {
@@ -218,13 +289,12 @@
         if (x === null) { excluded++; continue; }
         points.push({x, y}); continue;
       }
-      const group = config.x < 0 || config.type === 'histogram' ? 'All rows' : String(row[config.x] ?? '(Missing)');
       if (!groups.has(group)) groups.set(group, []);
       groups.get(group).push(y);
     }
-    if (excluded === rows.length) throw new Error('No numeric values remain. Missing values are not treated as zero.');
+    if (!count && excluded === rows.length) throw new Error('No numeric values remain. Missing values are not treated as zero.');
     if (config.type === 'scatter') {
-      return {type:config.type, points, selected:rows.length, excluded};
+      return describeResult({type:config.type, points, selected:rows.length, excluded}, data, config);
     }
     if (config.type === 'histogram') {
       const values = groups.get('All rows'), min = Math.min(...values), max = Math.max(...values);
@@ -232,11 +302,12 @@
       const width = min === max ? 1 : (max - min) / n;
       const bins = Array.from({length:n}, (_, i) => ({label:`${(min + width*i).toPrecision(5)} – ${(min + width*(i+1)).toPrecision(5)}`, value:0}));
       for (const v of values) bins[Math.min(n-1, Math.floor((v-min)/width))].value++;
-      return {type:config.type, groups:bins, selected:rows.length, excluded};
+      return describeResult({type:config.type, groups:bins, selected:rows.length, excluded}, data, config);
     }
     const limit = groupLimit(config);
     let entries = [...groups], rolled = null;
     if (entries.length > limit) {
+      validateRollup(source, config);
       // Rank by the number the mark itself would show, so the fold keeps the
       // groups the view is about. Selection is by size; the axis still lists the
       // survivors in the order the rows arrived, which is what a waterfall means.
@@ -264,20 +335,21 @@
     if (source.split) { result.split = source.split; notes.push(splitNote(source.split)); }
     if (rolled) notes.push(rollupNote(limit, groups.size, rolled.folded, count ? 'row count' : config.aggregation));
     if (notes.length) result.note = notes.join(' ');
-    return result;
+    return describeResult(result, data, config);
   }
   function grouped(data, config) {
     if (config.transform && config.transform !== 'none') throw new Error('Choose None for time analysis to compare separate series.');
     if (!data.columns[config.x] || !data.columns[config.series]) throw new Error('Choose a grouping column and a separate series.');
     const source=explodeRows(data,config);
-    if(source.independent_series!=null && config.x!==source.independent_series && config.series!==source.independent_series && new Set(filterRows(source,config).map(r=>r[source.independent_series])).size>1)throw new Error('Keep Source / activity as the grouping or separate series so independent amounts are not combined.');
+    if(source.independent_series!=null && !dimensions(config).includes(source.independent_series) && config.series!==source.independent_series && new Set(filterRows(source,config).map(r=>r[source.independent_series])).size>1)throw new Error('Keep Source / activity as the grouping or separate series so independent amounts are not combined.');
     if (!['sum','mean','count','median','min','max'].includes(config.aggregation)) throw new Error('Choose an aggregation.');
     const order=source.independent_series==null || config.series===source.independent_series ? source.series_order||[] : [];
     const rows=filterRows(source,config), groups=new Map(), series=new Set(order);let excluded=0;
     for(const row of rows) {
-      const label=String(row[config.x]??'(Missing)'), name=String(row[config.series]??'(Missing)');
+      const label=groupName(row,config), name=String(row[config.series]??'(Missing)');
       if(!groups.has(label))groups.set(label,new Map());series.add(name);
-      const value=config.aggregation==='count'?1:numeric(row[config.y]);
+      if(config.aggregation==='count'&&!groups.get(label).has(name))groups.get(label).set(name,[]);
+      const value=observation(row,config);
       if(value===null){excluded++;continue;}
       if(!groups.get(label).has(name))groups.get(label).set(name,[]);
       groups.get(label).get(name).push(value);
@@ -286,6 +358,7 @@
     const limit=groupLimit(config), countMode=config.aggregation==='count';
     let entries=[...groups], rolled=null;
     if(entries.length>limit){
+      validateRollup(source, config);
       // A label is ranked by everything drawn under it, across every series.
       const key=new Map(entries.map(([label,byName])=>[label,aggregate([...byName.values()].flat(),config,countMode)]));
       const kept=new Set(entries.slice().sort((a,b)=>key.get(b[0])-key.get(a[0])||
@@ -311,6 +384,9 @@
     return result;
   }
   function temporal(data, config) {
+    validateGrain(data, config, filterRows(data, config));
+    if (config.splitMulti) throw new Error('Time analysis does not split multi-value cells. Use a coverage-count chart or transaction-level dated facts.');
+    if (dimensions(config).some(column => column !== config.x)) throw new Error('Time analysis needs one time grouping; filter other dimensions or use separate ordinary series.');
     if(!['annual','yoy','change','forecast'].includes(config.transform))throw new Error('Choose a time analysis.');
     if(!['bar','line','area'].includes(config.type))throw new Error('Time analysis supports bar, line and area charts.');
     const column=data.columns[config.x];
@@ -326,7 +402,7 @@
     for(const row of rows) {
       const raw=String(row[config.x]??'').trim();
       const match=cycleInput?raw.match(/^(?:(\d{4})[-–])?(\d{4})$/):raw.match(/^(\d{4})(?:-\d{2}-\d{2}(?:T.*)?)?$/);
-      const value=config.aggregation==='count'?1:numeric(row[config.y]);
+      const value=observation(row,config);
       if(!match){excluded++;continue;}
       const sourceYear=Number(match[cycleInput?2:1]), year=bucketYear(sourceYear);
       if(sourceYear<1800||year>2200||cycleInput&&(sourceYear%2!==0||match[1]&&Number(match[1])!==sourceYear-1)){excluded++;continue;}
@@ -335,7 +411,8 @@
         if(!Number.isFinite(calendarDate.getTime())||calendarDate.toISOString().slice(0,10)!==raw.slice(0,10)||!Number.isFinite(timestamp.getTime())){incompleteYears.add(year);excluded++;continue;}
       }
       if(!sourceYears.has(year))sourceYears.set(year,new Set());sourceYears.get(year).add(sourceYear);
-      if(value===null){incompleteYears.add(year);excluded++;continue;}
+      if(config.aggregation==='count'&&!byYear.has(year))byYear.set(year,[]);
+      if(value===null){if(config.aggregation!=='count')incompleteYears.add(year);excluded++;continue;}
       if(!byYear.has(year))byYear.set(year,[]);byYear.get(year).push(value);
     }
     const groups=[...byYear].sort((a,b)=>a[0]-b[0]).map(([year,values])=>({label:String(year),year,n:values.length,value:config.aggregation==='count'?values.length:config.aggregation==='median'?quantile(values.slice().sort((a,b)=>a-b),.5):config.aggregation==='min'?Math.min(...values):config.aggregation==='max'?Math.max(...values):values.reduce((a,b)=>a+b,0)/(config.aggregation==='mean'?values.length:1)}));
@@ -385,7 +462,11 @@
       if(observed.some(g=>g.partial))note+=' Current or partial periods remain visible as partial observations and are excluded from the baseline history.';
       note+=' Calendar closure alone does not establish collection completeness. Closed source periods without explicit completeness evidence are used as reported, with that limitation. No calibrated uncertainty interval is available; future totals can differ substantially.';
     }
-    return {type:config.type,groups:output,selected:rows.length,excluded,note,temporal:true};
+    const additive = ['sum','count'].includes(config.aggregation);
+    return {type:config.type,groups:output,selected:rows.length,excluded,note,temporal:true,
+      transform:config.transform, units:config.transform==='yoy'?'percent':config.aggregation==='count'?'count':'source',
+      observedTotal:additive?groups.reduce((total,g)=>total+g.value,0):null,
+      forecastTotal:config.transform==='forecast'&&additive?output.filter(g=>g.forecast).reduce((total,g)=>total+g.value,0):null};
   }
   // chartColumns / timeColumn / identifierColumn are exported so Chart Studio
   // classifies fields through this module instead of forking the rules.

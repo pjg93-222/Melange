@@ -5,6 +5,9 @@ import argparse
 import base64
 import csv
 import datetime
+from functools import lru_cache
+from contextlib import contextmanager
+import gzip
 import hashlib
 import io
 import json
@@ -33,12 +36,38 @@ from report_insights import report_freshness, worksheet_data, stamp
 from graph_data import graph_schema, graph_view
 from comparison_data import subjects as comparison_subjects, flows as comparison_flows
 from cross_reference_data import latest_cross_reference
+import contribution_data
+import contribution_query
+import contribution_geo
+import contribution_workbook_guard
+
+# Bump the server revision with schema changes so existing desktop launchers
+# detect that the running process needs the updated contribution reader.
+CONTRIBUTION_STUDIO_REVISION = '2026-09-12-typed-fields-chart-families'
 import evidence_csv
 from report_directory import report_directory, require_report_path
 from validate_industry_coverage import workbook_roster
 from collection_coverage import inspect as inspect_coverage, cycles_from
 from fec_key_store import load_keys, save_keys, environment_keys, status as key_status
 from runtime_inputs import copy_fec_sources
+
+
+@lru_cache(maxsize=64)
+def static_asset(file_stamp):
+    content = Path(file_stamp[0]).read_bytes()
+    return content, 'W/"' + hashlib.sha256(content).hexdigest() + '"'
+
+
+def accepts_gzip(header):
+    for entry in (header or '').split(','):
+        parts = [part.strip() for part in entry.lower().split(';')]
+        if parts[0] != 'gzip':
+            continue
+        try:
+            return all(float(part[2:]) > 0 for part in parts[1:] if part.startswith('q='))
+        except ValueError:
+            return False
+    return False
 
 
 def read_json(path):
@@ -110,9 +139,83 @@ def process_alive(pid):
         return False
 
 
+@contextmanager
+def console_state_lock(root):
+    """Serialize collection claims and manifest changes across consoles."""
+    with (Path(root) / 'collection-control.lock').open('a+b') as stream:
+        if stream.tell() == 0:
+            stream.write(b'0'); stream.flush()
+        stream.seek(0)
+        deadline = time.monotonic() + 10
+        while True:
+            try:
+                if os.name == 'nt':
+                    import msvcrt
+                    msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
+                else:
+                    import fcntl
+                    fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except OSError:
+                if time.monotonic() >= deadline:
+                    raise ValueError('Another console is updating collection state. Try again shortly.')
+                time.sleep(.025)
+        try:
+            yield
+        finally:
+            stream.seek(0)
+            if os.name == 'nt':
+                msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                fcntl.flock(stream, fcntl.LOCK_UN)
+
+
+@contextmanager
+def process_identity_handle(pid):
+    """Hold the Windows process object open while checking and using its PID.
+
+    An open handle prevents PID reuse between verification and termination.
+    Inaccessible or missing identity leaves only the graceful stop path.
+    """
+    if os.name != 'nt' or type(pid) is not int or pid <= 0:
+        yield None
+        return
+    import ctypes
+    from ctypes import wintypes
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel.OpenProcess.restype = wintypes.HANDLE
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel.GetProcessTimes.argtypes = [wintypes.HANDLE] + [ctypes.POINTER(wintypes.FILETIME)] * 4
+    kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+    kernel.QueryFullProcessImageNameW.argtypes = [wintypes.HANDLE, wintypes.DWORD, wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)]
+    handle = kernel.OpenProcess(0x1000, False, pid)
+    if not handle:
+        yield None
+        return
+    try:
+        created, ended, kernel_time, user_time = (wintypes.FILETIME() for _ in range(4))
+        code = wintypes.DWORD(); size = wintypes.DWORD(32768)
+        executable = ctypes.create_unicode_buffer(size.value)
+        if (kernel.GetExitCodeProcess(handle, ctypes.byref(code)) and code.value == 259
+                and kernel.GetProcessTimes(handle, ctypes.byref(created), ctypes.byref(ended), ctypes.byref(kernel_time), ctypes.byref(user_time))
+                and kernel.QueryFullProcessImageNameW(handle, 0, executable, ctypes.byref(size))):
+            yield {'pid':pid, 'created':(created.dwHighDateTime << 32) | created.dwLowDateTime,
+                   'executable':os.path.normcase(executable.value)}
+        else:
+            yield None
+    finally:
+        kernel.CloseHandle(handle)
+
+
+def process_identity(pid):
+    with process_identity_handle(pid) as identity:
+        return identity
+
+
 def atomic_json(path, value):
     path = Path(path)
-    temporary = path.with_suffix(".tmp")
+    temporary = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
     temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
     os.replace(temporary, path)
 
@@ -358,7 +461,7 @@ class Console:
         cycles = data.get("cycles", [])
         if not cycles or any(type(c) is not int or c not in (2022, 2024, 2026) for c in cycles):
             raise ValueError("Select at least one supported election cycle.")
-        with self.lock:
+        with self.lock, console_state_lock(self.root):
             manifest = read_json(directory / "upload.json")
             if manifest.get("state") != "ready":
                 raise ValueError("This upload is not ready, or has already been started.")
@@ -392,10 +495,11 @@ class Console:
         try:
             self.start_prepared_process(identifier, directory, cycles, stored_keys)
         except Exception as error:
-            manifest = read_json(directory / "upload.json")
-            manifest.update(state="launch failed", finished_at=time.time(),
-                            launch_error=f'Runtime preparation or launch failed ({type(error).__name__}).')
-            atomic_json(directory / "upload.json", manifest)
+            with self.lock, console_state_lock(self.root):
+                manifest = read_json(directory / "upload.json")
+                manifest.update(state="launch failed", finished_at=time.time(),
+                                launch_error=f'Runtime preparation or launch failed ({type(error).__name__}).')
+                atomic_json(directory / "upload.json", manifest)
             if not background:
                 raise
         finally:
@@ -446,7 +550,7 @@ class Console:
             if name == 'FEC_API_KEY' or re.fullmatch(r'FEC_API_KEY_\d+', name):
                 environment.pop(name)
         environment["FEC_API_KEYS"] = "|".join(stored_keys)
-        with self.lock:
+        with self.lock, console_state_lock(self.root):
             stored_keys = load_keys()
             if not stored_keys:
                 raise ValueError('No enabled FEC keys remain. Save an enabled key before launching again.')
@@ -469,12 +573,13 @@ class Console:
                 raise ValueError("The collection process could not start. Check the local launcher log.")
             self.processes[identifier] = process
             manifest["pid"] = process.pid
+            manifest['process_identity'] = process_identity(process.pid)
             atomic_json(directory / "upload.json", manifest)
             threading.Thread(target=self.finish, args=(process, directory), daemon=True).start()
 
     def finish(self, process, directory):
         code = process.wait()
-        with self.lock:
+        with self.lock, console_state_lock(self.root):
             manifest = read_json(directory / "upload.json")
             manifest.update(state="stopped" if manifest.get("stop_requested") else "completed" if code == 0 else "failed", exit_code=code, finished_at=manifest.get("finished_at") or time.time())
             atomic_json(directory / "upload.json", manifest)
@@ -494,10 +599,12 @@ class Console:
         if not re.fullmatch(r"[a-f0-9]{32}", identifier):
             raise RunNotFound("Run not found.")
         directory = self.root / identifier
-        with self.lock:
+        with self.lock, console_state_lock(self.root):
             manifest = read_json(directory / "upload.json")
             if not manifest:
                 raise RunNotFound("Run not found.")
+            if manifest.get('state') not in ('preparing', 'starting', 'running'):
+                raise ValueError('This collection is not active; no process was stopped.')
             stamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
             control = {"desired_workers": 0, "stop": True, "updated_at": stamp}
             files = 0
@@ -508,7 +615,7 @@ class Console:
             # survives taskkill - or a server crash mid-kill - still sees stop:true.
             manifest.update(stop_requested=stamp, stop_mode="force" if force else "graceful")
             atomic_json(directory / "upload.json", manifest)
-            if identifier in getattr(self, 'preparing', set()) and not manifest.get('pid'):
+            if manifest.get('state') == 'preparing' and not manifest.get('pid'):
                 return {"ok":True, "mode":"preparation cancellation requested", "files":files}
             result = {"ok": True, "mode": "graceful", "files": files}
             if force:
@@ -516,11 +623,16 @@ class Console:
                 pid = process.pid if process is not None else manifest.get("pid")
                 result["mode"] = "force"
                 result["taskkill_returncode"] = None
-                if not pid:
+                if not pid or not manifest.get('process_identity'):
                     result["ok"] = False
-                    result["message"] = "No process handle was found for this run, so nothing could be killed."
+                    result['mode'] = 'graceful'
+                    result["message"] = "Graceful stop requested. This run has no verified process identity, so force-stop was withheld."
                     return result
-                kill = subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True)
+                with process_identity_handle(pid) as identity:
+                    if identity is None or identity != manifest['process_identity']:
+                        result.update(ok=False, mode='graceful', message='Graceful stop requested. The original process identity no longer matches; no process was killed.')
+                        return result
+                    kill = subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True)
                 result["taskkill_returncode"] = kill.returncode
                 if kill.returncode == 0:
                     # Mirror finish()'s state/exit_code/finished_at shape so snapshot()/runs()
@@ -684,7 +796,14 @@ class Console:
 
     def summary(self, include_archived=False):
         runs = self.runs()
-        credentials = key_status()
+        try:
+            credentials = {**key_status(), 'key_status_available':True}
+        except (RuntimeError, OSError, ValueError):
+            # Report analysis does not require opening the encrypted key store.
+            # Collection still uses load_keys and its normal authorization checks.
+            credentials = {'active_key_count':None, 'stored_key_count':None, 'encrypted':True,
+                           'key_status_available':False,
+                           'key_status_message':'Saved FEC keys are unavailable to this Windows session. Report analysis remains available.'}
         metadata = read_json(self.root / 'run-archives.json')
         archives = metadata.get('runs', {}) if isinstance(metadata, dict) else {}
         archives = archives if isinstance(archives, dict) else {}
@@ -979,19 +1098,45 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *_):
         pass
 
-    def send(self, value, status=200, content_type="application/json"):
-        content = json.dumps(value, ensure_ascii=False).encode() if content_type == "application/json" else value
+    def send(self, value, status=200, content_type="application/json", *, cache_control="no-store", etag=None,
+             frame_ancestors="'none'"):
+        content = json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode() if content_type == "application/json" else value
+        compressible = content_type == 'application/json' or content_type.startswith(('text/', 'image/svg+xml'))
+        compressed = compressible and status != 304 and len(content) >= 2048 and accepts_gzip(self.headers.get('Accept-Encoding'))
+        if compressed:
+            content = gzip.compress(content, compresslevel=1, mtime=0)
         self.send_response(status)
         self.send_header("Content-Type", content_type)
-        self.send_header("Content-Length", str(len(content)))
-        self.send_header("Cache-Control", "no-store")
+        if status != 304:
+            self.send_header("Content-Length", str(len(content)))
+        self.send_header("Cache-Control", cache_control)
+        if compressible:
+            self.send_header('Vary', 'Accept-Encoding')
+        if compressed:
+            self.send_header('Content-Encoding', 'gzip')
+        if etag:
+            self.send_header('ETag', etag)
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Content-Security-Policy", "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors 'none'")
+        self.send_header("Content-Security-Policy", "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors " + frame_ancestors)
         self.end_headers()
         self.wfile.write(content)
 
     def valid_host(self):
         return self.headers.get("Host") in (f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}")
+
+    def contribution_result(self, reader, data):
+        directory = self.server.app.report_directory
+        checked = contribution_workbook_guard.verify_sources(directory, data.get('dataset'))
+        result = reader(directory, data)
+        pinned = next((item for item in checked if item['dataset'] == data.get('dataset')), None)
+        if pinned:
+            provenance = result.get('provenance', {})
+            if any(pinned.get(key) is not None and provenance.get(key) != pinned[key]
+                   for key in ('workbook_sha256', 'database_sha256')):
+                raise ValueError('The published report or contribution source changed while the view was being prepared. Refresh the source before continuing.')
+            provenance.update(source_financial_universe_verified=pinned.get('source_financial_universe_verified'),
+                              source_proof_token=pinned.get('source_proof_token'))
+        return result
 
     def do_GET(self):
         if not self.valid_host():
@@ -1005,10 +1150,30 @@ class Handler(BaseHTTPRequestHandler):
                                   'data_root': app.configured_root,
                                   'resolved_data_root': str(app.root),
                                   'server_code_sha256': SERVER_CODE_SHA256,
+                                  'contribution_studio_revision': CONTRIBUTION_STUDIO_REVISION,
                                   'read_only': bool(getattr(app, 'read_only', False)),
                                   'report_directory':str(app.report_directory), 'pid': os.getpid()})
             if parsed.path == "/api/session":
+                if query.get('light', ['0'])[0] == '1':
+                    return self.send({'token':app.token, 'read_only':bool(getattr(app, 'read_only', False)),
+                                      'evidence_collection_available':True, 'api_version':2,
+                                      'report_directory':str(app.report_directory)})
                 return self.send({"token": app.token, **app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))})
+            if parsed.path == '/api/contributions/session':
+                return self.send({'token': app.token, 'read_only': bool(getattr(app, 'read_only', False))})
+            if parsed.path == '/api/contributions/catalog':
+                catalog = contribution_query.semantics.catalog(app.report_directory)
+                checks = {item['dataset']: item for item in contribution_workbook_guard.verify_sources(app.report_directory, strict=False)}
+                for dataset in catalog['datasets']:
+                    check = checks.get(dataset['id'])
+                    if check and not check['matched']:
+                        dataset.update(available=False, message=check['error'])
+                    elif check and any(check.get(key) is not None and dataset.get('provenance', {}).get(key) != check[key]
+                                       for key in ('workbook_sha256', 'database_sha256')):
+                        dataset.update(available=False, message='The report changed during source discovery. Refresh sources.')
+                return self.send(catalog)
+            if parsed.path == '/api/contributions/geography/catalog':
+                return self.send(contribution_geo.geo_catalog())
             if parsed.path == "/api/runs":
                 return self.send(app.summary(query.get('include_archived', ['0'])[0] in ('1','true')))
             if parsed.path == '/api/evidence-csv':
@@ -1073,6 +1238,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(app.graph(query.get('id',[''])[0], query.get('industry',[''])[0],
                                            {k:v[0] for k,v in query.items()}))
             assets = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript"),
+                      '/contribution-studio': ('contribution-studio.html', 'text/html; charset=utf-8'),
+                      '/contribution-studio.css': ('contribution-studio.css', 'text/css'),
+                      '/contribution-studio.js': ('contribution-studio.js', 'text/javascript'),
+                      '/contribution-plot.js': ('contribution-plot.js', 'text/javascript'),
+                      '/contribution-charts.js': ('contribution-charts.js', 'text/javascript'),
+                      '/contribution-map.js': ('contribution-map.js', 'text/javascript'),
                       '/mentat-icon.svg': ('mentat-icon.svg', 'image/svg+xml'),
                       "/style.css": ("style.css", "text/css"), "/template.csv": ("template.csv", "text/csv"),
                       '/workspace.css': ('workspace.css', 'text/css'),
@@ -1091,18 +1262,34 @@ class Handler(BaseHTTPRequestHandler):
                       '/graph.css': ('graph.css', 'text/css'),
                       '/acu-theme.css': ('acu-theme.css', 'text/css'),
                       '/chart-studio-core.js': ('chart-studio-core.js', 'text/javascript'),
+                      '/chart-studio-contributions.js': ('chart-studio-contributions.js', 'text/javascript'),
                       '/chart-studio.js': ('chart-studio.js', 'text/javascript'),
+                      '/chart-comparison.js': ('chart-comparison.js', 'text/javascript'),
                       '/chart-studio.css': ('chart-studio.css', 'text/css'),
                       '/theme.js': ('theme.js', 'text/javascript')}
             if parsed.path in assets:
                 filename, mime = assets[parsed.path]
-                return self.send((Path(__file__).parent / filename).read_bytes(), content_type=mime)
+                path = Path(__file__).parent / filename
+                info = path.stat()
+                content, etag = static_asset((str(path), info.st_size, info.st_mtime_ns, info.st_ctime_ns))
+                current = path.stat()
+                if (current.st_size, current.st_mtime_ns, current.st_ctime_ns) != (info.st_size, info.st_mtime_ns, info.st_ctime_ns):
+                    return self.send({'error':'The interface changed while loading. Refresh the page.'}, 409)
+                unchanged = etag in [tag.strip() for tag in self.headers.get('If-None-Match', '').split(',')]
+                # A Chart Studio comparison pane is this same document framed by
+                # this same origin. Only that document may be framed, and only
+                # by itself; every other response keeps frame-ancestors 'none'.
+                pane = parsed.path == '/' and query.get('studioPane', [''])[0] in ('B', 'C', 'D')
+                return self.send(b'' if unchanged else content, 304 if unchanged else 200,
+                                 content_type=mime, cache_control='private, no-cache', etag=etag,
+                                 frame_ancestors="'self'" if pane else "'none'")
             return self.send({"error": "Not found."}, 404)
         except (ValueError, OSError, KeyError, zipfile.BadZipFile) as error:
             return self.send({"error": str(error)}, 400)
 
     def do_POST(self):
-        if getattr(self.server.app, 'read_only', False) and self.path != '/api/evidence-csv':
+        analytical_paths = {'/api/contributions/query', '/api/contributions/records', '/api/contributions/geography'}
+        if getattr(self.server.app, 'read_only', False) and self.path not in analytical_paths | {'/api/evidence-csv'}:
             return self.send({"error":"This preview is read-only while the original console manages collection."}, 403)
         if not self.valid_host() or not secrets.compare_digest(self.headers.get("X-Mentat-Token", ""), self.server.app.token):
             return self.send({"error": "Refresh the app before continuing."}, 403)
@@ -1116,6 +1303,12 @@ class Handler(BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(length))
             if not isinstance(data, dict):
                 raise ValueError("Expected an upload or run request.")
+            if self.path == '/api/contributions/query':
+                return self.send(self.contribution_result(contribution_query.query, data))
+            if self.path == '/api/contributions/records':
+                return self.send(self.contribution_result(contribution_query.records, data))
+            if self.path == '/api/contributions/geography':
+                return self.send(contribution_geo.geography(data))
             if self.path == "/api/upload":
                 return self.send(self.server.app.upload(data))
             if self.path == '/api/roster':
@@ -1141,7 +1334,9 @@ class Handler(BaseHTTPRequestHandler):
             return self.send({"error": "Not found."}, 404)
         except RunNotFound as error:
             return self.send({"error": str(error)}, 404)
-        except RuntimeError:
+        except RuntimeError as error:
+            if self.path in analytical_paths:
+                return self.send({'error': str(error)}, 400)
             return self.send({"error": "The encrypted key store could not be accessed for this Windows user."}, 400)
         except (ValueError, OSError, KeyError, zipfile.BadZipFile) as error:
             return self.send({"error": str(error)}, 400)

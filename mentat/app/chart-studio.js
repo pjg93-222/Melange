@@ -1,21 +1,24 @@
-/* Chart Studio: shelves, marks and Show Me over the existing SVG engine.
-   Same-origin reads only; every chart is built and drawn locally. The rules
-   live in chart-studio-core.js, the drawing in charts.js / grouped-chart.js. */
+/* Original Chart Studio workbench: verified contribution aggregates come from
+   the local server; worksheet views retain their local chart-math path.
+   Both sources share the original shelves, Marks, Show Me and SVG canvas. */
 (() => {
   'use strict';
   const core = globalThis.MentatStudioCore;
   const math = globalThis.MentatCharts;
   const paint = globalThis.MentatChartRender;
+  const contributions = globalThis.MentatStudioContributions;
+  const contributionPlot = globalThis.MentatContributionPlot;
   const NS = 'http://www.w3.org/2000/svg';
   const el = id => document.getElementById('studio-' + id);
   const fmt = n => Number(n).toLocaleString('en-US', {maximumFractionDigits: 3});
   const compact = n => Math.abs(n) >= 1e5
     ? Number(n).toLocaleString('en-US', {notation: 'compact', maximumFractionDigits: 1})
     : Number(n).toLocaleString('en-US', {maximumFractionDigits: 2});
-  const STORE = 'mentat-chart-studio-v1';
+  const paneName = new URLSearchParams(location.search).get('studioPane');
+  const STORE = 'mentat-chart-studio-v1' + (/^[BCD]$/.test(paneName || '') ? '-pane-' + paneName : '');
   const ZONES = [['columns', 'Columns'], ['rows', 'Rows'], ['color', 'Colour'], ['size', 'Size'],
     ['label', 'Label'], ['detail', 'Detail'], ['tooltip', 'Tooltip'], ['filters', 'Filters'], ['pages', 'Pages']];
-  const OPERATORS = [['equals', 'Equals'], ['contains', 'Contains'], ['gte', 'At least'], ['lte', 'At most']];
+  const AGG_LABEL = {sum: 'SUM', mean: 'AVG', count: 'COUNT', median: 'MEDIAN', min: 'MIN', max: 'MAX'};
   const ANALYTICS = [
     {id: 'annual', group: 'transform', label: 'Period totals', hint: 'Group dated rows into calendar years or election cycles'},
     {id: 'yoy', group: 'transform', label: 'Year-over-year %', hint: 'Percentage change from the previous calendar year'},
@@ -38,6 +41,19 @@
   let pageTimer = 0;
   let hoverTile = '';
   let lastResult = null, lastConfig = null, lastTitle = '', lastScope = '';
+  let contributionCatalog = null, contributionToken = '', contributionResult = null, contributionRequest = null;
+  let contributionOffset = 0, contributionRevision = 0, contributionController = null, contributionPending = null;
+  let contributionMap = null, contributionGeometry = null, geometryKey = '', geometryRevision = 0, geometryTimer = null;
+  let recordOffset = 0, recordSelection = null, recordRevision = 0, exporting = false;
+  let pageMembersKey = '';
+  let pendingScope = null, appliedScope = null;
+  let inspectorTab = 'marks', overviewMode = false, overviewRevision = 0, overviewCompany = '';
+  let queryRequests = 0;
+  const contributionCache = new Map(), memberCache = new Map(), geometryCache = new Map(), geometryPending = new Map();
+  let contributionCacheEpoch=0;
+  const verified = () => el('source-mode').value === 'contributions';
+  const basis = () => sheet().source.basis || 'receipt';
+  const dataset = () => contributionCatalog?.datasets.find(d => d.id === el('dataset').value);
 
   const sheet = () => sheets[active];
   const columns = () => (data && data.columns) || [];
@@ -208,14 +224,178 @@
   }
   const text = select => select.selectedOptions[0] ? select.selectedOptions[0].textContent : '';
 
+  /* Verified contributions use the original shelves and canvas. Query results
+     are reused across display edits; underlying rows never enter browser sums. */
+  async function contributionAPI(path, body, signal) {
+    if(path==='query'&&body)queryRequests++;
+    const response=await fetch('/api/contributions/'+path,body?{method:'POST',headers:{'Content-Type':'application/json','X-Mentat-Token':contributionToken},body:JSON.stringify(body),signal}:{signal});
+    const result=await response.json();if(!response.ok||result.error)throw new Error(result.error||'Contribution data unavailable.');return result;
+  }
+  async function contributionReady(path, query, signal) {
+    for(;;){const result=await contributionAPI(path,query,signal);if(result.status==='failed')throw new Error(result.message||'Source verification failed.');if(!['preparing','building','queued'].includes(result.status))return result;status(result.message||'Verifying source records…');await new Promise(resolve=>setTimeout(resolve,Math.min(4000,result.retry_after_ms||1000)));if(signal?.aborted)throw new DOMException('View changed','AbortError');}
+  }
+  async function loadContributions(refresh=false) {
+    const ticket=++revision;failure('');status('Reading verified contribution fields…');
+    try {
+      if(!contributionCatalog||refresh){const [session,catalog]=await Promise.all([contributionAPI('session'),contributionAPI('catalog')]);if(ticket!==revision||!verified())return;contributionToken=session.token;contributionCatalog=catalog;}
+      const previous=el('dataset').value||new URLSearchParams(location.search).get('industry')||document.getElementById('graph-industry')?.value;
+      fill(el('dataset'),contributionCatalog.datasets.map(d=>[d.id,d.label||d.id]));
+      for(const option of el('dataset').options){const d=contributionCatalog.datasets.find(d=>d.id===option.value);option.disabled=!d.available;if(!d.available)option.textContent+=' — unavailable';}
+      el('dataset').value=contributionCatalog.datasets.some(d=>d.id===previous&&d.available)?previous:contributionCatalog.datasets.find(d=>d.available)?.id||'';
+      if(!dataset())throw new Error('No verified sources are available in the configured report folder.');
+      selectContributionDataset();
+      applyGraphScope();
+    }catch(error){if(ticket===revision){status('Verified data unavailable.');failure(error.message);}}
+  }
+  function selectContributionDataset() {
+    ++revision;contributionController?.abort();contributionPending=null;contributionOffset=0;contributionResult=null;contributionRequest=null;selection=[];history=[];future=[];
+    const d=dataset(),key='contributions|'+d.id+'|'+d.provenance.workbook_sha256;sourceKey=key;const restored=restore(key);
+    for(const state of sheets)state.source={...state.source,mode:'contributions',dataset:d.id,basis:state.source.basis||'receipt',reportName:d.provenance.workbook,sheet:'Verified source observations',runName:'Configured completed-report folder',sha256:d.provenance.workbook_sha256};
+    data={columns:contributions.fields(d.fields||contributionCatalog.fields,basis()),rows:[],row_count:0,header_row:0,sha256:d.provenance.workbook_sha256,sheet:'Verified source observations',note:d.provenance.scope};
+    if(!restored){sheet().columns=[{column:data.columns.findIndex(f=>f.id==='company'),aggregation:'sum'}];sheet().rows=[{column:data.columns.findIndex(f=>f.id==='amount'),aggregation:'sum'}];sheet().marks.type='bar';}
+    persist();renderAll();
+  }
+  function syncContributionControls() {
+    const on=verified();el('contribution-source').hidden=!on;el('worksheet-source').hidden=on;el('verified-summary').hidden=!on;el('result-controls').hidden=!on;
+    el('marks-note').textContent=on?'Colour separates series. Detail, Label and Tooltip dimensions define each mark’s grouping. Select a mark to inspect its source records.':'Colour separates series. Label shows the plotted value. Unsupported encodings produce an explanation.';
+    for(const id of ['param-start','param-end','param-limit','param-horizon','param-split'])el(id).closest('label').hidden=on&&id!=='param-horizon';
+    if(!on){el('map-settings').hidden=true;return;}
+    fill(el('mark'),[...core.MARK_TYPES,['map','Map'],...contributions.EXTRA_MARKS]);el('mark').value=sheet().marks.type;
+    const d=dataset();if(!d)return;
+    fill(el('basis'),d.bases.map(b=>[b.id,contributions.BASIS[b.id]?.[0]||b.label]));el('basis').value=basis();el('basis-note').textContent=contributions.BASIS[basis()]?.[1]||'';
+    if(data)data.columns=contributions.fields(d.fields||contributionCatalog.fields,basis());
+    if(el('destination'))el('destination').value=core.shelf(sheet().columns).map(p=>columns()[p.column]?.id).find(id=>['recipient_state','represented_state','state'].includes(id))||'';
+    el('param-groups').title='Groups per page. Totals and CSV exports include every matching group.';
+    el('map-settings').hidden=!['map','filled-map'].includes(sheet().marks.type);
+    el('bin-width-label').hidden=sheet().marks.type!=='histogram';el('bin-width').value=sheet().params.binWidth||100;
+    const map=sheet().map||{layers:['states','districts'],congress:'119'};
+    el('congress').value=map.congress;for(const [id,layer]of [['states','states'],['districts','districts'],['zips','zip_areas']])el('layer-'+id).checked=map.layers.includes(layer);
+  }
+  // Carried Graph scope becomes ordinary filter pills, so the reader can see
+  // and remove every one of them. A field this dataset does not have is
+  // reported, never silently dropped.
+  function applyGraphScope() {
+    const scope = pendingScope;
+    pendingScope = null;
+    if (!scope || !verified() || !data) return;
+    const missing = [];
+    const pills = [];
+    for (const {field, value} of scope.filters) {
+      const column = columns().find(f => f.id === field);
+      if (!column) { missing.push(field); continue; }
+      pills.push({column: column.index, op: 'equals', value: String(value), stage: 'row'});
+    }
+    appliedScope = {carried: true, industry: scope.industry,
+      company: (scope.filters.find(f => f.field === 'company') || {}).value || '',
+      cycle: (scope.filters.find(f => f.field === 'cycle') || {}).value || ''};
+    if (!pills.length && !missing.length) return;
+    commit(() => {
+      const kept = (sheet().filters || []).filter(f => !pills.some(p => p.column === Number(f.column)));
+      sheet().filters = [...kept, ...pills];
+    });
+    failure(missing.length ? 'This source has no ' + missing.join(' or ') + ' field, so that part of the Graph scope was not carried.' : '');
+  }
+
+  function queryCached(query) {
+    const key=JSON.stringify(query),cached=contributionCache.get(key),epoch=contributionCacheEpoch;
+    if(contributionResult&&contributionRequest&&JSON.stringify(contributionRequest)===key)return Promise.resolve(contributionResult);
+    if(cached&&Date.now()-cached.at<30000)return Promise.resolve(cached.result);
+    if(contributionPending?.key===key)return contributionPending.promise;
+    contributionController?.abort();contributionController=new AbortController();
+    const promise=contributionReady('query',query,contributionController.signal).then(result=>{if(epoch===contributionCacheEpoch){contributionCache.set(key,{result,at:Date.now()});if(contributionCache.size>12)contributionCache.delete(contributionCache.keys().next().value);}return result;}).finally(()=>{if(contributionPending?.key===key&&epoch===contributionCacheEpoch)contributionPending=null;});
+    contributionPending={key,promise};return promise;
+  }
+  function sourceScope(result,request) {
+    const p=result.provenance;
+    return [request.dataset,contributions.BASIS[request.basis]?.[0],p.workbook,'Workbook SHA256 '+p.workbook_sha256,'Analytical index '+p.index_token,'Query engine SHA256 '+p.query_engine_sha256,'Field semantics SHA256 '+p.field_semantics_sha256,'Groups '+(result.offset+1)+'–'+(result.offset+result.rows.length)+' of '+result.group_count,JSON.stringify({filters:request.filters,aggregate_filters:request.aggregate_filters,bin_width_cents:request.bin_width_cents}),p.scope].join(' · ');
+  }
+  async function renderContributionView() {
+    if(!data||!dataset()){el('canvas').replaceChildren();el('table').replaceChildren();el('verified-summary').textContent='Reading verified source fields…';el('result-controls').hidden=true;el('title').textContent='Chart Studio';el('note').textContent='Choose a verified report source in the Data pane.';lastResult=null;return;}
+    const ticket=++contributionRevision;
+    try {
+      const compiled=contributions.compile(sheet(),columns(),{dataset:dataset().id,basis:basis(),offset:contributionOffset});
+      const query=compiled.query,key=JSON.stringify(query);
+      if(contributionRequest&&JSON.stringify({...contributionRequest,offset:0})!==JSON.stringify({...query,offset:0})&&contributionOffset){contributionOffset=0;query.offset=0;}
+      if(!contributionRequest||JSON.stringify(contributionRequest)!==key){el('canvas').setAttribute('aria-busy','true');status('Reading verified source observations…');el('inspection').hidden=true;++recordRevision;lastResult=null;el('verified-summary').textContent='Reading verified totals…';}
+      const result=await queryCached(query);if(ticket!==contributionRevision||!verified())return;
+      failure('');contributionResult=result;contributionRequest=query;lastResult=result;lastConfig=compiled;
+      data.row_count=result.totals.records;data.rows=result.rows.map(row=>data.columns.map(f=>row[f.id]??''));
+      lastTitle=contributions.BASIS[basis()][0]+(query.dimensions.length?' by '+query.dimensions.map(id=>data.columns.find(f=>f.id===id)?.name||id).join(' / '):'');if(compiled.spec.measures.length!==1||compiled.spec.measures[0]!=='amount')lastTitle=compiled.spec.measures.map(id=>result.columns.find(c=>c.id===id)?.name||id).join(' / ')+' · '+lastTitle;lastScope=sourceScope(result,query);el('title').textContent=lastTitle;
+      const money=value=>contributionPlot.format(value,'amount');
+      el('verified-summary').replaceChildren();
+      for(const [label,value]of [[basis()==='original_supported'?'Selected gross amount':'Selected net amount',money(result.totals.amount)],['Source observations',fmt(result.totals.records)],['Reported donor identities',fmt(result.totals.contributors)]]){const item=document.createElement('span'),strong=document.createElement('strong');strong.textContent=value;item.append(strong,document.createTextNode(label));el('verified-summary').append(item);}
+      el('verified-summary').title='Totals cover all matching source records before grouped filters. Group distinct identity counts are not added together.';
+      el('group-count').textContent=result.group_count?`${fmt(result.offset+1)}–${fmt(result.offset+result.rows.length)} of ${fmt(result.group_count)} groups`:'No matching observations';
+      el('groups-prev').disabled=!query.offset;el('groups-next').disabled=!result.has_more;el('result-controls').hidden=false;
+      el('groups-prev').hidden=el('groups-next').hidden=compiled.spec.type==='map'||compiled.transform!=='none';
+      let rows=result.rows,spec={...compiled.spec,columns:result.columns,title:lastTitle},temporalModel=null,drewReferences=false;const notes=[...compiled.notes,...(result.notices||[])];
+      if(spec.type==='histogram'&&result.has_more)throw new Error('This histogram has more than 10,000 occupied bins. Increase the bin width or narrow the filters to display the complete distribution.');
+      if(compiled.transform!=='none'&&compiled.transform!=='annual'){
+        if(result.has_more)throw new Error('Period analysis requires every selected period. Narrow the filters.');
+        const time=query.dimensions[0],modelData={columns:[{index:0,name:time==='cycle'?'Election cycle':'Year',type:'category'},{index:1,name:'Amount',type:'number'}],rows:rows.map(r=>[r[time],r.amount]),row_numbers:rows.map((_,i)=>i+1),row_count:rows.length,header_row:0};
+        const model=math.build(modelData,{type:'line',x:0,y:1,series:-1,aggregation:'sum',filters:[],transform:compiled.transform,period:time==='cycle'?'cycle':'year',horizon:sheet().analytics.horizon||2,start:0,end:0,limit:0});
+        const id=compiled.transform==='yoy'?'percent_change':'amount';rows=model.groups.map(g=>({[time]:time==='cycle'?`${g.year-1}-${g.year}`:String(g.year),[id]:g.value}));spec.measures=[id];spec.columns=[{id,name:compiled.transform==='forecast'?'Observed amount and same-phase baseline':id==='amount'?'Period change':'Year-over-year change (%)',unit:id==='amount'?'cents':'percent'}];notes.push(model.note);
+        temporalModel={...model,type:spec.type,groups:model.groups.map(g=>({...g,value:g.value/(id==='amount'?100:1)}))};
+      }
+      if(spec.type==='map'){await renderContributionMap(ticket,compiled);return;}
+      clearTimeout(geometryTimer);contributionMap?.destroy?.();contributionMap=null;++geometryRevision;
+      el('canvas').hidden=false;el('table').hidden=true;el('canvas').className='studio-canvas fit-'+sheet().fit;
+      if(temporalModel){
+        const measure=spec.columns[0].name+(spec.columns[0].unit==='cents'?' (USD)':'');
+        const drawn=paint.chartSVG(temporalModel,measure,{type:spec.type,aggregation:'sum',x:0,y:1},{columns:[{name:'Period'},{name:measure}]},lastTitle,lastScope);el('canvas').replaceChildren(drawn.svg);
+      }else if(['pie','doughnut','waterfall','pareto','radar'].includes(spec.type)){
+        if(spec.measures.length!==1)throw new Error('This mark type uses one measure.');
+        const id=spec.measures[0],currency=contributions.MONEY.has(id),groups=rows.map(row=>({label:contributionPlot.label(row,spec.dimensions),value:row[id]/(currency?100:1),n:1}));
+        const drawn=paint.chartSVG({type:spec.type,groups,selected:result.totals.records,excluded:0},(result.columns.find(c=>c.id===id)?.name||id)+(currency?' (USD)':''),{type:spec.type,aggregation:'sum',x:0,y:1},{columns:[{name:'Group'},{name:id}]},lastTitle,lastScope);el('canvas').replaceChildren(drawn.svg);
+      }else if(MentatContributionCharts.TYPES.includes(spec.type))MentatContributionCharts.render(el('canvas'),rows,spec,row=>inspectContributions(row));
+      else {contributionPlot.render(el('canvas'),rows,spec,row=>inspectContributions(row));drewReferences=spec.type!=='scatter';}
+      if(sheet().analytics.totals)notes.push('Selected source total: '+money(result.totals.amount)+'. This total excludes projections and covers every matching group before grouped filters.');
+      // Say plainly when a requested reference line was not drawn, instead
+      // of describing one the reader cannot see.
+      if(sheet().analytics.average||sheet().analytics.median)notes.push(
+        drewReferences?'Reference lines mark the mean and median of the shown marks; source-level averages and medians are available as measures.'
+        :'Reference lines are not drawn on this mark type. Choose a bar, line, area or circle mark to see the mean and median of the shown marks.');
+      el('note').textContent=[contributions.BASIS[basis()][1],query.aggregate_filters.length?'Grouped filters apply after aggregation.':result.has_more?'Additional groups are on later pages; source totals cover all pages.':'All selected groups shown.',...notes].join(' ');
+      el('status').textContent=fmt(result.totals.records)+' source observations · '+fmt(result.group_count)+' groups · '+(result.reconciliation?.receipt_matches_workbook===true?'Included receipts reconcile to the workbook.':'Verified source records.')+' · '+fmt(queryRequests)+' verified queries this session';status('Verified contribution fields · '+data.columns.length+' fields');renderPager();
+    }catch(error){if(ticket===contributionRevision&&error.name!=='AbortError'){el('canvas').replaceChildren();el('note').textContent=error.message;failure(error.message);lastResult=null;}}
+    finally{if(ticket===contributionRevision)el('canvas').setAttribute('aria-busy','false');}
+  }
+  async function renderContributionMap(ticket,compiled,bbox=null) {
+    const current=++geometryRevision,result=contributionResult,map=sheet().map||{layers:['states','districts'],congress:'119'},zips=MentatContributionMap.eligibleZips(result.rows).sort(),key=JSON.stringify({zips,congress:map.congress,bbox});
+    if(result.has_more)throw new Error('Narrow the map filters so every geographical group can be included.');
+    const saved=contributionMap?.getView();status('Loading Census boundaries…');
+    const cached=geometryCache.get(key),pendingKey=key+'|'+[...map.layers].sort().join(',');let geometry=cached&&map.layers.every(layer=>cached.layers?.[layer])?cached:null;if(!geometry){if(!geometryPending.has(pendingKey))geometryPending.set(pendingKey,contributionAPI('geography',{zips,layers:map.layers,congress:map.congress,...(bbox?{bbox}:{})}).finally(()=>geometryPending.delete(pendingKey)));geometry=await geometryPending.get(pendingKey);geometryCache.set(key,geometry);}
+    if(ticket!==contributionRevision||current!==geometryRevision||!verified())return;
+    geometryCache.set(key,geometry);if(geometryCache.size>8)geometryCache.delete(geometryCache.keys().next().value);contributionGeometry=geometry;geometryKey=key;contributionMap?.destroy?.();el('canvas').hidden=false;el('table').hidden=true;
+    contributionMap=MentatContributionMap.render(el('canvas'),{groups:result.rows.map(r=>({...r,amount_cents:r.amount})),geometry,layers:map.layers,filled:compiled.spec.filled,title:lastTitle,valueLabel:basis()==='original_supported'?'Selected gross amount':'Selected net amount',showLayerControls:false,onSelect:row=>inspectContributions(contributions.mapSelection(row)),onViewport:event=>{if(!map.layers.includes('zip_areas'))return;clearTimeout(geometryTimer);geometryTimer=setTimeout(()=>renderContributionMap(contributionRevision,compiled,event.bbox).catch(e=>failure(e.message)),450);}});
+    if(saved)contributionMap.setView(saved);
+    lastScope+=' · Congress '+map.congress+'; '+map.layers.join(', ')+'; overlays do not allocate money. Mapped '+contributionPlot.format(contributionMap.data.mapped_cents,'amount')+'; unmapped '+contributionPlot.format(contributionMap.data.unmapped_cents,'amount')+' · '+(geometry.sources||[]).map(s=>(s.vintage||s.label||s.url)+' SHA256 '+s.sha256).join(' · ');
+    el('note').textContent=[contributions.BASIS[basis()][1],'ZIP marks combine eligible ZIP/state groups; grouped filters apply before this combination. Unmapped money remains in the selected total.',...(contributionMap.data.coverage_notes||[]),...(geometry.warnings||[])].join(' ');
+    el('status').textContent=fmt(result.group_count)+' geographic groups · '+fmt(contributionMap.data.marks.length)+' mapped marks · boundaries do not change money';status('Verified ZIP/state records and Census boundaries');
+  }
+  async function inspectContributions(row=null,offset=0) {
+    if(!contributionResult)return;recordSelection=row;recordOffset=offset;const ticket=++recordRevision,sourceRevision=contributionRevision;el('inspection').hidden=false;el('record-count').textContent='Reading source records…';el('records').replaceChildren();
+    try{const query={...contributionRequest,filters:contributions.markFilters(contributionRequest,row),aggregate_filters:[],limit:100,offset};const result=await contributionReady('records',query);if(ticket!==recordRevision||sourceRevision!==contributionRevision)return;if(!['workbook_sha256','database_sha256','index_token'].every(key=>result.provenance?.[key]===contributionResult.provenance?.[key]))throw new Error('Source changed before record inspection. Refresh the verified data.');
+      const columns=[['date','Date'],['contributor','Contributor'],['company','Company'],['recipient','Recipient'],['amount_cents','Selected amount'],['raw_cents','Raw observation'],['zip5','ZIP'],['state','State'],['decision_status','Accounting status'],['receipt_role','Receipt role'],['reasons','Reasons'],['source_id','Source ID'],['source_url','FEC filing']];for(const id of query.dimensions||[])if(!columns.some(c=>c[0]===id))columns.push([id,data.columns.find(c=>c.id===id)?.name||id]);const table=document.createElement('table'),head=document.createElement('tr'),body=document.createElement('tbody');for(const[,name]of columns){const th=document.createElement('th');th.textContent=name;head.append(th);}const thead=document.createElement('thead');thead.append(head);table.append(thead,body);
+      for(const record of result.rows){const tr=document.createElement('tr');for(const[id]of columns){const td=document.createElement('td'),value=record[id];td.textContent=id.endsWith('_cents')?contributionPlot.format(value,'amount'):Array.isArray(value)?value.join('; '):value??'';if(id==='source_url'&&/^https:\/\/(?:[^/]+\.)?fec\.gov\//.test(value||'')){const a=document.createElement('a');a.href=value;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Open filing';td.replaceChildren(a);}tr.append(td);}body.append(tr);}el('records').append(table);el('record-count').textContent=`${result.total_records?offset+1:0}–${offset+result.rows.length} of ${fmt(result.total_records)} source observations`;el('record-prev').disabled=!offset;el('record-next').disabled=!result.has_more;
+    }catch(error){if(ticket===recordRevision)el('record-count').textContent=error.message;}
+  }
+  async function downloadContributions(format) {
+    if(!contributionResult||!lastResult||exporting)return;const result=contributionResult,query=structuredClone(contributionRequest),ticket=contributionRevision;
+    try{if(format==='csv'){exporting=true;status('Preparing complete grouped CSV…');let rows=[],offset=0;for(;;){const page=await contributionReady('query',{...query,offset,limit:100000});if(ticket!==contributionRevision)throw new Error('View changed during export. Start the download again.');if(!contributions.sameSource(page.provenance,result.provenance))throw new Error('Source changed during export. Refresh the verified data.');rows.push(...page.rows);if(!page.has_more)break;if(!page.rows.length)throw new Error('The next export page is empty.');offset+=page.rows.length;}MentatExport.download(contributions.csv({...result,rows},query),'text/csv;charset=utf-8','mentat-chart-studio.csv');status('Exported '+fmt(rows.length)+' groups with source and accounting provenance.');}
+      else{const svg=el('canvas').querySelector('svg');if(!svg)throw new Error('This view has no image. Download its data CSV.');await MentatExport.image(svg,format,lastTitle,lastScope,'mentat-chart-studio');}
+    }catch(error){failure(error.message);}finally{exporting=false;}
+  }
+
   /* ---------------------------------------------------------------- pills */
 
   function fieldLabel(field, aggregation) {
+    if(verified()&&field.role==='measure'&&field.id!=='amount')return field.name;
     if (field.role !== 'measure' || !aggregation) return field.name;
-    const label = core.AGGREGATIONS.find(a => a[0] === aggregation);
-    return (label ? label[1] : 'Sum').toUpperCase() + '(' + field.name + ')';
+    return (AGG_LABEL[aggregation] || 'SUM') + '(' + field.name + ')';
   }
   function fieldTooltip(field) {
+    if(verified())return [field.name,'Data type: '+(field.data_type||field.type),'Role: '+field.role,field.discrete?'Discrete grouping':'Continuous aggregate',field.table,field.geographic_role?'Geography: '+field.geographic_role:'',field.description].filter(Boolean).join(' · ');
     const kind = field.role === 'measure' ? 'measure' : field.isTime ? 'date dimension' : 'dimension';
     return [field.name, 'detected type: ' + field.type + ' (' + kind + ')',
       'distinct values: ' + (field.distinct == null ? 'unknown' : fmt(field.distinct)),
@@ -237,20 +417,23 @@
       (settings.zone ? ', on ' + settings.zone : ', field') + '. Press Enter for actions.');
     const glyph = document.createElement('span');
     glyph.className = 'studio-glyph';
-    glyph.textContent = field.glyph === '#' ? '#' : field.glyph === 'cal' ? '▦' : 'Abc';
+    if (field.glyph === 'cal' || field.glyph === 'geo') glyph.append(typeGlyph(field.glyph));
+    else glyph.textContent = field.glyph === 'bool' ? 'T/F' : field.glyph === '#' ? '#' : 'Abc';
+    glyph.title = field.glyph === 'cal' ? 'Date' : field.glyph === 'geo' ? 'Geography'
+      : field.glyph === '#' ? 'Number' : field.glyph === 'bool' ? 'True/false' : 'Text';
     const name = document.createElement('span');
     name.className = 'studio-pill-name';
     name.textContent = fieldLabel(field, settings.aggregation);
     node.append(glyph, name);
-    if (settings.zone && field.role === 'measure' && ['columns', 'rows'].includes(settings.zone)) {
+    if (settings.zone) {
       const menu = document.createElement('button');
       menu.type = 'button';
       menu.className = 'studio-pill-menu';
       menu.textContent = '▾';
-      menu.setAttribute('aria-label', 'Aggregation for ' + field.name);
-      menu.onclick = event => { event.stopPropagation(); aggregationMenu(node, settings.zone, settings.position); };
+      menu.setAttribute('aria-label', 'Actions for ' + field.name);
+      menu.onclick = event => { event.stopPropagation(); sendMenu(node, field, settings); };
       node.append(menu);
-      node.oncontextmenu = event => { event.preventDefault(); aggregationMenu(node, settings.zone, settings.position); };
+      node.oncontextmenu = event => { event.preventDefault(); sendMenu(node, field, settings); };
     }
     node.addEventListener('dragstart', event => {
       dragging = settings.zone
@@ -293,22 +476,42 @@
     document.querySelectorAll('.studio-send').forEach(node => node.remove());
     const menu = document.createElement('div');
     menu.className = 'studio-send';
-    for (const [label, action] of items) {
+    for (const [label, action, options] of items) {
+      const settings = options || {};
+      if (settings.group) {
+        const heading = document.createElement('div');
+        heading.className = 'studio-send-group';
+        heading.textContent = label;
+        menu.append(heading);
+        continue;
+      }
       const button = document.createElement('button');
       button.type = 'button';
       button.textContent = label;
-      button.onclick = () => {
-        menu.remove();
-        if (anchor.isConnected) anchor.focus();
-        action();
-      };
+      if (settings.disabled || !action) {
+        button.disabled = true;
+        button.title = settings.reason || '';
+      } else {
+        button.onclick = () => {
+          menu.remove();
+          if (anchor.isConnected) anchor.focus();
+          action();
+        };
+      }
       menu.append(button);
     }
     const box = anchor.getBoundingClientRect();
     menu.style.left = Math.round(box.left + window.scrollX) + 'px';
     menu.style.top = Math.round(box.bottom + window.scrollY + 4) + 'px';
     document.body.append(menu);
-    const first = menu.querySelector('button');
+    // A long menu must never run off the bottom of the window: the entries at
+    // the end are the ones nobody thinks to scroll for.
+    const height = menu.getBoundingClientRect().height;
+    const below = window.innerHeight - box.bottom;
+    if (height > below && box.top > below) {
+      menu.style.top = Math.max(4, Math.round(box.top + window.scrollY - height - 4)) + 'px';
+    }
+    const first = menu.querySelector('button:not(:disabled)');
     if (first) first.focus();
     const dismiss = () => {
       menu.remove();
@@ -321,20 +524,125 @@
     document.addEventListener('keydown', escape);
     return menu;
   }
+  const engine = () => verified() ? 'verified' : 'worksheet';
+  const fieldOf = column => core.fieldAt(core.classifyFields(columns(), sheet().types), Number(column));
+
+  // Type glyphs are drawn, never typed: no emoji, and they take the pill's ink.
+  function typeGlyph(kind) {
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 12 12');
+    svg.setAttribute('aria-hidden', 'true');
+    const shapes = kind === 'cal'
+      ? [['rect', {x: 1, y: 2.6, width: 10, height: 8.4, rx: 1, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.2}],
+         ['line', {x1: 1, y1: 5.2, x2: 11, y2: 5.2, stroke: 'currentColor', 'stroke-width': 1.2}],
+         ['line', {x1: 3.6, y1: 1, x2: 3.6, y2: 3.6, stroke: 'currentColor', 'stroke-width': 1.2}],
+         ['line', {x1: 8.4, y1: 1, x2: 8.4, y2: 3.6, stroke: 'currentColor', 'stroke-width': 1.2}]]
+      : [['path', {d: 'M6 1.1c-2 0-3.5 1.5-3.5 3.4C2.5 7.2 6 11 6 11s3.5-3.8 3.5-6.5C9.5 2.6 8 1.1 6 1.1z',
+          fill: 'none', stroke: 'currentColor', 'stroke-width': 1.2}],
+         ['circle', {cx: 6, cy: 4.5, r: 1.2, fill: 'currentColor'}]];
+    for (const [tag, attributes] of shapes) {
+      const node = document.createElementNS(NS, tag);
+      for (const name of Object.keys(attributes)) node.setAttribute(name, String(attributes[name]));
+      svg.append(node);
+    }
+    return svg;
+  }
+
+  // Data-type actions. A verified field keeps the role its source defines, so
+  // the menu says so rather than offering a change the query cannot express.
+  function typeMenuItems(anchor, field, settings) {
+    const items = [['Data type', null, {group: true}]];
+    const overrides = sheet().types || {};
+    for (const role of ['dimension', 'measure']) {
+      const label = 'Treat as ' + (role === 'dimension' ? 'Dimension' : 'Measure');
+      if (verified()) {
+        items.push([label, null, {disabled: true,
+          reason: 'Verified fields keep the role the source defines. ZIP, committee ID and election cycle are already dimensions.'}]);
+        continue;
+      }
+      const check = core.canTreatAs(field, role);
+      if (!check.ok) { items.push([label, null, {disabled: true, reason: check.reason}]); continue; }
+      items.push([label, () => commit(() => {
+        const next = Object.assign({}, sheet().types || {});
+        next[String(field.index)] = {role: role};
+        sheet().types = next;
+      })]);
+    }
+    if (overrides[String(field.index)]) items.push(['Use the detected type', () => commit(() => {
+      const next = Object.assign({}, sheet().types || {});
+      delete next[String(field.index)];
+      sheet().types = next;
+    })]);
+    return items;
+  }
+
+  // Date part is one control, not two: it replaces the older "Use <field> here"
+  // swap, it sits at the top of the pill menu so it can never be the entry that
+  // falls below the fold, and it reads the catalog's date hierarchy.
+  function datePartItems(anchor, field, settings) {
+    const parts = core.datePartsFor(field, columns(), engine(), sheet());
+    if (!parts.length) return [];
+    const items = [['Date part', null, {group: true}]];
+    for (const part of parts) {
+      if (part.current) {
+        items.push(['\u2713 ' + part.label, null,
+          {disabled: true, reason: 'This pill already groups by ' + part.label.toLowerCase() + '.'}]);
+        continue;
+      }
+      items.push([part.label, () => commit(() => {
+        if (!verified()) { sheet().analytics.period = part.id; sheet().analytics.transform = 'annual'; return; }
+        const zone = settings.zone === 'rows' ? 'rows' : settings.zone === 'columns' ? 'columns' : '';
+        if (zone) {
+          const pills = core.shelf(sheet()[zone]);
+          if (pills[settings.position]) {
+            pills[settings.position] = {column: part.column, aggregation: 'sum'};
+            sheet()[zone] = pills;
+            return;
+          }
+        }
+        place('columns', part.column);
+      })]);
+    }
+    return items;
+  }
+
   function sendMenu(anchor, field, settings) {
-    const items = ZONES.map(([zone, label]) => ['Send to ' + label, () => commit(() => {
+    const items = [];
+    if (settings.zone === 'filters') items.push(['Edit filter\u2026', () => filterEditor(anchor, settings.position)]);
+    items.push(...datePartItems(anchor, field, settings));
+    const onAxis = settings.zone === 'columns' || settings.zone === 'rows';
+    if (onAxis && field.role === 'measure') {
+      const aggregations = core.aggregationsFor(field, engine());
+      items.push(['Measure', null, {group: true}]);
+      if (aggregations.length) items.push(['Aggregation\u2026', () => aggregationMenu(anchor, settings.zone, settings.position, aggregations)]);
+      else items.push(['Aggregation\u2026', null, {disabled: true,
+        reason: field.name + ' is computed from the source observations, so it has one definition.'}]);
+      const others = core.classifyFields(columns(), sheet().types).measures.filter(f => f.index !== field.index);
+      items.push(['Replace measure\u2026', others.length ? () => popup(anchor, others.map(other => [other.name, () => commit(() => {
+        const pills = core.shelf(sheet()[settings.zone]);
+        if (pills[settings.position]) { pills[settings.position] = {column: other.index, aggregation: 'sum'}; sheet()[settings.zone] = pills; }
+      })])) : null, {disabled: !others.length, reason: 'This source has no other measure.'}]);
+      items.push(['Political money\u2026', () => popup(anchor, core.measurePresets(columns(), engine(), sheet().types)
+        .map(preset => [preset.label,
+          preset.available ? () => commit(() => { sheets[active] = core.applyMeasurePreset(preset.id, sheet(), columns(), engine()); }) : null,
+          {disabled: !preset.available, reason: preset.reason}]))]);
+    }
+    items.push(...typeMenuItems(anchor, field, settings));
+    items.push(['Place', null, {group: true}]);
+    items.push(...ZONES.map(([zone, label]) => ['Send to ' + label, () => commit(() => {
       if (settings.zone) removeFrom(settings.zone, settings.position);
       place(zone, field.index, null, settings.aggregation);
-    })]);
+    })]));
     if (settings.zone) items.push(['Remove from ' + settings.zone, () => commit(() => removeFrom(settings.zone, settings.position))]);
     popup(anchor, items);
   }
-  function aggregationMenu(anchor, zone, position) {
-    popup(anchor, core.AGGREGATIONS.map(([id, label]) => [label, () => commit(() => {
+  function aggregationMenu(anchor, zone, position, list) {
+    popup(anchor, (list || core.AGGREGATIONS).map(([id, label]) => [label, () => commit(() => {
       const pills = core.shelf(sheet()[zone]);
       if (pills[position]) { pills[position].aggregation = id; sheet()[zone] = pills; }
     })]));
   }
+
 
   /* ----------------------------------------------------------- shelf edits */
 
@@ -362,7 +670,12 @@
       if (zone === 'columns' || zone === 'rows') state[zone] = list; else state.marks[zone] = list;
     } else if (zone === 'filters') {
       if (!canPlace(zone, column)) return false;
-      state.filters = state.filters.concat({column, op: 'equals', value: firstMember(column)});
+      // A new filter starts as an empty choice, which selects nothing and
+      // therefore filters nothing, instead of inheriting an arbitrary value.
+      const chosen = core.fieldAt(core.classifyFields(columns(), state.types), column);
+      state.filters = state.filters.concat(chosen && chosen.role === 'measure'
+        ? {column, op: 'between', value: ['', '']}
+        : {column, op: 'in', value: []});
     } else if (zone === 'pages') {
       state.pages = entry;
       state.pageMember = firstMember(column);
@@ -372,8 +685,50 @@
     }
     return true;
   }
+  // The facet query behind a member list, and the key that identifies it. A
+  // field's own filter never narrows its own member list, so opening the
+  // checklist shows every member the rest of the scope allows.
+  function facetSpec(column) {
+    const field = columns().find(f => f.index === column);
+    if (!field || field.role !== 'dimension' || !dataset()) return null;
+    const filters = [];
+    for (const f of sheet().filters || []) {
+      if (f.stage === 'aggregate') continue;
+      const source = columns().find(c => c.index === Number(f.column));
+      if (!source || source.index === column) continue;
+      if (source.role === 'measure' && source.id !== 'amount') continue;
+      try { filters.push(...contributions.clauses(f, source)); }
+      catch { /* an unfinished filter does not narrow the member list */ }
+    }
+    const facet = {dataset: dataset().id, basis: basis(), dimensions: [field.id], measures: ['records'],
+      filters: filters, aggregate_filters: [], sort: [{field: field.id, direction: 'asc'}], limit: 100000, offset: 0};
+    return {key: JSON.stringify(facet), facet: facet, field: field};
+  }
+  function membersCached(column) {
+    const spec = verified() ? facetSpec(column) : null;
+    if (!spec) return null;
+    const entry = memberCache.get(spec.key);
+    return entry && !entry.error && entry.values.length ? entry.values : null;
+  }
+  const memberTotal = column => verified() ? (membersCached(column) || []).length : members(column).length;
   function members(column) {
     if (!data) return [];
+    if(verified()){
+      const spec=facetSpec(column);if(!spec)return [];
+      const {key,facet,field}=spec;
+      if(core.pill(sheet().pages)?.column===column)pageMembersKey=key;
+      // A facet that failed is remembered for thirty seconds instead of being
+      // deleted, because deleting it re-fired the same query from every later
+      // render - the page-load query burst.
+      const cached=memberCache.get(key);
+      if(cached&&(!cached.error||Date.now()-cached.at<30000))return cached.values||[];
+      memberCache.set(key,{values:(cached&&cached.values)||[],at:Date.now()});const selectedDataset=dataset().id;
+      contributionReady('query',facet).then(result=>{
+        const values=result.rows.map(r=>String(r[field.id]??''));memberCache.set(key,{values,at:Date.now()});
+        if(verified()&&dataset()?.id===selectedDataset&&pageMembersKey===key&&core.pill(sheet().pages)?.column===column&&!values.includes(sheet().pageMember)){sheet().pageMember=values[0]||'';persist();}
+        renderAll();
+      }).catch(error=>{memberCache.set(key,{values:[],at:Date.now(),error:error.message});failure(error.message);});return [];
+    }
     const seen = [];
     for (const row of data.rows) {
       const value = String(row[column] == null ? '' : row[column]);
@@ -382,7 +737,7 @@
     }
     return seen.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
   }
-  const firstMember = column => members(column)[0] || '';
+  const firstMember = column => verified() ? String(data?.rows.find(row=>row[column]!=null&&row[column]!=='')?.[column]??'') : members(column)[0] || '';
 
   function dropTarget(node, zone) {
     node.dataset.zone = zone;
@@ -421,7 +776,7 @@
       // Decide before removing: a shelf that refuses the drop must not cost the
       // user the pill they were dragging.
       if (move.kind === 'pill' && !canPlace(zone, move.column)) {
-        const field = core.fieldAt(core.classifyFields(columns()), move.column);
+        const field = core.fieldAt(core.classifyFields(columns(), sheet().types), move.column);
         el('note').textContent = (field ? field.name : 'That field') + ' already has a filter.';
         return;
       }
@@ -436,9 +791,10 @@
   /* -------------------------------------------------------------- rendering */
 
   function renderFields() {
-    const meta = core.classifyFields(columns());
+    const meta = core.classifyFields(columns(), sheet().types);
+    el('field-table-label').hidden=!verified();const table=el('field-table').value;fill(el('field-table'),[['','All related tables'],...[...new Set(meta.fields.map(f=>f.table).filter(Boolean))].map(t=>[t,t])]);el('field-table').value=table;
     const query = el('search').value.trim().toLowerCase();
-    const matches = field => !query || field.name.toLowerCase().includes(query);
+    const matches = field => (!verified()||!table||field.table===table)&&(!query || [field.name,field.id,field.table,field.data_type,field.description].filter(Boolean).join(' ').toLowerCase().includes(query));
     const into = (node, fields) => node.replaceChildren(...fields.filter(matches).map(f => pillNode(f, {})));
     into(el('dimensions'), meta.dimensions);
     into(el('measures'), meta.measures);
@@ -450,7 +806,7 @@
   }
 
   function renderShelves() {
-    const meta = core.classifyFields(columns());
+    const meta = core.classifyFields(columns(), sheet().types);
     const state = sheet();
     const shelfInto = (node, zone, list, placeholder) => {
       const pills = core.shelf(list)
@@ -473,9 +829,9 @@
       const field = core.fieldAt(meta, Number(filter.column));
       if (!field) return null;
       const node = pillNode(field, {zone: 'filters', position});
-      const operator = OPERATORS.find(o => o[0] === filter.op);
-      node.querySelector('.studio-pill-name').textContent =
-        field.name + ' ' + (operator ? operator[1].toLowerCase() : filter.op) + ' ' + filter.value;
+      const summary = core.filterSummary(filter, field, memberTotal(field.index));
+      node.querySelector('.studio-pill-name').textContent = summary;
+      node.title = summary + ' \u00b7 Enter for actions, Delete to remove it';
       return node;
     }).filter(Boolean);
     el('filters').replaceChildren(...filterPills);
@@ -584,7 +940,7 @@
 
   function renderShowMe() {
     const selectionCounts = core.showMeSelection(sheet(), columns(), selection);
-    const tiles = core.showMeEligibility(selectionCounts);
+    const tiles = verified()?contributions.showMeEligibility(selectionCounts):core.showMeEligibility(selectionCounts);
     const recommended = data ? core.recommendedTile(columns()) : '';
     el('showme-grid').replaceChildren(...tiles.map(tile => {
       const button = document.createElement('button');
@@ -607,7 +963,10 @@
       button.addEventListener('mouseenter', describe);
       button.addEventListener('focus', describe);
       button.onclick = () => commit(() => {
-        const next = core.showMeApply(tile.id, sheet(), columns(), selection);
+        if(verified()&&['symbol-map','filled-map'].includes(tile.id)){
+          const filled=tile.id==='filled-map';sheet().columns=[{column:columns().find(f=>f.id===(filled?'state':'zip5')).index,aggregation:'sum'}];sheet().rows=[{column:columns().find(f=>f.id==='amount').index,aggregation:'sum'}];sheet().marks={type:filled?'filled-map':'map',color:null,size:null,label:null,detail:[],tooltip:[]};sheet().analytics.transform='none';return;
+        }
+        const next = (verified()?contributions:core).showMeApply(tile.id, sheet(), columns(), selection);
         sheets[active] = next;
       });
       return button;
@@ -619,30 +978,78 @@
 
   /* ------------------------------------------------------------- analytics */
 
+  // An analytics object that cannot change this view must say so rather than
+  // toggle and draw nothing. The reasons are the renderers' own limits: the
+  // verified path draws reference lines only in contribution-plot.js, and a
+  // grand total there is a stated figure, not a mark.
+  function analyticsRefusal(item) {
+    const state = sheet();
+    if (!data) return 'Choose a data source first.';
+    if (!verified()) return '';
+    const type = (state.marks && state.marks.type) || 'automatic';
+    if (item.group === 'transform') {
+      const timely = core.shelf([...state.columns, ...state.rows])
+        .some(p => ['date', 'year', 'cycle'].includes(columns()[p.column] && columns()[p.column].id));
+      return timely ? '' : 'Needs Contribution date, Year or Election cycle on Columns or Rows.';
+    }
+    if (item.id === 'totals') return '';
+    if (MentatContributionCharts.TYPES.includes(type) || ['pie','doughnut','waterfall','pareto','radar','map','filled-map','table','text'].includes(type)) {
+      return 'Reference lines are drawn on bar, line, area and circle marks.';
+    }
+    if (state.analytics.transform !== 'none') return 'Reference lines are not drawn on a period-analysis view.';
+    return '';
+  }
+
+  function analyticsRow(item, state, role) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'studio-analytics-item';
+    const refusal = analyticsRefusal(item);
+    button.draggable = !refusal;
+    button.disabled = !!refusal;
+    const on = item.group === 'transform' ? state.analytics.transform === item.id : !!state.analytics[item.id];
+    button.setAttribute('role', role);
+    button.setAttribute('aria-checked', String(on));
+    const text = document.createElement('span');
+    text.className = 'studio-analytics-text';
+    const title = document.createElement('span');
+    title.textContent = item.label;
+    const hint = document.createElement('small');
+    hint.textContent = refusal || item.hint;
+    text.append(title, hint);
+    const knob = document.createElement('span');
+    knob.className = 'studio-switch';
+    knob.setAttribute('aria-hidden', 'true');
+    if (refusal) button.title = refusal;
+    button.append(text, knob);
+    button.onclick = () => applyAnalytics(item.id);
+    button.addEventListener('dragstart', event => {
+      dragging = {kind: 'analytics', id: item.id};
+      dropped = false;
+      event.dataTransfer.effectAllowed = 'copy';
+      event.dataTransfer.setData('text/plain', item.label);
+    });
+    button.addEventListener('dragend', () => { dragging = null; });
+    return button;
+  }
+
   function renderAnalytics() {
     const state = sheet();
-    el('analytics-list').replaceChildren(...ANALYTICS.map(item => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'studio-analytics-item';
-      button.draggable = true;
-      const on = item.group === 'transform' ? state.analytics.transform === item.id : !!state.analytics[item.id];
-      button.setAttribute('aria-pressed', String(on));
-      const title = document.createElement('span');
-      title.textContent = item.label;
-      const hint = document.createElement('small');
-      hint.textContent = item.hint;
-      button.append(title, hint);
-      button.onclick = () => applyAnalytics(item.id);
-      button.addEventListener('dragstart', event => {
-        dragging = {kind: 'analytics', id: item.id};
-        dropped = false;
-        event.dataTransfer.effectAllowed = 'copy';
-        event.dataTransfer.setData('text/plain', item.label);
-      });
-      button.addEventListener('dragend', () => { dragging = null; });
-      return button;
-    }));
+    const host = el('analytics-list');
+    host.replaceChildren();
+    // One period analysis at a time; the reference lines are independent.
+    for (const [kind, heading, role] of [['transform', 'Period analysis', 'radio'], ['flag', 'Summarize', 'switch']]) {
+      const label = document.createElement('p');
+      label.className = 'studio-analytics-group';
+      label.textContent = heading;
+      const box = document.createElement('div');
+      if (role === 'radio') {
+        box.setAttribute('role', 'radiogroup');
+        box.setAttribute('aria-label', heading);
+      }
+      for (const item of ANALYTICS.filter(a => a.group === kind)) box.append(analyticsRow(item, state, role));
+      host.append(label, box);
+    }
   }
   function applyAnalytics(id) {
     const item = ANALYTICS.find(a => a.id === id);
@@ -652,6 +1059,122 @@
       if (item.group === 'transform') analytics.transform = analytics.transform === id ? 'none' : id;
       else analytics[id] = !analytics[id];
     });
+  }
+
+  /* ------------------------------------------------------- company overview */
+
+  // Four preset views of one company. No iframes: each card compiles a preset
+  // sheet, runs the ordinary verified query and paints it with the same
+  // renderers the builder uses, so a card and its builder view are one view.
+  function overviewCycle() {
+    const field = columns().find(f => f.id === 'cycle');
+    if (!field) return '';
+    const filter = (sheet().filters || []).find(f => Number(f.column) === field.index);
+    if (!filter || !core.filterActive(filter)) return '';
+    const values = core.filterValues(filter);
+    return (filter.op === 'equals' || filter.op === 'in') && values.length === 1 ? values[0] : '';
+  }
+  function renderOverviewControls() {
+    const toggle = el('overview-toggle');
+    const reason = !verified() ? 'Company overview uses verified contributions.'
+      : !data || !dataset() ? 'Choose a verified report source first.'
+      : !columns().some(f => f.id === 'company') ? 'This source has no company field.' : '';
+    toggle.disabled = !!reason;
+    toggle.title = reason || 'Four preset views of one company';
+    if (reason) overviewMode = false;
+    toggle.setAttribute('aria-pressed', String(overviewMode));
+    el('overview').hidden = !overviewMode;
+    el('grid').hidden = dataSourceTab || overviewMode;
+    const host = document.querySelector('#view-chart-studio .studio');
+    if (host) host.classList.toggle('studio-overview-mode', overviewMode);
+  }
+  function renderOverview() {
+    const field = columns().find(f => f.id === 'company');
+    if (!field) return;
+    const list = members(field.index);
+    const carried = (appliedScope && appliedScope.company) || '';
+    if (!overviewCompany || (list.length && list.indexOf(overviewCompany) === -1)) {
+      overviewCompany = list.indexOf(carried) !== -1 ? carried : list[0] || '';
+    }
+    fill(el('overview-company'), list.length ? list.map(m => [m, m]) : [['', 'Reading companies\u2026']]);
+    el('overview-company').value = overviewCompany;
+    const cycle = overviewCycle();
+    el('overview-scope').textContent = [overviewCompany || 'No company selected',
+      (dataset() || {}).label || (dataset() || {}).id || '', cycle ? 'Cycle ' + cycle : 'All cycles',
+      contributions.BASIS[basis()][0]].filter(Boolean).join(' \u00b7 ');
+    const ticket = ++overviewRevision;
+    const grid = el('overview-grid');
+    grid.replaceChildren();
+    const cards = core.companyOverviewPresets().map(preset => {
+      const card = document.createElement('section');
+      card.className = 'studio-overview-card';
+      const title = document.createElement('h3');
+      title.textContent = preset.title;
+      const note = document.createElement('p');
+      note.className = 'studio-note';
+      note.textContent = preset.note;
+      const body = document.createElement('div');
+      body.className = 'studio-overview-body';
+      body.textContent = 'Reading verified totals\u2026';
+      const actions = document.createElement('div');
+      actions.className = 'studio-overview-actions';
+      const open = document.createElement('button');
+      open.type = 'button';
+      open.textContent = 'Open in builder';
+      open.onclick = () => {
+        overviewMode = false;
+        commit(() => {
+          sheets[active] = core.companyOverviewSheet(preset, columns(),
+            {company: overviewCompany, cycle: overviewCycle()}, sheet());
+        });
+      };
+      actions.append(open);
+      card.append(title, note, body, actions);
+      if (!grid.children.length) card.classList.add('is-focused');
+      card.onmouseenter = () => {
+        for (const other of grid.children) other.classList.toggle('is-focused', other === card);
+      };
+      grid.append(card);
+      return {preset: preset, body: body};
+    });
+    if (!overviewCompany) {
+      for (const item of cards) item.body.textContent = 'Choose a company to read its giving.';
+      return;
+    }
+    // One query at a time: queryCached aborts the previous request, so four
+    // parallel cards would cancel each other.
+    (async () => {
+      for (const item of cards) {
+        if (ticket !== overviewRevision) return;
+        try { await renderOverviewCard(item.preset, item.body, ticket); }
+        catch (error) { if (ticket === overviewRevision && error.name !== 'AbortError') item.body.textContent = error.message; }
+      }
+    })();
+  }
+  async function renderOverviewCard(preset, body, ticket) {
+    const missing = core.companyOverviewMissing(preset, columns());
+    if (missing.length) { body.textContent = 'This source has no ' + missing.join(' or ') + ' field.'; return; }
+    const state = core.companyOverviewSheet(preset, columns(), {company: overviewCompany, cycle: overviewCycle()});
+    const compiled = contributions.compile(state, columns(), {dataset: dataset().id, basis: basis(), offset: 0});
+    const result = await queryCached(compiled.query);
+    if (ticket !== overviewRevision) return;
+    body.replaceChildren();
+    if (!result.rows.length) { body.textContent = 'No matching observations in this scope.'; return; }
+    const spec = Object.assign({}, compiled.spec, {columns: result.columns, title: preset.title});
+    if (['pie', 'doughnut', 'waterfall', 'pareto', 'radar'].includes(spec.type)) {
+      const id = spec.measures[0], currency = contributions.MONEY.has(id);
+      const groups = result.rows.map(row => ({label: contributionPlot.label(row, spec.dimensions),
+        value: row[id] / (currency ? 100 : 1), n: 1}));
+      const measure = ((result.columns.find(c => c.id === id) || {}).name || id) + (currency ? ' (USD)' : '');
+      const drawn = paint.chartSVG({type: spec.type, groups: groups, selected: result.totals.records, excluded: 0},
+        measure, {type: spec.type, aggregation: 'sum', x: 0, y: 1},
+        {columns: [{name: 'Group'}, {name: id}]}, preset.title, '');
+      body.append(drawn.svg);
+    } else if (MentatContributionCharts.TYPES.includes(spec.type)) {
+      MentatContributionCharts.render(body, result.rows, spec, () => {});
+    } else {
+      contributionPlot.render(body, result.rows, spec, () => {});
+    }
   }
 
   /* ---------------------------------------------------------------- sheets */
@@ -768,7 +1291,7 @@
     if (total == null) return false;
     const box = String(svg.getAttribute('viewBox') || '0 0 960 620').split(' ').map(Number);
     const note = document.createElementNS(NS, 'text');
-    note.textContent = 'Grand total ' + compact(total);
+    note.textContent = (lastConfig?.transform === 'forecast' ? 'Observed total ' : 'Grand total ') + compact(total);
     note.setAttribute('x', box[2] - 28);
     note.setAttribute('y', 88);
     note.setAttribute('text-anchor', 'end');
@@ -812,6 +1335,7 @@
   }
 
   function renderView() {
+    if(verified()){renderContributionView();return;}
     lastResult = null; lastConfig = null;
     el('canvas').replaceChildren();
     el('table').replaceChildren();
@@ -855,7 +1379,7 @@
     lastScope = [source.reportName + ' / ' + data.sheet,
       (result.split ? fmt(result.selected) + ' values from ' + fmt(data.row_count) + ' worksheet rows selected (' + result.split.cells + ' multi-value cells split); '
         : result.selected + ' of ' + data.row_count + ' rows selected; ') + result.excluded + ' rows excluded for missing or non-numeric values.',
-      'Group/X: ' + (core.fieldAt(report.fields, report.config.x) || {name: 'All rows'}).name + '.',
+      'Group/X: ' + (result.groupingLabel || (core.fieldAt(report.fields, report.config.x) || {name: 'All rows'}).name) + '.',
       ['box', 'scatter', 'histogram'].includes(result.type) ? 'Individual worksheet values.' : 'Aggregation: ' + report.config.aggregation + '.',
       'Worksheet rows: ' + (report.config.start || 'first data row') + '–' + (report.config.end || 'last data row') + '.',
       'Row count limit: ' + (report.config.limit || 'all matching rows') + ' (after filters).',
@@ -924,7 +1448,8 @@
     el('grid').hidden = !worksheet;
     el('datasource').hidden = worksheet;
     if (worksheet || !data) return;
-    const meta = core.classifyFields(columns());
+    if(verified()){renderRelationshipSource();return;}
+    const meta = core.classifyFields(columns(), sheet().types);
     const source = sheet().source;
     const list = document.createElement('dl');
     const pairs = [['Report folder', source.runName], ['Report', source.reportName], ['Worksheet', data.sheet],
@@ -958,6 +1483,24 @@
     el('datasource').replaceChildren(list, heading, table);
   }
 
+  function renderRelationshipSource(){
+    const model=dataset()?.model||contributionCatalog?.model,host=el('datasource');host.replaceChildren();
+    const add=(tag,value,parent=host)=>{const n=document.createElement(tag);n.textContent=value;parent.append(n);return n;};
+    add('h2','Sources, relationships and field definitions');add('p',model?.grain||'One preserved source observation. Measures aggregate at this grain.');
+    add('h3','Available report sources');const sources=add('div','');sources.className='studio-source-choices';
+    for(const item of contributionCatalog?.datasets||[]){const button=add('button',item.label||item.id,sources);button.type='button';button.disabled=!item.available;button.setAttribute('aria-pressed',String(item.id===dataset()?.id));button.onclick=()=>{el('dataset').value=item.id;selectContributionDataset();};}
+    const worksheets=add('button','Explore every report worksheet');worksheets.type='button';worksheets.onclick=()=>{dataSourceTab=false;el('source-mode').value='worksheet';el('source-mode').dispatchEvent(new Event('change'));};
+    add('p','Candidate funding, committee spending, coverage and evidence sheets have their own rows and measures. Select a worksheet to inspect its complete scanned field list. Alternative summary tables are never automatically added to receipt facts.');
+    if(model){add('h3','Logical tables');const cards=add('div','');cards.className='studio-model-tables';
+      for(const table of model.tables){const card=add('section','',cards);add('h4',table.name,card);add('p',table.grain,card);add('small','Key: '+table.key+' · '+table.source,card);}
+      add('h3','Relationships');for(const r of model.relationships){const p=add('p','');add('strong',r.from+' → '+r.to,p);add('span',' · '+r.cardinality+' · '+r.matching+'. '+r.behavior,p);}
+      add('p',model.notes.join(' '));add('h3','Date and geography levels');for(const [name,levels]of Object.entries(model.hierarchies))add('p',name+': '+levels.map(id=>columns().find(f=>f.id===id)?.name||id).join(' → '));
+    }
+    add('h3','Complete analytical field catalog');const table=add('table',''),thead=add('thead','',table),tr=add('tr','',thead);for(const title of ['Field','Logical table','Data type','Role','Interpretation','Use'])add('th',title,tr);const body=add('tbody','',table);
+    for(const field of columns()){const row=add('tr','',body);for(const value of [field.name,field.table||'Observation',field.data_type||field.type,field.role+(field.discrete?' · discrete':' · continuous'),field.description||''])add('td',value,row);const cell=add('td','',row),button=add('button',field.role==='measure'?'Add to Rows':'Add to Columns',cell);button.type='button';button.onclick=()=>{dataSourceTab=false;commit(()=>place(field.role==='measure'?'rows':'columns',field.index));};}
+    add('h3','Tableau references');for(const [name,url]of [['Relationships preserve table grain','https://help.tableau.com/current/pro/desktop/en-us/relate_tables.htm'],['Data types and mixed values','https://help.tableau.com/current/pro/desktop/en-us/datafields_typesandroles_datatypes.htm'],['Dimensions, measures, discrete and continuous fields','https://help.tableau.com/current/pro/desktop/en-us/datafields_typesandroles.htm']]){const p=add('p',''),a=add('a',name,p);a.href=url;a.target='_blank';a.rel='noopener noreferrer';}
+  }
+
   // Sort is switched off for a time view: chronological order is the meaning of
   // the axis, and core.sortResult refuses to reorder one, so a pressed-looking
   // button would promise something the view never does.
@@ -985,7 +1528,7 @@
   // worksheet holding several, so the studio offers the same Subject choice the
   // classic dialog does. The control appears only where that column exists.
   function renderSubjectParam() {
-    const field = data ? core.subjectField(core.classifyFields(columns()).fields) : null;
+    const field = data ? core.subjectField(core.classifyFields(columns(), sheet().types).fields) : null;
     el('param-subject-label').hidden = !field;
     if (!field) return;
     const list = defaultSubject(sheet(), field);
@@ -1001,6 +1544,7 @@
     el('labels').setAttribute('aria-pressed', String(!!state.showLabels));
     el('fit').value = state.fit;
     el('showme-toggle').setAttribute('aria-pressed', String(!el('showme').hidden));
+    el('showme-toggle').classList.toggle('is-primary', el('showme').hidden);
     el('param-start').value = state.params.start || '';
     el('param-end').value = state.params.end || '';
     el('param-limit').value = state.params.limit || '';
@@ -1012,6 +1556,7 @@
   }
 
   function renderAll() {
+    syncContributionControls();
     renderToolbar();
     renderFields();
     renderShelves();
@@ -1019,12 +1564,18 @@
     renderShowMe();
     renderSheets();
     renderDataSource();
-    if (!dataSourceTab) renderView();
+    renderScopeChip();
+    renderFilterRows();
+    renderOverviewControls();
+    if (overviewMode) renderOverview();
+    else if (!dataSourceTab) renderView();
+    window.dispatchEvent(new Event('mentat:studio-state'));
   }
 
   /* ------------------------------------------------------------- downloads */
 
   function download(format) {
+    if(verified()){downloadContributions(format);return;}
     if (!lastResult) { failure('Build a view before downloading.'); return; }
     failure('');
     if (format === 'csv') {
@@ -1041,40 +1592,250 @@
 
   /* --------------------------------------------------------------- filters */
 
+  // The filter pill's editor: a searchable member checklist for dimensions, a
+  // pair of bounds for numbers and dates, and the verified engine's stage
+  // choice. Apply goes through commit(), so a filter edit is one undo step.
   function filterEditor(anchor, position) {
-    const filter = sheet().filters[position];
-    if (!filter) return;
+    const stored = sheet().filters[position];
+    if (!stored) return;
+    const filter = core.normalizeFilter(stored);
+    const field = fieldOf(filter.column);
+    if (!field) return;
     const menu = popup(anchor, []);
     const form = document.createElement('div');
     form.className = 'studio-filter-editor';
+    const head = document.createElement('div');
+    head.className = 'studio-filter-head';
+    const title = document.createElement('strong');
+    title.textContent = field.name;
+    head.append(title);
+    const numeric = field.role === 'measure';
+    const dated = !numeric && (field.type === 'date' || field.unit === 'date');
+    const choices = numeric
+      ? [['between', 'Between'], ['gte', 'At least'], ['lte', 'At most'], ['equals', 'Equals']]
+      : dated ? [['between', 'Between'], ['equals', 'Equals']]
+      : [['in', 'Is one of'], ['notin', 'Is not one of'], ['equals', 'Equals'], ['contains', 'Contains']];
     const operator = document.createElement('select');
     operator.setAttribute('aria-label', 'Filter operation');
-    for (const [id, label] of OPERATORS) operator.append(new Option(label, id));
-    operator.value = filter.op;
-    const value = document.createElement('input');
-    value.type = 'text';
-    value.setAttribute('aria-label', 'Filter value');
-    value.value = filter.value;
+    for (const [id, label] of choices) operator.append(new Option(label, id));
+    operator.value = choices.some(choice => choice[0] === filter.op) ? filter.op : choices[0][0];
+    let stage = null;
+    if (verified()) {
+      stage = document.createElement('select');
+      stage.setAttribute('aria-label', 'Filter stage');
+      if (field.role === 'dimension' || field.id === 'amount') stage.append(new Option('Source records, before grouping', 'rows'));
+      if (field.role === 'measure') stage.append(new Option('Grouped values, after aggregation', 'aggregate'));
+      stage.value = stored.stage || (field.role === 'measure' && field.id !== 'amount' ? 'aggregate' : 'rows');
+    }
+    const body = document.createElement('div');
+    const hint = document.createElement('small');
+    hint.textContent = verified()
+      ? (numeric ? 'Money is entered in USD; counts are whole observations.'
+        : 'Exact text preserves identifiers such as leading-zero ZIPs.')
+      : 'Worksheet filters apply to source rows before aggregation.';
+    let read = () => ({op: operator.value, value: ''});
+    let poll = 0;
+    const stopPoll = () => { if (poll) { clearInterval(poll); poll = 0; } };
+
+    function drawScalar(count) {
+      const inputs = [];
+      for (let i = 0; i < count; i++) {
+        const input = document.createElement('input');
+        input.type = dated ? 'date' : numeric ? 'number' : 'text';
+        input.setAttribute('aria-label', count === 1 ? 'Filter value' : i ? 'Upper bound' : 'Lower bound');
+        if (count === 2) input.placeholder = i ? 'Up to' : 'From';
+        inputs.push(input);
+      }
+      const bounds = core.filterBounds(filter);
+      if (count === 2) inputs.forEach((input, i) => { input.value = filter.op === 'between' ? bounds[i] : ''; });
+      else inputs[0].value = Array.isArray(filter.value) ? '' : filter.value;
+      body.replaceChildren(...inputs);
+      read = () => ({op: operator.value,
+        value: count === 2 ? [inputs[0].value.trim(), inputs[1].value.trim()] : inputs[0].value.trim()});
+      inputs[0].focus();
+    }
+
+    function drawList() {
+      const chosen = new Set(core.filterValues(filter));
+      const search = document.createElement('input');
+      search.type = 'search';
+      search.placeholder = 'Search values';
+      search.setAttribute('aria-label', 'Search values');
+      const links = document.createElement('div');
+      links.className = 'studio-filter-links-row';
+      const all = document.createElement('button');
+      all.type = 'button';
+      all.textContent = 'All';
+      const none = document.createElement('button');
+      none.type = 'button';
+      none.textContent = 'None';
+      links.append(all, none);
+      const list = document.createElement('div');
+      list.className = 'studio-filter-members';
+      body.replaceChildren(search, links, list);
+      const paint = () => {
+        const available = members(field.index);
+        const query = search.value.trim().toLowerCase();
+        const shown = available.filter(value => !query || value.toLowerCase().includes(query)).slice(0, 400);
+        list.replaceChildren();
+        if (!available.length) {
+          const note = document.createElement('p');
+          note.textContent = verified() ? 'Reading the values of this field\u2026' : 'This column has no values.';
+          list.append(note);
+        }
+        for (const value of shown) {
+          const row = document.createElement('label');
+          const box = document.createElement('input');
+          box.type = 'checkbox';
+          box.checked = chosen.has(value);
+          box.onchange = () => { if (box.checked) chosen.add(value); else chosen.delete(value); };
+          row.append(box, document.createTextNode(value === '' ? '(blank)' : value));
+          list.append(row);
+        }
+        if (available.length > shown.length) {
+          const note = document.createElement('p');
+          note.textContent = (available.length - shown.length) + ' more values \u2014 narrow the search.';
+          list.append(note);
+        }
+        return available.length;
+      };
+      search.oninput = paint;
+      all.onclick = () => { for (const value of members(field.index)) chosen.add(value); paint(); };
+      none.onclick = () => { chosen.clear(); paint(); };
+      // members() memoises its facet query, so polling for the answer costs no
+      // extra request; the negative cache stops a failed facet from re-firing.
+      if (!paint() && verified()) {
+        poll = setInterval(() => { if (!menu.isConnected || paint()) stopPoll(); }, 400);
+        setTimeout(stopPoll, 20000);
+      }
+      read = () => ({op: operator.value, value: [...chosen]});
+      search.focus();
+    }
+
+    const draw = () => {
+      stopPoll();
+      const op = operator.value;
+      if (op === 'in' || op === 'notin') drawList(); else drawScalar(op === 'between' ? 2 : 1);
+    };
+    operator.onchange = draw;
     const actions = document.createElement('div');
     actions.className = 'studio-editor-actions';
     const apply = document.createElement('button');
     apply.type = 'button';
+    apply.className = 'is-primary';
     apply.textContent = 'Apply';
     apply.onclick = () => {
+      const next = read();
+      stopPoll();
       menu.remove();
       commit(() => {
-        sheet().filters[position] = {column: Number(filter.column), op: operator.value, value: value.value};
+        sheet().filters[position] = core.normalizeFilter(Object.assign({column: Number(filter.column)}, next,
+          stage ? {stage: stage.value} : {}));
       });
     };
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.textContent = 'Cancel';
+    cancel.onclick = () => { stopPoll(); menu.remove(); if (anchor.isConnected) anchor.focus(); };
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.textContent = 'Remove';
-    remove.onclick = () => { menu.remove(); commit(() => removeFrom('filters', position)); };
-    actions.append(apply, remove);
-    form.append(operator, value, actions);
+    remove.onclick = () => { stopPoll(); menu.remove(); commit(() => removeFrom('filters', position)); };
+    actions.append(apply, cancel, remove);
+    form.append(head, operator, body);
+    if (stage) form.append(stage);
+    form.append(hint, actions);
     menu.append(form);
-    operator.focus();
+    draw();
   }
+
+  // The Inspector's Filters tab and the Filters shelf are the same filters.
+  function renderFilterRows() {
+    const meta = core.classifyFields(columns(), sheet().types);
+    const rows = (sheet().filters || []).map((filter, position) => {
+      const field = core.fieldAt(meta, Number(filter.column));
+      if (!field) return null;
+      const row = document.createElement('div');
+      row.className = 'studio-filter-row';
+      const name = document.createElement('strong');
+      name.textContent = field.name;
+      const summary = document.createElement('span');
+      summary.textContent = core.filterSummary(filter, field, memberTotal(field.index));
+      const actions = document.createElement('div');
+      actions.className = 'studio-editor-actions';
+      const edit = document.createElement('button');
+      edit.type = 'button';
+      edit.textContent = 'Edit';
+      edit.onclick = () => filterEditor(edit, position);
+      const drop = document.createElement('button');
+      drop.type = 'button';
+      drop.textContent = 'Remove';
+      drop.onclick = () => commit(() => removeFrom('filters', position));
+      actions.append(edit, drop);
+      row.append(name, summary, actions);
+      return row;
+    }).filter(Boolean);
+    el('filter-rows').replaceChildren(...rows);
+    const used = new Set((sheet().filters || []).map(f => Number(f.column)));
+    fill(el('filter-add'), [['', 'Add a field\u2026'],
+      ...meta.dimensions.concat(meta.measures).filter(f => !used.has(f.index)).map(f => [String(f.index), f.name])]);
+    el('tab-filters').textContent = rows.length ? 'Filters (' + rows.length + ')' : 'Filters';
+  }
+
+  // The scope chip states the industry, cycle and company this view is reading,
+  // and says when that scope arrived from the Graph tab.
+  function scopeText() {
+    if (!data) return '';
+    if (!verified()) {
+      const source = sheet().source;
+      return [source.reportName, data.sheet].filter(Boolean).join(' \u00b7 ');
+    }
+    const meta = core.classifyFields(columns(), sheet().types);
+    const valueOf = id => {
+      const field = meta.fields.find(f => f.id === id);
+      if (!field) return '';
+      const filter = (sheet().filters || []).find(f => Number(f.column) === field.index);
+      if (!filter || !core.filterActive(filter)) return '';
+      const values = core.filterValues(filter);
+      return values.length === 1 ? values[0] : values.length ? values.length + ' selected' : '';
+    };
+    const carried = !!(appliedScope && appliedScope.carried);
+    const company = valueOf('company');
+    const parts = [(dataset() || {}).label || (dataset() || {}).id || '', valueOf('cycle') || 'All cycles'];
+    if (carried || company) parts.push(company || 'All companies');
+    return (carried ? 'Carried from Graph \u00b7 ' : '') + parts.filter(Boolean).join(' \u00b7 ');
+  }
+  function renderScopeChip() {
+    const text = scopeText();
+    el('scope-chip').textContent = text;
+    el('scope-change').hidden = !text;
+  }
+
+  // Canvas only hides the builder surfaces; the control that does it never
+  // hides, so there is always a way back.
+  function setOptionsHidden(hidden) {
+    const host = document.querySelector('#view-chart-studio .studio');
+    if (host) host.classList.toggle('studio-options-hidden', !!hidden);
+    el('view-builder').setAttribute('aria-checked', String(!hidden));
+    el('view-canvas').setAttribute('aria-checked', String(!!hidden));
+    el('view-builder').tabIndex = hidden ? -1 : 0;
+    el('view-canvas').tabIndex = hidden ? 0 : -1;
+  }
+  const applyOptionsHidden = hidden => {
+    const pane = window.MentatStudioPane;
+    if (pane && typeof pane.options === 'function') pane.options(hidden);
+    else setOptionsHidden(hidden);
+  };
+  function setInspectorTab(name) {
+    inspectorTab = ['marks', 'analytics', 'filters'].includes(name) ? name : 'marks';
+    for (const id of ['marks', 'analytics', 'filters']) {
+      const selected = id === inspectorTab;
+      el('tab-' + id).setAttribute('aria-selected', String(selected));
+      el('tab-' + id).tabIndex = selected ? 0 : -1;
+      el('pane-' + id).hidden = !selected;
+    }
+  }
+
 
   /* ----------------------------------------------------------------- wiring */
 
@@ -1144,8 +1905,10 @@
     dialog.showModal();
     dialog.dispatchEvent(new Event('mentat:open'));
   };
-  el('mark').onchange = () => commit(() => { sheet().marks.type = el('mark').value; });
+  el('mark').onchange = () => commit(() => { const type=el('mark').value;sheet().marks.type=type;if(verified()&&type==='histogram'&&columns().some(f=>f.id==='amount_bin')){sheet().columns=[{column:columns().find(f=>f.id==='amount_bin').index,aggregation:'sum'}];sheet().rows=[{column:columns().find(f=>f.id==='records').index,aggregation:'sum'}];sheet().marks={type,color:null,size:null,label:null,detail:[],tooltip:[]};sheet().analytics.transform='none';}if(verified()&&['map','filled-map'].includes(type)&&(type==='filled-map'||!core.shelf([...sheet().columns,...sheet().rows]).some(p=>['zip5','state'].includes(columns()[p.column]?.id)))){sheet().columns=[{column:columns().find(f=>f.id===(type==='filled-map'?'state':'zip5')).index,aggregation:'sum'}];sheet().rows=[{column:columns().find(f=>f.id==='amount').index,aggregation:'sum'}];sheet().marks={type,color:null,size:null,label:null,detail:[],tooltip:[]};sheet().map={...sheet().map,layers:[...new Set([...(sheet().map?.layers||['districts']),'states'])]};sheet().analytics.transform='none';} });
   el('search').oninput = renderFields;
+  el('field-table').onchange=renderFields;
+  el('bin-width').onchange=()=>{if(el('bin-width').reportValidity())commit(()=>{sheet().params.binWidth=Number(el('bin-width').value);});};
   el('show-hidden').onchange = () => {
     // The reveal is a reading habit, not part of the view, so it is remembered
     // in this browser rather than saved into the sheet.
@@ -1156,6 +1919,17 @@
   el('report').onchange = loadSheets;
   el('sheet').onchange = () => scan(false);
   el('rescan').onclick = () => scan(true);
+  el('source-mode').onchange=()=>{persist();data=null;sourceKey='';clearTimeout(geometryTimer);contributionController?.abort();++contributionRevision;contributionMap?.destroy?.();contributionMap=null;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.MARK_TYPES);loadRuns();}};
+  el('dataset').onchange=()=>{persist();selectContributionDataset();};
+  el('basis').onchange=()=>commit(()=>{sheet().source.basis=el('basis').value;contributionOffset=0;});
+  el('refresh-data').onclick=()=>{++contributionCacheEpoch;contributionController?.abort();contributionPending=null;contributionCache.clear();memberCache.clear();loadContributions(true);};
+  el('groups-prev').onclick=()=>{contributionOffset=Math.max(0,contributionOffset-(Number(sheet().params.maxGroups)||40));renderView();};
+  el('groups-next').onclick=()=>{contributionOffset+=Number(sheet().params.maxGroups)||40;renderView();};
+  el('inspect-all').onclick=()=>inspectContributions();
+  el('inspection-close').onclick=()=>{++recordRevision;el('inspection').hidden=true;};
+  el('record-prev').onclick=()=>inspectContributions(recordSelection,Math.max(0,recordOffset-100));
+  el('record-next').onclick=()=>inspectContributions(recordSelection,recordOffset+100);
+  for(const id of ['layer-states','layer-districts','layer-zips','congress'])el(id).onchange=()=>commit(()=>{sheet().map={congress:el('congress').value,layers:[['states','states'],['districts','districts'],['zips','zip_areas']].filter(([id])=>el('layer-'+id).checked).map(([,layer])=>layer)};});
   el('pager-prev').onclick = () => stepPage(-1);
   el('pager-next').onclick = () => stepPage(1);
   el('pager-play').onclick = togglePlay;
@@ -1169,30 +1943,91 @@
   el('param-period').onchange = () => commit(() => { sheet().analytics.period = el('param-period').value; });
   el('param-subject').onchange = () => commit(() => { sheet().params.subject = el('param-subject').value; });
   el('param-split').onchange = () => commit(() => { sheet().params.splitMulti = el('param-split').checked; });
-  for (const id of ['tab-data', 'tab-analytics']) el(id).onclick = () => {
-    const wantData = id === 'tab-data';
-    el('tab-data').setAttribute('aria-selected', String(wantData));
-    el('tab-analytics').setAttribute('aria-selected', String(!wantData));
-    el('pane-data').hidden = !wantData;
-    el('pane-analytics').hidden = wantData;
+  for (const id of ['marks', 'analytics', 'filters']) el('tab-' + id).onclick = () => setInspectorTab(id);
+  el('view-builder').onclick = () => applyOptionsHidden(false);
+  el('view-canvas').onclick = () => applyOptionsHidden(true);
+  el('scope-change').onclick = () => {
+    el('source-details').open = true;
+    el('source-details').querySelector('summary').focus();
+  };
+  el('inspector-toggle').onclick = () => {
+    const open = el('inspector').hidden;
+    el('inspector').hidden = !open;
+    el('inspector-toggle').setAttribute('aria-expanded', String(open));
+  };
+  el('inspector-close').onclick = () => {
+    el('inspector').hidden = true;
+    el('inspector-toggle').setAttribute('aria-expanded', 'false');
+    el('inspector-toggle').focus();
+  };
+  el('overview-toggle').onclick = () => {
+    overviewMode = !overviewMode;
+    if (overviewMode) el('inspection').hidden = true;
+    renderAll();
+  };
+  el('overview-company').onchange = () => { overviewCompany = el('overview-company').value; renderOverview(); };
+  if (window.matchMedia && window.matchMedia('(max-width: 1200px)').matches) el('inspector').hidden = true;
+  el('filter-add').onchange = () => {
+    const column = Number(el('filter-add').value);
+    el('filter-add').value = '';
+    if (!Number.isInteger(column)) return;
+    commit(() => { place('filters', column); });
+    setInspectorTab('filters');
   };
 
   function activate() {
     const view = document.getElementById('view-chart-studio');
     if (!view || view.hidden) { stopPlay(); return; }
-    if (!loadedSources) { loadedSources = true; loadRuns(); }
+    if (!loadedSources) { loadedSources = true; if(verified())loadContributions();else loadRuns(); }
   }
   // The Graph tab's "Create chart" button now opens Chart Studio; the classic
   // dialog stays one click away in the Chart Studio toolbar.
+  // The Graph scope a verified contribution dataset can express. Employee tier
+  // and the transfer mode/direction have no field in the contribution source,
+  // and the drill-down category/recipient live only inside graph.js, so none of
+  // them are carried. The button title says what does travel.
+  const GRAPH_SCOPE = [['company', 'company'], ['cycle', 'cycle']];
+  function graphScope() {
+    const read = id => (document.getElementById('graph-' + id) || {}).value || '';
+    const scope = {industry: read('industry'), filters: []};
+    for (const [control, field] of GRAPH_SCOPE) {
+      const value = read(control);
+      if (value) scope.filters.push({field, value});
+    }
+    return scope;
+  }
   const openBuilder = document.getElementById('graph-open-builder');
   if (openBuilder) {
-    openBuilder.textContent = 'Create chart';
+    openBuilder.textContent = 'Open in Chart Studio';
+    openBuilder.title = 'Carry the industry, company and cycle now showing into Chart Studio';
     openBuilder.removeAttribute('aria-haspopup');
-    openBuilder.onclick = () => { if (typeof showView === 'function') showView('chart-studio'); else location.hash = '#chart-studio'; };
+    openBuilder.onclick = () => {
+      pendingScope = graphScope();
+      if (typeof showView === 'function') showView('chart-studio'); else location.hash = '#chart-studio';
+      if (loadedSources && verified()) applyGraphScope();
+    };
   }
   window.addEventListener('mentat:view', activate);
   window.addEventListener('hashchange', activate);
   try { el('show-hidden').checked = localStorage.getItem('mentat-chart-studio-show-identifiers') === '1'; } catch {}
+  if(new URLSearchParams(location.search).has('worksheet'))el('source-mode').value='worksheet';
+  // Each comparison pane owns its normal chart state, request lifecycle and
+  // provenance. Only explicitly selected filters cross the pane boundary.
+  window.MentatStudioPane = {
+    filters() { return (sheet().filters || []).map(f=>({...f,field:columns()[f.column]?.id || columns()[f.column]?.name})); },
+    applyFilters(incoming, fields) {
+      const before=JSON.stringify(sheet().filters), supported=new Set(columns().map(c=>c.id||c.name));
+      const allowed=fields.filter(f=>supported.has(f));
+      const next=(sheet().filters||[]).filter(f=>!allowed.includes(columns()[f.column]?.id||columns()[f.column]?.name));
+      for(const f of incoming)if(allowed.includes(f.field)){const {field,...value}=f;next.push({...value,column:columns().findIndex(c=>(c.id||c.name)===field)});}
+      if(JSON.stringify(next)!==before)commit(()=>{sheet().filters=next;});
+      return fields.filter(f=>!supported.has(f));
+    },
+    ready:()=>!!data,
+    options(hidden) { setOptionsHidden(hidden); },
+    setOptionsHidden
+  };
+  if(el('destination'))el('destination').onchange=()=>{const id=el('destination').value;if(!id)return;const at=columns().findIndex(f=>f.id===id),amount=columns().findIndex(f=>f.id==='amount');if(at<0||amount<0){failure('Regenerate this workbook to create its destination fields.');return;}commit(()=>{sheet().columns=[{column:at,aggregation:'sum'}];sheet().rows=[{column:amount,aggregation:'sum'}];sheet().marks={type:'bar',color:null,size:null,label:null,detail:[],tooltip:[]};sheet().analytics.transform='none';});};
   renderAll();
   activate();
 })();

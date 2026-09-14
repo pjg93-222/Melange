@@ -21,24 +21,56 @@
 
   /* ---------------------------------------------------------------- fields */
 
-  function classifyFields(columns) {
+  // A sheet may re-read a column as a dimension or a measure. The override is
+  // per sheet and persisted with it; a text column can never become a measure,
+  // because there is nothing numeric in it to aggregate.
+  function canTreatAs(field, role) {
+    if (!field) return {ok: false, reason: 'That field is not in this source.'};
+    if (role === 'dimension') {
+      if (field.role === 'dimension') return {ok: false, reason: field.name + ' is already a dimension.'};
+      return {ok: true, reason: ''};
+    }
+    if (role !== 'measure') return {ok: false, reason: 'Choose Dimension or Measure.'};
+    if (field.role === 'measure') return {ok: false, reason: field.name + ' is already a measure.'};
+    if (field.type !== 'number') {
+      return {ok: false, reason: field.name + ' holds ' + (field.type === 'date' ? 'dates' : 'text') +
+        ', so there is nothing numeric to aggregate. Count it with COUNT on another measure instead.'};
+    }
+    return {ok: true, reason: ''};
+  }
+
+  function classifyFields(columns, overrides) {
     const fields = (columns || []).map((column, position) => {
       const field = {
         index: Number.isInteger(column.index) ? column.index : position,
         name: String(column.name == null ? 'Column ' + (position + 1) : column.name),
-        type: column.type || 'category',
+        type: column.type || 'category', id: column.id, unit: column.unit,
+        data_type:column.data_type,table:column.table,geographic_role:column.geographic_role,description:column.description,discrete:column.discrete,
         distinct: column.distinct == null ? null : column.distinct,
         missing: column.missing == null ? null : column.missing
       };
-      field.isTime = !!math.timeColumn(field);
+      if (column.accounting) field.accounting = column.accounting;
+      field.isTime = column.is_time === true || !!math.timeColumn(field);
       field.isIdentifier = !!math.identifierColumn(field);
-      field.role = field.type === 'number' && !field.isTime && !field.isIdentifier ? 'measure' : 'dimension';
+      field.role = column.role || (field.type === 'number' && !field.isTime && !field.isIdentifier ? 'measure' : 'dimension');
       // Identifier columns are real fields; they are folded away until the user
       // asks for them, exactly as recommend() already ignores them.
-      field.hidden = field.isIdentifier && !field.isTime;
-      field.glyph = field.role === 'measure' ? '#' : field.isTime ? 'cal' : 'Abc';
+      field.hidden = column.visible === true ? false : field.isIdentifier && !field.isTime;
+      field.glyph = field.geographic_role ? 'geo' : field.data_type==='boolean'?'bool':field.role === 'measure' ? '#' : field.isTime ? 'cal' : 'Abc';
       return field;
     });
+    const types = overrides && typeof overrides === 'object' ? overrides : {};
+    for (const field of fields) {
+      const wanted = types[String(field.index)];
+      const role = wanted && wanted.role;
+      if ((role === 'dimension' || role === 'measure') && role !== field.role && canTreatAs(field, role).ok) {
+        field.role = role;
+        field.coerced = true;
+        field.hidden = false;
+        field.glyph = field.geographic_role ? 'geo' : field.data_type === 'boolean' ? 'bool'
+          : field.role === 'measure' ? '#' : field.isTime ? 'cal' : 'Abc';
+      }
+    }
     return {
       fields,
       dimensions: fields.filter(f => f.role === 'dimension' && !f.hidden),
@@ -78,6 +110,7 @@
       pages: null,
       pageMember: '',
       analytics: {transform: 'none', period: '', horizon: 2, totals: false, average: false, median: false},
+      types: {},
       params: {start: 0, end: 0, limit: 0, subject: '', maxGroups: 0, splitMulti: false},
       sort: 'none',
       showLabels: false,
@@ -123,7 +156,7 @@
   const STUDIO_GROUP_LIMIT = 40;
 
   function compileReport(state, columns) {
-    const meta = classifyFields(columns);
+    const meta = classifyFields(columns, state && state.types);
     const issues = [], notes = [];
     const attach = list => shelf(list)
       .map(p => Object.assign({}, p, {field: fieldAt(meta, p.column)}))
@@ -140,6 +173,12 @@
     const markType = MARK_IDS.includes(marks.type) ? marks.type : 'automatic';
     const colorPill = pill(marks.color);
     const color = colorPill ? fieldAt(meta, colorPill.column) : null;
+    for (const channel of ['size', 'label', 'tooltip']) {
+      const values = Array.isArray(marks[channel]) ? shelf(marks[channel]) : [pill(marks[channel])].filter(Boolean);
+      if (values.length) issues.push(channel[0].toUpperCase() + channel.slice(1) + ' field encoding is unavailable in the worksheet renderer. Use the contribution explorer or remove this field.');
+    }
+    const details = attach(marks.detail);
+    if (details.some(p => p.field.role !== 'dimension')) issues.push('Detail requires dimensions; move a measure to Rows or Columns.');
 
     const firstDimension = allDimensions[0] || null;
     const firstMeasure = rowMeasures[0] || colMeasures[0] || null;
@@ -226,6 +265,8 @@
     let x = xPill ? xPill.column : -1;
     let y = yPill ? yPill.column : -1;
     let aggregation = yPill ? yPill.aggregation : 'count';
+    const selectedAccounting = fieldAt(meta, y)?.accounting;
+    if (aggregation === 'sum' && selectedAccounting?.safe_to_sum === false) issues.push(selectedAccounting.reason || 'This raw measure is not safe to sum. Choose the analysis amount.');
     if (type === 'histogram') x = -1;
     if (y === -1) aggregation = 'count';
     if (['scatter', 'box', 'histogram'].includes(type)) {
@@ -233,6 +274,15 @@
       else if (aggregation === 'count') aggregation = 'sum';
     }
     if (y === -1 && ['scatter', 'box', 'histogram'].includes(type)) issues.push('This view plots individual values, so it needs a numeric measure.');
+    const unusedMeasures = allMeasures.filter(p => p !== yPill && !(type === 'scatter' && p === xPill));
+    if (unusedMeasures.length) issues.push('This worksheet renderer cannot draw additional measures (' + unusedMeasures.map(p => p.field.name).join(', ') + '). Use a two-measure scatter, separate sheets, or the contribution explorer.');
+    let grouping = [...new Set(allDimensions.concat(details.filter(p => p.field.role === 'dimension')).map(p => p.column))];
+    if (type === 'scatter' && grouping.length) issues.push('Scatter plots individual rows here; dimension and Detail grouping require the contribution explorer.');
+    if (type === 'histogram' && grouping.length) notes.push('Histogram uses individual values; shelf dimensions do not group bins. Remove them or use a box plot for grouped distributions.');
+    if (['scatter', 'histogram'].includes(type)) grouping = [];
+    if (x < 0 && grouping.length) x = grouping[0];
+    if (x >= 0 && !['scatter', 'histogram'].includes(type)) grouping = [x, ...grouping.filter(column => column !== x && column !== series)];
+    if (transform !== 'none' && grouping.some(column => column !== x)) issues.push('Time analysis needs one time grouping; filter the other dimensions or use separate ordinary series.');
 
     const timeField = xPill && xPill.field.isTime ? xPill.field : null;
     const period = ['year', 'cycle'].includes(analytics.period) ? analytics.period
@@ -241,8 +291,9 @@
       ? Math.trunc(Number(analytics.horizon)) : 2;
 
     const filters = (state.filters || [])
-      .filter(f => f && f.value !== '' && f.value != null && fieldAt(meta, Number(f.column)))
-      .map(f => ({column: Number(f.column), op: f.op, value: String(f.value)}));
+      .filter(f => f && filterActive(f) && fieldAt(meta, Number(f.column)))
+      .map(f => normalizeFilter(f));
+    if (filters.some(f => ['gte','lte'].includes(f.op))) notes.push('Numeric filters apply to source rows before aggregation. Aggregate measure filters are available in the contribution explorer.');
     const pagePill = pill(state.pages);
     if (pagePill && fieldAt(meta, pagePill.column) && state.pageMember) {
       filters.push({column: pagePill.column, op: 'equals', value: String(state.pageMember)});
@@ -263,6 +314,7 @@
       type: type,
       x: x,
       y: y,
+      dimensions: grouping,
       aggregation: aggregation,
       transform: transform,
       period: period,
@@ -279,6 +331,7 @@
     if (config && transform === 'forecast' && (config.start || config.end || config.limit)) {
       notes.push('The same-phase forecast reads every worksheet row; clear the row range and row limit in Parameters.');
     }
+    if (config && config.splitMulti && config.aggregation !== 'count') issues.push('Split multi-value cells is coverage-only. Choose Count or use transaction-level ZIP data for money.');
     // Splitting rewrites the grouping cell, so a view with nothing on the axis
     // has no cell to split and the parameter would silently do nothing.
     if (config && config.splitMulti && config.x < 0 && config.series < 0) {
@@ -338,7 +391,7 @@
   ];
 
   function showMeSelection(state, columns, selected) {
-    const meta = classifyFields(columns);
+    const meta = classifyFields(columns, state && state.types);
     const indices = [];
     const add = value => {
       const p = pill(value);
@@ -449,6 +502,223 @@
     return '';
   }
 
+  /* --------------------------------------------------------------- filters */
+
+  // Include/exclude member lists join the four original scalar operations. A
+  // list filter with no members chosen is not a filter at all: it is dropped
+  // before it reaches either engine, so an empty choice never means "nothing".
+  const FILTER_OPS = [['equals', 'Equals'], ['contains', 'Contains'], ['gte', 'At least'],
+    ['lte', 'At most'], ['between', 'Between'], ['in', 'Is one of'], ['notin', 'Is not one of']];
+  const LIST_OPS = ['in', 'notin'];
+  const RANGE_OPS = ['between'];
+
+  const filterValues = filter => !filter ? []
+    : Array.isArray(filter.value) ? filter.value.map(String)
+    : filter.value == null || filter.value === '' ? [] : [String(filter.value)];
+
+  function filterActive(filter) {
+    if (!filter || !filter.op) return false;
+    if (LIST_OPS.indexOf(filter.op) !== -1) return filterValues(filter).length > 0;
+    if (RANGE_OPS.indexOf(filter.op) !== -1) return filterBounds(filter).some(bound => bound !== '');
+    return filter.value !== '' && filter.value != null;
+  }
+
+  // A range keeps both ends in one value, so an open end stays an empty string
+  // rather than a zero that would quietly exclude everything below it.
+  function filterBounds(filter) {
+    const value = filter && filter.value;
+    const list = Array.isArray(value) ? value : [value, ''];
+    return [list[0] == null ? '' : String(list[0]), list[1] == null ? '' : String(list[1])];
+  }
+
+  function normalizeFilter(filter) {
+    const op = FILTER_OPS.some(o => o[0] === (filter && filter.op)) ? filter.op : 'equals';
+    const out = {column: Number(filter.column), op: op,
+      value: LIST_OPS.indexOf(op) !== -1 ? filterValues(filter)
+        : RANGE_OPS.indexOf(op) !== -1 ? filterBounds(filter)
+        : String(filter && filter.value == null ? '' : filter.value)};
+    if (filter && filter.stage) out.stage = filter.stage;
+    return out;
+  }
+
+  // The one-line description a filter pill and the Inspector row both show.
+  function filterSummary(filter, field, memberCount) {
+    if (!filter) return '';
+    const name = field ? field.name : 'Field';
+    const money = !!(field && (field.unit === 'cents' || /amount|receipt|giving|dollar/i.test(field.name)));
+    const show = value => {
+      const number = Number(value);
+      return money && Number.isFinite(number)
+        ? number.toLocaleString('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0})
+        : String(value);
+    };
+    const values = filterValues(filter);
+    if (RANGE_OPS.indexOf(filter.op) !== -1) {
+      const [low, high] = filterBounds(filter);
+      if (low !== '' && high !== '') return name + ' ' + show(low) + ' to ' + show(high);
+      if (low !== '') return name + ' \u2265 ' + show(low);
+      if (high !== '') return name + ' \u2264 ' + show(high);
+      return name + ': any value';
+    }
+    if (LIST_OPS.indexOf(filter.op) !== -1) {
+      if (!values.length) return name + ': any value';
+      const total = Number.isFinite(Number(memberCount)) && Number(memberCount) >= values.length ? Number(memberCount) : null;
+      const listed = values.length <= 3 ? values.join(', ')
+        : total ? values.length + ' of ' + total + ' values' : values.length + ' values';
+      return name + (filter.op === 'in' ? ': ' : ' excludes ') + listed;
+    }
+    if (filter.op === 'contains') return name + ' contains ' + show(filter.value);
+    if (filter.op === 'gte') return name + ' \u2265 ' + show(filter.value);
+    if (filter.op === 'lte') return name + ' \u2264 ' + show(filter.value);
+    return name + ' = ' + show(filter.value);
+  }
+
+  /* ---------------------------------------------------- measures and types */
+
+  // Only offer what the active engine can actually compute. The verified server
+  // aggregates one money column six ways; every other verified measure is a
+  // source aggregate that is already defined, so it has no aggregation menu.
+  const VERIFIED_AGGREGATED = 'amount';
+
+  function aggregationsFor(field, engine) {
+    if (!field || field.role !== 'measure') return [];
+    if (engine !== 'verified') return AGGREGATIONS.slice();
+    return field.id === VERIFIED_AGGREGATED ? AGGREGATIONS.slice() : [];
+  }
+
+  // Political-money shortcuts. Each one either exists in this source or says
+  // why it does not, instead of failing when the query runs.
+  const MEASURE_PRESETS = [
+    {id: 'total-giving', label: 'Total giving', aggregation: 'sum'},
+    {id: 'gift-count', label: 'Gift count', aggregation: 'count'},
+    {id: 'average-gift', label: 'Average gift', aggregation: 'mean'},
+    {id: 'distinct-contributors', label: 'Distinct contributors', aggregation: 'sum'}
+  ];
+
+  function measurePresets(columns, engine, overrides) {
+    const meta = classifyFields(columns, overrides);
+    const byId = id => meta.fields.find(f => f.id === id) || null;
+    const firstMeasure = meta.measures[0] || null;
+    return MEASURE_PRESETS.map(preset => {
+      const view = Object.assign({}, preset, {available: false, reason: '', column: -1});
+      if (engine === 'verified') {
+        const wanted = preset.id === 'gift-count' ? 'records'
+          : preset.id === 'distinct-contributors' ? 'contributors' : VERIFIED_AGGREGATED;
+        const field = byId(wanted);
+        if (!field) { view.reason = 'This source has no ' + wanted + ' measure.'; return view; }
+        view.column = field.index;
+        view.aggregation = preset.id === 'average-gift' ? 'mean' : 'sum';
+        view.available = true;
+        return view;
+      }
+      if (preset.id === 'distinct-contributors') {
+        view.reason = 'Distinct contributor counts are computed from source records; use Verified contributions.';
+        return view;
+      }
+      if (!firstMeasure) { view.reason = 'This worksheet has no numeric measure.'; return view; }
+      view.column = firstMeasure.index;
+      view.available = true;
+      return view;
+    });
+  }
+
+  function applyMeasurePreset(id, state, columns, engine) {
+    const preset = measurePresets(columns, engine, state && state.types).find(p => p.id === id);
+    const next = clone(state);
+    if (!preset || !preset.available) return next;
+    const entry = {column: preset.column, aggregation: preset.aggregation};
+    const onColumns = shelf(next.columns).some(p => p.column === preset.column);
+    const measures = classifyFields(columns, state && state.types).measures.map(f => f.index);
+    const strip = list => shelf(list).filter(p => measures.indexOf(p.column) === -1);
+    if (onColumns) next.columns = strip(next.columns).concat(entry);
+    else next.rows = strip(next.rows).concat(entry);
+    return next;
+  }
+
+  // Date parts. Verified sources carry real derived columns, so the pill simply
+  // moves to that column and the grouping stays on the server. A worksheet has
+  // one date column, so the part is expressed with the existing period
+  // transform instead of inventing a column the worksheet does not have.
+  const DATE_PARTS = [['cycle', 'Election cycle'], ['year', 'Year'], ['quarter', 'Quarter'],
+    ['month', 'Month'], ['date', 'Exact date']];
+  const DATE_FIELD_IDS = DATE_PARTS.map(part => part[0]);
+
+  // Date-likeness is read from the catalog's own date hierarchy first. The
+  // detected time flag is only a fallback, so a date part cannot disappear
+  // because that flag was lost somewhere between the catalog and the pill.
+  const isDateLike = field => !!field && field.role === 'dimension' &&
+    (DATE_FIELD_IDS.indexOf(field.id) !== -1 || !!field.isTime);
+
+  function datePartsFor(field, columns, engine, state) {
+    if (!isDateLike(field)) return [];
+    if (engine === 'verified') {
+      const meta = classifyFields(columns);
+      return DATE_PARTS
+        .map(([id, label]) => {
+          const target = meta.fields.find(f => f.id === id);
+          return {id: id, label: label, column: target ? target.index : -1, current: field.id === id};
+        })
+        .filter(part => part.column >= 0);
+    }
+    // A worksheet has one date column, so the part is the period the existing
+    // transform groups by rather than a column the worksheet does not have.
+    const analytics = (state && state.analytics) || {};
+    const grouped = analytics.transform === 'annual';
+    return [['cycle', 'Election cycle'], ['year', 'Year']]
+      .map(([id, label]) => ({id: id, label: label, column: field.index, current: grouped && analytics.period === id}));
+  }
+
+  /* ------------------------------------------------------ company overview */
+
+  // One company, four questions. Read-only presets: no shelf editing, and each
+  // one names the field it groups by so "Open in builder" is the same view.
+  const COMPANY_OVERVIEW = [
+    {id: 'recipient-categories', title: 'Recipient categories', dimension: 'recipient_category',
+     measure: 'amount', mark: 'bar', limit: 10, sort: 'desc',
+     note: 'Net selected amount by recipient category, largest first.'},
+    {id: 'giving-by-cycle', title: 'Giving by election cycle', dimension: 'cycle',
+     measure: 'amount', mark: 'line', limit: 40, sort: 'none',
+     note: 'Net selected amount by election cycle, in chronological order.'},
+    {id: 'top-recipients', title: 'Top recipients', dimension: 'recipient',
+     measure: 'amount', mark: 'bar', limit: 8, sort: 'desc',
+     note: 'The eight largest recipient committees in this scope.'},
+    {id: 'party-split', title: 'Party split', dimension: 'party',
+     measure: 'amount', mark: 'doughnut', limit: 10, sort: 'desc',
+     note: 'The split is by recipient party. This source has no employee-level field.'}
+  ];
+
+  const companyOverviewPresets = () => COMPANY_OVERVIEW.map(preset => Object.assign({}, preset));
+
+  function companyOverviewMissing(preset, columns) {
+    const meta = classifyFields(columns);
+    return [preset.dimension, preset.measure].filter(id => !meta.fields.some(f => f.id === id));
+  }
+
+  function companyOverviewSheet(preset, columns, scope, base) {
+    const meta = classifyFields(columns);
+    const find = id => meta.fields.find(f => f.id === id) || null;
+    const next = base ? clone(base) : createSheet(preset.title, 'overview');
+    const dimension = find(preset.dimension);
+    const measure = find(preset.measure);
+    next.columns = dimension ? [{column: dimension.index, aggregation: 'sum'}] : [];
+    next.rows = measure ? [{column: measure.index, aggregation: 'sum'}] : [];
+    next.marks = {type: preset.mark, color: null, size: null, label: null, detail: [], tooltip: []};
+    next.analytics = Object.assign({}, next.analytics || {},
+      {transform: 'none', totals: false, average: false, median: false});
+    next.params = Object.assign({}, next.params || {},
+      {start: 0, end: 0, limit: 0, maxGroups: preset.limit, splitMulti: false});
+    next.pages = null;
+    next.pageMember = '';
+    next.sort = preset.sort;
+    next.filters = [];
+    const scoped = scope || {};
+    const company = find('company');
+    const cycle = find('cycle');
+    if (company && scoped.company) next.filters.push({column: company.index, op: 'equals', value: String(scoped.company), stage: 'row'});
+    if (cycle && scoped.cycle) next.filters.push({column: cycle.index, op: 'equals', value: String(scoped.cycle), stage: 'row'});
+    return next;
+  }
+
   /* -------------------------------------------------------- result helpers */
 
   const groupValue = group => group.value != null ? group.value : group.median != null ? group.median : 0;
@@ -507,6 +777,10 @@
 
   function totalNote(result, config) {
     if (!result) return '';
+    if (result.totalRefusal) return result.totalRefusal;
+    if (result.split) return 'Grand total is not shown: split coverage groups can overlap.';
+    if (['yoy', 'change'].includes(result.transform || config?.transform)) return 'Grand total is not shown for percentages or period changes.';
+    if (result.accounting?.safe_to_sum === false) return result.accounting.reason || 'Grand total is not shown for this accounting grain.';
     if (result.series) return 'Grand total is not shown: series are independent.';
     if (result.type === 'histogram') return 'Grand total is not shown for histograms (bins are row counts).';
     if (UNTOTALLED.indexOf(result.type) !== -1) return 'Grand total is not shown for ' + result.type + ' views.';
@@ -516,6 +790,7 @@
 
   function grandTotal(result, config) {
     if (totalNote(result, config)) return null;
+    if ((result?.transform || config?.transform) === 'forecast') return Number.isFinite(result.observedTotal) ? result.observedTotal : null;
     const values = markValues(result).filter(v => typeof v === 'number' && Number.isFinite(v));
     return values.length ? values.reduce((a, b) => a + b, 0) : null;
   }
@@ -539,13 +814,20 @@
       viewColumns: viewColumns,
       selected: result.selected == null ? null : result.selected,
       excluded: result.excluded == null ? null : result.excluded,
-      measureLabel: AGGREGATION_LABEL[config.aggregation] + '(' + name + ')',
+      measureLabel: ((result.transform || config.transform) === 'forecast' ? 'Observed ' : '') +
+        ((result.transform || config.transform) === 'yoy' ? 'YoY %(' + name + ')' :
+        (result.transform || config.transform) === 'change' ? 'Period change(' + name + ')' :
+        (result.split ? 'Coverage ' : '') + AGGREGATION_LABEL[config.aggregation] + '(' + name + ')'),
       total: total
     };
   }
 
   const api = {
     AGGREGATIONS, AGGREGATION_IDS, MARK_TYPES, MARK_IDS, TRANSFORMS, SHOW_ME, STUDIO_GROUP_LIMIT,
+    FILTER_OPS, LIST_OPS, RANGE_OPS, MEASURE_PRESETS, DATE_PARTS, COMPANY_OVERVIEW,
+    canTreatAs, isDateLike, filterValues, filterActive, filterBounds, normalizeFilter, filterSummary,
+    aggregationsFor, measurePresets, applyMeasurePreset, datePartsFor,
+    companyOverviewPresets, companyOverviewMissing, companyOverviewSheet,
     classifyFields, fieldAt, subjectField, pill, shelf, createSheet, clearSheet, swapShelves, sourceKey,
     compileConfig, compileReport,
     showMeSelection, showMeEligibility, showMeApply, recommendedTile,

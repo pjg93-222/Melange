@@ -53,11 +53,14 @@ test('classification agrees with chart-math chartColumns on measures', () => {
 
 /* --------------------------------------------------------- compileConfig */
 
-test('first dimension on Columns becomes x and first measure on Rows becomes y', () => {
-  const config = core.compileConfig(sheet({columns: [CATEGORY, TIER], rows: [AMOUNT, COUNT]}), COLUMNS);
+test('dimensions reach grouping and extra measures are explicitly refused', () => {
+  const report = core.compileReport(sheet({columns: [CATEGORY, TIER], rows: [AMOUNT, COUNT]}), COLUMNS);
+  const config = report.config;
   assert.strictEqual(config.x, CATEGORY);
   assert.strictEqual(config.y, AMOUNT);
   assert.strictEqual(config.type, 'bar');
+  assert.deepStrictEqual(config.dimensions, [CATEGORY, TIER]);
+  assert.match(report.issues.join(' '), /additional measures/);
 });
 
 test('a measure pill carries its own aggregation, defaulting to sum', () => {
@@ -714,10 +717,7 @@ test('splitting a multi-value cell makes one row per value and leaves the data a
 
   const pair = {columns: [{index: 0, name: 'A', type: 'category'}, {index: 1, name: 'B', type: 'category'}],
     rows: [['x; y', 'p; q'], ['z', 'r']], row_numbers: [2, 3]};
-  const crossed = math.explodeRows(pair, {splitMulti: true, x: 0, series: 1});
-  assert.deepStrictEqual(crossed.rows, [['x', 'p'], ['x', 'q'], ['y', 'p'], ['y', 'q'], ['z', 'r']]);
-  assert.deepStrictEqual(crossed.row_numbers, [2, 2, 2, 2, 3]);
-  assert.deepStrictEqual(crossed.split, {cells: 2, values: 4, columns: ['A', 'B']});
+  assert.throws(() => math.explodeRows(pair, {splitMulti: true, x: 0, series: 1}), /pairings are unknown/);
 });
 
 test('a split view counts a row once per value and says so', () => {
@@ -745,7 +745,7 @@ test('a split result carries the split facts, so a reader is told values not row
   assert.ok(!('split' in joined), 'an unsplit result keeps the old shape');
   assert.strictEqual(joined.selected, 70, 'and selected is a plain row count');
 
-  const compared = math.build(WIDE, wide({type: 'grouped', x: ZIPS, series: PARTY, splitMulti: true}));
+  const compared = math.build(WIDE, wide({type: 'grouped', x: ZIPS, series: PARTY, splitMulti: true, aggregation: 'count', y: -1}));
   assert.deepStrictEqual(compared.split, {cells: 3, values: 7, columns: ['ZIPs']},
     'Party was eligible to split but holds no multi-value cell, so the note does not name it');
   assert.strictEqual(compared.selected, 74);
@@ -771,7 +771,7 @@ test('the group limit and the split parameter reach the configuration', () => {
   assert.strictEqual(ungrouped.config.x, -1);
   assert.strictEqual(ungrouped.config.series, -1);
   assert.match(ungrouped.notes.join(' '), /Splitting multi-value cells applies to the grouping field/);
-  assert.strictEqual(ungrouped.issues.length, 0, 'it is a note, not a refusal');
+  assert.match(ungrouped.issues.join(' '), /coverage-only/, 'money splitting is refused even without grouping');
 
   const grouped = core.compileReport(sheet({columns: [CATEGORY], rows: [AMOUNT], params: {splitMulti: true}}), COLUMNS);
   assert.ok(!grouped.notes.some(n => /Splitting multi-value cells/.test(n)), 'a view with a grouping field is not warned');
@@ -781,4 +781,311 @@ test('a new sheet starts with no group limit and splitting off', () => {
   assert.strictEqual(core.createSheet('s').params.maxGroups, 0);
   assert.strictEqual(core.createSheet('s').params.splitMulti, false);
 });
+
+test('all shelf dimensions and Detail dimensions change the grouping grain', () => {
+  const report=core.compileReport(sheet({columns:[CATEGORY],rows:[AMOUNT,TIER]}),COLUMNS);
+  assert.deepStrictEqual(report.issues,[]);
+  assert.deepStrictEqual(report.config.dimensions,[CATEGORY,TIER]);
+  const detail=core.compileReport(sheet({columns:[CATEGORY],rows:[AMOUNT],marks:marks({detail:[TIER]})}),COLUMNS);
+  assert.deepStrictEqual(detail.issues,[]);
+  assert.deepStrictEqual(detail.config.dimensions,[CATEGORY,TIER]);
+  const diverse={...DATA,rows:DATA.rows.map((row,i)=>i===2?row.map((value,j)=>j===TIER?'Employees':value):row)};
+  const result=math.build(diverse,detail.config);
+  assert.ok(result.groups.length>math.build(diverse,core.compileConfig(sheet({columns:[CATEGORY],rows:[AMOUNT]}),COLUMNS)).groups.length);
+  assert.strictEqual(core.grandTotal(result,detail.config),7500);
+  const alone=core.compileReport(sheet({rows:[AMOUNT],marks:marks({detail:[TIER]})}),COLUMNS);
+  assert.strictEqual(alone.config.x,TIER);
+  assert.deepStrictEqual(alone.config.dimensions,[TIER]);
+});
+
+test('unsupported encodings and duplicate measure pills cannot silently do nothing', () => {
+  for(const channel of ['size','label','tooltip']){
+    const report=core.compileReport(sheet({columns:[CATEGORY],rows:[AMOUNT],marks:marks({[channel]:channel==='tooltip'?[TIER]:TIER})}),COLUMNS);
+    assert.match(report.issues.join(' '),/encoding is unavailable/);
+  }
+  const repeated=core.compileReport(sheet({columns:[CATEGORY],rows:[AMOUNT,{column:AMOUNT,aggregation:'mean'}]}),COLUMNS);
+  assert.match(repeated.issues.join(' '),/additional measures/);
+  const scatter=core.compileReport(sheet({columns:[COUNT],rows:[AMOUNT],marks:marks({detail:[CATEGORY]})}),COLUMNS);
+  assert.match(scatter.issues.join(' '),/dimension and Detail grouping/);
+});
+
+test('numeric ZIP variants and congressional district identifiers never become money measures', () => {
+  const names=['ZIP','ZIPs','ZIP5','ZIP9','zipcode','Postal Code','Congressional District','Candidate ID(s)'];
+  const fields=core.classifyFields(names.map((name,index)=>({name,index,type:'number'})));
+  assert.deepStrictEqual(fields.measures,[]);
+  assert.ok(fields.fields.every(field=>field.role==='dimension'));
+});
+
+test('split coverage has no additive grand total or monetary status label', () => {
+  const config=wide({x:ZIPS,y:-1,aggregation:'count',splitMulti:true});
+  const result=math.build(WIDE,config);
+  assert.strictEqual(core.grandTotal(result,config),null);
+  assert.match(core.totalNote(result,config),/coverage groups can overlap/);
+  assert.strictEqual(core.rowsToMarksSummary(result,config,WIDE_COLUMNS).measureLabel,'Coverage CNT(rows)');
+});
+
+test('percentages and period differences have explicit units and no monetary grand total', () => {
+  const d={columns:[{name:'Year',type:'category'},{name:'Amount',type:'number'}],rows:[[2022,100],[2023,200],[2024,400]],row_numbers:[2,3,4]};
+  for(const transform of ['yoy','change']){
+    const config={type:'line',x:0,y:1,aggregation:'sum',transform,period:'year'};
+    const result=math.build(d,config);
+    assert.strictEqual(core.grandTotal(result,config),null);
+    assert.match(core.totalNote(result,config),/percentages or period changes/);
+    assert.match(core.rowsToMarksSummary(result,config,d.columns).measureLabel,transform==='yoy'?/YoY %/:/Period change/);
+    if(transform==='yoy')assert.strictEqual(result.units,'percent');
+  }
+});
+
+test('forecast totals separate historical money from copied future baselines', () => {
+  const d={columns:[{name:'Year',type:'category'},{name:'Amount',type:'number'}],rows:Array.from({length:8},(_,i)=>[2016+i,(i+1)*100]),row_numbers:[2,3,4,5,6,7,8,9]};
+  const config={type:'line',x:0,y:1,aggregation:'sum',transform:'forecast',period:'year',horizon:2,as_of:'2025-01-01'};
+  const result=math.build(d,config);
+  assert.strictEqual(result.observedTotal,3600);
+  assert.strictEqual(result.forecastTotal,1100);
+  assert.strictEqual(core.grandTotal(result,config),3600);
+  const summary=core.rowsToMarksSummary(result,config,d.columns);
+  assert.strictEqual(summary.measureLabel,'Observed SUM(Amount)');
+  assert.strictEqual(summary.total,3600);
+});
+
+test('independent accounting groups have separate marks but no cross-layer total', () => {
+  const result={type:'bar',groups:[{label:'receipt',value:100},{label:'attribution',value:100}],totalRefusal:'Grand total is not shown: the displayed accounting groups can overlap.'};
+  assert.strictEqual(core.grandTotal(result,{aggregation:'sum'}),null);
+});
+
+
+/* =================================================== redesign 2026-09-13 === */
+
+const contributions = require('../chart-studio-contributions.js');
+
+// A stand-in for the verified catalog: the ids the studio actually looks up.
+const VERIFIED = [
+  {index: 0, id: 'company', name: 'Company', type: 'category', role: 'dimension', visible: true},
+  {index: 1, id: 'cycle', name: 'Election cycle', type: 'category', role: 'dimension', is_time: true, visible: true},
+  {index: 2, id: 'year', name: 'Contribution year', type: 'category', role: 'dimension', is_time: true, visible: true},
+  {index: 3, id: 'quarter', name: 'Contribution quarter', type: 'category', role: 'dimension', is_time: true, visible: true},
+  {index: 4, id: 'recipient', name: 'Recipient committee', type: 'category', role: 'dimension', visible: true},
+  {index: 5, id: 'recipient_category', name: 'Recipient category', type: 'category', role: 'dimension', visible: true},
+  {index: 6, id: 'party', name: 'Recipient party', type: 'category', role: 'dimension', visible: true},
+  {index: 7, id: 'amount', name: 'Selected amount', type: 'number', role: 'measure', unit: 'cents', visible: true},
+  {index: 8, id: 'records', name: 'Observation count', type: 'number', role: 'measure', unit: 'count', visible: true},
+  {index: 9, id: 'contributors', name: 'Distinct reported donor identities', type: 'number', role: 'measure', unit: 'count', visible: true}
+];
+
+function selectedRows(filters) {
+  const state = sheet({columns: [{column: CATEGORY, aggregation: 'sum'}],
+    rows: [{column: AMOUNT, aggregation: 'sum'}], filters: filters});
+  const report = core.compileReport(state, COLUMNS);
+  assert.deepStrictEqual(report.issues, []);
+  return math.build(DATA, report.config).selected;
+}
+
+/* ------------------------------------------------------------- filters */
+
+test('an empty member choice is not a filter, so it never selects nothing', () => {
+  assert.strictEqual(core.filterActive({column: CATEGORY, op: 'in', value: []}), false);
+  assert.strictEqual(core.filterActive({column: CATEGORY, op: 'in', value: ['Company PAC']}), true);
+  assert.strictEqual(core.filterActive({column: AMOUNT, op: 'between', value: ['', '']}), false);
+  assert.strictEqual(core.filterActive({column: AMOUNT, op: 'between', value: ['1000', '']}), true);
+  assert.strictEqual(selectedRows([{column: CATEGORY, op: 'in', value: []}]), ROWS.length);
+});
+
+test('include and exclude lists select complementary worksheet rows', () => {
+  assert.strictEqual(selectedRows([{column: CATEGORY, op: 'in', value: ['Company PAC']}]), 3);
+  assert.strictEqual(selectedRows([{column: CATEGORY, op: 'notin', value: ['Company PAC']}]), 3);
+  assert.strictEqual(selectedRows([{column: CATEGORY, op: 'in', value: ['Company PAC', 'Trade Association']}]), 5);
+});
+
+test('a range filter applies each bound it was given', () => {
+  assert.strictEqual(selectedRows([{column: AMOUNT, op: 'between', value: ['500', '2000']}]), 4);
+  assert.strictEqual(selectedRows([{column: AMOUNT, op: 'between', value: ['1000', '']}]), 3);
+  assert.strictEqual(selectedRows([{column: AMOUNT, op: 'between', value: ['', '750']}]), 3);
+});
+
+test('normalizeFilter keeps lists as arrays, ranges two-ended and scalars as text', () => {
+  assert.deepStrictEqual(core.normalizeFilter({column: '1', op: 'in', value: ['a', 'b']}),
+    {column: 1, op: 'in', value: ['a', 'b']});
+  assert.deepStrictEqual(core.normalizeFilter({column: 2, op: 'between', value: ['5']}),
+    {column: 2, op: 'between', value: ['5', '']});
+  assert.deepStrictEqual(core.normalizeFilter({column: 2, op: 'nonsense', value: 7}),
+    {column: 2, op: 'equals', value: '7'});
+  assert.deepStrictEqual(core.normalizeFilter({column: 0, op: 'equals', value: 'x', stage: 'rows'}),
+    {column: 0, op: 'equals', value: 'x', stage: 'rows'});
+});
+
+test('filterSummary reads as a sentence about the members, not about the operator', () => {
+  const company = {name: 'Company'};
+  assert.strictEqual(core.filterSummary({op: 'in', value: []}, company), 'Company: any value');
+  assert.strictEqual(core.filterSummary({op: 'in', value: ['Acme']}, company), 'Company: Acme');
+  assert.strictEqual(core.filterSummary({op: 'in', value: ['a', 'b', 'c', 'd']}, company, 10), 'Company: 4 of 10 values');
+  assert.strictEqual(core.filterSummary({op: 'notin', value: ['a', 'b', 'c', 'd']}, company, 10), 'Company excludes 4 of 10 values');
+  const amount = core.filterSummary({op: 'between', value: ['1000', '']}, {name: 'Selected amount', unit: 'cents'});
+  assert.ok(amount.startsWith('Selected amount'));
+  assert.ok(amount.includes('1,000'), amount);
+  assert.strictEqual(core.filterSummary({op: 'contains', value: 'PAC'}, {name: 'Recipient'}), 'Recipient contains PAC');
+});
+
+test('one filter pill becomes the clauses the verified engine understands', () => {
+  const company = VERIFIED[0], amount = VERIFIED[7];
+  assert.deepStrictEqual(contributions.clauses({column: 0, op: 'in', value: ['A', 'B']}, company),
+    [{field: 'company', op: 'in', value: ['A', 'B']}]);
+  // The server has no NOT IN, and filters are ANDed, so exclusion is a chain.
+  assert.deepStrictEqual(contributions.clauses({column: 0, op: 'notin', value: ['A', 'B']}, company),
+    [{field: 'company', op: 'ne', value: 'A'}, {field: 'company', op: 'ne', value: 'B'}]);
+  assert.deepStrictEqual(contributions.clauses({column: 0, op: 'in', value: []}, company), []);
+  assert.deepStrictEqual(contributions.clauses({column: 0, op: 'equals', value: ''}, company), []);
+  assert.deepStrictEqual(contributions.clauses({column: 7, op: 'between', value: ['10', '20']}, amount),
+    [{field: 'amount', op: 'gte', value: 1000}, {field: 'amount', op: 'lte', value: 2000}]);
+});
+
+/* -------------------------------------------------- measures and presets */
+
+test('aggregation menus offer only what the active engine can compute', () => {
+  const worksheet = core.classifyFields(COLUMNS);
+  const verified = core.classifyFields(VERIFIED);
+  const ids = list => list.map(a => a[0]);
+  assert.deepStrictEqual(ids(core.aggregationsFor(core.fieldAt(worksheet, AMOUNT), 'worksheet')), core.AGGREGATION_IDS);
+  assert.deepStrictEqual(core.aggregationsFor(core.fieldAt(worksheet, CYCLE), 'worksheet'), []);
+  assert.deepStrictEqual(ids(core.aggregationsFor(core.fieldAt(verified, 7), 'verified')), core.AGGREGATION_IDS);
+  // Every other verified measure is a source aggregate with one definition.
+  assert.deepStrictEqual(core.aggregationsFor(core.fieldAt(verified, 8), 'verified'), []);
+});
+
+test('political-money presets say what a source cannot answer instead of failing later', () => {
+  const verified = core.measurePresets(VERIFIED, 'verified');
+  assert.deepStrictEqual(verified.map(p => p.available), [true, true, true, true]);
+  assert.deepStrictEqual(verified.map(p => p.column), [7, 8, 7, 9]);
+  assert.strictEqual(verified.find(p => p.id === 'average-gift').aggregation, 'mean');
+  const worksheet = core.measurePresets(COLUMNS, 'worksheet');
+  const distinct = worksheet.find(p => p.id === 'distinct-contributors');
+  assert.strictEqual(distinct.available, false);
+  assert.match(distinct.reason, /Verified contributions/);
+  assert.strictEqual(core.measurePresets([], 'worksheet').every(p => !p.available), true);
+});
+
+test('a measure preset replaces the measure on the shelf that carried it', () => {
+  const onRows = core.applyMeasurePreset('gift-count', sheet({
+    columns: [{column: 0, aggregation: 'sum'}], rows: [{column: 7, aggregation: 'sum'}]}), VERIFIED, 'verified');
+  assert.deepStrictEqual(onRows.rows, [{column: 8, aggregation: 'sum'}]);
+  assert.deepStrictEqual(onRows.columns, [{column: 0, aggregation: 'sum'}]);
+  const onColumns = core.applyMeasurePreset('average-gift', sheet({
+    columns: [{column: 7, aggregation: 'sum'}], rows: [{column: 0, aggregation: 'sum'}]}), VERIFIED, 'verified');
+  assert.deepStrictEqual(onColumns.columns, [{column: 7, aggregation: 'mean'}]);
+  const refused = sheet({rows: [{column: AMOUNT, aggregation: 'sum'}]});
+  assert.deepStrictEqual(core.applyMeasurePreset('distinct-contributors', refused, COLUMNS, 'worksheet').rows,
+    [{column: AMOUNT, aggregation: 'sum'}]);
+});
+
+/* ------------------------------------------------------------ data types */
+
+test('a text column can never become a measure; a numeric identifier can', () => {
+  const meta = core.classifyFields(COLUMNS);
+  const text = core.fieldAt(meta, CATEGORY);
+  const refusal = core.canTreatAs(text, 'measure');
+  assert.strictEqual(refusal.ok, false);
+  assert.match(refusal.reason, /text/);
+  assert.strictEqual(core.canTreatAs(text, 'dimension').ok, false); // already one
+  const zip = core.classifyFields([{index: 0, name: 'ZIP Code', type: 'number', distinct: 9, missing: 0}]).fields[0];
+  assert.strictEqual(zip.role, 'dimension');
+  assert.strictEqual(core.canTreatAs(zip, 'measure').ok, true);
+});
+
+test('a per-sheet type override moves a field between the two lists and its glyph', () => {
+  const plain = core.classifyFields(COLUMNS);
+  assert.strictEqual(core.fieldAt(plain, COUNT).role, 'measure');
+  const coerced = core.classifyFields(COLUMNS, {[String(COUNT)]: {role: 'dimension'}});
+  assert.strictEqual(core.fieldAt(coerced, COUNT).role, 'dimension');
+  assert.strictEqual(core.fieldAt(coerced, COUNT).glyph, 'Abc');
+  assert.ok(coerced.dimensions.some(f => f.index === COUNT));
+  assert.ok(!coerced.measures.some(f => f.index === COUNT));
+  // A refused override changes nothing at all.
+  const refused = core.classifyFields(COLUMNS, {[String(CATEGORY)]: {role: 'measure'}});
+  assert.strictEqual(core.fieldAt(refused, CATEGORY).role, 'dimension');
+  // The override travels into the compiler, so the view follows the reader.
+  const state = sheet({columns: [{column: CYCLE, aggregation: 'sum'}], rows: [{column: COUNT, aggregation: 'sum'}],
+    types: {[String(COUNT)]: {role: 'dimension'}}});
+  const report = core.compileReport(state, COLUMNS);
+  assert.ok(report.config.dimensions.includes(COUNT));
+});
+
+test('date parts use real catalog columns when verified and periods on a worksheet', () => {
+  const verified = core.classifyFields(VERIFIED);
+  const parts = core.datePartsFor(core.fieldAt(verified, 1), VERIFIED, 'verified');
+  // The whole hierarchy this source has, with the pill's own part marked.
+  assert.deepStrictEqual(parts.map(p => p.id), ['cycle', 'year', 'quarter']);
+  assert.deepStrictEqual(parts.map(p => p.column), [1, 2, 3]);
+  assert.deepStrictEqual(parts.map(p => p.current), [true, false, false]);
+  const worksheet = core.classifyFields(COLUMNS);
+  const date = worksheet.fields.find(f => f.isTime);
+  assert.deepStrictEqual(core.datePartsFor(date, COLUMNS, 'worksheet').map(p => p.id), ['cycle', 'year']);
+  assert.deepStrictEqual(core.datePartsFor(core.fieldAt(worksheet, CATEGORY), COLUMNS, 'worksheet'), []);
+  // A worksheet marks the period the existing transform already groups by.
+  const grouped = sheet({analytics: {transform: 'annual', period: 'year'}});
+  assert.deepStrictEqual(core.datePartsFor(date, COLUMNS, 'worksheet', grouped).map(p => p.current), [false, true]);
+});
+
+test('a verified date field keeps its date parts even without the detected time flag', () => {
+  // The catalog's date hierarchy is the authority; the flag is only a fallback,
+  // so losing it anywhere between the catalog and the pill cannot hide the menu.
+  const stripped = VERIFIED.map(field => {
+    const copy = Object.assign({}, field);
+    delete copy.is_time;
+    return copy;
+  });
+  const meta = core.classifyFields(stripped);
+  for (const id of ['cycle', 'year', 'quarter']) {
+    const field = meta.fields.find(f => f.id === id);
+    assert.strictEqual(core.isDateLike(field), true, id + ' should be date-like');
+    assert.ok(core.datePartsFor(field, stripped, 'verified').length >= 3, id + ' should offer parts');
+  }
+  // A plain dimension is still not date-like, flag or no flag.
+  assert.strictEqual(core.isDateLike(meta.fields.find(f => f.id === 'company')), false);
+  assert.deepStrictEqual(core.datePartsFor(meta.fields.find(f => f.id === 'company'), stripped, 'verified'), []);
+  // Neither is a measure that happens to be named like a date.
+  assert.strictEqual(core.isDateLike({id: 'date', role: 'measure', isTime: true}), false);
+});
+
+/* ------------------------------------------------------ company overview */
+
+test('each company-overview preset builds the sheet its caption promises', () => {
+  const presets = core.companyOverviewPresets();
+  assert.deepStrictEqual(presets.map(p => p.id),
+    ['recipient-categories', 'giving-by-cycle', 'top-recipients', 'party-split']);
+  const cards = presets.map(p => core.companyOverviewSheet(p, VERIFIED, {company: 'Acme', cycle: '2025-2026'}));
+  assert.deepStrictEqual(cards.map(c => c.marks.type), ['bar', 'line', 'bar', 'doughnut']);
+  assert.deepStrictEqual(cards.map(c => c.params.maxGroups), [10, 40, 8, 10]);
+  assert.deepStrictEqual(cards[0].columns, [{column: 5, aggregation: 'sum'}]);
+  assert.deepStrictEqual(cards[0].rows, [{column: 7, aggregation: 'sum'}]);
+  assert.deepStrictEqual(cards[2].columns, [{column: 4, aggregation: 'sum'}]);
+  for (const card of cards) {
+    assert.strictEqual(card.analytics.transform, 'none');
+    assert.deepStrictEqual(card.filters.map(f => f.value), ['Acme', '2025-2026']);
+  }
+  // No company and no cycle chosen means no scope filters, never a blank one.
+  assert.deepStrictEqual(core.companyOverviewSheet(presets[0], VERIFIED, {}).filters, []);
+});
+
+test('a company-overview preset compiles into the verified query it describes', () => {
+  const preset = core.companyOverviewPresets()[0];
+  const card = core.companyOverviewSheet(preset, VERIFIED, {company: 'Acme', cycle: '2025-2026'});
+  const compiled = contributions.compile(card, VERIFIED, {dataset: 'Banking', basis: 'receipt'});
+  assert.deepStrictEqual(compiled.query.dimensions, ['recipient_category']);
+  assert.deepStrictEqual(compiled.query.measures, ['amount']);
+  assert.deepStrictEqual(compiled.query.filters,
+    [{field: 'company', op: 'eq', value: 'Acme'}, {field: 'cycle', op: 'eq', value: '2025-2026'}]);
+  assert.deepStrictEqual(compiled.query.sort, [{field: 'amount', direction: 'desc'}]);
+  assert.strictEqual(compiled.query.limit, 10);
+  assert.strictEqual(compiled.spec.type, 'bar');
+  const cycles = contributions.compile(core.companyOverviewSheet(core.companyOverviewPresets()[1], VERIFIED,
+    {company: 'Acme'}), VERIFIED, {dataset: 'Banking', basis: 'receipt'});
+  assert.deepStrictEqual(cycles.query.dimensions, ['cycle']);
+  assert.deepStrictEqual(cycles.query.sort, [{field: 'cycle', direction: 'asc'}]);
+});
+
+test('company overview names the fields a source does not have', () => {
+  const preset = core.companyOverviewPresets()[0];
+  assert.deepStrictEqual(core.companyOverviewMissing(preset, COLUMNS), ['recipient_category', 'amount']);
+  assert.deepStrictEqual(core.companyOverviewMissing(preset, VERIFIED), []);
+});
+
 

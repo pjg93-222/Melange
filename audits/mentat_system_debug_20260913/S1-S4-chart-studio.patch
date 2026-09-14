@@ -1,0 +1,154 @@
+diff --git a/mentat/app/chart-studio.js b/mentat/app/chart-studio.js
+index da79f01..0b4b188 100644
+--- a/mentat/app/chart-studio.js
++++ b/mentat/app/chart-studio.js
+@@ -46,6 +46,7 @@
+   let contributionMap = null, contributionGeometry = null, geometryKey = '', geometryRevision = 0, geometryTimer = null;
+   let recordOffset = 0, recordSelection = null, recordRevision = 0, exporting = false;
+   let pageMembersKey = '';
++  let pendingScope = null;
+   const contributionCache = new Map(), memberCache = new Map(), geometryCache = new Map(), geometryPending = new Map();
+   let contributionCacheEpoch=0;
+   const verified = () => el('source-mode').value === 'contributions';
+@@ -240,6 +241,7 @@
+       el('dataset').value=contributionCatalog.datasets.some(d=>d.id===previous&&d.available)?previous:contributionCatalog.datasets.find(d=>d.available)?.id||'';
+       if(!dataset())throw new Error('No verified sources are available in the configured report folder.');
+       selectContributionDataset();
++      applyGraphScope();
+     }catch(error){if(ticket===revision){status('Verified data unavailable.');failure(error.message);}}
+   }
+   function selectContributionDataset() {
+@@ -266,6 +268,28 @@
+     const map=sheet().map||{layers:['states','districts'],congress:'119'};
+     el('congress').value=map.congress;for(const [id,layer]of [['states','states'],['districts','districts'],['zips','zip_areas']])el('layer-'+id).checked=map.layers.includes(layer);
+   }
++  // Carried Graph scope becomes ordinary filter pills, so the reader can see
++  // and remove every one of them. A field this dataset does not have is
++  // reported, never silently dropped.
++  function applyGraphScope() {
++    const scope = pendingScope;
++    pendingScope = null;
++    if (!scope || !verified() || !data) return;
++    const missing = [];
++    const pills = [];
++    for (const {field, value} of scope.filters) {
++      const column = columns().find(f => f.id === field);
++      if (!column) { missing.push(field); continue; }
++      pills.push({column: column.index, op: 'equals', value: String(value), stage: 'row'});
++    }
++    if (!pills.length && !missing.length) return;
++    commit(() => {
++      const kept = (sheet().filters || []).filter(f => !pills.some(p => p.column === f.column));
++      sheet().filters = [...kept, ...pills];
++    });
++    failure(missing.length ? 'This source has no ' + missing.join(' or ') + ' field, so that part of the Graph scope was not carried.' : '');
++  }
++
+   function queryCached(query) {
+     const key=JSON.stringify(query),cached=contributionCache.get(key),epoch=contributionCacheEpoch;
+     if(contributionResult&&contributionRequest&&JSON.stringify(contributionRequest)===key)return Promise.resolve(contributionResult);
+@@ -298,7 +322,7 @@
+       el('group-count').textContent=result.group_count?`${fmt(result.offset+1)}–${fmt(result.offset+result.rows.length)} of ${fmt(result.group_count)} groups`:'No matching observations';
+       el('groups-prev').disabled=!query.offset;el('groups-next').disabled=!result.has_more;el('result-controls').hidden=false;
+       el('groups-prev').hidden=el('groups-next').hidden=compiled.spec.type==='map'||compiled.transform!=='none';
+-      let rows=result.rows,spec={...compiled.spec,columns:result.columns,title:lastTitle},temporalModel=null;const notes=[...compiled.notes,...(result.notices||[])];
++      let rows=result.rows,spec={...compiled.spec,columns:result.columns,title:lastTitle},temporalModel=null,drewReferences=false;const notes=[...compiled.notes,...(result.notices||[])];
+       if(spec.type==='histogram'&&result.has_more)throw new Error('This histogram has more than 10,000 occupied bins. Increase the bin width or narrow the filters to display the complete distribution.');
+       if(compiled.transform!=='none'&&compiled.transform!=='annual'){
+         if(result.has_more)throw new Error('Period analysis requires every selected period. Narrow the filters.');
+@@ -318,9 +342,13 @@
+         const id=spec.measures[0],currency=contributions.MONEY.has(id),groups=rows.map(row=>({label:contributionPlot.label(row,spec.dimensions),value:row[id]/(currency?100:1),n:1}));
+         const drawn=paint.chartSVG({type:spec.type,groups,selected:result.totals.records,excluded:0},(result.columns.find(c=>c.id===id)?.name||id)+(currency?' (USD)':''),{type:spec.type,aggregation:'sum',x:0,y:1},{columns:[{name:'Group'},{name:id}]},lastTitle,lastScope);el('canvas').replaceChildren(drawn.svg);
+       }else if(MentatContributionCharts.TYPES.includes(spec.type))MentatContributionCharts.render(el('canvas'),rows,spec,row=>inspectContributions(row));
+-      else contributionPlot.render(el('canvas'),rows,spec,row=>inspectContributions(row));
++      else {contributionPlot.render(el('canvas'),rows,spec,row=>inspectContributions(row));drewReferences=spec.type!=='scatter';}
+       if(sheet().analytics.totals)notes.push('Selected source total: '+money(result.totals.amount)+'. This total excludes projections and covers every matching group before grouped filters.');
+-      if(sheet().analytics.average||sheet().analytics.median)notes.push('Reference statistics apply to the displayed marks; source-level averages and medians are available as measures.');
++      // Say plainly when a requested reference line was not drawn, instead
++      // of describing one the reader cannot see.
++      if(sheet().analytics.average||sheet().analytics.median)notes.push(
++        drewReferences?'Reference lines mark the mean and median of the shown marks; source-level averages and medians are available as measures.'
++        :'Reference lines are not drawn on this mark type. Choose a bar, line, area or circle mark to see the mean and median of the shown marks.');
+       el('note').textContent=[contributions.BASIS[basis()][1],query.aggregate_filters.length?'Grouped filters apply after aggregation.':result.has_more?'Additional groups are on later pages; source totals cover all pages.':'All selected groups shown.',...notes].join(' ');
+       el('status').textContent=fmt(result.totals.records)+' source observations · '+fmt(result.group_count)+' groups · '+(result.reconciliation?.receipt_matches_workbook===true?'Included receipts reconcile to the workbook.':'Verified source records.');status('Verified contribution fields · '+data.columns.length+' fields');renderPager();
+     }catch(error){if(ticket===contributionRevision&&error.name!=='AbortError'){el('canvas').replaceChildren();el('note').textContent=error.message;failure(error.message);lastResult=null;}}
+@@ -781,19 +809,44 @@
+ 
+   /* ------------------------------------------------------------- analytics */
+ 
++  // An analytics object that cannot change this view must say so rather than
++  // toggle and draw nothing. The reasons are the renderers' own limits: the
++  // verified path draws reference lines only in contribution-plot.js, and a
++  // grand total there is a stated figure, not a mark.
++  function analyticsRefusal(item) {
++    const state = sheet();
++    if (!data) return 'Choose a data source first.';
++    if (!verified()) return '';
++    const type = (state.marks && state.marks.type) || 'automatic';
++    if (item.group === 'transform') {
++      const timely = core.shelf([...state.columns, ...state.rows])
++        .some(p => ['date', 'year', 'cycle'].includes(columns()[p.column] && columns()[p.column].id));
++      return timely ? '' : 'Needs Contribution date, Year or Election cycle on Columns or Rows.';
++    }
++    if (item.id === 'totals') return '';
++    if (MentatContributionCharts.TYPES.includes(type) || ['pie','doughnut','waterfall','pareto','radar','map','filled-map','table','text'].includes(type)) {
++      return 'Reference lines are drawn on bar, line, area and circle marks.';
++    }
++    if (state.analytics.transform !== 'none') return 'Reference lines are not drawn on a period-analysis view.';
++    return '';
++  }
++
+   function renderAnalytics() {
+     const state = sheet();
+     el('analytics-list').replaceChildren(...ANALYTICS.map(item => {
+       const button = document.createElement('button');
+       button.type = 'button';
+       button.className = 'studio-analytics-item';
+-      button.draggable = true;
++      const refusal = analyticsRefusal(item);
++      button.draggable = !refusal;
++      button.disabled = !!refusal;
+       const on = item.group === 'transform' ? state.analytics.transform === item.id : !!state.analytics[item.id];
+       button.setAttribute('aria-pressed', String(on));
+       const title = document.createElement('span');
+       title.textContent = item.label;
+       const hint = document.createElement('small');
+-      hint.textContent = item.hint;
++      hint.textContent = refusal || item.hint;
++      if (refusal) button.title = refusal;
+       button.append(title, hint);
+       button.onclick = () => applyAnalytics(item.id);
+       button.addEventListener('dragstart', event => {
+@@ -1391,11 +1444,30 @@
+   }
+   // The Graph tab's "Create chart" button now opens Chart Studio; the classic
+   // dialog stays one click away in the Chart Studio toolbar.
++  // The Graph scope a verified contribution dataset can express. Employee tier
++  // and the transfer mode/direction have no field in the contribution source,
++  // and the drill-down category/recipient live only inside graph.js, so none of
++  // them are carried. The button title says what does travel.
++  const GRAPH_SCOPE = [['company', 'company'], ['cycle', 'cycle']];
++  function graphScope() {
++    const read = id => (document.getElementById('graph-' + id) || {}).value || '';
++    const scope = {industry: read('industry'), filters: []};
++    for (const [control, field] of GRAPH_SCOPE) {
++      const value = read(control);
++      if (value) scope.filters.push({field, value});
++    }
++    return scope;
++  }
+   const openBuilder = document.getElementById('graph-open-builder');
+   if (openBuilder) {
+-    openBuilder.textContent = 'Create chart';
++    openBuilder.textContent = 'Open in Chart Studio';
++    openBuilder.title = 'Carry the industry, company and cycle now showing into Chart Studio';
+     openBuilder.removeAttribute('aria-haspopup');
+-    openBuilder.onclick = () => { if (typeof showView === 'function') showView('chart-studio'); else location.hash = '#chart-studio'; };
++    openBuilder.onclick = () => {
++      pendingScope = graphScope();
++      if (typeof showView === 'function') showView('chart-studio'); else location.hash = '#chart-studio';
++      if (loadedSources && verified()) applyGraphScope();
++    };
+   }
+   window.addEventListener('mentat:view', activate);
+   window.addEventListener('hashchange', activate);
