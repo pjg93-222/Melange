@@ -15,6 +15,7 @@ import json
 from pathlib import Path
 import re
 import time
+from functools import lru_cache
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -31,21 +32,63 @@ def name_key(value):
     return ' '.join(re.findall(r'[A-Z0-9]+', str(value or '').upper()))
 
 
+@lru_cache(maxsize=1)
+def receipt_rules():
+    return json.loads((Path(__file__).resolve().parents[1]/'inputs/fec_receipt_rules.json').read_text())
+
+
+def is_memo(row):
+    return str(row.get('memo_code') or '').strip().upper() == 'X' or any(
+        str(row.get(k) or '').strip().upper() in ('TRUE','1') for k in ('memoed_subtotal','is_memo_leg'))
+
+
 def receipt_role(row):
-    description = name_key(str(row.get('receipt_type_full') or '') + ' ' + str(row.get('memo_text') or ''))
-    memo = row.get('memo_code') == 'X' or row.get('memoed_subtotal') is True or row.get('is_memo_leg') == 1
-    if memo and ('PREVIOUSLY DISCLOSED' in description or 'CONTRIBUTION DISCLOSED' in description):
-        return 'previously_disclosed_memo'
-    if 'PURCHASER UNKNOWN' in description and ('SOLD' in description or re.search(r'PROCEEDS.*SALE', description)):
+    rules = receipt_rules()
+    receipt_description = name_key(str(row.get('receipt_type_full') or ''))
+    memo_description = name_key(str(row.get('memo_text') or ''))
+    description = (receipt_description + ' ' + memo_description).strip()
+    memo = is_memo(row)
+    if re.search(rules['sale_identity_pattern'],description) and re.search(rules['sale_event_pattern'],description):
         return 'asset_liquidation'
-    form, line = row.get('filing_form'), row.get('line_number')
-    if (form == 'F3X' and line in ('13', '14', '15', '16', '17')) or (form == 'F3' and line in ('12', '13A', '13B', '14', '15')):
-        return 'other_receipt'
-    if memo:
-        return 'memo'
-    if form in ('F3', 'F3X') and re.fullmatch(r'11(AI?|B|C)', str(line or '')):
-        return 'in_kind_contribution' if re.search(r'IN KIND|NOT LIQUIDATED', description) else 'contribution'
-    return 'unverified_receipt_role'
+    form = str(row.get('filing_form') or '').strip().upper()
+    line = re.sub(r'^SA','',re.sub(r'[() ]','',str(row.get('line_number') or '').strip().upper()))
+    role = next((role for role,lines in rules['forms'].get(form,{}).items() if line in lines),'unverified_receipt_role')
+    special = form == 'F3X' and line == '17' and re.search(rules['special_account_pattern'], description)
+    exact_descriptions = {name_key(value) for value in rules.get('non_giving_exact_descriptions', [])}
+    receipt_exact = (bool(re.search(rules['non_giving_exact_pattern'], receipt_description))
+                     or receipt_description in exact_descriptions)
+    memo_exact = (bool(re.search(rules['non_giving_exact_pattern'], memo_description))
+                  or memo_description in exact_descriptions)
+    exact_non_giving = receipt_exact or memo_exact
+    receipt_event_description = re.sub(rules['special_account_pattern'], '', receipt_description).strip()
+    memo_event_description = re.sub(rules['special_account_pattern'], '', memo_description).strip()
+    receipt_non_giving_event = bool(re.search(rules['non_giving_event_pattern'], receipt_event_description))
+    memo_non_giving_event = bool(re.search(rules['non_giving_event_pattern'], memo_event_description))
+    non_giving = (exact_non_giving or receipt_non_giving_event or memo_non_giving_event
+                  or re.search(rules['non_giving_event_pattern'], description))
+    # An account label describes where the receipt belongs, not what created
+    # it. Explicit interest is still income in a special account. A separate
+    # actual contribution description, however, conflicts with that event.
+    event_description = ' '.join(re.sub(rules['special_account_pattern'], '', part)
+                                 for part, is_non_giving in (
+                                     (receipt_description, receipt_exact or receipt_non_giving_event),
+                                     (memo_description, memo_exact or memo_non_giving_event))
+                                 if not is_non_giving)
+    giving_event = re.search(rules['giving_event_pattern'], event_description)
+    if special:
+        role = ('other_receipt' if exact_non_giving and not giving_event else
+                'unverified_other_receipt' if non_giving else 'contribution')
+    elif role == 'unverified_other_receipt' and non_giving:
+        role = 'unverified_other_receipt' if giving_event else 'other_receipt'
+    if role == 'unverified_other_receipt' and re.search(rules['transfer_event_pattern'], receipt_description) and not giving_event:
+        role = 'transfer_receipt'
+    if memo and re.search(rules['disclosure_pattern'],description) and role != 'other_receipt':
+        return 'unverified_disclosure_memo'
+    if role == 'contribution' and re.search(rules['refund_review_pattern'], description):
+        return 'unverified_refund_adjustment'
+    if role == 'contribution' and re.search(r'IN KIND|NOT LIQUIDATED',description):
+        return 'in_kind_contribution'
+    return role
 
 
 def source_link(row):
@@ -165,7 +208,7 @@ def summarize(snapshots, company, aliases):
             receipts.append({'company': company, 'reported_name': row.get('contributor_name'),
                              'committee_id': committee, 'cycle': cycle, 'sub_id': row['sub_id'],
                              'date': row.get('contribution_receipt_date'), 'amount': row.get('contribution_receipt_amount'),
-                             'role': role, 'included_company_contribution': role in ('contribution', 'in_kind_contribution'),
+                             'role': role, 'included_company_contribution': role in ('contribution', 'in_kind_contribution') and not is_memo(row),
                              'description': row.get('receipt_type_full'), 'line_number': row.get('line_number'),
                              'transaction_id': row.get('transaction_id'), 'source_url': source_link(row)})
         for row in snapshot['disbursements']:
