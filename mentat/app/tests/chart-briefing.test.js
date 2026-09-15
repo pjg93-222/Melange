@@ -60,3 +60,10 @@ test('a chart removed from a full tray makes room for exactly one more', () => {
   assert.strictEqual(refilled.at(-1).id, 'fresh');
   assert.throws(() => model.add(refilled, chart('over')), /Remove one first/);
 });
+
+test('added_at read back in seconds (as the server writes it) renders today\'s clock, not a 1970 date', () => {
+  const nowSeconds = Date.now() / 1000;
+  const now = new Date();
+  const expected = model.pad(now.getHours()) + ':' + model.pad(now.getMinutes());
+  assert.strictEqual(model.timeLabel(nowSeconds), expected);
+});

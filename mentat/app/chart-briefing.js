@@ -76,9 +76,21 @@
     ' · basis ' + ((item && item.basis) || 'unstated') +
     ' · exported ' + (exportedOn || '') + ' from Mentat Chart Studio';
 
+  const pad = n => String(n).padStart(2, '0');
+  // added_at (like saved_at in chart-studio.js) comes back from the server
+  // in seconds; a bare Date() reads it as milliseconds and prints a 1970
+  // clock. Pure, and up here with the model, so the Node test below can
+  // catch a regression without standing up a document.
+  const timeLabel = value => {
+    const date = value
+      ? new Date(typeof value === 'number' ? value * 1000 : value)
+      : new Date();
+    return Number.isNaN(date.getTime()) ? '' : pad(date.getHours()) + ':' + pad(date.getMinutes());
+  };
+
   const model = {CAP, add: addItem, move: moveItem, remove: removeItem,
     provenanceSha, sourceText, sourceRecord, provenanceRecord, sourceNoteText,
-    shortSha: item => provenanceSha(item).slice(0, 12)};
+    shortSha: item => provenanceSha(item).slice(0, 12), pad, timeLabel};
 
   // Node requires this file for the model alone; everything below needs a
   // document and must not run there.
@@ -96,15 +108,10 @@
   let busy = false;
   const svgCache = new Map();
 
-  const pad = n => String(n).padStart(2, '0');
   const isoDate = (date = new Date()) =>
     date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
   const dateLabel = (date = new Date()) =>
     date.toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'});
-  const timeLabel = value => {
-    const date = value ? new Date(value) : new Date();
-    return Number.isNaN(date.getTime()) ? '' : pad(date.getHours()) + ':' + pad(date.getMinutes());
-  };
   const escapeHtml = value => String(value == null ? '' : value)
     .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;').replaceAll("'", '&#39;');

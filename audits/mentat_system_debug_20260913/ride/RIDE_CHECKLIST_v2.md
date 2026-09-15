@@ -32,7 +32,7 @@ Verifies commit `f64316daa` (on top of `9b14e1d53` / `215faa9db` / `ed6474351`, 
 | 24 | F6 | P1 | Narrow the window under 1200px; Inspector toggle | Toggle visible with filter-count badge; drawer opens; Builder restores all |
 | 25 | E1 | P2 | Export, Copy image | Paste into Word or Teams shows the chart with caption |
 | 26 | E2 | P2 | Export, Print chart | Print preview: chart, title, scope, basis, source SHA, one page, no navigation rail |
-| 27 | E4 | P1 | Add to briefing on two different sheets | Badge "2"; drawer lists both with title, scope, basis, time |
+| 27 | E4 | P1 | Add to briefing on two different sheets (second sheet via Duplicate sheet, not + New sheet) | Badge "2"; drawer lists both with title, scope, basis, time |
 | 28 | E4 | P2 | Drawer: Remove one, reorder | List updates; order persists after reload |
 | 29 | E3 | P1 | Drawer: Export PowerPoint | .pptx opens in PowerPoint; one slide per item; caption and provenance footer |
 | 30 | E5 | P2 | Save view "Ride B"; reload; Open view | View restored from the server; visible on the mirror console too |
