@@ -19,7 +19,7 @@ app = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(app)
 
 READ_ONLY_REFUSAL = 'Read-only preview. Briefing changes are not saved.'
-ITEM_FIELDS = ('id', 'title', 'scope', 'note', 'basis', 'sheetId', 'sheetName', 'source',
+ITEM_FIELDS = ('id', 'title', 'scope', 'chip', 'note', 'basis', 'sheetId', 'sheetName', 'source',
                'provenance', 'width', 'height', 'added_at', 'origin')
 
 
@@ -71,7 +71,9 @@ class StudioBriefingTests(unittest.TestCase):
 
     def add(self, **overrides):
         payload = {'title': 'Published included receipts by Recipient category',
-                   'scope': 'Banking - Cycle 2025-2026 - Bank of America NA',
+                   'scope': 'Banking - Cycle 2025-2026 - Bank of America NA - Workbook SHA256 '
+                            + 'a' * 64 + ' - Groups 1-5 of 5',
+                   'chip': 'Banking - Cycle 2025-2026 - Bank of America NA',
                    'note': 'Top five categories', 'basis': 'Published included receipts',
                    'sheetId': 'sheet-1', 'sheetName': 'Recipients',
                    'source': {'workbook': 'Banking.xlsx'},
@@ -95,9 +97,33 @@ class StudioBriefingTests(unittest.TestCase):
         self.assertEqual(sorted(item), sorted(ITEM_FIELDS))
         self.assertEqual(item['title'], 'Published included receipts by Recipient category')
         self.assertEqual(item['sheetName'], 'Recipients')
+        self.assertEqual(item['chip'], 'Banking - Cycle 2025-2026 - Bank of America NA')
         self.assertEqual(item['provenance'], {'workbook_sha256': 'a' * 64})
         self.assertEqual((item['width'], item['height']), (960, 540))
         self.assertEqual(item['origin'], 'chart-studio')
+
+    def test_the_short_scope_chip_survives_the_round_trip(self):
+        """Every reader-facing surface prints the chip first and the full scope only
+        as a fallback - the drawer card, the printed sheet, the HTML bundle and the
+        slide notes. A tray stored without it comes back with the whole provenance
+        string where a one-line scope belongs, which is what a second console, a
+        reload, or the mirror console reads."""
+        identifier = self.add()[2]['id']
+        item = next(entry for entry in self.request('/api/studio/briefing')[2]['items']
+                    if entry['id'] == identifier)
+        self.assertEqual(item['chip'], 'Banking - Cycle 2025-2026 - Bank of America NA')
+        self.assertNotEqual(item['chip'], item['scope'])
+        self.assertLess(len(item['chip']), len(item['scope']))
+        stored = json.loads((self.tray / 'index.json').read_text(encoding='utf-8'))
+        self.assertEqual([entry['chip'] for entry in stored['items']],
+                         ['Banking - Cycle 2025-2026 - Bank of America NA'])
+
+    def test_an_item_sent_without_a_chip_still_lists_one_field_rather_than_none(self):
+        identifier = self.add(chip='')[2]['id']
+        item = next(entry for entry in self.request('/api/studio/briefing')[2]['items']
+                    if entry['id'] == identifier)
+        self.assertEqual(item['chip'], '')
+        self.assertEqual(sorted(item), sorted(ITEM_FIELDS))
 
     def test_the_stored_chart_comes_back_as_text_not_as_an_image_document(self):
         identifier = self.add()[2]['id']

@@ -269,15 +269,24 @@
 
   /* ------------------------------------------------------------ the drawer */
 
+  // The drawer is fixed over the right edge of the window. The page has to be
+  // told it is there, or it sits on top of the studio toolbar's right-hand
+  // controls and swallows their clicks; the class is what the stylesheet reads
+  // to reserve the gutter.
+  const markOpen = open => {
+    if (document.body) document.body.classList.toggle('studio-briefing-open', !!open);
+  };
   const openDrawer = () => {
     const drawer = el('briefing');
     if (drawer) drawer.hidden = false;
+    markOpen(true);
     const button = el('briefing-add');
     if (button) button.setAttribute('aria-expanded', 'true');
   };
   const closeDrawer = () => {
     const drawer = el('briefing');
     if (drawer) drawer.hidden = true;
+    markOpen(false);
     const button = el('briefing-add');
     if (button) { button.setAttribute('aria-expanded', 'false'); button.focus(); }
   };

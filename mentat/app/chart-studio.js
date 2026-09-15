@@ -373,8 +373,16 @@
   // reported, never silently dropped.
   function applyGraphScope() {
     const scope = pendingScope;
+    if (!scope) return;
+    // The carried scope is only consumed once it can actually be applied.
+    // "Open in Chart Studio" calls this eagerly, and loadContributions()
+    // calls it again when the verified data lands; on a page where Chart
+    // Studio has not loaded yet the eager call arrives first, and clearing
+    // pendingScope there threw the reader's company and cycle away before
+    // the second call could use them.
+    if (verified() && !data) return;
     pendingScope = null;
-    if (!scope || !verified() || !data) return;
+    if (!verified()) return;
     const missing = [];
     const pills = [];
     for (const {field, value} of scope.filters) {

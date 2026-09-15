@@ -1004,7 +1004,13 @@ class Console:
 
         identifier = uuid.uuid4().hex
         item = {'id': identifier, 'title': str(data.get('title', '')).strip(),
-                'scope': str(data.get('scope', '')).strip(), 'note': str(data.get('note', '')).strip(),
+                'scope': str(data.get('scope', '')).strip(),
+                # The short scope chip every reader-facing surface prints first.
+                # Dropping it here left the drawer, the printed sheet, the HTML
+                # bundle and the slide notes falling back to the full provenance
+                # string the moment the tray was read back off this console.
+                'chip': str(data.get('chip', '')).strip(),
+                'note': str(data.get('note', '')).strip(),
                 'basis': str(data.get('basis', '')).strip(), 'sheetId': str(data.get('sheetId', '')).strip(),
                 'sheetName': str(data.get('sheetName', '')).strip(),
                 'source': data.get('source') if isinstance(data.get('source'), dict) else {},
@@ -1393,8 +1399,17 @@ class Console:
             if index in identifiers:
                 raise ValueError('Report filename identifiers conflict; no ambiguous report will be opened.')
             identifiers.add(index)
-            industry = re.sub(r'\s+Industry Spending Overview$', '', path.stem, flags=re.IGNORECASE)
-            rows.append({'index':index,'name':path.name,'industry':industry,
+            # The companion `<Industry> Industry Spending Data.xlsx` is the tall,
+            # Tableau-shaped view of the SAME export. Stripping either suffix
+            # files both books under one industry instead of inventing an
+            # industry literally called "Credit Union Industry Spending Data";
+            # `kind` is what lets a caller tell the two apart without parsing
+            # the filename again.
+            stem = re.sub(r'\s+Industry Spending (Overview|Data)$', '', path.stem,
+                          flags=re.IGNORECASE)
+            kind = 'data' if re.search(r'\s+Industry Spending Data$', path.stem,
+                                       flags=re.IGNORECASE) else 'overview'
+            rows.append({'index':index,'name':path.name,'industry':stem,'kind':kind,
                          'source_directory':str(self.report_directory)})
         return rows
 

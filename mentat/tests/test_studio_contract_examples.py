@@ -130,6 +130,10 @@ class StudioContractExampleTests(unittest.TestCase):
         self.assertEqual(item['provenance'], EXAMPLES['briefing_add']['provenance'])
         self.assertEqual(item['source'], EXAMPLES['briefing_add']['source'])
         self.assertEqual(item['provenance']['sha'], EXAMPLES['expected']['workbook_sha256'])
+        # The short scope chip travels with the item. Every export prints it before
+        # it falls back to the full provenance scope, so a tray that loses it here
+        # prints the digest string where a reader expects one line.
+        self.assertEqual(item['chip'], EXAMPLES['briefing_add']['chip'])
 
     def test_a_briefing_item_sent_with_a_string_provenance_loses_it_entirely(self):
         """Why the browser must send objects: the server replaces anything that is not

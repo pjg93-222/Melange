@@ -9,6 +9,14 @@
   box-shadow: -10px 0 28px rgba(52, 38, 73, .18); overflow: hidden;
 }
 .studio-briefing[hidden] { display: none; }
+/* Room for the drawer. It is fixed over the right edge, so without this gutter
+   it covers the studio toolbar's right-hand controls - Classic builder at every
+   width, and Company overview and the Inspector toggle on a narrower window -
+   and every click on them lands on the drawer instead. Below 900px the drawer
+   is most of the window and stands as an overlay, as R4 intends. */
+@media (min-width: 900px) {
+  body.studio-briefing-open #view-chart-studio { padding-right: 340px; }
+}
 .studio-briefing-head { display: flex; align-items: center; gap: 8px; padding: 14px 14px 10px; }
 .studio-briefing-title { font-family: var(--font-serif); font-weight: 400; font-size: 21px; margin: 0; color: var(--acu-plum); }
 .studio-briefing-count {
