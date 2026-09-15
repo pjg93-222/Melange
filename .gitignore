@@ -72,3 +72,12 @@ mentat-backup-*/
 mentat/state/contribution-analytics/
 mentat/state/geography/
 mentat/state/contribution-source-proofs/
+
+# Mentat Pocket page template and the vendored PptxGenJS bundle
+!mentat/tools/pocket/*.html
+!mentat/app/vendor/*.js
+
+# Chart Studio HTTP contract: the worked example payloads both the python and the
+# node suites read. Source of truth, not a regenerable artifact - without this the
+# *.json sweep above would drop it and both suites would fail on a fresh checkout.
+!mentat/app/studio-contract-examples.json

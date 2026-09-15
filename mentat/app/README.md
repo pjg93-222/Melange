@@ -104,9 +104,17 @@ R 4.6 and the existing Mentat dependencies remain required. `-PythonPath`,
 `openpyxl`, already present in the bundled runtime.
 
 Each desktop launch checks the server's loaded code hash, report directory and
-read/write mode before reusing it. An older server can keep managing its existing
-work while the launcher opens an updated server on another local port. An open
-window titled MENTAT is not sufficient evidence that its server is current.
+read/write mode before reusing it. The hash covers every Python module in
+`mentat/app`, not server.py alone. A server of this same project, data root and
+report folder that is running older code, is not read-only, and reports
+`busy: false` is stopped by process id and replaced on the SAME port, with the
+reason printed. A busy server, a read-only preview, a server too old to report
+`busy`, and any port whose owning process is not a `server.py` process are all
+left running, and the launcher opens another local port with a printed notice.
+An open window titled MENTAT is not sufficient evidence that its server is
+current; the console's own status bar now states the build, port, start time
+and process id it is talking to, and offers Restart when the code on disk has
+moved on.
 
 The server binds only to loopback and checks local host, origin, and a session
 token for changes. This is a local single-user application, not a remote hosted
@@ -534,3 +542,44 @@ observations per phase. Current, explicitly partial and missing-value periods do
 not train it. No fixed presidential uplift, extrapolated growth, or calibrated
 prediction interval is implied. Unknown historical coverage stays disclosed.
 The benchmark follows the [seasonal naïve method](https://otexts.com/fpp3/simple-methods.html).
+
+**Saved views** live under the console data root at `studio\views\<32 hex>.json`, so a
+second console opened on the same data root lists the same views. `GET /api/studio/views`
+returns them newest first with a sheet count in place of the sheets; `GET
+/api/studio/views?id=` returns one view with its sheets and its active sheet; `POST
+/api/studio/views` saves one and `POST /api/studio/views/delete` removes one. A view needs
+a name of 1 to 80 characters and 1 to 24 named sheets, and its request body may not exceed
+512 KB. Duplicate names are allowed. Deleting a view that is already gone still reports
+success, so a repeated click is not an error. A read-only preview console refuses both
+writes with "Saved views are read-only in this preview console; save from the original
+console." and still answers the reads.
+
+**The briefing tray** is one shared tray per data root: an ordered
+`studio\briefing\index.json` beside one `<id>.svg` per item, capped at 40 items. `POST
+/api/studio/briefing/add` takes the caption fields and the chart itself as an SVG string of
+at most 6 MB; a forty-first item is refused with 409, and a chart that is oversized or does
+not begin `<svg` with 400. `POST /api/studio/briefing/remove` and `POST
+/api/studio/briefing/order` maintain the tray, and an order has to be a permutation of the
+tray it reorders. `GET /api/studio/briefing/item?id=` returns the stored chart as
+`text/plain`, never as `image/svg+xml`: an SVG served from this origin under an image type
+is script-capable, and these are assembled from report text. The tray is read-only in a
+preview console.
+
+**The PowerPoint bundle** `vendor\pptxgen.bundle.js` is PptxGenJS 4.0.1 (MIT), the UMD
+browser build from the npm registry tarball, copied unmodified; `vendor/LICENSE-pptxgenjs.md`
+carries its licence. SHA-256
+`4fb9eac5cfefb213e2d8743c2b7151025f31bfb3f834c73c12062916daa0f3f8`. The offline checks
+assert that hash against the bytes the console serves at `/vendor/pptxgen.bundle.js`, not
+against the file on disk. Load it with a plain script tag and read `window.PptxGenJS`; it
+defines `window.JSZip` as a side effect and is not `require()`-able from Node.
+
+**Publish phone snapshot** writes one self-contained page. `POST /api/publish/pocket` takes
+dataset ids from the contribution catalog, runs `tools\pocket\extract_pocket_data.py`
+against this console own port and then `tools\pocket\build_page.py`, and writes
+`mentat-pocket.html` into a `pocket` folder inside the configured report folder, beside the
+`pocket-data.json` and `pocket-integrity.json` it was built from. The repository template
+`tools\pocket\mentat-pocket.html` is read, never overwritten. Job state lives at `<data
+root>\publish\<id>\job.json` and is read back with `GET /api/publish/pocket?id=`; the
+child output is kept beside it in `publish.log`. One publication runs at a time, a second is
+refused with 409, and the console reports itself busy while one runs, so a restart will not
+interrupt it. Uploading the finished page to a private link remains a manual step.

@@ -51,6 +51,121 @@ from collection_coverage import inspect as inspect_coverage, cycles_from
 from fec_key_store import load_keys, save_keys, environment_keys, status as key_status
 from runtime_inputs import copy_fec_sources
 
+# Files this console serves. Hoisted out of the request handler so the build
+# identity below can hash exactly the set the browser can ask for.
+STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript"),
+                 '/contribution-studio': ('contribution-studio.html', 'text/html; charset=utf-8'),
+                 '/contribution-studio.css': ('contribution-studio.css', 'text/css'),
+                 '/contribution-studio.js': ('contribution-studio.js', 'text/javascript'),
+                 '/contribution-plot.js': ('contribution-plot.js', 'text/javascript'),
+                 '/contribution-charts.js': ('contribution-charts.js', 'text/javascript'),
+                 '/contribution-map.js': ('contribution-map.js', 'text/javascript'),
+                 '/mentat-icon.svg': ('mentat-icon.svg', 'image/svg+xml'),
+                 "/style.css": ("style.css", "text/css"), "/template.csv": ("template.csv", "text/csv"),
+                 '/workspace.css': ('workspace.css', 'text/css'),
+                 '/evidence-csv.js': ('evidence-csv.js', 'text/javascript'),
+                 '/charts.js': ('charts.js', 'text/javascript'), '/chart-math.js': ('chart-math.js', 'text/javascript'),
+                 '/graph.js': ('graph.js', 'text/javascript'),
+                 '/ui-state.js': ('ui-state.js', 'text/javascript'),
+                 '/coverage-view.js': ('coverage-view.js', 'text/javascript'),
+                 '/cross-reference.js': ('cross-reference.js', 'text/javascript'),
+                 '/cross-reference.css': ('cross-reference.css', 'text/css'),
+                 '/comparison.js': ('comparison.js', 'text/javascript'),
+                 '/grouped-chart.js': ('grouped-chart.js', 'text/javascript'),
+                 '/funding-comparison.js': ('funding-comparison.js', 'text/javascript'),
+                 '/comparison.css': ('comparison.css', 'text/css'),
+                 '/chart-export.js': ('chart-export.js', 'text/javascript'),
+                 '/graph.css': ('graph.css', 'text/css'),
+                 '/acu-theme.css': ('acu-theme.css', 'text/css'),
+                 '/chart-studio-core.js': ('chart-studio-core.js', 'text/javascript'),
+                 '/chart-studio-contributions.js': ('chart-studio-contributions.js', 'text/javascript'),
+                 '/chart-studio.js': ('chart-studio.js', 'text/javascript'),
+                 '/chart-comparison.js': ('chart-comparison.js', 'text/javascript'),
+                 '/chart-studio.css': ('chart-studio.css', 'text/css'),
+                 '/theme.js': ('theme.js', 'text/javascript'),
+                 '/chart-briefing.js': ('chart-briefing.js', 'text/javascript'),
+                 '/chart-briefing.css': ('chart-briefing.css', 'text/css'),
+                 '/vendor/pptxgen.bundle.js': ('vendor/pptxgen.bundle.js', 'text/javascript')}
+
+# Build identity. A console window outlives edits to this tree, so the page and
+# the launcher both compare what this process loaded with what is on disk now.
+# File names are folded into the tree hash, so a rename changes it too.
+
+
+@lru_cache(maxsize=512)
+def file_digest(identity):
+    """SHA-256 of one file, cached by (path, size, mtime_ns)."""
+    try:
+        return hashlib.sha256(Path(identity[0]).read_bytes()).digest()
+    except OSError:
+        return b'file unavailable'
+
+
+def tree_sha256(paths):
+    digest = hashlib.sha256()
+    for path in paths:
+        try:
+            info = path.stat()
+            identity = (str(path), info.st_size, info.st_mtime_ns)
+        except OSError:
+            identity = (str(path), -1, -1)
+        digest.update(path.name.encode('utf-8'))
+        digest.update(b'\0')
+        digest.update(file_digest(identity))
+        digest.update(b'\0')
+    return digest.hexdigest()
+
+
+def code_files():
+    """Every Python module this console loads from its own folder."""
+    return sorted(Path(__file__).resolve().parent.glob('*.py'), key=lambda path: path.name)
+
+
+def asset_files():
+    directory = Path(__file__).resolve().parent
+    return sorted({directory / name for name, _ in STATIC_ASSETS.values()}, key=lambda path: path.name)
+
+
+def git_sha():
+    """Short revision of the checkout, or 'unknown' when Git cannot answer."""
+    try:
+        finished = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=str(PROJECT),
+                                  capture_output=True, text=True, timeout=10,
+                                  creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return 'unknown'
+    value = (finished.stdout or '').strip()
+    return value if finished.returncode == 0 and re.fullmatch(r'[0-9a-f]{4,40}', value) else 'unknown'
+
+
+CODE_TREE_SHA256 = tree_sha256(code_files())
+ASSET_TREE_SHA256 = tree_sha256(asset_files())
+GIT_SHA = git_sha()
+STARTED_AT = time.time()
+
+
+def console_busy(app):
+    """Whether this console owns work a restart would interrupt.
+
+    A console that cannot answer is reported busy: never stop work on a guess.
+    """
+    reader = getattr(app, 'busy', None)
+    if not callable(reader):
+        return False
+    try:
+        return bool(reader())
+    except Exception:
+        return True
+
+
+def build_status(app, port):
+    """What this process loaded, beside what is on disk right now."""
+    return {'git_sha': GIT_SHA, 'code_sha256': CODE_TREE_SHA256, 'assets_sha256': ASSET_TREE_SHA256,
+            'on_disk_code_sha256_now': tree_sha256(code_files()),
+            'on_disk_assets_sha256_now': tree_sha256(asset_files()),
+            'started_at': STARTED_AT, 'port': int(port), 'pid': os.getpid(),
+            'busy': console_busy(app)}
+
 
 @lru_cache(maxsize=64)
 def static_asset(file_stamp):
@@ -213,11 +328,33 @@ def process_identity(pid):
         return identity
 
 
+def replace_with_retry(temporary, path, attempts=10):
+    """os.replace onto a destination another process has open, on Windows.
+
+    A reader holding the destination open makes os.replace raise PermissionError
+    (WinError 5) for as long as it holds it - microseconds, but a console listing
+    saved views while a worker rewrites index.json was enough to lose two runs in
+    twenty. Windows offers no way to wait on that handle, so back off and try
+    again: 20 ms doubling to a second, about four seconds in all. A hold that
+    never clears is a real failure and is raised, never swallowed.
+    """
+    delay = 0.02
+    for attempt in range(attempts):
+        try:
+            os.replace(temporary, path)
+            return
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(delay)
+            delay = min(delay * 2, 1.0)
+
+
 def atomic_json(path, value):
     path = Path(path)
     temporary = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
     temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
-    os.replace(temporary, path)
+    replace_with_retry(temporary, path)
 
 
 def normalize_upload(filename, content, target):
@@ -352,6 +489,10 @@ def report_quality(path):
         book.close()
 
 
+class Conflict(Exception):
+    """A well-formed request the current state cannot accept yet."""
+
+
 class RunNotFound(Exception):
     """A stop/workers request named a run id with no matching upload."""
 
@@ -364,17 +505,56 @@ class Console:
         self.report_directory = report_directory(PROJECT)
         self.keys_file = keys_file
         self.read_only = read_only
+        # The pocket publisher reads this console over HTTP, so the console
+        # needs the port it was given. main() sets it before serve_forever.
+        self.port = 0
         self.rscript = rscript or "C:/Program Files/R/R-4.6.0/bin/Rscript.exe"
         self.token = secrets.token_urlsafe(32)
         self.lock = threading.Lock()
         self.processes = {}
         self.preparing = set()
+        self.jobs = set()
         self.report_cache = {}
         configured = environment_keys()
         if self.keys_file:
             configured.append(Path(self.keys_file).read_text(encoding="utf-8-sig"))
         if configured and not read_only:
             save_keys(configured)
+
+    def busy(self):
+        """True while this console owns work that stopping it would interrupt."""
+        if self.preparing or self.jobs:
+            return True
+        return any(process.poll() is None for process in list(self.processes.values()))
+
+    def restart(self, port):
+        """Hand this console's port back to the launcher, which replaces it.
+
+        The launcher stops this process only after it confirms the identity,
+        the code hash and an idle busy flag, then binds the same port again.
+        """
+        script = Path(__file__).resolve().parent / 'Start-MentatApp.ps1'
+        if not script.is_file():
+            raise ValueError('The launcher script is unavailable. Close this window and open MENTAT again.')
+        shell = shutil.which('powershell') or str(Path(os.environ.get('SystemRoot', 'C:/Windows'))
+                                                  / 'System32/WindowsPowerShell/v1.0/powershell.exe')
+        command = [shell, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', str(script),
+                   '-NoBrowser', '-Port', str(int(port)), '-DataRoot', self.configured_root]
+        # Identity is project path plus data root; a restart that dropped the
+        # data root would open a second console on another port instead.
+        if self.keys_file:
+            command += ['-KeysFile', self.keys_file]
+        if self.rscript:
+            command += ['-RScriptPath', self.rscript]
+        # DETACHED_PROCESS would leave powershell.exe without a console: it
+        # exits 0 without running the launcher, so the restart silently fails.
+        flags = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP if os.name == 'nt' else 0
+        try:
+            subprocess.Popen(command, cwd=str(PROJECT), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL, close_fds=True, creationflags=flags)
+        except OSError:
+            raise ValueError('The launcher could not be started. Close this window and open MENTAT again.')
+        return {'restarting': True, 'port': int(port), 'pid': os.getpid()}
 
     def inspect_report(self, path):
         stat = path.stat()
@@ -708,8 +888,327 @@ class Console:
                 job['message'] = 'Could not start the evidence collector.'
             job['finished_at'] = time.time()
             atomic_json(root / 'collection.json', job)
-        threading.Thread(target=collect, daemon=True).start()
+        def run_collect():
+            try:
+                collect()
+            finally:
+                self.jobs.discard(identifier)
+        self.jobs.add(identifier)
+        threading.Thread(target=run_collect, daemon=True).start()
         return {'id':identifier, 'state':'collecting'}
+
+    # Chart Studio saved views. They live under the data root beside the runs,
+    # so a second console opened on the same data root lists the same views;
+    # that is what "save here, open on the mirror console" means. A read-only
+    # preview refuses the writes at the route, before the body is parsed.
+
+    def studio_directory(self, *parts):
+        return self.root.joinpath('studio', *parts)
+
+    def list_views(self):
+        """Saved views for the picker, newest first, without their sheets."""
+        directory = self.studio_directory('views')
+        values = []
+        if directory.is_dir():
+            for path in directory.glob('*.json'):
+                value = read_json(path)
+                if value.get('id') != path.stem or not isinstance(value.get('sheets'), list):
+                    continue
+                values.append({'id': value['id'], 'name': value.get('name', ''),
+                               'saved_at': value.get('saved_at', 0),
+                               'sourceKey': value.get('sourceKey', ''),
+                               'source': value.get('source', {}),
+                               'sheet_count': len(value['sheets'])})
+        values.sort(key=lambda item: (-(item['saved_at'] or 0), item['id']))
+        return {'views': values}
+
+    def get_view(self, identifier):
+        """One saved view with its sheets, or None when this console has no such view."""
+        if not re.fullmatch(r'[a-f0-9]{32}', identifier or ''):
+            raise ValueError('That is not a saved view identifier.')
+        value = read_json(self.studio_directory('views', identifier + '.json'))
+        if value.get('id') != identifier or not isinstance(value.get('sheets'), list):
+            return None
+        return {'id': value['id'], 'name': value.get('name', ''), 'saved_at': value.get('saved_at', 0),
+                'sourceKey': value.get('sourceKey', ''), 'source': value.get('source', {}),
+                'sheets': value['sheets'], 'active': value.get('active', 0)}
+
+    def save_view(self, data):
+        name = str(data.get('name', '')).strip()
+        if not 1 <= len(name) <= 80:
+            raise ValueError('Name the view: between 1 and 80 characters.')
+        source_key, source = data.get('sourceKey'), data.get('source')
+        if not isinstance(source_key, str) or not isinstance(source, dict):
+            raise ValueError('A saved view carries the source it was built from.')
+        sheets = data.get('sheets')
+        if not isinstance(sheets, list) or not 1 <= len(sheets) <= 24:
+            raise ValueError('Save between 1 and 24 sheets in one view.')
+        if any(not isinstance(sheet, dict) or not str(sheet.get('name', '')).strip() for sheet in sheets):
+            raise ValueError('Every sheet in a saved view needs a name.')
+        active = data.get('active')
+        if not isinstance(active, int) or isinstance(active, bool):
+            raise ValueError('The active sheet is a sheet number.')
+        identifier = uuid.uuid4().hex
+        value = {'id': identifier, 'name': name, 'saved_at': time.time(), 'sourceKey': source_key,
+                 'source': source, 'sheets': sheets, 'active': active}
+        directory = self.studio_directory('views')
+        with self.lock:
+            directory.mkdir(parents=True, exist_ok=True)
+            atomic_json(directory / (identifier + '.json'), value)
+        return {'id': identifier, 'saved_at': value['saved_at']}
+
+    def delete_view(self, data):
+        """Remove a saved view. Deleting one that is already gone is success."""
+        identifier = str(data.get('id', ''))
+        if not re.fullmatch(r'[a-f0-9]{32}', identifier):
+            raise ValueError('That is not a saved view identifier.')
+        with self.lock:
+            try:
+                (self.studio_directory('views') / (identifier + '.json')).unlink()
+            except FileNotFoundError:
+                pass
+        return {'deleted': True}
+
+    # The briefing tray: one shared tray per data root (Paul's v1 ruling), so
+    # every console on this data root shows the same items in the same order.
+
+    def briefing(self):
+        """The ordered tray. Missing or damaged index files read as empty."""
+        value = read_json(self.studio_directory('briefing', 'index.json'))
+        items = value.get('items')
+        return {'items': [item for item in items if isinstance(item, dict)] if isinstance(items, list) else []}
+
+    def briefing_item(self, identifier):
+        """The stored SVG for one item, or None when this console has no such item."""
+        if not re.fullmatch(r'[a-f0-9]{32}', identifier or ''):
+            raise ValueError('That is not a briefing item identifier.')
+        if not any(item.get('id') == identifier for item in self.briefing()['items']):
+            return None
+        try:
+            return self.studio_directory('briefing', identifier + '.svg').read_text(encoding='utf-8')
+        except OSError:
+            return None
+
+    def add_to_briefing(self, data):
+        svg = data.get('svg')
+        if not isinstance(svg, str) or not svg.startswith('<svg'):
+            raise ValueError('A briefing item carries the chart it was made from.')
+        if len(svg.encode('utf-8')) > 6 * 1024 * 1024:
+            raise ValueError('Narrow the view before adding it: this chart is over 6 MB.')
+
+        def dimension(value):
+            try:
+                return max(0, int(round(float(value))))
+            except (TypeError, ValueError):
+                return 0
+
+        identifier = uuid.uuid4().hex
+        item = {'id': identifier, 'title': str(data.get('title', '')).strip(),
+                'scope': str(data.get('scope', '')).strip(), 'note': str(data.get('note', '')).strip(),
+                'basis': str(data.get('basis', '')).strip(), 'sheetId': str(data.get('sheetId', '')).strip(),
+                'sheetName': str(data.get('sheetName', '')).strip(),
+                'source': data.get('source') if isinstance(data.get('source'), dict) else {},
+                'provenance': data.get('provenance') if isinstance(data.get('provenance'), dict) else {},
+                'width': dimension(data.get('width')), 'height': dimension(data.get('height')),
+                'added_at': time.time(), 'origin': str(data.get('origin', '')).strip()}
+        directory = self.studio_directory('briefing')
+        with self.lock:
+            directory.mkdir(parents=True, exist_ok=True)
+            items = self.briefing()['items']
+            if len(items) >= 40:
+                raise Conflict('The briefing holds 40 items. Remove one before adding another.')
+            temporary = directory / (identifier + '.svg.' + uuid.uuid4().hex + '.tmp')
+            temporary.write_text(svg, encoding='utf-8')
+            replace_with_retry(temporary, directory / (identifier + '.svg'))
+            items.append(item)
+            atomic_json(directory / 'index.json', {'items': items})
+        return {'id': identifier, 'added_at': item['added_at']}
+
+    def remove_from_briefing(self, data):
+        """Remove one item. Removing one that is already gone is success."""
+        identifier = str(data.get('id', ''))
+        if not re.fullmatch(r'[a-f0-9]{32}', identifier):
+            raise ValueError('That is not a briefing item identifier.')
+        directory = self.studio_directory('briefing')
+        with self.lock:
+            directory.mkdir(parents=True, exist_ok=True)
+            items = [item for item in self.briefing()['items'] if item.get('id') != identifier]
+            atomic_json(directory / 'index.json', {'items': items})
+            try:
+                (directory / (identifier + '.svg')).unlink()
+            except FileNotFoundError:
+                pass
+        return {'removed': True}
+
+    def order_briefing(self, data):
+        """Reorder the tray. The list has to be a permutation of what is there."""
+        ids = data.get('ids')
+        if not isinstance(ids, list) or any(not isinstance(value, str) for value in ids):
+            raise ValueError('Send the briefing order as a list of item identifiers.')
+        directory = self.studio_directory('briefing')
+        with self.lock:
+            directory.mkdir(parents=True, exist_ok=True)
+            items = self.briefing()['items']
+            index = {item.get('id'): item for item in items}
+            if len(ids) != len(items) or len(set(ids)) != len(ids) or any(value not in index for value in ids):
+                raise ValueError('The briefing order must list every item in the tray exactly once.')
+            atomic_json(directory / 'index.json', {'items': [index[value] for value in ids]})
+        return {'ok': True}
+
+    def publish_pocket(self, data):
+        """Publish the phone snapshot: read this console, then build the page.
+
+        Modelled on collect_evidence. One publication at a time per console;
+        the job state lives at <data root>/publish/<id>/job.json so a reader
+        that arrives after the answer was sent still sees the outcome.
+        """
+        port = int(getattr(self, 'port', 0) or 0)
+        if not port:
+            raise ValueError('This console does not know its own port. Restart it and publish again.')
+        datasets = data.get('datasets')
+        if not isinstance(datasets, list) or not datasets:
+            raise ValueError('Choose at least one dataset to publish.')
+        datasets = list(dict.fromkeys(str(value).strip() for value in datasets))
+        if any(not value or ',' in value for value in datasets):
+            raise ValueError('Choose datasets from the report catalog.')
+        known = {str(entry.get('id')) for entry in
+                 contribution_query.semantics.catalog(self.report_directory).get('datasets', [])}
+        unknown = [value for value in datasets if value not in known]
+        if unknown:
+            raise ValueError('Not in this report: ' + ', '.join(unknown) + '.')
+        identifier = 'publish-' + uuid.uuid4().hex
+        with self.lock:
+            if any(str(job).startswith('publish-') for job in self.jobs):
+                raise Conflict('A phone snapshot is already being published. Wait for it to finish.')
+            self.jobs.add(identifier)
+        root = self.root / 'publish' / identifier
+        root.mkdir(parents=True, exist_ok=True)
+        out_directory = Path(self.report_directory) / 'pocket'
+        tools = PROJECT / 'tools' / 'pocket'
+        flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+        log_path = root / 'publish.log'
+        job = {'id': identifier, 'status': 'queued', 'message': 'Preparing the snapshot.',
+               'datasets': datasets, 'output_path': str(out_directory / 'mentat-pocket.html'),
+               'console_pid': os.getpid(), 'output_files': [], 'selfcheck': None,
+               'selfcheck_message': '', 'started_at': time.time(), 'finished_at': None}
+
+        def record():
+            """Write the job state, retrying a reader's brief hold on the file.
+
+            os.replace fails while another process has the destination open,
+            and a poller reading job.json is such a process. A state write lost
+            that way would strand the job in 'running'. A copy is written: the
+            reply below shares this dict with the worker thread.
+            """
+            for attempt in range(5):
+                try:
+                    return atomic_json(root / 'job.json', dict(job))
+                except OSError:
+                    time.sleep(0.05)
+
+        record()
+
+        def step(script, arguments, log):
+            process = subprocess.Popen([sys.executable, str(tools / script)] + arguments, stdout=log,
+                                       stderr=subprocess.STDOUT, creationflags=flags)
+            job['pid'] = process.pid
+            record()
+            return process.wait()
+
+        def run_selfcheck(log):
+            """Check what was published. Advisory: the verdict is recorded, not enforced."""
+            log.write('\n--- selfcheck ---\n')
+            log.flush()
+            try:
+                finished = subprocess.run([sys.executable, str(tools / 'selfcheck.py'),
+                                           '--dir', str(out_directory)], capture_output=True,
+                                          text=True, creationflags=flags, timeout=600)
+            except (OSError, subprocess.SubprocessError) as error:
+                log.write('could not run: ' + str(error) + '\n')
+                return 'fail', 'The published page could not be checked: ' + str(error)
+            output = (finished.stdout or '') + (finished.stderr or '')
+            log.write(output)
+            summary = next((line.strip() for line in reversed(output.splitlines())
+                            if line.startswith('ALL CHECKS PASSED') or 'CHECK(S) FAILED' in line),
+                           'The self-check produced no summary. See ' + str(log_path))
+            return ('pass' if finished.returncode == 0 else 'fail'), summary
+
+        def publish():
+            failure = ''
+            try:
+                out_directory.mkdir(parents=True, exist_ok=True)
+                # The page links these as siblings. A snapshot published without
+                # them is a page a phone cannot install, so they ship with it.
+                for name in ('icon-180.png', 'manifest.webmanifest'):
+                    shutil.copyfile(tools / name, out_directory / name)
+                job.update(status='running', message='Reading the published report through this console.')
+                record()
+                with log_path.open('w', encoding='utf-8') as log:
+                    if step('extract_pocket_data.py', ['--port', str(port), '--out-dir', str(out_directory),
+                                                       '--datasets', ','.join(datasets)], log):
+                        failure = 'The snapshot reader did not finish. See ' + str(log_path)
+                    else:
+                        job.update(message='Building the page.')
+                        record()
+                        if step('build_page.py', ['--data', str(out_directory / 'pocket-data.json'),
+                                                  '--out', job['output_path']], log):
+                            failure = 'The page could not be built from the snapshot. See ' + str(log_path)
+                        else:
+                            job.update(message='Checking the published page.')
+                            record()
+                            job['selfcheck'], job['selfcheck_message'] = run_selfcheck(log)
+            except OSError as error:
+                failure = 'The publisher could not be started: ' + str(error)
+            job['output_files'] = [str(out_directory / name) for name in
+                                   ('mentat-pocket.html', 'pocket-data.json', 'pocket-integrity.json',
+                                    'icon-180.png', 'manifest.webmanifest')
+                                   if (out_directory / name).is_file()]
+            if not failure and not Path(job['output_path']).is_file():
+                failure = 'The page was not written. See ' + str(log_path)
+            job.update(status='failed' if failure else 'done',
+                       message=failure or ('Snapshot published to ' + job['output_path']),
+                       finished_at=time.time())
+            record()
+
+        def guarded():
+            try:
+                publish()
+            finally:
+                self.jobs.discard(identifier)
+
+        threading.Thread(target=guarded, daemon=True).start()
+        return {'job': dict(job)}
+
+    def publication(self, identifier):
+        """The stored state of one publication, or None when there is no such job.
+
+        A console that dies mid-publish leaves 'running' on disk forever, so a
+        state whose owning console is gone is reported failed. The owner is
+        checked, not the child: between the child exiting and this thread
+        writing 'done' the child pid is already dead and the job is fine.
+        """
+        if not re.fullmatch(r'publish-[a-f0-9]{32}', identifier or ''):
+            raise ValueError('That is not a phone snapshot publication.')
+        path = self.root / 'publish' / identifier / 'job.json'
+        if not path.parent.is_dir():
+            return None
+        # A reader and the worker's os.replace collide on Windows: the read
+        # fails with PermissionError while the state file is being swapped,
+        # and read_json reports that as an empty object. Measured at 8.9% of
+        # reads under contention, so a state that will not read is retried
+        # rather than reported missing. A job that never existed has no
+        # directory and is answered on the first pass.
+        for attempt in range(6):
+            job = read_json(path)
+            if job.get('id') == identifier:
+                break
+            time.sleep(0.05)
+        else:
+            return None
+        if job.get('status') in ('queued', 'running') and not process_alive(job.get('console_pid')):
+            job['status'] = 'failed'
+            job['message'] = 'The console that was publishing this snapshot is no longer running.'
+        return job
 
     def runs(self):
         values = []
@@ -1121,6 +1620,40 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(content)
 
+    def discard_body(self):
+        """Read and drop an unread request body before an early refusal.
+
+        Closing a socket that still has inbound data queued makes Windows send
+        RST, and the client can lose the 4xx it is already reading.
+
+        Only a body this server would otherwise have accepted is drained, and
+        only briefly. A client that declares a length it never sends must not
+        hold this thread: ThreadingHTTPServer gives it a thread per connection.
+        A missing, malformed or oversized Content-Length is left alone, because
+        there is then no body this server would have read either.
+        """
+        try:
+            length = int(self.headers.get('Content-Length', '0'))
+        except (TypeError, ValueError):
+            return
+        if length < 1 or length > 7_000_000:
+            return
+        previous = self.connection.gettimeout()
+        self.connection.settimeout(2)
+        try:
+            while length > 0:
+                chunk = self.rfile.read(min(length, 65_536))
+                if not chunk:
+                    return
+                length -= len(chunk)
+        except OSError:
+            return
+        finally:
+            try:
+                self.connection.settimeout(previous)
+            except OSError:
+                pass
+
     def valid_host(self):
         return self.headers.get("Host") in (f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}")
 
@@ -1152,12 +1685,14 @@ class Handler(BaseHTTPRequestHandler):
                                   'server_code_sha256': SERVER_CODE_SHA256,
                                   'contribution_studio_revision': CONTRIBUTION_STUDIO_REVISION,
                                   'read_only': bool(getattr(app, 'read_only', False)),
-                                  'report_directory':str(app.report_directory), 'pid': os.getpid()})
+                                  'report_directory':str(app.report_directory),
+                                  **build_status(app, self.server.server_port)})
             if parsed.path == "/api/session":
                 if query.get('light', ['0'])[0] == '1':
+                    build = build_status(app, self.server.server_port)
                     return self.send({'token':app.token, 'read_only':bool(getattr(app, 'read_only', False)),
                                       'evidence_collection_available':True, 'api_version':2,
-                                      'report_directory':str(app.report_directory)})
+                                      'report_directory':str(app.report_directory), 'build': build, **build})
                 return self.send({"token": app.token, **app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))})
             if parsed.path == '/api/contributions/session':
                 return self.send({'token': app.token, 'read_only': bool(getattr(app, 'read_only', False))})
@@ -1237,39 +1772,32 @@ class Handler(BaseHTTPRequestHandler):
             if parsed.path == '/api/graph':
                 return self.send(app.graph(query.get('id',[''])[0], query.get('industry',[''])[0],
                                            {k:v[0] for k,v in query.items()}))
-            assets = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript"),
-                      '/contribution-studio': ('contribution-studio.html', 'text/html; charset=utf-8'),
-                      '/contribution-studio.css': ('contribution-studio.css', 'text/css'),
-                      '/contribution-studio.js': ('contribution-studio.js', 'text/javascript'),
-                      '/contribution-plot.js': ('contribution-plot.js', 'text/javascript'),
-                      '/contribution-charts.js': ('contribution-charts.js', 'text/javascript'),
-                      '/contribution-map.js': ('contribution-map.js', 'text/javascript'),
-                      '/mentat-icon.svg': ('mentat-icon.svg', 'image/svg+xml'),
-                      "/style.css": ("style.css", "text/css"), "/template.csv": ("template.csv", "text/csv"),
-                      '/workspace.css': ('workspace.css', 'text/css'),
-                      '/evidence-csv.js': ('evidence-csv.js', 'text/javascript'),
-                      '/charts.js': ('charts.js', 'text/javascript'), '/chart-math.js': ('chart-math.js', 'text/javascript'),
-                      '/graph.js': ('graph.js', 'text/javascript'),
-                      '/ui-state.js': ('ui-state.js', 'text/javascript'),
-                      '/coverage-view.js': ('coverage-view.js', 'text/javascript'),
-                      '/cross-reference.js': ('cross-reference.js', 'text/javascript'),
-                      '/cross-reference.css': ('cross-reference.css', 'text/css'),
-                      '/comparison.js': ('comparison.js', 'text/javascript'),
-                      '/grouped-chart.js': ('grouped-chart.js', 'text/javascript'),
-                      '/funding-comparison.js': ('funding-comparison.js', 'text/javascript'),
-                      '/comparison.css': ('comparison.css', 'text/css'),
-                      '/chart-export.js': ('chart-export.js', 'text/javascript'),
-                      '/graph.css': ('graph.css', 'text/css'),
-                      '/acu-theme.css': ('acu-theme.css', 'text/css'),
-                      '/chart-studio-core.js': ('chart-studio-core.js', 'text/javascript'),
-                      '/chart-studio-contributions.js': ('chart-studio-contributions.js', 'text/javascript'),
-                      '/chart-studio.js': ('chart-studio.js', 'text/javascript'),
-                      '/chart-comparison.js': ('chart-comparison.js', 'text/javascript'),
-                      '/chart-studio.css': ('chart-studio.css', 'text/css'),
-                      '/theme.js': ('theme.js', 'text/javascript')}
+            if parsed.path == '/api/publish/pocket':
+                job = app.publication(query.get('id', [''])[0])
+                if job is None:
+                    return self.send({'error': 'That publication is not on this console.'}, 404)
+                return self.send(job)
+            if parsed.path == '/api/studio/briefing':
+                return self.send(app.briefing())
+            if parsed.path == '/api/studio/briefing/item':
+                svg = app.briefing_item(query.get('id', [''])[0])
+                if svg is None:
+                    return self.send({'error': 'That briefing item is not on this console.'}, 404)
+                return self.send(svg.encode('utf-8'), content_type='text/plain; charset=utf-8')
+            if parsed.path == '/api/studio/views':
+                identifier = query.get('id', [''])[0]
+                if not identifier:
+                    return self.send(app.list_views())
+                view = app.get_view(identifier)
+                if view is None:
+                    return self.send({'error': 'That saved view is not on this console.'}, 404)
+                return self.send({'view': view})
+            assets = STATIC_ASSETS
             if parsed.path in assets:
                 filename, mime = assets[parsed.path]
                 path = Path(__file__).parent / filename
+                if not path.is_file():
+                    return self.send({"error": "Not found."}, 404)
                 info = path.stat()
                 content, etag = static_asset((str(path), info.st_size, info.st_mtime_ns, info.st_ctime_ns))
                 current = path.stat()
@@ -1289,17 +1817,30 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         analytical_paths = {'/api/contributions/query', '/api/contributions/records', '/api/contributions/geography'}
+        if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/studio/briefing'):
+            self.discard_body()
+            return self.send({'error': 'The briefing is read-only in this preview console.'}, 403)
+        if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/studio/views'):
+            self.discard_body()
+            return self.send({'error': 'Saved views are read-only in this preview console; save from the original console.'}, 403)
         if getattr(self.server.app, 'read_only', False) and self.path not in analytical_paths | {'/api/evidence-csv'}:
+            self.discard_body()
             return self.send({"error":"This preview is read-only while the original console manages collection."}, 403)
         if not self.valid_host() or not secrets.compare_digest(self.headers.get("X-Mentat-Token", ""), self.server.app.token):
+            self.discard_body()
             return self.send({"error": "Refresh the app before continuing."}, 403)
         origin = self.headers.get("Origin")
         if origin and origin not in (f"http://localhost:{self.server.server_port}", f"http://127.0.0.1:{self.server.server_port}"):
+            self.discard_body()
             return self.send({"error": "Local access only."}, 403)
         try:
             length = int(self.headers.get("Content-Length", "0"))
             if length < 1 or length > 7_000_000:
+                self.discard_body()
                 raise ValueError("Request is empty or too large.")
+            if self.path == '/api/studio/views' and length > 512 * 1024:
+                self.discard_body()
+                raise ValueError('That view is too large to save. Remove a sheet and save again.')
             data = json.loads(self.rfile.read(length))
             if not isinstance(data, dict):
                 raise ValueError("Expected an upload or run request.")
@@ -1309,6 +1850,22 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(self.contribution_result(contribution_query.records, data))
             if self.path == '/api/contributions/geography':
                 return self.send(contribution_geo.geography(data))
+            if self.path == '/api/restart':
+                if console_busy(self.server.app):
+                    return self.send({'error': 'This console is still running collection work. Restart it once that finishes.'}, 409)
+                # A console already running the build that is on disk has nothing
+                # to restart. Answering 'restarting' anyway sent the launcher to
+                # reuse the process it already had - correctly - and left the
+                # reader watching a poll for a new pid that could never arrive,
+                # and two minutes later being told to close the tab.
+                # One snapshot, compared against itself, so the block handed back
+                # with current:true cannot carry on-disk values from a different
+                # moment than the ones the decision was made on.
+                build = build_status(self.server.app, self.server.server_port)
+                if (build['code_sha256'] == build['on_disk_code_sha256_now']
+                        and build['assets_sha256'] == build['on_disk_assets_sha256_now']):
+                    return self.send({'restarting': False, 'current': True, 'build': build})
+                return self.send(self.server.app.restart(self.server.server_port))
             if self.path == "/api/upload":
                 return self.send(self.server.app.upload(data))
             if self.path == '/api/roster':
@@ -1331,7 +1888,21 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(self.server.app.stop(data))
             if self.path == "/api/workers":
                 return self.send(self.server.app.set_workers(data))
+            if self.path == '/api/publish/pocket':
+                return self.send(self.server.app.publish_pocket(data))
+            if self.path == '/api/studio/briefing/add':
+                return self.send(self.server.app.add_to_briefing(data))
+            if self.path == '/api/studio/briefing/remove':
+                return self.send(self.server.app.remove_from_briefing(data))
+            if self.path == '/api/studio/briefing/order':
+                return self.send(self.server.app.order_briefing(data))
+            if self.path == '/api/studio/views':
+                return self.send(self.server.app.save_view(data))
+            if self.path == '/api/studio/views/delete':
+                return self.send(self.server.app.delete_view(data))
             return self.send({"error": "Not found."}, 404)
+        except Conflict as error:
+            return self.send({'error': str(error)}, 409)
         except RunNotFound as error:
             return self.send({"error": str(error)}, 404)
         except RuntimeError as error:
@@ -1357,6 +1928,7 @@ def main():
     os.chdir(reports)
     server = ThreadingHTTPServer(("127.0.0.1", options.port), Handler)
     server.app = Console(data_root, keys_file, rscript, options.read_only)
+    server.app.port = options.port or server.server_port
     print(f"Mentat app: http://127.0.0.1:{options.port}", flush=True)
     server.serve_forever()
 

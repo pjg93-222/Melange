@@ -133,6 +133,17 @@
     return next;
   }
 
+  // Where a single click puts a field. A grouping goes across the top unless
+  // something is already there; a dollar or count measure goes down the side
+  // unless something is already there. Only the shelves are read, so a click
+  // chooses the zone a drop onto that same empty shelf would choose.
+  function quickAddZone(field, state) {
+    const columnsEmpty = shelf(state && state.columns).length === 0;
+    const rowsEmpty = shelf(state && state.rows).length === 0;
+    if (field && field.role === 'measure') return rowsEmpty ? 'rows' : 'columns';
+    return columnsEmpty ? 'columns' : 'rows';
+  }
+
   // One worksheet, one saved session. data.sha256 digests the whole workbook,
   // so it is identical for every sheet in the file and cannot tell them apart;
   // the run, the report, the worksheet and the header row can.
@@ -140,6 +151,30 @@
     const source = fields || {}, body = data || {};
     return [source.run, source.report, body.sheet || source.sheet,
       String(body.header_row ?? ''), body.sha256 || ''].join('|');
+  }
+
+  /* ------------------------------------------------------- carried scope */
+
+  // Graph names an election cycle by the year it ends in ('2024'); the
+  // verified index stores the pair that cycle covers ('2023-2024'). A scope
+  // carried from Graph without this translation filtered on a value the
+  // index never holds, so the studio answered "No matching observations"
+  // for a company that plainly has receipts. Every other field is carried
+  // unchanged: this is a spelling difference, not a rule.
+  function carriedFilterValue(fieldId, value) {
+    const text = value == null ? '' : String(value);
+    if (fieldId !== 'cycle' || !/^\d{4}$/.test(text)) return text;
+    return (Number(text) - 1) + '-' + text;
+  }
+
+  // The reverse, for the Graph query the reconciliation strip fires. A label
+  // that is not a consecutive pair is not a cycle Graph can answer for, so
+  // it returns '' rather than a year the reader never chose.
+  function graphCycleValue(cycleLabel) {
+    const text = cycleLabel == null ? '' : String(cycleLabel);
+    const pair = /^(\d{4})-(\d{4})$/.exec(text);
+    if (pair) return Number(pair[2]) === Number(pair[1]) + 1 ? pair[2] : '';
+    return /^\d{4}$/.test(text) ? text : '';
   }
 
   /* --------------------------------------------------------------- compile */
@@ -175,7 +210,7 @@
     const color = colorPill ? fieldAt(meta, colorPill.column) : null;
     for (const channel of ['size', 'label', 'tooltip']) {
       const values = Array.isArray(marks[channel]) ? shelf(marks[channel]) : [pill(marks[channel])].filter(Boolean);
-      if (values.length) issues.push(channel[0].toUpperCase() + channel.slice(1) + ' field encoding is unavailable in the worksheet renderer. Use the contribution explorer or remove this field.');
+      if (values.length) issues.push(channel[0].toUpperCase() + channel.slice(1) + ' field encoding is unavailable in the worksheet renderer. Switch Data source to Verified contributions, or remove this field.');
     }
     const details = attach(marks.detail);
     if (details.some(p => p.field.role !== 'dimension')) issues.push('Detail requires dimensions; move a measure to Rows or Columns.');
@@ -194,7 +229,7 @@
         type = 'scatter'; xPill = colMeasures[0]; yPill = rowMeasures[0];
       } else if (orientation === 'none') {
         if (firstMeasure) { type = 'bar'; yPill = firstMeasure; }
-        else issues.push('Drag a dimension onto Columns or a measure onto Rows to build a view.');
+        else issues.push('Add a grouping (company, recipient, cycle) and a dollar measure.');
       } else {
         const dimension = orientation === 'vertical' ? colDimensions[0] : rowDimensions[0];
         const measure = orientation === 'vertical'
@@ -224,7 +259,7 @@
       type = orientation === 'horizontal' ? 'horizontal' : 'bar';
       xPill = orientation === 'horizontal' ? rowDimensions[0] : (colDimensions[0] || firstDimension);
       yPill = orientation === 'horizontal' ? (colMeasures[0] || rowMeasures[0] || null) : firstMeasure;
-      if (!xPill && !yPill) issues.push('Drag a dimension onto Columns or a measure onto Rows to build a view.');
+      if (!xPill && !yPill) issues.push('Add a grouping (company, recipient, cycle) and a dollar measure.');
     } else {
       type = markType; // pie, doughnut, waterfall, pareto, radar
       xPill = firstDimension; yPill = firstMeasure;
@@ -275,9 +310,9 @@
     }
     if (y === -1 && ['scatter', 'box', 'histogram'].includes(type)) issues.push('This view plots individual values, so it needs a numeric measure.');
     const unusedMeasures = allMeasures.filter(p => p !== yPill && !(type === 'scatter' && p === xPill));
-    if (unusedMeasures.length) issues.push('This worksheet renderer cannot draw additional measures (' + unusedMeasures.map(p => p.field.name).join(', ') + '). Use a two-measure scatter, separate sheets, or the contribution explorer.');
+    if (unusedMeasures.length) issues.push('This worksheet renderer cannot draw additional measures (' + unusedMeasures.map(p => p.field.name).join(', ') + '). Use a two-measure scatter, separate sheets, or switch Data source to Verified contributions.');
     let grouping = [...new Set(allDimensions.concat(details.filter(p => p.field.role === 'dimension')).map(p => p.column))];
-    if (type === 'scatter' && grouping.length) issues.push('Scatter plots individual rows here; dimension and Detail grouping require the contribution explorer.');
+    if (type === 'scatter' && grouping.length) issues.push('Scatter plots individual rows here; dimension and Detail grouping need Data source: Verified contributions.');
     if (type === 'histogram' && grouping.length) notes.push('Histogram uses individual values; shelf dimensions do not group bins. Remove them or use a box plot for grouped distributions.');
     if (['scatter', 'histogram'].includes(type)) grouping = [];
     if (x < 0 && grouping.length) x = grouping[0];
@@ -293,7 +328,7 @@
     const filters = (state.filters || [])
       .filter(f => f && filterActive(f) && fieldAt(meta, Number(f.column)))
       .map(f => normalizeFilter(f));
-    if (filters.some(f => ['gte','lte'].includes(f.op))) notes.push('Numeric filters apply to source rows before aggregation. Aggregate measure filters are available in the contribution explorer.');
+    if (filters.some(f => ['gte','lte'].includes(f.op))) notes.push('Numeric filters apply to source rows before aggregation. Aggregate measure filters are available in Verified contributions.');
     const pagePill = pill(state.pages);
     if (pagePill && fieldAt(meta, pagePill.column) && state.pageMember) {
       filters.push({column: pagePill.column, op: 'equals', value: String(state.pageMember)});
@@ -822,6 +857,62 @@
     };
   }
 
+  /* ------------------------------------------- what a payload says about its source */
+
+  // The server keeps a saved view's source, and a briefing item's source and
+  // provenance, as objects, and replaces anything else with an empty one. A
+  // caption sent bare is therefore either refused outright (a saved view came
+  // back 400) or silently thrown away (a briefing item's workbook digest, which
+  // then printed as "[object Obje" in every deck). The shapes are built here,
+  // in the one module both the browser and the test runner can load, so a test
+  // can read exactly what the client will put on the wire without a document.
+
+  // The caption a reader sees for a source, from any shape it has ever had:
+  // today's object, an older bare string, or nothing at all. It never hands an
+  // object to string concatenation.
+  function sourceLabelOf(value) {
+    if (typeof value === 'string') return value;
+    if (!value || typeof value !== 'object') return '';
+    return value.label || value.datasetLabel || value.reportName || '';
+  }
+
+  // A source known only by its caption - a view recovered from the old
+  // browser-local store, which never recorded anything else.
+  function captionSource(label) {
+    return label ? {label: String(label)} : {};
+  }
+
+  // What a saved view carries: enough to name the report, its digest and the
+  // folder it came from a year from now, plus the caption the menu prints.
+  function viewSourceRecord(state, chosen) {
+    const source = state || {};
+    const record = {};
+    const label = chosen ? (chosen.label || chosen.id) : (source.reportName || '');
+    if (label) record.label = label;
+    for (const key of ['reportName', 'sha256', 'runName', 'sheet', 'mode', 'dataset']) {
+      if (source[key]) record[key] = source[key];
+    }
+    if (chosen) {
+      record.dataset = chosen.id;
+      if (chosen.label) record.datasetLabel = chosen.label;
+    }
+    return record;
+  }
+
+  // What a chart carries into the briefing, and from there into a slide.
+  function chartSourceRecord(state) {
+    const source = state || {};
+    const label = source.reportName || '';
+    return {label: label, reportName: label, runName: source.runName || '',
+      sheet: source.sheet || '', mode: source.mode || '', dataset: source.dataset || ''};
+  }
+
+  function chartProvenanceRecord(state, sha, generatedAt) {
+    const label = (state || {}).reportName || '';
+    return {sha: sha || '', reportName: label, source: label,
+      generatedAt: generatedAt || new Date().toISOString()};
+  }
+
   const api = {
     AGGREGATIONS, AGGREGATION_IDS, MARK_TYPES, MARK_IDS, TRANSFORMS, SHOW_ME, STUDIO_GROUP_LIMIT,
     FILTER_OPS, LIST_OPS, RANGE_OPS, MEASURE_PRESETS, DATE_PARTS, COMPANY_OVERVIEW,
@@ -829,9 +920,11 @@
     aggregationsFor, measurePresets, applyMeasurePreset, datePartsFor,
     companyOverviewPresets, companyOverviewMissing, companyOverviewSheet,
     classifyFields, fieldAt, subjectField, pill, shelf, createSheet, clearSheet, swapShelves, sourceKey,
+    carriedFilterValue, graphCycleValue, quickAddZone,
     compileConfig, compileReport,
     showMeSelection, showMeEligibility, showMeApply, recommendedTile,
-    sortResult, sortLocked, markValues, referenceValues, grandTotal, totalNote, rowsToMarksSummary
+    sortResult, sortLocked, markValues, referenceValues, grandTotal, totalNote, rowsToMarksSummary,
+    sourceLabelOf, captionSource, viewSourceRecord, chartSourceRecord, chartProvenanceRecord
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MentatStudioCore = api;

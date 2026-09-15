@@ -330,6 +330,22 @@
     try {await MentatExport.image(el('image').firstChild,format,el('title').textContent,el('scope').textContent);}
     catch(e){error(e.message);}
   };
+  el('copy-image').onclick=async()=>{
+    if(!chart)return;
+    error('');
+    try {await MentatExport.copy(el('image').firstChild,el('title').textContent,el('scope').textContent);}
+    catch(e){error(e.message);}
+  };
+  el('briefing').onclick=()=>{
+    if(!chart)return;
+    if(!window.MentatBriefing){error('The briefing tray is not served by this console yet. Restart the console and try again.');return;}
+    error('');
+    const report=(el('report').selectedOptions[0]||{}).textContent||'';
+    window.MentatBriefing.capture({svg:el('image').firstChild,title:el('title').textContent,
+      scope:el('scope').textContent,chip:report,note:'',basis:'Worksheet values',
+      sheetId:'classic',sheetName:el('title').textContent,source:report,
+      provenance:(data&&data.sha256)||'',origin:'classic'});
+  };
   el('save-csv').onclick=()=>{
     if(!chart)return;
     const quote=v=>'"'+String(typeof v==='string' && /^[=+\-@\t\r]/.test(v)?"'"+v:v).replaceAll('"','""')+'"';

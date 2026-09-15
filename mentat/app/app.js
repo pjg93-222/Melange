@@ -369,6 +369,7 @@ async function poll() {
 }
 async function init() {
   try { const session = await api('/api/session?light=1'); token = session.token; readOnly=!!session.read_only;
+    try { renderBuild(session); scheduleBuildPoll(); } catch { }
     evidenceCollectionAvailable=!!session.evidence_collection_available;
     $('evidence-collect').disabled=readOnly||!evidenceCollectionAvailable||!!evidenceJob;
     if(!evidenceCollectionAvailable)$('evidence-job-status').textContent='Restart the MENTAT server to enable new snapshot collection. Saved evidence controls are ready to use.';
@@ -544,6 +545,133 @@ $('evidence-form').addEventListener('submit',async event=>{
 });
 try{evidenceJob=localStorage.getItem('mentat-evidence-job')||'';}catch{}
 if(evidenceJob){$('evidence-collect').disabled=true;pollEvidenceJob();}
+/* Build stamp and stale-build guard. A console window outlives edits to the
+   server tree, so the page states which build answered it, and offers the
+   same-port restart the launcher performs. Both elements are built here
+   because index.html is owned elsewhere this lane. */
+let buildStatus = null, buildPollTimer = 0, buildRestarting = false, buildBannerMode = '';
+// The "already current" confirmation clears itself; held here so a second press
+// restarts the countdown instead of stacking timers.
+let currentNoticeTimer = 0;
+function buildStartedText(value) {
+  const at = typeof value === 'number' ? new Date(value * 1000) : new Date(value ?? NaN);
+  return Number.isFinite(at.getTime()) ? at.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'unknown';
+}
+function buildStampText(build) {
+  const revision = build.git_sha && build.git_sha !== 'unknown' ? String(build.git_sha) : String(build.code_sha256 || 'unknown');
+  return `build ${revision.slice(0, 7)} · :${build.port ?? '—'} · started ${buildStartedText(build.started_at)} · pid ${build.pid ?? '—'}`;
+}
+function mountBuildElements() {
+  if ($('build-stamp')) return;
+  const stamp = document.createElement('span');
+  stamp.id = 'build-stamp';
+  stamp.className = 'build-stamp';
+  stamp.setAttribute('role', 'status');
+  document.querySelector('.app-navigation')?.append(stamp);
+  const banner = document.createElement('div');
+  banner.id = 'stale-banner';
+  banner.className = 'stale-banner';
+  banner.hidden = true;
+  banner.setAttribute('role', 'status');
+  const message = document.createElement('span');
+  message.id = 'stale-banner-message';
+  const action = document.createElement('button');
+  action.id = 'stale-restart';
+  action.type = 'button';
+  action.textContent = 'Restart';
+  action.addEventListener('click', () => { if (buildBannerMode === 'assets') location.reload(); else restartConsole(); });
+  banner.append(message, action);
+  const workspace = document.querySelector('.workspace'), anchor = $('error');
+  if (workspace && anchor && anchor.parentNode === workspace) workspace.insertBefore(banner, anchor);
+  else workspace?.prepend(banner);
+}
+function renderBuild(response) {
+  const build = response && response.code_sha256 === undefined && response.build ? response.build : response;
+  if (!build || typeof build !== 'object' || typeof build.code_sha256 !== 'string') return;
+  buildStatus = build;
+  mountBuildElements();
+  const stamp = $('build-stamp'), banner = $('stale-banner'), action = $('stale-restart');
+  if (stamp) stamp.textContent = buildStampText(build);
+  if (!banner || buildRestarting) return;
+  const codeChanged = !!build.on_disk_code_sha256_now && build.on_disk_code_sha256_now !== build.code_sha256;
+  const assetsChanged = !!build.on_disk_assets_sha256_now && build.on_disk_assets_sha256_now !== build.assets_sha256;
+  buildBannerMode = codeChanged ? 'code' : assetsChanged ? 'assets' : '';
+  banner.hidden = !buildBannerMode;
+  action.disabled = false;
+  if (codeChanged) {
+    // The launcher rebinds this same port, so this origin is where the
+    // current build answers once the restart finishes.
+    $('stale-banner-message').textContent = readOnly
+      ? `This read-only preview is running an older build. Close this tab and open ${location.origin}.`
+      : `This console is running an older build. Close this tab and open ${location.origin}, or press Restart.`;
+    action.textContent = 'Restart';
+    action.hidden = readOnly;
+  } else if (assetsChanged) {
+    $('stale-banner-message').textContent = 'Interface files changed.';
+    action.textContent = 'Reload';
+    action.hidden = false;
+  }
+}
+async function restartConsole() {
+  const action = $('stale-restart'), message = $('stale-banner-message');
+  const before = buildStatus && buildStatus.pid;
+  buildRestarting = true;
+  action.disabled = true;
+  action.textContent = 'Restarting…';
+  let answer;
+  try { answer = await api('/api/restart', {}); }
+  catch (error) {
+    buildRestarting = false; action.disabled = false; action.textContent = 'Restart';
+    message.textContent = `${error.message} Close this tab and open ${location.origin} instead.`;
+    return;
+  }
+  // A console already running the build on disk answers current:true and does
+  // not restart. Polling for a new pid then could only ever time out, so the
+  // reader is told the console is current and the poll never starts. The telling
+  // is transient: a standing bar offering Restart when nothing is stale is the
+  // same lie in a quieter voice, so the confirmation clears itself and hands the
+  // banner back to whatever renderBuild computes - which is hidden, on a console
+  // that is current.
+  if (answer && answer.current) {
+    buildRestarting = false;
+    action.disabled = false;
+    action.textContent = 'Restart';
+    if (answer.build) renderBuild(answer);
+    const banner = $('stale-banner'), note = $('stale-banner-message') || message;
+    const settle = () => { if (answer.build) renderBuild(answer); else if (banner) banner.hidden = true; };
+    if (banner) banner.hidden = false;
+    action.hidden = true;
+    note.textContent = 'Console already current \u2014 nothing to restart.';
+    clearTimeout(currentNoticeTimer);
+    currentNoticeTimer = setTimeout(settle, 5000);
+    return;
+  }
+  message.textContent = 'Restarting this console. The page reloads once the new build answers.';
+  const deadline = Date.now() + 120000;
+  const waitForNewBuild = async () => {
+    if (Date.now() > deadline) {
+      buildRestarting = false; action.disabled = false; action.textContent = 'Restart';
+      message.textContent = `The restart has not answered in two minutes. Close this tab and open ${location.origin}.`;
+      return;
+    }
+    try {
+      const health = await api('/api/health');
+      if (health.pid && before && health.pid !== before) { location.reload(); return; }
+    } catch { }
+    setTimeout(waitForNewBuild, 1500);
+  };
+  setTimeout(waitForNewBuild, 1500);
+}
+function scheduleBuildPoll() {
+  clearTimeout(buildPollTimer);
+  buildPollTimer = setTimeout(pollBuild, 60000);
+}
+async function pollBuild() {
+  if (!document.hidden && !buildRestarting) {
+    try { renderBuild(await api('/api/health')); } catch { }
+  }
+  scheduleBuildPoll();
+}
 restoreDraft();
 showView(location.hash.slice(1));
 init();

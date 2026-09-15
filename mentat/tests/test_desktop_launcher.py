@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import socket
 import subprocess
+import sys
 import tempfile
 import unittest
 import hashlib
@@ -21,6 +22,77 @@ def stop_verified_server(health, directory):
                         f"Stop-Process -Id {int(health['pid'])} -Force -ErrorAction Stop"],
                        env=os.environ.copy(), capture_output=True, check=True,
                        creationflags=subprocess.CREATE_NO_WINDOW)
+
+
+STALE_SERVER = '''import json, os, sys
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+health = json.loads(sys.argv[1])
+health['pid'] = os.getpid()
+
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *args): pass
+    def do_GET(self):
+        body = json.dumps(health).encode() if self.path == '/api/health' else b'not found'
+        self.send_response(200 if self.path == '/api/health' else 404)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+
+server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+print(server.server_port, flush=True)
+server.serve_forever()
+'''
+
+
+def code_tree_hash(app_directory):
+    """Re-derived here on purpose: the launcher and the server must agree."""
+    digest = hashlib.sha256()
+    for path in sorted(app_directory.glob('*.py'), key=lambda item: item.name):
+        digest.update(path.name.encode('utf-8'))
+        digest.update(b'\0')
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+        digest.update(b'\0')
+    return digest.hexdigest()
+
+
+def start_stale_server(directory, busy=False, read_only=False, drop_busy=False):
+    """A real server.py process of this identity, running a different build.
+
+    The launcher only replaces a process whose Win32_Process command line names
+    server.py, so the fixture is written to a file with that name.
+    """
+    project = Path(__file__).resolve().parents[1]
+    report_directory = str(Path(json.loads((project / 'config/report-directory.json').read_text())['directory']).resolve())
+    health = {'application': 'MENTAT', 'project': str(project), 'data_root': directory,
+              'resolved_data_root': directory, 'report_directory': report_directory,
+              'server_code_sha256': 'older-build', 'code_sha256': 'older-build',
+              'assets_sha256': 'older-assets', 'on_disk_code_sha256_now': 'older-build',
+              'on_disk_assets_sha256_now': 'older-assets', 'read_only': read_only, 'busy': busy}
+    if drop_busy:
+        health.pop('busy')
+    script = Path(directory) / 'stale' / 'server.py'
+    script.parent.mkdir(parents=True, exist_ok=True)
+    script.write_text(STALE_SERVER, encoding='utf-8')
+    process = subprocess.Popen([sys.executable, str(script), json.dumps(health)],
+                               stdout=subprocess.PIPE, text=True,
+                               creationflags=subprocess.CREATE_NO_WINDOW)
+    port = int(process.stdout.readline().strip())
+    process.stdout.close()
+    with urlopen(f'http://127.0.0.1:{port}/api/health', timeout=5) as response:
+        json.load(response)
+    return process, port
+
+
+def run_launcher(script, port, directory):
+    with tempfile.TemporaryFile(mode='w+', encoding='utf-8') as output:
+        result = subprocess.run(['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', str(script),
+                                 '-NoBrowser', '-Port', str(port), '-DataRoot', directory],
+                                cwd=directory, stdout=output, stderr=output, timeout=90)
+        output.seek(0)
+        return result.returncode, output.read()
 
 
 @unittest.skipUnless(os.name == 'nt', 'Windows desktop launcher')
@@ -110,6 +182,55 @@ class DesktopLauncherTests(unittest.TestCase):
                 finally:
                     stop_verified_server(health, directory)
                     server.shutdown();server.server_close();worker.join()
+
+    def test_an_idle_stale_server_is_replaced_on_its_own_port(self):
+        script = Path(__file__).resolve().parents[1] / 'app/Start-MentatApp.ps1'
+        with tempfile.TemporaryDirectory(prefix='MENTAT stale ') as directory:
+            stale, port = start_stale_server(directory, busy=False)
+            health = None
+            try:
+                code, text = run_launcher(script, port, directory)
+                self.assertEqual(code, 0, text)
+                self.assertIn('Stopping stale MENTAT server pid ' + str(stale.pid), text)
+                url = text.strip().splitlines()[-1].split('Mentat app: ')[-1]
+                self.assertEqual(url, f'http://127.0.0.1:{port}',
+                                 'an idle stale server must give its own port back\n' + text)
+                with urlopen(url + '/api/health', timeout=5) as response:
+                    health = json.load(response)
+                self.assertEqual(health['code_sha256'], code_tree_hash(script.parent))
+                self.assertNotEqual(health['pid'], stale.pid)
+                self.assertIsNotNone(stale.poll(), 'the stale server must have been stopped')
+            finally:
+                stop_verified_server(health, directory)
+                if stale.poll() is None:
+                    stale.kill()
+                stale.wait(timeout=15)
+
+    def test_a_busy_or_read_only_stale_server_is_left_running(self):
+        script = Path(__file__).resolve().parents[1] / 'app/Start-MentatApp.ps1'
+        for label, extra in (('busy', {'busy': True}), ('read-only', {'read_only': True, 'busy': False}),
+                             ('no busy field', {'drop_busy': True})):
+            with self.subTest(server=label), tempfile.TemporaryDirectory(prefix='MENTAT keep ') as directory:
+                stale, port = start_stale_server(directory, **extra)
+                health = None
+                try:
+                    code, text = run_launcher(script, port, directory)
+                    self.assertEqual(code, 0, text)
+                    self.assertNotIn('Stopping stale MENTAT server', text)
+                    url = text.strip().splitlines()[-1].split('Mentat app: ')[-1]
+                    self.assertNotEqual(url, f'http://127.0.0.1:{port}',
+                                        'this server may still own running work\n' + text)
+                    self.assertIsNone(stale.poll(), 'this server must still be running')
+                    with urlopen(f'http://127.0.0.1:{port}/api/health', timeout=5) as response:
+                        self.assertEqual(json.load(response)['pid'], stale.pid)
+                    with urlopen(url + '/api/health', timeout=5) as response:
+                        health = json.load(response)
+                    self.assertEqual(health['code_sha256'], code_tree_hash(script.parent))
+                finally:
+                    stop_verified_server(health, directory)
+                    if stale.poll() is None:
+                        stale.kill()
+                    stale.wait(timeout=15)
 
 
 if __name__ == '__main__':

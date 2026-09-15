@@ -47,7 +47,24 @@
 .studio-multi .studio-side,.studio-multi .studio-inspector,.studio-embedded .studio-side,.studio-embedded .studio-inspector {max-height:320px;overflow:auto}
 .studio-multi .studio-showme,.studio-embedded .studio-showme {width:auto}
 /* Canvas only: the builder surfaces go away, the way back never does. */
-.studio-options-hidden .studio-side,.studio-options-hidden .studio-inspector,.studio-options-hidden .studio-cards,.studio-options-hidden .studio-showme,.studio-options-hidden .studio-shelves,.studio-options-hidden .studio-shelf,.studio-options-hidden .studio-toolbar,.studio-options-hidden .studio-quick-tools label {display:none!important}
+.studio-options-hidden .studio-side,
+.studio-options-hidden .studio-cards,.studio-options-hidden .studio-showme,
+.studio-options-hidden .studio-shelves,.studio-options-hidden .studio-shelf,
+.studio-options-hidden .studio-quick-tools label {display:none!important}
+/* Canvas only is still a reading of filtered data, so the Inspector button
+   stays in the header with its count at every width and opens the panel as
+   a drawer over the chart rather than restoring the whole builder. */
+.studio-options-hidden .studio-inspector-toggle {display:inline-flex;align-items:center}
+.studio-options-hidden .studio-inspector-toggle[aria-expanded=false] {border-color:var(--acu-gold)}
+.studio-options-hidden .studio-inspector {display:flex!important;position:fixed;top:0;right:0;bottom:0;
+  width:min(340px,92vw);z-index:9;max-height:none;overflow-y:auto;border-left:1px solid var(--line);
+  box-shadow:-8px 0 24px rgba(52,38,73,.16)}
+.studio-options-hidden .studio-inspector[hidden] {display:none!important}
+.studio-options-hidden .studio-inspector-close {display:inline-block}
+/* Canvas only keeps the one control a reader came to the canvas for: a way
+   to take the chart away. Every other toolbar button edits the builder. */
+.studio-options-hidden .studio-toolbar {justify-content:flex-end;gap:0;border:0;background:none;padding:0;margin:0 0 8px;min-height:0}
+.studio-options-hidden .studio-toolbar > :not(#studio-download) {display:none!important}
 /* The control that put the builder away is the only way to bring it back,
    so it can never be part of what is put away. */
 .studio-quick-tools {position:sticky;top:0;z-index:3}
@@ -117,6 +134,11 @@
   box-shadow: 0 6px 18px rgba(52, 38, 73, .14);
 }
 .studio-menu button { white-space: nowrap; text-align: left; }
+/* A view is named where its menu entry was, so the menu never jumps. */
+.studio-menu input.studio-view-name {
+  font: inherit; font-size: 12px; width: 190px; padding: 4px 6px; color: var(--acu-plum);
+  border: 1px solid var(--acu-purple); border-radius: 4px; background: white;
+}
 
 /* ---------------------------------------------------------------- header */
 
@@ -145,6 +167,10 @@
   white-space: nowrap;
 }
 .studio-scope-chip:empty { display: none; }
+.studio-scope-block { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+/* What the hand-off could not bring across, under the scope it did. */
+.studio-scope-note { font-size: 11px; color: var(--muted); max-width: 60ch; }
+.studio-scope-note[hidden] { display: none; }
 .studio-scope-change {
   font: inherit; font-size: 11px; color: var(--acu-purple); background: none;
   border: 0; border-bottom: 1px solid var(--acu-purple); padding: 0; cursor: pointer;
@@ -162,6 +188,24 @@
   font: inherit; font-size: 12px; color: var(--acu-plum); background: white;
   border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; cursor: pointer;
 }
+/* The filter count rides on the Inspector toggle, so a closed Inspector
+   still says how many filters are shaping the view behind it. */
+.studio-inspector-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: white;
+  background: var(--acu-purple);
+}
+.studio-inspector-badge[hidden] { display: none; }
 .studio-overview-toggle[aria-pressed=true] { background: var(--acu-purple); border-color: var(--acu-purple); color: white; font-weight: 600; }
 .studio-overview-toggle:disabled { color: var(--muted); opacity: .55; cursor: default; }
 .studio-inspector-toggle { display: none; }
@@ -269,7 +313,30 @@
   padding: 1px 5px;
   cursor: pointer;
 }
-.studio-fields .studio-pill { width: 100%; }
+.studio-fields .studio-pill { width: 100%; position: relative; padding-right: 24px; }
+/* Click-to-add: the pill shows what a click will do before the click. The
+   mark is drawn, never focusable, so the pill keeps one tab stop. */
+.studio-fields .studio-pill::after {
+  content: '+';
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  line-height: 15px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 4px;
+  color: var(--acu-purple);
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+}
+.studio-fields .studio-pill:hover::after,
+.studio-fields .studio-pill:focus-visible::after { opacity: 1; }
+@media (hover: none) { .studio-fields .studio-pill::after { opacity: 1; } }
 
 /* ---------------------------------------------------------------- cards */
 
@@ -347,6 +414,56 @@
 .studio-canvas-wrap { flex: 1; padding: 12px 14px 16px; overflow: auto; min-width: 0; }
 .studio-canvas-wrap h2 { font-family: var(--font-serif); font-weight: 400; font-size: 21px; margin: 0 0 2px; }
 .studio-note { font-size: 11px; color: var(--muted); margin: 0 0 8px; }
+/* Graph and Studio read one workbook. When their totals differ, the strip
+   names the reason on the screen where the reader met the difference. */
+.studio-reconcile {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--acu-plum);
+  background: var(--acu-ivory);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 7px 10px;
+  margin: 0 0 10px;
+}
+.studio-reconcile[hidden] { display: none; }
+.studio-reconcile-agree { color: var(--acu-teal); font-weight: 600; }
+.studio-reconcile-differ { color: var(--chart-negative); font-weight: 600; }
+.studio-reconcile-link {
+  font: inherit;
+  font-size: 12px;
+  color: var(--acu-purple);
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+/* A report that cannot be read states the server's reason, in ink a reader
+   reads rather than the muted grey of an aside. */
+.studio-note.is-warning {
+  color: var(--acu-plum);
+  background: #fdf5e4;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 6px 8px;
+}
+.studio-progress {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--acu-paper);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 6px 8px;
+  margin: 0 0 8px;
+}
+.studio-progress[hidden] { display: none; }
+.studio-progress > span:first-child { flex: 1 1 140px; min-width: 0; }
+.studio-progress button { font: inherit; font-size: 11px; cursor: pointer; }
 .studio-canvas { overflow: auto; }
 .studio-canvas svg { display: block; max-width: 100%; height: auto; background: white; }
 .studio-canvas.fit-width svg { width: 100%; max-width: none; }
@@ -537,7 +654,10 @@
 
 @media (max-width: 1200px) {
   .studio-grid { grid-template-columns: 240px minmax(280px, 1fr); }
-  .studio-inspector-toggle { display: inline-block; }
+  .studio-inspector-toggle { display: inline-flex; align-items: center; }
+  /* Closed, with filters behind it, the toggle is the loudest thing the
+     reader has not looked at yet. */
+  .studio-inspector-toggle[aria-expanded=false] { border-color: var(--acu-gold); }
   .studio-inspector {
     position: fixed; top: 0; right: 0; bottom: 0; width: min(340px, 92vw); z-index: 9;
     border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(52, 38, 73, .16); overflow-y: auto;
@@ -553,4 +673,34 @@
   .studio-showme-grid { grid-template-columns: repeat(4, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) { .studio * { transition: none !important; } }
+/* -------------------------------------------------------------------- print */
+
+/* The provenance footer never shows on screen and always shows on paper, so
+   a printed chart can never be separated from the basis and the workbook
+   hash it was drawn from. */
+.studio-print-only { display: none; }
+@media print {
+  /* Printing the chart means printing the chart: the console rail, the
+     builder surfaces and the live status line all come off the page. */
+  body.studio-printing .app-navigation,
+  body.studio-printing .analysis-tabs,
+  body.studio-printing .app-footer { display: none !important; }
+  .studio-header, .studio-toolbar, .studio-quick-tools, .studio-shelves,
+  .studio-side, .studio-inspector, .studio-cards, .studio-showme,
+  .studio-sheets, .studio-status, .studio-inspection, .studio-result-controls,
+  .studio-briefing, .studio-share, .studio-reconcile, .studio-verified-summary,
+  #studio-note { display: none !important; }
+  .studio, .studio-grid, .studio-view { display: block !important; border: 0 !important; box-shadow: none !important; }
+  .studio-canvas-wrap { display: flex; flex-direction: column; overflow: visible !important; padding: 0 !important; }
+  .studio-canvas { max-height: none !important; overflow: visible !important; }
+  .studio-canvas svg, .studio-canvas-wrap svg { max-height: none !important; width: 100% !important; height: auto !important; }
+  .studio-print-only {
+    display: block; order: 99; margin-top: 10px;
+    border-top: 1px solid var(--line); padding-top: 8px;
+  }
+  .studio-print-title { font-family: var(--font-serif); font-weight: 400; font-size: 15px; margin: 0 0 3px; color: var(--acu-plum); }
+  .studio-print-line { font-size: 10px; line-height: 1.45; color: var(--muted); margin: 0 0 2px; }
+  .studio-print-mark { font-size: 10px; font-weight: 700; letter-spacing: .09em; color: var(--acu-plum); margin: 5px 0 0; }
+  @page { size: landscape; margin: 14mm; }
+}
 .studio-source-choices,.studio-model-tables{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.studio-model-tables section{flex:1 1 240px;border:1px solid var(--line,#d8d0df);border-radius:6px;padding:12px;background:var(--surface,#fff)}.studio-model-tables h4{margin:0 0 8px}.studio-model-tables p{margin:0 0 8px}.studio-datasource table{min-width:850px}.studio-datasource{overflow:auto}

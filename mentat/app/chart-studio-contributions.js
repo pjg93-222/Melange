@@ -80,7 +80,7 @@
     for(const p of [...(color?[color]:[]),...detail,...labels,...tooltip])if(p.field.role==='dimension')addDim(p.field);
     if(color&&color.field.role!=='dimension')throw new Error('Colour uses a dimension to separate series.');
     if(detail.some(p=>p.field.role==='measure'))throw new Error('Detail uses dimensions to define one mark per group.');
-    if(!measures.length)throw new Error('Place a measure on Columns or Rows to build a view.');
+    if(!measures.length)throw new Error('Add a dollar or count measure to Rows or Columns.');
     allMeasures.push(...measures);
     const encoded=p=>p.field.role==='measure'?measure(p):p.field.id;
     for(const p of [...labels,...tooltip,...(size?[size]:[])])if(p.field.role==='measure'&&!allMeasures.includes(encoded(p)))allMeasures.push(encoded(p));
@@ -89,7 +89,7 @@
     if(type==='circle'){if(measures.length!==2)throw new Error('Circle compares two measures. Place two measures on the shelves, or choose Bar.');type='scatter';}
     if(type==='text')type='table';
     const filled=type==='filled-map';if(filled)type='map';
-    if(!types.has(mark.type||'automatic'))throw new Error('This mark needs individual values. Use the report worksheet mode for that chart type, or select Bar, Line, Circle, Text or Map.');
+    if(!types.has(mark.type||'automatic'))throw new Error('This chart type needs individual receipts. Switch Data source to Report worksheet, or select Bar, Line, Circle, Text or Map.');
     const transform=state.analytics?.transform||'none';
     if(transform!=='none'){
       const time=dimensions.findIndex(d=>['date','year','cycle'].includes(d));
@@ -131,10 +131,47 @@
     if(detail.length||labels.some(p=>p.field.role==='dimension')||tooltip.some(p=>p.field.role==='dimension'))notes.push('Detail, Label and Tooltip dimensions define the grouping behind each mark.');
     return {query,spec,notes,transform};
   }
+  /* Graph and Chart Studio read the same workbook, so a difference between
+     them is a fact about the question each one was asked, not about the
+     money. reconcile() names that difference instead of leaving a reader to
+     decide which of two numbers on two screens is the wrong one. Pure: it is
+     handed the studio result, the basis it was drawn on, the Graph view for
+     the same company and cycle, and the Graph controls that were set. */
+  const RECONCILE_REASONS={
+    basis:'the basis is not Published included receipts',
+    graph_filter:'a Graph filter (employee level, giving type) has no verified field',
+    workbook:'the workbook version differs',
+    aggregate:'grouped filters apply after aggregation',
+    cycle:'the Graph view is pinned to one election cycle and this sheet covers every cycle',
+    unavailable:'the Graph total for this scope is not available',
+    unexplained:'this is unexplained — report it'
+  };
+  function reconcile(result,basis,graphView,filters){
+    const dollarsToCents=value=>Number.isFinite(Number(value))?Math.round(Number(value)*100):null;
+    const wholeCents=value=>Number.isFinite(Number(value))?Math.round(Number(value)):null;
+    const graphCents=graphView&&graphView.totals?dollarsToCents(graphView.totals.giving):null;
+    const studioCents=result&&result.totals?wholeCents(result.totals.amount):null;
+    const receiptCents=result&&result.comparison?wholeCents(result.comparison.receipt):null;
+    const out={graphCents,studioCents,receiptCents,differenceCents:null,agree:false,reasonId:'',reason:''};
+    if(graphCents===null||studioCents===null){out.reasonId='unavailable';out.reason=RECONCILE_REASONS.unavailable;return out;}
+    out.differenceCents=studioCents-graphCents;
+    if(basis==='receipt'&&out.differenceCents===0){out.agree=true;return out;}
+    const scope=filters||{};
+    const workbook=String((result.provenance||{}).workbook_sha256||'');
+    const books=((graphView||{}).reports||[]).map(report=>String(report.sha256||'')).filter(Boolean);
+    out.reasonId=basis!=='receipt'?'basis'
+      :!scope.studioCycle&&scope.graphCycle?'cycle'
+      :scope.tier||(scope.funding&&scope.funding!=='all')?'graph_filter'
+      :workbook&&books.length&&!books.includes(workbook)?'workbook'
+      :(result.reconciliation||{}).aggregate_filters_applied?'aggregate'
+      :'unexplained';
+    out.reason=RECONCILE_REASONS[out.reasonId];
+    return out;
+  }
   function markFilters(request,row){const filters=[...request.filters];if(row)for(const field of request.dimensions){const value=row[field];if(value!==undefined)filters.push({field,op:Array.isArray(value)?'in':'eq',value});}return filters;}
   function mapSelection(row){if(row.zip5&&Array.isArray(row.states)&&row.states.length)return {zip5:row.zip5,state:row.states};if(!row.zip5&&row.state)return {state:row.states||[row.state]};throw new Error('This map mark has no geographical source identity.');}
   const sameSource=(a,b)=>['workbook_sha256','database_sha256','index_token','query_engine_sha256','field_semantics_sha256'].every(k=>a?.[k]===b?.[k]);
   const quote=value=>'"'+String(typeof value==='string'&&/^\s*[=+@-]/.test(value)?"'"+value:value??'').replaceAll('"','""')+'"';
   function csv(result,request){const cols=result.columns;return '\uFEFF'+[cols.map(c=>c.id+(c.unit==='cents'?'_usd':'')).concat(['accounting_basis','source_workbook_sha256','database_sha256','analytical_index','query_engine_sha256','field_semantics_sha256','query_filters']).map(quote).join(','),...result.rows.map(row=>cols.map(c=>c.unit==='cents'&&row[c.id]!=null?row[c.id]/100:row[c.id]).concat([request.basis,result.provenance.workbook_sha256,result.provenance.database_sha256,result.provenance.index_token,result.provenance.query_engine_sha256,result.provenance.field_semantics_sha256,JSON.stringify({filters:request.filters,aggregate_filters:request.aggregate_filters,bin_width_cents:request.bin_width_cents})]).map(quote).join(','))].join('\r\n');}
-  const api={fields,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,BASIS,MONEY,EXTRA_MARKS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
+  const api={fields,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
 })(globalThis);

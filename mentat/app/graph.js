@@ -22,18 +22,36 @@
       tier:get('tier').value,cycle:get('cycle').value,funding:get('funding').value,mode:get('mode').value,
       direction:get('direction').value,category,recipient});
   }
+  // Which saved run this console reads. Chart Studio's reconciliation strip has
+  // to answer this the same way Graph does - a strip that reconciles against a
+  // run Graph would never display is worse than no strip - so the rule lives in
+  // one function and both views call it. A run that is only ready, or awaiting
+  // review, is never chosen; a run whose catalog has no industries is walked
+  // past rather than displayed empty.
+  function runCandidates(runs, preferred) {
+    const usable = run => !['ready','needs review'].includes(run.state);
+    const first = runs.find(r => r.id === preferred && usable(r))
+      || runs.find(r => r.state === 'completed') || runs[0];
+    return [first, ...runs.filter(usable)].filter((r,i,a) => r && a.findIndex(v => v?.id === r.id) === i);
+  }
+  async function chooseRun(preferred) {
+    const body = await api('/api/report-sources');
+    const runs = body.runs || [];
+    const candidates = runCandidates(runs, preferred);
+    for (const candidate of candidates) {
+      const available = await api('/api/graph-catalog?id=' + encodeURIComponent(candidate.id));
+      if (available.industries.length) return {runs, run: candidate, catalog: available};
+    }
+    return {runs, run: candidates[0] || null, catalog: null};
+  }
+  globalThis.MentatGraphRun = {
+    choose: preferred => chooseRun(preferred === undefined ? selectedRun : preferred),
+    candidates: runCandidates};
+
   async function loadRuns() {
     try {
-      const body=await api('/api/report-sources');
-      let chosen=body.runs.find(r=>r.id===selectedRun && !['ready','needs review'].includes(r.state))
-        ||body.runs.find(r=>r.state==='completed')||body.runs[0];
-      let catalog=null;
-      const candidates=[chosen,...body.runs.filter(r=>!['ready','needs review'].includes(r.state))].filter((r,i,a)=>r&&a.findIndex(v=>v?.id===r.id)===i);
-      for(const candidate of candidates){
-        const available=await api('/api/graph-catalog?id='+encodeURIComponent(candidate.id));
-        if(available.industries.length){chosen=candidate;catalog=available;break;}
-      }
-      options(get('run'),body.runs.map(r=>[r.id,`${r.name} · ${r.state}`]),chosen?.id);
+      const {runs, run: chosen, catalog} = await chooseRun(selectedRun);
+      options(get('run'),runs.map(r=>[r.id,`${r.name} · ${r.state}`]),chosen?.id);
       await loadCatalog(catalog);
     } catch(e){error(e.message);get('status').textContent='Report sources unavailable.';}
   }
@@ -80,6 +98,9 @@
     get('source-label').textContent=get('run').selectedOptions[0].textContent+(unavailable.length?' · Unavailable saved reports: '+unavailable.join(', '):'');
     get('status').textContent=`${view.totals.receipt_groups.toLocaleString()} included receipt groups · local data`;
     get('total').textContent=dollars(view.totals.giving);get('direct').textContent=dollars(view.totals.direct);
+    // Name the figure, so a reader can match it to Chart Studio rather than
+    // wonder which of two numbers on two screens is the real one.
+    get('basis-note').textContent='Workbook included receipts, net. Same figure as Chart Studio’s Published included receipts basis.';
     get('recipient-count').textContent=dollars(view.totals.organizations);
     for(const [id,value] of [['direct-share',view.totals.direct],['organization-share',view.totals.organizations]]) get(id).textContent=view.totals.giving>0&&value>=0&&value<=view.totals.giving ? (100*value/view.totals.giving).toFixed(1)+'% of net giving' : 'Share unavailable for signed totals';
     get('candidate-note').textContent=view.candidate_note;
@@ -204,17 +225,46 @@
     const name=get('export-target').value;
     get('export').disabled=!view||(name==='candidates'&&!view.candidate_available)||!view[name]?.length;
     get('full-table').disabled=get('export').disabled;
+    get('copy-image').disabled=get('export').disabled;
+    get('briefing').disabled=get('export').disabled;
   }
   get('export-target').onchange=syncExport;
-  get('export').onclick=async()=>{
-    if(!view)return;
-    const name=get('export-target').value,format=get('export-format').value;
-    if(name==='candidates'&&!view.candidate_available)return;
-    if(format==='csv'){exportChart(name);return;}
+  // One account of the chart being exported, read by the download, the
+  // clipboard copy and the briefing, so the three can never disagree.
+  function exportSubject() {
+    if(!view)return null;
+    const name=get('export-target').value;
+    if(name==='candidates'&&!view.candidate_available)return null;
+    const svg=get(name).querySelector('svg');
+    if(!svg)return null;
     const note=name==='candidates'?view.candidate_note:view.note;
     const context=`${get('scope').textContent}. ${name==='candidates'?get('mode').selectedOptions[0].textContent+'. '+(view.filters.mode==='direct'?'':view.filters.direction+'. '):''}${note} Preview: ${get(name).querySelectorAll('svg .graph-bar-button').length} of ${view[name].length} groups. `+view.reports.map(r=>`${r.name} SHA-256 ${r.sha256}`).join('; ');
-    try {await MentatExport.image(get(name).querySelector('svg'),format,titleFor[name],context,'mentat-'+name);}
+    return {name,svg,title:titleFor[name],context,reports:view.reports};
+  }
+  get('export').onclick=async()=>{
+    if(!view)return;
+    const format=get('export-format').value,subject=exportSubject();
+    if(!subject)return;
+    if(format==='csv'){exportChart(subject.name);return;}
+    try {await MentatExport.image(subject.svg,format,subject.title,subject.context,'mentat-'+subject.name);}
     catch(e){error(e.message);}
+  };
+  get('copy-image').onclick=async()=>{
+    const subject=exportSubject();
+    if(!subject){error('This chart has no image to copy. Export its CSV instead.');return;}
+    error('');
+    try {await MentatExport.copy(subject.svg,subject.title,subject.context);}
+    catch(e){error(e.message);}
+  };
+  get('briefing').onclick=()=>{
+    const subject=exportSubject();
+    if(!subject){error('This chart has no image to add. Export its CSV instead.');return;}
+    if(!window.MentatBriefing){error('The briefing tray is not served by this console yet. Restart the console and try again.');return;}
+    error('');
+    const report=(subject.reports||[])[0]||{};
+    window.MentatBriefing.capture({svg:subject.svg,title:subject.title,scope:subject.context,
+      chip:get('scope').textContent,note:'',basis:'Graph totals',sheetId:subject.name,sheetName:subject.title,
+      source:report.name||'',provenance:report.sha256||'',origin:'graph'});
   };
   function renderFreshness() {
     const host=get('freshness');host.replaceChildren();

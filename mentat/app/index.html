@@ -3,8 +3,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MENTAT</title>
 <link rel="icon" type="image/svg+xml" href="/mentat-icon.svg">
-<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/graph.css"><link rel="stylesheet" href="/comparison.css"><link rel="stylesheet" href="/acu-theme.css"><link rel="stylesheet" href="/cross-reference.css"><link rel="stylesheet" href="/workspace.css"><link rel="stylesheet" href="/chart-studio.css">
-<script src="/theme.js" defer></script><script src="/chart-export.js" defer></script><script src="/chart-math.js" defer></script><script src="/ui-state.js" defer></script><script src="/coverage-view.js" defer></script><script src="/app.js" defer></script><script src="/grouped-chart.js" defer></script><script src="/charts.js" defer></script><script src="/graph.js" defer></script><script src="/comparison.js" defer></script><script src="/funding-comparison.js" defer></script><script src="/chart-studio-core.js" defer></script><script src="/contribution-plot.js" defer></script><script src="/contribution-charts.js" defer></script><script src="/contribution-map.js" defer></script><script src="/chart-studio-contributions.js" defer></script><script src="/chart-studio.js" defer></script><script src="/chart-comparison.js" defer></script>
+<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/graph.css"><link rel="stylesheet" href="/comparison.css"><link rel="stylesheet" href="/acu-theme.css"><link rel="stylesheet" href="/cross-reference.css"><link rel="stylesheet" href="/workspace.css"><link rel="stylesheet" href="/chart-studio.css"><link rel="stylesheet" href="/chart-briefing.css">
+<script src="/theme.js" defer></script><script src="/chart-export.js" defer></script><script src="/chart-math.js" defer></script><script src="/ui-state.js" defer></script><script src="/coverage-view.js" defer></script><script src="/app.js" defer></script><script src="/grouped-chart.js" defer></script><script src="/charts.js" defer></script><script src="/graph.js" defer></script><script src="/comparison.js" defer></script><script src="/funding-comparison.js" defer></script><script src="/chart-studio-core.js" defer></script><script src="/contribution-plot.js" defer></script><script src="/contribution-charts.js" defer></script><script src="/contribution-map.js" defer></script><script src="/chart-studio-contributions.js" defer></script><script src="/chart-studio.js" defer></script><script src="/chart-briefing.js" defer></script><script src="/chart-comparison.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#workspace-main">Skip to workspace</a>
@@ -96,7 +96,7 @@
 <p id="graph-status" class="muted" role="status">Choose a report source.</p>
 <div id="graph-error" class="error" role="alert" hidden></div>
 <div id="graph-results" hidden><p id="graph-scope" class="chart-note" role="status"></p>
-<div class="graph-metrics"><div><span>Net giving in selected scope</span><strong id="graph-total">—</strong></div><div><span>Direct to candidates</span><strong id="graph-direct">—</strong><small id="graph-direct-share"></small></div><div><span>Recipient organizations</span><strong id="graph-recipient-count">—</strong><small id="graph-organization-share"></small></div></div>
+<div class="graph-metrics"><div><span>Net giving in selected scope</span><strong id="graph-total">—</strong><small id="graph-basis-note"></small></div><div><span>Direct to candidates</span><strong id="graph-direct">—</strong><small id="graph-direct-share"></small></div><div><span>Recipient organizations</span><strong id="graph-recipient-count">—</strong><small id="graph-organization-share"></small></div></div>
 <div id="graph-analysis-panel" role="tabpanel" aria-labelledby="graph-tab-overview" tabindex="0">
 <div class="graph-panels" data-analysis="overview">
 <section id="graph-category-panel" class="panel"><div class="panel-heading"><h2>Giving by recipient type</h2></div><p class="muted">Net contributions · saved receipt categories</p><div id="graph-categories"></div><p class="chart-note">Organization receipts are not attributed to candidates.</p><button class="graph-text-button" data-analysis-tab="recipients" type="button">View recipients →</button></section>
@@ -109,7 +109,7 @@
 <section class="panel" id="graph-company-panel" hidden><div class="panel-heading"><h2>Company comparison</h2><button class="graph-text-button" data-values="companies" type="button">View all →</button></div><p class="muted">Select a company to explore its giving.</p><div id="graph-companies"></div></section>
 <section class="panel" id="graph-level-panel" hidden><div class="panel-heading"><h2>Giving by employee level</h2></div><p class="chart-note">Personal giving in the selected scope. Corporate giving is separate.</p><div id="graph-levels"></div></section>
 </div></div>
-<div class="graph-details-tools"><details id="graph-method-details"><summary>Details &amp; methodology</summary><p id="graph-method" class="muted"></p><p class="muted">Chart images export the displayed preview. CSV includes every value in the selected breakdown.</p></details><div class="graph-export-tools"><label class="sr-only" for="graph-export-target">Chart to export</label><select id="graph-export-target"><option value="categories">Recipient types</option><option value="organizations">Organizations</option><option value="candidates">Candidates</option><option value="companies">Companies</option><option value="levels">Employee levels</option></select><button id="graph-full-table" class="graph-text-button" type="button">Full table</button><label class="sr-only" for="graph-export-format">Export format</label><select id="graph-export-format"><option value="png">PNG image</option><option value="svg">SVG image</option><option value="csv">CSV data</option></select><button id="graph-export" class="secondary" type="button">Export chart</button></div></div>
+<div class="graph-details-tools"><details id="graph-method-details"><summary>Details &amp; methodology</summary><p id="graph-method" class="muted"></p><p class="muted">Chart images export the displayed preview. CSV includes every value in the selected breakdown.</p></details><div class="graph-export-tools"><label class="sr-only" for="graph-export-target">Chart to export</label><select id="graph-export-target"><option value="categories">Recipient types</option><option value="organizations">Organizations</option><option value="candidates">Candidates</option><option value="companies">Companies</option><option value="levels">Employee levels</option></select><button id="graph-full-table" class="graph-text-button" type="button">Full table</button><label class="sr-only" for="graph-export-format">Export format</label><select id="graph-export-format"><option value="png">PNG image</option><option value="svg">SVG image</option><option value="csv">CSV data</option></select><button id="graph-export" class="secondary" type="button">Export chart</button><button id="graph-copy-image" class="secondary" type="button">Copy image</button><button id="graph-briefing" class="secondary" type="button">Add to briefing</button></div></div>
 </div>
 <section id="compare-panel" class="comparison-workspace" hidden aria-label="Compare subjects">
 <div class="panel-heading"><div><div class="section-label">COMPARE SUBJECTS</div><h2>Compare funding</h2><p>Choose sources and recipients to create a comparison.</p></div><span id="compare-count"></span></div>
@@ -157,22 +157,22 @@
 <button id="chart-create" class="secondary" type="button">Update chart</button>
 </details>
 </fieldset></section>
-<section class="chart-preview" aria-label="Graph preview"><div class="panel-heading"><div><div class="section-label">LOCAL EXPLORER</div><h2 id="chart-title">Your data, in view</h2></div><span class="badge subtle">LOCAL ONLY</span></div><p id="chart-context">Choose a worksheet to begin.</p><div id="chart-error" class="error" role="alert" hidden></div><div id="chart-image" class="chart-image"></div><div id="chart-export" hidden><button id="chart-save-png" class="secondary" type="button">Export PNG</button><button id="chart-save-svg" class="secondary" type="button">Export SVG</button> <button id="chart-save-csv" class="secondary" type="button">Export data CSV</button></div><p id="chart-scope" class="muted"></p><details><summary>Scanned columns</summary><div class="table-scroll"><table><thead><tr><th>Column</th><th>Detected type</th><th>Distinct</th><th>Missing</th></tr></thead><tbody id="chart-columns"></tbody></table></div></details><details><summary>Chart values & statistics</summary><div id="chart-values" class="table-scroll"></div></details></section></div>
+<section class="chart-preview" aria-label="Graph preview"><div class="panel-heading"><div><div class="section-label">LOCAL EXPLORER</div><h2 id="chart-title">Your data, in view</h2></div><span class="badge subtle">LOCAL ONLY</span></div><p id="chart-context">Choose a worksheet to begin.</p><div id="chart-error" class="error" role="alert" hidden></div><div id="chart-image" class="chart-image"></div><div id="chart-export" hidden><button id="chart-save-png" class="secondary" type="button">Export PNG</button><button id="chart-save-svg" class="secondary" type="button">Export SVG</button> <button id="chart-save-csv" class="secondary" type="button">Export data CSV</button><button id="chart-copy-image" class="secondary" type="button">Copy image</button><button id="chart-briefing" class="secondary" type="button">Add to briefing</button></div><p id="chart-scope" class="muted"></p><details><summary>Scanned columns</summary><div class="table-scroll"><table><thead><tr><th>Column</th><th>Detected type</th><th>Distinct</th><th>Missing</th></tr></thead><tbody id="chart-columns"></tbody></table></div></details><details><summary>Chart values & statistics</summary><div id="chart-values" class="table-scroll"></div></details></section></div>
 </dialog></section>
 
 <section id="view-chart-studio" role="tabpanel" aria-labelledby="tab-chart-studio" hidden>
 <div class="studio">
 <div class="studio-header">
 <h2 class="studio-heading">Chart Studio</h2>
-<span id="studio-scope-chip" class="studio-scope-chip" role="status"></span>
-<button id="studio-scope-change" class="studio-scope-change" type="button" hidden>Change scope</button>
+<span class="studio-scope-block"><span id="studio-scope-chip" class="studio-scope-chip" role="status"></span><small id="studio-scope-note" class="studio-scope-note" hidden></small></span>
+<button id="studio-scope-change" class="studio-scope-change" type="button" title="Open the Data source panel and choose a report">Data source</button>
 <span class="studio-header-gap"></span>
 <button id="studio-overview-toggle" class="studio-overview-toggle" type="button" aria-pressed="false">Company overview</button>
 <div id="studio-view-mode" class="studio-segmented studio-options-restore" role="radiogroup" aria-label="Studio view">
 <button id="studio-view-builder" type="button" role="radio" aria-checked="true" title="Data panel, shelves and Inspector">Builder</button>
 <button id="studio-view-canvas" type="button" role="radio" aria-checked="false" tabindex="-1" title="The chart on its own">Canvas only</button>
 </div>
-<button id="studio-inspector-toggle" class="studio-inspector-toggle" type="button" aria-expanded="false" aria-controls="studio-inspector">Inspector</button>
+<button id="studio-inspector-toggle" class="studio-inspector-toggle" type="button" aria-expanded="false" aria-controls="studio-inspector">Inspector<span id="studio-inspector-count" class="studio-inspector-badge" hidden></span></button>
 </div>
 <div class="studio-toolbar" role="toolbar" aria-label="Chart Studio toolbar">
 <button id="studio-undo" type="button" title="Undo the last change">&#8630; Undo</button>
@@ -184,7 +184,7 @@
 <select id="studio-fit" aria-label="Fit the view" title="How the drawing fills the view"><option value="standard">Fit: Standard</option><option value="width">Fit: Fit width</option><option value="entire">Fit: Entire view</option></select>
 <button id="studio-clear" type="button" title="Empty this sheet but keep the data source">Clear</button>
 <button id="studio-duplicate" type="button" title="Copy this sheet into a new one">Duplicate sheet</button>
-<details class="studio-menu" id="studio-download"><summary>Download</summary><div><button id="studio-download-png" type="button">Image (PNG)</button><button id="studio-download-svg" type="button">Image (SVG)</button><button id="studio-download-csv" type="button">Data (CSV)</button></div></details>
+<details class="studio-menu" id="studio-download"><summary>Export</summary><div><button id="studio-download-png" type="button">Image (PNG)</button><button id="studio-download-svg" type="button">Image (SVG)</button><button id="studio-download-csv" type="button">Data (CSV)</button><hr><button id="studio-copy-image" type="button">Copy image</button><button id="studio-print-chart" type="button">Print chart</button><hr><button id="studio-briefing-menu-add" type="button">Add to briefing</button><hr><button id="studio-save-view" type="button">Save view</button><button id="studio-open-views" type="button">Open view</button></div></details><button id="studio-briefing-add" class="studio-briefing-add" type="button" aria-controls="studio-briefing" title="Put this chart in the briefing tray">Add to briefing<span id="studio-briefing-badge" class="studio-briefing-badge" hidden></span></button>
 <button id="studio-showme-toggle" type="button" aria-pressed="true" aria-controls="studio-showme">Show Me</button>
 <span class="studio-toolbar-gap"></span>
 <button id="studio-classic" class="studio-classic" type="button" aria-haspopup="dialog" title="Open the original Create chart dialog">Classic builder</button>
@@ -194,11 +194,12 @@
 <aside class="studio-side" aria-label="Data">
 <div class="studio-pane" id="studio-pane-data">
 <h3 class="studio-panel-title">Data</h3>
-<details class="studio-source-disclosure" id="studio-source-details"><summary id="studio-source-summary">Data source</summary>
+<details class="studio-source-disclosure" id="studio-source-details" open><summary id="studio-source-summary">Data source</summary>
 <div class="studio-source">
 <label for="studio-source-mode">Data source<select id="studio-source-mode"><option value="contributions">Verified contributions</option><option value="worksheet">Report worksheet</option></select></label>
 <div id="studio-contribution-source">
 <label for="studio-dataset">Report<select id="studio-dataset"></select></label>
+<p id="studio-dataset-message" class="studio-note" hidden></p>
 <label for="studio-basis">Accounting basis<select id="studio-basis"></select></label>
 <label for="studio-destination">State location view<select id="studio-destination"><option value="">Choose a state view</option><option value="recipient_state">Recipient committee address</option><option value="represented_state">Candidate represented state</option><option value="state">Contributor state</option></select></label>
 <p id="studio-basis-note" class="studio-note"></p>
@@ -211,6 +212,7 @@
 <label for="studio-header">Header row<input id="studio-header" type="number" min="1" max="100" value="5"></label><button id="studio-rescan" class="studio-rescan" type="button">Rescan columns</button>
 </div>
 <p id="studio-loading" role="status">Reading verified contribution fields&#8230;</p>
+<div id="studio-progress" class="studio-progress" role="status" hidden><span id="studio-progress-message"></span><span id="studio-progress-elapsed"></span><button id="studio-progress-cancel" type="button">Cancel</button></div>
 </div>
 </details>
 <label for="studio-search">Search fields<input id="studio-search" type="search" placeholder="Filter this list" autocomplete="off"></label>
@@ -232,7 +234,9 @@
 </div>
 <div class="studio-canvas-wrap" id="studio-canvas-wrap">
 <h2 id="studio-title">Chart Studio</h2>
-<p id="studio-note" class="studio-note">Choose a report worksheet in the Data panel to begin.</p>
+<p id="studio-reconcile" class="studio-reconcile" role="status" hidden></p>
+<p id="studio-note" class="studio-note">Choose a verified report in the Data panel to begin.</p>
+<div id="studio-print-footer" class="studio-print-only" aria-hidden="true"><p id="studio-print-title" class="studio-print-title"></p><p id="studio-print-scope" class="studio-print-line"></p><p id="studio-print-source" class="studio-print-line"></p><p class="studio-print-mark">MENTAT</p></div>
 <div id="studio-error" class="error" role="alert" hidden></div>
 <div id="studio-verified-summary" class="studio-verified-summary" hidden></div>
 <div id="studio-canvas" class="studio-canvas fit-standard"></div>
@@ -271,7 +275,7 @@
 <div id="studio-pager" class="studio-pager" hidden><button id="studio-pager-prev" type="button" aria-label="Previous page member">&#9664;</button><button id="studio-pager-play" type="button" aria-pressed="false" aria-label="Play through the page members">&#9654;</button><button id="studio-pager-next" type="button" aria-label="Next page member">&#9654;|</button><span id="studio-pager-label"></span></div>
 <h3>Parameters</h3>
 <div class="studio-inline"><label for="studio-param-start">First worksheet row<input id="studio-param-start" type="number" min="1" step="1" placeholder="First"></label><label for="studio-param-end">Last worksheet row<input id="studio-param-end" type="number" min="1" step="1" placeholder="Last"></label></div>
-<div class="studio-inline"><label for="studio-param-limit">Row limit<input id="studio-param-limit" type="number" min="1" step="1" placeholder="All rows"></label><label for="studio-param-groups">Group limit<input id="studio-param-groups" type="number" min="1" max="1000" step="1" placeholder="40" title="Groups beyond this limit are combined into an Other mark (default 40)"></label></div>
+<div class="studio-inline"><label for="studio-param-limit">Row limit<input id="studio-param-limit" type="number" min="1" step="1" placeholder="All rows"></label><label for="studio-param-groups">Group limit<input id="studio-param-groups" type="number" min="1" max="1000" step="1" placeholder="40" title="40 per page (verified) &#183; fold after 40 (worksheet); Graph and classic fold at 60"></label></div>
 <label id="studio-bin-width-label" for="studio-bin-width" hidden>Histogram bin width (USD)<input id="studio-bin-width" type="number" min="0.01" step="0.01" value="100"></label>
 <label class="studio-check" for="studio-param-split"><input id="studio-param-split" type="checkbox"> Split "; "-separated cells on the grouping field</label>
 <label class="studio-check" for="studio-show-hidden"><input id="studio-show-hidden" type="checkbox"> Show identifier fields</label>
@@ -294,6 +298,26 @@
 </aside>
 </div>
 
+<aside class="studio-briefing" id="studio-briefing" hidden aria-label="Briefing">
+<div class="studio-briefing-head"><h3 class="studio-briefing-title">Briefing</h3><span id="studio-briefing-count" class="studio-briefing-count"></span><button id="studio-briefing-close" class="studio-briefing-close" type="button">Close</button></div>
+<p id="studio-briefing-notice" class="studio-briefing-notice" role="status" hidden></p>
+<div id="studio-briefing-items" class="studio-briefing-items"></div>
+<div class="studio-briefing-foot">
+<button id="studio-briefing-pptx" class="studio-briefing-primary" type="button">Export PowerPoint</button>
+<div class="studio-briefing-actions"><button id="studio-briefing-print" type="button">Print briefing</button><button id="studio-briefing-share" type="button">Share bundle</button></div>
+<button id="studio-briefing-save-view" type="button">Save view</button>
+<p class="studio-briefing-note">Every slide carries its scope, basis and source SHA-256.</p>
+</div>
+</aside>
+<dialog id="studio-share" class="studio-share" aria-labelledby="studio-share-title">
+<div class="studio-share-head"><h3 id="studio-share-title">Share bundle</h3><button id="studio-share-close" type="button">Close</button></div>
+<p class="studio-note">Choose the reports the phone snapshot should carry.</p>
+<div id="studio-share-datasets" class="studio-share-datasets" role="group" aria-label="Reports"></div>
+<div class="studio-share-buttons"><button id="studio-share-publish" class="studio-share-publish" type="button">Publish phone snapshot</button><button id="studio-briefing-html" type="button">Download HTML bundle</button></div>
+<p id="studio-share-progress" class="studio-note" role="status"></p>
+<p id="studio-share-output" class="studio-note" hidden></p>
+<p class="studio-note">Uploading to the private phone link is the coordinator’s step.</p>
+</dialog>
 <div class="studio-overview" id="studio-overview" hidden aria-label="Company overview">
 <div class="studio-overview-head">
 <label for="studio-overview-company">Company<select id="studio-overview-company"></select></label>

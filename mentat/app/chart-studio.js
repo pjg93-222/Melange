@@ -19,6 +19,9 @@
   const ZONES = [['columns', 'Columns'], ['rows', 'Rows'], ['color', 'Colour'], ['size', 'Size'],
     ['label', 'Label'], ['detail', 'Detail'], ['tooltip', 'Tooltip'], ['filters', 'Filters'], ['pages', 'Pages']];
   const AGG_LABEL = {sum: 'SUM', mean: 'AVG', count: 'COUNT', median: 'MEDIAN', min: 'MIN', max: 'MAX'};
+  // Every gesture a Data-pane field answers to, in the order a reader meets
+  // them. The pill says this before the click, so nobody has to discover it.
+  const CLICK_HINT = 'Click to add \u00b7 drag to place \u00b7 Enter for actions';
   const ANALYTICS = [
     {id: 'annual', group: 'transform', label: 'Period totals', hint: 'Group dated rows into calendar years or election cycles'},
     {id: 'yoy', group: 'transform', label: 'Year-over-year %', hint: 'Percentage change from the previous calendar year'},
@@ -49,6 +52,11 @@
   let pendingScope = null, appliedScope = null;
   let inspectorTab = 'marks', overviewMode = false, overviewRevision = 0, overviewCompany = '';
   let queryRequests = 0;
+  // The Data source panel opens on arrival and folds itself away once, after
+  // the first load that actually produced fields. sourceReady is what the
+  // folded summary reports; it is cleared whenever a load starts again.
+  let sourceSettled = false, sourceReady = false;
+  let progressStart = 0, progressTimer = 0, progressDepth = 0, progressOpened = false;
   const contributionCache = new Map(), memberCache = new Map(), geometryCache = new Map(), geometryPending = new Map();
   let contributionCacheEpoch=0;
   const verified = () => el('source-mode').value === 'contributions';
@@ -145,7 +153,85 @@
   function sourceFields() {
     return {run: el('run').value, report: el('report').value, sheet: el('sheet').value, header: Number(el('header').value) || 0};
   }
-  function status(message) { el('loading').textContent = message; }
+  function status(message) { el('loading').textContent = message; renderSourceSummary(); }
+
+  // The summary is the only part of the panel that survives being folded
+  // away, so the state the panel would have shown is written there rather
+  // than disappearing with it.
+  function renderSourceSummary() {
+    const details = el('source-details'), summary = el('source-summary');
+    if (!details || !summary) return;
+    const parts = ['Data source'];
+    if (!details.open) {
+      if (verified()) {
+        const chosen = dataset();
+        parts.push(chosen ? (chosen.label || chosen.id) : '', (contributions.BASIS[basis()] || [])[0] || '');
+      } else if (data) {
+        parts.push(sheet().source.reportName || '', data.sheet || '');
+      }
+      parts.push(sourceReady ? 'ready' : el('loading').textContent);
+    }
+    summary.textContent = parts.filter(Boolean).join(' · ');
+  }
+
+  // Folded once, and only once: a reader who opens the panel again keeps it
+  // open for the rest of the session.
+  function settleSource() {
+    sourceReady = true;
+    const details = el('source-details');
+    if (details && !sourceSettled) { sourceSettled = true; details.open = false; }
+    renderSourceSummary();
+  }
+
+  // A report that cannot be read says why under the select, in the server's
+  // own words, instead of only inside a thrown error nobody kept.
+  function renderDatasetMessage() {
+    const node = el('dataset-message');
+    if (!node) return;
+    const datasets = (contributionCatalog && contributionCatalog.datasets) || [];
+    const chosen = datasets.find(d => d.id === el('dataset').value);
+    const blocked = datasets.filter(d => !d.available && d.message);
+    const text = chosen && chosen.message ? chosen.message
+      : blocked.map(d => (d.label || d.id) + ': ' + d.message).join(' · ');
+    node.textContent = text;
+    node.hidden = !text;
+    node.classList.toggle('is-warning', !!text);
+  }
+
+  /* Preparing the verified index can take minutes. The reader gets the
+     server's own message, the time it has taken so far, and a way out that
+     keeps the view they already had instead of an empty canvas. */
+  function showProgress(message) {
+    // A prepare nobody can see is a console that looks frozen, and the way
+    // out of it is the Cancel button in this panel, so the panel opens for
+    // the duration and returns to where it was afterwards.
+    const details = el('source-details');
+    if (details && !details.open) { progressOpened = true; details.open = true; renderSourceSummary(); }
+    if (!progressStart) { progressStart = Date.now(); progressTimer = setInterval(tickProgress, 1000); }
+    el('progress-message').textContent = message;
+    el('progress').hidden = false;
+    tickProgress();
+  }
+  function tickProgress() {
+    if (!progressStart) return;
+    const seconds = Math.max(0, Math.floor((Date.now() - progressStart) / 1000));
+    el('progress-elapsed').textContent =
+      Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0') + ' elapsed';
+  }
+  function clearProgress() {
+    clearInterval(progressTimer);
+    progressTimer = 0; progressStart = 0;
+    el('progress').hidden = true;
+    const details = el('source-details');
+    if (progressOpened && details) { details.open = false; renderSourceSummary(); }
+    progressOpened = false;
+  }
+  // Several verified calls can be waiting at once (a view, its member lists,
+  // its records), so the row stays up until the last of them is done.
+  function releaseProgress() {
+    progressDepth = Math.max(0, progressDepth - 1);
+    if (!progressDepth) clearProgress();
+  }
   function failure(message) {
     el('error').textContent = message || '';
     el('error').hidden = !message;
@@ -153,6 +239,7 @@
 
   async function loadRuns() {
     const ticket = ++revision;
+    sourceReady = false;
     status('Choosing a report folder…');
     try {
       const body = await api('/api/report-sources');
@@ -194,6 +281,7 @@
   }
   async function scan(manual) {
     const ticket = ++revision;
+    sourceReady = false;
     status('Scanning columns…');
     failure('');
     try {
@@ -220,6 +308,7 @@
       status(fmt(data.row_count) + ' rows · ' + data.columns.length + ' columns scanned');
       persist();
       renderAll();
+      settleSource();
     } catch (e) { if (ticket === revision) { status('Column scan unavailable.'); failure(e.message); } }
   }
   const text = select => select.selectedOptions[0] ? select.selectedOptions[0].textContent : '';
@@ -232,20 +321,28 @@
     const result=await response.json();if(!response.ok||result.error)throw new Error(result.error||'Contribution data unavailable.');return result;
   }
   async function contributionReady(path, query, signal) {
-    for(;;){const result=await contributionAPI(path,query,signal);if(result.status==='failed')throw new Error(result.message||'Source verification failed.');if(!['preparing','building','queued'].includes(result.status))return result;status(result.message||'Verifying source records…');await new Promise(resolve=>setTimeout(resolve,Math.min(4000,result.retry_after_ms||1000)));if(signal?.aborted)throw new DOMException('View changed','AbortError');}
+    progressDepth++;
+    try{
+      for(;;){if(signal?.aborted)throw new DOMException('View changed','AbortError');const result=await contributionAPI(path,query,signal);if(result.status==='failed')throw new Error(result.message||'Source verification failed.');if(!['preparing','building','queued'].includes(result.status))return result;const waiting=result.message||'Verifying source records…';status(waiting);showProgress('Preparing verified data · '+waiting);await new Promise(resolve=>setTimeout(resolve,Math.min(4000,result.retry_after_ms||1000)));if(signal?.aborted)throw new DOMException('View changed','AbortError');}
+    } finally { releaseProgress(); }
   }
   async function loadContributions(refresh=false) {
-    const ticket=++revision;failure('');status('Reading verified contribution fields…');
+    const ticket=++revision;failure('');sourceReady=false;status('Reading verified contribution fields…');
     try {
       if(!contributionCatalog||refresh){const [session,catalog]=await Promise.all([contributionAPI('session'),contributionAPI('catalog')]);if(ticket!==revision||!verified())return;contributionToken=session.token;contributionCatalog=catalog;}
       const previous=el('dataset').value||new URLSearchParams(location.search).get('industry')||document.getElementById('graph-industry')?.value;
       fill(el('dataset'),contributionCatalog.datasets.map(d=>[d.id,d.label||d.id]));
-      for(const option of el('dataset').options){const d=contributionCatalog.datasets.find(d=>d.id===option.value);option.disabled=!d.available;if(!d.available)option.textContent+=' — unavailable';}
+      // An unavailable report carries the reason on its own option, so it is
+      // readable before it is chosen and not only after a failure.
+      for(const option of el('dataset').options){const d=contributionCatalog.datasets.find(d=>d.id===option.value);option.disabled=!d.available;option.title=d.message||'';if(!d.available)option.textContent+=' — unavailable';}
       el('dataset').value=contributionCatalog.datasets.some(d=>d.id===previous&&d.available)?previous:contributionCatalog.datasets.find(d=>d.available)?.id||'';
-      if(!dataset())throw new Error('No verified sources are available in the configured report folder.');
+      renderDatasetMessage();
+      if(!dataset())throw new Error(['No verified sources are available in the configured report folder.',
+        ...contributionCatalog.datasets.filter(d=>d.message).map(d=>(d.label||d.id)+': '+d.message)].join(' '));
       selectContributionDataset();
       applyGraphScope();
-    }catch(error){if(ticket===revision){status('Verified data unavailable.');failure(error.message);}}
+      settleSource();
+    }catch(error){if(ticket===revision){status('Verified data unavailable.');failure(error.message);renderDatasetMessage();}}
   }
   function selectContributionDataset() {
     ++revision;contributionController?.abort();contributionPending=null;contributionOffset=0;contributionResult=null;contributionRequest=null;selection=[];history=[];future=[];
@@ -265,7 +362,7 @@
     fill(el('basis'),d.bases.map(b=>[b.id,contributions.BASIS[b.id]?.[0]||b.label]));el('basis').value=basis();el('basis-note').textContent=contributions.BASIS[basis()]?.[1]||'';
     if(data)data.columns=contributions.fields(d.fields||contributionCatalog.fields,basis());
     if(el('destination'))el('destination').value=core.shelf(sheet().columns).map(p=>columns()[p.column]?.id).find(id=>['recipient_state','represented_state','state'].includes(id))||'';
-    el('param-groups').title='Groups per page. Totals and CSV exports include every matching group.';
+    el('param-groups').title='40 per page (verified) · fold after 40 (worksheet); Graph and classic fold at 60. Totals and CSV exports include every matching group.';
     el('map-settings').hidden=!['map','filled-map'].includes(sheet().marks.type);
     el('bin-width-label').hidden=sheet().marks.type!=='histogram';el('bin-width').value=sheet().params.binWidth||100;
     const map=sheet().map||{layers:['states','districts'],congress:'119'};
@@ -287,7 +384,9 @@
     }
     appliedScope = {carried: true, industry: scope.industry,
       company: (scope.filters.find(f => f.field === 'company') || {}).value || '',
-      cycle: (scope.filters.find(f => f.field === 'cycle') || {}).value || ''};
+      cycle: (scope.filters.find(f => f.field === 'cycle') || {}).value || '',
+      notCarried: [...(scope.notCarried || []),
+        ...missing.map(field => field + ': not carried (this source has no ' + field + ' field)')]};
     if (!pills.length && !missing.length) return;
     commit(() => {
       const kept = (sheet().filters || []).filter(f => !pills.some(p => p.column === Number(f.column)));
@@ -310,7 +409,7 @@
     return [request.dataset,contributions.BASIS[request.basis]?.[0],p.workbook,'Workbook SHA256 '+p.workbook_sha256,'Analytical index '+p.index_token,'Query engine SHA256 '+p.query_engine_sha256,'Field semantics SHA256 '+p.field_semantics_sha256,'Groups '+(result.offset+1)+'–'+(result.offset+result.rows.length)+' of '+result.group_count,JSON.stringify({filters:request.filters,aggregate_filters:request.aggregate_filters,bin_width_cents:request.bin_width_cents}),p.scope].join(' · ');
   }
   async function renderContributionView() {
-    if(!data||!dataset()){el('canvas').replaceChildren();el('table').replaceChildren();el('verified-summary').textContent='Reading verified source fields…';el('result-controls').hidden=true;el('title').textContent='Chart Studio';el('note').textContent='Choose a verified report source in the Data pane.';lastResult=null;return;}
+    if(!data||!dataset()){el('reconcile').hidden=true;el('canvas').replaceChildren();el('table').replaceChildren();el('verified-summary').textContent='Reading verified source fields…';el('result-controls').hidden=true;el('title').textContent='Chart Studio';el('note').textContent='Choose a verified report in the Data panel to begin.';lastResult=null;return;}
     const ticket=++contributionRevision;
     try {
       const compiled=contributions.compile(sheet(),columns(),{dataset:dataset().id,basis:basis(),offset:contributionOffset});
@@ -325,7 +424,7 @@
       el('verified-summary').replaceChildren();
       for(const [label,value]of [[basis()==='original_supported'?'Selected gross amount':'Selected net amount',money(result.totals.amount)],['Source observations',fmt(result.totals.records)],['Reported donor identities',fmt(result.totals.contributors)]]){const item=document.createElement('span'),strong=document.createElement('strong');strong.textContent=value;item.append(strong,document.createTextNode(label));el('verified-summary').append(item);}
       el('verified-summary').title='Totals cover all matching source records before grouped filters. Group distinct identity counts are not added together.';
-      el('group-count').textContent=result.group_count?`${fmt(result.offset+1)}–${fmt(result.offset+result.rows.length)} of ${fmt(result.group_count)} groups`:'No matching observations';
+      el('group-count').textContent=result.group_count?`${fmt(result.offset+1)}–${fmt(result.offset+result.rows.length)} of ${fmt(result.group_count)} groups · totals cover all ${fmt(result.group_count)}`:'No matching observations';
       el('groups-prev').disabled=!query.offset;el('groups-next').disabled=!result.has_more;el('result-controls').hidden=false;
       el('groups-prev').hidden=el('groups-next').hidden=compiled.spec.type==='map'||compiled.transform!=='none';
       let rows=result.rows,spec={...compiled.spec,columns:result.columns,title:lastTitle},temporalModel=null,drewReferences=false;const notes=[...compiled.notes,...(result.notices||[])];
@@ -356,8 +455,8 @@
         drewReferences?'Reference lines mark the mean and median of the shown marks; source-level averages and medians are available as measures.'
         :'Reference lines are not drawn on this mark type. Choose a bar, line, area or circle mark to see the mean and median of the shown marks.');
       el('note').textContent=[contributions.BASIS[basis()][1],query.aggregate_filters.length?'Grouped filters apply after aggregation.':result.has_more?'Additional groups are on later pages; source totals cover all pages.':'All selected groups shown.',...notes].join(' ');
-      el('status').textContent=fmt(result.totals.records)+' source observations · '+fmt(result.group_count)+' groups · '+(result.reconciliation?.receipt_matches_workbook===true?'Included receipts reconcile to the workbook.':'Verified source records.')+' · '+fmt(queryRequests)+' verified queries this session';status('Verified contribution fields · '+data.columns.length+' fields');renderPager();
-    }catch(error){if(ticket===contributionRevision&&error.name!=='AbortError'){el('canvas').replaceChildren();el('note').textContent=error.message;failure(error.message);lastResult=null;}}
+      el('status').textContent=fmt(result.totals.records)+' source observations · '+fmt(result.group_count)+' groups · '+(result.reconciliation?.receipt_matches_workbook===true?'Included receipts reconcile to the workbook.':'Verified source records.')+' · '+fmt(queryRequests)+' verified queries this session';status('Verified contribution fields · '+data.columns.length+' fields');renderPager();renderReconcile(result).catch(()=>{el('reconcile').hidden=true;});
+    }catch(error){if(ticket===contributionRevision&&error.name!=='AbortError'){el('reconcile').hidden=true;el('canvas').replaceChildren();el('note').textContent=error.message;failure(error.message);lastResult=null;}}
     finally{if(ticket===contributionRevision)el('canvas').setAttribute('aria-busy','false');}
   }
   async function renderContributionMap(ticket,compiled,bbox=null) {
@@ -411,10 +510,14 @@
     node.dataset.column = String(field.index);
     if (settings.zone) node.dataset.zone = settings.zone;
     if (settings.position != null) node.dataset.position = String(settings.position);
-    node.title = fieldTooltip(field) + (settings.zone ? ' · Enter to move it, Delete to remove it' : ' · Enter to send it to a shelf');
+    // The gesture comes first in the tooltip: the field facts are useful, but
+    // what a click will do is the thing a reader needs before they click.
+    node.title = settings.zone
+      ? fieldTooltip(field) + ' · Enter to move it, Delete to remove it'
+      : CLICK_HINT + ' · ' + fieldTooltip(field);
     node.setAttribute('role', 'button');
     node.setAttribute('aria-label', fieldLabel(field, settings.aggregation) +
-      (settings.zone ? ', on ' + settings.zone : ', field') + '. Press Enter for actions.');
+      (settings.zone ? ', on ' + settings.zone + '. Press Enter for actions.' : ', field. ' + CLICK_HINT + '.'));
     const glyph = document.createElement('span');
     glyph.className = 'studio-glyph';
     if (field.glyph === 'cal' || field.glyph === 'geo') glyph.append(typeGlyph(field.glyph));
@@ -456,18 +559,13 @@
         commit(() => removeFrom(settings.zone, settings.position));
       }
     });
-    node.addEventListener('click', event => {
+    node.addEventListener('click', () => {
       if (settings.zone === 'filters') { filterEditor(node, settings.position); return; }
       if (settings.zone) return;
-      if (event.ctrlKey || event.metaKey) {
-        selection = selection.includes(field.index) ? selection.filter(i => i !== field.index) : selection.concat(field.index);
-      } else {
-        selection = selection.length === 1 && selection[0] === field.index ? [] : [field.index];
-      }
-      const memory = focusMemory();
-      renderFields();
-      renderShowMe();
-      focusRestore(memory);
+      // A click on a Data-pane field goes through the same place()/commit()
+      // path a drop uses, so it is one undo step and one query, not a
+      // selection the reader then has to do something else with.
+      quickAdd(field);
     });
     return node;
   }
@@ -606,8 +704,33 @@
     return items;
   }
 
+  // The zone a single click uses, and the sentence that names it.
+  const zoneLabel = zone => (ZONES.find(z => z[0] === zone) || [zone, zone])[1];
+  const quickAddLabel = field => zoneLabel(core.quickAddZone(field, sheet()));
+  // A drag takes the pill with it; a click has no pill to take, so a field
+  // that is already on a shelf would be copied onto the other one rather than
+  // moved. Both the click and its menu entry ask here first.
+  const placedOn = field => ['columns', 'rows'].find(name =>
+    core.shelf(sheet()[name]).some(p => p.column === field.index));
+  function quickAdd(field) {
+    const placed = placedOn(field);
+    if (placed) { status(field.name + ' is already on ' + zoneLabel(placed) + '.'); return; }
+    const zone = core.quickAddZone(field, sheet());
+    commit(() => place(zone, field.index));
+    status('Added ' + field.name + ' to ' + zoneLabel(zone) + '.');
+  }
+
   function sendMenu(anchor, field, settings) {
     const items = [];
+    // The first entry is the gesture a click performs, so the keyboard reaches
+    // the same shelf the mouse does without reading down to the Place group.
+    if (!settings.zone) {
+      const placed = placedOn(field);
+      items.push(placed
+        ? ['Add to a shelf', null, {disabled: true, reason: field.name + ' is already on ' +
+            zoneLabel(placed) + '. Use Send to … below to move it.'}]
+        : ['Add to ' + quickAddLabel(field), () => quickAdd(field)]);
+    }
     if (settings.zone === 'filters') items.push(['Edit filter\u2026', () => filterEditor(anchor, settings.position)]);
     items.push(...datePartItems(anchor, field, settings));
     const onAxis = settings.zone === 'columns' || settings.zone === 'rows';
@@ -939,7 +1062,9 @@
   }
 
   function renderShowMe() {
-    const selectionCounts = core.showMeSelection(sheet(), columns(), selection);
+    // Show Me reads the shelves. A click now places a field instead of marking
+    // it, so there is no separate selection for a tile to read.
+    const selectionCounts = core.showMeSelection(sheet(), columns(), []);
     const tiles = verified()?contributions.showMeEligibility(selectionCounts):core.showMeEligibility(selectionCounts);
     const recommended = data ? core.recommendedTile(columns()) : '';
     el('showme-grid').replaceChildren(...tiles.map(tile => {
@@ -966,7 +1091,7 @@
         if(verified()&&['symbol-map','filled-map'].includes(tile.id)){
           const filled=tile.id==='filled-map';sheet().columns=[{column:columns().find(f=>f.id===(filled?'state':'zip5')).index,aggregation:'sum'}];sheet().rows=[{column:columns().find(f=>f.id==='amount').index,aggregation:'sum'}];sheet().marks={type:filled?'filled-map':'map',color:null,size:null,label:null,detail:[],tooltip:[]};sheet().analytics.transform='none';return;
         }
-        const next = (verified()?contributions:core).showMeApply(tile.id, sheet(), columns(), selection);
+        const next = (verified()?contributions:core).showMeApply(tile.id, sheet(), columns(), []);
         sheets[active] = next;
       });
       return button;
@@ -1337,12 +1462,13 @@
   function renderView() {
     if(verified()){renderContributionView();return;}
     lastResult = null; lastConfig = null;
+    el('reconcile').hidden = true;
     el('canvas').replaceChildren();
     el('table').replaceChildren();
     el('status').replaceChildren();
     if (!data) {
       el('title').textContent = 'Chart Studio';
-      el('note').textContent = 'Choose a report worksheet in the Data pane to begin.';
+      el('note').textContent = 'Choose a report worksheet in the Data panel to begin.';
       return;
     }
     const report = core.compileReport(sheet(), columns());
@@ -1565,6 +1691,8 @@
     renderSheets();
     renderDataSource();
     renderScopeChip();
+    renderDatasetMessage();
+    renderSourceSummary();
     renderFilterRows();
     renderOverviewControls();
     if (overviewMode) renderOverview();
@@ -1580,7 +1708,8 @@
     failure('');
     if (format === 'csv') {
       const quote = v => '"' + String(typeof v === 'string' && /^[=+\-@\t\r]/.test(v) ? "'" + v : v).replaceAll('"', '""') + '"';
-      const rows = [['Chart', lastTitle], ['Scope', lastScope], ...paint.tableRows(lastResult, lastConfig, data)];
+      const rows = [['Chart', lastTitle], ['Scope', lastScope], ['Note', el('note').textContent],
+        ...paint.tableRows(lastResult, lastConfig, data)];
       MentatExport.download('\uFEFF' + rows.map(r => r.map(quote).join(',')).join('\r\n'),
         'text/csv;charset=utf-8', 'mentat-chart-studio.csv');
       return;
@@ -1588,6 +1717,273 @@
     const svg = el('canvas').firstChild;
     if (!svg) { failure('This view has no image to export. Download the data CSV instead.'); return; }
     MentatExport.image(svg, format, lastTitle, lastScope, 'mentat-chart-studio').catch(e => failure(e.message));
+  }
+
+  // Everything that takes a chart out of this console needs the same account
+  // of it. One reader of the live view, so a download, a clipboard image, a
+  // print sheet and a slide can never disagree about what they are showing.
+  function currentChart() {
+    const state = sheet(), source = state.source || {};
+    const basisLabel = verified()
+      ? (contributions.BASIS[basis()] || [])[0] || ''
+      : 'Worksheet values';
+    // Both of these leave the console: into the briefing the server stores,
+    // and from there into every slide's speaker notes. The server keeps each
+    // one as an object and replaces anything else with an empty one, so
+    // sending a caption here threw the workbook digest away and left the
+    // exports printing "[object Obje" where a SHA-256 belongs. Send the
+    // objects, and keep the captions beside them for the print sheet, which
+    // has one line and no room for either.
+    const sourceLabel = source.reportName || '';
+    const sha = source.sha256 || (data && data.sha256) || '';
+    return {
+      svg: el('canvas').querySelector('svg'),
+      title: lastTitle || el('title').textContent || 'Chart Studio',
+      scope: lastScope || scopeText() || '',
+      chip: scopeText(),
+      note: el('note').textContent || '',
+      basis: basisLabel,
+      sheetId: state.id,
+      sheetName: state.name,
+      source: core.chartSourceRecord(source),
+      provenance: core.chartProvenanceRecord(source, sha),
+      sourceLabel: sourceLabel,
+      sha: sha
+    };
+  }
+
+  // The clipboard gets the same drawing the download would write, caption and
+  // all: an image pasted into a message has to carry its own scope.
+  async function copyImage() {
+    const chart = currentChart();
+    if (!chart.svg) { failure('This view has no image to copy. Download the data CSV instead.'); return; }
+    failure('');
+    try {
+      const size = await MentatExport.copy(chart.svg, chart.title, chart.scope);
+      status('Copied ' + size.width + 'x' + size.height + ' PNG with title and scope caption.');
+    } catch (error) { failure(error.message); }
+  }
+
+  // A printed sheet is still on a desk long after this window is closed, so
+  // it states its own title, scope, basis, workbook hash and date instead of
+  // relying on whoever printed it to remember them.
+  function printChart() {
+    const chart = currentChart();
+    if (!chart.svg) { failure('This view has no image to print. Download the data CSV instead.'); return; }
+    failure('');
+    el('print-title').textContent = chart.title;
+    el('print-scope').textContent = [chart.scope, chart.note].filter(Boolean).join(' \u00b7 ');
+    el('print-source').textContent = [chart.basis,
+      chart.sourceLabel ? 'Source ' + chart.sourceLabel : '',
+      chart.sha ? 'Workbook SHA-256 ' + chart.sha : '',
+      'Printed ' + new Date().toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})]
+      .filter(Boolean).join(' \u00b7 ');
+    document.body.classList.add('studio-printing');
+    const done = () => {
+      document.body.classList.remove('studio-printing');
+      window.removeEventListener('afterprint', done);
+      clearTimeout(timer);
+    };
+    // A dialog dismissed in a way that never fires afterprint must not leave
+    // the console wearing its print skin.
+    const timer = setTimeout(done, 60000);
+    window.addEventListener('afterprint', done);
+    window.print();
+  }
+
+  /* ---------------------------------------------------------- saved views */
+
+  // Views the server refused to keep still open in this tab, so a read-only
+  // preview is a console that cannot persist, not one that cannot work.
+  const VIEW_MIGRATION = 'mentat-chart-studio-migrated-v1';
+  let viewsMemory = [];
+  const previewReadOnly = () => { try { return !!readOnly; } catch { return false; } };
+  function viewMessage(error) {
+    if (previewReadOnly()) return 'Saved views are read-only in this preview console; save from the original console.';
+    const text = String((error && error.message) || '');
+    if (!text || /JSON|Unexpected token|Failed to fetch|NetworkError|<!DOCTYPE/i.test(text)) return 'Server unavailable.';
+    return text;
+  }
+  async function getJSON(path) {
+    const response = await fetch(path, {credentials: 'same-origin'});
+    let body = null;
+    try { body = await response.json(); } catch { body = null; }
+    if (!response.ok) throw new Error((body && body.error) || 'Server unavailable (' + response.status + ').');
+    return body || {};
+  }
+  const viewSourceLabel = () => {
+    if (verified()) { const chosen = dataset(); return chosen ? (chosen.label || chosen.id) : ''; }
+    return (sheet().source || {}).reportName || '';
+  };
+
+  // A saved view carries the source it was built from, and the server keeps
+  // that as an object: a view reopened next year has to name the report, its
+  // digest and the folder it came from, not just the words that happened to be
+  // on screen. Sending the caption alone was refused outright with 400. The
+  // shaping lives in chart-studio-core.js so the payload this console puts on
+  // the wire is the payload a test can read, and every caller goes through it.
+  const viewSourceRecord = () => core.viewSourceRecord(sheet().source, verified() ? dataset() : null);
+  // Views kept in this tab by an older build, and any view a future build
+  // shapes differently, still have to print something.
+  const viewSourceText = view => core.sourceLabelOf(view && view.source);
+  const defaultViewName = () => [sheet().name, viewSourceLabel()].filter(Boolean).join(' \u00b7 ');
+  function storeKeyLabel(key) {
+    const parts = String(key || '').split('|');
+    if (parts[0] === 'contributions') {
+      const entry = ((contributionCatalog && contributionCatalog.datasets) || []).find(d => d.id === parts[1]);
+      return entry ? (entry.label || entry.id) : (parts[1] || key);
+    }
+    return parts.filter(Boolean).pop() || 'worksheet';
+  }
+  const viewLabel = view => [view.name,
+    view.sheet_count ? view.sheet_count + ' sheet' + (view.sheet_count === 1 ? '' : 's') : '',
+    view.saved_at ? new Date(typeof view.saved_at === 'number'
+      ? view.saved_at * 1000 : view.saved_at).toLocaleString() : '',
+    view.memory ? 'this tab only' : ''].filter(Boolean).join(' \u00b7 ');
+
+  // The name is typed in place of the menu entry, the way a sheet is renamed,
+  // so naming a view never moves the reader out of the menu they opened.
+  function saveView() {
+    const button = el('save-view');
+    if (!button || !button.isConnected) return;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'studio-view-name';
+    input.value = defaultViewName();
+    input.setAttribute('aria-label', 'View name');
+    let done = false;
+    const finish = keep => {
+      if (done || !input.isConnected) return;
+      done = true;
+      const name = input.value.trim().slice(0, 80);
+      input.replaceWith(button);
+      if (keep && name) saveViewNamed(name);
+    };
+    input.onkeydown = event => {
+      if (event.key === 'Enter') { event.preventDefault(); finish(true); }
+      if (event.key === 'Escape') { event.preventDefault(); finish(false); }
+    };
+    input.onblur = () => finish(true);
+    button.replaceWith(input);
+    input.focus();
+    input.select();
+  }
+  async function saveViewNamed(name) {
+    const record = {name, sourceKey, source: viewSourceRecord(),
+      sheets: JSON.parse(JSON.stringify(sheets)), active};
+    failure('');
+    try {
+      const body = await api('/api/studio/views', record);
+      status('Saved view "' + name + '" \u00b7 ' + record.sheets.length +
+        ' sheet' + (record.sheets.length === 1 ? '' : 's') + '.');
+      return body;
+    } catch (error) {
+      viewsMemory.unshift(Object.assign({}, record, {id: 'memory-' + Date.now(),
+        saved_at: new Date().toISOString(), sheet_count: record.sheets.length, memory: true}));
+      failure(viewMessage(error) + ' "' + name + '" is kept in this tab only.');
+      return null;
+    }
+  }
+
+  // What a view needs before it can be opened here, said before the click
+  // rather than after it.
+  function openability(view) {
+    if (view.sourceKey === sourceKey) return {ok: true};
+    const parts = String(view.sourceKey || '').split('|');
+    if (parts[0] !== 'contributions') return {ok: false,
+      reason: 'Worksheet views open on the report they were saved from. Choose ' +
+        (viewSourceText(view) || 'that report') + ' in the Data panel first.'};
+    if (!verified()) return {ok: false, reason: 'Switch the Data panel to verified contribution data to open this view.'};
+    const entry = ((contributionCatalog && contributionCatalog.datasets) || []).find(d => d.id === parts[1]);
+    if (!entry) return {ok: false, reason: 'This console has no report called ' + parts[1] + '.'};
+    if (!entry.available) return {ok: false, reason: entry.message || 'That report is unavailable on this console.'};
+    return {ok: true, dataset: parts[1]};
+  }
+  async function openView(view) {
+    failure('');
+    const state = openability(view);
+    if (!state.ok) { failure(state.reason); return; }
+    let full = view;
+    if (!Array.isArray(full.sheets)) {
+      try { full = (await getJSON('/api/studio/views?id=' + encodeURIComponent(view.id))).view; }
+      catch (error) { failure(viewMessage(error)); return; }
+    }
+    if (!full || !Array.isArray(full.sheets) || !full.sheets.length) { failure('That saved view has no sheets in it.'); return; }
+    // Another dataset is selected first, exactly as the Data panel would, so
+    // the shelves land on the fields that view was built against.
+    if (state.dataset && state.dataset !== (dataset() || {}).id) {
+      el('dataset').value = state.dataset;
+      selectContributionDataset();
+    }
+    commit(() => {
+      sheets = full.sheets.map(s => Object.assign(core.createSheet(s.name, s.id), s));
+      active = Math.min(Math.max(0, full.active | 0), sheets.length - 1);
+      dataSourceTab = false;
+    });
+    status('Opened view "' + full.name + '".');
+  }
+
+  // The views that lived in this browser before the server had a place for
+  // them are offered back once, under their own names, rather than left to
+  // rot behind a feature that replaced them.
+  async function migrateStoredViews() {
+    let migrated = true;
+    try { migrated = localStorage.getItem(VIEW_MIGRATION) === '1'; } catch { migrated = true; }
+    if (migrated || previewReadOnly()) return [];
+    const store = readStore();
+    const saved = [];
+    for (const key of Object.keys(store)) {
+      const entry = store[key];
+      if (!entry || !Array.isArray(entry.sheets) || !entry.sheets.length) continue;
+      const label = storeKeyLabel(key);
+      const name = ('Recovered \u00b7 ' + label + ' \u00b7 ' + entry.sheets.length +
+        ' sheet' + (entry.sheets.length === 1 ? '' : 's')).slice(0, 80);
+      // The old store never recorded anything but the key, so a caption is all
+      // there is to carry - as an object, because a bare string is refused.
+      const source = core.captionSource(label);
+      try {
+        const body = await api('/api/studio/views',
+          {name, sourceKey: key, source, sheets: entry.sheets, active: entry.active | 0});
+        saved.push({id: body.id, saved_at: body.saved_at, name, sourceKey: key,
+          source, sheet_count: entry.sheets.length});
+      } catch (error) {
+        // Returning quietly here left the reader believing their old views had
+        // been recovered when the console had refused every one of them, and
+        // the migration flag below was never set so it silently retried for ever.
+        failure(viewMessage(error) + ' Views saved in this browser could not be moved onto this console.');
+        return saved;
+      }
+    }
+    try { localStorage.setItem(VIEW_MIGRATION, '1'); } catch {}
+    return saved;
+  }
+
+  async function openViews() {
+    const anchor = el('open-views');
+    failure('');
+    let views = [], notice = '';
+    try { views = (await getJSON('/api/studio/views')).views || []; }
+    catch (error) { notice = viewMessage(error); }
+    if (!notice && !views.length) views = await migrateStoredViews();
+    const all = [...views, ...viewsMemory.filter(saved => !views.some(v => v.id === saved.id))];
+    const here = all.filter(view => view.sourceKey === sourceKey);
+    const others = all.filter(view => view.sourceKey !== sourceKey);
+    const items = [];
+    if (notice) items.push([notice, null, {disabled: true, reason: notice}]);
+    items.push(['This source', null, {group: true}]);
+    if (here.length) for (const view of here) items.push([viewLabel(view), () => openView(view)]);
+    else items.push(['No saved views for this source yet', null,
+      {disabled: true, reason: 'Save one with Export \u203a Save view.'}]);
+    items.push(['Other sources', null, {group: true}]);
+    if (others.length) for (const view of others) {
+      const state = openability(view);
+      const sourceText = viewSourceText(view);
+      items.push([viewLabel(view) + (sourceText ? ' \u00b7 ' + sourceText : ''),
+        state.ok ? () => openView(view) : null,
+        state.ok ? {} : {disabled: true, reason: state.reason}]);
+    }
+    else items.push(['None', null, {disabled: true, reason: 'Views saved on other reports appear here.'}]);
+    popup(anchor, items);
   }
 
   /* --------------------------------------------------------------- filters */
@@ -1780,6 +2176,14 @@
     fill(el('filter-add'), [['', 'Add a field\u2026'],
       ...meta.dimensions.concat(meta.measures).filter(f => !used.has(f.index)).map(f => [String(f.index), f.name])]);
     el('tab-filters').textContent = rows.length ? 'Filters (' + rows.length + ')' : 'Filters';
+    // Below 1200px the Inspector is behind a button, so the number of filters
+    // shaping this view has to be readable without opening it.
+    const badge = el('inspector-count');
+    badge.textContent = rows.length ? String(rows.length) : '';
+    badge.hidden = !rows.length;
+    el('inspector-toggle').setAttribute('aria-label', rows.length
+      ? 'Inspector · ' + rows.length + ' active filter' + (rows.length === 1 ? '' : 's')
+      : 'Inspector');
   }
 
   // The scope chip states the industry, cycle and company this view is reading,
@@ -1805,10 +2209,138 @@
     if (carried || company) parts.push(company || 'All companies');
     return (carried ? 'Carried from Graph \u00b7 ' : '') + parts.filter(Boolean).join(' \u00b7 ');
   }
+  /* ------------------------------------------------------- reconciliation */
+
+  // The Graph controls that have no verified field. They are read at the
+  // moment of the comparison, because they decide which question Graph was
+  // asked, and therefore which difference has to be explained.
+  const graphFilterState = () => ({
+    tier: (document.getElementById('graph-tier') || {}).value || '',
+    funding: (document.getElementById('graph-funding') || {}).value || 'all'
+  });
+
+  // The same question, asked of Graph. One request per scope, remembered for
+  // the session, because the strip is redrawn on every display edit and a
+  // reconciliation must never cost a query the reader did not ask for.
+  const graphTotalsCache = new Map();
+  // The strip is often the first thing a reader opens, on a console where the
+  // Graph view has never rendered and #graph-run is therefore still empty - and
+  // an empty select made every reconciliation refuse itself. It cannot guess a
+  // run either: reconciling against a run Graph would not display is worse than
+  // no strip at all. So it calls the very chooser Graph calls, which prefers the
+  // selected run, skips runs that are only ready or awaiting review, and walks
+  // on past any run whose catalog has no industries.
+  let graphRunPromise = null;
+  function graphRunId() {
+    const chosen = (document.getElementById('graph-run') || {}).value || '';
+    if (chosen) return Promise.resolve(chosen);
+    const chooser = globalThis.MentatGraphRun;
+    if (!chooser) return Promise.resolve('');
+    if (!graphRunPromise) {
+      graphRunPromise = chooser.choose()
+        .then(result => {
+          // Only a run Graph would actually display counts, and only a real
+          // answer is worth remembering: caching '' would leave the strip dead
+          // for the rest of the session over one bad moment.
+          const id = (result && result.catalog && result.run) ? result.run.id : '';
+          if (!id) graphRunPromise = null;
+          return id;
+        })
+        .catch(() => { graphRunPromise = null; return ''; });
+    }
+    return graphRunPromise;
+  }
+  async function graphTotals(company, cycle) {
+    const run = await graphRunId();
+    const industry = (dataset() || {}).id || '';
+    if (!run || !industry) return Promise.reject(new Error('Graph has no saved run selected.'));
+    const chosen = graphFilterState();
+    const params = new URLSearchParams({id: run, industry: industry, company: company || '',
+      tier: chosen.tier, cycle: core.graphCycleValue(cycle), funding: chosen.funding,
+      mode: 'direct', direction: '', category: '', recipient: ''});
+    // Graph's own first paint asks for latest=1, and the server answers it by
+    // pinning the newest cycle it holds. A sheet that carries no cycle of its own
+    // has to ask that same question, or the strip quotes a figure covering every
+    // cycle at once and calls it what Graph is showing on screen.
+    if (!core.graphCycleValue(cycle)) params.set('latest', '1');
+    const key = params.toString();
+    if (graphTotalsCache.has(key)) return graphTotalsCache.get(key);
+    const promise = Promise.resolve(api('/api/graph?' + params))
+      .catch(error => { graphTotalsCache.delete(key); throw error; });
+    graphTotalsCache.set(key, promise);
+    return promise;
+  }
+
+  // The strip only means anything when both views were asked the same
+  // question, so it fires for a sheet whose row filters are a company, a
+  // cycle, or both - each one exact single value - and nothing else.
+  function reconcileScope() {
+    const meta = core.classifyFields(columns(), sheet().types);
+    const scope = {company: '', cycle: ''};
+    for (const filter of sheet().filters || []) {
+      if (!core.filterActive(filter)) continue;
+      const field = meta.fields.find(f => f.index === Number(filter.column));
+      const id = field ? field.id : '';
+      const values = core.filterValues(filter);
+      if ((id !== 'company' && id !== 'cycle') || filter.stage === 'aggregate' ||
+          ['equals', 'in'].indexOf(filter.op) === -1 || values.length !== 1 || scope[id]) return null;
+      scope[id] = values[0];
+    }
+    return scope;
+  }
+
+  // A Graph request that fails, or a scope Graph cannot express, leaves the
+  // strip away entirely. An absent strip is honest; a guessed one is not.
+  async function renderReconcile(result) {
+    const node = el('reconcile');
+    node.hidden = true;
+    if (!verified() || !result) return;
+    const scope = reconcileScope();
+    if (!scope) return;
+    const ticket = contributionRevision;
+    let graphView;
+    try { graphView = await graphTotals(scope.company, scope.cycle); }
+    catch { return; }
+    if (ticket !== contributionRevision || !verified()) return;
+    // Whatever cycle Graph pinned is the cycle this sentence has to name. Saying
+    // "All cycles" while Graph displays one was the strip describing a screen
+    // nobody was looking at.
+    const graphCycle = String(((graphView || {}).filters || {}).cycle || '');
+    const state = contributions.reconcile(result, basis(), graphView,
+      Object.assign({}, graphFilterState(), {studioCycle: scope.cycle, graphCycle: graphCycle}));
+    if (state.reasonId === 'unavailable') return;
+    const money = value => contributionPlot.format(value, 'amount');
+    const where = [scope.company || 'All companies',
+      scope.cycle || graphCycle || 'All cycles'].join(' · ');
+    const lead = document.createElement('span');
+    lead.textContent = 'Basis: ' + ((contributions.BASIS[basis()] || [])[0] || basis()) +
+      '. Graph shows ' + money(state.graphCents) + ' for ' + where +
+      ' (workbook receipts). Studio total ' + money(state.studioCents) + '. ';
+    const verdict = document.createElement('strong');
+    verdict.className = state.agree ? 'studio-reconcile-agree' : 'studio-reconcile-differ';
+    verdict.textContent = state.agree ? 'Agree.'
+      : 'Differ by ' + money(Math.abs(state.differenceCents)) + ' because ' + state.reason + '.';
+    const link = document.createElement('button');
+    link.type = 'button';
+    link.className = 'studio-reconcile-link';
+    link.textContent = 'Why Cross-reference differs';
+    link.onclick = () => {
+      if (typeof showView === 'function') showView('cross-reference');
+      else location.hash = '#cross-reference';
+    };
+    node.replaceChildren(lead, verdict, document.createTextNode(' '), link);
+    node.hidden = false;
+  }
+
   function renderScopeChip() {
-    const text = scopeText();
-    el('scope-chip').textContent = text;
-    el('scope-change').hidden = !text;
+    // The Data source button is permanent. The one way back to the report
+    // picker must never depend on there being a scope to describe.
+    el('scope-chip').textContent = scopeText();
+    // What the hand-off could not bring across is stated beside the scope,
+    // not left for the reader to meet as a number that looks too large.
+    const notes = (appliedScope && appliedScope.notCarried) || [];
+    el('scope-note').textContent = notes.join(' · ');
+    el('scope-note').hidden = !notes.length;
   }
 
   // Canvas only hides the builder surfaces; the control that does it never
@@ -1820,6 +2352,13 @@
     el('view-canvas').setAttribute('aria-checked', String(!!hidden));
     el('view-builder').tabIndex = hidden ? -1 : 0;
     el('view-canvas').tabIndex = hidden ? 0 : -1;
+    // Canvas only puts the Inspector behind its header button the way a narrow
+    // window does: the filter count stays readable and the panel stays off the
+    // chart until it is asked for.
+    const narrow = !!(window.matchMedia && window.matchMedia('(max-width: 1200px)').matches);
+    const closed = !!hidden || narrow;
+    el('inspector').hidden = closed;
+    el('inspector-toggle').setAttribute('aria-expanded', String(!closed));
   }
   const applyOptionsHidden = hidden => {
     const pane = window.MentatStudioPane;
@@ -1895,6 +2434,21 @@
   el('download-png').onclick = () => download('png');
   el('download-svg').onclick = () => download('svg');
   el('download-csv').onclick = () => download('csv');
+  el('copy-image').onclick = () => copyImage();
+  el('print-chart').onclick = () => printChart();
+  el('save-view').onclick = () => saveView();
+  el('open-views').onclick = () => openViews();
+  // The tray itself lives in chart-briefing.js. A console that is not yet
+  // serving it says so rather than answering the click with nothing.
+  const toBriefing = () => {
+    if (!window.MentatBriefing) {
+      failure('The briefing tray is not served by this console yet. Restart the console and try again.');
+      return;
+    }
+    window.MentatBriefing.capture(currentChart());
+  };
+  el('briefing-add').onclick = toBriefing;
+  el('briefing-menu-add').onclick = toBriefing;
   el('showme-toggle').onclick = () => { el('showme').hidden = !el('showme').hidden; renderToolbar(); };
   el('showme-close').onclick = () => { el('showme').hidden = true; renderToolbar(); };
   el('classic').onclick = () => {
@@ -1922,7 +2476,7 @@
   el('source-mode').onchange=()=>{persist();data=null;sourceKey='';clearTimeout(geometryTimer);contributionController?.abort();++contributionRevision;contributionMap?.destroy?.();contributionMap=null;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.MARK_TYPES);loadRuns();}};
   el('dataset').onchange=()=>{persist();selectContributionDataset();};
   el('basis').onchange=()=>commit(()=>{sheet().source.basis=el('basis').value;contributionOffset=0;});
-  el('refresh-data').onclick=()=>{++contributionCacheEpoch;contributionController?.abort();contributionPending=null;contributionCache.clear();memberCache.clear();loadContributions(true);};
+  el('refresh-data').onclick=()=>{++contributionCacheEpoch;contributionController?.abort();contributionPending=null;contributionCache.clear();memberCache.clear();graphTotalsCache.clear();loadContributions(true);};
   el('groups-prev').onclick=()=>{contributionOffset=Math.max(0,contributionOffset-(Number(sheet().params.maxGroups)||40));renderView();};
   el('groups-next').onclick=()=>{contributionOffset+=Number(sheet().params.maxGroups)||40;renderView();};
   el('inspect-all').onclick=()=>inspectContributions();
@@ -1947,8 +2501,22 @@
   el('view-builder').onclick = () => applyOptionsHidden(false);
   el('view-canvas').onclick = () => applyOptionsHidden(true);
   el('scope-change').onclick = () => {
+    // An explicit open outlives the prepare that may have opened the panel
+    // for its own reasons, so nothing closes it behind the reader's back.
+    progressOpened = false;
     el('source-details').open = true;
+    renderSourceSummary();
     el('source-details').querySelector('summary').focus();
+  };
+  el('source-details').addEventListener('toggle', renderSourceSummary);
+  // Cancelling aborts the request that is preparing and leaves the last good
+  // view exactly where it was: renderContributionView ignores AbortError.
+  el('progress-cancel').onclick = () => {
+    contributionController?.abort();
+    contributionPending = null;
+    progressDepth = 0;
+    clearProgress();
+    status('Preparing cancelled. The view above is the last one that loaded.');
   };
   el('inspector-toggle').onclick = () => {
     const open = el('inspector').hidden;
@@ -1966,7 +2534,24 @@
     renderAll();
   };
   el('overview-company').onchange = () => { overviewCompany = el('overview-company').value; renderOverview(); };
-  if (window.matchMedia && window.matchMedia('(max-width: 1200px)').matches) el('inspector').hidden = true;
+  // The Inspector is a column on a wide window and a drawer on a narrow one.
+  // Crossing that line applies the same rule the first paint applies, so a
+  // resized window never leaves the drawer sitting on top of its own toggle.
+  // The toggle states what it is showing from the start, not only after a
+  // click: a wide window arrives with the Inspector already open.
+  const narrowStudio = window.matchMedia ? window.matchMedia('(max-width: 1200px)') : null;
+  const syncInspector = isNarrow => {
+    const host = document.querySelector('#view-chart-studio .studio');
+    const closed = !!isNarrow || !!(host && host.classList.contains('studio-options-hidden'));
+    el('inspector').hidden = closed;
+    el('inspector-toggle').setAttribute('aria-expanded', String(!closed));
+  };
+  if (narrowStudio) {
+    syncInspector(narrowStudio.matches);
+    narrowStudio.addEventListener('change', event => syncInspector(event.matches));
+  } else {
+    el('inspector-toggle').setAttribute('aria-expanded', String(!el('inspector').hidden));
+  }
   el('filter-add').onchange = () => {
     const column = Number(el('filter-add').value);
     el('filter-add').value = '';
@@ -1987,12 +2572,28 @@
   // and the drill-down category/recipient live only inside graph.js, so none of
   // them are carried. The button title says what does travel.
   const GRAPH_SCOPE = [['company', 'company'], ['cycle', 'cycle']];
+  // What Graph can narrow by and this source cannot. Naming each one on the
+  // scope chip is the difference between a total that looks wrong and a
+  // total the reader knows is wider than the one they just left.
+  const GRAPH_NOT_CARRIED = [
+    ['tier', 'Employee level', 'verified data has no level field', ''],
+    ['funding', 'Giving type', 'verified data has no employee or corporate funding field', 'all'],
+    ['mode', 'Candidate view', 'downstream PAC activity and estimates stay in Graph', 'direct'],
+    ['direction', 'Support or opposition', 'that distinction exists only in Graph', 'Support']
+  ];
   function graphScope() {
     const read = id => (document.getElementById('graph-' + id) || {}).value || '';
-    const scope = {industry: read('industry'), filters: []};
+    const scope = {industry: read('industry'), filters: [], notCarried: []};
     for (const [control, field] of GRAPH_SCOPE) {
       const value = read(control);
-      if (value) scope.filters.push({field, value});
+      // Graph spells a cycle by its end year and the verified index spells it
+      // as the pair it covers, so the carried value is translated here rather
+      // than filtered on a spelling the index never holds.
+      if (value) scope.filters.push({field, value: core.carriedFilterValue(field, value)});
+    }
+    for (const [control, label, why, ignored] of GRAPH_NOT_CARRIED) {
+      const value = read(control);
+      if (value && value !== ignored) scope.notCarried.push(label + ': not carried (' + why + ')');
     }
     return scope;
   }
@@ -2025,7 +2626,16 @@
     },
     ready:()=>!!data,
     options(hidden) { setOptionsHidden(hidden); },
-    setOptionsHidden
+    setOptionsHidden,
+    // The briefing drawer and the share dialog live in chart-briefing.js and
+    // read the chart through the same one description the studio uses.
+    currentChart,
+    saveView,
+    openViews,
+    // The payload builders, so a browser test can assert what this console puts
+    // on the wire rather than what a fixture claims it puts there.
+    viewSourceRecord,
+    viewSourceText
   };
   if(el('destination'))el('destination').onchange=()=>{const id=el('destination').value;if(!id)return;const at=columns().findIndex(f=>f.id===id),amount=columns().findIndex(f=>f.id==='amount');if(at<0||amount<0){failure('Regenerate this workbook to create its destination fields.');return;}commit(()=>{sheet().columns=[{column:at,aggregation:'sum'}];sheet().rows=[{column:amount,aggregation:'sum'}];sheet().marks={type:'bar',color:null,size:null,label:null,detail:[],tooltip:[]};sheet().analytics.transform='none';});};
   renderAll();

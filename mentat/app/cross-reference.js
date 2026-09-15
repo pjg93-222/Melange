@@ -16,10 +16,12 @@
     ['verify','Verify & report','Reconcile decisions and expose remaining uncertainty.'],
   ];
   const statuses = {pending:'Pending',running:'In progress',completed:'Processed',review:'Needs evidence',failed:'Failed'};
+  // Engine keys, in the plain words a lobbyist reads. Anything unmapped still
+  // falls back to the key with its underscores removed, so a new engine
+  // reason is legible before it is named here.
   const reasons = {
     filing_relationship_evidence_missing:'Filing and amendment relationship needs evidence',
     latest_filing_completeness_unproven:'Complete latest filing has not been established',
-    original_source_of_transfer_unresolved:'Original donor behind a transfer is unresolved',
     company_pac_affiliation_unresolved:'Company connection to the PAC needs dated evidence',
     signed_adjustment_not_linked_refund:'Negative adjustment has no linked refund',
     receipt_role_unresolved:'Transaction meaning needs evidence',
@@ -28,6 +30,25 @@
     source_or_attribution_conflict:'Source facts or company matches disagree',
     funding_identity_unresolved:'Who supplied the money is unresolved',
     memo_parent_ambiguous:'Memo points to more than one possible receipt',
+    company_attribution_unresolved:'Donor not yet matched to a listed company (counted at $0)',
+    attribution_unresolved:'Attribution not settled (counted at $0)',
+    company_attribution_not_accepted:'Company match not accepted',
+    memo_parent_not_established:'Memo entry without a proven parent receipt',
+    original_source_of_transfer_unresolved:'Transfer whose original donor is unresolved',
+    earmark_counterpart_not_unique:'Earmark with more than one possible counterpart',
+    earmark_destination_ambiguous:'Earmark destination ambiguous',
+    overlapping_or_cyclic_earmark_links:'Earmark links overlap or loop',
+    observed_filing_versions_unresolved:'Amended filings not reconciled',
+    latest_filing_transaction_replacement_missing:'Latest filing lacks the replacing transaction',
+    latest_filing_manifest_not_corroborated:'Latest filing not corroborated by its manifest',
+    linked_refunds_exceed_original_gift:'Refunds exceed the original gift',
+    receipt_date_missing:'Receipt date missing',
+    excluded_source_metadata_conflict:'Source metadata conflict',
+    superseded_in_observed_filing_family:'Superseded by a later filing',
+    same_original_gift_at_conduit_and_destination:'Same gift seen at conduit and destination',
+    explicit_same_filing_memo_reference:'Memo references its own filing',
+    explicit_observed_refund:'Observed refund',
+    linked_refund:'Linked refund adjustment',
   };
   const reason = value => escape(String(value || '').split(';').map(part => Object.hasOwn(reasons, part.trim()) ? reasons[part.trim()] : part.trim().replaceAll('_',' ')).join('; '));
   function recordLink(row) {
@@ -49,8 +70,12 @@
     }).join('') + '</ol>';
   }
 
-  function metric(title, value, detail) {
-    return `<div class="xref-metric"><span>${title}</span><strong>${value}</strong><small>${detail}</small></div>`;
+  // Which election cycles a figure describes. A dollar total with no period
+  // beside it invites the reader to compare it with one from another run.
+  let scopeCycles = '';
+  function metric(title, value, detail, money) {
+    const cycles = money && scopeCycles ? `<small class="xref-metric-cycles">Cycles ${escape(scopeCycles)}</small>` : '';
+    return `<div class="xref-metric"><span>${title}</span><strong>${value}</strong>${cycles}<small>${detail}</small></div>`;
   }
 
   function table(rows, headings, cells, empty) {
@@ -59,6 +84,7 @@
   }
 
   function html(data) {
+    scopeCycles = '';
     if (!data || data.status === 'empty') return '<section class="panel xref-empty"><h2>From evidence to one coherent account</h2><p>Cross-referencing runs automatically as collected data is prepared for a report. Its decisions, dollar changes and remaining questions will appear here.</p>' + stepHtml([]) + '<p class="muted">No run has been saved yet. Viewing this page does not start collection.</p></section>';
     if (data.status === 'error' || !data.available) return `<section class="panel xref-warning" role="alert"><h2>Saved evidence unavailable</h2><p>${escape(data.message || 'The latest run could not be read.')}</p><p>No totals are shown until the saved run and its evidence agree.</p></section>`;
     const report = data.report, progress = data.progress;
@@ -69,6 +95,7 @@
     content += stepHtml(report?.steps || progress?.steps);
     if (!report) return content + `<section class="panel"><h2>Evidence is being reconciled</h2><p>${escape(progress?.message || 'Totals appear after the computation finishes. Unresolved evidence will remain visible.')}</p><p class="muted">Last progress update: ${escape(progress?.updated_at || 'Unknown')}. A saved status is not proof that a worker is still running.</p></section>`;
     const s = report.summary || {}, scope = report.scope || {};
+    scopeCycles = items(scope.cycles).join(', ');
     content += `<section class="panel xref-scope"><h2>What this run covers</h2><p>${escape(items(scope.industries).join(', ') || 'Industry scope unavailable')} · Cycles ${escape(items(scope.cycles).join(', ') || 'unavailable')}</p><p class="muted">${number(scope.company_count ?? items(scope.companies).length)} listed companies · ${number(scope.source_count)} source snapshots · Generated ${escape(report.generated_at || 'at an unknown time')}</p><details><summary>Companies in scope</summary><p>${escape(items(scope.companies).join(', ') || 'Company scope unavailable')}</p>${scope.company_count > items(scope.companies).length ? '<p class="muted">Company names are truncated in this display; the full scope is preserved in the saved report.</p>' : ''}</details><p class="xref-caption">Generation time describes this computation. It does not establish the FEC data-through date or completeness of company coverage.</p></section>`;
     content += '<div class="xref-metrics">' + metric('Records examined', number(s.input_records), 'Rows available in the selected sources.') + metric('Automatically resolved', number(s.automatic_decisions), 'Decisions supported by the available evidence; not an accuracy percentage.') + metric('Records needing review', number(s.unresolved_records), 'Missing or conflicting transaction evidence needs a check.') + '</div>';
     if (numeric(s.source_verified_records) || numeric(s.classified_from_stored_records)) {
@@ -78,11 +105,12 @@
       content += '</div>';
     }
     content += `<section class="panel"><div class="panel-heading"><h2>Keep each stage of money separate</h2><span class="badge">${s.verified_unique ? 'Scoped uniqueness established' : 'Provisional totals'}</span></div><div class="xref-money-grid">`;
-    content += metric('Observed original giving', money(s.observed_original_giving), s.verified_unique ? 'Counted under the scope and evidence rules of this run.' : 'Signed amounts after cross-referencing. Includes unresolved giving; not yet verified unique dollars.');
-    content += metric('Observed PAC outgoing activity', money(s.pac_outgoing), 'Recipient-reported activity in these records; incomplete. Do not add it to original giving.');
+    content += metric('Observed original giving', money(s.observed_original_giving), s.verified_unique ? 'Counted under the scope and evidence rules of this run.' : 'Signed amounts after cross-referencing. Includes unresolved giving; not yet verified unique dollars.', true);
+    content += metric('Observed PAC outgoing activity', money(s.pac_outgoing), 'Recipient-reported activity in these records; incomplete. Do not add it to original giving.', true);
     content += '</div><dl class="xref-breakdown"><div><dt>Employee giving · reported employer</dt><dd>' + money(s.employee_giving) + '</dd></div><div><dt>Corporate treasury giving · supported ownership</dt><dd>' + money(s.corporate_giving) + '</dd></div><div><dt>Funding attribution unverified</dt><dd>' + money(s.unverified_funding) + '</dd></div>';
     if (numeric(s.linked_refund_adjustments)) content += '<div><dt>Linked refund adjustments</dt><dd>' + money(s.linked_refund_adjustments) + '</dd></div>';
     content += '</dl><p class="xref-caption">These amounts follow the classifications supported in this run. Unverified funding attribution remains in the original-giving view.</p>';
+    content += '<p class="xref-caption">Rows with an unresolved company attribution are counted at $0 in every total above; memo, transfer, earmark and role reviews stay inside Observed original giving until resolved.</p>';
     if (numeric(s.supported_original_giving)) content += `<p class="xref-caption">Gross giving with complete uniqueness evidence: ${money(s.supported_original_giving)}. This separate measure requires complete filing, origin and route evidence; it does not invalidate resolved receipt classifications.</p>`;
     content += '</section>';
     if (items(report.partisan_breakdowns).length) {
@@ -90,7 +118,7 @@
       content += table(items(report.partisan_breakdowns), ['Money view','Democratic receipts','Republican receipts','Other / unknown receipts','D/R denominator','Democratic share of D/R','Republican share of D/R','D/R classification coverage'], row => [escape(String(row.view || '').replaceAll('_',' ')),money(row.democratic),money(row.republican),money(row.other_unknown),money(row.denominator_dr),percent(row.democratic_percent),percent(row.republican_percent),percent(row.classified_gross_percent)], 'Partisan evidence unavailable.');
       content += '<details><summary>Denominators and evidence basis</summary>' + items(report.partisan_breakdowns).map(row => `<p><strong>${escape(String(row.view || '').replaceAll('_',' '))}:</strong> ${escape(row.basis || 'Evidence basis unavailable.')}</p>`).join('') + '<p class="xref-caption">A missing or invalid share is unavailable, not zero. Original giving and recipient-reported PAC activity remain separate.</p></details></section>';
     }
-    content += `<section class="panel"><h2>What changed, and why</h2><div class="xref-money-grid">${metric('Previous receipt total', money(s.baseline_amount), 'Selected baseline. Changes may also separate different money stages.')}${metric('Change from previous total', money(s.amount_change), 'Every change is preserved with its evidence in the local ledger.')}</div>`;
+    content += `<section class="panel"><h2>What changed, and why</h2><div class="xref-money-grid">${metric('Previous receipt total', money(s.baseline_amount), 'Selected baseline. Changes may also separate different money stages.', true)}${metric('Change from previous total', money(s.amount_change), 'Every change is preserved with its evidence in the local ledger.', true)}</div>`;
     content += table(items(report.changes).slice(0,20), ['Company / cycle','Reason / record','Before','After','Change'], row => [escape(row.company) + '<small>' + escape(row.cycle) + '</small>',reason(row.reason) + (row.source_description ? '<small>' + escape(String(row.source_description).slice(0,500)) + '</small>' : '') + '<small>' + recordLink(row) + '</small>',money(row.before),money(row.after),money(row.delta)], 'No changed records are listed in this summary.');
     content += '<p class="xref-caption">Up to 20 decisions are shown here. The saved local ledger retains the complete record-level history.</p></section>';
     content += `<section class="panel"><h2>Records needing review</h2><p>${money(s.unresolved_amount)} is associated with unresolved records. This is an evidence gap, not an estimated error amount.</p>`;

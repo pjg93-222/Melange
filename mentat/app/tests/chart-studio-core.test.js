@@ -1,4 +1,6 @@
-/* Chart Studio compiler and Show Me table. Run: node --test mentat/app/tests */
+/* Chart Studio compiler and Show Me table. */
+// Node 24 rejects the bare directory form; run with the glob:
+//   node --test "mentat/app/tests/**/*.test.js"
 const test = require('node:test');
 const assert = require('node:assert');
 const core = require('../chart-studio-core.js');
@@ -231,7 +233,7 @@ test('time analysis asks for one Subject and filters to it', () => {
 test('an empty sheet compiles to no configuration and says why', () => {
   const report = core.compileReport(sheet({}), COLUMNS);
   assert.strictEqual(report.config, null);
-  assert.match(report.issues.join(' '), /Drag a dimension/);
+  assert.match(report.issues.join(' '), /Add a grouping \(company, recipient, cycle\) and a dollar measure\./);
 });
 
 test('hidden identifier fields still compile when a user places them', () => {
@@ -1080,6 +1082,46 @@ test('a company-overview preset compiles into the verified query it describes', 
     {company: 'Acme'}), VERIFIED, {dataset: 'Banking', basis: 'receipt'});
   assert.deepStrictEqual(cycles.query.dimensions, ['cycle']);
   assert.deepStrictEqual(cycles.query.sort, [{field: 'cycle', direction: 'asc'}]);
+});
+
+test('a single click sends a grouping across the top and a measure down the side', () => {
+  const meta = core.classifyFields(COLUMNS);
+  const dimension = core.fieldAt(meta, CATEGORY), measure = core.fieldAt(meta, AMOUNT);
+  const empty = sheet({});
+  assert.strictEqual(core.quickAddZone(dimension, empty), 'columns');
+  assert.strictEqual(core.quickAddZone(measure, empty), 'rows');
+  const taken = sheet({columns: [{column: CYCLE, aggregation: 'sum'}],
+    rows: [{column: AMOUNT, aggregation: 'sum'}]});
+  assert.strictEqual(core.quickAddZone(dimension, taken), 'rows');
+  assert.strictEqual(core.quickAddZone(measure, taken), 'columns');
+});
+
+test('the click zone reads the shelves only, never a field selection', () => {
+  const meta = core.classifyFields(COLUMNS);
+  const dimension = core.fieldAt(meta, CATEGORY);
+  // Marks channels are not shelves: a coloured view still sends the next
+  // grouping to the empty Columns shelf.
+  const coloured = sheet({marks: marks({color: {column: TIER, aggregation: 'sum'}})});
+  assert.strictEqual(core.quickAddZone(dimension, coloured), 'columns');
+  assert.strictEqual(core.quickAddZone(null, sheet({})), 'columns');
+  assert.strictEqual(core.quickAddZone(dimension, {}), 'columns');
+});
+
+test('a cycle carried from Graph is translated into the spelling the index stores', () => {
+  // graph.js option values are the end year; contribution_data.py stores the pair.
+  assert.strictEqual(core.carriedFilterValue('cycle', '2024'), '2023-2024');
+  assert.strictEqual(core.carriedFilterValue('cycle', 2026), '2025-2026');
+  assert.strictEqual(core.carriedFilterValue('cycle', '2023-2024'), '2023-2024');
+  assert.strictEqual(core.carriedFilterValue('cycle', ''), '');
+  assert.strictEqual(core.carriedFilterValue('company', '2024'), '2024');
+});
+
+test('the reverse map gives Graph the end year, and refuses anything that is not a cycle', () => {
+  assert.strictEqual(core.graphCycleValue('2023-2024'), '2024');
+  assert.strictEqual(core.graphCycleValue('2024'), '2024');
+  assert.strictEqual(core.graphCycleValue('2020-2024'), '');
+  assert.strictEqual(core.graphCycleValue(''), '');
+  assert.strictEqual(core.graphCycleValue(null), '');
 });
 
 test('company overview names the fields a source does not have', () => {
