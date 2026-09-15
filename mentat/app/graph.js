@@ -11,7 +11,7 @@
     if ([...node.options].some(o=>o.value===selected)) node.value=selected;
   }
   function error(text='') {get('error').textContent=text;get('error').hidden=!text;}
-  function clear() {view=null;get('results').hidden=true;get('candidate-detail').hidden=true;get('freshness').replaceChildren();get('provenance').replaceChildren();error();}
+  function clear() {view=null;window.dispatchEvent(new CustomEvent('mentat:graph',{detail:null}));get('results').hidden=true;get('candidate-detail').hidden=true;get('freshness').replaceChildren();get('provenance').replaceChildren();error();}
   function syncControls() {
     get('tier').disabled=get('funding').value==='corporate';
     if(get('tier').disabled)get('tier').value='';
@@ -24,25 +24,31 @@
   }
   async function loadRuns() {
     try {
-      const body=await api('/api/runs');
-      const chosen=body.runs.find(r=>r.id===selectedRun && !['ready','needs review'].includes(r.state))
+      const body=await api('/api/report-sources');
+      let chosen=body.runs.find(r=>r.id===selectedRun && !['ready','needs review'].includes(r.state))
         ||body.runs.find(r=>r.state==='completed')||body.runs[0];
-      options(get('run'),body.runs.map(r=>[r.id,r.name]),chosen?.id);
-      await loadCatalog();
+      let catalog=null;
+      const candidates=[chosen,...body.runs.filter(r=>!['ready','needs review'].includes(r.state))].filter((r,i,a)=>r&&a.findIndex(v=>v?.id===r.id)===i);
+      for(const candidate of candidates){
+        const available=await api('/api/graph-catalog?id='+encodeURIComponent(candidate.id));
+        if(available.industries.length){chosen=candidate;catalog=available;break;}
+      }
+      options(get('run'),body.runs.map(r=>[r.id,`${r.name} · ${r.state}`]),chosen?.id);
+      await loadCatalog(catalog);
     } catch(e){error(e.message);get('status').textContent='Report sources unavailable.';}
   }
-  async function loadCatalog() {
+  async function loadCatalog(preloaded=null) {
     const ticket=++revision;controller?.abort();clear();get('status').textContent='Reading saved report sources…';
     options(get('industry'),[]);options(get('company'),[['','All companies']]);options(get('cycle'),[['','All cycles']]);
     category='';recipient='';get('tier').value='';get('funding').value='all';get('mode').value='direct';syncControls();
     if(!get('run').value){get('status').textContent='No saved runs available.';return;}
     try {
-      const body=await api('/api/graph-catalog?id='+encodeURIComponent(get('run').value));
+      const body=preloaded?.industries ? preloaded : await api('/api/graph-catalog?id='+encodeURIComponent(get('run').value));
       if(ticket!==revision)return;
       options(get('industry'),body.industries.map(i=>[i.name,i.name]));
       unavailable=body.unavailable_reports||[];
       if(unavailable.length)get('source-label').textContent='Unavailable saved reports: '+unavailable.join(', ');
-      if(!body.industries.length){get('status').textContent='No guided report data in this run. Choose another saved run or use Create chart.';return;}
+      if(!body.industries.length){get('status').textContent=body.message||'No finalized report data in this run. Choose another saved run, or check Collection for its status.';return;}
       await refresh(true);
     } catch(e){if(ticket===revision){error(e.message);get('status').textContent='Report sources unavailable.';}}
   }
@@ -51,14 +57,10 @@
     if(!get('industry').value)return;
     get('status').textContent='Reading saved giving data…';
     try {
-      const response=await fetch('/api/graph?'+filters(),{signal:controller.signal});
+      const response=await fetch('/api/graph?'+filters()+(initial?'&latest=1':''),{signal:controller.signal});
       const body=await response.json();if(!response.ok)throw new Error(body.error||'Graph unavailable.');
       if(ticket!==revision)return;
-      if(initial && body.options.cycles.length){
-        options(get('cycle'),[['','All cycles'],...body.options.cycles.map(c=>[c,`${Number(c)-1}–${c}`])],body.options.cycles.at(-1));
-        return refresh();
-      }
-      view=body;render();
+      view=body;render();window.dispatchEvent(new CustomEvent('mentat:graph',{detail:{...body,run:get('run').value,industry:get('industry').value}}));
     } catch(e){if(ticket===revision&&e.name!=='AbortError'){error(e.message);get('status').textContent='Graph unavailable for this selection.';}}
   }
   function chip(text,clearFilter) {
@@ -103,7 +105,8 @@
   function draw(name,rows,onClick,shares=false) {
     const container=get(name);container.replaceChildren();
     if(!rows.length){const p=document.createElement('p');p.className='graph-empty';p.textContent='No nonzero amounts recorded for this selection.';container.append(p);return;}
-    const shown=name==='categories'?rows:rows.slice(0,5),total=rows.reduce((sum,r)=>sum+r.amount,0);
+    const count=Number(get('row-count').value);
+    const shown=count>0?rows.slice(0,count):rows,total=rows.reduce((sum,r)=>sum+r.amount,0);
     const percentages=shares&&total>0&&rows.every(r=>r.amount>=0);
     const compact=name==='candidates', width=compact?430:720, height=shown.length*(compact?62:52)+35;
     const svg=svgNode('svg',{viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':titleFor[name],class:'graph-bars'});
@@ -126,15 +129,22 @@
       const select=()=>onClick(row.id);group.addEventListener('click',select);group.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();select();}});
       svg.append(group);
     });container.append(svg);
-    if(name!=='categories') {const preview=document.createElement('p');preview.className='muted';preview.textContent=`Showing ${shown.length} of ${rows.length}`;container.append(preview);}
+    {const preview=document.createElement('p');preview.className='muted';preview.textContent=`Showing ${shown.length} of ${rows.length}`;container.append(preview);}
     const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=`All ${rows.length} values`;
-    const scroll=document.createElement('div');scroll.className='table-scroll';
-    const table=document.createElement('table'),head=document.createElement('thead'),body=document.createElement('tbody');
-    head.innerHTML='<tr><th>Name</th><th>Net amount</th></tr>';
-    rows.forEach(row=>{const tr=document.createElement('tr'),label=document.createElement('td'),value=document.createElement('td'),button=document.createElement('button');button.type='button';button.className='graph-text-button';button.textContent=row.label;button.onclick=()=>onClick(row.id);label.append(button);value.textContent=dollars(row.amount);tr.append(label,value);body.append(tr);});
-    table.append(head,body);scroll.append(table);details.append(summary,scroll);container.append(details);
+    let valuesBuilt=false;
+    details.addEventListener('toggle',()=>{
+      if(!details.open||valuesBuilt)return;
+      const scroll=document.createElement('div');scroll.className='table-scroll';
+      const table=document.createElement('table'),head=document.createElement('thead'),body=document.createElement('tbody');
+      head.innerHTML='<tr><th>Name</th><th>Net amount</th></tr>';
+      rows.forEach(row=>{const tr=document.createElement('tr'),label=document.createElement('td'),value=document.createElement('td'),button=document.createElement('button');button.type='button';button.className='graph-text-button';button.textContent=row.label;button.onclick=()=>onClick(row.id);label.append(button);value.textContent=dollars(row.amount);tr.append(label,value);body.append(tr);});
+      table.append(head,body);scroll.append(table);details.append(scroll);valuesBuilt=true;
+    });
+    details.append(summary);container.append(details);
     if(shares&&!percentages){const p=document.createElement('p');p.className='muted';p.textContent='Signed net amounts shown; percentage shares are withheld when a category is negative.';container.append(p);}
   }
+  get('row-count').oninput=()=>{if(!get('row-count').checkValidity()){get('row-status').textContent='Enter a positive whole number.';return;}get('row-status').textContent='';if(view)render();};
+  get('all-rows').onclick=()=>{get('row-count').value='';get('row-status').textContent='Showing every matching row.';if(view)render();};
   function showCandidate(id) {
     const row=view.candidates.find(c=>c.id===id);if(!row)return;
     get('candidate-detail-title').textContent=`${row.label} · ${id} · ${view.filters.mode==='direct'?'Included receipt groups':'Source committee activity'}`;
@@ -202,7 +212,7 @@
     if(name==='candidates'&&!view.candidate_available)return;
     if(format==='csv'){exportChart(name);return;}
     const note=name==='candidates'?view.candidate_note:view.note;
-    const context=`${get('scope').textContent}. ${name==='candidates'?get('mode').selectedOptions[0].textContent+'. '+(view.filters.mode==='direct'?'':view.filters.direction+'. '):''}${note} Preview: ${name==='categories'?view[name].length:Math.min(5,view[name].length)} of ${view[name].length} groups. `+view.reports.map(r=>`${r.name} SHA-256 ${r.sha256}`).join('; ');
+    const context=`${get('scope').textContent}. ${name==='candidates'?get('mode').selectedOptions[0].textContent+'. '+(view.filters.mode==='direct'?'':view.filters.direction+'. '):''}${note} Preview: ${get(name).querySelectorAll('svg .graph-bar-button').length} of ${view[name].length} groups. `+view.reports.map(r=>`${r.name} SHA-256 ${r.sha256}`).join('; ');
     try {await MentatExport.image(get(name).querySelector('svg'),format,titleFor[name],context,'mentat-'+name);}
     catch(e){error(e.message);}
   };
@@ -235,8 +245,16 @@
     get('open-'+name).onclick=()=>{get(name).showModal();if(name==='builder')get(name).dispatchEvent(new Event('mentat:open'));};
     get('close-'+name).onclick=()=>get(name).close();
   }
+  let reportSignature='';
+  window.addEventListener('mentat:run',event=>{
+    const run=event.detail;if(!loaded||get('run').value!=='published-reports')return;
+    const signature=JSON.stringify(run.reports.map(r=>[r.index,r.quality?.sha256]));
+    if(reportSignature&&signature!==reportSignature)loadCatalog();
+    reportSignature=signature;
+  });
   applyAnalysis();
-  function activate(){if(currentView==='graph'&&!loaded){loaded=true;loadRuns();}}
+  function activate(){if((currentView==='graph'||(currentView==='evidence'&&splitView))&&!loaded){loaded=true;loadRuns();}}
+  window.addEventListener('mentat:view',activate);
   document.querySelector('.workspace-tabs').addEventListener('click',activate);
   document.querySelector('.workspace-tabs').addEventListener('keydown',activate);
   window.addEventListener('hashchange',activate);activate();

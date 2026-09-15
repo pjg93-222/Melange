@@ -23,6 +23,36 @@ if (Test-Path -LiteralPath $localDataSetting) {
   }
 }
 $projectPath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+$serverHasher = [Security.Cryptography.SHA256]::Create()
+try {
+  $serverCodeHash = [BitConverter]::ToString($serverHasher.ComputeHash(
+    [IO.File]::ReadAllBytes((Join-Path $PSScriptRoot 'server.py')))).Replace('-', '').ToLowerInvariant()
+} finally { $serverHasher.Dispose() }
+$reportDirectory = $env:MENTAT_REPORT_DIRECTORY
+if (-not $reportDirectory) {
+  $reportConfiguration = Get-Content -Raw -LiteralPath (Join-Path $projectPath 'config\report-directory.json') | ConvertFrom-Json
+  if ($reportConfiguration.schema_version -ne 1) { throw 'Unsupported report-directory configuration.' }
+  $reportDirectory = [string]$reportConfiguration.directory
+}
+if (-not [IO.Path]::IsPathRooted($reportDirectory) -or -not (Test-Path -LiteralPath $reportDirectory -PathType Container)) {
+  throw 'The authoritative report folder is unavailable. No alternate folder will be used.'
+}
+$reportDirectory = (Resolve-Path -LiteralPath $reportDirectory).ProviderPath
+$env:MENTAT_REPORT_DIRECTORY = $reportDirectory
+function Test-CurrentMentatServer($health) {
+  return ($health.application -eq 'MENTAT' -and $health.project -eq $projectPath -and
+    $health.data_root -eq $DataRoot -and $health.report_directory -eq $reportDirectory -and
+    $health.server_code_sha256 -eq $serverCodeHash -and $health.read_only -eq $false)
+}
+function Test-MentatPortListening([int]$Candidate) {
+  # Windows HTTP connection retries can consume seconds on an unused port.
+  # Only ask for health after a bounded loopback TCP connection succeeds.
+  $client = New-Object Net.Sockets.TcpClient
+  try {
+    $connection = $client.ConnectAsync('127.0.0.1', $Candidate)
+    return ($connection.Wait(150) -and $client.Connected)
+  } catch { return $false } finally { $client.Dispose() }
+}
 if (-not $DataRoot) { $DataRoot = Join-Path $env:LOCALAPPDATA 'Mentat\console' }
 $DataRoot = [IO.Path]::GetFullPath($DataRoot)
 $hash = [Security.Cryptography.SHA256]::Create()
@@ -45,14 +75,15 @@ try {
   $freePort = $false
   foreach ($candidate in $ports) {
     $url = "http://127.0.0.1:$candidate"
+    $probe = New-Object Net.Sockets.TcpListener([Net.IPAddress]::Loopback, $candidate)
+    try { $probe.Start(); $Port = $candidate; $freePort = $true; break } catch { } finally { $probe.Stop() }
+    if (-not (Test-MentatPortListening $candidate)) { continue }
     try {
       $health = Invoke-RestMethod "$url/api/health" -TimeoutSec 2
-      if ($health.application -eq 'MENTAT' -and $health.project -eq $projectPath -and $health.data_root -eq $DataRoot) {
+      if (Test-CurrentMentatServer $health) {
         $available = $true; $Port = $candidate; break
       }
     } catch { }
-    $probe = New-Object Net.Sockets.TcpListener([Net.IPAddress]::Loopback, $candidate)
-    try { $probe.Start(); $Port = $candidate; $freePort = $true; break } catch { } finally { $probe.Stop() }
   }
   if (-not $available -and -not $freePort) { throw 'No local MENTAT port is available. Close an unused local app and try again.' }
   if (-not $available) {
@@ -64,7 +95,9 @@ if (-not $PythonPath) {
     $PythonPath = $pythonCommand.Source
   }
 }
-& $PythonPath -c "import sys; assert sys.version_info >= (3,11), 'Python 3.11 or newer is required'; import openpyxl" 2>&1 | Out-Null
+# The server imports openpyxl itself. Check availability here without loading
+# the entire package in a disposable process before loading it again.
+& $PythonPath -c "import sys, importlib.util; assert sys.version_info >= (3,11), 'Python 3.11 or newer is required'; assert importlib.util.find_spec('openpyxl') is not None, 'openpyxl is required'" 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'MENTAT requires Python 3.11 or newer with openpyxl. Run: python -m pip install openpyxl' }
 $arguments = @((Join-Path $PSScriptRoot 'server.py'), '--port', [string]$Port, '--data-root', $DataRoot)
 if ($KeysFile) { $arguments += @('--keys-file', $KeysFile) }
@@ -76,16 +109,20 @@ $url = "http://127.0.0.1:$Port"
     '"' + $_.Replace('"', '\"') + '"'
   }) -join ' '
   $process = Start-Process -FilePath $PythonPath -ArgumentList $quotedArguments `
-    -WindowStyle Hidden -PassThru `
+    -WindowStyle Hidden -PassThru -WorkingDirectory $reportDirectory `
     -RedirectStandardOutput (Join-Path $logDirectory "server-$Port.stdout.log") `
     -RedirectStandardError (Join-Path $logDirectory "server-$Port.stderr.log")
-  for ($attempt = 0; $attempt -lt 30; $attempt++) {
-    Start-Sleep -Milliseconds 300
+  $null = $process.Handle
+  $startupWatch = [Diagnostics.Stopwatch]::StartNew()
+  while ($startupWatch.Elapsed.TotalSeconds -lt 30) {
     if ($process.HasExited) { throw "MENTAT could not start. See $logDirectory\server-$Port.stderr.log." }
-    try {
-      $health = Invoke-RestMethod "$url/api/health" -TimeoutSec 1
-      if ($health.application -eq 'MENTAT' -and $health.project -eq $projectPath -and $health.data_root -eq $DataRoot) { $available = $true; break }
-    } catch { }
+    if (Test-MentatPortListening $Port) {
+      try {
+        $health = Invoke-RestMethod "$url/api/health" -TimeoutSec 1
+        if (Test-CurrentMentatServer $health) { $available = $true; break }
+      } catch { }
+    }
+    Start-Sleep -Milliseconds 100
   }
   if (-not $available) { throw 'Mentat app has not responded yet. Check its local server log.' }
 }

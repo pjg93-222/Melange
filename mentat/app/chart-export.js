@@ -8,22 +8,36 @@
   }
   async function image(source, format, title, context, name='mentat-chart') {
     if (!source) throw new Error('Create a chart before exporting.');
-    const svg = source.cloneNode(true), ns = 'http://www.w3.org/2000/svg';
-    const box = source.viewBox.baseVal, width = box.width, height = box.height;
-    const lines = String(context).match(new RegExp('.{1,' + Math.floor(width / 7) + '}(?:\\s|$)|.{1,' + Math.floor(width / 7) + '}', 'g')) || [];
-    const fullHeight = height + 65 + lines.length * 17;
-    svg.setAttribute('xmlns', ns); svg.setAttribute('viewBox', `0 0 ${width} ${fullHeight}`);
-    svg.setAttribute('width', width); svg.setAttribute('height', fullHeight);
-    svg.removeAttribute('class');
+    const ns = 'http://www.w3.org/2000/svg', box = source.viewBox.baseVal;
+    if (![box.x,box.y,box.width,box.height].every(Number.isFinite) || box.width <= 0 || box.height <= 0) throw new Error('The chart has no exportable viewport.');
+    // A map's viewBox moves and shrinks while zooming. Keep that viewBox on a
+    // nested, clipped viewport, and add the caption outside it. Resetting x/y to
+    // zero without moving the marks exports a different geographic area.
+    const absoluteWidth = /^\d+(?:\.\d+)?$/.test(source.getAttribute('width') || '') ? Number(source.getAttribute('width')) : 1000;
+    const width = Math.max(320, absoluteWidth), height = width * box.height / box.width;
+    const wrap = (value, size) => String(value ?? '').split(/\r?\n/).flatMap(line => line.match(new RegExp('.{1,' + size + '}(?:\\s|$)|.{1,' + size + '}', 'g')) || ['']);
+    const lineWidth = Math.max(20, Math.floor((width - 32) / 7));
+    const titles = wrap(title, lineWidth), lines = wrap(context, lineWidth);
+    const fullHeight = Math.ceil(height + 35 + (titles.length + lines.length) * 17);
+    const svg = document.createElementNS(ns,'svg'), viewport = source.cloneNode(true);
+    for (const [key,value] of Object.entries({xmlns:ns,viewBox:`0 0 ${width} ${fullHeight}`,width,height:fullHeight})) svg.setAttribute(key,value);
+    viewport.removeAttribute('class'); viewport.removeAttribute('style');
+    for (const [key,value] of Object.entries({x:0,y:0,width,height,overflow:'hidden',viewBox:`${box.x} ${box.y} ${box.width} ${box.height}`})) viewport.setAttribute(key,value);
     const background = document.createElementNS(ns, 'rect');
     for (const [k,v] of Object.entries({width, height:fullHeight, fill:'#ffffff'})) background.setAttribute(k,v);
-    svg.prepend(background);
+    svg.append(background);
+    const canvasBackground = document.createElementNS(ns,'rect');
+    const sourceBackground = getComputedStyle(source).backgroundColor;
+    for (const [key,value] of Object.entries({width,height,fill:sourceBackground && sourceBackground !== 'rgba(0, 0, 0, 0)' ? sourceBackground : '#ffffff'})) canvasBackground.setAttribute(key,value);
+    svg.append(canvasBackground,viewport);
+    const theme=globalThis.MentatTheme||{ink:'#202522',sans:'Arial, sans-serif'};
     const text = (value,y,bold=false) => {
       const node = document.createElementNS(ns,'text'); node.textContent=value;
-      for (const [k,v] of Object.entries({x:16,y,fill:MentatTheme.ink,'font-size':12,'font-family':MentatTheme.sans,'font-weight':bold?600:400})) node.setAttribute(k,v);
+      for (const [k,v] of Object.entries({x:16,y,fill:theme.ink,'font-size':12,'font-family':theme.sans,'font-weight':bold?600:400})) node.setAttribute(k,v);
       svg.append(node);
     };
-    text(title,height+24,true); lines.forEach((line,i)=>text(line.trim(),height+47+i*17));
+    titles.forEach((line,i)=>text(line.trim(),height+24+i*17,true));
+    lines.forEach((line,i)=>text(line.trim(),height+30+(titles.length+i)*17));
     const content = new XMLSerializer().serializeToString(svg);
     if (format === 'svg') {download(content,'image/svg+xml',name+'.svg'); return;}
     if (format !== 'png') throw new Error('Choose SVG or PNG.');
@@ -31,7 +45,10 @@
     try {
       const img=new Image();
       await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('Could not render PNG. Try SVG export.'));img.src=url;});
-      const canvas=document.createElement('canvas'); canvas.width=width*2;canvas.height=fullHeight*2;
+      // Dense multi-measure bar pages can exceed browser canvas limits. Reduce
+      // raster resolution uniformly while retaining the entire chart and caption.
+      const scale=Math.min(2,16384/width,16384/fullHeight,Math.sqrt(32000000/(width*fullHeight)));
+      const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.floor(width*scale));canvas.height=Math.max(1,Math.floor(fullHeight*scale));
       canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
       if(!blob)throw new Error('PNG export unavailable. Try SVG export.');

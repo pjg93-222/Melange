@@ -1,5 +1,10 @@
 # Mentat collection app
 
+**Chart Studio** retains the original interface and now provides verified
+contribution charts and maps through its existing field shelves.
+See [its accounting and usage guide](CONTRIBUTION_STUDIO.md) for data sources,
+accounting bases, field shelves, filters, ZIP overlays and record inspection.
+
 The console uses the palette and typography pairing from
 [America's Credit Unions](https://www.americascreditunions.org/), inspected on
 September 8, 2026: plum `#342649`, ivory `#F7EDE4`, gold `#ECA91C`, purple
@@ -28,7 +33,12 @@ Editing a draft invalidates its previous review and disables collection until
 it is reviewed again. Validated rosters persist on the server through the same
 readiness checks and isolated runner as uploaded workbooks. In **Collection**,
 select a ready roster and use **Continue collection setup** to resume it.
-The **PAC evidence** tab is independent of the selected collection run.
+The **PAC evidence** tab defaults to independent saved-snapshot selection. Choose
+the company snapshot, election cycle, and a committee available in that cycle.
+**Follow Graph selection** optionally restricts evidence to Graph's companies and
+cycle; its configuration controls remain available when no snapshot matches.
+**Refresh snapshots** discovers newly saved evidence. Company matching normalizes Unicode, whitespace
+and case; it does not guess corporate aliases or merge different legal names.
 
 The table format uses `canonical_name,alias,industry,exclusion`; only
 `canonical_name` is required. Repeat it for every alias. The included template
@@ -40,21 +50,43 @@ their values must agree. Manual entry rejects duplicate canonical companies.
 The console invokes the existing resilient R/PowerShell runner. It snapshots
 `R/`, `tools/`, `inputs/`, and `mentat.R` into a private runtime for each upload,
 with the uploaded roster installed as that runtime's `Company Name.xlsx`.
+FEC bulk snapshots include only the selected election cycles, plus shared metadata
+and those cycles' evidence receipts. Report input checks use the same cycle scope.
+The snapshot contains independent file copies so workers cannot modify the source files.
 This keeps collector roster resolution and readiness validation aligned.
 Existing source inputs and collection databases are not replaced.
 The app sets `MENTAT_CUSTOM_ROSTER=1` for its workers, allowing the R importer
 to read a roster containing only the uploaded industries. Without this flag,
 the standard importer's five required industry sheets remain required.
 
-Run state, raw exports, runtime snapshots, and reports live under
-`%LOCALAPPDATA%/Mentat/console`. The interface also discovers the latest 15 runs
+Final workbooks and all report viewing use one authoritative folder:
+`C:/Users/pgoff/OneDrive/Desktop/Mentat Complete Files`. Its location is set by
+`mentat/config/report-directory.json`, with `MENTAT_REPORT_DIRECTORY` as an explicit
+override. There is no fallback to Downloads, cached reports, or historical run
+workbooks. The server works from this directory and reports it in `/api/health`.
+Graph, Comparison, and the worksheet viewer select the folder through
+`/api/report-sources`; their industry names come from the exact workbook filenames.
+Banking and Community Banks therefore remain separate choices. The visible Graph
+scope names the selected company, employee level, funding view, and cycle beside
+the headline total. A Chief subtotal is not labeled as the whole industry total.
+
+Collection writes its final workbooks to the same folder. Run state, raw exports
+and runtime snapshots remain under `%LOCALAPPDATA%/Mentat/console`.
+The collection monitor also discovers the latest 15 runs
 in `mentat/.cache/resilient-industry-runs`. It refreshes every three seconds;
 the source runner updates on its own checkpoint schedule. A stale update is
 explicitly labeled and does not prove the worker is still running.
-Verified report rebuilds are listed separately from collection runs through
-`mentat/.cache/report-repairs`, preserving the original collection receipts.
+Historical collection metadata remains available for monitoring. Its outside-folder
+workbook links are rejected; it cannot supply a hidden alternate report source.
+Loading selects the newest saved sector/cycle before opening superseded databases.
+A newer failed collection still takes precedence over older verified coverage.
+Coverage checks index companies and evidence within each inspection; key status uses
+one fresh encrypted-store read per refresh, and the report catalog scans the folder once.
 
-Select a worker to see its latest 50 API checkpoints and 25 stored records.
+Select a worker to see its latest 50 API checkpoints and 25 stored records in
+**Activity Log: Person | Amount | Position | Title | Recipient**. Incoming position
+labels use the existing report title rules; final reports can additionally use
+executive/entity evidence. Missing titles remain unreported.
 These are provisional and may contain overlapping searches or filing versions;
 they are not final giving totals. Final workbook links appear only for industries
 whose runner status is `succeeded`. Collection, retries, merge, coverage gates,
@@ -71,6 +103,11 @@ R 4.6 and the existing Mentat dependencies remain required. `-PythonPath`,
 `-RScriptPath`, `-Port`, and `-NoBrowser` customize the launcher. Python needs
 `openpyxl`, already present in the bundled runtime.
 
+Each desktop launch checks the server's loaded code hash, report directory and
+read/write mode before reusing it. An older server can keep managing its existing
+work while the launcher opens an updated server on another local port. An open
+window titled MENTAT is not sufficient evidence that its server is current.
+
 The server binds only to loopback and checks local host, origin, and a session
 token for changes. This is a local single-user application, not a remote hosted
 service. Closing the browser does not stop collection. Keep the app server
@@ -82,8 +119,12 @@ The PAC evidence panel discovers `mentat/.cache/pac-evidence/*/evidence.json`.
 It keeps company receipts, exchange conversions, committee transfers, and
 support/opposition activity separate. Candidate names remain as filed beside
 their registered names; differences go to review rather than automatic merges.
-Changing its cycle or committee only filters a saved snapshot. It does not
-silently start another collection. The dates shown distinguish the evidence
+Changing its cycle or committee only filters a saved snapshot. **Configure a new
+snapshot** accepts company, aliases, committee IDs and election years; **Use selected
+snapshot settings** copies the current configuration for editing. **Collect new
+snapshot** explicitly starts the existing collector in a new directory. Progress
+survives page reloads, and a completed snapshot becomes selectable automatically.
+The dates shown distinguish the evidence
 snapshot from the financial summary's reporting period.
 
 Create an evidence snapshot with the bundled Python runtime:
@@ -168,6 +209,65 @@ transaction dates cannot substitute for it. The panel counts verified source dat
 and keeps overall report freshness unknown because source receipts do not prove
 complete company/employer search coverage.
 
+**Saved FEC coverage** in Loading and **FEC data-through by sector and cycle**
+in Collection use the collection database and its pinned coverage receipt. The
+Loading panel filters by the entered/reviewed sectors and selected cycles and
+shows the newest saved collection for each pair, including failed collections.
+These dates apply to that saved roster; editing names does not verify the new
+roster. Coverage warnings are separate from dismissible report-quality notices.
+
+`tools/collection_coverage.py` derives the earliest evidenced cutoff across every
+company's employer and corporate searches. The existing
+`validate_industry_coverage.py` producer stores a versioned `fec_coverage` record
+in `coverage-receipt.json`, with a database SHA-256, evaluation time, per-cycle
+cutoffs and their evidence. Reads validate the scope and database binding and
+never rewrite the receipt or database. Missing, malformed, changed, incomplete,
+or unreadable evidence remains **unverifiable**. Legacy receipts are inspected
+read-only with a bounded SQLite query; they cannot acquire a cutoff from task
+completion or file timestamps.
+
+Dated source assertions can be supplied as `fec_date_evidence` in the fanout
+receipt, or as rows in an optional `fec_date_evidence` SQLite table. Both use
+these fields:
+
+```json
+{"industry":"Example sector","company":"Example company","cycle":2026,
+ "kind":"employer","coverage_start":"2025-01-01",
+ "verified_data_through":"2026-08-31",
+ "verification_evidence":"Reference to the dated source coverage statement"}
+```
+
+An assertion must cover the cycle from its start and contain a real ISO calendar
+cutoff and nonempty supporting evidence. Both `employer` and `corporate` need
+evidence for every company; zero-result searches also need dated evidence.
+Conflicting valid cutoffs use the earliest date. Invalid or missing evidence
+prevents verification. These are source assertions, not independent FEC
+certification; existing collectors that do not obtain such evidence remain
+unverifiable. No cutoff is inferred from a maximum transaction date, API
+checkpoint, download, report rebuild, or modification timestamp.
+
+The latest valid stored transaction date is displayed separately, scoped by
+sector, company and cycle across employee and corporate records. It is an
+observation, never a coverage guarantee. Database and source file modification
+times remain labeled file events. Active cycles are stale beyond a **30-day**
+lag; past cycles require coverage through **December 31**. This UI policy is in
+`STALE_AFTER_DAYS`, is displayed in both panels, and is recalculated on reads.
+
+Offline verification (use the local Python executable if `python` is not on PATH):
+
+```powershell
+python -m unittest discover -s mentat/tests -p test_collection_coverage.py
+python -m unittest discover -s mentat/tests -p test_validate_industry_coverage.py
+python -m unittest discover -s mentat/tests -p test_collection_console.py
+node mentat/tests/test_coverage_view.cjs
+node mentat/tests/test_console_browser.cjs
+```
+
+The browser test uses a temporary local fixture and no FEC requests. Its Python
+and Playwright locations use the existing `MENTAT_PYTHON` and
+`MENTAT_NODE_MODULES` environment variables. The console suite's R ingestion
+test additionally needs the installed Mentat R packages, including `DBI`.
+
 **Graph** is a peer section of the console; Loading remains the default. Choose
 an industry, company (or all companies), employee level and election cycle.
 The employee labels are **Chief / Middle-Management / Employees**. They map to
@@ -178,11 +278,11 @@ giving scope, not an employee level. Choosing a level selects personal giving.
 Graph separates **Scope**, **Analysis**, and **Details & methodology**. The compact
 scope applies across **Overview / Recipients / Candidates / Companies**. Overview
 shows net giving, direct candidate contributions, giving to recipient organizations,
-a recipient-type chart, and a five-entry candidate preview. Recipient organizations
+a recipient-type chart, and an adjustable candidate preview. Recipient organizations
 exclude candidate-category receipts; unresolved candidate links stay visible in the
 candidate note, so the two summary amounts need not exhaust net giving.
 
-Recipients contains the complete type breakdown and a five-entry organization
+Recipients contains the complete type breakdown and an adjustable organization
 preview. JFC stays separate, as do Super PAC, Trade Association, Company PAC,
 Leadership PAC, Carey/hybrid, Other PAC, Candidate, Party Committee and Unclassified
 receipts. Companies shows company comparisons and the selected scope's personal
@@ -192,16 +292,20 @@ empty comparison placeholder. Click a type, organization, company or level to
 filter; click a candidate for its included receipt groups. These can be aggregates,
 not individual transactions. **View all** and **Full table** expose complete values.
 
+The saved-run selector is in Graph's main scope controls and updates as new runs
+arrive. Failed finalization is displayed as failed even for legacy run receipts
+whose top-level stage said completed. A roster or fetched rows alone cannot become
+a Graph source; the finalized report must pass the existing publication checks.
+
 **Sources & freshness** opens a keyboard-accessible drawer containing the selected
 reports' source receipts, retrieval timestamps, file modification timestamps,
 verified data-through dates, unknown states and SHA-256 fingerprints. Retrieval
-never establishes currency. The drawer also selects the saved run. Graph remains
+never establishes currency. Graph remains
 `#graph`; old `#charts` links redirect to it. Reset restores the latest cycle,
 all companies/levels/giving, and the Overview direct-contribution view.
 
 The contextual **Export chart** control exports a selected breakdown as PNG or SVG,
-or every value as CSV. Images contain the displayed preview (five entries except
-for the complete recipient-type breakdown), with scope, interpretation notes and
+or every value as CSV. Images contain the displayed row count, with scope, interpretation notes and
 report fingerprints attached. Empty or unavailable views cannot be exported.
 
 Guided graphs read the per-cycle receipt tables, using Recipient facts only in
@@ -224,12 +328,31 @@ bound to the workbook by its audit manifest. Missing or changed receipts withhol
 estimates. Partial downstream worksheet previews cannot produce rankings. These
 views make no new source requests or model runs and do not rewrite reports.
 
-**Create chart** opens an advanced builder that scans completed report worksheets locally and suggests bar,
-box, pie, line, scatter and histogram charts from their columns. Select a run,
-report and worksheet, then choose columns and an aggregation. Change the detected
+**Compare subjects** opens searchable, draggable comparison columns for industries,
+companies, people, recipients and candidates. Choose a saved run and industry,
+then search and click or drag subjects into the display. Existing columns remain
+when the source changes, allowing comparisons across industries and runs. Columns
+can be reordered by dragging and removed individually. There is no selected-subject
+cap; search renders 100 matches at a time and can reach the complete catalog.
+Person totals use report person keys and the Employee fact family, independently
+of Recipient/Master totals. Missing person-level breakdowns remain unavailable.
+Subjects may overlap and are never added into a combined comparison total.
+**Chart these subjects** sends subject-period values to the chart builder;
+**Choose report worksheet** returns to a normal report. Comparison CSV includes
+source report fingerprints. Existing worksheet limits still apply to charts.
+
+**Create chart** immediately builds a chart from the selected report. Pick a
+statistic and click **Bar**, **Line**, **Pie**, **Scatter**, **Histogram** or
+**Box plot**; compatible columns are selected automatically. Every change redraws
+the chart. **Over time**, **Year over year** and **Forecast** select the available
+date/year field, and comparison time views offer a subject dropdown. **Change
+data** contains run/worksheet selection; **More options** contains detailed
+settings. The builder scans completed report worksheets locally and supports bar,
+horizontal bar, box, pie, doughnut, line, area, scatter, histogram, waterfall,
+Pareto and radar charts. Change the detected
 header row and use **Rescan columns** for another table within a sheet. Filters
 combine with AND; first/last worksheet row controls isolate subsections. Use
-**Create chart** after changing options. PNG, SVG and chart-data CSV downloads include
+the automatic preview as you change options. PNG, SVG and chart-data CSV downloads include
 the worksheet, filters, aggregation and report SHA-256 in their provenance.
 
 Missing/non-numeric observations are excluded and counted, never converted to
@@ -241,8 +364,78 @@ Excel formulas. Totals and overlapping summary rows can double count, so choose
 the appropriate worksheet subsection. The current local limits are 50,000 rows,
 200 columns, 60 groups, and 5,000 scatter points. Oversized requests require a
 smaller worksheet or filters rather than silently creating a partial chart.
+Time analysis supports calendar-year totals, year-over-year percentages,
+absolute period changes and linear trend projections. Election cycles use two-year
+steps and cannot be labeled year-over-year. Missing prior periods are not filled
+with zero; percentage growth requires a positive prior base. Projections require
+three consecutive observed periods and a horizon of 1–10 periods. They are
+unvalidated least-squares trend scenarios, with no uncertainty interval; partial
+years are not annualized. Filter partial periods and select one comparison subject
+before time analysis. The subject dropdown handles this for comparison charts.
+Derived and projected values remain labeled in exports.
+
 Graphs do not call Higgsfield, FEC, or any external service; all scripts and
 rendering are served locally, with no CDN dependencies.
+
+Collection startup now acknowledges a **preparing** state before copying its
+isolated runtime. Enabled keys pass through the process environment, never command
+arguments. A concurrent key save finishes before launch. Chart source selection
+uses a small report-list endpoint instead of scanning the full collection-monitor
+snapshot. Active source folders are
+copied once; obsolete local source folders are skipped when an active source root
+is selected. Launch failures receive terminal timestamps, and completed runner
+receipts restore terminal state after a console restart. Graph catalogs read only
+workbook metadata, initial Graph loading requests the latest cycle in one query,
+and new report fingerprints refresh the graph source catalog.
+
+The timer separates elapsed time from estimated remaining time. Elapsed time
+advances from a server sample using a monotonic browser clock and freezes on
+terminal states. Stale checkpoints and exceeded estimates have explicit labels.
+The runner no longer converts a missing estimate to zero or invents a three-minute
+generator duration; total ETA remains unknown until the required phase timings
+are available. These runner changes apply to newly launched runtime snapshots.
+
+Collection workers claim one whole company at a time. When their own list runs
+out, they take an untouched company from another worker's waiting list. The
+manifest records ownership before dispatch; all cycles and retries stay with
+that company's private database. Claimed companies remain pinned after a crash.
+Initialization markers distinguish a dispatch that never started from resumable
+page checkpoints. Older manifests preserve their existing ownership and resume
+behavior. Each company starts a fresh R process, trading startup overhead for
+safe handoffs and bounded process lifetime.
+
+Recovery workers now default to automatic capacity sharing (`RecoveryWorkers=0`),
+subject to the same overall coordinator limit as collection. A positive value caps
+recovery concurrency. Exclusive database leases prevent write collisions;
+split retries queue one invocation per database, allowing unrelated databases
+to recover concurrently. The persistent per-key request ledger still enforces
+API budgets. Coverage, raw-export and deterministic merge gates are unchanged.
+The monitor shows waiting companies and handoff counts, and reads each worker's
+current status rather than every historical company attempt.
+
+HTTP fetch workers now share a request pool across all unfinished lanes. The
+requested fetch capacity is independent of the number of database coordinators;
+finishing a lane releases capacity for another lane's requests. Each request
+leases an available API key and reserves its durable budget before sending.
+Large unfiltered queries are divided into nonoverlapping date windows, including
+dates outside the nominal cycle. Their combined IDs must be unique, match the
+unsplit query's count, and retain previously checkpointed IDs before acceptance.
+Child windows resume from their own checkpoints. One R coordinator still owns
+each database's writes, classification and final storage.
+
+The monitor counts actual in-flight HTTP requests and reports database
+coordinators separately. Active workers can temporarily fall below the requested
+count during checkpoint processing, quota waits, or when fewer independent
+requests remain. Completed lanes do not lower the requested capacity.
+Collection still advances through industries sequentially; completed-industry
+workbook generation overlaps the next industry's collection. End-to-end timing
+also includes API latency, R startup and workbook generation.
+
+For inspection while an older console manages active collection, a separate
+instance can run with `python mentat/app/server.py --port 8806 --read-only`.
+All mutation endpoints are disabled in that instance. Restart the normal console
+after active work finishes to load backend changes; refresh its browser afterward.
+Do not refresh an old server against new assets before restarting it.
 
 Additional offline regression checks (browser checks require local Playwright
 and Chrome; `MENTAT_BROWSER_CHANNEL` can select another installed channel):
@@ -251,12 +444,20 @@ and Chrome; `MENTAT_BROWSER_CHANNEL` can select another installed channel):
 python mentat/tests/test_report_insights.py
 python mentat/tests/test_graph_data.py
 node --test mentat/tests/test_chart_math.cjs
+node --test mentat/tests/test_ui_analysis.cjs
+python mentat/tests/test_comparison_data.py
+python mentat/tests/test_worker_sharing.py
+python mentat/tests/test_api_request_pool.py
+python mentat/tests/test_api_company_cycle_fanout.py
+python mentat/tests/test_resilient_orchestrator.py
+& 'C:\Program Files\R\R-4.6.0\bin\Rscript.exe' mentat/tests/test_fec_api_fanout.R
+& 'C:\Program Files\R\R-4.6.0\bin\Rscript.exe' mentat/tests/test_request_windows.R
 node mentat/tests/test_console_browser.cjs
 ```
 
 The browser suite starts a temporary loopback fixture and checks Graph's default
 direct view, company/level/JFC filters, downstream directions, estimate withholding,
-dataset switching, all six chart types, PNG/SVG/CSV exports, escaped labels, narrow layouts,
+dataset switching, all 15 chart-builder types, PNG/SVG/CSV exports, escaped labels, narrow layouts,
 keyboard navigation and dialog dismissal/focus restoration, and the
 absence of external requests. `MENTAT_NODE_MODULES` and `MENTAT_PYTHON` override
 the local test dependencies. Neither test suite reads credentials or collects data.
@@ -268,3 +469,68 @@ against its named target. ActBlue and WinRed use their registered hybrid (Carey)
 category; ordinary registered PACs have a separate Other PAC category. Historical
 workbooks keep their original evidence and may predate these corrections.
 The September 8 audit and repair evidence are in `audits/mentat_20260908/`.
+
+Graph row counts are editable through **Rows per chart** or **Show all rows**.
+The chart builder also exposes a row limit after filters, a worksheet starting
+row, and a selectable **Row count** statistic.
+
+**Compare subjects → Who funded whom?** loads saved source-to-recipient
+relationships. Select companies/committees and candidates or recipient committees;
+search by name or FEC ID, and use receiver type to narrow the picker. Selections
+remain when changing the search or receiver-type filter. Side-by-side bars,
+horizontal comparisons and separate lines update immediately. Recipients per
+view accepts 1–60; Next/Previous retain all choices. Chart and exports cover the
+explicitly displayed page. Overall subject totals remain in a collapsed section.
+
+Company-associated personal receipts, corporate receipts, committee support,
+opposition and contribution/other activity stay separate. Candidate receipts
+require an authorized unique link. PAC activity is counted once per committee
+and cycle, without attributing it to funding companies. Missing pairs remain
+unavailable; partial downstream worksheets are withheld with an explanation.
+The comparison uses stored reports only and does not collect missing activity.
+`node --test mentat/tests/test_funding_comparison.cjs` and
+`python mentat/tests/test_comparison_data.py` cover the relationship calculations.
+
+The workspace navigation groups Loading and Collection, Graph and Cross-reference,
+and PAC evidence. It uses a left sidebar from 1100px and a horizontally scrolling
+tab bar below that width. Arrow keys, Home and End follow the visible order; a
+skip link moves focus into the current workspace. `workspace.css` contains this
+layout and the compact controls. Report-folder selection and explanatory coverage
+and cash-estimation text use disclosures; coverage status and reconciliation
+warnings stay visible. Compare subjects opens a focused view with Back to graph.
+
+Large workbook reads share an in-progress load for the same file, and Graph and
+subject comparisons check that every report still matches its starting file
+version before returning. If a report changes during a read, reload the view.
+Collection worker paths are resolved before containment checks, so Windows
+LocalAppData aliases identify the same run without allowing outside-run files.
+
+Collection now separates In progress, History, and Archived. Archiving changes only
+console metadata; it does not move or delete report files or checkpoints. Active
+runs cannot be archived, and an archived saved roster must be restored before it
+can start. Working folders show the internal collection directory and the configured
+completed-report directory.
+
+PAC evidence defaults to **CSV file → PAC → election cycle**. The local importer
+accepts up to 5 MB / 50,000 rows, retains original fields and filing duplicates,
+and keeps channel totals separate. Raw observations are paginated, while totals
+cover every selected row. Imported files live only in the server session. Saved
+FEC snapshots remain available through the Evidence source selector. **Split with
+PAC evidence / Split with Graph** opens both panes; narrow screens stack them.
+
+Chart types now choose compatible fields and preserve an eligible selected
+statistic. Axes include the field name and aggregation. Scatter renders every
+loaded valid pair with batched SVG paths; the former 5,000-point rendering cap is
+removed. Workbook loading still accepts at most 50,000 worksheet rows and rejects
+larger sources explicitly. Dense chart tables preview 200 points, while chart data
+CSV exports retain all points.
+
+Over time shows period totals (or the selected aggregation). Year over year shows
+percentage change from the prior calendar year; election-cycle data uses period
+change instead. Forecast uses a same-election-phase historical baseline: the latest
+completed value from the corresponding phase of the four-year calendar. It needs
+eight consecutive closed years or four closed two-year cycles, with at least two
+observations per phase. Current, explicitly partial and missing-value periods do
+not train it. No fixed presidential uplift, extrapolated growth, or calibrated
+prediction interval is implied. Unknown historical coverage stays disclosed.
+The benchmark follows the [seasonal naïve method](https://otexts.com/fpp3/simple-methods.html).

@@ -66,3 +66,9 @@ mentat/inputs/
 mentat/.cache/
 mentat-backup-*/
 .agents/
+
+# Contribution Studio source and regenerable analytical caches
+!mentat/app/contribution-studio.html
+mentat/state/contribution-analytics/
+mentat/state/geography/
+mentat/state/contribution-source-proofs/

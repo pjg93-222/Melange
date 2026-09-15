@@ -26,9 +26,9 @@
   }
   function measureLabel(config=chartConfig,result=chart,source=data) {
     const individual=['box','scatter','histogram'].includes(result?.type);
-    const base=!individual&&config.aggregation==='count'?'Row count':columnLabel(config.y,source);
+    const base=!individual&&config.aggregation==='count'?(config.y<0?'Row count':'Count of '+columnLabel(config.y,source)):columnLabel(config.y,source);
     const measured=individual||config.aggregation==='count'?base:`${base} · ${aggregateNames[config.aggregation]}`;
-    return config.transform==='yoy'?`${base} · year-over-year change (%)`:config.transform==='change'?`${measured} · period change`:measured;
+    return config.transform==='yoy'?`${base} · year-over-year change (%)`:config.transform==='change'?`${measured} · period change`:result?.split?`${measured} · coverage`:measured;
   }
   function error(message='') { el('error').textContent = message; el('error').hidden = !message; }
   function clearChart() { chart = null; el('image').replaceChildren(); el('values').replaceChildren(); el('export').hidden = true; el('scope').textContent = ''; }
@@ -193,7 +193,7 @@
   // axis minimum and maximum) so a caller can overlay reference lines exactly.
   function chartSVG(result, measure, config, source, titleText, scopeText) {
     let plot = null;
-    const grouping=columnLabel(config.x,source),xTitle=result.type==='histogram'?columnLabel(config.y,source):grouping;
+    const grouping=result.groupingLabel||columnLabel(config.x,source),xTitle=result.type==='histogram'?columnLabel(config.y,source):grouping;
     if(result.series){
       const svg=MentatGroupedSVG(result,titleText,scopeText),bounds=svg.getAttribute('viewBox').split(' ').map(Number);
       // Wide comparisons scroll inside the preview instead of shrinking labels.
@@ -310,10 +310,11 @@
     el('image').replaceChildren(chartSVG(result,measure,chartConfig,data,el('title').textContent,el('scope').textContent).svg);
   }
   function tableRows(result=chart, config=chartConfig, source=data) {
-    if(result.series)return [[columnLabel(config.x,source),...result.series.map(name=>`${name} · ${measureLabel(config,result,source)}`)],...result.groups.map(g=>[g.label,...g.values.map(v=>v.value??'Unavailable')])];
+    const grouping=result.groupingLabel||columnLabel(config.x,source);
+    if(result.series)return [[grouping,...result.series.map(name=>`${name} · ${measureLabel(config,result,source)}`)],...result.groups.map(g=>[g.label,...g.values.map(v=>v.value??'Unavailable')])];
     if (result.type === 'scatter') return [[columnLabel(config.x,source),columnLabel(config.y,source)], ...result.points.map(p=>[p.x,p.y])];
-    if (result.type === 'box') return [[columnLabel(config.x,source),'Count',`Q1 · ${measureLabel(config,result,source)}`,`Median · ${measureLabel(config,result,source)}`,`Q3 · ${measureLabel(config,result,source)}`,'Lower whisker','Upper whisker','Outliers'],...result.groups.map(g=>[g.label,g.n,g.q1,g.median,g.q3,g.low,g.high,g.outliers.join('; ')])];
-    return [[result.type==='histogram'?`${columnLabel(config.y,source)} · range`:columnLabel(config.x,source),result.type==='histogram'?'Row count':measureLabel(config,result,source),...(result.temporal?['Status','Baseline period']:[])],...result.groups.map(g=>[g.label,g.value,...(result.temporal?[g.forecast?'Same-phase baseline':g.partial?'Partial observation':'Observed / derived',g.forecast_basis_year??'']:[])])];
+    if (result.type === 'box') return [[grouping,'Count',`Q1 · ${measureLabel(config,result,source)}`,`Median · ${measureLabel(config,result,source)}`,`Q3 · ${measureLabel(config,result,source)}`,'Lower whisker','Upper whisker','Outliers'],...result.groups.map(g=>[g.label,g.n,g.q1,g.median,g.q3,g.low,g.high,g.outliers.join('; ')])];
+    return [[result.type==='histogram'?`${columnLabel(config.y,source)} · range`:grouping,result.type==='histogram'?'Row count':measureLabel(config,result,source),...(result.temporal?['Status','Baseline period']:[])],...result.groups.map(g=>[g.label,g.value,...(result.temporal?[g.forecast?'Same-phase baseline':g.partial?'Partial observation':'Observed / derived',g.forecast_basis_year??'']:[])])];
   }
   function renderValues() {
     const [head,...rows]=tableRows();

@@ -112,7 +112,7 @@ async function acceptRoster(value, revision) {
   upload = value; roster(value.readiness); runGroup = 'progress'; selectedRun = value.id; selectedLane = ''; clearRunDisplay();
   $('start').textContent = 'Start collection';
   $('draft-status').textContent = value.state === 'ready' ? 'Roster validated and saved. Choose cycles, then start collection.' : 'Review the name conflicts before starting.';
-  await refreshRuns(); await refreshRun();
+  if(!await refreshRuns())await refreshRun();
 }
 $('roster-form').addEventListener('submit', async event => {
   event.preventDefault(); showError(''); const revision = ++rosterRevision;
@@ -239,7 +239,7 @@ document.querySelectorAll('[data-run-group]').forEach(button => button.addEventL
 $('archive-run').addEventListener('click', async () => {
   const run = runCatalog.find(run=>run.id===selectedRun); if (!run || runArchiveBusy) return;
   runArchiveBusy = true; $('archive-run').disabled = true;
-  try { await api('/api/run-archive', {id:run.id, archived:!run.archived}); await refreshRuns(); await refreshRun(); showStatus(run.archived ? 'Run restored.' : 'Run archived. Its files are preserved.'); }
+  try { await api('/api/run-archive', {id:run.id, archived:!run.archived}); if(!await refreshRuns())await refreshRun(); showStatus(run.archived ? 'Run restored.' : 'Run archived. Its files are preserved.'); }
   catch (error) { showError(error.message); }
   finally { runArchiveBusy = false; renderRunLibrary(); }
 });
@@ -252,8 +252,10 @@ async function refreshRuns(initial) {
   $('completed-directory').textContent = body.report_directory || 'Configured completed-report folder';
   if (changed && selectedRun) await refreshRun();
   window.dispatchEvent(new CustomEvent('mentat:runs', {detail:body.runs}));
-  $('key-status').textContent = body.key_configured ? `${body.active_key_count} enabled FEC keys saved · ${body.stored_key_count - body.active_key_count} disabled` : 'No enabled FEC keys saved';
+  $('key-status').textContent = body.key_status_available===false ? body.key_status_message : body.key_configured ? `${body.active_key_count} enabled FEC keys saved · ${body.stored_key_count - body.active_key_count} disabled` : 'No enabled FEC keys saved';
+  if(body.key_status_available===false)$('key-hint').textContent=body.key_status_message;
   if (body.key_configured) $('key-hint').textContent = `${body.active_key_count} enabled keys; ${body.stored_key_count - body.active_key_count} disabled. Stored with Windows encryption. Leave blank to use them.`;
+  return changed;
 }
 let timerRun=null, timerSample=0;
 function updateTimer() {
@@ -359,22 +361,24 @@ async function refreshRun() {
   if (requested === selectedRun && lane === selectedLane) { render(run); window.dispatchEvent(new CustomEvent('mentat:run', {detail:run})); }
 }
 async function poll() {
-  if (busy) return;
+  if (busy || document.hidden || !['loading','collection'].includes(currentView)) return;
   busy = true;
-  try { await Promise.all([refreshRuns(),refreshRun()]); $('connection').textContent = '● Local connection'; }
+  try { const changed=await refreshRuns(); if(!changed)await refreshRun(); $('connection').textContent = '● Local connection'; }
   catch (error) { $('connection').textContent = 'Connection interrupted · retrying'; }
   finally { busy = false; }
 }
 async function init() {
-  try { const session = await api('/api/session?include_archived=1'); token = session.token; readOnly=!!session.read_only;
+  try { const session = await api('/api/session?light=1'); token = session.token; readOnly=!!session.read_only;
     evidenceCollectionAvailable=!!session.evidence_collection_available;
     $('evidence-collect').disabled=readOnly||!evidenceCollectionAvailable||!!evidenceJob;
     if(!evidenceCollectionAvailable)$('evidence-job-status').textContent='Restart the MENTAT server to enable new snapshot collection. Saved evidence controls are ready to use.';
     if(readOnly)showStatus('Read-only preview · the original console continues managing your active collection.');
-    await refreshRuns(session); await refreshRun(); $('connection').textContent = '● Local connection'; }
+    $('connection').textContent = '● Local connection';
+    if(['loading','collection'].includes(currentView))poll(); }
   catch (error) { showError(error.message); }
   setInterval(poll, 3000);
 }
+window.addEventListener('mentat:view',()=>{if(token&&['loading','collection'].includes(currentView))poll();});
 $('resume-setup').addEventListener('click', async () => {
   try {
     const value = await api('/api/run?id=' + encodeURIComponent(selectedRun));
@@ -471,6 +475,7 @@ function updateEvidenceCommittees() {
   renderEvidence();saveEvidenceSelection();
 }
 async function initEvidence() {
+  if(!savedEvidenceVisible())return;
   const ticket=++evidenceRevision;
   const previous=$('evidence-snapshot').value||evidencePreference.snapshot;
   $('evidence-snapshot').replaceChildren();
@@ -488,6 +493,12 @@ async function initEvidence() {
     if(matches.length)await loadEvidence();else clearEvidence(followsGraph()?'No saved PAC evidence matches the loaded graph companies and cycle. Choose saved evidence above to explore another snapshot.':'No saved PAC evidence is available.');
   }catch(error){if(ticket===evidenceRevision)clearEvidence(error.message);}
 }
+let savedEvidenceActive=false;
+function savedEvidenceVisible(){return !$('view-evidence').hidden&&$('evidence-source').value==='snapshot';}
+function activateSavedEvidence(){const active=savedEvidenceVisible();if(active&&!savedEvidenceActive)initEvidence();else if(!active&&savedEvidenceActive)++evidenceRevision;savedEvidenceActive=active;}
+window.addEventListener('mentat:view',activateSavedEvidence);
+window.addEventListener('DOMContentLoaded',activateSavedEvidence);
+$('evidence-source').addEventListener('change',activateSavedEvidence);
 window.addEventListener('mentat:graph', event=>{graphContext=event.detail;if(followsGraph())initEvidence();});
 $('evidence-mode').addEventListener('change', ()=>{saveEvidenceSelection();initEvidence();});
 $('evidence-refresh').addEventListener('click', initEvidence);
@@ -536,4 +547,4 @@ if(evidenceJob){$('evidence-collect').disabled=true;pollEvidenceJob();}
 restoreDraft();
 showView(location.hash.slice(1));
 init();
-initEvidence();
+activateSavedEvidence();
