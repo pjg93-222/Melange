@@ -21,7 +21,7 @@ spec = importlib.util.spec_from_file_location("studio_views_server", APP / "serv
 app = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(app)
 
-READ_ONLY_REFUSAL = 'Saved views are read-only in this preview console; save from the original console.'
+READ_ONLY_REFUSAL = 'Read-only preview. Save views from the main console.'
 
 
 def sheet(name='Recipients'):

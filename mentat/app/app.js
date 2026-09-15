@@ -559,7 +559,7 @@ function buildStartedText(value) {
 }
 function buildStampText(build) {
   const revision = build.git_sha && build.git_sha !== 'unknown' ? String(build.git_sha) : String(build.code_sha256 || 'unknown');
-  return `build ${revision.slice(0, 7)} · :${build.port ?? '—'} · started ${buildStartedText(build.started_at)} · pid ${build.pid ?? '—'}`;
+  return `build ${revision.slice(0, 7)} · port ${build.port ?? '?'} · up since ${buildStartedText(build.started_at)}`;
 }
 function mountBuildElements() {
   if ($('build-stamp')) return;
@@ -602,8 +602,8 @@ function renderBuild(response) {
     // The launcher rebinds this same port, so this origin is where the
     // current build answers once the restart finishes.
     $('stale-banner-message').textContent = readOnly
-      ? `This read-only preview is running an older build. Close this tab and open ${location.origin}.`
-      : `This console is running an older build. Close this tab and open ${location.origin}, or press Restart.`;
+      ? `This preview runs an older build. Close this tab and open ${location.origin}.`
+      : `This console runs an older build. Press Restart, or close this tab and open ${location.origin}.`;
     action.textContent = 'Restart';
     action.hidden = readOnly;
   } else if (assetsChanged) {
@@ -641,17 +641,17 @@ async function restartConsole() {
     const settle = () => { if (answer.build) renderBuild(answer); else if (banner) banner.hidden = true; };
     if (banner) banner.hidden = false;
     action.hidden = true;
-    note.textContent = 'Console already current \u2014 nothing to restart.';
+    note.textContent = 'Already up to date.';
     clearTimeout(currentNoticeTimer);
     currentNoticeTimer = setTimeout(settle, 5000);
     return;
   }
-  message.textContent = 'Restarting this console. The page reloads once the new build answers.';
+  message.textContent = 'Restarting. This page reloads when the new build is ready.';
   const deadline = Date.now() + 120000;
   const waitForNewBuild = async () => {
     if (Date.now() > deadline) {
       buildRestarting = false; action.disabled = false; action.textContent = 'Restart';
-      message.textContent = `The restart has not answered in two minutes. Close this tab and open ${location.origin}.`;
+      message.textContent = `Restart is taking too long. Close this tab and open ${location.origin}.`;
       return;
     }
     try {

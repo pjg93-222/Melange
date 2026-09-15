@@ -120,6 +120,6 @@ test('the data source panel opens, folds once, names what it cannot read, and sh
   await page.locator('#studio-progress-cancel').click();
   await page.locator('#studio-progress').waitFor({state:'hidden'});
   assert.equal(await page.locator('#studio-canvas svg').count(),1,'the last good view is still on the canvas');
-  assert.match(await page.locator('#studio-loading').textContent(),/Preparing cancelled/);
+  assert.match(await page.locator('#studio-loading').textContent(),/Cancelled\. Showing the last loaded view\./);
   assert.deepEqual(errors,[]);
 });

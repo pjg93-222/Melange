@@ -38,8 +38,8 @@ test('when Graph pinned one cycle and the sheet covers them all, that is the rea
     graph(100000000.00, '2026'), scope({studioCycle: '', graphCycle: '2026'}));
   assert.strictEqual(state.agree, false);
   assert.strictEqual(state.reasonId, 'cycle');
-  assert.match(state.reason, /pinned to one election cycle/);
-  assert.match(state.reason, /every cycle/);
+  assert.match(state.reason, /shows one election cycle/);
+  assert.match(state.reason, /this sheet shows all of them/);
   // The reader must never be told a plainly explicable gap is a mystery.
   assert.notStrictEqual(state.reasonId, 'unexplained');
 });

@@ -257,7 +257,7 @@ class ContributionHTTPTests(unittest.TestCase):
         with patch.object(app.subprocess, 'Popen') as spawn:
             status, _, body = self.request('/api/restart', method='POST', data={})
         self.assertEqual(status, 409)
-        self.assertIn('collection work', body['error'])
+        self.assertIn('Collection is running. Restart after it finishes.', body['error'])
         spawn.assert_not_called()
         self.console.busy = lambda: False
         self.console.restart = lambda port: {'restarting': True, 'port': port}

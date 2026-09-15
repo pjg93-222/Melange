@@ -362,7 +362,7 @@
     fill(el('basis'),d.bases.map(b=>[b.id,contributions.BASIS[b.id]?.[0]||b.label]));el('basis').value=basis();el('basis-note').textContent=contributions.BASIS[basis()]?.[1]||'';
     if(data)data.columns=contributions.fields(d.fields||contributionCatalog.fields,basis());
     if(el('destination'))el('destination').value=core.shelf(sheet().columns).map(p=>columns()[p.column]?.id).find(id=>['recipient_state','represented_state','state'].includes(id))||'';
-    el('param-groups').title='40 per page (verified) · fold after 40 (worksheet); Graph and classic fold at 60. Totals and CSV exports include every matching group.';
+    el('param-groups').title='Groups shown per page. Totals and CSV exports include every group.';
     el('map-settings').hidden=!['map','filled-map'].includes(sheet().marks.type);
     el('bin-width-label').hidden=sheet().marks.type!=='histogram';el('bin-width').value=sheet().params.binWidth||100;
     const map=sheet().map||{layers:['states','districts'],congress:'119'};
@@ -386,7 +386,7 @@
       company: (scope.filters.find(f => f.field === 'company') || {}).value || '',
       cycle: (scope.filters.find(f => f.field === 'cycle') || {}).value || '',
       notCarried: [...(scope.notCarried || []),
-        ...missing.map(field => field + ': not carried (this source has no ' + field + ' field)')]};
+        ...missing.map(field => field + ': not carried (not in this data)')]};
     if (!pills.length && !missing.length) return;
     commit(() => {
       const kept = (sheet().filters || []).filter(f => !pills.some(p => p.column === Number(f.column)));
@@ -728,7 +728,7 @@
       const placed = placedOn(field);
       items.push(placed
         ? ['Add to a shelf', null, {disabled: true, reason: field.name + ' is already on ' +
-            zoneLabel(placed) + '. Use Send to … below to move it.'}]
+            zoneLabel(placed) + '. Use Send to… to move it.'}]
         : ['Add to ' + quickAddLabel(field), () => quickAdd(field)]);
     }
     if (settings.zone === 'filters') items.push(['Edit filter\u2026', () => filterEditor(anchor, settings.position)]);
@@ -1756,11 +1756,11 @@
   // all: an image pasted into a message has to carry its own scope.
   async function copyImage() {
     const chart = currentChart();
-    if (!chart.svg) { failure('This view has no image to copy. Download the data CSV instead.'); return; }
+    if (!chart.svg) { failure('No image to copy. Export the CSV instead.'); return; }
     failure('');
     try {
       const size = await MentatExport.copy(chart.svg, chart.title, chart.scope);
-      status('Copied ' + size.width + 'x' + size.height + ' PNG with title and scope caption.');
+      status('Copied image.');
     } catch (error) { failure(error.message); }
   }
 
@@ -1769,7 +1769,7 @@
   // relying on whoever printed it to remember them.
   function printChart() {
     const chart = currentChart();
-    if (!chart.svg) { failure('This view has no image to print. Download the data CSV instead.'); return; }
+    if (!chart.svg) { failure('No image to print. Export the CSV instead.'); return; }
     failure('');
     el('print-title').textContent = chart.title;
     el('print-scope').textContent = [chart.scope, chart.note].filter(Boolean).join(' \u00b7 ');
@@ -1799,7 +1799,7 @@
   let viewsMemory = [];
   const previewReadOnly = () => { try { return !!readOnly; } catch { return false; } };
   function viewMessage(error) {
-    if (previewReadOnly()) return 'Saved views are read-only in this preview console; save from the original console.';
+    if (previewReadOnly()) return 'Read-only preview. Save views from the main console.';
     const text = String((error && error.message) || '');
     if (!text || /JSON|Unexpected token|Failed to fetch|NetworkError|<!DOCTYPE/i.test(text)) return 'Server unavailable.';
     return text;
@@ -1880,7 +1880,7 @@
     } catch (error) {
       viewsMemory.unshift(Object.assign({}, record, {id: 'memory-' + Date.now(),
         saved_at: new Date().toISOString(), sheet_count: record.sheets.length, memory: true}));
-      failure(viewMessage(error) + ' "' + name + '" is kept in this tab only.');
+      failure(viewMessage(error) + ' "' + name + '" stays in this tab.');
       return null;
     }
   }
@@ -1891,9 +1891,9 @@
     if (view.sourceKey === sourceKey) return {ok: true};
     const parts = String(view.sourceKey || '').split('|');
     if (parts[0] !== 'contributions') return {ok: false,
-      reason: 'Worksheet views open on the report they were saved from. Choose ' +
-        (viewSourceText(view) || 'that report') + ' in the Data panel first.'};
-    if (!verified()) return {ok: false, reason: 'Switch the Data panel to verified contribution data to open this view.'};
+      reason: 'Open ' +
+        (viewSourceText(view) || 'that report') + ' in the Data panel first. This view was saved there.'};
+    if (!verified()) return {ok: false, reason: 'Switch to Verified contributions to open this view.'};
     const entry = ((contributionCatalog && contributionCatalog.datasets) || []).find(d => d.id === parts[1]);
     if (!entry) return {ok: false, reason: 'This console has no report called ' + parts[1] + '.'};
     if (!entry.available) return {ok: false, reason: entry.message || 'That report is unavailable on this console.'};
@@ -1950,7 +1950,7 @@
         // Returning quietly here left the reader believing their old views had
         // been recovered when the console had refused every one of them, and
         // the migration flag below was never set so it silently retried for ever.
-        failure(viewMessage(error) + ' Views saved in this browser could not be moved onto this console.');
+        failure(viewMessage(error) + ' Browser-saved views were not moved to this console.');
         return saved;
       }
     }
@@ -2253,7 +2253,7 @@
   async function graphTotals(company, cycle) {
     const run = await graphRunId();
     const industry = (dataset() || {}).id || '';
-    if (!run || !industry) return Promise.reject(new Error('Graph has no saved run selected.'));
+    if (!run || !industry) return Promise.reject(new Error('Graph has no run selected.'));
     const chosen = graphFilterState();
     const params = new URLSearchParams({id: run, industry: industry, company: company || '',
       tier: chosen.tier, cycle: core.graphCycleValue(cycle), funding: chosen.funding,
@@ -2313,13 +2313,12 @@
     const where = [scope.company || 'All companies',
       scope.cycle || graphCycle || 'All cycles'].join(' · ');
     const lead = document.createElement('span');
-    lead.textContent = 'Basis: ' + ((contributions.BASIS[basis()] || [])[0] || basis()) +
-      '. Graph shows ' + money(state.graphCents) + ' for ' + where +
-      ' (workbook receipts). Studio total ' + money(state.studioCents) + '. ';
+    lead.textContent = 'Graph shows ' + money(state.graphCents) + ' for ' + where +
+      '. Studio shows ' + money(state.studioCents) + '. ';
     const verdict = document.createElement('strong');
     verdict.className = state.agree ? 'studio-reconcile-agree' : 'studio-reconcile-differ';
     verdict.textContent = state.agree ? 'Agree.'
-      : 'Differ by ' + money(Math.abs(state.differenceCents)) + ' because ' + state.reason + '.';
+      : 'They differ by ' + money(Math.abs(state.differenceCents)) + ' because ' + state.reason + '.';
     const link = document.createElement('button');
     link.type = 'button';
     link.className = 'studio-reconcile-link';
@@ -2442,7 +2441,7 @@
   // serving it says so rather than answering the click with nothing.
   const toBriefing = () => {
     if (!window.MentatBriefing) {
-      failure('The briefing tray is not served by this console yet. Restart the console and try again.');
+      failure('Briefing needs a console restart.');
       return;
     }
     window.MentatBriefing.capture(currentChart());
@@ -2477,8 +2476,8 @@
   el('dataset').onchange=()=>{persist();selectContributionDataset();};
   el('basis').onchange=()=>commit(()=>{sheet().source.basis=el('basis').value;contributionOffset=0;});
   el('refresh-data').onclick=()=>{++contributionCacheEpoch;contributionController?.abort();contributionPending=null;contributionCache.clear();memberCache.clear();graphTotalsCache.clear();loadContributions(true);};
-  el('groups-prev').onclick=()=>{contributionOffset=Math.max(0,contributionOffset-(Number(sheet().params.maxGroups)||40));renderView();};
-  el('groups-next').onclick=()=>{contributionOffset+=Number(sheet().params.maxGroups)||40;renderView();};
+  el('groups-prev').onclick=()=>{contributionOffset=Math.max(0,contributionOffset-(Number(sheet().params.maxGroups)||60));renderView();};
+  el('groups-next').onclick=()=>{contributionOffset+=Number(sheet().params.maxGroups)||60;renderView();};
   el('inspect-all').onclick=()=>inspectContributions();
   el('inspection-close').onclick=()=>{++recordRevision;el('inspection').hidden=true;};
   el('record-prev').onclick=()=>inspectContributions(recordSelection,Math.max(0,recordOffset-100));
@@ -2516,7 +2515,7 @@
     contributionPending = null;
     progressDepth = 0;
     clearProgress();
-    status('Preparing cancelled. The view above is the last one that loaded.');
+    status('Cancelled. Showing the last loaded view.');
   };
   el('inspector-toggle').onclick = () => {
     const open = el('inspector').hidden;
@@ -2576,10 +2575,10 @@
   // scope chip is the difference between a total that looks wrong and a
   // total the reader knows is wider than the one they just left.
   const GRAPH_NOT_CARRIED = [
-    ['tier', 'Employee level', 'verified data has no level field', ''],
-    ['funding', 'Giving type', 'verified data has no employee or corporate funding field', 'all'],
-    ['mode', 'Candidate view', 'downstream PAC activity and estimates stay in Graph', 'direct'],
-    ['direction', 'Support or opposition', 'that distinction exists only in Graph', 'Support']
+    ['tier', 'Employee level', 'not in verified data', ''],
+    ['funding', 'Giving type', 'not in verified data', 'all'],
+    ['mode', 'Candidate view', 'Graph only', 'direct'],
+    ['direction', 'Support or opposition', 'Graph only', 'Support']
   ];
   function graphScope() {
     const read = id => (document.getElementById('graph-' + id) || {}).value || '';

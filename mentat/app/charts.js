@@ -338,7 +338,7 @@
   };
   el('briefing').onclick=()=>{
     if(!chart)return;
-    if(!window.MentatBriefing){error('The briefing tray is not served by this console yet. Restart the console and try again.');return;}
+    if(!window.MentatBriefing){error('Briefing needs a console restart.');return;}
     error('');
     const report=(el('report').selectedOptions[0]||{}).textContent||'';
     window.MentatBriefing.capture({svg:el('image').firstChild,title:el('title').textContent,

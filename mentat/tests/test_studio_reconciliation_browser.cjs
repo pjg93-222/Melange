@@ -105,7 +105,7 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
     [{field:'company',op:'eq',value:'Alpha Bank'},{field:'cycle',op:'eq',value:'2023-2024'}]);
   await page.waitForSelector('#studio-reconcile:not([hidden])');
   const agreed=await page.locator('#studio-reconcile').textContent();
-  assert.match(agreed,/^Basis: Published included receipts\. Graph shows \$12,090,412\.00 for Alpha Bank · 2023-2024 \(workbook receipts\)\. Studio total \$12,090,412\.00\. Agree\./);
+  assert.match(agreed,/^Graph shows \$12,090,412\.00 for Alpha Bank · 2023-2024\. Studio shows \$12,090,412\.00\. Agree\./);
   assert.equal(await page.locator('#studio-reconcile .studio-reconcile-agree').textContent(),'Agree.');
   assert.equal(await page.locator('#studio-reconcile .studio-reconcile-link').textContent(),'Why Cross-reference differs');
   // The strip asked Graph the question the studio is showing, not Graph's own.
@@ -122,13 +122,13 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
   // the strip says which filter did it.
   await page.evaluate(()=>{document.getElementById('graph-tier').value='Chief';
     document.getElementById('graph-open-builder').click();});
-  await page.waitForFunction(()=>/Differ by/.test(document.getElementById('studio-reconcile').textContent));
+  await page.waitForFunction(()=>/They differ by/.test(document.getElementById('studio-reconcile').textContent));
   const differed=await page.locator('#studio-reconcile').textContent();
-  assert.match(differed,/Graph shows \$9,000,000\.00 for Alpha Bank · 2023-2024 \(workbook receipts\)\. Studio total \$12,090,412\.00\./);
-  assert.match(differed,/Differ by \$3,090,412\.00 because a Graph filter \(employee level, giving type\) has no verified field\./);
+  assert.match(differed,/Graph shows \$9,000,000\.00 for Alpha Bank · 2023-2024\. Studio shows \$12,090,412\.00\./);
+  assert.match(differed,/They differ by \$3,090,412\.00 because a Graph filter \(employee level or giving type\) is not carried\./);
   await page.waitForFunction(()=>!document.getElementById('studio-scope-note').hidden);
   assert.equal(await page.locator('#studio-scope-note').textContent(),
-    'Employee level: not carried (verified data has no level field)');
+    'Employee level: not carried (not in verified data)');
 
   // A basis that is not the workbook's included receipts is a different
   // question, and the strip refuses to call two numbers the same answer.
@@ -137,8 +137,8 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
   await page.waitForFunction(()=>/Agree\./.test(document.getElementById('studio-reconcile').textContent));
   await page.locator('#studio-scope-change').click();
   await page.locator('#studio-basis').selectOption('original_observed');
-  await page.waitForFunction(()=>/basis is not Published included receipts/.test(document.getElementById('studio-reconcile').textContent));
-  assert.match(await page.locator('#studio-reconcile').textContent(),/^Basis: Observed original giving \(provisional\)\./);
+  await page.waitForFunction(()=>/uses a different basis than Graph/.test(document.getElementById('studio-reconcile').textContent));
+  assert.match(await page.locator('#studio-reconcile').textContent(),/^Graph shows .+ Studio shows .+ They differ by .+ because this sheet uses a different basis than Graph\./);
 
   // A worksheet view has no verified total to reconcile, so the strip goes away.
   await page.locator('#studio-source-mode').selectOption('worksheet');

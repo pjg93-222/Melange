@@ -184,7 +184,7 @@
 <select id="studio-fit" aria-label="Fit the view" title="How the drawing fills the view"><option value="standard">Fit: Standard</option><option value="width">Fit: Fit width</option><option value="entire">Fit: Entire view</option></select>
 <button id="studio-clear" type="button" title="Empty this sheet but keep the data source">Clear</button>
 <button id="studio-duplicate" type="button" title="Copy this sheet into a new one">Duplicate sheet</button>
-<details class="studio-menu" id="studio-download"><summary>Export</summary><div><button id="studio-download-png" type="button">Image (PNG)</button><button id="studio-download-svg" type="button">Image (SVG)</button><button id="studio-download-csv" type="button">Data (CSV)</button><hr><button id="studio-copy-image" type="button">Copy image</button><button id="studio-print-chart" type="button">Print chart</button><hr><button id="studio-briefing-menu-add" type="button">Add to briefing</button><hr><button id="studio-save-view" type="button">Save view</button><button id="studio-open-views" type="button">Open view</button></div></details><button id="studio-briefing-add" class="studio-briefing-add" type="button" aria-controls="studio-briefing" title="Put this chart in the briefing tray">Add to briefing<span id="studio-briefing-badge" class="studio-briefing-badge" hidden></span></button>
+<details class="studio-menu" id="studio-download"><summary>Export</summary><div><button id="studio-download-png" type="button">Image (PNG)</button><button id="studio-download-svg" type="button">Image (SVG)</button><button id="studio-download-csv" type="button">Data (CSV)</button><hr><button id="studio-copy-image" type="button">Copy image</button><button id="studio-print-chart" type="button">Print chart</button><hr><button id="studio-briefing-menu-add" type="button">Add to briefing</button><hr><button id="studio-save-view" type="button">Save view</button><button id="studio-open-views" type="button">Open view</button></div></details><button id="studio-briefing-add" class="studio-briefing-add" type="button" aria-controls="studio-briefing" title="Add this chart to the briefing">Add to briefing<span id="studio-briefing-badge" class="studio-briefing-badge" hidden></span></button>
 <button id="studio-showme-toggle" type="button" aria-pressed="true" aria-controls="studio-showme">Show Me</button>
 <span class="studio-toolbar-gap"></span>
 <button id="studio-classic" class="studio-classic" type="button" aria-haspopup="dialog" title="Open the original Create chart dialog">Classic builder</button>
@@ -275,7 +275,7 @@
 <div id="studio-pager" class="studio-pager" hidden><button id="studio-pager-prev" type="button" aria-label="Previous page member">&#9664;</button><button id="studio-pager-play" type="button" aria-pressed="false" aria-label="Play through the page members">&#9654;</button><button id="studio-pager-next" type="button" aria-label="Next page member">&#9654;|</button><span id="studio-pager-label"></span></div>
 <h3>Parameters</h3>
 <div class="studio-inline"><label for="studio-param-start">First worksheet row<input id="studio-param-start" type="number" min="1" step="1" placeholder="First"></label><label for="studio-param-end">Last worksheet row<input id="studio-param-end" type="number" min="1" step="1" placeholder="Last"></label></div>
-<div class="studio-inline"><label for="studio-param-limit">Row limit<input id="studio-param-limit" type="number" min="1" step="1" placeholder="All rows"></label><label for="studio-param-groups">Group limit<input id="studio-param-groups" type="number" min="1" max="1000" step="1" placeholder="40" title="40 per page (verified) &#183; fold after 40 (worksheet); Graph and classic fold at 60"></label></div>
+<div class="studio-inline"><label for="studio-param-limit">Row limit<input id="studio-param-limit" type="number" min="1" step="1" placeholder="All rows"></label><label for="studio-param-groups">Group limit<input id="studio-param-groups" type="number" min="1" max="1000" step="1" placeholder="60" title="Groups shown per page"></label></div>
 <label id="studio-bin-width-label" for="studio-bin-width" hidden>Histogram bin width (USD)<input id="studio-bin-width" type="number" min="0.01" step="0.01" value="100"></label>
 <label class="studio-check" for="studio-param-split"><input id="studio-param-split" type="checkbox"> Split "; "-separated cells on the grouping field</label>
 <label class="studio-check" for="studio-show-hidden"><input id="studio-show-hidden" type="checkbox"> Show identifier fields</label>
@@ -306,17 +306,17 @@
 <button id="studio-briefing-pptx" class="studio-briefing-primary" type="button">Export PowerPoint</button>
 <div class="studio-briefing-actions"><button id="studio-briefing-print" type="button">Print briefing</button><button id="studio-briefing-share" type="button">Share bundle</button></div>
 <button id="studio-briefing-save-view" type="button">Save view</button>
-<p class="studio-briefing-note">Every slide carries its scope, basis and source SHA-256.</p>
+<p class="studio-briefing-note">Each slide shows its scope, basis and source.</p>
 </div>
 </aside>
 <dialog id="studio-share" class="studio-share" aria-labelledby="studio-share-title">
 <div class="studio-share-head"><h3 id="studio-share-title">Share bundle</h3><button id="studio-share-close" type="button">Close</button></div>
-<p class="studio-note">Choose the reports the phone snapshot should carry.</p>
+<p class="studio-note">Choose reports for the phone snapshot.</p>
 <div id="studio-share-datasets" class="studio-share-datasets" role="group" aria-label="Reports"></div>
 <div class="studio-share-buttons"><button id="studio-share-publish" class="studio-share-publish" type="button">Publish phone snapshot</button><button id="studio-briefing-html" type="button">Download HTML bundle</button></div>
 <p id="studio-share-progress" class="studio-note" role="status"></p>
 <p id="studio-share-output" class="studio-note" hidden></p>
-<p class="studio-note">Uploading to the private phone link is the coordinator’s step.</p>
+<p class="studio-note">The coordinator uploads it to the phone link.</p>
 </dialog>
 <div class="studio-overview" id="studio-overview" hidden aria-label="Company overview">
 <div class="studio-overview-head">

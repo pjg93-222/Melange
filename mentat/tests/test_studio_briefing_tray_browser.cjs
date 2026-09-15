@@ -84,7 +84,7 @@ test('the tray orders, reorders and drops charts, and says how many it holds',{t
   assert.equal(await page.$eval('#studio-briefing-print',n=>n.textContent),'Print briefing');
   assert.equal(await page.$eval('#studio-briefing-share',n=>n.textContent),'Share bundle');
   assert.equal(await page.$eval('.studio-briefing-note',n=>n.textContent),
-    'Every slide carries its scope, basis and source SHA-256.');
+    'Each slide shows its scope, basis and source.');
 
   await page.evaluate(()=>window.put('Published included receipts by Recipient category','#342649'));
   await page.evaluate(()=>window.put('Giving by election cycle','#57447b'));
@@ -95,7 +95,7 @@ test('the tray orders, reorders and drops charts, and says how many it holds',{t
   assert.equal(await page.$eval('#studio-briefing',n=>n.hidden),false,'adding a chart opens the drawer');
   // No server behind this fixture, so the tray has to say the charts are not
   // stored rather than implying they are.
-  assert.match(await page.$eval('#studio-briefing-notice',n=>n.textContent),/kept in this tab only/);
+  assert.match(await page.$eval('#studio-briefing-notice',n=>n.textContent),/stays in this tab/);
 
   await page.evaluate(()=>window.put('Top recipients','#327a7a'));
   const action=(index,label)=>page.locator('#studio-briefing-items .studio-briefing-card')
@@ -129,7 +129,7 @@ test('the tray orders, reorders and drops charts, and says how many it holds',{t
   assert.ok(!bundle.text.includes('Published included receipts by Recipient category'),
     'a removed chart must not survive in the bundle');
   assert.match(bundle.text,new RegExp(SHA),'the provenance table carries the workbook hash');
-  assert.match(bundle.text,/Every slide carries its scope, basis and source SHA-256\./);
+  assert.match(bundle.text,/Each slide shows its scope, basis and source\./);
   assert.ok(!/<script/i.test(bundle.text),'the bundle is a document, not a program');
 });
 

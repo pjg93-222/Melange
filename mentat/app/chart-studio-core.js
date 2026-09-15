@@ -188,7 +188,7 @@
   // The engine's default is the legacy callers' sixty, so the Studio never leans
   // on it - every compiled configuration carries its limit explicitly, and the
   // Group limit box in Parameters raises it.
-  const STUDIO_GROUP_LIMIT = 40;
+  const STUDIO_GROUP_LIMIT = 60;
 
   function compileReport(state, columns) {
     const meta = classifyFields(columns, state && state.types);
@@ -210,7 +210,7 @@
     const color = colorPill ? fieldAt(meta, colorPill.column) : null;
     for (const channel of ['size', 'label', 'tooltip']) {
       const values = Array.isArray(marks[channel]) ? shelf(marks[channel]) : [pill(marks[channel])].filter(Boolean);
-      if (values.length) issues.push(channel[0].toUpperCase() + channel.slice(1) + ' field encoding is unavailable in the worksheet renderer. Switch Data source to Verified contributions, or remove this field.');
+      if (values.length) issues.push(channel[0].toUpperCase() + channel.slice(1) + ' is not available for worksheet data. Remove this field or switch to Verified contributions.');
     }
     const details = attach(marks.detail);
     if (details.some(p => p.field.role !== 'dimension')) issues.push('Detail requires dimensions; move a measure to Rows or Columns.');
@@ -310,9 +310,9 @@
     }
     if (y === -1 && ['scatter', 'box', 'histogram'].includes(type)) issues.push('This view plots individual values, so it needs a numeric measure.');
     const unusedMeasures = allMeasures.filter(p => p !== yPill && !(type === 'scatter' && p === xPill));
-    if (unusedMeasures.length) issues.push('This worksheet renderer cannot draw additional measures (' + unusedMeasures.map(p => p.field.name).join(', ') + '). Use a two-measure scatter, separate sheets, or switch Data source to Verified contributions.');
+    if (unusedMeasures.length) issues.push('Worksheet charts show one measure. Not drawn: ' + unusedMeasures.map(p => p.field.name).join(', ') + '. Use separate sheets, a two-measure scatter, or Verified contributions.');
     let grouping = [...new Set(allDimensions.concat(details.filter(p => p.field.role === 'dimension')).map(p => p.column))];
-    if (type === 'scatter' && grouping.length) issues.push('Scatter plots individual rows here; dimension and Detail grouping need Data source: Verified contributions.');
+    if (type === 'scatter' && grouping.length) issues.push('Scatter shows individual rows here. Grouping needs Verified contributions.');
     if (type === 'histogram' && grouping.length) notes.push('Histogram uses individual values; shelf dimensions do not group bins. Remove them or use a box plot for grouped distributions.');
     if (['scatter', 'histogram'].includes(type)) grouping = [];
     if (x < 0 && grouping.length) x = grouping[0];
@@ -328,7 +328,7 @@
     const filters = (state.filters || [])
       .filter(f => f && filterActive(f) && fieldAt(meta, Number(f.column)))
       .map(f => normalizeFilter(f));
-    if (filters.some(f => ['gte','lte'].includes(f.op))) notes.push('Numeric filters apply to source rows before aggregation. Aggregate measure filters are available in Verified contributions.');
+    if (filters.some(f => ['gte','lte'].includes(f.op))) notes.push('Number filters apply to rows, not totals. Filter totals in Verified contributions.');
     const pagePill = pill(state.pages);
     if (pagePill && fieldAt(meta, pagePill.column) && state.pageMember) {
       filters.push({column: pagePill.column, op: 'equals', value: String(state.pageMember)});

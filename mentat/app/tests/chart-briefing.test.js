@@ -48,7 +48,7 @@ test('the tray holds forty charts and refuses the forty-first rather than droppi
   const items = filled(model.CAP);
   assert.strictEqual(items.length, 40);
   assert.strictEqual(model.CAP, 40);
-  assert.throws(() => model.add(items, chart('over')), /holds 40 charts/);
+  assert.throws(() => model.add(items, chart('over')), /is full \(40 charts\)/);
   assert.strictEqual(items[0].id, 'c0', 'the oldest chart must still be there after the refusal');
 });
 
@@ -58,5 +58,5 @@ test('a chart removed from a full tray makes room for exactly one more', () => {
   const refilled = model.add(items, chart('fresh'));
   assert.strictEqual(refilled.length, 40);
   assert.strictEqual(refilled.at(-1).id, 'fresh');
-  assert.throws(() => model.add(refilled, chart('over')), /Remove one before adding another/);
+  assert.throws(() => model.add(refilled, chart('over')), /Remove one first/);
 });

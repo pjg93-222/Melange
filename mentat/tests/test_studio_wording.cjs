@@ -39,16 +39,16 @@ test('an empty sheet asks for a grouping and a dollar measure, in those words',(
 test('every worksheet refusal names the Data source control as the way on',()=>{
   const marks=patch=>Object.assign(core.createSheet('x').marks,patch);
   assert.match(issues({marks:marks({size:{column:1,aggregation:'sum'}})}),
-    /Size field encoding is unavailable in the worksheet renderer\. Switch Data source to Verified contributions, or remove this field\./);
+    /Size is not available for worksheet data\. Remove this field or switch to Verified contributions\./);
   assert.match(issues({columns:[{column:0,aggregation:'sum'}],
     rows:[{column:1,aggregation:'sum'},{column:2,aggregation:'sum'}]}),
-    /Use a two-measure scatter, separate sheets, or switch Data source to Verified contributions\./);
+    /Use separate sheets, a two-measure scatter, or Verified contributions\./);
   assert.match(issues({marks:marks({type:'circle'}),columns:[{column:1,aggregation:'sum'}],
     rows:[{column:2,aggregation:'sum'},{column:0,aggregation:'sum'}]}),
-    /dimension and Detail grouping need Data source: Verified contributions\./);
+    /Scatter shows individual rows here\. Grouping needs Verified contributions\./);
   assert.match(notes({columns:[{column:0,aggregation:'sum'}],rows:[{column:1,aggregation:'sum'}],
     filters:[{column:1,op:'gte',value:'5'}]}),
-    /Aggregate measure filters are available in Verified contributions\./);
+    /Number filters apply to rows, not totals\. Filter totals in Verified contributions\./);
 });
 
 test('the verified engine asks for a measure and a mark in the reader’s vocabulary',()=>{
@@ -57,7 +57,7 @@ test('the verified engine asks for a measure and a mark in the reader’s vocabu
   const odd=Object.assign(core.createSheet('b'),{columns:[{column:at('company'),aggregation:'sum'}],
     rows:[{column:at('amount'),aggregation:'sum'}]});
   odd.marks.type='sunburst';
-  assert.throws(()=>compile(odd),/^Error: This chart type needs individual receipts\. Switch Data source to Report worksheet, or select Bar, Line, Circle, Text or Map\.$/);
+  assert.throws(()=>compile(odd),/^Error: Not available for verified data\. Use Bar, Line, Circle, Text or Map, or switch to Report worksheet\.$/);
 });
 
 test('the default empty state names the mode the console starts in',()=>{
@@ -81,15 +81,18 @@ test('the header keeps a permanent, plainly named way back to the report picker'
 test('Graph names the figure it shows, so it can be matched to Chart Studio',()=>{
   assert.match(read('index.html'),/<strong id="graph-total">—<\/strong><small id="graph-basis-note"><\/small>/);
   assert.match(read('graph.js'),
-    /Workbook included receipts, net\. Same figure as Chart Studio’s Published included receipts basis\./);
+    /Net workbook receipts\. Same basis as Chart Studio’s Published included receipts\./);
 });
 
-test('the group limit says what forty means, and stays forty',()=>{
-  assert.strictEqual(core.STUDIO_GROUP_LIMIT,40);
-  const label='40 per page (verified) · fold after 40 (worksheet); Graph and classic fold at 60';
-  assert.match(read('index.html'),/title="40 per page \(verified\) &#183; fold after 40 \(worksheet\); Graph and classic fold at 60"/);
-  assert.ok(read('chart-studio.js').includes(label),'the verified label says the same thing as the markup');
+test('the group limit says what it means, and is sixty everywhere',()=>{
+  assert.strictEqual(core.STUDIO_GROUP_LIMIT,60);
+  const markup='Groups shown per page';
+  const label=markup+'. Totals and CSV exports include every group.';
+  assert.match(read('index.html'),/title="Groups shown per page"/);
+  assert.match(read('index.html'),/placeholder="60" title="Groups shown per page"/);
+  assert.ok(read('chart-studio.js').includes(label),'the verified label opens with the same sentence as the markup');
   assert.doesNotMatch(read('index.html'),/default 40/);
+  assert.doesNotMatch(read('index.html'),/40 per page/);
   // The page counter says the totals are not the page.
   assert.match(read('chart-studio.js'),/groups · totals cover all \$\{fmt\(result\.group_count\)\}/);
 });
@@ -97,8 +100,8 @@ test('the group limit says what forty means, and stays forty',()=>{
 test('the cross-reference reasons and captions are the approved plain words',()=>{
   const xref=read('cross-reference.js');
   for(const [key,label] of [
-    ['company_attribution_unresolved','Donor not yet matched to a listed company (counted at $0)'],
-    ['attribution_unresolved','Attribution not settled (counted at $0)'],
+    ['company_attribution_unresolved','Donor not matched to a listed company · counted at $0'],
+    ['attribution_unresolved','Attribution unsettled · counted at $0'],
     ['company_attribution_not_accepted','Company match not accepted'],
     ['memo_parent_not_established','Memo entry without a proven parent receipt'],
     ['original_source_of_transfer_unresolved','Transfer whose original donor is unresolved'],
@@ -117,7 +120,7 @@ test('the cross-reference reasons and captions are the approved plain words',()=
     ['explicit_observed_refund','Observed refund'],
     ['linked_refund','Linked refund adjustment']
   ]) assert.ok(xref.includes(key+":'"+label.replaceAll("'","\\'")+"'"),'missing plain-word name for '+key);
-  assert.ok(xref.includes('Rows with an unresolved company attribution are counted at $0 in every total above; memo, transfer, earmark and role reviews stay inside Observed original giving until resolved.'));
+  assert.ok(xref.includes('Unresolved company attributions count as $0 in every total above. Memo, transfer, earmark and role reviews stay inside Observed original giving until resolved.'));
 });
 
 test('the reconciliation strip has a reason for every way two totals can part',()=>{

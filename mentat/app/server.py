@@ -925,7 +925,7 @@ class Console:
     def get_view(self, identifier):
         """One saved view with its sheets, or None when this console has no such view."""
         if not re.fullmatch(r'[a-f0-9]{32}', identifier or ''):
-            raise ValueError('That is not a saved view identifier.')
+            raise ValueError('Unknown saved view.')
         value = read_json(self.studio_directory('views', identifier + '.json'))
         if value.get('id') != identifier or not isinstance(value.get('sheets'), list):
             return None
@@ -936,18 +936,18 @@ class Console:
     def save_view(self, data):
         name = str(data.get('name', '')).strip()
         if not 1 <= len(name) <= 80:
-            raise ValueError('Name the view: between 1 and 80 characters.')
+            raise ValueError('View name must be 1 to 80 characters.')
         source_key, source = data.get('sourceKey'), data.get('source')
         if not isinstance(source_key, str) or not isinstance(source, dict):
-            raise ValueError('A saved view carries the source it was built from.')
+            raise ValueError('Saved view is missing its data source.')
         sheets = data.get('sheets')
         if not isinstance(sheets, list) or not 1 <= len(sheets) <= 24:
-            raise ValueError('Save between 1 and 24 sheets in one view.')
+            raise ValueError('A view holds 1 to 24 sheets.')
         if any(not isinstance(sheet, dict) or not str(sheet.get('name', '')).strip() for sheet in sheets):
             raise ValueError('Every sheet in a saved view needs a name.')
         active = data.get('active')
         if not isinstance(active, int) or isinstance(active, bool):
-            raise ValueError('The active sheet is a sheet number.')
+            raise ValueError('Active sheet must be a sheet number.')
         identifier = uuid.uuid4().hex
         value = {'id': identifier, 'name': name, 'saved_at': time.time(), 'sourceKey': source_key,
                  'source': source, 'sheets': sheets, 'active': active}
@@ -961,7 +961,7 @@ class Console:
         """Remove a saved view. Deleting one that is already gone is success."""
         identifier = str(data.get('id', ''))
         if not re.fullmatch(r'[a-f0-9]{32}', identifier):
-            raise ValueError('That is not a saved view identifier.')
+            raise ValueError('Unknown saved view.')
         with self.lock:
             try:
                 (self.studio_directory('views') / (identifier + '.json')).unlink()
@@ -981,7 +981,7 @@ class Console:
     def briefing_item(self, identifier):
         """The stored SVG for one item, or None when this console has no such item."""
         if not re.fullmatch(r'[a-f0-9]{32}', identifier or ''):
-            raise ValueError('That is not a briefing item identifier.')
+            raise ValueError('Unknown briefing item.')
         if not any(item.get('id') == identifier for item in self.briefing()['items']):
             return None
         try:
@@ -992,9 +992,9 @@ class Console:
     def add_to_briefing(self, data):
         svg = data.get('svg')
         if not isinstance(svg, str) or not svg.startswith('<svg'):
-            raise ValueError('A briefing item carries the chart it was made from.')
+            raise ValueError('Briefing item is missing its chart.')
         if len(svg.encode('utf-8')) > 6 * 1024 * 1024:
-            raise ValueError('Narrow the view before adding it: this chart is over 6 MB.')
+            raise ValueError('Chart is over 6 MB. Narrow the view first.')
 
         def dimension(value):
             try:
@@ -1016,7 +1016,7 @@ class Console:
             directory.mkdir(parents=True, exist_ok=True)
             items = self.briefing()['items']
             if len(items) >= 40:
-                raise Conflict('The briefing holds 40 items. Remove one before adding another.')
+                raise Conflict('Briefing is full (40 charts). Remove one first.')
             temporary = directory / (identifier + '.svg.' + uuid.uuid4().hex + '.tmp')
             temporary.write_text(svg, encoding='utf-8')
             replace_with_retry(temporary, directory / (identifier + '.svg'))
@@ -1028,7 +1028,7 @@ class Console:
         """Remove one item. Removing one that is already gone is success."""
         identifier = str(data.get('id', ''))
         if not re.fullmatch(r'[a-f0-9]{32}', identifier):
-            raise ValueError('That is not a briefing item identifier.')
+            raise ValueError('Unknown briefing item.')
         directory = self.studio_directory('briefing')
         with self.lock:
             directory.mkdir(parents=True, exist_ok=True)
@@ -1044,14 +1044,14 @@ class Console:
         """Reorder the tray. The list has to be a permutation of what is there."""
         ids = data.get('ids')
         if not isinstance(ids, list) or any(not isinstance(value, str) for value in ids):
-            raise ValueError('Send the briefing order as a list of item identifiers.')
+            raise ValueError('Briefing order must be a list of item ids.')
         directory = self.studio_directory('briefing')
         with self.lock:
             directory.mkdir(parents=True, exist_ok=True)
             items = self.briefing()['items']
             index = {item.get('id'): item for item in items}
             if len(ids) != len(items) or len(set(ids)) != len(ids) or any(value not in index for value in ids):
-                raise ValueError('The briefing order must list every item in the tray exactly once.')
+                raise ValueError('Briefing order must list every item once.')
             atomic_json(directory / 'index.json', {'items': [index[value] for value in ids]})
         return {'ok': True}
 
@@ -1064,13 +1064,13 @@ class Console:
         """
         port = int(getattr(self, 'port', 0) or 0)
         if not port:
-            raise ValueError('This console does not know its own port. Restart it and publish again.')
+            raise ValueError('Restart the console, then publish again.')
         datasets = data.get('datasets')
         if not isinstance(datasets, list) or not datasets:
-            raise ValueError('Choose at least one dataset to publish.')
+            raise ValueError('Choose at least one report.')
         datasets = list(dict.fromkeys(str(value).strip() for value in datasets))
         if any(not value or ',' in value for value in datasets):
-            raise ValueError('Choose datasets from the report catalog.')
+            raise ValueError('Choose reports from the catalog.')
         known = {str(entry.get('id')) for entry in
                  contribution_query.semantics.catalog(self.report_directory).get('datasets', [])}
         unknown = [value for value in datasets if value not in known]
@@ -1079,7 +1079,7 @@ class Console:
         identifier = 'publish-' + uuid.uuid4().hex
         with self.lock:
             if any(str(job).startswith('publish-') for job in self.jobs):
-                raise Conflict('A phone snapshot is already being published. Wait for it to finish.')
+                raise Conflict('A phone snapshot is already publishing. Wait for it to finish.')
             self.jobs.add(identifier)
         root = self.root / 'publish' / identifier
         root.mkdir(parents=True, exist_ok=True)
@@ -1207,7 +1207,7 @@ class Console:
             return None
         if job.get('status') in ('queued', 'running') and not process_alive(job.get('console_pid')):
             job['status'] = 'failed'
-            job['message'] = 'The console that was publishing this snapshot is no longer running.'
+            job['message'] = 'The publishing console stopped.'
         return job
 
     def runs(self):
@@ -1775,14 +1775,14 @@ class Handler(BaseHTTPRequestHandler):
             if parsed.path == '/api/publish/pocket':
                 job = app.publication(query.get('id', [''])[0])
                 if job is None:
-                    return self.send({'error': 'That publication is not on this console.'}, 404)
+                    return self.send({'error': 'Publication not on this console.'}, 404)
                 return self.send(job)
             if parsed.path == '/api/studio/briefing':
                 return self.send(app.briefing())
             if parsed.path == '/api/studio/briefing/item':
                 svg = app.briefing_item(query.get('id', [''])[0])
                 if svg is None:
-                    return self.send({'error': 'That briefing item is not on this console.'}, 404)
+                    return self.send({'error': 'Briefing item not on this console.'}, 404)
                 return self.send(svg.encode('utf-8'), content_type='text/plain; charset=utf-8')
             if parsed.path == '/api/studio/views':
                 identifier = query.get('id', [''])[0]
@@ -1790,7 +1790,7 @@ class Handler(BaseHTTPRequestHandler):
                     return self.send(app.list_views())
                 view = app.get_view(identifier)
                 if view is None:
-                    return self.send({'error': 'That saved view is not on this console.'}, 404)
+                    return self.send({'error': 'Saved view not on this console.'}, 404)
                 return self.send({'view': view})
             assets = STATIC_ASSETS
             if parsed.path in assets:
@@ -1819,10 +1819,10 @@ class Handler(BaseHTTPRequestHandler):
         analytical_paths = {'/api/contributions/query', '/api/contributions/records', '/api/contributions/geography'}
         if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/studio/briefing'):
             self.discard_body()
-            return self.send({'error': 'The briefing is read-only in this preview console.'}, 403)
+            return self.send({'error': 'Read-only preview. Briefing changes are not saved.'}, 403)
         if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/studio/views'):
             self.discard_body()
-            return self.send({'error': 'Saved views are read-only in this preview console; save from the original console.'}, 403)
+            return self.send({'error': 'Read-only preview. Save views from the main console.'}, 403)
         if getattr(self.server.app, 'read_only', False) and self.path not in analytical_paths | {'/api/evidence-csv'}:
             self.discard_body()
             return self.send({"error":"This preview is read-only while the original console manages collection."}, 403)
@@ -1852,7 +1852,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(contribution_geo.geography(data))
             if self.path == '/api/restart':
                 if console_busy(self.server.app):
-                    return self.send({'error': 'This console is still running collection work. Restart it once that finishes.'}, 409)
+                    return self.send({'error': 'Collection is running. Restart after it finishes.'}, 409)
                 # A console already running the build that is on disk has nothing
                 # to restart. Answering 'restarting' anyway sent the launcher to
                 # reuse the process it already had - correctly - and left the

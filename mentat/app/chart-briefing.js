@@ -19,7 +19,7 @@
 
   function addItem(items, item) {
     if (items.length >= CAP) {
-      throw new Error('The briefing holds ' + CAP + ' charts. Remove one before adding another.');
+      throw new Error('Briefing is full (' + CAP + ' charts). Remove one first.');
     }
     return items.concat([item]);
   }
@@ -123,11 +123,11 @@
   // The tray keeps working when the console will not store it, so every refusal
   // has to end by saying where the charts actually are.
   function refusal(error) {
-    if (previewReadOnly()) return 'Not saved in a read-only preview: this briefing is kept in this tab only.';
+    if (previewReadOnly()) return 'Read-only preview. This briefing stays in this tab.';
     const text = problem(error);
     return text === 'Server unavailable.'
-      ? 'Server unavailable: this briefing is kept in this tab only.'
-      : text + ' This briefing is kept in this tab only.';
+      ? 'Server unavailable. This briefing stays in this tab.'
+      : text + ' This briefing stays in this tab.';
   }
   async function getJSON(path) {
     const response = await fetch(path, {credentials: 'same-origin'});
@@ -174,14 +174,14 @@
     if (svgCache.has(item.id)) return svgCache.get(item.id);
     const response = await fetch('/api/studio/briefing/item?id=' + encodeURIComponent(item.id),
       {credentials: 'same-origin'});
-    if (!response.ok) throw new Error('That chart is no longer stored on this console.');
+    if (!response.ok) throw new Error('Chart no longer on this console.');
     const text = await response.text();
     svgCache.set(item.id, text);
     return text;
   }
   async function nodeFor(item) {
     const node = svgNode(await svgFor(item));
-    if (!node) throw new Error('That chart could not be read back.');
+    if (!node) throw new Error('Chart could not be read.');
     return node;
   }
 
@@ -192,7 +192,7 @@
   // scope and source themselves, and a baked-in caption would say it twice.
   function describe(chart) {
     if (!chart || !chart.svg) throw new Error('Build a chart before adding it to the briefing.');
-    if (!root.MentatExport) throw new Error('The export helper is not loaded on this page.');
+    if (!root.MentatExport) throw new Error('Export is not available. Reload the page.');
     const composed = root.MentatExport.compose(chart.svg, chart.title, chart.scope, {caption: false});
     const text = new XMLSerializer().serializeToString(composed.svg);
     if (text.length > 6 * 1024 * 1024) throw new Error('Narrow the view before adding it');
@@ -218,7 +218,7 @@
   }
   async function add(record) {
     if (items.length >= CAP) {
-      setNotice('The briefing holds ' + CAP + ' charts. Remove one before adding another.');
+      setNotice('Briefing is full (' + CAP + ' charts). Remove one first.');
       openDrawer();
       return null;
     }
@@ -396,7 +396,7 @@
         sheet.append(node);
       } catch {
         const missing = document.createElement('p');
-        missing.textContent = 'This chart is no longer stored on this console.';
+        missing.textContent = 'Chart no longer on this console.';
         sheet.append(missing);
       }
       const rule = document.createElement('hr');
@@ -450,7 +450,7 @@
   async function exportHtml() {
     const drawn = [];
     for (const item of items) {
-      let markup = '<p>This chart is no longer stored on this console.</p>';
+      let markup = '<p>Chart no longer on this console.</p>';
       try { markup = new XMLSerializer().serializeToString(await nodeFor(item)); } catch { /* keep the note */ }
       drawn.push(
         '<section>' +
@@ -482,7 +482,7 @@
       '<h2>Provenance</h2>',
       '<table><thead><tr><th>#</th><th>Chart</th><th>Scope</th><th>Basis</th>' +
         '<th>Workbook</th><th>Workbook SHA-256</th></tr></thead><tbody>' + rows + '</tbody></table>',
-      '<p class="lead">Every slide carries its scope, basis and source SHA-256.</p>',
+      '<p class="lead">Each slide shows its scope, basis and source.</p>',
       '</body></html>'
     ].join('\n');
     root.MentatExport.download(html, 'text/html;charset=utf-8', 'mentat-briefing-' + isoDate() + '.html');
@@ -502,10 +502,10 @@
         script.src = '/vendor/pptxgen.bundle.js';
         script.onload = () => root.PptxGenJS
           ? resolve(root.PptxGenJS)
-          : reject(new Error('The PowerPoint builder loaded but did not register itself.'));
+          : reject(new Error('PowerPoint export failed to load. Reload and try again.'));
         script.onerror = () => {
           pptxLoad = null;
-          reject(new Error('This console does not serve the PowerPoint builder yet. Restart it and try again.'));
+          reject(new Error('PowerPoint export needs a console restart.'));
         };
         document.head.append(script);
       });
@@ -519,7 +519,7 @@
     return await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(String(reader.result));
-      reader.onerror = () => reject(new Error('The chart image could not be read back.'));
+      reader.onerror = () => reject(new Error('Chart image could not be read.'));
       reader.readAsDataURL(blob);
     });
   }
@@ -536,7 +536,7 @@
         slide.addImage({data: png, x: 0.5, y: 1.15, w: 12.3, h: 5.0,
           sizing: {type: 'contain', w: 12.3, h: 5.0}});
       } catch {
-        slide.addText('This chart is no longer stored on this console.',
+        slide.addText('Chart no longer on this console.',
           {x: 0.5, y: 1.15, w: 12.3, h: 0.5, fontSize: 12, fontFace: 'Arial', color: 'BF3F36'});
       }
       const line = (deck.ShapeType && deck.ShapeType.line) || 'line';
@@ -567,7 +567,7 @@
   async function openShare() {
     const dialog = el('share');
     if (!dialog) return;
-    shareProgress('Reading the report catalogue…');
+    shareProgress('Loading reports…');
     shareOutput('');
     const host = el('share-datasets');
     if (host) host.replaceChildren();
@@ -589,8 +589,8 @@
           return label;
         }));
       }
-      shareProgress(datasets.length ? 'Choose the reports the phone snapshot should carry.'
-        : 'This console has no verified reports to publish.');
+      shareProgress(datasets.length ? 'Choose reports for the phone snapshot.'
+        : 'No verified reports to publish.');
     } catch (error) {
       shareProgress(problem(error));
     }
@@ -612,7 +612,7 @@
       const started = await post('/api/publish/pocket', {datasets: ids});
       const job = typeof started.job === 'string' ? started.job
         : (started.job && (started.job.id || started.job.job_id)) || '';
-      if (!job) throw new Error('The console did not say which job it started.');
+      if (!job) throw new Error('Publish did not start. Try again.');
       shareProgress('Building the phone snapshot…');
       pollPocket(job, Date.now());
     } catch (error) {
@@ -637,7 +637,7 @@
           return;
         }
         if (['failed', 'error', 'cancelled'].includes(status)) {
-          shareProgress(body.message || 'The phone snapshot did not finish.');
+          shareProgress(body.message || 'Phone snapshot failed.');
           if (button) button.disabled = false;
           return;
         }

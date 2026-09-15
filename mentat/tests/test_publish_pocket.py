@@ -298,7 +298,7 @@ class PublishPocketTests(unittest.TestCase):
         with patch.object(self.console, 'port', 0):
             status, _, body = self.request('/api/publish/pocket', method='POST', data={'datasets': ['Crypto']})
         self.assertEqual(status, 400)
-        self.assertIn('port', body['error'])
+        self.assertIn('Restart the console, then publish again.', body['error'])
         self.assertEqual(self.commands, [])
 
     def test_a_read_only_console_refuses_to_publish_and_still_reports_state(self):

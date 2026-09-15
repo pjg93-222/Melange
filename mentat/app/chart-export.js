@@ -14,7 +14,7 @@
     const settings = options || {};
     if (!source) throw new Error('Create a chart before exporting.');
     const ns = 'http://www.w3.org/2000/svg', box = source.viewBox.baseVal;
-    if (![box.x,box.y,box.width,box.height].every(Number.isFinite) || box.width <= 0 || box.height <= 0) throw new Error('The chart has no exportable viewport.');
+    if (![box.x,box.y,box.width,box.height].every(Number.isFinite) || box.width <= 0 || box.height <= 0) throw new Error('Nothing to export.');
     // A map's viewBox moves and shrinks while zooming. Keep that viewBox on a
     // nested, clipped viewport, and add the caption outside it. Resetting x/y to
     // zero without moving the marks exports a different geographic area.

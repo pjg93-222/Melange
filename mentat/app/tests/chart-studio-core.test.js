@@ -62,7 +62,7 @@ test('dimensions reach grouping and extra measures are explicitly refused', () =
   assert.strictEqual(config.y, AMOUNT);
   assert.strictEqual(config.type, 'bar');
   assert.deepStrictEqual(config.dimensions, [CATEGORY, TIER]);
-  assert.match(report.issues.join(' '), /additional measures/);
+  assert.match(report.issues.join(' '), /show one measure/);
 });
 
 test('a measure pill carries its own aggregation, defaulting to sum', () => {
@@ -763,11 +763,11 @@ test('the group limit and the split parameter reach the configuration', () => {
 
   const blank = core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT],
     params: {maxGroups: '', splitMulti: false}}), COLUMNS);
-  assert.strictEqual(core.STUDIO_GROUP_LIMIT, 40);
-  assert.strictEqual(blank.maxGroups, 40, 'blank compiles to the Studio default, stated explicitly');
+  assert.strictEqual(core.STUDIO_GROUP_LIMIT, 60);
+  assert.strictEqual(blank.maxGroups, 60, 'blank compiles to the Studio default, stated explicitly');
   assert.strictEqual(blank.splitMulti, false);
   assert.strictEqual(core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT],
-    params: {maxGroups: 0}}), COLUMNS).maxGroups, 40, 'zero means the same');
+    params: {maxGroups: 0}}), COLUMNS).maxGroups, 60, 'zero means the same');
 
   const ungrouped = core.compileReport(sheet({rows: [AMOUNT], params: {splitMulti: true}}), COLUMNS);
   assert.strictEqual(ungrouped.config.x, -1);
@@ -803,12 +803,12 @@ test('all shelf dimensions and Detail dimensions change the grouping grain', () 
 test('unsupported encodings and duplicate measure pills cannot silently do nothing', () => {
   for(const channel of ['size','label','tooltip']){
     const report=core.compileReport(sheet({columns:[CATEGORY],rows:[AMOUNT],marks:marks({[channel]:channel==='tooltip'?[TIER]:TIER})}),COLUMNS);
-    assert.match(report.issues.join(' '),/encoding is unavailable/);
+    assert.match(report.issues.join(' '),/is not available for worksheet data/);
   }
   const repeated=core.compileReport(sheet({columns:[CATEGORY],rows:[AMOUNT,{column:AMOUNT,aggregation:'mean'}]}),COLUMNS);
-  assert.match(repeated.issues.join(' '),/additional measures/);
+  assert.match(repeated.issues.join(' '),/show one measure/);
   const scatter=core.compileReport(sheet({columns:[COUNT],rows:[AMOUNT],marks:marks({detail:[CATEGORY]})}),COLUMNS);
-  assert.match(scatter.issues.join(' '),/dimension and Detail grouping/);
+  assert.match(scatter.issues.join(' '),/Grouping needs Verified contributions/);
 });
 
 test('numeric ZIP variants and congressional district identifiers never become money measures', () => {

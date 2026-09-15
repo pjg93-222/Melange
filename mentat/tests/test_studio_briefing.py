@@ -18,7 +18,7 @@ spec = importlib.util.spec_from_file_location("studio_briefing_server", APP / "s
 app = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(app)
 
-READ_ONLY_REFUSAL = 'The briefing is read-only in this preview console.'
+READ_ONLY_REFUSAL = 'Read-only preview. Briefing changes are not saved.'
 ITEM_FIELDS = ('id', 'title', 'scope', 'note', 'basis', 'sheetId', 'sheetName', 'source',
                'provenance', 'width', 'height', 'added_at', 'origin')
 

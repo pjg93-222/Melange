@@ -30,8 +30,8 @@
     source_or_attribution_conflict:'Source facts or company matches disagree',
     funding_identity_unresolved:'Who supplied the money is unresolved',
     memo_parent_ambiguous:'Memo points to more than one possible receipt',
-    company_attribution_unresolved:'Donor not yet matched to a listed company (counted at $0)',
-    attribution_unresolved:'Attribution not settled (counted at $0)',
+    company_attribution_unresolved:'Donor not matched to a listed company · counted at $0',
+    attribution_unresolved:'Attribution unsettled · counted at $0',
     company_attribution_not_accepted:'Company match not accepted',
     memo_parent_not_established:'Memo entry without a proven parent receipt',
     original_source_of_transfer_unresolved:'Transfer whose original donor is unresolved',
@@ -110,7 +110,7 @@
     content += '</div><dl class="xref-breakdown"><div><dt>Employee giving · reported employer</dt><dd>' + money(s.employee_giving) + '</dd></div><div><dt>Corporate treasury giving · supported ownership</dt><dd>' + money(s.corporate_giving) + '</dd></div><div><dt>Funding attribution unverified</dt><dd>' + money(s.unverified_funding) + '</dd></div>';
     if (numeric(s.linked_refund_adjustments)) content += '<div><dt>Linked refund adjustments</dt><dd>' + money(s.linked_refund_adjustments) + '</dd></div>';
     content += '</dl><p class="xref-caption">These amounts follow the classifications supported in this run. Unverified funding attribution remains in the original-giving view.</p>';
-    content += '<p class="xref-caption">Rows with an unresolved company attribution are counted at $0 in every total above; memo, transfer, earmark and role reviews stay inside Observed original giving until resolved.</p>';
+    content += '<p class="xref-caption">Unresolved company attributions count as $0 in every total above. Memo, transfer, earmark and role reviews stay inside Observed original giving until resolved.</p>';
     if (numeric(s.supported_original_giving)) content += `<p class="xref-caption">Gross giving with complete uniqueness evidence: ${money(s.supported_original_giving)}. This separate measure requires complete filing, origin and route evidence; it does not invalidate resolved receipt classifications.</p>`;
     content += '</section>';
     if (items(report.partisan_breakdowns).length) {

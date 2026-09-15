@@ -22,9 +22,9 @@ test('An older build on disk raises the restart banner, and the stamp names the 
  await page.evaluate(()=>{window.calls=[];const build={git_sha:'2906980d1',code_sha256:'a'.repeat(64),assets_sha256:'b'.repeat(64),on_disk_code_sha256_now:'c'.repeat(64),on_disk_assets_sha256_now:'b'.repeat(64),started_at:1757809380,port:8803,pid:79412,busy:false};window.fetch=async url=>{calls.push(String(url));let body;if(String(url).startsWith('/api/session?light=1'))body={token:'token',read_only:false,evidence_collection_available:true,api_version:2,build,...build};else if(url==='/api/evidence')body={snapshots:[]};else throw Error('Unexpected background request '+url);return {ok:true,json:async()=>body};};});
  for(const file of ['ui-state.js','coverage-view.js','app.js'])await page.addScriptTag({path:path.join(app,file)});
  await page.waitForFunction(()=>document.querySelector('#stale-banner')&&document.querySelector('#stale-banner').hidden===false);
- assert.equal(await page.locator('#stale-banner-message').textContent(),'This console is running an older build. Close this tab and open http://app.fixture, or press Restart.');
+ assert.equal(await page.locator('#stale-banner-message').textContent(),'This console runs an older build. Press Restart, or close this tab and open http://app.fixture.');
  assert.equal(await page.locator('#stale-restart').textContent(),'Restart');
- assert.match(await page.locator('#build-stamp').textContent(),/^build 2906980 · :8803 · started .+ · pid 79412$/);
+ assert.match(await page.locator('#build-stamp').textContent(),/^build 2906980 · port 8803 · up since .+$/);
  assert.deepEqual(await page.evaluate(()=>calls),['/api/session?light=1'],'the stamp must not cost an extra startup request');
  assert.deepEqual(errors,[]);
 });
@@ -43,7 +43,7 @@ test('Changed interface files ask for a reload, and a current build shows no ban
    assert.equal(await page.locator('#stale-restart').textContent(),scenario.action);
   }
   // Git unavailable falls back to the code tree hash, never to a blank stamp.
-  assert.match(await page.locator('#build-stamp').textContent(),/^build aaaaaaa · :8802 · started .+ · pid 41288$/);
+  assert.match(await page.locator('#build-stamp').textContent(),/^build aaaaaaa · port 8802 · up since .+$/);
   assert.deepEqual(errors,[],scenario.name);
   await page.close();
  }

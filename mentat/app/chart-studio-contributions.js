@@ -89,7 +89,7 @@
     if(type==='circle'){if(measures.length!==2)throw new Error('Circle compares two measures. Place two measures on the shelves, or choose Bar.');type='scatter';}
     if(type==='text')type='table';
     const filled=type==='filled-map';if(filled)type='map';
-    if(!types.has(mark.type||'automatic'))throw new Error('This chart type needs individual receipts. Switch Data source to Report worksheet, or select Bar, Line, Circle, Text or Map.');
+    if(!types.has(mark.type||'automatic'))throw new Error('Not available for verified data. Use Bar, Line, Circle, Text or Map, or switch to Report worksheet.');
     const transform=state.analytics?.transform||'none';
     if(transform!=='none'){
       const time=dimensions.findIndex(d=>['date','year','cycle'].includes(d));
@@ -122,7 +122,7 @@
       if(dimensions.includes('zip5')&&!dimensions.includes('state'))dimensions.push('state');
       if(color||size||labels.length||tooltip.length)notes.push('Map marks show ZIP, recorded states and selected amount.');
     }
-    const limit=type==='map'?100000:type==='histogram'?10000:Math.min(1000,Math.max(1,Number(state.params?.maxGroups)||40));
+    const limit=type==='map'?100000:type==='histogram'?10000:Math.min(1000,Math.max(1,Number(state.params?.maxGroups)||60));
     const chronological=['line','area','combination','dual-line','histogram'].includes(type),sort=chronological?[{field:dimensions[0],direction:'asc'}]:[{field:measures[0],direction:state.sort==='asc'?'asc':'desc'}];
     const query={dataset,basis,dimensions:[...new Set(dimensions)],measures:allMeasures,filters,aggregate_filters,sort,limit,offset:type==='map'||transform!=='none'?0:offset};
     if(transform!=='none')query.limit=100000;
@@ -138,13 +138,13 @@
      handed the studio result, the basis it was drawn on, the Graph view for
      the same company and cycle, and the Graph controls that were set. */
   const RECONCILE_REASONS={
-    basis:'the basis is not Published included receipts',
-    graph_filter:'a Graph filter (employee level, giving type) has no verified field',
+    basis:'this sheet uses a different basis than Graph',
+    graph_filter:'a Graph filter (employee level or giving type) is not carried',
     workbook:'the workbook version differs',
     aggregate:'grouped filters apply after aggregation',
-    cycle:'the Graph view is pinned to one election cycle and this sheet covers every cycle',
-    unavailable:'the Graph total for this scope is not available',
-    unexplained:'this is unexplained — report it'
+    cycle:'the Graph view shows one election cycle and this sheet shows all of them',
+    unavailable:'the Graph view has no total for this scope',
+    unexplained:'the cause is unknown; report it'
   };
   function reconcile(result,basis,graphView,filters){
     const dollarsToCents=value=>Number.isFinite(Number(value))?Math.round(Number(value)*100):null;

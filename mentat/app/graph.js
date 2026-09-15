@@ -66,7 +66,7 @@
       options(get('industry'),body.industries.map(i=>[i.name,i.name]));
       unavailable=body.unavailable_reports||[];
       if(unavailable.length)get('source-label').textContent='Unavailable saved reports: '+unavailable.join(', ');
-      if(!body.industries.length){get('status').textContent=body.message||'No finalized report data in this run. Choose another saved run, or check Collection for its status.';return;}
+      if(!body.industries.length){get('status').textContent=body.message||'This run has no finalized report. Choose another run or check Collection.';return;}
       await refresh(true);
     } catch(e){if(ticket===revision){error(e.message);get('status').textContent='Report sources unavailable.';}}
   }
@@ -100,7 +100,7 @@
     get('total').textContent=dollars(view.totals.giving);get('direct').textContent=dollars(view.totals.direct);
     // Name the figure, so a reader can match it to Chart Studio rather than
     // wonder which of two numbers on two screens is the real one.
-    get('basis-note').textContent='Workbook included receipts, net. Same figure as Chart Studio’s Published included receipts basis.';
+    get('basis-note').textContent='Net workbook receipts. Same basis as Chart Studio’s Published included receipts.';
     get('recipient-count').textContent=dollars(view.totals.organizations);
     for(const [id,value] of [['direct-share',view.totals.direct],['organization-share',view.totals.organizations]]) get(id).textContent=view.totals.giving>0&&value>=0&&value<=view.totals.giving ? (100*value/view.totals.giving).toFixed(1)+'% of net giving' : 'Share unavailable for signed totals';
     get('candidate-note').textContent=view.candidate_note;
@@ -251,15 +251,15 @@
   };
   get('copy-image').onclick=async()=>{
     const subject=exportSubject();
-    if(!subject){error('This chart has no image to copy. Export its CSV instead.');return;}
+    if(!subject){error('No image to copy. Export the CSV instead.');return;}
     error('');
     try {await MentatExport.copy(subject.svg,subject.title,subject.context);}
     catch(e){error(e.message);}
   };
   get('briefing').onclick=()=>{
     const subject=exportSubject();
-    if(!subject){error('This chart has no image to add. Export its CSV instead.');return;}
-    if(!window.MentatBriefing){error('The briefing tray is not served by this console yet. Restart the console and try again.');return;}
+    if(!subject){error('No image to add. Export the CSV instead.');return;}
+    if(!window.MentatBriefing){error('Briefing needs a console restart.');return;}
     error('');
     const report=(subject.reports||[])[0]||{};
     window.MentatBriefing.capture({svg:subject.svg,title:subject.title,scope:subject.context,
