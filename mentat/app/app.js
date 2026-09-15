@@ -579,7 +579,7 @@ function mountBuildElements() {
   action.id = 'stale-restart';
   action.type = 'button';
   action.textContent = 'Restart';
-  action.addEventListener('click', () => { if (buildBannerMode === 'assets') location.reload(); else restartConsole(); });
+  action.addEventListener('click', () => { restartConsole(); });
   banner.append(message, action);
   const workspace = document.querySelector('.workspace'), anchor = $('error');
   if (workspace && anchor && anchor.parentNode === workspace) workspace.insertBefore(banner, anchor);
@@ -593,12 +593,16 @@ function renderBuild(response) {
   const stamp = $('build-stamp'), banner = $('stale-banner'), action = $('stale-restart');
   if (stamp) stamp.textContent = buildStampText(build);
   if (!banner || buildRestarting) return;
+  // A reload cannot refresh this process's frozen build fields (server.py
+  // latches code_sha256/assets_sha256 at import time), so an assets-only
+  // mismatch needs the same restart as a code mismatch - not a Reload
+  // button that would just redraw this same stale banner forever.
   const codeChanged = !!build.on_disk_code_sha256_now && build.on_disk_code_sha256_now !== build.code_sha256;
   const assetsChanged = !!build.on_disk_assets_sha256_now && build.on_disk_assets_sha256_now !== build.assets_sha256;
-  buildBannerMode = codeChanged ? 'code' : assetsChanged ? 'assets' : '';
+  buildBannerMode = (codeChanged || assetsChanged) ? 'code' : '';
   banner.hidden = !buildBannerMode;
   action.disabled = false;
-  if (codeChanged) {
+  if (buildBannerMode === 'code') {
     // The launcher rebinds this same port, so this origin is where the
     // current build answers once the restart finishes.
     $('stale-banner-message').textContent = readOnly
@@ -606,10 +610,6 @@ function renderBuild(response) {
       : `This console runs an older build. Press Restart, or close this tab and open ${location.origin}.`;
     action.textContent = 'Restart';
     action.hidden = readOnly;
-  } else if (assetsChanged) {
-    $('stale-banner-message').textContent = 'Interface files changed.';
-    action.textContent = 'Reload';
-    action.hidden = false;
   }
 }
 async function restartConsole() {

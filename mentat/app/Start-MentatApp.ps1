@@ -62,22 +62,41 @@ function Test-MentatServerIdentity($health) {
   return ($health.application -eq 'MENTAT' -and $health.project -eq $projectPath -and
     $health.data_root -eq $DataRoot -and $health.report_directory -eq $reportDirectory)
 }
+function Test-MentatBuildCurrent($health) {
+  # A process latches its build identity at import time (server.py's
+  # CODE_TREE_SHA256 / ASSET_TREE_SHA256 module constants), while
+  # on_disk_*_now is recomputed fresh from disk on every health call no
+  # matter how old the process is - so this same pair of comparisons is
+  # accurate whichever process answers it. Current means BOTH pairs still
+  # agree: an interface-only edit (JS/CSS, no *.py change) leaves
+  # code_sha256 fresh but assets_sha256 stale, and that must count as stale
+  # too, or a reload can never clear the banner because the frozen fields
+  # never change without a restart. This mirrors the same two-pair
+  # comparison server.py's own /api/restart handler already makes.
+  $fields = @($health.PSObject.Properties.Name)
+  foreach ($field in @('code_sha256', 'on_disk_code_sha256_now', 'assets_sha256', 'on_disk_assets_sha256_now')) {
+    if ($fields -notcontains $field) { return $false }
+  }
+  return ($health.code_sha256 -eq $health.on_disk_code_sha256_now -and
+    $health.assets_sha256 -eq $health.on_disk_assets_sha256_now)
+}
 function Test-CurrentMentatServer($health) {
   return ((Test-MentatServerIdentity $health) -and
-    $health.code_sha256 -eq $codeTreeHash -and $health.read_only -eq $false)
+    (Test-MentatBuildCurrent $health) -and $health.read_only -eq $false)
 }
 function Test-ReplaceableMentatServer($health) {
   # Never stop a busy server, a read-only preview, or a server that does not
   # state in its own health block that it is idle. A server too old to answer
-  # with busy and code_sha256 keeps its port and gets a printed notice instead.
+  # with busy and the build-identity fields keeps its port and gets a
+  # printed notice instead.
   if (-not (Test-MentatServerIdentity $health)) { return $false }
   $fields = @($health.PSObject.Properties.Name)
-  foreach ($field in @('busy', 'code_sha256', 'pid', 'read_only')) {
+  foreach ($field in @('busy', 'code_sha256', 'on_disk_code_sha256_now', 'assets_sha256', 'on_disk_assets_sha256_now', 'pid', 'read_only')) {
     if ($fields -notcontains $field) { return $false }
   }
   if ($health.read_only -ne $false) { return $false }
   if ($health.busy -ne $false) { return $false }
-  if ($health.code_sha256 -eq $codeTreeHash) { return $false }
+  if (Test-MentatBuildCurrent $health) { return $false }
   try { return ([int]$health.pid -gt 0) } catch { return $false }
 }
 function Test-MentatPortListening([int]$Candidate) {

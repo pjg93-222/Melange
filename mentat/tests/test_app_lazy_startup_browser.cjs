@@ -28,10 +28,10 @@ test('An older build on disk raises the restart banner, and the stamp names the 
  assert.deepEqual(await page.evaluate(()=>calls),['/api/session?light=1'],'the stamp must not cost an extra startup request');
  assert.deepEqual(errors,[]);
 });
-test('Changed interface files ask for a reload, and a current build shows no banner',{timeout:120000},async t=>{
+test('Changed interface files ask for a restart, and a current build shows no banner',{timeout:120000},async t=>{
  const browser=await chromium.launch({headless:true,channel:process.env.MENTAT_BROWSER_CHANNEL||'chrome'});t.after(()=>browser.close());
  const html=fs.readFileSync(path.join(app,'index.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<link\b[^>]*>/gi,'');
- for(const scenario of [{name:'assets',on_disk_assets_sha256_now:'d'.repeat(64),banner:true,action:'Reload'},{name:'current',banner:false}]){
+ for(const scenario of [{name:'assets',on_disk_assets_sha256_now:'d'.repeat(64),banner:true,action:'Restart'},{name:'current',banner:false}]){
   const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.route('http://app.fixture/**',route=>route.fulfill({contentType:'text/html',body:html}));await page.goto('http://app.fixture/#chart-studio');
   await page.evaluate(scenario=>{window.calls=[];const build={git_sha:'unknown',code_sha256:'a'.repeat(64),assets_sha256:'b'.repeat(64),on_disk_code_sha256_now:'a'.repeat(64),on_disk_assets_sha256_now:scenario.on_disk_assets_sha256_now||'b'.repeat(64),started_at:1757809380,port:8802,pid:41288,busy:false};window.fetch=async url=>{calls.push(String(url));let body;if(String(url).startsWith('/api/session?light=1'))body={token:'token',read_only:false,evidence_collection_available:true,api_version:2,build,...build};else if(url==='/api/evidence')body={snapshots:[]};else throw Error('Unexpected background request '+url);return {ok:true,json:async()=>body};};},scenario);
@@ -39,7 +39,7 @@ test('Changed interface files ask for a reload, and a current build shows no ban
   await page.waitForFunction(()=>document.querySelector('#build-stamp')!==null);
   assert.equal(await page.locator('#stale-banner').isVisible(),scenario.banner,scenario.name);
   if(scenario.banner){
-   assert.equal(await page.locator('#stale-banner-message').textContent(),'Interface files changed.');
+   assert.equal(await page.locator('#stale-banner-message').textContent(),'This console runs an older build. Press Restart, or close this tab and open http://app.fixture.');
    assert.equal(await page.locator('#stale-restart').textContent(),scenario.action);
   }
   // Git unavailable falls back to the code tree hash, never to a blank stamp.

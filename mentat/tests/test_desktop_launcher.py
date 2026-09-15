@@ -9,6 +9,7 @@ import sys
 import tempfile
 import unittest
 import hashlib
+import importlib.util
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.request import urlopen
@@ -58,19 +59,57 @@ def code_tree_hash(app_directory):
     return digest.hexdigest()
 
 
-def start_stale_server(directory, busy=False, read_only=False, drop_busy=False):
+_server_module_cache = None
+
+
+def _static_assets(app_directory):
+    """The served-file list, read from server.py itself (its own source of
+    truth for what an asset build covers) rather than duplicated by hand."""
+    global _server_module_cache
+    if _server_module_cache is None:
+        spec = importlib.util.spec_from_file_location('desktop_launcher_test_server', app_directory / 'server.py')
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _server_module_cache = module
+    return _server_module_cache.STATIC_ASSETS
+
+
+def asset_tree_hash(app_directory):
+    """Re-derived here on purpose, same method as code_tree_hash: the
+    launcher and the server must agree on what the on-disk assets hash to."""
+    paths = sorted({app_directory / name for name, _ in _static_assets(app_directory).values()},
+                    key=lambda item: item.name)
+    digest = hashlib.sha256()
+    for path in paths:
+        digest.update(path.name.encode('utf-8'))
+        digest.update(b'\0')
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+        digest.update(b'\0')
+    return digest.hexdigest()
+
+
+def start_stale_server(directory, busy=False, read_only=False, drop_busy=False, stale_code=True, stale_assets=True):
     """A real server.py process of this identity, running a different build.
 
     The launcher only replaces a process whose Win32_Process command line names
-    server.py, so the fixture is written to a file with that name.
+    server.py, so the fixture is written to a file with that name. on_disk_*_now
+    always reports the true current on-disk hash - that is what a real process,
+    old or new, would compute fresh on every health call - while stale_code /
+    stale_assets control whether the *loaded* fields still lag behind it.
     """
     project = Path(__file__).resolve().parents[1]
+    app_directory = project / 'app'
     report_directory = str(Path(json.loads((project / 'config/report-directory.json').read_text())['directory']).resolve())
+    real_code_hash = code_tree_hash(app_directory)
+    real_assets_hash = asset_tree_hash(app_directory)
     health = {'application': 'MENTAT', 'project': str(project), 'data_root': directory,
               'resolved_data_root': directory, 'report_directory': report_directory,
-              'server_code_sha256': 'older-build', 'code_sha256': 'older-build',
-              'assets_sha256': 'older-assets', 'on_disk_code_sha256_now': 'older-build',
-              'on_disk_assets_sha256_now': 'older-assets', 'read_only': read_only, 'busy': busy}
+              'server_code_sha256': 'older-build',
+              'code_sha256': 'older-build' if stale_code else real_code_hash,
+              'assets_sha256': 'older-assets' if stale_assets else real_assets_hash,
+              'on_disk_code_sha256_now': real_code_hash,
+              'on_disk_assets_sha256_now': real_assets_hash,
+              'read_only': read_only, 'busy': busy}
     if drop_busy:
         health.pop('busy')
     script = Path(directory) / 'stale' / 'server.py'
@@ -195,6 +234,31 @@ class DesktopLauncherTests(unittest.TestCase):
                 url = text.strip().splitlines()[-1].split('Mentat app: ')[-1]
                 self.assertEqual(url, f'http://127.0.0.1:{port}',
                                  'an idle stale server must give its own port back\n' + text)
+                with urlopen(url + '/api/health', timeout=5) as response:
+                    health = json.load(response)
+                self.assertEqual(health['code_sha256'], code_tree_hash(script.parent))
+                self.assertNotEqual(health['pid'], stale.pid)
+                self.assertIsNotNone(stale.poll(), 'the stale server must have been stopped')
+            finally:
+                stop_verified_server(health, directory)
+                if stale.poll() is None:
+                    stale.kill()
+                stale.wait(timeout=15)
+
+    def test_an_idle_server_with_current_code_but_stale_assets_is_replaced_on_its_own_port(self):
+        """A JS/CSS-only change must not be mistaken for a current server
+        just because the Python code hash still matches on disk."""
+        script = Path(__file__).resolve().parents[1] / 'app/Start-MentatApp.ps1'
+        with tempfile.TemporaryDirectory(prefix='MENTAT stale assets ') as directory:
+            stale, port = start_stale_server(directory, busy=False, stale_code=False)
+            health = None
+            try:
+                code, text = run_launcher(script, port, directory)
+                self.assertEqual(code, 0, text)
+                self.assertIn('Stopping stale MENTAT server pid ' + str(stale.pid), text)
+                url = text.strip().splitlines()[-1].split('Mentat app: ')[-1]
+                self.assertEqual(url, f'http://127.0.0.1:{port}',
+                                 'an idle assets-stale server must give its own port back\n' + text)
                 with urlopen(url + '/api/health', timeout=5) as response:
                     health = json.load(response)
                 self.assertEqual(health['code_sha256'], code_tree_hash(script.parent))
