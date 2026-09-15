@@ -185,6 +185,21 @@ def _sources(directory):
         industry = workbook.name.removesuffix(' Industry Spending Overview.xlsx')
         item = {'id':industry, 'industry':industry, 'label':industry,
                 'workbook':workbook, 'workbook_sha256':_hash(workbook)}
+        # The companion Data workbook is published beside the Overview by the
+        # same run, from the same staging store and the same database. It is
+        # recorded as lineage evidence ONLY: the verified dataset still reads
+        # the pinned payload, so a Data book that is stale, hand-edited or
+        # simply absent cannot become a substitute report source. A lineage
+        # mismatch is reported, never silently accepted.
+        sibling = workbook.with_name(industry + ' Industry Spending Data.xlsx')
+        if sibling.is_file() and sibling.resolve().is_relative_to(directory):
+            item['data_workbook'] = sibling
+            item['data_workbook_sha256'] = _hash(sibling)
+            try:
+                item['data_lineage_matches'] = (
+                    _workbook_source(_stamp(sibling)) == _workbook_source(_stamp(workbook)))
+            except (OSError, ValueError, KeyError, zipfile.BadZipFile):
+                item['data_lineage_matches'] = False
         try:
             db_hash = _workbook_source(_stamp(workbook))
             # The P&C cache historically omits the ampersand, which slug() also does.
@@ -228,7 +243,14 @@ def _fields():
 
 
 def _provenance(source):
+    data_workbook = source.get('data_workbook')
     return {'workbook':source['workbook'].name,'workbook_sha256':source['workbook_sha256'],
+            'data_workbook':data_workbook.name if data_workbook else None,
+            'data_workbook_sha256':source.get('data_workbook_sha256'),
+            # None when there is no companion book; False is a REPORTED
+            # disagreement between the two books' pinned source databases, not a
+            # missing file, and the two must never read the same.
+            'data_lineage_matches':source.get('data_lineage_matches'),
             'destination_schema':source.get('destination_schema',0),
             'database_sha256':source.get('database_sha256'),'payload_sha256':source.get('payload_sha256'),
             'original_database_sha256':source.get('original_database_sha256'),

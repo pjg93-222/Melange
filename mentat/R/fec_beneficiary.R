@@ -619,7 +619,22 @@ fec_build_committee_map <- function(recipient_universe, committee_master, candid
   }
   result[is.na(preliminary_top_downstream_amount), preliminary_top_downstream_amount := 0]
   result[, lookup_key := paste(cycle, committee_id, sep = "|")]
+  # The tall mappings frame is the ONLY place the leadership-PAC sponsor links
+  # survive: `direct` collapses them into a `; `-joined relationship string, and
+  # a joined string cannot say which candidate a given relationship belongs to.
+  # It travels as an attribute rather than as a new column or a list return
+  # because every existing caller treats this function's value as the committee
+  # map data.table itself - it is indexed by column, subset by row and written
+  # straight into the JSON payload, none of which an attribute disturbs.
+  data.table::setattr(result, "mentat_committee_mappings", mappings)
   result
+}
+
+# Accessor for the tall committee -> candidate mappings carried on a
+# fec_build_committee_map result. Returns NULL for a map built by an older
+# vintage of this file, which callers must treat as "no sponsor rows".
+fec_committee_map_mappings <- function(committee_map) {
+  attr(committee_map, "mentat_committee_mappings", exact = TRUE)
 }
 
 fec_aggregate_downstream_activity <- function(downstream_activity, recipient_universe) {
