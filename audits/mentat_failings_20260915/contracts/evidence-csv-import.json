@@ -1,0 +1,189 @@
+{
+  "contract": "evidence-csv-import",
+  "version": 1,
+  "owner": "S3",
+  "produced_by": [
+    "mentat/app/evidence_csv.py:limits",
+    "mentat/app/evidence_csv.py:Store.catalog",
+    "mentat/app/evidence_csv.py:Store.sources",
+    "mentat/app/evidence_csv.py:Store.select",
+    "mentat/app/evidence_csv.py:catalog (legacy in-memory document)",
+    "mentat/app/evidence_csv.py:select (legacy in-memory document)",
+    "mentat/app/server.py:do_GET '/api/evidence-csv' (no id -> sources listing; id+committee+cycle+offset+limit -> SELECT; bad offset/limit -> error payload)",
+    "mentat/app/server.py:Console.evidence_csv_view"
+  ],
+  "consumed_by": [
+    "mentat/app/evidence-csv.js:loadRows (SELECT)",
+    "mentat/app/evidence-csv.js: sources listing render + #evidence-csv-source population",
+    "mentat/app/evidence-csv.js: pre-flight size check against LIMITS"
+  ],
+  "description": "The shapes read once a CSV has been imported: the size/row/column LIMITS the client pre-flights against, one imported CSV's CATALOG (nested inside a sources listing or a SELECT), the GET /api/evidence-csv sources listing, a paginated SELECT of one committee/cycle's rows, and the bounded error-payload shape (never a leaked Python exception string). Orientation only - the examples are the contract.",
+  "examples": [
+    {
+      "max_bytes": 50000000,
+      "max_columns": 200,
+      "max_rows": 500000,
+      "max_bytes_message": "Choose a CSV no larger than 50 MB.",
+      "max_columns_message": "The CSV needs unique nonempty column names, with no more than 200 columns.",
+      "max_rows_message": "Choose a CSV containing no more than 500,000 rows."
+    },
+    {
+      "id": "csv-0123456789abcdef0123456789abcdef",
+      "name": "example.csv",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+      "row_count": 45,
+      "committees": [
+        {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
+        {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
+      ],
+      "cycles": ["2026", "2024"],
+      "supported_rows": 40,
+      "unsupported_rows": 5,
+      "unassigned_rows": 3,
+      "session_only": false,
+      "imported_at": "2026-09-16T00:00:00Z",
+      "bytes": 12345,
+      "warnings": [
+        "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+        "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+        "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+      ]
+    },
+    {
+      "sources": [
+        {
+          "id": "csv-0123456789abcdef0123456789abcdef",
+          "name": "example.csv",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+          "row_count": 45,
+          "committees": [
+            {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
+            {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
+          ],
+          "cycles": ["2026", "2024"],
+          "supported_rows": 40,
+          "unsupported_rows": 5,
+          "unassigned_rows": 3,
+          "session_only": false,
+          "imported_at": "2026-09-16T00:00:00Z",
+          "bytes": 12345,
+          "warnings": [
+            "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+            "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+            "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+          ]
+        }
+      ],
+      "limits": {
+        "max_bytes": 50000000,
+        "max_columns": 200,
+        "max_rows": 500000,
+        "max_bytes_message": "Choose a CSV no larger than 50 MB.",
+        "max_columns_message": "The CSV needs unique nonempty column names, with no more than 200 columns.",
+        "max_rows_message": "Choose a CSV containing no more than 500,000 rows."
+      },
+      "session_only": false
+    },
+    {
+      "sources": [],
+      "limits": {
+        "max_bytes": 50000000,
+        "max_columns": 200,
+        "max_rows": 500000,
+        "max_bytes_message": "Choose a CSV no larger than 50 MB.",
+        "max_columns_message": "The CSV needs unique nonempty column names, with no more than 200 columns.",
+        "max_rows_message": "Choose a CSV containing no more than 500,000 rows."
+      },
+      "session_only": false
+    },
+    {
+      "source": {
+        "id": "csv-0123456789abcdef0123456789abcdef",
+        "name": "example.csv",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+        "row_count": 45,
+        "committees": [
+          {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
+          {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
+        ],
+        "cycles": ["2026", "2024"],
+        "supported_rows": 40,
+        "unsupported_rows": 5,
+        "unassigned_rows": 3,
+        "session_only": false,
+        "imported_at": "2026-09-16T00:00:00Z",
+        "bytes": 12345,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ]
+      },
+      "committee": {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
+      "committees": [
+        {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
+        {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
+      ],
+      "cycles": ["2026", "2024"],
+      "selected_cycle": "2026",
+      "columns": ["committee_id", "committee_name", "contribution_receipt_amount", "contribution_receipt_date", "cycle"],
+      "rows": [
+        {"row_number": 2, "committee_id": "C00000001", "committee_name": "Example PAC", "channel": "Receipts", "amount": 10.25, "date": "2026-02-03", "cycle": "2026", "status": "supported"}
+      ],
+      "totals": [
+        {"channel": "Receipts", "amount": 15.5, "row_count": 3}
+      ],
+      "supported_rows": 40,
+      "unsupported_rows": 5,
+      "offset": 0,
+      "limit": 200,
+      "total_rows": 42,
+      "has_more": false,
+      "warnings": [
+        "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+        "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+        "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+      ]
+    },
+    {
+      "error": "Choose a valid CSV row page (1–1,000 rows)."
+    }
+  ],
+  "negative_controls": [
+    {
+      "why": "DE-021-style: a session-scoped legacy shape must not leak into the persisted-import CATALOG. catalog.session_only is always false for a Store-backed import; only the pre-S3 in-memory legacy document used true.",
+      "shape": "catalog",
+      "payload": {
+        "id": "csv-0123456789abcdef0123456789abcdef",
+        "name": "example.csv",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+        "row_count": 45,
+        "committees": [
+          {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40}
+        ],
+        "cycles": ["2026"],
+        "supported_rows": 40,
+        "unsupported_rows": 5,
+        "unassigned_rows": 0,
+        "session_only": true,
+        "imported_at": "2026-09-16T00:00:00Z",
+        "bytes": 12345,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ]
+      }
+    },
+    {
+      "why": "a sources listing missing 'limits' silently breaks the client's pre-flight size/column/row check (evidence-csv.js reads limits.max_bytes_message before ever uploading).",
+      "shape": "sources_listing",
+      "payload": {"sources": [], "session_only": false}
+    },
+    {
+      "why": "the pre-S3 bug reproduced live by S0 (receipts/S0_area_c...): GET ?offset=abc answered {\"error\":\"invalid literal for int() with base 10: 'abc'\"} - a leaked Python exception, not M_PAGE. An error payload must never contain implementation-leak text.",
+      "shape": "error",
+      "payload": {"error": "invalid literal for int() with base 10: 'abc'"}
+    }
+  ]
+}

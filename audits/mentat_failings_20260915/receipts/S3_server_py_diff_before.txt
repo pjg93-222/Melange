@@ -1,0 +1,7 @@
+S3 server.py diff BEFORE edits
+date: 2026-09-16T19:51:47Z
+HEAD: d78cf0b8f1a03911ba0791220f396cd838eb6a00
+branch: codex/mentat-crypto
+command: git -C C:\Users\pgoff\Mentat diff -- mentat/app/server.py
+--- begin diff ---
+--- end diff (bytes: 0) ---

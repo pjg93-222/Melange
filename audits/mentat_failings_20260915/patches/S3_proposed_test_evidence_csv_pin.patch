@@ -1,0 +1,26 @@
+diff --git a/mentat/tests/test_evidence_csv.py b/mentat/tests/test_evidence_csv.py
+index b8ec7bebf..4aad4e9a8 100644
+--- a/mentat/tests/test_evidence_csv.py
++++ b/mentat/tests/test_evidence_csv.py
+@@ -115,7 +115,7 @@ class EvidenceCSVTests(unittest.TestCase):
+             with self.assertRaises(ValueError):
+                 self.document(self.receipts(2))
+ 
+-    def test_csv_http_is_authenticated_memory_only_and_available_in_read_only_mode(self):
++    def test_csv_http_is_authenticated_and_available_in_read_only_mode(self):
+         with tempfile.TemporaryDirectory() as temporary:
+             root = Path(temporary)
+             with patch.object(app, 'report_directory', return_value=root), patch.object(app, 'environment_keys', return_value=[]):
+@@ -140,10 +140,10 @@ class EvidenceCSVTests(unittest.TestCase):
+                 self.assertEqual(len(view['rows']), 1)
+                 self.assertEqual(view['total_rows'], 3)
+                 self.assertEqual(view['totals'][0]['amount'], 30.75)
+-                self.assertEqual(list(root.rglob('*')), [console.root])
++                self.assertTrue((console.root / 'evidence-csv' / source['id'] / 'import.json').is_file())
+                 with patch.object(app, 'report_directory', return_value=root), patch.object(app, 'environment_keys', return_value=[]):
+                     restarted = app.Console(console.root, read_only=True)
+-                self.assertEqual(restarted.evidence_csv_view()['sources'], [])
++                self.assertEqual(restarted.evidence_csv_view()['sources'][0]['id'], source['id'])
+             finally:
+                 server.shutdown()
+                 server.server_close()

@@ -1,0 +1,171 @@
+{
+  "contract": "evidence-job-status",
+  "version": 1,
+  "owner": "S3",
+  "produced_by": [
+    "mentat/app/evidence_csv.py:Store.job",
+    "mentat/app/evidence_csv.py:Upload.finish (writes import.json state 'reading', then 'ready'/'failed')",
+    "mentat/app/server.py:do_GET '/api/evidence-csv?job=<id>'",
+    "mentat/app/server.py:Console.collect_evidence (writes collection.json: 'collecting' -> 'completed'/'failed')",
+    "mentat/app/server.py:do_GET '/api/evidence-job' (synthesizes 'failed' from a dead pid found still 'collecting')"
+  ],
+  "consumed_by": [
+    "mentat/app/evidence-csv.js: poll ?job=<id> until state != 'reading'",
+    "mentat/app/app.js:pollEvidenceJob (collector job)"
+  ],
+  "description": "Two independent job-status vocabularies that cross the console/collector process boundary and are polled from the client: the evidence-CSV streaming ingest JOB (state reading|ready|failed, catalog non-null iff ready), and the PAC-evidence collector job (collection.json; state collecting|completed|failed, finished_at/message present only once the job is done). Orientation only - the examples are the contract.",
+  "examples": [
+    {
+      "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
+      "name": "big-import.csv",
+      "state": "reading",
+      "bytes": 6000000,
+      "bytes_read": 2500000,
+      "rows_read": 8000,
+      "message": "",
+      "started_at": 1758000000.0,
+      "finished_at": null,
+      "catalog": null
+    },
+    {
+      "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
+      "name": "big-import.csv",
+      "state": "ready",
+      "bytes": 6000000,
+      "bytes_read": 6000000,
+      "rows_read": 18000,
+      "message": "",
+      "started_at": 1758000000.0,
+      "finished_at": 1758000012.5,
+      "catalog": {
+        "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
+        "name": "big-import.csv",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+        "row_count": 18000,
+        "committees": [
+          {"id": "C00000001", "name": "Example PAC", "rows": 18000, "supported_rows": 17950}
+        ],
+        "cycles": ["2026", "2024"],
+        "supported_rows": 17950,
+        "unsupported_rows": 50,
+        "unassigned_rows": 0,
+        "session_only": false,
+        "imported_at": "2026-09-16T00:00:12Z",
+        "bytes": 6000000,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ]
+      }
+    },
+    {
+      "id": "csv-11111111111111111111111111111111",
+      "name": "broken.csv",
+      "state": "failed",
+      "bytes": 4200,
+      "bytes_read": 4200,
+      "rows_read": 12,
+      "message": "The CSV could not be read at row 13. Check its quoted fields and delimiter.",
+      "started_at": 1758000100.0,
+      "finished_at": 1758000100.4,
+      "catalog": null
+    },
+    {
+      "id": "snapshot-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
+      "company": "Example Company",
+      "aliases": ["EXCO"],
+      "committees": ["C00000001"],
+      "cycles": ["2026"],
+      "state": "collecting",
+      "pid": 12345,
+      "started_at": 1758000000.0
+    },
+    {
+      "id": "snapshot-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
+      "company": "Example Company",
+      "aliases": ["EXCO"],
+      "committees": ["C00000001"],
+      "cycles": ["2026"],
+      "state": "completed",
+      "pid": 12345,
+      "started_at": 1758000000.0,
+      "finished_at": 1758000090.0,
+      "message": "Snapshot ready."
+    },
+    {
+      "id": "snapshot-22222222222222222222222222222222",
+      "company": "Example Company",
+      "aliases": [],
+      "committees": ["C00000001"],
+      "cycles": ["2026"],
+      "state": "failed",
+      "pid": 12399,
+      "started_at": 1758000200.0,
+      "finished_at": 1758000260.0,
+      "message": "Collection failed: FEC evidence request failed: HTTP 500; URL https://api.open.fec.gov/v1/x. Full log: C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\pac-evidence\\snapshot-22222222222222222222222222222222\\collection.log"
+    },
+    {
+      "id": "snapshot-33333333333333333333333333333333",
+      "company": "Example Company",
+      "aliases": [],
+      "committees": ["C00000001"],
+      "cycles": ["2026"],
+      "state": "failed",
+      "pid": 0,
+      "started_at": 1758000300.0,
+      "finished_at": 1758000300.1,
+      "message": "Could not start the evidence collector: boom"
+    }
+  ],
+  "negative_controls": [
+    {
+      "why": "'done' is not in the reading|ready|failed vocabulary; evidence-csv.js polls on state !== 'reading' and would treat an unrecognized terminal state as still in progress forever.",
+      "shape": "job",
+      "payload": {
+        "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
+        "name": "big-import.csv",
+        "state": "done",
+        "bytes": 6000000,
+        "bytes_read": 6000000,
+        "rows_read": 18000,
+        "message": "",
+        "started_at": 1758000000.0,
+        "finished_at": 1758000012.5,
+        "catalog": null
+      }
+    },
+    {
+      "why": "DE-021-style: JOB.catalog must be non-null iff state is 'ready'; a 'ready' job with a null catalog is exactly the bug this contract exists to catch (the client would render an empty committee list for a supposedly finished import).",
+      "shape": "job",
+      "payload": {
+        "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
+        "name": "big-import.csv",
+        "state": "ready",
+        "bytes": 6000000,
+        "bytes_read": 6000000,
+        "rows_read": 18000,
+        "message": "",
+        "started_at": 1758000000.0,
+        "finished_at": 1758000012.5,
+        "catalog": null
+      }
+    },
+    {
+      "why": "a failed collector job's message must match one of the two documented templates ('Collection failed: <log tail>. Full log: <path>' or 'Could not start the evidence collector: <error>'); a bare message lacking 'Full log: ' and not matching the start-failure template silently drops the only pointer to collection.log an operator needs to debug it.",
+      "shape": "collector_job",
+      "payload": {
+        "id": "snapshot-44444444444444444444444444444444",
+        "company": "Example Company",
+        "aliases": [],
+        "committees": ["C00000001"],
+        "cycles": ["2026"],
+        "state": "failed",
+        "pid": 12400,
+        "started_at": 1758000400.0,
+        "finished_at": 1758000401.0,
+        "message": "The collector failed."
+      }
+    }
+  ]
+}

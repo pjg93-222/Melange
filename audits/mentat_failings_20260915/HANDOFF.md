@@ -618,6 +618,23 @@ the originals. Index: `receipts/S2_receipts_index.md`.
    half true: for every row whose response body is archived, the backfill
    restores street without re-fetching - 3,132 + 1,674 rows on lane-08 alone. A
    re-collect is still needed only for rows with no archived body.
+
+Answered by the production dry run (2026-09-16,
+receipts/S2_backfill_dryrun_production.md, 41 database copies, production files
+untouched): the backfill fills 100% of the ten 2026-09-15 Credit Unions
+run-lane databases (14,265 rows) and 32,581 of 783,808 contributions in
+banking-20260910, but the report-input sets
+mentat/.cache/receipt-metadata-repair-20260910/<industry>/mentat.db (7
+industries) and mentat/.cache/repair-20260908-databases (8) carry no
+fec_response_archive and empty checkpoints, so 0 of roughly 4.0 million rows
+can be filled there. S1's re-collect is therefore required for street on the
+report inputs. Note also that init_schema() on those older databases carries
+other lanes' pending migrations along with street (contributor_id,
+query_contract, the four evidence tables, and on the 2026-09-08 set the
+filing-form columns); six audit fixtures under
+outputs/mentat-full-audit-2026-09-13/ refuse init_schema() because their
+hand-built contributions table lacks two_year_transaction_period.
+
 4. **A leaked test console.** PID 45068 was listening on port 62160 from the
    Python baseline sweep. It runs from `%TEMP%`, is harmless, and can be killed
    at will. It is not on 8802 and not one of Paul's consoles.
@@ -700,17 +717,17 @@ four-runner sweep is `receipts/S2_final_sweep.txt`.
 
 ## S3 — PAC evidence ingestion (Area C)
 
-**Status:** not started
+**Status:** BUILT, receipts ready, UNCOMMITTED (2026-09-16). This slot is S0's stub; the full S3 record — files, contracts, before/after tallies, real-client pass, measurements, open items and the S6 pane state model — is the section of the same title appended at the END of this file.
 
-**Files owned:** see table. `server.py` is CONTENDED.
+**Files owned:** `mentat/app/evidence_csv.py`, `mentat/app/evidence-csv.js`, `mentat/tools/pac_evidence.py`, the four evidence hunks in `mentat/app/server.py` (CONTENDED; before/after diffs receipted).
 
-**Patches:** —
+**Patches:** `patches/S3_pac_evidence_fixes.patch` plus three PROPOSED patches for unowned files (`S3_PROPOSED_PATCHES.md`).
 
-**Contract decisions:** —
+**Contract decisions:** `contracts/evidence-csv-import.json`, `contracts/evidence-job-status.json`.
 
-**Open questions:** —
+**Open questions:** see the appended section, "Open for Paul".
 
-**Handoff notes for later sessions:** —
+**Handoff notes for later sessions:** see the appended section, "Pane state model for S6".
 
 ---
 
@@ -767,3 +784,166 @@ in-progress session.
 
 
 
+
+---
+
+## S3 — PAC evidence ingestion (Area C)
+
+**Session:** Fable, worktree evidence-csv-fetch-streaming-8bedff, 2026-09-16 (15:30–22:00 ET).
+**Status:** BUILT, receipts ready, UNCOMMITTED. Paul applies. One verification still
+open at write time (browser step 5, see "Tests" below).
+
+**Precondition record.** S0's status was "receipts ready" and the packet directory was
+untracked when S3 booted; on Paul's "commit it, then go" the packet was committed as
+`11654f911` (44 files, `git add -f` because the root `.gitignore` eats `*.json`/`*.txt`).
+S2's own commit `d78cf0b8f` landed on the branch between that and S3's first edit; it
+touched no `mentat/app/` file. S3's four source files were clean at both hashes.
+`git diff -- mentat/app/server.py` before S3's edit: empty (receipt
+`S3_server_py_diff_before.txt`); after: exactly four hunks, +73/−27, at `@@ -884`
+(collect_evidence messages), `@@ -1274` (Console evidence methods), `@@ -1729` (GET
+route), `@@ -1851` (streaming POST branch) — `S3_server_py_diff_after.txt`.
+
+**What S0's Area C actually said, and what S3 did about it.** No fetch failure
+reproduced. Finding 1 (imports live in one process's dict and vanish on same-port
+restart, launcher stale-stop or port hop, leaving "This CSV import is unavailable in the
+current app session") and Finding 2 (JSON POST of the whole file parsed synchronously on
+the request thread, 3.7–15.5 s for 4.95 MB, peak 11.8×, retained 7.8× forever) are both
+closed by one mechanism: an on-disk import store under the console data root, which every
+launcher-started console shares.
+
+**Files changed (S3-owned):**
+- `mentat/app/evidence_csv.py` (245 → ~830 lines): constants `MAX_BYTES = 50_000_000`,
+  `MAX_COLUMNS = 200` (kept), `MAX_ROWS = 500_000`, `CHUNK_BYTES`, `KEEP_IMPORTS = 10`,
+  `KEEP_BYTES = 250_000_000`, `PAGE_LIMIT = 1000`; `limits()`, `page_args()`,
+  `decode_name()`; `Upload` (chunked write, byte gate applied before the crossing chunk,
+  incremental UTF-8 decode, running sha256, abort-on-refuse so the handle never blocks a
+  delete); `Store(data_root, evict=True)` with `begin_upload / job / wait / sources /
+  catalog / select / ingest_text`; ingest runs in one background thread per console,
+  streams `csv.reader` over the file, checks `MAX_ROWS` before normalising each row,
+  writes rows to `rows.sqlite` in 1,000-row batches as `csv_rows(row_number, line_num,
+  committee_id, cycle, status, channel, amount, cells JSON)` plus a Decimal-exact
+  `totals` table; `select()` rebuilds only the requested page through the pure `rebuild()`
+  → `normalize()` path. Import id = `csv-` + sha256(bytes)[:32] (same file, same id on
+  every console). Legacy `parse/catalog/select/normalize` remain importable and run over
+  the same reader. The ceiling comment justifies 50 MB on measured disk figures only
+  (ingest seconds are NOT certifiable on this host, see Measurements).
+- `mentat/app/server.py`: the four hunks above. Streaming branch sits inside `do_POST`'s
+  `try:` before the 7 MB generic gate; `Content-Length > MAX_BYTES` is refused without
+  reading the body; short read → `M_SHORT`; legacy JSON `{name,text}` still accepted
+  (synchronous, returns the old CATALOG shape). GET: `?job=` polling, `limits` in the
+  listing, `page_args()` instead of bare `int()` (DEFECT-INT-LEAK closed).
+  `collect_evidence` failure message now `Collection failed: <last log line>. Full log:
+  <path>` and `Could not start the evidence collector: <OSError>`. `csv_imports` is gone;
+  `evidence_store` is a lazy accessor passing `evict=not read_only`.
+- `mentat/app/evidence-csv.js` (69 → 163 lines): raw-body `fetch` with the File as body
+  (no `file.text()`), pre-flight from the server's `limits` (no size literal in the file),
+  `?job=` polling at 500 ms with a progress line, a JS-built `#evidence-csv-source`
+  picker listing previous imports, every failure path writing file-or-URL plus reason to
+  `#evidence-csv-status`, new provenance sentence.
+- `mentat/tools/pac_evidence.py`: `Client.page` reports `FEC evidence request failed:
+  <reason>; URL <url>` for HTTPError, URLError, timeouts and non-JSON bodies; retries
+  transient classes with the existing backoff; cache-integrity message names the path.
+
+**Contracts (DE-021):** `contracts/evidence-csv-import.json` (LIMITS, JOB reading/ready/
+failed, listing, SELECT) and `contracts/evidence-job-status.json` (collector job states),
+asserted against the real producers in `test_evidence_csv_stream.py::
+test_contract_examples_against_producers` with six negative controls that fail the
+helper. Both JSON files are gitignored: commit with `git add -f`.
+
+**Tests (fail before, pass after):**
+- `tests/test_evidence_csv_stream.py` (18 tests): pristine HEAD `11654f911` → 1 failure +
+  18 errors (`no attribute 'Store'`), receipt `S3_before_python.txt`; live tree → 18/18,
+  `S3_after_python.txt`.
+- `tests/test_pac_evidence_errors.py` (7): 5/7 red before, 7/7 after
+  (`S3_pac_evidence_errors_before/after.txt`).
+- `tests/test_evidence_csv_browser.cjs` (Playwright, spawns `app/server.py` on a free port
+  with a temp data root; never 8802/8806/8808): pristine HEAD → red at step 4 (old client
+  never emits the new status), `S3_before_browser.txt`. Live tree, run under host load
+  with a second verifier active → steps 1–4 pass, step 5 (6 MB import) timed out at 60 s
+  twice without the status text being captured (`S3_after_browser_run1_contended.txt`).
+  Diagnosis on a quiet host was IN FLIGHT when this section was written: either host load
+  (this box had 1.6 GB of 31.5 GB free; identical 6 MB ingests measured 0.82–34.66 s) or a
+  client defect in `evidence-csv.js`. Whichever it is, `S3_after_browser.txt` is the
+  receipt; treat the client rewrite as UNPROVEN until that file shows the run green.
+- Pre-existing suites: `tests.test_pac_evidence` 10/10 (unchanged); `tests.test_evidence_csv`
+  (UNTRACKED, unowned) 10/10 → 9/10: the failing test pins "no files written" and "a
+  restart forgets", i.e. the defect S3 removed. Proposed fix in `patches/
+  S3_proposed_test_evidence_csv_pin.patch` (proven 10/10 on a temp copy).
+  `tests/test_console_browser.cjs` (tracked, modified by another lane, already red at :188
+  per S0) now also fails at :87 on the old "no larger than 5 MB" assertion; proposed fix
+  `S3_proposed_test_console_browser_limit.patch`. `index.html:343` still says "up to 5 MB"
+  (visible only until the first GET returns); proposed fix
+  `S3_proposed_index_html_limit_text.patch`. All three apply with `git apply --check`
+  exit 0; none applied (files outside S3's ownership).
+- DEFECT-KEYSTORE (1,975 tracebacks, log dated 09-11) was ALREADY CLOSED at HEAD: the
+  once-per-response catch in `summary()` landed 2026-09-13 in `2906980d1`, the POST
+  handler 09-08 in `4f6a6f564`. S3 pins it with `test_keystore_failure_reported_once`
+  rather than re-fixing it.
+
+**Real-client pass (criterion 7, DE-021):** `S3_real_client_pass.txt`. Writable console on
+port 8943, temp data root: streaming import, `?job=` progression 0 → 14,977 rows, limits,
+100-row page with `has_more`, `?offset=abc` → exactly `Choose a valid CSV row page
+(1–1,000 rows).`, unknown id → M_GONE, `Content-Length: 60000000` → M_BYTES, short read →
+`The upload ended early: 54 of 5,000 bytes arrived.`, legacy JSON import, no-token 403,
+and ONE real `POST /api/evidence-collect` (Coinbase, C00835959, cycle 2026) → completed
+in ~10 s, wrote `mentat/.cache/pac-evidence/snapshot-2eb1b6d618fa4595b4ddbe8043753ede/`
+(collection.log, collection.json, evidence.json 16 KB, snapshots.json 1.5 MB, 10 source-
+cache files; 13 receipt legs, 11 transfers, 3 candidate activities, IE totals reconcile).
+Two deviations in that receipt, stated plainly: its generated file was 390 KB, not 6 MB,
+and it deferred the restart-on-another-port step. Both are covered by
+`S3_smoke_server.txt` FINAL RUN (6,000,146-byte streaming POST; restart on 8902 with the
+same data root lists both imports and serves their rows).
+
+**Measurements (receipt `S3_smoke_server.txt`, three dated sections; the FINAL RUN is
+the shipped code):** streaming POST returns in 0.078 s for 6,000,146 B (the request thread
+only copies bytes; S0 measured 3.7–15.5 s for 4.95 MB); oversize refused in 0.015 s
+without reading; `rows.sqlite` 9,498,624 B for a 6,000,146 B source = 1.58× (was 5.06×
+before the cells-only payload); 100-row page 15–16 ms (46–47 ms at offset 7,000); disk per
+50 MB import ≈ 129 MB; behind `KEEP_BYTES` 250 MB ≈ 645 MB total. Ingest seconds were
+NOT certified: nine identical 6 MB ingests spanned 0.82–34.66 s with 1.6 GB RAM free, so
+the ceiling is justified on disk and on the request-thread cost only.
+
+**Contract deviations shipped (accepted):** local `atomic_json` in `evidence_csv.py`
+(server.py defines its own; `tools/` is not on `sys.path` at import); `decode_name()` in
+the module instead of a server.py import edit; `Upload.write` aborts before raising;
+table named `csv_rows`; `catalog/select` on a still-reading import raise `M_BUSY`; a
+failed ingest deletes `source.csv`/`rows.sqlite` and keeps `import.json` for the message;
+the every-1,000-rows progress write uses one attempt inside `try/except OSError` so an
+open handle can neither slow nor fail an import.
+
+**Unchanged by ruling (PACKET S3 criterion 8):** `SO_REUSEADDR`, the snapshot store
+location (`PROJECT/.cache/pac-evidence`, still keyed on the repo path), the startup
+`save_keys` call.
+
+**Open for Paul:**
+1. Apply `patches/S3_pac_evidence_fixes.patch` (145,242 B, 9 files, +2562/−97, proven
+   `git apply --check` exit 0 on `d78cf0b8f` in a throwaway worktree, then compiled) — or
+   commit the live files directly; contracts and receipts need `git add -f`. If S's
+   browser diagnosis edited `evidence-csv.js` or the `.cjs` after 21:30 UTC, regenerate
+   the patch first (`git diff` on the four tracked files + `git diff --no-index` on the
+   five new ones).
+2. The three proposed patches for unowned files (above).
+3. `MAX_ROWS` 50,000 → 500,000 and `KEEP_BYTES` 250 MB (~645 MB on disk) — S3's calls,
+   reversible by editing two constants.
+4. Read-only previews write imports into the shared data root but never evict; a
+   preview can still see and select the main console's imports (by design of the shared
+   store; say if that is unwanted).
+5. Consoles 8806 (and any 8802/8808 relaunch) predate every server.py edit and must be
+   restarted to serve the new routes; the F1 launcher restarts an idle stale console.
+
+**Pane state model for S6 (two-pane comparison; NOT built here):** the evidence CSV pane's
+whole state is `{source: 'csv', id: 'csv-<32hex>', committee, cycle, offset, limit}`; the
+snapshot pane's is `{source: 'snapshot', id: '<snapshot dir name>', cycle, committee,
+mode: 'saved' | 'graph'}`. What S3 leaves for S6: (a) ids are content-addressed, so the
+same file gives the same id on every console and data root — a second pane on another
+port can address an import by id without a file input; (b) `GET /api/evidence-csv` lists
+the ready imports with their catalogs, so a pane can populate from the id alone;
+(c) `evidence-csv.js` keeps `source`/`offset` closure-private today — S6 must expose
+`getState()/setState(state)` on the module and round-trip the state through the URL query
+(`?evidence=csv&id=…&committee=…&cycle=…&offset=…`) so two panes can be driven and
+compared; (d) the status line contract (file-or-URL plus reason, never blank) must hold
+per pane, so each pane needs its own `#evidence-csv-status` element or a keyed status
+map; (e) `limits` are per server, identical across consoles on the same build.
+
+**Next:** Paul restarts the consoles, applies or commits, rules on items 2–4; S6 builds the
+pane state model after the cross-industry contract exists.

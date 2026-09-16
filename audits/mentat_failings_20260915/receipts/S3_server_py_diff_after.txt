@@ -1,0 +1,145 @@
+S3 server.py diff AFTER edits
+date: 2026-09-16T21:02:18Z
+HEAD: d78cf0b8f1a03911ba0791220f396cd838eb6a00
+branch: codex/mentat-crypto
+note: HEAD was 11654f911 when this lane session started; d78cf0b8f (S2, contributor street columns) landed mid-session and touched no mentat/app file. mentat/app/server.py, evidence_csv.py and evidence-csv.js were clean at both.
+command: git -C C:\Users\pgoff\Mentat diff -- mentat/app/server.py
+--- begin diff ---
+diff --git a/mentat/app/server.py b/mentat/app/server.py
+index d1bbb9e9f..88e4d8a89 100644
+--- a/mentat/app/server.py
++++ b/mentat/app/server.py
+@@ -882,10 +882,21 @@ class Console:
+                     code = process.wait()
+                 ready = code == 0 and read_json(root / 'evidence.json').get('version') == 1
+                 job['state'] = 'completed' if ready else 'failed'
+-                job['message'] = 'Snapshot ready.' if ready else 'Collection did not finalize a snapshot. Saved responses are retained; see ' + str(root / 'collection.log')
+-            except OSError:
++                if ready:
++                    job['message'] = 'Snapshot ready.'
++                else:
++                    # Name the failure in the status line. "Did not finalize a
++                    # snapshot" told the reader nothing and left the reason in a
++                    # file nobody opened.
++                    try:
++                        said = [line.strip() for line in (root / 'collection.log').read_text(
++                            encoding='utf-8', errors='replace').splitlines() if line.strip()]
++                    except OSError:
++                        said = []
++                    job['message'] = f'Collection failed: {said[-1] if said else "no output"}. Full log: {root / "collection.log"}'
++            except OSError as error:
+                 job['state'] = 'failed'
+-                job['message'] = 'Could not start the evidence collector.'
++                job['message'] = f'Could not start the evidence collector: {error}'
+             job['finished_at'] = time.time()
+             atomic_json(root / 'collection.json', job)
+         def run_collect():
+@@ -1272,32 +1283,38 @@ class Console:
+             atomic_json(path, {'version':1, 'runs':entries})
+         return {'id':identifier, 'archived':archived}
+ 
+-    def import_evidence_csv(self, data):
+-        document = evidence_csv.parse(data.get('name'), data.get('text'))
++    @property
++    def evidence_store(self):
++        """CSV imports kept under the data root, not in this process.
++
++        The old dict lived in process memory, so a stale-build restart, an idle
++        stop or the launcher landing on a different port silently dropped every
++        import the reader had chosen. The data root is shared by every console
++        the launcher starts, so a file imported once stays listed.
++        """
+         with self.lock:
+-            imports = getattr(self, 'csv_imports', None)
+-            if imports is None:
+-                imports = self.csv_imports = {}
+-            existing = next((source for source in imports.values() if source['sha256'] == document['sha256']
+-                             and source['name'] == document['name']), None)
+-            if existing is not None:
+-                return evidence_csv.catalog(existing)
+-            if len(imports) >= 10 or sum(len(source['text'].encode('utf-8')) for source in imports.values()) + len(document['text'].encode('utf-8')) > 20_000_000:
+-                raise ValueError('This app session has reached its temporary CSV limit (10 files or 20 MB). Restart Mentat to clear temporary imports.')
+-            document['id'] = 'csv-' + uuid.uuid4().hex
+-            imports[document['id']] = document
+-        return evidence_csv.catalog(document)
++            store = getattr(self, 'csv_store', None)
++            if store is None:
++                store = self.csv_store = evidence_csv.Store(
++                    self.root, evict=not getattr(self, 'read_only', False))
++        return store
++
++    def import_evidence_csv(self, data):
++        """Legacy JSON import: read the text through the store, then answer."""
++        store = self.evidence_store
++        job = store.wait(store.ingest_text(data.get('name'), data.get('text'))['id'])
++        if job['state'] != 'ready':
++            raise ValueError(job['message'] or evidence_csv.M_GONE(job['id']))
++        return job['catalog']
++
++    def evidence_csv_job(self, identifier):
++        return self.evidence_store.job(identifier)
+ 
+     def evidence_csv_view(self, identifier='', committee='', cycle='', offset=0, limit=200):
+-        with self.lock:
+-            imports = getattr(self, 'csv_imports', {})
+-            if not identifier:
+-                return {'sources':[evidence_csv.catalog(source) for source in reversed(list(imports.values()))],
+-                        'session_only':True}
+-            if not re.fullmatch(r'csv-[a-f0-9]{32}', identifier) or identifier not in imports:
+-                raise ValueError('This CSV import is unavailable in the current app session. Choose the file again.')
+-            document = imports[identifier]
+-        return evidence_csv.select(document, committee, cycle, offset, limit)
++        store = self.evidence_store
++        if not identifier:
++            return {'sources':store.sources(), 'limits':evidence_csv.limits(), 'session_only':False}
++        return store.select(identifier, committee, cycle, *evidence_csv.page_args(offset, limit))
+ 
+     def summary(self, include_archived=False):
+         runs = self.runs()
+@@ -1727,8 +1744,13 @@ class Handler(BaseHTTPRequestHandler):
+             if parsed.path == "/api/runs":
+                 return self.send(app.summary(query.get('include_archived', ['0'])[0] in ('1','true')))
+             if parsed.path == '/api/evidence-csv':
++                if query.get('job', [''])[0]:
++                    return self.send(app.evidence_csv_job(query.get('job', [''])[0]))
++                # Page arguments are validated by the reader, which answers with
++                # the reader's own message. A bare int() leaked Python's own text
++                # ("invalid literal for int()") into the status line.
+                 return self.send(app.evidence_csv_view(query.get('id', [''])[0], query.get('committee', [''])[0],
+-                    query.get('cycle', [''])[0], int(query.get('offset', ['0'])[0]), int(query.get('limit', ['200'])[0])))
++                    query.get('cycle', [''])[0], query.get('offset', ['0'])[0], query.get('limit', ['200'])[0]))
+             if parsed.path == '/api/evidence':
+                 identifier = query.get('id', [''])[0]
+                 root = PROJECT / '.cache/pac-evidence'
+@@ -1849,6 +1871,30 @@ class Handler(BaseHTTPRequestHandler):
+             self.discard_body()
+             return self.send({"error": "Local access only."}, 403)
+         try:
++            # A chosen CSV streams straight to the data-root store: the request
++            # thread copies it in chunks and never holds the decoded file, so
++            # the generic body gate below does not apply to it. Its own ceiling
++            # is the reader's MAX_BYTES, which the page pre-flights from
++            # /api/evidence-csv so a refusal is shown before anything uploads.
++            if self.path == '/api/evidence-csv' and 'application/json' not in self.headers.get('Content-Type', '').lower():
++                store = self.server.app.evidence_store
++                expected = int(self.headers.get('Content-Length', '0'))
++                if expected > evidence_csv.MAX_BYTES:
++                    self.close_connection = True
++                    return self.send({'error': evidence_csv.M_BYTES}, 400)
++                upload = store.begin_upload(evidence_csv.decode_name(self.headers.get('X-Evidence-Name', '')))
++                try:
++                    received = 0
++                    while received < expected:
++                        chunk = self.rfile.read(min(evidence_csv.CHUNK_BYTES, expected - received))
++                        if not chunk:
++                            raise ValueError(evidence_csv.M_SHORT(received, expected))
++                        received += len(chunk)
++                        upload.write(chunk)
++                except BaseException:
++                    upload.abort()
++                    raise
++                return self.send(upload.finish())
+             length = int(self.headers.get("Content-Length", "0"))
+             if length < 1 or length > 7_000_000:
+                 self.discard_body()
+--- end diff (bytes: 8109) ---

@@ -1,0 +1,203 @@
+S3 RED BASELINE - Python suites, run against a PRISTINE worktree of HEAD
+==========================================================================
+
+Date: 2026-09-16 (America/New_York)
+Repo (source of HEAD): C:\Users\pgoff\Mentat, branch codex/mentat-crypto
+Pinned commit: 11654f911184a6ca5d9aa2d079f0c18ade578d09
+  (subject: "Record the mentat-failings lane packet: S0 diagnosis, S2 receipts
+   and the contracts convention")
+Worktree used for this run (scratch, detached HEAD, removed after this run):
+  C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-
+  Melange-Systems--claude-worktrees-evidence-csv-fetch-streaming-8bedff\
+  01cbac00-075b-491b-acb2-076e4014ef13\scratchpad\mentat-before
+  created via: git -C C:\Users\pgoff\Mentat worktree add "<above>" 11654f911
+cwd for every command below: <worktree>\mentat
+
+Files copied into the pristine worktree before running (S3's own deliverables,
+per the lane's explicit instructions):
+  - mentat\tests\test_evidence_csv_stream.py
+  - mentat\tests\test_evidence_csv_browser.cjs
+  - audits\mentat_failings_20260915\contracts\evidence-csv-import.json
+  - audits\mentat_failings_20260915\contracts\evidence-job-status.json
+
+Environment gaps found and worked around (read-only copies FROM the live tree
+INTO this scratch worktree only; nothing in C:\Users\pgoff\Mentat or in this
+scratch worktree's git state was touched):
+
+  1. mentat/inputs/ is entirely gitignored (.gitignore:65). server.py's import
+     chain (server -> contribution_data) stats mentat/inputs/fec_receipt_rules.json
+     at MODULE IMPORT TIME merely to record a staleness stamp; a fresh git
+     checkout has no mentat/inputs/ directory at all, so `import server` raised
+     FileNotFoundError before any of my tests could even load. Copied that one
+     file from the live tree's mentat/inputs/fec_receipt_rules.json. This is
+     the "committed-vs-live drift" gap already on record in this repo's
+     history (main not runnable alone; gitignored input files back committed
+     callers) - not something introduced by this lane.
+  2. mentat/config/report-directory.json is also gitignored (*.json,
+     .gitignore:6). server.py's main() calls report_directory(PROJECT) at
+     startup and raises ValueError before printing its ready line if that file
+     is absent. Wrote a stand-in config into the scratch worktree only, pointing
+     at a throwaway scratch directory (never Paul's real
+     "C:\Users\pgoff\OneDrive\Desktop\Mentat Complete Files"), so the console
+     could start without ever touching real report output.
+  3. mentat/tests/test_evidence_csv.py is untracked in git (confirmed via
+     `git status --porcelain`: `?? mentat/tests/test_evidence_csv.py`), so a
+     fresh worktree checkout does not contain it at all. Copied the file
+     verbatim (read-only, unmodified) from the live tree so the pre-existing
+     suite could be run for its baseline, per this session's explicit
+     instructions. This file was NOT edited (it is another owner's file).
+
+No other change was made to the pristine worktree beyond the four S3 files
+above and these three pre-existing, gitignored/untracked support files.
+
+==========================================================================
+COMMAND 1 of 2 (NEW): python -m unittest tests.test_evidence_csv_stream -v
+==========================================================================
+Exit code: 1 (FAILED)
+Full output:
+
+test_200_columns_accepted (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_200_columns_accepted) ... ERROR
+test_201_columns_rejected (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_201_columns_rejected) ... ERROR
+test_collect_evidence_failure_message (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_collect_evidence_failure_message) ... FAIL
+test_contract_examples_against_producers (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_contract_examples_against_producers) ... ERROR
+test_dedup_same_bytes_same_id (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_dedup_same_bytes_same_id) ... ERROR
+test_eviction (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_eviction) ... ERROR
+test_gone_import (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_gone_import) ... ERROR
+test_http_streaming_roundtrip (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_http_streaming_roundtrip) ... ERROR
+test_interrupted_reading_reports_failed (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_interrupted_reading_reports_failed) ... ERROR
+test_keystore_failure_reported_once (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_keystore_failure_reported_once) ... ok
+test_legacy_json_import_still_works (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_legacy_json_import_still_works) ... ok
+test_max_rows_enforced_incrementally (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_max_rows_enforced_incrementally) ... ERROR
+test_oversize_rejected_while_streaming (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_oversize_rejected_while_streaming) ... ERROR
+test_page_arguments_validated (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_page_arguments_validated) (offset='abc', limit='200') ... ERROR
+test_page_arguments_validated (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_page_arguments_validated) (offset='0', limit=True) ... ERROR
+test_page_arguments_validated (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_page_arguments_validated) (offset='-1', limit='10') ... ERROR
+test_page_arguments_validated (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_page_arguments_validated) (offset='0', limit='5000') ... ERROR
+test_peak_memory_bounded (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_peak_memory_bounded) ... ERROR
+test_select_totals_are_decimal_exact (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_select_totals_are_decimal_exact) ... ERROR
+test_truncated_inside_quoted_field (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_truncated_inside_quoted_field) ... ERROR
+test_truncated_mid_row_is_tolerated (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_truncated_mid_row_is_tolerated) ... ERROR
+
+[16 tests error with AttributeError: module 'evidence_csv' has no attribute
+ 'Store' (or 'KEEP_IMPORTS', or 'page_args') - the Store class and the
+ streaming API do not exist yet at this commit. Decisive line, repeated for
+ every one of those 16 (illustrative, from test_201_columns_rejected):]
+
+======================================================================
+ERROR: test_201_columns_rejected (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_201_columns_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "...\mentat-before\mentat\tests\test_evidence_csv_stream.py", line 444, in test_201_columns_rejected
+    store = csv_data.Store(root)
+            ^^^^^^^^^^^^^^
+AttributeError: module 'evidence_csv' has no attribute 'Store'
+
+[test_eviction fails one step earlier, before even reaching Store():]
+
+======================================================================
+ERROR: test_eviction (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_eviction)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "...\mentat-before\mentat\tests\test_evidence_csv_stream.py", line 516, in test_eviction
+    original_keep = csv_data.KEEP_IMPORTS
+                    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'evidence_csv' has no attribute 'KEEP_IMPORTS'
+
+[test_page_arguments_validated (all 4 subTest variants) fails because
+ page_args() does not exist yet:]
+
+======================================================================
+ERROR: test_page_arguments_validated (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_page_arguments_validated) (offset='abc', limit='200')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "...\mentat-before\mentat\tests\test_evidence_csv_stream.py", line 564, in test_page_arguments_validated
+    csv_data.page_args(offset, limit)
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: module 'evidence_csv' has no attribute 'page_args'
+
+[test_http_streaming_roundtrip fails differently: the OLD server only accepts
+ the legacy application/json {name,text} POST body, so a streaming
+ (Content-Type: text/csv) POST to /api/evidence-csv is answered 400, decisive
+ line:]
+
+======================================================================
+ERROR: test_http_streaming_roundtrip (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_http_streaming_roundtrip)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  ...
+  File "...\Python312\Lib\urllib\request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 400: Bad Request
+
+[test_collect_evidence_failure_message is a genuine FAIL (not ERROR): the OLD
+ collect_evidence() still writes the OLD message format
+ ("Collection did not finalize a snapshot. Saved responses are retained; see
+ ...") rather than the new "Collection failed: <last log line>. Full log: ..."
+ format the S3 contract specifies. Decisive line:]
+
+======================================================================
+FAIL: test_collect_evidence_failure_message (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_collect_evidence_failure_message)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "...\mentat-before\mentat\tests\test_evidence_csv_stream.py", line 788, in test_collect_evidence_failure_message
+    self.assertTrue(record['message'].startswith('Collection failed: FEC evidence request failed: HTTP 500'))
+AssertionError: False is not true
+
+[test_keystore_failure_reported_once and test_legacy_json_import_still_works
+ PASS at this commit - both assert PRE-EXISTING behaviour unrelated to S3's
+ new work (the do_GET '/api/runs' key_status fallback, and the legacy JSON
+ import route), so passing here is expected and correct, not a red-baseline
+ defect.]
+
+----------------------------------------------------------------------
+Ran 18 tests in 1.388s
+
+FAILED (failures=1, errors=18)
+EXIT CODE: 1
+
+Note: failures(1) + errors(18) = 19 > 18 "tests ran" because
+test_page_arguments_validated uses 4 subTest() cases, each counted
+independently by unittest while still being one test method.
+
+Test-authoring correction made during this run: test_keystore_failure_reported_once
+originally asserted the /api/evidence-collect error body equalled the raw
+crypt() RuntimeError text ('Windows could not access the encrypted FEC key
+store for this user.'). That failed here not because the implementation is
+missing, but because it is WRONG: do_POST's existing, unrelated
+`except RuntimeError` handler (server.py ~1923-1926, pre-existing, outside
+S3's owned hunks) already rewords any RuntimeError on a non-analytical path to
+'The encrypted key store could not be accessed for this Windows user.' before
+this lane touches anything. The test was corrected to assert that pre-existing
+sentence for the HTTP body, while still asserting the raw crypt() message text
+is what gets fed into RuntimeError() (i.e. what DPAPI actually said). Fixed,
+recompiled, and reproduced in this same file's current version - see the
+"ok" result above.
+
+==========================================================================
+COMMAND 2 of 2 (PRE-EXISTING): python -m unittest tests.test_evidence_csv -v
+==========================================================================
+(mentat/tests/test_evidence_csv.py is untracked in git; copied unmodified
+from the live tree per this session's instructions - see note above.)
+
+Exit code: 0 (OK)
+Full output:
+
+test_conflicting_amount_types_are_not_chosen_automatically (tests.test_evidence_csv.EvidenceCSVTests.test_conflicting_amount_types_are_not_chosen_automatically) ... ok
+test_csv_http_is_authenticated_memory_only_and_available_in_read_only_mode (tests.test_evidence_csv.EvidenceCSVTests.test_csv_http_is_authenticated_memory_only_and_available_in_read_only_mode) ... ok
+test_explicit_mentat_cycle_aggregate_has_no_invented_transaction_date (tests.test_evidence_csv.EvidenceCSVTests.test_explicit_mentat_cycle_aggregate_has_no_invented_transaction_date) ... ok
+test_malformed_or_unidentified_files_are_rejected (tests.test_evidence_csv.EvidenceCSVTests.test_malformed_or_unidentified_files_are_rejected) ... ok
+test_pagination_does_not_truncate_selected_totals (tests.test_evidence_csv.EvidenceCSVTests.test_pagination_does_not_truncate_selected_totals) ... ok
+test_receipts_disbursements_support_and_opposition_are_separate (tests.test_evidence_csv.EvidenceCSVTests.test_receipts_disbursements_support_and_opposition_are_separate) ... ok
+test_semicolon_csv_parses_accounting_amounts_without_double_signs (tests.test_evidence_csv.EvidenceCSVTests.test_semicolon_csv_parses_accounting_amounts_without_double_signs) ... ok
+test_unassigned_and_extra_cells_remain_inspectable (tests.test_evidence_csv.EvidenceCSVTests.test_unassigned_and_extra_cells_remain_inspectable) ... ok
+test_unsupported_dates_types_and_numbers_remain_visible_without_totals (tests.test_evidence_csv.EvidenceCSVTests.test_unsupported_dates_types_and_numbers_remain_visible_without_totals) ... ok
+test_utf8_quotes_refunds_and_duplicates_preserve_exact_source (tests.test_evidence_csv.EvidenceCSVTests.test_utf8_quotes_refunds_and_duplicates_preserve_exact_source) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.573s
+
+OK
+EXIT CODE: 0
+
+10/10, exactly as expected: the pre-existing suite is untouched by this
+lane's contract and stays green throughout.

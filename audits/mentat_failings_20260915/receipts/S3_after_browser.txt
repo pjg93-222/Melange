@@ -1,0 +1,140 @@
+S3 BROWSER VERIFICATION - GREEN
+date: 2026-09-16T22:54:20Z (UTC)
+HEAD: d78cf0b8f1a03911ba0791220f396cd838eb6a00   branch: codex/mentat-crypto
+host at run time: 2.8 GB free of 31.5 GB
+ports 8802/8806/8808 never bound by these runs; 8806 and 8841 (Paul's) untouched.
+
+WHY THE EARLIER RUNS FAILED AT STEP 5, AND WHAT WAS ACTUALLY BROKEN
+-------------------------------------------------------------------
+Step 5 (import six.csv ~6 MB) timed out twice at 60 s. That was (a) HOST LOAD:
+on a quiet host the same step passes in 2.4 s. The identical 6 MB ingest measured
+between 0.82 s and 34.66 s on this machine depending on what else was running.
+Orphaned consoles from the aborted runs were still resident (one on port 8943 with
+a temp data root) and free memory was 1.6 GB of 31.5 GB.
+
+Getting past step 5 then exposed two REAL defects, both mine, now fixed:
+
+1. SERVER, evidence_csv.py Store.read_record - reported a live import as gone.
+   Polling ?job= during the 40 MB ingest returned 'This CSV import is no longer on
+   disk (csv-b0de...)' while the directory AND import.json were both present on
+   disk (proved by listing the store at the moment of the error). read_record
+   caught OSError and returned None, and a transient Windows sharing violation on
+   import.json - which the ingest rewrites for progress every 1000 rows while the
+   page polls it twice a second - was being reported as a permanent 'gone'.
+   Fix: read_record retries a losing read briefly (5 attempts, 0.02-0.08 s apart);
+   a genuinely absent file (FileNotFoundError) still answers immediately.
+
+2. CLIENT, evidence-csv.js followJob - gave up after a single failed poll.
+   Even with the server fixed, one transient blip stranded the page on an error
+   while the import went on finishing invisibly behind it.
+   Fix: keep the last good state and retry; stop after pollFailureLimit = 5
+   consecutive failures, leaving the message on screen.
+
+3. TEST FIXTURE, test_evidence_csv_browser.cjs - step 6 was unpassable as written.
+   forty.csv used ~77-byte rows, so 40 MB came to 516,377 rows and the server
+   correctly refused the file with 'Choose a CSV containing no more than 500,000
+   rows.' MAX_ROWS binds alongside the 50 MB ceiling. The fixture now uses rows of
+   a realistic Schedule A width (~185 B): 6 MB -> 32,515 rows, 40 MB -> 212,985
+   rows. The test's assertions are unchanged.
+
+MEASURED TIMINGS PER STEP (quiet host, this run)
+------------------------------------------------
+  PASS step 1 (0.3s) - fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-fixtures-Hp1wvX
+  PASS step 2 (2.2s) - server A ready on port 59056, data root C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-data-hGRSvs
+  PASS step 3 (1.4s) - browser launched, page opened, pageerror/request listeners attached
+  PASS step 4 (0.7s) - evidence tab open, CSV source selected, empty-catalog status shown
+  PASS step 5 (1.8s) - six.csv imported (~6 MB), 100 rows rendered on the first page
+  PASS step 6 (17.3s) - forty.csv imported (~40 MB) after 144 polled progress samples
+  PASS step 7 (2.5s) - server restarted on the same port and data root; both prior imports reachable without re-upload
+  PASS step 8 (4.2s) - a second console on the same data root and a different port lists both imports
+  PASS step 9 (0.1s) - big.csv rejected by the client pre-flight size check; no POST issued
+  PASS step 10 (0.1s) - notes.txt rejected for its extension
+  PASS step 11 (0.5s) - wide201.csv rejected for exceeding the column cap
+  PASS step 12 (0.6s) - truncated.csv rejected for an unterminated quoted field
+  PASS step 13 (0.1s) - empty.csv rejected as empty
+  PASS step 14 (0.0s) - latin1.csv rejected for invalid UTF-8 bytes
+  PASS step 15 (0.8s) - nocommittee.csv rejected for missing a committee-id column
+  PASS step 16 (0.2s) - abort.csv reports a transport failure when the upload request is aborted
+  PASS step 17 (0.2s) - html.csv reports an unparseable HTTP 500 response
+  PASS step 18 (0.1s) - a bad ?offset= value returns 400 with the exact M_PAGE message, not a leaked exception
+  PASS step 19 (0.0s) - zero pageerror entries and zero remote requests across the whole run
+
+FULL OUTPUT: node tests\test_evidence_csv_browser.cjs
+-----------------------------------------------------
+STEP 1: write fixture CSVs to a scratch directory
+PASS step 1 (0.3s) - fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-fixtures-Hp1wvX
+STEP 2: pick a free port and launch the first console server
+PASS step 2 (2.2s) - server A ready on port 59056, data root C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-data-hGRSvs
+STEP 3: launch headless Chrome and open a page
+PASS step 3 (1.4s) - browser launched, page opened, pageerror/request listeners attached
+STEP 4: open the evidence tab, select CSV source, expect the empty-catalog status
+PASS step 4 (0.7s) - evidence tab open, CSV source selected, empty-catalog status shown
+STEP 5: import six.csv (~6 MB) and check the first page of rows
+PASS step 5 (1.8s) - six.csv imported (~6 MB), 100 rows rendered on the first page
+STEP 6: import forty.csv (~40 MB) and watch for a progress sample
+PASS step 6 (17.3s) - forty.csv imported (~40 MB) after 144 polled progress samples
+STEP 7: kill and relaunch the console on the same port/data root; reuse prior imports
+PASS step 7 (2.5s) - server restarted on the same port and data root; both prior imports reachable without re-upload
+STEP 8: launch a second console on the same data root, a different port
+PASS step 8 (4.2s) - a second console on the same data root and a different port lists both imports
+STEP 9: error case: big.csv rejected client-side, no upload issued
+PASS step 9 (0.1s) - big.csv rejected by the client pre-flight size check; no POST issued
+STEP 10: error case: notes.txt rejected for its extension
+PASS step 10 (0.1s) - notes.txt rejected for its extension
+STEP 11: error case: wide201.csv rejected for exceeding the column cap
+PASS step 11 (0.5s) - wide201.csv rejected for exceeding the column cap
+STEP 12: error case: truncated.csv rejected for an unterminated quoted field
+PASS step 12 (0.6s) - truncated.csv rejected for an unterminated quoted field
+STEP 13: error case: empty.csv rejected as empty
+PASS step 13 (0.1s) - empty.csv rejected as empty
+STEP 14: error case: latin1.csv rejected for invalid UTF-8 bytes
+PASS step 14 (0.0s) - latin1.csv rejected for invalid UTF-8 bytes
+STEP 15: error case: nocommittee.csv rejected for missing a committee-id column
+PASS step 15 (0.8s) - nocommittee.csv rejected for missing a committee-id column
+STEP 16: error case: abort.csv reports a transport failure when the upload is aborted
+PASS step 16 (0.2s) - abort.csv reports a transport failure when the upload request is aborted
+STEP 17: error case: html.csv reports an unparseable HTTP 500 response
+PASS step 17 (0.2s) - html.csv reports an unparseable HTTP 500 response
+STEP 18: error case: a bad ?offset= value returns 400 with the exact M_PAGE message
+PASS step 18 (0.1s) - a bad ?offset= value returns 400 with the exact M_PAGE message, not a leaked exception
+STEP 19: final check: zero pageerror entries and zero remote requests
+PASS step 19 (0.0s) - zero pageerror entries and zero remote requests across the whole run
+ALL 19 STEPS PASSED
+browser.close() exceeded its 10000ms bound
+
+NOTE: 'browser.close() exceeded its 10000ms bound' is a teardown warning printed
+after ALL 19 STEPS PASSED; the process exit code was 0.
+
+node tests\test_console_browser.cjs (cap 300 s) - EXPECTED RED AT :87
+---------------------------------------------------------------------
+AssertionError [ERR_ASSERTION]: The input did not match the regular expression /no larger than 5 MB/. Input:
+
+'Uploading too-large.csv…'
+
+    at C:\Users\pgoff\Mentat\mentat\tests\test_console_browser.cjs:87:12 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'Uploading too-large.csv…',
+  expected: /no larger than 5 MB/,
+  operator: 'match',
+  diff: 'simple'
+}
+
+This is the one the proposed patch addresses: the client no longer refuses a
+5,000,001-byte file, because the limit is now 50 MB and is served to the page by
+GET /api/evidence-csv. The status at that moment is 'Uploading too-large.csv...'.
+
+PYTHON SUITES
+-------------
+python -m unittest tests.test_evidence_csv
+  ----------------------------------------------------------------------
+  Ran 10 tests in 1.275s
+  
+  FAILED (failures=1)
+  (the single failure is the untracked test's pin of the old forget-on-restart
+   behaviour at :143 - O1, handled as a proposed patch, not edited here)
+python -m unittest tests.test_evidence_csv_stream
+  ----------------------------------------------------------------------
+  Ran 18 tests in 16.054s
+  
+  OK

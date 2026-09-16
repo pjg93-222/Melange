@@ -16,7 +16,7 @@ from pathlib import Path
 import re
 import time
 from functools import lru_cache
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -114,7 +114,7 @@ class Client:
         if path.exists():
             saved = json.loads(path.read_bytes())
             if saved.get('url') != url or hashlib.sha256(json.dumps(saved['response'], sort_keys=True).encode()).hexdigest() != saved.get('sha256'):
-                raise ValueError('FEC evidence cache integrity check failed.')
+                raise ValueError(f'FEC evidence cache integrity check failed for {path}.')
             return saved['response']
         for attempt in range(4):
             try:
@@ -128,8 +128,18 @@ class Client:
                 break
             except HTTPError as error:
                 if error.code not in (429, 500, 502, 503, 504) or attempt == 3:
-                    raise ValueError(f'FEC evidence request failed: HTTP {error.code}, endpoint {endpoint}') from None
+                    raise ValueError(f'FEC evidence request failed: HTTP {error.code}; URL {url}') from None
                 time.sleep(min(30, 2 ** attempt * 2))
+            except URLError as error:
+                if attempt == 3:
+                    raise ValueError(f'FEC evidence request failed: {error.reason}; URL {url}') from None
+                time.sleep(min(30, 2 ** attempt * 2))
+            except TimeoutError:
+                if attempt == 3:
+                    raise ValueError(f'FEC evidence request failed: timed out after 60 s; URL {url}') from None
+                time.sleep(min(30, 2 ** attempt * 2))
+            except json.JSONDecodeError:
+                raise ValueError(f'FEC evidence request failed: response was not JSON; URL {url}') from None
         atomic_json(path, {'url': url, 'retrieved_at': datetime.now(timezone.utc).isoformat(),
                           'sha256': hashlib.sha256(json.dumps(response, sort_keys=True).encode()).hexdigest(), 'response': response})
         return response

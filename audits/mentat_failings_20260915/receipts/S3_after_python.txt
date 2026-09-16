@@ -1,0 +1,181 @@
+VERIFICATION RUN: Python Unit Tests
+=====================================
+
+STEPS 1-2: Initial State and Syntax Checks
+-------------------------------------------
+
+Command 1:
+cd /c/Users/pgoff/Mentat/mentat && git rev-parse HEAD && echo "---" && git status --short -- mentat/app mentat/tools mentat/tests audits/mentat_failings_20260915 | head -40 && echo "---" && date -u
+
+CWD: C:\Users\pgoff\Mentat\mentat
+Exit code: 0
+
+Output:
+d78cf0b8f1a03911ba0791220f396cd838eb6a00
+---
+---
+Wed Sep 16 21:15:41 UTC 2026
+
+HEAD: d78cf0b8f1a03911ba0791220f396cd838eb6a00
+Working tree: CLEAN
+
+
+Command 2: Python syntax check
+python -m py_compile tests/test_evidence_csv_stream.py
+
+Exit code: 0
+Output: (no output - syntax OK)
+
+
+STEP 4: test_evidence_csv_stream
+---------------------------------
+
+Command:
+cd /c/Users/pgoff/Mentat/mentat && python -m unittest tests.test_evidence_csv_stream -v
+
+Exit code: 0
+
+Output:
+test_200_columns_accepted (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_200_columns_accepted) ... ok
+test_201_columns_rejected (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_201_columns_rejected) ... ok
+test_collect_evidence_failure_message (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_collect_evidence_failure_message) ... ok
+test_contract_examples_against_producers (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_contract_examples_against_producers) ... ok
+test_dedup_same_bytes_same_id (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_dedup_same_bytes_same_id) ... ok
+test_eviction (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_eviction) ... ok
+test_gone_import (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_gone_import) ... ok
+test_http_streaming_roundtrip (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_http_streaming_roundtrip) ... ok
+test_interrupted_reading_reports_failed (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_interrupted_reading_reports_failed) ... ok
+test_keystore_failure_reported_once (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_keystore_failure_reported_once) ... ok
+test_legacy_json_import_still_works (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_legacy_json_import_still_works) ... ok
+test_max_rows_enforced_incrementally (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_max_rows_enforced_incrementally) ... ok
+test_oversize_rejected_while_streaming (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_oversize_rejected_while_streaming) ... ok
+test_page_arguments_validated (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_page_arguments_validated) ... ok
+test_peak_memory_bounded (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_peak_memory_bounded) ... ok
+test_select_totals_are_decimal_exact (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_select_totals_are_decimal_exact) ... ok
+test_truncated_inside_quoted_field (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_truncated_inside_quoted_field) ... ok
+test_truncated_mid_row_is_tolerated (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_truncated_mid_row_is_tolerated) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 83.008s
+
+OK
+
+Verdict: PASS
+All 18 streaming tests passed.
+
+
+STEP 5: test_evidence_csv
+--------------------------
+
+Command:
+cd /c/Users/pgoff/Mentat/mentat && python -m unittest tests.test_evidence_csv -v
+
+Exit code: 1
+
+Output:
+test_conflicting_amount_types_are_not_chosen_automatically (tests.test_evidence_csv.EvidenceCSVTests.test_conflicting_amount_types_are_not_chosen_automatically) ... ok
+test_csv_http_is_authenticated_memory_only_and_available_in_read_only_mode (tests.test_evidence_csv.EvidenceCSVTests.test_csv_http_is_authenticated_memory_only_and_available_in_read_only_mode) ... FAIL
+test_explicit_mentat_cycle_aggregate_has_no_invented_transaction_date (tests.test_evidence_csv.EvidenceCSVTests.test_explicit_mentat_cycle_aggregate_has_no_invented_transaction_date) ... ok
+test_malformed_or_unidentified_files_are_rejected (tests.test_evidence_csv.EvidenceCSVTests.test_malformed_or_unidentified_files_are_rejected) ... ok
+test_pagination_does_not_truncate_selected_totals (tests.test_evidence_csv.EvidenceCSVTests.test_pagination_does_not_truncate_selected_totals) ... ok
+test_receipts_disbursements_support_and_opposition_are_separate (tests.test_evidence_csv.EvidenceCSVTests.test_receipts_disbursements_support_and_opposition_are_separate) ... ok
+test_semicolon_csv_parses_accounting_amounts_without_double_signs (tests.test_evidence_csv.EvidenceCSVTests.test_semicolon_csv_parses_accounting_amounts_without_double_signs) ... ok
+test_unassigned_and_extra_cells_remain_inspectable (tests.test_evidence_csv.EvidenceCSVTests.test_unassigned_and_extra_cells_remain_inspectable) ... ok
+test_unsupported_dates_types_and_numbers_remain_visible_without_totals (tests.test_evidence_csv.EvidenceCSVTests.test_unsupported_dates_types_and_numbers_remain_visible_without_totals) ... ok
+test_utf8_quotes_refunds_and_duplicates_preserve_exact_source (tests.test_evidence_csv.EvidenceCSVTests.test_utf8_quotes_refunds_and_duplicates_preserve_exact_source) ... ok
+
+======================================================================
+FAIL: test_csv_http_is_authenticated_memory_only_and_available_in_read_only_mode (tests.test_evidence_csv.EvidenceCSVTests.test_csv_http_is_authenticated_memory_only_and_available_in_read_only_mode)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_evidence_csv.py", line 143, in test_csv_http_is_authenticated_memory_only_and_available_in_read_only_mode
+    self.assertEqual(list(root.rglob('*')), [console.root])
+AssertionError: Lists differ: [Wind[57 chars]ate'), WindowsPath('C:/Users/pgoff/AppData/Loc[633 chars]sv')] != [Wind[57 chars]ate')]
+
+First list contains 6 additional elements.
+First extra element 1:
+WindowsPath('C:/Users/pgoff/AppData/Local/Temp/tmp9p0hpe2h/state/evidence-csv')
+
+Diff is 982 characters long. Set self.maxDiff to None to see full diff.
+
+----------------------------------------------------------------------
+Ran 10 tests in 1.270s
+
+FAILED (failures=1)
+
+Verdict: FAIL (Expected)
+Failing test: test_csv_http_is_authenticated_memory_only_and_available_in_read_only_mode
+Failure type: rglob assertion at line 143 - lists do not match
+Test expects: [console.root] only
+Test received: [console.root] + 6 additional paths in state/evidence-csv
+Result: 9 PASS, 1 FAIL (expected)
+
+
+STEP 6: test_pac_evidence
+--------------------------
+
+Command:
+cd /c/Users/pgoff/Mentat/mentat && python -m unittest tests.test_pac_evidence -v
+
+Exit code: 0
+
+Output:
+test_cash_contribution_and_other_receipt_are_distinct (tests.test_pac_evidence.EvidenceTests.test_cash_contribution_and_other_receipt_are_distinct) ... ok
+test_company_funding_personal_money_and_committee_activity_stay_separate (tests.test_pac_evidence.EvidenceTests.test_company_funding_personal_money_and_committee_activity_stay_separate) ... ok
+test_count_cursor_integrity_and_cache (tests.test_pac_evidence.EvidenceTests.test_count_cursor_integrity_and_cache) ... ok
+test_dates_block_retroactive_spending_and_unliquidated_assets (tests.test_pac_evidence.EvidenceTests.test_dates_block_retroactive_spending_and_unliquidated_assets) ... ok
+test_explicit_financial_events_and_refunds_are_other_receipts (tests.test_pac_evidence.EvidenceTests.test_explicit_financial_events_and_refunds_are_other_receipts) ... ok
+test_explicit_interest_income_survives_account_labels (tests.test_pac_evidence.EvidenceTests.test_explicit_interest_income_survives_account_labels) ... ok
+test_income_rule_preserves_ambiguous_captions_and_actual_gift_conflicts (tests.test_pac_evidence.EvidenceTests.test_income_rule_preserves_ambiguous_captions_and_actual_gift_conflicts) ... ok
+test_incomplete_pagination_does_not_publish_success (tests.test_pac_evidence.EvidenceTests.test_incomplete_pagination_does_not_publish_success) ... ok
+test_other_federal_receipts_must_not_be_blanket_excluded (tests.test_pac_evidence.EvidenceTests.test_other_federal_receipts_must_not_be_blanket_excluded) ... ok
+test_sale_and_memo_are_not_new_donations_even_with_contribution_code (tests.test_pac_evidence.EvidenceTests.test_sale_and_memo_are_not_new_donations_even_with_contribution_code) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.047s
+
+OK
+
+Verdict: PASS
+All 10 PAC evidence tests passed.
+
+
+STEP 6b: test_pac_evidence_errors
+----------------------------------
+
+Command:
+cd /c/Users/pgoff/Mentat/mentat && python -m unittest tests.test_pac_evidence_errors -v
+
+Exit code: 0
+
+Output:
+test_cache_integrity_names_path (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_cache_integrity_names_path) ... ok
+test_http_404_not_retried (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_http_404_not_retried) ... ok
+test_http_503_retried (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_http_503_retried) ... ok
+test_non_json_reported (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_non_json_reported) ... ok
+test_success_path_unchanged (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_success_path_unchanged) ... ok
+test_timeout_reported_with_url (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_timeout_reported_with_url) ... ok
+test_url_error_retried_then_reported (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_url_error_retried_then_reported) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.082s
+
+OK
+
+Verdict: PASS
+All 7 PAC evidence error tests passed.
+
+
+SUMMARY
+=======
+
+Step 4 (test_evidence_csv_stream): PASS - 18/18 tests OK
+Step 5 (test_evidence_csv): FAIL - 9/10 tests OK (1 expected failure)
+  - Failing test: test_csv_http_is_authenticated_memory_only_and_available_in_read_only_mode
+  - Failure: rglob assertion showing extra state/evidence-csv paths
+Step 6 (test_pac_evidence): PASS - 10/10 tests OK
+Step 6b (test_pac_evidence_errors): PASS - 7/7 tests OK
+
+Total Python tests: 44 tests
+Passed: 43
+Failed: 1 (expected)

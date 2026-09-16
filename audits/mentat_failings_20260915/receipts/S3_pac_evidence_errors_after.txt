@@ -1,0 +1,41 @@
+COMMAND 1: python -m py_compile tools/pac_evidence.py
+CWD: /c/Users/pgoff/Mentat/mentat
+HEAD: 11654f911184a6ca5d9aa2d079f0c18ade578d09
+DATE: 2026-09-16 19:46:34 UTC
+---- OUTPUT ----
+EXIT_CODE: 0
+
+COMMAND 2: python -m unittest tests.test_pac_evidence_errors -v
+---- OUTPUT ----
+test_cache_integrity_names_path (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_cache_integrity_names_path) ... ok
+test_http_404_not_retried (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_http_404_not_retried) ... ok
+test_http_503_retried (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_http_503_retried) ... ok
+test_non_json_reported (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_non_json_reported) ... ok
+test_success_path_unchanged (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_success_path_unchanged) ... ok
+test_timeout_reported_with_url (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_timeout_reported_with_url) ... ok
+test_url_error_retried_then_reported (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_url_error_retried_then_reported) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.028s
+
+OK
+EXIT_CODE: 0
+
+COMMAND 3: python -m unittest tests.test_pac_evidence -v
+---- OUTPUT ----
+test_cash_contribution_and_other_receipt_are_distinct (tests.test_pac_evidence.EvidenceTests.test_cash_contribution_and_other_receipt_are_distinct) ... ok
+test_company_funding_personal_money_and_committee_activity_stay_separate (tests.test_pac_evidence.EvidenceTests.test_company_funding_personal_money_and_committee_activity_stay_separate) ... ok
+test_count_cursor_integrity_and_cache (tests.test_pac_evidence.EvidenceTests.test_count_cursor_integrity_and_cache) ... ok
+test_dates_block_retroactive_spending_and_unliquidated_assets (tests.test_pac_evidence.EvidenceTests.test_dates_block_retroactive_spending_and_unliquidated_assets) ... ok
+test_explicit_financial_events_and_refunds_are_other_receipts (tests.test_pac_evidence.EvidenceTests.test_explicit_financial_events_and_refunds_are_other_receipts) ... ok
+test_explicit_interest_income_survives_account_labels (tests.test_pac_evidence.EvidenceTests.test_explicit_interest_income_survives_account_labels) ... ok
+test_income_rule_preserves_ambiguous_captions_and_actual_gift_conflicts (tests.test_pac_evidence.EvidenceTests.test_income_rule_preserves_ambiguous_captions_and_actual_gift_conflicts) ... ok
+test_incomplete_pagination_does_not_publish_success (tests.test_pac_evidence.EvidenceTests.test_incomplete_pagination_does_not_publish_success) ... ok
+test_other_federal_receipts_must_not_be_blanket_excluded (tests.test_pac_evidence.EvidenceTests.test_other_federal_receipts_must_not_be_blanket_excluded) ... ok
+test_sale_and_memo_are_not_new_donations_even_with_contribution_code (tests.test_pac_evidence.EvidenceTests.test_sale_and_memo_are_not_new_donations_even_with_contribution_code) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.051s
+
+OK
+EXIT_CODE: 0

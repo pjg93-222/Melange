@@ -1,0 +1,15 @@
+diff --git a/mentat/tests/test_console_browser.cjs b/mentat/tests/test_console_browser.cjs
+index a5425a5c5..a8f2627f7 100644
+--- a/mentat/tests/test_console_browser.cjs
++++ b/mentat/tests/test_console_browser.cjs
+@@ -83,8 +83,8 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+     // Evidence is configurable before Graph has ever loaded.
+     await page.locator('#tab-evidence').click();
+     assert.equal(await page.locator('#evidence-source').inputValue(),'csv');
+-    await page.locator('#evidence-csv-file').setInputFiles({name:'too-large.csv',mimeType:'text/csv',buffer:Buffer.alloc(5000001,65)});
+-    assert.match(await page.locator('#evidence-csv-status').innerText(),/no larger than 5 MB/);
++    await page.locator('#evidence-csv-file').setInputFiles({name:'too-large.csv',mimeType:'text/csv',buffer:Buffer.alloc(50000001,65)});
++    assert.match(await page.locator('#evidence-csv-status').innerText(),/too-large\.csv \(50\.0 MB\): Choose a CSV no larger than 50 MB\./);
+     const csvQuote=value=>'"'+String(value).replaceAll('"','""')+'"';
+     const csvRows=[['committee_id','committee_name','contribution_receipt_amount','contribution_receipt_date','cycle','contributor_name','memo_text'],
+       ...Array.from({length:101},(_,i)=>['C00000001','Alpha PAC',1,'2026-01-01',2026,i===0?'<img src=x onerror=alert(1)>':'Contributor '+i,'Fictional receipt']),

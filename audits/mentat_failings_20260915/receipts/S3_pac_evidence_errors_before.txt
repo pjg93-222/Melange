@@ -1,0 +1,77 @@
+COMMAND: python -m unittest tests.test_pac_evidence_errors -v
+CWD: /c/Users/pgoff/Mentat/mentat
+HEAD: 11654f911184a6ca5d9aa2d079f0c18ade578d09
+DATE: 2026-09-16 19:44:52 UTC
+---- OUTPUT ----
+test_cache_integrity_names_path (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_cache_integrity_names_path) ... FAIL
+test_http_404_not_retried (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_http_404_not_retried) ... FAIL
+test_http_503_retried (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_http_503_retried) ... ok
+test_non_json_reported (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_non_json_reported) ... FAIL
+test_success_path_unchanged (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_success_path_unchanged) ... ok
+test_timeout_reported_with_url (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_timeout_reported_with_url) ... ERROR
+test_url_error_retried_then_reported (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_url_error_retried_then_reported) ... ERROR
+
+======================================================================
+ERROR: test_timeout_reported_with_url (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_timeout_reported_with_url)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_pac_evidence_errors.py", line 47, in test_timeout_reported_with_url
+    client.page(ENDPOINT, PARAMS)
+  File "C:\Users\pgoff\Mentat\mentat\tools\pac_evidence.py", line 122, in page
+    response = self.transport(endpoint, params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_pac_evidence_errors.py", line 42, in transport
+    raise TimeoutError()
+TimeoutError
+
+======================================================================
+ERROR: test_url_error_retried_then_reported (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_url_error_retried_then_reported)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_pac_evidence_errors.py", line 34, in test_url_error_retried_then_reported
+    client.page(ENDPOINT, PARAMS)
+  File "C:\Users\pgoff\Mentat\mentat\tools\pac_evidence.py", line 122, in page
+    response = self.transport(endpoint, params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_pac_evidence_errors.py", line 29, in transport
+    raise urllib.error.URLError('getaddrinfo failed')
+urllib.error.URLError: <urlopen error getaddrinfo failed>
+
+======================================================================
+FAIL: test_cache_integrity_names_path (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_cache_integrity_names_path)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_pac_evidence_errors.py", line 104, in test_cache_integrity_names_path
+    self.assertEqual(str(ctx.exception),
+AssertionError: 'FEC [32 chars]ailed.' != 'FEC [32 chars]ailed for C:\\Users\\pgoff\\AppData\\Local\\Te[83 chars]son.'
+- FEC evidence cache integrity check failed.
++ FEC evidence cache integrity check failed for C:\Users\pgoff\AppData\Local\Temp\tmp5u7jbp0g\988e27f3a16a3fcf91350ba9033d7f3a1c39fb8d779e2f214349fe99bbe8446f.json.
+
+
+======================================================================
+FAIL: test_http_404_not_retried (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_http_404_not_retried)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_pac_evidence_errors.py", line 61, in test_http_404_not_retried
+    self.assertEqual(str(ctx.exception),
+AssertionError: 'FEC [28 chars]P 404, endpoint committee/C00000001/totals/' != 'FEC [28 chars]P 404; URL https://api.open.fec.gov/v1/committ[40 chars]=100'
+- FEC evidence request failed: HTTP 404, endpoint committee/C00000001/totals/
++ FEC evidence request failed: HTTP 404; URL https://api.open.fec.gov/v1/committee/C00000001/totals/?cycle=2024&per_page=100
+
+
+======================================================================
+FAIL: test_non_json_reported (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_non_json_reported)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_pac_evidence_errors.py", line 92, in test_non_json_reported
+    self.assertEqual(str(ctx.exception),
+AssertionError: 'x: line 1 column 1 (char 0)' != 'FEC evidence request failed: response was[90 chars]=100'
+- x: line 1 column 1 (char 0)
++ FEC evidence request failed: response was not JSON; URL https://api.open.fec.gov/v1/committee/C00000001/totals/?cycle=2024&per_page=100
+
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.035s
+
+FAILED (failures=3, errors=2)
+EXIT_CODE: 1

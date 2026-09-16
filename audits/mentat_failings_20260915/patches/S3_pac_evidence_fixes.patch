@@ -1,0 +1,2951 @@
+# Lane: mentat_failings_20260915
+# Session: S3 (pac_evidence fixes)
+# Date (UTC): 2026-09-16T22:58:39Z
+# HEAD: d78cf0b8f1a03911ba0791220f396cd838eb6a00
+# Files:
+#   modified: mentat/app/evidence_csv.py
+#   modified: mentat/app/server.py
+#   modified: mentat/app/evidence-csv.js
+#   modified: mentat/tools/pac_evidence.py
+#   new:      mentat/tests/test_evidence_csv_stream.py
+#   new:      mentat/tests/test_evidence_csv_browser.cjs
+#   new:      mentat/tests/test_pac_evidence_errors.py
+#   new:      audits/mentat_failings_20260915/contracts/evidence-csv-import.json
+#   new:      audits/mentat_failings_20260915/contracts/evidence-job-status.json
+# Apply from the repo root with: git apply --check audits/mentat_failings_20260915/patches/S3_pac_evidence_fixes.patch
+diff --git a/mentat/app/evidence-csv.js b/mentat/app/evidence-csv.js
+index 74a438a23..b6f3e54fe 100644
+--- a/mentat/app/evidence-csv.js
++++ b/mentat/app/evidence-csv.js
+@@ -1,8 +1,15 @@
+-/* CSV evidence uses selected source rows only; imported files live in this server session. */
++/* CSV evidence uses selected source rows only; imports are stored under the console data root. */
+ (() => {
+-  let source = null, revision = 0, offset = 0;
++  let source = null, revision = 0, offset = 0, limits = null, picker = null, stored = [];
+   const pageSize = 100;
++  const pollDelay = 500;
++  const pollFailureLimit = 5;
+   const channelName = value => String(value || 'Unclassified').replaceAll('_',' ');
++  const megabytes = value => (Number(value || 0) / 1e6).toFixed(1);
++  const say = text => { $('evidence-csv-status').textContent = text; };
++  const storedMessage = () => stored.length
++    ? `${number(stored.length)} imported CSVs on this computer`
++    : 'No CSV imported yet. Choose a file.';
+   function sourceMode() {
+     const saved = $('evidence-source').value === 'snapshot';
+     $('evidence-saved').hidden = !saved; $('evidence-csv-workspace').hidden = saved;
+@@ -10,12 +17,59 @@
+   }
+   try { if (localStorage.getItem('mentat-evidence-source') === 'snapshot') $('evidence-source').value = 'snapshot'; } catch {}
+   $('evidence-source').addEventListener('change', sourceMode); sourceMode();
++  function sourcePicker() {
++    if (picker) return picker;
++    const label = document.createElement('label');
++    label.className = 'evidence-csv-source-label';
++    label.htmlFor = 'evidence-csv-source';
++    label.textContent = 'Previously imported';
++    picker = document.createElement('select');
++    picker.id = 'evidence-csv-source';
++    picker.addEventListener('change', chooseStored);
++    label.appendChild(picker);
++    $('evidence-csv-workspace').prepend(label);
++    return picker;
++  }
+   function resetSelection() {
+     source = null; offset = 0; $('evidence-csv-results').hidden = true;
+     $('evidence-csv-committee').replaceChildren(new Option('Choose a CSV first',''));
+     $('evidence-csv-cycle').replaceChildren(new Option('All cycles',''));
+     $('evidence-csv-committee').disabled = true; $('evidence-csv-cycle').disabled = true;
+   }
++  function fillCommittees(committees) {
++    $('evidence-csv-committee').replaceChildren(...committees.map(item=>new Option(`${item.name || item.id} · ${item.id}`,item.id)));
++    $('evidence-csv-committee').disabled = !committees.length;
++  }
++  async function refreshSources() {
++    const select = sourcePicker();
++    const keep = source ? source.id : select.value;
++    try {
++      const body = await api('/api/evidence-csv');
++      limits = body.limits || limits;
++      stored = body.sources || [];
++      select.replaceChildren(new Option('Choose a previously imported CSV',''),
++        ...stored.map(item => new Option(`${item.name} · ${number(item.row_count)} rows · ${String(item.imported_at || '').slice(0,10)}`, item.id)));
++      select.value = stored.some(item => item.id === keep) ? keep : '';
++      say(storedMessage());
++      return stored;
++    } catch (error) {
++      say('GET /api/evidence-csv failed: ' + error.message);
++      return null;
++    }
++  }
++  async function chooseStored() {
++    const chosenId = sourcePicker().value;
++    const ticket = ++revision;
++    resetSelection();
++    sourcePicker().value = chosenId;
++    if (!chosenId) { say(storedMessage()); return; }
++    const chosen = stored.find(item => item.id === chosenId);
++    if (!chosen) { say(`${chosenId}: that imported CSV is no longer listed. Choose the file again.`); await refreshSources(); return; }
++    if (ticket !== revision) return;
++    source = chosen; offset = 0;
++    fillCommittees(chosen.committees || []);
++    await loadRows();
++  }
+   function renderRows(body) {
+     const rows = body.rows || [], pages = body.pagination || body;
+     const total = pages.total_rows ?? body.total_rows ?? rows.length;
+@@ -23,7 +77,7 @@
+     $('evidence-csv-title').textContent = body.committee?.name || body.committee?.id || 'Reported activity';
+     $('evidence-csv-scope').textContent = `${body.source?.name || source.name} · ${body.committee?.id || $('evidence-csv-committee').value} · ${body.selected_cycle || 'All cycles'} · ${number(total)} selected rows`;
+     setHtml('evidence-csv-totals', (body.totals || []).map(item => `<div><span>${escapeHtml(channelName(item.channel))}</span><strong>${currency(item.amount)}</strong><small>${number(item.row_count)} supported CSV rows</small></div>`).join('') || '<p>No supported amount totals for these rows. Review the original fields below.</p>');
+-    $('evidence-csv-provenance').textContent = `${body.source?.name || source.name} · Imported UTF-8 text SHA-256 ${body.source?.sha256 || source.sha256} · ${number(body.source?.row_count || source.row_count)} file rows. Imported into this local server session. Values are observed filings or labeled cycle aggregates, not donor allocations or reconciled giving totals.`;
++    $('evidence-csv-provenance').textContent = `${body.source?.name || source.name} · Imported UTF-8 text SHA-256 ${body.source?.sha256 || source.sha256} · ${number(body.source?.row_count || source.row_count)} file rows. Stored on this computer under the console data root; visible to every Mentat console that uses it. Values are observed filings or labeled cycle aggregates, not donor allocations or reconciled giving totals.`;
+     setHtml('evidence-csv-warnings', (body.warnings || []).map(warning=>`<li>${escapeHtml(typeof warning==='string'?warning:warning.message||JSON.stringify(warning))}</li>`).join('') || '<li>No parser warnings. Source coverage and filing completeness remain unverified.</li>');
+     $('evidence-csv-row-status').textContent = `${total ? `${number(offset+1)}–${number(offset+rows.length)} of ${number(total)}` : 'No matching'} rows · ${number(supported)} supported · ${number(body.unsupported_rows ?? Math.max(0,total-supported))} need interpretation. All selected rows contribute to the counts above, across pages.`;
+     setHtml('evidence-csv-rows', rows.map(row => `<tr><td>${number(row.row_number)}</td><td>${escapeHtml(row.date || 'Date unavailable')}<small>${escapeHtml(row.cycle || 'Cycle unavailable')}</small></td><td class="number">${(row.amount == null ? 'Not reported' : currency(row.amount))}</td><td>${escapeHtml(row.counterparty || row.candidate_name || row.candidate_id || 'Not reported')}<small>${escapeHtml(channelName(row.channel || row.kind))} · ${escapeHtml(row.status || '')}</small></td><td><details><summary>Original fields</summary><dl class="csv-raw">${Object.entries(row.raw || {}).map(([key,value])=>`<dt>${escapeHtml(key)}</dt><dd>${escapeHtml(value)}</dd>`).join('')}</dl>${row.extra_cells?.length ? `<p>Extra cells: ${escapeHtml(JSON.stringify(row.extra_cells))}</p>` : ''}${(row.issues||[]).map(issue=>`<p>${escapeHtml(issue)}</p>`).join('')}</details></td></tr>`).join(''));
+@@ -35,7 +89,7 @@
+     if (!source) return;
+     const ticket = ++revision;
+     const committee = $('evidence-csv-committee').value, cycle = $('evidence-csv-cycle').value;
+-    $('evidence-csv-status').textContent = 'Reading selected PAC rows…';
++    say('Reading selected PAC rows…');
+     $('evidence-csv-results').hidden = true;
+     $('evidence-csv-prev').disabled = true; $('evidence-csv-next').disabled = true;
+     try {
+@@ -45,25 +99,74 @@
+       $('evidence-csv-cycle').replaceChildren(new Option('All cycles',''),...cycles.map(value=>new Option(value,value)));
+       if(cycles.includes(cycle)) $('evidence-csv-cycle').value = cycle;
+       $('evidence-csv-cycle').disabled = !cycles.length;
+-      renderRows(body); $('evidence-csv-status').textContent = `${source.name} · ${number(source.row_count)} rows in file`;
+-    } catch (error) { if(ticket===revision) $('evidence-csv-status').textContent = error.message; }
++      renderRows(body); say(`${source.name} · ${number(source.row_count)} rows in file`);
++    } catch (error) {
++      if (ticket!==revision) return;
++      say(`GET /api/evidence-csv?id=${source.id}&committee=${committee}&cycle=${cycle}: ${error.message}`);
++      if (String(error.message).includes('no longer on disk')) refreshSources();
++    }
++  }
++  async function followJob(job, ticket, chosenName) {
++    let current = job, failures = 0;
++    while (ticket === revision) {
++      const label = current.name || chosenName;
++      if (current.state === 'failed') { say(`${label}: ${current.message || 'The CSV could not be read.'}`); return; }
++      if (current.state === 'ready') {
++        source = current.catalog; offset = 0;
++        await refreshSources();
++        if (ticket !== revision) return;
++        fillCommittees(source.committees || []);
++        await loadRows();
++        return;
++      }
++      say(`Reading ${label} · ${number(current.rows_read)} rows · ${megabytes(current.bytes_read)} of ${megabytes(current.bytes)} MB`);
++      await new Promise(resolve => setTimeout(resolve, pollDelay));
++      if (ticket !== revision) return;
++      try {
++        current = await api('/api/evidence-csv?' + new URLSearchParams({job:job.id}));
++        failures = 0;
++      } catch (error) {
++        // One failed poll is not a failed import. The read can lose a race
++        // with the progress the reader itself is writing, and giving up on the
++        // first one stranded the page on an error while the file went on being
++        // read behind it. Keep the last good state and try again; say so, and
++        // stop only once the failures are clearly not transient.
++        failures += 1;
++        say(`${label}: GET /api/evidence-csv?job=${job.id} failed: ${error.message}`
++            + (failures < pollFailureLimit ? ' Retrying.' : ''));
++        if (failures >= pollFailureLimit) return;
++      }
++    }
+   }
+   $('evidence-csv-file').addEventListener('change', async () => {
+     const file = $('evidence-csv-file').files[0]; if (!file) return;
+     const ticket = ++revision; resetSelection();
+-    if (file.size > 5_000_000) { $('evidence-csv-status').textContent = 'Choose a CSV no larger than 5 MB.'; return; }
+-    $('evidence-csv-status').textContent = `Reading ${file.name}…`;
++    if (limits && file.size > limits.max_bytes) {
++      say(`${file.name} (${megabytes(file.size)} MB): ${limits.max_bytes_message}`);
++      return;
++    }
++    say(`Uploading ${file.name}…`);
++    let response;
+     try {
+-      const text = await file.text(); if(ticket!==revision)return;
+-      const body = await api('/api/evidence-csv', {name:file.name,text}); if(ticket!==revision)return;
+-      source = body.source || body;
+-      const committees = body.committees || [];
+-      $('evidence-csv-committee').replaceChildren(...committees.map(item=>new Option(`${item.name || item.id} · ${item.id}`,item.id)));
+-      $('evidence-csv-committee').disabled = !committees.length;
+-      await loadRows();
+-    } catch(error) { if(ticket===revision) $('evidence-csv-status').textContent = error.message; }
++      response = await fetch('/api/evidence-csv', {method:'POST', headers:{'Content-Type':'text/csv',
++        'X-Mentat-Token':token, 'X-Evidence-Name':encodeURIComponent(file.name)}, body:file});
++    } catch (error) {
++      if (ticket===revision) say(`${file.name}: upload to /api/evidence-csv failed: ${error.message}`);
++      return;
++    }
++    if (ticket!==revision) return;
++    let body = null;
++    try { body = await response.json(); } catch { body = null; }
++    if (ticket!==revision) return;
++    if (!body || typeof body !== 'object') {
++      say(`${file.name}: /api/evidence-csv answered HTTP ${response.status} with no error message.`);
++      return;
++    }
++    if (!response.ok) { say(`${file.name}: ${body.error || `/api/evidence-csv answered HTTP ${response.status} with no error message.`}`); return; }
++    await followJob(body, ticket, file.name);
+   });
+   for (const id of ['evidence-csv-committee','evidence-csv-cycle']) $(id).addEventListener('change',()=>{offset=0;loadRows();});
+   $('evidence-csv-prev').addEventListener('click',()=>{offset=Math.max(0,offset-pageSize);loadRows();});
+   $('evidence-csv-next').addEventListener('click',()=>{offset+=pageSize;loadRows();});
++  refreshSources();
+ })();
+diff --git a/mentat/app/evidence_csv.py b/mentat/app/evidence_csv.py
+index 78e512264..3303dadc5 100644
+--- a/mentat/app/evidence_csv.py
++++ b/mentat/app/evidence_csv.py
+@@ -1,19 +1,70 @@
+-"""Read user-selected CSV evidence without collection, attribution, or file writes."""
++"""Read user-selected CSV evidence into a data-root store; no collection or attribution.
++
++The store lives under the console data root, so an import survives a restart, a
++stale-build relaunch and a launcher port hop: every console started on the same
++data root lists the same imports. Nothing here contacts a network service and
++nothing is attributed to a donor; the rows are the reader's own file.
++"""
+ from collections import defaultdict
++import codecs
++from contextlib import closing
+ import csv
+-from datetime import datetime
++from datetime import datetime, timezone
+ from decimal import Decimal, InvalidOperation
+ import hashlib
+-import io
++import json
+ import math
++import os
+ from pathlib import Path
+ import re
++import shutil
++import sqlite3
++import tempfile
++import threading
++import time
++import uuid
+ 
+ from cross_reference_data import _source_url
+ 
+-MAX_BYTES = 5_000_000
+-MAX_ROWS = 50_000
++# Bytes are now the only memory-relevant gate: the reader streams the file to
++# disk and the parser walks it row by row into sqlite, so neither the request
++# thread nor the console ever holds the decoded file. The 50 MB ceiling is a
++# time and disk budget, not a memory one.
++#
++# Disk is what the ceiling actually budgets, and disk is what measured
++# reproducibly. On a 6,000,146-byte 20-column file of 21,759 rows (2026-09-16),
++# storing every normalised field beside the cells cost 5.06x the source
++# (30,343,168 bytes), because each row then repeated its header names and its
++# derived values. Storing only the cells and recomputing normalize() for the
++# hundred rows a page shows costs 1.58x (9,498,624 bytes), the same figure in
++# every run. One 50 MB import is therefore about 129 MB of disk, source plus
++# database, and KEEP_BYTES, which budgets source bytes only, has roughly 395 MB
++# of databases behind its 250 MB of sources - about 645 MB in all. Lower
++# MAX_BYTES or KEEP_BYTES if that is too much for the machine.
++#
++# Ingest time is deliberately NOT the justification, because it could not be
++# pinned down here. The identical 6 MB ingest measured between 0.82 s and
++# 34.66 s across runs on this host - a 40x spread on identical work, with
++# 1.6 GB free of 31.5 GB and standalone runs sometimes slower than in-server
++# ones. That is S0's Finding 2 environment (working-set trimming under memory
++# pressure), not a property of this code, so no s/MB rate quoted here would
++# survive being checked on a quiet machine. What did hold in every run is the
++# part that matters: the POST returns in well under a second (0.08-0.81 s
++# observed) because the request thread only copies bytes to disk, and the wait
++# that follows is off-thread with rows and bytes reported to the page as they
++# are read. The ceiling is therefore about how long a reader is willing to
++# watch a progress line, not about blocking the console.
++#
++# Reading back is bounded by the page, not the file: a 100-row page measured
++# 15-16 ms, and 46-47 ms at offset 7,000 of a 7,253-row committee.
++MAX_BYTES = 50_000_000
+ MAX_COLUMNS = 200
++MAX_ROWS = 500_000
++CHUNK_BYTES = 65_536
++KEEP_IMPORTS = 10
++KEEP_BYTES = 250_000_000
++PAGE_LIMIT = 1000
++
+ COMMITTEE_FIELDS = ('committee_id', 'cmte_id', 'source_committee_id', 'pac_committee_id', 'pac_id', 'recipient_key')
+ NAME_FIELDS = ('committee_name', 'cmte_nm', 'source_committee_name', 'pac_name', 'recipient_committee')
+ DATE_FIELDS = ('transaction_date', 'transaction_dt', 'date', 'payment_date')
+@@ -34,6 +85,92 @@ DIRECTIONS = {'s':'Support', 'support':'Support', 'o':'Oppose', 'oppose':'Oppose
+               'contribution_other':'Contribution / Other', 'contribution':'Contribution / Other',
+               'unknown':'Unknown'}
+ 
++WARNINGS = (
++    'Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.',
++    'Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.',
++    'Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported.',
++)
++
++# Every refusal names the file or the reason, because a blank status line in
++# the page is itself a defect. The three messages that quote a limit are built
++# from the constants when they are raised, so a changed limit cannot leave a
++# stale number in the reader's status line.
++M_NAME = 'Choose a CSV file with a name ending in .csv.'
++M_EMPTY = 'The CSV file is empty.'
++M_UTF8 = 'Use a UTF-8 CSV file without invalid text characters.'
++M_COMMITTEE_COLUMN = 'The CSV needs a Committee ID, CMTE_ID, or Source Committee ID column.'
++M_NO_COMMITTEE_ROWS = 'The CSV has no rows with one valid FEC committee ID (C followed by eight digits).'
++M_BUSY = 'Another CSV is still being read. Wait for it to finish.'
++M_PAGE = 'Choose a valid CSV row page (1–1,000 rows).'
++M_INTERRUPTED = 'Reading was interrupted by a console restart. Choose the file again.'
++M_COMMITTEE = 'Choose a committee in this imported CSV.'
++M_CYCLE = 'Choose a cycle recorded in this CSV.'
++STORE_DIRECTORY = 'evidence-csv'
++IDENTIFIER = re.compile(r'csv-[a-f0-9]{32}')
++
++
++def bytes_message():
++    return f'Choose a CSV no larger than {MAX_BYTES // 1_000_000} MB.'
++
++
++def columns_message():
++    return f'The CSV needs unique nonempty column names, with no more than {MAX_COLUMNS} columns.'
++
++
++def rows_message():
++    return f'Choose a CSV containing no more than {MAX_ROWS:,} rows.'
++
++
++def M_READ(row_number):
++    return f'The CSV could not be read at row {row_number:,}. Check its quoted fields and delimiter.'
++
++
++def M_GONE(identifier):
++    return f'This CSV import is no longer on disk ({identifier}). Choose the file again.'
++
++
++def M_SHORT(received, expected):
++    return f'The upload ended early: {received:,} of {expected:,} bytes arrived.'
++
++
++_DERIVED = {'M_BYTES':bytes_message, 'M_COLUMNS':columns_message, 'M_ROWS':rows_message}
++
++
++def __getattr__(name):
++    """Serve the three limit messages at attribute time, not at import time.
++
++    A caller reading ``evidence_csv.M_BYTES`` gets the message for the limit
++    that is in force now, which keeps a monkeypatched limit and the message the
++    reader sees in agreement.
++    """
++    if name in _DERIVED:
++        return _DERIVED[name]()
++    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
++
++
++def limits():
++    return {'max_bytes':MAX_BYTES, 'max_columns':MAX_COLUMNS, 'max_rows':MAX_ROWS,
++            'max_bytes_message':bytes_message(), 'max_columns_message':columns_message(),
++            'max_rows_message':rows_message()}
++
++
++def decode_name(value):
++    """Decode a percent-encoded upload name header without importing urllib here."""
++    from urllib.parse import unquote
++    return unquote(str(value or ''))
++
++
++def page_args(offset, limit):
++    if isinstance(offset, bool) or isinstance(limit, bool):
++        raise ValueError(M_PAGE)
++    try:
++        offset, limit = int(str(offset).strip()), int(str(limit).strip())
++    except (TypeError, ValueError):
++        raise ValueError(M_PAGE) from None
++    if not 0 <= offset <= MAX_ROWS or not 1 <= limit <= PAGE_LIMIT:
++        raise ValueError(M_PAGE)
++    return offset, limit
++
+ 
+ def key(value):
+     return re.sub(r'[^a-z0-9]+', '_', str(value).strip().lower()).strip('_')
+@@ -147,47 +284,544 @@ def normalize(raw, row_number, columns, extra_cells=()):
+     }
+ 
+ 
+-def parse(name, text):
+-    if not isinstance(name, str) or not name.strip() or len(name) > 250 or Path(name).suffix.lower() != '.csv':
+-        raise ValueError('Choose a CSV file with a name ending in .csv.')
+-    if not isinstance(text, str) or not text.strip():
+-        raise ValueError('The CSV file is empty.')
+-    if '\x00' in text or '\ufffd' in text:
+-        raise ValueError('Use a UTF-8 CSV file without invalid text characters.')
+-    encoded = text.encode('utf-8')
+-    if len(encoded) > MAX_BYTES:
+-        raise ValueError('Choose a CSV file smaller than 5 MB.')
+-    content = text.lstrip('\ufeff')
+-    try:
++def rebuild(headers, columns, line_number, cells):
++    """Rebuild one normalised row from the original cells that were stored.
++
++    normalize() is pure - it reads only its arguments, the module tables and
++    _source_url, itself a pure string check - so recomputing it here returns
++    exactly what the ingest computed. Only the cells need to live on disk, and
++    storing the derived fields as well would have cost several times the size
++    of the file they came from.
++    """
++    raw = {header:cells[index] if index < len(cells) else '' for index,header in enumerate(headers)}
++    return normalize(raw, line_number, columns, cells[len(headers):])
++
++
++def atomic_json(path, value, attempts=6):
++    """Replace a record in one step so a reader never sees a half-written file.
++
++    attempts=1 for an advisory write, such as the progress the page polls. A
++    scanner or indexer holding import.json open for a moment is common on
++    Windows, and a progress update is not worth waiting on: retrying with a
++    backoff inside the row loop adds its sleeps to the ingest, and raising
++    would fail a perfectly good import over a counter nobody had read yet.
++    """
++    path = Path(path)
++    temporary = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
++    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding='utf-8')
++    for attempt in range(attempts):
++        try:
++            os.replace(temporary, path)
++            return
++        except PermissionError:
++            if attempt == attempts - 1:
++                temporary.unlink(missing_ok=True)
++                raise
++            time.sleep(0.05 * (attempt + 1))
++
++
++def job_view(record):
++    """The reading/ready/failed record the page polls, without store internals."""
++    return {'id':record.get('id', ''), 'name':record.get('name', ''), 'state':record.get('state', 'failed'),
++            'bytes':int(record.get('bytes') or 0), 'bytes_read':int(record.get('bytes_read') or 0),
++            'rows_read':int(record.get('rows_read') or 0), 'message':record.get('message') or '',
++            'started_at':record.get('started_at'), 'finished_at':record.get('finished_at'),
++            'catalog':record.get('catalog')}
++
++
++# One ingest thread per process, registered here so a record that claims to be
++# reading can be told apart from one whose reader died with a restart.
++_ACTIVE_LOCK = threading.Lock()
++_ACTIVE = {}
++
++
++class Upload:
++    """One in-flight file: size-gated, UTF-8 checked and hashed as it arrives."""
++
++    def __init__(self, store, name):
++        if not isinstance(name, str) or not name.strip() or len(name) > 250 or Path(name).suffix.lower() != '.csv':
++            raise ValueError(M_NAME)
++        self.store = store
++        self.name = Path(name).name
++        self.path = store.incoming / (uuid.uuid4().hex + '.csv')
++        self.bytes = 0
++        self._handle = self.path.open('wb')
++        self._decoder = codecs.getincrementaldecoder('utf-8')()
++        self._digest = hashlib.sha256()
++        self._blank = True
++        self._closed = False
++
++    def write(self, chunk):
++        """Accept one chunk, refusing before it is written if it crosses a limit.
++
++        A refusal closes and deletes the part-written file here rather than
++        waiting for the caller to abort. An open handle keeps its directory
++        undeletable on Windows, so a caller that simply stops writing after a
++        refusal would strand both the file and the sweep that should remove it.
++        """
++        if not chunk:
++            return
++        try:
++            if self.bytes + len(chunk) > MAX_BYTES:
++                raise ValueError(bytes_message())
++            try:
++                text = self._decoder.decode(chunk)
++            except UnicodeDecodeError as error:
++                raise ValueError(M_UTF8) from error
++            if '\x00' in text or '�' in text:
++                raise ValueError(M_UTF8)
++            if self._blank and text.strip():
++                self._blank = False
++            self._digest.update(chunk)
++            self._handle.write(chunk)
++            self.bytes += len(chunk)
++        except BaseException:
++            self.abort()
++            raise
++
++    def abort(self):
++        self._close()
++        try:
++            self.path.unlink(missing_ok=True)
++        except OSError:
++            pass
++
++    def _close(self):
++        if not self._closed:
++            self._closed = True
++            try:
++                self._handle.close()
++            except OSError:
++                pass
++
++    def finish(self):
++        """Name the import by its content and hand the file to a reader thread."""
++        try:
++            tail = self._decoder.decode(b'', True)
++        except UnicodeDecodeError as error:
++            self.abort()
++            raise ValueError(M_UTF8) from error
++        if '\x00' in tail or '�' in tail:
++            self.abort()
++            raise ValueError(M_UTF8)
++        if self._blank and tail.strip():
++            self._blank = False
++        self._close()
++        if self._blank:
++            self.abort()
++            raise ValueError(M_EMPTY)
++        digest = self._digest.hexdigest()
++        try:
++            return self.store.adopt('csv-' + digest[:32], self.name, self.path, self.bytes, digest)
++        except BaseException:
++            self.abort()
++            raise
++
++
++class Store:
++    """CSV imports kept under the console data root, one directory per file."""
++
++    def __init__(self, data_root, evict=True):
++        # evict=False for a read-only preview: it shares the data root with the
++        # console that owns it, and a preview must not delete the imports the
++        # reader chose in the main console. Sweeping abandoned uploads and old
++        # failures is safe from either and stays on.
++        self.data_root = Path(data_root)
++        self.evicts = bool(evict)
++        self.root = self.data_root / STORE_DIRECTORY
++        self.incoming = self.root / 'incoming'
++        self.incoming.mkdir(parents=True, exist_ok=True)
++        self.root = self.root.resolve()
++        self.incoming = self.incoming.resolve()
++        self.sweep()
++
++    def directory(self, identifier):
++        return self.root / identifier
++
++    def record_path(self, identifier):
++        return self.directory(identifier) / 'import.json'
++
++    def source_path(self, identifier):
++        return self.directory(identifier) / 'source.csv'
++
++    def database_path(self, identifier):
++        return self.directory(identifier) / 'rows.sqlite'
++
++    def begin_upload(self, name):
++        return Upload(self, name)
++
++    def read_record(self, identifier, attempts=5):
++        """Read a record, tolerating a reader that loses a race with a writer.
++
++        import.json is rewritten while it is being read: the ingest reports its
++        progress into it every thousand rows and the page polls it twice a
++        second. On Windows the reader's open can lose that race and come back
++        with a sharing violation, and treating that as 'this import is not
++        there' told the reader their file was gone while it sat on disk being
++        read. A file that is genuinely absent still answers at once.
++        """
++        path = self.record_path(identifier)
++        for attempt in range(attempts):
++            try:
++                value = json.loads(path.read_text(encoding='utf-8'))
++            except FileNotFoundError:
++                return None
++            except (OSError, ValueError):
++                if attempt == attempts - 1:
++                    return None
++                time.sleep(0.02 * (attempt + 1))
++                continue
++            return value if isinstance(value, dict) else None
++        return None
++
++    def reading(self, identifier, record):
++        """True only while this process still has a live reader for the import."""
++        if record.get('pid') != os.getpid():
++            return False
++        with _ACTIVE_LOCK:
++            thread = _ACTIVE.get(str(self.directory(identifier)))
++        return bool(thread is not None and thread.is_alive())
++
++    def record(self, identifier):
++        """The stored record, with a reader that died recorded as interrupted."""
++        if not isinstance(identifier, str) or not IDENTIFIER.fullmatch(identifier):
++            raise ValueError(M_GONE(identifier))
++        value = self.read_record(identifier)
++        if value is None or not self.directory(identifier).is_dir():
++            raise ValueError(M_GONE(identifier))
++        if value.get('state') == 'reading' and not self.reading(identifier, value):
++            value['state'] = 'failed'
++            value['message'] = M_INTERRUPTED
++            value['finished_at'] = time.time()
++            try:
++                atomic_json(self.record_path(identifier), value)
++            except OSError:
++                pass
++        return value
++
++    def job(self, identifier):
++        return job_view(self.record(identifier))
++
++    def wait(self, identifier, timeout=None):
++        """Block until the import stops reading. For the legacy route and tests."""
++        with _ACTIVE_LOCK:
++            thread = _ACTIVE.get(str(self.directory(identifier)))
++        if thread is not None:
++            thread.join(timeout)
++        deadline = None if timeout is None else time.monotonic() + timeout
++        while True:
++            current = self.job(identifier)
++            if current['state'] != 'reading':
++                return current
++            if deadline is not None and time.monotonic() >= deadline:
++                return current
++            time.sleep(0.01)
++
++    def ready(self, identifier):
++        value = self.record(identifier)
++        if value.get('state') == 'failed':
++            raise ValueError(value.get('message') or M_GONE(identifier))
++        if value.get('state') != 'ready' or not value.get('catalog'):
++            raise ValueError(M_BUSY)
++        return value
++
++    def sources(self):
++        records = []
++        for path in sorted(self.root.glob('csv-*')):
++            if not path.is_dir():
++                continue
++            value = self.read_record(path.name)
++            if value and value.get('state') == 'ready' and value.get('catalog'):
++                records.append(value)
++        records.sort(key=lambda value: (str(value.get('imported_at') or ''), str(value.get('id') or '')), reverse=True)
++        return [value['catalog'] for value in records]
++
++    def catalog(self, identifier):
++        return self.ready(identifier)['catalog']
++
++    def select(self, identifier, committee='', cycle='', offset=0, limit=200):
++        value = self.ready(identifier)
++        source = value['catalog']
++        offset, limit = page_args(offset, limit)
++        committee = committee or (source['committees'][0]['id'] if source['committees'] else '')
++        chosen = next((item for item in source['committees'] if item['id'] == committee), None)
++        if chosen is None:
++            raise ValueError(M_COMMITTEE)
++        if cycle and cycle not in source['cycles']:
++            raise ValueError(M_CYCLE)
++        database = self.database_path(identifier)
++        if not database.is_file():
++            raise ValueError(M_GONE(identifier))
++        stored = '' if committee == 'unassigned' else committee
++        where, parameters = 'committee_id = ?', [stored]
++        if cycle:
++            where, parameters = where + ' AND cycle = ?', parameters + [cycle]
++        try:
++            with closing(sqlite3.connect(database)) as connection:
++                total = connection.execute(f'SELECT COUNT(*) FROM csv_rows WHERE {where}', parameters).fetchone()[0]
++                supported = connection.execute(f'SELECT COUNT(*) FROM csv_rows WHERE {where} AND status = ?',
++                                               parameters + ['supported']).fetchone()[0]
++                page = connection.execute(f'SELECT line_num, cells FROM csv_rows WHERE {where} ORDER BY row_number LIMIT ? OFFSET ?',
++                                          parameters + [limit, offset]).fetchall()
++                channels = connection.execute(f'SELECT channel, amount, row_count FROM totals WHERE {where}', parameters).fetchall()
++        except sqlite3.Error as error:
++            raise ValueError(M_GONE(identifier)) from error
++        amounts, counts = defaultdict(Decimal), defaultdict(int)
++        for channel, amount, row_count in channels:
++            amounts[channel] += Decimal(amount)
++            counts[channel] += row_count
++        headers = value.get('columns', [])
++        columns = [key(item) for item in headers]
++        return {'source':source, 'committee':chosen, 'committees':source['committees'],
++                'cycles':source['cycles'], 'selected_cycle':cycle, 'columns':headers,
++                'rows':[{name:item for name,item in rebuild(headers, columns, line_number, json.loads(cells)).items()
++                         if not name.startswith('_')} for line_number,cells in page],
++                'totals':[{'channel':channel, 'amount':float(amounts[channel]), 'row_count':counts[channel]}
++                          for channel in sorted(amounts)],
++                'supported_rows':supported, 'unsupported_rows':total - supported,
++                'offset':offset, 'limit':limit, 'total_rows':total, 'has_more':offset + limit < total,
++                'warnings':list(WARNINGS)}
++
++    def adopt(self, identifier, name, path, size, digest):
++        """Take a finished upload: dedupe by content, else start reading it."""
++        existing = self.read_record(identifier)
++        if existing and existing.get('state') == 'ready' and existing.get('catalog'):
++            try:
++                path.unlink(missing_ok=True)
++            except OSError:
++                pass
++            return job_view(existing)
++        with _ACTIVE_LOCK:
++            for stale in [running for running, thread in _ACTIVE.items() if not thread.is_alive()]:
++                _ACTIVE.pop(stale, None)
++            if _ACTIVE:
++                raise ValueError(M_BUSY)
++            directory = self.directory(identifier)
++            if directory.exists():
++                shutil.rmtree(directory, ignore_errors=True)
++            directory.mkdir(parents=True, exist_ok=True)
++            os.replace(path, self.source_path(identifier))
++            value = {'id':identifier, 'name':name, 'state':'reading', 'bytes':int(size), 'bytes_read':0,
++                     'rows_read':0, 'message':'', 'started_at':time.time(), 'finished_at':None,
++                     'catalog':None, 'columns':[], 'sha256':digest, 'imported_at':'', 'pid':os.getpid()}
++            atomic_json(self.record_path(identifier), value)
++            thread = threading.Thread(target=self.ingest, args=(identifier, value), daemon=True,
++                                      name='evidence-csv-' + identifier)
++            _ACTIVE[str(directory)] = thread
++            thread.start()
++        return job_view(value)
++
++    def ingest(self, identifier, value):
++        """Read one import to completion. No exception may leave this thread."""
++        try:
++            catalog, columns = self.read_source(identifier, value)
++        except ValueError as error:
++            value.update(state='failed', message=str(error), finished_at=time.time())
++        except Exception as error:
++            value.update(state='failed', message=f'The CSV could not be read: {type(error).__name__}: {error}',
++                         finished_at=time.time())
++        else:
++            value.update(state='ready', message='', finished_at=time.time(), catalog=catalog,
++                         columns=columns, imported_at=catalog['imported_at'])
++        if value['state'] == 'failed':
++            # Keep the directory so the page can still read the reason; drop the
++            # bytes, which are now only a partial database and a refused file.
++            for path in (self.database_path(identifier), self.source_path(identifier)):
++                try:
++                    path.unlink(missing_ok=True)
++                except OSError:
++                    pass
++        try:
++            atomic_json(self.record_path(identifier), value)
++        except OSError:
++            pass
++        if value['state'] == 'ready' and self.evicts:
++            try:
++                self.evict()
++            except OSError:
++                pass
+         try:
+-            dialect = csv.Sniffer().sniff(content[:32768], delimiters=',;\t')
++            self.sweep()
++        except OSError:
++            pass
++
++    def read_source(self, identifier, value):
++        """Walk the file once into sqlite, accumulating exact totals as it goes."""
++        source, database = self.source_path(identifier), self.database_path(identifier)
++        database.unlink(missing_ok=True)
++        with source.open('rb') as raw:
++            head = raw.read(32768).decode('utf-8-sig', 'ignore')
++        try:
++            dialect = csv.Sniffer().sniff(head, delimiters=',;\t')
+         except csv.Error:
+             dialect = csv.excel
+-        reader = csv.reader(io.StringIO(content, newline=''), dialect=dialect, strict=True)
+-        headers = next(reader, [])
+-        columns = [key(value) for value in headers]
+-        if not headers or len(headers) > MAX_COLUMNS or not all(columns) or len(set(columns)) != len(columns):
+-            raise ValueError('The CSV needs unique nonempty column names, with no more than 200 columns.')
+-        if not set(columns).intersection(COMMITTEE_FIELDS):
+-            raise ValueError('The CSV needs a Committee ID, CMTE_ID, or Source Committee ID column.')
+-        rows = []
+-        for values in reader:
+-            if not any(value.strip() for value in values):
++        names = defaultdict(set)
++        committee_rows, committee_supported = defaultdict(int), defaultdict(int)
++        amounts, counts = defaultdict(Decimal), defaultdict(int)
++        cycles = set()
++        rows_read = unassigned = supported = unsupported = 0
++        with closing(sqlite3.connect(database)) as connection:
++            connection.execute('PRAGMA journal_mode=OFF')
++            connection.execute('PRAGMA synchronous=OFF')
++            # Only the original cells are stored. The columns beside them are
++            # the ones a selection filters, counts or orders on; every other
++            # field the page shows is recomputed by rebuild() at select time.
++            connection.execute('CREATE TABLE csv_rows (row_number INTEGER PRIMARY KEY, line_num INTEGER NOT NULL, '
++                               'committee_id TEXT NOT NULL, cycle TEXT NOT NULL, status TEXT NOT NULL, '
++                               'channel TEXT NOT NULL, amount TEXT, cells TEXT NOT NULL)')
++            connection.execute('CREATE TABLE totals (committee_id TEXT NOT NULL, cycle TEXT NOT NULL, '
++                               'channel TEXT NOT NULL, amount TEXT NOT NULL, row_count INTEGER NOT NULL)')
++            with source.open('r', encoding='utf-8-sig', newline='') as handle:
++                reader = csv.reader(handle, dialect=dialect, strict=True)
++                headers = next(reader, [])
++                columns = [key(item) for item in headers]
++                if not headers or len(headers) > MAX_COLUMNS or not all(columns) or len(set(columns)) != len(columns):
++                    raise ValueError(columns_message())
++                if not set(columns).intersection(COMMITTEE_FIELDS):
++                    raise ValueError(M_COMMITTEE_COLUMN)
++                batch = []
++                try:
++                    for values in reader:
++                        if not any(item.strip() for item in values):
++                            continue
++                        if rows_read >= MAX_ROWS:
++                            raise ValueError(rows_message())
++                        line_number = reader.line_num
++                        row = rebuild(headers, columns, line_number, values)
++                        rows_read += 1
++                        committee, row_cycle = row['committee_id'], row['cycle']
++                        if committee:
++                            names[committee].add(row['committee_name'] or committee)
++                            committee_rows[committee] += 1
++                            committee_supported[committee] += row['status'] == 'supported'
++                        else:
++                            unassigned += 1
++                        if row_cycle:
++                            cycles.add(row_cycle)
++                        if row['status'] == 'supported':
++                            supported += 1
++                            amounts[(committee, row_cycle, row['channel'])] += row['_amount']
++                            counts[(committee, row_cycle, row['channel'])] += 1
++                        else:
++                            unsupported += 1
++                        batch.append((rows_read, line_number, committee, row_cycle, row['status'], row['channel'],
++                                      None if row['_amount'] is None else str(row['_amount']),
++                                      json.dumps(values, ensure_ascii=False)))
++                        if len(batch) >= 1000:
++                            connection.executemany('INSERT INTO csv_rows VALUES (?,?,?,?,?,?,?,?)', batch)
++                            connection.commit()
++                            batch.clear()
++                            value.update(bytes_read=handle.buffer.tell(), rows_read=rows_read)
++                            try:
++                                atomic_json(self.record_path(identifier), value, attempts=1)
++                            except OSError:
++                                pass
++                except csv.Error as error:
++                    raise ValueError(M_READ(reader.line_num)) from error
++                if batch:
++                    connection.executemany('INSERT INTO csv_rows VALUES (?,?,?,?,?,?,?,?)', batch)
++            if not names:
++                raise ValueError(M_NO_COMMITTEE_ROWS)
++            connection.executemany('INSERT INTO totals VALUES (?,?,?,?,?)',
++                                   [(committee, row_cycle, channel, str(amounts[(committee, row_cycle, channel)]),
++                                     counts[(committee, row_cycle, channel)])
++                                    for committee, row_cycle, channel in amounts])
++            connection.execute('CREATE INDEX csv_rows_committee ON csv_rows (committee_id, cycle, row_number)')
++            connection.execute('CREATE INDEX totals_committee ON totals (committee_id, cycle)')
++            connection.commit()
++        committees = []
++        for committee in sorted(names):
++            labels = sorted(name for name in names[committee] if name != committee) or [committee]
++            committees.append({'id':committee, 'name':' / '.join(labels), 'rows':committee_rows[committee],
++                               'supported_rows':committee_supported[committee]})
++        if unassigned:
++            committees.append({'id':'unassigned', 'name':'Unassigned committee rows', 'rows':unassigned, 'supported_rows':0})
++        value.update(bytes_read=int(value.get('bytes') or 0), rows_read=rows_read)
++        return ({'id':identifier, 'name':value['name'], 'sha256':value['sha256'], 'row_count':rows_read,
++                 'committees':committees, 'cycles':sorted(cycles, reverse=True),
++                 'supported_rows':supported, 'unsupported_rows':unsupported, 'unassigned_rows':unassigned,
++                 'session_only':False, 'imported_at':datetime.now(timezone.utc).isoformat(),
++                 'bytes':int(value.get('bytes') or 0), 'warnings':list(WARNINGS)}, headers)
++
++    def sweep(self):
++        """Drop abandoned uploads and old failures. Undeletable paths wait a turn."""
++        cutoff = time.time() - 3600
++        for path in self.incoming.glob('*.csv'):
++            try:
++                if path.stat().st_mtime < cutoff:
++                    path.unlink()
++            except OSError:
++                pass
++        for path in self.root.glob('csv-*'):
++            if not path.is_dir():
+                 continue
+-            if len(rows) >= MAX_ROWS:
+-                raise ValueError('Choose a CSV containing no more than 50,000 rows.')
+-            raw = {header:values[index] if index < len(values) else '' for index,header in enumerate(headers)}
+-            rows.append(normalize(raw, reader.line_num, columns, values[len(headers):]))
+-    except csv.Error as error:
+-        raise ValueError('The CSV could not be read. Check its quoted fields and delimiter.') from error
+-    names = defaultdict(set)
+-    for row in rows:
+-        if row['committee_id']:
+-            names[row['committee_id']].add(row['committee_name'] or row['committee_id'])
+-    if not names:
+-        raise ValueError('The CSV has no rows with one valid FEC committee ID (C followed by eight digits).')
+-    return {'name':Path(name).name, 'sha256':hashlib.sha256(encoded).hexdigest(),
+-            'text':text, 'columns':headers, 'rows':rows, 'committee_names':dict(names)}
++            value = self.read_record(path.name)
++            if value and value.get('state') == 'failed' and float(value.get('finished_at') or 0) < cutoff:
++                shutil.rmtree(path, ignore_errors=True)
++
++    def evict(self):
++        """Keep the newest imports within the file and byte budgets."""
++        records = []
++        for path in self.root.glob('csv-*'):
++            if not path.is_dir():
++                continue
++            value = self.read_record(path.name)
++            if value and value.get('state') == 'ready':
++                records.append(value)
++        records.sort(key=lambda value: (str(value.get('imported_at') or ''), str(value.get('id') or '')), reverse=True)
++        kept = 0
++        for index, value in enumerate(records):
++            kept += int(value.get('bytes') or 0)
++            if index >= KEEP_IMPORTS or kept > KEEP_BYTES:
++                shutil.rmtree(self.directory(value['id']), ignore_errors=True)
++
++    def ingest_text(self, name, text):
++        """Write text through an upload so in-memory callers use the one parser."""
++        upload = self.begin_upload(name)
++        try:
++            if not isinstance(text, str) or not text.strip():
++                raise ValueError(M_EMPTY)
++            if '\x00' in text or '�' in text:
++                raise ValueError(M_UTF8)
++            encoded = text.encode('utf-8')
++            for start in range(0, len(encoded), CHUNK_BYTES):
++                upload.write(encoded[start:start + CHUNK_BYTES])
++        except UnicodeEncodeError as error:
++            upload.abort()
++            raise ValueError(M_UTF8) from error
++        except BaseException:
++            upload.abort()
++            raise
++        return upload.finish()
++
++    def document(self, identifier, text):
++        """Materialise a stored import in the in-memory shape the legacy API uses."""
++        value = self.ready(identifier)
++        headers = value.get('columns', [])
++        columns = [key(item) for item in headers]
++        rows = []
++        with closing(sqlite3.connect(self.database_path(identifier))) as connection:
++            for line_number, cells in connection.execute('SELECT line_num, cells FROM csv_rows ORDER BY row_number'):
++                rows.append(rebuild(headers, columns, line_number, json.loads(cells)))
++        names = defaultdict(set)
++        for row in rows:
++            if row['committee_id']:
++                names[row['committee_id']].add(row['committee_name'] or row['committee_id'])
++        return {'id':identifier, 'name':value['name'], 'sha256':value['sha256'], 'text':text,
++                'columns':value.get('columns', []), 'rows':rows,
++                'committee_names':{committee:sorted(labels) for committee,labels in names.items()},
++                'imported_at':value.get('imported_at', ''), 'bytes':int(value.get('bytes') or 0)}
++
++
++def parse(name, text):
++    """Parse text in memory through the same streaming reader the store uses."""
++    with tempfile.TemporaryDirectory(prefix='mentat-evidence-csv-') as temporary:
++        store = Store(temporary)
++        started = store.ingest_text(name, text)
++        finished = store.wait(started['id'])
++        if finished['state'] != 'ready':
++            raise ValueError(finished['message'] or M_GONE(finished['id']))
++        return store.document(finished['id'], text)
+ 
+ 
+ def catalog(document):
+@@ -209,11 +843,8 @@ def catalog(document):
+             'cycles':sorted({row['cycle'] for row in rows if row['cycle']}, reverse=True),
+             'supported_rows':sum(row['status'] == 'supported' for row in rows),
+             'unsupported_rows':sum(row['status'] != 'supported' for row in rows), 'unassigned_rows':unassigned,
+-            'session_only':True, 'warnings':[
+-                'Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.',
+-                'Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.',
+-                'Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported.',
+-            ]}
++            'session_only':False, 'imported_at':document.get('imported_at', ''),
++            'bytes':int(document.get('bytes') or 0), 'warnings':list(WARNINGS)}
+ 
+ 
+ def select(document, committee='', selected_cycle='', offset=0, limit=200):
+@@ -221,11 +852,10 @@ def select(document, committee='', selected_cycle='', offset=0, limit=200):
+     committee = committee or source['committees'][0]['id']
+     chosen = next((row for row in source['committees'] if row['id'] == committee), None)
+     if chosen is None:
+-        raise ValueError('Choose a committee in this imported CSV.')
++        raise ValueError(M_COMMITTEE)
+     if selected_cycle and selected_cycle not in source['cycles']:
+-        raise ValueError('Choose a cycle recorded in this CSV.')
+-    if isinstance(offset, bool) or isinstance(limit, bool) or not 0 <= offset <= MAX_ROWS or not 1 <= limit <= 1000:
+-        raise ValueError('Choose a valid CSV row page (1–1,000 rows).')
++        raise ValueError(M_CYCLE)
++    offset, limit = page_args(offset, limit)
+     rows = [row for row in document['rows'] if (row['committee_id'] == committee or committee == 'unassigned' and not row['committee_id'])
+             and (not selected_cycle or row['cycle'] == selected_cycle)]
+     totals = defaultdict(Decimal)
+diff --git a/mentat/app/server.py b/mentat/app/server.py
+index d1bbb9e9f..88e4d8a89 100644
+--- a/mentat/app/server.py
++++ b/mentat/app/server.py
+@@ -882,10 +882,21 @@ class Console:
+                     code = process.wait()
+                 ready = code == 0 and read_json(root / 'evidence.json').get('version') == 1
+                 job['state'] = 'completed' if ready else 'failed'
+-                job['message'] = 'Snapshot ready.' if ready else 'Collection did not finalize a snapshot. Saved responses are retained; see ' + str(root / 'collection.log')
+-            except OSError:
++                if ready:
++                    job['message'] = 'Snapshot ready.'
++                else:
++                    # Name the failure in the status line. "Did not finalize a
++                    # snapshot" told the reader nothing and left the reason in a
++                    # file nobody opened.
++                    try:
++                        said = [line.strip() for line in (root / 'collection.log').read_text(
++                            encoding='utf-8', errors='replace').splitlines() if line.strip()]
++                    except OSError:
++                        said = []
++                    job['message'] = f'Collection failed: {said[-1] if said else "no output"}. Full log: {root / "collection.log"}'
++            except OSError as error:
+                 job['state'] = 'failed'
+-                job['message'] = 'Could not start the evidence collector.'
++                job['message'] = f'Could not start the evidence collector: {error}'
+             job['finished_at'] = time.time()
+             atomic_json(root / 'collection.json', job)
+         def run_collect():
+@@ -1272,32 +1283,38 @@ class Console:
+             atomic_json(path, {'version':1, 'runs':entries})
+         return {'id':identifier, 'archived':archived}
+ 
+-    def import_evidence_csv(self, data):
+-        document = evidence_csv.parse(data.get('name'), data.get('text'))
++    @property
++    def evidence_store(self):
++        """CSV imports kept under the data root, not in this process.
++
++        The old dict lived in process memory, so a stale-build restart, an idle
++        stop or the launcher landing on a different port silently dropped every
++        import the reader had chosen. The data root is shared by every console
++        the launcher starts, so a file imported once stays listed.
++        """
+         with self.lock:
+-            imports = getattr(self, 'csv_imports', None)
+-            if imports is None:
+-                imports = self.csv_imports = {}
+-            existing = next((source for source in imports.values() if source['sha256'] == document['sha256']
+-                             and source['name'] == document['name']), None)
+-            if existing is not None:
+-                return evidence_csv.catalog(existing)
+-            if len(imports) >= 10 or sum(len(source['text'].encode('utf-8')) for source in imports.values()) + len(document['text'].encode('utf-8')) > 20_000_000:
+-                raise ValueError('This app session has reached its temporary CSV limit (10 files or 20 MB). Restart Mentat to clear temporary imports.')
+-            document['id'] = 'csv-' + uuid.uuid4().hex
+-            imports[document['id']] = document
+-        return evidence_csv.catalog(document)
++            store = getattr(self, 'csv_store', None)
++            if store is None:
++                store = self.csv_store = evidence_csv.Store(
++                    self.root, evict=not getattr(self, 'read_only', False))
++        return store
++
++    def import_evidence_csv(self, data):
++        """Legacy JSON import: read the text through the store, then answer."""
++        store = self.evidence_store
++        job = store.wait(store.ingest_text(data.get('name'), data.get('text'))['id'])
++        if job['state'] != 'ready':
++            raise ValueError(job['message'] or evidence_csv.M_GONE(job['id']))
++        return job['catalog']
++
++    def evidence_csv_job(self, identifier):
++        return self.evidence_store.job(identifier)
+ 
+     def evidence_csv_view(self, identifier='', committee='', cycle='', offset=0, limit=200):
+-        with self.lock:
+-            imports = getattr(self, 'csv_imports', {})
+-            if not identifier:
+-                return {'sources':[evidence_csv.catalog(source) for source in reversed(list(imports.values()))],
+-                        'session_only':True}
+-            if not re.fullmatch(r'csv-[a-f0-9]{32}', identifier) or identifier not in imports:
+-                raise ValueError('This CSV import is unavailable in the current app session. Choose the file again.')
+-            document = imports[identifier]
+-        return evidence_csv.select(document, committee, cycle, offset, limit)
++        store = self.evidence_store
++        if not identifier:
++            return {'sources':store.sources(), 'limits':evidence_csv.limits(), 'session_only':False}
++        return store.select(identifier, committee, cycle, *evidence_csv.page_args(offset, limit))
+ 
+     def summary(self, include_archived=False):
+         runs = self.runs()
+@@ -1727,8 +1744,13 @@ class Handler(BaseHTTPRequestHandler):
+             if parsed.path == "/api/runs":
+                 return self.send(app.summary(query.get('include_archived', ['0'])[0] in ('1','true')))
+             if parsed.path == '/api/evidence-csv':
++                if query.get('job', [''])[0]:
++                    return self.send(app.evidence_csv_job(query.get('job', [''])[0]))
++                # Page arguments are validated by the reader, which answers with
++                # the reader's own message. A bare int() leaked Python's own text
++                # ("invalid literal for int()") into the status line.
+                 return self.send(app.evidence_csv_view(query.get('id', [''])[0], query.get('committee', [''])[0],
+-                    query.get('cycle', [''])[0], int(query.get('offset', ['0'])[0]), int(query.get('limit', ['200'])[0])))
++                    query.get('cycle', [''])[0], query.get('offset', ['0'])[0], query.get('limit', ['200'])[0]))
+             if parsed.path == '/api/evidence':
+                 identifier = query.get('id', [''])[0]
+                 root = PROJECT / '.cache/pac-evidence'
+@@ -1849,6 +1871,30 @@ class Handler(BaseHTTPRequestHandler):
+             self.discard_body()
+             return self.send({"error": "Local access only."}, 403)
+         try:
++            # A chosen CSV streams straight to the data-root store: the request
++            # thread copies it in chunks and never holds the decoded file, so
++            # the generic body gate below does not apply to it. Its own ceiling
++            # is the reader's MAX_BYTES, which the page pre-flights from
++            # /api/evidence-csv so a refusal is shown before anything uploads.
++            if self.path == '/api/evidence-csv' and 'application/json' not in self.headers.get('Content-Type', '').lower():
++                store = self.server.app.evidence_store
++                expected = int(self.headers.get('Content-Length', '0'))
++                if expected > evidence_csv.MAX_BYTES:
++                    self.close_connection = True
++                    return self.send({'error': evidence_csv.M_BYTES}, 400)
++                upload = store.begin_upload(evidence_csv.decode_name(self.headers.get('X-Evidence-Name', '')))
++                try:
++                    received = 0
++                    while received < expected:
++                        chunk = self.rfile.read(min(evidence_csv.CHUNK_BYTES, expected - received))
++                        if not chunk:
++                            raise ValueError(evidence_csv.M_SHORT(received, expected))
++                        received += len(chunk)
++                        upload.write(chunk)
++                except BaseException:
++                    upload.abort()
++                    raise
++                return self.send(upload.finish())
+             length = int(self.headers.get("Content-Length", "0"))
+             if length < 1 or length > 7_000_000:
+                 self.discard_body()
+diff --git a/mentat/tools/pac_evidence.py b/mentat/tools/pac_evidence.py
+index 7e3def267..6e72d091c 100644
+--- a/mentat/tools/pac_evidence.py
++++ b/mentat/tools/pac_evidence.py
+@@ -16,7 +16,7 @@ from pathlib import Path
+ import re
+ import time
+ from functools import lru_cache
+-from urllib.error import HTTPError
++from urllib.error import HTTPError, URLError
+ from urllib.parse import urlencode
+ from urllib.request import Request, urlopen
+ 
+@@ -114,7 +114,7 @@ class Client:
+         if path.exists():
+             saved = json.loads(path.read_bytes())
+             if saved.get('url') != url or hashlib.sha256(json.dumps(saved['response'], sort_keys=True).encode()).hexdigest() != saved.get('sha256'):
+-                raise ValueError('FEC evidence cache integrity check failed.')
++                raise ValueError(f'FEC evidence cache integrity check failed for {path}.')
+             return saved['response']
+         for attempt in range(4):
+             try:
+@@ -128,8 +128,18 @@ class Client:
+                 break
+             except HTTPError as error:
+                 if error.code not in (429, 500, 502, 503, 504) or attempt == 3:
+-                    raise ValueError(f'FEC evidence request failed: HTTP {error.code}, endpoint {endpoint}') from None
++                    raise ValueError(f'FEC evidence request failed: HTTP {error.code}; URL {url}') from None
+                 time.sleep(min(30, 2 ** attempt * 2))
++            except URLError as error:
++                if attempt == 3:
++                    raise ValueError(f'FEC evidence request failed: {error.reason}; URL {url}') from None
++                time.sleep(min(30, 2 ** attempt * 2))
++            except TimeoutError:
++                if attempt == 3:
++                    raise ValueError(f'FEC evidence request failed: timed out after 60 s; URL {url}') from None
++                time.sleep(min(30, 2 ** attempt * 2))
++            except json.JSONDecodeError:
++                raise ValueError(f'FEC evidence request failed: response was not JSON; URL {url}') from None
+         atomic_json(path, {'url': url, 'retrieved_at': datetime.now(timezone.utc).isoformat(),
+                           'sha256': hashlib.sha256(json.dumps(response, sort_keys=True).encode()).hexdigest(), 'response': response})
+         return response
+diff --git a/mentat/tests/test_evidence_csv_stream.py b/mentat/tests/test_evidence_csv_stream.py
+new file mode 100644
+index 000000000..0af5b8193
+--- /dev/null
++++ b/mentat/tests/test_evidence_csv_stream.py
+@@ -0,0 +1,801 @@
++"""Streaming CSV evidence import (S3): fixtures built and summed from one plan,
++contract-verified shapes, and the HTTP surface. Written against the S3 CONTRACT
++in audits/mentat_failings_20260915/HANDOFF.md before the implementation landed;
++run first against a pristine worktree of HEAD to record the RED baseline.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import re
++import shutil
++import sys
++import tempfile
++import threading
++import time
++import tracemalloc
++import unittest
++import urllib.parse
++import uuid
++from contextlib import contextmanager
++from decimal import Decimal
++from pathlib import Path
++from unittest.mock import patch
++from urllib.error import HTTPError
++from urllib.request import Request, urlopen
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'app'))
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
++import evidence_csv as csv_data  # noqa: E402
++import server as app  # noqa: E402
++import fec_key_store  # noqa: E402
++
++REPO_ROOT = Path(__file__).resolve().parents[2]
++CONTRACTS = REPO_ROOT / 'audits' / 'mentat_failings_20260915' / 'contracts'
++
++
++def load_contract(name):
++    return json.loads((CONTRACTS / f'{name}.json').read_text(encoding='utf-8'))
++
++
++# ---------------------------------------------------------------------------
++# Exact messages, copied verbatim from the S3 CONTRACT. Hardcoded here rather
++# than read off evidence_csv.py, so a producer that silently reworded a
++# message (or never exported it as an importable name) shows up as a real
++# assertion failure instead of an AttributeError that could be mistaken for
++# "the implementation just isn't finished yet".
++# ---------------------------------------------------------------------------
++M_NAME = 'Choose a CSV file with a name ending in .csv.'
++M_EMPTY = 'The CSV file is empty.'
++M_UTF8 = 'Use a UTF-8 CSV file without invalid text characters.'
++M_BYTES = 'Choose a CSV no larger than 50 MB.'
++M_COLUMNS = 'The CSV needs unique nonempty column names, with no more than 200 columns.'
++M_COMMITTEE_COLUMN = 'The CSV needs a Committee ID, CMTE_ID, or Source Committee ID column.'
++M_ROWS = 'Choose a CSV containing no more than 500,000 rows.'
++M_NO_COMMITTEE_ROWS = 'The CSV has no rows with one valid FEC committee ID (C followed by eight digits).'
++M_BUSY = 'Another CSV is still being read. Wait for it to finish.'
++M_PAGE = 'Choose a valid CSV row page (1–1,000 rows).'
++M_INTERRUPTED = 'Reading was interrupted by a console restart. Choose the file again.'
++M_COMMITTEE = 'Choose a committee in this imported CSV.'
++M_CYCLE = 'Choose a cycle recorded in this CSV.'
++
++
++def m_read(row_number):
++    return f'The CSV could not be read at row {row_number:,}. Check its quoted fields and delimiter.'
++
++
++def m_gone(identifier):
++    return f'This CSV import is no longer on disk ({identifier}). Choose the file again.'
++
++
++def m_short(received, expected):
++    return f'The upload ended early: {received:,} of {expected:,} bytes arrived.'
++
++
++def m_rows(limit):
++    return f'Choose a CSV containing no more than {limit:,} rows.'
++
++
++# ---------------------------------------------------------------------------
++# Fixture: a single deterministic plan drives both the CSV text and the
++# expected Decimal totals, so the two can never drift apart (the packet's
++# DE-021 lesson applied to test authorship, not just cross-language contracts).
++# ---------------------------------------------------------------------------
++FIXTURE_COLUMNS = [
++    'committee_id', 'committee_name', 'contribution_receipt_amount', 'contribution_receipt_date',
++    'two_year_transaction_period', 'contributor_name', 'sub_id', 'disbursement_amount',
++    'disbursement_date', 'expenditure_amount', 'expenditure_date', 'support_oppose',
++    'net_included_amount', 'source_committee_id', 'candidate_id', 'candidate_name',
++    'filler_1', 'filler_2', 'filler_3', 'filler_4',
++]
++RECEIPT_AMOUNT = Decimal('10.00')
++DISBURSEMENT_AMOUNT = Decimal('5.00')
++INDEPENDENT_AMOUNT = Decimal('7.50')
++AGGREGATE_AMOUNT = Decimal('1234.56')
++PRIMARY_COMMITTEE = 'C00000001'
++
++
++def row_plan(index, total):
++    """Deterministic description of fixture row `index` (1-based) of `total`.
++
++    Cycles receipt -> disbursement -> independent_spending; every 37th row is
++    an unassigned row (blank committee, excluded from every total); the LAST
++    row is a reported_aggregate row. `row_line` renders exactly this plan to
++    CSV text, and `expected_totals` sums exactly this plan -- the CSV text and
++    the expectation can never independently drift.
++    """
++    cycle = '2026' if (index // 3) % 2 == 0 else '2024'
++    if index == total:
++        return {'kind': 'reported_aggregate', 'channel': 'Reported cycle aggregate · support',
++                 'amount': AGGREGATE_AMOUNT, 'committee_id': PRIMARY_COMMITTEE, 'cycle': '2026', 'supported': True}
++    if index % 37 == 0:
++        return {'kind': 'unassigned', 'channel': None, 'amount': None,
++                 'committee_id': '', 'cycle': cycle, 'supported': False}
++    remainder = index % 3
++    if remainder == 1:
++        return {'kind': 'receipt', 'channel': 'Receipts', 'amount': RECEIPT_AMOUNT,
++                 'committee_id': PRIMARY_COMMITTEE, 'cycle': cycle, 'supported': True}
++    if remainder == 2:
++        return {'kind': 'disbursement', 'channel': 'Disbursements', 'amount': DISBURSEMENT_AMOUNT,
++                 'committee_id': PRIMARY_COMMITTEE, 'cycle': cycle, 'supported': True}
++    direction = 'support' if (index // 3) % 2 == 0 else 'oppose'
++    return {'kind': 'independent_spending', 'channel': f'Independent spending · {direction}',
++            'amount': INDEPENDENT_AMOUNT, 'committee_id': PRIMARY_COMMITTEE, 'cycle': cycle, 'supported': True}
++
++
++def row_line(index, total):
++    plan = row_plan(index, total)
++    cells = {name: '' for name in FIXTURE_COLUMNS}
++    cells['sub_id'] = f'SA-{index}'
++    cells['filler_1'], cells['filler_2'] = 'FILLER-A', 'FILLER-B'
++    cells['filler_3'], cells['filler_4'] = 'FILLER-C', 'FILLER-D'
++    kind = plan['kind']
++    if kind == 'receipt':
++        cells['committee_id'] = plan['committee_id']
++        cells['committee_name'] = 'Example PAC'
++        cells['contribution_receipt_amount'] = str(plan['amount'])
++        cells['contribution_receipt_date'] = '2026-01-%02d' % (1 + index % 28)
++        cells['two_year_transaction_period'] = plan['cycle']
++        cells['contributor_name'] = f'"Contributor, {index}"'
++    elif kind == 'disbursement':
++        cells['committee_id'] = plan['committee_id']
++        cells['committee_name'] = 'Example PAC'
++        cells['disbursement_amount'] = str(plan['amount'])
++        cells['disbursement_date'] = '2026-02-%02d' % (1 + index % 28)
++        cells['two_year_transaction_period'] = plan['cycle']
++    elif kind == 'independent_spending':
++        cells['committee_id'] = plan['committee_id']
++        cells['committee_name'] = 'Example PAC'
++        cells['expenditure_amount'] = str(plan['amount'])
++        cells['expenditure_date'] = '2026-03-%02d' % (1 + index % 28)
++        cells['two_year_transaction_period'] = plan['cycle']
++        cells['support_oppose'] = 'S' if plan['channel'].endswith('support') else 'O'
++        cells['candidate_id'] = 'H0CA%05d' % (index % 100000)
++        cells['candidate_name'] = f'Candidate {index}'
++    elif kind == 'unassigned':
++        cells['committee_name'] = 'Unassigned Example'
++        cells['contribution_receipt_amount'] = str(RECEIPT_AMOUNT)
++        cells['contribution_receipt_date'] = '2026-01-10'
++        cells['two_year_transaction_period'] = plan['cycle']
++    else:  # reported_aggregate
++        cells['source_committee_id'] = plan['committee_id']
++        cells['net_included_amount'] = str(plan['amount'])
++        cells['support_oppose'] = 'Support'
++        cells['candidate_id'] = 'H0CA00001'
++        cells['candidate_name'] = 'Aggregate Candidate'
++        cells['two_year_transaction_period'] = plan['cycle']
++    return ','.join(cells[name] for name in FIXTURE_COLUMNS) + '\r\n'
++
++
++def build_fixture_text(total_rows):
++    header = ','.join(FIXTURE_COLUMNS) + '\r\n'
++    return header + ''.join(row_line(index, total_rows) for index in range(1, total_rows + 1))
++
++
++def expected_totals(total_rows, *, committee=PRIMARY_COMMITTEE, cycle=None):
++    """Sum row_plan()'s own numbers exactly the way Store.select is expected to:
++    only supported rows, filtered by committee (or 'unassigned') and optional
++    cycle. Returns (totals_list, matching_row_count)."""
++    totals, counts, matching = {}, {}, 0
++    for index in range(1, total_rows + 1):
++        plan = row_plan(index, total_rows)
++        row_committee = plan['committee_id'] or 'unassigned'
++        if row_committee != committee:
++            continue
++        if cycle and plan['cycle'] != cycle:
++            continue
++        matching += 1
++        if plan['supported']:
++            totals[plan['channel']] = totals.get(plan['channel'], Decimal('0')) + plan['amount']
++            counts[plan['channel']] = counts.get(plan['channel'], 0) + 1
++    ordered = [{'channel': channel, 'amount': float(amount), 'row_count': counts[channel]}
++               for channel, amount in sorted(totals.items())]
++    return ordered, matching
++
++
++def wide_csv(column_count):
++    headers = ['committee_id'] + [f'col{i}' for i in range(column_count - 1)]
++    row = [PRIMARY_COMMITTEE] + ['x'] * (column_count - 1)
++    return ','.join(headers) + '\r\n' + ','.join(row) + '\r\n'
++
++
++def rmtree_retry(path, attempts=15, delay=0.2):
++    """Windows can hold a delete handle on a just-closed sqlite file briefly;
++    retry rather than fail the test on an unrelated cleanup race."""
++    path = Path(path)
++    if not path.exists():
++        return
++    for attempt in range(attempts):
++        try:
++            shutil.rmtree(path)
++            return
++        except (PermissionError, OSError):
++            if attempt == attempts - 1:
++                raise
++            time.sleep(delay)
++
++
++@contextmanager
++def temp_data_root():
++    root = Path(tempfile.mkdtemp(prefix='mentat-evidence-csv-'))
++    try:
++        yield root
++    finally:
++        rmtree_retry(root)
++
++
++def start_console_server(root, *, read_only=True):
++    with patch.object(app, 'report_directory', return_value=root), patch.object(app, 'environment_keys', return_value=[]):
++        console = app.Console(root / 'state', read_only=read_only)
++    server = app.ThreadingHTTPServer(('127.0.0.1', 0), app.Handler)
++    server.app = console
++    worker = threading.Thread(target=server.serve_forever, daemon=True)
++    worker.start()
++    return console, server, worker
++
++
++def stop_console_server(server, worker):
++    server.shutdown()
++    server.server_close()
++    worker.join()
++
++
++# ---------------------------------------------------------------------------
++# Contract assertion helper: schema-by-example. Same key set, same JSON types,
++# enum values for state -- and the negative_controls in both contract files
++# must fail it, or the assertion has no teeth (brain DE-021).
++# ---------------------------------------------------------------------------
++def _type_family(value):
++    if isinstance(value, bool):
++        return 'bool'
++    if isinstance(value, (int, float)):
++        return 'number'
++    if isinstance(value, str):
++        return 'string'
++    if value is None:
++        return 'null'
++    if isinstance(value, list):
++        return 'array'
++    if isinstance(value, dict):
++        return 'object'
++    raise TypeError(f'unsupported example value type: {type(value)!r}')
++
++
++def assert_shape(value, examples, enums=None, path='$'):
++    """`examples` is a list of example payloads that together demonstrate every
++    state a shape can take; they must all share one key set. `value` must have
++    that same key set, and each field's JSON type family must match the type
++    family of that field in at least one example (a field that is sometimes
++    null and sometimes populated is validated as the union across the
++    examples that show both). `enums`: {field_name: {allowed values}}, checked
++    in addition to the type-family check. Raises AssertionError naming the
++    failing path on any mismatch."""
++    enums = enums or {}
++    if not isinstance(value, dict):
++        raise AssertionError(f'{path}: expected an object, got {type(value).__name__}')
++    keyset = set(examples[0].keys())
++    for example in examples[1:]:
++        if set(example.keys()) != keyset:
++            raise AssertionError(f'{path}: contract examples disagree on keys: '
++                                  f'{sorted(example.keys())} vs {sorted(keyset)}')
++    if set(value.keys()) != keyset:
++        raise AssertionError(f'{path}: key set {sorted(value.keys())} != contract key set {sorted(keyset)}')
++    for key in sorted(keyset):
++        field_path = f'{path}.{key}'
++        allowed = {_type_family(example[key]) for example in examples}
++        actual = _type_family(value[key])
++        if actual not in allowed:
++            raise AssertionError(f'{field_path}: type {actual!r} not in contract types {sorted(allowed)}')
++        if key in enums and value[key] not in enums[key]:
++            raise AssertionError(f'{field_path}: value {value[key]!r} not in allowed set {sorted(enums[key])}')
++
++
++def _group_by_keyset(examples):
++    groups = {}
++    for example in examples:
++        groups.setdefault(frozenset(example.keys()), []).append(example)
++    return groups
++
++
++IMPORT_CONTRACT = load_contract('evidence-csv-import')
++JOB_CONTRACT = load_contract('evidence-job-status')
++_import_groups = _group_by_keyset(IMPORT_CONTRACT['examples'])
++_job_groups = _group_by_keyset(JOB_CONTRACT['examples'])
++
++LIMITS_KEYS = frozenset({'max_bytes', 'max_columns', 'max_rows', 'max_bytes_message', 'max_columns_message', 'max_rows_message'})
++CATALOG_KEYS = frozenset({'id', 'name', 'sha256', 'row_count', 'committees', 'cycles', 'supported_rows',
++                          'unsupported_rows', 'unassigned_rows', 'session_only', 'imported_at', 'bytes', 'warnings'})
++SOURCES_LISTING_KEYS = frozenset({'sources', 'limits', 'session_only'})
++SELECT_KEYS = frozenset({'source', 'committee', 'committees', 'cycles', 'selected_cycle', 'columns', 'rows',
++                         'totals', 'supported_rows', 'unsupported_rows', 'offset', 'limit', 'total_rows',
++                         'has_more', 'warnings'})
++ERROR_KEYS = frozenset({'error'})
++JOB_KEYS = frozenset({'id', 'name', 'state', 'bytes', 'bytes_read', 'rows_read', 'message', 'started_at',
++                      'finished_at', 'catalog'})
++COLLECTOR_ACTIVE_KEYS = frozenset({'id', 'company', 'aliases', 'committees', 'cycles', 'state', 'pid', 'started_at'})
++COLLECTOR_DONE_KEYS = COLLECTOR_ACTIVE_KEYS | {'finished_at', 'message'}
++
++LIMITS_EXAMPLES = _import_groups[LIMITS_KEYS]
++CATALOG_EXAMPLES = _import_groups[CATALOG_KEYS]
++SOURCES_LISTING_EXAMPLES = _import_groups[SOURCES_LISTING_KEYS]
++SELECT_EXAMPLES = _import_groups[SELECT_KEYS]
++ERROR_EXAMPLES = _import_groups[ERROR_KEYS]
++COMMITTEE_EXAMPLES = CATALOG_EXAMPLES[0]['committees']
++TOTAL_EXAMPLES = SELECT_EXAMPLES[0]['totals']
++JOB_EXAMPLES = _job_groups[JOB_KEYS]
++COLLECTOR_ACTIVE_EXAMPLES = _job_groups[COLLECTOR_ACTIVE_KEYS]
++COLLECTOR_DONE_EXAMPLES = _job_groups[COLLECTOR_DONE_KEYS]
++
++CATALOG_WARNINGS = {
++    'Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended '
++    'rows are preserved; totals may overlap.',
++    'Committee names and IDs are taken from this CSV; their registration and committee type have not been '
++    'independently verified.',
++    'Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain '
++    'unsupported.',
++}
++
++ERROR_LEAK_PATTERN = re.compile(r'invalid literal|Traceback|line \d+, in |NoneType|Errno|Decimal\(')
++
++COLLECTOR_FAILURE_PATTERNS = (
++    re.compile(r'^Collection failed: .+\. Full log: .+$', re.DOTALL),
++    re.compile(r'^Could not start the evidence collector: .+$', re.DOTALL),
++)
++
++
++def assert_limits(value):
++    assert_shape(value, LIMITS_EXAMPLES)
++
++
++def assert_committee(value):
++    assert_shape(value, COMMITTEE_EXAMPLES)
++
++
++def assert_catalog(value):
++    assert_shape(value, CATALOG_EXAMPLES, enums={'session_only': {False}})
++    for committee in value['committees']:
++        assert_committee(committee)
++    for warning in value['warnings']:
++        if warning not in CATALOG_WARNINGS:
++            raise AssertionError(f'unexpected catalog warning: {warning!r}')
++
++
++def assert_sources_listing(value):
++    assert_shape(value, SOURCES_LISTING_EXAMPLES, enums={'session_only': {False}})
++    assert_limits(value['limits'])
++    for source in value['sources']:
++        assert_catalog(source)
++
++
++def assert_total(value):
++    assert_shape(value, TOTAL_EXAMPLES)
++
++
++def assert_select(value):
++    assert_shape(value, SELECT_EXAMPLES)
++    assert_catalog(value['source'])
++    assert_committee(value['committee'])
++    for committee in value['committees']:
++        assert_committee(committee)
++    for total in value['totals']:
++        assert_total(total)
++
++
++def assert_error_payload(value, expected=None):
++    assert_shape(value, ERROR_EXAMPLES)
++    message = value['error']
++    if ERROR_LEAK_PATTERN.search(message):
++        raise AssertionError(f'error payload leaks an implementation detail: {message!r}')
++    if expected is not None and message != expected:
++        raise AssertionError(f'error payload {message!r} != expected {expected!r}')
++
++
++def assert_job(value):
++    assert_shape(value, JOB_EXAMPLES, enums={'state': {'reading', 'ready', 'failed'}})
++    ready = value['state'] == 'ready'
++    has_catalog = value['catalog'] is not None
++    if ready != has_catalog:
++        raise AssertionError("JOB.catalog must be non-null iff state == 'ready' "
++                              f"(state={value['state']!r}, catalog is {'not ' if has_catalog else ''}None)")
++    if has_catalog:
++        assert_catalog(value['catalog'])
++    if value['state'] != 'failed' and value['message'] != '':
++        raise AssertionError(f"JOB.message must be '' unless failed, got {value['message']!r}")
++
++
++def assert_collector_job(value):
++    group = COLLECTOR_DONE_EXAMPLES if 'finished_at' in value else COLLECTOR_ACTIVE_EXAMPLES
++    assert_shape(value, group, enums={'state': {'collecting', 'completed', 'failed'}})
++    if value['state'] == 'failed':
++        if not any(pattern.match(value['message']) for pattern in COLLECTOR_FAILURE_PATTERNS):
++            raise AssertionError('failed collector JOB message matches neither documented failure template '
++                                  f'(missing "Full log: " and not a start-failure message): {value["message"]!r}')
++
++
++IMPORT_DISPATCH = {'catalog': assert_catalog, 'sources_listing': assert_sources_listing, 'error': assert_error_payload}
++JOB_DISPATCH = {'job': assert_job, 'collector_job': assert_collector_job}
++
++
++class EvidenceCSVStreamTests(unittest.TestCase):
++    # -- streaming ingest correctness -------------------------------------------------
++    def test_truncated_inside_quoted_field(self):
++        good_rows = build_fixture_text(3)
++        truncated = good_rows + 'C00000009,Example PAC,10.00,2026-01-09,2026,"Doe, Jane'
++        with temp_data_root() as root:
++            store = csv_data.Store(root)
++            job = store.wait(store.ingest_text('quote-cut.csv', truncated)['id'])
++            self.assertEqual(job['state'], 'failed')
++            self.assertRegex(job['message'],
++                              r'^The CSV could not be read at row [\d,]+\. Check its quoted fields and delimiter\.$')
++
++    def test_truncated_mid_row_is_tolerated(self):
++        total_rows = 40
++        text = build_fixture_text(total_rows)
++        truncated = text[:-5]  # cut inside the final (unquoted) row; no exception expected
++        with temp_data_root() as root:
++            store = csv_data.Store(root)
++            job = store.wait(store.ingest_text('mid-row.csv', truncated)['id'])
++            self.assertEqual(job['state'], 'ready')
++            self.assertLessEqual(abs(job['catalog']['row_count'] - total_rows), 1)
++
++    def test_201_columns_rejected(self):
++        with temp_data_root() as root:
++            store = csv_data.Store(root)
++            job = store.wait(store.ingest_text('wide201.csv', wide_csv(201))['id'])
++            self.assertEqual(job['state'], 'failed')
++            self.assertEqual(job['message'], M_COLUMNS)
++
++    def test_200_columns_accepted(self):
++        with temp_data_root() as root:
++            store = csv_data.Store(root)
++            job = store.wait(store.ingest_text('wide200.csv', wide_csv(200))['id'])
++            self.assertEqual(job['state'], 'ready')
++
++    def test_oversize_rejected_while_streaming(self):
++        with temp_data_root() as root:
++            store = csv_data.Store(root)
++            upload = store.begin_upload('big.csv')
++            chunk = b'a' * csv_data.CHUNK_BYTES
++            total_chunks = (csv_data.MAX_BYTES // csv_data.CHUNK_BYTES) + 3
++            accepted = 0
++            with self.assertRaises(ValueError) as ctx:
++                for _ in range(total_chunks):
++                    accepted += len(chunk)
++                    upload.write(chunk)
++            self.assertEqual(str(ctx.exception), M_BYTES)
++            self.assertLessEqual(accepted, csv_data.MAX_BYTES + csv_data.CHUNK_BYTES)
++
++    def test_peak_memory_bounded(self):
++        row_count = 40000
++        text = build_fixture_text(row_count)
++        data = text.encode('utf-8')
++        with temp_data_root() as root:
++            tracemalloc.start()
++            try:
++                store = csv_data.Store(root)
++                upload = store.begin_upload('peak.csv')
++                for offset in range(0, len(data), csv_data.CHUNK_BYTES):
++                    upload.write(data[offset:offset + csv_data.CHUNK_BYTES])
++                job = upload.finish()
++                job = store.wait(job['id'])
++                _, peak = tracemalloc.get_traced_memory()
++            finally:
++                tracemalloc.stop()
++        self.assertEqual(job['state'], 'ready')
++        self.assertLess(peak, 16 * 1024 * 1024,
++                         f'peak traced memory {peak / 1e6:.1f} MB for a {len(data) / 1e6:.1f} MB file '
++                         '(S0 baseline: 58.5 MB peak for a 4.95 MB file)')
++
++    def test_max_rows_enforced_incrementally(self):
++        original_max_rows = csv_data.MAX_ROWS
++        csv_data.MAX_ROWS = 100
++        try:
++            text = build_fixture_text(500)
++            with temp_data_root() as root:
++                store = csv_data.Store(root)
++                job = store.wait(store.ingest_text('too-many-rows.csv', text)['id'])
++                self.assertEqual(job['state'], 'failed')
++                self.assertEqual(job['message'], 'Choose a CSV containing no more than 100 rows.')
++                self.assertLessEqual(job['rows_read'], 101)
++        finally:
++            csv_data.MAX_ROWS = original_max_rows
++
++    def test_dedup_same_bytes_same_id(self):
++        text = build_fixture_text(10)
++        expected_id = 'csv-' + hashlib.sha256(text.encode('utf-8')).hexdigest()[:32]
++        with temp_data_root() as root:
++            store = csv_data.Store(root)
++            first = store.wait(store.ingest_text('a.csv', text)['id'])
++            second = store.ingest_text('a.csv', text)
++            self.assertEqual(first['id'], expected_id)
++            self.assertEqual(second['id'], expected_id)
++            self.assertEqual(second['state'], 'ready')
++
++    def test_eviction(self):
++        original_keep = csv_data.KEEP_IMPORTS
++        csv_data.KEEP_IMPORTS = 2
++        try:
++            with temp_data_root() as root:
++                store = csv_data.Store(root)
++                ids = []
++                for index in range(3):
++                    text = build_fixture_text(5 + index)  # distinct byte content per import
++                    job = store.wait(store.ingest_text(f'import-{index}.csv', text)['id'])
++                    ids.append(job['id'])
++                    time.sleep(0.01)  # keep imported_at strictly increasing
++                sources = store.sources()
++                self.assertEqual(len(sources), 2)
++                remaining = {source['id'] for source in sources}
++                self.assertNotIn(ids[0], remaining)
++                self.assertIn(ids[2], remaining)
++                self.assertFalse((root / 'evidence-csv' / ids[0]).exists())
++        finally:
++            csv_data.KEEP_IMPORTS = original_keep
++
++    def test_select_totals_are_decimal_exact(self):
++        total_rows = 120
++        text = build_fixture_text(total_rows)
++        with temp_data_root() as root:
++            store = csv_data.Store(root)
++            job = store.wait(store.ingest_text('totals.csv', text)['id'])
++            identifier = job['id']
++
++            expected_all, expected_count = expected_totals(total_rows, committee=PRIMARY_COMMITTEE)
++            selection = store.select(identifier, committee=PRIMARY_COMMITTEE, limit=csv_data.PAGE_LIMIT)
++            self.assertEqual(selection['totals'], expected_all)
++            self.assertEqual(selection['total_rows'], expected_count)
++            self.assertFalse(selection['has_more'])
++
++            expected_2026, expected_2026_count = expected_totals(total_rows, committee=PRIMARY_COMMITTEE, cycle='2026')
++            selection_2026 = store.select(identifier, committee=PRIMARY_COMMITTEE, cycle='2026', limit=csv_data.PAGE_LIMIT)
++            self.assertEqual(selection_2026['totals'], expected_2026)
++            self.assertEqual(selection_2026['total_rows'], expected_2026_count)
++
++            expected_unassigned, expected_unassigned_count = expected_totals(total_rows, committee='unassigned')
++            selection_unassigned = store.select(identifier, committee='unassigned', limit=csv_data.PAGE_LIMIT)
++            self.assertEqual(selection_unassigned['totals'], expected_unassigned)
++            self.assertEqual(selection_unassigned['total_rows'], expected_unassigned_count)
++
++    def test_page_arguments_validated(self):
++        for offset, limit in (('abc', '200'), ('0', True), ('-1', '10'), ('0', '5000')):
++            with self.subTest(offset=offset, limit=limit):
++                with self.assertRaises(ValueError) as ctx:
++                    csv_data.page_args(offset, limit)
++                self.assertEqual(str(ctx.exception), M_PAGE)
++
++    def test_gone_import(self):
++        text = build_fixture_text(5)
++        with temp_data_root() as root:
++            store = csv_data.Store(root)
++            job = store.wait(store.ingest_text('gone.csv', text)['id'])
++            identifier = job['id']
++            rmtree_retry(root / 'evidence-csv' / identifier)
++            with self.assertRaises(ValueError) as ctx:
++                store.select(identifier)
++            self.assertEqual(str(ctx.exception), m_gone(identifier))
++            self.assertNotIn(identifier, {source['id'] for source in store.sources()})
++
++    def test_interrupted_reading_reports_failed(self):
++        with temp_data_root() as root:
++            store = csv_data.Store(root)
++            identifier = 'csv-' + ('0' * 32)
++            fake_dir = root / 'evidence-csv' / identifier
++            fake_dir.mkdir(parents=True)
++            stale = {'id': identifier, 'name': 'stale.csv', 'state': 'reading', 'bytes': 100,
++                     'bytes_read': 10, 'rows_read': 1, 'message': '', 'started_at': time.time(),
++                     'finished_at': None, 'catalog': None, 'pid': 999999}
++            (fake_dir / 'import.json').write_text(json.dumps(stale), encoding='utf-8')
++            job = store.job(identifier)
++            self.assertEqual(job['state'], 'failed')
++            self.assertEqual(job['message'], M_INTERRUPTED)
++
++    # -- contract ----------------------------------------------------------------------
++    def test_contract_examples_against_producers(self):
++        with temp_data_root() as root:
++            store = csv_data.Store(root)
++            assert_limits(csv_data.limits())
++
++            text = build_fixture_text(40)
++            job = store.wait(store.ingest_text('producers.csv', text)['id'])
++            assert_job(job)
++            self.assertEqual(job['state'], 'ready')
++
++            catalog = store.catalog(job['id'])
++            assert_catalog(catalog)
++
++            listing = {'sources': store.sources(), 'limits': csv_data.limits(), 'session_only': False}
++            assert_sources_listing(listing)
++
++            selection = store.select(job['id'], committee=PRIMARY_COMMITTEE)
++            assert_select(selection)
++
++            # A fake collection.json, written the way Console.collect_evidence writes it.
++            collecting = {'id': 'snapshot-' + uuid.uuid4().hex, 'company': 'Example Co', 'aliases': [],
++                          'committees': [PRIMARY_COMMITTEE], 'cycles': ['2026'], 'state': 'collecting',
++                          'pid': os.getpid(), 'started_at': time.time()}
++            assert_collector_job(collecting)
++            completed = {**collecting, 'state': 'completed', 'finished_at': time.time(), 'message': 'Snapshot ready.'}
++            assert_collector_job(completed)
++            failed_log = {**collecting, 'state': 'failed', 'finished_at': time.time(),
++                          'message': 'Collection failed: FEC evidence request failed: HTTP 500; '
++                                     'URL https://api.open.fec.gov/v1/x. Full log: '
++                                     f'{root}/pac-evidence/{collecting["id"]}/collection.log'}
++            assert_collector_job(failed_log)
++            failed_start = {**collecting, 'state': 'failed', 'finished_at': time.time(),
++                             'message': 'Could not start the evidence collector: [WinError 2] file not found'}
++            assert_collector_job(failed_start)
++
++        for control in IMPORT_CONTRACT['negative_controls']:
++            with self.subTest(contract='evidence-csv-import', why=control['why']):
++                with self.assertRaises(AssertionError):
++                    IMPORT_DISPATCH[control['shape']](control['payload'])
++        for control in JOB_CONTRACT['negative_controls']:
++            with self.subTest(contract='evidence-job-status', why=control['why']):
++                with self.assertRaises(AssertionError):
++                    JOB_DISPATCH[control['shape']](control['payload'])
++
++    # -- HTTP surface ------------------------------------------------------------------
++    def test_http_streaming_roundtrip(self):
++        with temp_data_root() as root:
++            console, server, worker = start_console_server(root, read_only=True)
++            origin = f'http://127.0.0.1:{server.server_port}'
++            try:
++                text = build_fixture_text(250)
++                payload = text.encode('utf-8')
++                headers = {'Content-Type': 'text/csv', 'X-Mentat-Token': console.token,
++                           'X-Evidence-Name': urllib.parse.quote('roundtrip.csv'),
++                           'Content-Length': str(len(payload))}
++                with urlopen(Request(origin + '/api/evidence-csv', data=payload, headers=headers, method='POST')) as response:
++                    self.assertEqual(response.status, 200)
++                    job = json.load(response)
++                self.assertIn(job['state'], ('reading', 'ready'))
++
++                deadline = time.time() + 15
++                while job['state'] == 'reading' and time.time() < deadline:
++                    time.sleep(0.05)
++                    with urlopen(origin + '/api/evidence-csv?job=' + job['id']) as response:
++                        job = json.load(response)
++                self.assertEqual(job['state'], 'ready')
++
++                with urlopen(origin + '/api/evidence-csv?id=' + job['id'] + '&committee=' + PRIMARY_COMMITTEE
++                             + '&offset=0&limit=200') as response:
++                    selection = json.load(response)
++                self.assertEqual(len(selection['rows']), 200)
++                self.assertEqual(selection['limit'], 200)
++
++                oversize_headers = {'X-Mentat-Token': console.token, 'X-Evidence-Name': 'oversize.csv',
++                                    'Content-Length': str(csv_data.MAX_BYTES + 1), 'Content-Type': 'text/csv'}
++                request = Request(origin + '/api/evidence-csv', data=b'', headers=oversize_headers, method='POST')
++                with self.assertRaises(HTTPError) as ctx:
++                    urlopen(request)
++                self.assertEqual(ctx.exception.code, 400)
++                self.assertEqual(json.load(ctx.exception)['error'], M_BYTES)
++
++                no_token = Request(origin + '/api/evidence-csv', data=b'a,b\n',
++                                    headers={'Content-Type': 'text/csv', 'Content-Length': '4'}, method='POST')
++                with self.assertRaises(HTTPError) as ctx:
++                    urlopen(no_token)
++                self.assertEqual(ctx.exception.code, 403)
++
++                with self.assertRaises(HTTPError) as ctx:
++                    urlopen(origin + '/api/evidence-csv?id=' + job['id'] + '&offset=abc')
++                self.assertEqual(ctx.exception.code, 400)
++                self.assertEqual(json.load(ctx.exception)['error'], M_PAGE)
++
++                with urlopen(origin + '/api/evidence-csv') as response:
++                    body = json.load(response)
++                self.assertIn('limits', body)
++                self.assertIn('sources', body)
++            finally:
++                stop_console_server(server, worker)
++
++    def test_legacy_json_import_still_works(self):
++        with temp_data_root() as root:
++            console, server, worker = start_console_server(root, read_only=True)
++            origin = f'http://127.0.0.1:{server.server_port}'
++            try:
++                text = build_fixture_text(9)
++                payload = json.dumps({'name': 'legacy.csv', 'text': text}).encode()
++                headers = {'Content-Type': 'application/json', 'X-Mentat-Token': console.token}
++                with urlopen(Request(origin + '/api/evidence-csv', data=payload, headers=headers)) as response:
++                    self.assertEqual(response.status, 200)
++                    catalog = json.load(response)
++                self.assertIn('row_count', catalog)
++                with urlopen(origin + '/api/evidence-csv?id=' + catalog['id'] + '&committee=' + PRIMARY_COMMITTEE) as response:
++                    selection = json.load(response)
++                self.assertGreater(len(selection['rows']), 0)
++            finally:
++                stop_console_server(server, worker)
++
++    def test_keystore_failure_reported_once(self):
++        with temp_data_root() as root:
++            console, server, worker = start_console_server(root, read_only=False)
++            origin = f'http://127.0.0.1:{server.server_port}'
++            # The crypt() failure itself (what DPAPI actually raised)...
++            keystore_crypt_error = 'Windows could not access the encrypted FEC key store for this user.'
++            # ...is not the same string the HTTP layer surfaces for it: do_POST's
++            # generic `except RuntimeError` handler (pre-existing, not part of
++            # this lane) already rewords it for any non-analytical path,
++            # including /api/evidence-collect. Assert THAT sentence, not a
++            # verbatim echo of crypt()'s own message.
++            keystore_post_error = 'The encrypted key store could not be accessed for this Windows user.'
++            try:
++                with patch.object(fec_key_store, 'crypt', side_effect=RuntimeError(keystore_crypt_error)):
++                    with urlopen(origin + '/api/runs') as response:
++                        self.assertEqual(response.status, 200)
++                        first = json.load(response)
++                    with urlopen(origin + '/api/runs') as response:
++                        self.assertEqual(response.status, 200)
++                        second = json.load(response)
++                    self.assertFalse(first['key_status_available'])
++                    self.assertFalse(second['key_status_available'])
++                    self.assertEqual(first['key_status_message'], second['key_status_message'])
++
++                    payload = json.dumps({'company': 'Example Co', 'committees': PRIMARY_COMMITTEE,
++                                          'cycles': '2026'}).encode()
++                    headers = {'Content-Type': 'application/json', 'X-Mentat-Token': console.token,
++                               'Content-Length': str(len(payload))}
++                    with self.assertRaises(HTTPError) as ctx:
++                        urlopen(Request(origin + '/api/evidence-collect', data=payload, headers=headers))
++                    self.assertEqual(ctx.exception.code, 400)
++                    body = json.load(ctx.exception)
++                    self.assertEqual(body['error'], keystore_post_error)
++                    self.assertNotIn('Traceback', body['error'])
++            finally:
++                stop_console_server(server, worker)
++
++    def test_collect_evidence_failure_message(self):
++        with temp_data_root() as root:
++            console, _server, _worker = start_console_server(root, read_only=False)
++            # collect_evidence writes under PROJECT/.cache/pac-evidence; patch
++            # PROJECT itself so this test never touches the real working tree.
++            with patch.object(app, 'PROJECT', root):
++
++                class FakeFailingProcess:
++                    def __init__(self, log_handle):
++                        self._log_handle = log_handle
++                        self.pid = 4242
++
++                    def wait(self):
++                        self._log_handle.write('Collecting page 1 of 4...\n')
++                        self._log_handle.write('FEC evidence request failed: HTTP 500; '
++                                                'URL https://api.open.fec.gov/v1/x\n')
++                        self._log_handle.flush()
++                        return 1
++
++                def fake_popen_failing(args, stdout=None, stderr=None, creationflags=0):
++                    return FakeFailingProcess(stdout)
++
++                def wait_for_terminal(identifier, timeout=10):
++                    deadline = time.time() + timeout
++                    record_path = root / '.cache' / 'pac-evidence' / identifier / 'collection.json'
++                    record = {}
++                    while time.time() < deadline:
++                        if record_path.exists():
++                            record = json.loads(record_path.read_text(encoding='utf-8'))
++                            if record.get('state') != 'collecting':
++                                return record
++                        time.sleep(0.05)
++                    return record
++
++                with patch.object(app, 'load_keys', return_value=['k']), \
++                        patch.object(app.subprocess, 'Popen', side_effect=fake_popen_failing):
++                    job = console.collect_evidence({'company': 'Example Co', 'committees': PRIMARY_COMMITTEE,
++                                                     'cycles': '2026'})
++                    record = wait_for_terminal(job['id'])
++                self.assertEqual(record.get('state'), 'failed')
++                self.assertTrue(record['message'].startswith('Collection failed: FEC evidence request failed: HTTP 500'))
++                self.assertIn('Full log: ', record['message'])
++
++                with patch.object(app, 'load_keys', return_value=['k']), \
++                        patch.object(app.subprocess, 'Popen', side_effect=OSError('boom')):
++                    job = console.collect_evidence({'company': 'Example Co', 'committees': PRIMARY_COMMITTEE,
++                                                     'cycles': '2026'})
++                    record = wait_for_terminal(job['id'])
++                self.assertEqual(record.get('state'), 'failed')
++                self.assertEqual(record['message'], 'Could not start the evidence collector: boom')
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/mentat/tests/test_evidence_csv_browser.cjs b/mentat/tests/test_evidence_csv_browser.cjs
+new file mode 100644
+index 000000000..fb87bc664
+--- /dev/null
++++ b/mentat/tests/test_evidence_csv_browser.cjs
+@@ -0,0 +1,470 @@
++/* Streaming CSV evidence import (S3), real-client pass. Spawns the actual
++ * `python app/server.py` console (not console_browser_fixture.py) so imports
++ * really land on disk and survive a same-port restart. Run with
++ * MENTAT_NODE_MODULES pointing to a local Playwright installation, from cwd
++ * mentat/: `node tests\test_evidence_csv_browser.cjs`.
++ *
++ * Every wait below is bounded, and a top-level watchdog forces the process to
++ * exit and name the step it was on if something outside those bounds still
++ * hangs (a prior run hung silently for 10+ minutes with zero output; this is
++ * the fix -- see HANDOFF.md S3 section).
++ */
++const assert = require('node:assert/strict');
++const {spawn} = require('node:child_process');
++const path = require('node:path');
++const os = require('node:os');
++const fs = require('node:fs');
++const net = require('node:net');
++const modules = process.env.MENTAT_NODE_MODULES || path.join(os.homedir(), '.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules');
++const {chromium} = require(require.resolve('playwright', {paths: [modules]}));
++
++const MENTAT_DIR = path.resolve(__dirname, '..');
++const FORBIDDEN_PORTS = new Set([8802, 8806, 8808]);
++// Waits are sized for a loaded host, not a quiet one. The same 6 MB ingest
++// measured between 0.8s and 34.7s on this machine depending on what else was
++// running (1.6-3.5 GB free of 31.5 GB), and step 5 failed twice at 60s purely
++// under that load while passing in ~5s on a quiet host. The caps below have to
++// clear the slow end, and this one has to clear the sum of them.
++const HARD_CAP_MS = 870000;
++const trace = message => { if (process.env.MENTAT_BROWSER_TRACE) console.log(`[browser] ${message}`); };
++
++// Rows are the width of a real Schedule A export, ~155 bytes, which is what
++// makes a 40 MB fixture a legitimate import. At the original ~77 bytes a row,
++// 40 MB came to 516,377 rows and the server refused the whole file with
++// "Choose a CSV containing no more than 500,000 rows." - correctly, since
++// MAX_ROWS binds alongside the 50 MB ceiling. The fixture, not the server, was
++// what made step 6 unpassable.
++const HEADER = 'committee_id,committee_name,contribution_receipt_amount,contribution_receipt_date,'
++  + 'two_year_transaction_period,contributor_name,contributor_city,contributor_state,contributor_zip,'
++  + 'contributor_employer,contributor_occupation,memo_text,sub_id\r\n';
++
++function csvRow(index) {
++  return `C00000001,Example PAC,${(index % 1000) + 1}.00,2026-01-01,2026,"Contributor, ${index}",`
++    + `Washington,DC,20002,"Example Employer ${index}",Analyst,`
++    + `"Memo for row ${index}, padded to a realistic filing width",SA-${index}\r\n`;
++}
++
++function buildCsvOfSize(targetBytes) {
++  // Track the running byte count instead of re-measuring the whole
++  // accumulated string every iteration (Buffer.byteLength(text) on a
++  // multi-hundred-thousand-line string, called once per line, is O(n^2) and
++  // was the actual cause of a 4+ minute hang building forty.csv -- nothing
++  // to do with the server or Playwright).
++  const parts = [HEADER];
++  let bytes = Buffer.byteLength(HEADER, 'utf8');
++  let index = 1;
++  while (bytes < targetBytes) {
++    const row = csvRow(index);
++    parts.push(row);
++    bytes += Buffer.byteLength(row, 'utf8');
++    index += 1;
++  }
++  return parts.join('');
++}
++
++function wide201Csv() {
++  const headers = ['committee_id', ...Array.from({length: 200}, (_, i) => `col${i}`)];
++  const row = ['C00000001', ...Array.from({length: 200}, () => 'x')];
++  return headers.join(',') + '\r\n' + row.join(',') + '\r\n';
++}
++
++function truncatedCsv() {
++  return HEADER + csvRow(1) + 'C00000002,Example PAC,10.00,2026-01-02,2026,"Doe, Jane';
++}
++
++function latin1Buffer() {
++  return Buffer.concat([
++    Buffer.from(HEADER, 'utf8'),
++    Buffer.from('C00000001,Example PAC,10.00,2026-01-01,2026,', 'utf8'),
++    Buffer.from([0xff, 0xfe, 0x00]),
++    Buffer.from(',SA-1\r\n', 'utf8'),
++  ]);
++}
++
++function nocommitteeCsv() {
++  return 'name,amount\r\nExample,10\r\n';
++}
++
++function writeFixtures(dir) {
++  fs.writeFileSync(path.join(dir, 'six.csv'), buildCsvOfSize(6_000_000));
++  fs.writeFileSync(path.join(dir, 'forty.csv'), buildCsvOfSize(40_000_000));
++  fs.writeFileSync(path.join(dir, 'big.csv'), Buffer.alloc(51_000_000, 'a'));
++  fs.writeFileSync(path.join(dir, 'wide201.csv'), wide201Csv());
++  fs.writeFileSync(path.join(dir, 'truncated.csv'), truncatedCsv());
++  fs.writeFileSync(path.join(dir, 'empty.csv'), '');
++  fs.writeFileSync(path.join(dir, 'latin1.csv'), latin1Buffer());
++  fs.writeFileSync(path.join(dir, 'nocommittee.csv'), nocommitteeCsv());
++  fs.writeFileSync(path.join(dir, 'notes.txt'), 'just some notes, not a CSV\n');
++  fs.writeFileSync(path.join(dir, 'abort.csv'), HEADER + csvRow(1));
++  fs.writeFileSync(path.join(dir, 'html.csv'), HEADER + csvRow(1));
++}
++
++function withTimeout(promise, ms, label) {
++  let timer;
++  const timeout = new Promise((_, reject) => {
++    timer = setTimeout(() => reject(new Error(`${label} exceeded its ${ms}ms bound`)), ms);
++  });
++  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
++}
++
++function freePort() {
++  const attemptOnce = () => new Promise((resolve, reject) => {
++    const server = net.createServer();
++    server.on('error', reject);
++    server.listen(0, '127.0.0.1', () => {
++      const port = server.address().port;
++      server.close(() => resolve(port));
++    });
++  });
++  const pick = async () => {
++    for (;;) {
++      const port = await attemptOnce();
++      if (!FORBIDDEN_PORTS.has(port)) return port;
++    }
++  };
++  return withTimeout(pick(), 10000, 'freePort()');
++}
++
++function startServer(port, dataRoot) {
++  return new Promise((resolve, reject) => {
++    const child = spawn(process.env.MENTAT_PYTHON || 'python',
++      ['app/server.py', '--port', String(port), '--data-root', dataRoot],
++      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true});
++    const stderrLines = [];
++    let stdout = '';
++    let settled = false;
++    const timer = setTimeout(() => {
++      if (settled) return;
++      settled = true;
++      reject(new Error(`server on port ${port} did not print a ready line within 30s; stderr: ${stderrLines.join('')}`));
++    }, 30000);
++    child.stdout.on('data', chunk => {
++      stdout += chunk.toString();
++      trace(`server ${port} stdout: ${chunk.toString().trim()}`);
++      if (!settled && new RegExp(`Mentat app: http://127\\.0\\.0\\.1:${port}\\b`).test(stdout)) {
++        settled = true;
++        clearTimeout(timer);
++        resolve(child);
++      }
++    });
++    child.stderr.on('data', chunk => { stderrLines.push(chunk.toString()); trace(`server ${port} stderr: ${chunk.toString().trim()}`); });
++    child.on('exit', code => {
++      if (settled) return;
++      settled = true;
++      clearTimeout(timer);
++      reject(new Error(`server on port ${port} exited ${code} before reporting ready; stderr: ${stderrLines.join('')}`));
++    });
++    child.on('error', error => {
++      if (settled) return;
++      settled = true;
++      clearTimeout(timer);
++      reject(error);
++    });
++  });
++}
++
++function stopServer(child) {
++  return withTimeout(new Promise(resolve => {
++    if (!child || child.exitCode !== null) { resolve(); return; }
++    child.once('exit', () => resolve());
++    child.kill();
++  }), 10000, 'stopServer()').catch(error => { console.error(error.message); });
++}
++
++function cleanupPath(target) {
++  try { fs.rmSync(target, {recursive: true, force: true, maxRetries: 10, retryDelay: 200}); }
++  catch (error) { console.error(`cleanup failed for ${target}: ${error.message}`); }
++}
++
++let stepNumber = 0;
++let currentStepLabel = 'startup (fixtures, port selection, server launch)';
++let serverAForWatchdog = null;
++let serverBForWatchdog = null;
++
++// Belt-and-braces: even if some await above is never bounded by its own
++// timeout, this forces the process to end and say which step it died on,
++// rather than hang silently. Cleared implicitly by process.exit() on the
++// normal path, since exit cancels all pending timers.
++const watchdog = setTimeout(() => {
++  console.error(`RED: hung >${HARD_CAP_MS / 1000}s at step ${stepNumber} (${currentStepLabel})`);
++  try { if (serverAForWatchdog && serverAForWatchdog.exitCode === null) serverAForWatchdog.kill(); } catch { /* best effort */ }
++  try { if (serverBForWatchdog && serverBForWatchdog.exitCode === null) serverBForWatchdog.kill(); } catch { /* best effort */ }
++  process.exit(1);
++}, HARD_CAP_MS);
++
++let stepStartedAt = Date.now();
++
++function step(label) {
++  stepNumber += 1;
++  currentStepLabel = label;
++  stepStartedAt = Date.now();
++  console.log(`STEP ${stepNumber}: ${label}`);
++}
++
++function pass(detail) {
++  console.log(`PASS step ${stepNumber} (${((Date.now() - stepStartedAt) / 1000).toFixed(1)}s) - ${detail}`);
++}
++
++(async () => {
++  let browser = null;
++  let serverA = null;
++  let serverB = null;
++  let secondPage = null;
++  const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-evidence-data-'));
++  const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-evidence-fixtures-'));
++  let failed = false;
++
++  try {
++    step('write fixture CSVs to a scratch directory');
++    writeFixtures(fixtureDir);
++    pass(`fixtures written under ${fixtureDir}`);
++
++    step('pick a free port and launch the first console server');
++    const portA = await freePort();
++    serverA = await startServer(portA, dataRoot);
++    serverAForWatchdog = serverA;
++    const origin = `http://127.0.0.1:${portA}`;
++    pass(`server A ready on port ${portA}, data root ${dataRoot}`);
++
++    step('launch headless Chrome and open a page');
++    browser = await withTimeout(
++      chromium.launch({headless: true, channel: process.env.MENTAT_BROWSER_CHANNEL || 'chrome', timeout: 30000}),
++      35000, 'chromium.launch()',
++    );
++    const page = await browser.newPage({viewport: {width: 1440, height: 1050}});
++    page.setDefaultTimeout(15000);
++    const errors = [];
++    const remote = [];
++    const consoleLines = [];
++    const apiCalls = [];
++    page.on('pageerror', e => errors.push(e.message));
++    page.on('request', request => {
++      if (!request.url().startsWith(origin) && !request.url().startsWith('blob:')) remote.push(request.url());
++    });
++    // Diagnostics only. A status-wait that times out has to say what the status
++    // actually was and what the page had just been told, otherwise a slow host
++    // and a stuck client look identical in the failure output.
++    page.on('console', message => consoleLines.push(`${message.type()}: ${message.text()}`));
++    page.on('response', response => {
++      const url = response.url();
++      if (!url.includes('/api/evidence-csv')) return;
++      const entry = {line: `${new Date().toISOString().slice(11, 23)} ${response.request().method()} `
++        + `${response.status()} ${url.replace(origin, '')}`};
++      apiCalls.push(entry);
++      if (url.includes('job=') || response.status() >= 400) {
++        response.text().then(body => { entry.line += ` body=${body.slice(0, 240)}`; }, () => {});
++      }
++    });
++    pass('browser launched, page opened, pageerror/request listeners attached');
++
++    const statusText = async targetPage => (await targetPage.textContent('#evidence-csv-status')).trim();
++    const assertStatusNotEmpty = async targetPage => assert.notStrictEqual(await statusText(targetPage), '');
++
++    async function explainWait(what, error) {
++      let current = '<unreadable>';
++      try { current = await statusText(page); } catch (readError) { current = `<${readError.message}>`; }
++      error.message = [
++        `${error.message}`,
++        `  waiting for: ${what}`,
++        `  #evidence-csv-status was: ${JSON.stringify(current)}`,
++        `  last ${Math.min(14, apiCalls.length)} of ${apiCalls.length} /api/evidence-csv responses:`,
++        ...apiCalls.slice(-14).map(entry => `    ${entry.line}`),
++        `  page console (last 20 of ${consoleLines.length}):`,
++        ...consoleLines.slice(-20).map(line => `    ${line}`),
++        `  pageerrors: ${JSON.stringify(errors)}`,
++      ].join('\n');
++      throw error;
++    }
++
++    async function waitForStatusExact(expected, timeout = 15000) {
++      try {
++        await page.waitForFunction(
++          ({selector, text}) => (document.querySelector(selector)?.textContent || '').trim() === text,
++          {selector: '#evidence-csv-status', text: expected},
++          {timeout},
++        );
++      } catch (error) { await explainWait(`status exactly ${JSON.stringify(expected)}`, error); }
++      await assertStatusNotEmpty(page);
++    }
++
++    async function waitForStatusMatching(pattern, timeout = 15000) {
++      try {
++        await page.waitForFunction(
++          ({selector, source}) => new RegExp(source).test((document.querySelector(selector)?.textContent || '').trim()),
++          {selector: '#evidence-csv-status', source: pattern.source},
++          {timeout},
++        );
++      } catch (error) { await explainWait(`status matching ${pattern}`, error); }
++      await assertStatusNotEmpty(page);
++    }
++
++    step('open the evidence tab, select CSV source, expect the empty-catalog status');
++    await page.goto(origin + '/');
++    await page.click('#tab-evidence');
++    await page.selectOption('#evidence-source', 'csv');
++    await waitForStatusExact('No CSV imported yet. Choose a file.');
++    pass('evidence tab open, CSV source selected, empty-catalog status shown');
++
++    step('import six.csv (~6 MB) and check the first page of rows');
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'six.csv'));
++    // ~5s on a quiet host; 60s was not enough twice under load. See HARD_CAP_MS.
++    await waitForStatusMatching(/rows in file$/, 180000);
++    assert.equal(await page.isVisible('#evidence-csv-results'), true);
++    const rowCountSix = await page.locator('#evidence-csv-rows tr').count();
++    assert.equal(rowCountSix, 100);
++    const committeeOptionsSix = await page.locator('#evidence-csv-committee option').count();
++    assert.ok(committeeOptionsSix >= 1, 'expected at least one PAC option after importing six.csv');
++    pass(`six.csv imported (~6 MB), ${rowCountSix} rows rendered on the first page`);
++
++    step('import forty.csv (~40 MB) and watch for a progress sample');
++    const samples = [];
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'forty.csv'));
++    const pollDeadline = Date.now() + 480000;
++    let readyForty = false;
++    while (Date.now() < pollDeadline) {
++      const text = await statusText(page);
++      samples.push(text);
++      if (/rows in file$/.test(text)) { readyForty = true; break; }
++      await page.waitForTimeout(100);
++    }
++    assert.ok(readyForty, `forty.csv never reached a ready state within 480s; last samples: ${JSON.stringify(samples.slice(-5))}`);
++    await assertStatusNotEmpty(page);
++    assert.ok(samples.some(sample => /^Reading forty\.csv · [\d,]+ rows · [\d.]+ of 40\.0 MB$/.test(sample)),
++      `no progress sample matched the expected pattern; first samples: ${JSON.stringify(samples.slice(0, 20))}`);
++    assert.ok(await page.locator('#evidence-csv-rows tr').count() > 0);
++    pass(`forty.csv imported (~40 MB) after ${samples.length} polled progress samples`);
++
++    step('kill and relaunch the console on the same port/data root; reuse prior imports');
++    await stopServer(serverA);
++    serverA = await startServer(portA, dataRoot);
++    serverAForWatchdog = serverA;
++    await page.reload();
++    await page.click('#tab-evidence');
++    await page.selectOption('#evidence-source', 'csv');
++    await page.waitForSelector('#evidence-csv-source', {timeout: 15000});
++    const sourceOptionTexts = await page.locator('#evidence-csv-source option').allTextContents();
++    assert.equal(sourceOptionTexts.filter(text => text.includes('six.csv') || text.includes('forty.csv')).length, 2,
++      `expected exactly the 2 previously imported sources, got: ${JSON.stringify(sourceOptionTexts)}`);
++    const sixLabel = sourceOptionTexts.find(text => text.includes('six.csv'));
++    const [selectResponse] = await Promise.all([
++      page.waitForResponse(response => response.url().includes('/api/evidence-csv?id=') && response.request().method() === 'GET'),
++      page.selectOption('#evidence-csv-source', {label: sixLabel}),
++    ]);
++    assert.equal(selectResponse.status(), 200, 'GET /api/evidence-csv?id= for the previously imported six.csv must succeed after a restart');
++    assert.ok(await page.locator('#evidence-csv-rows tr').count() > 0);
++    await assertStatusNotEmpty(page);
++    pass('server restarted on the same port and data root; both prior imports reachable without re-upload');
++
++    step('launch a second console on the same data root, a different port');
++    const portB = await freePort();
++    serverB = await startServer(portB, dataRoot);
++    serverBForWatchdog = serverB;
++    const originB = `http://127.0.0.1:${portB}`;
++    secondPage = await browser.newPage();
++    secondPage.setDefaultTimeout(15000);
++    await secondPage.goto(originB + '/');
++    await secondPage.click('#tab-evidence');
++    await secondPage.selectOption('#evidence-source', 'csv');
++    await secondPage.waitForSelector('#evidence-csv-source', {timeout: 15000});
++    const sourceOptionTextsB = await secondPage.locator('#evidence-csv-source option').allTextContents();
++    assert.ok(sourceOptionTextsB.some(text => text.includes('six.csv')));
++    assert.ok(sourceOptionTextsB.some(text => text.includes('forty.csv')));
++    await secondPage.close();
++    secondPage = null;
++    await stopServer(serverB);
++    serverB = null;
++    serverBForWatchdog = null;
++    pass('a second console on the same data root and a different port lists both imports');
++
++    step('error case: big.csv rejected client-side, no upload issued');
++    const evidencePosts = [];
++    const trackPosts = request => {
++      if (request.method() === 'POST' && request.url().includes('/api/evidence-csv')) evidencePosts.push(request.url());
++    };
++    page.on('request', trackPosts);
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'big.csv'));
++    await waitForStatusMatching(/^big\.csv \(51\.0 MB\): Choose a CSV no larger than 50 MB\.$/);
++    page.off('request', trackPosts);
++    assert.equal(evidencePosts.length, 0, 'big.csv must be rejected client-side before any upload is attempted');
++    pass('big.csv rejected by the client pre-flight size check; no POST issued');
++
++    step('error case: notes.txt rejected for its extension');
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'notes.txt'));
++    await waitForStatusExact('notes.txt: Choose a CSV file with a name ending in .csv.');
++    pass('notes.txt rejected for its extension');
++
++    step('error case: wide201.csv rejected for exceeding the column cap');
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'wide201.csv'));
++    await waitForStatusExact('wide201.csv: The CSV needs unique nonempty column names, with no more than 200 columns.');
++    pass('wide201.csv rejected for exceeding the column cap');
++
++    step('error case: truncated.csv rejected for an unterminated quoted field');
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'truncated.csv'));
++    await waitForStatusMatching(/^truncated\.csv: The CSV could not be read at row [\d,]+\. Check its quoted fields and delimiter\.$/);
++    pass('truncated.csv rejected for an unterminated quoted field');
++
++    step('error case: empty.csv rejected as empty');
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'empty.csv'));
++    await waitForStatusExact('empty.csv: The CSV file is empty.');
++    pass('empty.csv rejected as empty');
++
++    step('error case: latin1.csv rejected for invalid UTF-8 bytes');
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'latin1.csv'));
++    await waitForStatusExact('latin1.csv: Use a UTF-8 CSV file without invalid text characters.');
++    pass('latin1.csv rejected for invalid UTF-8 bytes');
++
++    step('error case: nocommittee.csv rejected for missing a committee-id column');
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'nocommittee.csv'));
++    await waitForStatusExact('nocommittee.csv: The CSV needs a Committee ID, CMTE_ID, or Source Committee ID column.');
++    pass('nocommittee.csv rejected for missing a committee-id column');
++
++    step('error case: abort.csv reports a transport failure when the upload is aborted');
++    await page.route('**/api/evidence-csv', route => route.abort());
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'abort.csv'));
++    await waitForStatusMatching(/^abort\.csv: upload to \/api\/evidence-csv failed: /);
++    await page.unroute('**/api/evidence-csv');
++    pass('abort.csv reports a transport failure when the upload request is aborted');
++
++    step('error case: html.csv reports an unparseable HTTP 500 response');
++    await page.route('**/api/evidence-csv', route => route.fulfill({status: 500, contentType: 'text/html', body: '<html>oops</html>'}));
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'html.csv'));
++    await waitForStatusExact('html.csv: /api/evidence-csv answered HTTP 500 with no error message.');
++    await page.unroute('**/api/evidence-csv');
++    pass('html.csv reports an unparseable HTTP 500 response');
++
++    step('error case: a bad ?offset= value returns 400 with the exact M_PAGE message');
++    const sixSourceId = await page.evaluate(async () => {
++      const response = await fetch('/api/evidence-csv');
++      const body = await response.json();
++      const match = (body.sources || []).find(source => source.name === 'six.csv');
++      return match ? match.id : null;
++    });
++    assert.ok(sixSourceId, 'expected to find six.csv in the sources listing to probe the page-argument validator');
++    const pageProbe = await page.evaluate(async id => {
++      const response = await fetch(`/api/evidence-csv?id=${id}&offset=abc`);
++      const body = await response.json();
++      return {status: response.status, error: body.error};
++    }, sixSourceId);
++    assert.equal(pageProbe.status, 400);
++    assert.equal(pageProbe.error, 'Choose a valid CSV row page (1–1,000 rows).');
++    pass('a bad ?offset= value returns 400 with the exact M_PAGE message, not a leaked exception');
++
++    step('final check: zero pageerror entries and zero remote requests');
++    assert.equal(errors.length, 0, `expected zero pageerror entries, got: ${JSON.stringify(errors)}`);
++    assert.equal(remote.length, 0, `expected zero remote requests, got: ${JSON.stringify(remote)}`);
++    pass('zero pageerror entries and zero remote requests across the whole run');
++
++    console.log(`ALL ${stepNumber} STEPS PASSED`);
++  } catch (error) {
++    failed = true;
++    console.error(`FAIL step ${stepNumber} (${currentStepLabel}): ${error && error.stack ? error.stack : error}`);
++  } finally {
++    if (secondPage) { try { await withTimeout(secondPage.close(), 10000, 'secondPage.close()'); } catch (error) { console.error(error.message); } }
++    if (browser) { try { await withTimeout(browser.close(), 10000, 'browser.close()'); } catch (error) { console.error(error.message); } }
++    await stopServer(serverA);
++    await stopServer(serverB);
++    cleanupPath(fixtureDir);
++    cleanupPath(dataRoot);
++  }
++  process.exit(failed ? 1 : 0);
++})();
+diff --git a/mentat/tests/test_pac_evidence_errors.py b/mentat/tests/test_pac_evidence_errors.py
+new file mode 100644
+index 000000000..6dccc19e3
+--- /dev/null
++++ b/mentat/tests/test_pac_evidence_errors.py
+@@ -0,0 +1,125 @@
++import hashlib
++import json
++import sys
++import tempfile
++import unittest
++import urllib.error
++from pathlib import Path
++from unittest.mock import patch
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
++from pac_evidence import Client
++
++ENDPOINT = 'committee/C00000001/totals/'
++PARAMS = {'cycle': 2024, 'per_page': 100}
++EXPECTED_URL = 'https://api.open.fec.gov/v1/committee/C00000001/totals/?cycle=2024&per_page=100'
++
++
++class PacEvidenceErrorTests(unittest.TestCase):
++    def setUp(self):
++        patcher = patch('pac_evidence.time.sleep')
++        self.sleep = patcher.start()
++        self.addCleanup(patcher.stop)
++
++    def test_url_error_retried_then_reported(self):
++        calls = []
++
++        def transport(endpoint, params):
++            calls.append((endpoint, params))
++            raise urllib.error.URLError('getaddrinfo failed')
++
++        with tempfile.TemporaryDirectory() as directory:
++            client = Client(directory, key='fixture', transport=transport)
++            with self.assertRaises(ValueError) as ctx:
++                client.page(ENDPOINT, PARAMS)
++        self.assertEqual(str(ctx.exception),
++                          'FEC evidence request failed: getaddrinfo failed; URL ' + EXPECTED_URL)
++        self.assertEqual(len(calls), 4)
++        self.assertEqual(self.sleep.call_count, 3)
++
++    def test_timeout_reported_with_url(self):
++        def transport(endpoint, params):
++            raise TimeoutError()
++
++        with tempfile.TemporaryDirectory() as directory:
++            client = Client(directory, key='fixture', transport=transport)
++            with self.assertRaises(ValueError) as ctx:
++                client.page(ENDPOINT, PARAMS)
++        self.assertIn('timed out after 60 s; URL https://api.open.fec.gov/v1/', str(ctx.exception))
++
++    def test_http_404_not_retried(self):
++        calls = []
++
++        def transport(endpoint, params):
++            calls.append((endpoint, params))
++            raise urllib.error.HTTPError(EXPECTED_URL, 404, 'Not Found', {}, None)
++
++        with tempfile.TemporaryDirectory() as directory:
++            client = Client(directory, key='fixture', transport=transport)
++            with self.assertRaises(ValueError) as ctx:
++                client.page(ENDPOINT, PARAMS)
++        self.assertEqual(str(ctx.exception),
++                          'FEC evidence request failed: HTTP 404; URL ' + EXPECTED_URL)
++        self.assertEqual(len(calls), 1)
++        self.sleep.assert_not_called()
++
++    def test_http_503_retried(self):
++        calls = []
++
++        def transport(endpoint, params):
++            calls.append((endpoint, params))
++            if len(calls) <= 3:
++                raise urllib.error.HTTPError(EXPECTED_URL, 503, 'Service Unavailable', {}, None)
++            return {'results': [{'name': 'X'}], 'pagination': {}}
++
++        with tempfile.TemporaryDirectory() as directory:
++            client = Client(directory, key='fixture', transport=transport)
++            result = client.page(ENDPOINT, PARAMS)
++        self.assertEqual(result, {'results': [{'name': 'X'}], 'pagination': {}})
++        self.assertEqual(len(calls), 4)
++
++    def test_non_json_reported(self):
++        calls = []
++
++        def transport(endpoint, params):
++            calls.append((endpoint, params))
++            raise json.JSONDecodeError('x', '', 0)
++
++        with tempfile.TemporaryDirectory() as directory:
++            client = Client(directory, key='fixture', transport=transport)
++            with self.assertRaises(ValueError) as ctx:
++                client.page(ENDPOINT, PARAMS)
++        self.assertEqual(str(ctx.exception),
++                          'FEC evidence request failed: response was not JSON; URL ' + EXPECTED_URL)
++        self.assertEqual(len(calls), 1)
++        self.sleep.assert_not_called()
++
++    def test_cache_integrity_names_path(self):
++        with tempfile.TemporaryDirectory() as directory:
++            client = Client(directory, key='fixture', transport=lambda *a: {})
++            path = client.directory / (hashlib.sha256(EXPECTED_URL.encode()).hexdigest() + '.json')
++            path.write_text(json.dumps({'url': 'https://mismatched.example/', 'response': {}, 'sha256': 'bad'}))
++            with self.assertRaises(ValueError) as ctx:
++                client.page(ENDPOINT, PARAMS)
++        self.assertEqual(str(ctx.exception),
++                          f'FEC evidence cache integrity check failed for {path}.')
++
++    def test_success_path_unchanged(self):
++        response = {'results': [{'name': 'Y'}], 'pagination': {}}
++
++        def transport(endpoint, params):
++            return response
++
++        with tempfile.TemporaryDirectory() as directory:
++            client = Client(directory, key='fixture', transport=transport)
++            result = client.page(ENDPOINT, PARAMS)
++            self.assertEqual(result, response)
++            path = client.directory / (hashlib.sha256(EXPECTED_URL.encode()).hexdigest() + '.json')
++            saved = json.loads(path.read_text())
++        self.assertEqual(set(saved.keys()), {'url', 'retrieved_at', 'sha256', 'response'})
++        self.assertEqual(saved['url'], EXPECTED_URL)
++        self.assertEqual(saved['response'], response)
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/audits/mentat_failings_20260915/contracts/evidence-csv-import.json b/audits/mentat_failings_20260915/contracts/evidence-csv-import.json
+new file mode 100644
+index 000000000..7d6a39c41
+--- /dev/null
++++ b/audits/mentat_failings_20260915/contracts/evidence-csv-import.json
+@@ -0,0 +1,189 @@
++{
++  "contract": "evidence-csv-import",
++  "version": 1,
++  "owner": "S3",
++  "produced_by": [
++    "mentat/app/evidence_csv.py:limits",
++    "mentat/app/evidence_csv.py:Store.catalog",
++    "mentat/app/evidence_csv.py:Store.sources",
++    "mentat/app/evidence_csv.py:Store.select",
++    "mentat/app/evidence_csv.py:catalog (legacy in-memory document)",
++    "mentat/app/evidence_csv.py:select (legacy in-memory document)",
++    "mentat/app/server.py:do_GET '/api/evidence-csv' (no id -> sources listing; id+committee+cycle+offset+limit -> SELECT; bad offset/limit -> error payload)",
++    "mentat/app/server.py:Console.evidence_csv_view"
++  ],
++  "consumed_by": [
++    "mentat/app/evidence-csv.js:loadRows (SELECT)",
++    "mentat/app/evidence-csv.js: sources listing render + #evidence-csv-source population",
++    "mentat/app/evidence-csv.js: pre-flight size check against LIMITS"
++  ],
++  "description": "The shapes read once a CSV has been imported: the size/row/column LIMITS the client pre-flights against, one imported CSV's CATALOG (nested inside a sources listing or a SELECT), the GET /api/evidence-csv sources listing, a paginated SELECT of one committee/cycle's rows, and the bounded error-payload shape (never a leaked Python exception string). Orientation only - the examples are the contract.",
++  "examples": [
++    {
++      "max_bytes": 50000000,
++      "max_columns": 200,
++      "max_rows": 500000,
++      "max_bytes_message": "Choose a CSV no larger than 50 MB.",
++      "max_columns_message": "The CSV needs unique nonempty column names, with no more than 200 columns.",
++      "max_rows_message": "Choose a CSV containing no more than 500,000 rows."
++    },
++    {
++      "id": "csv-0123456789abcdef0123456789abcdef",
++      "name": "example.csv",
++      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
++      "row_count": 45,
++      "committees": [
++        {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
++        {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
++      ],
++      "cycles": ["2026", "2024"],
++      "supported_rows": 40,
++      "unsupported_rows": 5,
++      "unassigned_rows": 3,
++      "session_only": false,
++      "imported_at": "2026-09-16T00:00:00Z",
++      "bytes": 12345,
++      "warnings": [
++        "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++        "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
++        "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++      ]
++    },
++    {
++      "sources": [
++        {
++          "id": "csv-0123456789abcdef0123456789abcdef",
++          "name": "example.csv",
++          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
++          "row_count": 45,
++          "committees": [
++            {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
++            {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
++          ],
++          "cycles": ["2026", "2024"],
++          "supported_rows": 40,
++          "unsupported_rows": 5,
++          "unassigned_rows": 3,
++          "session_only": false,
++          "imported_at": "2026-09-16T00:00:00Z",
++          "bytes": 12345,
++          "warnings": [
++            "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++            "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
++            "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++          ]
++        }
++      ],
++      "limits": {
++        "max_bytes": 50000000,
++        "max_columns": 200,
++        "max_rows": 500000,
++        "max_bytes_message": "Choose a CSV no larger than 50 MB.",
++        "max_columns_message": "The CSV needs unique nonempty column names, with no more than 200 columns.",
++        "max_rows_message": "Choose a CSV containing no more than 500,000 rows."
++      },
++      "session_only": false
++    },
++    {
++      "sources": [],
++      "limits": {
++        "max_bytes": 50000000,
++        "max_columns": 200,
++        "max_rows": 500000,
++        "max_bytes_message": "Choose a CSV no larger than 50 MB.",
++        "max_columns_message": "The CSV needs unique nonempty column names, with no more than 200 columns.",
++        "max_rows_message": "Choose a CSV containing no more than 500,000 rows."
++      },
++      "session_only": false
++    },
++    {
++      "source": {
++        "id": "csv-0123456789abcdef0123456789abcdef",
++        "name": "example.csv",
++        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
++        "row_count": 45,
++        "committees": [
++          {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
++          {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
++        ],
++        "cycles": ["2026", "2024"],
++        "supported_rows": 40,
++        "unsupported_rows": 5,
++        "unassigned_rows": 3,
++        "session_only": false,
++        "imported_at": "2026-09-16T00:00:00Z",
++        "bytes": 12345,
++        "warnings": [
++          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
++          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++        ]
++      },
++      "committee": {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
++      "committees": [
++        {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
++        {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
++      ],
++      "cycles": ["2026", "2024"],
++      "selected_cycle": "2026",
++      "columns": ["committee_id", "committee_name", "contribution_receipt_amount", "contribution_receipt_date", "cycle"],
++      "rows": [
++        {"row_number": 2, "committee_id": "C00000001", "committee_name": "Example PAC", "channel": "Receipts", "amount": 10.25, "date": "2026-02-03", "cycle": "2026", "status": "supported"}
++      ],
++      "totals": [
++        {"channel": "Receipts", "amount": 15.5, "row_count": 3}
++      ],
++      "supported_rows": 40,
++      "unsupported_rows": 5,
++      "offset": 0,
++      "limit": 200,
++      "total_rows": 42,
++      "has_more": false,
++      "warnings": [
++        "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++        "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
++        "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++      ]
++    },
++    {
++      "error": "Choose a valid CSV row page (1–1,000 rows)."
++    }
++  ],
++  "negative_controls": [
++    {
++      "why": "DE-021-style: a session-scoped legacy shape must not leak into the persisted-import CATALOG. catalog.session_only is always false for a Store-backed import; only the pre-S3 in-memory legacy document used true.",
++      "shape": "catalog",
++      "payload": {
++        "id": "csv-0123456789abcdef0123456789abcdef",
++        "name": "example.csv",
++        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
++        "row_count": 45,
++        "committees": [
++          {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40}
++        ],
++        "cycles": ["2026"],
++        "supported_rows": 40,
++        "unsupported_rows": 5,
++        "unassigned_rows": 0,
++        "session_only": true,
++        "imported_at": "2026-09-16T00:00:00Z",
++        "bytes": 12345,
++        "warnings": [
++          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
++          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++        ]
++      }
++    },
++    {
++      "why": "a sources listing missing 'limits' silently breaks the client's pre-flight size/column/row check (evidence-csv.js reads limits.max_bytes_message before ever uploading).",
++      "shape": "sources_listing",
++      "payload": {"sources": [], "session_only": false}
++    },
++    {
++      "why": "the pre-S3 bug reproduced live by S0 (receipts/S0_area_c...): GET ?offset=abc answered {\"error\":\"invalid literal for int() with base 10: 'abc'\"} - a leaked Python exception, not M_PAGE. An error payload must never contain implementation-leak text.",
++      "shape": "error",
++      "payload": {"error": "invalid literal for int() with base 10: 'abc'"}
++    }
++  ]
++}
+diff --git a/audits/mentat_failings_20260915/contracts/evidence-job-status.json b/audits/mentat_failings_20260915/contracts/evidence-job-status.json
+new file mode 100644
+index 000000000..63069e715
+--- /dev/null
++++ b/audits/mentat_failings_20260915/contracts/evidence-job-status.json
+@@ -0,0 +1,171 @@
++{
++  "contract": "evidence-job-status",
++  "version": 1,
++  "owner": "S3",
++  "produced_by": [
++    "mentat/app/evidence_csv.py:Store.job",
++    "mentat/app/evidence_csv.py:Upload.finish (writes import.json state 'reading', then 'ready'/'failed')",
++    "mentat/app/server.py:do_GET '/api/evidence-csv?job=<id>'",
++    "mentat/app/server.py:Console.collect_evidence (writes collection.json: 'collecting' -> 'completed'/'failed')",
++    "mentat/app/server.py:do_GET '/api/evidence-job' (synthesizes 'failed' from a dead pid found still 'collecting')"
++  ],
++  "consumed_by": [
++    "mentat/app/evidence-csv.js: poll ?job=<id> until state != 'reading'",
++    "mentat/app/app.js:pollEvidenceJob (collector job)"
++  ],
++  "description": "Two independent job-status vocabularies that cross the console/collector process boundary and are polled from the client: the evidence-CSV streaming ingest JOB (state reading|ready|failed, catalog non-null iff ready), and the PAC-evidence collector job (collection.json; state collecting|completed|failed, finished_at/message present only once the job is done). Orientation only - the examples are the contract.",
++  "examples": [
++    {
++      "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
++      "name": "big-import.csv",
++      "state": "reading",
++      "bytes": 6000000,
++      "bytes_read": 2500000,
++      "rows_read": 8000,
++      "message": "",
++      "started_at": 1758000000.0,
++      "finished_at": null,
++      "catalog": null
++    },
++    {
++      "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
++      "name": "big-import.csv",
++      "state": "ready",
++      "bytes": 6000000,
++      "bytes_read": 6000000,
++      "rows_read": 18000,
++      "message": "",
++      "started_at": 1758000000.0,
++      "finished_at": 1758000012.5,
++      "catalog": {
++        "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
++        "name": "big-import.csv",
++        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
++        "row_count": 18000,
++        "committees": [
++          {"id": "C00000001", "name": "Example PAC", "rows": 18000, "supported_rows": 17950}
++        ],
++        "cycles": ["2026", "2024"],
++        "supported_rows": 17950,
++        "unsupported_rows": 50,
++        "unassigned_rows": 0,
++        "session_only": false,
++        "imported_at": "2026-09-16T00:00:12Z",
++        "bytes": 6000000,
++        "warnings": [
++          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
++          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++        ]
++      }
++    },
++    {
++      "id": "csv-11111111111111111111111111111111",
++      "name": "broken.csv",
++      "state": "failed",
++      "bytes": 4200,
++      "bytes_read": 4200,
++      "rows_read": 12,
++      "message": "The CSV could not be read at row 13. Check its quoted fields and delimiter.",
++      "started_at": 1758000100.0,
++      "finished_at": 1758000100.4,
++      "catalog": null
++    },
++    {
++      "id": "snapshot-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
++      "company": "Example Company",
++      "aliases": ["EXCO"],
++      "committees": ["C00000001"],
++      "cycles": ["2026"],
++      "state": "collecting",
++      "pid": 12345,
++      "started_at": 1758000000.0
++    },
++    {
++      "id": "snapshot-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
++      "company": "Example Company",
++      "aliases": ["EXCO"],
++      "committees": ["C00000001"],
++      "cycles": ["2026"],
++      "state": "completed",
++      "pid": 12345,
++      "started_at": 1758000000.0,
++      "finished_at": 1758000090.0,
++      "message": "Snapshot ready."
++    },
++    {
++      "id": "snapshot-22222222222222222222222222222222",
++      "company": "Example Company",
++      "aliases": [],
++      "committees": ["C00000001"],
++      "cycles": ["2026"],
++      "state": "failed",
++      "pid": 12399,
++      "started_at": 1758000200.0,
++      "finished_at": 1758000260.0,
++      "message": "Collection failed: FEC evidence request failed: HTTP 500; URL https://api.open.fec.gov/v1/x. Full log: C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\pac-evidence\\snapshot-22222222222222222222222222222222\\collection.log"
++    },
++    {
++      "id": "snapshot-33333333333333333333333333333333",
++      "company": "Example Company",
++      "aliases": [],
++      "committees": ["C00000001"],
++      "cycles": ["2026"],
++      "state": "failed",
++      "pid": 0,
++      "started_at": 1758000300.0,
++      "finished_at": 1758000300.1,
++      "message": "Could not start the evidence collector: boom"
++    }
++  ],
++  "negative_controls": [
++    {
++      "why": "'done' is not in the reading|ready|failed vocabulary; evidence-csv.js polls on state !== 'reading' and would treat an unrecognized terminal state as still in progress forever.",
++      "shape": "job",
++      "payload": {
++        "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
++        "name": "big-import.csv",
++        "state": "done",
++        "bytes": 6000000,
++        "bytes_read": 6000000,
++        "rows_read": 18000,
++        "message": "",
++        "started_at": 1758000000.0,
++        "finished_at": 1758000012.5,
++        "catalog": null
++      }
++    },
++    {
++      "why": "DE-021-style: JOB.catalog must be non-null iff state is 'ready'; a 'ready' job with a null catalog is exactly the bug this contract exists to catch (the client would render an empty committee list for a supposedly finished import).",
++      "shape": "job",
++      "payload": {
++        "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
++        "name": "big-import.csv",
++        "state": "ready",
++        "bytes": 6000000,
++        "bytes_read": 6000000,
++        "rows_read": 18000,
++        "message": "",
++        "started_at": 1758000000.0,
++        "finished_at": 1758000012.5,
++        "catalog": null
++      }
++    },
++    {
++      "why": "a failed collector job's message must match one of the two documented templates ('Collection failed: <log tail>. Full log: <path>' or 'Could not start the evidence collector: <error>'); a bare message lacking 'Full log: ' and not matching the start-failure template silently drops the only pointer to collection.log an operator needs to debug it.",
++      "shape": "collector_job",
++      "payload": {
++        "id": "snapshot-44444444444444444444444444444444",
++        "company": "Example Company",
++        "aliases": [],
++        "committees": ["C00000001"],
++        "cycles": ["2026"],
++        "state": "failed",
++        "pid": 12400,
++        "started_at": 1758000400.0,
++        "finished_at": 1758000401.0,
++        "message": "The collector failed."
++      }
++    }
++  ]
++}

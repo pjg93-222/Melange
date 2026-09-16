@@ -1,0 +1,116 @@
+S3 RED BASELINE - Browser (Playwright) suite, run against a PRISTINE worktree of HEAD
+=======================================================================================
+
+Date: 2026-09-16 (America/New_York)
+Repo (source of HEAD): C:\Users\pgoff\Mentat, branch codex/mentat-crypto
+Pinned commit: 11654f911184a6ca5d9aa2d079f0c18ade578d09
+Worktree used for this run (scratch, detached HEAD, removed after this run):
+  C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-
+  Melange-Systems--claude-worktrees-evidence-csv-fetch-streaming-8bedff\
+  01cbac00-075b-491b-acb2-076e4014ef13\scratchpad\mentat-before
+cwd for the command below: <worktree>\mentat
+Command: node tests\test_evidence_csv_browser.cjs
+(run wrapped in `timeout 270 ...` as an external safety net; the script's own
+internal watchdog is 240s - see "Hang found and fixed" below for why both
+exist)
+
+Environment gap found and worked around (same read-only-copy-from-live-tree
+pattern as the Python receipt, nothing in C:\Users\pgoff\Mentat touched):
+mentat/config/report-directory.json is gitignored (*.json). server.py's
+main() raises ValueError('The authoritative report directory is not
+configured.') before printing its ready line without it. Wrote a stand-in
+config into the scratch worktree only, pointing at a throwaway scratch
+directory, never Paul's real report directory.
+
+=======================================================================================
+HANG FOUND AND FIXED (before the red result below could even be produced)
+=======================================================================================
+
+Two of my own early runs of this exact script against this exact pristine
+worktree hung indefinitely with zero output (confirmed via
+Get-CimInstance Win32_Process: real `python app/server.py` and `node
+tests/test_evidence_csv_browser.cjs` processes alive for 10-20+ minutes, no
+progress). This was NOT a hang in the server or in the old client - it was a
+performance bug in this test's OWN fixture generator:
+
+    function buildCsvOfSize(targetBytes) {
+      let text = HEADER;
+      let index = 1;
+      while (Buffer.byteLength(text, 'utf8') < targetBytes) {   // <-- BUG
+        text += csvRow(index);
+        index += 1;
+      }
+      return text;
+    }
+
+`Buffer.byteLength(text, 'utf8')` re-encodes the ENTIRE accumulated string on
+every loop iteration. For a 40,000,000-byte target built ~530,000 rows at a
+time, that is O(n^2) total work, not O(n) - confirmed in isolation with a
+standalone timing script: unfixed, building six.csv+forty.csv did not finish
+within a 270s external `timeout` wrapper (exit code 124, stuck forever on
+"STEP 1: write fixture CSVs..."); fixed (tracking a running byte counter
+instead of re-measuring the whole string), the identical two files build in
+30ms + 187ms.
+
+Fix applied (both here and in the four-column generator's call sites are
+unchanged): accumulate lines in an array, track bytes with a running counter
+updated by `Buffer.byteLength(row, 'utf8')` on each new (short) row only, and
+`parts.join('')` once at the end. Propagated to both
+C:\Users\pgoff\Mentat\mentat\tests\test_evidence_csv_browser.cjs (live tree)
+and this scratch worktree's copy; `node --check` passed on both after the
+edit, and a `grep`/`cmp` byte-diff confirmed the regex/unicode content
+(the `\d`, `\.`, en dash U+2013, and middle-dot U+00B7 characters used in the
+exact-status-text assertions) survived the edit unmangled.
+
+Separately hardened while investigating (defense in depth, not required to
+fix the actual bug, but left in since a red-team run should not be able to
+hang silently again): a top-level 240s watchdog that force-exits and names
+the last-started step if anything ever blocks past that bound, and a
+`console.log('STEP N: ...')` printed at the START of every step (previously
+only a `PASS step N` was printed at the END, so a genuine hang gave zero
+diagnostic output - exactly what happened above).
+
+Two hung Node process trees from the pre-fix attempts were killed by PID+tree
+(`taskkill /F /T /PID <pid>`) rather than by name, and confirmed via a
+Win32_Process query for `mentat-evidence`/`test_evidence_csv_browser` in the
+command line that nothing else was affected - no port-8802/8806/8808 console
+and no other lane's process was touched.
+
+=======================================================================================
+RESULT (after the fix): exit code 1, wall time ~42s, clean bounded failure
+=======================================================================================
+
+STEP 1: write fixture CSVs to a scratch directory
+PASS step 1 - fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-fixtures-OBYzK7
+STEP 2: pick a free port and launch the first console server
+PASS step 2 - server A ready on port 65179, data root C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-data-e7x86A
+STEP 3: launch headless Chrome and open a page
+PASS step 3 - browser launched, page opened, pageerror/request listeners attached
+STEP 4: open the evidence tab, select CSV source, expect the empty-catalog status
+FAIL step 4 (open the evidence tab, select CSV source, expect the empty-catalog status): page.waitForFunction: Timeout 15000ms exceeded.
+    at waitForStatusExact (...\mentat-before\mentat\tests\test_evidence_csv_browser.cjs:231:18)
+    at ...\mentat-before\mentat\tests\test_evidence_csv_browser.cjs:252:11
+browser.close() exceeded its 10000ms bound
+EXIT CODE: 1
+
+Decisive line: `page.waitForFunction: Timeout 15000ms exceeded` at step 4,
+waiting for `#evidence-csv-status` to read exactly 'No CSV imported yet.
+Choose a file.'. The OLD (pre-S3) evidence-csv.js never sets that text - it
+leaves index.html's static placeholder ("FEC or Mentat CSV with a committee
+ID column · up to 5 MB.") until a file is chosen, and has no
+GET /api/evidence-csv sources-listing call at all. This is exactly the
+expected red signal: the client-side sources-listing feature does not exist
+yet at this commit.
+
+("browser.close() exceeded its 10000ms bound" is a secondary, non-fatal note:
+the withTimeout() wrapper logged it and let cleanup continue rather than
+re-throw; a post-run Win32_Process check confirmed no orphaned Chrome/python
+process remained, so this did not leak anything - it was not investigated
+further given the primary result was already a clean, fast, correctly
+diagnosed failure.)
+
+Steps 5-7 (forty.csv progress text, same-port restart reusing prior imports,
+second-server listing, the nine exact-text error cases, and the
+zero-pageerror/zero-remote-request check) never ran, because step 4 already
+demonstrates the client feature is absent and the test stops at its first
+failure by design (one `try` block covering every step).
