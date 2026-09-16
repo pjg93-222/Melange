@@ -1,0 +1,136 @@
+# S2_red_python.txt
+# date: 2026-09-16T07:06:03Z
+# cwd: C:\Users\pgoff\Mentat\mentat
+# branch: codex/mentat-crypto (LIVE working tree, not HEAD)
+# command: python -m unittest tests.test_raw_contribution_columns tests.test_backfill_contributor_street tests.test_export_raw_contribution_warehouse -v
+# ---
+test_contract_self_consistency (tests.test_raw_contribution_columns.ContractSelfConsistencyTests.test_contract_self_consistency) ... ok
+test_negative_control_fails_adjacency (tests.test_raw_contribution_columns.ContractSelfConsistencyTests.test_negative_control_fails_adjacency) ... ok
+test_formula_facts_projection_excludes_block (tests.test_raw_contribution_columns.FormulaFactsProjectionTests.test_formula_facts_projection_excludes_block) ... ok
+test_raw_warehouse_header_matches_contract (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_header_matches_contract) ... 
+  test_raw_warehouse_header_matches_contract (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_header_matches_contract) (table='corporate_giving') ... FAIL
+  test_raw_warehouse_header_matches_contract (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_header_matches_contract) (table='contributions') ... FAIL
+test_raw_warehouse_migrated_shape_same_header (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_migrated_shape_same_header) ... 
+  test_raw_warehouse_migrated_shape_same_header (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_migrated_shape_same_header) (table='corporate_giving') ... FAIL
+  test_raw_warehouse_migrated_shape_same_header (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_migrated_shape_same_header) (table='contributions') ... FAIL
+test_raw_warehouse_unmigrated_db_omits_and_flags (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_unmigrated_db_omits_and_flags) ... 
+  test_raw_warehouse_unmigrated_db_omits_and_flags (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_unmigrated_db_omits_and_flags) (table='corporate_giving') ... FAIL
+  test_raw_warehouse_unmigrated_db_omits_and_flags (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_unmigrated_db_omits_and_flags) (table='contributions') ... FAIL
+test_backfill_contributor_street (unittest.loader._FailedTest.test_backfill_contributor_street) ... ERROR
+test_atomic_replace_retries_transient_windows_denial (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_atomic_replace_retries_transient_windows_denial) ... ok
+test_corrupt_existing_partition_is_quarantined_and_rebuilt (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_corrupt_existing_partition_is_quarantined_and_rebuilt) ... ok
+test_cycle_parser_uses_two_year_cycles (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_cycle_parser_uses_two_year_cycles) ... ok
+test_full_lossless_partition_export_and_deterministic_reuse (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_full_lossless_partition_export_and_deterministic_reuse) ... ok
+test_wrong_industry_tag_fails_loudly (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_wrong_industry_tag_fails_loudly) ... ok
+
+======================================================================
+ERROR: test_backfill_contributor_street (unittest.loader._FailedTest.test_backfill_contributor_street)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_backfill_contributor_street
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_backfill_contributor_street.py", line 66, in <module>
+    import backfill_contributor_street as backfill  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'backfill_contributor_street'
+
+
+======================================================================
+FAIL: test_raw_warehouse_header_matches_contract (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_header_matches_contract) (table='corporate_giving')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_raw_contribution_columns.py", line 279, in test_raw_warehouse_header_matches_contract
+    self.assertEqual(read_csv_header(partition, table), expected)
+AssertionError: Lists differ: ['sub[52 chars]utor_city', 'contributor_state', 'contributor_[831 chars]son'] != ['sub[52 chars]utor_employer', 'contributor_occupation', 'con[879 chars]son']
+
+First differing element 3:
+'contributor_city'
+'contributor_employer'
+
+Second list contains 2 additional elements.
+First extra element 48:
+'company_match_reason'
+
+Diff is 1193 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_raw_warehouse_header_matches_contract (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_header_matches_contract) (table='contributions')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_raw_contribution_columns.py", line 279, in test_raw_warehouse_header_matches_contract
+    self.assertEqual(read_csv_header(partition, table), expected)
+AssertionError: Lists differ: ['sub[162 chars]utor_city', 'contributor_state', 'contributor_[1017 chars]son'] != ['sub[162 chars]utor_employer', 'contributor_occupation', 'con[1065 chars]son']
+
+First differing element 8:
+'contributor_city'
+'contributor_employer'
+
+Second list contains 2 additional elements.
+First extra element 61:
+'company_match_reason'
+
+Diff is 1660 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_raw_warehouse_migrated_shape_same_header (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_migrated_shape_same_header) (table='corporate_giving')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_raw_contribution_columns.py", line 305, in test_raw_warehouse_migrated_shape_same_header
+    self.assertEqual(
+AssertionError: Lists differ: ['sub[52 chars]utor_city', 'contributor_state', 'contributor_[879 chars]t_2'] != ['sub[52 chars]utor_employer', 'contributor_occupation', 'con[879 chars]son']
+
+First differing element 3:
+'contributor_city'
+'contributor_employer'
+
+Diff is 1315 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_raw_warehouse_migrated_shape_same_header (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_migrated_shape_same_header) (table='contributions')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_raw_contribution_columns.py", line 305, in test_raw_warehouse_migrated_shape_same_header
+    self.assertEqual(
+AssertionError: Lists differ: ['sub[162 chars]utor_city', 'contributor_state', 'contributor_[1065 chars]t_2'] != ['sub[162 chars]utor_employer', 'contributor_occupation', 'con[1065 chars]son']
+
+First differing element 8:
+'contributor_city'
+'contributor_employer'
+
+Diff is 1782 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_raw_warehouse_unmigrated_db_omits_and_flags (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_unmigrated_db_omits_and_flags) (table='corporate_giving')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_raw_contribution_columns.py", line 323, in test_raw_warehouse_unmigrated_db_omits_and_flags
+    self.assertEqual(read_csv_header(partition, table), expected)
+AssertionError: Lists differ: ['sub[52 chars]utor_city', 'contributor_state', 'contributor_[831 chars]son'] != ['sub[52 chars]utor_employer', 'contributor_occupation', 'con[831 chars]son']
+
+First differing element 3:
+'contributor_city'
+'contributor_employer'
+
+Diff is 1139 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_raw_warehouse_unmigrated_db_omits_and_flags (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_unmigrated_db_omits_and_flags) (table='contributions')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_raw_contribution_columns.py", line 323, in test_raw_warehouse_unmigrated_db_omits_and_flags
+    self.assertEqual(read_csv_header(partition, table), expected)
+AssertionError: Lists differ: ['sub[162 chars]utor_city', 'contributor_state', 'contributor_[1017 chars]son'] != ['sub[162 chars]utor_employer', 'contributor_occupation', 'con[1017 chars]son']
+
+First differing element 8:
+'contributor_city'
+'contributor_employer'
+
+Diff is 1606 characters long. Set self.maxDiff to None to see it.
+
+----------------------------------------------------------------------
+Ran 12 tests in 5.425s
+
+FAILED (failures=6, errors=1)
+# --- exit code: 1

@@ -1,0 +1,214 @@
+S2 final four-runner sweep (Phase 3a, T5)
+generated 2026-09-16T12:58:51-04:00
+repo C:\Users\pgoff\Mentat  branch codex/mentat-crypto (LIVE dirty tree)
+working directory for every runner: C:\Users\pgoff\Mentat\mentat
+PYTHONDONTWRITEBYTECODE=1 for every Python process.
+
+========================================================================
+(1) PYTHON - tests/test_*.py, every test whose id contains 'startup' dropped
+========================================================================
+runner: <SCRATCH>/s2_build/sweep_python.py
+  Loads each tests/test_*.py by its dotted name rather than
+  unittest discover(): `tests` is a namespace package (no __init__.py) and
+  Python 3.12's discover() refuses those.  Ids keep the tests.<module> form
+  the documented per-suite commands use.
+  test_startup_performance launches a console and leaked one earlier
+  (PID 45068 on port 62160), so it is filtered out before the runner sees it.
+
+57 test modules matched tests/test_*.py
+discovered 602 tests
+dropped 2 for 'startup' in the test id:
+  DROPPED tests.test_startup_performance.StartupPerformanceTests.test_cold_start_and_saved_port_reuse_have_matching_identity
+  DROPPED tests.test_startup_performance.StartupPerformanceTests.test_tcp_probe_does_not_wait_for_http_on_nonlisteners
+running 600 tests
+Ran 600 tests in 225.936s
+OK
+SWEEP SUMMARY: Ran 600 tests
+  failures: 0
+  errors:   0
+  skipped:  0
+  expected failures: 0
+  unexpected successes: 0
+SWEEP RESULT: OK
+PYTHON_SWEEP_EXIT=0
+
+S0 baseline: 587 tests with 1 pre-existing error (that startup test).
+
+========================================================================
+(2) R - every mentat/tests/test_*.R via C:\Program Files\R\R-4.6.0\bin\Rscript.exe
+========================================================================
+exit=0       3.0s  test_attribution_recheck.R                           test_attribution_recheck: PASS
+exit=0       1.4s  test_collection_contract.R                           test_collection_contract: PASS
+exit=0       1.9s  test_evidence_archive.R                              test_evidence_archive: PASS
+exit=0       0.6s  test_export_progress_guards.R                        test_export_progress_guards: PASS
+exit=0       2.9s  test_fec_api.R                                       test_fec_api: PASS
+exit=0       1.1s  test_fec_api_fanout.R                                test_fec_api_fanout: PASS
+exit=0     161.6s  test_fec_beneficiary_helpers.R                       test_fec_beneficiary_helpers: randomized=5000 parity_rows=15000 groups=20000 reference=24.890s optimized=13.920s speedup=1.8x PASS
+exit=0       1.6s  test_fec_page.R                                      test_fec_page: PASS
+exit=0      44.3s  test_identity_components.R                           test_identity_components: representative=9 randomized=1000 rows=750 reference=17.990s indexed=0.010s speedup=1799.0x PASS
+exit=0       4.3s  test_ingest.R                                        test_ingest: PASS
+exit=0       1.6s  test_names.R                                         test_names: PASS
+exit=0       2.7s  test_raw_contribution_columns.R                      test_raw_contribution_columns: PASS
+exit=0       2.0s  test_receipt_roles.R                                 test_receipt_roles: PASS
+exit=0       2.2s  test_reconcile.R                                     test_reconcile: PASS
+exit=0      44.0s  test_report.R                                        test_report: PASS
+exit=0       0.4s  test_report_directory.R                              test_report_directory: PASS
+exit=0      28.5s  test_report_vectorization.R                          test_report_vectorization: classification_rows=2000 reference=2.180s vector=0.090s speedup=24.2x entity_rows=10000 reference=10.520s vector=0.120s speedup=87.7x tier_rows=10000 reference=10.280s vector=0.060s speedup=171.3x production_rows=423000 vector=4.250s PASS
+exit=0       7.0s  test_request_windows.R                               Shared request date windows, complete union, overlap/missing rejection, checkpoint resume, retained counts: PASS
+exit=0       0.7s  test_rules.R                                         test_rules: PASS
+exit=0       0.5s  test_spending_detail_frames.R                        test_spending_detail_frames: PASS
+exit=0       2.8s  test_sqlite_lane_locking.R                           test_sqlite_lane_locking: PASS (waited 1.340s for write lock)
+exit=0       0.4s  test_state_destinations.R                            State destination identity, cycle isolation, ambiguity, national/unknown, negative amounts and both partition totals: PASS
+exit=0       1.5s  test_tidy_stage.R                                    test_tidy_stage: PASS
+exit=0       0.6s  test_transfer_evidence.R                             Transfer evidence: retained identities, amendment review, cache version and coverage serialization PASS
+
+R sweep: 24/24 exit 0
+  no nonzero exits
+
+Phase 2a ran 21 R suites, all exit 0. Suites in this sweep that Phase 2a did not run:
+  test_raw_contribution_columns.R, test_report_directory.R, test_state_destinations.R
+S0 proved test_fec_api.R exits 0 (Phase 0 baseline).
+
+========================================================================
+(3) NODE - every mentat/tests/*.cjs
+========================================================================
+exit=0     139.2s  test_app_lazy_startup_browser.cjs                    ℹ duration_ms 136608.4845
+exit=0      79.0s  test_chart_builder_browser.cjs                       ℹ duration_ms 78282.6661
+exit=0      92.9s  test_chart_comparison_browser.cjs                    ℹ duration_ms 92215.8516
+exit=0       0.4s  test_chart_math.cjs                                  ℹ duration_ms 153.2951
+exit=0       0.3s  test_chart_studio_contributions.cjs                  ℹ duration_ms 23.8618
+exit=1      57.4s  test_console_browser.cjs                             }
+exit=0      67.5s  test_contribution_charts_browser.cjs                 ℹ duration_ms 66401.2228
+exit=1      70.7s  test_contribution_export_browser.cjs                   }
+exit=0      40.6s  test_contribution_map_browser.cjs                    ℹ duration_ms 22643.0445
+exit=0       0.3s  test_contribution_map_eligibility.cjs                ℹ duration_ms 31.8941
+exit=0       0.3s  test_contribution_plot.cjs                           ℹ duration_ms 80.03
+exit=0      39.6s  test_contribution_plot_readability_browser.cjs       ℹ duration_ms 38871.1156
+exit=0       0.3s  test_contribution_studio.cjs                         ℹ duration_ms 19.948
+exit=0      39.7s  test_contribution_studio_map_browser.cjs             ℹ duration_ms 38801.1094
+exit=0      66.4s  test_contribution_studio_state_browser.cjs           ℹ duration_ms 65605.8139
+exit=0       1.0s  test_coverage_view.cjs                               Coverage view checks passed.
+exit=1       0.2s  test_cross_reference_view.cjs                        Node.js v24.18.0
+exit=0       0.2s  test_funding_comparison.cjs                          ℹ duration_ms 11.542
+exit=0     102.3s  test_graph_lazy_tables_browser.cjs                   ℹ duration_ms 101790.8601
+exit=0      28.8s  test_original_studio_contributions_browser.cjs       ℹ duration_ms 28198.7547
+exit=0       0.5s  test_raw_contribution_columns.cjs                    ℹ duration_ms 13.574
+exit=0      60.2s  test_studio_briefing_tray_browser.cjs                ℹ duration_ms 59009.2316
+exit=0      60.9s  test_studio_canvas_only_browser.cjs                  ℹ duration_ms 60447.2382
+exit=0      41.7s  test_studio_click_to_add_browser.cjs                 ℹ duration_ms 40425.7091
+exit=124   180.5s  test_studio_copy_print_browser.cjs                   TIMED OUT after 180s (killed by the sweep runner)
+exit=1      54.1s  test_studio_data_source_browser.cjs                    }
+exit=0      31.4s  test_studio_inspection_regression_browser.cjs        Matching source accepted; stale inspection rejected.
+exit=0      60.4s  test_studio_reconciliation_browser.cjs               ℹ duration_ms 59832.5415
+exit=0     111.4s  test_studio_ride1_browser.cjs                        ℹ duration_ms 110933.2481
+exit=0      42.3s  test_studio_temporal_regression_browser.cjs          forecast: rendered successfully
+exit=0       0.2s  test_studio_wording.cjs                              ℹ duration_ms 24.3292
+exit=0       0.1s  test_ui_analysis.cjs                                 ℹ duration_ms 17.8973
+
+Node sweep: 27/32 exit 0  (S2 added one .cjs, so the file count is one above S0's 31)
+Per-file timeout: 180s, enforced by the sweep runner. exit=124 means the
+runner killed the child, NOT that the test reported a failure. The first
+attempt at this sweep had no timeout and blocked for over six minutes on
+test_app_lazy_startup_browser.cjs with under a second of CPU.
+timed out (1): test_studio_copy_print_browser.cjs
+S0 baseline: 27 of 31 pass, 4 pre-existing reds:
+  baseline red: test_console_browser.cjs
+  baseline red: test_contribution_export_browser.cjs
+  baseline red: test_cross_reference_view.cjs
+  baseline red: test_studio_briefing_tray_browser.cjs
+this sweep's reds:
+  red: test_console_browser.cjs
+  red: test_contribution_export_browser.cjs
+  red: test_cross_reference_view.cjs
+  red: test_studio_copy_print_browser.cjs
+  red: test_studio_data_source_browser.cjs
+MATCH TO BASELINE: NO - see below
+  not in the S0 baseline: test_studio_copy_print_browser.cjs, test_studio_data_source_browser.cjs
+  baseline reds that now pass: test_studio_briefing_tray_browser.cjs
+
+Adjudication of every difference from the baseline:
+  * test_studio_briefing_tray_browser.cjs now PASSES. S0 recorded it as a
+    date-boundary flake that fails only when a run straddles local
+    midnight. Nothing was done to it.
+  * test_studio_data_source_browser.cjs (exit 1, waiting for
+    '#studio-progress' to become visible) and
+    test_studio_copy_print_browser.cjs (killed at the 180s cap) are NOT
+    S2 regressions, on two independent grounds:
+      (a) code path - both load only mentat/tests/../app plus Playwright;
+          neither requires or mentions ANY file S2 changed, and neither
+          mentions 'street'. S2 touched nothing under mentat/app/**.
+      (b) isolation - re-run one at a time with no other sweep load, BOTH
+          EXIT 0. They fail only inside the full 32-file browser sweep, so
+          they are load-sensitive, not broken.
+    S0's own baseline section is self-contradictory here: it gives a 27/31
+    table AND says 'S0 did not run [the Node sweep] to completion', so the
+    four-red list may simply be incomplete. Treat these two as previously
+    unmeasured flakes, not as anything this lane introduced.
+
+========================================================================
+(4) POWERSHELL - the five tests/Test-*.ps1 via powershell.exe -NoProfile
+========================================================================
+exit=0       2.6s  Test-MentatFundingLabels.ps1                         Test-MentatFundingLabels: PASS
+exit=0       2.8s  Test-MentatLastGoodGuard.ps1                         PASS: guard leaves no pending publication files after success or rejection
+exit=0       1.4s  Test-MentatNodeHeapPlan.ps1                          Test-MentatNodeHeapPlan: PASS
+exit=0       1.6s  Test-MentatReportDirectory.ps1                       Test-MentatReportDirectory: PASS
+exit=0       1.7s  Test-MentatWorkbookBuilderGuards.ps1                 Test-MentatWorkbookBuilderGuards: PASS
+
+PowerShell sweep: 5/5 exit 0   (S0 baseline 5/5)
+
+========================================================================
+(5) WORKING TREE - git status --porcelain, new entries since session start
+========================================================================
+session start (given): 58 ' M' + 202 '??' = 260 entries
+now: 62 ' M' + 207 '??' = 269 entries
+delta: +4 ' M', +5 '??'
+
+NEW ' M' since session start (verified by byte-comparing each before/
+snapshot with `git cat-file -p HEAD:<path>` after CRLF normalisation - these
+four were content-clean at HEAD bd5dc8ea1, so their whole diff is S2's):
+   M mentat/R/tidy_stage.R
+   M mentat/tools/export_raw_contribution_warehouse.py
+   M mentat/tools/build_tidy_workbook.py
+   M mentat/tests/test_export_raw_contribution_warehouse.py
+
+ALREADY ' M' at session start (other lanes' uncommitted work; S2 added hunks
+to each, and its patches carry only S2's +/- lines):
+   M mentat/R/schema.R
+   M mentat/R/report.R
+   M mentat/R/collect.R
+   M mentat/R/fec_api.R
+   M mentat/tools/export_crypto_spending_data.R
+   M mentat/tools/crypto_workbook_builder.mjs
+
+NEW '??' since session start (5):
+  ?? mentat/tools/backfill_contributor_street.py
+  ?? mentat/tests/test_raw_contribution_columns.py
+  ?? mentat/tests/test_raw_contribution_columns.R
+  ?? mentat/tests/test_raw_contribution_columns.cjs
+  ?? mentat/tests/test_backfill_contributor_street.py
+
+The packet directory is ONE collapsed entry, '?? audits/mentat_failings_20260915/',
+so patches/ and receipts/ add no git-status lines. receipts/*.txt and the
+contract .json are gitignored besides (see S2_contract_integrity.txt).
+
+Entries that appeared during the sweeps themselves (pre-sweep status vs now):
+  none
+
+Stray-artifact scan (bounded, mentat/tests, mentat/tools, mentat/R, and the
+usual bytecode/temp shapes):
+  * nothing new under mentat/tests, mentat/tools or mentat/R.
+  * no __pycache__ entry was written (PYTHONDONTWRITEBYTECODE=1 held); the
+    three __pycache__ directories under mentat/ all predate this session.
+  * ONE file has a fresh mtime inside the repo:
+      mentat/state/contribution-analytics/fe275657...5223d.sqlite
+      3,895,296 bytes, 2026-09-16 12:50:05 -0400
+    It is the contribution-analytics CACHE that the studio browser tests
+    populate by design. It is 1 of 41 files in a pre-existing ~7.9 GB cache
+    directory whose siblings date from 2026-09-12 to 09-14; the directory was
+    already a single untracked entry (`?? mentat/state/`) in the pre-sweep
+    status, and the file itself is gitignored (`git check-ignore -q`
+    exit 0).
+    S2 did NOT delete it: it is application cache in an app-managed directory,
+    not an S2 stray, and removing it would be deleting data rather than
+    cleaning up after this lane. Flagged for Paul, left in place.
+

@@ -1,0 +1,16 @@
+# S2_red_r.txt
+# date: 2026-09-16T07:06:09Z
+# cwd: C:\Users\pgoff\Mentat\mentat
+# branch: codex/mentat-crypto (LIVE working tree, not HEAD)
+# command: /c/Program Files/R/R-4.6.0/bin/Rscript.exe tests/test_raw_contribution_columns.R
+# ---
+FAIL check (a) collect.R contribution_columns() keeps the address block -- contribution_columns(): missing contributor_street_1, contributor_street_2
+FAIL check (b) collect.R corporate_columns keeps the address block -- corporate_columns: missing contributor_street_1, contributor_street_2
+FAIL check (c) fec_api.R fec_api_corporate_records() keeps the address block -- fec_api_corporate_records(): missing contributor_street_1, contributor_street_2
+FAIL check (d) tidy_stage.R contributions spec matches the contract -- MENTAT_TIDY_TABLE_SPECS$contributions: 56 columns, contract wants 58; absent from producer: street_1, street_2
+FAIL check (e) export_crypto_spending_data.R raw_export projection matches the contract -- raw_export projection: 50 columns, contract wants 52; absent from producer: street_1, street_2
+FAIL check (f) init_schema() migrates an old database to the street columns -- contributions not migrated: missing contributor_street_1, contributor_street_2; bulk_candidates not migrated: missing contributor_street_1, contributor_street_2; corporate_giving not migrated: missing contributor_street_1, contributor_street_2
+PASS check (g) negative control: the shuffled block is rejected
+test_raw_contribution_columns: 6 check(s) failed
+test_raw_contribution_columns: FAIL
+# --- exit code: 1

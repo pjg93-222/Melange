@@ -1,0 +1,55 @@
+S2 T2 - contract generator rerun and gitignore census
+generated 2026-09-16T03:54:05-04:00
+
+generator: <SCRATCH>/s2_build/gen_contract.py
+  updated for the post-implementation tree: rawHeaders 37 (parsed live from
+  crypto_workbook_builder.mjs), the records.map row projection 37 (parsed live
+  from the same file - the unindented fall-through return, not the
+  aggregateFacts/compactRaw branches), tidy spec 58 (parsed live from
+  tidy_stage.R). apply_placement() is idempotent on an already-placed block.
+  Destination is now argv[1]; this rerun wrote to scratch, NOT over the packet.
+
+--- regeneration ---
+contributions_pragma (live PRAGMA table_info order): 63 columns, street_already_present=True
+wrote C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-contributor-street-columns-0a1726\acfc8792-f597-44a3-ac0f-f7d883e56447\scratchpad\s2_build\contract_regen.json (15306 bytes)
+corporate_giving.header: 50
+contributions.header: 63
+workbook_r_stage.columns: 52
+contributions_sheet.headers: 37
+contributions_sheet.row_fields: 37
+tidy_contributions.columns: 58
+EXIT_CODE=0
+
+--- byte identity ---
+repo   audits/mentat_failings_20260915/contracts/raw_contribution_columns.json  15308 bytes  sha256 841e8fdd962ce5ced890e9edd27113f661de9529c5a43ed66311c61ee01c2df8
+regen  <SCRATCH>/s2_build/contract_regen.json  15308 bytes  sha256 841e8fdd962ce5ced890e9edd27113f661de9529c5a43ed66311c61ee01c2df8
+RESULT: BYTE-IDENTICAL
+
+--- git check-ignore -v (read-only) ---
+Verdict comes from `git check-ignore -q <path>` (exit 0 = the path IS
+ignored, exit 1 = it is not).  `-v` is quoted only for the matching rule:
+with -v git ALSO reports paths matched by a negated (!) pattern and still
+exits 0, so -v's exit code is not an ignore verdict - see the !*.md rows.
+IGNORED      check-ignore -q exit=0  rule=.gitignore:6:*.json  audits/mentat_failings_20260915/contracts/raw_contribution_columns.json
+not ignored  check-ignore -q exit=1  rule=.gitignore:31:!*.md  audits/mentat_failings_20260915/HANDOFF.md
+not ignored  check-ignore -q exit=1  rule=(no rule matches)  mentat/tools/backfill_contributor_street.py
+not ignored  check-ignore -q exit=1  rule=(no rule matches)  mentat/tests/test_raw_contribution_columns.py
+not ignored  check-ignore -q exit=1  rule=.gitignore:31:!*.md  audits/mentat_failings_20260915/contracts/README.md
+not ignored  check-ignore -q exit=1  rule=.gitignore:31:!*.md  audits/mentat_failings_20260915/PACKET.md
+IGNORED      check-ignore -q exit=0  rule=.gitignore:21:*.txt  audits/mentat_failings_20260915/receipts/S2_patch_check.txt
+not ignored  check-ignore -q exit=1  rule=(no rule matches)  audits/mentat_failings_20260915/patches/S2_street_columns.patch
+not ignored  check-ignore -q exit=1  rule=(no rule matches)  mentat/tests/test_raw_contribution_columns.R
+not ignored  check-ignore -q exit=1  rule=(no rule matches)  mentat/tests/test_raw_contribution_columns.cjs
+not ignored  check-ignore -q exit=1  rule=(no rule matches)  mentat/tests/test_backfill_contributor_street.py
+not ignored  check-ignore -q exit=1  rule=(no rule matches)  mentat/tools/build_tidy_workbook.py
+
+FINDING: the contract JSON and EVERY receipts/*.txt file ARE gitignored.
+  .gitignore:6  *.json   -> audits/.../contracts/raw_contribution_columns.json
+  .gitignore:21 *.txt    -> audits/.../receipts/*.txt
+  .gitignore:31 !*.md re-includes the .md packet files, so HANDOFF.md,
+  PACKET.md and contracts/README.md are NOT ignored; nor are the .patch,
+  .py, .R and .cjs files (no rule matches them).
+  The three test suites read the contract JSON at import time, so a
+  `git add` without -f would land tests that cannot find their contract.
+  Paul's call: `git add -f` the contract, or add a negation next to the
+  existing !formal_visibility_roles.json / !tier_overrides.json lines.

@@ -1,0 +1,80 @@
+# S2_red_node.txt
+# date: 2026-09-16T07:06:10Z
+# cwd: C:\Users\pgoff\Mentat\mentat
+# branch: codex/mentat-crypto (LIVE working tree, not HEAD)
+# command: node tests/test_raw_contribution_columns.cjs
+# ---
+✖ rawHeaders matches the contract header order (2.2744ms)
+✖ the row projection keeps the address block contiguous and cell aligned (1.9743ms)
+✔ compactRawHeaders still drops every geography column by design (0.2521ms)
+✔ negative control: a shuffled header block is rejected (0.1206ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 2
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.4628
+
+✖ failing tests:
+
+test at tests\test_raw_contribution_columns.cjs:119:1
+✖ rawHeaders matches the contract header order (2.2744ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+  
+    [
+      'Source ID',
+      'Cycle',
+      'FEC Filing Cycle',
+      'Cycle Alignment',
+  ...
+      'Date',
+  -   'Employer',
+  -   'Occupation',
+  -   'Street 1',
+  -   'Street 2',
+      'City',
+      'State',
+      'ZIP',
+  +   'Employer',
+  +   'Occupation',
+      'Record Type',
+      'Source Table',
+      'Company Match Status',
+      'Include in Analysis',
+      'Inclusion Reason',
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\Mentat\mentat\tests\test_raw_contribution_columns.cjs:120:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [Array],
+    expected: [Array],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests\test_raw_contribution_columns.cjs:123:1
+✖ the row projection keeps the address block contiguous and cell aligned (1.9743ms)
+  AssertionError [ERR_ASSERTION]: row projection block is not contiguous: found ["source_id","cycle_label","source_cycle","cycle_alignment","company","contributor","employee_tier","amount",null,"party","recipient_category","category_source","party_source","recipient","committee_id","recipient_key","date","city","state","zipcode","employer","occupation","record_type","source_table","company_match_status","include_in_analysis","inclusion_reason","person_key","identity_basis","is_memo_leg","is_conduit_leg","superseded_by_amendment","duplicate_filing_version","duplicate_memo",null]
+      at TestContext.<anonymous> (C:\Users\pgoff\Mentat\mentat\tests\test_raw_contribution_columns.cjs:125:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+# --- exit code: 1

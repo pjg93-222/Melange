@@ -1,0 +1,22 @@
+test_chunk_reader_preserves_every_value_and_rejects_corruption (tests.test_workbook_payload.WorkbookProjectionTests.test_chunk_reader_preserves_every_value_and_rejects_corruption) ... ok
+test_powershell_large_json_validation (tests.test_workbook_payload.WorkbookProjectionTests.test_powershell_large_json_validation) ... ok
+test_projection_preserves_financial_and_identity_inputs (tests.test_workbook_payload.WorkbookProjectionTests.test_projection_preserves_financial_and_identity_inputs) ... ok
+test_projection_preserves_fine_grain_detail_frames (tests.test_workbook_payload.WorkbookProjectionTests.test_projection_preserves_fine_grain_detail_frames) ... ok
+test_projection_retains_destination_lineage_and_both_complete_partitions (tests.test_workbook_payload.WorkbookProjectionTests.test_projection_retains_destination_lineage_and_both_complete_partitions) ... ok
+test_live_fanout_status_reads_allow_atomic_replacement (tests.test_resilient_orchestrator.ResilientOrchestratorTests.test_live_fanout_status_reads_allow_atomic_replacement) ... ok
+test_locked_status_write_is_nonfatal_counted_and_load_writes_raise (tests.test_resilient_orchestrator.ResilientOrchestratorTests.test_locked_status_write_is_nonfatal_counted_and_load_writes_raise) ... ok
+test_managed_fast_process_exit_codes_are_never_null (tests.test_resilient_orchestrator.ResilientOrchestratorTests.test_managed_fast_process_exit_codes_are_never_null) ... ok
+test_managed_wait_wakes_on_exit_without_sleeping (tests.test_resilient_orchestrator.ResilientOrchestratorTests.test_managed_wait_wakes_on_exit_without_sleeping) ... ok
+test_phase_timing_receipt_and_summary_line_are_always_wired (tests.test_resilient_orchestrator.ResilientOrchestratorTests.test_phase_timing_receipt_and_summary_line_are_always_wired) ... ok
+test_phase_timing_summary_formats_the_complete_expression (tests.test_resilient_orchestrator.ResilientOrchestratorTests.test_phase_timing_summary_formats_the_complete_expression) ... ok
+test_plan_only_accepts_roster_discovered_industry_count (tests.test_resilient_orchestrator.ResilientOrchestratorTests.test_plan_only_accepts_roster_discovered_industry_count) ... ok
+test_plan_only_counts_numbered_keys_and_comma_industries (tests.test_resilient_orchestrator.ResilientOrchestratorTests.test_plan_only_counts_numbered_keys_and_comma_industries) ... ok
+test_powershell_parser_accepts_script (tests.test_resilient_orchestrator.ResilientOrchestratorTests.test_powershell_parser_accepts_script) ... ok
+test_python_runtime_override_is_recorded_in_plan (tests.test_resilient_orchestrator.ResilientOrchestratorTests.test_python_runtime_override_is_recorded_in_plan) ... ok
+test_raw_data_gate_precedes_generator_release (tests.test_resilient_orchestrator.ResilientOrchestratorTests.test_raw_data_gate_precedes_generator_release) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 43.745s
+
+OK
+EXIT_CODE=0

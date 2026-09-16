@@ -1,0 +1,11 @@
+PASS check (a) collect.R contribution_columns() keeps the address block
+PASS check (b) collect.R corporate_columns keeps the address block
+PASS check (c) fec_api.R fec_api_corporate_records() keeps the address block
+PASS check (d) tidy_stage.R contributions spec matches the contract
+PASS check (e) export_crypto_spending_data.R raw_export projection matches the contract
+PASS check (f) init_schema() migrates an old database to the street columns
+PASS check (g) negative control: the shuffled block is rejected
+PASS check (h) report.R spending_raw_report_rows() SELECTs return the street columns
+test_raw_contribution_columns: 0 check(s) failed
+test_raw_contribution_columns: PASS
+EXIT_CODE=0

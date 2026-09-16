@@ -1,0 +1,49 @@
+S2 patch integrity check (Phase 3a, T3)
+generated 2026-09-16T12:19:00-04:00
+repo C:\Users\pgoff\Mentat  branch codex/mentat-crypto  (LIVE dirty tree)
+no git write operation was run against the Mentat repo.
+
+--- patch files ---
+S2_street_columns.patch: 108867 bytes, 2888 lines, sha256 9836fbe6d8f8f0fafbc0ab21dbabf9e0fdc4812a8914ebcecff899fcb086653b
+S2_street_columns_collect.patch: 4707 bytes, 88 lines, sha256 63be120c7d6239013d516ecb277f4447bcb8a0b308ec2ce180d66a5b1b8f7ba3
+
+--- check 1: reverse-apply against the LIVE working tree (read-only) ---
+command: git -c core.autocrlf=false -C C:\Users\pgoff\Mentat apply --check --reverse audits/mentat_failings_20260915/patches/<patch>
+S2_street_columns.patch: EXIT_CODE=0
+S2_street_columns_collect.patch: EXIT_CODE=0
+check 1 result: PASS (2/2 patches reverse-apply cleanly, i.e. each patch's post-image is exactly the live tree)
+
+--- check 2: rebuild the pre-edit tree in scratch, apply, compare bytes ---
+scratch tree: C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-contributor-street-columns-0a1726\acfc8792-f597-44a3-ac0f-f7d883e56447\scratchpad\s2_build\apply_test (git init there; NOT the Mentat repo)
+script: C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-contributor-street-columns-0a1726\acfc8792-f597-44a3-ac0f-f7d883e56447\scratchpad\s2_build\apply_test.py
+
+rebuilt pre-edit tree: 10 files, 6 new files absent
+git init in scratch tree: exit 0  (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-contributor-street-columns-0a1726\acfc8792-f597-44a3-ac0f-f7d883e56447\scratchpad\s2_build\apply_test)
+S2_street_columns.patch: git apply --check exit 0 
+S2_street_columns.patch: git apply exit 0 
+S2_street_columns_collect.patch: git apply --check exit 0 
+S2_street_columns_collect.patch: git apply exit 0 
+
+status    rebuilt sha256   live sha256      path
+match     0e91cbf2c3f2034b 0e91cbf2c3f2034b mentat/R/schema.R
+match     f83a5ad7e169a165 f83a5ad7e169a165 mentat/R/tidy_stage.R
+match     661e737a18ce13ac 661e737a18ce13ac mentat/R/report.R
+match     4ab775e4826e98e4 4ab775e4826e98e4 mentat/tools/export_raw_contribution_warehouse.py
+match     0d6dfcca33ced195 0d6dfcca33ced195 mentat/tools/export_crypto_spending_data.R
+match     ffafe6cb6846ab31 ffafe6cb6846ab31 mentat/tools/crypto_workbook_builder.mjs
+match     9d7059cce3ce69c3 9d7059cce3ce69c3 mentat/tools/build_tidy_workbook.py
+match     1627676e9c547c4d 1627676e9c547c4d mentat/tests/test_export_raw_contribution_warehouse.py
+match     4af91497af509295 4af91497af509295 mentat/R/collect.R
+match     6b94ed072ad88432 6b94ed072ad88432 mentat/R/fec_api.R
+match     cc0d1d8791db3a60 cc0d1d8791db3a60 mentat/tools/backfill_contributor_street.py
+match     24f93df7a7a4cae2 24f93df7a7a4cae2 mentat/tests/test_raw_contribution_columns.py
+match     24f13899c2b840c4 24f13899c2b840c4 mentat/tests/test_raw_contribution_columns.R
+match     f84de1f45546e3d3 f84de1f45546e3d3 mentat/tests/test_raw_contribution_columns.cjs
+match     ea6fe55f62750035 ea6fe55f62750035 mentat/tests/test_backfill_contributor_street.py
+match     841e8fdd962ce5ce 841e8fdd962ce5ce audits/mentat_failings_20260915/contracts/raw_contribution_columns.json
+
+files compared: 16  mismatches: 0
+apply_test.py EXIT_CODE=0
+check 2 result: PASS (no CRLF/LF corruption: every rebuilt file is byte-identical to live)
+
+OVERALL: PASS

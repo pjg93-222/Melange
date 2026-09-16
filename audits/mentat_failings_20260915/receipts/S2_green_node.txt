@@ -1,0 +1,13 @@
+✔ rawHeaders matches the contract header order (3.3682ms)
+✔ the row projection keeps the address block contiguous and cell aligned (2.8508ms)
+✔ compactRawHeaders still drops every geography column by design (0.3633ms)
+✔ negative control: a shuffled header block is rejected (0.4337ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 25.5446
+EXIT_CODE=0

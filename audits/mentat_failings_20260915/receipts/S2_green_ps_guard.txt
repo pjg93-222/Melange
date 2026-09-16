@@ -1,0 +1,2 @@
+Test-MentatWorkbookBuilderGuards: PASS
+EXIT_CODE=0

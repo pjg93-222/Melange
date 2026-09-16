@@ -1,0 +1,88 @@
+diff --git a/mentat/R/collect.R b/mentat/R/collect.R
+index 18fffbc7d..f79d7b3b1 100644
+--- a/mentat/R/collect.R
++++ b/mentat/R/collect.R
+@@ -3,8 +3,9 @@ contribution_columns <- function() {
+   c(
+     "sub_id", "transaction_id", "original_sub_id", "contributor_id",
+     "contributor_name", "contributor_first_name", "contributor_last_name",
+-    "contributor_suffix", "contributor_city", "contributor_state",
+-    "contributor_zip", "contributor_employer", "contributor_occupation",
++    "contributor_suffix", "contributor_employer", "contributor_occupation",
++    "contributor_street_1", "contributor_street_2", "contributor_city",
++    "contributor_state", "contributor_zip",
+     "contributor_aggregate_ytd", "contribution_receipt_amount",
+     "contribution_receipt_date", "committee_id", "committee_name",
+     "recipient_committee_type", "recipient_committee_designation", "entity_type",
+@@ -1130,6 +1131,20 @@ flatten_fec_rows <- function(
+       as_db_bool(row_scalar(row, field, default))
+     }, integer(1L))
+   }
++  # A page whose source rows carry no street column at all yields a blank
++  # street for every row on it. That is a shape fact about the source, not a
++  # bad row, so it is reported once per page and never interrupts the walk.
++  if (tabular_rows && row_count > 0L &&
++      !any(c("contributor_street_1", "contributor_street_2") %in% names(rows))) {
++    cat(sprintf(
++      paste0(
++        "flatten_fec_rows: source rows carry no contributor_street_1/",
++        "contributor_street_2; street will be blank for this page ",
++        "(phase=%s)\n"
++      ),
++      as.character(phase)
++    ))
++  }
+   employer_values <- page_text("contributor_employer")
+   occupation_values <- page_text("contributor_occupation")
+   contributor_names <- page_text("contributor_name")
+@@ -1268,6 +1283,8 @@ flatten_fec_rows <- function(
+     contributor_zip = page_text("contributor_zip"),
+     contributor_employer = employer_values,
+     contributor_occupation = occupation_values,
++    contributor_street_1 = page_text("contributor_street_1"),
++    contributor_street_2 = page_text("contributor_street_2"),
+     contributor_aggregate_ytd = page_number("contributor_aggregate_ytd"),
+     contribution_receipt_amount = amounts,
+     contribution_receipt_date = page_text("contribution_receipt_date"),
+@@ -3051,8 +3068,9 @@ checkpoint_corporate_page <- function(
+   zero_verified = 0L
+ ) {
+   corporate_columns <- c(
+-    "sub_id", "contributor_id", "contributor_name", "contributor_city", "contributor_state",
+-    "contributor_zip", "contributor_employer", "contributor_occupation",
++    "sub_id", "contributor_id", "contributor_name", "contributor_employer",
++    "contributor_occupation", "contributor_street_1", "contributor_street_2",
++    "contributor_city", "contributor_state", "contributor_zip",
+     "entity_type", "is_entity_contributor", "committee_id", "committee_name",
+     "recipient_committee_type", "recipient_committee_designation",
+     "contribution_receipt_date", "contribution_receipt_amount", "industry",
+@@ -3182,9 +3200,10 @@ collect_company_contributor_pass <- function(
+           )]
+         }
+         corporate <- records[, .(
+-          sub_id, contributor_name, contributor_city, contributor_state,
+-          contributor_zip, contributor_employer, contributor_occupation,
+-          contributor_id, entity_type, is_entity_contributor, committee_id, committee_name,
++          sub_id, contributor_id, contributor_name, contributor_employer,
++          contributor_occupation, contributor_street_1, contributor_street_2,
++          contributor_city, contributor_state, contributor_zip,
++          entity_type, is_entity_contributor, committee_id, committee_name,
+           recipient_committee_type,
+           recipient_committee_designation, contribution_receipt_date,
+           contribution_receipt_amount, industry, company, matched_variant,
+diff --git a/mentat/R/fec_api.R b/mentat/R/fec_api.R
+index e8b66db3a..868b8247d 100644
+--- a/mentat/R/fec_api.R
++++ b/mentat/R/fec_api.R
+@@ -2000,8 +2000,9 @@ fec_api_corporate_records <- function(
+     }
+   }
+   records[, .(
+-    sub_id, contributor_id, contributor_name, contributor_city, contributor_state,
+-    contributor_zip, contributor_employer, contributor_occupation,
++    sub_id, contributor_id, contributor_name, contributor_employer,
++    contributor_occupation, contributor_street_1, contributor_street_2,
++    contributor_city, contributor_state, contributor_zip,
+     entity_type, is_entity_contributor, committee_id, committee_name,
+     recipient_committee_type, recipient_committee_designation,
+     contribution_receipt_date,

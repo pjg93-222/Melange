@@ -1,0 +1,985 @@
+# S2 Phase 2a regression (post street-last reorder) -- cwd C:\Users\pgoff\Mentat\mentat
+
+===== Rscript tests/test_fec_api.R =====
+[1] 2
+[1] 2
+[1] 2
+unservable_query: Binance cycle 2024 -> decomposed into 2 queries, 3 rows
+unservable_decomposed_query: BINANCE.US cycle 2024 per_page 100 -> retrying from page 1 at per_page 50
+unservable_query: Binance cycle 2024 -> decomposed into 2 queries, 2 rows
+unservable_decomposed_query: BINANCEUS cycle 2024 per_page 100 -> retrying from page 1 at per_page 50
+unservable_decomposed_query: BINANCEUS cycle 2024 per_page 50 -> retrying from page 1 at per_page 20
+unservable_decomposed_query: BINANCEUS cycle 2024 per_page 20 -> retrying from page 1 at per_page 10
+unservable_decomposed_query: BINANCEUS cycle 2024 per_page 10 -> retrying from page 1 at per_page 5
+unservable_decomposed_query: BINANCEUS cycle 2024 per_page 5 -> retrying from page 1 at per_page 1
+test_fec_api: PASS
+EXIT=0 (tests/test_fec_api.R)
+===== Rscript tests/test_tidy_stage.R =====
+
+TIDY STAGE CONTRACT
+  [PASS] contributions carries every receipt, included and excluded
+  [PASS] contributions columns match the contract, in order
+  [PASS] ZIP+4 truncates to five digits
+  [PASS] an alphabetic ZIP is NULL, never a truncated guess
+  [PASS] blank text becomes NA, never an empty-string category
+  [PASS] flags are integer 0/1, never Yes/No
+  [PASS] analysis_amount is the amount when included and 0 when not
+  [PASS] committee type and designation carry BOTH the code and its label
+  [PASS] an unknown committee-type code resolves to NULL, never a neighbouring label
+  [PASS] dates stay ISO text
+  [PASS] giving_facts reconciles to the cycle totals
+  [PASS] giving_facts keeps the corporate row under its tier
+  [PASS] distinct_contributors ignores entity rows with no person
+  [PASS] contributor_facts excludes entity rows
+  [PASS] modal contributor spelling breaks ties alphabetically
+  [PASS] distinct_addresses counts the person's cycle, across parties
+  [PASS] recipient_facts reconciles to the cycle totals
+  [PASS] recipient_facts carries first and last gift dates
+  [PASS] a committee with two sponsors carries no single sponsor on the row
+  [PASS] a committee with exactly one sponsor carries the sponsor columns
+  [PASS] location_facts reconciles to the cycle totals
+  [PASS] committees covers every committee that appears in contributions
+  [PASS] a `;`-joined relationship becomes Multiple, never the joined text
+  [PASS] a single-valued relationship is kept verbatim
+  [PASS] committees take state and party affiliation from the FEC master
+  [PASS] sponsor_count is zero, not NULL, for an unsponsored committee
+  [PASS] committee_sponsors is filtered to the recipient universe
+  [PASS] both link sources are represented with their own row
+  [PASS] sponsor rows carry the candidate name
+  [PASS] candidates is filtered to referenced ids only
+  [PASS] incumbent codes decode to words
+  [PASS] an unknown incumbent code stays NULL
+  [PASS] beneficiary_bridge drops the Industry view (it is a sum of the company rows)
+  [PASS] set-valued activity columns become 0/1 flags, not `;`-joined text
+  [PASS] downstream activity keeps its JSON evidence as one text cell
+  [PASS] one candidate_id under two filed name spellings stays TWO rows
+  [PASS] the downstream key carries `candidate` (amendment D2)
+  [PASS] recipient_locations drops the `;`-joined evidence columns
+  [PASS] data_quality records the producer of every check
+  [PASS] the reconciliation guard passes on a consistent store
+  [PASS] a corrupted fact table FAILS the guard
+  [PASS] a repeated row key FAILS the guard
+  [PASS] the pre-amendment six-column key WOULD have reported a false duplicate
+  [PASS] a missing key column FAILS the guard rather than weakening it
+  [PASS] the store is installed under its final name, with no pending leftovers
+  [PASS] every contract table is present
+  [PASS] stored column names and order match the contract
+  [PASS] stored column affinities match the contract
+  [PASS] dates survive the round trip as ISO TEXT, never as an R Date's day number
+  [PASS] money survives as REAL dollars
+  [PASS] blanks are SQL NULL in the store
+  [PASS] the metadata table renders lists as JSON
+  [PASS] a missing metadata value is NULL, not the string NA
+  [PASS] the derived flag columns are stored as INTEGER
+  [PASS] data_quality metric is TEXT, so three producers' metrics are never summed
+  [PASS] two writes of the same frames produce identical stores
+test_tidy_stage: PASS
+EXIT=0 (tests/test_tidy_stage.R)
+===== Rscript tests/test_receipt_roles.R =====
+test_receipt_roles: PASS
+EXIT=0 (tests/test_receipt_roles.R)
+===== Rscript tests/test_collection_contract.R =====
+[1] 1
+Unservable query: test -> 26 exhaustive date windows
+test_collection_contract: PASS
+EXIT=0 (tests/test_collection_contract.R)
+===== Rscript tests/test_evidence_archive.R =====
+[1] 0
+[1] 0
+test_evidence_archive: PASS
+EXIT=0 (tests/test_evidence_archive.R)
+===== Rscript tests/test_fec_api_fanout.R =====
+test_fec_api_fanout: PASS
+EXIT=0 (tests/test_fec_api_fanout.R)
+===== Rscript tests/test_names.R =====
+[1] 0
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+Resume: skipping broad P2_name probe for resume-seed [BROWN, MICHAEL]; scoped legs=zip,city
+[1] 2
+[1] 1
+[1] 2
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 2
+[1] 1
+[1] 1
+test_names: single-token, blank, suffix, and LAST, FIRST names verified
+test_names: structurally invalid broad person queries rejected
+test_names: broad identities split into ZIP5/city query legs
+test_names: campaign-scoped completed checkpoints resume safely
+test_names: scoped resume skips broad probe and runs missing leg
+test_names: scoped resume retag rejects stale employer and identity seeds
+test_names: strict employer and cross-employer identity checks verified
+test_names: canonical company contributor query verified
+test_names: PASS
+EXIT=0 (tests/test_names.R)
+===== Rscript tests/test_rules.R =====
+test_rules: PASS
+EXIT=0 (tests/test_rules.R)
+===== Rscript tests/test_ingest.R =====
+Warning messages:
+1: Optional FEC bulk superset is missing: C:/Users/pgoff/AppData/Local/Temp/RtmpasYuMV/mentat-test-ingest-438466898d6/bulk/indiv22_crypto_superset.psv; observed-employer fallback for cycle 2022 will use roster variants. 
+2: Optional FEC bulk superset is missing: C:/Users/pgoff/AppData/Local/Temp/RtmpasYuMV/mentat-test-ingest-438466898d6/bulk/indiv24_crypto_superset.psv; observed-employer fallback for cycle 2024 will use roster variants. 
+3: Optional FEC bulk superset is missing: C:/Users/pgoff/AppData/Local/Temp/RtmpasYuMV/mentat-test-ingest-438466898d6/bulk/indiv26_crypto_superset.psv; observed-employer fallback for cycle 2026 will use roster variants. 
+test_ingest: industries=7 companies=70 variants=327 crypto_variants=16
+test_ingest: categories=425 leadership=2322 trade=335 executives=50 fixture=1189
+test_ingest: PASS
+EXIT=0 (tests/test_ingest.R)
+===== Rscript tests/test_reconcile.R =====
+test_reconcile: S1=4 S2=1 S3=1 S4=1 unmatched=1 pipeline_only=4
+test_reconcile: empty-pipeline degradation verified
+test_reconcile: PASS
+EXIT=0 (tests/test_reconcile.R)
+===== Rscript tests/test_request_windows.R =====
+Shared workers: sample -> 26 date windows; expected 2600 rows
+Shared workers: sample -> 26 date windows; expected 2600 rows
+Shared workers: sample -> 26 date windows; expected 2600 rows
+Shared workers: sample -> 26 date windows; expected 2600 rows
+Unservable query: sample -> 26 exhaustive date windows
+Unservable query: sample -> 26 exhaustive date windows
+Shared request date windows, complete union, overlap/missing rejection, checkpoint resume, retained counts: PASS
+EXIT=0 (tests/test_request_windows.R)
+===== Rscript tests/test_fec_beneficiary_helpers.R =====
+test_fec_beneficiary_helpers: randomized=5000 parity_rows=15000 groups=20000 reference=5.510s optimized=2.190s speedup=2.5x PASS
+EXIT=0 (tests/test_fec_beneficiary_helpers.R)
+===== Rscript tests/test_sqlite_lane_locking.R =====
+[1] 0
+[1] 0
+test_sqlite_lane_locking: PASS (waited 1.330s for write lock)
+EXIT=0 (tests/test_sqlite_lane_locking.R)
+===== Rscript tests/test_export_progress_guards.R =====
+test_export_progress_guards: PASS
+EXIT=0 (tests/test_export_progress_guards.R)
+===== Rscript tests/test_report.R =====
+[1] 2
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 2
+[1] 3
+[1] 1
+[1] 1
+[1] 2
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 1
+[1] 2
+[1] 2
+[1] 5
+[1] 5
+[1] 1
+[1] 3
+[1] 2
+[1] 2
+R8 row flags (only memos with retained, matched counterparts are excluded here):
+            table  company before_rows current_rows rows_superseded
+    contributions Coinbase          19           18               0
+    contributions   Gemini           3            3               0
+ corporate_giving Coinbase           2            2               0
+ rows_duplicate_filing_versions rows_memo_duplicates rows_collapsed
+                              0                    1              1
+                              0                    0              0
+                              0                    0              0
+ before_total current_total filing_version_dollar_delta
+       1336.7        1261.7                           0
+        850.0         850.0                           0
+      12000.0       12000.0                           0
+ memo_duplicate_dollar_delta dollar_delta
+                         -75          -75
+                           0            0
+                           0            0
+Coinbase corporate raw/analysis: $12000.00 -> $12000.00 (0 amendment flags; 0 filing-version flags; 0 memo duplicates)
+Recipient register committee-ID resolution:
+     register  rows resolved ambiguous resolution_rate
+       <char> <int>    <int>     <int>           <num>
+1: categories     3        2         0       0.6666667
+2: leadership     0        0         0       0.0000000
+3:      trade     0        0         0       0.0000000
+Bulk completeness audit (candidate / API / rescued / unreachable):
+    company cycle bulk_candidate_rows api_captured rescued unreachable
+     <char> <int>               <int>        <int>   <int>       <int>
+1: Coinbase  2022                   0            0       0           0
+2: Coinbase  2024                   0            0       0           0
+3: Coinbase  2026                   1            1       0           0
+4:   Gemini  2022                   0            0       0           0
+5:   Gemini  2024                   0            0       0           0
+6:   Gemini  2026                   2            1       0           1
+Report generation benchmark: rows=24 wall=10.440s rows/sec=2.30
+test_report: report versioning passes=1
+[1] 1
+$audit
+[1] "C:/Users/pgoff/AppData/Local/Temp/RtmpmOg888/mentat-test-report-143423e71672/reports/bulk_audit.csv"
+
+$unmatched
+[1] "C:/Users/pgoff/AppData/Local/Temp/RtmpmOg888/mentat-test-report-143423e71672/reports/bulk_audit_unmatched.csv"
+
+$tables
+$tables$audit
+    company cycle bulk_candidate_rows api_captured rescued unreachable
+     <char> <int>               <int>        <int>   <int>       <int>
+1: Coinbase  2022                   0            0       0           0
+2: Coinbase  2024                   0            0       0           0
+3: Coinbase  2026                   1            1       0           0
+4:   Gemini  2022                   0            0       0           0
+5:   Gemini  2024                   0            0       0           0
+6:   Gemini  2026                   2            0       1           1
+
+$tables$unmatched
+   company cycle           sub_id contributor_name contributor_city
+    <char> <int>           <char>           <char>           <char>
+1:  Gemini  2026 bulk-unreachable  MISSING, PERSON          SEATTLE
+   contributor_state contributor_zip employer_string contributor_occupation
+              <char>          <char>          <char>                 <char>
+1:                WA           98101          GEMINI               ENGINEER
+   committee_id amount
+         <char>  <num>
+1:     CMISSING    100
+
+
+[1] 1
+[1] 1
+test_report: strict company retagging verified
+test_report: legacy corporate exact-match revalidation verified
+test_report: six-sheet Spending Report contract verified
+test_report: exact template column layouts verified
+test_report: large worksheet column restoration verified
+test_report: contribution and corporate receipt counts verified
+test_report: amendment versions and signed redesignation legs verified
+test_report: 6,035 uniform Stats formulas and cross-sheet references verified
+test_report: Stats caches and fast automatic calculation mode verified
+test_report: PASS
+EXIT=0 (tests/test_report.R)
+===== Rscript tests/test_report_vectorization.R =====
+test_report_vectorization: classification_rows=2000 reference=2.780s vector=0.130s speedup=21.4x entity_rows=10000 reference=6.030s vector=0.030s speedup=201.0x tier_rows=10000 reference=6.190s vector=0.030s speedup=206.3x production_rows=423000 vector=2.640s PASS
+EXIT=0 (tests/test_report_vectorization.R)
+===== Rscript tests/test_spending_detail_frames.R =====
+test_spending_detail_frames: PASS
+EXIT=0 (tests/test_spending_detail_frames.R)
+===== Rscript tests/test_fec_page.R =====
+Transient FEC browser failure for Coinbase cycle 2024 (P1_employer); replaying the query, attempt 2 of 3: Chromote: timed out waiting for response to command Runtime.evaluate
+Transient FEC browser failure for Coinbase cycle 2024 (P1_employer); replaying the query, attempt 3 of 3: Chromote: timed out waiting for response to command Runtime.evaluate
+Transient FEC browser failure for Coinbase cycle 2024 (P1_employer); replaying the query, attempt 2 of 4: FEC canary failure for Coinbase cycle 2024 page 0
+Transient FEC browser failure for Coinbase cycle 2024 (P1_employer); replaying the query, attempt 3 of 4: FEC canary failure for Coinbase cycle 2024 page 0
+Transient FEC browser failure for Coinbase cycle 2024 (P1_employer); replaying the query, attempt 4 of 4: FEC canary failure for Coinbase cycle 2024 page 0
+FEC browser API fallback batch 1/1: pages 1-2.
+FEC browser API fallback retry 1/1 for pages 1-2: responses=1/2; last_page=1; last_status=200; error=
+test_fec_page: transient whole-query retry verified
+test_fec_page: incomplete browser API batches retried atomically
+test_fec_page: scoped ZIP/city URL filters verified
+test_fec_page: redundant redraw and page reads avoided
+test_fec_page: dead sessions bypass inner retries
+test_fec_page: canary failures remain bounded and fail closed
+test_fec_page: employer partition direct calls use active session
+test_fec_page: PASS
+EXIT=0 (tests/test_fec_page.R)
+===== Rscript tests/test_attribution_recheck.R =====
+test_attribution_recheck: PASS
+EXIT=0 (tests/test_attribution_recheck.R)
+===== Rscript tests/test_identity_components.R =====
+test_identity_components: representative=9 randomized=1000 rows=750 reference=4.810s indexed=0.000s speedup=Infx PASS
+EXIT=0 (tests/test_identity_components.R)
+===== Rscript tests/test_transfer_evidence.R =====
+Transfer evidence: retained identities, amendment review, cache version and coverage serialization PASS
+EXIT=0 (tests/test_transfer_evidence.R)
+===== python -m unittest tests.test_tidy_workbook =====
+.....FAIL giving_facts_vs_contributions: 2021-2022: Giving Facts 26.00 vs Contributions analysis 25.00
+1 severity-fail Data Quality row(s) failed; nothing published.
+.FAIL no_multivalue_cells: Recipient Facts: Committee Relationship (1)
+1 severity-fail Data Quality row(s) failed; nothing published.
+.......
+----------------------------------------------------------------------
+Ran 13 tests in 2.064s
+
+OK
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-gunyrlly\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.15s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-m85j5cmf\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.13s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-k7os_bgl\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.11s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-hp06m70d\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.14s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-skr8xuso\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.17s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-skr8xuso\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.1s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-rkn43gcm\Example Industry Spending Data.xlsx (13 sheets, 77 rows, 0.19s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-ei9ux0b_\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.17s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-7ejj96yx\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.12s)
+EXIT=0 (tests.test_tidy_workbook)
+===== python -m unittest tests.test_merge_company_shards =====
+............quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-shard-merge-aa9vrqun\a.db companies=Alpha
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-shard-merge-aa9vrqun\b.db companies=Beta
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-shard-merge-aa9vrqun\a.db companies=Alpha
+  api_page_checkpoints_replaced=0
+  api_work_progress_changed=0
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=0
+  bulk_candidates_inserted=0
+  bulk_candidates_pk_existing=1
+  canary_log_inserted=0
+  contributions_inserted=0
+  contributions_pk_existing=1
+  corporate_giving_inserted=0
+  corporate_giving_pk_existing=1
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=0
+  review_queue_identity_inserted=0
+  run_log_inserted=0
+  run_metrics_inserted=0
+  scrape_progress_changed=0
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-shard-merge-aa9vrqun\b.db companies=Beta
+  api_page_checkpoints_replaced=0
+  api_work_progress_changed=0
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=0
+  bulk_candidates_inserted=0
+  bulk_candidates_pk_existing=1
+  canary_log_inserted=0
+  contributions_inserted=0
+  contributions_pk_existing=1
+  corporate_giving_inserted=0
+  corporate_giving_pk_existing=1
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=0
+  review_queue_identity_inserted=0
+  run_log_inserted=0
+  run_metrics_inserted=0
+  scrape_progress_changed=0
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-audit-lease-m4xe8kxd\shard.db companies=Alpha
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-corporate-enrich-s0k6nkxk\shard.db companies=Alpha
+  api_page_checkpoints_replaced=0
+  api_work_progress_changed=0
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=0
+  bulk_candidates_inserted=0
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=0
+  contributions_inserted=0
+  contributions_pk_existing=0
+  corporate_giving_inserted=0
+  corporate_giving_pk_existing=1
+  corporate_giving_version_fields_enriched=2
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=0
+  review_queue_identity_inserted=0
+  run_log_inserted=0
+  run_metrics_inserted=0
+  scrape_progress_changed=0
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-zero-progress-ih8g_vi2\shard.db companies=Alpha
+  api_page_checkpoints_replaced=0
+  api_work_progress_changed=0
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=0
+  bulk_candidates_inserted=0
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=0
+  contributions_inserted=0
+  contributions_pk_existing=0
+  corporate_giving_inserted=0
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=0
+  review_queue_identity_inserted=0
+  run_log_inserted=0
+  run_metrics_inserted=0
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-00.db companies=Company 00
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-01.db companies=Company 01
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-02.db companies=Company 02
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-03.db companies=Company 03
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-04.db companies=Company 04
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-05.db companies=Company 05
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-06.db companies=Company 06
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-07.db companies=Company 07
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-08.db companies=Company 08
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-09.db companies=Company 09
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-00.db companies=Company 00
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-01.db companies=Company 01
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-02.db companies=Company 02
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-03.db companies=Company 03
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0.....
+----------------------------------------------------------------------
+Ran 17 tests in 7.108s
+
+OK
+
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-04.db companies=Company 04
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-05.db companies=Company 05
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-06.db companies=Company 06
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-07.db companies=Company 07
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-08.db companies=Company 08
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-qq1vo2sa\shard-09.db companies=Company 09
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+EXIT=0 (tests.test_merge_company_shards)
+===== python -m unittest tests.test_backfill_contributor_street =====
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.558s
+
+OK
+EXIT=0 (tests.test_backfill_contributor_street)
+===== end-to-end probe: street through flatten_fec_rows into both tables; canary negative control; street LAST in fresh schema =====
+PASS flatten carries street_1 -- 123 MAIN ST|
+PASS flatten carries street_2 -- APT 4|
+PASS no canary when the page has street
+PASS canary fires exactly once -- flatten_fec_rows: source rows carry no contributor_street_1/contributor_street_2; street will be blank for this page (phase=P2_variant)
+PASS canary names the phase -- flatten_fec_rows: source rows carry no contributor_street_1/contributor_street_2; street will be blank for this page (phase=P2_variant)
+PASS street is blank, not missing, on a street-less page
+PASS contributions row stores street --   sub_id contributor_street_1 contributor_street_2 | 1     p1          123 MAIN ST                APT 4 | 2     p2                                          
+PASS corporate_giving row stores street --   sub_id contributor_street_1 contributor_street_2 | 1 corp-1   500 CORPORATE PKWY                     
+PASS contributions fresh CREATE puts street LAST -- company_match_reason,excluded_reason,contributor_street_1,contributor_street_2
+PASS bulk_candidates fresh CREATE puts street LAST -- committee_id,amount,contributor_street_1,contributor_street_2
+PASS corporate_giving fresh CREATE puts street LAST -- company_match_reason,excluded_reason,contributor_street_1,contributor_street_2
+probe_phase2a: 0 failure(s)
+probe_phase2a: PASS
+EXIT=0 (probe_phase2a.R)
+===== shard-merge probe: build fixtures =====
+contributions
+  fresh    : ...excluded_reason,contributor_street_1,contributor_street_2
+  migrated : ...excluded_reason,contributor_street_1,contributor_street_2
+  control  : ...contributor_id,contributor_street_1,contributor_street_2
+corporate_giving
+  fresh    : ...excluded_reason,contributor_street_1,contributor_street_2
+  migrated : ...excluded_reason,contributor_street_1,contributor_street_2
+  control  : ...contributor_id,contributor_street_1,contributor_street_2
+bulk_candidates
+  fresh    : ...amount,contributor_street_1,contributor_street_2
+  migrated : ...amount,contributor_street_1,contributor_street_2
+  control  : ...amount,contributor_street_1,contributor_street_2
+probe_shards: wrote fresh / migrated / control into C:/Users/pgoff/AppData/Local/Temp/claude/C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-contributor-street-columns-0a1726/acfc8792-f597-44a3-ac0f-f7d883e56447/scratchpad/s2_build/shardprobe 
+EXIT=0 (probe_shards.R)
+===== shard-merge probe: merge_company_shards signatures =====
+---- main=fresh.sqlite  shard=migrated.sqlite ----
+contributions      signature equal: True  same SET: True  same ORDER: True
+corporate_giving   signature equal: True  same SET: True  same ORDER: True
+bulk_candidates    signature equal: True  same SET: True  same ORDER: True
+ensure_schema_compatible: ACCEPTED (no exception)
+
+---- main=fresh.sqlite  shard=legacy_no_contributor_id.sqlite ----
+contributions      signature equal: False same SET: True  same ORDER: False
+    first differing column @3: main=('contributor_id', 'TEXT', 0, None, 0) shard=('contributor_name', 'TEXT', 0, None, 0)
+corporate_giving   signature equal: False same SET: True  same ORDER: False
+    first differing column @1: main=('contributor_id', 'TEXT', 0, None, 0) shard=('contributor_name', 'TEXT', 0, None, 0)
+bulk_candidates    signature equal: True  same SET: True  same ORDER: True
+ensure_schema_compatible: RuntimeError -> contributions schema/uniqueness mismatch in C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-contributor-street-columns-0a1726\acfc8792-f597-44a3-ac0f-f7d883e56447\scratchpad\s2_build\shardprobe\legacy_no_contributor_id.sqlite
+
+EXIT=0 (probe_shards.py)

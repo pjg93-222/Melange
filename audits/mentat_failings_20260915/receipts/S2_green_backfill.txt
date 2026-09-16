@@ -1,0 +1,18 @@
+# S2 Phase 2a -- tools/backfill_contributor_street.py
+# cwd C:\Users\pgoff\Mentat\mentat
+# python -m unittest tests.test_backfill_contributor_street -v
+
+test_already_populated_street_is_never_touched (tests.test_backfill_contributor_street.BackfillContributorStreetTests.test_already_populated_street_is_never_touched) ... ok
+test_apply_fills_only_empty_street_and_leaves_the_rest (tests.test_backfill_contributor_street.BackfillContributorStreetTests.test_apply_fills_only_empty_street_and_leaves_the_rest) ... ok
+test_cli_defaults_to_a_dry_run_and_writes_a_receipt (tests.test_backfill_contributor_street.BackfillContributorStreetTests.test_cli_defaults_to_a_dry_run_and_writes_a_receipt) ... ok
+test_conflicting_values_are_counted_and_first_seen_wins (tests.test_backfill_contributor_street.BackfillContributorStreetTests.test_conflicting_values_are_counted_and_first_seen_wins) ... ok
+test_dry_run_reports_matches_and_writes_nothing (tests.test_backfill_contributor_street.BackfillContributorStreetTests.test_dry_run_reports_matches_and_writes_nothing) ... ok
+test_missing_street_columns_refuses_and_names_the_migration (tests.test_backfill_contributor_street.BackfillContributorStreetTests.test_missing_street_columns_refuses_and_names_the_migration) ... ok
+test_sub_ids_absent_from_evidence_are_counted_unmatched (tests.test_backfill_contributor_street.BackfillContributorStreetTests.test_sub_ids_absent_from_evidence_are_counted_unmatched) ... ok
+test_table_selection_limits_the_run (tests.test_backfill_contributor_street.BackfillContributorStreetTests.test_table_selection_limits_the_run) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.598s
+
+OK
+EXIT=0

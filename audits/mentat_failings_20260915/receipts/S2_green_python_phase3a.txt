@@ -1,0 +1,89 @@
+S2 T0 - the raw warehouse exporter reports a contract gap at receipt level
+generated 2026-09-16T12:17:09-04:00
+
+Change (mentat/tools/export_raw_contribution_warehouse.py):
+  * new helpers missing_columns_by_table() and warn_missing_contract_columns()
+    beside contract_column_order().
+  * when any table's placement reports missing block members, the export
+    receipt gains a TOP-LEVEL key `missing_contract_columns` = {table: [names]},
+    listing only the tables with gaps. The key is OMITTED entirely when
+    nothing is missing, so a migrated database's receipt keeps its old shape.
+  * one stderr line per affected table:
+      warning: <table> lacks contract columns <names>; run init_schema() from
+      mentat/R/schema.R before treating this export as complete
+  * `status` STAYS "succeeded". tools/parallel/Start-MentatResilientIndustryReports.ps1
+    keys its exit-code contract on that field (HANDOFF/PACKET), and the rows
+    written are a complete record of what the database actually holds, so a
+    schema gap must not become a pipeline outage.
+  * BOTH receipt paths are covered. The reuse ("fast") path builds its own
+    receipt dict and never computes a placement, so it would have silently
+    dropped the warning on every rerun - the case an operator hits most
+    often. It now recomputes the gap from the schema the stored manifest
+    already carries, giving the same answer as the full path.
+
+Tests extended (mentat/tests/test_raw_contribution_columns.py):
+  * export_partition() now returns (partition, receipt).
+  * test_raw_warehouse_unmigrated_db_omits_and_flags asserts status is still
+    "succeeded" AND the receipt key lists both street columns for both tables.
+  * test_raw_warehouse_header_matches_contract asserts the key is ABSENT on a
+    fresh full-block schema; test_raw_warehouse_migrated_shape_same_header
+    asserts it is ABSENT on an ALTER-migrated schema too (stronger than asked:
+    absence is proved for both complete shapes, not just one).
+
+file sha256 (live):
+  4ab775e4826e98e4e5d846d7b69ca25117926d0f0da3fa5dde5cc80a9c1d100e  mentat/tools/export_raw_contribution_warehouse.py
+  24f93df7a7a4cae2bb8b50e716af9d205fe0aee6f3ed237cab69047512ae6633  mentat/tests/test_raw_contribution_columns.py
+
+========================================================================
+GREEN: python -m unittest tests.test_raw_contribution_columns tests.test_export_raw_contribution_warehouse -v
+========================================================================
+test_contract_self_consistency (tests.test_raw_contribution_columns.ContractSelfConsistencyTests.test_contract_self_consistency) ... ok
+test_negative_control_fails_adjacency (tests.test_raw_contribution_columns.ContractSelfConsistencyTests.test_negative_control_fails_adjacency) ... ok
+test_formula_facts_projection_excludes_block (tests.test_raw_contribution_columns.FormulaFactsProjectionTests.test_formula_facts_projection_excludes_block) ... ok
+test_raw_warehouse_header_matches_contract (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_header_matches_contract) ... ok
+test_raw_warehouse_migrated_shape_same_header (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_migrated_shape_same_header) ... ok
+test_raw_warehouse_unmigrated_db_omits_and_flags (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_unmigrated_db_omits_and_flags) ... warning: contributions lacks contract columns ['contributor_street_1', 'contributor_street_2']; run init_schema() from mentat/R/schema.R before treating this export as complete
+warning: corporate_giving lacks contract columns ['contributor_street_1', 'contributor_street_2']; run init_schema() from mentat/R/schema.R before treating this export as complete
+ok
+test_tidy_workbook_sheet_carries_block (tests.test_raw_contribution_columns.TidyWorkbookSheetTests.test_tidy_workbook_sheet_carries_block)
+The companion Data workbook Contributions sheet carries the block. ... ok
+test_atomic_replace_retries_transient_windows_denial (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_atomic_replace_retries_transient_windows_denial) ... ok
+test_corrupt_existing_partition_is_quarantined_and_rebuilt (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_corrupt_existing_partition_is_quarantined_and_rebuilt) ... ok
+test_cycle_parser_uses_two_year_cycles (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_cycle_parser_uses_two_year_cycles) ... ok
+test_full_lossless_partition_export_and_deterministic_reuse (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_full_lossless_partition_export_and_deterministic_reuse) ... ok
+test_wrong_industry_tag_fails_loudly (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_wrong_industry_tag_fails_loudly) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 5.738s
+
+OK
+EXIT_CODE=0
+
+========================================================================
+PROBE: a REUSED snapshot must still report the gap
+(<SCRATCH>/s2_build/probe_t0_fastpath.py - negative control included: a
+ complete schema must produce NO key and NO warning on either path)
+========================================================================
+
+===== un-migrated database =====
+PASS [un-migrated] first export is the full path -- fast_path=False
+PASS [un-migrated] second export takes the REUSE path -- fast_path=True
+PASS [un-migrated] both runs keep status succeeded
+PASS [un-migrated] full path reports the gap -- {'contributions': ['contributor_street_1', 'contributor_street_2'], 'corporate_giving': ['contributor_street_1', 'contributor_street_2']}
+PASS [un-migrated] REUSE path reports the SAME gap -- {'contributions': ['contributor_street_1', 'contributor_street_2'], 'corporate_giving': ['contributor_street_1', 'contributor_street_2']}
+PASS [un-migrated] full path warned on stderr -- "warning: contributions lacks contract columns ['contributor_street_1', 'contributor_street"
+PASS [un-migrated] REUSE path warned on stderr -- "warning: contributions lacks contract columns ['contributor_street_1', 'contributor_street"
+
+===== fresh (full block) database =====
+PASS [fresh (full block)] first export is the full path -- fast_path=False
+PASS [fresh (full block)] second export takes the REUSE path -- fast_path=True
+PASS [fresh (full block)] both runs keep status succeeded
+PASS [fresh (full block)] full path omits the key
+PASS [fresh (full block)] REUSE path omits the key
+PASS [fresh (full block)] neither run warns -- ''
+
+probe_t0_fastpath: 0 check(s) failed
+probe_t0_fastpath: PASS
+EXIT_CODE=0
+
+OVERALL: PASS

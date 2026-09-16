@@ -1,0 +1,102 @@
+S2 T1 - companion Data workbook Contributions sheet carries the address block
+generated 2026-09-16T03:54:05-04:00
+
+edit: mentat/tools/build_tidy_workbook.py CONTRIBUTIONS gains
+      ("street_1", "Street 1", "T"), ("street_2", "Street 2", "T")
+      between the occupation and city entries, so the sheet order is
+      employer, occupation, street_1, street_2, city, state, zip5, zipcode.
+test: mentat/tests/test_raw_contribution_columns.py
+      TidyWorkbookSheetTests.test_tidy_workbook_sheet_carries_block
+
+pre-edit snapshot: <SCRATCH>/s2_build/before/mentat/tools/build_tidy_workbook.py
+  sha256 e037281051120f4c1b795e56d24f885a5a93d855c417ba8f51e37c65cdf333b1
+live file sha256 9d7059cce3ce69c3a47410cf185f630b67ac263b6eab7e2186303ba8f7d3dfe4
+
+--- RED: the new test run against the PRE-EDIT module (sys.modules injection); runner exits 0 when the test fails as expected ---
+injecting pre-edit module: C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-contributor-street-columns-0a1726\acfc8792-f597-44a3-ac0f-f7d883e56447\scratchpad\s2_build\before\mentat\tools\build_tidy_workbook.py
+  sha256 e037281051120f4c1b795e56d24f885a5a93d855c417ba8f51e37c65cdf333b1
+  CONTRIBUTIONS entries: 56
+  street present: False
+RED expectation: failures=1 errors=0
+test_tidy_workbook_sheet_carries_block (tests.test_raw_contribution_columns.TidyWorkbookSheetTests.test_tidy_workbook_sheet_carries_block)
+The companion Data workbook Contributions sheet carries the block. ... FAIL
+
+======================================================================
+FAIL: test_tidy_workbook_sheet_carries_block (tests.test_raw_contribution_columns.TidyWorkbookSheetTests.test_tidy_workbook_sheet_carries_block)
+The companion Data workbook Contributions sheet carries the block.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_raw_contribution_columns.py", line 336, in test_tidy_workbook_sheet_carries_block
+    assert_block_adjacent(keys, block)
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_raw_contribution_columns.py", line 78, in assert_block_adjacent
+    raise AssertionError(
+AssertionError: missing mandated column(s) ['street_1', 'street_2'] in ['source_id', 'transaction_id', 'back_reference_transaction_id', 'cycle_label', 'cycle', 'source_cycle', 'cycle_alignment', 'company', 'contributor', 'person_key', 'identity_basis', 'employee_tier', 'employer', 'occupation', 'city', 'state', 'zip5', 'zipcode', 'date', 'amount', 'analysis_amount', 'include_in_analysis', 'inclusion_reason', 'company_match_status', 'company_match_reason', 'matched_alias', 'recipient', 'committee_id', 'recipient_key', 'recipient_category', 'category_source', 'party', 'party_source', 'committee_type_code', 'committee_type', 'committee_designation_code', 'committee_designation', 'record_type', 'source_table', 'funding_source_type', 'funding_direction', 'receipt_role', 'receipt_type_full', 'filing_form', 'line_number', 'memo_text', 'is_memo_leg', 'is_conduit_leg', 'superseded_by_amendment', 'duplicate_filing_version', 'duplicate_memo', 'duplicate_of_sub_id', 'duplicate_reason', 'recipient_state', 'represented_state', 'source_url']
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+EXIT_CODE=0
+
+--- GREEN: the same test against the LIVE file ---
+test_tidy_workbook_sheet_carries_block (tests.test_raw_contribution_columns.TidyWorkbookSheetTests.test_tidy_workbook_sheet_carries_block)
+The companion Data workbook Contributions sheet carries the block. ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK
+EXIT_CODE=0
+
+--- GREEN: the whole S2 contract suite ---
+test_contract_self_consistency (tests.test_raw_contribution_columns.ContractSelfConsistencyTests.test_contract_self_consistency) ... ok
+test_negative_control_fails_adjacency (tests.test_raw_contribution_columns.ContractSelfConsistencyTests.test_negative_control_fails_adjacency) ... ok
+test_formula_facts_projection_excludes_block (tests.test_raw_contribution_columns.FormulaFactsProjectionTests.test_formula_facts_projection_excludes_block) ... ok
+test_raw_warehouse_header_matches_contract (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_header_matches_contract) ... ok
+test_raw_warehouse_migrated_shape_same_header (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_migrated_shape_same_header) ... ok
+test_raw_warehouse_unmigrated_db_omits_and_flags (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_unmigrated_db_omits_and_flags) ... ok
+test_tidy_workbook_sheet_carries_block (tests.test_raw_contribution_columns.TidyWorkbookSheetTests.test_tidy_workbook_sheet_carries_block)
+The companion Data workbook Contributions sheet carries the block. ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 5.034s
+
+OK
+EXIT_CODE=0
+
+--- REGRESSION: python -m unittest tests.test_tidy_workbook -v ---
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-adkvb0pw\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.12s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-3oavh7k1\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.16s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-k58o4hxb\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.13s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-lmy3r9x5\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.11s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-d5r_i8ur\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.14s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-d5r_i8ur\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.4s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-d3itdfd1\Example Industry Spending Data.xlsx (13 sheets, 77 rows, 0.22s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-xpqoupor\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.08s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-fhh1wmjn\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.08s)
+test_convert (tests.test_tidy_workbook.HelperTest.test_convert) ... ok
+test_title_header_builds_flag_headers (tests.test_tidy_workbook.HelperTest.test_title_header_builds_flag_headers) ... ok
+test_year_columns_are_not_thousands_formatted (tests.test_tidy_workbook.HelperTest.test_year_columns_are_not_thousands_formatted) ... ok
+test_checks_pass_and_about_lineage (tests.test_tidy_workbook.WriterTest.test_checks_pass_and_about_lineage) ... ok
+test_committee_name_with_semicolon_does_not_fail_w9 (tests.test_tidy_workbook.WriterTest.test_committee_name_with_semicolon_does_not_fail_w9)
+A real FEC name carrying ';' must publish. ... ok
+test_corrupt_fact_row_blocks_publication (tests.test_tidy_workbook.WriterTest.test_corrupt_fact_row_blocks_publication) ... FAIL giving_facts_vs_contributions: 2021-2022: Giving Facts 26.00 vs Contributions analysis 25.00
+1 severity-fail Data Quality row(s) failed; nothing published.
+ok
+test_packed_value_in_categorical_column_fails_w9 (tests.test_tidy_workbook.WriterTest.test_packed_value_in_categorical_column_fails_w9)
+The guard must still bite where a packed list can actually arise. ... FAIL no_multivalue_cells: Recipient Facts: Committee Relationship (1)
+1 severity-fail Data Quality row(s) failed; nothing published.
+ok
+test_receipt_shape (tests.test_tidy_workbook.WriterTest.test_receipt_shape) ... ok
+test_sheets_and_headers (tests.test_tidy_workbook.WriterTest.test_sheets_and_headers) ... ok
+test_skipped_checks_state_their_reason (tests.test_tidy_workbook.WriterTest.test_skipped_checks_state_their_reason) ... ok
+test_split_forces_per_cycle_sheets (tests.test_tidy_workbook.WriterTest.test_split_forces_per_cycle_sheets) ... ok
+test_table_refs_span_every_column_and_row (tests.test_tidy_workbook.WriterTest.test_table_refs_span_every_column_and_row) ... ok
+test_types_and_formats (tests.test_tidy_workbook.WriterTest.test_types_and_formats) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 2.198s
+
+OK
+EXIT_CODE=0
+

@@ -1,0 +1,17 @@
+test_contract_self_consistency (tests.test_raw_contribution_columns.ContractSelfConsistencyTests.test_contract_self_consistency) ... ok
+test_negative_control_fails_adjacency (tests.test_raw_contribution_columns.ContractSelfConsistencyTests.test_negative_control_fails_adjacency) ... ok
+test_formula_facts_projection_excludes_block (tests.test_raw_contribution_columns.FormulaFactsProjectionTests.test_formula_facts_projection_excludes_block) ... ok
+test_raw_warehouse_header_matches_contract (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_header_matches_contract) ... ok
+test_raw_warehouse_migrated_shape_same_header (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_migrated_shape_same_header) ... ok
+test_raw_warehouse_unmigrated_db_omits_and_flags (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_unmigrated_db_omits_and_flags) ... ok
+test_atomic_replace_retries_transient_windows_denial (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_atomic_replace_retries_transient_windows_denial) ... ok
+test_corrupt_existing_partition_is_quarantined_and_rebuilt (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_corrupt_existing_partition_is_quarantined_and_rebuilt) ... ok
+test_cycle_parser_uses_two_year_cycles (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_cycle_parser_uses_two_year_cycles) ... ok
+test_full_lossless_partition_export_and_deterministic_reuse (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_full_lossless_partition_export_and_deterministic_reuse) ... ok
+test_wrong_industry_tag_fails_loudly (tests.test_export_raw_contribution_warehouse.RawWarehouseTests.test_wrong_industry_tag_fails_loudly) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 5.031s
+
+OK
+EXIT_CODE=0
