@@ -1,10 +1,11 @@
 if (!exists("MENTAT_INDUSTRY")) MENTAT_INDUSTRY <- "Crypto"
 contribution_columns <- function() {
   c(
-    "sub_id", "transaction_id", "original_sub_id",
+    "sub_id", "transaction_id", "original_sub_id", "contributor_id",
     "contributor_name", "contributor_first_name", "contributor_last_name",
-    "contributor_suffix", "contributor_city", "contributor_state",
-    "contributor_zip", "contributor_employer", "contributor_occupation",
+    "contributor_suffix", "contributor_employer", "contributor_occupation",
+    "contributor_street_1", "contributor_street_2", "contributor_city",
+    "contributor_state", "contributor_zip",
     "contributor_aggregate_ytd", "contribution_receipt_amount",
     "contribution_receipt_date", "committee_id", "committee_name",
     "recipient_committee_type", "recipient_committee_designation", "entity_type",
@@ -26,6 +27,15 @@ contribution_columns <- function() {
 # A name match identifies the named party, not its role in the transaction.
 # Keep conversions and disclosure-only asset memos in raw evidence, but never
 # add them as another contribution from the exchange or original donor.
+fec_receipt_rules <- local({
+  cached <- NULL
+  function() {
+    if (is.null(cached)) cached <<- jsonlite::fromJSON(
+      file.path(mentat_input_dir(), "fec_receipt_rules.json"), simplifyVector = FALSE)
+    cached
+  }
+})
+
 fec_receipt_role <- function(rows) {
   column <- function(name) {
     if (!name %in% names(rows)) return(rep("", nrow(rows)))
@@ -33,28 +43,107 @@ fec_receipt_role <- function(rows) {
     value[is.na(value)] <- ""
     value
   }
-  description <- paste(column("receipt_type_full"), column("memo_text"))
+  normalized <- function(x) trim_text(gsub("[^A-Z0-9]+", " ", x))
+  receipt_description <- normalized(column("receipt_type_full"))
+  memo_description <- normalized(column("memo_text"))
+  description <- trim_text(paste(receipt_description, memo_description))
   role <- rep("unverified_receipt_role", nrow(rows))
-  contribution_line <- grepl("^11(AI?|B|C)$", column("line_number")) &
-    column("filing_form") %in% c("F3", "F3X")
-  role[contribution_line] <- "contribution"
-  other_line <- (column("filing_form") == "F3X" & column("line_number") %in% c("13", "14", "15", "16", "17")) |
-    (column("filing_form") == "F3" & column("line_number") %in% c("12", "13A", "13B", "14", "15"))
-  role[other_line] <- "other_receipt"
-  # Missing metadata cannot justify treating an exchange alias as a donor.
-  role[role == "unverified_receipt_role" & grepl("\\b(EXCHANGE|PROCESSOR)\\b", column("contributor_name"), perl = TRUE)] <- "intermediary_role_review"
-  sale <- grepl("PURCHASER UNKNOWN", description, fixed = TRUE) &
-    grepl("SOLD|PROCEEDS.*SALE", description, perl = TRUE)
+  # FEC form-specific receipt lines. A line number alone is ambiguous (17 is
+  # contributions on F3P, but other receipts on F3X).
+  # https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/
+  form <- column("filing_form")
+  line <- sub("^SA", "", gsub("[() ]", "", column("line_number")))
+  rules <- fec_receipt_rules()
+  for (f in names(rules$forms)) for (r in names(rules$forms[[f]])) {
+    role[form == f & line %in% unlist(rules$forms[[f]][[r]])] <- r
+  }
+  # "Other federal receipts" includes genuine hybrid-PAC and party-account
+  # contributions. The line label alone cannot establish economic meaning.
+  special <- form == "F3X" & line == "17" & grepl(rules$special_account_pattern, description, perl = TRUE)
+  exact_descriptions <- normalized(toupper(unlist(rules$non_giving_exact_descriptions)))
+  receipt_exact <- grepl(rules$non_giving_exact_pattern, receipt_description, perl = TRUE) |
+    receipt_description %in% exact_descriptions
+  memo_exact <- grepl(rules$non_giving_exact_pattern, memo_description, perl = TRUE) |
+    memo_description %in% exact_descriptions
+  exact_non_giving <- receipt_exact | memo_exact
+  receipt_event_description <- trim_text(gsub(
+    rules$special_account_pattern, "", receipt_description, perl = TRUE))
+  memo_event_description <- trim_text(gsub(
+    rules$special_account_pattern, "", memo_description, perl = TRUE))
+  receipt_non_giving_event <- grepl(rules$non_giving_event_pattern, receipt_event_description, perl = TRUE)
+  memo_non_giving_event <- grepl(rules$non_giving_event_pattern, memo_event_description, perl = TRUE)
+  non_giving <- exact_non_giving | receipt_non_giving_event | memo_non_giving_event |
+    grepl(rules$non_giving_event_pattern, description, perl = TRUE)
+  giving_description <- trim_text(paste(
+    gsub(rules$special_account_pattern, "", ifelse(receipt_exact | receipt_non_giving_event, "", receipt_description), perl = TRUE),
+    gsub(rules$special_account_pattern, "", ifelse(memo_exact | memo_non_giving_event, "", memo_description), perl = TRUE)
+  ))
+  giving_event <- grepl(rules$giving_event_pattern, giving_description, perl = TRUE)
+  role[special & !non_giving] <- "contribution"
+  role[role == "unverified_other_receipt" & non_giving & !special & !giving_event] <- "other_receipt"
+  role[special & non_giving] <- "unverified_other_receipt"
+  role[special & exact_non_giving & !giving_event] <- "other_receipt"
+  transfer_event <- grepl(rules$transfer_event_pattern, receipt_description, perl = TRUE)
+  role[role == "unverified_other_receipt" & transfer_event & !giving_event] <- "transfer_receipt"
+  # Names identify parties, never the economic role of an unknown receipt.
+  sale <- grepl(rules$sale_identity_pattern, description, perl = TRUE) &
+    grepl(rules$sale_event_pattern, description, perl = TRUE)
   role[sale] <- "asset_liquidation"
   memo <- column("memo_code") == "X" | column("memoed_subtotal") %in% c("1", "TRUE") |
     column("is_memo_leg") %in% c("1", "TRUE")
-  disclosed_asset <- grepl("PREVIOUSLY DISCLOSED|CONTRIBUTION DISCLOSED", description, perl = TRUE)
-  role[memo & disclosed_asset] <- "previously_disclosed_memo"
+  disclosed_asset <- grepl(rules$disclosure_pattern, description, perl = TRUE)
+  # Disclosure wording is a clue, not proof that a counted counterpart exists.
+  # Known non-contribution lines retain that classification; other disclosure
+  # memos need a linked parent or review before a changed total is published.
+  role[memo & disclosed_asset & !role %in% c("other_receipt", "asset_liquidation")] <- "unverified_disclosure_memo"
+  # A refund promise is not an observed refund. Retain the receipt and require
+  # the actual adjustment before certifying a net-giving amount.
+  role[role == "contribution" & grepl(rules$refund_review_pattern, description, perl = TRUE)] <- "unverified_refund_adjustment"
   role
 }
 
+fec_funding_source <- function(entity_type) {
+  entity <- toupper(trim_text(entity_type))
+  result <- rep("Unverified funding source", length(entity))
+  result[entity == "IND"] <- "Individual"
+  result[entity == "ORG"] <- "Organization (treasury attribution unverified)"
+  result[entity %in% c("PAC", "COM", "CCM", "PTY")] <- "PAC / committee"
+  result
+}
+
 fec_receipt_role_excluded <- function(role) {
-  role %in% c("asset_liquidation", "other_receipt", "previously_disclosed_memo", "intermediary_role_review")
+  role %in% c("asset_liquidation", "other_receipt")
+}
+
+fec_receipt_role_unresolved <- function(role) {
+  is.na(role) | role %in% c("", "intermediary_role_review") | startsWith(role, "unverified_")
+}
+
+# One eligibility predicate for summaries, memo parent checks, and QA.
+# Unknowns remain in raw/provisional views; publication requires evidence.
+fec_receipt_countable <- function(rows, verified_only = FALSE) {
+  value <- function(field, default) {
+    if (field %in% names(rows)) rows[[field]] else rep(default, nrow(rows))
+  }
+  role <- fec_receipt_role(rows)
+  keep <- value("company_match_status", "accepted") == "accepted" &
+    !nzchar(trim_text(value("excluded_reason", ""))) &
+    as.integer(value("duplicate_memo", 0L)) == 0L & !fec_receipt_role_excluded(role)
+  if (verified_only) keep <- keep & !fec_receipt_role_unresolved(role)
+  keep[is.na(keep)] <- FALSE
+  keep
+}
+
+fec_assert_receipt_evidence <- function(rows) {
+  unresolved <- fec_receipt_countable(rows) & fec_receipt_role_unresolved(fec_receipt_role(rows))
+  if (any(unresolved)) {
+    ids <- if ("sub_id" %in% names(rows)) rows$sub_id[unresolved] else which(unresolved)
+    stop(sprintf(
+      "Receipt evidence unresolved for %d rows (examples: %s). Raw records are retained. Hydrate FEC metadata before publishing; no blanket exclusion is permitted.",
+      sum(unresolved), paste(head(ids, 8L), collapse = ", ")
+    ), call. = FALSE)
+  }
+  invisible(TRUE)
 }
 
 row_scalar <- function(row, field, default = NA_character_) {
@@ -133,6 +222,20 @@ strip_legal_suffix <- function(x) {
   if (length(stripped) == 1L) stripped[[1L]] else stripped
 }
 
+company_employer_keys <- function(company, values) {
+  keys <- strip_legal_suffix(values)
+  # N.A. is a bank legal suffix. Keep this normalization scoped to bank
+  # companies so a generic employer's trailing words are not new aliases.
+  if (grepl("BANK", normalize_variant_key(company), fixed = TRUE)) {
+    keys <- sub(
+      "(?:\\s+(?:N A|NA|NATIONAL ASSOCIATION|NATIONAL ASSOC))+$",
+      "", keys, perl = TRUE
+    )
+    keys <- strip_legal_suffix(keys)
+  }
+  keys
+}
+
 employer_has_token_prefix <- function(employer_key, prefix_key) {
   employer_tokens <- strsplit(employer_key, " ", fixed = TRUE)[[1L]]
   prefix_tokens <- strsplit(prefix_key, " ", fixed = TRUE)[[1L]]
@@ -171,6 +274,49 @@ junk_employer_reason <- function(employer) {
   paste0("junk_employer:", key)
 }
 
+verified_employer_alias_register <- local({
+  cached <- NULL
+  function() {
+    if (!is.null(cached)) return(cached)
+    path <- file.path(mentat_input_dir(), "verified_employer_aliases.csv")
+    cached <<- if (file.exists(path)) {
+      register <- read.csv(path, stringsAsFactors = FALSE, check.names = FALSE,
+                           fileEncoding = "UTF-8-BOM")
+      required <- c("company", "alias", "evidence_url", "evidence_note")
+      if (!all(required %in% names(register))) {
+        stop("Verified employer alias register has invalid columns.", call. = FALSE)
+      }
+      register <- register[, required, drop = FALSE]
+      for (field in required) register[[field]] <- trim_text(register[[field]])
+      if (any(!nzchar(register$company) | !nzchar(register$alias) |
+              !nzchar(register$evidence_url))) {
+        stop("Verified employer aliases require company, alias and evidence URL.", call. = FALSE)
+      }
+      unique(register)
+    } else {
+      data.frame(company = character(), alias = character(),
+                 evidence_url = character(), evidence_note = character(),
+                 stringsAsFactors = FALSE)
+    }
+    cached
+  }
+})
+
+verified_employer_alias_evidence <- function(company, employer) {
+  register <- verified_employer_alias_register()
+  if (!nrow(register)) return(NULL)
+  company_key <- mentat_internal_company_name(company)
+  employer_key <- company_employer_keys(company, employer)
+  indexes <- which(
+    mentat_internal_company_name(register$company) == company_key &
+      company_employer_keys(company, register$alias) == employer_key
+  )
+  if (!length(indexes)) return(NULL)
+  row <- register[indexes[[1L]], , drop = FALSE]
+  list(alias = row$alias[[1L]], source_url = row$evidence_url[[1L]],
+       evidence_note = row$evidence_note[[1L]])
+}
+
 verified_employer_aliases <- function(company) {
   aliases <- list(
     Gemini = c(
@@ -185,7 +331,12 @@ verified_employer_aliases <- function(company) {
   if (identical(company, "Foris Dax Inc")) {
     return("CRYPTO.COM (FORIS DAX INC.)")
   }
-  aliases[[company]] %||% character()
+  register <- verified_employer_alias_register()
+  registered <- register$alias[
+    mentat_internal_company_name(register$company) ==
+      mentat_internal_company_name(company)
+  ]
+  unique(c(aliases[[company]] %||% character(), registered))
 }
 
 person_identity_key <- function(name) {
@@ -296,12 +447,13 @@ occupation_is_manual_trade <- function(occupation) {
 company_match_context <- function(company, variants, home_states = NULL) {
   verified_values <- verified_employer_aliases(company)
   variant_values <- unique(c(variants, verified_values))
-  variant_keys <- unique(strip_legal_suffix(variant_values))
+  variant_keys <- unique(company_employer_keys(company, variant_values))
   variant_keys <- variant_keys[nzchar(variant_keys)]
   list(
-    verified_keys = unique(strip_legal_suffix(verified_values)),
+    verified_keys = unique(company_employer_keys(company, verified_values)),
     variant_values = variant_values,
     variant_keys = variant_keys,
+    variant_squashed_keys = gsub(" ", "", variant_keys, fixed = TRUE),
     company_home_states = company_home_state_values(company, home_states)
   )
 }
@@ -327,7 +479,7 @@ company_employer_match <- function(
     contributor_occupation
   )
   if (!is.null(override)) return(override)
-  employer_key <- strip_legal_suffix(employer)
+  employer_key <- company_employer_keys(company, employer)
   result <- NULL
   if (!nzchar(employer_key)) {
     result <- list(status = "rejected", reason = "blank_employer")
@@ -342,10 +494,13 @@ company_employer_match <- function(
   verified_keys <- context$verified_keys
   variant_values <- context$variant_values
   variant_keys <- context$variant_keys
-  if (is.null(result) && employer_key %in% variant_keys) {
-    employer_tokens <- strsplit(employer_key, " ", fixed = TRUE)[[1L]]
+  exact_keys <- variant_keys[
+    gsub(" ", "", variant_keys, fixed = TRUE) ==
+      gsub(" ", "", employer_key, fixed = TRUE)
+  ]
+  if (is.null(result) && nzchar(employer_key) && length(exact_keys)) {
     company_home_states <- context$company_home_states
-    ambiguous_single_token <- length(employer_tokens) == 1L &&
+    ambiguous_single_token <- any(!grepl(" ", exact_keys, fixed = TRUE)) &&
       length(company_home_states) > 0L
     if (ambiguous_single_token) {
       row_state <- normalize_register_key(contributor_state)
@@ -372,7 +527,9 @@ company_employer_match <- function(
         )
       }
     } else {
-      reason <- if (employer_key %in% verified_keys) {
+      reason <- if (!employer_key %in% variant_keys) {
+        "squashed_form_exact"
+      } else if (employer_key %in% verified_keys) {
         "verified_employer_alias"
       } else {
         "verified_roster_alias"
@@ -541,7 +698,7 @@ company_employer_match_page <- function(
     )
   }
 
-  employer_keys <- strip_legal_suffix(employer)
+  employer_keys <- company_employer_keys(company, employer)
   unresolved <- is.na(status)
   blank <- unresolved & !nzchar(employer_keys)
   status[blank] <- "rejected"
@@ -557,9 +714,13 @@ company_employer_match_page <- function(
   reason[junk] <- junk_reasons[junk]
 
   unresolved <- is.na(status)
-  exact <- unresolved & employer_keys %in% context$variant_keys
-  token_count <- lengths(strsplit(employer_keys, " ", fixed = TRUE))
-  ambiguous <- exact & token_count == 1L &
+  employer_squashed_keys <- gsub(" ", "", employer_keys, fixed = TRUE)
+  exact <- unresolved & nzchar(employer_keys) &
+    employer_squashed_keys %in% context$variant_squashed_keys
+  ambiguous_alias_keys <- context$variant_squashed_keys[
+    !grepl(" ", context$variant_keys, fixed = TRUE)
+  ]
+  ambiguous <- exact & employer_squashed_keys %in% ambiguous_alias_keys &
     length(context$company_home_states) > 0L
   if (any(ambiguous)) {
     row_states <- normalize_register_key(contributor_state)
@@ -588,6 +749,8 @@ company_employer_match_page <- function(
     status[exact_unambiguous] <- "accepted"
     reason[exact_unambiguous & verified] <- "verified_employer_alias"
     reason[exact_unambiguous & !verified] <- "verified_roster_alias"
+    squashed_only <- exact_unambiguous & !employer_keys %in% context$variant_keys
+    reason[squashed_only] <- "squashed_form_exact"
   }
 
   # Resolve the same anchored-prefix and punctuation-squashed cases as the
@@ -733,12 +896,14 @@ company_cross_reference_people <- function(connection, company) {
 }
 
 variant_subsumes <- function(kept, candidate) {
-  kept_key <- normalize_variant_key(kept)
-  candidate_key <- normalize_variant_key(candidate)
+  # Attribution normalization is not evidence that two upstream searches have
+  # identical results. Only case-equivalent literal queries are redundant.
+  kept_key <- toupper(trim_text(kept))
+  candidate_key <- toupper(trim_text(candidate))
   if (!nzchar(kept_key) || !nzchar(candidate_key)) {
     return(FALSE)
   }
-  if (grepl(kept_key, candidate_key, fixed = TRUE)) {
+  if (identical(kept_key, candidate_key)) {
     return(TRUE)
   }
   FALSE
@@ -966,6 +1131,20 @@ flatten_fec_rows <- function(
       as_db_bool(row_scalar(row, field, default))
     }, integer(1L))
   }
+  # A page whose source rows carry no street column at all yields a blank
+  # street for every row on it. That is a shape fact about the source, not a
+  # bad row, so it is reported once per page and never interrupts the walk.
+  if (tabular_rows && row_count > 0L &&
+      !any(c("contributor_street_1", "contributor_street_2") %in% names(rows))) {
+    cat(sprintf(
+      paste0(
+        "flatten_fec_rows: source rows carry no contributor_street_1/",
+        "contributor_street_2; street will be blank for this page ",
+        "(phase=%s)\n"
+      ),
+      as.character(phase)
+    ))
+  }
   employer_values <- page_text("contributor_employer")
   occupation_values <- page_text("contributor_occupation")
   contributor_names <- page_text("contributor_name")
@@ -1094,6 +1273,7 @@ flatten_fec_rows <- function(
     sub_id = page_text("sub_id"),
     transaction_id = page_text("transaction_id"),
     original_sub_id = original_sub_ids,
+    contributor_id = page_text("contributor_id"),
     contributor_name = contributor_names,
     contributor_first_name = page_text("contributor_first_name"),
     contributor_last_name = page_text("contributor_last_name"),
@@ -1103,6 +1283,8 @@ flatten_fec_rows <- function(
     contributor_zip = page_text("contributor_zip"),
     contributor_employer = employer_values,
     contributor_occupation = occupation_values,
+    contributor_street_1 = page_text("contributor_street_1"),
+    contributor_street_2 = page_text("contributor_street_2"),
     contributor_aggregate_ytd = page_number("contributor_aggregate_ytd"),
     contribution_receipt_amount = amounts,
     contribution_receipt_date = page_text("contribution_receipt_date"),
@@ -1166,16 +1348,86 @@ flatten_fec_rows <- function(
   result[]
 }
 
+mentat_record_row_evidence <- function(connection, table, rows, stage) {
+  if (!table %in% c("contributions", "corporate_giving") || !nrow(rows)) return(invisible(NULL))
+  # The indexed page-sized staging table keeps evidence checks independent of
+  # the size of the historical database. No report attribution is rewritten.
+  observed_at <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3%z")
+  claim_fields <- c("sub_id", "company", "industry", "phase", "matched_variant",
+    "company_match_status", "company_match_reason", "contributor_id")
+  claims <- data.table::copy(data.table::as.data.table(rows))
+  for (field in setdiff(claim_fields, names(claims))) {
+    claims[, (field) := if (field == "phase" && table == "corporate_giving") "P2_company_name" else ""]
+  }
+  for (field in claim_fields) claims[, (field) := trim_text(get(field))]
+  evidence_fields <- intersect(c(claim_fields, "contributor_name", "contributor_employer",
+    "contributor_state", "contributor_occupation", "entity_type", "committee_id",
+    "contribution_receipt_amount", "contribution_receipt_date", "transaction_id", "file_num",
+    "two_year_transaction_period", "cycle"), names(claims))
+  claims <- unique(claims[, ..evidence_fields])
+  claim_payloads <- vapply(seq_len(nrow(claims)), function(i) {
+    mentat_evidence_json(as.list(claims[i]))
+  }, character(1L))
+  claim_rows <- claims[, ..claim_fields]
+  claim_rows[, `:=`(claim_id = vapply(paste(table, claim_payloads, sep = "\n"), mentat_evidence_sha256, character(1L)),
+    schema_version = 1L, source_table = table, evidence_json = claim_payloads, observed_at = observed_at)]
+  insert_rows_or_ignore(connection, "attribution_claims", claim_rows, names(claim_rows))
+
+  quoted_table <- as.character(DBI::dbQuoteIdentifier(connection, table))
+  quoted_stage <- as.character(DBI::dbQuoteIdentifier(connection, stage))
+  # Financial identity disagreements are evidence, not permission to silently
+  # overwrite the accepted row. Missing incoming metadata is not a correction.
+  financial_fields <- intersect(c("contributor_id", "contributor_name", "committee_id",
+    "contribution_receipt_amount", "contribution_receipt_date"), names(rows))
+  differences <- list()
+  for (field in financial_fields) {
+    qfield <- as.character(DBI::dbQuoteIdentifier(connection, field))
+    comparison <- paste0(
+      " WHERE s.", qfield, " IS NOT NULL AND t.", qfield, " IS NOT NULL",
+      " AND TRIM(s.", qfield, ")<>'' AND TRIM(t.", qfield, ")<>''",
+      " AND s.", qfield, "<>t.", qfield)
+    values <- DBI::dbGetQuery(connection, paste0(
+      "SELECT s.sub_id, s.company AS incoming_company, t.", qfield, " AS before_value, s.", qfield,
+      " AS after_value FROM ", quoted_stage, " s JOIN ", quoted_table, " t ON t.sub_id=s.sub_id",
+      comparison, " UNION SELECT s.sub_id, s.company, t.", qfield, ", s.", qfield,
+      " FROM ", quoted_stage, " s JOIN ", quoted_stage, " t ON t.sub_id=s.sub_id AND t.rowid<s.rowid",
+      comparison))
+    if (!nrow(values)) next
+    for (i in seq_len(nrow(values))) {
+      before <- mentat_evidence_json(values$before_value[[i]])
+      after <- mentat_evidence_json(values$after_value[[i]])
+      evidence <- mentat_evidence_json(list(source_table = table, sub_id = values$sub_id[[i]],
+        incoming_company = values$incoming_company[[i]], field_name = field, before_json = before, after_json = after))
+      differences[[length(differences) + 1L]] <- data.table::data.table(
+        conflict_id = mentat_evidence_sha256(evidence), schema_version = 1L, source_table = table,
+        sub_id = values$sub_id[[i]], field_name = field, before_json = before, after_json = after,
+        incoming_company = values$incoming_company[[i]], evidence_json = evidence,
+        observed_at = observed_at, resolution_status = "unresolved")
+    }
+  }
+  if (length(differences)) {
+    conflicts <- unique(data.table::rbindlist(differences))
+    insert_rows_or_ignore(connection, "source_record_conflicts", conflicts, names(conflicts))
+  }
+  invisible(NULL)
+}
+
 insert_rows_or_ignore <- function(connection, table, rows, columns) {
   if (!nrow(rows)) {
     return(invisible(0L))
   }
-  if (identical(table, "contributions") &&
-      all(c("sub_id", "company", "phase") %in% names(rows))) {
+  if (table %in% c("contributions", "corporate_giving") &&
+      "contributor_id" %in% columns && !"contributor_id" %in% names(rows)) {
+    # Older browser/bulk row producers do not contain this optional API field.
+    rows <- data.table::copy(data.table::as.data.table(rows))
+    rows[, contributor_id := NA_character_]
+  }
+  if (table %in% c("contributions", "corporate_giving") &&
+      all(c("sub_id", "company") %in% names(rows))) {
     incoming <- unique(data.table::data.table(
       sub_id = as.character(rows$sub_id),
       incoming_company = as.character(rows$company),
-      incoming_phase = as.character(rows$phase)
+      incoming_phase = if ("phase" %in% names(rows)) as.character(rows$phase) else "P2_company_name"
     ))
     ids <- unique(incoming$sub_id[nzchar(incoming$sub_id)])
     if (length(ids)) {
@@ -1183,7 +1435,7 @@ insert_rows_or_ignore <- function(connection, table, rows, columns) {
       stored <- data.table::as.data.table(DBI::dbGetQuery(
         connection,
         paste0(
-          "SELECT sub_id, company AS stored_company FROM contributions ",
+          "SELECT sub_id, company AS stored_company FROM ", table, " ",
           "WHERE sub_id IN (", placeholders, ")"
         ),
         params = as.list(ids)
@@ -1248,12 +1500,13 @@ insert_rows_or_ignore <- function(connection, table, rows, columns) {
       )
     )
   }
+  mentat_record_row_evidence(connection, table, rows, stage)
   DBI::dbExecute(connection, paste0(sql, quoted_stage))
   inserted <- DBI::dbGetQuery(connection, "SELECT changes() AS n")$n[[1L]]
   if (table %in% c("contributions", "corporate_giving")) {
     version_fields <- intersect(
       c(
-        "transaction_id", "original_sub_id", "amendment_indicator",
+        "transaction_id", "original_sub_id", "amendment_indicator", "contributor_id",
         "report_year", "report_type", "file_num", "pdf_url", "load_date",
         "filing_form", "receipt_type", "receipt_type_full", "line_number",
         "line_number_label", "memo_code", "memo_text", "back_reference_transaction_id",
@@ -1279,7 +1532,10 @@ insert_rows_or_ignore <- function(connection, table, rows, columns) {
         connection,
         paste0(
           "UPDATE ", quoted_table, " SET ", quoted_field, "=", replacement,
-          " WHERE sub_id IN (SELECT sub_id FROM ", quoted_stage, ")"
+          " WHERE sub_id IN (SELECT sub_id FROM ", quoted_stage, ")",
+          " AND NOT EXISTS (SELECT 1 FROM source_record_conflicts f WHERE f.source_table=",
+          as.character(DBI::dbQuoteString(connection, table)), " AND f.sub_id=", quoted_table,
+          ".sub_id AND f.resolution_status='unresolved')"
         )
       )
     }
@@ -1292,7 +1548,10 @@ insert_rows_or_ignore <- function(connection, table, rows, columns) {
         "memoed_subtotal=(SELECT memoed_subtotal FROM ", quoted_stage,
         " WHERE ", quoted_stage, ".sub_id=", quoted_table, ".sub_id) ",
         "WHERE sub_id IN (SELECT sub_id FROM ", quoted_stage,
-        " WHERE COALESCE(filing_form,'')<>'')"
+        " WHERE COALESCE(filing_form,'')<>'')",
+        " AND NOT EXISTS (SELECT 1 FROM source_record_conflicts f WHERE f.source_table=",
+        as.character(DBI::dbQuoteString(connection, table)), " AND f.sub_id=", quoted_table,
+        ".sub_id AND f.resolution_status='unresolved')"
       ))
     }
   }
@@ -2809,8 +3068,9 @@ checkpoint_corporate_page <- function(
   zero_verified = 0L
 ) {
   corporate_columns <- c(
-    "sub_id", "contributor_name", "contributor_city", "contributor_state",
-    "contributor_zip", "contributor_employer", "contributor_occupation",
+    "sub_id", "contributor_id", "contributor_name", "contributor_employer",
+    "contributor_occupation", "contributor_street_1", "contributor_street_2",
+    "contributor_city", "contributor_state", "contributor_zip",
     "entity_type", "is_entity_contributor", "committee_id", "committee_name",
     "recipient_committee_type", "recipient_committee_designation",
     "contribution_receipt_date", "contribution_receipt_amount", "industry",
@@ -2856,10 +3116,10 @@ checkpoint_corporate_page <- function(
 company_contributor_queries <- function(company, variants) {
   # The FEC query must carry the RAW variant text: "Crypto.com" and "Crypto COM"
   # are different searches upstream. normalize_variant_key() is a comparison key
-  # only - use it to de-duplicate case/punctuation twins, never as the query.
+  # only. Preserve punctuation variants until source evidence proves coverage.
   raw <- trim_text(c(company, variants))
   raw <- raw[!is.na(raw) & nzchar(raw)]
-  keys <- normalize_variant_key(raw)
+  keys <- toupper(raw)
   raw[nzchar(keys) & !duplicated(keys)]
 }
 
@@ -2940,8 +3200,9 @@ collect_company_contributor_pass <- function(
           )]
         }
         corporate <- records[, .(
-          sub_id, contributor_name, contributor_city, contributor_state,
-          contributor_zip, contributor_employer, contributor_occupation,
+          sub_id, contributor_id, contributor_name, contributor_employer,
+          contributor_occupation, contributor_street_1, contributor_street_2,
+          contributor_city, contributor_state, contributor_zip,
           entity_type, is_entity_contributor, committee_id, committee_name,
           recipient_committee_type,
           recipient_committee_designation, contribution_receipt_date,

@@ -1,10 +1,10 @@
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) < 2L || length(args) > 5L) {
+if (length(args) < 2L || length(args) > 6L) {
   stop(
     paste(
       "usage: Rscript tools/export_crypto_spending_data.R",
       "<mentat.db> <output.json> [fec-committee-master-dir]",
-      "[fec-beneficiary-dir] [industry]"
+      "[fec-beneficiary-dir] [industry] [tidy-staging.sqlite]"
     ),
     call. = FALSE
   )
@@ -40,11 +40,23 @@ MENTAT_INDUSTRY <- if (length(args) >= 5L && nzchar(trimws(args[[5L]]))) {
 if (!nzchar(MENTAT_INDUSTRY)) {
   stop("Industry cannot be empty.", call. = FALSE)
 }
+# Sixth positional argument: where to write the tidy staging store that
+# tools/build_tidy_workbook.py turns into the companion
+# `<Industry> Industry Spending Data.xlsx`. ABSENT means "skip staging": a
+# five-argument invocation - every existing caller, every ad-hoc console run -
+# behaves exactly as before and only prints that it skipped. The path is NOT
+# mustWork: the orchestrator passes a pending name that does not exist yet.
+tidy_stage_path <- if (length(args) >= 6L && nzchar(trimws(args[[6L]]))) {
+  normalizePath(trimws(args[[6L]]), winslash = "/", mustWork = FALSE)
+} else {
+  ""
+}
 
 for (module in c(
   "paths.R", "schema.R", "ingest.R", "fec_page.R", "collect.R",
   "fec_api.R", "reconcile.R", "report.R", "fec_beneficiary.R",
-  "identity_components.R", "export_guards.R", "fec_transfer_graph.R"
+  "identity_components.R", "export_guards.R", "fec_transfer_graph.R",
+  "state_destinations.R", "tidy_stage.R"
 )) {
   source(file.path(MENTAT_PROJECT_ROOT, "R", module), local = .GlobalEnv)
 }
@@ -131,7 +143,7 @@ read_fec_committee_master <- function(directory) {
       designation = character(), committee_type = character(),
       party_affiliation = character(), party = character(),
       connected_organization = character(), candidate_id = character(),
-      source_url = character()
+      source_url = character(), state = character()
     ))
   }
   headers <- c(
@@ -164,6 +176,7 @@ read_fec_committee_master <- function(directory) {
       cycle,
       committee_id = toupper(trim_text(committee_id)),
       committee_name = trim_text(committee_name),
+      state = toupper(trim_text(state)),
       designation = toupper(trim_text(designation)),
       committee_type = toupper(trim_text(committee_type)),
       party_affiliation = toupper(trim_text(party_affiliation)),
@@ -194,6 +207,22 @@ on.exit(DBI::dbDisconnect(connection), add = TRUE)
 lookups <- spending_report_lookups(connection)
 raw_rows <- spending_raw_report_rows(connection, versioning_applied = TRUE)
 export_phase("raw_database_rows_loaded", nrow(raw_rows))
+# S2 HANDOFF: this fill is a defensive guard for databases or report.R
+# versions whose spending_raw_report_rows() SELECT lacks
+# contributor_street_1 / contributor_street_2, so raw_rows could still
+# arrive without them. Backfill both columns here, before raw_export is
+# copied from raw_rows below, so the .() projection does not error with
+# "object not found"; report.R's SELECTs carry the two columns as of S2.
+for (column in c("contributor_street_1", "contributor_street_2")) {
+  if (!column %in% names(raw_rows)) raw_rows[, (column) := NA_character_]
+}
+evidence_scope <- contribution_cycle(raw_rows$contribution_receipt_date) %in% supported_cycles
+unresolved <- evidence_scope & fec_receipt_countable(raw_rows) &
+  fec_receipt_role_unresolved(raw_rows$receipt_role)
+if (any(unresolved)) {
+  atomic_write_csv(raw_rows[unresolved], paste0(output_path, ".receipt-review.csv"))
+}
+fec_assert_receipt_evidence(raw_rows[evidence_scope])
 analysis_rows <- spending_report_rows(
   connection,
   lookups = lookups,
@@ -459,7 +488,7 @@ raw_export[, inclusion_reason := ifelse(
     "Excluded recipient class from summaries",
     ifelse(
       duplicate_memo == 1L,
-      "Exact five-key memo duplicate",
+      paste0("Memo duplicate: ", duplicate_reason, "; retained source ", duplicate_of_sub_id),
       ifelse(
         nzchar(trim_text(excluded_reason)),
         trim_text(excluded_reason),
@@ -511,13 +540,17 @@ raw_export <- raw_export[, .(
     paste0("NAME:", normalize_variant_key(committee_name))
   ),
   date,
+  employer = trim_text(contributor_employer),
+  occupation = trim_text(contributor_occupation),
+  street_1 = trim_text(contributor_street_1),
+  street_2 = trim_text(contributor_street_2),
   city = trim_text(contributor_city),
   state = trim_text(contributor_state),
   zipcode = trim_text(contributor_zip),
-  employer = trim_text(contributor_employer),
-  occupation = trim_text(contributor_occupation),
   record_type = ifelse(is.na(record_type), trim_text(record_type_raw), record_type),
   source_table = trim_text(source_table),
+  funding_source_type = fec_funding_source(entity_type),
+  funding_direction = ifelse(recipient_category == "Company PAC", "Into company PAC", "To named recipient"),
   company_match_status = trim_text(company_match_status),
   company_match_reason = trim_text(company_match_reason),
   matched_alias = trim_text(matched_variant),
@@ -538,6 +571,8 @@ raw_export <- raw_export[, .(
   superseded_by_amendment = as.integer(superseded_by_amendment),
   duplicate_filing_version = as.integer(duplicate_filing_version),
   duplicate_memo = as.integer(duplicate_memo)
+  , duplicate_of_sub_id = trim_text(duplicate_of_sub_id)
+  , duplicate_reason = trim_text(duplicate_reason)
 )]
 raw_export[, sort_date := as.integer(as.Date(date))]
 data.table::setorder(raw_export, cycle, -sort_date, contributor, source_id)
@@ -641,6 +676,7 @@ calculated_omissions <- raw_export[
 ]
 omitted_non_accepted_by_cycle[as.character(calculated_omissions$cycle)] <-
   calculated_omissions$rows
+raw_export <- mentat_add_destinations(raw_export, fec_committee_master, candidate_master, candidate_links)
 workbook_raw_export <- raw_export[
   cycle %in% supported_cycles & company_match_status == "accepted"
 ]
@@ -699,6 +735,43 @@ guard_category_view_b <- analysis_rows[
   )
 ]
 
+# The tidy staging frames are built HERE, before the guard run, for the same
+# reason the guards themselves are: this is the last point at which every frame
+# is in scope AND nothing has been filtered for presentation. Building them
+# ahead of the guards is what lets mentat_guard_tidy_reconciliation refuse to
+# publish a store whose fact tables disagree with the cycle totals the Overview
+# prints - a check that is worthless after the store is already on disk.
+#
+# data_quality is filled in after the guards run, because the guard results ARE
+# its R-side rows. Nothing else is deferred.
+tidy_frames <- NULL
+if (nzchar(tidy_stage_path)) {
+  tidy_started_at <- unname(proc.time()[["elapsed"]])
+  tidy_frames <- mentat_build_tidy_frames(
+    raw_export = workbook_raw_export,
+    committee_map = committee_map,
+    committee_master = fec_committee_master,
+    candidate_links = candidate_links,
+    candidate_master = candidate_master,
+    downstream_activity_export = downstream_activity_export,
+    bridge = beneficiary_tables$bridge,
+    state_destinations = mentat_state_destinations(workbook_raw_export),
+    recipient_locations = unique(workbook_raw_export[
+      , c("cycle", "committee_id", "recipient", mentat_destination_fields),
+      with = FALSE
+    ]),
+    guard_results = NULL,
+    # Leadership-PAC sponsor links exist only inside fec_build_committee_map's
+    # internal mappings frame; it is carried out as an attribute so the
+    # committee_sponsors table can hold them beside the FEC ccl rows.
+    mappings = fec_committee_map_mappings(committee_map)
+  )
+  cat(sprintf(
+    "  tidy staging frames built in %.2fs\n",
+    unname(proc.time()[["elapsed"]]) - tidy_started_at
+  ))
+}
+
 guard_progress <- data.table::as.data.table(DBI::dbGetQuery(connection,
   "SELECT * FROM scrape_progress WHERE variant_set LIKE 'P1_employer%' OR variant_set LIKE 'P2_variant%' OR variant_set LIKE 'P2_company_name%'"))
 guard_progress[, destination := ifelse(grepl("^P2_company_name", variant_set), "corporate", "contributions")]
@@ -746,6 +819,17 @@ guard_results <- mentat_run_export_guards(
     # lost a group would ship a chartable sheet that silently understates the
     # cycle total printed one tab away.
     mentat_guard_detail_reconciliation(detail_frames, expected_cycle_totals),
+    # The companion Data workbook is a SECOND publication of the same dollars,
+    # regrouped four ways. Nothing downstream re-sums it against the Overview,
+    # so a fact table that lost a group would ship a chartable sheet quietly
+    # disagreeing with the figure printed in the other book. NULL when no
+    # staging path was supplied - mentat_run_export_guards drops NULL entries,
+    # so a five-argument invocation neither builds nor checks the store.
+    if (nzchar(tidy_stage_path)) {
+      mentat_guard_tidy_reconciliation(tidy_frames, expected_cycle_totals)
+    } else {
+      NULL
+    },
     # Mirrors the category list the workbook template renders
     # (tools/crypto_workbook_builder.mjs masterCategories). Kept here so a
     # category the template shows but nothing ever populates is reported rather
@@ -766,6 +850,7 @@ cat(sprintf(
 
 payload <- list(
   metadata = list(
+    destination_schema = 1L,
     transfer_coverage = transfer_context$coverage,
     industry = MENTAT_INDUSTRY,
     database_path = database_path,
@@ -838,6 +923,8 @@ payload <- list(
   cycles = cycles,
   companies = companies,
   raw_rows = workbook_raw_export,
+  state_destinations = mentat_state_destinations(workbook_raw_export),
+  recipient_locations = unique(workbook_raw_export[, c("cycle","committee_id","recipient",mentat_destination_fields), with=FALSE]),
   # Against every covered cycle, not the filtered one: under a per-cycle build
   # the other cycles' rows belong to their own build and are not exceptions.
   # Using supported_cycles here made a filtered Telecom export LARGER than the
@@ -869,6 +956,52 @@ payload <- list(
   beneficiary_summary = beneficiary_tables$summary
 )
 export_phase("payload_assembled", nrow(workbook_raw_export))
+
+# Tidy staging store. Written from the frames above, NOT from the JSON payload:
+# tools/prepare_workbook_payload.py projects raw_rows onto 18 fields that carry
+# no ZIP, city, state, employer or occupation, and formula-fact mode replaces
+# raw_rows outright. Going through the payload would give a large industry a
+# companion workbook silently narrower than a small one's.
+if (nzchar(tidy_stage_path)) {
+  tidy_frames$data_quality <- mentat_tidy_data_quality(guard_results)
+  tidy_blank_columns <- unlist(lapply(names(tidy_frames), function(name) {
+    frame <- tidy_frames[[name]]
+    if (is.null(frame) || !nrow(frame)) return(character())
+    empty <- names(frame)[vapply(frame, function(column) all(is.na(column)), logical(1))]
+    if (!length(empty)) return(character())
+    paste0(name, ".", empty)
+  }), use.names = FALSE)
+  mentat_write_tidy_stage(tidy_stage_path, tidy_frames, list(
+    schema_version = mentat_tidy_schema_version,
+    industry = MENTAT_INDUSTRY,
+    industry_slug = gsub(
+      "^_+|_+$", "", gsub("[^a-z0-9]+", "_", tolower(MENTAT_INDUSTRY))
+    ),
+    # Empty for an all-cycles build. The orchestrator sets MENTAT_CYCLE_FILTER
+    # before the export for exactly this reason.
+    cycle_label = trimws(Sys.getenv("MENTAT_CYCLE_FILTER", unset = "")),
+    supported_cycles = as.integer(supported_cycles),
+    cycle_labels = sprintf("%d-%d", supported_cycles - 1L, supported_cycles),
+    database_path = database_path,
+    # The database SHA-256 is the orchestrator's quiesced hash, not something R
+    # can recompute without re-reading a multi-gigabyte file; it reaches the
+    # writer as --database-sha256 and is recorded here as unknown.
+    database_sha256 = NA_character_,
+    generated_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS%z"),
+    exporter_version = paste0("md5:", unname(tools::md5sum(script_path))),
+    expected_cycle_totals = as.list(expected_cycle_totals),
+    accounting_note = paste(
+      "Analysis Amount counts included itemized receipts at the named recipient",
+      "and is 0 for memo, conduit, superseded, duplicate and out-of-cycle legs;",
+      "Amount is the figure as filed. Neither is verified unique giving."
+    ),
+    blank_columns = if (length(tidy_blank_columns)) tidy_blank_columns else character()
+  ))
+  export_phase("tidy_stage_written", nrow(tidy_frames$contributions))
+  cat(sprintf("  tidy staging store: %s\n", tidy_stage_path))
+} else {
+  cat("  tidy staging skipped: no staging path argument supplied.\n")
+}
 
 write_payload_json <- function(payload, path, chunk_rows = 10000L) {
   connection <- file(path, open = "wb")

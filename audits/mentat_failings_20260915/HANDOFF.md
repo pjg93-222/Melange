@@ -169,24 +169,24 @@ it in code.
 
 | File | Owner | Status | Notes |
 | --- | --- | --- | --- |
-| `audits/mentat_failings_20260915/**` | S0 | receipts ready | S0 writes nothing outside this directory |
+| `audits/mentat_failings_20260915/**` | S0 | committed by Paul | S0 writes nothing outside this directory |
 | `mentat/R/fec_api.R` | S1 | not started | retry, page checkpoints, API SELECT list |
 | `mentat/R/collect.R` | S1 | not started | scrape checkpoints, resume, industry SQL |
 | `mentat/R/fec_page.R` | S1 | not started | chromote browser fallback |
 | `mentat/tools/api_company_cycle_fanout.py` | S1 | not started | key cap, lane cap, recovery pool |
 | `mentat/tools/collect_api_lane.R` | S1 | not started | assigns `MENTAT_INDUSTRY` |
-| `mentat/R/schema.R` | S2 | receipts ready | `corporate_giving`, migrations |
-| `mentat/tools/export_raw_contribution_warehouse.py` | S2 | receipts ready | PRAGMA-driven export |
-| `mentat/tools/export_crypto_spending_data.R` | S2 | receipts ready | workbook column list |
-| `mentat/R/tidy_stage.R` | S2 | receipts ready | tidy contributions spec; content-clean at HEAD before S2, whole diff is S2's |
-| `mentat/R/report.R` | S2 | receipts ready | two SELECT lines only (`spending_raw_report_rows` :2029, :2048); file otherwise unowned |
-| `mentat/tools/build_tidy_workbook.py` | S2 | receipts ready | `CONTRIBUTIONS` registry: Street 1 / Street 2 on the companion Data workbook |
-| `mentat/tools/backfill_contributor_street.py` | S2 | receipts ready | NEW: rebuild street from archived FEC response bodies, no network |
-| `mentat/tests/test_raw_contribution_columns.py` | S2 | receipts ready | NEW: Python producers vs the contract; hosts `assert_block_adjacent` |
-| `mentat/tests/test_raw_contribution_columns.R` | S2 | receipts ready | NEW: checks (a)-(h) across collect.R, fec_api.R, tidy_stage.R, report.R |
-| `mentat/tests/test_raw_contribution_columns.cjs` | S2 | receipts ready | NEW: workbook sheet writer vs the contract |
-| `mentat/tests/test_backfill_contributor_street.py` | S2 | receipts ready | NEW: backfill precedence, idempotence, un-migrated refusal |
-| `mentat/tests/test_export_raw_contribution_warehouse.py` | S2 | receipts ready | EDITED: fixture SCHEMA in migrated shape + block assertions |
+| `mentat/R/schema.R` | S2 | committed by Paul | `corporate_giving`, migrations |
+| `mentat/tools/export_raw_contribution_warehouse.py` | S2 | committed by Paul | PRAGMA-driven export |
+| `mentat/tools/export_crypto_spending_data.R` | S2 | committed by Paul | workbook column list |
+| `mentat/R/tidy_stage.R` | S2 | committed by Paul | tidy contributions spec; content-clean at HEAD before S2, whole diff is S2's |
+| `mentat/R/report.R` | S2 | committed by Paul | two SELECT lines only (`spending_raw_report_rows` :2029, :2048); file otherwise unowned |
+| `mentat/tools/build_tidy_workbook.py` | S2 | committed by Paul | `CONTRIBUTIONS` registry: Street 1 / Street 2 on the companion Data workbook |
+| `mentat/tools/backfill_contributor_street.py` | S2 | committed by Paul | NEW: rebuild street from archived FEC response bodies, no network |
+| `mentat/tests/test_raw_contribution_columns.py` | S2 | committed by Paul | NEW: Python producers vs the contract; hosts `assert_block_adjacent` |
+| `mentat/tests/test_raw_contribution_columns.R` | S2 | committed by Paul | NEW: checks (a)-(h) across collect.R, fec_api.R, tidy_stage.R, report.R |
+| `mentat/tests/test_raw_contribution_columns.cjs` | S2 | committed by Paul | NEW: workbook sheet writer vs the contract |
+| `mentat/tests/test_backfill_contributor_street.py` | S2 | committed by Paul | NEW: backfill precedence, idempotence, un-migrated refusal |
+| `mentat/tests/test_export_raw_contribution_warehouse.py` | S2 | committed by Paul | EDITED: fixture SCHEMA in migrated shape + block assertions |
 | `mentat/app/evidence_csv.py` | S3 | not started | `MAX_BYTES`, `MAX_COLUMNS` |
 | `mentat/app/evidence-csv.js` | S3 | not started | client size mirror, status line |
 | `mentat/tools/pac_evidence.py` | S3 | not started | collector, `ThreadPoolExecutor(3)` |
@@ -226,7 +226,7 @@ hunks are its own. Do not hand Paul a patch you have not separated.
 
 ## S0 — Diagnosis (read-only)
 
-**Status:** receipts ready
+**Status:** committed by Paul (11654f911, 2026-09-16)
 
 **Files owned:** `audits/mentat_failings_20260915/**` only. S0 made no edit
 anywhere else in the tree.
@@ -323,8 +323,7 @@ previously existed in this repo.
 
 ## S2 — Address fields and schema (Area B)
 
-**Status:** `receipts ready`. S2 never commits. Everything described below is in
-the live working tree and in two patch files; Paul applies and commits.
+**Status:** committed by Paul (2026-09-16, whole-file; see Patches note)
 
 ### Files owned or touched
 
@@ -463,6 +462,15 @@ The packet directory is a single collapsed `?? audits/mentat_failings_20260915/`
 entry, so `patches/` and `receipts/` add no further lines. **`tidy_stage.R` is
 listed in S0's WORKING-TREE HAZARD paragraph as modified by another lane; on
 this evidence it was not.**
+
+Committed 2026-09-16 as whole files at Paul's ruling after a three-way merge
+showed collect.R, fec_api.R and export_crypto_spending_data.R cannot be
+separated from the contributor-id / evidence-archive lane's uncommitted hunks
+(S2's column lists carry contributor_id, which exists only in that lane's
+hunks). The commit therefore also carries that lane's hunks in schema.R,
+collect.R, fec_api.R, report.R, export_crypto_spending_data.R and
+crypto_workbook_builder.mjs. patches/S2_street_columns*.patch remain the
+hunk-isolated record of S2's own changes.
 
 ### Contract decisions
 

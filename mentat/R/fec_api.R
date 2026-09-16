@@ -227,12 +227,15 @@ fec_api_validate_cursor <- function(last_indexes, unit_id = "") {
 }
 
 fec_api_request_spec <- function(unit, last_indexes = NULL) {
-  query_values <- unit$variants
-  if (identical(unit$query_field, "contributor_employer") &&
-      !isTRUE(unit$preserve_query_spelling)) {
-    query_values <- unique(normalize_variant_key(query_values))
-    query_values <- query_values[nzchar(query_values)]
+  supported_filters <- c("min_date","max_date","contributor_zip","contributor_city","contributor_state")
+  unknown <- setdiff(names(unit$query_filters %||% list()), supported_filters)
+  if (length(unknown)) stop("Unsupported FEC query filter(s): ",paste(unknown,collapse=", "),
+    ". An ignored filter would silently broaden collection.",call.=FALSE)
+  if (!unit$query_field %in% c("contributor_employer","contributor_name")) {
+    stop("Unsupported FEC contributor query field: ",unit$query_field,call.=FALSE)
   }
+  query_values <- trim_text(unit$variants)
+  query_values <- query_values[nzchar(query_values) & !duplicated(toupper(query_values))]
   if (!length(query_values)) {
     stop("FEC API work unit has no normalized query value: ", unit$id, call. = FALSE)
   }
@@ -399,6 +402,21 @@ fec_api_curl_transport <- function(specs, api_key, concurrency) {
 
 fec_api_default_transport <- function(specs, api_key, concurrency) {
   if (!length(specs)) return(list())
+  pool_url <- Sys.getenv("MENTAT_REQUEST_POOL_URL", unset = "")
+  if (nzchar(pool_url)) {
+    require_package("curl")
+    require_package("jsonlite")
+    if (!grepl("^http://127[.]0[.]0[.]1:[0-9]+/batch$", pool_url)) stop("Invalid local request pool address.")
+    handle <- curl::new_handle()
+    curl::handle_setheaders(handle, "Content-Type" = "application/json",
+      "Authorization" = paste("Bearer", Sys.getenv("MENTAT_REQUEST_POOL_TOKEN")))
+    curl::handle_setopt(handle, postfields = jsonlite::toJSON(list(
+      specs = specs, lane = Sys.getenv("MENTAT_REQUEST_POOL_LANE")), auto_unbox = TRUE, digits = NA), timeout = 0)
+    response <- curl::curl_fetch_memory(pool_url, handle)
+    if (response$status_code != 200L) stop("Local request pool unavailable; checkpoints retained.")
+    result <- jsonlite::fromJSON(rawToChar(response$content), simplifyVector = FALSE)$responses
+    return(result)
+  }
   if (requireNamespace("httr2", quietly = TRUE)) {
     return(fec_api_httr2_transport(specs, api_key, concurrency))
   }
@@ -579,11 +597,83 @@ fec_api_parse_page <- function(response) {
     stop("FEC API returned a schedule_a row without sub_id.", call. = FALSE)
   }
   if (length(rows)) rows <- rows[order(sub_ids, method = "radix")]
-  count <- suppressWarnings(as.integer(pagination$count %||% NA_integer_))
-  list(rows = rows, last_indexes = last_indexes, count = count)
+  numeric_count <- suppressWarnings(as.numeric(pagination$count %||% NA_real_))
+  count <- if (length(numeric_count)==1L && is.finite(numeric_count) && numeric_count >= 0 &&
+               numeric_count == floor(numeric_count) && numeric_count <= .Machine$integer.max) as.integer(numeric_count) else NA_integer_
+  list(rows = rows, last_indexes = last_indexes, count = count,
+       is_count_exact = isTRUE(pagination$is_count_exact),
+       source_response = list(status = as.integer(response$status %||% 200L),
+         body = if (is.character(response$body) && length(response$body) == 1L && nzchar(response$body)) {
+           response$body
+         } else mentat_evidence_json(payload)))
+}
+
+# Archive only public response bodies and the allow-listed request specification.
+# Never persist transport headers, API keys, local pool tokens or transport objects.
+fec_api_archive_response <- function(connection, spec, response, page = -1L,
+                                     payload_kind = "fec_api_response_body") {
+  body <- response$body
+  if (!is.character(body) || length(body) != 1L) {
+    body <- mentat_evidence_json(response$json %||% body %||% list())
+  }
+  allowed_params <- c("per_page", "two_year_transaction_period", "sort", "contributor_employer",
+    "contributor_name", "min_date", "max_date", "contributor_zip", "contributor_city",
+    "contributor_state", "last_index", "last_contribution_receipt_date")
+  query <- mentat_evidence_json(list(schema_version = 1L,
+    request = list(id = spec$id, url = FEC_API_ENDPOINT,
+      params = spec$params[intersect(names(spec$params), allowed_params)])))
+  archive_hash <- mentat_evidence_sha256(body)
+  query_hash <- mentat_evidence_sha256(query)
+  status <- as.integer(response$status %||% NA_integer_)
+  unit_id <- as.character(spec$id %||% "")
+  observation_id <- mentat_evidence_sha256(mentat_evidence_json(list(
+    archive_sha256 = archive_hash, query_sha256 = query_hash,
+    unit_id = unit_id, page = as.integer(page), http_status = status, payload_kind = payload_kind)))
+  observed_at <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3%z")
+  DBI::dbExecute(connection, paste(
+    "INSERT OR IGNORE INTO fec_response_archive",
+    "(archive_sha256,schema_version,payload_kind,payload_json,created_at) VALUES (?,1,?,?,?)"),
+    params = list(archive_hash, payload_kind, body, observed_at))
+  DBI::dbExecute(connection, paste(
+    "INSERT INTO fec_response_observations",
+    "(observation_id,archive_sha256,unit_id,query_sha256,query_json,page,http_status,observed_at,last_observed_at)",
+    "VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(observation_id) DO UPDATE SET last_observed_at=excluded.last_observed_at"),
+    params = list(observation_id, archive_hash, unit_id, query_hash, query,
+                  as.integer(page), status, observed_at, observed_at))
+  invisible(archive_hash)
+}
+
+fec_api_archiving_transport <- function(connection, transport) {
+  force(connection); force(transport)
+  function(specs, api_key, concurrency) {
+    responses <- transport(specs, api_key, concurrency)
+    # Preserve responses before parsing, count validation or retries can fail.
+    DBI::dbWithTransaction(connection, {
+      for (index in seq_along(responses)) {
+        fec_api_archive_response(connection, specs[[index]], responses[[index]])
+      }
+    })
+    responses
+  }
+}
+
+fec_api_work_contract <- function(unit) {
+  # Never resume an old query under changed spelling, aliases, or validation.
+  as.character(jsonlite::toJSON(list(version = 2L,
+    request = fec_api_request_spec(unit), company = unit$company,
+    company_variants = as.list(unit$company_variants %||% unit$variants),
+    exclusions = as.list(unit$exclusions %||% character())),
+    auto_unbox = TRUE, null = "null", digits = NA))
 }
 
 fec_api_checkpoint_page <- function(connection, state, page) {
+  contract <- fec_api_work_contract(state$unit)
+  if (isTRUE(page$decomposed) && !identical(page$coverage_method, "exhaustive_date_windows")) {
+    value <- jsonlite::fromJSON(contract, simplifyVector = FALSE)
+    value$coverage_verified <- FALSE
+    value$coverage_reason <- "Observed spellings do not prove the failed broad query was covered"
+    contract <- as.character(jsonlite::toJSON(value,auto_unbox=TRUE,null="null",digits=NA))
+  }
   payload <- jsonlite::toJSON(
     page,
     auto_unbox = TRUE,
@@ -593,6 +683,15 @@ fec_api_checkpoint_page <- function(connection, state, page) {
   )
   cursor <- state$last_indexes %||% list()
   DBI::dbWithTransaction(connection, {
+    response <- page$source_response
+    if (is.null(response)) {
+      # Legacy checkpoints and a synthetic date-window union are preserved as
+      # parsed evidence; they must not be relabelled original HTTP responses.
+      response <- list(status = NA_integer_, body = payload)
+    }
+    fec_api_archive_response(connection,
+      page$source_request %||% fec_api_request_spec(state$unit), response, page = page$page_number,
+      payload_kind = if (is.null(page$source_response)) "parsed_checkpoint" else "fec_api_response_body")
     if (isTRUE(page$decomposed)) {
       DBI::dbExecute(
         connection,
@@ -615,14 +714,15 @@ fec_api_checkpoint_page <- function(connection, state, page) {
         "INSERT INTO api_work_progress",
         "(unit_id, company, cycle, kind, last_page, rows_seen, records_total,",
         "last_index, last_contribution_receipt_date, seen_keysets,",
-        "fetched_complete, stored_complete, updated_at)",
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)",
+        "fetched_complete, stored_complete, updated_at, query_contract)",
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)",
         "ON CONFLICT(unit_id) DO UPDATE SET",
         "last_page=excluded.last_page, rows_seen=excluded.rows_seen,",
         "records_total=excluded.records_total, last_index=excluded.last_index,",
         "last_contribution_receipt_date=excluded.last_contribution_receipt_date,",
         "seen_keysets=excluded.seen_keysets,",
-        "fetched_complete=excluded.fetched_complete, updated_at=excluded.updated_at"
+        "fetched_complete=excluded.fetched_complete, updated_at=excluded.updated_at,",
+        "query_contract=excluded.query_contract, stored_complete=0"
       ),
       params = list(
         state$unit$id,
@@ -636,7 +736,8 @@ fec_api_checkpoint_page <- function(connection, state, page) {
         trim_text(cursor$last_contribution_receipt_date %||% ""),
         paste(state$seen_keysets, collapse = "\n"),
         as.integer(state$complete),
-        format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3%z")
+        format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3%z"),
+        contract
       )
     )
   })
@@ -651,10 +752,22 @@ fec_api_load_progress <- function(connection, units) {
   )
   if (!nrow(progress)) return(list())
   unit_ids <- vapply(units, function(unit) unit$id, character(1L))
-  progress <- progress[progress$unit_id %in% unit_ids, , drop = FALSE]
+  expected_units <- c(units, unlist(lapply(units, fec_api_date_windows), recursive = FALSE))
+  expected_ids <- vapply(expected_units, function(unit) unit$id, character(1L))
+  relevant <- progress$unit_id %in% unit_ids
+  for (id in unit_ids) relevant <- relevant | startsWith(progress$unit_id, paste0(id, "::window::"))
+  progress <- progress[relevant, , drop = FALSE]
   restored <- list()
   for (index in seq_len(nrow(progress))) {
     row <- progress[index, , drop = FALSE]
+    expected_index <- match(row$unit_id[[1L]], expected_ids)
+    if (is.na(expected_index)) stop("Unrecognized saved FEC query window; preserve and recollect this shard.")
+    unit <- expected_units[[expected_index]]
+    if (!"query_contract" %in% names(row) ||
+        !identical(as.character(row$query_contract[[1L]]), fec_api_work_contract(unit))) {
+      stop("Saved FEC work predates or differs from the current query contract: ",
+           row$unit_id[[1L]], ". Preserve this source and run a fresh collection shard.", call. = FALSE)
+    }
     stored <- isTRUE(as.integer(row$stored_complete[[1L]]) == 1L)
     pages <- list()
     if (!stored) {
@@ -670,6 +783,9 @@ fec_api_load_progress <- function(connection, units) {
         pages <- lapply(payloads$payload_json, function(payload) {
           jsonlite::fromJSON(payload, simplifyVector = FALSE)
         })
+        if (any(vapply(pages, function(page) nzchar(page$validation_failure %||% ""), logical(1L)))) {
+          stop("Saved FEC pages failed snapshot validation; preserve them and use a fresh collection shard: ", row$unit_id[[1L]])
+        }
       }
     }
     cursor <- list()
@@ -817,6 +933,53 @@ fec_api_union_rows <- function(rows) {
   rows[!duplicated(sub_ids)]
 }
 
+fec_api_date_windows <- function(unit) {
+  # Unbounded outer windows preserve dates outside the nominal election cycle.
+  # The parent count and row-ID checks below gate publication of the union.
+  if (length(unit$query_filters) || isTRUE(unit$is_decomposition) || isTRUE(unit$is_window)) return(list())
+  cuts <- seq(as.Date(sprintf("%d-01-01", unit$cycle - 1L)), as.Date(sprintf("%d-01-01", unit$cycle + 1L)), by = "month")
+  lapply(seq_len(length(cuts) + 1L), function(index) {
+    child <- unit
+    child$id <- paste0(unit$id, "::window::", sprintf("%02d", index))
+    child$is_window <- TRUE
+    child$query_filters <- list()
+    if (index > 1L) child$query_filters$min_date <- format(cuts[[index - 1L]], "%m/%d/%Y")
+    if (index <= length(cuts)) child$query_filters$max_date <- format(cuts[[index]] - 1, "%m/%d/%Y")
+    child
+  })
+}
+
+fec_api_combine_date_windows <- function(state, child_result, expected_count = NULL, probe_rows = list()) {
+  # Timeout recovery must retain any exact population already observed. An
+  # unknown initial count is allowed; a changed known count is not coverage.
+  observed_counts <- c(state$expected_count, expected_count, vapply(state$pages,
+    function(page) suppressWarnings(as.integer(page$count %||% NA_integer_)), integer(1L)))
+  observed_counts <- unique(observed_counts[!is.na(observed_counts)])
+  if (length(observed_counts) > 1L) {
+    stop("Date-window coverage differs from the original exact count: ", state$unit$id)
+  }
+  if (length(observed_counts)) expected_count <- observed_counts[[1L]]
+  if (any(vapply(child_result$units, function(s) identical(s$coverage_verified, FALSE), logical(1L)))) {
+    stop("A date window was replaced by unproven narrower spellings; parent coverage remains unresolved.")
+  }
+  child_rows <- unlist(lapply(child_result$units, fec_api_state_rows), recursive = FALSE)
+  ids <- vapply(child_rows, function(row) trim_text(row_scalar(row,"sub_id","")), character(1L))
+  if (any(!nzchar(ids)) || anyDuplicated(ids) || (!is.null(expected_count) && length(ids) != expected_count)) {
+    stop("Date-window coverage is partial or overlapping: ", state$unit$id)
+  }
+  prior <- vapply(c(fec_api_state_rows(state),probe_rows),function(row) trim_text(row_scalar(row,"sub_id","")),character(1L))
+  if (any(!prior %in% ids)) stop("Date-window coverage omitted previously observed rows: ",state$unit$id)
+  count <- length(ids)
+  state$pages <- list(list(rows=child_rows,last_indexes=list(),count=count,
+    is_count_exact=TRUE,rows_collected=count,page_number=0L,complete=TRUE,
+    decomposed=TRUE,coverage_method="exhaustive_date_windows"))
+  state$last_indexes <- list(); state$seen_keysets <- character(); state$expected_count <- count
+  state$page <- 1L; state$rows_seen <- count; state$rows_collected_run <- count
+  state$seen_sub_ids <- ids; state$complete <- TRUE; state$stored_complete <- FALSE
+  state$coverage_verified <- TRUE
+  state
+}
+
 fec_api_collect_work_units <- function(
   units,
   api_key = fec_api_key(),
@@ -871,7 +1034,8 @@ fec_api_collect_work_units <- function(
       pages = restored_pages,
       seen_sub_ids = restored_sub_ids,
       complete = isTRUE(restored$complete),
-      stored_complete = isTRUE(restored$stored_complete)
+      stored_complete = isTRUE(restored$stored_complete),
+      coverage_verified = TRUE
     )
   })
   queue <- which(!vapply(states, function(state) state$complete, logical(1L)))
@@ -909,6 +1073,20 @@ fec_api_collect_work_units <- function(
       index <- selected[[offset]]
       state <- states[[index]]
       if (offset %in% fetched$unservable_queries) {
+        windows <- fec_api_date_windows(state$unit)
+        if (length(windows)) {
+          cat(sprintf("Unservable query: %s -> %d exhaustive date windows\n",state$unit$id,length(windows)))
+          child_result <- fec_api_collect_work_units(windows,api_key,concurrency,
+            transport,sleep,jitter,initial_states=initial_states,
+            page_callback=page_callback,before_request=before_request)
+          state <- fec_api_combine_date_windows(state,child_result)
+          if (is.function(page_callback)) page_callback(state,state$pages[[1L]])
+          states[[index]] <- state
+          request_count <- request_count + child_result$request_count
+          retry_count <- retry_count + child_result$retry_count
+          rate_limit_count <- rate_limit_count + child_result$rate_limit_count
+          next
+        }
         if (isTRUE(state$unit$is_decomposition)) {
           current_page_size <- suppressWarnings(as.integer(
             state$unit$per_page %||% FEC_API_PER_PAGE
@@ -991,6 +1169,7 @@ fec_api_collect_work_units <- function(
         state$rows_collected_run <- as.integer(union_count)
         state$complete <- TRUE
         state$stored_complete <- FALSE
+        state$coverage_verified <- FALSE
         state$pages <- list(list(
           rows = union_rows,
           last_indexes = list(),
@@ -1024,6 +1203,34 @@ fec_api_collect_work_units <- function(
         next
       }
       page <- fec_api_parse_page(fetched$responses[[offset]])
+      page$source_request <- specs[[offset]]
+      if (!isTRUE(page$is_count_exact) || is.na(page$count) || page$count < 0L) {
+        # Save the response for diagnosis, but never certify an estimated count.
+        page$page_number <- state$page
+        page$complete <- FALSE
+        page$validation_failure <- "exact_count_missing"
+        if (is.function(page_callback)) page_callback(state, page)
+        stop("FEC API requires an exact nonnegative pagination.count: ", state$unit$id,
+             ". Response preserved; split or rerun the query.", call. = FALSE)
+      }
+      # A large cursor chain cannot occupy idle workers. Split it into disjoint
+      # date windows, let the shared pool fetch those windows, and retain one
+      # coordinator for all checkpoint/database writes.
+      pool_width <- suppressWarnings(as.integer(Sys.getenv("MENTAT_REQUEST_POOL_WIDTH", "0")))
+      children <- if (!is.na(pool_width) && pool_width > 1L && !is.na(page$count) && page$count >= 2000L) fec_api_date_windows(state$unit) else list()
+      if (length(children)) {
+        cat(sprintf("Shared workers: %s -> %d date windows; expected %d rows\n", state$unit$id, length(children), page$count))
+        child_result <- fec_api_collect_work_units(children, api_key, concurrency,
+          transport, sleep, jitter, initial_states = initial_states,
+          page_callback = page_callback, before_request = before_request)
+        state <- fec_api_combine_date_windows(state,child_result,page$count,page$rows)
+        if (is.function(page_callback)) page_callback(state,state$pages[[1L]])
+        states[[index]] <- state
+        request_count <- request_count + child_result$request_count
+        retry_count <- retry_count + child_result$retry_count
+        rate_limit_count <- rate_limit_count + child_result$rate_limit_count
+        next
+      }
       page_sub_ids <- vapply(
         page$rows,
         function(row) trim_text(row_scalar(row, "sub_id", "")),
@@ -1064,10 +1271,8 @@ fec_api_collect_work_units <- function(
         if (is.na(state$expected_count)) {
           state$expected_count <- page$count
         } else if (state$expected_count != page$count) {
-          # FEC's pagination.count legitimately moves mid-crawl as new filings
-          # and amendments post.  On a long crawl (Verizon, State Farm, USAA)
-          # this is GUARANTEED.  Aborting the whole run discards every unit
-          # already fetched, so warn and adopt the newer count instead.
+          # Continue saving evidence, but a moving population is not a verified
+          # snapshot, even if its final size equals one previously seen count.
           warning(
             "FEC API pagination.count moved during work unit (continuing): ",
             state$unit$id, " ", state$expected_count, " -> ", page$count,
@@ -1094,20 +1299,14 @@ fec_api_collect_work_units <- function(
       ]
       counts_moved <- length(unique(observed_counts)) > 1L
       terminal_page <- !length(page$rows) || !length(page$last_indexes)
-      count_complete <- if (counts_moved) {
-        terminal_page && state$rows_seen %in% unique(observed_counts)
-      } else {
-        !is.na(state$expected_count) &&
-          state$rows_seen == state$expected_count
-      }
-      if (counts_moved && count_complete) {
-        warning(
-          "FEC API pagination.count moved after a complete previously ",
-          "reported snapshot; accepting ", state$rows_seen,
-          " rows for work unit: ", state$unit$id,
-          call. = FALSE
-        )
-        state$expected_count <- as.integer(state$rows_seen)
+      count_complete <- !counts_moved && !is.na(state$expected_count) &&
+        state$rows_seen == state$expected_count
+      if (counts_moved && terminal_page) {
+        page$complete <- FALSE
+        page$validation_failure <- "population_changed_during_collection"
+        if (is.function(page_callback)) page_callback(state, page)
+        stop("FEC API count changed during collection; snapshot remains unverified: ",
+             state$unit$id, ". Pages preserved; rerun in a fresh, narrower shard.", call. = FALSE)
       }
       if (!count_complete && terminal_page) {
         count_detail <- if (length(unique(observed_counts)) == 1L) {
@@ -1656,7 +1855,7 @@ fec_api_bulk_rescue <- function(
     cap = cap,
     api_key = api_key,
     concurrency = concurrency,
-    transport = transport,
+    transport = fec_api_archiving_transport(connection, transport),
     sleep = sleep,
     jitter = jitter,
     before_request = before_request,
@@ -1801,8 +2000,9 @@ fec_api_corporate_records <- function(
     }
   }
   records[, .(
-    sub_id, contributor_name, contributor_city, contributor_state,
-    contributor_zip, contributor_employer, contributor_occupation,
+    sub_id, contributor_id, contributor_name, contributor_employer,
+    contributor_occupation, contributor_street_1, contributor_street_2,
+    contributor_city, contributor_state, contributor_zip,
     entity_type, is_entity_contributor, committee_id, committee_name,
     recipient_committee_type, recipient_committee_designation,
     contribution_receipt_date,
@@ -2062,7 +2262,7 @@ fec_api_collect_checkpointed <- function(
       units,
       api_key = api_key,
       concurrency = concurrency,
-      transport = transport,
+      transport = fec_api_archiving_transport(connection, transport),
       sleep = sleep,
       jitter = jitter,
       initial_states = initial_states,
@@ -2200,7 +2400,7 @@ collect_crypto_api <- function(
   budget_id <- fec_api_budget_id(api_key)
   requests_reserved_run <- 0L
   reserve_request <- function(count) {
-    fec_api_budget_reserve(
+    if (!nzchar(Sys.getenv("MENTAT_REQUEST_POOL_URL", ""))) fec_api_budget_reserve(
       budget_connection,
       count,
       budget_id = budget_id

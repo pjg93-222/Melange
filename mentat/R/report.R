@@ -2014,6 +2014,7 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
   # source metadata stays blank/unverified instead of inventing receipt roles.
   receipt_projection <- function(table) {
     fields <- c("receipt_type_full", "filing_form", "receipt_type", "line_number", "line_number_label",
+                "file_num", "report_year", "report_type",
                 "memo_code", "memoed_subtotal", "memo_text", "back_reference_transaction_id", "back_reference_schedule_name")
     present <- DBI::dbListFields(connection, table)
     paste0(paste(vapply(fields, function(field) {
@@ -2025,7 +2026,7 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
     paste(
       "SELECT contributor_name, committee_name, contribution_receipt_date,",
       "contribution_receipt_amount, contributor_city, contributor_state,",
-      "contributor_zip, contributor_employer, contributor_occupation, company, sub_id, matched_variant,",
+      "contributor_zip, contributor_employer, contributor_occupation, contributor_street_1, contributor_street_2, company, sub_id, matched_variant,",
       "committee_id, recipient_committee_type, recipient_committee_designation,",
       "two_year_transaction_period, entity_type, is_entity_contributor,",
       receipt_projection("contributions"), "transaction_id, pdf_url,",
@@ -2044,7 +2045,7 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
     paste(
       "SELECT contributor_name, committee_name, contribution_receipt_date,",
       "contribution_receipt_amount, contributor_city, contributor_state,",
-      "contributor_zip, contributor_employer, contributor_occupation, company, sub_id, matched_variant,",
+      "contributor_zip, contributor_employer, contributor_occupation, contributor_street_1, contributor_street_2, company, sub_id, matched_variant,",
       "committee_id, recipient_committee_type, recipient_committee_designation,",
       "cycle AS two_year_transaction_period, entity_type, is_entity_contributor,",
       receipt_projection("corporate_giving"), "transaction_id, pdf_url, '' AS conduit_committee_id,",
@@ -2070,6 +2071,11 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
   rows <- unique(rows, by = "sub_id")
   rows[, source_priority := NULL]
   rows[, receipt_role := fec_receipt_role(rows)]
+  # Never trust flags computed by an older matcher on an immutable snapshot.
+  memo_plan <- mentat_memo_duplicate_plan(rows)
+  rows[, `:=`(duplicate_memo = memo_plan$duplicate_memo,
+              duplicate_of_sub_id = memo_plan$duplicate_of_sub_id,
+              duplicate_reason = memo_plan$duplicate_reason)]
   rows[]
 }
 
@@ -2079,11 +2085,7 @@ spending_report_rows <- function(connection, lookups = NULL, raw_rows = NULL) {
   if (!nrow(rows)) return(rows)
   rows <- data.table::copy(rows)
   rows[, receipt_role := fec_receipt_role(rows)]
-  rows <- rows[
-    company_match_status == "accepted" &
-      !nzchar(trim_text(excluded_reason)) &
-      duplicate_memo == 0L & !fec_receipt_role_excluded(receipt_role)
-  ]
+  rows <- rows[fec_receipt_countable(rows)]
   lookups <- lookups %||% spending_report_lookups(connection)
   variants <- lookups$companies
   company_variants <- split(variants$variant, variants$company)
@@ -3195,6 +3197,12 @@ write_spending_report <- function(
       raw_rows = raw_rows
     )
   }
+  unresolved <- fec_receipt_countable(raw_rows) &
+    fec_receipt_role_unresolved(fec_receipt_role(raw_rows))
+  if (any(unresolved)) {
+    atomic_write_csv(raw_rows[unresolved], file.path(paths$reports, "receipt_role_review.csv"))
+  }
+  fec_assert_receipt_evidence(raw_rows)
   if (nrow(raw_rows)) {
     raw_rows[, sort_date := as.integer(normalize_reconcile_date(
       contribution_receipt_date
@@ -3437,6 +3445,18 @@ reliability_report_lines <- function(connection, amendment_summary = NULL) {
     if (is.na(corporate_summary[[column]][[1L]])) {
       corporate_summary[[column]][[1L]] <- 0
     }
+  }
+  # The old SQL predicates above describe raw collection flags. Override all
+  # countability metrics with the exact report predicate and cross-table ID
+  # handling, including receipt-role exclusions and refreshed memo evidence.
+  qa_rows <- spending_raw_report_rows(connection, versioning_applied = TRUE)
+  qa_keep <- fec_receipt_countable(qa_rows)
+  for (table in c("contributions", "corporate_giving")) {
+    selected <- qa_rows$source_table == table
+    summary <- if (table == "contributions") contribution_summary else corporate_summary
+    summary[, countable_rows := sum(qa_keep & selected)]
+    summary[, countable_dollars := sum(qa_rows$contribution_receipt_amount[qa_keep & selected], na.rm = TRUE)]
+    summary[, unresolved_receipt_rows := sum(qa_keep & selected & fec_receipt_role_unresolved(qa_rows$receipt_role))]
   }
   max_load <- contribution_summary$max_load_date[[1L]]
   if (is.na(max_load) || !nzchar(trim_text(max_load))) {
