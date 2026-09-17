@@ -2,8 +2,9 @@
 
 The initialized source database is never modified until every company-cycle
 task succeeds. Each company belongs to exactly one lane (the merge invariant),
-all cycles for that company run sequentially in that lane, and lanes run in
-parallel with one API key each. A failed lane is retried in a fresh R process;
+all cycles for that company run sequentially in that lane. HTTP requests share
+a pool of independently leased API keys across lanes while each lane retains
+one database writer. A failed lane is retried in a fresh R process;
 remaining failures are then split into one fresh process per company-cycle.
 Keys are supplied only through child-process environments and are never
 written to manifests, receipts, command lines, or logs. On complete success,
@@ -13,8 +14,10 @@ collection/recovery failure it remains untouched.
 
 from __future__ import annotations
 
+import atexit
 import argparse
 import concurrent.futures
+import copy
 import hashlib
 import json
 import math
@@ -32,6 +35,7 @@ from typing import Any, Iterable, Sequence
 
 from sqlite_snapshot import create_snapshot, verify_database
 from fec_key_store import load_keys
+from api_request_pool import RequestPool
 
 
 SUPPORTED_CYCLES = (2022, 2024, 2026)
@@ -48,7 +52,7 @@ def utc_now() -> str:
 
 def atomic_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    pending = path.with_name(f".{path.name}.{os.getpid()}.pending")
+    pending = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.pending")
     pending.write_text(
         json.dumps(value, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -222,42 +226,103 @@ def resource_cap(
     requested_parallel: int,
     memory_per_lane_mb: int,
     memory_reserve_mb: int,
+    merge_batch_limit: int = MERGE_ATTACHMENT_LIMIT,
+    lane_ceiling: int = 0,
 ) -> dict[str, int]:
     cpu_count = max(1, os.cpu_count() or 1)
     available = available_memory_bytes()
     available_mb = available // (1024 * 1024) if available else 0
+    requested = requested_parallel if requested_parallel > 0 else max(key_count, 1)
+    # A failed memory probe must not silently strand the run on a single lane.
+    # Treat an unreadable probe as "unknown, do not constrain" and record it.
+    memory_probe_failed = not available_mb
     memory_cap = (
         max(1, (available_mb - memory_reserve_mb) // memory_per_lane_mb)
         if available_mb
-        else 1
+        else requested
     )
-    requested = requested_parallel if requested_parallel > 0 else MERGE_ATTACHMENT_LIMIT
     # A lane is primarily remote-API and SQLite-I/O bound. Keep CPU count as
     # telemetry, but do not strand a dedicated key/company pair merely because
     # there are fewer logical CPUs than independently rate-limited API keys.
-    cap = max(
-        1,
-        min(
-            requested,
-            key_count,
-            company_count,
-            memory_cap,
-            MERGE_ATTACHMENT_LIMIT,
-        ),
-    )
+    # merge_company_shards batches its attachments, so the ten-shard SQLite
+    # limit is no longer a ceiling on lane count.
+    limits = [requested, key_count, company_count, memory_cap]
+    if lane_ceiling > 0:
+        limits.append(lane_ceiling)
+    cap = max(1, min(limits))
     return {
         "requested_parallel": requested_parallel,
         "logical_cpu": cpu_count,
         "cpu_bound_lane_cap_applied": False,
         "available_memory_mb": int(available_mb),
+        "memory_probe_failed": memory_probe_failed,
         "memory_per_lane_mb": memory_per_lane_mb,
         "memory_reserve_mb": memory_reserve_mb,
         "memory_lane_cap": int(memory_cap),
         "key_cap": key_count,
         "company_cap": company_count,
-        "sqlite_merge_cap": MERGE_ATTACHMENT_LIMIT,
+        "lane_ceiling": lane_ceiling,
+        "sqlite_merge_cap": merge_batch_limit,
         "active_lane_cap": cap,
     }
+
+
+class LaneLimiter:
+    """Resizable concurrency gate so a running fanout can gain or shed lanes."""
+
+    def __init__(self, permits: int) -> None:
+        self.condition = threading.Condition()
+        self.limit = max(1, int(permits))
+        self.held = 0
+        self.stopped = False
+        self.resources: set[str] = set()
+
+    def resize(self, permits: int) -> None:
+        with self.condition:
+            self.limit = max(1, int(permits))
+            self.condition.notify_all()
+
+    def stop(self) -> None:
+        """Refuse every further permit. Lanes already holding one finish."""
+        with self.condition:
+            self.stopped = True
+            self.condition.notify_all()
+
+    def active(self) -> int:
+        with self.condition:
+            return self.held
+
+    def target(self) -> int:
+        with self.condition:
+            return self.limit
+
+    def acquire(self, resources: Sequence[str] = ()) -> bool:
+        """Block for a permit. Returns False once the operator has stopped."""
+        with self.condition:
+            while not self.stopped and (
+                self.held >= self.limit or self.resources.intersection(resources)
+            ):
+                self.condition.wait()
+            if self.stopped:
+                return False
+            self.held += 1
+            self.resources.update(resources)
+            return True
+
+    def release(self, resources: Sequence[str] = ()) -> None:
+        with self.condition:
+            self.held = max(0, self.held - 1)
+            self.resources.difference_update(resources)
+            self.condition.notify_all()
+
+
+def read_control(path: Path) -> dict[str, Any]:
+    """Read the operator control file. A missing or half-written file is ignored."""
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return value if isinstance(value, dict) else {}
 
 
 def execution_worker_cap(lane_count: int, resources: dict[str, int]) -> int:
@@ -298,6 +363,83 @@ def schedule_companies(
 
 def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+class CompanyWorkQueue:
+    """Single-coordinator queue. Only untouched companies can change owner.
+
+    Ownership is persisted BEFORE dispatch, including for a company's first
+    page. A crash can therefore never make a partially written company eligible
+    for stealing on resume. Old manifests conservatively pin every company.
+    """
+
+    def __init__(self, plans, pending_by_lane, manifest_path, *, resume=False):
+        self.plans = plans
+        self.manifest_path = manifest_path
+        self.manifest = read_json(manifest_path)
+        dynamic = self.manifest.get("scheduling", {}).get("strategy") == "company_work_sharing"
+        self.managed_initialization = self.manifest.get('scheduling', {}).get('initialization_markers', dynamic or not resume)
+        self.claimed = {
+            company for lane in self.manifest["lanes"]
+            for company in (lane.get("claimed_companies", []) if dynamic or not resume else lane["companies"])
+        }
+        self.pending = {
+            lane: {company: [task for task in tasks if task["company"] == company]
+                   for company in dict.fromkeys(task["company"] for task in tasks)}
+            for lane, tasks in pending_by_lane.items()
+        }
+        self.handoffs = list(self.manifest.get("scheduling", {}).get("handoffs", []))
+
+    def claim(self, lane):
+        own = self.pending.setdefault(lane, {})
+        donor = lane
+        if own:
+            company = next(iter(own))
+        else:
+            donors = [(number, work) for number, work in self.pending.items()
+                      if any(company not in self.claimed for company in work)]
+            if not donors:
+                return None
+            donor, work = max(donors, key=lambda item: (sum(len(v) for v in item[1].values()), -item[0]))
+            company = next(company for company in reversed(work) if company not in self.claimed)
+        tasks = self.pending[donor][company]
+        resuming = company in self.claimed
+        updated = copy.deepcopy(self.plans)
+        handoffs = list(self.handoffs)
+        if donor != lane:
+            source = next(p for p in updated if p["lane"] == donor)
+            target = next(p for p in updated if p["lane"] == lane)
+            owned_tasks = [task for task in source["tasks"] if task["company"] == company]
+            source["companies"].remove(company)
+            source["tasks"] = [task for task in source["tasks"] if task["company"] != company]
+            target["companies"].append(company)
+            target["tasks"].extend(owned_tasks)
+            handoffs.append({"company": company, "from_lane": donor, "to_lane": lane, "claimed_at": utc_now()})
+        claimed = self.claimed | {company}
+        manifest = copy.deepcopy(self.manifest)
+        for entry in manifest["lanes"]:
+            plan = next(p for p in updated if p["lane"] == entry["lane"])
+            entry["companies"] = plan["companies"]
+            entry["tasks"] = plan["tasks"]
+            entry["claimed_companies"] = [c for c in plan["companies"] if c in claimed]
+        manifest["scheduling"] = {"strategy": "company_work_sharing", "handoffs": handoffs,
+                                  "initialization_markers": self.managed_initialization}
+        atomic_json(self.manifest_path, manifest)
+        # Commit in-memory state only after the durable ownership write succeeds.
+        self.plans[:] = updated
+        self.manifest, self.claimed, self.handoffs = manifest, claimed, handoffs
+        del self.pending[donor][company]
+        return tasks, resuming
+
+    def pending_companies(self):
+        return sum(len(work) for work in self.pending.values())
+
+    def publish_run(self, run):
+        manifest = copy.deepcopy(self.manifest)
+        entry = next(lane for lane in manifest['lanes'] if lane['lane'] == run.lane)
+        entry.update(state=str(run.state), receipt=str(run.receipt), log=str(run.log))
+        atomic_json(self.manifest_path, manifest)
+        self.manifest = manifest
 
 
 def merge_attribution_conflict_count(path: Path) -> int:
@@ -363,6 +505,7 @@ def execute_lane(
     concurrency: int,
     sqlite_cache_mb: int,
     budget_database: Path,
+    request_pool: RequestPool | None = None,
 ) -> dict[str, Any]:
     environment = os.environ.copy()
     environment["FEC_API_KEY"] = lane_run.key
@@ -376,6 +519,11 @@ def execute_lane(
     environment["MENTAT_API_BUDGET_ID"] = (
         f"openfec:sha256:{lane_run.key_id}"
     )
+    if request_pool is not None:
+        environment["MENTAT_REQUEST_POOL_URL"] = request_pool.url
+        environment["MENTAT_REQUEST_POOL_TOKEN"] = request_pool.token
+        environment["MENTAT_REQUEST_POOL_LANE"] = str(lane_run.lane)
+        environment["MENTAT_REQUEST_POOL_WIDTH"] = str(len(request_pool.keys))
     if r_library_path is not None:
         environment["R_LIBS_USER"] = str(r_library_path)
     command = [
@@ -459,6 +607,10 @@ def execute_lane(
             f"Managed Rscript exited with code {int(process.returncode)}."
         )
     atomic_json(lane_run.receipt, receipt)
+    atomic_json(lane_run.state, {**state, "status": receipt["status"],
+                "lane": lane_run.lane, "completed": len(normalized_tasks),
+                "failed": failed_count, "tasks": normalized_tasks,
+                "current_company": None, "current_cycle": None})
     invocation_receipt = lane_run.receipt.with_name(
         f"{lane_run.receipt.stem}.invocation.json"
     )
@@ -500,13 +652,43 @@ def execute_lane(
     }
 
 
+def skipped_lane(lane_run: LaneRun) -> dict[str, Any]:
+    """A lane the operator stopped before it started. Its tasks stay unfinished."""
+    return {
+        "lane": lane_run.lane,
+        "attempt": lane_run.attempt,
+        "database": str(lane_run.database),
+        "key_id": lane_run.key_id,
+        "units": [],
+        "receipt": {
+            "tasks": [
+                {
+                    **task,
+                    "status": "skipped",
+                    "error": "Operator stopped the run before this lane started.",
+                }
+                for task in lane_run.tasks
+            ]
+        },
+    }
+
+
 def execute_lane_with_limit(
-    limiter: threading.BoundedSemaphore,
+    limiter: LaneLimiter,
     lane_run: LaneRun,
     **kwargs: Any,
 ) -> dict[str, Any]:
-    with limiter:
+    # A queued lane must not start once the operator has stopped the run. The
+    # thread pool has already marked every future RUNNING, so Future.cancel()
+    # cannot do this for us; the permit gate is the only reliable place.
+    resources = ("database:" + os.path.normcase(str(lane_run.database.resolve())),
+                 "key:" + key_id(lane_run.key))
+    if not limiter.acquire(resources):
+        return skipped_lane(lane_run)
+    try:
         return execute_lane(lane_run, **kwargs)
+    finally:
+        limiter.release(resources)
 
 
 def lane_state(path: Path) -> dict[str, Any]:
@@ -637,6 +819,9 @@ def combine_task_results(
 def receipt_attempt_number(path: Path) -> int:
     if path.name == "receipt.json":
         return 1
+    work = re.fullmatch(r"receipt\.work-(\d+)-[a-z0-9-]+\.json", path.name)
+    if work:
+        return int(work.group(1))
     recovery = re.fullmatch(
         r"receipt\.recovery-(\d+)(?:-[a-z0-9-]+)?\.json",
         path.name,
@@ -712,7 +897,9 @@ def parse_arguments(arguments: Sequence[str]) -> argparse.Namespace:
     parser.add_argument("--output-receipt", type=Path)
     parser.add_argument("--keys-file", type=Path)
     parser.add_argument("--max-parallel", type=int, default=0)
-    parser.add_argument("--recovery-workers", type=int, default=1)
+    parser.add_argument("--no-shared-requests", action="store_true")
+    parser.add_argument("--recovery-workers", type=int, default=0,
+                        help="Recovery concurrency; zero shares available worker capacity.")
     parser.add_argument("--concurrency-per-key", type=int, default=8)
     parser.add_argument(
         "--rscript-path",
@@ -731,6 +918,18 @@ def parse_arguments(arguments: Sequence[str]) -> argparse.Namespace:
         default=DEFAULT_MEMORY_RESERVE_MB,
     )
     parser.add_argument("--sqlite-cache-mb", type=int, default=256)
+    parser.add_argument("--merge-batch-limit", type=int, default=MERGE_ATTACHMENT_LIMIT)
+    parser.add_argument("--max-lane-ceiling", type=int, default=0)
+    parser.add_argument("--initial-workers", type=int, default=0)
+    parser.add_argument(
+        "--pool-width",
+        type=int,
+        default=0,
+        help=(
+            "Shared HTTP request-pool width. Zero uses every healthy API key; "
+            "the RAM-derived lane cap never bounds it."
+        ),
+    )
     parser.add_argument(
         "--resume",
         action="store_true",
@@ -747,8 +946,8 @@ def parse_arguments(arguments: Sequence[str]) -> argparse.Namespace:
     parsed = parser.parse_args(arguments)
     if parsed.max_parallel < 0:
         parser.error("--max-parallel must be zero (auto) or positive.")
-    if parsed.recovery_workers != 1:
-        parser.error("--recovery-workers must be 1; failures recover serially.")
+    if not 0 <= parsed.recovery_workers <= 64:
+        parser.error("--recovery-workers must be between 0 (auto) and 64.")
     if parsed.concurrency_per_key < 1 or parsed.concurrency_per_key > 64:
         parser.error("--concurrency-per-key must be between 1 and 64.")
     if parsed.memory_per_lane_mb < 128:
@@ -757,6 +956,14 @@ def parse_arguments(arguments: Sequence[str]) -> argparse.Namespace:
         parser.error("--memory-reserve-mb must be at least 256.")
     if parsed.sqlite_cache_mb < 32 or parsed.sqlite_cache_mb > 2048:
         parser.error("--sqlite-cache-mb must be between 32 and 2048.")
+    if parsed.merge_batch_limit < 2:
+        parser.error("--merge-batch-limit must be at least 2.")
+    if parsed.max_lane_ceiling < 0:
+        parser.error("--max-lane-ceiling must be zero (no ceiling) or positive.")
+    if parsed.initial_workers < 0:
+        parser.error("--initial-workers must be zero (auto) or positive.")
+    if not 0 <= parsed.pool_width <= 64:
+        parser.error("--pool-width must be between 0 (every healthy key) and 64.")
     return parsed
 
 
@@ -848,6 +1055,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
         requested_parallel=options.max_parallel,
         memory_per_lane_mb=options.memory_per_lane_mb,
         memory_reserve_mb=options.memory_reserve_mb,
+        merge_batch_limit=options.merge_batch_limit,
+        lane_ceiling=options.max_lane_ceiling,
     )
     if options.resume:
         assert existing_manifest is not None
@@ -861,9 +1070,18 @@ def main(arguments: Sequence[str] | None = None) -> int:
             )
         lane_count = int(existing_manifest["lane_count"])
         if len(keys) < lane_count:
-            raise RuntimeError(
-                f"Resume requires at least {lane_count} configured keys so "
-                "existing lanes never share a key concurrently."
+            # A key quarantined, rotated or disabled between attempts leaves
+            # fewer keys than the manifest planned lanes for. Refusing here
+            # discarded every verified company-cycle task the stopped attempt
+            # had already finished, which is the opposite of what a resume is
+            # for. Lanes take keys round-robin below instead, and
+            # execute_lane_with_limit holds a "key:" resource for the whole
+            # lane, so two lanes that share a key are serialized and still
+            # never hold the same key concurrently.
+            print(
+                f"[fanout] resuming {lane_count} planned lanes on "
+                f"{len(keys)} keys; lanes sharing a key run one at a time.",
+                flush=True,
             )
         plans = [
             {
@@ -880,7 +1098,14 @@ def main(arguments: Sequence[str] | None = None) -> int:
         )
         run_id = str(existing_manifest["run_id"])
     else:
-        lane_count = resources["active_lane_cap"]
+        # Plan every lane the key supply and roster structurally allow, so the
+        # operator can raise workers mid-run. Memory only decides where the run
+        # starts (--initial-workers), never where its ceiling sits.
+        lane_count = max(1, min(len(keys), len(companies)))
+        if options.max_parallel > 0:
+            lane_count = min(lane_count, options.max_parallel)
+        if options.max_lane_ceiling > 0:
+            lane_count = min(lane_count, options.max_lane_ceiling)
         plans = schedule_companies(companies, options.cycles, lane_count)
         run_id = f"{datetime.now().strftime('%Y%m%dT%H%M%S')}-{os.getpid()}"
     spare_keys = keys[lane_count:]
@@ -956,8 +1181,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
             receipt=receipt_path,
             state=state_path,
             log=log_path,
-            key=keys[index],
-            key_id=key_id(keys[index]),
+            key=keys[index % len(keys)],
+            key_id=key_id(keys[index % len(keys)]),
             tasks=tuple(pending_tasks if options.resume else plan["tasks"]),
             attempt=resume_number if options.resume else 1,
         )
@@ -998,7 +1223,6 @@ def main(arguments: Sequence[str] | None = None) -> int:
             )
         if merge_run.tasks:
             primary_runs.append(merge_run)
-            all_lane_runs.append(merge_run)
 
     task_total = sum(len(plan["tasks"]) for plan in plans)
     if not options.resume:
@@ -1061,19 +1285,142 @@ def main(arguments: Sequence[str] | None = None) -> int:
         flush=True,
     )
 
+    work_queue = CompanyWorkQueue(
+        plans, {run.lane: run.tasks for run in merge_runs}, manifest_path,
+        resume=options.resume,
+    )
+    lane_templates = {run.lane: run for run in merge_runs}
+    lane_failures: dict[int, list[dict[str, Any]]] = {run.lane: [] for run in merge_runs}
+
+    def initialization_markers(lane, tasks):
+        if not work_queue.managed_initialization:
+            return {}
+        directory = lane_templates[lane].database.parent / "initialized"
+        return {task["task_id"]: str(directory / (hashlib.sha256(task["task_id"].encode("utf-8")).hexdigest() + ".json")) for task in tasks}
+
+    def next_company(lane: int) -> LaneRun | None:
+        claimed = work_queue.claim(lane)
+        if claimed is None:
+            return None
+        tasks, resuming = claimed
+        template = lane_templates[lane]
+        token = hashlib.sha256(tasks[0]["company"].encode("utf-8")).hexdigest()[:16]
+        suffix = f"work-{template.attempt}-{token}.json"
+        assignment = template.assignments.with_name("assignments." + suffix)
+        atomic_json(assignment, {
+            "industry": options.industry.strip(), "run_id": run_id,
+            "lane": lane, "resume": resuming, "tasks": tasks,
+            "initialization_markers": initialization_markers(lane, tasks),
+        })
+        run = LaneRun(
+            lane=lane, database=template.database, assignments=assignment,
+            receipt=template.receipt.with_name("receipt." + suffix),
+            state=template.state.with_name("status." + suffix), log=template.log,
+            key=template.key, key_id=template.key_id, tasks=tuple(tasks),
+            attempt=template.attempt,
+        )
+        all_lane_runs.append(run)
+        work_queue.publish_run(run)
+        return run
+
     recovery_futures: dict[concurrent.futures.Future[dict[str, Any]], LaneRun] = {}
     recovery_results: list[tuple[LaneRun, dict[str, Any]]] = []
-    primary_worker_count = execution_worker_cap(lane_count, resources)
-    execution_limiter = threading.BoundedSemaphore(primary_worker_count)
+    primary_worker_count = (
+        max(1, min(options.initial_workers, lane_count))
+        if options.initial_workers > 0
+        else execution_worker_cap(lane_count, resources)
+    )
+    execution_limiter = LaneLimiter(primary_worker_count)
+    request_pool = None
+    worker_ceiling = lane_count if options.no_shared_requests else min(len(keys), options.max_parallel or len(keys), options.max_lane_ceiling or len(keys))
+    if not options.no_shared_requests:
+        # HTTP width follows the key supply, never the RAM-derived lane cap: the
+        # keys are the rate limit. R lanes stay bounded by execution_limiter.
+        pool_width = options.pool_width if options.pool_width > 0 else worker_ceiling
+        request_pool = RequestPool(keys, budget_database, pool_width)
+        request_pool.url = request_pool.start()
+        atexit.register(request_pool.close)
+    control_path = options.run_directory / "control.json"
+    workers_path = options.run_directory / "workers.json"
+    stop_requested = threading.Event()
+    control_finished = threading.Event()
+
+    def publish_workers() -> None:
+        pool_state = request_pool.snapshot() if request_pool else None
+        try:
+            atomic_json(
+                workers_path,
+                {
+                    "lane_count": lane_count,
+                    "worker_ceiling": worker_ceiling,
+                    "active_workers": pool_state["active_workers"] if pool_state else execution_limiter.active(),
+                    "database_writers": execution_limiter.active(),
+                    "request_pool": pool_state,
+                    "requested_workers": pool_state['requested_workers'] if pool_state else execution_limiter.target(),
+                    "quarantined_keys": pool_state['quarantined_keys'] if pool_state else [],
+                    "reissued_requests": pool_state['reissued_requests'] if pool_state else 0,
+                    "stopping": stop_requested.is_set(),
+                    "pending_companies": work_queue.pending_companies(),
+                    "company_handoffs": len(work_queue.handoffs),
+                    "scheduling": "company_work_sharing",
+                    "updated_at": utc_now(),
+                },
+            )
+        except OSError:
+            pass
+
+    def watch_control() -> None:
+        # The operator console writes control.json; a missing or half-written
+        # file must never disturb a live collection.
+        while not control_finished.wait(3):
+            control = read_control(control_path)
+            desired = control.get("desired_workers")
+            if isinstance(desired, int) and desired > 0:
+                # This dial owns the R database coordinators only. The shared HTTP
+                # pool is as wide as the key supply and never follows it.
+                target = max(1, min(int(desired), worker_ceiling, lane_count))
+                if target != execution_limiter.target():
+                    execution_limiter.resize(target)
+                    width = request_pool.snapshot()['requested_workers'] if request_pool else 0
+                    print(
+                        f"[fanout] operator set database coordinators to {target} "
+                        f"(lane ceiling {lane_count}; request pool width {width})",
+                        flush=True,
+                    )
+            if control.get("stop") and not stop_requested.is_set():
+                stop_requested.set()
+                execution_limiter.stop()
+                if request_pool: request_pool.stop()
+                print(
+                    "[fanout] operator stop requested; no further lanes will "
+                    "start and in-flight lanes will finish.",
+                    flush=True,
+                )
+            publish_workers()
+
+    publish_workers()
+    control_watcher = threading.Thread(
+        target=watch_control,
+        name="mentat-api-control",
+        daemon=True,
+    )
+    control_watcher.start()
     with concurrent.futures.ThreadPoolExecutor(
-        max_workers=primary_worker_count,
+        max_workers=lane_count,
         thread_name_prefix="mentat-api-primary",
     ) as primary_pool, concurrent.futures.ThreadPoolExecutor(
-        max_workers=options.recovery_workers,
+        max_workers=min(lane_count, options.recovery_workers or lane_count),
         thread_name_prefix="mentat-api-recovery",
     ) as recovery_pool:
-        primary_futures = {
-            primary_pool.submit(
+        primary_futures = {}
+
+        def submit_company(lane: int):
+            if stop_requested.is_set():
+                return None
+            run = next_company(lane)
+            if run is None:
+                return None
+            future = primary_pool.submit(
                 execute_lane_with_limit,
                 execution_limiter,
                 run,
@@ -1083,9 +1430,13 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 concurrency=options.concurrency_per_key,
                 sqlite_cache_mb=options.sqlite_cache_mb,
                 budget_database=budget_database,
-            ): run
-            for run in primary_runs
-        }
+                request_pool=request_pool,
+            )
+            primary_futures[future] = run
+            return future
+
+        for lane in lane_templates:
+            submit_company(lane)
         pending: set[concurrent.futures.Future[dict[str, Any]]] = set(
             primary_futures
         )
@@ -1100,6 +1451,14 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 started_monotonic=started_monotonic,
             ):
                 status_write_failures += 1
+            if stop_requested.is_set():
+                # Drop lanes that have not started. Anything already running
+                # keeps its API budget and finishes its own write cleanly.
+                for queued in list(pending):
+                    queued.cancel()
+                pending = {
+                    queued for queued in pending if not queued.cancelled()
+                }
             done, pending = concurrent.futures.wait(
                 pending,
                 timeout=1,
@@ -1109,8 +1468,15 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 run = primary_futures[future]
                 attempt = future.result()
                 attempts.append(attempt)
-                retry_tasks = failed_tasks(attempt["receipt"], run.tasks)
+                lane_failures[run.lane].extend(failed_tasks(attempt["receipt"], run.tasks))
+                next_future = submit_company(run.lane)
+                if next_future is not None:
+                    pending.add(next_future)
+                    continue
+                retry_tasks = lane_failures[run.lane]
                 if not retry_tasks:
+                    continue
+                if stop_requested.is_set():
                     continue
                 recovery_assignment = run.assignments.with_name(
                     f"assignments.recovery-{run.attempt}.json"
@@ -1130,6 +1496,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
                         "recovery_attempt": run.attempt,
                         "resume": True,
                         "tasks": retry_tasks,
+                        "initialization_markers": initialization_markers(run.lane, retry_tasks),
                     },
                 )
                 recovery_run = LaneRun(
@@ -1140,19 +1507,20 @@ def main(arguments: Sequence[str] | None = None) -> int:
                     state=recovery_state,
                     log=run.log,
                     key=(
-                        spare_keys[(run.lane - 1) % len(spare_keys)]
-                        if spare_keys
+                        spare_keys[run.lane - 1]
+                        if run.lane <= len(spare_keys)
                         else run.key
                     ),
                     key_id=key_id(
-                        spare_keys[(run.lane - 1) % len(spare_keys)]
-                        if spare_keys
+                        spare_keys[run.lane - 1]
+                        if run.lane <= len(spare_keys)
                         else run.key
                     ),
                     tasks=tuple(retry_tasks),
                     attempt=run.attempt + 1,
                 )
                 all_lane_runs.append(recovery_run)
+                work_queue.publish_run(recovery_run)
                 recovery_future = recovery_pool.submit(
                     execute_lane_with_limit,
                     execution_limiter,
@@ -1163,6 +1531,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
                     concurrency=options.concurrency_per_key,
                     sqlite_cache_mb=options.sqlite_cache_mb,
                     budget_database=budget_database,
+                request_pool=request_pool,
                 )
                 recovery_futures[recovery_future] = recovery_run
 
@@ -1192,7 +1561,10 @@ def main(arguments: Sequence[str] | None = None) -> int:
         split_futures: dict[
             concurrent.futures.Future[dict[str, Any]], LaneRun
         ] = {}
+        split_queues: dict[int, list[LaneRun]] = {}
         for recovery_run, recovery_result in recovery_results:
+            if stop_requested.is_set():
+                break
             split_tasks = failed_tasks(
                 recovery_result["receipt"],
                 recovery_run.tasks,
@@ -1224,6 +1596,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
                         "parent_attempt": recovery_run.attempt,
                         "resume": True,
                         "tasks": [task],
+                        "initialization_markers": initialization_markers(recovery_run.lane, [task]),
                     },
                 )
                 split_run = LaneRun(
@@ -1239,18 +1612,29 @@ def main(arguments: Sequence[str] | None = None) -> int:
                     attempt=split_attempt,
                 )
                 all_lane_runs.append(split_run)
-                split_future = recovery_pool.submit(
-                    execute_lane_with_limit,
-                    execution_limiter,
-                    split_run,
-                    rscript_path=rscript_path,
-                    lane_script=lane_script,
-                    r_library_path=r_library_path,
-                    concurrency=options.concurrency_per_key,
-                    sqlite_cache_mb=options.sqlite_cache_mb,
-                    budget_database=budget_database,
-                )
-                split_futures[split_future] = split_run
+                split_queues.setdefault(split_run.lane, []).append(split_run)
+
+        def submit_split(lane):
+            if stop_requested.is_set() or not split_queues[lane]:
+                return None
+            split_run = split_queues[lane].pop(0)
+            work_queue.publish_run(split_run)
+            future = recovery_pool.submit(
+                execute_lane_with_limit, execution_limiter, split_run,
+                rscript_path=rscript_path, lane_script=lane_script,
+                r_library_path=r_library_path,
+                concurrency=options.concurrency_per_key,
+                sqlite_cache_mb=options.sqlite_cache_mb,
+                budget_database=budget_database,
+                request_pool=request_pool,
+            )
+            split_futures[future] = split_run
+            return future
+
+        # At most one queued split per database keeps blocked same-owner jobs
+        # from occupying the pool while other companies could recover.
+        for lane in split_queues:
+            submit_split(lane)
 
         split_pending = set(split_futures)
         while split_pending:
@@ -1271,6 +1655,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
             )
             for future in done:
                 attempts.append(future.result())
+                next_future = submit_split(split_futures[future].lane)
+                if next_future is not None:
+                    split_pending.add(next_future)
 
     combined_tasks, final_failed = combine_task_results(plans, attempts)
     merge_log = run_directory / "merge.log"
@@ -1280,7 +1667,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "log": str(merge_log),
     }
     merged = False
-    if not final_failed:
+    # A stopped run never writes the source database, even if every lane that
+    # did run happened to succeed. Resume it later instead.
+    if not final_failed and not stop_requested.is_set():
         if (
             quiescent_database_fingerprint(source_database)
             != current_source_fingerprint
@@ -1308,9 +1697,12 @@ def main(arguments: Sequence[str] | None = None) -> int:
             json.dumps(canonical_company_order, ensure_ascii=False),
             "--expected-target-sha256",
             current_source_fingerprint,
+            "--merge-batch-limit",
+            str(options.merge_batch_limit),
             *[
                 f"{run.database}::{'|'.join(plans[run.lane - 1]['companies'])}"
                 for run in merge_runs
+                if plans[run.lane - 1]["companies"]
             ],
         ]
         merge_started = time.monotonic()
@@ -1379,8 +1771,11 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "merged": merged,
         "configured_key_count": len(keys),
         "spare_key_count": len(spare_keys),
+        "request_pool": request_pool.snapshot() if request_pool else None,
         "lane_count": lane_count,
         "execution_worker_count": primary_worker_count,
+        "final_worker_count": execution_limiter.target(),
+        "stopped_early": stop_requested.is_set(),
         "resource_cap": resources,
         "recovery_ladder": [
             "primary_lane",
@@ -1397,6 +1792,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "budget_database": str(budget_database),
         "telemetry": {
             "status_write_failures": status_write_failures,
+            "company_handoffs": len(work_queue.handoffs),
+            "scheduling": "company_work_sharing",
         },
         "tasks": combined_tasks,
         "failures": final_failed,
@@ -1410,6 +1807,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
         ],
         "merge": merge_result,
     }
+    control_finished.set()
+    publish_workers()
     atomic_json(output_receipt, receipt)
     print(
         f"MENTAT API FANOUT {final_status.upper()} "
@@ -1417,6 +1816,13 @@ def main(arguments: Sequence[str] | None = None) -> int:
         f"wall={receipt['wall_clock_seconds']:.3f}s receipt={output_receipt}",
         flush=True,
     )
+    if stop_requested.is_set() and final_status != "succeeded":
+        # Distinct from a real failure: the operator stopped this run, the
+        # source database was never merged, and --resume can continue it.
+        return 3
+    if request_pool:
+        request_pool.close()
+        atexit.unregister(request_pool.close)
     return 0 if final_status == "succeeded" else 2
 
 

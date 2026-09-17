@@ -37,6 +37,8 @@ receipt_path <- normalizePath(
 )
 key_id <- trimws(arguments[[5L]])
 concurrency <- suppressWarnings(as.integer(arguments[[6L]]))
+pool_width <- suppressWarnings(as.integer(Sys.getenv("MENTAT_REQUEST_POOL_WIDTH", "0")))
+if (!is.na(pool_width) && pool_width > 0L) concurrency <- max(concurrency, pool_width)
 if (!nzchar(industry) || !nzchar(key_id)) {
   stop("Industry and redacted key id are required.", call. = FALSE)
 }
@@ -67,6 +69,20 @@ for (module in c(
 require_package("DBI")
 require_package("RSQLite")
 require_package("jsonlite")
+
+# A managed upgrade can attach an existing checkpointed fanout to a shared
+# request pool without changing its company/database ownership manifest.
+pool_config_path <- file.path(dirname(dirname(dirname(assignments_path))), "request-pool.json")
+if (!nzchar(Sys.getenv("MENTAT_REQUEST_POOL_URL", "")) && file.exists(pool_config_path)) {
+  pool_config <- jsonlite::read_json(pool_config_path)
+  if (!identical(pool_config$schema, "mentat-request-pool-v1") ||
+      !grepl("^http://127[.]0[.]0[.]1:[0-9]+/batch$", pool_config$url)) stop("Invalid request pool configuration.")
+  Sys.setenv(MENTAT_REQUEST_POOL_URL = pool_config$url,
+    MENTAT_REQUEST_POOL_TOKEN = pool_config$token,
+    MENTAT_REQUEST_POOL_WIDTH = as.character(pool_config$width),
+    MENTAT_REQUEST_POOL_LANE = basename(dirname(assignments_path)))
+  concurrency <- max(concurrency, as.integer(pool_config$width))
+}
 
 atomic_write_json <- function(value, target) {
   directory <- dirname(target)
@@ -112,7 +128,8 @@ parse_assignments <- function(path) {
         "-", cycle
       )
     }
-    list(task_id = task_id, company = company, cycle = cycle)
+    list(task_id = task_id, company = company, cycle = cycle,
+         initialization_marker = payload$initialization_markers[[task_id]] %||% "")
   })
   ids <- vapply(normalized, `[[`, character(1L), "task_id")
   pairs <- vapply(normalized, function(task) {
@@ -136,6 +153,19 @@ sqlite_cache_mb <- function(
     stop("MENTAT_SQLITE_CACHE_MB must be between 32 and 2048.", call. = FALSE)
   }
   result
+}
+
+lane_startup_delay <- function(
+  lane_number,
+  request_pool_url = Sys.getenv("MENTAT_REQUEST_POOL_URL", unset = "")
+) {
+  # A managed request pool initializes the shared ledger before dispatching R
+  # lanes and reserves requests itself. Repeating the ordinal stagger for every
+  # company invocation adds no budget protection in this mode. SQLite still
+  # keeps its busy timeout, WAL checks, durable writes and per-key accounting.
+  if (grepl("^http://127[.]0[.]0[.]1:[0-9]+/batch$", request_pool_url)) return(0)
+  lane_index <- if (is.na(lane_number) || lane_number < 1L) 1L else lane_number
+  (lane_index - 1L) * 0.25
 }
 
 write_run_status <- function(
@@ -173,6 +203,21 @@ write_run_status <- function(
   )
 }
 
+initialize_lane_tasks <- function(connection, tasks, resume) {
+  # A durable dispatch can precede R startup. Missing markers still need a
+  # fresh reset on recovery. Mark after commit, before making API requests.
+  fresh_tasks <- Filter(function(task) {
+    marker <- task$initialization_marker %||% ""
+    !isTRUE(resume) || (nzchar(marker) && !file.exists(marker))
+  }, tasks)
+  reset_count <- if (length(fresh_tasks)) reset_api_progress(connection, fresh_tasks) else 0L
+  for (task in fresh_tasks) {
+    marker <- task$initialization_marker %||% ""
+    if (nzchar(marker)) atomic_write_json(list(task_id = task$task_id, initialized = TRUE), marker)
+  }
+  reset_count
+}
+
 run_lane <- function() {
   started_wall <- Sys.time()
   started_elapsed <- proc.time()[["elapsed"]]
@@ -205,11 +250,7 @@ run_lane <- function() {
   )
   DBI::dbExecute(connection, "PRAGMA mmap_size=1073741824")
   init_schema(connection)
-  reset_unit_count <- if (isTRUE(assignment$resume)) {
-    0L
-  } else {
-    reset_api_progress(connection, tasks)
-  }
+  reset_unit_count <- initialize_lane_tasks(connection, tasks, assignment$resume)
   refresh_mode <- if (isTRUE(assignment$resume)) {
     "resume"
   } else {
@@ -239,12 +280,7 @@ run_lane <- function() {
         call. = FALSE
       )
     }
-    lane_index <- if (is.na(lane_number) || lane_number < 1L) {
-      1L
-    } else {
-      lane_number
-    }
-    startup_jitter_seconds <- (lane_index - 1L) * 0.25
+    startup_jitter_seconds <- lane_startup_delay(lane_number)
     if (startup_jitter_seconds > 0) {
       Sys.sleep(startup_jitter_seconds)
     }
@@ -465,6 +501,7 @@ run_lane <- function() {
     refresh_mode = refresh_mode,
     reset_unit_count = reset_unit_count,
     concurrency = as.integer(concurrency),
+    startup_jitter_seconds = startup_jitter_seconds,
     sqlite_cache_mb = cache_mb,
     quick_check = postflight,
     started_at = format(started_wall, "%Y-%m-%dT%H:%M:%OS3%z"),

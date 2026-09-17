@@ -6,14 +6,16 @@ param(
   [string]$Cycles = '2022|2024|2026',
   [string]$RunDirectory = '',
   [string]$OutputReceiptPath = '',
-  [ValidateRange(0, 32)][int]$MaxParallel = 0,
-  [ValidateSet(1)][int]$RecoveryWorkers = 1,
+  [ValidateRange(0, 64)][int]$MaxParallel = 0,
+  [ValidateRange(0, 64)][int]$InitialWorkers = 0,
+  [ValidateRange(0, 64)][int]$RecoveryWorkers = 0,
   [ValidateRange(1, 64)][int]$ConcurrencyPerKey = 8,
   [string]$KeysFile = '',
   [string]$BudgetDatabase = '',
   [ValidateRange(128, 8192)][int]$MemoryPerLaneMB = 640,
   [ValidateRange(256, 16384)][int]$MemoryReserveMB = 1024,
   [ValidateRange(32, 2048)][int]$SQLiteCacheMB = 256,
+  [ValidateRange(2, 64)][int]$MergeBatchLimit = 10,
   [switch]$Resume,
   [string]$PythonPath = '',
   [string]$RScriptPath = 'C:\Program Files\R\R-4.6.0\bin\Rscript.exe',
@@ -109,13 +111,15 @@ $arguments = @(
   '--run-directory', $RunDirectory,
   '--output-receipt', $OutputReceiptPath,
   '--max-parallel', [string]$MaxParallel,
+  '--initial-workers', [string]$InitialWorkers,
   '--recovery-workers', [string]$RecoveryWorkers,
   '--concurrency-per-key', [string]$ConcurrencyPerKey,
   '--rscript-path', ([IO.Path]::GetFullPath($RScriptPath)),
   '--r-library-path', ([IO.Path]::GetFullPath($RLibraryPath)),
   '--memory-per-lane-mb', [string]$MemoryPerLaneMB,
   '--memory-reserve-mb', [string]$MemoryReserveMB,
-  '--sqlite-cache-mb', [string]$SQLiteCacheMB
+  '--sqlite-cache-mb', [string]$SQLiteCacheMB,
+  '--merge-batch-limit', [string]$MergeBatchLimit
 )
 if ($KeysFile) {
   $arguments += @('--keys-file', ([IO.Path]::GetFullPath($KeysFile)))

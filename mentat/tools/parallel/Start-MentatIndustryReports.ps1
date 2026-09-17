@@ -239,9 +239,9 @@ if (-not $GeneratorPath) {
 if (-not $MentatPath) {
   $MentatPath = Join-Path $projectRoot 'mentat.R'
 }
-if (-not $OutputDirectory) {
-  $OutputDirectory = Join-Path $workspaceRoot 'reports'
-}
+Import-Module (Join-Path $toolsRoot 'report_directory.psm1') -Force
+$OutputDirectory = Resolve-MentatReportDirectory -ProjectRoot $projectRoot -OutputDirectory $OutputDirectory
+$env:MENTAT_REPORT_DIRECTORY = $OutputDirectory
 if (-not $RunRoot) {
   $RunRoot = Join-Path $projectRoot '.cache\industry-report-runs'
 }

@@ -7,7 +7,7 @@ This is the failure-isolated production orchestrator. For each industry it:
 
   1. initializes a fresh run-local SQLite database;
   2. delegates collection to Start-MentatApiCompanyCycleFanout.ps1;
-  3. permits exactly one recovery lane while healthy API lanes continue;
+  3. shares safe worker capacity between collection and recovery;
   4. runs deterministic merge and company x cycle coverage gates;
   5. exports and verifies every raw contribution by industry/cycle/company;
   6. starts the workbook generator immediately after those gates.
@@ -42,8 +42,8 @@ param(
   [string]$Cycles = '2022|2024|2026',
   [ValidateRange(0, 64)]
   [int]$MaxParallel = 0,
-  [ValidateSet(1)]
-  [int]$RecoveryWorkers = 1,
+  [ValidateRange(0, 64)]
+  [int]$RecoveryWorkers = 0,
   [ValidateRange(1, 8)]
   [int]$MaxGeneratorWorkers = 3,
   [ValidateRange(50, 95)]
@@ -58,10 +58,16 @@ param(
   [int]$NodeHeapMb = 0,
   [ValidateRange(1, 45)]
   [double]$GeneratorPerformanceBudgetMinutes = 15,
+  [ValidateRange(2, 64)]
+  [int]$MergeBatchLimit = 10,
   [string]$KeysFile = '',
   [string]$OutputDirectory = '',
   [string]$RawDataDirectory = '',
   [string]$RunRoot = '',
+  # Continue the run folder named here instead of creating a new one: its
+  # logs, events, industry databases and fanout manifests are all reused.
+  [ValidatePattern('^$|^\d{8}T\d{6}-\d+$')]
+  [string]$ResumeRunId = '',
   [string]$RosterPath = '',
   [string]$GeneratorPath = '',
   [string]$RScriptPath =
@@ -325,7 +331,8 @@ function Get-ResourcePlan {
     [int]$KeyCount,
     [int]$RequestedParallel,
     [int]$BudgetPercent,
-    [double]$LaneGB
+    [double]$LaneGB,
+    [int]$MergeBatchLimit
   )
   $totalBytes = 0.0
   $freeBytes = 0.0
@@ -361,19 +368,17 @@ function Get-ResourcePlan {
     $KeyCount
   }
   $logicalCpu = [math]::Max(1, [Environment]::ProcessorCount)
-  $sqliteMergeCap = 10
   # API lanes are remote-I/O bound. Report logical CPUs as telemetry, but let
-  # the key, RAM, request, and ten-shard SQLite limits govern concurrency.
+  # the key, RAM, and request limits govern concurrency. The shard merge now
+  # batches instead of attaching every shard at once, so it no longer caps
+  # lane count here; it is still reported below for telemetry.
   $effective = [math]::Max(
     1,
     [math]::Min(
       $KeyCount,
       [math]::Min(
         $requested,
-        [math]::Min(
-          [int]$ramCap,
-          $sqliteMergeCap
-        )
+        [int]$ramCap
       )
     )
   )
@@ -394,8 +399,33 @@ function Get-ResourcePlan {
     ram_lane_cap = [int]$ramCap
     logical_cpu_telemetry = [int]$logicalCpu
     cpu_bound_lane_cap_applied = $false
-    sqlite_merge_cap = $sqliteMergeCap
+    sqlite_merge_cap = $MergeBatchLimit
   }
+}
+
+function Resolve-ManagedLogBase {
+  param(
+    [Parameter(Mandatory = $true)][string]$Directory,
+    [Parameter(Mandatory = $true)][string]$Stage
+  )
+  # Start-ManagedPowerShell refuses to reuse a log path, and a resumed run
+  # keeps the run folder the stopped attempt logged into. Hand this attempt
+  # its own pair beside those logs rather than overwriting the evidence of
+  # the attempt being resumed: <stage>.stdout.log, then
+  # <stage>.resume-1.stdout.log, <stage>.resume-2.stdout.log, and so on.
+  $base = Join-Path $Directory $Stage
+  if (-not (Test-Path -LiteralPath "$base.stdout.log") -and
+      -not (Test-Path -LiteralPath "$base.stderr.log")) {
+    return $base
+  }
+  $attempt = 1
+  while (
+    (Test-Path -LiteralPath "$base.resume-$attempt.stdout.log") -or
+    (Test-Path -LiteralPath "$base.resume-$attempt.stderr.log")
+  ) {
+    $attempt++
+  }
+  return "$base.resume-$attempt"
 }
 
 function Start-ManagedPowerShell {
@@ -450,9 +480,9 @@ function Start-ManagedPowerShell {
   return $process
 }
 
-if (-not $OutputDirectory) {
-  $OutputDirectory = Join-Path $workspaceRoot 'reports'
-}
+Import-Module (Join-Path $toolsRoot 'report_directory.psm1') -Force
+$OutputDirectory = Resolve-MentatReportDirectory -ProjectRoot $projectRoot -OutputDirectory $OutputDirectory
+$env:MENTAT_REPORT_DIRECTORY = $OutputDirectory
 if (-not $RawDataDirectory) {
   $RawDataDirectory = Join-Path $workspaceRoot 'outputs\raw-contributions'
 }
@@ -594,7 +624,8 @@ $resourcePlan = Get-ResourcePlan `
   -KeyCount $keyCount `
   -RequestedParallel $MaxParallel `
   -BudgetPercent $RamBudgetPercent `
-  -LaneGB $canonicalRamPerApiLaneGB
+  -LaneGB $canonicalRamPerApiLaneGB `
+  -MergeBatchLimit $MergeBatchLimit
 $resourcePlan.fanout_memory_per_lane_mb = $canonicalFanoutMemoryPerLaneMB
 $resourcePlan.ram_per_generator_gb = $RamPerGeneratorGB
 $resourcePlan.generator_workers = $MaxGeneratorWorkers
@@ -602,6 +633,7 @@ $resourcePlan.generator_workers = $MaxGeneratorWorkers
 $plan = [ordered]@{
   industries = $cleanIndustries
   cycles = $Cycles
+  resume_run_id = $ResumeRunId
   strategy = (
     'all safe API lanes collect one industry; completed-industry workbook ' +
     'generators overlap the next collection'
@@ -633,8 +665,20 @@ if ($PlanOnly) {
 [IO.Directory]::CreateDirectory($OutputDirectory) | Out-Null
 [IO.Directory]::CreateDirectory($RawDataDirectory) | Out-Null
 [IO.Directory]::CreateDirectory($RunRoot) | Out-Null
-$runId = '{0}-{1}' -f (Get-Date -Format 'yyyyMMddTHHmmss'), $PID
-$runDirectory = Join-Path $RunRoot $runId
+$resumingRun = -not [string]::IsNullOrWhiteSpace($ResumeRunId)
+if ($resumingRun) {
+  # The run id is kept: the saved industry databases hold the verified work of
+  # the attempt that stopped, and the fanout manifests beside them are what a
+  # fanout resume reloads its lane snapshots from.
+  $runId = $ResumeRunId
+  $runDirectory = Join-Path $RunRoot $runId
+  if (-not (Test-Path -LiteralPath $runDirectory -PathType Container)) {
+    throw "ResumeRunId names no run folder under RunRoot: $runDirectory"
+  }
+} else {
+  $runId = '{0}-{1}' -f (Get-Date -Format 'yyyyMMddTHHmmss'), $PID
+  $runDirectory = Join-Path $RunRoot $runId
+}
 $logDirectory = Join-Path $runDirectory 'logs'
 $industryRoot = Join-Path $runDirectory 'industries'
 foreach ($directory in @($runDirectory, $logDirectory, $industryRoot)) {
@@ -647,6 +691,17 @@ $summaryPath = Join-Path $runDirectory 'summary.json'
 $phaseTimingsPath = Join-Path $runDirectory 'phase-timings.json'
 $orchestratorLog = Join-Path $logDirectory 'orchestrator.log'
 $startedAt = [DateTimeOffset]::Now
+if ($resumingRun -and (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
+  try {
+    $priorManifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+    if ($null -ne $priorManifest.PSObject.Properties['started_at']) {
+      $startedAt = [DateTimeOffset]::Parse([string]$priorManifest.started_at)
+    }
+  } catch {
+    # A manifest this process cannot read is no reason to refuse the resume.
+    # The run keeps its own start time and says so in the rewritten manifest.
+  }
+}
 $wallWatch = [Diagnostics.Stopwatch]::StartNew()
 $env:R_LIBS_USER = $RLibraryPath
 try {
@@ -713,6 +768,8 @@ for ($index = 0; $index -lt $cleanIndustries.Count; $index++) {
 Write-AtomicJson $manifestPath ([ordered]@{
   run_id = $runId
   started_at = $startedAt.ToString('o')
+  resumed_run = $resumingRun
+  resumed_at = $(if ($resumingRun) { [DateTimeOffset]::Now.ToString('o') } else { $null })
   launcher_pid = $PID
   plan = $plan
   run_directory = $runDirectory
@@ -905,7 +962,8 @@ function Write-RunStatus {
   } else { $null }
   $collectionEta = $null
   if ($null -ne $FanoutState -and
-      $null -ne $FanoutState.PSObject.Properties['estimated_remaining_seconds']) {
+      $null -ne $FanoutState.PSObject.Properties['estimated_remaining_seconds'] -and
+      $null -ne $FanoutState.estimated_remaining_seconds) {
     $collectionEta = [double]$FanoutState.estimated_remaining_seconds
   }
   if ($null -ne $averageCollection) {
@@ -926,13 +984,15 @@ function Write-RunStatus {
   ).Count
   $averageGenerator = if ($generatorDurations.Count) {
     ($generatorDurations | Measure-Object -Average).Average
-  } else { 180.0 }
-  $generatorEta = if ($generatorPending) {
+  } else { $null }
+  $generatorEta = if (($generatorPending -or $remainingCollections) -and $null -ne $averageGenerator) {
     $averageGenerator * [math]::Ceiling(
-      $generatorPending / [double]$MaxGeneratorWorkers
+      ($generatorPending + $remainingCollections) / [double]$MaxGeneratorWorkers
     )
-  } else { 0.0 }
-  $overallEta = if ($null -ne $collectionEta) {
+  } elseif ($generatorPending -or $remainingCollections) { $null } else { 0.0 }
+  $overallEta = if ($null -eq $generatorEta -or ($remainingCollections -and $null -eq $collectionEta)) {
+    $null
+  } elseif ($null -ne $collectionEta) {
     [math]::Max($collectionEta, $generatorEta)
   } elseif ($generatorPending) {
     $generatorEta
@@ -951,7 +1011,7 @@ function Write-RunStatus {
     collection_eta_seconds = if ($null -ne $collectionEta) {
       [math]::Round($collectionEta, 3)
     } else { $null }
-    generator_eta_seconds = [math]::Round($generatorEta, 3)
+    generator_eta_seconds = if ($null -ne $generatorEta) { [math]::Round($generatorEta, 3) } else { $null }
     resources = $resourcePlan
     fanout = $FanoutState
     industries = $industryStates
@@ -1001,8 +1061,9 @@ function Start-GeneratorJob {
   param([Parameter(Mandatory = $true)]$Job)
   $jobRoot = Join-Path $industryRoot $Job.slug
   $prefix = 'generator-{0}-attempt-{1}' -f $Job.lane, $Job.attempt
-  $Job.stdout = Join-Path $jobRoot "$prefix.stdout.log"
-  $Job.stderr = Join-Path $jobRoot "$prefix.stderr.log"
+  $jobLogBase = Resolve-ManagedLogBase $jobRoot $prefix
+  $Job.stdout = "$jobLogBase.stdout.log"
+  $Job.stderr = "$jobLogBase.stderr.log"
   $parameters = [ordered]@{
     Industry = $Job.industry
     DatabasePath = $Job.database
@@ -1243,11 +1304,17 @@ function Wait-ManagedProcess {
       )
       $lastHeartbeat = [DateTimeOffset]::Now
     }
-    Start-Sleep -Seconds 2
+    # Keep the status/heartbeat cadence, but release the next stage as soon as
+    # this child exits instead of leaving completed work asleep for two seconds.
+    [void]$Process.WaitForExit(2000)
   }
 }
 
-Write-RunEvent 'run_started' '' "run_id=$runId"
+if ($resumingRun) {
+  Write-RunEvent 'run_resumed' '' "run_id=$runId"
+} else {
+  Write-RunEvent 'run_started' '' "run_id=$runId"
+}
 Write-RunLog 'MENTAT RESILIENT INDUSTRY RUN'
 Write-RunLog "Run ID: $runId"
 Write-RunLog "Industries: $($cleanIndustries -join ', ')"
@@ -1256,18 +1323,19 @@ Write-RunLog (
   "RAM budget: $RamBudgetPercent%; recovery lanes: $RecoveryWorkers"
 )
 Write-RunLog "Run folder: $runDirectory"
+if ($resumingRun) {
+  Write-RunLog (
+    "Resuming run ${runId}: saved industry databases and lane state are " +
+    'reused; logs and events are appended.'
+  )
+}
 Write-RunStatus 'starting'
 
 foreach ($state in $industryStates) {
   $state.started_at = [DateTimeOffset]::Now.ToString('o')
   $state.stage = 'initializing'
   $state.status = 'running'
-  Write-RunEvent 'industry_initializing' $state.industry
-  Write-RunLog "Initializing fresh database: $($state.industry)"
-  Write-RunStatus 'initializing' $state.industry
   $industryRootPath = Join-Path $industryRoot $state.slug
-  $initStdout = Join-Path $industryRootPath 'initialize.stdout.log'
-  $initStderr = Join-Path $industryRootPath 'initialize.stderr.log'
   $cycleCsv = ($Cycles -split '\|') |
     ForEach-Object {
       switch ($_) {
@@ -1277,57 +1345,81 @@ foreach ($state in $industryStates) {
         default { $_ }
       }
     }
-  $initCommand = (
-    '& ' + (ConvertTo-PowerShellLiteral $RScriptPath) + ' ' +
-    (ConvertTo-PowerShellLiteral $mentatEntry) + ' ' +
-    (ConvertTo-PowerShellLiteral "--industry=$($state.industry)") + ' ' +
-    (ConvertTo-PowerShellLiteral "--cycles=$($cycleCsv -join ',')") + ' ' +
-    (ConvertTo-PowerShellLiteral "--data-root=$($state.data_root)") + ' ' +
-    (ConvertTo-PowerShellLiteral '--skip-scrape') + ' ' +
-    (ConvertTo-PowerShellLiteral '--defer-report-files') +
-    '; exit $LASTEXITCODE'
+  # A fanout resume reloads lane databases whose fingerprint must still
+  # match the source database its manifest recorded. Re-initializing would
+  # write a new database and make every saved lane snapshot unusable.
+  $resumeIndustry = (
+    $resumingRun -and
+    (Test-Path -LiteralPath $state.database -PathType Leaf) -and
+    (Test-Path -LiteralPath (Join-Path $state.fanout_root 'manifest.json') -PathType Leaf)
   )
-  $initWatch = [Diagnostics.Stopwatch]::StartNew()
-  $process = Start-ManagedPowerShell `
-    -Command $initCommand `
-    -StdoutPath $initStdout `
-    -StderrPath $initStderr
-  $exitCode = Wait-ManagedProcess $process 'initializing' $state
-  $exitCodeDescription = Format-ManagedExitCode $exitCode
-  $initWatch.Stop()
-  Write-RInvocationReceipt `
-    -Path (Join-Path $industryRootPath 'initialize.invocation.json') `
-    -Industry $state.industry `
-    -Unit 'initialize' `
-    -ExitCode $exitCode `
-    -ElapsedSeconds $initWatch.Elapsed.TotalSeconds `
-    -LogPaths @($initStdout, $initStderr)
-  if ($exitCode -ne 0 -or
-      -not (Test-Path -LiteralPath $state.database -PathType Leaf)) {
-    $state.stage = 'failed'
-    $state.status = 'failed'
-    $state.finished_at = [DateTimeOffset]::Now.ToString('o')
-    $state.detail = (
-      "Initialization failed: exit=$exitCodeDescription; stderr=$initStderr"
+  if ($resumeIndustry) {
+    Write-RunEvent 'industry_resuming' $state.industry
+    Write-RunLog "Resuming $($state.industry): saved lane state found"
+    Write-RunStatus 'initializing' $state.industry
+  } else {
+    Write-RunEvent 'industry_initializing' $state.industry
+    Write-RunLog "Initializing fresh database: $($state.industry)"
+    Write-RunStatus 'initializing' $state.industry
+    $initLogBase = Resolve-ManagedLogBase $industryRootPath 'initialize'
+    $initStdout = "$initLogBase.stdout.log"
+    $initStderr = "$initLogBase.stderr.log"
+    $initCommand = (
+      '& ' + (ConvertTo-PowerShellLiteral $RScriptPath) + ' ' +
+      (ConvertTo-PowerShellLiteral $mentatEntry) + ' ' +
+      (ConvertTo-PowerShellLiteral "--industry=$($state.industry)") + ' ' +
+      (ConvertTo-PowerShellLiteral "--cycles=$($cycleCsv -join ',')") + ' ' +
+      (ConvertTo-PowerShellLiteral "--data-root=$($state.data_root)") + ' ' +
+      (ConvertTo-PowerShellLiteral '--skip-scrape') + ' ' +
+      (ConvertTo-PowerShellLiteral '--defer-report-files') +
+      '; exit $LASTEXITCODE'
     )
-    Write-RunEvent 'industry_failed' $state.industry $state.detail
-    Write-RunLog $state.detail
-    continue
+    $initWatch = [Diagnostics.Stopwatch]::StartNew()
+    $process = Start-ManagedPowerShell `
+      -Command $initCommand `
+      -StdoutPath $initStdout `
+      -StderrPath $initStderr
+    $exitCode = Wait-ManagedProcess $process 'initializing' $state
+    $exitCodeDescription = Format-ManagedExitCode $exitCode
+    $initWatch.Stop()
+    Write-RInvocationReceipt `
+      -Path (Join-Path $industryRootPath 'initialize.invocation.json') `
+      -Industry $state.industry `
+      -Unit 'initialize' `
+      -ExitCode $exitCode `
+      -ElapsedSeconds $initWatch.Elapsed.TotalSeconds `
+      -LogPaths @($initStdout, $initStderr)
+    if ($exitCode -ne 0 -or
+        -not (Test-Path -LiteralPath $state.database -PathType Leaf)) {
+      $state.stage = 'failed'
+      $state.status = 'failed'
+      $state.finished_at = [DateTimeOffset]::Now.ToString('o')
+      $state.detail = (
+        "Initialization failed: exit=$exitCodeDescription; stderr=$initStderr"
+      )
+      Write-RunEvent 'industry_failed' $state.industry $state.detail
+      Write-RunLog $state.detail
+      continue
+    }
   }
 
   $state.stage = 'collecting'
   $collectionWatch = [Diagnostics.Stopwatch]::StartNew()
   Write-RunEvent 'fanout_started' $state.industry
   Write-RunLog "API company-cycle fanout started: $($state.industry)"
-  $fanoutStdout = Join-Path $industryRootPath 'fanout.stdout.log'
-  $fanoutStderr = Join-Path $industryRootPath 'fanout.stderr.log'
+  $fanoutLogBase = Resolve-ManagedLogBase $industryRootPath 'fanout'
+  $fanoutStdout = "$fanoutLogBase.stdout.log"
+  $fanoutStderr = "$fanoutLogBase.stderr.log"
   $liveFanoutPlan = Get-ResourcePlan `
     -KeyCount $keyCount `
     -RequestedParallel $MaxParallel `
     -BudgetPercent $RamBudgetPercent `
-    -LaneGB $canonicalRamPerApiLaneGB
+    -LaneGB $canonicalRamPerApiLaneGB `
+    -MergeBatchLimit $MergeBatchLimit
   Write-RunLog (
-    "Live fanout lanes: $($liveFanoutPlan.effective_api_lanes)/$keyCount; " +
+    "Live fanout starting workers: " +
+    "$($liveFanoutPlan.effective_api_lanes)/$keyCount; " +
+    "lane ceiling: $(if ($MaxParallel) { $MaxParallel } else { 'auto' }); " +
     "memory_per_lane_mb=$canonicalFanoutMemoryPerLaneMB"
   )
   $fanoutParameters = [ordered]@{
@@ -1336,10 +1428,14 @@ foreach ($state in $industryStates) {
     Cycles = $Cycles
     RunDirectory = $state.fanout_root
     OutputReceiptPath = $state.fanout_receipt
-    # Recompute the live lane cap as prior-industry generators overlap.
-    MaxParallel = $liveFanoutPlan.effective_api_lanes
+    # Lane ceiling stays at the operator's request (0 = structural auto max);
+    # the live-recomputed RAM/key cap now only sets the starting worker count.
+    MaxParallel = $MaxParallel
+    InitialWorkers = $liveFanoutPlan.effective_api_lanes
     RecoveryWorkers = $RecoveryWorkers
     MemoryPerLaneMB = $canonicalFanoutMemoryPerLaneMB
+    MergeBatchLimit = $MergeBatchLimit
+    Resume = $resumeIndustry
     KeysFile = $KeysFile
     PythonPath = $PythonPath
     RScriptPath = $RScriptPath
@@ -1408,8 +1504,9 @@ foreach ($state in $industryStates) {
   $state.stage = 'finalizing_database'
   Write-RunEvent 'database_finalizing' $state.industry
   Write-RunLog "Retagging merged database: $($state.industry)"
-  $retagStdout = Join-Path $industryRootPath 'retag.stdout.log'
-  $retagStderr = Join-Path $industryRootPath 'retag.stderr.log'
+  $retagLogBase = Resolve-ManagedLogBase $industryRootPath 'retag'
+  $retagStdout = "$retagLogBase.stdout.log"
+  $retagStderr = "$retagLogBase.stderr.log"
   $retagCommand = (
     '& ' + (ConvertTo-PowerShellLiteral $RScriptPath) + ' ' +
     (ConvertTo-PowerShellLiteral $mentatEntry) + ' ' +
@@ -1451,8 +1548,9 @@ foreach ($state in $industryStates) {
   $coverageWatch = [Diagnostics.Stopwatch]::StartNew()
   Write-RunEvent 'coverage_gate_started' $state.industry
   Write-RunLog "Coverage gate started: $($state.industry)"
-  $coverageStdout = Join-Path $industryRootPath 'coverage.stdout.log'
-  $coverageStderr = Join-Path $industryRootPath 'coverage.stderr.log'
+  $coverageLogBase = Resolve-ManagedLogBase $industryRootPath 'coverage'
+  $coverageStdout = "$coverageLogBase.stdout.log"
+  $coverageStderr = "$coverageLogBase.stderr.log"
   $coverageCommand = (
     '& ' + (ConvertTo-PowerShellLiteral $PythonPath) + ' ' +
     (ConvertTo-PowerShellLiteral $coverageTool) + ' ' +
@@ -1492,8 +1590,9 @@ foreach ($state in $industryStates) {
   $rawDataWatch = [Diagnostics.Stopwatch]::StartNew()
   Write-RunEvent 'raw_data_export_started' $state.industry
   Write-RunLog "Raw-data warehouse export started: $($state.industry)"
-  $rawDataStdout = Join-Path $industryRootPath 'raw-data.stdout.log'
-  $rawDataStderr = Join-Path $industryRootPath 'raw-data.stderr.log'
+  $rawDataLogBase = Resolve-ManagedLogBase $industryRootPath 'raw-data'
+  $rawDataStdout = "$rawDataLogBase.stdout.log"
+  $rawDataStderr = "$rawDataLogBase.stderr.log"
   $rawDataCommand = (
     '& ' + (ConvertTo-PowerShellLiteral $PythonPath) + ' ' +
     (ConvertTo-PowerShellLiteral $rawExportTool) + ' ' +
@@ -1691,7 +1790,7 @@ foreach ($timing in $phaseTimingIndustries) {
   )
 }
 $finalStatus = if ($failures.Count) { 'failed' } else { 'succeeded' }
-Write-RunStatus 'completed'
+Write-RunStatus $(if ($failures.Count) { 'failed' } else { 'completed' })
 Write-RunEvent 'run_completed' '' (
   "status=$finalStatus; " +
   "seconds=$([math]::Round($wallWatch.Elapsed.TotalSeconds, 3))"

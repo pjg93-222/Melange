@@ -7,15 +7,23 @@ Usage:
 
 TARGET must already exist. Shards are attached read-only, schemas and
 quick_check are verified before any write, and the entire merge is committed
-as one transaction. A company may be assigned to exactly one shard.
+as one transaction. A company may be assigned to exactly one shard. More than
+--merge-batch-limit shards (default 10, SQLite's attached-database limit) are
+merged into a staged copy of TARGET across consecutive batches; TARGET is
+replaced, atomically, only once every batch has committed, and is left
+untouched if any batch fails.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
+import os
+import shutil
 import sqlite3
 import sys
+import tempfile
+import time
 from collections import defaultdict
 from contextlib import closing
 from dataclasses import dataclass
@@ -56,6 +64,16 @@ GLOBAL_APPEND_TABLES = (
     "run_log",
     "run_metrics",
 )
+
+# Optional only for pre-archive databases. When a shard has evidence, the
+# initialized target must have a compatible schema; silently dropping it is
+# never an acceptable legacy fallback. Preserve complete response archives,
+# including competing claims outside a shard's selected reporting companies.
+EVIDENCE_TABLES = (
+    "fec_response_archive", "fec_response_observations",
+    "attribution_claims", "source_record_conflicts",
+)
+EVIDENCE_TIMESTAMPS = frozenset({"created_at", "observed_at", "last_observed_at"})
 
 # These rows retain their source primary keys during the merge. Any duplicate
 # key must therefore describe the exact same logical row. Progress/checkpoint
@@ -247,6 +265,15 @@ def ensure_schema_compatible(
             raise RuntimeError(
                 f"{table} schema/uniqueness mismatch in {shard_path}"
             )
+    for table in EVIDENCE_TABLES:
+        shard_signature = schema_signature(connection, schema, table)
+        if not shard_signature[0]:
+            continue
+        main_signature = schema_signature(connection, "main", table)
+        if not main_signature[0]:
+            raise RuntimeError(f"target is missing evidence table {table}; initialize its schema before merging")
+        if shard_signature != main_signature:
+            raise RuntimeError(f"{table} evidence schema/uniqueness mismatch in {shard_path}")
 
 
 def null_safe_equal(
@@ -400,7 +427,9 @@ def audit_exact_pk_pair(
                     str(left_values[status_index]).strip().lower(),
                     str(right_values[status_index]).strip().lower(),
                 }
-                if statuses == {"rejected"}:
+                if statuses in ({"rejected"}, {"rejected", "review"}, {"rejected", "accepted"}):
+                    # A rejected search hit cannot compete with the same
+                    # filing's retained attribution. Keep its conflict receipt.
                     attribution_pairs.append((left_values, right_values))
                     continue
             if (
@@ -434,6 +463,8 @@ def build_attribution_resolutions(
     def row_order(row: tuple[object, ...]) -> tuple[object, ...]:
         company = str(row[company_index])
         return (
+            int(table == "corporate_giving" and "company_match_status" in columns
+                and str(row[columns.index("company_match_status")]).strip().lower() == "rejected"),
             ranks.get(company, len(ranks)),
             company.upper(),
             company,
@@ -924,6 +955,41 @@ def merge_global_table(
     return insert_or_ignore(connection, schema, table)
 
 
+def merge_evidence_table(connection: sqlite3.Connection, schema: str, table: str) -> int:
+    columns = table_columns(connection, "main", table)
+    keys = primary_key_columns(connection, "main", table)
+    if not keys:
+        raise RuntimeError(f"Evidence table {table} needs a stable primary key")
+    stable = [c for c in columns if c not in EVIDENCE_TIMESTAMPS]
+    collision = connection.execute(f'''
+        SELECT 1 FROM main.{quoted(table)} m JOIN {quoted(schema)}.{quoted(table)} s
+          ON {null_safe_equal('m','s',keys)}
+        WHERE NOT ({null_safe_equal('m','s',stable)}) LIMIT 1''').fetchone()
+    if collision:
+        raise RuntimeError(f"{table} evidence primary-key content conflict; merge refused")
+    if table == "fec_response_archive":
+        for fingerprint, payload in connection.execute(
+                f'SELECT archive_sha256,payload_json FROM {quoted(schema)}.{quoted(table)}'):
+            if hashlib.sha256(payload.encode('utf-8')).hexdigest() != fingerprint:
+                raise RuntimeError("Collector response archive hash mismatch; merge refused")
+    if table == "fec_response_observations":
+        for fingerprint, payload in connection.execute(
+                f'SELECT query_sha256,query_json FROM {quoted(schema)}.{quoted(table)}'):
+            if hashlib.sha256(payload.encode('utf-8')).hexdigest() != fingerprint:
+                raise RuntimeError("Collector response query hash mismatch; merge refused")
+    updates = []
+    for column in columns:
+        if column in EVIDENCE_TIMESTAMPS:
+            function = 'MAX' if column == 'last_observed_at' else 'MIN'
+            updates.append(f'{quoted(column)}={function}(COALESCE({quoted(column)},excluded.{quoted(column)}),excluded.{quoted(column)})')
+    action = 'DO UPDATE SET '+','.join(updates) if updates else 'DO NOTHING'
+    column_sql = ','.join(quoted(c) for c in columns)
+    connection.execute(f'''INSERT INTO main.{quoted(table)} ({column_sql})
+        SELECT {column_sql} FROM {quoted(schema)}.{quoted(table)} WHERE 1
+        ON CONFLICT({','.join(quoted(c) for c in keys)}) {action}''')
+    return int(connection.execute('SELECT changes()').fetchone()[0])
+
+
 def apply_attribution_resolutions(
     connection: sqlite3.Connection,
     resolutions: Sequence[AttributionResolution],
@@ -985,6 +1051,11 @@ def merge_shard(
     companies: Sequence[str],
 ) -> dict[str, int]:
     stats: dict[str, int] = {}
+    for table in EVIDENCE_TABLES:
+        if table_columns(connection, schema, table):
+            stats[f"{table}_changed"] = merge_evidence_table(connection, schema, table)
+        else:
+            stats[f"{table}_legacy_missing"] = 1
     for table in (
         "contributions",
         "corporate_giving",
@@ -1075,10 +1146,6 @@ def parse_specifications(
         for path, companies in grouped.items()
     ]
     specifications.sort(key=lambda item: str(item[0]).lower())
-    if len(specifications) > 10:
-        raise SystemExit(
-            "SQLite supports at most 10 attached shard databases per atomic merge"
-        )
     return specifications
 
 
@@ -1160,6 +1227,174 @@ def assert_expected_target_state(
         )
 
 
+ATOMIC_REPLACE_ATTEMPTS = 10
+ATOMIC_REPLACE_INITIAL_DELAY_SECONDS = 0.002
+
+
+def atomic_replace_target(target: Path, staged: Path) -> None:
+    for attempt in range(ATOMIC_REPLACE_ATTEMPTS):
+        try:
+            os.replace(staged, target)
+            return
+        except PermissionError:
+            if attempt + 1 >= ATOMIC_REPLACE_ATTEMPTS:
+                staged.unlink(missing_ok=True)
+                raise
+            time.sleep(
+                ATOMIC_REPLACE_INITIAL_DELAY_SECONDS * (2**attempt)
+            )
+
+
+def snapshot_target_for_batched_merge(
+    target: Path,
+    expected_target_sha256: str | None,
+) -> Path:
+    # A batched merge never touches the real target directly: it is verified
+    # and copied here, under the same write lease assert_expected_target_state
+    # requires, and the copy is what run_batched_merge actually merges into
+    # across consecutive batches. Only a fully committed copy ever replaces
+    # the real target.
+    connection = target_connection(target)
+    try:
+        quick_check(connection, "main")
+        connection.execute("BEGIN IMMEDIATE")
+        try:
+            assert_expected_target_state(
+                connection,
+                target,
+                expected_target_sha256,
+            )
+            descriptor, temp_name = tempfile.mkstemp(
+                dir=str(target.parent),
+                prefix=f".{target.name}.merge-staging.",
+                suffix=".tmp",
+            )
+            os.close(descriptor)
+            staged = Path(temp_name)
+            try:
+                shutil.copy2(target, staged)
+            except BaseException:
+                staged.unlink(missing_ok=True)
+                raise
+        finally:
+            connection.execute("ROLLBACK")
+    finally:
+        connection.close()
+    return staged
+
+
+def run_batched_merge(
+    target: Path,
+    specifications: Sequence[tuple[Path, tuple[str, ...]]],
+    company_order: Sequence[str],
+    expected_target_sha256: str | None,
+    merge_batch_limit: int,
+) -> int:
+    staged = snapshot_target_for_batched_merge(target, expected_target_sha256)
+    all_stats: list[tuple[Path, tuple[str, ...], dict[str, int]]] = []
+    attribution_resolutions: list[AttributionResolution] = []
+    attribution_conflicts_recorded = 0
+    try:
+        connection = target_connection(staged)
+        attached: list[str] = []
+        try:
+            batches = [
+                specifications[start : start + merge_batch_limit]
+                for start in range(0, len(specifications), merge_batch_limit)
+            ]
+            for batch in batches:
+                quick_check(connection, "main")
+                for index, (shard, companies) in enumerate(batch):
+                    schema = f"shard_{index}"
+                    shard_uri = shard.as_uri() + "?mode=ro"
+                    connection.execute(
+                        f"ATTACH DATABASE ? AS {quoted(schema)}",
+                        (shard_uri,),
+                    )
+                    attached.append(schema)
+                    quick_check(connection, schema)
+                    ensure_schema_compatible(connection, schema, shard)
+
+                connection.execute("BEGIN IMMEDIATE")
+                try:
+                    # Auditing this batch against "main" also catches
+                    # cross-batch collisions: every prior batch's rows are
+                    # already committed into "main" by the time this batch's
+                    # shards are compared against it.
+                    batch_resolutions = audit_exact_pk_collisions(
+                        connection,
+                        batch,
+                        company_order,
+                    )
+                    batch_conflicts_recorded = apply_attribution_resolutions(
+                        connection,
+                        batch_resolutions,
+                    )
+                    for index, (shard, companies) in enumerate(batch):
+                        schema = f"shard_{index}"
+                        stats = merge_shard(
+                            connection,
+                            index,
+                            schema,
+                            shard,
+                            companies,
+                        )
+                        all_stats.append((shard, companies, stats))
+                    quick_check(connection, "main")
+                    connection.execute("COMMIT")
+                except BaseException:
+                    connection.execute("ROLLBACK")
+                    raise
+
+                # Validate committed bytes, not just the transaction view.
+                quick_check(connection, "main")
+                attribution_resolutions.extend(batch_resolutions)
+                attribution_conflicts_recorded += batch_conflicts_recorded
+
+                for schema in reversed(attached):
+                    connection.execute(f"DETACH DATABASE {quoted(schema)}")
+                attached = []
+        finally:
+            for schema in reversed(attached):
+                try:
+                    connection.execute(f"DETACH DATABASE {quoted(schema)}")
+                except sqlite3.Error:
+                    pass
+            connection.close()
+    except BaseException:
+        staged.unlink(missing_ok=True)
+        raise
+
+    # Every batch committed into the staged copy; only now does the real
+    # target ever change, in one atomic replace.
+    atomic_replace_target(target, staged)
+
+    print("quick_check=ok")
+    for resolution in attribution_resolutions:
+        for conflict in resolution.conflicts:
+            print(
+                "attribution_conflict "
+                f"key={{'sub_id': {conflict.sub_id!r}}} "
+                f"stored_company={conflict.stored_company!r} "
+                f"incoming_company={conflict.incoming_company!r} "
+                f"incoming_phase={conflict.incoming_phase!r}"
+            )
+    print(
+        "attribution_conflicts_recorded="
+        f"{attribution_conflicts_recorded}"
+    )
+    for shard, companies, stats in all_stats:
+        print(
+            "shard="
+            + str(shard)
+            + " companies="
+            + "|".join(companies)
+        )
+        for name in sorted(stats):
+            print(f"  {name}={stats[name]}")
+    return 0
+
+
 def main(arguments: Sequence[str]) -> int:
     if len(arguments) < 2:
         raise SystemExit(__doc__)
@@ -1167,6 +1402,7 @@ def main(arguments: Sequence[str]) -> int:
     remaining = list(arguments[1:])
     encoded_company_order: str | None = None
     expected_target_sha256: str | None = None
+    merge_batch_limit = 10
     while remaining and remaining[0].startswith("--"):
         option = remaining.pop(0)
         if not remaining:
@@ -1176,10 +1412,25 @@ def main(arguments: Sequence[str]) -> int:
             encoded_company_order = value
         elif option == "--expected-target-sha256":
             expected_target_sha256 = value
+        elif option == "--merge-batch-limit":
+            try:
+                merge_batch_limit = int(value)
+            except ValueError:
+                raise SystemExit("--merge-batch-limit must be an integer")
+            if merge_batch_limit < 2:
+                raise SystemExit("--merge-batch-limit must be >= 2")
         else:
             raise SystemExit(f"Unknown option: {option}")
     specifications = parse_specifications(remaining, target)
     company_order = parse_company_order(encoded_company_order, specifications)
+    if len(specifications) > merge_batch_limit:
+        return run_batched_merge(
+            target,
+            specifications,
+            company_order,
+            expected_target_sha256,
+            merge_batch_limit,
+        )
     connection = target_connection(target)
     attached: list[str] = []
     all_stats: list[tuple[Path, tuple[str, ...], dict[str, int]]] = []

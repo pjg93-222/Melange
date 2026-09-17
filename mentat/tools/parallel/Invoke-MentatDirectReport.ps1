@@ -2,7 +2,7 @@
 param(
   [Parameter(Mandatory = $true)][string]$Industry,
   [Parameter(Mandatory = $true)][string]$DatabasePath,
-  [Parameter(Mandatory = $true)][string]$OutputDirectory,
+  [string]$OutputDirectory = '',
   [Parameter(Mandatory = $true)][string]$LogPath,
   [ValidateSet('','2021-2022','2023-2024','2025-2026')]
   [string]$CycleLabel = '',
@@ -12,6 +12,9 @@ param(
 $ErrorActionPreference = 'Stop'
 $parallelRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $toolsRoot = Split-Path -Parent $parallelRoot
+Import-Module (Join-Path $toolsRoot 'report_directory.psm1') -Force
+$OutputDirectory = Resolve-MentatReportDirectory -ProjectRoot (Split-Path -Parent $toolsRoot) -OutputDirectory $OutputDirectory
+$env:MENTAT_REPORT_DIRECTORY = $OutputDirectory
 $generator = Join-Path $toolsRoot 'generate_industry_report.ps1'
 foreach ($path in @($DatabasePath, $RLibraryPath, $generator)) {
   if (-not (Test-Path -LiteralPath $path)) {

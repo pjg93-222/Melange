@@ -124,6 +124,16 @@ foreach ($field in @(
   }
 }
 
+$workerToolsRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+Import-Module (Join-Path $workerToolsRoot 'report_directory.psm1') -Force
+$spec.output_directory = Resolve-MentatReportDirectory -ProjectRoot (Split-Path -Parent $workerToolsRoot) -OutputDirectory ([string]$spec.output_directory)
+$env:MENTAT_REPORT_DIRECTORY = [string]$spec.output_directory
+if (-not [string]::Equals(
+  [IO.Path]::GetFullPath((Split-Path -Parent ([string]$spec.expected_workbook_path))).TrimEnd('\','/'),
+  ([string]$spec.output_directory).TrimEnd('\','/'), [StringComparison]::OrdinalIgnoreCase)) {
+  throw 'Worker workbook path is outside the authoritative report directory.'
+}
+
 $lastGoodRoot = if (
   $null -ne $spec.PSObject.Properties['last_good_root'] -and
   -not [string]::IsNullOrWhiteSpace([string]$spec.last_good_root)

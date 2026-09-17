@@ -428,13 +428,14 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
 
         fanout.execute_lane = fake_execute
         try:
-            limiter = threading.BoundedSemaphore(2)
+            limiter = fanout.LaneLimiter(2)
             with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
                 futures = [
                     pool.submit(
                         fanout.execute_lane_with_limit,
                         limiter,
-                        lane,
+                        fanout.LaneRun(lane, Path(f'lane-{lane}.db'), Path('assignments'),
+                            Path('receipt'), Path('state'), Path('log'), f'key-{lane}', f'id-{lane}', (), 1),
                     )
                     for lane in range(3)
                 ]
@@ -621,6 +622,148 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
             receipt["merge"]["attribution_conflicts_recorded"],
             0,
         )
+
+    def test_resume_tolerates_fewer_keys_than_the_manifest_planned_lanes(self) -> None:
+        # Keys are quarantined, rotated or disabled between attempts. Refusing to
+        # resume on a short key list threw away every company-cycle the stopped
+        # attempt had already verified. Lanes now share the remaining keys, and
+        # the "key:" resource each lane holds keeps two of them off one key at
+        # the same time.
+        with tempfile.TemporaryDirectory(prefix="mentat-resume-keys-") as temp:
+            root = Path(temp)
+            source = root / "source.db"
+            merge_fixture.create_database(source)
+            with closing(sqlite3.connect(source)) as connection, connection:
+                connection.execute(
+                    "CREATE TABLE companies (industry TEXT NOT NULL, "
+                    "company TEXT NOT NULL, variant TEXT NOT NULL)"
+                )
+                connection.executemany(
+                    "INSERT INTO companies VALUES ('Fintech', ?, ?)",
+                    [("Alpha", "ALPHA"), ("Beta", "BETA")],
+                )
+            run_directory = root / "run"
+            receipt_path = run_directory / "receipt.json"
+            state = {"fail_beta": True}
+            guard = threading.Lock()
+            live: dict[str, int] = {}
+            shared_key_overlap: list[str] = []
+            observed_keys: list[str] = []
+            executed: list[tuple[str, int]] = []
+
+            def fake_execute(lane_run, **kwargs):
+                with guard:
+                    observed_keys.append(lane_run.key)
+                    live[lane_run.key] = live.get(lane_run.key, 0) + 1
+                    if live[lane_run.key] > 1:
+                        shared_key_overlap.append(lane_run.key)
+                try:
+                    tasks = []
+                    with closing(
+                        sqlite3.connect(lane_run.database)
+                    ) as connection, connection:
+                        for task in lane_run.tasks:
+                            broken = (
+                                state["fail_beta"] and task["company"] == "Beta"
+                            )
+                            if not broken:
+                                executed.append((task["company"], task["cycle"]))
+                                connection.execute(
+                                    "INSERT OR IGNORE INTO contributions "
+                                    "(sub_id, company, amount) VALUES (?, ?, ?)",
+                                    (
+                                        task["task_id"],
+                                        task["company"],
+                                        float(task["cycle"]),
+                                    ),
+                                )
+                            tasks.append(
+                                {
+                                    **task,
+                                    "status": "failed" if broken else "succeeded",
+                                    "wall_clock_seconds": 0.01,
+                                }
+                            )
+                finally:
+                    with guard:
+                        live[lane_run.key] -= 1
+                failed = [task for task in tasks if task["status"] != "succeeded"]
+                lane_receipt = {
+                    "status": "failed" if failed else "succeeded",
+                    "key_id": lane_run.key_id,
+                    "wall_clock_seconds": 0.01,
+                    "tasks": tasks,
+                }
+                fanout.atomic_json(lane_run.receipt, lane_receipt)
+                return {
+                    "lane": lane_run.lane,
+                    "attempt": lane_run.attempt,
+                    "exit_code": 1 if failed else 0,
+                    "wall_clock_seconds": 0.01,
+                    "receipt_path": str(lane_run.receipt),
+                    "state_path": str(lane_run.state),
+                    "log_path": str(lane_run.log),
+                    "database": str(lane_run.database),
+                    "key_id": lane_run.key_id,
+                    "receipt": lane_receipt,
+                }
+
+            arguments = [
+                "--source-database",
+                str(source),
+                "--industry",
+                "Fintech",
+                "--cycles",
+                "2022",
+                "--run-directory",
+                str(run_directory),
+                "--output-receipt",
+                str(receipt_path),
+                "--rscript-path",
+                sys.executable,
+                "--budget-database",
+                str(root / "budget.sqlite"),
+                "--max-parallel",
+                "2",
+            ]
+            planned = ["fixture-key-a", "fixture-key-b"]
+            with mock.patch.object(
+                fanout, "execute_lane", side_effect=fake_execute
+            ), mock.patch.object(
+                fanout,
+                "discover_keys",
+                side_effect=lambda keys_file, environment: list(planned),
+            ):
+                # Beta fails every rung of the ladder, so nothing is merged.
+                self.assertEqual(fanout.main(arguments), 2)
+                stopped = json.loads(
+                    receipt_path.read_text(encoding="utf-8")
+                )
+                manifest = json.loads(
+                    (run_directory / "manifest.json").read_text(encoding="utf-8")
+                )
+                # One of the two planned keys is gone before the resume.
+                planned[:] = ["fixture-key-a"]
+                state["fail_beta"] = False
+                observed_keys.clear()
+                executed.clear()
+                self.assertEqual(fanout.main([*arguments, "--resume"]), 0)
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            with closing(sqlite3.connect(source)) as connection:
+                merged_rows = connection.execute(
+                    "SELECT company FROM contributions ORDER BY company"
+                ).fetchall()
+        self.assertEqual(manifest["lane_count"], 2)
+        self.assertFalse(stopped["merged"])
+        # The resume ran on the surviving key alone and never doubled up on it.
+        self.assertEqual(set(observed_keys), {"fixture-key-a"})
+        self.assertEqual(shared_key_overlap, [])
+        # Alpha succeeded before the stop and is not collected a second time.
+        self.assertEqual(executed, [("Beta", 2022)])
+        self.assertEqual(receipt["status"], "succeeded")
+        self.assertTrue(receipt["merged"])
+        self.assertEqual(receipt["configured_key_count"], 1)
+        self.assertEqual([row[0] for row in merged_rows], ["Alpha", "Beta"])
 
     def test_failure_ladder_retries_then_splits_company_cycle(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-ladder-e2e-") as temp:
