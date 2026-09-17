@@ -1,6 +1,6 @@
 {
   "contract": "evidence-csv-import",
-  "version": 1,
+  "version": 2,
   "owner": "S3",
   "produced_by": [
     "mentat/app/evidence_csv.py:limits",
@@ -33,10 +33,23 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
       "row_count": 45,
       "committees": [
-        {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
-        {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
+        {
+          "id": "C00000001",
+          "name": "Example PAC",
+          "rows": 42,
+          "supported_rows": 40
+        },
+        {
+          "id": "unassigned",
+          "name": "Unassigned committee rows",
+          "rows": 3,
+          "supported_rows": 0
+        }
       ],
-      "cycles": ["2026", "2024"],
+      "cycles": [
+        "2026",
+        "2024"
+      ],
       "supported_rows": 40,
       "unsupported_rows": 5,
       "unassigned_rows": 3,
@@ -57,10 +70,23 @@
           "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
           "row_count": 45,
           "committees": [
-            {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
-            {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
+            {
+              "id": "C00000001",
+              "name": "Example PAC",
+              "rows": 42,
+              "supported_rows": 40
+            },
+            {
+              "id": "unassigned",
+              "name": "Unassigned committee rows",
+              "rows": 3,
+              "supported_rows": 0
+            }
           ],
-          "cycles": ["2026", "2024"],
+          "cycles": [
+            "2026",
+            "2024"
+          ],
           "supported_rows": 40,
           "unsupported_rows": 5,
           "unassigned_rows": 3,
@@ -103,10 +129,23 @@
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
         "row_count": 45,
         "committees": [
-          {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
-          {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
+          {
+            "id": "C00000001",
+            "name": "Example PAC",
+            "rows": 42,
+            "supported_rows": 40
+          },
+          {
+            "id": "unassigned",
+            "name": "Unassigned committee rows",
+            "rows": 3,
+            "supported_rows": 0
+          }
         ],
-        "cycles": ["2026", "2024"],
+        "cycles": [
+          "2026",
+          "2024"
+        ],
         "supported_rows": 40,
         "unsupported_rows": 5,
         "unassigned_rows": 3,
@@ -119,19 +158,56 @@
           "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
         ]
       },
-      "committee": {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
+      "committee": {
+        "id": "C00000001",
+        "name": "Example PAC",
+        "rows": 42,
+        "supported_rows": 40
+      },
       "committees": [
-        {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40},
-        {"id": "unassigned", "name": "Unassigned committee rows", "rows": 3, "supported_rows": 0}
+        {
+          "id": "C00000001",
+          "name": "Example PAC",
+          "rows": 42,
+          "supported_rows": 40
+        },
+        {
+          "id": "unassigned",
+          "name": "Unassigned committee rows",
+          "rows": 3,
+          "supported_rows": 0
+        }
       ],
-      "cycles": ["2026", "2024"],
+      "cycles": [
+        "2026",
+        "2024"
+      ],
       "selected_cycle": "2026",
-      "columns": ["committee_id", "committee_name", "contribution_receipt_amount", "contribution_receipt_date", "cycle"],
+      "columns": [
+        "committee_id",
+        "committee_name",
+        "contribution_receipt_amount",
+        "contribution_receipt_date",
+        "cycle"
+      ],
       "rows": [
-        {"row_number": 2, "committee_id": "C00000001", "committee_name": "Example PAC", "channel": "Receipts", "amount": 10.25, "date": "2026-02-03", "cycle": "2026", "status": "supported"}
+        {
+          "row_number": 2,
+          "committee_id": "C00000001",
+          "committee_name": "Example PAC",
+          "channel": "Receipts",
+          "amount": 10.25,
+          "date": "2026-02-03",
+          "cycle": "2026",
+          "status": "supported"
+        }
       ],
       "totals": [
-        {"channel": "Receipts", "amount": 15.5, "row_count": 3}
+        {
+          "channel": "Receipts",
+          "amount": 15.5,
+          "row_count": 3
+        }
       ],
       "supported_rows": 40,
       "unsupported_rows": 5,
@@ -147,6 +223,197 @@
     },
     {
       "error": "Choose a valid CSV row page (1–1,000 rows)."
+    },
+    {
+      "id": "csv-11111111111111111111111111111111",
+      "name": "workbook.xlsx",
+      "state": "ready",
+      "bytes": 20480,
+      "bytes_read": 20480,
+      "rows_read": 12,
+      "message": "",
+      "started_at": 1758000200.0,
+      "finished_at": 1758000200.5,
+      "catalog": {
+        "id": "csv-11111111111111111111111111111111",
+        "name": "workbook.xlsx",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+        "row_count": 12,
+        "committees": [
+          {
+            "id": "C00000001",
+            "name": "Example PAC",
+            "rows": 12,
+            "supported_rows": 12
+          }
+        ],
+        "cycles": [
+          "2026"
+        ],
+        "supported_rows": 12,
+        "unsupported_rows": 0,
+        "unassigned_rows": 0,
+        "session_only": false,
+        "imported_at": "2026-09-16T00:00:20Z",
+        "bytes": 20480,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ],
+        "format": "xlsx",
+        "source_kind": "path",
+        "source_path": "C:\\Users\\pgoff\\Desktop\\evidence\\workbook.xlsx",
+        "sheet": "Detail",
+        "sheets": [
+          "Sheet1",
+          "Detail"
+        ],
+        "encoding": "",
+        "delimiter": "",
+        "header_source": ""
+      },
+      "format": "xlsx",
+      "source_kind": "path",
+      "source_path": "C:\\Users\\pgoff\\Desktop\\evidence\\workbook.xlsx",
+      "sheet": "Detail",
+      "sheets": [
+        "Sheet1",
+        "Detail"
+      ],
+      "encoding": "",
+      "delimiter": "",
+      "header_source": ""
+    },
+    {
+      "id": "csv-22222222222222222222222222222222",
+      "name": "indiv26.zip",
+      "state": "ready",
+      "bytes": 1024,
+      "bytes_read": 1024,
+      "rows_read": 5,
+      "message": "",
+      "started_at": 1758000300.0,
+      "finished_at": 1758000300.2,
+      "catalog": {
+        "id": "csv-22222222222222222222222222222222",
+        "name": "indiv26.zip",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+        "row_count": 5,
+        "committees": [
+          {
+            "id": "C00000001",
+            "name": "Example PAC",
+            "rows": 5,
+            "supported_rows": 5
+          }
+        ],
+        "cycles": [
+          "2026"
+        ],
+        "supported_rows": 5,
+        "unsupported_rows": 0,
+        "unassigned_rows": 0,
+        "session_only": false,
+        "imported_at": "2026-09-16T00:01:00Z",
+        "bytes": 1024,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported.",
+          "Header taken from bundled."
+        ],
+        "format": "fec_bulk",
+        "source_kind": "upload",
+        "source_path": "",
+        "sheet": "",
+        "sheets": [],
+        "encoding": "utf-8",
+        "delimiter": "|",
+        "header_source": "bundled"
+      },
+      "format": "fec_bulk",
+      "source_kind": "upload",
+      "source_path": "",
+      "sheet": "",
+      "sheets": [],
+      "encoding": "utf-8",
+      "delimiter": "|",
+      "header_source": "bundled"
+    },
+    {
+      "id": "csv-33333333333333333333333333333333",
+      "name": "notes.pdf",
+      "state": "failed",
+      "bytes": 0,
+      "bytes_read": 0,
+      "rows_read": 0,
+      "message": "This file type (.pdf) is not supported. Choose CSV, TSV, TXT, XLSX, JSON or an FEC bulk ZIP.",
+      "started_at": 1758000400.0,
+      "finished_at": 1758000400.1,
+      "catalog": null,
+      "format": "",
+      "source_kind": "path",
+      "source_path": "C:\\Users\\pgoff\\Desktop\\evidence\\notes.pdf",
+      "sheet": "",
+      "sheets": [],
+      "encoding": "",
+      "delimiter": "",
+      "header_source": ""
+    },
+    {
+      "max_bytes": 500000000,
+      "max_columns": 200,
+      "max_rows": 5000000,
+      "max_bytes_message": "Choose a CSV no larger than 500 MB.",
+      "max_columns_message": "The CSV needs unique nonempty column names, with no more than 200 columns.",
+      "max_rows_message": "Choose a CSV containing no more than 5,000,000 rows.",
+      "accepted_suffixes": [
+        ".csv",
+        ".tsv",
+        ".txt",
+        ".xlsx",
+        ".xlsm",
+        ".json",
+        ".zip"
+      ],
+      "max_json_bytes": 25000000
+    },
+    {
+      "id": "csv-44444444444444444444444444444444",
+      "name": "receipts.csv",
+      "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "row_count": 3,
+      "committees": [
+        {
+          "id": "C00000001",
+          "name": "Example PAC",
+          "rows": 3,
+          "supported_rows": 3
+        }
+      ],
+      "cycles": [
+        "2026"
+      ],
+      "supported_rows": 3,
+      "unsupported_rows": 0,
+      "unassigned_rows": 0,
+      "session_only": false,
+      "imported_at": "2026-09-16T00:02:00Z",
+      "bytes": 512,
+      "warnings": [
+        "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+        "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+        "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+      ],
+      "format": "delimited",
+      "source_kind": "upload",
+      "source_path": "",
+      "sheet": "",
+      "sheets": [],
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "header_source": "row"
     }
   ],
   "negative_controls": [
@@ -159,9 +426,16 @@
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
         "row_count": 45,
         "committees": [
-          {"id": "C00000001", "name": "Example PAC", "rows": 42, "supported_rows": 40}
+          {
+            "id": "C00000001",
+            "name": "Example PAC",
+            "rows": 42,
+            "supported_rows": 40
+          }
         ],
-        "cycles": ["2026"],
+        "cycles": [
+          "2026"
+        ],
         "supported_rows": 40,
         "unsupported_rows": 5,
         "unassigned_rows": 0,
@@ -178,12 +452,160 @@
     {
       "why": "a sources listing missing 'limits' silently breaks the client's pre-flight size/column/row check (evidence-csv.js reads limits.max_bytes_message before ever uploading).",
       "shape": "sources_listing",
-      "payload": {"sources": [], "session_only": false}
+      "payload": {
+        "sources": [],
+        "session_only": false
+      }
     },
     {
       "why": "the pre-S3 bug reproduced live by S0 (receipts/S0_area_c...): GET ?offset=abc answered {\"error\":\"invalid literal for int() with base 10: 'abc'\"} - a leaked Python exception, not M_PAGE. An error payload must never contain implementation-leak text.",
       "shape": "error",
-      "payload": {"error": "invalid literal for int() with base 10: 'abc'"}
+      "payload": {
+        "error": "invalid literal for int() with base 10: 'abc'"
+      }
+    },
+    {
+      "why": "S3b format enum: 'excel' is not a recognised format (delimited|xlsx|json|fec_bulk).",
+      "shape": "catalog",
+      "payload": {
+        "id": "csv-11111111111111111111111111111111",
+        "name": "workbook.xlsx",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+        "row_count": 12,
+        "committees": [
+          {
+            "id": "C00000001",
+            "name": "Example PAC",
+            "rows": 12,
+            "supported_rows": 12
+          }
+        ],
+        "cycles": [
+          "2026"
+        ],
+        "supported_rows": 12,
+        "unsupported_rows": 0,
+        "unassigned_rows": 0,
+        "session_only": false,
+        "imported_at": "2026-09-16T00:00:20Z",
+        "bytes": 20480,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ],
+        "format": "excel",
+        "source_kind": "path",
+        "source_path": "C:\\Users\\pgoff\\Desktop\\evidence\\workbook.xlsx",
+        "sheet": "Detail",
+        "sheets": [
+          "Sheet1",
+          "Detail"
+        ],
+        "encoding": "",
+        "delimiter": "",
+        "header_source": ""
+      }
+    },
+    {
+      "why": "S3b source_kind enum: 'disk' is not a recognised source_kind (upload|path).",
+      "shape": "catalog",
+      "payload": {
+        "id": "csv-11111111111111111111111111111111",
+        "name": "workbook.xlsx",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+        "row_count": 12,
+        "committees": [
+          {
+            "id": "C00000001",
+            "name": "Example PAC",
+            "rows": 12,
+            "supported_rows": 12
+          }
+        ],
+        "cycles": [
+          "2026"
+        ],
+        "supported_rows": 12,
+        "unsupported_rows": 0,
+        "unassigned_rows": 0,
+        "session_only": false,
+        "imported_at": "2026-09-16T00:00:20Z",
+        "bytes": 20480,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ],
+        "format": "xlsx",
+        "source_kind": "disk",
+        "source_path": "C:\\Users\\pgoff\\Desktop\\evidence\\workbook.xlsx",
+        "sheet": "Detail",
+        "sheets": [
+          "Sheet1",
+          "Detail"
+        ],
+        "encoding": "",
+        "delimiter": "",
+        "header_source": ""
+      }
+    },
+    {
+      "why": "S3b sheets must be an array (the workbook's sheet names), not a joined string.",
+      "shape": "catalog",
+      "payload": {
+        "id": "csv-11111111111111111111111111111111",
+        "name": "workbook.xlsx",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+        "row_count": 12,
+        "committees": [
+          {
+            "id": "C00000001",
+            "name": "Example PAC",
+            "rows": 12,
+            "supported_rows": 12
+          }
+        ],
+        "cycles": [
+          "2026"
+        ],
+        "supported_rows": 12,
+        "unsupported_rows": 0,
+        "unassigned_rows": 0,
+        "session_only": false,
+        "imported_at": "2026-09-16T00:00:20Z",
+        "bytes": 20480,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ],
+        "format": "xlsx",
+        "source_kind": "path",
+        "source_path": "C:\\Users\\pgoff\\Desktop\\evidence\\workbook.xlsx",
+        "sheet": "Detail",
+        "sheets": "Sheet1, Detail",
+        "encoding": "",
+        "delimiter": "",
+        "header_source": ""
+      }
+    },
+    {
+      "why": "a limits payload missing accepted_suffixes silently breaks the client's M_TYPE pre-flight (evidence-csv.js must read limits.accepted_suffixes before ever uploading).",
+      "shape": "sources_listing",
+      "payload": {
+        "sources": [],
+        "limits": {
+          "max_bytes": 500000000,
+          "max_columns": 200,
+          "max_rows": 5000000,
+          "max_bytes_message": "Choose a CSV no larger than 500 MB.",
+          "max_columns_message": "The CSV needs unique nonempty column names, with no more than 200 columns.",
+          "max_rows_message": "Choose a CSV containing no more than 5,000,000 rows.",
+          "max_json_bytes": 25000000
+        },
+        "session_only": false
+      }
     }
   ]
 }

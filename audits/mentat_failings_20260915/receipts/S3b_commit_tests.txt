@@ -1,0 +1,27 @@
+S3b commit pre-stage test receipt
+==================================
+HEAD:        91fe7402a126eca3a38deeca0f7a84402632d8dd
+UTC date:    2026-09-17 01:52:10 UTC
+cwd:         C:\Users\pgoff\Mentat\mentat
+branch:      codex/mentat-crypto
+
+Commands and exit codes
+------------------------
+1) python -m py_compile app\evidence_csv.py app\server.py tests\test_evidence_readers.py tests\test_evidence_csv_stream.py
+   exit code: 0
+
+2) node --check app\evidence-csv.js
+   exit code: 0
+
+3) python -m unittest tests.test_evidence_readers tests.test_evidence_csv_stream tests.test_evidence_csv tests.test_pac_evidence_errors -v
+   exit code: 0
+   Ran 73 tests in 30.906s
+   OK
+
+Tally: test_evidence_readers=38, test_evidence_csv_stream=18, test_evidence_csv=10, test_pac_evidence_errors=7 -> 73 OK (matches expected 38+18+10+7=73)
+
+Note: Get-FileHash -Algorithm MD5 of mentat\tests\test_evidence_readers.py at staging time was
+163EF41AD924B124F3386EE07E0702C9, which differs from the md5 A recorded as green
+(b87de509a467ce36f5ffd79c4315e5cd). The file was staged anyway per instruction, and the full
+73/73 unittest run above (including the 38 test_evidence_readers cases) confirms it is green
+at HEAD content as staged. No content investigation beyond that was requested.

@@ -7,11 +7,12 @@ nothing is attributed to a donor; the rows are the reader's own file.
 """
 from collections import defaultdict
 import codecs
-from contextlib import closing
+from contextlib import closing, contextmanager
 import csv
-from datetime import datetime, timezone
+from datetime import date as date_type, datetime, time as time_type, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 import hashlib
+import io
 import json
 import math
 import os
@@ -19,10 +20,13 @@ from pathlib import Path
 import re
 import shutil
 import sqlite3
+import stat
+import string
 import tempfile
 import threading
 import time
 import uuid
+import zipfile
 
 from cross_reference_data import _source_url
 
@@ -81,6 +85,65 @@ KEEP_IMPORTS = 10
 KEEP_BYTES = 1_000_000_000
 PAGE_LIMIT = 1000
 
+# The picker refused every name that did not end .csv, and the reader refused
+# every byte that was not UTF-8, so the files Paul actually holds - a workbook,
+# a tab-separated export, an openFEC .json, an FEC bulk .zip - could not be
+# opened at all. Format is chosen by suffix first and content second: the
+# suffix says which reader to use, and that reader then decides the encoding,
+# the delimiter or the worksheet from the bytes themselves.
+#
+# JSON is the one format read whole, because an export is one document and
+# cannot be walked row by row without a streaming parser, so it carries its own
+# much smaller ceiling. A parsed document is not its bytes: every object, key
+# and string becomes an interpreter object, which costs several times the file
+# on disk before a single row is written, and this machine reads under the
+# memory pressure S0 recorded as its Finding 2. 25 MB is therefore the ceiling
+# for the one format that cannot be streamed; every other format streams, so
+# MAX_BYTES still governs them.
+MAX_JSON_BYTES = 25_000_000
+DELIMITED_SUFFIXES = ('.csv', '.tsv', '.txt')
+WORKBOOK_SUFFIXES = ('.xlsx', '.xlsm')
+ACCEPTED_SUFFIXES = DELIMITED_SUFFIXES + WORKBOOK_SUFFIXES + ('.json', '.zip')
+DELIMITERS = (',', ';', '\t', '|')
+SNIFF_BYTES = 32768
+HEADER_FIELD = re.compile(r'[A-Za-z_][A-Za-z0-9_ ]*')
+INPUTS = Path(__file__).resolve().parents[1] / 'inputs'
+
+# FEC bulk files ship without a header row, so the header has to come from
+# somewhere. The order is: the header file the reader gave, then a copy under
+# mentat/inputs, and only then the table below, which is the layout the
+# commission publishes for each file type. A header file on disk wins over the
+# table, because these layouts have changed before and the file beside the data
+# is the one that describes it.
+_BULK_TRANSACTION = ('CMTE_ID', 'AMNDT_IND', 'RPT_TP', 'TRANSACTION_PGI', 'IMAGE_NUM', 'TRANSACTION_TP',
+                     'ENTITY_TP', 'NAME', 'CITY', 'STATE', 'ZIP_CODE', 'EMPLOYER', 'OCCUPATION',
+                     'TRANSACTION_DT', 'TRANSACTION_AMT', 'OTHER_ID', 'TRAN_ID', 'FILE_NUM', 'MEMO_CD',
+                     'MEMO_TEXT', 'SUB_ID')
+_BULK_TO_CANDIDATE = _BULK_TRANSACTION[:16] + ('CAND_ID',) + _BULK_TRANSACTION[16:]
+BULK_HEADERS = {
+    # indiv26.zip is named for the layout and holds itcont.txt, named for the
+    # content, so both names have to resolve to the same header.
+    'indiv': _BULK_TRANSACTION,
+    'itcont': _BULK_TRANSACTION,
+    'itoth': _BULK_TRANSACTION,
+    'oth': _BULK_TRANSACTION,
+    'itpas2': _BULK_TO_CANDIDATE,
+    'pas2': _BULK_TO_CANDIDATE,
+    'cm': ('CMTE_ID', 'CMTE_NM', 'TRES_NM', 'CMTE_ST1', 'CMTE_ST2', 'CMTE_CITY', 'CMTE_ST', 'CMTE_ZIP',
+           'CMTE_DSGN', 'CMTE_TP', 'CMTE_PTY_AFFILIATION', 'CMTE_FILING_FREQ', 'ORG_TP',
+           'CONNECTED_ORG_NM', 'CAND_ID'),
+    'cn': ('CAND_ID', 'CAND_NAME', 'CAND_PTY_AFFILIATION', 'CAND_ELECTION_YR', 'CAND_OFFICE_ST',
+           'CAND_OFFICE', 'CAND_OFFICE_DISTRICT', 'CAND_ICI', 'CAND_STATUS', 'CAND_PCC', 'CAND_ST1',
+           'CAND_ST2', 'CAND_CITY', 'CAND_ST', 'CAND_ZIP'),
+    'ccl': ('CAND_ID', 'CAND_ELECTION_YR', 'FEC_ELECTION_YR', 'CMTE_ID', 'CMTE_TP', 'CMTE_DSGN', 'LINKAGE_ID'),
+    'oppexp': ('CMTE_ID', 'AMNDT_IND', 'RPT_YR', 'RPT_TP', 'IMAGE_NUM', 'LINE_NUM', 'FORM_TP_CD',
+               'SCHED_TP_CD', 'NAME', 'CITY', 'STATE', 'ZIP_CODE', 'TRANSACTION_DT', 'TRANSACTION_AMT',
+               'TRANSACTION_PGI', 'PURPOSE', 'CATEGORY', 'CATEGORY_DESC', 'MEMO_CD', 'MEMO_TEXT',
+               'ENTITY_TP', 'SUB_ID', 'FILE_NUM', 'TRAN_ID', 'BACK_REF_TRAN_ID'),
+}
+# Longest first, so 'itpas2' is not read as 'pas2' and 'itoth' not as 'oth'.
+BULK_TYPES = tuple(sorted(BULK_HEADERS, key=len, reverse=True))
+
 COMMITTEE_FIELDS = ('committee_id', 'cmte_id', 'source_committee_id', 'pac_committee_id', 'pac_id', 'recipient_key')
 NAME_FIELDS = ('committee_name', 'cmte_nm', 'source_committee_name', 'pac_name', 'recipient_committee')
 DATE_FIELDS = ('transaction_date', 'transaction_dt', 'date', 'payment_date')
@@ -121,6 +184,17 @@ M_PAGE = 'Choose a valid CSV row page (1–1,000 rows).'
 M_INTERRUPTED = 'Reading was interrupted by a console restart. Choose the file again.'
 M_COMMITTEE = 'Choose a committee in this imported CSV.'
 M_CYCLE = 'Choose a cycle recorded in this CSV.'
+# M_UTF8 above is kept defined for callers that still import it, but nothing
+# raises it any more: a file that is not valid UTF-8 is decoded as
+# Windows-1252 and says so in the catalog, and only content that is not text at
+# all (a NUL byte outside UTF-16) is refused, as M_BINARY.
+M_BINARY = 'This file contains binary data and could not be read as text.'
+M_JSON_SHAPE = 'The JSON must be an openFEC export ({"results": [...]}) or a list of objects.'
+M_HEADER = ('This looks like an FEC bulk file without a header row and its name is not a known bulk '
+            'type. Give its header file too.')
+M_XLSX_READ = 'The workbook could not be opened. It may be corrupt or password-protected.'
+M_ZIP_READ = 'The ZIP could not be opened. It may be corrupt.'
+M_CP1252 = 'Decoded as Windows-1252 because the file is not valid UTF-8.'
 STORE_DIRECTORY = 'evidence-csv'
 IDENTIFIER = re.compile(r'csv-[a-f0-9]{32}')
 
@@ -149,7 +223,29 @@ def M_SHORT(received, expected):
     return f'The upload ended early: {received:,} of {expected:,} bytes arrived.'
 
 
-_DERIVED = {'M_BYTES':bytes_message, 'M_COLUMNS':columns_message, 'M_ROWS':rows_message}
+def M_TYPE(suffix):
+    return (f'This file type ({suffix or "no extension"}) is not supported. '
+            'Choose CSV, TSV, TXT, XLSX, JSON or an FEC bulk ZIP.')
+
+
+def M_ZIP(members):
+    return f'The ZIP must hold exactly one .txt or .csv file; it holds: {", ".join(members[:10])}.'
+
+
+def M_SHEET(name, sheets):
+    return f'Worksheet {name!r} is not in this workbook. Sheets: {", ".join(sheets)}.'
+
+
+def M_PATH(path, reason):
+    return f'Cannot open {path}: {reason}'
+
+
+def json_size_message():
+    return f'Choose a JSON file no larger than {MAX_JSON_BYTES // 1_000_000} MB, or export it as CSV.'
+
+
+_DERIVED = {'M_BYTES':bytes_message, 'M_COLUMNS':columns_message, 'M_ROWS':rows_message,
+            'M_JSON_SIZE':json_size_message}
 
 
 def __getattr__(name):
@@ -167,7 +263,8 @@ def __getattr__(name):
 def limits():
     return {'max_bytes':MAX_BYTES, 'max_columns':MAX_COLUMNS, 'max_rows':MAX_ROWS,
             'max_bytes_message':bytes_message(), 'max_columns_message':columns_message(),
-            'max_rows_message':rows_message()}
+            'max_rows_message':rows_message(), 'accepted_suffixes':list(ACCEPTED_SUFFIXES),
+            'max_json_bytes':MAX_JSON_BYTES}
 
 
 def decode_name(value):
@@ -336,13 +433,46 @@ def atomic_json(path, value, attempts=6):
             time.sleep(0.05 * (attempt + 1))
 
 
+def descriptive(record):
+    """How this import was read, in the terms the page shows the reader.
+
+    The same block rides on the JOB and on the CATALOG, so a listing read back
+    tomorrow says what a poll of the running import said: which reader ran,
+    whether the file came from a browser upload or from a path on this
+    computer, which worksheet, which encoding and delimiter, and where an FEC
+    bulk header came from.
+    """
+    name = str(record.get('name') or '')
+    fmt = record.get('format') or ''
+    if not fmt and Path(name).suffix.lower() in ACCEPTED_SUFFIXES:
+        # An import read before these fields existed still names its format,
+        # from the only evidence it kept: the file name it was stored under.
+        fmt = source_format(name, record.get('header_path') or '')
+    return {'format':fmt, 'source_kind':record.get('source_kind') or 'upload',
+            'source_path':record.get('source_path') or '', 'sheet':record.get('sheet') or '',
+            'sheets':list(record.get('sheets') or []), 'encoding':record.get('encoding') or '',
+            'delimiter':record.get('delimiter') or '', 'header_source':record.get('header_source') or ''}
+
+
+def stored_catalog(record):
+    """One stored catalog, with any descriptive field it predates filled in.
+
+    The catalog is written once, when the import is read, so an import already
+    on disk carries the S3-era shape. The record beside it is filled the same
+    way for both, so the listing the page renders has one shape whether the
+    file was read today or last week.
+    """
+    catalog = dict(record.get('catalog') or {})
+    return {**descriptive(record), **catalog} if catalog else catalog
+
+
 def job_view(record):
     """The reading/ready/failed record the page polls, without store internals."""
     return {'id':record.get('id', ''), 'name':record.get('name', ''), 'state':record.get('state', 'failed'),
             'bytes':int(record.get('bytes') or 0), 'bytes_read':int(record.get('bytes_read') or 0),
             'rows_read':int(record.get('rows_read') or 0), 'message':record.get('message') or '',
             'started_at':record.get('started_at'), 'finished_at':record.get('finished_at'),
-            'catalog':record.get('catalog')}
+            'catalog':record.get('catalog'), **descriptive(record)}
 
 
 # One ingest thread per process, registered here so a record that claims to be
@@ -351,18 +481,78 @@ _ACTIVE_LOCK = threading.Lock()
 _ACTIVE = {}
 
 
-class Upload:
-    """One in-flight file: size-gated, UTF-8 checked and hashed as it arrives."""
+def accepted_suffix(name):
+    """The suffix this reader will open, or a refusal naming the one it got."""
+    if not isinstance(name, str) or not name.strip() or len(name) > 250:
+        raise ValueError(M_NAME)
+    suffix = Path(name).suffix.lower()
+    if suffix not in ACCEPTED_SUFFIXES:
+        raise ValueError(M_TYPE(suffix))
+    return suffix
 
-    def __init__(self, store, name):
-        if not isinstance(name, str) or not name.strip() or len(name) > 250 or Path(name).suffix.lower() != '.csv':
-            raise ValueError(M_NAME)
+
+def bulk_type(stem):
+    """The FEC bulk file type a name begins with, if it begins with one."""
+    lowered = str(stem or '').lower()
+    return next((name for name in BULK_TYPES if lowered.startswith(name)), '')
+
+
+def source_format(name, header_path=''):
+    """Which reader a name asks for.
+
+    Decided from the name alone, so the JOB the page polls can say what is
+    being read from the first poll onwards. A .zip here is always an FEC bulk
+    archive, and a .txt is bulk only when its name is a bulk type or the reader
+    supplied a header file; every other delimited name is read as text with its
+    own header row.
+    """
+    suffix = Path(str(name or '')).suffix.lower()
+    if suffix in WORKBOOK_SUFFIXES:
+        return 'xlsx'
+    if suffix == '.json':
+        return 'json'
+    if suffix == '.zip':
+        return 'fec_bulk'
+    if suffix == '.txt' and bulk_type(Path(str(name or '')).stem):
+        return 'fec_bulk'
+    if suffix in ('.txt', '.csv') and header_path:
+        return 'fec_bulk'
+    return 'delimited'
+
+
+def import_id(digest, sheet=''):
+    """'csv-' + the content digest, with a chosen worksheet folded in after it.
+
+    A file with no worksheet choice keeps the identifier its bytes alone gave
+    it before worksheets existed, so a CSV already in the store is still found
+    under the id it was stored with. Two worksheets of one workbook are two
+    imports, so the sheet name has to reach the identifier for the second one
+    not to dedupe onto the first.
+    """
+    if sheet:
+        digest = digest.copy()
+        digest.update(b'\x00' + sheet.encode('utf-8'))
+    return 'csv-' + digest.hexdigest()[:32]
+
+
+class Upload:
+    """One in-flight file: size-gated, hashed and written as it arrives.
+
+    Nothing is decoded here any more. A workbook, a zip and a UTF-16 export are
+    all legitimate now and none of them is UTF-8 text, so the encoding question
+    belongs to the reader that walks the file, not to the thread copying bytes
+    off a socket.
+    """
+
+    def __init__(self, store, name, sheet='', header_path=''):
+        self.suffix = accepted_suffix(name)
         self.store = store
         self.name = Path(name).name
-        self.path = store.incoming / (uuid.uuid4().hex + '.csv')
+        self.sheet = str(sheet or '')
+        self.header_path = str(header_path or '')
+        self.path = store.incoming / (uuid.uuid4().hex + self.suffix)
         self.bytes = 0
         self._handle = self.path.open('wb')
-        self._decoder = codecs.getincrementaldecoder('utf-8')()
         self._digest = hashlib.sha256()
         self._blank = True
         self._closed = False
@@ -380,13 +570,7 @@ class Upload:
         try:
             if self.bytes + len(chunk) > MAX_BYTES:
                 raise ValueError(bytes_message())
-            try:
-                text = self._decoder.decode(chunk)
-            except UnicodeDecodeError as error:
-                raise ValueError(M_UTF8) from error
-            if '\x00' in text or '�' in text:
-                raise ValueError(M_UTF8)
-            if self._blank and text.strip():
+            if self._blank and chunk.strip():
                 self._blank = False
             self._digest.update(chunk)
             self._handle.write(chunk)
@@ -412,26 +596,491 @@ class Upload:
 
     def finish(self):
         """Name the import by its content and hand the file to a reader thread."""
-        try:
-            tail = self._decoder.decode(b'', True)
-        except UnicodeDecodeError as error:
-            self.abort()
-            raise ValueError(M_UTF8) from error
-        if '\x00' in tail or '�' in tail:
-            self.abort()
-            raise ValueError(M_UTF8)
-        if self._blank and tail.strip():
-            self._blank = False
         self._close()
         if self._blank:
             self.abort()
             raise ValueError(M_EMPTY)
-        digest = self._digest.hexdigest()
         try:
-            return self.store.adopt('csv-' + digest[:32], self.name, self.path, self.bytes, digest)
+            # The workbook is opened by the reader thread and nowhere else, so
+            # a corrupt file and an unknown worksheet are reported the way
+            # every other unreadable file is: on the JOB the page is polling,
+            # not as a refusal of the upload that has already arrived.
+            return self.store.adopt(import_id(self._digest, self.sheet), self.name, self.path, self.bytes,
+                                    self._digest.hexdigest(), suffix=self.suffix, sheet=self.sheet,
+                                    header_path=self.header_path)
         except BaseException:
             self.abort()
             raise
+
+
+class Reader:
+    """One open source: its header row, its rows, and how far reading has got.
+
+    Every format answers with the same three things - a header list, an
+    iterator of (line_number, cells) and a byte position for the progress the
+    page polls - so the row loop in read_source never learns which format it is
+    walking, and the per-row path (row cap, normalise, batch, totals) stays the
+    one CSV imports have always used.
+    """
+
+    def __init__(self, headers, rows, tell, meta, warnings=()):
+        self.headers = list(headers)
+        self.rows = rows
+        self.tell = tell
+        self.meta = dict(meta)
+        self.warnings = list(warnings)
+
+
+def text_encoding(open_bytes):
+    """Choose an encoding for a text source, refusing content that is not text.
+
+    A BOM decides on its own. Otherwise the file is decoded once, incrementally,
+    in CHUNK_BYTES chunks: valid UTF-8 is read as UTF-8 and anything else falls
+    back to Windows-1252, which cannot fail and is what Excel writes on this
+    machine. The reader is told in the catalog when that fallback was used,
+    because a mangled name is a data question, not a reason to refuse the file.
+    A NUL byte outside UTF-16 is not text at all, and is refused.
+    """
+    with open_bytes() as raw:
+        head = raw.read(4)
+    if head.startswith(codecs.BOM_UTF8):
+        bom = 'utf-8-sig'
+    elif head.startswith(codecs.BOM_UTF16_LE) or head.startswith(codecs.BOM_UTF16_BE):
+        return 'utf-16'
+    else:
+        bom = ''
+    decoder = codecs.getincrementaldecoder('utf-8')()
+    valid = True
+    with open_bytes() as raw:
+        while True:
+            chunk = raw.read(CHUNK_BYTES)
+            if not chunk:
+                break
+            if b'\x00' in chunk:
+                raise ValueError(M_BINARY)
+            if valid:
+                try:
+                    decoder.decode(chunk)
+                except UnicodeDecodeError:
+                    valid = False
+    if valid:
+        try:
+            decoder.decode(b'', True)
+        except UnicodeDecodeError:
+            valid = False
+    return (bom or 'utf-8') if valid else 'cp1252'
+
+
+def head_text(open_bytes, encoding, size=SNIFF_BYTES):
+    with open_bytes() as raw:
+        head = raw.read(size)
+    return head.decode(encoding, 'replace')
+
+
+def steady_delimiter(lines):
+    """The candidate whose count repeats identically on every line, if any.
+
+    That is what a delimiter does: 20 pipes on every row. A comma inside one
+    field does not, and neither does a semicolon that appears in a note.
+    Returns the steadiest candidate and the count that made it steady.
+    """
+    chosen, best = '', 0
+    for candidate in DELIMITERS:
+        counts = [line.count(candidate) for line in lines]
+        if counts and counts[0] > best and all(count == counts[0] for count in counts):
+            chosen, best = candidate, counts[0]
+    return chosen, best
+
+
+def sniff_dialect(text, suffix):
+    """The delimiter a text file is written with, and the dialect to read it.
+
+    csv.Sniffer answers first, because it settles quoting at the same time.
+    It is overruled only by a candidate that is strictly steadier than the one
+    it chose, because its own preference table puts the comma ahead of the
+    pipe: on an FEC bulk row that holds one name like "Doe, Jane" and twenty
+    pipes, Sniffer returns the comma and the row reads as two fields. When
+    Sniffer cannot answer at all, the steadiest candidate stands on its own.
+    """
+    lines = [line for line in text.splitlines()[:20] if line.strip()]
+    if suffix == '.tsv' and any('\t' in line for line in lines[:1]):
+        return type('tabs', (csv.excel,), {'delimiter':'\t'})
+    chosen, best = steady_delimiter(lines)
+    try:
+        dialect = csv.Sniffer().sniff(text, delimiters=''.join(DELIMITERS))
+    except csv.Error:
+        dialect = None
+    if dialect is not None:
+        counts = [line.count(dialect.delimiter) for line in lines]
+        steady = bool(counts) and counts[0] > 0 and all(count == counts[0] for count in counts)
+        if not chosen or chosen == dialect.delimiter or (steady and counts[0] >= best):
+            return dialect
+        return type('steadier', (csv.excel,), {'delimiter':chosen})
+    if not chosen:
+        totals = {candidate:sum(line.count(candidate) for line in lines) for candidate in DELIMITERS}
+        chosen = (max(totals, key=lambda candidate: totals[candidate]) if any(totals.values())
+                  else ('\t' if suffix == '.tsv' else ','))
+    return type('sniffed', (csv.excel,), {'delimiter':chosen})
+
+
+def header_like(fields):
+    """True when a first line reads as column names rather than as data."""
+    values = [str(field).strip() for field in fields]
+    return bool(values) and all(HEADER_FIELD.fullmatch(value) for value in values)
+
+
+def cell_text(value):
+    """One workbook cell as the string a CSV would have carried."""
+    if value is None:
+        return ''
+    if value is True:
+        return 'TRUE'
+    if value is False:
+        return 'FALSE'
+    if isinstance(value, float):
+        return str(int(value)) if value.is_integer() and math.isfinite(value) else repr(value)
+    if isinstance(value, datetime):
+        return (value.date().isoformat()
+                if (value.hour, value.minute, value.second, value.microsecond) == (0, 0, 0, 0)
+                else value.isoformat())
+    if isinstance(value, timedelta):
+        return str(value)
+    if isinstance(value, (date_type, time_type)):
+        return value.isoformat()
+    return str(value)
+
+
+def json_text(value):
+    """One JSON field as a cell: a nested value keeps its own JSON text."""
+    if value is None:
+        return ''
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False)
+    return str(value)
+
+
+def read_header_file(path):
+    """One line of CSV column names, from the header file the reader gave."""
+    path = Path(path)
+    try:
+        if not path.is_file():
+            raise ValueError(M_PATH(str(path), 'no such file'))
+        if path.stat().st_size > 1_000_000:
+            raise ValueError(M_PATH(str(path), 'larger than 1 MB'))
+        raw = path.read_bytes()
+    except PermissionError as error:
+        raise ValueError(M_PATH(str(path), 'permission denied')) from error
+    except OSError as error:
+        raise ValueError(M_PATH(str(path), 'no such file')) from error
+    try:
+        text = raw.decode('utf-8-sig')
+    except UnicodeDecodeError:
+        text = raw.decode('cp1252')
+    line = next((item for item in text.splitlines() if item.strip()), '')
+    fields = [field.strip() for field in next(csv.reader([line]), [])]
+    if not fields or not any(fields):
+        raise ValueError(M_PATH(str(path), 'it holds no column names'))
+    return fields
+
+
+def bulk_headers(stems, header_path=''):
+    """The header row for a bulk file: given, found on disk, or bundled.
+
+    More than one name can carry the type: the commission ships its individual
+    contributions as itcont.txt inside indiv26.zip, so one name describes the
+    content and the other the layout. Both are known here, and either may be
+    the one a reader's own copy was renamed to, so each is tried in turn.
+    """
+    if header_path:
+        return read_header_file(header_path), 'header_path'
+    name = next((found for found in (bulk_type(stem) for stem in stems) if found), '')
+    if not name:
+        raise ValueError(M_HEADER)
+    try:
+        found = sorted(INPUTS.glob(f'**/{name}_header_file.csv'))
+    except OSError:
+        found = []
+    if found:
+        return read_header_file(found[0]), 'inputs'
+    return list(BULK_HEADERS[name]), 'bundled'
+
+
+@contextmanager
+def delimited_reader(path, record):
+    """CSV, TSV and plain text: one header row, then rows as they are read."""
+    suffix = Path(str(record.get('name') or path.name)).suffix.lower()
+
+    def open_bytes():
+        return path.open('rb')
+
+    encoding = text_encoding(open_bytes)
+    dialect = sniff_dialect(head_text(open_bytes, encoding), suffix)
+    warnings = [M_CP1252] if encoding == 'cp1252' else []
+    meta = {'encoding':encoding, 'delimiter':dialect.delimiter, 'header_source':'row', 'sheets':[]}
+    with path.open('r', encoding=encoding, newline='') as handle:
+        reader = csv.reader(handle, dialect=dialect, strict=True)
+        try:
+            headers = next(reader, [])
+        except csv.Error as error:
+            raise ValueError(M_READ(reader.line_num)) from error
+        if suffix == '.txt' and dialect.delimiter == '|' and not header_like(headers):
+            raise ValueError(M_HEADER)
+
+        def rows():
+            try:
+                for values in reader:
+                    yield reader.line_num, values
+            except csv.Error as error:
+                raise ValueError(M_READ(reader.line_num)) from error
+
+        yield Reader(headers, rows(), lambda: handle.buffer.tell(), meta, warnings)
+
+
+@contextmanager
+def bulk_reader(path, record):
+    """An FEC bulk file: pipe-delimited, no header row, header from elsewhere."""
+    name = str(record.get('name') or path.name)
+    if Path(name).suffix.lower() == '.zip':
+        try:
+            archive = zipfile.ZipFile(path)
+        except (OSError, ValueError, zipfile.BadZipFile) as error:
+            raise ValueError(M_ZIP_READ) from error
+        with archive:
+            members = [item for item in archive.infolist() if not item.is_dir()]
+            chosen = [item for item in members if item.filename.lower().endswith(('.txt', '.csv'))]
+            if len(chosen) != 1:
+                raise ValueError(M_ZIP([item.filename for item in members]))
+            member = chosen[0]
+            if member.file_size > MAX_BYTES:
+                raise ValueError(bytes_message())
+            with bulk_rows(lambda: archive.open(member), (Path(member.filename).stem, Path(name).stem),
+                           record, int(member.file_size)) as reader:
+                yield reader
+        return
+    with bulk_rows(lambda: path.open('rb'), (Path(name).stem,), record, path.stat().st_size) as reader:
+        yield reader
+
+
+@contextmanager
+def bulk_rows(open_bytes, stems, record, size):
+    """The rows of one bulk file or zip member, under a resolved header."""
+    encoding = text_encoding(open_bytes)
+    headers, header_source = bulk_headers(stems, record.get('header_path') or '')
+    warnings = [f'Header taken from {header_source}.']
+    if encoding == 'cp1252':
+        warnings.append(M_CP1252)
+    meta = {'encoding':encoding, 'delimiter':'|', 'header_source':header_source, 'sheets':[]}
+    raw = open_bytes()
+    # QUOTE_NONE because bulk rows are not quoted: an apostrophe or an inch
+    # mark in an employer name is a character there, not an opening quote.
+    stream = io.TextIOWrapper(raw, encoding=encoding, newline='')
+    reader = csv.reader(stream, delimiter='|', quoting=csv.QUOTE_NONE)
+
+    def rows():
+        try:
+            for values in reader:
+                yield reader.line_num, values
+        except csv.Error as error:
+            raise ValueError(M_READ(reader.line_num)) from error
+
+    def tell():
+        try:
+            return int(raw.tell())
+        except (OSError, ValueError):
+            return size
+
+    try:
+        yield Reader(headers, rows(), tell, meta, warnings)
+    finally:
+        try:
+            stream.detach()
+        except ValueError:
+            pass
+        raw.close()
+
+
+@contextmanager
+def workbook_reader(path, record):
+    """One worksheet of an .xlsx/.xlsm, read cell by cell, never held whole."""
+    import openpyxl
+    try:
+        book = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    except (OSError, ValueError, KeyError, TypeError, zipfile.BadZipFile) as error:
+        raise ValueError(M_XLSX_READ) from error
+    try:
+        sheets = list(book.sheetnames)
+        name = str(record.get('sheet') or '') or (sheets[0] if sheets else '')
+        if name not in sheets:
+            raise ValueError(M_SHEET(name, sheets))
+        size = int(record.get('bytes') or 0)
+        meta = {'encoding':'', 'delimiter':'', 'header_source':'row', 'sheets':sheets, 'sheet':name}
+        iterator = book[name].iter_rows(values_only=True)
+        headers, start = [], 0
+        for start, row in enumerate(iterator, 1):
+            cells = [cell_text(value) for value in row]
+            if any(cell.strip() for cell in cells):
+                while cells and not cells[-1].strip():
+                    cells.pop()
+                headers = cells
+                break
+        if not headers:
+            raise ValueError(M_EMPTY)
+        if len(headers) > MAX_COLUMNS:
+            raise ValueError(columns_message())
+        first = start
+
+        def rows():
+            index = first
+            try:
+                for index, row in enumerate(iterator, first + 1):
+                    cells = [cell_text(value) for value in row]
+                    # Trailing blanks past the header are the sheet's used
+                    # range, not extra values: dropping them keeps a whole
+                    # worksheet from being reported as ragged rows.
+                    while len(cells) > len(headers) and not cells[-1].strip():
+                        cells.pop()
+                    yield index, cells
+            except ValueError:
+                raise
+            except Exception as error:
+                raise ValueError(M_READ(index)) from error
+
+        yield Reader(headers, rows(), lambda: size, meta, [])
+    finally:
+        book.close()
+
+
+@contextmanager
+def json_reader(path, record):
+    """An openFEC export or a list of objects, read whole under its own cap."""
+    size = path.stat().st_size
+    if size > MAX_JSON_BYTES:
+        raise ValueError(json_size_message())
+
+    def open_bytes():
+        return path.open('rb')
+
+    encoding = text_encoding(open_bytes)
+    try:
+        document = json.loads(path.read_text(encoding=encoding))
+    except (ValueError, UnicodeDecodeError, OSError) as error:
+        raise ValueError(M_JSON_SHAPE) from error
+    items = document.get('results') if isinstance(document, dict) else document
+    if not isinstance(items, list) or not all(isinstance(item, dict) for item in items):
+        raise ValueError(M_JSON_SHAPE)
+    if not items:
+        raise ValueError(M_EMPTY)
+    headers, seen = [], set()
+    for item in items:
+        for name in item:
+            if name not in seen:
+                seen.add(name)
+                headers.append(str(name))
+    if len(headers) > MAX_COLUMNS:
+        raise ValueError(columns_message())
+    warnings = [M_CP1252] if encoding == 'cp1252' else []
+    meta = {'encoding':encoding, 'delimiter':'', 'header_source':'row', 'sheets':[]}
+
+    def rows():
+        for number, item in enumerate(items, 1):
+            yield number, [json_text(item.get(name)) for name in headers]
+
+    yield Reader(headers, rows(), lambda: size, meta, warnings)
+
+
+@contextmanager
+def open_source(path, record):
+    """The reader for one stored source, chosen by the format on its record."""
+    readers = {'xlsx':workbook_reader, 'json':json_reader, 'fec_bulk':bulk_reader}
+    fmt = record.get('format') or source_format(record.get('name', ''), record.get('header_path', ''))
+    with readers.get(fmt, delimited_reader)(path, record) as reader:
+        yield reader
+
+
+def drive_roots():
+    """Every drive root that answers, for a picker that starts from nothing."""
+    if os.name != 'nt':
+        return ['/']
+    roots = []
+    for letter in string.ascii_uppercase:
+        root = f'{letter}:\\'
+        try:
+            if Path(root).is_dir():
+                roots.append(root)
+        except OSError:
+            continue
+    return roots
+
+
+def shortcuts():
+    """The folders a reader actually keeps evidence in, when they exist."""
+    home = Path.home()
+    found = []
+    for label, candidates in (('Downloads', (home / 'Downloads', home / 'OneDrive' / 'Downloads')),
+                              ('Mentat inputs', (INPUTS,)),
+                              ('Desktop', (home / 'Desktop', home / 'OneDrive' / 'Desktop'))):
+        for candidate in candidates:
+            try:
+                if candidate.is_dir():
+                    found.append({'name':label, 'path':str(candidate)})
+                    break
+            except OSError:
+                continue
+    return found
+
+
+def directory_entries(directory, limit=2000):
+    """One folder's children, folders first, with what the reader may open."""
+    rows, truncated = [], False
+    with os.scandir(directory) as scan:
+        for entry in scan:
+            if len(rows) >= limit:
+                truncated = True
+                break
+            try:
+                is_dir = entry.is_dir()
+                info = entry.stat()
+                size = None if is_dir else int(info.st_size)
+                modified = datetime.fromtimestamp(info.st_mtime, timezone.utc).isoformat()
+            except OSError:
+                is_dir, size, modified = False, None, None
+            suffix = Path(entry.name).suffix.lower()
+            rows.append({'name':entry.name, 'path':str(Path(directory) / entry.name),
+                         'kind':'dir' if is_dir else 'file', 'size':size, 'modified':modified,
+                         'supported':(not is_dir) and suffix in ACCEPTED_SUFFIXES})
+    rows.sort(key=lambda row: (row['kind'] != 'dir', row['name'].lower()))
+    return rows, truncated
+
+
+def browse(path=''):
+    """List one folder on this computer, for the console's own file picker.
+
+    Read-only, and answered only over an authenticated POST. Nothing is hidden
+    by a hidden or system attribute: this is Paul's own machine, and a file he
+    cannot see in the picker is a file he cannot import.
+    """
+    text = str(path or '').strip().strip('"')
+    if not text:
+        return {'path':'', 'parent':None, 'roots':drive_roots(), 'shortcuts':shortcuts(),
+                'entries':[], 'truncated':False}
+    try:
+        chosen = Path(text).expanduser().resolve()
+        info = os.stat(chosen)
+    except PermissionError as error:
+        raise ValueError(M_PATH(text, 'permission denied')) from error
+    except (OSError, ValueError) as error:
+        raise ValueError(M_PATH(text, 'no such file')) from error
+    if not stat.S_ISDIR(info.st_mode):
+        raise ValueError(M_PATH(text, 'it is not a folder'))
+    try:
+        entries, truncated = directory_entries(chosen)
+    except PermissionError as error:
+        raise ValueError(M_PATH(text, 'permission denied')) from error
+    except OSError as error:
+        raise ValueError(M_PATH(text, 'it could not be listed')) from error
+    parent = str(chosen.parent) if chosen.parent != chosen else None
+    return {'path':str(chosen), 'parent':parent, 'roots':drive_roots(), 'shortcuts':shortcuts(),
+            'entries':entries, 'truncated':truncated}
 
 
 class Store:
@@ -457,14 +1106,119 @@ class Store:
     def record_path(self, identifier):
         return self.directory(identifier) / 'import.json'
 
-    def source_path(self, identifier):
-        return self.directory(identifier) / 'source.csv'
+    def source_path(self, identifier, suffix=''):
+        """The stored source, kept under the suffix it arrived with."""
+        directory = self.directory(identifier)
+        if suffix:
+            return directory / ('source' + suffix)
+        existing = sorted(path for path in directory.glob('source.*') if path.is_file())
+        return existing[0] if existing else directory / 'source.csv'
 
     def database_path(self, identifier):
         return self.directory(identifier) / 'rows.sqlite'
 
-    def begin_upload(self, name):
-        return Upload(self, name)
+    def begin_upload(self, name, sheet='', header_path=''):
+        return Upload(self, name, sheet=sheet, header_path=header_path)
+
+    def refusal(self, name, message, source_kind='path', source_path='', sheet='', header_path=''):
+        """Record a refusal the page can poll, the way a failed read is polled.
+
+        A path import can be refused before a byte is read - the file is not
+        there, it is a folder, it is too large, it is a type this reader does
+        not open - and the page is watching one channel, the JOB. Recording the
+        refusal as a failed import keeps the reader's status line in one place
+        instead of splitting 'could not start' from 'could not read', and the
+        hourly sweep drops it like any other failure.
+        """
+        suffix = Path(str(name or '')).suffix.lower()
+        identifier = 'csv-' + hashlib.sha256(
+            ('refused\x00' + str(source_path or name) + '\x00' + str(sheet or '')).encode('utf-8')).hexdigest()[:32]
+        stamp = time.time()
+        value = {'id':identifier, 'name':str(name or ''), 'state':'failed', 'bytes':0, 'bytes_read':0,
+                 'rows_read':0, 'message':str(message), 'started_at':stamp, 'finished_at':stamp,
+                 'catalog':None, 'columns':[], 'sha256':'', 'imported_at':'', 'pid':os.getpid(),
+                 'format':source_format(name, header_path) if suffix in ACCEPTED_SUFFIXES else '',
+                 'source_kind':source_kind, 'source_path':str(source_path or ''), 'sheet':str(sheet or ''),
+                 'sheets':[], 'encoding':'', 'delimiter':'', 'header_source':'', 'suffix':suffix,
+                 'header_path':str(header_path or '')}
+        self.directory(identifier).mkdir(parents=True, exist_ok=True)
+        atomic_json(self.record_path(identifier), value)
+        return job_view(value)
+
+    def import_path(self, path, sheet='', header_path=''):
+        """Read a file the reader chose by path, with no browser upload at all.
+
+        The answer is a JOB either way: a file that can be read starts a reader
+        thread, and one that cannot is recorded as a refusal under the same
+        identifier shape, so the page polls one thing and the console's own
+        message - never a Python exception - is what the reader is shown.
+        """
+        text = str(path or '').strip().strip('"')
+        try:
+            return self.read_chosen_path(text, sheet, header_path)
+        except ValueError as error:
+            return self.refusal(Path(text).name or text, str(error), source_path=text,
+                                sheet=sheet, header_path=header_path)
+
+    def read_chosen_path(self, text, sheet='', header_path=''):
+        """Copy the chosen file into the store and start reading it.
+
+        The copy runs in the same CHUNK_BYTES steps an upload arrives in, so
+        the import reads a still snapshot rather than a file being written
+        underneath it, and the identifier is the digest of exactly the bytes
+        that were read.
+        """
+        if not text:
+            raise ValueError(M_PATH(text, 'no such file'))
+        try:
+            chosen = Path(text).expanduser()
+            info = os.stat(chosen)
+        except PermissionError as error:
+            raise ValueError(M_PATH(text, 'permission denied')) from error
+        except (OSError, ValueError) as error:
+            raise ValueError(M_PATH(text, 'no such file')) from error
+        if stat.S_ISDIR(info.st_mode):
+            raise ValueError(M_PATH(text, 'it is a folder'))
+        if not stat.S_ISREG(info.st_mode):
+            raise ValueError(M_PATH(text, 'no such file'))
+        suffix = accepted_suffix(chosen.name)
+        if info.st_size > MAX_BYTES:
+            raise ValueError(M_PATH(text, f'larger than {MAX_BYTES // 1_000_000} MB'))
+        header_path = str(header_path or '')
+        if header_path:
+            read_header_file(header_path)
+        sheet = str(sheet or '')
+        target = self.incoming / (uuid.uuid4().hex + suffix)
+        digest, total, blank = hashlib.sha256(), 0, True
+        try:
+            try:
+                with chosen.open('rb') as raw, target.open('wb') as handle:
+                    while True:
+                        chunk = raw.read(CHUNK_BYTES)
+                        if not chunk:
+                            break
+                        total += len(chunk)
+                        if total > MAX_BYTES:
+                            raise ValueError(M_PATH(text, f'larger than {MAX_BYTES // 1_000_000} MB'))
+                        if blank and chunk.strip():
+                            blank = False
+                        digest.update(chunk)
+                        handle.write(chunk)
+            except PermissionError as error:
+                raise ValueError(M_PATH(text, 'permission denied')) from error
+            except OSError as error:
+                raise ValueError(M_PATH(text, 'it could not be read')) from error
+            if blank:
+                raise ValueError(M_EMPTY)
+            return self.adopt(import_id(digest, sheet), chosen.name, target, total, digest.hexdigest(),
+                              suffix=suffix, sheet=sheet, source_kind='path',
+                              source_path=str(chosen), header_path=header_path)
+        except BaseException:
+            try:
+                target.unlink(missing_ok=True)
+            except OSError:
+                pass
+            raise
 
     def read_record(self, identifier, attempts=5):
         """Read a record, tolerating a reader that loses a race with a writer.
@@ -550,14 +1304,14 @@ class Store:
             if value and value.get('state') == 'ready' and value.get('catalog'):
                 records.append(value)
         records.sort(key=lambda value: (str(value.get('imported_at') or ''), str(value.get('id') or '')), reverse=True)
-        return [value['catalog'] for value in records]
+        return [stored_catalog(value) for value in records]
 
     def catalog(self, identifier):
-        return self.ready(identifier)['catalog']
+        return stored_catalog(self.ready(identifier))
 
     def select(self, identifier, committee='', cycle='', offset=0, limit=200):
         value = self.ready(identifier)
-        source = value['catalog']
+        source = stored_catalog(value)
         offset, limit = page_args(offset, limit)
         committee = committee or (source['committees'][0]['id'] if source['committees'] else '')
         chosen = next((item for item in source['committees'] if item['id'] == committee), None)
@@ -598,7 +1352,8 @@ class Store:
                 'offset':offset, 'limit':limit, 'total_rows':total, 'has_more':offset + limit < total,
                 'warnings':list(WARNINGS)}
 
-    def adopt(self, identifier, name, path, size, digest):
+    def adopt(self, identifier, name, path, size, digest, suffix='.csv', sheet='',
+              source_kind='upload', source_path='', header_path=''):
         """Take a finished upload: dedupe by content, else start reading it."""
         existing = self.read_record(identifier)
         if existing and existing.get('state') == 'ready' and existing.get('catalog'):
@@ -616,10 +1371,14 @@ class Store:
             if directory.exists():
                 shutil.rmtree(directory, ignore_errors=True)
             directory.mkdir(parents=True, exist_ok=True)
-            os.replace(path, self.source_path(identifier))
+            os.replace(path, self.source_path(identifier, suffix))
             value = {'id':identifier, 'name':name, 'state':'reading', 'bytes':int(size), 'bytes_read':0,
                      'rows_read':0, 'message':'', 'started_at':time.time(), 'finished_at':None,
-                     'catalog':None, 'columns':[], 'sha256':digest, 'imported_at':'', 'pid':os.getpid()}
+                     'catalog':None, 'columns':[], 'sha256':digest, 'imported_at':'', 'pid':os.getpid(),
+                     'format':source_format(name, header_path), 'source_kind':source_kind,
+                     'source_path':str(source_path or ''), 'sheet':str(sheet or ''), 'sheets':[],
+                     'encoding':'', 'delimiter':'', 'header_source':'', 'suffix':suffix,
+                     'header_path':str(header_path or '')}
             atomic_json(self.record_path(identifier), value)
             thread = threading.Thread(target=self.ingest, args=(identifier, value), daemon=True,
                                       name='evidence-csv-' + identifier)
@@ -642,7 +1401,8 @@ class Store:
         if value['state'] == 'failed':
             # Keep the directory so the page can still read the reason; drop the
             # bytes, which are now only a partial database and a refused file.
-            for path in (self.database_path(identifier), self.source_path(identifier)):
+            for path in (self.database_path(identifier),
+                         self.source_path(identifier, value.get('suffix', ''))):
                 try:
                     path.unlink(missing_ok=True)
                 except OSError:
@@ -663,14 +1423,9 @@ class Store:
 
     def read_source(self, identifier, value):
         """Walk the file once into sqlite, accumulating exact totals as it goes."""
-        source, database = self.source_path(identifier), self.database_path(identifier)
+        source = self.source_path(identifier, value.get('suffix', ''))
+        database = self.database_path(identifier)
         database.unlink(missing_ok=True)
-        with source.open('rb') as raw:
-            head = raw.read(32768).decode('utf-8-sig', 'ignore')
-        try:
-            dialect = csv.Sniffer().sniff(head, delimiters=',;\t')
-        except csv.Error:
-            dialect = csv.excel
         names = defaultdict(set)
         committee_rows, committee_supported = defaultdict(int), defaultdict(int)
         amounts, counts = defaultdict(Decimal), defaultdict(int)
@@ -687,53 +1442,53 @@ class Store:
                                'channel TEXT NOT NULL, amount TEXT, cells TEXT NOT NULL)')
             connection.execute('CREATE TABLE totals (committee_id TEXT NOT NULL, cycle TEXT NOT NULL, '
                                'channel TEXT NOT NULL, amount TEXT NOT NULL, row_count INTEGER NOT NULL)')
-            with source.open('r', encoding='utf-8-sig', newline='') as handle:
-                reader = csv.reader(handle, dialect=dialect, strict=True)
-                headers = next(reader, [])
+            with open_source(source, value) as reader:
+                headers = reader.headers
                 columns = [key(item) for item in headers]
                 if not headers or len(headers) > MAX_COLUMNS or not all(columns) or len(set(columns)) != len(columns):
                     raise ValueError(columns_message())
                 if not set(columns).intersection(COMMITTEE_FIELDS):
                     raise ValueError(M_COMMITTEE_COLUMN)
+                # How the file turned out to be written is recorded before the
+                # first row, so a reader watching the progress line sees the
+                # encoding and delimiter that were chosen, not only the count.
+                value.update(reader.meta)
+                extra_warnings = list(reader.warnings)
                 batch = []
-                try:
-                    for values in reader:
-                        if not any(item.strip() for item in values):
-                            continue
-                        if rows_read >= MAX_ROWS:
-                            raise ValueError(rows_message())
-                        line_number = reader.line_num
-                        row = rebuild(headers, columns, line_number, values)
-                        rows_read += 1
-                        committee, row_cycle = row['committee_id'], row['cycle']
-                        if committee:
-                            names[committee].add(row['committee_name'] or committee)
-                            committee_rows[committee] += 1
-                            committee_supported[committee] += row['status'] == 'supported'
-                        else:
-                            unassigned += 1
-                        if row_cycle:
-                            cycles.add(row_cycle)
-                        if row['status'] == 'supported':
-                            supported += 1
-                            amounts[(committee, row_cycle, row['channel'])] += row['_amount']
-                            counts[(committee, row_cycle, row['channel'])] += 1
-                        else:
-                            unsupported += 1
-                        batch.append((rows_read, line_number, committee, row_cycle, row['status'], row['channel'],
-                                      None if row['_amount'] is None else str(row['_amount']),
-                                      json.dumps(values, ensure_ascii=False)))
-                        if len(batch) >= 1000:
-                            connection.executemany('INSERT INTO csv_rows VALUES (?,?,?,?,?,?,?,?)', batch)
-                            connection.commit()
-                            batch.clear()
-                            value.update(bytes_read=handle.buffer.tell(), rows_read=rows_read)
-                            try:
-                                atomic_json(self.record_path(identifier), value, attempts=1)
-                            except OSError:
-                                pass
-                except csv.Error as error:
-                    raise ValueError(M_READ(reader.line_num)) from error
+                for line_number, values in reader.rows:
+                    if not any(item.strip() for item in values):
+                        continue
+                    if rows_read >= MAX_ROWS:
+                        raise ValueError(rows_message())
+                    row = rebuild(headers, columns, line_number, values)
+                    rows_read += 1
+                    committee, row_cycle = row['committee_id'], row['cycle']
+                    if committee:
+                        names[committee].add(row['committee_name'] or committee)
+                        committee_rows[committee] += 1
+                        committee_supported[committee] += row['status'] == 'supported'
+                    else:
+                        unassigned += 1
+                    if row_cycle:
+                        cycles.add(row_cycle)
+                    if row['status'] == 'supported':
+                        supported += 1
+                        amounts[(committee, row_cycle, row['channel'])] += row['_amount']
+                        counts[(committee, row_cycle, row['channel'])] += 1
+                    else:
+                        unsupported += 1
+                    batch.append((rows_read, line_number, committee, row_cycle, row['status'], row['channel'],
+                                  None if row['_amount'] is None else str(row['_amount']),
+                                  json.dumps(values, ensure_ascii=False)))
+                    if len(batch) >= 1000:
+                        connection.executemany('INSERT INTO csv_rows VALUES (?,?,?,?,?,?,?,?)', batch)
+                        connection.commit()
+                        batch.clear()
+                        value.update(bytes_read=reader.tell(), rows_read=rows_read)
+                        try:
+                            atomic_json(self.record_path(identifier), value, attempts=1)
+                        except OSError:
+                            pass
                 if batch:
                     connection.executemany('INSERT INTO csv_rows VALUES (?,?,?,?,?,?,?,?)', batch)
             if not names:
@@ -757,14 +1512,15 @@ class Store:
                  'committees':committees, 'cycles':sorted(cycles, reverse=True),
                  'supported_rows':supported, 'unsupported_rows':unsupported, 'unassigned_rows':unassigned,
                  'session_only':False, 'imported_at':datetime.now(timezone.utc).isoformat(),
-                 'bytes':int(value.get('bytes') or 0), 'warnings':list(WARNINGS)}, headers)
+                 'bytes':int(value.get('bytes') or 0), 'warnings':list(WARNINGS) + extra_warnings,
+                 **descriptive(value)}, headers)
 
     def sweep(self):
         """Drop abandoned uploads and old failures. Undeletable paths wait a turn."""
         cutoff = time.time() - 3600
-        for path in self.incoming.glob('*.csv'):
+        for path in self.incoming.glob('*.*'):
             try:
-                if path.stat().st_mtime < cutoff:
+                if path.is_file() and path.stat().st_mtime < cutoff:
                     path.unlink()
             except OSError:
                 pass
@@ -798,13 +1554,13 @@ class Store:
             if not isinstance(text, str) or not text.strip():
                 raise ValueError(M_EMPTY)
             if '\x00' in text or '�' in text:
-                raise ValueError(M_UTF8)
+                raise ValueError(M_BINARY)
             encoded = text.encode('utf-8')
             for start in range(0, len(encoded), CHUNK_BYTES):
                 upload.write(encoded[start:start + CHUNK_BYTES])
         except UnicodeEncodeError as error:
             upload.abort()
-            raise ValueError(M_UTF8) from error
+            raise ValueError(M_BINARY) from error
         except BaseException:
             upload.abort()
             raise

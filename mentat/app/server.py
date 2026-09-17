@@ -1307,6 +1307,20 @@ class Console:
             raise ValueError(job['message'] or evidence_csv.M_GONE(job['id']))
         return job['catalog']
 
+    def import_evidence_path(self, data):
+        """Read a file the reader chose by path on this computer.
+
+        Asynchronous like the streaming upload, and answered with the same JOB
+        the page already polls, so a large workbook on a slow disk is never
+        read inside the request thread.
+        """
+        return self.evidence_store.import_path(data.get('path'), sheet=data.get('sheet', ''),
+                                               header_path=data.get('header_path', ''))
+
+    def evidence_files(self, data):
+        """One folder of this computer, for the console's own file picker."""
+        return evidence_csv.browse(data.get('path', ''))
+
     def evidence_csv_job(self, identifier):
         return self.evidence_store.job(identifier)
 
@@ -1860,7 +1874,8 @@ class Handler(BaseHTTPRequestHandler):
         if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/studio/views'):
             self.discard_body()
             return self.send({'error': 'Read-only preview. Save views from the main console.'}, 403)
-        if getattr(self.server.app, 'read_only', False) and self.path not in analytical_paths | {'/api/evidence-csv'}:
+        if getattr(self.server.app, 'read_only', False) and self.path not in (
+                analytical_paths | {'/api/evidence-csv', '/api/evidence-files'}):
             self.discard_body()
             return self.send({"error":"This preview is read-only while the original console manages collection."}, 403)
         if not self.valid_host() or not secrets.compare_digest(self.headers.get("X-Mentat-Token", ""), self.server.app.token):
@@ -1882,7 +1897,9 @@ class Handler(BaseHTTPRequestHandler):
                 if expected > evidence_csv.MAX_BYTES:
                     self.close_connection = True
                     return self.send({'error': evidence_csv.M_BYTES}, 400)
-                upload = store.begin_upload(evidence_csv.decode_name(self.headers.get('X-Evidence-Name', '')))
+                upload = store.begin_upload(
+                    evidence_csv.decode_name(self.headers.get('X-Evidence-Name', '')),
+                    sheet=evidence_csv.decode_name(self.headers.get('X-Evidence-Sheet', '')))
                 try:
                     received = 0
                     while received < expected:
@@ -1944,7 +1961,28 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == '/api/run-archive':
                 return self.send(self.server.app.archive_run(data))
             if self.path == '/api/evidence-csv':
+                # A body carrying a path names a file on this computer and is
+                # read off disk by the store, asynchronously, exactly like a
+                # streamed upload. The legacy {name, text} body is unchanged.
+                if 'path' in data:
+                    job = self.server.app.import_evidence_path(data)
+                    # The store records a refusal it reached before reading a
+                    # byte (no such file, a folder, too large, a type it does
+                    # not open) as a failed JOB, so the page can poll it like
+                    # any other failure. Over HTTP that same refusal is the
+                    # answer to this request, so it is sent as an error rather
+                    # than as a job the caller would poll to learn it never
+                    # started. Only a refusal can be failed here: a reader that
+                    # has started is still 'reading' when this returns.
+                    if job.get('state') == 'failed':
+                        return self.send({'error': job.get('message') or evidence_csv.M_GONE(job.get('id', ''))}, 400)
+                    return self.send(job)
                 return self.send(self.server.app.import_evidence_csv(data))
+            if self.path == '/api/evidence-files':
+                # Read-only, and authenticated by the same token as every other
+                # POST: do_GET checks only the Host header, so a folder listing
+                # has no business being answered there.
+                return self.send(self.server.app.evidence_files(data))
             if self.path == "/api/stop":
                 return self.send(self.server.app.stop(data))
             if self.path == "/api/workers":

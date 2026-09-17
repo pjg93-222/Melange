@@ -191,24 +191,28 @@ it in code.
 | `mentat/app/evidence-csv.js` | S3 | not started | client size mirror, status line |
 | `mentat/tools/pac_evidence.py` | S3 | not started | collector, `ThreadPoolExecutor(3)` |
 | `mentat/tools/fec_key_store.py` | S3 | not started | see DEFECT-KEYSTORE in PACKET.md |
-| `mentat/app/contribution_data.py` | S4 | in progress | `DIMENSIONS`, detail row cap |
-| `mentat/app/chart-studio.js` | S4 | in progress | API base, view routing |
-| `mentat/app/chart-studio-core.js` | S4 | in progress | `STUDIO_GROUP_LIMIT = 60` |
-| `mentat/app/snapshot_registry.py` | S4 | in progress | NEW |
-| `mentat/app/industry_scope.py` | S4 | in progress | NEW |
-| `mentat/app/chart-studio-contributions.js` | S4 | in progress | one-line: industry in the query body |
-| `mentat/tools/crypto_workbook_builder.mjs` | S4 | in progress | buildContributorDetail widening, S2 decision 7 |
-| `mentat/R/report.R` | S4 | in progress | contributor_keys only, S2 decision 7 |
-| `mentat/tests/test_snapshot_registry.py` | S4 | in progress | NEW |
-| `mentat/tests/test_industry_routes.py` | S4 | in progress | NEW |
-| `mentat/tests/test_studio_industry_browser.cjs` | S4 | in progress | NEW |
-| `mentat/tests/test_contributor_detail_header.cjs` | S4 | in progress | NEW |
+| `mentat/app/contribution_data.py` | S4 | BUILT, uncommitted | `DIMENSIONS`, detail row cap |
+| `mentat/app/chart-studio.js` | S4 | BUILT, uncommitted | API base, view routing |
+| `mentat/app/chart-studio-core.js` | S4 | BUILT, uncommitted | `STUDIO_GROUP_LIMIT = 60` |
+| `mentat/app/snapshot_registry.py` | S4 | BUILT, uncommitted | NEW |
+| `mentat/app/industry_scope.py` | S4 | BUILT, uncommitted | NEW |
+| `mentat/app/cross_reference_data.py` | S4 | BUILT, uncommitted | CLAIMED 2026-09-16, previously unowned: `?industry=` selects a run, so `latest_cross_reference` was refactored into a shared `_run_view` and a new `cross_reference_for_industry` |
+| `mentat/app/contribution_semantics.py` | S4 | BUILT, uncommitted | CLAIMED 2026-09-16, previously unowned: one line, `catalog(directory, sources=None)`, so a request can reuse the report-folder scan it already paid for |
+| `mentat/app/chart-studio-contributions.js` | S4 | BUILT, uncommitted | one-line: industry in the query body |
+| `mentat/tools/crypto_workbook_builder.mjs` | S4 | BUILT, uncommitted | buildContributorDetail widening, S2 decision 7 |
+| `mentat/R/report.R` | S4 | BUILT, uncommitted | contributor_keys only, S2 decision 7 |
+| `mentat/tests/test_snapshot_registry.py` | S4 | BUILT, uncommitted | NEW |
+| `mentat/tests/test_industry_routes.py` | S4 | BUILT, uncommitted | NEW |
+| `mentat/tests/test_studio_views_industry.py` | S4 | BUILT, uncommitted | NEW |
+| `mentat/tests/test_contribution_dimensions_order.py` | S4 | BUILT, uncommitted | NEW |
+| `mentat/tests/test_studio_industry_browser.cjs` | S4 | BUILT, uncommitted | NEW |
+| `mentat/tests/test_contributor_detail_header.cjs` | S4 | BUILT, uncommitted | NEW |
 | `mentat/app/index.html` | S5 | not started | tabs, graph-mode select |
 | `mentat/app/app.js` | S5 | not started | hash routing, localStorage |
 | `mentat/app/graph.js` | S5 | not started | `clear()`, scope handoff |
 | `mentat/app/graph_data.py` | S5 | not started | Downstream Activity worksheet |
 | `mentat/R/fec_beneficiary.R` | S5 | not started | produces Downstream Activity |
-| `mentat/app/server.py` | S4 | in progress | S3 hunks committed 303409192; S4 holds the industry route hunks; S5 waits for S4's commit |
+| `mentat/app/server.py` | S4 | BUILT, uncommitted | S4 hunks built and receipted; S5 waits for Paul's commit of S4 |
 | `mentat/tests/**` | shared | — | each session owns only the test files it adds |
 
 **WORKING-TREE HAZARD (verified 2026-09-16):** `fec_api.R`, `collect.R`, `schema.R`, `report.R`, `tidy_stage.R`, `prepare_workbook_payload.py`, `build_industry_report.ps1` and `finalize_crypto_excel.ps1` are all **modified-uncommitted by other lanes** right now. `git diff -- <file>` on any of them captures foreign hunks. Every S1/S2 patch must be separated hunk by hunk and the receipt must say which hunks are the session's own — the same rule as `server.py`. `build_tidy_workbook.py` was tracked and clean at HEAD `bd5dc8ea1`; S2 has since modified it (one registry edit) and it is now ` M` — that hunk is S2's alone.
@@ -742,17 +746,217 @@ four-runner sweep is `receipts/S2_final_sweep.txt`.
 
 ## S4 — Cross-industry addressing (Area E)
 
-**Status:** in progress (2026-09-16; design accepted by Paul: S4_DESIGN.md; precondition met at 303409192)
+**Status:** BUILT, receipts ready, UNCOMMITTED (2026-09-16 evening); Paul commits from
+`patches/S4_cross_industry_contract.patch`.
 
-**Files owned:** see table. `server.py` is CONTENDED.
+**Files owned:** see table, all now BUILT/uncommitted. `server.py` is CONTENDED and S5
+waits on Paul's commit. Claimed by S4 during the build, each previously unowned and each
+recorded in the table when claimed: `mentat/app/snapshot_registry.py` (NEW),
+`mentat/app/industry_scope.py` (NEW), `mentat/app/cross_reference_data.py` (the
+`?industry=` run selector), `mentat/app/contribution_semantics.py` (one line, a
+`sources=None` pass-through), `mentat/app/chart-studio-contributions.js`,
+`mentat/tools/crypto_workbook_builder.mjs`, `mentat/R/report.R` (contributor grain only).
+New tests: `tests/test_snapshot_registry.py`, `tests/test_industry_routes.py`,
+`tests/test_studio_views_industry.py`, `tests/test_contribution_dimensions_order.py`,
+`tests/test_contributor_detail_header.cjs`, `tests/test_studio_industry_browser.cjs`.
 
-**Patches:** —
+**Patches:** `patches/S4_cross_industry_contract.patch` — every tracked S4 file as
+`git diff HEAD`, then each new file as a `/dev/null` hunk, so the whole lane applies from
+one file. `server.py` was clean at HEAD before S4 (S3 committed its own hunks at
+303409192 and 91fe7402a), so the whole `server.py` diff in this patch is S4's.
 
-**Contract decisions:** contracts/snapshot_registry.json, contracts/contributions_api.json, contracts/studio_api.json (v1, written before code)
+**Receipts:** `receipts/S4_phase2-5_server.txt` (registry, scope, routes, the five
+python-review findings, close-out pass A, pass C), `receipts/S4_phase4_client.txt`
+(the five typescript-review findings and the real-client browser pass),
+`receipts/S4_phase6_contributor_detail.txt`, `receipts/S4_acceptance_real_snapshots.txt`.
 
-**Open questions:** —
+**Contract decisions:** three contracts, written before any code:
+`contracts/snapshot_registry.json` **v2**, `contracts/contributions_api.json` **v2**,
+`contracts/studio_api.json` **v1**; `contracts/raw_contribution_columns.json` is **v2**
+with no deferred surface. Every correction, and why:
 
-**Handoff notes for later sessions:** —
+1. **Underscore slug.** The console has one slug rule, `contribution_data._slug`:
+   `re.sub(r'[^a-z0-9]+','_',label.lower()).strip('_')`. It uses UNDERSCORES and it names
+   the `.cache/industry-report/<slug>/` directory. Every `"credit-union"` slug and
+   `/credit-union/` path in the contracts and in S4_DESIGN.md §2 became `credit_union`.
+   No second slug rule was invented. The collector slug `credit-unions` stays in a
+   negative control: it is the value that must be rejected.
+2. **Error body.** `server.py` emits exactly `{"error": str(error)}` (`do_GET :1853`,
+   `do_POST :1974`). Example 15 lost its `known` key.
+3. **Example 14 rewritten.** It carried `"pending_phase_5": true` and a `"..."`
+   placeholder, written before phase 5 decided. It now shows what the route answers.
+4. **`"token": "<hex>"` → `"<token>"`** — the session token is `secrets.token_urlsafe`,
+   not hex.
+5. **`schema_version` 2 → 3** in the six catalog/query/records examples, matching
+   `contribution_data.VERSION = 3` after the phase-6 lane's bump.
+6. **A fourth registry example, Telecom**, showing the unreadable-workbook shape:
+   `available: false`, `message: "Report workbook is unreadable."`, `workbook.sha256`
+   and `build_stamp` null. A stamp built from the three remaining fields would be the
+   SAME string for every unreadable book, so none is invented.
+7. **Parser relaxation, `chart-studio-core.js:1007`.** Adding example 6 turned the JS
+   consumer red — `"Telecom is missing a valid build_stamp."` — which is a live
+   client/server disagreement of the DE-021 kind that the example exposed. Fixed per
+   `contracts/README.md`'s own procedure ("Change the code until both are green and the
+   negative control still fails"): `build_stamp` may be null only when `available` is
+   false. Made during a docs-only pass, flagged in the receipt, and **the coordinator
+   ruled it STANDS**.
+
+**Design premise correction (measured, not assumed):** there never was a console-global
+industry to remove. `main()` takes `--port`, `--data-root`, `--keys-file`, `--rscript`,
+`--read-only` and nothing else, and one process already served every published snapshot.
+And **the dataset id IS the industry label**: `contribution_data.py` sets
+`industry = workbook.name.removesuffix(' Industry Spending Overview.xlsx')` and then
+`{'id': industry, 'industry': industry, 'label': industry, ...}`. S4's job was therefore
+not to add a selector but to make the one that existed explicit, uniform,
+registry-backed and echoed.
+
+**Measurements:**
+
+- `snapshot_registry.registry()` on the real published folder (8 books + one Excel lock
+  file): **3.15 s cold, 73 ms warm**. `_workbook_source` is `lru_cache`d; the warm cost is
+  the per-snapshot manifest and payload-header reads `_sources()` already did on every
+  catalog and query request before S4. Deliberately NOT memoized: a rebuilt workbook has
+  to change its `build_stamp` immediately, which is the whole point of the stamp.
+- Contributor grain, Banking: **783,808 rows, 95,331 distinct contributor-grain rows, no
+  street columns present yet, row-count delta 0** (phase 6 receipt).
+- Tests: nine-suite python **118 OK (skipped 1)**; `node --test "app/tests/**/*.test.js"`
+  **118/118**; `tests/test_studio_industry_browser.cjs` **10/10 steps, exit 0**;
+  R `test_spending_detail_frames` **PASS** (8 cells → 9, folded 5 → 6);
+  `test_raw_contribution_columns` **PASS** in both languages; `test_fec_api` **PASS**.
+  The one skip is contract example 13 (`/api/graph`), marked
+  `skipTest('acceptance run: needs a real workbook')`.
+
+**Acceptance:** `receipts/S4_acceptance_real_snapshots.txt` — **10 of 13 steps PASS** on a
+scratch console against the real published folder. A rerun and an independent verifier
+sweep were still running when this section was written and **their receipts
+(`S4_acceptance_rerun.txt`, `S4_verifier_sweep.txt`) do not exist on disk yet**; the three
+unfinished steps were waiting on the Banking analytics cache to rebuild after the
+`VERSION` 2 → 3 bump. Read those two files before treating acceptance as closed — this
+section does not claim a result it did not see.
+
+**Non-owned test edits, for their owners to nod at.** Each was forced by a contract
+change, and each keeps the test's own intent:
+
+- `mentat/tests/test_contribution_http.py` — the session body assertion (now carries
+  `industry` + `industries[]`), the geography-catalog assertion, and
+  `catalog.assert_called_once_with(report_root)` → `call_count` + `args[0]`, because the
+  route now threads its one folder scan into the producer.
+- `mentat/tests/test_console_delivery.py` (untracked at HEAD) — one assertion: the
+  geography catalogue body now carries `industry`.
+
+**Foreign observations, recorded because they are not S4's to fix:**
+
+- S3's commit 91fe7402a carried S4's HANDOFF hunks whole-file. No S4 code went in with it.
+- `contracts/evidence-csv-import.json` shows working-tree drift that S4 did not make.
+- A `~$Credit Union Industry Spending Overview.xlsx` Excel lock file was present in the
+  published folder while S4 measured, which means **the workbook was open in Excel**.
+  `_sources()` listed it as a ninth snapshot whose slug collided with the real Credit
+  Union's. The phantom is skipped now (`contribution_data.py:184-186`, phase-6 lane);
+  `snapshot_registry.find()` also resolves a label outright and prefers an available
+  snapshot on a slug, so addressing stays deterministic if one ever appears again.
+
+**Known limits, stated rather than hidden:**
+
+- **No UI writes `sheet.sources[]`.** `selectContributionDataset` rewrites every sheet's
+  `source`, and `sourceKey` is one per view. The two-industry model is proven at the
+  contract, API and server round-trip level and in the browser by two saved
+  single-industry views — not by a picker. The picker is S5's.
+- **POST `query`/`records` still scan the report folder twice**: once to resolve the
+  scope, once inside `contribution_query` → `contribution_data._source()`. Closing it
+  means changing the readers' signature, which the contract pins as a producer and both
+  suites patch.
+- **`graph_catalog` names come from every `.xlsx`**, a wider set than the registry's
+  Overview books, so an unknown graph industry deliberately falls through to the existing
+  "Choose an industry with completed reports." rather than the registry refusal. Refusing
+  it would remove views those routes serve today.
+- `Console.report_path('published-reports', i)` calls `published_reports()` once per
+  index — an N+1 older than S4, left alone.
+
+**Open for Paul:**
+
+1. Commit from the patch.
+2. Restart the consoles (below): they predate every S4 edit.
+3. Do the three non-owned test-file edits need their owners' nod, or does the contract
+   change carry them?
+4. Memoize the registry later, or keep paying 73 ms for a stamp that can never be stale?
+
+---
+
+### HANDOFF NOTES FOR S5 — the parameter names, verbatim
+
+- **`industry`** — the published label exactly as the registry lists it (`Credit Union`,
+  `Property & Casualty Insurance`), URL-encoded on GET, a JSON string on POST bodies. The
+  server also accepts the label's slug (`contribution_data._slug`, underscores:
+  `credit_union`, `property_casualty_insurance`) and **always echoes the label**.
+- **`dataset`** — the legacy selector on `/api/contributions/query|records`, the same
+  value as `industry`. Kept so every existing caller keeps working. Both present and
+  disagreeing is a 400.
+- **`id=published-reports`** — the graph and comparison routes' fixed run identifier.
+- **`build_stamp`** — 64 hex, echoed on every industry-scoped response;
+  `sha256("\n".join([workbook_sha256, companion or "", database or "", payload or ""]))`.
+  Null only on an entry whose workbook could not be read.
+- **`GET /api/snapshots`** — the registry envelope; `?industry=` filters it to one entry.
+- **`GET /api/cross-reference?industry=<label>`** — `industry` is the ONLY query key this
+  view accepts; every other key still raises "The cross-reference view accepts no path or
+  run parameters." The response carries `selected_by`: `"pointer"` on the latest path,
+  `"industry"` when a label chose the run, and `report_sha256` is always the digest of the
+  bytes that call read, never a pointer's claim.
+- **Saved views** — `source.industry`, `sheets[].source.industry`, and
+  `sheets[].sources[] = [{industry, dataset, label}]`. `GET /api/studio/views` list items
+  carry `industries[]`, the distinct labels in first-seen order. Membership in the
+  registry is deliberately NOT validated at save or load: a saved view must reload after
+  its snapshot is retired, and the client reports it at open time.
+
+Error bodies, verbatim — one key, `error`, and nothing else:
+
+```json
+{"error": "Choose a registered industry: Banking, Credit Union."}
+{"error": "The industry and dataset in this request disagree."}
+{"error": "Every series source in a saved view needs an industry."}
+{"error": "A saved view carries its industry inside its data source."}
+{"error": "The cross-reference view accepts no path or run parameters."}
+```
+
+The registered labels in the first one are sorted, joined with a comma and a space, and
+end in one period.
+
+---
+
+### RESTART, for Paul
+
+The running consoles predate every S4 edit, so none of this is live until they restart.
+S0 recorded 8802, 8806 (the Mentat console) and 8808 up. Per port, from any directory:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\pgoff\Mentat\mentat\app\Start-MentatApp.ps1 -Port 8806
+```
+
+`-DataRoot` is optional and was left off deliberately: `Start-MentatApp.ps1:111` already
+defaults it to `Join-Path $env:LOCALAPPDATA 'Mentat\console'`, which on this machine is
+`C:\Users\pgoff\AppData\Local\Mentat\console`. Passing it explicitly needs PowerShell's
+own syntax — `-DataRoot "$env:LOCALAPPDATA\Mentat\console"`, not the cmd.exe `%VAR%`
+form, which PowerShell does not expand. The launcher's real parameters are `-Port`
+(default 8802), `-PythonPath`, `-KeysFile`, `-RScriptPath`, `-NoBrowser`, `-AppWindow`,
+`-DataRoot`, `-ErrorLog`.
+
+**D-029 applies: the launcher replaces only an IDLE stale console.**
+`Start-MentatApp.ps1:98` returns false unless `$health.busy -eq $false`, so a console
+mid-collection keeps its port and its old build. Check `/api/health` before assuming a
+restart took.
+
+Expected build identity after the restart, computed from this working tree
+(`python -c "import server; print(server.CODE_TREE_SHA256, server.ASSET_TREE_SHA256)"`
+run in `mentat/app`):
+
+```
+code_sha256   5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+assets_sha256 30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+```
+
+A restarted console must report that pair in `/api/health` as `code_sha256` and
+`assets_sha256`, with `on_disk_code_sha256_now` and `on_disk_assets_sha256_now` equal to
+them. If they differ, the tree moved after this was written — recompute rather than
+trusting these two lines.
 
 ---
 
@@ -1060,3 +1264,17 @@ output for every command above). **Patch:** `patches/S3_cap_500MB_and_followups.
 (`git diff --no-color` of the six tracked files this addendum changed, plus
 `git diff --no-index` for the newly-tracked `mentat/tests/test_evidence_csv.py`;
 `git apply --check -R` from the repo root: exit 0).
+
+---
+
+### S3b addendum — any file type, any path (2026-09-16 night)
+
+**Paul's report after the S3 commits:** "still failing to fetch. It cannot look at files other than CSV files … should be able to look anywhere in a computer." Root cause was the file type, not the transport: `index.html:343` carried `accept=".csv,text/csv"`, the server refused any name not ending `.csv` before reading a byte, and non-UTF-8 text was refused. Paul: "Go, do all, get this done."
+
+**Built (this commit):** a reader layer in `evidence_csv.py` feeding the unchanged S3 ingest: delimited text `.csv/.tsv/.txt` (delimiter sniffed among `, ; tab |`, with a steady-count override when the Sniffer is wrong; encoding by BOM, then strict UTF-8, then Windows-1252 with a catalog warning; NUL → refusal), `.xlsx/.xlsm` via openpyxl read-only (first sheet by default, `sheet` selectable, `sheets` listed, cells to text), `.json` openFEC exports (whole-file parse, capped `MAX_JSON_BYTES = 25_000_000`), FEC bulk `.zip`/pipe `.txt` with no header row (types indiv/itcont/itpas2/pas2/itoth/oth/cm/cn/ccl/oppexp; headers from a given header file, else `mentat/inputs/**/<type>_header_file.csv`, else a bundled table; zip member size gated before extraction). Anything else: `This file type (.pdf) is not supported. Choose CSV, TSV, TXT, XLSX, JSON or an FEC bulk ZIP.` Path import `POST /api/evidence-csv {"path","sheet","header_path"}` copies the file into the store and ingests off-thread; directory browser `POST /api/evidence-files {"path"}` (roots, shortcuts, entries dirs-first, 2,000 cap; token-checked, POST-only because `do_GET` has no token check). Client: picker without `accept`, path box, header-file box, "Read this file", "Browse…" panel, worksheet picker. Import ids unchanged for CSV (`sha256(bytes)`), `sha256(bytes + NUL + sheet)` for a named sheet. JOB/CATALOG gain `format, source_kind, source_path, sheet, sheets, encoding, delimiter, header_source`; S3-era records are back-filled on read.
+
+**Evidence:** `tests/test_evidence_readers.py` 38/38 (red on 91fe7402a: no `import_path`/`browse`), stream 18/18, legacy 10/10, collector 7/7; `receipts/S3b_smoke_server.txt` 53/53 + 19/19 on scratch ports (2-sheet workbook, tsv, pipe txt, Windows-1252, json, a real-shaped `itcont.txt` inside `indiv26.zip`, `.pdf` refusal, path import, missing/folder refusals, browse of roots and `C:\Windows\System32\config` → permission denied). `receipts/S3b_server_py_diff_before.txt` shows server.py already carried the S4 lane's 128 uncommitted lines; this commit staged ONLY the four evidence hunks (+40/−2) via a context-anchored patch proven against a throwaway index.
+
+**Open for Paul:** (1) FEC bulk rows import but stay `unsupported` because `normalize()` does not read `TRANSACTION_TP`; the code-to-channel mapping is a data rule — proposal in `receipts/S3b_bulk_channel_proposal.md`. (2) `browse`/path import read anything this Windows user can read; local-only by Host/Origin/token, never to be moved to GET. (3) Restart the consoles to serve the new picker and routes.
+
+**Follows in the next commit:** the extended browser test (`test_evidence_csv_browser.cjs` steps 20+: xlsx/tsv/json/1252/bulk/pdf/path/browse) with its red-before and green-after receipts, and `receipts/S3b_real_client_pass.txt` (real workbook from `mentat/inputs` by path, Downloads browsed in Chrome, restart on another port).

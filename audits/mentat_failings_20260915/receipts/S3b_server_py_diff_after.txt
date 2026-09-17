@@ -1,0 +1,345 @@
+diff --git a/mentat/app/server.py b/mentat/app/server.py
+index 88e4d8a89..ef4715431 100644
+--- a/mentat/app/server.py
++++ b/mentat/app/server.py
+@@ -35,11 +35,13 @@ sys.path.insert(0, str(PROJECT / "tools"))
+ from report_insights import report_freshness, worksheet_data, stamp
+ from graph_data import graph_schema, graph_view
+ from comparison_data import subjects as comparison_subjects, flows as comparison_flows
+-from cross_reference_data import latest_cross_reference
++from cross_reference_data import latest_cross_reference, cross_reference_for_industry
+ import contribution_data
+ import contribution_query
+ import contribution_geo
+ import contribution_workbook_guard
++import snapshot_registry
++import industry_scope
+ 
+ # Bump the server revision with schema changes so existing desktop launchers
+ # detect that the running process needs the updated contribution reader.
+@@ -489,6 +491,55 @@ def report_quality(path):
+         book.close()
+ 
+ 
++def view_industries(value):
++    """Distinct industry labels a saved view addresses, first-seen order.
++
++    Read from the three places the save gate validates: the view source,
++    each sheet's source, and each sheet's series sources.
++    """
++    found = {}
++    for source in ([value.get('source')]
++                   + [sheet.get('source') for sheet in value.get('sheets') or []
++                      if isinstance(sheet, dict)]
++                   + [item for sheet in value.get('sheets') or [] if isinstance(sheet, dict)
++                      for item in sheet.get('sources') or []]):
++        if isinstance(source, dict) and isinstance(source.get('industry'), str) and source['industry']:
++            found.setdefault(source['industry'], None)
++    return list(found)
++
++
++def validate_view_industries(data, source, sheets):
++    """The industry shape a saved view must carry. Membership is NOT checked.
++
++    A saved view has to reload after its snapshot is retired, so the registry
++    is deliberately not consulted here; the client reports an unaddressable
++    source at open time. What is checked is the shape DE-021 got wrong: a
++    field agreed as a string that a producer sends as something else, or
++    puts where save_view's record whitelist below silently drops it.
++    """
++    named = 'Every series source in a saved view needs an industry.'
++    if 'industry' in data:
++        raise ValueError('A saved view carries its industry inside its data source.')
++
++    def carries(value):
++        return isinstance(value, dict) and isinstance(value.get('industry'), str) and bool(value['industry'].strip())
++
++    if 'industry' in source and not carries(source):
++        raise ValueError(named)
++    for sheet in sheets:
++        nested = sheet.get('source')
++        if isinstance(nested, dict) and 'industry' in nested and not carries(nested):
++            raise ValueError(named)
++        if 'sources' in sheet:
++            series = sheet.get('sources')
++            if not isinstance(series, list) or not all(carries(item) for item in series):
++                raise ValueError(named)
++            if any(not isinstance(item[key], str)
++                   for item in series for key in ('dataset', 'label') if key in item):
++                raise ValueError(named)
++    return data
++
++
+ class Conflict(Exception):
+     """A well-formed request the current state cannot accept yet."""
+ 
+@@ -929,6 +980,7 @@ class Console:
+                                'saved_at': value.get('saved_at', 0),
+                                'sourceKey': value.get('sourceKey', ''),
+                                'source': value.get('source', {}),
++                               'industries': view_industries(value),
+                                'sheet_count': len(value['sheets'])})
+         values.sort(key=lambda item: (-(item['saved_at'] or 0), item['id']))
+         return {'views': values}
+@@ -959,6 +1011,7 @@ class Console:
+         active = data.get('active')
+         if not isinstance(active, int) or isinstance(active, bool):
+             raise ValueError('Active sheet must be a sheet number.')
++        validate_view_industries(data, source, sheets)
+         identifier = uuid.uuid4().hex
+         value = {'id': identifier, 'name': name, 'saved_at': time.time(), 'sourceKey': source_key,
+                  'source': source, 'sheets': sheets, 'active': active}
+@@ -1307,6 +1360,20 @@ class Console:
+             raise ValueError(job['message'] or evidence_csv.M_GONE(job['id']))
+         return job['catalog']
+ 
++    def import_evidence_path(self, data):
++        """Read a file the reader chose by path on this computer.
++
++        Asynchronous like the streaming upload, and answered with the same JOB
++        the page already polls, so a large workbook on a slow disk is never
++        read inside the request thread.
++        """
++        return self.evidence_store.import_path(data.get('path'), sheet=data.get('sheet', ''),
++                                               header_path=data.get('header_path', ''))
++
++    def evidence_files(self, data):
++        """One folder of this computer, for the console's own file picker."""
++        return evidence_csv.browse(data.get('path', ''))
++
+     def evidence_csv_job(self, identifier):
+         return self.evidence_store.job(identifier)
+ 
+@@ -1454,10 +1521,11 @@ class Console:
+         return {'reports':reports,'report_directory':str(self.report_directory),
+                 'message':'Only reports in the authoritative folder are available. Select '+self.report_directory.name+' in the report viewer.'}
+ 
+-    def graph_catalog(self, identifier):
++    def graph_catalog(self, identifier, reports=None):
+         if identifier != 'published-reports':
+             return {'industries':[],'message':'Select the authoritative report folder: '+self.report_directory.name+'.'}
+-        industries = self.published_reports()
++        # `reports` lets one request reuse a folder scan it already paid for.
++        industries = self.published_reports() if reports is None else reports
+         groups, unavailable = {}, []
+         for industry in industries:
+             index = industry['index']
+@@ -1475,20 +1543,32 @@ class Console:
+                 'report_directory':str(self.report_directory),
+                 'message':'No supported reports are available in the authoritative folder.' if not groups else ''}
+ 
+-    def graph(self, identifier, industry, filters):
+-        selected = next((g for g in self.graph_catalog(identifier)['industries'] if g['name'] == industry), None)
++    def graph(self, identifier, industry, filters, registry=None):
++        # The folder is read once here and shared with the catalogue and the
++        # stamping below, and the caller's registry is reused when it has one.
++        reports = self.published_reports() if identifier == 'published-reports' else None
++        selected = next((g for g in self.graph_catalog(identifier, reports)['industries'] if g['name'] == industry), None)
+         if not selected:
+             raise ValueError('Choose an industry with completed reports.')
+         paths = [self.report_path(identifier,i) for i in selected['indices']]
+         result = graph_view(paths,filters)
++        # A report is stamped through its own published industry, not through
++        # the grouped catalogue name: one group can hold several workbooks.
++        published = {row['name']: row['industry'] for row in reports or []}
++        stamps = {item['industry']: item['build_stamp']
++                  for item in (registry or snapshot_registry.registry(self.report_directory))['snapshots']}
+         for report, path in zip(result['reports'], paths):
+             report['freshness'] = report_freshness(path)
+             report['source_directory'] = str(self.report_directory)
++            report['build_stamp'] = stamps.get(published.get(path.name))
+         result['report_directory'] = str(self.report_directory)
++        result['industry'] = industry
+         return result
+ 
+-    def comparison(self, identifier, industry, relationships=False):
+-        selected = next((g for g in self.graph_catalog(identifier)['industries'] if g['name'] == industry), None)
++    def comparison(self, identifier, industry, relationships=False, reports=None):
++        if reports is None and identifier == 'published-reports':
++            reports = self.published_reports()
++        selected = next((g for g in self.graph_catalog(identifier, reports)['industries'] if g['name'] == industry), None)
+         if not selected:
+             raise ValueError('Choose an industry with completed reports.')
+         build = comparison_flows if relationships else comparison_subjects
+@@ -1689,6 +1769,19 @@ class Handler(BaseHTTPRequestHandler):
+     def valid_host(self):
+         return self.headers.get("Host") in (f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}")
+ 
++    def scope_body(self, data):
++        """Resolve this body's industry, fill the legacy dataset, drop the key.
++
++        The readers select by `dataset`, and neither of their validators knows
++        `industry`, so it is removed before the reader sees it rather than left
++        for a future stricter validator to refuse.
++        """
++        entry = industry_scope.from_body(self.server.app.report_directory, data)
++        if entry and 'dataset' not in data:
++            data['dataset'] = entry['dataset']
++        data.pop('industry', None)
++        return entry
++
+     def contribution_result(self, reader, data):
+         directory = self.server.app.report_directory
+         checked = contribution_workbook_guard.verify_sources(directory, data.get('dataset'))
+@@ -1727,9 +1820,17 @@ class Handler(BaseHTTPRequestHandler):
+                                       'report_directory':str(app.report_directory), 'build': build, **build})
+                 return self.send({"token": app.token, **app.summary(query.get('include_archived', ['0'])[0] in ('1','true'))})
+             if parsed.path == '/api/contributions/session':
+-                return self.send({'token': app.token, 'read_only': bool(getattr(app, 'read_only', False))})
++                registry = snapshot_registry.registry(app.report_directory)
++                entry = industry_scope.from_query(registry, parsed.query)
++                return self.send({'token': app.token, 'read_only': bool(getattr(app, 'read_only', False)),
++                                  'industry': entry['industry'] if entry else None,
++                                  'industries': [{key: item[key] for key in ('industry','slug','available','build_stamp')}
++                                                 for item in registry['snapshots']]})
+             if parsed.path == '/api/contributions/catalog':
+-                catalog = contribution_query.semantics.catalog(app.report_directory)
++                # One scan of the report folder for this request: the semantic
++                # catalogue and the registry annotation below read the same list.
++                sources = contribution_data._sources(app.report_directory)
++                catalog = contribution_query.semantics.catalog(app.report_directory, sources)
+                 checks = {item['dataset']: item for item in contribution_workbook_guard.verify_sources(app.report_directory, strict=False)}
+                 for dataset in catalog['datasets']:
+                     check = checks.get(dataset['id'])
+@@ -1738,9 +1839,25 @@ class Handler(BaseHTTPRequestHandler):
+                     elif check and any(check.get(key) is not None and dataset.get('provenance', {}).get(key) != check[key]
+                                        for key in ('workbook_sha256', 'database_sha256')):
+                         dataset.update(available=False, message='The report changed during source discovery. Refresh sources.')
++                registry = snapshot_registry.registry(app.report_directory, sources)
++                entry = industry_scope.from_query(registry, parsed.query)
++                if entry:
++                    catalog['datasets'] = [item for item in catalog['datasets'] if item.get('id') == entry['dataset']]
++                stamps = {item['dataset']: item['build_stamp'] for item in registry['snapshots']}
++                for dataset in catalog['datasets']:
++                    dataset['build_stamp'] = stamps.get(dataset.get('id'))
++                catalog['industry'] = entry['industry'] if entry else None
+                 return self.send(catalog)
+             if parsed.path == '/api/contributions/geography/catalog':
+-                return self.send(contribution_geo.geo_catalog())
++                # geo_catalog() is industry-independent; the parameter is accepted
++                # and echoed so one client call carries one scope everywhere.
++                entry = industry_scope.from_query(app.report_directory, parsed.query)
++                return self.send({**contribution_geo.geo_catalog(),
++                                  'industry': entry['industry'] if entry else None})
++            if parsed.path == '/api/snapshots':
++                registry = snapshot_registry.registry(app.report_directory)
++                entry = industry_scope.from_query(registry, parsed.query)
++                return self.send({**registry, 'snapshots': [entry]} if entry else registry)
+             if parsed.path == "/api/runs":
+                 return self.send(app.summary(query.get('include_archived', ['0'])[0] in ('1','true')))
+             if parsed.path == '/api/evidence-csv':
+@@ -1799,16 +1916,30 @@ class Handler(BaseHTTPRequestHandler):
+             if parsed.path == '/api/graph-catalog':
+                 return self.send(app.graph_catalog(query.get('id',[''])[0]))
+             if parsed.path == '/api/cross-reference':
+-                if parsed.query:
++                # industry is the only key this view accepts; every other one is
++                # still refused, including a path or a run id.
++                selector = parse_qs(parsed.query, keep_blank_values=True)
++                if set(selector) - {'industry'}:
+                     raise ValueError('The cross-reference view accepts no path or run parameters.')
+-                return self.send(latest_cross_reference(PROJECT / 'state' / 'cross-reference'))
+-            if parsed.path == '/api/comparison':
+-                return self.send(app.comparison(query.get('id',[''])[0], query.get('industry',[''])[0]))
+-            if parsed.path == '/api/comparison-flows':
+-                return self.send(app.comparison(query.get('id',[''])[0], query.get('industry',[''])[0], True))
+-            if parsed.path == '/api/graph':
+-                return self.send(app.graph(query.get('id',[''])[0], query.get('industry',[''])[0],
+-                                           {k:v[0] for k,v in query.items()}))
++                root = PROJECT / 'state' / 'cross-reference'
++                if 'industry' not in selector:
++                    return self.send(latest_cross_reference(root))
++                scope = industry_scope.resolve(app.report_directory, industry=selector['industry'][0])
++                return self.send(cross_reference_for_industry(root, scope['industry']))
++            if parsed.path in ('/api/comparison', '/api/comparison-flows', '/api/graph'):
++                # A slug resolves to its label; a catalogue name the registry does
++                # not publish is handed on untouched, so these routes keep serving
++                # every workbook graph_catalog() offers. One registry per request,
++                # and none at all when no industry was named.
++                wanted = query.get('industry',[''])[0]
++                registry = snapshot_registry.registry(app.report_directory) if wanted else None
++                label = industry_scope.label_or_value(registry, wanted) if registry else wanted
++                if parsed.path == '/api/graph':
++                    return self.send(app.graph(query.get('id',[''])[0], label,
++                                               {**{k:v[0] for k,v in query.items()}, 'industry': label},
++                                               registry))
++                return self.send(app.comparison(query.get('id',[''])[0], label,
++                                                parsed.path == '/api/comparison-flows'))
+             if parsed.path == '/api/publish/pocket':
+                 job = app.publication(query.get('id', [''])[0])
+                 if job is None:
+@@ -1860,7 +1991,8 @@ class Handler(BaseHTTPRequestHandler):
+         if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/studio/views'):
+             self.discard_body()
+             return self.send({'error': 'Read-only preview. Save views from the main console.'}, 403)
+-        if getattr(self.server.app, 'read_only', False) and self.path not in analytical_paths | {'/api/evidence-csv'}:
++        if getattr(self.server.app, 'read_only', False) and self.path not in (
++                analytical_paths | {'/api/evidence-csv', '/api/evidence-files'}):
+             self.discard_body()
+             return self.send({"error":"This preview is read-only while the original console manages collection."}, 403)
+         if not self.valid_host() or not secrets.compare_digest(self.headers.get("X-Mentat-Token", ""), self.server.app.token):
+@@ -1882,7 +2014,9 @@ class Handler(BaseHTTPRequestHandler):
+                 if expected > evidence_csv.MAX_BYTES:
+                     self.close_connection = True
+                     return self.send({'error': evidence_csv.M_BYTES}, 400)
+-                upload = store.begin_upload(evidence_csv.decode_name(self.headers.get('X-Evidence-Name', '')))
++                upload = store.begin_upload(
++                    evidence_csv.decode_name(self.headers.get('X-Evidence-Name', '')),
++                    sheet=evidence_csv.decode_name(self.headers.get('X-Evidence-Sheet', '')))
+                 try:
+                     received = 0
+                     while received < expected:
+@@ -1905,12 +2039,19 @@ class Handler(BaseHTTPRequestHandler):
+             data = json.loads(self.rfile.read(length))
+             if not isinstance(data, dict):
+                 raise ValueError("Expected an upload or run request.")
+-            if self.path == '/api/contributions/query':
+-                return self.send(self.contribution_result(contribution_query.query, data))
+-            if self.path == '/api/contributions/records':
+-                return self.send(self.contribution_result(contribution_query.records, data))
++            if self.path in ('/api/contributions/query', '/api/contributions/records'):
++                entry = self.scope_body(data)
++                reader = contribution_query.query if self.path.endswith('/query') else contribution_query.records
++                result = self.contribution_result(reader, data)
++                if isinstance(result, dict):
++                    result.update(industry_scope.echo(entry))
++                return self.send(result)
+             if self.path == '/api/contributions/geography':
+-                return self.send(contribution_geo.geography(data))
++                entry = self.scope_body(data)
++                result = contribution_geo.geography(data)
++                if isinstance(result, dict):
++                    result.update(industry_scope.echo(entry))
++                return self.send(result)
+             if self.path == '/api/restart':
+                 if console_busy(self.server.app):
+                     return self.send({'error': 'Collection is running. Restart after it finishes.'}, 409)
+@@ -1944,7 +2085,28 @@ class Handler(BaseHTTPRequestHandler):
+             if self.path == '/api/run-archive':
+                 return self.send(self.server.app.archive_run(data))
+             if self.path == '/api/evidence-csv':
++                # A body carrying a path names a file on this computer and is
++                # read off disk by the store, asynchronously, exactly like a
++                # streamed upload. The legacy {name, text} body is unchanged.
++                if 'path' in data:
++                    job = self.server.app.import_evidence_path(data)
++                    # The store records a refusal it reached before reading a
++                    # byte (no such file, a folder, too large, a type it does
++                    # not open) as a failed JOB, so the page can poll it like
++                    # any other failure. Over HTTP that same refusal is the
++                    # answer to this request, so it is sent as an error rather
++                    # than as a job the caller would poll to learn it never
++                    # started. Only a refusal can be failed here: a reader that
++                    # has started is still 'reading' when this returns.
++                    if job.get('state') == 'failed':
++                        return self.send({'error': job.get('message') or evidence_csv.M_GONE(job.get('id', ''))}, 400)
++                    return self.send(job)
+                 return self.send(self.server.app.import_evidence_csv(data))
++            if self.path == '/api/evidence-files':
++                # Read-only, and authenticated by the same token as every other
++                # POST: do_GET checks only the Host header, so a folder listing
++                # has no business being answered there.
++                return self.send(self.server.app.evidence_files(data))
+             if self.path == "/api/stop":
+                 return self.send(self.server.app.stop(data))
+             if self.path == "/api/workers":

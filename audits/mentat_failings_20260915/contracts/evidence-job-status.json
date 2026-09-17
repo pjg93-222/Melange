@@ -1,6 +1,6 @@
 {
   "contract": "evidence-job-status",
-  "version": 1,
+  "version": 2,
   "owner": "S3",
   "produced_by": [
     "mentat/app/evidence_csv.py:Store.job",
@@ -13,7 +13,7 @@
     "mentat/app/evidence-csv.js: poll ?job=<id> until state != 'reading'",
     "mentat/app/app.js:pollEvidenceJob (collector job)"
   ],
-  "description": "Two independent job-status vocabularies that cross the console/collector process boundary and are polled from the client: the evidence-CSV streaming ingest JOB (state reading|ready|failed, catalog non-null iff ready), and the PAC-evidence collector job (collection.json; state collecting|completed|failed, finished_at/message present only once the job is done). Orientation only - the examples are the contract.",
+  "description": "Two independent job-status vocabularies that cross the console/collector process boundary and are polled from the client: the evidence-CSV streaming ingest JOB (state reading|ready|failed, catalog non-null iff ready), and the PAC-evidence collector job (collection.json; state collecting|completed|failed, finished_at/message present only once the job is done). Orientation only - the examples are the contract. S3b: the evidence-CSV JOB also carries how the import was read - format, source_kind, source_path, sheet, sheets, encoding, delimiter and header_source - because a file can now be a workbook, a JSON export, an FEC bulk archive or a path on this computer, and the reader is told which of those it turned out to be. The collector JOB is unchanged.",
   "examples": [
     {
       "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
@@ -43,9 +43,17 @@
         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
         "row_count": 18000,
         "committees": [
-          {"id": "C00000001", "name": "Example PAC", "rows": 18000, "supported_rows": 17950}
+          {
+            "id": "C00000001",
+            "name": "Example PAC",
+            "rows": 18000,
+            "supported_rows": 17950
+          }
         ],
-        "cycles": ["2026", "2024"],
+        "cycles": [
+          "2026",
+          "2024"
+        ],
         "supported_rows": 17950,
         "unsupported_rows": 50,
         "unassigned_rows": 0,
@@ -74,9 +82,15 @@
     {
       "id": "snapshot-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
       "company": "Example Company",
-      "aliases": ["EXCO"],
-      "committees": ["C00000001"],
-      "cycles": ["2026"],
+      "aliases": [
+        "EXCO"
+      ],
+      "committees": [
+        "C00000001"
+      ],
+      "cycles": [
+        "2026"
+      ],
       "state": "collecting",
       "pid": 12345,
       "started_at": 1758000000.0
@@ -84,9 +98,15 @@
     {
       "id": "snapshot-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
       "company": "Example Company",
-      "aliases": ["EXCO"],
-      "committees": ["C00000001"],
-      "cycles": ["2026"],
+      "aliases": [
+        "EXCO"
+      ],
+      "committees": [
+        "C00000001"
+      ],
+      "cycles": [
+        "2026"
+      ],
       "state": "completed",
       "pid": 12345,
       "started_at": 1758000000.0,
@@ -97,8 +117,12 @@
       "id": "snapshot-22222222222222222222222222222222",
       "company": "Example Company",
       "aliases": [],
-      "committees": ["C00000001"],
-      "cycles": ["2026"],
+      "committees": [
+        "C00000001"
+      ],
+      "cycles": [
+        "2026"
+      ],
       "state": "failed",
       "pid": 12399,
       "started_at": 1758000200.0,
@@ -109,13 +133,154 @@
       "id": "snapshot-33333333333333333333333333333333",
       "company": "Example Company",
       "aliases": [],
-      "committees": ["C00000001"],
-      "cycles": ["2026"],
+      "committees": [
+        "C00000001"
+      ],
+      "cycles": [
+        "2026"
+      ],
       "state": "failed",
       "pid": 0,
       "started_at": 1758000300.0,
       "finished_at": 1758000300.1,
       "message": "Could not start the evidence collector: boom"
+    },
+    {
+      "id": "csv-11111111111111111111111111111111",
+      "name": "workbook.xlsx",
+      "state": "ready",
+      "bytes": 20480,
+      "bytes_read": 20480,
+      "rows_read": 12,
+      "message": "",
+      "started_at": 1758000200.0,
+      "finished_at": 1758000200.5,
+      "catalog": {
+        "id": "csv-11111111111111111111111111111111",
+        "name": "workbook.xlsx",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+        "row_count": 12,
+        "committees": [
+          {
+            "id": "C00000001",
+            "name": "Example PAC",
+            "rows": 12,
+            "supported_rows": 12
+          }
+        ],
+        "cycles": [
+          "2026"
+        ],
+        "supported_rows": 12,
+        "unsupported_rows": 0,
+        "unassigned_rows": 0,
+        "session_only": false,
+        "imported_at": "2026-09-16T00:00:20Z",
+        "bytes": 20480,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ],
+        "format": "xlsx",
+        "source_kind": "path",
+        "source_path": "C:\\Users\\pgoff\\Desktop\\evidence\\workbook.xlsx",
+        "sheet": "Detail",
+        "sheets": [
+          "Sheet1",
+          "Detail"
+        ],
+        "encoding": "",
+        "delimiter": "",
+        "header_source": ""
+      },
+      "format": "xlsx",
+      "source_kind": "path",
+      "source_path": "C:\\Users\\pgoff\\Desktop\\evidence\\workbook.xlsx",
+      "sheet": "Detail",
+      "sheets": [
+        "Sheet1",
+        "Detail"
+      ],
+      "encoding": "",
+      "delimiter": "",
+      "header_source": ""
+    },
+    {
+      "id": "csv-22222222222222222222222222222222",
+      "name": "indiv26.zip",
+      "state": "ready",
+      "bytes": 1024,
+      "bytes_read": 1024,
+      "rows_read": 5,
+      "message": "",
+      "started_at": 1758000300.0,
+      "finished_at": 1758000300.2,
+      "catalog": {
+        "id": "csv-22222222222222222222222222222222",
+        "name": "indiv26.zip",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b85",
+        "row_count": 5,
+        "committees": [
+          {
+            "id": "C00000001",
+            "name": "Example PAC",
+            "rows": 5,
+            "supported_rows": 5
+          }
+        ],
+        "cycles": [
+          "2026"
+        ],
+        "supported_rows": 5,
+        "unsupported_rows": 0,
+        "unassigned_rows": 0,
+        "session_only": false,
+        "imported_at": "2026-09-16T00:01:00Z",
+        "bytes": 1024,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported.",
+          "Header taken from bundled."
+        ],
+        "format": "fec_bulk",
+        "source_kind": "upload",
+        "source_path": "",
+        "sheet": "",
+        "sheets": [],
+        "encoding": "utf-8",
+        "delimiter": "|",
+        "header_source": "bundled"
+      },
+      "format": "fec_bulk",
+      "source_kind": "upload",
+      "source_path": "",
+      "sheet": "",
+      "sheets": [],
+      "encoding": "utf-8",
+      "delimiter": "|",
+      "header_source": "bundled"
+    },
+    {
+      "id": "csv-33333333333333333333333333333333",
+      "name": "notes.pdf",
+      "state": "failed",
+      "bytes": 0,
+      "bytes_read": 0,
+      "rows_read": 0,
+      "message": "This file type (.pdf) is not supported. Choose CSV, TSV, TXT, XLSX, JSON or an FEC bulk ZIP.",
+      "started_at": 1758000400.0,
+      "finished_at": 1758000400.1,
+      "catalog": null,
+      "format": "",
+      "source_kind": "path",
+      "source_path": "C:\\Users\\pgoff\\Desktop\\evidence\\notes.pdf",
+      "sheet": "",
+      "sheets": [],
+      "encoding": "",
+      "delimiter": "",
+      "header_source": ""
     }
   ],
   "negative_controls": [
@@ -158,13 +323,65 @@
         "id": "snapshot-44444444444444444444444444444444",
         "company": "Example Company",
         "aliases": [],
-        "committees": ["C00000001"],
-        "cycles": ["2026"],
+        "committees": [
+          "C00000001"
+        ],
+        "cycles": [
+          "2026"
+        ],
         "state": "failed",
         "pid": 12400,
         "started_at": 1758000400.0,
         "finished_at": 1758000401.0,
         "message": "The collector failed."
+      }
+    },
+    {
+      "why": "'done' is not in the reading|ready|failed vocabulary; evidence-csv.js polls on state !== 'reading' and would treat an unrecognized terminal state as still in progress forever. (S3b shape: the same control against the JOB that carries the descriptive fields, so it fails on the invariant it names rather than on its key set.)",
+      "shape": "job",
+      "payload": {
+        "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
+        "name": "big-import.csv",
+        "state": "done",
+        "bytes": 6000000,
+        "bytes_read": 6000000,
+        "rows_read": 18000,
+        "message": "",
+        "started_at": 1758000000.0,
+        "finished_at": 1758000012.5,
+        "catalog": null,
+        "format": "delimited",
+        "source_kind": "upload",
+        "source_path": "",
+        "sheet": "",
+        "sheets": [],
+        "encoding": "utf-8",
+        "delimiter": ",",
+        "header_source": "row"
+      }
+    },
+    {
+      "why": "DE-021-style: JOB.catalog must be non-null iff state is 'ready'; a 'ready' job with a null catalog is exactly the bug this contract exists to catch (the client would render an empty committee list for a supposedly finished import). (S3b shape: the same control against the JOB that carries the descriptive fields, so it fails on the invariant it names rather than on its key set.)",
+      "shape": "job",
+      "payload": {
+        "id": "csv-89e9b6dc4d0b97b2f0a7b1a6c1b9a234",
+        "name": "big-import.csv",
+        "state": "ready",
+        "bytes": 6000000,
+        "bytes_read": 6000000,
+        "rows_read": 18000,
+        "message": "",
+        "started_at": 1758000000.0,
+        "finished_at": 1758000012.5,
+        "catalog": null,
+        "format": "delimited",
+        "source_kind": "upload",
+        "source_path": "",
+        "sheet": "",
+        "sheets": [],
+        "encoding": "utf-8",
+        "delimiter": ",",
+        "header_source": "row"
       }
     }
   ]

@@ -303,16 +303,26 @@ JOB_CONTRACT = load_contract('evidence-job-status')
 _import_groups = _group_by_keyset(IMPORT_CONTRACT['examples'])
 _job_groups = _group_by_keyset(JOB_CONTRACT['examples'])
 
-LIMITS_KEYS = frozenset({'max_bytes', 'max_columns', 'max_rows', 'max_bytes_message', 'max_columns_message', 'max_rows_message'})
+# S3b: LIMITS gained the accepted suffixes and the JSON ceiling, and the JOB
+# and the CATALOG gained the eight fields that say how an import was read
+# (format/source_kind/source_path/sheet/sheets/encoding/delimiter/
+# header_source). The producers answer those keys now, so the key sets this
+# suite holds them to are the S3b ones; the examples behind them live in the
+# same two contract files as before.
+LIMITS_KEYS = frozenset({'max_bytes', 'max_columns', 'max_rows', 'max_bytes_message', 'max_columns_message',
+                         'max_rows_message', 'accepted_suffixes', 'max_json_bytes'})
+DESCRIPTIVE_KEYS = {'format', 'source_kind', 'source_path', 'sheet', 'sheets', 'encoding', 'delimiter',
+                    'header_source'}
 CATALOG_KEYS = frozenset({'id', 'name', 'sha256', 'row_count', 'committees', 'cycles', 'supported_rows',
-                          'unsupported_rows', 'unassigned_rows', 'session_only', 'imported_at', 'bytes', 'warnings'})
+                          'unsupported_rows', 'unassigned_rows', 'session_only', 'imported_at', 'bytes',
+                          'warnings'} | DESCRIPTIVE_KEYS)
 SOURCES_LISTING_KEYS = frozenset({'sources', 'limits', 'session_only'})
 SELECT_KEYS = frozenset({'source', 'committee', 'committees', 'cycles', 'selected_cycle', 'columns', 'rows',
                          'totals', 'supported_rows', 'unsupported_rows', 'offset', 'limit', 'total_rows',
                          'has_more', 'warnings'})
 ERROR_KEYS = frozenset({'error'})
 JOB_KEYS = frozenset({'id', 'name', 'state', 'bytes', 'bytes_read', 'rows_read', 'message', 'started_at',
-                      'finished_at', 'catalog'})
+                      'finished_at', 'catalog'} | DESCRIPTIVE_KEYS)
 COLLECTOR_ACTIVE_KEYS = frozenset({'id', 'company', 'aliases', 'committees', 'cycles', 'state', 'pid', 'started_at'})
 COLLECTOR_DONE_KEYS = COLLECTOR_ACTIVE_KEYS | {'finished_at', 'message'}
 
@@ -328,6 +338,10 @@ COLLECTOR_ACTIVE_EXAMPLES = _job_groups[COLLECTOR_ACTIVE_KEYS]
 COLLECTOR_DONE_EXAMPLES = _job_groups[COLLECTOR_DONE_KEYS]
 
 CATALOG_WARNINGS = {
+    # S3b may add one more: a file decoded as Windows-1252, or an FEC bulk
+    # header taken from somewhere other than the file itself. Neither can come
+    # from the CSV fixtures in this suite, and both are asserted in
+    # test_evidence_readers.py against the files that do produce them.
     'Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended '
     'rows are preserved; totals may overlap.',
     'Committee names and IDs are taken from this CSV; their registration and committee type have not been '
@@ -352,8 +366,19 @@ def assert_committee(value):
     assert_shape(value, COMMITTEE_EXAMPLES)
 
 
+# The S3b vocabularies for the descriptive fields, checked here as well as in
+# test_evidence_readers.py: the shared contract file carries a negative control
+# for each of them, and a control that passes proves nothing.
+CATALOG_ENUMS = {'session_only': {False},
+                 'format': {'delimited', 'xlsx', 'json', 'fec_bulk'},
+                 'source_kind': {'upload', 'path'},
+                 'encoding': {'utf-8', 'utf-8-sig', 'utf-16', 'cp1252', ''},
+                 'delimiter': {',', ';', '\t', '|', ''},
+                 'header_source': {'row', 'header_path', 'inputs', 'bundled', ''}}
+
+
 def assert_catalog(value):
-    assert_shape(value, CATALOG_EXAMPLES, enums={'session_only': {False}})
+    assert_shape(value, CATALOG_EXAMPLES, enums=CATALOG_ENUMS)
     for committee in value['committees']:
         assert_committee(committee)
     for warning in value['warnings']:

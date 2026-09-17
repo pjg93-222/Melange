@@ -1,0 +1,107 @@
+S3b smoke 2026-09-16 21:16:51
+  data root : C:\Users\pgoff\AppData\Local\Temp\s3b-smoke-root-ro6ks4yg
+  fixtures  : C:\Users\pgoff\AppData\Local\Temp\s3b-smoke-fixtures-gcyxuzml
+  port      : 8911
+(1) streaming .xlsx, no worksheet chosen
+  [PASS] POST 200 :: 200
+  [PASS] ready
+  [PASS] sheets ['Sheet1', 'Detail'] :: ['Sheet1', 'Detail']
+  [PASS] default sheet Sheet1 :: Sheet1
+  [PASS] read sheet 1 rows :: 2
+  [PASS] format xlsx :: xlsx
+(1b) same bytes, worksheet Detail
+  [PASS] POST 200 :: 200
+  [PASS] ready
+  [PASS] distinct id :: csv-4c02801e773a971ffc525cdb44fec37a vs csv-436ed70dc0e281b6c0069698d4704fed
+  [PASS] sheet Detail :: Detail
+  [PASS] committee C00000002 :: ['C00000002']
+(2) .tsv and a pipe .txt with a header row
+  [PASS] tsv ready
+  [PASS] tsv delimiter TAB :: '\t'
+  [PASS] pipe txt ready
+  [PASS] pipe delimiter | :: '|'
+  [PASS] header from row :: row
+(3) Windows-1252 .csv
+  [PASS] ready
+  [PASS] encoding cp1252 :: cp1252
+  [PASS] warning present :: ['Decoded as Windows-1252 because the file is not valid UTF-8.']
+(4) openFEC .json
+  [PASS] ready
+  [PASS] format json :: json
+  [PASS] one row :: 1
+  [PASS] nested value is JSON text :: {"name": "Acme"}
+(5) FEC bulk zip, indiv layout, no header row
+  [PASS] ready
+  [PASS] format fec_bulk :: fec_bulk
+  [PASS] five rows :: 5
+  [PASS] header_source bundled :: bundled
+  [PASS] committee resolved :: ['C00000001']
+  [PASS] MMDDYYYY date normalised :: 2026-02-15 from 02152026
+(6) a .pdf name
+  [PASS] 400 :: 400
+  [PASS] M_TYPE :: {'error': 'This file type (.pdf) is not supported. Choose CSV, TSV, TXT, XLSX, JSON or an FEC bulk ZIP.'}
+(7) path imports
+  [PASS] 200 :: 200
+  [PASS] ready
+  [PASS] source_kind path :: path
+  [PASS] source_path echoed :: C:\Users\pgoff\AppData\Local\Temp\s3b-smoke-fixtures-gcyxuzml\path-import.xlsx
+  [PASS] missing path 400 :: 400
+  [PASS] missing path message :: {'error': 'Cannot open C:\\nope\\x.csv: no such file'}
+  [PASS] folder 400 :: 400
+  [PASS] folder message :: {'error': 'Cannot open C:\\Users\\pgoff\\AppData\\Local\\Temp\\s3b-smoke-fixtures-gcyxuzml: it is a folder'}
+(8) /api/evidence-files
+  [PASS] roots 200 :: 200
+  [PASS] roots listed :: ['C:\\']
+  [PASS] shortcuts listed :: ['Downloads', 'Mentat inputs', 'Desktop']
+  [PASS] no entries at the root :: []
+  [PASS] parent null :: None
+  [PASS] folder 200 :: 200
+  [PASS] sheets.xlsx supported :: {'indiv26.zip': True, 'path-import.xlsx': True, 'sheets.xlsx': True}
+  [PASS] indiv26.zip supported :: {'indiv26.zip': True, 'path-import.xlsx': True, 'sheets.xlsx': True}
+  [PASS] locked folder refused :: 400
+  [PASS] bounded message :: {'error': 'Cannot open C:\\Windows\\System32\\config: permission denied'}
+      Windows answered: 'Cannot open C:\\Windows\\System32\\config: permission denied'
+  [PASS] token required :: (403, {'error': 'Refresh the app before continuing.'})
+(9) GET listing limits
+  [PASS] accepted_suffixes present :: ['.csv', '.tsv', '.txt', '.xlsx', '.xlsm', '.json', '.zip']
+  [PASS] max_json_bytes present :: 100000000
+  [PASS] sources listed :: 8
+  removed C:\Users\pgoff\AppData\Local\Temp\s3b-smoke-root-ro6ks4yg: True
+  removed C:\Users\pgoff\AppData\Local\Temp\s3b-smoke-fixtures-gcyxuzml: True
+
+FAILURES: none
+
+========================================================================
+S3b addendum 2026-09-16 21:24:18 - coordinator rulings re-check
+  (1) MAX_JSON_BYTES 100 MB -> 25 MB   (2) itcont is a known FEC bulk type
+  data root : C:\Users\pgoff\AppData\Local\Temp\s3b-addendum-root-7ftw4uov
+  fixtures  : C:\Users\pgoff\AppData\Local\Temp\s3b-addendum-fixtures-gl4opohf
+  port      : 8912
+(A) the JSON ceiling, as the console reports it
+  [PASS] GET limits.max_json_bytes is 25,000,000 :: 25000000
+  [PASS] message names 25 MB :: Choose a JSON file no larger than 25 MB, or export it as CSV.
+(B) a JSON file over the new ceiling, under the old one
+  [PASS] fixture sits between the two caps :: 35,450,013 bytes
+  [PASS] POST 200 (a JOB, refused while reading) :: 200
+  [PASS] failed :: failed
+  [PASS] M_JSON_SIZE at 25 MB :: Choose a JSON file no larger than 25 MB, or export it as CSV.
+(C) a JSON file under the new ceiling still reads
+  [PASS] ready
+  [PASS] five rows :: 5
+(D) itcont: the FEC member name, now a known type on its own
+  [PASS] bare itcont.txt ready
+  [PASS] format fec_bulk :: fec_bulk
+  [PASS] header_source bundled :: bundled
+  [PASS] five rows :: 5
+  [PASS] committee resolved :: ['C00000001']
+(E) the archive-stem fallback still stands (unknown member, known archive)
+  [PASS] zip ready on the archive name
+  [PASS] header_source bundled :: bundled
+(F) bulk rows are still unsupported (normalize() untouched; proposal filed for Paul)
+  [PASS] rows visible :: 5
+  [PASS] none supported :: 0
+  [PASS] no totals assigned :: []
+  removed C:\Users\pgoff\AppData\Local\Temp\s3b-addendum-root-7ftw4uov: True
+  removed C:\Users\pgoff\AppData\Local\Temp\s3b-addendum-fixtures-gl4opohf: True
+
+ADDENDUM FAILURES: none

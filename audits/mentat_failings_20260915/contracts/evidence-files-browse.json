@@ -1,0 +1,267 @@
+{
+  "contract": "evidence-files-browse",
+  "version": 1,
+  "owner": "S3b",
+  "produced_by": [
+    "mentat/app/evidence_csv.py:browse",
+    "mentat/app/server.py:do_POST '/api/evidence-files'"
+  ],
+  "consumed_by": [
+    "mentat/app/evidence-csv.js: #evidence-browser panel render (path header, Up button, root/shortcut buttons, entries table)"
+  ],
+  "description": "The file-system browse() result the #evidence-browser panel renders: an empty path lists roots and shortcuts with no entries, a real directory lists its entries (directories before files, then name, case-insensitive) capped at 2,000 with 'truncated' set past the cap, and an unreadable path answers the bounded M_PATH error shape instead of a leaked exception. Orientation only - the examples are the contract.",
+  "examples": [
+    {
+      "path": "",
+      "parent": null,
+      "roots": [
+        "C:\\",
+        "D:\\"
+      ],
+      "shortcuts": [
+        {
+          "name": "Desktop",
+          "path": "C:\\Users\\pgoff\\Desktop"
+        },
+        {
+          "name": "Documents",
+          "path": "C:\\Users\\pgoff\\Documents"
+        }
+      ],
+      "entries": [],
+      "truncated": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Desktop\\evidence",
+      "parent": "C:\\Users\\pgoff\\Desktop",
+      "roots": [],
+      "shortcuts": [],
+      "entries": [
+        {
+          "name": "receipts",
+          "path": "C:\\Users\\pgoff\\Desktop\\evidence\\receipts",
+          "kind": "dir",
+          "size": null,
+          "modified": "2026-09-15T10:00:00Z",
+          "supported": false
+        },
+        {
+          "name": "indiv26.zip",
+          "path": "C:\\Users\\pgoff\\Desktop\\evidence\\indiv26.zip",
+          "kind": "file",
+          "size": 20480,
+          "modified": "2026-09-15T11:00:00Z",
+          "supported": true
+        },
+        {
+          "name": "notes.pdf",
+          "path": "C:\\Users\\pgoff\\Desktop\\evidence\\notes.pdf",
+          "kind": "file",
+          "size": 1024,
+          "modified": "2026-09-15T11:05:00Z",
+          "supported": false
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Desktop\\evidence\\big-folder",
+      "parent": "C:\\Users\\pgoff\\Desktop\\evidence",
+      "roots": [],
+      "shortcuts": [],
+      "entries": [
+        {
+          "name": "sub-a",
+          "path": "C:\\Users\\pgoff\\Desktop\\evidence\\big-folder\\sub-a",
+          "kind": "dir",
+          "size": null,
+          "modified": "2026-09-15T09:00:00Z",
+          "supported": false
+        },
+        {
+          "name": "row-0000.csv",
+          "path": "C:\\Users\\pgoff\\Desktop\\evidence\\big-folder\\row-0000.csv",
+          "kind": "file",
+          "size": 128,
+          "modified": "2026-09-15T09:01:00Z",
+          "supported": true
+        },
+        {
+          "name": "row-0001.csv",
+          "path": "C:\\Users\\pgoff\\Desktop\\evidence\\big-folder\\row-0001.csv",
+          "kind": "file",
+          "size": 128,
+          "modified": "2026-09-15T09:01:01Z",
+          "supported": true
+        }
+      ],
+      "truncated": true
+    },
+    {
+      "error": "Cannot open C:\\nope: no such file"
+    },
+    {
+      "path": "",
+      "parent": null,
+      "roots": [
+        "C:\\"
+      ],
+      "shortcuts": [
+        {
+          "name": "Downloads",
+          "path": "C:\\Users\\pgoff\\Downloads"
+        },
+        {
+          "name": "Mentat inputs",
+          "path": "C:\\Users\\pgoff\\Mentat\\mentat\\inputs"
+        }
+      ],
+      "entries": [],
+      "truncated": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Desktop\\evidence\\mixed",
+      "parent": "C:\\Users\\pgoff\\Desktop\\evidence",
+      "roots": [],
+      "shortcuts": [],
+      "entries": [
+        {
+          "name": "archive",
+          "path": "C:\\Users\\pgoff\\Desktop\\evidence\\mixed\\archive",
+          "kind": "dir",
+          "size": null,
+          "modified": "2026-09-16T09:00:00Z",
+          "supported": false
+        },
+        {
+          "name": "locked.csv",
+          "path": "C:\\Users\\pgoff\\Desktop\\evidence\\mixed\\locked.csv",
+          "kind": "file",
+          "size": null,
+          "modified": null,
+          "supported": true
+        }
+      ],
+      "truncated": false
+    }
+  ],
+  "negative_controls": [
+    {
+      "why": "entries[].kind is the enum dir|file; 'folder' is not a recognised kind.",
+      "shape": "listing",
+      "payload": {
+        "path": "C:\\Users\\pgoff\\Desktop\\evidence",
+        "parent": "C:\\Users\\pgoff\\Desktop",
+        "roots": [],
+        "shortcuts": [],
+        "entries": [
+          {
+            "name": "receipts",
+            "path": "C:\\Users\\pgoff\\Desktop\\evidence\\receipts",
+            "kind": "folder",
+            "size": null,
+            "modified": "2026-09-15T10:00:00Z",
+            "supported": false
+          },
+          {
+            "name": "indiv26.zip",
+            "path": "C:\\Users\\pgoff\\Desktop\\evidence\\indiv26.zip",
+            "kind": "file",
+            "size": 20480,
+            "modified": "2026-09-15T11:00:00Z",
+            "supported": true
+          },
+          {
+            "name": "notes.pdf",
+            "path": "C:\\Users\\pgoff\\Desktop\\evidence\\notes.pdf",
+            "kind": "file",
+            "size": 1024,
+            "modified": "2026-09-15T11:05:00Z",
+            "supported": false
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "why": "browse() must list directories before files (dirs first, then name case-insensitive); this payload puts a file ahead of a directory.",
+      "shape": "listing",
+      "payload": {
+        "path": "C:\\Users\\pgoff\\Desktop\\evidence",
+        "parent": "C:\\Users\\pgoff\\Desktop",
+        "roots": [],
+        "shortcuts": [],
+        "entries": [
+          {
+            "name": "indiv26.zip",
+            "path": "C:\\Users\\pgoff\\Desktop\\evidence\\indiv26.zip",
+            "kind": "file",
+            "size": 20480,
+            "modified": "2026-09-15T11:00:00Z",
+            "supported": true
+          },
+          {
+            "name": "receipts",
+            "path": "C:\\Users\\pgoff\\Desktop\\evidence\\receipts",
+            "kind": "dir",
+            "size": null,
+            "modified": "2026-09-15T10:00:00Z",
+            "supported": false
+          },
+          {
+            "name": "notes.pdf",
+            "path": "C:\\Users\\pgoff\\Desktop\\evidence\\notes.pdf",
+            "kind": "file",
+            "size": 1024,
+            "modified": "2026-09-15T11:05:00Z",
+            "supported": false
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "why": "an entry missing 'supported' silently breaks the client's muted/unsupported-row styling.",
+      "shape": "listing",
+      "payload": {
+        "path": "C:\\Users\\pgoff\\Desktop\\evidence",
+        "parent": "C:\\Users\\pgoff\\Desktop",
+        "roots": [],
+        "shortcuts": [],
+        "entries": [
+          {
+            "name": "receipts",
+            "path": "C:\\Users\\pgoff\\Desktop\\evidence\\receipts",
+            "kind": "dir",
+            "size": null,
+            "modified": "2026-09-15T10:00:00Z"
+          },
+          {
+            "name": "indiv26.zip",
+            "path": "C:\\Users\\pgoff\\Desktop\\evidence\\indiv26.zip",
+            "kind": "file",
+            "size": 20480,
+            "modified": "2026-09-15T11:00:00Z",
+            "supported": true
+          },
+          {
+            "name": "notes.pdf",
+            "path": "C:\\Users\\pgoff\\Desktop\\evidence\\notes.pdf",
+            "kind": "file",
+            "size": 1024,
+            "modified": "2026-09-15T11:05:00Z",
+            "supported": false
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "why": "a browse error must read 'Cannot open <path>: <reason>' (M_PATH), never a bare reason or a leaked exception string.",
+      "shape": "error",
+      "payload": {
+        "error": "no such file"
+      }
+    }
+  ]
+}
