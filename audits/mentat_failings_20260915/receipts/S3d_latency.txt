@@ -1,0 +1,56 @@
+# S3d latency receipt — console startup and workbook read (2026-09-17, Fable directly)
+
+Host: Paul's box under memory pressure all night (about 1.6 GB of 31.5 GB RAM free; other Claude sessions
+running tests and servers concurrently). Identical work swung 3x to 10x between runs, so every "after" figure
+below is the better of two runs and the swing is stated. Paul's order: "The app startup itself is incredibly
+slowed and needs a dramatic reduction in latency" / "The pace at which the system reads the spending overview
+is incredibly slowed and needs to be speeded up" / "Go, and yes" (yes = install python-calamine).
+
+## Startup — measured causes on Paul's warm console 8806 (build 971d805, before)
+- Page goto->load event: 10,764 ms (headless Chrome, 127.0.0.1:8806).
+- 30 static files, 234 KB: first start 158 ms, last end 5,349 ms. Handler ran HTTP/1.0 (new TCP connection per
+  file) with Nagle on; send() writes headers then body as two segments -> Windows delayed-ACK stall per file.
+  8 static files fetched in parallel: wall 1.02 s, individual 0.09 .. 1.01 s (serialised).
+- /api/session (full): 3.158 s alone; /api/runs?include_archived=1: 3,115 ms in the page waterfall;
+  /api/session?light=1 1,176 ms in the waterfall (queued behind the static burst). runs() re-read every run's
+  upload.json/status.json on every call.
+- Cold process -> ready line: 4.66 s (python -X importtime: import server 3.09 s, of which report_insights ->
+  openpyxl 0.97 s, numpy 0.25 s). Not changed in this pass (report_insights.py is another lane's uncommitted file).
+
+## Startup — after (scratch console from the patched server.py, --read-only on Paul's real data root
+   %LOCALAPPDATA%\Mentat\console, port 8975; Paul's 8806 was not restarted by this session)
+- Handler: protocol_version = 'HTTP/1.1', disable_nagle_algorithm = True (keep-alive + TCP_NODELAY).
+- read_json_cached(): a run status file is parsed again only when its (size, mtime_ns) changes.
+- 8 static files in parallel: wall 0.576 s, individual 0.08 .. 0.16 s (was 1.02 s / 0.09 .. 1.01 s).
+- /api/runs?include_archived=1: 1.198 s first call (disk), 0.283 s second (was 3.1 s every call).
+- /api/session: 0.613 s then 0.447 s (was 3.158 s).
+- Page goto->load: 1,169 ms first load, 1,509 ms second load (was 10,764 ms). Static 30 files 294->1,026 ms
+  (was 158->5,349 ms). API in the waterfall: /api/session 247 ms, /api/evidence-csv 461 ms, /api/runs 563 ms,
+  /api/run 94 ms (first load); 73 / 114 / 300 / 104 ms (second load).
+
+## Workbook read — Paul's Credit Union Industry Spending Overview.xlsx (15,113,389 B, 26 sheets, 27,632 data rows)
+- Before (971d805, openpyxl + lxml, launcher Python, quiet-ish host): 16.1 s. System Python without lxml: 30.3 s,
+  of which openpyxl XML parsing 19.9 s (2.17 M XML elements), normalize 4.8 s. Under load earlier: 130.7 s.
+- python-calamine 0.8.2 (Rust reader), disposable venv, same file: open 0.05 s; the four cycle sheets converted
+  in full: 1.17 s (27,648 rows); a 50-row survey of the largest sheet (Downstream Activity, 39,467 rows): 0.00 s,
+  its full conversion: 2.05 s. Threads do not help (the GIL is held during conversion; a shared workbook handle
+  raises "Already borrowed").
+- Installed into the launcher's Python (C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\
+  python\python.exe): python-calamine 0.8.2. The launcher's own check still requires only openpyxl.
+- After (calamine reader: 50-row survey of every sheet, full conversion only of the chosen table, openpyxl as the
+  fallback when calamine is absent): 8.7 s (first quiet-ish run, keep-candidates variant) / 22.9 s (second run,
+  host swing); survey-only variant under heavy contention: 15.0 s / 27.9 s; phase split under contention:
+  open+survey 1.72 s, normalize 7.51 s over 27,632 rows (272 us/row; the same call measures 28 us/row = 0.41 s per
+  14,762 rows on a quiet interpreter), record writes 0.24 s over 29 writes, conversion + sqlite the rest.
+  Results identical across engines: 27,632 rows, 27,430 supported, 264 committees, C00007880/2024 = 232 rows,
+  Receipts 9,064.59.
+- Expected on a quiet host from the component timings: about 3-5 s (open 0.05 + survey <0.5 + conversion 1.2 +
+  normalize 0.8 + sqlite ~1). The night's measurements never had a quiet host; the first restart of 8806 on this
+  commit is the real measurement.
+
+## Correctness after the change
+- tests.test_evidence_readers + test_evidence_csv + test_pac_evidence_errors: 58 OK under the launcher Python
+  (engine calamine) and 58 OK under the system Python (engine openpyxl fallback).
+- tests.test_evidence_csv_stream: 18 OK against the HTTP/1.1 handler (urllib keep-alive clients).
+- Browser suite: ALL 30 STEPS PASSED, exit 0 (S3d_after_browser.txt; the 40 MB import step took 116.8 s under
+  the same contention).

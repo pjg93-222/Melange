@@ -1,0 +1,68 @@
+# S3d browser run (HTTP/1.1 keep-alive + TCP_NODELAY handler, calamine reader)
+HEAD 971d805fc5ae2f6cd2affc6dc1e7989878442f07
+UTC 2026-09-17T04:44:02Z
+cmd node tests\test_evidence_csv_browser.cjs
+
+STEP 1: write fixture CSVs to a scratch directory
+PASS step 1 (0.6s) - fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-fixtures-CGZwOM
+STEP 2: pick a free port and launch the first console server
+PASS step 2 (1.7s) - server A ready on port 53963, data root C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-data-7E17kv
+STEP 3: launch headless Chrome and open a page
+PASS step 3 (1.5s) - browser launched, page opened, pageerror/request listeners attached
+STEP 4: open the evidence tab, select CSV source, expect the empty-catalog status
+PASS step 4 (4.2s) - evidence tab open, CSV source selected, empty-catalog status shown
+STEP 5: import six.csv (~6 MB) and check the first page of rows
+PASS step 5 (21.8s) - six.csv imported (~6 MB), 100 rows rendered on the first page
+STEP 6: import forty.csv (~40 MB) and watch for a progress sample
+PASS step 6 (116.8s) - forty.csv imported (~40 MB) after 822 polled progress samples
+STEP 7: kill and relaunch the console on the same port/data root; reuse prior imports
+PASS step 7 (2.7s) - server restarted on the same port and data root; both prior imports reachable without re-upload
+STEP 8: launch a second console on the same data root, a different port
+PASS step 8 (3.0s) - a second console on the same data root and a different port lists both imports
+STEP 9: error case: big.csv rejected client-side, no upload issued
+PASS step 9 (0.2s) - big.csv rejected by the client pre-flight size check; no POST issued
+STEP 10: error case: notes.txt is read as delimited text and refused for its header
+PASS step 10 (0.7s) - notes.txt read as delimited text and refused for its header
+STEP 11: error case: wide201.csv rejected for exceeding the column cap
+PASS step 11 (0.6s) - wide201.csv rejected for exceeding the column cap
+STEP 12: error case: truncated.csv rejected for an unterminated quoted field
+PASS step 12 (0.7s) - truncated.csv rejected for an unterminated quoted field
+STEP 13: error case: empty.csv rejected as empty
+PASS step 13 (0.2s) - empty.csv rejected as empty
+STEP 14: error case: latin1.csv holds control bytes and is refused as binary
+PASS step 14 (0.8s) - latin1.csv holds control bytes and is refused as binary
+STEP 15: error case: nocommittee.csv rejected for missing a committee-id column
+PASS step 15 (2.9s) - nocommittee.csv rejected for missing a committee-id column
+STEP 16: error case: abort.csv reports a transport failure when the upload is aborted
+PASS step 16 (0.2s) - abort.csv reports a transport failure when the upload request is aborted
+STEP 17: error case: html.csv reports an unparseable HTTP 500 response
+PASS step 17 (0.1s) - html.csv reports an unparseable HTTP 500 response
+STEP 18: error case: a bad ?offset= value returns 400 with the exact M_PAGE message
+PASS step 18 (0.0s) - a bad ?offset= value returns 400 with the exact M_PAGE message, not a leaked exception
+STEP 19: final check: zero pageerror entries and zero remote requests
+PASS step 19 (0.0s) - zero pageerror entries and zero remote requests across the whole run
+STEP 20: write additional S3b fixtures (xlsx, tsv, json, cp1252 csv, fec bulk zip, pdf)
+PASS step 20 (2.5s) - S3b fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-fixtures-CGZwOM
+STEP 21: picker input has no accept attribute; its label is unchanged
+PASS step 21 (0.1s) - picker input has no accept attribute; label text unchanged ("Choose CSV")
+STEP 22: upload a 2-sheet xlsx whose sheets share one header: both sheets read as one table, no picker UI
+PASS step 22 (0.8s) - sheets.xlsx read Sheet1 + Detail as one 3-row, 2-committee table; combined-sheets warning shown; no picker UI
+STEP 23: upload a tab-delimited tsv: ready
+PASS step 23 (0.7s) - evidence.tsv (tab-delimited) imported and ready
+STEP 24: upload an openFEC-shaped json file: ready
+PASS step 24 (0.7s) - evidence.json ({"results": [...]}) imported and ready
+STEP 25: upload a Windows-1252 csv: ready, with the decode warning visible
+PASS step 25 (0.7s) - cp1252.csv imported and ready; Windows-1252 decode warning visible in #evidence-csv-warnings
+STEP 26: upload an FEC bulk zip (recognised "indiv" stem): ready
+PASS step 26 (0.7s) - indiv-bulk.zip (FEC bulk) imported and ready
+STEP 27: error case: notes.pdf rejected for its file type, no upload issued
+PASS step 27 (0.1s) - notes.pdf rejected by the client pre-flight file-type check; no POST issued
+STEP 28: upload a Mentat industry workbook: title rows, header on row 4, two cycle sheets read as one table, receipts totalled
+PASS step 28 (0.7s) - overview.xlsx: 2 rows rendered from the cycle sheets, Receipts totalled, recipient names shown
+STEP 29: no path box, no browse panel, no sheet picker exist in the page (UI unchanged)
+PASS step 29 (0.1s) - none of the S3b path/browse/sheet controls exist in the page
+STEP 30: final check (again, across every S3b step too): zero pageerror entries and zero remote requests
+PASS step 30 (0.0s) - zero pageerror entries and zero remote requests across the whole run, including every S3b step
+ALL 30 STEPS PASSED
+browser.close() exceeded its 10000ms bound
+EXIT 0

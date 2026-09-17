@@ -983,9 +983,126 @@ def sheet_grade(columns):
     return 1
 
 
+def calamine_available():
+    """python-calamine (a Rust reader) parses this workbook ~10x faster than openpyxl."""
+    try:
+        import python_calamine  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
+def choose_sheets(record, sheets, survey):
+    """The worksheets to read as one table, or the refusal that names them.
+
+    survey maps each sheet name to (header_index, headers, columns, grade,
+    height). Naming a `sheet` reads only that one; otherwise the best-graded
+    header wins, ties by height then workbook order, and every sheet whose
+    keyed header is identical to the winner's is read after it.
+    """
+    chosen = str(record.get('sheet') or '')
+    if chosen and chosen not in sheets:
+        raise ValueError(M_SHEET(chosen, sheets))
+    if chosen:
+        return [chosen]
+    best = max(sheets, key=lambda name: (survey[name][3], survey[name][4], -sheets.index(name)))
+    if survey[best][3] == 0:
+        raise ValueError(M_NO_SHEET(sheets))
+    return [name for name in sheets if survey[name][2] == survey[best][2]]
+
+
+def table_headers(group, survey):
+    headers = list(survey[group[0]][1])
+    if not headers:
+        raise ValueError(M_EMPTY)
+    if len(headers) > MAX_COLUMNS:
+        raise ValueError(columns_message())
+    return headers
+
+
+def table_meta(record, sheets, group):
+    meta = {'encoding':'', 'delimiter':'', 'header_source':'row', 'sheets':sheets,
+            'sheet':group[0], 'sheets_read':list(group)}
+    warnings = ([f'Read {len(group)} worksheets with the same columns: {", ".join(group)}.']
+                if len(group) > 1 else [])
+    return meta, warnings
+
+
+@contextmanager
+def calamine_reader(path, record):
+    """The worksheets of an .xlsx/.xlsm through python-calamine.
+
+    Every sheet gets a 50-row survey for its header; only the sheets chosen as
+    the table are converted in full, one at a time. Paul's 26-sheet industry
+    workbook reads in a few seconds this way; openpyxl needed 16.
+    """
+    from python_calamine import CalamineWorkbook
+    try:
+        book = CalamineWorkbook.from_path(str(path))
+    except Exception as error:  # calamine raises its own exception classes
+        raise ValueError(M_XLSX_READ) from error
+    sheets = list(book.sheet_names)
+    record['sheets'] = sheets
+    chosen = str(record.get('sheet') or '')
+    if chosen and chosen not in sheets:
+        raise ValueError(M_SHEET(chosen, sheets))
+    # A 50-row survey per sheet is close to free in calamine (the XML is parsed
+    # in Rust; only those rows become Python objects), while converting a whole
+    # 39,000-row aggregate sheet that is then discarded costs seconds. So every
+    # sheet is surveyed cheaply and only the chosen table is converted in full.
+    survey = {}
+    for name in sheets:
+        if chosen and name != chosen:
+            survey[name] = (0, [], [], 0, 0)
+            continue
+        try:
+            sheet = book.get_sheet_by_name(name)
+            head = sheet.to_python(nrows=50, skip_empty_area=False)
+            height = int(getattr(sheet, 'height', 0) or len(head))
+        except Exception as error:
+            raise ValueError(M_XLSX_READ) from error
+        index, headers = header_row(head)
+        columns = [key(item) for item in headers]
+        survey[name] = (index, headers, columns, sheet_grade(columns), height)
+    group = choose_sheets(record, sheets, survey)
+    headers = table_headers(group, survey)
+    size = int(record.get('bytes') or 0)
+    meta, warnings = table_meta(record, sheets, group)
+
+    def rows():
+        for name in group:
+            first = survey[name][0]
+            index = first
+            try:
+                data = book.get_sheet_by_name(name).to_python(skip_empty_area=False)
+                for index, row in enumerate(data, 1):
+                    if index <= first:
+                        continue
+                    cells = [cell_text(value) for value in row]
+                    while len(cells) > len(headers) and not cells[-1].strip():
+                        cells.pop()
+                    yield index, cells
+            except ValueError:
+                raise
+            except Exception as error:
+                raise ValueError(M_READ(index)) from error
+            del data
+
+    yield Reader(headers, rows(), lambda: size, meta, warnings)
+
+
 @contextmanager
 def workbook_reader(path, record):
-    """The worksheets of an .xlsx/.xlsm that hold the table, read cell by cell.
+    """An .xlsx/.xlsm through calamine when it is installed, else openpyxl."""
+    engine = calamine_reader if calamine_available() else openpyxl_reader
+    record['engine'] = 'calamine' if engine is calamine_reader else 'openpyxl'
+    with engine(path, record) as reader:
+        yield reader
+
+
+@contextmanager
+def openpyxl_reader(path, record):
+    """The openpyxl fallback: the worksheets of an .xlsx/.xlsm, read cell by cell.
 
     With no worksheet named, every sheet is surveyed (its first rows only): the
     best-graded header wins, ties going to the sheet with more rows, and every

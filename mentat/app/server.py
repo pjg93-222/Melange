@@ -68,6 +68,7 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  '/evidence-csv.js': ('evidence-csv.js', 'text/javascript'),
                  '/charts.js': ('charts.js', 'text/javascript'), '/chart-math.js': ('chart-math.js', 'text/javascript'),
                  '/graph.js': ('graph.js', 'text/javascript'),
+                 '/scope.js': ('scope.js', 'text/javascript'),
                  '/ui-state.js': ('ui-state.js', 'text/javascript'),
                  '/coverage-view.js': ('coverage-view.js', 'text/javascript'),
                  '/cross-reference.js': ('cross-reference.js', 'text/javascript'),
@@ -192,6 +193,22 @@ def read_json(path):
         return json.loads(Path(path).read_text(encoding="utf-8-sig"))
     except (OSError, ValueError):
         return {}
+
+
+@lru_cache(maxsize=4096)
+def _cached_json(identity):
+    return read_json(identity[0])
+
+
+def read_json_cached(path):
+    """read_json keyed by (path, size, mtime_ns): a run's status file is parsed
+    again only when it changes. /api/runs re-read every status file on every
+    page load, which cost 3 s on a data root with a history of runs."""
+    try:
+        info = Path(path).stat()
+    except OSError:
+        return {}
+    return dict(_cached_json((str(path), info.st_size, info.st_mtime_ns)))
 
 
 def r_library_path(environment, project=PROJECT, rscript=""):
@@ -1283,20 +1300,20 @@ class Console:
     def runs(self):
         values = []
         for path in self.root.glob("*/upload.json"):
-            meta = read_json(path)
+            meta = read_json_cached(path)
             if not meta:
                 continue
             run_paths = sorted((path.parent / "runs").glob("*/manifest.json"))
             state = meta["state"]
             if run_paths and state not in ('stopped', 'failed', 'launch failed'):
-                state = run_state(read_json(run_paths[-1].parent / 'status.json'), state)
+                state = run_state(read_json_cached(run_paths[-1].parent / 'status.json'), state)
             values.append({"id": meta["id"], "name": meta["name"], "state": state,
                            "created_at": meta["created_at"], "directory": run_paths[-1].parent if run_paths else None,
                            "upload": meta})
         existing = PROJECT / ".cache/resilient-industry-runs"
         for path in sorted(existing.glob("*/manifest.json"), reverse=True)[:15]:
             values.append({"id": "existing-" + path.parent.name, "name": path.parent.name,
-                           "state": run_state(read_json(path.parent / 'status.json'), 'existing run'), "created_at": path.stat().st_mtime, "directory": path.parent})
+                           "state": run_state(read_json_cached(path.parent / 'status.json'), 'existing run'), "created_at": path.stat().st_mtime, "directory": path.parent})
         for path in (PROJECT / '.cache/report-repairs').glob('*/manifest.json'):
             meta = read_json(path)
             values.append({'id': 'repair-' + path.parent.name,
@@ -1706,6 +1723,14 @@ class Console:
 
 
 class Handler(BaseHTTPRequestHandler):
+    # The page loads about 35 small files. Under HTTP/1.0 each was a new
+    # connection, and with Nagle on, the header write and the body write
+    # became two segments that tripped Windows' 200 ms delayed-ACK stall,
+    # so the static waterfall alone took 5 s. Keep-alive plus TCP_NODELAY
+    # removes both; every response already carries a Content-Length.
+    protocol_version = 'HTTP/1.1'
+    disable_nagle_algorithm = True
+
     def log_message(self, *_):
         pass
 
