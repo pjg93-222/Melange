@@ -1,0 +1,233 @@
+S3b RED BASELINE - Python suite, run against a PRISTINE worktree of HEAD
+==========================================================================
+
+Date: 2026-09-16 (America/New_York)
+Repo (source of HEAD): C:\Users\pgoff\Mentat, branch codex/mentat-crypto
+Pinned commit: 91fe7402a126eca3a38deeca0f7a84402632d8dd
+  (subject: "Raise the PAC evidence CSV ceiling to 500 MB and apply the S3
+   follow-ups")
+Worktree used for this run (scratch, detached HEAD, removed after this run):
+  C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-
+  Melange-Systems--claude-worktrees-evidence-csv-fetch-streaming-8bedff\
+  01cbac00-075b-491b-acb2-076e4014ef13\scratchpad\mentat-before-s3b
+  created via: git -C C:\Users\pgoff\Mentat worktree add "<above>" 91fe7402a
+cwd for the command below: <worktree>\mentat
+
+Files copied into the pristine worktree before running (this lane's own
+deliverables, per the lane's explicit instructions):
+  - mentat\tests\test_evidence_readers.py                              (NEW)
+  - mentat\tests\test_evidence_csv_browser.cjs                         (spliced, steps 20+)
+  - audits\mentat_failings_20260915\contracts\evidence-csv-import.json (extended)
+  - audits\mentat_failings_20260915\contracts\evidence-files-browse.json (NEW)
+
+Environment gaps found and worked around (same pattern S3 already recorded in
+receipts/S3_before_python.txt; read-only copies FROM the live tree INTO this
+scratch worktree only, nothing in C:\Users\pgoff\Mentat or in this scratch
+worktree's git state was touched beyond the files this lane owns):
+
+  1. mentat/inputs/ is gitignored (.gitignore:65). server.py's import chain
+     stats mentat/inputs/fec_receipt_rules.json at MODULE IMPORT TIME; a fresh
+     checkout has no mentat/inputs/ at all. Copied that one file from the live
+     tree's mentat/inputs/fec_receipt_rules.json.
+  2. mentat/config/report-directory.json is gitignored (*.json, .gitignore:6).
+     server.py's main() raises ValueError before printing its ready line
+     without it (only matters for the browser receipt, which starts a real
+     server; the Python unittest run below never calls main()). Wrote a
+     stand-in config into the scratch worktree only, pointing at a throwaway
+     scratch directory under this session's own scratchpad -- never Paul's
+     real "C:\Users\pgoff\OneDrive\Desktop\Mentat Complete Files".
+
+A mistake made and corrected during this run, recorded because it is exactly
+the kind of thing a RED baseline is supposed to catch: this session's own
+first attempt ALSO copied mentat/tests/test_evidence_csv_stream.py and
+audits/.../contracts/evidence-job-status.json into the worktree, following
+the S3 receipt's precedent literally. `git status --porcelain` inside the
+worktree then showed both files as MODIFIED against the pinned commit (33
+and 249 lines respectively) -- not because this lane touched them, but
+because the LIVE tree's copies had already picked up Architect A's and
+executor B's concurrent, uncommitted S3b work on those same two files.
+Copying them in would have contaminated the "pristine HEAD" baseline with
+unrelated in-flight changes. Fixed with `git checkout --` on just those two
+paths inside the scratch worktree (restoring THIS worktree's own committed
+content at 91fe7402a; nothing outside this disposable worktree was touched).
+Neither file is a deliverable of this lane and neither was needed: this
+lane's test_evidence_readers.py keeps its own local copies of every message
+constant and schema-by-example helper (see its module docstring) and never
+imports test_evidence_csv_stream.py or evidence-job-status.json.
+
+A second correction, made after this session's own coordinator flagged it:
+the S3b cap on JSON imports is 25 MB (evidence_csv.MAX_JSON_BYTES =
+25_000_000, per the live app/evidence_csv.py), not the 100 MB this session
+had first guessed when drafting M_JSON_SIZE and the contract's
+`max_json_bytes` example. test_evidence_readers.py:58's M_JSON_SIZE constant
+now reads "Choose a JSON file no larger than 25 MB, or export it as CSV.";
+the one test that exercises the cap (test_json_over_cap) was never affected
+by the wrong constant because it always asserted against
+`csv_data.json_size_message()` computed live off the (test-narrowed)
+MAX_JSON_BYTES, the same pattern test_evidence_csv_stream.py uses for
+bytes_message(). The contract's own `max_json_bytes: 25000000` value was
+already corrected in the live packet by the time this session checked (see
+"Contract co-editing" below) -- this session's local generator script still
+had the stale 100000000 and was NOT re-run against the live file, to avoid
+clobbering that fix; the worktree copy below is the live (correct) file.
+
+Contract co-editing observed (informational, not a defect in this lane's own
+work): between this session's first and final RED capture, the live
+audits/mentat_failings_20260915/contracts/evidence-csv-import.json grew from
+this session's own 10 examples / 7 negative_controls (this session's initial
+splice) to 11 examples (a `receipts.csv`-named, format:"delimited" CATALOG
+example was added by another party under the extended S3b keyset) and the
+live evidence-files-browse.json grew from this session's 4 examples to 6 (two
+more "listing"-shaped examples). Both additions share the same key sets as
+this session's own CATALOG_EXAMPLES_S3B / LISTING_EXAMPLES groups (grouped by
+exact frozenset(keys()) in test_evidence_readers.py), so they were picked up
+automatically with no code change needed here, and
+test_contract_examples_against_producers still asserts every producer and
+every negative control (see the GREEN confirmation below). This is exactly
+the "S3-era CATALOG examples will need extending once every catalog gains
+the new universal fields" gap this session flagged as a forward-compatibility
+risk while drafting the contract (see this lane's final report) -- it
+appears to have been resolved by whoever owns test_evidence_csv_stream.py,
+independently, before this receipt was written.
+
+==========================================================================
+COMMAND: python -m unittest tests.test_evidence_readers -v
+==========================================================================
+Exit code: 1 (FAILED)
+Ran 38 tests in 5.166s
+FAILED (failures=1, errors=36)
+
+Tally: 36 errors, 1 failure, 1 ok.
+
+[36 tests ERROR with AttributeError: 'Store' object has no attribute
+ 'import_path' (30 tests) or the module has no 'browse' name propagated
+ through the test's own call sites (4 tests: test_browse_*), or a nested
+ AttributeError from a helper that itself calls store.import_path (2 tests:
+ test_http_streaming_with_sheet_header, test_import_path_copies_source,
+ whose ResourceWarning-then-ERROR lines are openpyxl's own harmless "unclosed
+ socket" warning printed by unittest's -v runner before the ERROR verdict,
+ not a second defect). Decisive line, repeated for all 30 direct cases
+ (illustrative, from test_xlsx_named_sheet_distinct_id):]
+
+======================================================================
+ERROR: test_xlsx_named_sheet_distinct_id (tests.test_evidence_readers.EvidenceReadersTests.test_xlsx_named_sheet_distinct_id)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "...\mentat-before-s3b\mentat\tests\test_evidence_readers.py", line 441, in test_xlsx_named_sheet_distinct_id
+    default_job = store.wait(store.import_path(str(workbook_path))['id'])
+                             ^^^^^^^^^^^^^^^^^
+AttributeError: 'Store' object has no attribute 'import_path'. Did you mean: 'record_path'?
+
+[The 4 test_browse_* tests fail the same way, calling the module-level
+function directly, decisive line from test_browse_root_lists_roots_and_shortcuts:]
+
+======================================================================
+ERROR: test_browse_root_lists_roots_and_shortcuts (tests.test_evidence_readers.EvidenceReadersTests.test_browse_root_lists_roots_and_shortcuts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "...\mentat-before-s3b\mentat\tests\test_evidence_readers.py", line 806, in test_browse_root_lists_roots_and_shortcuts
+    result = csv_data.browse('')
+             ^^^^^^^^^^^^^^^^
+AttributeError: module 'evidence_csv' has no attribute 'browse'
+
+[test_contract_examples_against_producers is a genuine FAIL, not ERROR: the
+ OLD limits() still returns only the 6 S3-era keys, so it never reaches the
+ module.browse()/Store.import_path() calls later in the same test method
+ before failing on its very first assertion. Decisive line:]
+
+======================================================================
+FAIL: test_contract_examples_against_producers (tests.test_evidence_readers.EvidenceReadersTests.test_contract_examples_against_producers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "...\mentat-before-s3b\mentat\tests\test_evidence_readers.py", line 951, in test_contract_examples_against_producers
+    assert_limits_s3b(csv_data.limits())
+  File "...\mentat-before-s3b\mentat\tests\test_evidence_readers.py", line 370, in assert_limits_s3b
+    assert_shape(value, LIMITS_EXAMPLES_S3B)
+  File "...\mentat-before-s3b\mentat\tests\test_evidence_readers.py", line 273, in assert_shape
+    raise AssertionError(f'{path}: key set {sorted(value.keys())} != contract key set {sorted(keyset)}')
+AssertionError: $: key set ['max_bytes', 'max_bytes_message', 'max_columns', 'max_columns_message', 'max_rows', 'max_rows_message'] != contract key set ['accepted_suffixes', 'max_bytes', 'max_bytes_message', 'max_columns', 'max_columns_message', 'max_json_bytes', 'max_rows', 'max_rows_message']
+
+[test_csv_id_unchanged_from_s3 is the one test that PASSES at this commit,
+ correctly: it exercises only the pre-existing Store.ingest_text() path with
+ sheet='', which is untouched by S3b and already matches the S3-era id
+ formula ('csv-' + sha256(bytes)[:32]) -- exactly the backward-compatibility
+ property this lane's own reading of the contract's id-formula proviso
+ ("existing CSV ids unchanged") predicted would still hold today.]
+
+==========================================================================
+GREEN CONFIRMATION (informational; not part of the RED baseline, recorded
+because this session verified it twice -- once mid-session against
+Architect A's/executor B's in-flight work, once after this session's
+coordinator reported "A and B have landed")
+==========================================================================
+Same command, same file, run against the LIVE tree (C:\Users\pgoff\Mentat\
+mentat, cwd) after A and B's implementation landed there:
+
+  Ran 38 tests in 11.491s
+  OK
+
+The pre-existing S3 suite was re-run alongside it for regression coverage
+(not owned by this lane, not edited by this lane, but reads the same
+contracts/evidence-csv-import.json this lane extended):
+
+  python -m unittest tests.test_evidence_csv_stream -v
+  Ran 18 tests in 81.825s
+  OK
+
+Both green. Every negative control in both contract files' negative_controls
+list was exercised inside test_contract_examples_against_producers via
+IMPORT_DISPATCH_S3B / BROWSE_DISPATCH and asserted to raise AssertionError;
+none of them passed the assertion. The three pre-existing S3 negative
+controls were left for test_evidence_csv_stream.py's own IMPORT_DISPATCH to
+assert (this lane's four new evidence-csv-import.json negative controls use
+only the shape names "catalog" and "sources_listing" that dispatch already
+recognises, specifically so appending them could never KeyError that
+pre-existing, un-owned suite's loop over the same negative_controls list --
+verified live, see this lane's final report).
+
+Survival checks, run against the actual files on disk with
+`'–' in text` / `'·' in text` / `re.search(r'\d', text)` /
+`'${' in text` (not recalled from memory):
+  mentat/tests/test_evidence_readers.py (a plain Python file -- `${` is a JS
+  template-literal risk and does not apply here; its absence is expected):
+    '${'        : False (expected -- pure Python, no JS interpolation in this file)
+    '\d'        : True  (e.g. `assertRegex(job['message'], r'... row [\d,]+\. ...')`)
+    en dash     : False (this file never hardcodes the M_PAGE text itself;
+                  it is asserted only in the sibling S3-era suite, see below)
+    middle dot  : False (no channel-label text of that form appears anywhere
+                  in the S3b surface this file exercises)
+  audits/mentat_failings_20260915/contracts/evidence-csv-import.json:
+    en dash     : True (the pre-existing S3-era literal
+                  'Choose a valid CSV row page (1-1,000 rows).' [en dash, not
+                  a hyphen] survived this lane's text-splice untouched, byte-identical)
+  mentat/tests/test_evidence_csv_browser.cjs:
+    '${'        : True (every new step's template-literal interpolation)
+    '\d'        : True (survives in the untouched, byte-identical steps 10-18,
+                  e.g. `[\d,]+ rows`)
+    en dash     : True (survives in the untouched step 18 M_PAGE assertion)
+    middle dot  : True (survives in the untouched step 6 progress-text regex)
+
+A fourth, project-specific escaping risk this lane found the hard way while
+writing the FEC-bulk fixture builder embedded as a Python script inside a JS
+template literal (splice_browser_test.py's PYTHON_S3B_FIXTURE_SCRIPT): a
+literal two-backslash Python string (backslash-r-backslash-n), written
+directly inside a JS backtick literal, is escape-processed once by JS itself
+(backslash-r/backslash-n become real CR/LF control bytes) before Python ever
+sees the generated script -- breaking the emitted .py file's own string
+literal ("SyntaxError: unterminated string literal"). `node --check` alone
+never caught this, because it only validates the OUTER .cjs syntax, not the
+Python string produced at runtime; it was only caught by actually running
+the generated fixture script inside the browser test. Fixed by writing four
+backslashes in the JS source (two escaped backslash-pairs), so JS's own
+escaping reduces it to the intended two-character sequence by the time
+Python parses it -- verified by evaluating the template literal in Node (not
+regex-extracting the raw source text, which skips JS's own escape processing
+entirely), py_compile-checking the result, and then actually running it and
+inspecting the produced .zip/.xlsx bytes.
+
+==========================================================================
+Worktree cleanup
+==========================================================================
+`git worktree remove --force "<worktree>"` and `git worktree prune` run after
+both the Python and browser RED captures (see S3b_before_browser.txt);
+`git worktree list` confirmed clean afterward (see this lane's final report).

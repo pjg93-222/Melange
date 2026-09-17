@@ -192,7 +192,10 @@
         ],
         "encoding": "",
         "delimiter": "",
-        "header_source": ""
+        "header_source": "",
+        "sheets_read": [
+          "Detail"
+        ]
       },
       "format": "xlsx",
       "source_kind": "path",
@@ -204,7 +207,10 @@
       ],
       "encoding": "",
       "delimiter": "",
-      "header_source": ""
+      "header_source": "",
+      "sheets_read": [
+        "Detail"
+      ]
     },
     {
       "id": "csv-22222222222222222222222222222222",
@@ -251,7 +257,8 @@
         "sheets": [],
         "encoding": "utf-8",
         "delimiter": "|",
-        "header_source": "bundled"
+        "header_source": "bundled",
+        "sheets_read": []
       },
       "format": "fec_bulk",
       "source_kind": "upload",
@@ -260,7 +267,8 @@
       "sheets": [],
       "encoding": "utf-8",
       "delimiter": "|",
-      "header_source": "bundled"
+      "header_source": "bundled",
+      "sheets_read": []
     },
     {
       "id": "csv-33333333333333333333333333333333",
@@ -280,7 +288,8 @@
       "sheets": [],
       "encoding": "",
       "delimiter": "",
-      "header_source": ""
+      "header_source": "",
+      "sheets_read": []
     }
   ],
   "negative_controls": [
@@ -357,7 +366,8 @@
         "sheets": [],
         "encoding": "utf-8",
         "delimiter": ",",
-        "header_source": "row"
+        "header_source": "row",
+        "sheets_read": []
       }
     },
     {
@@ -381,7 +391,8 @@
         "sheets": [],
         "encoding": "utf-8",
         "delimiter": ",",
-        "header_source": "row"
+        "header_source": "row",
+        "sheets_read": []
       }
     }
   ]

@@ -15,6 +15,7 @@ assertion failure, not as an accidental pass through borrowed code.
 """
 from __future__ import annotations
 
+import datetime
 import hashlib
 import json
 import os
@@ -294,14 +295,14 @@ _import_groups = _group_by_keyset(IMPORT_CONTRACT['examples'])
 _browse_groups = _group_by_keyset(BROWSE_CONTRACT['examples'])
 
 JOB_KEYS_S3B = frozenset({'id', 'name', 'state', 'bytes', 'bytes_read', 'rows_read', 'message', 'started_at',
-                          'finished_at', 'catalog', 'format', 'source_kind', 'source_path', 'sheet', 'sheets',
+                          'finished_at', 'catalog', 'format', 'source_kind', 'source_path', 'sheet', 'sheets', 'sheets_read',
                           'encoding', 'delimiter', 'header_source'})
 LIMITS_KEYS_S3B = frozenset({'max_bytes', 'max_columns', 'max_rows', 'max_bytes_message', 'max_columns_message',
                              'max_rows_message', 'accepted_suffixes', 'max_json_bytes'})
 SOURCES_LISTING_KEYS = frozenset({'sources', 'limits', 'session_only'})
 CATALOG_KEYS_S3B = frozenset({'id', 'name', 'sha256', 'row_count', 'committees', 'cycles', 'supported_rows',
                               'unsupported_rows', 'unassigned_rows', 'session_only', 'imported_at', 'bytes',
-                              'warnings', 'format', 'source_kind', 'source_path', 'sheet', 'sheets', 'encoding',
+                              'warnings', 'format', 'source_kind', 'source_path', 'sheet', 'sheets', 'sheets_read', 'encoding',
                               'delimiter', 'header_source'})
 COMMITTEE_KEYS = frozenset({'id', 'name', 'rows', 'supported_rows'})
 
@@ -430,8 +431,11 @@ class EvidenceReadersTests(unittest.TestCase):
             self.assertEqual(catalog['format'], 'xlsx')
             self.assertEqual(catalog['sheets'], ['Sheet1', 'Detail'])
             self.assertEqual(catalog['sheet'], 'Sheet1')
-            self.assertEqual(catalog['row_count'], 2)
-            self.assertEqual({c['id'] for c in catalog['committees']}, {'C00000001'})
+            # Sheet1 and Detail share one header, so both are read as one table.
+            self.assertEqual(catalog['sheets_read'], ['Sheet1', 'Detail'])
+            self.assertEqual(catalog['row_count'], 3)
+            self.assertEqual({c['id'] for c in catalog['committees']}, {'C00000001', 'C00000002'})
+            self.assertIn('Read 2 worksheets with the same columns: Sheet1, Detail.', catalog['warnings'])
 
     def test_xlsx_named_sheet_distinct_id(self):
         with temp_fixture_dir() as fixtures, temp_data_root() as root:
@@ -976,5 +980,99 @@ class EvidenceReadersTests(unittest.TestCase):
                     BROWSE_DISPATCH[control['shape']](control['payload'])
 
 
+
+# ---------------------------------------------------------------------------
+# S3c: a Mentat industry workbook (title rows above the header, header on row 4,
+# several cycle sheets sharing one header, aggregate sheets alongside). Paul's
+# 'Credit Union Industry Spending Overview.xlsx' failed on 21c9cab6d because the
+# reader took the first sheet's first row as the header.
+# ---------------------------------------------------------------------------
+class MentatWorkbookSelection(unittest.TestCase):
+    COLUMNS = ['Source ID', 'Cycle', 'FEC Filing Cycle', 'Cycle Alignment', 'Company', 'Contributor', 'Employee Tier',
+               'Amount', 'Analysis Amount', 'Party', 'Recipient Category', 'Category Source', 'Party Source', 'Recipient',
+               'Committee ID', 'Recipient Key', 'Date', 'City', 'State', 'ZIP', 'Employer', 'Occupation', 'Record Type']
+    CYCLES = {
+        '2023-2024': [('C00007880', "AMERICA'S CREDIT UNIONS PAC", 10.0, datetime.datetime(2024, 12, 31)),
+                      ('C00007880', "AMERICA'S CREDIT UNIONS PAC", 15.5, datetime.datetime(2024, 6, 1)),
+                      ('C00919084', 'TALARICO FOR TEXAS', 25.0, datetime.datetime(2024, 1, 2))],
+        '2025-2026': [('C00919084', 'TALARICO FOR TEXAS', 30.77, datetime.datetime(2026, 3, 3))],
+    }
+
+    def build(self, folder, *, with_data=True):
+        book = openpyxl.Workbook()
+        overview = book.active
+        overview.title = 'Master Overview'
+        overview.append(['Credit Union Master Overview'])
+        overview.append(['Mentat master-workbook layout'])
+        overview.append([])
+        overview.append(['Company', 'Rank', 'Total Giving'])
+        overview.append(['Alpha CU', 1, 100.0])
+        if with_data:
+            for cycle_name, rows in self.CYCLES.items():
+                sheet = book.create_sheet(cycle_name)
+                sheet.append([f'{cycle_name} Credit Union Contributions'])
+                sheet.append(['Contribution-date cycle.'])
+                sheet.append(['Source DB SHA-256: fixture'])
+                sheet.append(self.COLUMNS)
+                for index, (committee, recipient, amount, when) in enumerate(rows, 1):
+                    sheet.append([f'40{index}', cycle_name, cycle_name[-4:], 'OK', 'Alpha CU', 'DOE, JANE', 'Employee',
+                                  amount, amount, 'D', 'Candidate', 'fec', '', recipient, committee, f'FEC:{committee}',
+                                  when, 'CITY', 'ST', '00000', 'ALPHA CU', 'ANALYST', 'CONTRIBUTION'])
+            downstream = book.create_sheet('Downstream Activity')
+            downstream.append(['Downstream Committee-to-Candidate Activity'])
+            downstream.append(['Same-cycle activity.'])
+            downstream.append(['885,132 exact source rows'])
+            downstream.append([])
+            downstream.append(['Cycle', 'Source Committee', 'Source Committee ID', 'Candidate / Officeholder',
+                               'Support / Oppose', 'Transaction Type', 'Net Included Amount'])
+            downstream.append(['2021-2022', 'ABRAHAM LINCOLN PAC', 'C00631051', 'ARENHOLZ, ASHLEY', 'Contribution / Other',
+                               '24K', 10000])
+        target = Path(folder) / 'Credit Union Industry Spending Overview.xlsx'
+        book.save(target)
+        return target
+
+    def test_contribution_sheets_chosen_and_totalled(self):
+        with temp_fixture_dir() as fixtures, temp_data_root() as root:
+            target = self.build(fixtures)
+            store = csv_data.Store(root)
+            job = store.wait(store.import_path(str(target))['id'], timeout=120)
+            self.assertEqual(job['state'], 'ready', job.get('message'))
+            self.assertEqual(job['format'], 'xlsx')
+            self.assertEqual(job['sheet'], '2023-2024')
+            self.assertEqual(job['sheets_read'], ['2023-2024', '2025-2026'])
+            self.assertEqual(job['sheets'], ['Master Overview', '2023-2024', '2025-2026', 'Downstream Activity'])
+            catalog = job['catalog']
+            self.assertEqual(catalog['row_count'], 4)
+            self.assertEqual(catalog['supported_rows'], 4, catalog)
+            self.assertIn('Read 2 worksheets with the same columns: 2023-2024, 2025-2026.', catalog['warnings'])
+            names = {row['id']: row['name'] for row in catalog['committees']}
+            self.assertEqual(names['C00919084'], 'TALARICO FOR TEXAS')
+            self.assertEqual(catalog['cycles'], ['2026', '2024'])
+            page = store.select(job['id'], 'C00007880', '2024')
+            self.assertEqual(page['total_rows'], 2)
+            self.assertEqual(page['totals'], [{'channel': 'Receipts', 'amount': 25.5, 'row_count': 2}])
+            self.assertEqual(page['rows'][0]['date'], '2024-12-31')
+            self.assertEqual(page['rows'][0]['status'], 'supported')
+
+    def test_explicit_sheet_reads_the_aggregate_table(self):
+        with temp_fixture_dir() as fixtures, temp_data_root() as root:
+            target = self.build(fixtures)
+            store = csv_data.Store(root)
+            job = store.wait(store.import_path(str(target), sheet='Downstream Activity')['id'], timeout=120)
+            self.assertEqual(job['state'], 'ready', job.get('message'))
+            self.assertEqual(job['sheet'], 'Downstream Activity')
+            self.assertEqual(job['sheets_read'], ['Downstream Activity'])
+            page = store.select(job['id'], 'C00631051')
+            self.assertEqual(page['total_rows'], 1)
+            self.assertTrue(page['rows'][0]['channel'].startswith('Reported cycle aggregate'), page['rows'][0])
+
+    def test_workbook_without_a_committee_column_names_its_sheets(self):
+        with temp_fixture_dir() as fixtures, temp_data_root() as root:
+            target = self.build(fixtures, with_data=False)
+            store = csv_data.Store(root)
+            job = store.wait(store.import_path(str(target))['id'], timeout=120)
+            self.assertEqual(job['state'], 'failed')
+            self.assertEqual(job['message'], 'No worksheet in this workbook has a Committee ID column. Sheets: Master Overview.')
+            self.assertEqual(job['sheets'], ['Master Overview'])
 if __name__ == '__main__':
     unittest.main()

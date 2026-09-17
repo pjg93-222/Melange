@@ -311,7 +311,7 @@ _job_groups = _group_by_keyset(JOB_CONTRACT['examples'])
 # same two contract files as before.
 LIMITS_KEYS = frozenset({'max_bytes', 'max_columns', 'max_rows', 'max_bytes_message', 'max_columns_message',
                          'max_rows_message', 'accepted_suffixes', 'max_json_bytes'})
-DESCRIPTIVE_KEYS = {'format', 'source_kind', 'source_path', 'sheet', 'sheets', 'encoding', 'delimiter',
+DESCRIPTIVE_KEYS = {'format', 'source_kind', 'source_path', 'sheet', 'sheets', 'sheets_read', 'encoding', 'delimiter',
                     'header_source'}
 CATALOG_KEYS = frozenset({'id', 'name', 'sha256', 'row_count', 'committees', 'cycles', 'supported_rows',
                           'unsupported_rows', 'unassigned_rows', 'session_only', 'imported_at', 'bytes',

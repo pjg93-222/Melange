@@ -2010,7 +2010,10 @@ class Handler(BaseHTTPRequestHandler):
             # /api/evidence-csv so a refusal is shown before anything uploads.
             if self.path == '/api/evidence-csv' and 'application/json' not in self.headers.get('Content-Type', '').lower():
                 store = self.server.app.evidence_store
-                expected = int(self.headers.get('Content-Length', '0'))
+                try:
+                    expected = int(self.headers.get('Content-Length', '0'))
+                except ValueError:
+                    raise ValueError('The upload did not state its size.') from None
                 if expected > evidence_csv.MAX_BYTES:
                     self.close_connection = True
                     return self.send({'error': evidence_csv.M_BYTES}, 400)

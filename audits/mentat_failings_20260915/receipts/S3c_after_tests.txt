@@ -1,0 +1,6 @@
+# S3c test tallies
+HEAD b13d090180ea9e995609a76609b04793bec1fd2d  UTC 2026-09-17T03:29:08Z  cwd mentat/
+python -m unittest tests.test_evidence_readers tests.test_evidence_csv tests.test_pac_evidence_errors -> Ran 58 tests OK (readers 41 incl. MentatWorkbookSelection x3, legacy 10, collector 7)
+python -m unittest tests.test_evidence_csv_stream -> Ran 18 tests OK
+node tests\test_evidence_csv_browser.cjs -> ALL 30 STEPS PASSED, exit 0 (receipt S3c_after_browser.txt)
+real workbook probe (import_path, temp store): Credit Union Industry Spending Overview.xlsx -> ready in 130.7 s; sheets_read 2021-2022, 2023-2024, 2025-2026, Cycle Exceptions; 27,632 rows, 27,430 supported; 264 committees; C00007880/2024 = 232 rows, Receipts 9064.59

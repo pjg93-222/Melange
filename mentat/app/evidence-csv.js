@@ -50,10 +50,10 @@
     $('evidence-csv-committee').replaceChildren(...committees.map(item=>new Option(`${item.name || item.id} · ${item.id}`,item.id)));
     $('evidence-csv-committee').disabled = !committees.length;
   }
-  function hideSheetPicker() { $('evidence-sheet-label').hidden = true; }
+  function hideSheetPicker() { const label = $('evidence-sheet-label'); if (label) label.hidden = true; }
   function showSheets(job) {
     const sheets = job.sheets || [];
-    if (sheets.length > 1) {
+    if (sheets.length > 1 && $('evidence-sheet')) {
       $('evidence-sheet').replaceChildren(...sheets.map(name => new Option(name, name)));
       $('evidence-sheet').value = sheets.includes(job.sheet) ? job.sheet : sheets[0];
       $('evidence-sheet-label').hidden = false;
@@ -151,7 +151,9 @@
       }
       say(current.bytes_read
         ? `Reading ${label} · ${number(current.rows_read)} rows · ${megabytes(current.bytes_read)} of ${megabytes(current.bytes)} MB`
-        : `Reading ${label} · ${number(current.rows_read)} rows`);
+        : (!current.rows_read && (current.format === 'xlsx' || current.format === 'json'))
+          ? `Reading ${label} · opening the ${current.format === 'xlsx' ? 'workbook' : 'file'}…`
+          : `Reading ${label} · ${number(current.rows_read)} rows`);
       await new Promise(resolve => setTimeout(resolve, pollDelay));
       if (ticket !== revision) return;
       try {
@@ -207,7 +209,7 @@
   async function importPath(path, sheet, headerPath) {
     const ticket = ++revision; resetSelection(); hideSheetPicker();
     pendingPathRequest = {path, header_path: headerPath || ''}; pendingUploadFile = null;
-    $('evidence-path').value = path;
+    if ($('evidence-path')) $('evidence-path').value = path;
     say(`Reading ${path}…`);
     let job;
     try {
@@ -220,9 +222,9 @@
     await followJob(job, ticket, path);
   }
   function readPathBox() {
-    const path = $('evidence-path').value.trim();
+    const path = ($('evidence-path') || {value: ''}).value.trim();
     if (!path) { say('Enter a path on this computer, then choose Read this file.'); return; }
-    importPath(path, '', $('evidence-header-path').value.trim());
+    importPath(path, '', ($('evidence-header-path') || {value: ''}).value.trim());
   }
   function renderBrowser(body) {
     const header = `<p class="muted">${escapeHtml(body.path || 'This computer')}</p>`;
@@ -254,21 +256,21 @@
     const file = $('evidence-csv-file').files[0]; if (!file) return;
     importFile(file, '');
   });
-  $('evidence-sheet').addEventListener('change', () => {
+  if ($('evidence-sheet')) $('evidence-sheet').addEventListener('change', () => {
     const sheet = $('evidence-sheet').value;
     if (pendingUploadFile) importFile(pendingUploadFile, sheet);
     else if (pendingPathRequest) importPath(pendingPathRequest.path, sheet, pendingPathRequest.header_path);
   });
-  $('evidence-path-read').addEventListener('click', readPathBox);
-  $('evidence-path').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); readPathBox(); } });
-  $('evidence-browse').addEventListener('click', () => {
+  if ($('evidence-path-read')) $('evidence-path-read').addEventListener('click', readPathBox);
+  if ($('evidence-path')) $('evidence-path').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); readPathBox(); } });
+  if ($('evidence-browse')) $('evidence-browse').addEventListener('click', () => {
     const opening = $('evidence-browser').hidden;
     $('evidence-browser').hidden = !opening;
     if (opening) browse(directoryOf($('evidence-path').value));
   });
-  $('evidence-browser').addEventListener('click', event => {
+  if ($('evidence-browser')) $('evidence-browser').addEventListener('click', event => {
     const openTarget = event.target.closest('[data-open-path]');
-    if (openTarget) { importPath(openTarget.dataset.openPath, '', $('evidence-header-path').value.trim()); return; }
+    if (openTarget) { importPath(openTarget.dataset.openPath, '', ($('evidence-header-path') || {value: ''}).value.trim()); return; }
     const browseTarget = event.target.closest('[data-browse-path]');
     if (browseTarget) browse(browseTarget.dataset.browsePath);
   });

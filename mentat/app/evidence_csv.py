@@ -145,7 +145,7 @@ BULK_HEADERS = {
 BULK_TYPES = tuple(sorted(BULK_HEADERS, key=len, reverse=True))
 
 COMMITTEE_FIELDS = ('committee_id', 'cmte_id', 'source_committee_id', 'pac_committee_id', 'pac_id', 'recipient_key')
-NAME_FIELDS = ('committee_name', 'cmte_nm', 'source_committee_name', 'pac_name', 'recipient_committee')
+NAME_FIELDS = ('committee_name', 'cmte_nm', 'source_committee_name', 'pac_name', 'recipient_committee', 'recipient')
 DATE_FIELDS = ('transaction_date', 'transaction_dt', 'date', 'payment_date')
 AMOUNT_FIELDS = ('amount', 'transaction_amount', 'transaction_amt', 'net_included_amount')
 CYCLE_FIELDS = ('cycle', 'election_cycle', 'two_year_transaction_period')
@@ -156,7 +156,7 @@ SCHEMAS = (
 )
 TYPES = {
     'receipt':'receipt', 'receipts':'receipt', 'schedule_a':'receipt', 'sa':'receipt',
-    'contribution_receipt':'receipt', 'disbursement':'disbursement', 'disbursements':'disbursement',
+    'contribution_receipt':'receipt', 'contribution':'receipt', 'disbursement':'disbursement', 'disbursements':'disbursement',
     'schedule_b':'disbursement', 'sb':'disbursement', 'independent_expenditure':'independent_spending',
     'independent_spending':'independent_spending', 'schedule_e':'independent_spending', 'se':'independent_spending',
 }
@@ -388,7 +388,7 @@ def normalize(raw, row_number, columns, extra_cells=()):
         'amount':float(amount_value) if amount_value is not None else None, '_amount':amount_value,
         'date':observed_date, 'date_raw':date_raw, 'cycle':selected_cycle,
         'direction':direction if kind in ('independent_spending', 'reported_aggregate') else '',
-        'counterparty':first(row, ('contributor_name', 'recipient_name', 'candidate_name', 'candidate_officeholder', 'reported_name', 'name')),
+        'counterparty':first(row, ('contributor_name', 'contributor', 'recipient_name', 'candidate_name', 'candidate_officeholder', 'reported_name', 'name')),
         'candidate_id':first(row, ('candidate_id', 'cand_id', 'candidate_id_as_filed')),
         'candidate_name':first(row, ('candidate_name', 'candidate_officeholder', 'candidate_name_as_filed')),
         'record_id':first(row, ('sub_id', 'transaction_id', 'tran_id', 'record_id')),
@@ -450,7 +450,7 @@ def descriptive(record):
         fmt = source_format(name, record.get('header_path') or '')
     return {'format':fmt, 'source_kind':record.get('source_kind') or 'upload',
             'source_path':record.get('source_path') or '', 'sheet':record.get('sheet') or '',
-            'sheets':list(record.get('sheets') or []), 'encoding':record.get('encoding') or '',
+            'sheets':list(record.get('sheets') or []), 'sheets_read':list(record.get('sheets_read') or []), 'encoding':record.get('encoding') or '',
             'delimiter':record.get('delimiter') or '', 'header_source':record.get('header_source') or ''}
 
 
@@ -861,6 +861,42 @@ def bulk_reader(path, record):
         yield reader
 
 
+class BoundedBytes(io.RawIOBase):
+    """A byte stream that refuses to hand out more than `limit` bytes.
+
+    A zip member's declared size is the only gate before extraction; a lying
+    header could otherwise stream past MAX_BYTES into one unbounded csv line.
+    The stored source files are already capped on disk, so this only matters
+    for what is decompressed on the way out of an archive.
+    """
+
+    def __init__(self, raw, limit):
+        super().__init__()
+        self._raw, self._limit, self._count = raw, int(limit), 0
+
+    def readable(self):
+        return True
+
+    def readinto(self, buffer):
+        chunk = self._raw.read(len(buffer))
+        if not chunk:
+            return 0
+        self._count += len(chunk)
+        if self._count > self._limit:
+            raise ValueError(bytes_message())
+        buffer[:len(chunk)] = chunk
+        return len(chunk)
+
+    def tell(self):
+        return self._count
+
+    def close(self):
+        try:
+            self._raw.close()
+        finally:
+            super().close()
+
+
 @contextmanager
 def bulk_rows(open_bytes, stems, record, size):
     """The rows of one bulk file or zip member, under a resolved header."""
@@ -870,7 +906,7 @@ def bulk_rows(open_bytes, stems, record, size):
     if encoding == 'cp1252':
         warnings.append(M_CP1252)
     meta = {'encoding':encoding, 'delimiter':'|', 'header_source':header_source, 'sheets':[]}
-    raw = open_bytes()
+    raw = io.BufferedReader(BoundedBytes(open_bytes(), MAX_BYTES))
     # QUOTE_NONE because bulk rows are not quoted: an apostrophe or an inch
     # mark in an employer name is a character there, not an opening quote.
     stream = io.TextIOWrapper(raw, encoding=encoding, newline='')
@@ -899,9 +935,65 @@ def bulk_rows(open_bytes, stems, record, size):
         raw.close()
 
 
+COMMITTEE_KEYS = frozenset(COMMITTEE_FIELDS)
+AMOUNT_KEYS = frozenset(AMOUNT_FIELDS) | frozenset(name for _, amounts, _ in SCHEMAS for name in amounts)
+DATE_KEYS = frozenset(DATE_FIELDS) | frozenset(name for _, _, dates in SCHEMAS for name in dates)
+
+
+def M_NO_SHEET(sheets):
+    return f'No worksheet in this workbook has a Committee ID column. Sheets: {", ".join(sheets)}.'
+
+
+def header_row(rows, limit=50):
+    """(row index, header cells) of the first header-like row.
+
+    Exports and Mentat's own workbooks put a title, a note and a source line
+    above the header, so the header is the first row (within `limit`) whose
+    cells name a committee column; failing that, the first row with three or
+    more filled cells; failing that, the first row with anything in it.
+    """
+    wide = first = None
+    for index, values in enumerate(rows, 1):
+        if index > limit:
+            break
+        cells = [cell_text(value) for value in values]
+        while cells and not cells[-1].strip():
+            cells.pop()
+        filled = [cell for cell in cells if cell.strip()]
+        if not filled:
+            continue
+        if {key(cell) for cell in filled} & COMMITTEE_KEYS:
+            return index, cells
+        if wide is None and len(filled) >= 3:
+            wide = (index, cells)
+        if first is None:
+            first = (index, cells)
+    return wide or first or (0, [])
+
+
+def sheet_grade(columns):
+    """How much of a table a header describes: 3 dated amounts, 2 aggregates, 1 ids only, 0 none."""
+    keys = set(columns)
+    if not keys & COMMITTEE_KEYS:
+        return 0
+    if keys & AMOUNT_KEYS and keys & DATE_KEYS:
+        return 3
+    if 'net_included_amount' in keys:
+        return 2
+    return 1
+
+
 @contextmanager
 def workbook_reader(path, record):
-    """One worksheet of an .xlsx/.xlsm, read cell by cell, never held whole."""
+    """The worksheets of an .xlsx/.xlsm that hold the table, read cell by cell.
+
+    With no worksheet named, every sheet is surveyed (its first rows only): the
+    best-graded header wins, ties going to the sheet with more rows, and every
+    sheet whose header is identical to the winner's is read after it as one
+    table. A Mentat industry workbook therefore reads its cycle sheets
+    together and skips its overview, summary and list sheets; a workbook with
+    one data sheet reads that one. Naming a worksheet reads only that one.
+    """
     import openpyxl
     try:
         book = openpyxl.load_workbook(path, read_only=True, data_only=True)
@@ -909,46 +1001,59 @@ def workbook_reader(path, record):
         raise ValueError(M_XLSX_READ) from error
     try:
         sheets = list(book.sheetnames)
-        name = str(record.get('sheet') or '') or (sheets[0] if sheets else '')
-        if name not in sheets:
-            raise ValueError(M_SHEET(name, sheets))
-        size = int(record.get('bytes') or 0)
-        meta = {'encoding':'', 'delimiter':'', 'header_source':'row', 'sheets':sheets, 'sheet':name}
-        iterator = book[name].iter_rows(values_only=True)
-        headers, start = [], 0
-        for start, row in enumerate(iterator, 1):
-            cells = [cell_text(value) for value in row]
-            if any(cell.strip() for cell in cells):
-                while cells and not cells[-1].strip():
-                    cells.pop()
-                headers = cells
-                break
+        # Written onto the record before anything can fail, so a refused
+        # workbook still tells the reader which worksheets it has.
+        record['sheets'] = sheets
+        chosen = str(record.get('sheet') or '')
+        if chosen and chosen not in sheets:
+            raise ValueError(M_SHEET(chosen, sheets))
+        survey = {}
+        for name in sheets:
+            sheet = book[name]
+            index, headers = header_row(sheet.iter_rows(values_only=True))
+            columns = [key(item) for item in headers]
+            survey[name] = (index, headers, columns, sheet_grade(columns), int(sheet.max_row or 0))
+        if chosen:
+            group = [chosen]
+        else:
+            best = max(sheets, key=lambda name: (survey[name][3], survey[name][4], -sheets.index(name)))
+            if survey[best][3] == 0:
+                raise ValueError(M_NO_SHEET(sheets))
+            group = [name for name in sheets if survey[name][2] == survey[best][2]]
+        headers = list(survey[group[0]][1])
         if not headers:
             raise ValueError(M_EMPTY)
         if len(headers) > MAX_COLUMNS:
             raise ValueError(columns_message())
-        first = start
+        size = int(record.get('bytes') or 0)
+        meta = {'encoding':'', 'delimiter':'', 'header_source':'row', 'sheets':sheets,
+                'sheet':group[0], 'sheets_read':list(group)}
+        warnings = ([f'Read {len(group)} worksheets with the same columns: {", ".join(group)}.']
+                    if len(group) > 1 else [])
 
         def rows():
-            index = first
-            try:
-                for index, row in enumerate(iterator, first + 1):
-                    cells = [cell_text(value) for value in row]
-                    # Trailing blanks past the header are the sheet's used
-                    # range, not extra values: dropping them keeps a whole
-                    # worksheet from being reported as ragged rows.
-                    while len(cells) > len(headers) and not cells[-1].strip():
-                        cells.pop()
-                    yield index, cells
-            except ValueError:
-                raise
-            except Exception as error:
-                raise ValueError(M_READ(index)) from error
+            for name in group:
+                first = survey[name][0]
+                index = first
+                try:
+                    for index, row in enumerate(book[name].iter_rows(values_only=True), 1):
+                        if index <= first:
+                            continue
+                        cells = [cell_text(value) for value in row]
+                        # Trailing blanks past the header are the sheet's used
+                        # range, not extra values: dropping them keeps a whole
+                        # worksheet from being reported as ragged rows.
+                        while len(cells) > len(headers) and not cells[-1].strip():
+                            cells.pop()
+                        yield index, cells
+                except ValueError:
+                    raise
+                except Exception as error:
+                    raise ValueError(M_READ(index)) from error
 
-        yield Reader(headers, rows(), lambda: size, meta, [])
+        yield Reader(headers, rows(), lambda: size, meta, warnings)
     finally:
         book.close()
-
 
 @contextmanager
 def json_reader(path, record):
@@ -1350,7 +1455,7 @@ class Store:
                           for channel in sorted(amounts)],
                 'supported_rows':supported, 'unsupported_rows':total - supported,
                 'offset':offset, 'limit':limit, 'total_rows':total, 'has_more':offset + limit < total,
-                'warnings':list(WARNINGS)}
+                'warnings':list(source.get('warnings') or WARNINGS)}
 
     def adopt(self, identifier, name, path, size, digest, suffix='.csv', sheet='',
               source_kind='upload', source_path='', header_path=''):
@@ -1616,7 +1721,7 @@ def catalog(document):
             'supported_rows':sum(row['status'] == 'supported' for row in rows),
             'unsupported_rows':sum(row['status'] != 'supported' for row in rows), 'unassigned_rows':unassigned,
             'session_only':False, 'imported_at':document.get('imported_at', ''),
-            'bytes':int(document.get('bytes') or 0), 'warnings':list(WARNINGS)}
+            'bytes':int(document.get('bytes') or 0), 'warnings':list(WARNINGS) + list(document.get('warnings') or [])}
 
 
 def select(document, committee='', selected_cycle='', offset=0, limit=200):

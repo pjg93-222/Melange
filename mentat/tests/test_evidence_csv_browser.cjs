@@ -11,6 +11,7 @@
  */
 const assert = require('node:assert/strict');
 const {spawn} = require('node:child_process');
+const {execFileSync} = require('node:child_process');
 const path = require('node:path');
 const os = require('node:os');
 const fs = require('node:fs');
@@ -25,7 +26,7 @@ const FORBIDDEN_PORTS = new Set([8802, 8806, 8808]);
 // running (1.6-3.5 GB free of 31.5 GB), and step 5 failed twice at 60s purely
 // under that load while passing in ~5s on a quiet host. The caps below have to
 // clear the slow end, and this one has to clear the sum of them.
-const HARD_CAP_MS = 870000;
+const HARD_CAP_MS = 1_200_000; // raised for S3b: 14 more steps, each with its own bounded (mostly 15s) wait, added atop the original 19-step sum.
 const trace = message => { if (process.env.MENTAT_BROWSER_TRACE) console.log(`[browser] ${message}`); };
 
 // Rows are the width of a real Schedule A export, ~155 bytes, which is what
@@ -184,6 +185,121 @@ function cleanupPath(target) {
   catch (error) { console.error(`cleanup failed for ${target}: ${error.message}`); }
 }
 
+// ---------------------------------------------------------------------------
+// S3b additions: any file type, any path, xlsx sheets, browse(). Fixtures below
+// land in the SAME scratch fixtureDir step 1 already created. sheets.xlsx and
+// indiv-bulk.zip need a real xlsx/zip container; this repo already builds those
+// from Python (openpyxl / the zipfile stdlib) rather than a Node dependency, so
+// a short Python script is spawned once here, the same way startServer() already
+// spawns `python app/server.py`.
+// ---------------------------------------------------------------------------
+const PYTHON_S3B_FIXTURE_SCRIPT = `
+import sys, zipfile
+import openpyxl
+
+target = sys.argv[1]
+
+wb = openpyxl.Workbook()
+sheet1 = wb.active
+sheet1.title = 'Sheet1'
+sheet1.append(['committee_id', 'committee_name', 'contribution_receipt_amount', 'contribution_receipt_date',
+               'two_year_transaction_period'])
+sheet1.append(['C00000001', 'Example PAC', 10.0, '2026-01-05', '2026'])
+sheet1.append(['C00000001', 'Example PAC', 20.0, '2026-01-06', '2026'])
+detail = wb.create_sheet('Detail')
+detail.append(['committee_id', 'committee_name', 'contribution_receipt_amount', 'contribution_receipt_date',
+               'two_year_transaction_period'])
+detail.append(['C00000002', 'Detail PAC', 30.0, '2026-02-05', '2026'])
+wb.save(target + '/sheets.xlsx')
+
+import datetime
+book = openpyxl.Workbook()
+overview = book.active
+overview.title = 'Master Overview'
+overview.append(['Credit Union Master Overview'])
+overview.append(['Mentat master-workbook layout'])
+overview.append([])
+overview.append(['Company', 'Rank', 'Total Giving'])
+overview.append(['Alpha CU', 1, 100.0])
+columns = ['Source ID', 'Cycle', 'FEC Filing Cycle', 'Cycle Alignment', 'Company', 'Contributor', 'Employee Tier',
+           'Amount', 'Analysis Amount', 'Party', 'Recipient Category', 'Category Source', 'Party Source', 'Recipient',
+           'Committee ID', 'Recipient Key', 'Date', 'City', 'State', 'ZIP', 'Employer', 'Occupation', 'Record Type']
+cycles = {
+    '2023-2024': [('C00007880', 'AMERICAS CREDIT UNIONS PAC', 10.0, datetime.datetime(2024, 12, 31)),
+                  ('C00007880', 'AMERICAS CREDIT UNIONS PAC', 15.5, datetime.datetime(2024, 6, 1)),
+                  ('C00919084', 'TALARICO FOR TEXAS', 25.0, datetime.datetime(2024, 1, 2))],
+    '2025-2026': [('C00919084', 'TALARICO FOR TEXAS', 30.77, datetime.datetime(2026, 3, 3))],
+}
+for cycle_name, rows in cycles.items():
+    sheet = book.create_sheet(cycle_name)
+    sheet.append([cycle_name + ' Credit Union Contributions'])
+    sheet.append(['Contribution-date cycle.'])
+    sheet.append(['Source DB SHA-256: fixture'])
+    sheet.append(columns)
+    for index, (committee, recipient, amount, when) in enumerate(rows, 1):
+        sheet.append(['40%d' % index, cycle_name, cycle_name[-4:], 'OK', 'Alpha CU', 'DOE, JANE', 'Employee', amount, amount,
+                      'D', 'Candidate', 'fec', '', recipient, committee, 'FEC:' + committee, when, 'CITY', 'ST', '00000',
+                      'ALPHA CU', 'ANALYST', 'CONTRIBUTION'])
+downstream = book.create_sheet('Downstream Activity')
+downstream.append(['Downstream Committee-to-Candidate Activity'])
+downstream.append(['Same-cycle activity.'])
+downstream.append(['885,132 exact source rows'])
+downstream.append([])
+downstream.append(['Cycle', 'Source Committee', 'Source Committee ID', 'Candidate / Officeholder', 'Support / Oppose',
+                   'Transaction Type', 'Net Included Amount'])
+downstream.append(['2021-2022', 'ABRAHAM LINCOLN PAC', 'C00631051', 'ARENHOLZ, ASHLEY', 'Contribution / Other', '24K', 10000])
+book.save(target + '/overview.xlsx')
+
+header = ['CMTE_ID', 'AMNDT_IND', 'RPT_TP', 'TRANSACTION_PGI', 'IMAGE_NUM', 'TRANSACTION_TP', 'ENTITY_TP', 'NAME',
+          'CITY', 'STATE', 'ZIP_CODE', 'EMPLOYER', 'OCCUPATION', 'TRANSACTION_DT', 'TRANSACTION_AMT', 'OTHER_ID',
+          'TRAN_ID', 'FILE_NUM', 'MEMO_CD', 'MEMO_TEXT', 'SUB_ID']
+
+
+def bulk_row(index):
+    values = {name: '' for name in header}
+    values.update({
+        'CMTE_ID': 'C00000001', 'AMNDT_IND': 'N', 'RPT_TP': 'Q1', 'TRANSACTION_PGI': 'P2026',
+        'IMAGE_NUM': '2026030100000%d' % index, 'TRANSACTION_TP': '15', 'ENTITY_TP': 'IND',
+        'NAME': 'DOE JANE %d' % index, 'CITY': 'WASHINGTON', 'STATE': 'DC', 'ZIP_CODE': '20002',
+        'EMPLOYER': 'EXAMPLE EMPLOYER', 'OCCUPATION': 'ANALYST',
+        'TRANSACTION_DT': '0%d152026' % (1 + index % 9), 'TRANSACTION_AMT': '%d00.00' % index,
+        'TRAN_ID': 'SA-%d' % index, 'FILE_NUM': '1234567', 'SUB_ID': '400000000000%d' % index,
+    })
+    return '|'.join(values[name] for name in header)
+
+
+body = '\\r\\n'.join(bulk_row(index) for index in range(1, 4)) + '\\r\\n'
+with zipfile.ZipFile(target + '/indiv-bulk.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+    archive.writestr('indiv.txt', body)
+print('S3B_FIXTURES_OK')
+`;
+
+function buildXlsxAndZipFixtures(dir) {
+  const scriptPath = path.join(dir, 'build_s3b_fixtures.py');
+  fs.writeFileSync(scriptPath, PYTHON_S3B_FIXTURE_SCRIPT);
+  const output = execFileSync(process.env.MENTAT_PYTHON || 'python', [scriptPath, dir], {cwd: MENTAT_DIR}).toString();
+  if (!output.includes('S3B_FIXTURES_OK')) throw new Error(`fixture-building python script did not report success: ${output}`);
+}
+
+function writeS3bFixtures(dir) {
+  buildXlsxAndZipFixtures(dir);
+  fs.writeFileSync(path.join(dir, 'evidence.tsv'),
+    'committee_id\tcommittee_name\tcontribution_receipt_amount\tcontribution_receipt_date\ttwo_year_transaction_period\r\n'
+    + 'C00000001\tExample PAC\t10.00\t2026-01-05\t2026\r\n');
+  fs.writeFileSync(path.join(dir, 'evidence.json'), JSON.stringify({results: [
+    {committee_id: 'C00000001', committee_name: 'Example PAC', contribution_receipt_amount: 10.0,
+     contribution_receipt_date: '2026-01-05', two_year_transaction_period: '2026'},
+  ]}));
+  // Windows-1252: 'Caf\xe9 PAC' -- 0xE9 is invalid standalone UTF-8, valid cp1252.
+  fs.writeFileSync(path.join(dir, 'cp1252.csv'), Buffer.concat([
+    Buffer.from('committee_id,committee_name,contribution_receipt_amount,contribution_receipt_date,'
+      + 'two_year_transaction_period\r\nC00000001,Caf', 'utf8'),
+    Buffer.from([0xe9]),
+    Buffer.from(' PAC,10.00,2026-01-05,2026\r\n', 'utf8'),
+  ]));
+  fs.writeFileSync(path.join(dir, 'notes.pdf'), Buffer.from('%PDF-1.4 not really a pdf', 'utf8'));
+}
+
 let stepNumber = 0;
 let currentStepLabel = 'startup (fixtures, port selection, server launch)';
 let serverAForWatchdog = null;
@@ -271,7 +387,7 @@ function pass(detail) {
     async function explainWait(what, error) {
       let current = '<unreadable>';
       try { current = await statusText(page); } catch (readError) { current = `<${readError.message}>`; }
-      error.message = [
+      const enriched = [
         `${error.message}`,
         `  waiting for: ${what}`,
         `  #evidence-csv-status was: ${JSON.stringify(current)}`,
@@ -281,7 +397,7 @@ function pass(detail) {
         ...consoleLines.slice(-20).map(line => `    ${line}`),
         `  pageerrors: ${JSON.stringify(errors)}`,
       ].join('\n');
-      throw error;
+      throw Object.assign(new Error(enriched), {cause: error});
     }
 
     async function waitForStatusExact(expected, timeout = 15000) {
@@ -396,10 +512,10 @@ function pass(detail) {
     assert.equal(evidencePosts.length, 0, 'big.csv must be rejected client-side before any upload is attempted');
     pass('big.csv rejected by the client pre-flight size check; no POST issued');
 
-    step('error case: notes.txt rejected for its extension');
+    step('error case: notes.txt is read as delimited text and refused for its header');
     await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'notes.txt'));
-    await waitForStatusExact('notes.txt: Choose a CSV file with a name ending in .csv.');
-    pass('notes.txt rejected for its extension');
+    await waitForStatusExact('notes.txt: The CSV needs a Committee ID, CMTE_ID, or Source Committee ID column.');
+    pass('notes.txt read as delimited text and refused for its header');
 
     step('error case: wide201.csv rejected for exceeding the column cap');
     await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'wide201.csv'));
@@ -416,10 +532,10 @@ function pass(detail) {
     await waitForStatusExact('empty.csv: The CSV file is empty.');
     pass('empty.csv rejected as empty');
 
-    step('error case: latin1.csv rejected for invalid UTF-8 bytes');
+    step('error case: latin1.csv holds control bytes and is refused as binary');
     await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'latin1.csv'));
-    await waitForStatusExact('latin1.csv: Use a UTF-8 CSV file without invalid text characters.');
-    pass('latin1.csv rejected for invalid UTF-8 bytes');
+    await waitForStatusExact('latin1.csv: This file contains binary data and could not be read as text.');
+    pass('latin1.csv holds control bytes and is refused as binary');
 
     step('error case: nocommittee.csv rejected for missing a committee-id column');
     await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'nocommittee.csv'));
@@ -461,6 +577,106 @@ function pass(detail) {
     assert.equal(errors.length, 0, `expected zero pageerror entries, got: ${JSON.stringify(errors)}`);
     assert.equal(remote.length, 0, `expected zero remote requests, got: ${JSON.stringify(remote)}`);
     pass('zero pageerror entries and zero remote requests across the whole run');
+
+    step('write additional S3b fixtures (xlsx, tsv, json, cp1252 csv, fec bulk zip, pdf)');
+    writeS3bFixtures(fixtureDir);
+    pass(`S3b fixtures written under ${fixtureDir}`);
+
+    step('picker input has no accept attribute; its label is unchanged');
+    const fileInputAccept = await page.getAttribute('#evidence-csv-file', 'accept');
+    assert.equal(fileInputAccept, null, `expected no accept attribute on #evidence-csv-file, got ${JSON.stringify(fileInputAccept)}`);
+    const fileLabelText = (await page.textContent('label[for="evidence-csv-file"]')).trim();
+    assert.equal(fileLabelText, 'Choose CSV');
+    await assertStatusNotEmpty(page);
+    pass('picker input has no accept attribute; label text unchanged ("Choose CSV")');
+
+    step('upload a 2-sheet xlsx whose sheets share one header: both sheets read as one table, no picker UI');
+    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'sheets.xlsx'));
+    await waitForStatusMatching(/rows in file$/);
+    assert.equal(await page.locator('#evidence-sheet-label').count(), 0, 'no worksheet picker markup may exist (UI unchanged)');
+    // The page renders one committee at a time; the file-level count and the two
+    // committees (one per sheet) prove both sheets were read as one table.
+    const sheetsStatus = (await page.textContent('#evidence-csv-status')).trim();
+    assert.ok(/ · 3 rows in file$/.test(sheetsStatus), `expected '… · 3 rows in file', got ${JSON.stringify(sheetsStatus)}`);
+    const sheetsCommittees = await page.locator('#evidence-csv-committee option').allTextContents();
+    assert.equal(sheetsCommittees.length, 2, `expected two committees (one per sheet), got ${JSON.stringify(sheetsCommittees)}`);
+    const sheetsRowCount = await page.locator('#evidence-csv-rows tr').count();
+    assert.ok(sheetsRowCount > 0, 'expected rows rendered for the first committee');
+    const sheetsWarnings = await page.textContent('#evidence-csv-warnings');
+    assert.ok(sheetsWarnings.includes('Read 2 worksheets with the same columns: Sheet1, Detail.'),
+      `expected the combined-sheets warning, got: ${JSON.stringify(sheetsWarnings)}`);
+    await assertStatusNotEmpty(page);
+    pass('sheets.xlsx read Sheet1 + Detail as one 3-row, 2-committee table; combined-sheets warning shown; no picker UI');
+
+    step('upload a tab-delimited tsv: ready');
+    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'evidence.tsv'));
+    await waitForStatusMatching(/rows in file$/);
+    assert.ok(await page.locator('#evidence-csv-rows tr').count() > 0);
+    await assertStatusNotEmpty(page);
+    pass('evidence.tsv (tab-delimited) imported and ready');
+
+    step('upload an openFEC-shaped json file: ready');
+    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'evidence.json'));
+    await waitForStatusMatching(/rows in file$/);
+    assert.ok(await page.locator('#evidence-csv-rows tr').count() > 0);
+    await assertStatusNotEmpty(page);
+    pass('evidence.json ({"results": [...]}) imported and ready');
+
+    step('upload a Windows-1252 csv: ready, with the decode warning visible');
+    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'cp1252.csv'));
+    await waitForStatusMatching(/rows in file$/);
+    const warningsText = await page.textContent('#evidence-csv-warnings');
+    assert.ok(warningsText.includes('Decoded as Windows-1252 because the file is not valid UTF-8.'),
+      `expected the Windows-1252 warning in #evidence-csv-warnings, got: ${JSON.stringify(warningsText)}`);
+    await assertStatusNotEmpty(page);
+    pass('cp1252.csv imported and ready; Windows-1252 decode warning visible in #evidence-csv-warnings');
+
+    step('upload an FEC bulk zip (recognised "indiv" stem): ready');
+    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'indiv-bulk.zip'));
+    await waitForStatusMatching(/rows in file$/);
+    assert.ok(await page.locator('#evidence-csv-rows tr').count() > 0);
+    await assertStatusNotEmpty(page);
+    pass('indiv-bulk.zip (FEC bulk) imported and ready');
+
+    step('error case: notes.pdf rejected for its file type, no upload issued');
+    const evidencePostsPdf = [];
+    const trackPostsPdf = request => {
+      if (request.method() === 'POST' && request.url().includes('/api/evidence-csv')) evidencePostsPdf.push(request.url());
+    };
+    page.on('request', trackPostsPdf);
+    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'notes.pdf'));
+    await waitForStatusExact('notes.pdf: This file type (.pdf) is not supported. Choose CSV, TSV, TXT, XLSX, JSON or an FEC bulk ZIP.');
+    page.off('request', trackPostsPdf);
+    assert.equal(evidencePostsPdf.length, 0, 'notes.pdf must be rejected client-side before any upload is attempted');
+    pass('notes.pdf rejected by the client pre-flight file-type check; no POST issued');
+
+    step('upload a Mentat industry workbook: title rows, header on row 4, two cycle sheets read as one table, receipts totalled');
+    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'overview.xlsx'));
+    await waitForStatusMatching(/rows in file$/);
+    const overviewRows = await page.locator('#evidence-csv-rows tr').count();
+    assert.ok(overviewRows > 0, 'expected contribution rows rendered from the cycle sheets');
+    const overviewWarnings = await page.textContent('#evidence-csv-warnings');
+    assert.ok(overviewWarnings.includes('Read 2 worksheets with the same columns: 2023-2024, 2025-2026.'),
+      `expected the combined cycle-sheets warning, got: ${JSON.stringify(overviewWarnings)}`);
+    const overviewTotals = await page.textContent('#evidence-csv-totals');
+    assert.ok(overviewTotals.includes('Receipts'), `expected a Receipts channel total, got: ${JSON.stringify(overviewTotals)}`);
+    const overviewCommittees = await page.locator('#evidence-csv-committee option').allTextContents();
+    assert.ok(overviewCommittees.some(text => text.includes('TALARICO FOR TEXAS')),
+      `expected the recipient name in the committee picker, got: ${JSON.stringify(overviewCommittees)}`);
+    await assertStatusNotEmpty(page);
+    pass(`overview.xlsx: ${overviewRows} rows rendered from the cycle sheets, Receipts totalled, recipient names shown`);
+
+    step('no path box, no browse panel, no sheet picker exist in the page (UI unchanged)');
+    for (const id of ['evidence-path', 'evidence-header-path', 'evidence-path-read', 'evidence-browse', 'evidence-browser', 'evidence-sheet']) {
+      assert.equal(await page.locator('#' + id).count(), 0, `#${id} must not exist`);
+    }
+    await assertStatusNotEmpty(page);
+    pass('none of the S3b path/browse/sheet controls exist in the page');
+
+    step('final check (again, across every S3b step too): zero pageerror entries and zero remote requests');
+    assert.equal(errors.length, 0, `expected zero pageerror entries, got: ${JSON.stringify(errors)}`);
+    assert.equal(remote.length, 0, `expected zero remote requests, got: ${JSON.stringify(remote)}`);
+    pass('zero pageerror entries and zero remote requests across the whole run, including every S3b step');
 
     console.log(`ALL ${stepNumber} STEPS PASSED`);
   } catch (error) {

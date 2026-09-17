@@ -1,0 +1,161 @@
+S3b RED BASELINE - Browser (Playwright) suite, run against a PRISTINE worktree of HEAD
+=======================================================================================
+
+Date: 2026-09-16 (America/New_York)
+Repo (source of HEAD): C:\Users\pgoff\Mentat, branch codex/mentat-crypto
+Pinned commit: 91fe7402a126eca3a38deeca0f7a84402632d8dd
+Worktree used for this run (scratch, detached HEAD, removed after this run):
+  C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-
+  Melange-Systems--claude-worktrees-evidence-csv-fetch-streaming-8bedff\
+  01cbac00-075b-491b-acb2-076e4014ef13\scratchpad\mentat-before-s3b
+cwd for the command below: <worktree>\mentat
+Command: node tests\test_evidence_csv_browser.cjs
+(run in the FOREGROUND with the Bash tool's own `timeout` parameter at
+590000 ms, never run_in_background, per this lane's instructions; the
+script's own internal HARD_CAP_MS watchdog is 1,200,000 ms -- raised from
+S3's 870,000 ms because this lane appended 14 more steps, each with its own
+mostly-15s bound, atop the original 19-step sum. Both exist for the same
+belt-and-braces reason S3's receipt recorded: a watchdog that never fires
+is cheap; one that is missing when needed is not.)
+
+Environment gap found and worked around (same read-only-copy-from-live-tree
+pattern S3's own receipt recorded, nothing in C:\Users\pgoff\Mentat touched):
+mentat/config/report-directory.json is gitignored (*.json). server.py's
+main() raises ValueError('The authoritative report directory is not
+configured.') before printing its ready line without it. Wrote a stand-in
+config into the scratch worktree only, pointing at a throwaway directory
+under this session's own scratchpad, never Paul's real report directory.
+
+=======================================================================================
+RESULT: exit code 1, ~106s wall time, clean bounded failure -- NOT a hang
+=======================================================================================
+
+STEP 1: write fixture CSVs to a scratch directory
+PASS step 1 (0.3s) - fixtures written under ...\mentat-evidence-fixtures-WiWJls
+STEP 2: pick a free port and launch the first console server
+PASS step 2 (2.2s) - server A ready on port 57090
+STEP 3: launch headless Chrome and open a page
+PASS step 3 (2.3s)
+STEP 4: open the evidence tab, select CSV source, expect the empty-catalog status
+PASS step 4 (3.3s)
+STEP 5: import six.csv (~6 MB) and check the first page of rows
+PASS step 5 (16.0s) - 100 rows rendered on the first page
+STEP 6: import forty.csv (~40 MB) and watch for a progress sample
+PASS step 6 (70.3s) - 553 polled progress samples
+STEP 7: kill and relaunch the console on the same port/data root; reuse prior imports
+PASS step 7 (7.8s)
+STEP 8: launch a second console on the same data root, a different port
+PASS step 8 (3.9s)
+STEP 9: error case: big.csv rejected client-side, no upload issued
+PASS step 9 (0.3s)
+STEP 10: error case: notes.txt rejected for its extension
+FAIL step 10 (error case: notes.txt rejected for its extension): page.waitForFunction: Timeout 15000ms exceeded.
+    at waitForStatusExact (...\mentat-before-s3b\mentat\tests\test_evidence_csv_browser.cjs:367:20)
+    at ...\mentat-before-s3b\mentat\tests\test_evidence_csv_browser.cjs:479:11
+browser.close() exceeded its 10000ms bound
+EXIT CODE: 1
+
+Decisive line: `page.waitForFunction: Timeout 15000ms exceeded` waiting for
+`#evidence-csv-status` to read exactly 'notes.txt: Choose a CSV file with a
+name ending in .csv.'. Steps 1-9 are this lane's byte-identical, un-owned
+copy of S3's own 9 steps and all passed cleanly at this commit -- S3's own
+features are fully present and working here, as expected (HEAD is
+post-S3). Step 10 is ALSO byte-identical, un-owned S3 code (this lane wrote
+nothing before its own step 20), and it failed here for a reason this lane
+verified is NOT an S3b regression and NOT this lane's doing:
+
+  - Investigated whether the pristine server's response is actually wrong: a
+    direct, out-of-browser HTTP POST of notes.txt's bytes to a freshly
+    started console at this exact commit (same headers the old client sends)
+    returns HTTP 400 with body {"error":"Choose a CSV file with a name
+    ending in .csv."} -- byte for byte the message step 10 waits for. The
+    server side is correct.
+  - Read the pristine worktree's own mentat/app/evidence-csv.js at this
+    commit (unmodified, un-owned): its '#evidence-csv-file' change handler
+    (line ~141) does no client-side extension check at all any more (only a
+    file.size vs limits.max_bytes check) -- it uploads any chosen file and
+    relies on the server's 400 to produce the message step 10 waits for.
+    That flow SHOULD reach the exact expected text; it appears to be a
+    pre-existing timing/race flakiness in this already-committed S3 step
+    that predates this lane and is outside this lane's ownership or scope
+    to fix (this lane never edits test_evidence_csv_browser.cjs's own
+    pre-existing steps, only appends after them).
+  - This run therefore never reached this lane's own new steps (20-33) in
+    a single top-to-bottom pass. That is recorded honestly here as the
+    literal RED result of running the deliverable file exactly as written
+    against the pinned commit, per this lane's instructions -- it is not a
+    "RED: hung at Nn" case (the script finished cleanly and quickly, well
+    inside every bound; nothing was killed).
+
+Because a single run could not exercise this lane's own steps 20-33 past a
+pre-existing, un-owned step-10 flake, this lane separately confirmed both of
+the two things a RED baseline needs to show for that range, by other means:
+
+  (a) The S3b markup and API genuinely do not exist at this pinned commit
+      (so steps 20+ WOULD fail here once reached), confirmed by static
+      source inspection of the pristine worktree's own checked-out files
+      (not the live tree):
+        - mentat/app/index.html at 91fe7402a: the '#evidence-csv-file'
+          input still carries `accept=".csv,text/csv"` (this lane's own
+          step 21 requires no accept attribute at all) and its label reads
+          "Choose CSV" (not "Choose a file").
+        - `grep -c 'evidence-path\|evidence-browse\|evidence-sheet-label'`
+          against this commit's evidence-csv.js and index.html: 0 matches
+          in both files -- none of #evidence-path, #evidence-header-path,
+          #evidence-path-read, #evidence-browse, #evidence-sheet(-label),
+          #evidence-browser exist yet.
+        - `grep -n 'import_path\|def browse('` against this commit's
+          evidence_csv.py: no matches -- neither the Python API this lane's
+          steps 20-33 (network-wise, via /api/evidence-csv {"path":...} and
+          POST /api/evidence-files) depend on exists yet either.
+
+  (b) This lane's own new steps 20-33, as literally written in the
+      deliverable, DO pass -- end to end, all 14 of them, in order -- once
+      Architect A's and executor B's implementation exists. Recorded twice:
+      first against their in-flight (uncommitted) work mid-session, then
+      again after this session's coordinator reported "A and B have
+      landed": a full, unmodified run of
+      `node tests\test_evidence_csv_browser.cjs` against the LIVE tree
+      (C:\Users\pgoff\Mentat\mentat, not this scratch worktree) printed
+      `PASS step 20` through `PASS step 33` and `ALL 33 STEPS PASSED`,
+      including the two steps that were genuinely red on an earlier
+      mid-session pass and are recorded here for completeness:
+        - step 22 (2-sheet xlsx import) and step 23 (second-sheet switch):
+          passed cleanly once tested against A's/B's real xlsx reader.
+        - step 26 (Windows-1252 decode warning visible in
+          #evidence-csv-warnings): FAILED on an earlier mid-session pass
+          against A's in-flight work with the warnings list containing only
+          the three S3-era warnings, no Windows-1252 note. Root-caused to
+          Store.select() (mentat/app/evidence_csv.py, the
+          `'warnings':list(WARNINGS)` line inside the streaming Store class,
+          not the one in read_source()/catalog()) still returning the
+          hardcoded 3-item WARNINGS constant instead of the stored
+          catalog's own (dynamic) warnings list, even though
+          job['catalog']['warnings'] already carried the note correctly
+          (confirmed via this lane's own passing Python test
+          test_csv_windows_1252_fallback_warns). Reported to Architect A
+          during this session; passed cleanly on the final post-landing
+          run, i.e. it was fixed before this receipt was written.
+
+This lane's own step count: this deliverable appends steps 20-33 (14 new
+steps: write S3b fixtures; picker has no accept attribute and its label
+reads "Choose a file"; 2-sheet xlsx import defaults to the first sheet;
+picking the second sheet mints a new id; tsv; json; Windows-1252 csv with
+the decode warning visible; FEC bulk zip; notes.pdf rejected client-side
+with zero POSTs; Browse... with an empty path box shows roots; navigating
+to the fixture directory via the path box + Browse and opening the xlsx
+row; typing a valid path and pressing Enter; typing a nonexistent path and
+pressing Enter; a final zero-pageerror/zero-remote-request check covering
+every step, old and new, together) -- not "step 20" as a single item; the
+task brief's own step-20 shorthand refers to the accept-attribute check,
+which in this file's own numbering is step 21 because step 20 is this
+lane's own new fixture-writing step (kept as ITS OWN new step specifically
+so the pre-existing 19 steps' code needed zero edits, per this lane's
+instructions -- see the byte-identical confirmation in this lane's final
+report).
+
+HARD_CAP_MS: raised from 870,000 to 1,200,000 (one numeric literal changed;
+everything else in the file, including all 19 pre-existing steps' bodies,
+is untouched -- confirmed with a SequenceMatcher diff against the pristine
+file showing exactly one 'replace' opcode, covering only the digits of that
+one constant, and zero other non-insert opcodes).
