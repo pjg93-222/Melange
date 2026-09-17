@@ -1,0 +1,24 @@
+HEAD_SHA=3fdfeae8fed6140f705889fbd3a407645050a047
+HEAD_SUBJECT=Classify FEC bulk rows by transaction type code under a rule table (S3f)
+CAPTURED_AT=2026-09-17T15:09:18Z
+
+--- git status --porcelain -- <three files> ---
+ M mentat/app/report_insights.py
+ M mentat/tests/test_report_insights.py
+ M mentat/tools/build_industry_report.ps1
+
+--- git apply --check -R (packet patch already present in working tree) ---
+P5: exit=0
+P6c: exit=0
+P7b: exit=0
+
+--- git apply --check --cached (forward, against HEAD index) ---
+P5:
+error: patch failed: mentat/tools/build_industry_report.ps1:395
+error: mentat/tools/build_industry_report.ps1: patch does not apply
+P6c:
+error: patch failed: mentat/app/report_insights.py:265
+error: mentat/app/report_insights.py: patch does not apply
+P7b:
+error: patch failed: mentat/tests/test_report_insights.py:198
+error: mentat/tests/test_report_insights.py: patch does not apply

@@ -1,0 +1,23 @@
+sheets: ['Master Overview', 'Spending Overview', '2021-2022 Summary', '2023-2024 Summary', '2025-2026 Summary', 'Company List', 'Bank of America NA View', 'Capital One Bank NA View', 'Citibank View', 'Goldman Sachs Bank NA View', 'JP Morgan Chase Bank NA View', 'Morgan Stanley Bank View', 'PNC Bank NA View', 'Truist Bank View', 'US Bank NA View', 'Wells Fargo Bank NA View', 'Employee Rank Facts', 'Employee List', 'Recipient List', 'Beneficiary Summary', 'PAC & Candidate Map', 'Downstream Activity', 'Beneficiary Bridge', 'Transfer Paths', 'Funding Cohorts', 'Allocation Estimates', 'Allocation Coverage', 'Source Freshness', 'Classification Review', 'Data Quality', '2021-2022', '2023-2024', '2025-2026', 'Cycle Exceptions']
+
+[2021-2022] header row 4: ['Fact Type', 'Company', 'Employee Tier', 'Amount', 'Analysis Amount', 'Party', 'Recipient Category', 'Recipient Key', 'Gift Count', 'Include in Analysis', 'Person Key', 'Logic Check']
+  rows with amount: 5959  gross 43,934,164.24  net 43,922,067.58
+  include==Yes: 5959  net 43,922,067.58  gross 43,934,164.24
+  by include flag: {'Yes': (5959, '43,922,067.58')}
+
+[2023-2024] header row 4: ['Fact Type', 'Company', 'Employee Tier', 'Amount', 'Analysis Amount', 'Party', 'Recipient Category', 'Recipient Key', 'Gift Count', 'Include in Analysis', 'Person Key', 'Logic Check']
+  rows with amount: 6225  gross 69,117,914.40  net 69,115,884.60
+  include==Yes: 6225  net 69,115,884.60  gross 69,117,914.40
+  by include flag: {'Yes': (6225, '69,115,884.60')}
+
+[2025-2026] header row 4: ['Fact Type', 'Company', 'Employee Tier', 'Amount', 'Analysis Amount', 'Party', 'Recipient Category', 'Recipient Key', 'Gift Count', 'Include in Analysis', 'Person Key', 'Logic Check']
+  rows with amount: 4680  gross 33,413,535.13  net 33,413,266.53
+  include==Yes: 4680  net 33,413,266.53  gross 33,413,535.13
+  by include flag: {'Yes': (4680, '33,413,266.53')}
+
+[Cycle Exceptions] header row 4: ['Fact Type', 'Company', 'Employee Tier', 'Amount', 'Analysis Amount', 'Party', 'Recipient Category', 'Recipient Key', 'Gift Count', 'Include in Analysis', 'Person Key', 'Logic Check']
+  rows with amount: 1798  gross 512,951.01  net 473,876.01
+  include==Yes: 0  net 0.00  gross 0.00
+  by include flag: {'No': (1798, '473,876.01')}
+
+GRAND: {'yes_net': '146,451,218.71', 'yes_gross': '146,465,613.77', 'all_net': '146,925,094.72', 'all_gross': '146,978,564.78'}
