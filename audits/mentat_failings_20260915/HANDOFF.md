@@ -191,28 +191,28 @@ it in code.
 | `mentat/app/evidence-csv.js` | S3 | not started | client size mirror, status line |
 | `mentat/tools/pac_evidence.py` | S3 | not started | collector, `ThreadPoolExecutor(3)` |
 | `mentat/tools/fec_key_store.py` | S3 | not started | see DEFECT-KEYSTORE in PACKET.md |
-| `mentat/app/contribution_data.py` | S4 | BUILT, uncommitted | `DIMENSIONS`, detail row cap |
-| `mentat/app/chart-studio.js` | S4 | BUILT, uncommitted | API base, view routing |
-| `mentat/app/chart-studio-core.js` | S4 | BUILT, uncommitted | `STUDIO_GROUP_LIMIT = 60` |
-| `mentat/app/snapshot_registry.py` | S4 | BUILT, uncommitted | NEW |
-| `mentat/app/industry_scope.py` | S4 | BUILT, uncommitted | NEW |
-| `mentat/app/cross_reference_data.py` | S4 | BUILT, uncommitted | CLAIMED 2026-09-16, previously unowned: `?industry=` selects a run, so `latest_cross_reference` was refactored into a shared `_run_view` and a new `cross_reference_for_industry` |
-| `mentat/app/contribution_semantics.py` | S4 | BUILT, uncommitted | CLAIMED 2026-09-16, previously unowned: one line, `catalog(directory, sources=None)`, so a request can reuse the report-folder scan it already paid for |
-| `mentat/app/chart-studio-contributions.js` | S4 | BUILT, uncommitted | one-line: industry in the query body |
-| `mentat/tools/crypto_workbook_builder.mjs` | S4 | BUILT, uncommitted | buildContributorDetail widening, S2 decision 7 |
-| `mentat/R/report.R` | S4 | BUILT, uncommitted | contributor_keys only, S2 decision 7 |
-| `mentat/tests/test_snapshot_registry.py` | S4 | BUILT, uncommitted | NEW |
-| `mentat/tests/test_industry_routes.py` | S4 | BUILT, uncommitted | NEW |
-| `mentat/tests/test_studio_views_industry.py` | S4 | BUILT, uncommitted | NEW |
-| `mentat/tests/test_contribution_dimensions_order.py` | S4 | BUILT, uncommitted | NEW |
-| `mentat/tests/test_studio_industry_browser.cjs` | S4 | BUILT, uncommitted | NEW |
-| `mentat/tests/test_contributor_detail_header.cjs` | S4 | BUILT, uncommitted | NEW |
+| `mentat/app/contribution_data.py` | S4 | committed by Paul (8377b5e77) | `DIMENSIONS`, detail row cap |
+| `mentat/app/chart-studio.js` | S4 | committed by Paul (8377b5e77) | API base, view routing |
+| `mentat/app/chart-studio-core.js` | S4 | committed by Paul (8377b5e77) | `STUDIO_GROUP_LIMIT = 60` |
+| `mentat/app/snapshot_registry.py` | S4 | committed by Paul (8377b5e77) | NEW |
+| `mentat/app/industry_scope.py` | S4 | committed by Paul (8377b5e77) | NEW |
+| `mentat/app/cross_reference_data.py` | S4 | committed by Paul (8377b5e77) | CLAIMED 2026-09-16, previously unowned: `?industry=` selects a run, so `latest_cross_reference` was refactored into a shared `_run_view` and a new `cross_reference_for_industry` |
+| `mentat/app/contribution_semantics.py` | S4 | committed by Paul (8377b5e77) | CLAIMED 2026-09-16, previously unowned: one line, `catalog(directory, sources=None)`, so a request can reuse the report-folder scan it already paid for |
+| `mentat/app/chart-studio-contributions.js` | S4 | committed by Paul (8377b5e77) | one-line: industry in the query body |
+| `mentat/tools/crypto_workbook_builder.mjs` | S4 | committed by Paul (8377b5e77) | buildContributorDetail widening, S2 decision 7 |
+| `mentat/R/report.R` | S4 | committed by Paul (8377b5e77) | contributor_keys only, S2 decision 7 |
+| `mentat/tests/test_snapshot_registry.py` | S4 | committed by Paul (8377b5e77) | NEW |
+| `mentat/tests/test_industry_routes.py` | S4 | committed by Paul (8377b5e77) | NEW |
+| `mentat/tests/test_studio_views_industry.py` | S4 | committed by Paul (8377b5e77) | NEW |
+| `mentat/tests/test_contribution_dimensions_order.py` | S4 | committed by Paul (8377b5e77) | NEW |
+| `mentat/tests/test_studio_industry_browser.cjs` | S4 | committed by Paul (8377b5e77) | NEW |
+| `mentat/tests/test_contributor_detail_header.cjs` | S4 | committed by Paul (8377b5e77) | NEW |
 | `mentat/app/index.html` | S5 | not started | tabs, graph-mode select |
 | `mentat/app/app.js` | S5 | not started | hash routing, localStorage |
 | `mentat/app/graph.js` | S5 | not started | `clear()`, scope handoff |
 | `mentat/app/graph_data.py` | S5 | not started | Downstream Activity worksheet |
 | `mentat/R/fec_beneficiary.R` | S5 | not started | produces Downstream Activity |
-| `mentat/app/server.py` | S4 | BUILT, uncommitted | S4 hunks built and receipted; S5 waits for Paul's commit of S4 |
+| `mentat/app/server.py` | S4 | committed by Paul (8377b5e77) | S4 hunks built and receipted; S5 waits for Paul's commit of S4 |
 | `mentat/tests/**` | shared | — | each session owns only the test files it adds |
 
 **WORKING-TREE HAZARD (verified 2026-09-16):** `fec_api.R`, `collect.R`, `schema.R`, `report.R`, `tidy_stage.R`, `prepare_workbook_payload.py`, `build_industry_report.ps1` and `finalize_crypto_excel.ps1` are all **modified-uncommitted by other lanes** right now. `git diff -- <file>` on any of them captures foreign hunks. Every S1/S2 patch must be separated hunk by hunk and the receipt must say which hunks are the session's own — the same rule as `server.py`. `build_tidy_workbook.py` was tracked and clean at HEAD `bd5dc8ea1`; S2 has since modified it (one registry edit) and it is now ` M` — that hunk is S2's alone.
@@ -746,7 +746,7 @@ four-runner sweep is `receipts/S2_final_sweep.txt`.
 
 ## S4 — Cross-industry addressing (Area E)
 
-**Status:** BUILT, receipts ready, UNCOMMITTED (2026-09-16 evening); Paul commits from
+**Status:** committed by Paul (2026-09-16 evening, `8377b5e77`, 35 files, +8,351/-127, staged from patches/S4_cross_industry_contract.patch via `git apply --cached`; console 8806 verified current on code 5f7da2d1… / assets 30772a98…). Prior status for the record: BUILT, receipts ready, UNCOMMITTED (2026-09-16 evening); Paul commits from
 `patches/S4_cross_industry_contract.patch`.
 Patch regenerated against HEAD 21c9cab6d (S3b committed after pass B); 499891 bytes, 35 files.
 
