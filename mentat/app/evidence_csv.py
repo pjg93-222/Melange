@@ -28,8 +28,12 @@ from cross_reference_data import _source_url
 
 # Bytes are now the only memory-relevant gate: the reader streams the file to
 # disk and the parser walks it row by row into sqlite, so neither the request
-# thread nor the console ever holds the decoded file. The 50 MB ceiling is a
-# time and disk budget, not a memory one.
+# thread nor the console ever holds the decoded file. Paul's ruling 2026-09-16
+# raised the ceiling to "way past 5 or even 50" MB: the request thread only
+# copies CHUNK_BYTES (64 KiB) at a time, so a bigger ceiling costs it no more
+# time per chunk, and ingest itself runs off-thread with progress reported to
+# the page as rows and bytes are read. MAX_BYTES is therefore a time and disk
+# budget for that off-thread ingest, not a request-thread memory one.
 #
 # Disk is what the ceiling actually budgets, and disk is what measured
 # reproducibly. On a 6,000,146-byte 20-column file of 21,759 rows (2026-09-16),
@@ -37,10 +41,13 @@ from cross_reference_data import _source_url
 # (30,343,168 bytes), because each row then repeated its header names and its
 # derived values. Storing only the cells and recomputing normalize() for the
 # hundred rows a page shows costs 1.58x (9,498,624 bytes), the same figure in
-# every run. One 50 MB import is therefore about 129 MB of disk, source plus
-# database, and KEEP_BYTES, which budgets source bytes only, has roughly 395 MB
-# of databases behind its 250 MB of sources - about 645 MB in all. Lower
-# MAX_BYTES or KEEP_BYTES if that is too much for the machine.
+# every run - that is the design used here, so one import costs source plus
+# 1.58x source in sqlite, about 2.6x the source in all. At the 500 MB ceiling
+# that is about 1.3 GB of disk for one import. KEEP_BYTES budgets source bytes
+# only (KEEP_IMPORTS stays 10); at 1,000,000,000 (1 GB) of kept sources, the
+# sqlite databases behind them add roughly another 1.58 GB, about 2.6 GB kept
+# on disk worst case. Lower MAX_BYTES or KEEP_BYTES if that is too much for
+# the machine.
 #
 # Ingest time is deliberately NOT the justification, because it could not be
 # pinned down here. The identical 6 MB ingest measured between 0.82 s and
@@ -48,21 +55,30 @@ from cross_reference_data import _source_url
 # 1.6 GB free of 31.5 GB and standalone runs sometimes slower than in-server
 # ones. That is S0's Finding 2 environment (working-set trimming under memory
 # pressure), not a property of this code, so no s/MB rate quoted here would
-# survive being checked on a quiet machine. What did hold in every run is the
-# part that matters: the POST returns in well under a second (0.08-0.81 s
-# observed) because the request thread only copies bytes to disk, and the wait
-# that follows is off-thread with rows and bytes reported to the page as they
-# are read. The ceiling is therefore about how long a reader is willing to
-# watch a progress line, not about blocking the console.
+# survive being checked on a quiet machine; at 500 MB the honest expectation
+# is minutes, not seconds. What did hold in every run is the part that
+# matters: the POST returns in well under a second (0.08-0.81 s observed)
+# because the request thread only copies bytes to disk, and the wait that
+# follows is off-thread with rows and bytes reported to the page as they are
+# read. The ceiling is therefore about how long a reader is willing to watch
+# a progress line, not about blocking the console.
 #
 # Reading back is bounded by the page, not the file: a 100-row page measured
 # 15-16 ms, and 46-47 ms at offset 7,000 of a 7,253-row committee.
-MAX_BYTES = 50_000_000
+#
+# MAX_ROWS bounds ingest time and page offsets only - the rows themselves live
+# in sqlite, not in memory - and scales with MAX_BYTES: 500 MB at roughly
+# 100 bytes/row is about 5,000,000 rows.
+#
+# The generic 7 MB JSON body gate in server.py's do_POST (Content-Length >
+# 7_000_000) still bounds the legacy in-request JSON import path only; the
+# streamed CSV path above answers to MAX_BYTES.
+MAX_BYTES = 500_000_000
 MAX_COLUMNS = 200
-MAX_ROWS = 500_000
+MAX_ROWS = 5_000_000
 CHUNK_BYTES = 65_536
 KEEP_IMPORTS = 10
-KEEP_BYTES = 250_000_000
+KEEP_BYTES = 1_000_000_000
 PAGE_LIMIT = 1000
 
 COMMITTEE_FIELDS = ('committee_id', 'cmte_id', 'source_committee_id', 'pac_committee_id', 'pac_id', 'recipient_key')

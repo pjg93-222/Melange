@@ -1,0 +1,800 @@
+diff --git a/audits/mentat_failings_20260915/contracts/evidence-csv-import.json b/audits/mentat_failings_20260915/contracts/evidence-csv-import.json
+index 7d6a39c41..3f30a41e8 100644
+--- a/audits/mentat_failings_20260915/contracts/evidence-csv-import.json
++++ b/audits/mentat_failings_20260915/contracts/evidence-csv-import.json
+@@ -20,12 +20,12 @@
+   "description": "The shapes read once a CSV has been imported: the size/row/column LIMITS the client pre-flights against, one imported CSV's CATALOG (nested inside a sources listing or a SELECT), the GET /api/evidence-csv sources listing, a paginated SELECT of one committee/cycle's rows, and the bounded error-payload shape (never a leaked Python exception string). Orientation only - the examples are the contract.",
+   "examples": [
+     {
+-      "max_bytes": 50000000,
++      "max_bytes": 500000000,
+       "max_columns": 200,
+-      "max_rows": 500000,
+-      "max_bytes_message": "Choose a CSV no larger than 50 MB.",
++      "max_rows": 5000000,
++      "max_bytes_message": "Choose a CSV no larger than 500 MB.",
+       "max_columns_message": "The CSV needs unique nonempty column names, with no more than 200 columns.",
+-      "max_rows_message": "Choose a CSV containing no more than 500,000 rows."
++      "max_rows_message": "Choose a CSV containing no more than 5,000,000 rows."
+     },
+     {
+       "id": "csv-0123456789abcdef0123456789abcdef",
+@@ -75,24 +75,24 @@
+         }
+       ],
+       "limits": {
+-        "max_bytes": 50000000,
++        "max_bytes": 500000000,
+         "max_columns": 200,
+-        "max_rows": 500000,
+-        "max_bytes_message": "Choose a CSV no larger than 50 MB.",
++        "max_rows": 5000000,
++        "max_bytes_message": "Choose a CSV no larger than 500 MB.",
+         "max_columns_message": "The CSV needs unique nonempty column names, with no more than 200 columns.",
+-        "max_rows_message": "Choose a CSV containing no more than 500,000 rows."
++        "max_rows_message": "Choose a CSV containing no more than 5,000,000 rows."
+       },
+       "session_only": false
+     },
+     {
+       "sources": [],
+       "limits": {
+-        "max_bytes": 50000000,
++        "max_bytes": 500000000,
+         "max_columns": 200,
+-        "max_rows": 500000,
+-        "max_bytes_message": "Choose a CSV no larger than 50 MB.",
++        "max_rows": 5000000,
++        "max_bytes_message": "Choose a CSV no larger than 500 MB.",
+         "max_columns_message": "The CSV needs unique nonempty column names, with no more than 200 columns.",
+-        "max_rows_message": "Choose a CSV containing no more than 500,000 rows."
++        "max_rows_message": "Choose a CSV containing no more than 5,000,000 rows."
+       },
+       "session_only": false
+     },
+diff --git a/mentat/app/evidence_csv.py b/mentat/app/evidence_csv.py
+index 3303dadc5..df6babd30 100644
+--- a/mentat/app/evidence_csv.py
++++ b/mentat/app/evidence_csv.py
+@@ -28,8 +28,12 @@ from cross_reference_data import _source_url
+ 
+ # Bytes are now the only memory-relevant gate: the reader streams the file to
+ # disk and the parser walks it row by row into sqlite, so neither the request
+-# thread nor the console ever holds the decoded file. The 50 MB ceiling is a
+-# time and disk budget, not a memory one.
++# thread nor the console ever holds the decoded file. Paul's ruling 2026-09-16
++# raised the ceiling to "way past 5 or even 50" MB: the request thread only
++# copies CHUNK_BYTES (64 KiB) at a time, so a bigger ceiling costs it no more
++# time per chunk, and ingest itself runs off-thread with progress reported to
++# the page as rows and bytes are read. MAX_BYTES is therefore a time and disk
++# budget for that off-thread ingest, not a request-thread memory one.
+ #
+ # Disk is what the ceiling actually budgets, and disk is what measured
+ # reproducibly. On a 6,000,146-byte 20-column file of 21,759 rows (2026-09-16),
+@@ -37,10 +41,13 @@ from cross_reference_data import _source_url
+ # (30,343,168 bytes), because each row then repeated its header names and its
+ # derived values. Storing only the cells and recomputing normalize() for the
+ # hundred rows a page shows costs 1.58x (9,498,624 bytes), the same figure in
+-# every run. One 50 MB import is therefore about 129 MB of disk, source plus
+-# database, and KEEP_BYTES, which budgets source bytes only, has roughly 395 MB
+-# of databases behind its 250 MB of sources - about 645 MB in all. Lower
+-# MAX_BYTES or KEEP_BYTES if that is too much for the machine.
++# every run - that is the design used here, so one import costs source plus
++# 1.58x source in sqlite, about 2.6x the source in all. At the 500 MB ceiling
++# that is about 1.3 GB of disk for one import. KEEP_BYTES budgets source bytes
++# only (KEEP_IMPORTS stays 10); at 1,000,000,000 (1 GB) of kept sources, the
++# sqlite databases behind them add roughly another 1.58 GB, about 2.6 GB kept
++# on disk worst case. Lower MAX_BYTES or KEEP_BYTES if that is too much for
++# the machine.
+ #
+ # Ingest time is deliberately NOT the justification, because it could not be
+ # pinned down here. The identical 6 MB ingest measured between 0.82 s and
+@@ -48,21 +55,30 @@ from cross_reference_data import _source_url
+ # 1.6 GB free of 31.5 GB and standalone runs sometimes slower than in-server
+ # ones. That is S0's Finding 2 environment (working-set trimming under memory
+ # pressure), not a property of this code, so no s/MB rate quoted here would
+-# survive being checked on a quiet machine. What did hold in every run is the
+-# part that matters: the POST returns in well under a second (0.08-0.81 s
+-# observed) because the request thread only copies bytes to disk, and the wait
+-# that follows is off-thread with rows and bytes reported to the page as they
+-# are read. The ceiling is therefore about how long a reader is willing to
+-# watch a progress line, not about blocking the console.
++# survive being checked on a quiet machine; at 500 MB the honest expectation
++# is minutes, not seconds. What did hold in every run is the part that
++# matters: the POST returns in well under a second (0.08-0.81 s observed)
++# because the request thread only copies bytes to disk, and the wait that
++# follows is off-thread with rows and bytes reported to the page as they are
++# read. The ceiling is therefore about how long a reader is willing to watch
++# a progress line, not about blocking the console.
+ #
+ # Reading back is bounded by the page, not the file: a 100-row page measured
+ # 15-16 ms, and 46-47 ms at offset 7,000 of a 7,253-row committee.
+-MAX_BYTES = 50_000_000
++#
++# MAX_ROWS bounds ingest time and page offsets only - the rows themselves live
++# in sqlite, not in memory - and scales with MAX_BYTES: 500 MB at roughly
++# 100 bytes/row is about 5,000,000 rows.
++#
++# The generic 7 MB JSON body gate in server.py's do_POST (Content-Length >
++# 7_000_000) still bounds the legacy in-request JSON import path only; the
++# streamed CSV path above answers to MAX_BYTES.
++MAX_BYTES = 500_000_000
+ MAX_COLUMNS = 200
+-MAX_ROWS = 500_000
++MAX_ROWS = 5_000_000
+ CHUNK_BYTES = 65_536
+ KEEP_IMPORTS = 10
+-KEEP_BYTES = 250_000_000
++KEEP_BYTES = 1_000_000_000
+ PAGE_LIMIT = 1000
+ 
+ COMMITTEE_FIELDS = ('committee_id', 'cmte_id', 'source_committee_id', 'pac_committee_id', 'pac_id', 'recipient_key')
+diff --git a/mentat/app/index.html b/mentat/app/index.html
+index 6c14d9716..e0a7ced6d 100644
+--- a/mentat/app/index.html
++++ b/mentat/app/index.html
+@@ -340,7 +340,7 @@
+ <section id="view-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+ <div class="evidence-source-bar"><label for="evidence-source">Evidence source<select id="evidence-source"><option value="csv">CSV file</option><option value="snapshot">Saved FEC snapshots</option></select></label></div>
+ <div id="evidence-csv-workspace">
+-<section class="panel csv-picker" aria-label="Choose PAC evidence"><div class="section-label">FROM YOUR SELECTED FILE</div><h2>PAC evidence</h2><p class="muted">Choose a CSV, then a PAC. Review the reported rows beside your graph.</p><label class="csv-file-label" for="evidence-csv-file">Choose CSV<input id="evidence-csv-file" type="file" accept=".csv,text/csv"></label><p id="evidence-csv-status" role="status">FEC or Mentat CSV with a committee ID column · up to 5 MB.</p><div class="evidence-toolbar"><label for="evidence-csv-committee">PAC<select id="evidence-csv-committee" disabled><option value="">Choose a CSV first</option></select></label><label for="evidence-csv-cycle">Election cycle<select id="evidence-csv-cycle" disabled><option value="">All cycles</option></select></label></div></section>
++<section class="panel csv-picker" aria-label="Choose PAC evidence"><div class="section-label">FROM YOUR SELECTED FILE</div><h2>PAC evidence</h2><p class="muted">Choose a CSV, then a PAC. Review the reported rows beside your graph.</p><label class="csv-file-label" for="evidence-csv-file">Choose CSV<input id="evidence-csv-file" type="file" accept=".csv,text/csv"></label><p id="evidence-csv-status" role="status">FEC or Mentat CSV with a committee ID column · the console states the size limit when you choose a file.</p><div class="evidence-toolbar"><label for="evidence-csv-committee">PAC<select id="evidence-csv-committee" disabled><option value="">Choose a CSV first</option></select></label><label for="evidence-csv-cycle">Election cycle<select id="evidence-csv-cycle" disabled><option value="">All cycles</option></select></label></div></section>
+ <section id="evidence-csv-results" class="panel" aria-label="Selected CSV observations" hidden><h2 id="evidence-csv-title">Reported activity</h2><p id="evidence-csv-scope" class="muted"></p><div id="evidence-csv-totals" class="evidence-cards"></div><p class="muted">Sums reflect the selected CSV rows. Receipts, disbursements and independent spending stay separate; amended or duplicate filings may overlap.</p><details id="evidence-csv-details"><summary>File details &amp; interpretation</summary><p id="evidence-csv-provenance"></p><ul id="evidence-csv-warnings"></ul></details><h3>Source rows</h3><p id="evidence-csv-row-status" class="muted" role="status"></p><div class="table-scroll"><table><thead><tr><th>Row</th><th>Date / cycle</th><th>Amount</th><th>Counterparty / activity</th><th>Source</th></tr></thead><tbody id="evidence-csv-rows"></tbody></table></div><div class="csv-pagination"><button id="evidence-csv-prev" type="button" class="secondary">Previous rows</button><button id="evidence-csv-next" type="button" class="secondary">Next rows</button></div></section>
+ </div><div id="evidence-saved" hidden>
+ <section class="panel" aria-label="Evidence configuration">
+diff --git a/mentat/tests/test_console_browser.cjs b/mentat/tests/test_console_browser.cjs
+index 18d31b6d4..232dd50a4 100644
+--- a/mentat/tests/test_console_browser.cjs
++++ b/mentat/tests/test_console_browser.cjs
+@@ -8,7 +8,9 @@ const {once} = require('node:events');
+ const modules = process.env.MENTAT_NODE_MODULES || path.join(os.homedir(), '.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules');
+ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+ (async () => {
+-  const fixture = spawn(process.env.MENTAT_PYTHON || 'python', [path.join(__dirname, 'console_browser_fixture.py')], {stdio:['pipe','pipe','pipe']});
++  const trace=message=>{if(process.env.MENTAT_BROWSER_TRACE)console.log(`[browser] ${message}`);};
++  const fixture = spawn(process.env.MENTAT_PYTHON || 'python', [path.join(__dirname, 'console_browser_fixture.py')], {stdio:['pipe','pipe','pipe'],windowsHide:true});
++  trace(`Starting test ${process.pid}; temporary fixture ${fixture.pid}.`);
+   let browser;
+   const stderr=[]; fixture.stderr.on('data', chunk=>stderr.push(chunk.toString()));
+   try {
+@@ -21,26 +23,259 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+     browser = await chromium.launch({headless:true,channel:process.env.MENTAT_BROWSER_CHANNEL || 'chrome'});
+     const page = await browser.newPage({viewport:{width:1440,height:1050}});
+     page.setDefaultTimeout(15000);
++    async function captureScreenshot(file,fullPage=true) {
++      if(!file)return;
++      await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo(0,0);});
++      await page.screenshot({path:file,fullPage});
++    }
+     const errors=[],remote=[];
+     page.on('pageerror',e=>errors.push(e.message));
+     page.on('request',request=>{if(!request.url().startsWith(origin) && !request.url().startsWith('blob:'))remote.push(request.url());});
++    const savedEvidence={version:1,company:'Harborlight Credit Union',aliases:['HARBORLIGHT CU'],retrieved_at:'2026-09-10T00:00:00Z',scope:'Fixture evidence',
++      committee_finances:[{cycle:2024,committee_id:'C00000001',committee_name:'First PAC'},{cycle:2026,committee_id:'C00000002',committee_name:'Second PAC'}],
++      receipts:[],transfers:[],candidate_activity:[],temporal_routes:[]};
++    const crossReference={available:true,status:'completed',run_id:'fictional-browser-fixture',report:{
++      generated_at:'2026-09-10T00:00:00Z',scope:{industries:['Fictional credit union sample'],companies:[savedEvidence.company],cycles:[2024],source_count:1},
++      summary:{input_records:5,automatic_decisions:2,unresolved_records:1,unresolved_amount:40,observed_original_giving:100,
++        employee_giving:100,pac_outgoing:60,baseline_amount:160,amount_change:-60,verified_unique:false},
++      steps:[{id:'collect',status:'completed'},{id:'connect',status:'review',detail:'Missing counterpart'}],
++      unresolved_reasons:[{reason:'Reference missing',records:1,amount:40}],
++      review_queue:[{company:savedEvidence.company,reason:'Reference missing',cycle:2024,amount:40,record_id:'fixture-123'}],
++      changes:[{company:savedEvidence.company,reason:'Linked outgoing stage',cycle:2024,before:160,after:100,delta:-60,record_id:'fixture-456'}],
++      limitations:['Fictional fixture only. Collection coverage remains unverified.'],
++    }};
++    let extraSnapshot=false;
++    await page.route('**/api/evidence?*',route=>route.fulfill({json:savedEvidence}));
++    await page.route('**/api/evidence',route=>route.fulfill({json:{snapshots:[{id:'fixture-evidence',company:savedEvidence.company,cycles:[2024,2026],retrieved_at:savedEvidence.retrieved_at},...(extraSnapshot?[{id:'new-evidence',company:'Another Company',cycles:[2026]}]:[])]}}));
++    await page.route('**/api/cross-reference',route=>route.fulfill({json:crossReference}));
+     await page.goto(origin+'/');
+     assert.equal(await page.locator('#tab-loading').getAttribute('aria-selected'),'true');
++    assert.deepEqual(await page.locator('.workspace-tabs [role=tab]').evaluateAll(tabs=>tabs.map(tab=>tab.id)),
++      ['tab-loading','tab-collection','tab-graph','tab-chart-studio','tab-cross-reference','tab-evidence']);
++    assert.equal(await page.locator('.workspace-tabs').getAttribute('aria-orientation'),'vertical');
++    assert.equal(await page.evaluate(()=>{
++      const navigation=document.querySelector('.app-navigation').getBoundingClientRect();
++      const main=document.querySelector('#workspace-main').getBoundingClientRect();
++      const tabs=[...document.querySelectorAll('.workspace-tabs [role=tab]')].map(tab=>tab.getBoundingClientRect());
++      return navigation.right<=main.left && tabs.every((tab,index)=>index===0 || tab.top>=tabs[index-1].bottom);
++    }),true,'Desktop navigation occupies its own sidebar without overlapping the workspace.');
++    await page.waitForFunction(()=>document.querySelector('#loading-coverage').textContent.includes('Stale coverage'));
++    assert.match(await page.locator('#loading-coverage').innerText(),/2026-06-30/);
++    assert.match(await page.locator('#loading-coverage').innerText(),/Unverifiable coverage/);
++    assert.match(await page.locator('#loading-coverage').innerText(),/Current within policy/);
++    await page.locator('#sector').fill('A different sector');
++    assert.doesNotMatch(await page.locator('#loading-coverage').innerText(),/2026-06-30/);
++    assert.match(await page.locator('#loading-coverage').innerText(),/No saved collection evidence/);
++    await page.locator('#sector').fill('');
++    const coverageHelp=page.locator('#view-loading .coverage-panel .inline-help');
++    assert.equal(await coverageHelp.getAttribute('open'),null);
++    assert.match(await page.locator('#loading-coverage').innerText(),/Stale coverage/);
++    await coverageHelp.locator('summary').click();
++    assert.match(await coverageHelp.innerText(),/more than 30 days/);
++    assert.match(await page.locator('#loading-coverage').innerText(),/Unverifiable coverage/);
++    await coverageHelp.locator('summary').click();
++    await captureScreenshot(process.env.MENTAT_COVERAGE_SCREENSHOT);
+     assert.match(await page.locator('#sector').getAttribute('placeholder'),/Credit unions/);
+     assert.match(await page.locator('.company-name').getAttribute('placeholder'),/Credit Union/);
+     const rosterTemplate=await page.evaluate(()=>fetch('/template.csv').then(response=>response.text()));
+     assert.match(rosterTemplate,/Harborlight Credit Union/);
+     assert.doesNotMatch(rosterTemplate,/Crypto|Coinbase|Example Company/);
++    // Evidence is configurable before Graph has ever loaded.
++    await page.locator('#tab-evidence').click();
++    assert.equal(await page.locator('#evidence-source').inputValue(),'csv');
++    // 500,000,001 bytes exceeds the 500 MB cap without a 500 MB write: a sparse
++    // file (open + ftruncate) reports the right file.size for the client's
++    // pre-flight while NTFS allocates nothing until written.
++    const oversizeDir=fs.mkdtempSync(path.join(os.tmpdir(),'mentat-console-oversize-'));
++    const oversizePath=path.join(oversizeDir,'too-large.csv');
++    {const fd=fs.openSync(oversizePath,'w');fs.ftruncateSync(fd,500_000_001);fs.closeSync(fd);}
++    await page.locator('#evidence-csv-file').setInputFiles(oversizePath);
++    assert.match(await page.locator('#evidence-csv-status').innerText(),/too-large\.csv \(500\.0 MB\): Choose a CSV no larger than 500 MB\./);
++    fs.rmSync(oversizeDir,{recursive:true,force:true});
++    const csvQuote=value=>'"'+String(value).replaceAll('"','""')+'"';
++    const csvRows=[['committee_id','committee_name','contribution_receipt_amount','contribution_receipt_date','cycle','contributor_name','memo_text'],
++      ...Array.from({length:101},(_,i)=>['C00000001','Alpha PAC',1,'2026-01-01',2026,i===0?'<img src=x onerror=alert(1)>':'Contributor '+i,'Fictional receipt']),
++      ['C00000001','Alpha PAC',5,'2024-01-01',2024,'Prior cycle',''],
++      ['C00000001','Alpha PAC','','2026-01-01',2026,'Missing amount',''],
++      ['C00000001','Alpha PAC',999,'','','Missing date and cycle',''],
++      ['C00000002','Beta PAC',50,'2026-02-01',2026,'Another contributor',''],
++      ['','Unknown PAC',25,'2026-02-01',2026,'Unassigned receipt','']];
++    const csvFile={name:'fictional-pac-evidence.csv',mimeType:'text/csv',buffer:Buffer.from(csvRows.map(row=>row.map(csvQuote).join(',')).join('\r\n'))};
++    await page.locator('#evidence-csv-file').setInputFiles(csvFile);
++    await page.waitForFunction(()=>!document.querySelector('#evidence-csv-results').hidden&&document.querySelector('#evidence-csv-title').textContent==='Alpha PAC');
++    assert.equal(await page.locator('#evidence-csv-rows tr').count(),100);
++    assert.match(await page.locator('#evidence-csv-row-status').innerText(),/1–100 of 104/);
++    assert.match(await page.locator('#evidence-csv-totals').innerText(),/\$106\.00/);
++    assert.match(await page.locator('#evidence-csv-rows').innerText(),/<img src=x onerror=alert\(1\)>/);
++    assert.equal(await page.locator('#evidence-csv-rows img').count(),0);
++    await page.locator('#evidence-csv-next').click();
++    await page.waitForFunction(()=>document.querySelector('#evidence-csv-row-status').textContent.includes('101–104'));
++    assert.match(await page.locator('#evidence-csv-rows').innerText(),/Not reported/);
++    assert.match(await page.locator('#evidence-csv-rows').innerText(),/Date unavailable/);
++    assert.match(await page.locator('#evidence-csv-rows').innerText(),/Cycle unavailable/);
++    assert.match(await page.locator('#evidence-csv-row-status').innerText(),/2 need interpretation/);
++    await page.locator('#evidence-csv-cycle').selectOption('2026');
++    await page.waitForFunction(()=>!document.querySelector('#evidence-csv-results').hidden&&document.querySelector('#evidence-csv-totals').textContent.includes('$101.00'));
++    assert.match(await page.locator('#evidence-csv-row-status').innerText(),/1–100 of 102/);
++    await page.locator('#evidence-csv-committee').selectOption('C00000002');
++    await page.waitForFunction(()=>!document.querySelector('#evidence-csv-results').hidden&&document.querySelector('#evidence-csv-title').textContent==='Beta PAC');
++    assert.match(await page.locator('#evidence-csv-totals').innerText(),/\$50\.00/);
++    assert.equal(await page.locator('#evidence-csv-next').isDisabled(),true);
++    await page.locator('#evidence-csv-committee').selectOption('unassigned');
++    await page.waitForFunction(()=>!document.querySelector('#evidence-csv-results').hidden&&document.querySelector('#evidence-csv-title').textContent.includes('Unassigned'));
++    assert.match(await page.locator('#evidence-csv-totals').innerText(),/No supported amount totals/);
++    assert.match(await page.locator('#evidence-csv-row-status').innerText(),/1 need interpretation/);
++    await page.locator('#evidence-source').selectOption('snapshot');
++    await page.locator('#evidence-panel').waitFor();
++    assert.equal(await page.locator('#evidence-cycle').isDisabled(),false);
++    await page.locator('#evidence-cycle').selectOption('2024');
++    assert.deepEqual(await page.locator('#evidence-committee option').allTextContents(),['First PAC · C00000001']);
++    await page.reload();await page.locator('#evidence-panel').waitFor();
++    assert.equal(await page.locator('#evidence-source').inputValue(),'snapshot');
++    assert.equal(await page.locator('#evidence-cycle').inputValue(),'2024');
++    await page.locator('#evidence-cycle').selectOption('2026');
++    assert.deepEqual(await page.locator('#evidence-committee option').allTextContents(),['Second PAC · C00000002']);
++    await page.locator('#evidence-config summary').click();
++    await page.locator('#evidence-use-config').click();
++    assert.equal(await page.locator('#evidence-company-input').inputValue(),savedEvidence.company);
++    assert.equal(await page.locator('#evidence-cycles-input').inputValue(),'2024, 2026');
++    await page.locator('#evidence-mode').selectOption('graph');
++    await page.locator('#evidence-empty').waitFor();
++    assert.equal(await page.locator('#evidence-mode').isVisible(),true);
++    await page.locator('#evidence-mode').selectOption('saved');
++    await page.locator('#evidence-panel').waitFor();
++    extraSnapshot=true;await page.locator('#evidence-refresh').click();
++    await page.waitForFunction(()=>document.querySelector('#evidence-snapshot').options.length===2);
++    let evidenceRequest;
++    await page.route('**/api/evidence-collect',route=>{evidenceRequest=route.request().postDataJSON();return route.fulfill({json:{id:'new-evidence',state:'collecting'}});});
++    await page.route('**/api/evidence-job?*',route=>route.fulfill({json:{state:'completed',message:'Snapshot ready.'}}));
++    await page.locator('#evidence-company-input').fill('Another Company');
++    await page.locator('#evidence-collect').click();
++    await page.waitForFunction(()=>document.querySelector('#evidence-snapshot').value==='new-evidence');
++    assert.equal(evidenceRequest.company,'Another Company');
++    assert.equal(evidenceRequest.committees,'C00000001, C00000002');
++    assert.equal(await page.locator('#evidence-collect').isDisabled(),false);
++    await captureScreenshot(process.env.MENTAT_EVIDENCE_SCREENSHOT);
++    await page.locator('#evidence-source').selectOption('csv');
++    await page.locator('#evidence-csv-file').setInputFiles(csvFile);
++    await page.waitForFunction(()=>!document.querySelector('#evidence-csv-results').hidden);
++    await captureScreenshot(process.env.MENTAT_CSV_SCREENSHOT);
++    await page.locator('#split-view').click();
++    await page.locator('#graph-results').waitFor();
++    assert.equal(await page.locator('#view-evidence').isVisible(),true);
++    assert.equal(await page.locator('#view-graph').isVisible(),true);
++    assert.equal(await page.locator('#view-graph').getAttribute('role'),'region');
++    assert.equal(await page.evaluate(()=>document.querySelector('#view-graph').getBoundingClientRect().right<=document.querySelector('#view-evidence').getBoundingClientRect().left),true);
++    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
++    await captureScreenshot(process.env.MENTAT_SPLIT_SCREENSHOT);
++    await page.setViewportSize({width:820,height:1000});
++    await page.waitForFunction(()=>document.querySelector('.workspace-tabs').getAttribute('aria-orientation')==='horizontal');
++    assert.equal(await page.evaluate(()=>document.querySelector('#view-graph').getBoundingClientRect().right<=document.querySelector('#view-evidence').getBoundingClientRect().left),true,'The 820px in-app browser keeps both split panes side by side.');
++    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
++    await captureScreenshot(process.env.MENTAT_SPLIT_MEDIUM_SCREENSHOT);
++    await page.setViewportSize({width:1440,height:1050});
++    // First chart open occurs from an evidence-led split, before selecting Graph.
++    await page.locator('#graph-open-builder').click();
++    await page.locator('#view-chart-studio').waitFor({state:'visible'});
++    await page.locator('#studio-classic').click();
++    await page.locator('#chart-image svg').waitFor();
++    await page.keyboard.press('Escape');
++    await page.locator('#tab-evidence').click();
++    await page.setViewportSize({width:390,height:844});
++    await page.waitForFunction(()=>document.querySelector('.workspace-tabs').getAttribute('aria-orientation')==='horizontal');
++    assert.equal(await page.evaluate(()=>document.querySelector('#view-evidence').getBoundingClientRect().top>=document.querySelector('#view-graph').getBoundingClientRect().bottom),true);
++    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
++    await captureScreenshot(process.env.MENTAT_SPLIT_MOBILE_SCREENSHOT);
++    await page.setViewportSize({width:1440,height:1050});
++    await page.locator('#split-view').click();
++    assert.equal(await page.locator('#view-graph').isVisible(),false);
++    assert.equal(await page.locator('#view-evidence').getAttribute('role'),'tabpanel');
++    await page.locator('#evidence-source').selectOption('snapshot');
+     await page.locator('#tab-collection').click();
++    assert.equal(await page.locator('[data-run-group=history]').getAttribute('aria-pressed'),'true');
++    await page.locator('[data-run-group=progress]').click();
++    assert.equal(await page.locator('#runs').inputValue(),'');
++    assert.equal(await page.locator('#monitor').isVisible(),false);
++    assert.equal(await page.locator('#stop').isDisabled(),true);
++    await page.locator('[data-run-group=history]').click();
++    await page.locator('#monitor').waitFor();
++    await page.locator('#archive-run').click();
++    await page.waitForFunction(()=>document.querySelector('#run-count-archived').textContent==='1'&&document.querySelector('#runs').value==='');
++    assert.equal(await page.locator('#monitor').isVisible(),false);
++    await page.locator('[data-run-group=archived]').click();
++    await page.locator('#monitor').waitFor();
++    assert.equal(await page.locator('#archive-run').innerText(),'Restore run');
++    await captureScreenshot(process.env.MENTAT_ARCHIVED_SCREENSHOT);
++    assert.equal(await page.evaluate(()=>fetch('/api/reports?id=fixture').then(response=>response.json()).then(body=>body.reports.length)),1,'Archiving preserves completed report files.');
++    await page.locator('#archive-run').click();
++    await page.waitForFunction(()=>document.querySelector('#run-count-archived').textContent==='0');
++    await page.locator('[data-run-group=history]').click();
++    await page.locator('#monitor').waitFor();
++    assert.equal(await page.locator('#runs').inputValue(),'fixture');
++    assert.match(await page.locator('#collection-coverage').innerText(),/Stale coverage/);
++    assert.match(await page.locator('#collection-coverage').innerText(),/Unverifiable coverage/);
++    assert.match(await page.locator('#collection-coverage').innerText(),/2026-06-30/);
+     await page.locator('#report-freshness summary').first().waitFor();
+     assert.match(await page.locator('#report-freshness').innerText(),/1\/2 sources with verified/);
+     await page.locator('#report-freshness summary').first().click();
+     assert.match(await page.locator('#report-freshness').innerText(),/2026-07-31/);
+     assert.match(await page.locator('#report-freshness').innerText(),/2026-08-01T00:00:00\+00:00/);
++    const collectionRun=await page.evaluate(()=>fetch('/api/run?id=fixture').then(response=>response.json()));
++    const readyRun={...structuredClone(collectionRun),state:'ready',status:null,control:{}};
++    let simulatedRun=readyRun;
++    await page.route('**/api/run?*',route=>route.fulfill({json:simulatedRun}));
++    await page.evaluate(run=>render(run),readyRun);
++    assert.equal(await page.locator('#monitor').isVisible(),false,'A ready draft does not display an empty collection monitor.');
++    assert.equal(await page.locator('#resume-setup').isVisible(),true);
++    assert.equal(await page.locator('#run-readiness-note').isVisible(),true);
++    assert.match(await page.locator('#run-readiness-note').innerText(),/review|setup|start|collect/i);
++    await captureScreenshot(process.env.MENTAT_READY_SCREENSHOT);
++    const stoppedRun=structuredClone(collectionRun);
++    stoppedRun.state='stopped';stoppedRun.control={stop:true};
++    stoppedRun.status={...stoppedRun.status,stage:'collecting',current_industry:'Credit Unions',
++      fanout:{total:10,completed:4,running:8,failed:0},
++      industries:[{industry:'Credit Unions',stage:'collecting',workers:{active_workers:8,requested_workers:8,
++        database_writers:1,request_pool:{queued_requests:4}}}]};
++    simulatedRun=stoppedRun;
++    await page.evaluate(run=>render(run),stoppedRun);
++    assert.equal(await page.locator('#stage').innerText(),'stopped');
++    assert.match(await page.locator('#worker-metric-label').innerText(),/last checkpoint/i);
++    assert.equal(await page.locator('#workers').innerText(),'8','Stopped runs preserve the worker count as a historical checkpoint.');
++    assert.equal(await page.locator('#stop').isDisabled(),true);
++    assert.equal(await page.locator('#apply-workers').isDisabled(),true);
++    assert.equal(await page.locator('#worker-target').isDisabled(),true);
++    assert.equal(await page.locator('#eta').innerText(),'Stopped');
++    assert.equal(await page.locator('#stopping-banner').isVisible(),false);
++    await captureScreenshot(process.env.MENTAT_STOPPED_SCREENSHOT);
++    await page.unroute('**/api/run?*');
++    await page.evaluate(run=>render(run),collectionRun);
++    await captureScreenshot(process.env.MENTAT_COLLECTION_SCREENSHOT);
++    await page.locator('#tab-cross-reference').click();
++    await page.getByText('Observed original giving',{exact:true}).waitFor();
++    assert.equal(await page.locator('.xref-step').count(),6);
++    assert.match(await page.locator('#xref-results').innerText(),/not yet verified unique dollars/);
++    await captureScreenshot(process.env.MENTAT_CROSS_REFERENCE_SCREENSHOT);
++    trace('Loading, Evidence, Collection and Cross-reference checks passed.');
+     await page.locator('#tab-graph').click();
+     assert.equal(await page.locator('#workspace-title').textContent(),'Graph');
+     assert.equal(await page.locator('#graph-builder').getAttribute('open'),null);
+     await page.locator('#graph-results').waitFor();
++    const graphHash=new URL(page.url()).hash;
++    await page.locator('.skip-link').focus();
++    await page.keyboard.press('Enter');
++    assert.equal(new URL(page.url()).hash,graphHash,'Skipping navigation preserves the selected view URL.');
++    assert.equal(await page.locator('#tab-graph').getAttribute('aria-selected'),'true');
++    assert.equal(await page.locator('#workspace-main').evaluate(element=>element===document.activeElement),true);
++    assert.equal(await page.locator('.report-location').getAttribute('open'),null);
++    assert.equal(await page.locator('#graph-run').isVisible(),false);
++    await page.locator('.report-location > summary').click();
++    assert.equal(await page.locator('#graph-run').isVisible(),true);
++    assert.equal(await page.locator('#graph-run').inputValue(),'published-reports');
++    assert.equal(await page.locator('#graph-run option').count(),1);
++    await page.locator('#graph-run').focus();
++    assert.equal(await page.locator('#graph-run').evaluate(element=>element===document.activeElement),true);
++    await page.locator('.report-location > summary').click();
++    assert.equal(await page.locator('#graph-scope').isVisible(),true);
+     assert.equal(await page.locator('#graph-total').textContent(),'$1,585.00');
+     assert.equal(await page.locator('#graph-direct').textContent(),'$90.00');
+     assert.equal(await page.locator('#graph-tab-overview').getAttribute('aria-selected'),'true');
+@@ -49,13 +284,14 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+     assert.match(await page.locator('#graph-freshness').innerText(),/2026-07-31/);
+     assert.match(await page.locator('#graph-freshness').innerText(),/Freshness unknown/);
+     assert.match(await page.locator('#graph-freshness').innerText(),/Report file modified/);
+-    if(process.env.MENTAT_SOURCES_SCREENSHOT)await page.screenshot({path:process.env.MENTAT_SOURCES_SCREENSHOT});
++    await captureScreenshot(process.env.MENTAT_SOURCES_SCREENSHOT,false);
+     await page.keyboard.press('Escape');
+     assert.equal(await page.locator('#graph-open-sources').evaluate(e=>e===document.activeElement),true);
+     assert.deepEqual(await page.locator('#graph-tier option').allTextContents(),['All levels','Chief','Middle-Management','Employees']);
+     await page.locator('#graph-company').selectOption('Harborlight Credit Union');
+     await page.locator('#graph-tier').selectOption('Chief');
+     await page.waitForFunction(()=>document.querySelector('#graph-total').textContent==='$300.00'&&!document.querySelector('#graph-results').hidden);
++    assert.match(await page.locator('#graph-scope').innerText(),/Chief/);
+     assert.equal(await page.locator('#graph-direct').textContent(),'$100.00');
+     await page.locator('#graph-categories').getByRole('button',{name:'JFC: $200.00',exact:true}).click();
+     await page.waitForFunction(()=>document.querySelector('#graph-total').textContent==='$200.00'&&!document.querySelector('#graph-results').hidden);
+@@ -103,19 +339,62 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+     assert.match(await page.locator('#graph-levels').textContent(),/Chief/);
+     await page.locator('#graph-tab-overview').click();
+     await page.locator('#graph-candidate-detail').evaluate(e=>e.hidden=true);
+-    if(process.env.MENTAT_GRAPH_SCREENSHOT)await page.screenshot({path:process.env.MENTAT_GRAPH_SCREENSHOT,fullPage:true});
++    await captureScreenshot(process.env.MENTAT_GRAPH_SCREENSHOT);
++    trace('Guided Graph checks passed; entering mobile navigation checks.');
+     await page.setViewportSize({width:390,height:844});
++    await page.waitForFunction(()=>document.querySelector('.workspace-tabs').getAttribute('aria-orientation')==='horizontal');
++    assert.equal(await page.locator('.workspace-tabs').getAttribute('aria-orientation'),'horizontal');
+     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
++    await page.locator('#tab-graph').focus();
++    await page.keyboard.press('End');
++    assert.equal(await page.locator('#tab-evidence').getAttribute('aria-selected'),'true');
++    const mobileTabBounds=await page.locator('#tab-evidence').evaluate(element=>{
++      const tab=element.getBoundingClientRect(),nav=element.closest('.workspace-tabs').getBoundingClientRect();
++      return {tabLeft:tab.left,tabRight:tab.right,navLeft:nav.left,navRight:nav.right};
++    });
++    // Native scroll positions round fractional button widths to CSS pixels.
++    assert.equal(Math.round(mobileTabBounds.tabLeft)>=Math.round(mobileTabBounds.navLeft) && Math.round(mobileTabBounds.tabRight)<=Math.round(mobileTabBounds.navRight),
++      true,`Keyboard navigation brings the active mobile tab into view: ${JSON.stringify(mobileTabBounds)}`);
++    await page.keyboard.press('Home');
++    await page.keyboard.press('ArrowRight');
++    await page.keyboard.press('ArrowRight');
++    assert.equal(await page.locator('#tab-graph').getAttribute('aria-selected'),'true');
++    const mobileChartLabel=await page.locator('#graph-categories svg text').first().boundingBox();
++    assert.ok(mobileChartLabel && mobileChartLabel.height>=10,'Mobile chart labels retain a readable rendered size.');
++    await page.evaluate(()=>window.scrollTo(0,0));
++    await captureScreenshot(process.env.MENTAT_MOBILE_SCREENSHOT);
++    for(const width of [768,1099,1100]) {
++      await page.setViewportSize({width,height:900});
++      await page.waitForFunction(expected=>document.querySelector('.workspace-tabs').getAttribute('aria-orientation')===expected,width>=1100?'vertical':'horizontal');
++      assert.equal(await page.locator('.workspace-tabs').getAttribute('aria-orientation'),width>=1100?'vertical':'horizontal');
++      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`No page overflow at ${width}px.`);
++    }
++    trace('Responsive layout and mobile navigation checks passed; entering chart builder.');
+     await page.setViewportSize({width:1440,height:1050});
+     await page.locator('#graph-open-builder').click();
++    await page.locator('#view-chart-studio').waitFor({state:'visible'});
++    await page.locator('#studio-classic').click();
+     await page.locator('#chart-image svg').waitFor();
++    assert.equal(await page.locator('#graph-advanced').getAttribute('open'),null);
++    assert.equal(await page.locator('#chart-dataset').getAttribute('open'),null);
++    await page.locator('[data-chart="scatter"]').click();
++    assert.equal(await page.locator('#chart-type').inputValue(),'scatter');
++    assert.equal(await page.locator('#chart-image circle').count(),4);
++    await page.locator('[data-chart="histogram"]').click();
++    assert.equal(await page.locator('#chart-error').isVisible(),false);
+     assert.equal(await page.locator('#chart-header').inputValue(),'5');
+     assert.match(await page.locator('#chart-loading').innerText(),/5 rows · 5 columns/);
++    await page.locator('#chart-dataset > summary').click();
+     await page.locator('#chart-sheet').selectOption('Regional sample');
+     await page.waitForFunction(()=>document.querySelector('#chart-loading').textContent.includes('3 rows · 3 columns'));
+     assert.match(await page.locator('#chart-x').textContent(),/Region/);
++    await page.locator('#chart-y').selectOption('2');
++    await page.waitForFunction(()=>document.querySelector('#chart-title').textContent.startsWith('Cost'));
++    await page.locator('[data-chart="bar"]').click();
++    assert.match(await page.locator('#chart-values').textContent(),/60/);
+     await page.locator('#chart-sheet').selectOption('Candidate Funding');
+     await page.waitForFunction(()=>document.querySelector('#chart-loading').textContent.includes('5 rows · 5 columns'));
++    await page.locator('#graph-advanced > summary').click();
+     await page.locator('#chart-add-filter').click();
+     await page.getByLabel('Filter column',{exact:true}).selectOption('0');
+     await page.getByLabel('Filter value',{exact:true}).fill('Harborlight Credit Union');
+@@ -162,7 +441,7 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+     assert.match(chartCsv,/SHA-256:/);assert.match(chartCsv,/Candidate Funding/);
+     assert.match(chartCsv,/Numeric bins/);
+     await page.locator('#graph-builder').evaluate(e=>e.scrollTop=0);
+-    if(process.env.MENTAT_SCREENSHOT) await page.screenshot({path:process.env.MENTAT_SCREENSHOT,fullPage:true});
++    await captureScreenshot(process.env.MENTAT_SCREENSHOT);
+     await page.setViewportSize({width:390,height:844});
+     assert.equal(await page.locator('#chart-create').isVisible(),true);
+     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth),false);
+@@ -173,11 +452,33 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+     assert.equal(await page.locator('#graph-tab-recipients').getAttribute('aria-selected'),'true');
+     await page.locator('#tab-graph').focus();
+     await page.keyboard.press('ArrowRight');
++    assert.equal(await page.locator('#tab-chart-studio').getAttribute('aria-selected'),'true');
++    await page.keyboard.press('ArrowRight');
++    assert.equal(await page.locator('#tab-cross-reference').getAttribute('aria-selected'),'true');
++    await page.keyboard.press('ArrowRight');
++    assert.equal(await page.locator('#tab-evidence').getAttribute('aria-selected'),'true');
++    await page.keyboard.press('ArrowRight');
++    assert.equal(await page.locator('#tab-loading').getAttribute('aria-selected'),'true');
++    await page.keyboard.press('ArrowUp');
++    assert.equal(await page.locator('#tab-evidence').getAttribute('aria-selected'),'true');
++    await page.keyboard.press('ArrowDown');
++    assert.equal(await page.locator('#tab-loading').getAttribute('aria-selected'),'true');
++    await page.keyboard.press('End');
++    assert.equal(await page.locator('#tab-evidence').getAttribute('aria-selected'),'true');
++    await page.keyboard.press('Home');
+     assert.equal(await page.locator('#tab-loading').getAttribute('aria-selected'),'true');
++    assert.equal(await page.locator('.workspace-tabs [aria-selected=true]').count(),1);
++    assert.equal(await page.locator('#tab-loading').evaluate(element=>element===document.activeElement),true);
+     assert.deepEqual(errors,[]); assert.deepEqual(remote,[]);
+-    console.log('Browser checks passed: Graph guided scopes, JFC, levels, direct/downstream separation, exports, Advanced charts, freshness, narrow layout, keyboard tabs and local requests only.');
++    console.log('Browser checks passed: Graph guided scopes, JFC, levels, direct/downstream separation, exports, Advanced charts, freshness disclosures, responsive sidebar, skip link, keyboard tabs and local requests only.');
++  } catch(error) {
++    trace(`Failure before cleanup: ${error.stack || error}`);
++    throw error;
+   } finally {
++    trace('Closing browser.');
+     if(browser) await browser.close();
++    trace('Closing temporary fixture.');
+     const exited=once(fixture,'exit'); fixture.stdin.end('\n'); await exited;
++    trace('Cleanup complete.');
+   }
+ })().catch(error=>{console.error(error);process.exitCode=1;});
+diff --git a/mentat/tests/test_evidence_csv_browser.cjs b/mentat/tests/test_evidence_csv_browser.cjs
+index fb87bc664..089d314ff 100644
+--- a/mentat/tests/test_evidence_csv_browser.cjs
++++ b/mentat/tests/test_evidence_csv_browser.cjs
+@@ -88,7 +88,15 @@ function nocommitteeCsv() {
+ function writeFixtures(dir) {
+   fs.writeFileSync(path.join(dir, 'six.csv'), buildCsvOfSize(6_000_000));
+   fs.writeFileSync(path.join(dir, 'forty.csv'), buildCsvOfSize(40_000_000));
+-  fs.writeFileSync(path.join(dir, 'big.csv'), Buffer.alloc(51_000_000, 'a'));
++  // A sparse file: open + ftruncate to 500,000,001 bytes writes no actual
++  // data (NTFS allocates nothing until written), and the client pre-flight
++  // for an oversize file reads only file.size and sends no request, so the
++  // fixture can exceed the 500 MB cap without a 500 MB write.
++  {
++    const fd = fs.openSync(path.join(dir, 'big.csv'), 'w');
++    fs.ftruncateSync(fd, 500_000_001);
++    fs.closeSync(fd);
++  }
+   fs.writeFileSync(path.join(dir, 'wide201.csv'), wide201Csv());
+   fs.writeFileSync(path.join(dir, 'truncated.csv'), truncatedCsv());
+   fs.writeFileSync(path.join(dir, 'empty.csv'), '');
+@@ -383,7 +391,7 @@ function pass(detail) {
+     };
+     page.on('request', trackPosts);
+     await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'big.csv'));
+-    await waitForStatusMatching(/^big\.csv \(51\.0 MB\): Choose a CSV no larger than 50 MB\.$/);
++    await waitForStatusMatching(/^big\.csv \(500\.0 MB\): Choose a CSV no larger than 500 MB\.$/);
+     page.off('request', trackPosts);
+     assert.equal(evidencePosts.length, 0, 'big.csv must be rejected client-side before any upload is attempted');
+     pass('big.csv rejected by the client pre-flight size check; no POST issued');
+diff --git a/mentat/tests/test_evidence_csv_stream.py b/mentat/tests/test_evidence_csv_stream.py
+index 0af5b8193..d5aa59d3e 100644
+--- a/mentat/tests/test_evidence_csv_stream.py
++++ b/mentat/tests/test_evidence_csv_stream.py
+@@ -49,10 +49,10 @@ def load_contract(name):
+ M_NAME = 'Choose a CSV file with a name ending in .csv.'
+ M_EMPTY = 'The CSV file is empty.'
+ M_UTF8 = 'Use a UTF-8 CSV file without invalid text characters.'
+-M_BYTES = 'Choose a CSV no larger than 50 MB.'
++M_BYTES = 'Choose a CSV no larger than 500 MB.'
+ M_COLUMNS = 'The CSV needs unique nonempty column names, with no more than 200 columns.'
+ M_COMMITTEE_COLUMN = 'The CSV needs a Committee ID, CMTE_ID, or Source Committee ID column.'
+-M_ROWS = 'Choose a CSV containing no more than 500,000 rows.'
++M_ROWS = 'Choose a CSV containing no more than 5,000,000 rows.'
+ M_NO_COMMITTEE_ROWS = 'The CSV has no rows with one valid FEC committee ID (C followed by eight digits).'
+ M_BUSY = 'Another CSV is still being read. Wait for it to finish.'
+ M_PAGE = 'Choose a valid CSV row page (1–1,000 rows).'
+@@ -453,18 +453,28 @@ class EvidenceCSVStreamTests(unittest.TestCase):
+             self.assertEqual(job['state'], 'ready')
+ 
+     def test_oversize_rejected_while_streaming(self):
+-        with temp_data_root() as root:
+-            store = csv_data.Store(root)
+-            upload = store.begin_upload('big.csv')
+-            chunk = b'a' * csv_data.CHUNK_BYTES
+-            total_chunks = (csv_data.MAX_BYTES // csv_data.CHUNK_BYTES) + 3
+-            accepted = 0
+-            with self.assertRaises(ValueError) as ctx:
+-                for _ in range(total_chunks):
+-                    accepted += len(chunk)
+-                    upload.write(chunk)
+-            self.assertEqual(str(ctx.exception), M_BYTES)
+-            self.assertLessEqual(accepted, csv_data.MAX_BYTES + csv_data.CHUNK_BYTES)
++        # MAX_BYTES defaults to 500_000_000; writing that many bytes per test
++        # run would be slow, so this narrows the cap for its own duration (the
++        # module reads MAX_BYTES at call time, so Upload.write and
++        # bytes_message() both follow the narrowed value) and restores it.
++        original_max_bytes = csv_data.MAX_BYTES
++        csv_data.MAX_BYTES = 2_000_000
++        try:
++            with temp_data_root() as root:
++                store = csv_data.Store(root)
++                upload = store.begin_upload('big.csv')
++                chunk = b'a' * csv_data.CHUNK_BYTES
++                total_chunks = (csv_data.MAX_BYTES // csv_data.CHUNK_BYTES) + 3
++                accepted = 0
++                with self.assertRaises(ValueError) as ctx:
++                    for _ in range(total_chunks):
++                        accepted += len(chunk)
++                        upload.write(chunk)
++                self.assertEqual(str(ctx.exception), csv_data.bytes_message())
++                self.assertEqual(str(ctx.exception), 'Choose a CSV no larger than 2 MB.')
++                self.assertLessEqual(accepted, csv_data.MAX_BYTES + csv_data.CHUNK_BYTES)
++        finally:
++            csv_data.MAX_BYTES = original_max_bytes
+ 
+     def test_peak_memory_bounded(self):
+         row_count = 40000
+@@ -670,7 +680,7 @@ class EvidenceCSVStreamTests(unittest.TestCase):
+                 with self.assertRaises(HTTPError) as ctx:
+                     urlopen(request)
+                 self.assertEqual(ctx.exception.code, 400)
+-                self.assertEqual(json.load(ctx.exception)['error'], M_BYTES)
++                self.assertEqual(json.load(ctx.exception)['error'], csv_data.bytes_message())
+ 
+                 no_token = Request(origin + '/api/evidence-csv', data=b'a,b\n',
+                                     headers={'Content-Type': 'text/csv', 'Content-Length': '4'}, method='POST')
+diff --git a/mentat/tests/test_evidence_csv.py b/mentat/tests/test_evidence_csv.py
+new file mode 100644
+index 000000000..4aad4e9a8
+--- /dev/null
++++ b/mentat/tests/test_evidence_csv.py
+@@ -0,0 +1,154 @@
++"""CSV observations stay local, source-bound, and separated by recorded channel."""
++import hashlib
++import json
++from pathlib import Path
++import sys
++import tempfile
++import threading
++import unittest
++from unittest.mock import patch
++from urllib.error import HTTPError
++from urllib.request import Request, urlopen
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'app'))
++import evidence_csv as csv_data
++import server as app
++
++
++class EvidenceCSVTests(unittest.TestCase):
++    def document(self, text):
++        result = csv_data.parse('observations.csv', text)
++        result['id'] = 'csv-' + '1' * 32
++        return result
++
++    def receipts(self, rows=1):
++        return 'committee_id,committee_name,contribution_receipt_amount,contribution_receipt_date,cycle\n' + ''.join(
++            'C00000001,Example PAC,10.25,2026-02-03,2026\n' for _ in range(rows))
++
++    def test_utf8_quotes_refunds_and_duplicates_preserve_exact_source(self):
++        text = '\ufeffCMTE_ID,Committee Name,Contribution Receipt Amount,Contribution Receipt Date,Contributor Name,Cycle\n' + (
++            'C00000001,Example PAC,10.25,02/03/2026,"Example, Café",2026\n' * 2) + (
++            'C00000001,Example PAC,-5,2026-02-04,Refund,2026\n'
++            'C00000002,Another PAC,20,2026-02-05,Other,2024\n')
++        document = self.document(text)
++        view = csv_data.select(document, 'C00000001', '2026')
++        self.assertEqual(document['text'], text)
++        self.assertEqual(view['source']['sha256'], hashlib.sha256(text.encode('utf-8')).hexdigest())
++        self.assertEqual(view['total_rows'], 3)
++        self.assertEqual(view['totals'], [{'channel':'Receipts', 'amount':15.5, 'row_count':3}])
++        self.assertEqual(view['rows'][0]['raw']['Contributor Name'], 'Example, Café')
++        self.assertEqual(view['rows'][0]['date'], '2026-02-03')
++        self.assertEqual(view['cycles'], ['2026', '2024'])
++
++    def test_receipts_disbursements_support_and_opposition_are_separate(self):
++        text = ('committee_id,contribution_receipt_amount,contribution_receipt_date,disbursement_amount,disbursement_date,expenditure_amount,expenditure_date,support_oppose\n'
++                'C00000001,10,2026-01-01,,,,,\n'
++                'C00000001,,,20,2026-01-02,,,\n'
++                'C00000001,,,,,30,2026-01-03,S\n'
++                'C00000001,,,,,40,2026-01-04,O\n')
++        view = csv_data.select(self.document(text))
++        self.assertEqual({row['channel']:row['amount'] for row in view['totals']}, {
++            'Receipts':10, 'Disbursements':20, 'Independent spending · support':30, 'Independent spending · oppose':40})
++        self.assertNotIn('total_amount', view)
++        self.assertTrue(all(not row['cycle'] for row in view['rows']))
++
++    def test_explicit_mentat_cycle_aggregate_has_no_invented_transaction_date(self):
++        document = self.document('Cycle,Source Committee ID,Candidate ID,Candidate/Officeholder,Support/Oppose,Net Included Amount\n'
++                                 '2025-2026,C00000001,H0CA00001,Example Candidate,Support,123.45\n')
++        row = csv_data.select(document)['rows'][0]
++        self.assertEqual(row['status'], 'supported')
++        self.assertEqual(row['basis'], 'cycle aggregate')
++        self.assertIsNone(row['date'])
++        self.assertEqual(row['cycle'], '2026')
++        self.assertEqual(row['candidate_name'], 'Example Candidate')
++
++    def test_unsupported_dates_types_and_numbers_remain_visible_without_totals(self):
++        text = ('Committee ID,Type,Amount,Date\n'
++                'C00000001,receipt,25,not-a-date\n'
++                'C00000001,unknown,25,2026-01-01\n'
++                'C00000001,receipt,(-25),2026-01-01\n'
++                'C00000001,receipt,($-25),2026-01-01\n'
++                'C00000001,receipt,NaN,2026-01-01\n'
++                'C00000001,receipt,1e308,2026-01-01\n')
++        view = csv_data.select(self.document(text))
++        self.assertEqual(view['unsupported_rows'], 6)
++        self.assertEqual(view['totals'], [])
++        self.assertEqual(len(view['rows']), 6)
++        json.dumps(view, allow_nan=False)
++
++    def test_semicolon_csv_parses_accounting_amounts_without_double_signs(self):
++        view = csv_data.select(self.document('CMTE_ID;Type;Amount;Date\nC00000001;receipt;($1,234.50);01022026\n'))
++        self.assertEqual(view['totals'][0]['amount'], -1234.5)
++        self.assertEqual(view['rows'][0]['date'], '2026-01-02')
++
++    def test_unassigned_and_extra_cells_remain_inspectable(self):
++        view = csv_data.select(self.document('Committee ID,Type,Amount,Date\n'
++                                            'C00000001,receipt,10,2026-01-01\n'
++                                            'bad-id,receipt,12,2026-01-01,extra\n'), 'unassigned')
++        self.assertEqual(view['total_rows'], 1)
++        self.assertEqual(view['rows'][0]['raw']['Committee ID'], 'bad-id')
++        self.assertEqual(view['rows'][0]['extra_cells'], ['extra'])
++        self.assertEqual(view['totals'], [])
++
++    def test_conflicting_amount_types_are_not_chosen_automatically(self):
++        view = csv_data.select(self.document('committee_id,contribution_receipt_amount,disbursement_amount,date\n'
++                                            'C00000001,10,20,2026-01-01\n'))
++        self.assertEqual(view['unsupported_rows'], 1)
++        self.assertEqual(view['totals'], [])
++
++    def test_pagination_does_not_truncate_selected_totals(self):
++        view = csv_data.select(self.document(self.receipts(251)), offset=200, limit=50)
++        self.assertEqual(len(view['rows']), 50)
++        self.assertEqual(view['total_rows'], 251)
++        self.assertTrue(view['has_more'])
++        self.assertEqual(view['totals'][0]['amount'], 2572.75)
++        self.assertEqual(view['totals'][0]['row_count'], 251)
++
++    def test_malformed_or_unidentified_files_are_rejected(self):
++        for text in ('', 'Name,Amount\nExample,10\n', 'Committee ID,committee_id\nC00000001,C00000001\n',
++                     'Committee ID,Amount\nmissing,10\n', 'committee_id,amount\nC00000001,"broken\n'):
++            with self.subTest(text=text), self.assertRaises(ValueError):
++                self.document(text)
++        with self.assertRaises(ValueError):
++            csv_data.parse('file.xlsx', self.receipts())
++        with patch.object(csv_data, 'MAX_ROWS', 1):
++            with self.assertRaises(ValueError):
++                self.document(self.receipts(2))
++
++    def test_csv_http_is_authenticated_and_available_in_read_only_mode(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            root = Path(temporary)
++            with patch.object(app, 'report_directory', return_value=root), patch.object(app, 'environment_keys', return_value=[]):
++                console = app.Console(root / 'state', read_only=True)
++            server = app.ThreadingHTTPServer(('127.0.0.1', 0), app.Handler)
++            server.app = console
++            worker = threading.Thread(target=server.serve_forever, daemon=True)
++            worker.start()
++            origin = f'http://127.0.0.1:{server.server_port}'
++            payload = json.dumps({'name':'example.csv', 'text':self.receipts(3)}).encode()
++            headers = {'Content-Type':'application/json', 'X-Mentat-Token':console.token}
++            try:
++                with self.assertRaises(HTTPError) as error:
++                    urlopen(Request(origin + '/api/evidence-csv', data=payload))
++                self.assertEqual(error.exception.code, 403)
++                with urlopen(Request(origin + '/api/evidence-csv', data=payload, headers=headers)) as response:
++                    source = json.load(response)
++                with urlopen(origin + '/api/evidence-csv') as response:
++                    self.assertEqual(json.load(response)['sources'][0]['id'], source['id'])
++                with urlopen(origin + '/api/evidence-csv?id=' + source['id'] + '&committee=C00000001&cycle=2026&offset=1&limit=1') as response:
++                    view = json.load(response)
++                self.assertEqual(len(view['rows']), 1)
++                self.assertEqual(view['total_rows'], 3)
++                self.assertEqual(view['totals'][0]['amount'], 30.75)
++                self.assertTrue((console.root / 'evidence-csv' / source['id'] / 'import.json').is_file())
++                with patch.object(app, 'report_directory', return_value=root), patch.object(app, 'environment_keys', return_value=[]):
++                    restarted = app.Console(console.root, read_only=True)
++                self.assertEqual(restarted.evidence_csv_view()['sources'][0]['id'], source['id'])
++            finally:
++                server.shutdown()
++                server.server_close()
++                worker.join()
++
++
++if __name__ == '__main__':
++    unittest.main()

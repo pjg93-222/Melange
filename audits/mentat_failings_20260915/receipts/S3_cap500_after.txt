@@ -1,0 +1,172 @@
+S3 cap-raise (500 MB) verification receipt
+Repo: C:\Users\pgoff\Mentat   Branch: codex/mentat-crypto
+HEAD (working tree includes the uncommitted S3-cap changes verified below): 30340919211d116a39449a714f0bd1c5f6278be4
+UTC date: 2026-09-16T23:51:47Z
+cwd for every command below: C:\Users\pgoff\Mentat\mentat
+
+==================================================================
+$ python -m py_compile app/evidence_csv.py app/server.py tests/test_evidence_csv_stream.py tests/test_evidence_csv.py
+------------------------------------------------------------------
+------------------------------------------------------------------
+exit code: 0
+
+==================================================================
+$ node --check app/evidence-csv.js
+------------------------------------------------------------------
+------------------------------------------------------------------
+exit code: 0
+
+==================================================================
+$ node --check tests/test_evidence_csv_browser.cjs
+------------------------------------------------------------------
+------------------------------------------------------------------
+exit code: 0
+
+==================================================================
+$ node --check tests/test_console_browser.cjs
+------------------------------------------------------------------
+------------------------------------------------------------------
+exit code: 0
+
+==================================================================
+$ grep leftover-literal check: -n -E '50 MB|5 MB|50_000_000|50000000|5_000_000\b' app/evidence_csv.py app/evidence-csv.js app/index.html app/server.py
+------------------------------------------------------------------
+app/evidence_csv.py:78:MAX_ROWS = 5_000_000
+app/index.html:39:<label class="upload" for="file"><strong>Choose a roster</strong><span>CSV, TSV, or Excel · up to 5 MB</span><input id="file" type="file" accept=".csv,.tsv,.xlsx"></label>
+app/server.py:594:        if not content or len(content) > 5_000_000:
+app/server.py:595:            raise ValueError("Upload a nonempty file smaller than 5 MB.")
+------------------------------------------------------------------
+exit code: 0
+
+==================================================================
+$ python -m unittest tests.test_evidence_csv_stream -v (expect 18 OK)
+------------------------------------------------------------------
+test_200_columns_accepted (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_200_columns_accepted) ... ok
+test_201_columns_rejected (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_201_columns_rejected) ... ok
+test_collect_evidence_failure_message (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_collect_evidence_failure_message) ... ok
+test_contract_examples_against_producers (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_contract_examples_against_producers) ... ok
+test_dedup_same_bytes_same_id (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_dedup_same_bytes_same_id) ... ok
+test_eviction (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_eviction) ... ok
+test_gone_import (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_gone_import) ... ok
+test_http_streaming_roundtrip (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_http_streaming_roundtrip) ... ok
+test_interrupted_reading_reports_failed (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_interrupted_reading_reports_failed) ... ok
+test_keystore_failure_reported_once (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_keystore_failure_reported_once) ... ok
+test_legacy_json_import_still_works (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_legacy_json_import_still_works) ... ok
+test_max_rows_enforced_incrementally (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_max_rows_enforced_incrementally) ... ok
+test_oversize_rejected_while_streaming (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_oversize_rejected_while_streaming) ... ok
+test_page_arguments_validated (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_page_arguments_validated) ... ok
+test_peak_memory_bounded (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_peak_memory_bounded) ... ok
+test_select_totals_are_decimal_exact (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_select_totals_are_decimal_exact) ... ok
+test_truncated_inside_quoted_field (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_truncated_inside_quoted_field) ... ok
+test_truncated_mid_row_is_tolerated (tests.test_evidence_csv_stream.EvidenceCSVStreamTests.test_truncated_mid_row_is_tolerated) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 22.135s
+
+OK
+------------------------------------------------------------------
+exit code: 0
+
+==================================================================
+$ python -m unittest tests.test_evidence_csv -v (expect 10/10)
+------------------------------------------------------------------
+test_conflicting_amount_types_are_not_chosen_automatically (tests.test_evidence_csv.EvidenceCSVTests.test_conflicting_amount_types_are_not_chosen_automatically) ... ok
+test_csv_http_is_authenticated_and_available_in_read_only_mode (tests.test_evidence_csv.EvidenceCSVTests.test_csv_http_is_authenticated_and_available_in_read_only_mode) ... ok
+test_explicit_mentat_cycle_aggregate_has_no_invented_transaction_date (tests.test_evidence_csv.EvidenceCSVTests.test_explicit_mentat_cycle_aggregate_has_no_invented_transaction_date) ... ok
+test_malformed_or_unidentified_files_are_rejected (tests.test_evidence_csv.EvidenceCSVTests.test_malformed_or_unidentified_files_are_rejected) ... ok
+test_pagination_does_not_truncate_selected_totals (tests.test_evidence_csv.EvidenceCSVTests.test_pagination_does_not_truncate_selected_totals) ... ok
+test_receipts_disbursements_support_and_opposition_are_separate (tests.test_evidence_csv.EvidenceCSVTests.test_receipts_disbursements_support_and_opposition_are_separate) ... ok
+test_semicolon_csv_parses_accounting_amounts_without_double_signs (tests.test_evidence_csv.EvidenceCSVTests.test_semicolon_csv_parses_accounting_amounts_without_double_signs) ... ok
+test_unassigned_and_extra_cells_remain_inspectable (tests.test_evidence_csv.EvidenceCSVTests.test_unassigned_and_extra_cells_remain_inspectable) ... ok
+test_unsupported_dates_types_and_numbers_remain_visible_without_totals (tests.test_evidence_csv.EvidenceCSVTests.test_unsupported_dates_types_and_numbers_remain_visible_without_totals) ... ok
+test_utf8_quotes_refunds_and_duplicates_preserve_exact_source (tests.test_evidence_csv.EvidenceCSVTests.test_utf8_quotes_refunds_and_duplicates_preserve_exact_source) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 2.091s
+
+OK
+------------------------------------------------------------------
+exit code: 0
+
+==================================================================
+$ python -m unittest tests.test_pac_evidence tests.test_pac_evidence_errors -v (expect 10+7)
+------------------------------------------------------------------
+test_cash_contribution_and_other_receipt_are_distinct (tests.test_pac_evidence.EvidenceTests.test_cash_contribution_and_other_receipt_are_distinct) ... ok
+test_company_funding_personal_money_and_committee_activity_stay_separate (tests.test_pac_evidence.EvidenceTests.test_company_funding_personal_money_and_committee_activity_stay_separate) ... ok
+test_count_cursor_integrity_and_cache (tests.test_pac_evidence.EvidenceTests.test_count_cursor_integrity_and_cache) ... ok
+test_dates_block_retroactive_spending_and_unliquidated_assets (tests.test_pac_evidence.EvidenceTests.test_dates_block_retroactive_spending_and_unliquidated_assets) ... ok
+test_explicit_financial_events_and_refunds_are_other_receipts (tests.test_pac_evidence.EvidenceTests.test_explicit_financial_events_and_refunds_are_other_receipts) ... ok
+test_explicit_interest_income_survives_account_labels (tests.test_pac_evidence.EvidenceTests.test_explicit_interest_income_survives_account_labels) ... ok
+test_income_rule_preserves_ambiguous_captions_and_actual_gift_conflicts (tests.test_pac_evidence.EvidenceTests.test_income_rule_preserves_ambiguous_captions_and_actual_gift_conflicts) ... ok
+test_incomplete_pagination_does_not_publish_success (tests.test_pac_evidence.EvidenceTests.test_incomplete_pagination_does_not_publish_success) ... ok
+test_other_federal_receipts_must_not_be_blanket_excluded (tests.test_pac_evidence.EvidenceTests.test_other_federal_receipts_must_not_be_blanket_excluded) ... ok
+test_sale_and_memo_are_not_new_donations_even_with_contribution_code (tests.test_pac_evidence.EvidenceTests.test_sale_and_memo_are_not_new_donations_even_with_contribution_code) ... ok
+test_cache_integrity_names_path (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_cache_integrity_names_path) ... ok
+test_http_404_not_retried (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_http_404_not_retried) ... ok
+test_http_503_retried (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_http_503_retried) ... ok
+test_non_json_reported (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_non_json_reported) ... ok
+test_success_path_unchanged (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_success_path_unchanged) ... ok
+test_timeout_reported_with_url (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_timeout_reported_with_url) ... ok
+test_url_error_retried_then_reported (tests.test_pac_evidence_errors.PacEvidenceErrorTests.test_url_error_retried_then_reported) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.177s
+
+OK
+------------------------------------------------------------------
+exit code: 0
+
+==================================================================
+$ node tests/test_evidence_csv_browser.cjs (expect 19 steps PASS, exit 0)
+------------------------------------------------------------------
+STEP 1: write fixture CSVs to a scratch directory
+PASS step 1 (0.3s) - fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-fixtures-oMWsdV
+STEP 2: pick a free port and launch the first console server
+PASS step 2 (3.8s) - server A ready on port 61026, data root C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-data-P9r6TZ
+STEP 3: launch headless Chrome and open a page
+PASS step 3 (3.5s) - browser launched, page opened, pageerror/request listeners attached
+STEP 4: open the evidence tab, select CSV source, expect the empty-catalog status
+PASS step 4 (0.8s) - evidence tab open, CSV source selected, empty-catalog status shown
+STEP 5: import six.csv (~6 MB) and check the first page of rows
+PASS step 5 (4.0s) - six.csv imported (~6 MB), 100 rows rendered on the first page
+STEP 6: import forty.csv (~40 MB) and watch for a progress sample
+PASS step 6 (18.1s) - forty.csv imported (~40 MB) after 159 polled progress samples
+STEP 7: kill and relaunch the console on the same port/data root; reuse prior imports
+PASS step 7 (3.7s) - server restarted on the same port and data root; both prior imports reachable without re-upload
+STEP 8: launch a second console on the same data root, a different port
+PASS step 8 (4.8s) - a second console on the same data root and a different port lists both imports
+STEP 9: error case: big.csv rejected client-side, no upload issued
+PASS step 9 (0.1s) - big.csv rejected by the client pre-flight size check; no POST issued
+STEP 10: error case: notes.txt rejected for its extension
+PASS step 10 (0.1s) - notes.txt rejected for its extension
+STEP 11: error case: wide201.csv rejected for exceeding the column cap
+PASS step 11 (0.6s) - wide201.csv rejected for exceeding the column cap
+STEP 12: error case: truncated.csv rejected for an unterminated quoted field
+PASS step 12 (0.6s) - truncated.csv rejected for an unterminated quoted field
+STEP 13: error case: empty.csv rejected as empty
+PASS step 13 (0.1s) - empty.csv rejected as empty
+STEP 14: error case: latin1.csv rejected for invalid UTF-8 bytes
+PASS step 14 (0.0s) - latin1.csv rejected for invalid UTF-8 bytes
+STEP 15: error case: nocommittee.csv rejected for missing a committee-id column
+PASS step 15 (0.6s) - nocommittee.csv rejected for missing a committee-id column
+STEP 16: error case: abort.csv reports a transport failure when the upload is aborted
+PASS step 16 (0.1s) - abort.csv reports a transport failure when the upload request is aborted
+STEP 17: error case: html.csv reports an unparseable HTTP 500 response
+PASS step 17 (0.1s) - html.csv reports an unparseable HTTP 500 response
+STEP 18: error case: a bad ?offset= value returns 400 with the exact M_PAGE message
+PASS step 18 (0.0s) - a bad ?offset= value returns 400 with the exact M_PAGE message, not a leaked exception
+STEP 19: final check: zero pageerror entries and zero remote requests
+PASS step 19 (0.0s) - zero pageerror entries and zero remote requests across the whole run
+ALL 19 STEPS PASSED
+browser.close() exceeded its 10000ms bound
+------------------------------------------------------------------
+exit code: 0
+
+==================================================================
+$ node tests/test_console_browser.cjs (cap 300s; S0 baseline was red at :188; report whether the S3 oversize assertion at :87 now passes and what the first failure is, if any)
+------------------------------------------------------------------
+Browser checks passed: Graph guided scopes, JFC, levels, direct/downstream separation, exports, Advanced charts, freshness disclosures, responsive sidebar, skip link, keyboard tabs and local requests only.
+------------------------------------------------------------------
+exit code: 0
+
+Verification run complete.

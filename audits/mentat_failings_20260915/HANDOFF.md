@@ -191,15 +191,24 @@ it in code.
 | `mentat/app/evidence-csv.js` | S3 | not started | client size mirror, status line |
 | `mentat/tools/pac_evidence.py` | S3 | not started | collector, `ThreadPoolExecutor(3)` |
 | `mentat/tools/fec_key_store.py` | S3 | not started | see DEFECT-KEYSTORE in PACKET.md |
-| `mentat/app/contribution_data.py` | S4 | not started | `DIMENSIONS`, detail row cap |
-| `mentat/app/chart-studio.js` | S4 | not started | API base, view routing |
-| `mentat/app/chart-studio-core.js` | S4 | not started | `STUDIO_GROUP_LIMIT = 60` |
+| `mentat/app/contribution_data.py` | S4 | in progress | `DIMENSIONS`, detail row cap |
+| `mentat/app/chart-studio.js` | S4 | in progress | API base, view routing |
+| `mentat/app/chart-studio-core.js` | S4 | in progress | `STUDIO_GROUP_LIMIT = 60` |
+| `mentat/app/snapshot_registry.py` | S4 | in progress | NEW |
+| `mentat/app/industry_scope.py` | S4 | in progress | NEW |
+| `mentat/app/chart-studio-contributions.js` | S4 | in progress | one-line: industry in the query body |
+| `mentat/tools/crypto_workbook_builder.mjs` | S4 | in progress | buildContributorDetail widening, S2 decision 7 |
+| `mentat/R/report.R` | S4 | in progress | contributor_keys only, S2 decision 7 |
+| `mentat/tests/test_snapshot_registry.py` | S4 | in progress | NEW |
+| `mentat/tests/test_industry_routes.py` | S4 | in progress | NEW |
+| `mentat/tests/test_studio_industry_browser.cjs` | S4 | in progress | NEW |
+| `mentat/tests/test_contributor_detail_header.cjs` | S4 | in progress | NEW |
 | `mentat/app/index.html` | S5 | not started | tabs, graph-mode select |
 | `mentat/app/app.js` | S5 | not started | hash routing, localStorage |
 | `mentat/app/graph.js` | S5 | not started | `clear()`, scope handoff |
 | `mentat/app/graph_data.py` | S5 | not started | Downstream Activity worksheet |
 | `mentat/R/fec_beneficiary.R` | S5 | not started | produces Downstream Activity |
-| `mentat/app/server.py` | **CONTENDED** | **blocked** | see below |
+| `mentat/app/server.py` | S4 | in progress | S3 hunks committed 303409192; S4 holds the industry route hunks; S5 waits for S4's commit |
 | `mentat/tests/**` | shared | — | each session owns only the test files it adds |
 
 **WORKING-TREE HAZARD (verified 2026-09-16):** `fec_api.R`, `collect.R`, `schema.R`, `report.R`, `tidy_stage.R`, `prepare_workbook_payload.py`, `build_industry_report.ps1` and `finalize_crypto_excel.ps1` are all **modified-uncommitted by other lanes** right now. `git diff -- <file>` on any of them captures foreign hunks. Every S1/S2 patch must be separated hunk by hunk and the receipt must say which hunks are the session's own — the same rule as `server.py`. `build_tidy_workbook.py` was tracked and clean at HEAD `bd5dc8ea1`; S2 has since modified it (one registry edit) and it is now ` M` — that hunk is S2's alone.
@@ -733,13 +742,13 @@ four-runner sweep is `receipts/S2_final_sweep.txt`.
 
 ## S4 — Cross-industry addressing (Area E)
 
-**Status:** not started
+**Status:** in progress (2026-09-16; design accepted by Paul: S4_DESIGN.md; precondition met at 303409192)
 
 **Files owned:** see table. `server.py` is CONTENDED.
 
 **Patches:** —
 
-**Contract decisions:** —
+**Contract decisions:** contracts/snapshot_registry.json, contracts/contributions_api.json, contracts/studio_api.json (v1, written before code)
 
 **Open questions:** —
 
@@ -947,3 +956,107 @@ map; (e) `limits` are per server, identical across consoles on the same build.
 
 **Next:** Paul restarts the consoles, applies or commits, rules on items 2–4; S6 builds the
 pane state model after the cross-industry contract exists.
+
+---
+
+### S3 addendum — cap raised to 500 MB, follow-up patches applied (2026-09-16 evening)
+
+The S3 section above (both the stub at line ~727 and the full write-up at the end of
+this file) says "BUILT, receipts ready, UNCOMMITTED." That predates commit `303409192`,
+which landed S3 on this branch; this addendum is a second, separate pass on top of that
+commit.
+
+**Paul's ruling:** "Apply all, and the cap should be way past 5 or even 50."
+
+**Constants changed, in `mentat/app/evidence_csv.py`:**
+- `MAX_BYTES`: `50_000_000` → `500_000_000`. The request thread only ever copies
+  `CHUNK_BYTES` (64 KiB) at a time before handing off, so a larger ceiling costs the
+  request thread no more time per chunk; ingest itself runs off-thread with progress
+  reported to the page as rows and bytes are read. Ingest seconds are still NOT
+  certifiable on this host (an identical 6 MB ingest measured 0.82–34.66 s across runs
+  under memory pressure — S0's Finding 2 environment, not a property of the code), so the
+  honest expectation at 500 MB is minutes, not seconds.
+- `MAX_ROWS`: `500_000` → `5_000_000`. Rows live in `rows.sqlite`, not memory; the cap
+  only bounds ingest time and page offsets, and scales with `MAX_BYTES`: at roughly
+  100 bytes/row, 500 MB is about 5,000,000 rows.
+- `KEEP_BYTES`: `250_000_000` → `1_000_000_000`. This is an eviction budget of source
+  bytes only; `KEEP_IMPORTS` stays `10`.
+
+**Disk arithmetic (unchanged measurement, rescaled):** the design measured here stores
+only cells and recomputes `normalize()` per page, at 1.58× the source in `rows.sqlite`,
+so one import costs source + 1.58× source ≈ 2.6× the source in all. At the 500 MB
+ceiling that is about 1.3 GB of disk for one import; behind `KEEP_BYTES` = 1 GB of kept
+sources, the sqlite databases behind them add roughly another 1.58 GB, about 2.6 GB kept
+on disk worst case. The generic 7 MB JSON body gate in `server.py`'s `do_POST`
+(`Content-Length > 7_000_000`) is unchanged and still bounds the legacy in-request JSON
+import path only; the streamed CSV path answers to `MAX_BYTES`.
+
+**Three proposed patches applied, in this order (all were `git apply --check` clean
+before applying):**
+1. `patches/S3_proposed_index_html_limit_text.patch` — `index.html`'s
+   `#evidence-csv-status` resting text no longer states a size number; the console
+   states the size limit when a file is chosen, from the server's published `limits`.
+2. `patches/S3_proposed_test_evidence_csv_pin.patch` — `mentat/tests/test_evidence_csv.py`
+   is now git-tracked (added by this commit); the renamed test
+   `test_csv_http_is_authenticated_and_available_in_read_only_mode` pins that an import's
+   on-disk record exists and that a restart remembers it, replacing the old
+   "memory only / a restart forgets" assertions that pinned the pre-S3 defect.
+3. `patches/S3_proposed_test_console_browser_limit.patch` — `mentat/tests/test_console_browser.cjs`
+   lines ~86–87 now assert the server-published limit instead of the old "no larger than
+   5 MB" literal. This lane then re-edited that same assertion a second time, past what
+   the patch itself did, to the 500 MB cap: the oversize input is now a
+   500,000,001-byte SPARSE temp file (open + `ftruncateSync`, no real write) passed to
+   `setInputFiles` by path, not a `Buffer.alloc(...)`, so the case stays fast at the new
+   ceiling; regex now `too-large.csv (500.0 MB): Choose a CSV no larger than 500 MB.`.
+   This file already carried unrelated, uncommitted hunks from another lane (navigation,
+   coverage-panel and keyboard-nav checks) before S3 touched it; those hunks are untouched
+   by this addendum and are included in the receipt patch only because the file as a
+   whole changed.
+
+**Also updated for the new cap (not from the proposed-patches packet):**
+- `contracts/evidence-csv-import.json`: the `limits` example now reads `max_bytes:
+  500000000`, `max_rows: 5000000`, and the matching `_message` strings.
+- `mentat/tests/test_evidence_csv_stream.py`: `test_oversize_rejected_while_streaming`
+  now narrows `evidence_csv.MAX_BYTES` to `2_000_000` for its own duration (restored in
+  `finally`) instead of writing 500 MB per run, and asserts the live
+  `csv_data.bytes_message()` (`'Choose a CSV no larger than 2 MB.'`);
+  `test_http_streaming_roundtrip`'s oversize `Content-Length` case now asserts the live
+  `csv_data.bytes_message()` instead of a hardcoded 50 MB string.
+- `mentat/tests/test_evidence_csv_browser.cjs`: the `big.csv` pre-flight fixture is now a
+  500,000,001-byte sparse file (open + `ftruncateSync`, no 500 MB write); the expected
+  status regex is `big.csv (500.0 MB): Choose a CSV no larger than 500 MB.`. The sparse
+  file worked on the first try in this lane's runs — Playwright's `setInputFiles` by path
+  read only `file.size` and issued no request, so the documented Buffer fallback was not
+  needed.
+
+**Tallies (full output in `receipts/S3_cap500_after.txt`):**
+- `python -m py_compile` on `evidence_csv.py`, `server.py`, `test_evidence_csv_stream.py`,
+  `test_evidence_csv.py`: exit 0.
+- `node --check` on `evidence-csv.js`, `test_evidence_csv_browser.cjs`,
+  `test_console_browser.cjs`: exit 0.
+- Leftover-literal grep over `evidence_csv.py`, `evidence-csv.js`, `index.html`,
+  `server.py`: 4 hits, all expected and unrelated to the evidence-CSV path —
+  `evidence_csv.py:78` is the new `MAX_ROWS = 5_000_000` itself; `index.html:39` and
+  `server.py:594-595` are the separate roster-file upload's own "up to 5 MB" / `5_000_000`
+  gate (a different feature, out of S3's scope, untouched).
+- `tests.test_evidence_csv_stream`: 18/18 OK.
+- `tests.test_evidence_csv`: 10/10 OK (this suite is now tracked; the pin patch's
+  renamed test is included and passes).
+- `tests.test_pac_evidence` + `tests.test_pac_evidence_errors`: 17/17 OK (10 + 7).
+- `node tests/test_evidence_csv_browser.cjs`: 19/19 steps PASS, exit 0 — including step 9
+  (the sparse `big.csv` rejected client-side at the new 500 MB cap, zero uploads issued).
+- `node tests/test_console_browser.cjs`: the receipted run passed end-to-end
+  ("Browser checks passed…"), exit 0, including the :87 assertion this lane rewrote for
+  the 500 MB cap. Note for the next session: a separate, non-receipted run earlier the
+  same evening failed at a different, unrelated assertion (`[data-run-group=history]`
+  `aria-pressed`, around line 195, inside the other lane's in-progress run-group UI work)
+  — :87 had already passed in that run too before the unrelated failure. This looks like
+  the flakiness this file's own comments already describe elsewhere in the repo, not a
+  regression from this addendum; it was not investigated further here because it is
+  outside S3's ownership.
+
+**Receipts:** `receipts/S3_cap500_after.txt` (commands, HEAD, UTC date, exit codes, full
+output for every command above). **Patch:** `patches/S3_cap_500MB_and_followups.patch`
+(`git diff --no-color` of the six tracked files this addendum changed, plus
+`git diff --no-index` for the newly-tracked `mentat/tests/test_evidence_csv.py`;
+`git apply --check -R` from the repo root: exit 0).

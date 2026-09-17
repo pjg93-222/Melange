@@ -88,7 +88,15 @@ function nocommitteeCsv() {
 function writeFixtures(dir) {
   fs.writeFileSync(path.join(dir, 'six.csv'), buildCsvOfSize(6_000_000));
   fs.writeFileSync(path.join(dir, 'forty.csv'), buildCsvOfSize(40_000_000));
-  fs.writeFileSync(path.join(dir, 'big.csv'), Buffer.alloc(51_000_000, 'a'));
+  // A sparse file: open + ftruncate to 500,000,001 bytes writes no actual
+  // data (NTFS allocates nothing until written), and the client pre-flight
+  // for an oversize file reads only file.size and sends no request, so the
+  // fixture can exceed the 500 MB cap without a 500 MB write.
+  {
+    const fd = fs.openSync(path.join(dir, 'big.csv'), 'w');
+    fs.ftruncateSync(fd, 500_000_001);
+    fs.closeSync(fd);
+  }
   fs.writeFileSync(path.join(dir, 'wide201.csv'), wide201Csv());
   fs.writeFileSync(path.join(dir, 'truncated.csv'), truncatedCsv());
   fs.writeFileSync(path.join(dir, 'empty.csv'), '');
@@ -383,7 +391,7 @@ function pass(detail) {
     };
     page.on('request', trackPosts);
     await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'big.csv'));
-    await waitForStatusMatching(/^big\.csv \(51\.0 MB\): Choose a CSV no larger than 50 MB\.$/);
+    await waitForStatusMatching(/^big\.csv \(500\.0 MB\): Choose a CSV no larger than 500 MB\.$/);
     page.off('request', trackPosts);
     assert.equal(evidencePosts.length, 0, 'big.csv must be rejected client-side before any upload is attempted');
     pass('big.csv rejected by the client pre-flight size check; no POST issued');

@@ -49,10 +49,10 @@ def load_contract(name):
 M_NAME = 'Choose a CSV file with a name ending in .csv.'
 M_EMPTY = 'The CSV file is empty.'
 M_UTF8 = 'Use a UTF-8 CSV file without invalid text characters.'
-M_BYTES = 'Choose a CSV no larger than 50 MB.'
+M_BYTES = 'Choose a CSV no larger than 500 MB.'
 M_COLUMNS = 'The CSV needs unique nonempty column names, with no more than 200 columns.'
 M_COMMITTEE_COLUMN = 'The CSV needs a Committee ID, CMTE_ID, or Source Committee ID column.'
-M_ROWS = 'Choose a CSV containing no more than 500,000 rows.'
+M_ROWS = 'Choose a CSV containing no more than 5,000,000 rows.'
 M_NO_COMMITTEE_ROWS = 'The CSV has no rows with one valid FEC committee ID (C followed by eight digits).'
 M_BUSY = 'Another CSV is still being read. Wait for it to finish.'
 M_PAGE = 'Choose a valid CSV row page (1–1,000 rows).'
@@ -453,18 +453,28 @@ class EvidenceCSVStreamTests(unittest.TestCase):
             self.assertEqual(job['state'], 'ready')
 
     def test_oversize_rejected_while_streaming(self):
-        with temp_data_root() as root:
-            store = csv_data.Store(root)
-            upload = store.begin_upload('big.csv')
-            chunk = b'a' * csv_data.CHUNK_BYTES
-            total_chunks = (csv_data.MAX_BYTES // csv_data.CHUNK_BYTES) + 3
-            accepted = 0
-            with self.assertRaises(ValueError) as ctx:
-                for _ in range(total_chunks):
-                    accepted += len(chunk)
-                    upload.write(chunk)
-            self.assertEqual(str(ctx.exception), M_BYTES)
-            self.assertLessEqual(accepted, csv_data.MAX_BYTES + csv_data.CHUNK_BYTES)
+        # MAX_BYTES defaults to 500_000_000; writing that many bytes per test
+        # run would be slow, so this narrows the cap for its own duration (the
+        # module reads MAX_BYTES at call time, so Upload.write and
+        # bytes_message() both follow the narrowed value) and restores it.
+        original_max_bytes = csv_data.MAX_BYTES
+        csv_data.MAX_BYTES = 2_000_000
+        try:
+            with temp_data_root() as root:
+                store = csv_data.Store(root)
+                upload = store.begin_upload('big.csv')
+                chunk = b'a' * csv_data.CHUNK_BYTES
+                total_chunks = (csv_data.MAX_BYTES // csv_data.CHUNK_BYTES) + 3
+                accepted = 0
+                with self.assertRaises(ValueError) as ctx:
+                    for _ in range(total_chunks):
+                        accepted += len(chunk)
+                        upload.write(chunk)
+                self.assertEqual(str(ctx.exception), csv_data.bytes_message())
+                self.assertEqual(str(ctx.exception), 'Choose a CSV no larger than 2 MB.')
+                self.assertLessEqual(accepted, csv_data.MAX_BYTES + csv_data.CHUNK_BYTES)
+        finally:
+            csv_data.MAX_BYTES = original_max_bytes
 
     def test_peak_memory_bounded(self):
         row_count = 40000
@@ -670,7 +680,7 @@ class EvidenceCSVStreamTests(unittest.TestCase):
                 with self.assertRaises(HTTPError) as ctx:
                     urlopen(request)
                 self.assertEqual(ctx.exception.code, 400)
-                self.assertEqual(json.load(ctx.exception)['error'], M_BYTES)
+                self.assertEqual(json.load(ctx.exception)['error'], csv_data.bytes_message())
 
                 no_token = Request(origin + '/api/evidence-csv', data=b'a,b\n',
                                     headers={'Content-Type': 'text/csv', 'Content-Length': '4'}, method='POST')
