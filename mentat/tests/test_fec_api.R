@@ -245,7 +245,7 @@ pages <- list(
       list(sub_id = "B", contribution_receipt_date = "2024-04-02"),
       list(sub_id = "A", contribution_receipt_date = "2024-04-03")
     ),
-    pagination = list(
+    pagination = list(is_count_exact = TRUE,
       count = 3L,
       last_indexes = list(
         last_index = "cursor-1",
@@ -257,7 +257,7 @@ pages <- list(
     results = list(
       list(sub_id = "C", contribution_receipt_date = "2024-04-01")
     ),
-    pagination = list(
+    pagination = list(is_count_exact = TRUE,
       count = 3L,
       last_indexes = list(
         last_index = "cursor-2",
@@ -307,6 +307,12 @@ stopifnot(
   ))
 )
 
+# These fixtures each serve one fixed page list, so reconciliation is switched
+# off for them on purpose: they assert the terminal refusal - a population that
+# never verifies is never certified and nothing unverified is stored. The
+# re-walk that resolves a genuinely moving count lives in
+# test_fec_api_reconcile.R.
+Sys.setenv(MENTAT_RECONCILE_PASSES = "0")
 null_cursor_calls <- 0L
 null_cursor_transport <- function(specs, api_key, concurrency) {
   null_cursor_calls <<- null_cursor_calls + length(specs)
@@ -315,7 +321,7 @@ null_cursor_transport <- function(specs, api_key, concurrency) {
     headers = list(),
     json = list(
       results = list(list(sub_id = "ONLY")),
-      pagination = list(count = 999L, last_indexes = NULL)
+      pagination = list(is_count_exact = TRUE, count = 999L, last_indexes = NULL)
     )
   ))
 }
@@ -335,14 +341,15 @@ null_cursor_failure <- tryCatch(
 )
 stopifnot(
   null_cursor_calls == 1L,
-  grepl("pagination shortfall", null_cursor_failure, fixed = TRUE),
-  grepl("collected 1 of 999", null_cursor_failure, fixed = TRUE)
+  grepl("did not verify after 0 passes", null_cursor_failure, fixed = TRUE),
+  grepl("shortfall 1 of 999", null_cursor_failure, fixed = TRUE),
+  grepl("Nothing unverified was stored", null_cursor_failure, fixed = TRUE)
 )
 
 moving_count_pages <- list(
   list(
     results = list(list(sub_id = "MOVING-1"), list(sub_id = "MOVING-2")),
-    pagination = list(
+    pagination = list(is_count_exact = TRUE,
       count = 3L,
       last_indexes = list(
         last_index = "moving-cursor",
@@ -352,7 +359,7 @@ moving_count_pages <- list(
   ),
   list(
     results = list(list(sub_id = "MOVING-3")),
-    pagination = list(count = 4L, last_indexes = NULL)
+    pagination = list(is_count_exact = TRUE, count = 4L, last_indexes = NULL)
   )
 )
 moving_count_calls <- 0L
@@ -364,21 +371,17 @@ moving_count_transport <- function(specs, api_key, concurrency) {
     json = moving_count_pages[[moving_count_calls]]
   ))
 }
-moving_count_result <- suppressWarnings(fec_api_collect_work_units(
-  list(unit),
-  api_key = "fixture-key",
-  concurrency = 1L,
-  transport = moving_count_transport,
-  sleep = function(seconds) stop("unexpected sleep"),
-  jitter = function(...) 0
-))
-moving_count_state <- moving_count_result$units[[unit$id]]
-stopifnot(
-  moving_count_calls == 2L,
-  moving_count_result$rows == 3L,
-  isTRUE(moving_count_state$complete),
-  moving_count_state$expected_count == 3L
-)
+moving_count_saved <- list()
+moving_count_failure <- tryCatch(suppressWarnings(fec_api_collect_work_units(
+  list(unit), api_key = "fixture-key", concurrency = 1L,
+  transport = moving_count_transport, sleep = function(seconds) stop("unexpected sleep"),
+  jitter = function(...) 0,
+  page_callback = function(state, page) { moving_count_saved[[length(moving_count_saved)+1L]] <<- page }
+)), error = conditionMessage)
+stopifnot(grepl("did not verify after 0 passes", moving_count_failure, fixed = TRUE),
+          grepl("count moved ", moving_count_failure, fixed = TRUE),
+          !isTRUE(tail(moving_count_saved, 1)[[1]]$complete),
+          identical(tail(moving_count_saved, 1)[[1]]$validation_failure, "population_changed_during_collection"))
 
 moving_count_cursor_pages <- list(
   list(
@@ -386,7 +389,7 @@ moving_count_cursor_pages <- list(
       list(sub_id = "MOVING-CURSOR-1"),
       list(sub_id = "MOVING-CURSOR-2")
     ),
-    pagination = list(
+    pagination = list(is_count_exact = TRUE,
       count = 3L,
       last_indexes = list(
         last_index = "moving-cursor-1",
@@ -396,7 +399,7 @@ moving_count_cursor_pages <- list(
   ),
   list(
     results = list(list(sub_id = "MOVING-CURSOR-3")),
-    pagination = list(
+    pagination = list(is_count_exact = TRUE,
       count = 4L,
       last_indexes = list(
         last_index = "moving-cursor-2",
@@ -406,7 +409,7 @@ moving_count_cursor_pages <- list(
   ),
   list(
     results = list(list(sub_id = "MOVING-CURSOR-4")),
-    pagination = list(count = 4L, last_indexes = NULL)
+    pagination = list(is_count_exact = TRUE, count = 4L, last_indexes = NULL)
   )
 )
 moving_count_cursor_calls <- 0L
@@ -418,26 +421,22 @@ moving_count_cursor_transport <- function(specs, api_key, concurrency) {
     json = moving_count_cursor_pages[[moving_count_cursor_calls]]
   ))
 }
-moving_count_cursor_result <- suppressWarnings(fec_api_collect_work_units(
-  list(unit),
-  api_key = "fixture-key",
-  concurrency = 1L,
-  transport = moving_count_cursor_transport,
-  sleep = function(seconds) stop("unexpected sleep"),
-  jitter = function(...) 0
-))
-moving_count_cursor_state <- moving_count_cursor_result$units[[unit$id]]
-stopifnot(
-  moving_count_cursor_calls == 3L,
-  moving_count_cursor_result$rows == 4L,
-  isTRUE(moving_count_cursor_state$complete),
-  moving_count_cursor_state$expected_count == 4L
-)
+moving_count_cursor_saved <- list()
+moving_count_cursor_failure <- tryCatch(suppressWarnings(fec_api_collect_work_units(
+  list(unit), api_key = "fixture-key", concurrency = 1L,
+  transport = moving_count_cursor_transport, sleep = function(seconds) stop("unexpected sleep"),
+  jitter = function(...) 0,
+  page_callback = function(state, page) { moving_count_cursor_saved[[length(moving_count_cursor_saved)+1L]] <<- page }
+)), error = conditionMessage)
+stopifnot(grepl("did not verify after 0 passes", moving_count_cursor_failure, fixed = TRUE),
+          grepl("count moved ", moving_count_cursor_failure, fixed = TRUE),
+          !isTRUE(tail(moving_count_cursor_saved, 1)[[1]]$complete),
+          identical(tail(moving_count_cursor_saved, 1)[[1]]$validation_failure, "population_changed_during_collection"))
 
 downward_count_pages <- list(
   list(
     results = list(list(sub_id = "DOWN-1"), list(sub_id = "DOWN-2")),
-    pagination = list(
+    pagination = list(is_count_exact = TRUE,
       count = 5L,
       last_indexes = list(
         last_index = "down-cursor-1",
@@ -447,7 +446,7 @@ downward_count_pages <- list(
   ),
   list(
     results = list(list(sub_id = "DOWN-3")),
-    pagination = list(
+    pagination = list(is_count_exact = TRUE,
       count = 3L,
       last_indexes = list(
         last_index = "down-cursor-2",
@@ -457,7 +456,7 @@ downward_count_pages <- list(
   ),
   list(
     results = list(list(sub_id = "DOWN-4"), list(sub_id = "DOWN-5")),
-    pagination = list(count = 3L, last_indexes = NULL)
+    pagination = list(is_count_exact = TRUE, count = 3L, last_indexes = NULL)
   )
 )
 downward_count_calls <- 0L
@@ -469,26 +468,22 @@ downward_count_transport <- function(specs, api_key, concurrency) {
     json = downward_count_pages[[downward_count_calls]]
   ))
 }
-downward_count_result <- suppressWarnings(fec_api_collect_work_units(
-  list(unit),
-  api_key = "fixture-key",
-  concurrency = 1L,
-  transport = downward_count_transport,
-  sleep = function(seconds) stop("unexpected sleep"),
-  jitter = function(...) 0
-))
-downward_count_state <- downward_count_result$units[[unit$id]]
-stopifnot(
-  downward_count_calls == 3L,
-  downward_count_result$rows == 5L,
-  isTRUE(downward_count_state$complete),
-  downward_count_state$expected_count == 5L
-)
+downward_count_saved <- list()
+downward_count_failure <- tryCatch(suppressWarnings(fec_api_collect_work_units(
+  list(unit), api_key = "fixture-key", concurrency = 1L,
+  transport = downward_count_transport, sleep = function(seconds) stop("unexpected sleep"),
+  jitter = function(...) 0,
+  page_callback = function(state, page) { downward_count_saved[[length(downward_count_saved)+1L]] <<- page }
+)), error = conditionMessage)
+stopifnot(grepl("did not verify after 0 passes", downward_count_failure, fixed = TRUE),
+          grepl("count moved ", downward_count_failure, fixed = TRUE),
+          !isTRUE(tail(downward_count_saved, 1)[[1]]$complete),
+          identical(tail(downward_count_saved, 1)[[1]]$validation_failure, "population_changed_during_collection"))
 
 terminal_downward_pages <- list(
   list(
     results = list(list(sub_id = "TERM-DOWN-1"), list(sub_id = "TERM-DOWN-2")),
-    pagination = list(
+    pagination = list(is_count_exact = TRUE,
       count = 3L,
       last_indexes = list(
         last_index = "terminal-down-cursor",
@@ -498,7 +493,7 @@ terminal_downward_pages <- list(
   ),
   list(
     results = list(list(sub_id = "TERM-DOWN-3")),
-    pagination = list(count = 2L, last_indexes = NULL)
+    pagination = list(is_count_exact = TRUE, count = 2L, last_indexes = NULL)
   )
 )
 terminal_downward_calls <- 0L
@@ -510,21 +505,17 @@ terminal_downward_transport <- function(specs, api_key, concurrency) {
     json = terminal_downward_pages[[terminal_downward_calls]]
   ))
 }
-terminal_downward_result <- suppressWarnings(fec_api_collect_work_units(
-  list(unit),
-  api_key = "fixture-key",
-  concurrency = 1L,
-  transport = terminal_downward_transport,
-  sleep = function(seconds) stop("unexpected sleep"),
-  jitter = function(...) 0
-))
-terminal_downward_state <- terminal_downward_result$units[[unit$id]]
-stopifnot(
-  terminal_downward_calls == 2L,
-  terminal_downward_result$rows == 3L,
-  isTRUE(terminal_downward_state$complete),
-  terminal_downward_state$expected_count == 3L
-)
+terminal_downward_saved <- list()
+terminal_downward_failure <- tryCatch(suppressWarnings(fec_api_collect_work_units(
+  list(unit), api_key = "fixture-key", concurrency = 1L,
+  transport = terminal_downward_transport, sleep = function(seconds) stop("unexpected sleep"),
+  jitter = function(...) 0,
+  page_callback = function(state, page) { terminal_downward_saved[[length(terminal_downward_saved)+1L]] <<- page }
+)), error = conditionMessage)
+stopifnot(grepl("did not verify after 0 passes", terminal_downward_failure, fixed = TRUE),
+          grepl("count moved ", terminal_downward_failure, fixed = TRUE),
+          !isTRUE(tail(terminal_downward_saved, 1)[[1]]$complete),
+          identical(tail(terminal_downward_saved, 1)[[1]]$validation_failure, "population_changed_during_collection"))
 
 terminal_current_count_pages <- list(
   list(
@@ -532,7 +523,7 @@ terminal_current_count_pages <- list(
       list(sub_id = "CURRENT-DOWN-1"),
       list(sub_id = "CURRENT-DOWN-2")
     ),
-    pagination = list(
+    pagination = list(is_count_exact = TRUE,
       count = 5L,
       last_indexes = list(
         last_index = "current-down-cursor",
@@ -542,7 +533,7 @@ terminal_current_count_pages <- list(
   ),
   list(
     results = list(list(sub_id = "CURRENT-DOWN-3")),
-    pagination = list(count = 3L, last_indexes = NULL)
+    pagination = list(is_count_exact = TRUE, count = 3L, last_indexes = NULL)
   )
 )
 terminal_current_count_calls <- 0L
@@ -554,23 +545,18 @@ terminal_current_count_transport <- function(specs, api_key, concurrency) {
     json = terminal_current_count_pages[[terminal_current_count_calls]]
   ))
 }
-terminal_current_count_result <- suppressWarnings(
-  fec_api_collect_work_units(
-    list(unit),
-    api_key = "fixture-key",
-    concurrency = 1L,
-    transport = terminal_current_count_transport,
-    sleep = function(seconds) stop("unexpected sleep"),
-    jitter = function(...) 0
-  )
-)
-terminal_current_count_state <- terminal_current_count_result$units[[unit$id]]
-stopifnot(
-  terminal_current_count_calls == 2L,
-  terminal_current_count_result$rows == 3L,
-  isTRUE(terminal_current_count_state$complete),
-  terminal_current_count_state$expected_count == 3L
-)
+terminal_current_count_saved <- list()
+terminal_current_count_failure <- tryCatch(suppressWarnings(fec_api_collect_work_units(
+  list(unit), api_key = "fixture-key", concurrency = 1L,
+  transport = terminal_current_count_transport, sleep = function(seconds) stop("unexpected sleep"),
+  jitter = function(...) 0,
+  page_callback = function(state, page) { terminal_current_count_saved[[length(terminal_current_count_saved)+1L]] <<- page }
+)), error = conditionMessage)
+stopifnot(grepl("did not verify after 0 passes", terminal_current_count_failure, fixed = TRUE),
+          grepl("count moved ", terminal_current_count_failure, fixed = TRUE),
+          !isTRUE(tail(terminal_current_count_saved, 1)[[1]]$complete),
+          identical(tail(terminal_current_count_saved, 1)[[1]]$validation_failure, "population_changed_during_collection"))
+Sys.unsetenv("MENTAT_RECONCILE_PASSES")
 
 partial_cursor_failure <- tryCatch(
   {
@@ -597,7 +583,7 @@ cycle_transport <- function(specs, api_key, concurrency) {
     headers = list(),
     json = list(
       results = list(list(sub_id = paste0("CYCLE-", cycle_calls))),
-      pagination = list(
+      pagination = list(is_count_exact = TRUE,
         count = 10L,
         last_indexes = list(
           last_index = signatures[[cycle_calls]],
@@ -638,7 +624,7 @@ page_ceiling_failure <- local({
       headers = list(),
       json = list(
         results = list(list(sub_id = paste0("CEILING-", page_ceiling_calls))),
-        pagination = list(
+        pagination = list(is_count_exact = TRUE,
           count = 10L,
           last_indexes = list(
             last_index = paste0("ceiling-", page_ceiling_calls),
@@ -698,6 +684,7 @@ stopifnot(
 )
 
 unservable_unit <- unit
+unservable_unit$is_window <- TRUE  # Exercise unresolved narrow-spelling rescue inside a date window.
 unservable_unit$decomposition_variants <- c(
   "BINANCE", "BINANCE.US", "BINANCEUS"
 )
@@ -705,7 +692,7 @@ unservable_unit$decomposition_source <- "observed_employers"
 unservable_calls <- character()
 unservable_transport <- function(specs, api_key, concurrency) {
   lapply(specs, function(spec) {
-    employer <- spec$params$contributor_employer[[1L]]
+    employer <- toupper(spec$params$contributor_employer[[1L]])
     unservable_calls <<- c(unservable_calls, employer)
     if (identical(employer, "BINANCE")) {
       elapsed <- if (sum(unservable_calls == "BINANCE") == 1L) 55 else 0.4
@@ -717,7 +704,7 @@ unservable_transport <- function(specs, api_key, concurrency) {
       headers = list(),
       json = list(
         results = lapply(ids, function(id) list(sub_id = id)),
-        pagination = list(count = length(ids), last_indexes = NULL)
+        pagination = list(is_count_exact = TRUE, count = length(ids), last_indexes = NULL)
       )
     )
   })
@@ -751,6 +738,7 @@ stopifnot(
 )
 
 no_decomposition_unit <- unit
+no_decomposition_unit$is_window <- TRUE
 no_decomposition_unit$company_variants <- no_decomposition_unit$variants
 no_decomposition_unit$decomposition_variants <- character()
 no_decomposition_failure <- tryCatch(
@@ -786,7 +774,7 @@ stopifnot(
 adaptive_page_calls <- list()
 adaptive_page_transport <- function(specs, api_key, concurrency) {
   lapply(specs, function(spec) {
-    employer <- spec$params$contributor_employer[[1L]]
+    employer <- toupper(spec$params$contributor_employer[[1L]])
     per_page <- as.integer(spec$params$per_page[[1L]])
     adaptive_page_calls[[length(adaptive_page_calls) + 1L]] <<- list(
       employer = employer,
@@ -807,7 +795,7 @@ adaptive_page_transport <- function(specs, api_key, concurrency) {
       headers = list(),
       json = list(
         results = list(list(sub_id = id)),
-        pagination = list(count = 1L, last_indexes = NULL)
+        pagination = list(is_count_exact = TRUE, count = 1L, last_indexes = NULL)
       )
     )
   })
@@ -845,7 +833,7 @@ stopifnot(
 partial_decomposition_calls <- new.env(parent = emptyenv())
 partial_decomposition_transport <- function(specs, api_key, concurrency) {
   lapply(specs, function(spec) {
-    employer <- spec$params$contributor_employer[[1L]]
+    employer <- toupper(spec$params$contributor_employer[[1L]])
     count <- partial_decomposition_calls[[employer]] %||% 0L
     partial_decomposition_calls[[employer]] <- count + 1L
     if (employer %in% c("BINANCE", "BINANCEUS")) {
@@ -861,7 +849,7 @@ partial_decomposition_transport <- function(specs, api_key, concurrency) {
       headers = list(),
       json = list(
         results = list(list(sub_id = "ONLY-SUCCESSFUL-CHILD")),
-        pagination = list(count = 1L, last_indexes = NULL)
+        pagination = list(is_count_exact = TRUE, count = 1L, last_indexes = NULL)
       )
     )
   })
@@ -895,7 +883,7 @@ duplicate_page_transport <- function(specs, api_key, concurrency) {
     headers = list(),
     json = list(
       results = list(list(sub_id = id)),
-      pagination = list(
+      pagination = list(is_count_exact = TRUE,
         count = 2L,
         last_indexes = if (duplicate_page_calls == 1L) {
           list(
@@ -986,7 +974,7 @@ adaptive_transport <- function(specs, api_key, concurrency) {
       headers = list(),
       json = list(
         results = list(list(sub_id = specs[[index]]$id)),
-        pagination = list(count = 1L, last_indexes = NULL)
+        pagination = list(is_count_exact = TRUE, count = 1L, last_indexes = NULL)
       )
     )
   })
@@ -1030,7 +1018,7 @@ failure <- tryCatch(
 stopifnot(
   retry_calls == 3L,
   grepl("HTTP_500", failure, fixed = TRUE),
-  grepl("contributor_employer=BINANCE", failure, fixed = TRUE),
+  grepl("contributor_employer=Binance", failure, fixed = TRUE),
   grepl("API key redacted", failure, fixed = TRUE),
   !grepl(secret_key, failure, fixed = TRUE)
 )
@@ -1064,7 +1052,7 @@ rescue_no_cull <- fec_api_execute_rescue_plan(
       headers = list(),
       json = list(
         results = rescue_rows,
-        pagination = list(count = 2L, last_indexes = NULL)
+        pagination = list(is_count_exact = TRUE, count = 2L, last_indexes = NULL)
       )
     ))
   },
@@ -1102,7 +1090,7 @@ rescue_transport <- function(specs, api_key, concurrency) {
     headers = list(),
     json = list(
       results = list(list(sub_id = id)),
-      pagination = list(count = 1L, last_indexes = NULL)
+      pagination = list(is_count_exact = TRUE, count = 1L, last_indexes = NULL)
     )
   ))
 }
