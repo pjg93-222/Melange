@@ -291,6 +291,34 @@ def run_state(status, fallback):
     return stage if stage in ('failed', 'stopped') else fallback
 
 
+def run_has_lane_state(directory):
+    """Whether a run directory holds fanout manifests a resume could continue.
+
+    The manifest is what the fanout's --resume reloads. Without one there are
+    no lane snapshots to reuse, so a resume would have nothing to carry forward
+    and would only re-collect what the stopped attempt already collected.
+    """
+    if not directory:
+        return False
+    return next(Path(directory).glob('industries/*/fanout/manifest.json'), None) is not None
+
+
+def stale_resume_status(directory, meta):
+    """A resumed run's saved status still describes the attempt that stopped.
+
+    Reporting that terminal stage back would drop the run into History seconds
+    after the operator resumed it, and would offer Resume again for a run that
+    is already being relaunched. Only the relaunched orchestrator's own rewrite
+    makes the file current, so it is trusted from the moment it is rewritten.
+    """
+    if not meta.get('resumed_from'):
+        return False
+    try:
+        return (Path(directory) / 'status.json').stat().st_mtime < (meta.get('started_at') or 0)
+    except OSError:
+        return True
+
+
 def process_alive(pid):
     if not isinstance(pid, int) or pid <= 0:
         return False
@@ -781,9 +809,9 @@ class Console:
         self.prepare_launch(identifier, directory, cycles, stored_keys)
         return {"id":identifier, "state":"starting"}
 
-    def prepare_launch(self, identifier, directory, cycles, stored_keys, background=False):
+    def prepare_launch(self, identifier, directory, cycles, stored_keys, background=False, resume_run_id=""):
         try:
-            self.start_prepared_process(identifier, directory, cycles, stored_keys)
+            self.start_prepared_process(identifier, directory, cycles, stored_keys, resume_run_id)
         except Exception as error:
             with self.lock, console_state_lock(self.root):
                 manifest = read_json(directory / "upload.json")
@@ -795,7 +823,7 @@ class Console:
         finally:
             self.preparing.discard(identifier)
 
-    def start_prepared_process(self, identifier, directory, cycles, stored_keys):
+    def start_prepared_process(self, identifier, directory, cycles, stored_keys, resume_run_id=""):
         runtime = directory / "runtime" / "mentat"
         runtime.mkdir(parents=True, exist_ok=True)
         # Pin the current runner and inputs together; R resolves its roster relative to its entry point.
@@ -814,6 +842,13 @@ class Console:
                    "-RunRoot", str(directory / "runs"), "-OutputDirectory", str(self.report_directory),
                    "-RawDataDirectory", str(directory / "raw"), "-PythonPath", sys.executable,
                    "-RScriptPath", self.rscript, "-NoCache"]
+        if resume_run_id:
+            # Continue the existing run folder. The orchestrator keeps the run
+            # id, appends to its logs and events, and skips initialization for
+            # every industry whose saved lane state a fanout resume can reuse.
+            # The runtime above is re-staged either way, so a code fix landed
+            # since the stopped attempt is the code the resume runs.
+            command += ["-ResumeRunId", resume_run_id]
         environment = os.environ.copy()
         library = r_library_path(environment, PROJECT, self.rscript)
         if library:
@@ -853,7 +888,7 @@ class Console:
             manifest.update(state="starting")
             atomic_json(directory / "upload.json", manifest)
             try:
-                with (directory / "launcher.log").open("wb") as log:
+                with (directory / "launcher.log").open("ab" if resume_run_id else "wb") as log:
                     process = subprocess.Popen(command, cwd=runtime, env=environment, stdout=log,
                                                stderr=subprocess.STDOUT,
                                                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
@@ -882,6 +917,108 @@ class Console:
             if fanout.is_dir():
                 targets.append(fanout / "control.json")
         return targets
+
+    def resume_control_targets(self, identifier, run_id):
+        """Every control file a resume of one saved run has to clear.
+
+        stop() writes {"desired_workers": 0, "stop": true} to the run-level
+        control file and to every fanout control file the run had reached. A
+        relaunched orchestrator reads those same files, so a resume that left
+        them alone would stop itself within three seconds of starting.
+        """
+        directory = self.root / identifier
+        targets = [directory / "control.json"]
+        run = directory / "runs" / run_id
+        if (run / "control.json").is_file():
+            targets.append(run / "control.json")
+        for fanout in sorted(run.glob("industries/*/fanout")):
+            if fanout.is_dir():
+                targets.append(fanout / "control.json")
+        return targets
+
+    def resume_target(self, run):
+        """The run directory a stopped or failed collection could continue.
+
+        None means this run has nothing to resume: it is not an uploaded
+        roster, it never reached a terminal state a resume applies to, or it
+        holds no fanout manifest for the lane snapshots to be reloaded from.
+        """
+        if not isinstance(run, dict) or not run.get('upload'):
+            return None
+        if run.get('state') not in ('stopped', 'failed'):
+            return None
+        directory = run.get('directory')
+        return directory if run_has_lane_state(directory) else None
+
+    def resume(self, data, background=True):
+        """Continue a stopped or failed collection in its own run folder.
+
+        Every verified company-cycle task the stopped attempt finished stays
+        finished: the fanout reloads its lane databases and re-runs only what
+        did not succeed. Merge semantics are untouched - the industry source
+        database is still written only after every task in the plan passes.
+        """
+        identifier = str(data.get("id", ""))
+        if not re.fullmatch(r"[a-f0-9]{32}", identifier):
+            raise RunNotFound("Run not found.")
+        directory = self.root / identifier
+        with self.lock, console_state_lock(self.root):
+            run = self.find(identifier)
+            if run is None or not run.get('upload'):
+                raise RunNotFound("Run not found.")
+            target = self.resume_target(run)
+            if target is None:
+                raise ValueError("Nothing to resume for this roster.")
+            archives = read_json(self.root / 'run-archives.json')
+            if identifier in (archives.get('runs', {}) if isinstance(archives, dict) else {}):
+                raise ValueError('Restore this saved roster from Archived runs before resuming collection.')
+            if self.preparing or any(process.poll() is None for process in self.processes.values()):
+                raise ValueError("An app collection is already running. Wait for it to finish.")
+            if any(other['state'] in ('preparing', 'starting', 'running') and
+                   process_alive(other.get('upload', {}).get('pid') or other.get('upload', {}).get('console_pid'))
+                   for other in self.runs()):
+                raise ValueError("A saved collection is still active. Wait for it to finish.")
+            if not Path(self.rscript).is_file():
+                raise ValueError("Rscript is unavailable. Set -RScriptPath in the launcher.")
+            stored_keys = load_keys()
+            if not stored_keys:
+                raise ValueError("Enter an FEC API key before resuming collection.")
+            manifest = read_json(directory / "upload.json")
+            cycles = [cycle for cycle in manifest.get("cycles", []) if type(cycle) is int]
+            if not cycles:
+                raise ValueError("Nothing to resume for this roster.")
+            run_id = Path(target).name
+            stamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            # Clear the stop flags before the orchestrator can read them. A
+            # worker count the operator chose is kept; the zero stop() wrote is
+            # dropped rather than saved, so the fanout picks its own start.
+            for control_path in self.resume_control_targets(identifier, run_id):
+                previous = read_json(control_path)
+                previous = previous if isinstance(previous, dict) else {}
+                workers = previous.get("desired_workers")
+                control = {"stop": False}
+                if type(workers) is int and workers > 0:
+                    control["desired_workers"] = workers
+                control["updated_at"] = stamp
+                atomic_json(control_path, control)
+            manifest.update(state="preparing", cycles=cycles, resumed_from=run_id,
+                            resume_count=int(manifest.get("resume_count") or 0) + 1,
+                            started_at=time.time(), console_pid=os.getpid())
+            # A stop flag or an exit code left in the manifest would make
+            # start_prepared_process refuse the launch, or finish() record the
+            # relaunch as stopped the moment it exits.
+            for key in ("stop_requested", "stop_mode", "finished_at", "exit_code",
+                        "launch_error", "pid", "process_identity"):
+                manifest.pop(key, None)
+            atomic_json(directory / "upload.json", manifest)
+            self.preparing.add(identifier)
+        if background:
+            threading.Thread(target=self.prepare_launch,
+                             args=(identifier, directory, cycles, stored_keys, True),
+                             kwargs={"resume_run_id": run_id}, daemon=True).start()
+            return {"id": identifier, "state": "preparing", "resumed_from": run_id}
+        self.prepare_launch(identifier, directory, cycles, stored_keys, resume_run_id=run_id)
+        return {"id": identifier, "state": "starting", "resumed_from": run_id}
 
     def stop(self, data):
         identifier = str(data.get("id", ""))
@@ -1347,7 +1484,8 @@ class Console:
                 continue
             run_paths = sorted((path.parent / "runs").glob("*/manifest.json"))
             state = meta["state"]
-            if run_paths and state not in ('stopped', 'failed', 'launch failed'):
+            if (run_paths and state not in ('stopped', 'failed', 'launch failed')
+                    and not stale_resume_status(run_paths[-1].parent, meta)):
                 state = run_state(read_json_cached(run_paths[-1].parent / 'status.json'), state)
             values.append({"id": meta["id"], "name": meta["name"], "state": state,
                            "created_at": meta["created_at"], "directory": run_paths[-1].parent if run_paths else None,
@@ -1456,7 +1594,9 @@ class Console:
         archives = metadata.get('runs', {}) if isinstance(metadata, dict) else {}
         archives = archives if isinstance(archives, dict) else {}
         visible = [{**{key:value for key,value in run.items() if key not in ('directory', 'upload')},
-                    'archived':run['id'] in archives, 'can_archive':self.can_archive_run(run)}
+                    'archived':run['id'] in archives, 'can_archive':self.can_archive_run(run),
+                    'resumable':self.resume_target(run) is not None,
+                    'resumed_from':run.get('upload', {}).get('resumed_from')}
                    for run in runs if include_archived or run['id'] not in archives]
         return {"runs":visible, 'archived_count':sum(run['id'] in archives for run in runs),
                 'total_run_count':len(runs), 'collection_directory':str(self.root),
@@ -1642,6 +1782,8 @@ class Console:
                   "readiness": run.get("upload", {}).get("readiness"), "lanes": [], "events": [], "reports": [], "assurance": [], "fec_coverage": []}
         manifest = run.get('upload', {})
         result['launch_error'] = manifest.get('launch_error')
+        result['resumable'] = self.resume_target(run) is not None
+        result['resumed_from'] = manifest.get('resumed_from')
         if isinstance(manifest.get('started_at'), (int, float)):
             result['elapsed_seconds'] = max(0, (manifest.get('finished_at') or time.time()) - manifest['started_at'])
         if not directory:
@@ -2163,6 +2305,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(key_status())
             if self.path == "/api/start":
                 return self.send(self.server.app.launch(data, background=True))
+            if self.path == "/api/resume":
+                return self.send(self.server.app.resume(data))
             if self.path == '/api/quality/acknowledge':
                 return self.send(self.server.app.acknowledge_quality(data))
             if self.path == '/api/run-archive':

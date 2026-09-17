@@ -23,6 +23,9 @@ class ConsoleTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
+        report_patch = patch.object(app,'report_directory',return_value=self.root)
+        report_patch.start()
+        self.addCleanup(report_patch.stop)
         self.key_patch = patch('fec_key_store.key_path', return_value=self.root / 'test-keys.dpapi')
         self.key_patch.start()
         self.addCleanup(self.key_patch.stop)
@@ -48,6 +51,38 @@ class ConsoleTests(unittest.TestCase):
         industry = value["readiness"]["readiness"][0]
         self.assertEqual(industry["company_count"], 2)
         self.assertEqual(industry["companies"][0]["variant_count"], 3)
+
+    def test_completed_stage_with_failed_industry_is_failed(self):
+        uploaded = self.upload()
+        directory = self.root / uploaded['id'] / 'runs' / 'sample'
+        directory.mkdir(parents=True)
+        app.atomic_json(directory / 'manifest.json', {'run_id':'sample'})
+        app.atomic_json(directory / 'status.json', {'stage':'completed', 'industries':[{'industry':'Test','status':'failed'}]})
+        self.assertEqual(self.console.find(uploaded['id'])['state'], 'failed')
+        self.assertEqual(self.console.report_catalog(uploaded['id'])['reports'], [])
+
+    def test_evidence_collection_validates_and_preserves_configuration(self):
+        data = {'company':'Acme', 'aliases':['Acme Inc'], 'committees':'C00000001, C00000002', 'cycles':'2024,2026'}
+        with patch.object(app, 'PROJECT', self.root), patch.object(app, 'load_keys', return_value=['synthetic']), patch.object(app.threading, 'Thread') as thread:
+            for change in ({'committees':'../bad'}, {'cycles':'2025'}, {'company':''}):
+                with self.assertRaises(ValueError):
+                    self.console.collect_evidence({**data, **change})
+            thread.assert_not_called()
+            result = self.console.collect_evidence(data)
+            path = self.root / '.cache/pac-evidence' / result['id'] / 'collection.json'
+            saved = app.read_json(path)
+            self.assertEqual(saved['aliases'], ['Acme Inc'])
+            self.assertEqual(saved['cycles'], ['2024', '2026'])
+            with patch.object(app.subprocess, 'Popen') as popen:
+                popen.return_value.wait.return_value = 0
+                popen.return_value.pid = 123
+                app.atomic_json(path.parent / 'evidence.json', {'version':1})
+                thread.call_args.kwargs['target']()
+                self.assertEqual(app.read_json(path)['state'], 'completed')
+                self.assertNotIn('synthetic', str(popen.call_args))
+                (path.parent / 'evidence.json').unlink()
+                thread.call_args.kwargs['target']()
+                self.assertEqual(app.read_json(path)['state'], 'failed')
 
     def test_manual_sector_roster_persists_names_and_commas_without_collecting(self):
         value = self.console.create_roster({'sector': 'Energy', 'companies': [
@@ -126,6 +161,41 @@ class ConsoleTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.console.launch({"id":value["id"], "cycles":[2028]})
 
+    def test_background_launch_reserves_run_before_copying(self):
+        value = self.upload()
+        with patch.object(app.threading, 'Thread') as worker, patch.object(app.subprocess, 'Popen') as process:
+            result = self.console.launch({'id':value['id'], 'cycles':[2026], 'api_key':'offline-key'}, background=True)
+            self.assertEqual(result['state'], 'preparing')
+            self.assertEqual(app.read_json(self.root/value['id']/'upload.json')['state'], 'preparing')
+            self.assertIn(value['id'], self.console.preparing)
+            process.assert_not_called()
+            worker.return_value.start.assert_called_once()
+            with self.assertRaises(ValueError):self.console.launch({'id':value['id'], 'cycles':[2026]})
+
+    def test_preparation_failure_has_terminal_receipt(self):
+        value = self.upload()
+        self.console.preparing.add(value['id'])
+        with patch.object(self.console, 'start_prepared_process', side_effect=OSError('private diagnostic')):
+            self.console.prepare_launch(value['id'], self.root/value['id'], [2026], ['offline-key'], True)
+        manifest = app.read_json(self.root/value['id']/'upload.json')
+        self.assertEqual(manifest['state'], 'launch failed')
+        self.assertIsInstance(manifest['finished_at'], float)
+        self.assertNotIn(value['id'], self.console.preparing)
+        self.assertNotIn('private diagnostic', str(manifest))
+
+    def test_finish_preserves_stop_state_and_frozen_timestamp_without_keys(self):
+        value = self.upload()
+        directory = self.root/value['id']
+        manifest = app.read_json(directory/'upload.json')
+        manifest.update(state='stopped', stop_requested='now', finished_at=1234)
+        app.atomic_json(directory/'upload.json', manifest)
+        process = MagicMock();process.wait.return_value = 1
+        with patch.object(app, 'load_keys', side_effect=AssertionError('Finishing must not load credentials')):
+            self.console.finish(process, directory)
+        result = app.read_json(directory/'upload.json')
+        self.assertEqual(result['state'], 'stopped')
+        self.assertEqual(result['finished_at'], 1234)
+
     @unittest.skipUnless(Path("C:/Program Files/R/R-4.6.0/bin/Rscript.exe").is_file(), "R integration requires installed R 4.6")
     def test_runner_plan_and_offline_R_ingest_use_uploaded_aliases(self):
         value = self.upload()
@@ -134,6 +204,11 @@ class ConsoleTests(unittest.TestCase):
         with patch.object(app.subprocess, "Popen", return_value=runner) as launch, patch.object(app.threading,"Thread"):
             self.console.launch({"id":value["id"],"cycles":[2026],"api_key":"offline-plan-placeholder"})
         kwargs = launch.call_args.kwargs
+        hashing = subprocess.run([launch.call_args.args[0][0], '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command',
+                                  "(Get-FileHash -LiteralPath '" + str(runtime_path := self.root / value['id'] / 'roster.xlsx').replace("'", "''") + "').Algorithm"],
+                                 env=kwargs['env'], capture_output=True, text=True, timeout=30)
+        self.assertEqual(hashing.returncode, 0, hashing.stderr)
+        self.assertEqual(hashing.stdout.strip(), 'SHA256')
         plan = subprocess.run(launch.call_args.args[0] + ["-PlanOnly"], cwd=kwargs["cwd"],
                               env=kwargs["env"], capture_output=True, text=True, timeout=60)
         self.assertEqual(plan.returncode, 0, plan.stdout + plan.stderr)
@@ -232,6 +307,101 @@ class ConsoleTests(unittest.TestCase):
         self.assertTrue(result['reports'][0]['quality']['matches_run'])
         self.assertEqual(result['completed_collection'], {'total':3,'completed':3,'failed':1,'running':0})
 
+    def test_chart_report_list_does_not_inspect_workbooks_or_worker_databases(self):
+        upload = self.upload()
+        directory = self.root / upload['id'] / 'runs' / 'list-run'
+        directory.mkdir(parents=True)
+        report = directory / 'sample.xlsx'
+        report.write_bytes(b'not scanned by the catalog')
+        app.atomic_json(directory / 'manifest.json', {'run_id':'list-run'})
+        app.atomic_json(directory / 'status.json', {'stage':'collecting', 'industries':[
+            {'status':'failed','output_workbook':str(report)},
+            {'status':'succeeded','output_workbook':str(report)},
+            {'status':'succeeded','output_workbook':str(directory/'missing.xlsx')}]})
+        with patch.object(self.console, 'inspect_report', side_effect=AssertionError('must not scan')):
+            self.assertEqual(self.console.report_catalog(upload['id'])['reports'], [{'index':1,'name':'sample.xlsx','source_directory':str(self.root)}])
+
+    def test_shared_worker_monitor_reads_current_state_with_stable_lane_identity(self):
+        upload = self.upload()
+        directory = self.root / upload['id'] / 'runs' / 'shared-run'
+        lane = directory / 'industries/test/fanout/lanes/lane-01'
+        lane.mkdir(parents=True)
+        app.atomic_json(directory / 'manifest.json', {'run_id':'shared-run'})
+        app.atomic_json(directory / 'status.json', {'stage':'collecting','industries':[]})
+        app.atomic_json(lane / 'status.old.json', {'status':'succeeded','current_company':'Old'})
+        path = lane / 'status.work-1-current.json'
+        app.atomic_json(path, {'status':'running','current_company':'Current'})
+        manifest = {'industry':'Test','scheduling':{'strategy':'company_work_sharing'},
+                    'lanes':[{'lane':1,'state':str(path),'database':str(lane/'mentat.db')}]}
+        manifest_path = lane.parent.parent / 'manifest.json'
+        app.atomic_json(manifest_path, manifest)
+        first = self.console.snapshot(upload['id'])
+        self.assertEqual(len(first['lanes']), 1)
+        self.assertEqual(first['lanes'][0]['state']['current_company'], 'Current')
+        # The discovered directory and saved status can name the same physical
+        # run through different path spellings (including Windows app aliases).
+        (directory / 'alias-segment').mkdir()
+        run = self.console.find(upload['id'])
+        alias_run = {**run, 'directory':directory / 'alias-segment' / '..'}
+        with patch.object(self.console, 'find', return_value=alias_run):
+            aliased = self.console.snapshot(upload['id'], first['selected_lane'])
+        self.assertEqual(aliased['selected_lane'], first['selected_lane'])
+        self.assertEqual(aliased['lanes'], first['lanes'])
+        next_path = lane / 'status.work-1-next.json'
+        app.atomic_json(next_path, {'status':'running','current_company':'Next'})
+        manifest['lanes'][0]['state'] = str(next_path)
+        app.atomic_json(manifest_path, manifest)
+        second = self.console.snapshot(upload['id'], first['selected_lane'])
+        self.assertEqual(second['selected_lane'], first['selected_lane'])
+        self.assertEqual(second['lanes'][0]['state']['current_company'], 'Next')
+
+    def test_worker_status_outside_run_is_rejected_before_read(self):
+        upload = self.upload()
+        directory = self.root / upload['id'] / 'runs' / 'shared-run'
+        fanout = directory / 'industries/test/fanout'
+        fanout.mkdir(parents=True)
+        app.atomic_json(directory / 'manifest.json', {'run_id':'shared-run'})
+        app.atomic_json(directory / 'status.json', {'stage':'collecting','industries':[]})
+        outside = self.root / 'outside-status.json'
+        app.atomic_json(outside, {'status':'running'})
+        app.atomic_json(fanout / 'manifest.json', {
+            'industry':'Test','scheduling':{'strategy':'company_work_sharing'},
+            'lanes':[{'lane':1,'state':str(outside),'database':str(self.root/'outside.db')}]})
+        original = app.read_json
+        def guarded_read(path):
+            if Path(path).resolve() == outside.resolve():
+                self.fail('An outside status must not be read.')
+            return original(path)
+        with patch.object(app, 'read_json', side_effect=guarded_read):
+            with self.assertRaisesRegex(ValueError, 'outside its collection run'):
+                self.console.snapshot(upload['id'])
+
+    def test_evidence_endpoint_rejects_estimate_from_old_model_code(self):
+        import hashlib
+        from pac_cash_model import write_estimates
+        from test_pac_cash_model import snapshot
+        directory=self.root/'.cache/pac-evidence/fixture';directory.mkdir(parents=True)
+        (self.root/'tools').mkdir()
+        (self.root/'tools/pac_cash_model.py').write_bytes((app.PROJECT/'tools/pac_cash_model.py').read_bytes())
+        source=json.dumps([snapshot()]).encode()
+        (directory/'snapshots.json').write_bytes(source)
+        app.atomic_json(directory/'evidence.json',dict(version=1,company='Acme',aliases=['Acme Inc'],
+            source_snapshot_sha256=hashlib.sha256(source).hexdigest()))
+        current=write_estimates(directory)
+        server=app.ThreadingHTTPServer(('127.0.0.1',0),app.Handler);server.app=self.console
+        worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
+        try:
+            with patch.object(app,'PROJECT',self.root):
+                url=f'http://127.0.0.1:{server.server_port}/api/evidence?id=fixture'
+                with urlopen(url) as response:self.assertIn('cash_estimates',json.load(response))
+                app.atomic_json(directory/'cash-estimates.json',dict(current,method_code_sha256='old-model'))
+                with urlopen(url) as response:
+                    result=json.load(response)
+                    self.assertNotIn('cash_estimates',result)
+                    self.assertEqual(result['company'],'Acme')
+        finally:
+            server.shutdown();server.server_close();worker.join()
+
     def test_http_rejects_untrusted_posts_and_hosts(self):
         server = app.ThreadingHTTPServer(("127.0.0.1",0),app.Handler)
         server.app = self.console
@@ -287,6 +457,106 @@ class ConsoleTests(unittest.TestCase):
             {'quality': {'warnings': [{'id': 'hard-fail', 'severity': 'fail'}]}}]}):
             with self.assertRaises(ValueError):
                 self.console.acknowledge_quality({'id': 'test', 'warning_ids': ['hard-fail']})
+
+    def resumable_run(self, cycles=(2024,)):
+        """A saved roster whose most recent run stopped with lane state on disk."""
+        uploaded = self.upload()
+        directory = self.root / uploaded['id']
+        run_id = '20260917T101500-4242'
+        run = directory / 'runs' / run_id
+        fanout = run / 'industries' / 'test' / 'fanout'
+        fanout.mkdir(parents=True)
+        app.atomic_json(run / 'manifest.json', {'run_id': run_id})
+        app.atomic_json(run / 'status.json', {'run_id': run_id, 'stage': 'collecting'})
+        manifest = app.read_json(directory / 'upload.json')
+        manifest.update(state='stopped', cycles=list(cycles), stop_requested=True,
+                        stop_mode='force', exit_code=3, finished_at=1.0, pid=4242)
+        app.atomic_json(directory / 'upload.json', manifest)
+        return uploaded['id'], directory, run, fanout
+
+    def test_resume_refuses_wrong_state_missing_lane_state_or_active_collection(self):
+        identifier, directory, run, fanout = self.resumable_run()
+        # Resume applies to a terminal run only; nothing else is "the last run".
+        for state in ('ready', 'preparing', 'running', 'completed'):
+            manifest = app.read_json(directory / 'upload.json')
+            manifest['state'] = state
+            app.atomic_json(directory / 'upload.json', manifest)
+            with self.assertRaisesRegex(ValueError, 'Nothing to resume for this roster'):
+                self.console.resume({'id': identifier})
+        manifest = app.read_json(directory / 'upload.json')
+        manifest['state'] = 'stopped'
+        app.atomic_json(directory / 'upload.json', manifest)
+        # Stopped, but no fanout manifest: the fanout has no lane snapshots to reload.
+        with self.assertRaisesRegex(ValueError, 'Nothing to resume for this roster'):
+            self.console.resume({'id': identifier})
+        app.atomic_json(fanout / 'manifest.json', {'run_id': run.name, 'lane_count': 1})
+        self.assertTrue(self.console.find(identifier)['state'] == 'stopped')
+        self.assertTrue(self.console.snapshot(identifier)['resumable'])
+        # Resumable, but the runtime is still owned by a live collection.
+        self.console.processes['other'] = MagicMock(**{'poll.return_value': None})
+        with self.assertRaisesRegex(ValueError, 'already running'):
+            self.console.resume({'id': identifier})
+        self.console.processes.clear()
+        with self.assertRaises(app.RunNotFound):
+            self.console.resume({'id': 'f' * 32})
+        with self.assertRaises(app.RunNotFound):
+            self.console.resume({'id': 'not-an-id'})
+        # No refused resume may leave the roster mid-launch or edit its controls.
+        self.assertEqual(app.read_json(directory / 'upload.json')['state'], 'stopped')
+        self.assertEqual(self.console.preparing, set())
+        self.assertEqual(app.read_json(directory / 'control.json'), {})
+
+    def test_resume_clears_every_stop_flag_before_relaunching_the_saved_run(self):
+        identifier, directory, run, fanout = self.resumable_run()
+        app.atomic_json(fanout / 'manifest.json', {'run_id': run.name, 'lane_count': 1})
+        stale = '2026-09-17T10:20:00+00:00'
+        app.atomic_json(directory / 'control.json', {'stop': True, 'desired_workers': 0, 'updated_at': stale})
+        app.atomic_json(run / 'control.json', {'stop': True, 'desired_workers': 6, 'updated_at': stale})
+        app.atomic_json(fanout / 'control.json', {'stop': True, 'desired_workers': 0, 'updated_at': stale})
+        (directory / 'launcher.log').write_bytes(b'stopped attempt\n')
+        self.assertEqual(self.console.resume_control_targets(identifier, run.name),
+                         [directory / 'control.json', run / 'control.json', fanout / 'control.json'])
+        self.console.rscript = sys.executable
+        commands, observed = [], {}
+
+        def record(command, **kwargs):
+            commands.append(list(command))
+            # Read the controls the relaunched orchestrator will read, at the
+            # moment it is launched: a stop flag left here stops it in seconds.
+            observed.update({str(path): app.read_json(path) for path in
+                             (directory / 'control.json', run / 'control.json', fanout / 'control.json')})
+            return MagicMock(pid=4321)
+
+        with patch.object(app, 'load_keys', return_value=['stored-key']), \
+                patch.object(app, 'r_library_path', return_value=''), \
+                patch.object(app, 'copy_fec_sources'), \
+                patch.object(app, 'process_identity', return_value='fixture'), \
+                patch.object(app.shutil, 'copytree'), patch.object(app.shutil, 'copy2'), \
+                patch.object(app.threading, 'Thread'), \
+                patch.object(app.subprocess, 'Popen', side_effect=record):
+            value = self.console.resume({'id': identifier}, background=False)
+        self.assertEqual(value, {'id': identifier, 'state': 'starting', 'resumed_from': run.name})
+        command = commands[0]
+        self.assertEqual(command[command.index('-ResumeRunId') + 1], run.name)
+        self.assertNotIn('stored-key', ' '.join(command))
+        # Appended, never truncated: the stopped attempt's launcher log survives.
+        self.assertTrue((directory / 'launcher.log').read_bytes().startswith(b'stopped attempt\n'))
+        # Cleared before the launch, and only a worker count the operator chose
+        # is carried over - the zero stop() wrote is dropped, not saved.
+        for path, workers in ((directory / 'control.json', None), (run / 'control.json', 6),
+                              (fanout / 'control.json', None)):
+            control = observed[str(path)]
+            self.assertEqual(control, app.read_json(path))
+            self.assertIs(control['stop'], False)
+            self.assertEqual(control.get('desired_workers'), workers)
+            self.assertNotEqual(control['updated_at'], stale)
+        saved = app.read_json(directory / 'upload.json')
+        self.assertEqual(saved['resumed_from'], run.name)
+        self.assertEqual(saved['resume_count'], 1)
+        self.assertEqual(saved['state'], 'starting')
+        for key in ('stop_requested', 'stop_mode', 'exit_code', 'finished_at', 'launch_error'):
+            self.assertNotIn(key, saved)
+        self.assertEqual(self.console.preparing, set())
 
 
 if __name__ == "__main__":

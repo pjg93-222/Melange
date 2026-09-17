@@ -4,7 +4,7 @@ function setHtml(id, html) { if (renderedHtml.get(id) !== html) { $(id).innerHTM
 let token = '', upload = null, selectedRun = '', selectedLane = '', busy = false, warningIds = [];
 let readOnly = false, evidenceCollectionAvailable=false;
 let rosterRevision = 0, companySequence = 0, currentView = 'loading', splitView = false;
-let runCatalog = [], runGroup = '', runArchiveBusy = false;
+let runCatalog = [], runGroup = '', runArchiveBusy = false, resumeBusy = false;
 let savedCoverage = [];
 function renderLoadingCoverage() {
   const sectors = upload?.readiness?.readiness?.map(group => group.industry) || [$('sector').value];
@@ -178,7 +178,7 @@ $('stop').addEventListener('click', async event => {
   if (!selectedRun) return;
   const force = !event.shiftKey;
   const question = force
-    ? 'Stop this collection? This immediately terminates the collection and its worker processes. Partial lane data for the current run is discarded. The source database is not modified. This cannot be undone.'
+    ? 'Stop this collection? In-flight lanes are terminated. Lane data is kept and the run can be resumed.'
     : 'Stop this collection gracefully? In-flight lanes are allowed to finish first, and the run cannot be un-stopped.';
   if (!confirm(question)) return;
   try {
@@ -187,6 +187,18 @@ $('stop').addEventListener('click', async event => {
     if (result.ok === false) showError(result.message || 'The collection could not be stopped.');
   }
   catch (error) { showError(error.message); }
+});
+$('resume-run').addEventListener('click', async () => {
+  if (!selectedRun || resumeBusy) return;
+  resumeBusy = true; $('resume-run').disabled = true; showError('');
+  try {
+    await api('/api/resume', {id:selectedRun});
+    runGroup = 'progress'; showView('collection');
+    if (!await refreshRuns()) await refreshRun();
+    showStatus('Resuming the saved collection. Company/cycle work that already succeeded is kept; only unfinished work is collected again.');
+  }
+  catch (error) { showError(error.message); }
+  finally { resumeBusy = false; }
 });
 $('apply-workers').addEventListener('click', async () => {
   if (!selectedRun) return;
@@ -210,7 +222,7 @@ function collectionChoice(run) {
 function clearRunDisplay() {
   timerRun = null; $('monitor').hidden = true; $('resume-setup').hidden = true;
   $('run-readiness-note').hidden = true;
-  for (const id of ['stop','apply-workers','worker-target','clear-quality']) $(id).disabled = true;
+  for (const id of ['stop','resume-run','apply-workers','worker-target','clear-quality']) $(id).disabled = true;
   $('run-title').textContent = selectedRun ? 'Loading collection…' : 'No collections in this folder';
   $('stage').textContent = selectedRun ? 'Loading' : 'No selected collection';
 }
@@ -329,7 +341,15 @@ function render(run) {
   $('monitor').hidden = notStarted;
   $('run-readiness-note').hidden = !notStarted;
   $('run-readiness-note').textContent = archived ? 'Restore this saved roster above before continuing collection setup.' : run.state === 'ready' ? 'Roster saved. Continue setup to choose cycles and start collection, or archive this draft.' : 'This roster needs review before collection. Review the names in Loading.';
-  $('run-controls').hidden = !active;
+  // A resumable run is terminal, so the controls stay visible for it with
+  // only Resume enabled: that is where the operator looks for it.
+  const resumable = !!run.resumable && !readOnly && !archived;
+  $('run-controls').hidden = !active && !resumable;
+  $('resume-run').disabled = !resumable || resumeBusy;
+  $('resume-run').title = resumable
+    ? 'Continue this collection in its own run folder. Lane data already collected is kept and only unfinished company/cycle work is collected again.'
+    : run.resumed_from ? `Resumed from run ${run.resumed_from}.`
+    : 'Resume is available for a stopped or failed collection with saved lane data';
   const inactiveReason = active ? '' : 'No collection is running';
   $('stop').disabled = !active; $('stop').title = active ? 'Shift-click to stop gracefully and let in-flight lanes finish first.' : inactiveReason;
   $('worker-target').disabled = !active; $('worker-target').title = inactiveReason;
