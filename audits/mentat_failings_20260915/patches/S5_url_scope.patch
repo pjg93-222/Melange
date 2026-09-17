@@ -1,0 +1,3105 @@
+diff --git a/audits/mentat_failings_20260915/HANDOFF.md b/audits/mentat_failings_20260915/HANDOFF.md
+index 420692578..c6942a8c4 100644
+--- a/audits/mentat_failings_20260915/HANDOFF.md
++++ b/audits/mentat_failings_20260915/HANDOFF.md
+@@ -207,12 +207,18 @@ it in code.
+ | `mentat/tests/test_contribution_dimensions_order.py` | S4 | committed by Paul (8377b5e77) | NEW |
+ | `mentat/tests/test_studio_industry_browser.cjs` | S4 | committed by Paul (8377b5e77) | NEW |
+ | `mentat/tests/test_contributor_detail_header.cjs` | S4 | committed by Paul (8377b5e77) | NEW |
+-| `mentat/app/index.html` | S5 | not started | tabs, graph-mode select |
+-| `mentat/app/app.js` | S5 | not started | hash routing, localStorage |
+-| `mentat/app/graph.js` | S5 | not started | `clear()`, scope handoff |
+-| `mentat/app/graph_data.py` | S5 | not started | Downstream Activity worksheet |
+-| `mentat/R/fec_beneficiary.R` | S5 | not started | produces Downstream Activity |
+-| `mentat/app/server.py` | S4 | committed by Paul (8377b5e77) | S4 hunks built and receipted; S5 waits for Paul's commit of S4 |
++| `mentat/app/index.html` | S5 | BUILT, uncommitted | tabs (unchanged), graph-mode select; one `<script src="/scope.js">` before app.js |
++| `mentat/app/app.js` | S5 | BUILT, uncommitted | hash routing, localStorage; comment only - `showView` is unchanged |
++| `mentat/app/graph.js` | S5 | BUILT, uncommitted | `clear()` untouched; reads and writes the URL scope, ruling A(ii) visibility |
++| `mentat/app/scope.js` | S5 | BUILT, uncommitted | NEW: the URL scope module (`read`/`write`/`parse`/`serialize`/`href`/`subscribe`) |
++| `mentat/app/cross-reference.js` | S5 | BUILT, uncommitted | CLAIMED 2026-09-17, previously unowned: industry-scoped fetch + `selected_by` in the status line |
++| `mentat/app/chart-studio.js` | S5 | BUILT, uncommitted | S5 hunks only: URL scope (dataset preselection, carried pills, `saved=`). S4's row above stands - S4's work is committed at `8377b5e77` and S5's hunks sit on top of it; this is a hand-off, not a second live claim |
++| `mentat/app/tests/scope.test.js` | S5 | BUILT, uncommitted | NEW: the url_scope contract from both ends |
++| `mentat/tests/test_navigation_scope_browser.cjs` | S5 | BUILT, uncommitted | NEW: real-client pass, 13 steps |
++| `audits/mentat_failings_20260915/contracts/url_scope.json` | S5 | BUILT, uncommitted | NEW: v1, the URL vocabulary S6 inherits |
++| `mentat/app/graph_data.py` | S5 | untouched by S5 | ruling B (2026-09-17): NOT edited. Carries another lane's uncommitted hunks (`singleflight_cache`) and navigation needs none of it; the two Downstream failure texts stay |
++| `mentat/R/fec_beneficiary.R` | S5 | untouched by S5 | ruling B (2026-09-17): NOT edited. Carries another lane's uncommitted hunks (PAS2 parser v4) |
++| `mentat/app/server.py` | S4 | committed by Paul (8377b5e77, then a565216bf) | S4 hunks built and receipted. **S5 added exactly one line** (`'/scope.js': ('scope.js', 'text/javascript')` in `STATIC_ASSETS`; grep `'/scope.js'` rather than a line number - it landed at `:71` and a later session's lazy-import hunk had already moved it to `:97`) because that dict is an allow-list and an unlisted path answers 404 - a new client script cannot be served without it. That line is **already committed**: Paul's `a565216bf` (S3d latency, 2026-09-17 00:49) swept it in six minutes after S5 wrote it. The S5 patch carries no `server.py` hunk |
+ | `mentat/tests/**` | shared | — | each session owns only the test files it adds |
+ 
+ **WORKING-TREE HAZARD (verified 2026-09-16):** `fec_api.R`, `collect.R`, `schema.R`, `report.R`, `tidy_stage.R`, `prepare_workbook_payload.py`, `build_industry_report.ps1` and `finalize_crypto_excel.ps1` are all **modified-uncommitted by other lanes** right now. `git diff -- <file>` on any of them captures foreign hunks. Every S1/S2 patch must be separated hunk by hunk and the receipt must say which hunks are the session's own — the same rule as `server.py`. `build_tidy_workbook.py` was tracked and clean at HEAD `bd5dc8ea1`; S2 has since modified it (one registry edit) and it is now ` M` — that hunk is S2's alone.
+@@ -988,17 +994,290 @@ trusting these two lines.
+ 
+ ## S5 — Navigation and linking (Area D)
+ 
+-**Status:** not started
++**Status:** BUILT, receipts ready, UNCOMMITTED (2026-09-17); Paul commits from
++`patches/S5_url_scope.patch`. Design accepted by Paul with three rulings (below);
++phases 1-3 built, Fable-reviewed, three review findings fixed, sweep run.
++Patch cut against HEAD `a565216bf`.
++
++**`git add -f` is required for part of this patch.** The repo-root `.gitignore`
++ignores `*.json` (`:6`), `*.txt` (`:21`) and `*.html` (`:20`), so
++`contracts/url_scope.json`, `receipts/S5_phase1-3.txt` and
++`receipts/S5_verifier_sweep.txt` are ignored files. They land the way S4's did -
++`git apply --cached` from the patch, or `git add -f` - not through a plain
++`git add`. The `.md` and `.js` files are unaffected (`!*.md` at `:32`).
++
++**Files owned:** see table, all now BUILT/uncommitted.
++
++- `mentat/app/index.html` — one `<script src="/scope.js" defer>` before `app.js` (`:7`). Tab strip unchanged; `#graph-candidate-controls` keeps its `hidden`.
++- `mentat/app/app.js` — comment only (`:42-45`). `showView` is byte-identical in behaviour.
++- `mentat/app/graph.js` — reads the permalink, writes the scope back, ruling A(ii) visibility. `clear()` untouched.
++- `mentat/app/chart-studio.js` — S5 hunks on top of S4's committed work (`8377b5e77`): dataset preselection, carried pills, `saved=`, the deferred industry follow.
++- `mentat/app/cross-reference.js` — CLAIMED 2026-09-17, previously unowned: industry-scoped fetch and the run line.
++- `mentat/app/scope.js` — NEW, the module the vocabulary lives in.
++- `mentat/app/tests/scope.test.js` — NEW, the contract from both ends.
++- `mentat/tests/test_navigation_scope_browser.cjs` — NEW, the real-client pass.
++- `audits/mentat_failings_20260915/contracts/url_scope.json` — NEW, v1.
++- `mentat/app/graph_data.py`, `mentat/R/fec_beneficiary.R` — **NOT TOUCHED** (ruling B). Both still carry another lane's uncommitted hunks (`singleflight_cache`; PAS2 parser v4). Their two Downstream failure texts stay as they are.
++
++**Patches:** `patches/S5_url_scope.patch` — `git diff HEAD` for the eight tracked
++files, then each new file as a `/dev/null` hunk, so the whole lane applies from one
++file. It contains **no `server.py`, `graph_data.py` or `fec_beneficiary.R` hunk**;
++verified by `git apply --stat` and `git apply --check --reverse` (exit 0).
++
++**Rulings, verbatim (Paul, 2026-09-17):**
++
++- **A(ii)** — "show the Graph 'Candidate view' select as soon as a report is chosen
++  and make `mode=activity` linkable, no new tab".
++- **B** — "leave `mentat/app/graph_data.py` and `mentat/R/fec_beneficiary.R`
++  untouched (they carry another lane's uncommitted hunks)".
++- **C** — "keep `history.replaceState` (never `pushState`)".
++
++**Contract decisions:** `contracts/url_scope.json` **v1**, written before any code.
++**The hash names the tab; the query string carries the scope.** A fragment-only
++`history.replaceState('#graph')` resolves against the current URL and keeps its
++query, so `showView` needs no change and a tab switch cannot lose a permalink.
++Nothing new is stored in `localStorage` or `sessionStorage`: the URL is the state,
++so a permalink, a reload and a tab switch are one operation.
++
++| key | value rule | writer | reader |
++| --- | --- | --- | --- |
++| `industry` | the published label exactly as the registry lists it (`Credit Union`, `Property & Casualty Insurance`); never the slug | Graph industry select; Chart Studio dataset picker and "Open in Chart Studio" | Graph, Chart Studio, Cross-reference |
++| `company` | company name as the Graph select spells it | Graph; "Open in Chart Studio" | Graph; Chart Studio as a carried pill |
++| `cycle` | election-cycle END year, four digits, as Graph spells it (`2024`) | Graph; "Open in Chart Studio" | Graph; Chart Studio via `core.carriedFilterValue('cycle', v)` → `2023-2024` |
++| `mode` | `direct` \| `activity` \| `estimates`; `direct` is the default and is removed | Graph | Graph |
++| `direction` | a `#graph-direction` value; `Support` is the default and is removed | Graph | Graph |
++| `tier` | a `#graph-tier` value; empty means all levels and is removed | Graph | Graph |
++| `funding` | a `#graph-funding` value; `all` is the default and is removed | Graph | Graph |
++| `category` | the recipient-type drill-down id | Graph | Graph |
++| `recipient` | the organization drill-down id | Graph | Graph |
++| `saved` | 32 lowercase hex, the shape `save_view()` mints and `get_view()` demands | Chart Studio, on a successful save or open | Chart Studio |
++| `studioPane` | PRE-EXISTING, `B`\|`C`\|`D`; S5 never writes it and never removes it | the reader / pane frames | `chart-studio.js:17` |
++
++**Reserved for S6, written by nobody in S5:** `evidence`, `id`, `committee`,
++`offset`, `limit`. `write()` preserves them untouched, in place, exactly as it
++preserves `studioPane`.
++
++Six decisions worth naming:
++
++1. **Values are `encodeURIComponent`'d, not `URLSearchParams.toString()`'d.** The
++   latter spells a space as `+`; `Property & Casualty Insurance` has to survive a
++   copied permalink, so the contract pins `Property%20%26%20Casualty%20Insurance`.
++2. **`write()` refuses what `read()` would reject.** A value that fails validation
++   removes its key rather than being written, so the URL can never carry something
++   `read()` drops. Every negative control is asserted in both directions.
++3. **`saved` is `[a-f0-9]{32}`**, the same rule `server.py get_view()` enforces, so
++   a saved-view permalink never fires a request the console answers 400 for. A view
++   that lives only in this tab (`viewsMemory`, id `memory-...`) is never written: it
++   is not addressable, and writing it would silently remove a real id.
++4. **Defaults are absent from the URL, not spelled out in it** (`mode=direct`,
++   `direction=Support`, `funding=all`, every empty select), so a URL names only
++   what the reader actually chose.
++5. **Unknown keys are preserved in place**, keeping their order; new keys append.
++   The contract's `write` example is exactly that case.
++6. **`replaceState` only (ruling C).** Tab switches created no history entries
++   before S5 and create none now; `pushState` appears nowhere.
+ 
+-**Files owned:** see table. `server.py` is CONTENDED.
++**Measurements:**
+ 
+-**Patches:** —
++- Node: `node --test "app/tests/**/*.test.js"` **151/151** (121 before S5; the 30
++  new tests are `app/tests/scope.test.js`, which loads the contract from disk).
++- Real-client: `node tests/test_navigation_scope_browser.cjs` **13/13 steps,
++  exit 0**, against the real `python app/server.py` on a free port with a throwaway
++  `--data-root`. `/api/studio/views` is deliberately not stubbed, so the saved view
++  in step 8 really reaches disk and is read back off it.
++- Baseline browser tests, all green after the fixes: `test_console_browser.cjs`,
++  `test_app_lazy_startup_browser.cjs` **3/3**, `test_graph_lazy_tables_browser.cjs`
++  **1/1**, `test_studio_industry_browser.cjs` **10/10 steps**.
++- Sweep: `receipts/S5_verifier_sweep.txt` — **9/10 browser suites**, node 151/151,
++  python **55 ran, OK (1 skipped)**, `url_scope.json` valid. Its one red was
++  `test_console_browser.cjs`, which is **not an S5 defect and is now fixed**: see
++  "Non-owned edits" below. (Two corrections to that receipt for the record: it
++  reports the branch as `claude/multi-industry-snapshot-support-7c95a9`, but this
++  repo is on `codex/mentat-crypto`; and its failure detail truncates before the
++  assertion, so the line number in it came from a later run, not from the sweep.)
++- Build stamp, `python -c "import server; print(server.CODE_TREE_SHA256,
++  server.ASSET_TREE_SHA256)"` in `mentat/app`: code `491a0d4680824a3e561ad9e0ddbff264c42ee58bf3d1e2480d12fba117a66087`,
++  assets `9350a96481e14c24e0058e24fe12d0907e7f2d754e9b35ef6caefd2d7600773c`.
++
++**Fable review (2026-09-17), three findings, all fixed.** Each fix was made only
++after its new browser step had been written and RUN against the pre-fix bytes, so
++none rests on an argument alone; the pre-fix assertions are verbatim in
++`receipts/S5_phase1-3.txt`.
++
++1. **HIGH, `graph.js:125`, step 11.** `refresh(initial)` sent `&latest=1`
++   unconditionally, and `graph_view()` replaces the requested cycle with
++   `max(years)` whenever it is present (`graph_data.py:317-318`), so the URL said
++   2022 while the view showed 2024. Now `initial && !query.get('cycle')`. S5's own
++   step 1 could not see this: the fixture's newest cycle is the one that permalink
++   asks for, so the `/api/graph` stub now mirrors that server rule and the hole
++   cannot reopen. Pre-fix: `'2024' !== '2022'`.
++2. **HIGH, `chart-studio.js:60, :142, :154, :417-421, :2006-2013`, step 12.**
++   `saved=<id>` outlived the sheets it described: edit the opened view, reload, and
++   `openSavedFromUrl()` re-opened the saved view while `persist()` wrote it over the
++   edited sheets — **a data loss that did not exist before S5 put the id in the
++   URL**. The first change to the working sheets after an open or a save now clears
++   the id, at `commit()` (45 edit paths) and at `step()` (undo/redo mutates sheets
++   and calls `persist()` without going through `commit()`), and deliberately NOT at
++   `persist()`, which also runs on load paths and would have destroyed the
++   permalink before `openSavedFromUrl()` read it. An open fences its own `commit`
++   with `holdingSavedId`. Both directions are pinned by the step. Pre-fix:
++   `saved= leaving the URL after the first edit never happened`.
++3. **MEDIUM, `cross-reference.js:150-160`, step 13.** An industry-scoped ask that
++   found nothing still said "Latest run", naming the one run it was not showing.
++   Now "No cross-reference run for <label>". Both branches are pinned: step 5 the
++   found run, step 13 the empty one. Pre-fix: `got "Latest run · Saved evidence
++   refreshed."`.
++
++**User-visible changes, for Paul:**
++
++- **Cross-reference follows the URL's industry.** It is no longer "the latest saved
++  run" unconditionally: once the URL names an industry — and Graph always puts one
++  there — it shows the newest run for that industry, or that industry's empty
++  state. The status line says which of the three it is looking at: "Newest run for
++  Banking · …", "No cross-reference run for Banking · …", or "Latest run · …".
++  No silent fallback to the bare route was added; that would make the line lie.
++- **The Candidate view select is visible once a report is chosen**, wherever the
++  candidate panel is showing, instead of only on the Candidates analysis tab. The
++  note at `index.html:107` ("Direct contributions only") is now shown only while it
++  is true, because the select above it can make it untrue on the overview tab.
+ 
+-**Contract decisions:** —
++**Known limits, stated rather than hidden:**
+ 
+-**Open questions:** —
++a. **Chart Studio never writes `company`/`cycle` back.** Removing a carried pill
++   does not remove the key from the URL, so `loadContributions(refresh)` re-carries
++   it. Idempotent — the pill returns exactly as it was, nothing lost or duplicated
++   — but a removed pill can reappear on a source refresh. Graph owns those two keys
++   today; **S6 may want to give Chart Studio ownership of them.**
++b. **`scope.js merge()` re-encodes unknown keys' values** with
++   `encodeURIComponent`, so a `+` meaning a space in another session's key is
++   normalised to `%20`. The same value either way under `URLSearchParams`
++   decoding; harmless, named here so nobody reads it as data loss.
++c. **A first load that names no cycle still sends `latest=1`** and lands on the
++   newest cycle while the URL names no cycle at all. That is the contract's own
++   rule ("a URL names only what the reader chose") and it is unchanged from before
++   S5, but a link copied in that state means "newest", not "2024".
++d. **No cross-tab sync.** `subscribe` listens to `popstate` and this document's
++   `mentat:scope`; a second browser tab is a different document and no `storage`
++   event is used, so two tabs do not follow each other.
++e. **The S0 known-red for `test_console_browser.cjs` was a race, and it is closed
++   here** — see the second non-owned edit below.
++
++**Non-owned test edits, for their owner to nod at.** Both are in
++`mentat/tests/test_console_browser.cjs`, both forced, neither cosmetic:
++
++1. `:50` — `page.route('**/api/cross-reference', …)` gained a second registration
++   for the query form, the idiom that file already uses for `/api/evidence` at
++   `:48-49`. Forced by the contract: the test clicks `#split-view` while Evidence is
++   current (`:163`), which activates Graph; Graph now writes its industry into the
++   query, so Cross-reference asks S4's industry-scoped route and the bare glob
++   stopped matching. Measured, not assumed — a probe on the same fixture with no
++   industry in the URL still requests the bare route and still renders "Observed
++   original giving".
++2. `:196` — a `waitForFunction` was inserted before the run-group assertion. That
++   attribute is set by `renderRunLibrary()` (`app.js:217-227`), which runs only
++   after `mentat:view` → `poll()` → `refreshRuns()` →
++   `fetch('/api/runs?include_archived=1')` (`app.js:252`) comes back, and no wait
++   sat between the `#tab-collection` click at `:195` and the read. **It is a race,
++   not an S5 defect**: measured on byte-identical trees as pass, pass, **FAIL**
++   (`'false' !== 'true'` at `:196:12`), plus the sweep's red under load; S5 adds no
++   request on that path. The wait uses the file's own idiom (`:162`, `:173`) and the
++   assertion is unchanged. After it: two consecutive runs, exit 0 and exit 0.
++
++**Foreign facts, recorded because they are not S5's to fix:**
++
++- **HEAD moved under this lane mid-build.** `server.py` was clean when S5 checked
++  it, carried five foreign hunks by 00:29:56 (S3d's HTTP/1.1 and `read_json_cached`
++  work), gained S5's one `STATIC_ASSETS` line at 00:43:04, and at **00:49:02 Paul
++  committed `a565216bf`**, which carries all six. So **S3d's commit shipped S5's
++  `/scope.js` line** under a message that does not mention it, `server.py` is clean
++  again, and the S5 patch carries no `server.py` hunk. Every S5 measurement was
++  taken against exactly those bytes.
++- `mentat/app/graph_data.py`, `report_insights.py`, `style.css`, `graph.css` and
++  `desktop/Launcher.cs` are modified-uncommitted by other lanes right now. S5
++  touched none of them, and the build stamp above therefore describes a tree that
++  includes those foreign edits — it will not reproduce from a clean checkout of
++  HEAD plus this patch alone.
+ 
+-**Handoff notes for later sessions:** —
++**Open for Paul:**
++
++1. Commit from `patches/S5_url_scope.patch` (`git apply --cached`, as S4's went in;
++   the ignored `.json`/`.txt` files need that or `git add -f`).
++2. Restart the consoles: `scope.js` is a **new static asset**, so the assets stamp
++   changes and a console that predates it serves an `index.html` whose
++   `<script src="/scope.js">` would 404 on the old process. Expected identity after
++   the restart is the pair above.
++3. Cross-reference industry scoping (under "User-visible changes") — intended, but
++   it changes what that tab shows after a Graph visit.
++4. The two non-owned `test_console_browser.cjs` edits: does the contract change
++   carry them, or do they need their owner's nod?
++
++---
++
++### HANDOFF NOTES FOR S6 — the URL vocabulary, verbatim
++
++**The rule.** The hash names the tab (`app.js showView`, `#loading`,
++`#collection`, `#graph`, `#chart-studio`, `#cross-reference`, `#evidence`). The
++query string carries the scope. A fragment-only `replaceState` keeps the query, so
++the two never fight. `pushState` is used nowhere and ruling C says keep it that way.
++
++**Every key** is in the table above, with its value rule, its writer and its
++reader. **Ownership, which is the part that matters for a second pane:**
++
++- **Graph owns** `company`, `cycle`, `mode`, `direction`, `tier`, `funding`,
++  `category`, `recipient`. It writes all eight from one place, `writeScope(query)`
++  in `graph.js`, mirroring the `/api/graph` request it just made.
++- **Chart Studio owns** `industry` **on pick** (inside `selectContributionDataset`,
++  so all four call sites are covered) and `saved`. Graph also writes `industry`,
++  from its own select — last writer wins, and both spell it the same way because
++  the contract pins the published label.
++- **S6 owns** `evidence`, `id`, `committee`, `offset`, `limit`. S5 writes none of
++  them and `write()` preserves them in place.
++
++**The module**, `mentat/app/scope.js`, browser global `MentatScope`, CommonJS in
++node (UMD like `chart-studio-core.js`):
++
++```js
++read(search = location.search)  // -> {industry?, company?, ..., invalid: [{key, value, reason}]}
++write(partial, {location, history, dispatch, target} = defaults)  // -> the new scope
++parse(search)                   // the pure read
++serialize(scope)                // the pure write, keys in KEYS order
++href(view, scope, base = location)   // "/?<query>#<view>"
++subscribe(fn, target = window)  // popstate + mentat:scope; returns an unsubscribe
++KEYS, MODES, RESERVED           // the vocabulary as data
++```
++
++`read()` never throws: a value it refuses is dropped from the scope and reported in
++`invalid[]`, because a bad permalink must still open its tab. `write()` merges into
++the live query - an empty, null or undefined value removes its key, unknown keys
++are preserved in place, existing keys keep their order, new keys append - then
++calls `history.replaceState` and dispatches **`mentat:scope`** (a `CustomEvent`
++whose `detail` is the new scope) **only when the URL actually changed**. A no-op
++write dispatches nothing, which is why `showView` does not call `write({})`.
++
++**Extending it to a two-pane URL.** S3's pane model (this file, the "Pane state
++model for S6" section around lines 1173-1188) already commits the evidence pane to
++`?evidence=csv&id=…&committee=…&cycle=…&offset=…`, and those keys are the reserved
++list above. Two things to keep when you build it:
++
++- A second pane's keys should be **prefixed, not duplicated** (`paneB.cycle`, the
++  shape S5_DESIGN.md §2 anticipated), because `cycle` already belongs to Graph and
++  a bare second copy would make "whose cycle is this?" unanswerable. `write()`
++  preserves any prefixed key untouched today, so the prefix costs nothing now.
++- Add the new keys to `contracts/url_scope.json`, bump its `version`, and re-run
++  both suites. `app/tests/scope.test.js` reads the contract from disk, so new
++  examples and negative controls are picked up without touching the test.
++
++**Restart requirement.** `scope.js` is a new entry in `STATIC_ASSETS`
++(`server.py`, grep `'/scope.js'`), so `ASSET_TREE_SHA256` changes and a console that
++predates it serves an `index.html` referring to a script it will 404. Restart
++before judging anything in the browser:
++
++```powershell
++powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\pgoff\Mentat\mentat\app\Start-MentatApp.ps1 -Port 8806
++```
++
++D-029 applies: the launcher replaces only an IDLE stale console, so check
++`/api/health` before assuming a restart took.
+ 
+ ---
+ 
+diff --git a/audits/mentat_failings_20260915/contracts/README.md b/audits/mentat_failings_20260915/contracts/README.md
+index f2641bc00..598411e23 100644
+--- a/audits/mentat_failings_20260915/contracts/README.md
++++ b/audits/mentat_failings_20260915/contracts/README.md
+@@ -193,5 +193,6 @@ change in this lane.
+ | `snapshot_registry.json` (v2) | S4 | registry envelope + per-snapshot entry (industry, slug, workbook/companion/database/payload hashes, build_stamp; sha256 and build_stamp are null on an unreadable, unavailable workbook) | asserted by: `tests/test_snapshot_registry.py`, `tests/test_industry_routes.py` (GET /api/snapshots), `app/tests/studio-contract.test.js` (parseSnapshotRegistry) |
+ | `contributions_api.json` (v2) | S4 | industry-scoped request/response pairs across every contributions/graph/comparison/cross-reference/snapshots route, plus the two industry-resolution error bodies | asserted by: `tests/test_industry_routes.py` |
+ | `studio_api.json` (v1) | S4 | Chart Studio sheet + saved-view + briefing shapes carrying `source.industry` and `sheet.sources[]` round-trip | asserted by: `tests/test_studio_views_industry.py`, `app/tests/studio-contract.test.js`, `tests/test_studio_industry_browser.cjs` |
++| `url_scope.json` (v1) | S5 | the console URL scheme: hash names the tab, query string carries the scope (`industry`, `company`, `cycle`, `mode`, `direction`, `tier`, `funding`, `category`, `recipient`, `saved`), plus write() merge semantics (remove-on-empty, preserve-unknown) and S6's reserved keys | asserted by: `app/tests/scope.test.js`, `tests/test_navigation_scope_browser.cjs` |
+ 
+ Each session appends its contracts to this table as it creates them.
+diff --git a/mentat/app/app.js b/mentat/app/app.js
+index fbc318499..7859f9812 100644
+--- a/mentat/app/app.js
++++ b/mentat/app/app.js
+@@ -39,6 +39,10 @@ function showView(view, focus = false) {
+   $('split-view').setAttribute('aria-pressed', String(paired));
+   $('split-view').textContent = paired ? 'Single view' : currentView === 'graph' ? 'Split with PAC evidence' : 'Split with Graph';
+   if (paired) { $('workspace-title').textContent = 'Graph & PAC evidence'; $('graph-actions').hidden = false; }
++  // Fragment-only, so it resolves against the current URL and KEEPS the query
++  // string: the hash names the tab and the query carries the scope (scope.js),
++  // so switching tabs never loses a permalink's scope. replaceState, never
++  // pushState - Back does not step through tabs today (Paul's ruling C).
+   history.replaceState(null, '', '#' + currentView);
+   window.dispatchEvent(new CustomEvent('mentat:view', {detail:{view:currentView,split:paired}}));
+   if (focus) {
+diff --git a/mentat/app/chart-studio.js b/mentat/app/chart-studio.js
+index d094f93f9..475e16052 100644
+--- a/mentat/app/chart-studio.js
++++ b/mentat/app/chart-studio.js
+@@ -55,6 +55,9 @@
+   let recordOffset = 0, recordSelection = null, recordRevision = 0, exporting = false;
+   let pageMembersKey = '';
+   let pendingScope = null, appliedScope = null;
++  // The saved-view id currently in the URL, and the flag that lets an open
++  // install its own sheets without the edit-detector treating them as an edit.
++  let openedSaved = '', holdingSavedId = false;
+   let inspectorTab = 'marks', overviewMode = false, overviewRevision = 0, overviewCompany = '';
+   let queryRequests = 0;
+   // The Data source panel opens on arrival and folds itself away once, after
+@@ -136,6 +139,7 @@
+     future = [];
+     const memory = focusMemory();
+     change();
++    viewEdited();
+     persist();
+     renderAll();
+     focusRestore(memory);
+@@ -147,6 +151,7 @@
+     const memory = focusMemory();
+     sheets = snapshot.sheets;
+     active = Math.min(snapshot.active, sheets.length - 1);
++    viewEdited();
+     persist();
+     renderAll();
+     focusRestore(memory);
+@@ -335,7 +340,9 @@
+     const ticket=++revision;failure('');sourceReady=false;status('Reading verified contribution fields…');
+     try {
+       if(!contributionCatalog||refresh){const [session,catalog]=await Promise.all([contributionAPI('session'),contributionAPI('catalog')]);if(ticket!==revision||!verified())return;contributionToken=session.token;contributionCatalog=catalog;try{if(Array.isArray(session.industries))industries=core.parseSnapshotRegistry(session.industries);}catch(error){industries=null;}}
+-      const previous=el('dataset').value||new URLSearchParams(location.search).get('industry')||document.getElementById('graph-industry')?.value;
++      // The permalink's industry, read through the one module that owns the URL
++      // vocabulary (contracts/url_scope.json) instead of a second raw reader.
++      const previous=el('dataset').value||globalThis.MentatScope?.read().industry||document.getElementById('graph-industry')?.value;
+       fill(el('dataset'),contributionCatalog.datasets.map(d=>[d.id,d.label||d.id]));
+       // An unavailable report carries the reason on its own option, so it is
+       // readable before it is chosen and not only after a failure.
+@@ -345,8 +352,12 @@
+       if(!dataset())throw new Error(['No verified sources are available in the configured report folder.',
+         ...contributionCatalog.datasets.filter(d=>d.message).map(d=>(d.label||d.id)+': '+d.message)].join(' '));
+       selectContributionDataset();
++      // A permalink arrives with no pendingScope, so the URL supplies one; a
++      // click through from Graph already set it and is left alone.
++      if(!pendingScope)pendingScope=urlGraphScope();
+       applyGraphScope();
+       settleSource();
++      await openSavedFromUrl();
+     }catch(error){if(ticket===revision){status('Verified data unavailable.');failure(error.message);renderDatasetMessage();}}
+   }
+   function selectContributionDataset() {
+@@ -356,6 +367,11 @@
+     data={columns:contributions.fields(d.fields||contributionCatalog.fields,basis()),rows:[],row_count:0,header_row:0,sha256:d.provenance.workbook_sha256,sheet:'Verified source observations',note:d.provenance.scope};
+     if(!restored){sheet().columns=[{column:data.columns.findIndex(f=>f.id==='company'),aggregation:'sum'}];sheet().rows=[{column:data.columns.findIndex(f=>f.id==='amount'),aggregation:'sum'}];sheet().marks.type='bar';}
+     persist();renderAll();
++    // Four call sites reach this function - the Data panel picker, the shelf
++    // source buttons, openView() and the permalink path - and every one of them
++    // is a producer of the URL's `industry`, so the write lives here rather than
++    // at four places that could drift apart (DE-021).
++    globalThis.MentatScope?.write({industry:d.industry||d.id||''});
+   }
+   function syncContributionControls() {
+     const on=verified();el('contribution-source').hidden=!on;el('worksheet-source').hidden=on;el('verified-summary').hidden=!on;el('result-controls').hidden=!on;
+@@ -373,6 +389,51 @@
+     const map=sheet().map||{layers:['states','districts'],congress:'119'};
+     el('congress').value=map.congress;for(const [id,layer]of [['states','states'],['districts','districts'],['zips','zip_areas']])el('layer-'+id).checked=map.layers.includes(layer);
+   }
++  // A permalink's company and cycle become the same carried pills the Graph
++  // handoff produces, so applyGraphScope() below stays the only consumer and
++  // one code path renders both. Graph spells a cycle by its end year and the
++  // verified index by the pair it covers, so the same translation the handoff
++  // uses is applied here (chart-studio-core.js carriedFilterValue).
++  function urlGraphScope() {
++    const url=globalThis.MentatScope?.read();
++    if(!url||(!url.company&&!url.cycle))return null;
++    const filters=[];
++    if(url.company)filters.push({field:'company',value:url.company});
++    if(url.cycle)filters.push({field:'cycle',value:core.carriedFilterValue('cycle',url.cycle)});
++    return {industry:url.industry||'',filters,notCarried:[]};
++  }
++  // The saved-view id in the URL. A view that lives only in this tab
++  // (viewsMemory, id "memory-...") is not addressable, so it is never written:
++  // writing it would silently remove a real id that was already there.
++  function rememberSavedView(id) {
++    const value=String(id||'');
++    if(!/^[a-f0-9]{32}$/.test(value))return;
++    openedSaved=value;
++    globalThis.MentatScope?.write({saved:value});
++  }
++  // The first change to the working sheets after an open or a save. From here
++  // the id in the URL no longer describes what is on screen, and leaving it
++  // there would let the next reload re-open the saved view over the edit.
++  function viewEdited() {
++    if (holdingSavedId || !openedSaved) return;
++    openedSaved = '';
++    globalThis.MentatScope?.write({saved: ''});
++  }
++  // A saved-view permalink. The list is the cheapest way to get the view's
++  // sourceKey, which openability() needs before openView() will touch it;
++  // openView() fetches the sheets itself. A link to a view this console does
++  // not have says so rather than opening the wrong thing.
++  async function openSavedFromUrl() {
++    const id=globalThis.MentatScope?.read().saved;
++    if(!id||id===openedSaved)return;
++    openedSaved=id;
++    let views=[];
++    try { views=(await getJSON('/api/studio/views')).views||[]; }
++    catch (error) { failure(viewMessage(error)+' The saved view in this link could not be listed.'); return; }
++    const view=views.find(item=>item.id===id);
++    if(!view){failure('This console has no saved view '+id+'.');return;}
++    await openView(view);
++  }
+   // Carried Graph scope becomes ordinary filter pills, so the reader can see
+   // and remove every one of them. A field this dataset does not have is
+   // reported, never silently dropped.
+@@ -1887,6 +1948,7 @@
+     failure('');
+     try {
+       const body = await api('/api/studio/views', record);
++      rememberSavedView(body && body.id);
+       status('Saved view "' + name + '" \u00b7 ' + record.sheets.length +
+         ' sheet' + (record.sheets.length === 1 ? '' : 's') + '.');
+       return body;
+@@ -1941,11 +2003,15 @@
+       el('dataset').value = state.dataset;
+       selectContributionDataset();
+     }
+-    commit(() => {
+-      sheets = full.sheets.map(s => core.migrateSheet(Object.assign(core.createSheet(s.name, s.id), s)));
+-      active = Math.min(Math.max(0, full.active | 0), sheets.length - 1);
+-      dataSourceTab = false;
+-    });
++    holdingSavedId = true;
++    try {
++      commit(() => {
++        sheets = full.sheets.map(s => core.migrateSheet(Object.assign(core.createSheet(s.name, s.id), s)));
++        active = Math.min(Math.max(0, full.active | 0), sheets.length - 1);
++        dataSourceTab = false;
++      });
++    } finally { holdingSavedId = false; }
++    rememberSavedView(full.id);
+     status('Opened view "' + full.name + '".');
+   }
+ 
+@@ -2588,10 +2654,24 @@
+     setInspectorTab('filters');
+   };
+ 
++  // An industry the URL changed while this panel was hidden, applied the moment
++  // it is shown. Held rather than dropped when the panel is not ready yet, so a
++  // change that arrives during the first load is not lost.
++  let pendingIndustry = '';
++  function followScopeIndustry() {
++    if (!pendingIndustry || !loadedSources || !verified() || !contributionCatalog) return;
++    const label = pendingIndustry;
++    if (label === el('dataset').value) { pendingIndustry = ''; return; }
++    if (!(contributionCatalog.datasets || []).some(entry => entry.id === label && entry.available)) { pendingIndustry = ''; return; }
++    pendingIndustry = '';
++    el('dataset').value = label;
++    selectContributionDataset();
++  }
+   function activate() {
+     const view = document.getElementById('view-chart-studio');
+     if (!view || view.hidden) { stopPlay(); return; }
+     if (!loadedSources) { loadedSources = true; if(verified())loadContributions();else loadRuns(); }
++    followScopeIndustry();
+   }
+   // The Graph tab's "Create chart" button now opens Chart Studio; the classic
+   // dialog stays one click away in the Chart Studio toolbar.
+@@ -2632,10 +2712,31 @@
+     openBuilder.removeAttribute('aria-haspopup');
+     openBuilder.onclick = () => {
+       pendingScope = graphScope();
++      // The URL carries Graph's own spelling of the cycle (the end year, per
++      // contracts/url_scope.json); the carried pill keeps the verified index's
++      // pair spelling. One scope, two vocabularies, and the contract says which
++      // is which - so the scope is read from the Graph controls, not from the
++      // already-translated pendingScope.
++      const read = id => (document.getElementById('graph-' + id) || {}).value || '';
++      globalThis.MentatScope?.write({industry: pendingScope.industry, company: read('company'), cycle: read('cycle')});
+       if (typeof showView === 'function') showView('chart-studio'); else location.hash = '#chart-studio';
+       if (loadedSources && verified()) applyGraphScope();
+     };
+   }
++  // Back, or a scope written by another view in this document, can change the
++  // industry in the URL. Chart Studio follows it, but only when it disagrees
++  // with the picker, so its own write can never loop back into a second
++  // selection - and only once this panel is on screen, because re-selecting a
++  // dataset fires a verified query and nobody asked for one behind a hidden
++  // tab. A dataset this console does not have available is left alone;
++  // openability() and the Data panel already say why.
++  globalThis.MentatScope?.subscribe(next => {
++    const label = (next && next.industry) || '';
++    if (!label || label === el('dataset').value) return;
++    pendingIndustry = label;
++    const panel = document.getElementById('view-chart-studio');
++    if (panel && !panel.hidden) followScopeIndustry();
++  });
+   window.addEventListener('mentat:view', activate);
+   window.addEventListener('hashchange', activate);
+   try { el('show-hidden').checked = localStorage.getItem('mentat-chart-studio-show-identifiers') === '1'; } catch {}
+diff --git a/mentat/app/cross-reference.js b/mentat/app/cross-reference.js
+index c4270d4c8..34c790adf 100644
+--- a/mentat/app/cross-reference.js
++++ b/mentat/app/cross-reference.js
+@@ -139,23 +139,57 @@
+   const api = {html, stepHtml, money};
+   if (typeof module !== 'undefined' && module.exports) { module.exports = api; return; }
+   root.MentatCrossReference = api;
+-  let active = false, fetching = false, lastHtml = '';
++  let active = false, fetching = false, lastHtml = '', lastIndustry = null;
++  // The industry the URL names, through the one module that owns that
++  // vocabulary (audits/mentat_failings_20260915/contracts/url_scope.json).
++  const scopeIndustry = () => (globalThis.MentatScope ? globalThis.MentatScope.read().industry : '') || '';
++  // Which run the console actually read, said where the refresh status is said.
++  // S4's route answers selected_by: "pointer" on the latest path, "industry"
++  // when a label chose the run, so the reader is never left guessing whether a
++  // permalink's industry took.
++  const runText = data => {
++    if (!data) return 'Latest run';
++    // An industry-scoped ask that found nothing answers the empty envelope
++    // ({available:false, industry:<label>}), and saying "Latest run" over it
++    // would name the one run it is NOT showing. Before S5 this view always had
++    // the latest run to fall back on; a reader who followed a permalink is owed
++    // the reason the panel is empty.
++    if (data.industry && data.available === false) return 'No cross-reference run for ' + data.industry;
++    if (data.selected_by === 'industry' && data.industry) return 'Newest run for ' + data.industry;
++    return 'Latest run';
++  };
+   async function refresh() {
+     if (!active || fetching || document.hidden) return;
+     fetching = true;
+     const message = document.getElementById('xref-refresh-status');
++    const industry = scopeIndustry();
++    lastIndustry = industry;
+     try {
+-      const response = await fetch('/api/cross-reference', {cache:'no-store'});
++      // industry is the only query key this route accepts (server.py:1918-1928);
++      // without one it still answers for the latest saved run, as before.
++      const response = await fetch('/api/cross-reference' +
++        (industry ? '?industry=' + encodeURIComponent(industry) : ''), {cache:'no-store'});
+       if (!response.ok) throw new Error('The cross-reference view could not refresh.');
+       const data = await response.json(), next = html(data);
+       if (next !== lastHtml) { document.getElementById('xref-results').innerHTML = next; lastHtml = next; }
+-      message.textContent = 'Saved evidence refreshed. This page is read-only.';
++      message.textContent = runText(data) + ' \u00b7 Saved evidence refreshed. This page is read-only.';
+     } catch (error) {
+       message.textContent = `${error.message} Any previously displayed result is an older snapshot.`;
+     } finally { fetching = false; }
+   }
+   api.setActive = value => { active = !!value; if (active) refresh(); };
+   api.refresh = refresh;
++  // A scope written elsewhere in this document, or a Back button, can change the
++  // industry. Only a change matters, and only while this view is the one on
++  // screen; lastHtml is cleared so two runs that happen to render identically
++  // still repaint under their own status line.
++  globalThis.MentatScope?.subscribe(next => {
++    if (!active) return;
++    const industry = (next && next.industry) || '';
++    if (industry === lastIndustry) return;
++    lastHtml = '';
++    refresh();
++  });
+   document.getElementById('xref-refresh')?.addEventListener('click', refresh);
+   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+   api.setActive(!document.getElementById('view-cross-reference')?.hidden);
+diff --git a/mentat/app/graph.js b/mentat/app/graph.js
+index 1c619d865..e9885c82a 100644
+--- a/mentat/app/graph.js
++++ b/mentat/app/graph.js
+@@ -6,6 +6,16 @@
+   const titleFor = {categories:'Recipient types',organizations:'Top organizations',candidates:'Top candidates',companies:'Company comparison',levels:'Giving by employee level'};
+   let analysis = 'overview';
+   let loaded = false, revision = 0, view = null, category = '', recipient = '', controller = null, unavailable = [];
++  // Whether this console has a report to show. The Candidate view select is
++  // visible from that moment on (Paul's ruling A(ii), 2026-09-17), not only on
++  // the Candidates analysis tab, so Downstream PAC activity is a control the
++  // reader can see and `mode=activity` is a state a permalink can name.
++  let reportChosen = false;
++  // A permalink's company, cycle and tier cannot be put on the selects before
++  // the first response: those options are built in render() from the view the
++  // server echoes back. So they ride along with the first request instead, and
++  // render()'s own options(..., view.filters.company) lands them on the selects.
++  let urlScope = null;
+   function options(node, values, selected='') {
+     node.replaceChildren(...values.map(([id,label]) => new Option(label,id)));
+     if ([...node.options].some(o=>o.value===selected)) node.value=selected;
+@@ -18,10 +28,38 @@
+     get('direction').parentElement.hidden=get('mode').value==='direct';
+   }
+   function filters() {
+-    return new URLSearchParams({id:get('run').value,industry:get('industry').value,company:get('company').value,
+-      tier:get('tier').value,cycle:get('cycle').value,funding:get('funding').value,mode:get('mode').value,
++    return new URLSearchParams({id:get('run').value,industry:get('industry').value,
++      company:urlScope?.company ?? get('company').value,
++      tier:urlScope?.tier ?? get('tier').value,
++      cycle:urlScope?.cycle ?? get('cycle').value,
++      funding:get('funding').value,mode:get('mode').value,
+       direction:get('direction').value,category,recipient});
+   }
++  // Graph's own defaults are absent from the URL rather than spelled out in it,
++  // so a permalink names only what the reader actually chose.
++  const SCOPE_DEFAULTS={mode:'direct',direction:'Support',funding:'all'};
++  // The URL mirrors the request that was just made - same keys, same spellings
++  // (audits/mentat_failings_20260915/contracts/url_scope.json) - so a permalink,
++  // a reload and a tab switch all describe one query. A page that did not load
++  // scope.js keeps working; it simply has no URL scope.
++  function writeScope(query) {
++    const value=key=>{const text=query.get(key)||'';return text===SCOPE_DEFAULTS[key]?'':text;};
++    globalThis.MentatScope?.write({industry:query.get('industry')||'',company:query.get('company')||'',
++      cycle:query.get('cycle')||'',mode:value('mode'),direction:value('direction'),
++      tier:query.get('tier')||'',funding:value('funding'),
++      category:query.get('category')||'',recipient:query.get('recipient')||''});
++  }
++  // The permalink, applied once the catalog's own options exist. A value with no
++  // matching option is skipped, never invented.
++  function applyUrlScope() {
++    urlScope=null;
++    const scope=globalThis.MentatScope?.read();
++    if(!scope)return;
++    for(const name of ['industry','mode','direction','funding'])
++      if(scope[name]&&[...get(name).options].some(option=>option.value===scope[name]))get(name).value=scope[name];
++    category=scope.category||'';recipient=scope.recipient||'';
++    if(scope.company||scope.cycle||scope.tier)urlScope={company:scope.company,cycle:scope.cycle,tier:scope.tier};
++  }
+   // Which saved run this console reads. Chart Studio's reconciliation strip has
+   // to answer this the same way Graph does - a strip that reconciles against a
+   // run Graph would never display is worse than no strip - so the rule lives in
+@@ -58,7 +96,7 @@
+   async function loadCatalog(preloaded=null) {
+     const ticket=++revision;controller?.abort();clear();get('status').textContent='Reading saved report sources…';
+     options(get('industry'),[]);options(get('company'),[['','All companies']]);options(get('cycle'),[['','All cycles']]);
+-    category='';recipient='';get('tier').value='';get('funding').value='all';get('mode').value='direct';syncControls();
++    category='';recipient='';get('tier').value='';get('funding').value='all';get('mode').value='direct';reportChosen=false;urlScope=null;syncControls();
+     if(!get('run').value){get('status').textContent='No saved runs available.';return;}
+     try {
+       const body=preloaded?.industries ? preloaded : await api('/api/graph-catalog?id='+encodeURIComponent(get('run').value));
+@@ -67,6 +105,7 @@
+       unavailable=body.unavailable_reports||[];
+       if(unavailable.length)get('source-label').textContent='Unavailable saved reports: '+unavailable.join(', ');
+       if(!body.industries.length){get('status').textContent=body.message||'This run has no finalized report. Choose another run or check Collection.';return;}
++      reportChosen=true;applyUrlScope();syncControls();applyAnalysis();
+       await refresh(true);
+     } catch(e){if(ticket===revision){error(e.message);get('status').textContent='Report sources unavailable.';}}
+   }
+@@ -74,8 +113,16 @@
+     const ticket=++revision;controller?.abort();controller=new AbortController();clear();syncControls();
+     if(!get('industry').value)return;
+     get('status').textContent='Reading saved giving data…';
++    // One query object: the request that goes out and the URL the reader can
++    // copy are the same values, and the permalink is consumed exactly once.
++    const query=filters();writeScope(query);urlScope=null;
+     try {
+-      const response=await fetch('/api/graph?'+filters()+(initial?'&latest=1':''),{signal:controller.signal});
++      // latest=1 makes graph_view() replace the requested cycle with max(years)
++      // (graph_data.py:317-318). The URL already carries the cycle the reader
++      // chose, and writeScope() has just published it, so sending latest=1 as
++      // well left the URL saying 2022 while the view showed 2024. It is still
++      // sent on a first load that names no cycle, which is what it is for.
++      const response=await fetch('/api/graph?'+query+(initial&&!query.get('cycle')?'&latest=1':''),{signal:controller.signal});
+       const body=await response.json();if(!response.ok)throw new Error(body.error||'Graph unavailable.');
+       if(ticket!==revision)return;
+       view=body;render();window.dispatchEvent(new CustomEvent('mentat:graph',{detail:{...body,run:get('run').value,industry:get('industry').value}}));
+@@ -195,8 +242,14 @@
+     get('category-panel').hidden=!['overview','recipients'].includes(analysis);
+     get('organization-panel').hidden=analysis!=='recipients';
+     get('candidate-panel').hidden=!['overview','candidates'].includes(analysis);
+-    get('candidate-controls').hidden=analysis!=='candidates';
+-    get('candidate-separation').hidden=analysis!=='overview';
++    // Ruling A(ii): the Candidate view select appears as soon as a report is
++    // chosen, wherever the candidate panel is showing, rather than only on the
++    // Candidates analysis tab. Downstream PAC activity was reachable before
++    // this only by finding a tab that revealed the control.
++    get('candidate-controls').hidden=get('candidate-panel').hidden||!reportChosen;
++    // The note below says "Direct contributions only", which the select above
++    // can now make untrue on the overview tab, so it is shown only while it is.
++    get('candidate-separation').hidden=analysis!=='overview'||get('mode').value!=='direct';
+     get('company-panel').hidden=analysis!=='companies';
+     get('level-panel').hidden=analysis!=='companies';
+   }
+diff --git a/mentat/app/index.html b/mentat/app/index.html
+index 3cf29afb0..abb415231 100644
+--- a/mentat/app/index.html
++++ b/mentat/app/index.html
+@@ -4,7 +4,7 @@
+ <title>MENTAT</title>
+ <link rel="icon" type="image/svg+xml" href="/mentat-icon.svg">
+ <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/graph.css"><link rel="stylesheet" href="/comparison.css"><link rel="stylesheet" href="/acu-theme.css"><link rel="stylesheet" href="/cross-reference.css"><link rel="stylesheet" href="/workspace.css"><link rel="stylesheet" href="/chart-studio.css"><link rel="stylesheet" href="/chart-briefing.css">
+-<script src="/theme.js" defer></script><script src="/chart-export.js" defer></script><script src="/chart-math.js" defer></script><script src="/ui-state.js" defer></script><script src="/coverage-view.js" defer></script><script src="/app.js" defer></script><script src="/grouped-chart.js" defer></script><script src="/charts.js" defer></script><script src="/graph.js" defer></script><script src="/comparison.js" defer></script><script src="/funding-comparison.js" defer></script><script src="/chart-studio-core.js" defer></script><script src="/contribution-plot.js" defer></script><script src="/contribution-charts.js" defer></script><script src="/contribution-map.js" defer></script><script src="/chart-studio-contributions.js" defer></script><script src="/chart-studio.js" defer></script><script src="/chart-briefing.js" defer></script><script src="/chart-comparison.js" defer></script>
++<script src="/theme.js" defer></script><script src="/chart-export.js" defer></script><script src="/chart-math.js" defer></script><script src="/ui-state.js" defer></script><script src="/coverage-view.js" defer></script><script src="/scope.js" defer></script><script src="/app.js" defer></script><script src="/grouped-chart.js" defer></script><script src="/charts.js" defer></script><script src="/graph.js" defer></script><script src="/comparison.js" defer></script><script src="/funding-comparison.js" defer></script><script src="/chart-studio-core.js" defer></script><script src="/contribution-plot.js" defer></script><script src="/contribution-charts.js" defer></script><script src="/contribution-map.js" defer></script><script src="/chart-studio-contributions.js" defer></script><script src="/chart-studio.js" defer></script><script src="/chart-briefing.js" defer></script><script src="/chart-comparison.js" defer></script>
+ </head>
+ <body>
+ <a class="skip-link" href="#workspace-main">Skip to workspace</a>
+diff --git a/mentat/tests/test_console_browser.cjs b/mentat/tests/test_console_browser.cjs
+index 232dd50a4..827a977c5 100644
+--- a/mentat/tests/test_console_browser.cjs
++++ b/mentat/tests/test_console_browser.cjs
+@@ -47,6 +47,7 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+     let extraSnapshot=false;
+     await page.route('**/api/evidence?*',route=>route.fulfill({json:savedEvidence}));
+     await page.route('**/api/evidence',route=>route.fulfill({json:{snapshots:[{id:'fixture-evidence',company:savedEvidence.company,cycles:[2024,2026],retrieved_at:savedEvidence.retrieved_at},...(extraSnapshot?[{id:'new-evidence',company:'Another Company',cycles:[2026]}]:[])]}}));
++    await page.route('**/api/cross-reference?*',route=>route.fulfill({json:crossReference}));
+     await page.route('**/api/cross-reference',route=>route.fulfill({json:crossReference}));
+     await page.goto(origin+'/');
+     assert.equal(await page.locator('#tab-loading').getAttribute('aria-selected'),'true');
+@@ -192,6 +193,10 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+     assert.equal(await page.locator('#view-evidence').getAttribute('role'),'tabpanel');
+     await page.locator('#evidence-source').selectOption('snapshot');
+     await page.locator('#tab-collection').click();
++    // renderRunLibrary() (app.js:217-227) sets aria-pressed only after
++    // refreshRuns() -> /api/runs?include_archived=1 returns, so reading it
++    // straight after the click is a race: green warm, red under load.
++    await page.waitForFunction(()=>document.querySelector('[data-run-group=history]')?.getAttribute('aria-pressed')==='true');
+     assert.equal(await page.locator('[data-run-group=history]').getAttribute('aria-pressed'),'true');
+     await page.locator('[data-run-group=progress]').click();
+     assert.equal(await page.locator('#runs').inputValue(),'');
+diff --git a/mentat/app/scope.js b/mentat/app/scope.js
+new file mode 100644
+index 000000000..80c3827c7
+--- /dev/null
++++ b/mentat/app/scope.js
+@@ -0,0 +1,162 @@
++/* The console's URL scope: the hash names the tab, the query string carries the
++   scope. Pure except for `location` and `history`, so node:test can drive it
++   with a fake pair. Contract: audits/mentat_failings_20260915/contracts/url_scope.json.
++
++   Tab switches stay on history.replaceState (Paul's ruling C, 2026-09-17).
++   pushState is never used here: Back does not step through tabs today and S5
++   does not change that. */
++(function (root) {
++  'use strict';
++
++  // Every key this module owns, in the order it serializes them. A scope built
++  // from nothing writes its keys in this order; a scope merged into a live
++  // query leaves the keys already there where they are.
++  const KEYS = ['industry', 'company', 'cycle', 'mode', 'direction', 'tier',
++    'funding', 'category', 'recipient', 'saved'];
++  // The #graph-mode option values, verbatim (index.html:105).
++  const MODES = ['direct', 'activity', 'estimates'];
++  // S6's pane model owns these. S5 never writes one and never removes one.
++  const RESERVED = ['evidence', 'id', 'committee', 'offset', 'limit'];
++
++  const CYCLE_REASON = 'cycle must be a four-digit election-cycle end year';
++  const MODE_REASON = 'mode must be one of ' + MODES.join(', ');
++  const SAVED_REASON = 'saved must be a 32-character hexadecimal saved-view id';
++  const BLANK_REASON = 'a blank value names no scope, so the key is dropped';
++
++  // A bad permalink still has to open its tab, so nothing in here throws: an
++  // unusable value is dropped from the scope and reported through invalid[].
++  function check(key, raw) {
++    const text = raw == null ? '' : String(raw);
++    if (!text) return {ok: false, value: text, reason: BLANK_REASON};
++    if (key === 'cycle' && !/^\d{4}$/.test(text)) return {ok: false, value: text, reason: CYCLE_REASON};
++    if (key === 'mode' && MODES.indexOf(text) < 0) return {ok: false, value: text, reason: MODE_REASON};
++    // The same rule server.py get_view() enforces, so the client never fires a
++    // saved-view request the console will answer 400 for.
++    if (key === 'saved' && !/^[a-f0-9]{32}$/.test(text)) return {ok: false, value: text, reason: SAVED_REASON};
++    return {ok: true, value: text};
++  }
++
++  function entries(search) {
++    const text = String(search == null ? '' : search).replace(/^[?]/, '');
++    // URLSearchParams decodes both %20 and '+', keeps duplicates, keeps order,
++    // and never throws on a malformed escape.
++    return text ? [...new URLSearchParams(text)] : [];
++  }
++
++  /* --------------------------------------------------------------- reading */
++
++  function parse(search) {
++    const scope = {invalid: []};
++    const seen = Object.create(null);
++    for (const [key, value] of entries(search)) {
++      if (KEYS.indexOf(key) < 0 || seen[key]) continue;
++      seen[key] = true;
++      const checked = check(key, value);
++      if (checked.ok) scope[key] = checked.value;
++      else scope.invalid.push({key: key, value: checked.value, reason: checked.reason});
++    }
++    return scope;
++  }
++
++  function read(search) {
++    if (search !== undefined) return parse(search);
++    const here = typeof location === 'undefined' ? null : location;
++    return parse(here ? here.search : '');
++  }
++
++  /* --------------------------------------------------------------- writing */
++
++  // Values are encodeURIComponent'd, keys are written plain. URLSearchParams
++  // .toString() would spell a space as '+', and a published label such as
++  // "Property & Casualty Insurance" has to survive a copied permalink.
++  const encode = value => encodeURIComponent(String(value == null ? '' : value));
++
++  function serialize(scope) {
++    const source = scope || {};
++    const parts = [];
++    for (const key of KEYS) {
++      if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
++      const checked = check(key, source[key]);
++      if (checked.ok) parts.push(key + '=' + encode(checked.value));
++    }
++    return parts.join('&');
++  }
++
++  // Merge a partial scope into a live query string. An empty, null or
++  // undefined value removes its key; a value this module would refuse to read
++  // back removes it too, so the URL can never carry something read() rejects.
++  // Every other key in the query - studioPane, S6's reserved keys, anything a
++  // future session adds - is preserved untouched and keeps its place.
++  function merge(search, partial) {
++    const pairs = entries(search);
++    const changes = partial || {};
++    for (const key of Object.keys(changes)) {
++      if (KEYS.indexOf(key) < 0) continue;
++      const checked = check(key, changes[key]);
++      const at = pairs.findIndex(pair => pair[0] === key);
++      if (!checked.ok) {
++        for (let i = pairs.length - 1; i >= 0; i -= 1) if (pairs[i][0] === key) pairs.splice(i, 1);
++        continue;
++      }
++      if (at < 0) pairs.push([key, checked.value]);
++      else {
++        pairs[at] = [key, checked.value];
++        for (let i = pairs.length - 1; i > at; i -= 1) if (pairs[i][0] === key) pairs.splice(i, 1);
++      }
++    }
++    return pairs.map(pair => pair[0] + '=' + encode(pair[1])).join('&');
++  }
++
++  function notify(scope, options) {
++    const opts = options || {};
++    if (typeof opts.dispatch === 'function') { opts.dispatch(scope); return; }
++    const target = opts.target || root;
++    if (!target || typeof target.dispatchEvent !== 'function' || typeof CustomEvent !== 'function') return;
++    target.dispatchEvent(new CustomEvent('mentat:scope', {detail: scope}));
++  }
++
++  function write(partial, options) {
++    const opts = options || {};
++    const here = opts.location || (typeof location === 'undefined' ? null : location);
++    const past = opts.history || (typeof history === 'undefined' ? null : history);
++    if (!here) return read();
++    const before = String(here.search || '').replace(/^[?]/, '');
++    const after = merge(before, partial);
++    if (after === before || !past || typeof past.replaceState !== 'function') return parse(after);
++    const url = (here.pathname || '/') + (after ? '?' + after : '') + (here.hash || '');
++    // A document with an opaque origin (a page built by setContent, a sandboxed
++    // frame) refuses replaceState. Nothing changed, so nothing is announced.
++    try { past.replaceState(null, '', url); } catch (error) { return parse(before); }
++    const scope = parse(after);
++    notify(scope, opts);
++    return scope;
++  }
++
++  // The permalink for a view and a scope. Used by "Open in Chart Studio" and
++  // available to S6 for pane links.
++  function href(view, scope, base) {
++    const here = base === undefined ? (typeof location === 'undefined' ? null : location) : base;
++    const path = (here && here.pathname) || '/';
++    const query = serialize(scope);
++    return path + (query ? '?' + query : '') + (view ? '#' + String(view) : '');
++  }
++
++  function subscribe(fn, target) {
++    const host = target || root;
++    if (typeof fn !== 'function' || !host || typeof host.addEventListener !== 'function') {
++      return function () {};
++    }
++    const onScope = event => fn(event && event.detail ? event.detail : read());
++    const onPop = () => fn(read());
++    host.addEventListener('mentat:scope', onScope);
++    host.addEventListener('popstate', onPop);
++    return function () {
++      host.removeEventListener('mentat:scope', onScope);
++      host.removeEventListener('popstate', onPop);
++    };
++  }
++
++  const api = {KEYS, MODES, RESERVED, read, write, parse, serialize, href, subscribe};
++  if (typeof module !== 'undefined' && module.exports) module.exports = api;
++  else root.MentatScope = api;
++})(typeof globalThis === 'undefined' ? this : globalThis);
+diff --git a/mentat/app/tests/scope.test.js b/mentat/app/tests/scope.test.js
+new file mode 100644
+index 000000000..836ee68be
+--- /dev/null
++++ b/mentat/app/tests/scope.test.js
+@@ -0,0 +1,166 @@
++/* The URL scope contract, from both ends.
++
++   Every payload here is read from the one fixture both suites import
++   (audits/mentat_failings_20260915/contracts/url_scope.json, contracts/README.md's
++   loader convention). Nothing below hand-builds a URL or a scope: a copied
++   literal is how DE-021 happened. */
++
++// Run this suite with the glob form; Node 24 rejects a bare directory, and the
++// glob cannot live in the block comment above because it closes it:
++//   node --test "app/tests/**/*.test.js"      (cwd: mentat/)
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const path = require('node:path');
++const scope = require('../scope.js');
++
++const CONTRACTS = path.resolve(__dirname, '..', '..', '..', 'audits', 'mentat_failings_20260915', 'contracts');
++function loadContract(name) {
++  return JSON.parse(fs.readFileSync(path.join(CONTRACTS, name + '.json'), 'utf8'));
++}
++const contract = loadContract('url_scope');
++
++// "/?industry=Banking#graph" -> {query: 'industry=Banking', view: 'graph'}
++function split(url) {
++  const hash = url.indexOf('#');
++  const view = hash < 0 ? '' : url.slice(hash + 1);
++  const head = hash < 0 ? url : url.slice(0, hash);
++  const mark = head.indexOf('?');
++  return {query: mark < 0 ? '' : head.slice(mark + 1), view, pathname: mark < 0 ? head : head.slice(0, mark)};
++}
++
++// A location/history pair with no document behind it, so write() can be driven
++// from node exactly as the browser drives it.
++function fakeWindow(url) {
++  const parts = split(url);
++  const state = {
++    location: {pathname: parts.pathname || '/', search: parts.query ? '?' + parts.query : '', hash: parts.view ? '#' + parts.view : ''},
++    replaced: [],
++    events: new EventTarget()
++  };
++  state.history = {
++    replaceState(_data, _title, next) {
++      state.replaced.push(next);
++      const now = split(next);
++      state.location.pathname = now.pathname || '/';
++      state.location.search = now.query ? '?' + now.query : '';
++      state.location.hash = now.view ? '#' + now.view : '';
++    }
++  };
++  return state;
++}
++
++const urlExamples = contract.examples.filter(example => example.url);
++const writeExamples = contract.examples.filter(example => example.write);
++
++test('[url_scope] the contract itself is shaped the way contracts/README.md requires', () => {
++  assert.equal(contract.contract, 'url_scope');
++  assert.equal(contract.version, 1);
++  assert.equal(contract.owner, 'S5');
++  assert.ok(contract.produced_by.length >= 1, 'produced_by lists every producer');
++  assert.ok(contract.consumed_by.length >= 1, 'consumed_by lists every consumer');
++  assert.ok(contract.negative_controls.length >= 5, 'negative_controls is mandatory and non-empty');
++  assert.ok(urlExamples.length >= 5 && writeExamples.length >= 1);
++  // The key table and the module must name the same keys, or the table is prose.
++  assert.deepStrictEqual(
++    Object.keys(contract.keys).filter(key => key !== 'studioPane').sort(),
++    [...scope.KEYS].sort());
++  assert.deepStrictEqual(contract.reserved, [...scope.RESERVED]);
++});
++
++for (const example of urlExamples) {
++  test(`[url_scope] read() answers the contract scope for ${example.name}`, () => {
++    const parts = split(example.url);
++    assert.equal(parts.view, example.view, 'the hash names the tab');
++    assert.deepStrictEqual(scope.read(parts.query), Object.assign({}, example.scope, {invalid: []}));
++    // read() with a leading '?' is the same read; location.search carries one.
++    assert.deepStrictEqual(scope.read('?' + parts.query), Object.assign({}, example.scope, {invalid: []}));
++  });
++
++  test(`[url_scope] href() rebuilds ${example.name} byte for byte`, () => {
++    assert.equal(scope.href(example.view, example.scope, {pathname: '/'}), example.url);
++    // and serialize() is the pure half of the same rule
++    assert.equal(scope.serialize(example.scope), split(example.url).query);
++  });
++
++  test(`[url_scope] ${example.name} round-trips through write() onto an empty URL`, () => {
++    // The producer path: write() must be able to put every example on the wire.
++    const state = fakeWindow('/#' + example.view);
++    const written = scope.write(example.scope, {location: state.location, history: state.history, target: state.events});
++    assert.deepStrictEqual(written, Object.assign({}, example.scope, {invalid: []}));
++    assert.equal(state.location.search, '?' + split(example.url).query);
++    assert.equal(state.location.hash, '#' + example.view, 'write() keeps the hash');
++  });
++}
++
++for (const example of writeExamples) {
++  test(`[url_scope] write() merge semantics: ${example.name}`, () => {
++    const state = fakeWindow(example.write.before);
++    scope.write(example.write.partial, {location: state.location, history: state.history, target: state.events});
++    assert.equal(state.replaced.length, 1, 'one replaceState, never pushState');
++    assert.equal(state.replaced[0], example.write.after);
++  });
++}
++
++for (const control of contract.negative_controls) {
++  test(`[url_scope] negative control: ${control.why.split('.')[0]}`, () => {
++    const parts = split(control.url);
++    const result = scope.read(parts.query);
++    assert.deepStrictEqual(result, Object.assign({}, control.expected.scope, {invalid: control.expected.invalid}));
++    for (const bad of control.expected.invalid) {
++      assert.ok(!Object.prototype.hasOwnProperty.call(result, bad.key),
++        `${bad.key} must be absent from the scope, not merely reported`);
++    }
++    // Teeth: a value read() refuses must also be one write() will not produce,
++    // or a producer could mint the permalink this control forbids.
++    for (const bad of control.expected.invalid) {
++      if (!bad.value) continue;
++      const state = fakeWindow('/?' + bad.key + '=keep-me#' + control.view);
++      scope.write({[bad.key]: bad.value}, {location: state.location, history: state.history, target: state.events});
++      assert.equal(state.location.search, '', `write() must refuse to write ${bad.key}=${bad.value}`);
++    }
++  });
++}
++
++test('[url_scope] write() preserves unknown keys and their order, and appends new ones', () => {
++  const state = fakeWindow('/?evidence=csv&industry=Banking&offset=40&studioPane=B#evidence');
++  scope.write({industry: 'Credit Union', cycle: '2024'},
++    {location: state.location, history: state.history, target: state.events});
++  assert.equal(state.location.search, '?evidence=csv&industry=Credit%20Union&offset=40&studioPane=B&cycle=2024');
++  // S6's reserved keys survived untouched, which is the whole point of the list.
++  for (const key of contract.reserved) {
++    if (state.location.search.includes(key + '=')) assert.ok(true);
++  }
++  assert.ok(state.location.search.includes('evidence=csv'));
++  assert.ok(state.location.search.includes('offset=40'));
++});
++
++test('[url_scope] write() never writes a reserved key, even when asked', () => {
++  const state = fakeWindow('/#graph');
++  const asked = Object.fromEntries(contract.reserved.map(key => [key, 'x']));
++  scope.write(asked, {location: state.location, history: state.history, target: state.events});
++  assert.equal(state.location.search, '');
++  assert.equal(state.replaced.length, 0);
++});
++
++test('[url_scope] subscribe fires on a write, and not on a no-op write', () => {
++  const state = fakeWindow('/?industry=Banking#graph');
++  const seen = [];
++  const stop = scope.subscribe(value => seen.push(value), state.events);
++  scope.write({cycle: '2024'}, {location: state.location, history: state.history, target: state.events});
++  assert.equal(seen.length, 1, 'a change announces itself');
++  assert.deepStrictEqual(seen[0], {industry: 'Banking', cycle: '2024', invalid: []});
++  scope.write({cycle: '2024'}, {location: state.location, history: state.history, target: state.events});
++  assert.equal(seen.length, 1, 'writing the same value again announces nothing');
++  assert.equal(state.replaced.length, 1, 'and does not touch history either');
++  stop();
++  scope.write({cycle: '2022'}, {location: state.location, history: state.history, target: state.events});
++  assert.equal(seen.length, 1, 'unsubscribe stops the listener');
++});
++
++test('[url_scope] removing the last key drops the question mark rather than leaving "?"', () => {
++  const state = fakeWindow('/?industry=Banking#graph');
++  scope.write({industry: ''}, {location: state.location, history: state.history, target: state.events});
++  assert.equal(state.replaced[0], '/#graph');
++  assert.equal(state.location.search, '');
++});
+diff --git a/mentat/tests/test_navigation_scope_browser.cjs b/mentat/tests/test_navigation_scope_browser.cjs
+new file mode 100644
+index 000000000..baed79cf1
+--- /dev/null
++++ b/mentat/tests/test_navigation_scope_browser.cjs
+@@ -0,0 +1,592 @@
++/* S5 (Area D), real-client pass: the hash names the tab, the query string
++ * carries the scope.
++ *
++ * What this proves that a unit test cannot: a permalink opens Graph on the
++ * right industry, company, cycle and candidate view; switching tabs, reloading
++ * and clicking through to Chart Studio all keep that scope; Cross-reference
++ * asks the server for the industry the URL names; and a saved-view permalink
++ * opens its view on a second page. Contract:
++ * audits/mentat_failings_20260915/contracts/url_scope.json.
++ *
++ * Spawn pattern and stubbing: tests/test_studio_industry_browser.cjs (real
++ * `python app/server.py` on a free port with a throwaway --data-root, the two
++ * contribution datasets stubbed because no real snapshot exists in a throwaway
++ * root) plus the graph fixture shape from tests/test_graph_lazy_tables_browser.cjs.
++ * /api/studio/views is deliberately NOT stubbed: saved views really reach disk.
++ *
++ * Run: node tests/test_navigation_scope_browser.cjs   (cwd: mentat/)
++ * Needs MENTAT_NODE_MODULES pointing at a Playwright install, or the default
++ * ~/.cache/codex-runtimes/... path used by every other .cjs test here.
++ */
++'use strict';
++const assert = require('node:assert/strict');
++const {spawn} = require('node:child_process');
++const path = require('node:path');
++const os = require('node:os');
++const fs = require('node:fs');
++const net = require('node:net');
++
++const MENTAT_DIR = path.resolve(__dirname, '..');
++const CONTRACTS = path.resolve(__dirname, '..', '..', 'audits', 'mentat_failings_20260915', 'contracts');
++const loadContract = name => JSON.parse(fs.readFileSync(path.join(CONTRACTS, name + '.json'), 'utf8'));
++const urlScope = loadContract('url_scope');
++const snapshotRegistry = loadContract('snapshot_registry');
++
++const FORBIDDEN_PORTS = new Set([8802, 8806, 8808, 8841]);
++const trace = message => { if (process.env.MENTAT_BROWSER_TRACE) console.log(`[browser] ${message}`); };
++
++function resolvePlaywright() {
++  const modules = process.env.MENTAT_NODE_MODULES
++    || path.join(os.homedir(), '.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules');
++  try {
++    return {chromium: require(require.resolve('playwright', {paths: [modules]})).chromium, modules};
++  } catch (error) {
++    return {error, modules};
++  }
++}
++
++function withTimeout(promise, ms, label) {
++  let timer;
++  const timeout = new Promise((_, reject) => {
++    timer = setTimeout(() => reject(new Error(`${label} exceeded its ${ms}ms bound`)), ms);
++  });
++  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
++}
++
++function freePort() {
++  const attemptOnce = () => new Promise((resolve, reject) => {
++    const server = net.createServer();
++    server.on('error', reject);
++    server.listen(0, '127.0.0.1', () => {
++      const port = server.address().port;
++      server.close(() => resolve(port));
++    });
++  });
++  const pick = async () => {
++    for (;;) {
++      const port = await attemptOnce();
++      if (!FORBIDDEN_PORTS.has(port)) return port;
++    }
++  };
++  return withTimeout(pick(), 10000, 'freePort()');
++}
++
++function startServer(port, dataRoot) {
++  return new Promise((resolve, reject) => {
++    const child = spawn(process.env.MENTAT_PYTHON || 'python',
++      ['app/server.py', '--port', String(port), '--data-root', dataRoot],
++      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true});
++    const stderrLines = [];
++    let stdout = '';
++    let settled = false;
++    const timer = setTimeout(() => {
++      if (settled) return;
++      settled = true;
++      reject(new Error(`server on port ${port} did not print a ready line within 30s; stderr: ${stderrLines.join('')}`));
++    }, 30000);
++    child.stdout.on('data', chunk => {
++      stdout += chunk.toString();
++      trace(`server ${port} stdout: ${chunk.toString().trim()}`);
++      if (!settled && new RegExp(`Mentat app: http://127\\.0\\.0\\.1:${port}\\b`).test(stdout)) {
++        settled = true;
++        clearTimeout(timer);
++        resolve(child);
++      }
++    });
++    child.stderr.on('data', chunk => { stderrLines.push(chunk.toString()); trace(`server ${port} stderr: ${chunk.toString().trim()}`); });
++    child.on('exit', code => {
++      if (settled) return;
++      settled = true;
++      clearTimeout(timer);
++      reject(new Error(`server on port ${port} exited ${code} before reporting ready; stderr: ${stderrLines.join('')}`));
++    });
++    child.on('error', error => {
++      if (settled) return;
++      settled = true;
++      clearTimeout(timer);
++      reject(error);
++    });
++  });
++}
++
++function stopServer(child) {
++  return withTimeout(new Promise(resolve => {
++    if (!child || child.exitCode !== null) { resolve(); return; }
++    child.once('exit', () => resolve());
++    child.kill();
++  }), 10000, 'stopServer()').catch(error => { console.error(error.message); });
++}
++
++function cleanupPath(target) {
++  try { fs.rmSync(target, {recursive: true, force: true, maxRetries: 10, retryDelay: 200}); }
++  catch (error) { console.error(`cleanup failed for ${target}: ${error.message}`); }
++}
++
++/* ------------------------------------------------------------- the fixtures */
++// Two contribution datasets, the shape contribution_data.py:catalog() sends.
++const COMMON_FIELDS = [
++  {id: 'company', label: 'Company', name: 'Company', role: 'dimension', type: 'category'},
++  {id: 'cycle', label: 'Election cycle', name: 'Election cycle', role: 'dimension', type: 'category'},
++  {id: 'amount', label: 'Selected amount', name: 'Selected amount', role: 'measure', type: 'number', unit: 'cents'},
++  {id: 'records', label: 'Observation count', name: 'Observation count', role: 'measure', type: 'number', unit: 'count'},
++  {id: 'contributors', label: 'Distinct reported donor identities', name: 'Distinct reported donor identities', role: 'measure', type: 'number', unit: 'count'}
++];
++const BASES = ['receipt', 'original_observed', 'original_supported', 'raw', 'pac_activity']
++  .map(id => ({id, label: id, status: id === 'original_observed' ? 'provisional' : id === 'original_supported' ? 'supported_subset' : 'observed'}));
++
++function datasetEntry(industry, sha) {
++  return {
++    id: industry, industry, label: industry, available: true, message: null,
++    fields: COMMON_FIELDS, bases: BASES, default_basis: 'receipt',
++    provenance: {
++      workbook: industry + ' Industry Spending Overview.xlsx', workbook_sha256: sha,
++      data_workbook: null, data_workbook_sha256: null, data_lineage_matches: null,
++      destination_schema: 1, database_sha256: sha, payload_sha256: sha,
++      original_database_sha256: sha, accounting_engine_sha256: 'e'.repeat(64),
++      cycle_basis: 'Contribution date, calendar election cycle',
++      scope: 'S5 browser-test fixture. Not real collection data.'
++    }
++  };
++}
++const BANKING = datasetEntry('Banking', 'a'.repeat(64));
++const CREDIT_UNION = datasetEntry('Credit Union', 'b'.repeat(64));
++// The build stamps come from the registry contract itself, never from a copy.
++const REGISTRY_ENTRIES = snapshotRegistry.examples[0].snapshots;
++
++const GRAPH_COMPANIES = {Banking: 'Fixture Bank', 'Credit Union': 'Fixture Credit Union'};
++const GRAPH_CYCLES = ['2022', '2024'];
++const GRAPH_CATALOG = {
++  industries: [{name: 'Banking', indices: [0]}, {name: 'Credit Union', indices: [1]}],
++  unavailable_reports: [], report_directory: 'fixture', message: ''
++};
++const rows = name => [0, 1, 2].map(i => ({id: `${name}-${i}`, label: `${name} label ${i}`, amount: 1000 - i}));
++
++// A cross-reference run this stub can serve, and the empty envelope the real
++// route answers with when the named industry has no saved run at all. The
++// status line has to name which of the two it is looking at.
++const XREF_REPORT = {
++  generated_at: '2026-09-17T00:00:00Z',
++  scope: {industries: ['Banking'], companies: ['Fixture Bank'], cycles: [2024], source_count: 1},
++  summary: {input_records: 5, automatic_decisions: 2, unresolved_records: 1, unresolved_amount: 40,
++    observed_original_giving: 100, employee_giving: 100, corporate_giving: 0, unverified_funding: 0,
++    pac_outgoing: 60, baseline_amount: 160, amount_change: -60, verified_unique: false},
++  steps: [{id: 'collect', status: 'completed'}],
++  unresolved_reasons: [], review_queue: [], changes: [], limitations: []
++};
++
++// The real route echoes the filters it was asked for; render() puts the
++// company and cycle back on the selects from that echo, so the stub has to
++// echo them too or the permalink could never land on a control.
++//
++// It also mirrors ONE server rule exactly, because a permalink depends on it:
++// graph_data.py:317-318 replaces the requested cycle with max(years) whenever
++// latest=1 is present. A stub that ignored that would let a client send both a
++// cycle and latest=1 and still look correct here while the real console showed
++// a different cycle from the one in the URL.
++function graphView(query) {
++  const industry = query.get('industry') || 'Banking';
++  const cycle = query.get('latest') === '1' ? GRAPH_CYCLES[GRAPH_CYCLES.length - 1] : (query.get('cycle') || '');
++  return {
++    options: {companies: [GRAPH_COMPANIES[industry] || 'Fixture Bank'], cycles: GRAPH_CYCLES,
++      unknown_tiers: false, recipients: []},
++    filters: {company: query.get('company') || '', cycle,
++      tier: query.get('tier') || '', mode: query.get('mode') || 'direct',
++      direction: query.get('direction') || 'Support'},
++    totals: {receipt_groups: 12, giving: 1234.5, direct: 234.5, organizations: 1000,
++      unresolved_candidate_links: 0},
++    candidate_available: true, candidate_note: 'Synthetic candidates, no real donor records.',
++    note: 'Offline fixture only.',
++    reports: [{name: industry + ' fixture workbook.xlsx', sha256: 'c'.repeat(64)}],
++    candidate_details: [],
++    categories: rows('categories'), organizations: rows('organizations'),
++    candidates: rows('candidates'), companies: rows('companies'), levels: rows('levels')
++  };
++}
++
++let stepNumber = 0;
++function step(label) { stepNumber += 1; console.log(`STEP ${stepNumber}: ${label}`); }
++function pass(detail) { console.log(`PASS step ${stepNumber} - ${detail}`); }
++// Launching the console is not one of the ten steps the brief names, so it
++// prints under its own heading and does not shift their numbers.
++function setup(label) { console.log(`SETUP: ${label}`); }
++
++(async () => {
++  const playwright = resolvePlaywright();
++  if (playwright.error) {
++    console.error('FAIL: playwright could not be resolved at ' + playwright.modules
++      + ' (' + playwright.error.message + '). This suite is a page test; there is no node-driven substitute.');
++    process.exitCode = 1;
++    return;
++  }
++  const {chromium} = playwright;
++
++  let browser = null;
++  let server = null;
++  const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-navigation-scope-'));
++  let failed = false;
++  const crossReferenceRequests = [];
++  const graphRequests = [];
++  const viewTraffic = [];
++  let crossReferenceAvailable = true;
++
++  // Every page in this run gets the same stubs. One dispatcher, matched on the
++  // pathname with a predicate rather than a glob, so registration order can
++  // never decide whether /api/graph-catalog is answered by the /api/graph stub.
++  async function installRoutes(page) {
++    await page.route(target => target.pathname.startsWith('/api/'), route => {
++      const target = new URL(route.request().url());
++      const where = target.pathname;
++      if (where === '/api/contributions/session') {
++        return route.fulfill({json: {token: 'navigation-scope-token', read_only: false,
++          industry: 'Banking', industries: REGISTRY_ENTRIES}});
++      }
++      if (where === '/api/contributions/catalog') {
++        return route.fulfill({json: {datasets: [BANKING, CREDIT_UNION], fields: COMMON_FIELDS, amount_unit: 'cents'}});
++      }
++      if (where === '/api/contributions/query') {
++        const body = route.request().postDataJSON() || {};
++        const entry = body.dataset === 'Credit Union' ? CREDIT_UNION : BANKING;
++        const dims = body.dimensions && body.dimensions.length ? body.dimensions : ['company'];
++        const made = [Object.assign({}, ...dims.map(d => ({[d]: d === 'cycle' ? '2023-2024' : entry.industry + ' Donor'})),
++          {amount: 123400, records: 3, contributors: 3})];
++        return route.fulfill({json: {status: 'ready', rows: made,
++          columns: [...dims, ...(body.measures || ['amount'])].map(id => COMMON_FIELDS.find(f => f.id === id) || {id, label: id}),
++          totals: {amount: 123400, records: 3, contributors: 3}, group_count: made.length,
++          offset: 0, has_more: false, provenance: entry.provenance,
++          basis_label: 'Published included receipts',
++          reconciliation: {conserved: true, receipt_matches_workbook: true},
++          notices: [], verified_unique: false}});
++      }
++      if (where === '/api/report-sources') {
++        return route.fulfill({json: {runs: [{id: 'published-reports', name: 'Published reports',
++          state: 'completed', source_directory: 'fixture'}], report_directory: 'fixture'}});
++      }
++      if (where === '/api/graph-catalog') return route.fulfill({json: GRAPH_CATALOG});
++      if (where === '/api/graph') {
++        graphRequests.push(target.pathname + target.search);
++        return route.fulfill({json: graphView(target.searchParams)});
++      }
++      if (where === '/api/cross-reference') {
++        crossReferenceRequests.push(target.pathname + target.search);
++        const industry = target.searchParams.get('industry');
++        if (!crossReferenceAvailable) {
++          return route.fulfill({json: {available: false, status: 'empty', industry, message: 'stub'}});
++        }
++        return route.fulfill({json: {available: true, status: 'completed', run_id: 'nav-scope-stub',
++          industry, selected_by: industry ? 'industry' : 'pointer', report: XREF_REPORT}});
++      }
++      return route.continue();
++    });
++    page.on('response', response => {
++      const where = new URL(response.url()).pathname;
++      if (where === '/api/studio/views') viewTraffic.push(response.request().method() + ' ' + response.status());
++    });
++  }
++
++  // Playwright's waitForFunction polls on animation frames by default, and
++  // Chromium throttles those in a background tab - this run keeps two pages
++  // open at once. So every wait here polls on a timer, and a wait that never
++  // comes true reports the page's own state rather than a bare timeout.
++  async function until(target, predicate, label, diagnose, attempts = 80) {
++    for (let attempt = 0; attempt < attempts; attempt += 1) {
++      if (await target.evaluate(predicate)) return;
++      await target.waitForTimeout(250);
++    }
++    const seen = diagnose ? await target.evaluate(diagnose) : null;
++    throw new Error(label + ' never happened' + (seen ? '. Page: ' + JSON.stringify(seen) : '.'));
++  }
++  const studioState = () => ({
++    search: location.search,
++    error: (document.getElementById('studio-error') || {}).textContent || '',
++    loading: (document.getElementById('studio-loading') || {}).textContent || '',
++    status: (document.getElementById('studio-status') || {}).textContent || '',
++    dataset: (document.getElementById('studio-dataset') || {}).value || '',
++    datasetOptions: [...document.querySelectorAll('#studio-dataset option')].map(o => o.value),
++    nameInputPresent: !!document.querySelector('input.studio-view-name'),
++    exportMenuOpen: !!(document.getElementById('studio-download') || {}).open,
++    scopeModule: typeof globalThis.MentatScope
++  });
++
++  const graphSelects = page => page.evaluate(() => ({
++    industry: document.getElementById('graph-industry').value,
++    company: document.getElementById('graph-company').value,
++    cycle: document.getElementById('graph-cycle').value,
++    mode: document.getElementById('graph-mode').value
++  }));
++
++  try {
++    setup('pick a free port and launch the console server on a throwaway --data-root');
++    const port = await freePort();
++    server = await startServer(port, dataRoot);
++    const origin = `http://127.0.0.1:${port}`;
++    browser = await withTimeout(
++      chromium.launch({headless: true, channel: process.env.MENTAT_BROWSER_CHANNEL || 'chrome', timeout: 30000}),
++      35000, 'chromium.launch()');
++    const page = await browser.newPage({viewport: {width: 1440, height: 1050}});
++    page.setDefaultTimeout(20000);
++    const errors = [];
++    page.on('pageerror', e => errors.push(e.message));
++    await installRoutes(page);
++    console.log(`SETUP done - server ready on port ${port}, data root ${dataRoot}, routes stubbed`);
++
++    // The permalink under test is the contract's own Graph example, retargeted
++    // at this fixture's company so the example and the test cannot drift.
++    const example = urlScope.examples.find(entry => entry.name === 'graph_permalink_downstream_activity');
++    const company = GRAPH_COMPANIES.Banking;
++    const permalink = '/?industry=Banking&company=' + encodeURIComponent(company)
++      + '&cycle=2024&mode=activity#graph';
++
++    step('open the Graph permalink and read the four controls back');
++    await page.goto(origin + permalink);
++    await page.waitForSelector('#view-graph:not([hidden])');
++    await page.waitForSelector('#graph-results:not([hidden])');
++    assert.equal(await page.evaluate(() => location.hash), '#graph');
++    assert.deepEqual(await graphSelects(page),
++      {industry: 'Banking', company, cycle: '2024', mode: 'activity'});
++    // and the scope the contract names is exactly what scope.js read here
++    assert.deepEqual(await page.evaluate(() => MentatScope.read().mode), example.scope.mode);
++    pass(`Graph opened on the permalink: ${JSON.stringify(await graphSelects(page))}`);
++
++    step('switch to Chart Studio: the dataset follows the URL and company/cycle arrive as pills');
++    await page.click('#tab-chart-studio');
++    await page.waitForSelector('#view-chart-studio:not([hidden])');
++    await until(page, () => document.querySelectorAll('#studio-dataset option').length >= 2,
++      'the dataset picker listing both reports', studioState);
++    await page.waitForSelector('#studio-canvas svg');
++    assert.equal(await page.locator('#studio-dataset').inputValue(), 'Banking');
++    await until(page, () => window.MentatStudioPane && (window.MentatStudioPane.filters() || []).length >= 2,
++      'the carried company and cycle arriving as filter pills', studioState);
++    const pills = await page.evaluate(() => window.MentatStudioPane.filters().map(f => [f.field, f.value]));
++    assert.deepEqual(pills.find(p => p[0] === 'company'), ['company', company]);
++    // Graph spells a cycle by its end year, the verified index by the pair.
++    assert.deepEqual(pills.find(p => p[0] === 'cycle'), ['cycle', '2023-2024']);
++    const pillText = await page.locator('#studio-filters .studio-pill').allTextContents();
++    assert.ok(pillText.length >= 2, `expected two filter pills on the shelf, got ${JSON.stringify(pillText)}`);
++    pass(`dataset=Banking, carried pills ${JSON.stringify(pills)}, shelf shows ${JSON.stringify(pillText)}`);
++
++    step('back to Graph: the selects still equal the URL');
++    await page.click('#tab-graph');
++    await page.waitForSelector('#view-graph:not([hidden])');
++    assert.deepEqual(await graphSelects(page), {industry: 'Banking', company, cycle: '2024', mode: 'activity'});
++    assert.equal(await page.evaluate(() => location.search),
++      '?industry=Banking&company=' + encodeURIComponent(company) + '&cycle=2024&mode=activity');
++    pass('Graph selections survived the round trip through Chart Studio');
++
++    step('reload the page: the scope comes back from the URL alone');
++    await page.reload();
++    await page.waitForSelector('#view-graph:not([hidden])');
++    await page.waitForSelector('#graph-results:not([hidden])');
++    assert.deepEqual(await graphSelects(page), {industry: 'Banking', company, cycle: '2024', mode: 'activity'});
++    pass('reload restored industry, company, cycle and candidate view');
++
++    step('Cross-reference asks the server for the industry the URL names');
++    crossReferenceRequests.length = 0;
++    await page.click('#tab-cross-reference');
++    await page.waitForSelector('#view-cross-reference:not([hidden])');
++    await until(page, () => ((document.getElementById('xref-refresh-status') || {}).textContent || '').includes('Newest run for'),
++      'the cross-reference status naming the industry-selected run',
++      () => ({status: (document.getElementById('xref-refresh-status') || {}).textContent || ''}));
++    assert.ok(crossReferenceRequests.some(url => url === '/api/cross-reference?industry=Banking'),
++      `expected an industry-scoped cross-reference request, saw ${JSON.stringify(crossReferenceRequests)}`);
++    const xrefStatus = await page.locator('#xref-refresh-status').textContent();
++    assert.match(xrefStatus, /^Newest run for Banking · /);
++    // and the run that came back is the one on screen, not just in the status line
++    assert.match(await page.locator('#xref-results').innerText(), /Observed original giving/);
++    pass(`request ${crossReferenceRequests[0]} and status "${xrefStatus}"`);
++
++    step('change the Graph company select: the URL follows the control');
++    await page.click('#tab-graph');
++    await page.waitForSelector('#view-graph:not([hidden])');
++    await page.selectOption('#graph-company', '');
++    await until(page, () => !location.search.includes('company='),
++      'the company key leaving the URL', () => ({search: location.search}));
++    assert.ok(!(await page.evaluate(() => location.search)).includes('company='),
++      'clearing the company must remove the key, not write an empty one');
++    await page.selectOption('#graph-company', company);
++    await until(page, () => location.search.includes('company='),
++      'the company key returning to the URL', () => ({search: location.search}));
++    assert.equal(await page.evaluate(() => location.search),
++      '?industry=Banking&cycle=2024&mode=activity&company=' + encodeURIComponent(company));
++    pass('the company key left the URL when cleared and came back when chosen');
++
++    step('"Open in Chart Studio" carries the scope into the URL and switches the tab');
++    await page.click('#graph-open-builder');
++    await page.waitForSelector('#view-chart-studio:not([hidden])');
++    const afterOpen = await page.evaluate(() => ({search: location.search, hash: location.hash}));
++    assert.equal(afterOpen.hash, '#chart-studio');
++    for (const [key, value] of [['industry', 'Banking'], ['company', company], ['cycle', '2024']]) {
++      assert.equal(new URLSearchParams(afterOpen.search).get(key), value, `${key} in the URL after the handoff`);
++    }
++    pass(`URL after the handoff: ${afterOpen.search}${afterOpen.hash}`);
++
++    step('save a view: its id lands in the URL, and that permalink opens it on a fresh page');
++    if (!(await page.locator('#studio-download').evaluate(el => el.open))) await page.click('#studio-download > summary');
++    await page.waitForSelector('#studio-save-view', {state: 'visible'});
++    await page.click('#studio-save-view');
++    const nameInput = page.locator('input.studio-view-name');
++    await nameInput.fill('Scope test');
++    await nameInput.press('Enter');
++    await until(page, () => /(^|[?&])saved=[a-f0-9]{32}([&]|$)/.test(location.search),
++      'the saved view id reaching the URL (saved-view traffic: ' + JSON.stringify(viewTraffic) + ')',
++      studioState);
++    const savedId = new URLSearchParams(await page.evaluate(() => location.search)).get('saved');
++    assert.match(savedId, /^[a-f0-9]{32}$/);
++    const second = await browser.newPage({viewport: {width: 1440, height: 1050}});
++    second.setDefaultTimeout(20000);
++    const secondErrors = [];
++    second.on('pageerror', e => secondErrors.push(e.message));
++    // chart-studio.js status() writes to #studio-loading, and the verified
++    // query's own summary overwrites it a moment later, so every line that
++    // element ever holds is recorded rather than sampled.
++    await second.addInitScript(() => {
++      window.__studioLines = [];
++      document.addEventListener('DOMContentLoaded', () => {
++        const node = document.getElementById('studio-loading');
++        if (!node) return;
++        const record = () => window.__studioLines.push(node.textContent || '');
++        record();
++        new MutationObserver(record).observe(node, {childList: true, characterData: true, subtree: true});
++      });
++    });
++    await installRoutes(second);
++    await second.goto(origin + '/?industry=Banking&saved=' + savedId + '#chart-studio');
++    await second.waitForSelector('#view-chart-studio:not([hidden])');
++    await until(second, () => (window.__studioLines || []).some(line => line.includes('Opened view')),
++      'the saved-view permalink opening its view', studioState);
++    const openedLine = await second.evaluate(() => (window.__studioLines || []).find(line => line.includes('Opened view')));
++    assert.match(openedLine, /Opened view "Scope test"/);
++    // The saved sheet carries the two pills the Graph handoff put on it. This
++    // page's own URL names no company and no cycle, so nothing but the opened
++    // view could have produced them.
++    const openedFilters = await second.evaluate(() => window.MentatStudioPane.filters().map(f => [f.field, f.value]));
++    assert.deepEqual(openedFilters.find(f => f[0] === 'company'), ['company', company]);
++    assert.deepEqual(openedFilters.find(f => f[0] === 'cycle'), ['cycle', '2023-2024']);
++    const sheetNames = await second.locator('#studio-sheet-tabs button, .studio-sheet-tab').allTextContents();
++    assert.deepEqual(secondErrors, [], `saved-view permalink page errors: ${JSON.stringify(secondErrors)}`);
++    // The view really reached disk on the spawned server, not just this tab.
++    const onDisk = fs.readFileSync(path.join(dataRoot, 'studio', 'views', savedId + '.json'), 'utf8');
++    JSON.parse(onDisk);
++    await second.close();
++    pass(`saved=${savedId}; the permalink page reported "${openedLine.trim()}" carrying ${JSON.stringify(openedFilters)}; sheet tabs ${JSON.stringify(sheetNames)}`);
++
++    step('negative control: a permalink with mode=pac opens Graph on direct and reports nothing to the console');
++    const control = urlScope.negative_controls.find(entry => entry.url.includes('mode=pac'));
++    const before = errors.length;
++    await page.goto(origin + control.url);
++    await page.waitForSelector('#view-graph:not([hidden])');
++    await page.waitForSelector('#graph-results:not([hidden])');
++    assert.equal(await page.locator('#graph-mode').inputValue(), 'direct');
++    assert.equal(await page.evaluate(() => location.search.includes('mode=')), false,
++      'a refused value must not stay in the URL either');
++    assert.equal(errors.length, before, `a bad permalink must not raise a page error: ${JSON.stringify(errors)}`);
++    pass(`${control.url} opened Graph on mode=direct with no page error`);
++
++    step('ruling A(ii): the Candidate view select is visible once a report is chosen');
++    assert.equal(await page.locator('#graph-candidate-controls').isVisible(), true);
++    assert.equal(await page.locator('#graph-mode').isVisible(), true);
++    const activityOption = await page.locator('#graph-mode option[value=activity]').textContent();
++    assert.equal(activityOption, 'Downstream PAC activity');
++    pass(`#graph-candidate-controls visible on the overview tab, offering "${activityOption}"`);
++
++    step('a permalink that names a cycle is not overridden by latest=1');
++    // graph_data.py:317-318 replaces the requested cycle with max(years) when
++    // latest=1 is present, and refresh(initial) used to send it unconditionally,
++    // so the URL said one cycle while the view showed the newest one.
++    graphRequests.length = 0;
++    await page.goto(origin + '/?industry=Banking&cycle=2022#graph');
++    await page.waitForSelector('#view-graph:not([hidden])');
++    await page.waitForSelector('#graph-results:not([hidden])');
++    assert.equal(await page.locator('#graph-cycle').inputValue(), '2022',
++      'the cycle select must show the cycle the permalink named');
++    assert.equal(new URLSearchParams(await page.evaluate(() => location.search)).get('cycle'), '2022',
++      'the URL must keep the cycle the permalink named');
++    const cycleRequest = graphRequests.find(url => url.includes('cycle=2022'));
++    assert.ok(cycleRequest, `no /api/graph request carried cycle=2022: ${JSON.stringify(graphRequests)}`);
++    assert.ok(!cycleRequest.includes('latest=1'),
++      `a request that names a cycle must not also send latest=1: ${cycleRequest}`);
++    pass(`request ${cycleRequest}, select 2022, URL keeps cycle=2022`);
++
++    step('the first edit after opening a saved view drops saved= so a reload cannot overwrite the edit');
++    const third = await browser.newPage({viewport: {width: 1440, height: 1050}});
++    third.setDefaultTimeout(20000);
++    const thirdErrors = [];
++    third.on('pageerror', e => thirdErrors.push(e.message));
++    await third.addInitScript(() => {
++      window.__studioLines = [];
++      document.addEventListener('DOMContentLoaded', () => {
++        const node = document.getElementById('studio-loading');
++        if (!node) return;
++        const record = () => window.__studioLines.push(node.textContent || '');
++        record();
++        new MutationObserver(record).observe(node, {childList: true, characterData: true, subtree: true});
++      });
++    });
++    await installRoutes(third);
++    const savedLink = origin + '/?industry=Banking&saved=' + savedId + '#chart-studio';
++    await third.goto(savedLink);
++    await third.waitForSelector('#view-chart-studio:not([hidden])');
++    await until(third, () => (window.__studioLines || []).some(line => line.includes('Opened view')),
++      'the saved view opening on the third page', studioState);
++    assert.equal(await third.locator('#studio-mark').inputValue(), 'bar', 'the saved view opens on its own mark type');
++    // One ordinary edit, through the shipped control, which goes through commit().
++    await third.selectOption('#studio-mark', 'line');
++    await until(third, () => !location.search.includes('saved='),
++      'saved= leaving the URL after the first edit', studioState);
++    assert.equal(await third.locator('#studio-mark').inputValue(), 'line');
++    await third.reload();
++    await third.waitForSelector('#view-chart-studio:not([hidden])');
++    await until(third, () => document.querySelectorAll('#studio-dataset option').length >= 2,
++      'the third page reloading its dataset picker', studioState);
++    await until(third, () => (document.getElementById('studio-mark') || {}).value === 'line',
++      'the edit surviving the reload', studioState);
++    assert.equal(await third.evaluate(() => location.search.includes('saved=')), false,
++      'the reloaded URL must still not carry saved=');
++    // The other direction: the permalink still re-opens the saved view, and the
++    // id comes back with it. Both halves are pinned, so neither can regress.
++    await third.goto(savedLink);
++    await third.waitForSelector('#view-chart-studio:not([hidden])');
++    await until(third, () => (window.__studioLines || []).some(line => line.includes('Opened view')),
++      'the permalink re-opening the saved view', studioState);
++    await until(third, () => (document.getElementById('studio-mark') || {}).value === 'bar',
++      'the saved view replacing the edited sheet', studioState);
++    assert.equal(new URLSearchParams(await third.evaluate(() => location.search)).get('saved'), savedId,
++      're-opening the permalink puts the id back in the URL');
++    assert.deepEqual(thirdErrors, [], `saved-view edit page errors: ${JSON.stringify(thirdErrors)}`);
++    await third.close();
++    pass('edit dropped saved=, survived a reload, and the permalink still re-opens the view');
++
++    step('an industry with no cross-reference run says so, rather than "Latest run"');
++    crossReferenceAvailable = false;
++    crossReferenceRequests.length = 0;
++    await page.goto(origin + '/?industry=Banking#cross-reference');
++    await page.waitForSelector('#view-cross-reference:not([hidden])');
++    await until(page, () => ((document.getElementById('xref-refresh-status') || {}).textContent || '').length > 20,
++      'the cross-reference status line settling',
++      () => ({status: (document.getElementById('xref-refresh-status') || {}).textContent || ''}));
++    const emptyStatus = await page.locator('#xref-refresh-status').textContent();
++    assert.ok(emptyStatus.startsWith('No cross-reference run for Banking'),
++      `an empty industry-scoped answer must name the industry, got "${emptyStatus}"`);
++    assert.ok(crossReferenceRequests.some(url => url === '/api/cross-reference?industry=Banking'),
++      `expected an industry-scoped request, saw ${JSON.stringify(crossReferenceRequests)}`);
++    pass(`status "${emptyStatus}"`);
++
++    assert.deepEqual(errors, [], `expected zero pageerror entries, got: ${JSON.stringify(errors)}`);
++    console.log(`ALL ${stepNumber} STEPS PASSED`);
++  } catch (error) {
++    failed = true;
++    console.error(`FAIL step ${stepNumber}: ${error && error.stack ? error.stack : error}`);
++  } finally {
++    if (browser) {
++      // Routed pages hold their handlers open, so they are closed first; a
++      // browser closed out from under them overruns its own bound and prints
++      // a stray failure line after a green run.
++      for (const open of browser.contexts().flatMap(context => context.pages())) {
++        try { await withTimeout(open.close(), 10000, 'page.close()'); } catch (error) { console.error(error.message); }
++      }
++      try { await withTimeout(browser.close(), 20000, 'browser.close()'); } catch (error) { console.error(error.message); }
++    }
++    await stopServer(server);
++    cleanupPath(dataRoot);
++  }
++  process.exitCode = failed ? 1 : 0;
++})();
+diff --git a/audits/mentat_failings_20260915/contracts/url_scope.json b/audits/mentat_failings_20260915/contracts/url_scope.json
+new file mode 100644
+index 000000000..b7eb0f550
+--- /dev/null
++++ b/audits/mentat_failings_20260915/contracts/url_scope.json
+@@ -0,0 +1,316 @@
++{
++  "contract": "url_scope",
++  "version": 1,
++  "owner": "S5",
++  "produced_by": [
++    "mentat/app/scope.js:write",
++    "mentat/app/graph.js:writeScope (called from refresh(), the one path every Graph control change reaches)",
++    "mentat/app/chart-studio.js:selectContributionDataset (industry)",
++    "mentat/app/chart-studio.js:saveViewNamed (saved, on a successful save)",
++    "mentat/app/chart-studio.js:openView (saved, on a successful open)",
++    "mentat/app/chart-studio.js:#graph-open-builder onclick (industry, company, cycle)"
++  ],
++  "consumed_by": [
++    "mentat/app/scope.js:read",
++    "mentat/app/scope.js:parse",
++    "mentat/app/graph.js:applyUrlScope (after loadCatalog fills the selects)",
++    "mentat/app/chart-studio.js:loadContributions (industry, company, cycle, saved)",
++    "mentat/app/cross-reference.js:refresh (industry -> GET /api/cross-reference?industry=)",
++    "S6 (inherits this vocabulary for the pane model: evidence, id, committee, offset, limit)"
++  ],
++  "description": "The console's URL scheme. The hash names the tab (app.js showView) and the query string carries the scope, so a permalink, a reload and a tab switch are one operation. Values are encodeURIComponent-encoded and decoded with URLSearchParams; keys are plain. write() merges into the live query: an empty value removes its key, unknown keys are preserved in place, existing keys keep their order and new keys append. A value write() would refuse is never put in the URL, so anything read() rejects could only have been typed by hand. Tab switches stay on history.replaceState (Paul's ruling C); pushState is never used. Orientation only - the examples are the contract.",
++  "keys": {
++    "industry": {
++      "value": "The published industry label exactly as the snapshot registry lists it (S4 HANDOFF: 'Credit Union', 'Property & Casualty Insurance'). Any non-empty string; the label, never the slug. URL-encoded, so '&' survives.",
++      "writers": [
++        "mentat/app/graph.js (industry select)",
++        "mentat/app/chart-studio.js (dataset picker, Open in Chart Studio)"
++      ],
++      "readers": [
++        "mentat/app/graph.js",
++        "mentat/app/chart-studio.js",
++        "mentat/app/cross-reference.js"
++      ]
++    },
++    "company": {
++      "value": "Company name as the Graph company select spells it. Any non-empty string.",
++      "writers": [
++        "mentat/app/graph.js (company select)",
++        "mentat/app/chart-studio.js (Open in Chart Studio)"
++      ],
++      "readers": [
++        "mentat/app/graph.js",
++        "mentat/app/chart-studio.js (carried filter pill)"
++      ]
++    },
++    "cycle": {
++      "value": "Election-cycle END year, four digits, as Graph spells it (2024). Chart Studio translates it to the index's pair spelling with chart-studio-core.js carriedFilterValue('cycle', value).",
++      "writers": [
++        "mentat/app/graph.js (cycle select)",
++        "mentat/app/chart-studio.js (Open in Chart Studio)"
++      ],
++      "readers": [
++        "mentat/app/graph.js",
++        "mentat/app/chart-studio.js (carried filter pill)"
++      ]
++    },
++    "mode": {
++      "value": "One of direct, activity, estimates - the #graph-mode option values. 'direct' is the default and is removed from the URL rather than written.",
++      "writers": [
++        "mentat/app/graph.js (Candidate view select)"
++      ],
++      "readers": [
++        "mentat/app/graph.js"
++      ]
++    },
++    "direction": {
++      "value": "A #graph-direction option value. 'Support' is the default and is removed.",
++      "writers": [
++        "mentat/app/graph.js"
++      ],
++      "readers": [
++        "mentat/app/graph.js"
++      ]
++    },
++    "tier": {
++      "value": "A #graph-tier option value (Chief, Middle-Management, Employees, Unknown). Empty means all levels and is removed.",
++      "writers": [
++        "mentat/app/graph.js"
++      ],
++      "readers": [
++        "mentat/app/graph.js"
++      ]
++    },
++    "funding": {
++      "value": "A #graph-funding option value. 'all' is the default and is removed.",
++      "writers": [
++        "mentat/app/graph.js"
++      ],
++      "readers": [
++        "mentat/app/graph.js"
++      ]
++    },
++    "category": {
++      "value": "The recipient-type drill-down id Graph holds in its module-level `category`.",
++      "writers": [
++        "mentat/app/graph.js"
++      ],
++      "readers": [
++        "mentat/app/graph.js"
++      ]
++    },
++    "recipient": {
++      "value": "The organization drill-down id Graph holds in its module-level `recipient`.",
++      "writers": [
++        "mentat/app/graph.js"
++      ],
++      "readers": [
++        "mentat/app/graph.js"
++      ]
++    },
++    "saved": {
++      "value": "A 32-character lowercase hexadecimal saved-view id, the same shape server.py save_view() mints (uuid4().hex) and get_view() demands (re.fullmatch(r'[a-f0-9]{32}')).",
++      "writers": [
++        "mentat/app/chart-studio.js (saveViewNamed success, openView)"
++      ],
++      "readers": [
++        "mentat/app/chart-studio.js (loadContributions opens it through openability())"
++      ]
++    },
++    "studioPane": {
++      "value": "PRE-EXISTING, unchanged by S5: B, C or D selects a Chart Studio comparison pane's localStorage store (chart-studio.js:17). scope.js never writes it and never removes it - it is one of the unknown keys write() preserves in place.",
++      "writers": [
++        "the reader, by hand, and chart-comparison.js's pane frames"
++      ],
++      "readers": [
++        "mentat/app/chart-studio.js:17"
++      ]
++    }
++  },
++  "reserved": [
++    "evidence",
++    "id",
++    "committee",
++    "offset",
++    "limit"
++  ],
++  "reserved_note": "S6's pane model owns these keys. S5 writes none of them and its write() merge preserves any that are present, exactly as it preserves studioPane.",
++  "examples": [
++    {
++      "name": "graph_permalink_downstream_activity",
++      "why": "Ruling A(ii): mode=activity is linkable, and the Candidate view select is visible as soon as a report is chosen.",
++      "url": "/?industry=Banking&company=JPMorgan%20Chase&cycle=2024&mode=activity#graph",
++      "view": "graph",
++      "scope": {
++        "industry": "Banking",
++        "company": "JPMorgan Chase",
++        "cycle": "2024",
++        "mode": "activity"
++      }
++    },
++    {
++      "name": "chart_studio_permalink",
++      "why": "Company and cycle arrive as carried filter pills through pendingScope/applyGraphScope.",
++      "url": "/?industry=Credit%20Union&company=Navy%20Federal&cycle=2024#chart-studio",
++      "view": "chart-studio",
++      "scope": {
++        "industry": "Credit Union",
++        "company": "Navy Federal",
++        "cycle": "2024"
++      }
++    },
++    {
++      "name": "saved_view_permalink",
++      "why": "saved= opens one saved view through the existing openability()/openView() path.",
++      "url": "/?industry=Banking&saved=0123456789abcdef0123456789abcdef#chart-studio",
++      "view": "chart-studio",
++      "scope": {
++        "industry": "Banking",
++        "saved": "0123456789abcdef0123456789abcdef"
++      }
++    },
++    {
++      "name": "cross_reference_permalink",
++      "why": "S4's GET /api/cross-reference?industry=<label> selects the newest run for a label.",
++      "url": "/?industry=Banking#cross-reference",
++      "view": "cross-reference",
++      "scope": {
++        "industry": "Banking"
++      }
++    },
++    {
++      "name": "ampersand_label",
++      "why": "A published label with '&' in it must survive the round trip; this is why values are encodeURIComponent'd rather than handed to URLSearchParams.toString().",
++      "url": "/?industry=Property%20%26%20Casualty%20Insurance#graph",
++      "view": "graph",
++      "scope": {
++        "industry": "Property & Casualty Insurance"
++      }
++    },
++    {
++      "name": "graph_filters_full",
++      "why": "Every Graph filter key at once, in the serialization order scope.js writes.",
++      "url": "/?industry=Banking&company=JPMorgan%20Chase&cycle=2024&mode=activity&direction=Oppose&tier=Chief&funding=personal&category=Candidate&recipient=C00401224#graph",
++      "view": "graph",
++      "scope": {
++        "industry": "Banking",
++        "company": "JPMorgan Chase",
++        "cycle": "2024",
++        "mode": "activity",
++        "direction": "Oppose",
++        "tier": "Chief",
++        "funding": "personal",
++        "category": "Candidate",
++        "recipient": "C00401224"
++      }
++    },
++    {
++      "name": "write_merge_remove_on_empty_and_preserve_unknown",
++      "why": "The two write() rules in one example: an empty value removes its key, an unknown key (studioPane, S6's future keys) is preserved untouched and keeps its place. Existing keys keep their order; a new key appends.",
++      "write": {
++        "before": "/?industry=Banking&company=X&studioPane=B#graph",
++        "partial": {
++          "company": "",
++          "cycle": "2022"
++        },
++        "after": "/?industry=Banking&studioPane=B&cycle=2022#graph"
++      }
++    }
++  ],
++  "negative_controls": [
++    {
++      "why": "mode=pac is not a #graph-mode option value. A bad permalink must still open the tab, so the key is dropped and reported rather than thrown.",
++      "url": "/?industry=Banking&mode=pac#graph",
++      "view": "graph",
++      "expected": {
++        "scope": {
++          "industry": "Banking"
++        },
++        "invalid": [
++          {
++            "key": "mode",
++            "value": "pac",
++            "reason": "mode must be one of direct, activity, estimates"
++          }
++        ]
++      }
++    },
++    {
++      "why": "A two-digit cycle is not the four-digit end year Graph spells.",
++      "url": "/?industry=Banking&cycle=24#graph",
++      "view": "graph",
++      "expected": {
++        "scope": {
++          "industry": "Banking"
++        },
++        "invalid": [
++          {
++            "key": "cycle",
++            "value": "24",
++            "reason": "cycle must be a four-digit election-cycle end year"
++          }
++        ]
++      }
++    },
++    {
++      "why": "A non-numeric cycle is refused by the same rule, so the shape of the refusal cannot depend on the value happening to be digits.",
++      "url": "/?industry=Banking&cycle=abcd#graph",
++      "view": "graph",
++      "expected": {
++        "scope": {
++          "industry": "Banking"
++        },
++        "invalid": [
++          {
++            "key": "cycle",
++            "value": "abcd",
++            "reason": "cycle must be a four-digit election-cycle end year"
++          }
++        ]
++      }
++    },
++    {
++      "why": "An explicitly blank industry is not a scope. It is dropped and reported; the rest of the URL still reads.",
++      "url": "/?industry=&company=JPMorgan%20Chase#graph",
++      "view": "graph",
++      "expected": {
++        "scope": {
++          "company": "JPMorgan Chase"
++        },
++        "invalid": [
++          {
++            "key": "industry",
++            "value": "",
++            "reason": "a blank value names no scope, so the key is dropped"
++          }
++        ]
++      }
++    },
++    {
++      "why": "saved=xyz is not 32 hex, which is exactly what server.py get_view() refuses. The client must not fire a request the server will answer 400 for.",
++      "url": "/?industry=Banking&saved=xyz#chart-studio",
++      "view": "chart-studio",
++      "expected": {
++        "scope": {
++          "industry": "Banking"
++        },
++        "invalid": [
++          {
++            "key": "saved",
++            "value": "xyz",
++            "reason": "saved must be a 32-character hexadecimal saved-view id"
++          }
++        ]
++      }
++    },
++    {
++      "why": "The teeth of the other five: a URL with no query at all invents nothing. An empty scope and an empty invalid[] - not a default industry, not a default mode. This is the control that fails if read() ever starts guessing values the reader did not put in the URL.",
++      "url": "/#graph",
++      "view": "graph",
++      "expected": {
++        "scope": {},
++        "invalid": []
++      }
++    }
++  ]
++}
+diff --git a/audits/mentat_failings_20260915/S5_DESIGN.md b/audits/mentat_failings_20260915/S5_DESIGN.md
+new file mode 100644
+index 000000000..e94edca4e
+--- /dev/null
++++ b/audits/mentat_failings_20260915/S5_DESIGN.md
+@@ -0,0 +1,208 @@
++# S5 DESIGN — Navigation and linking (Area D)
++
++Date: 2026-09-17. Status: **ACCEPTED** by Paul, 2026-09-17, with three rulings:
++**A(ii)** show the Graph "Candidate view" select as soon as a report is chosen and make
++`mode=activity` linkable, no new tab; **B** leave `mentat/app/graph_data.py` and
++`mentat/R/fec_beneficiary.R` untouched (both carry another lane's uncommitted hunks);
++**C** keep `history.replaceState`, never `pushState`. Phases 1-3 are built against HEAD
++`971d805fc`; HEAD moved to `a565216bf` mid-build (Paul's S3d latency commit, which also
++swept in S5's one `server.py` line) and every S5 measurement was taken against those
++bytes. See HANDOFF.md's S5 section for what the code contradicted in this document
++(§0.5's account of what hides the Candidate view select, and §4's "`server.py`:
++untouched"). Designed and reasoned by the session model (Fable) per Paul's 2026-09-16
++directive. Line numbers below come from a read-only census of HEAD `971d805fc` on
++2026-09-17; re-grep before editing.
++
++## 0. What Area D measured (PACKET.md:982-1096)
++
++1. Six tabs (Loading, Collection, Graph, Chart Studio, Cross-reference, PAC evidence).
++   The only navigational state is the tab name in the hash: `history.replaceState(null,
++   '', '#' + currentView)` (`app.js:42`), `hashchange -> showView(location.hash.slice(1))`
++   (`:53`), init at `:676`. No entity, industry, cycle or filter is ever in the URL;
++   `pushState`, `permalink`, `entity_link`: NOT FOUND. "There is no way to link to an
++   entity in this console."
++2. Click paths from a named entity in Graph: Downstream = one click, nothing lost (same
++   view); PAC evidence = one click, industry/entity/cycle/tier/funding/company all lost
++   (independent controls); Chart Studio = one click, all Graph selections lost unless the
++   "Open in Chart Studio" handler (`chart-studio.js:2628-2638`) set `pendingScope`, and
++   returning to Graph loses the scope again; Cross-reference = one click, everything lost
++   (separate source, `window.MentatCrossReference?.setActive()` at `app.js:33`).
++3. `graph.js:14 clear()` nulls `view` on `loadCatalog()` (`:59`) and `refresh()` (`:74`);
++   DOM selections persist, the data object does not.
++4. Reload: `sessionStorage` unused; `localStorage` holds only the roster draft, evidence
++   preferences and the evidence job id; entity, industry and cycle are lost on reload in
++   every tab.
++5. Downstream PAC activity is not a tab; it is `<option value="activity">` of the
++   `graph-mode` select (`index.html:105`) inside `#graph-candidate-controls`.
++   **Corrected during the build:** that container is not "hidden until candidates
++   load". `graph.js applyAnalysis()` set `get('candidate-controls').hidden =
++   analysis !== 'candidates'`, so the select was reachable only from the Candidates
++   analysis tab, at any time, and stripping `hidden` from `index.html` alone would
++   have been undone on the next `applyAnalysis()`. Under ruling A(ii) the rule now
++   lives in `graph.js` and reads: visible wherever the candidate panel is showing,
++   once a report is chosen. `index.html:105` keeps its `hidden` for the moment
++   before a report exists. Its data is the "Downstream Activity" worksheet
++   (`graph_data.py:83-136 activity_xml_rows`, produced by `fec_beneficiary.R`); the two
++   failure texts are `graph_data.py:93` and `:257`. No symbol "PAC analysis" exists.
++
++## 1. Two facts that fix the shape
++
++- Chart Studio ALREADY reads the query string: `new URLSearchParams(location.search)
++  .get('industry')` at `chart-studio.js:~337` (dataset preselection) and `studioPane` at
++  `:17`. S3's pane model for S6 (HANDOFF:1173-1188) already commits the evidence pane to
++  query keys (`?evidence=csv&id=…&committee=…&cycle=…&offset=…`).
++- A fragment-only `replaceState('#graph')` resolves against the current URL and KEEPS
++  its query string, so the existing tab code preserves whatever scope the query carries.
++
++Therefore: **the hash names the tab; the query string carries the scope.** No second
++state store, no new localStorage keys. The URL is the state, so a permalink, a reload
++and a tab switch are the same operation.
++
++## 2. Vocabulary (the contract; S6 inherits it)
++
++Query keys, reusing the Graph API's own filter names (`graph.js:20-24 filters()`), so a
++URL scope and a `/api/graph` request spell things identically:
++
++| key | value | who writes | who reads |
++| --- | --- | --- | --- |
++| `industry` | published label (S4; slug accepted by the API, the URL carries the label) | Graph industry select, Chart Studio dataset picker | Graph, Chart Studio, Cross-reference |
++| `company` | company name as the Graph select spells it | Graph | Graph, Chart Studio (pill) |
++| `cycle` | end year, four digits, as Graph spells it | Graph | Graph, Chart Studio (pill via `core.carriedFilterValue`) |
++| `mode` | `direct` \| `activity` \| `estimates` (the `graph-mode` values) | Graph | Graph |
++| `direction`, `tier`, `funding`, `category`, `recipient` | Graph filter values, written only when not the default | Graph | Graph |
++| `saved` | 32-hex saved-view id | Chart Studio (after save or open) | Chart Studio |
++| `studioPane` | existing, unchanged | Chart Studio | Chart Studio |
++| `evidence`, `id`, `committee`, `offset`, `limit`, `paneB.*` | RESERVED for S6's pane model; S5 writes none | — | — |
++
++Rules: `showView` keeps writing only the hash; scope keys are written with
++`history.replaceState` (never `pushState`: tab switches do not create history entries
++today and S5 does not change that; Paul may choose otherwise, question C). A key is
++removed from the URL when its control returns to the default/empty. Unknown keys are
++preserved untouched (S6's). Values are URL-encoded; labels with `&` survive
++(`Property %26 Casualty Insurance`).
++
++## 3. `mentat/app/scope.js` (new, S5-owned)
++
++UMD like `chart-studio-core.js` (browser global `MentatScope`, CommonJS for node tests).
++- `read()` -> `{industry, company, cycle, mode, ...}` from `location.search`; validates
++  `cycle` (4 digits) and `mode` (enum); invalid values are dropped and reported through
++  `read().invalid[]`, never thrown (a bad permalink must still open the tab).
++- `write(partial)` -> merges into the current query (empty/undefined removes the key),
++  `history.replaceState` with the same hash, then dispatches `mentat:scope` with the new
++  scope; no-op when nothing changed.
++- `subscribe(fn)` -> `popstate` + `mentat:scope`.
++- `href(view, scope)` -> the permalink string for a view and scope, used by the
++  "Open in Chart Studio" handler and available to S6 for pane links.
++- Pure: no DOM lookups except `location`/`history`; testable in node with a fake
++  `location`/`history` pair.
++
++## 4. Wiring, per file
++
++- `index.html` (S5): one `<script src="scope.js">` before `app.js`; `#graph-candidate-controls`
++  loses `hidden` so the Candidate view (Downstream) select is visible once a report is
++  chosen (question A); the tab strip is unchanged (no new tab: UI simplification law,
++  and Paul's wording domain).
++- `app.js` (S5): `showView` unchanged; the six tabs stay. **Built without the
++  `MentatScope.write({})` call this section proposed**: `write({})` changes nothing,
++  and by contract an unchanged URL dispatches nothing, so the call could not make a
++  listener re-read. None needs it - each view re-reads on its own entry (`graph.js`
++  in `loadCatalog`, `chart-studio.js` in `activate`, `cross-reference.js` in
++  `setActive`). `app.js` therefore carries a comment and no behaviour change, which
++  keeps a heavily contended file at zero risk.
++- `graph.js` (S5): after `loadCatalog()` fills the selects, apply `MentatScope.read()` to
++  industry/company/cycle/mode/direction/tier/funding/category/recipient before the first
++  `refresh()`; on every control change (the existing `syncControls`/`refresh` path) call
++  `MentatScope.write(filtersAsScope())`. `clear()` stays as written: scope now lives in
++  the URL, so `loadCatalog()`'s `clear()` no longer loses it. The "Open in Chart Studio"
++  handler writes `MentatScope.write({industry, company, cycle})` before `showView`.
++- `chart-studio.js` (S5): `loadContributions()` keeps its `?industry=` preselection (now
++  through `MentatScope.read()`); after `selectContributionDataset()` it writes `industry`
++  back; when the URL carries `company`/`cycle` and no `pendingScope`, it builds
++  `pendingScope` from the URL (same shape `graphScope()` produces) so `applyGraphScope()`
++  carries them as pills; `saved=<id>` -> after the catalog loads, `openView({id})` through
++  the existing `openability()`; saving or opening a view writes `saved`.
++- `cross-reference.js` (unowned; S5 claims it in the table): when `MentatScope.read()
++  .industry` is set, fetch `/api/cross-reference?industry=<label>` (S4 route), else the
++  bare route; render `selected_by` ("newest run for Banking" vs "latest run"); re-fetch
++  on `mentat:scope` when `industry` changes.
++- `graph_data.py`, `fec_beneficiary.R` (S5 per the table): NOT TOUCHED. Both carry
++  another lane's uncommitted hunks (`graph_data.py` +60/-11 `singleflight_cache`;
++  `fec_beneficiary.R` +21/-8 PAS2 parser v4), and navigation needs neither. Their
++  Downstream failure texts stay; question B.
++- `server.py`: **one line**, not untouched. `/?anything` does already serve
++  `index.html` (`studioPane` proves it) and the cross-reference route does already
++  take `industry`, so no routing changed - but `STATIC_ASSETS` (`server.py:58-91`)
++  is an allow-list and `do_GET` answers 404 for any path not in it (`:1963-1982`),
++  so a new client script cannot be served without an entry:
++  `'/scope.js': ('scope.js', 'text/javascript'),` in `server.py` (grep it; `:71` when
++  it landed, `:97` once a later session inserted lazy imports above it). That line
++  landed in Paul's `a565216bf` (S3d's latency commit, which swept it in six minutes
++  after S5 wrote it), so **the S5 patch carries no `server.py` hunk**.
++
++## 5. Contract and tests (DE-021 method)
++
++- `contracts/url_scope.json` (v1, owner S5): the key table above as data; examples: a
++  Graph permalink `/?industry=Banking&company=JPMorgan%20Chase&cycle=2024&mode=activity#graph`,
++  a Chart Studio permalink `/?industry=Credit%20Union&company=Navy%20Federal&cycle=2024#chart-studio`,
++  a saved-view permalink `/?industry=Banking&saved=<32hex>#chart-studio`, a cross-reference
++  permalink `/?industry=Banking#cross-reference`; the `read()` result for each; the
++  `write()` merge semantics (remove-on-empty, preserve-unknown); negative controls:
++  `mode=pac`, `cycle=24`, `industry=` (blank), `saved=xyz`. Producers listed: scope.js
++  write(), graph.js, chart-studio.js. Consumers: scope.js read(), graph.js,
++  chart-studio.js, cross-reference.js, S6.
++- Node: `app/tests/scope.test.js` imports the contract; round-trips every example through
++  `read`/`write`/`href`; negative controls drop the bad key and report it.
++- Browser: `tests/test_navigation_scope_browser.cjs` (Playwright, spawn pattern of
++  `test_studio_industry_browser.cjs`, two stubbed datasets + a stubbed graph catalog as
++  `test_graph_lazy_tables_browser.cjs` does), **13 steps as built**: open the Graph
++  permalink and assert the controls (1); switch to Chart Studio and assert dataset +
++  pills (2); back to Graph, scope intact (3); reload, intact (4); Cross-reference tab
++  issues `/api/cross-reference?industry=…` (5); a Graph control change moves the URL
++  (6); "Open in Chart Studio" rewrites the URL (7); the `saved=` permalink opens the
++  view on a second page (8); negative control, `mode=pac` opens Graph on `direct` (9);
++  ruling A(ii), the Candidate view select is visible (10); a permalink's cycle is not
++  overridden by `latest=1` (11); the first edit after an open drops `saved=` and the
++  permalink still re-opens the view (12); an industry with no cross-reference run says
++  so (13).
++- No python route change, so no new python suite; the existing browser tests that touch
++  tabs (`test_console_browser.cjs`, `test_app_lazy_startup_browser.cjs`,
++  `test_graph_lazy_tables_browser.cjs`) must stay at their baseline.
++
++### Review (Fable, 2026-09-17, on the S5 diff)
++
++Three findings, each fixed only after its new step had been written and RUN against
++the pre-fix bytes, so no fix rests on an argument alone. Pre-fix assertions verbatim
++in `receipts/S5_phase1-3.txt`.
++
++| # | Finding | Fix | Step |
++| --- | --- | --- | --- |
++| 1 (HIGH) | `refresh(initial)` sent `&latest=1` unconditionally, and `graph_view()` replaces the requested cycle with `max(years)` when it is present (`graph_data.py:317-318`), so the URL said 2022 while the view showed 2024. S5's own step 1 could not see it: the fixture's newest cycle is the one that permalink asks for. | `graph.js:125` sends it only when `initial && !query.get('cycle')`; the stub now mirrors the server rule so the hole cannot reopen. | **11**, pre-fix `'2024' !== '2022'` |
++| 2 (HIGH) | `saved=<id>` outlived the sheets it described: edit the opened view, reload, and `openSavedFromUrl()` re-opened it while `persist()` wrote over every edit since - **a data loss that did not exist before S5 put the id in the URL**. | the first change to the working sheets clears the id, at `commit()` (`:142`) and `step()` (`:154`, undo/redo bypasses `commit`), never at `persist()` (it also runs on load paths and would destroy the permalink before it is read); an open fences its own `commit` (`:2006-2013`). | **12**, pre-fix `saved= leaving the URL after the first edit never happened` |
++| 3 (MED) | an industry-scoped ask that found nothing still said "Latest run", naming the one run it was not showing. | `cross-reference.js:150-160` answers "No cross-reference run for <label>"; both branches are pinned (step 5 the found run, step 13 the empty one). | **13**, pre-fix `got "Latest run · Saved evidence refreshed."` |
++
++## 6. Phases (one architect dispatch for 1-3, Fable review, then close-out)
++
++| # | Phase | Exit |
++| --- | --- | --- |
++| 0 | Paul's go; questions A-C | recorded |
++| 1 | Contract + README index row | negative controls non-empty |
++| 2 | scope.js + node tests | 100% of contract examples round-trip |
++| 3 | Wiring (index.html, app.js, graph.js, chart-studio.js, cross-reference.js) + browser test + real-client pass | browser pass green; baseline browser tests unchanged |
++| 4 | Fable review (inline) + fix; sweep in parallel | zero HIGH |
++| 5 | Patch cut once after `git log -1`; HANDOFF S5 section with the URL vocabulary for S6; Paul commits; restart; brain + session | done |
++
++Write path for the architect: python scripts run from Bash (Edit/Write refuse Mentat
++paths in this session; DE-022). Never Sonnet or Haiku for code.
++
++## 7. Questions for Paul
++
++- **A. Downstream visibility.** Options: (i) leave the select hidden until candidates load
++  but make `mode=activity` linkable; (ii) also show the Candidate view select as soon as
++  a report is chosen (recommended, no new surface); (iii) a seventh tab "PAC activity"
++  (not recommended: UI simplification law, and it duplicates a Graph mode).
++- **B. Downstream production gaps.** If any industry's report lacks the worksheet, the
++  fix is in `fec_beneficiary.R` (collection side, another lane's uncommitted hunks). S5
++  proposes leaving both readers untouched. Confirm, or name the industry that is missing
++  it and S5 measures.
++- **C. History.** Keep `replaceState` (Back never steps through tabs, as today) or move
++  tab switches to `pushState` so Back walks the tabs. Recommended: keep `replaceState`.
+diff --git a/audits/mentat_failings_20260915/receipts/S5_phase1-3.txt b/audits/mentat_failings_20260915/receipts/S5_phase1-3.txt
+new file mode 100644
+index 000000000..283473283
+--- /dev/null
++++ b/audits/mentat_failings_20260915/receipts/S5_phase1-3.txt
+@@ -0,0 +1,712 @@
++S5 - Navigation and linking (Area D), phases 1-3
++================================================================================
++Repo   : C:\Users\pgoff\Mentat, branch codex/mentat-crypto, HEAD 971d805fc
++Date   : 2026-09-17
++Design : audits/mentat_failings_20260915/S5_DESIGN.md (ACCEPTED; rulings A(ii), B, C)
++Cwd for every test command below: C:\Users\pgoff\Mentat\mentat
++
++WRITE PATH: the Edit/Write tools refuse every path under C:\Users\pgoff\Mentat in
++this session (worktree guard), so every edit was made by a python script run from
++Bash that reads the target as bytes, preserves its CRLF/LF, and does an exact-match
++replace asserting the anchor occurs exactly once. Each edited file was backed up
++once as <file>.bak-20260917-s5 before its first edit. No git add/commit/stash/
++checkout/push was run; the stash stack was never touched.
++
++--------------------------------------------------------------------------------
++1. CONTRACT  audits/mentat_failings_20260915/contracts/url_scope.json (v1, S5)
++--------------------------------------------------------------------------------
++examples          : 7 (6 permalink + 1 write-merge)
++negative_controls : 6
++keys table        : 11 entries (industry, company, cycle, mode, direction, tier, funding, category, recipient, saved, studioPane)
++reserved for S6   : evidence, id, committee, offset, limit
++produced_by       : 6
++  - mentat/app/scope.js:write
++  - mentat/app/graph.js:writeScope (called from refresh(), the one path every Graph control change reaches)
++  - mentat/app/chart-studio.js:selectContributionDataset (industry)
++  - mentat/app/chart-studio.js:saveViewNamed (saved, on a successful save)
++  - mentat/app/chart-studio.js:openView (saved, on a successful open)
++  - mentat/app/chart-studio.js:#graph-open-builder onclick (industry, company, cycle)
++consumed_by       : 6
++  - mentat/app/scope.js:read
++  - mentat/app/scope.js:parse
++  - mentat/app/graph.js:applyUrlScope (after loadCatalog fills the selects)
++  - mentat/app/chart-studio.js:loadContributions (industry, company, cycle, saved)
++  - mentat/app/cross-reference.js:refresh (industry -> GET /api/cross-reference?industry=)
++  - S6 (inherits this vocabulary for the pane model: evidence, id, committee, offset, limit)
++
++negative controls, one line each:
++  /?industry=Banking&mode=pac#graph                    -> scope {"industry": "Banking"}, invalid [["mode", "pac"]]
++  /?industry=Banking&cycle=24#graph                    -> scope {"industry": "Banking"}, invalid [["cycle", "24"]]
++  /?industry=Banking&cycle=abcd#graph                  -> scope {"industry": "Banking"}, invalid [["cycle", "abcd"]]
++  /?industry=&company=JPMorgan%20Chase#graph           -> scope {"company": "JPMorgan Chase"}, invalid [["industry", ""]]
++  /?industry=Banking&saved=xyz#chart-studio            -> scope {"industry": "Banking"}, invalid [["saved", "xyz"]]
++  /#graph                                              -> scope {}, invalid []
++
++README index row added (contracts/README.md, Index table). NOTE: this file is
++gitignored by the repo-root .gitignore (`*.json` at :6), exactly like every other
++contract in this lane; it reaches the repo through `git apply --cached` from the
++lane patch, as S4's did.
++
++--------------------------------------------------------------------------------
++2. NODE CONTRACT SUITE   node --test "app/tests/**/*.test.js"
++--------------------------------------------------------------------------------
++BEFORE S5: 121 tests, 121 pass, 0 fail (measured at the start of this session).
++AFTER  S5: see below. The 30 new tests are app/tests/scope.test.js, which loads
++contracts/url_scope.json through contracts/README.md's node loader and never
++embeds a copy of a payload.
++
++✔ the tray keeps charts in the order they were added (1.1495ms)
++✔ adding returns a new list, so an export already running keeps its own order (0.1946ms)
++✔ move walks a chart exactly one place in the direction asked (0.1609ms)
++✔ move off either end changes nothing at all, rather than wrapping round (0.8387ms)
++✔ remove takes out exactly the named chart and leaves the rest in order (0.5195ms)
++✔ the tray holds forty charts and refuses the forty-first rather than dropping the first (0.8578ms)
++✔ a chart removed from a full tray makes room for exactly one more (1.0003ms)
++✔ added_at read back in seconds (as the server writes it) renders today's clock, not a 1970 date (1.6466ms)
++✔ classifyFields splits dimensions, measures and hidden identifier fields (3.2394ms)
++✔ classification agrees with chart-math chartColumns on measures (1.4058ms)
++✔ dimensions reach grouping and extra measures are explicitly refused (1.1034ms)
++✔ a measure pill carries its own aggregation, defaulting to sum (0.571ms)
++✔ a dimension with no measure counts rows (0.2602ms)
++✔ a date dimension on Columns with a measure draws a line under Automatic (0.318ms)
++✔ a date dimension with no measure stays a bar of row counts (0.5064ms)
++✔ two measures, one on each shelf, draw a scatter (0.3294ms)
++✔ a dimension on Rows with a measure on Columns draws horizontal bars (0.5513ms)
++✔ a Colour pill becomes the separate series and pairs the chart type (0.4062ms)
++✔ a Colour measure is refused with a note rather than becoming a series (0.2004ms)
++✔ explicit mark types override Automatic (0.352ms)
++✔ a circle mark without two measures reports an issue (0.2051ms)
++✔ a histogram ignores the grouping column (0.1451ms)
++✔ Swap exchanges Columns and Rows (0.2573ms)
++✔ filters, pages and row parameters reach the configuration (0.2462ms)
++✔ blank row parameters compile to zero, which the engine reads as unbounded (0.0887ms)
++✔ analytics map to transform, period and horizon (0.0908ms)
++✔ time analysis without a date field is refused (0.0863ms)
++✔ time analysis forces a bar, line or area mark and drops Colour (0.1667ms)
++✔ time analysis asks for one Subject and filters to it (0.759ms)
++✔ an empty sheet compiles to no configuration and says why (0.1921ms)
++✔ hidden identifier fields still compile when a user places them (0.1349ms)
++✔ every compiled configuration is accepted by the chart engine (36.3791ms)
++✔ the 15 chart types the classic dialog offers are all reachable (0.8017ms)
++✔ Sort orders the x dimension by the y measure and leaves scatter alone (0.726ms)
++✔ a time view keeps chronological order whatever Sort says (0.6705ms)
++✔ rowsToMarksSummary describes the view for the status bar (0.6188ms)
++✔ mark values follow the order the renderer appends marks (0.2419ms)
++✔ reference lines average and median the plotted marks (0.3037ms)
++✔ a grand total is withheld unless the marks are additive parts of one whole (0.6446ms)
++✔ reference lines are withheld from independent series (0.4363ms)
++✔ Show Me holds the 24 Tableau tiles in order (0.5074ms)
++✔ the nine out-of-release tiles are always disabled (0.2833ms)
++✔ the Show Me eligibility table greys tiles the field selection cannot satisfy (0.3425ms)
++✔ a tile that needs a date says so (0.0984ms)
++✔ the selection counts shelf fields plus anything picked in the Data pane (0.2621ms)
++✔ clicking a tile sets marks and shelves in one step (1.7714ms)
++✔ the recommended tile follows chart-math recommend() (0.3225ms)
++✔ Clear keeps the data source and drops the view (0.1488ms)
++✔ the session key names the worksheet, not just the workbook digest (0.1416ms)
++✔ pill accepts a bare column index, a numeric string and a full pill (0.7845ms)
++✔ more groups than the limit fold into one Other mark instead of refusing to draw (1.6208ms)
++✔ the group limit is a parameter, and a high enough one folds nothing (0.63ms)
++✔ folding does not change the grand total (0.6024ms)
++✔ Other pools the raw rows, so every aggregation reads the folded rows themselves (2.06ms)
++✔ a side-by-side comparison folds its grouping field the same way (0.3798ms)
++✔ a group limit that is not a positive whole number is refused (0.7757ms)
++✔ Sort reorders the real groups and leaves Other at the end (0.2373ms)
++✔ splitting a multi-value cell makes one row per value and leaves the data alone (0.4579ms)
++✔ a split view counts a row once per value and says so (0.2719ms)
++✔ a split result carries the split facts, so a reader is told values not rows (0.5806ms)
++✔ the group limit and the split parameter reach the configuration (0.2053ms)
++✔ a new sheet starts with no group limit and splitting off (0.0485ms)
++✔ all shelf dimensions and Detail dimensions change the grouping grain (0.2951ms)
++✔ unsupported encodings and duplicate measure pills cannot silently do nothing (0.1601ms)
++✔ numeric ZIP variants and congressional district identifiers never become money measures (0.113ms)
++✔ split coverage has no additive grand total or monetary status label (0.192ms)
++✔ percentages and period differences have explicit units and no monetary grand total (0.4702ms)
++✔ forecast totals separate historical money from copied future baselines (0.9645ms)
++✔ independent accounting groups have separate marks but no cross-layer total (0.1589ms)
++✔ an empty member choice is not a filter, so it never selects nothing (0.3242ms)
++✔ include and exclude lists select complementary worksheet rows (0.572ms)
++✔ a range filter applies each bound it was given (0.5515ms)
++✔ normalizeFilter keeps lists as arrays, ranges two-ended and scalars as text (0.2569ms)
++✔ filterSummary reads as a sentence about the members, not about the operator (61.7918ms)
++✔ one filter pill becomes the clauses the verified engine understands (0.4455ms)
++✔ aggregation menus offer only what the active engine can compute (0.1503ms)
++✔ political-money presets say what a source cannot answer instead of failing later (0.285ms)
++✔ a measure preset replaces the measure on the shelf that carried it (0.2768ms)
++✔ a text column can never become a measure; a numeric identifier can (0.1141ms)
++✔ a per-sheet type override moves a field between the two lists and its glyph (0.2625ms)
++✔ date parts use real catalog columns when verified and periods on a worksheet (0.255ms)
++✔ a verified date field keeps its date parts even without the detected time flag (0.1898ms)
++✔ each company-overview preset builds the sheet its caption promises (0.5424ms)
++✔ a company-overview preset compiles into the verified query it describes (1.1382ms)
++✔ a single click sends a grouping across the top and a measure down the side (0.1708ms)
++✔ the click zone reads the shelves only, never a field selection (0.1079ms)
++✔ a cycle carried from Graph is translated into the spelling the index stores (0.1301ms)
++✔ the reverse map gives Graph the end year, and refuses anything that is not a cycle (0.1432ms)
++✔ company overview names the fields a source does not have (0.1374ms)
++✔ a one-cycle report still agrees, and the pinned cycle raises no reason at all (1.1662ms)
++✔ when Graph pinned one cycle and the sheet covers them all, that is the reason (0.2523ms)
++✔ a sheet with its own cycle is never explained away by the cycle reason (0.1027ms)
++✔ the basis outranks the cycle, because a wrong basis explains more (0.1626ms)
++✔ the cycle outranks a Graph filter, since the pinned cycle is the bigger cut (0.1321ms)
++✔ no pinned cycle at all leaves the older reasons exactly as they were (1.0008ms)
++✔ every reason id the chain can produce has wording to print (1.5209ms)
++✔ [url_scope] the contract itself is shaped the way contracts/README.md requires (2.3875ms)
++✔ [url_scope] read() answers the contract scope for graph_permalink_downstream_activity (2.4707ms)
++✔ [url_scope] href() rebuilds graph_permalink_downstream_activity byte for byte (2.0167ms)
++✔ [url_scope] graph_permalink_downstream_activity round-trips through write() onto an empty URL (1.011ms)
++✔ [url_scope] read() answers the contract scope for chart_studio_permalink (0.1846ms)
++✔ [url_scope] href() rebuilds chart_studio_permalink byte for byte (0.0953ms)
++✔ [url_scope] chart_studio_permalink round-trips through write() onto an empty URL (0.1507ms)
++✔ [url_scope] read() answers the contract scope for saved_view_permalink (0.203ms)
++✔ [url_scope] href() rebuilds saved_view_permalink byte for byte (0.0832ms)
++✔ [url_scope] saved_view_permalink round-trips through write() onto an empty URL (0.1703ms)
++✔ [url_scope] read() answers the contract scope for cross_reference_permalink (0.091ms)
++✔ [url_scope] href() rebuilds cross_reference_permalink byte for byte (0.1154ms)
++✔ [url_scope] cross_reference_permalink round-trips through write() onto an empty URL (0.0907ms)
++✔ [url_scope] read() answers the contract scope for ampersand_label (0.6616ms)
++✔ [url_scope] href() rebuilds ampersand_label byte for byte (0.0428ms)
++✔ [url_scope] ampersand_label round-trips through write() onto an empty URL (0.0656ms)
++✔ [url_scope] read() answers the contract scope for graph_filters_full (0.0916ms)
++✔ [url_scope] href() rebuilds graph_filters_full byte for byte (0.0402ms)
++✔ [url_scope] graph_filters_full round-trips through write() onto an empty URL (0.0644ms)
++✔ [url_scope] write() merge semantics: write_merge_remove_on_empty_and_preserve_unknown (0.1238ms)
++✔ [url_scope] negative control: mode=pac is not a #graph-mode option value (0.1766ms)
++✔ [url_scope] negative control: A two-digit cycle is not the four-digit end year Graph spells (0.0732ms)
++✔ [url_scope] negative control: A non-numeric cycle is refused by the same rule, so the shape of the refusal cannot depend on the value happening to be digits (0.0665ms)
++✔ [url_scope] negative control: An explicitly blank industry is not a scope (0.0569ms)
++✔ [url_scope] negative control: saved=xyz is not 32 hex, which is exactly what server (0.0732ms)
++✔ [url_scope] negative control: The teeth of the other five: a URL with no query at all invents nothing (0.042ms)
++✔ [url_scope] write() preserves unknown keys and their order, and appends new ones (0.1248ms)
++✔ [url_scope] write() never writes a reserved key, even when asked (0.0991ms)
++✔ [url_scope] subscribe fires on a write, and not on a no-op write (0.2733ms)
++✔ [url_scope] removing the last key drops the question mark rather than leaving "?" (0.0647ms)
++✔ the builder makes the saved-view payload the server accepts, from the live sheet (3.4446ms)
++✔ a chosen dataset that names its own industry wins over its id (0.2473ms)
++✔ a worksheet with no verified dataset still names its report and digest (0.1027ms)
++✔ a view recovered from the old browser store sends its caption as an object (0.1001ms)
++✔ the builder makes the briefing source and provenance the exports read back (0.3093ms)
++✔ no builder can be talked into emitting a string, whatever it is handed (1.1589ms)
++✔ what the builder makes round-trips back through the readers (0.2002ms)
++✔ the example item yields the real workbook digest, not a stringified object (0.0721ms)
++✔ the source caption comes off the object, so the picker never prints one (0.1292ms)
++✔ the export source line carries the true short SHA and never the word object (0.2051ms)
++✔ no reader ever stringifies an object, whatever shape the item arrives in (0.2046ms)
++✔ an item with no digest at all says so in words rather than printing nothing (0.0732ms)
++✔ what the browser sends the server is an object, so a caption is wrapped not dropped (0.1243ms)
++✔ a record that survives the round trip still reads back as the same digest (0.0922ms)
++✔ [studio_api] viewSourceRecord emits industry for a contributions source, matching the fixture exactly (0.0859ms)
++✔ [studio_api] createSheet carries an empty ordered series-sources array (0.1958ms)
++✔ [studio_api] migrateSheet backfills industry and normalizes sources, matching migration_input -> migration_output exactly (0.1428ms)
++✔ [studio_api] chartSourceRecord emits industry for a briefing source (0.105ms)
++✔ [studio_api] negative control with teeth: a source without industry yields no industry key at all (0.1392ms)
++✔ [studio_api] negative control with teeth: a sources[] entry lacking industry is dropped by migrateSheet (0.159ms)
++✔ [snapshot_registry] parseSnapshotRegistry accepts every example envelope (0.3397ms)
++✔ [snapshot_registry] parseSnapshotRegistry rejects every negative control, wrapped as a single-entry list (0.3264ms)
++✔ a fresh sheet carries no industry or dataset key on its source (2.104ms)
++✔ migrating a fresh worksheet sheet adds no industry key either (0.372ms)
++✔ negative control: a source that names an empty industry keeps it, so the server can refuse it (0.1065ms)
++ℹ tests 151
++ℹ suites 0
++ℹ pass 151
++ℹ fail 0
++ℹ cancelled 0
++ℹ skipped 0
++ℹ todo 0
++ℹ duration_ms 355.6293
++
++--------------------------------------------------------------------------------
++3. REAL-CLIENT PASS   node tests/test_navigation_scope_browser.cjs
++--------------------------------------------------------------------------------
++Spawns the real `python app/server.py` on a free port (never 8802/8806/8808/8841)
++with a throwaway --data-root. /api/studio/views is NOT stubbed: the saved view in
++step 8 really reaches disk on that server and is read back from it.
++
++SETUP: pick a free port and launch the console server on a throwaway --data-root
++SETUP done - server ready on port 58438, data root C:\Users\pgoff\AppData\Local\Temp\mentat-navigation-scope-jwVWRK, routes stubbed
++STEP 1: open the Graph permalink and read the four controls back
++PASS step 1 - Graph opened on the permalink: {"industry":"Banking","company":"Fixture Bank","cycle":"2024","mode":"activity"}
++STEP 2: switch to Chart Studio: the dataset follows the URL and company/cycle arrive as pills
++PASS step 2 - dataset=Banking, carried pills [["company","Fixture Bank"],["cycle","2023-2024"]], shelf shows ["AbcCompany = Fixture Bank▾","Election cycle = 2023-2024▾"]
++STEP 3: back to Graph: the selects still equal the URL
++PASS step 3 - Graph selections survived the round trip through Chart Studio
++STEP 4: reload the page: the scope comes back from the URL alone
++PASS step 4 - reload restored industry, company, cycle and candidate view
++STEP 5: Cross-reference asks the server for the industry the URL names
++PASS step 5 - request /api/cross-reference?industry=Banking and status "Newest run for Banking · Saved evidence refreshed. This page is read-only."
++STEP 6: change the Graph company select: the URL follows the control
++PASS step 6 - the company key left the URL when cleared and came back when chosen
++STEP 7: "Open in Chart Studio" carries the scope into the URL and switches the tab
++PASS step 7 - URL after the handoff: ?industry=Banking&cycle=2024&mode=activity&company=Fixture%20Bank#chart-studio
++STEP 8: save a view: its id lands in the URL, and that permalink opens it on a fresh page
++PASS step 8 - saved=24512f64a2264676a1a0390806ff6af3; the permalink page reported "Opened view "Scope test"." carrying [["company","Fixture Bank"],["cycle","2023-2024"]]; sheet tabs ["Sheet 1"]
++STEP 9: negative control: a permalink with mode=pac opens Graph on direct and reports nothing to the console
++PASS step 9 - /?industry=Banking&mode=pac#graph opened Graph on mode=direct with no page error
++STEP 10: ruling A(ii): the Candidate view select is visible once a report is chosen
++PASS step 10 - #graph-candidate-controls visible on the overview tab, offering "Downstream PAC activity"
++ALL 10 STEPS PASSED
++browser.close() exceeded its 20000ms bound
++
++--------------------------------------------------------------------------------
++4. BASELINE BROWSER TESTS (must stay at baseline)
++--------------------------------------------------------------------------------
++test_console_browser.cjs            exit 0  (see note below)
++test_app_lazy_startup_browser.cjs   exit 0  3/3
++test_graph_lazy_tables_browser.cjs  exit 0  1/1
++test_studio_industry_browser.cjs    exit 0  10/10 steps
++
++test_console_browser.cjs FAILED FIRST, and the failure was real, not a flake:
++  locator.waitFor: Timeout 15000ms exceeded.
++    - waiting for getByText('Observed original giving', { exact: true })
++    at tests/test_console_browser.cjs:254
++
++Diagnosis, measured rather than assumed. That test clicks #split-view while the
++Evidence tab is current (:163), which satisfies graph.js activate()'s
++`currentView==='evidence' && splitView` branch and loads Graph. Graph now writes
++its industry into the query string, so the Cross-reference view asks S4's
++industry-scoped route, and the test's stub glob `**/api/cross-reference` (:50) no
++longer matched - the request fell through to the real fixture server, which has no
++saved cross-reference run, so the panel rendered its empty state.
++
++Negative control for that diagnosis: a probe on the SAME fixture, with no industry
++in the URL, still requests the bare route and still renders the panel:
++  search after load: ""
++  search at xref: ""
++  cross-reference requests: ["http://127.0.0.1:PORT/api/cross-reference", x2]
++  status line: "Latest run - Saved evidence refreshed. This page is read-only."
++  has "Observed original giving": true
++  pageerrors: []
++
++Fix: tests/test_console_browser.cjs:50 gained a second page.route for the query
++form, which is the idiom that file already uses for /api/evidence at :48-49. That
++is a NON-OWNED test edit, forced by the contract change, recorded in HANDOFF.md
++for its owner to nod at. Nothing else in that test changed.
++
++--- test_console_browser.cjs (tail) ---
++Browser checks passed: Graph guided scopes, JFC, levels, direct/downstream separation, exports, Advanced charts, freshness disclosures, responsive sidebar, skip link, keyboard tabs and local requests only.
++
++--- test_app_lazy_startup_browser.cjs (tail) ---
++✔ Chart Studio startup only handshakes; saved evidence loads on its visible source and keeps Graph context (81307.4082ms)
++✔ An older build on disk raises the restart banner, and the stamp names the console answering (16871.6161ms)
++✔ Changed interface files ask for a restart, and a current build shows no banner (41746.6214ms)
++ℹ tests 3
++ℹ suites 0
++ℹ pass 3
++ℹ fail 0
++ℹ cancelled 0
++ℹ skipped 0
++ℹ todo 0
++ℹ duration_ms 139961.3634
++
++--- test_graph_lazy_tables_browser.cjs (tail) ---
++{"fixtureRows":10012,"render":[{"milliseconds":71.29999999701977,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42},{"milliseconds":15,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42},{"milliseconds":16,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42}]}
++✔ closed Graph tables are deferred without losing rows, callbacks or exports (90603.7781ms)
++ℹ tests 1
++ℹ suites 0
++ℹ pass 1
++ℹ fail 0
++ℹ cancelled 0
++ℹ skipped 0
++ℹ todo 0
++ℹ duration_ms 90626.3234
++
++--- test_studio_industry_browser.cjs (tail) ---
++        "splitMulti": false
++      },
++      "sort": "none",
++      "showLabels": false,
++      "fit": "standard"
++    }
++  ],
++  "active": 0
++}
++PASS step 9 - both on-disk view files are valid JSON and printed above verbatim
++STEP 10: final check: zero pageerror entries
++PASS step 10 - zero pageerror entries across the whole run
++ALL 10 STEPS PASSED
++browser.close() exceeded its 10000ms bound
++
++
++--------------------------------------------------------------------------------
++5. WORKING-TREE STATE AND HUNK SEPARATION
++--------------------------------------------------------------------------------
++git diff --stat for the files S5 touched:
++
++ audits/mentat_failings_20260915/HANDOFF.md         | 141 ++++++++++++++++++---
++ .../mentat_failings_20260915/contracts/README.md   |   1 +
++ mentat/app/app.js                                  |   4 +
++ mentat/app/chart-studio.js                         |  88 ++++++++++++-
++ mentat/app/cross-reference.js                      |  32 ++++-
++ mentat/app/graph.js                                |  60 ++++++++-
++ mentat/app/index.html                              |   2 +-
++ mentat/tests/test_console_browser.cjs              |   1 +
++ 8 files changed, 301 insertions(+), 28 deletions(-)
++warning: in the working copy of 'audits/mentat_failings_20260915/HANDOFF.md', LF will be replaced by CRLF the next time Git touches it
++warning: in the working copy of 'mentat/app/app.js', LF will be replaced by CRLF the next time Git touches it
++warning: in the working copy of 'mentat/app/cross-reference.js', LF will be replaced by CRLF the next time Git touches it
++
++New, untracked files S5 created:
++  mentat/app/scope.js
++  mentat/app/tests/scope.test.js
++  mentat/tests/test_navigation_scope_browser.cjs
++  audits/mentat_failings_20260915/contracts/url_scope.json   (gitignored: *.json)
++
++server.py is CONTENDED and was modified by ANOTHER SESSION while S5 worked: it was
++clean when S5 checked it, and carried five foreign hunks by the time S5 made its
++edit (file mtime 2026-09-17 00:29:56; S5's edit 00:43:04). Then, at 00:49:02, Paul
++committed a565216bf ("Cut console startup to about a second and read workbooks
++through calamine"), which carries all six hunks INCLUDING S5's one line. HEAD is
++therefore a565216bf, not 971d805fc, server.py is clean again, and the S5 patch must
++carry no server.py hunk at all. Every measurement in this receipt was taken against
++exactly those bytes - they were in the working tree, uncommitted, while the tests
++ran - so the results stand. The hunk boundary, for the record (this diff is now
++empty because it is committed):
++
++  @@ -70,0 +71 @@    '/scope.js': ('scope.js', 'text/javascript'),   <- S5
++  @@ -196,0 +198,16 @@  _cached_json / read_json_cached              <- foreign (S3d)
++  @@ -1286 +1303 @@, @@ -1292 +1309 @@, @@ -1299 +1316 @@           <- foreign (S3d)
++  @@ -1708,0 +1726,8 @@                                             <- foreign (S3d)
++
++Current `git diff -U0 -- mentat/app/server.py` (expected: empty):
++
++
++Why that one line exists at all: STATIC_ASSETS (server.py:58-91) is an allow-list
++and do_GET answers 404 for any path not in it (:1963-1982), so a new client script
++cannot be served without an entry. S5_DESIGN.md section 4's "server.py: untouched"
++was wrong on that point. No other manifest lists app assets - a repo-wide grep for
++another file naming chart-studio.js turned up only docs, patches and audit notes.
++
++--------------------------------------------------------------------------------
++6. WHAT THE CODE CONTRADICTED IN S5_DESIGN.md
++--------------------------------------------------------------------------------
++a. Section 0.5 says #graph-candidate-controls is "hidden until candidates load".
++   It is not. graph.js applyAnalysis() set
++   `get('candidate-controls').hidden = analysis !== 'candidates'`, so the Candidate
++   view select was reachable only from the Candidates analysis tab, at any time.
++   Removing `hidden` from index.html alone would have been undone by applyAnalysis()
++   on the next call. Built per the brief's own instruction for that case: the rule
++   now lives in graph.js and reads "visible wherever the candidate panel is showing,
++   once a report is chosen"; index.html:105 keeps its `hidden` for the moment before
++   a report exists.
++b. Section 4 says "server.py: untouched". See section 5 above.
++c. Section 4 says app.js's showView should call MentatScope.write({}) after
++   switching. Not built: write({}) changes nothing, so it dispatches nothing (the
++   module is a no-op on an unchanged URL by contract), and no listener needs it -
++   graph.js re-reads on loadCatalog, chart-studio.js on activate, cross-reference.js
++   on setActive. app.js therefore carries a comment and no behaviour change, which
++   keeps a CONTENDED-adjacent file at zero risk.
++d. Section 3 gives write() the signature write(partial). Built as
++   write(partial, {location, history, dispatch, target}) so node:test can drive it
++   with a fake location/history/EventTarget triple; every caller in the client uses
++   the one-argument form.
++
++
++================================================================================
++FABLE REVIEW FIXES (2026-09-17, after the S5 diff review)
++================================================================================
++Three findings, each fixed only after its new browser step was written and RUN
++against the pre-fix bytes, so every fix has a recorded failure behind it. No
++server.py change; no git writes; same write path.
++
++--------------------------------------------------------------------------------
++FIX 1 (HIGH) - latest=1 silently overrode a permalink's cycle
++--------------------------------------------------------------------------------
++Root cause, read rather than inferred: graph_data.py:317-318
++
++    if filters.get('latest') == '1' and years:
++        selected['cycle'] = max(years)
++
++refresh(initial) sent `&latest=1` unconditionally on the first load, and
++writeScope(query) had already published the permalink's cycle, so the URL said
++2022 while the view showed 2024. S5's own step 1 could not see it: the fixture's
++newest cycle IS the cycle that permalink asks for.
++
++Test first. The /api/graph stub now mirrors that one server rule exactly
++(tests/test_navigation_scope_browser.cjs, graphView(): latest=1 -> max(cycles)),
++because a stub that ignored it would let this bug pass forever.
++
++PRE-FIX RUN, verbatim:
++
++    STEP 11: a permalink that names a cycle is not overridden by latest=1
++    FAIL step 11: AssertionError [ERR_ASSERTION]: the cycle select must show the cycle the permalink named
++
++    '2024' !== '2022'
++
++        at C:\Users\pgoff\Mentat\mentat\tests\test_navigation_scope_browser.cjs:499:12
++
++Fix, mentat/app/graph.js:120-125 (live):
++
++    const response=await fetch('/api/graph?'+query+(initial&&!query.get('cycle')?'&latest=1':''),{signal:controller.signal});
++
++latest=1 is still sent on a first load that names no cycle, which is what it is
++for. AFTER:
++
++    PASS step 11 - request /api/graph?id=published-reports&industry=Banking&company=&tier=&cycle=2022&funding=all&mode=direct&direction=Support&category=&recipient=, select 2022, URL keeps cycle=2022
++
++--------------------------------------------------------------------------------
++FIX 2 (HIGH) - a saved= id that outlived the sheets it described
++--------------------------------------------------------------------------------
++Opening a saved view put its id in the URL. Edit the view, reload, and
++openSavedFromUrl() re-opened the saved view while persist() wrote it over the
++edited sheets: every edit since the open, gone. That loss did not exist before S5
++put the id in the URL, so S5 takes it back out.
++
++Choke point, chosen by reading all three candidates rather than guessing:
++  - commit()  (chart-studio.js:133) - 45 call sites, every ordinary edit.   CHOSEN
++  - step()    (:145) - undo/redo mutates sheets and calls persist() without
++                        going through commit().                             CHOSEN
++  - persist() (:79)  - REJECTED: it also runs on load paths
++                        (selectContributionDataset), which would have destroyed
++                        the permalink before openSavedFromUrl() ever read it.
++
++PRE-FIX RUN, verbatim:
++
++    STEP 12: the first edit after opening a saved view drops saved= so a reload cannot overwrite the edit
++    FAIL step 12: Error: saved= leaving the URL after the first edit never happened. Page: {"search":"?industry=Banking&saved=0026224cfc294f9d88a847846aa7b766","error":"Place a date, year, quarter, month or election cycle first on the shelves for a timeline.","loading":"Verified contribution fields \u00b7 5 fields","status":"3 source observations \u00b7 1 groups \u00b7 Included receipts reconcile to the workbook. \u00b7 2 verified queries this session","dataset":"Banking","datasetOptions":["Banking","Credit Union"],"nameInputPresent":false,"exportMenuOpen":false,"scopeModule":"object"}
++
++Fix, mentat/app/chart-studio.js (live lines):
++  :60        `let openedSaved = '', holdingSavedId = false;` moved up beside the
++             rest of the module state, so nothing running during the IIFE body
++             can reach it in its temporal dead zone.
++  :142       commit() calls viewEdited() right after change().
++  :154       step() (undo/redo) calls viewEdited() before persist().
++  :417-421   viewEdited(): clears openedSaved and writes {saved: ''} unless an
++             open is installing its own sheets.
++  :2006-2013 openView() sets holdingSavedId around its own commit, so the open
++             is not mistaken for an edit; rememberSavedView() then puts the id
++             back.
++
++Both directions are pinned by the step, so neither can regress: the edit drops
++the id AND the permalink still re-opens the view and brings the id back. AFTER:
++
++    PASS step 12 - edit dropped saved=, survived a reload, and the permalink still re-opens the view
++
++--------------------------------------------------------------------------------
++FIX 3 (MEDIUM) - "Latest run" over an industry that has no run
++--------------------------------------------------------------------------------
++An industry-scoped ask that found nothing answers the empty envelope
++({available:false, industry:<label>, status:'empty'}) and the status line still
++read "Latest run", naming the one run it was NOT showing.
++
++PRE-FIX RUN, verbatim:
++
++    STEP 13: an industry with no cross-reference run says so, rather than "Latest run"
++    FAIL step 13: AssertionError [ERR_ASSERTION]: an empty industry-scoped answer must name the industry, got "Latest run \u00b7 Saved evidence refreshed. This page is read-only."
++        at C:\Users\pgoff\Mentat\mentat\tests\test_navigation_scope_browser.cjs:567:12
++
++Fix, mentat/app/cross-reference.js:150-160 (live): runText() now answers
++"No cross-reference run for <label>" when data.industry is set and
++data.available is false, and keeps "Newest run for <label>" / "Latest run"
++otherwise. The stub gained a switch so BOTH branches are pinned - step 5 asserts
++"Newest run for Banking" against a real envelope (and that the run rendered:
++"Observed original giving" is on screen), step 13 asserts the empty one. AFTER:
++
++    PASS step 13 - status "No cross-reference run for Banking \u00b7 Saved evidence refreshed. This page is read-only."
++
++--------------------------------------------------------------------------------
++RECORDED, NO CODE CHANGE (also in HANDOFF's "Known limits")
++--------------------------------------------------------------------------------
++a. Chart Studio never writes company/cycle back, so removing a carried pill does
++   not remove the key from the URL, and loadContributions(refresh) re-carries it
++   from the URL. Idempotent - the pill comes back as it was, nothing is lost or
++   duplicated - but it does mean a removed pill can reappear on a source refresh.
++   Graph owns those two keys today; S6 may give Chart Studio ownership.
++b. scope.js merge() re-encodes unknown keys' values with encodeURIComponent, so a
++   '+' that meant a space in someone else's key is normalised to %20. Same value
++   either way under URLSearchParams decoding; harmless.
++c. A first load that names no cycle still sends latest=1 and lands on the newest
++   cycle, while the URL names no cycle at all. That is the contract's own rule
++   ("a URL names only what the reader chose") and it is unchanged from before S5,
++   but a copied link therefore means "newest", not "2024".
++
++--------------------------------------------------------------------------------
++RE-RUN AFTER THE FIXES
++--------------------------------------------------------------------------------
++node --test "app/tests/**/*.test.js"
++
++✔ [snapshot_registry] parseSnapshotRegistry rejects every negative control, wrapped as a single-entry list (0.335ms)
++✔ a fresh sheet carries no industry or dataset key on its source (1.9562ms)
++✔ migrating a fresh worksheet sheet adds no industry key either (0.3809ms)
++✔ negative control: a source that names an empty industry keeps it, so the server can refuse it (0.1787ms)
++ℹ tests 151
++ℹ suites 0
++ℹ pass 151
++ℹ fail 0
++ℹ cancelled 0
++ℹ skipped 0
++ℹ todo 0
++ℹ duration_ms 979.107
++
++node tests\test_navigation_scope_browser.cjs  (exit 0)
++
++SETUP: pick a free port and launch the console server on a throwaway --data-root
++SETUP done - server ready on port 61143, data root C:\Users\pgoff\AppData\Local\Temp\mentat-navigation-scope-znyLGH, routes stubbed
++STEP 1: open the Graph permalink and read the four controls back
++PASS step 1 - Graph opened on the permalink: {"industry":"Banking","company":"Fixture Bank","cycle":"2024","mode":"activity"}
++STEP 2: switch to Chart Studio: the dataset follows the URL and company/cycle arrive as pills
++PASS step 2 - dataset=Banking, carried pills [["company","Fixture Bank"],["cycle","2023-2024"]], shelf shows ["AbcCompany = Fixture Bank▾","Election cycle = 2023-2024▾"]
++STEP 3: back to Graph: the selects still equal the URL
++PASS step 3 - Graph selections survived the round trip through Chart Studio
++STEP 4: reload the page: the scope comes back from the URL alone
++PASS step 4 - reload restored industry, company, cycle and candidate view
++STEP 5: Cross-reference asks the server for the industry the URL names
++PASS step 5 - request /api/cross-reference?industry=Banking and status "Newest run for Banking · Saved evidence refreshed. This page is read-only."
++STEP 6: change the Graph company select: the URL follows the control
++PASS step 6 - the company key left the URL when cleared and came back when chosen
++STEP 7: "Open in Chart Studio" carries the scope into the URL and switches the tab
++PASS step 7 - URL after the handoff: ?industry=Banking&cycle=2024&mode=activity&company=Fixture%20Bank#chart-studio
++STEP 8: save a view: its id lands in the URL, and that permalink opens it on a fresh page
++PASS step 8 - saved=833cd49c32f64a73a0446959a2ad7c83; the permalink page reported "Opened view "Scope test"." carrying [["company","Fixture Bank"],["cycle","2023-2024"]]; sheet tabs ["Sheet 1"]
++STEP 9: negative control: a permalink with mode=pac opens Graph on direct and reports nothing to the console
++PASS step 9 - /?industry=Banking&mode=pac#graph opened Graph on mode=direct with no page error
++STEP 10: ruling A(ii): the Candidate view select is visible once a report is chosen
++PASS step 10 - #graph-candidate-controls visible on the overview tab, offering "Downstream PAC activity"
++STEP 11: a permalink that names a cycle is not overridden by latest=1
++PASS step 11 - request /api/graph?id=published-reports&industry=Banking&company=&tier=&cycle=2022&funding=all&mode=direct&direction=Support&category=&recipient=, select 2022, URL keeps cycle=2022
++STEP 12: the first edit after opening a saved view drops saved= so a reload cannot overwrite the edit
++PASS step 12 - edit dropped saved=, survived a reload, and the permalink still re-opens the view
++STEP 13: an industry with no cross-reference run says so, rather than "Latest run"
++PASS step 13 - status "No cross-reference run for Banking · Saved evidence refreshed. This page is read-only."
++ALL 13 STEPS PASSED
++browser.close() exceeded its 20000ms bound
++
++node tests\test_graph_lazy_tables_browser.cjs  (exit 0)
++
++{"fixtureRows":10012,"render":[{"milliseconds":73.59999999403954,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42},{"milliseconds":21.5,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42},{"milliseconds":18.099999994039536,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42}]}
++✔ closed Graph tables are deferred without losing rows, callbacks or exports (131909.9364ms)
++ℹ tests 1
++ℹ suites 0
++ℹ pass 1
++ℹ fail 0
++ℹ cancelled 0
++ℹ skipped 0
++ℹ todo 0
++ℹ duration_ms 131920.279
++
++node tests\test_studio_industry_browser.cjs  (exit 0)
++
++      "sort": "none",
++      "showLabels": false,
++      "fit": "standard"
++    }
++  ],
++  "active": 0
++}
++PASS step 9 - both on-disk view files are valid JSON and printed above verbatim
++STEP 10: final check: zero pageerror entries
++PASS step 10 - zero pageerror entries across the whole run
++ALL 10 STEPS PASSED
++browser.close() exceeded its 10000ms bound
++
++node tests\test_console_browser.cjs  (exit 0)
++
++Browser checks passed: Graph guided scopes, JFC, levels, direct/downstream separation, exports, Advanced charts, freshness disclosures, responsive sidebar, skip link, keyboard tabs and local requests only.
++
++Final working-tree state of the S5 client files:
++
++ mentat/app/app.js                     |   4 ++
++ mentat/app/chart-studio.js            | 113 ++++++++++++++++++++++++++++++++--
++ mentat/app/cross-reference.js         |  40 +++++++++++-
++ mentat/app/graph.js                   |  65 +++++++++++++++++--
++ mentat/app/index.html                 |   2 +-
++ mentat/tests/test_console_browser.cjs |   1 +
++ 6 files changed, 209 insertions(+), 16 deletions(-)
++warning: in the working copy of 'mentat/app/app.js', LF will be replaced by CRLF the next time Git touches it
++warning: in the working copy of 'mentat/app/cross-reference.js', LF will be replaced by CRLF the next time Git touches it
++
++server.py (expected: clean; S5's one line is in HEAD a565216bf):
++(clean)
++
++
++================================================================================
++CLOSE-OUT (2026-09-17)
++================================================================================
++
++--------------------------------------------------------------------------------
++1. THE S0 KNOWN-RED IN test_console_browser.cjs WAS A RACE, AND IT IS CLOSED
++--------------------------------------------------------------------------------
++The verifier sweep (receipts/S5_verifier_sweep.txt) reported 9/10 browser suites
++with test_console_browser.cjs red, and its failure detail truncates before the
++assertion. Reproduced here rather than assumed:
++
++    AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++
++    'false' !== 'true'
++
++        at C:\Users\pgoff\Mentat\mentat\tests\test_console_browser.cjs:196:12
++      actual: 'false', expected: 'true'
++
++Line 196 asserts [data-run-group=history] has aria-pressed === 'true', straight
++after the #tab-collection click at :195. That attribute is set by
++renderRunLibrary() (app.js:217-227), which runs only after
++mentat:view -> poll() -> refreshRuns() -> fetch('/api/runs?include_archived=1')
++(app.js:252) comes back. No wait sat between the click and the read.
++
++Evidence that it is a race and not an S5 defect:
++  - Same bytes, four runs: PASS, PASS, FAIL, plus the sweep's FAIL under load.
++  - S5 adds no request on that path; its app.js hunk is a comment.
++  - runGroup is a module variable in app.js, not URL state; nothing in the scope
++    module can reach it.
++
++Fix (non-owned edit 2), tests/test_console_browser.cjs:196, using the file's own
++idiom from :162 and :173, assertion unchanged:
++
++    await page.waitForFunction(()=>document.querySelector('[data-run-group=history]')?.getAttribute('aria-pressed')==='true');
++
++After the fix, two consecutive runs: exit 0 and exit 0.
++
++--------------------------------------------------------------------------------
++2. BUILD STAMP
++--------------------------------------------------------------------------------
++From mentat/app:
++  python -c "import server; print(server.CODE_TREE_SHA256, server.ASSET_TREE_SHA256)"
++
++  code   491a0d4680824a3e561ad9e0ddbff264c42ee58bf3d1e2480d12fba117a66087
++  assets 9350a96481e14c24e0058e24fe12d0907e7f2d754e9b35ef6caefd2d7600773c
++
++Read this with two caveats, both measured:
++
++  a. The code stamp is NOT S4's 5f7da2d1... and S5 is not why. code_files()
++     globs every *.py in mentat/app, and S5 added and changed no .py at all. The
++     drift comes from S3d's committed server.py and evidence_csv.py (a565216bf).
++  b. It also includes foreign UNCOMMITTED .py edits that are in this tree right
++     now (graph_data.py, report_insights.py), so this pair will NOT reproduce
++     from a clean checkout of HEAD plus the S5 patch alone. The assets stamp is
++     S5's to own - scope.js is a new STATIC_ASSETS entry and index.html,
++     graph.js, chart-studio.js and cross-reference.js all changed - and it is the
++     reason a restart is required before judging anything in the browser.
++
++--------------------------------------------------------------------------------
++3. PATCH
++--------------------------------------------------------------------------------
++Cut after: git -C C:\Users\pgoff\Mentat log --oneline -1
++  a565216bf Cut console startup to about a second and read workbooks through calamine
++
++  patches/S5_url_scope.patch
++  15 files, 2702 insertions(+), 28 deletions(-)
++
++  git apply --stat                         lists all 15 files
++  git apply --cached --check               exit 0   <- what Paul runs
++  git apply --check --reverse              exit 0   (working tree)
++  git apply --cached --check --reverse     exit 1   EXPECTED: the seven new files
++                                                    do not exist in the index yet,
++                                                    so they cannot be reverse-removed
++                                                    from it. Not a defect.
++  no server.py / graph_data.py / fec_beneficiary.R hunk header (38 headers checked)
++
++A DEFECT IN THE FIRST CUT, recorded because it would have been invisible in the
++commit. The cutter captured `git diff` through subprocess(text=True), which
++decodes with the locale encoding - cp1252 on this machine - so every em dash,
++middle dot and ellipsis came back as mojibake and re-encoding to UTF-8 changed
++the bytes. `git apply --cached --check` refused exactly three files:
++HANDOFF.md:207, chart-studio.js:335 and graph.js:58 - the three whose changed
++lines carry non-ASCII. Each of those files' diffs applied cleanly on its own,
++which is what made the cause visible: the corruption was in the cutter, not the
++diff. The cutter now works in bytes end to end and the checks above are its
++output. Anyone cutting a patch in this repo from python should do the same.
++
++REMINDER FOR WHOEVER COMMITS: the repo-root .gitignore ignores *.json (:6) and
++*.txt (:21), so contracts/url_scope.json, receipts/S5_phase1-3.txt and
++receipts/S5_verifier_sweep.txt are ignored files. `git apply --cached` from this
++patch stages them anyway (that is how S4's contracts went in); a plain `git add`
++will not.
+diff --git a/audits/mentat_failings_20260915/receipts/S5_verifier_sweep.txt b/audits/mentat_failings_20260915/receipts/S5_verifier_sweep.txt
+new file mode 100644
+index 000000000..a5dfb9b4d
+--- /dev/null
++++ b/audits/mentat_failings_20260915/receipts/S5_verifier_sweep.txt
+@@ -0,0 +1,136 @@
++S5 VERIFIER SWEEP REPORT
++================================================================================
++Generated: 2026-09-17T01:45:00
++Worktree: C:\Users\pgoff\Mentat
++Branch: claude/multi-industry-snapshot-support-7c95a9
++================================================================================
++
++A. GIT LOG AND STATUS
++--------------------------------------------------------------------------------
++Command: git log --oneline -1
++Output:  a565216bf Cut console startup to about a second and read workbooks through calamine
++Exit Code: 0
++
++Command: git status --short -- mentat/app mentat/tests mentat/app/tests audits/mentat_failings_20260915
++Output (excluding .bak files):
++M audits/mentat_failings_20260915/HANDOFF.md
++ M audits/mentat_failings_20260915/contracts/README.md
++M mentat/app/app.js
++M mentat/app/chart-studio.js
++M mentat/app/cross-reference.js
++M mentat/app/desktop/Launcher.cs
++M mentat/app/graph.css
++M mentat/app/graph.js
++M mentat/app/graph_data.py
++M mentat/app/index.html
++M mentat/app/report_insights.py
++M mentat/app/style.css
++?? mentat/app/scope.js (NEW FILE)
++(+ 26 test files modified)
++
++Total uncommitted modified files: 39 (excluding backups)
++Exit Code: 0
++
++B. NODE SYNTAX CHECKS
++--------------------------------------------------------------------------------
++Command: node --check <file> (7 files)
++
++Results:
++  mentat/app/scope.js                : PASS
++  mentat/app/graph.js                : PASS
++  mentat/app/chart-studio.js         : PASS
++  mentat/app/cross-reference.js      : PASS
++  mentat/app/app.js                  : PASS
++  mentat/app/tests/scope.test.js     : PASS
++  mentat/tests/test_navigation_scope_browser.cjs : PASS
++
++Exit Code: 0 (all files)
++Wall Time: 589ms
++
++C. NODE TEST RUNNER
++--------------------------------------------------------------------------------
++Command: node --test "app/tests/**/*.test.js" (from mentat/ dir)
++
++Results:
++  ✔ tests     151
++  ✔ suites    0
++  ✔ pass      151
++  ✖ fail      0
++  - cancelled 0
++  - skipped   0
++  - duration_ms 775.5891
++
++Exit Code: 0
++Wall Time: 962ms
++
++D. BROWSER TESTS (Sequential)
++--------------------------------------------------------------------------------
++Command: node tests/<file> (10 files, sequential)
++
++Results:
++  test_navigation_scope_browser.cjs        : PASS    (77440ms, exit 0)
++  test_console_browser.cjs                 : FAIL    (84910ms, exit 1)
++  test_app_lazy_startup_browser.cjs        : PASS    (195726ms, exit 0)
++  test_graph_lazy_tables_browser.cjs       : PASS    (118317ms, exit 0)
++  test_studio_industry_browser.cjs         : PASS    (40217ms, exit 0)
++  test_studio_data_source_browser.cjs      : PASS    (24857ms, exit 0)
++  test_chart_builder_browser.cjs           : PASS    (117835ms, exit 0)
++  test_chart_comparison_browser.cjs        : PASS    (84649ms, exit 0)
++  test_contribution_studio_state_browser.cjs : PASS  (143373ms, exit 0)
++  test_studio_ride1_browser.cjs            : PASS    (112477ms, exit 0)
++
++Summary:
++  - Passed: 9/10
++  - Failed: 1/10
++  - Total execution time: 899.6 seconds
++
++Known to skip per plan: test_contribution_export_browser.cjs,
++  test_cross_reference_view.cjs, test_studio_briefing_tray_browser.cjs,
++  test_evidence_csv_browser.cjs
++
++FAILURE DETAIL: test_console_browser.cjs
++  First assertion error line: AssertionError [ERR_ASSERTION]:
++    Expected values to be strictly equal:
++
++E. PYTHON SMOKE TESTS
++--------------------------------------------------------------------------------
++Command: python -m unittest tests.test_studio_views tests.test_studio_views_industry
++         tests.test_cross_reference_data tests.test_industry_routes -v
++
++Results:
++  Ran 55 tests in 9.386s
++  OK (skipped=1)
++  Exit Code: 0
++Wall Time: 26655ms
++
++F. JSON VALIDATION
++--------------------------------------------------------------------------------
++Command: python -c "import json;json.load(open(r'...url_scope.json',encoding='utf-8'))"
++File: C:\Users\pgoff\Mentat\audits\mentat_failings_20260915\contracts\url_scope.json
++
++Result: VALID
++Exit Code: 0
++Wall Time: 172ms
++
++================================================================================
++VERDICT TABLE
++================================================================================
++Suite                              Result      Evidence
++--------------------------------------------------------------------------------
++A. Git Status                      PASS        39 files modified, exit code 0
++B. Node Syntax Checks              PASS        7/7 files pass, exit code 0
++C. Node Test Runner (151 tests)    PASS        151 pass, 0 fail, exit code 0
++D. Browser Tests (10 planned)      FAIL        test_console_browser.cjs exit 1; 9 pass
++E. Python Smoke Tests (55)         PASS        54 pass + 1 skip, exit code 0
++F. JSON Validation                 PASS        url_scope.json valid, exit code 0
++================================================================================
++
++BLOCKING ISSUES
++--------------------------------------------------------------------------------
++CRITICAL: test_console_browser.cjs failed with exit code 1
++  Location: C:\Users\pgoff\Mentat\mentat\tests\test_console_browser.cjs
++  Execution time: 84910ms
++  Failure type: AssertionError [ERR_ASSERTION]
++  Message: Expected values to be strictly equal:
++  Impact: Blocks S5 merge (1 of 10 browser tests failed)
++

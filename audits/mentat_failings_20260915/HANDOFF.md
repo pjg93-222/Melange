@@ -207,15 +207,15 @@ it in code.
 | `mentat/tests/test_contribution_dimensions_order.py` | S4 | committed by Paul (8377b5e77) | NEW |
 | `mentat/tests/test_studio_industry_browser.cjs` | S4 | committed by Paul (8377b5e77) | NEW |
 | `mentat/tests/test_contributor_detail_header.cjs` | S4 | committed by Paul (8377b5e77) | NEW |
-| `mentat/app/index.html` | S5 | BUILT, uncommitted | tabs (unchanged), graph-mode select; one `<script src="/scope.js">` before app.js |
-| `mentat/app/app.js` | S5 | BUILT, uncommitted | hash routing, localStorage; comment only - `showView` is unchanged |
-| `mentat/app/graph.js` | S5 | BUILT, uncommitted | `clear()` untouched; reads and writes the URL scope, ruling A(ii) visibility |
-| `mentat/app/scope.js` | S5 | BUILT, uncommitted | NEW: the URL scope module (`read`/`write`/`parse`/`serialize`/`href`/`subscribe`) |
-| `mentat/app/cross-reference.js` | S5 | BUILT, uncommitted | CLAIMED 2026-09-17, previously unowned: industry-scoped fetch + `selected_by` in the status line |
-| `mentat/app/chart-studio.js` | S5 | BUILT, uncommitted | S5 hunks only: URL scope (dataset preselection, carried pills, `saved=`). S4's row above stands - S4's work is committed at `8377b5e77` and S5's hunks sit on top of it; this is a hand-off, not a second live claim |
-| `mentat/app/tests/scope.test.js` | S5 | BUILT, uncommitted | NEW: the url_scope contract from both ends |
-| `mentat/tests/test_navigation_scope_browser.cjs` | S5 | BUILT, uncommitted | NEW: real-client pass, 13 steps |
-| `audits/mentat_failings_20260915/contracts/url_scope.json` | S5 | BUILT, uncommitted | NEW: v1, the URL vocabulary S6 inherits |
+| `mentat/app/index.html` | S5 | committed by Paul (a7e09ed8c) | tabs (unchanged), graph-mode select; one `<script src="/scope.js">` before app.js |
+| `mentat/app/app.js` | S5 | committed by Paul (a7e09ed8c) | hash routing, localStorage; comment only - `showView` is unchanged |
+| `mentat/app/graph.js` | S5 | committed by Paul (a7e09ed8c) | `clear()` untouched; reads and writes the URL scope, ruling A(ii) visibility |
+| `mentat/app/scope.js` | S5 | committed by Paul (a7e09ed8c) | NEW: the URL scope module (`read`/`write`/`parse`/`serialize`/`href`/`subscribe`) |
+| `mentat/app/cross-reference.js` | S5 | committed by Paul (a7e09ed8c) | CLAIMED 2026-09-17, previously unowned: industry-scoped fetch + `selected_by` in the status line |
+| `mentat/app/chart-studio.js` | S5 | committed by Paul (a7e09ed8c) | S5 hunks only: URL scope (dataset preselection, carried pills, `saved=`). S4's row above stands - S4's work is committed at `8377b5e77` and S5's hunks sit on top of it; this is a hand-off, not a second live claim |
+| `mentat/app/tests/scope.test.js` | S5 | committed by Paul (a7e09ed8c) | NEW: the url_scope contract from both ends |
+| `mentat/tests/test_navigation_scope_browser.cjs` | S5 | committed by Paul (a7e09ed8c) | NEW: real-client pass, 13 steps |
+| `audits/mentat_failings_20260915/contracts/url_scope.json` | S5 | committed by Paul (a7e09ed8c) | NEW: v1, the URL vocabulary S6 inherits |
 | `mentat/app/graph_data.py` | S5 | untouched by S5 | ruling B (2026-09-17): NOT edited. Carries another lane's uncommitted hunks (`singleflight_cache`) and navigation needs none of it; the two Downstream failure texts stay |
 | `mentat/R/fec_beneficiary.R` | S5 | untouched by S5 | ruling B (2026-09-17): NOT edited. Carries another lane's uncommitted hunks (PAS2 parser v4) |
 | `mentat/app/server.py` | S4 | committed by Paul (8377b5e77, then a565216bf) | S4 hunks built and receipted. **S5 added exactly one line** (`'/scope.js': ('scope.js', 'text/javascript')` in `STATIC_ASSETS`; grep `'/scope.js'` rather than a line number - it landed at `:71` and a later session's lazy-import hunk had already moved it to `:97`) because that dict is an allow-list and an unlisted path answers 404 - a new client script cannot be served without it. That line is **already committed**: Paul's `a565216bf` (S3d latency, 2026-09-17 00:49) swept it in six minutes after S5 wrote it. The S5 patch carries no `server.py` hunk |
@@ -994,7 +994,7 @@ trusting these two lines.
 
 ## S5 — Navigation and linking (Area D)
 
-**Status:** BUILT, receipts ready, UNCOMMITTED (2026-09-17); Paul commits from
+**Status:** committed by Paul (2026-09-17, `a7e09ed8c`, 14 files, +2,506/-16, staged from patches/S5_url_scope.patch via `git apply --cached` with the HANDOFF hunk excluded because 522e3ad31 had already carried this section whole-file; console 8806 verified current on assets 9350a964… / code ba9d6c22… and serving /scope.js). Prior status for the record: BUILT, receipts ready, UNCOMMITTED (2026-09-17); Paul commits from
 `patches/S5_url_scope.patch`. Design accepted by Paul with three rulings (below);
 phases 1-3 built, Fable-reviewed, three review findings fixed, sweep run.
 Patch cut against HEAD `a565216bf`.
