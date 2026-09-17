@@ -1,0 +1,56 @@
+# S3e startup receipt — launcher and server cold start (2026-09-17 ~02:30 ET, Fable directly)
+
+Paul: "I need start-up latency to be dramatically reduced, work on optimizing all of this". Host still under
+memory pressure with other sessions active; each figure is the better of the runs taken, swings are stated.
+
+## Where the launcher's time went (Start-MentatApp.ps1, measured step by step in PowerShell 5.1)
+- python check subprocess (import sys, importlib.util; find_spec openpyxl): 5.46 s   (a bare `python -c pass`: 2.76 s)
+- TcpListener bind probes 8802..8811 (10 ports): 1.40 s
+- Invoke-RestMethod /api/health, first call: 1.09 s (second: 0.02 s); Invoke-WebRequest -UseBasicParsing: 15.67 s (!)
+- Net.WebClient with Proxy = $null: 0.10 s; mutex: 0.13 s
+- Start-Process server + poll until /api/health answers: 6.71 s (the server's own cold start under load)
+- Launcher end-to-end to its "Mentat app:" line, scratch port + temp data root, -NoBrowser: 10.00 s
+
+## Server cold start (before)
+- process start -> ready line: 4.66 s (`python -X importtime`: import server 3.09 s, report_insights -> openpyxl
+  0.97 s, numpy 0.25 s); warm: import server 0.58-1.01 s, Console() 0.00 s, bind 0.013 s, git rev-parse 0.09 s.
+- openpyxl reached the process through THREE top-level imports: report_insights, graph_data, and comparison_data
+  (which imports both).
+
+## Changes
+server.py
+- report_freshness / worksheet_data / stamp (report_insights), graph_schema / graph_view (graph_data), and
+  comparison_subjects / comparison_flows (comparison_data) are lazy wrappers: the module is imported on first call;
+  the names remain module attributes, so tests that patch.object(app, ...) still work (test_report_directory_console
+  passes).
+- GIT_SHA at import replaced by git_sha_cached() (lru_cache), so the git subprocess runs on the first health call.
+Start-MentatApp.ps1
+- Get-MentatHealth: HttpWebRequest with Proxy = $null and a millisecond timeout, replacing Invoke-RestMethod in the
+  port scan and the startup poll.
+- Get-MentatListeningPorts: one IPGlobalProperties.GetActiveTcpListeners() census replaces a bind probe per port;
+  the first free candidate gets one confirming bind probe. Falls back to the old per-port probes if the census fails.
+- The separate Python process that checked for openpyxl is replaced by a Test-Path of Lib\site-packages\openpyxl
+  beside the interpreter; the process check remains as the fallback when that folder is not found.
+- Edge app window flags add --disable-extensions --disable-sync --disable-background-networking
+  --disable-component-update (the Mentat\browser profile is Mentat's own; extension renderers were observed in it).
+
+## After
+- import server: 0.16 s warm; openpyxl, numpy and pandas NOT loaded at startup (219 modules vs the full stack).
+  First workbook route pays the deferred import once: 0.39 s.
+- server process start -> ready line: 0.48 s (was 4.66 s; 6.71 s under load).
+- launcher end-to-end to ready line, same harness, full server start on a fresh port: 4.60 s (was 10.00 s); a run
+  that found a current server already on its port: 4.03 s. The remainder is PowerShell's own startup, the code-tree
+  hash it computes for the build stamp, the mutex, the census, one health call per live console (8802, 8806 tonight),
+  and the interpreter start on a loaded host.
+- Page load after the S3d handler change: 1.2 s (was 10.8 s); see S3d_latency.txt.
+
+## Correctness
+- tests.test_report_directory_console + tests.test_desktop_launcher + tests.test_evidence_readers: 55 OK.
+- tests.test_evidence_csv_stream: 18 OK (run right after the server.py lazy-import change).
+- The launcher script parses under PowerShell 5.1 and its test file (test_desktop_launcher, 14 cases incl. the
+  console test file) drives the real script.
+
+## Not changed
+- report_insights.py, graph_data.py, comparison_data.py themselves (other lanes' files, some with uncommitted
+  edits): their top-level openpyxl imports stand; only server.py stopped importing them at startup.
+- The Edge app window's own start (1-3 s) and PowerShell's host start are outside the repo's control.

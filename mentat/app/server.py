@@ -32,9 +32,46 @@ PROJECT = Path(__file__).resolve().parents[1]
 SERVER_CODE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(PROJECT / "tools"))
-from report_insights import report_freshness, worksheet_data, stamp
-from graph_data import graph_schema, graph_view
-from comparison_data import subjects as comparison_subjects, flows as comparison_flows
+# report_insights and graph_data import openpyxl (0.4 s warm, seconds on a cold
+# disk), which no request needs until a workbook is opened. They are imported
+# on first use; the names stay module attributes so tests can patch them.
+def report_freshness(*args, **kwargs):
+    from report_insights import report_freshness as implementation
+    return implementation(*args, **kwargs)
+
+
+def worksheet_data(*args, **kwargs):
+    from report_insights import worksheet_data as implementation
+    return implementation(*args, **kwargs)
+
+
+def stamp(*args, **kwargs):
+    from report_insights import stamp as implementation
+    return implementation(*args, **kwargs)
+
+
+def graph_schema(*args, **kwargs):
+    from graph_data import graph_schema as implementation
+    return implementation(*args, **kwargs)
+
+
+def graph_view(*args, **kwargs):
+    from graph_data import graph_view as implementation
+    return implementation(*args, **kwargs)
+
+
+# comparison_data imports graph_data and report_insights (openpyxl) at its top;
+# same treatment: imported on first use, names kept as module attributes.
+def comparison_subjects(*args, **kwargs):
+    from comparison_data import subjects as implementation
+    return implementation(*args, **kwargs)
+
+
+def comparison_flows(*args, **kwargs):
+    from comparison_data import flows as implementation
+    return implementation(*args, **kwargs)
+
+
 from cross_reference_data import latest_cross_reference, cross_reference_for_industry
 import contribution_data
 import contribution_query
@@ -143,7 +180,12 @@ def git_sha():
 
 CODE_TREE_SHA256 = tree_sha256(code_files())
 ASSET_TREE_SHA256 = tree_sha256(asset_files())
-GIT_SHA = git_sha()
+
+
+@lru_cache(maxsize=1)
+def git_sha_cached():
+    """The git subprocess runs once, on the first health call, not at startup."""
+    return git_sha()
 STARTED_AT = time.time()
 
 
@@ -163,7 +205,7 @@ def console_busy(app):
 
 def build_status(app, port):
     """What this process loaded, beside what is on disk right now."""
-    return {'git_sha': GIT_SHA, 'code_sha256': CODE_TREE_SHA256, 'assets_sha256': ASSET_TREE_SHA256,
+    return {'git_sha': git_sha_cached(), 'code_sha256': CODE_TREE_SHA256, 'assets_sha256': ASSET_TREE_SHA256,
             'on_disk_code_sha256_now': tree_sha256(code_files()),
             'on_disk_assets_sha256_now': tree_sha256(asset_files()),
             'started_at': STARTED_AT, 'port': int(port), 'pid': os.getpid(),

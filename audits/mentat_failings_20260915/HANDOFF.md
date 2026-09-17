@@ -207,12 +207,18 @@ it in code.
 | `mentat/tests/test_contribution_dimensions_order.py` | S4 | committed by Paul (8377b5e77) | NEW |
 | `mentat/tests/test_studio_industry_browser.cjs` | S4 | committed by Paul (8377b5e77) | NEW |
 | `mentat/tests/test_contributor_detail_header.cjs` | S4 | committed by Paul (8377b5e77) | NEW |
-| `mentat/app/index.html` | S5 | not started | tabs, graph-mode select |
-| `mentat/app/app.js` | S5 | not started | hash routing, localStorage |
-| `mentat/app/graph.js` | S5 | not started | `clear()`, scope handoff |
-| `mentat/app/graph_data.py` | S5 | not started | Downstream Activity worksheet |
-| `mentat/R/fec_beneficiary.R` | S5 | not started | produces Downstream Activity |
-| `mentat/app/server.py` | S4 | committed by Paul (8377b5e77) | S4 hunks built and receipted; S5 waits for Paul's commit of S4 |
+| `mentat/app/index.html` | S5 | BUILT, uncommitted | tabs (unchanged), graph-mode select; one `<script src="/scope.js">` before app.js |
+| `mentat/app/app.js` | S5 | BUILT, uncommitted | hash routing, localStorage; comment only - `showView` is unchanged |
+| `mentat/app/graph.js` | S5 | BUILT, uncommitted | `clear()` untouched; reads and writes the URL scope, ruling A(ii) visibility |
+| `mentat/app/scope.js` | S5 | BUILT, uncommitted | NEW: the URL scope module (`read`/`write`/`parse`/`serialize`/`href`/`subscribe`) |
+| `mentat/app/cross-reference.js` | S5 | BUILT, uncommitted | CLAIMED 2026-09-17, previously unowned: industry-scoped fetch + `selected_by` in the status line |
+| `mentat/app/chart-studio.js` | S5 | BUILT, uncommitted | S5 hunks only: URL scope (dataset preselection, carried pills, `saved=`). S4's row above stands - S4's work is committed at `8377b5e77` and S5's hunks sit on top of it; this is a hand-off, not a second live claim |
+| `mentat/app/tests/scope.test.js` | S5 | BUILT, uncommitted | NEW: the url_scope contract from both ends |
+| `mentat/tests/test_navigation_scope_browser.cjs` | S5 | BUILT, uncommitted | NEW: real-client pass, 13 steps |
+| `audits/mentat_failings_20260915/contracts/url_scope.json` | S5 | BUILT, uncommitted | NEW: v1, the URL vocabulary S6 inherits |
+| `mentat/app/graph_data.py` | S5 | untouched by S5 | ruling B (2026-09-17): NOT edited. Carries another lane's uncommitted hunks (`singleflight_cache`) and navigation needs none of it; the two Downstream failure texts stay |
+| `mentat/R/fec_beneficiary.R` | S5 | untouched by S5 | ruling B (2026-09-17): NOT edited. Carries another lane's uncommitted hunks (PAS2 parser v4) |
+| `mentat/app/server.py` | S4 | committed by Paul (8377b5e77, then a565216bf) | S4 hunks built and receipted. **S5 added exactly one line** (`'/scope.js': ('scope.js', 'text/javascript')` in `STATIC_ASSETS`; grep `'/scope.js'` rather than a line number - it landed at `:71` and a later session's lazy-import hunk had already moved it to `:97`) because that dict is an allow-list and an unlisted path answers 404 - a new client script cannot be served without it. That line is **already committed**: Paul's `a565216bf` (S3d latency, 2026-09-17 00:49) swept it in six minutes after S5 wrote it. The S5 patch carries no `server.py` hunk |
 | `mentat/tests/**` | shared | — | each session owns only the test files it adds |
 
 **WORKING-TREE HAZARD (verified 2026-09-16):** `fec_api.R`, `collect.R`, `schema.R`, `report.R`, `tidy_stage.R`, `prepare_workbook_payload.py`, `build_industry_report.ps1` and `finalize_crypto_excel.ps1` are all **modified-uncommitted by other lanes** right now. `git diff -- <file>` on any of them captures foreign hunks. Every S1/S2 patch must be separated hunk by hunk and the receipt must say which hunks are the session's own — the same rule as `server.py`. `build_tidy_workbook.py` was tracked and clean at HEAD `bd5dc8ea1`; S2 has since modified it (one registry edit) and it is now ` M` — that hunk is S2's alone.
@@ -988,17 +994,290 @@ trusting these two lines.
 
 ## S5 — Navigation and linking (Area D)
 
-**Status:** not started
+**Status:** BUILT, receipts ready, UNCOMMITTED (2026-09-17); Paul commits from
+`patches/S5_url_scope.patch`. Design accepted by Paul with three rulings (below);
+phases 1-3 built, Fable-reviewed, three review findings fixed, sweep run.
+Patch cut against HEAD `a565216bf`.
 
-**Files owned:** see table. `server.py` is CONTENDED.
+**`git add -f` is required for part of this patch.** The repo-root `.gitignore`
+ignores `*.json` (`:6`), `*.txt` (`:21`) and `*.html` (`:20`), so
+`contracts/url_scope.json`, `receipts/S5_phase1-3.txt` and
+`receipts/S5_verifier_sweep.txt` are ignored files. They land the way S4's did -
+`git apply --cached` from the patch, or `git add -f` - not through a plain
+`git add`. The `.md` and `.js` files are unaffected (`!*.md` at `:32`).
 
-**Patches:** —
+**Files owned:** see table, all now BUILT/uncommitted.
 
-**Contract decisions:** —
+- `mentat/app/index.html` — one `<script src="/scope.js" defer>` before `app.js` (`:7`). Tab strip unchanged; `#graph-candidate-controls` keeps its `hidden`.
+- `mentat/app/app.js` — comment only (`:42-45`). `showView` is byte-identical in behaviour.
+- `mentat/app/graph.js` — reads the permalink, writes the scope back, ruling A(ii) visibility. `clear()` untouched.
+- `mentat/app/chart-studio.js` — S5 hunks on top of S4's committed work (`8377b5e77`): dataset preselection, carried pills, `saved=`, the deferred industry follow.
+- `mentat/app/cross-reference.js` — CLAIMED 2026-09-17, previously unowned: industry-scoped fetch and the run line.
+- `mentat/app/scope.js` — NEW, the module the vocabulary lives in.
+- `mentat/app/tests/scope.test.js` — NEW, the contract from both ends.
+- `mentat/tests/test_navigation_scope_browser.cjs` — NEW, the real-client pass.
+- `audits/mentat_failings_20260915/contracts/url_scope.json` — NEW, v1.
+- `mentat/app/graph_data.py`, `mentat/R/fec_beneficiary.R` — **NOT TOUCHED** (ruling B). Both still carry another lane's uncommitted hunks (`singleflight_cache`; PAS2 parser v4). Their two Downstream failure texts stay as they are.
 
-**Open questions:** —
+**Patches:** `patches/S5_url_scope.patch` — `git diff HEAD` for the eight tracked
+files, then each new file as a `/dev/null` hunk, so the whole lane applies from one
+file. It contains **no `server.py`, `graph_data.py` or `fec_beneficiary.R` hunk**;
+verified by `git apply --stat` and `git apply --check --reverse` (exit 0).
 
-**Handoff notes for later sessions:** —
+**Rulings, verbatim (Paul, 2026-09-17):**
+
+- **A(ii)** — "show the Graph 'Candidate view' select as soon as a report is chosen
+  and make `mode=activity` linkable, no new tab".
+- **B** — "leave `mentat/app/graph_data.py` and `mentat/R/fec_beneficiary.R`
+  untouched (they carry another lane's uncommitted hunks)".
+- **C** — "keep `history.replaceState` (never `pushState`)".
+
+**Contract decisions:** `contracts/url_scope.json` **v1**, written before any code.
+**The hash names the tab; the query string carries the scope.** A fragment-only
+`history.replaceState('#graph')` resolves against the current URL and keeps its
+query, so `showView` needs no change and a tab switch cannot lose a permalink.
+Nothing new is stored in `localStorage` or `sessionStorage`: the URL is the state,
+so a permalink, a reload and a tab switch are one operation.
+
+| key | value rule | writer | reader |
+| --- | --- | --- | --- |
+| `industry` | the published label exactly as the registry lists it (`Credit Union`, `Property & Casualty Insurance`); never the slug | Graph industry select; Chart Studio dataset picker and "Open in Chart Studio" | Graph, Chart Studio, Cross-reference |
+| `company` | company name as the Graph select spells it | Graph; "Open in Chart Studio" | Graph; Chart Studio as a carried pill |
+| `cycle` | election-cycle END year, four digits, as Graph spells it (`2024`) | Graph; "Open in Chart Studio" | Graph; Chart Studio via `core.carriedFilterValue('cycle', v)` → `2023-2024` |
+| `mode` | `direct` \| `activity` \| `estimates`; `direct` is the default and is removed | Graph | Graph |
+| `direction` | a `#graph-direction` value; `Support` is the default and is removed | Graph | Graph |
+| `tier` | a `#graph-tier` value; empty means all levels and is removed | Graph | Graph |
+| `funding` | a `#graph-funding` value; `all` is the default and is removed | Graph | Graph |
+| `category` | the recipient-type drill-down id | Graph | Graph |
+| `recipient` | the organization drill-down id | Graph | Graph |
+| `saved` | 32 lowercase hex, the shape `save_view()` mints and `get_view()` demands | Chart Studio, on a successful save or open | Chart Studio |
+| `studioPane` | PRE-EXISTING, `B`\|`C`\|`D`; S5 never writes it and never removes it | the reader / pane frames | `chart-studio.js:17` |
+
+**Reserved for S6, written by nobody in S5:** `evidence`, `id`, `committee`,
+`offset`, `limit`. `write()` preserves them untouched, in place, exactly as it
+preserves `studioPane`.
+
+Six decisions worth naming:
+
+1. **Values are `encodeURIComponent`'d, not `URLSearchParams.toString()`'d.** The
+   latter spells a space as `+`; `Property & Casualty Insurance` has to survive a
+   copied permalink, so the contract pins `Property%20%26%20Casualty%20Insurance`.
+2. **`write()` refuses what `read()` would reject.** A value that fails validation
+   removes its key rather than being written, so the URL can never carry something
+   `read()` drops. Every negative control is asserted in both directions.
+3. **`saved` is `[a-f0-9]{32}`**, the same rule `server.py get_view()` enforces, so
+   a saved-view permalink never fires a request the console answers 400 for. A view
+   that lives only in this tab (`viewsMemory`, id `memory-...`) is never written: it
+   is not addressable, and writing it would silently remove a real id.
+4. **Defaults are absent from the URL, not spelled out in it** (`mode=direct`,
+   `direction=Support`, `funding=all`, every empty select), so a URL names only
+   what the reader actually chose.
+5. **Unknown keys are preserved in place**, keeping their order; new keys append.
+   The contract's `write` example is exactly that case.
+6. **`replaceState` only (ruling C).** Tab switches created no history entries
+   before S5 and create none now; `pushState` appears nowhere.
+
+**Measurements:**
+
+- Node: `node --test "app/tests/**/*.test.js"` **151/151** (121 before S5; the 30
+  new tests are `app/tests/scope.test.js`, which loads the contract from disk).
+- Real-client: `node tests/test_navigation_scope_browser.cjs` **13/13 steps,
+  exit 0**, against the real `python app/server.py` on a free port with a throwaway
+  `--data-root`. `/api/studio/views` is deliberately not stubbed, so the saved view
+  in step 8 really reaches disk and is read back off it.
+- Baseline browser tests, all green after the fixes: `test_console_browser.cjs`,
+  `test_app_lazy_startup_browser.cjs` **3/3**, `test_graph_lazy_tables_browser.cjs`
+  **1/1**, `test_studio_industry_browser.cjs` **10/10 steps**.
+- Sweep: `receipts/S5_verifier_sweep.txt` — **9/10 browser suites**, node 151/151,
+  python **55 ran, OK (1 skipped)**, `url_scope.json` valid. Its one red was
+  `test_console_browser.cjs`, which is **not an S5 defect and is now fixed**: see
+  "Non-owned edits" below. (Two corrections to that receipt for the record: it
+  reports the branch as `claude/multi-industry-snapshot-support-7c95a9`, but this
+  repo is on `codex/mentat-crypto`; and its failure detail truncates before the
+  assertion, so the line number in it came from a later run, not from the sweep.)
+- Build stamp, `python -c "import server; print(server.CODE_TREE_SHA256,
+  server.ASSET_TREE_SHA256)"` in `mentat/app`: code `491a0d4680824a3e561ad9e0ddbff264c42ee58bf3d1e2480d12fba117a66087`,
+  assets `9350a96481e14c24e0058e24fe12d0907e7f2d754e9b35ef6caefd2d7600773c`.
+
+**Fable review (2026-09-17), three findings, all fixed.** Each fix was made only
+after its new browser step had been written and RUN against the pre-fix bytes, so
+none rests on an argument alone; the pre-fix assertions are verbatim in
+`receipts/S5_phase1-3.txt`.
+
+1. **HIGH, `graph.js:125`, step 11.** `refresh(initial)` sent `&latest=1`
+   unconditionally, and `graph_view()` replaces the requested cycle with
+   `max(years)` whenever it is present (`graph_data.py:317-318`), so the URL said
+   2022 while the view showed 2024. Now `initial && !query.get('cycle')`. S5's own
+   step 1 could not see this: the fixture's newest cycle is the one that permalink
+   asks for, so the `/api/graph` stub now mirrors that server rule and the hole
+   cannot reopen. Pre-fix: `'2024' !== '2022'`.
+2. **HIGH, `chart-studio.js:60, :142, :154, :417-421, :2006-2013`, step 12.**
+   `saved=<id>` outlived the sheets it described: edit the opened view, reload, and
+   `openSavedFromUrl()` re-opened the saved view while `persist()` wrote it over the
+   edited sheets — **a data loss that did not exist before S5 put the id in the
+   URL**. The first change to the working sheets after an open or a save now clears
+   the id, at `commit()` (45 edit paths) and at `step()` (undo/redo mutates sheets
+   and calls `persist()` without going through `commit()`), and deliberately NOT at
+   `persist()`, which also runs on load paths and would have destroyed the
+   permalink before `openSavedFromUrl()` read it. An open fences its own `commit`
+   with `holdingSavedId`. Both directions are pinned by the step. Pre-fix:
+   `saved= leaving the URL after the first edit never happened`.
+3. **MEDIUM, `cross-reference.js:150-160`, step 13.** An industry-scoped ask that
+   found nothing still said "Latest run", naming the one run it was not showing.
+   Now "No cross-reference run for <label>". Both branches are pinned: step 5 the
+   found run, step 13 the empty one. Pre-fix: `got "Latest run · Saved evidence
+   refreshed."`.
+
+**User-visible changes, for Paul:**
+
+- **Cross-reference follows the URL's industry.** It is no longer "the latest saved
+  run" unconditionally: once the URL names an industry — and Graph always puts one
+  there — it shows the newest run for that industry, or that industry's empty
+  state. The status line says which of the three it is looking at: "Newest run for
+  Banking · …", "No cross-reference run for Banking · …", or "Latest run · …".
+  No silent fallback to the bare route was added; that would make the line lie.
+- **The Candidate view select is visible once a report is chosen**, wherever the
+  candidate panel is showing, instead of only on the Candidates analysis tab. The
+  note at `index.html:107` ("Direct contributions only") is now shown only while it
+  is true, because the select above it can make it untrue on the overview tab.
+
+**Known limits, stated rather than hidden:**
+
+a. **Chart Studio never writes `company`/`cycle` back.** Removing a carried pill
+   does not remove the key from the URL, so `loadContributions(refresh)` re-carries
+   it. Idempotent — the pill returns exactly as it was, nothing lost or duplicated
+   — but a removed pill can reappear on a source refresh. Graph owns those two keys
+   today; **S6 may want to give Chart Studio ownership of them.**
+b. **`scope.js merge()` re-encodes unknown keys' values** with
+   `encodeURIComponent`, so a `+` meaning a space in another session's key is
+   normalised to `%20`. The same value either way under `URLSearchParams`
+   decoding; harmless, named here so nobody reads it as data loss.
+c. **A first load that names no cycle still sends `latest=1`** and lands on the
+   newest cycle while the URL names no cycle at all. That is the contract's own
+   rule ("a URL names only what the reader chose") and it is unchanged from before
+   S5, but a link copied in that state means "newest", not "2024".
+d. **No cross-tab sync.** `subscribe` listens to `popstate` and this document's
+   `mentat:scope`; a second browser tab is a different document and no `storage`
+   event is used, so two tabs do not follow each other.
+e. **The S0 known-red for `test_console_browser.cjs` was a race, and it is closed
+   here** — see the second non-owned edit below.
+
+**Non-owned test edits, for their owner to nod at.** Both are in
+`mentat/tests/test_console_browser.cjs`, both forced, neither cosmetic:
+
+1. `:50` — `page.route('**/api/cross-reference', …)` gained a second registration
+   for the query form, the idiom that file already uses for `/api/evidence` at
+   `:48-49`. Forced by the contract: the test clicks `#split-view` while Evidence is
+   current (`:163`), which activates Graph; Graph now writes its industry into the
+   query, so Cross-reference asks S4's industry-scoped route and the bare glob
+   stopped matching. Measured, not assumed — a probe on the same fixture with no
+   industry in the URL still requests the bare route and still renders "Observed
+   original giving".
+2. `:196` — a `waitForFunction` was inserted before the run-group assertion. That
+   attribute is set by `renderRunLibrary()` (`app.js:217-227`), which runs only
+   after `mentat:view` → `poll()` → `refreshRuns()` →
+   `fetch('/api/runs?include_archived=1')` (`app.js:252`) comes back, and no wait
+   sat between the `#tab-collection` click at `:195` and the read. **It is a race,
+   not an S5 defect**: measured on byte-identical trees as pass, pass, **FAIL**
+   (`'false' !== 'true'` at `:196:12`), plus the sweep's red under load; S5 adds no
+   request on that path. The wait uses the file's own idiom (`:162`, `:173`) and the
+   assertion is unchanged. After it: two consecutive runs, exit 0 and exit 0.
+
+**Foreign facts, recorded because they are not S5's to fix:**
+
+- **HEAD moved under this lane mid-build.** `server.py` was clean when S5 checked
+  it, carried five foreign hunks by 00:29:56 (S3d's HTTP/1.1 and `read_json_cached`
+  work), gained S5's one `STATIC_ASSETS` line at 00:43:04, and at **00:49:02 Paul
+  committed `a565216bf`**, which carries all six. So **S3d's commit shipped S5's
+  `/scope.js` line** under a message that does not mention it, `server.py` is clean
+  again, and the S5 patch carries no `server.py` hunk. Every S5 measurement was
+  taken against exactly those bytes.
+- `mentat/app/graph_data.py`, `report_insights.py`, `style.css`, `graph.css` and
+  `desktop/Launcher.cs` are modified-uncommitted by other lanes right now. S5
+  touched none of them, and the build stamp above therefore describes a tree that
+  includes those foreign edits — it will not reproduce from a clean checkout of
+  HEAD plus this patch alone.
+
+**Open for Paul:**
+
+1. Commit from `patches/S5_url_scope.patch` (`git apply --cached`, as S4's went in;
+   the ignored `.json`/`.txt` files need that or `git add -f`).
+2. Restart the consoles: `scope.js` is a **new static asset**, so the assets stamp
+   changes and a console that predates it serves an `index.html` whose
+   `<script src="/scope.js">` would 404 on the old process. Expected identity after
+   the restart is the pair above.
+3. Cross-reference industry scoping (under "User-visible changes") — intended, but
+   it changes what that tab shows after a Graph visit.
+4. The two non-owned `test_console_browser.cjs` edits: does the contract change
+   carry them, or do they need their owner's nod?
+
+---
+
+### HANDOFF NOTES FOR S6 — the URL vocabulary, verbatim
+
+**The rule.** The hash names the tab (`app.js showView`, `#loading`,
+`#collection`, `#graph`, `#chart-studio`, `#cross-reference`, `#evidence`). The
+query string carries the scope. A fragment-only `replaceState` keeps the query, so
+the two never fight. `pushState` is used nowhere and ruling C says keep it that way.
+
+**Every key** is in the table above, with its value rule, its writer and its
+reader. **Ownership, which is the part that matters for a second pane:**
+
+- **Graph owns** `company`, `cycle`, `mode`, `direction`, `tier`, `funding`,
+  `category`, `recipient`. It writes all eight from one place, `writeScope(query)`
+  in `graph.js`, mirroring the `/api/graph` request it just made.
+- **Chart Studio owns** `industry` **on pick** (inside `selectContributionDataset`,
+  so all four call sites are covered) and `saved`. Graph also writes `industry`,
+  from its own select — last writer wins, and both spell it the same way because
+  the contract pins the published label.
+- **S6 owns** `evidence`, `id`, `committee`, `offset`, `limit`. S5 writes none of
+  them and `write()` preserves them in place.
+
+**The module**, `mentat/app/scope.js`, browser global `MentatScope`, CommonJS in
+node (UMD like `chart-studio-core.js`):
+
+```js
+read(search = location.search)  // -> {industry?, company?, ..., invalid: [{key, value, reason}]}
+write(partial, {location, history, dispatch, target} = defaults)  // -> the new scope
+parse(search)                   // the pure read
+serialize(scope)                // the pure write, keys in KEYS order
+href(view, scope, base = location)   // "/?<query>#<view>"
+subscribe(fn, target = window)  // popstate + mentat:scope; returns an unsubscribe
+KEYS, MODES, RESERVED           // the vocabulary as data
+```
+
+`read()` never throws: a value it refuses is dropped from the scope and reported in
+`invalid[]`, because a bad permalink must still open its tab. `write()` merges into
+the live query - an empty, null or undefined value removes its key, unknown keys
+are preserved in place, existing keys keep their order, new keys append - then
+calls `history.replaceState` and dispatches **`mentat:scope`** (a `CustomEvent`
+whose `detail` is the new scope) **only when the URL actually changed**. A no-op
+write dispatches nothing, which is why `showView` does not call `write({})`.
+
+**Extending it to a two-pane URL.** S3's pane model (this file, the "Pane state
+model for S6" section around lines 1173-1188) already commits the evidence pane to
+`?evidence=csv&id=…&committee=…&cycle=…&offset=…`, and those keys are the reserved
+list above. Two things to keep when you build it:
+
+- A second pane's keys should be **prefixed, not duplicated** (`paneB.cycle`, the
+  shape S5_DESIGN.md §2 anticipated), because `cycle` already belongs to Graph and
+  a bare second copy would make "whose cycle is this?" unanswerable. `write()`
+  preserves any prefixed key untouched today, so the prefix costs nothing now.
+- Add the new keys to `contracts/url_scope.json`, bump its `version`, and re-run
+  both suites. `app/tests/scope.test.js` reads the contract from disk, so new
+  examples and negative controls are picked up without touching the test.
+
+**Restart requirement.** `scope.js` is a new entry in `STATIC_ASSETS`
+(`server.py`, grep `'/scope.js'`), so `ASSET_TREE_SHA256` changes and a console that
+predates it serves an `index.html` referring to a script it will 404. Restart
+before judging anything in the browser:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\pgoff\Mentat\mentat\app\Start-MentatApp.ps1 -Port 8806
+```
+
+D-029 applies: the launcher replaces only an IDLE stale console, so check
+`/api/health` before assuming a restart took.
 
 ---
 
@@ -1341,3 +1620,18 @@ output for every command above). **Patch:** `patches/S3_cap_500MB_and_followups.
 **For S6 (pane state model, added to the S3 section's list):** split view = two or more PACs side by side, from the same import or different imports (each pane = `{source, id, committee, cycle, offset, limit}`); and the imported rows should be graphable: register a ready import as a Chart Studio data source with committee, cycle, channel, amount, date and counterparty as fields, so the studio's existing engine charts them without a new renderer. Neither is built here.
 
 **Paul's next step:** restart 8806 (and 8802) to get the fast handler and the calamine reader; the first restart is the real startup measurement on a quiet console.
+
+
+### S3e addendum — launcher and server cold start (2026-09-17 ~02:30 ET, Fable directly)
+
+**Paul:** "I need start-up latency to be dramatically reduced, work on optimizing all of this."
+
+**Measured (receipt `receipts/S3e_startup.txt`):** the launcher took 10.0 s to its ready line on a scratch port; a second Python process spawned only to check for openpyxl cost 5.5 s on this loaded host (a bare interpreter start was 2.8 s), ten bind probes 1.4 s, PowerShell's `Invoke-RestMethod` 1.1 s on its first call (`Invoke-WebRequest` 15.7 s), and the server's own cold start 4.7 s because three top-level imports (report_insights, graph_data, comparison_data) pulled openpyxl and numpy before any request needed them.
+
+**Changed:** `server.py` imports those three modules lazily through wrappers that keep the same attribute names (tests patch them by name), and runs `git rev-parse` on the first health call instead of at import. `Start-MentatApp.ps1` checks for openpyxl with a `Test-Path` of `Lib\site-packages\openpyxl` beside the interpreter (process check kept as fallback), takes one TCP listener census instead of a bind probe per port, calls health through a proxy-free `HttpWebRequest` with millisecond timeouts, and starts the Edge app window without extensions, sync, background networking or component updates.
+
+**After:** server process to ready line 0.48 s (was 4.66 s); `import server` 0.16 s with openpyxl, numpy and pandas absent until a workbook route runs (0.39 s once, on first use); launcher end-to-end to ready line 4.6 s with a full server start (was 10.0 s). Together with S3d: page load 1.2 s (was 10.8 s).
+
+**Verified:** 55 tests across `test_report_directory_console`, `test_desktop_launcher` (drives the real script) and `test_evidence_readers`; stream 18. The launcher script parses under PowerShell 5.1.
+
+**Paul's next step:** run the launcher again (not only restart the console): the launcher file itself changed.

@@ -99,6 +99,29 @@ function Test-ReplaceableMentatServer($health) {
   if (Test-MentatBuildCurrent $health) { return $false }
   try { return ([int]$health.pid -gt 0) } catch { return $false }
 }
+function Get-MentatHealth([string]$Url, [int]$TimeoutMs) {
+  # HttpWebRequest with no proxy: Invoke-RestMethod pays ~1 s of .NET and proxy
+  # discovery on its first call here, and Invoke-WebRequest far more. A local
+  # console answers in milliseconds; the client should not add seconds.
+  try {
+    $request = [Net.WebRequest]::Create($Url)
+    $request.Proxy = $null
+    $request.Timeout = $TimeoutMs
+    $request.ReadWriteTimeout = $TimeoutMs
+    $response = $request.GetResponse()
+    try {
+      $reader = New-Object IO.StreamReader($response.GetResponseStream())
+      try { return ($reader.ReadToEnd() | ConvertFrom-Json) } finally { $reader.Dispose() }
+    } finally { $response.Dispose() }
+  } catch { return $null }
+}
+function Get-MentatListeningPorts {
+  # One census of every TCP listener replaces a bind probe per candidate port.
+  try {
+    return @([Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties().GetActiveTcpListeners() |
+      ForEach-Object { $_.Port })
+  } catch { return $null }
+}
 function Test-MentatPortListening([int]$Candidate) {
   # Windows HTTP connection retries can consume seconds on an unused port.
   # Only ask for health after a bounded loopback TCP connection succeeds.
@@ -132,18 +155,30 @@ try {
   $stalePort = 0
   $staleHealth = $null
   $reclaimed = $false
+  $listening = Get-MentatListeningPorts
   foreach ($candidate in $ports) {
     $url = "http://127.0.0.1:$candidate"
-    $probe = New-Object Net.Sockets.TcpListener([Net.IPAddress]::Loopback, $candidate)
-    $isFree = $false
-    try { $probe.Start(); $isFree = $true } catch { } finally { $probe.Stop() }
+    if ($null -ne $listening) {
+      $isFree = ($listening -notcontains $candidate)
+    } else {
+      $probe = New-Object Net.Sockets.TcpListener([Net.IPAddress]::Loopback, $candidate)
+      $isFree = $false
+      try { $probe.Start(); $isFree = $true } catch { } finally { $probe.Stop() }
+    }
     if ($isFree) {
-      if (-not $freePort) { $freePort = $true; $freeCandidate = $candidate }
+      if (-not $freePort) {
+        # One bind probe confirms the first free candidate before it is chosen.
+        $probe = New-Object Net.Sockets.TcpListener([Net.IPAddress]::Loopback, $candidate)
+        $confirmed = $false
+        try { $probe.Start(); $confirmed = $true } catch { } finally { $probe.Stop() }
+        if ($confirmed) { $freePort = $true; $freeCandidate = $candidate }
+      }
       continue
     }
-    if (-not (Test-MentatPortListening $candidate)) { continue }
+    if ($null -eq $listening -and -not (Test-MentatPortListening $candidate)) { continue }
     try {
-      $health = Invoke-RestMethod "$url/api/health" -TimeoutSec 2
+      $health = Get-MentatHealth "$url/api/health" 2000
+      if ($null -eq $health) { continue }
       if (Test-CurrentMentatServer $health) {
         $available = $true; $Port = $candidate; break
       }
@@ -185,10 +220,17 @@ if (-not $PythonPath) {
     $PythonPath = $pythonCommand.Source
   }
 }
-# The server imports openpyxl itself. Check availability here without loading
-# the entire package in a disposable process before loading it again.
-& $PythonPath -c "import sys, importlib.util; assert sys.version_info >= (3,11), 'Python 3.11 or newer is required'; assert importlib.util.find_spec('openpyxl') is not None, 'openpyxl is required'" 2>&1 | Out-Null
-if ($LASTEXITCODE -ne 0) { throw 'MENTAT requires Python 3.11 or newer with openpyxl. Run: python -m pip install openpyxl' }
+# The server imports openpyxl itself. A second Python process just to check for
+# it cost a full interpreter start (2.8 s on a loaded host). The package folder
+# beside the interpreter is checked instead; the process check remains as the
+# fallback for a layout this does not recognise.
+$pythonHome = Split-Path -Parent $PythonPath
+$openpyxlPresent = (Test-Path -LiteralPath (Join-Path $pythonHome 'Lib\site-packages\openpyxl')) -or
+  (Test-Path -LiteralPath (Join-Path $pythonHome 'lib\site-packages\openpyxl'))
+if (-not $openpyxlPresent) {
+  & $PythonPath -c "import sys, importlib.util; assert sys.version_info >= (3,11), 'Python 3.11 or newer is required'; assert importlib.util.find_spec('openpyxl') is not None, 'openpyxl is required'" 2>&1 | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw 'MENTAT requires Python 3.11 or newer with openpyxl. Run: python -m pip install openpyxl' }
+}
 $arguments = @((Join-Path $PSScriptRoot 'server.py'), '--port', [string]$Port, '--data-root', $DataRoot)
 if ($KeysFile) { $arguments += @('--keys-file', $KeysFile) }
 if ($RScriptPath) { $arguments += @('--rscript', $RScriptPath) }
@@ -207,10 +249,8 @@ $url = "http://127.0.0.1:$Port"
   while ($startupWatch.Elapsed.TotalSeconds -lt 30) {
     if ($process.HasExited) { throw "MENTAT could not start. See $logDirectory\server-$Port.stderr.log." }
     if (Test-MentatPortListening $Port) {
-      try {
-        $health = Invoke-RestMethod "$url/api/health" -TimeoutSec 1
-        if (Test-CurrentMentatServer $health) { $available = $true; break }
-      } catch { }
+      $health = Get-MentatHealth "$url/api/health" 1000
+      if ($null -ne $health -and (Test-CurrentMentatServer $health)) { $available = $true; break }
     }
     Start-Sleep -Milliseconds 100
   }
@@ -233,7 +273,10 @@ if (-not $NoBrowser) {
     $browserPath = $browserCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
     if (-not $browserPath) { throw 'Install Microsoft Edge or Google Chrome to use the MENTAT app window.' }
     $profilePath = Join-Path $env:LOCALAPPDATA 'Mentat\browser'
-    Start-Process -FilePath $browserPath -ArgumentList @("--app=$url", ('--user-data-dir="' + $profilePath + '"'), '--no-first-run', '--no-default-browser-check')
+    # The app profile is Mentat's own: no extensions, sync, background networking
+    # or component updates, all of which delay the first paint of the window.
+    Start-Process -FilePath $browserPath -ArgumentList @("--app=$url", ('--user-data-dir="' + $profilePath + '"'), '--no-first-run', '--no-default-browser-check',
+      '--disable-extensions', '--disable-sync', '--disable-background-networking', '--disable-component-update')
   } else { Start-Process $url }
 }
 Write-Host "Mentat app: $url"
