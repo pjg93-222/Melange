@@ -16,7 +16,8 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "app"))
-from cross_reference_digest import LARGE_CENTS, LARGE_INDIVIDUAL_CENTS, build_digest, main
+from cross_reference_digest import (LARGE_MEDIAN_MULTIPLE, LARGE_PERCENTILE, MINIMUM_CLASS_RECORDS,
+                                    build_digest, main, nearest_rank)
 from cross_reference_data import latest_cross_reference
 
 LEDGER_SCHEMA = """
@@ -46,10 +47,14 @@ def change(record_id, before, after, **updates):
     return value
 
 
+# Twenty ordinary individual gifts, so the individual class is big enough to
+# have a distribution worth cutting at all.
+FILLER = [decision(f"filler{index:02d}", 1_000, 1_000, 1_000) for index in range(MINIMUM_CLASS_RECORDS)]
+
 # One refund the engine linked, one negative adjustment it could not link, one
 # reclassification that took money out of the accepted baseline and one that
-# took nothing, one large individual receipt and one larger organisation
-# receipt that is still under the general threshold, and one ordinary gift.
+# took nothing, one outsized individual receipt and one larger organisation
+# receipt whose own class is too small to cut, and one ordinary gift.
 DECISIONS = [
     decision("orig", 5_000_000, 5_000_000, 5_000_000),
     decision("refund1", -200_000, -200_000, -200_000, bucket="linked_refund",
@@ -62,6 +67,7 @@ DECISIONS = [
     decision("large_ind", 12_000_000, 12_000_000, 12_000_000),
     decision("large_org", 50_000_000, 50_000_000, 50_000_000),
     decision("ordinary", 100_000, 100_000, 100_000),
+    *FILLER,
 ]
 LINKS = [
     {"kind": "refund", "source_id": "refund1", "counterpart_id": "orig", "amount_cents": -200_000,
@@ -75,7 +81,8 @@ CHANGES = [
     change("refund2", 0.0, -7_500.0, source_description="RETURN OF ERRONEOUS DEBIT",
            source_url="https://docquery.fec.gov/pdf/222/two.pdf"),
 ]
-ENTITIES = {"large_ind": "IND", "large_org": "ORG", "ordinary": "IND", "orig": "IND"}
+ENTITIES = {"large_ind": "IND", "large_org": "ORG", "ordinary": "IND", "orig": "IND",
+            **{row["source_id"]: "IND" for row in FILLER}}
 URLS = {"orig": "https://docquery.fec.gov/pdf/000/orig.pdf",
         "refund1": "https://docquery.fec.gov/pdf/333/three.pdf",
         "large_ind": "https://docquery.fec.gov/pdf/444/four.pdf"}
@@ -137,7 +144,7 @@ class DigestTests(unittest.TestCase):
         # A baseline of zero means the accepted report never counted the money.
         self.assertNotIn("nongiving_zero", [item["record_id"] for item in outliers["non_giving"]])
 
-    def test_individual_and_general_size_thresholds_select_different_rows(self):
+    def test_the_size_cut_is_relative_to_the_row_s_own_class(self):
         outliers = self.digest()["outliers"]
         self.assertEqual(outliers["large_count"], 1)
         self.assertEqual(outliers["large_amount"], 120_000.0)
@@ -146,21 +153,74 @@ class DigestTests(unittest.TestCase):
         self.assertEqual(row["entity"], "IND")
         self.assertEqual(row["amount"], 120_000.0)
         self.assertEqual(row["source_url"], URLS["large_ind"])
-        # $500,000 from an organisation is under the general threshold.
+        # $500,000 is the only receipt in its class, which is far too small to
+        # cut, so the bigger row is the one that is not listed.
         self.assertNotIn("large_org", [item["record_id"] for item in outliers["large"]])
         self.assertNotIn("ordinary", [item["record_id"] for item in outliers["large"]])
 
-    def test_an_unknown_entity_type_is_judged_by_the_general_threshold_alone(self):
-        rows = [decision("huge", LARGE_CENTS, LARGE_CENTS, LARGE_CENTS),
-                decision("sizeable", LARGE_INDIVIDUAL_CENTS, LARGE_INDIVIDUAL_CENTS, LARGE_INDIVIDUAL_CENTS)]
-        outliers = build_digest(rows, [], [])["outliers"]
-        self.assertEqual([row["record_id"] for row in outliers["large"]], ["huge"])
-        self.assertEqual(outliers["large"][0]["entity"], "")
+    def test_the_class_median_and_percentile_are_nearest_rank_over_counted_rows(self):
+        # Nearest rank: the value at 1-based position ceil(percentile/100 * n)
+        # counting up from the smallest, so both statistics are real receipts.
+        sample = [1_000] * 18 + [5_000, 1_000_000]
+        self.assertEqual(nearest_rank(sample, 50), 1_000)
+        self.assertEqual(nearest_rank(sample, 90), 1_000)
+        self.assertEqual(nearest_rank(sample, 99.9), 1_000_000)
+        rows = [decision(f"i{index:02d}", value, value, value) for index, value in enumerate(sample)]
+        entities = {row["source_id"]: "IND" for row in rows}
+        digest = build_digest(rows, [], [], entities=entities, percentile=90, median_multiple=20)
+        individual = digest["basis"]["classes"]["individual"]
+        self.assertEqual(individual["records"], 20)
+        self.assertEqual(individual["median_cents"], 1_000)
+        self.assertEqual(individual["percentile_cents"], 1_000)
+        # 20 x the $10.00 median beats the 90th percentile, so it is the cut.
+        self.assertEqual(individual["threshold_cents"], 20_000)
+        self.assertEqual([row["record_id"] for row in digest["outliers"]["large"]], ["i19"])
+        self.assertEqual(digest["outliers"]["large_count"], 1)
+        self.assertEqual(digest["outliers"]["large_amount"], 10_000.0)
+
+    def test_a_row_over_the_percentile_but_under_the_median_multiple_is_not_listed(self):
+        # i18 is $50, above the 90th percentile of $10, and still nowhere near
+        # 20 x the median. One arm of the cut is not enough on its own.
+        sample = [1_000] * 18 + [5_000, 1_000_000]
+        rows = [decision(f"i{index:02d}", value, value, value) for index, value in enumerate(sample)]
+        entities = {row["source_id"]: "IND" for row in rows}
+        listed = build_digest(rows, [], [], entities=entities,
+                              percentile=90, median_multiple=20)["outliers"]["large"]
+        self.assertNotIn("i18", [row["record_id"] for row in listed])
+        # Drop the multiple to 1 and the percentile alone decides.
+        listed = build_digest(rows, [], [], entities=entities,
+                              percentile=90, median_multiple=1)["outliers"]["large"]
+        self.assertEqual(len(listed), 20)
+
+    def test_a_class_under_the_minimum_size_lists_nothing_and_says_so(self):
+        sample = [1_000] * (MINIMUM_CLASS_RECORDS - 2) + [900_000_000]
+        rows = [decision(f"i{index:02d}", value, value, value) for index, value in enumerate(sample)]
+        entities = {row["source_id"]: "IND" for row in rows}
+        digest = build_digest(rows, [], [], entities=entities)
+        individual = digest["basis"]["classes"]["individual"]
+        self.assertEqual(individual["records"], MINIMUM_CLASS_RECORDS - 1)
+        self.assertIsNone(individual["threshold_cents"])
+        self.assertEqual(digest["outliers"]["large_count"], 0)
+        self.assertEqual(digest["outliers"]["large_amount"], 0)
+        self.assertIn(f"fewer than {MINIMUM_CLASS_RECORDS}", digest["basis"]["text"])
+        self.assertIn("individuals", digest["basis"]["text"])
+
+    def test_an_unknown_entity_type_joins_the_non_individual_class(self):
+        sample = [1_000] * 19 + [1_000_000]
+        rows = [decision(f"o{index:02d}", value, value, value) for index, value in enumerate(sample)]
+        digest = build_digest(rows, [], [], percentile=90, median_multiple=20)
+        self.assertEqual(digest["basis"]["classes"]["other"]["records"], 20)
+        self.assertEqual(digest["basis"]["classes"]["individual"]["records"], 0)
+        self.assertEqual([row["record_id"] for row in digest["outliers"]["large"]], ["o19"])
+        self.assertEqual(digest["outliers"]["large"][0]["entity"], "")
 
     def test_a_zeroed_row_is_never_a_large_receipt(self):
-        rows = [decision("zeroed", LARGE_CENTS * 5, 0, LARGE_CENTS * 5,
-                         reasons=["company_attribution_unresolved"])]
-        self.assertEqual(build_digest(rows, [], [])["outliers"]["large_count"], 0)
+        rows = [*FILLER, decision("zeroed", 900_000_000, 0, 900_000_000,
+                                  reasons=["company_attribution_not_accepted"])]
+        entities = {row["source_id"]: "IND" for row in rows}
+        digest = build_digest(rows, [], [], entities=entities)
+        self.assertEqual(digest["basis"]["classes"]["individual"]["records"], MINIMUM_CLASS_RECORDS)
+        self.assertEqual(digest["outliers"]["large_count"], 0)
 
     def test_rows_are_ordered_by_size_and_capped_without_losing_the_count(self):
         rows, changes = [], []
@@ -187,24 +247,38 @@ class DigestTests(unittest.TestCase):
         self.assertEqual(json.dumps(first, sort_keys=True), json.dumps(second, sort_keys=True))
         self.assertEqual(first["counts"]["source_records"], len(DECISIONS))
 
-    def test_the_stated_basis_names_both_thresholds_and_asks_for_ratification(self):
-        digest = self.digest(large_cents=25_000_000, large_individual_cents=5_000_000)
+    def test_the_stated_basis_prints_both_computed_thresholds_and_asks_for_ratification(self):
+        digest = self.digest()
         basis = digest["basis"]
-        self.assertEqual(basis["large_cents"], 25_000_000)
-        self.assertEqual(basis["large_individual_cents"], 5_000_000)
-        self.assertIn("$250,000.00", basis["text"])
-        self.assertIn("$50,000.00", basis["text"])
+        self.assertEqual(basis["percentile"], LARGE_PERCENTILE)
+        self.assertEqual(basis["median_multiple"], LARGE_MEDIAN_MULTIPLE)
+        self.assertEqual(basis["minimum_class_records"], MINIMUM_CLASS_RECORDS)
+        individual = basis["classes"]["individual"]
+        self.assertEqual(individual["records"], MINIMUM_CLASS_RECORDS + 3)
+        self.assertEqual(individual["median_cents"], 1_000)
+        self.assertEqual(individual["percentile_cents"], 12_000_000)
+        self.assertEqual(individual["threshold_cents"], 12_000_000)
+        self.assertEqual(individual["listed_count"], 1)
+        self.assertEqual(individual["listed_cents"], 12_000_000)
+        self.assertEqual(basis["classes"]["other"]["records"], 1)
+        self.assertIsNone(basis["classes"]["other"]["threshold_cents"])
+        self.assertIn("top 0.1%", basis["text"])
+        self.assertIn("20x", basis["text"])
+        self.assertIn("$120,000.00", basis["text"])
         self.assertIn("ratification", basis["text"])
         self.assertEqual(digest["schema_version"], 1)
         self.assertEqual(digest["run_id"], "20260917-fixture")
         self.assertEqual(digest["generated_at"], "2026-09-17T00:00:00+00:00")
 
-    def test_a_threshold_that_is_not_a_positive_whole_number_of_cents_is_refused(self):
-        for value in (0, -1, 1.5, True, "100"):
-            with self.assertRaises(ValueError):
-                build_digest([], [], [], large_cents=value)
-            with self.assertRaises(ValueError):
-                build_digest([], [], [], large_individual_cents=value)
+    def test_a_percentile_or_multiple_outside_its_range_is_refused(self):
+        for value in (0, -1, 89.9, 100, 100.1, True, "99.9"):
+            with self.subTest(percentile=value):
+                with self.assertRaises(ValueError):
+                    build_digest([], [], [], percentile=value)
+        for value in (0, -1, 1.5, True, "20"):
+            with self.subTest(median_multiple=value):
+                with self.assertRaises(ValueError):
+                    build_digest([], [], [], median_multiple=value)
 
     def test_the_digest_publishes_no_total_of_giving(self):
         text = json.dumps(self.digest())

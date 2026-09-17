@@ -22,7 +22,8 @@ import sys
 import time
 import uuid
 
-from cross_reference_digest import LARGE_CENTS, LARGE_INDIVIDUAL_CENTS, build_digest
+from cross_reference_digest import (LARGE_MEDIAN_MULTIPLE, LARGE_PERCENTILE, build_digest,
+                                    multiple_setting, percentile_setting)
 from cross_reference_store import EvidenceStore, canonical, fetch_exact_evidence, fetch_filing_header_evidence, now
 from report_source_guard import atomic, cents, source_sha, sha, accepted_scopes, accepted_facts
 from validate_industry_coverage import api_query_coverage
@@ -31,22 +32,23 @@ from recheck_attribution import recheck_attribution
 PROJECT = Path(__file__).resolve().parents[1]
 STEPS = [('define','Define'),('collect','Collect'),('identify','Identify'),('connect','Connect'),('count','Count'),('verify','Verify and report')]
 # Which counted receipts the dwarfed cross-reference view lists for an eyeball.
-# These sizes select rows to look at; they change no accounting decision.
-LARGE_RECEIPT_VARIABLES = (('MENTAT_XREF_LARGE_RECEIPT_CENTS',LARGE_CENTS),
-                           ('MENTAT_XREF_LARGE_INDIVIDUAL_CENTS',LARGE_INDIVIDUAL_CENTS))
+# The cut is relative to the run: a row is listed when it reaches this
+# percentile of its own class and this multiple of that class's median. These
+# settings select rows to look at; they change no accounting decision.
+LARGE_RECEIPT_VARIABLES = (('MENTAT_XREF_LARGE_PERCENTILE',LARGE_PERCENTILE,float,percentile_setting),
+                           ('MENTAT_XREF_LARGE_MEDIAN_MULTIPLE',LARGE_MEDIAN_MULTIPLE,int,multiple_setting))
 
 
-def large_thresholds(environment=None):
-    """Read both outlier sizes from the environment, refusing anything but positive cents."""
+def outlier_rule(environment=None):
+    """Read the percentile and median multiple from the environment, refusing anything else."""
     environment=os.environ if environment is None else environment
     values=[]
-    for name,default in LARGE_RECEIPT_VARIABLES:
+    for name,default,parse,validate in LARGE_RECEIPT_VARIABLES:
         raw=str(environment.get(name) or '').strip()
         if not raw:values.append(default);continue
-        try:value=int(raw)
-        except ValueError as error:raise ValueError(f'{name} must be a positive whole number of cents') from error
-        if value<=0:raise ValueError(f'{name} must be a positive whole number of cents')
-        values.append(value)
+        try:value=parse(raw)
+        except ValueError:value=raw
+        values.append(validate(value,name))
     return tuple(values)
 
 
@@ -360,8 +362,8 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
     from cross_reference_engine import analyze
     database=Path(database).resolve();cycles=sorted(set(map(int,cycles)))
     if not cycles or any(c<2000 or c%2 for c in cycles):raise ValueError('Use even election cycles')
-    # Read before any work so a mistyped size fails now, not after the run.
-    large_cents,large_individual_cents=large_thresholds()
+    # Read before any work so a mistyped setting fails now, not after the run.
+    large_percentile,large_median_multiple=outlier_rule()
     state_root=Path(state_root or os.environ.get('MENTAT_CROSS_REFERENCE_ROOT',PROJECT/'state/cross-reference')).resolve()
     baseline_root=Path(baseline_root or os.environ.get('MENTAT_ACCEPTED_SOURCE_ROOT',PROJECT/'state/accepted-report-sources'))
     if affiliations_path is None:
@@ -496,7 +498,7 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
             run_id=run_id,generated_at=report['generated_at'],
             entities={r['sub_id']:r.get('entity_type') for r in rows},
             source_urls={r['sub_id']:r.get('pdf_url') for r in rows},
-            large_cents=large_cents,large_individual_cents=large_individual_cents))
+            percentile=large_percentile,median_multiple=large_median_multiple))
         atomic(directory/'progress.json',{'schema_version':1,'run_id':run_id,'status':'completed','updated_at':now(),'steps':steps})
         atomic(state_root/'latest.json',{'schema_version':1,'run_id':run_id,'report_sha256':sha(directory/'report.json')})
         for name,items in [('changes',changes),('review',review),('coverage',coverage_tasks)]:

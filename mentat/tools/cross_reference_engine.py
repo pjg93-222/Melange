@@ -19,6 +19,13 @@ evidence assertions, not discovered facts or an accuracy estimate. Unsupported
 certificates cannot promote a row. Collection completeness is never inferred.
 Observed receipt decisions and missing filing coverage are separate: a missing
 filing census does not make an otherwise established receipt ambiguous.
+
+A row loses its amount only where evidence contradicts it: a rejected company
+match, an explicit source exclusion, a non-giving receipt role, a proven memo
+or earmark duplicate of a counted parent, a superseded filing version. Missing
+or ambiguous information - an employer the register does not resolve, a prefix
+still under review, a memo whose parent is not in the corpus - keeps its
+dollars, is flagged unverified and stays in the review queue.
 """
 from __future__ import annotations
 
@@ -105,7 +112,6 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
     source = dict(sorted(source.items()))
     merged, decisions, reviews, coverage, links = {}, {}, [], [], []
     conflicted = set()
-    attribution_review = set()
 
     def review(reason, ids, action, **context):
         reviews.append(dict(reason=reason, source_ids=sorted(set(ids)), action=action, **context))
@@ -195,19 +201,24 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
             d["attribution_resolution"] = row["attribution_resolution"]
             reason(sid, "automatic_exact_alias_recheck")
         match = _text(row.get("company_match_status"))
-        attribution_unresolved = (match not in ("ACCEPTED", "REJECTED", "EXCLUDED") or
+        # Only a matcher decision against this company (REJECTED/EXCLUDED)
+        # contradicts the row; it is removed below. REVIEW, an unrecognised
+        # state, a blank status, or an accepted status carrying no company name
+        # is missing information about the employer, not evidence against the
+        # gift: those rows keep their dollars and carry an unverified flag.
+        attribution_unverified = (match not in ("ACCEPTED", "REJECTED", "EXCLUDED") or
                                   (match == "ACCEPTED" and not _text(row.get("company"))))
         # Corporate-name searches intentionally land in REVIEW. Exact, dated
         # affiliation evidence is stronger than that provisional search state.
         # It may settle a PAC or treasury entity without weakening exclusions or
         # treating a broad name prefix as proof.
         early_affiliations = []
-        if attribution_unresolved and match not in ("REJECTED", "EXCLUDED"):
+        if attribution_unverified and match not in ("REJECTED", "EXCLUDED"):
             if entity in ("PAC", "COM", "CCM", "PTY"):
                 early_affiliations = affiliations_for(row, "connected_pac")
                 if early_affiliations:
                     match = "ACCEPTED"
-                    attribution_unresolved = False
+                    attribution_unverified = False
                     bucket = d["bucket"] = "pac_activity"
                     d["attribution_status"] = "dated_affiliation_supported"
                     reason(sid, "connected_pac_affiliation",
@@ -216,16 +227,19 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
                 early_affiliations = affiliations_for(row, "treasury_entity")
                 if early_affiliations:
                     match = "ACCEPTED"
-                    attribution_unresolved = False
+                    attribution_unverified = False
                     bucket = d["bucket"] = "corporate_original"
                     d["attribution_status"] = "dated_affiliation_supported"
                     reason(sid, "treasury_entity_affiliation",
                            [a["evidence_id"] for a in early_affiliations])
-        if not attribution_unresolved and str(row.get("excluded_reason") or "").strip():
-            # Reinterpreting a receipt is not authorization to undo a separate
-            # explicit source exclusion. Preserve the decision and its reason;
-            # callers may adjudicate that policy in a separately tracked change.
-            exclude(sid, "preexisting_source_exclusion:" + str(row["excluded_reason"]).strip(), link_evidence=[sid])
+        # Reinterpreting a receipt is not authorization to undo a separate
+        # explicit source exclusion. Preserve the decision and its reason;
+        # callers may adjudicate that policy in a separately tracked change.
+        # An unverified employer match never suppresses it either: the checks
+        # below repeat it wherever this one is skipped.
+        source_policy = str(row.get("excluded_reason") or "").strip()
+        if not attribution_unverified and source_policy:
+            exclude(sid, "preexisting_source_exclusion:" + source_policy, link_evidence=[sid])
             d["bucket"] = "excluded_source_policy"
             continue
         claims = row.get("attribution_claims") or []
@@ -245,10 +259,13 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
         if row.get("source_conflicts"):
             conflicted.add(sid)
             d["bucket"] = "conflicting_source_evidence"
-            if attribution_unresolved:
-                attribution_review.add(sid)
-                exclude(sid, "company_attribution_unresolved", link_evidence=[sid])
-                d["bucket"] = "attribution_unresolved"
+            if attribution_unverified:
+                if source_policy:
+                    exclude(sid, "preexisting_source_exclusion:" + source_policy, link_evidence=[sid])
+                    d["bucket"] = "excluded_source_policy"
+                else:
+                    d["attribution_status"] = "unverified"
+                    reason(sid, "company_attribution_unverified")
             reason(sid, "source_or_attribution_conflict")
             review("source_or_attribution_conflict", [sid],
                    "Resolve conflicting source facts against the preserved FEC evidence before applying accounting or attribution decisions.",
@@ -258,18 +275,25 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
             exclude(sid, "non_giving_receipt_role:" + role, link_evidence=[sid])
             d["bucket"] = "non_giving"
             d["attribution_status"] = "not_required_for_non_giving"
-            if attribution_unresolved:
+            if attribution_unverified:
                 reason(sid, "non_giving_resolved_without_company_attribution")
             continue
-        if attribution_unresolved:
-            attribution_review.add(sid)
-            exclude(sid, "company_attribution_unresolved", link_evidence=[sid])
-            d["bucket"] = "attribution_unresolved"
-            review("company_attribution_unresolved", [sid],
+        if attribution_unverified:
+            # Unverified is not disproved. A missing employer match, a prefix
+            # still under review or an accepted match with no company name says
+            # nothing against the receipt, so the amount stays counted in its
+            # own entity bucket, flagged and queued, and the row goes on to the
+            # role, memo, amendment, earmark and refund passes like any other.
+            if source_policy:
+                exclude(sid, "preexisting_source_exclusion:" + source_policy, link_evidence=[sid])
+                d["bucket"] = "excluded_source_policy"
+                continue
+            d["attribution_status"] = "unverified"
+            reason(sid, "company_attribution_unverified")
+            review("company_attribution_unverified", [sid],
                    "Resolve the employer/company identity and record an accepted or rejected attribution decision.",
                    company=d["company"], company_match_status=row.get("company_match_status"),
                    company_match_reason=row.get("company_match_reason") or row.get("excluded_reason") or "")
-            continue
         claimed_companies = {_text(c.get("company")) for c in claims if isinstance(c, dict)
                              and c.get("company") and _text(c.get("company_match_status", c.get("status", ""))) not in ("REJECTED", "EXCLUDED")}
         if len(claimed_companies | {_text(row.get('company'))}) > 1:
@@ -337,7 +361,7 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
     for sid, row in merged.items():
         # An amended row reclassified as non-giving still supersedes its old
         # contribution representation. Classification cannot hide the winner.
-        if is_memo(row) or sid in conflicted or sid in attribution_review:
+        if is_memo(row) or sid in conflicted:
             continue
         h = headers.get(_file(row), {})
         if (not h or h.get("relationship_evidence") is False or not row.get("transaction_id")):
@@ -565,14 +589,14 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
         retained = []
         for item in tasks:
             active = [s for s in item["source_ids"] if s in decisions and
-                      (decisions[s]["status"] != "excluded_with_evidence" or s in attribution_review)]
+                      decisions[s]["status"] != "excluded_with_evidence"]
             if not active:
                 continue
             item["source_ids"] = sorted(active)
-            item["positive_cents"] = sum(max(0, decisions[s]["amount_cents"] if s in attribution_review else
-                                             decisions[s]["counted_cents"] + decisions[s]["pac_activity_cents"]) for s in active)
-            item["negative_cents"] = sum(min(0, decisions[s]["amount_cents"] if s in attribution_review else
-                                             decisions[s]["counted_cents"] + decisions[s]["pac_activity_cents"]) for s in active)
+            item["positive_cents"] = sum(max(0, decisions[s]["counted_cents"] + decisions[s]["pac_activity_cents"])
+                                         for s in active)
+            item["negative_cents"] = sum(min(0, decisions[s]["counted_cents"] + decisions[s]["pac_activity_cents"])
+                                         for s in active)
             retained.append(item)
         return sorted({_json(r): r for r in retained}.values(), key=_json)
 
@@ -599,8 +623,6 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
             d["supported_unique_cents"] = d["counted_cents"]
             d["status"] = "supported_by_supplied_completeness_evidence"
             reason(sid, "supplied_unique_origin_certificate", c["evidence_ids"])
-        elif sid in attribution_review:
-            d["status"] = "held_for_attribution_review"
         elif d["counted_cents"] or d["pac_activity_cents"]:
             d["status"] = ("needs_review" if sid in unresolved_ids else
                            "source_verified" if d["exact_fec_response_verified"] else "classified_provisional")
@@ -646,10 +668,10 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
         supported_unique_gross_cents=sum(d["supported_unique_cents"] for d in result_rows),
         pac_activity_observed_on_recipient_receipts_cents=sum(d["pac_activity_cents"] for d in result_rows),
         observed_linked_refund_cents=sum(d["counted_cents"] for d in result_rows if d["bucket"] == "linked_refund"),
-        unresolved_positive_cents=sum(max(0, decisions[s]["amount_cents"] if s in attribution_review else
-                                           decisions[s]["counted_cents"] + decisions[s]["pac_activity_cents"]) for s in unresolved_ids),
-        unresolved_negative_cents=sum(min(0, decisions[s]["amount_cents"] if s in attribution_review else
-                                           decisions[s]["counted_cents"] + decisions[s]["pac_activity_cents"]) for s in unresolved_ids),
+        unresolved_positive_cents=sum(max(0, decisions[s]["counted_cents"] + decisions[s]["pac_activity_cents"])
+                                      for s in unresolved_ids),
+        unresolved_negative_cents=sum(min(0, decisions[s]["counted_cents"] + decisions[s]["pac_activity_cents"])
+                                      for s in unresolved_ids),
         unresolved_source_records=len(unresolved_ids), source_records=len(result_rows),
         coverage_source_records=sum(bool(d["coverage_reasons"]) for d in result_rows),
         auto_resolved_records=len(result_rows) - len(unresolved_ids),

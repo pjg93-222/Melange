@@ -14,11 +14,16 @@ the rows it can list. ``entities``, ``source_urls`` and ``descriptions`` are
 looked up with ``.get`` for a bounded set of record ids, so a caller may back
 them with a lazy reader rather than a dictionary of every source row.
 
-The two size thresholds are a proposed default and await the owner's
-ratification; they are stated in the digest so no reader has to guess them.
+"Large" is relative to the run, never an absolute dollar figure: the counted
+receipts are split into individuals and everything else, and a row is listed
+only when it is both in the top slice of its own class and a large multiple of
+that class's median receipt. The percentile and the multiple are proposed
+defaults and await the owner's ratification; the resulting dollar thresholds,
+the medians and the class sizes are stated in the digest so no reader has to
+guess them.
 
-CLI: ``python cross_reference_digest.py <run_dir> [--large-cents N]
-[--large-individual-cents N]`` opens ``<run_dir>/ledger.sqlite`` read-only and
+CLI: ``python cross_reference_digest.py <run_dir> [--percentile P]
+[--median-multiple M]`` opens ``<run_dir>/ledger.sqlite`` read-only and
 writes ``<run_dir>/digest.json``. It modifies nothing else.
 """
 from __future__ import annotations
@@ -27,8 +32,10 @@ from collections.abc import Iterable, Mapping
 from contextlib import closing
 from datetime import datetime, timezone
 import argparse
+import bisect
 import json
 from pathlib import Path
+import re
 import sqlite3
 import sys
 import time
@@ -36,8 +43,13 @@ import time
 from report_source_guard import atomic
 
 SCHEMA_VERSION = 1
-LARGE_CENTS = 100_000_000
-LARGE_INDIVIDUAL_CENTS = 10_000_000
+LARGE_PERCENTILE = 99.9
+LARGE_MEDIAN_MULTIPLE = 20
+# A class this small has no distribution worth cutting, so it lists nothing.
+MINIMUM_CLASS_RECORDS = 20
+INDIVIDUAL_CLASS = "individual"
+OTHER_CLASS = "other"
+CLASS_LABELS = {INDIVIDUAL_CLASS: "individuals", OTHER_CLASS: "other contributors"}
 ROW_LIMIT = 200
 NON_GIVING_PREFIX = "non_giving_receipt_role:"
 # The engine files ``signed_adjustment_not_linked_refund`` in its review queue
@@ -52,10 +64,57 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _threshold(value, name: str) -> int:
-    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
-        raise ValueError(f"{name} must be a positive whole number of cents")
+def percentile_setting(value, name: str = "percentile") -> float:
+    """The class cut, as a percentile between 90 and 100 (100 excluded)."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{name} must be a number from 90 up to but not including 100")
+    value = float(value)
+    if not 90 <= value < 100:
+        raise ValueError(f"{name} must be a number from 90 up to but not including 100")
     return value
+
+
+def multiple_setting(value, name: str = "median_multiple") -> int:
+    """How many times the class median a listed receipt must reach."""
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ValueError(f"{name} must be a positive whole number")
+    return value
+
+
+def nearest_rank(sorted_cents, percentile: float) -> int:
+    """The nearest-rank percentile of an ascending sample of whole cents.
+
+    Nearest rank: the value whose 1-based position is ``ceil(percentile/100 * n)``
+    counting from the smallest, clamped into the sample. It is a value the
+    sample actually contains, so the printed threshold is a real receipt size
+    and no interpolation invents a figure between two rows. The rank is taken
+    in whole integers from the percentile rounded to six decimals, so the same
+    sample always yields the same rank on any machine.
+    """
+    count = len(sorted_cents)
+    if not count:
+        raise ValueError("A percentile needs at least one value")
+    scaled = round(float(percentile) * 1_000_000)
+    rank = -(-scaled * count // 100_000_000)  # ceil(percentile * count / 100)
+    return sorted_cents[min(max(rank, 1), count) - 1]
+
+
+def class_thresholds(sorted_cents, percentile: float, multiple: int) -> dict:
+    """Median, percentile and listing threshold for one class of counted receipts.
+
+    The median is the nearest-rank 50th percentile, so both statistics use one
+    definition and both stay whole cents. A class below the minimum size gets no
+    threshold at all and therefore lists nothing.
+    """
+    records = len(sorted_cents)
+    result = {"records": records, "median_cents": 0, "percentile_cents": 0,
+              "threshold_cents": None, "listed_count": 0, "listed_cents": 0}
+    if records < MINIMUM_CLASS_RECORDS:
+        return result
+    result["median_cents"] = nearest_rank(sorted_cents, 50)
+    result["percentile_cents"] = nearest_rank(sorted_cents, percentile)
+    result["threshold_cents"] = max(result["percentile_cents"], multiple * result["median_cents"])
+    return result
 
 
 def _cents(value) -> int:
@@ -83,29 +142,70 @@ def _reasons(decision: Mapping) -> tuple:
     return tuple(reasons) if isinstance(reasons, (list, tuple)) else ()
 
 
-def basis_text(large_cents: int, large_individual_cents: int) -> str:
-    """One sentence a reader can check the listed rows against."""
-    return (f"A receipt is listed as large at {_money(large_cents)} or more, or at "
-            f"{_money(large_individual_cents)} or more when an individual sent it; both thresholds are a "
-            "proposed default and await the owner's ratification.")
+def _row_view(decision: Mapping, amount: int, baseline: int, counted: int, entity: str) -> dict:
+    return {"company": _text(decision.get("company"), 200), "cycle": decision.get("cycle"),
+            "amount_cents": amount, "baseline_cents": baseline, "counted_cents": counted,
+            "receipt_role": _text(decision.get("receipt_role"), 80), "entity_type": entity}
+
+
+def _hold(rows: list, amount: int, record: str, view: dict) -> None:
+    """Keep only the ``ROW_LIMIT`` biggest receipts of one class, in rank order.
+
+    The listing threshold is unknown until every decision has been read, so the
+    rows that could survive it are held here. A row dropped at a trim already
+    had ``ROW_LIMIT`` bigger rows ahead of it and can never be listed.
+    """
+    rows.append((-amount, record, view))
+    if len(rows) > 2 * ROW_LIMIT:
+        rows.sort(key=lambda item: item[:2])
+        del rows[ROW_LIMIT:]
+
+
+def _share(percentile: float) -> str:
+    return f"{round(100 - percentile, 6):g}"
+
+
+def _threshold_text(classes: Mapping, name: str) -> str:
+    threshold = classes.get(name, {}).get("threshold_cents")
+    return "no figure at all" if threshold is None else _money(threshold) + " or more"
+
+
+def basis_text(percentile: float, multiple: int, classes: Mapping) -> str:
+    """One sentence a reader can check the listed rows against, plus any caveat."""
+    sentence = (f"A receipt is listed as large when it is in the top {_share(percentile)}% of its own class and "
+                f"at least {multiple}x that class's median counted receipt, which is "
+                f"{_threshold_text(classes, INDIVIDUAL_CLASS)} from an individual and "
+                f"{_threshold_text(classes, OTHER_CLASS)} from any other contributor; the {_share(percentile)}% "
+                f"cut and the {multiple}x multiple are a proposed default and await the owner's ratification.")
+    small = [name for name in (INDIVIDUAL_CLASS, OTHER_CLASS)
+             if classes.get(name, {}).get("threshold_cents") is None]
+    if small:
+        sentence += (" This run counted fewer than " + str(MINIMUM_CLASS_RECORDS) + " receipts sent by " +
+                     " and ".join(CLASS_LABELS[name] for name in small) +
+                     ", too few to cut a distribution, so no such row is listed.")
+    return sentence
 
 
 def build_digest(decisions: Iterable[Mapping], links: Iterable[Mapping], changes: Iterable[Mapping], *,
                  run_id: str = "", generated_at: str = "", entities: Mapping | None = None,
                  source_urls: Mapping | None = None, descriptions: Mapping | None = None,
-                 large_cents: int = LARGE_CENTS,
-                 large_individual_cents: int = LARGE_INDIVIDUAL_CENTS) -> dict:
+                 percentile: float = LARGE_PERCENTILE,
+                 median_multiple: int = LARGE_MEDIAN_MULTIPLE) -> dict:
     """Return the dwarfed view of one run: clear refunds and obvious outliers.
 
     ``decisions`` are the engine's per-row decisions, ``links`` its supported
     links and ``changes`` the runner's presentation change rows. ``entities``
     maps a record id to its FEC ``entity_type``, ``source_urls`` to its public
     filing URL and ``descriptions`` to its receipt text; all three are optional
-    fallbacks, and an absent entity type leaves a row subject to the general
-    threshold only.
+    fallbacks, and an absent entity type puts a row in the non-individual class.
+
+    Large is measured against this run only: every counted receipt joins the
+    individual or the non-individual class, and a row is listed when it reaches
+    both the class's ``percentile`` and ``median_multiple`` times the class
+    median. ``entities`` is therefore asked about every counted receipt.
     """
-    large_cents = _threshold(large_cents, "large_cents")
-    large_individual_cents = _threshold(large_individual_cents, "large_individual_cents")
+    percentile = percentile_setting(percentile)
+    median_multiple = multiple_setting(median_multiple)
     entities = {} if entities is None else entities
     source_urls = {} if source_urls is None else source_urls
     descriptions = {} if descriptions is None else descriptions
@@ -123,6 +223,11 @@ def build_digest(decisions: Iterable[Mapping], links: Iterable[Mapping], changes
 
     kept: dict[str, dict] = {}
     unlinked, non_giving, large = [], [], []
+    # Every counted receipt joins its class sample; only the largest few of each
+    # class can survive the cut, so their display rows are the only ones held
+    # while the thresholds are still unknown.
+    samples: dict[str, list] = {INDIVIDUAL_CLASS: [], OTHER_CLASS: []}
+    candidates: dict[str, list] = {INDIVIDUAL_CLASS: [], OTHER_CLASS: []}
     source_records = 0
     for decision in decisions:
         source_records += 1
@@ -139,17 +244,33 @@ def build_digest(decisions: Iterable[Mapping], links: Iterable[Mapping], changes
         if baseline > 0 and any(str(reason).startswith(NON_GIVING_PREFIX) for reason in reasons):
             non_giving.append(record)
             listed = True
-        # An entity type is only consulted where it can change the answer, so a
-        # lazy reader is asked about large receipts and nothing else.
-        if counted > 0 and abs(amount) >= min(large_cents, large_individual_cents):
+        if counted > 0:
             entity = _text(entities.get(record), 40).strip().upper()
-            if abs(amount) >= large_cents or (entity == "IND" and abs(amount) >= large_individual_cents):
-                large.append(record)
-                listed = True
+            name = INDIVIDUAL_CLASS if entity == "IND" else OTHER_CLASS
+            samples[name].append(abs(amount))
+            _hold(candidates[name], abs(amount), record, _row_view(decision, amount, baseline, counted, entity))
         if listed:
-            kept[record] = {"company": _text(decision.get("company"), 200), "cycle": decision.get("cycle"),
-                            "amount_cents": amount, "baseline_cents": baseline, "counted_cents": counted,
-                            "receipt_role": _text(decision.get("receipt_role"), 80), "entity_type": entity}
+            kept[record] = _row_view(decision, amount, baseline, counted, entity)
+
+    # A class cut can only be drawn once every counted receipt has been seen.
+    # Counting and totalling the listed rows uses the whole class sample; the
+    # held display rows only decide which of them this digest prints.
+    classes: dict[str, dict] = {}
+    for name in (INDIVIDUAL_CLASS, OTHER_CLASS):
+        sample = sorted(samples[name])
+        summary = class_thresholds(sample, percentile, median_multiple)
+        threshold = summary["threshold_cents"]
+        if threshold is not None:
+            start = bisect.bisect_left(sample, threshold)
+            summary["listed_count"] = len(sample) - start
+            summary["listed_cents"] = sum(sample[start:])
+            for ranking, record, view in candidates[name]:
+                if -ranking >= threshold:
+                    kept.setdefault(record, view)
+                    large.append(record)
+        classes[name] = summary
+    large_count = sum(summary["listed_count"] for summary in classes.values())
+    large_listed_cents = sum(summary["listed_cents"] for summary in classes.values())
 
     wanted = set(unlinked) | set(non_giving)
     context: dict[str, dict] = {}
@@ -211,8 +332,9 @@ def build_digest(decisions: Iterable[Mapping], links: Iterable[Mapping], changes
 
     return {
         "schema_version": SCHEMA_VERSION, "run_id": _identifier(run_id), "generated_at": _text(generated_at, 60),
-        "basis": {"large_cents": large_cents, "large_individual_cents": large_individual_cents,
-                  "text": basis_text(large_cents, large_individual_cents)},
+        "basis": {"percentile": percentile, "median_multiple": median_multiple,
+                  "minimum_class_records": MINIMUM_CLASS_RECORDS, "classes": classes,
+                  "text": basis_text(percentile, median_multiple, classes)},
         "refunds": {
             "linked": linked, "linked_count": len(refund_links),
             "linked_amount": _dollars(sum(amount or _cents(row(refund).get("amount_cents"))
@@ -223,8 +345,8 @@ def build_digest(decisions: Iterable[Mapping], links: Iterable[Mapping], changes
         "outliers": {
             "non_giving": non_giving_listed, "non_giving_count": len(non_giving),
             "non_giving_amount": total(non_giving, "baseline_cents"),
-            "large": large_listed, "large_count": len(large),
-            "large_amount": total(large, "amount_cents"),
+            "large": large_listed, "large_count": large_count,
+            "large_amount": _dollars(large_listed_cents),
         },
         "counts": {"source_records": source_records},
     }
@@ -287,6 +409,33 @@ class _SourceDescription:
         return default if not value else value
 
 
+ENTITY_FIELD = re.compile(r'"entity_type":"([^"]*)"')
+
+
+def _entity_types(db: sqlite3.Connection) -> dict:
+    """Every stored record's FEC entity type, in one pass over the ledger.
+
+    Classing a run's counted receipts needs the entity type of each of them, so
+    the one-record-at-a-time reader used for the handful of listed rows would
+    read most of the table anyway. The stored payload is canonical JSON, so the
+    field is lifted from the text and only a payload that does not match is
+    parsed.
+    """
+    found = {}
+    for source_id, payload in db.execute("SELECT source_id, payload_json FROM source_records"):
+        match = ENTITY_FIELD.search(payload or "")
+        if match:
+            value = match.group(1)
+        else:
+            try:
+                value = (json.loads(payload) or {}).get("entity_type") or ""
+            except ValueError:
+                value = ""
+        if value:
+            found[str(source_id)] = sys.intern(str(value))
+    return found
+
+
 def _payloads(db: sqlite3.Connection, table: str):
     for (payload,) in db.execute(f"SELECT payload_json FROM {table}"):
         try:
@@ -308,29 +457,32 @@ def _run_identity(run_dir: Path) -> str:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Build digest.json for one saved cross-reference run.")
     parser.add_argument("run_dir", type=Path)
-    parser.add_argument("--large-cents", type=int, default=LARGE_CENTS)
-    parser.add_argument("--large-individual-cents", type=int, default=LARGE_INDIVIDUAL_CENTS)
+    parser.add_argument("--percentile", type=float, default=LARGE_PERCENTILE)
+    parser.add_argument("--median-multiple", type=int, default=LARGE_MEDIAN_MULTIPLE)
     args = parser.parse_args(argv)
     run_dir = args.run_dir.resolve()
     ledger = run_dir / "ledger.sqlite"
     if not ledger.is_file():
         parser.error(f"No decision ledger at {ledger}")
-    for value, name in ((args.large_cents, "--large-cents"),
-                        (args.large_individual_cents, "--large-individual-cents")):
-        if value <= 0:
-            parser.error(f"{name} must be a positive whole number of cents")
+    try:
+        percentile_setting(args.percentile, "--percentile")
+        multiple_setting(args.median_multiple, "--median-multiple")
+    except ValueError as error:
+        parser.error(str(error))
     started = time.monotonic()
     with closing(sqlite3.connect(ledger.as_uri() + "?mode=ro", uri=True)) as db:
         sources = _SourceRows(db)
         digest = build_digest(
             _payloads(db, "decisions"), _payloads(db, "links"), _payloads(db, "changes"),
             run_id=_run_identity(run_dir), generated_at=_now(),
-            entities=sources.field("entity_type"), source_urls=sources.field("pdf_url"),
+            entities=_entity_types(db), source_urls=sources.field("pdf_url"),
             descriptions=sources.receipt_text(),
-            large_cents=args.large_cents, large_individual_cents=args.large_individual_cents)
+            percentile=args.percentile, median_multiple=args.median_multiple)
     atomic(run_dir / "digest.json", digest)
-    refunds, outliers = digest["refunds"], digest["outliers"]
+    refunds, outliers, classes = digest["refunds"], digest["outliers"], digest["basis"]["classes"]
     print(json.dumps({"run_id": digest["run_id"], "source_records": digest["counts"]["source_records"],
+                      "large_thresholds": {name: value["threshold_cents"] for name, value in classes.items()},
+                      "class_records": {name: value["records"] for name, value in classes.items()},
                       "linked_refunds": refunds["linked_count"], "linked_refund_amount": refunds["linked_amount"],
                       "unlinked_adjustments": refunds["unlinked_count"], "unlinked_amount": refunds["unlinked_amount"],
                       "non_giving": outliers["non_giving_count"], "non_giving_amount": outliers["non_giving_amount"],

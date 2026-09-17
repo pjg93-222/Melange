@@ -355,9 +355,12 @@ class CrossReferenceDataTests(unittest.TestCase):
             def record(sid, amount, name="PERSON, ONE", entity="IND", donor_id=None, memo=None, reference=None):
                 return (sid, "A Bank", "UI Fixture", 2024, amount, name, "12345", "2024-01-01",
                         "C00000001", sid, 10, "F3X", "11AI", entity, "accepted", donor_id, memo, reference)
+            # Large is relative to the run, so the individual class needs enough
+            # ordinary receipts to have a distribution the one outlier stands out of.
             db.executemany("INSERT INTO contributions VALUES(" + ",".join("?" for _ in range(18)) + ")",
                            [record("a", 100), record("memo", 100, memo="X", reference="a"),
-                            record("big", 250_000)])
+                            record("big", 250_000),
+                            *(record(f"small{index:02d}", 1) for index in range(20))])
             db.execute("INSERT INTO corporate_giving VALUES(" + ",".join("?" for _ in range(18)) + ")",
                        record("pac", 60, name="A BANK PAC", entity="PAC", donor_id="C00000002"))
         original = database.read_bytes()
@@ -376,7 +379,7 @@ class CrossReferenceDataTests(unittest.TestCase):
         # The runner wrote the digest beside its report, and it is the same file.
         saved = json.loads((self.root / snapshot["run_id"] / "digest.json").read_text(encoding="utf-8"))
         self.assertEqual(saved["run_id"], snapshot["run_id"])
-        self.assertEqual(saved["counts"]["source_records"], 4)
+        self.assertEqual(saved["counts"]["source_records"], 24)
         self.assertEqual(digest["outliers"]["large_count"], 1)
         self.assertEqual(digest["outliers"]["large"][0]["record_id"], "big")
         self.assertEqual(digest["outliers"]["large"][0]["amount"], 250_000.0)
