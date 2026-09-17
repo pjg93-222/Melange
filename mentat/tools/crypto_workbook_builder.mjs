@@ -2239,7 +2239,7 @@ function buildContributorDetail() {
   titleBlock(
     sheet,
     "Contributor Detail",
-    "One row per contributor state / city / ZIP / employer / occupation per company per cycle. Static values: totals reconcile to the cycle totals; smaller rows beyond the row cap are folded into an Other row per company and cycle. A blank ZIP is a contribution whose filed ZIP is missing or not five digits, not a dropped row.",
+    "One row per contributor employer / occupation / street / city / state / ZIP per company per cycle. Static values: totals reconcile to the cycle totals; smaller rows beyond the row cap are folded into an Other row per company and cycle. A blank ZIP is a contribution whose filed ZIP is missing or not five digits, not a dropped row.",
     detailSourceNote(rows.length, folded),
     "M",
   );

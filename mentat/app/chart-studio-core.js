@@ -102,7 +102,10 @@
     return {
       id: id || '',
       name: name || 'Sheet 1',
-      source: {run: '', runName: '', report: '', reportName: '', sheet: '', header: 0, sha256: '', dataset: '', industry: ''},
+      // No dataset or industry key by default: a report worksheet has neither,
+      // and an EMPTY industry is the shape the save gate refuses. Contributions
+      // mode and migrateSheet() set both when a dataset exists.
+      source: {run: '', runName: '', report: '', reportName: '', sheet: '', header: 0, sha256: ''},
       // The ordered series sources a sheet can fan out across - empty means
       // the sheet reads one series, its own `source`. Each entry is
       // {industry, dataset, label}. Populated by contributions mode and by
