@@ -1131,3 +1131,153 @@ test('company overview names the fields a source does not have', () => {
 });
 
 
+
+/* ---- report-workbook guards: the Overview book is polymorphic ------------ */
+
+// A cycle sheet as the published Overview writes it: one Fact Type column
+// stacking three partitions of the SAME money. Summing the sheet whole is 3x.
+const FACT_COLUMNS = [
+  {index: 0, name: 'Fact Type', type: 'category'},
+  {index: 1, name: 'Recipient', type: 'category'},
+  {index: 2, name: 'Amount', type: 'number'}
+];
+const FACT_ROWS = [
+  ['Recipient', 'Alpha PAC', 70], ['Recipient', 'Beta PAC', 30],
+  ['Employee', 'Alpha PAC', 55], ['Employee', 'Beta PAC', 25],
+  ['Master', 'Alpha PAC', 70], ['Master', 'Beta PAC', 30]
+];
+const FACT_DATA = {sheet: '2025-2026', header_row: 1, columns: FACT_COLUMNS, rows: FACT_ROWS,
+  row_numbers: [2, 3, 4, 5, 6, 7], row_count: FACT_ROWS.length, sha256: 'fact'};
+
+const VIEW_COLUMNS = [
+  {index: 0, name: 'View', type: 'category'},
+  {index: 1, name: 'Recipient', type: 'category'},
+  {index: 2, name: 'Total Giving', type: 'number'}
+];
+const VIEW_ROWS = [['Industry', 'Alpha PAC', 70], ['Industry', 'Beta PAC', 30],
+  ['Company', 'Alpha PAC', 70], ['Company', 'Beta PAC', 30]];
+
+const valuesOf = (columns, rows) => index => [...new Set(rows.map(row => String(row[index])))];
+
+test('a Fact Type column earns a Recipient guard, whatever its spacing or case', () => {
+  const guards = core.defaultGuards(FACT_COLUMNS, valuesOf(FACT_COLUMNS, FACT_ROWS));
+  assert.strictEqual(guards.length, 1);
+  assert.strictEqual(guards[0].column, 0);
+  assert.strictEqual(guards[0].value, 'Recipient');
+  assert.match(guards[0].note, /^Cycle sheets stack three fact partitions \(Recipient, Employee, Master\) of the same money\./);
+  const spaced = core.defaultGuards([{index: 4, name: '  fact type '}], {4: [' RECIPIENT ']});
+  assert.strictEqual(spaced.length, 1);
+  assert.strictEqual(spaced[0].column, 4, 'the guard names the column index the filter pill uses');
+});
+
+test('a Fact Type column that never holds Recipient earns no pill either', () => {
+  // The three partitions are what the guard is for. A column of that name
+  // holding something else would be filtered down to nothing, so it is left
+  // alone - the same rule the View guard follows.
+  assert.deepStrictEqual(core.defaultGuards(FACT_COLUMNS, {0: ['Employee', 'Master']}), []);
+  assert.deepStrictEqual(core.defaultGuards(FACT_COLUMNS, {}), [],
+    'no values read means no guard, on either column');
+  assert.deepStrictEqual(core.defaultGuards(FACT_COLUMNS, () => []), []);
+});
+
+test('no Fact Type column means no pill', () => {
+  assert.deepStrictEqual(core.defaultGuards(COLUMNS, {}), []);
+  assert.deepStrictEqual(core.defaultGuards([{index: 0, name: 'Fact Types'}], {}), []);
+  assert.deepStrictEqual(core.defaultGuards([], {}), []);
+  assert.deepStrictEqual(core.defaultGuards(null, null), []);
+});
+
+test('a View column earns a guard only when the sheet actually holds an Industry view', () => {
+  const guards = core.defaultGuards(VIEW_COLUMNS, valuesOf(VIEW_COLUMNS, VIEW_ROWS));
+  assert.strictEqual(guards.length, 1);
+  assert.strictEqual(guards[0].value, 'Industry');
+  assert.match(guards[0].note, /^This sheet repeats every recipient under an Industry view and a Company view\./);
+  // Negative control: the same column name over values that are not views.
+  const other = [['Company', 'Alpha PAC', 70], ['Company', 'Beta PAC', 30]];
+  assert.deepStrictEqual(core.defaultGuards(VIEW_COLUMNS, valuesOf(VIEW_COLUMNS, other)), []);
+  assert.deepStrictEqual(core.defaultGuards(VIEW_COLUMNS, {}), [], 'no values read means no View guard');
+});
+
+test('a sheet carrying both columns is guarded twice, in column order', () => {
+  const columns = [{index: 0, name: 'Fact Type'}, {index: 1, name: 'View'}];
+  const guards = core.defaultGuards(columns, index => index === 0 ? ['Recipient'] : ['Industry']);
+  assert.deepStrictEqual(guards.map(g => [g.column, g.value]), [[0, 'Recipient'], [1, 'Industry']]);
+});
+
+const factSheet = filters => sheet({columns: [{column: 1, aggregation: 'sum'}],
+  rows: [{column: 2, aggregation: 'sum'}], filters: filters || []});
+
+test('the Recipient guard is what makes a cycle sheet sum to the report total', () => {
+  const bare = core.compileConfig(factSheet(), FACT_COLUMNS);
+  const whole = math.build(FACT_DATA, bare);
+  assert.strictEqual(core.grandTotal(whole, bare), 280, 'the unguarded sheet stacks three partitions');
+  const guard = core.defaultGuards(FACT_COLUMNS, valuesOf(FACT_COLUMNS, FACT_ROWS))[0];
+  const config = core.compileConfig(factSheet([{column: guard.column, op: 'equals', value: guard.value}]), FACT_COLUMNS);
+  assert.strictEqual(core.grandTotal(math.build(FACT_DATA, config), config), 100, 'one partition is the report total');
+});
+
+test('the guard pill reads as the plain equality a reader can remove', () => {
+  const guard = core.defaultGuards(FACT_COLUMNS, valuesOf(FACT_COLUMNS, FACT_ROWS))[0];
+  const field = core.fieldAt(core.classifyFields(FACT_COLUMNS), guard.column);
+  assert.strictEqual(core.filterSummary({column: guard.column, op: 'equals', value: guard.value}, field, 3),
+    'Fact Type = Recipient');
+});
+
+test('the four committee-activity sheets carry a caption, and no other sheet does', () => {
+  const note = core.committeeActivitySheet('Downstream Activity');
+  assert.match(note, /^This sheet reports recipient committees\u2019 own activity, not the industry\u2019s giving\./);
+  assert.match(note, /do not reconcile to the report\u2019s Total Giving\.$/);
+  for (const name of ['Downstream Activity', 'Beneficiary Summary', 'Beneficiary Bridge', 'Transfer Paths',
+    'transfer paths', '  BENEFICIARY BRIDGE  '])
+    assert.strictEqual(core.committeeActivitySheet(name), note, name + ' must carry the caption');
+  for (const name of ['Recipient Detail', 'Recipient List', '2025-2026', 'Candidate Funding', '', null, undefined])
+    assert.strictEqual(core.committeeActivitySheet(name), null, String(name) + ' must not carry the caption');
+});
+
+test('a committee-activity caption suppresses the grand total through the engine refusal', () => {
+  const config = core.compileConfig(factSheet(), FACT_COLUMNS);
+  const result = math.build(FACT_DATA, config);
+  assert.strictEqual(core.totalNote(result, config), '', 'nothing refuses this view on its own');
+  result.totalRefusal = core.committeeActivitySheet('Transfer Paths');
+  assert.strictEqual(core.totalNote(result, config), result.totalRefusal);
+  assert.strictEqual(core.grandTotal(result, config), null);
+  assert.strictEqual(core.rowsToMarksSummary(result, config, FACT_COLUMNS).total, null);
+});
+
+test('the catalog splits into the tall Data book and the Overview book', () => {
+  const catalog = {reports: [
+    {index: 11, name: 'Banking Industry Spending Overview.xlsx', industry: 'Banking', kind: 'overview'},
+    {index: 22, name: 'Banking Industry Spending Data.xlsx', industry: 'Banking', kind: 'data'}
+  ]};
+  const groups = core.groupWorksheets(catalog);
+  assert.deepStrictEqual(groups.data.map(r => r.index), [22]);
+  assert.deepStrictEqual(groups.overview.map(r => r.index), [11]);
+  assert.deepStrictEqual(core.groupWorksheets(catalog.reports), groups, 'the body or its rows, either way');
+  assert.strictEqual(core.WORKSHEET_GROUP_LABELS.data, 'Data workbook (tall, chart-ready)');
+  assert.strictEqual(core.WORKSHEET_GROUP_LABELS.overview, 'Overview workbook (report layout)');
+});
+
+test('a catalog of Overview books alone has an empty Data group', () => {
+  const groups = core.groupWorksheets([
+    {index: 1, name: 'Banking Industry Spending Overview.xlsx', kind: 'overview'},
+    {index: 2, name: 'Credit Union Industry Spending Overview.xlsx', kind: 'overview'}
+  ]);
+  assert.deepStrictEqual(groups.data, []);
+  assert.strictEqual(groups.overview.length, 2);
+  assert.deepStrictEqual(core.groupWorksheets([]), {data: [], overview: []});
+  assert.deepStrictEqual(core.groupWorksheets(null), {data: [], overview: []});
+  assert.strictEqual(core.NO_DATA_WORKBOOK_HINT,
+    'The chart-ready Data workbook has not been published for this industry yet.');
+});
+
+test('a server that sends no kind is read from the filename, the same rule at the other end', () => {
+  assert.strictEqual(core.workbookKind({name: 'Banking Industry Spending Data.xlsx'}), 'data');
+  assert.strictEqual(core.workbookKind({name: 'banking industry spending data.xlsx'}), 'data');
+  assert.strictEqual(core.workbookKind({name: 'Banking Industry Spending Overview.xlsx'}), 'overview');
+  assert.strictEqual(core.workbookKind({name: 'Industry Spending Data Appendix.xlsx'}), 'overview');
+  assert.strictEqual(core.workbookKind({name: 'Fixture.xlsx'}), 'overview');
+  // An explicit kind always wins over the filename.
+  assert.strictEqual(core.workbookKind({name: 'Fixture.xlsx', kind: 'data'}), 'data');
+  assert.strictEqual(core.workbookKind({name: 'Banking Industry Spending Data.xlsx', kind: 'overview'}), 'overview');
+  assert.strictEqual(core.workbookKind(null), 'overview');
+});

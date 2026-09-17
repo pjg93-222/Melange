@@ -265,10 +265,39 @@
       if (!el('run').value) { status('No report folder is available.'); return; }
       const body = await api('/api/reports?id=' + encodeURIComponent(el('run').value));
       if (ticket !== revision) return;
-      fill(el('report'), body.reports.map(r => [r.index, r.name]));
+      fillReports(body.reports || []);
       if (!body.reports.length) { status('This folder has no completed reports.'); return; }
       await loadSheets();
     } catch (e) { if (ticket === revision) { status('Reports unavailable.'); failure(e.message); } }
+  }
+  // Both books of an industry arrive in one catalog. The tall companion is the
+  // one a chart should be built from, so it is listed first and picked first;
+  // the Overview keeps its own group because its sheets are a report layout,
+  // not a table. `fill` cannot hold groups, so these options are built here.
+  function worksheetHint() {
+    let node = document.getElementById('studio-worksheet-hint');
+    if (!node) {
+      node = document.createElement('p');
+      node.id = 'studio-worksheet-hint';
+      node.className = 'studio-note';
+      el('worksheet-source').append(node);
+    }
+    return node;
+  }
+  function fillReports(reports) {
+    const groups = core.groupWorksheets(reports);
+    el('report').replaceChildren(...['data', 'overview']
+      .filter(kind => groups[kind].length)
+      .map(kind => {
+        const group = document.createElement('optgroup');
+        group.label = core.WORKSHEET_GROUP_LABELS[kind];
+        group.append(...groups[kind].map(r => new Option(r.name, r.index)));
+        return group;
+      }));
+    if (groups.data.length) el('report').value = String(groups.data[0].index);
+    const hint = worksheetHint();
+    hint.textContent = groups.data.length ? '' : core.NO_DATA_WORKBOOK_HINT;
+    hint.hidden = groups.data.length > 0;
   }
   async function loadSheets() {
     const ticket = ++revision;
@@ -309,6 +338,7 @@
         // selection belongs to the source it was made in.
         selection = [];
         restore(key);
+        applyDefaultGuards();
       }
       const record = {run: fields.run, runName: text(el('run')), report: fields.report, reportName: text(el('report')),
         sheet: data.sheet, header: data.header_row, sha256: data.sha256};
@@ -320,6 +350,40 @@
       renderAll();
       settleSource();
     } catch (e) { if (ticket === revision) { status('Column scan unavailable.'); failure(e.message); } }
+  }
+  // A polymorphic Overview sheet opens with the partition the report itself
+  // totals already selected, on every sheet of this workbook's state, so
+  // nothing sums three stacked partitions before the reader has looked. The
+  // guard is an ordinary filter pill, so removing it stands for as long as this
+  // worksheet stays loaded and comes back the next time it is loaded.
+  let guardsKey = '', guardsList = [];
+  function worksheetGuards() {
+    if (!data || verified()) return [];
+    if (guardsKey !== sourceKey) { guardsKey = sourceKey; guardsList = core.defaultGuards(data.columns, members); }
+    return guardsList;
+  }
+  function applyDefaultGuards() {
+    const guards = worksheetGuards();
+    if (!guards.length) return;
+    for (const state of sheets) {
+      const filters = Array.isArray(state.filters) ? state.filters : [];
+      const added = guards.filter(guard => !filters.some(f => Number(f.column) === guard.column))
+        .map(guard => ({column: guard.column, op: 'equals', value: guard.value, stage: 'row'}));
+      if (added.length) state.filters = [...filters, ...added];
+    }
+  }
+  // What a report worksheet says on its own account: the guard currently
+  // holding one partition, and the sheets whose money is a recipient
+  // committee's rather than the industry's.
+  function worksheetNotes() {
+    if (!data || verified()) return [];
+    const committee = core.committeeActivitySheet(data.sheet);
+    const filters = sheet().filters || [];
+    const active = worksheetGuards()
+      .filter(guard => filters.some(f => Number(f.column) === guard.column &&
+        f.op === 'equals' && String(f.value) === guard.value))
+      .map(guard => guard.note);
+    return committee ? [committee, ...active] : active;
   }
   const text = select => select.selectedOptions[0] ? select.selectedOptions[0].textContent : '';
 
@@ -1555,7 +1619,8 @@
       ? paint.measureLabel(report.config, null, data) + ' · ' + markName
       : 'Build a view';
     if (!report.config || report.issues.length) {
-      el('note').textContent = report.issues.join(' ') || 'Drag a field onto Columns or Rows.';
+      el('note').textContent = [...worksheetNotes(),
+        report.issues.join(' ') || 'Drag a field onto Columns or Rows.'].join(' ');
       el('canvas').hidden = false;
       el('table').hidden = true;
       return;
@@ -1589,7 +1654,13 @@
       'Split multi-value cells: ' + (report.config.splitMulti ? 'on' : 'off') + '.',
       'SHA-256: ' + data.sha256 + '.'].join(' ');
     if (result.note) lastScope += ' ' + result.note;
-    const notes = report.notes.slice();
+    // Recipient-committee activity is not the industry's money, so a grand
+    // total over it would print a figure that reads as one the report
+    // reconciles to. The engine's own refusal field carries the reason into
+    // totalNote(), grandTotal() and the status line at once.
+    const committee = core.committeeActivitySheet(data.sheet);
+    if (committee && !result.totalRefusal) result.totalRefusal = committee;
+    const notes = [...worksheetNotes(), ...report.notes];
 
     if (report.renderMode === 'table') {
       el('canvas').hidden = true;
@@ -1608,7 +1679,9 @@
       overlayReference(drawn.svg, drawn.plot, references);
       if (analytics.totals) {
         const refusal = core.totalNote(result, report.config);
-        if (refusal) notes.push(refusal);
+        // The committee-activity caption is already in the list; it is the
+        // same sentence, and saying it twice reads as two reasons.
+        if (refusal) { if (!notes.includes(refusal)) notes.push(refusal); }
         else if (!overlayTotal(drawn.svg, core.grandTotal(result, report.config))) {
           notes.push('A grand total is not defined for this view.');
         }

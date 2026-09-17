@@ -210,6 +210,86 @@
     return /^\d{4}$/.test(text) ? text : '';
   }
 
+  /* ------------------------------------------------- report-workbook guards */
+
+  // The published `<Industry> Industry Spending Overview.xlsx` is a report
+  // layout, not a table. Its cycle sheets stack three partitions of the same
+  // money under `Fact Type` - Recipient, Employee and Master - and only the
+  // Recipient partition matches the report's own Total Giving; `Recipient List`
+  // repeats every recipient once under an Industry view and again under a
+  // Company view. Summing such a sheet whole triples or doubles it, so a
+  // worksheet that carries one of those columns opens with the partition the
+  // report itself totals already selected. The guard is an ordinary filter
+  // pill: one click removes it, and the note says what removing it shows.
+  // Each guard needs its own value to be present in the column: a sheet that
+  // names the column but never holds the value would otherwise open empty.
+  const WORKSHEET_GUARDS = [
+    {column: 'Fact Type', value: 'Recipient', needsValue: true,
+      note: 'Cycle sheets stack three fact partitions (Recipient, Employee, Master) of the same money. Only one partition matches the report total; Recipient is selected. Remove this filter to see the others.'},
+    {column: 'View', value: 'Industry', needsValue: true,
+      note: 'This sheet repeats every recipient under an Industry view and a Company view. Industry is selected so amounts are not doubled.'}
+  ];
+
+  // These four sheets carry the recipient committees' own receipts and
+  // disbursements. That money is the committee's, not the industry's, and it
+  // is orders of magnitude larger, so it is never presented as an industry
+  // total.
+  const COMMITTEE_ACTIVITY_SHEETS = ['Downstream Activity', 'Beneficiary Summary',
+    'Beneficiary Bridge', 'Transfer Paths'];
+  const COMMITTEE_ACTIVITY_NOTE = 'This sheet reports recipient committees\u2019 own activity, not the industry\u2019s giving. Totals here are not industry money and do not reconcile to the report\u2019s Total Giving.';
+
+  const WORKSHEET_GROUP_LABELS = {data: 'Data workbook (tall, chart-ready)',
+    overview: 'Overview workbook (report layout)'};
+  const NO_DATA_WORKBOOK_HINT = 'The chart-ready Data workbook has not been published for this industry yet.';
+
+  const guardText = value => String(value == null ? '' : value).trim();
+  const guardSame = (a, b) => guardText(a).toLowerCase() === guardText(b).toLowerCase();
+
+  // `columns` is the scanned column metadata. `values` reads one column's
+  // values: either a function of the column index, or anything indexable by it.
+  // Only the `View` guard reads values, and only for the column it has already
+  // matched by name, so a caller never scans a sheet this returns nothing for.
+  function defaultGuards(columns, values) {
+    const read = index => {
+      const list = typeof values === 'function' ? values(index) : (values || {})[index];
+      return Array.isArray(list) ? list : [];
+    };
+    const guards = [];
+    (columns || []).forEach((column, position) => {
+      const index = Number.isInteger(column && column.index) ? column.index : position;
+      for (const guard of WORKSHEET_GUARDS) {
+        if (!guardSame(column && column.name, guard.column)) continue;
+        // A column of either name can appear elsewhere without holding the
+        // value this guard selects, and filtering on a value the sheet does
+        // not have would empty the chart instead of correcting it.
+        if (guard.needsValue && !read(index).some(value => guardSame(value, guard.value))) continue;
+        guards.push({column: index, name: guardText(column && column.name),
+          value: guard.value, note: guard.note});
+      }
+    });
+    return guards;
+  }
+
+  const committeeActivitySheet = name =>
+    COMMITTEE_ACTIVITY_SHEETS.some(sheet => guardSame(sheet, name)) ? COMMITTEE_ACTIVITY_NOTE : null;
+
+  // The catalog tags every workbook with `kind` (server.py published_reports).
+  // A server that does not send it still names the companion in the filename,
+  // which is the same rule read from the other end.
+  const DATA_WORKBOOK_NAME = /\s+Industry Spending Data\.xlsx$/i;
+  function workbookKind(entry) {
+    const kind = guardText(entry && entry.kind).toLowerCase();
+    if (kind === 'data' || kind === 'overview') return kind;
+    return DATA_WORKBOOK_NAME.test(guardText(entry && entry.name)) ? 'data' : 'overview';
+  }
+  function groupWorksheets(catalog) {
+    const rows = Array.isArray(catalog) ? catalog
+      : Array.isArray(catalog && catalog.reports) ? catalog.reports : [];
+    const data = [], overview = [];
+    for (const entry of rows) (workbookKind(entry) === 'data' ? data : overview).push(entry);
+    return {data: data, overview: overview};
+  }
+
   /* --------------------------------------------------------------- compile */
 
   const positiveInteger = value => {
@@ -1043,6 +1123,8 @@
     companyOverviewPresets, companyOverviewMissing, companyOverviewSheet,
     classifyFields, fieldAt, subjectField, pill, shelf, createSheet, clearSheet, swapShelves, sourceKey,
     carriedFilterValue, graphCycleValue, quickAddZone, migrateSheet,
+    WORKSHEET_GROUP_LABELS, NO_DATA_WORKBOOK_HINT, COMMITTEE_ACTIVITY_NOTE,
+    defaultGuards, committeeActivitySheet, workbookKind, groupWorksheets,
     compileConfig, compileReport,
     showMeSelection, showMeEligibility, showMeApply, recommendedTile,
     sortResult, sortLocked, markValues, referenceValues, grandTotal, totalNote, rowsToMarksSummary,
