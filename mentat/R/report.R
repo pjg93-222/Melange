@@ -2015,21 +2015,33 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
   }
   # Exports read immutable snapshots, including pre-migration databases. Missing
   # source metadata stays blank/unverified instead of inventing receipt roles.
-  receipt_projection <- function(table) {
-    fields <- c("receipt_type_full", "filing_form", "receipt_type", "line_number", "line_number_label",
-                "file_num", "report_year", "report_type",
-                "memo_code", "memoed_subtotal", "memo_text", "back_reference_transaction_id", "back_reference_schedule_name")
+  optional_projection <- function(table, fields) {
     present <- DBI::dbListFields(connection, table)
     paste0(paste(vapply(fields, function(field) {
       if (field %in% present) field else paste0("NULL AS ", field)
     }, character(1L)), collapse = ", "), ",")
+  }
+  receipt_projection <- function(table) {
+    optional_projection(table, c(
+      "receipt_type_full", "filing_form", "receipt_type", "line_number", "line_number_label",
+      "file_num", "report_year", "report_type",
+      "memo_code", "memoed_subtotal", "memo_text", "back_reference_transaction_id", "back_reference_schedule_name"))
+  }
+  # contributor_street_1/2 arrived with the street-column migration. Snapshots
+  # taken before it do not carry the columns, and SELECTing them
+  # unconditionally aborts the whole export with "no such column" before any
+  # guard downstream can run. Give them the same tolerance the receipt
+  # metadata above already has: absent means blank, never a failed export.
+  street_projection <- function(table) {
+    optional_projection(table, c("contributor_street_1", "contributor_street_2"))
   }
   people <- data.table::as.data.table(DBI::dbGetQuery(
     connection,
     paste(
       "SELECT contributor_name, committee_name, contribution_receipt_date,",
       "contribution_receipt_amount, contributor_city, contributor_state,",
-      "contributor_zip, contributor_employer, contributor_occupation, contributor_street_1, contributor_street_2, company, sub_id, matched_variant,",
+      "contributor_zip, contributor_employer, contributor_occupation,",
+      street_projection("contributions"), "company, sub_id, matched_variant,",
       "committee_id, recipient_committee_type, recipient_committee_designation,",
       "two_year_transaction_period, entity_type, is_entity_contributor,",
       receipt_projection("contributions"), "transaction_id, pdf_url,",
@@ -2048,7 +2060,8 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
     paste(
       "SELECT contributor_name, committee_name, contribution_receipt_date,",
       "contribution_receipt_amount, contributor_city, contributor_state,",
-      "contributor_zip, contributor_employer, contributor_occupation, contributor_street_1, contributor_street_2, company, sub_id, matched_variant,",
+      "contributor_zip, contributor_employer, contributor_occupation,",
+      street_projection("corporate_giving"), "company, sub_id, matched_variant,",
       "committee_id, recipient_committee_type, recipient_committee_designation,",
       "cycle AS two_year_transaction_period, entity_type, is_entity_contributor,",
       receipt_projection("corporate_giving"), "transaction_id, pdf_url, '' AS conduit_committee_id,",
