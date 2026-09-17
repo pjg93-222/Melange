@@ -1818,3 +1818,5 @@ $177,980,393.39 exactly):**
 - **R8** `evidence-csv.js`: the PAC option text pluralises ("1 row" / "2 rows").
 
 **Paul restarts 8806/8802 after commit; existing imports re-read themselves on the first listing.**
+
+**COMMITTED** as `882f1f93f` (2026-09-17 12:59 ET, 18 files, +6,257/-75: the 15 patch files plus S7_DESIGN.md, S7_BRAIN_UPDATE.md and the patch itself; per-file numstat identical to patches/S7_pac_evidence_categories.patch, no foreign hunks). Fable double-check before the ledger entry: index empty, HEAD f0181e523 -> 882f1f93f only, the 12:36 report/tidy commits and S3f touch no evidence file, the companion Data workbook (tools/build_tidy_workbook.py) writes the same Recipient Category / Record Type / Include in Analysis / Inclusion Reason headers S7 reads. Paul re-runs the launcher for 8806/8802; existing imports re-read themselves on the first listing.

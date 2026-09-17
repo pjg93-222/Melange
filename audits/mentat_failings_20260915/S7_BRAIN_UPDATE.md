@@ -4,7 +4,7 @@
 
 - MENTAT FAILINGS S7 (2026-09-17, worktree pac-evidence-filters-724237; code in C:\Users\pgoff\Mentat
   on codex/mentat-crypto): PAC evidence committee categories, type filter and corporate rows BUILT,
-  UNCOMMITTED at write time (patch audits/mentat_failings_20260915/patches/S7_pac_evidence_categories.patch,
+  COMMITTED as 882f1f93f at 12:59 ET (patch audits/mentat_failings_20260915/patches/S7_pac_evidence_categories.patch,
   185,507 B, 15 diffs, cut as bytes, `git apply --cached --check` exit 0 on f0181e523). Paul's brief:
   "Fairshake missing within Crypto ... filter ... candidate committees, trade associations, carey's,
   company pac's". DIAGNOSIS (measured on 8806/8802, data root C:\Users\pgoff\AppData\Local\Mentat\console):
