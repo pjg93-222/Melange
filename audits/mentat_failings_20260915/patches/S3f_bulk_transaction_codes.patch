@@ -1,0 +1,462 @@
+diff --git a/audits/mentat_failings_20260915/HANDOFF.md b/audits/mentat_failings_20260915/HANDOFF.md
+index 845d9b133..226d35546 100644
+--- a/audits/mentat_failings_20260915/HANDOFF.md
++++ b/audits/mentat_failings_20260915/HANDOFF.md
+@@ -1635,3 +1635,31 @@ output for every command above). **Patch:** `patches/S3_cap_500MB_and_followups.
+ **Verified:** 55 tests across `test_report_directory_console`, `test_desktop_launcher` (drives the real script) and `test_evidence_readers`; stream 18. The launcher script parses under PowerShell 5.1.
+ 
+ **Paul's next step:** run the launcher again (not only restart the console): the launcher file itself changed.
++
++
++### S3f addendum — FEC bulk TRANSACTION_TP → channel ruling (2026-09-17 ~10:00 ET, Fable directly, after /ecc:council)
++
++**Paul:** "/ecc:council You rule on the mapping" — the question S3b left open in `receipts/S3b_bulk_channel_proposal.md` (bulk rows import but every one stays `unsupported` because `normalize()` never read `TRANSACTION_TP`) was delegated to this session to decide.
++
++**Council (three fresh voices given only the proposal; their replies are in the session transcript):**
++- Pragmatist: ship the proposal today and add an unsupported-dollar line so a gap is loud; flagged that 18K, 12 and 18G were missing from the receipt list and that 15J is memo-only by definition.
++- Skeptic: do not ratify a second hand-typed classifier; translate codes to form lines and reuse the openFEC classifier; accept the ruling only when one committee's bulk totals reconcile to openFEC `/totals`; give excluded codes a "recognised, excluded" state so `unsupported` stays a tripwire. Surprise: "Disbursements" can never reconcile to a committee's reported disbursements because operating expenditures live in the separate oppexp file.
++- Critic: ship the architecture (editable table, visible-but-unsupported, memo legs out, Form 7 out) but not the code list as written: the 20-series are loan repayments and Levin spending, not refunds; 18K/18G missing while 24G is counted; amended filings double count. Surprise: independent expenditures appear twice by design, once on the 24/48-hour notice and again on the periodic report; Form 7 rows are filed under the corporation's own filer ID, so the Form 7 question is moot at committee level.
++
++**Ruling (recorded verbatim in the table's `ruling` field, `mentat/inputs/fec_transaction_types.json`):**
++- Receipts: 10, 11, 12, 15, 15C, 15E, 15Z, 18G, 18K, 18U, 19, 30, 31, 32.
++- Disbursements: 22Y, 22Z, 23Y, 24C, 24G, 24K, 24P, 24R, 24U, 24Z, 28L, 29. Every bulk catalog carries the warning that this channel is contributions, transfers and refunds made, and that operating expenditures are in the separate oppexp file (Skeptic's surprise adopted as a label rather than a rename, so the channel name matches the workbook and openFEC paths).
++- Independent spending: 24E → Support, 24A → Oppose, direction taken from the code because bulk files have no support/oppose column.
++- Excluded by ruling, visible, out of totals, each row saying "excluded by ruling: <reason>": 24F and 24N (Form 7 communication costs are the corporation's or union's own spending, not the PAC's), 15J (memo share of a joint fundraiser), 20A, 20B, 20C, 20F, 20G, 20R, 20V (Levin and loan repayments, not refunds; Critic's finding adopted).
++- Memo entries (`MEMO_CD = X`, or the J-suffixed memo codes) keep their channel and direction and stay out of totals with "Memo entry; not counted in totals."
++- 24/48-hour notice reports (`RPT_TP` 24 or 48) stay out of totals with "Notice report (24/48-hour); the periodic filing carries this amount." (Critic's surprise adopted.)
++- Any code not in the table stays unsupported with "Transaction type code X is not in the mapping table (inputs/fec_transaction_types.json)." and the generic "does not identify a supported type" issue is not added on top.
++- The table ships with `verified: false`; every bulk catalog warns that it has not been checked against the FEC's published list until Paul flips the flag. A missing or unreadable table maps nothing and says so in the catalog.
++
++**Rejected:** reusing the openFEC classifier through a code → form-line translation. Bulk rows lack the fields that classifier reads, so the translation would be a second classifier under another name, which is the Skeptic's own stated risk. **Deferred, not rejected:** amended-filing de-duplication (`AMNDT_IND` / `FILE_NUM`, latest filing wins) is the next data rule for Paul; a reconciliation test of one real committee's bulk totals against openFEC `/totals` is the follow-up that would let `verified` flip on evidence instead of by eye.
++
++**Changed:** `app/evidence_csv.py` (`transaction_types()` reads the table once per process; `normalize()` reads only the bulk key `transaction_tp`, so a Mentat workbook's `transaction_type` column keeps its existing behaviour; `bulk_warnings()` on every bulk catalog), `mentat/inputs/fec_transaction_types.json` (new; `mentat/inputs/` is gitignored as a whole, so the file is force-added and is the first tracked file in that folder), `tests/test_evidence_readers.py` (class `BulkCodeMapping`, three tests). `server.py` untouched.
++
++**Evidence (`receipts/S3f_bulk_codes.txt`):** red on HEAD d71d2b813 (11-row bulk fixture imports with `supported_rows` 0, "0 != 6"; `transaction_types` missing); green after: `test_evidence_readers` 44 under the system Python (openpyxl fallback), readers + legacy + collector 61 under the launcher Python (calamine), stream 18. Fixture totals: Receipts $350 (2 rows), Disbursements $530 (2), Independent spending support $1,000 (1), oppose $700 (1); the 24F, 15J, memo, notice and unknown-code rows stay visible and out of totals with the texts above.
++
++**Paul's next steps:** restart the console (server code changed; the launcher did not); check the JSON against fec.gov's transaction type code list and set `verified` to true; rule on amended-filing de-duplication.
+diff --git a/audits/mentat_failings_20260915/receipts/S3f_bulk_codes.txt b/audits/mentat_failings_20260915/receipts/S3f_bulk_codes.txt
+new file mode 100644
+index 000000000..e5a315ca7
+--- /dev/null
++++ b/audits/mentat_failings_20260915/receipts/S3f_bulk_codes.txt
+@@ -0,0 +1,53 @@
++S3f receipt: FEC bulk TRANSACTION_TP -> channel mapping (council ruling), 2026-09-17, Fable directly
++=====================================================================================================
++
++Files in this change
++  mentat/app/evidence_csv.py            transaction_types(), unknown_code_issue(), excluded_code_issue(), bulk_warnings(); normalize() reads transaction_tp
++  mentat/inputs/fec_transaction_types.json   the ruling table (schema_version 1, verified: false) -- force-added, mentat/inputs/ is gitignored
++  mentat/tests/test_evidence_readers.py  class BulkCodeMapping (3 tests)
++  mentat/app/server.py                   NOT touched (git status shows no diff)
++
++Red before (HEAD d71d2b813 reader swapped in for the run, working copy restored byte for byte afterwards)
++  $ python -m unittest tests.test_evidence_readers.BulkCodeMapping
++  FAIL:  test_codes_map_and_exclusions_hold      AssertionError: 0 != 6   (11 bulk rows imported, supported_rows 0, no totals)
++  ERROR: test_missing_table_maps_nothing         module has no transaction_types
++  ok:    test_workbook_transaction_type_column_is_untouched   (pins existing workbook behaviour; passes on both)
++  Ran 3 tests in 0.219s   FAILED (failures=1, errors=1)
++
++Green after (final run, with the excluded-by-ruling wording)
++  system Python (openpyxl fallback)
++    $ python -m unittest tests.test_evidence_readers
++    Ran 44 tests in 70.254s  OK        (host under load; the same suite ran in 5.1 s one run earlier)
++    $ python -m unittest tests.test_evidence_csv_stream
++    Ran 18 tests in 16.680s  OK
++  launcher Python C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe (python-calamine)
++    $ python.exe -m unittest tests.test_evidence_readers tests.test_evidence_csv tests.test_pac_evidence_errors
++    Ran 61 tests in 9.259s   OK
++
++Fixture (BulkCodeMapping.build): indiv26.txt, bundled indiv header, 11 pipe rows, one committee C00000001
++  row  code  amount  extra            expected
++  1    15    100                      Receipts
++  2    18K   250                      Receipts
++  3    22Y   30                       Disbursements
++  4    24K   500                      Disbursements
++  5    24E   1000                     Independent spending / support
++  6    24A   700                      Independent spending / oppose
++  7    24F   90                       unsupported: "Transaction type code 24F is excluded by ruling: Form 7 communication cost for a candidate: the corporation's or union's own spending, not the PAC's."
++  8    15J   40                       unsupported: "Memo entry; not counted in totals."
++  9    15    60      MEMO_CD=X        channel Receipts, unsupported: "Memo entry; not counted in totals."
++  10   24E   300     RPT_TP=24        direction Support, unsupported: "Notice report (24/48-hour); the periodic filing carries this amount."
++  11   99Z   5                        unsupported: "Transaction type code 99Z is not in the mapping table (inputs/fec_transaction_types.json)."
++  For rows 7 and 11 the generic "The CSV does not identify a supported receipt or activity type." issue is NOT added.
++  catalog: row_count 11, supported_rows 6; totals Receipts (350.0, 2), Disbursements (530.0, 2), IE support (1000.0, 1), IE oppose (700.0, 1)
++  catalog warnings carry: "Bulk itemized files: Disbursements here are contributions, transfers and refunds made; operating expenditures are in the separate oppexp file."
++                         "The transaction-type table inputs/fec_transaction_types.json has not been verified against the FEC's published list."
++  missing table (INPUTS patched to a folder without the file): supported_rows 0, warning "... is missing, so every bulk row stays unsupported."
++
++Two source defects hit while landing the test (both mine, both fixed before this run)
++  - the fixture line was written with real CR LF inside the string literal -> SyntaxError line 1101; rewritten with the escape sequences
++  - the channel label 'Independent spending · support' had a stray backslash before the middle dot -> KeyError; byte-level fix
++
++Not in this change (recorded in HANDOFF S3f addendum)
++  - amended filings (AMNDT_IND / FILE_NUM) are not de-duplicated: an amended report's rows and the original's both count
++  - no reconciliation test against openFEC /totals for a real committee yet
++  - the table is marked verified: false until Paul checks it against the FEC's current code list and flips the flag
+diff --git a/mentat/app/evidence_csv.py b/mentat/app/evidence_csv.py
+index 418b47fdb..ff330990c 100644
+--- a/mentat/app/evidence_csv.py
++++ b/mentat/app/evidence_csv.py
+@@ -11,6 +11,7 @@ from contextlib import closing, contextmanager
+ import csv
+ from datetime import date as date_type, datetime, time as time_type, timedelta, timezone
+ from decimal import Decimal, InvalidOperation
++from functools import lru_cache
+ import hashlib
+ import io
+ import json
+@@ -336,6 +337,53 @@ def cycle(value):
+     return ''
+ 
+ 
++MEMO_ISSUE = 'Memo entry; not counted in totals.'
++NOTICE_ISSUE = 'Notice report (24/48-hour); the periodic filing carries this amount.'
++TRANSACTION_TABLE = 'inputs/fec_transaction_types.json'
++
++
++@lru_cache(maxsize=1)
++def transaction_types():
++    """The FEC bulk TRANSACTION_TP -> channel table, read once from the inputs folder.
++
++    The file is Paul's to edit (see its "ruling" field). A missing or unreadable
++    file maps nothing, so every bulk row stays unsupported and visible rather
++    than counted under a guess.
++    """
++    path = INPUTS / 'fec_transaction_types.json'
++    try:
++        data = json.loads(path.read_text(encoding='utf-8-sig'))
++    except (OSError, ValueError):
++        return {'verified': False, 'codes': {}, 'excluded': {}, 'memo_codes': set(), 'notice_report_types': set(), 'missing': True}
++    codes = {str(code).upper(): value for code, value in (data.get('codes') or {}).items()
++             if isinstance(value, dict) and value.get('kind') in ('receipt', 'disbursement', 'independent_spending')}
++    excluded = {str(code).upper(): str(reason) for code, reason in (data.get('excluded_by_ruling') or {}).items()}
++    return {'verified': bool(data.get('verified')), 'codes': codes, 'excluded': excluded,
++            'memo_codes': {str(code).upper() for code in data.get('memo_codes') or []},
++            'notice_report_types': {str(code).upper() for code in data.get('notice_report_types') or []},
++            'missing': False}
++
++
++def unknown_code_issue(code):
++    return f'Transaction type code {code} is not in the mapping table ({TRANSACTION_TABLE}).'
++
++
++def excluded_code_issue(code, reason):
++    return f'Transaction type code {code} is excluded by ruling: {reason}.'
++
++
++def bulk_warnings():
++    """Catalog notes for FEC bulk imports: what the channels mean here and whether the table is verified."""
++    table = transaction_types()
++    notes = ['Bulk itemized files: Disbursements here are contributions, transfers and refunds made; '
++             'operating expenditures are in the separate oppexp file.']
++    if table['missing']:
++        notes.append(f'The transaction-type table {TRANSACTION_TABLE} is missing, so every bulk row stays unsupported.')
++    elif not table['verified']:
++        notes.append(f'The transaction-type table {TRANSACTION_TABLE} has not been verified against the FEC\'s published list.')
++    return notes
++
++
+ def normalize(raw, row_number, columns, extra_cells=()):
+     row = dict(zip(columns, raw.values()))
+     issues = []
+@@ -346,6 +394,28 @@ def normalize(raw, row_number, columns, extra_cells=()):
+         issues.append('A unique valid FEC committee ID is missing or conflicting.')
+     specific = [(kind, amount_fields, dates) for kind,amount_fields,dates in SCHEMAS if first(row, amount_fields)]
+     explicit_kind = TYPES.get(key(first(row, ('record_type', 'activity_type', 'schedule', 'schedule_type', 'type', 'transaction_type'))))
++    # FEC bulk rows carry their type as the commission's TRANSACTION_TP code.
++    # The code -> channel table is Paul's data file; memo entries and 24/48-hour
++    # notice reports are classified but kept out of totals; an unlisted code
++    # names the table it is missing from. Only the bulk key is read here, so a
++    # workbook's own transaction_type column keeps its existing behaviour.
++    code = row.get('transaction_tp', '').strip().upper()
++    code_direction, code_issue = '', ''
++    if code:
++        table = transaction_types()
++        entry = table['codes'].get(code)
++        if entry:
++            explicit_kind, code_direction = entry['kind'], entry.get('direction', '')
++        if row.get('memo_cd', '').strip().upper() == 'X' or code in table['memo_codes']:
++            code_issue = MEMO_ISSUE
++        elif row.get('rpt_tp', '').strip().upper() in table['notice_report_types']:
++            code_issue = NOTICE_ISSUE
++        elif code in table['excluded']:
++            code_issue = excluded_code_issue(code, table['excluded'][code])
++        elif entry is None:
++            code_issue = unknown_code_issue(code)
++        if code_issue:
++            issues.append(code_issue)
+     kind, amount_raw, date_raw = 'unsupported', '', ''
+     basis = 'dated observation'
+     if len(specific) == 1:
+@@ -359,7 +429,7 @@ def normalize(raw, row_number, columns, extra_cells=()):
+         amount_raw, date_raw = first(row, AMOUNT_FIELDS), first(row, DATE_FIELDS)
+         kind = explicit_kind or 'unsupported'
+     direction_raw = first(row, ('support_oppose', 'support_oppose_indicator', 'direction'))
+-    direction = DIRECTIONS.get(key(direction_raw), 'Unknown')
++    direction = code_direction or DIRECTIONS.get(key(direction_raw), 'Unknown')
+     selected_cycle = cycle(first(row, CYCLE_FIELDS))
+     if (not specific and kind == 'unsupported' and row.get('net_included_amount', '').strip()
+             and row.get('source_committee_id', '').strip() and direction_raw and selected_cycle):
+@@ -372,7 +442,7 @@ def normalize(raw, row_number, columns, extra_cells=()):
+         issues.append('The transaction date is missing or invalid; no date was inferred.')
+     if direction_raw and key(direction_raw) not in DIRECTIONS and kind in ('independent_spending', 'reported_aggregate'):
+         issues.append('The activity direction is not recognized; it was not assigned to support or opposition.')
+-    if kind == 'unsupported':
++    if kind == 'unsupported' and not code_issue:
+         issues.append('The CSV does not identify a supported receipt or activity type.')
+     if extra_cells:
+         issues.append('This row contains more values than its header.')
+@@ -902,7 +972,7 @@ def bulk_rows(open_bytes, stems, record, size):
+     """The rows of one bulk file or zip member, under a resolved header."""
+     encoding = text_encoding(open_bytes)
+     headers, header_source = bulk_headers(stems, record.get('header_path') or '')
+-    warnings = [f'Header taken from {header_source}.']
++    warnings = [f'Header taken from {header_source}.', *bulk_warnings()]
+     if encoding == 'cp1252':
+         warnings.append(M_CP1252)
+     meta = {'encoding':encoding, 'delimiter':'|', 'header_source':header_source, 'sheets':[]}
+diff --git a/mentat/inputs/fec_transaction_types.json b/mentat/inputs/fec_transaction_types.json
+new file mode 100644
+index 000000000..c383b7a5f
+--- /dev/null
++++ b/mentat/inputs/fec_transaction_types.json
+@@ -0,0 +1,148 @@
++{
++  "schema_version": 1,
++  "verified": false,
++  "source": "FEC transaction type code descriptions (fec.gov, Campaign finance data: transaction type codes). Set verified to true after checking this file against the commission's current table.",
++  "ruling": "2026-09-17, Fable after /ecc:council. Unlisted codes, memo codes, memo-flagged rows and 24/48-hour notice reports stay visible and out of totals. Form 7 communication costs (24F/24N) are a corporation's or union's own spending, not the PAC's, and stay unsupported. The 20-series (loan repayments, Levin) are not refunds and stay unsupported. Amended filings are not de-duplicated yet.",
++  "codes": {
++    "10": {
++      "kind": "receipt",
++      "label": "Contribution to a Super PAC, hybrid PAC or non-federal account from an individual, partnership or LLC"
++    },
++    "11": {
++      "kind": "receipt",
++      "label": "Tribal contribution"
++    },
++    "12": {
++      "kind": "receipt",
++      "label": "Transfer from an affiliated committee"
++    },
++    "15": {
++      "kind": "receipt",
++      "label": "Contribution from an individual, partnership or LLC"
++    },
++    "15C": {
++      "kind": "receipt",
++      "label": "Contribution from the candidate"
++    },
++    "15E": {
++      "kind": "receipt",
++      "label": "Earmarked contribution from an individual, partnership or LLC"
++    },
++    "15Z": {
++      "kind": "receipt",
++      "label": "In-kind contribution received from a registered filer"
++    },
++    "18G": {
++      "kind": "receipt",
++      "label": "Transfer in from an affiliated committee"
++    },
++    "18K": {
++      "kind": "receipt",
++      "label": "Contribution received from a registered filer (PAC to PAC)"
++    },
++    "18U": {
++      "kind": "receipt",
++      "label": "Contribution received from an unregistered committee"
++    },
++    "19": {
++      "kind": "receipt",
++      "label": "Electioneering communication donation received"
++    },
++    "30": {
++      "kind": "receipt",
++      "label": "Convention account receipt"
++    },
++    "31": {
++      "kind": "receipt",
++      "label": "Headquarters account receipt"
++    },
++    "32": {
++      "kind": "receipt",
++      "label": "Recount account receipt"
++    },
++    "22Y": {
++      "kind": "disbursement",
++      "label": "Contribution refund to an individual, partnership or LLC"
++    },
++    "22Z": {
++      "kind": "disbursement",
++      "label": "Contribution refund to a registered filer"
++    },
++    "23Y": {
++      "kind": "disbursement",
++      "label": "Contribution refund to an unregistered committee"
++    },
++    "24C": {
++      "kind": "disbursement",
++      "label": "Coordinated party expenditure"
++    },
++    "24G": {
++      "kind": "disbursement",
++      "label": "Transfer out to an affiliated committee"
++    },
++    "24K": {
++      "kind": "disbursement",
++      "label": "Contribution made to a non-affiliated committee"
++    },
++    "24P": {
++      "kind": "disbursement",
++      "label": "Contribution made to a possible federal candidate, including in-kind"
++    },
++    "24R": {
++      "kind": "disbursement",
++      "label": "Election recount disbursement"
++    },
++    "24U": {
++      "kind": "disbursement",
++      "label": "Contribution made to an unregistered committee"
++    },
++    "24Z": {
++      "kind": "disbursement",
++      "label": "In-kind contribution made to a registered filer"
++    },
++    "28L": {
++      "kind": "disbursement",
++      "label": "Refund of a bundled contribution"
++    },
++    "29": {
++      "kind": "disbursement",
++      "label": "Electioneering communication disbursement"
++    },
++    "24E": {
++      "kind": "independent_spending",
++      "direction": "Support",
++      "label": "Independent expenditure advocating the election of a candidate"
++    },
++    "24A": {
++      "kind": "independent_spending",
++      "direction": "Oppose",
++      "label": "Independent expenditure opposing the election of a candidate"
++    }
++  },
++  "excluded_by_ruling": {
++    "24F": "Form 7 communication cost for a candidate: the corporation's or union's own spending, not the PAC's",
++    "24N": "Form 7 communication cost against a candidate: the corporation's or union's own spending, not the PAC's",
++    "15J": "Memo: recipient committee's share of a joint fundraising contribution",
++    "20A": "Levin non-federal disbursement",
++    "20B": "Loan repayment to a bank",
++    "20C": "Loan repayment to the candidate",
++    "20F": "Loan repayment to a candidate",
++    "20G": "Loan repayment to an individual",
++    "20R": "Loan repayment to a registered filer",
++    "20V": "Loan repayment to a vendor"
++  },
++  "memo_codes": [
++    "10J",
++    "11J",
++    "15J",
++    "18J",
++    "19J",
++    "30J",
++    "31J",
++    "32J"
++  ],
++  "notice_report_types": [
++    "24",
++    "48"
++  ]
++}
+diff --git a/mentat/tests/test_evidence_readers.py b/mentat/tests/test_evidence_readers.py
+index 43ea21e16..4da83e9ac 100644
+--- a/mentat/tests/test_evidence_readers.py
++++ b/mentat/tests/test_evidence_readers.py
+@@ -1074,5 +1074,86 @@ class MentatWorkbookSelection(unittest.TestCase):
+             self.assertEqual(job['state'], 'failed')
+             self.assertEqual(job['message'], 'No worksheet in this workbook has a Committee ID column. Sheets: Master Overview.')
+             self.assertEqual(job['sheets'], ['Master Overview'])
++
++
++# ---------------------------------------------------------------------------
++# S3f: the FEC bulk TRANSACTION_TP -> channel ruling (inputs/fec_transaction_types.json).
++# ---------------------------------------------------------------------------
++class BulkCodeMapping(unittest.TestCase):
++    HEADER = ('CMTE_ID,AMNDT_IND,RPT_TP,TRANSACTION_PGI,IMAGE_NUM,TRANSACTION_TP,ENTITY_TP,NAME,CITY,STATE,'
++              'ZIP_CODE,EMPLOYER,OCCUPATION,TRANSACTION_DT,TRANSACTION_AMT,OTHER_ID,TRAN_ID,FILE_NUM,MEMO_CD,'
++              'MEMO_TEXT,SUB_ID').split(',')
++
++    def row(self, code, amount, *, rpt='Q1', memo='', index=1):
++        values = {name: '' for name in self.HEADER}
++        values.update({'CMTE_ID': 'C00000001', 'AMNDT_IND': 'N', 'RPT_TP': rpt, 'TRANSACTION_PGI': 'P2026',
++                       'IMAGE_NUM': f'2026030100000{index}', 'TRANSACTION_TP': code, 'ENTITY_TP': 'IND',
++                       'NAME': f'DOE JANE {index}', 'TRANSACTION_DT': '02152026', 'TRANSACTION_AMT': str(amount),
++                       'TRAN_ID': f'SA-{index}', 'FILE_NUM': '1234567', 'MEMO_CD': memo, 'SUB_ID': f'4000000000{index:02d}'})
++        return '|'.join(values[name] for name in self.HEADER)
++
++    def build(self, folder):
++        rows = [self.row('15', 100, index=1), self.row('18K', 250, index=2), self.row('22Y', 30, index=3),
++                self.row('24K', 500, index=4), self.row('24E', 1000, index=5), self.row('24A', 700, index=6),
++                self.row('24F', 90, index=7), self.row('15J', 40, index=8), self.row('15', 60, memo='X', index=9),
++                self.row('24E', 300, rpt='24', index=10), self.row('99Z', 5, index=11)]
++        target = Path(folder) / 'indiv26.txt'
++        target.write_text('\r\n'.join(rows) + '\r\n', encoding='utf-8')
++        return target
++
++    def test_codes_map_and_exclusions_hold(self):
++        with temp_fixture_dir() as fixtures, temp_data_root() as root:
++            store = csv_data.Store(root)
++            job = store.wait(store.import_path(str(self.build(fixtures)))['id'], timeout=120)
++            self.assertEqual(job['state'], 'ready', job.get('message'))
++            self.assertEqual(job['format'], 'fec_bulk')
++            catalog = job['catalog']
++            self.assertEqual(catalog['row_count'], 11)
++            self.assertEqual(catalog['supported_rows'], 6, catalog)
++            self.assertTrue(any('Disbursements here are contributions' in note for note in catalog['warnings']))
++            self.assertTrue(any('not been verified' in note for note in catalog['warnings']))
++            page = store.select(job['id'], 'C00000001', '', 0, 100)
++            totals = {item['channel']: (item['amount'], item['row_count']) for item in page['totals']}
++            self.assertEqual(totals['Receipts'], (350.0, 2))
++            self.assertEqual(totals['Disbursements'], (530.0, 2))
++            self.assertEqual(totals['Independent spending · support'], (1000.0, 1))
++            self.assertEqual(totals['Independent spending · oppose'], (700.0, 1))
++            by_code = {row['raw']['TRANSACTION_TP'] + ':' + row['raw']['TRAN_ID']: row for row in page['rows']}
++            self.assertEqual(by_code['24F:SA-7']['status'], 'unsupported')
++            self.assertIn("Transaction type code 24F is excluded by ruling: Form 7 communication cost for a candidate: "
++                          "the corporation's or union's own spending, not the PAC's.", by_code['24F:SA-7']['issues'])
++            self.assertNotIn('The CSV does not identify a supported receipt or activity type.', by_code['24F:SA-7']['issues'])
++            self.assertIn('Memo entry; not counted in totals.', by_code['15J:SA-8']['issues'])
++            self.assertIn('Memo entry; not counted in totals.', by_code['15:SA-9']['issues'])
++            self.assertEqual(by_code['15:SA-9']['channel'], 'Receipts')
++            self.assertIn('Notice report (24/48-hour); the periodic filing carries this amount.', by_code['24E:SA-10']['issues'])
++            self.assertEqual(by_code['24E:SA-10']['direction'], 'Support')
++            self.assertIn('Transaction type code 99Z is not in the mapping table (inputs/fec_transaction_types.json).', by_code['99Z:SA-11']['issues'])
++            self.assertNotIn('The CSV does not identify a supported receipt or activity type.', by_code['99Z:SA-11']['issues'])
++
++    def test_missing_table_maps_nothing(self):
++        with temp_fixture_dir() as fixtures, temp_data_root() as root:
++            csv_data.transaction_types.cache_clear()
++            with patch.object(csv_data, 'INPUTS', Path(fixtures) / 'no-inputs'):
++                try:
++                    store = csv_data.Store(root)
++                    job = store.wait(store.import_path(str(self.build(fixtures)))['id'], timeout=120)
++                    self.assertEqual(job['state'], 'ready', job.get('message'))
++                    self.assertEqual(job['catalog']['supported_rows'], 0)
++                    self.assertTrue(any('is missing' in note for note in job['catalog']['warnings']))
++                finally:
++                    csv_data.transaction_types.cache_clear()
++
++    def test_workbook_transaction_type_column_is_untouched(self):
++        # A Mentat 'Downstream Activity' aggregate row carries transaction_type (not
++        # transaction_tp) and keeps its reported_aggregate classification.
++        columns = ['cycle', 'source_committee', 'source_committee_id', 'support_oppose', 'transaction_type', 'net_included_amount']
++        raw = dict(zip(['Cycle', 'Source Committee', 'Source Committee ID', 'Support / Oppose', 'Transaction Type', 'Net Included Amount'],
++                       ['2021-2022', 'ABRAHAM LINCOLN PAC', 'C00631051', 'Contribution / Other', '24K', '10000']))
++        row = csv_data.normalize(raw, 6, columns)
++        self.assertEqual(row['kind'], 'reported_aggregate')
++        self.assertEqual(row['status'], 'supported')
++
++
+ if __name__ == '__main__':
+     unittest.main()

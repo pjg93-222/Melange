@@ -1074,5 +1074,86 @@ class MentatWorkbookSelection(unittest.TestCase):
             self.assertEqual(job['state'], 'failed')
             self.assertEqual(job['message'], 'No worksheet in this workbook has a Committee ID column. Sheets: Master Overview.')
             self.assertEqual(job['sheets'], ['Master Overview'])
+
+
+# ---------------------------------------------------------------------------
+# S3f: the FEC bulk TRANSACTION_TP -> channel ruling (inputs/fec_transaction_types.json).
+# ---------------------------------------------------------------------------
+class BulkCodeMapping(unittest.TestCase):
+    HEADER = ('CMTE_ID,AMNDT_IND,RPT_TP,TRANSACTION_PGI,IMAGE_NUM,TRANSACTION_TP,ENTITY_TP,NAME,CITY,STATE,'
+              'ZIP_CODE,EMPLOYER,OCCUPATION,TRANSACTION_DT,TRANSACTION_AMT,OTHER_ID,TRAN_ID,FILE_NUM,MEMO_CD,'
+              'MEMO_TEXT,SUB_ID').split(',')
+
+    def row(self, code, amount, *, rpt='Q1', memo='', index=1):
+        values = {name: '' for name in self.HEADER}
+        values.update({'CMTE_ID': 'C00000001', 'AMNDT_IND': 'N', 'RPT_TP': rpt, 'TRANSACTION_PGI': 'P2026',
+                       'IMAGE_NUM': f'2026030100000{index}', 'TRANSACTION_TP': code, 'ENTITY_TP': 'IND',
+                       'NAME': f'DOE JANE {index}', 'TRANSACTION_DT': '02152026', 'TRANSACTION_AMT': str(amount),
+                       'TRAN_ID': f'SA-{index}', 'FILE_NUM': '1234567', 'MEMO_CD': memo, 'SUB_ID': f'4000000000{index:02d}'})
+        return '|'.join(values[name] for name in self.HEADER)
+
+    def build(self, folder):
+        rows = [self.row('15', 100, index=1), self.row('18K', 250, index=2), self.row('22Y', 30, index=3),
+                self.row('24K', 500, index=4), self.row('24E', 1000, index=5), self.row('24A', 700, index=6),
+                self.row('24F', 90, index=7), self.row('15J', 40, index=8), self.row('15', 60, memo='X', index=9),
+                self.row('24E', 300, rpt='24', index=10), self.row('99Z', 5, index=11)]
+        target = Path(folder) / 'indiv26.txt'
+        target.write_text('\r\n'.join(rows) + '\r\n', encoding='utf-8')
+        return target
+
+    def test_codes_map_and_exclusions_hold(self):
+        with temp_fixture_dir() as fixtures, temp_data_root() as root:
+            store = csv_data.Store(root)
+            job = store.wait(store.import_path(str(self.build(fixtures)))['id'], timeout=120)
+            self.assertEqual(job['state'], 'ready', job.get('message'))
+            self.assertEqual(job['format'], 'fec_bulk')
+            catalog = job['catalog']
+            self.assertEqual(catalog['row_count'], 11)
+            self.assertEqual(catalog['supported_rows'], 6, catalog)
+            self.assertTrue(any('Disbursements here are contributions' in note for note in catalog['warnings']))
+            self.assertTrue(any('not been verified' in note for note in catalog['warnings']))
+            page = store.select(job['id'], 'C00000001', '', 0, 100)
+            totals = {item['channel']: (item['amount'], item['row_count']) for item in page['totals']}
+            self.assertEqual(totals['Receipts'], (350.0, 2))
+            self.assertEqual(totals['Disbursements'], (530.0, 2))
+            self.assertEqual(totals['Independent spending · support'], (1000.0, 1))
+            self.assertEqual(totals['Independent spending · oppose'], (700.0, 1))
+            by_code = {row['raw']['TRANSACTION_TP'] + ':' + row['raw']['TRAN_ID']: row for row in page['rows']}
+            self.assertEqual(by_code['24F:SA-7']['status'], 'unsupported')
+            self.assertIn("Transaction type code 24F is excluded by ruling: Form 7 communication cost for a candidate: "
+                          "the corporation's or union's own spending, not the PAC's.", by_code['24F:SA-7']['issues'])
+            self.assertNotIn('The CSV does not identify a supported receipt or activity type.', by_code['24F:SA-7']['issues'])
+            self.assertIn('Memo entry; not counted in totals.', by_code['15J:SA-8']['issues'])
+            self.assertIn('Memo entry; not counted in totals.', by_code['15:SA-9']['issues'])
+            self.assertEqual(by_code['15:SA-9']['channel'], 'Receipts')
+            self.assertIn('Notice report (24/48-hour); the periodic filing carries this amount.', by_code['24E:SA-10']['issues'])
+            self.assertEqual(by_code['24E:SA-10']['direction'], 'Support')
+            self.assertIn('Transaction type code 99Z is not in the mapping table (inputs/fec_transaction_types.json).', by_code['99Z:SA-11']['issues'])
+            self.assertNotIn('The CSV does not identify a supported receipt or activity type.', by_code['99Z:SA-11']['issues'])
+
+    def test_missing_table_maps_nothing(self):
+        with temp_fixture_dir() as fixtures, temp_data_root() as root:
+            csv_data.transaction_types.cache_clear()
+            with patch.object(csv_data, 'INPUTS', Path(fixtures) / 'no-inputs'):
+                try:
+                    store = csv_data.Store(root)
+                    job = store.wait(store.import_path(str(self.build(fixtures)))['id'], timeout=120)
+                    self.assertEqual(job['state'], 'ready', job.get('message'))
+                    self.assertEqual(job['catalog']['supported_rows'], 0)
+                    self.assertTrue(any('is missing' in note for note in job['catalog']['warnings']))
+                finally:
+                    csv_data.transaction_types.cache_clear()
+
+    def test_workbook_transaction_type_column_is_untouched(self):
+        # A Mentat 'Downstream Activity' aggregate row carries transaction_type (not
+        # transaction_tp) and keeps its reported_aggregate classification.
+        columns = ['cycle', 'source_committee', 'source_committee_id', 'support_oppose', 'transaction_type', 'net_included_amount']
+        raw = dict(zip(['Cycle', 'Source Committee', 'Source Committee ID', 'Support / Oppose', 'Transaction Type', 'Net Included Amount'],
+                       ['2021-2022', 'ABRAHAM LINCOLN PAC', 'C00631051', 'Contribution / Other', '24K', '10000']))
+        row = csv_data.normalize(raw, 6, columns)
+        self.assertEqual(row['kind'], 'reported_aggregate')
+        self.assertEqual(row['status'], 'supported')
+
+
 if __name__ == '__main__':
     unittest.main()

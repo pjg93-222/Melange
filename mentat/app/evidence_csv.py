@@ -11,6 +11,7 @@ from contextlib import closing, contextmanager
 import csv
 from datetime import date as date_type, datetime, time as time_type, timedelta, timezone
 from decimal import Decimal, InvalidOperation
+from functools import lru_cache
 import hashlib
 import io
 import json
@@ -336,6 +337,53 @@ def cycle(value):
     return ''
 
 
+MEMO_ISSUE = 'Memo entry; not counted in totals.'
+NOTICE_ISSUE = 'Notice report (24/48-hour); the periodic filing carries this amount.'
+TRANSACTION_TABLE = 'inputs/fec_transaction_types.json'
+
+
+@lru_cache(maxsize=1)
+def transaction_types():
+    """The FEC bulk TRANSACTION_TP -> channel table, read once from the inputs folder.
+
+    The file is Paul's to edit (see its "ruling" field). A missing or unreadable
+    file maps nothing, so every bulk row stays unsupported and visible rather
+    than counted under a guess.
+    """
+    path = INPUTS / 'fec_transaction_types.json'
+    try:
+        data = json.loads(path.read_text(encoding='utf-8-sig'))
+    except (OSError, ValueError):
+        return {'verified': False, 'codes': {}, 'excluded': {}, 'memo_codes': set(), 'notice_report_types': set(), 'missing': True}
+    codes = {str(code).upper(): value for code, value in (data.get('codes') or {}).items()
+             if isinstance(value, dict) and value.get('kind') in ('receipt', 'disbursement', 'independent_spending')}
+    excluded = {str(code).upper(): str(reason) for code, reason in (data.get('excluded_by_ruling') or {}).items()}
+    return {'verified': bool(data.get('verified')), 'codes': codes, 'excluded': excluded,
+            'memo_codes': {str(code).upper() for code in data.get('memo_codes') or []},
+            'notice_report_types': {str(code).upper() for code in data.get('notice_report_types') or []},
+            'missing': False}
+
+
+def unknown_code_issue(code):
+    return f'Transaction type code {code} is not in the mapping table ({TRANSACTION_TABLE}).'
+
+
+def excluded_code_issue(code, reason):
+    return f'Transaction type code {code} is excluded by ruling: {reason}.'
+
+
+def bulk_warnings():
+    """Catalog notes for FEC bulk imports: what the channels mean here and whether the table is verified."""
+    table = transaction_types()
+    notes = ['Bulk itemized files: Disbursements here are contributions, transfers and refunds made; '
+             'operating expenditures are in the separate oppexp file.']
+    if table['missing']:
+        notes.append(f'The transaction-type table {TRANSACTION_TABLE} is missing, so every bulk row stays unsupported.')
+    elif not table['verified']:
+        notes.append(f'The transaction-type table {TRANSACTION_TABLE} has not been verified against the FEC\'s published list.')
+    return notes
+
+
 def normalize(raw, row_number, columns, extra_cells=()):
     row = dict(zip(columns, raw.values()))
     issues = []
@@ -346,6 +394,28 @@ def normalize(raw, row_number, columns, extra_cells=()):
         issues.append('A unique valid FEC committee ID is missing or conflicting.')
     specific = [(kind, amount_fields, dates) for kind,amount_fields,dates in SCHEMAS if first(row, amount_fields)]
     explicit_kind = TYPES.get(key(first(row, ('record_type', 'activity_type', 'schedule', 'schedule_type', 'type', 'transaction_type'))))
+    # FEC bulk rows carry their type as the commission's TRANSACTION_TP code.
+    # The code -> channel table is Paul's data file; memo entries and 24/48-hour
+    # notice reports are classified but kept out of totals; an unlisted code
+    # names the table it is missing from. Only the bulk key is read here, so a
+    # workbook's own transaction_type column keeps its existing behaviour.
+    code = row.get('transaction_tp', '').strip().upper()
+    code_direction, code_issue = '', ''
+    if code:
+        table = transaction_types()
+        entry = table['codes'].get(code)
+        if entry:
+            explicit_kind, code_direction = entry['kind'], entry.get('direction', '')
+        if row.get('memo_cd', '').strip().upper() == 'X' or code in table['memo_codes']:
+            code_issue = MEMO_ISSUE
+        elif row.get('rpt_tp', '').strip().upper() in table['notice_report_types']:
+            code_issue = NOTICE_ISSUE
+        elif code in table['excluded']:
+            code_issue = excluded_code_issue(code, table['excluded'][code])
+        elif entry is None:
+            code_issue = unknown_code_issue(code)
+        if code_issue:
+            issues.append(code_issue)
     kind, amount_raw, date_raw = 'unsupported', '', ''
     basis = 'dated observation'
     if len(specific) == 1:
@@ -359,7 +429,7 @@ def normalize(raw, row_number, columns, extra_cells=()):
         amount_raw, date_raw = first(row, AMOUNT_FIELDS), first(row, DATE_FIELDS)
         kind = explicit_kind or 'unsupported'
     direction_raw = first(row, ('support_oppose', 'support_oppose_indicator', 'direction'))
-    direction = DIRECTIONS.get(key(direction_raw), 'Unknown')
+    direction = code_direction or DIRECTIONS.get(key(direction_raw), 'Unknown')
     selected_cycle = cycle(first(row, CYCLE_FIELDS))
     if (not specific and kind == 'unsupported' and row.get('net_included_amount', '').strip()
             and row.get('source_committee_id', '').strip() and direction_raw and selected_cycle):
@@ -372,7 +442,7 @@ def normalize(raw, row_number, columns, extra_cells=()):
         issues.append('The transaction date is missing or invalid; no date was inferred.')
     if direction_raw and key(direction_raw) not in DIRECTIONS and kind in ('independent_spending', 'reported_aggregate'):
         issues.append('The activity direction is not recognized; it was not assigned to support or opposition.')
-    if kind == 'unsupported':
+    if kind == 'unsupported' and not code_issue:
         issues.append('The CSV does not identify a supported receipt or activity type.')
     if extra_cells:
         issues.append('This row contains more values than its header.')
@@ -902,7 +972,7 @@ def bulk_rows(open_bytes, stems, record, size):
     """The rows of one bulk file or zip member, under a resolved header."""
     encoding = text_encoding(open_bytes)
     headers, header_source = bulk_headers(stems, record.get('header_path') or '')
-    warnings = [f'Header taken from {header_source}.']
+    warnings = [f'Header taken from {header_source}.', *bulk_warnings()]
     if encoding == 'cp1252':
         warnings.append(M_CP1252)
     meta = {'encoding':encoding, 'delimiter':'|', 'header_source':header_source, 'sheets':[]}

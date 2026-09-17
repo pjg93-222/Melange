@@ -1,0 +1,53 @@
+S3f receipt: FEC bulk TRANSACTION_TP -> channel mapping (council ruling), 2026-09-17, Fable directly
+=====================================================================================================
+
+Files in this change
+  mentat/app/evidence_csv.py            transaction_types(), unknown_code_issue(), excluded_code_issue(), bulk_warnings(); normalize() reads transaction_tp
+  mentat/inputs/fec_transaction_types.json   the ruling table (schema_version 1, verified: false) -- force-added, mentat/inputs/ is gitignored
+  mentat/tests/test_evidence_readers.py  class BulkCodeMapping (3 tests)
+  mentat/app/server.py                   NOT touched (git status shows no diff)
+
+Red before (HEAD d71d2b813 reader swapped in for the run, working copy restored byte for byte afterwards)
+  $ python -m unittest tests.test_evidence_readers.BulkCodeMapping
+  FAIL:  test_codes_map_and_exclusions_hold      AssertionError: 0 != 6   (11 bulk rows imported, supported_rows 0, no totals)
+  ERROR: test_missing_table_maps_nothing         module has no transaction_types
+  ok:    test_workbook_transaction_type_column_is_untouched   (pins existing workbook behaviour; passes on both)
+  Ran 3 tests in 0.219s   FAILED (failures=1, errors=1)
+
+Green after (final run, with the excluded-by-ruling wording)
+  system Python (openpyxl fallback)
+    $ python -m unittest tests.test_evidence_readers
+    Ran 44 tests in 70.254s  OK        (host under load; the same suite ran in 5.1 s one run earlier)
+    $ python -m unittest tests.test_evidence_csv_stream
+    Ran 18 tests in 16.680s  OK
+  launcher Python C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe (python-calamine)
+    $ python.exe -m unittest tests.test_evidence_readers tests.test_evidence_csv tests.test_pac_evidence_errors
+    Ran 61 tests in 9.259s   OK
+
+Fixture (BulkCodeMapping.build): indiv26.txt, bundled indiv header, 11 pipe rows, one committee C00000001
+  row  code  amount  extra            expected
+  1    15    100                      Receipts
+  2    18K   250                      Receipts
+  3    22Y   30                       Disbursements
+  4    24K   500                      Disbursements
+  5    24E   1000                     Independent spending / support
+  6    24A   700                      Independent spending / oppose
+  7    24F   90                       unsupported: "Transaction type code 24F is excluded by ruling: Form 7 communication cost for a candidate: the corporation's or union's own spending, not the PAC's."
+  8    15J   40                       unsupported: "Memo entry; not counted in totals."
+  9    15    60      MEMO_CD=X        channel Receipts, unsupported: "Memo entry; not counted in totals."
+  10   24E   300     RPT_TP=24        direction Support, unsupported: "Notice report (24/48-hour); the periodic filing carries this amount."
+  11   99Z   5                        unsupported: "Transaction type code 99Z is not in the mapping table (inputs/fec_transaction_types.json)."
+  For rows 7 and 11 the generic "The CSV does not identify a supported receipt or activity type." issue is NOT added.
+  catalog: row_count 11, supported_rows 6; totals Receipts (350.0, 2), Disbursements (530.0, 2), IE support (1000.0, 1), IE oppose (700.0, 1)
+  catalog warnings carry: "Bulk itemized files: Disbursements here are contributions, transfers and refunds made; operating expenditures are in the separate oppexp file."
+                         "The transaction-type table inputs/fec_transaction_types.json has not been verified against the FEC's published list."
+  missing table (INPUTS patched to a folder without the file): supported_rows 0, warning "... is missing, so every bulk row stays unsupported."
+
+Two source defects hit while landing the test (both mine, both fixed before this run)
+  - the fixture line was written with real CR LF inside the string literal -> SyntaxError line 1101; rewritten with the escape sequences
+  - the channel label 'Independent spending · support' had a stray backslash before the middle dot -> KeyError; byte-level fix
+
+Not in this change (recorded in HANDOFF S3f addendum)
+  - amended filings (AMNDT_IND / FILE_NUM) are not de-duplicated: an amended report's rows and the original's both count
+  - no reconciliation test against openFEC /totals for a real committee yet
+  - the table is marked verified: false until Paul checks it against the FEC's current code list and flips the flag

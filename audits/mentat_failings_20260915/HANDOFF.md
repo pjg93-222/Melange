@@ -1635,3 +1635,31 @@ output for every command above). **Patch:** `patches/S3_cap_500MB_and_followups.
 **Verified:** 55 tests across `test_report_directory_console`, `test_desktop_launcher` (drives the real script) and `test_evidence_readers`; stream 18. The launcher script parses under PowerShell 5.1.
 
 **Paul's next step:** run the launcher again (not only restart the console): the launcher file itself changed.
+
+
+### S3f addendum — FEC bulk TRANSACTION_TP → channel ruling (2026-09-17 ~10:00 ET, Fable directly, after /ecc:council)
+
+**Paul:** "/ecc:council You rule on the mapping" — the question S3b left open in `receipts/S3b_bulk_channel_proposal.md` (bulk rows import but every one stays `unsupported` because `normalize()` never read `TRANSACTION_TP`) was delegated to this session to decide.
+
+**Council (three fresh voices given only the proposal; their replies are in the session transcript):**
+- Pragmatist: ship the proposal today and add an unsupported-dollar line so a gap is loud; flagged that 18K, 12 and 18G were missing from the receipt list and that 15J is memo-only by definition.
+- Skeptic: do not ratify a second hand-typed classifier; translate codes to form lines and reuse the openFEC classifier; accept the ruling only when one committee's bulk totals reconcile to openFEC `/totals`; give excluded codes a "recognised, excluded" state so `unsupported` stays a tripwire. Surprise: "Disbursements" can never reconcile to a committee's reported disbursements because operating expenditures live in the separate oppexp file.
+- Critic: ship the architecture (editable table, visible-but-unsupported, memo legs out, Form 7 out) but not the code list as written: the 20-series are loan repayments and Levin spending, not refunds; 18K/18G missing while 24G is counted; amended filings double count. Surprise: independent expenditures appear twice by design, once on the 24/48-hour notice and again on the periodic report; Form 7 rows are filed under the corporation's own filer ID, so the Form 7 question is moot at committee level.
+
+**Ruling (recorded verbatim in the table's `ruling` field, `mentat/inputs/fec_transaction_types.json`):**
+- Receipts: 10, 11, 12, 15, 15C, 15E, 15Z, 18G, 18K, 18U, 19, 30, 31, 32.
+- Disbursements: 22Y, 22Z, 23Y, 24C, 24G, 24K, 24P, 24R, 24U, 24Z, 28L, 29. Every bulk catalog carries the warning that this channel is contributions, transfers and refunds made, and that operating expenditures are in the separate oppexp file (Skeptic's surprise adopted as a label rather than a rename, so the channel name matches the workbook and openFEC paths).
+- Independent spending: 24E → Support, 24A → Oppose, direction taken from the code because bulk files have no support/oppose column.
+- Excluded by ruling, visible, out of totals, each row saying "excluded by ruling: <reason>": 24F and 24N (Form 7 communication costs are the corporation's or union's own spending, not the PAC's), 15J (memo share of a joint fundraiser), 20A, 20B, 20C, 20F, 20G, 20R, 20V (Levin and loan repayments, not refunds; Critic's finding adopted).
+- Memo entries (`MEMO_CD = X`, or the J-suffixed memo codes) keep their channel and direction and stay out of totals with "Memo entry; not counted in totals."
+- 24/48-hour notice reports (`RPT_TP` 24 or 48) stay out of totals with "Notice report (24/48-hour); the periodic filing carries this amount." (Critic's surprise adopted.)
+- Any code not in the table stays unsupported with "Transaction type code X is not in the mapping table (inputs/fec_transaction_types.json)." and the generic "does not identify a supported type" issue is not added on top.
+- The table ships with `verified: false`; every bulk catalog warns that it has not been checked against the FEC's published list until Paul flips the flag. A missing or unreadable table maps nothing and says so in the catalog.
+
+**Rejected:** reusing the openFEC classifier through a code → form-line translation. Bulk rows lack the fields that classifier reads, so the translation would be a second classifier under another name, which is the Skeptic's own stated risk. **Deferred, not rejected:** amended-filing de-duplication (`AMNDT_IND` / `FILE_NUM`, latest filing wins) is the next data rule for Paul; a reconciliation test of one real committee's bulk totals against openFEC `/totals` is the follow-up that would let `verified` flip on evidence instead of by eye.
+
+**Changed:** `app/evidence_csv.py` (`transaction_types()` reads the table once per process; `normalize()` reads only the bulk key `transaction_tp`, so a Mentat workbook's `transaction_type` column keeps its existing behaviour; `bulk_warnings()` on every bulk catalog), `mentat/inputs/fec_transaction_types.json` (new; `mentat/inputs/` is gitignored as a whole, so the file is force-added and is the first tracked file in that folder), `tests/test_evidence_readers.py` (class `BulkCodeMapping`, three tests). `server.py` untouched.
+
+**Evidence (`receipts/S3f_bulk_codes.txt`):** red on HEAD d71d2b813 (11-row bulk fixture imports with `supported_rows` 0, "0 != 6"; `transaction_types` missing); green after: `test_evidence_readers` 44 under the system Python (openpyxl fallback), readers + legacy + collector 61 under the launcher Python (calamine), stream 18. Fixture totals: Receipts $350 (2 rows), Disbursements $530 (2), Independent spending support $1,000 (1), oppose $700 (1); the 24F, 15J, memo, notice and unknown-code rows stay visible and out of totals with the texts above.
+
+**Paul's next steps:** restart the console (server code changed; the launcher did not); check the JSON against fec.gov's transaction type code list and set `verified` to true; rule on amended-filing de-duplication.
