@@ -42,6 +42,17 @@ def is_memo(row):
         str(row.get(k) or '').strip().upper() in ('TRUE','1') for k in ('memoed_subtotal','is_memo_leg'))
 
 
+def receipt_line_code(row):
+    """Twin of collect.R fec_receipt_line_code(). A blank line number is missing
+    information, not evidence: recover the schedule line from the transaction id
+    prefix (SA17.621125) before classifying."""
+    line = re.sub(r'^SA','',re.sub(r'[() ]','',str(row.get('line_number') or '').strip().upper()))
+    if not line:
+        found = re.match(r'^SA(\d+[A-Z]*)\.', str(row.get('transaction_id') or '').strip().upper())
+        line = found.group(1) if found else ''
+    return line
+
+
 def receipt_role(row):
     rules = receipt_rules()
     receipt_description = name_key(str(row.get('receipt_type_full') or ''))
@@ -51,7 +62,7 @@ def receipt_role(row):
     if re.search(rules['sale_identity_pattern'],description) and re.search(rules['sale_event_pattern'],description):
         return 'asset_liquidation'
     form = str(row.get('filing_form') or '').strip().upper()
-    line = re.sub(r'^SA','',re.sub(r'[() ]','',str(row.get('line_number') or '').strip().upper()))
+    line = receipt_line_code(row)
     role = next((role for role,lines in rules['forms'].get(form,{}).items() if line in lines),'unverified_receipt_role')
     special = form == 'F3X' and line == '17' and re.search(rules['special_account_pattern'], description)
     exact_descriptions = {name_key(value) for value in rules.get('non_giving_exact_descriptions', [])}
@@ -74,7 +85,10 @@ def receipt_role(row):
                                      (receipt_description, receipt_exact or receipt_non_giving_event),
                                      (memo_description, memo_exact or memo_non_giving_event))
                                  if not is_non_giving)
-    giving_event = re.search(rules['giving_event_pattern'], event_description)
+    # A redesignation moves money already given; CONTRIBUTION beside it names
+    # that same money, so it never contradicts the redesignation.
+    redesignation = re.search(rules['redesignation_event_pattern'], description)
+    giving_event = (not redesignation) and re.search(rules['giving_event_pattern'], event_description)
     if special:
         role = ('other_receipt' if exact_non_giving and not giving_event else
                 'unverified_other_receipt' if non_giving else 'contribution')
@@ -82,6 +96,12 @@ def receipt_role(row):
         role = 'unverified_other_receipt' if giving_event else 'other_receipt'
     if role == 'unverified_other_receipt' and re.search(rules['transfer_event_pattern'], receipt_description) and not giving_event:
         role = 'transfer_receipt'
+    if role in ('unverified_other_receipt', 'unverified_receipt_role') and non_giving and giving_event:
+        role = 'unverified_contradicted_receipt'
+    # collect.R demotes this to 'disclosure_memo' (excluded) only when the whole
+    # payload proves the repeat: same committee, cycle and amount on a counted
+    # line-11 gift. One row cannot see that, so the twin always reports the
+    # unpaired verdict - which is the counted, flagged one.
     if memo and re.search(rules['disclosure_pattern'],description) and role != 'other_receipt':
         return 'unverified_disclosure_memo'
     if role == 'contribution' and re.search(rules['refund_review_pattern'], description):

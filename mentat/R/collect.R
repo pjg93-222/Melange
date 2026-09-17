@@ -36,6 +36,59 @@ fec_receipt_rules <- local({
   }
 })
 
+# A blank line number is missing information, not evidence against the row.
+# FEC transaction ids carry the schedule line in their prefix (SA17.621125),
+# so recover it before classifying. A row with neither a line nor a derivable
+# one stays unresolved: counted, flagged, never refused.
+fec_receipt_line_code <- function(line_number, transaction_id) {
+  line <- sub("^SA", "", gsub("[() ]", "", line_number))
+  derived <- sub("^SA([0-9]+[A-Z]*)\\..*$", "\\1", transaction_id)
+  derived[derived == transaction_id] <- ""
+  blank <- !nzchar(line)
+  line[blank] <- derived[blank]
+  line
+}
+
+# Row-level eligibility that does not depend on the receipt role, so the
+# disclosure pairing below can ask "is there a COUNTED line-11 gift" without
+# recursing back into fec_receipt_role().
+fec_receipt_row_eligible <- function(rows) {
+  value <- function(field, default) {
+    if (field %in% names(rows)) rows[[field]] else rep(default, nrow(rows))
+  }
+  keep <- value("company_match_status", "accepted") == "accepted" &
+    !nzchar(trim_text(value("excluded_reason", ""))) &
+    as.integer(value("duplicate_memo", 0L)) == 0L
+  keep[is.na(keep)] <- FALSE
+  keep
+}
+
+# "Previously disclosed" is a CLAIM of a repeat, not proof of one. A repeat is
+# proven only when the payload itself carries the counterpart: the same
+# committee, the same cycle, the same amount, on a counted line-11 gift. The
+# pairing needs the whole payload, so it runs here rather than in the
+# single-row python twin (tools/pac_evidence.py), which cannot see other rows
+# and therefore always reports the unpaired verdict.
+fec_receipt_disclosure_duplicate <- function(rows, role, line) {
+  candidate <- role %in% "unverified_disclosure_memo"
+  if (!any(candidate)) return(candidate)
+  needed <- c("committee_id", "contribution_receipt_amount",
+              "two_year_transaction_period")
+  if (!all(needed %in% names(rows))) return(rep(FALSE, length(role)))
+  amount <- suppressWarnings(as.numeric(rows[["contribution_receipt_amount"]]))
+  cycle <- suppressWarnings(as.integer(rows[["two_year_transaction_period"]]))
+  key <- paste(
+    toupper(trim_text(rows[["committee_id"]])),
+    as.character(cycle),
+    formatC(round(amount, 2L), format = "f", digits = 2L),
+    sep = "\r"
+  )
+  known <- !is.na(amount) & !is.na(cycle)
+  parent <- role %in% "contribution" & startsWith(line, "11") &
+    fec_receipt_row_eligible(rows) & known
+  candidate & known & key %in% key[parent]
+}
+
 fec_receipt_role <- function(rows) {
   column <- function(name) {
     if (!name %in% names(rows)) return(rep("", nrow(rows)))
@@ -52,7 +105,7 @@ fec_receipt_role <- function(rows) {
   # contributions on F3P, but other receipts on F3X).
   # https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/
   form <- column("filing_form")
-  line <- sub("^SA", "", gsub("[() ]", "", column("line_number")))
+  line <- fec_receipt_line_code(column("line_number"), column("transaction_id"))
   rules <- fec_receipt_rules()
   for (f in names(rules$forms)) for (r in names(rules$forms[[f]])) {
     role[form == f & line %in% unlist(rules$forms[[f]][[r]])] <- r
@@ -78,13 +131,27 @@ fec_receipt_role <- function(rows) {
     gsub(rules$special_account_pattern, "", ifelse(receipt_exact | receipt_non_giving_event, "", receipt_description), perl = TRUE),
     gsub(rules$special_account_pattern, "", ifelse(memo_exact | memo_non_giving_event, "", memo_description), perl = TRUE)
   ))
-  giving_event <- grepl(rules$giving_event_pattern, giving_description, perl = TRUE)
+  # A redesignation moves money that was already given from one election to
+  # another. The word CONTRIBUTION beside it names that same money, so it is
+  # not a second, conflicting claim and must not make the row look
+  # self-contradictory: the redesignation classification wins.
+  redesignation <- grepl(rules$redesignation_event_pattern, description, perl = TRUE)
+  giving_event <- grepl(rules$giving_event_pattern, giving_description, perl = TRUE) &
+    !redesignation
   role[special & !non_giving] <- "contribution"
   role[role == "unverified_other_receipt" & non_giving & !special & !giving_event] <- "other_receipt"
   role[special & non_giving] <- "unverified_other_receipt"
   role[special & exact_non_giving & !giving_event] <- "other_receipt"
   transfer_event <- grepl(rules$transfer_event_pattern, receipt_description, perl = TRUE)
   role[role == "unverified_other_receipt" & transfer_event & !giving_event] <- "transfer_receipt"
+  # A CONTRADICTION, not an ambiguity: one row's own text both asserts a gift
+  # and asserts the money is not a gift. Missing or ambiguous evidence is
+  # counted and flagged (2026-09-17 ruling); a self-contradicting row is the
+  # only thing fec_assert_receipt_evidence() still stops the export for. The
+  # role must already be unresolved, so this never refuses a row that today's
+  # classifier accepts.
+  role[role %in% c("unverified_other_receipt", "unverified_receipt_role") &
+       non_giving & giving_event] <- "unverified_contradicted_receipt"
   # Names identify parties, never the economic role of an unknown receipt.
   sale <- grepl(rules$sale_identity_pattern, description, perl = TRUE) &
     grepl(rules$sale_event_pattern, description, perl = TRUE)
@@ -96,6 +163,10 @@ fec_receipt_role <- function(rows) {
   # Known non-contribution lines retain that classification; other disclosure
   # memos need a linked parent or review before a changed total is published.
   role[memo & disclosed_asset & !role %in% c("other_receipt", "asset_liquidation")] <- "unverified_disclosure_memo"
+  # Proven repeat -> excluded. Unproven claim -> the row keeps the unverified
+  # role, stays countable, and carries receipt_role_reason
+  # "disclosure_memo_unmatched" so a reader can filter it.
+  role[fec_receipt_disclosure_duplicate(rows, role, line)] <- "disclosure_memo"
   # A refund promise is not an observed refund. Retain the receipt and require
   # the actual adjustment before certifying a net-giving amount.
   role[role == "contribution" & grepl(rules$refund_review_pattern, description, perl = TRUE)] <- "unverified_refund_adjustment"
@@ -112,7 +183,26 @@ fec_funding_source <- function(entity_type) {
 }
 
 fec_receipt_role_excluded <- function(role) {
-  role %in% c("asset_liquidation", "other_receipt")
+  role %in% c("asset_liquidation", "other_receipt", "disclosure_memo")
+}
+
+# The only refusal that survives the 2026-09-17 ruling. Ambiguity is counted
+# and flagged; contradiction stops publication.
+fec_receipt_role_contradicted <- function(role) {
+  role %in% "unverified_contradicted_receipt"
+}
+
+# Reader-facing pair for a countable row whose role could not be resolved:
+# receipt_role_unverified = 1 plus the reason a reader can filter on.
+fec_receipt_role_unverified <- function(role) {
+  as.integer(fec_receipt_role_unresolved(role))
+}
+
+fec_receipt_role_reason <- function(role) {
+  reason <- ifelse(fec_receipt_role_unresolved(role), as.character(role), "")
+  reason[is.na(reason)] <- ""
+  reason[role %in% "unverified_disclosure_memo"] <- "disclosure_memo_unmatched"
+  reason
 }
 
 fec_receipt_role_unresolved <- function(role) {
@@ -122,25 +212,26 @@ fec_receipt_role_unresolved <- function(role) {
 # One eligibility predicate for summaries, memo parent checks, and QA.
 # Unknowns remain in raw/provisional views; publication requires evidence.
 fec_receipt_countable <- function(rows, verified_only = FALSE) {
-  value <- function(field, default) {
-    if (field %in% names(rows)) rows[[field]] else rep(default, nrow(rows))
-  }
   role <- fec_receipt_role(rows)
-  keep <- value("company_match_status", "accepted") == "accepted" &
-    !nzchar(trim_text(value("excluded_reason", ""))) &
-    as.integer(value("duplicate_memo", 0L)) == 0L & !fec_receipt_role_excluded(role)
+  keep <- fec_receipt_row_eligible(rows) & !fec_receipt_role_excluded(role)
   if (verified_only) keep <- keep & !fec_receipt_role_unresolved(role)
   keep[is.na(keep)] <- FALSE
   keep
 }
 
+# 2026-09-17 ruling: a cross-verification step may remove or zero a row only
+# when the evidence CONTRADICTS it. Missing or ambiguous information is never
+# grounds for exclusion - those rows stay counted and carry
+# receipt_role_unverified = 1 with receipt_role_reason. Only self-contradicting
+# evidence still stops the export.
 fec_assert_receipt_evidence <- function(rows) {
-  unresolved <- fec_receipt_countable(rows) & fec_receipt_role_unresolved(fec_receipt_role(rows))
-  if (any(unresolved)) {
-    ids <- if ("sub_id" %in% names(rows)) rows$sub_id[unresolved] else which(unresolved)
+  contradicted <- fec_receipt_countable(rows) &
+    fec_receipt_role_contradicted(fec_receipt_role(rows))
+  if (any(contradicted)) {
+    ids <- if ("sub_id" %in% names(rows)) rows$sub_id[contradicted] else which(contradicted)
     stop(sprintf(
-      "Receipt evidence unresolved for %d rows (examples: %s). Raw records are retained. Hydrate FEC metadata before publishing; no blanket exclusion is permitted.",
-      sum(unresolved), paste(head(ids, 8L), collapse = ", ")
+      "Receipt evidence contradicts itself for %d rows (examples: %s). Raw records are retained. Reconcile the conflicting receipt text before publishing; no blanket exclusion is permitted.",
+      sum(contradicted), paste(head(ids, 8L), collapse = ", ")
     ), call. = FALSE)
   }
   invisible(TRUE)

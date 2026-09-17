@@ -222,6 +222,10 @@ unresolved <- evidence_scope & fec_receipt_countable(raw_rows) &
 if (any(unresolved)) {
   atomic_write_csv(raw_rows[unresolved], paste0(output_path, ".receipt-review.csv"))
 }
+# 2026-09-17 ruling: unresolved receipt roles no longer block the export. The
+# CSV above is the review list for rows that ship counted and flagged
+# (receipt_role_unverified = 1); the gate below stops publication only when a
+# row's own evidence contradicts itself.
 fec_assert_receipt_evidence(raw_rows[evidence_scope])
 analysis_rows <- spending_report_rows(
   connection,
@@ -499,6 +503,11 @@ raw_export[, inclusion_reason := ifelse(
 )]
 raw_export[fec_receipt_role_excluded(receipt_role),
            inclusion_reason := paste0("Receipt role: ", receipt_role)]
+# Counted, but the receipt role could not be resolved from the filing. The row
+# ships with the money in the total and the caveat attached, so a reader can
+# filter on it (2026-09-17 ruling: contradictions, not ambiguity).
+raw_export[, receipt_role_unverified := fec_receipt_role_unverified(receipt_role)]
+raw_export[, receipt_role_reason := fec_receipt_role_reason(receipt_role)]
 raw_export[, cycle_alignment := ifelse(
   cycle == source_cycle,
   "OK",
@@ -557,6 +566,8 @@ raw_export <- raw_export[, .(
   include_in_analysis,
   inclusion_reason,
   receipt_role,
+  receipt_role_unverified,
+  receipt_role_reason,
   receipt_type_full = trim_text(receipt_type_full),
   filing_form = trim_text(filing_form),
   line_number = trim_text(line_number),

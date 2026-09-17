@@ -11,13 +11,168 @@ class EvidenceTests(unittest.TestCase):
         sale = {'contributor_name': 'EXAMPLE EXCHANGE', 'receipt_type': '10', 'filing_form': 'F3X', 'line_number': '17',
                 'receipt_type_full': '25,000,000 USDC SOLD VIA EXCHANGE - PURCHASER UNKNOWN'}
         self.assertEqual(receipt_role(sale), 'asset_liquidation')
-        self.assertEqual(receipt_role({**sale, 'memo_code': 'X', 'receipt_type_full': 'CONTRIBUTION PREVIOUSLY DISCLOSED'}), 'previously_disclosed_memo')
+        self.assertEqual(receipt_role({**sale, 'memo_code': 'X', 'receipt_type_full': 'CONTRIBUTION PREVIOUSLY DISCLOSED'}), 'unverified_disclosure_memo')
+        self.assertEqual(receipt_role({'filing_form':'F3X','line_number':'11AI','memo_code':'X','memo_text':'PREVIOUSLY DISCLOSED'}), 'unverified_disclosure_memo')
         self.assertEqual(receipt_role({'filing_form':'F3X', 'line_number':'11AI', 'receipt_type_full':'IN-KIND - BITCOIN NOT LIQUIDATED'}), 'in_kind_contribution')
 
     def test_cash_contribution_and_other_receipt_are_distinct(self):
         self.assertEqual(receipt_role({'filing_form':'F3X', 'line_number':'11AI'}), 'contribution')
-        self.assertEqual(receipt_role({'filing_form':'F3X', 'line_number':'17'}), 'other_receipt')
+        self.assertEqual(receipt_role({'filing_form':'F3X', 'line_number':'17'}), 'unverified_other_receipt')
         self.assertEqual(receipt_role({'contributor_name':'Acme'}), 'unverified_receipt_role')
+        self.assertEqual(receipt_role({'filing_form':'F3','line_number':'12'}), 'transfer_receipt')
+        self.assertEqual(receipt_role({'filing_form':'F3P','line_number':'17'}), 'contribution')
+
+    def test_other_federal_receipts_must_not_be_blanket_excluded(self):
+        cases = {
+            'NON-CONTRIBUTION ACCOUNT':'contribution',
+            'HEADQUARTERS ACCOUNT CONTRIBUTION':'contribution',
+            'LEGAL PROCEEDINGS ACCOUNT':'contribution',
+            'NON-CONTRIBUTION':'other_receipt',
+            'OTHER FEDERAL RECEIPTS (DIVIDENDS, INTEREST, ETC.)':'unverified_other_receipt',
+            'INTEREST':'other_receipt',
+            'RETURN OF ERRONEOUS DEBIT MADE BY PROCESSOR':'other_receipt',
+            'NON-CONTRIBUTION ACCOUNT; 1500000 USDC LIQUIDATED VIA EXCHANGE - PURCHASER UNKNOWN':'asset_liquidation',
+            'NON-CONTRIBUTION ACCOUNT; REFUND FOR PROCESSING FEES':'unverified_other_receipt',
+            'LEGAL PROCEEDINGS ACCOUNT; IMPERMISSIBLE CONTRIBUTION; SEE NEXT REPORT FOR REFUND':'unverified_refund_adjustment',
+        }
+        for description, expected in cases.items():
+            with self.subTest(description=description):
+                self.assertEqual(receipt_role({'filing_form':'F3X','line_number':'17','receipt_type_full':description}), expected)
+
+    def test_explicit_interest_income_survives_account_labels(self):
+        for description in ('NON-CONTRIBUTION: INTEREST','NONCONTRIBUTION ACCOUNT - INTEREST',
+                'HEADQUARTERS INTEREST INCOME','RECOUNT INTEREST INCOME','PAC BANK INTEREST',
+                'CD INTEREST INCOME','MONTHLY INTEREST','INVESTMENT ACCOUNT INTEREST',
+                'INTEREST/DIVIDENDS','INVESTMENT INCOME'):
+            with self.subTest(description=description):
+                self.assertEqual(receipt_role({'filing_form':'F3X','line_number':'17',
+                    'receipt_type_full':description}), 'other_receipt')
+        for account in ('NON-CONTRIBUTION ACCOUNT','NONCONTRIBUTION ACCOUNT','HEADQUARTERS ACCOUNT',
+                        'LEGAL PROCEEDINGS ACCOUNT','RECOUNT ACCOUNT','CONVENTION ACCOUNT','NON-CONTRIBUTION'):
+            self.assertEqual(receipt_role({'filing_form':'F3X','line_number':'17',
+                'receipt_type_full':'INTEREST INCOME','memo_text':account}), 'other_receipt')
+
+    def test_income_rule_preserves_ambiguous_captions_and_actual_gift_conflicts(self):
+        for description in ('OTHER FEDERAL RECEIPTS (DIVIDENDS, INTEREST, ETC.)',
+                'INVESTMENT OPPORTUNITY','INTEREST IN PUBLIC POLICY'):
+            self.assertEqual(receipt_role({'filing_form':'F3X','line_number':'17',
+                'receipt_type_full':description}), 'unverified_other_receipt')
+        for gift in ('CONTRIBUTION','HEADQUARTERS ACCOUNT CONTRIBUTION','NON-CONTRIBUTION ACCOUNT DONATION'):
+            for fields in ({'receipt_type_full':gift,'memo_text':'INTEREST INCOME'},
+                           {'receipt_type_full':'INTEREST INCOME','memo_text':gift}):
+                self.assertEqual(receipt_role({'filing_form':'F3X','line_number':'17',**fields}),
+                                 'unverified_contradicted_receipt')
+        self.assertEqual(receipt_role({'filing_form':'F3P','line_number':'17',
+            'receipt_type_full':'INTEREST INCOME'}), 'contribution')
+
+    def test_explicit_financial_events_and_refunds_are_other_receipts(self):
+        descriptions = ('INTEREST RECEIVED','INVESTMENT CHANGE IN VALUE',
+            'PAC INVESTMENT CHANGE IN VALUE','INVESTMENT LOSS','BANK INTEREST LOST',
+            'GAIN ON SALE OF STOCK','LOSS ON SALE OF BOND','REINVESTED DIVIDEND',
+            'UNREALIZED INVESTMENT GAINS','NET INVESTMENT EARNINGS',
+            'INTEREST/DIVIDENDS INCOME PLUS UNREALIZED LOSS ON INVESTMENTS',
+            'INTEREST, DIVIDENDS, CAPITAL GAIN (LOSS)','SALE OF INVESTMENT',
+            'NET INVESTMENT EARNINGS/LOSS','SERVICE FEE','JANUARY INTEREST',
+            'PROCEEDS FROM SALE OF 8 SHS VANGUARD REAL ESTATE',
+            'CREDIT CARD REWARDS','MUTUAL FUND INVESTMENT ACTIVITY FOR PERIOD 1-1-26 THROUGH 3-31-26',
+            'INTEREST FOR THE MONTH OF AUGUST 2023','NTEREST INCOME',
+            'DUPLICATE BANK FEE CREDIT','ONE TIME ADJUSTMENT',
+            'COMMERCIAL CARD REBATE','VENDOR REFUND',
+            'RETURN OF FRAUDULENT DISBURSEMENT - SEE MEMO TEXT',
+            'REFUND OF 9/18/22 FRAUDULENT DISBURSEMENT',
+            'CREDIT FOR UNAUTHORIZED DISBURSEMENT ON 2/20/2024',
+            'RETURNED EXAMPLE CONSULTING BILL PAYMENT',
+            'REFUND OF ERRONEOUS BANK FEES FROM MAY 2023',
+            'REFUND OF UNAUTHORIZED TRANSACTION THAT OCCURRED ON 07/31/2023',
+            'BANK ERRONEOUSLY DEPOSITED 251 17 INTO PAC ACCOUNT THIS ERROR WILL BE REVERSED',
+            'REVERSAL OF 08/27 ARKPAC FOR SEN. JOHN BOOZMAN CONTRIBUTION',
+            'BANK REFUND OF STOLEN 7/26/21 CONTRIBUTION TO EXAMPLE FOR CONGRESS',
+            'CREDIT FOR UNAUTHORIZED ACTIVITY','RECOVERED FUNDS FROM BANK FRAUD',
+            'NON-CONTRIBUTION AMOUNT','REFUND OF BANK FEES ERRONEOUSLY CHARGED',
+            'REFUND OF MERCHANT FEES','REFUND OF CHECK ORDER FEE',
+            'BANK STOP PAYMENT FEE REFUND','BANK FEE REVERSAL','BANK FEE REFUND',
+            'INTEREST DISTRIBUTION FUND','INTEREST (DISTRIBUTION FUND)',
+            'INTEREST EARNE','INTEREST EARNER','JULY INTEREST EARNED',
+            'OCTOBER MONTHLY INTEREST','ACCOUNT INTEREST','INTEREST FROM BANK ACCT',
+            'INTEREST ON DEPOSIT ACCT','INTEREST ON BANK ACCOUNT','CASH BACK REWARD',
+            'JPM TEST DEPOSIT','NON-CONTRIBUTORY ACCOUNT RECEIPT',
+            'BANK ERROR DEPOSIT. HOPE TO HAVE THE BANK REVERSE THE ERROR IN APRIL 2022.',
+            'BANK DEPOSIT ERROR - REFUNDED 08/10/2022','INTEREST ($0.32)',
+            'TEST DEPOSIT')
+        for description in descriptions:
+            with self.subTest(description=description):
+                self.assertEqual(receipt_role({'filing_form':'F3X','line_number':'17',
+                    'receipt_type_full':description}), 'other_receipt')
+        self.assertEqual(receipt_role({'filing_form':'F3X','line_number':'17',
+            'receipt_type_full':'JFC TRANSFER: EXAMPLE JOINT FUNDRAISING COMMITTEE'}),
+            'transfer_receipt')
+        self.assertEqual(receipt_role({'filing_form':'F3X','line_number':'17',
+            'receipt_type_full':'TRANSFER','memo_text':'TRANSFER FROM EXAMPLE JFC'}),
+            'transfer_receipt')
+        self.assertEqual(receipt_role({'filing_form':'F3X','line_number':'17',
+            'receipt_type_full':'REVERSAL OF EXAMPLE CONTRIBUTION','memo_text':'CONTRIBUTION'}),
+            'unverified_contradicted_receipt')
+        self.assertEqual(receipt_role({'filing_form':'F3X','line_number':'17',
+            'receipt_type_full':'CONTRIBUTION','memo_text':'BANK FEE REFUND'}),
+            'unverified_contradicted_receipt')
+
+
+    def test_ambiguity_counts_and_only_contradiction_refuses(self):
+        """2026-09-17 ruling, mirrored from mentat/R/collect.R."""
+        role = receipt_role
+        # exact non-giving captions stay excluded
+        for description in ('NON-CONTRIBUTION', 'INTEREST', 'SERVICE FEE'):
+            self.assertEqual(role({'filing_form':'F3X','line_number':'17',
+                'receipt_type_full':description}), 'other_receipt')
+        # redesignations, bank artifacts and fair-market-value sales
+        for description in ('CONTRIBUTION REDESIGNATION FROM GENERAL',
+                'REDESIGNATION TO RECOUNT', 'NON CONFORMING IMAGE CHECK REDEPOSIT',
+                'NON CONFIRMING CHECK REDEPOSIT', 'ACH FAILURE TO SETTLE RETURN',
+                'DUPLICATE TRANSACTION SENT IN ERROR RETURNED ON 3/13/25',
+                'STALE CHECK', 'MISDIRECTED WIRE REFUND', 'CREDIT',
+                'OVERPAYMENT OF PAYROLL TO BE CORRECTED IN AUGUST',
+                'REFUND FOR WORKERS COMPENSATION INSURANCE',
+                'VOTER FILE PURCHASE AT FAIR MARKET VALUE'):
+            with self.subTest(description=description):
+                self.assertEqual(role({'filing_form':'F3X','line_number':'17',
+                    'receipt_type_full':description}), 'other_receipt')
+        # a redesignation split across the two fields is one claim, not a conflict
+        self.assertEqual(role({'filing_form':'F3','line_number':'15',
+            'receipt_type_full':'CONTRIBUTION','memo_text':'REDESIGNATION FROM GENERAL'}),
+            'other_receipt')
+        # special accounts the v5 ruleset now names
+        for description in ('RECOUNT LEGAL FUND CONTRIBUTION', 'LEGAL FUND CONTRIBUTION',
+                'HEADQUARTERS BUILDING FUND CONTRIBUTION', 'IE ONLY ACCOUNT CONTRIBUTION'):
+            with self.subTest(description=description):
+                self.assertEqual(role({'filing_form':'F3X','line_number':'17',
+                    'receipt_type_full':description}), 'contribution')
+        self.assertEqual(role({'filing_form':'F3X','line_number':'17',
+            'receipt_type_full':'NON-FEDERAL CONTRIBUTION TRANSFERRED FROM STATE ACCOUNT'}),
+            'transfer_receipt')
+        # F13 inaugural donations count
+        self.assertEqual(role({'filing_form':'F13','line_number':'F132'}), 'contribution')
+        # a blank line number is recovered from the transaction id prefix
+        self.assertEqual(role({'filing_form':'F3X','line_number':'',
+            'transaction_id':'SA17.621125'}), 'unverified_other_receipt')
+        self.assertEqual(role({'filing_form':'F3X','line_number':'',
+            'transaction_id':'SA11AI.42'}), 'contribution')
+        self.assertEqual(role({'filing_form':'F3X','line_number':'',
+            'transaction_id':'E966384FC6024738878E'}), 'unverified_receipt_role')
+        # a blank description on an other-receipts line stays unresolved (counted
+        # and flagged by the R gate), it is never a contradiction
+        for form, line in (('F3X','17'), ('F3','15'), ('F3P','21'), ('F4','19A')):
+            with self.subTest(form=form):
+                self.assertEqual(role({'filing_form':form,'line_number':line,
+                    'receipt_type_full':'','memo_text':''}), 'unverified_other_receipt')
+        # a single row can never prove a repeat, so the twin reports the unpaired
+        # verdict that collect.R uses when the payload holds no counterpart
+        self.assertEqual(role({'filing_form':'F3X','line_number':'17','memo_code':'X',
+            'receipt_type_full':'24,999,995 USDC CONTRIBUTION PREVIOUSLY DISCLOSED'}),
+            'unverified_disclosure_memo')
+        # the sale wording added in v5
+        self.assertEqual(role({'filing_form':'F3X','line_number':'17',
+            'receipt_type_full':'5,000 ETH CONVERTED BY EXCHANGE - UNKNOWN PURCHASER'}),
+            'asset_liquidation')
 
     def test_count_cursor_integrity_and_cache(self):
         with tempfile.TemporaryDirectory() as directory:
