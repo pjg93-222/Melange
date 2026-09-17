@@ -1949,6 +1949,19 @@ class Handler(BaseHTTPRequestHandler):
                 value = read_json(root / identifier / 'evidence.json')
                 if value.get('version') != 1:
                     raise ValueError('Evidence snapshot unavailable.')
+                # S7: a snapshot names its committees but never says what kind of
+                # committee each one is, so the picker read 'FAIRSHAKE - C00835959'
+                # with nothing to tell a Super PAC from a candidate committee. The
+                # label is read from the FEC committee master here, at read time,
+                # rather than written into the stored snapshot: it is a label, not
+                # evidence, and a master that cannot be read must never cost the
+                # reader the snapshot itself.
+                try:
+                    for committee in value.get('committee_finances') or []:
+                        committee['category'], committee['category_source'] = (
+                            evidence_csv.classify_committee(committee.get('committee_id', '')))
+                except Exception:
+                    pass
                 estimates = read_json(root / identifier / 'cash-estimates.json')
                 evidence_hash = hashlib.sha256((root / identifier / 'evidence.json').read_bytes()).hexdigest()
                 if (estimates.get('source_snapshot_sha256') == value.get('source_snapshot_sha256')

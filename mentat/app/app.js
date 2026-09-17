@@ -474,7 +474,7 @@ async function loadEvidence() {
 function updateEvidenceCommittees() {
   if(!evidence)return;
   const previous=$('evidence-committee').value||evidencePreference.committee;
-  const names=new Map(evidence.committee_finances.filter(row=>String(row.cycle)===$('evidence-cycle').value).map(row=>[row.committee_id,row.committee_name||row.committee_id]));
+  const names=new Map(evidence.committee_finances.filter(row=>String(row.cycle)===$('evidence-cycle').value).map(row=>[row.committee_id,(row.committee_name||row.committee_id)+(row.category?` · ${row.category}`:'')]));
   $('evidence-committee').replaceChildren(...[...names].map(([id,name])=>new Option(`${name} · ${id}`,id)));
   if(names.has(previous))$('evidence-committee').value=previous;
   renderEvidence();saveEvidenceSelection();

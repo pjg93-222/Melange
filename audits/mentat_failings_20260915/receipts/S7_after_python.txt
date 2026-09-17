@@ -1,0 +1,30 @@
+S7 GREEN: python suites after the Fable review fixes (R1-R3, R5, R8)
+====================================================================
+
+$ git -C C:\Users\pgoff\Mentat log -1 --format='%H %s'
+f0181e52382db85b12cfe3d714a667afe0570235 Record the cross-reference and workbook review packet (2026-09-17)
+
+$ cd C:\Users\pgoff\Mentat\mentat
+$ python -m unittest tests.test_evidence_categories tests.test_evidence_readers tests.test_evidence_csv_stream tests.test_evidence_csv tests.test_pac_evidence
+
+................................................................................................................
+----------------------------------------------------------------------
+Ran 112 tests in 18.604s
+
+OK
+
+$ "C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" -m unittest tests.test_evidence_categories tests.test_evidence_readers tests.test_evidence_csv tests.test_pac_evidence_errors   (launcher Python, python-calamine)
+
+...........................................................................................
+----------------------------------------------------------------------
+Ran 91 tests in 10.398s
+
+OK
+
+$ for f in app/tests/*.js; do node --test $f; done   (node unit suites, incl. scope.test.js)
+  app/tests/chart-briefing.test.js :: ℹ pass 8 ℹ fail 0 
+  app/tests/chart-studio-core.test.js :: ℹ pass 93 ℹ fail 0 
+  app/tests/reconcile-cycle.test.js :: ℹ pass 7 ℹ fail 0 
+  app/tests/scope.test.js :: ℹ pass 30 ℹ fail 0 
+  app/tests/studio-contract.test.js :: ℹ pass 22 ℹ fail 0 
+  app/tests/studio-worksheet-sheet.test.js :: ℹ pass 3 ℹ fail 0 

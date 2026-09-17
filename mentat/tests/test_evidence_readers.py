@@ -303,8 +303,12 @@ SOURCES_LISTING_KEYS = frozenset({'sources', 'limits', 'session_only'})
 CATALOG_KEYS_S3B = frozenset({'id', 'name', 'sha256', 'row_count', 'committees', 'cycles', 'supported_rows',
                               'unsupported_rows', 'unassigned_rows', 'session_only', 'imported_at', 'bytes',
                               'warnings', 'format', 'source_kind', 'source_path', 'sheet', 'sheets', 'sheets_read', 'encoding',
-                              'delimiter', 'header_source'})
-COMMITTEE_KEYS = frozenset({'id', 'name', 'rows', 'supported_rows'})
+                              'delimiter', 'header_source',
+                              # S7
+                              'categories', 'excluded_rows', 'catalog_version', 'state', 'reread', 'stale',
+                              'rows_read'})
+COMMITTEE_KEYS = frozenset({'id', 'name', 'rows', 'supported_rows', 'excluded_rows', 'category',
+                            'category_source'})
 
 JOB_EXAMPLES_S3B = _import_groups[JOB_KEYS_S3B]
 LIMITS_EXAMPLES_S3B = _import_groups[LIMITS_KEYS_S3B]
@@ -320,11 +324,16 @@ BROWSE_ERROR_EXAMPLES = _browse_groups[BROWSE_ERROR_KEYS]
 ENTRY_EXAMPLES = [entry for example in LISTING_EXAMPLES for entry in example['entries']]
 SHORTCUT_EXAMPLES = [shortcut for example in LISTING_EXAMPLES for shortcut in example['shortcuts']]
 
+def category_warning(text):
+    """True for the per-import sentence S7 built to replace the static committee-type note."""
+    return (text.startswith('Committee categories ')
+            or text.startswith('The FEC committee master is not available')
+            or text.startswith('The FEC committee master file '))
+
+
 CATALOG_WARNINGS_S3B = {
     'Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended '
     'rows are preserved; totals may overlap.',
-    'Committee names and IDs are taken from this CSV; their registration and committee type have not been '
-    'independently verified.',
     'Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain '
     'unsupported.',
     WINDOWS_1252_WARNING,
@@ -335,13 +344,14 @@ CATALOG_WARNINGS_S3B = {
 
 
 def assert_committee(value):
-    assert_shape(value, COMMITTEE_EXAMPLES)
+    assert_shape(value, COMMITTEE_EXAMPLES, enums={'category': set(csv_data.CATEGORIES) | {''}})
 
 
 def assert_catalog_s3b(value):
     assert_shape(value, CATALOG_EXAMPLES_S3B,
                  enums={'format': {'delimited', 'xlsx', 'json', 'fec_bulk'},
                         'source_kind': {'upload', 'path'},
+                        'state': {'ready', 'reading'},
                         'encoding': {'utf-8', 'utf-8-sig', 'utf-16', 'cp1252', ''},
                         'delimiter': {',', ';', '\t', '|', ''},
                         'header_source': {'row', 'header_path', 'inputs', 'bundled', ''}})
@@ -349,8 +359,11 @@ def assert_catalog_s3b(value):
         raise AssertionError(f"catalog.sheets must be an array, got {type(value['sheets']).__name__}")
     for committee in value['committees']:
         assert_committee(committee)
+    names = [item['category'] for item in value['categories']]
+    if names != [name for name in csv_data.CATEGORIES if name in set(names)]:
+        raise AssertionError(f'catalog.categories out of vocabulary order: {names}')
     for warning in value['warnings']:
-        if warning not in CATALOG_WARNINGS_S3B:
+        if warning not in CATALOG_WARNINGS_S3B and not category_warning(warning):
             raise AssertionError(f'unexpected catalog warning: {warning!r}')
 
 

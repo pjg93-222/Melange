@@ -1,0 +1,83 @@
+S7 real-client acceptance: the real Crypto workbook through a scratch console
+================================================================================================
+source        C:\Users\pgoff\AppData\Local\Mentat\console\evidence-csv\csv-88ea228457b8499d1ec27eeaba967f61\source.xlsx (read-only copy at crypto-source.xlsx, 5,788,519 bytes)
+server        C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe app/server.py --port 8950 --data-root <scratchpad>/scratch-console
+started       2026-09-17 12:48:59
+
+console ready, token acquired from GET /api/session (read_only=False)
+POST /api/evidence-csv {"path": ...} -> csv-88ea228457b8499d1ec27eeaba967f61 state=ready in 1.7s
+  import id matches the live store id: True  (expected csv-88ea228457b8499d1ec27eeaba967f61)
+
+GET /api/evidence-csv  ->  crypto-source.xlsx
+  row_count 6,343   committees 523   catalog_version 2   state ready  reread False  stale False
+  supported_rows 6,273   excluded_rows 70   unsupported_rows 0
+
+  categories[] (vocabulary order, as the committee-type select lists them)
+    category              committees      rows   supported  excluded
+    Super PAC                     21     2,683       2,676         7
+    Trade Association              2         9           9         0
+    JFC                           65       465         461         4
+    Company PAC                    2     1,375       1,359        16
+    Leadership PAC                50       179         175         4
+    Carey                         23        69          68         1
+    Other PAC                      4        10          10         0
+    Candidate                    294     1,404       1,388        16
+    Party Committee               54       116         102        14
+    Unclassified                   8        33          25         8
+    TOTAL                        523     6,343       6,273        70
+
+  catalog warnings
+    - Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.
+    - Committee categories come from this file's Recipient Category column; 18 committees the file left blank or Unclassified were checked against the FEC committee master (cm26, cm24, cm22).
+    - Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported.
+    - Read 4 worksheets with the same columns: 2021-2022, 2023-2024, 2025-2026, Cycle Exceptions.
+
+  FAIRSHAKE committee entry: {"category": "Super PAC", "category_source": "file:Recipient Category", "excluded_rows": 6, "id": "C00835959", "name": "FAIRSHAKE", "rows": 28, "supported_rows": 22}
+
+GET /api/evidence-csv?id=...&committee=C00835959  (all cycles)
+  total_rows 28   supported_rows 22   excluded_rows 6   unsupported_rows 0
+  total  Receipts                               $177,980,393.39   22 rows
+  committee.category        Super PAC
+  committee.category_source file:Recipient Category
+  excluded rows on this page: 6
+    row    25    $23,000,000.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
+    row    26    $23,000,000.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
+    row    27    $23,000,000.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
+    row    28    $23,000,000.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
+    row  2090    $24,999,995.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
+    row  2575         $5,000.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
+
+  expected by the design, measured here
+    supported rows       expected              22.00   measured              22.00   MATCH
+    excluded rows        expected               6.00   measured               6.00   MATCH
+    unsupported rows     expected               0.00   measured               0.00   MATCH
+    Receipts total       expected     177,980,393.39   measured     177,980,393.39   MATCH
+    category             expected          Super PAC   measured          Super PAC   MATCH
+    category_source      expected      file:Recipient Category   measured      file:Recipient Category   MATCH
+
+GET /api/evidence  (saved FEC snapshots, labelled from the FEC committee master)
+  snapshots reachable from this console: ['fairshake-20260908', 'snapshot-2eb1b6d618fa4595b4ddbe8043753ede']
+  fairshake-20260908: 3 committees
+    C00835959  FAIRSHAKE                         Super PAC         fec_master:cm26
+    C00836221  DEFEND AMERICAN JOBS              Super PAC         fec_master:cm26
+    C00848440  PROTECT PROGRESS                  Super PAC         fec_master:cm26
+
+scratch server on port 8950 stopped (exit 1); data root left under the scratchpad.
+
+Addendum: an import stored under the OLD rules re-reads itself on the first listing
+================================================================================================
+import.json rewritten to the pre-S7 shape (catalog_version removed, category fields stripped,
+the static committee-type warning put back). rows.sqlite 4,034,560 bytes before.
+console restarted on port 8950 (a fresh process, exactly as after Paul restarts 8806)
+  first GET /api/evidence-csv answered in 0.02s (it must not block on the re-read)
+    state reading   reread True   stale False   catalog_version 0   rows_read 6,343
+    the picker shows this entry disabled: "... - re-reading under the current rules"
+    select while re-reading: HTTP 400 'Another CSV is still being read. Wait for it to finish.'
+  re-read finished after 1.6s
+    state ready   reread False   stale False   catalog_version 2
+    id unchanged: True   imported_at unchanged: True
+    row_count 6,343   supported 6,273   excluded 70   unsupported 0
+    categories[]: Super PAC 21, Trade Association 2, JFC 65, Company PAC 2, Leadership PAC 50, Carey 23, Other PAC 4, Candidate 294, Party Committee 54, Unclassified 8
+    FAIRSHAKE after the re-read: 22 supported, 6 excluded, 0 unsupported, Receipts $177,980,393.39
+    rows.sqlite 4,034,560 bytes after; directory holds ['import.json', 'rows.sqlite', 'source.xlsx']
+  scratch server on port 8950 stopped.

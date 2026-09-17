@@ -313,13 +313,17 @@ LIMITS_KEYS = frozenset({'max_bytes', 'max_columns', 'max_rows', 'max_bytes_mess
                          'max_rows_message', 'accepted_suffixes', 'max_json_bytes'})
 DESCRIPTIVE_KEYS = {'format', 'source_kind', 'source_path', 'sheet', 'sheets', 'sheets_read', 'encoding', 'delimiter',
                     'header_source'}
+# S7: every catalog now says which categories its committees fall into, how
+# many rows the workbook itself excluded, which rule set it was built under,
+# and whether this console is re-reading it right now.
+CATEGORY_KEYS = {'categories', 'excluded_rows', 'catalog_version', 'state', 'reread', 'stale', 'rows_read'}
 CATALOG_KEYS = frozenset({'id', 'name', 'sha256', 'row_count', 'committees', 'cycles', 'supported_rows',
                           'unsupported_rows', 'unassigned_rows', 'session_only', 'imported_at', 'bytes',
-                          'warnings'} | DESCRIPTIVE_KEYS)
+                          'warnings'} | DESCRIPTIVE_KEYS | CATEGORY_KEYS)
 SOURCES_LISTING_KEYS = frozenset({'sources', 'limits', 'session_only'})
 SELECT_KEYS = frozenset({'source', 'committee', 'committees', 'cycles', 'selected_cycle', 'columns', 'rows',
-                         'totals', 'supported_rows', 'unsupported_rows', 'offset', 'limit', 'total_rows',
-                         'has_more', 'warnings'})
+                         'totals', 'supported_rows', 'excluded_rows', 'unsupported_rows', 'offset', 'limit',
+                         'total_rows', 'has_more', 'warnings'})
 ERROR_KEYS = frozenset({'error'})
 JOB_KEYS = frozenset({'id', 'name', 'state', 'bytes', 'bytes_read', 'rows_read', 'message', 'started_at',
                       'finished_at', 'catalog'} | DESCRIPTIVE_KEYS)
@@ -337,6 +341,18 @@ JOB_EXAMPLES = _job_groups[JOB_KEYS]
 COLLECTOR_ACTIVE_EXAMPLES = _job_groups[COLLECTOR_ACTIVE_KEYS]
 COLLECTOR_DONE_EXAMPLES = _job_groups[COLLECTOR_DONE_KEYS]
 
+def category_warning(text):
+    """True for the per-import sentence that replaced the static committee-type note.
+
+    S7 builds warning 2 for the import in front of the reader - which column
+    the categories came from, and how many committees the FEC committee
+    master had to classify - so it cannot be a fixed string in a set.
+    """
+    return (text.startswith('Committee categories ')
+            or text.startswith('The FEC committee master is not available')
+            or text.startswith('The FEC committee master file '))
+
+
 CATALOG_WARNINGS = {
     # S3b may add one more: a file decoded as Windows-1252, or an FEC bulk
     # header taken from somewhere other than the file itself. Neither can come
@@ -344,8 +360,6 @@ CATALOG_WARNINGS = {
     # test_evidence_readers.py against the files that do produce them.
     'Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended '
     'rows are preserved; totals may overlap.',
-    'Committee names and IDs are taken from this CSV; their registration and committee type have not been '
-    'independently verified.',
     'Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain '
     'unsupported.',
 }
@@ -363,13 +377,15 @@ def assert_limits(value):
 
 
 def assert_committee(value):
-    assert_shape(value, COMMITTEE_EXAMPLES)
+    # A category outside the shared vocabulary is a filter option the Graph
+    # tab does not have, so the two tabs would hide different committees.
+    assert_shape(value, COMMITTEE_EXAMPLES, enums={'category': set(csv_data.CATEGORIES) | {''}})
 
 
 # The S3b vocabularies for the descriptive fields, checked here as well as in
 # test_evidence_readers.py: the shared contract file carries a negative control
 # for each of them, and a control that passes proves nothing.
-CATALOG_ENUMS = {'session_only': {False},
+CATALOG_ENUMS = {'session_only': {False}, 'state': {'ready', 'reading'},
                  'format': {'delimited', 'xlsx', 'json', 'fec_bulk'},
                  'source_kind': {'upload', 'path'},
                  'encoding': {'utf-8', 'utf-8-sig', 'utf-16', 'cp1252', ''},
@@ -381,8 +397,11 @@ def assert_catalog(value):
     assert_shape(value, CATALOG_EXAMPLES, enums=CATALOG_ENUMS)
     for committee in value['committees']:
         assert_committee(committee)
+    names = [item['category'] for item in value['categories']]
+    if names != [name for name in csv_data.CATEGORIES if name in set(names)]:
+        raise AssertionError(f'catalog.categories out of vocabulary order: {names}')
     for warning in value['warnings']:
-        if warning not in CATALOG_WARNINGS:
+        if warning not in CATALOG_WARNINGS and not category_warning(warning):
             raise AssertionError(f'unexpected catalog warning: {warning!r}')
 
 
@@ -405,6 +424,15 @@ def assert_select(value):
         assert_committee(committee)
     for total in value['totals']:
         assert_total(total)
+    for row in value['rows']:
+        if row['status'] not in ('supported', 'unsupported', 'excluded'):
+            raise AssertionError(f"row {row.get('row_number')}: unknown status {row['status']!r}")
+        # An excluded row is an amount deliberately left out of the totals;
+        # the page has to be able to say whose decision that was.
+        if row['status'] == 'excluded' and not any(
+                str(issue).startswith('Excluded by the workbook') for issue in row['issues']):
+            raise AssertionError(f"row {row.get('row_number')}: status excluded with no "
+                                  f"'Excluded by the workbook' issue: {row['issues']!r}")
 
 
 def assert_error_payload(value, expected=None):
@@ -438,7 +466,8 @@ def assert_collector_job(value):
                                   f'(missing "Full log: " and not a start-failure message): {value["message"]!r}')
 
 
-IMPORT_DISPATCH = {'catalog': assert_catalog, 'sources_listing': assert_sources_listing, 'error': assert_error_payload}
+IMPORT_DISPATCH = {'catalog': assert_catalog, 'sources_listing': assert_sources_listing,
+                   'select': assert_select, 'error': assert_error_payload}
 JOB_DISPATCH = {'job': assert_job, 'collector_job': assert_collector_job}
 
 

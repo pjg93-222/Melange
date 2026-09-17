@@ -63,6 +63,22 @@ function buildCsvOfSize(targetBytes) {
   return parts.join('');
 }
 
+// S7: a workbook-shaped CSV with the three columns the industry workbooks
+// carry - the recipient's category, whether the row is corporate treasury
+// giving or an employee contribution, and whether the workbook's own
+// analysis counts it.
+const CATEGORY_HEADER = 'committee_id,committee_name,amount,date,two_year_transaction_period,record_type,'
+  + 'recipient_category,include_in_analysis,inclusion_reason\r\n';
+
+function categoryCsv() {
+  return CATEGORY_HEADER
+    + 'C00835959,FAIRSHAKE,25000000,2026-01-05,2026,CORPORATE,Super PAC,Yes,\r\n'
+    + 'C00835959,FAIRSHAKE,5000,2026-01-06,2026,CONTRIBUTION,Super PAC,Yes,\r\n'
+    + 'C00835959,FAIRSHAKE,23000000,2026-01-07,2026,CORPORATE,,No,Exact five-key memo duplicate\r\n'
+    + 'C00000935,DCCC,1000,2026-02-05,2026,CONTRIBUTION,Party Committee,Yes,\r\n'
+    + 'C00401224,NRCC,2000,2026-02-06,2026,CONTRIBUTION,Party Committee,Yes,\r\n';
+}
+
 function wide201Csv() {
   const headers = ['committee_id', ...Array.from({length: 200}, (_, i) => `col${i}`)];
   const row = ['C00000001', ...Array.from({length: 200}, () => 'x')];
@@ -427,7 +443,16 @@ function pass(detail) {
     await page.click('#tab-evidence');
     await page.selectOption('#evidence-source', 'csv');
     await waitForStatusExact('No CSV imported yet. Choose a file.');
-    pass('evidence tab open, CSV source selected, empty-catalog status shown');
+    // Every POST below carries the page's token, and app.js only assigns it once
+    // GET /api/session?light=1 answers - a different round trip from the one
+    // evidence-csv.js uses for the listing above. Uploading as soon as the
+    // listing lands raced that assignment and the console answered 403
+    // 'Refresh the app before continuing.' #connection is the page's own signal
+    // that the token is set: app.js writes it on the line after `token = session.token`.
+    await page.waitForFunction(
+      () => (document.getElementById('connection') || {}).textContent === '\u25cf Local connection',
+      null, {timeout: 30000});
+    pass('evidence tab open, CSV source selected, empty-catalog status shown, console token assigned');
 
     step('import six.csv (~6 MB) and check the first page of rows');
     await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'six.csv'));
@@ -665,6 +690,86 @@ function pass(detail) {
       `expected the recipient name in the committee picker, got: ${JSON.stringify(overviewCommittees)}`);
     await assertStatusNotEmpty(page);
     pass(`overview.xlsx: ${overviewRows} rows rendered from the cycle sheets, Receipts totalled, recipient names shown`);
+
+    step('S7: a workbook-shaped CSV with categories, a CORPORATE row and a row the workbook excludes');
+    fs.writeFileSync(path.join(fixtureDir, 'categories.csv'), categoryCsv());
+    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'categories.csv'));
+    await waitForStatusMatching(/rows in file$/);
+    const allTypes = await page.locator('#evidence-csv-category option').allTextContents();
+    assert.ok(allTypes.some(text => text.startsWith('Super PAC')),
+      `expected a Super PAC option in the committee-type select, got: ${JSON.stringify(allTypes)}`);
+    assert.ok(allTypes.some(text => text.startsWith('Party Committee')),
+      `expected a Party Committee option in the committee-type select, got: ${JSON.stringify(allTypes)}`);
+    assert.equal(await page.locator('#evidence-csv-committee option').count(), 3);
+    pass(`categories.csv imported; committee-type select offers ${JSON.stringify(allTypes)}`);
+
+    step('S7: choosing the type Super PAC shows FAIRSHAKE and hides DCCC');
+    await page.selectOption('#evidence-csv-category', 'Super PAC');
+    await page.waitForFunction(() => {
+      const options = [...document.querySelectorAll('#evidence-csv-committee option')].map(item => item.textContent);
+      return options.length === 1 && options[0].includes('FAIRSHAKE');
+    }, null, {timeout: 15000});
+    const superPacOptions = await page.locator('#evidence-csv-committee option').allTextContents();
+    assert.ok(superPacOptions[0].includes('C00835959') && superPacOptions[0].includes('Super PAC'),
+      `expected the option to name the id and the category, got: ${JSON.stringify(superPacOptions)}`);
+    assert.ok(!superPacOptions.some(text => text.includes('DCCC')),
+      `DCCC must be hidden under the Super PAC filter, got: ${JSON.stringify(superPacOptions)}`);
+    await waitForStatusMatching(/3 PACs in file . 1 shown \(Super PAC\)/);
+    pass(`type filter Super PAC -> ${JSON.stringify(superPacOptions)}`);
+
+    step('S7: typing "dccc" with All types shows only DCCC');
+    await page.selectOption('#evidence-csv-category', '');
+    await page.fill('#evidence-csv-find', 'dccc');
+    await page.waitForFunction(() => {
+      const options = [...document.querySelectorAll('#evidence-csv-committee option')].map(item => item.textContent);
+      return options.length === 1 && options[0].includes('DCCC');
+    }, null, {timeout: 15000});
+    await waitForStatusMatching(/1 shown matching "dccc"/);
+    const searchOptions = await page.locator('#evidence-csv-committee option').allTextContents();
+    assert.ok(!searchOptions.some(text => text.includes('FAIRSHAKE')),
+      `FAIRSHAKE must be hidden by the search, got: ${JSON.stringify(searchOptions)}`);
+    pass(`search "dccc" -> ${JSON.stringify(searchOptions)}`);
+
+    step('S7: a filter that matches nothing hides the results panel instead of showing another PAC');
+    await page.fill('#evidence-csv-find', 'zzz-no-such-pac');
+    await page.waitForFunction(
+      () => document.querySelectorAll('#evidence-csv-committee option').length === 0,
+      null, {timeout: 15000});
+    await waitForStatusMatching(/0 shown matching "zzz-no-such-pac"/);
+    // Asking the server for committee '' would NOT have been empty: select()
+    // reads a blank committee as the first committee of the import, so the
+    // panel used to show an unrelated PAC while the picker showed nothing.
+    assert.equal(await page.isVisible('#evidence-csv-results'), false,
+      'the results panel must be hidden when no PAC matches the filter');
+    pass('no match: committee select empty, results panel hidden, status says 0 shown');
+
+    step('S7: the CORPORATE row is counted in Receipts and the Include=No row is shown as excluded');
+    await page.fill('#evidence-csv-find', 'fairshake');
+    await page.waitForFunction(() => {
+      const scope = document.getElementById('evidence-csv-scope');
+      return scope && scope.textContent.includes('C00835959') && scope.textContent.includes('Super PAC');
+    }, null, {timeout: 20000});
+    const totalsText = await page.textContent('#evidence-csv-totals');
+    assert.ok(totalsText.includes('Receipts'), `expected a Receipts total, got: ${JSON.stringify(totalsText)}`);
+    // 25,000,000 corporate + 5,000 employee contribution; the 23,000,000 memo
+    // duplicate the workbook excludes must NOT be in it.
+    assert.ok(totalsText.includes('$25,005,000'),
+      `expected the CORPORATE row inside the Receipts total, got: ${JSON.stringify(totalsText)}`);
+    assert.ok(totalsText.includes('2 supported CSV rows'),
+      `expected 2 supported rows behind the Receipts total, got: ${JSON.stringify(totalsText)}`);
+    const scopeText = await page.textContent('#evidence-csv-scope');
+    assert.ok(scopeText.includes('Super PAC') && scopeText.includes('file:recipient_category'),
+      `expected the category and its source in the results scope line, got: ${JSON.stringify(scopeText)}`);
+    const rowStatus = await page.textContent('#evidence-csv-row-status');
+    assert.ok(rowStatus.includes('1 excluded by the workbook'),
+      `expected the excluded count in the row status line, got: ${JSON.stringify(rowStatus)}`);
+    const rowsText = await page.textContent('#evidence-csv-rows');
+    assert.ok(rowsText.includes('excluded'),
+      `expected the excluded row rendered with its status, got: ${JSON.stringify(rowsText.slice(0, 400))}`);
+    assert.ok(rowsText.includes('Excluded by the workbook: Exact five-key memo duplicate'),
+      `expected the workbook's own reason on the excluded row, got: ${JSON.stringify(rowsText.slice(0, 800))}`);
+    await assertStatusNotEmpty(page);
+    pass('CORPORATE folded into Receipts ($25,005,000 over 2 rows); the Include=No row is visible and excluded');
 
     step('no path box, no browse panel, no sheet picker exist in the page (UI unchanged)');
     for (const id of ['evidence-path', 'evidence-header-path', 'evidence-path-read', 'evidence-browse', 'evidence-browser', 'evidence-sheet']) {

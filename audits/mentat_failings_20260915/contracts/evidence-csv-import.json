@@ -1,6 +1,6 @@
 {
   "contract": "evidence-csv-import",
-  "version": 2,
+  "version": 3,
   "owner": "S3",
   "produced_by": [
     "mentat/app/evidence_csv.py:limits",
@@ -17,7 +17,7 @@
     "mentat/app/evidence-csv.js: sources listing render + #evidence-csv-source population",
     "mentat/app/evidence-csv.js: pre-flight size check against LIMITS"
   ],
-  "description": "The shapes read once a CSV has been imported: the size/row/column LIMITS the client pre-flights against, one imported CSV's CATALOG (nested inside a sources listing or a SELECT), the GET /api/evidence-csv sources listing, a paginated SELECT of one committee/cycle's rows, and the bounded error-payload shape (never a leaked Python exception string). Orientation only - the examples are the contract.",
+  "description": "The shapes read once a CSV has been imported: the size/row/column LIMITS the client pre-flights against, one imported CSV's CATALOG (nested inside a sources listing or a SELECT), the GET /api/evidence-csv sources listing, a paginated SELECT of one committee/cycle's rows, and the bounded error-payload shape (never a leaked Python exception string). Orientation only - the examples are the contract. v3 (S7, 2026-09-17): every committee carries the category the file gave it or the FEC committee master inferred, with the source of that label; the CATALOG carries the per-category rollup the picker filters on, its excluded-row count and the CATALOG_VERSION its rules were built under, plus the three fields that say whether this console is re-reading the import; the SELECT carries the rows the workbook excluded from its own analysis.",
   "examples": [
     {
       "max_bytes": 500000000,
@@ -74,13 +74,19 @@
               "id": "C00000001",
               "name": "Example PAC",
               "rows": 42,
-              "supported_rows": 40
+              "supported_rows": 40,
+              "category": "Super PAC",
+              "category_source": "file:recipient_category",
+              "excluded_rows": 1
             },
             {
               "id": "unassigned",
               "name": "Unassigned committee rows",
               "rows": 3,
-              "supported_rows": 0
+              "supported_rows": 0,
+              "category": "",
+              "category_source": "",
+              "excluded_rows": 0
             }
           ],
           "cycles": [
@@ -95,9 +101,31 @@
           "bytes": 12345,
           "warnings": [
             "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
-            "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+            "Committee categories come from this file's recipient_category column.",
             "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
-          ]
+          ],
+          "categories": [
+            {
+              "category": "Super PAC",
+              "committees": 1,
+              "rows": 3,
+              "supported_rows": 2,
+              "excluded_rows": 1
+            },
+            {
+              "category": "Trade Association",
+              "committees": 1,
+              "rows": 1,
+              "supported_rows": 1,
+              "excluded_rows": 0
+            }
+          ],
+          "excluded_rows": 1,
+          "catalog_version": 2,
+          "state": "ready",
+          "reread": false,
+          "stale": false,
+          "rows_read": 4
         }
       ],
       "limits": {
@@ -133,13 +161,19 @@
             "id": "C00000001",
             "name": "Example PAC",
             "rows": 42,
-            "supported_rows": 40
+            "supported_rows": 40,
+            "category": "Super PAC",
+            "category_source": "file:recipient_category",
+            "excluded_rows": 1
           },
           {
             "id": "unassigned",
             "name": "Unassigned committee rows",
             "rows": 3,
-            "supported_rows": 0
+            "supported_rows": 0,
+            "category": "",
+            "category_source": "",
+            "excluded_rows": 0
           }
         ],
         "cycles": [
@@ -154,28 +188,59 @@
         "bytes": 12345,
         "warnings": [
           "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
-          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Committee categories come from this file's recipient_category column.",
           "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
-        ]
+        ],
+        "categories": [
+          {
+            "category": "Super PAC",
+            "committees": 1,
+            "rows": 3,
+            "supported_rows": 2,
+            "excluded_rows": 1
+          },
+          {
+            "category": "Trade Association",
+            "committees": 1,
+            "rows": 1,
+            "supported_rows": 1,
+            "excluded_rows": 0
+          }
+        ],
+        "excluded_rows": 1,
+        "catalog_version": 2,
+        "state": "ready",
+        "reread": false,
+        "stale": false,
+        "rows_read": 4
       },
       "committee": {
         "id": "C00000001",
         "name": "Example PAC",
         "rows": 42,
-        "supported_rows": 40
+        "supported_rows": 40,
+        "category": "Super PAC",
+        "category_source": "file:recipient_category",
+        "excluded_rows": 1
       },
       "committees": [
         {
           "id": "C00000001",
           "name": "Example PAC",
           "rows": 42,
-          "supported_rows": 40
+          "supported_rows": 40,
+          "category": "Super PAC",
+          "category_source": "file:recipient_category",
+          "excluded_rows": 1
         },
         {
           "id": "unassigned",
           "name": "Unassigned committee rows",
           "rows": 3,
-          "supported_rows": 0
+          "supported_rows": 0,
+          "category": "",
+          "category_source": "",
+          "excluded_rows": 0
         }
       ],
       "cycles": [
@@ -219,7 +284,8 @@
         "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
         "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
         "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
-      ]
+      ],
+      "excluded_rows": 1
     },
     {
       "error": "Choose a valid CSV row page (1–1,000 rows)."
@@ -244,7 +310,10 @@
             "id": "C00000001",
             "name": "Example PAC",
             "rows": 12,
-            "supported_rows": 12
+            "supported_rows": 12,
+            "category": "Super PAC",
+            "category_source": "file:recipient_category",
+            "excluded_rows": 1
           }
         ],
         "cycles": [
@@ -258,7 +327,7 @@
         "bytes": 20480,
         "warnings": [
           "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
-          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Committee categories come from this file's recipient_category column.",
           "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
         ],
         "format": "xlsx",
@@ -274,7 +343,29 @@
         "header_source": "",
         "sheets_read": [
           "Detail"
-        ]
+        ],
+        "categories": [
+          {
+            "category": "Super PAC",
+            "committees": 1,
+            "rows": 3,
+            "supported_rows": 2,
+            "excluded_rows": 1
+          },
+          {
+            "category": "Trade Association",
+            "committees": 1,
+            "rows": 1,
+            "supported_rows": 1,
+            "excluded_rows": 0
+          }
+        ],
+        "excluded_rows": 1,
+        "catalog_version": 2,
+        "state": "ready",
+        "reread": false,
+        "stale": false,
+        "rows_read": 4
       },
       "format": "xlsx",
       "source_kind": "path",
@@ -311,7 +402,10 @@
             "id": "C00000001",
             "name": "Example PAC",
             "rows": 5,
-            "supported_rows": 5
+            "supported_rows": 5,
+            "category": "Super PAC",
+            "category_source": "file:recipient_category",
+            "excluded_rows": 1
           }
         ],
         "cycles": [
@@ -325,7 +419,7 @@
         "bytes": 1024,
         "warnings": [
           "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
-          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+          "Committee categories come from this file's recipient_category column.",
           "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported.",
           "Header taken from bundled."
         ],
@@ -337,7 +431,29 @@
         "encoding": "utf-8",
         "delimiter": "|",
         "header_source": "bundled",
-        "sheets_read": []
+        "sheets_read": [],
+        "categories": [
+          {
+            "category": "Super PAC",
+            "committees": 1,
+            "rows": 3,
+            "supported_rows": 2,
+            "excluded_rows": 1
+          },
+          {
+            "category": "Trade Association",
+            "committees": 1,
+            "rows": 1,
+            "supported_rows": 1,
+            "excluded_rows": 0
+          }
+        ],
+        "excluded_rows": 1,
+        "catalog_version": 2,
+        "state": "ready",
+        "reread": false,
+        "stale": false,
+        "rows_read": 4
       },
       "format": "fec_bulk",
       "source_kind": "upload",
@@ -398,7 +514,10 @@
           "id": "C00000001",
           "name": "Example PAC",
           "rows": 3,
-          "supported_rows": 3
+          "supported_rows": 3,
+          "category": "Super PAC",
+          "category_source": "file:recipient_category",
+          "excluded_rows": 1
         }
       ],
       "cycles": [
@@ -412,7 +531,7 @@
       "bytes": 512,
       "warnings": [
         "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
-        "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+        "Committee categories come from this file's recipient_category column.",
         "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
       ],
       "format": "delimited",
@@ -423,7 +542,29 @@
       "encoding": "utf-8",
       "delimiter": ",",
       "header_source": "row",
-      "sheets_read": []
+      "sheets_read": [],
+      "categories": [
+        {
+          "category": "Super PAC",
+          "committees": 1,
+          "rows": 3,
+          "supported_rows": 2,
+          "excluded_rows": 1
+        },
+        {
+          "category": "Trade Association",
+          "committees": 1,
+          "rows": 1,
+          "supported_rows": 1,
+          "excluded_rows": 0
+        }
+      ],
+      "excluded_rows": 1,
+      "catalog_version": 2,
+      "state": "ready",
+      "reread": false,
+      "stale": false,
+      "rows_read": 4
     }
   ],
   "negative_controls": [
@@ -625,6 +766,639 @@
         },
         "session_only": false
       }
+    },
+    {
+      "shape": "catalog",
+      "payload": {
+        "categories": [
+          {
+            "category": "Super PAC",
+            "committees": 1,
+            "rows": 3,
+            "supported_rows": 2,
+            "excluded_rows": 1
+          },
+          {
+            "category": "Trade Association",
+            "committees": 1,
+            "rows": 1,
+            "supported_rows": 1,
+            "excluded_rows": 0
+          }
+        ],
+        "excluded_rows": 1,
+        "format": "delimited",
+        "source_kind": "upload",
+        "source_path": "",
+        "sheet": "",
+        "sheets": [],
+        "sheets_read": [],
+        "encoding": "utf-8",
+        "delimiter": ",",
+        "header_source": "row",
+        "id": "csv-df276ecd510f24f9ef22054878938a9a",
+        "name": "producers.csv",
+        "sha256": "df276ecd510f24f9ef22054878938a9ae4bce5d2a8bd6612d230b34940886b03",
+        "row_count": 4,
+        "committees": [
+          {
+            "category": "Hybrid PAC",
+            "category_source": "file:recipient_category",
+            "excluded_rows": 1,
+            "id": "C00000001",
+            "name": "Example Super PAC",
+            "rows": 3,
+            "supported_rows": 2
+          },
+          {
+            "category": "Trade Association",
+            "category_source": "file:recipient_category",
+            "excluded_rows": 0,
+            "id": "C00000002",
+            "name": "Example Trade PAC",
+            "rows": 1,
+            "supported_rows": 1
+          }
+        ],
+        "cycles": [
+          "2026"
+        ],
+        "supported_rows": 3,
+        "unsupported_rows": 0,
+        "unassigned_rows": 0,
+        "session_only": false,
+        "imported_at": "2026-09-17T16:08:45.310690+00:00",
+        "bytes": 478,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee categories come from this file's recipient_category column.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ],
+        "catalog_version": 2,
+        "rows_read": 4,
+        "state": "ready",
+        "reread": false,
+        "stale": false
+      },
+      "why": "S7 category vocabulary: 'Hybrid PAC' is not one of the ten names the Graph tab and the PAC evidence picker share, so a filter built from it would drop every committee it labels."
+    },
+    {
+      "shape": "catalog",
+      "payload": {
+        "categories": [
+          {
+            "category": "Trade Association",
+            "committees": 1,
+            "rows": 1,
+            "supported_rows": 1,
+            "excluded_rows": 0
+          },
+          {
+            "category": "Super PAC",
+            "committees": 1,
+            "rows": 3,
+            "supported_rows": 2,
+            "excluded_rows": 1
+          }
+        ],
+        "excluded_rows": 1,
+        "format": "delimited",
+        "source_kind": "upload",
+        "source_path": "",
+        "sheet": "",
+        "sheets": [],
+        "sheets_read": [],
+        "encoding": "utf-8",
+        "delimiter": ",",
+        "header_source": "row",
+        "id": "csv-df276ecd510f24f9ef22054878938a9a",
+        "name": "producers.csv",
+        "sha256": "df276ecd510f24f9ef22054878938a9ae4bce5d2a8bd6612d230b34940886b03",
+        "row_count": 4,
+        "committees": [
+          {
+            "category": "Super PAC",
+            "category_source": "file:recipient_category",
+            "excluded_rows": 1,
+            "id": "C00000001",
+            "name": "Example Super PAC",
+            "rows": 3,
+            "supported_rows": 2
+          },
+          {
+            "category": "Trade Association",
+            "category_source": "file:recipient_category",
+            "excluded_rows": 0,
+            "id": "C00000002",
+            "name": "Example Trade PAC",
+            "rows": 1,
+            "supported_rows": 1
+          }
+        ],
+        "cycles": [
+          "2026"
+        ],
+        "supported_rows": 3,
+        "unsupported_rows": 0,
+        "unassigned_rows": 0,
+        "session_only": false,
+        "imported_at": "2026-09-17T16:08:45.310690+00:00",
+        "bytes": 478,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee categories come from this file's recipient_category column.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ],
+        "catalog_version": 2,
+        "rows_read": 4,
+        "state": "ready",
+        "reread": false,
+        "stale": false
+      },
+      "why": "S7 category order: categories[] out of vocabulary order, so the committee-type select would list types in an order that changes with the file."
+    },
+    {
+      "shape": "select",
+      "payload": {
+        "source": {
+          "categories": [
+            {
+              "category": "Super PAC",
+              "committees": 1,
+              "rows": 3,
+              "supported_rows": 2,
+              "excluded_rows": 1
+            },
+            {
+              "category": "Trade Association",
+              "committees": 1,
+              "rows": 1,
+              "supported_rows": 1,
+              "excluded_rows": 0
+            }
+          ],
+          "excluded_rows": 1,
+          "format": "delimited",
+          "source_kind": "upload",
+          "source_path": "",
+          "sheet": "",
+          "sheets": [],
+          "sheets_read": [],
+          "encoding": "utf-8",
+          "delimiter": ",",
+          "header_source": "row",
+          "id": "csv-df276ecd510f24f9ef22054878938a9a",
+          "name": "producers.csv",
+          "sha256": "df276ecd510f24f9ef22054878938a9ae4bce5d2a8bd6612d230b34940886b03",
+          "row_count": 4,
+          "committees": [
+            {
+              "category": "Super PAC",
+              "category_source": "file:recipient_category",
+              "excluded_rows": 1,
+              "id": "C00000001",
+              "name": "Example Super PAC",
+              "rows": 3,
+              "supported_rows": 2
+            },
+            {
+              "category": "Trade Association",
+              "category_source": "file:recipient_category",
+              "excluded_rows": 0,
+              "id": "C00000002",
+              "name": "Example Trade PAC",
+              "rows": 1,
+              "supported_rows": 1
+            }
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "supported_rows": 3,
+          "unsupported_rows": 0,
+          "unassigned_rows": 0,
+          "session_only": false,
+          "imported_at": "2026-09-17T16:08:45.310690+00:00",
+          "bytes": 478,
+          "warnings": [
+            "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+            "Committee categories come from this file's recipient_category column.",
+            "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+          ],
+          "catalog_version": 2,
+          "rows_read": 4,
+          "state": "ready",
+          "reread": false,
+          "stale": false
+        },
+        "committee": {
+          "category": "Super PAC",
+          "excluded_rows": 1,
+          "id": "C00000001",
+          "name": "Example Super PAC",
+          "rows": 3,
+          "supported_rows": 2
+        },
+        "committees": [
+          {
+            "category": "Super PAC",
+            "category_source": "file:recipient_category",
+            "excluded_rows": 1,
+            "id": "C00000001",
+            "name": "Example Super PAC",
+            "rows": 3,
+            "supported_rows": 2
+          },
+          {
+            "category": "Trade Association",
+            "category_source": "file:recipient_category",
+            "excluded_rows": 0,
+            "id": "C00000002",
+            "name": "Example Trade PAC",
+            "rows": 1,
+            "supported_rows": 1
+          }
+        ],
+        "cycles": [
+          "2026"
+        ],
+        "selected_cycle": "",
+        "columns": [
+          "committee_id",
+          "committee_name",
+          "amount",
+          "date",
+          "two_year_transaction_period",
+          "record_type",
+          "recipient_category",
+          "include_in_analysis",
+          "inclusion_reason"
+        ],
+        "rows": [
+          {
+            "row_number": 2,
+            "raw": {
+              "committee_id": "C00000001",
+              "committee_name": "Example Super PAC",
+              "amount": "25000000",
+              "date": "2026-01-05",
+              "two_year_transaction_period": "2026",
+              "record_type": "CORPORATE",
+              "recipient_category": "Super PAC",
+              "include_in_analysis": "Yes",
+              "inclusion_reason": ""
+            },
+            "extra_cells": [],
+            "committee_id": "C00000001",
+            "committee_name": "Example Super PAC",
+            "kind": "receipt",
+            "channel": "Receipts",
+            "basis": "dated observation",
+            "amount": 25000000.0,
+            "date": "2026-01-05",
+            "date_raw": "2026-01-05",
+            "cycle": "2026",
+            "direction": "",
+            "counterparty": "",
+            "candidate_id": "",
+            "candidate_name": "",
+            "record_id": "",
+            "source_url": "",
+            "category": "Super PAC",
+            "status": "supported",
+            "issues": []
+          },
+          {
+            "row_number": 3,
+            "raw": {
+              "committee_id": "C00000001",
+              "committee_name": "Example Super PAC",
+              "amount": "5000",
+              "date": "2026-01-06",
+              "two_year_transaction_period": "2026",
+              "record_type": "CONTRIBUTION",
+              "recipient_category": "Super PAC",
+              "include_in_analysis": "Yes",
+              "inclusion_reason": ""
+            },
+            "extra_cells": [],
+            "committee_id": "C00000001",
+            "committee_name": "Example Super PAC",
+            "kind": "receipt",
+            "channel": "Receipts",
+            "basis": "dated observation",
+            "amount": 5000.0,
+            "date": "2026-01-06",
+            "date_raw": "2026-01-06",
+            "cycle": "2026",
+            "direction": "",
+            "counterparty": "",
+            "candidate_id": "",
+            "candidate_name": "",
+            "record_id": "",
+            "source_url": "",
+            "category": "Super PAC",
+            "status": "supported",
+            "issues": []
+          },
+          {
+            "row_number": 4,
+            "raw": {
+              "committee_id": "C00000001",
+              "committee_name": "Example Super PAC",
+              "amount": "23000000",
+              "date": "2026-01-07",
+              "two_year_transaction_period": "2026",
+              "record_type": "CORPORATE",
+              "recipient_category": "",
+              "include_in_analysis": "No",
+              "inclusion_reason": "Exact five-key memo duplicate"
+            },
+            "extra_cells": [],
+            "committee_id": "C00000001",
+            "committee_name": "Example Super PAC",
+            "kind": "receipt",
+            "channel": "Receipts",
+            "basis": "dated observation",
+            "amount": 23000000.0,
+            "date": "2026-01-07",
+            "date_raw": "2026-01-07",
+            "cycle": "2026",
+            "direction": "",
+            "counterparty": "",
+            "candidate_id": "",
+            "candidate_name": "",
+            "record_id": "",
+            "source_url": "",
+            "category": "",
+            "status": "excluded",
+            "issues": [
+              "Excluded by the workbook: Exact five-key memo duplicate"
+            ]
+          }
+        ],
+        "totals": [
+          {
+            "channel": "Receipts",
+            "amount": 25005000.0,
+            "row_count": 2
+          }
+        ],
+        "supported_rows": 2,
+        "excluded_rows": 1,
+        "unsupported_rows": 0,
+        "offset": 0,
+        "limit": 200,
+        "total_rows": 3,
+        "has_more": false,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee categories come from this file's recipient_category column.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ]
+      },
+      "why": "S7 select: a committee without category_source, so the results heading could not say whether the label came from the file or from the FEC committee master."
+    },
+    {
+      "shape": "select",
+      "payload": {
+        "source": {
+          "categories": [
+            {
+              "category": "Super PAC",
+              "committees": 1,
+              "rows": 3,
+              "supported_rows": 2,
+              "excluded_rows": 1
+            },
+            {
+              "category": "Trade Association",
+              "committees": 1,
+              "rows": 1,
+              "supported_rows": 1,
+              "excluded_rows": 0
+            }
+          ],
+          "excluded_rows": 1,
+          "format": "delimited",
+          "source_kind": "upload",
+          "source_path": "",
+          "sheet": "",
+          "sheets": [],
+          "sheets_read": [],
+          "encoding": "utf-8",
+          "delimiter": ",",
+          "header_source": "row",
+          "id": "csv-df276ecd510f24f9ef22054878938a9a",
+          "name": "producers.csv",
+          "sha256": "df276ecd510f24f9ef22054878938a9ae4bce5d2a8bd6612d230b34940886b03",
+          "row_count": 4,
+          "committees": [
+            {
+              "category": "Super PAC",
+              "category_source": "file:recipient_category",
+              "excluded_rows": 1,
+              "id": "C00000001",
+              "name": "Example Super PAC",
+              "rows": 3,
+              "supported_rows": 2
+            },
+            {
+              "category": "Trade Association",
+              "category_source": "file:recipient_category",
+              "excluded_rows": 0,
+              "id": "C00000002",
+              "name": "Example Trade PAC",
+              "rows": 1,
+              "supported_rows": 1
+            }
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "supported_rows": 3,
+          "unsupported_rows": 0,
+          "unassigned_rows": 0,
+          "session_only": false,
+          "imported_at": "2026-09-17T16:08:45.310690+00:00",
+          "bytes": 478,
+          "warnings": [
+            "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+            "Committee categories come from this file's recipient_category column.",
+            "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+          ],
+          "catalog_version": 2,
+          "rows_read": 4,
+          "state": "ready",
+          "reread": false,
+          "stale": false
+        },
+        "committee": {
+          "category": "Super PAC",
+          "category_source": "file:recipient_category",
+          "excluded_rows": 1,
+          "id": "C00000001",
+          "name": "Example Super PAC",
+          "rows": 3,
+          "supported_rows": 2
+        },
+        "committees": [
+          {
+            "category": "Super PAC",
+            "category_source": "file:recipient_category",
+            "excluded_rows": 1,
+            "id": "C00000001",
+            "name": "Example Super PAC",
+            "rows": 3,
+            "supported_rows": 2
+          },
+          {
+            "category": "Trade Association",
+            "category_source": "file:recipient_category",
+            "excluded_rows": 0,
+            "id": "C00000002",
+            "name": "Example Trade PAC",
+            "rows": 1,
+            "supported_rows": 1
+          }
+        ],
+        "cycles": [
+          "2026"
+        ],
+        "selected_cycle": "",
+        "columns": [
+          "committee_id",
+          "committee_name",
+          "amount",
+          "date",
+          "two_year_transaction_period",
+          "record_type",
+          "recipient_category",
+          "include_in_analysis",
+          "inclusion_reason"
+        ],
+        "rows": [
+          {
+            "row_number": 2,
+            "raw": {
+              "committee_id": "C00000001",
+              "committee_name": "Example Super PAC",
+              "amount": "25000000",
+              "date": "2026-01-05",
+              "two_year_transaction_period": "2026",
+              "record_type": "CORPORATE",
+              "recipient_category": "Super PAC",
+              "include_in_analysis": "Yes",
+              "inclusion_reason": ""
+            },
+            "extra_cells": [],
+            "committee_id": "C00000001",
+            "committee_name": "Example Super PAC",
+            "kind": "receipt",
+            "channel": "Receipts",
+            "basis": "dated observation",
+            "amount": 25000000.0,
+            "date": "2026-01-05",
+            "date_raw": "2026-01-05",
+            "cycle": "2026",
+            "direction": "",
+            "counterparty": "",
+            "candidate_id": "",
+            "candidate_name": "",
+            "record_id": "",
+            "source_url": "",
+            "category": "Super PAC",
+            "status": "supported",
+            "issues": []
+          },
+          {
+            "row_number": 3,
+            "raw": {
+              "committee_id": "C00000001",
+              "committee_name": "Example Super PAC",
+              "amount": "5000",
+              "date": "2026-01-06",
+              "two_year_transaction_period": "2026",
+              "record_type": "CONTRIBUTION",
+              "recipient_category": "Super PAC",
+              "include_in_analysis": "Yes",
+              "inclusion_reason": ""
+            },
+            "extra_cells": [],
+            "committee_id": "C00000001",
+            "committee_name": "Example Super PAC",
+            "kind": "receipt",
+            "channel": "Receipts",
+            "basis": "dated observation",
+            "amount": 5000.0,
+            "date": "2026-01-06",
+            "date_raw": "2026-01-06",
+            "cycle": "2026",
+            "direction": "",
+            "counterparty": "",
+            "candidate_id": "",
+            "candidate_name": "",
+            "record_id": "",
+            "source_url": "",
+            "category": "Super PAC",
+            "status": "supported",
+            "issues": []
+          },
+          {
+            "row_number": 4,
+            "raw": {
+              "committee_id": "C00000001",
+              "committee_name": "Example Super PAC",
+              "amount": "23000000",
+              "date": "2026-01-07",
+              "two_year_transaction_period": "2026",
+              "record_type": "CORPORATE",
+              "recipient_category": "",
+              "include_in_analysis": "No",
+              "inclusion_reason": "Exact five-key memo duplicate"
+            },
+            "extra_cells": [],
+            "committee_id": "C00000001",
+            "committee_name": "Example Super PAC",
+            "kind": "receipt",
+            "channel": "Receipts",
+            "basis": "dated observation",
+            "amount": 23000000.0,
+            "date": "2026-01-07",
+            "date_raw": "2026-01-07",
+            "cycle": "2026",
+            "direction": "",
+            "counterparty": "",
+            "candidate_id": "",
+            "candidate_name": "",
+            "record_id": "",
+            "source_url": "",
+            "category": "",
+            "status": "excluded",
+            "issues": []
+          }
+        ],
+        "totals": [
+          {
+            "channel": "Receipts",
+            "amount": 25005000.0,
+            "row_count": 2
+          }
+        ],
+        "supported_rows": 2,
+        "excluded_rows": 1,
+        "unsupported_rows": 0,
+        "offset": 0,
+        "limit": 200,
+        "total_rows": 3,
+        "has_more": false,
+        "warnings": [
+          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+          "Committee categories come from this file's recipient_category column.",
+          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+        ]
+      },
+      "why": "S7 exclusion: a row with status excluded and no \"Excluded by the workbook\" issue, which would leave an amount off the totals with nothing on the page saying why."
     }
   ]
 }

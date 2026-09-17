@@ -160,6 +160,13 @@ TYPES = {
     'contribution_receipt':'receipt', 'contribution':'receipt', 'disbursement':'disbursement', 'disbursements':'disbursement',
     'schedule_b':'disbursement', 'sb':'disbursement', 'independent_expenditure':'independent_spending',
     'independent_spending':'independent_spending', 'schedule_e':'independent_spending', 'se':'independent_spending',
+    # Paul's ruling 2026-09-17: a workbook's CORPORATE rows are the company's
+    # own treasury giving, reported on the same amount and date columns as
+    # its employees' contributions, so they belong in the same Receipts
+    # channel rather than one of their own. Before this they matched no key
+    # at all and every one of them read as unsupported - 333 rows in the
+    # Crypto workbook, $176.9M of Fairshake's $178.0M.
+    'corporate':'receipt', 'corporate_giving':'receipt', 'corporate_contribution':'receipt',
 }
 DIRECTIONS = {'s':'Support', 'support':'Support', 'o':'Oppose', 'oppose':'Oppose', 'opposition':'Oppose',
               'contribution_other':'Contribution / Other', 'contribution':'Contribution / Other',
@@ -170,6 +177,34 @@ WARNINGS = (
     'Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.',
     'Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported.',
 )
+
+# Committee categories. The vocabulary is the Graph tab's (app/graph_data.py
+# CATEGORIES) and has to stay equal to it: both tabs filter the same
+# committees by the same words, and a name in one and not the other is a
+# filter that silently drops PACs. It is repeated here rather than imported
+# because graph_data pulls the report stack in with it and S3e made this
+# module's imports lazy on purpose; tests/test_evidence_categories.py asserts
+# the two lists are equal.
+CATEGORIES = ('Super PAC', 'Trade Association', 'JFC', 'Company PAC', 'Leadership PAC',
+              'Carey', 'Other PAC', 'Candidate', 'Party Committee', 'Unclassified')
+CATEGORY_INDEX = {name.lower():name for name in CATEGORIES}
+# Not a bare `category`: an FEC bulk oppexp file has a CATEGORY column
+# carrying the commission's purpose code, which would read as a committee
+# category, canonicalise to Unclassified and then stop the committee master
+# being consulted at all (the file wins, Paul's ruling 4).
+CATEGORY_FIELDS = ('recipient_category', 'committee_category')
+INCLUSION_FIELDS = ('include_in_analysis',)
+INCLUSION_REASON_FIELDS = ('inclusion_reason',)
+FALSE_TEXT = {'no', 'n', 'false', '0'}
+
+# Catalogs are built once, at ingest, so a rule change here cannot reach an
+# import already on disk. The version is written into import.json beside the
+# catalog and Store.sources() re-reads anything older under the current
+# rules, because the alternative is a console that answers two different
+# things about one file depending on the day it was imported.
+CATALOG_VERSION = 2
+
+EXCLUDED_ISSUE = 'Excluded by the workbook.'
 
 # Every refusal names the file or the reason, because a blank status line in
 # the page is itself a defect. The three messages that quote a limit are built
@@ -384,6 +419,219 @@ def bulk_warnings():
     return notes
 
 
+def excluded_issue(reason):
+    """Why a row the workbook marked Include in Analysis = No is out of the totals."""
+    reason = str(reason or '').strip()
+    return f'Excluded by the workbook: {reason}' if reason else EXCLUDED_ISSUE
+
+
+def canonical_category(value):
+    """One category name from the file, in the Graph vocabulary.
+
+    Case-insensitive exact match; text that is not one of the ten names is
+    Unclassified, which is itself one of them; a blank cell stays blank, so a
+    committee the file never labelled can be told from one the file calls
+    Unclassified, and only the first kind reaches the committee master.
+    """
+    text = str(value or '').strip()
+    return CATEGORY_INDEX.get(text.lower(), 'Unclassified') if text else ''
+
+
+def modal_from_counts(counts):
+    """The commonest category in a tally, ties broken by vocabulary order."""
+    if not counts:
+        return ''
+    best = max(counts.values())
+    return next((name for name in CATEGORIES if counts.get(name) == best), '')
+
+
+def modal_category(rows):
+    """The category of a committee: the commonest CLASSIFIED one over its rows.
+
+    A file can disagree with itself - the Crypto workbook labels Fairshake a
+    Super PAC on 22 rows and leaves the cell blank on 6 - so no single row
+    can decide. Ties go to the earlier name in the vocabulary, a fixed order,
+    so two runs over one file never disagree.
+
+    'Unclassified' does not count. It is the absence of a classification
+    rather than one of them - graph_data reads a missing recipient_category
+    as exactly that word - so a committee named Carey once and Unclassified
+    five times is Carey, and one the file only ever calls Unclassified still
+    reaches the committee master.
+    """
+    counts = defaultdict(int)
+    for row in rows:
+        name = row.get('category') if isinstance(row, dict) else row
+        if name and name != 'Unclassified':
+            counts[name] += 1
+    return modal_from_counts(counts)
+
+
+def category_header(headers):
+    """The file's own category column, under the name the file writes it with."""
+    columns = [key(item) for item in headers]
+    return next((headers[columns.index(name)] for name in CATEGORY_FIELDS if name in columns), '')
+
+
+@lru_cache(maxsize=1)
+def committee_master():
+    """The FEC committee master (cm.txt), read once per process and lazily.
+
+    Loaded only when a committee has no category in the file it came from, so
+    a console that never opens PAC evidence never pays for it. Newest cycle
+    first: cm26 answers, cm24 fills what it does not know, cm22 what neither
+    does, and the cycle that supplied each ID is kept so the page can say
+    where a label came from. The files ship without a header row; a copy
+    saved through a spreadsheet can grow one, and its first field is not a
+    committee ID so it is skipped like any other unusable line. Nothing here
+    may raise: a master that cannot be read leaves its committees
+    Unclassified and says so in the catalog warnings.
+    """
+    root = INPUTS / 'fec_committee_master'
+    rows, cycles, notes = {}, [], []
+    try:
+        folders = sorted((path for path in root.glob('cm*') if (path / 'cm.txt').is_file()),
+                         key=lambda path: path.name, reverse=True)
+    except OSError:
+        folders = []
+    for folder in folders:
+        try:
+            text = (folder / 'cm.txt').read_text(encoding='utf-8', errors='replace')
+        except OSError as error:
+            notes.append(f'The FEC committee master file {folder.name}/cm.txt could not be read '
+                         f'({type(error).__name__}); its committees stay Unclassified.')
+            continue
+        cycles.append(folder.name)
+        for line in text.splitlines():
+            fields = line.split('|')
+            if len(fields) < 13:
+                continue
+            identifier = fields[0].strip().upper()
+            if identifier in rows or not re.fullmatch(r'C\d{8}', identifier):
+                continue
+            rows[identifier] = (fields[8].strip().upper(), fields[9].strip().upper(),
+                                fields[12].strip().upper(), folder.name)
+    return {'rows':rows, 'cycles':cycles, 'warnings':notes}
+
+
+def classify_committee(committee_id, has_file_categories=False):
+    """(category, category_source) for one committee ID from the FEC master.
+
+    The order is the report pipeline's own fallback order (R/report.R), so a
+    committee the workbook did not label reads here the way it reads in the
+    industry report, with the ORG_TP rules added for files that carry no
+    category column at all. Designation beats type and type beats ORG_TP,
+    because a joint fundraising committee filed as a Super PAC is still a
+    JFC. Exported for server.py, which labels saved snapshots the same way.
+
+    `has_file_categories` says the file carried a category column of its own.
+    A committee connected to a corporation (ORG_TP C or W) is then read as
+    Other PAC rather than Company PAC, because 'Company PAC' in a Mentat
+    workbook means one of the industry's OWN companies' PACs - a label the
+    file assigns - and a payment processor's PAC that happens to be
+    registered to a corporation must not land in that bucket.
+    """
+    master = committee_master()
+    entry = master['rows'].get(str(committee_id or '').strip().upper())
+    if entry is None:
+        if not master['cycles']:
+            return 'Unclassified', 'committee master not available'
+        return 'Unclassified', 'not in the FEC committee master (' + ', '.join(sorted(master['cycles'])) + ')'
+    designation, committee_type, organisation, cycle = entry
+    source = f'fec_master:{cycle}'
+    if designation == 'J':
+        return 'JFC', source
+    if designation == 'D':
+        return 'Leadership PAC', source
+    if committee_type in ('X', 'Y', 'Z'):
+        return 'Party Committee', source
+    if committee_type in ('O', 'U'):
+        return 'Super PAC', source
+    if committee_type in ('V', 'W'):
+        return 'Carey', source
+    if committee_type in ('H', 'S', 'P') or designation in ('A', 'P'):
+        return 'Candidate', source
+    connected = f'fec_master:org_type:{cycle}'
+    if organisation == 'T':
+        return 'Trade Association', connected
+    if organisation in ('C', 'W'):
+        return ('Other PAC' if has_file_categories else 'Company PAC'), connected
+    if organisation in ('L', 'M', 'V'):
+        return 'Other PAC', connected
+    return 'Unclassified', source
+
+
+def committee_category(counts, identifier, header, unclassified=False):
+    """(category, category_source, consulted) for one committee.
+
+    Paul's ruling 2026-09-17: when both know the committee the file wins, and
+    the master only fills blanks. The file is the industry pipeline's own
+    classification of this recipient; the master is a registration record
+    that does not know, for instance, which of a company's PACs the analysis
+    treats as its own.
+
+    A blank cell and the word 'Unclassified' are the same absence, so both
+    reach the master: measured on the Crypto import, of the 15 committees
+    the file leaves Unclassified the master classifies 7, among them
+    C00567412 CHAMBER OF DIGITAL COMMERCE PAC (ORG_TP T -> Trade
+    Association), exactly the kind of PAC that read as missing. When the
+    master cannot do better either, the source names both, so a reader can
+    tell 'nobody knows' from 'the file never said'. `consulted` reports
+    whether the master was asked, which is what the catalog sentence counts.
+    """
+    category = modal_from_counts(counts or {})
+    if category:
+        return category, f'file:{header}', False
+    category, source = classify_committee(identifier, bool(header))
+    if category != 'Unclassified' or not unclassified:
+        return category, source, True
+    return 'Unclassified', f'file:{header}; {source}', True
+
+
+def category_buckets(committees):
+    """The per-category rollup the picker's type filter is built from."""
+    buckets = defaultdict(lambda: {'committees':0, 'rows':0, 'supported_rows':0, 'excluded_rows':0})
+    for item in committees:
+        if not item.get('category'):
+            continue
+        bucket = buckets[item['category']]
+        bucket['committees'] += 1
+        for field in ('rows', 'supported_rows', 'excluded_rows'):
+            bucket[field] += int(item.get(field) or 0)
+    return [{'category':name, **buckets[name]} for name in CATEGORIES if name in buckets]
+
+
+def category_warning(header, consulted):
+    """The catalog sentence that says where THIS import's categories came from.
+
+    It replaces the standing note that committee type 'has not been
+    independently verified', which was equally true of every import and told
+    a reader nothing about the one in front of them. The master is only
+    consulted when it was actually used, so a file that labels every
+    committee itself never loads it.
+    """
+    if header and not consulted:
+        return f"Committee categories come from this file's {header} column."
+    cycles = ', '.join(committee_master()['cycles'])
+    plural = 'committee' if consulted == 1 else 'committees'
+    if header and cycles:
+        return (f"Committee categories come from this file's {header} column; {consulted:,} {plural} the "
+                f'file left blank or Unclassified were checked against the FEC committee master ({cycles}).')
+    if header:
+        return (f"Committee categories come from this file's {header} column; the FEC committee master is "
+                f'not available, so the {consulted:,} {plural} the file left blank or Unclassified stay '
+                'Unclassified.')
+    if cycles:
+        return f'Committee categories were classified from the FEC committee master ({cycles}).'
+    return 'The FEC committee master is not available, so every committee here is Unclassified.'
+
+
+def catalog_warnings(header, consulted):
+    """The three standing catalog notes, the second one built for this import."""
+    notes = [WARNINGS[0], category_warning(header, consulted), WARNINGS[2]]
+    return notes + committee_master()['warnings'] if consulted else notes
+
+
 def normalize(raw, row_number, columns, extra_cells=()):
     row = dict(zip(columns, raw.values()))
     issues = []
@@ -446,6 +694,15 @@ def normalize(raw, row_number, columns, extra_cells=()):
         issues.append('The CSV does not identify a supported receipt or activity type.')
     if extra_cells:
         issues.append('This row contains more values than its header.')
+    # Paul's ruling 2026-09-17: the workbook already decided which of its own
+    # rows count, and its duplicate memo legs would otherwise double the
+    # corporate channel. An excluded row keeps its kind, channel and amount
+    # and stays on the page with the workbook's own reason; it is simply out
+    # of every total. Its status is a third value, so every consumer that
+    # tests for 'supported' goes on counting exactly what it counted before.
+    excluded = key(first(row, INCLUSION_FIELDS)) in FALSE_TEXT
+    if excluded:
+        issues.append(excluded_issue(first(row, INCLUSION_REASON_FIELDS)))
     channel = {'receipt':'Receipts', 'disbursement':'Disbursements'}.get(kind)
     if kind == 'independent_spending':
         channel = 'Independent spending · ' + direction.lower()
@@ -463,7 +720,8 @@ def normalize(raw, row_number, columns, extra_cells=()):
         'candidate_name':first(row, ('candidate_name', 'candidate_officeholder', 'candidate_name_as_filed')),
         'record_id':first(row, ('sub_id', 'transaction_id', 'tran_id', 'record_id')),
         'source_url':_source_url(first(row, ('source_url', 'pdf_url', 'filing_url'))),
-        'status':'unsupported' if issues else 'supported', 'issues':issues,
+        'category':canonical_category(first(row, CATEGORY_FIELDS)),
+        'status':'excluded' if excluded else ('unsupported' if issues else 'supported'), 'issues':issues,
     }
 
 
@@ -524,16 +782,31 @@ def descriptive(record):
             'delimiter':record.get('delimiter') or '', 'header_source':record.get('header_source') or ''}
 
 
-def stored_catalog(record):
+def stored_catalog(record, state='ready', reread=False, stale=False):
     """One stored catalog, with any descriptive field it predates filled in.
 
     The catalog is written once, when the import is read, so an import already
     on disk carries the S3-era shape. The record beside it is filled the same
     way for both, so the listing the page renders has one shape whether the
-    file was read today or last week.
+    file was read today or last week - including the S7 category fields,
+    which an import read before them is about to be re-read for.
+
+    The last three fields describe the ENTRY, not the file: whether this
+    console is re-reading the import under the current rules right now, and
+    whether it is one a read-only console can only report as out of date,
+    because a preview shares its data root with the console that owns these
+    imports and must not rewrite them.
     """
     catalog = dict(record.get('catalog') or {})
-    return {**descriptive(record), **catalog} if catalog else catalog
+    if not catalog:
+        return catalog
+    filled = {'categories':[], 'excluded_rows':0, **descriptive(record), **catalog}
+    filled['committees'] = [{'category':'', 'category_source':'', 'excluded_rows':0, **item}
+                            for item in filled.get('committees') or []]
+    filled['catalog_version'] = int(record.get('catalog_version') or 0)
+    filled['rows_read'] = int(record.get('rows_read') or catalog.get('row_count') or 0)
+    filled['state'], filled['reread'], filled['stale'] = state, bool(reread), bool(stale)
+    return filled
 
 
 def job_view(record):
@@ -542,13 +815,26 @@ def job_view(record):
             'bytes':int(record.get('bytes') or 0), 'bytes_read':int(record.get('bytes_read') or 0),
             'rows_read':int(record.get('rows_read') or 0), 'message':record.get('message') or '',
             'started_at':record.get('started_at'), 'finished_at':record.get('finished_at'),
-            'catalog':record.get('catalog'), **descriptive(record)}
+            'catalog':stored_catalog(record) or None, **descriptive(record)}
 
 
 # One ingest thread per process, registered here so a record that claims to be
 # reading can be told apart from one whose reader died with a restart.
 _ACTIVE_LOCK = threading.Lock()
 _ACTIVE = {}
+
+
+def _active_worker(directory):
+    """The live ingest or re-read thread for one import directory, if any.
+
+    Dead entries are dropped on the way past: a worker that has finished must
+    not leave its import looking busy until the next upload happens to prune
+    the registry.
+    """
+    with _ACTIVE_LOCK:
+        for finished in [running for running, thread in _ACTIVE.items() if not thread.is_alive()]:
+            _ACTIVE.pop(finished, None)
+        return _ACTIVE.get(str(directory))
 
 
 def accepted_suffix(name):
@@ -1585,6 +1871,11 @@ class Store:
             raise ValueError(value.get('message') or M_GONE(identifier))
         if value.get('state') != 'ready' or not value.get('catalog'):
             raise ValueError(M_BUSY)
+        # A re-read leaves the record READY on purpose (see reread()), so the
+        # import survives a restart or a failure. The reader still must not be
+        # handed a catalog that is about to be replaced under them.
+        if _active_worker(self.directory(identifier)) is not None:
+            raise ValueError(M_BUSY)
         return value
 
     def sources(self):
@@ -1596,7 +1887,140 @@ class Store:
             if value and value.get('state') == 'ready' and value.get('catalog'):
                 records.append(value)
         records.sort(key=lambda value: (str(value.get('imported_at') or ''), str(value.get('id') or '')), reverse=True)
-        return [stored_catalog(value) for value in records]
+        running = self.refresh([value for value in records if self.rereadable(value)])
+        return [stored_catalog(value,
+                               state='reading' if value['id'] in running else 'ready',
+                               reread=value['id'] in running,
+                               stale=value['id'] not in running
+                                     and int(value.get('catalog_version') or 0) < CATALOG_VERSION)
+                for value in records]
+
+    def rereadable(self, value):
+        """True when this catalog predates the current rules and the file is still here.
+
+        An import whose stored source was evicted cannot be re-read at all, and
+        one whose re-read already failed under this version is not retried on
+        every listing; both are reported stale instead.
+        """
+        if int(value.get('catalog_version') or 0) >= CATALOG_VERSION:
+            return False
+        if int(value.get('reread_failed') or 0) >= CATALOG_VERSION:
+            return False
+        return self.source_path(value.get('id', ''), value.get('suffix', '')).is_file()
+
+    def refresh(self, records):
+        """Queue a re-read of every import whose catalog predates the current rules.
+
+        Catalogs are built once, at ingest, so a rule change reaches an import
+        already on disk only by reading it again. The bytes are the same, so
+        the id is the same and the reader sees the import they already had
+        gain the new fields rather than a second copy of it. One worker at a
+        time, the same as an ingest; a read-only console never starts one,
+        because it shares its data root with the console that owns these
+        imports. Returns the ids the page should show as re-reading. This
+        never blocks: the listing is answered from the catalogs on disk while
+        the worker runs behind it.
+        """
+        if not records or not self.evicts:
+            return set()
+        with _ACTIVE_LOCK:
+            for finished in [running for running, thread in _ACTIVE.items() if not thread.is_alive()]:
+                _ACTIVE.pop(finished, None)
+            if _ACTIVE:
+                return {value['id'] for value in records
+                        if str(self.directory(value['id'])) in _ACTIVE}
+            worker = threading.Thread(target=self.reread_all, args=(list(records),), daemon=True,
+                                      name='evidence-csv-reread')
+            for value in records:
+                _ACTIVE[str(self.directory(value['id']))] = worker
+            worker.start()
+        return {value['id'] for value in records}
+
+    def reread_all(self, records):
+        """Re-read each stale import in turn. No exception may leave this thread."""
+        for value in records:
+            identifier = str(value.get('id') or '')
+            try:
+                self.reread(identifier, value)
+            except Exception:
+                pass
+            finally:
+                with _ACTIVE_LOCK:
+                    _ACTIVE.pop(str(self.directory(identifier)), None)
+
+    def reread(self, identifier, value):
+        """Read one stored import again under the current rules, in place.
+
+        The import stays exactly as it is until the new catalog is complete:
+        the new rows database is built BESIDE the old one and swapped in only
+        once it is whole, the record keeps saying ready with the catalog it
+        already has, and a re-read that fails leaves the reader the import
+        they had rather than deleting its bytes the way a failed first ingest
+        does. The reader options come off the record, so the same worksheet,
+        header file and format that produced this import produce it again.
+        The import date is kept too: the console re-reading a file is not the
+        reader importing it again, and the picker is ordered by that date.
+        """
+        working = dict(value)
+        # The record's `sheet` is the worksheet the reader ENDED UP on, not the
+        # one it was asked for: read_source overwrites it from the reader's own
+        # metadata. Replaying it would narrow a workbook that was read as
+        # several compatible cycle sheets down to the first of them - measured
+        # on the Crypto workbook, 6,343 rows became 1,063. The identifier says
+        # which it was, because a chosen worksheet is folded into it
+        # (import_id): an id that is the file digest alone was read with no
+        # worksheet chosen, and must be read that way again.
+        digest = str(value.get('sha256') or '')
+        working['sheet'] = '' if digest and identifier == 'csv-' + digest[:32] else str(value.get('sheet') or '')
+        temporary = self.directory(identifier) / 'rows.reread.sqlite'
+        try:
+            catalog, columns = self.read_source(identifier, working, database=temporary)
+        except Exception as error:
+            temporary.unlink(missing_ok=True)
+            self.amend(identifier, {'reread_failed':CATALOG_VERSION,
+                                    'reread_message':f'{type(error).__name__}: {error}'})
+            return
+        stored = int((value.get('catalog') or {}).get('row_count') or 0)
+        if stored and catalog['row_count'] != stored:
+            # The same bytes read with the same options give the same rows, so a
+            # different count means the options were NOT reproduced. Refuse the
+            # swap rather than replace a whole import with a partial one; the
+            # entry stays listed, stale, with what it already had. Relax this
+            # deliberately if a future CATALOG_VERSION changes WHICH rows are
+            # read rather than only how they are classified.
+            temporary.unlink(missing_ok=True)
+            self.amend(identifier, {'reread_failed':CATALOG_VERSION,
+                                    'reread_message':f're-read produced {catalog["row_count"]:,} rows, '
+                                                     f'not the {stored:,} this import was stored with'})
+            return
+        for attempt in range(6):
+            try:
+                os.replace(temporary, self.database_path(identifier))
+                break
+            except OSError:
+                # A page reading the old database holds it open for a moment.
+                # Losing the swap is not a failure worth marking: the listing
+                # will offer the re-read again.
+                if attempt == 5:
+                    temporary.unlink(missing_ok=True)
+                    return
+                time.sleep(0.05 * (attempt + 1))
+        catalog['imported_at'] = value.get('imported_at') or catalog['imported_at']
+        self.amend(identifier, {'catalog':catalog, 'columns':columns, 'catalog_version':CATALOG_VERSION,
+                                'imported_at':catalog['imported_at'], 'reread_failed':0, 'reread_message':'',
+                                'rows_read':int(working.get('rows_read') or catalog['row_count']),
+                                'bytes_read':int(working.get('bytes_read') or value.get('bytes') or 0)})
+
+    def amend(self, identifier, fields):
+        """Merge fields into a record, leaving everything else as it stands."""
+        record = self.read_record(identifier)
+        if not record:
+            return
+        record.update(fields)
+        try:
+            atomic_json(self.record_path(identifier), record)
+        except OSError:
+            pass
 
     def catalog(self, identifier):
         return stored_catalog(self.ready(identifier))
@@ -1623,6 +2047,8 @@ class Store:
                 total = connection.execute(f'SELECT COUNT(*) FROM csv_rows WHERE {where}', parameters).fetchone()[0]
                 supported = connection.execute(f'SELECT COUNT(*) FROM csv_rows WHERE {where} AND status = ?',
                                                parameters + ['supported']).fetchone()[0]
+                excluded = connection.execute(f'SELECT COUNT(*) FROM csv_rows WHERE {where} AND status = ?',
+                                              parameters + ['excluded']).fetchone()[0]
                 page = connection.execute(f'SELECT line_num, cells FROM csv_rows WHERE {where} ORDER BY row_number LIMIT ? OFFSET ?',
                                           parameters + [limit, offset]).fetchall()
                 channels = connection.execute(f'SELECT channel, amount, row_count FROM totals WHERE {where}', parameters).fetchall()
@@ -1640,7 +2066,8 @@ class Store:
                          if not name.startswith('_')} for line_number,cells in page],
                 'totals':[{'channel':channel, 'amount':float(amounts[channel]), 'row_count':counts[channel]}
                           for channel in sorted(amounts)],
-                'supported_rows':supported, 'unsupported_rows':total - supported,
+                'supported_rows':supported, 'excluded_rows':excluded,
+                'unsupported_rows':total - supported - excluded,
                 'offset':offset, 'limit':limit, 'total_rows':total, 'has_more':offset + limit < total,
                 'warnings':list(source.get('warnings') or WARNINGS)}
 
@@ -1689,7 +2116,8 @@ class Store:
                          finished_at=time.time())
         else:
             value.update(state='ready', message='', finished_at=time.time(), catalog=catalog,
-                         columns=columns, imported_at=catalog['imported_at'])
+                         columns=columns, imported_at=catalog['imported_at'],
+                         catalog_version=CATALOG_VERSION)
         if value['state'] == 'failed':
             # Keep the directory so the page can still read the reason; drop the
             # bytes, which are now only a partial database and a refused file.
@@ -1713,16 +2141,24 @@ class Store:
         except OSError:
             pass
 
-    def read_source(self, identifier, value):
-        """Walk the file once into sqlite, accumulating exact totals as it goes."""
+    def read_source(self, identifier, value, database=None):
+        """Walk the file once into sqlite, accumulating exact totals as it goes.
+
+        `database` writes the rows somewhere other than the import's own, for
+        a re-read that must not disturb the database the page is reading.
+        """
         source = self.source_path(identifier, value.get('suffix', ''))
-        database = self.database_path(identifier)
+        database = Path(database) if database else self.database_path(identifier)
         database.unlink(missing_ok=True)
         names = defaultdict(set)
         committee_rows, committee_supported = defaultdict(int), defaultdict(int)
+        committee_excluded = defaultdict(int)
+        committee_categories = defaultdict(lambda: defaultdict(int))
+        committee_unclassified = set()
         amounts, counts = defaultdict(Decimal), defaultdict(int)
         cycles = set()
-        rows_read = unassigned = supported = unsupported = 0
+        rows_read = unassigned = supported = unsupported = excluded = 0
+        header = ''
         with closing(sqlite3.connect(database)) as connection:
             connection.execute('PRAGMA journal_mode=OFF')
             connection.execute('PRAGMA synchronous=OFF')
@@ -1741,6 +2177,7 @@ class Store:
                     raise ValueError(columns_message())
                 if not set(columns).intersection(COMMITTEE_FIELDS):
                     raise ValueError(M_COMMITTEE_COLUMN)
+                header = category_header(headers)
                 # How the file turned out to be written is recorded before the
                 # first row, so a reader watching the progress line sees the
                 # encoding and delimiter that were chosen, not only the count.
@@ -1759,6 +2196,11 @@ class Store:
                         names[committee].add(row['committee_name'] or committee)
                         committee_rows[committee] += 1
                         committee_supported[committee] += row['status'] == 'supported'
+                        committee_excluded[committee] += row['status'] == 'excluded'
+                        if row['category'] == 'Unclassified':
+                            committee_unclassified.add(committee)
+                        elif row['category']:
+                            committee_categories[committee][row['category']] += 1
                     else:
                         unassigned += 1
                     if row_cycle:
@@ -1767,6 +2209,8 @@ class Store:
                         supported += 1
                         amounts[(committee, row_cycle, row['channel'])] += row['_amount']
                         counts[(committee, row_cycle, row['channel'])] += 1
+                    elif row['status'] == 'excluded':
+                        excluded += 1
                     else:
                         unsupported += 1
                     batch.append((rows_read, line_number, committee, row_cycle, row['status'], row['channel'],
@@ -1792,19 +2236,30 @@ class Store:
             connection.execute('CREATE INDEX csv_rows_committee ON csv_rows (committee_id, cycle, row_number)')
             connection.execute('CREATE INDEX totals_committee ON totals (committee_id, cycle)')
             connection.commit()
-        committees = []
+        committees, consulted = [], 0
         for committee in sorted(names):
             labels = sorted(name for name in names[committee] if name != committee) or [committee]
+            category, category_source, asked = committee_category(
+                committee_categories.get(committee), committee, header, committee in committee_unclassified)
+            consulted += asked
             committees.append({'id':committee, 'name':' / '.join(labels), 'rows':committee_rows[committee],
-                               'supported_rows':committee_supported[committee]})
+                               'supported_rows':committee_supported[committee],
+                               'excluded_rows':committee_excluded[committee],
+                               'category':category, 'category_source':category_source})
         if unassigned:
-            committees.append({'id':'unassigned', 'name':'Unassigned committee rows', 'rows':unassigned, 'supported_rows':0})
+            # The pseudo-committee is rows with no committee ID at all, so it
+            # has no registration to classify and no category to filter on.
+            committees.append({'id':'unassigned', 'name':'Unassigned committee rows', 'rows':unassigned,
+                               'supported_rows':0, 'excluded_rows':0, 'category':'', 'category_source':''})
         value.update(bytes_read=int(value.get('bytes') or 0), rows_read=rows_read)
         return ({'id':identifier, 'name':value['name'], 'sha256':value['sha256'], 'row_count':rows_read,
                  'committees':committees, 'cycles':sorted(cycles, reverse=True),
+                 'categories':category_buckets(committees),
                  'supported_rows':supported, 'unsupported_rows':unsupported, 'unassigned_rows':unassigned,
+                 'excluded_rows':excluded,
                  'session_only':False, 'imported_at':datetime.now(timezone.utc).isoformat(),
-                 'bytes':int(value.get('bytes') or 0), 'warnings':list(WARNINGS) + extra_warnings,
+                 'bytes':int(value.get('bytes') or 0),
+                 'warnings':catalog_warnings(header, consulted) + extra_warnings,
                  **descriptive(value)}, headers)
 
     def sweep(self):
@@ -1890,25 +2345,42 @@ def parse(name, text):
 
 def catalog(document):
     rows = document['rows']
-    committees = []
-    counts, supported_counts = defaultdict(int), defaultdict(int)
+    committees, consulted = [], 0
+    counts, supported_counts, excluded_counts = defaultdict(int), defaultdict(int), defaultdict(int)
+    categories = defaultdict(lambda: defaultdict(int))
+    unclassified_ids = set()
     for row in rows:
         counts[row['committee_id']] += 1
         supported_counts[row['committee_id']] += row['status'] == 'supported'
+        excluded_counts[row['committee_id']] += row['status'] == 'excluded'
+        if row.get('category') == 'Unclassified':
+            unclassified_ids.add(row['committee_id'])
+        elif row.get('category'):
+            categories[row['committee_id']][row['category']] += 1
+    header = category_header(document.get('columns') or [])
     for identifier, names in sorted(document['committee_names'].items()):
         labels = sorted(name for name in names if name != identifier) or [identifier]
+        category, category_source, asked = committee_category(
+            categories.get(identifier), identifier, header, identifier in unclassified_ids)
+        consulted += asked
         committees.append({'id':identifier, 'name':' / '.join(labels), 'rows':counts[identifier],
-                           'supported_rows':supported_counts[identifier]})
+                           'supported_rows':supported_counts[identifier],
+                           'excluded_rows':excluded_counts[identifier],
+                           'category':category, 'category_source':category_source})
     unassigned = sum(not row['committee_id'] for row in rows)
     if unassigned:
-        committees.append({'id':'unassigned', 'name':'Unassigned committee rows', 'rows':unassigned, 'supported_rows':0})
+        committees.append({'id':'unassigned', 'name':'Unassigned committee rows', 'rows':unassigned,
+                           'supported_rows':0, 'excluded_rows':0, 'category':'', 'category_source':''})
     return {'id':document['id'], 'name':document['name'], 'sha256':document['sha256'],
             'row_count':len(rows), 'committees':committees,
             'cycles':sorted({row['cycle'] for row in rows if row['cycle']}, reverse=True),
+            'categories':category_buckets(committees),
             'supported_rows':sum(row['status'] == 'supported' for row in rows),
-            'unsupported_rows':sum(row['status'] != 'supported' for row in rows), 'unassigned_rows':unassigned,
+            'unsupported_rows':sum(row['status'] == 'unsupported' for row in rows), 'unassigned_rows':unassigned,
+            'excluded_rows':sum(row['status'] == 'excluded' for row in rows),
             'session_only':False, 'imported_at':document.get('imported_at', ''),
-            'bytes':int(document.get('bytes') or 0), 'warnings':list(WARNINGS) + list(document.get('warnings') or [])}
+            'bytes':int(document.get('bytes') or 0),
+            'warnings':catalog_warnings(header, consulted) + list(document.get('warnings') or [])}
 
 
 def select(document, committee='', selected_cycle='', offset=0, limit=200):
@@ -1933,6 +2405,7 @@ def select(document, committee='', selected_cycle='', offset=0, limit=200):
             'rows':[{k:v for k,v in row.items() if not k.startswith('_')} for row in rows[offset:offset+limit]],
             'totals':[{'channel':channel, 'amount':float(value), 'row_count':counts[channel]} for channel,value in sorted(totals.items())],
             'supported_rows':sum(row['status'] == 'supported' for row in rows),
-            'unsupported_rows':sum(row['status'] != 'supported' for row in rows),
+            'excluded_rows':sum(row['status'] == 'excluded' for row in rows),
+            'unsupported_rows':sum(row['status'] == 'unsupported' for row in rows),
             'offset':offset, 'limit':limit, 'total_rows':len(rows), 'has_more':offset+limit < len(rows),
             'warnings':source['warnings']}

@@ -1,0 +1,3382 @@
+diff --git a/audits/mentat_failings_20260915/HANDOFF.md b/audits/mentat_failings_20260915/HANDOFF.md
+index 226d35546..258b3880d 100644
+--- a/audits/mentat_failings_20260915/HANDOFF.md
++++ b/audits/mentat_failings_20260915/HANDOFF.md
+@@ -1663,3 +1663,158 @@ output for every command above). **Patch:** `patches/S3_cap_500MB_and_followups.
+ **Evidence (`receipts/S3f_bulk_codes.txt`):** red on HEAD d71d2b813 (11-row bulk fixture imports with `supported_rows` 0, "0 != 6"; `transaction_types` missing); green after: `test_evidence_readers` 44 under the system Python (openpyxl fallback), readers + legacy + collector 61 under the launcher Python (calamine), stream 18. Fixture totals: Receipts $350 (2 rows), Disbursements $530 (2), Independent spending support $1,000 (1), oppose $700 (1); the 24F, 15J, memo, notice and unknown-code rows stay visible and out of totals with the texts above.
+ 
+ **Paul's next steps:** restart the console (server code changed; the launcher did not); check the JSON against fec.gov's transaction type code list and set `verified` to true; rule on amended-filing de-duplication.
++
++## S7 - PAC evidence committee categories, filter and corporate rows (Area C follow-on)
++
++**Session:** Opus architect build on Fable's design `S7_DESIGN.md`, 2026-09-17 (worktree
++`pac-evidence-filters-724237`; code in `C:\Users\pgoff\Mentat`, branch `codex/mentat-crypto`,
++HEAD `3fdfeae8f` = S3f at claim time). **Status: BUILT** (uncommitted; Paul commits).
++
++**Paul's rulings (2026-09-17, binding, verbatim from the brief):**
++1. CORPORATE rows fold into Receipts: `TYPES` gains `'corporate': 'receipt'` (also accept
++   `'corporate_giving'` and `'corporate_contribution'`). Same channel "Receipts", same
++   amount/date fields as today.
++2. Honour the workbook's `Include in Analysis`: a row whose `include_in_analysis` value is
++   No/N/False/0 (case-insensitive) keeps its kind, channel and amount, is VISIBLE, is OUT of
++   every total, gets status `excluded` (a third status value next to `supported`/`unsupported`)
++   and the issue text `Excluded by the workbook: <Inclusion Reason>` (or `Excluded by the
++   workbook.` when the reason cell is blank). Yes/blank/absent column: unchanged. If the row
++   also has other issues it is still `excluded` (all issues listed). This applies to
++   CONTRIBUTION rows too (the Crypto import has 61 such rows counted today). Every consumer
++   that today tests `status != 'supported'` keeps treating excluded rows as not counted; the
++   totals table sums only `supported`.
++3. Category fallback from the FEC committee master for committees with no file category.
++4. When both exist, the file category wins; the master only fills blanks.
++5. Filter control: one "Committee type" select plus one "Find a PAC" search box (no chips).
++
++**Files claimed by S7** (hunks after S3f `3fdfeae8f`; nothing reformatted, no foreign line touched):
++- `mentat/app/evidence_csv.py` - CATEGORIES, `TYPES['corporate']`, `include_in_analysis` in
++  `normalize()`, `committee_master()` / `classify_committee()`, category and excluded tallies in
++  both catalog builders, `CATALOG_VERSION` and the stale-catalog re-read in `Store.sources()`.
++- `mentat/app/evidence-csv.js` - committee-type select, PAC search box, rebuild of the PAC list,
++  status/scope/row-status lines, re-read polling.
++- `mentat/app/index.html` - the evidence picker block only (two new controls).
++- `mentat/app/server.py` - ONE hunk in the `GET /api/evidence?id=` branch (snapshot committee
++  labels).
++- `mentat/app/app.js` - ONE line in `updateEvidenceCommittees()` (category suffix).
++- `audits/mentat_failings_20260915/contracts/evidence-csv-import.json` - v2 -> v3.
++- `mentat/tests/test_evidence_categories.py` (new), `mentat/tests/test_evidence_csv_stream.py`
++  (contract key sets and the catalog-warning allowance), `mentat/tests/test_evidence_csv_browser.cjs`
++  (new steps).
++- `audits/mentat_failings_20260915/receipts/S7_*.txt`,
++  `audits/mentat_failings_20260915/patches/S7_pac_evidence_categories.patch`.
++
++**Measured before any edit (read-only GETs against Paul's console 8806, 2026-09-17):**
++`csv-88ea228457b8499d1ec27eeaba967f61` (Crypto Industry Spending Overview.xlsx) 6,343 rows /
++523 committees / 6,010 supported / 333 unsupported. `committee=C00835959` (FAIRSHAKE): 28 rows,
++`supported_rows` 6, `unsupported_rows` 22, totals `Receipts $1,011,179.52` (6 rows). By
++(Record Type, status): CORPORATE/unsupported 22, CONTRIBUTION/supported 6. By
++(Record Type, Include in Analysis, Recipient Category): CORPORATE/Yes/Super PAC 17,
++CORPORATE/No/blank 5, CONTRIBUTION/Yes/Super PAC 5, CONTRIBUTION/No/blank 1. The six
++Include=No rows all carry `Inclusion Reason` = "Exact five-key memo duplicate" and `Memo Leg` 1.
++Sum of the 22 Include=Yes amounts: 177,980,393.39.
++
++**Evidence (receipts/):**
++- `S7_before.txt` - RED on the untouched tree (HEAD 3fdfeae8f): `tests/test_evidence_categories.py`
++  24 failures, 33 errors, 25 tests.
++- `S7_after_python.txt` - GREEN: `test_evidence_categories` + `test_evidence_readers` +
++  `test_evidence_csv_stream` + `test_evidence_csv` + `test_pac_evidence` = 112 tests OK under the
++  system Python; 91 OK under the launcher Python (python-calamine); the six node unit suites under
++  `app/tests/` (incl. `scope.test.js` 30) 163 pass / 0 fail.
++- `S7_after_browser.txt` - `node tests/test_evidence_csv_browser.cjs`: ALL 35 STEPS PASSED
++- `S7_real_client.txt` - the real Crypto workbook through a scratch console on port 8940 under a
++  temp data root, plus the re-read addendum.
++
++**Measured acceptance (real workbook, not assumed):** import id `csv-88ea228457b8499d1ec27eeaba967f61`
++reproduced exactly. FAIRSHAKE C00835959: **22 supported, 6 excluded, 0 unsupported, Receipts
++$177,980,393.39** (all four match the design's expectation); category `Super PAC`, source
++`file:Recipient Category`. Whole import: 6,343 rows, 523 committees, 6,273 supported, 70 excluded,
++**0 unsupported** (was 333). categories[] AFTER the review fixes: Super PAC 21, Trade Association 2,
++JFC 65, Company PAC 2, Leadership PAC 50, Carey 23, Other PAC 4, Candidate 294, Party Committee 54,
++Unclassified 8 - 523 committees in all. The design's expectation (Carey 20, Party 53, Unclassified
++~30, summing to 536) was a ROW-level tally in which one committee could appear under several
++categories; the modal rule gives each committee one. Catalog warning 2 now reads: "Committee
++categories come from this file's Recipient Category column; 18 committees the file left blank or
++Unclassified were checked against the FEC committee master (cm26, cm24, cm22)." Snapshot
++`fairshake-20260908` labels its three committees Super PAC from `fec_master:cm26`.
++
++**Re-read proven on the real import** (receipts addendum): import.json rewritten to the pre-S7 shape,
++console restarted. First listing answered in 0.03 s with `state reading / reread true / rows_read
++6,343`; `select` during it refused with the existing M_BUSY; re-read finished in 1.7 s with the same
++id, the same `imported_at`, row_count 6,343 and the new fields. Re-run after the review fixes: the
++same figures, with the reviewed categories[].
++
++**Deviations from the brief, each with its reason:**
++1. The re-read keeps the record `state: 'ready'` on disk and tracks the in-flight work in the process
++   registry, instead of writing `state: 'reading'` into import.json. Writing it would have made a
++   console restart mid-re-read mark the record failed (`record()` does that for a reader whose pid is
++   gone), and `ingest()`'s failure branch DELETES the stored source and rows database - i.e. a
++   restart during the re-read would have destroyed a good import. The listing still reports
++   `state: 'reading'`, `reread: true`, `rows_read` exactly as the brief asks; `catalog`/`select`
++   still raise M_BUSY, via a check in `ready()`.
++2. The new rows database is built as `rows.reread.sqlite` beside the old one and swapped in with
++   `os.replace` (retried, since a page reading the old one holds it open for a moment) only after the
++   new catalog is complete, for the same reason.
++3. A re-read whose row_count differs from the stored one is REFUSED (import left stale, reason
++   recorded in `reread_message`). This caught a real defect: the record's `sheet` is the worksheet the
++   reader settled on, not the one it was asked for, so replaying it read only the first cycle sheet -
++   measured on the real Crypto workbook, 6,343 rows became 1,063 and FAIRSHAKE disappeared. The fix
++   derives the original choice from the identifier (a chosen worksheet is folded into the import id),
++   and the guard stays as the backstop.
++4. Status line: the brief's `N PACs in file - M shown (Type) matching "x"` is present, but the line
++   still ENDS with `- N rows in file`, because ten existing steps of
++   `tests/test_evidence_csv_browser.cjs` wait on `/rows in file$/`.
++5. The committee-master fixture is 11 rows, not 9: the rule has 11 branches.
++6. The contract v3 examples-vs-producers assertion lives where it already lived
++   (`test_evidence_csv_stream.py::test_contract_examples_against_producers`, plus the S3b copy in
++   `test_evidence_readers.py`), rather than being duplicated into the new test file.
++7. `tests/test_evidence_csv_stream.py` and `tests/test_evidence_readers.py` had to be edited (both
++   carry their own copies of the contract key sets and catalog-warning sets); the brief listed only
++   the contract file.
++8. A rule branch the brief did not name: an ID that IS in the master but matches no rule gets
++   `category_source = 'fec_master:<cycle>'` (not the org_type form).
++9. `tests/test_evidence_csv_browser.cjs` step 4 gained a wait for the page's console token. Without
++   it the suite is RED at step 5 - "six.csv: Refresh the app before continuing." on a POST 403 -
++   and a NEGATIVE CONTROL with `app/evidence-csv.js` and `app/index.html` restored to HEAD failed
++   identically, so the race is not S7's. Root cause: `app.js` assigns `token` only when GET
++   `/api/session?light=1` answers, a different round trip from the one `evidence-csv.js` uses for
++   its first listing, and the suite uploaded as soon as the listing landed. THIS IS A REAL PRODUCT
++   RACE, not only a test one: a reader who picks a file within ~300 ms of the page appearing gets
++   the same 403 and has to reload. The honest fix is in the client (have `importFile` wait for the
++   token, or set it before the evidence scripts run). Fable ruled S7 should fix it since S7 already
++   owns this file: see R5 below. The test wait stays as a guard.
++
++**Fable review fixes (2026-09-17, after an independent run that reproduced 22/6/0 and
++$177,980,393.39 exactly):**
++- **R1** `evidence-csv.js`: when the type filter and the search leave NO committee visible,
++  `applyFilter()` used to call `loadRows()` with committee `''`, and `select()` reads a blank
++  committee as the FIRST committee of the import - so the results panel showed an unrelated PAC
++  while the picker showed nothing. It now hides the results panel, says `... 0 shown (Type)
++  matching "x"`, and loads again when a later filter change makes rows visible. New browser step.
++- **R2** `evidence_csv.py`: the bare `category` key is out of `CATEGORY_FIELDS` (an FEC bulk
++  `oppexp` file has a `CATEGORY` column holding the commission's purpose code, which would have
++  canonicalised to Unclassified and stopped the master being consulted for that whole import).
++- **R3** `evidence_csv.py`: a file value of `Unclassified` is the ABSENCE of a classification, not
++  one of them (graph_data reads a missing recipient_category as that same word), so it no longer
++  counts in the committee tally and no longer blocks the master. A committee named Carey once and
++  Unclassified five times is Carey; one only ever called Unclassified is checked against the
++  master; when the master cannot do better either, the source names both
++  (`file:Recipient Category; fec_master:cm26`). ORG_TP C/W reads as `Other PAC` when the file has
++  a category column and `Company PAC` only when it has none, because `Company PAC` in a Mentat
++  workbook means the industry's OWN companies' PACs (C00468314 DEMOCRACY ENGINE, INC., PAC must
++  not land there). The catalog sentence counts committees CHECKED, not resolved.
++  MEASURED EFFECT on the Crypto import: Trade Association 1 -> **2** (C00567412 CHAMBER OF DIGITAL
++  COMMERCE PAC, ORG_TP T - exactly the kind of PAC Paul said was hidden), Carey 21 -> **23**,
++  Unclassified 15 -> **8**, new Other PAC **4**, Company PAC unchanged at 2, total still 523.
++  FAIRSHAKE unchanged at 22/6/0 and $177,980,393.39.
++- **R4** contract v3: no example string changed under R3 (both committees in the contract fixture
++  carry file categories, so the warning sentence is identical), and both contract suites pass
++  unchanged with all four negative controls still failing the helper. Nothing regenerated.
++- **R5** `evidence-csv.js`: `importFile()` and `importPath()` now await the console token before
++  posting - if the global `token` is empty they fetch `/api/session?light=1` themselves (the same
++  endpoint app.js uses; `token` is a top-level `let` in a classic script, so the binding is
++  shared), with a 5 s bound, the status line "Waiting for the console session..." while waiting,
++  and a refusal to post on timeout. `app.js` is untouched beyond the one category line.
++- **R8** `evidence-csv.js`: the PAC option text pluralises ("1 row" / "2 rows").
++
++**Paul restarts 8806/8802 after commit; existing imports re-read themselves on the first listing.**
+diff --git a/audits/mentat_failings_20260915/contracts/evidence-csv-import.json b/audits/mentat_failings_20260915/contracts/evidence-csv-import.json
+index 9c8c39234..04c3905ee 100644
+--- a/audits/mentat_failings_20260915/contracts/evidence-csv-import.json
++++ b/audits/mentat_failings_20260915/contracts/evidence-csv-import.json
+@@ -1,6 +1,6 @@
+ {
+   "contract": "evidence-csv-import",
+-  "version": 2,
++  "version": 3,
+   "owner": "S3",
+   "produced_by": [
+     "mentat/app/evidence_csv.py:limits",
+@@ -17,7 +17,7 @@
+     "mentat/app/evidence-csv.js: sources listing render + #evidence-csv-source population",
+     "mentat/app/evidence-csv.js: pre-flight size check against LIMITS"
+   ],
+-  "description": "The shapes read once a CSV has been imported: the size/row/column LIMITS the client pre-flights against, one imported CSV's CATALOG (nested inside a sources listing or a SELECT), the GET /api/evidence-csv sources listing, a paginated SELECT of one committee/cycle's rows, and the bounded error-payload shape (never a leaked Python exception string). Orientation only - the examples are the contract.",
++  "description": "The shapes read once a CSV has been imported: the size/row/column LIMITS the client pre-flights against, one imported CSV's CATALOG (nested inside a sources listing or a SELECT), the GET /api/evidence-csv sources listing, a paginated SELECT of one committee/cycle's rows, and the bounded error-payload shape (never a leaked Python exception string). Orientation only - the examples are the contract. v3 (S7, 2026-09-17): every committee carries the category the file gave it or the FEC committee master inferred, with the source of that label; the CATALOG carries the per-category rollup the picker filters on, its excluded-row count and the CATALOG_VERSION its rules were built under, plus the three fields that say whether this console is re-reading the import; the SELECT carries the rows the workbook excluded from its own analysis.",
+   "examples": [
+     {
+       "max_bytes": 500000000,
+@@ -74,13 +74,19 @@
+               "id": "C00000001",
+               "name": "Example PAC",
+               "rows": 42,
+-              "supported_rows": 40
++              "supported_rows": 40,
++              "category": "Super PAC",
++              "category_source": "file:recipient_category",
++              "excluded_rows": 1
+             },
+             {
+               "id": "unassigned",
+               "name": "Unassigned committee rows",
+               "rows": 3,
+-              "supported_rows": 0
++              "supported_rows": 0,
++              "category": "",
++              "category_source": "",
++              "excluded_rows": 0
+             }
+           ],
+           "cycles": [
+@@ -95,9 +101,31 @@
+           "bytes": 12345,
+           "warnings": [
+             "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+-            "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
++            "Committee categories come from this file's recipient_category column.",
+             "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+-          ]
++          ],
++          "categories": [
++            {
++              "category": "Super PAC",
++              "committees": 1,
++              "rows": 3,
++              "supported_rows": 2,
++              "excluded_rows": 1
++            },
++            {
++              "category": "Trade Association",
++              "committees": 1,
++              "rows": 1,
++              "supported_rows": 1,
++              "excluded_rows": 0
++            }
++          ],
++          "excluded_rows": 1,
++          "catalog_version": 2,
++          "state": "ready",
++          "reread": false,
++          "stale": false,
++          "rows_read": 4
+         }
+       ],
+       "limits": {
+@@ -133,13 +161,19 @@
+             "id": "C00000001",
+             "name": "Example PAC",
+             "rows": 42,
+-            "supported_rows": 40
++            "supported_rows": 40,
++            "category": "Super PAC",
++            "category_source": "file:recipient_category",
++            "excluded_rows": 1
+           },
+           {
+             "id": "unassigned",
+             "name": "Unassigned committee rows",
+             "rows": 3,
+-            "supported_rows": 0
++            "supported_rows": 0,
++            "category": "",
++            "category_source": "",
++            "excluded_rows": 0
+           }
+         ],
+         "cycles": [
+@@ -154,28 +188,59 @@
+         "bytes": 12345,
+         "warnings": [
+           "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+-          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
++          "Committee categories come from this file's recipient_category column.",
+           "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+-        ]
++        ],
++        "categories": [
++          {
++            "category": "Super PAC",
++            "committees": 1,
++            "rows": 3,
++            "supported_rows": 2,
++            "excluded_rows": 1
++          },
++          {
++            "category": "Trade Association",
++            "committees": 1,
++            "rows": 1,
++            "supported_rows": 1,
++            "excluded_rows": 0
++          }
++        ],
++        "excluded_rows": 1,
++        "catalog_version": 2,
++        "state": "ready",
++        "reread": false,
++        "stale": false,
++        "rows_read": 4
+       },
+       "committee": {
+         "id": "C00000001",
+         "name": "Example PAC",
+         "rows": 42,
+-        "supported_rows": 40
++        "supported_rows": 40,
++        "category": "Super PAC",
++        "category_source": "file:recipient_category",
++        "excluded_rows": 1
+       },
+       "committees": [
+         {
+           "id": "C00000001",
+           "name": "Example PAC",
+           "rows": 42,
+-          "supported_rows": 40
++          "supported_rows": 40,
++          "category": "Super PAC",
++          "category_source": "file:recipient_category",
++          "excluded_rows": 1
+         },
+         {
+           "id": "unassigned",
+           "name": "Unassigned committee rows",
+           "rows": 3,
+-          "supported_rows": 0
++          "supported_rows": 0,
++          "category": "",
++          "category_source": "",
++          "excluded_rows": 0
+         }
+       ],
+       "cycles": [
+@@ -219,7 +284,8 @@
+         "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+         "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
+         "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+-      ]
++      ],
++      "excluded_rows": 1
+     },
+     {
+       "error": "Choose a valid CSV row page (1–1,000 rows)."
+@@ -244,7 +310,10 @@
+             "id": "C00000001",
+             "name": "Example PAC",
+             "rows": 12,
+-            "supported_rows": 12
++            "supported_rows": 12,
++            "category": "Super PAC",
++            "category_source": "file:recipient_category",
++            "excluded_rows": 1
+           }
+         ],
+         "cycles": [
+@@ -258,7 +327,7 @@
+         "bytes": 20480,
+         "warnings": [
+           "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+-          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
++          "Committee categories come from this file's recipient_category column.",
+           "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+         ],
+         "format": "xlsx",
+@@ -274,7 +343,29 @@
+         "header_source": "",
+         "sheets_read": [
+           "Detail"
+-        ]
++        ],
++        "categories": [
++          {
++            "category": "Super PAC",
++            "committees": 1,
++            "rows": 3,
++            "supported_rows": 2,
++            "excluded_rows": 1
++          },
++          {
++            "category": "Trade Association",
++            "committees": 1,
++            "rows": 1,
++            "supported_rows": 1,
++            "excluded_rows": 0
++          }
++        ],
++        "excluded_rows": 1,
++        "catalog_version": 2,
++        "state": "ready",
++        "reread": false,
++        "stale": false,
++        "rows_read": 4
+       },
+       "format": "xlsx",
+       "source_kind": "path",
+@@ -311,7 +402,10 @@
+             "id": "C00000001",
+             "name": "Example PAC",
+             "rows": 5,
+-            "supported_rows": 5
++            "supported_rows": 5,
++            "category": "Super PAC",
++            "category_source": "file:recipient_category",
++            "excluded_rows": 1
+           }
+         ],
+         "cycles": [
+@@ -325,7 +419,7 @@
+         "bytes": 1024,
+         "warnings": [
+           "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+-          "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
++          "Committee categories come from this file's recipient_category column.",
+           "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported.",
+           "Header taken from bundled."
+         ],
+@@ -337,7 +431,29 @@
+         "encoding": "utf-8",
+         "delimiter": "|",
+         "header_source": "bundled",
+-        "sheets_read": []
++        "sheets_read": [],
++        "categories": [
++          {
++            "category": "Super PAC",
++            "committees": 1,
++            "rows": 3,
++            "supported_rows": 2,
++            "excluded_rows": 1
++          },
++          {
++            "category": "Trade Association",
++            "committees": 1,
++            "rows": 1,
++            "supported_rows": 1,
++            "excluded_rows": 0
++          }
++        ],
++        "excluded_rows": 1,
++        "catalog_version": 2,
++        "state": "ready",
++        "reread": false,
++        "stale": false,
++        "rows_read": 4
+       },
+       "format": "fec_bulk",
+       "source_kind": "upload",
+@@ -398,7 +514,10 @@
+           "id": "C00000001",
+           "name": "Example PAC",
+           "rows": 3,
+-          "supported_rows": 3
++          "supported_rows": 3,
++          "category": "Super PAC",
++          "category_source": "file:recipient_category",
++          "excluded_rows": 1
+         }
+       ],
+       "cycles": [
+@@ -412,7 +531,7 @@
+       "bytes": 512,
+       "warnings": [
+         "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
+-        "Committee names and IDs are taken from this CSV; their registration and committee type have not been independently verified.",
++        "Committee categories come from this file's recipient_category column.",
+         "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
+       ],
+       "format": "delimited",
+@@ -423,7 +542,29 @@
+       "encoding": "utf-8",
+       "delimiter": ",",
+       "header_source": "row",
+-      "sheets_read": []
++      "sheets_read": [],
++      "categories": [
++        {
++          "category": "Super PAC",
++          "committees": 1,
++          "rows": 3,
++          "supported_rows": 2,
++          "excluded_rows": 1
++        },
++        {
++          "category": "Trade Association",
++          "committees": 1,
++          "rows": 1,
++          "supported_rows": 1,
++          "excluded_rows": 0
++        }
++      ],
++      "excluded_rows": 1,
++      "catalog_version": 2,
++      "state": "ready",
++      "reread": false,
++      "stale": false,
++      "rows_read": 4
+     }
+   ],
+   "negative_controls": [
+@@ -625,6 +766,639 @@
+         },
+         "session_only": false
+       }
++    },
++    {
++      "shape": "catalog",
++      "payload": {
++        "categories": [
++          {
++            "category": "Super PAC",
++            "committees": 1,
++            "rows": 3,
++            "supported_rows": 2,
++            "excluded_rows": 1
++          },
++          {
++            "category": "Trade Association",
++            "committees": 1,
++            "rows": 1,
++            "supported_rows": 1,
++            "excluded_rows": 0
++          }
++        ],
++        "excluded_rows": 1,
++        "format": "delimited",
++        "source_kind": "upload",
++        "source_path": "",
++        "sheet": "",
++        "sheets": [],
++        "sheets_read": [],
++        "encoding": "utf-8",
++        "delimiter": ",",
++        "header_source": "row",
++        "id": "csv-df276ecd510f24f9ef22054878938a9a",
++        "name": "producers.csv",
++        "sha256": "df276ecd510f24f9ef22054878938a9ae4bce5d2a8bd6612d230b34940886b03",
++        "row_count": 4,
++        "committees": [
++          {
++            "category": "Hybrid PAC",
++            "category_source": "file:recipient_category",
++            "excluded_rows": 1,
++            "id": "C00000001",
++            "name": "Example Super PAC",
++            "rows": 3,
++            "supported_rows": 2
++          },
++          {
++            "category": "Trade Association",
++            "category_source": "file:recipient_category",
++            "excluded_rows": 0,
++            "id": "C00000002",
++            "name": "Example Trade PAC",
++            "rows": 1,
++            "supported_rows": 1
++          }
++        ],
++        "cycles": [
++          "2026"
++        ],
++        "supported_rows": 3,
++        "unsupported_rows": 0,
++        "unassigned_rows": 0,
++        "session_only": false,
++        "imported_at": "2026-09-17T16:08:45.310690+00:00",
++        "bytes": 478,
++        "warnings": [
++          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++          "Committee categories come from this file's recipient_category column.",
++          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++        ],
++        "catalog_version": 2,
++        "rows_read": 4,
++        "state": "ready",
++        "reread": false,
++        "stale": false
++      },
++      "why": "S7 category vocabulary: 'Hybrid PAC' is not one of the ten names the Graph tab and the PAC evidence picker share, so a filter built from it would drop every committee it labels."
++    },
++    {
++      "shape": "catalog",
++      "payload": {
++        "categories": [
++          {
++            "category": "Trade Association",
++            "committees": 1,
++            "rows": 1,
++            "supported_rows": 1,
++            "excluded_rows": 0
++          },
++          {
++            "category": "Super PAC",
++            "committees": 1,
++            "rows": 3,
++            "supported_rows": 2,
++            "excluded_rows": 1
++          }
++        ],
++        "excluded_rows": 1,
++        "format": "delimited",
++        "source_kind": "upload",
++        "source_path": "",
++        "sheet": "",
++        "sheets": [],
++        "sheets_read": [],
++        "encoding": "utf-8",
++        "delimiter": ",",
++        "header_source": "row",
++        "id": "csv-df276ecd510f24f9ef22054878938a9a",
++        "name": "producers.csv",
++        "sha256": "df276ecd510f24f9ef22054878938a9ae4bce5d2a8bd6612d230b34940886b03",
++        "row_count": 4,
++        "committees": [
++          {
++            "category": "Super PAC",
++            "category_source": "file:recipient_category",
++            "excluded_rows": 1,
++            "id": "C00000001",
++            "name": "Example Super PAC",
++            "rows": 3,
++            "supported_rows": 2
++          },
++          {
++            "category": "Trade Association",
++            "category_source": "file:recipient_category",
++            "excluded_rows": 0,
++            "id": "C00000002",
++            "name": "Example Trade PAC",
++            "rows": 1,
++            "supported_rows": 1
++          }
++        ],
++        "cycles": [
++          "2026"
++        ],
++        "supported_rows": 3,
++        "unsupported_rows": 0,
++        "unassigned_rows": 0,
++        "session_only": false,
++        "imported_at": "2026-09-17T16:08:45.310690+00:00",
++        "bytes": 478,
++        "warnings": [
++          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++          "Committee categories come from this file's recipient_category column.",
++          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++        ],
++        "catalog_version": 2,
++        "rows_read": 4,
++        "state": "ready",
++        "reread": false,
++        "stale": false
++      },
++      "why": "S7 category order: categories[] out of vocabulary order, so the committee-type select would list types in an order that changes with the file."
++    },
++    {
++      "shape": "select",
++      "payload": {
++        "source": {
++          "categories": [
++            {
++              "category": "Super PAC",
++              "committees": 1,
++              "rows": 3,
++              "supported_rows": 2,
++              "excluded_rows": 1
++            },
++            {
++              "category": "Trade Association",
++              "committees": 1,
++              "rows": 1,
++              "supported_rows": 1,
++              "excluded_rows": 0
++            }
++          ],
++          "excluded_rows": 1,
++          "format": "delimited",
++          "source_kind": "upload",
++          "source_path": "",
++          "sheet": "",
++          "sheets": [],
++          "sheets_read": [],
++          "encoding": "utf-8",
++          "delimiter": ",",
++          "header_source": "row",
++          "id": "csv-df276ecd510f24f9ef22054878938a9a",
++          "name": "producers.csv",
++          "sha256": "df276ecd510f24f9ef22054878938a9ae4bce5d2a8bd6612d230b34940886b03",
++          "row_count": 4,
++          "committees": [
++            {
++              "category": "Super PAC",
++              "category_source": "file:recipient_category",
++              "excluded_rows": 1,
++              "id": "C00000001",
++              "name": "Example Super PAC",
++              "rows": 3,
++              "supported_rows": 2
++            },
++            {
++              "category": "Trade Association",
++              "category_source": "file:recipient_category",
++              "excluded_rows": 0,
++              "id": "C00000002",
++              "name": "Example Trade PAC",
++              "rows": 1,
++              "supported_rows": 1
++            }
++          ],
++          "cycles": [
++            "2026"
++          ],
++          "supported_rows": 3,
++          "unsupported_rows": 0,
++          "unassigned_rows": 0,
++          "session_only": false,
++          "imported_at": "2026-09-17T16:08:45.310690+00:00",
++          "bytes": 478,
++          "warnings": [
++            "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++            "Committee categories come from this file's recipient_category column.",
++            "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++          ],
++          "catalog_version": 2,
++          "rows_read": 4,
++          "state": "ready",
++          "reread": false,
++          "stale": false
++        },
++        "committee": {
++          "category": "Super PAC",
++          "excluded_rows": 1,
++          "id": "C00000001",
++          "name": "Example Super PAC",
++          "rows": 3,
++          "supported_rows": 2
++        },
++        "committees": [
++          {
++            "category": "Super PAC",
++            "category_source": "file:recipient_category",
++            "excluded_rows": 1,
++            "id": "C00000001",
++            "name": "Example Super PAC",
++            "rows": 3,
++            "supported_rows": 2
++          },
++          {
++            "category": "Trade Association",
++            "category_source": "file:recipient_category",
++            "excluded_rows": 0,
++            "id": "C00000002",
++            "name": "Example Trade PAC",
++            "rows": 1,
++            "supported_rows": 1
++          }
++        ],
++        "cycles": [
++          "2026"
++        ],
++        "selected_cycle": "",
++        "columns": [
++          "committee_id",
++          "committee_name",
++          "amount",
++          "date",
++          "two_year_transaction_period",
++          "record_type",
++          "recipient_category",
++          "include_in_analysis",
++          "inclusion_reason"
++        ],
++        "rows": [
++          {
++            "row_number": 2,
++            "raw": {
++              "committee_id": "C00000001",
++              "committee_name": "Example Super PAC",
++              "amount": "25000000",
++              "date": "2026-01-05",
++              "two_year_transaction_period": "2026",
++              "record_type": "CORPORATE",
++              "recipient_category": "Super PAC",
++              "include_in_analysis": "Yes",
++              "inclusion_reason": ""
++            },
++            "extra_cells": [],
++            "committee_id": "C00000001",
++            "committee_name": "Example Super PAC",
++            "kind": "receipt",
++            "channel": "Receipts",
++            "basis": "dated observation",
++            "amount": 25000000.0,
++            "date": "2026-01-05",
++            "date_raw": "2026-01-05",
++            "cycle": "2026",
++            "direction": "",
++            "counterparty": "",
++            "candidate_id": "",
++            "candidate_name": "",
++            "record_id": "",
++            "source_url": "",
++            "category": "Super PAC",
++            "status": "supported",
++            "issues": []
++          },
++          {
++            "row_number": 3,
++            "raw": {
++              "committee_id": "C00000001",
++              "committee_name": "Example Super PAC",
++              "amount": "5000",
++              "date": "2026-01-06",
++              "two_year_transaction_period": "2026",
++              "record_type": "CONTRIBUTION",
++              "recipient_category": "Super PAC",
++              "include_in_analysis": "Yes",
++              "inclusion_reason": ""
++            },
++            "extra_cells": [],
++            "committee_id": "C00000001",
++            "committee_name": "Example Super PAC",
++            "kind": "receipt",
++            "channel": "Receipts",
++            "basis": "dated observation",
++            "amount": 5000.0,
++            "date": "2026-01-06",
++            "date_raw": "2026-01-06",
++            "cycle": "2026",
++            "direction": "",
++            "counterparty": "",
++            "candidate_id": "",
++            "candidate_name": "",
++            "record_id": "",
++            "source_url": "",
++            "category": "Super PAC",
++            "status": "supported",
++            "issues": []
++          },
++          {
++            "row_number": 4,
++            "raw": {
++              "committee_id": "C00000001",
++              "committee_name": "Example Super PAC",
++              "amount": "23000000",
++              "date": "2026-01-07",
++              "two_year_transaction_period": "2026",
++              "record_type": "CORPORATE",
++              "recipient_category": "",
++              "include_in_analysis": "No",
++              "inclusion_reason": "Exact five-key memo duplicate"
++            },
++            "extra_cells": [],
++            "committee_id": "C00000001",
++            "committee_name": "Example Super PAC",
++            "kind": "receipt",
++            "channel": "Receipts",
++            "basis": "dated observation",
++            "amount": 23000000.0,
++            "date": "2026-01-07",
++            "date_raw": "2026-01-07",
++            "cycle": "2026",
++            "direction": "",
++            "counterparty": "",
++            "candidate_id": "",
++            "candidate_name": "",
++            "record_id": "",
++            "source_url": "",
++            "category": "",
++            "status": "excluded",
++            "issues": [
++              "Excluded by the workbook: Exact five-key memo duplicate"
++            ]
++          }
++        ],
++        "totals": [
++          {
++            "channel": "Receipts",
++            "amount": 25005000.0,
++            "row_count": 2
++          }
++        ],
++        "supported_rows": 2,
++        "excluded_rows": 1,
++        "unsupported_rows": 0,
++        "offset": 0,
++        "limit": 200,
++        "total_rows": 3,
++        "has_more": false,
++        "warnings": [
++          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++          "Committee categories come from this file's recipient_category column.",
++          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++        ]
++      },
++      "why": "S7 select: a committee without category_source, so the results heading could not say whether the label came from the file or from the FEC committee master."
++    },
++    {
++      "shape": "select",
++      "payload": {
++        "source": {
++          "categories": [
++            {
++              "category": "Super PAC",
++              "committees": 1,
++              "rows": 3,
++              "supported_rows": 2,
++              "excluded_rows": 1
++            },
++            {
++              "category": "Trade Association",
++              "committees": 1,
++              "rows": 1,
++              "supported_rows": 1,
++              "excluded_rows": 0
++            }
++          ],
++          "excluded_rows": 1,
++          "format": "delimited",
++          "source_kind": "upload",
++          "source_path": "",
++          "sheet": "",
++          "sheets": [],
++          "sheets_read": [],
++          "encoding": "utf-8",
++          "delimiter": ",",
++          "header_source": "row",
++          "id": "csv-df276ecd510f24f9ef22054878938a9a",
++          "name": "producers.csv",
++          "sha256": "df276ecd510f24f9ef22054878938a9ae4bce5d2a8bd6612d230b34940886b03",
++          "row_count": 4,
++          "committees": [
++            {
++              "category": "Super PAC",
++              "category_source": "file:recipient_category",
++              "excluded_rows": 1,
++              "id": "C00000001",
++              "name": "Example Super PAC",
++              "rows": 3,
++              "supported_rows": 2
++            },
++            {
++              "category": "Trade Association",
++              "category_source": "file:recipient_category",
++              "excluded_rows": 0,
++              "id": "C00000002",
++              "name": "Example Trade PAC",
++              "rows": 1,
++              "supported_rows": 1
++            }
++          ],
++          "cycles": [
++            "2026"
++          ],
++          "supported_rows": 3,
++          "unsupported_rows": 0,
++          "unassigned_rows": 0,
++          "session_only": false,
++          "imported_at": "2026-09-17T16:08:45.310690+00:00",
++          "bytes": 478,
++          "warnings": [
++            "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++            "Committee categories come from this file's recipient_category column.",
++            "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++          ],
++          "catalog_version": 2,
++          "rows_read": 4,
++          "state": "ready",
++          "reread": false,
++          "stale": false
++        },
++        "committee": {
++          "category": "Super PAC",
++          "category_source": "file:recipient_category",
++          "excluded_rows": 1,
++          "id": "C00000001",
++          "name": "Example Super PAC",
++          "rows": 3,
++          "supported_rows": 2
++        },
++        "committees": [
++          {
++            "category": "Super PAC",
++            "category_source": "file:recipient_category",
++            "excluded_rows": 1,
++            "id": "C00000001",
++            "name": "Example Super PAC",
++            "rows": 3,
++            "supported_rows": 2
++          },
++          {
++            "category": "Trade Association",
++            "category_source": "file:recipient_category",
++            "excluded_rows": 0,
++            "id": "C00000002",
++            "name": "Example Trade PAC",
++            "rows": 1,
++            "supported_rows": 1
++          }
++        ],
++        "cycles": [
++          "2026"
++        ],
++        "selected_cycle": "",
++        "columns": [
++          "committee_id",
++          "committee_name",
++          "amount",
++          "date",
++          "two_year_transaction_period",
++          "record_type",
++          "recipient_category",
++          "include_in_analysis",
++          "inclusion_reason"
++        ],
++        "rows": [
++          {
++            "row_number": 2,
++            "raw": {
++              "committee_id": "C00000001",
++              "committee_name": "Example Super PAC",
++              "amount": "25000000",
++              "date": "2026-01-05",
++              "two_year_transaction_period": "2026",
++              "record_type": "CORPORATE",
++              "recipient_category": "Super PAC",
++              "include_in_analysis": "Yes",
++              "inclusion_reason": ""
++            },
++            "extra_cells": [],
++            "committee_id": "C00000001",
++            "committee_name": "Example Super PAC",
++            "kind": "receipt",
++            "channel": "Receipts",
++            "basis": "dated observation",
++            "amount": 25000000.0,
++            "date": "2026-01-05",
++            "date_raw": "2026-01-05",
++            "cycle": "2026",
++            "direction": "",
++            "counterparty": "",
++            "candidate_id": "",
++            "candidate_name": "",
++            "record_id": "",
++            "source_url": "",
++            "category": "Super PAC",
++            "status": "supported",
++            "issues": []
++          },
++          {
++            "row_number": 3,
++            "raw": {
++              "committee_id": "C00000001",
++              "committee_name": "Example Super PAC",
++              "amount": "5000",
++              "date": "2026-01-06",
++              "two_year_transaction_period": "2026",
++              "record_type": "CONTRIBUTION",
++              "recipient_category": "Super PAC",
++              "include_in_analysis": "Yes",
++              "inclusion_reason": ""
++            },
++            "extra_cells": [],
++            "committee_id": "C00000001",
++            "committee_name": "Example Super PAC",
++            "kind": "receipt",
++            "channel": "Receipts",
++            "basis": "dated observation",
++            "amount": 5000.0,
++            "date": "2026-01-06",
++            "date_raw": "2026-01-06",
++            "cycle": "2026",
++            "direction": "",
++            "counterparty": "",
++            "candidate_id": "",
++            "candidate_name": "",
++            "record_id": "",
++            "source_url": "",
++            "category": "Super PAC",
++            "status": "supported",
++            "issues": []
++          },
++          {
++            "row_number": 4,
++            "raw": {
++              "committee_id": "C00000001",
++              "committee_name": "Example Super PAC",
++              "amount": "23000000",
++              "date": "2026-01-07",
++              "two_year_transaction_period": "2026",
++              "record_type": "CORPORATE",
++              "recipient_category": "",
++              "include_in_analysis": "No",
++              "inclusion_reason": "Exact five-key memo duplicate"
++            },
++            "extra_cells": [],
++            "committee_id": "C00000001",
++            "committee_name": "Example Super PAC",
++            "kind": "receipt",
++            "channel": "Receipts",
++            "basis": "dated observation",
++            "amount": 23000000.0,
++            "date": "2026-01-07",
++            "date_raw": "2026-01-07",
++            "cycle": "2026",
++            "direction": "",
++            "counterparty": "",
++            "candidate_id": "",
++            "candidate_name": "",
++            "record_id": "",
++            "source_url": "",
++            "category": "",
++            "status": "excluded",
++            "issues": []
++          }
++        ],
++        "totals": [
++          {
++            "channel": "Receipts",
++            "amount": 25005000.0,
++            "row_count": 2
++          }
++        ],
++        "supported_rows": 2,
++        "excluded_rows": 1,
++        "unsupported_rows": 0,
++        "offset": 0,
++        "limit": 200,
++        "total_rows": 3,
++        "has_more": false,
++        "warnings": [
++          "Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.",
++          "Committee categories come from this file's recipient_category column.",
++          "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
++        ]
++      },
++      "why": "S7 exclusion: a row with status excluded and no \"Excluded by the workbook\" issue, which would leave an amount off the totals with nothing on the page saying why."
+     }
+   ]
+ }
+diff --git a/mentat/app/app.js b/mentat/app/app.js
+index 7859f9812..8fbd04a3b 100644
+--- a/mentat/app/app.js
++++ b/mentat/app/app.js
+@@ -474,7 +474,7 @@ async function loadEvidence() {
+ function updateEvidenceCommittees() {
+   if(!evidence)return;
+   const previous=$('evidence-committee').value||evidencePreference.committee;
+-  const names=new Map(evidence.committee_finances.filter(row=>String(row.cycle)===$('evidence-cycle').value).map(row=>[row.committee_id,row.committee_name||row.committee_id]));
++  const names=new Map(evidence.committee_finances.filter(row=>String(row.cycle)===$('evidence-cycle').value).map(row=>[row.committee_id,(row.committee_name||row.committee_id)+(row.category?` · ${row.category}`:'')]));
+   $('evidence-committee').replaceChildren(...[...names].map(([id,name])=>new Option(`${name} · ${id}`,id)));
+   if(names.has(previous))$('evidence-committee').value=previous;
+   renderEvidence();saveEvidenceSelection();
+diff --git a/mentat/app/evidence-csv.js b/mentat/app/evidence-csv.js
+index 95ef51517..d25218b37 100644
+--- a/mentat/app/evidence-csv.js
++++ b/mentat/app/evidence-csv.js
+@@ -2,6 +2,7 @@
+ (() => {
+   let source = null, revision = 0, offset = 0, limits = null, picker = null, stored = [];
+   let pendingUploadFile = null, pendingPathRequest = null;
++  let rereadTimer = null, rereadDeadline = 0;
+   const pageSize = 100;
+   const pollDelay = 500;
+   const pollFailureLimit = 5;
+@@ -44,11 +45,68 @@
+     source = null; offset = 0; $('evidence-csv-results').hidden = true;
+     $('evidence-csv-committee').replaceChildren(new Option('Choose a CSV first',''));
+     $('evidence-csv-cycle').replaceChildren(new Option('All cycles',''));
++    $('evidence-csv-category').replaceChildren(new Option('All types',''));
++    $('evidence-csv-find').value = '';
+     $('evidence-csv-committee').disabled = true; $('evidence-csv-cycle').disabled = true;
++    $('evidence-csv-category').disabled = true; $('evidence-csv-find').disabled = true;
+   }
+-  function fillCommittees(committees) {
+-    $('evidence-csv-committee').replaceChildren(...committees.map(item=>new Option(`${item.name || item.id} · ${item.id}`,item.id)));
+-    $('evidence-csv-committee').disabled = !committees.length;
++  // A file can hold 523 PACs (the Crypto workbook does), so the list is a
++  // committee-type filter and a search over one rebuilt select rather than a
++  // single roll of everything in committee-ID order. A committee the file
++  // never categorised reads as Unclassified here, which is also the name the
++  // FEC committee master falls back to, so one option covers both.
++  const categoryOf = item => item.category || 'Unclassified';
++  const committeeOrder = item => item.id === 'unassigned' ? '\uffff' : String(item.name || item.id).toLowerCase();
++  function visibleCommittees() {
++    if (!source) return [];
++    const type = $('evidence-csv-category').value;
++    const text = $('evidence-csv-find').value.trim().toLowerCase();
++    return (source.committees || [])
++      .filter(item => !type || categoryOf(item) === type)
++      .filter(item => !text || String(item.name || '').toLowerCase().includes(text)
++                            || String(item.id || '').toLowerCase().includes(text))
++      .sort((a, b) => committeeOrder(a).localeCompare(committeeOrder(b)));
++  }
++  function fillCategories() {
++    const select = $('evidence-csv-category');
++    const previous = select.value;
++    const items = (source && source.categories) || [];
++    select.replaceChildren(new Option('All types',''),
++      ...items.map(item => new Option(`${item.category} · ${number(item.committees)}`, item.category)));
++    select.value = items.some(item => item.category === previous) ? previous : '';
++    select.disabled = !source;
++    $('evidence-csv-find').disabled = !source;
++  }
++  function fillCommittees() {
++    const select = $('evidence-csv-committee');
++    const previous = select.value;
++    const visible = visibleCommittees();
++    select.replaceChildren(...visible.map(item => new Option(`${item.name || item.id} · ${item.id}`
++      + ` · ${categoryOf(item)} · ${number(item.rows || 0)} row${Number(item.rows) === 1 ? '' : 's'}`,
++      item.id)));
++    select.disabled = !visible.length;
++    if (visible.some(item => item.id === previous)) select.value = previous;
++    else if (visible.length) select.value = visible[0].id;
++    return select.value !== previous;
++  }
++  function filterStatus() {
++    if (!source) return storedMessage();
++    const type = $('evidence-csv-category').value, text = $('evidence-csv-find').value.trim();
++    return `${source.name} · ${number((source.committees || []).length)} PACs in file`
++      + ` · ${number(visibleCommittees().length)} shown`
++      + (type ? ` (${type})` : '') + (text ? ` matching "${text}"` : '')
++      + ` · ${number(source.row_count)} rows in file`;
++  }
++  function applyFilter() {
++    if (!source) return;
++    const moved = fillCommittees();
++    say(filterStatus());
++    // Nothing visible means there is nothing to show. Asking the server for
++    // committee '' would not have been empty: select() reads a blank
++    // committee as the FIRST committee of the import, so the panel showed
++    // some unrelated PAC's rows while the picker showed nothing at all.
++    if (!$('evidence-csv-committee').options.length) { $('evidence-csv-results').hidden = true; return; }
++    if (moved) { offset = 0; loadRows(); }
+   }
+   function hideSheetPicker() { const label = $('evidence-sheet-label'); if (label) label.hidden = true; }
+   function showSheets(job) {
+@@ -69,15 +127,41 @@
+       limits = body.limits || limits;
+       stored = body.sources || [];
+       select.replaceChildren(new Option('Choose a previously imported CSV',''),
+-        ...stored.map(item => new Option(`${item.name} · ${number(item.row_count)} rows · ${item.format || 'delimited'} · ${String(item.imported_at || '').slice(0,10)}`, item.id)));
+-      select.value = stored.some(item => item.id === keep) ? keep : '';
+-      say(storedMessage());
++        ...stored.map(item => {
++          const option = new Option(`${item.name} · ${number(item.row_count)} rows · ${item.format || 'delimited'} · ${String(item.imported_at || '').slice(0,10)}`
++            + (item.reread ? ' · re-reading under the current rules' : ''), item.id);
++          option.disabled = !!item.reread;
++          return option;
++        }));
++      select.value = stored.some(item => item.id === keep && !item.reread) ? keep : '';
++      say(source ? filterStatus() : storedMessage());
++      watchRereads();
+       return stored;
+     } catch (error) {
+       say('GET /api/evidence-csv failed: ' + error.message);
+       return null;
+     }
+   }
++  // An import read under an older rule set is re-read by the console on the
++  // first listing, so its entry is briefly unusable. Poll until it is back,
++  // and give up after ten minutes rather than polling a console that is never
++  // going to answer differently.
++  function watchRereads() {
++    const waiting = stored.filter(item => item.reread).map(item => item.id);
++    if (!waiting.length) { rereadDeadline = 0; return; }
++    if (!rereadDeadline) rereadDeadline = Date.now() + 600000;
++    if (Date.now() > rereadDeadline || rereadTimer) return;
++    rereadTimer = setTimeout(async () => {
++      rereadTimer = null;
++      const watched = new Set(waiting);
++      await refreshSources();
++      if (!source || !watched.has(source.id)) return;
++      const refreshed = stored.find(item => item.id === source.id);
++      if (!refreshed || refreshed.reread) return;
++      source = refreshed; offset = 0;
++      fillCategories(); fillCommittees(); await loadRows();
++    }, 2000);
++  }
+   async function chooseStored() {
+     const chosenId = sourcePicker().value;
+     const ticket = ++revision;
+@@ -88,7 +172,7 @@
+     if (!chosen) { say(`${chosenId}: that imported CSV is no longer listed. Choose the file again.`); await refreshSources(); return; }
+     if (ticket !== revision) return;
+     source = chosen; offset = 0;
+-    fillCommittees(chosen.committees || []);
++    fillCategories(); fillCommittees();
+     await loadRows();
+   }
+   function renderRows(body) {
+@@ -96,7 +180,9 @@
+     const total = pages.total_rows ?? body.total_rows ?? rows.length;
+     const supported = body.supported_rows ?? rows.filter(row=>row.status==='supported').length;
+     $('evidence-csv-title').textContent = body.committee?.name || body.committee?.id || 'Reported activity';
+-    $('evidence-csv-scope').textContent = `${body.source?.name || source.name} · ${body.committee?.id || $('evidence-csv-committee').value} · ${body.selected_cycle || 'All cycles'} · ${number(total)} selected rows`;
++    const committeeCategory = body.committee?.category ? ` · ${body.committee.category}`
++      + (body.committee.category_source ? ` (${body.committee.category_source})` : '') : '';
++    $('evidence-csv-scope').textContent = `${body.source?.name || source.name} · ${body.committee?.id || $('evidence-csv-committee').value}${committeeCategory} · ${body.selected_cycle || 'All cycles'} · ${number(total)} selected rows`;
+     setHtml('evidence-csv-totals', (body.totals || []).map(item => `<div><span>${escapeHtml(channelName(item.channel))}</span><strong>${currency(item.amount)}</strong><small>${number(item.row_count)} supported CSV rows</small></div>`).join('') || '<p>No supported amount totals for these rows. Review the original fields below.</p>');
+     const sourceKind = body.source?.source_kind || source.source_kind;
+     const sourcePath = body.source?.source_path || source.source_path;
+@@ -104,7 +190,10 @@
+       + (sourceKind === 'path' && sourcePath ? ` Read from ${sourcePath}.` : '')
+       + ` Stored on this computer under the console data root; visible to every Mentat console that uses it. Values are observed filings or labeled cycle aggregates, not donor allocations or reconciled giving totals.`;
+     setHtml('evidence-csv-warnings', (body.warnings || []).map(warning=>`<li>${escapeHtml(typeof warning==='string'?warning:warning.message||JSON.stringify(warning))}</li>`).join('') || '<li>No parser warnings. Source coverage and filing completeness remain unverified.</li>');
+-    $('evidence-csv-row-status').textContent = `${total ? `${number(offset+1)}–${number(offset+rows.length)} of ${number(total)}` : 'No matching'} rows · ${number(supported)} supported · ${number(body.unsupported_rows ?? Math.max(0,total-supported))} need interpretation. All selected rows contribute to the counts above, across pages.`;
++    const excluded = body.excluded_rows ?? rows.filter(row=>row.status==='excluded').length;
++    $('evidence-csv-row-status').textContent = `${total ? `${number(offset+1)}–${number(offset+rows.length)} of ${number(total)}` : 'No matching'} rows · ${number(supported)} supported`
++      + (excluded ? ` · ${number(excluded)} excluded by the workbook` : '')
++      + ` · ${number(body.unsupported_rows ?? Math.max(0,total-supported-excluded))} need interpretation. All selected rows contribute to the counts above, across pages.`;
+     setHtml('evidence-csv-rows', rows.map(row => `<tr><td>${number(row.row_number)}</td><td>${escapeHtml(row.date || 'Date unavailable')}<small>${escapeHtml(row.cycle || 'Cycle unavailable')}</small></td><td class="number">${(row.amount == null ? 'Not reported' : currency(row.amount))}</td><td>${escapeHtml(row.counterparty || row.candidate_name || row.candidate_id || 'Not reported')}<small>${escapeHtml(channelName(row.channel || row.kind))} · ${escapeHtml(row.status || '')}</small></td><td><details><summary>Original fields</summary><dl class="csv-raw">${Object.entries(row.raw || {}).map(([key,value])=>`<dt>${escapeHtml(key)}</dt><dd>${escapeHtml(value)}</dd>`).join('')}</dl>${row.extra_cells?.length ? `<p>Extra cells: ${escapeHtml(JSON.stringify(row.extra_cells))}</p>` : ''}${(row.issues||[]).map(issue=>`<p>${escapeHtml(issue)}</p>`).join('')}</details></td></tr>`).join(''));
+     $('evidence-csv-prev').disabled = offset===0;
+     $('evidence-csv-next').disabled = pages.has_more == null ? offset+rows.length>=total : !pages.has_more;
+@@ -124,7 +213,7 @@
+       $('evidence-csv-cycle').replaceChildren(new Option('All cycles',''),...cycles.map(value=>new Option(value,value)));
+       if(cycles.includes(cycle)) $('evidence-csv-cycle').value = cycle;
+       $('evidence-csv-cycle').disabled = !cycles.length;
+-      renderRows(body); say(`${source.name} · ${number(source.row_count)} rows in file`);
++      renderRows(body); say(filterStatus());
+     } catch (error) {
+       if (ticket!==revision) return;
+       say(`GET /api/evidence-csv?id=${source.id}&committee=${committee}&cycle=${cycle}: ${error.message}`);
+@@ -145,7 +234,7 @@
+         source = current.catalog; offset = 0;
+         await refreshSources();
+         if (ticket !== revision) return;
+-        fillCommittees(source.committees || []);
++        fillCategories(); fillCommittees();
+         await loadRows();
+         return;
+       }
+@@ -172,6 +261,28 @@
+       }
+     }
+   }
++  // app.js assigns the page's token when GET /api/session?light=1 answers,
++  // a different round trip from the listing this script fetches on load, so
++  // a reader who chose a file in that window got HTTP 403 'Refresh the app
++  // before continuing.' and had to reload. `token` is a top-level `let` in
++  // app.js and both files are classic scripts, so they share the binding and
++  // this one can fill it in from the same endpoint rather than race it.
++  async function awaitToken(label) {
++    if (token) return true;
++    say(`${label}: Waiting for the console session…`);
++    const deadline = Date.now() + 5000;
++    while (!token && Date.now() < deadline) {
++      try {
++        const session = await api('/api/session?light=1');
++        if (!token && session && session.token) token = session.token;
++      } catch { /* app.js is asking for the same thing; try again below */ }
++      if (token) return true;
++      await new Promise(resolve => setTimeout(resolve, 200));
++    }
++    if (token) return true;
++    say(`${label}: The console session is not ready. Reload the page, then choose the file again.`);
++    return false;
++  }
+   async function importFile(file, sheet) {
+     const ticket = ++revision; resetSelection(); hideSheetPicker();
+     const suffix = suffixOf(file.name);
+@@ -184,6 +295,8 @@
+       return;
+     }
+     pendingUploadFile = file; pendingPathRequest = null;
++    if (!await awaitToken(file.name)) return;
++    if (ticket!==revision) return;
+     say(`Uploading ${file.name}…`);
+     let response;
+     try {
+@@ -210,6 +323,8 @@
+     const ticket = ++revision; resetSelection(); hideSheetPicker();
+     pendingPathRequest = {path, header_path: headerPath || ''}; pendingUploadFile = null;
+     if ($('evidence-path')) $('evidence-path').value = path;
++    if (!await awaitToken(path)) return;
++    if (ticket!==revision) return;
+     say(`Reading ${path}…`);
+     let job;
+     try {
+@@ -275,6 +390,8 @@
+     if (browseTarget) browse(browseTarget.dataset.browsePath);
+   });
+   for (const id of ['evidence-csv-committee','evidence-csv-cycle']) $(id).addEventListener('change',()=>{offset=0;loadRows();});
++  $('evidence-csv-category').addEventListener('change', applyFilter);
++  $('evidence-csv-find').addEventListener('input', applyFilter);
+   $('evidence-csv-prev').addEventListener('click',()=>{offset=Math.max(0,offset-pageSize);loadRows();});
+   $('evidence-csv-next').addEventListener('click',()=>{offset+=pageSize;loadRows();});
+   refreshSources();
+diff --git a/mentat/app/evidence_csv.py b/mentat/app/evidence_csv.py
+index ff330990c..3e74b9f86 100644
+--- a/mentat/app/evidence_csv.py
++++ b/mentat/app/evidence_csv.py
+@@ -160,6 +160,13 @@ TYPES = {
+     'contribution_receipt':'receipt', 'contribution':'receipt', 'disbursement':'disbursement', 'disbursements':'disbursement',
+     'schedule_b':'disbursement', 'sb':'disbursement', 'independent_expenditure':'independent_spending',
+     'independent_spending':'independent_spending', 'schedule_e':'independent_spending', 'se':'independent_spending',
++    # Paul's ruling 2026-09-17: a workbook's CORPORATE rows are the company's
++    # own treasury giving, reported on the same amount and date columns as
++    # its employees' contributions, so they belong in the same Receipts
++    # channel rather than one of their own. Before this they matched no key
++    # at all and every one of them read as unsupported - 333 rows in the
++    # Crypto workbook, $176.9M of Fairshake's $178.0M.
++    'corporate':'receipt', 'corporate_giving':'receipt', 'corporate_contribution':'receipt',
+ }
+ DIRECTIONS = {'s':'Support', 'support':'Support', 'o':'Oppose', 'oppose':'Oppose', 'opposition':'Oppose',
+               'contribution_other':'Contribution / Other', 'contribution':'Contribution / Other',
+@@ -171,6 +178,34 @@ WARNINGS = (
+     'Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported.',
+ )
+ 
++# Committee categories. The vocabulary is the Graph tab's (app/graph_data.py
++# CATEGORIES) and has to stay equal to it: both tabs filter the same
++# committees by the same words, and a name in one and not the other is a
++# filter that silently drops PACs. It is repeated here rather than imported
++# because graph_data pulls the report stack in with it and S3e made this
++# module's imports lazy on purpose; tests/test_evidence_categories.py asserts
++# the two lists are equal.
++CATEGORIES = ('Super PAC', 'Trade Association', 'JFC', 'Company PAC', 'Leadership PAC',
++              'Carey', 'Other PAC', 'Candidate', 'Party Committee', 'Unclassified')
++CATEGORY_INDEX = {name.lower():name for name in CATEGORIES}
++# Not a bare `category`: an FEC bulk oppexp file has a CATEGORY column
++# carrying the commission's purpose code, which would read as a committee
++# category, canonicalise to Unclassified and then stop the committee master
++# being consulted at all (the file wins, Paul's ruling 4).
++CATEGORY_FIELDS = ('recipient_category', 'committee_category')
++INCLUSION_FIELDS = ('include_in_analysis',)
++INCLUSION_REASON_FIELDS = ('inclusion_reason',)
++FALSE_TEXT = {'no', 'n', 'false', '0'}
++
++# Catalogs are built once, at ingest, so a rule change here cannot reach an
++# import already on disk. The version is written into import.json beside the
++# catalog and Store.sources() re-reads anything older under the current
++# rules, because the alternative is a console that answers two different
++# things about one file depending on the day it was imported.
++CATALOG_VERSION = 2
++
++EXCLUDED_ISSUE = 'Excluded by the workbook.'
++
+ # Every refusal names the file or the reason, because a blank status line in
+ # the page is itself a defect. The three messages that quote a limit are built
+ # from the constants when they are raised, so a changed limit cannot leave a
+@@ -384,6 +419,219 @@ def bulk_warnings():
+     return notes
+ 
+ 
++def excluded_issue(reason):
++    """Why a row the workbook marked Include in Analysis = No is out of the totals."""
++    reason = str(reason or '').strip()
++    return f'Excluded by the workbook: {reason}' if reason else EXCLUDED_ISSUE
++
++
++def canonical_category(value):
++    """One category name from the file, in the Graph vocabulary.
++
++    Case-insensitive exact match; text that is not one of the ten names is
++    Unclassified, which is itself one of them; a blank cell stays blank, so a
++    committee the file never labelled can be told from one the file calls
++    Unclassified, and only the first kind reaches the committee master.
++    """
++    text = str(value or '').strip()
++    return CATEGORY_INDEX.get(text.lower(), 'Unclassified') if text else ''
++
++
++def modal_from_counts(counts):
++    """The commonest category in a tally, ties broken by vocabulary order."""
++    if not counts:
++        return ''
++    best = max(counts.values())
++    return next((name for name in CATEGORIES if counts.get(name) == best), '')
++
++
++def modal_category(rows):
++    """The category of a committee: the commonest CLASSIFIED one over its rows.
++
++    A file can disagree with itself - the Crypto workbook labels Fairshake a
++    Super PAC on 22 rows and leaves the cell blank on 6 - so no single row
++    can decide. Ties go to the earlier name in the vocabulary, a fixed order,
++    so two runs over one file never disagree.
++
++    'Unclassified' does not count. It is the absence of a classification
++    rather than one of them - graph_data reads a missing recipient_category
++    as exactly that word - so a committee named Carey once and Unclassified
++    five times is Carey, and one the file only ever calls Unclassified still
++    reaches the committee master.
++    """
++    counts = defaultdict(int)
++    for row in rows:
++        name = row.get('category') if isinstance(row, dict) else row
++        if name and name != 'Unclassified':
++            counts[name] += 1
++    return modal_from_counts(counts)
++
++
++def category_header(headers):
++    """The file's own category column, under the name the file writes it with."""
++    columns = [key(item) for item in headers]
++    return next((headers[columns.index(name)] for name in CATEGORY_FIELDS if name in columns), '')
++
++
++@lru_cache(maxsize=1)
++def committee_master():
++    """The FEC committee master (cm.txt), read once per process and lazily.
++
++    Loaded only when a committee has no category in the file it came from, so
++    a console that never opens PAC evidence never pays for it. Newest cycle
++    first: cm26 answers, cm24 fills what it does not know, cm22 what neither
++    does, and the cycle that supplied each ID is kept so the page can say
++    where a label came from. The files ship without a header row; a copy
++    saved through a spreadsheet can grow one, and its first field is not a
++    committee ID so it is skipped like any other unusable line. Nothing here
++    may raise: a master that cannot be read leaves its committees
++    Unclassified and says so in the catalog warnings.
++    """
++    root = INPUTS / 'fec_committee_master'
++    rows, cycles, notes = {}, [], []
++    try:
++        folders = sorted((path for path in root.glob('cm*') if (path / 'cm.txt').is_file()),
++                         key=lambda path: path.name, reverse=True)
++    except OSError:
++        folders = []
++    for folder in folders:
++        try:
++            text = (folder / 'cm.txt').read_text(encoding='utf-8', errors='replace')
++        except OSError as error:
++            notes.append(f'The FEC committee master file {folder.name}/cm.txt could not be read '
++                         f'({type(error).__name__}); its committees stay Unclassified.')
++            continue
++        cycles.append(folder.name)
++        for line in text.splitlines():
++            fields = line.split('|')
++            if len(fields) < 13:
++                continue
++            identifier = fields[0].strip().upper()
++            if identifier in rows or not re.fullmatch(r'C\d{8}', identifier):
++                continue
++            rows[identifier] = (fields[8].strip().upper(), fields[9].strip().upper(),
++                                fields[12].strip().upper(), folder.name)
++    return {'rows':rows, 'cycles':cycles, 'warnings':notes}
++
++
++def classify_committee(committee_id, has_file_categories=False):
++    """(category, category_source) for one committee ID from the FEC master.
++
++    The order is the report pipeline's own fallback order (R/report.R), so a
++    committee the workbook did not label reads here the way it reads in the
++    industry report, with the ORG_TP rules added for files that carry no
++    category column at all. Designation beats type and type beats ORG_TP,
++    because a joint fundraising committee filed as a Super PAC is still a
++    JFC. Exported for server.py, which labels saved snapshots the same way.
++
++    `has_file_categories` says the file carried a category column of its own.
++    A committee connected to a corporation (ORG_TP C or W) is then read as
++    Other PAC rather than Company PAC, because 'Company PAC' in a Mentat
++    workbook means one of the industry's OWN companies' PACs - a label the
++    file assigns - and a payment processor's PAC that happens to be
++    registered to a corporation must not land in that bucket.
++    """
++    master = committee_master()
++    entry = master['rows'].get(str(committee_id or '').strip().upper())
++    if entry is None:
++        if not master['cycles']:
++            return 'Unclassified', 'committee master not available'
++        return 'Unclassified', 'not in the FEC committee master (' + ', '.join(sorted(master['cycles'])) + ')'
++    designation, committee_type, organisation, cycle = entry
++    source = f'fec_master:{cycle}'
++    if designation == 'J':
++        return 'JFC', source
++    if designation == 'D':
++        return 'Leadership PAC', source
++    if committee_type in ('X', 'Y', 'Z'):
++        return 'Party Committee', source
++    if committee_type in ('O', 'U'):
++        return 'Super PAC', source
++    if committee_type in ('V', 'W'):
++        return 'Carey', source
++    if committee_type in ('H', 'S', 'P') or designation in ('A', 'P'):
++        return 'Candidate', source
++    connected = f'fec_master:org_type:{cycle}'
++    if organisation == 'T':
++        return 'Trade Association', connected
++    if organisation in ('C', 'W'):
++        return ('Other PAC' if has_file_categories else 'Company PAC'), connected
++    if organisation in ('L', 'M', 'V'):
++        return 'Other PAC', connected
++    return 'Unclassified', source
++
++
++def committee_category(counts, identifier, header, unclassified=False):
++    """(category, category_source, consulted) for one committee.
++
++    Paul's ruling 2026-09-17: when both know the committee the file wins, and
++    the master only fills blanks. The file is the industry pipeline's own
++    classification of this recipient; the master is a registration record
++    that does not know, for instance, which of a company's PACs the analysis
++    treats as its own.
++
++    A blank cell and the word 'Unclassified' are the same absence, so both
++    reach the master: measured on the Crypto import, of the 15 committees
++    the file leaves Unclassified the master classifies 7, among them
++    C00567412 CHAMBER OF DIGITAL COMMERCE PAC (ORG_TP T -> Trade
++    Association), exactly the kind of PAC that read as missing. When the
++    master cannot do better either, the source names both, so a reader can
++    tell 'nobody knows' from 'the file never said'. `consulted` reports
++    whether the master was asked, which is what the catalog sentence counts.
++    """
++    category = modal_from_counts(counts or {})
++    if category:
++        return category, f'file:{header}', False
++    category, source = classify_committee(identifier, bool(header))
++    if category != 'Unclassified' or not unclassified:
++        return category, source, True
++    return 'Unclassified', f'file:{header}; {source}', True
++
++
++def category_buckets(committees):
++    """The per-category rollup the picker's type filter is built from."""
++    buckets = defaultdict(lambda: {'committees':0, 'rows':0, 'supported_rows':0, 'excluded_rows':0})
++    for item in committees:
++        if not item.get('category'):
++            continue
++        bucket = buckets[item['category']]
++        bucket['committees'] += 1
++        for field in ('rows', 'supported_rows', 'excluded_rows'):
++            bucket[field] += int(item.get(field) or 0)
++    return [{'category':name, **buckets[name]} for name in CATEGORIES if name in buckets]
++
++
++def category_warning(header, consulted):
++    """The catalog sentence that says where THIS import's categories came from.
++
++    It replaces the standing note that committee type 'has not been
++    independently verified', which was equally true of every import and told
++    a reader nothing about the one in front of them. The master is only
++    consulted when it was actually used, so a file that labels every
++    committee itself never loads it.
++    """
++    if header and not consulted:
++        return f"Committee categories come from this file's {header} column."
++    cycles = ', '.join(committee_master()['cycles'])
++    plural = 'committee' if consulted == 1 else 'committees'
++    if header and cycles:
++        return (f"Committee categories come from this file's {header} column; {consulted:,} {plural} the "
++                f'file left blank or Unclassified were checked against the FEC committee master ({cycles}).')
++    if header:
++        return (f"Committee categories come from this file's {header} column; the FEC committee master is "
++                f'not available, so the {consulted:,} {plural} the file left blank or Unclassified stay '
++                'Unclassified.')
++    if cycles:
++        return f'Committee categories were classified from the FEC committee master ({cycles}).'
++    return 'The FEC committee master is not available, so every committee here is Unclassified.'
++
++
++def catalog_warnings(header, consulted):
++    """The three standing catalog notes, the second one built for this import."""
++    notes = [WARNINGS[0], category_warning(header, consulted), WARNINGS[2]]
++    return notes + committee_master()['warnings'] if consulted else notes
++
++
+ def normalize(raw, row_number, columns, extra_cells=()):
+     row = dict(zip(columns, raw.values()))
+     issues = []
+@@ -446,6 +694,15 @@ def normalize(raw, row_number, columns, extra_cells=()):
+         issues.append('The CSV does not identify a supported receipt or activity type.')
+     if extra_cells:
+         issues.append('This row contains more values than its header.')
++    # Paul's ruling 2026-09-17: the workbook already decided which of its own
++    # rows count, and its duplicate memo legs would otherwise double the
++    # corporate channel. An excluded row keeps its kind, channel and amount
++    # and stays on the page with the workbook's own reason; it is simply out
++    # of every total. Its status is a third value, so every consumer that
++    # tests for 'supported' goes on counting exactly what it counted before.
++    excluded = key(first(row, INCLUSION_FIELDS)) in FALSE_TEXT
++    if excluded:
++        issues.append(excluded_issue(first(row, INCLUSION_REASON_FIELDS)))
+     channel = {'receipt':'Receipts', 'disbursement':'Disbursements'}.get(kind)
+     if kind == 'independent_spending':
+         channel = 'Independent spending · ' + direction.lower()
+@@ -463,7 +720,8 @@ def normalize(raw, row_number, columns, extra_cells=()):
+         'candidate_name':first(row, ('candidate_name', 'candidate_officeholder', 'candidate_name_as_filed')),
+         'record_id':first(row, ('sub_id', 'transaction_id', 'tran_id', 'record_id')),
+         'source_url':_source_url(first(row, ('source_url', 'pdf_url', 'filing_url'))),
+-        'status':'unsupported' if issues else 'supported', 'issues':issues,
++        'category':canonical_category(first(row, CATEGORY_FIELDS)),
++        'status':'excluded' if excluded else ('unsupported' if issues else 'supported'), 'issues':issues,
+     }
+ 
+ 
+@@ -524,16 +782,31 @@ def descriptive(record):
+             'delimiter':record.get('delimiter') or '', 'header_source':record.get('header_source') or ''}
+ 
+ 
+-def stored_catalog(record):
++def stored_catalog(record, state='ready', reread=False, stale=False):
+     """One stored catalog, with any descriptive field it predates filled in.
+ 
+     The catalog is written once, when the import is read, so an import already
+     on disk carries the S3-era shape. The record beside it is filled the same
+     way for both, so the listing the page renders has one shape whether the
+-    file was read today or last week.
++    file was read today or last week - including the S7 category fields,
++    which an import read before them is about to be re-read for.
++
++    The last three fields describe the ENTRY, not the file: whether this
++    console is re-reading the import under the current rules right now, and
++    whether it is one a read-only console can only report as out of date,
++    because a preview shares its data root with the console that owns these
++    imports and must not rewrite them.
+     """
+     catalog = dict(record.get('catalog') or {})
+-    return {**descriptive(record), **catalog} if catalog else catalog
++    if not catalog:
++        return catalog
++    filled = {'categories':[], 'excluded_rows':0, **descriptive(record), **catalog}
++    filled['committees'] = [{'category':'', 'category_source':'', 'excluded_rows':0, **item}
++                            for item in filled.get('committees') or []]
++    filled['catalog_version'] = int(record.get('catalog_version') or 0)
++    filled['rows_read'] = int(record.get('rows_read') or catalog.get('row_count') or 0)
++    filled['state'], filled['reread'], filled['stale'] = state, bool(reread), bool(stale)
++    return filled
+ 
+ 
+ def job_view(record):
+@@ -542,7 +815,7 @@ def job_view(record):
+             'bytes':int(record.get('bytes') or 0), 'bytes_read':int(record.get('bytes_read') or 0),
+             'rows_read':int(record.get('rows_read') or 0), 'message':record.get('message') or '',
+             'started_at':record.get('started_at'), 'finished_at':record.get('finished_at'),
+-            'catalog':record.get('catalog'), **descriptive(record)}
++            'catalog':stored_catalog(record) or None, **descriptive(record)}
+ 
+ 
+ # One ingest thread per process, registered here so a record that claims to be
+@@ -551,6 +824,19 @@ _ACTIVE_LOCK = threading.Lock()
+ _ACTIVE = {}
+ 
+ 
++def _active_worker(directory):
++    """The live ingest or re-read thread for one import directory, if any.
++
++    Dead entries are dropped on the way past: a worker that has finished must
++    not leave its import looking busy until the next upload happens to prune
++    the registry.
++    """
++    with _ACTIVE_LOCK:
++        for finished in [running for running, thread in _ACTIVE.items() if not thread.is_alive()]:
++            _ACTIVE.pop(finished, None)
++        return _ACTIVE.get(str(directory))
++
++
+ def accepted_suffix(name):
+     """The suffix this reader will open, or a refusal naming the one it got."""
+     if not isinstance(name, str) or not name.strip() or len(name) > 250:
+@@ -1585,6 +1871,11 @@ class Store:
+             raise ValueError(value.get('message') or M_GONE(identifier))
+         if value.get('state') != 'ready' or not value.get('catalog'):
+             raise ValueError(M_BUSY)
++        # A re-read leaves the record READY on purpose (see reread()), so the
++        # import survives a restart or a failure. The reader still must not be
++        # handed a catalog that is about to be replaced under them.
++        if _active_worker(self.directory(identifier)) is not None:
++            raise ValueError(M_BUSY)
+         return value
+ 
+     def sources(self):
+@@ -1596,7 +1887,140 @@ class Store:
+             if value and value.get('state') == 'ready' and value.get('catalog'):
+                 records.append(value)
+         records.sort(key=lambda value: (str(value.get('imported_at') or ''), str(value.get('id') or '')), reverse=True)
+-        return [stored_catalog(value) for value in records]
++        running = self.refresh([value for value in records if self.rereadable(value)])
++        return [stored_catalog(value,
++                               state='reading' if value['id'] in running else 'ready',
++                               reread=value['id'] in running,
++                               stale=value['id'] not in running
++                                     and int(value.get('catalog_version') or 0) < CATALOG_VERSION)
++                for value in records]
++
++    def rereadable(self, value):
++        """True when this catalog predates the current rules and the file is still here.
++
++        An import whose stored source was evicted cannot be re-read at all, and
++        one whose re-read already failed under this version is not retried on
++        every listing; both are reported stale instead.
++        """
++        if int(value.get('catalog_version') or 0) >= CATALOG_VERSION:
++            return False
++        if int(value.get('reread_failed') or 0) >= CATALOG_VERSION:
++            return False
++        return self.source_path(value.get('id', ''), value.get('suffix', '')).is_file()
++
++    def refresh(self, records):
++        """Queue a re-read of every import whose catalog predates the current rules.
++
++        Catalogs are built once, at ingest, so a rule change reaches an import
++        already on disk only by reading it again. The bytes are the same, so
++        the id is the same and the reader sees the import they already had
++        gain the new fields rather than a second copy of it. One worker at a
++        time, the same as an ingest; a read-only console never starts one,
++        because it shares its data root with the console that owns these
++        imports. Returns the ids the page should show as re-reading. This
++        never blocks: the listing is answered from the catalogs on disk while
++        the worker runs behind it.
++        """
++        if not records or not self.evicts:
++            return set()
++        with _ACTIVE_LOCK:
++            for finished in [running for running, thread in _ACTIVE.items() if not thread.is_alive()]:
++                _ACTIVE.pop(finished, None)
++            if _ACTIVE:
++                return {value['id'] for value in records
++                        if str(self.directory(value['id'])) in _ACTIVE}
++            worker = threading.Thread(target=self.reread_all, args=(list(records),), daemon=True,
++                                      name='evidence-csv-reread')
++            for value in records:
++                _ACTIVE[str(self.directory(value['id']))] = worker
++            worker.start()
++        return {value['id'] for value in records}
++
++    def reread_all(self, records):
++        """Re-read each stale import in turn. No exception may leave this thread."""
++        for value in records:
++            identifier = str(value.get('id') or '')
++            try:
++                self.reread(identifier, value)
++            except Exception:
++                pass
++            finally:
++                with _ACTIVE_LOCK:
++                    _ACTIVE.pop(str(self.directory(identifier)), None)
++
++    def reread(self, identifier, value):
++        """Read one stored import again under the current rules, in place.
++
++        The import stays exactly as it is until the new catalog is complete:
++        the new rows database is built BESIDE the old one and swapped in only
++        once it is whole, the record keeps saying ready with the catalog it
++        already has, and a re-read that fails leaves the reader the import
++        they had rather than deleting its bytes the way a failed first ingest
++        does. The reader options come off the record, so the same worksheet,
++        header file and format that produced this import produce it again.
++        The import date is kept too: the console re-reading a file is not the
++        reader importing it again, and the picker is ordered by that date.
++        """
++        working = dict(value)
++        # The record's `sheet` is the worksheet the reader ENDED UP on, not the
++        # one it was asked for: read_source overwrites it from the reader's own
++        # metadata. Replaying it would narrow a workbook that was read as
++        # several compatible cycle sheets down to the first of them - measured
++        # on the Crypto workbook, 6,343 rows became 1,063. The identifier says
++        # which it was, because a chosen worksheet is folded into it
++        # (import_id): an id that is the file digest alone was read with no
++        # worksheet chosen, and must be read that way again.
++        digest = str(value.get('sha256') or '')
++        working['sheet'] = '' if digest and identifier == 'csv-' + digest[:32] else str(value.get('sheet') or '')
++        temporary = self.directory(identifier) / 'rows.reread.sqlite'
++        try:
++            catalog, columns = self.read_source(identifier, working, database=temporary)
++        except Exception as error:
++            temporary.unlink(missing_ok=True)
++            self.amend(identifier, {'reread_failed':CATALOG_VERSION,
++                                    'reread_message':f'{type(error).__name__}: {error}'})
++            return
++        stored = int((value.get('catalog') or {}).get('row_count') or 0)
++        if stored and catalog['row_count'] != stored:
++            # The same bytes read with the same options give the same rows, so a
++            # different count means the options were NOT reproduced. Refuse the
++            # swap rather than replace a whole import with a partial one; the
++            # entry stays listed, stale, with what it already had. Relax this
++            # deliberately if a future CATALOG_VERSION changes WHICH rows are
++            # read rather than only how they are classified.
++            temporary.unlink(missing_ok=True)
++            self.amend(identifier, {'reread_failed':CATALOG_VERSION,
++                                    'reread_message':f're-read produced {catalog["row_count"]:,} rows, '
++                                                     f'not the {stored:,} this import was stored with'})
++            return
++        for attempt in range(6):
++            try:
++                os.replace(temporary, self.database_path(identifier))
++                break
++            except OSError:
++                # A page reading the old database holds it open for a moment.
++                # Losing the swap is not a failure worth marking: the listing
++                # will offer the re-read again.
++                if attempt == 5:
++                    temporary.unlink(missing_ok=True)
++                    return
++                time.sleep(0.05 * (attempt + 1))
++        catalog['imported_at'] = value.get('imported_at') or catalog['imported_at']
++        self.amend(identifier, {'catalog':catalog, 'columns':columns, 'catalog_version':CATALOG_VERSION,
++                                'imported_at':catalog['imported_at'], 'reread_failed':0, 'reread_message':'',
++                                'rows_read':int(working.get('rows_read') or catalog['row_count']),
++                                'bytes_read':int(working.get('bytes_read') or value.get('bytes') or 0)})
++
++    def amend(self, identifier, fields):
++        """Merge fields into a record, leaving everything else as it stands."""
++        record = self.read_record(identifier)
++        if not record:
++            return
++        record.update(fields)
++        try:
++            atomic_json(self.record_path(identifier), record)
++        except OSError:
++            pass
+ 
+     def catalog(self, identifier):
+         return stored_catalog(self.ready(identifier))
+@@ -1623,6 +2047,8 @@ class Store:
+                 total = connection.execute(f'SELECT COUNT(*) FROM csv_rows WHERE {where}', parameters).fetchone()[0]
+                 supported = connection.execute(f'SELECT COUNT(*) FROM csv_rows WHERE {where} AND status = ?',
+                                                parameters + ['supported']).fetchone()[0]
++                excluded = connection.execute(f'SELECT COUNT(*) FROM csv_rows WHERE {where} AND status = ?',
++                                              parameters + ['excluded']).fetchone()[0]
+                 page = connection.execute(f'SELECT line_num, cells FROM csv_rows WHERE {where} ORDER BY row_number LIMIT ? OFFSET ?',
+                                           parameters + [limit, offset]).fetchall()
+                 channels = connection.execute(f'SELECT channel, amount, row_count FROM totals WHERE {where}', parameters).fetchall()
+@@ -1640,7 +2066,8 @@ class Store:
+                          if not name.startswith('_')} for line_number,cells in page],
+                 'totals':[{'channel':channel, 'amount':float(amounts[channel]), 'row_count':counts[channel]}
+                           for channel in sorted(amounts)],
+-                'supported_rows':supported, 'unsupported_rows':total - supported,
++                'supported_rows':supported, 'excluded_rows':excluded,
++                'unsupported_rows':total - supported - excluded,
+                 'offset':offset, 'limit':limit, 'total_rows':total, 'has_more':offset + limit < total,
+                 'warnings':list(source.get('warnings') or WARNINGS)}
+ 
+@@ -1689,7 +2116,8 @@ class Store:
+                          finished_at=time.time())
+         else:
+             value.update(state='ready', message='', finished_at=time.time(), catalog=catalog,
+-                         columns=columns, imported_at=catalog['imported_at'])
++                         columns=columns, imported_at=catalog['imported_at'],
++                         catalog_version=CATALOG_VERSION)
+         if value['state'] == 'failed':
+             # Keep the directory so the page can still read the reason; drop the
+             # bytes, which are now only a partial database and a refused file.
+@@ -1713,16 +2141,24 @@ class Store:
+         except OSError:
+             pass
+ 
+-    def read_source(self, identifier, value):
+-        """Walk the file once into sqlite, accumulating exact totals as it goes."""
++    def read_source(self, identifier, value, database=None):
++        """Walk the file once into sqlite, accumulating exact totals as it goes.
++
++        `database` writes the rows somewhere other than the import's own, for
++        a re-read that must not disturb the database the page is reading.
++        """
+         source = self.source_path(identifier, value.get('suffix', ''))
+-        database = self.database_path(identifier)
++        database = Path(database) if database else self.database_path(identifier)
+         database.unlink(missing_ok=True)
+         names = defaultdict(set)
+         committee_rows, committee_supported = defaultdict(int), defaultdict(int)
++        committee_excluded = defaultdict(int)
++        committee_categories = defaultdict(lambda: defaultdict(int))
++        committee_unclassified = set()
+         amounts, counts = defaultdict(Decimal), defaultdict(int)
+         cycles = set()
+-        rows_read = unassigned = supported = unsupported = 0
++        rows_read = unassigned = supported = unsupported = excluded = 0
++        header = ''
+         with closing(sqlite3.connect(database)) as connection:
+             connection.execute('PRAGMA journal_mode=OFF')
+             connection.execute('PRAGMA synchronous=OFF')
+@@ -1741,6 +2177,7 @@ class Store:
+                     raise ValueError(columns_message())
+                 if not set(columns).intersection(COMMITTEE_FIELDS):
+                     raise ValueError(M_COMMITTEE_COLUMN)
++                header = category_header(headers)
+                 # How the file turned out to be written is recorded before the
+                 # first row, so a reader watching the progress line sees the
+                 # encoding and delimiter that were chosen, not only the count.
+@@ -1759,6 +2196,11 @@ class Store:
+                         names[committee].add(row['committee_name'] or committee)
+                         committee_rows[committee] += 1
+                         committee_supported[committee] += row['status'] == 'supported'
++                        committee_excluded[committee] += row['status'] == 'excluded'
++                        if row['category'] == 'Unclassified':
++                            committee_unclassified.add(committee)
++                        elif row['category']:
++                            committee_categories[committee][row['category']] += 1
+                     else:
+                         unassigned += 1
+                     if row_cycle:
+@@ -1767,6 +2209,8 @@ class Store:
+                         supported += 1
+                         amounts[(committee, row_cycle, row['channel'])] += row['_amount']
+                         counts[(committee, row_cycle, row['channel'])] += 1
++                    elif row['status'] == 'excluded':
++                        excluded += 1
+                     else:
+                         unsupported += 1
+                     batch.append((rows_read, line_number, committee, row_cycle, row['status'], row['channel'],
+@@ -1792,19 +2236,30 @@ class Store:
+             connection.execute('CREATE INDEX csv_rows_committee ON csv_rows (committee_id, cycle, row_number)')
+             connection.execute('CREATE INDEX totals_committee ON totals (committee_id, cycle)')
+             connection.commit()
+-        committees = []
++        committees, consulted = [], 0
+         for committee in sorted(names):
+             labels = sorted(name for name in names[committee] if name != committee) or [committee]
++            category, category_source, asked = committee_category(
++                committee_categories.get(committee), committee, header, committee in committee_unclassified)
++            consulted += asked
+             committees.append({'id':committee, 'name':' / '.join(labels), 'rows':committee_rows[committee],
+-                               'supported_rows':committee_supported[committee]})
++                               'supported_rows':committee_supported[committee],
++                               'excluded_rows':committee_excluded[committee],
++                               'category':category, 'category_source':category_source})
+         if unassigned:
+-            committees.append({'id':'unassigned', 'name':'Unassigned committee rows', 'rows':unassigned, 'supported_rows':0})
++            # The pseudo-committee is rows with no committee ID at all, so it
++            # has no registration to classify and no category to filter on.
++            committees.append({'id':'unassigned', 'name':'Unassigned committee rows', 'rows':unassigned,
++                               'supported_rows':0, 'excluded_rows':0, 'category':'', 'category_source':''})
+         value.update(bytes_read=int(value.get('bytes') or 0), rows_read=rows_read)
+         return ({'id':identifier, 'name':value['name'], 'sha256':value['sha256'], 'row_count':rows_read,
+                  'committees':committees, 'cycles':sorted(cycles, reverse=True),
++                 'categories':category_buckets(committees),
+                  'supported_rows':supported, 'unsupported_rows':unsupported, 'unassigned_rows':unassigned,
++                 'excluded_rows':excluded,
+                  'session_only':False, 'imported_at':datetime.now(timezone.utc).isoformat(),
+-                 'bytes':int(value.get('bytes') or 0), 'warnings':list(WARNINGS) + extra_warnings,
++                 'bytes':int(value.get('bytes') or 0),
++                 'warnings':catalog_warnings(header, consulted) + extra_warnings,
+                  **descriptive(value)}, headers)
+ 
+     def sweep(self):
+@@ -1890,25 +2345,42 @@ def parse(name, text):
+ 
+ def catalog(document):
+     rows = document['rows']
+-    committees = []
+-    counts, supported_counts = defaultdict(int), defaultdict(int)
++    committees, consulted = [], 0
++    counts, supported_counts, excluded_counts = defaultdict(int), defaultdict(int), defaultdict(int)
++    categories = defaultdict(lambda: defaultdict(int))
++    unclassified_ids = set()
+     for row in rows:
+         counts[row['committee_id']] += 1
+         supported_counts[row['committee_id']] += row['status'] == 'supported'
++        excluded_counts[row['committee_id']] += row['status'] == 'excluded'
++        if row.get('category') == 'Unclassified':
++            unclassified_ids.add(row['committee_id'])
++        elif row.get('category'):
++            categories[row['committee_id']][row['category']] += 1
++    header = category_header(document.get('columns') or [])
+     for identifier, names in sorted(document['committee_names'].items()):
+         labels = sorted(name for name in names if name != identifier) or [identifier]
++        category, category_source, asked = committee_category(
++            categories.get(identifier), identifier, header, identifier in unclassified_ids)
++        consulted += asked
+         committees.append({'id':identifier, 'name':' / '.join(labels), 'rows':counts[identifier],
+-                           'supported_rows':supported_counts[identifier]})
++                           'supported_rows':supported_counts[identifier],
++                           'excluded_rows':excluded_counts[identifier],
++                           'category':category, 'category_source':category_source})
+     unassigned = sum(not row['committee_id'] for row in rows)
+     if unassigned:
+-        committees.append({'id':'unassigned', 'name':'Unassigned committee rows', 'rows':unassigned, 'supported_rows':0})
++        committees.append({'id':'unassigned', 'name':'Unassigned committee rows', 'rows':unassigned,
++                           'supported_rows':0, 'excluded_rows':0, 'category':'', 'category_source':''})
+     return {'id':document['id'], 'name':document['name'], 'sha256':document['sha256'],
+             'row_count':len(rows), 'committees':committees,
+             'cycles':sorted({row['cycle'] for row in rows if row['cycle']}, reverse=True),
++            'categories':category_buckets(committees),
+             'supported_rows':sum(row['status'] == 'supported' for row in rows),
+-            'unsupported_rows':sum(row['status'] != 'supported' for row in rows), 'unassigned_rows':unassigned,
++            'unsupported_rows':sum(row['status'] == 'unsupported' for row in rows), 'unassigned_rows':unassigned,
++            'excluded_rows':sum(row['status'] == 'excluded' for row in rows),
+             'session_only':False, 'imported_at':document.get('imported_at', ''),
+-            'bytes':int(document.get('bytes') or 0), 'warnings':list(WARNINGS) + list(document.get('warnings') or [])}
++            'bytes':int(document.get('bytes') or 0),
++            'warnings':catalog_warnings(header, consulted) + list(document.get('warnings') or [])}
+ 
+ 
+ def select(document, committee='', selected_cycle='', offset=0, limit=200):
+@@ -1933,6 +2405,7 @@ def select(document, committee='', selected_cycle='', offset=0, limit=200):
+             'rows':[{k:v for k,v in row.items() if not k.startswith('_')} for row in rows[offset:offset+limit]],
+             'totals':[{'channel':channel, 'amount':float(value), 'row_count':counts[channel]} for channel,value in sorted(totals.items())],
+             'supported_rows':sum(row['status'] == 'supported' for row in rows),
+-            'unsupported_rows':sum(row['status'] != 'supported' for row in rows),
++            'excluded_rows':sum(row['status'] == 'excluded' for row in rows),
++            'unsupported_rows':sum(row['status'] == 'unsupported' for row in rows),
+             'offset':offset, 'limit':limit, 'total_rows':len(rows), 'has_more':offset+limit < len(rows),
+             'warnings':source['warnings']}
+diff --git a/mentat/app/index.html b/mentat/app/index.html
+index abb415231..f850ec85c 100644
+--- a/mentat/app/index.html
++++ b/mentat/app/index.html
+@@ -340,7 +340,7 @@
+ <section id="view-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+ <div class="evidence-source-bar"><label for="evidence-source">Evidence source<select id="evidence-source"><option value="csv">CSV file</option><option value="snapshot">Saved FEC snapshots</option></select></label></div>
+ <div id="evidence-csv-workspace">
+-<section class="panel csv-picker" aria-label="Choose PAC evidence"><div class="section-label">FROM YOUR SELECTED FILE</div><h2>PAC evidence</h2><p class="muted">Choose a CSV, then a PAC. Review the reported rows beside your graph.</p><label class="csv-file-label" for="evidence-csv-file">Choose CSV<input id="evidence-csv-file" type="file"></label><p id="evidence-csv-status" role="status">FEC or Mentat CSV with a committee ID column · the console states the size limit when you choose a file.</p><div class="evidence-toolbar"><label for="evidence-csv-committee">PAC<select id="evidence-csv-committee" disabled><option value="">Choose a CSV first</option></select></label><label for="evidence-csv-cycle">Election cycle<select id="evidence-csv-cycle" disabled><option value="">All cycles</option></select></label></div></section>
++<section class="panel csv-picker" aria-label="Choose PAC evidence"><div class="section-label">FROM YOUR SELECTED FILE</div><h2>PAC evidence</h2><p class="muted">Choose a CSV, then a PAC. Review the reported rows beside your graph.</p><label class="csv-file-label" for="evidence-csv-file">Choose CSV<input id="evidence-csv-file" type="file"></label><p id="evidence-csv-status" role="status">FEC or Mentat CSV with a committee ID column · the console states the size limit when you choose a file.</p><div class="evidence-toolbar"><label for="evidence-csv-category">Committee type<select id="evidence-csv-category" disabled><option value="">All types</option></select></label><label for="evidence-csv-find">Find a PAC<input id="evidence-csv-find" type="search" placeholder="Name or committee ID" autocomplete="off" disabled></label><label for="evidence-csv-committee">PAC<select id="evidence-csv-committee" disabled><option value="">Choose a CSV first</option></select></label><label for="evidence-csv-cycle">Election cycle<select id="evidence-csv-cycle" disabled><option value="">All cycles</option></select></label></div></section>
+ <section id="evidence-csv-results" class="panel" aria-label="Selected CSV observations" hidden><h2 id="evidence-csv-title">Reported activity</h2><p id="evidence-csv-scope" class="muted"></p><div id="evidence-csv-totals" class="evidence-cards"></div><p class="muted">Sums reflect the selected CSV rows. Receipts, disbursements and independent spending stay separate; amended or duplicate filings may overlap.</p><details id="evidence-csv-details"><summary>File details &amp; interpretation</summary><p id="evidence-csv-provenance"></p><ul id="evidence-csv-warnings"></ul></details><h3>Source rows</h3><p id="evidence-csv-row-status" class="muted" role="status"></p><div class="table-scroll"><table><thead><tr><th>Row</th><th>Date / cycle</th><th>Amount</th><th>Counterparty / activity</th><th>Source</th></tr></thead><tbody id="evidence-csv-rows"></tbody></table></div><div class="csv-pagination"><button id="evidence-csv-prev" type="button" class="secondary">Previous rows</button><button id="evidence-csv-next" type="button" class="secondary">Next rows</button></div></section>
+ </div><div id="evidence-saved" hidden>
+ <section class="panel" aria-label="Evidence configuration">
+diff --git a/mentat/app/server.py b/mentat/app/server.py
+index 38f0bb6fe..328e00fbd 100644
+--- a/mentat/app/server.py
++++ b/mentat/app/server.py
+@@ -1949,6 +1949,19 @@ class Handler(BaseHTTPRequestHandler):
+                 value = read_json(root / identifier / 'evidence.json')
+                 if value.get('version') != 1:
+                     raise ValueError('Evidence snapshot unavailable.')
++                # S7: a snapshot names its committees but never says what kind of
++                # committee each one is, so the picker read 'FAIRSHAKE - C00835959'
++                # with nothing to tell a Super PAC from a candidate committee. The
++                # label is read from the FEC committee master here, at read time,
++                # rather than written into the stored snapshot: it is a label, not
++                # evidence, and a master that cannot be read must never cost the
++                # reader the snapshot itself.
++                try:
++                    for committee in value.get('committee_finances') or []:
++                        committee['category'], committee['category_source'] = (
++                            evidence_csv.classify_committee(committee.get('committee_id', '')))
++                except Exception:
++                    pass
+                 estimates = read_json(root / identifier / 'cash-estimates.json')
+                 evidence_hash = hashlib.sha256((root / identifier / 'evidence.json').read_bytes()).hexdigest()
+                 if (estimates.get('source_snapshot_sha256') == value.get('source_snapshot_sha256')
+diff --git a/mentat/tests/test_evidence_csv_browser.cjs b/mentat/tests/test_evidence_csv_browser.cjs
+index b767fab2c..ed8b7dfeb 100644
+--- a/mentat/tests/test_evidence_csv_browser.cjs
++++ b/mentat/tests/test_evidence_csv_browser.cjs
+@@ -63,6 +63,22 @@ function buildCsvOfSize(targetBytes) {
+   return parts.join('');
+ }
+ 
++// S7: a workbook-shaped CSV with the three columns the industry workbooks
++// carry - the recipient's category, whether the row is corporate treasury
++// giving or an employee contribution, and whether the workbook's own
++// analysis counts it.
++const CATEGORY_HEADER = 'committee_id,committee_name,amount,date,two_year_transaction_period,record_type,'
++  + 'recipient_category,include_in_analysis,inclusion_reason\r\n';
++
++function categoryCsv() {
++  return CATEGORY_HEADER
++    + 'C00835959,FAIRSHAKE,25000000,2026-01-05,2026,CORPORATE,Super PAC,Yes,\r\n'
++    + 'C00835959,FAIRSHAKE,5000,2026-01-06,2026,CONTRIBUTION,Super PAC,Yes,\r\n'
++    + 'C00835959,FAIRSHAKE,23000000,2026-01-07,2026,CORPORATE,,No,Exact five-key memo duplicate\r\n'
++    + 'C00000935,DCCC,1000,2026-02-05,2026,CONTRIBUTION,Party Committee,Yes,\r\n'
++    + 'C00401224,NRCC,2000,2026-02-06,2026,CONTRIBUTION,Party Committee,Yes,\r\n';
++}
++
+ function wide201Csv() {
+   const headers = ['committee_id', ...Array.from({length: 200}, (_, i) => `col${i}`)];
+   const row = ['C00000001', ...Array.from({length: 200}, () => 'x')];
+@@ -427,7 +443,16 @@ function pass(detail) {
+     await page.click('#tab-evidence');
+     await page.selectOption('#evidence-source', 'csv');
+     await waitForStatusExact('No CSV imported yet. Choose a file.');
+-    pass('evidence tab open, CSV source selected, empty-catalog status shown');
++    // Every POST below carries the page's token, and app.js only assigns it once
++    // GET /api/session?light=1 answers - a different round trip from the one
++    // evidence-csv.js uses for the listing above. Uploading as soon as the
++    // listing lands raced that assignment and the console answered 403
++    // 'Refresh the app before continuing.' #connection is the page's own signal
++    // that the token is set: app.js writes it on the line after `token = session.token`.
++    await page.waitForFunction(
++      () => (document.getElementById('connection') || {}).textContent === '\u25cf Local connection',
++      null, {timeout: 30000});
++    pass('evidence tab open, CSV source selected, empty-catalog status shown, console token assigned');
+ 
+     step('import six.csv (~6 MB) and check the first page of rows');
+     await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'six.csv'));
+@@ -666,6 +691,86 @@ function pass(detail) {
+     await assertStatusNotEmpty(page);
+     pass(`overview.xlsx: ${overviewRows} rows rendered from the cycle sheets, Receipts totalled, recipient names shown`);
+ 
++    step('S7: a workbook-shaped CSV with categories, a CORPORATE row and a row the workbook excludes');
++    fs.writeFileSync(path.join(fixtureDir, 'categories.csv'), categoryCsv());
++    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'categories.csv'));
++    await waitForStatusMatching(/rows in file$/);
++    const allTypes = await page.locator('#evidence-csv-category option').allTextContents();
++    assert.ok(allTypes.some(text => text.startsWith('Super PAC')),
++      `expected a Super PAC option in the committee-type select, got: ${JSON.stringify(allTypes)}`);
++    assert.ok(allTypes.some(text => text.startsWith('Party Committee')),
++      `expected a Party Committee option in the committee-type select, got: ${JSON.stringify(allTypes)}`);
++    assert.equal(await page.locator('#evidence-csv-committee option').count(), 3);
++    pass(`categories.csv imported; committee-type select offers ${JSON.stringify(allTypes)}`);
++
++    step('S7: choosing the type Super PAC shows FAIRSHAKE and hides DCCC');
++    await page.selectOption('#evidence-csv-category', 'Super PAC');
++    await page.waitForFunction(() => {
++      const options = [...document.querySelectorAll('#evidence-csv-committee option')].map(item => item.textContent);
++      return options.length === 1 && options[0].includes('FAIRSHAKE');
++    }, null, {timeout: 15000});
++    const superPacOptions = await page.locator('#evidence-csv-committee option').allTextContents();
++    assert.ok(superPacOptions[0].includes('C00835959') && superPacOptions[0].includes('Super PAC'),
++      `expected the option to name the id and the category, got: ${JSON.stringify(superPacOptions)}`);
++    assert.ok(!superPacOptions.some(text => text.includes('DCCC')),
++      `DCCC must be hidden under the Super PAC filter, got: ${JSON.stringify(superPacOptions)}`);
++    await waitForStatusMatching(/3 PACs in file . 1 shown \(Super PAC\)/);
++    pass(`type filter Super PAC -> ${JSON.stringify(superPacOptions)}`);
++
++    step('S7: typing "dccc" with All types shows only DCCC');
++    await page.selectOption('#evidence-csv-category', '');
++    await page.fill('#evidence-csv-find', 'dccc');
++    await page.waitForFunction(() => {
++      const options = [...document.querySelectorAll('#evidence-csv-committee option')].map(item => item.textContent);
++      return options.length === 1 && options[0].includes('DCCC');
++    }, null, {timeout: 15000});
++    await waitForStatusMatching(/1 shown matching "dccc"/);
++    const searchOptions = await page.locator('#evidence-csv-committee option').allTextContents();
++    assert.ok(!searchOptions.some(text => text.includes('FAIRSHAKE')),
++      `FAIRSHAKE must be hidden by the search, got: ${JSON.stringify(searchOptions)}`);
++    pass(`search "dccc" -> ${JSON.stringify(searchOptions)}`);
++
++    step('S7: a filter that matches nothing hides the results panel instead of showing another PAC');
++    await page.fill('#evidence-csv-find', 'zzz-no-such-pac');
++    await page.waitForFunction(
++      () => document.querySelectorAll('#evidence-csv-committee option').length === 0,
++      null, {timeout: 15000});
++    await waitForStatusMatching(/0 shown matching "zzz-no-such-pac"/);
++    // Asking the server for committee '' would NOT have been empty: select()
++    // reads a blank committee as the first committee of the import, so the
++    // panel used to show an unrelated PAC while the picker showed nothing.
++    assert.equal(await page.isVisible('#evidence-csv-results'), false,
++      'the results panel must be hidden when no PAC matches the filter');
++    pass('no match: committee select empty, results panel hidden, status says 0 shown');
++
++    step('S7: the CORPORATE row is counted in Receipts and the Include=No row is shown as excluded');
++    await page.fill('#evidence-csv-find', 'fairshake');
++    await page.waitForFunction(() => {
++      const scope = document.getElementById('evidence-csv-scope');
++      return scope && scope.textContent.includes('C00835959') && scope.textContent.includes('Super PAC');
++    }, null, {timeout: 20000});
++    const totalsText = await page.textContent('#evidence-csv-totals');
++    assert.ok(totalsText.includes('Receipts'), `expected a Receipts total, got: ${JSON.stringify(totalsText)}`);
++    // 25,000,000 corporate + 5,000 employee contribution; the 23,000,000 memo
++    // duplicate the workbook excludes must NOT be in it.
++    assert.ok(totalsText.includes('$25,005,000'),
++      `expected the CORPORATE row inside the Receipts total, got: ${JSON.stringify(totalsText)}`);
++    assert.ok(totalsText.includes('2 supported CSV rows'),
++      `expected 2 supported rows behind the Receipts total, got: ${JSON.stringify(totalsText)}`);
++    const scopeText = await page.textContent('#evidence-csv-scope');
++    assert.ok(scopeText.includes('Super PAC') && scopeText.includes('file:recipient_category'),
++      `expected the category and its source in the results scope line, got: ${JSON.stringify(scopeText)}`);
++    const rowStatus = await page.textContent('#evidence-csv-row-status');
++    assert.ok(rowStatus.includes('1 excluded by the workbook'),
++      `expected the excluded count in the row status line, got: ${JSON.stringify(rowStatus)}`);
++    const rowsText = await page.textContent('#evidence-csv-rows');
++    assert.ok(rowsText.includes('excluded'),
++      `expected the excluded row rendered with its status, got: ${JSON.stringify(rowsText.slice(0, 400))}`);
++    assert.ok(rowsText.includes('Excluded by the workbook: Exact five-key memo duplicate'),
++      `expected the workbook's own reason on the excluded row, got: ${JSON.stringify(rowsText.slice(0, 800))}`);
++    await assertStatusNotEmpty(page);
++    pass('CORPORATE folded into Receipts ($25,005,000 over 2 rows); the Include=No row is visible and excluded');
++
+     step('no path box, no browse panel, no sheet picker exist in the page (UI unchanged)');
+     for (const id of ['evidence-path', 'evidence-header-path', 'evidence-path-read', 'evidence-browse', 'evidence-browser', 'evidence-sheet']) {
+       assert.equal(await page.locator('#' + id).count(), 0, `#${id} must not exist`);
+diff --git a/mentat/tests/test_evidence_csv_stream.py b/mentat/tests/test_evidence_csv_stream.py
+index 87c0ff83a..a6e958ea1 100644
+--- a/mentat/tests/test_evidence_csv_stream.py
++++ b/mentat/tests/test_evidence_csv_stream.py
+@@ -313,13 +313,17 @@ LIMITS_KEYS = frozenset({'max_bytes', 'max_columns', 'max_rows', 'max_bytes_mess
+                          'max_rows_message', 'accepted_suffixes', 'max_json_bytes'})
+ DESCRIPTIVE_KEYS = {'format', 'source_kind', 'source_path', 'sheet', 'sheets', 'sheets_read', 'encoding', 'delimiter',
+                     'header_source'}
++# S7: every catalog now says which categories its committees fall into, how
++# many rows the workbook itself excluded, which rule set it was built under,
++# and whether this console is re-reading it right now.
++CATEGORY_KEYS = {'categories', 'excluded_rows', 'catalog_version', 'state', 'reread', 'stale', 'rows_read'}
+ CATALOG_KEYS = frozenset({'id', 'name', 'sha256', 'row_count', 'committees', 'cycles', 'supported_rows',
+                           'unsupported_rows', 'unassigned_rows', 'session_only', 'imported_at', 'bytes',
+-                          'warnings'} | DESCRIPTIVE_KEYS)
++                          'warnings'} | DESCRIPTIVE_KEYS | CATEGORY_KEYS)
+ SOURCES_LISTING_KEYS = frozenset({'sources', 'limits', 'session_only'})
+ SELECT_KEYS = frozenset({'source', 'committee', 'committees', 'cycles', 'selected_cycle', 'columns', 'rows',
+-                         'totals', 'supported_rows', 'unsupported_rows', 'offset', 'limit', 'total_rows',
+-                         'has_more', 'warnings'})
++                         'totals', 'supported_rows', 'excluded_rows', 'unsupported_rows', 'offset', 'limit',
++                         'total_rows', 'has_more', 'warnings'})
+ ERROR_KEYS = frozenset({'error'})
+ JOB_KEYS = frozenset({'id', 'name', 'state', 'bytes', 'bytes_read', 'rows_read', 'message', 'started_at',
+                       'finished_at', 'catalog'} | DESCRIPTIVE_KEYS)
+@@ -337,6 +341,18 @@ JOB_EXAMPLES = _job_groups[JOB_KEYS]
+ COLLECTOR_ACTIVE_EXAMPLES = _job_groups[COLLECTOR_ACTIVE_KEYS]
+ COLLECTOR_DONE_EXAMPLES = _job_groups[COLLECTOR_DONE_KEYS]
+ 
++def category_warning(text):
++    """True for the per-import sentence that replaced the static committee-type note.
++
++    S7 builds warning 2 for the import in front of the reader - which column
++    the categories came from, and how many committees the FEC committee
++    master had to classify - so it cannot be a fixed string in a set.
++    """
++    return (text.startswith('Committee categories ')
++            or text.startswith('The FEC committee master is not available')
++            or text.startswith('The FEC committee master file '))
++
++
+ CATALOG_WARNINGS = {
+     # S3b may add one more: a file decoded as Windows-1252, or an FEC bulk
+     # header taken from somewhere other than the file itself. Neither can come
+@@ -344,8 +360,6 @@ CATALOG_WARNINGS = {
+     # test_evidence_readers.py against the files that do produce them.
+     'Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended '
+     'rows are preserved; totals may overlap.',
+-    'Committee names and IDs are taken from this CSV; their registration and committee type have not been '
+-    'independently verified.',
+     'Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain '
+     'unsupported.',
+ }
+@@ -363,13 +377,15 @@ def assert_limits(value):
+ 
+ 
+ def assert_committee(value):
+-    assert_shape(value, COMMITTEE_EXAMPLES)
++    # A category outside the shared vocabulary is a filter option the Graph
++    # tab does not have, so the two tabs would hide different committees.
++    assert_shape(value, COMMITTEE_EXAMPLES, enums={'category': set(csv_data.CATEGORIES) | {''}})
+ 
+ 
+ # The S3b vocabularies for the descriptive fields, checked here as well as in
+ # test_evidence_readers.py: the shared contract file carries a negative control
+ # for each of them, and a control that passes proves nothing.
+-CATALOG_ENUMS = {'session_only': {False},
++CATALOG_ENUMS = {'session_only': {False}, 'state': {'ready', 'reading'},
+                  'format': {'delimited', 'xlsx', 'json', 'fec_bulk'},
+                  'source_kind': {'upload', 'path'},
+                  'encoding': {'utf-8', 'utf-8-sig', 'utf-16', 'cp1252', ''},
+@@ -381,8 +397,11 @@ def assert_catalog(value):
+     assert_shape(value, CATALOG_EXAMPLES, enums=CATALOG_ENUMS)
+     for committee in value['committees']:
+         assert_committee(committee)
++    names = [item['category'] for item in value['categories']]
++    if names != [name for name in csv_data.CATEGORIES if name in set(names)]:
++        raise AssertionError(f'catalog.categories out of vocabulary order: {names}')
+     for warning in value['warnings']:
+-        if warning not in CATALOG_WARNINGS:
++        if warning not in CATALOG_WARNINGS and not category_warning(warning):
+             raise AssertionError(f'unexpected catalog warning: {warning!r}')
+ 
+ 
+@@ -405,6 +424,15 @@ def assert_select(value):
+         assert_committee(committee)
+     for total in value['totals']:
+         assert_total(total)
++    for row in value['rows']:
++        if row['status'] not in ('supported', 'unsupported', 'excluded'):
++            raise AssertionError(f"row {row.get('row_number')}: unknown status {row['status']!r}")
++        # An excluded row is an amount deliberately left out of the totals;
++        # the page has to be able to say whose decision that was.
++        if row['status'] == 'excluded' and not any(
++                str(issue).startswith('Excluded by the workbook') for issue in row['issues']):
++            raise AssertionError(f"row {row.get('row_number')}: status excluded with no "
++                                  f"'Excluded by the workbook' issue: {row['issues']!r}")
+ 
+ 
+ def assert_error_payload(value, expected=None):
+@@ -438,7 +466,8 @@ def assert_collector_job(value):
+                                   f'(missing "Full log: " and not a start-failure message): {value["message"]!r}')
+ 
+ 
+-IMPORT_DISPATCH = {'catalog': assert_catalog, 'sources_listing': assert_sources_listing, 'error': assert_error_payload}
++IMPORT_DISPATCH = {'catalog': assert_catalog, 'sources_listing': assert_sources_listing,
++                   'select': assert_select, 'error': assert_error_payload}
+ JOB_DISPATCH = {'job': assert_job, 'collector_job': assert_collector_job}
+ 
+ 
+diff --git a/mentat/tests/test_evidence_readers.py b/mentat/tests/test_evidence_readers.py
+index 4da83e9ac..776b490a1 100644
+--- a/mentat/tests/test_evidence_readers.py
++++ b/mentat/tests/test_evidence_readers.py
+@@ -303,8 +303,12 @@ SOURCES_LISTING_KEYS = frozenset({'sources', 'limits', 'session_only'})
+ CATALOG_KEYS_S3B = frozenset({'id', 'name', 'sha256', 'row_count', 'committees', 'cycles', 'supported_rows',
+                               'unsupported_rows', 'unassigned_rows', 'session_only', 'imported_at', 'bytes',
+                               'warnings', 'format', 'source_kind', 'source_path', 'sheet', 'sheets', 'sheets_read', 'encoding',
+-                              'delimiter', 'header_source'})
+-COMMITTEE_KEYS = frozenset({'id', 'name', 'rows', 'supported_rows'})
++                              'delimiter', 'header_source',
++                              # S7
++                              'categories', 'excluded_rows', 'catalog_version', 'state', 'reread', 'stale',
++                              'rows_read'})
++COMMITTEE_KEYS = frozenset({'id', 'name', 'rows', 'supported_rows', 'excluded_rows', 'category',
++                            'category_source'})
+ 
+ JOB_EXAMPLES_S3B = _import_groups[JOB_KEYS_S3B]
+ LIMITS_EXAMPLES_S3B = _import_groups[LIMITS_KEYS_S3B]
+@@ -320,11 +324,16 @@ BROWSE_ERROR_EXAMPLES = _browse_groups[BROWSE_ERROR_KEYS]
+ ENTRY_EXAMPLES = [entry for example in LISTING_EXAMPLES for entry in example['entries']]
+ SHORTCUT_EXAMPLES = [shortcut for example in LISTING_EXAMPLES for shortcut in example['shortcuts']]
+ 
++def category_warning(text):
++    """True for the per-import sentence S7 built to replace the static committee-type note."""
++    return (text.startswith('Committee categories ')
++            or text.startswith('The FEC committee master is not available')
++            or text.startswith('The FEC committee master file '))
++
++
+ CATALOG_WARNINGS_S3B = {
+     'Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended '
+     'rows are preserved; totals may overlap.',
+-    'Committee names and IDs are taken from this CSV; their registration and committee type have not been '
+-    'independently verified.',
+     'Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain '
+     'unsupported.',
+     WINDOWS_1252_WARNING,
+@@ -335,13 +344,14 @@ CATALOG_WARNINGS_S3B = {
+ 
+ 
+ def assert_committee(value):
+-    assert_shape(value, COMMITTEE_EXAMPLES)
++    assert_shape(value, COMMITTEE_EXAMPLES, enums={'category': set(csv_data.CATEGORIES) | {''}})
+ 
+ 
+ def assert_catalog_s3b(value):
+     assert_shape(value, CATALOG_EXAMPLES_S3B,
+                  enums={'format': {'delimited', 'xlsx', 'json', 'fec_bulk'},
+                         'source_kind': {'upload', 'path'},
++                        'state': {'ready', 'reading'},
+                         'encoding': {'utf-8', 'utf-8-sig', 'utf-16', 'cp1252', ''},
+                         'delimiter': {',', ';', '\t', '|', ''},
+                         'header_source': {'row', 'header_path', 'inputs', 'bundled', ''}})
+@@ -349,8 +359,11 @@ def assert_catalog_s3b(value):
+         raise AssertionError(f"catalog.sheets must be an array, got {type(value['sheets']).__name__}")
+     for committee in value['committees']:
+         assert_committee(committee)
++    names = [item['category'] for item in value['categories']]
++    if names != [name for name in csv_data.CATEGORIES if name in set(names)]:
++        raise AssertionError(f'catalog.categories out of vocabulary order: {names}')
+     for warning in value['warnings']:
+-        if warning not in CATALOG_WARNINGS_S3B:
++        if warning not in CATALOG_WARNINGS_S3B and not category_warning(warning):
+             raise AssertionError(f'unexpected catalog warning: {warning!r}')
+ 
+ 
+diff --git a/mentat/tests/test_evidence_categories.py b/mentat/tests/test_evidence_categories.py
+new file mode 100644
+index 000000000..e8f664187
+--- /dev/null
++++ b/mentat/tests/test_evidence_categories.py
+@@ -0,0 +1,664 @@
++"""S7: committee categories, the committee-type filter and CORPORATE rows.
++
++Written against the S7 brief (Paul's rulings of 2026-09-17) BEFORE the
++implementation landed, and run first against the untouched tree to record the
++RED baseline in receipts/S7_before.txt.
++
++Four things are pinned here:
++  * CORPORATE rows fold into Receipts (ruling 1);
++  * a workbook's `Include in Analysis = No` makes a row `excluded` -- visible,
++    with its reason, and out of every total (ruling 2);
++  * a committee's category comes from the file's own category column, and only
++    a committee with none is classified from the FEC committee master
++    (rulings 3 and 4);
++  * the catalog, the listing and the select response carry those fields, and an
++    import read under the old rules re-reads itself on the first listing.
++"""
++from __future__ import annotations
++
++import json
++import shutil
++import sys
++import tempfile
++import time
++import unittest
++from contextlib import contextmanager
++from pathlib import Path
++from unittest.mock import patch
++
++import openpyxl
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'app'))
++import evidence_csv as csv_data  # noqa: E402
++
++REPO_ROOT = Path(__file__).resolve().parents[2]
++REAL_MASTER = REPO_ROOT / 'mentat' / 'inputs' / 'fec_committee_master'
++
++
++def rmtree_retry(path, attempts=10):
++    for attempt in range(attempts):
++        try:
++            shutil.rmtree(path)
++            return
++        except FileNotFoundError:
++            return
++        except OSError:
++            if attempt == attempts - 1:
++                return
++            time.sleep(0.1 * (attempt + 1))
++
++
++@contextmanager
++def temp_data_root():
++    root = Path(tempfile.mkdtemp(prefix='mentat-evidence-categories-'))
++    try:
++        yield root
++    finally:
++        rmtree_retry(root)
++
++
++@contextmanager
++def temp_fixture_dir():
++    root = Path(tempfile.mkdtemp(prefix='mentat-evidence-categories-fixtures-'))
++    try:
++        yield root
++    finally:
++        rmtree_retry(root)
++
++
++# ---------------------------------------------------------------------------
++# Fixtures
++# ---------------------------------------------------------------------------
++MASTER_COLUMNS = 15
++
++
++def master_row(identifier, name, designation, committee_type, org_type):
++    """One cm.txt row: 15 pipe-separated fields, no header, no quoting.
++
++    Column numbers are the commission's: 1 CMTE_ID, 9 CMTE_DSGN, 10 CMTE_TP,
++    13 ORG_TP.
++    """
++    fields = [''] * MASTER_COLUMNS
++    fields[0], fields[1] = identifier, name
++    fields[8], fields[9], fields[12] = designation, committee_type, org_type
++    return '|'.join(fields)
++
++
++# One row per branch of the classification rule, in the order the rule tries
++# them, plus a header row (real cm.txt files have none; a copy saved from a
++# spreadsheet can) and one committee that is deliberately absent.
++MASTER_ROWS = [
++    '|'.join(['CMTE_ID', 'CMTE_NM', 'TRES_NM', 'CMTE_ST1', 'CMTE_ST2', 'CMTE_CITY', 'CMTE_ST',
++              'CMTE_ZIP', 'CMTE_DSGN', 'CMTE_TP', 'CMTE_PTY_AFFILIATION', 'CMTE_FILING_FREQ',
++              'ORG_TP', 'CONNECTED_ORG_NM', 'CAND_ID']),
++    master_row('C00000001', 'JOINT FUND', 'J', 'O', 'C'),      # designation J beats type O and ORG_TP C
++    master_row('C00000002', 'LEADER PAC', 'D', 'N', 'M'),      # designation D beats ORG_TP M
++    master_row('C00000003', 'STATE PARTY', 'U', 'X', ''),      # type X
++    master_row('C00000004', 'SUPER PAC', 'U', 'O', ''),        # type O
++    master_row('C00000005', 'CAREY PAC', 'U', 'V', ''),        # type V
++    master_row('C00000006', 'HOUSE CAMPAIGN', 'U', 'H', ''),   # type H
++    master_row('C00000007', 'AUTHORIZED CTE', 'A', 'N', ''),   # designation A
++    master_row('C00000008', 'TRADE PAC', 'B', 'Q', 'T'),       # ORG_TP T
++    master_row('C00000009', 'CORPORATE PAC', 'B', 'Q', 'C'),   # ORG_TP C
++    master_row('C00000010', 'MEMBERSHIP PAC', 'B', 'Q', 'L'),  # ORG_TP L
++    master_row('C00000011', 'NO RULE MATCHES', 'B', 'Q', ''),  # nothing matches
++]
++
++MASTER_EXPECTED = {
++    'C00000001': ('JFC', 'fec_master:cm24'),
++    'C00000002': ('Leadership PAC', 'fec_master:cm24'),
++    'C00000003': ('Party Committee', 'fec_master:cm24'),
++    'C00000004': ('Super PAC', 'fec_master:cm24'),
++    'C00000005': ('Carey', 'fec_master:cm24'),
++    'C00000006': ('Candidate', 'fec_master:cm24'),
++    'C00000007': ('Candidate', 'fec_master:cm24'),
++    'C00000008': ('Trade Association', 'fec_master:org_type:cm24'),
++    'C00000009': ('Company PAC', 'fec_master:org_type:cm24'),
++    'C00000010': ('Other PAC', 'fec_master:org_type:cm24'),
++    'C00000011': ('Unclassified', 'fec_master:cm24'),
++}
++
++
++def write_master(inputs, cycles=('cm24',), rows=None):
++    """Write cm.txt under `inputs`/fec_committee_master/<cycle>/, as cm.txt is
++    written on disk: pipe-delimited, CRLF, no quoting."""
++    for cycle in cycles:
++        folder = Path(inputs) / 'fec_committee_master' / cycle
++        folder.mkdir(parents=True, exist_ok=True)
++        (folder / 'cm.txt').write_text('\r\n'.join(rows or MASTER_ROWS) + '\r\n', encoding='utf-8')
++    return Path(inputs)
++
++
++@contextmanager
++def master_at(inputs):
++    """Point evidence_csv at `inputs` for the committee master, cache cleared
++    on both sides so neither this test nor the next reads a stale table."""
++    csv_data.committee_master.cache_clear()
++    try:
++        with patch.object(csv_data, 'INPUTS', Path(inputs)):
++            yield
++    finally:
++        csv_data.committee_master.cache_clear()
++
++
++WORKBOOK_HEADER = ['Committee ID', 'Recipient', 'Amount', 'Date', 'Cycle', 'Record Type',
++                   'Recipient Category', 'Include in Analysis', 'Inclusion Reason']
++
++
++def workbook_rows():
++    """Two committees whose rows exercise every rule at once.
++
++    C00000004 SUPER PAC: 4 rows -- two CORPORATE counted as Receipts, one
++    CONTRIBUTION counted, one CORPORATE excluded by the workbook.
++    C00000008 TRADE PAC: 2 rows with no category in the file at all, so the
++    committee master has to classify it.
++    C00000005 CAREY PAC: 2 rows the file calls Unclassified, which is an
++    absence, so the master classifies it after all.
++    C00000011 NO RULE MATCHES: 1 Unclassified row the master cannot do
++    better with, so the source has to name both.
++    """
++    return [
++        ['C00000004', 'SUPER PAC', 25000000, '2026-01-05', '2026', 'CORPORATE', 'Super PAC', 'Yes', ''],
++        ['C00000004', 'SUPER PAC', 15000000, '2026-01-06', '2026', 'CORPORATE', 'Super PAC', 'Yes', ''],
++        ['C00000004', 'SUPER PAC', 5000, '2026-01-07', '2026', 'CONTRIBUTION', 'Super PAC', 'Yes', ''],
++        ['C00000004', 'SUPER PAC', 23000000, '2026-01-08', '2026', 'CORPORATE', '', 'No', 'Exact five-key memo duplicate'],
++        ['C00000008', 'TRADE PAC', 1000, '2026-02-05', '2026', 'CONTRIBUTION', '', 'Yes', ''],
++        ['C00000008', 'TRADE PAC', 2000, '2026-02-06', '2026', 'CORPORATE', '', 'Yes', ''],
++        ['C00000005', 'CAREY PAC', 3000, '2026-03-05', '2026', 'CONTRIBUTION', 'Unclassified', 'Yes', ''],
++        ['C00000005', 'CAREY PAC', 4000, '2026-03-06', '2026', 'CONTRIBUTION', 'Unclassified', 'Yes', ''],
++        ['C00000011', 'NO RULE PAC', 500, '2026-04-05', '2026', 'CONTRIBUTION', 'Unclassified', 'Yes', ''],
++    ]
++
++
++def write_two_sheet_workbook(path):
++    """The shape the real industry workbooks have: several cycle sheets with
++    the same columns, read as one table because no worksheet was chosen. A
++    re-read that replays the reader's recorded sheet instead of the reader's
++    recorded CHOICE reads only the first of them.
++    """
++    workbook = openpyxl.Workbook()
++    rows = workbook_rows()
++    for index, (title, group) in enumerate((('2023-2024', rows[:3]), ('2025-2026', rows[3:]))):
++        sheet = workbook.active if index == 0 else workbook.create_sheet()
++        sheet.title = title
++        sheet.append(WORKBOOK_HEADER)
++        for row in group:
++            sheet.append(row)
++    workbook.save(path)
++    return path
++
++
++def write_workbook(path):
++    workbook = openpyxl.Workbook()
++    sheet = workbook.active
++    sheet.title = 'Sheet1'
++    sheet.append(WORKBOOK_HEADER)
++    for row in workbook_rows():
++        sheet.append(row)
++    workbook.save(path)
++    return path
++
++
++def normalized(cells, columns=None, row_number=1):
++    """normalize() one row given as {header: text}."""
++    headers = list(cells)
++    return csv_data.normalize(dict(cells), row_number, columns or [csv_data.key(name) for name in headers])
++
++
++# ---------------------------------------------------------------------------
++class CategoryVocabulary(unittest.TestCase):
++    def test_vocabulary_matches_graph_data(self):
++        # graph_data is imported INSIDE the test: evidence_csv must not import
++        # it (S3e made the console's imports lazy on purpose), so the agreement
++        # is asserted here rather than enforced by an import.
++        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'app'))
++        import graph_data
++        self.assertEqual(list(csv_data.CATEGORIES), list(graph_data.CATEGORIES))
++
++    def test_canonicalisation_table(self):
++        cases = [
++            ('Super PAC', 'Super PAC'),
++            ('super pac', 'Super PAC'),
++            ('  TRADE ASSOCIATION  ', 'Trade Association'),
++            ('JFC', 'JFC'),
++            ('Company PAC', 'Company PAC'),
++            ('Leadership PAC', 'Leadership PAC'),
++            ('Carey', 'Carey'),
++            ('Other PAC', 'Other PAC'),
++            ('Candidate', 'Candidate'),
++            ('Party Committee', 'Party Committee'),
++            ('Unclassified', 'Unclassified'),
++            ('Hybrid super PAC', 'Unclassified'),   # unknown non-blank text
++            ('001', 'Unclassified'),
++            ('', ''),                                # blank stays blank
++            ('   ', ''),
++        ]
++        for text, expected in cases:
++            with self.subTest(text=text):
++                self.assertEqual(csv_data.canonical_category(text), expected)
++
++    def test_row_reads_every_category_header(self):
++        for header in ('Recipient Category', 'Committee Category'):
++            with self.subTest(header=header):
++                row = normalized({'Committee ID': 'C00000004', 'Amount': '10', 'Date': '2026-01-05',
++                                  'Record Type': 'CONTRIBUTION', header: 'super pac'})
++                self.assertEqual(row['category'], 'Super PAC')
++
++    def test_a_bare_category_column_is_not_a_committee_category(self):
++        # An FEC bulk oppexp file has a CATEGORY column holding the
++        # commission's purpose code. Reading it as a committee category would
++        # canonicalise every row to Unclassified and, because the file beats
++        # the master, stop the master being consulted for that whole import.
++        row = normalized({'CMTE_ID': 'C00000004', 'TRANSACTION_AMT': '10', 'TRANSACTION_DT': '01052026',
++                          'CATEGORY': '001', 'CATEGORY_DESC': 'Administrative'})
++        self.assertEqual(row['category'], '')
++
++    def test_row_without_a_category_column_is_blank(self):
++        row = normalized({'Committee ID': 'C00000004', 'Amount': '10', 'Date': '2026-01-05',
++                          'Record Type': 'CONTRIBUTION'})
++        self.assertEqual(row['category'], '')
++
++
++class CorporateRows(unittest.TestCase):
++    def test_corporate_is_a_receipt(self):
++        for text in ('CORPORATE', 'corporate', 'Corporate Giving', 'corporate_contribution'):
++            with self.subTest(record_type=text):
++                row = normalized({'Committee ID': 'C00000004', 'Amount': '25000000', 'Date': '2026-01-05',
++                                  'Record Type': text})
++                self.assertEqual(row['kind'], 'receipt')
++                self.assertEqual(row['channel'], 'Receipts')
++                self.assertEqual(row['status'], 'supported')
++                self.assertEqual(row['issues'], [])
++
++    def test_corporate_row_is_no_longer_unsupported(self):
++        row = normalized({'Committee ID': 'C00000004', 'Amount': '25000000', 'Date': '2026-01-05',
++                          'Record Type': 'CORPORATE'})
++        self.assertNotIn('The CSV does not identify a supported receipt or activity type.', row['issues'])
++
++
++class WorkbookExclusion(unittest.TestCase):
++    def base(self, **extra):
++        cells = {'Committee ID': 'C00000004', 'Amount': '23000000', 'Date': '2026-01-08',
++                 'Record Type': 'CORPORATE'}
++        cells.update(extra)
++        return normalized(cells)
++
++    def test_no_makes_the_row_excluded_with_its_reason(self):
++        row = self.base(**{'Include in Analysis': 'No', 'Inclusion Reason': 'Exact five-key memo duplicate'})
++        self.assertEqual(row['status'], 'excluded')
++        self.assertEqual(row['kind'], 'receipt')
++        self.assertEqual(row['channel'], 'Receipts')
++        self.assertEqual(row['amount'], 23000000.0)
++        self.assertIn('Excluded by the workbook: Exact five-key memo duplicate', row['issues'])
++
++    def test_no_without_a_reason(self):
++        row = self.base(**{'Include in Analysis': 'No'})
++        self.assertEqual(row['status'], 'excluded')
++        self.assertIn('Excluded by the workbook.', row['issues'])
++
++    def test_every_false_spelling(self):
++        for text in ('No', 'no', 'N', 'n', 'FALSE', 'false', 'False', '0'):
++            with self.subTest(value=text):
++                self.assertEqual(self.base(**{'Include in Analysis': text})['status'], 'excluded')
++
++    def test_yes_blank_and_absent_are_unchanged(self):
++        for text in ('Yes', 'yes', 'Y', 'TRUE', '1', ''):
++            with self.subTest(value=text):
++                row = self.base(**{'Include in Analysis': text})
++                self.assertEqual(row['status'], 'supported')
++                self.assertEqual(row['issues'], [])
++        self.assertEqual(self.base()['status'], 'supported')
++
++    def test_a_contribution_row_is_excluded_too(self):
++        row = normalized({'Committee ID': 'C00000004', 'Amount': '5000', 'Date': '2026-01-07',
++                          'Record Type': 'CONTRIBUTION', 'Include in Analysis': 'No',
++                          'Inclusion Reason': 'Exact five-key memo duplicate'})
++        self.assertEqual(row['status'], 'excluded')
++        self.assertEqual(row['channel'], 'Receipts')
++
++    def test_excluded_wins_over_other_issues(self):
++        row = normalized({'Committee ID': 'C00000004', 'Amount': 'not a number', 'Date': '2026-01-08',
++                          'Record Type': 'CORPORATE', 'Include in Analysis': 'No',
++                          'Inclusion Reason': 'Exact five-key memo duplicate'})
++        self.assertEqual(row['status'], 'excluded')
++        self.assertIn('The observed amount is missing or not a finite number.', row['issues'])
++        self.assertIn('Excluded by the workbook: Exact five-key memo duplicate', row['issues'])
++
++
++class CommitteeMaster(unittest.TestCase):
++    def test_every_rule_branch(self):
++        with temp_fixture_dir() as fixtures:
++            write_master(fixtures)
++            with master_at(fixtures):
++                for identifier, expected in MASTER_EXPECTED.items():
++                    with self.subTest(committee=identifier):
++                        self.assertEqual(csv_data.classify_committee(identifier), expected)
++
++    def test_org_type_corporation_depends_on_whether_the_file_classifies(self):
++        # 'Company PAC' in a Mentat workbook means one of the industry's OWN
++        # companies' PACs, a label the file assigns. A PAC that is merely
++        # registered to a corporation (C00468314 DEMOCRACY ENGINE, INC., PAC)
++        # must not land in that bucket when the file is the one classifying.
++        with temp_fixture_dir() as fixtures:
++            write_master(fixtures)
++            with master_at(fixtures):
++                self.assertEqual(csv_data.classify_committee('C00000009'),
++                                 ('Company PAC', 'fec_master:org_type:cm24'))
++                self.assertEqual(csv_data.classify_committee('C00000009', True),
++                                 ('Other PAC', 'fec_master:org_type:cm24'))
++                # Every other branch is unaffected by the file having a column.
++                for identifier in ('C00000001', 'C00000004', 'C00000008', 'C00000010'):
++                    with self.subTest(committee=identifier):
++                        self.assertEqual(csv_data.classify_committee(identifier, True),
++                                         MASTER_EXPECTED[identifier])
++
++    def test_committee_absent_from_the_master(self):
++        with temp_fixture_dir() as fixtures:
++            write_master(fixtures)
++            with master_at(fixtures):
++                category, source = csv_data.classify_committee('C00009999')
++                self.assertEqual(category, 'Unclassified')
++                self.assertEqual(source, 'not in the FEC committee master (cm24)')
++
++    def test_newest_cycle_wins_and_older_cycles_fill_blanks(self):
++        with temp_fixture_dir() as fixtures:
++            # cm26 knows C00000004 as a Carey committee; cm24 still calls it a
++            # Super PAC and is the only file that knows C00000008 at all.
++            write_master(fixtures, cycles=('cm24',))
++            folder = Path(fixtures) / 'fec_committee_master' / 'cm26'
++            folder.mkdir(parents=True, exist_ok=True)
++            (folder / 'cm.txt').write_text(master_row('C00000004', 'SUPER PAC', 'U', 'V', '') + '\r\n',
++                                           encoding='utf-8')
++            with master_at(fixtures):
++                self.assertEqual(csv_data.classify_committee('C00000004'), ('Carey', 'fec_master:cm26'))
++                self.assertEqual(csv_data.classify_committee('C00000008'),
++                                 ('Trade Association', 'fec_master:org_type:cm24'))
++                self.assertEqual(csv_data.classify_committee('C00009999')[1],
++                                 'not in the FEC committee master (cm24, cm26)')
++
++    def test_no_master_directory(self):
++        with temp_fixture_dir() as fixtures:
++            with master_at(Path(fixtures) / 'absent'):
++                self.assertEqual(csv_data.classify_committee('C00000004'),
++                                 ('Unclassified', 'committee master not available'))
++
++    def test_unreadable_master_never_raises(self):
++        with temp_fixture_dir() as fixtures:
++            folder = Path(fixtures) / 'fec_committee_master' / 'cm24'
++            folder.mkdir(parents=True)
++            (folder / 'cm.txt').write_bytes(b'\x00\x01\x02 not a master file\n')
++            with master_at(fixtures):
++                category, _ = csv_data.classify_committee('C00000004')
++                self.assertEqual(category, 'Unclassified')
++
++    @unittest.skipUnless((REAL_MASTER / 'cm26' / 'cm.txt').is_file(),
++                         'the real FEC committee master is not in this checkout')
++    def test_real_master_smoke(self):
++        csv_data.committee_master.cache_clear()
++        try:
++            for identifier, expected in (('C00835959', 'Super PAC'),          # FAIRSHAKE, CMTE_TP O
++                                         ('C00567412', 'Trade Association'),  # CHAMBER OF DIGITAL COMMERCE, ORG_TP T
++                                         ('C00448696', 'Carey')):             # SENATE CONSERVATIVES FUND, CMTE_TP V
++                with self.subTest(committee=identifier):
++                    category, source = csv_data.classify_committee(identifier, True)
++                    self.assertEqual(category, expected)
++                    self.assertTrue(source.startswith('fec_master:'), source)
++        finally:
++            csv_data.committee_master.cache_clear()
++
++
++class CommitteeCategory(unittest.TestCase):
++    """The modal rule, over rows, with blanks and a tie."""
++
++    def rows_for(self, categories):
++        return [normalized({'Committee ID': 'C00000004', 'Amount': '10', 'Date': '2026-01-05',
++                            'Record Type': 'CONTRIBUTION', 'Recipient Category': text}, row_number=index)
++                for index, text in enumerate(categories, start=1)]
++
++    def test_modal_category_ignores_blanks(self):
++        rows = self.rows_for(['Super PAC', '', 'Super PAC', 'Candidate', ''])
++        self.assertEqual(csv_data.modal_category(rows), 'Super PAC')
++
++    def test_a_tie_is_broken_by_vocabulary_order(self):
++        # Candidate is later in the vocabulary than Super PAC, so Super PAC wins.
++        rows = self.rows_for(['Candidate', 'Super PAC'])
++        self.assertEqual(csv_data.modal_category(rows), 'Super PAC')
++        rows = self.rows_for(['Candidate', 'Trade Association'])
++        self.assertEqual(csv_data.modal_category(rows), 'Trade Association')
++
++    def test_all_blank_is_blank(self):
++        self.assertEqual(csv_data.modal_category(self.rows_for(['', '', ''])), '')
++
++    def test_unclassified_is_an_absence_not_a_category(self):
++        # graph_data reads a missing recipient_category as the word
++        # 'Unclassified', so the two mean the same thing and neither can
++        # outvote a category the file actually named.
++        self.assertEqual(csv_data.modal_category(self.rows_for(
++            ['Unclassified', 'Unclassified', 'Unclassified', 'Unclassified', 'Unclassified', 'Carey'])),
++            'Carey')
++        self.assertEqual(csv_data.modal_category(self.rows_for(['Unclassified', 'Unclassified'])), '')
++
++
++class StoreEndToEnd(unittest.TestCase):
++    """One workbook through the real Store: catalog, listing and select."""
++
++    def ingest(self, root, fixtures):
++        store = csv_data.Store(root)
++        job = store.wait(store.import_path(str(write_workbook(Path(fixtures) / 'overview.xlsx')))['id'],
++                         timeout=180)
++        self.assertEqual(job['state'], 'ready', job.get('message'))
++        return store, job
++
++    def test_catalog_listing_and_select(self):
++        with temp_fixture_dir() as fixtures, temp_data_root() as root:
++            write_master(fixtures)
++            with master_at(fixtures):
++                store, job = self.ingest(root, fixtures)
++                catalog = store.catalog(job['id'])
++
++                self.assertEqual(catalog['catalog_version'], csv_data.CATALOG_VERSION)
++                self.assertEqual(catalog['row_count'], 9)
++                self.assertEqual(catalog['supported_rows'], 8)
++                self.assertEqual(catalog['excluded_rows'], 1)
++                self.assertEqual(catalog['unsupported_rows'], 0)
++
++                committees = {item['id']: item for item in catalog['committees']}
++                self.assertEqual(committees['C00000004']['category'], 'Super PAC')
++                self.assertEqual(committees['C00000004']['category_source'], 'file:Recipient Category')
++                self.assertEqual(committees['C00000004']['excluded_rows'], 1)
++                # No row of C00000008 carries a category, so the master answers.
++                self.assertEqual(committees['C00000008']['category'], 'Trade Association')
++                self.assertEqual(committees['C00000008']['category_source'], 'fec_master:org_type:cm24')
++                self.assertEqual(committees['C00000008']['excluded_rows'], 0)
++                # The file calls C00000005 Unclassified, which is an absence, so
++                # the master is asked and knows better.
++                self.assertEqual(committees['C00000005']['category'], 'Carey')
++                self.assertEqual(committees['C00000005']['category_source'], 'fec_master:cm24')
++                # Neither the file nor the master can classify C00000011, and the
++                # source says so rather than implying one of them decided.
++                self.assertEqual(committees['C00000011']['category'], 'Unclassified')
++                self.assertEqual(committees['C00000011']['category_source'],
++                                 'file:Recipient Category; fec_master:cm24')
++
++                categories = {item['category']: item for item in catalog['categories']}
++                self.assertEqual([item['category'] for item in catalog['categories']],
++                                 [name for name in csv_data.CATEGORIES if name in categories])
++                self.assertEqual(categories['Super PAC'],
++                                 {'category': 'Super PAC', 'committees': 1, 'rows': 4,
++                                  'supported_rows': 3, 'excluded_rows': 1})
++                self.assertEqual(categories['Trade Association'],
++                                 {'category': 'Trade Association', 'committees': 1, 'rows': 2,
++                                  'supported_rows': 2, 'excluded_rows': 0})
++                self.assertEqual(categories['Carey'],
++                                 {'category': 'Carey', 'committees': 1, 'rows': 2,
++                                  'supported_rows': 2, 'excluded_rows': 0})
++                self.assertEqual(categories['Unclassified'],
++                                 {'category': 'Unclassified', 'committees': 1, 'rows': 1,
++                                  'supported_rows': 1, 'excluded_rows': 0})
++
++                warning = next((text for text in catalog['warnings']
++                                if text.startswith('Committee categories')), '')
++                # Three committees were CHECKED against the master, not three
++                # resolved by it: C00000011 was checked and stayed Unclassified.
++                self.assertEqual(warning,
++                                 "Committee categories come from this file's Recipient Category column; "
++                                 '3 committees the file left blank or Unclassified were checked against '
++                                 'the FEC committee master (cm24).')
++                self.assertNotIn('Committee names and IDs are taken from this CSV; their registration and '
++                                 'committee type have not been independently verified.', catalog['warnings'])
++
++                page = store.select(job['id'], 'C00000004', '', 0, 100)
++                totals = {item['channel']: (item['amount'], item['row_count']) for item in page['totals']}
++                self.assertEqual(totals['Receipts'], (40005000.0, 3))
++                self.assertEqual(page['supported_rows'], 3)
++                self.assertEqual(page['excluded_rows'], 1)
++                self.assertEqual(page['unsupported_rows'], 0)
++                self.assertEqual(page['total_rows'], 4)
++                self.assertEqual(catalog['row_count'],
++                                 sum(item['rows'] for item in catalog['committees']))
++                self.assertEqual(page['committee']['category'], 'Super PAC')
++                self.assertEqual(page['committee']['category_source'], 'file:Recipient Category')
++                excluded = [row for row in page['rows'] if row['status'] == 'excluded']
++                self.assertEqual(len(excluded), 1)
++                self.assertIn('Excluded by the workbook: Exact five-key memo duplicate', excluded[0]['issues'])
++                self.assertEqual({row['category'] for row in page['rows']}, {'Super PAC', ''})
++
++    def test_master_unavailable_never_fails_the_import(self):
++        with temp_fixture_dir() as fixtures, temp_data_root() as root:
++            with master_at(Path(fixtures) / 'absent'):
++                store, job = self.ingest(root, fixtures)
++                catalog = store.catalog(job['id'])
++                committees = {item['id']: item for item in catalog['committees']}
++                self.assertEqual(committees['C00000008']['category'], 'Unclassified')
++                self.assertEqual(committees['C00000008']['category_source'], 'committee master not available')
++                # The file said Unclassified here, so the source names both.
++                self.assertEqual(committees['C00000011']['category_source'],
++                                 'file:Recipient Category; committee master not available')
++                self.assertTrue(any('not available' in text for text in catalog['warnings']))
++
++
++class StaleCatalogReRead(unittest.TestCase):
++    """An import ingested under the old rules re-reads itself on the first listing."""
++
++    def stale(self, root, fixtures, writer=None):
++        store = csv_data.Store(root)
++        write = writer or write_workbook
++        job = store.wait(store.import_path(str(write(Path(fixtures) / 'overview.xlsx')))['id'],
++                         timeout=180)
++        self.assertEqual(job['state'], 'ready', job.get('message'))
++        record_path = store.record_path(job['id'])
++        record = json.loads(record_path.read_text(encoding='utf-8'))
++        record.pop('catalog_version', None)
++        catalog = dict(record['catalog'])
++        catalog.pop('catalog_version', None)
++        for committee in catalog['committees']:
++            committee.pop('category', None)
++            committee.pop('category_source', None)
++            committee.pop('excluded_rows', None)
++        catalog.pop('categories', None)
++        catalog.pop('excluded_rows', None)
++        record['catalog'] = catalog
++        record_path.write_text(json.dumps(record), encoding='utf-8')
++        return store, job['id']
++
++    def test_stale_import_is_re_read(self):
++        with temp_fixture_dir() as fixtures, temp_data_root() as root:
++            write_master(fixtures)
++            with master_at(fixtures):
++                store, identifier = self.stale(root, fixtures)
++                first = store.sources()
++                self.assertEqual(len(first), 1)
++                self.assertIn(first[0]['state'], ('reading', 'ready'))
++                deadline = time.time() + 180
++                while time.time() < deadline:
++                    listing = store.sources()
++                    if listing and listing[0]['state'] == 'ready' and not listing[0]['reread']:
++                        break
++                    time.sleep(0.05)
++                entry = store.sources()[0]
++                self.assertEqual(entry['id'], identifier, 'the re-read must keep the same import id')
++                self.assertEqual(entry['catalog_version'], csv_data.CATALOG_VERSION)
++                self.assertTrue(entry['categories'], entry)
++                self.assertEqual({item['category'] for item in entry['categories']},
++                                 {'Super PAC', 'Trade Association', 'Carey', 'Unclassified'})
++                self.assertEqual(entry['excluded_rows'], 1)
++                self.assertFalse(entry['reread'])
++                self.assertFalse(entry['stale'])
++                # A second listing must not queue the work again.
++                self.assertFalse(store.sources()[0]['reread'])
++
++    def test_a_multi_sheet_workbook_is_re_read_with_the_same_sheets(self):
++        # Regression: the record's `sheet` is the sheet the reader ended up on,
++        # so replaying it read only the first cycle sheet of a workbook that
++        # was originally read as all of them (measured on the real Crypto
++        # workbook: 6,343 rows became 1,063 and FAIRSHAKE vanished).
++        with temp_fixture_dir() as fixtures, temp_data_root() as root:
++            write_master(fixtures)
++            with master_at(fixtures):
++                store, identifier = self.stale(root, fixtures, writer=write_two_sheet_workbook)
++                record = json.loads(store.record_path(identifier).read_text(encoding='utf-8'))
++                self.assertEqual(record['catalog']['row_count'], 9)
++                self.assertGreater(len(record.get('sheets_read') or []), 1, record.get('sheets_read'))
++                self.assertTrue(record['sheet'], 'the reader records the sheet it settled on')
++                deadline = time.time() + 180
++                while time.time() < deadline:
++                    listing = store.sources()
++                    if listing and not listing[0]['reread']:
++                        break
++                    time.sleep(0.05)
++                entry = store.sources()[0]
++                self.assertEqual(entry['catalog_version'], csv_data.CATALOG_VERSION,
++                                 json.loads(store.record_path(identifier).read_text(encoding='utf-8'))
++                                 .get('reread_message'))
++                self.assertEqual(entry['row_count'], 9, 'every cycle sheet must be read again')
++                self.assertEqual({item['id'] for item in entry['committees']},
++                                 {'C00000004', 'C00000005', 'C00000008', 'C00000011'})
++                self.assertEqual(store.select(identifier, 'C00000004')['total_rows'], 4)
++
++    def test_a_re_read_that_loses_rows_is_refused(self):
++        # The guard behind the regression above: if the reader options are ever
++        # not reproduced, the import the reader already had must survive.
++        with temp_fixture_dir() as fixtures, temp_data_root() as root:
++            write_master(fixtures)
++            with master_at(fixtures):
++                store, identifier = self.stale(root, fixtures)
++                record_path = store.record_path(identifier)
++                record = json.loads(record_path.read_text(encoding='utf-8'))
++                record['catalog']['row_count'] = 99
++                record_path.write_text(json.dumps(record), encoding='utf-8')
++                deadline = time.time() + 180
++                while time.time() < deadline:
++                    listing = store.sources()
++                    if listing and not listing[0]['reread']:
++                        break
++                    time.sleep(0.05)
++                entry = store.sources()[0]
++                self.assertEqual(entry['catalog_version'], 0, 'the stale catalog must be kept')
++                self.assertTrue(entry['stale'])
++                self.assertEqual(entry['row_count'], 99, 'the old catalog is left exactly as it was')
++                refused = json.loads(record_path.read_text(encoding='utf-8'))
++                self.assertEqual(refused['reread_failed'], csv_data.CATALOG_VERSION)
++                self.assertIn('not the 99 this import was stored with', refused['reread_message'])
++                self.assertTrue(store.source_path(identifier, record.get('suffix', '')).is_file(),
++                                'a refused re-read must not delete the stored file')
++                self.assertFalse((store.directory(identifier) / 'rows.reread.sqlite').exists())
++                # And it is not retried on every listing.
++                self.assertFalse(store.sources()[0]['reread'])
++
++    def test_read_only_console_lists_the_stale_entry_without_re_reading(self):
++        with temp_fixture_dir() as fixtures, temp_data_root() as root:
++            write_master(fixtures)
++            with master_at(fixtures):
++                _, identifier = self.stale(root, fixtures)
++                preview = csv_data.Store(root, evict=False)
++                entry = preview.sources()[0]
++                self.assertEqual(entry['id'], identifier)
++                self.assertTrue(entry['stale'])
++                self.assertFalse(entry['reread'])
++                self.assertEqual(entry['catalog_version'], 0)
++                record = json.loads(preview.record_path(identifier).read_text(encoding='utf-8'))
++                self.assertNotIn('catalog_version', record)
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/audits/mentat_failings_20260915/receipts/S7_before.txt b/audits/mentat_failings_20260915/receipts/S7_before.txt
+new file mode 100644
+index 000000000..939095005
+--- /dev/null
++++ b/audits/mentat_failings_20260915/receipts/S7_before.txt
+@@ -0,0 +1,70 @@
++S7 RED baseline: tests/test_evidence_categories.py against the untouched tree (HEAD 3fdfeae8f, S3f)
++=======================================================================================================
++
++$ cd C:\Users\pgoff\Mentat\mentat
++$ git log -1 --format='%H %s'
++3fdfeae8fed6140f705889fbd3a407645050a047 Classify FEC bulk rows by transaction type code under a rule table (S3f)
++
++$ python -m unittest tests.test_evidence_categories
++
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='Super PAC')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='super pac')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='  TRADE ASSOCIATION  ')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='JFC')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='Company PAC')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='Leadership PAC')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='Carey')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='Other PAC')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='Candidate')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='Party Committee')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='Unclassified')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='Hybrid super PAC')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='001')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='')
++ERROR: test_canonicalisation_table (CategoryVocabulary.test_canonicalisation_table) (text='   ')
++ERROR: test_row_reads_every_category_header (CategoryVocabulary.test_row_reads_every_category_header) (header='Recipient Category')
++ERROR: test_row_reads_every_category_header (CategoryVocabulary.test_row_reads_every_category_header) (header='Category')
++ERROR: test_row_reads_every_category_header (CategoryVocabulary.test_row_reads_every_category_header) (header='Committee Category')
++ERROR: test_row_without_a_category_column_is_blank (CategoryVocabulary.test_row_without_a_category_column_is_blank)
++ERROR: test_vocabulary_matches_graph_data (CategoryVocabulary.test_vocabulary_matches_graph_data)
++ERROR: test_a_tie_is_broken_by_vocabulary_order (CommitteeCategory.test_a_tie_is_broken_by_vocabulary_order)
++ERROR: test_all_blank_is_blank (CommitteeCategory.test_all_blank_is_blank)
++ERROR: test_modal_category_ignores_blanks (CommitteeCategory.test_modal_category_ignores_blanks)
++ERROR: test_committee_absent_from_the_master (CommitteeMaster.test_committee_absent_from_the_master)
++ERROR: test_every_rule_branch (CommitteeMaster.test_every_rule_branch)
++ERROR: test_newest_cycle_wins_and_older_cycles_fill_blanks (CommitteeMaster.test_newest_cycle_wins_and_older_cycles_fill_blanks)
++ERROR: test_no_master_directory (CommitteeMaster.test_no_master_directory)
++ERROR: test_real_master_smoke (CommitteeMaster.test_real_master_smoke)
++ERROR: test_unreadable_master_never_raises (CommitteeMaster.test_unreadable_master_never_raises)
++ERROR: test_read_only_console_lists_the_stale_entry_without_re_reading (StaleCatalogReRead.test_read_only_console_lists_the_stale_entry_without_re_reading)
++ERROR: test_stale_import_is_re_read (StaleCatalogReRead.test_stale_import_is_re_read)
++ERROR: test_catalog_listing_and_select (StoreEndToEnd.test_catalog_listing_and_select)
++ERROR: test_master_unavailable_never_fails_the_import (StoreEndToEnd.test_master_unavailable_never_fails_the_import)
++FAIL: test_corporate_is_a_receipt (CorporateRows.test_corporate_is_a_receipt) (record_type='CORPORATE')
++FAIL: test_corporate_is_a_receipt (CorporateRows.test_corporate_is_a_receipt) (record_type='corporate')
++FAIL: test_corporate_is_a_receipt (CorporateRows.test_corporate_is_a_receipt) (record_type='Corporate Giving')
++FAIL: test_corporate_is_a_receipt (CorporateRows.test_corporate_is_a_receipt) (record_type='corporate_contribution')
++FAIL: test_corporate_row_is_no_longer_unsupported (CorporateRows.test_corporate_row_is_no_longer_unsupported)
++FAIL: test_a_contribution_row_is_excluded_too (WorkbookExclusion.test_a_contribution_row_is_excluded_too)
++FAIL: test_every_false_spelling (WorkbookExclusion.test_every_false_spelling) (value='No')
++FAIL: test_every_false_spelling (WorkbookExclusion.test_every_false_spelling) (value='no')
++FAIL: test_every_false_spelling (WorkbookExclusion.test_every_false_spelling) (value='N')
++FAIL: test_every_false_spelling (WorkbookExclusion.test_every_false_spelling) (value='n')
++FAIL: test_every_false_spelling (WorkbookExclusion.test_every_false_spelling) (value='FALSE')
++FAIL: test_every_false_spelling (WorkbookExclusion.test_every_false_spelling) (value='false')
++FAIL: test_every_false_spelling (WorkbookExclusion.test_every_false_spelling) (value='False')
++FAIL: test_every_false_spelling (WorkbookExclusion.test_every_false_spelling) (value='0')
++FAIL: test_excluded_wins_over_other_issues (WorkbookExclusion.test_excluded_wins_over_other_issues)
++FAIL: test_no_makes_the_row_excluded_with_its_reason (WorkbookExclusion.test_no_makes_the_row_excluded_with_its_reason)
++FAIL: test_no_without_a_reason (WorkbookExclusion.test_no_without_a_reason)
++FAIL: test_yes_blank_and_absent_are_unchanged (WorkbookExclusion.test_yes_blank_and_absent_are_unchanged) (value='Yes')
++FAIL: test_yes_blank_and_absent_are_unchanged (WorkbookExclusion.test_yes_blank_and_absent_are_unchanged) (value='yes')
++FAIL: test_yes_blank_and_absent_are_unchanged (WorkbookExclusion.test_yes_blank_and_absent_are_unchanged) (value='Y')
++FAIL: test_yes_blank_and_absent_are_unchanged (WorkbookExclusion.test_yes_blank_and_absent_are_unchanged) (value='TRUE')
++FAIL: test_yes_blank_and_absent_are_unchanged (WorkbookExclusion.test_yes_blank_and_absent_are_unchanged) (value='1')
++FAIL: test_yes_blank_and_absent_are_unchanged (WorkbookExclusion.test_yes_blank_and_absent_are_unchanged) (value='')
++FAIL: test_yes_blank_and_absent_are_unchanged (WorkbookExclusion.test_yes_blank_and_absent_are_unchanged)
++
++Ran 25 tests in 0.135s
++
++FAILED (failures=24, errors=33)
+diff --git a/audits/mentat_failings_20260915/receipts/S7_after_python.txt b/audits/mentat_failings_20260915/receipts/S7_after_python.txt
+new file mode 100644
+index 000000000..a357e00fc
+--- /dev/null
++++ b/audits/mentat_failings_20260915/receipts/S7_after_python.txt
+@@ -0,0 +1,30 @@
++S7 GREEN: python suites after the Fable review fixes (R1-R3, R5, R8)
++====================================================================
++
++$ git -C C:\Users\pgoff\Mentat log -1 --format='%H %s'
++f0181e52382db85b12cfe3d714a667afe0570235 Record the cross-reference and workbook review packet (2026-09-17)
++
++$ cd C:\Users\pgoff\Mentat\mentat
++$ python -m unittest tests.test_evidence_categories tests.test_evidence_readers tests.test_evidence_csv_stream tests.test_evidence_csv tests.test_pac_evidence
++
++................................................................................................................
++----------------------------------------------------------------------
++Ran 112 tests in 18.604s
++
++OK
++
++$ "C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" -m unittest tests.test_evidence_categories tests.test_evidence_readers tests.test_evidence_csv tests.test_pac_evidence_errors   (launcher Python, python-calamine)
++
++...........................................................................................
++----------------------------------------------------------------------
++Ran 91 tests in 10.398s
++
++OK
++
++$ for f in app/tests/*.js; do node --test $f; done   (node unit suites, incl. scope.test.js)
++  app/tests/chart-briefing.test.js :: ℹ pass 8 ℹ fail 0 
++  app/tests/chart-studio-core.test.js :: ℹ pass 93 ℹ fail 0 
++  app/tests/reconcile-cycle.test.js :: ℹ pass 7 ℹ fail 0 
++  app/tests/scope.test.js :: ℹ pass 30 ℹ fail 0 
++  app/tests/studio-contract.test.js :: ℹ pass 22 ℹ fail 0 
++  app/tests/studio-worksheet-sheet.test.js :: ℹ pass 3 ℹ fail 0 
+diff --git a/audits/mentat_failings_20260915/receipts/S7_after_browser.txt b/audits/mentat_failings_20260915/receipts/S7_after_browser.txt
+new file mode 100644
+index 000000000..efca1ce4e
+--- /dev/null
++++ b/audits/mentat_failings_20260915/receipts/S7_after_browser.txt
+@@ -0,0 +1,81 @@
++S7 browser: node tests/test_evidence_csv_browser.cjs (MENTAT_NODE_MODULES -> codex-primary-runtime)
++===========================================================================================
++
++Step 4 waits for the page's console token. Before the R5 client fix the suite was RED at step 5
++with 'six.csv: Refresh the app before continuing.' (POST 403); a negative control with
++app/evidence-csv.js and app/index.html restored to HEAD failed identically, so the race was not
++S7's. R5 now fills the token in from the same endpoint app.js uses, so the product no longer has
++the race either; the wait stays as a test-level guard.
++
++STEP 1: write fixture CSVs to a scratch directory
++PASS step 1 (0.2s) - fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-fixtures-tgXuFG
++STEP 2: pick a free port and launch the first console server
++PASS step 2 (0.9s) - server A ready on port 53338, data root C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-data-nWAMWb
++STEP 3: launch headless Chrome and open a page
++PASS step 3 (3.7s) - browser launched, page opened, pageerror/request listeners attached
++STEP 4: open the evidence tab, select CSV source, expect the empty-catalog status
++PASS step 4 (0.4s) - evidence tab open, CSV source selected, empty-catalog status shown, console token assigned
++STEP 5: import six.csv (~6 MB) and check the first page of rows
++PASS step 5 (2.2s) - six.csv imported (~6 MB), 100 rows rendered on the first page
++STEP 6: import forty.csv (~40 MB) and watch for a progress sample
++PASS step 6 (13.3s) - forty.csv imported (~40 MB) after 117 polled progress samples
++STEP 7: kill and relaunch the console on the same port/data root; reuse prior imports
++PASS step 7 (1.1s) - server restarted on the same port and data root; both prior imports reachable without re-upload
++STEP 8: launch a second console on the same data root, a different port
++PASS step 8 (2.2s) - a second console on the same data root and a different port lists both imports
++STEP 9: error case: big.csv rejected client-side, no upload issued
++PASS step 9 (0.0s) - big.csv rejected by the client pre-flight size check; no POST issued
++STEP 10: error case: notes.txt is read as delimited text and refused for its header
++PASS step 10 (0.5s) - notes.txt read as delimited text and refused for its header
++STEP 11: error case: wide201.csv rejected for exceeding the column cap
++PASS step 11 (0.5s) - wide201.csv rejected for exceeding the column cap
++STEP 12: error case: truncated.csv rejected for an unterminated quoted field
++PASS step 12 (0.6s) - truncated.csv rejected for an unterminated quoted field
++STEP 13: error case: empty.csv rejected as empty
++PASS step 13 (0.0s) - empty.csv rejected as empty
++STEP 14: error case: latin1.csv holds control bytes and is refused as binary
++PASS step 14 (0.5s) - latin1.csv holds control bytes and is refused as binary
++STEP 15: error case: nocommittee.csv rejected for missing a committee-id column
++PASS step 15 (0.6s) - nocommittee.csv rejected for missing a committee-id column
++STEP 16: error case: abort.csv reports a transport failure when the upload is aborted
++PASS step 16 (0.0s) - abort.csv reports a transport failure when the upload request is aborted
++STEP 17: error case: html.csv reports an unparseable HTTP 500 response
++PASS step 17 (0.0s) - html.csv reports an unparseable HTTP 500 response
++STEP 18: error case: a bad ?offset= value returns 400 with the exact M_PAGE message
++PASS step 18 (0.0s) - a bad ?offset= value returns 400 with the exact M_PAGE message, not a leaked exception
++STEP 19: final check: zero pageerror entries and zero remote requests
++PASS step 19 (0.0s) - zero pageerror entries and zero remote requests across the whole run
++STEP 20: write additional S3b fixtures (xlsx, tsv, json, cp1252 csv, fec bulk zip, pdf)
++PASS step 20 (1.2s) - S3b fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-fixtures-tgXuFG
++STEP 21: picker input has no accept attribute; its label is unchanged
++PASS step 21 (0.0s) - picker input has no accept attribute; label text unchanged ("Choose CSV")
++STEP 22: upload a 2-sheet xlsx whose sheets share one header: both sheets read as one table, no picker UI
++PASS step 22 (1.1s) - sheets.xlsx read Sheet1 + Detail as one 3-row, 2-committee table; combined-sheets warning shown; no picker UI
++STEP 23: upload a tab-delimited tsv: ready
++PASS step 23 (0.6s) - evidence.tsv (tab-delimited) imported and ready
++STEP 24: upload an openFEC-shaped json file: ready
++PASS step 24 (0.6s) - evidence.json ({"results": [...]}) imported and ready
++STEP 25: upload a Windows-1252 csv: ready, with the decode warning visible
++PASS step 25 (0.6s) - cp1252.csv imported and ready; Windows-1252 decode warning visible in #evidence-csv-warnings
++STEP 26: upload an FEC bulk zip (recognised "indiv" stem): ready
++PASS step 26 (0.6s) - indiv-bulk.zip (FEC bulk) imported and ready
++STEP 27: error case: notes.pdf rejected for its file type, no upload issued
++PASS step 27 (0.0s) - notes.pdf rejected by the client pre-flight file-type check; no POST issued
++STEP 28: upload a Mentat industry workbook: title rows, header on row 4, two cycle sheets read as one table, receipts totalled
++PASS step 28 (0.6s) - overview.xlsx: 2 rows rendered from the cycle sheets, Receipts totalled, recipient names shown
++STEP 29: S7: a workbook-shaped CSV with categories, a CORPORATE row and a row the workbook excludes
++PASS step 29 (0.5s) - categories.csv imported; committee-type select offers ["All types","Super PAC · 1","Party Committee · 2"]
++STEP 30: S7: choosing the type Super PAC shows FAIRSHAKE and hides DCCC
++PASS step 30 (0.0s) - type filter Super PAC -> ["FAIRSHAKE · C00835959 · Super PAC · 3 rows"]
++STEP 31: S7: typing "dccc" with All types shows only DCCC
++PASS step 31 (0.2s) - search "dccc" -> ["DCCC · C00000935 · Party Committee · 1 row"]
++STEP 32: S7: a filter that matches nothing hides the results panel instead of showing another PAC
++PASS step 32 (0.0s) - no match: committee select empty, results panel hidden, status says 0 shown
++STEP 33: S7: the CORPORATE row is counted in Receipts and the Include=No row is shown as excluded
++PASS step 33 (0.0s) - CORPORATE folded into Receipts ($25,005,000 over 2 rows); the Include=No row is visible and excluded
++STEP 34: no path box, no browse panel, no sheet picker exist in the page (UI unchanged)
++PASS step 34 (0.0s) - none of the S3b path/browse/sheet controls exist in the page
++STEP 35: final check (again, across every S3b step too): zero pageerror entries and zero remote requests
++PASS step 35 (0.0s) - zero pageerror entries and zero remote requests across the whole run, including every S3b step
++ALL 35 STEPS PASSED
++browser.close() exceeded its 10000ms bound
+diff --git a/audits/mentat_failings_20260915/receipts/S7_real_client.txt b/audits/mentat_failings_20260915/receipts/S7_real_client.txt
+new file mode 100644
+index 000000000..39cef6e9c
+--- /dev/null
++++ b/audits/mentat_failings_20260915/receipts/S7_real_client.txt
+@@ -0,0 +1,83 @@
++S7 real-client acceptance: the real Crypto workbook through a scratch console
++================================================================================================
++source        C:\Users\pgoff\AppData\Local\Mentat\console\evidence-csv\csv-88ea228457b8499d1ec27eeaba967f61\source.xlsx (read-only copy at crypto-source.xlsx, 5,788,519 bytes)
++server        C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe app/server.py --port 8950 --data-root <scratchpad>/scratch-console
++started       2026-09-17 12:48:59
++
++console ready, token acquired from GET /api/session (read_only=False)
++POST /api/evidence-csv {"path": ...} -> csv-88ea228457b8499d1ec27eeaba967f61 state=ready in 1.7s
++  import id matches the live store id: True  (expected csv-88ea228457b8499d1ec27eeaba967f61)
++
++GET /api/evidence-csv  ->  crypto-source.xlsx
++  row_count 6,343   committees 523   catalog_version 2   state ready  reread False  stale False
++  supported_rows 6,273   excluded_rows 70   unsupported_rows 0
++
++  categories[] (vocabulary order, as the committee-type select lists them)
++    category              committees      rows   supported  excluded
++    Super PAC                     21     2,683       2,676         7
++    Trade Association              2         9           9         0
++    JFC                           65       465         461         4
++    Company PAC                    2     1,375       1,359        16
++    Leadership PAC                50       179         175         4
++    Carey                         23        69          68         1
++    Other PAC                      4        10          10         0
++    Candidate                    294     1,404       1,388        16
++    Party Committee               54       116         102        14
++    Unclassified                   8        33          25         8
++    TOTAL                        523     6,343       6,273        70
++
++  catalog warnings
++    - Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.
++    - Committee categories come from this file's Recipient Category column; 18 committees the file left blank or Unclassified were checked against the FEC committee master (cm26, cm24, cm22).
++    - Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported.
++    - Read 4 worksheets with the same columns: 2021-2022, 2023-2024, 2025-2026, Cycle Exceptions.
++
++  FAIRSHAKE committee entry: {"category": "Super PAC", "category_source": "file:Recipient Category", "excluded_rows": 6, "id": "C00835959", "name": "FAIRSHAKE", "rows": 28, "supported_rows": 22}
++
++GET /api/evidence-csv?id=...&committee=C00835959  (all cycles)
++  total_rows 28   supported_rows 22   excluded_rows 6   unsupported_rows 0
++  total  Receipts                               $177,980,393.39   22 rows
++  committee.category        Super PAC
++  committee.category_source file:Recipient Category
++  excluded rows on this page: 6
++    row    25    $23,000,000.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
++    row    26    $23,000,000.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
++    row    27    $23,000,000.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
++    row    28    $23,000,000.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
++    row  2090    $24,999,995.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
++    row  2575         $5,000.00  Receipts      Excluded by the workbook: Exact five-key memo duplicate
++
++  expected by the design, measured here
++    supported rows       expected              22.00   measured              22.00   MATCH
++    excluded rows        expected               6.00   measured               6.00   MATCH
++    unsupported rows     expected               0.00   measured               0.00   MATCH
++    Receipts total       expected     177,980,393.39   measured     177,980,393.39   MATCH
++    category             expected          Super PAC   measured          Super PAC   MATCH
++    category_source      expected      file:Recipient Category   measured      file:Recipient Category   MATCH
++
++GET /api/evidence  (saved FEC snapshots, labelled from the FEC committee master)
++  snapshots reachable from this console: ['fairshake-20260908', 'snapshot-2eb1b6d618fa4595b4ddbe8043753ede']
++  fairshake-20260908: 3 committees
++    C00835959  FAIRSHAKE                         Super PAC         fec_master:cm26
++    C00836221  DEFEND AMERICAN JOBS              Super PAC         fec_master:cm26
++    C00848440  PROTECT PROGRESS                  Super PAC         fec_master:cm26
++
++scratch server on port 8950 stopped (exit 1); data root left under the scratchpad.
++
++Addendum: an import stored under the OLD rules re-reads itself on the first listing
++================================================================================================
++import.json rewritten to the pre-S7 shape (catalog_version removed, category fields stripped,
++the static committee-type warning put back). rows.sqlite 4,034,560 bytes before.
++console restarted on port 8950 (a fresh process, exactly as after Paul restarts 8806)
++  first GET /api/evidence-csv answered in 0.02s (it must not block on the re-read)
++    state reading   reread True   stale False   catalog_version 0   rows_read 6,343
++    the picker shows this entry disabled: "... - re-reading under the current rules"
++    select while re-reading: HTTP 400 'Another CSV is still being read. Wait for it to finish.'
++  re-read finished after 1.6s
++    state ready   reread False   stale False   catalog_version 2
++    id unchanged: True   imported_at unchanged: True
++    row_count 6,343   supported 6,273   excluded 70   unsupported 0
++    categories[]: Super PAC 21, Trade Association 2, JFC 65, Company PAC 2, Leadership PAC 50, Carey 23, Other PAC 4, Candidate 294, Party Committee 54, Unclassified 8
++    FAIRSHAKE after the re-read: 22 supported, 6 excluded, 0 unsupported, Receipts $177,980,393.39
++    rows.sqlite 4,034,560 bytes after; directory holds ['import.json', 'rows.sqlite', 'source.xlsx']
++  scratch server on port 8950 stopped.

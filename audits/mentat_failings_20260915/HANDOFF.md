@@ -1663,3 +1663,158 @@ output for every command above). **Patch:** `patches/S3_cap_500MB_and_followups.
 **Evidence (`receipts/S3f_bulk_codes.txt`):** red on HEAD d71d2b813 (11-row bulk fixture imports with `supported_rows` 0, "0 != 6"; `transaction_types` missing); green after: `test_evidence_readers` 44 under the system Python (openpyxl fallback), readers + legacy + collector 61 under the launcher Python (calamine), stream 18. Fixture totals: Receipts $350 (2 rows), Disbursements $530 (2), Independent spending support $1,000 (1), oppose $700 (1); the 24F, 15J, memo, notice and unknown-code rows stay visible and out of totals with the texts above.
 
 **Paul's next steps:** restart the console (server code changed; the launcher did not); check the JSON against fec.gov's transaction type code list and set `verified` to true; rule on amended-filing de-duplication.
+
+## S7 - PAC evidence committee categories, filter and corporate rows (Area C follow-on)
+
+**Session:** Opus architect build on Fable's design `S7_DESIGN.md`, 2026-09-17 (worktree
+`pac-evidence-filters-724237`; code in `C:\Users\pgoff\Mentat`, branch `codex/mentat-crypto`,
+HEAD `3fdfeae8f` = S3f at claim time). **Status: BUILT** (uncommitted; Paul commits).
+
+**Paul's rulings (2026-09-17, binding, verbatim from the brief):**
+1. CORPORATE rows fold into Receipts: `TYPES` gains `'corporate': 'receipt'` (also accept
+   `'corporate_giving'` and `'corporate_contribution'`). Same channel "Receipts", same
+   amount/date fields as today.
+2. Honour the workbook's `Include in Analysis`: a row whose `include_in_analysis` value is
+   No/N/False/0 (case-insensitive) keeps its kind, channel and amount, is VISIBLE, is OUT of
+   every total, gets status `excluded` (a third status value next to `supported`/`unsupported`)
+   and the issue text `Excluded by the workbook: <Inclusion Reason>` (or `Excluded by the
+   workbook.` when the reason cell is blank). Yes/blank/absent column: unchanged. If the row
+   also has other issues it is still `excluded` (all issues listed). This applies to
+   CONTRIBUTION rows too (the Crypto import has 61 such rows counted today). Every consumer
+   that today tests `status != 'supported'` keeps treating excluded rows as not counted; the
+   totals table sums only `supported`.
+3. Category fallback from the FEC committee master for committees with no file category.
+4. When both exist, the file category wins; the master only fills blanks.
+5. Filter control: one "Committee type" select plus one "Find a PAC" search box (no chips).
+
+**Files claimed by S7** (hunks after S3f `3fdfeae8f`; nothing reformatted, no foreign line touched):
+- `mentat/app/evidence_csv.py` - CATEGORIES, `TYPES['corporate']`, `include_in_analysis` in
+  `normalize()`, `committee_master()` / `classify_committee()`, category and excluded tallies in
+  both catalog builders, `CATALOG_VERSION` and the stale-catalog re-read in `Store.sources()`.
+- `mentat/app/evidence-csv.js` - committee-type select, PAC search box, rebuild of the PAC list,
+  status/scope/row-status lines, re-read polling.
+- `mentat/app/index.html` - the evidence picker block only (two new controls).
+- `mentat/app/server.py` - ONE hunk in the `GET /api/evidence?id=` branch (snapshot committee
+  labels).
+- `mentat/app/app.js` - ONE line in `updateEvidenceCommittees()` (category suffix).
+- `audits/mentat_failings_20260915/contracts/evidence-csv-import.json` - v2 -> v3.
+- `mentat/tests/test_evidence_categories.py` (new), `mentat/tests/test_evidence_csv_stream.py`
+  (contract key sets and the catalog-warning allowance), `mentat/tests/test_evidence_csv_browser.cjs`
+  (new steps).
+- `audits/mentat_failings_20260915/receipts/S7_*.txt`,
+  `audits/mentat_failings_20260915/patches/S7_pac_evidence_categories.patch`.
+
+**Measured before any edit (read-only GETs against Paul's console 8806, 2026-09-17):**
+`csv-88ea228457b8499d1ec27eeaba967f61` (Crypto Industry Spending Overview.xlsx) 6,343 rows /
+523 committees / 6,010 supported / 333 unsupported. `committee=C00835959` (FAIRSHAKE): 28 rows,
+`supported_rows` 6, `unsupported_rows` 22, totals `Receipts $1,011,179.52` (6 rows). By
+(Record Type, status): CORPORATE/unsupported 22, CONTRIBUTION/supported 6. By
+(Record Type, Include in Analysis, Recipient Category): CORPORATE/Yes/Super PAC 17,
+CORPORATE/No/blank 5, CONTRIBUTION/Yes/Super PAC 5, CONTRIBUTION/No/blank 1. The six
+Include=No rows all carry `Inclusion Reason` = "Exact five-key memo duplicate" and `Memo Leg` 1.
+Sum of the 22 Include=Yes amounts: 177,980,393.39.
+
+**Evidence (receipts/):**
+- `S7_before.txt` - RED on the untouched tree (HEAD 3fdfeae8f): `tests/test_evidence_categories.py`
+  24 failures, 33 errors, 25 tests.
+- `S7_after_python.txt` - GREEN: `test_evidence_categories` + `test_evidence_readers` +
+  `test_evidence_csv_stream` + `test_evidence_csv` + `test_pac_evidence` = 112 tests OK under the
+  system Python; 91 OK under the launcher Python (python-calamine); the six node unit suites under
+  `app/tests/` (incl. `scope.test.js` 30) 163 pass / 0 fail.
+- `S7_after_browser.txt` - `node tests/test_evidence_csv_browser.cjs`: ALL 35 STEPS PASSED
+- `S7_real_client.txt` - the real Crypto workbook through a scratch console on port 8940 under a
+  temp data root, plus the re-read addendum.
+
+**Measured acceptance (real workbook, not assumed):** import id `csv-88ea228457b8499d1ec27eeaba967f61`
+reproduced exactly. FAIRSHAKE C00835959: **22 supported, 6 excluded, 0 unsupported, Receipts
+$177,980,393.39** (all four match the design's expectation); category `Super PAC`, source
+`file:Recipient Category`. Whole import: 6,343 rows, 523 committees, 6,273 supported, 70 excluded,
+**0 unsupported** (was 333). categories[] AFTER the review fixes: Super PAC 21, Trade Association 2,
+JFC 65, Company PAC 2, Leadership PAC 50, Carey 23, Other PAC 4, Candidate 294, Party Committee 54,
+Unclassified 8 - 523 committees in all. The design's expectation (Carey 20, Party 53, Unclassified
+~30, summing to 536) was a ROW-level tally in which one committee could appear under several
+categories; the modal rule gives each committee one. Catalog warning 2 now reads: "Committee
+categories come from this file's Recipient Category column; 18 committees the file left blank or
+Unclassified were checked against the FEC committee master (cm26, cm24, cm22)." Snapshot
+`fairshake-20260908` labels its three committees Super PAC from `fec_master:cm26`.
+
+**Re-read proven on the real import** (receipts addendum): import.json rewritten to the pre-S7 shape,
+console restarted. First listing answered in 0.03 s with `state reading / reread true / rows_read
+6,343`; `select` during it refused with the existing M_BUSY; re-read finished in 1.7 s with the same
+id, the same `imported_at`, row_count 6,343 and the new fields. Re-run after the review fixes: the
+same figures, with the reviewed categories[].
+
+**Deviations from the brief, each with its reason:**
+1. The re-read keeps the record `state: 'ready'` on disk and tracks the in-flight work in the process
+   registry, instead of writing `state: 'reading'` into import.json. Writing it would have made a
+   console restart mid-re-read mark the record failed (`record()` does that for a reader whose pid is
+   gone), and `ingest()`'s failure branch DELETES the stored source and rows database - i.e. a
+   restart during the re-read would have destroyed a good import. The listing still reports
+   `state: 'reading'`, `reread: true`, `rows_read` exactly as the brief asks; `catalog`/`select`
+   still raise M_BUSY, via a check in `ready()`.
+2. The new rows database is built as `rows.reread.sqlite` beside the old one and swapped in with
+   `os.replace` (retried, since a page reading the old one holds it open for a moment) only after the
+   new catalog is complete, for the same reason.
+3. A re-read whose row_count differs from the stored one is REFUSED (import left stale, reason
+   recorded in `reread_message`). This caught a real defect: the record's `sheet` is the worksheet the
+   reader settled on, not the one it was asked for, so replaying it read only the first cycle sheet -
+   measured on the real Crypto workbook, 6,343 rows became 1,063 and FAIRSHAKE disappeared. The fix
+   derives the original choice from the identifier (a chosen worksheet is folded into the import id),
+   and the guard stays as the backstop.
+4. Status line: the brief's `N PACs in file - M shown (Type) matching "x"` is present, but the line
+   still ENDS with `- N rows in file`, because ten existing steps of
+   `tests/test_evidence_csv_browser.cjs` wait on `/rows in file$/`.
+5. The committee-master fixture is 11 rows, not 9: the rule has 11 branches.
+6. The contract v3 examples-vs-producers assertion lives where it already lived
+   (`test_evidence_csv_stream.py::test_contract_examples_against_producers`, plus the S3b copy in
+   `test_evidence_readers.py`), rather than being duplicated into the new test file.
+7. `tests/test_evidence_csv_stream.py` and `tests/test_evidence_readers.py` had to be edited (both
+   carry their own copies of the contract key sets and catalog-warning sets); the brief listed only
+   the contract file.
+8. A rule branch the brief did not name: an ID that IS in the master but matches no rule gets
+   `category_source = 'fec_master:<cycle>'` (not the org_type form).
+9. `tests/test_evidence_csv_browser.cjs` step 4 gained a wait for the page's console token. Without
+   it the suite is RED at step 5 - "six.csv: Refresh the app before continuing." on a POST 403 -
+   and a NEGATIVE CONTROL with `app/evidence-csv.js` and `app/index.html` restored to HEAD failed
+   identically, so the race is not S7's. Root cause: `app.js` assigns `token` only when GET
+   `/api/session?light=1` answers, a different round trip from the one `evidence-csv.js` uses for
+   its first listing, and the suite uploaded as soon as the listing landed. THIS IS A REAL PRODUCT
+   RACE, not only a test one: a reader who picks a file within ~300 ms of the page appearing gets
+   the same 403 and has to reload. The honest fix is in the client (have `importFile` wait for the
+   token, or set it before the evidence scripts run). Fable ruled S7 should fix it since S7 already
+   owns this file: see R5 below. The test wait stays as a guard.
+
+**Fable review fixes (2026-09-17, after an independent run that reproduced 22/6/0 and
+$177,980,393.39 exactly):**
+- **R1** `evidence-csv.js`: when the type filter and the search leave NO committee visible,
+  `applyFilter()` used to call `loadRows()` with committee `''`, and `select()` reads a blank
+  committee as the FIRST committee of the import - so the results panel showed an unrelated PAC
+  while the picker showed nothing. It now hides the results panel, says `... 0 shown (Type)
+  matching "x"`, and loads again when a later filter change makes rows visible. New browser step.
+- **R2** `evidence_csv.py`: the bare `category` key is out of `CATEGORY_FIELDS` (an FEC bulk
+  `oppexp` file has a `CATEGORY` column holding the commission's purpose code, which would have
+  canonicalised to Unclassified and stopped the master being consulted for that whole import).
+- **R3** `evidence_csv.py`: a file value of `Unclassified` is the ABSENCE of a classification, not
+  one of them (graph_data reads a missing recipient_category as that same word), so it no longer
+  counts in the committee tally and no longer blocks the master. A committee named Carey once and
+  Unclassified five times is Carey; one only ever called Unclassified is checked against the
+  master; when the master cannot do better either, the source names both
+  (`file:Recipient Category; fec_master:cm26`). ORG_TP C/W reads as `Other PAC` when the file has
+  a category column and `Company PAC` only when it has none, because `Company PAC` in a Mentat
+  workbook means the industry's OWN companies' PACs (C00468314 DEMOCRACY ENGINE, INC., PAC must
+  not land there). The catalog sentence counts committees CHECKED, not resolved.
+  MEASURED EFFECT on the Crypto import: Trade Association 1 -> **2** (C00567412 CHAMBER OF DIGITAL
+  COMMERCE PAC, ORG_TP T - exactly the kind of PAC Paul said was hidden), Carey 21 -> **23**,
+  Unclassified 15 -> **8**, new Other PAC **4**, Company PAC unchanged at 2, total still 523.
+  FAIRSHAKE unchanged at 22/6/0 and $177,980,393.39.
+- **R4** contract v3: no example string changed under R3 (both committees in the contract fixture
+  carry file categories, so the warning sentence is identical), and both contract suites pass
+  unchanged with all four negative controls still failing the helper. Nothing regenerated.
+- **R5** `evidence-csv.js`: `importFile()` and `importPath()` now await the console token before
+  posting - if the global `token` is empty they fetch `/api/session?light=1` themselves (the same
+  endpoint app.js uses; `token` is a top-level `let` in a classic script, so the binding is
+  shared), with a 5 s bound, the status line "Waiting for the console session..." while waiting,
+  and a refusal to post on timeout. `app.js` is untouched beyond the one category line.
+- **R8** `evidence-csv.js`: the PAC option text pluralises ("1 row" / "2 rows").
+
+**Paul restarts 8806/8802 after commit; existing imports re-read themselves on the first listing.**

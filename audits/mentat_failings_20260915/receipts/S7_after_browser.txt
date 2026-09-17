@@ -1,0 +1,81 @@
+S7 browser: node tests/test_evidence_csv_browser.cjs (MENTAT_NODE_MODULES -> codex-primary-runtime)
+===========================================================================================
+
+Step 4 waits for the page's console token. Before the R5 client fix the suite was RED at step 5
+with 'six.csv: Refresh the app before continuing.' (POST 403); a negative control with
+app/evidence-csv.js and app/index.html restored to HEAD failed identically, so the race was not
+S7's. R5 now fills the token in from the same endpoint app.js uses, so the product no longer has
+the race either; the wait stays as a test-level guard.
+
+STEP 1: write fixture CSVs to a scratch directory
+PASS step 1 (0.2s) - fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-fixtures-tgXuFG
+STEP 2: pick a free port and launch the first console server
+PASS step 2 (0.9s) - server A ready on port 53338, data root C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-data-nWAMWb
+STEP 3: launch headless Chrome and open a page
+PASS step 3 (3.7s) - browser launched, page opened, pageerror/request listeners attached
+STEP 4: open the evidence tab, select CSV source, expect the empty-catalog status
+PASS step 4 (0.4s) - evidence tab open, CSV source selected, empty-catalog status shown, console token assigned
+STEP 5: import six.csv (~6 MB) and check the first page of rows
+PASS step 5 (2.2s) - six.csv imported (~6 MB), 100 rows rendered on the first page
+STEP 6: import forty.csv (~40 MB) and watch for a progress sample
+PASS step 6 (13.3s) - forty.csv imported (~40 MB) after 117 polled progress samples
+STEP 7: kill and relaunch the console on the same port/data root; reuse prior imports
+PASS step 7 (1.1s) - server restarted on the same port and data root; both prior imports reachable without re-upload
+STEP 8: launch a second console on the same data root, a different port
+PASS step 8 (2.2s) - a second console on the same data root and a different port lists both imports
+STEP 9: error case: big.csv rejected client-side, no upload issued
+PASS step 9 (0.0s) - big.csv rejected by the client pre-flight size check; no POST issued
+STEP 10: error case: notes.txt is read as delimited text and refused for its header
+PASS step 10 (0.5s) - notes.txt read as delimited text and refused for its header
+STEP 11: error case: wide201.csv rejected for exceeding the column cap
+PASS step 11 (0.5s) - wide201.csv rejected for exceeding the column cap
+STEP 12: error case: truncated.csv rejected for an unterminated quoted field
+PASS step 12 (0.6s) - truncated.csv rejected for an unterminated quoted field
+STEP 13: error case: empty.csv rejected as empty
+PASS step 13 (0.0s) - empty.csv rejected as empty
+STEP 14: error case: latin1.csv holds control bytes and is refused as binary
+PASS step 14 (0.5s) - latin1.csv holds control bytes and is refused as binary
+STEP 15: error case: nocommittee.csv rejected for missing a committee-id column
+PASS step 15 (0.6s) - nocommittee.csv rejected for missing a committee-id column
+STEP 16: error case: abort.csv reports a transport failure when the upload is aborted
+PASS step 16 (0.0s) - abort.csv reports a transport failure when the upload request is aborted
+STEP 17: error case: html.csv reports an unparseable HTTP 500 response
+PASS step 17 (0.0s) - html.csv reports an unparseable HTTP 500 response
+STEP 18: error case: a bad ?offset= value returns 400 with the exact M_PAGE message
+PASS step 18 (0.0s) - a bad ?offset= value returns 400 with the exact M_PAGE message, not a leaked exception
+STEP 19: final check: zero pageerror entries and zero remote requests
+PASS step 19 (0.0s) - zero pageerror entries and zero remote requests across the whole run
+STEP 20: write additional S3b fixtures (xlsx, tsv, json, cp1252 csv, fec bulk zip, pdf)
+PASS step 20 (1.2s) - S3b fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-fixtures-tgXuFG
+STEP 21: picker input has no accept attribute; its label is unchanged
+PASS step 21 (0.0s) - picker input has no accept attribute; label text unchanged ("Choose CSV")
+STEP 22: upload a 2-sheet xlsx whose sheets share one header: both sheets read as one table, no picker UI
+PASS step 22 (1.1s) - sheets.xlsx read Sheet1 + Detail as one 3-row, 2-committee table; combined-sheets warning shown; no picker UI
+STEP 23: upload a tab-delimited tsv: ready
+PASS step 23 (0.6s) - evidence.tsv (tab-delimited) imported and ready
+STEP 24: upload an openFEC-shaped json file: ready
+PASS step 24 (0.6s) - evidence.json ({"results": [...]}) imported and ready
+STEP 25: upload a Windows-1252 csv: ready, with the decode warning visible
+PASS step 25 (0.6s) - cp1252.csv imported and ready; Windows-1252 decode warning visible in #evidence-csv-warnings
+STEP 26: upload an FEC bulk zip (recognised "indiv" stem): ready
+PASS step 26 (0.6s) - indiv-bulk.zip (FEC bulk) imported and ready
+STEP 27: error case: notes.pdf rejected for its file type, no upload issued
+PASS step 27 (0.0s) - notes.pdf rejected by the client pre-flight file-type check; no POST issued
+STEP 28: upload a Mentat industry workbook: title rows, header on row 4, two cycle sheets read as one table, receipts totalled
+PASS step 28 (0.6s) - overview.xlsx: 2 rows rendered from the cycle sheets, Receipts totalled, recipient names shown
+STEP 29: S7: a workbook-shaped CSV with categories, a CORPORATE row and a row the workbook excludes
+PASS step 29 (0.5s) - categories.csv imported; committee-type select offers ["All types","Super PAC · 1","Party Committee · 2"]
+STEP 30: S7: choosing the type Super PAC shows FAIRSHAKE and hides DCCC
+PASS step 30 (0.0s) - type filter Super PAC -> ["FAIRSHAKE · C00835959 · Super PAC · 3 rows"]
+STEP 31: S7: typing "dccc" with All types shows only DCCC
+PASS step 31 (0.2s) - search "dccc" -> ["DCCC · C00000935 · Party Committee · 1 row"]
+STEP 32: S7: a filter that matches nothing hides the results panel instead of showing another PAC
+PASS step 32 (0.0s) - no match: committee select empty, results panel hidden, status says 0 shown
+STEP 33: S7: the CORPORATE row is counted in Receipts and the Include=No row is shown as excluded
+PASS step 33 (0.0s) - CORPORATE folded into Receipts ($25,005,000 over 2 rows); the Include=No row is visible and excluded
+STEP 34: no path box, no browse panel, no sheet picker exist in the page (UI unchanged)
+PASS step 34 (0.0s) - none of the S3b path/browse/sheet controls exist in the page
+STEP 35: final check (again, across every S3b step too): zero pageerror entries and zero remote requests
+PASS step 35 (0.0s) - zero pageerror entries and zero remote requests across the whole run, including every S3b step
+ALL 35 STEPS PASSED
+browser.close() exceeded its 10000ms bound

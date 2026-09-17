@@ -2,6 +2,7 @@
 (() => {
   let source = null, revision = 0, offset = 0, limits = null, picker = null, stored = [];
   let pendingUploadFile = null, pendingPathRequest = null;
+  let rereadTimer = null, rereadDeadline = 0;
   const pageSize = 100;
   const pollDelay = 500;
   const pollFailureLimit = 5;
@@ -44,11 +45,68 @@
     source = null; offset = 0; $('evidence-csv-results').hidden = true;
     $('evidence-csv-committee').replaceChildren(new Option('Choose a CSV first',''));
     $('evidence-csv-cycle').replaceChildren(new Option('All cycles',''));
+    $('evidence-csv-category').replaceChildren(new Option('All types',''));
+    $('evidence-csv-find').value = '';
     $('evidence-csv-committee').disabled = true; $('evidence-csv-cycle').disabled = true;
+    $('evidence-csv-category').disabled = true; $('evidence-csv-find').disabled = true;
   }
-  function fillCommittees(committees) {
-    $('evidence-csv-committee').replaceChildren(...committees.map(item=>new Option(`${item.name || item.id} · ${item.id}`,item.id)));
-    $('evidence-csv-committee').disabled = !committees.length;
+  // A file can hold 523 PACs (the Crypto workbook does), so the list is a
+  // committee-type filter and a search over one rebuilt select rather than a
+  // single roll of everything in committee-ID order. A committee the file
+  // never categorised reads as Unclassified here, which is also the name the
+  // FEC committee master falls back to, so one option covers both.
+  const categoryOf = item => item.category || 'Unclassified';
+  const committeeOrder = item => item.id === 'unassigned' ? '\uffff' : String(item.name || item.id).toLowerCase();
+  function visibleCommittees() {
+    if (!source) return [];
+    const type = $('evidence-csv-category').value;
+    const text = $('evidence-csv-find').value.trim().toLowerCase();
+    return (source.committees || [])
+      .filter(item => !type || categoryOf(item) === type)
+      .filter(item => !text || String(item.name || '').toLowerCase().includes(text)
+                            || String(item.id || '').toLowerCase().includes(text))
+      .sort((a, b) => committeeOrder(a).localeCompare(committeeOrder(b)));
+  }
+  function fillCategories() {
+    const select = $('evidence-csv-category');
+    const previous = select.value;
+    const items = (source && source.categories) || [];
+    select.replaceChildren(new Option('All types',''),
+      ...items.map(item => new Option(`${item.category} · ${number(item.committees)}`, item.category)));
+    select.value = items.some(item => item.category === previous) ? previous : '';
+    select.disabled = !source;
+    $('evidence-csv-find').disabled = !source;
+  }
+  function fillCommittees() {
+    const select = $('evidence-csv-committee');
+    const previous = select.value;
+    const visible = visibleCommittees();
+    select.replaceChildren(...visible.map(item => new Option(`${item.name || item.id} · ${item.id}`
+      + ` · ${categoryOf(item)} · ${number(item.rows || 0)} row${Number(item.rows) === 1 ? '' : 's'}`,
+      item.id)));
+    select.disabled = !visible.length;
+    if (visible.some(item => item.id === previous)) select.value = previous;
+    else if (visible.length) select.value = visible[0].id;
+    return select.value !== previous;
+  }
+  function filterStatus() {
+    if (!source) return storedMessage();
+    const type = $('evidence-csv-category').value, text = $('evidence-csv-find').value.trim();
+    return `${source.name} · ${number((source.committees || []).length)} PACs in file`
+      + ` · ${number(visibleCommittees().length)} shown`
+      + (type ? ` (${type})` : '') + (text ? ` matching "${text}"` : '')
+      + ` · ${number(source.row_count)} rows in file`;
+  }
+  function applyFilter() {
+    if (!source) return;
+    const moved = fillCommittees();
+    say(filterStatus());
+    // Nothing visible means there is nothing to show. Asking the server for
+    // committee '' would not have been empty: select() reads a blank
+    // committee as the FIRST committee of the import, so the panel showed
+    // some unrelated PAC's rows while the picker showed nothing at all.
+    if (!$('evidence-csv-committee').options.length) { $('evidence-csv-results').hidden = true; return; }
+    if (moved) { offset = 0; loadRows(); }
   }
   function hideSheetPicker() { const label = $('evidence-sheet-label'); if (label) label.hidden = true; }
   function showSheets(job) {
@@ -69,14 +127,40 @@
       limits = body.limits || limits;
       stored = body.sources || [];
       select.replaceChildren(new Option('Choose a previously imported CSV',''),
-        ...stored.map(item => new Option(`${item.name} · ${number(item.row_count)} rows · ${item.format || 'delimited'} · ${String(item.imported_at || '').slice(0,10)}`, item.id)));
-      select.value = stored.some(item => item.id === keep) ? keep : '';
-      say(storedMessage());
+        ...stored.map(item => {
+          const option = new Option(`${item.name} · ${number(item.row_count)} rows · ${item.format || 'delimited'} · ${String(item.imported_at || '').slice(0,10)}`
+            + (item.reread ? ' · re-reading under the current rules' : ''), item.id);
+          option.disabled = !!item.reread;
+          return option;
+        }));
+      select.value = stored.some(item => item.id === keep && !item.reread) ? keep : '';
+      say(source ? filterStatus() : storedMessage());
+      watchRereads();
       return stored;
     } catch (error) {
       say('GET /api/evidence-csv failed: ' + error.message);
       return null;
     }
+  }
+  // An import read under an older rule set is re-read by the console on the
+  // first listing, so its entry is briefly unusable. Poll until it is back,
+  // and give up after ten minutes rather than polling a console that is never
+  // going to answer differently.
+  function watchRereads() {
+    const waiting = stored.filter(item => item.reread).map(item => item.id);
+    if (!waiting.length) { rereadDeadline = 0; return; }
+    if (!rereadDeadline) rereadDeadline = Date.now() + 600000;
+    if (Date.now() > rereadDeadline || rereadTimer) return;
+    rereadTimer = setTimeout(async () => {
+      rereadTimer = null;
+      const watched = new Set(waiting);
+      await refreshSources();
+      if (!source || !watched.has(source.id)) return;
+      const refreshed = stored.find(item => item.id === source.id);
+      if (!refreshed || refreshed.reread) return;
+      source = refreshed; offset = 0;
+      fillCategories(); fillCommittees(); await loadRows();
+    }, 2000);
   }
   async function chooseStored() {
     const chosenId = sourcePicker().value;
@@ -88,7 +172,7 @@
     if (!chosen) { say(`${chosenId}: that imported CSV is no longer listed. Choose the file again.`); await refreshSources(); return; }
     if (ticket !== revision) return;
     source = chosen; offset = 0;
-    fillCommittees(chosen.committees || []);
+    fillCategories(); fillCommittees();
     await loadRows();
   }
   function renderRows(body) {
@@ -96,7 +180,9 @@
     const total = pages.total_rows ?? body.total_rows ?? rows.length;
     const supported = body.supported_rows ?? rows.filter(row=>row.status==='supported').length;
     $('evidence-csv-title').textContent = body.committee?.name || body.committee?.id || 'Reported activity';
-    $('evidence-csv-scope').textContent = `${body.source?.name || source.name} · ${body.committee?.id || $('evidence-csv-committee').value} · ${body.selected_cycle || 'All cycles'} · ${number(total)} selected rows`;
+    const committeeCategory = body.committee?.category ? ` · ${body.committee.category}`
+      + (body.committee.category_source ? ` (${body.committee.category_source})` : '') : '';
+    $('evidence-csv-scope').textContent = `${body.source?.name || source.name} · ${body.committee?.id || $('evidence-csv-committee').value}${committeeCategory} · ${body.selected_cycle || 'All cycles'} · ${number(total)} selected rows`;
     setHtml('evidence-csv-totals', (body.totals || []).map(item => `<div><span>${escapeHtml(channelName(item.channel))}</span><strong>${currency(item.amount)}</strong><small>${number(item.row_count)} supported CSV rows</small></div>`).join('') || '<p>No supported amount totals for these rows. Review the original fields below.</p>');
     const sourceKind = body.source?.source_kind || source.source_kind;
     const sourcePath = body.source?.source_path || source.source_path;
@@ -104,7 +190,10 @@
       + (sourceKind === 'path' && sourcePath ? ` Read from ${sourcePath}.` : '')
       + ` Stored on this computer under the console data root; visible to every Mentat console that uses it. Values are observed filings or labeled cycle aggregates, not donor allocations or reconciled giving totals.`;
     setHtml('evidence-csv-warnings', (body.warnings || []).map(warning=>`<li>${escapeHtml(typeof warning==='string'?warning:warning.message||JSON.stringify(warning))}</li>`).join('') || '<li>No parser warnings. Source coverage and filing completeness remain unverified.</li>');
-    $('evidence-csv-row-status').textContent = `${total ? `${number(offset+1)}–${number(offset+rows.length)} of ${number(total)}` : 'No matching'} rows · ${number(supported)} supported · ${number(body.unsupported_rows ?? Math.max(0,total-supported))} need interpretation. All selected rows contribute to the counts above, across pages.`;
+    const excluded = body.excluded_rows ?? rows.filter(row=>row.status==='excluded').length;
+    $('evidence-csv-row-status').textContent = `${total ? `${number(offset+1)}–${number(offset+rows.length)} of ${number(total)}` : 'No matching'} rows · ${number(supported)} supported`
+      + (excluded ? ` · ${number(excluded)} excluded by the workbook` : '')
+      + ` · ${number(body.unsupported_rows ?? Math.max(0,total-supported-excluded))} need interpretation. All selected rows contribute to the counts above, across pages.`;
     setHtml('evidence-csv-rows', rows.map(row => `<tr><td>${number(row.row_number)}</td><td>${escapeHtml(row.date || 'Date unavailable')}<small>${escapeHtml(row.cycle || 'Cycle unavailable')}</small></td><td class="number">${(row.amount == null ? 'Not reported' : currency(row.amount))}</td><td>${escapeHtml(row.counterparty || row.candidate_name || row.candidate_id || 'Not reported')}<small>${escapeHtml(channelName(row.channel || row.kind))} · ${escapeHtml(row.status || '')}</small></td><td><details><summary>Original fields</summary><dl class="csv-raw">${Object.entries(row.raw || {}).map(([key,value])=>`<dt>${escapeHtml(key)}</dt><dd>${escapeHtml(value)}</dd>`).join('')}</dl>${row.extra_cells?.length ? `<p>Extra cells: ${escapeHtml(JSON.stringify(row.extra_cells))}</p>` : ''}${(row.issues||[]).map(issue=>`<p>${escapeHtml(issue)}</p>`).join('')}</details></td></tr>`).join(''));
     $('evidence-csv-prev').disabled = offset===0;
     $('evidence-csv-next').disabled = pages.has_more == null ? offset+rows.length>=total : !pages.has_more;
@@ -124,7 +213,7 @@
       $('evidence-csv-cycle').replaceChildren(new Option('All cycles',''),...cycles.map(value=>new Option(value,value)));
       if(cycles.includes(cycle)) $('evidence-csv-cycle').value = cycle;
       $('evidence-csv-cycle').disabled = !cycles.length;
-      renderRows(body); say(`${source.name} · ${number(source.row_count)} rows in file`);
+      renderRows(body); say(filterStatus());
     } catch (error) {
       if (ticket!==revision) return;
       say(`GET /api/evidence-csv?id=${source.id}&committee=${committee}&cycle=${cycle}: ${error.message}`);
@@ -145,7 +234,7 @@
         source = current.catalog; offset = 0;
         await refreshSources();
         if (ticket !== revision) return;
-        fillCommittees(source.committees || []);
+        fillCategories(); fillCommittees();
         await loadRows();
         return;
       }
@@ -172,6 +261,28 @@
       }
     }
   }
+  // app.js assigns the page's token when GET /api/session?light=1 answers,
+  // a different round trip from the listing this script fetches on load, so
+  // a reader who chose a file in that window got HTTP 403 'Refresh the app
+  // before continuing.' and had to reload. `token` is a top-level `let` in
+  // app.js and both files are classic scripts, so they share the binding and
+  // this one can fill it in from the same endpoint rather than race it.
+  async function awaitToken(label) {
+    if (token) return true;
+    say(`${label}: Waiting for the console session…`);
+    const deadline = Date.now() + 5000;
+    while (!token && Date.now() < deadline) {
+      try {
+        const session = await api('/api/session?light=1');
+        if (!token && session && session.token) token = session.token;
+      } catch { /* app.js is asking for the same thing; try again below */ }
+      if (token) return true;
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    if (token) return true;
+    say(`${label}: The console session is not ready. Reload the page, then choose the file again.`);
+    return false;
+  }
   async function importFile(file, sheet) {
     const ticket = ++revision; resetSelection(); hideSheetPicker();
     const suffix = suffixOf(file.name);
@@ -184,6 +295,8 @@
       return;
     }
     pendingUploadFile = file; pendingPathRequest = null;
+    if (!await awaitToken(file.name)) return;
+    if (ticket!==revision) return;
     say(`Uploading ${file.name}…`);
     let response;
     try {
@@ -210,6 +323,8 @@
     const ticket = ++revision; resetSelection(); hideSheetPicker();
     pendingPathRequest = {path, header_path: headerPath || ''}; pendingUploadFile = null;
     if ($('evidence-path')) $('evidence-path').value = path;
+    if (!await awaitToken(path)) return;
+    if (ticket!==revision) return;
     say(`Reading ${path}…`);
     let job;
     try {
@@ -275,6 +390,8 @@
     if (browseTarget) browse(browseTarget.dataset.browsePath);
   });
   for (const id of ['evidence-csv-committee','evidence-csv-cycle']) $(id).addEventListener('change',()=>{offset=0;loadRows();});
+  $('evidence-csv-category').addEventListener('change', applyFilter);
+  $('evidence-csv-find').addEventListener('input', applyFilter);
   $('evidence-csv-prev').addEventListener('click',()=>{offset=Math.max(0,offset-pageSize);loadRows();});
   $('evidence-csv-next').addEventListener('click',()=>{offset+=pageSize;loadRows();});
   refreshSources();
