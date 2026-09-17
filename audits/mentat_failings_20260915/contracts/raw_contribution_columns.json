@@ -1,6 +1,6 @@
 {
   "contract": "raw_contribution_columns",
-  "version": 2,
+  "version": 3,
   "owner": "S2 — Address fields and schema (audits/mentat_failings_20260915)",
   "rule": "On every listed surface the mandated columns appear in this exact order and immediately adjacent: occupation, street_1, street_2, city, state, zip. employer immediately precedes occupation on every surface (existing convention, kept). Producers keep their own constants; the tests in mentat/tests/test_raw_contribution_columns.{py,R,cjs} import this file and assert each producer against it, with a negative control that must fail.",
   "mandated_db": [
@@ -232,6 +232,8 @@
         "include_in_analysis",
         "inclusion_reason",
         "receipt_role",
+        "receipt_role_unverified",
+        "receipt_role_reason",
         "receipt_type_full",
         "filing_form",
         "line_number",
@@ -248,7 +250,8 @@
         "duplicate_memo",
         "duplicate_of_sub_id",
         "duplicate_reason"
-      ]
+      ],
+      "note": "v3 (2026-09-17, brain D-040): receipt_role_unverified and receipt_role_reason follow receipt_role; an unresolved receipt role ships counted and flagged instead of refusing the export."
     },
     "contributions_sheet": {
       "producer": "mentat/tools/crypto_workbook_builder.mjs rawHeaders + records.map row projection",
