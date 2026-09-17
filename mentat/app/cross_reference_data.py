@@ -4,6 +4,11 @@ The browser cannot select a filesystem path. The run pointer and every artifact
 must resolve under the fixed state directory, and embedded run IDs must agree.
 Only explicitly allowed aggregate/evidence fields are returned; raw donor data
 and filesystem paths stay in the local ledger.
+
+The published report workbook is the accounting of record, so this view carries
+no totals at all: it returns the run's scope and the run's digest of clear
+refunds and obvious outliers (``digest.json``, written by
+``tools/cross_reference_digest.py``). A run without a digest says so.
 """
 from __future__ import annotations
 
@@ -20,6 +25,12 @@ STEP_STATUSES = {"pending", "running", "completed", "review", "failed"}
 RUN_STATUSES = {"running", "completed", "failed"}
 RUN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,119}\Z")
 DEFAULT_ROOT = Path(__file__).resolve().parents[1] / "state" / "cross-reference"
+DIGEST_MISSING = ("This run has no outlier/refund digest. Build it with "
+                  "tools/cross_reference_digest.py <run_dir>.")
+URL_FIELDS = {"source_url", "refund_source_url", "original_source_url"}
+AMOUNT_FIELDS = {"amount", "before", "after", "delta", "refund_amount", "original_amount"}
+COUNT_FIELDS = {"records"}
+ID_FIELDS = {"record_id", "refund_record_id", "original_record_id"}
 
 
 class EvidenceError(ValueError):
@@ -70,11 +81,6 @@ def _number(value, integer=False):
     return int(value) if integer else value
 
 
-def _percent(value):
-    value = _number(value)
-    return value if value is not None and 0 <= value <= 100 else None
-
-
 def _source_url(value):
     """Allow only public FEC filing links; never pass API credentials to a link."""
     if not isinstance(value, str) or len(value) > 2000:
@@ -120,37 +126,62 @@ def _rows(value, fields, limit):
             continue
         item = {}
         for key in fields:
-            item[key] = (_source_url(row.get(key)) if key == "source_url" else
-                         _number(row.get(key), integer=key == "records")
-                         if key in {"records", "amount", "before", "after", "delta"}
+            item[key] = (_source_url(row.get(key)) if key in URL_FIELDS else
+                         _number(row.get(key), integer=key in COUNT_FIELDS)
+                         if key in AMOUNT_FIELDS | COUNT_FIELDS
                          else _text(str(row.get(key, ""))) if key == "cycle"
+                         else _text(row.get(key), 120) if key in ID_FIELDS
+                         else _text(row.get(key), 300) if key == "description"
                          else _text(row.get(key)))
         result.append(item)
     return result
 
 
-def _report(value):
+def _digest(root, run_id):
+    """The run's clear refunds and obvious outliers, or None when it has none saved.
+
+    Nothing here is a total of giving: each count and amount describes only the
+    rows listed beside it, and the basis sentence states the sizes that chose
+    them.
+    """
+    value, _ = _load(root, Path(run_id) / "digest.json", 4_000_000, optional=True)
+    if value is None:
+        return None
+    basis = value.get("basis") if isinstance(value.get("basis"), dict) else {}
+    refunds = value.get("refunds") if isinstance(value.get("refunds"), dict) else {}
+    outliers = value.get("outliers") if isinstance(value.get("outliers"), dict) else {}
+    return {
+        "basis": _text(basis.get("text"), 500),
+        "refunds": {
+            "linked": _rows(refunds.get("linked"), ("refund_record_id", "original_record_id", "company",
+                                                    "cycle", "refund_amount", "original_amount",
+                                                    "refund_source_url", "original_source_url"), 200),
+            "linked_count": _number(refunds.get("linked_count"), integer=True),
+            "linked_amount": _number(refunds.get("linked_amount")),
+            "unlinked": _rows(refunds.get("unlinked"), ("record_id", "company", "cycle", "amount",
+                                                        "description", "source_url"), 200),
+            "unlinked_count": _number(refunds.get("unlinked_count"), integer=True),
+            "unlinked_amount": _number(refunds.get("unlinked_amount")),
+        },
+        "outliers": {
+            "non_giving": _rows(outliers.get("non_giving"), ("record_id", "company", "cycle", "amount",
+                                                             "role", "description", "source_url"), 200),
+            "non_giving_count": _number(outliers.get("non_giving_count"), integer=True),
+            "non_giving_amount": _number(outliers.get("non_giving_amount")),
+            "large": _rows(outliers.get("large"), ("record_id", "company", "cycle", "amount",
+                                                   "entity", "role", "source_url"), 200),
+            "large_count": _number(outliers.get("large_count"), integer=True),
+            "large_amount": _number(outliers.get("large_amount")),
+        },
+    }
+
+
+def _report(value, root, run_id):
+    """Scope, and the digest. No total of any kind leaves this function."""
     if value.get("status") != "completed":
         raise EvidenceError("The saved report has not completed computation.")
     scope = value.get("scope") if isinstance(value.get("scope"), dict) else {}
-    summary = value.get("summary") if isinstance(value.get("summary"), dict) else {}
-    numbers = {key: _number(summary.get(key), integer=key in {
-        "input_records", "automatic_decisions", "unresolved_records", "source_verified_records",
-        "classified_from_stored_records", "coverage_records", "coverage_only_records"}) for key in (
-        "input_records", "automatic_decisions", "unresolved_records", "unresolved_amount",
-        "source_verified_records", "classified_from_stored_records", "coverage_records",
-        "coverage_amount", "coverage_only_records",
-        "observed_original_giving", "supported_original_giving", "employee_giving",
-        "corporate_giving", "unverified_funding", "linked_refund_adjustments", "pac_outgoing", "baseline_amount", "amount_change")}
-    numbers["verified_unique"] = summary.get("verified_unique") is True
-    partisan = []
-    for row in _items(value.get("partisan_breakdowns"))[:10]:
-        if isinstance(row, dict):
-            partisan.append({
-                "view": _text(row.get("view")), "basis": _text(row.get("basis"), 1000),
-                **{key: _number(row.get(key)) for key in ("democratic", "republican", "other_unknown", "denominator_dr")},
-                **{key: _percent(row.get(key)) for key in ("democratic_percent", "republican_percent", "classified_gross_percent")},
-            })
+    digest = _digest(root, run_id)
     return {
         "run_id": value["run_id"], "status": "completed",
         "generated_at": _text(value.get("generated_at")),
@@ -158,15 +189,10 @@ def _report(value):
             "industries": [_text(x) for x in _items(scope.get("industries"))[:100] if isinstance(x, str)],
             "companies": [_text(x) for x in _items(scope.get("companies"))[:1000] if isinstance(x, str)],
             "cycles": [str(x)[:20] for x in _items(scope.get("cycles"))[:20] if isinstance(x, (str, int))],
-            "source_count": _number(scope.get("source_count"), integer=True),
             "company_count": len([x for x in _items(scope.get("companies")) if isinstance(x, str)]),
         },
-        "summary": numbers, "steps": _steps(value.get("steps")),
-        "partisan_breakdowns": partisan,
-        "unresolved_reasons": _rows(value.get("unresolved_reasons"), ("reason", "records", "amount"), 50),
-        "coverage_reasons": _rows(value.get("coverage_reasons"), ("reason", "records", "amount", "action"), 50),
-        "review_queue": _rows(value.get("review_queue"), ("reason", "action", "company", "cycle", "amount", "record_id", "source_url"), 20),
-        "changes": _rows(value.get("changes"), ("reason", "source_description", "company", "cycle", "before", "after", "delta", "record_id", "source_url"), 20),
+        "digest_available": digest is not None, "digest": digest,
+        "digest_message": "" if digest is not None else DIGEST_MISSING,
         "limitations": [_text(x, 1000) for x in _items(value.get("limitations"))[:30] if isinstance(x, str)],
     }
 
@@ -215,7 +241,7 @@ def _run_view(root, run_id, now, expected_digest=None):
             result["notices"].append("Progress is stale or undated. The saved status does not establish that a worker is still running.")
     if report is not None:
         _identity(report, run_id)
-        result["report"] = _report(report)
+        result["report"] = _report(report, root, run_id)
         result["status"] = "completed" if result["status"] != "failed" else "failed"
         age = _age_hours(report.get("generated_at"), now)
         result["report_age_hours"] = round(age, 1) if age is not None else None

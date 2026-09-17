@@ -391,7 +391,7 @@ function setup(label) { console.log(`SETUP: ${label}`); }
     const xrefStatus = await page.locator('#xref-refresh-status').textContent();
     assert.match(xrefStatus, /^Newest run for Banking · /);
     // and the run that came back is the one on screen, not just in the status line
-    assert.match(await page.locator('#xref-results').innerText(), /Observed original giving/);
+    assert.match(await page.locator('#xref-results').innerText(), /it publishes no totals/);
     pass(`request ${crossReferenceRequests[0]} and status "${xrefStatus}"`);
 
     step('change the Graph company select: the URL follows the control');

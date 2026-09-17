@@ -97,30 +97,22 @@ test('the group limit says what it means, and is sixty everywhere',()=>{
   assert.match(read('chart-studio.js'),/groups · totals cover all \$\{fmt\(result\.group_count\)\}/);
 });
 
-test('the cross-reference reasons and captions are the approved plain words',()=>{
+// The cross-reference tab was dwarfed on the owner's ruling: the published
+// report workbook is the accounting of record, so the tab carries no totals and
+// the review-reason vocabulary it used to print went with them.
+test('the cross-reference says what it is, in the approved plain words',()=>{
   const xref=read('cross-reference.js');
+  assert.ok(xref.includes('The published report workbook is the accounting of record. This view lists only obvious outliers and clear refunds found while cross-referencing; it publishes no totals.'));
   for(const [key,label] of [
-    ['company_attribution_unresolved','Donor not matched to a listed company · counted at $0'],
-    ['attribution_unresolved','Attribution unsettled · counted at $0'],
-    ['company_attribution_not_accepted','Company match not accepted'],
-    ['memo_parent_not_established','Memo entry without a proven parent receipt'],
-    ['original_source_of_transfer_unresolved','Transfer whose original donor is unresolved'],
-    ['earmark_counterpart_not_unique','Earmark with more than one possible counterpart'],
-    ['earmark_destination_ambiguous','Earmark destination ambiguous'],
-    ['overlapping_or_cyclic_earmark_links','Earmark links overlap or loop'],
-    ['observed_filing_versions_unresolved','Amended filings not reconciled'],
-    ['latest_filing_transaction_replacement_missing','Latest filing lacks the replacing transaction'],
-    ['latest_filing_manifest_not_corroborated','Latest filing not corroborated by its manifest'],
-    ['linked_refunds_exceed_original_gift','Refunds exceed the original gift'],
-    ['receipt_date_missing','Receipt date missing'],
-    ['excluded_source_metadata_conflict','Source metadata conflict'],
-    ['superseded_in_observed_filing_family','Superseded by a later filing'],
-    ['same_original_gift_at_conduit_and_destination','Same gift seen at conduit and destination'],
-    ['explicit_same_filing_memo_reference','Memo references its own filing'],
-    ['explicit_observed_refund','Observed refund'],
-    ['linked_refund','Linked refund adjustment']
-  ]) assert.ok(xref.includes(key+":'"+label.replaceAll("'","\\'")+"'"),'missing plain-word name for '+key);
-  assert.ok(xref.includes('Unresolved company attributions count as $0 in every total above. Memo, transfer, earmark and role reviews stay inside Observed original giving until resolved.'));
+    ['other_receipt','Other receipt'],
+    ['asset_liquidation','Asset or liability liquidation'],
+    ['IND','Individual'],
+    ['ORG','Organization']
+  ]) assert.ok(xref.includes(key+":'"+label+"'"),'missing plain-word name for '+key);
+  for(const heading of ['Clear refunds','Obvious outliers','Negative adjustments without a matched original',
+    'Counted as giving, but not giving','Large receipts to eyeball'])
+    assert.ok(xref.includes('>'+heading+'<'),'missing heading '+heading);
+  assert.ok(!xref.includes('Observed original giving'),'the tab publishes no total');
 });
 
 test('the reconciliation strip has a reason for every way two totals can part',()=>{
