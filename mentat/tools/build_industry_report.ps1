@@ -348,6 +348,16 @@ $dataPath = Join-Path $cacheRoot (
 $manifestPath = Join-Path $cacheRoot (
   "manifest$cycleToken-$databaseToken.json"
 )
+# Tidy staging store: the typed, tall SQLite the R exporter writes beside the
+# JSON payload and the companion Data workbook is built from. Named from the
+# SAME tokens as $dataPath so a per-cycle build gets its own store and never
+# reads the all-cycles one. Declared HERE, before $cycleToken is reassigned for
+# the per-cycle projection below.
+$stagePath = Join-Path $cacheRoot (
+  "tidy$cycleToken-$databaseToken.sqlite"
+)
+$tidyWriter = Join-Path $projectRoot 'tools\build_tidy_workbook.py'
+$tidyStageModule = Join-Path $projectRoot 'R\tidy_stage.R'
 # Set BEFORE the export, not just around the workbook step: the exporter reads it
 # to narrow the payload, which is what keeps a large industry under V8's
 # 536,870,888-byte JSON string limit. Telecom's full payload is 591,338,574 and
@@ -374,6 +384,10 @@ $dataInputPaths = @(
   # cache hit the export never runs and a newly added or tightened guard is
   # silently skipped. Fingerprinting it forces the re-run that lets it fire.
   (Join-Path $projectRoot 'R\export_guards.R'),
+  # tidy_stage.R shapes the staging store the companion Data workbook is built
+  # from. It produces no JSON-payload output at all, so without this a change to
+  # a staging column would be a cache hit and republish the old store.
+  $tidyStageModule,
   (Join-Path $projectRoot 'R\fec_transfer_graph.R'),
   (Join-Path $projectRoot 'tools\fec_transfer_graph.py'),
   (Join-Path $projectRoot 'tools\enrich_downstream.py'),
@@ -400,6 +414,17 @@ if (-not $NoCache -and (Test-Path -LiteralPath $dataPath) -and (Test-Path -Liter
       [long]$manifest.data_bytes -eq (Get-Item -LiteralPath $dataPath).Length
     )
     if ($cacheHit) { $cacheHit = Test-JsonFile $dataPath }
+    if ($cacheHit) {
+      # A data cache hit skips the export entirely, and the export is the only
+      # thing that writes the staging store. Without this the first build after
+      # tidy staging landed would hit the cache, find no store, and publish an
+      # Overview with no companion Data workbook - or, worse, republish a store
+      # produced under different code.
+      $cacheHit = (Test-Path -LiteralPath $stagePath -PathType Leaf) -and
+        ([string]$manifest.stage_sha256 -eq (
+          Get-FileHash -LiteralPath $stagePath -Algorithm SHA256
+        ).Hash.ToLowerInvariant())
+    }
   } catch { $cacheHit = $false }
 }
 
@@ -408,12 +433,36 @@ $exportSeconds = 0.0
 if (-not $cacheHit) {
   $exportWatch = [Diagnostics.Stopwatch]::StartNew()
   $pendingData = "$dataPath.pending-$PID"
-  & $RScriptPath $exporter $DatabasePath $pendingData $CommitteeMasterDirectory $BeneficiaryDirectory $Industry
+  # Sixth positional argument. The exporter treats an absent one as "skip
+  # staging", so this script and the exporter can be applied in either order.
+  $pendingStage = "$stagePath.pending-$PID"
+  if (Test-Path -LiteralPath $pendingStage) {
+    Remove-Item -LiteralPath $pendingStage -Force
+  }
+  & $RScriptPath $exporter $DatabasePath $pendingData $CommitteeMasterDirectory $BeneficiaryDirectory $Industry $pendingStage
   if ($LASTEXITCODE -ne 0) { throw "$Industry data export failed with exit code $LASTEXITCODE" }
-  & $PythonPath (Join-Path $projectRoot 'tools\enrich_downstream.py') $pendingData $BeneficiaryDirectory
+  & $PythonPath (Join-Path $projectRoot 'tools\enrich_downstream.py') $pendingData $BeneficiaryDirectory --staging $pendingStage
   if ($LASTEXITCODE -ne 0) { throw 'Transfer allocation and coverage enrichment failed.' }
   if (-not (Test-JsonFile $pendingData)) {
     throw "$Industry data export did not produce valid JSON."
+  }
+  # Integrity-check the store the same way the payload is checked, and for the
+  # same reason: a truncated SQLite file opens without error and answers most
+  # queries. PRAGMA integrity_check walks the b-trees; the receipt count proves
+  # the R side actually ran rather than the file holding only the seven
+  # enrichment tables.
+  if (-not (Test-Path -LiteralPath $pendingStage -PathType Leaf)) {
+    throw "$Industry data export did not produce a tidy staging store: $pendingStage"
+  }
+  $stageProbe = @(& $PythonPath -c 'import sqlite3,sys;connection=sqlite3.connect(sys.argv[1]);print(connection.execute("PRAGMA integrity_check").fetchone()[0]);print(connection.execute("SELECT COUNT(*) FROM contributions").fetchone()[0])' $pendingStage)
+  if ($LASTEXITCODE -ne 0) {
+    throw "Tidy staging store could not be read: $pendingStage"
+  }
+  if ($stageProbe.Count -lt 2 -or $stageProbe[0].Trim() -ne 'ok') {
+    throw "Tidy staging store failed its integrity check: $pendingStage"
+  }
+  if ([long]$stageProbe[1].Trim() -le 0) {
+    throw "Tidy staging store holds no receipt rows; refusing to publish an empty companion workbook."
   }
   $databaseHashAfterExport = Get-QuiescentDatabaseSha256 $DatabasePath
   if ($databaseHashAfterExport -ne $databaseHash) {
@@ -427,9 +476,13 @@ if (-not $cacheHit) {
     throw 'Report code or source inputs changed during export; refusing to publish mixed inputs.'
   }
   Move-Item -LiteralPath $pendingData -Destination $dataPath -Force
+  Move-Item -LiteralPath $pendingStage -Destination $stagePath -Force
   $dataItem = Get-Item -LiteralPath $dataPath
   $dataHash = (
     Get-FileHash -LiteralPath $dataPath -Algorithm SHA256
+  ).Hash.ToLowerInvariant()
+  $stageHash = (
+    Get-FileHash -LiteralPath $stagePath -Algorithm SHA256
   ).Hash.ToLowerInvariant()
   Write-AtomicText $manifestPath ([pscustomobject]@{
     schema_version = 2
@@ -438,6 +491,8 @@ if (-not $cacheHit) {
     cycle_label = $CycleLabel
     data_sha256 = $dataHash
     data_bytes = [long]$dataItem.Length
+    stage_sha256 = $stageHash
+    stage_bytes = [long](Get-Item -LiteralPath $stagePath).Length
     guard_receipt = 'embedded:metadata.export_guards'
     generated_at = [DateTimeOffset]::Now.ToString('o')
   } | ConvertTo-Json)
@@ -570,6 +625,13 @@ $workbookFingerprintInputs = @(
 if (Test-Path -LiteralPath $artifactToolModule -PathType Leaf) {
   $workbookFingerprintInputs += $artifactToolModule
 }
+# The tidy writer decides the companion Data workbook's sheets, types and
+# receipt. Guarded the same way as the artifact tool because the two lanes that
+# produce this feature can land in either order; an absent writer simply means
+# no Data workbook is published on this build.
+if (Test-Path -LiteralPath $tidyWriter -PathType Leaf) {
+  $workbookFingerprintInputs += $tidyWriter
+}
 $workbookFingerprintSalt = (
   (
     'template={0}|industry={1}|cycle={2}|compact_raw={3}|' +
@@ -692,6 +754,10 @@ try {
           $workbookCacheHit = $false
         } else {
           Assert-WorkbookPackage $stageWorkbook $expectedWorksheetCount
+          # Carried out of the cache-hit branch so the manifest rewrite that
+          # records data_workbook_sha256 below does not have to re-hash the
+          # Overview, and cannot record an empty hash on a cache hit.
+          $workbookSha256 = $cachedWorkbookSha256
         }
       }
     } catch {
@@ -816,14 +882,95 @@ try {
 
   $targetWorkbook = Join-Path $OutputDirectory "${reportBaseName}.xlsx"
   $pendingWorkbook = "$targetWorkbook.pending-$PID"
+  $dataReportBaseName = if ($CycleLabel) {
+    "${Industry} Industry Spending Data ${CycleLabel}"
+  } else {
+    "${Industry} Industry Spending Data"
+  }
+  $stageDataWorkbook = Join-Path $stageDirectory "${dataReportBaseName}.xlsx"
+  $targetDataWorkbook = $null
+  $dataWorkbookSha256 = $null
+  $dataWorksheetCount = 0
   $finalizeWatch.Start()
   try {
+    # Companion Data workbook. Built AFTER the dollar reconciliation and BEFORE
+    # anything is copied into the output folder, so a writer failure leaves the
+    # previously published pair untouched rather than publishing an Overview
+    # whose companion is stale or missing.
+    if (Test-Path -LiteralPath $tidyWriter -PathType Leaf) {
+      # The Excel finalizer emits its receipt on STDOUT, so there is no file to
+      # hand the writer. Persist the object that was captured (fresh build) or
+      # replayed from the workbook cache manifest (cache hit): either way it
+      # carries the Excel-computed cycle_totals the writer reconciles against.
+      $overviewReceiptPath = Join-Path $stageDirectory 'formula_receipt.json'
+      Write-AtomicText $overviewReceiptPath (
+        $formulaReceiptObject | ConvertTo-Json -Depth 10
+      )
+      & $PythonPath $tidyWriter --staging $stagePath --out $stageDataWorkbook --database $DatabasePath --database-sha256 $databaseHash --payload $dataPath --overview $stageWorkbook --overview-receipt $overviewReceiptPath
+      if ($LASTEXITCODE -ne 0) {
+        throw "Tidy data workbook build failed with exit code $LASTEXITCODE"
+      }
+      if (-not (Test-Path -LiteralPath $stageDataWorkbook -PathType Leaf)) {
+        throw "Tidy data workbook writer did not create $stageDataWorkbook"
+      }
+      # The writer's OWN receipt, not the Overview's: the Data book has its own
+      # sheet count, so the Overview's `-lt 16` floor would be meaningless here.
+      $dataReceiptPath = "$stageDataWorkbook.receipt.json"
+      if (-not (Test-Path -LiteralPath $dataReceiptPath -PathType Leaf)) {
+        throw "Tidy data workbook writer did not create $dataReceiptPath"
+      }
+      if (-not (Test-JsonFile $dataReceiptPath)) {
+        throw 'Tidy data workbook writer produced an invalid receipt.'
+      }
+      $dataReceiptObject = Get-Content -Raw -LiteralPath $dataReceiptPath |
+        ConvertFrom-Json
+      $dataWorksheetCount = [int]$dataReceiptObject.expected_worksheet_count
+      if ($dataWorksheetCount -lt 1) {
+        throw 'Tidy data workbook receipt reported no worksheets.'
+      }
+      Assert-WorkbookPackage $stageDataWorkbook $dataWorksheetCount
+      $dataWorkbookSha256 = (
+        Get-FileHash -LiteralPath $stageDataWorkbook -Algorithm SHA256
+      ).Hash.ToLowerInvariant()
+      if ([string]$dataReceiptObject.sha256 -and
+          [string]$dataReceiptObject.sha256 -ne $dataWorkbookSha256) {
+        throw 'Tidy data workbook does not match the SHA-256 in its own receipt.'
+      }
+      $targetDataWorkbook = Join-Path $OutputDirectory "${dataReportBaseName}.xlsx"
+    } else {
+      Write-Warning (
+        'Tidy data workbook writer is not installed; publishing the Overview ' +
+        "only. Expected: $tidyWriter"
+      )
+    }
     # Publish companions on cache hits too, binding every CSV to the validated
     # workbook and exact payload. A bundle reader can reject partial updates.
     & $PythonPath (Join-Path $projectRoot 'tools\enrich_downstream.py') $buildDataPath $BeneficiaryDirectory --audit-only --workbook $stageWorkbook --audit-directory (Join-Path $OutputDirectory ($reportBaseName + '.audit'))
     if ($LASTEXITCODE -ne 0) { throw 'Audit companion publication failed.' }
     Copy-Item -LiteralPath $stageWorkbook -Destination $pendingWorkbook -Force
     Move-Item -LiteralPath $pendingWorkbook -Destination $targetWorkbook -Force
+    # Immediately after the Overview and BEFORE `sourceGuard accept`, so the
+    # accepted source advances only once BOTH books are on disk. The console
+    # globs this folder, so the pair must never be half-published: the Data book
+    # goes out under the same copy-then-atomic-move as the Overview.
+    if ($targetDataWorkbook) {
+      $pendingDataWorkbook = "$targetDataWorkbook.pending-$PID"
+      Copy-Item -LiteralPath $stageDataWorkbook -Destination $pendingDataWorkbook -Force
+      Move-Item -LiteralPath $pendingDataWorkbook -Destination $targetDataWorkbook -Force
+    }
+    # Recorded after publication so the manifest never claims a companion that
+    # was not published. Rewritten on cache hits too - the Overview fields are
+    # replayed verbatim from the values already in scope.
+    Write-AtomicText $workbookCacheManifestPath ([pscustomobject]@{
+      workbook_fingerprint = $workbookFingerprint
+      workbook_sha256 = $workbookSha256
+      data_workbook_sha256 = $dataWorkbookSha256
+      template_contract = $templateContract
+      expected_worksheet_count = $expectedWorksheetCount
+      data_expected_worksheet_count = $dataWorksheetCount
+      generated_at = [DateTimeOffset]::Now.ToString('o')
+      formula_receipt = $formulaReceiptObject
+    } | ConvertTo-Json -Depth 10)
   } finally {
     $finalizeWatch.Stop()
   }
@@ -859,6 +1006,16 @@ $underPerformanceBudget = (
   industry = $Industry
   workbook = $targetWorkbook
   bytes = (Get-Item -LiteralPath $targetWorkbook).Length
+  data_workbook = $targetDataWorkbook
+  data_workbook_bytes = if ($targetDataWorkbook) {
+    (Get-Item -LiteralPath $targetDataWorkbook).Length
+  } else { 0 }
+  data_workbook_sha256 = $dataWorkbookSha256
+  data_expected_worksheet_count = $dataWorksheetCount
+  stage_store = $stagePath
+  stage_sha256 = if (Test-Path -LiteralPath $stagePath -PathType Leaf) {
+    (Get-FileHash -LiteralPath $stagePath -Algorithm SHA256).Hash.ToLowerInvariant()
+  } else { $null }
   database_sha256 = $databaseHash
   data_sha256 = (
     Get-FileHash -LiteralPath $dataPath -Algorithm SHA256
