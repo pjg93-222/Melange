@@ -1,0 +1,251 @@
+{
+  "contract": "snapshot_registry",
+  "version": 2,
+  "owner": "S4",
+  "produced_by": [
+    "mentat/app/snapshot_registry.py:registry",
+    "mentat/app/server.py:Handler.do_GET (the /api/snapshots branch)",
+    "mentat/app/server.py:Handler.do_GET (the /api/contributions/session branch, industries[])"
+  ],
+  "consumed_by": [
+    "mentat/app/industry_scope.py:resolve",
+    "mentat/app/chart-studio-core.js:parseSnapshotRegistry",
+    "mentat/app/chart-studio.js (industry picker)",
+    "mentat/app/app.js (S5)",
+    "mentat/app/graph.js (S5)"
+  ],
+  "description": "industry is the published label; requests accept a label or a slug and every response echoes the label. build_stamp = sha256(workbook_sha256 + \"\\n\" + companion_sha256_or_empty + \"\\n\" + database_sha256_or_empty + \"\\n\" + payload_sha256_or_empty); workbook/companion names are relative to report_directory, database.path is relative to the project root, and no entry may carry an absolute path. A workbook this process cannot open is reported as one entry with available false and message 'Report workbook is unreadable.'; it has no hash, so workbook.sha256 and build_stamp are null - on that entry only. Every available entry carries both.",
+  "examples": [
+    {
+      "schema_version": 1,
+      "report_directory": "C:\\Reports\\Published",
+      "generated_at": "2026-09-16T23:00:00Z",
+      "snapshots": [
+        {
+          "industry": "Banking",
+          "slug": "banking",
+          "dataset": "Banking",
+          "available": true,
+          "message": null,
+          "workbook": {
+            "name": "Banking Industry Spending Overview.xlsx",
+            "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+            "bytes": 40894512,
+            "modified_at": "2026-09-10T14:56:03Z"
+          },
+          "companion": null,
+          "database": {
+            "path": ".cache/industry-report/banking/mentat.db",
+            "sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+            "hydrated": false
+          },
+          "payload_sha256": "cba938023ed737faff031ce82bbf232088065f7475bb38ae48ac64bfd1aca59c",
+          "destination_schema": 1,
+          "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+        },
+        {
+          "industry": "Credit Union",
+          "slug": "credit_union",
+          "dataset": "Credit Union",
+          "available": true,
+          "message": null,
+          "workbook": {
+            "name": "Credit Union Industry Spending Overview.xlsx",
+            "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+            "bytes": 15728640,
+            "modified_at": "2026-07-28T23:01:00Z"
+          },
+          "companion": {
+            "name": "Credit Union Industry Spending Data.xlsx",
+            "sha256": "fbb1acc85543f3d5a71c5a1053f63340b4559b02be9bdbf31e9c43bff1c86679",
+            "bytes": 2097152,
+            "modified_at": "2026-07-28T23:02:00Z",
+            "lineage_matches": true
+          },
+          "database": {
+            "path": ".cache/receipt-metadata-repair-20260910/credit_union/mentat.db",
+            "sha256": "df85df18510bba895a4276e4374247cbfc227e21f3af0af61eaea143c73b0e75",
+            "hydrated": true
+          },
+          "payload_sha256": "a1b87e0336d50703120bdbdb6fce0725429b586537102e490fe4a51eb53d3d74",
+          "destination_schema": 1,
+          "build_stamp": "9e56fd99c8e6898e817510b9f61dc8178d9c42a154c25382bdf9bc49549ca489"
+        },
+        {
+          "industry": "Fintech",
+          "slug": "fintech",
+          "dataset": "Fintech",
+          "available": false,
+          "message": "Pinned report source evidence is unavailable.",
+          "workbook": {
+            "name": "Fintech Industry Spending Overview.xlsx",
+            "sha256": "46ce20a6073b0f103da3f4b3df555143e4534039fbc200ce9a21710c082a838d",
+            "bytes": 8912896,
+            "modified_at": "2026-06-02T10:00:00Z"
+          },
+          "companion": null,
+          "database": null,
+          "payload_sha256": null,
+          "destination_schema": null,
+          "build_stamp": "f58dcc7d69ddfaa58aaf3ce25edcccf17d1cf4f52a90b56cdf8970308d1c64a4"
+        },
+        {
+          "industry": "Telecom",
+          "slug": "telecom",
+          "dataset": "Telecom",
+          "available": false,
+          "message": "Report workbook is unreadable.",
+          "workbook": {
+            "name": "Telecom Industry Spending Overview.xlsx",
+            "sha256": null,
+            "bytes": 6291456,
+            "modified_at": "2026-08-14T09:30:00Z"
+          },
+          "companion": null,
+          "database": null,
+          "payload_sha256": null,
+          "destination_schema": null,
+          "build_stamp": null
+        }
+      ]
+    }
+  ],
+  "negative_controls": [
+    {
+      "why": "every snapshot entry must carry a build_stamp; a producer that returns before hashing finishes (or drops the field) must be rejected, not silently treated as available",
+      "payload": {
+        "industry": "Banking",
+        "slug": "banking",
+        "dataset": "Banking",
+        "available": true,
+        "message": null,
+        "workbook": {
+          "name": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "bytes": 40894512,
+          "modified_at": "2026-09-10T14:56:03Z"
+        },
+        "companion": null,
+        "database": {
+          "path": ".cache/industry-report/banking/mentat.db",
+          "sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+          "hydrated": false
+        },
+        "payload_sha256": "cba938023ed737faff031ce82bbf232088065f7475bb38ae48ac64bfd1aca59c",
+        "destination_schema": 1
+      }
+    },
+    {
+      "why": "workbook.name must be relative to report_directory (S4_DESIGN.md section 2); an absolute path leaks the collector's local filesystem layout and violates the 'names relative to report_directory' rule",
+      "payload": {
+        "industry": "Banking",
+        "slug": "banking",
+        "dataset": "Banking",
+        "available": true,
+        "message": null,
+        "workbook": {
+          "name": "C:\\Users\\x\\Downloads\\Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "bytes": 40894512,
+          "modified_at": "2026-09-10T14:56:03Z"
+        },
+        "companion": null,
+        "database": {
+          "path": ".cache/industry-report/banking/mentat.db",
+          "sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+          "hydrated": false
+        },
+        "payload_sha256": "cba938023ed737faff031ce82bbf232088065f7475bb38ae48ac64bfd1aca59c",
+        "destination_schema": 1,
+        "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+      }
+    },
+    {
+      "why": "'credit-unions' is the R collector's MENTAT_INDUSTRY slug, never a published label; the registry's industry field must be the published label the workbook name encodes ('Credit Union'), so a label/workbook mismatch using a collector slug must be rejected",
+      "payload": {
+        "industry": "credit-unions",
+        "slug": "credit_union",
+        "dataset": "Credit Union",
+        "available": true,
+        "message": null,
+        "workbook": {
+          "name": "Credit Union Industry Spending Overview.xlsx",
+          "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+          "bytes": 15728640,
+          "modified_at": "2026-07-28T23:01:00Z"
+        },
+        "companion": {
+          "name": "Credit Union Industry Spending Data.xlsx",
+          "sha256": "fbb1acc85543f3d5a71c5a1053f63340b4559b02be9bdbf31e9c43bff1c86679",
+          "bytes": 2097152,
+          "modified_at": "2026-07-28T23:02:00Z",
+          "lineage_matches": true
+        },
+        "database": {
+          "path": ".cache/receipt-metadata-repair-20260910/credit_union/mentat.db",
+          "sha256": "df85df18510bba895a4276e4374247cbfc227e21f3af0af61eaea143c73b0e75",
+          "hydrated": true
+        },
+        "payload_sha256": "a1b87e0336d50703120bdbdb6fce0725429b586537102e490fe4a51eb53d3d74",
+        "destination_schema": 1,
+        "build_stamp": "9e56fd99c8e6898e817510b9f61dc8178d9c42a154c25382bdf9bc49549ca489"
+      }
+    },
+    {
+      "why": "build_stamp must be 64 lowercase hex characters recomputable from the four source hashes by the formula in description; 'ABC' is neither the right length nor recomputable",
+      "payload": {
+        "industry": "Credit Union",
+        "slug": "credit_union",
+        "dataset": "Credit Union",
+        "available": true,
+        "message": null,
+        "workbook": {
+          "name": "Credit Union Industry Spending Overview.xlsx",
+          "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+          "bytes": 15728640,
+          "modified_at": "2026-07-28T23:01:00Z"
+        },
+        "companion": {
+          "name": "Credit Union Industry Spending Data.xlsx",
+          "sha256": "fbb1acc85543f3d5a71c5a1053f63340b4559b02be9bdbf31e9c43bff1c86679",
+          "bytes": 2097152,
+          "modified_at": "2026-07-28T23:02:00Z",
+          "lineage_matches": true
+        },
+        "database": {
+          "path": ".cache/receipt-metadata-repair-20260910/credit_union/mentat.db",
+          "sha256": "df85df18510bba895a4276e4374247cbfc227e21f3af0af61eaea143c73b0e75",
+          "hydrated": true
+        },
+        "payload_sha256": "a1b87e0336d50703120bdbdb6fce0725429b586537102e490fe4a51eb53d3d74",
+        "destination_schema": 1,
+        "build_stamp": "ABC"
+      }
+    },
+    {
+      "why": "the DE-021 shape: companion must be an object carrying its own sha256/bytes/modified_at/lineage_matches, not a bare filename string a consumer would have to re-derive metadata for",
+      "payload": {
+        "industry": "Credit Union",
+        "slug": "credit_union",
+        "dataset": "Credit Union",
+        "available": true,
+        "message": null,
+        "workbook": {
+          "name": "Credit Union Industry Spending Overview.xlsx",
+          "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+          "bytes": 15728640,
+          "modified_at": "2026-07-28T23:01:00Z"
+        },
+        "companion": "Credit Union Industry Spending Data.xlsx",
+        "database": {
+          "path": ".cache/receipt-metadata-repair-20260910/credit_union/mentat.db",
+          "sha256": "df85df18510bba895a4276e4374247cbfc227e21f3af0af61eaea143c73b0e75",
+          "hydrated": true
+        },
+        "payload_sha256": "a1b87e0336d50703120bdbdb6fce0725429b586537102e490fe4a51eb53d3d74",
+        "destination_schema": 1,
+        "build_stamp": "9e56fd99c8e6898e817510b9f61dc8178d9c42a154c25382bdf9bc49549ca489"
+      }
+    }
+  ]
+}

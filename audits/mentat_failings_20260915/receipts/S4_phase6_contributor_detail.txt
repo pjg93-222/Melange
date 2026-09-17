@@ -1,0 +1,657 @@
+S4 phase 6 - Contributor Detail + Chart Studio DIMENSIONS (raw_contribution_columns
+contract surfaces contributor_detail_sheet and chart_studio_dimensions, both
+previously "deferred to S4"). Work order: S2's decision 7, HANDOFF.md :534-570
+and :671-675. Run 2026-09-16. All edits made in the SCRATCH copy
+(...\scratchpad\Mentat); the only real-tree access was read-only, for the two
+Task 4 measurements below.
+
+====================================================================
+MEASUREMENT NUMBERS (Task 4, read-only against the real tree, BEFORE the
+report.R edit was applied to the scratch copy)
+====================================================================
+
+Step 1 - _sources() against the REAL app (C:\Users\pgoff\Mentat\mentat\app,
+imported unmodified) and the real configured report directory
+(MENTAT_REPORT_DIRECTORY = "C:\Users\pgoff\OneDrive\Desktop\Mentat Complete
+Files"):
+
+  contribution_data module file: C:\Users\pgoff\Mentat\mentat\app\contribution_data.py
+  9 source(s):
+    industry='Banking' available=True database=C:/Users/pgoff/Mentat/mentat/.cache/report-repairs/banking-20260910/data/mentat.db
+    industry='Community Banks' available=True database=C:/Users/pgoff/Mentat/mentat/.cache/receipt-metadata-repair-20260910/community_banks/mentat.db
+    industry='Credit Arms' available=True database=C:/Users/pgoff/Mentat/mentat/.cache/receipt-metadata-repair-20260910/credit_arms/mentat.db
+    industry='Credit Union' available=True database=C:/Users/pgoff/Mentat/mentat/.cache/receipt-metadata-repair-20260910/credit_union/mentat.db
+    industry='Crypto' available=True database=C:/Users/pgoff/Mentat/mentat/.cache/receipt-metadata-repair-20260910/crypto/mentat.db
+    industry='Fintech' available=True database=C:/Users/pgoff/Mentat/mentat/.cache/receipt-metadata-repair-20260910/fintech/mentat.db
+    industry='Property & Casualty Insurance' available=True database=C:/Users/pgoff/Mentat/mentat/.cache/receipt-metadata-repair-20260910/property_casualty_insurance/mentat.db
+    industry='Telecom' available=True database=C:/Users/pgoff/Mentat/mentat/.cache/receipt-metadata-repair-20260910/telecom/mentat.db
+    industry='~$Credit Union' available=False database=None
+      message: Pinned report source evidence is unavailable.
+
+Step 2 - Banking database, opened read-only (file:<path>?mode=ro, uri=True):
+  path: C:\Users\pgoff\Mentat\mentat\.cache\report-repairs\banking-20260910\data\mentat.db
+  table found from sqlite_master (not guessed): "contributions" (only table
+    whose name contains "contribution"; 60 columns per PRAGMA table_info,
+    total rows = 783,808)
+  contributor_street_1 present on this table: FALSE
+  contributor_street_2 present on this table: FALSE
+  (a) distinct (two_year_transaction_period, company, contributor_state,
+      contributor_city, contributor_zip, contributor_employer,
+      contributor_occupation) rows: 95,331
+  (b) distinct (... + contributor_street_1, contributor_street_2) rows: N/A -
+      street columns are absent from this table. Per the work order: "report
+      that plainly: delta 0." DELTA = 0.
+  (c) rows with non-empty contributor_street_1: N/A - column absent. DELTA = 0.
+
+  This is expected, not a surprise: this Banking database is a
+  report-repairs/receipt-metadata-repair snapshot from 2026-09-10, not one of
+  S2's 10 run-lane databases (S2's backfill, per
+  audits/mentat_failings_20260915/receipts/S2_backfill_dryrun_production.md,
+  covered run-lane DBs only; report-input-20260910 + repair-20260908 sets have
+  no street archive and need an S1 re-collect, per prior lane memory).
+
+Conclusion for Task 4: Paul's decision 7 (street_1/street_2 join the
+contributor_keys grain after occupation) is applied unconditionally as
+instructed; on THIS particular real database the columns are absent so the
+grain change is a no-op there (delta 0), consistent with the work order's
+explicit fallback instruction. Databases S2 did backfill (the 10 run-lane
+DBs) will show the grain widen for real once street data is present.
+
+====================================================================
+FILES CHANGED (all in the SCRATCH copy; line numbers are AFTER editing)
+====================================================================
+
+1. mentat/app/contribution_data.py
+   - DIMENSIONS reordered, :48-60. New contiguous contributor block
+     (employer, occupation, street_1, street_2, city, state, zip5) placed at
+     the position 'zip5' occupied before (right after 'date', before
+     'contributor'). Two new entries added:
+       'street_1':'Contributor street 1', 'street_2':'Contributor street 2'
+     Every other key's relative order is unchanged.
+   - _record(), :351: added
+       street_1=str(raw.get('contributor_street_1') or '').strip(),
+       street_2=str(raw.get('contributor_street_2') or '').strip(),
+     beside the employer/occupation reads, same .strip() coercion as
+     employer/occupation (both of those DO .strip(), so street_1/street_2 do
+     too).
+   - VERSION: 2 -> 3, :35.
+   - _fields() (:238), _schema() (:308), _insert() (:362) needed NO changes:
+     they already iterate DIMENSIONS / build columns from dict keys generically.
+
+2. mentat/tools/crypto_workbook_builder.mjs, buildContributorDetail() :2205-2259
+   - headers (:2207-2211): Cycle, Company, Employer, Occupation, Street 1,
+     Street 2, City, State, ZIP, Total Giving, Gift Count, Contributors, Rows
+     Folded (13 entries; was 11, no street).
+   - row projection .map (:2223-2237): added row.street_1 ?? "" and
+     row.street_2 ?? "" in the new position; reordered employer/occupation
+     ahead of them to match the new header.
+   - folded-rows reduce index (:2238): row[10] -> row[12].
+   - titleBlock width argument (:2244): "K" -> "M".
+   - A5:K -> A5:M at both sites (:2248 values assignment, :2249 tables.add).
+   - currency range (:2252): H6:H -> J6:J.
+   - count range (:2253): I6:K -> K6:M.
+   - widths array (:2254): 11 entries -> 13:
+       [14, 28, 42, 32, 20, 20, 24, 10, 12, 18, 14, 14, 14]
+     Cycle/Company/Employer/Occupation/City/State/ZIP/Total Giving/Gift
+     Count/Contributors/Rows Folded widths are the same numbers the old array
+     used for those same headers, just relocated; Street 1/Street 2 (20, 20)
+     reuse the width this same file already gives "Street 1"/"Street 2" in
+     buildRawSheet's rawHeaders widths object (columns T/U, both 20). This
+     specific number was not dictated by the work order; flagged as my
+     interpretation.
+   - wrap-text range (:2259): B6:G -> B6:I.
+   node --check tools/crypto_workbook_builder.mjs: syntax OK (the file cannot
+   be executed/imported directly outside its real CLI invocation; see the
+   note on tests/test_contributor_detail_header.cjs below).
+
+3. audits/mentat_failings_20260915/contracts/raw_contribution_columns.json
+   - "version": 1 -> 2 (:3).
+   - Removed "status": "deferred to S4" from both contributor_detail_sheet
+     (:442-443 before edit) and chart_studio_dimensions (:462-463 before
+     edit). INTERPRETATION: the work order said to flip the status "to
+     whatever vocabulary the file uses for asserted surfaces" - every other
+     (already-asserted) surface in this contract carries NO "status" key at
+     all, so "the file's vocabulary for asserted surfaces" is the absence of
+     a status key, and that's what I did (deleted the key rather than setting
+     it to some new string). Flagged as my interpretation since the file
+     itself supplies no explicit "asserted" vocabulary to copy.
+   - Did NOT touch contracts/README.md's index table (the only place an
+     "asserted by <tests>" text literally exists in this lane) - the work
+     order's file list explicitly excludes it ("Touch nothing else"), and the
+     conditional in item 4 ("if the file carries one") is false for
+     raw_contribution_columns.json itself, which carries no "asserted by"
+     text. See CONTRADICTIONS/GAPS below.
+   - Left the "producer" line-citations for both surfaces
+     (":2199-2245"/"1828-1831" etc.) untouched; not requested, and they were
+     already stale per HANDOFF ("the contract cites :2199-2245; the live
+     function starts at :2205") even before this session, now further stale
+     after buildContributorDetail's internal edits.
+
+4. mentat/R/report.R, spending_detail_frames() (starts :1806)
+   - contributor_keys, :1828-1831: added "street_1", "street_2" after
+     "occupation" (Paul's decision 7).
+   - required (source-column validation list), :1813-1817: added "street_1",
+     "street_2" after "occupation" - not explicitly asked for by the work
+     order, but this function's own pattern validates every column it is
+     about to use (employer/occupation are already in this list) before
+     touching data.table; leaving street_1/street_2 out of `required` would
+     not have prevented a failure on a caller missing those columns, only
+     made the resulting R error uglier ("object 'street_1' not found" instead
+     of a clear stop() message) - see CONTRADICTIONS/GAPS, this exact
+     scenario now fires against an existing, un-owned test fixture.
+   - empty_frame()'s literal data.table(), :1849-1852: added
+     street_1 = character(), street_2 = character(), beside
+     employer/occupation, so the zero-row path also carries the new columns.
+   - trim/normalize block, :1878-1880: added
+       detail[, street_1 := trim_text(street_1)]
+       detail[, street_2 := trim_text(street_2)]
+     beside the employer/occupation trim_text() calls, same coercion.
+   - Checked S2's SELECT lines per the work order: mentat/R/report.R
+     spending_raw_report_rows(), :2032 and :2051 (contract cited :2029/:2048;
+     shifted +3 by this session's earlier edits in the same file) ALREADY
+     select contributor_street_1, contributor_street_2 in both the
+     `contributions` and `corporate_giving` SELECT lists. This matches
+     HANDOFF's note #8 that S2 already made this edit. NOT a gap - no action
+     needed, SELECT lines untouched.
+   - Also confirmed (read-only trace, no edit needed) that the real caller,
+     mentat/tools/export_crypto_spending_data.R's raw_export projection
+     (:545-546: `street_1 = trim_text(contributor_street_1), street_2 =
+     trim_text(contributor_street_2),`), already renames the raw SQL columns
+     to the short names (street_1/street_2, matching employer/occupation/
+     city/state/zipcode's own renaming) that spending_detail_frames expects
+     via its `rows` argument (workbook_raw_export). So the grain edit is
+     wired end to end for the real production path.
+
+5. NEW mentat/tests/test_contribution_dimensions_order.py (7 unittest cases,
+   in-process, no server, mentat/app on sys.path the same way
+   tests/test_contribution_data.py does it):
+   - DimensionsOrderTests: contiguous-block check (hardcoded literal list per
+     the work order) + a second check that the contract's
+     chart_studio_dimensions.required_key_order matches that exact block.
+   - InsertColumnAlignmentTests: builds an in-memory sqlite via
+     contribution_data._schema(), writes one row through the real
+     contribution_data._insert() with a distinct sentinel string per string
+     DIMENSIONS column (derived cycle/year/date/zip5 fields use realistic
+     values rather than arbitrary sentinels, since _record() computes them;
+     all 26 DIMENSIONS values end up distinct - asserted in the fixture
+     itself), reads back by column NAME, asserts each sentinel sits under its
+     own name.
+   - Negative control: builds a second table with DIMENSIONS' column order
+     REVERSED, inserts the same values positionally ('?' placeholders) in the
+     ORIGINAL order, and asserts the by-name read now DISAGREES with the
+     expected sentinels - proving the assertion above has teeth.
+   - ContractStatusTests: contract loads via the README loader path formula
+     and both previously-deferred surfaces no longer carry
+     "status": "deferred to S4".
+
+6. NEW mentat/tests/test_contributor_detail_header.cjs (plain node:test /
+   node:assert/strict, style of tests/test_chart_math.cjs):
+   crypto_workbook_builder.mjs is a top-level CLI script (reads process.argv
+   and imports a real artifact-tool workbook at import time - confirmed by
+   reading the file: `const [dataPath, outputDir, ...] = process.argv.slice(2)`
+   and `await fs.mkdir(outputDir, ...)` run unguarded at module scope), so
+   `import()`-ing it directly in a test process is not viable (this is also
+   why tests/test_raw_contribution_columns.cjs, S2's existing sibling test on
+   the SAME file, reads it as text instead of importing it). Per the work
+   order's explicit fallback ("the smallest real entry point ... pass a
+   minimal recording stub"), this test extracts buildContributorDetail AND
+   every real helper its body actually calls (titleBlock, styleTable,
+   detailPlaceholder, detailSourceNote, excelColumn, plus the colors /
+   currencyFormat / countFormat constants they read) VERBATIM from the live
+   source text via a brace/string-aware scanner, and runs that combined,
+   unmodified source in a node:vm context. The only stand-in is the
+   worksheet object (workbook.worksheets.getItem(...)): a minimal recording
+   stub matching the real shape (getRange().values/.format, tables.add,
+   freezePanes) that captures whatever the real code writes, without
+   rendering anything. This is a stricter bar than the sibling .cjs test:
+   it actually EXECUTES the real producer function, not just its literal
+   text.
+   - Asserts the produced header array equals
+     contract.surfaces.contributor_detail_sheet.required_headers exactly.
+   - Negative control: contract headers with the two Street entries removed
+     do NOT equal the produced header.
+   - A synthetic row omitting street_1 entirely yields '' (asserted
+     !== undefined AND === '') in the Street 1 cell.
+   - Extra check: every row stays cell-aligned with the header (same length).
+   Node quirk hit and fixed: values built inside vm.runInContext are
+   different-realm Arrays; node:assert/strict's deepEqual rejected them as
+   "same structure but not reference-equal" even with identical content. Fix:
+   a toHostArray() helper rebuilds the vm-realm arrays with Array.from(...,
+   toHostArray) in the host realm before asserting.
+
+====================================================================
+TEST TAILS, VERBATIM
+====================================================================
+
+### python -m unittest tests.test_contribution_dimensions_order -v ###
+test_chart_studio_dimensions_no_longer_deferred (tests.test_contribution_dimensions_order.ContractStatusTests.test_chart_studio_dimensions_no_longer_deferred) ... ok
+test_contract_loads_and_is_the_expected_shape (tests.test_contribution_dimensions_order.ContractStatusTests.test_contract_loads_and_is_the_expected_shape) ... ok
+test_contributor_detail_sheet_no_longer_deferred (tests.test_contribution_dimensions_order.ContractStatusTests.test_contributor_detail_sheet_no_longer_deferred) ... ok
+test_dimensions_block_matches_contract_required_key_order (tests.test_contribution_dimensions_order.DimensionsOrderTests.test_dimensions_block_matches_contract_required_key_order)
+The contract is the single source of truth (README.md); DIMENSIONS ... ok
+test_dimensions_contains_the_contiguous_contributor_block (tests.test_contribution_dimensions_order.DimensionsOrderTests.test_dimensions_contains_the_contiguous_contributor_block) ... ok
+test_insert_writes_each_dimension_under_its_own_column_name (tests.test_contribution_dimensions_order.InsertColumnAlignmentTests.test_insert_writes_each_dimension_under_its_own_column_name) ... ok
+test_negative_control_positional_insert_into_shuffled_schema_mismatches (tests.test_contribution_dimensions_order.InsertColumnAlignmentTests.test_negative_control_positional_insert_into_shuffled_schema_mismatches)
+Prove the by-name assertion above has teeth: build a second table ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.004s
+
+OK
+EXIT: 0
+
+### python -m unittest tests.test_raw_contribution_columns -v ###
+test_contract_self_consistency (tests.test_raw_contribution_columns.ContractSelfConsistencyTests.test_contract_self_consistency) ... ok
+test_negative_control_fails_adjacency (tests.test_raw_contribution_columns.ContractSelfConsistencyTests.test_negative_control_fails_adjacency) ... ok
+test_formula_facts_projection_excludes_block (tests.test_raw_contribution_columns.FormulaFactsProjectionTests.test_formula_facts_projection_excludes_block) ... ok
+test_raw_warehouse_header_matches_contract (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_header_matches_contract) ... ok
+test_raw_warehouse_migrated_shape_same_header (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_migrated_shape_same_header) ... ok
+test_raw_warehouse_unmigrated_db_omits_and_flags (tests.test_raw_contribution_columns.RawWarehouseContractTests.test_raw_warehouse_unmigrated_db_omits_and_flags) ... warning: contributions lacks contract columns ['contributor_street_1', 'contributor_street_2']; run init_schema() from mentat/R/schema.R before treating this export as complete
+warning: corporate_giving lacks contract columns ['contributor_street_1', 'contributor_street_2']; run init_schema() from mentat/R/schema.R before treating this export as complete
+ok
+test_tidy_workbook_sheet_carries_block (tests.test_raw_contribution_columns.TidyWorkbookSheetTests.test_tidy_workbook_sheet_carries_block)
+The companion Data workbook Contributions sheet carries the block. ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 11.141s
+
+OK
+EXIT: 0
+
+### node tests/test_contributor_detail_header.cjs ###
+✔ buildContributorDetail header matches the contract required_headers exactly (65.6826ms)
+✔ negative control: a header with the two Street columns removed does not equal the produced header (1.2598ms)
+✔ a row lacking street_1 yields '' in the Street 1 cell, not undefined (0.8005ms)
+✔ the row block stays cell-aligned with the header for every row (0.6851ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 78.5804
+EXIT: 0
+
+### node tests/test_raw_contribution_columns.cjs ###
+✔ rawHeaders matches the contract header order (2.1954ms)
+✔ the row projection keeps the address block contiguous and cell aligned (2.1179ms)
+✔ compactRawHeaders still drops every geography column by design (0.3534ms)
+✔ negative control: a shuffled header block is rejected (0.1401ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12.9806
+EXIT: 0
+
+### & "C:/Program Files/R/R-4.6.0/bin/Rscript.exe" tests\test_raw_contribution_columns.R ###
+PASS check (a) collect.R contribution_columns() keeps the address block
+PASS check (b) collect.R corporate_columns keeps the address block
+PASS check (c) fec_api.R fec_api_corporate_records() keeps the address block
+PASS check (d) tidy_stage.R contributions spec matches the contract
+PASS check (e) export_crypto_spending_data.R raw_export projection matches the contract
+PASS check (f) init_schema() migrates an old database to the street columns
+PASS check (g) negative control: the shuffled block is rejected
+PASS check (h) report.R spending_raw_report_rows() SELECTs return the street columns
+test_raw_contribution_columns: 0 check(s) failed
+test_raw_contribution_columns: PASS
+EXIT: 0
+
+### & "C:/Program Files/R/R-4.6.0/bin/Rscript.exe" tests\test_fec_api.R ###
+[1] 2
+[1] 2
+[1] 2
+unservable_query: Binance cycle 2024 -> decomposed into 2 queries, 3 rows
+unservable_decomposed_query: BINANCE.US cycle 2024 per_page 100 -> retrying from page 1 at per_page 50
+unservable_query: Binance cycle 2024 -> decomposed into 2 queries, 2 rows
+unservable_decomposed_query: BINANCEUS cycle 2024 per_page 100 -> retrying from page 1 at per_page 50
+unservable_decomposed_query: BINANCEUS cycle 2024 per_page 50 -> retrying from page 1 at per_page 20
+unservable_decomposed_query: BINANCEUS cycle 2024 per_page 20 -> retrying from page 1 at per_page 10
+unservable_decomposed_query: BINANCEUS cycle 2024 per_page 10 -> retrying from page 1 at per_page 5
+unservable_decomposed_query: BINANCEUS cycle 2024 per_page 5 -> retrying from page 1 at per_page 1
+test_fec_api: PASS
+EXIT: 0
+
+====================================================================
+EXTRA DILIGENCE (not in the mandated list; run because I directly edited
+spending_detail_frames()/contributor_keys, a function other R tests exercise)
+====================================================================
+
+& "C:/Program Files/R/R-4.6.0/bin/Rscript.exe" tests/test_report.R
+  -> ends "test_report: PASS" (report versioning, retagging, six-sheet
+     contract, template column layouts, Stats formulas all verified; no
+     failures). Full tail available on request; omitted here for length.
+
+& "C:/Program Files/R/R-4.6.0/bin/Rscript.exe" tests/test_workbook_payload.py
+  (python, not R; the module docstring's "contributor_detail" hit was Python
+  round-trip fixture, unrelated to the R grain) -> Ran 5 tests, OK.
+
+& "C:/Program Files/R/R-4.6.0/bin/Rscript.exe" tests/test_spending_detail_frames.R
+  -> Error: spending_detail_frames is missing source columns: street_1, street_2
+     Execution halted
+  THIS IS A REAL REGRESSION. See CONTRADICTIONS/GAPS below - not fixed,
+  per "Touch nothing else" (this file is not in my edit list).
+
+====================================================================
+CONTRADICTIONS/GAPS WITH THE WORK ORDER (not silently adapted)
+====================================================================
+
+1. tests/test_spending_detail_frames.R now FAILS as a direct, unavoidable
+   consequence of Paul's decision 7. Its synthetic `fixture` data.table
+   (defined :35-68 of that file) has no street_1/street_2 columns at all -
+   it predates the decision. Once contributor_keys includes street_1/
+   street_2 and the function trims them (`detail[, street_1 :=
+   trim_text(street_1)]`), any caller whose input lacks those columns fails.
+   I added street_1/street_2 to the `required` source-column check
+   specifically so this fails with a clear message
+   ("spending_detail_frames is missing source columns: street_1, street_2")
+   instead of an opaque data.table "object 'street_1' not found" - removing
+   that check would NOT have avoided the failure, only made it uglier, since
+   the trim_text() line references the same missing column either way.
+   This file is not in my Task 4 file list ("mentat\R\report.R" only among
+   R files) and "Touch nothing else" is explicit, so I left it broken and am
+   reporting it here rather than silently patching a file outside scope. Its
+   fixture needs street_1/street_2 columns added (11-element character
+   vectors, matching its other columns) by whoever owns it; production's
+   real caller (export_crypto_spending_data.R's workbook_raw_export) already
+   supplies both columns, so this is a test-fixture gap, not a production gap.
+
+2. tests\test_fec_api.R PASSED on this scratch copy (twice, reproducibly),
+   contradicting the work order's stated expectation ("memory says RED at
+   HEAD from another lane - record, do not fix"). Recorded verbatim above,
+   not forced to either state. Possible explanations I did not chase down
+   (out of scope for this task): the scratch copy may have been taken from a
+   point after that other lane's fix landed, or the RED state lives only on
+   the live/main tree this scratch copy was branched from, not in this copy.
+
+3. crypto_workbook_builder.mjs's previewRanges Map (line ~2663, gated behind
+   MENTAT_RENDER_PREVIEWS=1, used only for optional PNG diagnostics) still
+   has `["Contributor Detail", "A1:K30"]` - column K, not widened to M. This
+   site was NOT in S2's enumerated "site list" the work order told me to
+   update ("headers, the row projection .map, the row[10] folded index,
+   titleBlock width, A5:K both sites, currency range, count range, widths
+   array, wrap-text" - eight items, all accounted for above). I left it
+   untouched rather than silently expanding scope beyond the enumerated
+   list; flagging it here since a preview render taken with
+   MENTAT_RENDER_PREVIEWS=1 would now clip columns L/M of this sheet.
+
+4. contracts/raw_contribution_columns.json's per-surface "producer" text for
+   contributor_detail_sheet and chart_studio_dimensions still cites the
+   PRE-session line numbers (":2199-2245", ":48-58", ":343-348") - already
+   noted as stale by HANDOFF.md before this session even started ("the
+   contract cites :2199-2245; the live function starts at :2205"), and now
+   further stale after this session's own edits shifted lines again. The
+   work order's item 4 only asked me to touch "status" (flip) and "version"
+   (bump) on this file; I did not also rewrite these citations, since that
+   was not requested and the file list doesn't call out a general line-number
+   refresh. Flagging so a future session doesn't trust these line numbers.
+
+5. Work order item 4's clause "add this test and Task 3's test to the
+   loader-facing 'asserted by' text if the file carries one" - the only place
+   in this lane where an "asserted by <tests>" phrase literally exists is
+   contracts/README.md's index table, which is outside my file list. I read
+   this literally as: for raw_contribution_columns.json itself (the file
+   item 4 is editing), that text does not exist, so the "if the file carries
+   one" condition is false and no edit applies. I did not edit README.md.
+   Flagging this reading explicitly since the antecedent of "the file" is
+   ambiguous in the work order's wording.
+
+====================================================================
+SUMMARY
+====================================================================
+Tasks 1-3: complete, all mandated tests pass (11 Python + Node assertions
+across the two new files, plus the two pre-existing sibling contract tests
+re-verified green). Task 4: measurement done read-only against the real
+tree as specified (delta 0 on the one real database checked, for the
+documented reason); grain edit applied to the scratch copy's report.R;
+both mandated Rscript runs captured verbatim (test_raw_contribution_columns.R
+PASS as expected, test_fec_api.R PASS - contradicting the work order's RED
+expectation, recorded not forced). One real regression surfaced in a file
+outside this task's edit scope (tests/test_spending_detail_frames.R) and is
+reported above rather than silently fixed.
+
+====================================================================
+MID-TASK ADDITION: _sources() Excel-lock-file skip
+====================================================================
+Received mid-task from the coordinator: the server lane found that against
+the real published folder, _sources()'s glob `* Industry Spending Overview.xlsx`
+also matches an open Excel lock file, e.g. `~$Credit Union Industry Spending
+Overview.xlsx`, and lists it as a phantom extra source whose slug collides
+with the real book. This is independently corroborated by my own Task 4 Step
+1 measurement above, taken BEFORE this fix, which already shows exactly that:
+    industry='~$Credit Union' available=False database=None
+Also corroborated by reading server.py (read-only; server.py is out of my
+edit scope) - Console.published_reports() (server.py :1400-1408) already has
+the identical guard: `if path.name.startswith('~$'): continue`.
+
+Fix applied in mentat/app/contribution_data.py, _sources() (:176), glob loop
+(now :183-186): added
+    if workbook.name.startswith('~$'):
+        continue
+immediately after the `for workbook in sorted(...)` line, before the existing
+is_relative_to() check - the same skip server.py already applies, now applied
+here too.
+
+Test added: mentat/tests/test_contribution_dimensions_order.py,
+SourcesSkipsExcelLockFilesTests (new class, appended to the file) - builds a
+temp directory with a real `Banking Industry Spending Overview.xlsx` and a
+`~$Banking Industry Spending Overview.xlsx` lock file (both empty; both come
+back unavailable, which is expected and not what's under test), asserts
+_sources() returns exactly one item, industry 'Banking'.
+
+Verified adversarially: temporarily removed the guard and reran just this
+test - it FAILED (2 != 1, the phantom '~$Banking' item present), confirming
+the test has teeth; then restored the guard and reran the full file - back
+to green. Verbatim before/after:
+
+  BEFORE (guard removed): FAILED (failures=1)
+    AssertionError: 2 != 1 : expected exactly one source, got
+    [{'industry': 'Banking', ...}, {'industry': '~$Banking', ...}]
+
+  AFTER (guard restored, full file, final run):
+### python -m unittest tests.test_contribution_dimensions_order -v (final, 8 tests) ###
+test_chart_studio_dimensions_no_longer_deferred (tests.test_contribution_dimensions_order.ContractStatusTests.test_chart_studio_dimensions_no_longer_deferred) ... ok
+test_contract_loads_and_is_the_expected_shape (tests.test_contribution_dimensions_order.ContractStatusTests.test_contract_loads_and_is_the_expected_shape) ... ok
+test_contributor_detail_sheet_no_longer_deferred (tests.test_contribution_dimensions_order.ContractStatusTests.test_contributor_detail_sheet_no_longer_deferred) ... ok
+test_dimensions_block_matches_contract_required_key_order (tests.test_contribution_dimensions_order.DimensionsOrderTests.test_dimensions_block_matches_contract_required_key_order)
+The contract is the single source of truth (README.md); DIMENSIONS ... ok
+test_dimensions_contains_the_contiguous_contributor_block (tests.test_contribution_dimensions_order.DimensionsOrderTests.test_dimensions_contains_the_contiguous_contributor_block) ... ok
+test_insert_writes_each_dimension_under_its_own_column_name (tests.test_contribution_dimensions_order.InsertColumnAlignmentTests.test_insert_writes_each_dimension_under_its_own_column_name) ... ok
+test_negative_control_positional_insert_into_shuffled_schema_mismatches (tests.test_contribution_dimensions_order.InsertColumnAlignmentTests.test_negative_control_positional_insert_into_shuffled_schema_mismatches)
+Prove the by-name assertion above has teeth: build a second table ... ok
+test_sources_skips_an_excel_lock_file_and_returns_only_the_real_book (tests.test_contribution_dimensions_order.SourcesSkipsExcelLockFilesTests.test_sources_skips_an_excel_lock_file_and_returns_only_the_real_book) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.008s
+
+OK
+EXIT: 0
+
+
+====================================================================
+2026-09-16: Follow-up - close the two S4 gaps flagged above (items 1 and 3)
+====================================================================
+This closes CONTRADICTIONS/GAPS #1 (test_spending_detail_frames.R fixture
+missing street_1/street_2) and #3 (crypto_workbook_builder.mjs previewRanges
+still A1:K30 for Contributor Detail) from the entry above. All edits made in
+the SCRATCH copy (...\scratchpad\Mentat); C:\Users\pgoff\Mentat was not
+touched.
+
+--------------------------------------------------------------------
+Task 1: mentat/tests/test_spending_detail_frames.R fixture
+--------------------------------------------------------------------
+File: mentat/tests/test_spending_detail_frames.R (SCRATCH copy)
+
+Read mentat/R/report.R's spending_detail_frames() (live SCRATCH lines
+1806-2007): `required` (:1813-1818), `contributor_keys` (:1828-1831) and
+`empty_frame()` (:1842-1857) were all extended with street_1/street_2, and
+the trim block (:1879-1880) trims both. contributor_keys is
+c(cycle, cycle_label, company, state, city, zip5, employer, occupation,
+street_1, street_2) - street_1/street_2 sit in the grain immediately after
+occupation, and (via contributor_columns = c(contributor_keys, "total_giving",
+...)) in that same position in the output frame's column order.
+
+Fixture change (test file, fixture definition, was :35-68, now :35-73 after
+the added columns and header-comment rewrite): added
+  street_1 = c("1 Market St", "200 Broadway", "350 5th Ave",
+               "100 Congress Ave", "100 Congress Ave", "400 Pine St",
+               "400 Pine St", "1 Market St", "10 Beacon St", "20 Beacon St",
+               "1 Market St"),
+  street_2 = c("Suite 100", "", "Fl 20", "", "", "", "Apt 2", "Suite 100",
+               "", "", "Suite 100"),
+placed after `occupation` and before `amount`, mirroring the `required`
+column order in report.R. Row 2's street_2 and several other rows are "" so
+the blank/short-value fold path is exercised, matching the existing
+zipcode-blank exercise already in the fixture.
+
+Expectation arithmetic (why nrow(contributors) moves from 8 to 9, and why
+capped$stats$contributor_folded_rows / sum(folded_rows) move from 5 to 6):
+
+Under the OLD grain (no street), rows 4+5 (both TX/Austin/Alpha/Manager,
+zip5 "" for both) and rows 9+10 (both MA/Boston/Alpha/Clerk, zip5 "02134"
+for both) were the fixture's only two same-cell duplicate pairs, so the 10
+included rows folded into 8 contributor cells.
+
+Under the NEW grain (+street_1, street_2):
+  - Rows 4 and 5 were both given street_1 "100 Congress Ave" and street_2
+    "" - identical on the new grain columns too - so they still fold into
+    ONE cell. This exercises the "still merges when street matches,
+    including a blank street_2" path.
+  - Rows 9 and 10 were given DIFFERENT street_1 values ("10 Beacon St" vs
+    "20 Beacon St") - same city/state/zip5/employer/occupation, different
+    street - so they now land in TWO separate cells instead of one. This
+    exercises the "grain split on a differing street" path.
+Net: 10 included rows -> 9 contributor cells (8 singleton-or-merged cells
+unchanged + the Boston pair splitting from 1 cell into 2 = +1). Updated
+`nrow(contributors) == 8L` to `== 9L` (uncapped block).
+
+Capped-at-6 arithmetic: reserve = 3 (unique (cycle, company) pairs: Alpha/
+2024, Beta/2024, Alpha/2022 - unaffected by the street columns). keep =
+max(6 - 3, 0) = 3. Before this change: 8 grouped contributor rows - 3 kept
+= 5 folded. After: 9 grouped contributor rows - 3 kept = 6 folded. The 3
+kept rows are unaffected (still the same top-3 by total_giving: row1=1000,
+row8=900, row6=800 - none of the split/merged rows are anywhere near the
+top), so this is a pure +1 on the folded side. Updated
+`capped$stats$contributor_folded_rows == 5L` to `== 6L` and
+`sum(capped_contributors$folded_rows) == 5L` to `== 6L`. Verified by hand
+that the existing capped_contributors assertions for
+`cycle == 2024L & company == "Alpha"` (state == "Other (3 rows folded)",
+city == "", contributors == 3L) are untouched and still correct, because
+that bucket's folded members (rows 2, 3, 4+5) are all cycle 2024 and the
+split only affects the cycle-2022 Boston pair - no existing assertion reads
+that (2022, Alpha) Other bucket by name, so nothing there needed updating
+beyond the stats totals above. No assertion was removed or weakened; only
+the two row/fold counts whose arithmetic changed were updated, with the
+above arithmetic recorded in the file's own comments as well as here.
+
+New assertion added (does not replace or weaken anything) directly after
+the ZIP block, asserting street_1/street_2 sit right after occupation in
+the OUTPUT frame's columns, per the task brief:
+  occupation_position <- match("occupation", names(contributors))
+  stopifnot(
+    !is.na(occupation_position),
+    identical(
+      names(contributors)[occupation_position + c(1L, 2L)],
+      c("street_1", "street_2")
+    )
+  )
+
+Run: & "C:/Program Files/R/R-4.6.0/bin/Rscript.exe" tests/test_spending_detail_frames.R
+Tail (verbatim, full output - the script prints nothing but the final line
+on success):
+  test_spending_detail_frames: PASS
+
+Re-run: & "C:/Program Files/R/R-4.6.0/bin/Rscript.exe" tests/test_raw_contribution_columns.R
+Tail (verbatim, full output):
+  PASS check (a) collect.R contribution_columns() keeps the address block
+  PASS check (b) collect.R corporate_columns keeps the address block
+  PASS check (c) fec_api.R fec_api_corporate_records() keeps the address block
+  PASS check (d) tidy_stage.R contributions spec matches the contract
+  PASS check (e) export_crypto_spending_data.R raw_export projection matches the contract
+  PASS check (f) init_schema() migrates an old database to the street columns
+  PASS check (g) negative control: the shuffled block is rejected
+  PASS check (h) report.R spending_raw_report_rows() SELECTs return the street columns
+  test_raw_contribution_columns: 0 check(s) failed
+  test_raw_contribution_columns: PASS
+
+--------------------------------------------------------------------
+Task 2: mentat/tools/crypto_workbook_builder.mjs previewRanges
+--------------------------------------------------------------------
+File: mentat/tools/crypto_workbook_builder.mjs (SCRATCH copy)
+
+`grep -n "previewRanges"` found one Map literal, :2652-2672, and one use
+site, :2692-2706 (`if (process.env.MENTAT_RENDER_PREVIEWS === "1") { for
+(const [sheetName, range] of previewRanges) { ... workbook.render({
+sheetName, range, scale: 0.75, format: "png" }) ... } }`). previewRanges
+feeds the OPTIONAL diagnostic PNG preview render of each sheet (gated
+behind MENTAT_RENDER_PREVIEWS=1) - i.e. it is purely the visible-preview
+crop rectangle for a screenshot artifact, not used by the real XLSX export
+(`SpreadsheetFile.exportXlsx(workbook)` at :2687, just above, is
+unconditional and does not consult previewRanges at all).
+
+`grep -n "Contributor Detail"` found the previewRanges entry at :2663
+(`["Contributor Detail", "A1:K30"]`) plus the sheet's own build function
+`buildContributorDetail()` (:2205-2249+). Read that function: headers
+(:2207-2211) are 13 columns - Cycle, Company, Employer, Occupation, Street
+1, Street 2, City, State, ZIP, Total Giving, Gift Count, Contributors, Rows
+Folded (A..M) - the row body is written to `A5:M${last}` (:2248) and the
+table is added over `A5:M${last}` (:2249); titleBlock's width argument is
+already "M" (:2244). So the sheet genuinely spans through column M, and the
+previewRanges crop of A1:K30 clips the two rightmost columns (Contributors,
+Rows Folded) out of the PNG preview.
+
+Widened the previewRanges entry to match the sheet's real width:
+  ["Contributor Detail", "A1:K30"],  ->  ["Contributor Detail", "A1:M30"],
+(SCRATCH file, line 2663.)
+
+Confirmed no other site in the SCRATCH tree references the stale A1:K30
+range (`grep -rn "K30"` under mentat/ only matched unrelated FEC
+transaction-ID substrings in inputs/fec_beneficiary/pas222/itpas2.txt and
+binary cache files - no code references).
+
+Run: node tests\test_contributor_detail_header.cjs
+Tail (verbatim, full output):
+  ✔ buildContributorDetail header matches the contract required_headers exactly (61.3774ms)
+  ✔ negative control: a header with the two Street columns removed does not equal the produced header (1.2398ms)
+  ✔ a row lacking street_1 yields '' in the Street 1 cell, not undefined (0.6934ms)
+  ✔ the row block stays cell-aligned with the header for every row (0.6526ms)
+  ℹ tests 4
+  ℹ suites 0
+  ℹ pass 4
+  ℹ fail 0
+  ℹ cancelled 0
+  ℹ skipped 0
+  ℹ todo 0
+  ℹ duration_ms 70.6607
+
+Run: node tests\test_raw_contribution_columns.cjs
+Tail (verbatim, full output):
+  ✔ rawHeaders matches the contract header order (1.4187ms)
+  ✔ the row projection keeps the address block contiguous and cell aligned (2.4249ms)
+  ✔ compactRawHeaders still drops every geography column by design (0.2817ms)
+  ✔ negative control: a shuffled header block is rejected (0.3758ms)
+  ℹ tests 4
+  ℹ suites 0
+  ℹ pass 4
+  ℹ fail 0
+  ℹ cancelled 0
+  ℹ skipped 0
+  ℹ todo 0
+  ℹ duration_ms 11.1
+
+--------------------------------------------------------------------
+Anything that contradicted this task's brief
+--------------------------------------------------------------------
+Nothing contradicted the brief. Both gaps were exactly as described in this
+file's own CONTRADICTIONS/GAPS #1 and #3 above (same file, same function,
+same stale A1:K30 range), which made the "explain the arithmetic" and "read
+the surrounding code" steps straightforward to verify against the live
+report.R and crypto_workbook_builder.mjs rather than guesswork. The row/fold
+count deltas (8->9 contributor cells, 5->6 folded rows under cap 6) were
+derived by hand-tracing every one of the fixture's 10 included rows through
+the new 10-column contributor grain before editing, then confirmed by the
+passing test run above.

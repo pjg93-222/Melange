@@ -1,0 +1,269 @@
+S4 - cross-industry addressing (Area E), phase 4 client review pass
+Date: 2026-09-16 21:05:50 EDT
+Tree: C:\Users\pgoff\Mentat  branch codex/mentat-crypto  HEAD 91fe7402a126eca3a38deeca0f7a84402632d8dd
+Working directory for every command below: C:\Users\pgoff\Mentat\mentat
+
+================================================================
+THE FIVE TYPESCRIPT-REVIEWER FINDINGS
+================================================================
+
+1 HIGH  chartSourceRecord emitted industry:'' unconditionally - exactly the
+        shape studio_api.json negative_controls[2] says must be REJECTED, on
+        every worksheet-mode chart added to the briefing. The server would have
+        400'd its own client.
+        chart-studio-core.js:956-967  builds the record without industry, then
+        chart-studio-core.js:965     writes the key only when it carries a value.
+
+3 LOW   viewSourceRecord ran record.industry = chosen.industry || chosen.id even
+        when both were empty, writing the same refused blank.
+        chart-studio-core.js:949-950  set only when the resolved value is a non-empty string.
+
+2 HIGH  Two assertions had been patched with Object.assign in the TEST, which
+        made assertion (b) certify the defect in finding 1 rather than catch it.
+        The FIXTURE was updated instead and both assertions are straight
+        deepStrictEqual against it again:
+        studio-contract-examples.json producer.view_verified.chosen_dataset,
+          examples.views_save.source, producer.chart.sheet_source and
+          examples.briefing_add.source each gain "industry": "Crypto";
+          producer.view_worksheet keeps no dataset and so no industry key.
+        studio-contract.test.js:46   straight comparison restored
+        studio-contract.test.js:84   straight comparison restored
+        studio-contract.test.js:53   NEW test: chosen.industry beats chosen.id
+          (viewSourceRecord({}, {id:'Banking', label:'Banking', industry:'Credit Union'})
+           yields 'Credit Union'), plus the fallback to id, plus the two builders
+           proven never to write a blank industry key at all.
+
+4 MED   A malformed registry entry from GET /api/contributions/session threw out
+        of parseSnapshotRegistry and aborted the whole Contributions panel load.
+        Nothing reads `industries` yet, so the panel must not die for it.
+        chart-studio.js:337   the call is wrapped; industries falls back to null.
+
+5 MED   The browser test's list_views industries[] check printed PENDING SERVER
+        when the field was absent, so it could not fail. The server emits it now.
+        tests/test_studio_industry_browser.cjs:391-393  unconditional
+        Array.isArray + deepEqual; the PENDING SERVER branch is gone.
+
+================================================================
+node --test "app/tests/**/*.test.js"
+================================================================
+✔ [studio_api] negative control with teeth: a source without industry yields no industry key at all (0.0622ms)
+✔ [studio_api] negative control with teeth: a sources[] entry lacking industry is dropped by migrateSheet (0.1251ms)
+✔ [snapshot_registry] parseSnapshotRegistry accepts every example envelope (0.3498ms)
+✔ [snapshot_registry] parseSnapshotRegistry rejects every negative control, wrapped as a single-entry list (0.3258ms)
+ℹ tests 118
+ℹ suites 0
+ℹ pass 118
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 264.3672
+
+================================================================
+python -m unittest tests.test_studio_contract_examples tests.test_studio_views_industry -v
+(the python side posts the SAME fixture to the real routes; the server
+ stores source verbatim, so the added industry key must survive)
+================================================================
+test_the_two_industry_example_saves_and_reloads_byte_intact (tests.test_studio_views_industry.StudioIndustryTests.test_the_two_industry_example_saves_and_reloads_byte_intact) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 1.386s
+
+OK
+
+================================================================
+REAL-CLIENT PASS (DE-021's condition): node tests/test_studio_industry_browser.cjs
+It spawns the actual python app/server.py on a free port - never 8802/8806/
+8808/8841, which the test itself refuses - with a throwaway --data-root,
+saves two single-industry views from the real client, reloads them, and
+prints the JSON that reached disk.
+================================================================
+STEP 1: pick a free port and launch the console server on a throwaway --data-root
+PASS step 1 - server ready on port 56468, data root C:\Users\pgoff\AppData\Local\Temp\mentat-studio-industry-data-hcbzg9
+STEP 2: launch headless Chrome and stub the two contribution datasets
+PASS step 2 - routes stubbed for session, catalog (Banking + Credit Union, both available) and query
+STEP 3: open Chart Studio in Verified contributions mode and wait for the dataset picker
+PASS step 3 - Chart Studio open, both datasets listed, first chart rendered
+STEP 4: save the Banking sheet as its own view (dataset defaults to the first available report)
+PASS step 4 - Banking view saved; last query body carried industry="Banking"
+STEP 5: switch the Report picker to Credit Union and save that as a second view
+PASS step 5 - Credit Union view saved; last query body carried industry="Credit Union"
+STEP 6: reload the console and read the saved views back over HTTP, from the real server
+list_views industries[] for "Banking" view: ["Banking"]
+list_views industries[] for "Credit Union" view: ["Credit Union"]
+PASS step 6 - both saved views found in GET /api/studio/views from the real server
+STEP 7: read each saved view over HTTP and assert every sheet’s source.industry survived
+PASS step 7 - every sheet in both saved views carries the correct source.industry
+STEP 8: open the Credit Union view through the real UI (not the current console industry) and confirm openView() switches the report
+PASS step 8 - openView()/openability() opened the Credit Union view from the Banking source and switched the Report picker
+STEP 9: read the two saved <id>.json files straight off the throwaway data root
+--- on-disk e8dd0b19680a44b18ee40383ee81fcc5.json (S4 browser Banking) ---
+{
+  "id": "e8dd0b19680a44b18ee40383ee81fcc5",
+  "name": "S4 browser Banking",
+  "saved_at": 1789607166.2458491,
+  "sourceKey": "contributions|Banking|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source": {
+    "label": "Banking",
+    "reportName": "Banking Industry Spending Overview.xlsx",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "runName": "Configured completed-report folder",
+    "sheet": "Verified source observations",
+    "mode": "contributions",
+    "dataset": "Banking",
+    "industry": "Banking",
+    "datasetLabel": "Banking"
+  },
+  "sheets": [
+    {
+      "id": "s1",
+      "name": "Sheet 1",
+      "source": {
+        "run": "",
+        "runName": "Configured completed-report folder",
+        "report": "",
+        "reportName": "Banking Industry Spending Overview.xlsx",
+        "sheet": "Verified source observations",
+        "header": 0,
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "dataset": "Banking",
+        "industry": "Banking",
+        "mode": "contributions",
+        "basis": "receipt"
+      },
+      "sources": [],
+      "columns": [
+        {
+          "column": 0,
+          "aggregation": "sum"
+        }
+      ],
+      "rows": [
+        {
+          "column": 2,
+          "aggregation": "sum"
+        }
+      ],
+      "marks": {
+        "type": "bar",
+        "color": null,
+        "size": null,
+        "label": null,
+        "detail": [],
+        "tooltip": []
+      },
+      "filters": [],
+      "pages": null,
+      "pageMember": "",
+      "analytics": {
+        "transform": "none",
+        "period": "",
+        "horizon": 2,
+        "totals": false,
+        "average": false,
+        "median": false
+      },
+      "types": {},
+      "params": {
+        "start": 0,
+        "end": 0,
+        "limit": 0,
+        "subject": "",
+        "maxGroups": 0,
+        "splitMulti": false
+      },
+      "sort": "none",
+      "showLabels": false,
+      "fit": "standard"
+    }
+  ],
+  "active": 0
+}
+--- on-disk deac08e3e20b4c869cc9aef9f5f3af8d.json (S4 browser Credit Union) ---
+{
+  "id": "deac08e3e20b4c869cc9aef9f5f3af8d",
+  "name": "S4 browser Credit Union",
+  "saved_at": 1789607166.8191028,
+  "sourceKey": "contributions|Credit Union|bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "source": {
+    "label": "Credit Union",
+    "reportName": "Credit Union Industry Spending Overview.xlsx",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "runName": "Configured completed-report folder",
+    "sheet": "Verified source observations",
+    "mode": "contributions",
+    "dataset": "Credit Union",
+    "industry": "Credit Union",
+    "datasetLabel": "Credit Union"
+  },
+  "sheets": [
+    {
+      "id": "s1",
+      "name": "Sheet 1",
+      "source": {
+        "run": "",
+        "runName": "Configured completed-report folder",
+        "report": "",
+        "reportName": "Credit Union Industry Spending Overview.xlsx",
+        "sheet": "Verified source observations",
+        "header": 0,
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "dataset": "Credit Union",
+        "industry": "Credit Union",
+        "mode": "contributions",
+        "basis": "receipt"
+      },
+      "sources": [],
+      "columns": [
+        {
+          "column": 0,
+          "aggregation": "sum"
+        }
+      ],
+      "rows": [
+        {
+          "column": 2,
+          "aggregation": "sum"
+        }
+      ],
+      "marks": {
+        "type": "bar",
+        "color": null,
+        "size": null,
+        "label": null,
+        "detail": [],
+        "tooltip": []
+      },
+      "filters": [],
+      "pages": null,
+      "pageMember": "",
+      "analytics": {
+        "transform": "none",
+        "period": "",
+        "horizon": 2,
+        "totals": false,
+        "average": false,
+        "median": false
+      },
+      "types": {},
+      "params": {
+        "start": 0,
+        "end": 0,
+        "limit": 0,
+        "subject": "",
+        "maxGroups": 0,
+        "splitMulti": false
+      },
+      "sort": "none",
+      "showLabels": false,
+      "fit": "standard"
+    }
+  ],
+  "active": 0
+}
+PASS step 9 - both on-disk view files are valid JSON and printed above verbatim
+STEP 10: final check: zero pageerror entries
+PASS step 10 - zero pageerror entries across the whole run
+ALL 10 STEPS PASSED
+browser.close() exceeded its 10000ms bound
+browser test exit: 0

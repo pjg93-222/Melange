@@ -45,6 +45,11 @@
   let hoverTile = '';
   let lastResult = null, lastConfig = null, lastTitle = '', lastScope = '';
   let contributionCatalog = null, contributionToken = '', contributionResult = null, contributionRequest = null;
+  // The snapshot registry folded into GET /api/contributions/session as
+  // industries[] (S4_DESIGN.md section 2). Left null on an older server that
+  // does not send the field yet; nothing here has a reader for it beyond
+  // parseSnapshotRegistry's own validation.
+  let industries = null;
   let contributionOffset = 0, contributionRevision = 0, contributionController = null, contributionPending = null;
   let contributionMap = null, contributionGeometry = null, geometryKey = '', geometryRevision = 0, geometryTimer = null;
   let recordOffset = 0, recordSelection = null, recordRevision = 0, exporting = false;
@@ -329,7 +334,7 @@
   async function loadContributions(refresh=false) {
     const ticket=++revision;failure('');sourceReady=false;status('Reading verified contribution fields…');
     try {
-      if(!contributionCatalog||refresh){const [session,catalog]=await Promise.all([contributionAPI('session'),contributionAPI('catalog')]);if(ticket!==revision||!verified())return;contributionToken=session.token;contributionCatalog=catalog;}
+      if(!contributionCatalog||refresh){const [session,catalog]=await Promise.all([contributionAPI('session'),contributionAPI('catalog')]);if(ticket!==revision||!verified())return;contributionToken=session.token;contributionCatalog=catalog;try{if(Array.isArray(session.industries))industries=core.parseSnapshotRegistry(session.industries);}catch(error){industries=null;}}
       const previous=el('dataset').value||new URLSearchParams(location.search).get('industry')||document.getElementById('graph-industry')?.value;
       fill(el('dataset'),contributionCatalog.datasets.map(d=>[d.id,d.label||d.id]));
       // An unavailable report carries the reason on its own option, so it is
@@ -347,7 +352,7 @@
   function selectContributionDataset() {
     ++revision;contributionController?.abort();contributionPending=null;contributionOffset=0;contributionResult=null;contributionRequest=null;selection=[];history=[];future=[];
     const d=dataset(),key='contributions|'+d.id+'|'+d.provenance.workbook_sha256;sourceKey=key;const restored=restore(key);
-    for(const state of sheets)state.source={...state.source,mode:'contributions',dataset:d.id,basis:state.source.basis||'receipt',reportName:d.provenance.workbook,sheet:'Verified source observations',runName:'Configured completed-report folder',sha256:d.provenance.workbook_sha256};
+    for(const state of sheets)state.source={...state.source,mode:'contributions',dataset:d.id,industry:d.industry,basis:state.source.basis||'receipt',reportName:d.provenance.workbook,sheet:'Verified source observations',runName:'Configured completed-report folder',sha256:d.provenance.workbook_sha256};
     data={columns:contributions.fields(d.fields||contributionCatalog.fields,basis()),rows:[],row_count:0,header_row:0,sha256:d.provenance.workbook_sha256,sheet:'Verified source observations',note:d.provenance.scope};
     if(!restored){sheet().columns=[{column:data.columns.findIndex(f=>f.id==='company'),aggregation:'sum'}];sheet().rows=[{column:data.columns.findIndex(f=>f.id==='amount'),aggregation:'sum'}];sheet().marks.type='bar';}
     persist();renderAll();
@@ -420,7 +425,7 @@
     if(!data||!dataset()){el('reconcile').hidden=true;el('canvas').replaceChildren();el('table').replaceChildren();el('verified-summary').textContent='Reading verified source fields…';el('result-controls').hidden=true;el('title').textContent='Chart Studio';el('note').textContent='Choose a verified report in the Data panel to begin.';lastResult=null;return;}
     const ticket=++contributionRevision;
     try {
-      const compiled=contributions.compile(sheet(),columns(),{dataset:dataset().id,basis:basis(),offset:contributionOffset});
+      const compiled=contributions.compile(sheet(),columns(),{dataset:dataset().id,industry:dataset().industry,basis:basis(),offset:contributionOffset});
       const query=compiled.query,key=JSON.stringify(query);
       if(contributionRequest&&JSON.stringify({...contributionRequest,offset:0})!==JSON.stringify({...query,offset:0})&&contributionOffset){contributionOffset=0;query.offset=0;}
       if(!contributionRequest||JSON.stringify(contributionRequest)!==key){el('canvas').setAttribute('aria-busy','true');status('Reading verified source observations…');el('inspection').hidden=true;++recordRevision;lastResult=null;el('verified-summary').textContent='Reading verified totals…';}
@@ -1288,7 +1293,7 @@
     const missing = core.companyOverviewMissing(preset, columns());
     if (missing.length) { body.textContent = 'This source has no ' + missing.join(' or ') + ' field.'; return; }
     const state = core.companyOverviewSheet(preset, columns(), {company: overviewCompany, cycle: overviewCycle()});
-    const compiled = contributions.compile(state, columns(), {dataset: dataset().id, basis: basis(), offset: 0});
+    const compiled = contributions.compile(state, columns(), {dataset: dataset().id, industry: dataset().industry, basis: basis(), offset: 0});
     const result = await queryCached(compiled.query);
     if (ticket !== overviewRevision) return;
     body.replaceChildren();
@@ -1905,6 +1910,19 @@
     const entry = ((contributionCatalog && contributionCatalog.datasets) || []).find(d => d.id === parts[1]);
     if (!entry) return {ok: false, reason: 'This console has no report called ' + parts[1] + '.'};
     if (!entry.available) return {ok: false, reason: entry.message || 'That report is unavailable on this console.'};
+    // A view whose sheets fan out across more than one industry (S4_DESIGN.md
+    // section 4, sheet.sources[]) names every industry it needs at the view
+    // level too, so opening it can be refused up front rather than partway
+    // through a sheet that turns out to name an unregistered or unavailable
+    // report.
+    if (Array.isArray(view.industries)) {
+      const datasets = (contributionCatalog && contributionCatalog.datasets) || [];
+      for (const label of view.industries) {
+        const match = datasets.find(d => d.industry === label || d.id === label);
+        if (!match) return {ok: false, reason: 'This console has no report called ' + label + '.'};
+        if (!match.available) return {ok: false, reason: match.message || 'That report is unavailable on this console.'};
+      }
+    }
     return {ok: true, dataset: parts[1]};
   }
   async function openView(view) {
@@ -1924,7 +1942,7 @@
       selectContributionDataset();
     }
     commit(() => {
-      sheets = full.sheets.map(s => Object.assign(core.createSheet(s.name, s.id), s));
+      sheets = full.sheets.map(s => core.migrateSheet(Object.assign(core.createSheet(s.name, s.id), s)));
       active = Math.min(Math.max(0, full.active | 0), sheets.length - 1);
       dataSourceTab = false;
     });
@@ -1946,9 +1964,12 @@
       const label = storeKeyLabel(key);
       const name = ('Recovered \u00b7 ' + label + ' \u00b7 ' + entry.sheets.length +
         ' sheet' + (entry.sheets.length === 1 ? '' : 's')).slice(0, 80);
-      // The old store never recorded anything but the key, so a caption is all
-      // there is to carry - as an object, because a bare string is refused.
-      const source = core.captionSource(label);
+      // The old store never recorded anything but the key, so the key itself
+      // is all there is to carry - as an object, because a bare string is
+      // refused. A contributions key still carries its dataset (the dataset
+      // id IS the industry label), so captionSourceForKey recovers industry
+      // and dataset here instead of losing them the way a bare caption did.
+      const source = core.captionSourceForKey(key);
       try {
         const body = await api('/api/studio/views',
           {name, sourceKey: key, source, sheets: entry.sheets, active: entry.active | 0});

@@ -2205,8 +2205,9 @@ function buildRecipientDetail() {
 function buildContributorDetail() {
   const sheet = workbook.worksheets.getItem("Contributor Detail");
   const headers = [
-    "Cycle", "Company", "State", "City", "ZIP", "Employer", "Occupation",
-    "Total Giving", "Gift Count", "Contributors", "Rows Folded",
+    "Cycle", "Company", "Employer", "Occupation", "Street 1", "Street 2",
+    "City", "State", "ZIP", "Total Giving", "Gift Count", "Contributors",
+    "Rows Folded",
   ];
   const numericHeaders = new Set([
     "Total Giving", "Gift Count", "Contributors", "Rows Folded",
@@ -2222,38 +2223,40 @@ function buildContributorDetail() {
     .map((row) => [
       cycleLabelByNumber.get(row.cycle) ?? row.cycle_label ?? String(row.cycle),
       row.company ?? "",
-      row.state ?? "",
-      row.city ?? "",
-      row.zip5 ?? "",
       row.employer ?? "",
       row.occupation ?? "",
+      row.street_1 ?? "",
+      row.street_2 ?? "",
+      row.city ?? "",
+      row.state ?? "",
+      row.zip5 ?? "",
       Number(row.total_giving || 0),
       Number(row.gift_count || 0),
       Number(row.contributors || 0),
       Number(row.folded_rows || 0),
     ]);
-  const folded = rows.reduce((total, row) => total + Number(row[10] || 0), 0);
+  const folded = rows.reduce((total, row) => total + Number(row[12] || 0), 0);
   titleBlock(
     sheet,
     "Contributor Detail",
     "One row per contributor state / city / ZIP / employer / occupation per company per cycle. Static values: totals reconcile to the cycle totals; smaller rows beyond the row cap are folded into an Other row per company and cycle. A blank ZIP is a contribution whose filed ZIP is missing or not five digits, not a dropped row.",
     detailSourceNote(rows.length, folded),
-    "K",
+    "M",
   );
   const body = rows.length ? rows : [detailPlaceholder(headers, numericHeaders)];
   const last = 5 + body.length;
-  sheet.getRange(`A5:K${last}`).values = [headers, ...body];
-  const table = sheet.tables.add(`A5:K${last}`, true, "ContributorDetailTable");
+  sheet.getRange(`A5:M${last}`).values = [headers, ...body];
+  const table = sheet.tables.add(`A5:M${last}`, true, "ContributorDetailTable");
   styleTable(table);
   sheet.freezePanes.freezeRows(5);
-  sheet.getRange(`H6:H${last}`).format.numberFormat = currencyFormat;
-  sheet.getRange(`I6:K${last}`).format.numberFormat = countFormat;
-  const widths = [14, 28, 10, 24, 12, 42, 32, 18, 14, 14, 14];
+  sheet.getRange(`J6:J${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`K6:M${last}`).format.numberFormat = countFormat;
+  const widths = [14, 28, 42, 32, 20, 20, 24, 10, 12, 18, 14, 14, 14];
   widths.forEach((width, index) => {
     const column = excelColumn(index + 1);
     sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
   });
-  sheet.getRange(`B6:G${last}`).format.wrapText = true;
+  sheet.getRange(`B6:I${last}`).format.wrapText = true;
   return sheet;
 }
 
@@ -2657,7 +2660,7 @@ const previewRanges = new Map([
   ["Beneficiary Summary", "A1:X30"],
   ["PAC & Candidate Map", "A1:S30"],
   ["Recipient Detail", "A1:S30"],
-  ["Contributor Detail", "A1:K30"],
+  ["Contributor Detail", "A1:M30"],
   ["Downstream Activity", "A1:AB25"],
   ["Beneficiary Bridge", "A1:V25"],
   ...payload.cycles.map((cycle) => [`${cycle.label} Summary`, "A1:S35"]),

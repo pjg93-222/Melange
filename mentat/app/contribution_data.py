@@ -32,7 +32,7 @@ from run_cross_reference import coalesce_source_observations
 from cross_reference_store import EvidenceStore
 
 CACHE_ROOT = PROJECT / 'state' / 'contribution-analytics'
-VERSION = 2
+VERSION = 3
 RULE_PATHS = [PROJECT/'tools'/ (name+'.py') for name in ('run_cross_reference','cross_reference_engine',
     'cross_reference_store','pac_evidence','report_source_guard','validate_industry_coverage','fec_filing_headers')]
 RULE_PATHS += [PROJECT/'inputs/fec_receipt_rules.json',Path(__file__)]
@@ -47,10 +47,12 @@ DESTINATIONS = {'recipient_state':'Recipient committee state','represented_state
     'recipient_location_evidence':'Committee location evidence','represented_location_evidence':'Candidate link evidence'}
 DIMENSIONS = {
     'industry':'Industry', 'cycle':'Election cycle', 'year':'Contribution year',
-    'company':'Company', 'date':'Contribution date', 'zip5':'Contributor ZIP',
+    'company':'Company', 'date':'Contribution date',
+    'employer':'Reported employer', 'occupation':'Reported occupation',
+    'street_1':'Contributor street 1', 'street_2':'Contributor street 2',
+    'city':'Contributor city', 'state':'Contributor state', 'zip5':'Contributor ZIP',
     'contributor':'Reported contributor',
-    'state':'Contributor state', 'city':'Contributor city', 'employer':'Reported employer',
-    'occupation':'Reported occupation', 'recipient':'Recipient committee',
+    'recipient':'Recipient committee',
     'committee_id':'Committee ID', 'recipient_category':'Recipient category',
     'party':'Recipient party', 'funding_source':'Funding source',
     'decision_status':'Accounting status', 'receipt_role':'Receipt role',
@@ -180,11 +182,24 @@ def _sources(directory):
         raise ValueError('The configured report directory is unavailable.')
     result = []
     for workbook in sorted(directory.glob('* Industry Spending Overview.xlsx')):
+        if workbook.name.startswith('~$'):
+            continue
         if not workbook.resolve().is_relative_to(directory):
             raise ValueError('A report resolves outside its configured directory.')
         industry = workbook.name.removesuffix(' Industry Spending Overview.xlsx')
-        item = {'id':industry, 'industry':industry, 'label':industry,
-                'workbook':workbook, 'workbook_sha256':_hash(workbook)}
+        item = {'id':industry, 'industry':industry, 'label':industry, 'workbook':workbook}
+        try:
+            item['workbook_sha256'] = _hash(workbook)
+        except OSError:
+            # One book this process cannot open - Excel holding it, a scanner
+            # mid-pass - used to abort the whole list, so every route that
+            # lists snapshots answered 400 instead of naming the one snapshot
+            # that cannot be read. The entry is reported unavailable and the
+            # scan continues. No filename enters the message, as everywhere.
+            item.update(workbook_sha256=None, available=False,
+                        message='Report workbook is unreadable.')
+            result.append(item)
+            continue
         # The companion Data workbook is published beside the Overview by the
         # same run, from the same staging store and the same database. It is
         # recorded as lineage evidence ONLY: the verified dataset still reads
@@ -194,7 +209,13 @@ def _sources(directory):
         sibling = workbook.with_name(industry + ' Industry Spending Data.xlsx')
         if sibling.is_file() and sibling.resolve().is_relative_to(directory):
             item['data_workbook'] = sibling
-            item['data_workbook_sha256'] = _hash(sibling)
+            try:
+                item['data_workbook_sha256'] = _hash(sibling)
+            except OSError:
+                # The companion is lineage evidence, never a report source, so
+                # an unreadable one is a reported blank plus a failed lineage
+                # check below - it does not disqualify the Overview book.
+                item['data_workbook_sha256'] = None
             try:
                 item['data_lineage_matches'] = (
                     _workbook_source(_stamp(sibling)) == _workbook_source(_stamp(workbook)))
@@ -259,9 +280,10 @@ def _provenance(source):
             'scope':'Tracked companies represented by the pinned report source. Collection completeness is not inferred.'}
 
 
-def catalog(report_directory):
+def catalog(report_directory, sources=None):
+    # `sources` lets one request reuse a scan it already paid for.
     datasets=[]
-    for source in _sources(report_directory):
+    for source in (_sources(report_directory) if sources is None else sources):
         datasets.append({k:source[k] for k in ('id','industry','label','available')})
         datasets[-1].update(fields=_fields(), bases=[{'id':k,'label':v[0],'status':'provisional' if k=='original_observed' else 'supported_subset' if k=='original_supported' else 'observed'} for k,v in BASES.items()],
                             provenance=_provenance(source), message=source.get('message'), default_basis='receipt')
@@ -346,6 +368,7 @@ def _record(raw, decision, receipt):
         contributor=str(raw.get('contributor_name') or ''),
         state=str(raw.get('contributor_state') or '').upper().strip(),city=str(raw.get('contributor_city') or '').strip(),
         employer=str(raw.get('contributor_employer') or '').strip(),occupation=str(raw.get('contributor_occupation') or '').strip(),
+        street_1=str(raw.get('contributor_street_1') or '').strip(),street_2=str(raw.get('contributor_street_2') or '').strip(),
         recipient=str(raw.get('committee_name') or raw.get('committee_id') or ''),committee_id=str(raw.get('committee_id') or ''),
         party=str((receipt or {}).get('party') or raw.get('baseline_party') or 'Unknown'),
         recipient_category=str((receipt or {}).get('recipient_category') or raw.get('baseline_category') or 'Unclassified'),

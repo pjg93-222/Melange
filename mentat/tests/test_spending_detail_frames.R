@@ -29,9 +29,13 @@ stopifnot(
   length(MENTAT_FEC_COMMITTEE_DESIGNATION_LABELS) == 6L
 )
 
-# Three (cycle, company) groups, ten recipient committees, eight contributor
-# cells. The last row is excluded from analysis and carries the largest amount
-# in the fixture, so anything that leaks it into a total is unmissable.
+# Three (cycle, company) groups, ten recipient committees, nine contributor
+# cells (S4: street_1/street_2 joined the contributor grain, so the Boston
+# pair below - same city/zip/employer/occupation but different street_1 -
+# now lands in two cells instead of one; the Austin pair keeps sharing a
+# street, including a blank street_2, so it still folds into one). The last
+# row is excluded from analysis and carries the largest amount in the
+# fixture, so anything that leaks it into a total is unmissable.
 fixture <- data.table(
   cycle = c(rep(2024L, 7L), rep(2022L, 3L), 2024L),
   cycle_label = c(rep("2023-2024", 7L), rep("2021-2022", 3L), "2023-2024"),
@@ -58,6 +62,12 @@ fixture <- data.table(
   occupation = c("Engineer", "Analyst", "Analyst", "Manager", "Manager",
                  "Director", "Director", "Engineer", "Clerk", "Clerk",
                  "Engineer"),
+  street_1 = c("1 Market St", "200 Broadway", "350 5th Ave",
+               "100 Congress Ave", "100 Congress Ave", "400 Pine St",
+               "400 Pine St", "1 Market St", "10 Beacon St", "20 Beacon St",
+               "1 Market St"),
+  street_2 = c("Suite 100", "", "Fl 20", "", "", "", "Apt 2", "Suite 100",
+               "", "", "Suite 100"),
   amount = c(1000, 50, 40, 30, 20, 800, 10, 900, 5, 5, 9999),
   person_key = c("p1", "p2", "p3", "shared", "shared", "p4", "p5", "p6", "p7",
                  "p7", "pX"),
@@ -77,7 +87,7 @@ recipients <- uncapped$recipient_detail
 contributors <- uncapped$contributor_detail
 stopifnot(
   nrow(recipients) == 10L,
-  nrow(contributors) == 8L,
+  nrow(contributors) == 9L,
   all(recipients$folded_rows == 0L),
   all(contributors$folded_rows == 0L),
   uncapped$stats$recipient_folded_rows == 0L,
@@ -116,8 +126,22 @@ stopifnot(
   contributors[city == "Seattle" & zip5 == "", total_giving] == 10
 )
 
+# S4: street_1/street_2 joined the contributor grain directly after
+# occupation, both in the group-by key and in the output frame's column
+# order.
+occupation_position <- match("occupation", names(contributors))
+stopifnot(
+  !is.na(occupation_position),
+  identical(
+    names(contributors)[occupation_position + c(1L, 2L)],
+    c("street_1", "street_2")
+  )
+)
+
 # Capped at 6 with three (cycle, company) groups: three rows are reserved for the
 # Other rows, so only the three largest survive and seven recipient groups fold.
+# The contributor grain now has nine cells (not eight - see the street_1 split
+# above), so its fold count moves too: reserve 3, keep 3, fold 9 - 3 = 6.
 capped <- spending_detail_frames(fixture, 6L)
 capped_recipients <- capped$recipient_detail
 capped_contributors <- capped$contributor_detail
@@ -127,9 +151,9 @@ stopifnot(
   capped$stats$recipient_rows == nrow(capped_recipients),
   capped$stats$contributor_rows == nrow(capped_contributors),
   capped$stats$recipient_folded_rows == 7L,
-  capped$stats$contributor_folded_rows == 5L,
+  capped$stats$contributor_folded_rows == 6L,
   sum(capped_recipients$folded_rows) == 7L,
-  sum(capped_contributors$folded_rows) == 5L,
+  sum(capped_contributors$folded_rows) == 6L,
   sort(capped_recipients[folded_rows == 0L, total_giving], decreasing = TRUE) ==
     c(1000, 900, 800)
 )

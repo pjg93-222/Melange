@@ -1,6 +1,6 @@
 {
   "contract": "raw_contribution_columns",
-  "version": 1,
+  "version": 2,
   "owner": "S2 — Address fields and schema (audits/mentat_failings_20260915)",
   "rule": "On every listed surface the mandated columns appear in this exact order and immediately adjacent: occupation, street_1, street_2, city, state, zip. employer immediately precedes occupation on every surface (existing convention, kept). Producers keep their own constants; the tests in mentat/tests/test_raw_contribution_columns.{py,R,cjs} import this file and assert each producer against it, with a negative control that must fail.",
   "mandated_db": [
@@ -440,7 +440,6 @@
       ]
     },
     "contributor_detail_sheet": {
-      "status": "deferred to S4",
       "producer": "mentat/tools/crypto_workbook_builder.mjs buildContributorDetail (:2199-2245) fed by mentat/R/report.R contributor_keys (:1828-1831)",
       "required_headers": [
         "Cycle",
@@ -460,7 +459,6 @@
       "note": "current header is Cycle, Company, State, City, ZIP, Employer, Occupation, ...; reorder and street are S4's call because street changes the aggregate's grain"
     },
     "chart_studio_dimensions": {
-      "status": "deferred to S4",
       "producer": "mentat/app/contribution_data.py DIMENSIONS (:48-58) and the record builder (:343-348)",
       "required_key_order": [
         "employer",

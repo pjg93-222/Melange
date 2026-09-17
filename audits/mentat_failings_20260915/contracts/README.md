@@ -189,6 +189,9 @@ change in this lane.
 | Contract file | Owner | Shape | Status |
 | --- | --- | --- | --- |
 | _(none yet — S0 is read-only and writes no contracts)_ | — | — | — |
-| `raw_contribution_columns.json` | S2 | column-order block + per-surface headers (raw warehouse x2, R stage, Contributions sheet, tidy registry; Contributor Detail + Chart Studio deferred) | asserted by `tests/test_raw_contribution_columns.{py,R,cjs}` |
+| `raw_contribution_columns.json` (v2) | S2 | column-order block + per-surface headers (raw warehouse x2, R stage, Contributions sheet, tidy registry, Contributor Detail, Chart Studio DIMENSIONS - no surface deferred) | asserted by `tests/test_raw_contribution_columns.{py,R,cjs}`, `tests/test_contribution_dimensions_order.py`, `tests/test_contributor_detail_header.cjs` |
+| `snapshot_registry.json` (v2) | S4 | registry envelope + per-snapshot entry (industry, slug, workbook/companion/database/payload hashes, build_stamp; sha256 and build_stamp are null on an unreadable, unavailable workbook) | asserted by: `tests/test_snapshot_registry.py`, `tests/test_industry_routes.py` (GET /api/snapshots), `app/tests/studio-contract.test.js` (parseSnapshotRegistry) |
+| `contributions_api.json` (v2) | S4 | industry-scoped request/response pairs across every contributions/graph/comparison/cross-reference/snapshots route, plus the two industry-resolution error bodies | asserted by: `tests/test_industry_routes.py` |
+| `studio_api.json` (v1) | S4 | Chart Studio sheet + saved-view + briefing shapes carrying `source.industry` and `sheet.sources[]` round-trip | asserted by: `tests/test_studio_views_industry.py`, `app/tests/studio-contract.test.js`, `tests/test_studio_industry_browser.cjs` |
 
 Each session appends its contracts to this table as it creates them.

@@ -79,8 +79,8 @@ def model():
         'notes':['These are fixed, audited relationships, not an editable arbitrary-join engine.',
                  'Candidate, committee spending, coverage and evidence sheets remain separate sources at their own grain.']}
 
-def catalog(directory):
-    result=data.catalog(directory);result['fields']=fields();result['model']=model()
+def catalog(directory, sources=None):
+    result=data.catalog(directory, sources);result['fields']=fields();result['model']=model()
     for item in result['datasets']:item['fields']=result['fields'];item['model']=result['model']
     return result
 

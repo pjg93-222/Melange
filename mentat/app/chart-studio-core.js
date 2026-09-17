@@ -102,7 +102,13 @@
     return {
       id: id || '',
       name: name || 'Sheet 1',
-      source: {run: '', runName: '', report: '', reportName: '', sheet: '', header: 0, sha256: ''},
+      source: {run: '', runName: '', report: '', reportName: '', sheet: '', header: 0, sha256: '', dataset: '', industry: ''},
+      // The ordered series sources a sheet can fan out across - empty means
+      // the sheet reads one series, its own `source`. Each entry is
+      // {industry, dataset, label}. Populated by contributions mode and by
+      // migrateSheet(); nothing renders more than one source yet (S4 delivers
+      // the model, not the chart).
+      sources: [],
       columns: [],
       rows: [],
       marks: {type: 'automatic', color: null, size: null, label: null, detail: [], tooltip: []},
@@ -130,6 +136,30 @@
   function clearSheet(state) {
     const next = createSheet(state.name, state.id);
     next.source = clone(state.source || {});
+    return next;
+  }
+
+  // Backfills a sheet loaded from disk or the browser-local store before the
+  // industry parameter existed: a source that only ever recorded `dataset`
+  // gets `industry = dataset` (S4_DESIGN.md section 0.2 - the dataset id IS
+  // the industry label), and `sources` is normalized to an array of
+  // {industry, dataset, label} entries, dropping anything that cannot resolve
+  // to an industry rather than carrying a fan-out entry openability() could
+  // never check against the registry.
+  function migrateSheet(sheet) {
+    const next = sheet && typeof sheet === 'object' ? clone(sheet) : {};
+    const source = next.source && typeof next.source === 'object' ? next.source : {};
+    if (source.dataset && !source.industry) source.industry = source.dataset;
+    next.source = source;
+    const rawSources = Array.isArray(next.sources) ? next.sources : [];
+    next.sources = rawSources
+      .filter(entry => entry && typeof entry === 'object')
+      .map(entry => ({
+        industry: typeof entry.industry === 'string' ? entry.industry : '',
+        dataset: typeof entry.dataset === 'string' ? entry.dataset : '',
+        label: typeof entry.label === 'string' ? entry.label : ''
+      }))
+      .filter(entry => entry.industry);
     return next;
   }
 
@@ -882,6 +912,21 @@
     return label ? {label: String(label)} : {};
   }
 
+  // The same recovery, from a store key rather than a resolved label. This
+  // module never touches the network, so a contributions key
+  // ('contributions|<dataset>|<sha>') cannot look the dataset up in a
+  // catalog - but the dataset id IS the industry label (S4_DESIGN.md section
+  // 0.2), so the key alone is enough to recover industry and dataset instead
+  // of losing them the way a bare caption always did.
+  function captionSourceForKey(key) {
+    const parts = String(key || '').split('|');
+    if (parts[0] === 'contributions') {
+      const label = parts[1] || '';
+      return label ? {label: label, dataset: label, industry: label} : {};
+    }
+    return captionSource(parts.filter(Boolean).pop() || '');
+  }
+
   // What a saved view carries: enough to name the report, its digest and the
   // folder it came from a year from now, plus the caption the menu prints.
   function viewSourceRecord(state, chosen) {
@@ -889,12 +934,20 @@
     const record = {};
     const label = chosen ? (chosen.label || chosen.id) : (source.reportName || '');
     if (label) record.label = label;
-    for (const key of ['reportName', 'sha256', 'runName', 'sheet', 'mode', 'dataset']) {
+    for (const key of ['reportName', 'sha256', 'runName', 'sheet', 'mode', 'dataset', 'industry']) {
       if (source[key]) record[key] = source[key];
     }
     if (chosen) {
       record.dataset = chosen.id;
       if (chosen.label) record.datasetLabel = chosen.label;
+      // The DE-021 fix: a chosen catalog entry resolves to an industry,
+      // falling back to its id when an older catalog has not been extended
+      // with the field yet (id and industry are the same string today -
+      // S4_DESIGN.md section 0.2). A catalog entry with neither sets no key:
+      // an empty industry is the shape studio_api.json refuses, so writing
+      // one here would send the server a payload it must reject.
+      const industry = chosen.industry || chosen.id;
+      if (typeof industry === 'string' && industry) record.industry = industry;
     }
     return record;
   }
@@ -903,14 +956,80 @@
   function chartSourceRecord(state) {
     const source = state || {};
     const label = source.reportName || '';
-    return {label: label, reportName: label, runName: source.runName || '',
+    const record = {label: label, reportName: label, runName: source.runName || '',
       sheet: source.sheet || '', mode: source.mode || '', dataset: source.dataset || ''};
+    // Every worksheet-mode chart reaches the briefing through here, and an
+    // empty industry is exactly the payload studio_api.json's third negative
+    // control says must be refused. The key is written only when it carries
+    // a value - the same truthy-only rule viewSourceRecord above follows.
+    if (source.industry) record.industry = source.industry;
+    return record;
   }
 
   function chartProvenanceRecord(state, sha, generatedAt) {
     const label = (state || {}).reportName || '';
     return {sha: sha || '', reportName: label, source: label,
       generatedAt: generatedAt || new Date().toISOString()};
+  }
+
+  /* --------------------------------------------------------- snapshot registry */
+
+  const BUILD_STAMP_RE = /^[0-9a-f]{64}$/;
+
+  // Reads the snapshot registry envelope (contracts/snapshot_registry.json)
+  // or the bare `industries[]` array GET /api/contributions/session folds it
+  // into, and throws in plain English on anything that is not a usable
+  // entry. Consumed by industry_scope.resolve server-side and by the picker
+  // here; both need the same refusal the first time a bad entry is seen,
+  // not a silent `undefined` two calls later.
+  function parseSnapshotRegistry(payload) {
+    const list = Array.isArray(payload) ? payload
+      : (payload && Array.isArray(payload.snapshots)) ? payload.snapshots
+      : null;
+    if (!list) throw new Error('The snapshot registry must be a list of entries or an envelope with a snapshots array.');
+    for (const entry of list) {
+      if (!entry || typeof entry !== 'object') {
+        throw new Error('Each snapshot entry must be an object.');
+      }
+      if (typeof entry.industry !== 'string' || !entry.industry) {
+        throw new Error('Each snapshot entry needs a non-empty industry label.');
+      }
+      if (typeof entry.slug !== 'string') {
+        throw new Error(entry.industry + ' is missing its slug.');
+      }
+      if (typeof entry.available !== 'boolean') {
+        throw new Error(entry.industry + ' is missing its available flag.');
+      }
+      // A workbook the console could not open has no hash and therefore no
+      // stamp (contracts/snapshot_registry.json v2, the Telecom example). That
+      // is the ONLY entry allowed to omit it: an entry claiming to be available
+      // without a stamp is negative_controls[0], and still throws here.
+      const unreadable = entry.available === false && entry.build_stamp == null;
+      if (!unreadable && (typeof entry.build_stamp !== 'string' || !BUILD_STAMP_RE.test(entry.build_stamp))) {
+        throw new Error(entry.industry + ' is missing a valid build_stamp.');
+      }
+      if (entry.workbook && typeof entry.workbook === 'object' && typeof entry.workbook.name === 'string'
+          && /[\\/:]/.test(entry.workbook.name)) {
+        throw new Error(entry.industry + '’s workbook name must be relative to the report directory, not a path.');
+      }
+      // Not in the field list S4_DESIGN.md section 2 gives this function, but
+      // required to fail negative_controls[2] in contracts/snapshot_registry.json
+      // (an entry whose industry is the collector slug 'credit-unions' while
+      // dataset still reads the published label 'Credit Union'): section 1
+      // states dataset carries "the same value as industry", so the two
+      // disagreeing is exactly the DE-021 shape this contract exists to catch.
+      if (typeof entry.dataset === 'string' && entry.dataset && entry.dataset !== entry.industry) {
+        throw new Error(entry.industry + ' does not match its dataset (' + entry.dataset + ').');
+      }
+      // Also not in that field list, but required to fail negative_controls[4]
+      // (a companion sent as a bare filename string): section 2 defines
+      // companion, when present, as an object carrying its own sha256/bytes/
+      // modified_at/lineage_matches, the same DE-021 shape as industry-as-object.
+      if (entry.companion != null && typeof entry.companion !== 'object') {
+        throw new Error(entry.industry + '’s companion must be an object, not a bare filename.');
+      }
+    }
+    return list;
   }
 
   const api = {
@@ -920,11 +1039,12 @@
     aggregationsFor, measurePresets, applyMeasurePreset, datePartsFor,
     companyOverviewPresets, companyOverviewMissing, companyOverviewSheet,
     classifyFields, fieldAt, subjectField, pill, shelf, createSheet, clearSheet, swapShelves, sourceKey,
-    carriedFilterValue, graphCycleValue, quickAddZone,
+    carriedFilterValue, graphCycleValue, quickAddZone, migrateSheet,
     compileConfig, compileReport,
     showMeSelection, showMeEligibility, showMeApply, recommendedTile,
     sortResult, sortLocked, markValues, referenceValues, grandTotal, totalNote, rowsToMarksSummary,
-    sourceLabelOf, captionSource, viewSourceRecord, chartSourceRecord, chartProvenanceRecord
+    sourceLabelOf, captionSource, captionSourceForKey, viewSourceRecord, chartSourceRecord, chartProvenanceRecord,
+    parseSnapshotRegistry
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MentatStudioCore = api;

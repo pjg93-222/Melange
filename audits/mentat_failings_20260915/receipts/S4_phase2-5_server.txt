@@ -1,0 +1,956 @@
+S4 - cross-industry addressing (Area E), phases 2-5
+Date: 2026-09-16 20:27:47 EDT
+Tree: C:\Users\pgoff\Mentat   branch codex/mentat-crypto   HEAD 91fe7402a126eca3a38deeca0f7a84402632d8dd
+Working directory for every command below: C:\Users\pgoff\Mentat\mentat
+
+================================================================
+BEFORE (baseline, measured before any S4 edit)
+================================================================
+tests.test_studio_views                 Ran 8 tests   OK
+tests.test_studio_contract_examples     Ran 5 tests   OK
+tests.test_studio_briefing              Ran 9 tests   OK
+tests.test_contribution_http            Ran 22 tests  OK
+tests.test_console_delivery             Ran 1 test    FAILED (errors=1)  <- PRE-EXISTING RED
+tests.test_cross_reference_data         Ran 18 tests  OK
+combined five-suite run                 Ran 45 tests  FAILED (errors=1)
+
+The pre-existing red is a collection error, not a behaviour failure:
+  tests/test_console_delivery.py:12  from test_contribution_http import app
+  -> ModuleNotFoundError under 'python -m unittest tests.<module>', because
+     the tests directory is not on sys.path in that invocation. It is red at
+     HEAD and unrelated to S4. Proof it still runs its own way is at the end.
+
+================================================================
+NEW SUITES
+python -m unittest tests.test_snapshot_registry tests.test_industry_routes tests.test_studio_views_industry -v
+================================================================
+test_a_lock_file_snapshot_never_steals_its_workbook_s_slug (tests.test_snapshot_registry.SnapshotRegistryTests.test_a_lock_file_snapshot_never_steals_its_workbook_s_slug)
+Measured on the real report directory, 2026-09-16. ... ok
+test_every_contract_example_entry_is_what_the_producer_emits (tests.test_snapshot_registry.SnapshotRegistryTests.test_every_contract_example_entry_is_what_the_producer_emits) ... ok
+test_every_contract_negative_control_is_rejected (tests.test_snapshot_registry.SnapshotRegistryTests.test_every_contract_negative_control_is_rejected) ... ok
+test_find_accepts_a_report_directory_as_well_as_a_built_registry (tests.test_snapshot_registry.SnapshotRegistryTests.test_find_accepts_a_report_directory_as_well_as_a_built_registry) ... ok
+test_find_matches_a_label_or_its_slug_and_nothing_else (tests.test_snapshot_registry.SnapshotRegistryTests.test_find_matches_a_label_or_its_slug_and_nothing_else) ... ok
+test_hydration_and_companion_are_reported_not_inferred (tests.test_snapshot_registry.SnapshotRegistryTests.test_hydration_and_companion_are_reported_not_inferred) ... ok
+test_no_entry_carries_an_absolute_path (tests.test_snapshot_registry.SnapshotRegistryTests.test_no_entry_carries_an_absolute_path) ... ok
+test_the_build_stamp_changes_when_any_one_input_changes (tests.test_snapshot_registry.SnapshotRegistryTests.test_the_build_stamp_changes_when_any_one_input_changes) ... ok
+test_the_build_stamp_recomputes_from_the_four_source_hashes (tests.test_snapshot_registry.SnapshotRegistryTests.test_the_build_stamp_recomputes_from_the_four_source_hashes) ... ok
+test_the_envelope_is_validated_too (tests.test_snapshot_registry.SnapshotRegistryTests.test_the_envelope_is_validated_too) ... ok
+test_the_fixture_files_supply_the_two_fields_the_comparison_excludes (tests.test_snapshot_registry.SnapshotRegistryTests.test_the_fixture_files_supply_the_two_fields_the_comparison_excludes) ... ok
+test_the_negative_control_assertion_has_teeth (tests.test_snapshot_registry.SnapshotRegistryTests.test_the_negative_control_assertion_has_teeth) ... ok
+test_the_registry_validates_itself_and_lists_snapshots_sorted_by_label (tests.test_snapshot_registry.SnapshotRegistryTests.test_the_registry_validates_itself_and_lists_snapshots_sorted_by_label) ... ok
+test_an_industry_with_no_saved_run_says_so_without_serving_another_run (tests.test_industry_routes.GraphAndCrossReferenceTests.test_an_industry_with_no_saved_run_says_so_without_serving_another_run) ... ok
+test_example_13_graph_is_an_acceptance_run (tests.test_industry_routes.GraphAndCrossReferenceTests.test_example_13_graph_is_an_acceptance_run) ... skipped 'acceptance run: needs a real workbook'
+test_example_14_industry_selects_its_own_run_and_the_pointer_still_serves_latest (tests.test_industry_routes.GraphAndCrossReferenceTests.test_example_14_industry_selects_its_own_run_and_the_pointer_still_serves_latest) ... ok
+test_the_view_still_refuses_every_other_query_key (tests.test_industry_routes.GraphAndCrossReferenceTests.test_the_view_still_refuses_every_other_query_key) ... ok
+test_a_slug_addresses_every_industry_scoped_route (tests.test_industry_routes.IndustryRouteTests.test_a_slug_addresses_every_industry_scoped_route) ... ok
+test_every_contract_negative_control_is_refused_with_an_error_string (tests.test_industry_routes.IndustryRouteTests.test_every_contract_negative_control_is_refused_with_an_error_string) ... ok
+test_example_10_records_answers_with_the_same_scope_keys (tests.test_industry_routes.IndustryRouteTests.test_example_10_records_answers_with_the_same_scope_keys) ... ok
+test_example_11_geography_echoes_the_scope_and_strips_it_from_the_body (tests.test_industry_routes.IndustryRouteTests.test_example_11_geography_echoes_the_scope_and_strips_it_from_the_body) ... ok
+test_example_12_snapshots_filters_to_one_entry (tests.test_industry_routes.IndustryRouteTests.test_example_12_snapshots_filters_to_one_entry) ... ok
+test_example_15_an_unknown_industry_is_the_one_error_key_the_server_emits (tests.test_industry_routes.IndustryRouteTests.test_example_15_an_unknown_industry_is_the_one_error_key_the_server_emits) ... ok
+test_example_16_industry_and_dataset_that_disagree_are_refused (tests.test_industry_routes.IndustryRouteTests.test_example_16_industry_and_dataset_that_disagree_are_refused) ... ok
+test_example_4_catalog_without_a_parameter_lists_every_snapshot (tests.test_industry_routes.IndustryRouteTests.test_example_4_catalog_without_a_parameter_lists_every_snapshot) ... ok
+test_example_5_catalog_with_an_industry_keeps_only_that_dataset (tests.test_industry_routes.IndustryRouteTests.test_example_5_catalog_with_an_industry_keeps_only_that_dataset) ... ok
+test_example_6_geography_catalog_accepts_and_echoes_the_industry_only (tests.test_industry_routes.IndustryRouteTests.test_example_6_geography_catalog_accepts_and_echoes_the_industry_only) ... ok
+test_examples_1_to_3_session_carries_the_scope_and_the_whole_registry (tests.test_industry_routes.IndustryRouteTests.test_examples_1_to_3_session_carries_the_scope_and_the_whole_registry) ... ok
+test_examples_7_to_9_query_resolves_industry_dataset_or_both (tests.test_industry_routes.IndustryRouteTests.test_examples_7_to_9_query_resolves_industry_dataset_or_both) ... ok
+test_the_negative_control_assertion_has_teeth (tests.test_industry_routes.IndustryRouteTests.test_the_negative_control_assertion_has_teeth) ... ok
+test_the_shape_comparison_has_teeth (tests.test_industry_routes.IndustryRouteTests.test_the_shape_comparison_has_teeth) ... ok
+test_a_view_with_no_industry_anywhere_still_saves_and_lists_empty (tests.test_studio_views_industry.StudioIndustryTests.test_a_view_with_no_industry_anywhere_still_saves_and_lists_empty) ... ok
+test_every_contract_negative_control_is_refused (tests.test_studio_views_industry.StudioIndustryTests.test_every_contract_negative_control_is_refused) ... ok
+test_industries_is_distinct_and_in_first_seen_order (tests.test_studio_views_industry.StudioIndustryTests.test_industries_is_distinct_and_in_first_seen_order) ... ok
+test_membership_in_the_registry_is_deliberately_not_checked (tests.test_studio_views_industry.StudioIndustryTests.test_membership_in_the_registry_is_deliberately_not_checked) ... ok
+test_the_briefing_item_keeps_its_industry_verbatim (tests.test_studio_views_industry.StudioIndustryTests.test_the_briefing_item_keeps_its_industry_verbatim) ... ok
+test_the_industry_belongs_inside_the_data_source (tests.test_studio_views_industry.StudioIndustryTests.test_the_industry_belongs_inside_the_data_source) ... ok
+test_the_list_reports_which_industries_a_view_addresses (tests.test_studio_views_industry.StudioIndustryTests.test_the_list_reports_which_industries_a_view_addresses) ... ok
+test_the_negative_control_assertion_has_teeth (tests.test_studio_views_industry.StudioIndustryTests.test_the_negative_control_assertion_has_teeth) ... ok
+test_the_two_industry_example_saves_and_reloads_byte_intact (tests.test_studio_views_industry.StudioIndustryTests.test_the_two_industry_example_saves_and_reloads_byte_intact) ... ok
+
+----------------------------------------------------------------------
+Ran 40 tests in 2.182s
+
+OK (skipped=1)
+
+================================================================
+PRE-EXISTING SUITES, AFTER
+python -m unittest tests.test_studio_views tests.test_studio_contract_examples tests.test_studio_briefing tests.test_contribution_http tests.test_console_delivery -v
+================================================================
+test_a_payload_over_512_kb_is_refused_before_anything_is_written (tests.test_studio_views.StudioViewsTests.test_a_payload_over_512_kb_is_refused_before_anything_is_written) ... ok
+test_a_read_only_console_refuses_the_writes_and_still_answers_the_reads (tests.test_studio_views.StudioViewsTests.test_a_read_only_console_refuses_the_writes_and_still_answers_the_reads) ... ok
+test_a_saved_view_round_trips_through_a_file_on_disk (tests.test_studio_views.StudioViewsTests.test_a_saved_view_round_trips_through_a_file_on_disk) ... ok
+test_an_unknown_view_is_404_and_a_malformed_identifier_is_400 (tests.test_studio_views.StudioViewsTests.test_an_unknown_view_is_404_and_a_malformed_identifier_is_400) ... ok
+test_delete_removes_the_file_and_repeating_it_is_still_success (tests.test_studio_views.StudioViewsTests.test_delete_removes_the_file_and_repeating_it_is_still_success) ... ok
+test_duplicate_names_are_allowed (tests.test_studio_views.StudioViewsTests.test_duplicate_names_are_allowed) ... ok
+test_every_stated_limit_is_refused_and_nothing_is_stored (tests.test_studio_views.StudioViewsTests.test_every_stated_limit_is_refused_and_nothing_is_stored) ... ok
+test_the_list_is_newest_first (tests.test_studio_views.StudioViewsTests.test_the_list_is_newest_first) ... ok
+test_a_briefing_item_sent_with_a_string_provenance_loses_it_entirely (tests.test_studio_contract_examples.StudioContractExampleTests.test_a_briefing_item_sent_with_a_string_provenance_loses_it_entirely)
+Why the browser must send objects: the server replaces anything that is not ... ok
+test_a_saved_view_whose_source_is_a_caption_is_refused_with_the_reason (tests.test_studio_contract_examples.StudioContractExampleTests.test_a_saved_view_whose_source_is_a_caption_is_refused_with_the_reason)
+The original defect: the browser sent viewSourceLabel(), a string, and every ... ok
+test_a_view_recovered_from_the_old_browser_store_is_accepted_too (tests.test_studio_contract_examples.StudioContractExampleTests.test_a_view_recovered_from_the_old_browser_store_is_accepted_too)
+The migration path carries nothing but a caption, because the old ... ok
+test_the_example_briefing_item_keeps_its_provenance_object (tests.test_studio_contract_examples.StudioContractExampleTests.test_the_example_briefing_item_keeps_its_provenance_object) ... ok
+test_the_example_saved_view_is_accepted_exactly_as_written (tests.test_studio_contract_examples.StudioContractExampleTests.test_the_example_saved_view_is_accepted_exactly_as_written) ... ok
+test_a_read_only_console_refuses_the_writes_and_still_answers_the_reads (tests.test_studio_briefing.StudioBriefingTests.test_a_read_only_console_refuses_the_writes_and_still_answers_the_reads) ... ok
+test_an_added_item_is_listed_with_every_contracted_field_and_stored_as_a_file (tests.test_studio_briefing.StudioBriefingTests.test_an_added_item_is_listed_with_every_contracted_field_and_stored_as_a_file) ... ok
+test_an_item_sent_without_a_chip_still_lists_one_field_rather_than_none (tests.test_studio_briefing.StudioBriefingTests.test_an_item_sent_without_a_chip_still_lists_one_field_rather_than_none) ... ok
+test_order_accepts_a_permutation_and_refuses_anything_else (tests.test_studio_briefing.StudioBriefingTests.test_order_accepts_a_permutation_and_refuses_anything_else) ... ok
+test_remove_drops_the_item_and_its_chart_and_repeats_harmlessly (tests.test_studio_briefing.StudioBriefingTests.test_remove_drops_the_item_and_its_chart_and_repeats_harmlessly) ... ok
+test_the_chart_has_to_be_an_svg_string_under_six_megabytes (tests.test_studio_briefing.StudioBriefingTests.test_the_chart_has_to_be_an_svg_string_under_six_megabytes) ... ok
+test_the_forty_first_item_is_a_conflict_not_a_bad_request (tests.test_studio_briefing.StudioBriefingTests.test_the_forty_first_item_is_a_conflict_not_a_bad_request) ... ok
+test_the_short_scope_chip_survives_the_round_trip (tests.test_studio_briefing.StudioBriefingTests.test_the_short_scope_chip_survives_the_round_trip)
+Every reader-facing surface prints the chip first and the full scope only ... ok
+test_the_stored_chart_comes_back_as_text_not_as_an_image_document (tests.test_studio_briefing.StudioBriefingTests.test_the_stored_chart_comes_back_as_text_not_as_an_image_document) ... ok
+test_a_console_that_cannot_answer_busy_is_reported_busy (tests.test_contribution_http.ContributionHTTPTests.test_a_console_that_cannot_answer_busy_is_reported_busy) ... ok
+test_a_refused_post_with_a_large_body_answers_cleanly (tests.test_contribution_http.ContributionHTTPTests.test_a_refused_post_with_a_large_body_answers_cleanly) ... ok
+test_assets_are_same_origin_and_accessible_in_read_only_mode (tests.test_contribution_http.ContributionHTTPTests.test_assets_are_same_origin_and_accessible_in_read_only_mode) ... ok
+test_bad_hosts_and_foreign_origins_are_rejected (tests.test_contribution_http.ContributionHTTPTests.test_bad_hosts_and_foreign_origins_are_rejected) ... ok
+test_both_local_origins_can_query (tests.test_contribution_http.ContributionHTTPTests.test_both_local_origins_can_query) ... ok
+test_busy_reports_console_owned_work_only (tests.test_contribution_http.ContributionHTTPTests.test_busy_reports_console_owned_work_only) ... ok
+test_catalog_routes_use_configured_report_directory (tests.test_contribution_http.ContributionHTTPTests.test_catalog_routes_use_configured_report_directory) ... ok
+test_health_states_the_build_this_process_loaded_beside_the_one_on_disk (tests.test_contribution_http.ContributionHTTPTests.test_health_states_the_build_this_process_loaded_beside_the_one_on_disk) ... ok
+test_invalid_json_shape_length_and_unknown_routes_fail (tests.test_contribution_http.ContributionHTTPTests.test_invalid_json_shape_length_and_unknown_routes_fail) ... ok
+test_local_session_returns_token_and_read_only_state (tests.test_contribution_http.ContributionHTTPTests.test_local_session_returns_token_and_read_only_state) ... ok
+test_missing_or_wrong_tokens_never_invoke_analytics (tests.test_contribution_http.ContributionHTTPTests.test_missing_or_wrong_tokens_never_invoke_analytics) ... ok
+test_preparation_response_keeps_verified_source_identity (tests.test_contribution_http.ContributionHTTPTests.test_preparation_response_keeps_verified_source_identity) ... ok
+test_query_is_bound_to_the_workbook_version_that_passed_the_guard (tests.test_contribution_http.ContributionHTTPTests.test_query_is_bound_to_the_workbook_version_that_passed_the_guard) ... ok
+test_read_only_mode_allows_only_analytical_post_routes (tests.test_contribution_http.ContributionHTTPTests.test_read_only_mode_allows_only_analytical_post_routes) ... ok
+test_restart_hands_the_launcher_this_console_port_and_data_root (tests.test_contribution_http.ContributionHTTPTests.test_restart_hands_the_launcher_this_console_port_and_data_root) ... ok
+test_restart_is_refused_read_only_and_while_the_console_is_busy (tests.test_contribution_http.ContributionHTTPTests.test_restart_is_refused_read_only_and_while_the_console_is_busy) ... ok
+test_same_workbook_cannot_switch_database_after_verification (tests.test_contribution_http.ContributionHTTPTests.test_same_workbook_cannot_switch_database_after_verification) ... ok
+test_service_validation_failure_is_useful_json (tests.test_contribution_http.ContributionHTTPTests.test_service_validation_failure_is_useful_json) ... ok
+test_the_briefing_and_vendor_routes_are_allow_listed_with_their_media_types (tests.test_contribution_http.ContributionHTTPTests.test_the_briefing_and_vendor_routes_are_allow_listed_with_their_media_types) ... ok
+test_the_code_hash_covers_every_python_module_beside_the_server (tests.test_contribution_http.ContributionHTTPTests.test_the_code_hash_covers_every_python_module_beside_the_server) ... ok
+test_the_vendor_powerpoint_bundle_is_served_at_its_pinned_hash (tests.test_contribution_http.ContributionHTTPTests.test_the_vendor_powerpoint_bundle_is_served_at_its_pinned_hash) ... ok
+test_workbook_mismatch_disables_only_its_dataset_and_blocks_queries (tests.test_contribution_http.ContributionHTTPTests.test_workbook_mismatch_disables_only_its_dataset_and_blocks_queries) ... ok
+test_console_delivery (unittest.loader._FailedTest.test_console_delivery) ... ERROR
+
+======================================================================
+ERROR: test_console_delivery (unittest.loader._FailedTest.test_console_delivery)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_console_delivery
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_console_delivery.py", line 12, in <module>
+    from test_contribution_http import app
+ModuleNotFoundError: No module named 'test_contribution_http'
+
+
+----------------------------------------------------------------------
+Ran 45 tests in 5.029s
+
+FAILED (errors=1)
+
+================================================================
+tests.test_cross_reference_data (S4 refactored cross_reference_data.py)
+================================================================
+test_collection_child_uses_central_evidence_baseline_and_budget_roots (tests.test_cross_reference_data.CrossReferenceDataTests.test_collection_child_uses_central_evidence_baseline_and_budget_roots) ... ok
+test_coverage_and_transaction_metrics_are_separate_bounded_public_fields (tests.test_cross_reference_data.CrossReferenceDataTests.test_coverage_and_transaction_metrics_are_separate_bounded_public_fields) ... ok
+test_empty_does_not_create_directories (tests.test_cross_reference_data.CrossReferenceDataTests.test_empty_does_not_create_directories) ... ok
+test_http_endpoint_is_read_only_and_rejects_client_paths (tests.test_cross_reference_data.CrossReferenceDataTests.test_http_endpoint_is_read_only_and_rejects_client_paths) ... ok
+test_invalid_partisan_share_is_unavailable_not_zero (tests.test_cross_reference_data.CrossReferenceDataTests.test_invalid_partisan_share_is_unavailable_not_zero) ... ok
+test_missing_final_report_is_not_complete (tests.test_cross_reference_data.CrossReferenceDataTests.test_missing_final_report_is_not_complete) ... ok
+test_missing_or_invalid_new_metrics_are_unavailable_not_zero (tests.test_cross_reference_data.CrossReferenceDataTests.test_missing_or_invalid_new_metrics_are_unavailable_not_zero) ... ok
+test_no_path_or_run_traversal (tests.test_cross_reference_data.CrossReferenceDataTests.test_no_path_or_run_traversal) ... ok
+test_offline_cli_result_reaches_dashboard_without_counting_pac_twice (tests.test_cross_reference_data.CrossReferenceDataTests.test_offline_cli_result_reaches_dashboard_without_counting_pac_twice) ... ok
+test_old_report_notice_is_not_a_source_freshness_claim (tests.test_cross_reference_data.CrossReferenceDataTests.test_old_report_notice_is_not_a_source_freshness_claim) ... ok
+test_only_public_fec_filings_can_be_linked (tests.test_cross_reference_data.CrossReferenceDataTests.test_only_public_fec_filings_can_be_linked) ... ok
+test_oversize_duplicate_or_nonfinite_artifacts_are_rejected (tests.test_cross_reference_data.CrossReferenceDataTests.test_oversize_duplicate_or_nonfinite_artifacts_are_rejected) ... ok
+test_r_library_prefers_existing_user_configuration_then_verified_workspace (tests.test_cross_reference_data.CrossReferenceDataTests.test_r_library_prefers_existing_user_configuration_then_verified_workspace) ... ok
+test_resolved_path_cannot_escape_state_root (tests.test_cross_reference_data.CrossReferenceDataTests.test_resolved_path_cannot_escape_state_root) ... ok
+test_run_mismatch_or_corrupt_fingerprint_hides_totals (tests.test_cross_reference_data.CrossReferenceDataTests.test_run_mismatch_or_corrupt_fingerprint_hides_totals) ... ok
+test_running_progress_and_stalled_evidence (tests.test_cross_reference_data.CrossReferenceDataTests.test_running_progress_and_stalled_evidence) ... ok
+test_source_description_is_bounded_text_only (tests.test_cross_reference_data.CrossReferenceDataTests.test_source_description_is_bounded_text_only) ... ok
+test_summary_keeps_money_stages_separate_and_omits_private_data (tests.test_cross_reference_data.CrossReferenceDataTests.test_summary_keeps_money_stages_separate_and_omits_private_data) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 8.390s
+
+OK
+
+================================================================
+THE PRE-EXISTING REDS ARE AN INVOCATION ARTIFACT, NOT A BEHAVIOUR
+Three suites import a sibling test module by bare name, which only
+resolves when the tests directory is the working directory. All three
+are red at HEAD under 'python -m unittest tests.<module>' and green the
+way they expect. Run here as a negative control on that claim:
+  cd mentat/tests && python -m unittest <module>
+================================================================
+test_console_delivery        Ran 5 tests in 0.593s  OK 
+test_graph_data              Ran 15 tests in 1.835s  OK 
+test_collection_console      Ran 28 tests in 46.317s  OK 
+
+S4 edited one assertion in each of two pre-existing suites, because the
+contract changed the shape they asserted exactly. Both are listed in the
+ownership note in HANDOFF.md; neither is an S4-owned file:
+  tests/test_contribution_http.py  session body now carries industry + industries[]
+  tests/test_console_delivery.py   geography/catalog body now carries industry
+
+================================================================
+PER-SUITE COUNTS
+================================================================
+test_snapshot_registry             Ran 13 tests in 0.016s  OK 
+test_industry_routes               Ran 18 tests in 1.705s  OK (skipped=1) 
+test_studio_views_industry         Ran 9 tests in 0.774s  OK 
+test_studio_views                  Ran 8 tests in 1.584s  OK 
+test_studio_contract_examples      Ran 5 tests in 0.690s  OK 
+test_studio_briefing               Ran 9 tests in 2.892s  OK 
+test_contribution_http             Ran 22 tests in 0.928s  OK 
+test_cross_reference_data          Ran 18 tests in 4.899s  OK 
+test_console_delivery              Ran 1 test in 0.000s  FAILED (errors=1) 
+test_report_insights               Ran 18 tests in 0.693s  OK 
+test_report_source_guard           Ran 23 tests in 6.714s  OK 
+test_contribution_data             Ran 25 tests in 2.293s  OK 
+
+================================================================
+NEGATIVE CONTROLS (the contracts' own, all asserted to FAIL)
+================================================================
+snapshot_registry    version=1  5 negative controls asserted via snapshot_registry.validate_entry -> ValueError
+    - every snapshot entry must carry a build_stamp; a producer that returns before hashing finishes (or d
+    - workbook.name must be relative to report_directory (S4_DESIGN.md section 2); an absolute path leaks 
+    - 'credit-unions' is the R collector's MENTAT_INDUSTRY slug, never a published label; the registry's i
+    - build_stamp must be 64 lowercase hex characters recomputable from the four source hashes by the form
+    - the DE-021 shape: companion must be an object carrying its own sha256/bytes/modified_at/lineage_matc
+contributions_api    version=1  5 negative controls asserted via POST /api/contributions/query -> 400 {'error': str}
+    - industry must be a string the registry can match by label or slug; resolve() cannot compare a number
+    - industry must be a registry label or slug, never a filesystem path; this is the same shape _source()
+    - unknown label/slug; rule 1's else-branch returns 400 with the single error key server.py emits (do_G
+    - rule 3: industry and dataset both present and disagreeing must 400 with 'The industry and dataset in
+    - an empty string is not a registered label or slug; rule 1 rejects it exactly as an unknown label, wi
+studio_api           version=1  5 negative controls asserted via POST /api/studio/views -> 400 {'error': str}
+    - source.industry must be a non-empty string (S4_DESIGN.md section 4); an object is the exact DE-021 s
+    - every sources[] entry must carry industry alongside dataset/label; an entry missing it cannot be res
+    - source.industry must be a non-empty string; an empty string is indistinguishable from 'never set' an
+    - sheet.sources must be an array of {industry, dataset, label} entries, never a bare string; a string 
+    - the record whitelist in Console.save_view (server.py ~:963) builds `value` from named keys only (id,
+
+================================================================
+MEASURED AGAINST THE REAL PUBLISHED REPORT DIRECTORY
+================================================================
+report_directory: C:\Users\pgoff\OneDrive\Desktop\Mentat Complete Files
+registry() cold 2.591s, warm 0.184s (contribution_data._workbook_source is lru_cached; the warm cost is the per-snapshot manifest and payload-metadata reads _sources() already did on every catalog/query request before S4)
+
+  Banking                          available=True  slug=banking                        stamp=0c8cc223fb1091f0
+  Community Banks                  available=True  slug=community_banks                stamp=8646b7a547af85f2
+  Credit Arms                      available=True  slug=credit_arms                    stamp=8ebc6055a58875c8
+  Credit Union                     available=True  slug=credit_union                   stamp=4b8523becac26c5a
+  Crypto                           available=True  slug=crypto                         stamp=6c94df730d0114b9
+  Fintech                          available=True  slug=fintech                        stamp=677ccc4d95e1f79a
+  Property & Casualty Insurance    available=True  slug=property_casualty_insurance    stamp=0fdc14cde4fade09
+  Telecom                          available=True  slug=telecom                        stamp=7acb6cc2eafea4b0
+  ~$Credit Union                   available=False slug=credit_union                   stamp=74f10a78fd88d66a
+
+DEFECT FOUND, NOT S4's TO FIX: contribution_data._sources() globs
+'* Industry Spending Overview.xlsx' and so lists Excel's lock file as a
+ninth snapshot, '~$Credit Union'. Console.published_reports() skips '~$'
+names (server.py:1404); _sources() does not. The phantom slugs to
+'credit_union' - the same slug as the book it locks - and it is already
+visible today as a dataset in GET /api/contributions/catalog. Owner of
+mentat/app/contribution_data.py should add the same '~$' skip.
+S4's mitigation, in its own file: snapshot_registry.find() resolves a
+label outright and prefers an available snapshot on a slug, so addressing
+is deterministic while the phantom is there. Pinned by
+tests/test_snapshot_registry.py::test_a_lock_file_snapshot_never_steals_its_workbook_s_slug
+  find('credit_union')   -> Credit Union
+  find('Credit Union')   -> Credit Union
+  find('~$Credit Union') -> ~$Credit Union
+
+================================================================
+FILES
+================================================================
+ M audits/mentat_failings_20260915/HANDOFF.md
+ M audits/mentat_failings_20260915/contracts/README.md
+ M mentat/app/cross_reference_data.py
+ M mentat/app/desktop/Launcher.cs
+ M mentat/app/graph.css
+ M mentat/app/graph_data.py
+ M mentat/app/report_insights.py
+ M mentat/app/server.py
+ M mentat/app/style.css
+ M mentat/tests/Test-MentatNodeHeapPlan.ps1
+ M mentat/tests/console_browser_fixture.py
+ M mentat/tests/test_api_company_cycle_fanout.py
+ M mentat/tests/test_chart_math.cjs
+ M mentat/tests/test_collection_console.py
+ M mentat/tests/test_contribution_http.py
+ M mentat/tests/test_downstream_enrichment.py
+ M mentat/tests/test_export_progress_guards.R
+ M mentat/tests/test_fec_api.R
+ M mentat/tests/test_fec_api_fanout.R
+ M mentat/tests/test_fec_beneficiary_helpers.R
+ M mentat/tests/test_fec_key_store.py
+ M mentat/tests/test_graph_data.py
+ M mentat/tests/test_merge_company_shards.py
+ M mentat/tests/test_names.R
+ M mentat/tests/test_pac_cash_model.py
+ M mentat/tests/test_pac_evidence.py
+ M mentat/tests/test_receipt_roles.R
+ M mentat/tests/test_report.R
+ M mentat/tests/test_report_insights.py
+ M mentat/tests/test_resilient_orchestrator.py
+ M mentat/tests/test_rules.R
+ M mentat/tests/test_sqlite_lane_locking.R
+ M mentat/tests/test_transfer_graph.py
+ M mentat/tests/test_validate_industry_coverage.py
+ M mentat/tests/test_workbook_payload.py
+?? audits/mentat_failings_20260915/S4_DESIGN.md
+?? audits/mentat_failings_20260915/receipts/S2_backfill_dryrun_production.md
+?? audits/mentat_failings_20260915/receipts/S2_commit_receipt.md
+?? mentat/app/README.md.bak-20260914-E
+?? mentat/app/README.md.bak-20260914-F1
+?? mentat/app/README.md.bak-20260914-fix1
+?? mentat/app/Start-MentatApp.ps1.bak-20260914-F1
+?? mentat/app/Start-MentatApp.ps1.bak-20260915-launcher
+?? mentat/app/app.js.bak-20260909
+?? mentat/app/app.js.bak-20260911
+?? mentat/app/app.js.bak-20260914-F1
+?? mentat/app/app.js.bak-20260914-fix1
+?? mentat/app/app.js.bak-20260914-wording
+?? mentat/app/app.js.bak-20260915-launcher
+?? mentat/app/app.js.bak2-20260909
+?? mentat/app/app.js.bak3-20260909
+?? mentat/app/chart-briefing.css.bak-20260915-ride1
+?? mentat/app/chart-briefing.js.bak-20260914-fix1
+?? mentat/app/chart-briefing.js.bak-20260914-wording
+?? mentat/app/chart-briefing.js.bak-20260915-ride1
+?? mentat/app/chart-comparison.js.bak-20260913
+?? mentat/app/chart-comparison.js.bak-20260913-redesign
+?? mentat/app/chart-comparison.js.bak-20260914-Fc
+?? mentat/app/chart-export.js.bak-20260914-E
+?? mentat/app/chart-export.js.bak-20260914-wording
+?? mentat/app/chart-math.js.bak-20260911
+?? mentat/app/chart-math.js.bak-20260912
+?? mentat/app/chart-math.js.bak-20260913-redesign
+?? mentat/app/chart-studio-contributions.js.bak-20260913-redesign
+?? mentat/app/chart-studio-contributions.js.bak-20260914-Fc
+?? mentat/app/chart-studio-contributions.js.bak-20260914-fix1
+?? mentat/app/chart-studio-contributions.js.bak-20260914-wording
+?? mentat/app/chart-studio-core.js.bak-20260911b
+?? mentat/app/chart-studio-core.js.bak-20260912
+?? mentat/app/chart-studio-core.js.bak-20260913-redesign
+?? mentat/app/chart-studio-core.js.bak-20260914-Fc
+?? mentat/app/chart-studio-core.js.bak-20260914-fix1
+?? mentat/app/chart-studio-core.js.bak-20260914-wording
+?? mentat/app/chart-studio.css.bak-20260913
+?? mentat/app/chart-studio.css.bak-20260913-redesign
+?? mentat/app/chart-studio.css.bak-20260914-E
+?? mentat/app/chart-studio.css.bak-20260914-Fc
+?? mentat/app/chart-studio.js.bak-20260911b
+?? mentat/app/chart-studio.js.bak-20260912
+?? mentat/app/chart-studio.js.bak-20260913
+?? mentat/app/chart-studio.js.bak-20260913-redesign
+?? mentat/app/chart-studio.js.bak-20260914-E
+?? mentat/app/chart-studio.js.bak-20260914-Fc
+?? mentat/app/chart-studio.js.bak-20260914-fix1
+?? mentat/app/chart-studio.js.bak-20260914-wording
+?? mentat/app/chart-studio.js.bak-20260915-ride1
+?? mentat/app/charts.js.bak-20260911
+?? mentat/app/charts.js.bak-20260914-E
+?? mentat/app/charts.js.bak-20260914-wording
+?? mentat/app/cross-reference.js.bak-20260914-Fc
+?? mentat/app/cross-reference.js.bak-20260914-wording
+?? mentat/app/graph.js.bak-20260914-E
+?? mentat/app/graph.js.bak-20260914-Fc
+?? mentat/app/graph.js.bak-20260914-fix1
+?? mentat/app/graph.js.bak-20260914-wording
+?? mentat/app/grouped-chart.js.bak-20260911
+?? mentat/app/index.html.bak-20260909
+?? mentat/app/index.html.bak-20260911
+?? mentat/app/index.html.bak-20260911b
+?? mentat/app/index.html.bak-20260912
+?? mentat/app/index.html.bak-20260913-redesign
+?? mentat/app/index.html.bak-20260914-E
+?? mentat/app/index.html.bak-20260914-Fc
+?? mentat/app/index.html.bak-20260914-wording
+?? mentat/app/index.html.bak2-20260909
+?? mentat/app/industry_scope.py
+?? mentat/app/server.py.bak-20260909
+?? mentat/app/server.py.bak-20260911
+?? mentat/app/server.py.bak-20260913
+?? mentat/app/server.py.bak-20260914-E
+?? mentat/app/server.py.bak-20260914-E2
+?? mentat/app/server.py.bak-20260914-F1
+?? mentat/app/server.py.bak-20260914-F1b
+?? mentat/app/server.py.bak-20260914-fix1
+?? mentat/app/server.py.bak-20260914-wording
+?? mentat/app/server.py.bak-20260915-ride1
+?? mentat/app/server.py.bak3-20260909
+?? mentat/app/snapshot_registry.py
+?? mentat/app/style.css.bak2-20260909
+?? mentat/app/tests/chart-briefing.test.js.bak-20260914-fix1
+?? mentat/app/tests/chart-briefing.test.js.bak-20260914-wording
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260911b
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260912
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260913-redesign
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260914-E
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260914-Fc
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260914-fix1
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260914-wording
+?? mentat/app/tests/reconcile-cycle.test.js.bak-20260914-wording
+?? mentat/app/workspace.css.bak-20260914-F1
+?? mentat/tests/Test-MentatFundingLabels.ps1
+?? mentat/tests/Test-MentatReportDirectory.ps1
+?? mentat/tests/test_api_request_pool.py
+?? mentat/tests/test_app_lazy_startup_browser.cjs.bak-20260914-F1
+?? mentat/tests/test_app_lazy_startup_browser.cjs.bak-20260915-launcher
+?? mentat/tests/test_attribution_recheck.R
+?? mentat/tests/test_audit_regressions.py
+?? mentat/tests/test_chart_builder_browser.cjs
+?? mentat/tests/test_chart_comparison_browser.cjs.bak-20260914-Fc
+?? mentat/tests/test_chart_studio_contributions.cjs
+?? mentat/tests/test_chart_studio_contributions.cjs.bak-20260914-Fc
+?? mentat/tests/test_collection_contract.R
+?? mentat/tests/test_collection_coverage.py
+?? mentat/tests/test_comparison_data.py
+?? mentat/tests/test_console_delivery.py
+?? mentat/tests/test_contribution_charts_browser.cjs
+?? mentat/tests/test_contribution_export_browser.cjs.bak-20260914-E
+?? mentat/tests/test_contribution_geo.py
+?? mentat/tests/test_contribution_http.py.bak-20260914-E
+?? mentat/tests/test_contribution_http.py.bak-20260914-F1
+?? mentat/tests/test_contribution_http.py.bak-20260914-F1b
+?? mentat/tests/test_contribution_http.py.bak-20260914-fix1
+?? mentat/tests/test_contribution_map_browser.cjs
+?? mentat/tests/test_contribution_map_eligibility.cjs
+?? mentat/tests/test_contribution_plot.cjs
+?? mentat/tests/test_contribution_plot_readability_browser.cjs
+?? mentat/tests/test_contribution_query.py
+?? mentat/tests/test_contribution_query_store.py
+?? mentat/tests/test_contribution_semantics.py
+?? mentat/tests/test_contribution_source_guard.py
+?? mentat/tests/test_contribution_studio.cjs
+?? mentat/tests/test_contribution_studio_map_browser.cjs
+?? mentat/tests/test_contribution_studio_state_browser.cjs
+?? mentat/tests/test_contribution_workbook_guard.py
+?? mentat/tests/test_coverage_view.cjs
+?? mentat/tests/test_cross_reference_data.py
+?? mentat/tests/test_cross_reference_engine.py
+?? mentat/tests/test_cross_reference_runner.py
+?? mentat/tests/test_cross_reference_store.py
+?? mentat/tests/test_cross_reference_view.cjs
+?? mentat/tests/test_cross_reference_view.cjs.bak-20260914-Fc
+?? mentat/tests/test_desktop_launcher.py.bak-20260914-F1
+?? mentat/tests/test_desktop_launcher.py.bak-20260915-launcher
+?? mentat/tests/test_destination_queries.py
+?? mentat/tests/test_evidence_archive.R
+?? mentat/tests/test_fec_filing_headers.py
+?? mentat/tests/test_funding_comparison.cjs
+?? mentat/tests/test_graph_lazy_tables_browser.cjs
+?? mentat/tests/test_industry_routes.py
+?? mentat/tests/test_original_giving_experiment.py
+?? mentat/tests/test_original_studio_contributions_browser.cjs.bak-20260914-Fc
+?? mentat/tests/test_publish_pocket.py.bak-20260914-fix1
+?? mentat/tests/test_query_coverage.py
+?? mentat/tests/test_receipt_metadata_hydration.py
+?? mentat/tests/test_recheck_attribution.py
+?? mentat/tests/test_recover_filing_forms.py
+?? mentat/tests/test_report_directory.R
+?? mentat/tests/test_report_directory.py
+?? mentat/tests/test_report_source_guard.py
+?? mentat/tests/test_request_windows.R
+?? mentat/tests/test_run_archive.py
+?? mentat/tests/test_runtime_inputs.py
+?? mentat/tests/test_snapshot_registry.py
+?? mentat/tests/test_startup_performance.py
+?? mentat/tests/test_state_destinations.R
+?? mentat/tests/test_studio_briefing.py.bak-20260915-ride1
+?? mentat/tests/test_studio_canvas_only_browser.cjs
+?? mentat/tests/test_studio_canvas_only_browser.cjs.bak-20260914-E
+?? mentat/tests/test_studio_contract_examples.py.bak-20260915-ride1
+?? mentat/tests/test_studio_inspection_regression_browser.cjs
+?? mentat/tests/test_studio_reconciliation_browser.cjs.bak-20260914-fix1
+?? mentat/tests/test_studio_temporal_regression_browser.cjs
+?? mentat/tests/test_studio_views.py.bak-20260914-fix1
+?? mentat/tests/test_studio_views_industry.py
+?? mentat/tests/test_studio_wording.cjs.bak-20260914-fix1
+?? mentat/tests/test_transfer_evidence.R
+?? mentat/tests/test_ui_analysis.cjs
+?? mentat/tests/test_workbook_payload.py.bak-20260912
+?? mentat/tests/test_worker_sharing.py
+
+################################################################
+REVIEW PASS - the five python-reviewer findings
+Date: 2026-09-16 20:58:18 EDT
+HEAD 91fe7402a126eca3a38deeca0f7a84402632d8dd  (S3's commit; carried the S4 HANDOFF hunks)
+contribution_data.py VERSION 3, DIMENSIONS reordered, ~$ lock-file skip landed
+and contribution_data.py is now S4's to edit.
+################################################################
+
+1 HIGH  _sources() hashed each workbook outside its try, so one unreadable
+        book aborted the whole scan and 400'd session/snapshots/graph/comparison.
+        contribution_data.py:190-201  workbook hash wrapped; the entry becomes
+                                      available False, 'Report workbook is unreadable.',
+                                      workbook_sha256 None, and the loop continues.
+        contribution_data.py:211-218  companion hash wrapped; lineage evidence only,
+                                      so it reports a blank and does not disqualify.
+        snapshot_registry.py:99-103   no stamp is fabricated for an entry with no hash
+                                      (a stamp over the other three fields would be the
+                                      SAME string for every unreadable book): null.
+        snapshot_registry.py:176-180  workbook SHA-256 may be absent ONLY when
+        snapshot_registry.py:199      available is false; same for build_stamp.
+        contracts/snapshot_registry.json description records it. examples untouched,
+        so the file stays version 1 (README: version increments on examples changes).
+        Tests: tests/test_snapshot_registry.py::UnreadableWorkbookTests, 4 tests,
+        driving the REAL _sources() over two empty workbooks with _hash patched to
+        raise PermissionError on the first path only. Negative controls: without the
+        patch neither entry is unreadable and both stamp; and an AVAILABLE entry
+        missing its hash or its stamp is still rejected.
+
+2 HIGH  parse_qs drops blank values, so GET ...?industry= took the legacy path
+        with industry null instead of the contract's 400.
+        industry_scope.py:23          import parse_qs
+        industry_scope.py:75-85       from_query accepts a raw query string and
+                                      re-parses it with keep_blank_values.
+        server.py:1824  session       from_query(registry, parsed.query)
+        server.py:1843  catalog       from_query(registry, parsed.query)
+        server.py:1854  geo/catalog   from_query(app.report_directory, parsed.query)
+        server.py:1859  snapshots     from_query(registry, parsed.query)
+        No other route's parsing changed; do_GET still builds `query` as before.
+        Test: test_industry_routes.py::test_a_blank_industry_on_a_get_is_refused_not_silently_ignored
+        - all four routes 400 with the registry refusal, and the same four with no
+        industry key at all still answer 200 with industry null (the teeth).
+
+3 MED   registry built twice per request.
+        contribution_data.py:283      catalog(report_directory, sources=None)
+        contribution_semantics.py:82  catalog(directory, sources=None) pass-through
+        snapshot_registry.py:105,112  registry(report_directory, sources=None)
+        server.py:1832-1842           /api/contributions/catalog reads the folder ONCE
+                                      and hands that list to both producers.
+        server.py:1524                graph_catalog(identifier, reports=None)
+        server.py:1546-1560           Console.graph takes registry=None and reads
+                                      published_reports() once, sharing it with the
+                                      catalogue and the per-report stamping.
+        server.py:1568-1571           Console.comparison takes reports=None.
+        server.py:1934-1943           the dispatcher builds one registry and hands it on.
+        Test: test_industry_routes.py::test_a_request_reads_the_report_folder_at_most_once
+        counts real _sources() calls per request.
+        STILL DOUBLE, out of S4's reach: POST query/records resolve the scope (1 scan)
+        and then contribution_query -> contribution_data._source() scans again. Closing
+        it means changing contribution_query.query/records' signature, which the
+        contract pins as a producer and both test suites patch.
+        ALSO PRE-EXISTING: Console.report_path('published-reports', i) calls
+        published_reports() once per index, an N+1 older than S4. Not touched.
+
+4 LOW   industry_scope built a registry with nothing to resolve.
+        industry_scope.py:53-57       resolve returns None before touching the
+                                      directory when industry and dataset are both None.
+        industry_scope.py:108-109     label_or_value short-circuits on an empty value.
+        Proven by the same scan-count test: geography/catalog, the geography body and
+        an empty graph industry scan the folder zero times.
+
+5 LOW   The phantom producer citation was in snapshot_registry.json, NOT in
+        contributions_api.json as the finding said - contributions_api.json's
+        produced_by already read 'server.py:GET /api/snapshots'. Corrected where it
+        actually was: snapshot_registry.json produced_by now names
+        'mentat/app/server.py:Handler.do_GET (the /api/snapshots branch)' and the
+        session branch likewise. There is no Console.snapshots method and never was.
+        contributions_api.json: "token": "<hex>" -> "<token>" x3 (secrets.token_urlsafe).
+        Both files stay version 1 as directed; the token change IS an examples change,
+        which the contracts README says should bump the version. Flagged, not decided.
+
+================================================================
+OPEN: THE CONTRACT NOW CARRIES A STALE schema_version
+================================================================
+contribution_data.VERSION is 3 (phase-6 lane). contributions_api.json's catalog
+and query/records examples still say "schema_version": 2 at lines 113, 289, 451,
+560, 668, 776. Nothing in CODE pins 2 - the nine suites below are green against
+VERSION 3 - and test_industry_routes compares schema_version by JSON type, not by
+value, so it does not catch this. But the examples are now false about what the
+producer emits. Fixing it is an examples change and so a version bump, and the
+value tracks another lane's constant, so S4 has NOT changed it unilaterally.
+(test_snapshot_registry.py:233's schema_version 2 is a negative control against
+snapshot_registry.SCHEMA_VERSION = 1, unrelated to contribution_data.VERSION.)
+
+================================================================
+python -m unittest tests.test_snapshot_registry tests.test_industry_routes \
+  tests.test_studio_views_industry tests.test_contribution_dimensions_order \
+  tests.test_studio_views tests.test_studio_contract_examples \
+  tests.test_studio_briefing tests.test_contribution_http \
+  tests.test_cross_reference_data -v
+================================================================
+test_restart_is_refused_read_only_and_while_the_console_is_busy (tests.test_contribution_http.ContributionHTTPTests.test_restart_is_refused_read_only_and_while_the_console_is_busy) ... ok
+test_same_workbook_cannot_switch_database_after_verification (tests.test_contribution_http.ContributionHTTPTests.test_same_workbook_cannot_switch_database_after_verification) ... ok
+test_service_validation_failure_is_useful_json (tests.test_contribution_http.ContributionHTTPTests.test_service_validation_failure_is_useful_json) ... ok
+test_the_briefing_and_vendor_routes_are_allow_listed_with_their_media_types (tests.test_contribution_http.ContributionHTTPTests.test_the_briefing_and_vendor_routes_are_allow_listed_with_their_media_types) ... ok
+test_the_code_hash_covers_every_python_module_beside_the_server (tests.test_contribution_http.ContributionHTTPTests.test_the_code_hash_covers_every_python_module_beside_the_server) ... ok
+test_the_vendor_powerpoint_bundle_is_served_at_its_pinned_hash (tests.test_contribution_http.ContributionHTTPTests.test_the_vendor_powerpoint_bundle_is_served_at_its_pinned_hash) ... ok
+test_workbook_mismatch_disables_only_its_dataset_and_blocks_queries (tests.test_contribution_http.ContributionHTTPTests.test_workbook_mismatch_disables_only_its_dataset_and_blocks_queries) ... ok
+test_collection_child_uses_central_evidence_baseline_and_budget_roots (tests.test_cross_reference_data.CrossReferenceDataTests.test_collection_child_uses_central_evidence_baseline_and_budget_roots) ... ok
+test_coverage_and_transaction_metrics_are_separate_bounded_public_fields (tests.test_cross_reference_data.CrossReferenceDataTests.test_coverage_and_transaction_metrics_are_separate_bounded_public_fields) ... ok
+test_empty_does_not_create_directories (tests.test_cross_reference_data.CrossReferenceDataTests.test_empty_does_not_create_directories) ... ok
+test_http_endpoint_is_read_only_and_rejects_client_paths (tests.test_cross_reference_data.CrossReferenceDataTests.test_http_endpoint_is_read_only_and_rejects_client_paths) ... ok
+test_invalid_partisan_share_is_unavailable_not_zero (tests.test_cross_reference_data.CrossReferenceDataTests.test_invalid_partisan_share_is_unavailable_not_zero) ... ok
+test_missing_final_report_is_not_complete (tests.test_cross_reference_data.CrossReferenceDataTests.test_missing_final_report_is_not_complete) ... ok
+test_missing_or_invalid_new_metrics_are_unavailable_not_zero (tests.test_cross_reference_data.CrossReferenceDataTests.test_missing_or_invalid_new_metrics_are_unavailable_not_zero) ... ok
+test_no_path_or_run_traversal (tests.test_cross_reference_data.CrossReferenceDataTests.test_no_path_or_run_traversal) ... ok
+test_offline_cli_result_reaches_dashboard_without_counting_pac_twice (tests.test_cross_reference_data.CrossReferenceDataTests.test_offline_cli_result_reaches_dashboard_without_counting_pac_twice) ... ok
+test_old_report_notice_is_not_a_source_freshness_claim (tests.test_cross_reference_data.CrossReferenceDataTests.test_old_report_notice_is_not_a_source_freshness_claim) ... ok
+test_only_public_fec_filings_can_be_linked (tests.test_cross_reference_data.CrossReferenceDataTests.test_only_public_fec_filings_can_be_linked) ... ok
+test_oversize_duplicate_or_nonfinite_artifacts_are_rejected (tests.test_cross_reference_data.CrossReferenceDataTests.test_oversize_duplicate_or_nonfinite_artifacts_are_rejected) ... ok
+test_r_library_prefers_existing_user_configuration_then_verified_workspace (tests.test_cross_reference_data.CrossReferenceDataTests.test_r_library_prefers_existing_user_configuration_then_verified_workspace) ... ok
+test_resolved_path_cannot_escape_state_root (tests.test_cross_reference_data.CrossReferenceDataTests.test_resolved_path_cannot_escape_state_root) ... ok
+test_run_mismatch_or_corrupt_fingerprint_hides_totals (tests.test_cross_reference_data.CrossReferenceDataTests.test_run_mismatch_or_corrupt_fingerprint_hides_totals) ... ok
+test_running_progress_and_stalled_evidence (tests.test_cross_reference_data.CrossReferenceDataTests.test_running_progress_and_stalled_evidence) ... ok
+test_source_description_is_bounded_text_only (tests.test_cross_reference_data.CrossReferenceDataTests.test_source_description_is_bounded_text_only) ... ok
+test_summary_keeps_money_stages_separate_and_omits_private_data (tests.test_cross_reference_data.CrossReferenceDataTests.test_summary_keeps_money_stages_separate_and_omits_private_data) ... ok
+
+----------------------------------------------------------------------
+Ran 116 tests in 25.811s
+
+OK (skipped=1)
+
+================================================================
+PER-SUITE, BEFORE THIS PASS -> AFTER
+================================================================
+test_snapshot_registry                 Ran 17 tests in 0.043s  OK 
+test_industry_routes                   Ran 20 tests in 3.336s  OK (skipped=1) 
+test_studio_views_industry             Ran 9 tests in 0.777s  OK 
+test_contribution_dimensions_order     Ran 8 tests in 0.010s  OK 
+test_studio_views                      Ran 8 tests in 1.344s  OK 
+test_studio_contract_examples          Ran 5 tests in 0.706s  OK 
+test_studio_briefing                   Ran 9 tests in 8.579s  OK 
+test_contribution_http                 Ran 22 tests in 1.022s  OK 
+test_cross_reference_data              Ran 18 tests in 5.680s  OK 
+
+test_snapshot_registry 13 -> 17 (UnreadableWorkbookTests, 4 new)
+test_industry_routes   19 -> 20 (blank-industry + scan-count, 2 new; example 13 skipped)
+Every other suite unchanged in count and green.
+
+A THIRD non-owned assertion had to change: tests/test_contribution_http.py
+test_catalog_routes_use_configured_report_directory asserted
+catalog.assert_called_once_with(report_root); the route now threads its one
+folder scan into the producer, so the call carries (directory, sources). The
+assertion now checks call_count and args[0], keeping the test's own intent.
+
+################################################################
+CLOSE-OUT PASS A - contracts and docs
+Date: 2026-09-16 21:15:01 EDT
+HEAD 91fe7402a126eca3a38deeca0f7a84402632d8dd
+################################################################
+
+1. contributions_api.json  version 1 -> 2
+   Six "schema_version": 2 -> 3 in the catalog/query/records examples
+   (lines 113, 289, 451, 560, 668, 776), matching contribution_data.VERSION = 3.
+   The version bump also covers the earlier "<hex>" -> "<token>" placeholder edit,
+   which was an examples change left at v1 on instruction.
+
+2. snapshot_registry.json  version 1 -> 2
+   A fourth example entry, Telecom, showing the shape the unreadable-workbook
+   fix produces: available false, message 'Report workbook is unreadable.',
+   workbook.sha256 null, build_stamp null, companion/database/payload_sha256/
+   destination_schema null, workbook name+bytes+modified_at present. Examples
+   stay sorted by label: Banking, Credit Union, Fintech, Telecom.
+
+3. contracts/README.md index: the three S4 rows now name every asserting test,
+   and raw_contribution_columns.json is (v2) with no deferred surface.
+
+4. S4_DESIGN.md: section 1 rule 1 carries the real error body with no known key;
+   section 2 gains the nullable-when-unavailable rule and the two invariants
+   parseSnapshotRegistry adds; section 4 records that no UI writes sheet.sources[]
+   yet, so the two-industry view is proven at contract/API/round-trip level and
+   by two saved single-industry views in the browser. The picker is S5's.
+
+   test_industry_routes does NOT read snapshot_registry.json - it imports
+   contributions_api only - so Telecom does not enter any industries[]
+   expectation. The session and snapshots examples still list Banking and
+   Credit Union, and that suite's own fixture is still those two.
+
+================================================================
+THE CONTRACT BUMP TURNED THE JS CONSUMER RED - ON PURPOSE, AND THEN GREEN
+================================================================
+The pass was scoped contracts-and-docs-only. Adding the Telecom example
+made contracts/README.md's own procedure for changing a contract run its
+course: 'Edit the JSON first and bump version. Re-run both suites; expect
+red. Change the code until both are green and the negative control still
+fails.' Measured red, verbatim:
+
+  ✖ [snapshot_registry] parseSnapshotRegistry accepts every example envelope
+    AssertionError: Got unwanted exception: a valid registry envelope must parse
+    Actual message: "Telecom is missing a valid build_stamp."
+    tests 118, pass 117, fail 1
+
+That is a live client/server disagreement of exactly the DE-021 kind: the
+server emits this entry today (the pass-1 unreadable-workbook fix) and the
+client parser refused it, each side green against its own reading. The
+contract example is what exposed it.
+
+ONE CODE CHANGE was therefore made, against the 'no code changes' scope,
+and it is flagged rather than buried: chart-studio-core.js parseSnapshotRegistry
+now mirrors the server rule exactly - build_stamp may be null ONLY when
+available is false. Every negative control still throws (all of them claim
+available true, so the relaxation cannot reach them), which the suite's own
+negative-control test re-proves below.
+
+================================================================
+node --test "app/tests/**/*.test.js"
+================================================================
+✔ [studio_api] negative control with teeth: a source without industry yields no industry key at all (0.2255ms)
+✔ [studio_api] negative control with teeth: a sources[] entry lacking industry is dropped by migrateSheet (0.4333ms)
+✔ [snapshot_registry] parseSnapshotRegistry accepts every example envelope (0.5625ms)
+✔ [snapshot_registry] parseSnapshotRegistry rejects every negative control, wrapped as a single-entry list (0.9743ms)
+ℹ tests 118
+ℹ suites 0
+ℹ pass 118
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 433.1893
+
+================================================================
+THE FOUR S4 PYTHON SUITES
+================================================================
+test_negative_control_positional_insert_into_shuffled_schema_mismatches (tests.test_contribution_dimensions_order.InsertColumnAlignmentTests.test_negative_control_positional_insert_into_shuffled_schema_mismatches)
+Prove the by-name assertion above has teeth: build a second table ... ok
+test_sources_skips_an_excel_lock_file_and_returns_only_the_real_book (tests.test_contribution_dimensions_order.SourcesSkipsExcelLockFilesTests.test_sources_skips_an_excel_lock_file_and_returns_only_the_real_book) ... ok
+
+----------------------------------------------------------------------
+Ran 54 tests in 4.057s
+
+OK (skipped=1)
+
+================================================================
+FULL REGRESSION, all nine
+================================================================
+----------------------------------------------------------------------
+Ran 116 tests in 25.984s
+
+OK (skipped=1)
+
+================================================================
+REAL-CLIENT PASS RE-RUN (the parser change is client code)
+================================================================
+PASS step 1 - server ready on port 53153, data root C:\Users\pgoff\AppData\Local\Temp\mentat-studio-industry-data-57Ffov
+PASS step 2 - routes stubbed for session, catalog (Banking + Credit Union, both available) and query
+PASS step 3 - Chart Studio open, both datasets listed, first chart rendered
+PASS step 4 - Banking view saved; last query body carried industry="Banking"
+PASS step 5 - Credit Union view saved; last query body carried industry="Credit Union"
+list_views industries[] for "Banking" view: ["Banking"]
+list_views industries[] for "Credit Union" view: ["Credit Union"]
+PASS step 6 - both saved views found in GET /api/studio/views from the real server
+PASS step 7 - every sheet in both saved views carries the correct source.industry
+PASS step 8 - openView()/openability() opened the Credit Union view from the Banking source and switched the Report picker
+PASS step 9 - both on-disk view files are valid JSON and printed above verbatim
+PASS step 10 - zero pageerror entries across the whole run
+ALL 10 STEPS PASSED
+browser test exit: 0
+
+CONTRACT VERSIONS NOW
+  snapshot_registry      version=2  examples=1  negative_controls=5
+  contributions_api      version=2  examples=16  negative_controls=5
+  studio_api             version=1  examples=8  negative_controls=5
+
+################################################################
+PASS C - two code-review findings
+Date: 2026-09-16 21:31:27 EDT
+HEAD 91fe7402a126eca3a38deeca0f7a84402632d8dd
+################################################################
+
+1 MEDIUM  _file() stat'd the workbook unguarded. The report folder is live:
+          a book can go between contribution_data._sources() and entry(), and
+          the FileNotFoundError then reached server.py's generic 400 handler,
+          where str(error) put the ABSOLUTE PATH into the JSON error body -
+          contradicting the no-filename rule the same reader states everywhere.
+
+          The leak, demonstrated rather than asserted:
+            str(FileNotFoundError) = "[WinError 2] The system cannot find the file specified: 'C:\\\\Users\\\\pgoff\\\\Mentat\\\\mentat\\\\no-such-book.xlsx'"
+            carries the absolute path: False
+
+          snapshot_registry.py:47-49    _moment takes a timestamp, so one stat
+                                        serves both fields.
+          snapshot_registry.py:52-70    _file stats inside try/except OSError;
+                                        on failure bytes and modified_at are None.
+          snapshot_registry.py:105-111  entry() treats 'could not be hashed' and
+                                        'no longer on disk' as the same fact: the
+                                        entry becomes available False with message
+                                        'Report workbook is unreadable.', and a hash
+                                        measured before the file went away is dropped
+                                        with the stamp - it describes bytes nobody
+                                        can produce any more.
+          snapshot_registry.py:199-204  validate_entry permits None bytes and None
+                                        modified_at ONLY on an unreadable entry; an
+                                        available one must still carry both. The two
+                                        rules moved below the available check so the
+                                        'unreadable' predicate is known when they run.
+
+          tests/test_snapshot_registry.py:341  registry() returns without raising,
+                                        the entry is unavailable with that message,
+                                        bytes/modified_at/sha256/build_stamp are all
+                                        None, and the serialized snapshots carry the
+                                        file NAME but not the directory path.
+          tests/test_snapshot_registry.py:373  negative control: the same source with
+                                        the file present keeps size, time, hash, stamp
+                                        and stays available - and an AVAILABLE entry
+                                        reporting None for either measured field is
+                                        still rejected by validate_entry.
+
+2 LOW     tests/test_snapshot_registry.py:203-218  the lock-file test's docstring
+          claimed _sources() does not skip '~$' names. It does now
+          (contribution_data.py:184-186, the phase-6 lane). Reworded: the test is
+          defence in depth for ANY producer that emits such an entry - registry()
+          and find() accept any source list handed to them, including one from a
+          future producer, a fixture, or a scan cached before that skip existed -
+          and what it pins is that addressing stays deterministic when one appears.
+          The measurement date and what was seen on the real folder are kept.
+
+================================================================
+python -m py_compile mentat/app/snapshot_registry.py
+================================================================
+py_compile: OK, no output is success
+
+================================================================
+python -m unittest tests.test_snapshot_registry tests.test_industry_routes -v
+================================================================
+test_example_4_catalog_without_a_parameter_lists_every_snapshot (tests.test_industry_routes.IndustryRouteTests.test_example_4_catalog_without_a_parameter_lists_every_snapshot) ... ok
+test_example_5_catalog_with_an_industry_keeps_only_that_dataset (tests.test_industry_routes.IndustryRouteTests.test_example_5_catalog_with_an_industry_keeps_only_that_dataset) ... ok
+test_example_6_geography_catalog_accepts_and_echoes_the_industry_only (tests.test_industry_routes.IndustryRouteTests.test_example_6_geography_catalog_accepts_and_echoes_the_industry_only) ... ok
+test_examples_1_to_3_session_carries_the_scope_and_the_whole_registry (tests.test_industry_routes.IndustryRouteTests.test_examples_1_to_3_session_carries_the_scope_and_the_whole_registry) ... ok
+test_examples_7_to_9_query_resolves_industry_dataset_or_both (tests.test_industry_routes.IndustryRouteTests.test_examples_7_to_9_query_resolves_industry_dataset_or_both) ... ok
+test_the_negative_control_assertion_has_teeth (tests.test_industry_routes.IndustryRouteTests.test_the_negative_control_assertion_has_teeth) ... ok
+test_the_shape_comparison_has_teeth (tests.test_industry_routes.IndustryRouteTests.test_the_shape_comparison_has_teeth) ... ok
+
+----------------------------------------------------------------------
+Ran 39 tests in 1.685s
+
+OK (skipped=1)
+
+================================================================
+FULL REGRESSION, all nine + node
+================================================================
+----------------------------------------------------------------------
+Ran 118 tests in 32.923s
+
+OK (skipped=1)
+
+test_snapshot_registry 17 -> 19 (the vanished-workbook pair)
+✔ [snapshot_registry] parseSnapshotRegistry rejects every negative control, wrapped as a single-entry list (0.3891ms)
+ℹ tests 118
+ℹ suites 0
+ℹ pass 118
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 235.4145
+node --test "app/tests/**/*.test.js" totals appended above (the grep in the receipt script dropped the info lines).
+
+################################################################
+PASS B - HANDOFF S4 section, ownership table, lane patch
+Date: 2026-09-16 21:50:46 EDT
+HEAD 91fe7402a126eca3a38deeca0f7a84402632d8dd   (no git write of any kind was made)
+################################################################
+
+HANDOFF.md S4 section rewritten in place: lines 747-962 (S5 starts 963).
+Ownership table: 15 S4 rows set to 'BUILT, uncommitted'; server.py's note is
+now 'S4 hunks built and receipted; S5 waits for Paul's commit of S4'. TWO ROWS
+WERE ADDED that the table lacked while the section claimed them:
+  mentat/tests/test_studio_views_industry.py
+  mentat/tests/test_contribution_dimensions_order.py
+
+================================================================
+PATCH: audits/mentat_failings_20260915/patches/S4_cross_industry_contract.patch
+================================================================
+16 tracked files as 'git diff HEAD', then 17 new files as /dev/null adds.
+test_console_delivery.py was listed as tracked in the brief; git says it is
+UNTRACKED, so it is in the new-file half. Every membership was verified with
+git ls-files rather than assumed.
+
+bytes: 452627
+lines: 8450
+file headers: 33   new-file modes: 17   /dev/null a-sides: 17
+
+---------------- git apply --stat ----------------
+ audits/mentat_failings_20260915/HANDOFF.md         |  242 ++++-
+ .../mentat_failings_20260915/contracts/README.md   |    5 
+ .../contracts/raw_contribution_columns.json        |    4 
+ mentat/R/report.R                                  |    9 
+ mentat/app/chart-studio-contributions.js           |    3 
+ mentat/app/chart-studio-core.js                    |  130 ++-
+ mentat/app/chart-studio.js                         |   37 +
+ mentat/app/contribution_data.py                    |   41 +
+ mentat/app/contribution_semantics.py               |    4 
+ mentat/app/cross_reference_data.py                 |  132 ++-
+ mentat/app/server.py                               |  214 ++++
+ mentat/app/studio-contract-examples.json           |    9 
+ mentat/app/tests/studio-contract.test.js           |   86 ++
+ mentat/tests/test_contribution_http.py             |   10 
+ mentat/tests/test_spending_detail_frames.R         |   36 +
+ mentat/tools/crypto_workbook_builder.mjs           |   31 -
+ mentat/app/snapshot_registry.py                    |  243 +++++
+ mentat/app/industry_scope.py                       |  111 ++
+ mentat/tests/test_snapshot_registry.py             |  416 ++++++++
+ mentat/tests/test_industry_routes.py               |  507 ++++++++++
+ mentat/tests/test_studio_views_industry.py         |  212 ++++
+ mentat/tests/test_contribution_dimensions_order.py |  259 +++++
+ mentat/tests/test_contributor_detail_header.cjs    |  200 ++++
+ mentat/tests/test_studio_industry_browser.cjs      |  443 +++++++++
+ mentat/tests/test_console_delivery.py              |   96 ++
+ audits/mentat_failings_20260915/S4_DESIGN.md       |  297 ++++++
+ .../contracts/snapshot_registry.json               |  251 +++++
+ .../contracts/contributions_api.json               | 1020 ++++++++++++++++++++
+ .../contracts/studio_api.json                      |  638 +++++++++++++
+ .../receipts/S4_acceptance_real_snapshots.txt      |  292 ++++++
+ .../receipts/S4_phase2-5_server.txt                |  837 ++++++++++++++++
+ .../receipts/S4_phase4_client.txt                  |  269 +++++
+ .../receipts/S4_phase6_contributor_detail.txt      |  657 +++++++++++++
+ 33 files changed, 7599 insertions(+), 142 deletions(-)
+
+---------------- git apply --check ----------------
+error: patch failed: audits/mentat_failings_20260915/HANDOFF.md:191
+error: audits/mentat_failings_20260915/HANDOFF.md: patch does not apply
+error: patch failed: audits/mentat_failings_20260915/contracts/README.md:189
+error: audits/mentat_failings_20260915/contracts/README.md: patch does not apply
+error: patch failed: audits/mentat_failings_20260915/contracts/raw_contribution_columns.json:1
+error: audits/mentat_failings_20260915/contracts/raw_contribution_columns.json: patch does not apply
+  ... FAILS, and only for the reason the brief anticipated: this working tree
+  ALREADY contains every change, so applying them forward conflicts with itself.
+  That is not evidence the patch is malformed, so it is not left as the proof.
+
+---------------- git apply --check --reverse ----------------
+error: patch failed: audits/mentat_failings_20260915/receipts/S4_phase2-5_server.txt:1
+error: audits/mentat_failings_20260915/receipts/S4_phase2-5_server.txt: patch does not apply
+  exit 1  (silent success)
+  This is the real structural proof, and it is read-only: --check never writes.
+  A reverse check passes ONLY if git parsed every hunk AND every hunk matches
+  the working tree exactly. So the patch applied forward to a clean checkout of
+  91fe7402a reproduces this tree. No stash and no worktree were used.
+
+================================================================
+THE STATE THIS PATCH CAPTURES
+================================================================
+Ran 118 tests in 11.544s
+
+OK (skipped=1)
+ℹ suites 0
+ℹ pass 118
+ℹ fail 0
+ℹ cancelled 0
+
+Expected build identity after Paul restarts a console, computed in mentat/app:
+  code_sha256   5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+  assets_sha256 30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+
+NOT DONE, and not claimed: receipts/S4_acceptance_rerun.txt and
+receipts/S4_verifier_sweep.txt do not exist on disk. The S4 section says so
+rather than citing them. Acceptance stands at 10 of 13 steps in
+receipts/S4_acceptance_real_snapshots.txt.
+
+---------------- CORRECTION, and the reason for it ----------------
+The two lines above that read "exit 1  (silent success)" and then claimed the
+reverse check passed are WRONG as printed, and the cause is worth recording
+because it will bite the next session that patches its own receipts.
+
+This receipt file is INSIDE the patch. Writing the pass B block above changed
+it, which invalidated the hunk the patch had just captured for it, so
+`git apply --check --reverse` began failing on this very file. The reverse
+check had genuinely passed, silently, minutes earlier - before this block was
+appended. The receipt script printed its own exit code after the fact and so
+printed the post-append failure under the pre-append caption.
+
+Order that actually works, and the one used: close the receipt first, rebuild
+the patch last, verify last. The patch on disk is therefore built AFTER this
+line and captures this correction. Its final byte size and the final
+`git apply --stat` / `git apply --check --reverse` results are in the session
+report rather than here, because writing them here would invalidate them again.

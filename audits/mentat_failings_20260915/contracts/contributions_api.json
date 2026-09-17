@@ -1,0 +1,1020 @@
+{
+  "contract": "contributions_api",
+  "version": 2,
+  "owner": "S4",
+  "produced_by": [
+    "mentat/app/server.py:GET /api/contributions/session",
+    "mentat/app/server.py:GET /api/contributions/catalog",
+    "mentat/app/server.py:GET /api/contributions/geography/catalog",
+    "mentat/app/server.py:POST /api/contributions/query",
+    "mentat/app/server.py:POST /api/contributions/records",
+    "mentat/app/server.py:POST /api/contributions/geography",
+    "mentat/app/server.py:GET /api/snapshots",
+    "mentat/app/server.py:GET /api/graph",
+    "mentat/app/server.py:GET /api/comparison",
+    "mentat/app/server.py:GET /api/comparison-flows",
+    "mentat/app/server.py:GET /api/cross-reference"
+  ],
+  "consumed_by": [
+    "mentat/app/chart-studio-contributions.js:compile",
+    "mentat/app/chart-studio.js",
+    "mentat/app/contribution-studio.js",
+    "mentat/app/app.js (S5)"
+  ],
+  "description": "A route that receives `industry` resolves it against the snapshot registry by label or slug (400 'Choose a registered industry.' if it does not match); absent `industry` it falls back to the legacy `dataset` value; when both are present and disagree the route returns 400 'The industry and dataset in this request disagree.'; and when neither is present the route keeps its existing legacy behaviour unchanged.",
+  "examples": [
+    {
+      "name": "session no param",
+      "method": "GET",
+      "path": "/api/contributions/session",
+      "status": 200,
+      "response": {
+        "token": "<token>",
+        "read_only": false,
+        "industry": null,
+        "industries": [
+          {
+            "industry": "Banking",
+            "slug": "banking",
+            "available": true,
+            "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+          },
+          {
+            "industry": "Credit Union",
+            "slug": "credit_union",
+            "available": true,
+            "build_stamp": "9e56fd99c8e6898e817510b9f61dc8178d9c42a154c25382bdf9bc49549ca489"
+          }
+        ]
+      }
+    },
+    {
+      "name": "session ?industry=Credit Union (label)",
+      "method": "GET",
+      "path": "/api/contributions/session",
+      "query": {
+        "industry": "Credit Union"
+      },
+      "status": 200,
+      "response": {
+        "token": "<token>",
+        "read_only": false,
+        "industry": "Credit Union",
+        "industries": [
+          {
+            "industry": "Banking",
+            "slug": "banking",
+            "available": true,
+            "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+          },
+          {
+            "industry": "Credit Union",
+            "slug": "credit_union",
+            "available": true,
+            "build_stamp": "9e56fd99c8e6898e817510b9f61dc8178d9c42a154c25382bdf9bc49549ca489"
+          }
+        ]
+      }
+    },
+    {
+      "name": "session ?industry=credit_union (slug)",
+      "method": "GET",
+      "path": "/api/contributions/session",
+      "query": {
+        "industry": "credit_union"
+      },
+      "status": 200,
+      "response": {
+        "token": "<token>",
+        "read_only": false,
+        "industry": "Credit Union",
+        "industries": [
+          {
+            "industry": "Banking",
+            "slug": "banking",
+            "available": true,
+            "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+          },
+          {
+            "industry": "Credit Union",
+            "slug": "credit_union",
+            "available": true,
+            "build_stamp": "9e56fd99c8e6898e817510b9f61dc8178d9c42a154c25382bdf9bc49549ca489"
+          }
+        ]
+      }
+    },
+    {
+      "name": "catalog no param",
+      "method": "GET",
+      "path": "/api/contributions/catalog",
+      "status": 200,
+      "response": {
+        "schema_version": 3,
+        "datasets": [
+          {
+            "id": "Banking",
+            "industry": "Banking",
+            "label": "Banking",
+            "available": true,
+            "fields": [
+              {
+                "id": "cycle",
+                "label": "Election cycle",
+                "role": "dimension",
+                "type": "category",
+                "data_type": "string",
+                "unit": null,
+                "table": "Contribution observations",
+                "discrete": true,
+                "is_time": true,
+                "geographic_role": null,
+                "description": "Groups source observations without changing their amounts.",
+                "aggregation": null
+              },
+              {
+                "id": "amount",
+                "label": "Net amount",
+                "role": "measure",
+                "type": "number",
+                "data_type": "decimal",
+                "unit": "cents",
+                "table": "Contribution observations",
+                "discrete": false,
+                "is_time": false,
+                "geographic_role": null,
+                "description": "Computed from selected individual observations, before chart pagination.",
+                "aggregation": "source aggregate"
+              }
+            ],
+            "bases": [
+              {
+                "id": "receipt",
+                "label": "Published included receipt view",
+                "status": "observed"
+              },
+              {
+                "id": "original_supported",
+                "label": "Supported original giving subset",
+                "status": "supported_subset"
+              }
+            ],
+            "provenance": {
+              "workbook": "Banking Industry Spending Overview.xlsx",
+              "workbook_sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "data_workbook": null,
+              "data_workbook_sha256": null,
+              "data_lineage_matches": null,
+              "destination_schema": 1,
+              "database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+              "payload_sha256": "cba938023ed737faff031ce82bbf232088065f7475bb38ae48ac64bfd1aca59c",
+              "original_database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+              "accounting_engine_sha256": "<64hex>",
+              "cycle_basis": "Contribution date, calendar election cycle",
+              "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred."
+            },
+            "message": null,
+            "default_basis": "receipt",
+            "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+          },
+          {
+            "id": "Credit Union",
+            "industry": "Credit Union",
+            "label": "Credit Union",
+            "available": true,
+            "fields": [
+              {
+                "id": "cycle",
+                "label": "Election cycle",
+                "role": "dimension",
+                "type": "category",
+                "data_type": "string",
+                "unit": null,
+                "table": "Contribution observations",
+                "discrete": true,
+                "is_time": true,
+                "geographic_role": null,
+                "description": "Groups source observations without changing their amounts.",
+                "aggregation": null
+              },
+              {
+                "id": "amount",
+                "label": "Net amount",
+                "role": "measure",
+                "type": "number",
+                "data_type": "decimal",
+                "unit": "cents",
+                "table": "Contribution observations",
+                "discrete": false,
+                "is_time": false,
+                "geographic_role": null,
+                "description": "Computed from selected individual observations, before chart pagination.",
+                "aggregation": "source aggregate"
+              }
+            ],
+            "bases": [
+              {
+                "id": "receipt",
+                "label": "Published included receipt view",
+                "status": "observed"
+              },
+              {
+                "id": "original_supported",
+                "label": "Supported original giving subset",
+                "status": "supported_subset"
+              }
+            ],
+            "provenance": {
+              "workbook": "Credit Union Industry Spending Overview.xlsx",
+              "workbook_sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+              "data_workbook": "Credit Union Industry Spending Data.xlsx",
+              "data_workbook_sha256": "fbb1acc85543f3d5a71c5a1053f63340b4559b02be9bdbf31e9c43bff1c86679",
+              "data_lineage_matches": true,
+              "destination_schema": 1,
+              "database_sha256": "df85df18510bba895a4276e4374247cbfc227e21f3af0af61eaea143c73b0e75",
+              "payload_sha256": "a1b87e0336d50703120bdbdb6fce0725429b586537102e490fe4a51eb53d3d74",
+              "original_database_sha256": "df85df18510bba895a4276e4374247cbfc227e21f3af0af61eaea143c73b0e75",
+              "accounting_engine_sha256": "<64hex>",
+              "cycle_basis": "Contribution date, calendar election cycle",
+              "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred."
+            },
+            "message": null,
+            "default_basis": "receipt",
+            "build_stamp": "9e56fd99c8e6898e817510b9f61dc8178d9c42a154c25382bdf9bc49549ca489"
+          }
+        ],
+        "fields": [
+          {
+            "id": "cycle",
+            "label": "Election cycle",
+            "role": "dimension",
+            "type": "category",
+            "data_type": "string",
+            "unit": null,
+            "table": "Contribution observations",
+            "discrete": true,
+            "is_time": true,
+            "geographic_role": null,
+            "description": "Groups source observations without changing their amounts.",
+            "aggregation": null
+          },
+          {
+            "id": "amount",
+            "label": "Net amount",
+            "role": "measure",
+            "type": "number",
+            "data_type": "decimal",
+            "unit": "cents",
+            "table": "Contribution observations",
+            "discrete": false,
+            "is_time": false,
+            "geographic_role": null,
+            "description": "Computed from selected individual observations, before chart pagination.",
+            "aggregation": "source aggregate"
+          }
+        ],
+        "amount_unit": "cents",
+        "industry": null
+      }
+    },
+    {
+      "name": "catalog ?industry=Banking",
+      "method": "GET",
+      "path": "/api/contributions/catalog",
+      "query": {
+        "industry": "Banking"
+      },
+      "status": 200,
+      "response": {
+        "schema_version": 3,
+        "datasets": [
+          {
+            "id": "Banking",
+            "industry": "Banking",
+            "label": "Banking",
+            "available": true,
+            "fields": [
+              {
+                "id": "cycle",
+                "label": "Election cycle",
+                "role": "dimension",
+                "type": "category",
+                "data_type": "string",
+                "unit": null,
+                "table": "Contribution observations",
+                "discrete": true,
+                "is_time": true,
+                "geographic_role": null,
+                "description": "Groups source observations without changing their amounts.",
+                "aggregation": null
+              },
+              {
+                "id": "amount",
+                "label": "Net amount",
+                "role": "measure",
+                "type": "number",
+                "data_type": "decimal",
+                "unit": "cents",
+                "table": "Contribution observations",
+                "discrete": false,
+                "is_time": false,
+                "geographic_role": null,
+                "description": "Computed from selected individual observations, before chart pagination.",
+                "aggregation": "source aggregate"
+              }
+            ],
+            "bases": [
+              {
+                "id": "receipt",
+                "label": "Published included receipt view",
+                "status": "observed"
+              },
+              {
+                "id": "original_supported",
+                "label": "Supported original giving subset",
+                "status": "supported_subset"
+              }
+            ],
+            "provenance": {
+              "workbook": "Banking Industry Spending Overview.xlsx",
+              "workbook_sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "data_workbook": null,
+              "data_workbook_sha256": null,
+              "data_lineage_matches": null,
+              "destination_schema": 1,
+              "database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+              "payload_sha256": "cba938023ed737faff031ce82bbf232088065f7475bb38ae48ac64bfd1aca59c",
+              "original_database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+              "accounting_engine_sha256": "<64hex>",
+              "cycle_basis": "Contribution date, calendar election cycle",
+              "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred."
+            },
+            "message": null,
+            "default_basis": "receipt",
+            "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+          }
+        ],
+        "fields": [
+          {
+            "id": "cycle",
+            "label": "Election cycle",
+            "role": "dimension",
+            "type": "category",
+            "data_type": "string",
+            "unit": null,
+            "table": "Contribution observations",
+            "discrete": true,
+            "is_time": true,
+            "geographic_role": null,
+            "description": "Groups source observations without changing their amounts.",
+            "aggregation": null
+          },
+          {
+            "id": "amount",
+            "label": "Net amount",
+            "role": "measure",
+            "type": "number",
+            "data_type": "decimal",
+            "unit": "cents",
+            "table": "Contribution observations",
+            "discrete": false,
+            "is_time": false,
+            "geographic_role": null,
+            "description": "Computed from selected individual observations, before chart pagination.",
+            "aggregation": "source aggregate"
+          }
+        ],
+        "amount_unit": "cents",
+        "industry": "Banking"
+      }
+    },
+    {
+      "name": "geography/catalog ?industry=Banking",
+      "method": "GET",
+      "path": "/api/contributions/geography/catalog",
+      "query": {
+        "industry": "Banking"
+      },
+      "status": 200,
+      "response": {
+        "schema_version": 1,
+        "geography_kind": "donor_recorded_zip",
+        "congresses": [
+          "119",
+          "120"
+        ],
+        "default_congress": "119",
+        "layers": {
+          "states": {
+            "url": "<census-url>",
+            "vintage": "2024 TIGERweb states",
+            "name": "<layer-name>"
+          },
+          "zip_areas": {
+            "url": "<census-url>",
+            "vintage": "2025 ZCTA",
+            "name": "<layer-name>"
+          }
+        },
+        "zip_points": {
+          "url": "<gazetteer-url>",
+          "vintage": "2025 Gazetteer, Census ZCTA internal points",
+          "meaning": "Representative ZIP-area points; not donor addresses."
+        },
+        "polygon_limit": 500,
+        "max_zips": 50000,
+        "notes": [
+          "State and district outlines never allocate contribution amounts.",
+          "ZCTAs approximate ZIP geography; not every postal ZIP has a ZCTA.",
+          "Congress and geometry hashes are returned with each view.",
+          "Geometry is simplified for display, not precise address-to-district assignment."
+        ],
+        "industry": "Banking"
+      }
+    },
+    {
+      "name": "query body industry only",
+      "method": "POST",
+      "path": "/api/contributions/query",
+      "body": {
+        "industry": "Banking",
+        "dimensions": [
+          "cycle"
+        ],
+        "measures": [
+          "amount"
+        ],
+        "limit": 60
+      },
+      "status": 200,
+      "response": {
+        "schema_version": 3,
+        "status": "ready",
+        "dataset": "Banking",
+        "basis": "receipt",
+        "basis_label": "Published included receipt view",
+        "columns": [
+          {
+            "id": "cycle",
+            "label": "Election cycle",
+            "role": "dimension",
+            "type": "category",
+            "data_type": "string",
+            "unit": null,
+            "table": "Contribution observations",
+            "discrete": true,
+            "is_time": true,
+            "geographic_role": null,
+            "description": "Groups source observations without changing their amounts.",
+            "aggregation": null,
+            "name": "Election cycle"
+          },
+          {
+            "id": "amount",
+            "label": "Net amount",
+            "role": "measure",
+            "type": "number",
+            "data_type": "decimal",
+            "unit": "cents",
+            "table": "Contribution observations",
+            "discrete": false,
+            "is_time": false,
+            "geographic_role": null,
+            "description": "Computed from selected individual observations, before chart pagination.",
+            "aggregation": "source aggregate",
+            "name": "Net amount"
+          }
+        ],
+        "rows": [
+          {
+            "cycle": "2025-2026",
+            "amount": 12500000
+          }
+        ],
+        "totals": {
+          "amount": 125000000,
+          "records": 420
+        },
+        "group_count": 1,
+        "offset": 0,
+        "limit": 60,
+        "has_more": false,
+        "comparison": {},
+        "geography": {
+          "observations": 420,
+          "valid_zip_observations": 398,
+          "unmapped_amount": 220000
+        },
+        "reconciliation": {
+          "source_receipt_cents": 125000000,
+          "expected_receipt_cents": 125000000,
+          "receipt_matches_workbook": true,
+          "filtered_amount_cents": 125000000,
+          "grouped_amount_cents": 125000000,
+          "aggregate_filters_applied": false,
+          "conserved": true
+        },
+        "provenance": {
+          "workbook": "Banking Industry Spending Overview.xlsx",
+          "workbook_sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "data_workbook": null,
+          "data_workbook_sha256": null,
+          "data_lineage_matches": null,
+          "destination_schema": 1,
+          "database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+          "payload_sha256": "cba938023ed737faff031ce82bbf232088065f7475bb38ae48ac64bfd1aca59c",
+          "original_database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+          "accounting_engine_sha256": "<64hex>",
+          "cycle_basis": "Contribution date, calendar election cycle",
+          "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+          "ledger_run_id": "<ledger-run-id>",
+          "query_engine_sha256": "<64hex>",
+          "field_semantics_sha256": "<64hex>",
+          "query_projection_sha256": "<64hex>"
+        },
+        "notices": [
+          "Observed original giving remains provisional; supported giving is a subset, not a complete total."
+        ],
+        "verified_unique": false,
+        "industry": "Banking",
+        "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+      }
+    },
+    {
+      "name": "query body industry and agreeing dataset",
+      "method": "POST",
+      "path": "/api/contributions/query",
+      "body": {
+        "industry": "Banking",
+        "dataset": "Banking",
+        "dimensions": [
+          "cycle"
+        ],
+        "measures": [
+          "amount"
+        ],
+        "limit": 60
+      },
+      "status": 200,
+      "response": {
+        "schema_version": 3,
+        "status": "ready",
+        "dataset": "Banking",
+        "basis": "receipt",
+        "basis_label": "Published included receipt view",
+        "columns": [
+          {
+            "id": "cycle",
+            "label": "Election cycle",
+            "role": "dimension",
+            "type": "category",
+            "data_type": "string",
+            "unit": null,
+            "table": "Contribution observations",
+            "discrete": true,
+            "is_time": true,
+            "geographic_role": null,
+            "description": "Groups source observations without changing their amounts.",
+            "aggregation": null,
+            "name": "Election cycle"
+          },
+          {
+            "id": "amount",
+            "label": "Net amount",
+            "role": "measure",
+            "type": "number",
+            "data_type": "decimal",
+            "unit": "cents",
+            "table": "Contribution observations",
+            "discrete": false,
+            "is_time": false,
+            "geographic_role": null,
+            "description": "Computed from selected individual observations, before chart pagination.",
+            "aggregation": "source aggregate",
+            "name": "Net amount"
+          }
+        ],
+        "rows": [
+          {
+            "cycle": "2025-2026",
+            "amount": 12500000
+          }
+        ],
+        "totals": {
+          "amount": 125000000,
+          "records": 420
+        },
+        "group_count": 1,
+        "offset": 0,
+        "limit": 60,
+        "has_more": false,
+        "comparison": {},
+        "geography": {
+          "observations": 420,
+          "valid_zip_observations": 398,
+          "unmapped_amount": 220000
+        },
+        "reconciliation": {
+          "source_receipt_cents": 125000000,
+          "expected_receipt_cents": 125000000,
+          "receipt_matches_workbook": true,
+          "filtered_amount_cents": 125000000,
+          "grouped_amount_cents": 125000000,
+          "aggregate_filters_applied": false,
+          "conserved": true
+        },
+        "provenance": {
+          "workbook": "Banking Industry Spending Overview.xlsx",
+          "workbook_sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "data_workbook": null,
+          "data_workbook_sha256": null,
+          "data_lineage_matches": null,
+          "destination_schema": 1,
+          "database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+          "payload_sha256": "cba938023ed737faff031ce82bbf232088065f7475bb38ae48ac64bfd1aca59c",
+          "original_database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+          "accounting_engine_sha256": "<64hex>",
+          "cycle_basis": "Contribution date, calendar election cycle",
+          "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+          "ledger_run_id": "<ledger-run-id>",
+          "query_engine_sha256": "<64hex>",
+          "field_semantics_sha256": "<64hex>",
+          "query_projection_sha256": "<64hex>"
+        },
+        "notices": [
+          "Observed original giving remains provisional; supported giving is a subset, not a complete total."
+        ],
+        "verified_unique": false,
+        "industry": "Banking",
+        "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+      }
+    },
+    {
+      "name": "query body legacy dataset only",
+      "method": "POST",
+      "path": "/api/contributions/query",
+      "body": {
+        "dataset": "Banking",
+        "dimensions": [
+          "cycle"
+        ],
+        "measures": [
+          "amount"
+        ],
+        "limit": 60
+      },
+      "status": 200,
+      "response": {
+        "schema_version": 3,
+        "status": "ready",
+        "dataset": "Banking",
+        "basis": "receipt",
+        "basis_label": "Published included receipt view",
+        "columns": [
+          {
+            "id": "cycle",
+            "label": "Election cycle",
+            "role": "dimension",
+            "type": "category",
+            "data_type": "string",
+            "unit": null,
+            "table": "Contribution observations",
+            "discrete": true,
+            "is_time": true,
+            "geographic_role": null,
+            "description": "Groups source observations without changing their amounts.",
+            "aggregation": null,
+            "name": "Election cycle"
+          },
+          {
+            "id": "amount",
+            "label": "Net amount",
+            "role": "measure",
+            "type": "number",
+            "data_type": "decimal",
+            "unit": "cents",
+            "table": "Contribution observations",
+            "discrete": false,
+            "is_time": false,
+            "geographic_role": null,
+            "description": "Computed from selected individual observations, before chart pagination.",
+            "aggregation": "source aggregate",
+            "name": "Net amount"
+          }
+        ],
+        "rows": [
+          {
+            "cycle": "2025-2026",
+            "amount": 12500000
+          }
+        ],
+        "totals": {
+          "amount": 125000000,
+          "records": 420
+        },
+        "group_count": 1,
+        "offset": 0,
+        "limit": 60,
+        "has_more": false,
+        "comparison": {},
+        "geography": {
+          "observations": 420,
+          "valid_zip_observations": 398,
+          "unmapped_amount": 220000
+        },
+        "reconciliation": {
+          "source_receipt_cents": 125000000,
+          "expected_receipt_cents": 125000000,
+          "receipt_matches_workbook": true,
+          "filtered_amount_cents": 125000000,
+          "grouped_amount_cents": 125000000,
+          "aggregate_filters_applied": false,
+          "conserved": true
+        },
+        "provenance": {
+          "workbook": "Banking Industry Spending Overview.xlsx",
+          "workbook_sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "data_workbook": null,
+          "data_workbook_sha256": null,
+          "data_lineage_matches": null,
+          "destination_schema": 1,
+          "database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+          "payload_sha256": "cba938023ed737faff031ce82bbf232088065f7475bb38ae48ac64bfd1aca59c",
+          "original_database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+          "accounting_engine_sha256": "<64hex>",
+          "cycle_basis": "Contribution date, calendar election cycle",
+          "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+          "ledger_run_id": "<ledger-run-id>",
+          "query_engine_sha256": "<64hex>",
+          "field_semantics_sha256": "<64hex>",
+          "query_projection_sha256": "<64hex>"
+        },
+        "notices": [
+          "Observed original giving remains provisional; supported giving is a subset, not a complete total."
+        ],
+        "verified_unique": false,
+        "industry": "Banking",
+        "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+      }
+    },
+    {
+      "name": "records body industry",
+      "method": "POST",
+      "path": "/api/contributions/records",
+      "body": {
+        "industry": "Banking",
+        "dimensions": [
+          "cycle",
+          "company"
+        ],
+        "basis": "receipt",
+        "limit": 50,
+        "offset": 0
+      },
+      "status": 200,
+      "response": {
+        "schema_version": 3,
+        "status": "ready",
+        "dataset": "Banking",
+        "basis": "receipt",
+        "rows": [
+          {
+            "source_id": "<source-id>",
+            "cycle": "2025-2026",
+            "company": "Example Bank Corp",
+            "date": "2026-01-15",
+            "amount_cents": 25000,
+            "reasons": [],
+            "evidence_ids": []
+          }
+        ],
+        "total_records": 1,
+        "offset": 0,
+        "limit": 50,
+        "has_more": false,
+        "provenance": {
+          "workbook": "Banking Industry Spending Overview.xlsx",
+          "workbook_sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "data_workbook": null,
+          "data_workbook_sha256": null,
+          "data_lineage_matches": null,
+          "destination_schema": 1,
+          "database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+          "payload_sha256": "cba938023ed737faff031ce82bbf232088065f7475bb38ae48ac64bfd1aca59c",
+          "original_database_sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+          "accounting_engine_sha256": "<64hex>",
+          "cycle_basis": "Contribution date, calendar election cycle",
+          "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+          "index_token": "<hex>",
+          "query_engine_sha256": "<64hex>",
+          "field_semantics_sha256": "<64hex>"
+        },
+        "amount_unit": "cents",
+        "industry": "Banking",
+        "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+      }
+    },
+    {
+      "name": "geography body industry, two zips",
+      "method": "POST",
+      "path": "/api/contributions/geography",
+      "body": {
+        "industry": "Banking",
+        "zips": [
+          "20001",
+          "20002"
+        ],
+        "layers": [
+          "states"
+        ],
+        "congress": "119"
+      },
+      "status": 200,
+      "response": {
+        "schema_version": 1,
+        "geography_kind": "donor_recorded_zip",
+        "congress": "119",
+        "points": [
+          {
+            "zip5": "20001",
+            "zip": "20001",
+            "longitude": -77.0166,
+            "latitude": 38.9122
+          }
+        ],
+        "layers": {
+          "states": {
+            "type": "FeatureCollection",
+            "features": []
+          }
+        },
+        "sources": [
+          {
+            "url": "<gazetteer-url>",
+            "vintage": "2025 Gazetteer, ZCTA representative points",
+            "sha256": "<64hex>",
+            "fetched_at": "2026-09-16T20:00:00Z"
+          }
+        ],
+        "warnings": [],
+        "errors": {},
+        "coverage": {
+          "requested_zips": 2,
+          "invalid_zips": [],
+          "located_zips": 1,
+          "unmatched_zips": [
+            "20002"
+          ],
+          "polygon_zips": [],
+          "deferred_polygon_zips": [],
+          "polygon_complete": true
+        },
+        "industry": "Banking"
+      }
+    },
+    {
+      "name": "snapshots ?industry=Banking",
+      "method": "GET",
+      "path": "/api/snapshots",
+      "query": {
+        "industry": "Banking"
+      },
+      "status": 200,
+      "response": {
+        "schema_version": 1,
+        "report_directory": "C:\\Reports\\Published",
+        "generated_at": "2026-09-16T23:00:00Z",
+        "snapshots": [
+          {
+            "industry": "Banking",
+            "slug": "banking",
+            "dataset": "Banking",
+            "available": true,
+            "message": null,
+            "workbook": {
+              "name": "Banking Industry Spending Overview.xlsx",
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "bytes": 40894512,
+              "modified_at": "2026-09-10T14:56:03Z"
+            },
+            "companion": null,
+            "database": {
+              "path": ".cache/industry-report/banking/mentat.db",
+              "sha256": "ff773b686aad09e470c6bf4072b0bf6e6976b9292c37051f2a3123c5e05eec19",
+              "hydrated": false
+            },
+            "payload_sha256": "cba938023ed737faff031ce82bbf232088065f7475bb38ae48ac64bfd1aca59c",
+            "destination_schema": 1,
+            "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435"
+          }
+        ]
+      }
+    },
+    {
+      "name": "graph ?id=published-reports&industry=Banking",
+      "method": "GET",
+      "path": "/api/graph",
+      "query": {
+        "id": "published-reports",
+        "industry": "Banking"
+      },
+      "status": 200,
+      "response": {
+        "industry": "Banking",
+        "reports": [
+          {
+            "build_stamp": "e55f42500c1924c953e77700116fea68e2c42efd20c63577fc29af452c71a435",
+            "...": "existing report keys unchanged"
+          }
+        ],
+        "...": "existing graph keys unchanged"
+      }
+    },
+    {
+      "name": "cross-reference ?industry=Banking",
+      "method": "GET",
+      "path": "/api/cross-reference",
+      "query": {
+        "industry": "Banking"
+      },
+      "status": 200,
+      "response": {
+        "available": true,
+        "run_id": "20260916-000002",
+        "status": "completed",
+        "notices": [],
+        "industry": "Banking",
+        "selected_by": "industry",
+        "report_sha256": "<64hex>",
+        "report_age_hours": 0.5,
+        "report": {
+          "run_id": "20260916-000002",
+          "status": "completed",
+          "scope": {
+            "industries": [
+              "Banking"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "error: unknown industry",
+      "method": "GET",
+      "path": "/api/contributions/catalog",
+      "query": {
+        "industry": "Fintec"
+      },
+      "status": 400,
+      "response": {
+        "error": "Choose a registered industry: Banking, Credit Union."
+      }
+    },
+    {
+      "name": "error: industry and dataset disagree",
+      "method": "POST",
+      "path": "/api/contributions/query",
+      "body": {
+        "industry": "Banking",
+        "dataset": "Credit Union"
+      },
+      "status": 400,
+      "response": {
+        "error": "The industry and dataset in this request disagree."
+      }
+    }
+  ],
+  "negative_controls": [
+    {
+      "why": "industry must be a string the registry can match by label or slug; resolve() cannot compare a number, so rule 1 (industry present -> must resolve) rejects it before any lookup runs",
+      "payload": {
+        "industry": 12
+      }
+    },
+    {
+      "why": "industry must be a registry label or slug, never a filesystem path; this is the same shape _source() already rejects for dataset today ('Choose a configured contribution dataset, not a file path.'), and rule 1 rejects it the same way for industry",
+      "payload": {
+        "industry": "C:\\x.xlsx"
+      }
+    },
+    {
+      "why": "unknown label/slug; rule 1's else-branch returns 400 with the single error key server.py emits (do_GET :1853, do_POST :1974): {\"error\": \"Choose a registered industry: Banking, Credit Union.\"}",
+      "payload": {
+        "industry": "Fintec"
+      }
+    },
+    {
+      "why": "rule 3: industry and dataset both present and disagreeing must 400 with 'The industry and dataset in this request disagree.', never silently prefer one",
+      "payload": {
+        "industry": "Banking",
+        "dataset": "Credit Union"
+      }
+    },
+    {
+      "why": "an empty string is not a registered label or slug; rule 1 rejects it exactly as an unknown label, with the same 400 'Choose a registered industry.'",
+      "payload": {
+        "industry": ""
+      }
+    }
+  ]
+}

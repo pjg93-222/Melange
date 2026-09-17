@@ -68,7 +68,7 @@
     if(filter.value===''||filter.value==null)return [];
     return [{field:field.id,op:simple,value:filterValue(filter.value,field)}];
   }
-  function compile(state,columns,{dataset,basis='receipt',offset=0}={}){
+  function compile(state,columns,{dataset,industry,basis='receipt',offset=0}={}){
     const byIndex=new Map(columns.map(f=>[f.index,f])),attach=list=>core.shelf(list).map(p=>({...p,field:byIndex.get(p.column)})).filter(p=>p.field);
     const axes=attach([...(state.columns||[]),...(state.rows||[])]),dimensions=[],measures=[],allMeasures=[],notes=[];
     const addDim=f=>{if(!dimensions.includes(f.id))dimensions.push(f.id);};
@@ -125,6 +125,7 @@
     const limit=type==='map'?100000:type==='histogram'?10000:Math.min(1000,Math.max(1,Number(state.params?.maxGroups)||60));
     const chronological=['line','area','combination','dual-line','histogram'].includes(type),sort=chronological?[{field:dimensions[0],direction:'asc'}]:[{field:measures[0],direction:state.sort==='asc'?'asc':'desc'}];
     const query={dataset,basis,dimensions:[...new Set(dimensions)],measures:allMeasures,filters,aggregate_filters,sort,limit,offset:type==='map'||transform!=='none'?0:offset};
+    if(industry)query.industry=industry;
     if(transform!=='none')query.limit=100000;
     if(type==='histogram'||query.dimensions.includes('amount_bin')||filters.some(f=>f.field==='amount_bin'))query.bin_width_cents=binWidth;
     const spec={type,filled,binWidth,dimensions:query.dimensions,measures,color:color?.field.id||'',size:size?encoded(size):'',labelFields:labels.map(encoded),tooltip:tooltip.map(encoded),labels:!!state.showLabels,references:{average:!!state.analytics?.average,median:!!state.analytics?.median}};

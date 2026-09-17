@@ -1813,8 +1813,8 @@ spending_detail_frames <- function(rows, row_cap = 45000L) {
   required <- c(
     "cycle", "cycle_label", "company", "committee_id", "recipient",
     "committee_type", "committee_designation", "recipient_category", "party",
-    "state", "city", "zipcode", "employer", "occupation", "amount",
-    "person_key", "include_in_analysis", "date"
+    "state", "city", "zipcode", "employer", "occupation", "street_1",
+    "street_2", "amount", "person_key", "include_in_analysis", "date"
   )
   absent <- setdiff(required, names(detail))
   if (length(absent)) {
@@ -1827,7 +1827,7 @@ spending_detail_frames <- function(rows, row_cap = 45000L) {
   recipient_keys <- c("cycle", "cycle_label", "company", "committee_id")
   contributor_keys <- c(
     "cycle", "cycle_label", "company", "state", "city", "zip5", "employer",
-    "occupation"
+    "occupation", "street_1", "street_2"
   )
   recipient_columns <- c(
     recipient_keys, "recipient", "committee_type", "committee_type_label",
@@ -1848,6 +1848,7 @@ spending_detail_frames <- function(rows, row_cap = 45000L) {
       recipient_category = character(), party = character(),
       state = character(), city = character(), zip5 = character(),
       employer = character(), occupation = character(),
+      street_1 = character(), street_2 = character(),
       total_giving = numeric(), gift_count = integer(),
       contributors = integer(), first_date = character(),
       last_date = character(), folded_rows = integer()
@@ -1875,6 +1876,8 @@ spending_detail_frames <- function(rows, row_cap = 45000L) {
   detail[, city := trim_text(city)]
   detail[, employer := trim_text(employer)]
   detail[, occupation := trim_text(occupation)]
+  detail[, street_1 := trim_text(street_1)]
+  detail[, street_2 := trim_text(street_2)]
   detail[, person_key := trim_text(person_key)]
   detail[, amount := as.numeric(amount)]
   detail[, date := trim_text(date)]

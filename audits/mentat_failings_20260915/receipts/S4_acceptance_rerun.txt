@@ -1,0 +1,530 @@
+S4 Acceptance Re-run (analytics polling + studio contract payloads)
+Driver started: 2026-09-16T21:40:31.442087
+================================================================================
+[2026-09-16T21:40:31.444088] Chosen port: 65282 (base_url=http://127.0.0.1:65282)
+[2026-09-16T21:40:31.444088] Data root: C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-multi-industry-snapshot-support-7c95a9\0b85c89b-e0b5-4619-ada5-b2f661f60e01\scratchpad\acceptance_data_root_2
+[2026-09-16T21:40:31.444088] Report directory (env MENTAT_REPORT_DIRECTORY): C:\Users\pgoff\OneDrive\Desktop\Mentat Complete Files
+[2026-09-16T21:40:31.444088] Command: C:\Users\pgoff\AppData\Local\Programs\Python\Python312\python.exe app/server.py --port 65282 --data-root C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-multi-industry-snapshot-support-7c95a9\0b85c89b-e0b5-4619-ada5-b2f661f60e01\scratchpad\acceptance_data_root_2 (cwd=C:\Users\pgoff\Mentat\mentat)
+[2026-09-16T21:40:31.494518] Started server pid=78748
+Server PID: 78748
+[2026-09-16T21:40:34.633092] Server ready=True after 3.1s
+[2026-09-16T21:40:34.633092] ASSERT PASS: server_started_and_ready :: stdout marker 'Mentat app: http://127.0.0.1:65282' seen=True
+[2026-09-16T21:41:09.374034] GET /api/contributions/session -> 200
+[2026-09-16T21:41:09.374034] ASSERT PASS: session_token_present :: token_present=True
+
+STEP 1: GET /api/health (initial)
+Status: 200
+  code_sha256: 5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+  assets_sha256: 30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+  on_disk_code_sha256_now: 5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+  on_disk_assets_sha256_now: 30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+  git_sha: 91fe7402a
+  started_at: 1789609234.2854178
+[2026-09-16T21:41:09.464805] ASSERT PASS: step1_code_sha256_matches_on_disk :: code_sha256=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f on_disk_code_sha256_now=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+[2026-09-16T21:41:09.464805] ASSERT PASS: step1_assets_sha256_matches_on_disk :: assets_sha256=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8 on_disk_assets_sha256_now=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+
+STEP 2: POST /api/contributions/query (poll to ready) for Banking and Credit Union
+-- industry=Banking body={"industry": "Banking", "dimensions": ["cycle"], "measures": ["amount"], "limit": 60}
+[2026-09-16T21:41:21.466411] POLL query:Banking attempt=1 http=200 status=preparing elapsed=12.0s
+[2026-09-16T21:41:39.678039] POLL query:Banking attempt=2 http=200 status=preparing elapsed=30.2s
+[2026-09-16T21:41:55.992725] POLL query:Banking attempt=3 http=200 status=preparing elapsed=46.5s
+[2026-09-16T21:42:14.773400] POLL query:Banking attempt=4 http=200 status=preparing elapsed=65.3s
+[2026-09-16T21:42:33.283743] POLL query:Banking attempt=5 http=200 status=preparing elapsed=83.8s
+[2026-09-16T21:42:49.378469] POLL query:Banking attempt=6 http=200 status=preparing elapsed=99.9s
+[2026-09-16T21:43:07.140813] POLL query:Banking attempt=7 http=200 status=preparing elapsed=117.7s
+[2026-09-16T21:43:23.931011] POLL query:Banking attempt=8 http=200 status=preparing elapsed=134.5s
+[2026-09-16T21:43:39.749278] POLL query:Banking attempt=9 http=200 status=preparing elapsed=150.3s
+[2026-09-16T21:43:56.003825] POLL query:Banking attempt=10 http=200 status=preparing elapsed=166.5s
+[2026-09-16T21:44:11.427797] POLL query:Banking attempt=11 http=200 status=preparing elapsed=182.0s
+[2026-09-16T21:44:28.060336] POLL query:Banking attempt=12 http=200 status=preparing elapsed=198.6s
+[2026-09-16T21:44:43.597263] POLL query:Banking attempt=13 http=200 status=preparing elapsed=214.1s
+[2026-09-16T21:44:59.011382] POLL query:Banking attempt=14 http=200 status=preparing elapsed=229.5s
+[2026-09-16T21:45:14.824339] POLL query:Banking attempt=15 http=200 status=preparing elapsed=245.4s
+[2026-09-16T21:45:30.281348] POLL query:Banking attempt=16 http=200 status=preparing elapsed=260.8s
+[2026-09-16T21:45:45.784072] POLL query:Banking attempt=17 http=200 status=preparing elapsed=276.3s
+[2026-09-16T21:46:01.186998] POLL query:Banking attempt=18 http=200 status=preparing elapsed=291.7s
+[2026-09-16T21:46:17.258476] POLL query:Banking attempt=19 http=200 status=preparing elapsed=307.8s
+[2026-09-16T21:46:32.743589] POLL query:Banking attempt=20 http=200 status=preparing elapsed=323.3s
+[2026-09-16T21:46:48.203658] POLL query:Banking attempt=21 http=200 status=preparing elapsed=338.7s
+[2026-09-16T21:47:03.655234] POLL query:Banking attempt=22 http=200 status=preparing elapsed=354.2s
+[2026-09-16T21:47:19.327708] POLL query:Banking attempt=23 http=200 status=preparing elapsed=369.9s
+[2026-09-16T21:47:34.958453] POLL query:Banking attempt=24 http=200 status=preparing elapsed=385.5s
+[2026-09-16T21:47:50.466267] POLL query:Banking attempt=25 http=200 status=preparing elapsed=401.0s
+[2026-09-16T21:48:06.022824] POLL query:Banking attempt=26 http=200 status=preparing elapsed=416.6s
+[2026-09-16T21:48:21.560444] POLL query:Banking attempt=27 http=200 status=preparing elapsed=432.1s
+[2026-09-16T21:48:37.056724] POLL query:Banking attempt=28 http=200 status=preparing elapsed=447.6s
+[2026-09-16T21:48:52.669111] POLL query:Banking attempt=29 http=200 status=preparing elapsed=463.2s
+[2026-09-16T21:49:08.210475] POLL query:Banking attempt=30 http=200 status=preparing elapsed=478.7s
+[2026-09-16T21:49:23.721103] POLL query:Banking attempt=31 http=200 status=preparing elapsed=494.3s
+[2026-09-16T21:49:39.212063] POLL query:Banking attempt=32 http=200 status=preparing elapsed=509.7s
+[2026-09-16T21:49:54.695864] POLL query:Banking attempt=33 http=200 status=preparing elapsed=525.2s
+[2026-09-16T21:50:10.220577] POLL query:Banking attempt=34 http=200 status=preparing elapsed=540.8s
+[2026-09-16T21:50:25.729968] POLL query:Banking attempt=35 http=200 status=preparing elapsed=556.3s
+[2026-09-16T21:50:41.698246] POLL query:Banking attempt=36 http=200 status=preparing elapsed=572.2s
+[2026-09-16T21:50:57.247113] POLL query:Banking attempt=37 http=200 status=preparing elapsed=587.8s
+[2026-09-16T21:51:12.971940] POLL query:Banking attempt=38 http=200 status=preparing elapsed=603.5s
+[2026-09-16T21:51:28.562953] POLL query:Banking attempt=39 http=200 status=preparing elapsed=619.1s
+[2026-09-16T21:51:44.128888] POLL query:Banking attempt=40 http=200 status=preparing elapsed=634.7s
+[2026-09-16T21:51:59.707485] POLL query:Banking attempt=41 http=200 status=preparing elapsed=650.2s
+[2026-09-16T21:52:15.245068] POLL query:Banking attempt=42 http=200 status=preparing elapsed=665.8s
+[2026-09-16T21:52:30.771281] POLL query:Banking attempt=43 http=200 status=preparing elapsed=681.3s
+[2026-09-16T21:52:46.303542] POLL query:Banking attempt=44 http=200 status=preparing elapsed=696.8s
+[2026-09-16T21:53:01.878942] POLL query:Banking attempt=45 http=200 status=preparing elapsed=712.4s
+[2026-09-16T21:53:17.571662] POLL query:Banking attempt=46 http=200 status=preparing elapsed=728.1s
+[2026-09-16T21:53:33.112971] POLL query:Banking attempt=47 http=200 status=preparing elapsed=743.6s
+[2026-09-16T21:53:48.857067] POLL query:Banking attempt=48 http=200 status=preparing elapsed=759.4s
+[2026-09-16T21:54:04.284333] POLL query:Banking attempt=49 http=200 status=preparing elapsed=774.8s
+[2026-09-16T21:54:21.335299] POLL query:Banking attempt=50 http=200 status=preparing elapsed=791.9s
+[2026-09-16T21:54:36.714612] POLL query:Banking attempt=51 http=200 status=preparing elapsed=807.2s
+[2026-09-16T21:54:52.105476] POLL query:Banking attempt=52 http=200 status=preparing elapsed=822.6s
+[2026-09-16T21:55:07.501234] POLL query:Banking attempt=53 http=200 status=preparing elapsed=838.0s
+[2026-09-16T21:55:23.009490] POLL query:Banking attempt=54 http=200 status=preparing elapsed=853.5s
+[2026-09-16T21:55:46.269413] POLL query:Banking attempt=55 http=200 status=preparing elapsed=876.8s
+[2026-09-16T21:56:25.670237] POLL query:Banking attempt=56 http=200 status=preparing elapsed=916.2s
+[2026-09-16T21:56:41.474995] POLL query:Banking attempt=57 http=200 status=preparing elapsed=932.0s
+[2026-09-16T21:56:56.924074] POLL query:Banking attempt=58 http=200 status=preparing elapsed=947.5s
+[2026-09-16T21:57:12.375396] POLL query:Banking attempt=59 http=200 status=preparing elapsed=962.9s
+[2026-09-16T21:57:27.713201] POLL query:Banking attempt=60 http=200 status=preparing elapsed=978.2s
+[2026-09-16T21:57:43.101440] POLL query:Banking attempt=61 http=200 status=preparing elapsed=993.6s
+[2026-09-16T21:58:04.937052] POLL query:Banking attempt=62 http=200 status=preparing elapsed=1015.5s
+[2026-09-16T21:58:20.295434] POLL query:Banking attempt=63 http=200 status=preparing elapsed=1030.8s
+[2026-09-16T21:58:35.625097] POLL query:Banking attempt=64 http=200 status=preparing elapsed=1046.2s
+[2026-09-16T21:59:16.667475] POLL query:Banking attempt=65 http=200 status=preparing elapsed=1087.2s
+[2026-09-16T21:59:32.067874] POLL query:Banking attempt=66 http=200 status=preparing elapsed=1102.6s
+[2026-09-16T21:59:47.477254] POLL query:Banking attempt=67 http=200 status=preparing elapsed=1118.0s
+[2026-09-16T22:00:02.799873] POLL query:Banking attempt=68 http=200 status=preparing elapsed=1133.3s
+[2026-09-16T22:00:18.187903] POLL query:Banking attempt=69 http=200 status=preparing elapsed=1148.7s
+[2026-09-16T22:00:38.701894] POLL query:Banking attempt=70 http=200 status=preparing elapsed=1169.2s
+[2026-09-16T22:00:54.102114] POLL query:Banking attempt=71 http=200 status=preparing elapsed=1184.6s
+[2026-09-16T22:01:17.378421] POLL query:Banking attempt=72 http=200 status=preparing elapsed=1207.9s
+[2026-09-16T22:01:33.043782] POLL query:Banking attempt=73 http=200 status=preparing elapsed=1223.6s
+[2026-09-16T22:01:49.904906] POLL query:Banking attempt=74 http=200 status=preparing elapsed=1240.4s
+[2026-09-16T22:02:05.300929] POLL query:Banking attempt=75 http=200 status=preparing elapsed=1255.8s
+[2026-09-16T22:02:25.396235] POLL query:Banking attempt=76 http=200 status=preparing elapsed=1275.9s
+[2026-09-16T22:02:40.770433] POLL query:Banking attempt=77 http=200 status=preparing elapsed=1291.3s
+[2026-09-16T22:02:56.139340] POLL query:Banking attempt=78 http=200 status=preparing elapsed=1306.7s
+[2026-09-16T22:03:11.599933] POLL query:Banking attempt=79 http=200 status=preparing elapsed=1322.1s
+[2026-09-16T22:03:42.145270] POLL query:Banking attempt=80 http=200 status=preparing elapsed=1352.7s
+[2026-09-16T22:04:14.869662] POLL query:Banking attempt=81 http=200 status=preparing elapsed=1385.4s
+[2026-09-16T22:04:30.337466] POLL query:Banking attempt=82 http=200 status=preparing elapsed=1400.9s
+[2026-09-16T22:04:45.780202] POLL query:Banking attempt=83 http=200 status=preparing elapsed=1416.3s
+[2026-09-16T22:05:01.184842] POLL query:Banking attempt=84 http=200 status=preparing elapsed=1431.7s
+[2026-09-16T22:05:16.588151] POLL query:Banking attempt=85 http=200 status=preparing elapsed=1447.1s
+[2026-09-16T22:05:31.933382] POLL query:Banking attempt=86 http=200 status=preparing elapsed=1462.5s
+[2026-09-16T22:05:47.270455] POLL query:Banking attempt=87 http=200 status=preparing elapsed=1477.8s
+[2026-09-16T22:06:02.753210] POLL query:Banking attempt=88 http=200 status=preparing elapsed=1493.3s
+[2026-09-16T22:06:18.092802] POLL query:Banking attempt=89 http=200 status=preparing elapsed=1508.6s
+[2026-09-16T22:06:18.092802] POLL query:Banking TIMEOUT after 1508.6s, last status=preparing
+   total_wait_seconds=1508.6 timed_out=True final_http=200 final_status=preparing
+[2026-09-16T22:06:18.097568] ASSERT FAIL: query_ready_Banking :: did not reach ready within 1500s; last status=preparing
+-- industry=Credit Union body={"industry": "Credit Union", "dimensions": ["cycle"], "measures": ["amount"], "limit": 60}
+[2026-09-16T22:06:18.797693] POLL query:Credit Union attempt=1 http=200 status=preparing elapsed=0.7s
+[2026-09-16T22:06:34.229882] POLL query:Credit Union attempt=2 http=200 status=preparing elapsed=16.1s
+[2026-09-16T22:06:49.674859] POLL query:Credit Union attempt=3 http=200 status=preparing elapsed=31.6s
+[2026-09-16T22:07:04.981882] POLL query:Credit Union attempt=4 http=200 status=preparing elapsed=46.9s
+[2026-09-16T22:07:20.346147] POLL query:Credit Union attempt=5 http=200 status=preparing elapsed=62.2s
+[2026-09-16T22:07:35.583882] POLL query:Credit Union attempt=6 http=200 status=preparing elapsed=77.5s
+[2026-09-16T22:14:22.607440] POLL query:Credit Union attempt=7 http=200 status=preparing elapsed=484.5s
+[2026-09-16T22:14:37.941446] POLL query:Credit Union attempt=8 http=200 status=preparing elapsed=499.8s
+[2026-09-16T22:14:55.577987] POLL query:Credit Union attempt=9 http=200 status=preparing elapsed=517.5s
+[2026-09-16T22:15:10.921438] POLL query:Credit Union attempt=10 http=200 status=preparing elapsed=532.8s
+[2026-09-16T22:15:26.240218] POLL query:Credit Union attempt=11 http=200 status=preparing elapsed=548.1s
+[2026-09-16T22:15:41.896160] POLL query:Credit Union attempt=12 http=200 status=preparing elapsed=563.8s
+[2026-09-16T22:15:57.513996] POLL query:Credit Union attempt=13 http=200 status=preparing elapsed=579.4s
+[2026-09-16T22:16:12.870236] POLL query:Credit Union attempt=14 http=200 status=preparing elapsed=594.8s
+[2026-09-16T22:16:28.219450] POLL query:Credit Union attempt=15 http=200 status=preparing elapsed=610.1s
+[2026-09-16T22:16:43.792073] POLL query:Credit Union attempt=16 http=200 status=preparing elapsed=625.7s
+[2026-09-16T22:16:59.038477] POLL query:Credit Union attempt=17 http=200 status=preparing elapsed=640.9s
+[2026-09-16T22:17:14.749446] POLL query:Credit Union attempt=18 http=200 status=preparing elapsed=656.7s
+[2026-09-16T22:17:29.960405] POLL query:Credit Union attempt=19 http=200 status=preparing elapsed=671.9s
+[2026-09-16T22:17:45.394874] POLL query:Credit Union attempt=20 http=200 status=preparing elapsed=687.3s
+[2026-09-16T22:18:01.293976] POLL query:Credit Union attempt=21 http=200 status=preparing elapsed=703.2s
+[2026-09-16T22:18:16.536852] POLL query:Credit Union attempt=22 http=200 status=preparing elapsed=718.4s
+[2026-09-16T22:18:40.902267] POLL query:Credit Union attempt=23 http=200 status=preparing elapsed=742.8s
+[2026-09-16T22:18:56.235349] POLL query:Credit Union attempt=24 http=200 status=preparing elapsed=758.1s
+[2026-09-16T22:19:11.666764] POLL query:Credit Union attempt=25 http=200 status=preparing elapsed=773.6s
+[2026-09-16T22:19:27.027493] POLL query:Credit Union attempt=26 http=200 status=preparing elapsed=788.9s
+[2026-09-16T22:19:42.737498] POLL query:Credit Union attempt=27 http=200 status=preparing elapsed=804.6s
+[2026-09-16T22:19:58.372774] POLL query:Credit Union attempt=28 http=200 status=preparing elapsed=820.3s
+[2026-09-16T22:20:13.932996] POLL query:Credit Union attempt=29 http=200 status=preparing elapsed=835.8s
+[2026-09-16T22:20:31.555063] POLL query:Credit Union attempt=30 http=200 status=preparing elapsed=853.5s
+[2026-09-16T22:20:52.460067] POLL query:Credit Union attempt=31 http=200 status=preparing elapsed=874.4s
+[2026-09-16T22:21:08.622279] POLL query:Credit Union attempt=32 http=200 status=preparing elapsed=890.5s
+[2026-09-16T22:21:25.902040] POLL query:Credit Union attempt=33 http=200 status=ready elapsed=907.8s
+   total_wait_seconds=907.8 timed_out=False final_http=200 final_status=ready
+[2026-09-16T22:21:25.902040] ASSERT PASS: query_ready_Credit Union :: status=ready
+[2026-09-16T22:21:25.902040] ASSERT PASS: query_industry_echo_Credit Union :: requested=Credit Union echoed=Credit Union
+   dataset=Credit Union industry=Credit Union build_stamp=4b8523becac26c5ad4dd625fe9bfb0991b6742debbae81212e129ddea6a9b8b9
+   group_count=3 len(rows)=3
+   rows[0]={"cycle": "2023-2024", "amount": 77908835}
+   totals={"amount": 142200565, "records": 27519, "contributors": 2588}
+[2026-09-16T22:21:25.902040] Skipping cross-industry comparisons because one or both industries timed out.
+
+STEP 3: POST /api/contributions/records (Credit Union, poll to ready)
+[2026-09-16T22:21:26.289136] POLL records:Credit Union attempt=1 http=200 status=ready elapsed=0.4s
+total_wait_seconds=0.4 timed_out=False final_http=200 final_status=ready
+[2026-09-16T22:21:26.289136] ASSERT PASS: records_ready :: status=ready
+status=ready dataset=Credit Union industry=Credit Union
+len(rows)=5
+rows[0] keys=['amount_cents', 'city', 'committee_id', 'company', 'contributor', 'cycle', 'date', 'decision_status', 'employer', 'evidence_ids', 'funding_source', 'industry', 'occupation', 'original_cents', 'pac_cents', 'party', 'raw_cents', 'raw_zip', 'reasons', 'receipt_cents', 'receipt_role', 'recipient', 'recipient_category', 'recipient_location_evidence', 'recipient_location_status', 'recipient_state', 'represented_location_evidence', 'represented_location_status', 'represented_state', 'source_id', 'source_table', 'source_url', 'state', 'street_1', 'street_2', 'supported_cents', 'unresolved', 'year', 'zip5']
+
+STEP 4: POST /api/studio/views (examples.views_save verbatim from contract)
+POST status=200 response={"id": "a1b5a76a664b4359b6716293722cb7df", "saved_at": 1789611686.3280845}
+[2026-09-16T22:21:26.332081] ASSERT PASS: views_save_200 :: http=200
+[2026-09-16T22:21:26.333081] ASSERT PASS: views_save_has_id :: id='a1b5a76a664b4359b6716293722cb7df'
+GET /api/studio/views?id=a1b5a76a664b4359b6716293722cb7df -> 200
+[2026-09-16T22:21:26.370580] ASSERT PASS: view_sheets_roundtrip_equal :: equal=True
+[2026-09-16T22:21:26.370580] ASSERT PASS: view_source_industry_roundtrip_equal :: got='Banking' expected='Banking'
+[2026-09-16T22:21:26.390592] ASSERT PASS: view_found_in_list :: view_id=a1b5a76a664b4359b6716293722cb7df present=True
+[2026-09-16T22:21:26.390592] ASSERT PASS: view_industries_field :: industries=['Banking', 'Credit Union']
+
+On-disk view JSON (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-multi-industry-snapshot-support-7c95a9\0b85c89b-e0b5-4619-ada5-b2f661f60e01\scratchpad\acceptance_data_root_2\studio\views\a1b5a76a664b4359b6716293722cb7df.json):
+{
+  "id": "a1b5a76a664b4359b6716293722cb7df",
+  "name": "Cross-industry PAC comparison",
+  "saved_at": 1789611686.3280845,
+  "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+  "source": {
+    "label": "Banking",
+    "reportName": "Banking Industry Spending Overview.xlsx",
+    "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+    "runName": "Configured completed-report folder",
+    "sheet": "Verified source observations",
+    "mode": "contributions",
+    "dataset": "Banking",
+    "datasetLabel": "Banking",
+    "industry": "Banking"
+  },
+  "sheets": [
+    {
+      "id": "sheet-1",
+      "name": "Recipients",
+      "source": {
+        "run": "published-reports",
+        "runName": "Configured completed-report folder",
+        "report": "Banking Industry Spending Overview.xlsx",
+        "reportName": "Banking Industry Spending Overview.xlsx",
+        "sheet": "Verified source observations",
+        "header": 0,
+        "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "industry": "Banking",
+        "dataset": "Banking"
+      },
+      "sources": [],
+      "columns": [],
+      "rows": [],
+      "marks": {
+        "type": "automatic",
+        "color": null,
+        "size": null,
+        "label": null,
+        "detail": [],
+        "tooltip": []
+      },
+      "filters": [],
+      "pages": null,
+      "pageMember": "",
+      "analytics": {
+        "transform": "none",
+        "period": "",
+        "horizon": 2,
+        "totals": false,
+        "average": false,
+        "median": false
+      },
+      "types": {},
+      "params": {
+        "start": 0,
+        "end": 0,
+        "limit": 0,
+        "subject": "",
+        "maxGroups": 0,
+        "splitMulti": false
+      },
+      "sort": "none",
+      "showLabels": false,
+      "fit": "standard"
+    },
+    {
+      "id": "sheet-2",
+      "name": "Credit Union PACs",
+      "source": {
+        "run": "published-reports",
+        "runName": "Configured completed-report folder",
+        "report": "Credit Union Industry Spending Overview.xlsx",
+        "reportName": "Credit Union Industry Spending Overview.xlsx",
+        "sheet": "Verified source observations",
+        "header": 0,
+        "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+        "industry": "Credit Union",
+        "dataset": "Credit Union"
+      },
+      "sources": [
+        {
+          "industry": "Credit Union",
+          "dataset": "Credit Union",
+          "label": "Credit Union"
+        },
+        {
+          "industry": "Banking",
+          "dataset": "Banking",
+          "label": "Banking"
+        }
+      ],
+      "columns": [],
+      "rows": [],
+      "marks": {
+        "type": "automatic",
+        "color": null,
+        "size": null,
+        "label": null,
+        "detail": [],
+        "tooltip": []
+      },
+      "filters": [],
+      "pages": null,
+      "pageMember": "",
+      "analytics": {
+        "transform": "none",
+        "period": "",
+        "horizon": 2,
+        "totals": false,
+        "average": false,
+        "median": false
+      },
+      "types": {},
+      "params": {
+        "start": 0,
+        "end": 0,
+        "limit": 0,
+        "subject": "",
+        "maxGroups": 0,
+        "splitMulti": false
+      },
+      "sort": "none",
+      "showLabels": false,
+      "fit": "standard"
+    }
+  ],
+  "active": 0
+}
+
+STEP 5: POST /api/studio/briefing/add (examples.briefing_add verbatim from contract)
+POST status=200 response={"id": "295fb3f2f5e74bf8892c472e34689fd5", "added_at": 1789611686.3964798}
+[2026-09-16T22:21:26.400309] ASSERT PASS: briefing_add_200 :: http=200
+[2026-09-16T22:21:26.430325] ASSERT PASS: briefing_item_found :: id=295fb3f2f5e74bf8892c472e34689fd5 present=True
+briefing item source.industry = 'Banking'
+
+STEP 6: GET /api/health (final)
+Status: 200
+  code_sha256: 5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+[2026-09-16T22:21:26.456136] ASSERT PASS: final_code_sha256_matches_step1 :: step1=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f step6=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+  assets_sha256: 30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+[2026-09-16T22:21:26.456136] ASSERT PASS: final_assets_sha256_matches_step1 :: step1=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8 step6=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+  on_disk_code_sha256_now: 5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+[2026-09-16T22:21:26.456136] ASSERT PASS: final_on_disk_code_sha256_now_matches_step1 :: step1=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f step6=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+  on_disk_assets_sha256_now: 30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+[2026-09-16T22:21:26.457137] ASSERT PASS: final_on_disk_assets_sha256_now_matches_step1 :: step1=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8 step6=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+
+FINAL STAMP BLOCK (verbatim, step 6 /api/health):
+{
+  "application": "MENTAT",
+  "assets_sha256": "30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8",
+  "busy": false,
+  "code_sha256": "5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f",
+  "contribution_studio_revision": "2026-09-12-typed-fields-chart-families",
+  "data_root": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-multi-industry-snapshot-support-7c95a9\\0b85c89b-e0b5-4619-ada5-b2f661f60e01\\scratchpad\\acceptance_data_root_2",
+  "git_sha": "91fe7402a",
+  "on_disk_assets_sha256_now": "30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8",
+  "on_disk_code_sha256_now": "5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f",
+  "pid": 78748,
+  "port": 65282,
+  "project": "C:\\Users\\pgoff\\Mentat\\mentat",
+  "read_only": false,
+  "report_directory": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files",
+  "resolved_data_root": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-multi-industry-snapshot-support-7c95a9\\0b85c89b-e0b5-4619-ada5-b2f661f60e01\\scratchpad\\acceptance_data_root_2",
+  "server_code_sha256": "03486d523e0f12d5a29c1085b428b24ec1a53d4a5ccfaf5f87294f64de96851a",
+  "started_at": 1789609234.2854178
+}
+[2026-09-16T22:21:26.458137] Terminating server pid=78748 via taskkill /PID 78748 /T /F
+
+taskkill stdout: SUCCESS: The process with PID 78748 (child process of PID 70360) has been terminated.
+taskkill stderr: 
+[2026-09-16T22:21:29.064389] ASSERT PASS: server_process_terminated :: pid=78748 confirmed_gone=True
+
+================================================================================
+ASSERTION SUMMARY
+================================================================================
+  PASS  server_started_and_ready: stdout marker 'Mentat app: http://127.0.0.1:65282' seen=True
+  PASS  session_token_present: token_present=True
+  PASS  step1_code_sha256_matches_on_disk: code_sha256=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f on_disk_code_sha256_now=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+  PASS  step1_assets_sha256_matches_on_disk: assets_sha256=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8 on_disk_assets_sha256_now=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+  FAIL  query_ready_Banking: did not reach ready within 1500s; last status=preparing
+  PASS  query_ready_Credit Union: status=ready
+  PASS  query_industry_echo_Credit Union: requested=Credit Union echoed=Credit Union
+  PASS  records_ready: status=ready
+  PASS  views_save_200: http=200
+  PASS  views_save_has_id: id='a1b5a76a664b4359b6716293722cb7df'
+  PASS  view_sheets_roundtrip_equal: equal=True
+  PASS  view_source_industry_roundtrip_equal: got='Banking' expected='Banking'
+  PASS  view_found_in_list: view_id=a1b5a76a664b4359b6716293722cb7df present=True
+  PASS  view_industries_field: industries=['Banking', 'Credit Union']
+  PASS  briefing_add_200: http=200
+  PASS  briefing_item_found: id=295fb3f2f5e74bf8892c472e34689fd5 present=True
+  PASS  final_code_sha256_matches_step1: step1=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f step6=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+  PASS  final_assets_sha256_matches_step1: step1=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8 step6=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+  PASS  final_on_disk_code_sha256_now_matches_step1: step1=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f step6=5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f
+  PASS  final_on_disk_assets_sha256_now_matches_step1: step1=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8 step6=30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8
+  PASS  server_process_terminated: pid=78748 confirmed_gone=True
+Total: 20/21 assertions passed
+Driver finished: 2026-09-16T22:21:29.084396
+
+================================================================================
+SUPPLEMENTARY PASS: cross-industry differ checks + mismatch 400 check
+Rationale: pass 1 hit the 25-minute bound on Banking (a single global
+build lock in app/contribution_data.py serializes analytics-cache
+materialization across datasets in one process, so Credit Union's own
+889s of 'preparing' was largely spent queued behind Banking's build, not
+building itself). Evidence: two new .sqlite files appeared under
+mentat\state\contribution-analytics during pass 1's run window:
+  3434390f...857b.sqlite  707,477,504 bytes  finished 2026-09-16 22:19:21
+  ce0ffeca...83df.sqlite   56,619,008 bytes  finished 2026-09-16 22:21:09
+both timestamps AFTER pass 1's 22:06:18 Banking timeout, both BEFORE
+Credit Union's 22:21:25 'ready' -- consistent with Banking's own build
+finishing at 22:19:21 and releasing the gate for Credit Union's (much
+smaller, 56MB vs 707MB) build to run and finish at 22:21:09.
+Both caches are now warm on disk, independent of data root, so a fresh
+query for either industry should resolve to 'ready' immediately.
+This pass re-verifies against the code as it is now, using a new server
+process/port/data-root, and appends its findings here rather than
+replacing pass 1's timing evidence.
+Started: 2026-09-16T22:25:52.358881
+[2026-09-16T22:25:52.361881] Chosen port: 60503 (base_url=http://127.0.0.1:60503)
+[2026-09-16T22:25:52.361881] Data root: C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-multi-industry-snapshot-support-7c95a9\0b85c89b-e0b5-4619-ada5-b2f661f60e01\scratchpad\acceptance_data_root_2b
+[2026-09-16T22:25:52.361881] Command: C:\Users\pgoff\AppData\Local\Programs\Python\Python312\python.exe app/server.py --port 60503 --data-root C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-multi-industry-snapshot-support-7c95a9\0b85c89b-e0b5-4619-ada5-b2f661f60e01\scratchpad\acceptance_data_root_2b (cwd=C:\Users\pgoff\Mentat\mentat)
+[2026-09-16T22:25:52.601092] Started server pid=64680
+Server PID: 64680
+[2026-09-16T22:25:58.961865] ASSERT PASS: server2_started_and_ready :: seen=True
+[2026-09-16T22:26:08.194800] ASSERT PASS: session2_token_present :: present=True
+[2026-09-16T22:28:08.205430] DRIVER2 EXCEPTION: TimeoutError: timed out
+DRIVER2 EXCEPTION: TimeoutError: timed out
+[2026-09-16T22:28:08.205430] Terminating server pid=64680
+taskkill stdout: SUCCESS: The process with PID 64680 (child process of PID 63764) has been terminated.
+taskkill stderr: 
+[2026-09-16T22:28:11.249486] ASSERT PASS: server2_process_terminated :: pid=64680 confirmed_gone=True
+
+SUPPLEMENTARY ASSERTION SUMMARY
+  PASS  server2_started_and_ready: seen=True
+  PASS  session2_token_present: present=True
+  PASS  server2_process_terminated: pid=64680 confirmed_gone=True
+Supplementary total: 3/3 assertions passed
+Supplementary pass finished: 2026-09-16T22:28:11.249486
+
+================================================================================
+SUPPLEMENTARY PASS 2: same checks, larger per-request timeout (900s)
+Rationale: pass 1 hit the 25-minute bound on Banking (a single global
+build lock in app/contribution_data.py serializes analytics-cache
+materialization across datasets in one process, so Credit Union's own
+889s of 'preparing' was largely spent queued behind Banking's build, not
+building itself). Evidence: two new .sqlite files appeared under
+mentat\state\contribution-analytics during pass 1's run window:
+  3434390f...857b.sqlite  707,477,504 bytes  finished 2026-09-16 22:19:21
+  ce0ffeca...83df.sqlite   56,619,008 bytes  finished 2026-09-16 22:21:09
+both timestamps AFTER pass 1's 22:06:18 Banking timeout, both BEFORE
+Credit Union's 22:21:25 'ready' -- consistent with Banking's own build
+finishing at 22:19:21 and releasing the gate for Credit Union's (much
+smaller, 56MB vs 707MB) build to run and finish at 22:21:09.
+Both caches are now warm on disk, independent of data root, so a fresh
+query for either industry should resolve to 'ready' immediately.
+This pass re-verifies against the code as it is now, using a new server
+process/port/data-root, and appends its findings here rather than
+replacing pass 1's timing evidence.
+Started: 2026-09-16T22:30:02.331042
+[2026-09-16T22:30:02.333040] Chosen port: 49252 (base_url=http://127.0.0.1:49252)
+[2026-09-16T22:30:02.333040] Data root: C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-multi-industry-snapshot-support-7c95a9\0b85c89b-e0b5-4619-ada5-b2f661f60e01\scratchpad\acceptance_data_root_2c
+[2026-09-16T22:30:02.333040] Command: C:\Users\pgoff\AppData\Local\Programs\Python\Python312\python.exe app/server.py --port 49252 --data-root C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-multi-industry-snapshot-support-7c95a9\0b85c89b-e0b5-4619-ada5-b2f661f60e01\scratchpad\acceptance_data_root_2c (cwd=C:\Users\pgoff\Mentat\mentat)
+[2026-09-16T22:30:02.676365] Started server pid=81744
+Server PID: 81744
+[2026-09-16T22:30:06.252485] ASSERT PASS: server3_started_and_ready :: seen=True
+[2026-09-16T22:30:10.136289] ASSERT PASS: session3_token_present :: present=True
+[2026-09-16T22:30:56.070510] POLL query2:Banking attempt=1 http=200 status=ready elapsed=45.9s
+-- industry=Banking total_wait_seconds=45.9 timed_out=False final_status=ready
+[2026-09-16T22:30:56.070510] ASSERT PASS: query3_ready_Banking :: status=ready timed_out=False
+[2026-09-16T22:30:56.070510] ASSERT PASS: query3_industry_echo_Banking :: requested=Banking echoed=Banking
+   dataset=Banking industry=Banking build_stamp=0c8cc223fb1091f07e4ac87af3f6628b55f0041139a6f700111db92bf14dadcc
+   group_count=3 len(rows)=3
+   rows[0]={"cycle": "2023-2024", "amount": 2610720416}
+   totals={"amount": 5476284405, "records": 592570, "contributors": 45881}
+[2026-09-16T22:30:56.564803] POLL query2:Credit Union attempt=1 http=200 status=ready elapsed=0.5s
+-- industry=Credit Union total_wait_seconds=0.5 timed_out=False final_status=ready
+[2026-09-16T22:30:56.564803] ASSERT PASS: query3_ready_Credit Union :: status=ready timed_out=False
+[2026-09-16T22:30:56.564803] ASSERT PASS: query3_industry_echo_Credit Union :: requested=Credit Union echoed=Credit Union
+   dataset=Credit Union industry=Credit Union build_stamp=4b8523becac26c5ad4dd625fe9bfb0991b6742debbae81212e129ddea6a9b8b9
+   group_count=3 len(rows)=3
+   rows[0]={"cycle": "2023-2024", "amount": 77908835}
+   totals={"amount": 142200565, "records": 27519, "contributors": 2588}
+[2026-09-16T22:30:56.564803] ASSERT PASS: datasets_differ :: banking=Banking credit_union=Credit Union
+[2026-09-16T22:30:56.564803] ASSERT PASS: industries_differ :: banking=Banking credit_union=Credit Union
+[2026-09-16T22:30:56.564803] ASSERT PASS: build_stamps_differ :: banking=0c8cc223fb1091f07e4ac87af3f6628b55f0041139a6f700111db92bf14dadcc credit_union=4b8523becac26c5ad4dd625fe9bfb0991b6742debbae81212e129ddea6a9b8b9
+GET /api/snapshots -> 200, count=8
+[2026-09-16T22:30:56.659554] ASSERT PASS: build_stamp_matches_snapshot_Banking :: query_build_stamp=0c8cc223fb1091f07e4ac87af3f6628b55f0041139a6f700111db92bf14dadcc snapshot_build_stamp=0c8cc223fb1091f07e4ac87af3f6628b55f0041139a6f700111db92bf14dadcc
+[2026-09-16T22:30:56.659554] ASSERT PASS: build_stamp_matches_snapshot_Credit Union :: query_build_stamp=4b8523becac26c5ad4dd625fe9bfb0991b6742debbae81212e129ddea6a9b8b9 snapshot_build_stamp=4b8523becac26c5ad4dd625fe9bfb0991b6742debbae81212e129ddea6a9b8b9
+POST /api/contributions/query (mismatched industry/dataset) -> 400 body={"error": "The industry and dataset in this request disagree."}
+[2026-09-16T22:30:56.749615] ASSERT PASS: mismatch_status_400 :: http=400
+[2026-09-16T22:30:56.749615] ASSERT PASS: mismatch_error_message_exact :: got='The industry and dataset in this request disagree.' expected='The industry and dataset in this request disagree.'
+GET /api/health (supplementary pass):
+{
+  "application": "MENTAT",
+  "assets_sha256": "30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8",
+  "busy": false,
+  "code_sha256": "5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f",
+  "contribution_studio_revision": "2026-09-12-typed-fields-chart-families",
+  "data_root": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-multi-industry-snapshot-support-7c95a9\\0b85c89b-e0b5-4619-ada5-b2f661f60e01\\scratchpad\\acceptance_data_root_2c",
+  "git_sha": "21c9cab6d",
+  "on_disk_assets_sha256_now": "30772a98f1c9d7d1fd37f1c3ca81223ad823ef15cc175da48ce84591463728b8",
+  "on_disk_code_sha256_now": "5f7da2d17ee9a94d24c9916bfecee82726639ebe9ad7161ef94ea3631f5fb28f",
+  "pid": 81744,
+  "port": 49252,
+  "project": "C:\\Users\\pgoff\\Mentat\\mentat",
+  "read_only": false,
+  "report_directory": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files",
+  "resolved_data_root": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-multi-industry-snapshot-support-7c95a9\\0b85c89b-e0b5-4619-ada5-b2f661f60e01\\scratchpad\\acceptance_data_root_2c",
+  "server_code_sha256": "03486d523e0f12d5a29c1085b428b24ec1a53d4a5ccfaf5f87294f64de96851a",
+  "started_at": 1789612206.1411922
+}
+[2026-09-16T22:30:56.776143] Terminating server pid=81744
+taskkill stdout: SUCCESS: The process with PID 81744 (child process of PID 73076) has been terminated.
+taskkill stderr: 
+[2026-09-16T22:31:01.390637] ASSERT PASS: server3_process_terminated :: pid=81744 confirmed_gone=True
+
+SUPPLEMENTARY ASSERTION SUMMARY
+  PASS  server3_started_and_ready: seen=True
+  PASS  session3_token_present: present=True
+  PASS  query3_ready_Banking: status=ready timed_out=False
+  PASS  query3_industry_echo_Banking: requested=Banking echoed=Banking
+  PASS  query3_ready_Credit Union: status=ready timed_out=False
+  PASS  query3_industry_echo_Credit Union: requested=Credit Union echoed=Credit Union
+  PASS  datasets_differ: banking=Banking credit_union=Credit Union
+  PASS  industries_differ: banking=Banking credit_union=Credit Union
+  PASS  build_stamps_differ: banking=0c8cc223fb1091f07e4ac87af3f6628b55f0041139a6f700111db92bf14dadcc credit_union=4b8523becac26c5ad4dd625fe9bfb0991b6742debbae81212e129ddea6a9b8b9
+  PASS  build_stamp_matches_snapshot_Banking: query_build_stamp=0c8cc223fb1091f07e4ac87af3f6628b55f0041139a6f700111db92bf14dadcc snapshot_build_stamp=0c8cc223fb1091f07e4ac87af3f6628b55f0041139a6f700111db92bf14dadcc
+  PASS  build_stamp_matches_snapshot_Credit Union: query_build_stamp=4b8523becac26c5ad4dd625fe9bfb0991b6742debbae81212e129ddea6a9b8b9 snapshot_build_stamp=4b8523becac26c5ad4dd625fe9bfb0991b6742debbae81212e129ddea6a9b8b9
+  PASS  mismatch_status_400: http=400
+  PASS  mismatch_error_message_exact: got='The industry and dataset in this request disagree.' expected='The industry and dataset in this request disagree.'
+  PASS  server3_process_terminated: pid=81744 confirmed_gone=True
+Supplementary total: 14/14 assertions passed
+Supplementary pass finished: 2026-09-16T22:31:01.390637
+
+================================================================================
+NOTE: git_sha drift between passes
+================================================================================
+Pass 1 (21:40-22:21) reported git_sha=91fe7402a in every /api/health response.
+Pass 3 (22:30) reported git_sha=21c9cab6d. `git rev-parse --short HEAD` on this
+worktree now returns 21c9cab6d, one commit ahead of pass 1's reading:
+  21c9cab6d Read PAC evidence from any file type and any path on this computer
+A new commit landed on this branch during the run window (consistent with
+concurrent session activity noted in project memory; this driver made no
+commits and touched no source file). code_sha256 and assets_sha256 (the tree
+hashes over app/ code and assets) were IDENTICAL across pass 1 and pass 3
+(5f7da2d1...fb28f / 30772a98...728b8), so the intervening commit did not touch
+server code or assets -- only the build-identity git_sha field moved.

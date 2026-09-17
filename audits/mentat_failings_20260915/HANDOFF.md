@@ -748,6 +748,7 @@ four-runner sweep is `receipts/S2_final_sweep.txt`.
 
 **Status:** BUILT, receipts ready, UNCOMMITTED (2026-09-16 evening); Paul commits from
 `patches/S4_cross_industry_contract.patch`.
+Patch regenerated against HEAD 21c9cab6d (S3b committed after pass B); 499891 bytes, 35 files.
 
 **Files owned:** see table, all now BUILT/uncommitted. `server.py` is CONTENDED and S5
 waits on Paul's commit. Claimed by S4 during the build, each previously unowned and each
@@ -827,12 +828,37 @@ registry-backed and echoed.
   `skipTest('acceptance run: needs a real workbook')`.
 
 **Acceptance:** `receipts/S4_acceptance_real_snapshots.txt` — **10 of 13 steps PASS** on a
-scratch console against the real published folder. A rerun and an independent verifier
-sweep were still running when this section was written and **their receipts
-(`S4_acceptance_rerun.txt`, `S4_verifier_sweep.txt`) do not exist on disk yet**; the three
-unfinished steps were waiting on the Banking analytics cache to rebuild after the
-`VERSION` 2 → 3 bump. Read those two files before treating acceptance as closed — this
-section does not claim a result it did not see.
+scratch console against the real published folder. Rerun complete
+(`receipts/S4_acceptance_rerun.txt`): Banking and Credit Union queries ready with distinct
+dataset/industry/build_stamp matching `GET /api/snapshots`; industry/dataset disagreement
+→ 400 exact message; records ready 5 rows; two-industry saved view round-trips sheets +
+`source.industry`, list `industries` == [Banking, Credit Union], on-disk JSON captured;
+briefing add echoes `source.industry`; health stamps identical across three fresh processes
+(code `5f7da2d1…`, assets `30772a98…`). Cost: `VERSION` 3 invalidated the analytics
+caches; Banking's 707 MB index took ~38 min behind the single global build lock
+(`_build_gate`); Banking and Credit Union caches are now built in the real state dir, the
+other six materialize on first query.
+
+**Read that rerun as three passes, not one.** Pass 1 (21:40–22:21) recorded
+`FAIL query_ready_Banking: did not reach ready within 1500s; last status=preparing` and
+skipped its cross-industry comparisons. The Banking readiness, the differ checks and the
+400 above are **pass 3's** (22:30:56), taken after the 707 MB cache finished at 22:19:21;
+the saved-view and briefing round-trips are pass 1's. The rerun also records `git_sha`
+drift — pass 1 saw 91fe7402a, pass 3 saw 21c9cab6d — with `code_sha256` and
+`assets_sha256` identical across both, so the intervening commit touched no server code
+or asset.
+
+**The verifier sweep receipt now exists** (`receipts/S4_verifier_sweep.txt`) and carries a
+dated **Post-sweep diagnosis**: of the two node tests it called NEW RED, **neither is
+S4's**. `test_studio_data_source_browser.cjs` passes alone twice (45.8 s, 63.0 s) against
+byte-identical inputs — a load-induced flake. `test_evidence_csv_browser.cjs` fails alone
+twice, deterministically, at step 14, because commit 21c9cab6d retired `M_UTF8` in favour
+of `M_BINARY` (`mentat/app/evidence_csv.py:187-191`) without updating that test's
+expectation (`mentat/tests/test_evidence_csv_browser.cjs:499`) — S3b's to close, not
+S4's. That sweep's own "HEAD commit: 91fe7402a (VERIFIED)" line is FALSE: 21c9cab6d had
+been HEAD for 8m20s when it ran. S4's own suites were re-run during the diagnosis and are
+unmoved: `node --test "app/tests/**/*.test.js"` **118/118**,
+`tests/test_studio_industry_browser.cjs` **10/10 steps, exit 0**.
 
 **Non-owned test edits, for their owners to nod at.** Each was forced by a contract
 change, and each keeps the test's own intent:

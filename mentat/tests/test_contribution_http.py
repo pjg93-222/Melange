@@ -78,7 +78,10 @@ class ContributionHTTPTests(unittest.TestCase):
     def test_local_session_returns_token_and_read_only_state(self):
         status, headers, body = self.request("/api/contributions/session")
         self.assertEqual(status, 200)
-        self.assertEqual(body, {"token": self.console.token, "read_only": True})
+        # The session now carries this console's industry scope: the echo of
+        # ?industry= (absent here) and the registry the picker loads once.
+        self.assertEqual(body, {"token": self.console.token, "read_only": True,
+                                "industry": None, "industries": []})
         self.assertEqual(headers["Cache-Control"], "no-store")
         self.assertEqual(headers["X-Content-Type-Options"], "nosniff")
         self.assertIn("frame-ancestors 'none'", headers["Content-Security-Policy"])
@@ -88,7 +91,10 @@ class ContributionHTTPTests(unittest.TestCase):
         status, _, body = self.request("/api/contributions/catalog?directory=C:/arbitrary")
         self.assertEqual(status, 200)
         self.assertEqual(body["datasets"][0]["id"], "Banking")
-        self.catalog.assert_called_once_with(self.report_root)
+        # The route reads the report folder once and threads that one scan into
+        # the catalogue producer, so the call carries the directory and the list.
+        self.assertEqual(self.catalog.call_count, 1)
+        self.assertEqual(self.catalog.call_args.args[0], self.report_root)
         self.guard.assert_called_once_with(self.report_root, strict=False)
         status, _, body = self.request("/api/contributions/geography/catalog")
         self.assertEqual((status, body["congresses"]), (200, ["119", "120"]))

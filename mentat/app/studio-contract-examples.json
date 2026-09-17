@@ -11,7 +11,8 @@
       "sheet": "Verified source observations",
       "mode": "contributions",
       "dataset": "Crypto",
-      "datasetLabel": "Crypto"
+      "datasetLabel": "Crypto",
+      "industry": "Crypto"
     },
     "sheets": [
       {"name": "Recipients", "charts": [{"kind": "bar", "field": "amount"}]},
@@ -33,7 +34,8 @@
       "runName": "Configured completed-report folder",
       "sheet": "Verified source observations",
       "mode": "contributions",
-      "dataset": "Crypto"
+      "dataset": "Crypto",
+      "industry": "Crypto"
     },
     "provenance": {
       "sha": "9c3f1ad27b40e5c68f2a7d1b4e0c6a3958d7f2e1b0c9a8d7e6f5a4b3c2d1e0f9",
@@ -58,7 +60,7 @@
         "runName": "Configured completed-report folder",
         "sha256": "9c3f1ad27b40e5c68f2a7d1b4e0c6a3958d7f2e1b0c9a8d7e6f5a4b3c2d1e0f9"
       },
-      "chosen_dataset": {"id": "Crypto", "label": "Crypto"}
+      "chosen_dataset": {"id": "Crypto", "label": "Crypto", "industry": "Crypto"}
     },
     "view_worksheet": {
       "comment": "A plain worksheet, with no verified dataset chosen: the caption falls back to the report name and no dataset keys appear at all.",
@@ -87,6 +89,7 @@
       "sheet_source": {
         "mode": "contributions",
         "dataset": "Crypto",
+        "industry": "Crypto",
         "basis": "receipt",
         "reportName": "Crypto Industry Spending Overview.xlsx",
         "sheet": "Verified source observations",

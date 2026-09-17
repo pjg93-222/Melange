@@ -181,6 +181,60 @@ def _age_hours(value, now):
         return None
 
 
+def _run_view(root, run_id, now, expected_digest=None):
+    """One saved run, read once and rendered display-safe.
+
+    Both entry points below share this reader. The pointer path passes the
+    fingerprint the pointer claims; the industry path passes none and
+    therefore claims none. `report_sha256` is always the digest of the bytes
+    this call actually read, never a claim copied from a pointer.
+    """
+    report, raw_report = _load(root, Path(run_id) / "report.json", 2_000_000, optional=True)
+    progress, _ = _load(root, Path(run_id) / "progress.json", 256_000, optional=True)
+    if report is None and progress is None:
+        raise EvidenceError("The selected run has no saved report or progress evidence.")
+    if expected_digest is not None:
+        if not isinstance(expected_digest, str) or not re.fullmatch(r"[a-f0-9]{64}", expected_digest):
+            raise EvidenceError("The saved report fingerprint is invalid.")
+        if raw_report is None or hashlib.sha256(raw_report).hexdigest() != expected_digest:
+            raise EvidenceError("The saved report no longer matches its recorded fingerprint.")
+    result = {"available": True, "run_id": run_id, "status": "running", "notices": [],
+              "report_sha256": hashlib.sha256(raw_report).hexdigest() if raw_report is not None else None}
+    if progress is not None:
+        _identity(progress, run_id)
+        status = progress.get("status")
+        if status not in RUN_STATUSES:
+            raise EvidenceError("The saved run has an unsupported status.")
+        result["status"] = status
+        result["progress"] = {"run_id": run_id, "status": status,
+                              "updated_at": _text(progress.get("updated_at")),
+                              "steps": _steps(progress.get("steps")),
+                              "message": _text(progress.get("message"), 1000)}
+        age = _age_hours(progress.get("updated_at"), now)
+        if status == "running" and (age is None or age > 1):
+            result["notices"].append("Progress is stale or undated. The saved status does not establish that a worker is still running.")
+    if report is not None:
+        _identity(report, run_id)
+        result["report"] = _report(report)
+        result["status"] = "completed" if result["status"] != "failed" else "failed"
+        age = _age_hours(report.get("generated_at"), now)
+        result["report_age_hours"] = round(age, 1) if age is not None else None
+        if age is None:
+            result["notices"].append("The report generation time is missing or invalid; report age is unknown.")
+        elif age > 24 * 30:
+            result["notices"].append("This reconciliation was generated more than 30 days ago. Review its source scope before reusing the totals.")
+    elif result["status"] == "completed":
+        raise EvidenceError("The run is marked completed but its report is missing.")
+    result["industry"] = next(iter(result.get("report", {}).get("scope", {}).get("industries", [])), None)
+    return result
+
+
+def _unreadable(error, industry=None):
+    # File errors may disclose local filenames; expose only our own messages.
+    message = str(error) if isinstance(error, EvidenceError) else "The saved evidence could not be read safely."
+    return {"available": False, "status": "error", "industry": industry, "message": message}
+
+
 def latest_cross_reference(state_root=DEFAULT_ROOT, *, now=None):
     """Return a display-safe snapshot, never collect, mutate, or run a process."""
     root = Path(state_root).resolve()
@@ -188,48 +242,46 @@ def latest_cross_reference(state_root=DEFAULT_ROOT, *, now=None):
     try:
         pointer, _ = _load(root, "latest.json", 16_384, optional=True)
         if pointer is None:
-            return {"available": False, "status": "empty", "message": "No cross-reference run has been saved yet."}
+            return {"available": False, "status": "empty", "industry": None,
+                    "message": "No cross-reference run has been saved yet."}
         run_id = pointer.get("run_id")
         if pointer.get("schema_version") != 1 or not isinstance(run_id, str) or not RUN_ID.fullmatch(run_id):
             raise EvidenceError("The saved run pointer is invalid.")
-        report, raw_report = _load(root, Path(run_id) / "report.json", 2_000_000, optional=True)
-        progress, _ = _load(root, Path(run_id) / "progress.json", 256_000, optional=True)
-        if report is None and progress is None:
-            raise EvidenceError("The selected run has no saved report or progress evidence.")
-        digest = pointer.get("report_sha256")
-        if digest is not None:
-            if not isinstance(digest, str) or not re.fullmatch(r"[a-f0-9]{64}", digest):
-                raise EvidenceError("The saved report fingerprint is invalid.")
-            if raw_report is None or hashlib.sha256(raw_report).hexdigest() != digest:
-                raise EvidenceError("The saved report no longer matches its recorded fingerprint.")
-        result = {"available": True, "run_id": run_id, "status": "running", "notices": []}
-        if progress is not None:
-            _identity(progress, run_id)
-            status = progress.get("status")
-            if status not in RUN_STATUSES:
-                raise EvidenceError("The saved run has an unsupported status.")
-            result["status"] = status
-            result["progress"] = {"run_id": run_id, "status": status,
-                                  "updated_at": _text(progress.get("updated_at")),
-                                  "steps": _steps(progress.get("steps")),
-                                  "message": _text(progress.get("message"), 1000)}
-            age = _age_hours(progress.get("updated_at"), now)
-            if status == "running" and (age is None or age > 1):
-                result["notices"].append("Progress is stale or undated. The saved status does not establish that a worker is still running.")
-        if report is not None:
-            _identity(report, run_id)
-            result["report"] = _report(report)
-            result["status"] = "completed" if result["status"] != "failed" else "failed"
-            age = _age_hours(report.get("generated_at"), now)
-            result["report_age_hours"] = round(age, 1) if age is not None else None
-            if age is None:
-                result["notices"].append("The report generation time is missing or invalid; report age is unknown.")
-            elif age > 24 * 30:
-                result["notices"].append("This reconciliation was generated more than 30 days ago. Review its source scope before reusing the totals.")
-        elif result["status"] == "completed":
-            raise EvidenceError("The run is marked completed but its report is missing.")
+        result = _run_view(root, run_id, now, pointer.get("report_sha256"))
+        result["selected_by"] = "pointer"
         return result
     except (EvidenceError, OSError, RuntimeError) as error:
-        # File errors may disclose local filenames; expose only our own messages.
-        message = str(error) if isinstance(error, EvidenceError) else "The saved evidence could not be read safely."
-        return {"available": False, "status": "error", "message": message}
+        return _unreadable(error)
+
+
+def cross_reference_for_industry(state_root, industry, *, now=None):
+    """The newest saved run whose scope is exactly this one industry.
+
+    Run directories are scanned newest-first by id, which the runner mints in
+    lexicographic time order. The latest.json pointer is deliberately not
+    consulted: it names one run for the whole console, and this view is asked
+    for one industry.
+    """
+    root = Path(state_root).resolve()
+    now = now or datetime.now(timezone.utc)
+    try:
+        if not isinstance(industry, str) or not industry:
+            raise EvidenceError("Choose a registered industry.")
+        names = sorted((entry.name for entry in root.iterdir()
+                        if entry.is_dir() and RUN_ID.fullmatch(entry.name)),
+                       reverse=True) if root.is_dir() else []
+        for run_id in names:
+            report, _ = _load(root, Path(run_id) / "report.json", 2_000_000, optional=True)
+            if report is None:
+                continue
+            scope = report.get("scope") if isinstance(report.get("scope"), dict) else {}
+            if scope.get("industries") != [industry]:
+                continue
+            result = _run_view(root, run_id, now)
+            result["selected_by"] = "industry"
+            result["industry"] = industry
+            return result
+        return {"available": False, "status": "empty", "industry": industry,
+                "message": "No cross-reference run has been saved for this industry yet."}
+    except (EvidenceError, OSError, RuntimeError) as error:
+        return _unreadable(error, industry)

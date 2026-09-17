@@ -1,0 +1,334 @@
+================================================================================
+S4 VERIFICATION SWEEP REPORT
+Date: 2026-09-16 22:06:56
+================================================================================
+
+A. PYTHON S4 SUITES (test_snapshot_registry, test_industry_routes, test_studio_views_industry, test_contribution_dimensions_order)
+--------------------------------------------------------------------------------
+Status: PASS (54 tests in 4.090s)
+Result: OK (skipped=1)
+
+B. PYTHON PRE-EXISTING SUITES
+--------------------------------------------------------------------------------
+Suites run:
+  - test_studio_views: PASS
+  - test_studio_contract_examples: PASS
+  - test_studio_briefing: PASS
+  - test_contribution_http: PASS
+  - test_cross_reference_data: PASS
+  - test_raw_contribution_columns: PASS
+  - test_graph_data: FAIL - ImportError: No module named 'graph_fixture'
+  - test_comparison_data: FAIL - ImportError: No module named 'graph_fixture'
+  - test_console_delivery: PASS (5 tests in 0.674s)
+
+Result: 71 tests PASS, 2 test modules with ImportError (graph_fixture missing)
+
+C. NODE TESTS (.cjs sweep)
+--------------------------------------------------------------------------------
+Total test files: 35
+PASS: 30
+FAIL: 5
+
+NEW RED (not in baseline):
+  - test_evidence_csv_browser.cjs
+  - test_studio_data_source_browser.cjs
+
+D. R TESTS
+--------------------------------------------------------------------------------
+test_raw_contribution_columns.R: PASS
+test_spending_detail_frames.R: PASS
+test_fec_api.R: PASS
+test_receipt_roles.R: PASS
+test_report.R: PASS
+test_report_vectorization.R: PASS
+test_rules.R: PASS
+test_tidy_stage.R: PASS (54/54 checks)
+
+Result: ALL PASS
+
+E. QUALITY GATE
+--------------------------------------------------------------------------------
+Ruff: NOT INSTALLED (module not found)
+
+Python syntax check (py_compile): ALL PASS
+Node syntax check (node --check): ALL PASS
+
+F. GIT STATUS AND DIFF
+--------------------------------------------------------------------------------
+HEAD commit: 91fe7402a126eca3a38deeca0f7a84402632d8dd (VERIFIED)
+
+Diff stat summary: 539 insertions(+), 106 deletions(-)
+Tracked files changed: 10 files
+
+================================================================================
+SUMMARY
+================================================================================
+
+PYTHON S4:            PASS (54 tests)
+PYTHON PRE-EXISTING:  PASS (71 tests), UNVERIFIED (2 import errors)
+NODE TESTS:           30 PASS, 5 FAIL
+R TESTS:              ALL PASS (8 files)
+QUALITY GATE:         PASS (syntax checks)
+GIT:                  HEAD verified
+
+
+================================================================================
+POST-SWEEP DIAGNOSIS - 2026-09-16, added after the 22:06:56 sweep above
+================================================================================
+
+Question put to this diagnosis: of the two node tests recorded above as NEW RED,
+did the S4 lane cause either? Answer: NO - neither. One is a load-induced flake,
+the other is a deterministic regression owned by S3b. Evidence below.
+
+TWO CORRECTIONS TO THE SWEEP REPORT ABOVE, both load-bearing
+--------------------------------------------------------------------------------
+1. Section F's "HEAD commit: 91fe7402a126eca3a38deeca0f7a84402632d8dd (VERIFIED)"
+   is FALSE. Commit 21c9cab6d ("Read PAC evidence from any file type and any path
+   on this computer", the S3b lane) has committer date 2026-09-16 21:58:36 -0400,
+   which is 8 minutes 20 seconds BEFORE this sweep's own 22:06:56 header. HEAD at
+   sweep time was 21c9cab6d, not 91fe7402a. The word VERIFIED was not earned.
+   This matters because 21c9cab6d is the direct cause of one of the two reds.
+   Section F's "Tracked files changed: 10 files" is likewise inconsistent with the
+   working tree (67 tracked files modified), so section F should not be relied on.
+
+2. This report records only the NAMES of the two red tests. It records none of
+   their output, so the first failing assertion could not be read from it and had
+   to be re-derived by re-running both tests. A sweep that reports a red without
+   its failing tail cannot be acted on. Future sweeps must keep the tail.
+
+The "Step 7 / browser.close() timeout" characterisation that reached the
+coordinator is also wrong on both counts: the real first failure is at STEP 14,
+and "browser.close() exceeded its 10000ms bound" is a line printed AFTER the
+failure, on the way out of an already-failed run. It is a consequence, not a
+cause, and not an assertion.
+
+HOST STATE DURING THE RE-RUNS
+--------------------------------------------------------------------------------
+tasklist at the start of this diagnosis showed the Banking analytics cache build
+still resident: python.exe pid 17480 at 6,538,136 K (6.5 GB). Also resident was
+python.exe pid 78748 at 2,691,488 K, which S4_acceptance_rerun.txt names as the
+acceptance driver's console server (that receipt records "Started server
+pid=78748" and ran 21:40:31 -> 22:21:29). So at 22:06:56 the sweep was sharing
+the host with the 6.5 GB cache build, the acceptance rerun's own server, and its
+own 35-file node sweep. The contention was real and is documented, not assumed.
+
+
+TEST 1 - tests/test_studio_data_source_browser.cjs
+================================================================================
+VERDICT: S4-caused NO. Load-induced flake. No edit made.
+
+Re-run alone, twice, both PASS:
+
+  run 1  (wall 48s)
+  OK the data source panel opens, folds once, names what it cannot read, and shows a prepare it can cancel (45778.7486ms)
+  i tests 1
+  i pass 1
+  i fail 0
+  i duration_ms 45785.4883
+  EXIT=0
+
+  run 2  (wall 64s)
+  OK the data source panel opens, folds once, names what it cannot read, and shows a prepare it can cancel (62952.1857ms)
+  i tests 1
+  i pass 1
+  i fail 0
+  i duration_ms 62962.7884
+  EXIT=0
+
+Why this is not S4, argued from a controlled comparison rather than from absence
+of evidence. The bytes that failed at 22:06:56 are the same bytes that pass now:
+
+  - tests/test_studio_data_source_browser.cjs is TRACKED and CLEAN
+    (git status --porcelain returns nothing for it); mtime 2026-09-15 03:43:39,
+    which predates the whole S4 lane.
+  - every asset the test loads was last written BEFORE the sweep. Latest of the
+    fifteen is app/chart-studio-core.js at 21:14:07; then chart-studio.js
+    21:01:28, index.html 20:35:13, chart-studio-contributions.js 20:18:51, and
+    the remaining eleven are 09-08 to 09-14.
+
+So S4's edits were already on disk and already loaded by the run that went red.
+Code cannot explain a difference it was present for on both sides. The only
+variable that changed between 22:06:56 and these re-runs is host load.
+
+Mechanism, stated so it can be falsified: the test sets
+page.setDefaultTimeout(12000) at tests/test_studio_data_source_browser.cjs:20,
+and the whole test needs 45.8-63.0 s of wall time even with the host to itself.
+Any single locator wait that crosses 12 s fails the test outright. Under the
+sweep's contention that is the expected outcome, not a surprising one.
+
+S4's client surfaces were also checked directly against this test's fixture, and
+none of them is reachable from it:
+
+  - app/chart-studio.js:337 parses the registry only behind
+    if(Array.isArray(session.industries)). The fixture's /session stub returns
+    {token:'fixture-token',read_only:true} (test:53) with no industries key, so
+    `industries` stays null and core.parseSnapshotRegistry is never called.
+  - app/chart-studio.js:355 writes d.industry into state.source.industry, and
+    :428 passes it to contributions.compile. The fixture's /catalog datasets
+    (test:55-58) carry no industry and no build_stamp; both flow through as
+    undefined and the test asserts on neither.
+  - the openability branch at app/chart-studio.js:1913-1922 is guarded by
+    if(Array.isArray(view.industries)), and core.migrateSheet is called only from
+    openView (app/chart-studio.js:1945). This test never opens a saved view.
+  - build_stamp validation lives in the registry parser, which as above never
+    runs here, so a catalog without build_stamp is not rejected.
+
+ACTION: none. The test is not edited and its assertions are not weakened. It
+should be treated as GREEN and struck from the NEW RED list above.
+
+
+TEST 2 - tests/test_evidence_csv_browser.cjs
+================================================================================
+VERDICT: S4-caused NO. NOT load. A deterministic regression introduced by commit
+21c9cab6d (the S3b lane), which is S3's to fix. No edit made - out of S4's lane.
+
+Re-run alone, twice. Both FAIL, at the same step, on the same assertion, with the
+same two strings. Run 1 wall 76s (22:21:46 -> 22:23:02); run 2 wall 112s
+(22:24:05 -> 22:25:57). Steps 1-13 PASS in both.
+
+--- run 1, verbatim tail ---------------------------------------------------
+FAIL step 14 (error case: latin1.csv rejected for invalid UTF-8 bytes): Error: page.waitForFunction: Timeout 15000ms exceeded.
+  waiting for: status exactly "latin1.csv: Use a UTF-8 CSV file without invalid text characters."
+  #evidence-csv-status was: "latin1.csv: This file contains binary data and could not be read as text."
+  last 14 of 59 /api/evidence-csv responses:
+    02:22:18.052 GET 200 /api/evidence-csv?job=csv-c889eccd47528e9daab8061eb37a7813 body={"id":"csv-c889eccd47528e9daab8061eb37a7813","name":"forty.csv","state":"ready","bytes":40000180,"bytes_read":40000180,"rows_read":212985,"message":"","started_at":1789611718.1058323,"finished_at":1789611737.9666378,"catalog":{"id":"csv-c88
+    02:22:18.057 GET 200 /api/evidence-csv
+    02:22:18.239 GET 200 /api/evidence-csv?id=csv-c889eccd47528e9daab8061eb37a7813&committee=C00000001&cycle=&offset=0&limit=100
+    02:22:25.778 GET 200 /api/evidence-csv
+    02:22:26.083 GET 200 /api/evidence-csv?id=csv-78db2b6e8f77f8805cf59d768149069a&committee=C00000001&cycle=&offset=0&limit=100
+    02:22:32.749 POST 200 /api/evidence-csv
+    02:22:33.267 GET 200 /api/evidence-csv?job=csv-15d81395e7f8d4c0fb41130ac0cb7ada body={"id":"csv-15d81395e7f8d4c0fb41130ac0cb7ada","name":"notes.txt","state":"failed","bytes":27,"bytes_read":0,"rows_read":0,"message":"The CSV needs a Committee ID, CMTE_ID, or Source Committee ID column.","started_at":1789611752.7199302,"fini
+    02:22:33.330 POST 200 /api/evidence-csv
+    02:22:33.874 GET 200 /api/evidence-csv?job=csv-dae3aff1767e9070387efcf030b585d5 body={"id":"csv-dae3aff1767e9070387efcf030b585d5","name":"wide201.csv","state":"failed","bytes":1715,"bytes_read":0,"rows_read":0,"message":"The CSV needs unique nonempty column names, with no more than 200 columns.","started_at":1789611753.3174
+    02:22:33.947 POST 200 /api/evidence-csv
+    02:22:34.456 GET 200 /api/evidence-csv?job=csv-adfd5101355e2e9829948fc0bf927f47 body={"id":"csv-adfd5101355e2e9829948fc0bf927f47","name":"truncated.csv","state":"failed","bytes":462,"bytes_read":0,"rows_read":0,"message":"The CSV could not be read at row 3. Check its quoted fields and delimiter.","started_at":1789611753.923
+    02:22:34.491 POST 400 /api/evidence-csv
+    02:22:34.567 POST 200 /api/evidence-csv
+    02:22:35.081 GET 200 /api/evidence-csv?job=csv-757b8ce3e2940062445c10866e65c78a body={"id":"csv-757b8ce3e2940062445c10866e65c78a","name":"latin1.csv","state":"failed","bytes":294,"bytes_read":0,"rows_read":0,"message":"This file contains binary data and could not be read as text.","started_at":1789611754.5460775,"finished_a
+  page console (last 20 of 3):
+    verbose: [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o
+    verbose: [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o
+    error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+  pageerrors: []
+    at explainWait (C:\Users\pgoff\Mentat\mentat\tests\test_evidence_csv_browser.cjs:362:27)
+    at async waitForStatusExact (C:\Users\pgoff\Mentat\mentat\tests\test_evidence_csv_browser.cjs:372:25)
+    at async C:\Users\pgoff\Mentat\mentat\tests\test_evidence_csv_browser.cjs:499:5
+browser.close() exceeded its 10000ms bound
+EXIT=1
+END=2026-09-16T22:23:02-04:00
+--- end run 1 tail ---------------------------------------------------------
+
+--- run 2, verbatim first failing assertion --------------------------------
+FAIL step 14 (error case: latin1.csv rejected for invalid UTF-8 bytes): Error: page.waitForFunction: Timeout 15000ms exceeded.
+  waiting for: status exactly "latin1.csv: Use a UTF-8 CSV file without invalid text characters."
+  #evidence-csv-status was: "latin1.csv: This file contains binary data and could not be read as text."
+--- run 2 exit -------------------------------------------------------------
+browser.close() exceeded its 10000ms bound
+EXIT=1
+END=2026-09-16T22:25:57-04:00
+--- end run 2 --------------------------------------------------------------
+
+ROOT CAUSE, with file:line on both sides
+--------------------------------------------------------------------------------
+The test pins a message the console deliberately retired 8 minutes before the
+sweep ran.
+
+  EXPECTED by the test:
+    mentat/tests/test_evidence_csv_browser.cjs:499  (working tree)
+    mentat/tests/test_evidence_csv_browser.cjs:421  (same line at HEAD)
+      await waitForStatusExact('latin1.csv: Use a UTF-8 CSV file without invalid text characters.');
+
+  PRODUCED by the console:
+    mentat/app/evidence_csv.py:191
+      M_BINARY = 'This file contains binary data and could not be read as text.'
+
+  And the console says in its own source, at mentat/app/evidence_csv.py:187-190,
+  that the expected string is dead:
+      # M_UTF8 above is kept defined for callers that still import it, but nothing
+      # raises it any more: a file that is not valid UTF-8 is decoded as
+      # Windows-1252 and says so in the catalog, and only content that is not text
+      # at all (a NUL byte outside UTF-16) is refused, as M_BINARY.
+
+  The fixture matches that rule exactly. latin1Buffer() at
+  mentat/tests/test_evidence_csv_browser.cjs:76-83 emits the bytes
+  [0xff, 0xfe, 0x00] - a NUL outside UTF-16 - so under the new reader it is
+  binary, by design, and M_BINARY is the correct answer. The test, not the
+  console, is what is stale.
+
+  Provenance of the change, by search rather than by assertion:
+    git log -S "binary data and could not be read as text" -- mentat/app/evidence_csv.py
+      -> 21c9cab6d  Read PAC evidence from any file type and any path on this computer
+  M_BINARY did not exist before 21c9cab6d. That commit is dated 21:58:36; the
+  sweep ran at 22:06:56. The red was already unavoidable when the sweep started.
+
+  21c9cab6d's own message predicted this: "The extended browser test and the
+  real-client receipt follow in the next commit." The extension did land in the
+  working tree at 22:16:26 (+213/-6, HARD_CAP_MS 870000 -> 1_200_000, 14 new
+  steps, step 10 relabelled to "notes.txt is read as delimited text and refused
+  for its header") - but it did NOT update step 14. So both the committed test
+  and its uncommitted extension still pin the retired string.
+
+WHY THIS IS NOT S4
+--------------------------------------------------------------------------------
+Nothing on the failing path is S4's. app/evidence_csv.py and app/evidence-csv.js
+are not S4 files and appear in no S4 patch. The failing assertion reads
+#evidence-csv-status in the PAC evidence tab; it never touches the contributions
+session, the catalog, build_stamp, DIMENSIONS, schema_version, the stored-view
+migration or the industries parse. S4's server.py hunks do not touch the
+/api/evidence-csv routes.
+
+WHY THIS IS NOT LOAD
+--------------------------------------------------------------------------------
+Two runs alone, 36 s apart in duration, identical failure. The status line is not
+a timeout artefact: the server had already answered and the browser had already
+rendered the final text. The receipt's own log shows the settled answer -
+  state "failed", message "This file contains binary data and could not be read
+  as text." - so the 15 s waitForFunction expired waiting for a string that will
+  never arrive, however quiet the host is.
+
+ACTION: none taken here. This is S3's test and S3's regression; the S4 lane does
+not edit it. The fix is one line - update
+mentat/tests/test_evidence_csv_browser.cjs:499 to the M_BINARY text, and rename
+the step from "rejected for invalid UTF-8 bytes" to what the console now does -
+which tightens the test to the shipped contract rather than weakening it. That
+belongs to whoever closes out 21c9cab6d's deferred test work. Flagged to the
+coordinator.
+
+THE "browser.close() TIMEOUT" IS HOST NOISE, PROVED BY A PASSING RUN
+--------------------------------------------------------------------------------
+tests/test_studio_industry_browser.cjs - the S4 lane's own browser test - was run
+as part of this diagnosis and printed, verbatim:
+
+  ALL 10 STEPS PASSED
+  browser.close() exceeded its 10000ms bound
+  EXIT=0
+
+So on this host that line is emitted on a run where every step passed and the
+process exits 0. It carries no information about success or failure and must not
+be read as an assertion. Any sweep that reports it as the failure has reported
+the last line it saw rather than the first thing that broke.
+
+S4 REGRESSION RE-RUN, after the diagnosis
+--------------------------------------------------------------------------------
+  node --test "app/tests/**/*.test.js"
+    i tests 118
+    i pass 118
+    i fail 0
+    i duration_ms 1145.8575
+    EXIT=0
+  node tests/test_studio_industry_browser.cjs
+    ALL 10 STEPS PASSED
+    EXIT=0
+
+Both match the counts the HANDOFF S4 section already records (118/118, 10/10), so
+S4 is unmoved by this diagnosis - as it must be, since no S4 file was edited.
+
+BASELINE CONSEQUENCE
+--------------------------------------------------------------------------------
+Of the two tests this sweep called NEW RED, neither belongs on an S4 blocker
+list. test_studio_data_source_browser.cjs is green. test_evidence_csv_browser.cjs
+is red for a reason that predates the sweep by 8 minutes and is owned by S3b.
+No file was edited by this diagnosis except this receipt and the one HANDOFF
+Status line recording the patch regeneration.
+
+================================================================================
