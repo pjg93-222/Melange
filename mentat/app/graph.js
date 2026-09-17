@@ -6,6 +6,16 @@
   const titleFor = {categories:'Recipient types',organizations:'Top organizations',candidates:'Top candidates',companies:'Company comparison',levels:'Giving by employee level'};
   let analysis = 'overview';
   let loaded = false, revision = 0, view = null, category = '', recipient = '', controller = null, unavailable = [];
+  // Whether this console has a report to show. The Candidate view select is
+  // visible from that moment on (Paul's ruling A(ii), 2026-09-17), not only on
+  // the Candidates analysis tab, so Downstream PAC activity is a control the
+  // reader can see and `mode=activity` is a state a permalink can name.
+  let reportChosen = false;
+  // A permalink's company, cycle and tier cannot be put on the selects before
+  // the first response: those options are built in render() from the view the
+  // server echoes back. So they ride along with the first request instead, and
+  // render()'s own options(..., view.filters.company) lands them on the selects.
+  let urlScope = null;
   function options(node, values, selected='') {
     node.replaceChildren(...values.map(([id,label]) => new Option(label,id)));
     if ([...node.options].some(o=>o.value===selected)) node.value=selected;
@@ -18,9 +28,37 @@
     get('direction').parentElement.hidden=get('mode').value==='direct';
   }
   function filters() {
-    return new URLSearchParams({id:get('run').value,industry:get('industry').value,company:get('company').value,
-      tier:get('tier').value,cycle:get('cycle').value,funding:get('funding').value,mode:get('mode').value,
+    return new URLSearchParams({id:get('run').value,industry:get('industry').value,
+      company:urlScope?.company ?? get('company').value,
+      tier:urlScope?.tier ?? get('tier').value,
+      cycle:urlScope?.cycle ?? get('cycle').value,
+      funding:get('funding').value,mode:get('mode').value,
       direction:get('direction').value,category,recipient});
+  }
+  // Graph's own defaults are absent from the URL rather than spelled out in it,
+  // so a permalink names only what the reader actually chose.
+  const SCOPE_DEFAULTS={mode:'direct',direction:'Support',funding:'all'};
+  // The URL mirrors the request that was just made - same keys, same spellings
+  // (audits/mentat_failings_20260915/contracts/url_scope.json) - so a permalink,
+  // a reload and a tab switch all describe one query. A page that did not load
+  // scope.js keeps working; it simply has no URL scope.
+  function writeScope(query) {
+    const value=key=>{const text=query.get(key)||'';return text===SCOPE_DEFAULTS[key]?'':text;};
+    globalThis.MentatScope?.write({industry:query.get('industry')||'',company:query.get('company')||'',
+      cycle:query.get('cycle')||'',mode:value('mode'),direction:value('direction'),
+      tier:query.get('tier')||'',funding:value('funding'),
+      category:query.get('category')||'',recipient:query.get('recipient')||''});
+  }
+  // The permalink, applied once the catalog's own options exist. A value with no
+  // matching option is skipped, never invented.
+  function applyUrlScope() {
+    urlScope=null;
+    const scope=globalThis.MentatScope?.read();
+    if(!scope)return;
+    for(const name of ['industry','mode','direction','funding'])
+      if(scope[name]&&[...get(name).options].some(option=>option.value===scope[name]))get(name).value=scope[name];
+    category=scope.category||'';recipient=scope.recipient||'';
+    if(scope.company||scope.cycle||scope.tier)urlScope={company:scope.company,cycle:scope.cycle,tier:scope.tier};
   }
   // Which saved run this console reads. Chart Studio's reconciliation strip has
   // to answer this the same way Graph does - a strip that reconciles against a
@@ -58,7 +96,7 @@
   async function loadCatalog(preloaded=null) {
     const ticket=++revision;controller?.abort();clear();get('status').textContent='Reading saved report sources…';
     options(get('industry'),[]);options(get('company'),[['','All companies']]);options(get('cycle'),[['','All cycles']]);
-    category='';recipient='';get('tier').value='';get('funding').value='all';get('mode').value='direct';syncControls();
+    category='';recipient='';get('tier').value='';get('funding').value='all';get('mode').value='direct';reportChosen=false;urlScope=null;syncControls();
     if(!get('run').value){get('status').textContent='No saved runs available.';return;}
     try {
       const body=preloaded?.industries ? preloaded : await api('/api/graph-catalog?id='+encodeURIComponent(get('run').value));
@@ -67,6 +105,7 @@
       unavailable=body.unavailable_reports||[];
       if(unavailable.length)get('source-label').textContent='Unavailable saved reports: '+unavailable.join(', ');
       if(!body.industries.length){get('status').textContent=body.message||'This run has no finalized report. Choose another run or check Collection.';return;}
+      reportChosen=true;applyUrlScope();syncControls();applyAnalysis();
       await refresh(true);
     } catch(e){if(ticket===revision){error(e.message);get('status').textContent='Report sources unavailable.';}}
   }
@@ -74,8 +113,16 @@
     const ticket=++revision;controller?.abort();controller=new AbortController();clear();syncControls();
     if(!get('industry').value)return;
     get('status').textContent='Reading saved giving data…';
+    // One query object: the request that goes out and the URL the reader can
+    // copy are the same values, and the permalink is consumed exactly once.
+    const query=filters();writeScope(query);urlScope=null;
     try {
-      const response=await fetch('/api/graph?'+filters()+(initial?'&latest=1':''),{signal:controller.signal});
+      // latest=1 makes graph_view() replace the requested cycle with max(years)
+      // (graph_data.py:317-318). The URL already carries the cycle the reader
+      // chose, and writeScope() has just published it, so sending latest=1 as
+      // well left the URL saying 2022 while the view showed 2024. It is still
+      // sent on a first load that names no cycle, which is what it is for.
+      const response=await fetch('/api/graph?'+query+(initial&&!query.get('cycle')?'&latest=1':''),{signal:controller.signal});
       const body=await response.json();if(!response.ok)throw new Error(body.error||'Graph unavailable.');
       if(ticket!==revision)return;
       view=body;render();window.dispatchEvent(new CustomEvent('mentat:graph',{detail:{...body,run:get('run').value,industry:get('industry').value}}));
@@ -195,8 +242,14 @@
     get('category-panel').hidden=!['overview','recipients'].includes(analysis);
     get('organization-panel').hidden=analysis!=='recipients';
     get('candidate-panel').hidden=!['overview','candidates'].includes(analysis);
-    get('candidate-controls').hidden=analysis!=='candidates';
-    get('candidate-separation').hidden=analysis!=='overview';
+    // Ruling A(ii): the Candidate view select appears as soon as a report is
+    // chosen, wherever the candidate panel is showing, rather than only on the
+    // Candidates analysis tab. Downstream PAC activity was reachable before
+    // this only by finding a tab that revealed the control.
+    get('candidate-controls').hidden=get('candidate-panel').hidden||!reportChosen;
+    // The note below says "Direct contributions only", which the select above
+    // can now make untrue on the overview tab, so it is shown only while it is.
+    get('candidate-separation').hidden=analysis!=='overview'||get('mode').value!=='direct';
     get('company-panel').hidden=analysis!=='companies';
     get('level-panel').hidden=analysis!=='companies';
   }

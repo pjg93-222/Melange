@@ -139,23 +139,57 @@
   const api = {html, stepHtml, money};
   if (typeof module !== 'undefined' && module.exports) { module.exports = api; return; }
   root.MentatCrossReference = api;
-  let active = false, fetching = false, lastHtml = '';
+  let active = false, fetching = false, lastHtml = '', lastIndustry = null;
+  // The industry the URL names, through the one module that owns that
+  // vocabulary (audits/mentat_failings_20260915/contracts/url_scope.json).
+  const scopeIndustry = () => (globalThis.MentatScope ? globalThis.MentatScope.read().industry : '') || '';
+  // Which run the console actually read, said where the refresh status is said.
+  // S4's route answers selected_by: "pointer" on the latest path, "industry"
+  // when a label chose the run, so the reader is never left guessing whether a
+  // permalink's industry took.
+  const runText = data => {
+    if (!data) return 'Latest run';
+    // An industry-scoped ask that found nothing answers the empty envelope
+    // ({available:false, industry:<label>}), and saying "Latest run" over it
+    // would name the one run it is NOT showing. Before S5 this view always had
+    // the latest run to fall back on; a reader who followed a permalink is owed
+    // the reason the panel is empty.
+    if (data.industry && data.available === false) return 'No cross-reference run for ' + data.industry;
+    if (data.selected_by === 'industry' && data.industry) return 'Newest run for ' + data.industry;
+    return 'Latest run';
+  };
   async function refresh() {
     if (!active || fetching || document.hidden) return;
     fetching = true;
     const message = document.getElementById('xref-refresh-status');
+    const industry = scopeIndustry();
+    lastIndustry = industry;
     try {
-      const response = await fetch('/api/cross-reference', {cache:'no-store'});
+      // industry is the only query key this route accepts (server.py:1918-1928);
+      // without one it still answers for the latest saved run, as before.
+      const response = await fetch('/api/cross-reference' +
+        (industry ? '?industry=' + encodeURIComponent(industry) : ''), {cache:'no-store'});
       if (!response.ok) throw new Error('The cross-reference view could not refresh.');
       const data = await response.json(), next = html(data);
       if (next !== lastHtml) { document.getElementById('xref-results').innerHTML = next; lastHtml = next; }
-      message.textContent = 'Saved evidence refreshed. This page is read-only.';
+      message.textContent = runText(data) + ' \u00b7 Saved evidence refreshed. This page is read-only.';
     } catch (error) {
       message.textContent = `${error.message} Any previously displayed result is an older snapshot.`;
     } finally { fetching = false; }
   }
   api.setActive = value => { active = !!value; if (active) refresh(); };
   api.refresh = refresh;
+  // A scope written elsewhere in this document, or a Back button, can change the
+  // industry. Only a change matters, and only while this view is the one on
+  // screen; lastHtml is cleared so two runs that happen to render identically
+  // still repaint under their own status line.
+  globalThis.MentatScope?.subscribe(next => {
+    if (!active) return;
+    const industry = (next && next.industry) || '';
+    if (industry === lastIndustry) return;
+    lastHtml = '';
+    refresh();
+  });
   document.getElementById('xref-refresh')?.addEventListener('click', refresh);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   api.setActive(!document.getElementById('view-cross-reference')?.hidden);

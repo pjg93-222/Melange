@@ -39,6 +39,10 @@ function showView(view, focus = false) {
   $('split-view').setAttribute('aria-pressed', String(paired));
   $('split-view').textContent = paired ? 'Single view' : currentView === 'graph' ? 'Split with PAC evidence' : 'Split with Graph';
   if (paired) { $('workspace-title').textContent = 'Graph & PAC evidence'; $('graph-actions').hidden = false; }
+  // Fragment-only, so it resolves against the current URL and KEEPS the query
+  // string: the hash names the tab and the query carries the scope (scope.js),
+  // so switching tabs never loses a permalink's scope. replaceState, never
+  // pushState - Back does not step through tabs today (Paul's ruling C).
   history.replaceState(null, '', '#' + currentView);
   window.dispatchEvent(new CustomEvent('mentat:view', {detail:{view:currentView,split:paired}}));
   if (focus) {

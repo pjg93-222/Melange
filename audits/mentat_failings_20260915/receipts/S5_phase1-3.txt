@@ -1,0 +1,712 @@
+S5 - Navigation and linking (Area D), phases 1-3
+================================================================================
+Repo   : C:\Users\pgoff\Mentat, branch codex/mentat-crypto, HEAD 971d805fc
+Date   : 2026-09-17
+Design : audits/mentat_failings_20260915/S5_DESIGN.md (ACCEPTED; rulings A(ii), B, C)
+Cwd for every test command below: C:\Users\pgoff\Mentat\mentat
+
+WRITE PATH: the Edit/Write tools refuse every path under C:\Users\pgoff\Mentat in
+this session (worktree guard), so every edit was made by a python script run from
+Bash that reads the target as bytes, preserves its CRLF/LF, and does an exact-match
+replace asserting the anchor occurs exactly once. Each edited file was backed up
+once as <file>.bak-20260917-s5 before its first edit. No git add/commit/stash/
+checkout/push was run; the stash stack was never touched.
+
+--------------------------------------------------------------------------------
+1. CONTRACT  audits/mentat_failings_20260915/contracts/url_scope.json (v1, S5)
+--------------------------------------------------------------------------------
+examples          : 7 (6 permalink + 1 write-merge)
+negative_controls : 6
+keys table        : 11 entries (industry, company, cycle, mode, direction, tier, funding, category, recipient, saved, studioPane)
+reserved for S6   : evidence, id, committee, offset, limit
+produced_by       : 6
+  - mentat/app/scope.js:write
+  - mentat/app/graph.js:writeScope (called from refresh(), the one path every Graph control change reaches)
+  - mentat/app/chart-studio.js:selectContributionDataset (industry)
+  - mentat/app/chart-studio.js:saveViewNamed (saved, on a successful save)
+  - mentat/app/chart-studio.js:openView (saved, on a successful open)
+  - mentat/app/chart-studio.js:#graph-open-builder onclick (industry, company, cycle)
+consumed_by       : 6
+  - mentat/app/scope.js:read
+  - mentat/app/scope.js:parse
+  - mentat/app/graph.js:applyUrlScope (after loadCatalog fills the selects)
+  - mentat/app/chart-studio.js:loadContributions (industry, company, cycle, saved)
+  - mentat/app/cross-reference.js:refresh (industry -> GET /api/cross-reference?industry=)
+  - S6 (inherits this vocabulary for the pane model: evidence, id, committee, offset, limit)
+
+negative controls, one line each:
+  /?industry=Banking&mode=pac#graph                    -> scope {"industry": "Banking"}, invalid [["mode", "pac"]]
+  /?industry=Banking&cycle=24#graph                    -> scope {"industry": "Banking"}, invalid [["cycle", "24"]]
+  /?industry=Banking&cycle=abcd#graph                  -> scope {"industry": "Banking"}, invalid [["cycle", "abcd"]]
+  /?industry=&company=JPMorgan%20Chase#graph           -> scope {"company": "JPMorgan Chase"}, invalid [["industry", ""]]
+  /?industry=Banking&saved=xyz#chart-studio            -> scope {"industry": "Banking"}, invalid [["saved", "xyz"]]
+  /#graph                                              -> scope {}, invalid []
+
+README index row added (contracts/README.md, Index table). NOTE: this file is
+gitignored by the repo-root .gitignore (`*.json` at :6), exactly like every other
+contract in this lane; it reaches the repo through `git apply --cached` from the
+lane patch, as S4's did.
+
+--------------------------------------------------------------------------------
+2. NODE CONTRACT SUITE   node --test "app/tests/**/*.test.js"
+--------------------------------------------------------------------------------
+BEFORE S5: 121 tests, 121 pass, 0 fail (measured at the start of this session).
+AFTER  S5: see below. The 30 new tests are app/tests/scope.test.js, which loads
+contracts/url_scope.json through contracts/README.md's node loader and never
+embeds a copy of a payload.
+
+✔ the tray keeps charts in the order they were added (1.1495ms)
+✔ adding returns a new list, so an export already running keeps its own order (0.1946ms)
+✔ move walks a chart exactly one place in the direction asked (0.1609ms)
+✔ move off either end changes nothing at all, rather than wrapping round (0.8387ms)
+✔ remove takes out exactly the named chart and leaves the rest in order (0.5195ms)
+✔ the tray holds forty charts and refuses the forty-first rather than dropping the first (0.8578ms)
+✔ a chart removed from a full tray makes room for exactly one more (1.0003ms)
+✔ added_at read back in seconds (as the server writes it) renders today's clock, not a 1970 date (1.6466ms)
+✔ classifyFields splits dimensions, measures and hidden identifier fields (3.2394ms)
+✔ classification agrees with chart-math chartColumns on measures (1.4058ms)
+✔ dimensions reach grouping and extra measures are explicitly refused (1.1034ms)
+✔ a measure pill carries its own aggregation, defaulting to sum (0.571ms)
+✔ a dimension with no measure counts rows (0.2602ms)
+✔ a date dimension on Columns with a measure draws a line under Automatic (0.318ms)
+✔ a date dimension with no measure stays a bar of row counts (0.5064ms)
+✔ two measures, one on each shelf, draw a scatter (0.3294ms)
+✔ a dimension on Rows with a measure on Columns draws horizontal bars (0.5513ms)
+✔ a Colour pill becomes the separate series and pairs the chart type (0.4062ms)
+✔ a Colour measure is refused with a note rather than becoming a series (0.2004ms)
+✔ explicit mark types override Automatic (0.352ms)
+✔ a circle mark without two measures reports an issue (0.2051ms)
+✔ a histogram ignores the grouping column (0.1451ms)
+✔ Swap exchanges Columns and Rows (0.2573ms)
+✔ filters, pages and row parameters reach the configuration (0.2462ms)
+✔ blank row parameters compile to zero, which the engine reads as unbounded (0.0887ms)
+✔ analytics map to transform, period and horizon (0.0908ms)
+✔ time analysis without a date field is refused (0.0863ms)
+✔ time analysis forces a bar, line or area mark and drops Colour (0.1667ms)
+✔ time analysis asks for one Subject and filters to it (0.759ms)
+✔ an empty sheet compiles to no configuration and says why (0.1921ms)
+✔ hidden identifier fields still compile when a user places them (0.1349ms)
+✔ every compiled configuration is accepted by the chart engine (36.3791ms)
+✔ the 15 chart types the classic dialog offers are all reachable (0.8017ms)
+✔ Sort orders the x dimension by the y measure and leaves scatter alone (0.726ms)
+✔ a time view keeps chronological order whatever Sort says (0.6705ms)
+✔ rowsToMarksSummary describes the view for the status bar (0.6188ms)
+✔ mark values follow the order the renderer appends marks (0.2419ms)
+✔ reference lines average and median the plotted marks (0.3037ms)
+✔ a grand total is withheld unless the marks are additive parts of one whole (0.6446ms)
+✔ reference lines are withheld from independent series (0.4363ms)
+✔ Show Me holds the 24 Tableau tiles in order (0.5074ms)
+✔ the nine out-of-release tiles are always disabled (0.2833ms)
+✔ the Show Me eligibility table greys tiles the field selection cannot satisfy (0.3425ms)
+✔ a tile that needs a date says so (0.0984ms)
+✔ the selection counts shelf fields plus anything picked in the Data pane (0.2621ms)
+✔ clicking a tile sets marks and shelves in one step (1.7714ms)
+✔ the recommended tile follows chart-math recommend() (0.3225ms)
+✔ Clear keeps the data source and drops the view (0.1488ms)
+✔ the session key names the worksheet, not just the workbook digest (0.1416ms)
+✔ pill accepts a bare column index, a numeric string and a full pill (0.7845ms)
+✔ more groups than the limit fold into one Other mark instead of refusing to draw (1.6208ms)
+✔ the group limit is a parameter, and a high enough one folds nothing (0.63ms)
+✔ folding does not change the grand total (0.6024ms)
+✔ Other pools the raw rows, so every aggregation reads the folded rows themselves (2.06ms)
+✔ a side-by-side comparison folds its grouping field the same way (0.3798ms)
+✔ a group limit that is not a positive whole number is refused (0.7757ms)
+✔ Sort reorders the real groups and leaves Other at the end (0.2373ms)
+✔ splitting a multi-value cell makes one row per value and leaves the data alone (0.4579ms)
+✔ a split view counts a row once per value and says so (0.2719ms)
+✔ a split result carries the split facts, so a reader is told values not rows (0.5806ms)
+✔ the group limit and the split parameter reach the configuration (0.2053ms)
+✔ a new sheet starts with no group limit and splitting off (0.0485ms)
+✔ all shelf dimensions and Detail dimensions change the grouping grain (0.2951ms)
+✔ unsupported encodings and duplicate measure pills cannot silently do nothing (0.1601ms)
+✔ numeric ZIP variants and congressional district identifiers never become money measures (0.113ms)
+✔ split coverage has no additive grand total or monetary status label (0.192ms)
+✔ percentages and period differences have explicit units and no monetary grand total (0.4702ms)
+✔ forecast totals separate historical money from copied future baselines (0.9645ms)
+✔ independent accounting groups have separate marks but no cross-layer total (0.1589ms)
+✔ an empty member choice is not a filter, so it never selects nothing (0.3242ms)
+✔ include and exclude lists select complementary worksheet rows (0.572ms)
+✔ a range filter applies each bound it was given (0.5515ms)
+✔ normalizeFilter keeps lists as arrays, ranges two-ended and scalars as text (0.2569ms)
+✔ filterSummary reads as a sentence about the members, not about the operator (61.7918ms)
+✔ one filter pill becomes the clauses the verified engine understands (0.4455ms)
+✔ aggregation menus offer only what the active engine can compute (0.1503ms)
+✔ political-money presets say what a source cannot answer instead of failing later (0.285ms)
+✔ a measure preset replaces the measure on the shelf that carried it (0.2768ms)
+✔ a text column can never become a measure; a numeric identifier can (0.1141ms)
+✔ a per-sheet type override moves a field between the two lists and its glyph (0.2625ms)
+✔ date parts use real catalog columns when verified and periods on a worksheet (0.255ms)
+✔ a verified date field keeps its date parts even without the detected time flag (0.1898ms)
+✔ each company-overview preset builds the sheet its caption promises (0.5424ms)
+✔ a company-overview preset compiles into the verified query it describes (1.1382ms)
+✔ a single click sends a grouping across the top and a measure down the side (0.1708ms)
+✔ the click zone reads the shelves only, never a field selection (0.1079ms)
+✔ a cycle carried from Graph is translated into the spelling the index stores (0.1301ms)
+✔ the reverse map gives Graph the end year, and refuses anything that is not a cycle (0.1432ms)
+✔ company overview names the fields a source does not have (0.1374ms)
+✔ a one-cycle report still agrees, and the pinned cycle raises no reason at all (1.1662ms)
+✔ when Graph pinned one cycle and the sheet covers them all, that is the reason (0.2523ms)
+✔ a sheet with its own cycle is never explained away by the cycle reason (0.1027ms)
+✔ the basis outranks the cycle, because a wrong basis explains more (0.1626ms)
+✔ the cycle outranks a Graph filter, since the pinned cycle is the bigger cut (0.1321ms)
+✔ no pinned cycle at all leaves the older reasons exactly as they were (1.0008ms)
+✔ every reason id the chain can produce has wording to print (1.5209ms)
+✔ [url_scope] the contract itself is shaped the way contracts/README.md requires (2.3875ms)
+✔ [url_scope] read() answers the contract scope for graph_permalink_downstream_activity (2.4707ms)
+✔ [url_scope] href() rebuilds graph_permalink_downstream_activity byte for byte (2.0167ms)
+✔ [url_scope] graph_permalink_downstream_activity round-trips through write() onto an empty URL (1.011ms)
+✔ [url_scope] read() answers the contract scope for chart_studio_permalink (0.1846ms)
+✔ [url_scope] href() rebuilds chart_studio_permalink byte for byte (0.0953ms)
+✔ [url_scope] chart_studio_permalink round-trips through write() onto an empty URL (0.1507ms)
+✔ [url_scope] read() answers the contract scope for saved_view_permalink (0.203ms)
+✔ [url_scope] href() rebuilds saved_view_permalink byte for byte (0.0832ms)
+✔ [url_scope] saved_view_permalink round-trips through write() onto an empty URL (0.1703ms)
+✔ [url_scope] read() answers the contract scope for cross_reference_permalink (0.091ms)
+✔ [url_scope] href() rebuilds cross_reference_permalink byte for byte (0.1154ms)
+✔ [url_scope] cross_reference_permalink round-trips through write() onto an empty URL (0.0907ms)
+✔ [url_scope] read() answers the contract scope for ampersand_label (0.6616ms)
+✔ [url_scope] href() rebuilds ampersand_label byte for byte (0.0428ms)
+✔ [url_scope] ampersand_label round-trips through write() onto an empty URL (0.0656ms)
+✔ [url_scope] read() answers the contract scope for graph_filters_full (0.0916ms)
+✔ [url_scope] href() rebuilds graph_filters_full byte for byte (0.0402ms)
+✔ [url_scope] graph_filters_full round-trips through write() onto an empty URL (0.0644ms)
+✔ [url_scope] write() merge semantics: write_merge_remove_on_empty_and_preserve_unknown (0.1238ms)
+✔ [url_scope] negative control: mode=pac is not a #graph-mode option value (0.1766ms)
+✔ [url_scope] negative control: A two-digit cycle is not the four-digit end year Graph spells (0.0732ms)
+✔ [url_scope] negative control: A non-numeric cycle is refused by the same rule, so the shape of the refusal cannot depend on the value happening to be digits (0.0665ms)
+✔ [url_scope] negative control: An explicitly blank industry is not a scope (0.0569ms)
+✔ [url_scope] negative control: saved=xyz is not 32 hex, which is exactly what server (0.0732ms)
+✔ [url_scope] negative control: The teeth of the other five: a URL with no query at all invents nothing (0.042ms)
+✔ [url_scope] write() preserves unknown keys and their order, and appends new ones (0.1248ms)
+✔ [url_scope] write() never writes a reserved key, even when asked (0.0991ms)
+✔ [url_scope] subscribe fires on a write, and not on a no-op write (0.2733ms)
+✔ [url_scope] removing the last key drops the question mark rather than leaving "?" (0.0647ms)
+✔ the builder makes the saved-view payload the server accepts, from the live sheet (3.4446ms)
+✔ a chosen dataset that names its own industry wins over its id (0.2473ms)
+✔ a worksheet with no verified dataset still names its report and digest (0.1027ms)
+✔ a view recovered from the old browser store sends its caption as an object (0.1001ms)
+✔ the builder makes the briefing source and provenance the exports read back (0.3093ms)
+✔ no builder can be talked into emitting a string, whatever it is handed (1.1589ms)
+✔ what the builder makes round-trips back through the readers (0.2002ms)
+✔ the example item yields the real workbook digest, not a stringified object (0.0721ms)
+✔ the source caption comes off the object, so the picker never prints one (0.1292ms)
+✔ the export source line carries the true short SHA and never the word object (0.2051ms)
+✔ no reader ever stringifies an object, whatever shape the item arrives in (0.2046ms)
+✔ an item with no digest at all says so in words rather than printing nothing (0.0732ms)
+✔ what the browser sends the server is an object, so a caption is wrapped not dropped (0.1243ms)
+✔ a record that survives the round trip still reads back as the same digest (0.0922ms)
+✔ [studio_api] viewSourceRecord emits industry for a contributions source, matching the fixture exactly (0.0859ms)
+✔ [studio_api] createSheet carries an empty ordered series-sources array (0.1958ms)
+✔ [studio_api] migrateSheet backfills industry and normalizes sources, matching migration_input -> migration_output exactly (0.1428ms)
+✔ [studio_api] chartSourceRecord emits industry for a briefing source (0.105ms)
+✔ [studio_api] negative control with teeth: a source without industry yields no industry key at all (0.1392ms)
+✔ [studio_api] negative control with teeth: a sources[] entry lacking industry is dropped by migrateSheet (0.159ms)
+✔ [snapshot_registry] parseSnapshotRegistry accepts every example envelope (0.3397ms)
+✔ [snapshot_registry] parseSnapshotRegistry rejects every negative control, wrapped as a single-entry list (0.3264ms)
+✔ a fresh sheet carries no industry or dataset key on its source (2.104ms)
+✔ migrating a fresh worksheet sheet adds no industry key either (0.372ms)
+✔ negative control: a source that names an empty industry keeps it, so the server can refuse it (0.1065ms)
+ℹ tests 151
+ℹ suites 0
+ℹ pass 151
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 355.6293
+
+--------------------------------------------------------------------------------
+3. REAL-CLIENT PASS   node tests/test_navigation_scope_browser.cjs
+--------------------------------------------------------------------------------
+Spawns the real `python app/server.py` on a free port (never 8802/8806/8808/8841)
+with a throwaway --data-root. /api/studio/views is NOT stubbed: the saved view in
+step 8 really reaches disk on that server and is read back from it.
+
+SETUP: pick a free port and launch the console server on a throwaway --data-root
+SETUP done - server ready on port 58438, data root C:\Users\pgoff\AppData\Local\Temp\mentat-navigation-scope-jwVWRK, routes stubbed
+STEP 1: open the Graph permalink and read the four controls back
+PASS step 1 - Graph opened on the permalink: {"industry":"Banking","company":"Fixture Bank","cycle":"2024","mode":"activity"}
+STEP 2: switch to Chart Studio: the dataset follows the URL and company/cycle arrive as pills
+PASS step 2 - dataset=Banking, carried pills [["company","Fixture Bank"],["cycle","2023-2024"]], shelf shows ["AbcCompany = Fixture Bank▾","Election cycle = 2023-2024▾"]
+STEP 3: back to Graph: the selects still equal the URL
+PASS step 3 - Graph selections survived the round trip through Chart Studio
+STEP 4: reload the page: the scope comes back from the URL alone
+PASS step 4 - reload restored industry, company, cycle and candidate view
+STEP 5: Cross-reference asks the server for the industry the URL names
+PASS step 5 - request /api/cross-reference?industry=Banking and status "Newest run for Banking · Saved evidence refreshed. This page is read-only."
+STEP 6: change the Graph company select: the URL follows the control
+PASS step 6 - the company key left the URL when cleared and came back when chosen
+STEP 7: "Open in Chart Studio" carries the scope into the URL and switches the tab
+PASS step 7 - URL after the handoff: ?industry=Banking&cycle=2024&mode=activity&company=Fixture%20Bank#chart-studio
+STEP 8: save a view: its id lands in the URL, and that permalink opens it on a fresh page
+PASS step 8 - saved=24512f64a2264676a1a0390806ff6af3; the permalink page reported "Opened view "Scope test"." carrying [["company","Fixture Bank"],["cycle","2023-2024"]]; sheet tabs ["Sheet 1"]
+STEP 9: negative control: a permalink with mode=pac opens Graph on direct and reports nothing to the console
+PASS step 9 - /?industry=Banking&mode=pac#graph opened Graph on mode=direct with no page error
+STEP 10: ruling A(ii): the Candidate view select is visible once a report is chosen
+PASS step 10 - #graph-candidate-controls visible on the overview tab, offering "Downstream PAC activity"
+ALL 10 STEPS PASSED
+browser.close() exceeded its 20000ms bound
+
+--------------------------------------------------------------------------------
+4. BASELINE BROWSER TESTS (must stay at baseline)
+--------------------------------------------------------------------------------
+test_console_browser.cjs            exit 0  (see note below)
+test_app_lazy_startup_browser.cjs   exit 0  3/3
+test_graph_lazy_tables_browser.cjs  exit 0  1/1
+test_studio_industry_browser.cjs    exit 0  10/10 steps
+
+test_console_browser.cjs FAILED FIRST, and the failure was real, not a flake:
+  locator.waitFor: Timeout 15000ms exceeded.
+    - waiting for getByText('Observed original giving', { exact: true })
+    at tests/test_console_browser.cjs:254
+
+Diagnosis, measured rather than assumed. That test clicks #split-view while the
+Evidence tab is current (:163), which satisfies graph.js activate()'s
+`currentView==='evidence' && splitView` branch and loads Graph. Graph now writes
+its industry into the query string, so the Cross-reference view asks S4's
+industry-scoped route, and the test's stub glob `**/api/cross-reference` (:50) no
+longer matched - the request fell through to the real fixture server, which has no
+saved cross-reference run, so the panel rendered its empty state.
+
+Negative control for that diagnosis: a probe on the SAME fixture, with no industry
+in the URL, still requests the bare route and still renders the panel:
+  search after load: ""
+  search at xref: ""
+  cross-reference requests: ["http://127.0.0.1:PORT/api/cross-reference", x2]
+  status line: "Latest run - Saved evidence refreshed. This page is read-only."
+  has "Observed original giving": true
+  pageerrors: []
+
+Fix: tests/test_console_browser.cjs:50 gained a second page.route for the query
+form, which is the idiom that file already uses for /api/evidence at :48-49. That
+is a NON-OWNED test edit, forced by the contract change, recorded in HANDOFF.md
+for its owner to nod at. Nothing else in that test changed.
+
+--- test_console_browser.cjs (tail) ---
+Browser checks passed: Graph guided scopes, JFC, levels, direct/downstream separation, exports, Advanced charts, freshness disclosures, responsive sidebar, skip link, keyboard tabs and local requests only.
+
+--- test_app_lazy_startup_browser.cjs (tail) ---
+✔ Chart Studio startup only handshakes; saved evidence loads on its visible source and keeps Graph context (81307.4082ms)
+✔ An older build on disk raises the restart banner, and the stamp names the console answering (16871.6161ms)
+✔ Changed interface files ask for a restart, and a current build shows no banner (41746.6214ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 139961.3634
+
+--- test_graph_lazy_tables_browser.cjs (tail) ---
+{"fixtureRows":10012,"render":[{"milliseconds":71.29999999701977,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42},{"milliseconds":15,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42},{"milliseconds":16,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42}]}
+✔ closed Graph tables are deferred without losing rows, callbacks or exports (90603.7781ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 90626.3234
+
+--- test_studio_industry_browser.cjs (tail) ---
+        "splitMulti": false
+      },
+      "sort": "none",
+      "showLabels": false,
+      "fit": "standard"
+    }
+  ],
+  "active": 0
+}
+PASS step 9 - both on-disk view files are valid JSON and printed above verbatim
+STEP 10: final check: zero pageerror entries
+PASS step 10 - zero pageerror entries across the whole run
+ALL 10 STEPS PASSED
+browser.close() exceeded its 10000ms bound
+
+
+--------------------------------------------------------------------------------
+5. WORKING-TREE STATE AND HUNK SEPARATION
+--------------------------------------------------------------------------------
+git diff --stat for the files S5 touched:
+
+ audits/mentat_failings_20260915/HANDOFF.md         | 141 ++++++++++++++++++---
+ .../mentat_failings_20260915/contracts/README.md   |   1 +
+ mentat/app/app.js                                  |   4 +
+ mentat/app/chart-studio.js                         |  88 ++++++++++++-
+ mentat/app/cross-reference.js                      |  32 ++++-
+ mentat/app/graph.js                                |  60 ++++++++-
+ mentat/app/index.html                              |   2 +-
+ mentat/tests/test_console_browser.cjs              |   1 +
+ 8 files changed, 301 insertions(+), 28 deletions(-)
+warning: in the working copy of 'audits/mentat_failings_20260915/HANDOFF.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/app/app.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/app/cross-reference.js', LF will be replaced by CRLF the next time Git touches it
+
+New, untracked files S5 created:
+  mentat/app/scope.js
+  mentat/app/tests/scope.test.js
+  mentat/tests/test_navigation_scope_browser.cjs
+  audits/mentat_failings_20260915/contracts/url_scope.json   (gitignored: *.json)
+
+server.py is CONTENDED and was modified by ANOTHER SESSION while S5 worked: it was
+clean when S5 checked it, and carried five foreign hunks by the time S5 made its
+edit (file mtime 2026-09-17 00:29:56; S5's edit 00:43:04). Then, at 00:49:02, Paul
+committed a565216bf ("Cut console startup to about a second and read workbooks
+through calamine"), which carries all six hunks INCLUDING S5's one line. HEAD is
+therefore a565216bf, not 971d805fc, server.py is clean again, and the S5 patch must
+carry no server.py hunk at all. Every measurement in this receipt was taken against
+exactly those bytes - they were in the working tree, uncommitted, while the tests
+ran - so the results stand. The hunk boundary, for the record (this diff is now
+empty because it is committed):
+
+  @@ -70,0 +71 @@    '/scope.js': ('scope.js', 'text/javascript'),   <- S5
+  @@ -196,0 +198,16 @@  _cached_json / read_json_cached              <- foreign (S3d)
+  @@ -1286 +1303 @@, @@ -1292 +1309 @@, @@ -1299 +1316 @@           <- foreign (S3d)
+  @@ -1708,0 +1726,8 @@                                             <- foreign (S3d)
+
+Current `git diff -U0 -- mentat/app/server.py` (expected: empty):
+
+
+Why that one line exists at all: STATIC_ASSETS (server.py:58-91) is an allow-list
+and do_GET answers 404 for any path not in it (:1963-1982), so a new client script
+cannot be served without an entry. S5_DESIGN.md section 4's "server.py: untouched"
+was wrong on that point. No other manifest lists app assets - a repo-wide grep for
+another file naming chart-studio.js turned up only docs, patches and audit notes.
+
+--------------------------------------------------------------------------------
+6. WHAT THE CODE CONTRADICTED IN S5_DESIGN.md
+--------------------------------------------------------------------------------
+a. Section 0.5 says #graph-candidate-controls is "hidden until candidates load".
+   It is not. graph.js applyAnalysis() set
+   `get('candidate-controls').hidden = analysis !== 'candidates'`, so the Candidate
+   view select was reachable only from the Candidates analysis tab, at any time.
+   Removing `hidden` from index.html alone would have been undone by applyAnalysis()
+   on the next call. Built per the brief's own instruction for that case: the rule
+   now lives in graph.js and reads "visible wherever the candidate panel is showing,
+   once a report is chosen"; index.html:105 keeps its `hidden` for the moment before
+   a report exists.
+b. Section 4 says "server.py: untouched". See section 5 above.
+c. Section 4 says app.js's showView should call MentatScope.write({}) after
+   switching. Not built: write({}) changes nothing, so it dispatches nothing (the
+   module is a no-op on an unchanged URL by contract), and no listener needs it -
+   graph.js re-reads on loadCatalog, chart-studio.js on activate, cross-reference.js
+   on setActive. app.js therefore carries a comment and no behaviour change, which
+   keeps a CONTENDED-adjacent file at zero risk.
+d. Section 3 gives write() the signature write(partial). Built as
+   write(partial, {location, history, dispatch, target}) so node:test can drive it
+   with a fake location/history/EventTarget triple; every caller in the client uses
+   the one-argument form.
+
+
+================================================================================
+FABLE REVIEW FIXES (2026-09-17, after the S5 diff review)
+================================================================================
+Three findings, each fixed only after its new browser step was written and RUN
+against the pre-fix bytes, so every fix has a recorded failure behind it. No
+server.py change; no git writes; same write path.
+
+--------------------------------------------------------------------------------
+FIX 1 (HIGH) - latest=1 silently overrode a permalink's cycle
+--------------------------------------------------------------------------------
+Root cause, read rather than inferred: graph_data.py:317-318
+
+    if filters.get('latest') == '1' and years:
+        selected['cycle'] = max(years)
+
+refresh(initial) sent `&latest=1` unconditionally on the first load, and
+writeScope(query) had already published the permalink's cycle, so the URL said
+2022 while the view showed 2024. S5's own step 1 could not see it: the fixture's
+newest cycle IS the cycle that permalink asks for.
+
+Test first. The /api/graph stub now mirrors that one server rule exactly
+(tests/test_navigation_scope_browser.cjs, graphView(): latest=1 -> max(cycles)),
+because a stub that ignored it would let this bug pass forever.
+
+PRE-FIX RUN, verbatim:
+
+    STEP 11: a permalink that names a cycle is not overridden by latest=1
+    FAIL step 11: AssertionError [ERR_ASSERTION]: the cycle select must show the cycle the permalink named
+
+    '2024' !== '2022'
+
+        at C:\Users\pgoff\Mentat\mentat\tests\test_navigation_scope_browser.cjs:499:12
+
+Fix, mentat/app/graph.js:120-125 (live):
+
+    const response=await fetch('/api/graph?'+query+(initial&&!query.get('cycle')?'&latest=1':''),{signal:controller.signal});
+
+latest=1 is still sent on a first load that names no cycle, which is what it is
+for. AFTER:
+
+    PASS step 11 - request /api/graph?id=published-reports&industry=Banking&company=&tier=&cycle=2022&funding=all&mode=direct&direction=Support&category=&recipient=, select 2022, URL keeps cycle=2022
+
+--------------------------------------------------------------------------------
+FIX 2 (HIGH) - a saved= id that outlived the sheets it described
+--------------------------------------------------------------------------------
+Opening a saved view put its id in the URL. Edit the view, reload, and
+openSavedFromUrl() re-opened the saved view while persist() wrote it over the
+edited sheets: every edit since the open, gone. That loss did not exist before S5
+put the id in the URL, so S5 takes it back out.
+
+Choke point, chosen by reading all three candidates rather than guessing:
+  - commit()  (chart-studio.js:133) - 45 call sites, every ordinary edit.   CHOSEN
+  - step()    (:145) - undo/redo mutates sheets and calls persist() without
+                        going through commit().                             CHOSEN
+  - persist() (:79)  - REJECTED: it also runs on load paths
+                        (selectContributionDataset), which would have destroyed
+                        the permalink before openSavedFromUrl() ever read it.
+
+PRE-FIX RUN, verbatim:
+
+    STEP 12: the first edit after opening a saved view drops saved= so a reload cannot overwrite the edit
+    FAIL step 12: Error: saved= leaving the URL after the first edit never happened. Page: {"search":"?industry=Banking&saved=0026224cfc294f9d88a847846aa7b766","error":"Place a date, year, quarter, month or election cycle first on the shelves for a timeline.","loading":"Verified contribution fields \u00b7 5 fields","status":"3 source observations \u00b7 1 groups \u00b7 Included receipts reconcile to the workbook. \u00b7 2 verified queries this session","dataset":"Banking","datasetOptions":["Banking","Credit Union"],"nameInputPresent":false,"exportMenuOpen":false,"scopeModule":"object"}
+
+Fix, mentat/app/chart-studio.js (live lines):
+  :60        `let openedSaved = '', holdingSavedId = false;` moved up beside the
+             rest of the module state, so nothing running during the IIFE body
+             can reach it in its temporal dead zone.
+  :142       commit() calls viewEdited() right after change().
+  :154       step() (undo/redo) calls viewEdited() before persist().
+  :417-421   viewEdited(): clears openedSaved and writes {saved: ''} unless an
+             open is installing its own sheets.
+  :2006-2013 openView() sets holdingSavedId around its own commit, so the open
+             is not mistaken for an edit; rememberSavedView() then puts the id
+             back.
+
+Both directions are pinned by the step, so neither can regress: the edit drops
+the id AND the permalink still re-opens the view and brings the id back. AFTER:
+
+    PASS step 12 - edit dropped saved=, survived a reload, and the permalink still re-opens the view
+
+--------------------------------------------------------------------------------
+FIX 3 (MEDIUM) - "Latest run" over an industry that has no run
+--------------------------------------------------------------------------------
+An industry-scoped ask that found nothing answers the empty envelope
+({available:false, industry:<label>, status:'empty'}) and the status line still
+read "Latest run", naming the one run it was NOT showing.
+
+PRE-FIX RUN, verbatim:
+
+    STEP 13: an industry with no cross-reference run says so, rather than "Latest run"
+    FAIL step 13: AssertionError [ERR_ASSERTION]: an empty industry-scoped answer must name the industry, got "Latest run \u00b7 Saved evidence refreshed. This page is read-only."
+        at C:\Users\pgoff\Mentat\mentat\tests\test_navigation_scope_browser.cjs:567:12
+
+Fix, mentat/app/cross-reference.js:150-160 (live): runText() now answers
+"No cross-reference run for <label>" when data.industry is set and
+data.available is false, and keeps "Newest run for <label>" / "Latest run"
+otherwise. The stub gained a switch so BOTH branches are pinned - step 5 asserts
+"Newest run for Banking" against a real envelope (and that the run rendered:
+"Observed original giving" is on screen), step 13 asserts the empty one. AFTER:
+
+    PASS step 13 - status "No cross-reference run for Banking \u00b7 Saved evidence refreshed. This page is read-only."
+
+--------------------------------------------------------------------------------
+RECORDED, NO CODE CHANGE (also in HANDOFF's "Known limits")
+--------------------------------------------------------------------------------
+a. Chart Studio never writes company/cycle back, so removing a carried pill does
+   not remove the key from the URL, and loadContributions(refresh) re-carries it
+   from the URL. Idempotent - the pill comes back as it was, nothing is lost or
+   duplicated - but it does mean a removed pill can reappear on a source refresh.
+   Graph owns those two keys today; S6 may give Chart Studio ownership.
+b. scope.js merge() re-encodes unknown keys' values with encodeURIComponent, so a
+   '+' that meant a space in someone else's key is normalised to %20. Same value
+   either way under URLSearchParams decoding; harmless.
+c. A first load that names no cycle still sends latest=1 and lands on the newest
+   cycle, while the URL names no cycle at all. That is the contract's own rule
+   ("a URL names only what the reader chose") and it is unchanged from before S5,
+   but a copied link therefore means "newest", not "2024".
+
+--------------------------------------------------------------------------------
+RE-RUN AFTER THE FIXES
+--------------------------------------------------------------------------------
+node --test "app/tests/**/*.test.js"
+
+✔ [snapshot_registry] parseSnapshotRegistry rejects every negative control, wrapped as a single-entry list (0.335ms)
+✔ a fresh sheet carries no industry or dataset key on its source (1.9562ms)
+✔ migrating a fresh worksheet sheet adds no industry key either (0.3809ms)
+✔ negative control: a source that names an empty industry keeps it, so the server can refuse it (0.1787ms)
+ℹ tests 151
+ℹ suites 0
+ℹ pass 151
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 979.107
+
+node tests\test_navigation_scope_browser.cjs  (exit 0)
+
+SETUP: pick a free port and launch the console server on a throwaway --data-root
+SETUP done - server ready on port 61143, data root C:\Users\pgoff\AppData\Local\Temp\mentat-navigation-scope-znyLGH, routes stubbed
+STEP 1: open the Graph permalink and read the four controls back
+PASS step 1 - Graph opened on the permalink: {"industry":"Banking","company":"Fixture Bank","cycle":"2024","mode":"activity"}
+STEP 2: switch to Chart Studio: the dataset follows the URL and company/cycle arrive as pills
+PASS step 2 - dataset=Banking, carried pills [["company","Fixture Bank"],["cycle","2023-2024"]], shelf shows ["AbcCompany = Fixture Bank▾","Election cycle = 2023-2024▾"]
+STEP 3: back to Graph: the selects still equal the URL
+PASS step 3 - Graph selections survived the round trip through Chart Studio
+STEP 4: reload the page: the scope comes back from the URL alone
+PASS step 4 - reload restored industry, company, cycle and candidate view
+STEP 5: Cross-reference asks the server for the industry the URL names
+PASS step 5 - request /api/cross-reference?industry=Banking and status "Newest run for Banking · Saved evidence refreshed. This page is read-only."
+STEP 6: change the Graph company select: the URL follows the control
+PASS step 6 - the company key left the URL when cleared and came back when chosen
+STEP 7: "Open in Chart Studio" carries the scope into the URL and switches the tab
+PASS step 7 - URL after the handoff: ?industry=Banking&cycle=2024&mode=activity&company=Fixture%20Bank#chart-studio
+STEP 8: save a view: its id lands in the URL, and that permalink opens it on a fresh page
+PASS step 8 - saved=833cd49c32f64a73a0446959a2ad7c83; the permalink page reported "Opened view "Scope test"." carrying [["company","Fixture Bank"],["cycle","2023-2024"]]; sheet tabs ["Sheet 1"]
+STEP 9: negative control: a permalink with mode=pac opens Graph on direct and reports nothing to the console
+PASS step 9 - /?industry=Banking&mode=pac#graph opened Graph on mode=direct with no page error
+STEP 10: ruling A(ii): the Candidate view select is visible once a report is chosen
+PASS step 10 - #graph-candidate-controls visible on the overview tab, offering "Downstream PAC activity"
+STEP 11: a permalink that names a cycle is not overridden by latest=1
+PASS step 11 - request /api/graph?id=published-reports&industry=Banking&company=&tier=&cycle=2022&funding=all&mode=direct&direction=Support&category=&recipient=, select 2022, URL keeps cycle=2022
+STEP 12: the first edit after opening a saved view drops saved= so a reload cannot overwrite the edit
+PASS step 12 - edit dropped saved=, survived a reload, and the permalink still re-opens the view
+STEP 13: an industry with no cross-reference run says so, rather than "Latest run"
+PASS step 13 - status "No cross-reference run for Banking · Saved evidence refreshed. This page is read-only."
+ALL 13 STEPS PASSED
+browser.close() exceeded its 20000ms bound
+
+node tests\test_graph_lazy_tables_browser.cjs  (exit 0)
+
+{"fixtureRows":10012,"render":[{"milliseconds":73.59999999403954,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42},{"milliseconds":21.5,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42},{"milliseconds":18.099999994039536,"tableRows":0,"createdTableRows":0,"descendants":349,"marks":42}]}
+✔ closed Graph tables are deferred without losing rows, callbacks or exports (131909.9364ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 131920.279
+
+node tests\test_studio_industry_browser.cjs  (exit 0)
+
+      "sort": "none",
+      "showLabels": false,
+      "fit": "standard"
+    }
+  ],
+  "active": 0
+}
+PASS step 9 - both on-disk view files are valid JSON and printed above verbatim
+STEP 10: final check: zero pageerror entries
+PASS step 10 - zero pageerror entries across the whole run
+ALL 10 STEPS PASSED
+browser.close() exceeded its 10000ms bound
+
+node tests\test_console_browser.cjs  (exit 0)
+
+Browser checks passed: Graph guided scopes, JFC, levels, direct/downstream separation, exports, Advanced charts, freshness disclosures, responsive sidebar, skip link, keyboard tabs and local requests only.
+
+Final working-tree state of the S5 client files:
+
+ mentat/app/app.js                     |   4 ++
+ mentat/app/chart-studio.js            | 113 ++++++++++++++++++++++++++++++++--
+ mentat/app/cross-reference.js         |  40 +++++++++++-
+ mentat/app/graph.js                   |  65 +++++++++++++++++--
+ mentat/app/index.html                 |   2 +-
+ mentat/tests/test_console_browser.cjs |   1 +
+ 6 files changed, 209 insertions(+), 16 deletions(-)
+warning: in the working copy of 'mentat/app/app.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/app/cross-reference.js', LF will be replaced by CRLF the next time Git touches it
+
+server.py (expected: clean; S5's one line is in HEAD a565216bf):
+(clean)
+
+
+================================================================================
+CLOSE-OUT (2026-09-17)
+================================================================================
+
+--------------------------------------------------------------------------------
+1. THE S0 KNOWN-RED IN test_console_browser.cjs WAS A RACE, AND IT IS CLOSED
+--------------------------------------------------------------------------------
+The verifier sweep (receipts/S5_verifier_sweep.txt) reported 9/10 browser suites
+with test_console_browser.cjs red, and its failure detail truncates before the
+assertion. Reproduced here rather than assumed:
+
+    AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+    'false' !== 'true'
+
+        at C:\Users\pgoff\Mentat\mentat\tests\test_console_browser.cjs:196:12
+      actual: 'false', expected: 'true'
+
+Line 196 asserts [data-run-group=history] has aria-pressed === 'true', straight
+after the #tab-collection click at :195. That attribute is set by
+renderRunLibrary() (app.js:217-227), which runs only after
+mentat:view -> poll() -> refreshRuns() -> fetch('/api/runs?include_archived=1')
+(app.js:252) comes back. No wait sat between the click and the read.
+
+Evidence that it is a race and not an S5 defect:
+  - Same bytes, four runs: PASS, PASS, FAIL, plus the sweep's FAIL under load.
+  - S5 adds no request on that path; its app.js hunk is a comment.
+  - runGroup is a module variable in app.js, not URL state; nothing in the scope
+    module can reach it.
+
+Fix (non-owned edit 2), tests/test_console_browser.cjs:196, using the file's own
+idiom from :162 and :173, assertion unchanged:
+
+    await page.waitForFunction(()=>document.querySelector('[data-run-group=history]')?.getAttribute('aria-pressed')==='true');
+
+After the fix, two consecutive runs: exit 0 and exit 0.
+
+--------------------------------------------------------------------------------
+2. BUILD STAMP
+--------------------------------------------------------------------------------
+From mentat/app:
+  python -c "import server; print(server.CODE_TREE_SHA256, server.ASSET_TREE_SHA256)"
+
+  code   491a0d4680824a3e561ad9e0ddbff264c42ee58bf3d1e2480d12fba117a66087
+  assets 9350a96481e14c24e0058e24fe12d0907e7f2d754e9b35ef6caefd2d7600773c
+
+Read this with two caveats, both measured:
+
+  a. The code stamp is NOT S4's 5f7da2d1... and S5 is not why. code_files()
+     globs every *.py in mentat/app, and S5 added and changed no .py at all. The
+     drift comes from S3d's committed server.py and evidence_csv.py (a565216bf).
+  b. It also includes foreign UNCOMMITTED .py edits that are in this tree right
+     now (graph_data.py, report_insights.py), so this pair will NOT reproduce
+     from a clean checkout of HEAD plus the S5 patch alone. The assets stamp is
+     S5's to own - scope.js is a new STATIC_ASSETS entry and index.html,
+     graph.js, chart-studio.js and cross-reference.js all changed - and it is the
+     reason a restart is required before judging anything in the browser.
+
+--------------------------------------------------------------------------------
+3. PATCH
+--------------------------------------------------------------------------------
+Cut after: git -C C:\Users\pgoff\Mentat log --oneline -1
+  a565216bf Cut console startup to about a second and read workbooks through calamine
+
+  patches/S5_url_scope.patch
+  15 files, 2702 insertions(+), 28 deletions(-)
+
+  git apply --stat                         lists all 15 files
+  git apply --cached --check               exit 0   <- what Paul runs
+  git apply --check --reverse              exit 0   (working tree)
+  git apply --cached --check --reverse     exit 1   EXPECTED: the seven new files
+                                                    do not exist in the index yet,
+                                                    so they cannot be reverse-removed
+                                                    from it. Not a defect.
+  no server.py / graph_data.py / fec_beneficiary.R hunk header (38 headers checked)
+
+A DEFECT IN THE FIRST CUT, recorded because it would have been invisible in the
+commit. The cutter captured `git diff` through subprocess(text=True), which
+decodes with the locale encoding - cp1252 on this machine - so every em dash,
+middle dot and ellipsis came back as mojibake and re-encoding to UTF-8 changed
+the bytes. `git apply --cached --check` refused exactly three files:
+HANDOFF.md:207, chart-studio.js:335 and graph.js:58 - the three whose changed
+lines carry non-ASCII. Each of those files' diffs applied cleanly on its own,
+which is what made the cause visible: the corruption was in the cutter, not the
+diff. The cutter now works in bytes end to end and the checks above are its
+output. Anyone cutting a patch in this repo from python should do the same.
+
+REMINDER FOR WHOEVER COMMITS: the repo-root .gitignore ignores *.json (:6) and
+*.txt (:21), so contracts/url_scope.json, receipts/S5_phase1-3.txt and
+receipts/S5_verifier_sweep.txt are ignored files. `git apply --cached` from this
+patch stages them anyway (that is how S4's contracts went in); a plain `git add`
+will not.

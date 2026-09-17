@@ -1,0 +1,316 @@
+{
+  "contract": "url_scope",
+  "version": 1,
+  "owner": "S5",
+  "produced_by": [
+    "mentat/app/scope.js:write",
+    "mentat/app/graph.js:writeScope (called from refresh(), the one path every Graph control change reaches)",
+    "mentat/app/chart-studio.js:selectContributionDataset (industry)",
+    "mentat/app/chart-studio.js:saveViewNamed (saved, on a successful save)",
+    "mentat/app/chart-studio.js:openView (saved, on a successful open)",
+    "mentat/app/chart-studio.js:#graph-open-builder onclick (industry, company, cycle)"
+  ],
+  "consumed_by": [
+    "mentat/app/scope.js:read",
+    "mentat/app/scope.js:parse",
+    "mentat/app/graph.js:applyUrlScope (after loadCatalog fills the selects)",
+    "mentat/app/chart-studio.js:loadContributions (industry, company, cycle, saved)",
+    "mentat/app/cross-reference.js:refresh (industry -> GET /api/cross-reference?industry=)",
+    "S6 (inherits this vocabulary for the pane model: evidence, id, committee, offset, limit)"
+  ],
+  "description": "The console's URL scheme. The hash names the tab (app.js showView) and the query string carries the scope, so a permalink, a reload and a tab switch are one operation. Values are encodeURIComponent-encoded and decoded with URLSearchParams; keys are plain. write() merges into the live query: an empty value removes its key, unknown keys are preserved in place, existing keys keep their order and new keys append. A value write() would refuse is never put in the URL, so anything read() rejects could only have been typed by hand. Tab switches stay on history.replaceState (Paul's ruling C); pushState is never used. Orientation only - the examples are the contract.",
+  "keys": {
+    "industry": {
+      "value": "The published industry label exactly as the snapshot registry lists it (S4 HANDOFF: 'Credit Union', 'Property & Casualty Insurance'). Any non-empty string; the label, never the slug. URL-encoded, so '&' survives.",
+      "writers": [
+        "mentat/app/graph.js (industry select)",
+        "mentat/app/chart-studio.js (dataset picker, Open in Chart Studio)"
+      ],
+      "readers": [
+        "mentat/app/graph.js",
+        "mentat/app/chart-studio.js",
+        "mentat/app/cross-reference.js"
+      ]
+    },
+    "company": {
+      "value": "Company name as the Graph company select spells it. Any non-empty string.",
+      "writers": [
+        "mentat/app/graph.js (company select)",
+        "mentat/app/chart-studio.js (Open in Chart Studio)"
+      ],
+      "readers": [
+        "mentat/app/graph.js",
+        "mentat/app/chart-studio.js (carried filter pill)"
+      ]
+    },
+    "cycle": {
+      "value": "Election-cycle END year, four digits, as Graph spells it (2024). Chart Studio translates it to the index's pair spelling with chart-studio-core.js carriedFilterValue('cycle', value).",
+      "writers": [
+        "mentat/app/graph.js (cycle select)",
+        "mentat/app/chart-studio.js (Open in Chart Studio)"
+      ],
+      "readers": [
+        "mentat/app/graph.js",
+        "mentat/app/chart-studio.js (carried filter pill)"
+      ]
+    },
+    "mode": {
+      "value": "One of direct, activity, estimates - the #graph-mode option values. 'direct' is the default and is removed from the URL rather than written.",
+      "writers": [
+        "mentat/app/graph.js (Candidate view select)"
+      ],
+      "readers": [
+        "mentat/app/graph.js"
+      ]
+    },
+    "direction": {
+      "value": "A #graph-direction option value. 'Support' is the default and is removed.",
+      "writers": [
+        "mentat/app/graph.js"
+      ],
+      "readers": [
+        "mentat/app/graph.js"
+      ]
+    },
+    "tier": {
+      "value": "A #graph-tier option value (Chief, Middle-Management, Employees, Unknown). Empty means all levels and is removed.",
+      "writers": [
+        "mentat/app/graph.js"
+      ],
+      "readers": [
+        "mentat/app/graph.js"
+      ]
+    },
+    "funding": {
+      "value": "A #graph-funding option value. 'all' is the default and is removed.",
+      "writers": [
+        "mentat/app/graph.js"
+      ],
+      "readers": [
+        "mentat/app/graph.js"
+      ]
+    },
+    "category": {
+      "value": "The recipient-type drill-down id Graph holds in its module-level `category`.",
+      "writers": [
+        "mentat/app/graph.js"
+      ],
+      "readers": [
+        "mentat/app/graph.js"
+      ]
+    },
+    "recipient": {
+      "value": "The organization drill-down id Graph holds in its module-level `recipient`.",
+      "writers": [
+        "mentat/app/graph.js"
+      ],
+      "readers": [
+        "mentat/app/graph.js"
+      ]
+    },
+    "saved": {
+      "value": "A 32-character lowercase hexadecimal saved-view id, the same shape server.py save_view() mints (uuid4().hex) and get_view() demands (re.fullmatch(r'[a-f0-9]{32}')).",
+      "writers": [
+        "mentat/app/chart-studio.js (saveViewNamed success, openView)"
+      ],
+      "readers": [
+        "mentat/app/chart-studio.js (loadContributions opens it through openability())"
+      ]
+    },
+    "studioPane": {
+      "value": "PRE-EXISTING, unchanged by S5: B, C or D selects a Chart Studio comparison pane's localStorage store (chart-studio.js:17). scope.js never writes it and never removes it - it is one of the unknown keys write() preserves in place.",
+      "writers": [
+        "the reader, by hand, and chart-comparison.js's pane frames"
+      ],
+      "readers": [
+        "mentat/app/chart-studio.js:17"
+      ]
+    }
+  },
+  "reserved": [
+    "evidence",
+    "id",
+    "committee",
+    "offset",
+    "limit"
+  ],
+  "reserved_note": "S6's pane model owns these keys. S5 writes none of them and its write() merge preserves any that are present, exactly as it preserves studioPane.",
+  "examples": [
+    {
+      "name": "graph_permalink_downstream_activity",
+      "why": "Ruling A(ii): mode=activity is linkable, and the Candidate view select is visible as soon as a report is chosen.",
+      "url": "/?industry=Banking&company=JPMorgan%20Chase&cycle=2024&mode=activity#graph",
+      "view": "graph",
+      "scope": {
+        "industry": "Banking",
+        "company": "JPMorgan Chase",
+        "cycle": "2024",
+        "mode": "activity"
+      }
+    },
+    {
+      "name": "chart_studio_permalink",
+      "why": "Company and cycle arrive as carried filter pills through pendingScope/applyGraphScope.",
+      "url": "/?industry=Credit%20Union&company=Navy%20Federal&cycle=2024#chart-studio",
+      "view": "chart-studio",
+      "scope": {
+        "industry": "Credit Union",
+        "company": "Navy Federal",
+        "cycle": "2024"
+      }
+    },
+    {
+      "name": "saved_view_permalink",
+      "why": "saved= opens one saved view through the existing openability()/openView() path.",
+      "url": "/?industry=Banking&saved=0123456789abcdef0123456789abcdef#chart-studio",
+      "view": "chart-studio",
+      "scope": {
+        "industry": "Banking",
+        "saved": "0123456789abcdef0123456789abcdef"
+      }
+    },
+    {
+      "name": "cross_reference_permalink",
+      "why": "S4's GET /api/cross-reference?industry=<label> selects the newest run for a label.",
+      "url": "/?industry=Banking#cross-reference",
+      "view": "cross-reference",
+      "scope": {
+        "industry": "Banking"
+      }
+    },
+    {
+      "name": "ampersand_label",
+      "why": "A published label with '&' in it must survive the round trip; this is why values are encodeURIComponent'd rather than handed to URLSearchParams.toString().",
+      "url": "/?industry=Property%20%26%20Casualty%20Insurance#graph",
+      "view": "graph",
+      "scope": {
+        "industry": "Property & Casualty Insurance"
+      }
+    },
+    {
+      "name": "graph_filters_full",
+      "why": "Every Graph filter key at once, in the serialization order scope.js writes.",
+      "url": "/?industry=Banking&company=JPMorgan%20Chase&cycle=2024&mode=activity&direction=Oppose&tier=Chief&funding=personal&category=Candidate&recipient=C00401224#graph",
+      "view": "graph",
+      "scope": {
+        "industry": "Banking",
+        "company": "JPMorgan Chase",
+        "cycle": "2024",
+        "mode": "activity",
+        "direction": "Oppose",
+        "tier": "Chief",
+        "funding": "personal",
+        "category": "Candidate",
+        "recipient": "C00401224"
+      }
+    },
+    {
+      "name": "write_merge_remove_on_empty_and_preserve_unknown",
+      "why": "The two write() rules in one example: an empty value removes its key, an unknown key (studioPane, S6's future keys) is preserved untouched and keeps its place. Existing keys keep their order; a new key appends.",
+      "write": {
+        "before": "/?industry=Banking&company=X&studioPane=B#graph",
+        "partial": {
+          "company": "",
+          "cycle": "2022"
+        },
+        "after": "/?industry=Banking&studioPane=B&cycle=2022#graph"
+      }
+    }
+  ],
+  "negative_controls": [
+    {
+      "why": "mode=pac is not a #graph-mode option value. A bad permalink must still open the tab, so the key is dropped and reported rather than thrown.",
+      "url": "/?industry=Banking&mode=pac#graph",
+      "view": "graph",
+      "expected": {
+        "scope": {
+          "industry": "Banking"
+        },
+        "invalid": [
+          {
+            "key": "mode",
+            "value": "pac",
+            "reason": "mode must be one of direct, activity, estimates"
+          }
+        ]
+      }
+    },
+    {
+      "why": "A two-digit cycle is not the four-digit end year Graph spells.",
+      "url": "/?industry=Banking&cycle=24#graph",
+      "view": "graph",
+      "expected": {
+        "scope": {
+          "industry": "Banking"
+        },
+        "invalid": [
+          {
+            "key": "cycle",
+            "value": "24",
+            "reason": "cycle must be a four-digit election-cycle end year"
+          }
+        ]
+      }
+    },
+    {
+      "why": "A non-numeric cycle is refused by the same rule, so the shape of the refusal cannot depend on the value happening to be digits.",
+      "url": "/?industry=Banking&cycle=abcd#graph",
+      "view": "graph",
+      "expected": {
+        "scope": {
+          "industry": "Banking"
+        },
+        "invalid": [
+          {
+            "key": "cycle",
+            "value": "abcd",
+            "reason": "cycle must be a four-digit election-cycle end year"
+          }
+        ]
+      }
+    },
+    {
+      "why": "An explicitly blank industry is not a scope. It is dropped and reported; the rest of the URL still reads.",
+      "url": "/?industry=&company=JPMorgan%20Chase#graph",
+      "view": "graph",
+      "expected": {
+        "scope": {
+          "company": "JPMorgan Chase"
+        },
+        "invalid": [
+          {
+            "key": "industry",
+            "value": "",
+            "reason": "a blank value names no scope, so the key is dropped"
+          }
+        ]
+      }
+    },
+    {
+      "why": "saved=xyz is not 32 hex, which is exactly what server.py get_view() refuses. The client must not fire a request the server will answer 400 for.",
+      "url": "/?industry=Banking&saved=xyz#chart-studio",
+      "view": "chart-studio",
+      "expected": {
+        "scope": {
+          "industry": "Banking"
+        },
+        "invalid": [
+          {
+            "key": "saved",
+            "value": "xyz",
+            "reason": "saved must be a 32-character hexadecimal saved-view id"
+          }
+        ]
+      }
+    },
+    {
+      "why": "The teeth of the other five: a URL with no query at all invents nothing. An empty scope and an empty invalid[] - not a default industry, not a default mode. This is the control that fails if read() ever starts guessing values the reader did not put in the URL.",
+      "url": "/#graph",
+      "view": "graph",
+      "expected": {
+        "scope": {},
+        "invalid": []
+      }
+    }
+  ]
+}

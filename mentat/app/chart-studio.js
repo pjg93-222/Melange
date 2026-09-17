@@ -55,6 +55,9 @@
   let recordOffset = 0, recordSelection = null, recordRevision = 0, exporting = false;
   let pageMembersKey = '';
   let pendingScope = null, appliedScope = null;
+  // The saved-view id currently in the URL, and the flag that lets an open
+  // install its own sheets without the edit-detector treating them as an edit.
+  let openedSaved = '', holdingSavedId = false;
   let inspectorTab = 'marks', overviewMode = false, overviewRevision = 0, overviewCompany = '';
   let queryRequests = 0;
   // The Data source panel opens on arrival and folds itself away once, after
@@ -136,6 +139,7 @@
     future = [];
     const memory = focusMemory();
     change();
+    viewEdited();
     persist();
     renderAll();
     focusRestore(memory);
@@ -147,6 +151,7 @@
     const memory = focusMemory();
     sheets = snapshot.sheets;
     active = Math.min(snapshot.active, sheets.length - 1);
+    viewEdited();
     persist();
     renderAll();
     focusRestore(memory);
@@ -335,7 +340,9 @@
     const ticket=++revision;failure('');sourceReady=false;status('Reading verified contribution fields…');
     try {
       if(!contributionCatalog||refresh){const [session,catalog]=await Promise.all([contributionAPI('session'),contributionAPI('catalog')]);if(ticket!==revision||!verified())return;contributionToken=session.token;contributionCatalog=catalog;try{if(Array.isArray(session.industries))industries=core.parseSnapshotRegistry(session.industries);}catch(error){industries=null;}}
-      const previous=el('dataset').value||new URLSearchParams(location.search).get('industry')||document.getElementById('graph-industry')?.value;
+      // The permalink's industry, read through the one module that owns the URL
+      // vocabulary (contracts/url_scope.json) instead of a second raw reader.
+      const previous=el('dataset').value||globalThis.MentatScope?.read().industry||document.getElementById('graph-industry')?.value;
       fill(el('dataset'),contributionCatalog.datasets.map(d=>[d.id,d.label||d.id]));
       // An unavailable report carries the reason on its own option, so it is
       // readable before it is chosen and not only after a failure.
@@ -345,8 +352,12 @@
       if(!dataset())throw new Error(['No verified sources are available in the configured report folder.',
         ...contributionCatalog.datasets.filter(d=>d.message).map(d=>(d.label||d.id)+': '+d.message)].join(' '));
       selectContributionDataset();
+      // A permalink arrives with no pendingScope, so the URL supplies one; a
+      // click through from Graph already set it and is left alone.
+      if(!pendingScope)pendingScope=urlGraphScope();
       applyGraphScope();
       settleSource();
+      await openSavedFromUrl();
     }catch(error){if(ticket===revision){status('Verified data unavailable.');failure(error.message);renderDatasetMessage();}}
   }
   function selectContributionDataset() {
@@ -356,6 +367,11 @@
     data={columns:contributions.fields(d.fields||contributionCatalog.fields,basis()),rows:[],row_count:0,header_row:0,sha256:d.provenance.workbook_sha256,sheet:'Verified source observations',note:d.provenance.scope};
     if(!restored){sheet().columns=[{column:data.columns.findIndex(f=>f.id==='company'),aggregation:'sum'}];sheet().rows=[{column:data.columns.findIndex(f=>f.id==='amount'),aggregation:'sum'}];sheet().marks.type='bar';}
     persist();renderAll();
+    // Four call sites reach this function - the Data panel picker, the shelf
+    // source buttons, openView() and the permalink path - and every one of them
+    // is a producer of the URL's `industry`, so the write lives here rather than
+    // at four places that could drift apart (DE-021).
+    globalThis.MentatScope?.write({industry:d.industry||d.id||''});
   }
   function syncContributionControls() {
     const on=verified();el('contribution-source').hidden=!on;el('worksheet-source').hidden=on;el('verified-summary').hidden=!on;el('result-controls').hidden=!on;
@@ -372,6 +388,51 @@
     el('bin-width-label').hidden=sheet().marks.type!=='histogram';el('bin-width').value=sheet().params.binWidth||100;
     const map=sheet().map||{layers:['states','districts'],congress:'119'};
     el('congress').value=map.congress;for(const [id,layer]of [['states','states'],['districts','districts'],['zips','zip_areas']])el('layer-'+id).checked=map.layers.includes(layer);
+  }
+  // A permalink's company and cycle become the same carried pills the Graph
+  // handoff produces, so applyGraphScope() below stays the only consumer and
+  // one code path renders both. Graph spells a cycle by its end year and the
+  // verified index by the pair it covers, so the same translation the handoff
+  // uses is applied here (chart-studio-core.js carriedFilterValue).
+  function urlGraphScope() {
+    const url=globalThis.MentatScope?.read();
+    if(!url||(!url.company&&!url.cycle))return null;
+    const filters=[];
+    if(url.company)filters.push({field:'company',value:url.company});
+    if(url.cycle)filters.push({field:'cycle',value:core.carriedFilterValue('cycle',url.cycle)});
+    return {industry:url.industry||'',filters,notCarried:[]};
+  }
+  // The saved-view id in the URL. A view that lives only in this tab
+  // (viewsMemory, id "memory-...") is not addressable, so it is never written:
+  // writing it would silently remove a real id that was already there.
+  function rememberSavedView(id) {
+    const value=String(id||'');
+    if(!/^[a-f0-9]{32}$/.test(value))return;
+    openedSaved=value;
+    globalThis.MentatScope?.write({saved:value});
+  }
+  // The first change to the working sheets after an open or a save. From here
+  // the id in the URL no longer describes what is on screen, and leaving it
+  // there would let the next reload re-open the saved view over the edit.
+  function viewEdited() {
+    if (holdingSavedId || !openedSaved) return;
+    openedSaved = '';
+    globalThis.MentatScope?.write({saved: ''});
+  }
+  // A saved-view permalink. The list is the cheapest way to get the view's
+  // sourceKey, which openability() needs before openView() will touch it;
+  // openView() fetches the sheets itself. A link to a view this console does
+  // not have says so rather than opening the wrong thing.
+  async function openSavedFromUrl() {
+    const id=globalThis.MentatScope?.read().saved;
+    if(!id||id===openedSaved)return;
+    openedSaved=id;
+    let views=[];
+    try { views=(await getJSON('/api/studio/views')).views||[]; }
+    catch (error) { failure(viewMessage(error)+' The saved view in this link could not be listed.'); return; }
+    const view=views.find(item=>item.id===id);
+    if(!view){failure('This console has no saved view '+id+'.');return;}
+    await openView(view);
   }
   // Carried Graph scope becomes ordinary filter pills, so the reader can see
   // and remove every one of them. A field this dataset does not have is
@@ -1887,6 +1948,7 @@
     failure('');
     try {
       const body = await api('/api/studio/views', record);
+      rememberSavedView(body && body.id);
       status('Saved view "' + name + '" \u00b7 ' + record.sheets.length +
         ' sheet' + (record.sheets.length === 1 ? '' : 's') + '.');
       return body;
@@ -1941,11 +2003,15 @@
       el('dataset').value = state.dataset;
       selectContributionDataset();
     }
-    commit(() => {
-      sheets = full.sheets.map(s => core.migrateSheet(Object.assign(core.createSheet(s.name, s.id), s)));
-      active = Math.min(Math.max(0, full.active | 0), sheets.length - 1);
-      dataSourceTab = false;
-    });
+    holdingSavedId = true;
+    try {
+      commit(() => {
+        sheets = full.sheets.map(s => core.migrateSheet(Object.assign(core.createSheet(s.name, s.id), s)));
+        active = Math.min(Math.max(0, full.active | 0), sheets.length - 1);
+        dataSourceTab = false;
+      });
+    } finally { holdingSavedId = false; }
+    rememberSavedView(full.id);
     status('Opened view "' + full.name + '".');
   }
 
@@ -2588,10 +2654,24 @@
     setInspectorTab('filters');
   };
 
+  // An industry the URL changed while this panel was hidden, applied the moment
+  // it is shown. Held rather than dropped when the panel is not ready yet, so a
+  // change that arrives during the first load is not lost.
+  let pendingIndustry = '';
+  function followScopeIndustry() {
+    if (!pendingIndustry || !loadedSources || !verified() || !contributionCatalog) return;
+    const label = pendingIndustry;
+    if (label === el('dataset').value) { pendingIndustry = ''; return; }
+    if (!(contributionCatalog.datasets || []).some(entry => entry.id === label && entry.available)) { pendingIndustry = ''; return; }
+    pendingIndustry = '';
+    el('dataset').value = label;
+    selectContributionDataset();
+  }
   function activate() {
     const view = document.getElementById('view-chart-studio');
     if (!view || view.hidden) { stopPlay(); return; }
     if (!loadedSources) { loadedSources = true; if(verified())loadContributions();else loadRuns(); }
+    followScopeIndustry();
   }
   // The Graph tab's "Create chart" button now opens Chart Studio; the classic
   // dialog stays one click away in the Chart Studio toolbar.
@@ -2632,10 +2712,31 @@
     openBuilder.removeAttribute('aria-haspopup');
     openBuilder.onclick = () => {
       pendingScope = graphScope();
+      // The URL carries Graph's own spelling of the cycle (the end year, per
+      // contracts/url_scope.json); the carried pill keeps the verified index's
+      // pair spelling. One scope, two vocabularies, and the contract says which
+      // is which - so the scope is read from the Graph controls, not from the
+      // already-translated pendingScope.
+      const read = id => (document.getElementById('graph-' + id) || {}).value || '';
+      globalThis.MentatScope?.write({industry: pendingScope.industry, company: read('company'), cycle: read('cycle')});
       if (typeof showView === 'function') showView('chart-studio'); else location.hash = '#chart-studio';
       if (loadedSources && verified()) applyGraphScope();
     };
   }
+  // Back, or a scope written by another view in this document, can change the
+  // industry in the URL. Chart Studio follows it, but only when it disagrees
+  // with the picker, so its own write can never loop back into a second
+  // selection - and only once this panel is on screen, because re-selecting a
+  // dataset fires a verified query and nobody asked for one behind a hidden
+  // tab. A dataset this console does not have available is left alone;
+  // openability() and the Data panel already say why.
+  globalThis.MentatScope?.subscribe(next => {
+    const label = (next && next.industry) || '';
+    if (!label || label === el('dataset').value) return;
+    pendingIndustry = label;
+    const panel = document.getElementById('view-chart-studio');
+    if (panel && !panel.hidden) followScopeIndustry();
+  });
   window.addEventListener('mentat:view', activate);
   window.addEventListener('hashchange', activate);
   try { el('show-hidden').checked = localStorage.getItem('mentat-chart-studio-show-identifiers') === '1'; } catch {}

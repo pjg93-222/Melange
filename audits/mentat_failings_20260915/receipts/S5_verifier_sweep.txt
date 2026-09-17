@@ -1,0 +1,136 @@
+S5 VERIFIER SWEEP REPORT
+================================================================================
+Generated: 2026-09-17T01:45:00
+Worktree: C:\Users\pgoff\Mentat
+Branch: claude/multi-industry-snapshot-support-7c95a9
+================================================================================
+
+A. GIT LOG AND STATUS
+--------------------------------------------------------------------------------
+Command: git log --oneline -1
+Output:  a565216bf Cut console startup to about a second and read workbooks through calamine
+Exit Code: 0
+
+Command: git status --short -- mentat/app mentat/tests mentat/app/tests audits/mentat_failings_20260915
+Output (excluding .bak files):
+M audits/mentat_failings_20260915/HANDOFF.md
+ M audits/mentat_failings_20260915/contracts/README.md
+M mentat/app/app.js
+M mentat/app/chart-studio.js
+M mentat/app/cross-reference.js
+M mentat/app/desktop/Launcher.cs
+M mentat/app/graph.css
+M mentat/app/graph.js
+M mentat/app/graph_data.py
+M mentat/app/index.html
+M mentat/app/report_insights.py
+M mentat/app/style.css
+?? mentat/app/scope.js (NEW FILE)
+(+ 26 test files modified)
+
+Total uncommitted modified files: 39 (excluding backups)
+Exit Code: 0
+
+B. NODE SYNTAX CHECKS
+--------------------------------------------------------------------------------
+Command: node --check <file> (7 files)
+
+Results:
+  mentat/app/scope.js                : PASS
+  mentat/app/graph.js                : PASS
+  mentat/app/chart-studio.js         : PASS
+  mentat/app/cross-reference.js      : PASS
+  mentat/app/app.js                  : PASS
+  mentat/app/tests/scope.test.js     : PASS
+  mentat/tests/test_navigation_scope_browser.cjs : PASS
+
+Exit Code: 0 (all files)
+Wall Time: 589ms
+
+C. NODE TEST RUNNER
+--------------------------------------------------------------------------------
+Command: node --test "app/tests/**/*.test.js" (from mentat/ dir)
+
+Results:
+  ✔ tests     151
+  ✔ suites    0
+  ✔ pass      151
+  ✖ fail      0
+  - cancelled 0
+  - skipped   0
+  - duration_ms 775.5891
+
+Exit Code: 0
+Wall Time: 962ms
+
+D. BROWSER TESTS (Sequential)
+--------------------------------------------------------------------------------
+Command: node tests/<file> (10 files, sequential)
+
+Results:
+  test_navigation_scope_browser.cjs        : PASS    (77440ms, exit 0)
+  test_console_browser.cjs                 : FAIL    (84910ms, exit 1)
+  test_app_lazy_startup_browser.cjs        : PASS    (195726ms, exit 0)
+  test_graph_lazy_tables_browser.cjs       : PASS    (118317ms, exit 0)
+  test_studio_industry_browser.cjs         : PASS    (40217ms, exit 0)
+  test_studio_data_source_browser.cjs      : PASS    (24857ms, exit 0)
+  test_chart_builder_browser.cjs           : PASS    (117835ms, exit 0)
+  test_chart_comparison_browser.cjs        : PASS    (84649ms, exit 0)
+  test_contribution_studio_state_browser.cjs : PASS  (143373ms, exit 0)
+  test_studio_ride1_browser.cjs            : PASS    (112477ms, exit 0)
+
+Summary:
+  - Passed: 9/10
+  - Failed: 1/10
+  - Total execution time: 899.6 seconds
+
+Known to skip per plan: test_contribution_export_browser.cjs,
+  test_cross_reference_view.cjs, test_studio_briefing_tray_browser.cjs,
+  test_evidence_csv_browser.cjs
+
+FAILURE DETAIL: test_console_browser.cjs
+  First assertion error line: AssertionError [ERR_ASSERTION]:
+    Expected values to be strictly equal:
+
+E. PYTHON SMOKE TESTS
+--------------------------------------------------------------------------------
+Command: python -m unittest tests.test_studio_views tests.test_studio_views_industry
+         tests.test_cross_reference_data tests.test_industry_routes -v
+
+Results:
+  Ran 55 tests in 9.386s
+  OK (skipped=1)
+  Exit Code: 0
+Wall Time: 26655ms
+
+F. JSON VALIDATION
+--------------------------------------------------------------------------------
+Command: python -c "import json;json.load(open(r'...url_scope.json',encoding='utf-8'))"
+File: C:\Users\pgoff\Mentat\audits\mentat_failings_20260915\contracts\url_scope.json
+
+Result: VALID
+Exit Code: 0
+Wall Time: 172ms
+
+================================================================================
+VERDICT TABLE
+================================================================================
+Suite                              Result      Evidence
+--------------------------------------------------------------------------------
+A. Git Status                      PASS        39 files modified, exit code 0
+B. Node Syntax Checks              PASS        7/7 files pass, exit code 0
+C. Node Test Runner (151 tests)    PASS        151 pass, 0 fail, exit code 0
+D. Browser Tests (10 planned)      FAIL        test_console_browser.cjs exit 1; 9 pass
+E. Python Smoke Tests (55)         PASS        54 pass + 1 skip, exit code 0
+F. JSON Validation                 PASS        url_scope.json valid, exit code 0
+================================================================================
+
+BLOCKING ISSUES
+--------------------------------------------------------------------------------
+CRITICAL: test_console_browser.cjs failed with exit code 1
+  Location: C:\Users\pgoff\Mentat\mentat\tests\test_console_browser.cjs
+  Execution time: 84910ms
+  Failure type: AssertionError [ERR_ASSERTION]
+  Message: Expected values to be strictly equal:
+  Impact: Blocks S5 merge (1 of 10 browser tests failed)
+

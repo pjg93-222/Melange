@@ -47,6 +47,7 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     let extraSnapshot=false;
     await page.route('**/api/evidence?*',route=>route.fulfill({json:savedEvidence}));
     await page.route('**/api/evidence',route=>route.fulfill({json:{snapshots:[{id:'fixture-evidence',company:savedEvidence.company,cycles:[2024,2026],retrieved_at:savedEvidence.retrieved_at},...(extraSnapshot?[{id:'new-evidence',company:'Another Company',cycles:[2026]}]:[])]}}));
+    await page.route('**/api/cross-reference?*',route=>route.fulfill({json:crossReference}));
     await page.route('**/api/cross-reference',route=>route.fulfill({json:crossReference}));
     await page.goto(origin+'/');
     assert.equal(await page.locator('#tab-loading').getAttribute('aria-selected'),'true');
@@ -192,6 +193,10 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     assert.equal(await page.locator('#view-evidence').getAttribute('role'),'tabpanel');
     await page.locator('#evidence-source').selectOption('snapshot');
     await page.locator('#tab-collection').click();
+    // renderRunLibrary() (app.js:217-227) sets aria-pressed only after
+    // refreshRuns() -> /api/runs?include_archived=1 returns, so reading it
+    // straight after the click is a race: green warm, red under load.
+    await page.waitForFunction(()=>document.querySelector('[data-run-group=history]')?.getAttribute('aria-pressed')==='true');
     assert.equal(await page.locator('[data-run-group=history]').getAttribute('aria-pressed'),'true');
     await page.locator('[data-run-group=progress]').click();
     assert.equal(await page.locator('#runs').inputValue(),'');
