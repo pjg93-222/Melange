@@ -656,6 +656,247 @@ run_test("t11", function() {
   )
 })
 
+# ---------------------------------------------------------------------------
+# openFEC answers a large result set with pagination.is_count_exact FALSE and an
+# ESTIMATED count. Paul's rulings: "It should always be complete, no
+# misrepresentation" and "API count can change, it should always be verified".
+# An estimated count is a refusal to count, not a verdict on the data, so the
+# collector verifies the population another way - exhaustive date windows, and,
+# when the parent will not count either, the windows' own exact counts - instead
+# of failing the task. Nothing unverified is stored either way.
+# ---------------------------------------------------------------------------
+estimated_unit <- employer_unit("P1_employer:Acme:2024:ESTIMATED")
+
+estimated_page <- function(rows, count, exact, cursor = NULL) {
+  page <- ok_page(rows, count, cursor)
+  page$json$pagination$is_count_exact <- exact
+  page
+}
+
+# Windows 1..21 hold 100 rows each and window 22 holds 80: 2,180 verified ids.
+# Windows 23..26 are empty.
+estimated_windows <- function(index, seen) {
+  size <- if (index <= 21L) 100L else if (index == 22L) 80L else 0L
+  list(size = size, count = size, exact = TRUE)
+}
+
+# parent_count(seen) and window_count(index, seen) report what the API says on
+# the seen-th request for that query, so a probe can differ from the walk. The
+# parent's own page 1 is window 1's rows, as a live split's page 1 would be, so
+# no row observed before the split can go missing from the union.
+estimated_transport_factory <- function(prefix, parent_count, window_count, calls, cursors) {
+  function(specs, api_key, concurrency) {
+    lapply(specs, function(spec) {
+      index <- window_index(spec$id)
+      seen <- (calls[[spec$id]] %||% 0L) + 1L
+      calls[[spec$id]] <- seen
+      if (!is.null(spec$params$last_index)) {
+        cursors[[spec$id]] <- (cursors[[spec$id]] %||% 0L) + 1L
+      }
+      if (index == 0L) {
+        reported <- parent_count(seen)
+        rows <- lapply(1:100, function(row) fixture_row(sprintf("%s01-%04d", prefix, row)))
+        return(estimated_page(rows, reported$count, reported$exact, 1L))
+      }
+      reported <- window_count(index, seen)
+      rows <- if (!reported$size) list() else lapply(
+        seq_len(reported$size),
+        function(row) fixture_row(sprintf("%s%02d-%04d", prefix, index, row))
+      )
+      estimated_page(rows, reported$count, reported$exact, NULL)
+    })
+  }
+}
+
+estimated_per_window <- function(calls) {
+  vapply(sprintf("%s::window::%02d", estimated_unit$id, 1:26),
+    function(id) calls[[id]] %||% 0L, integer(1L))
+}
+
+run_test("t12", function() {
+  calls <- new.env(parent = emptyenv())
+  cursors <- new.env(parent = emptyenv())
+  result <- fec_api_collect_work_units(
+    list(estimated_unit), api_key = "fixture-key", concurrency = 6L,
+    transport = estimated_transport_factory(
+      "Q",
+      function(seen) {
+        if (seen == 1L) list(count = 2200L, exact = FALSE) else list(count = 2180L, exact = TRUE)
+      },
+      estimated_windows, calls, cursors
+    ),
+    sleep = no_sleep, jitter = no_jitter
+  )
+  state <- result$units[[estimated_unit$id]]
+  per_window <- estimated_per_window(calls)
+  stopifnot(
+    "an estimated count no longer fails the unit" = isTRUE(state$complete),
+    "coverage is verified" = isTRUE(state$coverage_verified),
+    "the union names its coverage method" =
+      identical(state$pages[[1L]]$coverage_method, "exhaustive_date_windows"),
+    "the union is the whole population" =
+      identical(as.integer(state$expected_count), 2180L),
+    "rows are the whole union" = identical(as.integer(state$rows_seen), 2180L),
+    "the union page holds every row" = identical(length(state$pages[[1L]]$rows), 2180L),
+    "no reconciliation pass was needed" = identical(result$reconcile_count, 0L),
+    "the parent was asked twice: the estimate and one fresh proof" =
+      identical(calls[[estimated_unit$id]], 2L),
+    "the parent was never re-walked as a cursor chain" =
+      identical(cursors[[estimated_unit$id]] %||% 0L, 0L),
+    "every window was walked exactly once" = all(per_window == 1L),
+    "1 estimate + 26 windows + 1 parent proof" = identical(result$request_count, 28L)
+  )
+})
+
+run_test("t13", function() {
+  calls <- new.env(parent = emptyenv())
+  cursors <- new.env(parent = emptyenv())
+  result <- fec_api_collect_work_units(
+    list(estimated_unit), api_key = "fixture-key", concurrency = 6L,
+    transport = estimated_transport_factory(
+      "R",
+      function(seen) list(count = 2190L + seen, exact = FALSE),
+      estimated_windows, calls, cursors
+    ),
+    sleep = no_sleep, jitter = no_jitter
+  )
+  state <- result$units[[estimated_unit$id]]
+  per_window <- estimated_per_window(calls)
+  stopifnot(
+    "a parent that will not count no longer fails the unit" = isTRUE(state$complete),
+    "coverage is verified" = isTRUE(state$coverage_verified),
+    "the population is the sum of the window counts" =
+      identical(as.integer(state$expected_count), 2180L),
+    "no reconciliation pass was needed" = identical(result$reconcile_count, 0L),
+    "the log names the window-sum mode" = any(grepl(
+      "verified against the sum of 26 exact window counts (parent count estimated)",
+      state$reconcile_log, fixed = TRUE
+    )),
+    "the estimated parent count was never treated as the population" =
+      !any(grepl("fresh parent count", state$reconcile_log, fixed = TRUE)),
+    "the parent was asked twice and never re-walked" =
+      identical(calls[[estimated_unit$id]], 2L) &&
+      identical(cursors[[estimated_unit$id]] %||% 0L, 0L),
+    "every window was walked once and proved once" = all(per_window == 2L),
+    "1 estimate + 26 windows + 1 parent probe + 26 window proofs" =
+      identical(result$request_count, 54L)
+  )
+})
+
+run_test("t14", function() {
+  calls <- new.env(parent = emptyenv())
+  cursors <- new.env(parent = emptyenv())
+  failure <- tryCatch({
+    fec_api_collect_work_units(
+      list(estimated_unit), api_key = "fixture-key", concurrency = 6L,
+      transport = estimated_transport_factory(
+        "S",
+        function(seen) list(count = 2190L + seen, exact = FALSE),
+        function(index, seen) {
+          reported <- estimated_windows(index, seen)
+          # Window 22 walked cleanly but will not count itself afterwards.
+          if (index == 22L && seen >= 2L) reported$exact <- FALSE
+          reported
+        },
+        calls, cursors
+      ),
+      sleep = no_sleep, jitter = no_jitter
+    )
+    ""
+  }, error = conditionMessage)
+  stopifnot(
+    "the window that would not count is named" =
+      grepl(paste0(estimated_unit$id, "::window::22"), failure, fixed = TRUE),
+    "the failure says that window's count was estimated" =
+      grepl("reported an estimated pagination.count", failure, fixed = TRUE),
+    "the failure names the population that cannot be verified" =
+      grepl(paste0("population of ", estimated_unit$id), failure, fixed = TRUE),
+    "the failure states nothing was stored" =
+      grepl("Nothing unverified was stored", failure, fixed = TRUE)
+  )
+})
+
+run_test("t15", function() {
+  # Negative control for t12's guard: a unit that already carries query filters
+  # has no date windows to split into, so the exact-count contract still fires
+  # and the response is still checkpointed for diagnosis.
+  filtered_unit <- employer_unit("P1_employer:Acme:2024:FILTERED")
+  filtered_unit$query_filters <- list(min_date = "01/01/2024", max_date = "12/31/2024")
+  saved <- list()
+  failure <- tryCatch({
+    fec_api_collect_work_units(
+      list(filtered_unit), api_key = "fixture-key", concurrency = 1L,
+      transport = function(specs, api_key, concurrency) {
+        lapply(specs, function(spec) {
+          estimated_page(
+            lapply(1:10, function(row) fixture_row(sprintf("U1-%04d", row))),
+            500L, FALSE, NULL
+          )
+        })
+      },
+      sleep = no_sleep, jitter = no_jitter,
+      page_callback = function(state, page) saved[[length(saved) + 1L]] <<- page
+    )
+    ""
+  }, error = conditionMessage)
+  stopifnot(
+    "a filtered unit has no date windows to split into" =
+      identical(length(fec_api_date_windows(filtered_unit)), 0L),
+    "the exact-count contract still fires" =
+      grepl("requires an exact nonnegative pagination.count", failure, fixed = TRUE),
+    "the failure names the unit" = grepl(filtered_unit$id, failure, fixed = TRUE),
+    "exactly one response was checkpointed for diagnosis" = identical(length(saved), 1L),
+    "the checkpointed page is not complete" = !isTRUE(saved[[1L]]$complete),
+    "the checkpoint names the validation failure" =
+      identical(saved[[1L]]$validation_failure, "exact_count_missing")
+  )
+})
+
+run_test("t16", function() {
+  calls <- new.env(parent = emptyenv())
+  cursors <- new.env(parent = emptyenv())
+  recollected <- character()
+  result <- fec_api_collect_work_units(
+    list(estimated_unit), api_key = "fixture-key", concurrency = 6L,
+    transport = estimated_transport_factory(
+      "V",
+      function(seen) list(count = 2190L + seen, exact = FALSE),
+      function(index, seen) {
+        # Window 22 was walked while it held 74 rows and grew to 80 afterwards.
+        if (index == 22L && seen == 1L) {
+          return(list(size = 74L, count = 74L, exact = TRUE))
+        }
+        estimated_windows(index, seen)
+      },
+      calls, cursors
+    ),
+    sleep = no_sleep, jitter = no_jitter,
+    reset_callback = function(state) recollected <<- c(recollected, state$unit$id)
+  )
+  state <- result$units[[estimated_unit$id]]
+  per_window <- estimated_per_window(calls)
+  stopifnot(
+    "the union published after the second pass" = isTRUE(state$complete),
+    "the population is the sum of the window counts" =
+      identical(as.integer(state$expected_count), 2180L),
+    "exactly one reconciliation pass" = identical(result$reconcile_count, 1L),
+    "the pass reason names the window-count sum" = any(grepl(
+      "windows hold 2174 rows against a window-count sum of 2180",
+      state$reconcile_log, fixed = TRUE
+    )),
+    "the second pass verified against the window counts" = any(grepl(
+      "verified against the sum of 26 exact window counts (parent count estimated)",
+      state$reconcile_log, fixed = TRUE
+    )),
+    "only the stale window was re-collected" =
+      identical(recollected, paste0(estimated_unit$id, "::window::22")),
+    "the stale window was asked twice more than the others" =
+      identical(per_window[[22L]], 4L) && all(per_window[-22L] == 3L),
+    "1 estimate + 26 windows + 2 x (1 parent probe + 26 proofs) + 1 re-walk" =
+      identical(result$request_count, 82L)
+  )
+})
+
 passed <- sum(vapply(results, function(value) identical(value, "PASS"), logical(1L)))
 cat(sprintf(
   "test_fec_api_reconcile: %s (%d/%d)\n",

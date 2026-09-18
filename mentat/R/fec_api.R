@@ -1047,27 +1047,65 @@ fec_api_collect_windows_verified <- function(
     outcome
   }
   # One page-1 request. NULL means that query itself is unservable, which is not
-  # a moving population: the caller then verifies window by window instead.
-  probe <- function(unit) {
+  # a moving population: the caller then verifies window by window instead. An
+  # estimated count is likewise no verdict on the data but a refusal to count;
+  # only a caller that can verify another way passes allow_estimate, and every
+  # page carries count_exact so that caller can tell the two apart.
+  probe <- function(unit, allow_estimate = FALSE) {
     fetched <- fec_api_fetch_with_retry(list(fec_api_request_spec(unit)), api_key = api_key,
       concurrency = concurrency, transport = transport, sleep = sleep, jitter = jitter,
       before_request = before_request)
     absorb(fetched)
     if (length(fetched$unservable_queries)) return(NULL)
     page <- fec_api_parse_page(fetched$responses[[1L]])
-    if (!isTRUE(page$is_count_exact) || is.na(page$count) || page$count < 0L) {
+    page$count_exact <- isTRUE(page$is_count_exact) && !is.na(page$count) && page$count >= 0L
+    if (!page$count_exact && !isTRUE(allow_estimate)) {
       stop("FEC API requires an exact nonnegative pagination.count: ", unit$id,
            ". Response preserved; split or rerun the query.", call. = FALSE)
     }
     page
   }
   child_states <- collect(windows, initial_states)$units
+  # One page-1 request per window, shared by the window-count sum and the
+  # stale-window search so that one pass never asks the same window twice.
+  probe_windows <- function(allow_estimate) {
+    pages <- list()
+    for (name in names(child_states)) {
+      if (identical(child_states[[name]]$coverage_verified, FALSE)) {
+        pages[name] <- list(NULL)
+        next
+      }
+      pages[name] <- list(probe(child_states[[name]]$unit, allow_estimate = allow_estimate))
+    }
+    pages
+  }
+  # The windows partition the parent population, so their own exact counts sum
+  # to it. A window that will not report one cannot stand in for the parent's
+  # refusal to count: nothing unverified is stored for it.
+  window_count_total <- function(pages) {
+    total <- 0L
+    for (name in names(child_states)) {
+      page <- pages[[name]]
+      if (is.null(page)) {
+        stop("FEC API date window ", name, " remained unservable, so the population of ",
+          state$unit$id, " cannot be verified against the window counts. ",
+          "Nothing unverified was stored.", call. = FALSE)
+      }
+      if (!isTRUE(page$count_exact)) {
+        stop("FEC API date window ", name, " reported an estimated pagination.count, so the ",
+          "population of ", state$unit$id, " cannot be verified against the window counts. ",
+          "Nothing unverified was stored.", call. = FALSE)
+      }
+      total <- total + as.integer(page$count)
+    }
+    total
+  }
   observed <- c(fec_api_state_rows(state), probe_rows)
   reconcile_log <- character()
   ids <- character()
   pass <- 0L
   repeat {
-    parent <- probe(state$unit)
+    parent <- probe(state$unit, allow_estimate = TRUE)
     if (!is.null(parent)) observed <- c(observed, parent$rows)
     union_rows <- unlist(lapply(child_states, fec_api_state_rows), recursive = FALSE)
     ids <- vapply(union_rows, function(row) trim_text(row_scalar(row,"sub_id","")), character(1L))
@@ -1076,11 +1114,22 @@ fec_api_collect_windows_verified <- function(
     }
     unproven <- names(child_states)[vapply(child_states,
       function(child) identical(child$coverage_verified, FALSE), logical(1L))]
+    # An estimated parent count is a refusal to count, not a verdict on the
+    # data. The union is then verified against the windows' own exact counts,
+    # which partition the same population.
+    window_sum <- !length(unproven) && !is.null(parent) && !isTRUE(parent$count_exact)
+    window_pages <- if (window_sum) probe_windows(TRUE) else NULL
+    window_total <- if (window_sum) window_count_total(window_pages) else NA_integer_
     reason <- if (length(unproven)) {
       paste0(length(unproven),
         " date window(s) were replaced by unproven narrower spellings")
     } else if (is.null(parent)) {
       NA_character_
+    } else if (window_sum) {
+      if (length(ids) != window_total) {
+        paste0("windows hold ", length(ids),
+          " rows against a window-count sum of ", window_total)
+      } else NA_character_
     } else if (length(ids) != parent$count) {
       paste0("windows hold ", length(ids),
         " rows against a fresh parent count of ", parent$count)
@@ -1089,6 +1138,10 @@ fec_api_collect_windows_verified <- function(
       if (is.null(parent)) {
         reconcile_log <- c(reconcile_log,
           "parent count unavailable (query remained unservable); verified per window")
+      } else if (window_sum) {
+        reconcile_log <- c(reconcile_log,
+          paste0("verified against the sum of ", length(window_pages),
+            " exact window counts (parent count estimated)"))
       }
       break
     }
@@ -1102,6 +1155,7 @@ fec_api_collect_windows_verified <- function(
     pass <- pass + 1L
     reconcile_log <- c(reconcile_log, paste0("pass ", pass, ": ", reason))
     cat(sprintf("Reconcile pass %d for %s: %s\n", pass, state$unit$id, reason))
+    if (is.null(window_pages)) window_pages <- probe_windows(FALSE)
     stale <- character()
     for (name in names(child_states)) {
       child <- child_states[[name]]
@@ -1109,7 +1163,7 @@ fec_api_collect_windows_verified <- function(
         stale <- c(stale, name)
         next
       }
-      window_page <- probe(child$unit)
+      window_page <- window_pages[[name]]
       if (is.null(window_page)) next
       if (!identical(as.integer(window_page$count), length(fec_api_state_rows(child)))) {
         stale <- c(stale, name)
@@ -1370,7 +1424,27 @@ fec_api_collect_work_units <- function(
       page <- fec_api_parse_page(fetched$responses[[offset]])
       page$source_request <- specs[[offset]]
       if (!isTRUE(page$is_count_exact) || is.na(page$count) || page$count < 0L) {
-        # Save the response for diagnosis, but never certify an estimated count.
+        # An estimated count is a refusal to count, not a verdict on the data.
+        # Verify the population by exhaustive date windows rather than fail.
+        estimate_windows <- fec_api_date_windows(state$unit)
+        if (length(estimate_windows)) {
+          cat(sprintf("Reconcile: %s reported an estimated count; verifying by %d exhaustive date windows\n",
+            state$unit$id, length(estimate_windows)))
+          verified <- fec_api_collect_windows_verified(state, estimate_windows, api_key, concurrency,
+            transport, sleep, jitter, initial_states = initial_states,
+            page_callback = page_callback, before_request = before_request,
+            reset_callback = reset_callback, limit = reconcile_limit, probe_rows = page$rows)
+          state <- verified$state
+          if (is.function(page_callback)) page_callback(state,state$pages[[1L]])
+          states[[index]] <- state
+          request_count <- request_count + verified$request_count
+          retry_count <- retry_count + verified$retry_count
+          rate_limit_count <- rate_limit_count + verified$rate_limit_count
+          reconcile_count <- reconcile_count + verified$reconcile_count
+          next
+        }
+        # No window to split into: save the response for diagnosis, but never
+        # certify an estimated count.
         page$page_number <- state$page
         page$complete <- FALSE
         page$validation_failure <- "exact_count_missing"
