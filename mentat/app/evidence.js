@@ -216,8 +216,13 @@
   function updateAdd() {
     const chosen = parseSourceValue(sourceValue());
     const committee = $('evidence-pac').value;
+    // A pane is identified by its cycle as well as its source and committee: the
+    // same PAC on two cycles is a comparison a reader asks for, and treating it as
+    // a duplicate left #evidence-add permanently disabled with no way to say why.
+    const cycle = $('evidence-cycle').value;
     const already = [...panes.values()].some(pane => pane.source === chosen.kind
-      && pane.id === chosen.id && pane.committee === committee);
+      && pane.id === chosen.id && pane.committee === committee
+      && String(pane.cycle || '') === String(cycle || ''));
     $('evidence-add').disabled = !chosen.kind || !committee || already || panes.size >= MAX_PANES;
   }
 
@@ -421,7 +426,7 @@
       : (pane.excluded ? `${number(pane.supported)} supported · ${number(pane.excluded)} excluded by the workbook`
                        : `${number(pane.supported)} supported`);
     const topLabel = isSnapshot ? 'Snapshot legs' : 'Top contributors in this file';
-    return `<section class="panel evidence-pane" data-pane="${pane.key}" data-committee="${escapeHtml(pane.committee)}" aria-label="${escapeHtml(pane.name)} pane">
+    return `<section class="panel evidence-pane" data-pane="${pane.key}" data-committee="${escapeHtml(pane.committee)}" data-cycle="${escapeHtml(pane.cycle || '')}" aria-label="${escapeHtml(pane.name)} pane">
       <div class="pane-head">
         <div class="pane-title">
           <div class="pane-kind">${escapeHtml(pane.industry || 'Imported file')} · ${escapeHtml(pane.sourceKind)}</div>
@@ -1501,7 +1506,15 @@
     } catch (error) { $('evidence-job-status').textContent = error.message; collectorState(); }
   });
   window.addEventListener('mentat:graph', event => { graphContext = event.detail; followGraph(); });
-  window.addEventListener('mentat:view', () => { renderPanes(); start(); });
+  // Only this tab's own view pays for the catalogs. app.js dispatches mentat:view on
+  // every tab change, so an unguarded start() made a reader who opened Chart Studio
+  // fetch the import listing and the snapshot catalog they never asked for. `split`
+  // is true when Graph is paired with this pane, which shows it too.
+  window.addEventListener('mentat:view', event => {
+    renderPanes();
+    const detail = event.detail || {};
+    if (detail.view === 'evidence' || detail.split) start();
+  });
 
   /* ------------------------------------------------------------------ start */
   async function start() {

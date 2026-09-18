@@ -742,6 +742,60 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
       `reselecting an already-read snapshot must not fetch it again: ${JSON.stringify(bodyReads)}`);
     pass('snapshot body read exactly once across three source changes');
 
+    step('the same PAC on two cycles opens as two panes, and Add says so rather than going dead');
+    // Pane identity is (source, committee, cycle). Before the fix it was
+    // (source, committee), so asking for one committee on a second cycle - the
+    // comparison the panes exist for - silently disabled #evidence-add.
+    while ((await page.locator('#evidence-panes [data-pane]').count()) > 0) {
+      await page.click('#evidence-panes [data-pane] .pane-remove');
+      await page.waitForTimeout(200);
+    }
+    await page.selectOption('#evidence-source', stressValue);
+    await waitStatus(/stress[.]csv/, 90000);
+    const twoCycles = await page.locator('#evidence-cycle option').evaluateAll(
+      nodes => nodes.map(node => node.value).filter(Boolean).slice(0, 2));
+    assert.equal(twoCycles.length, 2, `the fixture must carry two cycles: ${JSON.stringify(twoCycles)}`);
+    const onePac = await page.locator('#evidence-pac option').evaluateAll(nodes => nodes[0].value);
+    await page.selectOption('#evidence-pac', onePac);
+    await page.selectOption('#evidence-cycle', twoCycles[0]);
+    await page.click('#evidence-add');
+    await waitPanes(1);
+    await page.selectOption('#evidence-cycle', twoCycles[1]);
+    assert.equal(await page.locator('#evidence-add').isDisabled(), false,
+      'a second cycle of the same PAC must be addable');
+    await page.click('#evidence-add');
+    await waitPanes(2);
+    const cycles = await page.locator('#evidence-panes [data-pane]').evaluateAll(
+      nodes => nodes.map(node => node.dataset.cycle || ''));
+    assert.deepEqual([...cycles].sort(), [...twoCycles].sort(),
+      `two panes, one per cycle: ${JSON.stringify(cycles)}`);
+    await page.selectOption('#evidence-cycle', twoCycles[1]);
+    assert.equal(await page.locator('#evidence-add').isDisabled(), true,
+      'the exact same pane stays refused');
+    pass(`the same PAC opened on ${JSON.stringify(cycles)} as two panes`);
+
+    step('a view that is not this one does not fetch the evidence catalogs');
+    // app.js dispatches mentat:view on every tab change. start() used to run on
+    // any of them, so opening Chart Studio fetched the import listing and the
+    // snapshot catalog a reader there never asked for.
+    const catalogReads = [];
+    const watchCatalogs = request => {
+      const url = request.url();
+      if (/[/]api[/]evidence-csv(\?|$)/.test(url) || /[/]api[/]evidence(\?|$)/.test(url)) catalogReads.push(url);
+    };
+    const fresh = await browser.newPage({viewport: {width: 1280, height: 900}});
+    fresh.on('request', watchCatalogs);
+    await fresh.goto(`${origin}/#chart-studio`, {waitUntil: 'load'});
+    await fresh.waitForTimeout(2500);
+    assert.deepEqual(catalogReads, [],
+      `Chart Studio must not read the evidence catalogs: ${JSON.stringify(catalogReads)}`);
+    await fresh.goto(`${origin}/#evidence`, {waitUntil: 'load'});
+    await fresh.waitForFunction(() => document.querySelectorAll('#evidence-source option').length > 1,
+      null, {timeout: 90000});
+    assert.ok(catalogReads.length > 0, 'the evidence view must read them');
+    await fresh.close();
+    pass(`no catalog read on Chart Studio; ${catalogReads.length} on the evidence view`);
+
     step('final check: zero pageerror entries and zero off-origin requests');
     assert.deepEqual(errors, [], `page errors: ${JSON.stringify(errors)}`);
     assert.deepEqual(remote, [], `off-origin requests: ${JSON.stringify(remote)}`);
