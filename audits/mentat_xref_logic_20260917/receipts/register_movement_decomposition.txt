@@ -1,0 +1,32 @@
+rows before=849399 after=849399  same keys=True
+
+================================================================================================
+ROWS THAT CHANGED BUCKET
+================================================================================================
+  Citibank                 funding_unverified -> pac_activity     rows=  17 $    58,900.00
+  Truist Bank              funding_unverified -> pac_activity     rows=   7 $    58,831.06
+  Bank of America NA       funding_unverified -> pac_activity     rows=  10 $    37,500.00
+  TOTAL rows=34 $155,231.06
+
+================================================================================================
+ROWS THAT KEPT THEIR BUCKET BUT NEWLY CITE A NEW EVIDENCE ID
+================================================================================================
+  rows=28,948  gross=$1,685,533.96  pac_activity_cents already counted=$617,088.00
+  (these were already pac_activity via their own C-id, or are employees giving
+   TO the company PAC - funding_direction relabelled, no dollars moved)
+    Citibank                 funding_direction original_donor_to_recipient -> employee_to_company_pac  rows=  7057 $   470,638.47
+
+================================================================================================
+REVIEW QUEUE: ROWS THAT LEFT
+================================================================================================
+  reasons dropped by the promoted rows:
+    -company_named_unverified                     rows=  34 $  155,231.06
+  reasons the promoted rows still carry:
+    +connected_pac_affiliation                    rows=  34 $  155,231.06
+    +separate_observed_pac_activity               rows=  34 $  155,231.06
+    +recognized_contribution_receipt              rows=  31 $   91,500.00
+    +provisional_receipt_role:unverified_other_receipt rows=   2 $   32,400.00
+    +provisional_receipt_role:transfer_receipt    rows=   1 $   31,331.06
+
+  rows newly excluded (regression check): 0
+  total counted_cents delta = $-155,231.06   total pac_activity_cents delta = $155,231.06

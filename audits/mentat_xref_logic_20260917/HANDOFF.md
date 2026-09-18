@@ -106,3 +106,46 @@ The earlier list was written before the patch was cut and tells you to run `git 
    Expect most of the $5,808,336.42 unverified-funding line to move to PAC activity and observed original giving to fall back toward its pre-change position against the workbook. That is a prediction about the next run, not a measured figure - REVIEW.md 5f flags it as such.
 
 The dead run `20260917T174138-ec8ba8ba4523` and the killed Banking run `20260917T191516-1199b40e8c61` (no `report.json`, used nowhere in this packet) were both left in place; nothing under `state/cross-reference` was deleted.
+
+## Register data added, 2026-09-18 (supersedes "What Paul does next" item 2)
+
+Item 2 of the previous list is done, not left as homework. Four records were added
+to `inputs/verified_company_affiliations.json` (12 -> 16), each corroborated by a
+verbatim FEC committee master line: `C00039305` (Citibank), `C00009639` (Truist
+Bank), `C00043489` (Bank of America NA), `C00018036` (US Bank NA). REVIEW.md
+section 10 has the master lines, the alias rule, the rejections and the numbers.
+
+Measured, not predicted: Banking re-run `20260918T164949-17cd31b9e70f`
+(`receipts/run_banking_after_register.txt`) against `20260918T030844-6098810b1ae7`
+moved unverified funding $5,808,336.42 -> $5,653,105.36
+(-155,231.06) and PAC activity $22,774,438.00 ->
+$22,929,669.06 (+155,231.06); observed original giving
+$77,054,485.76 -> $76,899,254.70. Tests
+`113 passed, 27 subtests passed in 10.63s` (`receipts/pytest_after_register.txt`).
+
+**Item 4's prediction was wrong.** It expected most of the unverified-funding line
+to move; $155,231.06 did. The rest of section 6b is not reachable by adding
+missing committees: the ORG rows are `treasury_entity` territory and land in
+`corporate_original` rather than PAC activity, and the remaining PAC spellings are
+alias work on the twelve existing records. REVIEW.md 10d gives the mechanism with
+line references.
+
+Still Paul's calls, all listed with evidence in REVIEW.md 10b and 10e:
+
+1. **`treasury_entity` policy** for the company-unit ORG rows (`PNC ADVISORS`,
+   `WELLS FARGO BANK`, `JP MORGAN CHASE`, `CITIBANK N A`, `CITIBANK F S B`,
+   `CAPITAL ONE BANK`, ...). These are the bulk of section 6b's
+   $4,324,780.39 and they move to `corporate_original`, not PAC activity.
+2. **Alias extensions on the existing twelve records** for reported PAC spellings
+   the master cannot disambiguate (`PNC PAC FED`, `PNC FEDERAL PAC`, `US BANK CORP
+   PAC`, `J P MORGAN CHASE CO PAC`, `BANK OF AMERICA CORP PAC`, ...).
+3. **The two Wells Fargo committees** `C00300178` and `C00429852`, whose master
+   `CONNECTED_ORG_NM` fields name each other rather than the company.
+4. **`C00142596` `BBVA PAC OF THE PNC FINANCIAL SERVICES GROUP, INC.`** - blank
+   field 14, no Banking row reports it.
+5. **The four misfiled aliases** in 10e.
+6. **The 6c alias gap** (`CITICORP`, `CITICORP NORTH AMERICA`) is untouched.
+
+`state/cross-reference/latest.json` now points at `20260918T164949-17cd31b9e70f`, so the console on
+8806 shows this run once Paul restarts it. No port was bound and no run was
+deleted by this lane.

@@ -364,3 +364,167 @@ Receipts (decisive lines):
 - The runs were started detached and read when they exited (one until-loop on the run's exit line each; no poll-supervision). `state/cross-reference/latest.json` moved from the dead run `20260917T174138-ec8ba8ba4523` to `20260917T190836-4d409860e341` when Fintech started and to the Banking run when it started; the dead run's directory is untouched.
 - The patch was cut as bytes with `git diff -- <the three files> > patches/xref_contradiction_text.patch` (bash redirect) and proven with `git apply --check` (`receipts/git_apply_check.txt`), per DE-025.
 - No Sonnet/Haiku agent was used; no scout claims were relied on.
+
+## 10. D4 closed: the register records added, and what they moved (2026-09-18)
+
+This section is an addition; sections 1-9 are unchanged. It records the register
+work section 6 left open, done against the FEC committee master on disk.
+
+### 10a. What was added
+
+Four records, `inputs/verified_company_affiliations.json`, 12 -> 16 records, schema
+unchanged (`schema_version` 2, `relationship` `connected_pac`, `valid_from`
+`2021-01-01`, LF endings, prettier-style arrays preserved). Every `entity_id` and
+`entity_name` is the verbatim `CMTE_ID` / `CMTE_NM` of the master line quoted
+beside it; nothing was invented.
+
+| Committee | Company | `CMTE_NM` (field 2, verbatim) | `CONNECTED_ORG_NM` (field 14) | Master lines |
+|---|---|---|---|---|
+| `C00039305` | Citibank | `CITIGROUP INC. PAC - STATE (CITI PAC-STATE)` | `CITIGROUP INC.` | cm22/cm.txt:268, cm24/cm.txt:260, cm26/cm.txt:254 |
+| `C00009639` | Truist Bank | `TRUIST FINANCIAL CORPORATION FEDERAL, STATE & LOCAL POLITICAL ACTION COMMITTEE (FORMERLY SUNTRUST BANKS, INC. MAIN STREET BANKERS PAC)` | `TRUIST FINANCIAL CORPORATION` | cm22/cm.txt:102, cm24/cm.txt:99, cm26/cm.txt:98 |
+| `C00043489` | Bank of America NA | `BANK OF AMERICA CORPORATION STATE AND FEDERAL PAC` | `BANK OF AMERICA CORPORATION (blank in cm24)` | cm22/cm.txt:312, cm24/cm.txt:303, cm26/cm.txt:295 |
+| `C00018036` | US Bank NA | `U.S. BANCORP POLITICAL PARTICIPATION PROGRAM` | `U.S. BANCORP` | cm22/cm.txt:162, cm24/cm.txt:158, cm26/cm.txt:156 |
+
+Aliases were added only where a reported spelling observed in the Banking run is a
+punctuation/abbreviation variant or a literal truncation of that committee's own
+master name, and no other committee of that company could be denoted:
+`C00009639` took three (the name without its parenthetical, the 100-character
+truncation `... (FORMERLY SUNTRUST BA`, and `TRUIST FINANCIAL CORP. FEDERAL STATE
+& LOCAL PAC`); `C00043489` took two (`BANK OF AMERICA STATE AND FEDERAL PAC` and
+the same name with `PAC` spelled out). `C00039305`'s reported spelling is
+byte-identical to its master name, so it needed none. `C00018036` has no observed
+spelling that denotes it rather than the already-registered `C00488882`, so its
+alias list is empty and it moves nothing - it is added because the master states
+its connection unambiguously and it was missing from the register.
+
+### 10b. What was rejected, and why
+
+- **`PNC PAC Michigan`** - no committee of that name exists in `cm22`, `cm24` or
+  `cm26` (exact and substring search over `CMTE_NM` both return nothing). It
+  cannot be added without inventing an ID.
+- **`JP Morgan Chase Co State and Fed PAC`** - likewise absent from the master.
+  JP Morgan Chase has exactly two committees in the master, `C00104299` and
+  `C00128512`, and both are already registered.
+- **`Capital One Association Political Fund PAC`** - absent from the master as a
+  committee name. Capital One has exactly one committee, `C00326595`, already
+  registered; the reported spellings are variants of it, not a missing committee.
+- **`C00150672` `GEORGIA REPUBLICAN PARTY INC.`** - its `CONNECTED_ORG_NM` reads
+  `TRUIST BANK`, but the committee is a state party, not the company's PAC.
+  Registering it would post a state party's receipts as Truist PAC activity.
+- **`C00939330` `ROBB TUCKER FOR CONGRESS`, `C00957126` `ASHLEY WEBB: TAKE NO
+  PRISONERS`** - candidate committees that matched only as false positives of the
+  `BBT` stem inside `roBBTucker` and `weBBTake`. Both carry `CONNECTED_ORG_NM`
+  `NONE`.
+- **`C00300178` and `C00429852` (Wells Fargo)** - their `CONNECTED_ORG_NM` fields
+  name *each other's committee names* rather than an organisation
+  (`C00429852` -> `WELLS FARGO AND COMPANY EMPLOYEE PAC ...`, and the registered
+  `C00034595` -> `WELLS FARGO AND COMPANY NORTH CAROLINA EMPLOYEES GOOD GOVERNMENT
+  FUND`). The master therefore does not state a connection to Wells Fargo the
+  company; establishing it takes a two-step inference through another committee.
+  Left out; $36,249.76 of Banking rows turn on this and it is a data call.
+- **`C00142596` `BBVA PAC OF THE PNC FINANCIAL SERVICES GROUP, INC.`** (cm22 only)
+  - the committee's own name asserts the PNC connection but field 14 is blank, so
+  the master does not state it. No Banking row reports this name, so it would move
+  nothing. Listed as a candidate, not added.
+- **`U.S. BANCORP PIPER JAFFRAY INC. FEDERAL PAC`** (6 rows / $13,750.00) - not a
+  committee in any of the three cycle files, so it cannot be corroborated.
+
+### 10c. Measured movement
+
+Command, from `C:\Users\pgoff\Mentat\mentat`:
+`python tools/run_cross_reference.py --database "C:\Users\pgoff\Mentat\mentat\.cache\report-repairs\banking-20260910\data\mentat.db" --industry Banking --offline`,
+stdout at `receipts/run_banking_after_register.txt`, run `20260918T164949-17cd31b9e70f`,
+against run `20260918T030844-6098810b1ae7` (`receipts/run_banking.txt`).
+
+| Figure | Before | After | Delta |
+|---|---|---|---|
+| Observed original giving | $77,054,485.76 | $76,899,254.70 | -155,231.06 |
+| Employee giving | $71,246,149.34 | $71,246,149.34 | 0.00 |
+| Unverified funding | $5,808,336.42 | $5,653,105.36 | -155,231.06 |
+| PAC activity (`pac_outgoing`) | $22,774,438.00 | $22,929,669.06 | +155,231.06 |
+| Corporate giving | $0.00 | $0.00 | 0.00 |
+| Review queue, rows | 46,156 | 46,125 | -31 |
+| Review queue, gross | $16,990,616.89 | $16,899,116.89 | -91,500.00 |
+| Observed giving against the $54,762,844.05 workbook | +$22,291,641.71 | +$22,136,410.65 | -155,231.06 |
+| Baseline | $133,516,227.27 | $133,516,227.27 | 0.00 |
+| Elapsed | 650.41 s | 1041.23 s | |
+
+Rows that actually changed bucket, from a row-by-row diff of the two runs'
+`ledger.sqlite` (`receipts/register_movement_decomposition.txt`):
+
+| Company | Committee | Rows | Gross | Bucket change |
+|---|---|---|---|---|
+| Citibank | `C00039305` | 17 | $58,900.00 | funding_unverified -> pac_activity |
+| Truist Bank | `C00009639` | 7 | $58,831.06 | funding_unverified -> pac_activity |
+| Bank of America NA | `C00043489` | 10 | $37,500.00 | funding_unverified -> pac_activity |
+
+Total 34 rows, $155,231.06 now counted as PAC activity rather than the
+company's own unverified funding. `C00018036` moved nothing, as expected: it has
+no alias, so no row reports a name that resolves to it.
+
+The movement is exactly conservative. Summed over all 849,399 decisions,
+`counted_cents` changed by $-155,231.06 and `pac_activity_cents` by
+$155,231.06: the same dollars, reclassified, none created or destroyed.
+**0 rows were newly excluded** and every one of the fifteen
+exclusion reasons is row-for-row and cent-for-cent identical to the before run,
+so nothing was lost to make this move.
+
+A further 28,948 rows kept their bucket but newly cite one of the four
+evidence IDs. They are not movement: they were already `pac_activity` through
+their own committee ID, or - 7,057 of them - are employees giving **to**
+the company PAC, whose `funding_direction` is relabelled
+`original_donor_to_recipient` -> `employee_to_company_pac` by the recipient route
+at `tools/cross_reference_engine.py:467-471`. No dollars move on any of them, which
+is why `employee_giving` is unchanged at $71,246,149.34.
+
+The review queue fell by 31 rows
+and $91,500.00, not by the full
+$155,231.06, because three of the promoted rows stay in the queue on a different
+reason: two on `provisional_receipt_role:unverified_other_receipt` ($32,400.00) and
+one on `provisional_receipt_role:transfer_receipt` ($31,331.06). $155,231.06 -
+$63,731.06 = $91,500.00, which is the measured drop. All 34 promoted rows
+dropped `company_named_unverified`, which falls 6,247 -> 6,213 rows
+($5,140,809.45 -> $4,985,578.39).
+
+### 10d. The section 6b prediction was wrong, and by how much
+
+HANDOFF step 4 predicted "most of the $5,808,336.42 unverified-funding
+line" would move. It did not, and could not. Section 6b's $4,324,780.39 is
+dominated by rows the register cannot reach through `connected_pac`:
+
+- **ORG rows** (`PNC ADVISORS`, `WELLS FARGO BANK`, `JP MORGAN CHASE`, `CITIBANK
+  N A`, ...) are seeded `organization_unverified` at
+  `tools/cross_reference_engine.py:261` and are tested against `treasury_entity`,
+  not `connected_pac` (`:302-310`, `:455`). A `connected_pac` record never moves
+  them, and a `treasury_entity` record moves them to `corporate_original`, not to
+  PAC activity. `treasury_ownership_unresolved` is unmoved at 1,328 rows /
+  $4,281,699.33 before and 1,328 / $4,281,699.33 after.
+- **PAC-type rows whose reported spelling is not a variant of any master committee
+  name** (`PNC PAC FED`, `US BANK CORP PAC`, `J P MORGAN CHASE CO PAC`, ...) can
+  only be resolved by asserting which of the company's committees the spelling
+  denotes. Where a company has two committees, that is an inference the master does
+  not license; where it has one, it is safe but is alias work on an *existing*
+  record, not a missing record, and was left for a separate ruling.
+
+So the lever section 6b describes is real but is mostly an **alias** lever on the
+twelve existing records plus a `treasury_entity` policy call, not the missing-record
+lever this section closes. The measured missing-record effect is $155,231.06.
+
+### 10e. Register defects found while doing this (not fixed)
+
+Four aliases on the pre-existing records are another committee's verbatim master
+name: `BANK OF AMERICA CORPORATION STATE AND FEDERAL PAC` on `C00364778` (it is
+`C00043489`), the Truist federal/state/local name on `C00386524` (it is
+`C00009639`), `U.S. BANCORP POLITICAL PARTICIPATION PROGRAM` on `C00488882` (it is
+`C00018036`), and `WELLS FARGO AND COMPANY EMPLOYEES GOOD GOVERNMENT FEDERAL FUND
+II` on `C00034595` (it is `C00300178`). Now that three of those committees have
+their own records, a row reporting one of those names matches both records, so
+`affiliations_for` returns two affiliations and the reason cites two evidence IDs.
+No dollars are double counted - `:298`, `:445` and `:459` assign rather than
+accumulate - but the citation is wrong on the old record. Removing those four
+aliases is a data call and was left alone.
+
+### 10f. Tests
+
+`python -m pytest tests/test_cross_reference_engine.py tests/test_cross_reference_runner.py tests/test_cross_reference_digest.py tests/test_cross_reference_data.py -q`
+(`receipts/pytest_after_register.txt`): `113 passed, 27 subtests passed in 10.63s` - the same 113 as section 8.
