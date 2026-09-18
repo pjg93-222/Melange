@@ -19,6 +19,7 @@ import shutil
 import sqlite3
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -190,26 +191,175 @@ def asset_files():
     return sorted({directory / name for name, _ in STATIC_ASSETS.values()}, key=lambda path: path.name)
 
 
-def git_sha():
-    """Short revision of the checkout, or 'unknown' when Git cannot answer."""
+GIT_SHA_COMMAND = ['git', 'rev-parse', '--short', 'HEAD']
+GIT_SHA_TIMEOUT_SECONDS = 10
+# Nine hex digits is what `git rev-parse --short HEAD` answers in this repo
+# today, so the two readers below agree on sight. The width is safe to fix
+# here because the value is display-only: D-029's restart gate compares
+# code_sha256 and assets_sha256, never the git sha.
+GIT_SHA_DISPLAY_LENGTH = 9
+
+
+def git_sha_from_gitdir():
+    """Short revision read off Git's own files, with no child process at all.
+
+    On this OneDrive-backed tree a `git` child can wedge on placeholder I/O and
+    then refuse to die (measured 2026-09-18: two orphaned git.exe alive for an
+    hour), so the ordinary answer is read straight out of the repository.
+    Returns None when anything is missing or malformed, and the caller then
+    falls back to Git itself.
+    """
     try:
-        finished = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=str(PROJECT),
-                                  capture_output=True, text=True, timeout=10,
-                                  creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+        # PROJECT is the app's parent folder, not the checkout root, so
+        # PROJECT/.git does not exist. `git rev-parse` answered anyway because
+        # it searches upward from its working directory; this reader searches
+        # the same way so that both paths speak about the same checkout.
+        pointer = None
+        for candidate in (PROJECT, *PROJECT.parents):
+            if (candidate / '.git').exists():
+                pointer = candidate / '.git'
+                break
+        if pointer is None:
+            return None
+        if pointer.is_dir():
+            gitdir = pointer
+        elif pointer.is_file():
+            # A linked worktree keeps `.git` as a FILE holding `gitdir: <path>`,
+            # and that path may be relative to the folder holding the file.
+            marker = pointer.read_text(encoding='utf-8', errors='ignore').strip()
+            if not marker.startswith('gitdir:'):
+                return None
+            gitdir = Path(os.path.normpath(str(pointer.parent / marker[len('gitdir:'):].strip())))
+        else:
+            return None
+        head = (gitdir / 'HEAD').read_text(encoding='utf-8', errors='ignore').strip()
+    except OSError:
+        return None
+    if re.fullmatch(r'[0-9a-f]{40}', head):
+        # A detached HEAD holds the commit itself rather than a ref.
+        return head[:GIT_SHA_DISPLAY_LENGTH]
+    if not head.startswith('ref:'):
+        return None
+    reference = head[len('ref:'):].strip()
+    # Only a plain ref path is followed, so a malformed HEAD cannot send this
+    # reader up out of the repository.
+    if not re.fullmatch(r'refs/[\w.-]+(?:/[\w.-]+)*', reference) or '..' in reference:
+        return None
+    # A worktree's own refs folder holds only the refs it owns; a shared branch
+    # lives in the common directory instead, loose or packed.
+    common = gitdir
+    try:
+        if (gitdir / 'commondir').is_file():
+            relative = (gitdir / 'commondir').read_text(encoding='utf-8', errors='ignore').strip()
+            if relative:
+                common = Path(os.path.normpath(str(gitdir / relative)))
+    except OSError:
+        return None
+    for candidate in (gitdir / reference, common / reference):
+        try:
+            value = candidate.read_text(encoding='utf-8', errors='ignore').strip()
+        except OSError:
+            continue
+        if re.fullmatch(r'[0-9a-f]{40}', value):
+            return value[:GIT_SHA_DISPLAY_LENGTH]
+    try:
+        packed = (common / 'packed-refs').read_text(encoding='utf-8', errors='ignore')
+    except OSError:
+        return None
+    for line in packed.splitlines():
+        # '#' opens the header line and '^' a tag's peeled commit, not a ref.
+        if not line or line[0] in '#^':
+            continue
+        parts = line.split()
+        if len(parts) == 2 and parts[1] == reference and re.fullmatch(r'[0-9a-f]{40}', parts[0]):
+            return parts[0][:GIT_SHA_DISPLAY_LENGTH]
+    return None
+
+
+def git_sha():
+    """Short revision from Git itself, or 'unknown' when Git cannot answer.
+
+    stdout goes to a temporary FILE, never a pipe. subprocess.run answers a
+    timeout by re-entering communicate() to drain, and communicate() then
+    blocks forever joining the pipe-reader threads of a child that will not
+    die: that is how one health call hung the whole console. A real file
+    handle creates no reader threads, so kill() is the entire cleanup and this
+    returns on time even when the child is wedged.
+    """
+    try:
+        with tempfile.TemporaryFile() as sink:
+            child = subprocess.Popen(GIT_SHA_COMMAND, cwd=str(PROJECT), stdin=subprocess.DEVNULL,
+                                     stdout=sink, stderr=subprocess.DEVNULL,
+                                     creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+            try:
+                code = child.wait(timeout=GIT_SHA_TIMEOUT_SECONDS)
+            except subprocess.TimeoutExpired:
+                child.kill()
+                try:
+                    # Reap the child if the kill lands; never wait on it again.
+                    child.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    pass
+                return 'unknown'
+            sink.seek(0)
+            value = sink.read().decode('utf-8', errors='ignore').strip()
     except (OSError, ValueError, subprocess.SubprocessError):
         return 'unknown'
-    value = (finished.stdout or '').strip()
-    return value if finished.returncode == 0 and re.fullmatch(r'[0-9a-f]{4,40}', value) else 'unknown'
+    return value if code == 0 and re.fullmatch(r'[0-9a-f]{4,40}', value) else 'unknown'
 
 
 CODE_TREE_SHA256 = tree_sha256(code_files())
 ASSET_TREE_SHA256 = tree_sha256(asset_files())
 
 
-@lru_cache(maxsize=1)
+_git_sha_lock = threading.Lock()
+_git_sha_value = None
+_git_sha_started = False
+
+
+def git_sha_lookup():
+    """Where the build stamp's revision comes from: Git's files, then Git."""
+    return git_sha_from_gitdir() or git_sha()
+
+
+def resolve_git_sha():
+    """Store the revision once, off the request path, whatever happens."""
+    global _git_sha_value
+    try:
+        value = git_sha_lookup()
+    except Exception:
+        value = None
+    with _git_sha_lock:
+        _git_sha_value = value or 'unknown'
+
+
 def git_sha_cached():
-    """The git subprocess runs once, on the first health call, not at startup."""
-    return git_sha()
+    """The revision if it is already known, otherwise 'unknown' at once.
+
+    A request must never wait on this lookup. lru_cache did wait: it does not
+    serialise concurrent callers, so one page load raced two request threads
+    into the git child, and when that child wedged /api/session never
+    answered and the console window hung at startup. One daemon thread does
+    the work instead and later requests pick up the answer it left.
+    """
+    global _git_sha_started
+    if _git_sha_value is not None:
+        return _git_sha_value
+    with _git_sha_lock:
+        if _git_sha_value is not None:
+            return _git_sha_value
+        if not _git_sha_started:
+            _git_sha_started = True
+            threading.Thread(target=resolve_git_sha, name='git-sha', daemon=True).start()
+    return 'unknown'
+
+
+def reset_git_sha_cache():
+    """Forget the resolved revision so a test can drive the resolver again."""
+    global _git_sha_value, _git_sha_started
+    with _git_sha_lock:
+        _git_sha_value = None
+        _git_sha_started = False
 STARTED_AT = time.time()
 
 
