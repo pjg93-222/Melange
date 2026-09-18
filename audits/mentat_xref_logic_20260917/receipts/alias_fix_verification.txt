@@ -1,0 +1,39 @@
+Alias-citation proof: the four aliases that were another committee's master name
+before run 20260918T164949-17cd31b9e70f, after run 20260918T173505-84f3f46b7351
+====================================================================================================
+
+KEPT - would strand: alias on C00034595, which is really C00300178's master name
+  alias        : 'WELLS FARGO AND COMPANY EMPLOYEES GOOD GOVERNMENT FEDERAL FUND II'
+  company      : ['Wells Fargo Bank NA']
+  rows         : 242
+  bucket       : ['pac_activity'] -> ['pac_activity']
+  counted+pac  : $572,500.00 -> $572,500.00   unchanged=True
+  cites before : ['fec-committee-C00034595']
+  cites after  : ['fec-committee-C00034595']
+
+REMOVED: alias on C00488882, which is really C00018036's master name
+  alias        : 'U.S. BANCORP POLITICAL PARTICIPATION PROGRAM'
+  company      : ['US Bank NA']
+  rows         : 136
+  bucket       : ['pac_activity'] -> ['pac_activity']
+  counted+pac  : $424,000.00 -> $424,000.00   unchanged=True
+  cites before : ['fec-committee-C00018036', 'fec-committee-C00488882']
+  cites after  : ['fec-committee-C00018036']
+
+REMOVED: alias on C00364778, which is really C00043489's master name
+  alias        : 'BANK OF AMERICA CORPORATION STATE AND FEDERAL PAC'
+  company      : ['Bank of America NA']
+  rows         : 43
+  bucket       : ['pac_activity'] -> ['pac_activity']
+  counted+pac  : $158,088.00 -> $158,088.00   unchanged=True
+  cites before : ['fec-committee-C00043489', 'fec-committee-C00364778']
+  cites after  : ['fec-committee-C00043489']
+
+REMOVED: alias on C00386524, which is really C00009639's master name
+  alias        : 'TRUIST FINANCIAL CORPORATION FEDERAL, STATE & LOCAL POLITICAL ACTION COMMITTEE (FORMERLY SUNTRUST BANKS, INC. MAIN STREET BANKERS PAC)'
+  company      : ['Truist Bank']
+  rows         : 9
+  bucket       : ['pac_activity'] -> ['pac_activity']
+  counted+pac  : $35,000.00 -> $35,000.00   unchanged=True
+  cites before : ['fec-committee-C00009639', 'fec-committee-C00386524']
+  cites after  : ['fec-committee-C00009639']

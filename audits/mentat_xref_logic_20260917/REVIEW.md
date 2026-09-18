@@ -528,3 +528,144 @@ aliases is a data call and was left alone.
 
 `python -m pytest tests/test_cross_reference_engine.py tests/test_cross_reference_runner.py tests/test_cross_reference_digest.py tests/test_cross_reference_data.py -q`
 (`receipts/pytest_after_register.txt`): `113 passed, 27 subtests passed in 10.63s` - the same 113 as section 8.
+
+## 11. The two follow-ups Paul ruled on: alias fix done, treasury records withheld (2026-09-18)
+
+Sections 1-10 are unchanged. Paul's instruction was "fix those" for both 10e (the
+misfiled aliases) and the missing `treasury_entity` records. One is done; the other
+hit its own tripwire and is reported instead of applied.
+
+### 11a. The misfiled aliases: three removed, one kept
+
+Each of the four aliases in 10e is another committee's verbatim master name. Before
+touching the file I looked up every Banking row that reports each spelling
+(`receipts/alias_fix_verification.txt`):
+
+| Alias, on record | Really | Rows | Counted + PAC | Cited before | Action |
+|---|---|---|---|---|---|
+| `BANK OF AMERICA CORPORATION STATE AND FEDERAL PAC` on `C00364778` | `C00043489` | 43 | $158,088.00 | `C00043489` **and** `C00364778` | removed |
+| `U.S. BANCORP POLITICAL PARTICIPATION PROGRAM` on `C00488882` | `C00018036` | 136 | $424,000.00 | `C00018036` **and** `C00488882` | removed |
+| `TRUIST FINANCIAL CORPORATION FEDERAL, STATE & LOCAL ... (FORMERLY SUNTRUST ...)` on `C00386524` | `C00009639` | 9 | $35,000.00 | `C00009639` **and** `C00386524` | removed |
+| `WELLS FARGO AND COMPANY EMPLOYEES GOOD GOVERNMENT FEDERAL FUND II` on `C00034595` | `C00300178` | 242 | $572,500.00 | `C00034595` **only** | **KEPT** |
+
+The first three rows already matched the correct record as well as the wrong one,
+because section 10 gave `C00043489`, `C00018036` and `C00009639` their own records.
+Dropping the stale alias leaves the correct match standing.
+
+The fourth is the stranding case the instruction asked me to watch for. `C00300178`
+is **not** in the register - section 10b withheld it because its master
+`CONNECTED_ORG_NM` names another committee rather than Wells Fargo the company - so
+those 242 rows match *only* through the alias on `C00034595`. Removing it would
+leave all 242 rows, $572,500.00 of observed PAC activity, with no affiliation at
+all, falling into `company_pac_affiliation_unresolved`. The spelling is
+`WELLS FARGO AND COMPANY EMPLOYEES GOOD GOVERNMENT FEDERAL FUND II`. It was left in
+place. Registering `C00300178` properly, or accepting the two-step inference in
+10b, is the fix; both are Paul's call.
+
+After the change, measured on run `20260918T173505-84f3f46b7351`
+(`receipts/alias_fix_verification.txt`): all three corrected groups cite exactly one
+evidence ID - `fec-committee-C00043489`, `fec-committee-C00018036`,
+`fec-committee-C00009639` - their bucket is still `pac_activity` and their
+counted + PAC cents are identical to before.
+
+### 11b. Measured effect of the alias fix: none, as intended
+
+Run `20260918T173505-84f3f46b7351` (`receipts/run_banking_after_alias_fix.txt`) against
+`20260918T164949-17cd31b9e70f`. Every summary figure is **identical**:
+observed original giving $76,899,254.70, employee
+giving $71,246,149.34, unverified funding
+$5,653,105.36, PAC activity
+$22,929,669.06, review queue
+46,125 rows /
+$16,899,116.89. Every review reason and every exclusion
+reason is row-for-row and cent-for-cent unchanged. All summary fields equal:
+**True**. Elapsed 1041.23 s -> 917.89 s. That is
+the right outcome: this was a citation correction, not an accounting change.
+
+### 11c. `treasury_entity`: the tripwire fired, so nothing was added
+
+The register still holds zero `treasury_entity` records and `corporate_original` is
+still $0.00. Applying the instructed evidence - the
+`companies` table variants for Banking plus `inputs/verified_employer_aliases.csv`,
+judged by the whole-token test (`receipts/treasury_entity_candidates.txt`) - selects
+**1,328 ORG rows / $4,110,703.75**, which is **3.01x** the workbook's
+$1,365,262.42 Corporate tier. That is past the "roughly double" tripwire, so the treasury
+half was **not committed** and the alias fix was kept, exactly as instructed.
+
+Two things make me confident the tripwire is right rather than merely cautious.
+
+**The roster test has no discriminating power here.** It matches 1,328 of 1,328
+rows; **zero** ORG rows in the bucket fail it. That is tautological: a row is in
+`organization_unverified` with this company precisely because its contributor name
+already names the company. Using the same test again to decide treasury ownership
+adds no evidence.
+
+**The rows are not giving.** Of the 1,328, the FEC's own line label is
+`Other Federal Receipts (Dividends, Interest, etc.).` on **873 rows /
+$2,629,439.21** and `Total Amount of Other Receipts` on 393 rows / $314,445.18;
+only 52 rows / $47,300.88 sit on a contributions line. The engine has already
+reached the same conclusion independently: **1,250 of the 1,328 rows carry
+`receipt_role = unverified_other_receipt`** ($2,935,434.79) and only 71 rows
+($1,153,768.96) are role `contribution`. Across the wider corporate feed the memo
+text on such rows reads `INTEREST` (822), `DIVIDEND INCOME` (129), `INTEREST INCOME`
+(90), `INTEREST EARNED` (32), `BANK INTEREST` (16). These are banks paying interest
+on the committee's own deposit account, reported with the bank as the ORG
+contributor - not the bank giving money.
+
+**Federal-candidate check, as asked.** 415 of the matched rows,
+$347,611.99, are receipts of federal candidate committees (`committee_type`
+H/S/P). Corporate treasury money cannot lawfully go to a federal candidate, so every
+one of those rows is evidence of a matching error rather than of treasury giving.
+The pattern is unmistakable once listed: `WELLS FARGO BANK` -> `RICK SCOTT FOR
+FLORIDA` $1.15; `BANK OF AMERICA` -> `FRIENDS OF CHRIS MURPHY` $46.96, $33.83,
+$24.31 in consecutive months; `US BANK` -> `SENSENBRENNER COMMITTEE` $1.55, $1.50,
+$1.55; `PNC BANK` -> `VOLUNTEERS FOR SHIMKUS` $49.97; `CAPITAL ONE BANK` ->
+`CITIZENS FOR BOYLE` $44.41, $21.54, $26.71. Small, recurring, monthly, from the
+bank that holds the account: interest, not contributions.
+
+### 11d. The narrower candidate set Paul may actually want
+
+Restricting to the rows the engine already calls contributions
+(`receipt_role == contribution`) gives **71 rows / $1,153,768.96**, which is
+**0.85x** the workbook Corporate tier - inside the tripwire. Per company:
+
+| Company | Rows | Gross | To federal candidates |
+|---|---|---|---|
+| Bank of America NA | 19 | $1,010,980.39 | 0 |
+| Goldman Sachs Bank NA | 8 | $109,368.19 | 3 / $6,800.00 |
+| Truist Bank | 21 | $17,169.50 | 1 / -$36.00 |
+| JP Morgan Chase Bank NA | 2 | $5,800.00 | 2 / $5,800.00 |
+| Wells Fargo Bank NA | 7 | $4,910.96 | 4 / $1,552.91 |
+| Citibank | 6 | $4,364.44 | 6 / $4,364.44 |
+| Morgan Stanley Bank | 2 | $600.00 | 0 |
+| PNC Bank NA | 5 | $557.00 | 3 / $2.00 |
+| Capital One Bank NA | 1 | $18.48 | 1 / $18.48 |
+
+I did not add these either, for three reasons Paul should weigh:
+
+1. **One row is 87% of it.** A single 2021-01-12 receipt, `BANK OF AMERICA` ->
+   `PIC 2021, INC.` for $1,000,000.00, carries the total. Corporate money to a
+   presidential inaugural committee is lawful, so this one is plausibly real
+   treasury giving - but a "Corporate tier" that is one row is a finding, not a
+   tier, and the 0.85x agreement with the workbook may be coincidence.
+2. **It still contains non-treasury names.** `GOLDMAN SACHS PHILANTHROPY FUND`
+   ($100,000.00) and `MORGAN STANLEY GIFT FUND` ($600.00) are donor-advised funds,
+   not company treasuries; `COMPUTERSHARE/KCC - CS WANG V. WELLS FARGO BANK
+   SETTLEMENT` ($308.05) is a settlement administrator; `CAPITAL ONE CAFE - UNION
+   SQUARE` ($18.48) is a coffee shop; several `BANK OF AMERICA` -> `COMMON POWER`
+   rows are memoed `REFUND, NON-CONTRIBUTION ACCOUNT`.
+3. **`CITI HEALTH HOME CARE SERVICES` is a false positive of the whole-token test**
+   against the roster variant `Citi`. It is not Citibank. Two rows, $0.00, so it
+   costs nothing here - but it shows the test will attach unrelated companies to a
+   short roster variant, which is exactly the failure mode a treasury register
+   would make permanent.
+
+My recommendation, for Paul to accept or reject: do not build the treasury register
+from a name test at all. Build it from the receipt evidence - role `contribution`,
+a non-candidate recipient, and a named corporate entity - and adjudicate the
+surviving handful by hand. On Banking that is a list of well under 71 rows.
+
+### 11e. Tests
+
+`python -m pytest tests/test_cross_reference_engine.py tests/test_cross_reference_runner.py tests/test_cross_reference_digest.py tests/test_cross_reference_data.py -q`
+(`receipts/pytest_after_alias_fix.txt`): `113 passed, 27 subtests passed in 8.04s`.

@@ -1,0 +1,65 @@
+treasury_entity candidate analysis for Banking (NOTHING WAS ADDED - tripwire fired)
+run 20260918T173505-84f3f46b7351; workbook Corporate tier $1,365,262.42
+roster = companies table variants for Banking + inputs/verified_employer_aliases.csv
+test   = whole-token _name_patterns/_text_names, twin of cross_reference_engine.py:74-95
+====================================================================================================
+
+A. ALL matching organization_unverified ORG rows (what the instruction's test selects)
+  Wells Fargo Bank NA      rows=  516 $ 1,262,062.03  federal-candidate: 123 rows / $-2,101.85
+  Bank of America NA       rows=   77 $ 1,027,866.34  federal-candidate: 51 rows / $3,583.41
+  PNC Bank NA              rows=   96 $   712,318.82  federal-candidate: 28 rows / $34,256.32
+  JP Morgan Chase Bank NA  rows=  187 $   553,505.28  federal-candidate: 3 rows / $5,800.00
+  Truist Bank              rows=   80 $   157,289.89  federal-candidate: 36 rows / $124,213.19
+  Citibank                 rows=  172 $   123,867.72  federal-candidate: 29 rows / $19,468.81
+  Goldman Sachs Bank NA    rows=   10 $   111,892.73  federal-candidate: 4 rows / $9,300.00
+  US Bank NA               rows=   30 $    74,331.13  federal-candidate: 27 rows / $70,476.80
+  Capital One Bank NA      rows=  140 $    46,522.88  federal-candidate: 104 rows / $43,147.29
+  Morgan Stanley Bank      rows=   20 $    41,046.93  federal-candidate: 10 rows / $39,468.02
+  TOTAL 1328 rows / $4,110,703.75   = 3.01x the workbook Corporate tier
+  federal-candidate receipts among them: 415 rows / $347,611.99
+  TRIPWIRE (> ~2x): FIRES - treasury records withheld
+  ORG rows the roster does not carry: 0 rows / $0.00
+
+B. WHY those rows are not treasury giving - FEC line label of the same rows
+    873 rows $ 2,629,439.21  'Other Federal Receipts (Dividends, Interest, etc.).'
+      3 rows $ 1,100,000.00  '(blank)'
+    393 rows $   314,445.18  'Total Amount of Other Receipts'
+     52 rows $    47,300.88  'Contributions From Individuals/Persons Other Than Political Committees'
+      4 rows $    15,000.00  'Transfers from authorized committees'
+      2 rows $     4,500.00  'Non-Federal Receipts from Persons Levin (L-1A)'
+      1 rows $        18.48  'Contributions From the Candidate'
+
+   receipt_role the engine already assigned them:
+   1250 rows $ 2,935,434.79  'unverified_other_receipt'
+     71 rows $ 1,153,768.96  'contribution'
+      5 rows $    17,000.00  'transfer_receipt'
+      2 rows $     4,500.00  'unverified_receipt_role'
+
+C. The narrower subset Paul may actually want: receipt_role == contribution
+  Bank of America NA       rows=  19 $1,010,980.39  federal-candidate: 0 rows / $0.00
+        BANK OF AMERICA                                             18 $1,010,480.39
+        MERRILL LYNCH, PIERCE, FENNER & SMITH INC.                   1 $     500.00
+  Goldman Sachs Bank NA    rows=   8 $  109,368.19  federal-candidate: 3 rows / $6,800.00
+        GOLDMAN SACHS PHILANTHROPY FUND                              2 $ 100,000.00
+        GOLDMAN SACHS & CO. LLC                                      2 $   5,800.00
+        GOLDMAN SACHS                                                4 $   3,568.19
+  Truist Bank              rows=  21 $   17,169.50  federal-candidate: 1 rows / $-36.00
+        TRUIST                                                       3 $  16,503.49
+        TRUIST BANK                                                 18 $     666.01
+  JP Morgan Chase Bank NA  rows=   2 $    5,800.00  federal-candidate: 2 rows / $5,800.00
+        JP MORGAN SECURITIES LLC                                     2 $   5,800.00
+  Wells Fargo Bank NA      rows=   7 $    4,910.96  federal-candidate: 4 rows / $1,552.91
+        WELLS FARGO                                                  3 $   4,050.00
+        WELLS FARGO BANK                                             3 $     552.91
+        COMPUTERSHARE/KCC - CS WANG V. WELLS FARGO BANK SETTLEMENT   1 $     308.05
+  Citibank                 rows=   6 $    4,364.44  federal-candidate: 6 rows / $4,364.44
+        CITI CARDS                                                   4 $   4,364.44
+        CITI HEALTH HOME CARE SERVICES                               2 $       0.00
+  Morgan Stanley Bank      rows=   2 $      600.00  federal-candidate: 0 rows / $0.00
+        MORGAN STANLEY GIFT FUND                                     2 $     600.00
+  PNC Bank NA              rows=   5 $      557.00  federal-candidate: 3 rows / $2.00
+        PNC BANK                                                     5 $     557.00
+  Capital One Bank NA      rows=   1 $       18.48  federal-candidate: 1 rows / $18.48
+        CAPITAL ONE CAFE - UNION SQUARE                              1 $      18.48
+  TOTAL 71 rows / $1,153,768.96   = 0.85x the workbook Corporate tier
+  federal-candidate receipts among them: 20 rows / $18,501.83 (unlawful for corporate treasury)

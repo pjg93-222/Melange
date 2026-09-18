@@ -149,3 +149,45 @@ Still Paul's calls, all listed with evidence in REVIEW.md 10b and 10e:
 `state/cross-reference/latest.json` now points at `20260918T164949-17cd31b9e70f`, so the console on
 8806 shows this run once Paul restarts it. No port was bound and no run was
 deleted by this lane.
+
+## Alias fix landed, treasury records withheld, 2026-09-18 (follow-up to the register work above)
+
+**Done.** Three of the four misfiled aliases in REVIEW.md 10e are removed:
+`BANK OF AMERICA CORPORATION STATE AND FEDERAL PAC` off `C00364778`,
+`U.S. BANCORP POLITICAL PARTICIPATION PROGRAM` off `C00488882`, and the Truist
+federal/state/local name off `C00386524`. The 43, 136 and 9 rows that reported those
+spellings now cite one correct evidence ID instead of two, with bucket and cents
+unchanged (`receipts/alias_fix_verification.txt`). Run `20260918T173505-84f3f46b7351`
+reproduces every summary figure of the previous run exactly - all fields equal:
+True - which is the intended result for a citation-only change.
+
+**Kept deliberately.** `WELLS FARGO AND COMPANY EMPLOYEES GOOD GOVERNMENT FEDERAL
+FUND II` stays on `C00034595`. The committee it really names, `C00300178`, is not in
+the register, so 242 rows / $572,500.00 match only through that alias and removing
+it would strand all of them. Paul's call: register `C00300178` (its master field 14
+names another committee, not Wells Fargo) or leave the alias.
+
+**Withheld: the `treasury_entity` records.** The instructed evidence - Banking
+roster variants plus `verified_employer_aliases.csv`, whole-token test - selects
+1,328 ORG rows / $4,110,703.75, **3.01x** the workbook's $1,365,262.42 Corporate tier.
+Tripwire fired, so nothing was added and `corporate_original` stays
+$0.00. The evidence in REVIEW.md 11c is that these
+rows are bank interest, not giving: 873 rows / $2,629,439.21 sit on the FEC line
+`Other Federal Receipts (Dividends, Interest, etc.).`, 1,250 of 1,328 already carry
+`receipt_role = unverified_other_receipt`, and 415 rows / $347,611.99 are
+receipts of **federal candidate** committees, which corporate treasury money cannot
+lawfully be. The roster test also matched 1,328 of 1,328 rows - no discriminating
+power, because naming the company is what put them in the bucket.
+
+Next decisions for Paul, in REVIEW.md 11d:
+
+1. Whether the Corporate tier should be built from receipt evidence (role
+   `contribution` + non-candidate recipient + named corporate entity) rather than a
+   name test. The role-`contribution` subset is 71 rows / $1,153,768.96 = 0.85x the
+   workbook, but $1,000,000.00 of it is a single `BANK OF AMERICA` -> `PIC 2021,
+   INC.` row and the rest still holds donor-advised funds, a settlement
+   administrator and a coffee shop.
+2. `C00300178` (see above).
+3. `CITI HEALTH HOME CARE SERVICES` matches the roster variant `Citi` on the
+   whole-token test and is not Citibank - worth a roster exclusion before any
+   treasury work.
