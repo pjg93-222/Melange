@@ -306,7 +306,9 @@ CATALOG_KEYS_S3B = frozenset({'id', 'name', 'sha256', 'row_count', 'committees',
                               'delimiter', 'header_source',
                               # S7
                               'categories', 'excluded_rows', 'catalog_version', 'state', 'reread', 'stale',
-                              'rows_read'})
+                              'rows_read',
+                              # S6: the industry a Mentat workbook file name declares
+                              'industry'})
 COMMITTEE_KEYS = frozenset({'id', 'name', 'rows', 'supported_rows', 'excluded_rows', 'category',
                             'category_source'})
 

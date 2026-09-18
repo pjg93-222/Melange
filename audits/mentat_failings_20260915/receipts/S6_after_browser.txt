@@ -1,0 +1,57 @@
+STEP 1: build two industry-workbook fixtures, a two-header workbook and a third CSV
+PASS step 1 (0.6s) - fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-s6-fixtures-BkCY2r
+STEP 2: launch a scratch console on a free port with a temp data root
+PASS step 2 (0.3s) - console ready on 55463, data root C:\Users\pgoff\AppData\Local\Temp\mentat-s6-data-BCQM4i
+STEP 3: launch headless Chrome and open the PAC evidence tab
+PASS step 3 (0.9s) - tab open, status "Finding imported files and saved snapshots…", empty state names both actions
+STEP 4: PORTED: the path box, the Browse panel and the worksheet picker exist in the page
+PASS step 4 (0.2s) - Import drawer opens and carries the path box, header box, Browse and the picker
+STEP 5: PORTED: upload before the console token is assigned must not 403
+PASS step 5 (0.6s) - imported Crypto Industry Spending Overview.xlsx with no token wait: "Crypto Industry Spending Overview.xlsx · 3 PACs in file · 3 shown · 8 rows in file"
+STEP 6: the Source select labels the import by the industry its file name declares
+PASS step 6 (0.0s) - Source options ["Choose a file or a snapshot","Crypto · 8 rows","Snapshot · Coinbase · 2026","Snapshot · Coinbase · 2024, 2026"]
+STEP 7: import the second workbook through the path box
+PASS step 7 (0.7s) - two imports listed: ["Choose a file or a snapshot","Credit Union · 4 rows","Crypto · 8 rows","Snapshot · Coinbase · 2026","Snapshot · Coinbase · 2024, 2026"]
+STEP 8: PORTED: choosing the type Super PAC shows FAIRSHAKE and hides DCCC
+PASS step 8 (0.0s) - type Super PAC leaves ["FAIRSHAKE · C00835959 · Super PAC · 4 rows"]
+STEP 9: PORTED: typing "dccc" with All types shows only DCCC
+PASS step 9 (0.0s) - search narrowed to DCCC: "Crypto Industry Spending Overview.xlsx · 3 PACs in file · 1 shown matching \"dccc\" · 8 rows in file"
+STEP 10: PORTED: a search that matches nothing empties the PAC list and disables Add pane
+PASS step 10 (0.0s) - no match: Add pane disabled, status "Crypto Industry Spending Overview.xlsx · 3 PACs in file · 0 shown matching \"no-such-committee\" · 8 rows in file"
+STEP 11: add a DCCC pane from the Crypto workbook
+PASS step 11 (0.3s) - pane A DCCC $147,900 over 3 rows, chip ["DCCC · Crypto×"]
+STEP 12: add DCCC from the Credit Union workbook: two panes and the compare strip
+PASS step 12 (0.3s) - compare strip: 8 rows, Receipts $147,900 [100%] vs $2,700 [2%]
+STEP 13: no Map button anywhere: a control nobody can click is a mistake (Paul, 2026-09-17)
+PASS step 13 (0.0s) - zero Map buttons; the only disabled control is Add pane, and only when there is nothing to add
+STEP 14: the URL carries the prefixed pane keys and never the single-pane ones
+PASS step 14 (0.0s) - query ?a.source=csv&a.id=csv-6bb0617bdd031562a38798f062c4d5ff&a.committee=C00000935&b.source=csv&b.id=csv-bb9eeb0d76e8f033be85f324af08f75b&b.committee=C00000935
+STEP 15: reload that URL: both panes restore after the listing loads
+PASS step 15 (0.0s) - restored ["a:C00000935","b:C00000935"] from the permalink
+STEP 16: remove a pane from its chip: one pane left, the compare strip goes
+PASS step 16 (0.1s) - one pane left, query ?a.source=csv&a.id=csv-6bb0617bdd031562a38798f062c4d5ff&a.committee=C00000935
+STEP 17: PORTED: the CORPORATE row counts in Receipts and the Include=No row shows as excluded
+PASS step 17 (0.3s) - FAIRSHAKE $35,005,000 over 4 rows, 1 excluded badge in the drawer
+STEP 18: About these figures opens the file details and the parser warnings
+PASS step 18 (0.0s) - About these figures carries the SHA-256 provenance and the interpretation note
+STEP 19: the fourth pane fills the grid and Add pane refuses a fifth
+PASS step 19 (0.2s) - four panes, Add pane disabled, status "Credit Union Industry Spending Overview.xlsx · 3 PACs in file · 1 shown matching \"culac\" · 4 rows in file · 4 panes open · remove one to add another"
+STEP 20: a saved snapshot is listed as a source and opens as a pane
+PASS step 20 (0.4s) - snapshot pane open: ["Crypto · Spending workbook","Crypto · Spending workbook","Crypto · Spending workbook","Coinbase · Saved FEC snapshot · 2026-09-16"]
+STEP 21: PORTED: the Browse panel lists a folder on this computer and opens a file from it
+PASS step 21 (0.1s) - Browse listed 4 entries under the fixture folder
+STEP 22: the Import drawer imports a third file and it joins the Source list
+PASS step 22 (0.6s) - three imports listed: ["Choose a file or a snapshot","third.csv · 1 rows","Credit Union · 4 rows","Crypto · 8 rows","Snapshot · Coinbase · 2026","Snapshot · Coinbase · 2024, 2026"]
+STEP 23: PORTED: a workbook whose two sheets disagree on their header offers the worksheet picker
+PASS step 23 (0.6s) - worksheet picker offered ["Alpha","Beta"]
+STEP 24: PORTED: the re-read watch marks an import read under older rules
+PASS step 24 (2.5s) - the option said "re-reading under the current rules" and was disabled, then came back
+STEP 25: F7: Split with Graph gives one pane column, and the single view gives them back
+PASS step 25 (0.1s) - split with Graph: 1 column, back to 1 for 0 pane(s)
+STEP 26: F7: Follow Graph selection, with no graph loaded, says so rather than moving pane A
+PASS step 26 (1.9s) - Follow Graph with no graph loaded: pane A unchanged, no page error
+STEP 27: F7: a three-pane URL restores all three panes
+PASS step 27 (0.4s) - restored ["a:C00000935","b:C00000935","c:C00835959"] from a 3-pane permalink
+STEP 28: final check: zero pageerror entries and zero off-origin requests
+PASS step 28 (0.0s) - no page errors, no off-origin requests across every step
+ALL 28 STEPS PASSED

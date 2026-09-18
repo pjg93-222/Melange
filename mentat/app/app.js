@@ -395,8 +395,10 @@ async function init() {
   try { const session = await api('/api/session?light=1'); token = session.token; readOnly=!!session.read_only;
     try { renderBuild(session); scheduleBuildPoll(); } catch { }
     evidenceCollectionAvailable=!!session.evidence_collection_available;
-    $('evidence-collect').disabled=readOnly||!evidenceCollectionAvailable||!!evidenceJob;
-    if(!evidenceCollectionAvailable)$('evidence-job-status').textContent='Restart the MENTAT server to enable new snapshot collection. Saved evidence controls are ready to use.';
+    // The collector form lives in the PAC evidence tab's New snapshot drawer
+    // now (evidence.js owns that whole tab), so what this session says about
+    // the collector is handed over rather than reached for from here.
+    window.MentatEvidence?.setCollector(evidenceCollectionAvailable, readOnly);
     if(readOnly)showStatus('Read-only preview · the original console continues managing your active collection.');
     $('connection').textContent = '● Local connection';
     if(['loading','collection'].includes(currentView))poll(); }
@@ -412,163 +414,12 @@ $('resume-setup').addEventListener('click', async () => {
     $('start').textContent = 'Start collection'; showView('loading');
   } catch (error) { showError(error.message); }
 });
-let evidence = null;
 const currency = value => value == null ? 'Unresolved' : Number(value).toLocaleString('en-US', {style:'currency', currency:'USD', maximumFractionDigits:2});
-const sourceAnchor = (url, text) => /^https:\/\/(docquery\.fec\.gov|www\.fec\.gov)\//.test(url || '') ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(text)} ↗</a>` : escapeHtml(text);
-function renderEvidence() {
-  if (!evidence) return;
-  const cycle = Number($('evidence-cycle').value), committee = $('evidence-committee').value;
-  const finances = evidence.committee_finances.find(row => row.cycle === cycle && row.committee_id === committee);
-  const names = new Map(evidence.committee_finances.map(row => [row.committee_id, row.committee_name || row.committee_id]));
-  const receipts = evidence.receipts.filter(row => row.cycle === cycle && row.committee_id === committee);
-  const contributions = receipts.filter(row => row.included_company_contribution).reduce((sum,row) => sum + row.amount,0);
-  const conversions = receipts.filter(row => row.role === 'asset_liquidation').reduce((sum,row) => sum + row.amount,0);
-  $('evidence-scope').textContent = `Evidence collected ${evidence.retrieved_at?.slice(0,10) || 'date unavailable'}. ${evidence.scope}`;
-  setHtml('evidence-funding', `<div><span>${escapeHtml(evidence.company)} · direct itemized contributions</span><strong>${currency(contributions)}</strong><small>Includes reported in-kind value; excludes personal donations.</small></div><div><span>Exchange proceeds · excluded from contributions</span><strong>${currency(conversions)}</strong><small>Asset conversions are not another donation by the exchange.</small></div><div><span>Committee ending cash · all donors</span><strong>${currency(finances?.ending_cash_as_reported)}</strong><small>Financial summary through ${escapeHtml(finances?.coverage_end || 'unknown')}.</small></div>`);
-  const transfers = new Map();
-  for (const row of evidence.transfers.filter(row => row.cycle === cycle && row.source === committee)) {
-    const prior = transfers.get(row.destination) || {name:row.destination_name,amount:0}; prior.amount += row.amount; transfers.set(row.destination,prior);
-  }
-  const incoming = new Map();
-  for (const row of evidence.transfers.filter(row => row.cycle === cycle && row.destination === committee)) incoming.set(row.source, (incoming.get(row.source) || 0) + row.amount);
-  const incomingHtml = incoming.size ? '<h3 class="evidence-subheading">Incoming committee transfers</h3>' + [...incoming].map(([id,amount]) => `<p>${escapeHtml(names.get(id) || id)} → ${escapeHtml(names.get(committee) || committee)} <b>${currency(amount)}</b></p>`).join('') : '';
-  setHtml('evidence-transfers', incomingHtml + `<h3 class="evidence-subheading">Outgoing committee transfers</h3>` + ([...transfers].map(([id,row]) => `<p>${escapeHtml(names.get(committee) || committee)} → ${escapeHtml(row.name || names.get(id) || id)} <b>${currency(row.amount)}</b></p>`).join('') || '<p class="muted">No contribution or transfer disbursements found in this snapshot.</p>') + `<p class="muted">${finances?.regular_ie_reconciles ? 'The collected regular-report expenditure total matches the committee financial summary.' : 'The collected regular-report expenditure total differs from the financial summary. Coverage remains unresolved; no donor allocation is calculated.'}</p>`);
-  setHtml('evidence-receipts', receipts.map(row => `<tr><td>${escapeHtml(row.reported_name)}<small>${escapeHtml(label(row.role))} · ${row.included_company_contribution ? 'Included contribution' : 'Excluded from company contribution total'}</small></td><td>${escapeHtml(row.date)}</td><td class="number">${currency(row.amount)}</td><td>${sourceAnchor(row.source_url, row.description || 'Original filing')}<small>Line ${escapeHtml(row.line_number)} · ${escapeHtml(row.sub_id)}</small></td></tr>`).join('') || '<tr><td colspan="4">No matching company receipts in this committee and cycle.</td></tr>');
-  const candidates = evidence.candidate_activity.filter(row => row.cycle === cycle && row.committee_id === committee).sort((a,b) => b.committee_spending - a.committee_spending);
-  const estimate = evidence.cash_estimates?.cycles?.find(row => row.cycle === cycle);
-  const candidateEstimates = new Map();
-  const candidateKey = row => JSON.stringify([row.candidate_id_as_filed, row.candidate_name_as_filed, row.direction]);
-  if (estimate?.status === 'estimated') {
-    setHtml('allocation-status', '<div class="allocation-status allocation-ready"><strong>Cash ledger reconciled · conditional estimate available</strong><p>Uses proportional pooling and receipts-before-payments ordering within each day. These are modeling assumptions, not verified donor choices.</p></div>');
-    const selected = estimate.allocations.filter(row => row.committee === committee);
-    const values = new Map();
-    for (const row of selected) {
-      const kind = row.kind === 'candidate' ? `candidate · ${row.direction}` : row.kind;
-      const value = row.estimated_funding[evidence.company] || 0;
-      values.set(kind, (values.get(kind) || 0) + value);
-      if (row.kind === 'candidate') candidateEstimates.set(candidateKey(row), (candidateEstimates.get(candidateKey(row)) || 0) + value);
-    }
-    setHtml('allocation-results', [...values].map(([kind,value]) => `<div class="allocation-result"><span>${escapeHtml(evidence.company)} · estimated ${escapeHtml(label(kind))}</span><strong>${currency(value)}</strong></div>`).join('') + `<div class="allocation-result"><span>Estimated company cash retained</span><strong>${currency(estimate.closing_funding?.[committee]?.[evidence.company] || 0)}</strong></div>`);
-  } else {
-    const issues = estimate?.issues || [];
-    setHtml('allocation-status', `<div class="allocation-status"><strong>Company cash estimate awaits reconciliation</strong><p>${estimate ? 'The saved network does not yet support a balanced, dated cash ledger. An unavailable estimate is not zero.' : 'No verified cash-estimation receipt is available for this snapshot.'}</p>${issues.length ? '<details><summary>' + issues.length + ' outstanding checks across the selected cycle’s network</summary><ul>' + issues.map(issue => `<li><b>${escapeHtml(names.get(issue.committee_id) || issue.committee_id || 'Network')}</b> — ${escapeHtml(issue.detail)}</li>`).join('') + '</ul></details>' : ''}</div>`);
-    setHtml('allocation-results', '');
-  }
-  setHtml('evidence-candidates', candidates.map(row => `<tr><td><details><summary>${escapeHtml(row.candidate_name_as_filed || 'Candidate name missing')}</summary><p>As-filed ID: ${escapeHtml(row.candidate_id_as_filed)}<br>Register: ${escapeHtml(row.registered_candidate_name || 'Unresolved')}<br>${row.identity_status === 'name_matches_registration' ? 'Name matches the candidate register.' : 'Name / ID needs review. Aliases and filing errors can cause differences; no automatic reassignment.'}</p></details></td><td>${escapeHtml(row.direction)}</td><td class="number">${currency(row.committee_spending)}</td><td class="number">${estimate?.status === 'estimated' ? currency(candidateEstimates.get(candidateKey(row)) ?? null) : 'Awaiting reconciliation'}</td><td>${escapeHtml(row.first_date)}<small>to ${escapeHtml(row.last_date)}</small></td><td>${sourceAnchor(row.source_urls?.[0], 'Filing')}<small>${row.source_rows} records</small></td></tr>`).join(''));
-  const timing = (evidence.temporal_routes || []).filter(row => row.cycle === cycle);
-  const assets = new Set(timing.filter(row => row.status === 'asset_liquidation_link_required').map(row => row.receipt_sub_id)).size;
-  $('evidence-timing').textContent = `${assets} in-kind receipt(s) in this cycle require a documented liquidation link before a cash route can be evaluated. Date-compatible routes are possibilities, not assigned dollars. Transfers outside the ${evidence.committee_finances.filter(row => row.cycle === cycle).length}-committee snapshot remain outside its coverage.`;
-}
-let graphContext=null, evidenceRevision=0;
-let evidencePreference={};
-try{evidencePreference=JSON.parse(localStorage.getItem('mentat-evidence-selection')||'{}')||{};}catch{}
-if(['saved','graph'].includes(evidencePreference.mode))$('evidence-mode').value=evidencePreference.mode;
-function saveEvidenceSelection() {
-  evidencePreference={mode:$('evidence-mode').value,snapshot:$('evidence-snapshot').value,
-    cycle:$('evidence-cycle').value,committee:$('evidence-committee').value};
-  try{localStorage.setItem('mentat-evidence-selection',JSON.stringify(evidencePreference));}catch{}
-}
-const followsGraph=()=>$('evidence-mode').value==='graph';
-function clearEvidence(message) {
-  evidence=null; $('evidence-panel').hidden=true; $('evidence-empty').hidden=false;
-  $('evidence-empty').textContent=message;
-}
-async function loadEvidence() {
-  const id=$('evidence-snapshot').value, ticket=++evidenceRevision;
-  const previousCycle=$('evidence-cycle').value||evidencePreference.cycle;
-  clearEvidence('Loading saved evidence…');
-  if(!id)return;
-  let body;
-  try{body=await api('/api/evidence?id='+encodeURIComponent(id));}
-  catch(error){if(ticket===evidenceRevision)clearEvidence(error.message);return;}
-  if(ticket!==evidenceRevision)return;
-  const graphCycle=followsGraph()?graphContext?.filters.cycle:'';
-  const cycles=[...new Set(body.committee_finances.map(row=>row.cycle))].filter(c=>!graphCycle||String(c)===graphCycle).sort((a,b)=>b-a);
-  if(!cycles.length){clearEvidence('No evidence snapshot covers the loaded graph cycle.');return;}
-  evidence=body;
-  $('evidence-cycle').replaceChildren(...cycles.map(c=>new Option(`${c-1}–${c}`,c)));
-  if(cycles.some(c=>String(c)===previousCycle))$('evidence-cycle').value=previousCycle;
-  $('evidence-cycle').disabled=!!graphCycle;
-  $('evidence-panel').hidden=false; $('evidence-empty').hidden=true; updateEvidenceCommittees();
-}
-function updateEvidenceCommittees() {
-  if(!evidence)return;
-  const previous=$('evidence-committee').value||evidencePreference.committee;
-  const names=new Map(evidence.committee_finances.filter(row=>String(row.cycle)===$('evidence-cycle').value).map(row=>[row.committee_id,(row.committee_name||row.committee_id)+(row.category?` · ${row.category}`:'')]));
-  $('evidence-committee').replaceChildren(...[...names].map(([id,name])=>new Option(`${name} · ${id}`,id)));
-  if(names.has(previous))$('evidence-committee').value=previous;
-  renderEvidence();saveEvidenceSelection();
-}
-async function initEvidence() {
-  if(!savedEvidenceVisible())return;
-  const ticket=++evidenceRevision;
-  const previous=$('evidence-snapshot').value||evidencePreference.snapshot;
-  $('evidence-snapshot').replaceChildren();
-  clearEvidence('Finding saved evidence…');
-  if(followsGraph()&&!graphContext){clearEvidence('Load a graph, or choose saved evidence above.');return;}
-  try {
-    const snapshotCatalog=await api('/api/evidence');
-    if(ticket!==evidenceRevision)return;
-    const companies=graphContext?(graphContext.filters.company?[graphContext.filters.company]:(graphContext.options?.companies||graphContext.companies.map(row=>row.id))):[];
-    const names=new Set(companies.map(MentatState.normalizeName));
-    const matches=snapshotCatalog.snapshots.filter(row=>!followsGraph()||(names.has(MentatState.normalizeName(row.company)) &&
-      (!graphContext.filters.cycle || (row.cycles || []).some(c=>String(c)===graphContext.filters.cycle)))).sort((a,b)=>String(b.retrieved_at||'').localeCompare(String(a.retrieved_at||'')));
-    $('evidence-snapshot').replaceChildren(...matches.map(row=>new Option(`${row.company} · ${row.retrieved_at?.slice(0,10)||'Undated'}`,row.id)));
-    if(matches.some(row=>row.id===previous))$('evidence-snapshot').value=previous;
-    if(matches.length)await loadEvidence();else clearEvidence(followsGraph()?'No saved PAC evidence matches the loaded graph companies and cycle. Choose saved evidence above to explore another snapshot.':'No saved PAC evidence is available.');
-  }catch(error){if(ticket===evidenceRevision)clearEvidence(error.message);}
-}
-let savedEvidenceActive=false;
-function savedEvidenceVisible(){return !$('view-evidence').hidden&&$('evidence-source').value==='snapshot';}
-function activateSavedEvidence(){const active=savedEvidenceVisible();if(active&&!savedEvidenceActive)initEvidence();else if(!active&&savedEvidenceActive)++evidenceRevision;savedEvidenceActive=active;}
-window.addEventListener('mentat:view',activateSavedEvidence);
-window.addEventListener('DOMContentLoaded',activateSavedEvidence);
-$('evidence-source').addEventListener('change',activateSavedEvidence);
-window.addEventListener('mentat:graph', event=>{graphContext=event.detail;if(followsGraph())initEvidence();});
-$('evidence-mode').addEventListener('change', ()=>{saveEvidenceSelection();initEvidence();});
-$('evidence-refresh').addEventListener('click', initEvidence);
-$('evidence-snapshot').addEventListener('change', () => loadEvidence().catch(error => clearEvidence(error.message)));
-$('evidence-cycle').addEventListener('change', updateEvidenceCommittees);
-$('evidence-committee').addEventListener('change', ()=>{renderEvidence();saveEvidenceSelection();});
-$('evidence-use-config').addEventListener('click',()=>{
-  if(!evidence){$('evidence-job-status').textContent='Choose a saved snapshot first.';return;}
-  $('evidence-company-input').value=evidence.company;
-  $('evidence-cycles-input').value=[...new Set(evidence.committee_finances.map(r=>r.cycle))].join(', ');
-  $('evidence-committees-input').value=[...new Set(evidence.committee_finances.map(r=>r.committee_id))].join(', ');
-  $('evidence-aliases-input').value=(evidence.aliases||[]).join('\n');
-});
-let evidenceJob='', evidenceJobTimer;
-async function pollEvidenceJob() {
-  if(!evidenceJob)return;
-  try {
-    const job=await api('/api/evidence-job?id='+encodeURIComponent(evidenceJob));
-    $('evidence-job-status').textContent=job.state==='collecting'?`Collecting ${job.company} evidence… Saved responses are retained as collection progresses.`:job.message||label(job.state);
-    if(job.state!=='collecting'){
-      clearTimeout(evidenceJobTimer);$('evidence-collect').disabled=readOnly||!evidenceCollectionAvailable;
-      const id=evidenceJob;evidenceJob='';try{localStorage.removeItem('mentat-evidence-job');}catch{}
-      if(job.state==='completed'){
-        $('evidence-mode').value='saved';await initEvidence();
-        if([...$('evidence-snapshot').options].some(o=>o.value===id)){$('evidence-snapshot').value=id;await loadEvidence();}
-      }
-      return;
-    }
-  }catch(error){$('evidence-job-status').textContent=error.message+' · retrying';}
-  evidenceJobTimer=setTimeout(pollEvidenceJob,3000);
-}
-$('evidence-form').addEventListener('submit',async event=>{
-  event.preventDefault();if(evidenceJob)return;
-  $('evidence-collect').disabled=true;
-  try {
-    const job=await api('/api/evidence-collect',{company:$('evidence-company-input').value,
-      aliases:$('evidence-aliases-input').value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean),
-      committees:$('evidence-committees-input').value,cycles:$('evidence-cycles-input').value});
-    evidenceJob=job.id;
-    try{localStorage.setItem('mentat-evidence-job',evidenceJob);}catch{}
-    pollEvidenceJob();
-  }catch(error){$('evidence-job-status').textContent=error.message;$('evidence-collect').disabled=readOnly||!evidenceCollectionAvailable;}
-});
-try{evidenceJob=localStorage.getItem('mentat-evidence-job')||'';}catch{}
-if(evidenceJob){$('evidence-collect').disabled=true;pollEvidenceJob();}
+/* The PAC evidence tab - its scope bar, its panes, the saved-snapshot reader and
+   the collector form - lives in app/evidence.js (S6). This file keeps the tab
+   and split-view plumbing, the `mentat:graph` dispatch Graph uses and
+   `MentatEvidence.setCollector`, which hands over what /api/session says about
+   the collector. `currency` stays here because every view formats money. */
 /* Build stamp and stale-build guard. A console window outlives edits to the
    server tree, so the page states which build answered it, and offers the
    same-port restart the launcher performs. Both elements are built here
@@ -699,4 +550,3 @@ async function pollBuild() {
 restoreDraft();
 showView(location.hash.slice(1));
 init();
-activateSavedEvidence();

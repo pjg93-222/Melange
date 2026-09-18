@@ -102,7 +102,7 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  '/mentat-icon.svg': ('mentat-icon.svg', 'image/svg+xml'),
                  "/style.css": ("style.css", "text/css"), "/template.csv": ("template.csv", "text/csv"),
                  '/workspace.css': ('workspace.css', 'text/css'),
-                 '/evidence-csv.js': ('evidence-csv.js', 'text/javascript'),
+                 '/evidence.js': ('evidence.js', 'text/javascript'),
                  '/charts.js': ('charts.js', 'text/javascript'), '/chart-math.js': ('chart-math.js', 'text/javascript'),
                  '/graph.js': ('graph.js', 'text/javascript'),
                  '/scope.js': ('scope.js', 'text/javascript'),
@@ -1580,6 +1580,10 @@ class Console:
             return {'sources':store.sources(), 'limits':evidence_csv.limits(), 'session_only':False}
         return store.select(identifier, committee, cycle, *evidence_csv.page_args(offset, limit))
 
+    def evidence_csv_summary(self, identifier='', committee='', cycle=''):
+        """One committee's figures for a pane header, without its rows."""
+        return self.evidence_store.summary(identifier, committee, cycle)
+
     def summary(self, include_archived=False):
         runs = self.runs()
         try:
@@ -2072,6 +2076,12 @@ class Handler(BaseHTTPRequestHandler):
             if parsed.path == '/api/evidence-csv':
                 if query.get('job', [''])[0]:
                     return self.send(app.evidence_csv_job(query.get('job', [''])[0]))
+                # A pane asks for its committee's figures, not its rows: same id
+                # and committee, no paging, and the same refusals (an unknown
+                # committee is still M_COMMITTEE 400).
+                if query.get('summary', [''])[0] and query.get('id', [''])[0]:
+                    return self.send(app.evidence_csv_summary(query.get('id', [''])[0],
+                        query.get('committee', [''])[0], query.get('cycle', [''])[0]))
                 # Page arguments are validated by the reader, which answers with
                 # the reader's own message. A bare int() leaked Python's own text
                 # ("invalid literal for int()") into the status line.

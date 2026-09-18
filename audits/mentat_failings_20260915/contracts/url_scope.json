@@ -1,14 +1,15 @@
 {
   "contract": "url_scope",
-  "version": 1,
-  "owner": "S5",
+  "version": 2,
+  "owner": "S5; pane keys S6",
   "produced_by": [
     "mentat/app/scope.js:write",
     "mentat/app/graph.js:writeScope (called from refresh(), the one path every Graph control change reaches)",
     "mentat/app/chart-studio.js:selectContributionDataset (industry)",
     "mentat/app/chart-studio.js:saveViewNamed (saved, on a successful save)",
     "mentat/app/chart-studio.js:openView (saved, on a successful open)",
-    "mentat/app/chart-studio.js:#graph-open-builder onclick (industry, company, cycle)"
+    "mentat/app/chart-studio.js:#graph-open-builder onclick (industry, company, cycle)",
+    "mentat/app/evidence.js:writeScope (the prefixed pane keys a.* - d.*, and category for the committee-type filter; called from every control that opens, closes or re-points a pane)"
   ],
   "consumed_by": [
     "mentat/app/scope.js:read",
@@ -16,9 +17,9 @@
     "mentat/app/graph.js:applyUrlScope (after loadCatalog fills the selects)",
     "mentat/app/chart-studio.js:loadContributions (industry, company, cycle, saved)",
     "mentat/app/cross-reference.js:refresh (industry -> GET /api/cross-reference?industry=)",
-    "S6 (inherits this vocabulary for the pane model: evidence, id, committee, offset, limit)"
+    "mentat/app/evidence.js:restorePanes (a.* - d.*, category), after GET /api/evidence-csv and GET /api/evidence have answered, the same pattern graph.js:applyUrlScope uses"
   ],
-  "description": "The console's URL scheme. The hash names the tab (app.js showView) and the query string carries the scope, so a permalink, a reload and a tab switch are one operation. Values are encodeURIComponent-encoded and decoded with URLSearchParams; keys are plain. write() merges into the live query: an empty value removes its key, unknown keys are preserved in place, existing keys keep their order and new keys append. A value write() would refuse is never put in the URL, so anything read() rejects could only have been typed by hand. Tab switches stay on history.replaceState (Paul's ruling C); pushState is never used. Orientation only - the examples are the contract.",
+  "description": "The console's URL scheme. The hash names the tab (app.js showView) and the query string carries the scope, so a permalink, a reload and a tab switch are one operation. Values are encodeURIComponent-encoded and decoded with URLSearchParams; keys are plain. write() merges into the live query: an empty value removes its key, unknown keys are preserved in place, existing keys keep their order and new keys append. A value write() would refuse is never put in the URL, so anything read() rejects could only have been typed by hand. Tab switches stay on history.replaceState (Paul's ruling C); pushState is never used. Orientation only - the examples are the contract. v2 (S6, 2026-09-17): up to four PAC evidence panes, each addressed by a PREFIXED key (a.source, a.id, a.committee, a.cycle ... d.*) so `cycle` goes on belonging to Graph and \"whose cycle is this?\" stays answerable. The pane's search text is transient and is never written; `category` carries the committee-type filter in the same spelling Graph uses. A fifth prefix is not a key this module knows, so e.id is preserved in the query and never read as scope.",
   "keys": {
     "industry": {
       "value": "The published industry label exactly as the snapshot registry lists it (S4 HANDOFF: 'Credit Union', 'Property & Casualty Insurance'). Any non-empty string; the label, never the slug. URL-encoded, so '&' survives.",
@@ -125,6 +126,166 @@
       "readers": [
         "mentat/app/chart-studio.js:17"
       ]
+    },
+    "a.source": {
+      "value": "Pane A. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "a.id": {
+      "value": "Pane A. The import id ('csv-' + 32 hex) or the saved snapshot's directory name. Import ids are content-addressed, so the same file gives the same id on every console and data root, and a permalink opens the same pane elsewhere.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "a.committee": {
+      "value": "Pane A. The FEC committee this pane follows, or 'unassigned' for the pseudo-committee of rows with no committee ID at all.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "a.cycle": {
+      "value": "Pane A. This pane's cycle as the four-digit end year, or absent for all cycles.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "b.source": {
+      "value": "Pane B. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "b.id": {
+      "value": "Pane B. The import id ('csv-' + 32 hex) or the saved snapshot's directory name. Import ids are content-addressed, so the same file gives the same id on every console and data root, and a permalink opens the same pane elsewhere.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "b.committee": {
+      "value": "Pane B. The FEC committee this pane follows, or 'unassigned' for the pseudo-committee of rows with no committee ID at all.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "b.cycle": {
+      "value": "Pane B. This pane's cycle as the four-digit end year, or absent for all cycles.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "c.source": {
+      "value": "Pane C. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "c.id": {
+      "value": "Pane C. The import id ('csv-' + 32 hex) or the saved snapshot's directory name. Import ids are content-addressed, so the same file gives the same id on every console and data root, and a permalink opens the same pane elsewhere.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "c.committee": {
+      "value": "Pane C. The FEC committee this pane follows, or 'unassigned' for the pseudo-committee of rows with no committee ID at all.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "c.cycle": {
+      "value": "Pane C. This pane's cycle as the four-digit end year, or absent for all cycles.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "d.source": {
+      "value": "Pane D. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "d.id": {
+      "value": "Pane D. The import id ('csv-' + 32 hex) or the saved snapshot's directory name. Import ids are content-addressed, so the same file gives the same id on every console and data root, and a permalink opens the same pane elsewhere.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "d.committee": {
+      "value": "Pane D. The FEC committee this pane follows, or 'unassigned' for the pseudo-committee of rows with no committee ID at all.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "d.cycle": {
+      "value": "Pane D. This pane's cycle as the four-digit end year, or absent for all cycles.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (add pane, remove pane, change source/committee/cycle, Follow Graph)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
     }
   },
   "reserved": [
@@ -134,7 +295,7 @@
     "offset",
     "limit"
   ],
-  "reserved_note": "S6's pane model owns these keys. S5 writes none of them and its write() merge preserves any that are present, exactly as it preserves studioPane.",
+  "reserved_note": "S6's SINGLE-pane keys, superseded by the prefixed set below and never written by anything. S5 writes none of them and write()'s merge preserves any that are present, exactly as it preserves studioPane and a fifth pane's e.* keys. A permalink that still carries them opens the tab with no pane, which is the point of the negative control.",
   "examples": [
     {
       "name": "graph_permalink_downstream_activity",
@@ -214,6 +375,68 @@
           "cycle": "2022"
         },
         "after": "/?industry=Banking&studioPane=B&cycle=2022#graph"
+      }
+    },
+    {
+      "name": "evidence_two_panes_same_pac_two_industries",
+      "why": "The lane's own case: DCCC in the Crypto workbook beside DCCC in the Credit Union workbook, which is what the compare strip exists for. Both panes restore from the URL after the listing loads.",
+      "url": "/?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00000935&b.source=csv&b.id=csv-a6591d397b2bda66ab7827b686e24098&b.committee=C00000935#evidence",
+      "view": "evidence",
+      "scope": {
+        "a.source": "csv",
+        "a.id": "csv-88ea228457b8499d1ec27eeaba967f61",
+        "a.committee": "C00000935",
+        "b.source": "csv",
+        "b.id": "csv-a6591d397b2bda66ab7827b686e24098",
+        "b.committee": "C00000935"
+      }
+    },
+    {
+      "name": "evidence_four_panes_mixed_sources_and_cycles",
+      "why": "The ceiling: four panes, an imported file and a saved snapshot side by side, two of them pinned to a cycle, plus the committee-type filter in the bar.",
+      "url": "/?category=Super%20PAC&a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00835959&a.cycle=2024&b.source=csv&b.id=csv-a6591d397b2bda66ab7827b686e24098&b.committee=C00007880&c.source=csv&c.id=csv-88ea228457b8499d1ec27eeaba967f61&c.committee=C00000935&c.cycle=2026&d.source=snapshot&d.id=fairshake-20260908&d.committee=C00835959#evidence",
+      "view": "evidence",
+      "scope": {
+        "category": "Super PAC",
+        "a.source": "csv",
+        "a.id": "csv-88ea228457b8499d1ec27eeaba967f61",
+        "a.committee": "C00835959",
+        "a.cycle": "2024",
+        "b.source": "csv",
+        "b.id": "csv-a6591d397b2bda66ab7827b686e24098",
+        "b.committee": "C00007880",
+        "c.source": "csv",
+        "c.id": "csv-88ea228457b8499d1ec27eeaba967f61",
+        "c.committee": "C00000935",
+        "c.cycle": "2026",
+        "d.source": "snapshot",
+        "d.id": "fairshake-20260908",
+        "d.committee": "C00835959"
+      }
+    },
+    {
+      "name": "evidence_unassigned_pseudo_committee",
+      "why": "Rows with no committee ID at all are a pane like any other, so the committee rule has to admit the one word that is not a committee id.",
+      "url": "/?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=unassigned#evidence",
+      "view": "evidence",
+      "scope": {
+        "a.source": "csv",
+        "a.id": "csv-88ea228457b8499d1ec27eeaba967f61",
+        "a.committee": "unassigned"
+      }
+    },
+    {
+      "name": "write_removes_a_closed_pane_and_keeps_the_others",
+      "why": "Removing pane B writes empty values for b.*, which drops those keys and leaves A and C where they were - the merge rule, applied to the pane set.",
+      "write": {
+        "before": "/?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00000935&b.source=csv&b.id=csv-a6591d397b2bda66ab7827b686e24098&b.committee=C00000935&c.source=snapshot&c.id=fairshake-20260908&c.committee=C00835959#evidence",
+        "partial": {
+          "b.source": "",
+          "b.id": "",
+          "b.committee": "",
+          "b.cycle": ""
+        },
+        "after": "/?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00000935&c.source=snapshot&c.id=fairshake-20260908&c.committee=C00835959#evidence"
       }
     }
   ],
@@ -310,6 +533,85 @@
       "expected": {
         "scope": {},
         "invalid": []
+      }
+    },
+    {
+      "why": "A NON-PREFIXED id is one of the superseded single-pane keys. It is not read as a pane id (and never written), so the tab opens with no pane rather than with a pane whose source nobody named. Silently dropped, like studioPane, because it is not this module's key at all.",
+      "url": "/?evidence=csv&id=csv-88ea228457b8499d1ec27eeaba967f61&committee=C00000935&offset=40&limit=100#evidence",
+      "view": "evidence",
+      "expected": {
+        "scope": {},
+        "invalid": []
+      }
+    },
+    {
+      "why": "A FIFTH pane. Four panes are the ruling, so e.* is not a key this module knows: it is preserved in the query untouched and never read as scope, so a hand-edited permalink cannot open a fifth pane through the back door.",
+      "url": "/?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00000935&e.source=csv&e.id=csv-a6591d397b2bda66ab7827b686e24098&e.committee=C00000935#evidence",
+      "view": "evidence",
+      "expected": {
+        "scope": {
+          "a.source": "csv",
+          "a.id": "csv-88ea228457b8499d1ec27eeaba967f61",
+          "a.committee": "C00000935"
+        },
+        "invalid": []
+      }
+    },
+    {
+      "why": "b.source=file is outside csv|snapshot, the only two kinds of source a pane can read. Dropped and reported, and write() will not mint it either, so no permalink can ask the client to fetch a route that does not exist.",
+      "url": "/?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00000935&b.source=file&b.id=csv-a6591d397b2bda66ab7827b686e24098#evidence",
+      "view": "evidence",
+      "expected": {
+        "scope": {
+          "a.source": "csv",
+          "a.id": "csv-88ea228457b8499d1ec27eeaba967f61",
+          "a.committee": "C00000935",
+          "b.id": "csv-a6591d397b2bda66ab7827b686e24098"
+        },
+        "invalid": [
+          {
+            "key": "b.source",
+            "value": "file",
+            "reason": "a pane source must be one of csv, snapshot"
+          }
+        ]
+      }
+    },
+    {
+      "why": "A pane cycle must be the four-digit end year, exactly as Graph's `cycle` is; '24' is the same refusal in a prefixed key.",
+      "url": "/?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00000935&a.cycle=24#evidence",
+      "view": "evidence",
+      "expected": {
+        "scope": {
+          "a.source": "csv",
+          "a.id": "csv-88ea228457b8499d1ec27eeaba967f61",
+          "a.committee": "C00000935"
+        },
+        "invalid": [
+          {
+            "key": "a.cycle",
+            "value": "24",
+            "reason": "cycle must be a four-digit election-cycle end year"
+          }
+        ]
+      }
+    },
+    {
+      "why": "A pane committee with a space in it is not a committee id and not \"unassigned\"; the client must not fire a select the console answers 400 for.",
+      "url": "/?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=DCCC%20committee#evidence",
+      "view": "evidence",
+      "expected": {
+        "scope": {
+          "a.source": "csv",
+          "a.id": "csv-88ea228457b8499d1ec27eeaba967f61"
+        },
+        "invalid": [
+          {
+            "key": "a.committee",
+            "value": "DCCC committee",
+            "reason": "a pane committee must be a committee id or \"unassigned\""
+          }
+        ]
       }
     }
   ]

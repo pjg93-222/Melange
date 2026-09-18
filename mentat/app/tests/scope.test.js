@@ -55,8 +55,8 @@ const writeExamples = contract.examples.filter(example => example.write);
 
 test('[url_scope] the contract itself is shaped the way contracts/README.md requires', () => {
   assert.equal(contract.contract, 'url_scope');
-  assert.equal(contract.version, 1);
-  assert.equal(contract.owner, 'S5');
+  assert.equal(contract.version, 2);
+  assert.equal(contract.owner, 'S5; pane keys S6');
   assert.ok(contract.produced_by.length >= 1, 'produced_by lists every producer');
   assert.ok(contract.consumed_by.length >= 1, 'consumed_by lists every consumer');
   assert.ok(contract.negative_controls.length >= 5, 'negative_controls is mandatory and non-empty');

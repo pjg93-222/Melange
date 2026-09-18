@@ -11,14 +11,35 @@
   // Every key this module owns, in the order it serializes them. A scope built
   // from nothing writes its keys in this order; a scope merged into a live
   // query leaves the keys already there where they are.
+  // S6's pane model (D-039). Up to four PAC evidence panes, each addressed by
+  // a PREFIXED key so `cycle` can go on belonging to Graph and "whose cycle is
+  // this?" stays answerable: `a.source` is the kind of source (an import or a
+  // saved snapshot), `a.id` the import id or the snapshot directory name,
+  // `a.committee` the FEC committee, `a.cycle` its cycle. A fifth prefix is not
+  // a key this module knows, so `e.id` is preserved in the query and never read
+  // as scope - the same treatment studioPane gets.
+  const PANES = ['a', 'b', 'c', 'd'];
+  const PANE_FIELDS = ['source', 'id', 'committee', 'cycle'];
+  const PANE_KEYS = [];
+  for (let pane = 0; pane < PANES.length; pane += 1) {
+    for (let field = 0; field < PANE_FIELDS.length; field += 1) {
+      PANE_KEYS.push(PANES[pane] + '.' + PANE_FIELDS[field]);
+    }
+  }
+  const PANE_SOURCES = ['csv', 'snapshot'];
+  const PANE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
+  const PANE_COMMITTEE = /^(unassigned|[A-Za-z0-9][A-Za-z0-9-]{0,31})$/;
   const KEYS = ['industry', 'company', 'cycle', 'mode', 'direction', 'tier',
-    'funding', 'category', 'recipient', 'saved'];
+    'funding', 'category', 'recipient', 'saved'].concat(PANE_KEYS);
   // The #graph-mode option values, verbatim (index.html:105).
   const MODES = ['direct', 'activity', 'estimates'];
   // S6's pane model owns these. S5 never writes one and never removes one.
   const RESERVED = ['evidence', 'id', 'committee', 'offset', 'limit'];
 
   const CYCLE_REASON = 'cycle must be a four-digit election-cycle end year';
+  const PANE_SOURCE_REASON = 'a pane source must be one of ' + PANE_SOURCES.join(', ');
+  const PANE_ID_REASON = 'a pane id must be an import id or a saved-snapshot directory name';
+  const PANE_COMMITTEE_REASON = 'a pane committee must be a committee id or "unassigned"';
   const MODE_REASON = 'mode must be one of ' + MODES.join(', ');
   const SAVED_REASON = 'saved must be a 32-character hexadecimal saved-view id';
   const BLANK_REASON = 'a blank value names no scope, so the key is dropped';
@@ -28,6 +49,15 @@
   function check(key, raw) {
     const text = raw == null ? '' : String(raw);
     if (!text) return {ok: false, value: text, reason: BLANK_REASON};
+    const dot = key.indexOf('.');
+    if (dot > 0) {
+      const field = key.slice(dot + 1);
+      if (field === 'source' && PANE_SOURCES.indexOf(text) < 0) return {ok: false, value: text, reason: PANE_SOURCE_REASON};
+      if (field === 'id' && !PANE_ID.test(text)) return {ok: false, value: text, reason: PANE_ID_REASON};
+      if (field === 'committee' && !PANE_COMMITTEE.test(text)) return {ok: false, value: text, reason: PANE_COMMITTEE_REASON};
+      if (field === 'cycle' && !/^\d{4}$/.test(text)) return {ok: false, value: text, reason: CYCLE_REASON};
+      return {ok: true, value: text};
+    }
     if (key === 'cycle' && !/^\d{4}$/.test(text)) return {ok: false, value: text, reason: CYCLE_REASON};
     if (key === 'mode' && MODES.indexOf(text) < 0) return {ok: false, value: text, reason: MODE_REASON};
     // The same rule server.py get_view() enforces, so the client never fires a
@@ -156,7 +186,8 @@
     };
   }
 
-  const api = {KEYS, MODES, RESERVED, read, write, parse, serialize, href, subscribe};
+  const api = {KEYS, MODES, RESERVED, PANES, PANE_FIELDS, PANE_KEYS, PANE_SOURCES,
+    read, write, parse, serialize, href, subscribe};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MentatScope = api;
 })(typeof globalThis === 'undefined' ? this : globalThis);

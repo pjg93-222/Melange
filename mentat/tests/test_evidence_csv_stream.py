@@ -325,6 +325,12 @@ SELECT_KEYS = frozenset({'source', 'committee', 'committees', 'cycles', 'selecte
                          'totals', 'supported_rows', 'excluded_rows', 'unsupported_rows', 'offset', 'limit',
                          'total_rows', 'has_more', 'warnings'})
 ERROR_KEYS = frozenset({'error'})
+# S6: one committee's figures for a pane, without its rows. tests/
+# test_evidence_summary.py holds the full asserter and the producer checks; this
+# copy exists so the v4 negative controls fail HERE too - IMPORT_DISPATCH raises
+# KeyError, not an assertion, for a shape it does not know.
+SUMMARY_KEYS = frozenset({'source', 'committee', 'cycles', 'selected_cycle', 'totals_by_cycle',
+                          'totals', 'counterparties', 'counts'})
 JOB_KEYS = frozenset({'id', 'name', 'state', 'bytes', 'bytes_read', 'rows_read', 'message', 'started_at',
                       'finished_at', 'catalog'} | DESCRIPTIVE_KEYS)
 COLLECTOR_ACTIVE_KEYS = frozenset({'id', 'company', 'aliases', 'committees', 'cycles', 'state', 'pid', 'started_at'})
@@ -335,6 +341,7 @@ CATALOG_EXAMPLES = _import_groups[CATALOG_KEYS]
 SOURCES_LISTING_EXAMPLES = _import_groups[SOURCES_LISTING_KEYS]
 SELECT_EXAMPLES = _import_groups[SELECT_KEYS]
 ERROR_EXAMPLES = _import_groups[ERROR_KEYS]
+SUMMARY_EXAMPLES = _import_groups[SUMMARY_KEYS]
 COMMITTEE_EXAMPLES = CATALOG_EXAMPLES[0]['committees']
 TOTAL_EXAMPLES = SELECT_EXAMPLES[0]['totals']
 JOB_EXAMPLES = _job_groups[JOB_KEYS]
@@ -466,8 +473,39 @@ def assert_collector_job(value):
                                   f'(missing "Full log: " and not a start-failure message): {value["message"]!r}')
 
 
+def assert_summary(value):
+    """SUMMARY: shape, the ten-counterparty ceiling, its order, and named rows."""
+    assert_shape(value, SUMMARY_EXAMPLES, path='$summary')
+    assert_shape(value['source'], [example['source'] for example in SUMMARY_EXAMPLES], path='$summary.source')
+    assert_shape(value['committee'], [example['committee'] for example in SUMMARY_EXAMPLES],
+                 enums={'category': set(csv_data.CATEGORIES) | {''}}, path='$summary.committee')
+    assert_shape(value['counts'], [example['counts'] for example in SUMMARY_EXAMPLES], path='$summary.counts')
+    totals = [total for example in SUMMARY_EXAMPLES for total in example['totals']]
+    for index, total in enumerate(value['totals']):
+        assert_shape(total, totals, path=f'$summary.totals[{index}]')
+    for cycle, entries in (value['totals_by_cycle'] or {}).items():
+        if not (isinstance(cycle, str) and cycle.isdigit()):
+            raise AssertionError(f'$summary.totals_by_cycle: {cycle!r} is not a cycle string')
+        for index, total in enumerate(entries):
+            assert_shape(total, totals, path=f'$summary.totals_by_cycle[{cycle}][{index}]')
+    parties = [party for example in SUMMARY_EXAMPLES for party in example['counterparties']]
+    if len(value['counterparties']) > 10:
+        raise AssertionError('$summary.counterparties: more than the documented top ten')
+    previous = None
+    for index, party in enumerate(value['counterparties']):
+        assert_shape(party, parties, path=f'$summary.counterparties[{index}]')
+        if not party['name']:
+            raise AssertionError(f'$summary.counterparties[{index}].name is blank')
+        if previous is not None and party['amount'] > previous:
+            raise AssertionError('$summary.counterparties: not ordered by amount')
+        previous = party['amount']
+    if value['selected_cycle'] not in ([''] + list(value['cycles'])):
+        raise AssertionError('$summary.selected_cycle is not blank and not one of cycles')
+
+
 IMPORT_DISPATCH = {'catalog': assert_catalog, 'sources_listing': assert_sources_listing,
-                   'select': assert_select, 'error': assert_error_payload}
+                   'select': assert_select, 'error': assert_error_payload,
+                   'summary': assert_summary}
 JOB_DISPATCH = {'job': assert_job, 'collector_job': assert_collector_job}
 
 
@@ -673,6 +711,9 @@ class EvidenceCSVStreamTests(unittest.TestCase):
 
             selection = store.select(job['id'], committee=PRIMARY_COMMITTEE)
             assert_select(selection)
+
+            assert_summary(store.summary(job['id'], committee=PRIMARY_COMMITTEE))
+            assert_summary(store.summary(job['id'], committee=PRIMARY_COMMITTEE, cycle='2026'))
 
             # A fake collection.json, written the way Console.collect_evidence writes it.
             collecting = {'id': 'snapshot-' + uuid.uuid4().hex, 'company': 'Example Co', 'aliases': [],

@@ -1,0 +1,47 @@
+S6 BEFORE - RED baseline on the untouched tree
+date: 2026-09-17T15:15:23-04:00
+HEAD: bd8c65ebb414f8f7fa7db1f7bbd8bee556a2b93b Console: Resume last run continues a stopped or failed collection in its own run folder
+note: tests/test_evidence_summary.py is the only new file in the tree at this point;
+      no app file, contract or CSS has been edited yet.
+
+=== cd mentat && python -m unittest tests.test_evidence_summary ===
+ERROR: test_summary_examples_match_the_producer (tests.test_evidence_summary.ContractTests.test_summary_examples_match_the_producer)
+ERROR: test_a_real_workbook_name_derives_the_industry (tests.test_evidence_summary.IndustryLabelTests.test_a_real_workbook_name_derives_the_industry)
+ERROR: test_data_workbook_name_gives_the_industry (tests.test_evidence_summary.IndustryLabelTests.test_data_workbook_name_gives_the_industry)
+ERROR: test_industry_falls_back_to_the_source_path_basename (tests.test_evidence_summary.IndustryLabelTests.test_industry_falls_back_to_the_source_path_basename)
+ERROR: test_industry_is_backfilled_for_a_catalog_that_predates_it (tests.test_evidence_summary.IndustryLabelTests.test_industry_is_backfilled_for_a_catalog_that_predates_it)
+ERROR: test_listing_and_catalog_carry_the_industry (tests.test_evidence_summary.IndustryLabelTests.test_listing_and_catalog_carry_the_industry)
+ERROR: test_match_is_case_insensitive (tests.test_evidence_summary.IndustryLabelTests.test_match_is_case_insensitive)
+ERROR: test_non_mentat_names_have_no_industry (tests.test_evidence_summary.IndustryLabelTests.test_non_mentat_names_have_no_industry) (name='six.csv')
+ERROR: test_non_mentat_names_have_no_industry (tests.test_evidence_summary.IndustryLabelTests.test_non_mentat_names_have_no_industry) (name='schedule_a.csv')
+ERROR: test_non_mentat_names_have_no_industry (tests.test_evidence_summary.IndustryLabelTests.test_non_mentat_names_have_no_industry) (name='Crypto Industry Spending Overview.csv')
+ERROR: test_non_mentat_names_have_no_industry (tests.test_evidence_summary.IndustryLabelTests.test_non_mentat_names_have_no_industry) (name='Industry Spending Overview.xlsx')
+ERROR: test_non_mentat_names_have_no_industry (tests.test_evidence_summary.IndustryLabelTests.test_non_mentat_names_have_no_industry) (name='Crypto Industry Spending Summary.xlsx')
+ERROR: test_non_mentat_names_have_no_industry (tests.test_evidence_summary.IndustryLabelTests.test_non_mentat_names_have_no_industry) (name='Crypto Spending Overview.xlsx')
+ERROR: test_non_mentat_names_have_no_industry (tests.test_evidence_summary.IndustryLabelTests.test_non_mentat_names_have_no_industry) (name='')
+ERROR: test_non_mentat_names_have_no_industry (tests.test_evidence_summary.IndustryLabelTests.test_non_mentat_names_have_no_industry) (name='rows.sqlite')
+ERROR: test_overview_workbook_name_gives_the_industry (tests.test_evidence_summary.IndustryLabelTests.test_overview_workbook_name_gives_the_industry)
+ERROR: test_shortest_industry_wins_over_a_greedy_match (tests.test_evidence_summary.IndustryLabelTests.test_shortest_industry_wins_over_a_greedy_match)
+ERROR: test_a_blank_committee_takes_the_first_one_like_select (tests.test_evidence_summary.SummaryStoreTests.test_a_blank_committee_takes_the_first_one_like_select)
+ERROR: test_a_cycle_narrows_totals_counterparties_and_counts (tests.test_evidence_summary.SummaryStoreTests.test_a_cycle_narrows_totals_counterparties_and_counts)
+ERROR: test_counterparties_are_the_top_ten_by_amount_over_supported_rows (tests.test_evidence_summary.SummaryStoreTests.test_counterparties_are_the_top_ten_by_amount_over_supported_rows)
+ERROR: test_each_committee_is_summarised_alone (tests.test_evidence_summary.SummaryStoreTests.test_each_committee_is_summarised_alone)
+ERROR: test_summary_shape_and_figures_for_all_cycles (tests.test_evidence_summary.SummaryStoreTests.test_summary_shape_and_figures_for_all_cycles)
+ERROR: test_unknown_committee_is_the_existing_refusal (tests.test_evidence_summary.SummaryStoreTests.test_unknown_committee_is_the_existing_refusal)
+ERROR: test_unknown_cycle_is_the_existing_refusal (tests.test_evidence_summary.SummaryStoreTests.test_unknown_cycle_is_the_existing_refusal)
+FAIL: test_catalog_examples_carry_industry (tests.test_evidence_summary.ContractTests.test_catalog_examples_carry_industry) (example='csv-44444444444444444444444444444444')
+FAIL: test_contract_names_the_summary_producer_and_consumer (tests.test_evidence_summary.ContractTests.test_contract_names_the_summary_producer_and_consumer)
+FAIL: test_contract_version_is_four (tests.test_evidence_summary.ContractTests.test_contract_version_is_four)
+FAIL: test_summary_negative_controls_all_fail (tests.test_evidence_summary.ContractTests.test_summary_negative_controls_all_fail)
+FAIL: test_summary_route_answers_the_same_payload (tests.test_evidence_summary.SummaryRouteTests.test_summary_route_answers_the_same_payload)
+FAIL: test_the_listing_carries_industry_for_every_source (tests.test_evidence_summary.SummaryRouteTests.test_the_listing_carries_industry_for_every_source)
+Ran 27 tests in 4.279s
+FAILED (failures=6, errors=24)
+
+--- tail ---
+AssertionError: 'industry' not found in {'categories': [{'category': 'Super PAC', 'committees': 1, 'rows': 2, 'supported_rows': 2, 'excluded_rows': 0}, {'category': 'Party Committee', 'committees': 1, 'rows': 16, 'supported_rows': 14, 'excluded_rows': 2}], 'excluded_rows': 2, 'format': 'delimited', 'source_kind': 'upload', 'source_path': '', 'sheet': '', 'sheets': [], 'sheets_read': [], 'encoding': 'utf-8', 'delimiter': ',', 'header_source': 'row', 'id': 'csv-cddbcc524796ac4df8b964d4705c8589', 'name': 'summary-fixture.csv', 'sha256': 'cddbcc524796ac4df8b964d4705c8589625dda6eb3a2e155b2deeaeee0c58c67', 'row_count': 18, 'committees': [{'category': 'Party Committee', 'category_source': 'file:Recipient Category', 'excluded_rows': 2, 'id': 'C00000935', 'name': 'DCCC', 'rows': 16, 'supported_rows': 14}, {'category': 'Super PAC', 'category_source': 'file:Recipient Category', 'excluded_rows': 0, 'id': 'C00835959', 'name': 'FAIRSHAKE', 'rows': 2, 'supported_rows': 2}], 'cycles': ['2026', '2024', '2022'], 'supported_rows': 16, 'unsupported_rows': 0, 'unassigned_rows': 0, 'session_only': False, 'imported_at': '2026-09-17T19:15:34.428670+00:00', 'bytes': 1901, 'warnings': ['Imported observations are not verified coverage or donor-attributed PAC spending. Duplicate and amended rows are preserved; totals may overlap.', "Committee categories come from this file's Recipient Category column.", 'Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported.'], 'catalog_version': 2, 'rows_read': 18, 'state': 'ready', 'reread': False, 'stale': False}
+
+----------------------------------------------------------------------
+Ran 27 tests in 3.500s
+
+FAILED (failures=6, errors=24)

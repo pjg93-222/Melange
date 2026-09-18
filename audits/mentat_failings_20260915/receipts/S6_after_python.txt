@@ -1,0 +1,55 @@
+S6 AFTER (fix pass) - python suites
+2026-09-17T16:38:54-04:00
+HEAD: a9ed5c23623dc189a0f3f683810e347ae3a8d53f Raw-column contract v3: receipt_role_unverified and receipt_role_reason follow receipt_role
+
+=== system python ===
+--- test_evidence_summary ---
+Ran 27 tests in 3.158s
+
+OK
+--- test_evidence_categories ---
+Ran 30 tests in 0.838s
+
+OK
+--- test_evidence_readers ---
+Ran 44 tests in 7.077s
+
+OK
+--- test_evidence_csv_stream ---
+Ran 18 tests in 13.903s
+
+OK
+--- test_evidence_csv ---
+Ran 10 tests in 2.209s
+
+OK
+--- test_pac_evidence ---
+Ran 11 tests in 0.050s
+
+OK
+
+=== launcher python (python-calamine) ===
+--- test_evidence_summary ---
+Ran 27 tests in 3.101s
+
+OK
+--- test_evidence_categories ---
+Ran 30 tests in 0.783s
+
+OK
+--- test_evidence_readers ---
+Ran 44 tests in 4.228s
+
+OK
+--- test_evidence_csv_stream ---
+Ran 18 tests in 17.129s
+
+OK
+--- test_evidence_csv ---
+Ran 10 tests in 1.156s
+
+OK
+--- test_pac_evidence ---
+Ran 11 tests in 0.048s
+
+OK

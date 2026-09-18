@@ -234,6 +234,24 @@ M_CP1252 = 'Decoded as Windows-1252 because the file is not valid UTF-8.'
 STORE_DIRECTORY = 'evidence-csv'
 IDENTIFIER = re.compile(r'csv-[a-f0-9]{32}')
 
+# A Mentat industry workbook names its industry in its own file name, so an
+# import read from one can be labelled with it without opening the file again.
+# `.+?` is lazy and the pattern is anchored at both ends, so a name that
+# repeats the phrase keeps the first copy inside the label rather than
+# swallowing it. Anything else - an FEC bulk file, a hand-saved CSV - has no
+# industry, and the field is then blank rather than guessed.
+WORKBOOK_NAME = re.compile(r'^(?P<industry>.+?) Industry Spending (?:Overview|Data)\.xlsx$', re.IGNORECASE)
+# The name a blank counterparty cell reads as in a ranking. The same words the
+# row table already shows for an unreported counterparty.
+BLANK_COUNTERPARTY = 'Not reported'
+TOP_COUNTERPARTIES = 10
+
+
+def industry_of(name):
+    """The industry a Mentat workbook file name declares, or '' for anything else."""
+    match = WORKBOOK_NAME.match(str(name or '').strip())
+    return match.group('industry').strip() if match else ''
+
 
 def bytes_message():
     return f'Choose a CSV no larger than {MAX_BYTES // 1_000_000} MB.'
@@ -804,6 +822,11 @@ def stored_catalog(record, state='ready', reread=False, stale=False):
     filled['committees'] = [{'category':'', 'category_source':'', 'excluded_rows':0, **item}
                             for item in filled.get('committees') or []]
     filled['catalog_version'] = int(record.get('catalog_version') or 0)
+    # Derived here rather than written at ingest, so every import already on
+    # disk answers with it on the first listing and none has to be re-read for
+    # a label that is a function of its own file name.
+    filled['industry'] = (industry_of(filled.get('name'))
+                          or industry_of(Path(str(record.get('source_path') or '')).name))
     filled['rows_read'] = int(record.get('rows_read') or catalog.get('row_count') or 0)
     filled['state'], filled['reread'], filled['stale'] = state, bool(reread), bool(stale)
     return filled
@@ -2070,6 +2093,81 @@ class Store:
                 'unsupported_rows':total - supported - excluded,
                 'offset':offset, 'limit':limit, 'total_rows':total, 'has_more':offset + limit < total,
                 'warnings':list(source.get('warnings') or WARNINGS)}
+
+    def summary(self, identifier, committee='', cycle=''):
+        """One committee's channel totals by cycle, top counterparties and counts.
+
+        Read from the import's own sqlite and bounded by that committee's rows.
+        The totals table already carries the (cycle, channel) sums, so nothing
+        is parsed back for them; only the committee's SUPPORTED rows are
+        rebuilt, for the counterparty ranking a pane shows above its row table.
+        A cycle in the request narrows the totals, the ranking and the counts,
+        and leaves totals_by_cycle whole so the pane can still draw every bar.
+        """
+        value = self.ready(identifier)
+        source = stored_catalog(value)
+        committee = committee or (source['committees'][0]['id'] if source['committees'] else '')
+        chosen = next((item for item in source['committees'] if item['id'] == committee), None)
+        if chosen is None:
+            raise ValueError(M_COMMITTEE)
+        if cycle and cycle not in source['cycles']:
+            raise ValueError(M_CYCLE)
+        database = self.database_path(identifier)
+        if not database.is_file():
+            raise ValueError(M_GONE(identifier))
+        stored = '' if committee == 'unassigned' else committee
+        scope, parameters = 'committee_id = ?', [stored]
+        if cycle:
+            scope, parameters = scope + ' AND cycle = ?', parameters + [cycle]
+        try:
+            with closing(sqlite3.connect(database)) as connection:
+                channels = connection.execute('SELECT cycle, channel, amount, row_count FROM totals '
+                                              'WHERE committee_id = ?', [stored]).fetchall()
+                counted = dict(connection.execute(f'SELECT status, COUNT(*) FROM csv_rows WHERE {scope} '
+                                                  'GROUP BY status', parameters).fetchall())
+                supported = connection.execute(f'SELECT line_num, cells FROM csv_rows WHERE {scope} '
+                                               'AND status = ? ORDER BY row_number',
+                                               parameters + ['supported']).fetchall()
+        except sqlite3.Error as error:
+            raise ValueError(M_GONE(identifier)) from error
+        cycle_amounts, cycle_counts = defaultdict(Decimal), defaultdict(int)
+        for row_cycle, channel, amount, row_count in channels:
+            cycle_amounts[(row_cycle, channel)] += Decimal(amount)
+            cycle_counts[(row_cycle, channel)] += row_count
+        totals_by_cycle = {}
+        for row_cycle in sorted({pair[0] for pair in cycle_amounts if pair[0]}, reverse=True):
+            totals_by_cycle[row_cycle] = [
+                {'channel':channel, 'amount':float(cycle_amounts[(row_cycle, channel)]),
+                 'row_count':cycle_counts[(row_cycle, channel)]}
+                for channel in sorted(pair[1] for pair in cycle_amounts if pair[0] == row_cycle)]
+        amounts, counts = defaultdict(Decimal), defaultdict(int)
+        for (row_cycle, channel), amount in cycle_amounts.items():
+            if cycle and row_cycle != cycle:
+                continue
+            amounts[channel] += amount
+            counts[channel] += cycle_counts[(row_cycle, channel)]
+        headers = value.get('columns', [])
+        columns = [key(item) for item in headers]
+        party_amounts, party_rows = defaultdict(Decimal), defaultdict(int)
+        for line_number, cells in supported:
+            row = rebuild(headers, columns, line_number, json.loads(cells))
+            name = row['counterparty'] or BLANK_COUNTERPARTY
+            party_amounts[name] += row['_amount'] or Decimal('0')
+            party_rows[name] += 1
+        ranked = sorted(party_amounts.items(), key=lambda item: (-item[1], item[0]))[:TOP_COUNTERPARTIES]
+        return {'source':{'id':source['id'], 'name':source['name'], 'industry':source['industry']},
+                'committee':{field:chosen[field] for field in
+                             ('id', 'name', 'category', 'category_source', 'rows',
+                              'supported_rows', 'excluded_rows')},
+                'cycles':list(source['cycles']), 'selected_cycle':cycle,
+                'totals_by_cycle':totals_by_cycle,
+                'totals':[{'channel':channel, 'amount':float(amounts[channel]),
+                           'row_count':counts[channel]} for channel in sorted(amounts)],
+                'counterparties':[{'name':name, 'amount':float(amount), 'rows':party_rows[name]}
+                                  for name, amount in ranked],
+                'counts':{'supported':int(counted.get('supported', 0)),
+                          'excluded':int(counted.get('excluded', 0)),
+                          'unsupported':int(counted.get('unsupported', 0))}}
 
     def adopt(self, identifier, name, path, size, digest, suffix='.csv', sheet='',
               source_kind='upload', source_path='', header_path=''):

@@ -338,38 +338,48 @@
 </section>
 
 <section id="view-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
-<div class="evidence-source-bar"><label for="evidence-source">Evidence source<select id="evidence-source"><option value="csv">CSV file</option><option value="snapshot">Saved FEC snapshots</option></select></label></div>
-<div id="evidence-csv-workspace">
-<section class="panel csv-picker" aria-label="Choose PAC evidence"><div class="section-label">FROM YOUR SELECTED FILE</div><h2>PAC evidence</h2><p class="muted">Choose a CSV, then a PAC. Review the reported rows beside your graph.</p><label class="csv-file-label" for="evidence-csv-file">Choose CSV<input id="evidence-csv-file" type="file"></label><p id="evidence-csv-status" role="status">FEC or Mentat CSV with a committee ID column · the console states the size limit when you choose a file.</p><div class="evidence-toolbar"><label for="evidence-csv-category">Committee type<select id="evidence-csv-category" disabled><option value="">All types</option></select></label><label for="evidence-csv-find">Find a PAC<input id="evidence-csv-find" type="search" placeholder="Name or committee ID" autocomplete="off" disabled></label><label for="evidence-csv-committee">PAC<select id="evidence-csv-committee" disabled><option value="">Choose a CSV first</option></select></label><label for="evidence-csv-cycle">Election cycle<select id="evidence-csv-cycle" disabled><option value="">All cycles</option></select></label></div></section>
-<section id="evidence-csv-results" class="panel" aria-label="Selected CSV observations" hidden><h2 id="evidence-csv-title">Reported activity</h2><p id="evidence-csv-scope" class="muted"></p><div id="evidence-csv-totals" class="evidence-cards"></div><p class="muted">Sums reflect the selected CSV rows. Receipts, disbursements and independent spending stay separate; amended or duplicate filings may overlap.</p><details id="evidence-csv-details"><summary>File details &amp; interpretation</summary><p id="evidence-csv-provenance"></p><ul id="evidence-csv-warnings"></ul></details><h3>Source rows</h3><p id="evidence-csv-row-status" class="muted" role="status"></p><div class="table-scroll"><table><thead><tr><th>Row</th><th>Date / cycle</th><th>Amount</th><th>Counterparty / activity</th><th>Source</th></tr></thead><tbody id="evidence-csv-rows"></tbody></table></div><div class="csv-pagination"><button id="evidence-csv-prev" type="button" class="secondary">Previous rows</button><button id="evidence-csv-next" type="button" class="secondary">Next rows</button></div></section>
-</div><div id="evidence-saved" hidden>
-<section class="panel" aria-label="Evidence configuration">
-<div class="panel-heading"><h2>Saved FEC snapshots</h2><button id="evidence-refresh" class="secondary" type="button">Refresh snapshots</button></div>
-<div class="evidence-toolbar"><label for="evidence-mode">Evidence scope<select id="evidence-mode"><option value="saved">Choose saved evidence</option><option value="graph">Follow Graph selection</option></select></label><label for="evidence-snapshot">Saved snapshot<select id="evidence-snapshot"></select></label></div>
-<p class="muted">Choose a saved company, cycle and committee independently, or follow Graph. These controls filter saved evidence.</p>
-<details id="evidence-config"><summary>Configure a new snapshot</summary>
+<p class="view-intro">Follow the reported money for one PAC, or several side by side, from any industry file or saved snapshot.</p>
+<section class="panel evidence-scope" aria-label="Scope">
+<div class="evidence-scope-grid">
+<label for="evidence-source">Source<select id="evidence-source"><option value="">Choose a file or a snapshot</option></select></label>
+<label for="evidence-type">Committee type<select id="evidence-type" disabled><option value="">All types</option></select></label>
+<label for="evidence-find">Find a PAC<input id="evidence-find" type="search" placeholder="Name or committee ID" autocomplete="off" disabled></label>
+<label for="evidence-pac">PAC<select id="evidence-pac" disabled></select></label>
+<label for="evidence-cycle">Cycle<select id="evidence-cycle" disabled><option value="">All cycles</option></select></label>
+<button id="evidence-add" type="button" class="primary" disabled>Add pane</button>
+</div>
+<div class="evidence-scope-actions">
+<button id="evidence-import-open" type="button" class="secondary" aria-expanded="false" aria-controls="evidence-import-drawer">Import a file</button>
+<button id="evidence-snapshot-open" type="button" class="secondary" aria-expanded="false" aria-controls="evidence-snapshot-drawer">New snapshot</button>
+<label class="evidence-follow" for="evidence-follow-graph"><input id="evidence-follow-graph" type="checkbox"> Follow Graph selection</label>
+<span id="evidence-status" class="muted" role="status">Finding imported files and saved snapshots&hellip;</span>
+</div>
+<div id="evidence-import-drawer" class="evidence-drawer" hidden>
+<div class="evidence-toolbar">
+<label class="csv-file-label" for="evidence-csv-file"><strong>Choose a file</strong><span>CSV, TSV, TXT, XLSX, JSON or an FEC bulk ZIP &middot; the console states the size limit when you choose one.</span><input id="evidence-csv-file" type="file"></label>
+<label for="evidence-path">Or a path on this computer<input id="evidence-path" type="text" autocomplete="off" spellcheck="false" placeholder="A full path to a file on this computer"></label>
+<label for="evidence-header-path">FEC bulk header file &middot; optional<input id="evidence-header-path" type="text" autocomplete="off" spellcheck="false"></label>
+<label id="evidence-sheet-label" for="evidence-sheet" hidden>Worksheet<select id="evidence-sheet"></select></label>
+</div>
+<div class="editor-actions"><button id="evidence-path-read" type="button" class="secondary">Read this file</button><button id="evidence-browse" type="button" class="secondary">Browse this computer</button></div>
+<div id="evidence-browser" class="evidence-browser table-scroll" hidden></div>
+</div>
+<div id="evidence-snapshot-drawer" class="evidence-drawer" hidden>
 <form id="evidence-form"><div class="evidence-toolbar">
 <label for="evidence-company-input">Company<input id="evidence-company-input" required maxlength="250"></label>
 <label for="evidence-cycles-input">Election years<input id="evidence-cycles-input" required placeholder="2024, 2026"></label>
 <label for="evidence-committees-input">FEC committee IDs<input id="evidence-committees-input" required placeholder="C00000001, C00000002"></label>
-</div><label for="evidence-aliases-input">Company aliases · one per line<textarea id="evidence-aliases-input" rows="3"></textarea></label>
+</div><label for="evidence-aliases-input">Company aliases &middot; one per line<textarea id="evidence-aliases-input" rows="3"></textarea></label>
 <p class="muted">Committee IDs define the network covered. Collecting makes new FEC requests and saves a separate snapshot; existing evidence is preserved.</p>
-<button id="evidence-use-config" type="button" class="secondary">Use selected snapshot settings</button> <button id="evidence-collect" type="submit">Collect new snapshot</button>
-</form></details><p id="evidence-job-status" role="status"></p>
+<div class="editor-actions"><button id="evidence-use-config" type="button" class="secondary">Use the chosen snapshot&rsquo;s settings</button><button id="evidence-refresh" type="button" class="secondary">Refresh snapshots</button><button id="evidence-collect" type="submit" class="primary">Collect new snapshot</button></div>
+</form><p id="evidence-job-status" role="status"></p>
+</div>
+<div class="evidence-chip-row"><span class="muted">Open panes</span><div id="evidence-chips" class="evidence-chips"></div></div>
 </section>
-<p id="evidence-empty" class="empty" hidden>No PAC evidence snapshot is available yet. Collection reports remain in the Collection tab.</p>
-<section id="evidence-panel" class="panel" hidden aria-label="PAC spending evidence">
-<div class="panel-heading"><div><div class="section-label">FOLLOW THE REPORTED MONEY</div><h2>Company → PAC → candidates</h2><p>Explore the recorded legs. Spending from a pooled PAC is committee activity; it cannot be assigned to a particular donor without further evidence.</p></div></div>
-<div class="evidence-toolbar"><label for="evidence-cycle">Election cycle<select id="evidence-cycle"></select></label><label for="evidence-committee">Spending committee<select id="evidence-committee"></select></label></div>
-<p id="evidence-scope" class="muted"></p><div id="evidence-funding" class="evidence-cards"></div>
-<div id="evidence-transfers"></div>
-<div class="allocation-panel"><h3>Conditional company cash estimate</h3><div id="allocation-status" role="status"></div><div id="allocation-results"></div><details><summary>Estimation method &amp; assumptions</summary><p>At each payment, assign the same fraction as the company's share of the PAC's available cash. Carry that fraction through PAC transfers; leave retained cash and operating expenses in their own categories.</p><p class="formula">Estimated company-funded spending = payment × company cash share before payment</p><p class="muted">Example only: a 25% cash share × $10 million of candidate spending gives a $2.5 million estimate. This is an accounting assumption, not proof of donor intent or influence.</p></details></div>
-<details><summary>Company receipt evidence and excluded conversions</summary><div class="table-scroll"><table><thead><tr><th>Reported name / role</th><th>Date</th><th>Amount</th><th>Filing explanation</th></tr></thead><tbody id="evidence-receipts"></tbody></table></div></details>
-<h3 class="evidence-subheading">Candidate activity as filed</h3><p class="muted">Amounts below belong to the selected committee. Support and opposition stay separate. Expand a name to compare the filing with the candidate register.</p>
-<div class="table-scroll"><table><thead><tr><th>Candidate / identity check</th><th>Direction</th><th class="number">Committee spending</th><th class="number">Estimated company funding</th><th>Activity dates</th><th>Evidence</th></tr></thead><tbody id="evidence-candidates"></tbody></table></div>
-<details><summary>What is needed for a donor allocation?</summary><p>Reconcile all receipts and disbursements, opening and retained cash, asset conversions and refunds. Enforce donation → transfer → expenditure dates, including transfers between cycles. Document any earmark before calling a dollar amount traced. Otherwise, show assumptions and uncertainty with the estimate.</p><p id="evidence-timing" class="muted"></p></details>
+<p id="evidence-empty" class="empty">No PAC pane is open. Import an industry file, or choose a saved snapshot, then add a pane.</p>
+<div id="evidence-panes" class="evidence-panes"></div>
+<section id="evidence-compare" class="panel evidence-compare" aria-label="Compare panes" hidden></section>
 </section>
-</div></section>
 </section>
-</main><script src="/evidence-csv.js" defer></script><footer>MENTAT <span>FEC collection · canonical names + aliases</span></footer>
+</main><script src="/evidence.js" defer></script><footer>MENTAT <span>FEC collection · canonical names + aliases</span></footer>
 </body></html>

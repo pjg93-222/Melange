@@ -168,29 +168,116 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 .working-folders summary{color:var(--acu-purple)}
 #split-view{white-space:nowrap;margin-left:auto;font-size:13px}
 #split-view[aria-pressed=true]{background:#eee7f2;border-color:#cbbbd5}
-.evidence-source-bar{margin-bottom:14px;max-width:280px}
-.evidence-source-bar label{font-size:12px;color:var(--muted)}
-.evidence-source-bar select{margin-top:6px}
-.csv-picker h2{margin:8px 0}
-.csv-file-label{display:block;font-size:13px;color:var(--acu-purple);margin:18px 0 8px}
+/* PAC evidence v2 (S6): one scope bar, up to four PAC panes side by side, one
+   comparison strip. Console palette only - --line IS #e4d9d0 and --acu-plum IS
+   #342649, the mockup's own values. The three the theme has no token for are
+   declared here, scoped to this tab, so the fidelity pass against
+   S6_MOCKUP_Main.dc.html has one place to read: the control-label slate, the
+   hairline between table rows, and the compare bar. 44px targets, and every
+   chip and pane control is a real focusable button. */
+#view-evidence{--s6-label:#526e84;--s6-hairline:#f1e9e3;--s6-bar:#9ed4d5;--s6-bar-strong:#327a7a}
+/* The shared .panel rule is a 10px radius, a #e7e0dc border and a uniform pad;
+   the mockup's cards are 6px, --line (#e4d9d0) and asymmetric padding. Scoped
+   to this tab so no other view moves. */
+#view-evidence .panel{border-radius:6px;border-color:var(--line)}
+.evidence-pane{padding:18px 20px 16px}
+.evidence-scope{margin-bottom:18px;padding:18px 22px 16px}
+.evidence-scope-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:end}
+.evidence-scope-grid label{font-size:13px;color:var(--s6-label);min-width:0}
+.evidence-scope-grid select,.evidence-scope-grid input{width:100%;max-width:100%;margin-top:6px;min-height:44px;box-sizing:border-box}
+.evidence-scope-grid #evidence-add{min-height:44px;white-space:nowrap}
+.evidence-scope-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.evidence-scope-actions button{min-height:44px;font-size:13px}
+.evidence-follow{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);min-height:44px}
+.evidence-follow input{width:18px;height:18px;min-height:0;margin:0}
+#evidence-status{font-size:13px;color:var(--muted);overflow-wrap:anywhere;margin-left:auto;max-width:100%}
+.evidence-drawer{margin-top:14px;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:#fbfaf9}
+.evidence-drawer .editor-actions{margin-top:12px}
+.evidence-drawer button{min-height:44px}
+.evidence-browser{margin-top:12px;max-height:320px;overflow:auto;font-size:12px}
+.evidence-browser tr[data-browse-path],.evidence-browser tr[data-open-path]{cursor:pointer}
+.evidence-browser tr[data-open-path]:hover,.evidence-browser tr[data-browse-path]:hover{background:#f7f2fa}
+.evidence-chip-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
+.evidence-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:0 6px 0 12px;min-height:36px;border:1px solid #d8cddd;border-radius:18px;background:#f7f2fa;font-size:13px}
+.chip button{border:0;background:transparent;width:32px;height:32px;min-height:32px;border-radius:16px;color:var(--acu-purple);font-size:16px;line-height:1;padding:0}
+.chip button:hover{background:#e3d6ea}
+.evidence-panes{display:grid;grid-template-columns:1fr;gap:18px;align-items:stretch}
+.evidence-pane{display:flex;flex-direction:column;gap:14px;min-width:0}
+.pane-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.pane-title{min-width:0}
+.pane-title h2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.pane-kind{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.evidence-pane h2{font-size:22px;line-height:1.15;margin:2px 0 0;overflow-wrap:anywhere}
+.pane-tags{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;font-size:13px}
+.pane-buttons{display:flex;gap:6px;flex-shrink:0}
+.pane-buttons button{min-height:44px;font-size:13px;padding:0 10px}
+.pane-buttons .pane-remove{width:44px;padding:0;font-size:18px}
+.pane-buttons button:disabled,.evidence-compare button:disabled{opacity:.45;cursor:not-allowed}
+.pane-message{overflow-wrap:anywhere}
+.pane-figures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(max-width:1400px){#evidence-panes[data-panes="3"] .pane-figures,#evidence-panes[data-panes="4"] .pane-figures{grid-template-columns:1fr}}
+.pane-figure{background:#fbfaf9;border:1px solid var(--line);border-radius:6px;padding:12px 14px;min-width:0}
+/* F3. At 1280 with three panes a 26px "$177,980,393" wrapped to two lines and
+   the card grew to 78px. The figure never wraps; it shrinks instead, and below
+   three panes' worth of width the two cards stack. */
+.pane-figure strong{display:block;font-size:clamp(18px,1.6vw,26px);font-weight:600;margin:2px 0;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pane-figure .label,.pane-cycles .label,.pane-top .label{font-size:13px;color:var(--s6-label);display:block}
+.pane-figure .muted{font-size:12px}
+.pane-channels{display:grid;gap:6px;font-size:13px;color:var(--acu-plum)}
+.pane-channels>div{display:flex;justify-content:space-between;gap:10px}
+.pane-cycles{display:grid;gap:6px}
+.pane-cycle{display:grid;grid-template-columns:64px minmax(0,1fr) 120px;gap:10px;align-items:center;font-size:13px}
+.bartrack{height:8px;background:var(--s6-hairline);border-radius:2px;overflow:hidden}
+.bar{height:8px;background:var(--s6-bar-strong);border-radius:2px}
+.bar.thin{height:6px;background:var(--s6-bar)}
+.pane-top table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+.pane-top table{table-layout:fixed}
+.pane-top td{padding:8px 6px;border-bottom:1px solid var(--s6-hairline)}
+.pane-top td:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pane-top td.num{width:112px}
+
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pane-drawer{border-top:1px solid var(--line);padding-top:12px;min-width:0}
+.pane-drawer table{width:100%;border-collapse:collapse}
+.pane-drawer th{font-size:11px;white-space:normal;text-align:left;text-transform:uppercase;letter-spacing:.6px;color:var(--s6-label);padding:8px 6px;border-bottom:1px solid var(--line)}
+.pane-drawer td{font-size:13px;vertical-align:top;padding:8px 6px;border-bottom:1px solid var(--s6-hairline)}
+.pane-drawer td small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.pane-drawer .table-scroll table{min-width:460px}
+.pane-drawer h3{font-size:14px;margin:14px 0 6px}
+.badge.excluded{background:#f3ede9;color:var(--muted);font-weight:500;border:1px solid var(--line)}
+.pane-provenance{font-size:12px;margin-top:auto;overflow-wrap:anywhere}
+.link-button{border:0;background:transparent;padding:0;color:var(--acu-purple);font:inherit;text-decoration:underline;cursor:pointer;min-height:24px}
+.pane-about-body{font-size:12px;color:var(--muted)}
+.pane-about-body li,.pane-about-body p{overflow-wrap:anywhere;line-height:1.6}
+.evidence-compare{margin-top:18px;min-width:0;padding:18px 22px}
+.evidence-compare .panel-heading{align-items:baseline;gap:12px;flex-wrap:wrap}
+.evidence-compare .panel-heading h2{font-size:22px}
+.evidence-compare .panel-heading .muted{font-size:13px;font-weight:400}
+/* F2. table-layout:auto sized the pane columns by their header TEXT, so the bar
+   tracks came out 223px and 269px in the same row and the bars stopped being
+   comparable - which is the whole point of the strip. Fixed layout, a 200px
+   metric column, and every pane column equal. */
+.evidence-compare table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px;table-layout:fixed}
+.evidence-compare th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--s6-label);padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:bottom}
+.evidence-compare .th-sub{font-weight:400;text-transform:none;letter-spacing:0;font-size:11px}
+.evidence-compare td{padding:8px 6px;border-bottom:1px solid var(--s6-hairline);vertical-align:top;overflow-wrap:anywhere}
+.evidence-compare .compare-metric{font-weight:600;width:200px}
+.evidence-compare th{overflow:hidden;text-overflow:ellipsis}
+.compare-cell{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:10px;align-items:center}
+.csv-file-label{display:block;font-size:13px;color:var(--acu-purple);margin:0}
+.csv-file-label span{display:block;font-size:11px;color:var(--muted);margin-top:4px}
 .csv-file-label input{display:block;max-width:100%;margin-top:8px;font:inherit}
 .csv-file-label input::file-selector-button{padding:9px 12px;border:1px solid #c6bab0;background:white;border-radius:5px;color:var(--acu-plum);margin-right:10px}
-#evidence-csv-status{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
-#evidence-csv-results{min-width:0}
-#evidence-csv-results h2{font-size:23px;overflow-wrap:anywhere}
-#evidence-csv-results th{font-size:11px;white-space:nowrap}
-#evidence-csv-results td{font-size:12px;vertical-align:top}
-#evidence-csv-results td small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
-#evidence-csv-totals{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-#evidence-csv-totals>div{padding:14px;min-width:0}
-#evidence-csv-totals span,#evidence-csv-totals small{font-size:11px;display:block;text-transform:none}
-#evidence-csv-totals strong{font-size:24px;display:block;margin:8px 0}
-#evidence-csv-details{font-size:12px;color:var(--muted);margin:16px 0}
-#evidence-csv-details p,#evidence-csv-details li{overflow-wrap:anywhere;line-height:1.6}
 .csv-pagination{display:flex;justify-content:space-between;gap:12px;margin-top:14px}
-.csv-pagination button{font-size:12px}
-.csv-raw{display:grid;grid-template-columns:minmax(80px,1fr) minmax(120px,2fr);gap:6px 12px;width:350px;white-space:normal}
+.csv-pagination button{font-size:12px;min-height:44px}
+.csv-raw{display:grid;grid-template-columns:minmax(80px,1fr) minmax(120px,2fr);gap:6px 12px;width:330px;white-space:normal}
 .csv-raw dt{font-weight:600;overflow-wrap:anywhere}.csv-raw dd{margin:0;overflow-wrap:anywhere}
+/* The mockup's scope bar is six columns at 1440: Source, Committee type, Find
+   a PAC, PAC, Cycle, Add pane. Narrower than that the grid halves rather than
+   squeezing a 44px select into 140px. */
+@media(min-width:1100px){.evidence-scope-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:16px}}
+@media(max-width:700px){.evidence-scope-grid{grid-template-columns:1fr}.pane-figures{grid-template-columns:1fr}.evidence-compare .compare-metric{width:120px}.pane-cycle{grid-template-columns:70px minmax(0,1fr) 92px}}
 #chart-image{overflow:auto;overscroll-behavior:contain}#chart-image svg{min-width:700px}
 .split-workspace{max-width:none;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:0 24px}
 .split-workspace>.workspace-heading,.split-workspace>#error{grid-column:1/-1}
@@ -204,11 +291,12 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 .split-workspace .analysis-tabs{flex-wrap:wrap;gap:4px}
 .split-workspace .analysis-tabs button{flex:1;padding:8px;font-size:12px}
 .split-workspace .graph-row-tools{flex-wrap:wrap}
+.split-workspace .evidence-panes{grid-template-columns:1fr!important}
 .split-workspace .evidence-toolbar{display:grid;grid-template-columns:1fr;gap:12px}
 .split-workspace .evidence-toolbar label{max-width:100%;min-width:0}
 .split-workspace .graph-panels .graph-bars{min-width:530px}
 @media(max-width:799px){.split-workspace{grid-template-columns:1fr}.split-workspace>#view-graph{grid-column:1;grid-row:3}.split-workspace>#view-evidence{grid-column:1;grid-row:4;border-left:0;padding-left:0;border-top:1px solid var(--line);margin-top:28px;padding-top:24px}}
-@media(max-width:600px){.run-library{padding:14px}.run-collections{gap:4px}.run-collections button{font-size:12px;padding:8px}.run-collections span{margin-left:4px}.run-library .run-toolbar{flex-wrap:wrap}.run-library .run-toolbar>label{flex-basis:100%}#split-view{margin-left:0}.evidence-source-bar{max-width:none}}
+@media(max-width:600px){.run-library{padding:14px}.run-collections{gap:4px}.run-collections button{font-size:12px;padding:8px}.run-collections span{margin-left:4px}.run-library .run-toolbar{flex-wrap:wrap}.run-library .run-toolbar>label{flex-basis:100%}#split-view{margin-left:0}}
 /* Keep both visual and evidence content near the top in the paired workspace. */
 @media(min-width:1151px){
   .split-workspace .graph-filter-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -221,15 +309,12 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
   .split-workspace .graph-metrics span,.split-workspace .graph-metrics small{font-size:10px}
   .split-workspace .evidence-toolbar{grid-template-columns:1fr 1fr}
   .split-workspace .evidence-toolbar select{font-size:12px;padding:8px}
-  .split-workspace .csv-picker{padding:20px}
-  .split-workspace .csv-picker p{font-size:12px}
+  .split-workspace .evidence-scope-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .split-workspace .evidence-pane h2{font-size:19px}
 }
-#evidence-csv-results table{width:100%}
-#evidence-csv-results th,#evidence-csv-results td{padding:10px 7px}
-#evidence-csv-results th{white-space:normal;font-size:10px}
-#evidence-csv-results td:nth-child(2){min-width:78px}
-#evidence-csv-results td:nth-child(4){white-space:normal;min-width:105px;max-width:240px;overflow-wrap:anywhere}
-#evidence-csv-results td:nth-child(5) summary{white-space:normal;font-size:11px;min-width:45px}
+.pane-drawer td:nth-child(2){min-width:78px}
+.pane-drawer td:nth-child(4){white-space:normal;min-width:105px;max-width:240px;overflow-wrap:anywhere}
+.pane-drawer td:nth-child(5) summary{white-space:normal;font-size:11px;min-width:45px}
 
 @media(min-width:800px) and (max-width:1150px){
   .split-workspace{gap:0 16px}
@@ -243,10 +328,9 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
   .split-workspace .scope-actions{gap:10px}
   .split-workspace .analysis-tabs button{flex-basis:40%}
   .split-workspace .graph-filter-grid label:last-child{grid-column:auto}
-}#evidence-csv-results .table-scroll table{min-width:450px}
-#evidence-csv-results th:first-child,#evidence-csv-results td:first-child{width:38px}
-#evidence-csv-results th:nth-child(2),#evidence-csv-results td:nth-child(2){width:92px}
-#evidence-csv-results th:nth-child(3),#evidence-csv-results td:nth-child(3){width:85px}
+}.pane-drawer th:first-child,.pane-drawer td:first-child{width:38px}
+.pane-drawer th:nth-child(2),.pane-drawer td:nth-child(2){width:92px}
+.pane-drawer th:nth-child(3),.pane-drawer td:nth-child(3){width:85px}
 
 /* F1 build stamp and stale-build banner. Gold #eca91c, plum text, muted stamp. */
 .app-navigation .build-stamp{color:var(--muted);font-size:11px;white-space:nowrap}

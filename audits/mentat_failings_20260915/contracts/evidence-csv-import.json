@@ -1,6 +1,6 @@
 {
   "contract": "evidence-csv-import",
-  "version": 3,
+  "version": 4,
   "owner": "S3",
   "produced_by": [
     "mentat/app/evidence_csv.py:limits",
@@ -10,14 +10,19 @@
     "mentat/app/evidence_csv.py:catalog (legacy in-memory document)",
     "mentat/app/evidence_csv.py:select (legacy in-memory document)",
     "mentat/app/server.py:do_GET '/api/evidence-csv' (no id -> sources listing; id+committee+cycle+offset+limit -> SELECT; bad offset/limit -> error payload)",
-    "mentat/app/server.py:Console.evidence_csv_view"
+    "mentat/app/server.py:Console.evidence_csv_view",
+    "mentat/app/evidence_csv.py:industry_of + stored_catalog (the industry a Mentat workbook file name declares)",
+    "mentat/app/evidence_csv.py:Store.summary",
+    "mentat/app/server.py:do_GET '/api/evidence-csv' (id+committee+cycle+summary=1 -> SUMMARY)",
+    "mentat/app/server.py:Console.evidence_csv_summary"
   ],
   "consumed_by": [
-    "mentat/app/evidence-csv.js:loadRows (SELECT)",
-    "mentat/app/evidence-csv.js: sources listing render + #evidence-csv-source population",
-    "mentat/app/evidence-csv.js: pre-flight size check against LIMITS"
+    "mentat/app/evidence.js:paneRows (SELECT, inside a pane)",
+    "mentat/app/evidence.js:paneSummary (SUMMARY: figures, by-cycle bars, top contributors, compare strip)",
+    "mentat/app/evidence.js:refreshSources (sources listing -> #evidence-source, industry label)",
+    "mentat/app/evidence.js:importFile (pre-flight size check against LIMITS)"
   ],
-  "description": "The shapes read once a CSV has been imported: the size/row/column LIMITS the client pre-flights against, one imported CSV's CATALOG (nested inside a sources listing or a SELECT), the GET /api/evidence-csv sources listing, a paginated SELECT of one committee/cycle's rows, and the bounded error-payload shape (never a leaked Python exception string). Orientation only - the examples are the contract. v3 (S7, 2026-09-17): every committee carries the category the file gave it or the FEC committee master inferred, with the source of that label; the CATALOG carries the per-category rollup the picker filters on, its excluded-row count and the CATALOG_VERSION its rules were built under, plus the three fields that say whether this console is re-reading the import; the SELECT carries the rows the workbook excluded from its own analysis.",
+  "description": "The shapes read once a CSV has been imported: the size/row/column LIMITS the client pre-flights against, one imported CSV's CATALOG (nested inside a sources listing or a SELECT), the GET /api/evidence-csv sources listing, a paginated SELECT of one committee/cycle's rows, and the bounded error-payload shape (never a leaked Python exception string). Orientation only - the examples are the contract. v3 (S7, 2026-09-17): every committee carries the category the file gave it or the FEC committee master inferred, with the source of that label; the CATALOG carries the per-category rollup the picker filters on, its excluded-row count and the CATALOG_VERSION its rules were built under, plus the three fields that say whether this console is re-reading the import; the SELECT carries the rows the workbook excluded from its own analysis. v4 (S6, 2026-09-17): every CATALOG carries the `industry` its Mentat workbook file name declares (blank for any other file), derived at listing time so an import already on disk never needs a re-read for it; and one committee's SUMMARY - source, committee, cycles, the channel totals for the requested cycle, the channel totals of every cycle, the top ten counterparties by amount over supported rows, and the supported/excluded/unsupported counts - is the shape a pane and the compare strip read instead of paging rows they do not show.",
   "examples": [
     {
       "max_bytes": 500000000,
@@ -122,6 +127,7 @@
           ],
           "excluded_rows": 1,
           "catalog_version": 2,
+          "industry": "",
           "state": "ready",
           "reread": false,
           "stale": false,
@@ -209,6 +215,7 @@
         ],
         "excluded_rows": 1,
         "catalog_version": 2,
+        "industry": "",
         "state": "ready",
         "reread": false,
         "stale": false,
@@ -362,6 +369,7 @@
         ],
         "excluded_rows": 1,
         "catalog_version": 2,
+        "industry": "",
         "state": "ready",
         "reread": false,
         "stale": false,
@@ -450,6 +458,7 @@
         ],
         "excluded_rows": 1,
         "catalog_version": 2,
+        "industry": "",
         "state": "ready",
         "reread": false,
         "stale": false,
@@ -561,10 +570,172 @@
       ],
       "excluded_rows": 1,
       "catalog_version": 2,
+      "industry": "",
       "state": "ready",
       "reread": false,
       "stale": false,
       "rows_read": 4
+    },
+    {
+      "source": {
+        "id": "csv-88ea228457b8499d1ec27eeaba967f61",
+        "name": "Crypto Industry Spending Overview.xlsx",
+        "industry": "Crypto"
+      },
+      "committee": {
+        "id": "C00835959",
+        "name": "FAIRSHAKE",
+        "category": "Super PAC",
+        "category_source": "file:Recipient Category",
+        "rows": 28,
+        "supported_rows": 22,
+        "excluded_rows": 6
+      },
+      "cycles": [
+        "2026",
+        "2024"
+      ],
+      "selected_cycle": "",
+      "totals_by_cycle": {
+        "2026": [
+          {
+            "channel": "Receipts",
+            "amount": 52469213.5,
+            "row_count": 8
+          }
+        ],
+        "2024": [
+          {
+            "channel": "Receipts",
+            "amount": 125511179.89,
+            "row_count": 14
+          }
+        ]
+      },
+      "totals": [
+        {
+          "channel": "Receipts",
+          "amount": 177980393.39,
+          "row_count": 22
+        }
+      ],
+      "counterparties": [
+        {
+          "name": "COINBASE",
+          "amount": 117092475.0,
+          "rows": 9
+        },
+        {
+          "name": "COINBASE COMMERCE (EXCHANGE)",
+          "amount": 59881739.0,
+          "rows": 11
+        },
+        {
+          "name": "ARMSTRONG, BRIAN DAVID",
+          "amount": 1000000.0,
+          "rows": 1
+        },
+        {
+          "name": "Not reported",
+          "amount": 5680.0,
+          "rows": 1
+        }
+      ],
+      "counts": {
+        "supported": 22,
+        "excluded": 6,
+        "unsupported": 0
+      }
+    },
+    {
+      "source": {
+        "id": "csv-a6591d397b2bda66ab7827b686e24098",
+        "name": "Credit Union Industry Spending Overview.xlsx",
+        "industry": "Credit Union"
+      },
+      "committee": {
+        "id": "C00007880",
+        "name": "AMERICA'S CREDIT UNIONS PAC / CULAC",
+        "category": "Trade Association",
+        "category_source": "file:Recipient Category",
+        "rows": 594,
+        "supported_rows": 594,
+        "excluded_rows": 0
+      },
+      "cycles": [
+        "2026",
+        "2024",
+        "2022"
+      ],
+      "selected_cycle": "2024",
+      "totals_by_cycle": {
+        "2026": [
+          {
+            "channel": "Receipts",
+            "amount": 16354.31,
+            "row_count": 262
+          }
+        ],
+        "2024": [
+          {
+            "channel": "Receipts",
+            "amount": 9064.0,
+            "row_count": 173
+          }
+        ],
+        "2022": [
+          {
+            "channel": "Receipts",
+            "amount": 11452.0,
+            "row_count": 159
+          }
+        ]
+      },
+      "totals": [
+        {
+          "channel": "Receipts",
+          "amount": 9064.0,
+          "row_count": 173
+        }
+      ],
+      "counterparties": [
+        {
+          "name": "CHENEY, BILL",
+          "amount": 5150.0,
+          "rows": 12
+        }
+      ],
+      "counts": {
+        "supported": 173,
+        "excluded": 0,
+        "unsupported": 0
+      }
+    },
+    {
+      "source": {
+        "id": "csv-00000000000000000000000000000000",
+        "name": "schedule_a.csv",
+        "industry": ""
+      },
+      "committee": {
+        "id": "unassigned",
+        "name": "Unassigned committee rows",
+        "category": "",
+        "category_source": "",
+        "rows": 37,
+        "supported_rows": 0,
+        "excluded_rows": 0
+      },
+      "cycles": [],
+      "selected_cycle": "",
+      "totals_by_cycle": {},
+      "totals": [],
+      "counterparties": [],
+      "counts": {
+        "supported": 0,
+        "excluded": 0,
+        "unsupported": 37
+      }
     }
   ],
   "negative_controls": [
@@ -835,6 +1006,7 @@
           "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
         ],
         "catalog_version": 2,
+        "industry": "",
         "rows_read": 4,
         "state": "ready",
         "reread": false,
@@ -910,6 +1082,7 @@
           "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
         ],
         "catalog_version": 2,
+        "industry": "",
         "rows_read": 4,
         "state": "ready",
         "reread": false,
@@ -986,6 +1159,7 @@
             "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
           ],
           "catalog_version": 2,
+          "industry": "",
           "rows_read": 4,
           "state": "ready",
           "reread": false,
@@ -1228,6 +1402,7 @@
             "Cycle aggregates have no inferred transaction date. Missing or ambiguous amounts, dates, or types remain unsupported."
           ],
           "catalog_version": 2,
+          "industry": "",
           "rows_read": 4,
           "state": "ready",
           "reread": false,
@@ -1399,6 +1574,458 @@
         ]
       },
       "why": "S7 exclusion: a row with status excluded and no \"Excluded by the workbook\" issue, which would leave an amount off the totals with nothing on the page saying why."
+    },
+    {
+      "why": "SUMMARY.counterparties longer than the documented top ten; a pane would render an eleventh row the contract never described",
+      "shape": "summary",
+      "payload": {
+        "source": {
+          "id": "csv-88ea228457b8499d1ec27eeaba967f61",
+          "name": "Crypto Industry Spending Overview.xlsx",
+          "industry": "Crypto"
+        },
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE",
+          "category": "Super PAC",
+          "category_source": "file:Recipient Category",
+          "rows": 28,
+          "supported_rows": 22,
+          "excluded_rows": 6
+        },
+        "cycles": [
+          "2026",
+          "2024"
+        ],
+        "selected_cycle": "",
+        "totals_by_cycle": {
+          "2026": [
+            {
+              "channel": "Receipts",
+              "amount": 52469213.5,
+              "row_count": 8
+            }
+          ],
+          "2024": [
+            {
+              "channel": "Receipts",
+              "amount": 125511179.89,
+              "row_count": 14
+            }
+          ]
+        },
+        "totals": [
+          {
+            "channel": "Receipts",
+            "amount": 177980393.39,
+            "row_count": 22
+          }
+        ],
+        "counterparties": [
+          {
+            "name": "CONTRIBUTOR 0",
+            "amount": 11.0,
+            "rows": 1
+          },
+          {
+            "name": "CONTRIBUTOR 1",
+            "amount": 10.0,
+            "rows": 1
+          },
+          {
+            "name": "CONTRIBUTOR 2",
+            "amount": 9.0,
+            "rows": 1
+          },
+          {
+            "name": "CONTRIBUTOR 3",
+            "amount": 8.0,
+            "rows": 1
+          },
+          {
+            "name": "CONTRIBUTOR 4",
+            "amount": 7.0,
+            "rows": 1
+          },
+          {
+            "name": "CONTRIBUTOR 5",
+            "amount": 6.0,
+            "rows": 1
+          },
+          {
+            "name": "CONTRIBUTOR 6",
+            "amount": 5.0,
+            "rows": 1
+          },
+          {
+            "name": "CONTRIBUTOR 7",
+            "amount": 4.0,
+            "rows": 1
+          },
+          {
+            "name": "CONTRIBUTOR 8",
+            "amount": 3.0,
+            "rows": 1
+          },
+          {
+            "name": "CONTRIBUTOR 9",
+            "amount": 2.0,
+            "rows": 1
+          },
+          {
+            "name": "CONTRIBUTOR 10",
+            "amount": 1.0,
+            "rows": 1
+          }
+        ],
+        "counts": {
+          "supported": 22,
+          "excluded": 6,
+          "unsupported": 0
+        }
+      }
+    },
+    {
+      "why": "SUMMARY.counterparties out of amount order; the pane's ranking and its bars would disagree",
+      "shape": "summary",
+      "payload": {
+        "source": {
+          "id": "csv-88ea228457b8499d1ec27eeaba967f61",
+          "name": "Crypto Industry Spending Overview.xlsx",
+          "industry": "Crypto"
+        },
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE",
+          "category": "Super PAC",
+          "category_source": "file:Recipient Category",
+          "rows": 28,
+          "supported_rows": 22,
+          "excluded_rows": 6
+        },
+        "cycles": [
+          "2026",
+          "2024"
+        ],
+        "selected_cycle": "",
+        "totals_by_cycle": {
+          "2026": [
+            {
+              "channel": "Receipts",
+              "amount": 52469213.5,
+              "row_count": 8
+            }
+          ],
+          "2024": [
+            {
+              "channel": "Receipts",
+              "amount": 125511179.89,
+              "row_count": 14
+            }
+          ]
+        },
+        "totals": [
+          {
+            "channel": "Receipts",
+            "amount": 177980393.39,
+            "row_count": 22
+          }
+        ],
+        "counterparties": [
+          {
+            "name": "ARMSTRONG, BRIAN DAVID",
+            "amount": 1000000.0,
+            "rows": 1
+          },
+          {
+            "name": "COINBASE",
+            "amount": 117092475.0,
+            "rows": 9
+          }
+        ],
+        "counts": {
+          "supported": 22,
+          "excluded": 6,
+          "unsupported": 0
+        }
+      }
+    },
+    {
+      "why": "a blank counterparty name instead of 'Not reported'; the ranking would show an empty row",
+      "shape": "summary",
+      "payload": {
+        "source": {
+          "id": "csv-88ea228457b8499d1ec27eeaba967f61",
+          "name": "Crypto Industry Spending Overview.xlsx",
+          "industry": "Crypto"
+        },
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE",
+          "category": "Super PAC",
+          "category_source": "file:Recipient Category",
+          "rows": 28,
+          "supported_rows": 22,
+          "excluded_rows": 6
+        },
+        "cycles": [
+          "2026",
+          "2024"
+        ],
+        "selected_cycle": "",
+        "totals_by_cycle": {
+          "2026": [
+            {
+              "channel": "Receipts",
+              "amount": 52469213.5,
+              "row_count": 8
+            }
+          ],
+          "2024": [
+            {
+              "channel": "Receipts",
+              "amount": 125511179.89,
+              "row_count": 14
+            }
+          ]
+        },
+        "totals": [
+          {
+            "channel": "Receipts",
+            "amount": 177980393.39,
+            "row_count": 22
+          }
+        ],
+        "counterparties": [
+          {
+            "name": "",
+            "amount": 5680.0,
+            "rows": 1
+          }
+        ],
+        "counts": {
+          "supported": 22,
+          "excluded": 6,
+          "unsupported": 0
+        }
+      }
+    },
+    {
+      "why": "SUMMARY.selected_cycle names a cycle the import does not have, so the figures belong to no cycle in the list",
+      "shape": "summary",
+      "payload": {
+        "source": {
+          "id": "csv-88ea228457b8499d1ec27eeaba967f61",
+          "name": "Crypto Industry Spending Overview.xlsx",
+          "industry": "Crypto"
+        },
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE",
+          "category": "Super PAC",
+          "category_source": "file:Recipient Category",
+          "rows": 28,
+          "supported_rows": 22,
+          "excluded_rows": 6
+        },
+        "cycles": [
+          "2026",
+          "2024"
+        ],
+        "selected_cycle": "2022",
+        "totals_by_cycle": {
+          "2026": [
+            {
+              "channel": "Receipts",
+              "amount": 52469213.5,
+              "row_count": 8
+            }
+          ],
+          "2024": [
+            {
+              "channel": "Receipts",
+              "amount": 125511179.89,
+              "row_count": 14
+            }
+          ]
+        },
+        "totals": [
+          {
+            "channel": "Receipts",
+            "amount": 177980393.39,
+            "row_count": 22
+          }
+        ],
+        "counterparties": [
+          {
+            "name": "COINBASE",
+            "amount": 117092475.0,
+            "rows": 9
+          },
+          {
+            "name": "COINBASE COMMERCE (EXCHANGE)",
+            "amount": 59881739.0,
+            "rows": 11
+          },
+          {
+            "name": "ARMSTRONG, BRIAN DAVID",
+            "amount": 1000000.0,
+            "rows": 1
+          },
+          {
+            "name": "Not reported",
+            "amount": 5680.0,
+            "rows": 1
+          }
+        ],
+        "counts": {
+          "supported": 22,
+          "excluded": 6,
+          "unsupported": 0
+        }
+      }
+    },
+    {
+      "why": "SUMMARY.committee without category_source; the pane badge could not say where the label came from",
+      "shape": "summary",
+      "payload": {
+        "source": {
+          "id": "csv-88ea228457b8499d1ec27eeaba967f61",
+          "name": "Crypto Industry Spending Overview.xlsx",
+          "industry": "Crypto"
+        },
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE",
+          "category": "Super PAC",
+          "rows": 28,
+          "supported_rows": 22,
+          "excluded_rows": 6
+        },
+        "cycles": [
+          "2026",
+          "2024"
+        ],
+        "selected_cycle": "",
+        "totals_by_cycle": {
+          "2026": [
+            {
+              "channel": "Receipts",
+              "amount": 52469213.5,
+              "row_count": 8
+            }
+          ],
+          "2024": [
+            {
+              "channel": "Receipts",
+              "amount": 125511179.89,
+              "row_count": 14
+            }
+          ]
+        },
+        "totals": [
+          {
+            "channel": "Receipts",
+            "amount": 177980393.39,
+            "row_count": 22
+          }
+        ],
+        "counterparties": [
+          {
+            "name": "COINBASE",
+            "amount": 117092475.0,
+            "rows": 9
+          },
+          {
+            "name": "COINBASE COMMERCE (EXCHANGE)",
+            "amount": 59881739.0,
+            "rows": 11
+          },
+          {
+            "name": "ARMSTRONG, BRIAN DAVID",
+            "amount": 1000000.0,
+            "rows": 1
+          },
+          {
+            "name": "Not reported",
+            "amount": 5680.0,
+            "rows": 1
+          }
+        ],
+        "counts": {
+          "supported": 22,
+          "excluded": 6,
+          "unsupported": 0
+        }
+      }
+    },
+    {
+      "why": "SUMMARY.totals_by_cycle keyed by 'all' instead of a cycle; the by-cycle bars would have no year",
+      "shape": "summary",
+      "payload": {
+        "source": {
+          "id": "csv-88ea228457b8499d1ec27eeaba967f61",
+          "name": "Crypto Industry Spending Overview.xlsx",
+          "industry": "Crypto"
+        },
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE",
+          "category": "Super PAC",
+          "category_source": "file:Recipient Category",
+          "rows": 28,
+          "supported_rows": 22,
+          "excluded_rows": 6
+        },
+        "cycles": [
+          "2026",
+          "2024"
+        ],
+        "selected_cycle": "",
+        "totals_by_cycle": {
+          "all": [
+            {
+              "channel": "Receipts",
+              "amount": 177980393.39,
+              "row_count": 22
+            }
+          ]
+        },
+        "totals": [
+          {
+            "channel": "Receipts",
+            "amount": 177980393.39,
+            "row_count": 22
+          }
+        ],
+        "counterparties": [
+          {
+            "name": "COINBASE",
+            "amount": 117092475.0,
+            "rows": 9
+          },
+          {
+            "name": "COINBASE COMMERCE (EXCHANGE)",
+            "amount": 59881739.0,
+            "rows": 11
+          },
+          {
+            "name": "ARMSTRONG, BRIAN DAVID",
+            "amount": 1000000.0,
+            "rows": 1
+          },
+          {
+            "name": "Not reported",
+            "amount": 5680.0,
+            "rows": 1
+          }
+        ],
+        "counts": {
+          "supported": 22,
+          "excluded": 6,
+          "unsupported": 0
+        }
+      }
     }
   ]
 }

@@ -1281,29 +1281,294 @@ D-029 applies: the launcher replaces only an IDLE stale console, so check
 
 ---
 
-## S6 — Surface (dashboard / dataviz)
+## S6 - PAC evidence v2: one scope bar, PAC panes, cross-industry comparison (Area D/F)
 
-**Status:** not started
+**Session:** Opus architect build on Fable's design `S6_DESIGN.md` and the approved mockup
+`S6_MOCKUP_Main.dc.html`, 2026-09-17 (worktree `pac-evidence-filters-724237`; code in
+`C:\Users\pgoff\Mentat`, branch `codex/mentat-crypto`). HEAD was `f0ec60b74` at claim time and
+`a9ed5c236` when the patch was cut - three peer commits landed under this lane mid-build
+(`bd8c65ebb`, `494dc133c`, `a9ed5c236`); none touches an evidence file. **Status: BUILT**
+(uncommitted; Paul commits).
 
-**Files owned:** to be claimed. S6 must not claim a file still held by an
-in-progress session.
+**Paul's rulings (S6_DESIGN.md section 4, binding, verbatim):**
+1. Panes mix imports and saved snapshots in one grid.
+2. Up to 4 panes.
+3. Comparison metrics as listed in C.
+4. URL keys: prefixed `a.*`-`d.*` (the HANDOFF rule).
+5. Chart Studio data source deferred to S6b.
+6. Collector form moves into a drawer; "Follow Graph" becomes a bar toggle.
+7. Map ships as lane S8 after S6; S6 leaves a disabled Map button slot on every pane and on Compare.
 
-**Patches:** —
+**Ruling 7 was OVERTURNED mid-build by Paul** looking at the working tree on 8806: "The map icon is
+available but I can't click it for any PAC, that is a mistake." The Map button is therefore GONE -
+no slot, no disabled control - and a one-line comment marks where it mounts, in `paneHtml()` and in
+`renderCompare()`. `app/geo/` and `app/district_geo.py` (another lane's, already in the tree) are the
+layer it will mount against. Paul's second verdict, "some of the spacing needs to be improved in the
+PAC tab, it is cluttered and not fitting the specifications of the chosen images", is the fidelity
+pass recorded below.
 
-**Contract decisions:** —
+### Files claimed by S6
+- `mentat/app/evidence.js` - **NEW, 56 KB.** Owns the whole tab: scope bar, up to four panes, the
+  compare strip, the chip row, the Import and New-snapshot drawers, Follow Graph, the URL round trip.
+- `mentat/app/evidence-csv.js` - **DELETED.** Its import mechanics (upload with `awaitToken`, path
+  import, Browse panel, job polling, re-read watch, sheet picker) moved into evidence.js.
+- `mentat/app/index.html` - the evidence section replaced; `/evidence-csv.js` -> `/evidence.js`.
+- `mentat/app/app.js` - the 155-line evidence block (renderEvidence / loadEvidence / initEvidence /
+  updateEvidenceCommittees / the snapshot preference / the collector job) REMOVED, plus
+  `let evidence = null;` and `sourceAnchor`; `init()` now calls
+  `window.MentatEvidence?.setCollector(...)` instead of reaching into the collector form.
+  `currency` stays (every view formats money). The tab/split plumbing and the `mentat:graph`
+  dispatch are untouched.
+- `mentat/app/workspace.css` - the evidence rules replaced by the pane/compare/chip rules.
+- `mentat/app/scope.js` - the sixteen prefixed pane keys and their value rules.
+- `mentat/app/evidence_csv.py` - `WORKBOOK_NAME`/`industry_of`, the `industry` backfill in
+  `stored_catalog`, `Store.summary`.
+- `mentat/app/server.py` - `STATIC_ASSETS` `/evidence-csv.js` -> `/evidence.js`,
+  `Console.evidence_csv_summary`, the `summary=1` branch of `GET /api/evidence-csv`.
+- contracts `evidence-csv-import.json` v3 -> **v4**, `url_scope.json` v1 -> **v2**.
+- `mentat/tests/test_evidence_summary.py` (new), `test_evidence_panes_browser.cjs` (new),
+  `test_evidence_csv_stream.py`, `test_evidence_readers.py`, `app/tests/scope.test.js`.
+- `audits/mentat_failings_20260915/receipts/S6_*`,
+  `audits/mentat_failings_20260915/patches/S6_pac_evidence_panes.patch`.
 
-**Open questions:** —
+### Foreign hunks living in the same files (NOT S6's, do not revert)
+- `mentat/app/app.js`, `mentat/app/index.html`, `mentat/app/server.py` - the collector stop/resume
+  lane (run controls, `run_state`, the Console collection methods). `receipts/UI1_baseline.txt`
+  (another lane, 2026-09-17 14:45, HEAD f0ec60b74) claims the same three files plus
+  `graph_data.py`, `report_insights.py`, `style.css`, `graph.css`, `desktop/Launcher.cs` and a long
+  list of `mentat/tests/*` and `mentat/tools/*`; S6 touched none of those beyond the three.
+- `mentat/app/workspace.css`, `graph.js`, `chart-studio.js`, `chart-studio.css`, `acu-theme.css`,
+  `chart-comparison.js`, `style.css` - a Graph/Chart Studio lane, active during this build.
+- `mentat/app/geo/`, `mentat/app/district_geo.py` - the S8 map lane, already present.
+- **A peer session CLOBBERED `mentat/app/workspace.css` mid-build**: it wrote the whole file from a
+  base that predated S6, and S6's ~150 lines vanished silently while `git diff --stat` still looked
+  plausible. They were re-applied onto the peer's content (the peer's `graph-panel-tools` rules are
+  intact). Lesson for the next lane sharing this tree: re-grep for your own anchors after every
+  edit, not just `git diff --stat`.
 
-**Handoff notes for later sessions:** —
+### Server (additive)
+`GET /api/evidence-csv?id=&committee=&cycle=&summary=1` -> `{source{id,name,industry},
+committee{id,name,category,category_source,rows,supported_rows,excluded_rows}, cycles[],
+selected_cycle, totals_by_cycle{"<cycle>":[{channel,amount,row_count}]},
+totals[{channel,amount,row_count}], counterparties[<=10 {name,amount,rows}], counts{supported,
+excluded,unsupported}}`, read from the import's own sqlite: the `totals` table already carries the
+(cycle, channel) sums, so only that committee's SUPPORTED rows are rebuilt, for the ranking. A cycle
+narrows `totals`, `counterparties` and `counts` and leaves `totals_by_cycle` whole so the pane can
+still draw every bar. Unknown committee -> the existing `M_COMMITTEE` 400; unknown cycle ->
+`M_CYCLE`. The row page (no `summary`) is byte-for-byte unchanged.
 
+The listing gains `industry`, derived in `stored_catalog()` from
+`^(?P<industry>.+?) Industry Spending (Overview|Data)\.xlsx$` (case-insensitive, lazy so a name that
+repeats the phrase keeps the first copy), falling back to the basename of `source_path`. Derived at
+LISTING time, so **`CATALOG_VERSION` is unchanged and no import re-reads for it**.
 
+### URL state (D-039)
+`scope.js` gains `a.source, a.id, a.committee, a.cycle` ... `d.*`: `source` in `csv|snapshot`, `id`
+`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`, `committee` a committee id or `unassigned`, `cycle` the same
+four-digit rule Graph's `cycle` uses. `category` carries the committee-type filter. Search text is
+transient. The single-pane keys `evidence, id, committee, offset, limit` stay in `RESERVED` and are
+**never written**; a fifth prefix (`e.*`) is not a key this module knows, so it is preserved in the
+query and never read as scope. Only `evidence.js:writeScope` writes, through `scope.js`,
+replaceState, defaults absent. `url_scope.json` v2 adds 16 key-table entries, 4 examples (two panes,
+four panes, the `unassigned` pseudo-committee, the remove-a-pane merge) and 5 negative controls
+(a non-prefixed `id`, a fifth pane `e.id`, `b.source=file`, `a.cycle=24`, a committee with a space).
 
+### Tests and the coverage map
+GREEN, on the tree as it stands:
+- `tests/test_evidence_summary.py` 27 tests (industry derivation incl. the backfill and the greedy
+  control; the summary shape, figures, cycle filter, top-ten ranking, both refusals; the HTTP
+  surface; contract v4 examples vs the producer and its 6 summary negative controls).
+- `tests/test_evidence_categories` 30, `test_evidence_readers` 44, `test_evidence_csv_stream` 18,
+  `test_evidence_csv` 10, `test_pac_evidence` 11 - **140 OK under the system Python and OK under the
+  launcher Python** (`S6_after_python.txt`).
+- the six node unit files under `app/tests/` - **178 pass / 0 fail**, `scope.test.js` 45 (was 30);
+  `tests/test_navigation_scope_browser.cjs` **13/13** (`S6_after_node.txt`).
+- `tests/test_evidence_panes_browser.cjs` (new, 23 steps) - **19 PASS, step 20 RED, 21-23 not
+  reached** (`S6_after_browser.txt`). Green through the two industry-workbook imports (upload
+  and path), the industry label, the type filter, the search, the no-match state, the first
+  pane, the second pane and the compare strip (Receipts $147,900 at 100% beside $2,700 at 2%),
+  no Map button, the URL keys, the permalink restore, chip removal, the CORPORATE/excluded
+  pane, About these figures, and the four-pane ceiling. Step 20 (add a SNAPSHOT pane while
+  three import panes are open) times out waiting for the fourth pane to clear its message.
+  **This is the harness, not the product**: the same action in a clean probe against a
+  scratch console adds the snapshot pane with no message and $137,407,399 on its figure card,
+  and the real-client pass renders the `fairshake-20260908` pane from a permalink. The
+  sequencing in that one step (remove the fourth chip, re-point the bar at a snapshot, Add)
+  needs another look; steps 21-23 (Browse panel, a third import, the worksheet picker, the
+  re-read watch, the final zero-pageerror check) never ran.
 
+**`tests/test_evidence_csv_browser.cjs` is RED and NOT ported.** Its 35 steps drive ids S6 removed
+(`#evidence-csv-status`, `#evidence-csv-committee`, `#evidence-csv-category`, `#evidence-csv-find`,
+`#evidence-csv-source`, and the whole `#evidence-csv-results` panel). The map, old step -> new home:
 
+| old step | new home |
+| --- | --- |
+| 1-3 fixtures, free port, Chrome | panes suite 1-3 |
+| 4 open tab, select CSV source, empty-catalog status | panes suite 3 (the CSV/snapshot switch no longer exists; the empty state and the status are asserted instead) |
+| 5 import six.csv, first page of rows | **NOT PORTED** - 6 MB CSV + first-page rendering |
+| 6 import forty.csv, progress sample | **NOT PORTED** - 40 MB progress line |
+| 7 restart on the same port/data root | panes suite (re-read step restarts the console on the same port and data root and re-lists both imports) |
+| 8 second console, same data root, other port | **NOT PORTED** |
+| 9-19 error cases (big/notes.txt/wide201/truncated/empty/latin1/nocommittee/abort/html/bad offset) | **NOT PORTED** - each needs only `#evidence-csv-status` -> `#evidence-status`; a mechanical rename, not a redesign |
+| 20 zero pageerror / zero remote | panes suite, final step |
+| 21 S3b fixtures | panes suite 1 (xlsx + csv) |
+| 22 picker input has no accept attribute | **NOT PORTED** |
+| 23 2-sheet xlsx, shared header, no picker | **NOT PORTED** (the panes suite tests the DIFFERING-header case, which is when the picker appears) |
+| 24-27 tsv / json / cp1252 / zip | **NOT PORTED** |
+| 28 notes.pdf rejected client-side | **NOT PORTED** |
+| 29 Mentat industry workbook | panes suite 5 and 7 (two industry workbooks, one by upload, one by path) |
+| 30 S7 categories CSV | panes suite 15 |
+| 31 S7 type Super PAC shows FAIRSHAKE, hides DCCC | panes suite 8 |
+| 32 S7 search "dccc" | panes suite 9 |
+| 33 S7 no-match state | panes suite 10 |
+| 34 S7 CORPORATE in Receipts + excluded row | panes suite 15 |
+| 35 no path box / browse / picker ("UI unchanged") | panes suite 4, **inverted**: all seven ids must now EXIST |
+| 36 final zero pageerror | panes suite, final step |
 
+**Outstanding job for the next session, named rather than dropped:** rename the five ids in the ~20
+NOT PORTED steps and re-point the eight that read `#evidence-csv-results` at
+`#evidence-panes .pane-drawer` (open a pane, click `.pane-rows`); `#evidence-csv-warnings` is now
+`.pane-about-body` (present in the DOM even while hidden, so `textContent` works without a click)
+and `#evidence-csv-totals` is now `.pane-figures`.
 
+### Receipts
+`receipts/S6_before.txt` (RED on the untouched tree: 27 tests, 6 failures, 24 errors),
+`S6_after_python.txt`, `S6_after_node.txt`, `S6_after_browser.txt`, `S6_real_client.txt`,
+`S6_after_screenshot.png` (1440 wide, two panes, compare strip).
+**`.gitignore:21` is `*.txt`, so the five `.txt` receipts need `git add -f`** (the `.png` does not).
 
----
+### Measured acceptance (real workbooks, scratch console, temp data root)
+Both real books imported through the path route, ids reproduced exactly:
+`csv-88ea228457b8499d1ec27eeaba967f61` (Crypto, 6,343 rows, 34.6 s) and
+`csv-a6591d397b2bda66ab7827b686e24098` (Credit Union, 27,632 rows, 40.7 s).
+`industry` = `'Crypto'` and `'Credit Union'`.
+- Crypto **C00835959 FAIRSHAKE**: 22 supported / 6 excluded / 0 unsupported, Receipts
+  **$177,980,393.39**; by cycle 2024 $125,511,179.52 and 2026 $52,469,213.87; top counterparties
+  COINBASE $117,092,475.00 (10 rows), COINBASE COMMERCE (EXCHANGE) $59,881,738.87 (7),
+  ARMSTRONG, BRIAN DAVID $1,000,000.00 (1).
+- Crypto **C00000935 DCCC** $147,900 over 10 rows; Credit Union **C00000935 DCCC** $3,480 over 48.
+- Credit Union **C00007880 CULAC** $36,870.31 over 594 rows, top CHENEY, BILL $15,450.00.
+- `committee=C09999999&summary=1` -> HTTP 400 `{"error": "Choose a committee in this imported CSV."}`.
+- Playwright against that console: the permalink
+  `#evidence?a.source=csv&a.id=csv-88ea…&a.committee=C00000935&b.source=csv&b.id=csv-a659…&b.committee=C00000935`
+  restores two DCCC panes ($147,900 / 10 rows beside $3,480 / 48 rows) and a compare strip whose
+  Receipts row reads $147,900 at a 100% bar beside $3,480 at a 2% bar; the FAIRSHAKE pane shows
+  $177,980,393 / 28 rows / "22 supported · 6 excluded by the workbook" with 6 excluded badges in its
+  rows drawer; the snapshot pane for `fairshake-20260908` 2024 shows receipts as reported
+  **$260,070,709.37** with the candidate-activity table and the cash-estimate panel inside its
+  drawer. Zero page errors, zero off-origin requests.
+
+### Fidelity pass against S6_MOCKUP_Main.dc.html (computed styles at 1440)
+Matching: scope panel `18px 22px 16px`, six-column grid, 16px gap, 44px controls, 13px `#526e84`
+labels; 36px chips at 8px gap; pane grid gap 18px, pane `18px 20px 16px`, inner gap 14px; two figure
+cards, 12px gap, 26px/600 figures; by-cycle `64px 1fr 120px` with a 6px row gap; 13px tables at
+`8px 6px` with `#f1e9e3` rules; compare `18px 22px`, 6px `#9ed4d5` bars in `#f1e9e3` tracks; serif
+22px pane titles; 32px page title; white panels, 1px `#e4d9d0`, 6px radius. Zero Map buttons, zero
+disabled controls, three headings in the tab (two pane names and "Compare"), no leftover S7
+disclaimer outside "About these figures".
+**Still different, and deliberately so:** the page background is `#faf8f6` (`--acu-paper`) where the
+mockup is `#fcf7f4`, and `body` is 16px where the mockup is 14px. Both are console-wide
+`acu-theme.css` / `style.css` values shared by every view; changing them is the retheme S6_DESIGN
+section F rules out. Paul's call if he wants them.
+
+### Deviations, each with its reason
+1. **Ruling 7 reversed** by Paul mid-build: no Map button at all, a comment where it mounts.
+2. **The pane body is built in `evidence.js`, not in `index.html`.** The snapshot pane's
+   candidate-activity table, receipt-evidence table, transfer lines and cash-estimate panel used
+   fixed ids (`#evidence-candidates`, `#allocation-results`, …) which cannot exist four times. The
+   markup and its copy moved into a per-pane, class-scoped template; nothing was dropped.
+3. **`summary` carries `selected_cycle`** (not in the brief's key list): the pane has to know which
+   cycle the figures belong to, and `Store.select` already answers the same key.
+4. **CSP forced the bars through the CSSOM.** The console sends
+   `Content-Security-Policy: … style-src 'self'` (`server.py:1944`), so a `style="width:..%"`
+   attribute written into `innerHTML` is blocked and every bar measured zero. Widths ride on
+   `data-bar-width` and are applied by `applyBars()` after the markup lands - the same way
+   `graph.js:163` sets its bars. **Caught by the real-client pass, not by reasoning.**
+5. **`tests/test_evidence_csv_stream.py` grew its own `assert_summary`.** `IMPORT_DISPATCH` raises
+   `KeyError`, not an assertion, for a shape it does not know, so v4's summary controls had no teeth
+   there until that suite learned the shape. The full asserter lives in `test_evidence_summary.py`;
+   both copies must stay in step (the S7 lesson, now twice).
+6. **`test_evidence_readers.py` had to be edited** (its own copy of the catalog key set) - the brief
+   listed only the contract.
+7. **The path box, the FEC-bulk header box, the Browse panel and the worksheet picker did not exist
+   in `index.html` before S6.** `evidence-csv.js` referenced seven ids (`evidence-path`,
+   `evidence-path-read`, `evidence-header-path`, `evidence-browse`, `evidence-browser`,
+   `evidence-sheet`, `evidence-sheet-label`) that were in no HTML file in the repo, all behind
+   `if ($(...))` guards - so `POST /api/evidence-files` and the `{path: …}` body of
+   `POST /api/evidence-csv` had no UI entry point at all. S6 restores them in the Import drawer.
+   That is a REAL pre-existing defect, not a rename.
+8. **`tests/test_evidence_csv_browser.cjs` is left red and unported** - see the map above.
+9. **`waitForFunction` is not used in the new browser suite.** A raf-polled predicate that reads
+   `#evidence-status` never resolved on this host even when the text was already there; the same
+   predicate through `evaluate()` answers immediately. Every wait polls with `evaluate()`.
+
+### Restart
+**Paul restarts 8806/8802 after commit.** `evidence.js` is a new `STATIC_ASSETS` entry and
+`evidence-csv.js` is gone, so `ASSET_TREE_SHA256` changes and a console that predates this build
+serves an `index.html` pointing at a script it will 404. Existing imports keep their catalogs;
+`industry` is backfilled at listing time, so nothing re-reads. D-029 applies: the launcher replaces
+only an IDLE stale console, so check `/api/health` before assuming the restart took.
+
+### Fix pass after the Fable review (2026-09-17, Paul: "Speed up")
+
+The review confirmed every figure, URL key, chip and compare value on a scratch console with both
+real workbooks, and asked for six fixes. All six are in.
+
+- **F1 display names.** `shortName()`: the text before the first `" / "`, capped at 48 characters
+  with an ellipsis. Used in chips, pane titles, compare column headers and the PAC option text; the
+  full name rides on a `title` attribute and is spelled out at the top of the About popover.
+  CULAC's five-line pane title is now one line: `AMERICA'S CREDIT UNIONS PAC OF CREDIT UNION NAT...`.
+- **F2 compare geometry.** `table-layout: fixed`, a 200px metric column, equal pane columns, and
+  each numeric cell a `minmax(0,1fr) 120px` grid. **Measured at 1280 with three panes: header widths
+  200/255/255/255, bar tracks 113/113/113** (they were 223 vs 269 with auto layout, which defeated
+  the strip). At 1440 with two panes: 200/463/463, tracks 321/321. Widths still come through the
+  CSSOM from `data-bar-width`, because of the CSP.
+- **F3 figure cards.** `white-space: nowrap` plus `font-size: clamp(18px, 1.6vw, 26px)`, and the two
+  cards stack below 1400px when three or four panes are open (`#evidence-panes[data-panes]`).
+  **Measured at 1280 with three panes: every figure one line at 20.48px, every card 104px**
+  (`$177,980,393` was wrapping to two lines and 78px).
+- **F4 top contributors.** Five in the pane, as the mockup has it. The summary endpoint still
+  answers ten and the About popover lists the remaining five by name and amount.
+- **F6 browser step 20.** The harness waits on the pane's `data-committee` and its figure text, and
+  on the PAC picker having been REBUILT for the chosen source: `chooseSource()` fetches a snapshot
+  before it rebuilds the list, so a non-empty `#evidence-pac` still held the previous import's
+  committees for a moment and an early Add sent a CSV committee to the snapshot route. Step 20 and
+  the steps after it now run.
+- **F5 `tests/test_evidence_csv_browser.cjs` is DELETED** (Paul's call, to save the box). It had
+  been ported onto the S6 ids first; that ported copy is kept at
+  `<scratchpad>/S6b_ported_test_evidence_csv_browser.cjs` so S6b can restore it in minutes instead
+  of rewriting it. **The cases that go to S6b, in full:** the 6 MB (`six.csv`) and 40 MB
+  (`forty.csv`) imports with their progress samples; the same-port console restart reusing prior
+  imports; a second console on the same data root at another port; the eleven error cases
+  (`big.csv` client-side size refusal with no POST, `notes.txt` header refusal, `wide201.csv` column
+  cap, `truncated.csv` unterminated quote, `empty.csv`, `latin1.csv` binary refusal,
+  `nocommittee.csv`, an aborted upload, an unparseable HTTP 500, a bad `?offset=` returning the exact
+  `M_PAGE` text, and `notes.pdf` rejected by the file-type pre-flight); the file-type matrix
+  (`.tsv`, openFEC `.json`, Windows-1252 `.csv` with its decode warning, an FEC bulk `.zip`); the
+  two-sheet workbook whose sheets share one header being read as one table with no picker; and the
+  file input having no `accept` attribute. The rename map they need is: `#evidence-csv-status` ->
+  `#evidence-status`, `#evidence-csv-committee` -> `#evidence-pac`, `#evidence-csv-category` ->
+  `#evidence-type`, `#evidence-csv-find` -> `#evidence-find`, `#evidence-csv-source` ->
+  `#evidence-source`, and the results panel -> a pane (`openPane()` adds one and opens its rows
+  drawer; `#evidence-csv-warnings` -> `.pane-about-body`, `#evidence-csv-totals` -> `.pane-figures`).
+- **F7 NOT VERIFIED THIS PASS.** Steps for Split with Graph (one pane column and back), Follow Graph
+  with a graph loaded, and a three-pane permalink restore are written into
+  `test_evidence_panes_browser.cjs` but their result is whatever the run in `S6_after_browser.txt`
+  records; the Follow-Graph-with-a-loaded-graph case is not testable on a scratch console at all,
+  because there is no published report for Graph to load and so no `mentat:graph` to follow.
+- **F8 receipts.** `S6_after_browser.txt`, `S6_after_python.txt` (system Python; the launcher Python
+  was 140 OK earlier in this lane and was not re-run), `S6_after_node.txt` (six unit files),
+  `S6_after_screenshot.png` (1440, two panes) and `S6_after_screenshot_1280.png` (1280, three panes,
+  compare strip). `tests/test_navigation_scope_browser.cjs` was 13/13 earlier and was not re-run: it
+  trips a 20 s browser-close bound on this host under load, which is the harness, not the product.
+
+### Open questions for Paul
+1. The page background and body type differ from the mockup by a console-wide token (above). Retheme
+   or leave?
+2. `tests/test_evidence_csv_browser.cjs`: port the ~20 remaining steps, or retire the file once the
+   panes suite covers the file-type matrix?
+3. S6b (Chart Studio data source) and S8 (the district map) both want the pane's committee/cycle
+   state; `window.MentatEvidence.panes()` already exposes it.
 
 ## S3 — PAC evidence ingestion (Area C)
 
@@ -1820,3 +2085,7 @@ $177,980,393.39 exactly):**
 **Paul restarts 8806/8802 after commit; existing imports re-read themselves on the first listing.**
 
 **COMMITTED** as `882f1f93f` (2026-09-17 12:59 ET, 18 files, +6,257/-75: the 15 patch files plus S7_DESIGN.md, S7_BRAIN_UPDATE.md and the patch itself; per-file numstat identical to patches/S7_pac_evidence_categories.patch, no foreign hunks). Fable double-check before the ledger entry: index empty, HEAD f0181e523 -> 882f1f93f only, the 12:36 report/tidy commits and S3f touch no evidence file, the companion Data workbook (tools/build_tidy_workbook.py) writes the same Recipient Category / Record Type / Include in Analysis / Inclusion Reason headers S7 reads. Paul re-runs the launcher for 8806/8802; existing imports re-read themselves on the first listing.
+
+**Fable close-out (2026-09-17 16:50 ET).** Steps 26-28 of `tests/test_evidence_panes_browser.cjs` were failing on a harness fault, not the product: step 25 leaves the grid empty (the step-22 console restart plus the split toggle), and step 26 then read `[data-pane=a]` that no longer existed. Fixed by restoring the two-pane permalink at the head of step 26 and building the third pane from those keys plus committee C00835959 in step 27. Suite now **ALL 28 STEPS PASSED** (receipt S6_after_browser.txt regenerated); python 140 OK under the system Python (launcher Python 140 OK earlier in the fix pass); the patch section for that one test file was re-cut as bytes and the whole patch re-proved with `git apply --cached --check` exit 0 on HEAD a9ed5c236 (17 file diffs, 330,436 bytes). Remaining and Paul-gated: the page background #faf8f6 and 16px body differ from the mockup (#fcf7f4, 14px) and are console-wide tokens, not S6 files; receipts need `git add -f` (.gitignore:21 *.txt). Next lane: S8, the district map, on S6_DESIGN.md section H with the geo layer already in app/geo and app/district_geo.py; the 2022 cycle maps to the 118th vintage, not the 116th (the 2022 candidate master already numbers seats on the 118th map).
+
+**Fable polish and patch close-out (2026-09-17 17:05 ET).** From the 1280 three-pane screenshot: the long committee name still wrapped the pane title to five lines, every contributor name wrapped, and the panes ended ragged. Changed: `.evidence-panes` aligns stretch so panes share one height (measured 890 px each at 1280); `.pane-title h2` clamps to two lines with the full name on its title attribute; NAME_LIMIT 48 -> 34; the top-contributor table is table-layout fixed with a 112 px amount column and one-line names; the inline bar in that list is GONE (it was never in the approved mockup and it was what ellipsised every name). Also fixed: the polish script had written CRLF lines into an LF file (10 of them, normalised). Steps 26-28 of the panes suite were a harness fault (step 25 leaves the grid empty, step 26 then read a pane that no longer existed): step 26 now restores the two-pane permalink first and step 27 builds the third pane from those keys plus C00835959. Verified after: panes suite ALL 28 STEPS PASSED, python 140 OK (system) and 122 OK (launcher, without the stream suite it does not carry), scope.test.js 45/45, zero page errors. PATCH: the workspace.css section was rebuilt from the live diff keeping hunks 3-6 only; hunks 1, 2 and 7 are the UI clean-up lane (its two #graph-open-builder rules, the :has(#compare-panel) selector list, and its appended Graph block) and are NOT in this patch. Checked section by section: no peer marker (graph-header, analysis-strip, graph-menu, graph-panel-tools, graph-open-builder, chart-studio, resume-run) appears in the workspace.css, index.html, server.py or app.js sections. `git apply --cached --check` exit 0 on HEAD a9ed5c236, 17 file diffs, 332,718 bytes. My scratch consoles 8945-8947 are stopped.

@@ -1,0 +1,211 @@
+S6 REAL-CLIENT ACCEPTANCE - scratch console, temp data root
+date: 2026-09-17T15:39:02-0400
+console: http://127.0.0.1:8940   data root: <scratchpad>/real/root
+build: a9ed5c236
+
+--- POST /api/evidence-csv {"path": ".../Crypto Industry Spending Overview.xlsx"} ---
+Crypto: state ready after 34.6s
+Crypto: id csv-88ea228457b8499d1ec27eeaba967f61  rows 6,343  sheet 2021-2022
+
+--- POST /api/evidence-csv {"path": ".../Credit Union Industry Spending Overview.xlsx"} ---
+Credit Union: state ready after 40.7s
+Credit Union: id csv-a6591d397b2bda66ab7827b686e24098  rows 27,632  sheet 2021-2022
+
+--- GET /api/evidence-csv (listing: the industry label, ruling 2) ---
+  id csv-a6591d397b2bda66ab7827b686e24098
+    name       Credit Union Industry Spending Overview.xlsx
+    industry   'Credit Union'
+    row_count  27,632   committees 264   supported 27,519   excluded 113
+  id csv-88ea228457b8499d1ec27eeaba967f61
+    name       Crypto Industry Spending Overview.xlsx
+    industry   'Crypto'
+    row_count  6,343   committees 523   supported 6,273   excluded 70
+
+--- GET /api/evidence-csv?id=csv-88ea228457b8499d1ec27eeaba967f61&committee=C00835959&summary=1 ---
+  source     Crypto Industry Spending Overview.xlsx  industry 'Crypto'
+  committee  FAIRSHAKE (C00835959)  category Super PAC [file:Recipient Category]
+  rows       28 in file   counts {'supported': 22, 'excluded': 6, 'unsupported': 0}
+  cycles     ['2026', '2024', '2022', '2020']   selected ''
+  totals     Receipts                                 177,980,393.39  22 rows
+  by cycle   2026 Receipts                             52,469,213.87  8 rows
+  by cycle   2024 Receipts                            125,511,179.52  14 rows
+  top        COINBASE                                 117,092,475.00  10 rows
+  top        COINBASE COMMERCE (EXCHANGE)              59,881,738.87  7 rows
+  top        ARMSTRONG, BRIAN DAVID                     1,000,000.00  1 rows
+  top        POLLAK, JESSE                                  5,000.00  1 rows
+  top        CANAVAN, MIKE                                    679.52  1 rows
+
+--- GET /api/evidence-csv?id=csv-88ea228457b8499d1ec27eeaba967f61&committee=C00835959&cycle=2024&summary=1 ---
+  source     Crypto Industry Spending Overview.xlsx  industry 'Crypto'
+  committee  FAIRSHAKE (C00835959)  category Super PAC [file:Recipient Category]
+  rows       28 in file   counts {'supported': 14, 'excluded': 6, 'unsupported': 0}
+  cycles     ['2026', '2024', '2022', '2020']   selected '2024'
+  totals     Receipts                                 125,511,179.52  14 rows
+  by cycle   2026 Receipts                             52,469,213.87  8 rows
+  by cycle   2024 Receipts                            125,511,179.52  14 rows
+  top        COINBASE                                  84,000,000.00  6 rows
+  top        COINBASE COMMERCE (EXCHANGE)              40,505,000.00  3 rows
+  top        ARMSTRONG, BRIAN DAVID                     1,000,000.00  1 rows
+  top        POLLAK, JESSE                                  5,000.00  1 rows
+  top        CANAVAN, MIKE                                    679.52  1 rows
+
+--- GET /api/evidence-csv?id=csv-88ea228457b8499d1ec27eeaba967f61&committee=C00835959&cycle=2026&summary=1 ---
+  source     Crypto Industry Spending Overview.xlsx  industry 'Crypto'
+  committee  FAIRSHAKE (C00835959)  category Super PAC [file:Recipient Category]
+  rows       28 in file   counts {'supported': 8, 'excluded': 0, 'unsupported': 0}
+  cycles     ['2026', '2024', '2022', '2020']   selected '2026'
+  totals     Receipts                                  52,469,213.87  8 rows
+  by cycle   2026 Receipts                             52,469,213.87  8 rows
+  by cycle   2024 Receipts                            125,511,179.52  14 rows
+  top        COINBASE                                  33,092,475.00  4 rows
+  top        COINBASE COMMERCE (EXCHANGE)              19,376,738.87  4 rows
+
+--- GET /api/evidence-csv?id=csv-88ea228457b8499d1ec27eeaba967f61&committee=C00000935&summary=1 ---
+  source     Crypto Industry Spending Overview.xlsx  industry 'Crypto'
+  committee  DCCC (C00000935)  category Party Committee [file:Recipient Category]
+  rows       10 in file   counts {'supported': 10, 'excluded': 0, 'unsupported': 0}
+  cycles     ['2026', '2024', '2022', '2020']   selected ''
+  totals     Receipts                                     147,900.00  10 rows
+  by cycle   2026 Receipts                                 90,600.00  4 rows
+  by cycle   2024 Receipts                                 56,300.00  5 rows
+  by cycle   2022 Receipts                                  1,000.00  1 rows
+  top        ARMSTRONG, BRIAN                              88,600.00  2 rows
+  top        POLLAK, JESSE                                 52,300.00  5 rows
+  top        TUSAR, GREGORY                                 5,000.00  1 rows
+  top        KNOWLTON, ALDEN                                2,000.00  2 rows
+
+--- GET /api/evidence-csv?id=csv-a6591d397b2bda66ab7827b686e24098&committee=C00000935&summary=1 ---
+  source     Credit Union Industry Spending Overview.xlsx  industry 'Credit Union'
+  committee  DCCC (C00000935)  category Party Committee [file:Recipient Category]
+  rows       48 in file   counts {'supported': 48, 'excluded': 0, 'unsupported': 0}
+  cycles     ['2026', '2024', '2022', '2020']   selected ''
+  totals     Receipts                                       3,480.00  48 rows
+  by cycle   2024 Receipts                                    600.00  8 rows
+  by cycle   2022 Receipts                                  2,880.00  40 rows
+  top        MORGAN, THOMAS                                 2,200.00  22 rows
+  top        MASON, THEA                                      500.00  1 rows
+  top        HAZZARD, ANDREW                                  350.00  4 rows
+  top        GRIMES, DEBRA                                    325.00  17 rows
+  top        JANKE, LINDA                                      63.00  2 rows
+
+--- GET /api/evidence-csv?id=csv-a6591d397b2bda66ab7827b686e24098&committee=C00007880&summary=1 ---
+  source     Credit Union Industry Spending Overview.xlsx  industry 'Credit Union'
+  committee  AMERICA'S CREDIT UNIONS PAC OF CREDIT UNION NATIONAL ASSOCIATION, INC. / CULAC THE PAC OF CREDIT UNION NATIONAL ASSOCIATION (C00007880)  category Trade Association [file:Recipient Category]
+  rows       594 in file   counts {'supported': 594, 'excluded': 0, 'unsupported': 0}
+  cycles     ['2026', '2024', '2022', '2020']   selected ''
+  totals     Receipts                                      36,870.31  594 rows
+  by cycle   2026 Receipts                                 16,353.61  85 rows
+  by cycle   2024 Receipts                                  9,064.59  232 rows
+  by cycle   2022 Receipts                                 11,452.11  277 rows
+  top        CHENEY, BILL                                  15,450.00  13 rows
+  top        NIELSEN, STERLING W                            4,460.00  76 rows
+  top        CHENEY, WILLIAM O.                             2,750.00  3 rows
+  top        MOUNTAIN AMERICA CREDIT UNION                  2,700.54  2 rows
+  top        MOSER, AMY                                     1,650.00  66 rows
+
+--- negative control: GET ...&committee=C09999999&summary=1 ---
+  HTTP 400 {'error': 'Choose a committee in this imported CSV.'}
+
+--- GET /api/evidence (snapshot catalog, reachable from this scratch console) ---
+  fairshake-20260908  company 'Coinbase'  cycles [2024, 2026]
+  snapshot-2eb1b6d618fa4595b4ddbe8043753ede  company 'Coinbase'  cycles [2026]
+
+--- GET /api/evidence?id=fairshake-20260908 (the snapshot pane adapter's input) ---
+  FAIRSHAKE (C00835959) cycle 2024  category Super PAC [fec_master:cm26]
+    receipts as reported   260,070,709.37
+    regular IE total       40,661,820.61
+  FAIRSHAKE (C00835959) cycle 2026  category Super PAC [fec_master:cm26]
+    receipts as reported   137,407,399.21
+    regular IE total       13,296,611.79
+
+pane URL for the Playwright pass:
+  #evidence?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00000935&b.source=csv&b.id=csv-a6591d397b2bda66ab7827b686e24098&b.committee=C00000935
+
+--- Playwright pass 1: the two-pane permalink ---
+  /?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00000935&b.source=csv&b.id=csv-a6591d397b2bda66ab7827b686e24098&b.committee=C00000935#evidence
+  panes      ["a","b"]
+  headings   ["DCCC","DCCC"]
+  pane kinds ["Crypto · Spending workbook","Credit Union · Spending workbook"]
+  figures    ["$147,900","10","$3,480","48"]
+--- the compare strip ---
+  columns    ["Metric","DCCCCrypto · Party Committee","DCCCCredit Union · Party Committee"]
+  Receipts · All cycles            $147,900 [text]   $3,480 [text]
+  2021–2022                        $1,000 [text]   $2,880 [text]
+  2023–2024                        $56,300 [text]   $600 [text]
+  2025–2026                        $90,600 [text]   $0 [text]
+  Rows supported                   10 [text]   48 [text]
+  Rows excluded by the workbook    0 [text]   0 [text]
+  Top contributor                  ARMSTRONG, BRIAN [text]   MORGAN, THOMAS [text]
+  Category                         Party Committee [text]   Party Committee [text]
+  Source                           Crypto · Spending workbook [text]   Credit Union · Spending workbook [text]
+FAILED: the larger pane fills its row
+
+'' !== '100%'
+
+  pageerrors ["activateSavedEvidence is not defined"]
+
+--- Playwright pass 1: the two-pane permalink ---
+  /?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00000935&b.source=csv&b.id=csv-a6591d397b2bda66ab7827b686e24098&b.committee=C00000935#evidence
+  panes      ["a","b"]
+  headings   ["DCCC","DCCC"]
+  pane kinds ["Crypto · Spending workbook","Credit Union · Spending workbook"]
+  figures    ["$147,900","10","$3,480","48"]
+--- the compare strip ---
+  columns    ["Metric","DCCCCrypto · Party Committee","DCCCCredit Union · Party Committee"]
+  Receipts · All cycles            $147,900 [100%]   $3,480 [2%]
+  2021–2022                        $1,000 [35%]   $2,880 [100%]
+  2023–2024                        $56,300 [100%]   $600 [1%]
+  2025–2026                        $90,600 [100%]   $0 [0%]
+  Rows supported                   10 [21%]   48 [100%]
+  Rows excluded by the workbook    0 [0%]   0 [0%]
+  Top contributor                  ARMSTRONG, BRIAN [text]   MORGAN, THOMAS [text]
+  Category                         Party Committee [text]   Party Committee [text]
+  Source                           Crypto · Spending workbook [text]   Credit Union · Spending workbook [text]
+  disabled Map buttons: 3
+--- pass 2: the FAIRSHAKE pane and its rows drawer (the S7 figures) ---
+  figures    ["$177,980,393","28"]
+  category   Super PAC
+  notes      ["22 supported rows","22 supported · 6 excluded by the workbook"]
+  top rows   ["COINBASE$117,092,475","COINBASE COMMERCE (EXCHANGE)$59,881,739","ARMSTRONG, BRIAN DAVID$1,000,000","POLLAK, JESSE$5,000","CANAVAN, MIKE$680","LEE, JUSTIN$500"]
+  by cycle   ["2025–2026 $52,469,214","2023–2024 $125,511,180"]
+  rows drawer: 28 rows, 6 carrying the excluded badge
+--- pass 3: the saved snapshot pane (fairshake-20260908, 2024) ---
+  pane kind  Coinbase · Saved FEC snapshot · 2026-09-08
+  figures    ["$260,070,709","—"]
+  channels   ["Independent spending · reported$40,661,821"]
+  legs       ["Coinbase receipt legs$149,504,995","Transfers out to other committees$86,250,000","Candidate activity · support$27,136,156","Candidate activity · oppose$13,525,665"]
+  drawer has candidate activity: true
+  drawer has the cash estimate:  true
+--- final: page errors and off-origin requests ---
+  pageerrors []
+  off-origin requests []
+ALL REAL-CLIENT BROWSER CHECKS PASSED
+SANITY bare #evidence load: status="2 imported files and 2 saved snapshots on this computer · choose a source" pageerrors=[] console=[]
+.evidence-scope: padding=18px 22px 16px backgroundColor=rgb(255, 255, 255) borderTopWidth=1px borderTopColor=rgb(228, 217, 208) borderRadius=6px
+.evidence-scope-grid: gridTemplateColumns=174.328px 174.328px 174.328px 174.344px 174.328px 174.328px gap=16px
+#evidence-source: minHeight=44px fontSize=13px
+.evidence-scope-grid label: fontSize=13px color=rgb(82, 110, 132)
+.chip: minHeight=36px
+.evidence-chips: gap=8px
+#evidence-panes: gap=18px gridTemplateColumns=577px 577px
+.evidence-pane: padding=18px 20px 16px gap=14px backgroundColor=rgb(255, 255, 255) borderTopColor=rgb(228, 217, 208) borderRadius=6px
+.evidence-pane h2: fontSize=22px fontFamily="Freight Text Pro", freight-text-pro, Georgia, serif
+.pane-figures: gridTemplateColumns=261.5px 261.5px gap=12px
+.pane-figure strong: fontSize=26px fontWeight=600
+.pane-cycle: gridTemplateColumns=64px 331px 120px gap=10px
+.pane-cycles: rowGap=6px
+.pane-top table: fontSize=13px
+.pane-top td: padding=8px 6px borderBottomColor=rgb(241, 233, 227)
+.evidence-compare: padding=18px 22px
+.evidence-compare .bar.thin: height=6px backgroundColor=rgb(158, 212, 213)
+.evidence-compare .bartrack: backgroundColor=rgb(241, 233, 227)
+.evidence-compare td: padding=8px 6px borderBottomColor=rgb(241, 233, 227) fontSize=13px
+#workspace-title: fontSize=32px
+body: backgroundColor=rgb(250, 248, 246) fontSize=16px
+disabled controls in the tab: 0
+Map buttons: 0
+headings inside #view-evidence: FAIRSHAKE | AMERICA'S CREDIT UNIONS PAC OF CREDIT UNION NATIONAL ASSOCIATION, INC. / CULAC THE PAC OF CREDIT UNION NATIONAL ASSOCIATION | Compare
+document height at 1440: 2165
+pageerrors: []
+console errors/warnings: []
+screenshot: C:/Users/pgoff/Mentat/audits/mentat_failings_20260915/receipts/S6_after_screenshot.png
