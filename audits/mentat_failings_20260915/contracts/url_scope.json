@@ -1,6 +1,6 @@
 {
   "contract": "url_scope",
-  "version": 2,
+  "version": 3,
   "owner": "S5; pane keys S6",
   "produced_by": [
     "mentat/app/scope.js:write",
@@ -167,6 +167,16 @@
         "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
       ]
     },
+    "a.map": {
+      "value": "Pane A. The direction of the district map open on this pane, 'raised' or 'spent'; absent when the pane grid is showing (S8).",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (open the map, switch Raised/Spent, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
+      ]
+    },
     "b.source": {
       "value": "Pane B. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
       "writers": [
@@ -205,6 +215,16 @@
       "readers": [
         "mentat/app/scope.js:read",
         "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "b.map": {
+      "value": "Pane B. The direction of the district map open on this pane, 'raised' or 'spent'; absent when the pane grid is showing (S8).",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (open the map, switch Raised/Spent, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
       ]
     },
     "c.source": {
@@ -247,6 +267,16 @@
         "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
       ]
     },
+    "c.map": {
+      "value": "Pane C. The direction of the district map open on this pane, 'raised' or 'spent'; absent when the pane grid is showing (S8).",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (open the map, switch Raised/Spent, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
+      ]
+    },
     "d.source": {
       "value": "Pane D. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
       "writers": [
@@ -285,6 +315,16 @@
       "readers": [
         "mentat/app/scope.js:read",
         "mentat/app/evidence.js:restorePanes (after the listing and the snapshot catalog load)"
+      ]
+    },
+    "d.map": {
+      "value": "Pane D. The direction of the district map open on this pane, 'raised' or 'spent'; absent when the pane grid is showing (S8).",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (open the map, switch Raised/Spent, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
       ]
     }
   },
@@ -437,6 +477,22 @@
           "b.cycle": ""
         },
         "after": "/?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00000935&c.source=snapshot&c.id=fairshake-20260908&c.committee=C00835959#evidence"
+      }
+    },
+    {
+      "name": "evidence_map_permalink_spent",
+      "why": "S8. A map permalink reopens the map it was cut from: the pane is restored first from a.source/a.id/a.committee/a.cycle, then a.map reopens the district map on that pane.",
+      "url": "/?a.source=snapshot&a.id=fairshake-20260908&a.committee=C00835959&a.cycle=2024&a.map=spent#evidence",
+      "view": "evidence",
+      "expected": {
+        "scope": {
+          "a.source": "snapshot",
+          "a.id": "fairshake-20260908",
+          "a.committee": "C00835959",
+          "a.cycle": "2024",
+          "a.map": "spent"
+        },
+        "invalid": []
       }
     }
   ],
@@ -610,6 +666,25 @@
             "key": "a.committee",
             "value": "DCCC committee",
             "reason": "a pane committee must be a committee id or \"unassigned\""
+          }
+        ]
+      }
+    },
+    {
+      "why": "S8. a.map=sideways is neither direction the map offers. A bad permalink must still open the tab and its pane, so the key is dropped and reported rather than thrown.",
+      "url": "/?a.source=csv&a.id=csv-88ea228457b8499d1ec27eeaba967f61&a.committee=C00804179&a.map=sideways#evidence",
+      "view": "evidence",
+      "expected": {
+        "scope": {
+          "a.source": "csv",
+          "a.id": "csv-88ea228457b8499d1ec27eeaba967f61",
+          "a.committee": "C00804179"
+        },
+        "invalid": [
+          {
+            "key": "a.map",
+            "value": "sideways",
+            "reason": "a pane map must be one of raised, spent"
           }
         ]
       }

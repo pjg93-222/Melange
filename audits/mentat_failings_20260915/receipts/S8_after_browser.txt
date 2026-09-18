@@ -1,0 +1,36 @@
+STEP 1: build one industry workbook fixture with contributor ZIP and state
+PASS step 1 (0.5s) - fixture written under C:\Users\pgoff\AppData\Local\Temp\mentat-s8-fixtures-LSrNet
+STEP 2: launch a scratch console on a free port with a temp data root
+PASS step 2 (0.3s) - console ready on 55169, data root C:\Users\pgoff\AppData\Local\Temp\mentat-s8-data-RkiyZD
+STEP 3: launch headless Chrome and open the PAC evidence tab
+PASS step 3 (1.1s) - evidence tab open
+STEP 4: import the Crypto fixture through the path box
+PASS step 4 (0.1s) - imported: "Reading C:\\Users\\pgoff\\AppData\\Local\\Temp\\mentat-s8-fixtures-LSrNet\\Crypto Industry Spending Overview.xlsx…"
+STEP 5: choose the PAC and cycle 2024 in the scope bar, and add the pane
+PASS step 5 (0.9s) - pane A open for COINBASE INNOVATION PAC, cycle 2024
+STEP 6: the pane header carries a visible .pane-map button labelled Map
+PASS step 6 (0.0s) - .pane-map exists, is visible, and reads "Map"
+STEP 7: clicking Map hides the pane grid and shows the map view
+PASS step 7 (0.1s) - #evidence-panes hidden, #evidence-map shown
+STEP 8: the map header carries the two direction buttons, the cycle select and Back
+PASS step 8 (0.0s) - direction buttons ["Raised · where it came from","Spent · where it went"]
+STEP 9: click Raised: the heatmap paints and the ranked list carries CA-12
+PASS step 9 (0.1s) - at least one district is painted; CA-12 is present in the ranked list
+STEP 10: the reconciliation line names the located and reported totals
+PASS step 10 (0.0s) - reconcile: "$407,081 located + $0 unlocated = $407,081 reported receipts · Contributor geography is by ZIP, approximate, and a ZIP that straddles districts is split by its land-area shares and marked “split”."
+STEP 11: toggling a layer chip flips aria-pressed and the off class, both ways
+PASS step 11 (0.1s) - layer toggled off: aria-pressed true -> false
+PASS step 11 (0.1s) - layer chip restored to on
+STEP 12: a CA-12 tooltip names the district and a dollar amount
+PASS step 12 (0.0s) - tooltip: "CA-12\nContributors $383,197 · 1 rows · 94.1% of the kind · CHOI, EMILIE · by the contributor ZIP, then the state"
+STEP 13: click the CA-12 district path: it gains class "chosen"
+PASS step 13 (0.2s) - CA-12 district path carries class "chosen"
+STEP 14: Back to panes: the map closes and the pane shows the CA-12 district filter
+PASS step 14 (0.1s) - district filter reads "Filtered to CA-12 by contributor ZIP · 1 of 3 rows on this page Clear"
+STEP 15: URL round trip: a.map=raised restores the map after a fresh navigation
+PASS step 15 (0.1s) - permalink http://127.0.0.1:55169/?a.source=csv&a.id=csv-3cf53efccec73aeb3535de4b8b773961&a.committee=C00804179&a.cycle=2024&a.map=raised#evidence restored the map in the raised direction
+STEP 16: screenshot the map at 1440x900
+PASS step 16 (0.1s) - screenshot saved to C:\Users\pgoff\Mentat\audits\mentat_failings_20260915\receipts\S8_after_screenshot.png (106292 bytes)
+STEP 17: final check: zero pageerror entries and zero console error entries
+PASS step 17 (0.0s) - no page errors, no console errors across every step
+ALL 17 STEPS PASSED

@@ -362,14 +362,20 @@ third.close()
     assert.equal(compare.find(row => row.metric === 'Top contributor').cells[0].bar, null, 'text rows carry no bar');
     pass(`compare strip: ${metrics.length} rows, Receipts ${receipts.cells[0].text} [100%] vs ${receipts.cells[1].text} [2%]`);
 
-    step('no Map button anywhere: a control nobody can click is a mistake (Paul, 2026-09-17)');
-    assert.equal(await page.locator('.pane-map, .compare-map').count(), 0);
+    step('the Map button is on every pane and on Compare, and every one of them works (S8)');
+    // S6 asserted ZERO Map buttons, because a control nobody can click is a
+    // mistake (Paul, 2026-09-17). S8 ships the map, so the same rule now reads
+    // the other way: the button is there AND it is enabled. What it opens is
+    // tests/test_evidence_map_browser.cjs's job.
+    assert.equal(await page.locator('#evidence-panes .pane-map').count(), 2);
+    assert.equal(await page.locator('#evidence-compare #evidence-compare-map').count(), 1);
+    assert.equal(await page.locator('#evidence-panes .pane-map:disabled').count(), 0);
     // Add pane is legitimately disabled (the chosen PAC is already open, or four
     // panes are); what Paul objected to was a control that is NEVER clickable.
     const stuck = await page.locator('#view-evidence button:disabled').evaluateAll(
       nodes => nodes.filter(node => node.id !== 'evidence-add').map(node => node.id || node.className));
     assert.deepEqual(stuck, [], `disabled controls other than Add pane: ${JSON.stringify(stuck)}`);
-    pass('zero Map buttons; the only disabled control is Add pane, and only when there is nothing to add');
+    pass('two pane Map buttons and one on Compare, all enabled; the only disabled control is Add pane');
 
     step('the URL carries the prefixed pane keys and never the single-pane ones');
     const query = await page.evaluate(() => location.search);

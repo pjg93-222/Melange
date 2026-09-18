@@ -1,0 +1,88 @@
+S8 AFTER - python suites, both interpreters
+date: 2026-09-17T20:36:54-04:00
+
+################ interpreter: python
+Python 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+--- python tests/test_evidence_geo.py
+----------------------------------------------------------------------
+Ran 24 tests in 0.613s
+
+OK
+--- python tests/test_district_geo.py
+----------------------------------------------------------------------
+Ran 19 tests in 0.110s
+
+OK
+--- python tests/test_evidence_summary.py
+----------------------------------------------------------------------
+Ran 27 tests in 2.890s
+
+OK
+--- python tests/test_evidence_categories.py
+----------------------------------------------------------------------
+Ran 30 tests in 0.402s
+
+OK
+--- python tests/test_evidence_readers.py
+----------------------------------------------------------------------
+Ran 44 tests in 2.379s
+
+OK
+--- python tests/test_evidence_csv_stream.py
+----------------------------------------------------------------------
+Ran 18 tests in 22.002s
+
+OK
+--- python tests/test_evidence_csv.py
+----------------------------------------------------------------------
+Ran 10 tests in 1.102s
+
+OK
+--- python tests/test_pac_evidence.py
+----------------------------------------------------------------------
+Ran 11 tests in 0.021s
+
+OK
+
+################ interpreter: C:/Users/pgoff/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe
+Python 3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]
+--- C:/Users/pgoff/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe tests/test_evidence_geo.py
+----------------------------------------------------------------------
+Ran 24 tests in 0.481s
+
+OK
+--- C:/Users/pgoff/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe tests/test_district_geo.py
+----------------------------------------------------------------------
+Ran 19 tests in 0.104s
+
+OK
+--- C:/Users/pgoff/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe tests/test_evidence_summary.py
+----------------------------------------------------------------------
+Ran 27 tests in 3.128s
+
+OK
+--- C:/Users/pgoff/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe tests/test_evidence_categories.py
+----------------------------------------------------------------------
+Ran 30 tests in 0.400s
+
+OK
+--- C:/Users/pgoff/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe tests/test_evidence_readers.py
+----------------------------------------------------------------------
+Ran 44 tests in 2.265s
+
+OK
+--- C:/Users/pgoff/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe tests/test_evidence_csv_stream.py
+----------------------------------------------------------------------
+Ran 18 tests in 22.427s
+
+OK
+--- C:/Users/pgoff/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe tests/test_evidence_csv.py
+----------------------------------------------------------------------
+Ran 10 tests in 0.774s
+
+OK
+--- C:/Users/pgoff/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe tests/test_pac_evidence.py
+----------------------------------------------------------------------
+Ran 11 tests in 0.020s
+
+OK

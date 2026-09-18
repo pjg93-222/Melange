@@ -84,6 +84,7 @@ import industry_scope
 # detect that the running process needs the updated contribution reader.
 CONTRIBUTION_STUDIO_REVISION = '2026-09-12-typed-fields-chart-families'
 import evidence_csv
+import evidence_geo
 from report_directory import report_directory, require_report_path
 from validate_industry_coverage import workbook_roster
 from collection_coverage import inspect as inspect_coverage, cycles_from
@@ -125,7 +126,23 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  '/theme.js': ('theme.js', 'text/javascript'),
                  '/chart-briefing.js': ('chart-briefing.js', 'text/javascript'),
                  '/chart-briefing.css': ('chart-briefing.css', 'text/css'),
-                 '/vendor/pptxgen.bundle.js': ('vendor/pptxgen.bundle.js', 'text/javascript')}
+                 '/vendor/pptxgen.bundle.js': ('vendor/pptxgen.bundle.js', 'text/javascript'),
+                 # S8: the PAC evidence map draws from geography built once by
+                 # tools/build_district_geo.py and shipped like any other asset.
+                 # Without these entries an unregistered path falls through to
+                 # {"error": "Not found."} and the map 404s.
+                 # The charset form is deliberate: send() JSON-ENCODES its value when the
+                 # content type is exactly 'application/json', so a file already read
+                 # as bytes must not use that exact string (measured: TypeError,
+                 # 'Object of type bytes is not JSON serializable', and the connection
+                 # dropped). The compressible test below matches the prefix, so these
+                 # still gzip.
+                 '/geo/index.json': ('geo/index.json', 'application/json; charset=utf-8'),
+                 '/geo/cd119.json': ('geo/cd119.json', 'application/json; charset=utf-8'),
+                 '/geo/cd118.json': ('geo/cd118.json', 'application/json; charset=utf-8'),
+                 '/geo/cd116.json': ('geo/cd116.json', 'application/json; charset=utf-8'),
+                 '/geo/zcta_cd119.json': ('geo/zcta_cd119.json', 'application/json; charset=utf-8'),
+                 '/geo/zcta_cd118.json': ('geo/zcta_cd118.json', 'application/json; charset=utf-8')}
 
 # Build identity. A console window outlives edits to this tree, so the page and
 # the launcher both compare what this process loaded with what is on disk now.
@@ -1584,6 +1601,17 @@ class Console:
         """One committee's figures for a pane header, without its rows."""
         return self.evidence_store.summary(identifier, committee, cycle)
 
+    def evidence_geography(self, source='', identifier='', committee='', cycle='', direction='spent'):
+        """One pane's map: where this committee's money came from, or went.
+
+        The import store is opened only for an import, so a snapshot map never
+        touches the CSV database, and the snapshot root is this console's own
+        collection cache - the same directory /api/evidence reads.
+        """
+        return evidence_geo.geography(source, identifier, committee, cycle, direction,
+                                      store=self.evidence_store if source == 'csv' else None,
+                                      snapshot_root=PROJECT / '.cache/pac-evidence')
+
     def summary(self, include_archived=False):
         runs = self.runs()
         try:
@@ -1925,7 +1953,7 @@ class Handler(BaseHTTPRequestHandler):
     def send(self, value, status=200, content_type="application/json", *, cache_control="no-store", etag=None,
              frame_ancestors="'none'"):
         content = json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode() if content_type == "application/json" else value
-        compressible = content_type == 'application/json' or content_type.startswith(('text/', 'image/svg+xml'))
+        compressible = content_type.startswith(('application/json', 'text/', 'image/svg+xml'))
         compressed = compressible and status != 304 and len(content) >= 2048 and accepts_gzip(self.headers.get('Accept-Encoding'))
         if compressed:
             content = gzip.compress(content, compresslevel=1, mtime=0)
@@ -2087,6 +2115,14 @@ class Handler(BaseHTTPRequestHandler):
                 # ("invalid literal for int()") into the status line.
                 return self.send(app.evidence_csv_view(query.get('id', [''])[0], query.get('committee', [''])[0],
                     query.get('cycle', [''])[0], query.get('offset', ['0'])[0], query.get('limit', ['200'])[0]))
+            if parsed.path == '/api/evidence-geo':
+                # One pane, one cycle, one direction. Every refusal is the
+                # reader's own sentence, raised as ValueError and answered 400
+                # by the handler below, like every other evidence route.
+                return self.send(app.evidence_geography(
+                    query.get('source', [''])[0], query.get('id', [''])[0],
+                    query.get('committee', [''])[0], query.get('cycle', [''])[0],
+                    query.get('direction', ['spent'])[0]))
             if parsed.path == '/api/evidence':
                 identifier = query.get('id', [''])[0]
                 root = PROJECT / '.cache/pac-evidence'

@@ -36,9 +36,9 @@
   // CULAC THE PAC OF CREDIT UNION NATIONAL ASSOCIATION", five lines in a pane
   // title and a chip row of its own. Everything the reader SCANS - chip, pane
   // title, compare heading, PAC option - gets the text before the first " / ",
-  // capped at 48 characters; the full name rides on a title attribute and is
+  // capped at 34 characters; the full name rides on a title attribute and is
   // spelled out in the About popover, so nothing is hidden, only folded.
-  const NAME_LIMIT = 48;
+  const NAME_LIMIT = 34;
   const shortName = value => {
     const text = String(value == null ? '' : value).trim();
     const head = (text.split(' / ')[0] || text).trim() || text;
@@ -421,7 +421,6 @@
       : (pane.excluded ? `${number(pane.supported)} supported · ${number(pane.excluded)} excluded by the workbook`
                        : `${number(pane.supported)} supported`);
     const topLabel = isSnapshot ? 'Snapshot legs' : 'Top contributors in this file';
-    const partyPeak = Math.max(1, ...(pane.counterparties || []).map(item => item.amount));
     return `<section class="panel evidence-pane" data-pane="${pane.key}" data-committee="${escapeHtml(pane.committee)}" aria-label="${escapeHtml(pane.name)} pane">
       <div class="pane-head">
         <div class="pane-title">
@@ -435,7 +434,7 @@
           </div>
         </div>
         <div class="pane-buttons">
-          <!-- The district Map button mounts here when the geo layer ships (app/geo, app/district_geo.py). -->
+          <button type="button" class="secondary pane-map">Map</button>
           <button type="button" class="secondary pane-rows" aria-expanded="${pane.rowsOpen}">${pane.rowsOpen ? 'Hide rows' : 'Rows'}</button>
           <button type="button" class="secondary pane-remove" aria-label="Remove ${escapeHtml(shortName(pane.name))}">×</button>
         </div>
@@ -458,7 +457,7 @@
           : '<p class="muted">No cycle is recorded for these rows.</p>'}</div>
       <div class="pane-top"><span class="label">${topLabel}</span>
         ${(pane.counterparties || []).length ? `<table><tbody>${(pane.counterparties || []).slice(0, TOP_IN_PANE).map(item =>
-          `<tr><td>${escapeHtml(item.name)}</td><td class="pane-top-bar">${bar(item.amount, partyPeak, true)}</td><td class="num">${money(item.amount)}</td></tr>`).join('')}</tbody></table>`
+          `<tr><td title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</td><td class="num">${money(item.amount)}</td></tr>`).join('')}</tbody></table>`
           : '<p class="muted">No counterparty is named on these rows.</p>'}</div>
       ${pane.rowsOpen ? paneDrawerHtml(pane) : ''}
       <p class="muted pane-provenance">${escapeHtml(pane.provenance)} ·
@@ -480,10 +479,16 @@
   function csvDrawerHtml(pane) {
     const body = pane.rows;
     if (!body) return '<div class="pane-drawer"><p class="muted">Reading rows…</p></div>';
-    const rows = body.rows || [];
+    // S8. A district clicked on the map filters this page of rows by the
+    // contributor ZIP, through the same crosswalk that drew the map; the
+    // header says which district and on what basis, and Clear puts it back.
+    const rows = rowsInDistrict(pane, body.rows || []);
     const total = body.total_rows ?? rows.length;
     const excluded = body.excluded_rows ?? 0;
     return `<div class="pane-drawer">
+      ${pane.district ? `<p class="pane-district-filter">Filtered to <strong>${escapeHtml(pane.district)}</strong>`
+        + `${pane.districtBasis ? ' by ' + escapeHtml(pane.districtBasis) : ''} · ${number(rows.length)} of ${number((body.rows || []).length)} rows on this page`
+        + ` <button type="button" class="link-button pane-district-clear">Clear</button></p>` : ''}
       <span class="label">Source rows · ${total ? `${number(pane.offset + 1)}–${number(pane.offset + rows.length)} of ${number(total)}` : 'no matching rows'}</span>
       <p class="muted">${number(body.supported_rows ?? 0)} supported${excluded ? ` · ${number(excluded)} excluded by the workbook` : ''} · ${number(body.unsupported_rows ?? 0)} need interpretation. All selected rows contribute to the figures above, across pages.</p>
       <div class="table-scroll"><table><thead><tr><th>Row</th><th>Date / cycle</th><th class="num">Amount</th><th>Counterparty / activity</th><th>Status</th></tr></thead><tbody>
@@ -547,7 +552,8 @@
     host.style.gridTemplateColumns = `repeat(${Math.max(1, splitWithGraph() ? 1 : open.length)}, minmax(0, 1fr))`;
     render(host, open.map(paneHtml).join(''));
     applyBars(host);
-    $('evidence-empty').hidden = open.length > 0;
+    host.hidden = Boolean(mapPane);
+    $('evidence-empty').hidden = open.length > 0 || Boolean(mapPane);
   }
 
   const splitWithGraph = () => document.querySelector('.workspace')?.classList.contains('split-workspace') || false;
@@ -588,7 +594,7 @@
   function renderCompare() {
     const open = PANE_KEYS.filter(key => panes.has(key)).map(key => panes.get(key));
     const host = $('evidence-compare');
-    host.hidden = open.length < 2;
+    host.hidden = open.length < 2 || Boolean(mapPane);
     if (open.length < 2) { render(host, ''); return; }
     const heads = open.map(pane => `<th title="${escapeHtml(pane.name)}">${escapeHtml(shortName(pane.name))}`
       + `<br><span class="th-sub">${escapeHtml(pane.industry || 'Imported file')} · ${escapeHtml(pane.category)}</span></th>`).join('');
@@ -602,7 +608,7 @@
       return `<tr><td class="compare-metric">${escapeHtml(metric)}</td>${cells}</tr>`;
     }).join('');
     render(host, `<div class="panel-heading"><h2>Compare</h2>
-      <!-- The Top districts Map button mounts here when the geo layer ships. -->
+      <button type="button" class="secondary" id="evidence-compare-map">Top districts &middot; Map</button>
       <span class="muted">Bars are scaled per row to the largest pane. Figures are observed filings from each source; a bar across industries compares sources, not FEC totals.</span></div>
       <div class="table-scroll"><table><thead><tr><th class="compare-metric">Metric</th>${heads}</tr></thead><tbody>${body}</tbody></table></div>`);
     applyBars(host);
@@ -631,6 +637,9 @@
       partial[key + '.id'] = pane ? pane.id : '';
       partial[key + '.committee'] = pane ? pane.committee : '';
       partial[key + '.cycle'] = pane ? pane.cycle : '';
+      // S8. `<pane>.map` is the open map's direction, and absent when the pane
+      // grid is showing: a permalink reopens exactly the view it was cut from.
+      partial[key + '.map'] = (pane && mapPane === key) ? mapStateFor(key).direction : '';
     }
     partial.category = $('evidence-type').value || '';
     api.write(partial);
@@ -658,6 +667,10 @@
       opened += 1;
       await loadPane(pane);
     }
+    const wantsMap = PANE_KEYS.find(key => panes.has(key) && current[key + '.map']);
+    if (wantsMap) {
+      mapStateFor(wantsMap).direction = current[wantsMap + '.map'];
+    }
     if (opened) {
       const first = panes.get(PANE_KEYS.find(key => panes.has(key)));
       $('evidence-source').value = first.source + ':' + first.id;
@@ -665,6 +678,7 @@
       $('evidence-cycle').value = first.cycle || '';
     }
     renderPanes(); renderChips(); renderCompare(); applyFilter();
+    if (wantsMap) await openMap(wantsMap, current[wantsMap + '.map']);
   }
 
   const api2Evidence = id => api('/api/evidence?id=' + encodeURIComponent(id));
@@ -859,6 +873,339 @@
     evidenceJobTimer = setTimeout(pollEvidenceJob, 3000);
   }
 
+  /* ------------------------------------------------------------ the map (S8) */
+  /* One map per pane, opened from the pane header or from the Compare heading.
+
+     Geography is static and served from /geo (built once by
+     tools/build_district_geo.py); the money comes from GET /api/evidence-geo,
+     which has already reconciled located + unlocated back to what the committee
+     reported. This module draws what that route balanced and never re-adds it.
+
+     Heat: candidate spending colours the DISTRICT; Senate races, transfers,
+     operating payments and asset conversions colour the whole STATE, because
+     that is as far as their basis reaches (S6_DESIGN). Support and oppose stay
+     apart in the list and the tooltip; the map heats the amount. */
+  const MAP_RAMP = ['#f1e9e3', '#d6c8e2', '#8b6984', '#57447b', '#342649'];
+  const MAP_OUTLINE = '#bcaea1';
+  let mapPane = '';                    // the pane key whose map is open, or ''
+  const mapStates = new Map();         // pane key -> map view state
+  const vintages = new Map();          // '118' -> the parsed boundary file
+  let crosswalk = null, crosswalkVintage = '';
+
+  function mapStateFor(key) {
+    if (!mapStates.has(key)) {
+      mapStates.set(key, {direction: 'spent', cycle: null, body: null, off: null,
+                          district: '', message: '', loading: false});
+    }
+    return mapStates.get(key);
+  }
+
+  // A continuous ramp on a log scale, so $10,000 and $10,000,000 both read.
+  // The five published stops sit at $1,000 .. $10,000,000+; the legend below
+  // the map draws the same gradient and labels them from body.stops.
+  const mixColour = (from, to, position) => {
+    const parts = value => [1, 3, 5].map(at => parseInt(value.slice(at, at + 2), 16));
+    const start = parts(from), end = parts(to);
+    return '#' + start.map((value, index) => Math.round(value + (end[index] - value) * position)
+      .toString(16).padStart(2, '0')).join('');
+  };
+  function heatColour(value) {
+    if (!(value > 0)) return '';
+    const span = MAP_RAMP.length - 1;
+    const position = Math.min(1, Math.max(0, (Math.log10(value) - 2) / 5));
+    const slot = Math.min(span - 1, Math.floor(position * span));
+    return mixColour(MAP_RAMP[slot], MAP_RAMP[slot + 1], position * span - slot);
+  }
+
+  const isSenateKey = key => /-SEN$/.test(String(key || ''));
+  const kindsOn = (body, off) => (body.kinds || []).filter(kind => !off.has(kind.kind));
+
+  // Every visible row, folded onto the shape that carries it. A Senate row
+  // keeps its CA-SEN key in the list and heats the state CA on the map.
+  function heatFrom(body, off) {
+    const districts = new Map(), states = new Map(), notes = new Map();
+    const fold = (table, key, row, kind) => {
+      table.set(key, (table.get(key) || 0) + (row.amount || 0));
+      const lines = notes.get(key) || [];
+      lines.push(`${kind.label} ${money(row.amount)} · ${number(row.rows)} rows · `
+        + `${(row.share * 100).toFixed(1)}% of the kind`
+        + (row.support ? ` · support ${money(row.support)}` : '')
+        + (row.oppose ? ` · oppose ${money(row.oppose)}` : '')
+        + (row.who ? ` · ${row.who}` : '') + ` · ${kind.basis}`);
+      notes.set(key, lines);
+    };
+    for (const kind of kindsOn(body, off)) {
+      for (const row of kind.districts || []) fold(isSenateKey(row.key) ? states : districts,
+        isSenateKey(row.key) ? row.key.slice(0, 2) : row.key, row, kind);
+      for (const row of kind.states || []) fold(states, row.key, row, kind);
+    }
+    return {districts, states, notes};
+  }
+
+  async function vintageFile(name) {
+    if (!name) return null;
+    if (vintages.has(name)) return vintages.get(name);
+    // Static assets need no token (server.py do_GET gates only on the host).
+    const response = await fetch('/geo/' + name);
+    if (!response.ok) throw new Error(`The ${name} district boundaries could not be loaded.`);
+    const body = await response.json();
+    vintages.set(name, body);
+    return body;
+  }
+
+  function mapSvgHtml(shapes, heat) {
+    const state = [];
+    const district = [];
+    const outline = [];
+    for (const [key, entry] of Object.entries(shapes.states || {})) {
+      const value = heat.states.get(key) || 0;
+      state.push(`<path class="map-shape" d="${escapeHtml(entry.path)}" data-key="${escapeHtml(key)}"`
+        + ` data-fill="${escapeHtml(heatColour(value) || MAP_RAMP[0])}"></path>`);
+      outline.push(`<path class="map-outline" d="${escapeHtml(entry.path)}" data-stroke="${MAP_OUTLINE}"></path>`);
+    }
+    for (const [key, entry] of Object.entries(shapes.districts || {})) {
+      const value = heat.districts.get(key) || 0;
+      district.push(`<path class="map-shape map-district" d="${escapeHtml(entry.path)}"`
+        + ` data-key="${escapeHtml(key)}" data-district="${escapeHtml(key)}"`
+        + ` data-fill="${escapeHtml(value > 0 ? heatColour(value) : 'none')}"></path>`);
+    }
+    return `<svg class="map-canvas" viewBox="0 0 ${shapes.width || 975} ${shapes.height || 610}"`
+      + ` role="img" aria-label="Spending by congressional district" preserveAspectRatio="xMidYMid meet">`
+      + `<g class="map-states">${state.join('')}</g>`
+      + `<g class="map-districts">${district.join('')}</g>`
+      + `<g class="map-outlines">${outline.join('')}</g></svg>`;
+  }
+
+  function mapListHtml(body, off) {
+    const groups = (body.kinds || []).map(kind => {
+      const rows = [...(kind.districts || []), ...(kind.states || [])]
+        .sort((first, second) => second.amount - first.amount);
+      const share = body.reported_total ? kind.total / body.reported_total * 100 : 0;
+      const lines = rows.map(row => {
+        const tone = row.oppose > 0 && !(row.support > 0) ? 'oppose' : (row.support > 0 ? 'support' : '');
+        const label = isSenateKey(row.key) ? `${row.key.slice(0, 2)} · Senate` : row.key;
+        return `<tr class="map-row" data-district="${escapeHtml(row.key)}">`
+          + `<td><strong>${escapeHtml(label)}</strong>${row.split ? ' <span class="badge">split</span>' : ''}</td>`
+          + `<td>${escapeHtml(row.who || '—')}</td>`
+          + `<td class="${tone}">${escapeHtml(tone || kind.kind)}</td>`
+          + `<td class="num">${money(row.amount)}</td>`
+          + `<td class="num">${(row.share * 100).toFixed(1)}%</td></tr>`;
+      }).join('');
+      return `<tr class="group"><td colspan="3">${escapeHtml(kind.label)} · ${money(kind.total)} · `
+        + `${escapeHtml(kind.basis)}${off.has(kind.kind) ? ' · off the heat' : ''}</td>`
+        + `<td class="num">${money(kind.total)}</td><td class="num">${share.toFixed(1)}%</td></tr>${lines}`;
+    }).join('');
+    const unlocated = (body.unlocated || []).map(item =>
+      `<tr class="map-unlocated"><td><strong>Unlocated</strong></td><td colspan="2">${escapeHtml(item.reason)}</td>`
+      + `<td class="num">${money(item.amount)}</td><td class="num">${number(item.rows)} rows</td></tr>`).join('');
+    return `<div class="table-scroll map-list"><table>
+      <thead><tr><th>Where</th><th>To</th><th>Kind</th><th class="num">Amount</th><th class="num">Share</th></tr></thead>
+      <tbody>${groups}${unlocated || ''}</tbody></table></div>`;
+  }
+
+  function mapHtml(pane, state) {
+    const body = state.body;
+    const cycles = pane.cycles || [];
+    const off = state.off || new Set();
+    const raised = state.direction === 'raised';
+    const reconciliation = body
+      ? `${money(body.located_total)} located + ${money(body.unlocated_total)} unlocated = `
+        + `${money(body.reported_total)} ${raised ? 'reported receipts' : 'reported disbursements'}`
+        + (body.reconciles ? '' : ' — these do not reconcile; the route says so above')
+      : '';
+    return `<div class="map-head">
+      <div class="pane-title">
+        <div class="pane-kind">${escapeHtml(pane.industry || 'Imported file')} · ${escapeHtml(pane.sourceKind)}</div>
+        <h2 title="${escapeHtml(pane.name)}">${escapeHtml(shortName(pane.name))}
+          <span class="muted">${escapeHtml(pane.committee)}</span></h2>
+      </div>
+      <div class="map-controls">
+        <div class="seg" role="group" aria-label="Direction">
+          <button type="button" class="map-direction${raised ? ' on' : ''}" data-direction="raised"
+            aria-pressed="${raised}">Raised · where it came from</button>
+          <button type="button" class="map-direction${raised ? '' : ' on'}" data-direction="spent"
+            aria-pressed="${!raised}">Spent · where it went</button></div>
+        <label class="map-cycle-label" for="evidence-map-cycle">Cycle
+          <select id="evidence-map-cycle">${cycles.map(value =>
+            `<option value="${escapeHtml(value)}"${value === (state.cycle ?? pane.cycle) ? ' selected' : ''}>${escapeHtml(cycleLabel(value))}</option>`).join('')}</select></label>
+        <button type="button" class="secondary" id="evidence-map-back">Back to panes</button>
+      </div></div>
+    ${state.message ? `<p class="muted map-message">${escapeHtml(state.message)}</p>` : ''}
+    ${body ? `<div class="map-layers">
+      <span class="muted">${escapeHtml(raised ? 'All receipts' : 'All spend')}, ${escapeHtml(cycleLabel(body.cycle))}:
+        <strong>${money(body.reported_total)}</strong> as reported · located ${money(body.located_total)} ·
+        unlocated ${money(body.unlocated_total)}</span>
+      ${(body.kinds || []).map((kind, index) => `<button type="button" class="layer${off.has(kind.kind) ? ' off' : ''}"
+        data-layer="${escapeHtml(kind.kind)}" aria-pressed="${!off.has(kind.kind)}">
+        <span class="dot" data-fill="${MAP_RAMP[Math.min(MAP_RAMP.length - 1, index + 1)]}"></span>
+        ${escapeHtml(kind.label)} · ${money(kind.total)}${off.has(kind.kind) ? ' · off' : ''}</button>`).join('')}
+    </div>
+    <div class="map-grid">
+      <section class="map-figure" aria-label="Spend heatmap">
+        <div class="panel-heading"><h2>${escapeHtml(raised ? 'Receipts' : 'Spend')} heatmap ·
+          by congressional district and state</h2>
+          <span class="muted">Hover for amount, share and kind · click a district to filter this pane&rsquo;s rows</span></div>
+        <div class="map-canvas-host" data-district-filter="${escapeHtml(state.district)}"></div>
+        <div class="map-legend"><span class="muted">Heat</span><div class="map-ramp"></div>
+          <span class="muted">${(body.stops || []).map(stop => money(stop)).join(' · ')}+</span>
+          <span class="muted map-basis">${escapeHtml(body.congress ? body.congress + ' boundaries' : '')}${
+            body.zip_basis ? ' · ZIP shares by ' + escapeHtml(body.zip_basis) : ''}</span></div>
+      </section>
+      <section class="map-ranked" aria-label="Ranked list">
+        <div class="panel-heading"><h2>${escapeHtml(raised ? 'All receipts' : 'All spend')}, ranked</h2>
+          <span class="muted">${number((body.kinds || []).reduce((total, kind) => total + (kind.rows || 0), 0))} placed rows</span></div>
+        ${mapListHtml(body, off)}
+        <p class="muted map-reconcile">${escapeHtml(reconciliation)}${
+          raised ? ' · Contributor geography is by ZIP, approximate, and a ZIP that straddles districts is split by its land-area shares and marked “split”.' : ''}</p>
+      </section>
+    </div>` : '<p class="muted">Loading this map…</p>'}`;
+  }
+
+  function paintMap(host, shapes, heat) {
+    for (const node of host.querySelectorAll('[data-fill]')) {
+      // CSP style-src 'self': a style attribute written through innerHTML is
+      // blocked, so every fill is set through the CSSOM, as graph.js does.
+      node.style.fill = node.dataset.fill;
+    }
+    for (const node of host.querySelectorAll('[data-stroke]')) {
+      node.style.fill = 'none';
+      node.style.stroke = node.dataset.stroke;
+    }
+    for (const node of host.querySelectorAll('.map-shape')) {
+      const lines = heat.notes.get(node.dataset.key);
+      const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+      title.textContent = lines ? `${node.dataset.key}\n${lines.join('\n')}`
+        : `${node.dataset.key}\nNo spending on this map`;
+      node.appendChild(title);
+    }
+    void shapes;
+  }
+
+  async function renderMap() {
+    const host = $('evidence-map');
+    const pane = panes.get(mapPane);
+    if (!pane) { host.hidden = true; return; }
+    const state = mapStateFor(mapPane);
+    host.hidden = false;
+    render(host, mapHtml(pane, state));
+    if (!state.body) return;
+    const canvas = host.querySelector('.map-canvas-host');
+    let shapes = null;
+    try {
+      shapes = await vintageFile(state.body.boundary_file);
+    } catch (error) {
+      render(canvas, `<p class="muted">${escapeHtml(error.message)}</p>`);
+      return;
+    }
+    if (!shapes) {
+      render(canvas, '<p class="muted">No district boundaries are built for this cycle.</p>');
+      return;
+    }
+    const heat = heatFrom(state.body, state.off || new Set());
+    render(canvas, mapSvgHtml(shapes, heat));
+    paintMap(host, shapes, heat);
+    for (const node of host.querySelectorAll('.layer .dot')) node.style.background = node.dataset.fill;
+    if (state.district) {
+      const chosen = canvas.querySelector(`[data-district="${CSS.escape(state.district)}"]`);
+      if (chosen) chosen.classList.add('chosen');
+    }
+  }
+
+  async function loadMap() {
+    const pane = panes.get(mapPane);
+    if (!pane) return;
+    const state = mapStateFor(mapPane);
+    state.loading = true;
+    state.message = '';
+    try {
+      const cycle = state.cycle ?? pane.cycle ?? '';
+      state.body = await api('/api/evidence-geo?' + new URLSearchParams({
+        source: pane.source, id: pane.id, committee: pane.committee,
+        cycle: cycle, direction: state.direction}));
+      state.cycle = state.body.cycle || cycle;
+      if (state.off === null) {
+        state.off = new Set((state.body.kinds || []).filter(kind => !kind.default_on).map(kind => kind.kind));
+      }
+      if (state.body.reason) state.message = state.body.reason;
+      if (!state.body.reconciles) {
+        state.message = (state.message ? state.message + ' ' : '')
+          + 'Located and unlocated do not add up to the reported total; the gap is listed below.';
+      }
+    } catch (error) {
+      state.body = null;
+      state.message = error.message;
+    }
+    state.loading = false;
+    await renderMap();
+  }
+
+  async function openMap(key, direction) {
+    if (!panes.has(key)) return;
+    mapPane = key;
+    const state = mapStateFor(key);
+    if (direction) state.direction = direction;
+    $('evidence-panes').hidden = true;
+    $('evidence-compare').hidden = true;
+    $('evidence-empty').hidden = true;
+    $('evidence-map').hidden = false;
+    await renderMap();
+    writeScope();
+    if (!state.body) await loadMap();
+  }
+
+  function closeMap() {
+    mapPane = '';
+    $('evidence-map').hidden = true;
+    $('evidence-panes').hidden = false;
+    renderPanes(); renderChips(); renderCompare();
+    writeScope();
+  }
+
+  // The rows drawer's district filter. An imported file carries the
+  // contributor's ZIP, so the crosswalk that built the map answers which rows
+  // belong to the district that was clicked; nothing is guessed from a name.
+  async function crosswalkFor(vintage) {
+    if (!vintage) return null;
+    if (crosswalk && crosswalkVintage === vintage) return crosswalk;
+    const body = await vintageFile('zcta_cd' + vintage + '.json');
+    crosswalk = body; crosswalkVintage = vintage;
+    return body;
+  }
+
+  async function chooseDistrict(key) {
+    const pane = panes.get(mapPane);
+    const state = mapStateFor(mapPane);
+    if (!pane || !state.body) return;
+    state.district = state.district === key ? '' : key;
+    pane.district = state.district;
+    pane.districtBasis = '';
+    if (state.district && pane.source === 'csv') {
+      try {
+        await crosswalkFor(state.body.vintage);
+        pane.districtBasis = 'contributor ZIP';
+      } catch (error) { pane.districtBasis = ''; state.message = error.message; }
+    }
+    pane.rowsOpen = Boolean(state.district);
+    if (pane.rowsOpen && !pane.rows) await loadPaneRows(pane);
+    await renderMap();
+  }
+
+  const districtOfZip = value => {
+    const digits = String(value == null ? '' : value).replace(/\D/g, '').slice(0, 5);
+    if (!crosswalk || digits.length < 5) return [];
+    return (crosswalk[digits] || []).map(part => part[0]);
+  };
+
+  function rowsInDistrict(pane, rows) {
+    if (!pane.district) return rows;
+    if (pane.source !== 'csv' || !crosswalk) return rows;
+    return rows.filter(row => {
+      const raw = row.raw || {};
+      const field = Object.keys(raw).find(name => /zip/i.test(name));
+      return field ? districtOfZip(raw[field]).includes(pane.district) : false;
+    });
+  }
+
   /* ---------------------------------------------------------------- wiring   */
   function toggleDrawer(button, drawer) {
     const opening = $(drawer).hidden;
@@ -904,6 +1251,10 @@
     if (!root) return;
     const pane = panes.get(root.dataset.pane);
     if (!pane) return;
+    if (event.target.closest('.pane-map')) { openMap(pane.key, mapStateFor(pane.key).direction); return; }
+    if (event.target.closest('.pane-district-clear')) {
+      pane.district = ''; mapStateFor(pane.key).district = ''; renderPanes(); return;
+    }
     if (event.target.closest('.pane-remove')) { removePane(pane.key); return; }
     if (event.target.closest('.pane-rows')) {
       pane.rowsOpen = !pane.rowsOpen;
@@ -918,6 +1269,43 @@
       body.hidden = !body.hidden;
       about.setAttribute('aria-expanded', String(!body.hidden));
     }
+  });
+  $('evidence-map').addEventListener('click', event => {
+    if (event.target.closest('#evidence-map-back')) { closeMap(); return; }
+    const direction = event.target.closest('.map-direction');
+    if (direction) {
+      const state = mapStateFor(mapPane);
+      if (state.direction !== direction.dataset.direction) {
+        state.direction = direction.dataset.direction;
+        state.body = null; state.off = null; state.district = '';
+        renderMap().then(loadMap).then(writeScope);
+      }
+      return;
+    }
+    const layer = event.target.closest('.layer');
+    if (layer) {
+      const state = mapStateFor(mapPane);
+      const kind = layer.dataset.layer;
+      if (state.off.has(kind)) state.off.delete(kind); else state.off.add(kind);
+      renderMap();
+      return;
+    }
+    const shape = event.target.closest('[data-district]');
+    if (shape) chooseDistrict(shape.dataset.district);
+  });
+  $('evidence-map').addEventListener('change', event => {
+    if (event.target.id !== 'evidence-map-cycle') return;
+    const state = mapStateFor(mapPane);
+    state.cycle = event.target.value;
+    state.body = null; state.off = null; state.district = '';
+    loadMap();
+  });
+  // The compare strip is rendered from JS, so its Map button is reached by
+  // delegation from the static host rather than by id at load time.
+  $('evidence-compare').addEventListener('click', event => {
+    if (!event.target.closest('#evidence-compare-map')) return;
+    const first = PANE_KEYS.find(key => panes.has(key));
+    if (first) openMap(first, mapStateFor(first).direction);
   });
   $('evidence-csv-file').addEventListener('change', () => {
     const file = $('evidence-csv-file').files[0];

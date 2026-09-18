@@ -19,7 +19,10 @@
   // a key this module knows, so `e.id` is preserved in the query and never read
   // as scope - the same treatment studioPane gets.
   const PANES = ['a', 'b', 'c', 'd'];
-  const PANE_FIELDS = ['source', 'id', 'committee', 'cycle'];
+  // S8 adds `map`: the direction of the district map open on that pane
+  // ('raised' or 'spent'). Absent means the pane grid is showing, so an
+  // ordinary permalink is unchanged and a map permalink reopens the map.
+  const PANE_FIELDS = ['source', 'id', 'committee', 'cycle', 'map'];
   const PANE_KEYS = [];
   for (let pane = 0; pane < PANES.length; pane += 1) {
     for (let field = 0; field < PANE_FIELDS.length; field += 1) {
@@ -29,6 +32,7 @@
   const PANE_SOURCES = ['csv', 'snapshot'];
   const PANE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
   const PANE_COMMITTEE = /^(unassigned|[A-Za-z0-9][A-Za-z0-9-]{0,31})$/;
+  const PANE_MAP = ['raised', 'spent'];
   const KEYS = ['industry', 'company', 'cycle', 'mode', 'direction', 'tier',
     'funding', 'category', 'recipient', 'saved'].concat(PANE_KEYS);
   // The #graph-mode option values, verbatim (index.html:105).
@@ -40,6 +44,7 @@
   const PANE_SOURCE_REASON = 'a pane source must be one of ' + PANE_SOURCES.join(', ');
   const PANE_ID_REASON = 'a pane id must be an import id or a saved-snapshot directory name';
   const PANE_COMMITTEE_REASON = 'a pane committee must be a committee id or "unassigned"';
+  const PANE_MAP_REASON = 'a pane map must be one of ' + PANE_MAP.join(', ');
   const MODE_REASON = 'mode must be one of ' + MODES.join(', ');
   const SAVED_REASON = 'saved must be a 32-character hexadecimal saved-view id';
   const BLANK_REASON = 'a blank value names no scope, so the key is dropped';
@@ -56,6 +61,7 @@
       if (field === 'id' && !PANE_ID.test(text)) return {ok: false, value: text, reason: PANE_ID_REASON};
       if (field === 'committee' && !PANE_COMMITTEE.test(text)) return {ok: false, value: text, reason: PANE_COMMITTEE_REASON};
       if (field === 'cycle' && !/^\d{4}$/.test(text)) return {ok: false, value: text, reason: CYCLE_REASON};
+      if (field === 'map' && PANE_MAP.indexOf(text) < 0) return {ok: false, value: text, reason: PANE_MAP_REASON};
       return {ok: true, value: text};
     }
     if (key === 'cycle' && !/^\d{4}$/.test(text)) return {ok: false, value: text, reason: CYCLE_REASON};

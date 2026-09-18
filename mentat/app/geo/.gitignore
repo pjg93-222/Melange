@@ -1,0 +1,6 @@
+# The repo root .gitignore ignores *.json for data artifacts. These files are
+# NOT artifacts of a run: they are built once from Census downloads by
+# mentat/tools/build_district_geo.py and shipped with the console, like
+# app/index.html. Without this negation `git add mentat/app/geo` adds nothing
+# and the map 404s on a fresh checkout.
+!*.json

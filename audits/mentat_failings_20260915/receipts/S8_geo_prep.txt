@@ -1,0 +1,260 @@
+S8 GEO PREP - congressional-district data layer for the PAC evidence map
+Session: Opus architect, 2026-09-17, worktree pac-evidence-filters-724237, code in
+C:\Users\pgoff\Mentat (branch codex/mentat-crypto), in parallel with the S6 architect.
+Scope: NEW FILES ONLY. No existing file touched, no git add/commit/stash, no ports.
+Elapsed: about 75 minutes including the Census discovery.
+
+================================================================================
+1. FILES CREATED
+================================================================================
+mentat/tools/build_district_geo.py        41,180 bytes  dev-time builder (stdlib only)
+mentat/app/district_geo.py                21,111 bytes  runtime reader (stdlib only)
+mentat/tests/test_district_geo.py         17,773 bytes  19 tests, both Pythons green
+mentat/app/geo/.gitignore                    347 bytes  see DEVIATION 4
+mentat/app/geo/index.json                  2,241 bytes  cycle -> vintage, the only file
+                                                        the runtime consults to resolve a cycle
+mentat/app/geo/cd119.json                479,847 bytes  437 districts + 52 states
+mentat/app/geo/cd118.json                475,833 bytes  437 districts + 52 states
+mentat/app/geo/cd116.json                480,654 bytes  437 districts + 52 states
+mentat/app/geo/zcta_cd119.json           907,049 bytes  33,791 ZCTAs
+mentat/app/geo/zcta_cd118.json           905,339 bytes  33,791 ZCTAs
+audits/mentat_failings_20260915/receipts/S8_geo_prep.txt   16,194 bytes  this file
+  (the root .gitignore ignores *.txt, so this receipt needs `git add -f`, the same way the
+   77 receipts already tracked in this folder were added; the JSON under app/geo does not -
+   see DEVIATION 4)
+
+Download cache (gitignored by the repo root .gitignore line 66, mentat/.cache/):
+mentat/.cache/geo/  13,774,312 bytes total, 6 files, re-downloaded only with --refresh.
+
+Every vintage file is under the 1.5 MB budget (largest 480,654) and every crosswalk under
+2.5 MB (largest 907,049). No simplification beyond the 0.5 px filter was needed.
+
+================================================================================
+2. EXACT URLS USED (directory indexes read, not guessed)
+================================================================================
+https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_cd119_20m.zip     404,377 B
+https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_cd118_20m.zip     401,195 B
+https://www2.census.gov/geo/tiger/GENZ2021/shp/cb_2021_us_cd116_20m.zip     405,764 B
+https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_state_20m.zip     187,671 B
+https://www2.census.gov/geo/docs/maps-data/data/rel2020/cd-sld/tab20_cd11920_zcta520_natl.txt
+                                                                          6,195,997 B
+https://www2.census.gov/geo/docs/maps-data/data/rel2020/cd-sld/tab20_cd11820_zcta520_natl.txt
+                                                                          6,179,308 B
+
+TWO OF THE THREE NAMES THE BRIEF EXPECTED DO NOT EXIST. What the directories list:
+
+  GENZ2024/shp/ : cb_2024_us_cd119_20m.zip  cb_2024_us_cd119_500k.zip  cb_2024_us_cd119_5m.zip
+                  cb_2024_us_state_20m.zip  cb_2024_us_state_500k.zip  cb_2024_us_state_5m.zip
+  GENZ2023/shp/ : cb_2023_us_cd118_20m.zip  (+500k, 5m)  cb_2023_us_state_20m.zip (+500k, 5m)
+  GENZ2022/shp/ : cb_2022_us_cd118_20m.zip  (+500k, 5m)  cb_2022_us_state_20m.zip (+500k, 5m)
+                  ** NO cd116 FILE. ** The 2022 vintage had already moved to the new maps.
+  GENZ2021/shp/ : cb_2021_us_cd116_20m.zip  cb_2021_us_state_20m.zip
+  GENZ2020/shp/ : cb_2020_us_cd116_20m.zip  (also 2019, 2018)
+
+  So the 116th-Congress map (= the 117th Congress's map: both sat on the same 2011 lines)
+  comes from GENZ2021, the newest vintage that still publishes it. Nothing was guessed.
+
+  ZCTA relationship files are named cd-FIRST, not zcta-first: the brief's
+  tab20_zcta520_cd119_natl.txt does not exist; tab20_cd11920_zcta520_natl.txt does.
+  The directory lists tab20_cd11820_* and tab20_cd11920_* families only (natl + per-state),
+  plus CD118_LANDAREA.txt, CD119_LANDAREA.txt and the SLD files.
+  ** THERE IS NO cd116 RELATIONSHIP FILE ** in rel2020/cd-sld/ - the 2020 ZCTAs were only
+  tabulated against the 118th and 119th. The older .../data/rel/ directory carries
+  zcta_cd111_rel_10.txt and nothing newer. See DEVIATION 1.
+
+No URL was unreachable; no HTTP error was seen. Cold run (all six downloads): 3.7 s total.
+Warm run (cache hit): 1.6 s for all three vintages and both crosswalks.
+
+================================================================================
+3. COUNTS
+================================================================================
+cd119  437 districts (435 House + DC-AL + PR-AL) across 52 places, 52 state outlines,
+       8 at-large: AK DC DE ND PR SD VT WY.  CA=52 TX=38 FL=28 NY=26 IL=17 PA=17.
+       24,546 district vertices + 10,711 state vertices after the 0.5 px filter.
+cd118  identical counts; 24,194 district vertices.  CA=52 TX=38 NC=14.
+cd116  437 districts, 9 at-large (MT-AL as well), CA=53 TX=36 FL=27 NY=27 MT=1.
+       24,611 district vertices.
+       0 unplaced, 0 no-seat/water rows and 0 STATEFP mismatches in all three.
+zcta_cd119  33,791 ZCTAs = every ZCTA the source names. 28,670 in one district,
+            4,817 in two, 294 in three, 10 in four. 441 distinct district keys
+            (437 drawn + the 4 undrawn territories). 40,116 source part rows,
+            281 district-remainder lines (no ZCTA) skipped.
+zcta_cd118  33,791 ZCTAs; 28,763 / 4,728 / 290 / 10; 441 keys; 40,006 parts.
+Widest real splits (cd119): 92324 -> CA-33 0.499, CA-23 0.177, CA-39 0.177, CA-41 0.147;
+90002 -> CA-43 0.621, CA-42 0.310, CA-37 0.055, CA-44 0.014.
+
+SHARES ARE LAND AREA, and that is forced by the source, not chosen: the relationship file's
+header is OID/GEOID/NAMELSAD/AREALAND/AREAWATER/MTFCC/FUNCSTAT for the CD, the same seven
+for the ZCTA, then AREALAND_PART and AREAWATER_PART. There is no population column at all.
+Shares are computed as AREALAND_PART / sum over the ZCTA's parts, parts under 0.01 dropped,
+the rest renormalised, rounded to 3 decimals with the residual folded into the largest part
+so every ZCTA sums to exactly 1.000 (verified for all 33,791 in both files).
+
+================================================================================
+4. VERIFICATION (what was actually run, not inferred)
+================================================================================
+Projection is a real equal-area conic. Projected px^2 / true (ALAND+AWATER) m^2 should equal
+scale^2/R^2 = 28,515.1 (x1e12) for an equal-area projection. Measured on the shipped
+geometry with rings closed: NM 28,519.7 (+0.02%), KS 28,506.2 (-0.03%), CO 28,488.9
+(-0.09%), MT 28,420.9 (-0.33%), TX 28,415.5 (-0.35%), CA 27,599.0 (-3.21%, its water and
+the Channel Islands). Re-projecting the raw source vertices densified to 0.02 degrees moves
+these by at most 0.09%, and the 0.5 px simplification moves area by at most 0.008%: the
+error is the 20m source's own generalisation, not the projection or the simplification.
+  Caveat worth keeping: an earlier check of mine reported +8% to +16% here. That was a bug
+  in the throwaway checker (it parsed paths back into OPEN rings, dropping one shoelace
+  segment). The shipped paths end each ring with Z and do not repeat the first point, which
+  is correct SVG; any consumer doing its own point-in-polygon must close the ring first.
+  The note is now in the build block of every vintage file.
+
+Known coordinates land in the right district (point-in-polygon on the shipped paths, all
+hitting exactly one district):
+  Washington DC   -77.0369, 38.9072 -> (768.4, 215.3) in DC-AL, bbox [767.1,213.7,770.3,217.5]
+  Oakland CA     -122.2712, 37.8044 -> (114.7, 210.5) in CA-12
+  Chicago IL      -87.6298, 41.8781 -> (611.8, 181.2) in IL-07
+  Austin TX       -97.7431, 30.2672 -> (467.6, 405.8) in TX-37
+  Anchorage AK   -149.9003, 61.2181 -> (195.4, 518.8) in AK-AL   (Alaska inset)
+  Honolulu HI    -157.8583, 21.3069 -> (299.2, 543.7) in HI-01   (Hawaii inset)
+  San Juan PR     -66.1057, 18.4655 -> (909.1, 566.3) in PR-AL   (Caribbean inset)
+  Negative control: the same DC coordinates with the meridian changed from -96 to -90 give
+  (682.8, 229.8), outside the DC bbox. The assertion has teeth.
+
+Layout. Every district and state lies inside 975 x 610 (overall envelope
+[10.0, 6.0, 924.9, 587.4]). No district in any other region overlaps the Alaska
+([10.0,413.7,246.0,552.3]), Hawaii ([258.0,526.6,352.0,587.4]) or Caribbean
+([876.1,565.4,924.9,576.5]) inset. Compass sanity from state centroids: WA left of ME
+(186<848), WA above FL (42<437), CA left of NY (159<775), MN above TX (101<386).
+
+Label points. 411 of 437 districts take the area centroid of their largest ring; 26 are
+crescents whose area centroid falls in the NEIGHBOURING district (CA-19, CA-28, CA-41,
+CA-45, CT-01, GA-13, IL-07, IL-09, IL-13, IL-16, IL-17, KY-01, LA-04, LA-06, MA-01, MA-08,
+MD-06, NC-13, NJ-06, NJ-08, ...) and get a grid-searched interior point instead. Every
+centroid in all three vintages is inside its own polygon and its own bbox; the per-vintage
+counts and the list of grid-searched keys are in each file's build block.
+
+Determinism across the two Pythons. Built with system python 3.12.10 and with the launcher's
+3.12.14: zcta_cd118.json and zcta_cd119.json are byte-identical, and cd119/cd118/cd116/index
+are identical once the build timestamp is removed (sha256 f1157cdb8caaedb5 / 81dbb9bcc7f08d67
+/ 9994d4e6903ad341 both ways).
+
+Runtime cost measured in-process: first district_for_zip call 110 ms and 11.7 MB resident
+(the crosswalk is parsed then, never at import); 1,000 further lookups 19 ms in total;
+load_vintage(2026) 8 ms and 0.8 MB. Nothing is loaded until a function is called.
+
+================================================================================
+5. TEST TAILS (19 tests; the same file on both interpreters)
+================================================================================
+$ python mentat/tests/test_district_geo.py          # system, Python 3.12.10
+test_zip_lookup_with_no_crosswalk_file_reports_it (__main__.FixtureTests...) ... ok
+----------------------------------------------------------------------
+Ran 19 tests in 0.225s
+
+OK
+
+$ C:\Users\pgoff\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe
+      mentat/tests/test_district_geo.py             # launcher, Python 3.12.14
+test_zip_lookup_with_no_crosswalk_file_reports_it (__main__.FixtureTests...) ... ok
+----------------------------------------------------------------------
+Ran 19 tests in 0.169s
+
+OK
+
+13 fixture tests (a data root the test writes: a 3-district vintage, a 4-ZIP crosswalk, an
+8-line cn.txt, a 2-line cm.txt) cover cycle -> vintage including '2023-2024' and the en-dash
+form, ZIP shares, H/S/P/at-large candidates, the delegate-code translation, the out-of-range
+seat, the cross-cycle fallback, every missing-file path and a corrupt index. 6 tests read the
+real files and skip when they are absent. The real-data assertions: every cd119 key matches
+^[A-Z]{2}-(\d{2}|AL|SEN)$, CA has 52 House districts and the file has 437, DC projects inside
+DC-AL, 94607 -> CA-12 top share, 20008 -> [('DC-AL', 1.0)], and H0AL01055 -> AL-01.
+
+================================================================================
+6. DEVIATIONS AND OPEN RULINGS FOR PAUL
+================================================================================
+1. NO ZIP CROSSWALK EXISTS FOR THE 2022 CYCLE, and none was substituted.
+   The Census never tabulated the 2020 ZCTAs against the 116th districts. I did NOT fall
+   back to the 118th crosswalk, because CA-45 (say) exists on both maps and means different
+   ground: colouring 116th-map districts with 118th-map ZIP shares would be wrong geography
+   presented as right. district_for_zip(zip, 2022) returns [] and zip_basis(2022) returns
+   None, both with the reason in last_problem. index.json records zcta_file: null for the
+   116 vintage. A 2022 map can still show candidate/committee geography (which needs no
+   crosswalk) and, if Paul wants ZIP geography for 2022, the UI can ask for cycle 2024
+   explicitly and label it - that is a UI decision, not a silent default.
+
+2. RULING 9 MAY BE WRONG FOR MONEY, and the data says so. The 2021-2022 candidate master
+   (cn22) already numbers House seats on the NEW 118th map: it carries NC-14, a seat the
+   116th map does not have, and TX/FL numbering to match, because 2022 candidates ran in the
+   redistricted seats. So money in the 2022 cycle went to 118th-map districts, while the
+   members sitting during 2021-2022 sat in 116th-map seats. Ruling 9 chose the 116th map. If
+   the S8 map is "where the money went", cycle 2022 should point at vintage 118. I built all
+   three vintages and followed ruling 9 in index.json as instructed; the contradiction is
+   recorded in index.json notes and is a one-line change there (cycles.2022 = "118"), no
+   rebuild needed. PAUL'S CALL.
+
+3. FOUR TERRITORIES HAVE NO 20m BOUNDARY. cb_*_state_20m and cb_*_cd*_20m each carry 52
+   records: 50 states + DC + PR. American Samoa, Guam, the Northern Marianas and the US
+   Virgin Islands are absent at 20m. Their 17 ZIPs ARE in the relationship file, so dropping
+   them would have lost money: their FIPS codes are resolved from a documented four-entry
+   table, their ZIPs keep keys AS-AL/GU-AL/MP-AL/VI-AL, and each vintage file lists them
+   under "undrawn" with the reason. district_exists() counts them as real seats. Before this,
+   the crosswalk held 33,774 of 33,791 ZCTAs; it now holds all of them. If Paul wants them
+   drawn, the 500k files carry them and the builder needs only the region boxes filled in
+   (samoa/guam/marianas are already declared and inert at 20m).
+
+4. mentat/app/geo/.gitignore (NEW FILE, 6 lines). The repo root .gitignore line 6 ignores
+   *.json, so `git add mentat/app/geo` would have added nothing and the map would 404 on a
+   fresh checkout. The nested file negates it for this directory only; verified with
+   git status --untracked-files=all, which now lists all six JSON files as untracked. Say
+   the word and it can be dropped in favour of `git add -f`, which is how the receipts in
+   this folder are tracked.
+
+5. THE FEC CANDIDATE MASTER CARRIES SEATS THAT DO NOT EXIST, and they are passed through,
+   not dropped. Districts as filed include TX-66 and FL-81 (cn22), MT-22 and FL-59 (cn26) -
+   no such seats. district_for_candidate returns the key exactly as the master states it and
+   district_exists(key, cycle) says whether the cycle's map has that seat, so the S8 caller
+   can bucket them as unmatched (S6_DESIGN's rule: never dropped). Measured against the
+   119th map: cn22 172 rows on 111 such keys, cn24 90 rows on 50, cn26 60 rows on 45. Most
+   are honest vintage effects (PA-18, CA-53, MI-14, MT-AL: seats that existed on an older
+   map), which resolve correctly once checked against the right vintage.
+
+6. ONE CODE TRANSLATION was added deliberately. The two masters disagree on the delegate
+   seats: Census writes CD..FP 98 (key *-AL) while the FEC writes district 00 for DC, PR,
+   AS, GU and VI but 01 for the Northern Marianas (7 rows across the three cn files).
+   Because those six jurisdictions have exactly one seat by statute, any district code there
+   folds to AL. Without it those 7 rows resolved to MP-01, which no map has, and the
+   delegate's money would have sat in the unmatched bucket for no reason. A blank district
+   in a single-seat state (3 rows: AK, DE, GU) still returns None - the master did not say,
+   and this module does not guess.
+
+7. NOT DONE, deliberately out of scope: no server route, no UI, no Chart Studio wiring, no
+   geocoding (S6_DESIGN's precise layer, which is Paul's explicit-start job per ruling 10),
+   and no shapely/geopy install (ruling 11 stays Paul's - nothing here needs either).
+   committee_state() reads cm.txt field 7 in this module rather than widening
+   evidence_csv.committee_master(), which keeps only fields 9/10/13: S6 owns that file this
+   session, so it was read and left alone.
+
+8. index.json is the ONLY place the cycle -> vintage mapping lives. district_geo.py never
+   hard-codes it, so changing a mapping or adding the 2028 cycle is an index edit plus a
+   builder run.
+
+================================================================================
+7. WHAT THE S8 UI LANE MUST STILL DO (not done here: those files belong to S6)
+================================================================================
+a) THE GEO FILES ARE NOT SERVED YET. server.py:95-128 STATIC_ASSETS is an explicit
+   allow-list of URL path -> (filename, mime), and subdirectories are supported (there is
+   already '/vendor/pptxgen.bundle.js': ('vendor/pptxgen.bundle.js', ...)). Six entries are
+   needed, e.g. '/geo/index.json': ('geo/index.json', 'application/json') and the same for
+   cd119/cd118/cd116/zcta_cd119/zcta_cd118. Until then the page gets 404s
+   (server.py:2195-2214: an unregistered path falls through to {"error": "Not found."}).
+   Nothing else is required: the handler streams the file, sets an ETag and needs no code
+   change. server.py was read and NOT edited - S6 owns it this session.
+b) app/geo/*.json are data the page fetches; app/district_geo.py is for the SERVER side
+   (summary routes that need a district key per row). Both read the same index.json.
+c) Adding a new app/*.py changes the console's CODE_TREE_SHA256 (server.py:159-181), which
+   is how a stale build is detected, so Paul re-runs the launcher after committing, as in
+   S3 and S7. Checked: test_contribution_http.py:247-254 builds its expected module list
+   from the same glob it compares against, so a new module cannot break it, and
+   mentat/tests/test_console_delivery.py is green with these files present (5 tests, OK).
+d) OBSERVED AT 2026-09-17 ~19:30Z, NOT CAUSED HERE: mentat/tests/test_desktop_launcher.py
+   is red, 5 errors, all "FileNotFoundError ... mentat\app\evidence.js". The working copy of
+   server.py registers '/evidence.js' at line 105 while app/evidence.js does not exist yet;
+   that line is absent from HEAD, so it is the S6 lane mid-edit, not this lane. Flagged in
+   case it is news to S6.

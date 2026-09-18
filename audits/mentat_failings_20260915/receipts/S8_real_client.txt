@@ -1,0 +1,60 @@
+S8 REAL-CLIENT PASS - scratch console, temp data root
+date: 2026-09-17T20:36:18-0400
+console: http://127.0.0.1:8941   data root: C:\Users\pgoff\AppData\Local\Temp\mentat-s8-xvvegn_8
+build: 487589584 (working tree, uncommitted)
+
+--- POST /api/evidence-csv {"path": ".../Crypto Industry Spending Overview.xlsx"} ---
+  state ready after 2.1s  id csv-88ea228457b8499d1ec27eeaba967f61  rows 6343  sheet 2021-2022
+--- POST /api/evidence-csv {"path": ".../Credit Union Industry Spending Overview.xlsx"} ---
+  state ready after 18.6s  id csv-a6591d397b2bda66ab7827b686e24098  rows 27632  sheet 2021-2022
+
+--- GET /api/evidence-geo?source=snapshot&id=fairshake-20260908&committee=C00835959&cycle=2024&direction=spent ---
+  committee   FAIRSHAKE (C00835959)  cycle 2024  vintage 118 (118th)
+  reported        195,826,511.43
+  located         193,545,160.56
+  unlocated         2,281,350.87
+  reconciles  True   193,545,160.56 + 2,281,350.87 = 195,826,511.43
+  kind candidates        38,381,214.73  default_on=True  districts  28  states  0  [by the candidate's district]
+  kind transfers         86,250,000.00  default_on=True  districts   0  states  2  [by the committee's registered state]
+  kind operating          5,413,950.83  default_on=True  districts   0  states 14  [by the payee's state]
+  kind conversions       63,499,995.00  default_on=False districts   0  states  1  [in-kind assets liquidated back to the contributor]
+    candidate districts: 28
+    CA-SEN      10,041,118.54  oppose  PORTER, KATHERINE REP.
+    CA-45        2,791,716.00  support STEEL, MICHELLE PARK REP.
+    CO-08        2,270,929.00  support CARAVEO, YADIRA REP., CARAVEO, YADIRA
+    NY-16        2,078,023.00  oppose  BOWMAN, JAMAAL REP.
+    NY-18        1,987,660.00  support RYAN, PATRICK REP.
+    transfer   VA     54,550,000.00  DEFEND AMERICAN JOBS
+    transfer   FL     31,700,000.00  PROTECT PROGRESS
+    oper  NY      1,179,080.48  POTTER, PHIL, GLOBAL STRATEGY GROUP, BV STRATE
+    oper  FL      1,130,735.83  SCHOEN SURVEY RESEARCH, ARK INVEST, BISON STRA
+    oper  MD        837,073.00  TARGETED PLATFORM MEDIA
+    oper  DE        600,822.00  DOCKSIDE STRATEGIES, REGER RESEARCH
+    oper  AL        485,500.00  IMPACT RESEARCH
+    oper  ID        401,900.00  GUIDANT POLLING AND STRATEGY
+    conv  CA     63,499,995.00  COINBASE
+    unlocated      2,260,606.00    3 rows  H2NC01149 is in no FEC candidate master (2026, 2024, 2022), so its spending stays unmatche
+    unlocated         19,999.88    1 rows  H4NC01053 is in no FEC candidate master (2026, 2024, 2022), so its spending stays unmatche
+    unlocated            744.99    1 rows  the committee reported more than its itemised rows add to (unitemised and other activity)
+
+--- GET /api/evidence-geo?source=csv&id=csv-88ea228457b8499d1ec27eeaba967f61&committee=C00804179&cycle=2024&direction=raised ---
+  committee   COINBASE, INC. INNOVATION PAC (COINBASE INNOVATION PAC) (C00804179)  cycle 2024  vintage 118  zip basis: land area (AREALAND_PART); the file carries no population column
+  reported        275,016.22   located 275,016.22   unlocated 0.00   reconciles True
+  kind contributors     275,016.22  districts 1  states 1
+    CA total (districts + state fallback) 275,016.22
+    CA-12        272,323.88  rows  727  share  99.0%  split=False  COINBASE, INC., BAUGUESS, SCOTT, C
+
+--- refusals ---
+  an unknown source                             400 Choose an imported file or a saved snapshot.
+  a committee the snapshot does not carry       400 Choose a committee in this source.
+  a direction that is neither                   400 Choose Raised or Spent.
+
+--- static geography ---
+  GET /geo/index.json       200      2,572 bytes  application/json; charset=utf-8
+  GET /geo/cd119.json       200    479,847 bytes  application/json; charset=utf-8
+  GET /geo/cd118.json       200    475,833 bytes  application/json; charset=utf-8
+  GET /geo/cd116.json       200    480,654 bytes  application/json; charset=utf-8
+  GET /geo/zcta_cd119.json  200    907,049 bytes  application/json; charset=utf-8
+  GET /geo/zcta_cd118.json  200    905,339 bytes  application/json; charset=utf-8
+
+server on 8941 stopped (exit 1)

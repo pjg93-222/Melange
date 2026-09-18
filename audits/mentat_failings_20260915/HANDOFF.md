@@ -2089,3 +2089,179 @@ $177,980,393.39 exactly):**
 **Fable close-out (2026-09-17 16:50 ET).** Steps 26-28 of `tests/test_evidence_panes_browser.cjs` were failing on a harness fault, not the product: step 25 leaves the grid empty (the step-22 console restart plus the split toggle), and step 26 then read `[data-pane=a]` that no longer existed. Fixed by restoring the two-pane permalink at the head of step 26 and building the third pane from those keys plus committee C00835959 in step 27. Suite now **ALL 28 STEPS PASSED** (receipt S6_after_browser.txt regenerated); python 140 OK under the system Python (launcher Python 140 OK earlier in the fix pass); the patch section for that one test file was re-cut as bytes and the whole patch re-proved with `git apply --cached --check` exit 0 on HEAD a9ed5c236 (17 file diffs, 330,436 bytes). Remaining and Paul-gated: the page background #faf8f6 and 16px body differ from the mockup (#fcf7f4, 14px) and are console-wide tokens, not S6 files; receipts need `git add -f` (.gitignore:21 *.txt). Next lane: S8, the district map, on S6_DESIGN.md section H with the geo layer already in app/geo and app/district_geo.py; the 2022 cycle maps to the 118th vintage, not the 116th (the 2022 candidate master already numbers seats on the 118th map).
 
 **Fable polish and patch close-out (2026-09-17 17:05 ET).** From the 1280 three-pane screenshot: the long committee name still wrapped the pane title to five lines, every contributor name wrapped, and the panes ended ragged. Changed: `.evidence-panes` aligns stretch so panes share one height (measured 890 px each at 1280); `.pane-title h2` clamps to two lines with the full name on its title attribute; NAME_LIMIT 48 -> 34; the top-contributor table is table-layout fixed with a 112 px amount column and one-line names; the inline bar in that list is GONE (it was never in the approved mockup and it was what ellipsised every name). Also fixed: the polish script had written CRLF lines into an LF file (10 of them, normalised). Steps 26-28 of the panes suite were a harness fault (step 25 leaves the grid empty, step 26 then read a pane that no longer existed): step 26 now restores the two-pane permalink first and step 27 builds the third pane from those keys plus C00835959. Verified after: panes suite ALL 28 STEPS PASSED, python 140 OK (system) and 122 OK (launcher, without the stream suite it does not carry), scope.test.js 45/45, zero page errors. PATCH: the workspace.css section was rebuilt from the live diff keeping hunks 3-6 only; hunks 1, 2 and 7 are the UI clean-up lane (its two #graph-open-builder rules, the :has(#compare-panel) selector list, and its appended Graph block) and are NOT in this patch. Checked section by section: no peer marker (graph-header, analysis-strip, graph-menu, graph-panel-tools, graph-open-builder, chart-studio, resume-run) appears in the workspace.css, index.html, server.py or app.js sections. `git apply --cached --check` exit 0 on HEAD a9ed5c236, 17 file diffs, 332,718 bytes. My scratch consoles 8945-8947 are stopped.
+
+## S8 - the congressional-district map for the PAC evidence tab (2026-09-17, Opus architect)
+
+Built on S6 (HEAD `487589584`) and the S8 geo prep (`receipts/S8_geo_prep.txt`).
+Nothing is committed: Paul commits, then **re-runs the launcher** - six new static
+assets and a new `app/*.py` module change `CODE_TREE_SHA256`/the asset hash, so a
+console started before the commit reports a stale build.
+
+**READ THIS BEFORE COMMITTING.** The patch does NOT carry `mentat/app/geo/*.json`
+(3.2 MB of built geography that is already sitting untracked in the working tree
+from the geo prep). `git add -f mentat/app/geo` is REQUIRED, and not only so the
+map stops 404ing on a fresh checkout: `app/geo/index.json` is where the ruling-9
+correction lives, so without it cycle 2022 silently goes back to the 116th map.
+The receipts under `audits/.../receipts/` need `git add -f` too (`*.txt` and
+`*.png` are gitignored), as every receipt in that folder already did.
+
+### Rulings carried (S6_DESIGN section H, rulings 7-12)
+7. The Map button ships here, at the S6 mount points: every pane header and the
+   Compare heading. No layout change was needed; the comments became buttons.
+8. ZIP matches are approximate and split: a straddling ZIP is divided by the
+   crosswalk's land-area shares, every part is marked `split`, and the Raised
+   footnote says so in words.
+9. **CORRECTED, Paul 2026-09-17.** `cycles["2022"]` is now `"118"`, not `"116"`.
+   The map answers where the MONEY went, and the 2021-2022 FEC candidate master
+   already numbers House seats on the redistricted 118th map - it carries NC-14,
+   a seat the 116th map has no equivalent for - because 2022 candidates ran in
+   the new seats. The 116th paths stay built and shipped for anyone reading where
+   the members who SAT in 2021-2022 sat; no cycle points at them, so the map
+   never mixes the two. Recorded in `app/geo/index.json` notes (the OPEN QUESTION
+   note is replaced by a SETTLED one) and asserted in
+   `tests/test_district_geo.py::BuiltGeographyTests::test_the_shipped_index_draws_2022_on_the_118th_map`
+   and `tests/test_evidence_geo.py::ShippedIndex`. A side effect worth having:
+   2022 now HAS ZIP geography, because the 118th crosswalk exists and the 116th
+   one never did.
+10. No geocoding job in this lane and no Start button. S8b owns it.
+11. Nothing here needs `shapely` or `geopy`; neither was installed.
+12. Default heat = candidates + transfers + operating. Asset conversions ship
+    `default_on: false`: listed, always in the total, off the heat until asked.
+
+### Files claimed by S8
+NEW: `mentat/app/evidence_geo.py` (the producer), `mentat/tests/test_evidence_geo.py`,
+`mentat/tests/test_evidence_map_browser.cjs`,
+`audits/mentat_failings_20260915/contracts/evidence-geo.json`.
+ALREADY ON DISK from the geo prep, untracked, NOT in the patch because they are
+3.2 MB of built geography that is already in the working tree - `git add` them
+directly: `mentat/app/district_geo.py`, `mentat/tools/build_district_geo.py`,
+`mentat/tests/test_district_geo.py`, `mentat/app/geo/{.gitignore,index.json,
+cd119.json,cd118.json,cd116.json,zcta_cd119.json,zcta_cd118.json}`.
+EDITED (hunk-exact; three lanes share this tree):
+* `mentat/app/server.py` - four hunks: six `/geo/*.json` STATIC_ASSETS entries;
+  `import evidence_geo`; `Console.evidence_geography`; the `/api/evidence-geo`
+  GET route. Plus ONE line in `send()` (the `compressible` test) - see DEVIATION 2.
+  No `resume-run` marker appears in any hunk.
+* `mentat/app/evidence.js` - the map module, the two Map buttons at the S6 mount
+  points, the rows-drawer district filter, `<pane>.map` in `writeScope` and
+  `restorePanes`, and the map's own handlers.
+* `mentat/app/index.html` - ONE line: `<section id="evidence-map">` after
+  `#evidence-compare`, inside `#view-evidence`. No `#view-graph`,
+  `#view-chart-studio`, `graph-*` or `chart-studio` markup is touched.
+* `mentat/app/workspace.css` - ONE hunk, APPENDED at the end of the file, so it
+  cannot collide with the UI lane's hunks 1/2/7 or anyone else's.
+* `mentat/app/scope.js` - `map` added to `PANE_FIELDS`, with its own vocabulary
+  check (`raised`/`spent`) and reason string.
+* `mentat/app/district_geo.py` - `committee_state(id, cycle=None)`: see DEVIATION 1.
+* `mentat/app/geo/index.json` - the ruling-9 correction and its notes.
+* `audits/.../contracts/url_scope.json` - v2 -> v3.
+
+### Contracts
+* `contracts/evidence-geo.json` **v1**: the route, the request, six rules, four
+  examples generated FROM the producer, and six negative controls, each one a
+  valid example with exactly one thing broken. Asserted both ways in
+  `test_evidence_geo.py::Contract` - every example validates, every control is
+  refused for its own stated reason, and a real payload satisfies the contract.
+  Controls: a district key outside `^[A-Z]{2}-(\d{2}|AL|SEN)$`; located+unlocated
+  not reconciling; a share outside 0..1; a kind with no basis; an unlocated
+  bucket with no reason; rewritten legend stops.
+* `contracts/url_scope.json` **v3**: `a.map` - `d.map`, one example
+  (`a.map=spent` reopens the map) and one negative control (`a.map=sideways` is
+  dropped and reported, and the pane still opens).
+
+### MEASURED ACCEPTANCE (receipts/S8_real_client.txt, scratch console, temp root)
+`fairshake-20260908`, C00835959, cycle 2024, direction spent, vintage 118:
+
+```
+reported      195,826,511.43   located 193,545,160.56   unlocated 2,281,350.87   reconciles True
+candidates     38,381,214.73   28 districts   CA-SEN oppose PORTER 10,041,118.54 (largest)
+transfers      86,250,000.00   VA 54,550,000.00 Defend American Jobs · FL 31,700,000.00 Protect Progress
+operating       5,413,950.83   NY 1,179,080.48 · FL 1,130,735.83 · MD 837,073.00 · DE 600,822.00 · AL 485,500.00 · ID 401,900.00
+conversions    63,499,995.00   CA 63,499,995.00 Coinbase   (default_on False)
+unlocated       2,260,606.00 + 19,999.88 on candidate ids no master carries (H2NC01149, H4NC01053)
+                     744.99 the committee reported more than its itemised rows add to
+```
+Against the brief's expectations: transfers, operating, conversions and the
+district count are EXACT; `candidates 40,661,821` is the Schedule E total, which
+the route splits into 38,381,214.73 located plus 2,280,605.88 on ids the master
+lacks (38,381,214.73 + 2,280,605.88 = 40,661,820.61) exactly as ruled - never
+dropped; CA-SEN 10,041,118.54 rounds to the 10,041,119 on the artboard. The
+$744.99 is NEW and real: the FEC summary's disbursements exceed itemised
+Schedule B + E by that much (unitemised/other activity). It is in `unlocated`
+with that reason, which is why located + unlocated reconciles to the cent.
+`40,661,821 + 86,250,000 + 5,413,951 + 63,499,995` is 195,825,767, not
+195,826,511: the artboard's arithmetic was 744 short, and this is that gap.
+
+Crypto import, C00804179, cycle 2024, raised: reported 275,016.22, located
+275,016.22, unlocated 0.00, CA-12 272,323.88 over 727 rows (99.0%), rest CA
+state fallback. The brief's `CA 402,081 / ZIP 94607 383,197` is the ALL-CYCLES
+figure, not 2024 - NOT RE-MEASURED, see OPEN below.
+
+### Tests
+`tests/test_evidence_geo.py` - 24 tests, green on both interpreters. Fixture data
+root (a three-district map, a four-ZIP crosswalk with a straddling ZIP, a
+candidate master with a Senate seat, a presidential candidate and a TX-66 that no
+map has, and a committee master where Protect Progress is FL in cm24 and MN in
+cm26), plus the shipped-index tests and the contract tests.
+`tests/test_evidence_map_browser.cjs` - the map opened from a pane, Raised/Spent,
+a layer chip, a tooltip, a district click filtering the rows drawer, Back to
+panes and a URL round trip, zero page errors.
+Re-run green: `test_district_geo` (20), `test_evidence_summary` (27),
+`test_evidence_categories` (30), `test_evidence_readers` (44),
+`test_evidence_csv_stream` (18), `test_evidence_csv` (10), `test_pac_evidence`
+(11) under BOTH Pythons; `test_navigation_scope_browser.cjs` 13/13;
+`test_evidence_panes_browser.cjs` 28 steps.
+
+### DEVIATIONS (three, all forced by measurement)
+1. `district_geo.committee_state` gained an OPTIONAL `cycle`. Protect Progress
+   (C00848440) is registered in FL in the 2023-2024 master and MN in the
+   2025-2026 one, so the cycle-less newest-first answer put $31.7M of 2024
+   transfers in Minnesota. With no argument the behaviour is byte-identical to
+   before (test_district_geo stays green); with a cycle it reads that cycle's
+   own master first and footnotes the fallback in `last_problem`.
+2. ONE line in `server.py:send()`. `send()` JSON-ENCODES its value when the
+   content type is exactly `application/json`, so serving a `.json` file already
+   read as bytes raised `TypeError: Object of type bytes is not JSON
+   serializable` and dropped the connection - measured, not predicted. The six
+   geo assets are registered as `application/json; charset=utf-8` and the
+   `compressible` test now matches the PREFIX, so API JSON still gzips and the
+   files do too. Every other response is unchanged.
+3. Asset conversions are identified by payee AND description, not OR. The brief
+   said "21B rows whose description says in-kind or not liquidated, OR whose
+   payee matches a contributor company of the snapshot". Measured on the real
+   snapshot, OR gives 64,655,404.58 (it also swallows POTTER, PHIL 997,971.14
+   and ARK INVEST 157,438.44, both in-kind twins of their own receipts) and
+   leaves operating at 4,258,546.25 - contradicting the ruled 63,499,995 /
+   5,413,951 and the artboard's own operating list (NY 1,179,080, FL 1,130,736),
+   which counts Potter and Ark as operating. The rule implemented is: the payee
+   matches the SNAPSHOT'S OWN company or aliases (`evidence.json` company +
+   aliases) **and** the description says in-kind / not liquidated. That
+   reproduces the ruled numbers exactly and still refuses to call an ordinary
+   legal fee paid to Coinbase a conversion.
+
+### Also worth knowing
+* An IMPORT records money RECEIVED: every row's committee id is the recipient and
+  no contributor in the Crypto workbook's cycle sheets is a committee (checked
+  all three sheets: zero). So "Spent" for an import comes from the SAME
+  workbook's `Downstream Activity` sheet, read with `graph_data.activity_xml_rows`
+  (the reader Graph's activity mode already uses) rather than a second
+  implementation; Fairshake has 34 committee-candidate groups there. A file with
+  no such sheet answers with no kinds and a plain reason, never an invented basis.
+* Operating, transfers and conversions colour the STATE, not a district, because
+  a payee's street address says where a vendor banks, not which electorate the
+  money was aimed at. The ZIP is still read, but only to recover a state the
+  filer left blank. Senate rows keep a `CA-SEN` key in the list and heat all of
+  California. A presidential race has no district or state at all and goes to
+  `unlocated` with that reason.
+* CSP: the console serves `style-src 'self'`, so every fill, stroke and width in
+  the map is set through the CSSOM after render (`paintMap`), the way graph.js
+  does; the legend gradient lives in `workspace.css` for the same reason.
+
+### OPEN / NOT DONE
+* The all-cycles Crypto raised figure (CA 402,081 / 94607 383,197) was not
+  re-measured; only cycle 2024 was. The route accepts a blank cycle, but a blank
+  cycle has no vintage, so the all-cycles map draws nothing today - a cycle must
+  be chosen. Deciding what an all-cycles map should draw is Paul's call.
+* S8b still owns the precise geocoding layer (ruling 10) and the Start button.
+* The Compare strip's "Top districts" row (S6_DESIGN C) is not added; its Map
+  button opens the first pane's map instead.

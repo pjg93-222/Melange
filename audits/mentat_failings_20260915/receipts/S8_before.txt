@@ -1,0 +1,13 @@
+S8 BEFORE - red, written before the producer and the map existed
+date: 2026-09-17T20:20:53-04:00
+HEAD: 487589584c33fcc575c52240c9c468ab1f907623 PAC evidence v2: one scope bar, PAC panes across industries, compare strip (S6)
+
+$ python mentat/tests/test_evidence_geo.py
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_evidence_geo.py", line 24, in <module>
+    import evidence_geo  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'evidence_geo'
+
+$ node mentat/tests/test_evidence_map_browser.cjs  (file not written yet)
+ls: cannot access 'mentat/tests/test_evidence_map_browser.cjs': No such file or directory
