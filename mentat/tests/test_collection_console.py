@@ -2,12 +2,14 @@
 import base64
 import importlib.util
 import json
+import os
 from pathlib import Path
 import sqlite3
 import subprocess
 import sys
 import tempfile
 import threading
+import time
 import unittest
 from unittest.mock import patch, MagicMock
 from urllib.request import Request, urlopen
@@ -557,6 +559,133 @@ class ConsoleTests(unittest.TestCase):
         for key in ('stop_requested', 'stop_mode', 'exit_code', 'finished_at', 'launch_error'):
             self.assertNotIn(key, saved)
         self.assertEqual(self.console.preparing, set())
+
+    def orphaned_run(self, state='starting', pid=None, identity=None, lane_state=True):
+        """A saved roster left live-looking by a console that was killed.
+
+        The orchestrator wrote its status while it collected and then died with
+        the console that owned it, so no terminal state was ever recorded. The
+        console PID stays this live process on purpose: the console that
+        launched a run being alive says nothing about the orchestrator, so it
+        must never be what keeps a dead collection looking live.
+        """
+        uploaded = self.upload()
+        directory = self.root / uploaded['id']
+        run_id = '20260917T124148-57020'
+        run = directory / 'runs' / run_id
+        fanout = run / 'industries' / 'test' / 'fanout'
+        fanout.mkdir(parents=True)
+        app.atomic_json(run / 'manifest.json', {'run_id': run_id})
+        app.atomic_json(run / 'status.json', {'run_id': run_id, 'stage': 'collecting'})
+        if lane_state:
+            app.atomic_json(fanout / 'manifest.json', {'run_id': run_id, 'lane_count': 1})
+        manifest = app.read_json(directory / 'upload.json')
+        manifest.update(state=state, cycles=[2024], started_at=1.0, console_pid=os.getpid())
+        if pid is not None:
+            manifest.update(pid=pid, process_identity=identity)
+        app.atomic_json(directory / 'upload.json', manifest)
+        return uploaded['id'], directory, run
+
+    def dead_pid(self):
+        """A PID with no live process: one this test started and watched exit.
+
+        The finished Popen object is kept for the life of the test, so Windows
+        cannot hand the PID to an unrelated process and make the fixture lie.
+        """
+        self.finished = subprocess.Popen([sys.executable, '-c', 'pass'])
+        self.finished.wait()
+        self.assertFalse(app.process_alive(self.finished.pid))
+        return self.finished.pid
+
+    def summary_row(self, identifier):
+        """The row /api/runs hands the page for one roster."""
+        return next(row for row in self.console.summary()['runs'] if row['id'] == identifier)
+
+    def test_dead_collection_reports_stopped_and_resumable_without_rewriting_it(self):
+        pid = self.dead_pid()
+        identifier, directory, run = self.orphaned_run(
+            state='starting', pid=pid, identity={'pid': pid, 'created': 1, 'executable': 'orchestrator.exe'})
+        before = (directory / 'upload.json').read_bytes()
+        row = self.summary_row(identifier)
+        self.assertEqual(row['state'], 'stopped')
+        self.assertTrue(row['resumable'])
+        # Computed, not recorded: a GET leaves the saved manifest byte for byte.
+        self.assertEqual((directory / 'upload.json').read_bytes(), before)
+        self.assertEqual(app.read_json(directory / 'upload.json')['state'], 'starting')
+        # find() feeds resume() and snapshot() from the same computed list.
+        self.assertEqual(self.console.find(identifier)['state'], 'stopped')
+        self.assertTrue(self.console.snapshot(identifier)['resumable'])
+        self.assertEqual(self.console.resume_target(self.console.find(identifier)), run)
+
+    def test_live_collection_is_never_demoted(self):
+        identifier, directory, run = self.orphaned_run(
+            state='starting', pid=os.getpid(), identity=app.process_identity(os.getpid()))
+        row = self.summary_row(identifier)
+        self.assertEqual(row['state'], 'starting')
+        self.assertFalse(row['resumable'])
+        self.assertEqual(app.read_json(directory / 'upload.json')['state'], 'starting')
+
+    @unittest.skipUnless(os.name == 'nt', 'Windows process identity')
+    def test_recycled_pid_cannot_keep_a_dead_collection_looking_live(self):
+        identifier, directory, run = self.orphaned_run(
+            state='running', pid=os.getpid(),
+            identity={**app.process_identity(os.getpid()), 'created': 1})
+        self.assertEqual(self.summary_row(identifier)['state'], 'stopped')
+
+    def test_run_this_console_still_owns_is_never_demoted(self):
+        identifier, directory, run = self.orphaned_run(state='starting', pid=self.dead_pid())
+        self.console.preparing.add(identifier)
+        self.assertEqual(self.summary_row(identifier)['state'], 'starting')
+        self.console.preparing.clear()
+        self.console.processes[identifier] = MagicMock(**{'poll.return_value': None})
+        self.assertEqual(self.summary_row(identifier)['state'], 'starting')
+        self.console.processes[identifier].poll.return_value = 1
+        self.assertEqual(self.summary_row(identifier)['state'], 'stopped')
+
+    def test_preparing_without_a_pid_is_not_demoted(self):
+        identifier, directory, run = self.orphaned_run(state='preparing')
+        status = run / 'status.json'
+        os.utime(status, (time.time(), time.time() - app.ORPHANED_RUN_GRACE_SECONDS - 3600))
+        row = self.summary_row(identifier)
+        self.assertEqual(row['state'], 'preparing')
+        self.assertFalse(row['resumable'])
+
+    def test_collecting_without_a_pid_is_demoted_only_after_the_grace_elapses(self):
+        self.assertGreaterEqual(app.ORPHANED_RUN_GRACE_SECONDS, 15 * 60)
+        identifier, directory, run = self.orphaned_run(state='starting')
+        before = (directory / 'upload.json').read_bytes()
+        status = run / 'status.json'
+        for age in (0, app.ORPHANED_RUN_GRACE_SECONDS - 60):
+            os.utime(status, (time.time(), time.time() - age))
+            row = self.summary_row(identifier)
+            self.assertEqual(row['state'], 'starting', f'age {age}s is inside the grace')
+            self.assertFalse(row['resumable'])
+        os.utime(status, (time.time(), time.time() - app.ORPHANED_RUN_GRACE_SECONDS - 60))
+        row = self.summary_row(identifier)
+        self.assertEqual(row['state'], 'stopped')
+        self.assertTrue(row['resumable'])
+        self.assertEqual((directory / 'upload.json').read_bytes(), before)
+
+    def test_demoted_run_passes_the_resume_state_guard(self):
+        pid = self.dead_pid()
+        identifier, directory, run = self.orphaned_run(
+            state='starting', pid=pid, identity={'pid': pid, 'created': 1, 'executable': 'orchestrator.exe'})
+        self.console.rscript = sys.executable
+        with patch.object(app, 'load_keys', return_value=['stored-key']), \
+                patch.object(app, 'r_library_path', return_value=''), \
+                patch.object(app, 'copy_fec_sources'), \
+                patch.object(app, 'process_identity', return_value='fixture'), \
+                patch.object(app.shutil, 'copytree'), patch.object(app.shutil, 'copy2'), \
+                patch.object(app.threading, 'Thread'), \
+                patch.object(app.subprocess, 'Popen', return_value=MagicMock(pid=4321)) as launch:
+            value = self.console.resume({'id': identifier}, background=False)
+        self.assertEqual(value, {'id': identifier, 'state': 'starting', 'resumed_from': run.name})
+        command = launch.call_args.args[0]
+        self.assertEqual(command[command.index('-ResumeRunId') + 1], run.name)
+        saved = app.read_json(directory / 'upload.json')
+        self.assertEqual(saved['resumed_from'], run.name)
+        self.assertEqual(saved['pid'], 4321)
+        self.assertEqual(saved['resume_count'], 1)
 
 
 if __name__ == "__main__":

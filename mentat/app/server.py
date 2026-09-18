@@ -336,6 +336,25 @@ def stale_resume_status(directory, meta):
         return True
 
 
+ORPHANED_RUN_GRACE_SECONDS = 15 * 60
+
+
+def run_status_is_stale(directory, grace=ORPHANED_RUN_GRACE_SECONDS):
+    """Whether a run stopped writing its status file longer than a grace ago.
+
+    Only consulted where the manifest names no process to ask about, so the
+    file's own age is the only evidence there is. A run with no directory or no
+    status file yet has produced no evidence at all and is never called stale:
+    a collection seconds from its first write must not be read as dead.
+    """
+    if not directory:
+        return False
+    try:
+        return time.time() - (Path(directory) / 'status.json').stat().st_mtime > grace
+    except OSError:
+        return False
+
+
 def process_alive(pid):
     if not isinstance(pid, int) or pid <= 0:
         return False
@@ -432,6 +451,28 @@ def process_identity_handle(pid):
 def process_identity(pid):
     with process_identity_handle(pid) as identity:
         return identity
+
+
+def process_confirmed_dead(manifest):
+    """Whether the collection process a saved run names is provably gone.
+
+    Only a positive answer is ever acted on, so every ambiguity answers False:
+    no PID recorded, a process this session cannot open, a manifest written
+    before identities were kept. Where an identity was kept it is compared
+    through one open handle, the way stop() verifies before it kills, so a
+    recycled PID that now belongs to something else cannot keep a dead run
+    looking alive.
+    """
+    pid = manifest.get('pid')
+    if type(pid) is not int or pid <= 0:
+        return False
+    if not process_alive(pid):
+        return True
+    saved = manifest.get('process_identity')
+    if not isinstance(saved, dict):
+        return False
+    with process_identity_handle(pid) as identity:
+        return identity is not None and identity != saved
 
 
 def replace_with_retry(temporary, path, attempts=10):
@@ -1493,6 +1534,37 @@ class Console:
             job['message'] = 'The publishing console stopped.'
         return job
 
+    def orphaned_state(self, identifier, state, meta, directory):
+        """Report a live-looking run whose collection process is gone as stopped.
+
+        finish() records an exit only for a process THIS console holds a handle
+        for, so a console that is killed leaves its run showing whatever state
+        the orchestrator last wrote - "starting", hours after every process it
+        named has exited. That presents a dead collection as live, and because
+        resume_target() applies only to a terminal state it also locks the run
+        out of Resume, which is precisely the run Resume exists for. The
+        correction is computed, never written: the manifest belongs to whichever
+        console owns the roster next, and a read path leaves it untouched.
+        """
+        if state not in ('preparing', 'starting', 'running'):
+            return state
+        # Work this console owns is never second-guessed. A launch thread
+        # between claiming the roster and writing the PID is alive by
+        # definition, and its manifest has no PID to check yet.
+        if identifier in getattr(self, 'preparing', set()):
+            return state
+        process = getattr(self, 'processes', {}).get(identifier)
+        if process is not None and process.poll() is None:
+            return state
+        if process_confirmed_dead(meta):
+            return 'stopped'
+        # No PID names no process to ask about. Preparing may be seconds from
+        # writing one, so it stands whatever its age; a run that claimed to be
+        # collecting and then wrote nothing for the whole grace period does not.
+        if state != 'preparing' and not meta.get('pid') and run_status_is_stale(directory):
+            return 'stopped'
+        return state
+
     def runs(self):
         values = []
         for path in self.root.glob("*/upload.json"):
@@ -1504,6 +1576,8 @@ class Console:
             if (run_paths and state not in ('stopped', 'failed', 'launch failed')
                     and not stale_resume_status(run_paths[-1].parent, meta)):
                 state = run_state(read_json_cached(run_paths[-1].parent / 'status.json'), state)
+            state = self.orphaned_state(meta["id"], state, meta,
+                                        run_paths[-1].parent if run_paths else None)
             values.append({"id": meta["id"], "name": meta["name"], "state": state,
                            "created_at": meta["created_at"], "directory": run_paths[-1].parent if run_paths else None,
                            "upload": meta})
