@@ -241,3 +241,8 @@ $76,899,254.70. Tests `113 passed, 27 subtests passed in 8.59s`.
 Caveat for the report: the Banking corporate tier is one real row, a single lawful
 2021 inaugural donation. It is real money and belongs in the line, but it is not a
 distribution and no cross-company comparison should rest on it.
+
+## Stored-text fidelity of the exclusions, 2026-09-18
+
+- 2026-09-18 STORED-TEXT FIDELITY BOUND: the 29,816 contradicted-by-text exclusions ($32,538,668.49) are not an artefact of damaged text. Maximum exposure to a truncation fault is 112 rows / $4,823.06 (0.0148%), established by EXACT CENSUS of all 29,816 rows against the shipped `_tokens`/`_text_names` rule, not by sampling. A bounded live check of all six truncation-consistent classes plus a 20-row CITIZENS control found 0 faults, 0 verdict changes and 0 amendment disqualifications in 41 rows / 41 requests (47 requests total incl. shape proof; seed 20260918). Request shape: `/v1/schedules/schedule_a/?committee_id=&two_year_transaction_period=&image_number=` then match `sub_id`; `sub_id` alone returns HTTP 400. The commission holds `CITIB`, `CITIBA`, `CITIBAN`, `CITIGROU` verbatim, so these are filer abbreviations, not collector damage. Also established: the excluded set is TWO populations (22,472 `contributions` + 7,356 `corporate_giving`, 12 shared ids), and `scraped_at`/`load_date` show the text was captured 2021-2024, NOT by a 09-09/10 code path. Receipt `receipts/banking_text_census.txt`, REVIEW.md section 10. Wording line: this does NOT establish that stored text matches what the commission holds beyond the 41 rows fetched.
+

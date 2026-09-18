@@ -820,3 +820,67 @@ generosity across the ten companies can rest on it.
 
 `python -m pytest tests/test_cross_reference_engine.py tests/test_cross_reference_runner.py tests/test_cross_reference_digest.py tests/test_cross_reference_data.py -q`
 (`receipts/pytest_after_treasury.txt`): `113 passed, 27 subtests passed in 8.59s`.
+
+## 13. Stored-text fidelity of the contradicted-by-text exclusions (2026-09-18)
+
+Question: ruling D-043 makes stored employer and contributor text financially
+material, because text that names another organisation excludes the row. A
+truncated or substituted employer would therefore convert a counted row into an
+excluded one silently. Do the 29,816 Banking exclusions worth $32,538,668.49 rest
+on text the commission actually holds?
+
+Answer, by exact census plus a bounded live check: yes, so far as any truncation
+fault could reach. Maximum exposure to truncation is **112 rows / $4,823.06**,
+0.0148% of the gross, established by censusing all 29,816 rows rather than by
+sampling. Live verification of all six truncation-consistent text classes plus a
+20-row control found **zero faults and zero verdict changes** in 41 rows / 41
+requests, with zero rows disqualified by amendment.
+
+Findings of record:
+
+- **Frame.** 29,816 rows; 29,689 strictly positive $32,160,162.76, 10 at exactly
+  $0.00, 117 negative -$378,505.73, gross $32,538,668.49. The previously reported
+  "29,699 positive" folds in the 10 zero rows; dollars agree to the cent.
+- **Two populations.** 22,472 `contributions` rows carry `contributor_employer`;
+  7,356 `corporate_giving` rows carry `contributor_name`; 12 ids appear in both.
+  About a quarter of the excluded set has no employer text at all.
+- **Collection dates refute the 09-09/10 premise.** `scraped_at` is dominated by
+  2023 (8,708 in 2023-08 alone) and `load_date` runs 2021-2024 with only 1,322
+  rows in 2026. The 09-10 run merged already-collected rows, corroborating its own
+  receipt describing itself as a recovery.
+- **No field-width cliff.** `contributor_employer` maxes at 38 characters,
+  `contributor_name` at 106, both continuous past every candidate boundary.
+- **The exclusions are correct.** All 22,461 reconstructed exclusions carry
+  `matched_variant = "Citi"` and
+  `company_match_reason = squashed_prefix_unverified_remainder`. The texts are
+  real, different institutions: CITIZENS BUSINESS BANK 7,282, CITIZENS BANK 4,530,
+  END CITIZENS UNITED $4,138,380.34, STATE GOVERNMENT CITIZENS' CAMPAIGN
+  $4,314,166.93, Independent Community Bankers of America, Target's and PepsiCo's
+  citizens funds. The rule catches an upstream "CITI" prefix mis-attribution; the
+  money was never Citibank's.
+- **Live shape proved.** `GET /v1/schedules/schedule_a/?committee_id=&two_year_transaction_period=&image_number=`,
+  matching `sub_id` in the page. Filtering on `sub_id` alone returns HTTP 400.
+  Credential sent as an `X-Api-Key` header, one pinned 40-character key, paced.
+- **The commission holds the abbreviations verbatim.** sub_id 4012620221391578788,
+  file_number 1552533, SUTCH, JEREMY: stored `CITIB`, commission `CITIB`. Likewise
+  `CITIBA`, `CITIBAN`, `CITIGROU`. Filer-entered abbreviations, not collector damage.
+
+Wording line, binding: this establishes what the stored text is, what the rule does
+with it, and the maximum money truncation could move. It does NOT establish that
+the remaining stored text matches what the commission holds. The five Banking rows
+measured through credit-unions archives remain a separate stratum and are not
+pooled; archive evidence licenses only that the collector did not damage that text
+between response and storage, on a code path that is not Banking's.
+
+Two sentences worth carrying forward on their own. **The commission's own record
+holds `CITIB`, `CITIBA`, `CITIBAN` and `CITIGROU` verbatim**, filed under
+file_number 1552533, so the class that looked most like truncation is
+filer-entered abbreviation rather than damage. And **the amendment guard was not
+vacuous**: live file numbers came back populated 41 of 41 and equal to the stored
+value every time, with the latest live load date at 2026-08-25, before the
+2026-09-10 cutoff, so zero disqualifications is a measured result rather than an
+untested path.
+
+Receipt: `receipts/banking_text_census.txt` (full tables, histograms, request log
+summary, seed 20260918, 47 requests total).
+

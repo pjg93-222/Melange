@@ -1,0 +1,189 @@
+BANKING CONTRADICTED-BY-TEXT CENSUS AND BOUNDED LIVE VERIFICATION
+=================================================================
+Date              : 2026-09-18
+Run under census  : state/cross-reference/20260918T173505-84f3f46b7351
+Engine under test : tools/cross_reference_engine.py (imported, not reimplemented)
+Exclusion reason  : attribution_contradicted_by_text (ruling D-043, commit 627300bc9)
+Live requests     : 47 total (6 request-shape proof + 41 comparison)
+Seed              : 20260918
+Scope note        : read-only against the repository; no run state was modified.
+
+WORDING LINE (binding on every claim below)
+-------------------------------------------
+This record establishes WHAT THE STORED TEXT IS, WHAT THE SHIPPED RULE DOES WITH
+IT, and THE MAXIMUM MONEY A TRUNCATION FAULT COULD MOVE. For the 41 rows fetched
+live it also establishes that stored text equals the commission's current text.
+It does NOT establish that the remaining stored text matches what the commission
+holds. No claim of general byte-fidelity is made or implied.
+
+1. FRAME VERIFICATION (independent recount)
+-------------------------------------------
+    rows             : 29,816            (expected 29,816)
+    positive rows    : 29,689 = $32,160,162.76
+    zero-amount rows : 10
+    negative rows    : 117 = $-378,505.73
+    gross            : $32,538,668.49    (expected $32,538,668.49)
+
+  Reconciliation: the previously reported "29,699 positive" counts the 10 rows at
+  exactly $0.00 alongside the 29,689 strictly positive rows. Dollars agree to the
+  cent. 29,689 + 10 = 29,699.
+
+2. PER-POPULATION SPLIT (the excluded set is two populations, not one)
+----------------------------------------------------------------------
+    source_table = contributions    : 22,472 rows  (individuals; contributor_employer)
+    source_table = corporate_giving :  7,356 rows  (entities; contributor_name)
+    ids present in both tables      :     12
+    (22,472 + 7,356 = 29,828 = 29,816 + 12)
+
+  About a quarter of the excluded set carries no employer text at all.
+
+3. COLLECTION-DATE DISTRIBUTION (the 09-09/10 premise is false)
+----------------------------------------------------------------
+  scraped_at, top months:
+      2023-08  8,708      2023-11  2,480      2023-09  1,466
+      2023-01  1,378      2022-11  1,138      2026-09  1,043
+      2024-01    780      2024-06    562      2024-02    481
+
+  load_date by year:
+      2022 11,823    2023 5,839    2021 2,861
+      2026  1,322    2025   444    2024   183
+
+  This text was captured across 2021-2024. It was NOT captured by any 2026-09-09/10
+  code path; the 09-10 run merged already-collected rows, which corroborates that
+  run's own receipt describing itself as a recovery. Any live comparison therefore
+  spans a multi-year amendment window, not a one-week one.
+
+4. WHAT THE EXCLUSIONS ACTUALLY ARE
+------------------------------------
+  Shipped-rule reconstruction over the 22,472 rows carrying employer text:
+      excludes under stored text     : 22,461   (99.95% agreement with the engine)
+      would count under stored text  :     11   (engine also consults recipient/role routes)
+
+  Every row carries matched_variant = "Citi" and
+  company_match_reason = squashed_prefix_unverified_remainder.
+
+  Top stored employer texts (individuals):
+      7,282  CITIZENS BUSINESS BANK       679  CITIZENS
+      4,530  CITIZENS BANK                379  PNCSD
+      1,387  PNCA                         283  CITIZENS STATE BANK
+        276  CITIZEN ACTION OF NEW YORK   258  CITIZENS ENERGY GROUP
+        215  US BANKRUPTCY COURT          210  CITIBUS
+
+  Top stored contributor names (entities), with dollars:
+      1,277  $4,138,380.34  END CITIZENS UNITED
+        103  $4,314,166.93  STATE GOVERNMENT CITIZENS' CAMPAIGN
+        732  $1,343,000.00  INDEPENDENT COMMUNITY BANKERS OF AMERICA PAC
+        434  $1,024,000.00  INDEPENDENT COMMUNITY BANKERS OF AMERICA PAC (var.)
+        337  $  787,000.00  TARGET CORPORATION CITIZENS POLITICAL FORUM
+        136  $  315,258.53  PEPSICO, INC. CONCERNED CITIZENS FUND
+
+  These are a coherent directory of real, identifiable, DIFFERENT institutions.
+  The text rule is not destroying good attributions; it is catching a bad one
+  made upstream by a "CITI" prefix match. The money was never Citibank's.
+
+5. TRUNCATION-CONSISTENT CENSUS (exact, all 29,816 rows; not a sample)
+----------------------------------------------------------------------
+  Test: stored text that excludes today AND is a prefix of some company variant,
+  i.e. text a truncation could have converted from counted to excluded.
+
+    company      text        rows    dollars     extends to
+    PNC Bank NA  'PNCI'        31  $3,920.81     PNCINVESTMENTS
+    Citibank     'CITIGROU'    64  $  632.99     CITIGROUPENERGYINC, CITIGROUPINCPAC
+    PNC Bank NA  'PNCB'        13  $  247.26     PNCBANKNA
+    Citibank     'CITIB'        2  $   15.00     CITIBANK
+    Citibank     'CITIBAN'      1  $    5.00     CITIBANK
+    Citibank     'CITIBA'       1  $    2.00     CITIBANK
+    ------------------------------------------------------------
+    TOTAL (contributions)      112  $4,823.06
+    TOTAL (corporate_giving)     0  $    0.00
+
+  MAXIMUM EXPOSURE TO A TRUNCATION FAULT: 112 rows, $4,823.06,
+  = 0.0148% of $32,538,668.49. This is a census of the whole population,
+  so it holds even if every one of those rows were a genuine fault.
+
+6. FIELD-WIDTH CHECK (no truncation ceiling in either field)
+-------------------------------------------------------------
+    contributions.contributor_employer : max length 38, no cliff, 551 distinct
+    corporate_giving.contributor_name  : max length 106, no cliff, 732 distinct
+  Lengths run continuously past every candidate boundary (60, 67, 76, 90, 106),
+  so there is no fixed-width truncation in the stored text.
+
+7. LIVE VERIFICATION
+---------------------
+  Request shape PROVED (5/5 on the proof rows):
+      GET https://api.open.fec.gov/v1/schedules/schedule_a/
+          ?committee_id=<cid>&two_year_transaction_period=<yr>&image_number=<img>
+          per_page=100
+      then match sub_id within the returned page.
+      Credential sent as an X-Api-Key HEADER (never in the URL). One 40-character
+      key from the data_gov pool, pinned for the whole run, paced at 1.0 s.
+
+      Filtering by sub_id alone is REJECTED by the API:
+      HTTP 400 "Please choose a single `two_year_transaction_period` or add one of
+      the following filters to your query: `committee_id`, `contributor_id`, ..."
+
+  Sample (targeted, NOT a random draw from the population):
+      stratum A, truncation-consistent : 21 rows, covering all 6 distinct texts
+      stratum B, CITIZENS control      : 20 rows
+      total                            : 41 rows / 41 requests
+      cycle composition A: {2022: 14, 2026: 7}   B: {2022: 20}
+
+  Results:
+      compared                       : 41
+      disqualified by amendment      :  0
+      scored                         : 41
+      contributor_employer identical : 41 / 41
+      contributor_name identical     : 41 / 41
+      tokens equal on employer       : 41 / 41
+      truncation / substitution /
+        encoding / whitespace / case :  0 of each
+
+      VERDICT CHANGES                :  0
+        stored EXCLUDES / live COUNTS (money wrongly removed) : 0   $0.00
+        stored COUNTS / live EXCLUDES                          : 0   $0.00
+
+  Amendment guard was NOT vacuous: live file_number populated 41/41 and equal to
+  the stored file_num in every case; live load_date populated 41/41 with a maximum
+  of 2026-08-25, before the 2026-09-10 cutoff; amendment_indicator A=40, N=1.
+
+  Decisive observation: the commission's own record holds 'CITIB', 'CITIBA',
+  'CITIBAN' and 'CITIGROU' verbatim. Example, sub_id 4012620221391578788,
+  file_number 1552533, contributor SUTCH, JEREMY: stored employer 'CITIB',
+  commission employer 'CITIB'. These are filer-entered abbreviations, not
+  collector damage.
+
+8. CONFIDENCE AND ITS LIMITS
+-----------------------------
+  The operative bound is the CENSUS bound in section 5: at most 112 rows and
+  $4,823.06 could be moved by truncation, exactly, across all 29,816 rows.
+
+  The live sample was deliberately TARGETED at the truncation-consistent classes
+  plus a control. It is therefore NOT a random sample of the population, and a
+  rule-of-three extrapolation from it to all 29,816 rows is NOT valid. For the
+  record, 0 faults in 41 trials gives a 95% upper bound of 3/41 = 7.32% within the
+  sampled strata only; applying that to the whole population would imply
+  <= 2,182 rows / <= $2,380,878.18, and that figure is REPORTED ONLY TO BE
+  REJECTED as a category error. The census bound is smaller and exact, and it is
+  the one that governs.
+
+  What remains unproven: substitution or encoding damage that replaces one
+  coherent organisation name with a different coherent organisation name would not
+  be caught by the prefix test, and the 20 control rows test it only in the
+  dominant CITIZENS class. No such fault was observed.
+
+9. SEPARATE STRATUM, NOT POOLED
+--------------------------------
+  Five Banking rows were independently measured through credit-unions archives by
+  the census lane: all five CITIZENS/CITI class, all byte-identical with equal
+  tokens. Those five are recorded separately and are NOT pooled with the 41 rows
+  fetched here. Archive evidence licenses only that the collector did not damage
+  that text between response and storage, on a code path that is not Banking's.
+
+10. VERDICT
+------------
+  The exclusion of 29,816 Banking rows worth $32,538,668.49 under
+  attribution_contradicted_by_text is NOT an artefact of damaged stored text.
+  Truncation could account for at most $4,823.06 by exact census, and live
+  verification of all six truncation-consistent classes found zero faults and
+  zero verdict changes. The exclusions rest on text naming real, different
+  organisations, mis-attributed upstream by a "CITI" prefix match.
