@@ -1,0 +1,7 @@
+Baseline four-file suite BEFORE any edit (HEAD f0ec60b74, xref files clean per `git status --porcelain`).
+Command, from C:\Users\pgoff\Mentat\mentat:
+  python -m pytest tests/test_cross_reference_engine.py tests/test_cross_reference_runner.py tests/test_cross_reference_digest.py tests/test_cross_reference_data.py -q
+Tail as observed in the session (captured from the console before receipt files were set up; not re-run afterwards because the tree was already patched):
+............................................................ [ 55%]
+................................................          [100%]
+108 passed, 27 subtests passed in 54.05s

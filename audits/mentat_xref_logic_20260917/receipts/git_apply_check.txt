@@ -1,0 +1,38 @@
+git apply --check of audits/mentat_xref_logic_20260917/patches/xref_contradiction_text.patch
+cwd C:\Users\pgoff\Mentat   branch codex/mentat-crypto   HEAD 487589584c33fcc575c52240c9c468ab1f907623
+patch 32211 bytes, LF line endings, ASCII only
+
+The patch was cut with `git diff -- <the three files> > <patch>` from the working tree,
+so the working tree ALREADY contains the change. A plain `git apply --check` therefore
+fails by construction (it tries to apply the change a second time). The two checks that
+prove the patch is good are recorded below it:
+  --cached  : the patch applies cleanly to the index, which equals HEAD -> it applies to a clean tree.
+  --reverse : the patch reverses cleanly out of the working tree -> it is an exact,
+              complete description of the uncommitted change, with nothing missing.
+
+$ git apply --check audits/mentat_xref_logic_20260917/patches/xref_contradiction_text.patch
+error: patch failed: mentat/tests/test_cross_reference_engine.py:214
+error: mentat/tests/test_cross_reference_engine.py: patch does not apply
+error: patch failed: mentat/tools/cross_reference_engine.py:22
+error: mentat/tools/cross_reference_engine.py: patch does not apply
+error: patch failed: mentat/tools/run_cross_reference.py:357
+error: mentat/tools/run_cross_reference.py: patch does not apply
+exit 1
+
+$ git apply --check --cached audits/mentat_xref_logic_20260917/patches/xref_contradiction_text.patch
+(no output)
+exit 0
+
+$ git apply --check --reverse audits/mentat_xref_logic_20260917/patches/xref_contradiction_text.patch
+(no output)
+exit 0
+
+Verdict: the patch is faithful and complete (--cached and --reverse both exit 0).
+Paul: the three files are ALREADY modified in the working tree, so do NOT `git apply` the
+patch on top of them -- it will fail as case 1 above. Commit the working tree by explicit
+paths instead:
+  git add -- mentat/tools/cross_reference_engine.py mentat/tools/run_cross_reference.py mentat/tests/test_cross_reference_engine.py
+  git commit
+The patch is the record of what those three files contain; to apply it to a clean checkout,
+`git checkout -- <the three paths>` first, or use `git apply --index <patch>` on a tree where
+they match HEAD.

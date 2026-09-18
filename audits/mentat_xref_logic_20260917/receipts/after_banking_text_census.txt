@@ -1,0 +1,221 @@
+decisions in scope: 36082
+
+== attribution_contradicted_by_text per company ==
+  Citibank                                                                                                       rows= 26024 gross=  $29,261,620.88
+  Bank of America NA                                                                                             rows=  1519 gross=   $3,032,100.00
+  US Bank NA                                                                                                     rows=   336 gross=     $169,958.52
+  PNC Bank NA                                                                                                    rows=  1925 gross=      $54,845.09
+  JP Morgan Chase Bank NA                                                                                        rows=    11 gross=      $20,143.82
+  Morgan Stanley Bank                                                                                            rows=     1 gross=           $0.18
+  TOTAL rows=29816 gross=$32,538,668.49
+
+== attribution_contradicted_by_text: top texts ==
+  ('Citibank', 'PAC', 'STATE GOVERNMENT CITIZENS CAMPAIGN')                                                      rows=    97 gross=   $4,202,000.00
+  ('Citibank', 'PAC', 'END CITIZENS UNITED')                                                                     rows=  1265 gross=   $4,123,980.34
+  ('Citibank', 'PAC', 'CITIZENS ALLIANCE POLITICAL ACTION COMMITTEE INC')                                        rows=    23 gross=   $2,310,500.00
+  ('Citibank', 'CCM', 'CITIZENS TO ELECT RICK LARSEN')                                                           rows=   128 gross=   $1,854,345.00
+  ('Bank of America NA', 'PAC', 'INDEPENDENT COMMUNITY BANKERS OF AMERICA POLITICAL ACTION COMMITTEE')           rows=   713 gross=   $1,291,500.00
+  ('Bank of America NA', 'PAC', 'INDEPENDENT COMMUNITY BANKERS OF AMERICA PAC')                                  rows=   421 gross=   $1,014,500.00
+  ('Citibank', 'COM', 'CITIZENS ALLIANCE OF AMERICA 501C4')                                                      rows=     7 gross=     $995,000.00
+  ('Citibank', 'PAC', 'CITIZENS UNITED POLITICAL VICTORY FUND')                                                  rows=   305 gross=     $833,300.00
+  ('Citibank', 'PAC', 'TARGET CORPORATION CITIZENS POLITICAL FORUM TARGETCITIZENS POLITICAL FORUM')              rows=   329 gross=     $763,500.00
+  ('Citibank', 'IND', 'CITIZENS 1ST BANK')                                                                       rows=    85 gross=     $723,235.00
+  ('Citibank', 'COM', 'CITIZENS ALLIANCE FOR FLORIDA S ECONOMY')                                                 rows=     3 gross=     $640,000.00
+  ('Citibank', 'PAC', 'END CITIZENS UNITED PAC')                                                                 rows=    97 gross=     $636,060.00
+  ('Citibank', 'IND', 'CITIZENS ADVICE BUREAU')                                                                  rows=     2 gross=     $550,000.00
+  ('Citibank', 'IND', 'CITIZENS FIRST BANK')                                                                     rows=   160 gross=     $499,129.50
+  ('Citibank', 'CCM', 'CITIZENS FOR WATERS')                                                                     rows=     9 gross=     $412,000.00
+  ('Citibank', 'PAC', 'MARYLAND ASSOCIATION FOR CONCERNED CITIZENS POLITICAL ACTION COMMITTEE')                  rows=   137 gross=     $397,750.00
+  ('Citibank', 'IND', 'CITIZENS BANK')                                                                           rows=  4535 gross=     $382,262.86
+  ('Citibank', 'PAC', 'PEPSICO INC CONCERNED CITIZENS FUND')                                                     rows=   170 gross=     $380,898.53
+  ('Citibank', 'ORG', 'CITIZENS BANK')                                                                           rows=   341 gross=     $348,366.50
+  ('Citibank', 'ORG', 'NORTH CAROLINA CITIZENS FOR PROTECTING OUR SCHOOLS')                                      rows=     1 gross=     $250,000.00
+  ('Citibank', 'PAC', 'CITIZENS FINANCIAL GROUP INC POLITICAL ACTION COMMITTEE CITIZENS PAC')                    rows=   104 gross=     $243,500.00
+  ('Citibank', 'PAC', 'CITIZENS ORGANIZED POLITICAL ACTION COMMITTEE')                                           rows=    65 gross=     $233,500.00
+  ('Bank of America NA', 'PAC', 'INDEPENDENT COMMUNITY BANKERS OF AMERICA POLITICAL ACTION CO')                  rows=   152 gross=     $232,500.00
+  ('Citibank', 'PAC', 'TARGET CITIZENS POLITICAL FORUM')                                                         rows=    93 gross=     $208,000.00
+  ('Citibank', 'IND', 'CITIZENS BUSINESS BANK')                                                                  rows=  7282 gross=     $203,225.05
+  ('Citibank', 'PAC', 'CITIZENS FINANCIAL GROUP INC PAC')                                                        rows=    90 gross=     $201,000.00
+  ('Citibank', 'PAC', 'CNA FINANCIAL CORPORATION CITIZENS FOR GOOD GOVERNMENT')                                  rows=    71 gross=     $194,000.00
+  ('Citibank', 'PAC', 'TARGET CORPORATION CITIZENS POLITICAL FORUM TARGETCITIZENS')                              rows=    76 gross=     $184,000.00
+  ('Citibank', 'CCM', 'CITIZENS FOR JOHN RUTHERFORD')                                                            rows=    17 gross=     $183,000.00
+  ('Citibank', 'PAC', 'CITIZENS FOR PROSPERITY IN AMERICA TODAY PAC')                                            rows=    33 gross=     $181,000.00
+  ('Citibank', 'CCM', 'CITIZENS FOR JOE KENNEDY 1988')                                                           rows=    33 gross=     $177,429.40
+  ('Citibank', 'PAC', 'TARGET CORPORATION CITIZENS POLITICAL FORUM')                                             rows=    61 gross=     $176,500.00
+  ('Citibank', 'ORG', 'CITIZENS INVESTMENT SERVICES')                                                            rows=     3 gross=     $155,182.10
+  ('Citibank', 'PAC', 'END CITIZENS UNITED FEDERAL PAC')                                                         rows=     2 gross=     $150,000.00
+  ('Citibank', 'CCM', 'CITIZENS FOR TURNER')                                                                     rows=    64 gross=     $147,046.81
+  ('Citibank', 'COM', 'CITIZENS FOR JUSTICE')                                                                    rows=     1 gross=     $130,000.00
+  ('Citibank', 'CCM', 'CITIZENS FOR DAVID STUCKENBERG')                                                          rows=     5 gross=     $125,000.00
+  ('Citibank', 'PAC', 'FREEPORT MCMORAN INC CITIZENSHIP COMMITTEE')                                              rows=    40 gross=     $122,500.00
+  ('Citibank', 'ORG', 'CITIZENS FOR RESPONSIBLE ENERGY SOLUTIONS INC')                                           rows=     7 gross=     $119,246.33
+  ('Citibank', 'PAC', 'TARGET CORP CITIZENS POLITICAL FORUM')                                                    rows=    60 gross=     $118,500.00
+  ('Citibank', 'PAC', 'NUTRIEN AG SOLUTIONS EMPLOYEE CITIZENSHIP FUND PAC')                                      rows=    46 gross=     $108,000.00
+  ('Citibank', 'COM', 'STATE GOVERNMENT CITIZENS CAMPAIGN')                                                      rows=     3 gross=     $105,000.00
+  ('Citibank', 'ORG', 'CITIZEN IMPACT')                                                                          rows=     1 gross=     $100,000.00
+  ('Citibank', 'PAC', 'END CITIZENS UNITED PRIORITY 2024 UNITEMIZED')                                            rows=    16 gross=      $95,830.78
+  ('Citibank', 'PAC', 'END CITIZENS UNITED PRIORITY 2024')                                                       rows=    16 gross=      $95,193.49
+  ('Citibank', 'COM', 'CITIZENS ALLIANCE POLITICAL ACTION COMMITTEE INC')                                        rows=     3 gross=      $93,000.00
+  ('Citibank', 'PAC', 'CITIZENS ORGANIZED PAC')                                                                  rows=    22 gross=      $92,500.00
+  ('Citibank', 'CCM', 'CITIZENS FOR BOYLE')                                                                      rows=     9 gross=      $92,001.25
+  ('Citibank', 'PAC', 'NUTRIEN AG SOLUTIONS EMPLOYEE CITIZENSHIP FUND POLITICAL ACT')                            rows=    26 gross=      $87,500.00
+  ('Citibank', 'PAC', 'PUBLIC SERVICE COMPANY OF NEW MEXICO RESPONSIBLE CITIZENS GROUP FEDERAL')                 rows=    20 gross=      $82,500.00
+  ('Citibank', 'COM', 'WV CITIZEN ACTION GROUP')                                                                 rows=     2 gross=      $80,000.00
+  ('Citibank', 'ORG', 'CITIZENS AGAINST LAWSUIT ABUSE ACTION')                                                   rows=     3 gross=      $76,000.00
+  ('Citibank', 'COM', 'CITIZENS FOR DAVID STUCKENBERG')                                                          rows=     2 gross=      $75,000.00
+  ('Citibank', 'COM', 'CITIZENS AGAINST AIPAC CORRUPTION')                                                       rows=    23 gross=      $72,806.30
+  ('Bank of America NA', 'PAC', 'INDEPENDENT COMMUNITY BANKERS OF AMERICA POLITICAL ACTION COMMITTEE ICBA PAC')  rows=    32 gross=      $70,500.00
+  ('Citibank', 'PAC', 'NUTRIEN AG SOLUTIONS EMPLOYEE CITIZENSHIP FUND PAC NUTRIEN CITIZENSHIP FUND PAC')         rows=    46 gross=      $69,000.00
+  ('Citibank', 'ORG', 'AMERICANS FOR CITIZEN VOTING LLC')                                                        rows=     2 gross=      $67,000.00
+  ('Citibank', 'PAC', 'MARYLAND ASSOCIATION FOR CONCERNED CITIZENS PAC')                                         rows=    19 gross=      $66,750.00
+  ('Citibank', 'PAC', 'CALIFORNIA TEACHERS ASSOCIATION ASSOCIATION FOR BETTER CITIZENSHIP SMALL CONTRIBUTOR COMMI') rows=     2 gross=      $64,800.00
+  ('US Bank NA', 'PAC', 'TD BANK US HOLDING COMPANY POLITICAL ACTION COMMITTEE TD BANK PAC')                     rows=    26 gross=      $63,000.00
+  TOTAL rows=29816 gross=$32,538,668.49
+
+== company_named_unverified per company ==
+  Wells Fargo Bank NA                                                                                            rows=  2340 gross=   $1,575,766.94
+  PNC Bank NA                                                                                                    rows=   534 gross=   $1,217,384.94
+  JP Morgan Chase Bank NA                                                                                        rows=   462 gross=     $777,876.16
+  Capital One Bank NA                                                                                            rows=   385 gross=     $379,250.97
+  Goldman Sachs Bank NA                                                                                          rows=    92 gross=     $302,181.70
+  Bank of America NA                                                                                             rows=  1285 gross=     $235,021.13
+  Citibank                                                                                                       rows=   516 gross=     $229,545.56
+  Truist Bank                                                                                                    rows=   262 gross=     $212,497.68
+  Morgan Stanley Bank                                                                                            rows=   221 gross=     $126,106.75
+  US Bank NA                                                                                                     rows=   152 gross=      $87,477.62
+  TOTAL rows=6249 gross=$5,143,109.45
+
+== company_named_unverified: top texts ==
+  ('PNC Bank NA', 'ORG', 'PNC ADVISORS')                                                                         rows=    36 gross=     $648,198.75
+  ('Wells Fargo Bank NA', 'ORG', 'WELLS FARGO PAC ACCOUNT')                                                      rows=    52 gross=     $621,580.67
+  ('Wells Fargo Bank NA', 'ORG', 'WELLS FARGO BANK')                                                             rows=   170 gross=     $478,368.88
+  ('JP Morgan Chase Bank NA', 'ORG', 'JP MORGAN CHASE')                                                          rows=    97 gross=     $310,994.69
+  ('JP Morgan Chase Bank NA', 'ORG', 'JP MORGAN CHASE NA')                                                       rows=    64 gross=     $197,361.95
+  ('PNC Bank NA', 'PAC', 'PNC PAC BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF T')                           rows=     4 gross=     $110,000.00
+  ('Goldman Sachs Bank NA', 'IND', 'GOLDMAN SACHS AND CO')                                                       rows=     7 gross=     $107,900.00
+  ('Goldman Sachs Bank NA', 'ORG', 'GOLDMAN SACHS PHILANTHROPY FUND')                                            rows=     2 gross=     $100,000.00
+  ('Wells Fargo Bank NA', 'PAC', 'WELLS FARGO AND CO EMPLOYEE PAC')                                              rows=     8 gross=      $81,000.00
+  ('Morgan Stanley Bank', 'IND', 'MORGAN STANLEY PRIVATE WEALTH MANAGEME')                                       rows=    49 gross=      $73,838.44
+  ('Wells Fargo Bank NA', 'ORG', 'WELLS FARGO FINANCIAL ADVISORS')                                               rows=    13 gross=      $69,702.45
+  ('Wells Fargo Bank NA', 'IND', 'WELLS FARGO BANK RETIRED')                                                     rows=  1105 gross=      $68,710.00
+  ('PNC Bank NA', 'ORG', 'PNC BANK')                                                                             rows=    52 gross=      $64,130.88
+  ('PNC Bank NA', 'PAC', 'PNC PAC BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL')           rows=     2 gross=      $60,000.00
+  ('Citibank', 'PAC', 'CITIGROUP INC PAC STATE CITI PAC STATE')                                                  rows=    17 gross=      $58,900.00
+  ('PNC Bank NA', 'PAC', 'PNC FINANCIAL SERVICES GROUP PAC')                                                     rows=     2 gross=      $55,000.00
+  ('Citibank', 'ORG', 'CITIBANK N A')                                                                            rows=    26 gross=      $53,998.66
+  ('Capital One Bank NA', 'PAC', 'CAPITAL ONE FINANCIAL CORPORATION')                                            rows=    15 gross=      $48,500.00
+  ('JP Morgan Chase Bank NA', 'PAC', 'J P MORGAN CHASE COMPANY PAC')                                             rows=     3 gross=      $45,000.00
+  ('Capital One Bank NA', 'PAC', 'CAPITAL ONE ASSOCIATION POLITICAL FUND PAC')                                   rows=     3 gross=      $45,000.00
+  ('Bank of America NA', 'IND', 'MERRILL LYNCH WEALTH MANAGEMENT')                                               rows=    45 gross=      $40,869.23
+  ('Citibank', 'ORG', 'CITIBANK F S B')                                                                          rows=    97 gross=      $40,735.90
+  ('JP Morgan Chase Bank NA', 'ORG', 'JP MORGAN CHASE BANK')                                                     rows=    12 gross=      $38,848.03
+  ('JP Morgan Chase Bank NA', 'IND', 'JP MORGAN ASSET MANAGEMENT')                                               rows=    32 gross=      $32,743.31
+  ('Truist Bank', 'COM', 'TRUIST FINANCIAL CORP FEDERAL STATE LOCAL PAC')                                        rows=     1 gross=      $31,331.06
+  ('JP Morgan Chase Bank NA', 'PAC', 'JP MORGAN CHASE FEDERAL PAC')                                              rows=     3 gross=      $31,000.00
+  ('Capital One Bank NA', 'ORG', 'CAPITAL ONE BANK')                                                             rows=   124 gross=      $29,602.93
+  ('Wells Fargo Bank NA', 'COM', 'WELLS FARGO AND COMPANY EMPLOYEES GOOD GOVERNMENT FEDERAL FUND')               rows=    10 gross=      $29,000.00
+  ('JP Morgan Chase Bank NA', 'IND', 'JP MORGAN PRIVATE BANK')                                                   rows=    33 gross=      $25,811.05
+  ('Capital One Bank NA', 'IND', 'CAPITAL ONE HEALTHCARE REAL ESTATE')                                           rows=    11 gross=      $25,100.00
+  ('JP Morgan Chase Bank NA', 'PAC', 'J P MORGAN CHASE CO PAC')                                                  rows=     5 gross=      $25,000.00
+  ('PNC Bank NA', 'PAC', 'BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP INC PNC PA') rows=     5 gross=      $25,000.00
+  ('Bank of America NA', 'PAC', 'BANK OF AMERICA STATE AND FEDERAL PAC')                                         rows=     5 gross=      $24,000.00
+  ('US Bank NA', 'PAC', 'US BANK CORP PAC')                                                                      rows=     5 gross=      $20,000.00
+  ('Capital One Bank NA', 'PAC', 'CAPITAL ONE FINANCIAL CORP ASSOC POLTICAL FUND')                               rows=     4 gross=      $20,000.00
+  ('Goldman Sachs Bank NA', 'PAC', 'GOLDMAN SACHS GROUP INC POLITICAL ACTION COMMITTEE THE')                     rows=     8 gross=      $19,500.00
+  ('Capital One Bank NA', 'PAC', 'CAPITAL ONE FINANCIAL CORP ASSOCIATE PAC')                                     rows=     5 gross=      $17,500.00
+  ('Truist Bank', 'PAC', 'TRUIST FINANCIAL CORPORATION FEDERAL STATE LOCAL POLITICAL ACTION COMMITTEE')          rows=     4 gross=      $17,500.00
+  ('Capital One Bank NA', 'PAC', 'CAPITAL ONE FINANCIAL CORPORATION ASSOC POLITICAL FUND')                       rows=     4 gross=      $17,000.00
+  ('Goldman Sachs Bank NA', 'IND', 'GOLDMAN SACHS WILLKIE FARR')                                                 rows=     3 gross=      $16,925.20
+  TOTAL rows=6249 gross=$5,143,109.45
+
+== company_attribution_unverified (blank / no-employer or recipient-rescued): top texts ==
+  ('Citibank', 'IND', 'CITICORP NORTH AMERICA INC')                                                              rows=    17 gross=         $653.82
+  TOTAL rows=17 gross=$653.82
+
+== attribution_status x text verdict ==
+  ('unverified', '-')                                                                                            rows= 29816 gross=  $32,538,668.49
+  ('unverified', 'named')                                                                                        rows=  5587 gross=   $4,929,137.45
+  ('role_supported', 'named')                                                                                    rows=   514 gross=     $192,016.13
+  ('recipient_supported', 'named')                                                                               rows=   148 gross=      $21,955.87
+  ('recipient_supported', 'unverified')                                                                          rows=    17 gross=         $653.82
+  TOTAL rows=36082 gross=$37,682,431.76
+
+== D4 register gap: entity rows naming the company (own PACs/treasury as donors) ==
+  ('PNC Bank NA', 'ORG', 'PNC ADVISORS', 'no C-id', 'organization_unverified')                                   rows=    36 gross=     $648,198.75
+  ('Wells Fargo Bank NA', 'ORG', 'WELLS FARGO PAC ACCOUNT', 'no C-id', 'organization_unverified')                rows=    52 gross=     $621,580.67
+  ('Wells Fargo Bank NA', 'ORG', 'WELLS FARGO BANK', 'no C-id', 'organization_unverified')                       rows=   170 gross=     $478,368.88
+  ('JP Morgan Chase Bank NA', 'ORG', 'JP MORGAN CHASE', 'no C-id', 'organization_unverified')                    rows=    97 gross=     $310,994.69
+  ('JP Morgan Chase Bank NA', 'ORG', 'JP MORGAN CHASE NA', 'no C-id', 'organization_unverified')                 rows=    64 gross=     $197,361.95
+  ('PNC Bank NA', 'PAC', 'PNC PAC BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF T', 'no C-id', 'funding_unverified') rows=     4 gross=     $110,000.00
+  ('Goldman Sachs Bank NA', 'ORG', 'GOLDMAN SACHS PHILANTHROPY FUND', 'no C-id', 'organization_unverified')      rows=     2 gross=     $100,000.00
+  ('Wells Fargo Bank NA', 'PAC', 'WELLS FARGO AND CO EMPLOYEE PAC', 'no C-id', 'funding_unverified')             rows=     8 gross=      $81,000.00
+  ('Wells Fargo Bank NA', 'ORG', 'WELLS FARGO FINANCIAL ADVISORS', 'no C-id', 'organization_unverified')         rows=    13 gross=      $69,702.45
+  ('PNC Bank NA', 'ORG', 'PNC BANK', 'no C-id', 'organization_unverified')                                       rows=    52 gross=      $64,130.88
+  ('PNC Bank NA', 'PAC', 'PNC PAC BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL', 'no C-id', 'funding_unverified') rows=     2 gross=      $60,000.00
+  ('Citibank', 'PAC', 'CITIGROUP INC PAC STATE CITI PAC STATE', 'no C-id', 'funding_unverified')                 rows=    17 gross=      $58,900.00
+  ('PNC Bank NA', 'PAC', 'PNC FINANCIAL SERVICES GROUP PAC', 'no C-id', 'funding_unverified')                    rows=     2 gross=      $55,000.00
+  ('Citibank', 'ORG', 'CITIBANK N A', 'no C-id', 'organization_unverified')                                      rows=    26 gross=      $53,998.66
+  ('Capital One Bank NA', 'PAC', 'CAPITAL ONE FINANCIAL CORPORATION', 'no C-id', 'funding_unverified')           rows=    15 gross=      $48,500.00
+  ('JP Morgan Chase Bank NA', 'PAC', 'J P MORGAN CHASE COMPANY PAC', 'no C-id', 'funding_unverified')            rows=     3 gross=      $45,000.00
+  ('Capital One Bank NA', 'PAC', 'CAPITAL ONE ASSOCIATION POLITICAL FUND PAC', 'no C-id', 'funding_unverified')  rows=     3 gross=      $45,000.00
+  ('Citibank', 'ORG', 'CITIBANK F S B', 'no C-id', 'organization_unverified')                                    rows=    97 gross=      $40,735.90
+  ('JP Morgan Chase Bank NA', 'ORG', 'JP MORGAN CHASE BANK', 'no C-id', 'organization_unverified')               rows=    12 gross=      $38,848.03
+  ('Truist Bank', 'COM', 'TRUIST FINANCIAL CORP FEDERAL STATE LOCAL PAC', 'no C-id', 'funding_unverified')       rows=     1 gross=      $31,331.06
+  ('JP Morgan Chase Bank NA', 'PAC', 'JP MORGAN CHASE FEDERAL PAC', 'no C-id', 'funding_unverified')             rows=     3 gross=      $31,000.00
+  ('Capital One Bank NA', 'ORG', 'CAPITAL ONE BANK', 'no C-id', 'organization_unverified')                       rows=   124 gross=      $29,602.93
+  ('Wells Fargo Bank NA', 'COM', 'WELLS FARGO AND COMPANY EMPLOYEES GOOD GOVERNMENT FEDERAL FUND', 'no C-id', 'funding_unverified') rows=    10 gross=      $29,000.00
+  ('JP Morgan Chase Bank NA', 'PAC', 'J P MORGAN CHASE CO PAC', 'no C-id', 'funding_unverified')                 rows=     5 gross=      $25,000.00
+  ('PNC Bank NA', 'PAC', 'BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP INC PNC PA', 'no C-id', 'funding_unverified') rows=     5 gross=      $25,000.00
+  ('Bank of America NA', 'PAC', 'BANK OF AMERICA STATE AND FEDERAL PAC', 'no C-id', 'funding_unverified')        rows=     5 gross=      $24,000.00
+  ('US Bank NA', 'PAC', 'US BANK CORP PAC', 'no C-id', 'funding_unverified')                                     rows=     5 gross=      $20,000.00
+  ('Capital One Bank NA', 'PAC', 'CAPITAL ONE FINANCIAL CORP ASSOC POLTICAL FUND', 'no C-id', 'funding_unverified') rows=     4 gross=      $20,000.00
+  ('Goldman Sachs Bank NA', 'PAC', 'GOLDMAN SACHS GROUP INC POLITICAL ACTION COMMITTEE THE', 'no C-id', 'funding_unverified') rows=     8 gross=      $19,500.00
+  ('Capital One Bank NA', 'PAC', 'CAPITAL ONE FINANCIAL CORP ASSOCIATE PAC', 'no C-id', 'funding_unverified')    rows=     5 gross=      $17,500.00
+  ('Truist Bank', 'PAC', 'TRUIST FINANCIAL CORPORATION FEDERAL STATE LOCAL POLITICAL ACTION COMMITTEE', 'no C-id', 'funding_unverified') rows=     4 gross=      $17,500.00
+  ('Capital One Bank NA', 'PAC', 'CAPITAL ONE FINANCIAL CORPORATION ASSOC POLITICAL FUND', 'no C-id', 'funding_unverified') rows=     4 gross=      $17,000.00
+  ('Truist Bank', 'ORG', 'BB T TRUIST', 'no C-id', 'organization_unverified')                                    rows=    14 gross=      $15,724.89
+  ('Wells Fargo Bank NA', '', 'WELLS FARGO CO EMPLOYEE PAC', 'no C-id', 'funding_unverified')                    rows=     3 gross=      $15,000.00
+  ('PNC Bank NA', 'PAC', 'PNC PAC FED', 'no C-id', 'funding_unverified')                                         rows=     3 gross=      $15,000.00
+  ('PNC Bank NA', 'PAC', 'PNC FEDERAL PAC', 'no C-id', 'funding_unverified')                                     rows=     4 gross=      $15,000.00
+  ('Bank of America NA', 'PAC', 'BANK OF AMERICA CORP PAC', 'no C-id', 'funding_unverified')                     rows=     4 gross=      $15,000.00
+  ('PNC Bank NA', 'PAC', 'FED THE PNC FINANCIAL SERVICES GROUP INC PAC PNC PAC FEDERAL', 'no C-id', 'funding_unverified') rows=     4 gross=      $15,000.00
+  ('PNC Bank NA', 'PAC', 'PNC PAC FEDERAL BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMIT', 'no C-id', 'funding_unverified') rows=     3 gross=      $15,000.00
+  ('PNC Bank NA', 'PAC', 'BIPARTISAN PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP INC PNC PAC', 'no C-id', 'funding_unverified') rows=     3 gross=      $15,000.00
+  TOTAL rows=1298 gross=$4,324,780.39
+
+== D4 register gap: recipient committees resolved through the committee master only ==
+  ('Citibank', 'C00039305', 'CITIGROUP INC PAC STATE CITI PAC STATE')                                            rows=     2 gross=       $1,000.00
+  TOTAL rows=2 gross=$1,000.00
+
+== role route: top employer/occupation pairs ==
+  ('Morgan Stanley Bank', 'MORGAN STANLEY PRIVATE WEALTH MANAGEME', 'FINANCIAL ADVISOR')                         rows=    42 gross=      $56,900.00
+  ('Bank of America NA', 'MERRILL LYNCH WEALTH MANAGEMENT', 'FINANCIAL ADVISOR')                                 rows=    20 gross=      $21,851.47
+  ('Bank of America NA', 'BANK OF AMERICA MERILL LYNCH', 'SR FINANCIAL CONSULTANT')                              rows=    12 gross=      $10,200.00
+  ('Bank of America NA', 'BANK OF AMERICA AND MERRILL LYNCH', 'WEALTH MANAGEMENT ADVISOR')                       rows=     4 gross=       $7,500.00
+  ('Bank of America NA', 'MERRILL LYNCH WEALTH MANAGER', 'FINANCIAL ADVISOR')                                    rows=     6 gross=       $6,910.00
+  ('Bank of America NA', 'MERRILL LYNCH WEALTH MANAGEMENT', 'SENIOR FINANCIAL ADVISOR SENIOR VICE')              rows=     2 gross=       $6,600.00
+  ('Bank of America NA', 'MERRILL LYNCH WEALTH MANAGEMENT', 'WEALTH MANAGEMENT ADVISOR')                         rows=     4 gross=       $5,650.00
+  ('Truist Bank', 'TRUIST INVESTMENTS LLC', 'FINANCIAL ADVISOR')                                                 rows=     1 gross=       $5,000.00
+  ('Wells Fargo Bank NA', 'WELLS FARGO CONTRACTOR', 'BUSINESS EXECUTION ASSOCIATE')                              rows=     5 gross=       $4,140.24
+  ('Morgan Stanley Bank', 'MORGAN STANLEY BARNEY', 'FINANCIAL ADVISOR')                                          rows=     4 gross=       $4,000.00
+  ('Wells Fargo Bank NA', 'WELLS FARGO ADVISORS LFC', 'WEALTH MANAGEMENT')                                       rows=     2 gross=       $3,958.96
+  ('PNC Bank NA', 'PNC MEZZANINE CAPITAL', 'ADVISORY PARTNER')                                                   rows=     3 gross=       $3,650.00
+  ('Morgan Stanley Bank', 'MORGAN STANLEY INVESTMENT', 'FINANCIAL ADVISOR')                                      rows=     2 gross=       $3,190.22
+  ('Morgan Stanley Bank', 'MORGAN STANLEY PRIVATE WEALTH MANAGEME', 'PRIVATE WEALTH ADVISOR')                    rows=     2 gross=       $3,000.00
+  ('Wells Fargo Bank NA', 'WELLS FARGO INVESTMENTS', 'FINANCIAL ADVISOR')                                        rows=     1 gross=       $2,900.00
+  ('PNC Bank NA', 'PNC CAPITAL ADVISORS', 'INV MGR')                                                             rows=     8 gross=       $2,850.00
+  ('Bank of America NA', 'BANK OF AMERICA MERRIL LYNCH', 'SENIOR FINANCIAL ADVISOR')                             rows=    21 gross=       $2,100.00
+  ('Wells Fargo Bank NA', 'WELLS FARGO FINANCIAL NETWORK', 'FINANCIAL ADVISOR')                                  rows=     4 gross=       $2,100.00
+  ('Bank of America NA', 'MERRILL LYNCH PRIVATE WEALTH', 'SR CONSULTANT')                                        rows=     3 gross=       $2,100.00
+  ('Wells Fargo Bank NA', 'WELLS FARGO ADVIISORS', 'FINANCIAL ADVISOR')                                          rows=     3 gross=       $2,010.00
+  ('Wells Fargo Bank NA', 'WELLS FARGO WEALTH MANAGEMENT', 'WEALTH ADVISOR MANAGING DIRECTOR')                   rows=     2 gross=       $2,000.00
+  ('Bank of America NA', 'MERRILL LYNCH WEALTH MANAGEMENT', 'SENIOR FINANCIAL ADVISOR')                          rows=     2 gross=       $1,500.00
+  ('Morgan Stanley Bank', 'MORGAN STANLEY SMITH', 'FINANCIAL ADVISOR')                                           rows=     1 gross=       $1,500.00
+  ('Bank of America NA', 'BANK OF AMERICA RETIRED', 'VP IT INTERNAL CONSULTANT')                                 rows=   116 gross=       $1,444.00
+  ('JP Morgan Chase Bank NA', 'JP MORGAN PRIVATE BANK', 'WEALTH ADVISOR')                                        rows=     5 gross=       $1,250.00
+  ('Wells Fargo Bank NA', 'WELLS FARGO INVESTMENTS', 'INVESTMENT CONSULTANT')                                    rows=    12 gross=       $1,155.00
+  ('Bank of America NA', 'MERRILL LYNCH SUBSIDIARY OF BANK OF A', 'FINANCIAL ADVISOR')                           rows=     1 gross=       $1,000.00
+  ('Morgan Stanley Bank', 'MORGAN STANLEY S', 'FINANCIAL CONSULTANT')                                            rows=     1 gross=       $1,000.00
+  ('Morgan Stanley Bank', 'MORGAN STANLEYS', 'FINANCIAL CONSULTANT')                                             rows=     1 gross=       $1,000.00
+  ('Goldman Sachs Bank NA', 'GOLDMAN SACHS ASSET MANAGEMENT L P', 'TRUSTEE')                                     rows=     1 gross=       $1,000.00
+  TOTAL rows=514 gross=$192,016.13

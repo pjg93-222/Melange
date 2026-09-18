@@ -1,0 +1,13 @@
+before held rows: 10302
+after decisions seen for those rows: 10302
+== verdict of the formerly held rows ==
+  contradicted                                                                               rows=  8695 gross=$   6,562,667.89 counted=$           0.00 pac=$          0.00
+  named                                                                                      rows=  1606 gross=$   1,993,000.53 counted=$   1,963,500.53 pac=$          0.00
+  other:non_giving_receipt_role:other_receipt,non_giving_resolved_without_company_attribution rows=     1 gross=$       2,900.00 counted=$           0.00 pac=$          0.00
+  TOTAL rows=10302 gross=$8,558,568.42 counted=$1,963,500.53 pac=$0.00
+== attribution_status x verdict ==
+  ('unverified', 'contradicted')                                                             rows=  8695 gross=$   6,562,667.89 counted=$           0.00 pac=$          0.00
+  ('unverified', 'named')                                                                    rows=  1602 gross=$   1,986,979.46 counted=$   1,957,479.46 pac=$          0.00
+  ('role_supported', 'named')                                                                rows=     4 gross=$       6,021.07 counted=$       6,021.07 pac=$          0.00
+  ('not_required_for_non_giving', 'other:non_giving_receipt_role:other_receipt,non_giving_resolved_without_company_attribution') rows=     1 gross=$       2,900.00 counted=$           0.00 pac=$          0.00
+  TOTAL rows=10302 gross=$8,558,568.42 counted=$1,963,500.53 pac=$0.00

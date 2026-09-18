@@ -1,0 +1,171 @@
+decisions in scope: 10301
+
+== attribution_contradicted_by_text per company ==
+  Cash App                                                                                                       rows=  1264 gross=   $6,032,540.47
+  Dave Inc.                                                                                                      rows=  2560 gross=     $183,526.16
+  SoFi                                                                                                           rows=  2857 gross=     $176,239.69
+  Chime                                                                                                          rows=  1287 gross=      $99,228.32
+  Stripe                                                                                                         rows=   723 gross=      $70,878.25
+  Plaid                                                                                                          rows=     4 gross=         $255.00
+  TOTAL rows=8695 gross=$6,562,667.89
+
+== attribution_contradicted_by_text: top texts ==
+  ('Cash App', 'ORG', 'BLOCKCHAIN COM INC')                                                                      rows=     1 gross=   $5,000,000.00
+  ('Cash App', 'ORG', 'BLOCKCHAIN GAME PARTNERS INC')                                                            rows=     1 gross=     $598,559.94
+  ('Cash App', 'ORG', 'BLOCKCHAIN INNOVATION PROJECT INC')                                                       rows=     2 gross=     $150,000.00
+  ('Cash App', 'IND', 'BLOCK COMMUNICATIONS INC')                                                                rows=   200 gross=     $125,303.68
+  ('SoFi', 'ORG', 'THE SOFITEL CHICAGO')                                                                         rows=     1 gross=      $66,425.97
+  ('Stripe', 'IND', 'STRIPES')                                                                                   rows=   163 gross=      $49,054.80
+  ('Dave Inc.', 'ORG', 'DAVE ARBOGAST GROUP INC')                                                                rows=     1 gross=      $46,000.00
+  ('Chime', 'IND', 'CHIMEDICAL MANAGEMENT GROUP')                                                                rows=    37 gross=      $35,200.00
+  ('Cash App', 'IND', 'BLOCK SECURITY INC')                                                                      rows=     4 gross=      $34,800.00
+  ('Dave Inc.', 'CCM', 'FRIENDS OF DAVE BRAT INC')                                                               rows=    11 gross=      $34,500.00
+  ('Cash App', 'IND', 'SQUARE ONE MANAGEMENT INC')                                                               rows=    10 gross=      $26,800.00
+  ('Dave Inc.', 'IND', 'DAVE THOMPSON DESIGNS INC')                                                              rows=  1274 gross=      $23,425.04
+  ('Cash App', 'IND', 'SQUARE SEVEN INC')                                                                        rows=    12 gross=      $21,424.32
+  ('Cash App', 'IND', 'BLOCK DISTRIBUTING CO INC')                                                               rows=     4 gross=      $20,000.00
+  ('Cash App', 'IND', 'SQUARE ONE MARKETS INC')                                                                  rows=    16 gross=      $19,950.00
+  ('SoFi', 'ORG', 'SOFIA L TSAKOPOULOS INVESTMENTS')                                                             rows=     3 gross=      $19,500.00
+  ('SoFi', 'IND', 'SOFIA UNIVERSITY')                                                                            rows=   166 gross=      $15,991.72
+  ('Stripe', 'ORG', 'ATLANTA NATIONAL BASEBALL CLUB LLC DBA GWINNETT STRIPERS')                                  rows=     1 gross=      $12,500.00
+  ('Dave Inc.', 'IND', 'DAVE JONES INC')                                                                         rows=     5 gross=      $11,000.00
+  ('Chime', 'ORG', 'CHIMEDICAL MANAGEMENT GROUP')                                                                rows=     1 gross=      $10,000.00
+  ('Chime', 'IND', 'CHIMERA SECURITIES')                                                                         rows=   128 gross=       $9,284.60
+  ('Cash App', 'IND', 'SQUARE EGG ENTERTAINMENT INC')                                                            rows=    13 gross=       $8,625.00
+  ('Chime', 'IND', 'CHIMERIX INC')                                                                               rows=    10 gross=       $8,450.00
+  ('SoFi', 'IND', 'SOFIA')                                                                                       rows=  1343 gross=       $7,632.53
+  ('Dave Inc.', 'IND', 'DAVE MATTHEWS BAND INC')                                                                 rows=   236 gross=       $7,160.60
+  ('SoFi', 'IND', 'SOFIA BOMBAY SELF EMPLOYED')                                                                  rows=     2 gross=       $7,000.00
+  ('SoFi', 'IND', 'SOFITEL HOTEL')                                                                               rows=   167 gross=       $6,953.13
+  ('SoFi', 'IND', 'SOFIA L TSAKOPOULOS INVESTMENTS')                                                             rows=     2 gross=       $6,600.00
+  ('Dave Inc.', 'IND', 'DAVE GRYP CONSTRUCTION INC')                                                             rows=    10 gross=       $5,200.00
+  ('Chime', 'IND', 'CHIMENTO WEBB PC')                                                                           rows=     6 gross=       $5,103.88
+  ('Dave Inc.', 'IND', 'DAVE CHRISTIAN CONST CO INC')                                                            rows=    65 gross=       $4,977.20
+  ('Chime', 'IND', 'CHIMES')                                                                                     rows=   419 gross=       $4,935.60
+  ('Cash App', 'IND', 'SQUARE INDIGO INC')                                                                       rows=    56 gross=       $4,838.09
+  ('SoFi', 'IND', 'SOFIDEL')                                                                                     rows=   112 gross=       $4,486.96
+  ('SoFi', 'IND', 'SOFIA BILLER')                                                                                rows=    12 gross=       $4,481.17
+  ('Chime', 'IND', 'CHIMES INTERNATIONAL')                                                                       rows=   139 gross=       $4,306.62
+  ('Cash App', 'IND', 'SQUARE ROOT INC')                                                                         rows=   159 gross=       $3,381.00
+  ('Dave Inc.', 'IND', 'DAVE S FRAMING INC')                                                                     rows=   105 gross=       $3,301.00
+  ('Chime', 'IND', 'CHIMERA INVESTMENT CORPORATION')                                                             rows=    15 gross=       $3,291.20
+  ('SoFi', 'IND', 'SOFIAK REPORTING SERVICES')                                                                   rows=    74 gross=       $3,250.68
+  ('Dave Inc.', 'PAC', 'FRIENDS OF DAVE BRAT INC')                                                               rows=     2 gross=       $3,000.00
+  ('SoFi', 'IND', 'SOFIA STORAGE')                                                                               rows=   118 gross=       $2,835.86
+  ('Chime', 'IND', 'CHIMERIX')                                                                                   rows=    25 gross=       $2,779.69
+  ('SoFi', 'IND', 'SOFIA KHAN')                                                                                  rows=     8 gross=       $2,519.16
+  ('Dave Inc.', 'IND', 'DAVE SCHMITT CONSTRUCTION INC')                                                          rows=     3 gross=       $2,500.00
+  ('Dave Inc.', 'IND', 'DAVE S AUTO BODY INC')                                                                   rows=     9 gross=       $2,500.00
+  ('Dave Inc.', 'IND', 'DAVE SINCLAIR BUICK GMC INC')                                                            rows=     1 gross=       $2,500.00
+  ('Stripe', 'IND', 'STRIPES LAWN CARE LLC')                                                                     rows=    54 gross=       $2,215.24
+  ('Dave Inc.', 'IND', 'DAVE SCOTT GROUP INC')                                                                   rows=   134 gross=       $2,196.62
+  ('Dave Inc.', 'IND', 'DAVE STEIN INC')                                                                         rows=    52 gross=       $2,077.00
+  ('SoFi', 'IND', 'SOFIA PHILHARMONIC')                                                                          rows=    83 gross=       $2,075.00
+  ('Dave Inc.', 'IND', 'DAVE EVANS TRANSPORTS INC')                                                              rows=    80 gross=       $2,054.53
+  ('SoFi', 'IND', 'SOFIA SANCHEZ')                                                                               rows=     3 gross=       $2,005.00
+  ('Chime', 'IND', 'CHIMERA HOSPITALITY CORP')                                                                   rows=     2 gross=       $2,000.00
+  ('SoFi', 'IND', 'SOFIA KAMAN')                                                                                 rows=     4 gross=       $2,000.00
+  ('Dave Inc.', 'IND', 'DAVE HUMPHREY ENTERPISES INC')                                                           rows=     2 gross=       $2,000.00
+  ('SoFi', 'IND', 'SOFIA CHANG')                                                                                 rows=     2 gross=       $2,000.00
+  ('Chime', 'IND', 'CHIMENTO WEBB P C')                                                                          rows=     8 gross=       $1,991.02
+  ('Stripe', 'IND', 'STRIPES INC')                                                                               rows=    10 gross=       $1,823.45
+  ('Chime', 'IND', 'CHIMERA')                                                                                    rows=    56 gross=       $1,817.48
+  TOTAL rows=8695 gross=$6,562,667.89
+
+== company_named_unverified per company ==
+  Cash App                                                                                                       rows=   473 gross=   $1,048,964.00
+  Robinhood                                                                                                      rows=   307 gross=     $464,753.99
+  Stripe                                                                                                         rows=   223 gross=     $354,033.37
+  Chime                                                                                                          rows=    88 gross=      $62,116.18
+  Plaid                                                                                                          rows=   429 gross=      $55,688.22
+  SoFi                                                                                                           rows=    85 gross=       $7,423.70
+  Klarna                                                                                                         rows=     1 gross=          $21.07
+  TOTAL rows=1606 gross=$1,993,000.53
+
+== company_named_unverified: top texts ==
+  ('Cash App', 'PAC', 'H R BLOCK INC POLITICAL ACTION COMMITTEE BLOCKPAC')                                       rows=   295 gross=     $675,004.00
+  ('Robinhood', 'PAC', 'ROBINHOOD MARKETS INC PAC')                                                              rows=   123 gross=     $385,250.00
+  ('Cash App', 'PAC', 'H R BLOCK INC PAC BLOCKPAC')                                                              rows=   133 gross=     $261,000.00
+  ('Stripe', 'PAC', 'STRIPE INC POLITICAL ACTION COMMITTEE')                                                     rows=    48 gross=     $161,200.00
+  ('Stripe', 'IND', 'STRIPE WIX')                                                                                rows=    12 gross=      $92,664.71
+  ('Stripe', 'PAC', 'STRIPE INC PAC')                                                                            rows=    16 gross=      $60,700.00
+  ('Chime', 'PAC', 'CHIME FINANCIAL INC PAC CHIME PAC')                                                          rows=    18 gross=      $40,500.00
+  ('Cash App', 'PAC', 'H R BLOCK INC PAC')                                                                       rows=    16 gross=      $37,750.00
+  ('Cash App', 'COM', 'H R BLOCK INC POLITICAL ACTION COMMITTEE BLOCKPAC')                                       rows=     8 gross=      $37,500.00
+  ('Plaid', 'IND', 'PLAID PAISLEY ENTERPRISES')                                                                  rows=    12 gross=      $33,300.00
+  ('Robinhood', 'IND', 'ROBINHOOD PRODUCTIONS INC')                                                              rows=    29 gross=      $25,415.40
+  ('Robinhood', 'IND', 'ROBINHOOD MARKETS PAC')                                                                  rows=     7 gross=      $25,000.00
+  ('Cash App', 'PAC', 'H R BLOCK INC POLITICAL ACTION COMMITTEE')                                                rows=     9 gross=      $23,000.00
+  ('Stripe', 'COM', 'STRIPE INC PAC')                                                                            rows=     5 gross=      $18,400.00
+  ('Chime', 'IND', 'CHIME TV')                                                                                   rows=     5 gross=      $17,600.00
+  ('Robinhood', 'IND', 'ROBINHOOD INTEGRATIVE HEALTH')                                                           rows=    64 gross=       $7,650.53
+  ('Stripe', 'ORG', 'STRIPE TRANSFER')                                                                           rows=    11 gross=       $6,210.61
+  ('Plaid', 'IND', 'PLAID GIRAFFE INC')                                                                          rows=     2 gross=       $5,800.00
+  ('Robinhood', 'PAC', 'ROBINHOOD MARKETS PAC')                                                                  rows=     1 gross=       $5,000.00
+  ('Stripe', 'IND', 'STRIPE INCE')                                                                               rows=     2 gross=       $5,000.00
+  ('Robinhood', 'COM', 'ROBINHOOD MARKETS INC PAC')                                                              rows=     2 gross=       $4,500.00
+  ('Plaid', 'IND', 'PLAID ENTERPRISES')                                                                          rows=    90 gross=       $4,192.44
+  ('Cash App', 'PAC', 'H R BLOCK INC POLITICAL ACTION COMMITTEE BLOCK PAC')                                      rows=     2 gross=       $4,000.00
+  ('SoFi', 'IND', 'SOCIAL FINANCE INSTITUTE')                                                                    rows=     6 gross=       $3,600.00
+  ('Plaid', 'IND', 'PLAID SHAMAN DESIGN')                                                                        rows=    34 gross=       $3,400.00
+  ('Plaid', 'IND', 'PLAID PANTRY')                                                                               rows=   137 gross=       $3,039.89
+  ('SoFi', 'IND', 'SOFI BANK')                                                                                   rows=    33 gross=       $2,835.20
+  ('Stripe', 'COM', 'STRIPE INC POLITICAL ACTION COMMITTEE')                                                     rows=     1 gross=       $2,500.00
+  ('Cash App', 'COM', 'H R BLOCK INC PAC BLOCKPAC')                                                              rows=     1 gross=       $2,500.00
+  ('Cash App', 'COM', 'H R BLOCK INC PAC BLOCK PAC')                                                             rows=     1 gross=       $2,500.00
+  ('Cash App', 'ORG', 'H R BLOCK INC POLITICAL ACTION COMMITTEE BLOCKPAC')                                       rows=     1 gross=       $2,500.00
+  ('Robinhood', 'IND', 'ROBINHOOD INTEGRATIVE')                                                                  rows=    22 gross=       $2,452.66
+  ('Plaid', 'IND', 'PLAID SKY INC')                                                                              rows=    54 gross=       $2,197.00
+  ('Robinhood', 'IND', 'ROBINHOODINTEGRATIVE')                                                                   rows=    16 gross=       $2,012.22
+  ('Robinhood', 'IND', 'ROBINHOOD SECURITES')                                                                    rows=     4 gross=       $2,000.00
+  ('Chime', 'PAC', 'CHIME FINANCIAL INC PAC')                                                                    rows=     2 gross=       $2,000.00
+  ('Cash App', 'COM', 'H R BLOCK INC POLITICAL ACTION COMMITTEE')                                                rows=     2 gross=       $2,000.00
+  ('Robinhood', 'IND', 'ROBINHOOD FUEL')                                                                         rows=     1 gross=       $1,500.00
+  ('Stripe', 'IND', 'STRIPE FORCE 1 INC')                                                                        rows=    35 gross=       $1,477.89
+  ('Stripe', 'IND', 'STRIPE SPECIALIST LLC')                                                                     rows=    40 gross=       $1,429.00
+  TOTAL rows=1606 gross=$1,993,000.53
+
+== company_attribution_unverified (blank / no-employer or recipient-rescued): top texts ==
+  TOTAL rows=0 gross=$0.00
+
+== attribution_status x text verdict ==
+  ('unverified', '-')                                                                                            rows=  8695 gross=   $6,562,667.89
+  ('unverified', 'named')                                                                                        rows=  1602 gross=   $1,986,979.46
+  ('role_supported', 'named')                                                                                    rows=     4 gross=       $6,021.07
+  TOTAL rows=10301 gross=$8,555,668.42
+
+== D4 register gap: entity rows naming the company (own PACs/treasury as donors) ==
+  ('Cash App', 'PAC', 'H R BLOCK INC POLITICAL ACTION COMMITTEE BLOCKPAC', 'no C-id', 'funding_unverified')      rows=   295 gross=     $675,004.00
+  ('Robinhood', 'PAC', 'ROBINHOOD MARKETS INC PAC', 'no C-id', 'funding_unverified')                             rows=   123 gross=     $385,250.00
+  ('Cash App', 'PAC', 'H R BLOCK INC PAC BLOCKPAC', 'no C-id', 'funding_unverified')                             rows=   133 gross=     $261,000.00
+  ('Stripe', 'PAC', 'STRIPE INC POLITICAL ACTION COMMITTEE', 'no C-id', 'funding_unverified')                    rows=    48 gross=     $161,200.00
+  ('Stripe', 'PAC', 'STRIPE INC PAC', 'no C-id', 'funding_unverified')                                           rows=    16 gross=      $60,700.00
+  ('Chime', 'PAC', 'CHIME FINANCIAL INC PAC CHIME PAC', 'no C-id', 'funding_unverified')                         rows=    18 gross=      $40,500.00
+  ('Cash App', 'PAC', 'H R BLOCK INC PAC', 'no C-id', 'funding_unverified')                                      rows=    16 gross=      $37,750.00
+  ('Cash App', 'COM', 'H R BLOCK INC POLITICAL ACTION COMMITTEE BLOCKPAC', 'no C-id', 'funding_unverified')      rows=     8 gross=      $37,500.00
+  ('Cash App', 'PAC', 'H R BLOCK INC POLITICAL ACTION COMMITTEE', 'no C-id', 'funding_unverified')               rows=     9 gross=      $23,000.00
+  ('Stripe', 'COM', 'STRIPE INC PAC', 'no C-id', 'funding_unverified')                                           rows=     5 gross=      $18,400.00
+  ('Stripe', 'ORG', 'STRIPE TRANSFER', 'no C-id', 'organization_unverified')                                     rows=    11 gross=       $6,210.61
+  ('Robinhood', 'PAC', 'ROBINHOOD MARKETS PAC', 'no C-id', 'funding_unverified')                                 rows=     1 gross=       $5,000.00
+  ('Robinhood', 'COM', 'ROBINHOOD MARKETS INC PAC', 'no C-id', 'funding_unverified')                             rows=     2 gross=       $4,500.00
+  ('Cash App', 'PAC', 'H R BLOCK INC POLITICAL ACTION COMMITTEE BLOCK PAC', 'no C-id', 'funding_unverified')     rows=     2 gross=       $4,000.00
+  ('Stripe', 'COM', 'STRIPE INC POLITICAL ACTION COMMITTEE', 'no C-id', 'funding_unverified')                    rows=     1 gross=       $2,500.00
+  ('Cash App', 'COM', 'H R BLOCK INC PAC BLOCKPAC', 'no C-id', 'funding_unverified')                             rows=     1 gross=       $2,500.00
+  ('Cash App', 'COM', 'H R BLOCK INC PAC BLOCK PAC', 'no C-id', 'funding_unverified')                            rows=     1 gross=       $2,500.00
+  ('Cash App', 'ORG', 'H R BLOCK INC POLITICAL ACTION COMMITTEE BLOCKPAC', 'no C-id', 'organization_unverified') rows=     1 gross=       $2,500.00
+  ('Chime', 'PAC', 'CHIME FINANCIAL INC PAC', 'no C-id', 'funding_unverified')                                   rows=     2 gross=       $2,000.00
+  ('Cash App', 'COM', 'H R BLOCK INC POLITICAL ACTION COMMITTEE', 'no C-id', 'funding_unverified')               rows=     2 gross=       $2,000.00
+  ('Stripe', 'ORG', 'STRIPE X TECHNICAL SERVICES', 'no C-id', 'organization_unverified')                         rows=     8 gross=       $1,345.85
+  ('Robinhood', 'ORG', 'ROBINHOOD SOLAR GROUP LLC', 'no C-id', 'organization_unverified')                        rows=     1 gross=       $1,000.00
+  ('Chime', 'PAC', 'CHIME PAC', 'no C-id', 'funding_unverified')                                                 rows=     1 gross=       $1,000.00
+  ('Cash App', 'PAC', 'BLOCKPAC H R BLOCK INC PAC', 'no C-id', 'funding_unverified')                             rows=     1 gross=       $1,000.00
+  TOTAL rows=706 gross=$1,738,360.46
+
+== D4 register gap: recipient committees resolved through the committee master only ==
+  TOTAL rows=0 gross=$0.00
+
+== role route: top employer/occupation pairs ==
+  ('Stripe', 'STRIPE INCE', 'CORPORATE ADVISOR')                                                                 rows=     2 gross=       $5,000.00
+  ('Plaid', 'PLAID CONSTRUCTION', 'GENERAL CONTRACTOR')                                                          rows=     1 gross=       $1,000.00
+  ('Klarna', 'KLARNA FOUNDEVER', 'CONSULTANT')                                                                   rows=     1 gross=          $21.07
+  TOTAL rows=4 gross=$6,021.07

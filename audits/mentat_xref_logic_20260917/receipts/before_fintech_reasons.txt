@@ -1,0 +1,58 @@
+run 20260911T010907-d7fdb039c080 industry ['Fintech'] elapsed 60.81 status completed
+database C:\Users\pgoff\Mentat\mentat\.cache\receipt-metadata-repair-20260910\fintech\mentat.db
+summary {"amount_change": -714147.79, "automatic_decisions": 51164, "baseline_amount": 9803891.31, "corporate_giving": 0.0, "employee_giving": 8506671.08, "input_records": 86270, "linked_refund_adjustments": 0.0, "observed_original_giving": 9089743.52, "pac_outgoing": 0.0, "supported_original_giving": 0.0, "unresolved_amount": 17899062.06, "unresolved_negative": -158746.58, "unresolved_positive": 17740315.48, "unresolved_records": 35106, "unverified_funding": 583072.44, "verified_unique": false}
+
+== review-queue reasons (report.json unresolved_reasons) ==
+  company_attribution_unresolved                          records=  10302 amount=$    8,558,568.42
+  latest_filing_completeness_unproven                     records=  20340 amount=$    6,945,196.45
+  memo_parent_not_established                             records=   1656 amount=$    1,890,257.81
+  original_source_of_transfer_unresolved                  records=    979 amount=$    1,095,668.07
+  treasury_ownership_unresolved                           records=    711 amount=$      583,072.44
+  filing_relationship_evidence_missing                    records=   2808 amount=$      505,039.38
+  receipt_role_unresolved                                 records=     97 amount=$      270,318.61
+  reciprocal_earmark_not_established                      records=      6 amount=$      140,000.00
+  signed_adjustment_not_linked_refund                     records=     56 amount=$      125,375.06
+
+decisions read: 86270
+== every decision reason (rows carry several) ==
+  individual_with_accepted_employer_match                      rows=  24097 gross=    $8,768,421.20 counted=    $8,506,671.08 pac=          $0.00 baseline=    $8,496,271.08
+  company_attribution_unresolved                               rows=  10302 gross=    $8,558,568.42 counted=            $0.00 pac=          $0.00 baseline=            $0.00
+  recognized_contribution_receipt                              rows=  23732 gross=    $7,985,506.96 counted=    $7,726,208.64 pac=          $0.00 baseline=    $7,715,908.64
+  company_attribution_not_accepted                             rows=  51060 gross=    $2,985,544.14 counted=            $0.00 pac=          $0.00 baseline=            $0.00
+  provisional_receipt_role:transfer_receipt                    rows=    979 gross=    $1,095,668.07 counted=    $1,093,216.27 pac=          $0.00 baseline=    $1,093,116.27
+  non_giving_receipt_role:other_receipt                        rows=    100 gross=      $724,547.79 counted=            $0.00 pac=          $0.00 baseline=      $724,547.79
+  provisional_receipt_role:unverified_refund_adjustment        rows=      3 gross=      $250,000.00 counted=      $250,000.00 pac=          $0.00 baseline=      $250,000.00
+  negative_amount_is_not_refund_proof                          rows=     56 gross=      $125,375.06 counted=     $-125,375.06 pac=          $0.00 baseline=     $-125,375.06
+  provisional_receipt_role:unverified_other_receipt            rows=     90 gross=       $15,891.61 counted=       $15,891.61 pac=          $0.00 baseline=       $15,891.61
+  retained_original_earmarked_receipt                          rows=      1 gross=        $6,600.00 counted=        $6,600.00 pac=          $0.00 baseline=        $6,600.00
+  same_original_gift_at_conduit_and_destination                rows=      1 gross=        $6,600.00 counted=            $0.00 pac=          $0.00 baseline=        $6,600.00
+  provisional_receipt_role:unverified_receipt_role             rows=      4 gross=        $4,427.00 counted=        $4,427.00 pac=          $0.00 baseline=        $4,427.00
+  explicit_same_filing_memo_reference                          rows=      1 gross=        $2,900.00 counted=            $0.00 pac=          $0.00 baseline=        $2,900.00
+  superseded_in_observed_filing_family                         rows=      2 gross=        $1,500.00 counted=            $0.00 pac=          $0.00 baseline=        $1,500.00
+
+== reasons on EXCLUDED decisions (dollars removed) ==
+  company_attribution_not_accepted                             rows=  51060 gross=    $2,985,544.14 counted=            $0.00 pac=          $0.00 baseline=            $0.00
+  non_giving_receipt_role:other_receipt                        rows=    100 gross=      $724,547.79 counted=            $0.00 pac=          $0.00 baseline=      $724,547.79
+  individual_with_accepted_employer_match                      rows=      4 gross=       $11,000.00 counted=            $0.00 pac=          $0.00 baseline=       $11,000.00
+  recognized_contribution_receipt                              rows=      4 gross=       $11,000.00 counted=            $0.00 pac=          $0.00 baseline=       $11,000.00
+  same_original_gift_at_conduit_and_destination                rows=      1 gross=        $6,600.00 counted=            $0.00 pac=          $0.00 baseline=        $6,600.00
+  explicit_same_filing_memo_reference                          rows=      1 gross=        $2,900.00 counted=            $0.00 pac=          $0.00 baseline=        $2,900.00
+  superseded_in_observed_filing_family                         rows=      2 gross=        $1,500.00 counted=            $0.00 pac=          $0.00 baseline=        $1,500.00
+
+== status ==
+  needs_review                                                 rows=  24803 gross=    $9,340,493.64 counted=    $9,089,743.52 pac=          $0.00 baseline=    $9,068,343.52
+  held_for_attribution_review                                  rows=  10302 gross=    $8,558,568.42 counted=            $0.00 pac=          $0.00 baseline=            $0.00
+  excluded_with_evidence                                       rows=  51164 gross=    $3,721,091.93 counted=            $0.00 pac=          $0.00 baseline=      $735,547.79
+  provisional                                                  rows=      1 gross=            $0.00 counted=            $0.00 pac=          $0.00 baseline=            $0.00
+
+== bucket ==
+  employee_original                                            rows=  24097 gross=    $8,768,421.20 counted=    $8,506,671.08 pac=          $0.00 baseline=    $8,496,271.08
+  attribution_unresolved                                       rows=  10302 gross=    $8,558,568.42 counted=            $0.00 pac=          $0.00 baseline=            $0.00
+  excluded_company_match                                       rows=  51060 gross=    $2,985,544.14 counted=            $0.00 pac=          $0.00 baseline=            $0.00
+  non_giving                                                   rows=    100 gross=      $724,547.79 counted=            $0.00 pac=          $0.00 baseline=      $724,547.79
+  organization_unverified                                      rows=    711 gross=      $583,072.44 counted=      $583,072.44 pac=          $0.00 baseline=      $583,072.44
+
+== attribution_status ==
+  unverified                                                   rows=  62173 gross=   $12,851,732.79 counted=      $583,072.44 pac=          $0.00 baseline=    $1,307,620.23
+  accepted_reported_employer                                   rows=  24097 gross=    $8,768,421.20 counted=    $8,506,671.08 pac=          $0.00 baseline=    $8,496,271.08
+

@@ -22,10 +22,23 @@ filing census does not make an otherwise established receipt ambiguous.
 
 A row loses its amount only where evidence contradicts it: a rejected company
 match, an explicit source exclusion, a non-giving receipt role, a proven memo
-or earmark duplicate of a counted parent, a superseded filing version. Missing
-or ambiguous information - an employer the register does not resolve, a prefix
-still under review, a memo whose parent is not in the corpus - keeps its
-dollars, is flagged unverified and stays in the review queue.
+or earmark duplicate of a counted parent, a superseded filing version, or a
+row whose own reported text (an individual's employer, an entity's contributor
+name) names another organization and not the listed company or any name
+supplied for it. Missing or ambiguous information - an employer the register
+does not resolve, a prefix still under review, a memo whose parent is not in
+the corpus, a blank or no-employer text - keeps its dollars, is flagged
+unverified and stays in the review queue. Text that names the listed company
+counts under company_named_unverified. Two routes upgrade the attribution
+status without moving dollars: the recipient route (the money goes to the
+company's registered PAC, or to a committee whose FEC connected organization
+resolves to the company) and the role route (an advisor, consultant,
+contractor, trustee, partner, counsel or board marker with the company named).
+
+Company names: {company: [variant or verified alias, ...]}; the company label
+itself and its register entity names always count. Committee connected
+organizations: {committee_id: [CONNECTED_ORG_NM, ...]} from the FEC committee
+master.
 """
 from __future__ import annotations
 
@@ -36,6 +49,50 @@ import json
 import re
 
 from pac_evidence import is_memo, name_key, receipt_role
+
+# Reported text that says a donor has no employer rather than naming one. A
+# text made only of these tokens is missing information, not evidence against
+# the gift.
+NO_EMPLOYER_TOKENS = frozenset(
+    "NOT EMPLOYED NONE N A NA UNEMPLOYED RETIRED SELF INFORMATION REQUESTED PER BEST "
+    "EFFORTS UNKNOWN HOMEMAKER STUDENT DISABLED".split())
+# Adjacent-position markers (ruling D3, 2026-09-17). An advisor or similar
+# whose text also names the listed company is role-supported. DIRECTOR is a
+# bank rank and RETIRED is not a role, so neither is a marker.
+ROLE_MARKER = re.compile(
+    r"\b(?:ADVIS(?:ORS|OR|ERS|ER|ORY)|CONSULT(?:ANTS|ANT|ING)|CONTRACTOR|TRUSTEE|PARTNER|COUNSEL|BOARD)\b")
+
+
+def _tokens(value):
+    return re.findall(r"[A-Z0-9]+", str(value or "").upper())
+
+
+def _names_an_organization(value):
+    return any(token not in NO_EMPLOYER_TOKENS for token in _tokens(value))
+
+
+def _name_patterns(names):
+    """Whole-token patterns for each name. A name of eight or more characters
+    also matches with its spaces removed, so JPMORGAN CHASE names JP Morgan."""
+    patterns = []
+    for name in names:
+        key = " ".join(_tokens(name))
+        if not key:
+            continue
+        patterns.append(re.compile(r"\b" + re.escape(key) + r"\b"))
+        squashed = key.replace(" ", "")
+        if len(squashed) >= 8:
+            patterns.append(squashed)
+    return patterns
+
+
+def _text_names(value, patterns):
+    tokens = _tokens(value)
+    if not tokens:
+        return False
+    key, squashed = " ".join(tokens), "".join(tokens)
+    return any(pattern in squashed if isinstance(pattern, str) else pattern.search(key)
+               for pattern in patterns)
 
 
 def _text(value):
@@ -87,7 +144,8 @@ def _identifiers(values):
     return sorted({str(value) for value in values if value not in (None, "")})
 
 
-def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifest=None):
+def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifest=None,
+            company_names=None, committee_connected_orgs=None):
     """Return stable decisions, supported links, review tasks and cent totals.
 
     Identical repeated source rows are coalesced; conflicting rows or retrieved
@@ -134,6 +192,24 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
                               amount_cents=d["amount_cents"], evidence_ids=sorted(set(link_evidence))))
 
     affiliation_rows = affiliations.get("records", []) if isinstance(affiliations, dict) else affiliations
+    supplied_names = {_text(company): list(names or []) for company, names in (company_names or {}).items()}
+    connected_orgs = {str(committee or "").upper(): list(names or [])
+                      for committee, names in (committee_connected_orgs or {}).items()}
+    name_patterns = {}
+
+    def patterns_for(company):
+        key = _text(company)
+        if key not in name_patterns:
+            names = [company, *supplied_names.get(key, [])]
+            for affiliation in affiliation_rows:
+                if _text(affiliation.get("company")) == key:
+                    names.extend([affiliation.get("entity_name"), *(affiliation.get("aliases") or [])])
+            name_patterns[key] = _name_patterns(names) if key else []
+        return name_patterns[key]
+
+    def recipient_as_contributor(row):
+        return {**row, "contributor_id": row.get("committee_id"),
+                "contributor_name": (row.get("committee") or {}).get("name") or row.get("committee_name")}
 
     def affiliations_for(row, relationship):
         day, company = _day(row.get("contribution_receipt_date")), _text(row.get("company"))
@@ -288,12 +364,56 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
                 exclude(sid, "preexisting_source_exclusion:" + source_policy, link_evidence=[sid])
                 d["bucket"] = "excluded_source_policy"
                 continue
-            d["attribution_status"] = "unverified"
-            reason(sid, "company_attribution_unverified")
-            review("company_attribution_unverified", [sid],
+            # The row's own text is the one contradiction test (ruling D1). An
+            # individual's employer or occupation, or an entity's contributor
+            # name, either names the listed company (or a supplied name for
+            # it), names nothing (blank, NOT EMPLOYED, RETIRED, SELF), or names
+            # another organization. Only the last contradicts the attribution.
+            patterns = patterns_for(row.get("company"))
+            employer, occupation = row.get("contributor_employer"), row.get("contributor_occupation")
+            if entity == "IND":
+                own_text = employer
+                named = _text_names(employer, patterns) or _text_names(occupation, patterns)
+            else:
+                own_text = row.get("contributor_name")
+                named = _text_names(own_text, patterns)
+            # Recipient route: the employer need not prove the affiliation when
+            # the money goes to the company's registered PAC or to a committee
+            # whose FEC connected organization resolves to the company.
+            recipient_pacs = affiliations_for(recipient_as_contributor(row), "connected_pac") if entity == "IND" else []
+            connected = [org for org in connected_orgs.get(str(row.get("committee_id") or "").upper(), [])
+                         if _text_names(org, patterns)] if entity == "IND" and not recipient_pacs else []
+            # Role route: an adjacent position whose text names the company.
+            role_marker = bool(entity == "IND" and named and ROLE_MARKER.search(
+                " ".join(_tokens(employer)) + " " + " ".join(_tokens(occupation))))
+            if recipient_pacs or connected:
+                d["attribution_status"] = "recipient_supported"
+                if connected:
+                    d["funding_direction"] = "employee_to_company_pac"
+                    reason(sid, "recipient_connected_organization_resolves_to_company")
+                code = "company_named_unverified" if named else "company_attribution_unverified"
+            elif named:
+                code = "company_named_unverified"
+                if role_marker:
+                    d["attribution_status"] = "role_supported"
+                    reason(sid, "role_marker_with_company_named")
+                else:
+                    d["attribution_status"] = "unverified"
+            elif patterns and _names_an_organization(own_text):
+                # Naming a different organization contradicts the attribution;
+                # the amount leaves the totals with the row as its evidence.
+                exclude(sid, "attribution_contradicted_by_text", link_evidence=[sid])
+                d["bucket"] = "excluded_company_match"
+                continue
+            else:
+                code = "company_attribution_unverified"
+                d["attribution_status"] = "unverified"
+            reason(sid, code)
+            review(code, [sid],
                    "Resolve the employer/company identity and record an accepted or rejected attribution decision.",
                    company=d["company"], company_match_status=row.get("company_match_status"),
-                   company_match_reason=row.get("company_match_reason") or row.get("excluded_reason") or "")
+                   company_match_reason=row.get("company_match_reason") or row.get("excluded_reason") or "",
+                   reported_text=" ".join(_tokens(own_text)))
         claimed_companies = {_text(c.get("company")) for c in claims if isinstance(c, dict)
                              and c.get("company") and _text(c.get("company_match_status", c.get("status", ""))) not in ("REJECTED", "EXCLUDED")}
         if len(claimed_companies | {_text(row.get('company'))}) > 1:
@@ -345,9 +465,7 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
                        [sid], "Establish the dated company/entity relationship with a source and evidence ID.",
                        company=d["company"], entity_id=str(row.get("contributor_id") or ""))
         if d["bucket"] == "employee_original":
-            recipient_row = {**row, "contributor_id": row.get("committee_id"),
-                             "contributor_name": (row.get("committee") or {}).get("name")}
-            recipient_pacs = affiliations_for(recipient_row, "connected_pac")
+            recipient_pacs = affiliations_for(recipient_as_contributor(row), "connected_pac")
             if recipient_pacs:
                 d["funding_direction"] = "employee_to_company_pac"
                 reason(sid, "recipient_is_dated_company_pac", [a["evidence_id"] for a in recipient_pacs])

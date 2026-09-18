@@ -1,0 +1,1 @@
+groups=389 rows=1148 gross=$526,514.04 groups_with_identical_amounts=389 probable_duplicate_counted=$344,433.54

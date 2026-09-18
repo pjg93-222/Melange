@@ -1,0 +1,470 @@
+diff --git a/mentat/tests/test_cross_reference_engine.py b/mentat/tests/test_cross_reference_engine.py
+index 1dfd1ca5a..54c8a6e3c 100644
+--- a/mentat/tests/test_cross_reference_engine.py
++++ b/mentat/tests/test_cross_reference_engine.py
+@@ -214,7 +214,9 @@ class CrossReferenceTests(unittest.TestCase):
+                              for item in result['review_queue']))
+         near=changed(pac,sub_id='near',transaction_id='near',
+                      contributor_name='ACME EMPLOYEE PAC SUPPORTERS')
+-        self.assertTrue(any(item['reason']=='company_attribution_unverified'
++        # A near name is not a dated affiliation. It names the company, so it
++        # stays counted and queued under the company-named flag (ruling D1).
++        self.assertTrue(any(item['reason']=='company_named_unverified'
+                             for item in analyze([near],affiliations=affiliation)['review_queue']))
+ 
+     def test_affiliation_aliases_are_exact_and_do_not_enable_prefix_matching(self):
+@@ -229,7 +231,7 @@ class CrossReferenceTests(unittest.TestCase):
+         self.assertEqual(result['decisions'][0]['bucket'],'pac_activity')
+         near=changed(pac,sub_id='near-alias',transaction_id='near-alias',
+                      contributor_name='ACME LEGACY PAC SUPPORTERS')
+-        self.assertTrue(any(item['reason']=='company_attribution_unverified'
++        self.assertTrue(any(item['reason']=='company_named_unverified'
+                             for item in analyze([near],affiliations=affiliation)['review_queue']))
+ 
+     def test_exact_dated_treasury_affiliation_overrides_provisional_name_review(self):
+@@ -524,6 +526,137 @@ class CrossReferenceTests(unittest.TestCase):
+         self.assertIn('automatic_exact_alias_recheck',result['decisions'][0]['reasons'])
+         self.assertEqual(result['decisions'][0]['receipt_verification_status'],'source_verified')
+ 
++    def test_text_naming_another_organization_contradicts_the_attribution(self):
++        # Ruling D1 (2026-09-17): a row whose own reported text names an
++        # organization that is not the listed company or any of its supplied
++        # names is a contradiction, not an ambiguity. It leaves the totals with
++        # its evidence; a proven duplicate is the other kind of contradiction.
++        names={'Citibank':['Citi','Citibank','Citigroup']}
++        pac=changed(row('pac',5000),company='Citibank',entity_type='PAC',contributor_name='END CITIZENS UNITED',
++                    company_match_status='review',company_match_reason='corporate_name_not_verified')
++        result=analyze([pac],company_names=names)
++        decision=result['decisions'][0]
++        self.assertEqual(decision['counted_cents'],0)
++        self.assertEqual(decision['pac_activity_cents'],0)
++        self.assertEqual(decision['status'],'excluded_with_evidence')
++        self.assertEqual(decision['bucket'],'excluded_company_match')
++        self.assertIn('attribution_contradicted_by_text',decision['reasons'])
++        self.assertNotIn('company_attribution_unverified',decision['reasons'])
++        self.assertFalse(result['review_queue'])
++        self.assertEqual(result['totals']['provisional_original_giving_cents'],0)
++        self.assertEqual(result['changes'][0]['delta_cents'],-500000)
++        # The company's own label is a name even when no roster is supplied.
++        self.assertEqual(analyze([pac])['decisions'][0]['status'],'excluded_with_evidence')
++
++    def test_text_naming_the_company_stays_counted_while_a_stranger_is_excluded(self):
++        names={'Citibank':['Citi','Citibank','Citigroup']}
++        rows=[changed(row('named'),company='Citibank',contributor_employer='CITIBANK N A',contributor_occupation='BANKER',
++                      company_match_status='review',company_match_reason='prefix_with_unverified_trailing_tokens:N A'),
++              changed(row('stranger'),company='Citibank',contributor_employer='CITIZENS BUSINESS BANK',contributor_occupation='BANKER',
++                      company_match_status='review',company_match_reason='squashed_prefix_unverified_remainder:ZENSBUSINESSBANK'),
++              changed(row('blank'),company='Citibank',contributor_employer='',contributor_occupation='',company_match_status='review'),
++              changed(row('none'),company='Citibank',contributor_employer='NOT EMPLOYED',contributor_occupation='RETIRED',
++                      company_match_status='review'),
++              changed(row('short'),company='Citibank',contributor_employer='CITI TRENDS',contributor_occupation='CLERK',
++                      company_match_status='review')]
++        result=analyze(rows,company_names=names)
++        decisions={d['source_id']:d for d in result['decisions']}
++        queued={}
++        for item in result['review_queue']:queued.setdefault(item['reason'],[]).extend(item['source_ids'])
++        for sid in ('named','short'):
++            self.assertEqual(decisions[sid]['counted_cents'],10000)
++            self.assertEqual(decisions[sid]['attribution_status'],'unverified')
++            self.assertIn('company_named_unverified',decisions[sid]['reasons'])
++            self.assertEqual(decisions[sid]['status'],'needs_review')
++        for sid in ('blank','none'):
++            self.assertEqual(decisions[sid]['counted_cents'],10000)
++            self.assertEqual(decisions[sid]['attribution_status'],'unverified')
++            self.assertIn('company_attribution_unverified',decisions[sid]['reasons'])
++        self.assertEqual(decisions['stranger']['counted_cents'],0)
++        self.assertEqual(decisions['stranger']['status'],'excluded_with_evidence')
++        self.assertIn('attribution_contradicted_by_text',decisions['stranger']['reasons'])
++        self.assertEqual(sorted(queued['company_named_unverified']),['named','short'])
++        self.assertEqual(sorted(queued['company_attribution_unverified']),['blank','none'])
++        self.assertNotIn('stranger',[sid for ids in queued.values() for sid in ids])
++        self.assertEqual(result['totals']['provisional_original_giving_cents'],40000)
++        self.assertEqual(result['totals']['unresolved_positive_cents'],40000)
++
++    def test_recipient_company_pac_supports_an_unverified_attribution(self):
++        # Ruling (2026-09-17): another employer is fine when the money goes to
++        # something affiliated with the listed company. The register or the FEC
++        # connected-organization field proves the recipient side; the employer
++        # field does not have to.
++        names={'Citibank':['Citi','Citibank','Citigroup']}
++        affiliation={'records':[dict(company='Citibank',entity_id='C00008474',entity_name='CITIGROUP INC. PAC',
++            relationship='connected_pac',valid_from='2021-01-01',source_url='https://fec.gov/fixture',evidence_id='citi-pac')]}
++        registered=changed(row('registered'),company='Citibank',committee_id='C00008474',contributor_employer='ACME WIDGETS INC',
++                           contributor_occupation='ENGINEER',company_match_status='review')
++        connected=changed(row('connected'),company='Citibank',committee_id='C00039305',contributor_employer='ACME WIDGETS INC',
++                          contributor_occupation='ENGINEER',company_match_status='review')
++        stranger=changed(row('stranger'),company='Citibank',committee_id='C00000001',contributor_employer='ACME WIDGETS INC',
++                         contributor_occupation='ENGINEER',company_match_status='review')
++        result=analyze([registered,connected,stranger],affiliations=affiliation,company_names=names,
++                       committee_connected_orgs={'C00039305':['CITIGROUP INC.']})
++        decisions={d['source_id']:d for d in result['decisions']}
++        self.assertEqual(decisions['registered']['counted_cents'],10000)
++        self.assertEqual(decisions['registered']['attribution_status'],'recipient_supported')
++        self.assertIn('recipient_is_dated_company_pac',decisions['registered']['reasons'])
++        self.assertEqual(decisions['registered']['funding_direction'],'employee_to_company_pac')
++        self.assertEqual(decisions['connected']['counted_cents'],10000)
++        self.assertEqual(decisions['connected']['attribution_status'],'recipient_supported')
++        self.assertIn('recipient_connected_organization_resolves_to_company',decisions['connected']['reasons'])
++        for sid in ('registered','connected'):
++            self.assertIn('company_attribution_unverified',decisions[sid]['reasons'])
++            self.assertEqual(decisions[sid]['status'],'needs_review')
++        self.assertEqual(decisions['stranger']['counted_cents'],0)
++        self.assertIn('attribution_contradicted_by_text',decisions['stranger']['reasons'])
++        self.assertEqual(result['totals']['provisional_original_giving_cents'],20000)
++
++    def test_role_marker_with_the_company_named_is_role_supported(self):
++        # Ruling D3 (2026-09-17): advisor, adviser, advisory, consultant,
++        # consulting, contractor, trustee, partner, counsel and board are the
++        # adjacent-position markers; DIRECTOR and RETIRED are not. The route
++        # changes the verification status only; the text test decides dollars.
++        names={'Citibank':['Citi','Citibank','Citigroup'],'Wells Fargo Bank NA':['Wells Fargo']}
++        consultant=changed(row('consultant'),company='Citibank',contributor_employer='SELF-EMPLOYED',
++                           contributor_occupation='CONSULTANT TO CITIBANK',company_match_status='review')
++        retired=changed(row('retired'),company='Wells Fargo Bank NA',contributor_employer='WELLS FARGO BANK RETIRED',
++                        contributor_occupation='RETIRED',company_match_status='review')
++        director=changed(row('director'),company='Citibank',contributor_employer='ACME CAPITAL',
++                         contributor_occupation='MANAGING DIRECTOR',company_match_status='review')
++        advisor=changed(row('advisor'),company='Citibank',contributor_employer='ACME CAPITAL',
++                        contributor_occupation='ADVISOR TO CITI',company_match_status='review')
++        result=analyze([consultant,retired,director,advisor],company_names=names)
++        decisions={d['source_id']:d for d in result['decisions']}
++        for sid in ('consultant','advisor'):
++            self.assertEqual(decisions[sid]['counted_cents'],10000)
++            self.assertEqual(decisions[sid]['attribution_status'],'role_supported')
++            self.assertIn('role_marker_with_company_named',decisions[sid]['reasons'])
++            self.assertIn('company_named_unverified',decisions[sid]['reasons'])
++        self.assertEqual(decisions['retired']['counted_cents'],10000)
++        self.assertEqual(decisions['retired']['attribution_status'],'unverified')
++        self.assertIn('company_named_unverified',decisions['retired']['reasons'])
++        self.assertNotIn('role_marker_with_company_named',decisions['retired']['reasons'])
++        self.assertEqual(decisions['director']['counted_cents'],0)
++        self.assertIn('attribution_contradicted_by_text',decisions['director']['reasons'])
++        self.assertEqual(result['totals']['provisional_original_giving_cents'],30000)
++
++    def test_proven_duplicate_memo_leg_stays_excluded_under_the_text_test(self):
++        names={'Citibank':['Citi','Citibank','Citigroup']}
++        parent=changed(row('a'),company='Citibank',contributor_employer='CITIBANK',company_match_status='review',
++                       transaction_id='SA11AI.TX')
++        memo=changed(row('b'),company='Citibank',contributor_employer='CITIBANK',company_match_status='review',
++                     memo_code='X',memo_text='[SA11AI:TX]')
++        result=analyze([parent,memo],company_names=names)
++        decisions={d['source_id']:d for d in result['decisions']}
++        self.assertEqual(decisions['a']['counted_cents'],10000)
++        self.assertIn('company_named_unverified',decisions['a']['reasons'])
++        self.assertEqual(decisions['b']['counted_cents'],0)
++        self.assertEqual(decisions['b']['status'],'excluded_with_evidence')
++        self.assertIn('explicit_same_filing_memo_reference',decisions['b']['reasons'])
++        self.assertEqual([link['kind'] for link in result['links']],['memo'])
++        self.assertEqual(result['totals']['provisional_original_giving_cents'],10000)
++
+ 
+ if __name__ == '__main__':
+     unittest.main()
+diff --git a/mentat/tools/cross_reference_engine.py b/mentat/tools/cross_reference_engine.py
+index abbef2dde..ad7f0b5a1 100644
+--- a/mentat/tools/cross_reference_engine.py
++++ b/mentat/tools/cross_reference_engine.py
+@@ -22,10 +22,23 @@ filing census does not make an otherwise established receipt ambiguous.
+ 
+ A row loses its amount only where evidence contradicts it: a rejected company
+ match, an explicit source exclusion, a non-giving receipt role, a proven memo
+-or earmark duplicate of a counted parent, a superseded filing version. Missing
+-or ambiguous information - an employer the register does not resolve, a prefix
+-still under review, a memo whose parent is not in the corpus - keeps its
+-dollars, is flagged unverified and stays in the review queue.
++or earmark duplicate of a counted parent, a superseded filing version, or a
++row whose own reported text (an individual's employer, an entity's contributor
++name) names another organization and not the listed company or any name
++supplied for it. Missing or ambiguous information - an employer the register
++does not resolve, a prefix still under review, a memo whose parent is not in
++the corpus, a blank or no-employer text - keeps its dollars, is flagged
++unverified and stays in the review queue. Text that names the listed company
++counts under company_named_unverified. Two routes upgrade the attribution
++status without moving dollars: the recipient route (the money goes to the
++company's registered PAC, or to a committee whose FEC connected organization
++resolves to the company) and the role route (an advisor, consultant,
++contractor, trustee, partner, counsel or board marker with the company named).
++
++Company names: {company: [variant or verified alias, ...]}; the company label
++itself and its register entity names always count. Committee connected
++organizations: {committee_id: [CONNECTED_ORG_NM, ...]} from the FEC committee
++master.
+ """
+ from __future__ import annotations
+ 
+@@ -37,6 +50,50 @@ import re
+ 
+ from pac_evidence import is_memo, name_key, receipt_role
+ 
++# Reported text that says a donor has no employer rather than naming one. A
++# text made only of these tokens is missing information, not evidence against
++# the gift.
++NO_EMPLOYER_TOKENS = frozenset(
++    "NOT EMPLOYED NONE N A NA UNEMPLOYED RETIRED SELF INFORMATION REQUESTED PER BEST "
++    "EFFORTS UNKNOWN HOMEMAKER STUDENT DISABLED".split())
++# Adjacent-position markers (ruling D3, 2026-09-17). An advisor or similar
++# whose text also names the listed company is role-supported. DIRECTOR is a
++# bank rank and RETIRED is not a role, so neither is a marker.
++ROLE_MARKER = re.compile(
++    r"\b(?:ADVIS(?:ORS|OR|ERS|ER|ORY)|CONSULT(?:ANTS|ANT|ING)|CONTRACTOR|TRUSTEE|PARTNER|COUNSEL|BOARD)\b")
++
++
++def _tokens(value):
++    return re.findall(r"[A-Z0-9]+", str(value or "").upper())
++
++
++def _names_an_organization(value):
++    return any(token not in NO_EMPLOYER_TOKENS for token in _tokens(value))
++
++
++def _name_patterns(names):
++    """Whole-token patterns for each name. A name of eight or more characters
++    also matches with its spaces removed, so JPMORGAN CHASE names JP Morgan."""
++    patterns = []
++    for name in names:
++        key = " ".join(_tokens(name))
++        if not key:
++            continue
++        patterns.append(re.compile(r"\b" + re.escape(key) + r"\b"))
++        squashed = key.replace(" ", "")
++        if len(squashed) >= 8:
++            patterns.append(squashed)
++    return patterns
++
++
++def _text_names(value, patterns):
++    tokens = _tokens(value)
++    if not tokens:
++        return False
++    key, squashed = " ".join(tokens), "".join(tokens)
++    return any(pattern in squashed if isinstance(pattern, str) else pattern.search(key)
++               for pattern in patterns)
++
+ 
+ def _text(value):
+     return " ".join(str(value or "").upper().split())
+@@ -87,7 +144,8 @@ def _identifiers(values):
+     return sorted({str(value) for value in values if value not in (None, "")})
+ 
+ 
+-def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifest=None):
++def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifest=None,
++            company_names=None, committee_connected_orgs=None):
+     """Return stable decisions, supported links, review tasks and cent totals.
+ 
+     Identical repeated source rows are coalesced; conflicting rows or retrieved
+@@ -134,6 +192,24 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
+                               amount_cents=d["amount_cents"], evidence_ids=sorted(set(link_evidence))))
+ 
+     affiliation_rows = affiliations.get("records", []) if isinstance(affiliations, dict) else affiliations
++    supplied_names = {_text(company): list(names or []) for company, names in (company_names or {}).items()}
++    connected_orgs = {str(committee or "").upper(): list(names or [])
++                      for committee, names in (committee_connected_orgs or {}).items()}
++    name_patterns = {}
++
++    def patterns_for(company):
++        key = _text(company)
++        if key not in name_patterns:
++            names = [company, *supplied_names.get(key, [])]
++            for affiliation in affiliation_rows:
++                if _text(affiliation.get("company")) == key:
++                    names.extend([affiliation.get("entity_name"), *(affiliation.get("aliases") or [])])
++            name_patterns[key] = _name_patterns(names) if key else []
++        return name_patterns[key]
++
++    def recipient_as_contributor(row):
++        return {**row, "contributor_id": row.get("committee_id"),
++                "contributor_name": (row.get("committee") or {}).get("name") or row.get("committee_name")}
+ 
+     def affiliations_for(row, relationship):
+         day, company = _day(row.get("contribution_receipt_date")), _text(row.get("company"))
+@@ -288,12 +364,56 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
+                 exclude(sid, "preexisting_source_exclusion:" + source_policy, link_evidence=[sid])
+                 d["bucket"] = "excluded_source_policy"
+                 continue
+-            d["attribution_status"] = "unverified"
+-            reason(sid, "company_attribution_unverified")
+-            review("company_attribution_unverified", [sid],
++            # The row's own text is the one contradiction test (ruling D1). An
++            # individual's employer or occupation, or an entity's contributor
++            # name, either names the listed company (or a supplied name for
++            # it), names nothing (blank, NOT EMPLOYED, RETIRED, SELF), or names
++            # another organization. Only the last contradicts the attribution.
++            patterns = patterns_for(row.get("company"))
++            employer, occupation = row.get("contributor_employer"), row.get("contributor_occupation")
++            if entity == "IND":
++                own_text = employer
++                named = _text_names(employer, patterns) or _text_names(occupation, patterns)
++            else:
++                own_text = row.get("contributor_name")
++                named = _text_names(own_text, patterns)
++            # Recipient route: the employer need not prove the affiliation when
++            # the money goes to the company's registered PAC or to a committee
++            # whose FEC connected organization resolves to the company.
++            recipient_pacs = affiliations_for(recipient_as_contributor(row), "connected_pac") if entity == "IND" else []
++            connected = [org for org in connected_orgs.get(str(row.get("committee_id") or "").upper(), [])
++                         if _text_names(org, patterns)] if entity == "IND" and not recipient_pacs else []
++            # Role route: an adjacent position whose text names the company.
++            role_marker = bool(entity == "IND" and named and ROLE_MARKER.search(
++                " ".join(_tokens(employer)) + " " + " ".join(_tokens(occupation))))
++            if recipient_pacs or connected:
++                d["attribution_status"] = "recipient_supported"
++                if connected:
++                    d["funding_direction"] = "employee_to_company_pac"
++                    reason(sid, "recipient_connected_organization_resolves_to_company")
++                code = "company_named_unverified" if named else "company_attribution_unverified"
++            elif named:
++                code = "company_named_unverified"
++                if role_marker:
++                    d["attribution_status"] = "role_supported"
++                    reason(sid, "role_marker_with_company_named")
++                else:
++                    d["attribution_status"] = "unverified"
++            elif patterns and _names_an_organization(own_text):
++                # Naming a different organization contradicts the attribution;
++                # the amount leaves the totals with the row as its evidence.
++                exclude(sid, "attribution_contradicted_by_text", link_evidence=[sid])
++                d["bucket"] = "excluded_company_match"
++                continue
++            else:
++                code = "company_attribution_unverified"
++                d["attribution_status"] = "unverified"
++            reason(sid, code)
++            review(code, [sid],
+                    "Resolve the employer/company identity and record an accepted or rejected attribution decision.",
+                    company=d["company"], company_match_status=row.get("company_match_status"),
+-                   company_match_reason=row.get("company_match_reason") or row.get("excluded_reason") or "")
++                   company_match_reason=row.get("company_match_reason") or row.get("excluded_reason") or "",
++                   reported_text=" ".join(_tokens(own_text)))
+         claimed_companies = {_text(c.get("company")) for c in claims if isinstance(c, dict)
+                              and c.get("company") and _text(c.get("company_match_status", c.get("status", ""))) not in ("REJECTED", "EXCLUDED")}
+         if len(claimed_companies | {_text(row.get('company'))}) > 1:
+@@ -345,9 +465,7 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
+                        [sid], "Establish the dated company/entity relationship with a source and evidence ID.",
+                        company=d["company"], entity_id=str(row.get("contributor_id") or ""))
+         if d["bucket"] == "employee_original":
+-            recipient_row = {**row, "contributor_id": row.get("committee_id"),
+-                             "contributor_name": (row.get("committee") or {}).get("name")}
+-            recipient_pacs = affiliations_for(recipient_row, "connected_pac")
++            recipient_pacs = affiliations_for(recipient_as_contributor(row), "connected_pac")
+             if recipient_pacs:
+                 d["funding_direction"] = "employee_to_company_pac"
+                 reason(sid, "recipient_is_dated_company_pac", [a["evidence_id"] for a in recipient_pacs])
+diff --git a/mentat/tools/run_cross_reference.py b/mentat/tools/run_cross_reference.py
+index 1237a1c32..8665267cb 100644
+--- a/mentat/tools/run_cross_reference.py
++++ b/mentat/tools/run_cross_reference.py
+@@ -357,6 +357,54 @@ def partisan_breakdowns(result,rows):
+     return result
+ 
+ 
++COMMITTEE_MASTER_CYCLES=('cm22','cm24','cm26')
++
++
++def committee_master_paths(root=None):
++    root=Path(root or PROJECT/'inputs/fec_committee_master')
++    return [root/cycle/'cm.txt' for cycle in COMMITTEE_MASTER_CYCLES]
++
++
++def company_names(database,industry):
++    """Every name the source roster and the verified employer aliases give a listed company."""
++    names=defaultdict(set)
++    with closing(sqlite3.connect(Path(database).resolve().as_uri()+'?mode=ro',uri=True)) as db:
++        if table_exists(db,'companies'):
++            for company,variant in db.execute('SELECT company,variant FROM companies WHERE industry=?',(industry,)):
++                if company and variant:names[str(company)].add(str(variant))
++    aliases=PROJECT/'inputs/verified_employer_aliases.csv'
++    if aliases.is_file():
++        with aliases.open(encoding='utf-8-sig',newline='') as stream:
++            for item in csv.DictReader(stream):
++                if item.get('company') and item.get('alias'):names[item['company']].add(item['alias'])
++    return {company:sorted(values) for company,values in sorted(names.items())}
++
++
++def committee_connected_organizations(root=None):
++    """FEC committee master field 14 (CONNECTED_ORG_NM) by committee ID, across the cycles on disk."""
++    names=defaultdict(set)
++    for path in committee_master_paths(root):
++        if not path.is_file():continue
++        with path.open(encoding='latin-1') as stream:
++            for line in stream:
++                fields=line.rstrip('\r\n').split('|')
++                if len(fields)>=14 and fields[0].strip() and fields[13].strip():
++                    names[fields[0].strip().upper()].add(fields[13].strip())
++    return {committee:sorted(values) for committee,values in sorted(names.items())}
++
++
++def excluded_reasons(result):
++    """Rows and gross dollars removed per reason; a removed row lists every reason it carries."""
++    groups=defaultdict(lambda:{'records':0,'amount_cents':0})
++    for decision in result.get('decisions',[]):
++        if decision.get('status')!='excluded_with_evidence':continue
++        amount=abs(int(decision.get('amount_cents',0)))
++        for reason in decision.get('reasons',[]):
++            groups[reason]['records']+=1;groups[reason]['amount_cents']+=amount
++    return sorted(({'reason':reason,'records':value['records'],'amount':value['amount_cents']/100} for reason,value in groups.items()),
++                  key=lambda r:(-r['amount'],r['reason']))
++
++
+ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=None,evidence_dirs=(),
+         header_dirs=(),fetch=True,max_requests=100,companies=None,affiliations_path=None,manifest_path=None,progress_callback=None):
+     from cross_reference_engine import analyze
+@@ -404,11 +452,14 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
+         for relative in fingerprints:
+             target=directory/'rules'/relative;target.parent.mkdir(parents=True,exist_ok=True)
+             target.write_bytes((PROJECT/relative).read_bytes())
++        # The committee master decides the recipient route's connected-organization
++        # test; it is fingerprinted, not copied (three multi-megabyte FEC bulk files).
++        committee_master={str(p.relative_to(PROJECT)):sha(p) for p in committee_master_paths() if p.is_file()}
+         supplied={key:{'sha256':sha(Path(p)),'path':str(Path(p).resolve())} for key,p in [('affiliations',affiliations_path),('filing_manifest',manifest_path)] if p}
+         for key,item in supplied.items():(directory/(key+'.json')).write_bytes(Path(item['path']).read_bytes())
+         scope={'industries':[industry],'companies':roster,'cycles':cycles,'source_count':1,
+                'database':str(database),'database_sha256':source_hash,'baseline':baseline_info,
+-               'rule_fingerprints':fingerprints,'supplied_evidence':supplied,
++               'rule_fingerprints':fingerprints,'supplied_evidence':supplied,'committee_master':committee_master,
+                'source_change_counts':dict(Counter(c['kind'] for c in source_changes)),
+                'source_observations':len(source_observations),'distinct_source_ids':len(rows),
+                'accounting_basis':'original giving once; PAC outgoing activity separately','collection_coverage':coverage,
+@@ -451,7 +502,11 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
+         affiliations=json.loads(Path(affiliations_path).read_text()) if affiliations_path else None
+         filing_manifest=json.loads(Path(manifest_path).read_text()) if manifest_path else None
+         update('connect','running','Cross-referencing explicit filing, memo and intermediary relationships')
+-        result=analyze(rows,evidence=evidence,headers=headers,affiliations=affiliations,filing_manifest=filing_manifest)
++        names=company_names(database,industry)
++        connected=committee_connected_organizations()
++        scope['attribution_text_test']={'companies_with_names':len(names),'committees_with_connected_organization':len(connected)}
++        result=analyze(rows,evidence=evidence,headers=headers,affiliations=affiliations,filing_manifest=filing_manifest,
++                       company_names=names,committee_connected_orgs=connected)
+         update('identify','review' if result.get('review_queue') else 'completed','Attribution and transaction decisions recorded with evidence')
+         update('connect','review' if result.get('review_queue') or result.get('coverage_queue') else 'completed',
+                f'{len(result.get("links",[]))} evidence-backed links; filing coverage checks tracked separately from receipt review')
+@@ -463,6 +518,8 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
+         if source_sha(database)!=source_hash:raise ValueError('Source changed during cross-referencing')
+         if any(sha(PROJECT/path)!=expected or sha(directory/'rules'/path)!=expected for path,expected in fingerprints.items()):
+             raise ValueError('Accounting rules changed during the run; repeat with stable code')
++        if any(sha(PROJECT/path)!=expected for path,expected in committee_master.items()):
++            raise ValueError('Committee master changed during the run; repeat with stable inputs')
+         if any(sha(Path(value['path']))!=value['sha256'] or sha(directory/(key+'.json'))!=value['sha256'] for key,value in supplied.items()):
+             raise ValueError('Supplied evidence changed during the run')
+         if any(sha(directory/name) != expected for name,expected in attribution_recheck.get('artifacts', {}).items()):
+@@ -478,7 +535,8 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
+         update('verify','review' if review or coverage_tasks or not coverage['complete'] else 'completed',
+                'Source unchanged; decisions reconciled; receipt review and collection coverage reported separately')
+         report={'schema_version':1,'run_id':run_id,'generated_at':now(),'status':'completed','scope':scope,
+-                'summary':summary,'steps':steps,'unresolved_reasons':reasons,'review_queue':review[:20],'changes':changes[:20],
++                'summary':summary,'steps':steps,'unresolved_reasons':reasons,'excluded_reasons':excluded_reasons(result),
++                'review_queue':review[:20],'changes':changes[:20],
+                 'coverage_reasons':coverage_reasons,'coverage_task_count':len(coverage_tasks),
+                 'partisan_breakdowns':partisan_breakdowns(result,rows),
+                 'recovery':recovery,'header_recovery':header_recovery,'imports':imports,'checks':checks,'link_count':len(result.get('links',[])),
+@@ -538,7 +596,9 @@ def main():
+     result=run(args.database,args.industry,[int(c) for c in args.cycles.replace('|',',').split(',')],args.state_root,
+                args.baseline_root,args.evidence_dir,args.header_dir,not args.offline,args.max_requests,args.company,
+                args.affiliations,args.filing_manifest,progress)
+-    print(json.dumps({'run_id':result['run_id'],'summary':result['summary'],'link_count':result['link_count']}),flush=True)
++    print(json.dumps({'run_id':result['run_id'],'summary':result['summary'],'link_count':result['link_count'],
++                      'unresolved_reasons':result['unresolved_reasons'],'excluded_reasons':result['excluded_reasons'],
++                      'elapsed_seconds':result['elapsed_seconds']}),flush=True)
+ 
+ 
+ if __name__=='__main__':main()

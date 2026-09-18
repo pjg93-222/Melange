@@ -1,0 +1,16 @@
+before held rows: 36241
+after decisions seen for those rows: 36241
+== verdict of the formerly held rows ==
+  contradicted                                                                               rows= 29816 gross=$  32,538,668.49 counted=$           0.00 pac=$          0.00
+  named                                                                                      rows=  6249 gross=$   5,143,109.45 counted=$   4,962,032.35 pac=$          0.00
+  other:non_giving_receipt_role:other_receipt,non_giving_resolved_without_company_attribution rows=   159 gross=$     258,523.95 counted=$           0.00 pac=$          0.00
+  unverified                                                                                 rows=    17 gross=$         653.82 counted=$         653.82 pac=$          0.00
+  TOTAL rows=36241 gross=$37,940,955.71 counted=$4,962,686.17 pac=$0.00
+== attribution_status x verdict ==
+  ('unverified', 'contradicted')                                                             rows= 29816 gross=$  32,538,668.49 counted=$           0.00 pac=$          0.00
+  ('unverified', 'named')                                                                    rows=  5587 gross=$   4,929,137.45 counted=$   4,749,860.35 pac=$          0.00
+  ('not_required_for_non_giving', 'other:non_giving_receipt_role:other_receipt,non_giving_resolved_without_company_attribution') rows=   159 gross=$     258,523.95 counted=$           0.00 pac=$          0.00
+  ('role_supported', 'named')                                                                rows=   514 gross=$     192,016.13 counted=$     190,216.13 pac=$          0.00
+  ('recipient_supported', 'named')                                                           rows=   148 gross=$      21,955.87 counted=$      21,955.87 pac=$          0.00
+  ('recipient_supported', 'unverified')                                                      rows=    17 gross=$         653.82 counted=$         653.82 pac=$          0.00
+  TOTAL rows=36241 gross=$37,940,955.71 counted=$4,962,686.17 pac=$0.00

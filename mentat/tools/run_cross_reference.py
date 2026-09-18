@@ -357,6 +357,54 @@ def partisan_breakdowns(result,rows):
     return result
 
 
+COMMITTEE_MASTER_CYCLES=('cm22','cm24','cm26')
+
+
+def committee_master_paths(root=None):
+    root=Path(root or PROJECT/'inputs/fec_committee_master')
+    return [root/cycle/'cm.txt' for cycle in COMMITTEE_MASTER_CYCLES]
+
+
+def company_names(database,industry):
+    """Every name the source roster and the verified employer aliases give a listed company."""
+    names=defaultdict(set)
+    with closing(sqlite3.connect(Path(database).resolve().as_uri()+'?mode=ro',uri=True)) as db:
+        if table_exists(db,'companies'):
+            for company,variant in db.execute('SELECT company,variant FROM companies WHERE industry=?',(industry,)):
+                if company and variant:names[str(company)].add(str(variant))
+    aliases=PROJECT/'inputs/verified_employer_aliases.csv'
+    if aliases.is_file():
+        with aliases.open(encoding='utf-8-sig',newline='') as stream:
+            for item in csv.DictReader(stream):
+                if item.get('company') and item.get('alias'):names[item['company']].add(item['alias'])
+    return {company:sorted(values) for company,values in sorted(names.items())}
+
+
+def committee_connected_organizations(root=None):
+    """FEC committee master field 14 (CONNECTED_ORG_NM) by committee ID, across the cycles on disk."""
+    names=defaultdict(set)
+    for path in committee_master_paths(root):
+        if not path.is_file():continue
+        with path.open(encoding='latin-1') as stream:
+            for line in stream:
+                fields=line.rstrip('\r\n').split('|')
+                if len(fields)>=14 and fields[0].strip() and fields[13].strip():
+                    names[fields[0].strip().upper()].add(fields[13].strip())
+    return {committee:sorted(values) for committee,values in sorted(names.items())}
+
+
+def excluded_reasons(result):
+    """Rows and gross dollars removed per reason; a removed row lists every reason it carries."""
+    groups=defaultdict(lambda:{'records':0,'amount_cents':0})
+    for decision in result.get('decisions',[]):
+        if decision.get('status')!='excluded_with_evidence':continue
+        amount=abs(int(decision.get('amount_cents',0)))
+        for reason in decision.get('reasons',[]):
+            groups[reason]['records']+=1;groups[reason]['amount_cents']+=amount
+    return sorted(({'reason':reason,'records':value['records'],'amount':value['amount_cents']/100} for reason,value in groups.items()),
+                  key=lambda r:(-r['amount'],r['reason']))
+
+
 def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=None,evidence_dirs=(),
         header_dirs=(),fetch=True,max_requests=100,companies=None,affiliations_path=None,manifest_path=None,progress_callback=None):
     from cross_reference_engine import analyze
@@ -404,11 +452,14 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
         for relative in fingerprints:
             target=directory/'rules'/relative;target.parent.mkdir(parents=True,exist_ok=True)
             target.write_bytes((PROJECT/relative).read_bytes())
+        # The committee master decides the recipient route's connected-organization
+        # test; it is fingerprinted, not copied (three multi-megabyte FEC bulk files).
+        committee_master={str(p.relative_to(PROJECT)):sha(p) for p in committee_master_paths() if p.is_file()}
         supplied={key:{'sha256':sha(Path(p)),'path':str(Path(p).resolve())} for key,p in [('affiliations',affiliations_path),('filing_manifest',manifest_path)] if p}
         for key,item in supplied.items():(directory/(key+'.json')).write_bytes(Path(item['path']).read_bytes())
         scope={'industries':[industry],'companies':roster,'cycles':cycles,'source_count':1,
                'database':str(database),'database_sha256':source_hash,'baseline':baseline_info,
-               'rule_fingerprints':fingerprints,'supplied_evidence':supplied,
+               'rule_fingerprints':fingerprints,'supplied_evidence':supplied,'committee_master':committee_master,
                'source_change_counts':dict(Counter(c['kind'] for c in source_changes)),
                'source_observations':len(source_observations),'distinct_source_ids':len(rows),
                'accounting_basis':'original giving once; PAC outgoing activity separately','collection_coverage':coverage,
@@ -451,7 +502,11 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
         affiliations=json.loads(Path(affiliations_path).read_text()) if affiliations_path else None
         filing_manifest=json.loads(Path(manifest_path).read_text()) if manifest_path else None
         update('connect','running','Cross-referencing explicit filing, memo and intermediary relationships')
-        result=analyze(rows,evidence=evidence,headers=headers,affiliations=affiliations,filing_manifest=filing_manifest)
+        names=company_names(database,industry)
+        connected=committee_connected_organizations()
+        scope['attribution_text_test']={'companies_with_names':len(names),'committees_with_connected_organization':len(connected)}
+        result=analyze(rows,evidence=evidence,headers=headers,affiliations=affiliations,filing_manifest=filing_manifest,
+                       company_names=names,committee_connected_orgs=connected)
         update('identify','review' if result.get('review_queue') else 'completed','Attribution and transaction decisions recorded with evidence')
         update('connect','review' if result.get('review_queue') or result.get('coverage_queue') else 'completed',
                f'{len(result.get("links",[]))} evidence-backed links; filing coverage checks tracked separately from receipt review')
@@ -463,6 +518,8 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
         if source_sha(database)!=source_hash:raise ValueError('Source changed during cross-referencing')
         if any(sha(PROJECT/path)!=expected or sha(directory/'rules'/path)!=expected for path,expected in fingerprints.items()):
             raise ValueError('Accounting rules changed during the run; repeat with stable code')
+        if any(sha(PROJECT/path)!=expected for path,expected in committee_master.items()):
+            raise ValueError('Committee master changed during the run; repeat with stable inputs')
         if any(sha(Path(value['path']))!=value['sha256'] or sha(directory/(key+'.json'))!=value['sha256'] for key,value in supplied.items()):
             raise ValueError('Supplied evidence changed during the run')
         if any(sha(directory/name) != expected for name,expected in attribution_recheck.get('artifacts', {}).items()):
@@ -478,7 +535,8 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
         update('verify','review' if review or coverage_tasks or not coverage['complete'] else 'completed',
                'Source unchanged; decisions reconciled; receipt review and collection coverage reported separately')
         report={'schema_version':1,'run_id':run_id,'generated_at':now(),'status':'completed','scope':scope,
-                'summary':summary,'steps':steps,'unresolved_reasons':reasons,'review_queue':review[:20],'changes':changes[:20],
+                'summary':summary,'steps':steps,'unresolved_reasons':reasons,'excluded_reasons':excluded_reasons(result),
+                'review_queue':review[:20],'changes':changes[:20],
                 'coverage_reasons':coverage_reasons,'coverage_task_count':len(coverage_tasks),
                 'partisan_breakdowns':partisan_breakdowns(result,rows),
                 'recovery':recovery,'header_recovery':header_recovery,'imports':imports,'checks':checks,'link_count':len(result.get('links',[])),
@@ -538,7 +596,9 @@ def main():
     result=run(args.database,args.industry,[int(c) for c in args.cycles.replace('|',',').split(',')],args.state_root,
                args.baseline_root,args.evidence_dir,args.header_dir,not args.offline,args.max_requests,args.company,
                args.affiliations,args.filing_manifest,progress)
-    print(json.dumps({'run_id':result['run_id'],'summary':result['summary'],'link_count':result['link_count']}),flush=True)
+    print(json.dumps({'run_id':result['run_id'],'summary':result['summary'],'link_count':result['link_count'],
+                      'unresolved_reasons':result['unresolved_reasons'],'excluded_reasons':result['excluded_reasons'],
+                      'elapsed_seconds':result['elapsed_seconds']}),flush=True)
 
 
 if __name__=='__main__':main()
