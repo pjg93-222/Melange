@@ -1,0 +1,82 @@
+S8b REAL-CLIENT PASS - scratch console, temp data root
+date: 2026-09-18T12:39:50-0400
+console: http://127.0.0.1:8941   data root: C:\Users\pgoff\AppData\Local\Temp\mentat-s8b-gxur4zgo\data
+HEAD: b9fe34d02ad08a2197677b76a0d07690797c3676 Record the collector slowdown diagnosis packet (2026-09-17/18)
+
+--- POST /api/evidence-csv {"path": ".../Crypto Industry Spending Overview.xlsx"} ---
+  state ready after 6.0s  id csv-88ea228457b8499d1ec27eeaba967f61  rows 6343  sheet 2021-2022
+
+--- RULING A: /api/evidence-geo with a blank cycle ---
+  400 A map is drawn on one Congress, so it needs one cycle, not all of them. Choose 2026, 2024, 2022, 2020.
+
+--- GET /api/evidence-geo?source=csv&committee=C00804179&cycle=2024&direction=raised (the S8 figures, which must not regress) ---
+  PRE-GEOCODE, the real Crypto workbook
+    reported         275,016.22   located       275,016.22   unlocated         0.00   reconciles True
+    cycle 2024  vintage 118  geocoded_rows 0  zip_rows 741  pending_rows 0
+    CA-12          272,323.88  rows   727  basis zip        split False  COINBASE, INC., BAUGUESS, SCOTT, CHOI, EMI
+    CA               2,692.34  rows    14  basis zip        split False  FLOYD, BENJAMIN
+
+--- POST /api/evidence-geocode on the real workbook ---
+  400 No row in this import carries a street address, so there is nothing to geocode.
+  FINDING: the shipped industry workbooks' CYCLE SHEETS carry City, State and ZIP and
+  NO street column (headers checked on 2023-2024 and 2025-2026: Source ID, Cycle, ...,
+  Date, City, State, ZIP, Employer, Occupation, ...). S2's street_1/street_2 landed on
+  the Contributor Detail grain, not here. So the precise layer has nothing to send on
+  real data today: every row is ZIP-based, pending_rows is 0, and Start refuses in
+  words rather than sending an empty batch.
+
+--- the service, discovered rather than guessed ---
+  benchmark     4  Public_AR_Current        default=True
+  benchmark     8  Public_AR_ACS2025        default=False
+  benchmark    11  Public_AR_LUCA           default=True
+  benchmark  2020  Public_AR_Census2020     default=False
+  vintage       4  Current_Current          default=True
+  vintage     410  Census2010_Current       default=False
+  vintage     417  ACS2017_Current          default=False
+  vintage     418  ACS2018_Current          default=False
+  vintage     419  ACS2019_Current          default=False
+  vintage     420  Census2020_Current       default=False
+  vintage     421  ACS2021_Current          default=False
+  vintage     422  ACS2022_Current          default=False
+  vintage     423  ACS2023_Current          default=False
+  vintage     424  ACS2024_Current          default=False
+  vintage     425  ACS2025_Current          default=False
+  this console sends benchmark=4 vintage=420
+  the ONE-ADDRESS route carries a district layer at benchmark 4 with vintage 4 (119th, field CD119) and vintage 423 (118th, field CD118);
+  the BATCH route carries none - measured below.
+
+--- the live pass, on an import that DOES carry a street column (6 rows) ---
+  imported in 0.5s  id csv-870b12125da1ffa4f07f7470bb1ac7c5  rows 6
+  PRE-GEOCODE
+    reported          11,000.00   located        11,000.00   unlocated         0.00   reconciles True
+    cycle 2024  vintage 118  geocoded_rows 0  zip_rows 0  pending_rows 6
+    CA-12            5,250.00  rows     2  basis zip        split False  DONOR ONE, DONOR SIX
+    CA-11            4,000.00  rows     2  basis zip        split False  DONOR TWO, DONOR THREE
+    NY-10            1,000.00  rows     1  basis zip        split False  DONOR FOUR
+    WA-07              750.00  rows     1  basis zip        split False  DONOR FIVE
+
+  --- POST /api/evidence-geocode (LIVE: this sends 6 street addresses) ---
+  start 200 state=running rows_total=6
+  done: 4 of 6 addresses matched to a street address · the rest stay by ZIP
+  requests 1  sent 6  matched 4  non_exact 0  tie 0  no_match 2  cached 0  seconds 0.8
+  benchmark 4  vintage 420  service US Census Geocoder (geocoding.geo.census.gov)
+    1 FRANK H OGAWA PLAZA      OAKLAND        CA 94612  tract -           118=-      119=-      no_match
+    100 PINE ST                SAN FRANCISCO  CA 94111  tract 06075011700 118=CA-11  119=CA-11  exact
+    11 WALL ST                 NEW YORK       NY 10005  tract 36061000700 118=NY-10  119=NY-10  exact
+    1455 MARKET ST             SAN FRANCISCO  CA 94103  tract 06075017603 118=CA-11  119=CA-11  exact
+    400 BROAD ST               SEATTLE        WA 98109  tract 53033007101 118=WA-07  119=WA-07  exact
+    999 NOWHERE BLVD           NOWHEREVILLE   CA 94607  tract -           118=-      119=-      no_match
+
+  POST-GEOCODE (live US Census batch geocoder)
+    reported          11,000.00   located        11,000.00   unlocated         0.00   reconciles True
+    cycle 2024  vintage 118  geocoded_rows 4  zip_rows 2  pending_rows 0
+    CA-12            5,250.00  rows     2  basis zip        split False  DONOR ONE, DONOR SIX
+    CA-11            4,000.00  rows     2  basis street     split False  DONOR TWO, DONOR THREE
+    NY-10            1,000.00  rows     1  basis street     split False  DONOR FOUR
+    WA-07              750.00  rows     1  basis street     split False  DONOR FIVE
+
+--- the two new static assets ---
+  GET /geo/tract_cd119.json  200  1,776,166 bytes  application/json; charset=utf-8
+  GET /geo/tract_cd118.json  200  1,778,872 bytes  application/json; charset=utf-8
+
+console on 8941 stopped

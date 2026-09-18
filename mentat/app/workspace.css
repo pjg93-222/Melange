@@ -477,3 +477,42 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 .map-reconcile, .map-message { margin: 0; }
 .pane-district-filter { margin: 0 0 6px; font-size: 13px; }
 @media (max-width: 1100px) { .map-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* S8b - the map's one-line cycle note and the geocoding offer under the Raised
+   list. APPENDED at the end of the file, like S8's block above it, so three
+   lanes editing this stylesheet cannot land on the same hunk. */
+#evidence-map .map-note {
+  margin: 0 0 .35rem;
+  font-size: .82rem;
+}
+#evidence-map .map-geocode {
+  margin: .6rem 0 0;
+  padding: .6rem .7rem;
+  border: 1px solid var(--line, #e3dcd4);
+  border-radius: 6px;
+  background: var(--panel-soft, #faf7f3);
+  display: grid;
+  gap: .35rem;
+}
+#evidence-map .map-geocode-offer {
+  margin: 0;
+  font-size: .86rem;
+  font-weight: 600;
+}
+#evidence-map .map-geocode-privacy,
+#evidence-map .map-geocode-progress,
+#evidence-map .map-geocode-note {
+  margin: 0;
+  font-size: .8rem;
+  line-height: 1.45;
+}
+#evidence-map .map-geocode-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4rem;
+}
+#evidence-map .map-geocode-actions button[disabled] {
+  opacity: .55;
+  cursor: default;
+}

@@ -365,9 +365,12 @@ class Contract(GeoFixture):
             self.skipTest(f'{CONTRACT.name} is not written yet')
         self.contract = json.loads(CONTRACT.read_text(encoding='utf-8'))
 
-    def test_the_contract_is_v1_and_names_the_route(self):
-        self.assertEqual(self.contract['version'], 1)
+    def test_the_contract_is_v2_and_names_the_route(self):
+        # v2 is S8b: ruling A (no blank cycle), the per-row `basis`, and the
+        # three raised-row counters.
+        self.assertEqual(self.contract['version'], 2)
         self.assertEqual(self.contract['route'], '/api/evidence-geo')
+        self.assertIn('RULING A', ' '.join(self.contract['rules']))
 
     def test_every_example_validates(self):
         self.assertGreaterEqual(len(self.contract['examples']), 1)
@@ -391,6 +394,81 @@ class Contract(GeoFixture):
             payload = json.loads(json.dumps(control['payload']))
             self.assertNotEqual(evidence_geo.contract_problems(payload), [],
                                 control['name'])
+
+
+class RulingA(GeoFixture):
+    """Paul, 2026-09-18: "There should be no all cycles, street address yes".
+
+    A district map is drawn on ONE Congress, so the route refuses a blank
+    cycle instead of answering an empty or a silently-chosen map. The
+    newest-cycle fallback is the CLIENT's job, so what is asserted here is the
+    SERVER's refusal - the thing the client can rely on.
+    """
+
+    def test_a_blank_cycle_on_an_import_is_refused_and_names_the_cycles(self):
+        store, identifier = self.store()
+        with self.assertRaises(ValueError) as caught:
+            evidence_geo.geography('csv', identifier, 'C00804179', '', 'raised', store=store)
+        message = str(caught.exception)
+        self.assertIn('one cycle, not all of them', message)
+        self.assertIn('2024', message)
+        self.assertIn('2026', message)
+
+    def test_a_blank_cycle_on_a_snapshot_is_refused_rather_than_silently_picked(self):
+        """The snapshot path used to answer with the FIRST unit's cycle.
+
+        That is worse than an empty map: the pane said All cycles and the map
+        answered 2024 without saying so. It is a refusal now.
+        """
+        with self.assertRaises(ValueError) as caught:
+            evidence_geo.geography('snapshot', 'fixture-snap', 'C00835959', '', 'raised',
+                                   snapshot_root=self.snapshot_root)
+        message = str(caught.exception)
+        self.assertIn('one cycle, not all of them', message)
+        self.assertIn('2024', message)
+        self.assertIn('2026', message)
+
+    def test_an_absent_cycle_is_refused_the_same_way_a_blank_one_is(self):
+        store, identifier = self.store()
+        for value in (None, '', '   '):
+            with self.assertRaises(ValueError) as caught:
+                evidence_geo.geography('csv', identifier, 'C00804179', value, 'spent', store=store)
+            self.assertIn('one cycle', str(caught.exception))
+
+    def test_the_refusal_is_not_an_empty_map(self):
+        """A refusal, never a payload: an empty map would read as "no money"."""
+        store, identifier = self.store()
+        try:
+            payload = evidence_geo.geography('csv', identifier, 'C00804179', '', 'raised',
+                                             store=store)
+        except ValueError:
+            return
+        self.fail(f'a blank cycle answered with a payload: {payload.get("cycle")!r}')
+
+    def test_the_cycles_a_source_offers_are_concrete_and_newest_first(self):
+        store, identifier = self.store()
+        self.assertEqual(evidence_geo.source_cycles('csv', identifier, 'C00804179', store),
+                         [2026, 2024])
+        self.assertEqual(
+            evidence_geo.source_cycles('snapshot', 'fixture-snap', 'C00835959',
+                                       snapshot_root=self.snapshot_root), [2026, 2024])
+        for cycles in (evidence_geo.source_cycles('csv', identifier, 'C00804179', store),
+                       evidence_geo.source_cycles('snapshot', 'fixture-snap', 'C00835959',
+                                                  snapshot_root=self.snapshot_root)):
+            self.assertTrue(all(isinstance(value, int) for value in cycles))
+            self.assertNotIn('', cycles)
+
+    def test_a_source_with_no_cycle_still_gets_a_sentence_not_a_crash(self):
+        self.assertIn('no cycle to draw', evidence_geo.M_BLANK_CYCLE([]))
+
+    def test_every_payload_this_route_answers_states_a_cycle(self):
+        store, identifier = self.store()
+        for payload in (self.snapshot_spend('2024'),
+                        evidence_geo.geography('csv', identifier, 'C00804179', '2024', 'raised',
+                                               store=store)):
+            self.assertTrue(str(payload['cycle']).strip())
+            self.assertTrue(payload['vintage'])
+            self.assertEqual(evidence_geo.contract_problems(payload), [])
 
 
 if __name__ == '__main__':

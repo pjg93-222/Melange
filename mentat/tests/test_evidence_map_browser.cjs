@@ -31,7 +31,7 @@ const FORBIDDEN_PORTS = new Set([8802, 8806, 8808, 8841, 8940, 8971, 8990, 8991,
 const HARD_CAP_MS = 900_000;
 const CRYPTO_BOOK = 'Crypto Industry Spending Overview.xlsx';
 const RECEIPTS_DIR = path.resolve(MENTAT_DIR, '..', 'audits', 'mentat_failings_20260915', 'receipts');
-const SCREENSHOT_PATH = path.join(RECEIPTS_DIR, 'S8_after_screenshot.png');
+const SCREENSHOT_PATH = path.join(RECEIPTS_DIR, 'S8b_after_screenshot.png');
 
 let stepNumber = 0, currentStepLabel = '(none)', stepStartedAt = Date.now();
 let serverForWatchdog = null;
@@ -70,11 +70,12 @@ function freePort() {
   return withTimeout(pick(), 10000, 'freePort()');
 }
 
-function startServer(port, dataRoot) {
+function startServer(port, dataRoot, extraEnv) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.env.MENTAT_PYTHON || 'python',
       ['app/server.py', '--port', String(port), '--data-root', dataRoot],
-      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true});
+      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
+       env: {...process.env, ...(extraEnv || {})}});
     const stderr = [];
     let stdout = '', settled = false;
     const timer = setTimeout(() => {
@@ -119,7 +120,7 @@ import openpyxl
 target = sys.argv[1]
 HEAD = ['committee_id', 'committee_name', 'amount', 'date', 'two_year_transaction_period',
         'record_type', 'recipient_category', 'include_in_analysis', 'inclusion_reason',
-        'contributor_name', 'state', 'zip']
+        'contributor_name', 'street_1', 'city', 'state', 'zip']
 
 def book(rows, name, sheets=('2023-2024', '2025-2026')):
     workbook = openpyxl.Workbook()
@@ -133,16 +134,67 @@ def book(rows, name, sheets=('2023-2024', '2025-2026')):
     workbook.save(target + '/' + name)
 
 CRYPTO = [
-    ('C00804179', 'COINBASE INNOVATION PAC', 383197, '2024-05-05', '2024', 'CONTRIBUTION', 'Company PAC', 'Yes', '', 'CHOI, EMILIE', 'CA', '94607'),
-    ('C00804179', 'COINBASE INNOVATION PAC', 18884, '2024-05-06', '2024', 'CONTRIBUTION', 'Company PAC', 'Yes', '', 'POLLAK, JESSE', 'CA', '94105'),
-    ('C00804179', 'COINBASE INNOVATION PAC', 5000, '2024-05-07', '2024', 'CONTRIBUTION', 'Company PAC', 'Yes', '', 'NO ZIP PERSON', 'NY', ''),
-    ('C00804179', 'COINBASE INNOVATION PAC', 1000, '2026-01-05', '2026', 'CONTRIBUTION', 'Company PAC', 'Yes', '', 'LATER PERSON', 'CA', '94607'),
+    ('C00804179', 'COINBASE INNOVATION PAC', 383197, '2024-05-05', '2024', 'CONTRIBUTION', 'Company PAC', 'Yes', '', 'CHOI, EMILIE', '1 Frank H Ogawa Plaza', 'Oakland', 'CA', '94607'),
+    ('C00804179', 'COINBASE INNOVATION PAC', 18884, '2024-05-06', '2024', 'CONTRIBUTION', 'Company PAC', 'Yes', '', 'POLLAK, JESSE', '100 Pine St', 'San Francisco', 'CA', '94105'),
+    ('C00804179', 'COINBASE INNOVATION PAC', 5000, '2024-05-07', '2024', 'CONTRIBUTION', 'Company PAC', 'Yes', '', 'NO ZIP PERSON', '', '', 'NY', ''),
+    ('C00804179', 'COINBASE INNOVATION PAC', 1000, '2026-01-05', '2026', 'CONTRIBUTION', 'Company PAC', 'Yes', '', 'LATER PERSON', '', '', 'CA', '94607'),
+    ('C00835959', 'FAIRSHAKE', 2500, '2024-06-01', '2024', 'CONTRIBUTION', 'Super PAC', 'Yes', '', 'SECOND PAC DONOR', '', '', 'CA', '94607'),
+    ('C00835959', 'FAIRSHAKE', 3500, '2026-02-02', '2026', 'CONTRIBUTION', 'Super PAC', 'Yes', '', 'SECOND PAC LATER', '', '', 'CA', '94105'),
 ]
 book(CRYPTO, '${CRYPTO_BOOK}')
 `;
 
+// S8b: the geocoder, stubbed. The console is started with MENTAT_GEOCODE_URL
+// pointing here, so no contributor address leaves this machine during a test
+// and the answer is deterministic. The body is a multipart upload of
+// `id,street,city,state,zip` rows; this reads the ids and the streets out of
+// it and answers in the Census's own CSV shape - a MATCH for the Pine Street
+// row (state 06, county 075, tract 011700, which the shipped
+// geo/tract_cd118.json places in CA-11) and a No_Match for everything else,
+// deliberately OUT OF ORDER, because the real service answers out of order.
+const http = require('node:http');
+
+function stubRows(body) {
+  const part = body.split(/\r?\n\r?\n/).slice(1).join('\n\n');
+  return part.split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line => line && !line.startsWith('--') && line.split(',').length >= 5)
+    .map(line => {
+      const fields = line.split(',');
+      return {id: fields[0], street: fields[1] || '', line};
+    });
+}
+
+function stubAnswer(rows) {
+  const answered = rows.map(row => /PINE/i.test(row.street)
+    ? `"${row.id}","${row.line}","Match","Exact","100 PINE ST, SAN FRANCISCO, CA, 94105",`
+      + '"-122.39867061781,37.792455266252","192281482","R","06","075","011700","2014"'
+    : `"${row.id}","${row.line}","No_Match"`);
+  return answered.reverse().join('\n') + '\n';
+}
+
+function startStubGeocoder() {
+  return new Promise((resolve, reject) => {
+    const calls = [];
+    const stub = http.createServer((request, response) => {
+      const chunks = [];
+      request.on('data', chunk => chunks.push(chunk));
+      request.on('end', () => {
+        const body = Buffer.concat(chunks).toString('utf8');
+        const rows = stubRows(body);
+        calls.push({rows: rows.length, body});
+        response.writeHead(200, {'Content-Type': 'text/plain'});
+        response.end(stubAnswer(rows));
+      });
+    });
+    stub.on('error', reject);
+    stub.listen(0, '127.0.0.1', () => resolve({stub, calls,
+      url: `http://127.0.0.1:${stub.address().port}/geographies/addressbatch`}));
+  });
+}
+
 (async () => {
-  let browser = null, server = null, failed = false;
+  let browser = null, server = null, failed = false, stubbed = null;
   const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-s8-data-'));
   const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-s8-fixtures-'));
   try {
@@ -152,9 +204,10 @@ book(CRYPTO, '${CRYPTO_BOOK}')
     assert.ok(fs.existsSync(path.join(fixtureDir, CRYPTO_BOOK)));
     pass(`fixture written under ${fixtureDir}`);
 
-    step('launch a scratch console on a free port with a temp data root');
+    step('start the stub geocoder, then a scratch console pointed at it');
+    stubbed = await startStubGeocoder();
     const port = await freePort();
-    server = await startServer(port, dataRoot);
+    server = await startServer(port, dataRoot, {MENTAT_GEOCODE_URL: stubbed.url});
     serverForWatchdog = server;
     const origin = `http://127.0.0.1:${port}`;
     pass(`console ready on ${port}, data root ${dataRoot}`);
@@ -347,6 +400,83 @@ book(CRYPTO, '${CRYPTO_BOOK}')
     assert.equal(raisedPressedAfterReload, 'true', `direction was not restored as raised: ${raisedPressedAfterReload}`);
     pass(`permalink ${mapUrl} restored the map in the raised direction`);
 
+    step('RULING A: the map cycle select offers concrete cycles only, never All cycles');
+    const cycleOptions = await page.evaluate(() =>
+      [...document.querySelectorAll('#evidence-map-cycle option')]
+        .map(option => ({value: option.value, text: option.textContent.trim()})));
+    assert.ok(cycleOptions.length >= 1, JSON.stringify(cycleOptions));
+    assert.equal(cycleOptions.filter(option => option.value === '').length, 0,
+      `the map cycle select still offers a blank cycle: ${JSON.stringify(cycleOptions)}`);
+    assert.equal(cycleOptions.filter(option => /All cycles/i.test(option.text)).length, 0,
+      `the map cycle select still offers "All cycles": ${JSON.stringify(cycleOptions)}`);
+    assert.equal(await page.inputValue('#evidence-map-cycle'), '2024');
+    pass(`cycle options ${JSON.stringify(cycleOptions.map(option => option.value))}, selected 2024`);
+
+    step('the geocoding offer, its Start and its privacy sentence are under the Raised list');
+    await page.waitForSelector('#evidence-map .map-geocode', {timeout: 20000});
+    const offerText = (await page.textContent('#evidence-map .map-geocode-offer')).trim();
+    assert.equal(offerText,
+      'Contributor geography is by ZIP. Geocode street addresses for exact districts.', offerText);
+    const privacyText = (await page.textContent('#evidence-map .map-geocode-privacy')).trim();
+    assert.ok(/street address/i.test(privacyText), privacyText);
+    assert.ok(/No name, amount, employer or occupation is sent/.test(privacyText), privacyText);
+    assert.ok(privacyText.includes(new URL(stubbed.url).host),
+      `the privacy sentence must name the host actually called: ${privacyText}`);
+    assert.equal(await page.locator('#evidence-map-geocode-start').count(), 1);
+    assert.equal(await page.isDisabled('#evidence-map-geocode-start'), false,
+      'Start should be live while rows are still pending');
+    pass(`offer + Start + privacy naming ${new URL(stubbed.url).host}`);
+
+    step('Start: the stub is called and the footnote becomes the matched/unmatched counts');
+    await page.click('#evidence-map-geocode-start');
+    await waitFor(() => {
+      const node = document.querySelector('#evidence-map .map-geocode-offer');
+      return !!node && /rows matched to a street address/.test(node.textContent);
+    }, null, 60000, 'the geocoding footnote to become the matched counts');
+    const matchedText = (await page.textContent('#evidence-map .map-geocode-offer')).trim();
+    assert.match(matchedText, /^1 of 3 rows matched to a street address; the rest stay by ZIP$/,
+      matchedText);
+    assert.ok(stubbed.calls.length >= 1, 'the stub geocoder was never called');
+    assert.equal(stubbed.calls[0].rows, 2, `expected 2 addresses uploaded: ${stubbed.calls[0].rows}`);
+    for (const secret of ['CHOI', 'POLLAK', '383197', '18884']) {
+      assert.ok(!stubbed.calls[0].body.includes(secret),
+        `${secret} reached the geocoder; only street, city, state and ZIP may be sent`);
+    }
+    assert.equal(await page.isDisabled('#evidence-map-geocode-start'), true,
+      'Start should be spent once no row is pending');
+    pass(`footnote ${JSON.stringify(matchedText)}; upload carried 2 addresses and no name or amount`);
+
+    step('RULING A: a pane on All cycles opens the map on the newest cycle and says so once');
+    await page.click('#evidence-map-back');
+    await page.waitForSelector('#evidence-panes:not([hidden])', {timeout: 20000});
+    // A SECOND committee, so this is a fresh pane key with no remembered map
+    // state: reusing pane A's key would carry its 2024 cycle over and the
+    // fallback under test would never run.
+    await page.selectOption('#evidence-pac', 'C00835959');
+    await page.selectOption('#evidence-cycle', '');
+    await waitFor(() => !document.getElementById('evidence-add').disabled, null, 20000, 'a page condition');
+    await page.click('#evidence-add');
+    await waitPanes(2);
+    await page.click('#evidence-panes [data-pane=b] .pane-map');
+    await page.waitForSelector('#evidence-map:not([hidden])', {timeout: 20000});
+    await page.waitForSelector('#evidence-map .map-note', {timeout: 20000});
+    const noteText = (await page.textContent('#evidence-map .map-note')).trim();
+    assert.match(noteText, /^Showing 2025.2026; a map covers one Congress\.$/, noteText);
+    assert.equal(await page.inputValue('#evidence-map-cycle'), '2026');
+    assert.equal(await page.locator('#evidence-map .map-note').count(), 1,
+      'the note must be said once, not on every render');
+    const paneBCycles = await page.evaluate(() =>
+      [...document.querySelectorAll('#evidence-map-cycle option')].map(option => option.value));
+    assert.equal(paneBCycles.includes(''), false, JSON.stringify(paneBCycles));
+    pass(`note ${JSON.stringify(noteText)}; cycle select resolved to 2026`);
+
+    step('back to pane A for the screenshot');
+    await page.click('#evidence-map-back');
+    await page.waitForSelector('#evidence-panes:not([hidden])', {timeout: 20000});
+    await page.click(`${paneSel} .pane-map`);
+    await page.waitForSelector('#evidence-map:not([hidden])', {timeout: 20000});
+    pass('pane A map reopened');
+
     step('screenshot the map at 1440x900');
     fs.mkdirSync(RECEIPTS_DIR, {recursive: true});
     await page.setViewportSize({width: 1440, height: 900});
@@ -368,6 +498,7 @@ book(CRYPTO, '${CRYPTO_BOOK}')
     clearTimeout(watchdog);
     if (browser) await browser.close().catch(() => {});
     await stopServer(server);
+    if (stubbed) await new Promise(resolve => stubbed.stub.close(() => resolve()));
     for (const target of [dataRoot, fixtureDir]) {
       try { fs.rmSync(target, {recursive: true, force: true, maxRetries: 10, retryDelay: 200}); }
       catch (error) { console.error(`cleanup failed for ${target}: ${error.message}`); }

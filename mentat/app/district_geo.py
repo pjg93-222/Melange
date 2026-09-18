@@ -301,6 +301,78 @@ def district_for_zip(zip5, cycle):
     return [(key, share) for key, share in parts]
 
 
+# --------------------------------------------------- tract crosswalk (S8b)
+
+@lru_cache(maxsize=8)
+def _tract_crosswalk(root, vintage):
+    path = Path(root) / f'tract_cd{vintage}.json'
+    try:
+        payload = json.loads(path.read_text(encoding='utf-8'))
+    except OSError as error:
+        return {'__error__': f'no census-tract-to-district crosswalk is built for the {vintage}th '
+                             f'Congress ({path.name}, {type(error).__name__}); run '
+                             f'tools/build_tract_geo.py'}
+    except ValueError as error:
+        return {'__error__': f'the tract crosswalk {path.name} is not valid JSON ({error})'}
+    if not isinstance(payload.get('districts'), dict):
+        return {'__error__': f'the tract crosswalk {path.name} carries no districts'}
+    return payload
+
+
+def district_for_tract(tract_geoid, vintage):
+    """The seat an 11-digit 2020 census tract sits in, or '' - S8b.
+
+    EXACT where it answers, and silent where it cannot. The US Census BATCH
+    geocoder does not return a congressional district (measured 2026-09-18: its
+    geography columns are STATE, COUNTY, TRACT, BLOCK under every vintage and
+    the layers parameter is ignored), so a geocoded street address reaches its
+    district through the Census's own CD-to-tract tabulation, built by
+    tools/build_tract_geo.py.
+
+    Only tracts lying WHOLLY inside one district are in those files. A tract
+    split between two districts is absent on purpose: placing an address in it
+    would need a land-area share, which is exactly the approximation the ZIP
+    crosswalk already makes, so such a row keeps its ZIP basis rather than
+    being reported as an exact street match. `vintage` is a boundary vintage
+    ('119', '118'), not a cycle - one geocode serves every cycle and the caller
+    decides which map it is reading.
+    """
+    digits = re.sub(r'\D', '', str(tract_geoid or ''))
+    if len(digits) != 11:
+        return _problem(f'{tract_geoid!r} is not an 11-digit 2020 census tract') or ''
+    key = str(vintage or '').strip()
+    if not key:
+        return _problem('no boundary vintage was named for the tract lookup') or ''
+    payload = _tract_crosswalk(str(geo_dir()), key)
+    if '__error__' in payload:
+        _problem(payload['__error__'])
+        return ''
+    found = payload['districts'].get(digits)
+    if not found:
+        _problem(f'census tract {digits} is not wholly inside one {key}th-Congress district, '
+                 f'so this address keeps its approximate ZIP basis')
+        return ''
+    _solved()
+    return found
+
+
+def tract_basis(cycle):
+    """{'vintage', 'file', 'source', 'basis'} for a cycle's tract crosswalk, or None."""
+    vintage = vintage_for_cycle(cycle)
+    if vintage is None:
+        return None
+    payload = index()
+    if payload is None:
+        return None
+    entry = (payload.get('vintages') or {}).get(vintage) or {}
+    if not entry.get('tract_file'):
+        return _problem(f'no census-tract-to-district crosswalk is recorded for the {vintage}th-'
+                        f'Congress map, so street addresses cannot be placed for this cycle')
+    _solved()
+    return {'vintage': vintage, 'file': entry['tract_file'],
+            'source': entry.get('tract_source'), 'basis': entry.get('tract_basis')}
+
+
 # ----------------------------------------------------------- candidate master
 
 @lru_cache(maxsize=4)
@@ -510,6 +582,7 @@ def committee_state(committee_id, cycle=None):
 def reset_caches():
     """Drop every cached file. For tests that swap the data root mid-process."""
     global last_problem
-    for cache in (_index, _vintage_file, _crosswalk, _candidate_master, _committee_states):
+    for cache in (_index, _vintage_file, _crosswalk, _tract_crosswalk, _candidate_master,
+                  _committee_states):
         cache.cache_clear()
     last_problem = None

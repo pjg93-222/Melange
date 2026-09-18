@@ -1,0 +1,53 @@
+S8b BEFORE - the S8b tests against the PRE-CHANGE bytes (negative control)
+date: 2026-09-18T12:24:37-04:00
+HEAD: dba77f87fe9dff3237723cb79cec959eff81340d Verify an estimated FEC count by exhaustive date windows instead of failing the task
+
+--- the control tree: the live app, with the three S8b-edited modules reset to HEAD
+    and app/geocode.py removed (it does not exist at HEAD) ---
+  HEAD:mentat/app/evidence_geo.py -> 29284 bytes
+  HEAD:mentat/app/district_geo.py -> 22296 bytes
+  HEAD:mentat/app/server.py -> 136250 bytes
+  HEAD has mentat/app/geocode.py?      NO
+  HEAD has mentat/tests/test_geocode.py? NO
+  HEAD has mentat/app/geo/tract_cd118.json? NO
+
+--- tests/test_geocode.py (40 tests) against the pre-change app: EXPECTED RED ---
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-pac-evidence-filters-724237\6e7316d8-fa52-492d-9549-5001f1656290\scratchpad\negcontrol\tests\test_geocode.py", line 27, in <module>
+    import geocode  # noqa: E402
+    ^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'geocode'
+
+--- RULING A against the pre-change producer: does a blank cycle draw anything? ---
+RED: the pre-change producer ACCEPTED a blank cycle instead of refusing it.
+     cycle='2024'  vintage='118'  kinds=1  located=10500.00
+     boundary_file='cd118.json'  -> the client would draw nothing
+     counters present? []
+     bases stated by rows: [None]
+
+--- the contract before S8b regenerates it ---
+  version 1  examples 4  controls 6  rules 6
+
+--- tests/test_evidence_geo.py against the S8b working tree, BEFORE the contract is regenerated ---
+First extra element 0:
+'the payload has no geocoded_rows'
+
++ []
+- ['the payload has no geocoded_rows',
+-  'the payload has no zip_rows',
+-  'the payload has no pending_rows',
+-  'geocoded_rows is not a row count',
+-  'zip_rows is not a row count',
+-  'pending_rows is not a row count',
+-  'basis None on CA-SEN is not a placing basis',
+-  'basis None on CA-45 is not a placing basis',
+-  'basis None on NY-16 is not a placing basis',
+-  'basis None on FL is not a placing basis',
+-  'basis None on VA is not a placing basis',
+-  'basis None on NY is not a placing basis',
+-  'basis None on CA is not a placing basis'] : snapshot spent, four kinds, reconciled
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.819s
+
+FAILED (failures=1)

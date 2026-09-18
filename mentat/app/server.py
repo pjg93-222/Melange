@@ -85,6 +85,7 @@ import industry_scope
 CONTRIBUTION_STUDIO_REVISION = '2026-09-12-typed-fields-chart-families'
 import evidence_csv
 import evidence_geo
+import geocode
 from report_directory import report_directory, require_report_path
 from validate_industry_coverage import workbook_roster
 from collection_coverage import inspect as inspect_coverage, cycles_from
@@ -142,7 +143,13 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  '/geo/cd118.json': ('geo/cd118.json', 'application/json; charset=utf-8'),
                  '/geo/cd116.json': ('geo/cd116.json', 'application/json; charset=utf-8'),
                  '/geo/zcta_cd119.json': ('geo/zcta_cd119.json', 'application/json; charset=utf-8'),
-                 '/geo/zcta_cd118.json': ('geo/zcta_cd118.json', 'application/json; charset=utf-8')}
+                 '/geo/zcta_cd118.json': ('geo/zcta_cd118.json', 'application/json; charset=utf-8'),
+                 # S8b: the census-tract crosswalk that turns a geocoded street
+                 # address into a district. The batch geocoder answers a 2020
+                 # census block, never a district (measured 2026-09-18), so the
+                 # bridge ships like the ZIP crosswalk beside it.
+                 '/geo/tract_cd119.json': ('geo/tract_cd119.json', 'application/json; charset=utf-8'),
+                 '/geo/tract_cd118.json': ('geo/tract_cd118.json', 'application/json; charset=utf-8')}
 
 # Build identity. A console window outlives edits to this tree, so the page and
 # the launcher both compare what this process loaded with what is on disk now.
@@ -1684,7 +1691,39 @@ class Console:
         """
         return evidence_geo.geography(source, identifier, committee, cycle, direction,
                                       store=self.evidence_store if source == 'csv' else None,
-                                      snapshot_root=PROJECT / '.cache/pac-evidence')
+                                      snapshot_root=PROJECT / '.cache/pac-evidence',
+                                      data_root=self.root)
+
+    def evidence_geocode(self, identifier=''):
+        """What this import's geocoding has done, without scanning the import.
+
+        Polled twice a second while a job runs, so it reads the job file and
+        nothing else: the row counts a reader cares about (matched, by ZIP,
+        still to do) come from /api/evidence-geo, which has to read the rows
+        anyway.
+        """
+        if not evidence_csv.IDENTIFIER.fullmatch(str(identifier or '')):
+            raise ValueError(evidence_csv.M_GONE(identifier))
+        return geocode.status(self.root, identifier)
+
+    def start_evidence_geocode(self, data):
+        """Ruling 10: one job per import, and ONLY from an explicit Start.
+
+        The read-only preview is refused here as well as at the handler, because
+        it shares its data root with the console that owns these imports and a
+        job started from it would write that console's cache.
+        """
+        if getattr(self, 'read_only', False):
+            raise ValueError(geocode.M_READ_ONLY)
+        identifier = str(data.get('id') or '')
+        if not evidence_csv.IDENTIFIER.fullmatch(identifier):
+            raise ValueError(evidence_csv.M_GONE(identifier))
+        if str(data.get('action') or 'start').strip().lower() == 'stop':
+            return geocode.stop(self.root, identifier)
+        addresses = geocode.addresses_for(self.evidence_store, identifier,
+                                          str(data.get('committee') or '').strip().upper(),
+                                          str(data.get('cycle') or '').strip())
+        return geocode.start(self.root, identifier, addresses)
 
     def summary(self, include_archived=False):
         runs = self.runs()
@@ -2189,6 +2228,10 @@ class Handler(BaseHTTPRequestHandler):
                 # ("invalid literal for int()") into the status line.
                 return self.send(app.evidence_csv_view(query.get('id', [''])[0], query.get('committee', [''])[0],
                     query.get('cycle', [''])[0], query.get('offset', ['0'])[0], query.get('limit', ['200'])[0]))
+            if parsed.path == '/api/evidence-geocode':
+                # Read-only on purpose: starting and stopping are POSTs, so a
+                # GET can never begin sending addresses anywhere.
+                return self.send(app.evidence_geocode(query.get('id', [''])[0]))
             if parsed.path == '/api/evidence-geo':
                 # One pane, one cycle, one direction. Every refusal is the
                 # reader's own sentence, raised as ValueError and answered 400
@@ -2333,6 +2376,9 @@ class Handler(BaseHTTPRequestHandler):
         if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/studio/views'):
             self.discard_body()
             return self.send({'error': 'Read-only preview. Save views from the main console.'}, 403)
+        if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/evidence-geocode'):
+            self.discard_body()
+            return self.send({'error': geocode.M_READ_ONLY}, 403)
         if getattr(self.server.app, 'read_only', False) and self.path not in (
                 analytical_paths | {'/api/evidence-csv', '/api/evidence-files'}):
             self.discard_body()
@@ -2449,6 +2495,10 @@ class Handler(BaseHTTPRequestHandler):
                         return self.send({'error': job.get('message') or evidence_csv.M_GONE(job.get('id', ''))}, 400)
                     return self.send(job)
                 return self.send(self.server.app.import_evidence_csv(data))
+            if self.path == '/api/evidence-geocode':
+                # S8b ruling 10. The ONLY door that sends contributor addresses
+                # to the US Census Geocoder, and it opens on an explicit Start.
+                return self.send(self.server.app.start_evidence_geocode(data))
             if self.path == '/api/evidence-files':
                 # Read-only, and authenticated by the same token as every other
                 # POST: do_GET checks only the Host header, so a folder listing

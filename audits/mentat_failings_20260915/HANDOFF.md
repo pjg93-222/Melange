@@ -2265,3 +2265,251 @@ Re-run green: `test_district_geo` (20), `test_evidence_summary` (27),
 * S8b still owns the precise geocoding layer (ruling 10) and the Start button.
 * The Compare strip's "Top districts" row (S6_DESIGN C) is not added; its Map
   button opens the first pane's map instead.
+
+## S8b - street-address geocoding and no "All cycles" on the map (2026-09-18, Opus architect)
+
+Built on S8 (`491570a0b`); HEAD moved three times under this lane, all collector
+work, none of it touching these files. Nothing is committed: **Paul commits, then
+re-runs the launcher** - a new `app/*.py` module and two new static assets change
+`CODE_TREE_SHA256` and the asset hash, so a console started before the commit
+reports a stale build.
+
+**READ THIS BEFORE COMMITTING.** As with S8, the patch does NOT carry
+`mentat/app/geo/*.json`. Two NEW built files sit untracked in the working tree
+and must be added by hand: `git add mentat/app/geo/tract_cd119.json
+mentat/app/geo/tract_cd118.json` (no `-f`: `mentat/app/geo/.gitignore` already
+negates the root `*.json` rule). Without them a geocoded address resolves to no
+district at all and every row silently stays ZIP-based. The amended
+`mentat/app/geo/index.json` IS in the patch - it was tracked with S8 - and gains
+`tract_file` / `tract_source` / `tract_basis` per vintage plus one note. Receipts need `git add -f` as always (`*.txt`, `*.png`).
+
+### Paul's two rulings, verbatim
+> "There should be no all cycles, street address yes" (2026-09-18)
+
+**RULING A - no "All cycles" on the map.** A district map belongs to one
+Congress, so a blank cycle has no vintage and draws nothing. The map's cycle
+select offers only the concrete cycles of that pane's source, never "All
+cycles". Opening the map from a pane whose cycle is "All cycles" selects the
+newest cycle the source carries and says so once in the map header ("Showing
+2025-2026; a map covers one Congress."). `/api/evidence-geo` with a blank or
+absent `cycle` returns 400 naming the cycles it will accept, rather than an
+empty map. The pane itself keeps "All cycles" for its figures: this rule is the
+map only.
+
+**RULING B - street-address geocoding (the "precise layer").** The US Census
+BATCH geocoder, a shared sqlite cache on the data root, one resumable job per
+import started ONLY by an explicit Start (S6_DESIGN ruling 10), and a raised map
+that prefers a cached street match over the ZIP crosswalk per row and reports
+the mix.
+
+### THE DISCOVERY THAT CHANGED THE DESIGN (measured, not guessed)
+The design assumed `POST geocoding.geo.census.gov/geocoder/geographies/addressbatch`
+returns a Congressional District. **IT DOES NOT, AND NO PARAMETER MAKES IT.**
+Measured 2026-09-18:
+
+* `GET /geocoder/benchmarks` -> id **4 `Public_AR_Current`** (default), 8
+  `Public_AR_ACS2025`, 11 `Public_AR_LUCA`, 2020 `Public_AR_Census2020`.
+* `GET /geocoder/vintages?benchmark=4` -> id **4 `Current_Current`** (default),
+  410 Census2010, 417-425 ACS2017..ACS2025, **420 `Census2020_Current`**.
+* The ONE-ADDRESS route `geographies/address` DOES carry the district:
+  benchmark 4 + vintage **4** answers a `119th Congressional Districts` layer
+  (field `CD119`), benchmark 4 + vintage **423** (`ACS2023_Current`) answers a
+  `118th Congressional Districts` layer (field `CD118`). Those are the
+  identifiers the brief asked for; they are recorded in `geocode.DISTRICT_VINTAGES`.
+* The BATCH route answers a fixed CSV whose geography columns are **STATE,
+  COUNTY, TRACT, BLOCK** - the 2020 census block - and nothing else. Identical
+  under vintage 4 and 420, and `layers=54`, `layers=Congressional Districts`
+  and `layers=all` were all ignored (three byte-identical responses).
+
+One address at a time is exactly what the batch design existed to avoid
+(27,632 rows), so the batch answer is BRIDGED LOCALLY: the 2020 census tract it
+returns determines the district through the Census's own CD-to-tract
+tabulation. `mentat/tools/build_tract_geo.py` turns
+`https://www2.census.gov/geo/docs/maps-data/data/rel2020/cd-sld/tab20_cd119­20_tract20_natl.txt`
+(and the cd118 twin) into `geo/tract_cd119.json` (1,776,166 B, 80,590 whole
+tracts, 4,932 straddling and omitted) and `geo/tract_cd118.json` (1,778,872 B,
+80,713 whole, 4,809 omitted). Only tracts lying WHOLLY inside one district are
+kept: an address in a split tract would need a land-area share, which is the
+approximation the ZIP crosswalk already makes, so it keeps its ZIP basis instead
+of being claimed as an exact match. Verified end to end: 100 Pine St, San
+Francisco geocodes to tract 06075011700, which the crosswalk places in CA-11 -
+the same seat the single-address route's `CD119` field returns.
+
+**This is a deviation from the settled design and the orchestrator should rule
+on it.** The alternative is one request per address (hours per workbook), and
+the brief forbade guessing identifiers, so the tract bridge is what the service
+actually makes possible.
+
+### The cache
+sqlite at `<data_root>/geocode/addresses.sqlite`, WAL + 30 s busy timeout,
+shared by every console on that data root, surviving restarts. Key = the
+normalised address, upper-cased, punctuation stripped, whitespace collapsed,
+ZIP truncated to five: `100 PINE ST|SAN FRANCISCO|CA|94111`. Content-addressed,
+so two imports sharing a donor share the lookup and a cached row is never
+re-sent.
+
+```
+addresses(key PK, street, city, state, zip5, latitude, longitude, tract,
+          district_119, district_118, matched, source, fetched_at)
+```
+`matched` is `exact | non_exact | tie | no_match`. **DEVIATION:** one column
+beyond the brief's list, `tract`, so the districts can be re-derived from a
+rebuilt crosswalk without sending a single address again - a privacy win, not a
+convenience.
+
+### The job
+`geocode.Job`: one per import, background thread, `?job=`-style polling through
+`GET /api/evidence-geocode?id=`, state on disk at
+`<data_root>/geocode/<import id>.job.json`. Resumable BY CONSTRUCTION - the
+cache is the record of what is done, so a stopped job that starts again sends
+only what is missing (proven: stop after 2 of 6, resume sends exactly 4).
+Chunked at 2,000 rows (the service's own ceiling is 10,000 and is refused above
+that before anything is sent). A failure records its reason and stops; a job
+whose thread died with a restart reports `stopped`, never `running`. No
+exception may leave the thread.
+
+### What leaves the machine
+Street, city, state and a five-digit ZIP. Nothing else - the upload is
+`id,street,city,state,zip` where `id` is the opaque cache key, so the service is
+not told which import, committee or person an address belongs to. Asserted two
+ways: a unit test that no name, amount or employer can reach
+`build_batch_csv`, and a browser step that greps the ACTUAL uploaded body for
+`CHOI`, `POLLAK`, `383197`, `18884`. The privacy sentence beside Start is
+served by the console and derived from the host actually in force
+(`geocode.service_name`), so a console pointed elsewhere cannot claim the Census.
+
+### The map's answer
+`/api/evidence-geo?...&direction=raised` prefers a cached street match per row.
+Each district/state row gains `basis` (`street` | `zip` | `zip_split` | `''`
+for a SPENT kind) and the payload gains three DISJOINT counts that add to every
+raised row read: `geocoded_rows` (placed by a cached street match),
+`zip_rows` (no usable address, or a cached answer the service could not place,
+or a straddling tract) and `pending_rows` (an address that could be geocoded but
+has not been). A district reached only by street matches loses the `split` mark.
+Nothing about the Spent side changes: its three counts are 0.
+
+### Files claimed by S8b
+NEW: `mentat/app/geocode.py`, `mentat/tools/build_tract_geo.py`,
+`mentat/tests/test_geocode.py`.
+NEW, BUILT, UNTRACKED (add by hand, see above): `mentat/app/geo/tract_cd119.json`,
+`mentat/app/geo/tract_cd118.json`.
+EDITED (hunk-exact; several lanes share this tree):
+* `mentat/app/evidence_geo.py` - `M_BLANK_CYCLE`, `source_cycles`, the ruling-A
+  refusal in `geography`, `class Mix`, `place_by_street`, `basis_of`, the
+  `basis` field on every ranked row, the three counts, and the contract checks.
+* `mentat/app/district_geo.py` - `_tract_crosswalk`, `district_for_tract`,
+  `tract_basis`, and the new cache in `reset_caches`.
+* `mentat/app/server.py` - FIVE hunks, all far from the collector lane's
+  `Console.runs` / `orphaned_state` region: `import geocode`; two `/geo/tract_*`
+  STATIC_ASSETS entries; `data_root=self.root` on `evidence_geography` plus
+  `Console.evidence_geocode` and `Console.start_evidence_geocode`; the
+  `/api/evidence-geocode` GET route; the read-only POST refusal and the
+  `/api/evidence-geocode` POST route.
+* `mentat/app/evidence.js` - `mapCycles`/`chooseMapCycle` and the header note,
+  the cycle select, and the geocoding block (`geocodeFootnote`, `geocodeHtml`,
+  `readGeocode`, `pollGeocode`, `startGeocode`, `stopGeocode`) with its two
+  click handlers.
+* `mentat/app/workspace.css` - ONE hunk, APPENDED at the end of the file, as
+  S8's was, so it cannot collide with the UI lane's hunks.
+* `mentat/app/geo/index.json` - `tract_file` / `tract_source` / `tract_basis`
+  per vintage, and one note.
+* `audits/.../contracts/evidence-geo.json` - v1 -> **v2**.
+* `mentat/tests/test_evidence_geo.py` - `class RulingA` (7 tests) and the
+  version assertion.
+* `mentat/tests/test_evidence_map_browser.cjs` - a stub geocoder, a street
+  column and a second committee in the fixture, and four new steps.
+NOT TOUCHED: `graph.*`, `chart-studio.*`, `cross_reference*`, `report_insights.py`,
+`style.css`, `acu-theme.css`, `desktop/Launcher.cs`, `index.html`, `scope.js`,
+`contracts/url_scope.json`. No peer marker (`graph-header`, `analysis-strip`,
+`graph-menu`, `graph-panel-tools`, `chart-studio`, `resume-run`,
+`cross_reference`) appears in any section of the patch.
+
+### Contract
+`contracts/evidence-geo.json` **v2**: three new rules (ruling A; the `basis`
+vocabulary; the three disjoint counts), five examples regenerated FROM the
+producer (the fifth is a street-geocoded import), and nine negative controls -
+the six S8 ones plus a payload with no cycle, a row whose basis is not a basis,
+and a street-matched row still marked split. Every example validates and every
+control is refused for its own stated reason (`test_evidence_geo.py::Contract`).
+
+### Tests
+`tests/test_geocode.py` - **41 tests**, no network: normalisation (case,
+punctuation, ZIP+4, refusals), the cache round trip and its persistence, the
+batch upload and the parse of a RECORDED response (copied byte-for-byte from a
+real 2026-09-18 call, rows out of order), all four match classes including tie
+and non_exact, the job finishing / resuming / failing / refusing a second run,
+a read-only console refused with `geocode.M_READ_ONLY`, a map GET that
+does NOT create the cache file, and the
+`basis`/`geocoded_rows`/`zip_rows`/`pending_rows` mix before and after a run.
+`tests/test_evidence_geo.py` - 24 -> **31** (`class RulingA`).
+`tests/test_evidence_map_browser.cjs` - 18 -> **22 steps**, all green.
+
+Green under BOTH interpreters (`receipts/S8b_after_python.txt`): test_geocode 41,
+test_evidence_geo 31, test_district_geo 20, test_evidence_summary 27,
+test_evidence_categories 30, test_evidence_readers 44, test_evidence_csv_stream 18,
+test_evidence_csv 10, test_pac_evidence 11 - 232 tests, twice, all OK.
+Node (`receipts/S8b_after_browser.txt`): 11 unit files exit 0,
+test_evidence_map_browser 22/22, test_evidence_panes_browser 28/28,
+test_navigation_scope_browser 13/13.
+RED FIRST (`receipts/S8b_before.txt`): the S8b tests against the pre-change bytes
+taken from HEAD - `test_geocode.py` cannot even import (`No module named
+'geocode'`), and the pre-change producer ACCEPTED a blank cycle, answered with
+`cycle='2024'` chosen silently from the first snapshot unit, carried none of the
+three counts, and stated `basis: None` on every row.
+
+### MEASURED (receipts/S8b_real_client.txt, scratch console on 8941, temp root)
+The S8 figures do not regress: the real Crypto workbook, C00804179, cycle 2024,
+raised - reported 275,016.22, located 275,016.22, unlocated 0.00, **CA-12
+272,323.88 over 727 rows**, basis `zip`, plus CA 2,692.34 over 14 rows.
+Ruling A on the same import: `400 A map is drawn on one Congress, so it needs
+one cycle, not all of them. Choose 2026, 2024, 2022, 2020.`
+
+**THE SERVICE WAS REACHABLE AND A REAL BATCH CALL WAS MADE.** 6 addresses in
+1 request, 0.8 s: 4 exact, 0 non-exact, 0 tie, 2 no_match, benchmark 4,
+vintage 420. The mix moved from `geocoded 0 / zip 0 / pending 6` to
+`geocoded 4 / zip 2 / pending 0`, and CA-11, NY-10 and WA-07 changed from
+`basis: zip` to `basis: street`.
+
+### THE FINDING THAT LIMITS THIS TODAY
+**The shipped industry workbooks' CYCLE SHEETS carry no street column.** Their
+headers are `Source ID, Cycle, FEC Filing Cycle, Cycle Alignment, Company,
+Contributor, Employee Tier, Amount, Analysis Amount, Party, Recipient Category,
+Category Source, Party Source, Recipient, Committee ID, Recipient Key, Date,
+City, State, ZIP, Employer, Occupation, ...` - S2's `street_1`/`street_2` landed
+on the Contributor Detail grain, not here. So on the real Crypto workbook every
+row is ZIP-based, `pending_rows` is 0, and Start refuses in words: *"No row in
+this import carries a street address, so there is nothing to geocode."* The live
+pass above therefore ran on a six-row import built WITH a street column, using
+real public addresses. The precise layer is complete and proven; it will place
+real contributor money the day the cycle sheets carry the street the FEC filing
+already has. **That is a workbook-builder change and is Paul's call.**
+
+### DEVIATIONS (four)
+1. The batch geocoder returns a 2020 census BLOCK, not a district, so the design's
+   central assumption is false. Bridged with a shipped tract crosswalk and a new
+   build tool. See above.
+2. The cache carries one extra column, `tract`, beyond the brief's list.
+3. The map's header note is STICKY: `chooseMapCycle` leaves `note` alone when the
+   cycle is already valid, because `openMap` and `loadMap` both call it and the
+   second call would otherwise wipe the note the first one earned. It clears when
+   the reader picks a cycle from the select. Measured, not predicted - the browser
+   step failed on exactly this before the fix.
+4. The privacy sentence is served by the console rather than hard-coded in the
+   page, so a console pointed at a different host cannot claim the Census.
+5. `geocode.Cache(data_root, create=False)` for the map. Found while reviewing
+   this lane's own work: `geography` opened the cache unconditionally, so a
+   plain GET created `<data root>/geocode/addresses.sqlite` - a write into a
+   data root a READ-ONLY preview only shares. The map now opens an existing
+   cache or has none, and only Start creates the file; pinned by
+   `test_reading_a_map_never_creates_the_cache_file`.
+
+### OPEN / NOT DONE
+* The cycle sheets' missing street column (above) - the one thing standing
+  between this lane and a precise map of real contributor money.
+* A tract split between two districts is omitted from the crosswalk, so ~5.9% of
+  tracts fall back to ZIP even after a successful geocode. Splitting them by land
+  area is possible with the same relationship file if Paul wants it.
+* `pending_rows` is computed by reading the import's rows, so it costs one full
+  read of the raised side - the same read the map already does, but a very large
+  import pays it on every map open.
+* The Compare strip's "Top districts" row is still not added (S8's own OPEN).

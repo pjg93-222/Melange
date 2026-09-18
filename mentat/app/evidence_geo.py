@@ -35,6 +35,7 @@ import sqlite3
 
 import district_geo
 import evidence_csv
+import geocode
 
 # The legend's real stops, in dollars. The client draws a log ramp between
 # them; they are published so the page never invents its own scale.
@@ -58,6 +59,19 @@ M_DIRECTION = 'Choose Raised or Spent.'
 M_COMMITTEE = 'Choose a committee in this source.'
 M_SNAPSHOT = 'That saved snapshot is unavailable.'
 M_CYCLE = 'Choose a cycle this source records.'
+
+
+def M_BLANK_CYCLE(cycles):
+    """Ruling A (Paul, 2026-09-18): "There should be no all cycles" on the map.
+
+    A district map is drawn on ONE Congress's boundaries, so a blank cycle has
+    no vintage and would draw an empty country. The refusal names the cycles
+    this source actually carries rather than answering with a blank map, and
+    choosing one of them is the client's job.
+    """
+    known = ', '.join(str(value) for value in cycles if str(value or '').strip())
+    return ('A map is drawn on one Congress, so it needs one cycle, not all of them. '
+            + (f'Choose {known}.' if known else 'This source records no cycle to draw.'))
 M_NO_OUTBOUND = ('This import records money this committee RECEIVED, not money it sent, so it '
                  'carries no outbound rows to place on a map. Open a saved FEC snapshot for '
                  'this committee to see where it spent.')
@@ -123,15 +137,19 @@ class Bucket:
     def __init__(self, kind):
         self.kind = kind
         self.districts = defaultdict(lambda: {'amount': Decimal(0), 'rows': 0, 'support': Decimal(0),
-                                              'oppose': Decimal(0), 'who': {}, 'split': False})
+                                              'oppose': Decimal(0), 'who': {}, 'split': False,
+                                              'bases': set()})
         self.states = defaultdict(lambda: {'amount': Decimal(0), 'rows': 0, 'support': Decimal(0),
-                                           'oppose': Decimal(0), 'who': {}, 'split': False})
+                                           'oppose': Decimal(0), 'who': {}, 'split': False,
+                                           'bases': set()})
 
-    def _add(self, table, key, amount, rows=1, who='', direction='', split=False):
+    def _add(self, table, key, amount, rows=1, who='', direction='', split=False, basis=''):
         entry = table[key]
         entry['amount'] += amount
         entry['rows'] += rows
         entry['split'] = entry['split'] or split
+        if basis:
+            entry['bases'].add(basis)
         if direction == 'support':
             entry['support'] += amount
         elif direction == 'oppose':
@@ -159,6 +177,23 @@ class Bucket:
                 'states': _rank(self.states, total, STATE_KEY)}
 
 
+def basis_of(bases):
+    """One word for how a row's district was decided: street, zip or zip_split.
+
+    S8b. '' for a row no contributor basis placed - every SPENT kind, whose
+    basis is the candidate's seat or the payee's state and has nothing to do
+    with a contributor address. A district reached only by street matches is
+    exact, so it carries neither the split mark nor the ZIP caveat.
+    """
+    if not bases:
+        return ''
+    if bases == {'street'}:
+        return 'street'
+    if 'zip_split' in bases:
+        return 'zip_split'
+    return 'zip'
+
+
 def _rank(table, total, pattern):
     rows = []
     for key, entry in table.items():
@@ -168,6 +203,7 @@ def _rank(table, total, pattern):
             continue
         who = sorted(entry['who'].items(), key=lambda item: (-item[1], item[0]))
         rows.append({'key': key, 'amount': cash(entry['amount']), 'rows': entry['rows'],
+                     'basis': basis_of(entry['bases']),
                      'share': float((entry['amount'] / total).quantize(Decimal('0.000001')))
                               if total > 0 else 0.0,
                      'support': cash(entry['support']), 'oppose': cash(entry['oppose']),
@@ -196,6 +232,60 @@ class Unlocated:
                       key=lambda row: (-abs(row['amount']), row['reason']))
 
 
+class Mix:
+    """How many raised rows each basis placed - S8b's honesty counter.
+
+    The three counts are DISJOINT and add to every row the raised side read:
+
+      geocoded  the address was in the geocode cache and resolved to a seat
+      pending   the row has an address this console could geocode, but has not
+                yet; it is placed by ZIP today and would sharpen if Start ran
+      zip       everything else: no usable address at all, or a cached answer
+                the service could not place, or a census tract that straddles
+                two districts. Never dropped - S6_DESIGN's rule stands.
+
+    A Spent map reads no contributor address, so its Mix stays all zero and
+    the page shows no geocoding line for it.
+    """
+
+    def __init__(self):
+        self.geocoded = 0
+        self.pending = 0
+        self.zip = 0
+
+    def street(self, cache, values, cycle, bucket, unlocated, amount, who):
+        """Place one raised row by street if the cache can, counting either way.
+
+        True when the row was placed here and the caller must not place it
+        again. False leaves the row to the ZIP path, with the count already
+        recorded, so no row can be counted twice or not at all.
+        """
+        parts = geocode.normalise(*geocode.address_of(values))
+        if parts is None:
+            self.zip += 1
+            return False
+        if cache is None:
+            self.pending += 1
+            return False
+        row = cache.get(parts[0])
+        if row is None:
+            self.pending += 1
+            return False
+        key = geocode.district_of(row, cycle)
+        if not key:
+            self.zip += 1
+            return False
+        if place_by_street(bucket, unlocated, amount, key, who=who):
+            self.geocoded += 1
+            return True
+        self.geocoded += 1
+        return True
+
+    def payload(self):
+        return {'geocoded_rows': self.geocoded, 'zip_rows': self.zip,
+                'pending_rows': self.pending}
+
+
 # ------------------------------------------------------------ shared placing
 
 def place_by_zip(bucket, unlocated, amount, zip_value, state_value, cycle, who='', reason_prefix=''):
@@ -210,15 +300,30 @@ def place_by_zip(bucket, unlocated, amount, zip_value, state_value, cycle, who='
                               amount * money(share))
                 continue
             bucket.add_district(key, amount * money(share), rows=1 if key == parts[0][0] else 0,
-                                who=who, split=split)
+                                who=who, split=split,
+                                basis='zip_split' if split else 'zip')
         return
     state = state_of(state_value)
     if state:
         reason = ('the ZIP was missing or unknown' if not digits or not parts else '')
-        bucket.add_state(state, amount, who=who or reason)
+        bucket.add_state(state, amount, who=who or reason, basis='zip')
         return
     problem = district_geo.last_problem or 'no usable ZIP or state on the row'
     unlocated.add(f'{reason_prefix}{problem}', amount)
+
+
+def place_by_street(bucket, unlocated, amount, key, who=''):
+    """An address the geocoder matched: one district, no share, no caveat.
+
+    S8b's precise layer. The key has already been read off the cache for this
+    cycle's boundary vintage, so this function only records it - and refuses a
+    key the map has no line for rather than drawing a seat that does not exist.
+    """
+    if DISTRICT_KEY.fullmatch(str(key or '')):
+        bucket.add_district(key, amount, who=who, basis='street')
+        return True
+    unlocated.add(f'a geocoded address resolved to {key!r}, which this map has no seat for', amount)
+    return False
 
 
 def place_by_state(bucket, unlocated, amount, zip_value, state_value, cycle, who='',
@@ -361,19 +466,24 @@ def snapshot_spent(unit, evidence, cycle):
     return buckets, unlocated, reported
 
 
-def snapshot_raised(unit, cycle):
+def snapshot_raised(unit, cycle, cache=None):
     bucket = Bucket('contributors')
     unlocated = Unlocated()
+    mix = Mix()
     for row in unit.get('receipts') or []:
         if is_memo(row):
             continue
         amount = money(row.get('contribution_receipt_amount'))
+        who = str(row.get('contributor_name') or '')
+        # The cache is content-addressed by ADDRESS, so a snapshot receipt is
+        # placed by street whenever some import already paid for that lookup.
+        if mix.street(cache, row, cycle, bucket, unlocated, amount, who):
+            continue
         place_by_zip(bucket, unlocated, amount, row.get('contributor_zip'),
-                     row.get('contributor_state'), cycle,
-                     who=str(row.get('contributor_name') or ''),
+                     row.get('contributor_state'), cycle, who=who,
                      reason_prefix='a receipt could not be placed: ')
     reported = money((unit.get('totals') or {}).get('receipts'))
-    return {'contributors': bucket}, unlocated, reported
+    return {'contributors': bucket}, unlocated, reported, mix
 
 
 # ---------------------------------------------------------------- the imports
@@ -414,19 +524,23 @@ def import_rows(store, identifier, committee, cycle):
     return catalog, chosen, headers, [evidence_csv.key(item) for item in headers], rows
 
 
-def import_raised(store, identifier, committee, cycle):
+def import_raised(store, identifier, committee, cycle, cache=None):
     catalog, chosen, headers, columns, rows = import_rows(store, identifier, committee, cycle)
     bucket, unlocated, reported = Bucket('contributors'), Unlocated(), Decimal(0)
+    mix = Mix()
     for line_number, cells in rows:
         row = evidence_csv.rebuild(headers, columns, line_number, json.loads(cells))
         values = dict(zip(columns, row['raw'].values()))
         amount = row['_amount'] or Decimal(0)
         reported += amount
+        who = row['counterparty'] or evidence_csv.BLANK_COUNTERPARTY
+        if mix.street(cache, values, cycle, bucket, unlocated, amount, who):
+            continue
         place_by_zip(bucket, unlocated, amount,
                      evidence_csv.first(values, ZIP_FIELDS), evidence_csv.first(values, STATE_FIELDS),
-                     cycle, who=row['counterparty'] or evidence_csv.BLANK_COUNTERPARTY,
+                     cycle, who=who,
                      reason_prefix='a contributor row could not be placed: ')
-    return catalog, chosen, {'contributors': bucket}, unlocated, reported
+    return catalog, chosen, {'contributors': bucket}, unlocated, reported, mix
 
 
 def import_spent(store, identifier, committee, cycle):
@@ -470,8 +584,32 @@ def import_spent(store, identifier, committee, cycle):
 
 # ------------------------------------------------------------------ the route
 
+def source_cycles(source, identifier, committee='', store=None, snapshot_root=None):
+    """The concrete cycles this pane's source records, newest first.
+
+    Ruling A's other half: the refusal has to be able to NAME them, and the
+    client's newest-cycle fallback reads the same list off the pane.
+    """
+    years = set()
+    if source == 'snapshot':
+        units, _evidence = snapshot_units(snapshot_root, identifier)
+        for unit in units:
+            if committee and str(unit.get('committee_id') or '').upper() != committee:
+                continue
+            year = district_geo.normalise_cycle(unit.get('cycle'))
+            if year:
+                years.add(year)
+    elif store is not None:
+        catalog = evidence_csv.stored_catalog(store.ready(identifier))
+        for value in catalog.get('cycles') or []:
+            year = district_geo.normalise_cycle(value)
+            if year:
+                years.add(year)
+    return sorted(years, reverse=True)
+
+
 def geography(source, identifier, committee='', cycle='', direction='spent',
-              store=None, snapshot_root=None):
+              store=None, snapshot_root=None, data_root=None):
     """The map payload for one pane. Raises ValueError with a reader's message."""
     source = str(source or '').strip().lower()
     direction = str(direction or 'spent').strip().lower()
@@ -483,8 +621,29 @@ def geography(source, identifier, committee='', cycle='', direction='spent',
         raise ValueError(M_DIRECTION)
     if not IDENTIFIER.fullmatch(str(identifier or '')):
         raise ValueError(M_SOURCE)
+    # RULING A. A blank cycle is refused HERE, before any reading, and the
+    # refusal names the cycles this source will accept. It is deliberately not
+    # a quiet fallback to the newest cycle: the map would then disagree with
+    # the pane that opened it without saying so.
+    if not cycle:
+        raise ValueError(M_BLANK_CYCLE(source_cycles(source, identifier, committee, store,
+                                                     snapshot_root)))
+
+    cache = None
+    if data_root is None and store is not None:
+        data_root = getattr(store, 'data_root', None)
+    if data_root is not None:
+        try:
+            # create=False: reading a map never writes into the data root, so a
+            # read-only preview sharing another console's root stays read-only.
+            cache = geocode.Cache(data_root, create=False)
+        except (OSError, sqlite3.Error):
+            # No cache yet, or one this console cannot open: that costs
+            # precision, never a map. Every row stays ZIP-based and is counted.
+            cache = None
 
     reason, label, name = '', '', ''
+    mix = Mix()
     if source == 'snapshot':
         if not COMMITTEE.fullmatch(committee):
             raise ValueError(M_COMMITTEE)
@@ -497,18 +656,18 @@ def geography(source, identifier, committee='', cycle='', direction='spent',
         if direction == 'spent':
             buckets, unlocated, reported = snapshot_spent(unit, evidence, cycle)
         else:
-            buckets, unlocated, reported = snapshot_raised(unit, cycle)
+            buckets, unlocated, reported, mix = snapshot_raised(unit, cycle, cache)
     else:
         if store is None:
             raise ValueError(M_SOURCE)
         if direction == 'raised':
-            catalog, chosen, buckets, unlocated, reported = import_raised(store, identifier, committee, cycle)
+            catalog, chosen, buckets, unlocated, reported, mix = import_raised(
+                store, identifier, committee, cycle, cache)
         else:
             catalog, chosen, buckets, unlocated, reported, reason = import_spent(
                 store, identifier, committee, cycle)
         committee, name = chosen['id'], chosen.get('name') or chosen['id']
         label = catalog.get('industry') or catalog.get('name') or identifier
-        cycle = cycle or ''
 
     located = sum((bucket.total() for bucket in buckets.values()), Decimal(0))
     residual = money(reported) - located - unlocated.total()
@@ -532,7 +691,9 @@ def geography(source, identifier, committee='', cycle='', direction='spent',
         'reported_total': cash(reported), 'located_total': cash(located),
         'unlocated_total': cash(unlocated.total()),
         'reconciles': (money(reported) - located - unlocated.total()).copy_abs() <= CENT,
-        'kinds': kinds, 'unlocated': unlocated.payload(), 'stops': list(STOPS)}
+        'kinds': kinds, 'unlocated': unlocated.payload(), 'stops': list(STOPS),
+        'tract_basis': (district_geo.tract_basis(cycle) or {}).get('basis') or '',
+        **mix.payload()}
     if reason:
         payload['reason'] = reason
     if not vintage and cycle:
@@ -561,11 +722,18 @@ def contract_problems(payload):
     if not isinstance(payload, dict):
         return ['the payload is not an object']
     for field in ('direction', 'cycle', 'reported_total', 'located_total',
-                  'unlocated_total', 'kinds', 'unlocated', 'stops'):
+                  'unlocated_total', 'kinds', 'unlocated', 'stops',
+                  'geocoded_rows', 'zip_rows', 'pending_rows'):
         if field not in payload:
             problems.append(f'the payload has no {field}')
     if payload.get('direction') not in DIRECTIONS:
         problems.append('direction must be raised or spent')
+    if not str(payload.get('cycle') or '').strip():
+        problems.append('a map payload states no cycle; a map is drawn on one Congress')
+    for field in ('geocoded_rows', 'zip_rows', 'pending_rows'):
+        count = payload.get(field)
+        if not isinstance(count, int) or isinstance(count, bool) or count < 0:
+            problems.append(f'{field} is not a row count')
     if not isinstance(payload.get('kinds'), list):
         problems.append('kinds must be a list')
         return problems
@@ -594,6 +762,10 @@ def contract_problems(payload):
             share = row.get('share')
             if not isinstance(share, (int, float)) or not 0.0 <= float(share) <= 1.0:
                 problems.append(f'share {share!r} on {key} is outside 0..1')
+            if row.get('basis') not in ('', 'street', 'zip', 'zip_split'):
+                problems.append(f'basis {row.get("basis")!r} on {key} is not a placing basis')
+            if row.get('basis') == 'street' and row.get('split'):
+                problems.append(f'{key} is street-matched and still marked split')
             inner += money(row.get('amount'))
         if (inner - money(kind.get('total'))).copy_abs() > CENT:
             problems.append(f'kind {kind.get("kind")!r} does not add to its own total')

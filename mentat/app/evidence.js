@@ -895,9 +895,36 @@
   function mapStateFor(key) {
     if (!mapStates.has(key)) {
       mapStates.set(key, {direction: 'spent', cycle: null, body: null, off: null,
-                          district: '', message: '', loading: false});
+                          district: '', message: '', loading: false,
+                          note: '', geocode: null, geocodeTimer: 0, geocodeMessage: ''});
     }
     return mapStates.get(key);
+  }
+
+  /* RULING A (Paul, 2026-09-18): "There should be no all cycles" on the map.
+
+     A district map is drawn on ONE Congress, so the cycle select offers only
+     the concrete cycles the pane's source records - never the pane's own
+     "All cycles". A pane sitting on All cycles opens on the newest cycle the
+     source carries and the map header says so once, rather than the map
+     quietly disagreeing with the pane it was opened from. The route refuses a
+     blank cycle outright, so this is not decoration: without it the map would
+     answer 400. */
+  const mapCycles = pane => [...new Set((pane.cycles || []).map(String).filter(Boolean))]
+    .sort((first, second) => Number(second) - Number(first));
+
+  function chooseMapCycle(pane, state) {
+    const cycles = mapCycles(pane);
+    const wanted = String(state.cycle ?? pane.cycle ?? '');
+    // A valid cycle leaves `note` ALONE rather than clearing it: openMap and
+    // loadMap both call this, and the second call always sees the cycle the
+    // first one chose, so clearing here would wipe the note the moment it was
+    // earned. The reader clears it themselves by picking a cycle.
+    if (wanted && cycles.includes(wanted)) return wanted;
+    state.note = cycles.length
+      ? `Showing ${cycleLabel(cycles[0])}; a map covers one Congress.`
+      : 'This source records no cycle, so there is no Congress to draw.';
+    return cycles[0] || '';
   }
 
   // A continuous ramp on a log scale, so $10,000 and $10,000,000 both read.
@@ -1005,7 +1032,7 @@
 
   function mapHtml(pane, state) {
     const body = state.body;
-    const cycles = pane.cycles || [];
+    const cycles = mapCycles(pane);
     const off = state.off || new Set();
     const raised = state.direction === 'raised';
     const reconciliation = body
@@ -1027,9 +1054,10 @@
             aria-pressed="${!raised}">Spent · where it went</button></div>
         <label class="map-cycle-label" for="evidence-map-cycle">Cycle
           <select id="evidence-map-cycle">${cycles.map(value =>
-            `<option value="${escapeHtml(value)}"${value === (state.cycle ?? pane.cycle) ? ' selected' : ''}>${escapeHtml(cycleLabel(value))}</option>`).join('')}</select></label>
+            `<option value="${escapeHtml(value)}"${value === state.cycle ? ' selected' : ''}>${escapeHtml(cycleLabel(value))}</option>`).join('')}</select></label>
         <button type="button" class="secondary" id="evidence-map-back">Back to panes</button>
       </div></div>
+    ${state.note ? `<p class="muted map-note">${escapeHtml(state.note)}</p>` : ''}
     ${state.message ? `<p class="muted map-message">${escapeHtml(state.message)}</p>` : ''}
     ${body ? `<div class="map-layers">
       <span class="muted">${escapeHtml(raised ? 'All receipts' : 'All spend')}, ${escapeHtml(cycleLabel(body.cycle))}:
@@ -1057,6 +1085,7 @@
         ${mapListHtml(body, off)}
         <p class="muted map-reconcile">${escapeHtml(reconciliation)}${
           raised ? ' · Contributor geography is by ZIP, approximate, and a ZIP that straddles districts is split by its land-area shares and marked “split”.' : ''}</p>
+        ${raised ? geocodeHtml(pane, state) : ''}
       </section>
     </div>` : '<p class="muted">Loading this map…</p>'}`;
   }
@@ -1079,6 +1108,111 @@
       node.appendChild(title);
     }
     void shapes;
+  }
+
+  /* The precise layer (S8b, ruling 10). One line under the Raised list, a
+     Start, and while it runs a progress line and a Stop. Nothing here is
+     automatic: contributor street addresses leave this machine only when the
+     reader presses Start, and the sentence beside it says exactly that and
+     exactly which service is called. A saved snapshot has no import to
+     geocode, so it gets the footnote and no button. */
+  const GEOCODE_OFFER = 'Contributor geography is by ZIP. Geocode street addresses for exact districts.';
+  const GEOCODE_PRIVACY = 'Start sends the contributor street address, city, state and ZIP of this '
+    + 'import to the US Census Geocoder (geocoding.geo.census.gov). No name, amount, employer or '
+    + 'occupation is sent.';
+
+  function geocodeFootnote(body) {
+    const matched = Number(body.geocoded_rows || 0);
+    const total = matched + Number(body.zip_rows || 0) + Number(body.pending_rows || 0);
+    return matched > 0
+      ? `${number(matched)} of ${number(total)} rows matched to a street address; the rest stay by ZIP`
+      : GEOCODE_OFFER;
+  }
+
+  function geocodeHtml(pane, state) {
+    const body = state.body;
+    if (!body) return '';
+    if (pane.source !== 'csv') {
+      return `<p class="muted map-geocode-note">${escapeHtml(geocodeFootnote(body))}</p>`;
+    }
+    const job = state.geocode || {};
+    const running = job.state === 'running';
+    const pending = Number(body.pending_rows || 0);
+    // The server names the host it would actually call, so this sentence can
+    // never claim the Census about a console pointed somewhere else.
+    const privacy = job.privacy || GEOCODE_PRIVACY;
+    return `<div class="map-geocode">
+      <p class="map-geocode-offer">${escapeHtml(geocodeFootnote(body))}</p>
+      <p class="muted map-geocode-privacy">${escapeHtml(privacy)}</p>
+      <div class="map-geocode-actions">
+        <button type="button" class="secondary" id="evidence-map-geocode-start"${
+          running || collectorReadOnly || !pending ? ' disabled' : ''}>Start</button>
+        ${running ? '<button type="button" class="secondary" id="evidence-map-geocode-stop">Stop</button>' : ''}
+        ${collectorReadOnly ? '<span class="muted">This preview is read-only; start geocoding from the console that owns these imports.</span>' : ''}
+      </div>
+      ${job.progress || state.geocodeMessage
+        ? `<p class="muted map-geocode-progress">${escapeHtml(state.geocodeMessage || job.progress)}</p>`
+        : ''}</div>`;
+  }
+
+  async function readGeocode(key) {
+    const pane = panes.get(key);
+    const state = mapStateFor(key);
+    if (!pane || pane.source !== 'csv') return null;
+    try {
+      state.geocode = await api('/api/evidence-geocode?' + new URLSearchParams({id: pane.id}));
+    } catch (error) {
+      state.geocode = null;
+      state.geocodeMessage = error.message;
+    }
+    return state.geocode;
+  }
+
+  function pollGeocode(key) {
+    const state = mapStateFor(key);
+    clearTimeout(state.geocodeTimer);
+    state.geocodeTimer = setTimeout(async () => {
+      if (mapPane !== key) return;
+      const job = await readGeocode(key);
+      if (job && job.state === 'running') { await renderMap(); pollGeocode(key); return; }
+      // Finished, stopped or failed: the mix has changed, so the map is read
+      // again rather than left showing the counts from before the run.
+      state.geocodeMessage = '';
+      await loadMap();
+    }, POLL_DELAY);
+  }
+
+  async function startGeocode() {
+    const key = mapPane;
+    const pane = panes.get(key);
+    const state = mapStateFor(key);
+    if (!pane || pane.source !== 'csv') return;
+    state.geocodeMessage = 'Starting the geocoding job\u2026';
+    await renderMap();
+    try {
+      state.geocode = await api('/api/evidence-geocode',
+        {id: pane.id, committee: pane.committee, cycle: state.cycle || '', action: 'start'});
+      state.geocodeMessage = '';
+    } catch (error) {
+      state.geocodeMessage = error.message;
+      await renderMap();
+      return;
+    }
+    await renderMap();
+    pollGeocode(key);
+  }
+
+  async function stopGeocode() {
+    const key = mapPane;
+    const pane = panes.get(key);
+    const state = mapStateFor(key);
+    if (!pane) return;
+    try {
+      state.geocode = await api('/api/evidence-geocode', {id: pane.id, action: 'stop'});
+    } catch (error) {
+      state.geocodeMessage = error.message;
+    }
+    await renderMap();
   }
 
   async function renderMap() {
@@ -1118,11 +1252,16 @@
     state.loading = true;
     state.message = '';
     try {
-      const cycle = state.cycle ?? pane.cycle ?? '';
+      // RULING A: never send a blank cycle. The route refuses one, and the
+      // pane's "All cycles" has already been resolved to the newest concrete
+      // cycle, with the note in the header saying which.
+      const cycle = chooseMapCycle(pane, state);
+      state.cycle = cycle;
       state.body = await api('/api/evidence-geo?' + new URLSearchParams({
         source: pane.source, id: pane.id, committee: pane.committee,
         cycle: cycle, direction: state.direction}));
       state.cycle = state.body.cycle || cycle;
+      if (state.direction === 'raised' && pane.source === 'csv') await readGeocode(mapPane);
       if (state.off === null) {
         state.off = new Set((state.body.kinds || []).filter(kind => !kind.default_on).map(kind => kind.kind));
       }
@@ -1144,6 +1283,7 @@
     mapPane = key;
     const state = mapStateFor(key);
     if (direction) state.direction = direction;
+    state.cycle = chooseMapCycle(panes.get(key), state);
     $('evidence-panes').hidden = true;
     $('evidence-compare').hidden = true;
     $('evidence-empty').hidden = true;
@@ -1154,6 +1294,7 @@
   }
 
   function closeMap() {
+    if (mapPane) clearTimeout(mapStateFor(mapPane).geocodeTimer);
     mapPane = '';
     $('evidence-map').hidden = true;
     $('evidence-panes').hidden = false;
@@ -1272,6 +1413,8 @@
   });
   $('evidence-map').addEventListener('click', event => {
     if (event.target.closest('#evidence-map-back')) { closeMap(); return; }
+    if (event.target.closest('#evidence-map-geocode-start')) { startGeocode(); return; }
+    if (event.target.closest('#evidence-map-geocode-stop')) { stopGeocode(); return; }
     const direction = event.target.closest('.map-direction');
     if (direction) {
       const state = mapStateFor(mapPane);
@@ -1297,6 +1440,9 @@
     if (event.target.id !== 'evidence-map-cycle') return;
     const state = mapStateFor(mapPane);
     state.cycle = event.target.value;
+    // The reader has now chosen a cycle, so the "showing the newest" note has
+    // done its job and goes.
+    state.note = '';
     state.body = null; state.off = null; state.district = '';
     loadMap();
   });

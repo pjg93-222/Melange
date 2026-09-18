@@ -1,0 +1,74 @@
+S8b AFTER - node unit files and the evidence browser suites
+date: 2026-09-18T12:47:29-04:00
+HEAD: b9fe34d02ad08a2197677b76a0d07690797c3676 Record the collector slowdown diagnosis packet (2026-09-17/18)
+node: v24.18.0
+
+--- node unit files (no browser) ---
+  test_chart_math                            exit 0  ℹ duration_ms 144.956
+  test_chart_studio_contributions            exit 0  ℹ duration_ms 13.7531
+  test_contribution_charts_browser           exit 0  ℹ duration_ms 1642.0717
+  test_contribution_map_eligibility          exit 0  ℹ duration_ms 21.3965
+  test_contribution_plot                     exit 0  ℹ duration_ms 45.8457
+  test_contribution_studio                   exit 0  ℹ duration_ms 12.0868
+  test_contributor_detail_header             exit 0  ℹ duration_ms 24.2675
+  test_coverage_view                         exit 0  Coverage view checks passed.
+  test_cross_reference_view                  exit 0  Cross-reference view checks passed.
+  test_funding_comparison                    exit 0  ℹ duration_ms 9.028
+  test_raw_contribution_columns              exit 0  ℹ duration_ms 8.472
+
+--- tests/test_evidence_map_browser.cjs (S8 + S8b) ---
+STEP 9: click Raised: the heatmap paints and the ranked list carries CA-12
+PASS step 9 (0.2s) - at least one district is painted; CA-12 is present in the ranked list
+STEP 10: the reconciliation line names the located and reported totals
+PASS step 10 (0.0s) - reconcile: "$407,081 located + $0 unlocated = $407,081 reported receipts · Contributor geography is by ZIP, approximate, and a ZIP that straddles districts is split by its land-area shares and marked “split”."
+STEP 11: toggling a layer chip flips aria-pressed and the off class, both ways
+PASS step 11 (0.1s) - layer toggled off: aria-pressed true -> false
+PASS step 11 (0.1s) - layer chip restored to on
+STEP 12: a CA-12 tooltip names the district and a dollar amount
+PASS step 12 (0.0s) - tooltip: "CA-12\nContributors $383,197 · 1 rows · 94.1% of the kind · CHOI, EMILIE · by the contributor ZIP, then the state"
+STEP 13: click the CA-12 district path: it gains class "chosen"
+PASS step 13 (0.2s) - CA-12 district path carries class "chosen"
+STEP 14: Back to panes: the map closes and the pane shows the CA-12 district filter
+PASS step 14 (0.1s) - district filter reads "Filtered to CA-12 by contributor ZIP · 1 of 3 rows on this page Clear"
+STEP 15: URL round trip: a.map=raised restores the map after a fresh navigation
+PASS step 15 (0.1s) - permalink http://127.0.0.1:60310/?a.source=csv&a.id=csv-6d541bb5d39db418c79d8582f0e8cd40&a.committee=C00804179&a.cycle=2024&a.map=raised#evidence restored the map in the raised direction
+STEP 16: RULING A: the map cycle select offers concrete cycles only, never All cycles
+PASS step 16 (0.0s) - cycle options ["2026","2024"], selected 2024
+STEP 17: the geocoding offer, its Start and its privacy sentence are under the Raised list
+PASS step 17 (0.0s) - offer + Start + privacy naming 127.0.0.1:60309
+STEP 18: Start: the stub is called and the footnote becomes the matched/unmatched counts
+PASS step 18 (0.7s) - footnote "1 of 3 rows matched to a street address; the rest stay by ZIP"; upload carried 2 addresses and no name or amount
+STEP 19: RULING A: a pane on All cycles opens the map on the newest cycle and says so once
+PASS step 19 (0.4s) - note "Showing 2025–2026; a map covers one Congress."; cycle select resolved to 2026
+STEP 20: back to pane A for the screenshot
+PASS step 20 (0.2s) - pane A map reopened
+STEP 21: screenshot the map at 1440x900
+PASS step 21 (0.1s) - screenshot saved to C:\Users\pgoff\Mentat\audits\mentat_failings_20260915\receipts\S8b_after_screenshot.png (106907 bytes)
+STEP 22: final check: zero pageerror entries and zero console error entries
+PASS step 22 (0.0s) - no page errors, no console errors across every step
+ALL 22 STEPS PASSED
+  exit 0
+
+--- tests/test_evidence_panes_browser.cjs (S6, must stay 28/28) ---
+PASS step 23 (0.7s) - worksheet picker offered ["Alpha","Beta"]
+STEP 24: PORTED: the re-read watch marks an import read under older rules
+PASS step 24 (3.0s) - the option said "re-reading under the current rules" and was disabled, then came back
+STEP 25: F7: Split with Graph gives one pane column, and the single view gives them back
+PASS step 25 (0.2s) - split with Graph: 1 column, back to 1 for 0 pane(s)
+STEP 26: F7: Follow Graph selection, with no graph loaded, says so rather than moving pane A
+PASS step 26 (1.9s) - Follow Graph with no graph loaded: pane A unchanged, no page error
+STEP 27: F7: a three-pane URL restores all three panes
+PASS step 27 (0.4s) - restored ["a:C00000935","b:C00000935","c:C00835959"] from a 3-pane permalink
+STEP 28: final check: zero pageerror entries and zero off-origin requests
+PASS step 28 (0.0s) - no page errors, no off-origin requests across every step
+ALL 28 STEPS PASSED
+  exit 0
+
+--- tests/test_navigation_scope_browser.cjs (S5 URL vocabulary) ---
+STEP 12: the first edit after opening a saved view drops saved= so a reload cannot overwrite the edit
+PASS step 12 - edit dropped saved=, survived a reload, and the permalink still re-opens the view
+STEP 13: an industry with no cross-reference run says so, rather than "Latest run"
+PASS step 13 - status "No cross-reference run for Banking · Saved evidence refreshed. This page is read-only."
+ALL 13 STEPS PASSED
+browser.close() exceeded its 20000ms bound
+  exit 0
