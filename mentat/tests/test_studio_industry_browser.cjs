@@ -337,10 +337,11 @@ async function nodeDrivenFallback(reason) {
     pass('Chart Studio open, both datasets listed, first chart rendered');
 
     async function openExportMenu() {
-      // <details id="studio-download"> toggles on every click of its summary,
-      // so this only clicks when it is actually closed - a second save's
-      // blind click on an already-open menu would close it instead.
-      if (!(await page.locator('#studio-download').evaluate(el => el.open))) await page.click('#studio-download > summary');
+      // Save view and Open view live in the Views menu since the 2026-09-17
+      // UI clean-up (item 14). <details> toggles on every click of its
+      // summary, so this only clicks when it is actually closed - a second
+      // save's blind click on an open menu would close it instead.
+      if (!(await page.locator('#studio-views').evaluate(el => el.open))) await page.click('#studio-views > summary');
       await page.waitForSelector('#studio-save-view', {state: 'visible'});
     }
     async function saveCurrentViewAs(name) {

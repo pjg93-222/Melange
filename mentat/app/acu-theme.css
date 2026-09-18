@@ -22,6 +22,10 @@
   --chart-ink:var(--acu-plum);
   --chart-grid:#e8e0da;
   --chart-negative:#bf3f36;
+  /* The only colours added for the 2026-09-17 UI clean-up: a party pair for
+     the candidate dots, beside the chart colours they sit among. */
+  --party-dem:#3b6db5;
+  --party-rep:#b8433a;
   font-family:var(--font-sans);
   color:var(--acu-plum);
   background:var(--acu-paper);
@@ -31,6 +35,8 @@ h1,h2{font-family:var(--font-serif);font-weight:400;letter-spacing:-.35px;color:
 h3{font-family:var(--font-sans);color:var(--acu-plum)}
 .workspace-heading h1{font-family:var(--font-serif);font-weight:400;font-size:34px}
 .graph-panels h2,.sources-drawer h2,.chart-preview h2{font-family:var(--font-serif);font-weight:400;font-size:23px}
+.graph-info{color:var(--acu-purple)}
+.graph-legend-item{color:var(--muted)}
 .wordmark{font-family:var(--font-sans);font-weight:700;color:var(--acu-ivory);letter-spacing:.8px}
 header{background:var(--acu-plum)}
 header .workspace-tabs button{color:var(--acu-ivory)}

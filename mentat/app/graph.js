@@ -140,6 +140,10 @@
     syncControls();get('chips').replaceChildren();
     if(category)chip(category,()=>{category='';recipient='';});
     if(recipient)chip(opts.recipients.find(r=>r.id===recipient)?.label||recipient,()=>{recipient='';});
+    // The scope sentence is no longer printed on screen - it only repeated the
+    // selects the reader is looking at (UI clean-up 2026-09-17, item 1) - but
+    // it is still built here, because the CSV, the image caption, the SVG
+    // <desc> and the briefing slide all quote it as their scope line.
     const scope=[get('industry').value,view.filters.company||'All companies',view.filters.tier||'All levels',get('funding').selectedOptions[0].textContent,get('cycle').selectedOptions[0].textContent,category,recipient].filter(Boolean).join(' · ');
     get('scope').textContent=scope;
     get('source-label').textContent=get('run').selectedOptions[0].textContent+(unavailable.length?' · Unavailable saved reports: '+unavailable.join(', '):'');
@@ -149,18 +153,29 @@
     // wonder which of two numbers on two screens is the real one.
     get('basis-note').textContent='Net workbook receipts. Same basis as Chart Studio’s Published included receipts.';
     get('recipient-count').textContent=dollars(view.totals.organizations);
-    for(const [id,value] of [['direct-share',view.totals.direct],['organization-share',view.totals.organizations]]) get(id).textContent=view.totals.giving>0&&value>=0&&value<=view.totals.giving ? (100*value/view.totals.giving).toFixed(1)+'% of net giving' : 'Share unavailable for signed totals';
+    // Each part figure carries a share bar and the share in words. The bar is
+    // drawn only when the share is a real fraction of the net: a signed total
+    // has no width to draw, and a bar at 0% would read as "none of it".
+    for(const [name,value] of [['direct',view.totals.direct],['organization',view.totals.organizations]]) {
+      const usable=view.totals.giving>0&&value>=0&&value<=view.totals.giving;
+      const percent=usable?100*value/view.totals.giving:0;
+      get(name+'-share').textContent=usable?percent.toFixed(1)+'% of net giving':'Share unavailable for signed totals';
+      const bar=get(name+'-bar');bar.style.width=percent.toFixed(1)+'%';
+      bar.parentElement.hidden=!usable;
+    }
     get('candidate-note').textContent=view.candidate_note;
-    get('unresolved').hidden=view.filters.mode!=='direct'||view.totals.unresolved_candidate_links===0;
-    get('unresolved').textContent=`${dollars(view.totals.unresolved_candidate_links)} in candidate-category receipts has no unique authorized candidate link and is excluded from these rankings.`;
+    // Item 4: the candidate-category receipts with no unique authorized
+    // candidate link are an aside about the denominator, so they became the
+    // tooltip on the candidates panel's information mark instead of a second
+    // sentence of prose under the chart.
+    const unresolved=view.filters.mode==='direct'&&view.totals.unresolved_candidate_links!==0
+      ? `${dollars(view.totals.unresolved_candidate_links)} in candidate-category receipts has no unique authorized candidate link and is excluded from these rankings.`
+      : '';
+    const mark=get('unresolved');
+    mark.hidden=!unresolved;mark.title=unresolved;mark.setAttribute('aria-label',unresolved);
     get('method').textContent=view.note;
     get('provenance').replaceChildren(...view.reports.map(r=>{const p=document.createElement('p');p.className='muted';p.textContent=`${r.name} · SHA-256 ${r.sha256}`;return p;}));
-    draw('categories',view.categories,id=>{category=id;recipient='';refresh();},true);
-    draw('organizations',view.organizations,id=>{recipient=id;refresh();});
-    if(view.candidate_available)draw('candidates',view.candidates,showCandidate);
-    else{get('candidates').replaceChildren();const p=document.createElement('p');p.className='graph-empty';p.textContent='This candidate view is unavailable for the selected scope.';get('candidates').append(p);}
-    draw('companies',view.companies,id=>{get('company').value=id;category='';recipient='';refresh();});
-    draw('levels',view.levels,id=>{get('tier').value=id;get('funding').value='personal';refresh();});
+    paintAll();
     renderFreshness();applyAnalysis();syncExport();
     get('results').hidden=false;
   }
@@ -170,35 +185,66 @@
     if(text!==undefined)node.textContent=text;
     return node;
   }
-  function draw(name,rows,onClick,shares=false) {
+  const PANELS=['categories','organizations','candidates','companies','levels'];
+  // What each panel's share is a share OF. These are the figures the KPI strip
+  // above already prints, so a reader can add a panel's shares up and land on
+  // the tile the panel belongs to (item 6).
+  // Downstream PAC activity and conditional industry estimates are not part of
+  // "direct to candidates" - they are other committees' whole reported
+  // activity - so only the direct view divides by that KPI. The other two
+  // divide by the candidate rows they are showing, and the label says so.
+  function denomLabel(name) {
+    if(name!=='candidates')return {categories:'net giving',organizations:'recipient organizations',
+      companies:'net giving',levels:'the shown levels'}[name]||'net giving';
+    return view&&view.filters.mode!=='direct'?'this candidate view':'direct to candidates';
+  }
+  const PANEL_CLICK={
+    categories:id=>{category=id;recipient='';refresh();},
+    organizations:id=>{recipient=id;refresh();},
+    candidates:id=>showCandidate(id),
+    companies:id=>{get('company').value=id;category='';recipient='';refresh();},
+    levels:id=>{get('tier').value=id;get('funding').value='personal';refresh();}
+  };
+  // Top N is a client-side slice of the payload the one /api/graph request has
+  // already returned. /api/graph has no row-count parameter - the old global
+  // "Rows per chart" input sliced in this function too - so a Top N change
+  // costs no request, no route change and nothing in the URL (item 2).
+  function topN(name) {
+    const select=document.getElementById('graph-top-'+name);
+    return Math.max(1,Number(select&&select.value)||10);
+  }
+  function denominator(name) {
+    if(!view)return 0;
+    if(name==='candidates')return view.filters.mode==='direct'
+      ? view.totals.direct
+      : (view.candidates||[]).reduce((sum,row)=>sum+row.amount,0);
+    if(name==='levels')return (view.levels||[]).reduce((sum,row)=>sum+row.amount,0);
+    if(name==='organizations')return view.totals.organizations;
+    return view.totals.giving;
+  }
+  // Party colour only where the payload actually carries a party
+  // (graph_data.py:371 joins every party recorded for a candidate). A label
+  // this console cannot read as one party gets the neutral dot, never a guess.
+  function partyClass(party) {
+    const text=String(party||'').toUpperCase();
+    if(!text)return '';
+    const dem=/(^|[^A-Z])(DEM|D|DFL)([^A-Z]|$)/.test(text),rep=/(^|[^A-Z])(REP|R|GOP)([^A-Z]|$)/.test(text);
+    if(dem&&!rep)return 'is-dem';
+    if(rep&&!dem)return 'is-rep';
+    return 'is-other';
+  }
+  function emptyPanel(name,message) {
     const container=get(name);container.replaceChildren();
-    if(!rows.length){const p=document.createElement('p');p.className='graph-empty';p.textContent='No nonzero amounts recorded for this selection.';container.append(p);return;}
-    const count=Number(get('row-count').value);
-    const shown=count>0?rows.slice(0,count):rows,total=rows.reduce((sum,r)=>sum+r.amount,0);
-    const percentages=shares&&total>0&&rows.every(r=>r.amount>=0);
-    const compact=name==='candidates', width=compact?430:720, height=shown.length*(compact?62:52)+35;
-    const svg=svgNode('svg',{viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':titleFor[name],class:'graph-bars'});
-    svg.append(svgNode('title',{},titleFor[name]),svgNode('desc',{},`${get('scope').textContent}. ${shown.length} of ${rows.length} groups. Values in USD.`));
-    const positive=Math.max(0,...shown.map(r=>r.amount)),negative=Math.min(0,...shown.map(r=>r.amount));
-    const scale=330/(positive-negative||1),zero=205-negative*scale;
-    const colors=MentatTheme.palette;
-    shown.forEach((row,i)=>{
-      const y=i*(compact?62:52)+26,label=row.label+(row.party?` · ${row.party}`:'');
-      const text=label.length>(compact?33:24)?label.slice(0,compact?30:21)+'…':label;
-      const group=svgNode('g',{role:'button',tabindex:0,'aria-label':`${label}: ${dollars(row.amount)}`,class:'graph-bar-button'});
-      group.append(svgNode('title',{},`${label}: ${dollars(row.amount)}`));
-      group.append(svgNode('rect',{x:0,y:y-24,width,height:compact?60:48,fill:'transparent','pointer-events':'all'}));
-      group.append(svgNode('text',{x:compact?4:190,y,fill:MentatTheme.ink,'text-anchor':compact?'start':'end','font-family':MentatTheme.sans,'font-size':compact?16:17},text));
-      if(compact) {
-        group.append(svgNode('line',{x1:4,x2:width-4,y1:y+31,y2:y+31,stroke:MentatTheme.grid}));
-        group.append(svgNode('text',{x:4,y:y+21,fill:MentatTheme.muted,'font-family':MentatTheme.sans,'font-size':12},row.id));
-      } else group.append(svgNode('rect',{x:Math.min(zero,zero+row.amount*scale),y:y-18,width:Math.max(1,Math.abs(row.amount*scale)),height:27,rx:2,fill:row.amount<0?MentatTheme.negative:colors[Math.min(i,colors.length-1)],class:'graph-mark'}));
-      group.append(svgNode('text',{x:width-8,y:compact?y+21:y,fill:MentatTheme.ink,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':compact?16:17},dollars(row.amount)));
-      const select=()=>onClick(row.id);group.addEventListener('click',select);group.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();select();}});
-      svg.append(group);
-    });container.append(svg);
-    {const preview=document.createElement('p');preview.className='muted';preview.textContent=`Showing ${shown.length} of ${rows.length}`;container.append(preview);}
-    const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=`All ${rows.length} values`;
+    const p=document.createElement('p');p.className='graph-empty';p.textContent=message;container.append(p);
+    const foot=document.getElementById('graph-foot-'+name);
+    if(foot)foot.textContent='';
+  }
+  // The full-value table stays exactly where it was - inside the panel's own
+  // container, built on first open - because "Full table", "View all" and the
+  // lazy-table regression all reach for `#graph-<name> > details`.
+  function appendValues(container,name,rows,onClick) {
+    const details=document.createElement('details'),summary=document.createElement('summary');
+    summary.textContent=`All ${rows.length} values`;
     let valuesBuilt=false;
     details.addEventListener('toggle',()=>{
       if(!details.open||valuesBuilt)return;
@@ -209,10 +255,178 @@
       table.append(head,body);scroll.append(table);details.append(scroll);valuesBuilt=true;
     });
     details.append(summary);container.append(details);
-    if(shares&&!percentages){const p=document.createElement('p');p.className='muted';p.textContent='Signed net amounts shown; percentage shares are withheld when a category is negative.';container.append(p);}
   }
-  get('row-count').oninput=()=>{if(!get('row-count').checkValidity()){get('row-status').textContent='Enter a positive whole number.';return;}get('row-status').textContent='';if(view)render();};
-  get('all-rows').onclick=()=>{get('row-count').value='';get('row-status').textContent='Showing every matching row.';if(view)render();};
+  function footText(name,shown,total,percentages,covered) {
+    return `Showing ${shown} of ${total}`+(percentages
+      ? ` · ${covered.toFixed(1)}% of ${denomLabel(name)}`
+      : ' · shares withheld for signed net amounts');
+  }
+  const ROW_HEIGHT=30,ROW_TOP=22;
+  // The chart is drawn at the panel's own pixel width, so its viewBox and its
+  // layout width agree and nothing is scaled: a 720-wide drawing inside a
+  // 540-wide bento tile renders 13px type at under 10px. A panel that is
+  // hidden when it is drawn has no width yet, so it falls back and is redrawn
+  // when its tab opens (selectAnalysis).
+  const panelWidth=container=>Math.max(420,Math.min(760,Math.round(container.clientWidth||520)));
+  function draw(name,rows,onClick) {
+    if(!rows.length){emptyPanel(name,'No nonzero amounts recorded for this selection.');return;}
+    const container=get(name);container.replaceChildren();
+    const shown=rows.slice(0,topN(name)),total=denominator(name);
+    const spark=name==='companies',CHART_WIDTH=panelWidth(container);
+    const shareRight=CHART_WIDTH-4,sparkWide=46;
+    const sparkX=spark?shareRight-sparkWide:0;
+    const valueRight=(spark?sparkX-10:shareRight)-44;
+    const LABEL_RIGHT=Math.round(CHART_WIDTH*0.27),BAR_LEFT=LABEL_RIGHT+8;
+    const barMax=Math.max(48,valueRight-96-BAR_LEFT);
+    const percentages=total>0&&shown.every(row=>row.amount>=0);
+    const height=shown.length*ROW_HEIGHT+ROW_TOP+10;
+    const svg=svgNode('svg',{viewBox:`0 0 ${CHART_WIDTH} ${height}`,role:'img','aria-label':titleFor[name],class:'graph-bars'});
+    svg.append(svgNode('title',{},titleFor[name]),svgNode('desc',{},`${get('scope').textContent}. ${shown.length} of ${rows.length} groups. Values in USD.`));
+    const positive=Math.max(0,...shown.map(r=>r.amount)),negative=Math.min(0,...shown.map(r=>r.amount));
+    const scale=barMax/(positive-negative||1),zero=BAR_LEFT-negative*scale;
+    const colors=MentatTheme.palette;
+    let covered=0;
+    shown.forEach((row,i)=>{
+      const y=ROW_TOP+i*ROW_HEIGHT,label=row.label+(row.party?` · ${row.party}`:'');
+      const percent=percentages?100*row.amount/total:null;
+      if(percent!==null)covered+=percent;
+      const party=name==='candidates'?partyClass(row.party):'';
+      const room=Math.max(10,Math.floor(LABEL_RIGHT/6.6)-(party?2:0));
+      const text=label.length>room?label.slice(0,room-1)+'…':label;
+      // The accessible name is unchanged: name, colon, money. The share and the
+      // per-cycle figures ride in <title>, which is the hover detail (item 12).
+      const group=svgNode('g',{role:'button',tabindex:0,'aria-label':`${label}: ${dollars(row.amount)}`,class:'graph-bar-button'});
+      group.append(svgNode('title',{},`${label} · ${dollars(row.amount)}`+(percent!==null?` · ${percent.toFixed(1)}% of ${denomLabel(name)}`:'')));
+      group.append(svgNode('rect',{x:0,y:y-13,width:CHART_WIDTH,height:ROW_HEIGHT-2,fill:'transparent','pointer-events':'all'}));
+      if(party)group.append(svgNode('circle',{cx:9,cy:y-4,r:4.5,class:'graph-party '+party}));
+      group.append(svgNode('text',{x:LABEL_RIGHT,y,fill:MentatTheme.ink,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':12.5},text));
+      group.append(svgNode('rect',{x:Math.min(zero,zero+row.amount*scale),y:y-11,width:Math.max(1,Math.abs(row.amount*scale)),height:14,rx:2,fill:row.amount<0?MentatTheme.negative:colors[Math.min(i,colors.length-1)],class:'graph-mark'}));
+      group.append(svgNode('text',{x:valueRight,y,fill:MentatTheme.ink,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':12.5,class:'graph-value'},dollars(row.amount)));
+      group.append(svgNode('text',{x:shareRight,y,fill:MentatTheme.muted,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':11.5,class:'graph-share'},percent!==null?percent.toFixed(1)+'%':'—'));
+      if(spark)group.append(svgNode('g',{class:'graph-spark','data-spark':row.id,transform:`translate(${sparkX},${y-11})`}));
+      const select=()=>onClick(row.id);group.addEventListener('click',select);group.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();select();}});
+      svg.append(group);
+    });
+    container.append(svg);
+    appendValues(container,name,rows,onClick);
+    const foot=document.getElementById('graph-foot-'+name);
+    if(foot)foot.textContent=footText(name,shown.length,rows.length,percentages,covered);
+  }
+  // Item 11: employee level is one stacked bar with a legend. Each segment is
+  // still a .graph-bar-button carrying the same accessible name the bars use,
+  // so the keyboard path, the export preview count and the click-through into
+  // the level are all unchanged.
+  function drawStack(name,rows,onClick) {
+    if(!rows.length){emptyPanel(name,'No nonzero amounts recorded for this selection.');return;}
+    const container=get(name);container.replaceChildren();
+    const shown=rows.slice(0,topN(name)),total=denominator(name);
+    const percentages=total>0&&shown.every(row=>row.amount>=0);
+    const width=panelWidth(container),height=36;
+    const svg=svgNode('svg',{viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':titleFor[name],class:'graph-bars graph-stack'});
+    svg.append(svgNode('title',{},titleFor[name]),svgNode('desc',{},`${get('scope').textContent}. ${shown.length} of ${rows.length} levels. Values in USD.`));
+    const span=shown.reduce((sum,row)=>sum+Math.max(0,row.amount),0)||1;
+    const colors=MentatTheme.palette,legend=document.createElement('div');
+    legend.className='graph-legend';
+    let x=0,covered=0;
+    shown.forEach((row,i)=>{
+      const wide=percentages?Math.max(2,width*Math.max(0,row.amount)/span):Math.max(2,width/shown.length);
+      const percent=percentages?100*row.amount/total:null;
+      if(percent!==null)covered+=percent;
+      const fill=row.amount<0?MentatTheme.negative:colors[Math.min(i,colors.length-1)];
+      const group=svgNode('g',{role:'button',tabindex:0,'aria-label':`${row.label}: ${dollars(row.amount)}`,class:'graph-bar-button'});
+      group.append(svgNode('title',{},`${row.label} · ${dollars(row.amount)}`+(percent!==null?` · ${percent.toFixed(1)}% of ${denomLabel(name)}`:'')));
+      group.append(svgNode('rect',{x,y:6,width:wide,height:24,rx:2,fill,class:'graph-mark'}));
+      const select=()=>onClick(row.id);group.addEventListener('click',select);group.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();select();}});
+      svg.append(group);
+      x+=wide;
+      const item=document.createElement('button');item.type='button';item.className='graph-legend-item';
+      const swatch=document.createElement('i');swatch.style.background=fill;
+      const caption=document.createElement('span');
+      caption.textContent=`${row.label} ${dollars(row.amount)}`+(percent!==null?` · ${percent.toFixed(1)}%`:'');
+      item.append(swatch,caption);item.onclick=select;
+      legend.append(item);
+    });
+    container.append(svg,legend);
+    appendValues(container,name,rows,onClick);
+    const foot=document.getElementById('graph-foot-'+name);
+    if(foot)foot.textContent=footText(name,shown.length,rows.length,percentages,covered);
+  }
+  function drawPanel(name) {
+    if(!view)return;
+    if(name==='candidates'&&!view.candidate_available){
+      emptyPanel('candidates','This candidate view is unavailable for the selected scope.');return;
+    }
+    if(name==='levels')drawStack(name,view.levels||[],PANEL_CLICK.levels);
+    else draw(name,view[name]||[],PANEL_CLICK[name]);
+    if(name==='companies')fillSparklines();
+  }
+  function paintAll() { for(const name of PANELS)drawPanel(name); }
+  for(const name of PANELS) {
+    const select=document.getElementById('graph-top-'+name);
+    if(select)select.onchange=()=>{if(view)drawPanel(name);};
+  }
+  /* --------------------------------------------------- company sparklines */
+  // One /api/graph request per registered election cycle, with every other
+  // filter left exactly as the panel's own request had it, cached by that
+  // request string for the life of the session so the same key is never
+  // fetched twice. The panel paints without them and they arrive afterwards;
+  // an arrival from a scope the reader has already left is dropped by the
+  // revision it was started under. Fewer than three cycles draws nothing: a
+  // two-point line is a segment, not a shape.
+  const sparkCache=new Map();
+  const SPARK_CYCLES=5,SPARK_MINIMUM=3;
+  function sparkQueries() {
+    if(!view)return [];
+    const cycles=[...new Set((view.options.cycles||[]).map(String))].sort();
+    if(cycles.length<SPARK_MINIMUM)return [];
+    return cycles.slice(-SPARK_CYCLES).map(cycle=>{
+      const query=filters();query.set('cycle',cycle);query.delete('latest');
+      return {cycle,key:query.toString()};
+    });
+  }
+  async function fillSparklines() {
+    const ticket=revision,queries=sparkQueries();
+    if(!queries.length)return;
+    const answers=await Promise.all(queries.map(async entry=>{
+      if(!sparkCache.has(entry.key))sparkCache.set(entry.key,fetch('/api/graph?'+entry.key)
+        .then(response=>response.ok?response.json():null)
+        .then(body=>body&&!body.error&&Array.isArray(body.companies)?body.companies:null)
+        .catch(()=>null));
+      return {cycle:entry.cycle,rows:await sparkCache.get(entry.key)};
+    }));
+    if(ticket!==revision||!view)return;
+    const series=new Map(),cycles=[];
+    for(const answer of answers) {
+      if(!answer.rows)continue;
+      cycles.push(answer.cycle);
+      for(const row of answer.rows) {
+        if(!series.has(row.id))series.set(row.id,[]);
+        series.get(row.id).push([answer.cycle,row.amount]);
+      }
+    }
+    if(cycles.length<SPARK_MINIMUM)return;
+    drawSparklines(series,cycles);
+  }
+  function drawSparklines(series,cycles) {
+    const svg=get('companies').querySelector('svg');
+    if(!svg)return;
+    for(const slot of svg.querySelectorAll('[data-spark]')) {
+      const points=(series.get(slot.dataset.spark)||[]).slice().sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+      if(points.length<SPARK_MINIMUM)continue;
+      const values=points.map(point=>point[1]),low=Math.min(...values),high=Math.max(...values);
+      const span=high-low||1,wide=54,tall=14;
+      const coords=points.map((point,i)=>[i*wide/(points.length-1),tall-2-((point[1]-low)/span)*(tall-4)]);
+      slot.replaceChildren();
+      slot.append(svgNode('polyline',{fill:'none','stroke-width':1.5,class:'graph-spark-line',
+        points:coords.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(' ')}));
+      slot.append(svgNode('circle',{cx:coords[coords.length-1][0].toFixed(1),cy:coords[coords.length-1][1].toFixed(1),r:1.8,class:'graph-spark-dot'}));
+      const title=slot.parentElement&&slot.parentElement.querySelector('title');
+      if(title&&!title.textContent.includes(points[0][0]))
+        title.textContent+=' · '+points.map(([cycle,value])=>`${cycle} ${dollars(value)}`).join(' · ');
+    }
+    const foot=document.getElementById('graph-foot-companies');
+    if(foot&&!foot.textContent.includes('sparkline'))foot.textContent+=` · sparkline ${cycles.join(' · ')}`;
+  }
   function showCandidate(id) {
     const row=view.candidates.find(c=>c.id===id);if(!row)return;
     get('candidate-detail-title').textContent=`${row.label} · ${id} · ${view.filters.mode==='direct'?'Included receipt groups':'Source committee activity'}`;
@@ -239,6 +453,9 @@
     names.forEach(name=>{const tab=get('tab-'+name);tab.setAttribute('aria-selected',String(name===analysis));tab.tabIndex=name===analysis?0:-1;});
     get('analysis-panel').setAttribute('aria-labelledby','graph-tab-'+analysis);
     document.querySelector('.graph-panels').dataset.analysis=analysis;
+    // Item 8: the Overview is a two by two grid of the four analyses; each tab
+    // still opens its own analysis in full, with the organization breakdown
+    // only where a reader asked for recipients.
     get('category-panel').hidden=!['overview','recipients'].includes(analysis);
     get('organization-panel').hidden=analysis!=='recipients';
     get('candidate-panel').hidden=!['overview','candidates'].includes(analysis);
@@ -250,11 +467,16 @@
     // The note below says "Direct contributions only", which the select above
     // can now make untrue on the overview tab, so it is shown only while it is.
     get('candidate-separation').hidden=analysis!=='overview'||get('mode').value!=='direct';
-    get('company-panel').hidden=analysis!=='companies';
-    get('level-panel').hidden=analysis!=='companies';
+    get('company-panel').hidden=!['overview','companies'].includes(analysis);
+    get('level-panel').hidden=!['overview','companies'].includes(analysis);
   }
   function selectAnalysis(name,focus=false) {
     analysis=name;applyAnalysis();
+    // A panel that was hidden when it was drawn had no width to draw at, so
+    // the panels are redrawn as its tab opens. This costs no request: Top N is
+    // a slice of the payload already in hand, and the sparkline cache is keyed
+    // by request string.
+    if(view)paintAll();
     get('export-target').value={overview:'categories',recipients:'organizations',candidates:'candidates',companies:'companies'}[name];syncExport();
     if(name==='overview'&&get('mode').value!=='direct'){get('mode').value='direct';refresh();}
     if(focus)get('tab-'+name).focus();
@@ -282,6 +504,30 @@
     get('briefing').disabled=get('export').disabled;
   }
   get('export-target').onchange=syncExport;
+  // One set of panel actions, wherever the reader presses it: a panel's own
+  // Export menu and the view's export line both go through the same
+  // exportSubject() / exportChart() pair, so the two can never disagree about
+  // which chart, which scope or which provenance they are writing out.
+  document.querySelectorAll('#view-graph [data-export]').forEach(button=>{
+    button.onclick=()=>{
+      const name=button.dataset.export,format=button.dataset.format;
+      const menu=button.closest('details');
+      if(menu)menu.open=false;
+      get('export-target').value=name;syncExport();
+      if(format==='table'){showValues(name);return;}
+      if(format==='copy'){get('copy-image').click();return;}
+      if(format==='briefing'){get('briefing').click();return;}
+      get('export-format').value=format;get('export').click();
+    };
+  });
+  // A menu left open after the reader has moved on is a menu in the way. Only
+  // an outside click closes them: Escape belongs to the dialogs these menus
+  // open, and a menu that vanished on Escape would take the button the dialog
+  // has to return focus to with it.
+  document.addEventListener('click',event=>{
+    for(const menu of document.querySelectorAll('#view-graph details.graph-menu[open]'))
+      if(!menu.contains(event.target))menu.open=false;
+  });
   // One account of the chart being exported, read by the download, the
   // clipboard copy and the briefing, so the three can never disagree.
   function exportSubject() {

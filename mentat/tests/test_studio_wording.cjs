@@ -73,7 +73,9 @@ test('the default empty state names the mode the console starts in',()=>{
 
 test('the header keeps a permanent, plainly named way back to the report picker',()=>{
   const html=read('index.html');
-  assert.match(html,/<button id="studio-scope-change" class="studio-scope-change" type="button" title="[^"]*">Data source<\/button>/);
+  // The label became "Change data" in the 2026-09-17 UI clean-up (item 13):
+  // the header now carries the scope as chips, so the button names the act.
+  assert.match(html,/<button id="studio-scope-change" class="studio-scope-change" type="button" title="[^"]*">Change data<\/button>/);
   assert.doesNotMatch(html,/id="studio-scope-change"[^>]*\shidden/);
   assert.match(html,/<details class="studio-source-disclosure" id="studio-source-details" open>/);
 });

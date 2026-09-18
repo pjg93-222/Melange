@@ -233,7 +233,7 @@
   color: var(--acu-plum);
   margin: 0 0 10px;
 }
-.studio-pane { padding: 12px; overflow-y: auto; max-height: 74vh; }
+.studio-pane { padding: 12px; }
 .studio-pane h3 {
   font-size: 11px;
   letter-spacing: .08em;
@@ -704,3 +704,81 @@
   @page { size: landscape; margin: 14mm; }
 }
 .studio-source-choices,.studio-model-tables{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.studio-model-tables section{flex:1 1 240px;border:1px solid var(--line,#d8d0df);border-radius:6px;padding:12px;background:var(--surface,#fff)}.studio-model-tables h4{margin:0 0 8px}.studio-model-tables p{margin:0 0 8px}.studio-datasource table{min-width:850px}.studio-datasource{overflow:auto}
+
+/* ------------------------------------------------- UI clean-up, 2026-09-17
+   Chart Studio, option A: five chrome rows become two, equal side columns with
+   one padding and one section-label style, the Inspector column is the single
+   scroll container, and the canvas title says what the chart is. */
+
+/* Row two: one toolbar with visible groups. The Fit select stops inheriting
+   style.css's blanket `select{width:100%}` - that is what stretched it. */
+.studio-toolbar .studio-group{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.studio-toolbar .studio-divider{flex:none;width:1px;height:22px;margin:0 3px;background:var(--line)}
+.studio-toolbar select{width:auto;max-width:150px;margin:0}
+/* Show Me is the builder's one gold action, always, and says whether the
+   Inspector's disclosure is open behind it. */
+.studio-toolbar button#studio-showme-toggle{background:var(--acu-gold);border-color:var(--acu-gold);
+  color:var(--acu-plum);font-weight:600}
+.studio-toolbar button#studio-showme-toggle:hover:not(:disabled){background:#f2bb4b;border-color:#f2bb4b}
+.studio-toolbar button#studio-showme-toggle[aria-pressed=true]{background:#f2bb4b;border-color:#d1900f}
+
+/* Row one: scope chips beside the title. */
+.studio-scope-chip{display:flex;flex-wrap:wrap;gap:5px;background:none;border-radius:0;padding:0;max-width:60ch;
+  overflow:visible;text-overflow:clip;white-space:normal}
+.studio-scope-chip>span{display:inline-flex;align-items:center;font-size:11px;color:var(--acu-plum);
+  background:var(--acu-ivory);border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.studio-scope-chip>span.is-ready{color:var(--acu-teal);font-weight:600;background:none;border-color:transparent}
+
+/* Equal side columns, one padding, one section-label style, one scrollbar. */
+.studio-grid{grid-template-columns:280px minmax(0,1fr) 280px}
+.studio-side,.studio-inspector{max-height:82vh;overflow-y:auto}
+.studio-pane{padding:12px;overflow:visible;max-height:none}
+.studio-inspector .studio-pane{padding:12px}
+
+/* The Data source summary reads as a chip line with a ready mark. */
+.studio-source-disclosure>summary{display:flex;align-items:center;flex-wrap:wrap;gap:5px;
+  letter-spacing:0;text-transform:none;font-size:11px}
+.studio-source-disclosure>summary>span{display:inline-flex;align-items:center;font-size:11px;color:var(--acu-plum);
+  background:white;border:1px solid var(--line);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.studio-source-disclosure>summary>span.is-ready{color:var(--acu-teal);font-weight:700;background:none;border-color:transparent;padding:0}
+.studio-source-disclosure>summary>span.is-waiting{color:var(--muted);background:none;border-color:transparent;padding:0;white-space:normal}
+
+/* Canvas column: title, scope subtitle, chart, one footer. */
+#studio-title:empty{display:none}
+.studio-subtitle{margin:0 0 8px;font-size:11.5px;color:var(--muted);line-height:1.5}
+.studio-subtitle:empty{display:none}
+.studio-foot{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.studio-foot .studio-reconcile{margin:0 0 6px}
+.studio-foot-line{display:flex;align-items:flex-start;flex-wrap:wrap;gap:8px 16px}
+.studio-foot-line #studio-note{flex:1 1 240px;margin:0}
+.studio-foot-line .studio-result-controls{flex:0 1 auto;margin:0;justify-content:flex-end}
+.studio-foot-line .studio-result-controls span{flex:0 0 auto}
+
+/* Inspector: properties first, then disclosures; no nested scroll. */
+.studio-disclosure{border-top:1px solid var(--line);margin-top:10px;padding-top:8px}
+.studio-disclosure[hidden]{display:none}
+.studio-disclosure>summary{list-style:none;cursor:pointer;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--acu-purple);font-weight:600;padding:2px 0}
+.studio-disclosure>summary::-webkit-details-marker{display:none}
+.studio-disclosure>summary::before{content:'\25B8 '}
+.studio-disclosure[open]>summary::before{content:'\25BE '}
+.studio-disclosure-hint{margin-left:6px;font-size:10px;letter-spacing:0;text-transform:none;
+  font-weight:400;color:var(--muted)}
+.studio-disclosure-hint:empty{display:none}
+.studio-disclosure>div{padding-top:6px}
+.studio-showme{margin:6px 0 0;border:0;background:none}
+.studio-showme-head{display:none}
+.studio-showme-grid{max-height:none;overflow:visible;padding:0;grid-template-columns:repeat(3,1fr)}
+.studio-showme-foot{border-top:0;padding:8px 0 0;min-height:0}
+.studio-options-hidden .studio-showme,.studio-options-hidden #studio-showme-details{display:none!important}
+@media print{.studio-showme,#studio-showme-details,.studio-foot{display:none!important}}
+@media (max-width:1200px){
+  .studio-grid{grid-template-columns:240px minmax(280px,1fr)}
+  .studio-side,.studio-inspector{max-height:none}
+  .studio-inspector{max-height:100vh}
+}
+@media (max-width:1000px){
+  .studio-grid{grid-template-columns:1fr}
+  .studio-side,.studio-inspector{max-height:none}
+  .studio-showme-grid{grid-template-columns:repeat(4,1fr)}
+}

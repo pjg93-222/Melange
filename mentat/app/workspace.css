@@ -40,8 +40,6 @@ input[type=number],input[type=search]{font:inherit;color:var(--acu-plum);border:
 .coverage-panel .panel-heading{flex-wrap:wrap;gap:4px 20px}
 .graph-actions{gap:8px}
 .graph-actions .secondary{font-size:13px;padding:8px 12px;border-color:#ded4e2}
-#graph-open-builder{background:var(--acu-plum);border-color:var(--acu-plum);color:white}
-#graph-open-builder:hover{background:var(--acu-purple)}
 .graph-controls{padding:16px 20px}
 .scope-heading{margin-bottom:10px}
 .scope-actions{display:flex;align-items:start;gap:18px}
@@ -146,7 +144,7 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 /* Comparison is a focused workspace, opened from Graph. */
-#view-graph:has(#compare-panel:not([hidden])) > :is(.graph-controls,.analysis-tabs,.graph-row-tools,#graph-status,#graph-error,#graph-results){display:none}
+#view-graph:has(#compare-panel:not([hidden])) > :is(.graph-controls,.analysis-strip,#graph-error,#graph-results){display:none}
 #view-graph:has(#compare-panel:not([hidden])) > #compare-panel{margin-top:0}
 /* Keep financial labels readable; wide breakdowns scroll inside their cards. */
 @media(max-width:600px){
@@ -344,3 +342,138 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 @media(max-width:1099px){
   .app-navigation .build-stamp{order:1;margin-left:12px;font-size:10px}
 }
+
+/* ------------------------------------------------- UI clean-up, 2026-09-17
+   Graph: one header line, underline tabs with one caption at the right, three
+   equal KPI tiles with a share bar, one shared panel chrome, a two by two
+   Overview, one slim export line. Every colour is an ACU token; the only new
+   pair is the party dots in acu-theme.css. */
+.graph-header{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px 14px}
+.graph-header .graph-filter-grid{flex:1 1 640px;min-width:0;gap:12px}
+.graph-header #graph-reset{flex:none;margin-bottom:9px;font-size:12px}
+.graph-header .graph-actions{flex:none;margin-left:auto;display:flex;align-items:center;gap:8px}
+.graph-controls{padding:14px 18px}
+.graph-chips:not(:empty){margin-top:12px}
+#graph-open-builder{background:var(--acu-gold);border-color:var(--acu-gold);color:var(--acu-plum);font-weight:600}
+#graph-open-builder:hover{background:#f2bb4b;border-color:#f2bb4b}
+
+/* An overflow menu with the same manners as the studio's. */
+#view-graph details.graph-menu{position:relative}
+#view-graph details.graph-menu>summary{list-style:none;display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;color:var(--acu-plum);background:white;border:1px solid #ded4e2;border-radius:6px;
+  padding:8px 12px;min-height:38px;cursor:pointer;white-space:nowrap}
+#view-graph details.graph-menu>summary::-webkit-details-marker{display:none}
+#view-graph details.graph-menu>summary:hover{border-color:var(--acu-purple);background:#f7f2fa}
+#view-graph details.graph-menu>div{position:absolute;right:0;z-index:6;margin-top:4px;display:flex;
+  flex-direction:column;gap:3px;padding:8px;min-width:210px;background:white;border:1px solid var(--line);
+  border-radius:8px;box-shadow:0 8px 24px #34264926}
+#view-graph details.graph-menu>div hr{width:100%;margin:2px 0;border:0;border-top:1px solid var(--line)}
+#view-graph details.graph-menu>div button{font:inherit;font-size:12px;text-align:left;white-space:nowrap;
+  border:0;background:none;color:var(--acu-plum);padding:6px 8px;border-radius:5px;min-height:0;cursor:pointer}
+#view-graph details.graph-menu>div button:hover{background:#f3eef8}
+#view-graph details.graph-menu>div label{display:block;font-size:11px;color:var(--muted);margin:4px 0 0}
+#view-graph details.graph-menu>div select{display:block;width:100%;margin:4px 0 0;font-size:12px;padding:6px}
+.graph-menu-mark{font-size:10px;color:var(--muted)}
+
+/* Underline tabs, one caption. */
+.analysis-strip{display:flex;align-items:flex-end;gap:16px;border-bottom:1px solid var(--line);margin:20px 0 0}
+.analysis-strip .analysis-tabs{border-bottom:0;margin:0;flex:1 1 auto;min-width:0}
+.analysis-caption{margin-left:auto;padding-bottom:11px;font-size:11px;color:var(--muted);white-space:nowrap}
+#graph-status{margin:0}
+
+/* Three equal tiles; the two part figures carry a thin share bar. */
+.graph-metrics{margin:18px 0;padding:16px 0}
+.graph-metrics>div:first-child strong{font-size:27px;font-weight:500}
+.graph-share-track{height:4px;max-width:220px;margin:1px 0 6px;background:var(--chart-grid);border-radius:2px;overflow:hidden}
+.graph-share-track>i{display:block;height:100%;background:var(--acu-purple)}
+
+/* One panel chrome: h2 left, tools right, body, footer. */
+.graph-panels{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.graph-panels[data-analysis=candidates]{grid-template-columns:minmax(0,1fr)}
+.graph-panels>.panel{padding:16px 18px 14px;display:flex;flex-direction:column}
+.graph-panels h2{font-size:18px}
+.graph-panels .panel-heading{align-items:center;gap:8px 12px;margin-bottom:10px}
+.graph-panel-tools{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.graph-panel-tools .graph-candidate-controls{margin:0;max-width:none;gap:8px}
+.graph-panel-tools .graph-candidate-controls label{flex:0 0 auto;font-size:11px}
+.graph-panel-tools .graph-candidate-controls select{width:auto;font-size:12px;min-height:30px;padding:4px 6px;margin:0}
+.graph-topn{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.graph-topn select{width:auto;min-width:56px;margin:0;padding:4px 6px;font-size:12px;min-height:30px}
+.graph-panel-sub{margin:-2px 0 10px;font-size:12px;color:var(--muted);line-height:1.5}
+.graph-panel-foot{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:10px;font-size:12px;color:var(--muted)}
+.graph-foot-count{min-width:0;overflow-wrap:anywhere}
+.graph-panel-foot .graph-export-menu{margin-left:auto;flex:none}
+.graph-panel-foot .graph-export-menu>summary{min-height:0;padding:4px 9px;font-size:11px}
+.graph-info{display:inline-flex;align-items:center;justify-content:center;flex:none;width:15px;height:15px;
+  border:1px solid var(--line);border-radius:50%;background:var(--acu-paper);
+  font-size:10px;font-weight:700;font-style:normal;line-height:1;cursor:help}
+
+/* Bars: label, bar, value, share, and for companies a sparkline. */
+.graph-panels .graph-bars{width:100%;max-width:760px;height:auto}
+[data-analysis=candidates] #graph-candidates>.graph-bars{max-width:760px}
+.graph-panels[data-analysis=overview] #graph-companies>details,
+.graph-panels[data-analysis=overview] #graph-levels>details,
+.graph-panels[data-analysis=overview] #graph-organizations>details{display:none}
+.graph-party{stroke:none}
+.graph-party.is-dem{fill:var(--party-dem)}
+.graph-party.is-rep{fill:var(--party-rep)}
+.graph-party.is-other{fill:var(--acu-taupe)}
+.graph-value,.graph-share{font-variant-numeric:tabular-nums}
+.graph-spark-line{stroke:var(--acu-teal);fill:none}
+.graph-spark-dot{fill:var(--acu-teal)}
+.graph-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0 0}
+.graph-legend-item{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0;
+  font:inherit;font-size:12px;cursor:pointer;text-align:left;min-height:0}
+.graph-legend-item:hover{color:var(--acu-plum)}
+.graph-legend-item>i{display:inline-block;width:10px;height:10px;border-radius:2px;flex:none}
+
+/* One slim export line for the whole view. */
+.graph-details-tools{padding:10px 16px;margin-top:18px;align-items:center}
+.graph-details-tools .graph-export-tools{gap:14px;align-items:center}
+.graph-details-tools .graph-text-button{font-size:12px}
+@media(max-width:1000px){
+  .graph-panels,.graph-panels[data-analysis=overview],.graph-panels[data-analysis=recipients],
+  .graph-panels[data-analysis=companies]{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:700px){
+  .graph-header .graph-actions{margin-left:0;width:100%}
+  .analysis-strip{flex-wrap:wrap}
+  .analysis-caption{width:100%;margin:0;padding:0 0 8px;white-space:normal}
+  .graph-panel-tools{width:100%;margin:0;justify-content:flex-start}
+}
+
+/* S8 - the PAC evidence district map. One map replaces the pane grid; Back to
+   panes restores it. Colours are the console's own (acu-theme.css); the heat
+   ramp lives here because a CSP of style-src 'self' blocks an inline gradient. */
+.evidence-map { display: flex; flex-direction: column; gap: 14px; }
+.map-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.map-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.map-cycle-label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.evidence-map .seg { display: inline-flex; border: 1px solid #b4a4bd; border-radius: 4px; overflow: hidden; }
+.evidence-map .seg button { border: 0; background: #fff; color: #342649; min-height: 44px; padding: 0 18px; font-size: 14px; cursor: pointer; }
+.evidence-map .seg button.on { background: #342649; color: #fff; }
+.map-layers { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.map-layers .layer { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px;
+  border: 1px solid #d6c8e2; border-radius: 18px; background: #f7f2fa; font-size: 13px; cursor: pointer; color: inherit; }
+.map-layers .layer.off { background: #fff; color: #716a64; border-style: dashed; }
+.map-layers .dot { width: 10px; height: 10px; border-radius: 5px; display: inline-block; }
+.map-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 520px); gap: 20px; align-items: start; }
+.map-figure, .map-ranked { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.map-canvas-host { border: 1px solid #e4d9d0; border-radius: 4px; background: #fbfaf9; padding: 8px; }
+.map-canvas { width: 100%; height: auto; display: block; }
+.map-canvas .map-shape { stroke: none; }
+.map-canvas .map-district { cursor: pointer; }
+.map-canvas .map-district.chosen { stroke: #342649; stroke-width: 1.6; }
+.map-canvas .map-outline { fill: none; stroke-width: 0.6; pointer-events: none; }
+.map-legend { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+.map-ramp { width: 260px; height: 12px; border-radius: 2px;
+  background: linear-gradient(90deg, #f1e9e3, #d6c8e2, #8b6984, #57447b, #342649); }
+.map-list { max-height: 60vh; overflow: auto; }
+.map-list .group td { background: #fbfaf9; font-weight: 600; }
+.map-list .map-row { cursor: pointer; }
+.map-list .support { color: #327a7a; font-weight: 600; }
+.map-list .oppose { color: #bf3f36; font-weight: 600; }
+.map-list .map-unlocated td { background: #f7ede4; }
+.map-reconcile, .map-message { margin: 0; }
+.pane-district-filter { margin: 0 0 6px; font-size: 13px; }
+@media (max-width: 1100px) { .map-grid { grid-template-columns: minmax(0, 1fr); } }

@@ -147,8 +147,11 @@ test('a Graph scope carried before Chart Studio has its data is still carried',{
   assert.ok(pills.some(text=>/Election cycle = 2023-2024/.test(text)),'the carried cycle is a filter pill: '+JSON.stringify(pills));
 
   // And the chip says where the scope came from, naming both.
-  const chip=await page.locator('#studio-scope-chip').textContent();
-  assert.match(chip,/^Carried from Graph · Banking · 2023-2024 · Alpha Bank$/);
+  // The header scope is a chip line since the 2026-09-17 UI clean-up (item 13):
+  // the same parts, one <span> each, so they are read as a list rather than as
+  // one sentence with separators in its text.
+  const chip=await page.locator('#studio-scope-chip span').allTextContents();
+  assert.deepEqual(chip,['Carried from Graph','Banking','2023-2024','Alpha Bank']);
 
   // The query the console was actually asked is the carried one, and the strip
   // agrees with Graph to the cent.
@@ -195,6 +198,8 @@ test('the open briefing drawer never covers the studio toolbar controls',{timeou
     // The reader can actually press the one it used to swallow. It opens the
     // classic dialog as a modal, which makes the rest of the page inert, so
     // that dialog is closed again before the drawer is.
+    // Classic builder moved under Export (UI clean-up 2026-09-17, item 14).
+    if(!(await page.locator('#studio-download').evaluate(el=>el.open)))await page.locator('#studio-download > summary').click();
     await page.locator('#studio-classic').click({timeout:5000});
     await page.waitForFunction(()=>document.getElementById('graph-builder').open);
     await page.evaluate(()=>document.getElementById('graph-builder').close());

@@ -63,7 +63,7 @@
   // The Data source panel opens on arrival and folds itself away once, after
   // the first load that actually produced fields. sourceReady is what the
   // folded summary reports; it is cleared whenever a load starts again.
-  let sourceSettled = false, sourceReady = false;
+  let sourceReady = false;
   let progressStart = 0, progressTimer = 0, progressDepth = 0, progressOpened = false;
   const contributionCache = new Map(), memberCache = new Map(), geometryCache = new Map(), geometryPending = new Map();
   let contributionCacheEpoch=0;
@@ -171,25 +171,33 @@
   function renderSourceSummary() {
     const details = el('source-details'), summary = el('source-summary');
     if (!details || !summary) return;
-    const parts = ['Data source'];
-    if (!details.open) {
-      if (verified()) {
-        const chosen = dataset();
-        parts.push(chosen ? (chosen.label || chosen.id) : '', (contributions.BASIS[basis()] || [])[0] || '');
-      } else if (data) {
-        parts.push(sheet().source.reportName || '', data.sheet || '');
-      }
-      parts.push(sourceReady ? 'ready' : el('loading').textContent);
+    // A chip line, open or folded: what this panel is pointed at, then whether
+    // it is ready (UI clean-up item 16). It used to read "Data source" while
+    // open and a sentence while folded, so the state disappeared with the fold.
+    const chips = [];
+    if (verified()) {
+      const chosen = dataset();
+      chips.push(chosen ? (chosen.label || chosen.id) : '', (contributions.BASIS[basis()] || [])[0] || '');
+    } else if (data) {
+      chips.push(sheet().source.reportName || '', data.sheet || '');
     }
-    summary.textContent = parts.filter(Boolean).join(' · ');
+    summary.replaceChildren();
+    for (const text of chips.filter(Boolean)) {
+      const chip = document.createElement('span');
+      chip.textContent = text;
+      summary.append(chip);
+    }
+    const mark = document.createElement('span');
+    mark.className = sourceReady ? 'is-ready' : 'is-waiting';
+    mark.textContent = sourceReady ? '✓ Ready' : (el('loading').textContent || 'Data source');
+    summary.append(mark);
   }
 
-  // Folded once, and only once: a reader who opens the panel again keeps it
-  // open for the rest of the session.
+  // The panel stays open (item 16). Its selects are the way into every report,
+  // and folding them away after the first load was the console's doing, not the
+  // reader's; the ready mark on the summary carries what the fold used to say.
   function settleSource() {
     sourceReady = true;
-    const details = el('source-details');
-    if (details && !sourceSettled) { sourceSettled = true; details.open = false; }
     renderSourceSummary();
   }
 
@@ -448,8 +456,12 @@
     if(data)data.columns=contributions.fields(d.fields||contributionCatalog.fields,basis());
     if(el('destination'))el('destination').value=core.shelf(sheet().columns).map(p=>columns()[p.column]?.id).find(id=>['recipient_state','represented_state','state'].includes(id))||'';
     el('param-groups').title='Groups shown per page. Totals and CSV exports include every group.';
+    const mapWasHidden=el('map-settings').hidden;
     el('map-settings').hidden=!['map','filled-map'].includes(sheet().marks.type);
+    if(mapWasHidden&&!el('map-settings').hidden)el('map-settings').open=true;
+    const binWasHidden=el('bin-width-label').hidden;
     el('bin-width-label').hidden=sheet().marks.type!=='histogram';el('bin-width').value=sheet().params.binWidth||100;
+    if(binWasHidden&&!el('bin-width-label').hidden&&el('params-details'))el('params-details').open=true;
     const map=sheet().map||{layers:['states','districts'],congress:'119'};
     el('congress').value=map.congress;for(const [id,layer]of [['states','states'],['districts','districts'],['zips','zip_areas']])el('layer-'+id).checked=map.layers.includes(layer);
   }
@@ -542,12 +554,20 @@
     const promise=contributionReady('query',query,contributionController.signal).then(result=>{if(epoch===contributionCacheEpoch){contributionCache.set(key,{result,at:Date.now()});if(contributionCache.size>12)contributionCache.delete(contributionCache.keys().next().value);}return result;}).finally(()=>{if(contributionPending?.key===key&&epoch===contributionCacheEpoch)contributionPending=null;});
     contributionPending={key,promise};return promise;
   }
+  // The scope under the chart title: the parts the header chips carry, plus the
+  // basis, so the chart and the chrome cannot disagree about what is on screen.
+  function scopeSubtitle() {
+    if(!data)return '';
+    const parts=scopeText().split(' · ').filter(Boolean);
+    if(verified()){const label=contributions.BASIS[basis()];if(label&&label[0])parts.push(label[0].toLowerCase());}
+    return parts.join(' · ');
+  }
   function sourceScope(result,request) {
     const p=result.provenance;
     return [request.dataset,contributions.BASIS[request.basis]?.[0],p.workbook,'Workbook SHA256 '+p.workbook_sha256,'Analytical index '+p.index_token,'Query engine SHA256 '+p.query_engine_sha256,'Field semantics SHA256 '+p.field_semantics_sha256,'Groups '+(result.offset+1)+'–'+(result.offset+result.rows.length)+' of '+result.group_count,JSON.stringify({filters:request.filters,aggregate_filters:request.aggregate_filters,bin_width_cents:request.bin_width_cents}),p.scope].join(' · ');
   }
   async function renderContributionView() {
-    if(!data||!dataset()){el('reconcile').hidden=true;el('canvas').replaceChildren();el('table').replaceChildren();el('verified-summary').textContent='Reading verified source fields…';el('result-controls').hidden=true;el('title').textContent='Chart Studio';el('note').textContent='Choose a verified report in the Data panel to begin.';lastResult=null;return;}
+    if(!data||!dataset()){el('reconcile').hidden=true;el('canvas').replaceChildren();el('table').replaceChildren();el('verified-summary').textContent='Reading verified source fields…';el('result-controls').hidden=true;el('title').textContent='';el('subtitle').textContent='';el('note').textContent='Choose a verified report in the Data panel to begin.';lastResult=null;return;}
     const ticket=++contributionRevision;
     try {
       const compiled=contributions.compile(sheet(),columns(),{dataset:dataset().id,industry:dataset().industry,basis:basis(),offset:contributionOffset});
@@ -557,7 +577,7 @@
       const result=await queryCached(query);if(ticket!==contributionRevision||!verified())return;
       failure('');contributionResult=result;contributionRequest=query;lastResult=result;lastConfig=compiled;
       data.row_count=result.totals.records;data.rows=result.rows.map(row=>data.columns.map(f=>row[f.id]??''));
-      lastTitle=contributions.BASIS[basis()][0]+(query.dimensions.length?' by '+query.dimensions.map(id=>data.columns.find(f=>f.id===id)?.name||id).join(' / '):'');if(compiled.spec.measures.length!==1||compiled.spec.measures[0]!=='amount')lastTitle=compiled.spec.measures.map(id=>result.columns.find(c=>c.id===id)?.name||id).join(' / ')+' · '+lastTitle;lastScope=sourceScope(result,query);el('title').textContent=lastTitle;
+      lastTitle=contributions.BASIS[basis()][0]+(query.dimensions.length?' by '+query.dimensions.map(id=>data.columns.find(f=>f.id===id)?.name||id).join(' / '):'');if(compiled.spec.measures.length!==1||compiled.spec.measures[0]!=='amount')lastTitle=compiled.spec.measures.map(id=>result.columns.find(c=>c.id===id)?.name||id).join(' / ')+' · '+lastTitle;lastScope=sourceScope(result,query);el('title').textContent=lastTitle;el('subtitle').textContent=scopeSubtitle();
       const money=value=>contributionPlot.format(value,'amount');
       el('verified-summary').replaceChildren();
       for(const [label,value]of [[basis()==='original_supported'?'Selected gross amount':'Selected net amount',money(result.totals.amount)],['Source observations',fmt(result.totals.records)],['Reported donor identities',fmt(result.totals.contributors)]]){const item=document.createElement('span'),strong=document.createElement('strong');strong.textContent=value;item.append(strong,document.createTextNode(label));el('verified-summary').append(item);}
@@ -1105,7 +1125,11 @@
   function renderPager() {
     const state = sheet();
     const pill = core.pill(state.pages);
+    // A pager inside a folded disclosure is a control nobody can find, so
+    // placing a Pages field opens it once.
+    const pagerWasHidden = el('pager').hidden;
     el('pager').hidden = !pill;
+    if (pill && pagerWasHidden && el('pages-details')) el('pages-details').open = true;
     if (!pill) { stopPlay(); return; }
     const list = members(pill.column);
     const at = Math.max(0, list.indexOf(state.pageMember));
@@ -1237,6 +1261,12 @@
     if (!hoverTile) el('showme-foot').textContent = recommended
       ? 'Suggested from the scanned columns: ' + (tiles.find(t => t.id === recommended) || {}).label
       : 'Choose fields to see what fits.';
+    // The suggestion also rides on the closed disclosure's own summary, so a
+    // reader can see what fits without opening it.
+    const hint = el('showme-hint');
+    if (hint) hint.textContent = recommended
+      ? ' · suggested: ' + ((tiles.find(t => t.id === recommended) || {}).label || '')
+      : '';
   }
 
   /* ------------------------------------------------------------- analytics */
@@ -1345,7 +1375,7 @@
     toggle.disabled = !!reason;
     toggle.title = reason || 'Four preset views of one company';
     if (reason) overviewMode = false;
-    toggle.setAttribute('aria-pressed', String(overviewMode));
+    syncViewMode();
     el('overview').hidden = !overviewMode;
     el('grid').hidden = dataSourceTab || overviewMode;
     const host = document.querySelector('#view-chart-studio .studio');
@@ -1605,7 +1635,8 @@
     el('table').replaceChildren();
     el('status').replaceChildren();
     if (!data) {
-      el('title').textContent = 'Chart Studio';
+      el('title').textContent = '';
+      el('subtitle').textContent = '';
       el('note').textContent = 'Choose a report worksheet in the Data panel to begin.';
       return;
     }
@@ -1615,9 +1646,12 @@
     // aggregated view from one that plots individual values, so a box,
     // histogram or scatter title would read "· Sum" without it. The real title
     // is set again below, once math.build has produced that result.
+    // The h2 never names the console (item 17): before a chart is drawn it is
+     // empty, and an empty title is not rendered at all (chart-studio.css).
     el('title').textContent = report.config
       ? paint.measureLabel(report.config, null, data) + ' · ' + markName
-      : 'Build a view';
+      : '';
+    el('subtitle').textContent = report.config ? scopeSubtitle() : '';
     if (!report.config || report.issues.length) {
       el('note').textContent = [...worksheetNotes(),
         report.issues.join(' ') || 'Drag a field onto Columns or Rows.'].join(' ');
@@ -1637,6 +1671,7 @@
     lastResult = result; lastConfig = report.config;
     const measure = paint.measureLabel(report.config, result, data);
     el('title').textContent = measure + ' · ' + markName;
+    el('subtitle').textContent = scopeSubtitle();
     const source = sheet().source;
     const filterText = report.config.filters
       .map(f => (core.fieldAt(report.fields, f.column) || {name: 'field'}).name + ' ' + f.op + ' ' + f.value).join('; ');
@@ -1816,8 +1851,7 @@
     renderSortButtons(data ? core.compileReport(state, columns()).config : null);
     el('labels').setAttribute('aria-pressed', String(!!state.showLabels));
     el('fit').value = state.fit;
-    el('showme-toggle').setAttribute('aria-pressed', String(!el('showme').hidden));
-    el('showme-toggle').classList.toggle('is-primary', el('showme').hidden);
+    el('showme-toggle').setAttribute('aria-pressed', String(!!el('showme-details').open));
     el('param-start').value = state.params.start || '';
     el('param-end').value = state.params.end || '';
     el('param-limit').value = state.params.limit || '';
@@ -2502,7 +2536,13 @@
   function renderScopeChip() {
     // The Data source button is permanent. The one way back to the report
     // picker must never depend on there being a scope to describe.
-    el('scope-chip').textContent = scopeText();
+    const host = el('scope-chip');
+    host.replaceChildren();
+    for (const part of scopeText().split(' · ').filter(Boolean)) {
+      const chip = document.createElement('span');
+      chip.textContent = part;
+      host.append(chip);
+    }
     // What the hand-off could not bring across is stated beside the scope,
     // not left for the reader to meet as a number that looks too large.
     const notes = (appliedScope && appliedScope.notCarried) || [];
@@ -2515,10 +2555,7 @@
   function setOptionsHidden(hidden) {
     const host = document.querySelector('#view-chart-studio .studio');
     if (host) host.classList.toggle('studio-options-hidden', !!hidden);
-    el('view-builder').setAttribute('aria-checked', String(!hidden));
-    el('view-canvas').setAttribute('aria-checked', String(!!hidden));
-    el('view-builder').tabIndex = hidden ? -1 : 0;
-    el('view-canvas').tabIndex = hidden ? 0 : -1;
+    syncViewMode();
     // Canvas only puts the Inspector behind its header button the way a narrow
     // window does: the filter count stays readable and the panel stays off the
     // chart until it is asked for.
@@ -2526,6 +2563,27 @@
     const closed = !!hidden || narrow;
     el('inspector').hidden = closed;
     el('inspector-toggle').setAttribute('aria-expanded', String(!closed));
+  }
+  // Builder, Company overview and Canvas are three states of one thing, so they
+  // are one radiogroup (item 13). Before this, Company overview was a separate
+  // toggle beside a two-way segment and both could look "on" at once.
+  function syncViewMode() {
+    const host = document.querySelector('#view-chart-studio .studio');
+    const hidden = !!(host && host.classList.contains('studio-options-hidden'));
+    const state = overviewMode ? 'overview' : hidden ? 'canvas' : 'builder';
+    for (const [id, name] of [['view-builder', 'builder'], ['overview-toggle', 'overview'], ['view-canvas', 'canvas']]) {
+      const on = state === name;
+      el(id).setAttribute('aria-checked', String(on));
+      if (id === 'overview-toggle') el(id).setAttribute('aria-pressed', String(on));
+      el(id).tabIndex = on ? 0 : -1;
+    }
+  }
+  function setViewMode(mode) {
+    const was = overviewMode;
+    overviewMode = mode === 'overview';
+    if (overviewMode) el('inspection').hidden = true;
+    if (!overviewMode) applyOptionsHidden(mode === 'canvas');
+    if (overviewMode !== was) renderAll(); else syncViewMode();
   }
   const applyOptionsHidden = hidden => {
     const pane = window.MentatStudioPane;
@@ -2615,9 +2673,24 @@
     window.MentatBriefing.capture(currentChart());
   };
   el('briefing-add').onclick = toBriefing;
-  el('briefing-menu-add').onclick = toBriefing;
-  el('showme-toggle').onclick = () => { el('showme').hidden = !el('showme').hidden; renderToolbar(); };
-  el('showme-close').onclick = () => { el('showme').hidden = true; renderToolbar(); };
+  // Show Me lives in exactly one place in the DOM - the Inspector's own
+  // disclosure (item 18) - and the toolbar button opens that disclosure rather
+  // than a second copy of it: it brings the Inspector back if it is closed,
+  // puts the Marks pane in front, and scrolls the block into view.
+  el('showme-toggle').onclick = () => {
+    const details = el('showme-details'), open = !details.open;
+    details.open = open;
+    if (open) {
+      if (el('inspector').hidden) {
+        el('inspector').hidden = false;
+        el('inspector-toggle').setAttribute('aria-expanded', 'true');
+      }
+      setInspectorTab('marks');
+      details.scrollIntoView({block: 'nearest'});
+    }
+    renderToolbar();
+  };
+  el('showme-close').onclick = () => { el('showme-details').open = false; renderToolbar(); };
   el('classic').onclick = () => {
     // The classic dialog only scans its report list while the Graph view is
     // showing (charts.js activate()), so go there first and then open it.
@@ -2665,8 +2738,24 @@
   el('param-subject').onchange = () => commit(() => { sheet().params.subject = el('param-subject').value; });
   el('param-split').onchange = () => commit(() => { sheet().params.splitMulti = el('param-split').checked; });
   for (const id of ['marks', 'analytics', 'filters']) el('tab-' + id).onclick = () => setInspectorTab(id);
-  el('view-builder').onclick = () => applyOptionsHidden(false);
-  el('view-canvas').onclick = () => applyOptionsHidden(true);
+  el('view-builder').onclick = () => setViewMode('builder');
+  el('view-canvas').onclick = () => setViewMode('canvas');
+  // A radiogroup the keyboard can cross: the unselected options carry
+  // tabIndex -1, so without this they could only be reached with a mouse.
+  el('view-mode').addEventListener('keydown', event => {
+    const order = ['view-builder', 'overview-toggle', 'view-canvas'];
+    const at = order.indexOf(event.target.id);
+    const step = {ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1}[event.key];
+    if (at < 0 || !step) return;
+    event.preventDefault();
+    for (let i = 1; i <= order.length; i += 1) {
+      const next = el(order[(at + step * i + order.length * order.length) % order.length]);
+      if (next.disabled) continue;
+      next.focus();
+      next.click();
+      return;
+    }
+  });
   el('scope-change').onclick = () => {
     // An explicit open outlives the prepare that may have opened the panel
     // for its own reasons, so nothing closes it behind the reader's back.
@@ -2695,11 +2784,7 @@
     el('inspector-toggle').setAttribute('aria-expanded', 'false');
     el('inspector-toggle').focus();
   };
-  el('overview-toggle').onclick = () => {
-    overviewMode = !overviewMode;
-    if (overviewMode) el('inspection').hidden = true;
-    renderAll();
-  };
+  el('overview-toggle').onclick = () => setViewMode('overview');
   el('overview-company').onchange = () => { overviewCompany = el('overview-company').value; renderOverview(); };
   // The Inspector is a column on a wide window and a drawer on a narrow one.
   // Crossing that line applies the same rule the first paint applies, so a

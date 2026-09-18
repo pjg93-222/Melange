@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mentat UI clean-up mockups</title>
+<style>
+:root{--paper:#fcf7f4;--ivory:#f7ede4;--line:#e4d9d0;--plum:#342649;--purple:#57447b;--gold:#eca91c;--teal:#327a7a;--aqua:#9ed4d5;--mauve:#8b6984;--lilac:#d6c8e2;--taupe:#bcaea1;--muted:#716a64;--ink:#342649;--neg:#bf3f36;--grid:#e8e0da;--dem:#3b6db5;--rep:#b8433a;
+ --sans:"Articulat CF",articulat-cf,"Segoe UI",Arial,sans-serif;--serif:"Freight Text Pro",freight-text-pro,Georgia,serif}
+*{box-sizing:border-box}
+body{margin:0;background:#ece5df;font:13px/1.45 var(--sans);color:var(--ink)}
+.switch{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.switch strong{margin-right:8px;font-family:var(--serif);font-size:16px}
+.switch a{padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;background:var(--paper)}
+.switch a:hover{border-color:var(--purple)}
+.mock{width:1440px;margin:24px auto;background:var(--paper);border:1px solid var(--line);box-shadow:0 8px 30px rgba(52,38,73,.12);display:grid;grid-template-columns:200px 1fr;min-height:820px}
+.cap{width:1440px;margin:24px auto 0;font-family:var(--serif);font-size:20px}
+.cap small{display:block;font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:4px}
+.side{border-right:1px solid var(--line);padding:22px 18px;display:flex;flex-direction:column}
+.wm{font-weight:700;letter-spacing:.18em;font-size:14px}
+.tag{color:var(--muted);font-size:11px;margin-bottom:22px}
+.grp{font-size:10px;letter-spacing:.14em;color:var(--muted);margin:14px 0 6px}
+.nav{padding:7px 10px;border-radius:6px;margin:1px -10px}
+.nav.on{background:var(--lilac);color:var(--plum);font-weight:600}
+.side .foot{margin-top:auto;font-size:11px;color:var(--muted)}
+.main{padding:22px 28px 24px}
+h1{font:400 30px/1.1 var(--serif);margin:0}
+h2{font:400 18px/1.2 var(--serif);margin:0}
+.row{display:flex;align-items:center;gap:10px}
+.sel{display:inline-flex;flex-direction:column;gap:2px;font-size:11px;color:var(--muted)}
+.sel b{display:inline-flex;align-items:center;justify-content:space-between;gap:10px;font-weight:500;color:var(--ink);font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:5px 9px;min-width:132px}
+.sel b::after{content:"\25BE";color:var(--muted)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:6px;padding:6px 12px;font-size:12.5px;color:var(--ink)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#2a1d3a;font-weight:600}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--purple)}
+.chipbar{display:flex;gap:6px}
+.chip{background:var(--ivory);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-top:16px;align-items:flex-end}
+.tabs span{padding:8px 2px;color:var(--muted)}
+.tabs span.on{color:var(--plum);border-bottom:2px solid var(--purple);font-weight:600}
+.tabs .capr{margin-left:auto;color:var(--muted);font-size:12px;padding-bottom:8px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:#fff;border:1px solid var(--line);border-radius:8px;margin-top:16px}
+.kpi{padding:14px 18px 12px;border-right:1px solid var(--line)}
+.kpi:last-child{border-right:0}
+.kpi span{display:block;font-size:11.5px;color:var(--muted)}
+.kpi strong{display:block;font:500 26px/1.15 var(--serif);margin:4px 0 6px}
+.bar{height:4px;background:var(--grid);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--purple)}
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px 16px 12px;display:flex;flex-direction:column}
+.ph{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ph .r{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--purple)}
+.ph .mini{border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--ink);background:#fff}
+.sub{color:var(--muted);font-size:12px;margin:-6px 0 10px}
+.bars{display:grid;grid-template-columns:150px 1fr 96px 46px;row-gap:7px;align-items:center;font-size:12px}
+.bars .lab{text-align:right;padding-right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bars .trk{height:14px;background:transparent}
+.bars .trk i{display:block;height:100%;border-radius:2px;background:var(--taupe)}
+.bars .trk i.top{background:var(--plum)}
+.bars .val{text-align:right;font-variant-numeric:tabular-nums}
+.bars .pct{text-align:right;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.dem{background:var(--dem)}.rep{background:var(--rep)}
+.pfoot{margin-top:auto;padding-top:10px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+.pfoot a{color:var(--purple);margin-left:auto}
+.tool{display:flex;justify-content:flex-end;gap:14px;margin-top:16px;font-size:12.5px;color:var(--purple)}
+.spark{display:inline-block;width:46px;height:14px;vertical-align:middle}
+.stack{display:flex;height:22px;border-radius:4px;overflow:hidden;margin:10px 0 8px}
+.stack i{display:block;height:100%}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--muted)}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.tip{position:absolute;background:var(--plum);color:#fff;font-size:11.5px;padding:6px 9px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.srow1{display:flex;align-items:center;gap:12px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#fff}
+.seg span{padding:5px 12px;font-size:12.5px;color:var(--muted)}
+.seg span.on{background:var(--purple);color:#fff}
+.tb{display:flex;align-items:center;gap:6px;margin-top:12px;padding:6px 8px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.tb .g{display:flex;gap:4px;align-items:center}
+.tb .d{width:1px;height:22px;background:var(--line);margin:0 6px}
+.tb .b{border:1px solid transparent;border-radius:5px;padding:4px 8px;font-size:12px;color:var(--ink)}
+.tb .b:hover{border-color:var(--line)}
+.tb .sp{flex:1}
+.tb .lay{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.tb .lay span{padding:3px 8px;font-size:11.5px;color:var(--muted)}
+.tb .lay span.on{background:var(--ivory);color:var(--plum);font-weight:600}
+.grid3{display:grid;grid-template-columns:280px 1fr 280px;gap:12px;margin-top:12px;min-height:560px}
+.pane{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px}
+.pt{font-size:10.5px;letter-spacing:.14em;color:var(--muted);margin:10px 0 6px}
+.pt:first-child{margin-top:0}
+.src{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px}
+.src .ok{color:var(--teal);font-weight:600}
+.search{border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--muted);font-size:12px;margin:8px 0 2px;background:#fff}
+.pills{display:flex;flex-direction:column;gap:5px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--purple);color:#fff;border-radius:999px;padding:3px 10px;font-size:11.5px;width:max-content}
+.pill.m{background:var(--teal)}
+.pill small{opacity:.8;font-size:10px}
+.shelf{display:grid;grid-template-columns:70px 1fr;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f1e9e1}
+.shelf b{font-size:10.5px;letter-spacing:.12em;color:var(--muted);font-weight:600}
+.shelf .drop{min-height:26px;border:1px dashed var(--line);border-radius:6px;padding:2px 6px;display:flex;gap:6px;align-items:center;color:var(--muted);font-size:12px}
+.shelf .drop .pill{padding:2px 9px}
+.ctitle{font:400 17px/1.3 var(--serif);margin:12px 0 4px}
+.ctitle small{font-family:var(--sans);color:var(--muted);font-size:12px;margin-left:8px}
+.chart{padding:6px 4px 0}
+.rec{margin-top:10px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
+.rec b{color:var(--teal)}
+.itabs{display:flex;gap:16px;border-bottom:1px solid var(--line);margin:4px 0 10px}
+.itabs span{padding:4px 0;color:var(--muted)}
+.itabs span.on{color:var(--plum);border-bottom:2px solid var(--purple);font-weight:600}
+.prop{display:grid;grid-template-columns:64px 1fr;align-items:center;gap:8px;margin:6px 0}
+.prop span{font-size:12px;color:var(--muted)}
+.prop .drop{min-height:26px;border:1px dashed var(--line);border-radius:6px;padding:2px 6px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.disc{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12.5px;color:var(--purple)}
+.sheets{display:flex;gap:6px;margin-top:12px;font-size:12px}
+.sheets span{border:1px solid var(--line);border-radius:6px 6px 0 0;padding:5px 12px;background:#fff;color:var(--muted)}
+.sheets span.on{color:var(--plum);font-weight:600;border-bottom-color:#fff}
+.smgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.smgrid .sm{border:1px solid var(--line);border-radius:6px;padding:8px}
+.smgrid .sm h4{margin:0 0 6px;font:600 12px var(--sans);color:var(--muted)}
+.pop{position:absolute;right:26px;top:118px;width:320px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 30px rgba(52,38,73,.18);padding:10px;z-index:3}
+.pop .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pop .tile{border:1px solid var(--line);border-radius:6px;padding:8px 4px;font-size:10px;text-align:center;color:var(--muted)}
+.pop .tile.on{border-color:var(--purple);color:var(--plum);background:var(--ivory)}
+.pop .tile i{display:block;height:18px;margin:0 auto 5px;width:22px;background:linear-gradient(90deg,var(--plum) 60%,transparent 60%);opacity:.7}
+.pop .foot{font-size:11px;color:var(--muted);margin-top:8px}
+.notes{width:1440px;margin:12px auto 32px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px 18px;font-size:13px}
+.notes h3{margin:0 0 6px;font:400 18px var(--serif)}
+.notes ul{margin:6px 0 0 18px;padding:0}
+.notes li{margin:3px 0}
+.board{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;min-height:560px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column}
+.tile.on{outline:2px solid var(--purple);outline-offset:-1px}
+.tile .th{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+.tile .th b{font-weight:600;color:var(--plum);border:1px solid var(--line);border-radius:6px;padding:3px 8px;background:#fff}
+.tile .th .r{margin-left:auto;display:flex;gap:10px;color:var(--purple)}
+.tile .rec{margin-top:auto}
+</style>
+</head>
+<body>
+<div class="switch"><strong>Mentat UI clean-up · mockups</strong><a href="#ga">Graph A · concise</a><a href="#gb">Graph B · depth</a><a href="#sa">Chart Studio A · concise</a><a href="#sb">Chart Studio B · depth</a><a href="#sc">Chart Studio C · board</a><a href="#notes">What changes</a></div>
+
+<div class="cap" id="ga">Graph A — concise<small>One filter row, one primary action, three equal KPI tiles, two panels with identical chrome, one export line. Same data as today.</small></div>
+<div class="mock">
+ <aside class="side"><div class="wm">MENTAT</div><div class="tag">Giving, in perspective.</div>
+  <div class="grp">WORKSPACE</div><div class="nav">Loading</div><div class="nav">Collection</div>
+  <div class="grp">ANALYSIS</div><div class="nav on">Graph</div><div class="nav">Chart Studio</div><div class="nav">Cross-reference</div>
+  <div class="grp">EVIDENCE</div><div class="nav">PAC evidence</div>
+  <div class="foot">Local only<br>build ea222fa · port 8806</div></aside>
+ <div class="main">
+  <div class="row"><h1>Graph</h1>
+   <div class="row" style="margin-left:22px;gap:8px">
+    <label class="sel">Industry<b>Banking</b></label><label class="sel">Company<b>All companies</b></label><label class="sel">Employee level<b>All levels</b></label><label class="sel">Election cycle<b>2025–2026</b></label><label class="sel">Giving<b>All giving</b></label>
+    <span class="btn ghost" style="align-self:flex-end">Reset</span>
+   </div>
+   <span style="margin-left:auto" class="row"><span class="btn gold">Open in Chart Studio</span><span class="btn" title="Compare subjects · Sources &amp; freshness · Split with PAC evidence · Report folder">⋯</span></span>
+  </div>
+  <div class="tabs"><span class="on">Overview</span><span>Recipients</span><span>Candidates</span><span>Companies</span><span class="capr">2,047 receipt groups · local data</span></div>
+  <div class="kpis">
+   <div class="kpi"><span>Net giving in selected scope</span><strong>$12,003,181.12</strong><span>Net workbook receipts · same basis as Chart Studio</span></div>
+   <div class="kpi"><span>Direct to candidates</span><strong>$2,160,828.13</strong><div class="bar"><i style="width:18%"></i></div><span style="margin-top:4px">18.0% of net giving</span></div>
+   <div class="kpi"><span>Recipient organizations</span><strong>$9,822,364.89</strong><div class="bar"><i style="width:81.8%"></i></div><span style="margin-top:4px">81.8% of net giving</span></div>
+  </div>
+  <div class="bento">
+   <div class="panel"><div class="ph"><h2>Giving by recipient type</h2><div class="r"><span class="mini">Top 10 ▾</span><span>View all →</span></div></div><div class="sub">Net contributions · saved receipt categories</div>
+    <div class="bars">
+     <span class="lab">Carey</span><span class="trk"><i class="top" style="width:100%"></i></span><span class="val">$2,838,522.75</span><span class="pct">23.6%</span>
+     <span class="lab">Company PAC</span><span class="trk"><i style="width:80%"></i></span><span class="val">$2,276,748.42</span><span class="pct">19.0%</span>
+     <span class="lab">Candidate</span><span class="trk"><i style="width:77%"></i></span><span class="val">$2,180,816.23</span><span class="pct">18.2%</span>
+     <span class="lab">JFC</span><span class="trk"><i style="width:65%"></i></span><span class="val">$1,843,447.63</span><span class="pct">15.4%</span>
+     <span class="lab">Other PAC</span><span class="trk"><i style="width:56%"></i></span><span class="val">$1,582,962.42</span><span class="pct">13.2%</span>
+     <span class="lab">Party Committee</span><span class="trk"><i style="width:32%"></i></span><span class="val">$895,100.73</span><span class="pct">7.5%</span>
+     <span class="lab">Super PAC</span><span class="trk"><i style="width:5.4%"></i></span><span class="val">$152,297.32</span><span class="pct">1.3%</span>
+     <span class="lab">Leadership PAC</span><span class="trk"><i style="width:4.7%"></i></span><span class="val">$132,602.32</span><span class="pct">1.1%</span>
+     <span class="lab">Trade Association</span><span class="trk"><i style="width:3.5%"></i></span><span class="val">$98,183.30</span><span class="pct">0.8%</span>
+     <span class="lab">Unclassified</span><span class="trk"><i style="width:.2%"></i></span><span class="val">$2,500.00</span><span class="pct">0.0%</span>
+    </div>
+    <div class="pfoot">Showing 10 of 10 <span title="Organization receipts are not attributed to candidates." style="cursor:help">ⓘ</span><a>Export ▾</a></div>
+   </div>
+   <div class="panel"><div class="ph"><h2>Top candidates</h2><div class="r"><span class="mini">Direct contributions ▾</span><span class="mini">Top 10 ▾</span><span>View all →</span></div></div><div class="sub">Direct contributions to uniquely linked principal or authorized committees</div>
+    <div class="bars">
+     <span class="lab"><i class="dot dem"></i>Warner, Mark</span><span class="trk"><i class="top" style="width:100%"></i></span><span class="val">$116,533.00</span><span class="pct">5.4%</span>
+     <span class="lab"><i class="dot dem"></i>Goldman, Daniel</span><span class="trk"><i style="width:50%"></i></span><span class="val">$58,250.00</span><span class="pct">2.7%</span>
+     <span class="lab"><i class="dot dem"></i>Khanna, Rohit</span><span class="trk"><i style="width:40%"></i></span><span class="val">$46,500.00</span><span class="pct">2.2%</span>
+     <span class="lab"><i class="dot dem"></i>Krishnamoorthi, S</span><span class="trk"><i style="width:39%"></i></span><span class="val">$45,238.09</span><span class="pct">2.1%</span>
+     <span class="lab"><i class="dot dem"></i>Talarico, James</span><span class="trk"><i style="width:38.5%"></i></span><span class="val">$44,877.95</span><span class="pct">2.1%</span>
+     <span class="lab"><i class="dot rep"></i>Hagerty, Bill</span><span class="trk"><i style="width:38%"></i></span><span class="val">$44,375.00</span><span class="pct">2.1%</span>
+     <span class="lab"><i class="dot dem"></i>Moulton, Seth</span><span class="trk"><i style="width:35.6%"></i></span><span class="val">$41,475.29</span><span class="pct">1.9%</span>
+     <span class="lab"><i class="dot rep"></i>Ohtaki, Peter</span><span class="trk"><i style="width:31.5%"></i></span><span class="val">$36,684.65</span><span class="pct">1.7%</span>
+     <span class="lab"><i class="dot rep"></i>Barr, Garland</span><span class="trk"><i style="width:30.3%"></i></span><span class="val">$35,280.49</span><span class="pct">1.6%</span>
+     <span class="lab"><i class="dot dem"></i>Craig, Angie</span><span class="trk"><i style="width:26.8%"></i></span><span class="val">$31,263.09</span><span class="pct">1.4%</span>
+    </div>
+    <div class="pfoot">Showing 10 of 582 <span title="$19,988.10 in candidate-category receipts has no unique authorized candidate link and is excluded from these rankings." style="cursor:help">ⓘ</span><a>Export ▾</a></div>
+   </div>
+  </div>
+  <div class="tool"><span>Details &amp; methodology</span><span>Copy image</span><span>Add to briefing</span><span>Export ▾</span></div>
+ </div>
+</div>
+
+<div class="cap" id="gb">Graph B — depth<small>Same header and KPI strip; the Overview becomes a symmetric 2×2 bento so the four analyses sit on one screen; sparklines, a stacked level bar, party colour and hover detail add depth without new controls.</small></div>
+<div class="mock" style="position:relative">
+ <aside class="side"><div class="wm">MENTAT</div><div class="tag">Giving, in perspective.</div>
+  <div class="grp">WORKSPACE</div><div class="nav">Loading</div><div class="nav">Collection</div>
+  <div class="grp">ANALYSIS</div><div class="nav on">Graph</div><div class="nav">Chart Studio</div><div class="nav">Cross-reference</div>
+  <div class="grp">EVIDENCE</div><div class="nav">PAC evidence</div>
+  <div class="foot">Local only<br>build ea222fa · port 8806</div></aside>
+ <div class="main">
+  <div class="row"><h1>Graph</h1>
+   <div class="row" style="margin-left:22px;gap:8px">
+    <label class="sel">Industry<b>Banking</b></label><label class="sel">Company<b>All companies</b></label><label class="sel">Employee level<b>All levels</b></label><label class="sel">Election cycle<b>2025–2026</b></label><label class="sel">Giving<b>All giving</b></label>
+    <span class="btn ghost" style="align-self:flex-end">Reset</span>
+   </div>
+   <span style="margin-left:auto" class="row"><span class="btn gold">Open in Chart Studio</span><span class="btn">⋯</span></span>
+  </div>
+  <div class="tabs"><span class="on">Overview</span><span>Recipients</span><span>Candidates</span><span>Companies</span><span class="capr">2,047 receipt groups · local data</span></div>
+  <div class="kpis">
+   <div class="kpi"><span>Net giving in selected scope</span><strong>$12,003,181.12</strong><span>Net workbook receipts · same basis as Chart Studio</span></div>
+   <div class="kpi"><span>Direct to candidates</span><strong>$2,160,828.13</strong><div class="bar"><i style="width:18%"></i></div><span style="margin-top:4px">18.0% of net giving</span></div>
+   <div class="kpi"><span>Recipient organizations</span><strong>$9,822,364.89</strong><div class="bar"><i style="width:81.8%"></i></div><span style="margin-top:4px">81.8% of net giving</span></div>
+  </div>
+  <div class="bento">
+   <div class="panel"><div class="ph"><h2>Giving by recipient type</h2><div class="r"><span class="mini">Top 6 ▾</span><span>View all →</span></div></div>
+    <div class="bars">
+     <span class="lab">Carey</span><span class="trk"><i class="top" style="width:100%"></i></span><span class="val">$2,838,522.75</span><span class="pct">23.6%</span>
+     <span class="lab">Company PAC</span><span class="trk"><i style="width:80%"></i></span><span class="val">$2,276,748.42</span><span class="pct">19.0%</span>
+     <span class="lab">Candidate</span><span class="trk"><i style="width:77%"></i></span><span class="val">$2,180,816.23</span><span class="pct">18.2%</span>
+     <span class="lab">JFC</span><span class="trk"><i style="width:65%"></i></span><span class="val">$1,843,447.63</span><span class="pct">15.4%</span>
+     <span class="lab">Other PAC</span><span class="trk"><i style="width:56%"></i></span><span class="val">$1,582,962.42</span><span class="pct">13.2%</span>
+     <span class="lab">Party Committee</span><span class="trk"><i style="width:32%"></i></span><span class="val">$895,100.73</span><span class="pct">7.5%</span>
+    </div><div class="pfoot">6 of 10 types · 96.9% of scope<a>Export ▾</a></div>
+   </div>
+   <div class="panel"><div class="ph"><h2>Top candidates</h2><div class="r"><span class="mini">Direct contributions ▾</span><span class="mini">Top 6 ▾</span><span>View all →</span></div></div>
+    <div class="bars">
+     <span class="lab"><i class="dot dem"></i>Warner, Mark</span><span class="trk"><i class="top" style="width:100%"></i></span><span class="val">$116,533.00</span><span class="pct">5.4%</span>
+     <span class="lab"><i class="dot dem"></i>Goldman, Daniel</span><span class="trk"><i style="width:50%"></i></span><span class="val">$58,250.00</span><span class="pct">2.7%</span>
+     <span class="lab"><i class="dot dem"></i>Khanna, Rohit</span><span class="trk"><i style="width:40%"></i></span><span class="val">$46,500.00</span><span class="pct">2.2%</span>
+     <span class="lab"><i class="dot dem"></i>Krishnamoorthi, S</span><span class="trk"><i style="width:39%"></i></span><span class="val">$45,238.09</span><span class="pct">2.1%</span>
+     <span class="lab"><i class="dot dem"></i>Talarico, James</span><span class="trk"><i style="width:38.5%"></i></span><span class="val">$44,877.95</span><span class="pct">2.1%</span>
+     <span class="lab"><i class="dot rep"></i>Hagerty, Bill</span><span class="trk"><i style="width:38%"></i></span><span class="val">$44,375.00</span><span class="pct">2.1%</span>
+    </div><div class="pfoot">6 of 582 · <span class="dot dem"></span>D 5 · <span class="dot rep"></span>R 1<a>Export ▾</a></div>
+   </div>
+   <div class="panel"><div class="ph"><h2>Company comparison</h2><div class="r"><span class="mini">Top 6 ▾</span><span>View all →</span></div></div>
+    <div class="bars" style="grid-template-columns:150px 1fr 96px 56px">
+     <span class="lab">Goldman Sachs Bank NA</span><span class="trk"><i class="top" style="width:100%"></i></span><span class="val">$2,603,984.35</span><svg class="spark" viewBox="0 0 46 14"><polyline fill="none" stroke="#327a7a" stroke-width="1.5" points="2,11 23,7 44,3"/><circle cx="44" cy="3" r="1.8" fill="#327a7a"/></svg>
+     <span class="lab">Wells Fargo Bank NA</span><span class="trk"><i style="width:72%"></i></span><span class="val">$1,887,747.99</span><svg class="spark" viewBox="0 0 46 14"><polyline fill="none" stroke="#327a7a" stroke-width="1.5" points="2,5 23,9 44,6"/><circle cx="44" cy="6" r="1.8" fill="#327a7a"/></svg>
+     <span class="lab">Morgan Stanley Bank</span><span class="trk"><i style="width:65%"></i></span><span class="val">$1,690,229.84</span><svg class="spark" viewBox="0 0 46 14"><polyline fill="none" stroke="#327a7a" stroke-width="1.5" points="2,10 23,10 44,4"/><circle cx="44" cy="4" r="1.8" fill="#327a7a"/></svg>
+     <span class="lab">JP Morgan Chase Bank NA</span><span class="trk"><i style="width:61%"></i></span><span class="val">$1,577,645.50</span><svg class="spark" viewBox="0 0 46 14"><polyline fill="none" stroke="#327a7a" stroke-width="1.5" points="2,8 23,4 44,7"/><circle cx="44" cy="7" r="1.8" fill="#327a7a"/></svg>
+     <span class="lab">Bank of America NA</span><span class="trk"><i style="width:56%"></i></span><span class="val">$1,459,371.05</span><svg class="spark" viewBox="0 0 46 14"><polyline fill="none" stroke="#327a7a" stroke-width="1.5" points="2,12 23,8 44,5"/><circle cx="44" cy="5" r="1.8" fill="#327a7a"/></svg>
+     <span class="lab">PNC Bank NA</span><span class="trk"><i style="width:31%"></i></span><span class="val">$811,222.40</span><svg class="spark" viewBox="0 0 46 14"><polyline fill="none" stroke="#327a7a" stroke-width="1.5" points="2,6 23,7 44,9"/><circle cx="44" cy="9" r="1.8" fill="#327a7a"/></svg>
+    </div><div class="pfoot">6 of 10 · sparkline = 2022 · 2024 · 2026<a>Export ▾</a></div>
+   </div>
+   <div class="panel"><div class="ph"><h2>Giving by employee level</h2><div class="r"><span>View all →</span></div></div><div class="sub">Personal giving in the selected scope · corporate giving is separate</div>
+    <div class="stack"><i style="width:69.7%;background:var(--plum)"></i><i style="width:24.6%;background:var(--teal)"></i><i style="width:5.7%;background:var(--lilac)"></i></div>
+    <div class="legend"><span><b style="background:var(--plum)"></b>Employees $8,295,314.41 · 69.7%</span><span><b style="background:var(--teal)"></b>Middle-Management $2,935,072.85 · 24.6%</span><span><b style="background:var(--lilac)"></b>Chief $689,968.21 · 5.7%</span></div>
+    <div class="pfoot">3 of 3<a>Export ▾</a></div>
+   </div>
+  </div>
+  <div class="tool"><span>Details &amp; methodology</span><span>Copy image</span><span>Add to briefing</span><span>Export ▾</span></div>
+ </div>
+ <div class="tip" style="left:520px;top:604px">Goldman Sachs Bank NA · $2,603,984.35 · 21.7% of scope<br><span style="opacity:.75">2022 $0.61M · 2024 $0.92M · 2026 $1.07M</span></div>
+</div>
+
+<div class="cap" id="sa">Chart Studio A — concise<small>Five chrome rows become two; one toolbar with grouped actions; equal side panels; Show Me and Parameters fold under the Marks properties; the canvas title says what the chart is.</small></div>
+<div class="mock">
+ <aside class="side"><div class="wm">MENTAT</div><div class="tag">Giving, in perspective.</div>
+  <div class="grp">WORKSPACE</div><div class="nav">Loading</div><div class="nav">Collection</div>
+  <div class="grp">ANALYSIS</div><div class="nav">Graph</div><div class="nav on">Chart Studio</div><div class="nav">Cross-reference</div>
+  <div class="grp">EVIDENCE</div><div class="nav">PAC evidence</div>
+  <div class="foot">Local only<br>build ea222fa · port 8806</div></aside>
+ <div class="main">
+  <div class="srow1"><h1>Chart Studio</h1><div class="chipbar" style="margin-left:14px"><span class="chip">Banking</span><span class="chip">All cycles</span><span class="chip">Published included receipts</span></div><span class="btn ghost">Change data</span>
+   <span style="margin-left:auto" class="row"><span class="seg"><span class="on">Builder</span><span>Company overview</span><span>Canvas</span></span><span class="btn">Inspector</span></span></div>
+  <div class="tb"><div class="g"><span class="b">↶ Undo</span><span class="b">↷ Redo</span></div><span class="d"></span><div class="g"><span class="b">⇄ Swap</span><span class="b">↑ Sort</span><span class="b">↓ Sort</span><span class="b">Labels</span></div><span class="d"></span><div class="g"><span class="b">Fit: Standard ▾</span></div><span class="d"></span><div class="g"><span class="b">Clear</span><span class="b">Duplicate</span></div><span class="sp"></span><span class="btn gold" style="padding:4px 10px">Show Me</span><span class="b" style="border:1px solid var(--line)">Export ▾</span><span class="b" style="border:1px solid var(--line)">Views ▾</span><span class="b" style="border:1px solid var(--line)">Add to briefing</span></div>
+  <div class="grid3">
+   <div class="pane"><div class="pt">DATA</div><div class="src"><span class="chip">Banking</span><span class="chip">Published included receipts</span><span class="ok">✓ Ready</span></div>
+    <div class="search">Search fields</div>
+    <div class="pt">DIMENSIONS</div><div class="pills"><span class="pill"><small>Abc</small>Industry</span><span class="pill"><small>📅</small>Election cycle</span><span class="pill"><small>📅</small>Contribution year</span><span class="pill"><small>Abc</small>Company</span><span class="pill"><small>📅</small>Contribution date</span><span class="pill"><small>Abc</small>Reported employer</span><span class="pill"><small>Abc</small>Reported occupation</span><span class="pill"><small>Abc</small>Contributor city</span><span class="pill"><small>Abc</small>Contributor state</span><span class="pill"><small>#</small>Contributor ZIP</span></div>
+    <div class="pt">MEASURES</div><div class="pills"><span class="pill m"><small>#</small>Selected amount</span><span class="pill m"><small>#</small>Gross amount</span><span class="pill m"><small>#</small>Records</span><span class="pill m"><small>#</small>Contributors</span></div>
+   </div>
+   <div class="pane">
+    <div class="shelf"><b>COLUMNS</b><div class="drop"><span class="pill"><small>Abc</small>Company ▾</span></div></div>
+    <div class="shelf"><b>ROWS</b><div class="drop"><span class="pill m"><small>#</small>SUM(Selected amount) ▾</span></div></div>
+    <div class="shelf" style="border-bottom:0"><b>FILTERS</b><div class="drop">Drop a field to filter</div></div>
+    <div class="ctitle">Selected amount by Company<small>Banking · All cycles · published included receipts</small></div>
+    <div class="chart"><div class="bars" style="grid-template-columns:190px 1fr 110px 0">
+     <span class="lab">Goldman Sachs Bank NA</span><span class="trk"><i class="top" style="width:100%"></i></span><span class="val">$2,603,984.35</span><span></span>
+     <span class="lab">Wells Fargo Bank NA</span><span class="trk"><i class="top" style="width:72%"></i></span><span class="val">$1,887,747.99</span><span></span>
+     <span class="lab">Morgan Stanley Bank</span><span class="trk"><i class="top" style="width:65%"></i></span><span class="val">$1,690,229.84</span><span></span>
+     <span class="lab">JP Morgan Chase Bank NA</span><span class="trk"><i class="top" style="width:61%"></i></span><span class="val">$1,577,645.50</span><span></span>
+     <span class="lab">Bank of America NA</span><span class="trk"><i class="top" style="width:56%"></i></span><span class="val">$1,459,371.05</span><span></span>
+     <span class="lab">PNC Bank NA</span><span class="trk"><i class="top" style="width:31%"></i></span><span class="val">$811,222.40</span><span></span>
+     <span class="lab">Capital One Bank NA</span><span class="trk"><i class="top" style="width:28%"></i></span><span class="val">$726,472.52</span><span></span>
+     <span class="lab">Citibank</span><span class="trk"><i class="top" style="width:25%"></i></span><span class="val">$651,435.07</span><span></span>
+     <span class="lab">Truist Bank</span><span class="trk"><i class="top" style="width:13.5%"></i></span><span class="val">$351,961.42</span><span></span>
+     <span class="lab">US Bank NA</span><span class="trk"><i class="top" style="width:9.3%"></i></span><span class="val">$243,110.98</span><span></span>
+    </div></div>
+    <div class="rec"><b>✓ Reconciles to the workbook</b> · $12,003,181.12 in scope · 10 groups · <span style="color:var(--purple)">View source records</span></div>
+   </div>
+   <div class="pane"><div class="pt">INSPECTOR</div><div class="itabs"><span class="on">Marks</span><span>Analytics</span><span>Filters</span></div>
+    <div class="prop"><span>Mark type</span><div class="drop" style="border-style:solid;color:var(--ink)">Bar ▾</div></div>
+    <div class="prop"><span>Colour</span><div class="drop">Colour</div></div>
+    <div class="prop"><span>Size</span><div class="drop">Size</div></div>
+    <div class="prop"><span>Label</span><div class="drop">Label</div></div>
+    <div class="prop"><span>Detail</span><div class="drop">Detail</div></div>
+    <div class="prop"><span>Tooltip</span><div class="drop">Tooltip</div></div>
+    <div class="disc">▸ Show Me <span style="color:var(--muted)">· suggested: Horizontal bars</span></div>
+    <div class="disc">▸ Pages</div>
+    <div class="disc">▸ Parameters</div>
+   </div>
+  </div>
+  <div class="sheets"><span>Data source</span><span class="on">Sheet 1</span><span>+ New sheet</span></div>
+ </div>
+</div>
+
+<div class="cap" id="sb">Chart Studio B — depth<small>Same two-row chrome. Show Me becomes a popover from its button; a Split by shelf renders small multiples on the canvas; hover gives the exact figure and its share.</small></div>
+<div class="mock" style="position:relative">
+ <aside class="side"><div class="wm">MENTAT</div><div class="tag">Giving, in perspective.</div>
+  <div class="grp">WORKSPACE</div><div class="nav">Loading</div><div class="nav">Collection</div>
+  <div class="grp">ANALYSIS</div><div class="nav">Graph</div><div class="nav on">Chart Studio</div><div class="nav">Cross-reference</div>
+  <div class="grp">EVIDENCE</div><div class="nav">PAC evidence</div>
+  <div class="foot">Local only<br>build ea222fa · port 8806</div></aside>
+ <div class="main">
+  <div class="srow1"><h1>Chart Studio</h1><div class="chipbar" style="margin-left:14px"><span class="chip">Banking</span><span class="chip">All cycles</span><span class="chip">Published included receipts</span></div><span class="btn ghost">Change data</span>
+   <span style="margin-left:auto" class="row"><span class="seg"><span class="on">Builder</span><span>Company overview</span><span>Canvas</span></span><span class="btn">Inspector</span></span></div>
+  <div class="tb"><div class="g"><span class="b">↶ Undo</span><span class="b">↷ Redo</span></div><span class="d"></span><div class="g"><span class="b">⇄ Swap</span><span class="b">↑ Sort</span><span class="b">↓ Sort</span><span class="b">Labels</span></div><span class="d"></span><div class="g"><span class="b">Fit: Standard ▾</span></div><span class="d"></span><div class="g"><span class="b">Clear</span><span class="b">Duplicate</span></div><span class="sp"></span><span class="btn gold" style="padding:4px 10px">Show Me</span><span class="b" style="border:1px solid var(--line)">Export ▾</span><span class="b" style="border:1px solid var(--line)">Views ▾</span><span class="b" style="border:1px solid var(--line)">Add to briefing</span></div>
+  <div class="pop"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Show Me</div><div class="tiles"><div class="tile"><i></i>Text table</div><div class="tile"><i></i>Heat map</div><div class="tile"><i></i>Highlight</div><div class="tile"><i></i>Symbol map</div><div class="tile"><i></i>Filled map</div><div class="tile"><i></i>Pie</div><div class="tile on"><i></i>Horizontal bars</div><div class="tile"><i></i>Stacked bars</div><div class="tile"><i></i>Side by side</div><div class="tile"><i></i>Treemap</div><div class="tile"><i></i>Circle views</div><div class="tile"><i></i>Lines</div></div><div class="foot">Suggested from your shelves: Horizontal bars · Split by Election cycle gives one chart per cycle</div></div>
+  <div class="grid3">
+   <div class="pane"><div class="pt">DATA</div><div class="src"><span class="chip">Banking</span><span class="chip">Published included receipts</span><span class="ok">✓ Ready</span></div>
+    <div class="search">Search fields</div>
+    <div class="pt">DIMENSIONS</div><div class="pills"><span class="pill"><small>Abc</small>Industry</span><span class="pill"><small>📅</small>Election cycle</span><span class="pill"><small>📅</small>Contribution year</span><span class="pill"><small>Abc</small>Company</span><span class="pill"><small>📅</small>Contribution date</span><span class="pill"><small>Abc</small>Reported employer</span><span class="pill"><small>Abc</small>Contributor state</span><span class="pill"><small>#</small>Contributor ZIP</span></div>
+    <div class="pt">MEASURES</div><div class="pills"><span class="pill m"><small>#</small>Selected amount</span><span class="pill m"><small>#</small>Gross amount</span><span class="pill m"><small>#</small>Records</span><span class="pill m"><small>#</small>Contributors</span></div>
+   </div>
+   <div class="pane">
+    <div class="shelf"><b>COLUMNS</b><div class="drop"><span class="pill"><small>Abc</small>Company ▾</span></div></div>
+    <div class="shelf"><b>ROWS</b><div class="drop"><span class="pill m"><small>#</small>SUM(Selected amount) ▾</span></div></div>
+    <div class="shelf"><b>FILTERS</b><div class="drop">Drop a field to filter</div></div>
+    <div class="shelf" style="border-bottom:0"><b>SPLIT BY</b><div class="drop"><span class="pill"><small>📅</small>Election cycle ▾</span></div></div>
+    <div class="ctitle">Selected amount by Company, split by Election cycle<small>Banking · published included receipts</small></div>
+    <div class="smgrid">
+     <div class="sm"><h4>2021–2022 · $3.1M</h4><div class="bars" style="grid-template-columns:96px 1fr 62px 0;font-size:11px"><span class="lab">Goldman Sachs</span><span class="trk"><i class="top" style="width:60%"></i></span><span class="val">$0.61M</span><span></span><span class="lab">Wells Fargo</span><span class="trk"><i class="top" style="width:82%"></i></span><span class="val">$0.83M</span><span></span><span class="lab">Morgan Stanley</span><span class="trk"><i class="top" style="width:38%"></i></span><span class="val">$0.39M</span><span></span><span class="lab">JP Morgan Chase</span><span class="trk"><i class="top" style="width:47%"></i></span><span class="val">$0.48M</span><span></span><span class="lab">Bank of America</span><span class="trk"><i class="top" style="width:30%"></i></span><span class="val">$0.31M</span><span></span><span class="lab">PNC</span><span class="trk"><i class="top" style="width:33%"></i></span><span class="val">$0.33M</span><span></span></div></div>
+     <div class="sm"><h4>2023–2024 · $4.4M</h4><div class="bars" style="grid-template-columns:96px 1fr 62px 0;font-size:11px"><span class="lab">Goldman Sachs</span><span class="trk"><i class="top" style="width:90%"></i></span><span class="val">$0.92M</span><span></span><span class="lab">Wells Fargo</span><span class="trk"><i class="top" style="width:60%"></i></span><span class="val">$0.61M</span><span></span><span class="lab">Morgan Stanley</span><span class="trk"><i class="top" style="width:41%"></i></span><span class="val">$0.42M</span><span></span><span class="lab">JP Morgan Chase</span><span class="trk"><i class="top" style="width:70%"></i></span><span class="val">$0.71M</span><span></span><span class="lab">Bank of America</span><span class="trk"><i class="top" style="width:52%"></i></span><span class="val">$0.53M</span><span></span><span class="lab">PNC</span><span class="trk"><i class="top" style="width:28%"></i></span><span class="val">$0.29M</span><span></span></div></div>
+     <div class="sm"><h4>2025–2026 · $4.5M</h4><div class="bars" style="grid-template-columns:96px 1fr 62px 0;font-size:11px"><span class="lab">Goldman Sachs</span><span class="trk"><i class="top" style="width:100%"></i></span><span class="val">$1.07M</span><span></span><span class="lab">Wells Fargo</span><span class="trk"><i class="top" style="width:44%"></i></span><span class="val">$0.45M</span><span></span><span class="lab">Morgan Stanley</span><span class="trk"><i class="top" style="width:86%"></i></span><span class="val">$0.88M</span><span></span><span class="lab">JP Morgan Chase</span><span class="trk"><i class="top" style="width:38%"></i></span><span class="val">$0.39M</span><span></span><span class="lab">Bank of America</span><span class="trk"><i class="top" style="width:61%"></i></span><span class="val">$0.62M</span><span></span><span class="lab">PNC</span><span class="trk"><i class="top" style="width:19%"></i></span><span class="val">$0.19M</span><span></span></div></div>
+    </div>
+    <div class="rec"><b>✓ Reconciles to the workbook</b> · $12,003,181.12 across 3 cycles · <span style="color:var(--purple)">View source records</span></div>
+   </div>
+   <div class="pane"><div class="pt">INSPECTOR</div><div class="itabs"><span class="on">Marks</span><span>Analytics</span><span>Filters</span></div>
+    <div class="prop"><span>Mark type</span><div class="drop" style="border-style:solid;color:var(--ink)">Bar ▾</div></div>
+    <div class="prop"><span>Colour</span><div class="drop"><span class="pill" style="padding:2px 9px"><small>📅</small>Election cycle</span></div></div>
+    <div class="prop"><span>Size</span><div class="drop">Size</div></div>
+    <div class="prop"><span>Label</span><div class="drop">Label</div></div>
+    <div class="prop"><span>Detail</span><div class="drop">Detail</div></div>
+    <div class="prop"><span>Tooltip</span><div class="drop">Tooltip</div></div>
+    <div class="disc">▸ Pages</div>
+    <div class="disc">▸ Parameters</div>
+   </div>
+  </div>
+  <div class="sheets"><span>Data source</span><span class="on">Sheet 1</span><span>+ New sheet</span></div>
+ </div>
+ <div class="tip" style="left:790px;top:470px">Wells Fargo Bank NA · 2023–2024 · $612,410.22<br><span style="opacity:.75">34% of its three-cycle total · 14% of the cycle</span></div>
+</div>
+
+<div class="cap" id="sc">Chart Studio C — board<small>Multiple charts. Canvas mode becomes a board of 1, 2 or 4 tiles; each tile is one sheet, picked from its header; the Inspector edits the selected tile; Export and Add to briefing act on the selected tile, or on the whole board from the Views menu. New behaviour: today one sheet shows at a time.</small></div>
+<div class="mock">
+ <aside class="side"><div class="wm">MENTAT</div><div class="tag">Giving, in perspective.</div>
+  <div class="grp">WORKSPACE</div><div class="nav">Loading</div><div class="nav">Collection</div>
+  <div class="grp">ANALYSIS</div><div class="nav">Graph</div><div class="nav on">Chart Studio</div><div class="nav">Cross-reference</div>
+  <div class="grp">EVIDENCE</div><div class="nav">PAC evidence</div>
+  <div class="foot">Local only<br>build ea222fa · port 8806</div></aside>
+ <div class="main">
+  <div class="srow1"><h1>Chart Studio</h1><div class="chipbar" style="margin-left:14px"><span class="chip">Banking</span><span class="chip">All cycles</span><span class="chip">Published included receipts</span></div><span class="btn ghost">Change data</span>
+   <span style="margin-left:auto" class="row"><span class="seg"><span>Builder</span><span>Company overview</span><span class="on">Canvas</span></span><span class="btn">Inspector</span></span></div>
+  <div class="tb"><div class="g"><span class="b">↶ Undo</span><span class="b">↷ Redo</span></div><span class="d"></span><div class="g"><span class="b">⇄ Swap</span><span class="b">↑ Sort</span><span class="b">↓ Sort</span><span class="b">Labels</span></div><span class="d"></span><div class="g"><span class="b">Fit: Standard ▾</span></div><span class="d"></span><div class="g"><span class="b">Clear</span><span class="b">Duplicate</span></div><span class="sp"></span><span class="lay" title="Board: sheets shown side by side"><span>Board</span><span>1</span><span class="on">2</span><span>4</span></span><span class="btn gold" style="padding:4px 10px">Show Me</span><span class="b" style="border:1px solid var(--line)">Export ▾</span><span class="b" style="border:1px solid var(--line)">Views ▾</span><span class="b" style="border:1px solid var(--line)">Add to briefing</span></div>
+  <div class="board">
+   <div class="tile on"><div class="th"><b>Sheet 1 ▾</b><span>Selected · the Inspector edits this tile</span><span class="r"><span>Export ▾</span><span>Add to briefing</span></span></div>
+    <div class="ctitle">Selected amount by Company<small>Banking · All cycles</small></div>
+    <div class="bars" style="grid-template-columns:170px 1fr 100px 0">
+     <span class="lab">Goldman Sachs Bank NA</span><span class="trk"><i class="top" style="width:100%"></i></span><span class="val">$2,603,984.35</span><span></span>
+     <span class="lab">Wells Fargo Bank NA</span><span class="trk"><i class="top" style="width:72%"></i></span><span class="val">$1,887,747.99</span><span></span>
+     <span class="lab">Morgan Stanley Bank</span><span class="trk"><i class="top" style="width:65%"></i></span><span class="val">$1,690,229.84</span><span></span>
+     <span class="lab">JP Morgan Chase Bank NA</span><span class="trk"><i class="top" style="width:61%"></i></span><span class="val">$1,577,645.50</span><span></span>
+     <span class="lab">Bank of America NA</span><span class="trk"><i class="top" style="width:56%"></i></span><span class="val">$1,459,371.05</span><span></span>
+     <span class="lab">PNC Bank NA</span><span class="trk"><i class="top" style="width:31%"></i></span><span class="val">$811,222.40</span><span></span>
+     <span class="lab">Capital One Bank NA</span><span class="trk"><i class="top" style="width:28%"></i></span><span class="val">$726,472.52</span><span></span>
+     <span class="lab">Citibank</span><span class="trk"><i class="top" style="width:25%"></i></span><span class="val">$651,435.07</span><span></span>
+    </div>
+    <div class="rec"><b>✓ Reconciles to the workbook</b> · $12,003,181.12 · 10 groups · <span style="color:var(--purple)">View source records</span></div>
+   </div>
+   <div class="tile"><div class="th"><b>Sheet 2 ▾</b><span class="r"><span>Export ▾</span><span>Add to briefing</span></span></div>
+    <div class="ctitle">Selected amount by Election cycle<small>Banking · all companies</small></div>
+    <div class="bars" style="grid-template-columns:110px 1fr 100px 46px">
+     <span class="lab">2021–2022</span><span class="trk"><i class="top" style="width:69%"></i></span><span class="val">$3,102,410.22</span><span class="pct">25.8%</span>
+     <span class="lab">2023–2024</span><span class="trk"><i class="top" style="width:98%"></i></span><span class="val">$4,398,220.15</span><span class="pct">36.6%</span>
+     <span class="lab">2025–2026</span><span class="trk"><i class="top" style="width:100%"></i></span><span class="val">$4,502,550.75</span><span class="pct">37.5%</span>
+    </div>
+    <div class="rec"><b>✓ Reconciles to the workbook</b> · $12,003,181.12 · 3 groups · <span style="color:var(--purple)">View source records</span></div>
+   </div>
+  </div>
+  <div class="sheets"><span>Data source</span><span class="on">Sheet 1</span><span>Sheet 2</span><span>+ New sheet</span></div>
+ </div>
+</div>
+
+<div class="notes" id="notes">
+ <h3>What changes, against the five aims</h3>
+ <ul>
+  <li><b>Ease of use.</b> Graph: one filter row, one primary action, everything else behind ⋯. Chart Studio: two chrome rows instead of five; the chart is visible without scrolling on a 1440×900 screen.</li>
+  <li><b>Conciseness.</b> Graph loses the repeated scope sentence, the global "Rows per chart" input and the export target/format selects (48 to about 30 visible controls). Chart Studio loses three duplicate entry points (Show Me toggle + section + Chart variant select become one), "Add to briefing" appears once, Save/Open view move under Views, Classic builder moves under Export (87 to about 55).</li>
+  <li><b>Symmetry.</b> Equal side panels 280 | flex | 280 with the same padding and section labels; Graph panels share one header layout (title left, Top N and View all right) and one footer line; KPI tiles are equal thirds.</li>
+  <li><b>De-cluttering.</b> Helper sentences move into ⓘ tooltips and panel footers; caps-lock summaries become chips; the stale-build banner keeps its place (system, untouched).</li>
+  <li><b>Depth of visualization.</b> Share-of-scope beside every bar, party colour on candidates, sparklines per company across cycles, a stacked level bar, hover detail, and in Chart Studio a Split by shelf that renders small multiples. Every figure keeps its window and denominator on screen.</li>
+ </ul>
+ <p style="color:var(--muted);margin:10px 0 0">Numbers are the real Banking figures from the console on 2026-09-17; sparkline and per-cycle splits are illustrative shapes, the real ones come from the workbook.</p>
+</div>
+</body>
+</html>

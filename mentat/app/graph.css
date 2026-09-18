@@ -17,6 +17,8 @@ header .workspace-tabs button[aria-selected=true]{color:white;background:none;bo
 .scope-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px}
 .scope-heading .section-label{font-size:11px;letter-spacing:1px}
 .graph-filter-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+.graph-filter-grid label[for=graph-run]{grid-column:1/-1}
+#graph-run{max-width:640px}
 .graph-filter-grid label,.graph-candidate-controls label{font-size:13px;font-weight:400;color:#526e84;min-width:0}
 .graph-filter-grid select{margin:4px 0 0;border-color:var(--line);padding:8px 11px;font-size:14px}
 .graph-chips{display:flex;gap:8px;flex-wrap:wrap}

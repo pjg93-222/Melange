@@ -420,7 +420,8 @@ function setup(label) { console.log(`SETUP: ${label}`); }
     pass(`URL after the handoff: ${afterOpen.search}${afterOpen.hash}`);
 
     step('save a view: its id lands in the URL, and that permalink opens it on a fresh page');
-    if (!(await page.locator('#studio-download').evaluate(el => el.open))) await page.click('#studio-download > summary');
+    // Save view moved into the Views menu (UI clean-up 2026-09-17, item 14).
+    if (!(await page.locator('#studio-views').evaluate(el => el.open))) await page.click('#studio-views > summary');
     await page.waitForSelector('#studio-save-view', {state: 'visible'});
     await page.click('#studio-save-view');
     const nameInput = page.locator('input.studio-view-name');

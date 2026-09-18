@@ -38,7 +38,8 @@
     const labelNode=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.checked=state.links.includes(field);check.dataset.field=field;
     check.onchange=()=>{state.links=check.checked?[...state.links,field]:state.links.filter(f=>f!==field);persist();if(check.checked)sync(window,[field]);};labelNode.append(check,document.createTextNode(label));links.append(labelNode);
   }toolbar.append(links);
-  const overviewToggle=document.getElementById('studio-overview-toggle');if(overviewToggle)toolbar.append(overviewToggle);
+  // Company overview is one option of the header's segmented view control
+  // (UI clean-up 2026-09-17, item 13), so it is not relocated here any more.
   const note=document.createElement('span');note.className='studio-link-status';note.setAttribute('role','status');toolbar.append(note);
   const grid=document.createElement('div');grid.id='studio-comparison-grid';grid.className='studio-comparison-grid';studio.before(toolbar,grid);grid.append(studio);
   const frames=new Map(),blocked=new Set();
