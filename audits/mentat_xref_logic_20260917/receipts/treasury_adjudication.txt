@@ -1,0 +1,522 @@
+Treasury-entity adjudication for Banking, 2026-09-18
+run 20260918T173505-84f3f46b7351; every candidate row judged individually
+========================================================================================================
+
+CANDIDATE CRITERIA (receipt evidence, not names):
+  bucket organization_unverified, entity_type ORG, contributor resolves to a listed Banking
+  company, receipt_role == contribution, recipient committee type NOT in (H, S, P).
+  roster-matching ORG rows in the bucket : 1328 / $4,110,703.75
+  ... of which role == contribution     : 71 / $1,153,768.96
+  ... dropped, federal-candidate recipient: 20 / $18,501.83
+  CANDIDATE SET                          : 51 / $1,135,267.13
+
+RULES
+  R0 ACCEPT  contributor is the corporation itself or a wholly-identified corporate entity of it,
+             and the receipt is a genuine disbursement of corporate money.
+  R1 REJECT  donor-advised fund / charitable foundation (separate 501(c)(3) legal entity).
+  R2 REJECT  settlement administrator.
+  R3 REJECT  merchant, card or deposit-account artefact.
+  R4 REJECT  false positive of a short roster variant.
+  R5 REJECT  the receipt reports itself as interest, dividends or a refund.
+  R6 REJECT  corporate money into a federal contribution account - unlawful, so a reporting or
+             matching artefact rather than treasury giving.
+  R7 REJECT  no affirmative evidence of a corporate disbursement.
+
+========================================================================================================
+VERDICTS: 1 accepted / $1,000,000.00, 50 rejected / $135,267.13
+========================================================================================================
+
+[ACCEPT R0] $1,000,000.00  Bank of America NA  2021-01-12  recipient type X  form F13
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'PIC 2021, INC.'
+    line label  : ''
+    source_id   : 4092420211371961952
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202109209466753293
+    reason      : FEC Form 13, the inaugural-committee donation report: a disbursement of corporate funds the law permits, filed from the corporation's own HQ address (CHARLOTTE, NC).
+
+[REJECT R1] $75,000.00  Goldman Sachs Bank NA  2024-09-26  recipient type X  form F4
+    contributor : 'GOLDMAN SACHS PHILANTHROPY FUND'
+    recipient   : 'DEVELOPMENT NOW FOR CHICAGO'
+    line label  : ''
+    memo        : '* CHOOSE CHICAGO FOUNDATION'
+    source_id   : 4060320251204404271
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202506039761730483
+    reason      : donor-advised fund or charitable foundation: a 501(c)(3) is a separate legal entity, not the company treasury.
+
+[REJECT R1] $25,000.00  Goldman Sachs Bank NA  2024-04-24  recipient type X  form F4
+    contributor : 'GOLDMAN SACHS PHILANTHROPY FUND'
+    recipient   : '170 FREEDOM MILWAUKEE 2024 HOST COMMITTEE INC'
+    line label  : ''
+    source_id   : 4010520261299974666
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202510159790906141
+    reason      : donor-advised fund or charitable foundation: a 501(c)(3) is a separate legal entity, not the company treasury.
+
+[REJECT R6] $9,870.77  Truist Bank  2024-02-02  recipient type Q  form F3X
+    contributor : 'TRUIST'
+    recipient   : 'SOLAR ENERGY INDUSTRIES ASSOCIATION PAC (SOLARPAC)'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4032220241885500243
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202403209624800782
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $5,500.00  Bank of America NA  2023-09-06  recipient type Q  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'PIONEER NATURAL RESOURCES USA, INC. FEDERAL POLITICAL ACTION COMMITTEE'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4102020231806523658
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202310169598467001
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $4,922.63  Truist Bank  2023-02-23  recipient type Q  form F3X
+    contributor : 'TRUIST'
+    recipient   : 'SOLAR ENERGY INDUSTRIES ASSOCIATION PAC (SOLARPAC)'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4080320231762801587
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202307319584196535
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R5] $2,800.00  Wells Fargo Bank NA  2024-05-29  recipient type V  form F3X
+    contributor : 'WELLS FARGO'
+    recipient   : 'AMERICAN VALUES 2024'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    source_id   : 4082320242014919371
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202408219675241962
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R5] $1,710.09  Truist Bank  2025-03-26  recipient type V  form F3X
+    contributor : 'TRUIST'
+    recipient   : 'AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'NON CONTRIBUTION ACCOUNT'
+    source_id   : 4081820251218582847
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202507319789344832
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R6] $1,436.86  Bank of America NA  2021-02-28  recipient type Q  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'PEACE ACTION PAC/ FKA SANE/FREEZE PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4031920211261794536
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202103189441293655
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R5] $1,309.27  Bank of America NA  2023-07-12  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'REFUND, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4082120231799912933
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202308209596757257
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R6] $1,219.29  Bank of America NA  2026-07-31  recipient type Q  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'PEACE ACTION PAC/ FKA SANE/FREEZE PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090120261595547995
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608189899553860
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $889.30  Goldman Sachs Bank NA  2024-10-31  recipient type Q  form F3X
+    contributor : 'GOLDMAN SACHS'
+    recipient   : "ILLINOIS AGRICULTURAL ASSOCIATION ACTIVATOR POLITICAL INVOLVEMENT FUND (FED) 'ACTIVATOR'/'ILLINOIS FARM BUREAU ACTIVATOR'"
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4022620251179067600
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202502269753967062
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $860.68  Goldman Sachs Bank NA  2024-12-31  recipient type Q  form F3X
+    contributor : 'GOLDMAN SACHS'
+    recipient   : "ILLINOIS AGRICULTURAL ASSOCIATION ACTIVATOR POLITICAL INVOLVEMENT FUND (FED) 'ACTIVATOR'/'ILLINOIS FARM BUREAU ACTIVATOR'"
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4022620251179067640
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202502269753967077
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $818.21  Goldman Sachs Bank NA  2024-11-29  recipient type Q  form F3X
+    contributor : 'GOLDMAN SACHS'
+    recipient   : "ILLINOIS AGRICULTURAL ASSOCIATION ACTIVATOR POLITICAL INVOLVEMENT FUND (FED) 'ACTIVATOR'/'ILLINOIS FARM BUREAU ACTIVATOR'"
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4022620251179067639
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202502269753967077
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $615.00  Truist Bank  2026-07-21  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640293
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571553
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $500.00  Bank of America NA  2025-12-09  recipient type W  form F3X
+    contributor : 'MERRILL LYNCH, PIERCE, FENNER & SMITH INC.'
+    recipient   : 'VOTERS OF TOMORROW PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4060220261512130020
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202604299866729722
+    reason      : recipient is a political committee (type W) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R1] $500.00  Morgan Stanley Bank  2025-02-27  recipient type V  form F3X
+    contributor : 'MORGAN STANLEY GIFT FUND'
+    recipient   : 'ACTBLUE'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4082820251244921847
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202507319764548359
+    reason      : donor-advised fund or charitable foundation: a 501(c)(3) is a separate legal entity, not the company treasury.
+
+[REJECT R6] $384.73  Bank of America NA  2023-09-30  recipient type Q  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'PEACE ACTION PAC/ FKA SANE/FREEZE PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4112120231811366717
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202311209599331135
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $370.00  Truist Bank  2026-07-22  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640295
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571553
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R2] $308.05  Wells Fargo Bank NA  2022-02-11  recipient type Q  form F3X
+    contributor : 'COMPUTERSHARE/KCC - CS WANG V. WELLS FARGO BANK SETTLEMENT ADMINISTRATOR'
+    recipient   : 'DEMOCRATIC CLUB OF SANTA MARIA VALLEY'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4052520221493473156
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202205249514385111
+    reason      : settlement administrator distributing class-action proceeds, not the company.
+
+[REJECT R6] $300.00  PNC Bank NA  2026-05-18  recipient type N  form F3X
+    contributor : 'PNC BANK'
+    recipient   : 'PEORIA PAC LLC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4072120261535178441
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202607149875033279
+    reason      : recipient is a political committee (type N) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $255.00  PNC Bank NA  2026-05-05  recipient type O  form F3X
+    contributor : 'PNC BANK'
+    recipient   : 'UFCW LOCAL 227 WORKING FAMILIES FUND'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4072820261539189418
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202607149874990006
+    reason      : recipient is a political committee (type O) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $250.00  Wells Fargo Bank NA  2022-10-11  recipient type V  form F3X
+    contributor : 'WELLS FARGO'
+    recipient   : 'UNITED DEMOCRATIC WOMEN'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4021520231726218266
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202302149578270033
+    reason      : recipient is a political committee (type V) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R5] $236.29  Bank of America NA  2023-11-01  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'REFUND, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4010220241813656078
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202312209599756330
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R5] $150.08  Bank of America NA  2023-12-01  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'REFUND, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4022220241826151998
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202401319619491914
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R6] $130.25  Truist Bank  2026-07-27  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640299
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571555
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $120.00  Truist Bank  2026-07-24  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640297
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571554
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $105.00  Truist Bank  2026-07-22  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640294
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571553
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R1] $100.00  Morgan Stanley Bank  2025-01-09  recipient type V  form F3X
+    contributor : 'MORGAN STANLEY GIFT FUND'
+    recipient   : 'ACTBLUE'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4082820251244921836
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202507319764548355
+    reason      : donor-advised fund or charitable foundation: a 501(c)(3) is a separate legal entity, not the company treasury.
+
+[REJECT R5] $98.85  Bank of America NA  2024-05-01  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'REFUND, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4062720241962952603
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202406209652355339
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R5] $71.70  Bank of America NA  2023-10-02  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'REFUND, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4112820231811791114
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202311209599356205
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R6] $65.00  Truist Bank  2026-07-27  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640298
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571554
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R5] $46.51  Bank of America NA  2024-11-01  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'REFUND, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4011720251132853813
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202412059739554073
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R6] $40.00  Truist Bank  2026-07-30  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640300
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571555
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $30.00  Truist Bank  2026-07-20  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640292
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571552
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R5] $26.58  Bank of America NA  2024-09-03  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'REFUND, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4112720241073869199
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202410209710007236
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R6] $25.00  Truist Bank  2026-07-06  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640289
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571551
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $20.00  Truist Bank  2026-07-20  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640291
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571552
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $20.00  Truist Bank  2026-07-23  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640296
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571554
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $15.00  Truist Bank  2026-07-03  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640287
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571551
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $10.00  Truist Bank  2026-07-06  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640288
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571551
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $10.00  Truist Bank  2026-07-08  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640290
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571552
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R5] $0.04  Bank of America NA  2023-11-30  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'INTEREST, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4010220241813656074
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202312209599756329
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R5] $0.04  Bank of America NA  2023-07-31  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'INTEREST, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4082120231799912934
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202308209596757257
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R5] $0.04  Bank of America NA  2023-08-31  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'INTEREST, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4092220231802732184
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202309209597280117
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R5] $0.04  Bank of America NA  2023-09-29  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'INTEREST, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4102320231806765694
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202310209598806207
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R5] $0.04  Bank of America NA  2023-10-31  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'INTEREST, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4112820231811791121
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202311209599356207
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R5] $0.03  Bank of America NA  2023-12-31  recipient type W  form F3X
+    contributor : 'BANK OF AMERICA'
+    recipient   : 'COMMON POWER'
+    line label  : 'Other Federal Receipts (Dividends, Interest, etc.).'
+    memo        : 'INTEREST, NON-CONTRIBUTION ACCOUNT'
+    source_id   : 4022220241826151999
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202401319619491914
+    reason      : the receipt's own FEC line label or memo reports it as interest, dividends or a refund on a non-contribution account - not a disbursement of corporate money.
+
+[REJECT R6] $-4.23  Truist Bank  2026-07-31  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640301
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571555
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $-159.06  Truist Bank  2026-07-02  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640286
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571550
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+[REJECT R6] $-709.95  Truist Bank  2026-07-02  recipient type Q  form F3X
+    contributor : 'TRUIST BANK'
+    recipient   : 'NATIONAL ORGANIZATION FOR WOMEN, INC. PAC'
+    line label  : 'Contributions From Individuals/Persons Other Than Political Committees'
+    source_id   : 4090220261595640285
+    filing      : https://docquery.fec.gov/cgi-bin/fecimg/?202608199899571550
+    reason      : recipient is a political committee (type Q) and the receipt sits on the contributions line; corporate treasury money cannot lawfully fund a federal contribution account, so the row is a reporting or matching artefact - most often an individual donor recorded under their bank's name.
+
+========================================================================================================
+DROPPED BEFORE ADJUDICATION: role == contribution but the recipient IS a federal candidate
+committee (type H/S/P). Corporate treasury money cannot lawfully go there, so each of these is a
+matching artefact by construction. Listed in full because two of them are cases named explicitly
+in the instruction (the Capital One cafe line and CITI HEALTH HOME CARE SERVICES).
+========================================================================================================
+  $  3,300.00  Goldman Sachs Bank NA  [S] 'GOLDMAN SACHS & CO. LLC'
+              -> 'CRAMER FOR SENATE'  2023-01-20  4072720231757576547
+  $  2,900.00  JP Morgan Chase Bank NA [H] 'JP MORGAN SECURITIES LLC'
+              -> 'JAKE AUCHINCLOSS FOR CONGRESS'  2022-06-07  4072520221543705484
+  $  2,900.00  JP Morgan Chase Bank NA [H] 'JP MORGAN SECURITIES LLC'
+              -> 'JAKE AUCHINCLOSS FOR CONGRESS'  2022-06-07  4072520221543705485
+  $  2,500.00  Goldman Sachs Bank NA  [S] 'GOLDMAN SACHS & CO. LLC'
+              -> 'CRAMER FOR SENATE'  2023-01-20  4072720231757576548
+  $  2,123.26  Citibank               [H] 'CITI CARDS'
+              -> 'SCOTT FOR CONGRESS'  2024-10-31  4013020251138555966
+  $  2,123.26  Citibank               [H] 'CITI CARDS'
+              -> 'SCOTT FOR CONGRESS'  2024-10-31  4013020251138555967
+  $  1,000.00  Goldman Sachs Bank NA  [H] 'GOLDMAN SACHS'
+              -> 'CARTWRIGHT FOR CONGRESS'  2022-10-31  4032420231738167585
+  $  1,000.00  Wells Fargo Bank NA    [H] 'WELLS FARGO'
+              -> 'CARTWRIGHT FOR CONGRESS'  2022-11-04  4032420231738168489
+  $  1,000.00  Citibank               [H] 'CITI HEALTH HOME CARE SERVICES'
+              -> 'SOLAGES FOR CONGRESS'  2022-08-01  4041520231742634198
+  $    540.93  Wells Fargo Bank NA    [H] 'WELLS FARGO BANK'
+              -> 'ERIC CHING FOR CONGRESS'  2024-01-05  4022120241825516068
+  $     58.96  Citibank               [H] 'CITI CARDS'
+              -> 'SCOTT FOR CONGRESS'  2024-10-31  4013020251138555964
+  $     58.96  Citibank               [H] 'CITI CARDS'
+              -> 'SCOTT FOR CONGRESS'  2024-10-31  4013020251138555965
+  $     18.48  Capital One Bank NA    [H] 'CAPITAL ONE CAFE - UNION SQUARE'
+              -> 'VIN KRUTTIVENTI FOR CONGRESS'  2025-10-16  4030520261411386185
+  $      5.99  Wells Fargo Bank NA    [H] 'WELLS FARGO BANK'
+              -> 'ERIC CHING FOR CONGRESS'  2024-02-14  4022120241825516069
+  $      5.99  Wells Fargo Bank NA    [H] 'WELLS FARGO BANK'
+              -> 'ERIC CHING FOR CONGRESS'  2024-02-24  4041120241889024843
+  $      0.73  PNC Bank NA            [S] 'PNC BANK'
+              -> 'MCGUIGAN FOR PENNSYLVANIA'  2021-04-30  4072420211322684407
+  $      0.64  PNC Bank NA            [S] 'PNC BANK'
+              -> 'MCGUIGAN FOR PENNSYLVANIA'  2021-06-30  4072420211322684409
+  $      0.63  PNC Bank NA            [S] 'PNC BANK'
+              -> 'MCGUIGAN FOR PENNSYLVANIA'  2021-05-28  4072420211322684408
+  $    -36.00  Truist Bank            [H] 'TRUIST BANK'
+              -> 'RAYMOND SMITH FOR NORTH CAROLINA'  2026-04-06  4072920261539431528
+  $ -1,000.00  Citibank               [H] 'CITI HEALTH HOME CARE SERVICES'
+              -> 'SOLAGES FOR CONGRESS'  2022-08-01  4041520231742634199
+  TOTAL 20 rows / $18,501.83
+
+========================================================================================================
+REJECTION SUMMARY
+  R1    4 rows  $  100,600.00
+  R2    1 rows  $      308.05
+  R5   15 rows  $    6,449.60
+  R6   30 rows  $   27,909.48
+
+RECORDS JUSTIFIED (one per company with a surviving row, named as the surviving evidence carries)
+  Bank of America NA: 1 row(s) / $1,000,000.00, name(s) ['BANK OF AMERICA']
+  Goldman Sachs Bank NA: NO record - no row survived adjudication
+  Morgan Stanley Bank: NO record - no row survived adjudication
+  PNC Bank NA: NO record - no row survived adjudication
+  Truist Bank: NO record - no row survived adjudication
+  Wells Fargo Bank NA: NO record - no row survived adjudication
+
+SWEEP NOTE: affiliations_for() matches on name alone and does not consult receipt_role, so a
+treasury alias also attributes every other organization_unverified ORG row carrying the same
+name. For 'BANK OF AMERICA' that is:
+  71 rows / $1,025,874.75 total
+    role contribution                   18 $1,010,480.39
+    role unverified_other_receipt       52 $   13,394.36
+    role transfer_receipt                1 $    2,000.00
+  adjudicated and accepted: $1,000,000.00; carried in with it: $25,874.75

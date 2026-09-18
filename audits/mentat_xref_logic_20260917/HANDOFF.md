@@ -191,3 +191,53 @@ Next decisions for Paul, in REVIEW.md 11d:
 3. `CITI HEALTH HOME CARE SERVICES` matches the roster variant `Citi` on the
    whole-token test and is not Citibank - worth a roster exclusion before any
    treasury work.
+
+## Treasury register built from receipt evidence, 2026-09-18
+
+Section 11c withheld treasury records because the roster name test selected 3.01x
+the workbook. Paul ruled: build it from receipt evidence instead. Done.
+
+**Adjudication** (`receipts/treasury_adjudication.txt`, every row judged
+individually): candidate set 51 rows / $1,135,267.13 - role `contribution`,
+recipient not a federal candidate committee. **1 accepted, 50 rejected**: 4 rows /
+$100,600.00 donor-advised funds, 1 / $308.05 settlement administrator, 15 /
+$6,449.60 interest or refunds by their own line label or memo, 30 / $27,909.48
+corporate money on a federal contribution line, which is unlawful and therefore a
+reporting artefact. A further 20 rows / $18,501.83 never reached adjudication
+because their recipient is a federal candidate committee; the Capital One cafe line
+and `CITI HEALTH HOME CARE SERVICES` are in that group.
+
+**Accepted:** `BANK OF AMERICA`, Charlotte NC, to `PIC 2021, INC.`, 2021-01-12,
+$1,000,000.00, on **FEC Form 13** - the inaugural-committee donation report, which
+appears exactly once in the whole Banking corporate feed. Lawful corporate money,
+real treasury giving.
+
+**Record added:** one `treasury_entity` for Bank of America NA, `entity_name`
+`BANK OF AMERICA`, evidence `fec-receipt-4092420211371961952`. No `entity_id` - a
+treasury entity is not a committee. The other nine companies get none.
+
+**Result**, run `20260918T183722-d8f0fb287912`: `corporate_original` $0.00 -> **$1,025,874.75**, unverified
+funding down by the same, observed original giving unchanged at
+$76,899,254.70. Tests `113 passed, 27 subtests passed in 8.59s`.
+
+**Two things to know before quoting the number.**
+
+1. The corporate line is **71 rows, not one**. `affiliations_for` matches on name
+   and never checks `receipt_role`, so the record also pulled in 52 bank-interest
+   rows, a transfer and the 17 `BANK OF AMERICA` rows this lane had itself rejected:
+   $1,000,000.00 adjudicated plus $25,874.75 (2.5%) carried in on the
+   name. A role-aware affiliation test would remove that; it is an engine change,
+   not a data one.
+2. Against the workbook's $1,365,262.42 Corporate tier this run is **$1,025,874.75, 0.751x**,
+   gap $339,387.67. It does **not** land near the workbook. The gap is
+   +$101,252.13 for eight companies whose rows this lane rejected as donor-advised
+   funds, interest and contribution-line artefacts, +$251,029.90 residual I could not
+   reproduce from the database with any of six filters, -$12,894.36 swept
+   excess. The residual lives in `R/report.R:2060-2090`, which merges the people and
+   corporate feeds and dedups on `sub_id` by `source_priority`; I did not replicate
+   that, so I am naming it rather than explaining it away. That is the next
+   reconciliation job.
+
+Caveat for the report: the Banking corporate tier is one real row, a single lawful
+2021 inaugural donation. It is real money and belongs in the line, but it is not a
+distribution and no cross-company comparison should rest on it.

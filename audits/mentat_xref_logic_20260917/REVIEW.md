@@ -669,3 +669,154 @@ surviving handful by hand. On Banking that is a list of well under 71 rows.
 
 `python -m pytest tests/test_cross_reference_engine.py tests/test_cross_reference_runner.py tests/test_cross_reference_digest.py tests/test_cross_reference_data.py -q`
 (`receipts/pytest_after_alias_fix.txt`): `113 passed, 27 subtests passed in 8.04s`.
+
+## 12. The treasury register, built from receipt evidence (2026-09-18)
+
+Sections 1-11 are unchanged. Section 11c withheld `treasury_entity` records because
+a roster name test selected $4,110,703.75, 3.01x the workbook. Paul's ruling was to
+build the register the other way: candidates from receipt evidence, every row
+adjudicated by hand, a record only where a row survives.
+
+### 12a. The candidate set
+
+From run `20260918T173505-84f3f46b7351`, rows in `organization_unverified` with
+`entity_type` ORG whose contributor resolves to a listed Banking company:
+
+| Stage | Rows | Gross |
+|---|---|---|
+| roster-matching ORG rows in the bucket | 1,328 | $4,110,703.75 |
+| ... `receipt_role == contribution` | 71 | $1,153,768.96 |
+| ... dropped, recipient IS a federal candidate committee (H/S/P) | 20 | $18,501.83 |
+| **candidate set adjudicated** | **51** | **$1,135,267.13** |
+
+The 20 dropped rows are listed in full in `receipts/treasury_adjudication.txt`:
+corporate treasury money cannot lawfully reach a federal candidate, so each is a
+matching artefact by construction. Two cases the instruction named explicitly fall
+here - `CAPITAL ONE CAFE - UNION SQUARE` ($18.48) and `CITI HEALTH HOME CARE
+SERVICES`, which is not Citibank at all but a false positive of the short roster
+variant `Citi`.
+
+### 12b. Adjudication: 1 accepted, 50 rejected
+
+Every one of the 51 rows carries a verdict and a reason in
+`receipts/treasury_adjudication.txt`. Rules applied:
+
+| Code | Verdict | Rule | Rows | Gross |
+|---|---|---|---|---|
+| R0 | ACCEPT | contributor is the corporation itself and the receipt is a genuine disbursement of corporate money | 1 | $1,000,000.00 |
+| R1 | reject | donor-advised fund or charitable foundation - a 501(c)(3) is a separate legal entity, not the company treasury | 4 | $100,600.00 |
+| R2 | reject | settlement administrator distributing class-action proceeds | 1 | $308.05 |
+| R5 | reject | the receipt's own line label or memo reports it as interest, dividends or a refund | 15 | $6,449.60 |
+| R6 | reject | corporate money on a federal contribution line - unlawful, so a reporting or matching artefact, usually an individual donor recorded under their bank's name | 30 | $27,909.48 |
+
+R1 covers `GOLDMAN SACHS PHILANTHROPY FUND` ($100,000.00 across two host-committee
+receipts) and `MORGAN STANLEY GIFT FUND` ($600.00 to ActBlue). R2 is
+`COMPUTERSHARE/KCC - CS WANG V. WELLS FARGO BANK SETTLEMENT ADMINISTRATOR`. R5
+catches the `BANK OF AMERICA` -> `COMMON POWER` rows memoed `REFUND,
+NON-CONTRIBUTION ACCOUNT` and the `TRUIST` -> AFP Action row memoed `NON
+CONTRIBUTION ACCOUNT`. R6 is the largest group and the most instructive: 30 rows
+where a bank's name sits on line 11(a) of a traditional PAC, including five
+consecutive July-2026 `TRUIST BANK` receipts at NOW PAC and three monthly
+`GOLDMAN SACHS` receipts at the Illinois Farm Bureau Activator with interest-shaped
+cents.
+
+**The one acceptance.** `BANK OF AMERICA`, Charlotte NC 28202 - the corporation's
+own headquarters address - to `PIC 2021, INC.` (`C00765040`), 2021-01-12,
+$1,000,000.00, source id `4092420211371961952`, filed on **FEC Form 13**, the
+report of donations accepted by a presidential inaugural committee. Form 13 appears
+exactly once in the entire Banking corporate feed and for exactly this amount.
+Corporate money to an inaugural committee is lawful, so this is a real disbursement
+of corporate treasury funds and belongs in the corporate line. Its filing is
+`https://docquery.fec.gov/cgi-bin/fecimg/?202109209466753293`.
+
+### 12c. The record added
+
+One record, `inputs/verified_company_affiliations.json`, 16 -> 17 records:
+company `Bank of America NA`, `entity_name` `BANK OF AMERICA` - the corporate name
+the surviving evidence actually carries - `relationship` `treasury_entity`,
+`valid_from` `2021-01-01`, `source_url` the Form 13 filing above, `evidence_id`
+`fec-receipt-4092420211371961952`. It carries no `entity_id`: a treasury entity is
+not an FEC committee, and the schema takes `entity_id` **or** `entity_name`.
+
+The other nine companies get no record, because no row of theirs survived
+adjudication.
+
+### 12d. Measured result, and the sweep it carries
+
+Run `20260918T183722-d8f0fb287912` (`receipts/run_banking_after_treasury.txt`) against
+`20260918T173505-84f3f46b7351`:
+
+| Figure | Before | After | Delta |
+|---|---|---|---|
+| Corporate giving (`corporate_original`) | $0.00 | $1,025,874.75 | +$1,025,874.75 |
+| Unverified funding | $5,653,105.36 | $4,627,230.61 | -$1,025,874.75 |
+| Observed original giving | $76,899,254.70 | $76,899,254.70 | $0.00 |
+| Employee giving | $71,246,149.34 | $71,246,149.34 | $0.00 |
+| PAC activity | $22,929,669.06 | $22,929,669.06 | $0.00 |
+| Review queue | 46,125 / $16,899,116.89 | 46,107 / $15,888,636.50 | -18 rows / -$1,010,480.39 |
+
+Observed original giving does not move: this is a reclassification out of unverified
+funding into the corporate line, not new money.
+
+**Be clear about what the $1,025,874.75 contains.** `affiliations_for` matches on name
+alone and never consults `receipt_role`
+(`tools/cross_reference_engine.py:214-232`), so the record's name also attributes
+every other `organization_unverified` ORG row reporting `BANK OF AMERICA`. The
+corporate line is therefore **71 rows**, not one:
+
+| | Rows | Gross |
+|---|---|---|
+| adjudicated and accepted | 1 | $1,000,000.00 |
+| other `contribution`-role rows, individually rejected above | 17 | $10,480.39 |
+| `unverified_other_receipt` rows (bank interest) | 52 | $13,394.36 |
+| `transfer_receipt` row | 1 | $2,000.00 |
+| **total in `corporate_original`** | **71** | **$1,025,874.75** |
+
+So $1,000,000.00 is adjudicated and $25,874.75 - 2.5% - rides in on the
+name. That is the price of the register's name-matching mechanism, and it is worth
+recording that a role-aware affiliation test would remove it.
+
+### 12e. Against the workbook, and the gap named
+
+Corporate tier in the published Banking workbook: **$1,365,262.42**. This run:
+**$1,025,874.75** - **0.751x**, a gap of **$339,387.67**. It does not land near the
+workbook figure, and the difference decomposes exactly:
+
+| Component | Dollars |
+|---|---|
+| the eight other companies the workbook's population carries and this run rejects | +$101,252.13 |
+| residual I could not reproduce from the database at all | +$251,029.90 |
+| the swept excess this run counts and that population does not | -$12,894.36 |
+| **total gap** | **$339,387.67** |
+
+The best reconstruction of the workbook's CORPORATE population I could build from
+`corporate_giving` is `receipt_role == contribution` **and**
+`company_match_status == 'accepted'`: **80 rows / $1,114,232.52**, 0.82x the workbook,
+of which Bank of America is $1,012,980.39 and the other eight companies
+$101,252.13 (Goldman $29,868.19, Wells Fargo $17,550.00, Truist $17,169.50,
+US Bank $15,000.00, Citibank $13,364.44, JP Morgan $5,800.00, Morgan Stanley
+$2,500.00). Every one of those non-BofA rows is a row this lane adjudicated and
+rejected under R1, R2, R5 or R6 - they are donor-advised funds, interest and
+contribution-line artefacts. **This run counts less than the workbook because it
+refuses money the workbook accepts, not because it is missing evidence.**
+
+The remaining $251,029.90 I could not reproduce. Six filters over `corporate_giving`
+were tried (accepted only; accepted + review; ORG only; with and without duplicate
+and amendment flags; contribution + transfer roles; positive amounts only) and none
+reaches $1,365,262.42; the closest is $1,114,232.52. `R/report.R:2060-2090` assembles the
+facts by merging the people and corporate feeds and deduplicating on `sub_id` with a
+`source_priority` that prefers accepted and person rows, then applies
+`fec_receipt_role` again - I did not replicate that assembly, so I am naming this
+residual rather than attributing it. Whoever reconciles the workbook next should
+start there.
+
+**Reporting caveat, to be written down rather than used as a reason to omit the
+money:** the Banking corporate line is one real row. $1,000,000.00 of the
+$1,025,874.75 is a single lawful 2021 inaugural donation by Bank of America. The tier is
+real, but it is not a distribution, and no inference about relative corporate
+generosity across the ten companies can rest on it.
+
+### 12f. Tests
+
+`python -m pytest tests/test_cross_reference_engine.py tests/test_cross_reference_runner.py tests/test_cross_reference_digest.py tests/test_cross_reference_data.py -q`
+(`receipts/pytest_after_treasury.txt`): `113 passed, 27 subtests passed in 8.59s`.

@@ -277,6 +277,15 @@
       "valid_from": "2021-01-01",
       "source_url": "https://www.fec.gov/data/committee/C00018036/",
       "evidence_id": "fec-committee-C00018036"
+    },
+    {
+      "company": "Bank of America NA",
+      "entity_name": "BANK OF AMERICA",
+      "aliases": [],
+      "relationship": "treasury_entity",
+      "valid_from": "2021-01-01",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202109209466753293",
+      "evidence_id": "fec-receipt-4092420211371961952"
     }
   ]
 }
