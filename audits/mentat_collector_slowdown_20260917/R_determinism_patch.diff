@@ -1,0 +1,309 @@
+--- a/mentat/R/fec_api.R
++++ b/mentat/R/fec_api.R
+@@ -2511,16 +2511,58 @@
+     before_request = before_request
+   )
+   page <- fec_api_parse_page(repeated$responses[[1L]])
+-  expected <- vapply(first$pages[[1L]]$rows, function(row) {
++  first_page <- first$pages[[1L]]
++  expected <- vapply(first_page$rows, function(row) {
+     row_scalar(row, "sub_id", "")
+   }, character(1L))
+   actual <- vapply(page$rows, function(row) {
+     row_scalar(row, "sub_id", "")
+   }, character(1L))
++  # A date-window union is one synthetic page 0 carrying the WHOLE verified
++  # population, so an exact comparison against a 100-row page 1 can never
++  # match: a structural false positive. For a union the drift question is
++  # containment of the fresh page plus an unmoved exact count. page_number is
++  # 0 for an ordinary page 1 as well (see page_number <- state$page - 1L), so
++  # only the decomposed/coverage_method flags identify a union page.
++  union_page <- isTRUE(first_page$decomposed) ||
++    identical(first_page$coverage_method, "exhaustive_date_windows")
++  verified_count <- suppressWarnings(as.integer(
++    first$expected_count %||% first$rows_seen %||% NA_integer_
++  ))
++  fresh_count <- if (isTRUE(page$is_count_exact)) {
++    suppressWarnings(as.integer(page$count))
++  } else NA_integer_
++  count_text <- if (is.na(fresh_count)) "not exact" else format(fresh_count)
++  verified_text <- if (is.na(verified_count)) "unknown" else format(verified_count)
++  counts_agree <- is.na(fresh_count) || is.na(verified_count) ||
++    identical(fresh_count, verified_count)
++  contained <- sum(actual %in% expected)
++  if (union_page) {
++    return(list(
++      identical = identical(contained, length(actual)) && counts_agree,
++      mode = "union_subset",
++      unit_id = first_name,
++      request_count = repeated$request_count,
++      retry_count = repeated$retry_count,
++      detail = sprintf(
++        "fresh page 1: %d ids, %d in union; count %s vs verified %s",
++        length(actual), contained, count_text, verified_text
++      )
++    ))
++  }
+   list(
+     identical = identical(sort(expected), sort(actual)),
++    mode = "page_one",
++    unit_id = first_name,
+     request_count = repeated$request_count,
+-    retry_count = repeated$retry_count
++    retry_count = repeated$retry_count,
++    detail = sprintf(
++      paste0(
++        "fresh page 1: %d ids, %d matching the stored page 1 of %d;",
++        " count %s vs verified %s"
++      ),
++      length(actual), contained, length(expected), count_text, verified_text
++    )
+   )
+ }
+ 
+@@ -2734,8 +2776,27 @@
+   } else {
+     determinism_value <- determinism
+   }
++  determinism_detail <- ""
++  determinism_unit <- ""
++  if (is.list(determinism)) {
++    determinism_detail <- trim_text(determinism$detail %||% "")
++    determinism_unit <- trim_text(determinism$unit_id %||% "")
++  }
++  # Advisory, not fatal: a date-window union is a synthetic page 0 over the
++  # whole population, which made the old exact page-1 comparison a structural
++  # false positive, and a live cycle's page 1 legitimately changes as filings
++  # post. The walk-time verification (a constant count equal to the rows
++  # collected, after reconciliation) remains the guarantee; the spot check only
++  # records drift observed after that snapshot was verified.
+   if (identical(determinism_value, FALSE)) {
+-    stop("FEC API determinism spot-check returned a different sub_id set.", call. = FALSE)
++    cat(sprintf(
++      paste0(
++        "Determinism spot-check: population changed after a verified walk",
++        " for %s (%s); snapshot stands as verified at walk time.\n"
++      ),
++      determinism_unit,
++      determinism_detail
++    ))
+   }
+   identity <- list(
+     units = list(), request_count = 0L, retry_count = 0L,
+@@ -2817,6 +2878,7 @@
+     paused = FALSE,
+     retries = total_retries,
+     determinism = determinism_value,
++    determinism_detail = determinism_detail,
+     request_count = total_requests,
+     requests_used = budget$requests_used,
+     requests_remaining = budget$requests_remaining,
+--- a/mentat/tests/test_fec_api_reconcile.R
++++ b/mentat/tests/test_fec_api_reconcile.R
+@@ -456,6 +456,206 @@
+   )
+ })
+ 
++# ---------------------------------------------------------------------------
++# Determinism spot-check against a date-window union. The union is one synthetic
++# page 0 holding the whole verified population, so the old exact page-1 set
++# comparison was a structural false positive (t11 shows it failing on a correct
++# snapshot). The check is now containment plus an unmoved exact count, and a
++# FALSE is recorded, not fatal.
++# ---------------------------------------------------------------------------
++union_unit <- employer_unit("P1_employer:Acme:2024:UNION")
++union_page_ids <- sprintf("W01-%04d", 1:100)
++
++# Windows 1..22 hold 100 rows each and window 23 holds 7: 2,207 verified ids.
++# The parent's own page 1 is window 1's first 100 rows, as the live split was.
++union_transport_factory <- function(parent_count, first_page_ids, calls) {
++  function(specs, api_key, concurrency) {
++    lapply(specs, function(spec) {
++      index <- window_index(spec$id)
++      seen <- (calls[[spec$id]] %||% 0L) + 1L
++      calls[[spec$id]] <- seen
++      if (index == 0L) {
++        return(ok_page(lapply(first_page_ids, fixture_row), parent_count, 1L))
++      }
++      size <- if (index <= 22L) 100L else if (index == 23L) 7L else 0L
++      rows <- if (!size) list() else lapply(
++        seq_len(size), function(row) fixture_row(sprintf("W%02d-%04d", index, row))
++      )
++      ok_page(rows, size, NULL)
++    })
++  }
++}
++
++# One page-1 response for the spot-check re-fetch.
++spot_check_transport <- function(ids, count) {
++  function(specs, api_key, concurrency) {
++    lapply(specs, function(spec) ok_page(lapply(ids, fixture_row), count, NULL))
++  }
++}
++
++union_result_cache <- NULL
++union_result <- function() {
++  if (is.null(union_result_cache)) {
++    Sys.setenv(MENTAT_REQUEST_POOL_WIDTH = "6")
++    on.exit(Sys.unsetenv("MENTAT_REQUEST_POOL_WIDTH"), add = TRUE)
++    calls <- new.env(parent = emptyenv())
++    union_result_cache <<- fec_api_collect_work_units(
++      list(union_unit), api_key = "fixture-key", concurrency = 6L,
++      transport = union_transport_factory(2207L, union_page_ids, calls),
++      sleep = no_sleep, jitter = no_jitter
++    )
++  }
++  union_result_cache
++}
++
++run_test("t8", function() {
++  result <- union_result()
++  state <- result$units[[union_unit$id]]
++  check <- fec_api_determinism_spot_check(
++    result, api_key = "fixture-key", concurrency = 1L,
++    transport = spot_check_transport(union_page_ids, 2207L),
++    sleep = no_sleep, jitter = no_jitter
++  )
++  stopifnot(
++    "the split unit published a union" = isTRUE(state$complete),
++    "the union is the whole verified population" =
++      identical(as.integer(state$expected_count), 2207L),
++    "the union is one synthetic page" = identical(length(state$pages), 1L),
++    "the union page is flagged decomposed" = isTRUE(state$pages[[1L]]$decomposed),
++    "the union page names its coverage method" =
++      identical(state$pages[[1L]]$coverage_method, "exhaustive_date_windows"),
++    "a date-window split records no decomposition event" =
++      identical(length(result$decompositions %||% list()), 0L),
++    "the split unit is still spot-checked" = is.list(check),
++    "the union branch was taken" = identical(check$mode, "union_subset"),
++    "a contained page 1 is not drift" = isTRUE(check$identical),
++    "the detail is reportable" = identical(
++      check$detail,
++      "fresh page 1: 100 ids, 100 in union; count 2207 vs verified 2207"
++    ),
++    "the unit is named for the receipt" = identical(check$unit_id, union_unit$id)
++  )
++})
++
++run_test("t9", function() {
++  result <- union_result()
++  drifted <- c(union_page_ids[1:99], "DRIFT-0001")
++  check <- fec_api_determinism_spot_check(
++    result, api_key = "fixture-key", concurrency = 1L,
++    transport = spot_check_transport(drifted, 2207L),
++    sleep = no_sleep, jitter = no_jitter
++  )
++  # The caller's own FALSE branch, lifted from the parsed function, must record
++  # the drift instead of stopping the task.
++  statements <- as.list(body(collect_crypto_api))
++  branch <- Filter(function(statement) {
++    grepl(
++      "identical(determinism_value, FALSE)",
++      paste(deparse(statement), collapse = " "),
++      fixed = TRUE
++    )
++  }, statements)
++  stopifnot("the caller still branches on a FALSE" = identical(length(branch), 1L))
++  environment <- new.env(parent = globalenv())
++  assign("determinism_value", check$identical, envir = environment)
++  assign("determinism_unit", check$unit_id, envir = environment)
++  assign("determinism_detail", check$detail, envir = environment)
++  printed <- paste(
++    capture.output(eval(branch[[1L]], envir = environment)),
++    collapse = " "
++  )
++  source_text <- readLines(
++    file.path(project_root, "R", "fec_api.R"), warn = FALSE
++  )
++  caller_text <- paste(deparse(body(collect_crypto_api)), collapse = " ")
++  stopifnot(
++    "a stray id is drift" = identical(check$identical, FALSE),
++    "the union branch was taken" = identical(check$mode, "union_subset"),
++    "the detail counts the stray id" = identical(
++      check$detail,
++      "fresh page 1: 100 ids, 99 in union; count 2207 vs verified 2207"
++    ),
++    "the fatal stop is gone from the source" = !any(grepl(
++      "determinism spot-check returned a different sub_id set",
++      source_text, fixed = TRUE
++    )),
++    "the caller cannot stop on a FALSE" = !grepl(
++      "returned a different sub_id set", caller_text, fixed = TRUE
++    ),
++    "the caller records the drift" = grepl(
++      "population changed after a verified walk", caller_text, fixed = TRUE
++    ),
++    "the receipt carries the detail" = grepl(
++      "determinism_detail", caller_text, fixed = TRUE
++    ),
++    "the recorded line names the unit" = grepl(union_unit$id, printed, fixed = TRUE),
++    "the recorded line carries the detail" = grepl(check$detail, printed, fixed = TRUE),
++    "the recorded line keeps the snapshot verified" = grepl(
++      "snapshot stands as verified at walk time", printed, fixed = TRUE
++    )
++  )
++})
++
++run_test("t10", function() {
++  normal_unit <- employer_unit("P1_employer:Acme:2024:NORMAL")
++  normal_ids <- sprintf("N1-%04d", 1:100)
++  transport <- function(specs, api_key, concurrency) {
++    lapply(specs, function(spec) {
++      ok_page(lapply(normal_ids, fixture_row), 100L, NULL)
++    })
++  }
++  result <- fec_api_collect_work_units(
++    list(normal_unit), api_key = "fixture-key", concurrency = 1L,
++    transport = transport, sleep = no_sleep, jitter = no_jitter
++  )
++  state <- result$units[[normal_unit$id]]
++  check <- fec_api_determinism_spot_check(
++    result, api_key = "fixture-key", concurrency = 1L,
++    transport = transport, sleep = no_sleep, jitter = no_jitter
++  )
++  stopifnot(
++    "the unit walked normally" = isTRUE(state$complete),
++    "no union page was written" = !isTRUE(state$pages[[1L]]$decomposed),
++    # An ordinary page 1 is also numbered 0, so page_number cannot identify a
++    # union page; only the decomposed/coverage_method flags can.
++    "an ordinary page 1 is numbered 0" =
++      identical(as.integer(state$pages[[1L]]$page_number), 0L),
++    "the exact page-1 comparison is kept" = identical(check$mode, "page_one"),
++    "an unchanged page 1 passes" = isTRUE(check$identical),
++    "the detail is reportable" = identical(
++      check$detail,
++      "fresh page 1: 100 ids, 100 matching the stored page 1 of 100; count 100 vs verified 100"
++    )
++  )
++})
++
++# ---------------------------------------------------------------------------
++# Negative control: the pre-change comparison, run inline on t8's fixture, must
++# fail on a snapshot the collector verified. That is why this change exists.
++# ---------------------------------------------------------------------------
++run_test("t11", function() {
++  result <- union_result()
++  state <- result$units[[union_unit$id]]
++  expected <- vapply(state$pages[[1L]]$rows, function(row) {
++    row_scalar(row, "sub_id", "")
++  }, character(1L))
++  actual <- union_page_ids
++  pre_change <- identical(sort(expected), sort(actual))
++  check <- fec_api_determinism_spot_check(
++    result, api_key = "fixture-key", concurrency = 1L,
++    transport = spot_check_transport(union_page_ids, 2207L),
++    sleep = no_sleep, jitter = no_jitter
++  )
++  stopifnot(
++    "the union page holds the whole population" = identical(length(expected), 2207L),
++    "the fresh page 1 holds 100 ids" = identical(length(actual), 100L),
++    "every fresh id is inside the union" = all(actual %in% expected),
++    "the pre-change comparison fails on a correct snapshot" =
++      identical(pre_change, FALSE),
++    "the new check passes on the same fixture" = isTRUE(check$identical)
++  )
++})
++
+ passed <- sum(vapply(results, function(value) identical(value, "PASS"), logical(1L)))
+ cat(sprintf(
+   "test_fec_api_reconcile: %s (%d/%d)\n",

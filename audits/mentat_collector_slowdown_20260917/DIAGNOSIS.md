@@ -4,9 +4,13 @@ Reported symptom, verbatim: *"there has been a massive slow down in data collect
 fixes, and every lane is failing now. I think the workers, when they checkpoint, halt the entire
 collection and kill the process. Many times it suddenly drops down to 0 workers."*
 
-This packet is filed in the Mentat repo because the lane's worktree
-(`.claude/worktrees/mentat-collector-slowdown-dfbf5b`) was removed by the 2026-09-18 disk clearance
-and took the original copy with it. The commits below are the durable record.
+This packet lives in the Mentat repo because the lane's worktree
+(`.claude/worktrees/mentat-collector-slowdown-dfbf5b`) was removed by the 2026-09-18 disk clearance.
+That clearance rehomed all six files here before deleting the worktree, so nothing was lost. An
+earlier revision of this paragraph said the copy had been destroyed; that was wrong, and wrong in a
+way worth recording — it came from reading a directory listing truncated by a `tail`, which is the
+same error of inferring absence from an incomplete view that this packet warns about elsewhere. The
+patch files beside this one are that rehomed set; the commits below are the durable record.
 
 ## Verdict
 

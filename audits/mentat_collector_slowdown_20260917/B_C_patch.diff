@@ -1,0 +1,403 @@
+--- a/mentat/tools/api_request_pool.py
++++ b/mentat/tools/api_request_pool.py
+@@ -6,6 +6,7 @@
+ import json
+ import secrets
+ import sqlite3
++import sys
+ import threading
+ import time
+ from urllib.parse import urlencode
+@@ -14,6 +15,10 @@
+ from email.utils import parsedate_to_datetime
+ 
+ ENDPOINT = 'https://api.open.fec.gov/v1/schedules/schedule_a/'
++# A 403 carrying one of these codes condemns the key itself, never the query,
++# so the pool must retire that key instead of failing the collection task.
++INVALID_KEY_CODES = {'API_KEY_INVALID','API_KEY_DISABLED','API_KEY_UNAUTHORIZED','API_KEY_MISSING','API_KEY_UNVERIFIED'}
++POOL_EXHAUSTED_BODY = json.dumps({'error':{'code':'API_KEY_POOL_EXHAUSTED','message':'Every configured FEC API key was quarantined as invalid.'}})
+ 
+ 
+ class NoRedirect(HTTPRedirectHandler):
+@@ -35,8 +40,28 @@
+                 'body':response.read().decode('utf-8'), 'elapsed_seconds':time.monotonic()-started}
+ 
+ 
++def invalid_key_code(result):
++    """Return the FEC error code when a 403 blames the key itself, else None."""
++    if result.get('status')!=403:return None
++    body=result.get('body') or ''
++    try:code=str(json.loads(body).get('error',{}).get('code',''))
++    except (ValueError,TypeError,AttributeError):code=''
++    if code in INVALID_KEY_CODES:return code
++    return 'API_KEY_INVALID' if 'API_KEY_INVALID' in body else None
++
++
++def cooldown_seconds(headers, fallback=60):
++    """Retry-After in seconds; accepts the numeric and the HTTP-date form."""
++    value=headers.get('retry-after')
++    if value is None:return fallback
++    try:return max(1,float(value))
++    except (ValueError,TypeError):
++        try:return max(1,parsedate_to_datetime(value).timestamp()-time.time())
++        except (ValueError,TypeError,AttributeError,OverflowError):return fallback
++
++
+ class RequestPool:
+-    def __init__(self, keys, budget_path, workers, *, transport=request, cap=1000, window=3600):
++    def __init__(self, keys, budget_path, workers, *, transport=request, cap=1000, window=3600, quarantine=True):
+         self.keys = list(dict.fromkeys(keys))
+         self.ids = ['openfec:sha256:'+hashlib.sha256(k.encode()).hexdigest()[:12] for k in self.keys]
+         self.budget_path = str(budget_path)
+@@ -44,7 +69,11 @@
+         self.transport = transport
+         self.condition = threading.Condition()
+         self.busy, self.cooldown = set(), {}
+-        self.limit = max(1,min(workers,len(self.keys)))
++        self.quarantine = quarantine
++        self.quarantined = {}
++        self.reissued = 0
++        self.requested = max(1,int(workers))
++        self.limit = max(1,min(self.requested,len(self.keys)))
+         self.stopped = False
+         self.waiting = self.completed = 0
+         self.peak = 0
+@@ -57,16 +86,34 @@
+         self.server = None
+         self.token = secrets.token_urlsafe(32)
+ 
++    def healthy(self):
++        """Key indexes the API has not rejected. Quarantine is one-way per run."""
++        return [index for index in range(len(self.keys)) if index not in self.quarantined]
++
+     def snapshot(self):
+         with self.condition:
+             return {'active_workers':len(self.busy), 'requested_workers':self.limit,
+                     'queued_requests':self.waiting, 'completed_requests':self.completed,
+                     'peak_active_workers':self.peak, 'assisted_lanes':sorted(self.assisted),
++                    'quarantined_keys':[self.ids[i][-12:] for i in sorted(self.quarantined)],
++                    'healthy_keys':len(self.healthy()), 'reissued_requests':self.reissued,
+                     'scheduling':'shared_request_pool'}
+ 
++    def rescale(self):
++        # Caller holds self.condition. Width follows the keys that still work.
++        self.limit=max(1,min(self.requested,max(1,len(self.healthy()))))
++
+     def resize(self, count):
+         with self.condition:
+-            self.limit=max(1,min(int(count),len(self.keys)));self.condition.notify_all()
++            self.requested=max(1,int(count));self.rescale();self.condition.notify_all()
++
++    def condemn(self, index, code):
++        """Retire a rejected key. One stderr line per key, redacted to its id."""
++        with self.condition:
++            first=index not in self.quarantined
++            self.quarantined[index]=code
++            self.rescale();self.condition.notify_all()
++        if first:print(f'[request-pool] quarantined key {self.ids[index][-12:]}: {code}',file=sys.stderr,flush=True)
+ 
+     def stop(self):
+         with self.condition:
+@@ -83,36 +130,63 @@
+             db.execute('INSERT INTO api_request_budget VALUES (?,?,?) ON CONFLICT(budget_id) DO UPDATE SET window_started_epoch=excluded.window_started_epoch, requests_used=excluded.requests_used',(self.ids[index],start,used+1))
+             return True
+ 
+-    def execute(self, spec, lane):
++    def acquire(self, lane):
++        """Reserve a healthy key, or None once the pool stops or runs out of keys."""
+         index=None
+         with self.condition:
+             self.waiting+=1
+             try:
+                 while index is None:
+-                    if self.stopped:
+-                        return {'status':429,'headers':{'Retry-After':'1'},'body':'','pool_stopped':True}
++                    if self.stopped:return None
++                    healthy=self.healthy()
++                    if not healthy:return None
+                     now=time.time()
+                     if len(self.busy)<self.limit:
+-                        for candidate in sorted(range(len(self.keys)),key=lambda i:self.last_used[i]):
++                        for candidate in sorted(healthy,key=lambda i:self.last_used[i]):
+                             if candidate not in self.busy and self.cooldown.get(candidate,0)<=now and self.reserve(candidate,now):
+                                 index=candidate;break
+                     if index is None:self.condition.wait(.25)
+                 self.busy.add(index);self.last_used[index]=time.monotonic()
+                 self.peak=max(self.peak,len(self.busy));self.assisted.add(str(lane))
++                return index
+             finally:self.waiting-=1
+-        try:
+-            result=self.transport(spec,self.keys[index])
+-            if result.get('status')==429:
+-                headers={k.lower():v for k,v in result.get('headers',{}).items()}
+-                try:delay=max(1,float(headers.get('retry-after',60)))
+-                except (ValueError,TypeError):
+-                    try:delay=max(1,parsedate_to_datetime(headers['retry-after']).timestamp()-time.time())
+-                    except (ValueError,KeyError,TypeError):delay=60
+-                with self.condition:self.cooldown[index]=time.time()+delay
+-            return result
+-        finally:
+-            with self.condition:
+-                self.busy.remove(index);self.completed+=1;self.condition.notify_all()
++
++    def release(self, index):
++        with self.condition:
++            self.busy.discard(index);self.completed+=1;self.condition.notify_all()
++
++    def depleted(self, headers):
++        """True when the API reports no requests left in this key's window."""
++        remaining=headers.get('x-ratelimit-remaining')
++        if remaining is None:return False
++        try:return int(str(remaining).strip())<=0
++        except (ValueError,TypeError):return False
++
++    def execute(self, spec, lane):
++        # One bad key must cost one request, not the whole collection task: the
++        # 403 retires that key and the same spec is re-issued on a healthy one.
++        result=None
++        for attempt in range(len(self.keys)):
++            index=self.acquire(lane)
++            if index is None:
++                if self.stopped:return {'status':429,'headers':{'Retry-After':'1'},'body':'','pool_stopped':True}
++                if result is not None:return result
++                return {'status':403,'headers':{},'body':POOL_EXHAUSTED_BODY,'pool_exhausted':True}
++            if attempt:
++                with self.condition:self.reissued+=1
++            code=None
++            try:
++                result=self.transport(spec,self.keys[index])
++                headers={str(k).lower():v for k,v in (result.get('headers') or {}).items()}
++                if result.get('status')==429 or self.depleted(headers):
++                    with self.condition:self.cooldown[index]=time.time()+cooldown_seconds(headers)
++                if self.quarantine:
++                    code=invalid_key_code(result)
++                    if code:self.condemn(index,code)
++            finally:
++                self.release(index)
++            if code is None:return result
++        return result
+ 
+     def batch(self, specs, lane):
+         if not isinstance(specs,list) or not 1<=len(specs)<=128:raise ValueError('Invalid batch size')
+@@ -184,6 +258,7 @@
+             except (OSError,ValueError):control={}
+             if control.get('stop'):pool.stop()
+             if isinstance(control.get('desired_workers'),int) and control['desired_workers']>0:pool.resize(control['desired_workers'])
++            # snapshot() carries quarantined_keys/healthy_keys/reissued_requests.
+             write(args.run_directory/'request-workers.json',{**pool.snapshot(),'updated_at_epoch':time.time()})
+             time.sleep(.5)
+     finally:
+--- a/mentat/tools/api_company_cycle_fanout.py
++++ b/mentat/tools/api_company_cycle_fanout.py
+@@ -922,6 +922,15 @@
+     parser.add_argument("--max-lane-ceiling", type=int, default=0)
+     parser.add_argument("--initial-workers", type=int, default=0)
+     parser.add_argument(
++        "--pool-width",
++        type=int,
++        default=0,
++        help=(
++            "Shared HTTP request-pool width. Zero uses every healthy API key; "
++            "the RAM-derived lane cap never bounds it."
++        ),
++    )
++    parser.add_argument(
+         "--resume",
+         action="store_true",
+         help="Reuse verified lane databases and run only non-success tasks.",
+@@ -953,6 +962,8 @@
+         parser.error("--max-lane-ceiling must be zero (no ceiling) or positive.")
+     if parsed.initial_workers < 0:
+         parser.error("--initial-workers must be zero (auto) or positive.")
++    if not 0 <= parsed.pool_width <= 64:
++        parser.error("--pool-width must be between 0 (every healthy key) and 64.")
+     return parsed
+ 
+ 
+@@ -1314,9 +1325,10 @@
+     request_pool = None
+     worker_ceiling = lane_count if options.no_shared_requests else min(len(keys), options.max_parallel or len(keys), options.max_lane_ceiling or len(keys))
+     if not options.no_shared_requests:
+-        requested = read_control(run_directory / 'control.json').get('desired_workers')
+-        requested = requested if isinstance(requested, int) and requested > 0 else options.initial_workers or execution_worker_cap(worker_ceiling, resources)
+-        request_pool = RequestPool(keys, budget_database, min(requested, worker_ceiling))
++        # HTTP width follows the key supply, never the RAM-derived lane cap: the
++        # keys are the rate limit. R lanes stay bounded by execution_limiter.
++        pool_width = options.pool_width if options.pool_width > 0 else worker_ceiling
++        request_pool = RequestPool(keys, budget_database, pool_width)
+         request_pool.url = request_pool.start()
+         atexit.register(request_pool.close)
+     control_path = options.run_directory / "control.json"
+@@ -1325,16 +1337,19 @@
+     control_finished = threading.Event()
+ 
+     def publish_workers() -> None:
++        pool_state = request_pool.snapshot() if request_pool else None
+         try:
+             atomic_json(
+                 workers_path,
+                 {
+                     "lane_count": lane_count,
+                     "worker_ceiling": worker_ceiling,
+-                    "active_workers": request_pool.snapshot()["active_workers"] if request_pool else execution_limiter.active(),
++                    "active_workers": pool_state["active_workers"] if pool_state else execution_limiter.active(),
+                     "database_writers": execution_limiter.active(),
+-                    "request_pool": request_pool.snapshot() if request_pool else None,
+-                    "requested_workers": request_pool.snapshot()['requested_workers'] if request_pool else execution_limiter.target(),
++                    "request_pool": pool_state,
++                    "requested_workers": pool_state['requested_workers'] if pool_state else execution_limiter.target(),
++                    "quarantined_keys": pool_state['quarantined_keys'] if pool_state else [],
++                    "reissued_requests": pool_state['reissued_requests'] if pool_state else 0,
+                     "stopping": stop_requested.is_set(),
+                     "pending_companies": work_queue.pending_companies(),
+                     "company_handoffs": len(work_queue.handoffs),
+@@ -1352,13 +1367,15 @@
+             control = read_control(control_path)
+             desired = control.get("desired_workers")
+             if isinstance(desired, int) and desired > 0:
+-                target = max(1, min(int(desired), worker_ceiling))
+-                if target != (request_pool.snapshot()['requested_workers'] if request_pool else execution_limiter.target()):
+-                    execution_limiter.resize(min(target, lane_count))
+-                    if request_pool: request_pool.resize(target)
++                # This dial owns the R database coordinators only. The shared HTTP
++                # pool is as wide as the key supply and never follows it.
++                target = max(1, min(int(desired), worker_ceiling, lane_count))
++                if target != execution_limiter.target():
++                    execution_limiter.resize(target)
++                    width = request_pool.snapshot()['requested_workers'] if request_pool else 0
+                     print(
+-                        f"[fanout] operator set workers to {target} "
+-                        f"(worker ceiling {worker_ceiling})",
++                        f"[fanout] operator set database coordinators to {target} "
++                        f"(lane ceiling {lane_count}; request pool width {width})",
+                         flush=True,
+                     )
+             if control.get("stop") and not stop_requested.is_set():
+@@ -1745,6 +1762,7 @@
+         "merged": merged,
+         "configured_key_count": len(keys),
+         "spare_key_count": len(spare_keys),
++        "request_pool": request_pool.snapshot() if request_pool else None,
+         "lane_count": lane_count,
+         "execution_worker_count": primary_worker_count,
+         "final_worker_count": execution_limiter.target(),
+--- a/mentat/tests/test_api_request_pool.py
++++ b/mentat/tests/test_api_request_pool.py
+@@ -17,6 +17,8 @@
+ 
+ 
+ def specs(n):return [{'id':str(i),'url':ENDPOINT,'params':{'contributor_employer':'Fictional Company','test':str(i)}} for i in range(n)]
++
++INVALID_KEY_BODY='{"error":{"code":"API_KEY_INVALID","message":"The API key supplied is not valid."}}'
+ 
+ 
+ class PoolTests(unittest.TestCase):
+@@ -89,4 +91,108 @@
+             finally:pool.close()
+ 
+ 
++class QuarantineTests(unittest.TestCase):
++    """One dead key in the shared pool must cost one request, not a whole task."""
++
++    def pool_with_one_bad_key(self, tmp, *, keys=4, bad=1, quarantine=True):
++        used=[];lock=threading.Lock()
++        def fetch(spec,key):
++            with lock:used.append(key)
++            if key==f'key-{bad}':return {'status':403,'headers':{},'body':INVALID_KEY_BODY}
++            return {'status':200,'headers':{},'body':'{"ok":1}'}
++        pool=RequestPool([f'key-{i}' for i in range(keys)],Path(tmp)/'budget.db',keys,
++                         transport=fetch,quarantine=quarantine)
++        return pool,used
++
++    def batch_within(self, pool, count, seconds=5, lane='lane-1'):
++        """Run a batch on a daemon thread so a regression fails instead of hanging."""
++        box={}
++        def run():
++            try:box['result']=pool.batch(specs(count),lane)
++            except BaseException as error:box['error']=error
++        thread=threading.Thread(target=run,daemon=True);thread.start();thread.join(seconds)
++        if thread.is_alive():
++            pool.stop();thread.join(seconds)
++            self.fail(f'pool.batch did not return within {seconds}s')
++        if 'error' in box:raise box['error']
++        return box['result']
++
++    def test_invalid_key_is_quarantined_and_request_reissued(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            pool,used=self.pool_with_one_bad_key(tmp)
++            try:
++                results=self.batch_within(pool,8)
++                self.assertEqual([r['status'] for r in results],[200]*8)
++                state=pool.snapshot()
++                self.assertEqual(state['quarantined_keys'],[pool.ids[1][-12:]])
++                self.assertGreaterEqual(state['reissued_requests'],1)
++                self.assertEqual(state['healthy_keys'],3)
++                # The fixture really did hand out the bad key, and never again after.
++                self.assertEqual(used.count('key-1'),1)
++                self.assertEqual(state['completed_requests'],len(used))
++            finally:pool.close()
++
++    def test_quarantine_disabled_surfaces_the_403_negative_control(self):
++        # Negative control for the test above: with quarantine off the identical
++        # fixture must fail a request, so the passing case cannot be vacuous.
++        with tempfile.TemporaryDirectory() as tmp:
++            pool,used=self.pool_with_one_bad_key(tmp,quarantine=False)
++            try:
++                results=self.batch_within(pool,8)
++                self.assertIn(403,[r['status'] for r in results])
++                self.assertIn('key-1',used)
++                state=pool.snapshot()
++                self.assertEqual(state['quarantined_keys'],[])
++                self.assertEqual(state['reissued_requests'],0)
++                self.assertEqual(state['healthy_keys'],4)
++            finally:pool.close()
++
++    def test_all_keys_invalid_returns_403_without_looping(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            calls=[];lock=threading.Lock()
++            def fetch(spec,key):
++                with lock:calls.append(key)
++                return {'status':403,'headers':{},'body':INVALID_KEY_BODY}
++            pool=RequestPool([f'key-{i}' for i in range(4)],Path(tmp)/'budget.db',4,transport=fetch)
++            try:
++                started=time.monotonic()
++                results=self.batch_within(pool,6)
++                self.assertLess(time.monotonic()-started,5)
++                self.assertEqual([r['status'] for r in results],[403]*6)
++                self.assertEqual(pool.snapshot()['healthy_keys'],0)
++                self.assertLessEqual(len(calls),2*4*6)
++                self.assertEqual(sorted(set(calls)),[f'key-{i}' for i in range(4)])
++            finally:pool.close()
++
++    def test_ratelimit_remaining_zero_cools_the_key(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            used=[];lock=threading.Lock()
++            def fetch(spec,key):
++                with lock:used.append(key)
++                if key=='key-0':
++                    return {'status':200,'headers':{'X-RateLimit-Remaining':'0','Retry-After':'30'},'body':'{"ok":1}'}
++                return {'status':200,'headers':{},'body':'{"ok":1}'}
++            pool=RequestPool([f'key-{i}' for i in range(3)],Path(tmp)/'budget.db',3,transport=fetch)
++            try:
++                self.batch_within(pool,1)
++                self.assertEqual(used,['key-0'])
++                second=self.batch_within(pool,2)
++                self.assertEqual([r['status'] for r in second],[200,200])
++                self.assertNotIn('key-0',used[1:])
++                state=pool.snapshot()
++                self.assertEqual(state['healthy_keys'],3)
++                self.assertEqual(state['quarantined_keys'],[])
++            finally:pool.close()
++
++    def test_resize_clamps_to_healthy_keys(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            pool,used=self.pool_with_one_bad_key(tmp,keys=3,bad=1)
++            try:
++                self.batch_within(pool,3)
++                self.assertEqual(pool.snapshot()['healthy_keys'],2)
++                pool.resize(10)
++                self.assertEqual(pool.snapshot()['requested_workers'],2)
++            finally:pool.close()
++
++
+ if __name__=='__main__':unittest.main()

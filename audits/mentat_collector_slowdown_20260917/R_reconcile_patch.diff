@@ -1,0 +1,523 @@
+--- a/mentat/R/fec_api.R
++++ b/mentat/R/fec_api.R
+@@ -60,6 +60,20 @@
+     stop("MENTAT_CONCURRENCY must be a positive integer.", call. = FALSE)
+   }
+   concurrency
++}
++
++# Paul's ruling: an FEC pagination.count that moves during collection must not
++# abort the lane and must never be stored unverified. The collector re-walks the
++# cursor until one whole pass observes a constant count equal to the rows it
++# collected, and fails loudly only after this many reconciliation passes.
++fec_api_reconcile_passes <- function(
++  value = Sys.getenv("MENTAT_RECONCILE_PASSES", unset = "3")
++) {
++  passes <- suppressWarnings(as.integer(trimws(value)))
++  if (length(passes) != 1L || is.na(passes) || passes < 0L) {
++    stop("MENTAT_RECONCILE_PASSES must be a nonnegative integer.", call. = FALSE)
++  }
++  passes
+ }
+ 
+ fec_api_budget_exhausted <- function(used, requested, cap) {
+@@ -674,6 +688,8 @@
+     value$coverage_reason <- "Observed spellings do not prove the failed broad query was covered"
+     contract <- as.character(jsonlite::toJSON(value,auto_unbox=TRUE,null="null",digits=NA))
+   }
++  # A resumed unit must know which reconciliation pass produced these pages.
++  page$reconcile_pass <- as.integer(state$reconcile_pass %||% 0L)
+   payload <- jsonlite::toJSON(
+     page,
+     auto_unbox = TRUE,
+@@ -757,17 +773,43 @@
+   relevant <- progress$unit_id %in% unit_ids
+   for (id in unit_ids) relevant <- relevant | startsWith(progress$unit_id, paste0(id, "::window::"))
+   progress <- progress[relevant, , drop = FALSE]
++  # Paul's ruling: unresumable saved work is a per-unit fact, never lane-fatal.
++  # Drop that unit's checkpoints and progress row, say so, and collect it fresh.
++  # The evidence archive tables are never touched by this.
++  discard <- function(unit_id, reason) {
++    DBI::dbWithTransaction(connection, {
++      DBI::dbExecute(
++        connection,
++        "DELETE FROM api_page_checkpoints WHERE unit_id=?",
++        params = list(unit_id)
++      )
++      DBI::dbExecute(
++        connection,
++        "DELETE FROM api_work_progress WHERE unit_id=?",
++        params = list(unit_id)
++      )
++    })
++    cat(sprintf(
++      "Reconcile: saved work for %s is not resumable (%s); re-collecting.\n",
++      unit_id, reason
++    ))
++    invisible(NULL)
++  }
+   restored <- list()
+-  for (index in seq_len(nrow(progress))) {
+-    row <- progress[index, , drop = FALSE]
+-    expected_index <- match(row$unit_id[[1L]], expected_ids)
+-    if (is.na(expected_index)) stop("Unrecognized saved FEC query window; preserve and recollect this shard.")
+-    unit <- expected_units[[expected_index]]
+-    if (!"query_contract" %in% names(row) ||
+-        !identical(as.character(row$query_contract[[1L]]), fec_api_work_contract(unit))) {
+-      stop("Saved FEC work predates or differs from the current query contract: ",
+-           row$unit_id[[1L]], ". Preserve this source and run a fresh collection shard.", call. = FALSE)
+-    }
++  for (index in seq_len(nrow(progress))) {
++    row <- progress[index, , drop = FALSE]
++    unit_id <- as.character(row$unit_id[[1L]])
++    expected_index <- match(unit_id, expected_ids)
++    if (is.na(expected_index)) {
++      discard(unit_id, "unrecognized saved FEC query window")
++      next
++    }
++    unit <- expected_units[[expected_index]]
++    if (!"query_contract" %in% names(row) ||
++        !identical(as.character(row$query_contract[[1L]]), fec_api_work_contract(unit))) {
++      discard(unit_id, "saved work differs from the current query contract")
++      next
++    }
+     stored <- isTRUE(as.integer(row$stored_complete[[1L]]) == 1L)
+     pages <- list()
+     if (!stored) {
+@@ -777,16 +819,19 @@
+           "SELECT page, payload_json FROM api_page_checkpoints",
+           "WHERE unit_id=? ORDER BY page"
+         ),
+-        params = list(row$unit_id[[1L]])
++        params = list(unit_id)
+       )
+-      if (nrow(payloads)) {
++      if (nrow(payloads)) {
+         pages <- lapply(payloads$payload_json, function(payload) {
+           jsonlite::fromJSON(payload, simplifyVector = FALSE)
+-        })
+-        if (any(vapply(pages, function(page) nzchar(page$validation_failure %||% ""), logical(1L)))) {
+-          stop("Saved FEC pages failed snapshot validation; preserve them and use a fresh collection shard: ", row$unit_id[[1L]])
+-        }
++        })
+       }
++    }
++    if (length(pages) && any(vapply(pages, function(page) {
++      nzchar(page$validation_failure %||% "")
++    }, logical(1L)))) {
++      discard(unit_id, "saved pages failed snapshot validation")
++      next
+     }
+     cursor <- list()
+     if (nzchar(trim_text(row$last_index[[1L]])) ||
+@@ -796,18 +841,23 @@
+           last_index = row$last_index[[1L]],
+           last_contribution_receipt_date = row$last_contribution_receipt_date[[1L]]
+         ),
+-        row$unit_id[[1L]]
++        unit_id
+       )
+     }
+     seen <- trim_text(row$seen_keysets[[1L]])
+     seen <- if (nzchar(seen)) strsplit(seen, "\n", fixed = TRUE)[[1L]] else character()
+-    restored[[row$unit_id[[1L]]]] <- list(
++    saved_passes <- vapply(pages, function(page) {
++      suppressWarnings(as.integer(page$reconcile_pass %||% 0L))
++    }, integer(1L))
++    saved_passes <- saved_passes[!is.na(saved_passes)]
++    restored[[unit_id]] <- list(
+       last_indexes = cursor,
+       seen_keysets = seen,
+       expected_count = suppressWarnings(as.integer(row$records_total[[1L]])),
+       page = as.integer(row$last_page[[1L]]) + 1L,
+       rows_seen = as.integer(row$rows_seen[[1L]]),
+       pages = pages,
++      reconcile_pass = if (length(saved_passes)) max(saved_passes) else 0L,
+       complete = stored || isTRUE(as.integer(row$fetched_complete[[1L]]) == 1L),
+       stored_complete = stored
+     )
+@@ -949,26 +999,16 @@
+   })
+ }
+ 
+-fec_api_combine_date_windows <- function(state, child_result, expected_count = NULL, probe_rows = list()) {
+-  # Timeout recovery must retain any exact population already observed. An
+-  # unknown initial count is allowed; a changed known count is not coverage.
+-  observed_counts <- c(state$expected_count, expected_count, vapply(state$pages,
+-    function(page) suppressWarnings(as.integer(page$count %||% NA_integer_)), integer(1L)))
+-  observed_counts <- unique(observed_counts[!is.na(observed_counts)])
+-  if (length(observed_counts) > 1L) {
+-    stop("Date-window coverage differs from the original exact count: ", state$unit$id)
+-  }
+-  if (length(observed_counts)) expected_count <- observed_counts[[1L]]
+-  if (any(vapply(child_result$units, function(s) identical(s$coverage_verified, FALSE), logical(1L)))) {
+-    stop("A date window was replaced by unproven narrower spellings; parent coverage remains unresolved.")
+-  }
++fec_api_combine_date_windows <- function(state, child_result, expected_count = NULL) {
++  # Pure combine. Population verification against a FRESH parent count lives in
++  # fec_api_collect_windows_verified; a split-time count is only a hint now.
++  # Blank or duplicate ids still mean overlapping windows: a bug, not API drift.
+   child_rows <- unlist(lapply(child_result$units, fec_api_state_rows), recursive = FALSE)
+   ids <- vapply(child_rows, function(row) trim_text(row_scalar(row,"sub_id","")), character(1L))
+-  if (any(!nzchar(ids)) || anyDuplicated(ids) || (!is.null(expected_count) && length(ids) != expected_count)) {
++  if (any(!nzchar(ids)) || anyDuplicated(ids) ||
++      (!is.null(expected_count) && length(ids) != as.integer(expected_count))) {
+     stop("Date-window coverage is partial or overlapping: ", state$unit$id)
+   }
+-  prior <- vapply(c(fec_api_state_rows(state),probe_rows),function(row) trim_text(row_scalar(row,"sub_id","")),character(1L))
+-  if (any(!prior %in% ids)) stop("Date-window coverage omitted previously observed rows: ",state$unit$id)
+   count <- length(ids)
+   state$pages <- list(list(rows=child_rows,last_indexes=list(),count=count,
+     is_count_exact=TRUE,rows_collected=count,page_number=0L,complete=TRUE,
+@@ -980,6 +1020,122 @@
+   state
+ }
+ 
++# Paul's ruling: a date-window union is published only against a count observed
++# in the SAME pass that produced the rows. Collect the windows, re-fetch the
++# parent page, and re-walk only the windows whose own count moved. Nothing
++# unverified is returned; the split-time parent count is a hint, not proof.
++fec_api_collect_windows_verified <- function(
++  state, windows, api_key, concurrency, transport, sleep, jitter,
++  initial_states = list(), page_callback = NULL,
++  before_request = function(count) invisible(NULL), reset_callback = NULL,
++  limit = fec_api_reconcile_passes(), probe_rows = list()
++) {
++  requests <- 0L; retries <- 0L; rate_limits <- 0L; child_reconciles <- 0L
++  absorb <- function(outcome) {
++    requests <<- requests + as.integer(outcome$request_count)
++    retries <<- retries + as.integer(outcome$retry_count)
++    rate_limits <<- rate_limits + as.integer(outcome$rate_limit_count)
++    child_reconciles <<- child_reconciles + as.integer(outcome$reconcile_count %||% 0L)
++    invisible(NULL)
++  }
++  collect <- function(targets, states) {
++    outcome <- fec_api_collect_work_units(targets, api_key = api_key,
++      concurrency = concurrency, transport = transport, sleep = sleep, jitter = jitter,
++      initial_states = states, page_callback = page_callback,
++      before_request = before_request, reset_callback = reset_callback)
++    absorb(outcome)
++    outcome
++  }
++  # One page-1 request. NULL means that query itself is unservable, which is not
++  # a moving population: the caller then verifies window by window instead.
++  probe <- function(unit) {
++    fetched <- fec_api_fetch_with_retry(list(fec_api_request_spec(unit)), api_key = api_key,
++      concurrency = concurrency, transport = transport, sleep = sleep, jitter = jitter,
++      before_request = before_request)
++    absorb(fetched)
++    if (length(fetched$unservable_queries)) return(NULL)
++    page <- fec_api_parse_page(fetched$responses[[1L]])
++    if (!isTRUE(page$is_count_exact) || is.na(page$count) || page$count < 0L) {
++      stop("FEC API requires an exact nonnegative pagination.count: ", unit$id,
++           ". Response preserved; split or rerun the query.", call. = FALSE)
++    }
++    page
++  }
++  child_states <- collect(windows, initial_states)$units
++  observed <- c(fec_api_state_rows(state), probe_rows)
++  reconcile_log <- character()
++  ids <- character()
++  pass <- 0L
++  repeat {
++    parent <- probe(state$unit)
++    if (!is.null(parent)) observed <- c(observed, parent$rows)
++    union_rows <- unlist(lapply(child_states, fec_api_state_rows), recursive = FALSE)
++    ids <- vapply(union_rows, function(row) trim_text(row_scalar(row,"sub_id","")), character(1L))
++    if (any(!nzchar(ids)) || anyDuplicated(ids)) {
++      stop("Date-window coverage is partial or overlapping: ", state$unit$id)
++    }
++    unproven <- names(child_states)[vapply(child_states,
++      function(child) identical(child$coverage_verified, FALSE), logical(1L))]
++    reason <- if (length(unproven)) {
++      paste0(length(unproven),
++        " date window(s) were replaced by unproven narrower spellings")
++    } else if (is.null(parent)) {
++      NA_character_
++    } else if (length(ids) != parent$count) {
++      paste0("windows hold ", length(ids),
++        " rows against a fresh parent count of ", parent$count)
++    } else NA_character_
++    if (is.na(reason)) {
++      if (is.null(parent)) {
++        reconcile_log <- c(reconcile_log,
++          "parent count unavailable (query remained unservable); verified per window")
++      }
++      break
++    }
++    if (pass >= limit) {
++      reconcile_log <- c(reconcile_log, paste0("pass ", pass + 1L, ": ", reason))
++      stop("FEC API date-window population for ", state$unit$id,
++        " did not verify after ", limit, " passes: ",
++        paste(reconcile_log, collapse = "; "),
++        ". Nothing unverified was stored.", call. = FALSE)
++    }
++    pass <- pass + 1L
++    reconcile_log <- c(reconcile_log, paste0("pass ", pass, ": ", reason))
++    cat(sprintf("Reconcile pass %d for %s: %s\n", pass, state$unit$id, reason))
++    stale <- character()
++    for (name in names(child_states)) {
++      child <- child_states[[name]]
++      if (identical(child$coverage_verified, FALSE)) {
++        stale <- c(stale, name)
++        next
++      }
++      window_page <- probe(child$unit)
++      if (is.null(window_page)) next
++      if (!identical(as.integer(window_page$count), length(fec_api_state_rows(child)))) {
++        stale <- c(stale, name)
++      }
++    }
++    if (!length(stale)) next
++    for (name in stale) if (is.function(reset_callback)) reset_callback(child_states[[name]])
++    refreshed <- collect(lapply(stale, function(name) child_states[[name]]$unit), list())
++    for (name in names(refreshed$units)) child_states[[name]] <- refreshed$units[[name]]
++  }
++  prior <- unique(vapply(observed,
++    function(row) trim_text(row_scalar(row,"sub_id","")), character(1L)))
++  absent <- sum(!prior %in% ids)
++  if (absent > 0L) {
++    reconcile_log <- c(reconcile_log,
++      paste0(absent, " previously observed rows absent from the verified population"))
++    cat(sprintf("Reconcile: %s -> %d previously observed row(s) absent from the verified population\n",
++      state$unit$id, absent))
++  }
++  combined <- fec_api_combine_date_windows(state, list(units = child_states), length(ids))
++  combined$reconcile_pass <- as.integer(state$reconcile_pass %||% 0L) + pass
++  combined$reconcile_log <- c(state$reconcile_log %||% character(), reconcile_log)
++  list(state = combined, request_count = requests, retry_count = retries,
++    rate_limit_count = rate_limits, reconcile_count = pass + child_reconciles)
++}
++
+ fec_api_collect_work_units <- function(
+   units,
+   api_key = fec_api_key(),
+@@ -989,14 +1145,15 @@
+   jitter = stats::runif,
+   initial_states = list(),
+   page_callback = NULL,
+-  before_request = function(count) invisible(NULL)
++  before_request = function(count) invisible(NULL),
++  reset_callback = NULL
+ ) {
+   if (!length(units)) {
+     return(list(
+       units = list(), request_count = 0L, retry_count = 0L,
+       rate_limit_count = 0L, rows = 0L, rows_total = 0L,
+       final_concurrency = as.integer(concurrency), wall_clock_seconds = 0,
+-      decompositions = list()
++      decompositions = list(), reconcile_count = 0L
+     ))
+   }
+   unit_ids <- vapply(units, function(unit) unit$id, character(1L))
+@@ -1004,6 +1161,7 @@
+     stop("FEC API work-unit IDs must be non-empty and unique.", call. = FALSE)
+   }
+   units <- units[order(unit_ids, method = "radix")]
++  reconcile_limit <- fec_api_reconcile_passes()
+   states <- lapply(units, function(unit) {
+     restored <- initial_states[[unit$id]] %||% list()
+     restored_pages <- restored$pages %||% list()
+@@ -1035,6 +1193,8 @@
+       seen_sub_ids = restored_sub_ids,
+       complete = isTRUE(restored$complete),
+       stored_complete = isTRUE(restored$stored_complete),
++      reconcile_pass = as.integer(restored$reconcile_pass %||% 0L),
++      reconcile_log = as.character(restored$reconcile_log %||% character()),
+       coverage_verified = TRUE
+     )
+   })
+@@ -1043,6 +1203,7 @@
+   retry_count <- 0L
+   rate_limit_count <- 0L
+   decompositions <- list()
++  reconcile_count <- 0L
+   current_concurrency <- as.integer(concurrency)
+   started <- proc.time()[["elapsed"]]
+   while (length(queue)) {
+@@ -1076,15 +1237,17 @@
+         windows <- fec_api_date_windows(state$unit)
+         if (length(windows)) {
+           cat(sprintf("Unservable query: %s -> %d exhaustive date windows\n",state$unit$id,length(windows)))
+-          child_result <- fec_api_collect_work_units(windows,api_key,concurrency,
++          verified <- fec_api_collect_windows_verified(state,windows,api_key,concurrency,
+             transport,sleep,jitter,initial_states=initial_states,
+-            page_callback=page_callback,before_request=before_request)
+-          state <- fec_api_combine_date_windows(state,child_result)
++            page_callback=page_callback,before_request=before_request,
++            reset_callback=reset_callback,limit=reconcile_limit)
++          state <- verified$state
+           if (is.function(page_callback)) page_callback(state,state$pages[[1L]])
+           states[[index]] <- state
+-          request_count <- request_count + child_result$request_count
+-          retry_count <- retry_count + child_result$retry_count
+-          rate_limit_count <- rate_limit_count + child_result$rate_limit_count
++          request_count <- request_count + verified$request_count
++          retry_count <- retry_count + verified$retry_count
++          rate_limit_count <- rate_limit_count + verified$rate_limit_count
++          reconcile_count <- reconcile_count + verified$reconcile_count
+           next
+         }
+         if (isTRUE(state$unit$is_decomposition)) {
+@@ -1147,7 +1310,8 @@
+             jitter = jitter,
+             initial_states = list(),
+             page_callback = NULL,
+-            before_request = before_request
++            before_request = before_request,
++            reset_callback = NULL
+           )
+         } else {
+           stop("unreachable: decomposition children were checked above")
+@@ -1155,6 +1319,7 @@
+         request_count <- request_count + child_result$request_count
+         retry_count <- retry_count + child_result$retry_count
+         rate_limit_count <- rate_limit_count + child_result$rate_limit_count
++        reconcile_count <- reconcile_count + (child_result$reconcile_count %||% 0L)
+         child_names <- sort(names(child_result$units), method = "radix")
+         child_rows <- unlist(lapply(child_names, function(name) {
+           fec_api_state_rows(child_result$units[[name]])
+@@ -1220,15 +1385,17 @@
+       children <- if (!is.na(pool_width) && pool_width > 1L && !is.na(page$count) && page$count >= 2000L) fec_api_date_windows(state$unit) else list()
+       if (length(children)) {
+         cat(sprintf("Shared workers: %s -> %d date windows; expected %d rows\n", state$unit$id, length(children), page$count))
+-        child_result <- fec_api_collect_work_units(children, api_key, concurrency,
++        verified <- fec_api_collect_windows_verified(state, children, api_key, concurrency,
+           transport, sleep, jitter, initial_states = initial_states,
+-          page_callback = page_callback, before_request = before_request)
+-        state <- fec_api_combine_date_windows(state,child_result,page$count,page$rows)
++          page_callback = page_callback, before_request = before_request,
++          reset_callback = reset_callback, limit = reconcile_limit, probe_rows = page$rows)
++        state <- verified$state
+         if (is.function(page_callback)) page_callback(state,state$pages[[1L]])
+         states[[index]] <- state
+-        request_count <- request_count + child_result$request_count
+-        retry_count <- retry_count + child_result$retry_count
+-        rate_limit_count <- rate_limit_count + child_result$rate_limit_count
++        request_count <- request_count + verified$request_count
++        retry_count <- retry_count + verified$retry_count
++        rate_limit_count <- rate_limit_count + verified$rate_limit_count
++        reconcile_count <- reconcile_count + verified$reconcile_count
+         next
+       }
+       page_sub_ids <- vapply(
+@@ -1301,38 +1468,48 @@
+       terminal_page <- !length(page$rows) || !length(page$last_indexes)
+       count_complete <- !counts_moved && !is.na(state$expected_count) &&
+         state$rows_seen == state$expected_count
+-      if (counts_moved && terminal_page) {
++      # Paul's ruling: a moving count is reconciled, not aborted. Re-walk the
++      # cursor from scratch until one pass observes a constant count equal to the
++      # rows it collected; fail loudly, having stored nothing, once passes run out.
++      drift <- if (counts_moved && terminal_page) {
++        paste0("count moved ", paste(unique(observed_counts), collapse = "->"),
++          " after ", state$rows_seen, " rows")
++      } else if (!count_complete && terminal_page) {
++        paste0("shortfall ", state$rows_seen, " of ",
++          if (length(observed_counts)) paste(unique(observed_counts), collapse = ",") else "unknown")
++      } else if (!counts_moved && !is.na(state$expected_count) &&
++                 state$rows_seen > state$expected_count) {
++        paste0("overrun ", state$rows_seen, " > ", state$expected_count)
++      } else {
++        NA_character_
++      }
++      if (!is.na(drift)) {
++        attempt <- as.integer(state$reconcile_pass) + 1L
++        state$reconcile_log <- c(state$reconcile_log, paste0("pass ", attempt, ": ", drift))
+         page$complete <- FALSE
+         page$validation_failure <- "population_changed_during_collection"
+         if (is.function(page_callback)) page_callback(state, page)
+-        stop("FEC API count changed during collection; snapshot remains unverified: ",
+-             state$unit$id, ". Pages preserved; rerun in a fresh, narrower shard.", call. = FALSE)
+-      }
+-      if (!count_complete && terminal_page) {
+-        count_detail <- if (length(unique(observed_counts)) == 1L) {
+-          paste0(" of ", unique(observed_counts)[[1L]])
+-        } else {
+-          paste0(
+-            " rows; reported counts=",
+-            paste(unique(observed_counts), collapse = ",")
+-          )
++        if (attempt > reconcile_limit) {
++          stop("FEC API population for ", state$unit$id, " did not verify after ",
++            reconcile_limit, " passes: ", paste(state$reconcile_log, collapse = "; "),
++            ". Nothing unverified was stored.", call. = FALSE)
+         }
+-        stop(
+-          paste0(
+-            "FEC API pagination shortfall for ", state$unit$id,
+-            ": collected ", state$rows_seen, count_detail,
+-            " rows without a continuation cursor."
+-          ),
+-          call. = FALSE
+-        )
+-      }
+-      if (!counts_moved && !is.na(state$expected_count) &&
+-          state$rows_seen > state$expected_count) {
+-        stop(
+-          "FEC API collected more rows than pagination.count for work unit: ",
+-          state$unit$id,
+-          call. = FALSE
+-        )
++        state$reconcile_pass <- attempt
++        state$last_indexes <- list()
++        state$seen_keysets <- character()
++        state$page <- 0L
++        state$rows_seen <- 0L
++        state$expected_count <- NA_integer_
++        state$pages <- list()
++        state$seen_sub_ids <- character()
++        state$rows_collected_run <- 0L
++        state$complete <- FALSE
++        if (is.function(reset_callback)) reset_callback(state)
++        cat(sprintf("Reconcile pass %d for %s: %s\n", attempt, state$unit$id, drift))
++        reconcile_count <- reconcile_count + 1L
++        states[[index]] <- state
++        unfinished <- c(unfinished, index)
++        next
+       }
+       has_more <- if (!is.na(state$expected_count)) {
+         !count_complete
+@@ -1375,7 +1552,8 @@
+     rows_total = sum(vapply(states, function(state) state$rows_seen, integer(1L))),
+     final_concurrency = current_concurrency,
+     wall_clock_seconds = unname(elapsed),
+-    decompositions = decompositions
++    decompositions = decompositions,
++    reconcile_count = reconcile_count
+   )
+ }
+ 
+@@ -2269,7 +2447,31 @@
+       page_callback = function(state, page) {
+         fec_api_checkpoint_page(connection, state, page)
+       },
+-      before_request = before_request
++      before_request = before_request,
++      # A reconciliation pass restarts one unit's cursor walk. Its earlier
++      # checkpoints must never survive into the verified population.
++      reset_callback = function(state) {
++        DBI::dbWithTransaction(connection, {
++          DBI::dbExecute(
++            connection,
++            "DELETE FROM api_page_checkpoints WHERE unit_id=?",
++            params = list(state$unit$id)
++          )
++          DBI::dbExecute(
++            connection,
++            paste(
++              "UPDATE api_work_progress SET last_page=-1, rows_seen=0,",
++              "records_total=NULL, last_index='', last_contribution_receipt_date='',",
++              "seen_keysets='', fetched_complete=0, stored_complete=0, updated_at=?",
++              "WHERE unit_id=?"
++            ),
++            params = list(
++              format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3%z"),
++              state$unit$id
++            )
++          )
++        })
++      }
+     ),
+     error = on_abort
+   )

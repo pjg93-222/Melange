@@ -1,0 +1,783 @@
+diff --git a/mentat/app/app.js b/mentat/app/app.js
+index 8fbd04a3b..0fc76ebee 100644
+--- a/mentat/app/app.js
++++ b/mentat/app/app.js
+@@ -4,7 +4,7 @@ function setHtml(id, html) { if (renderedHtml.get(id) !== html) { $(id).innerHTM
+ let token = '', upload = null, selectedRun = '', selectedLane = '', busy = false, warningIds = [];
+ let readOnly = false, evidenceCollectionAvailable=false;
+ let rosterRevision = 0, companySequence = 0, currentView = 'loading', splitView = false;
+-let runCatalog = [], runGroup = '', runArchiveBusy = false;
++let runCatalog = [], runGroup = '', runArchiveBusy = false, resumeBusy = false;
+ let savedCoverage = [];
+ function renderLoadingCoverage() {
+   const sectors = upload?.readiness?.readiness?.map(group => group.industry) || [$('sector').value];
+@@ -178,7 +178,7 @@ $('stop').addEventListener('click', async event => {
+   if (!selectedRun) return;
+   const force = !event.shiftKey;
+   const question = force
+-    ? 'Stop this collection? This immediately terminates the collection and its worker processes. Partial lane data for the current run is discarded. The source database is not modified. This cannot be undone.'
++    ? 'Stop this collection? In-flight lanes are terminated. Lane data is kept and the run can be resumed.'
+     : 'Stop this collection gracefully? In-flight lanes are allowed to finish first, and the run cannot be un-stopped.';
+   if (!confirm(question)) return;
+   try {
+@@ -188,6 +188,18 @@ $('stop').addEventListener('click', async event => {
+   }
+   catch (error) { showError(error.message); }
+ });
++$('resume-run').addEventListener('click', async () => {
++  if (!selectedRun || resumeBusy) return;
++  resumeBusy = true; $('resume-run').disabled = true; showError('');
++  try {
++    await api('/api/resume', {id:selectedRun});
++    runGroup = 'progress'; showView('collection');
++    if (!await refreshRuns()) await refreshRun();
++    showStatus('Resuming the saved collection. Company/cycle work that already succeeded is kept; only unfinished work is collected again.');
++  }
++  catch (error) { showError(error.message); }
++  finally { resumeBusy = false; }
++});
+ $('apply-workers').addEventListener('click', async () => {
+   if (!selectedRun) return;
+   try {
+@@ -210,7 +222,7 @@ function collectionChoice(run) {
+ function clearRunDisplay() {
+   timerRun = null; $('monitor').hidden = true; $('resume-setup').hidden = true;
+   $('run-readiness-note').hidden = true;
+-  for (const id of ['stop','apply-workers','worker-target','clear-quality']) $(id).disabled = true;
++  for (const id of ['stop','resume-run','apply-workers','worker-target','clear-quality']) $(id).disabled = true;
+   $('run-title').textContent = selectedRun ? 'Loading collection…' : 'No collections in this folder';
+   $('stage').textContent = selectedRun ? 'Loading' : 'No selected collection';
+ }
+@@ -329,7 +341,15 @@ function render(run) {
+   $('monitor').hidden = notStarted;
+   $('run-readiness-note').hidden = !notStarted;
+   $('run-readiness-note').textContent = archived ? 'Restore this saved roster above before continuing collection setup.' : run.state === 'ready' ? 'Roster saved. Continue setup to choose cycles and start collection, or archive this draft.' : 'This roster needs review before collection. Review the names in Loading.';
+-  $('run-controls').hidden = !active;
++  // A resumable run is terminal, so the controls stay visible for it with
++  // only Resume enabled: that is where the operator looks for it.
++  const resumable = !!run.resumable && !readOnly && !archived;
++  $('run-controls').hidden = !active && !resumable;
++  $('resume-run').disabled = !resumable || resumeBusy;
++  $('resume-run').title = resumable
++    ? 'Continue this collection in its own run folder. Lane data already collected is kept and only unfinished company/cycle work is collected again.'
++    : run.resumed_from ? `Resumed from run ${run.resumed_from}.`
++    : 'Resume is available for a stopped or failed collection with saved lane data';
+   const inactiveReason = active ? '' : 'No collection is running';
+   $('stop').disabled = !active; $('stop').title = active ? 'Shift-click to stop gracefully and let in-flight lanes finish first.' : inactiveReason;
+   $('worker-target').disabled = !active; $('worker-target').title = inactiveReason;
+diff --git a/mentat/app/index.html b/mentat/app/index.html
+index f850ec85c..e54cd26be 100644
+--- a/mentat/app/index.html
++++ b/mentat/app/index.html
+@@ -59,7 +59,7 @@
+ <p id="freshness" class="muted"></p>
+ 
+ <div class="quality-panel" role="status"><strong id="quality-title">Collection coverage unverified</strong><p id="quality-detail">Completed tasks do not establish complete downstream coverage.</p><div id="quality-checks"></div><button id="clear-quality" type="button" hidden>Clear reviewed notices</button><details><summary>Data scope and source age</summary><p>Search checks cover the requested names at collection time. Missing employer names and unlisted aliases can still leave gaps. Rebuilt reports show observed committee transfers through three hops, with unresolved paths and separate conditional estimates. These are not traced company dollars or lower bounds. Historical reports may predate transfer coverage.</p><p>Rebuilt reports classify ActBlue and WinRed as hybrid/Carey committees. Older exports may still use the former Super PAC reporting rule.</p><ul id="source-snapshots"></ul></details></div>
+-<div id="run-controls"><div class="section-label">RUN CONTROLS</div><div class="editor-actions"><button id="stop" type="button" class="danger" disabled title="No collection is running">Stop collection</button><label class="field" for="worker-target">Workers</label><input id="worker-target" type="number" min="1" max="64" placeholder="e.g. 6" disabled title="No collection is running"><button id="apply-workers" type="button" class="secondary" disabled title="No collection is running">Apply</button></div></div>
++<div id="run-controls"><div class="section-label">RUN CONTROLS</div><div class="editor-actions"><button id="stop" type="button" class="danger" disabled title="No collection is running">Stop collection</button><button id="resume-run" type="button" class="secondary" disabled title="Resume is available for a stopped or failed collection with saved lane data">Resume last run</button><label class="field" for="worker-target">Workers</label><input id="worker-target" type="number" min="1" max="64" placeholder="e.g. 6" disabled title="No collection is running"><button id="apply-workers" type="button" class="secondary" disabled title="No collection is running">Apply</button></div></div>
+ <div class="metrics"><div><span>Search tasks processed</span><strong id="completed">—</strong></div><div><span id="worker-metric-label">Active workers</span><strong id="workers">—</strong><small id="worker-detail"></small></div><div><span>Failed tasks</span><strong id="failed">—</strong></div><div><span>Estimated time left</span><strong id="eta">—</strong><small>Elapsed <span id="elapsed">—</span></small></div></div>
+ <span id="stopping-banner" class="badge" hidden>Stopping - finishing in-flight lanes.</span>
+ <div class="progress-track"><div id="progress"></div></div><p id="phase-description" class="muted"></p>
+diff --git a/mentat/app/server.py b/mentat/app/server.py
+index 328e00fbd..9d0771246 100644
+--- a/mentat/app/server.py
++++ b/mentat/app/server.py
+@@ -291,6 +291,34 @@ def run_state(status, fallback):
+     return stage if stage in ('failed', 'stopped') else fallback
+ 
+ 
++def run_has_lane_state(directory):
++    """Whether a run directory holds fanout manifests a resume could continue.
++
++    The manifest is what the fanout's --resume reloads. Without one there are
++    no lane snapshots to reuse, so a resume would have nothing to carry forward
++    and would only re-collect what the stopped attempt already collected.
++    """
++    if not directory:
++        return False
++    return next(Path(directory).glob('industries/*/fanout/manifest.json'), None) is not None
++
++
++def stale_resume_status(directory, meta):
++    """A resumed run's saved status still describes the attempt that stopped.
++
++    Reporting that terminal stage back would drop the run into History seconds
++    after the operator resumed it, and would offer Resume again for a run that
++    is already being relaunched. Only the relaunched orchestrator's own rewrite
++    makes the file current, so it is trusted from the moment it is rewritten.
++    """
++    if not meta.get('resumed_from'):
++        return False
++    try:
++        return (Path(directory) / 'status.json').stat().st_mtime < (meta.get('started_at') or 0)
++    except OSError:
++        return True
++
++
+ def process_alive(pid):
+     if not isinstance(pid, int) or pid <= 0:
+         return False
+@@ -781,9 +809,9 @@ class Console:
+         self.prepare_launch(identifier, directory, cycles, stored_keys)
+         return {"id":identifier, "state":"starting"}
+ 
+-    def prepare_launch(self, identifier, directory, cycles, stored_keys, background=False):
++    def prepare_launch(self, identifier, directory, cycles, stored_keys, background=False, resume_run_id=""):
+         try:
+-            self.start_prepared_process(identifier, directory, cycles, stored_keys)
++            self.start_prepared_process(identifier, directory, cycles, stored_keys, resume_run_id)
+         except Exception as error:
+             with self.lock, console_state_lock(self.root):
+                 manifest = read_json(directory / "upload.json")
+@@ -795,7 +823,7 @@ class Console:
+         finally:
+             self.preparing.discard(identifier)
+ 
+-    def start_prepared_process(self, identifier, directory, cycles, stored_keys):
++    def start_prepared_process(self, identifier, directory, cycles, stored_keys, resume_run_id=""):
+         runtime = directory / "runtime" / "mentat"
+         runtime.mkdir(parents=True, exist_ok=True)
+         # Pin the current runner and inputs together; R resolves its roster relative to its entry point.
+@@ -814,6 +842,13 @@ class Console:
+                    "-RunRoot", str(directory / "runs"), "-OutputDirectory", str(self.report_directory),
+                    "-RawDataDirectory", str(directory / "raw"), "-PythonPath", sys.executable,
+                    "-RScriptPath", self.rscript, "-NoCache"]
++        if resume_run_id:
++            # Continue the existing run folder. The orchestrator keeps the run
++            # id, appends to its logs and events, and skips initialization for
++            # every industry whose saved lane state a fanout resume can reuse.
++            # The runtime above is re-staged either way, so a code fix landed
++            # since the stopped attempt is the code the resume runs.
++            command += ["-ResumeRunId", resume_run_id]
+         environment = os.environ.copy()
+         library = r_library_path(environment, PROJECT, self.rscript)
+         if library:
+@@ -853,7 +888,7 @@ class Console:
+             manifest.update(state="starting")
+             atomic_json(directory / "upload.json", manifest)
+             try:
+-                with (directory / "launcher.log").open("wb") as log:
++                with (directory / "launcher.log").open("ab" if resume_run_id else "wb") as log:
+                     process = subprocess.Popen(command, cwd=runtime, env=environment, stdout=log,
+                                                stderr=subprocess.STDOUT,
+                                                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+@@ -883,6 +918,108 @@ class Console:
+                 targets.append(fanout / "control.json")
+         return targets
+ 
++    def resume_control_targets(self, identifier, run_id):
++        """Every control file a resume of one saved run has to clear.
++
++        stop() writes {"desired_workers": 0, "stop": true} to the run-level
++        control file and to every fanout control file the run had reached. A
++        relaunched orchestrator reads those same files, so a resume that left
++        them alone would stop itself within three seconds of starting.
++        """
++        directory = self.root / identifier
++        targets = [directory / "control.json"]
++        run = directory / "runs" / run_id
++        if (run / "control.json").is_file():
++            targets.append(run / "control.json")
++        for fanout in sorted(run.glob("industries/*/fanout")):
++            if fanout.is_dir():
++                targets.append(fanout / "control.json")
++        return targets
++
++    def resume_target(self, run):
++        """The run directory a stopped or failed collection could continue.
++
++        None means this run has nothing to resume: it is not an uploaded
++        roster, it never reached a terminal state a resume applies to, or it
++        holds no fanout manifest for the lane snapshots to be reloaded from.
++        """
++        if not isinstance(run, dict) or not run.get('upload'):
++            return None
++        if run.get('state') not in ('stopped', 'failed'):
++            return None
++        directory = run.get('directory')
++        return directory if run_has_lane_state(directory) else None
++
++    def resume(self, data, background=True):
++        """Continue a stopped or failed collection in its own run folder.
++
++        Every verified company-cycle task the stopped attempt finished stays
++        finished: the fanout reloads its lane databases and re-runs only what
++        did not succeed. Merge semantics are untouched - the industry source
++        database is still written only after every task in the plan passes.
++        """
++        identifier = str(data.get("id", ""))
++        if not re.fullmatch(r"[a-f0-9]{32}", identifier):
++            raise RunNotFound("Run not found.")
++        directory = self.root / identifier
++        with self.lock, console_state_lock(self.root):
++            run = self.find(identifier)
++            if run is None or not run.get('upload'):
++                raise RunNotFound("Run not found.")
++            target = self.resume_target(run)
++            if target is None:
++                raise ValueError("Nothing to resume for this roster.")
++            archives = read_json(self.root / 'run-archives.json')
++            if identifier in (archives.get('runs', {}) if isinstance(archives, dict) else {}):
++                raise ValueError('Restore this saved roster from Archived runs before resuming collection.')
++            if self.preparing or any(process.poll() is None for process in self.processes.values()):
++                raise ValueError("An app collection is already running. Wait for it to finish.")
++            if any(other['state'] in ('preparing', 'starting', 'running') and
++                   process_alive(other.get('upload', {}).get('pid') or other.get('upload', {}).get('console_pid'))
++                   for other in self.runs()):
++                raise ValueError("A saved collection is still active. Wait for it to finish.")
++            if not Path(self.rscript).is_file():
++                raise ValueError("Rscript is unavailable. Set -RScriptPath in the launcher.")
++            stored_keys = load_keys()
++            if not stored_keys:
++                raise ValueError("Enter an FEC API key before resuming collection.")
++            manifest = read_json(directory / "upload.json")
++            cycles = [cycle for cycle in manifest.get("cycles", []) if type(cycle) is int]
++            if not cycles:
++                raise ValueError("Nothing to resume for this roster.")
++            run_id = Path(target).name
++            stamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
++            # Clear the stop flags before the orchestrator can read them. A
++            # worker count the operator chose is kept; the zero stop() wrote is
++            # dropped rather than saved, so the fanout picks its own start.
++            for control_path in self.resume_control_targets(identifier, run_id):
++                previous = read_json(control_path)
++                previous = previous if isinstance(previous, dict) else {}
++                workers = previous.get("desired_workers")
++                control = {"stop": False}
++                if type(workers) is int and workers > 0:
++                    control["desired_workers"] = workers
++                control["updated_at"] = stamp
++                atomic_json(control_path, control)
++            manifest.update(state="preparing", cycles=cycles, resumed_from=run_id,
++                            resume_count=int(manifest.get("resume_count") or 0) + 1,
++                            started_at=time.time(), console_pid=os.getpid())
++            # A stop flag or an exit code left in the manifest would make
++            # start_prepared_process refuse the launch, or finish() record the
++            # relaunch as stopped the moment it exits.
++            for key in ("stop_requested", "stop_mode", "finished_at", "exit_code",
++                        "launch_error", "pid", "process_identity"):
++                manifest.pop(key, None)
++            atomic_json(directory / "upload.json", manifest)
++            self.preparing.add(identifier)
++        if background:
++            threading.Thread(target=self.prepare_launch,
++                             args=(identifier, directory, cycles, stored_keys, True),
++                             kwargs={"resume_run_id": run_id}, daemon=True).start()
++            return {"id": identifier, "state": "preparing", "resumed_from": run_id}
++        self.prepare_launch(identifier, directory, cycles, stored_keys, resume_run_id=run_id)
++        return {"id": identifier, "state": "starting", "resumed_from": run_id}
++
+     def stop(self, data):
+         identifier = str(data.get("id", ""))
+         force = bool(data.get("force", True))
+@@ -1347,7 +1484,8 @@ class Console:
+                 continue
+             run_paths = sorted((path.parent / "runs").glob("*/manifest.json"))
+             state = meta["state"]
+-            if run_paths and state not in ('stopped', 'failed', 'launch failed'):
++            if (run_paths and state not in ('stopped', 'failed', 'launch failed')
++                    and not stale_resume_status(run_paths[-1].parent, meta)):
+                 state = run_state(read_json_cached(run_paths[-1].parent / 'status.json'), state)
+             values.append({"id": meta["id"], "name": meta["name"], "state": state,
+                            "created_at": meta["created_at"], "directory": run_paths[-1].parent if run_paths else None,
+@@ -1456,7 +1594,9 @@ class Console:
+         archives = metadata.get('runs', {}) if isinstance(metadata, dict) else {}
+         archives = archives if isinstance(archives, dict) else {}
+         visible = [{**{key:value for key,value in run.items() if key not in ('directory', 'upload')},
+-                    'archived':run['id'] in archives, 'can_archive':self.can_archive_run(run)}
++                    'archived':run['id'] in archives, 'can_archive':self.can_archive_run(run),
++                    'resumable':self.resume_target(run) is not None,
++                    'resumed_from':run.get('upload', {}).get('resumed_from')}
+                    for run in runs if include_archived or run['id'] not in archives]
+         return {"runs":visible, 'archived_count':sum(run['id'] in archives for run in runs),
+                 'total_run_count':len(runs), 'collection_directory':str(self.root),
+@@ -1642,6 +1782,8 @@ class Console:
+                   "readiness": run.get("upload", {}).get("readiness"), "lanes": [], "events": [], "reports": [], "assurance": [], "fec_coverage": []}
+         manifest = run.get('upload', {})
+         result['launch_error'] = manifest.get('launch_error')
++        result['resumable'] = self.resume_target(run) is not None
++        result['resumed_from'] = manifest.get('resumed_from')
+         if isinstance(manifest.get('started_at'), (int, float)):
+             result['elapsed_seconds'] = max(0, (manifest.get('finished_at') or time.time()) - manifest['started_at'])
+         if not directory:
+@@ -2163,6 +2305,8 @@ class Handler(BaseHTTPRequestHandler):
+                 return self.send(key_status())
+             if self.path == "/api/start":
+                 return self.send(self.server.app.launch(data, background=True))
++            if self.path == "/api/resume":
++                return self.send(self.server.app.resume(data))
+             if self.path == '/api/quality/acknowledge':
+                 return self.send(self.server.app.acknowledge_quality(data))
+             if self.path == '/api/run-archive':
+diff --git a/mentat/tools/parallel/Start-MentatResilientIndustryReports.ps1 b/mentat/tools/parallel/Start-MentatResilientIndustryReports.ps1
+index af8c74452..690b7b9a2 100644
+--- a/mentat/tools/parallel/Start-MentatResilientIndustryReports.ps1
++++ b/mentat/tools/parallel/Start-MentatResilientIndustryReports.ps1
+@@ -7,7 +7,7 @@ This is the failure-isolated production orchestrator. For each industry it:
+ 
+   1. initializes a fresh run-local SQLite database;
+   2. delegates collection to Start-MentatApiCompanyCycleFanout.ps1;
+-  3. permits exactly one recovery lane while healthy API lanes continue;
++  3. shares safe worker capacity between collection and recovery;
+   4. runs deterministic merge and company x cycle coverage gates;
+   5. exports and verifies every raw contribution by industry/cycle/company;
+   6. starts the workbook generator immediately after those gates.
+@@ -42,8 +42,8 @@ param(
+   [string]$Cycles = '2022|2024|2026',
+   [ValidateRange(0, 64)]
+   [int]$MaxParallel = 0,
+-  [ValidateSet(1)]
+-  [int]$RecoveryWorkers = 1,
++  [ValidateRange(0, 64)]
++  [int]$RecoveryWorkers = 0,
+   [ValidateRange(1, 8)]
+   [int]$MaxGeneratorWorkers = 3,
+   [ValidateRange(50, 95)]
+@@ -58,10 +58,16 @@ param(
+   [int]$NodeHeapMb = 0,
+   [ValidateRange(1, 45)]
+   [double]$GeneratorPerformanceBudgetMinutes = 15,
++  [ValidateRange(2, 64)]
++  [int]$MergeBatchLimit = 10,
+   [string]$KeysFile = '',
+   [string]$OutputDirectory = '',
+   [string]$RawDataDirectory = '',
+   [string]$RunRoot = '',
++  # Continue the run folder named here instead of creating a new one: its
++  # logs, events, industry databases and fanout manifests are all reused.
++  [ValidatePattern('^$|^\d{8}T\d{6}-\d+$')]
++  [string]$ResumeRunId = '',
+   [string]$RosterPath = '',
+   [string]$GeneratorPath = '',
+   [string]$RScriptPath =
+@@ -325,7 +331,8 @@ function Get-ResourcePlan {
+     [int]$KeyCount,
+     [int]$RequestedParallel,
+     [int]$BudgetPercent,
+-    [double]$LaneGB
++    [double]$LaneGB,
++    [int]$MergeBatchLimit
+   )
+   $totalBytes = 0.0
+   $freeBytes = 0.0
+@@ -361,19 +368,17 @@ function Get-ResourcePlan {
+     $KeyCount
+   }
+   $logicalCpu = [math]::Max(1, [Environment]::ProcessorCount)
+-  $sqliteMergeCap = 10
+   # API lanes are remote-I/O bound. Report logical CPUs as telemetry, but let
+-  # the key, RAM, request, and ten-shard SQLite limits govern concurrency.
++  # the key, RAM, and request limits govern concurrency. The shard merge now
++  # batches instead of attaching every shard at once, so it no longer caps
++  # lane count here; it is still reported below for telemetry.
+   $effective = [math]::Max(
+     1,
+     [math]::Min(
+       $KeyCount,
+       [math]::Min(
+         $requested,
+-        [math]::Min(
+-          [int]$ramCap,
+-          $sqliteMergeCap
+-        )
++        [int]$ramCap
+       )
+     )
+   )
+@@ -394,10 +399,35 @@ function Get-ResourcePlan {
+     ram_lane_cap = [int]$ramCap
+     logical_cpu_telemetry = [int]$logicalCpu
+     cpu_bound_lane_cap_applied = $false
+-    sqlite_merge_cap = $sqliteMergeCap
++    sqlite_merge_cap = $MergeBatchLimit
+   }
+ }
+ 
++function Resolve-ManagedLogBase {
++  param(
++    [Parameter(Mandatory = $true)][string]$Directory,
++    [Parameter(Mandatory = $true)][string]$Stage
++  )
++  # Start-ManagedPowerShell refuses to reuse a log path, and a resumed run
++  # keeps the run folder the stopped attempt logged into. Hand this attempt
++  # its own pair beside those logs rather than overwriting the evidence of
++  # the attempt being resumed: <stage>.stdout.log, then
++  # <stage>.resume-1.stdout.log, <stage>.resume-2.stdout.log, and so on.
++  $base = Join-Path $Directory $Stage
++  if (-not (Test-Path -LiteralPath "$base.stdout.log") -and
++      -not (Test-Path -LiteralPath "$base.stderr.log")) {
++    return $base
++  }
++  $attempt = 1
++  while (
++    (Test-Path -LiteralPath "$base.resume-$attempt.stdout.log") -or
++    (Test-Path -LiteralPath "$base.resume-$attempt.stderr.log")
++  ) {
++    $attempt++
++  }
++  return "$base.resume-$attempt"
++}
++
+ function Start-ManagedPowerShell {
+   param(
+     [Parameter(Mandatory = $true)][string]$Command,
+@@ -450,9 +480,9 @@ function Start-ManagedPowerShell {
+   return $process
+ }
+ 
+-if (-not $OutputDirectory) {
+-  $OutputDirectory = Join-Path $workspaceRoot 'reports'
+-}
++Import-Module (Join-Path $toolsRoot 'report_directory.psm1') -Force
++$OutputDirectory = Resolve-MentatReportDirectory -ProjectRoot $projectRoot -OutputDirectory $OutputDirectory
++$env:MENTAT_REPORT_DIRECTORY = $OutputDirectory
+ if (-not $RawDataDirectory) {
+   $RawDataDirectory = Join-Path $workspaceRoot 'outputs\raw-contributions'
+ }
+@@ -594,7 +624,8 @@ $resourcePlan = Get-ResourcePlan `
+   -KeyCount $keyCount `
+   -RequestedParallel $MaxParallel `
+   -BudgetPercent $RamBudgetPercent `
+-  -LaneGB $canonicalRamPerApiLaneGB
++  -LaneGB $canonicalRamPerApiLaneGB `
++  -MergeBatchLimit $MergeBatchLimit
+ $resourcePlan.fanout_memory_per_lane_mb = $canonicalFanoutMemoryPerLaneMB
+ $resourcePlan.ram_per_generator_gb = $RamPerGeneratorGB
+ $resourcePlan.generator_workers = $MaxGeneratorWorkers
+@@ -602,6 +633,7 @@ $resourcePlan.generator_workers = $MaxGeneratorWorkers
+ $plan = [ordered]@{
+   industries = $cleanIndustries
+   cycles = $Cycles
++  resume_run_id = $ResumeRunId
+   strategy = (
+     'all safe API lanes collect one industry; completed-industry workbook ' +
+     'generators overlap the next collection'
+@@ -633,8 +665,20 @@ if ($PlanOnly) {
+ [IO.Directory]::CreateDirectory($OutputDirectory) | Out-Null
+ [IO.Directory]::CreateDirectory($RawDataDirectory) | Out-Null
+ [IO.Directory]::CreateDirectory($RunRoot) | Out-Null
+-$runId = '{0}-{1}' -f (Get-Date -Format 'yyyyMMddTHHmmss'), $PID
+-$runDirectory = Join-Path $RunRoot $runId
++$resumingRun = -not [string]::IsNullOrWhiteSpace($ResumeRunId)
++if ($resumingRun) {
++  # The run id is kept: the saved industry databases hold the verified work of
++  # the attempt that stopped, and the fanout manifests beside them are what a
++  # fanout resume reloads its lane snapshots from.
++  $runId = $ResumeRunId
++  $runDirectory = Join-Path $RunRoot $runId
++  if (-not (Test-Path -LiteralPath $runDirectory -PathType Container)) {
++    throw "ResumeRunId names no run folder under RunRoot: $runDirectory"
++  }
++} else {
++  $runId = '{0}-{1}' -f (Get-Date -Format 'yyyyMMddTHHmmss'), $PID
++  $runDirectory = Join-Path $RunRoot $runId
++}
+ $logDirectory = Join-Path $runDirectory 'logs'
+ $industryRoot = Join-Path $runDirectory 'industries'
+ foreach ($directory in @($runDirectory, $logDirectory, $industryRoot)) {
+@@ -647,6 +691,17 @@ $summaryPath = Join-Path $runDirectory 'summary.json'
+ $phaseTimingsPath = Join-Path $runDirectory 'phase-timings.json'
+ $orchestratorLog = Join-Path $logDirectory 'orchestrator.log'
+ $startedAt = [DateTimeOffset]::Now
++if ($resumingRun -and (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
++  try {
++    $priorManifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
++    if ($null -ne $priorManifest.PSObject.Properties['started_at']) {
++      $startedAt = [DateTimeOffset]::Parse([string]$priorManifest.started_at)
++    }
++  } catch {
++    # A manifest this process cannot read is no reason to refuse the resume.
++    # The run keeps its own start time and says so in the rewritten manifest.
++  }
++}
+ $wallWatch = [Diagnostics.Stopwatch]::StartNew()
+ $env:R_LIBS_USER = $RLibraryPath
+ try {
+@@ -713,6 +768,8 @@ for ($index = 0; $index -lt $cleanIndustries.Count; $index++) {
+ Write-AtomicJson $manifestPath ([ordered]@{
+   run_id = $runId
+   started_at = $startedAt.ToString('o')
++  resumed_run = $resumingRun
++  resumed_at = $(if ($resumingRun) { [DateTimeOffset]::Now.ToString('o') } else { $null })
+   launcher_pid = $PID
+   plan = $plan
+   run_directory = $runDirectory
+@@ -905,7 +962,8 @@ function Write-RunStatus {
+   } else { $null }
+   $collectionEta = $null
+   if ($null -ne $FanoutState -and
+-      $null -ne $FanoutState.PSObject.Properties['estimated_remaining_seconds']) {
++      $null -ne $FanoutState.PSObject.Properties['estimated_remaining_seconds'] -and
++      $null -ne $FanoutState.estimated_remaining_seconds) {
+     $collectionEta = [double]$FanoutState.estimated_remaining_seconds
+   }
+   if ($null -ne $averageCollection) {
+@@ -926,13 +984,15 @@ function Write-RunStatus {
+   ).Count
+   $averageGenerator = if ($generatorDurations.Count) {
+     ($generatorDurations | Measure-Object -Average).Average
+-  } else { 180.0 }
+-  $generatorEta = if ($generatorPending) {
++  } else { $null }
++  $generatorEta = if (($generatorPending -or $remainingCollections) -and $null -ne $averageGenerator) {
+     $averageGenerator * [math]::Ceiling(
+-      $generatorPending / [double]$MaxGeneratorWorkers
++      ($generatorPending + $remainingCollections) / [double]$MaxGeneratorWorkers
+     )
+-  } else { 0.0 }
+-  $overallEta = if ($null -ne $collectionEta) {
++  } elseif ($generatorPending -or $remainingCollections) { $null } else { 0.0 }
++  $overallEta = if ($null -eq $generatorEta -or ($remainingCollections -and $null -eq $collectionEta)) {
++    $null
++  } elseif ($null -ne $collectionEta) {
+     [math]::Max($collectionEta, $generatorEta)
+   } elseif ($generatorPending) {
+     $generatorEta
+@@ -951,7 +1011,7 @@ function Write-RunStatus {
+     collection_eta_seconds = if ($null -ne $collectionEta) {
+       [math]::Round($collectionEta, 3)
+     } else { $null }
+-    generator_eta_seconds = [math]::Round($generatorEta, 3)
++    generator_eta_seconds = if ($null -ne $generatorEta) { [math]::Round($generatorEta, 3) } else { $null }
+     resources = $resourcePlan
+     fanout = $FanoutState
+     industries = $industryStates
+@@ -1001,8 +1061,9 @@ function Start-GeneratorJob {
+   param([Parameter(Mandatory = $true)]$Job)
+   $jobRoot = Join-Path $industryRoot $Job.slug
+   $prefix = 'generator-{0}-attempt-{1}' -f $Job.lane, $Job.attempt
+-  $Job.stdout = Join-Path $jobRoot "$prefix.stdout.log"
+-  $Job.stderr = Join-Path $jobRoot "$prefix.stderr.log"
++  $jobLogBase = Resolve-ManagedLogBase $jobRoot $prefix
++  $Job.stdout = "$jobLogBase.stdout.log"
++  $Job.stderr = "$jobLogBase.stderr.log"
+   $parameters = [ordered]@{
+     Industry = $Job.industry
+     DatabasePath = $Job.database
+@@ -1243,11 +1304,17 @@ function Wait-ManagedProcess {
+       )
+       $lastHeartbeat = [DateTimeOffset]::Now
+     }
+-    Start-Sleep -Seconds 2
++    # Keep the status/heartbeat cadence, but release the next stage as soon as
++    # this child exits instead of leaving completed work asleep for two seconds.
++    [void]$Process.WaitForExit(2000)
+   }
+ }
+ 
+-Write-RunEvent 'run_started' '' "run_id=$runId"
++if ($resumingRun) {
++  Write-RunEvent 'run_resumed' '' "run_id=$runId"
++} else {
++  Write-RunEvent 'run_started' '' "run_id=$runId"
++}
+ Write-RunLog 'MENTAT RESILIENT INDUSTRY RUN'
+ Write-RunLog "Run ID: $runId"
+ Write-RunLog "Industries: $($cleanIndustries -join ', ')"
+@@ -1256,18 +1323,19 @@ Write-RunLog (
+   "RAM budget: $RamBudgetPercent%; recovery lanes: $RecoveryWorkers"
+ )
+ Write-RunLog "Run folder: $runDirectory"
++if ($resumingRun) {
++  Write-RunLog (
++    "Resuming run ${runId}: saved industry databases and lane state are " +
++    'reused; logs and events are appended.'
++  )
++}
+ Write-RunStatus 'starting'
+ 
+ foreach ($state in $industryStates) {
+   $state.started_at = [DateTimeOffset]::Now.ToString('o')
+   $state.stage = 'initializing'
+   $state.status = 'running'
+-  Write-RunEvent 'industry_initializing' $state.industry
+-  Write-RunLog "Initializing fresh database: $($state.industry)"
+-  Write-RunStatus 'initializing' $state.industry
+   $industryRootPath = Join-Path $industryRoot $state.slug
+-  $initStdout = Join-Path $industryRootPath 'initialize.stdout.log'
+-  $initStderr = Join-Path $industryRootPath 'initialize.stderr.log'
+   $cycleCsv = ($Cycles -split '\|') |
+     ForEach-Object {
+       switch ($_) {
+@@ -1277,57 +1345,81 @@ foreach ($state in $industryStates) {
+         default { $_ }
+       }
+     }
+-  $initCommand = (
+-    '& ' + (ConvertTo-PowerShellLiteral $RScriptPath) + ' ' +
+-    (ConvertTo-PowerShellLiteral $mentatEntry) + ' ' +
+-    (ConvertTo-PowerShellLiteral "--industry=$($state.industry)") + ' ' +
+-    (ConvertTo-PowerShellLiteral "--cycles=$($cycleCsv -join ',')") + ' ' +
+-    (ConvertTo-PowerShellLiteral "--data-root=$($state.data_root)") + ' ' +
+-    (ConvertTo-PowerShellLiteral '--skip-scrape') + ' ' +
+-    (ConvertTo-PowerShellLiteral '--defer-report-files') +
+-    '; exit $LASTEXITCODE'
++  # A fanout resume reloads lane databases whose fingerprint must still
++  # match the source database its manifest recorded. Re-initializing would
++  # write a new database and make every saved lane snapshot unusable.
++  $resumeIndustry = (
++    $resumingRun -and
++    (Test-Path -LiteralPath $state.database -PathType Leaf) -and
++    (Test-Path -LiteralPath (Join-Path $state.fanout_root 'manifest.json') -PathType Leaf)
+   )
+-  $initWatch = [Diagnostics.Stopwatch]::StartNew()
+-  $process = Start-ManagedPowerShell `
+-    -Command $initCommand `
+-    -StdoutPath $initStdout `
+-    -StderrPath $initStderr
+-  $exitCode = Wait-ManagedProcess $process 'initializing' $state
+-  $exitCodeDescription = Format-ManagedExitCode $exitCode
+-  $initWatch.Stop()
+-  Write-RInvocationReceipt `
+-    -Path (Join-Path $industryRootPath 'initialize.invocation.json') `
+-    -Industry $state.industry `
+-    -Unit 'initialize' `
+-    -ExitCode $exitCode `
+-    -ElapsedSeconds $initWatch.Elapsed.TotalSeconds `
+-    -LogPaths @($initStdout, $initStderr)
+-  if ($exitCode -ne 0 -or
+-      -not (Test-Path -LiteralPath $state.database -PathType Leaf)) {
+-    $state.stage = 'failed'
+-    $state.status = 'failed'
+-    $state.finished_at = [DateTimeOffset]::Now.ToString('o')
+-    $state.detail = (
+-      "Initialization failed: exit=$exitCodeDescription; stderr=$initStderr"
++  if ($resumeIndustry) {
++    Write-RunEvent 'industry_resuming' $state.industry
++    Write-RunLog "Resuming $($state.industry): saved lane state found"
++    Write-RunStatus 'initializing' $state.industry
++  } else {
++    Write-RunEvent 'industry_initializing' $state.industry
++    Write-RunLog "Initializing fresh database: $($state.industry)"
++    Write-RunStatus 'initializing' $state.industry
++    $initLogBase = Resolve-ManagedLogBase $industryRootPath 'initialize'
++    $initStdout = "$initLogBase.stdout.log"
++    $initStderr = "$initLogBase.stderr.log"
++    $initCommand = (
++      '& ' + (ConvertTo-PowerShellLiteral $RScriptPath) + ' ' +
++      (ConvertTo-PowerShellLiteral $mentatEntry) + ' ' +
++      (ConvertTo-PowerShellLiteral "--industry=$($state.industry)") + ' ' +
++      (ConvertTo-PowerShellLiteral "--cycles=$($cycleCsv -join ',')") + ' ' +
++      (ConvertTo-PowerShellLiteral "--data-root=$($state.data_root)") + ' ' +
++      (ConvertTo-PowerShellLiteral '--skip-scrape') + ' ' +
++      (ConvertTo-PowerShellLiteral '--defer-report-files') +
++      '; exit $LASTEXITCODE'
+     )
+-    Write-RunEvent 'industry_failed' $state.industry $state.detail
+-    Write-RunLog $state.detail
+-    continue
++    $initWatch = [Diagnostics.Stopwatch]::StartNew()
++    $process = Start-ManagedPowerShell `
++      -Command $initCommand `
++      -StdoutPath $initStdout `
++      -StderrPath $initStderr
++    $exitCode = Wait-ManagedProcess $process 'initializing' $state
++    $exitCodeDescription = Format-ManagedExitCode $exitCode
++    $initWatch.Stop()
++    Write-RInvocationReceipt `
++      -Path (Join-Path $industryRootPath 'initialize.invocation.json') `
++      -Industry $state.industry `
++      -Unit 'initialize' `
++      -ExitCode $exitCode `
++      -ElapsedSeconds $initWatch.Elapsed.TotalSeconds `
++      -LogPaths @($initStdout, $initStderr)
++    if ($exitCode -ne 0 -or
++        -not (Test-Path -LiteralPath $state.database -PathType Leaf)) {
++      $state.stage = 'failed'
++      $state.status = 'failed'
++      $state.finished_at = [DateTimeOffset]::Now.ToString('o')
++      $state.detail = (
++        "Initialization failed: exit=$exitCodeDescription; stderr=$initStderr"
++      )
++      Write-RunEvent 'industry_failed' $state.industry $state.detail
++      Write-RunLog $state.detail
++      continue
++    }
+   }
+ 
+   $state.stage = 'collecting'
+   $collectionWatch = [Diagnostics.Stopwatch]::StartNew()
+   Write-RunEvent 'fanout_started' $state.industry
+   Write-RunLog "API company-cycle fanout started: $($state.industry)"
+-  $fanoutStdout = Join-Path $industryRootPath 'fanout.stdout.log'
+-  $fanoutStderr = Join-Path $industryRootPath 'fanout.stderr.log'
++  $fanoutLogBase = Resolve-ManagedLogBase $industryRootPath 'fanout'
++  $fanoutStdout = "$fanoutLogBase.stdout.log"
++  $fanoutStderr = "$fanoutLogBase.stderr.log"
+   $liveFanoutPlan = Get-ResourcePlan `
+     -KeyCount $keyCount `
+     -RequestedParallel $MaxParallel `
+     -BudgetPercent $RamBudgetPercent `
+-    -LaneGB $canonicalRamPerApiLaneGB
++    -LaneGB $canonicalRamPerApiLaneGB `
++    -MergeBatchLimit $MergeBatchLimit
+   Write-RunLog (
+-    "Live fanout lanes: $($liveFanoutPlan.effective_api_lanes)/$keyCount; " +
++    "Live fanout starting workers: " +
++    "$($liveFanoutPlan.effective_api_lanes)/$keyCount; " +
++    "lane ceiling: $(if ($MaxParallel) { $MaxParallel } else { 'auto' }); " +
+     "memory_per_lane_mb=$canonicalFanoutMemoryPerLaneMB"
+   )
+   $fanoutParameters = [ordered]@{
+@@ -1336,10 +1428,14 @@ foreach ($state in $industryStates) {
+     Cycles = $Cycles
+     RunDirectory = $state.fanout_root
+     OutputReceiptPath = $state.fanout_receipt
+-    # Recompute the live lane cap as prior-industry generators overlap.
+-    MaxParallel = $liveFanoutPlan.effective_api_lanes
++    # Lane ceiling stays at the operator's request (0 = structural auto max);
++    # the live-recomputed RAM/key cap now only sets the starting worker count.
++    MaxParallel = $MaxParallel
++    InitialWorkers = $liveFanoutPlan.effective_api_lanes
+     RecoveryWorkers = $RecoveryWorkers
+     MemoryPerLaneMB = $canonicalFanoutMemoryPerLaneMB
++    MergeBatchLimit = $MergeBatchLimit
++    Resume = $resumeIndustry
+     KeysFile = $KeysFile
+     PythonPath = $PythonPath
+     RScriptPath = $RScriptPath
+@@ -1408,8 +1504,9 @@ foreach ($state in $industryStates) {
+   $state.stage = 'finalizing_database'
+   Write-RunEvent 'database_finalizing' $state.industry
+   Write-RunLog "Retagging merged database: $($state.industry)"
+-  $retagStdout = Join-Path $industryRootPath 'retag.stdout.log'
+-  $retagStderr = Join-Path $industryRootPath 'retag.stderr.log'
++  $retagLogBase = Resolve-ManagedLogBase $industryRootPath 'retag'
++  $retagStdout = "$retagLogBase.stdout.log"
++  $retagStderr = "$retagLogBase.stderr.log"
+   $retagCommand = (
+     '& ' + (ConvertTo-PowerShellLiteral $RScriptPath) + ' ' +
+     (ConvertTo-PowerShellLiteral $mentatEntry) + ' ' +
+@@ -1451,8 +1548,9 @@ foreach ($state in $industryStates) {
+   $coverageWatch = [Diagnostics.Stopwatch]::StartNew()
+   Write-RunEvent 'coverage_gate_started' $state.industry
+   Write-RunLog "Coverage gate started: $($state.industry)"
+-  $coverageStdout = Join-Path $industryRootPath 'coverage.stdout.log'
+-  $coverageStderr = Join-Path $industryRootPath 'coverage.stderr.log'
++  $coverageLogBase = Resolve-ManagedLogBase $industryRootPath 'coverage'
++  $coverageStdout = "$coverageLogBase.stdout.log"
++  $coverageStderr = "$coverageLogBase.stderr.log"
+   $coverageCommand = (
+     '& ' + (ConvertTo-PowerShellLiteral $PythonPath) + ' ' +
+     (ConvertTo-PowerShellLiteral $coverageTool) + ' ' +
+@@ -1492,8 +1590,9 @@ foreach ($state in $industryStates) {
+   $rawDataWatch = [Diagnostics.Stopwatch]::StartNew()
+   Write-RunEvent 'raw_data_export_started' $state.industry
+   Write-RunLog "Raw-data warehouse export started: $($state.industry)"
+-  $rawDataStdout = Join-Path $industryRootPath 'raw-data.stdout.log'
+-  $rawDataStderr = Join-Path $industryRootPath 'raw-data.stderr.log'
++  $rawDataLogBase = Resolve-ManagedLogBase $industryRootPath 'raw-data'
++  $rawDataStdout = "$rawDataLogBase.stdout.log"
++  $rawDataStderr = "$rawDataLogBase.stderr.log"
+   $rawDataCommand = (
+     '& ' + (ConvertTo-PowerShellLiteral $PythonPath) + ' ' +
+     (ConvertTo-PowerShellLiteral $rawExportTool) + ' ' +
+@@ -1691,7 +1790,7 @@ foreach ($timing in $phaseTimingIndustries) {
+   )
+ }
+ $finalStatus = if ($failures.Count) { 'failed' } else { 'succeeded' }
+-Write-RunStatus 'completed'
++Write-RunStatus $(if ($failures.Count) { 'failed' } else { 'completed' })
+ Write-RunEvent 'run_completed' '' (
+   "status=$finalStatus; " +
+   "seconds=$([math]::Round($wallWatch.Elapsed.TotalSeconds, 3))"

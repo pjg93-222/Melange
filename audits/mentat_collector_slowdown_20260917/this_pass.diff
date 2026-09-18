@@ -1,0 +1,432 @@
+--- a/mentat/tools/parallel/Start-MentatResilientIndustryReports.ps1 (session baseline)
++++ b/mentat/tools/parallel/Start-MentatResilientIndustryReports.ps1 (after this pass)
+@@ -403,6 +403,31 @@
+   }
+ }
+ 
++function Resolve-ManagedLogBase {
++  param(
++    [Parameter(Mandatory = $true)][string]$Directory,
++    [Parameter(Mandatory = $true)][string]$Stage
++  )
++  # Start-ManagedPowerShell refuses to reuse a log path, and a resumed run
++  # keeps the run folder the stopped attempt logged into. Hand this attempt
++  # its own pair beside those logs rather than overwriting the evidence of
++  # the attempt being resumed: <stage>.stdout.log, then
++  # <stage>.resume-1.stdout.log, <stage>.resume-2.stdout.log, and so on.
++  $base = Join-Path $Directory $Stage
++  if (-not (Test-Path -LiteralPath "$base.stdout.log") -and
++      -not (Test-Path -LiteralPath "$base.stderr.log")) {
++    return $base
++  }
++  $attempt = 1
++  while (
++    (Test-Path -LiteralPath "$base.resume-$attempt.stdout.log") -or
++    (Test-Path -LiteralPath "$base.resume-$attempt.stderr.log")
++  ) {
++    $attempt++
++  }
++  return "$base.resume-$attempt"
++}
++
+ function Start-ManagedPowerShell {
+   param(
+     [Parameter(Mandatory = $true)][string]$Command,
+@@ -1036,8 +1061,9 @@
+   param([Parameter(Mandatory = $true)]$Job)
+   $jobRoot = Join-Path $industryRoot $Job.slug
+   $prefix = 'generator-{0}-attempt-{1}' -f $Job.lane, $Job.attempt
+-  $Job.stdout = Join-Path $jobRoot "$prefix.stdout.log"
+-  $Job.stderr = Join-Path $jobRoot "$prefix.stderr.log"
++  $jobLogBase = Resolve-ManagedLogBase $jobRoot $prefix
++  $Job.stdout = "$jobLogBase.stdout.log"
++  $Job.stderr = "$jobLogBase.stderr.log"
+   $parameters = [ordered]@{
+     Industry = $Job.industry
+     DatabasePath = $Job.database
+@@ -1335,8 +1361,9 @@
+     Write-RunEvent 'industry_initializing' $state.industry
+     Write-RunLog "Initializing fresh database: $($state.industry)"
+     Write-RunStatus 'initializing' $state.industry
+-    $initStdout = Join-Path $industryRootPath 'initialize.stdout.log'
+-    $initStderr = Join-Path $industryRootPath 'initialize.stderr.log'
++    $initLogBase = Resolve-ManagedLogBase $industryRootPath 'initialize'
++    $initStdout = "$initLogBase.stdout.log"
++    $initStderr = "$initLogBase.stderr.log"
+     $initCommand = (
+       '& ' + (ConvertTo-PowerShellLiteral $RScriptPath) + ' ' +
+       (ConvertTo-PowerShellLiteral $mentatEntry) + ' ' +
+@@ -1380,8 +1407,9 @@
+   $collectionWatch = [Diagnostics.Stopwatch]::StartNew()
+   Write-RunEvent 'fanout_started' $state.industry
+   Write-RunLog "API company-cycle fanout started: $($state.industry)"
+-  $fanoutStdout = Join-Path $industryRootPath 'fanout.stdout.log'
+-  $fanoutStderr = Join-Path $industryRootPath 'fanout.stderr.log'
++  $fanoutLogBase = Resolve-ManagedLogBase $industryRootPath 'fanout'
++  $fanoutStdout = "$fanoutLogBase.stdout.log"
++  $fanoutStderr = "$fanoutLogBase.stderr.log"
+   $liveFanoutPlan = Get-ResourcePlan `
+     -KeyCount $keyCount `
+     -RequestedParallel $MaxParallel `
+@@ -1476,8 +1504,9 @@
+   $state.stage = 'finalizing_database'
+   Write-RunEvent 'database_finalizing' $state.industry
+   Write-RunLog "Retagging merged database: $($state.industry)"
+-  $retagStdout = Join-Path $industryRootPath 'retag.stdout.log'
+-  $retagStderr = Join-Path $industryRootPath 'retag.stderr.log'
++  $retagLogBase = Resolve-ManagedLogBase $industryRootPath 'retag'
++  $retagStdout = "$retagLogBase.stdout.log"
++  $retagStderr = "$retagLogBase.stderr.log"
+   $retagCommand = (
+     '& ' + (ConvertTo-PowerShellLiteral $RScriptPath) + ' ' +
+     (ConvertTo-PowerShellLiteral $mentatEntry) + ' ' +
+@@ -1519,8 +1548,9 @@
+   $coverageWatch = [Diagnostics.Stopwatch]::StartNew()
+   Write-RunEvent 'coverage_gate_started' $state.industry
+   Write-RunLog "Coverage gate started: $($state.industry)"
+-  $coverageStdout = Join-Path $industryRootPath 'coverage.stdout.log'
+-  $coverageStderr = Join-Path $industryRootPath 'coverage.stderr.log'
++  $coverageLogBase = Resolve-ManagedLogBase $industryRootPath 'coverage'
++  $coverageStdout = "$coverageLogBase.stdout.log"
++  $coverageStderr = "$coverageLogBase.stderr.log"
+   $coverageCommand = (
+     '& ' + (ConvertTo-PowerShellLiteral $PythonPath) + ' ' +
+     (ConvertTo-PowerShellLiteral $coverageTool) + ' ' +
+@@ -1560,8 +1590,9 @@
+   $rawDataWatch = [Diagnostics.Stopwatch]::StartNew()
+   Write-RunEvent 'raw_data_export_started' $state.industry
+   Write-RunLog "Raw-data warehouse export started: $($state.industry)"
+-  $rawDataStdout = Join-Path $industryRootPath 'raw-data.stdout.log'
+-  $rawDataStderr = Join-Path $industryRootPath 'raw-data.stderr.log'
++  $rawDataLogBase = Resolve-ManagedLogBase $industryRootPath 'raw-data'
++  $rawDataStdout = "$rawDataLogBase.stdout.log"
++  $rawDataStderr = "$rawDataLogBase.stderr.log"
+   $rawDataCommand = (
+     '& ' + (ConvertTo-PowerShellLiteral $PythonPath) + ' ' +
+     (ConvertTo-PowerShellLiteral $rawExportTool) + ' ' +
+
+--- a/mentat/tests/test_collection_console.py (session baseline)
++++ b/mentat/tests/test_collection_console.py (after this pass)
+@@ -458,6 +458,106 @@
+             with self.assertRaises(ValueError):
+                 self.console.acknowledge_quality({'id': 'test', 'warning_ids': ['hard-fail']})
+ 
++    def resumable_run(self, cycles=(2024,)):
++        """A saved roster whose most recent run stopped with lane state on disk."""
++        uploaded = self.upload()
++        directory = self.root / uploaded['id']
++        run_id = '20260917T101500-4242'
++        run = directory / 'runs' / run_id
++        fanout = run / 'industries' / 'test' / 'fanout'
++        fanout.mkdir(parents=True)
++        app.atomic_json(run / 'manifest.json', {'run_id': run_id})
++        app.atomic_json(run / 'status.json', {'run_id': run_id, 'stage': 'collecting'})
++        manifest = app.read_json(directory / 'upload.json')
++        manifest.update(state='stopped', cycles=list(cycles), stop_requested=True,
++                        stop_mode='force', exit_code=3, finished_at=1.0, pid=4242)
++        app.atomic_json(directory / 'upload.json', manifest)
++        return uploaded['id'], directory, run, fanout
++
++    def test_resume_refuses_wrong_state_missing_lane_state_or_active_collection(self):
++        identifier, directory, run, fanout = self.resumable_run()
++        # Resume applies to a terminal run only; nothing else is "the last run".
++        for state in ('ready', 'preparing', 'running', 'completed'):
++            manifest = app.read_json(directory / 'upload.json')
++            manifest['state'] = state
++            app.atomic_json(directory / 'upload.json', manifest)
++            with self.assertRaisesRegex(ValueError, 'Nothing to resume for this roster'):
++                self.console.resume({'id': identifier})
++        manifest = app.read_json(directory / 'upload.json')
++        manifest['state'] = 'stopped'
++        app.atomic_json(directory / 'upload.json', manifest)
++        # Stopped, but no fanout manifest: the fanout has no lane snapshots to reload.
++        with self.assertRaisesRegex(ValueError, 'Nothing to resume for this roster'):
++            self.console.resume({'id': identifier})
++        app.atomic_json(fanout / 'manifest.json', {'run_id': run.name, 'lane_count': 1})
++        self.assertTrue(self.console.find(identifier)['state'] == 'stopped')
++        self.assertTrue(self.console.snapshot(identifier)['resumable'])
++        # Resumable, but the runtime is still owned by a live collection.
++        self.console.processes['other'] = MagicMock(**{'poll.return_value': None})
++        with self.assertRaisesRegex(ValueError, 'already running'):
++            self.console.resume({'id': identifier})
++        self.console.processes.clear()
++        with self.assertRaises(app.RunNotFound):
++            self.console.resume({'id': 'f' * 32})
++        with self.assertRaises(app.RunNotFound):
++            self.console.resume({'id': 'not-an-id'})
++        # No refused resume may leave the roster mid-launch or edit its controls.
++        self.assertEqual(app.read_json(directory / 'upload.json')['state'], 'stopped')
++        self.assertEqual(self.console.preparing, set())
++        self.assertEqual(app.read_json(directory / 'control.json'), {})
++
++    def test_resume_clears_every_stop_flag_before_relaunching_the_saved_run(self):
++        identifier, directory, run, fanout = self.resumable_run()
++        app.atomic_json(fanout / 'manifest.json', {'run_id': run.name, 'lane_count': 1})
++        stale = '2026-09-17T10:20:00+00:00'
++        app.atomic_json(directory / 'control.json', {'stop': True, 'desired_workers': 0, 'updated_at': stale})
++        app.atomic_json(run / 'control.json', {'stop': True, 'desired_workers': 6, 'updated_at': stale})
++        app.atomic_json(fanout / 'control.json', {'stop': True, 'desired_workers': 0, 'updated_at': stale})
++        (directory / 'launcher.log').write_bytes(b'stopped attempt\n')
++        self.assertEqual(self.console.resume_control_targets(identifier, run.name),
++                         [directory / 'control.json', run / 'control.json', fanout / 'control.json'])
++        self.console.rscript = sys.executable
++        commands, observed = [], {}
++
++        def record(command, **kwargs):
++            commands.append(list(command))
++            # Read the controls the relaunched orchestrator will read, at the
++            # moment it is launched: a stop flag left here stops it in seconds.
++            observed.update({str(path): app.read_json(path) for path in
++                             (directory / 'control.json', run / 'control.json', fanout / 'control.json')})
++            return MagicMock(pid=4321)
++
++        with patch.object(app, 'load_keys', return_value=['stored-key']), \
++                patch.object(app, 'r_library_path', return_value=''), \
++                patch.object(app, 'copy_fec_sources'), \
++                patch.object(app, 'process_identity', return_value='fixture'), \
++                patch.object(app.shutil, 'copytree'), patch.object(app.shutil, 'copy2'), \
++                patch.object(app.threading, 'Thread'), \
++                patch.object(app.subprocess, 'Popen', side_effect=record):
++            value = self.console.resume({'id': identifier}, background=False)
++        self.assertEqual(value, {'id': identifier, 'state': 'starting', 'resumed_from': run.name})
++        command = commands[0]
++        self.assertEqual(command[command.index('-ResumeRunId') + 1], run.name)
++        self.assertNotIn('stored-key', ' '.join(command))
++        # Appended, never truncated: the stopped attempt's launcher log survives.
++        self.assertTrue((directory / 'launcher.log').read_bytes().startswith(b'stopped attempt\n'))
++        # Cleared before the launch, and only a worker count the operator chose
++        # is carried over - the zero stop() wrote is dropped, not saved.
++        for path, workers in ((directory / 'control.json', None), (run / 'control.json', 6),
++                              (fanout / 'control.json', None)):
++            control = observed[str(path)]
++            self.assertEqual(control, app.read_json(path))
++            self.assertIs(control['stop'], False)
++            self.assertEqual(control.get('desired_workers'), workers)
++            self.assertNotEqual(control['updated_at'], stale)
++        saved = app.read_json(directory / 'upload.json')
++        self.assertEqual(saved['resumed_from'], run.name)
++        self.assertEqual(saved['resume_count'], 1)
++        self.assertEqual(saved['state'], 'starting')
++        for key in ('stop_requested', 'stop_mode', 'exit_code', 'finished_at', 'launch_error'):
++            self.assertNotIn(key, saved)
++        self.assertEqual(self.console.preparing, set())
++
+ 
+ if __name__ == "__main__":
+     unittest.main()
+
+--- a/mentat/tests/test_api_company_cycle_fanout.py (session baseline)
++++ b/mentat/tests/test_api_company_cycle_fanout.py (after this pass)
+@@ -622,6 +622,148 @@
+             receipt["merge"]["attribution_conflicts_recorded"],
+             0,
+         )
++
++    def test_resume_tolerates_fewer_keys_than_the_manifest_planned_lanes(self) -> None:
++        # Keys are quarantined, rotated or disabled between attempts. Refusing to
++        # resume on a short key list threw away every company-cycle the stopped
++        # attempt had already verified. Lanes now share the remaining keys, and
++        # the "key:" resource each lane holds keeps two of them off one key at
++        # the same time.
++        with tempfile.TemporaryDirectory(prefix="mentat-resume-keys-") as temp:
++            root = Path(temp)
++            source = root / "source.db"
++            merge_fixture.create_database(source)
++            with closing(sqlite3.connect(source)) as connection, connection:
++                connection.execute(
++                    "CREATE TABLE companies (industry TEXT NOT NULL, "
++                    "company TEXT NOT NULL, variant TEXT NOT NULL)"
++                )
++                connection.executemany(
++                    "INSERT INTO companies VALUES ('Fintech', ?, ?)",
++                    [("Alpha", "ALPHA"), ("Beta", "BETA")],
++                )
++            run_directory = root / "run"
++            receipt_path = run_directory / "receipt.json"
++            state = {"fail_beta": True}
++            guard = threading.Lock()
++            live: dict[str, int] = {}
++            shared_key_overlap: list[str] = []
++            observed_keys: list[str] = []
++            executed: list[tuple[str, int]] = []
++
++            def fake_execute(lane_run, **kwargs):
++                with guard:
++                    observed_keys.append(lane_run.key)
++                    live[lane_run.key] = live.get(lane_run.key, 0) + 1
++                    if live[lane_run.key] > 1:
++                        shared_key_overlap.append(lane_run.key)
++                try:
++                    tasks = []
++                    with closing(
++                        sqlite3.connect(lane_run.database)
++                    ) as connection, connection:
++                        for task in lane_run.tasks:
++                            broken = (
++                                state["fail_beta"] and task["company"] == "Beta"
++                            )
++                            if not broken:
++                                executed.append((task["company"], task["cycle"]))
++                                connection.execute(
++                                    "INSERT OR IGNORE INTO contributions "
++                                    "(sub_id, company, amount) VALUES (?, ?, ?)",
++                                    (
++                                        task["task_id"],
++                                        task["company"],
++                                        float(task["cycle"]),
++                                    ),
++                                )
++                            tasks.append(
++                                {
++                                    **task,
++                                    "status": "failed" if broken else "succeeded",
++                                    "wall_clock_seconds": 0.01,
++                                }
++                            )
++                finally:
++                    with guard:
++                        live[lane_run.key] -= 1
++                failed = [task for task in tasks if task["status"] != "succeeded"]
++                lane_receipt = {
++                    "status": "failed" if failed else "succeeded",
++                    "key_id": lane_run.key_id,
++                    "wall_clock_seconds": 0.01,
++                    "tasks": tasks,
++                }
++                fanout.atomic_json(lane_run.receipt, lane_receipt)
++                return {
++                    "lane": lane_run.lane,
++                    "attempt": lane_run.attempt,
++                    "exit_code": 1 if failed else 0,
++                    "wall_clock_seconds": 0.01,
++                    "receipt_path": str(lane_run.receipt),
++                    "state_path": str(lane_run.state),
++                    "log_path": str(lane_run.log),
++                    "database": str(lane_run.database),
++                    "key_id": lane_run.key_id,
++                    "receipt": lane_receipt,
++                }
++
++            arguments = [
++                "--source-database",
++                str(source),
++                "--industry",
++                "Fintech",
++                "--cycles",
++                "2022",
++                "--run-directory",
++                str(run_directory),
++                "--output-receipt",
++                str(receipt_path),
++                "--rscript-path",
++                sys.executable,
++                "--budget-database",
++                str(root / "budget.sqlite"),
++                "--max-parallel",
++                "2",
++            ]
++            planned = ["fixture-key-a", "fixture-key-b"]
++            with mock.patch.object(
++                fanout, "execute_lane", side_effect=fake_execute
++            ), mock.patch.object(
++                fanout,
++                "discover_keys",
++                side_effect=lambda keys_file, environment: list(planned),
++            ):
++                # Beta fails every rung of the ladder, so nothing is merged.
++                self.assertEqual(fanout.main(arguments), 2)
++                stopped = json.loads(
++                    receipt_path.read_text(encoding="utf-8")
++                )
++                manifest = json.loads(
++                    (run_directory / "manifest.json").read_text(encoding="utf-8")
++                )
++                # One of the two planned keys is gone before the resume.
++                planned[:] = ["fixture-key-a"]
++                state["fail_beta"] = False
++                observed_keys.clear()
++                executed.clear()
++                self.assertEqual(fanout.main([*arguments, "--resume"]), 0)
++            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
++            with closing(sqlite3.connect(source)) as connection:
++                merged_rows = connection.execute(
++                    "SELECT company FROM contributions ORDER BY company"
++                ).fetchall()
++        self.assertEqual(manifest["lane_count"], 2)
++        self.assertFalse(stopped["merged"])
++        # The resume ran on the surviving key alone and never doubled up on it.
++        self.assertEqual(set(observed_keys), {"fixture-key-a"})
++        self.assertEqual(shared_key_overlap, [])
++        # Alpha succeeded before the stop and is not collected a second time.
++        self.assertEqual(executed, [("Beta", 2022)])
++        self.assertEqual(receipt["status"], "succeeded")
++        self.assertTrue(receipt["merged"])
++        self.assertEqual(receipt["configured_key_count"], 1)
++        self.assertEqual([row[0] for row in merged_rows], ["Alpha", "Beta"])
+ 
+     def test_failure_ladder_retries_then_splits_company_cycle(self) -> None:
+         with tempfile.TemporaryDirectory(prefix="mentat-ladder-e2e-") as temp:
+
+--- a/mentat/tests/test_resilient_orchestrator.py (session baseline)
++++ b/mentat/tests/test_resilient_orchestrator.py (after this pass)
+@@ -61,6 +61,50 @@
+         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+         values = json.loads(result.stdout)
+         self.assertEqual(values, {'exit_code': 37, 'wait_ms': 2000, 'statuses': 2})
++
++    def test_resumed_attempt_gets_its_own_managed_log_pair(self) -> None:
++        # Start-ManagedPowerShell refuses to reuse a log path and a resume keeps
++        # the run folder, so every stage the stopped attempt logged would throw
++        # "Managed process log already exists" before it collected anything.
++        with tempfile.TemporaryDirectory(prefix="mentat-resume-logs-") as temporary:
++            directory = Path(temporary)
++            (directory / "fanout.stdout.log").write_text("stopped attempt")
++            (directory / "fanout.resume-1.stderr.log").write_text("first resume")
++            command = """
++$ErrorActionPreference='Stop'
++$text=Get-Content -LiteralPath '%s' -Raw
++$tokens=$null;$errors=$null
++$ast=[Management.Automation.Language.Parser]::ParseInput($text,[ref]$tokens,[ref]$errors)
++$definition=@($ast.FindAll({param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Resolve-ManagedLogBase'},$true))
++. ([scriptblock]::Create($definition[0].Extent.Text))
++$root='%s'
++[pscustomobject]@{
++  fresh=(Split-Path -Leaf (Resolve-ManagedLogBase $root 'initialize'))
++  taken=(Split-Path -Leaf (Resolve-ManagedLogBase $root 'fanout'))
++}|ConvertTo-Json -Compress
++""" % (
++                str(SCRIPT).replace("'", "''"),
++                str(directory).replace("'", "''"),
++            )
++            result = subprocess.run(
++                [
++                    str(POWERSHELL),
++                    "-NoProfile",
++                    "-NonInteractive",
++                    "-Command",
++                    command,
++                ],
++                capture_output=True,
++                text=True,
++                env=os.environ.copy(),
++                timeout=30,
++            )
++            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
++            values = json.loads(result.stdout)
++        # A stage with no prior log keeps the plain name; a stage the stopped
++        # attempt already wrote skips past every attempt already on disk, so the
++        # logs being resumed from are never truncated.
++        self.assertEqual(values, {"fresh": "initialize", "taken": "fanout.resume-2"})
+ 
+     def test_powershell_parser_accepts_script(self) -> None:
+         for script in POWERSHELL_ENTRYPOINTS:
+
+# mentat/app/server.py: unchanged in this pass
+
+# mentat/app/app.js: unchanged in this pass
+
+# mentat/app/index.html: unchanged in this pass
+
+# mentat/tools/parallel/Start-MentatApiCompanyCycleFanout.ps1: unchanged in this pass
+
+# mentat/tools/api_company_cycle_fanout.py: unchanged in this pass
