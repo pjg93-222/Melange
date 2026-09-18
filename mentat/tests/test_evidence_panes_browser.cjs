@@ -165,6 +165,26 @@ third = open(target + '/third.csv', 'w', encoding='utf-8', newline='')
 third.write('committee_id,committee_name,amount,date,two_year_transaction_period\\r\\n')
 third.write('C00000003,Third PAC,42,2026-04-01,2026\\r\\n')
 third.close()
+
+# A 106-row stress file in the pre-S6 receipts schema: 101 Alpha PAC rows whose
+# first contributor name is a hostile HTML payload, a prior-cycle row, a row
+# with no amount, a row with no date or cycle, one Beta PAC row and one row with
+# no committee at all. 104 of them select as Alpha PAC, which is what makes the
+# drawer page 100 + 4 and report two rows as needing interpretation.
+import csv
+stress = [['committee_id', 'committee_name', 'contribution_receipt_amount',
+           'contribution_receipt_date', 'cycle', 'contributor_name', 'memo_text']]
+for index in range(101):
+    stress.append(['C00000001', 'Alpha PAC', 1, '2026-01-01', 2026,
+                   '<img src=x onerror=alert(1)>' if index == 0 else 'Contributor ' + str(index),
+                   'Fictional receipt'])
+stress.append(['C00000001', 'Alpha PAC', 5, '2024-01-01', 2024, 'Prior cycle', ''])
+stress.append(['C00000001', 'Alpha PAC', '', '2026-01-01', 2026, 'Missing amount', ''])
+stress.append(['C00000001', 'Alpha PAC', 999, '', '', 'Missing date and cycle', ''])
+stress.append(['C00000002', 'Beta PAC', 50, '2026-02-01', 2026, 'Another contributor', ''])
+stress.append(['', 'Unknown PAC', 25, '2026-02-01', 2026, 'Unassigned receipt', ''])
+with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
+    csv.writer(handle, quoting=csv.QUOTE_ALL).writerows(stress)
 `;
 
 (async () => {
@@ -615,6 +635,112 @@ third.close()
     assert.ok(restoredThree.length >= 3, JSON.stringify(restoredThree));
     assert.equal(await page.isVisible('#evidence-compare'), true);
     pass(`restored ${JSON.stringify(restoredThree)} from a ${restoredThree.length}-pane permalink`);
+
+    step('re-homed from tests/test_console_browser.cjs: the row drawer pages 104 source rows, counts the ones needing interpretation, and escapes a hostile contributor name');
+    // The console smoke test drove these through the pre-S6 #evidence-csv-*
+    // panel, which commit 487589584 deleted. The propositions still ship, in
+    // the pane row drawer (app/evidence.js:488-503), so they are asserted here
+    // instead. The escaping one is load-bearing: render() writes the drawer
+    // with innerHTML (app/evidence.js:61), so escapeHtml is the only guard.
+    await page.goto(origin + '/#evidence');
+    await waitStatus(/choose a source|Nothing imported yet|PACs in file/, 90000);
+    await openDrawer('evidence-import-open');
+    await page.setInputFiles('#evidence-csv-file', path.join(fixtureDir, 'stress.csv'));
+    await waitFor(() => [...document.querySelectorAll('#evidence-source option')]
+      .some(node => /^stress[.]csv /.test(node.textContent)), null, 120000, 'the stress import to be listed');
+    const stressValue = await page.locator('#evidence-source option').evaluateAll(
+      nodes => (nodes.find(node => /^stress[.]csv /.test(node.textContent)) || {}).value);
+    assert.ok(stressValue && stressValue.startsWith('csv:'), `stress.csv source value: ${stressValue}`);
+    await page.selectOption('#evidence-source', stressValue);
+    await waitFor(() => !document.getElementById('evidence-pac').disabled, null, 60000, 'the PAC picker to fill');
+    assert.deepEqual(await page.locator('#evidence-pac option').allTextContents(),
+      ['Alpha PAC · C00000001 · Unclassified · 104 rows',
+       'Beta PAC · C00000002 · Unclassified · 1 row',
+       'Unassigned committee rows · unassigned · Unclassified · 1 row']);
+    await page.selectOption('#evidence-pac', 'C00000001');
+    await page.click('#evidence-add');
+    await waitPanes(1);
+    const stressPane = '#evidence-panes [data-pane=a]';
+    await page.click(`${stressPane} .pane-rows`);
+    await page.waitForSelector(`${stressPane} .pane-drawer tbody tr`);
+    const sourceRows = async () => (await page.locator(`${stressPane} .pane-drawer .label`)
+      .first().innerText()).trim();
+    // PAGE_SIZE is 100 (app/evidence.js:20), so 104 selected rows page 100 + 4.
+    assert.equal(await page.locator(`${stressPane} .pane-drawer tbody tr`).count(), 100);
+    assert.equal(await sourceRows(), 'Source rows · 1–100 of 104');
+    assert.match(await page.locator(`${stressPane} .pane-drawer p.muted`).first().innerText(),
+      /102 supported · 2 need interpretation/);
+    // The hostile contributor name must arrive as text and build no element.
+    assert.match(await page.locator(`${stressPane} .pane-drawer`).innerText(),
+      /<img src=x onerror=alert\(1\)>/);
+    assert.equal(await page.locator(`${stressPane} .pane-drawer img`).count(), 0,
+      'a contributor name must never become a live element');
+    await page.click(`${stressPane} .pane-next`);
+    await waitFor(() => /101/.test(document.querySelector(
+      '#evidence-panes [data-pane=a] .pane-drawer .label').textContent), null, 60000, 'the second page');
+    assert.equal(await sourceRows(), 'Source rows · 101–104 of 104');
+    assert.equal(await page.locator(`${stressPane} .pane-drawer tbody tr`).count(), 4);
+    // has_more drives the buttons (app/evidence.js:505-506): the last page
+    // offers no Next, and a page past the first offers Previous.
+    assert.equal(await page.isDisabled(`${stressPane} .pane-next`), true,
+      'the last page of source rows must not offer Next');
+    assert.equal(await page.isDisabled(`${stressPane} .pane-prev`), false);
+    const lastPage = await page.locator(`${stressPane} .pane-drawer`).innerText();
+    for (const placeholder of ['Not reported', 'Date unavailable', 'Cycle unavailable']) {
+      assert.ok(lastPage.includes(placeholder),
+        `${placeholder} missing from the last page: ${lastPage.slice(0, 400)}`);
+    }
+    // A row with no committee_id at all is unassigned, and those are exactly
+    // the rows the console reports as needing interpretation.
+    await page.selectOption('#evidence-pac', 'unassigned');
+    await page.click('#evidence-add');
+    await waitPanes(2);
+    const unassignedPane = '#evidence-panes [data-pane=b]';
+    assert.equal((await page.locator(`${unassignedPane} h2`).first().innerText()).trim(),
+      'Unassigned committee rows');
+    await page.click(`${unassignedPane} .pane-rows`);
+    await page.waitForSelector(`${unassignedPane} .pane-drawer tbody tr`);
+    assert.match(await page.locator(`${unassignedPane} .pane-drawer p.muted`).first().innerText(),
+      /0 supported · 1 need interpretation/);
+    // Restricting the cycle narrows the selected rows. The cycle is pane
+    // state, and updateAdd() treats (source, committee) as pane identity
+    // (app/evidence.js:217-222), so the same PAC cannot be opened twice:
+    // close pane A and reopen it on 2026. 101 receipts plus the row with no
+    // amount carry cycle 2026; the 2024 row and the undated row do not.
+    await page.click(`${stressPane} .pane-remove`);
+    await waitPanes(1);
+    await page.selectOption('#evidence-cycle', '2026');
+    await page.selectOption('#evidence-pac', 'C00000001');
+    await page.click('#evidence-add');
+    await waitPanes(2);
+    await page.click(`${stressPane} .pane-rows`);
+    await page.waitForSelector(`${stressPane} .pane-drawer tbody tr`);
+    assert.equal(await sourceRows(), 'Source rows · 1–100 of 102');
+    pass('104 rows paged 100+4, 2 need interpretation, the hostile name escaped as text, unassigned row counted');
+
+    step('re-homed from tests/test_app_lazy_startup_browser.cjs: a saved snapshot body is read once per id, not again on reselection');
+    // The old lazy-startup test watched this through app.js, which S6
+    // (487589584) emptied of every evidence reference, so it could no longer
+    // observe it. chooseSource() guards on snapshotBodies.has(id)
+    // (app/evidence.js:288-290): the body is read the first time a snapshot is
+    // chosen and never again, however often the reader switches back to it.
+    const bodyReads = [];
+    page.on('request', request => {
+      if (/[/]api[/]evidence[?]id=/.test(request.url())) bodyReads.push(request.url());
+    });
+    const savedSnapshotValue = await page.locator('#evidence-source option').evaluateAll(
+      nodes => (nodes.find(node => node.value.startsWith('snapshot:')) || {}).value);
+    assert.ok(savedSnapshotValue, 'the fixture must publish a saved snapshot');
+    await page.selectOption('#evidence-source', savedSnapshotValue);
+    await waitStatus(/Coinbase/, 90000);
+    assert.equal(bodyReads.length, 1, `the first selection reads the body once: ${JSON.stringify(bodyReads)}`);
+    await page.selectOption('#evidence-source', stressValue);
+    await waitStatus(/stress[.]csv/, 90000);
+    await page.selectOption('#evidence-source', savedSnapshotValue);
+    await waitStatus(/Coinbase/, 90000);
+    assert.equal(bodyReads.length, 1,
+      `reselecting an already-read snapshot must not fetch it again: ${JSON.stringify(bodyReads)}`);
+    pass('snapshot body read exactly once across three source changes');
 
     step('final check: zero pageerror entries and zero off-origin requests');
     assert.deepEqual(errors, [], `page errors: ${JSON.stringify(errors)}`);

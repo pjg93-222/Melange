@@ -81,85 +81,59 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     const rosterTemplate=await page.evaluate(()=>fetch('/template.csv').then(response=>response.text()));
     assert.match(rosterTemplate,/Harborlight Credit Union/);
     assert.doesNotMatch(rosterTemplate,/Crypto|Coinbase|Example Company/);
-    // Evidence is configurable before Graph has ever loaded.
+    // Evidence is configurable before Graph has ever loaded. Since S6 the scope
+    // bar lists every import and every saved snapshot under one Source select
+    // whose values are '', 'csv:<id>' or 'snapshot:<id>' (evidence.js
+    // fillSourceSelect). This fixture publishes no imports, so the only real
+    // source is the saved snapshot the /api/evidence route serves.
     await page.locator('#tab-evidence').click();
-    assert.equal(await page.locator('#evidence-source').inputValue(),'csv');
+    await page.waitForFunction(()=>[...document.querySelector('#evidence-source').options].some(option=>option.value.startsWith('snapshot:')));
+    assert.deepEqual(await page.locator('#evidence-source option').evaluateAll(options=>options.map(option=>option.value)),
+      ['','snapshot:fixture-evidence'],'The scope bar offers the saved snapshot by its real id before Graph has loaded.');
+    assert.equal(await page.locator('#evidence-source').inputValue(),'','No source is chosen until the reader picks one.');
+    assert.match(await page.locator('#evidence-status').innerText(),/0 imported files and 1 saved snapshot/);
     // 500,000,001 bytes exceeds the 500 MB cap without a 500 MB write: a sparse
     // file (open + ftruncate) reports the right file.size for the client's
     // pre-flight while NTFS allocates nothing until written.
+    await page.locator('#evidence-import-open').click();
     const oversizeDir=fs.mkdtempSync(path.join(os.tmpdir(),'mentat-console-oversize-'));
     const oversizePath=path.join(oversizeDir,'too-large.csv');
     {const fd=fs.openSync(oversizePath,'w');fs.ftruncateSync(fd,500_000_001);fs.closeSync(fd);}
     await page.locator('#evidence-csv-file').setInputFiles(oversizePath);
-    assert.match(await page.locator('#evidence-csv-status').innerText(),/too-large\.csv \(500\.0 MB\): Choose a CSV no larger than 500 MB\./);
+    assert.match(await page.locator('#evidence-status').innerText(),/too-large\.csv \(500\.0 MB\): Choose a CSV no larger than 500 MB\./);
     fs.rmSync(oversizeDir,{recursive:true,force:true});
-    const csvQuote=value=>'"'+String(value).replaceAll('"','""')+'"';
-    const csvRows=[['committee_id','committee_name','contribution_receipt_amount','contribution_receipt_date','cycle','contributor_name','memo_text'],
-      ...Array.from({length:101},(_,i)=>['C00000001','Alpha PAC',1,'2026-01-01',2026,i===0?'<img src=x onerror=alert(1)>':'Contributor '+i,'Fictional receipt']),
-      ['C00000001','Alpha PAC',5,'2024-01-01',2024,'Prior cycle',''],
-      ['C00000001','Alpha PAC','','2026-01-01',2026,'Missing amount',''],
-      ['C00000001','Alpha PAC',999,'','','Missing date and cycle',''],
-      ['C00000002','Beta PAC',50,'2026-02-01',2026,'Another contributor',''],
-      ['','Unknown PAC',25,'2026-02-01',2026,'Unassigned receipt','']];
-    const csvFile={name:'fictional-pac-evidence.csv',mimeType:'text/csv',buffer:Buffer.from(csvRows.map(row=>row.map(csvQuote).join(',')).join('\r\n'))};
-    await page.locator('#evidence-csv-file').setInputFiles(csvFile);
-    await page.waitForFunction(()=>!document.querySelector('#evidence-csv-results').hidden&&document.querySelector('#evidence-csv-title').textContent==='Alpha PAC');
-    assert.equal(await page.locator('#evidence-csv-rows tr').count(),100);
-    assert.match(await page.locator('#evidence-csv-row-status').innerText(),/1–100 of 104/);
-    assert.match(await page.locator('#evidence-csv-totals').innerText(),/\$106\.00/);
-    assert.match(await page.locator('#evidence-csv-rows').innerText(),/<img src=x onerror=alert\(1\)>/);
-    assert.equal(await page.locator('#evidence-csv-rows img').count(),0);
-    await page.locator('#evidence-csv-next').click();
-    await page.waitForFunction(()=>document.querySelector('#evidence-csv-row-status').textContent.includes('101–104'));
-    assert.match(await page.locator('#evidence-csv-rows').innerText(),/Not reported/);
-    assert.match(await page.locator('#evidence-csv-rows').innerText(),/Date unavailable/);
-    assert.match(await page.locator('#evidence-csv-rows').innerText(),/Cycle unavailable/);
-    assert.match(await page.locator('#evidence-csv-row-status').innerText(),/2 need interpretation/);
-    await page.locator('#evidence-csv-cycle').selectOption('2026');
-    await page.waitForFunction(()=>!document.querySelector('#evidence-csv-results').hidden&&document.querySelector('#evidence-csv-totals').textContent.includes('$101.00'));
-    assert.match(await page.locator('#evidence-csv-row-status').innerText(),/1–100 of 102/);
-    await page.locator('#evidence-csv-committee').selectOption('C00000002');
-    await page.waitForFunction(()=>!document.querySelector('#evidence-csv-results').hidden&&document.querySelector('#evidence-csv-title').textContent==='Beta PAC');
-    assert.match(await page.locator('#evidence-csv-totals').innerText(),/\$50\.00/);
-    assert.equal(await page.locator('#evidence-csv-next').isDisabled(),true);
-    await page.locator('#evidence-csv-committee').selectOption('unassigned');
-    await page.waitForFunction(()=>!document.querySelector('#evidence-csv-results').hidden&&document.querySelector('#evidence-csv-title').textContent.includes('Unassigned'));
-    assert.match(await page.locator('#evidence-csv-totals').innerText(),/No supported amount totals/);
-    assert.match(await page.locator('#evidence-csv-row-status').innerText(),/1 need interpretation/);
-    await page.locator('#evidence-source').selectOption('snapshot');
-    await page.locator('#evidence-panel').waitFor();
+    await page.locator('#evidence-import-open').click();
+    // Choosing a source fills the cycle and PAC pickers from that source. Since
+    // S6 the cycle is carried into the pane rather than narrowing the PAC list:
+    // visibleCommittees() filters on #evidence-type and #evidence-find only
+    // (evidence.js:158-166), so the old "cycle 2024 leaves only First PAC"
+    // expectation no longer describes the product.
+    await page.locator('#evidence-source').selectOption('snapshot:fixture-evidence');
+    await page.waitForFunction(()=>!document.querySelector('#evidence-cycle').disabled);
     assert.equal(await page.locator('#evidence-cycle').isDisabled(),false);
+    assert.deepEqual(await page.locator('#evidence-cycle option').evaluateAll(o=>o.map(x=>x.value)),['','2026','2024']);
+    assert.deepEqual(await page.locator('#evidence-pac option').evaluateAll(o=>o.map(x=>x.value)),['C00000001','C00000002']);
     await page.locator('#evidence-cycle').selectOption('2024');
-    assert.deepEqual(await page.locator('#evidence-committee option').allTextContents(),['First PAC · C00000001']);
-    await page.reload();await page.locator('#evidence-panel').waitFor();
-    assert.equal(await page.locator('#evidence-source').inputValue(),'snapshot');
-    assert.equal(await page.locator('#evidence-cycle').inputValue(),'2024');
-    await page.locator('#evidence-cycle').selectOption('2026');
-    assert.deepEqual(await page.locator('#evidence-committee option').allTextContents(),['Second PAC · C00000002']);
-    await page.locator('#evidence-config summary').click();
+    // The snapshot drawer still seeds the collector from the chosen snapshot.
+    await page.locator('#evidence-snapshot-open').click();
     await page.locator('#evidence-use-config').click();
     assert.equal(await page.locator('#evidence-company-input').inputValue(),savedEvidence.company);
     assert.equal(await page.locator('#evidence-cycles-input').inputValue(),'2024, 2026');
-    await page.locator('#evidence-mode').selectOption('graph');
-    await page.locator('#evidence-empty').waitFor();
-    assert.equal(await page.locator('#evidence-mode').isVisible(),true);
-    await page.locator('#evidence-mode').selectOption('saved');
-    await page.locator('#evidence-panel').waitFor();
     extraSnapshot=true;await page.locator('#evidence-refresh').click();
-    await page.waitForFunction(()=>document.querySelector('#evidence-snapshot').options.length===2);
+    await page.waitForFunction(()=>[...document.querySelector('#evidence-source').options].filter(option=>option.value.startsWith('snapshot:')).length===2);
     let evidenceRequest;
     await page.route('**/api/evidence-collect',route=>{evidenceRequest=route.request().postDataJSON();return route.fulfill({json:{id:'new-evidence',state:'collecting'}});});
     await page.route('**/api/evidence-job?*',route=>route.fulfill({json:{state:'completed',message:'Snapshot ready.'}}));
     await page.locator('#evidence-company-input').fill('Another Company');
     await page.locator('#evidence-collect').click();
-    await page.waitForFunction(()=>document.querySelector('#evidence-snapshot').value==='new-evidence');
+    await page.waitForFunction(()=>document.querySelector('#evidence-source').value==='snapshot:new-evidence');
+    assert.equal(await page.locator('#evidence-source').inputValue(),'snapshot:new-evidence','Collecting selects the snapshot it just wrote.');
     assert.equal(evidenceRequest.company,'Another Company');
     assert.equal(evidenceRequest.committees,'C00000001, C00000002');
     assert.equal(await page.locator('#evidence-collect').isDisabled(),false);
     await captureScreenshot(process.env.MENTAT_EVIDENCE_SCREENSHOT);
-    await page.locator('#evidence-source').selectOption('csv');
-    await page.locator('#evidence-csv-file').setInputFiles(csvFile);
-    await page.waitForFunction(()=>!document.querySelector('#evidence-csv-results').hidden);
+    await page.locator('#evidence-source').selectOption('snapshot:fixture-evidence');
+    await page.waitForFunction(()=>!document.querySelector('#evidence-pac').disabled);
     await captureScreenshot(process.env.MENTAT_CSV_SCREENSHOT);
     await page.locator('#split-view').click();
     await page.locator('#graph-results').waitFor();
@@ -193,7 +167,7 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     await page.locator('#split-view').click();
     assert.equal(await page.locator('#view-graph').isVisible(),false);
     assert.equal(await page.locator('#view-evidence').getAttribute('role'),'tabpanel');
-    await page.locator('#evidence-source').selectOption('snapshot');
+    await page.locator('#evidence-source').selectOption('snapshot:fixture-evidence');
     await page.locator('#tab-collection').click();
     // renderRunLibrary() (app.js:217-227) sets aria-pressed only after
     // refreshRuns() -> /api/runs?include_archived=1 returns, so reading it
@@ -245,6 +219,11 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
         database_writers:1,request_pool:{queued_requests:4}}}]};
     simulatedRun=stoppedRun;
     await page.evaluate(run=>render(run),stoppedRun);
+    // The 3 s setInterval(poll) at app.js:406 refetches the mocked /api/run?*;
+    // a response that left the route while simulatedRun was still readyRun can
+    // land after render(stoppedRun) and put 'ready' back. Wait for the state to
+    // converge, then assert it -- the equality below is still the check.
+    await page.waitForFunction(()=>document.querySelector('#stage').textContent==='stopped');
     assert.equal(await page.locator('#stage').innerText(),'stopped');
     assert.match(await page.locator('#worker-metric-label').innerText(),/last checkpoint/i);
     assert.equal(await page.locator('#workers').innerText(),'8','Stopped runs preserve the worker count as a historical checkpoint.');
