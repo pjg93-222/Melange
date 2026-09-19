@@ -1,0 +1,9 @@
+﻿
+########## OLD CLASSIFIER | Credit Union | rules v 5 ##########
+OLD gate would refuse (countable & unresolved): 1 
+NEW still unresolved (but counted and flagged) : 1 
+rows the commit resolved: 0 
+rows newly unresolved   : 0 
+
+old gate verdict on this database: REFUSED -> Receipt evidence unresolved for 1 rows (examples: 4011320251128197633). Raw records are retained. Hydrate FEC metadata before publishing; no blanket exclusion is permitted. 
+DONE

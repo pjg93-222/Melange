@@ -1,0 +1,356 @@
+{
+  "alternative_rule_loss_dollars": 25528436.0,
+  "alternative_rule_loss_share": 0.004769,
+  "blocked_edge_dollars": 33047447.0,
+  "blocked_edge_share": 0.006203,
+  "built_seconds": 242.094,
+  "cache_hit": false,
+  "cache_json_bytes": 248321426,
+  "cash_rows_by_status": {
+    "current": {
+      "dollars": 5234322126.0,
+      "rows": 1395892
+    },
+    "unresolved_record": {
+      "dollars": 135000.0,
+      "rows": 3
+    },
+    "unresolved_version": {
+      "dollars": 59307155.0,
+      "rows": 765
+    }
+  },
+  "committed_rule_loss_dollars": 58575883.0,
+  "committed_rule_loss_share": 0.010943,
+  "counts": {
+    "cash_transfer_rows": 1405634,
+    "invalid_transfer_destinations": 3,
+    "latest_rows": 1404863,
+    "memo_rows": 8971,
+    "source_rows": 1926725,
+    "superseded_or_duplicate_rows": 0,
+    "unresolved_rows": 774,
+    "unresolved_version_groups": 366
+  },
+  "current_cash_edge_dollars": 5327441910.0,
+  "current_rows": 1404863,
+  "cycle": 2024,
+  "distinct_file_nums": 39213,
+  "edge_source_committees": 6780,
+  "edge_source_committees_unresolved": 44,
+  "edges": 185605,
+  "edges_positive": 181350,
+  "file_nums_needed_for_multi_file_groups": 128,
+  "files_before": {
+    "itoth.txt": 324793821
+  },
+  "filing_headers_sha256": "da097f766ede949b32b82c68ffbb9ca55c9427e85c9a28f8beb81ac59a4d8599",
+  "header_dir": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\cross-reference\\filing-headers",
+  "header_file_nums": [
+    1726043,
+    1727368,
+    1751876,
+    1753366,
+    1758506,
+    1791745,
+    1812320,
+    1818089,
+    1881052,
+    1887996,
+    1888666,
+    1903277,
+    1903675,
+    1943509,
+    1948205,
+    1955690,
+    1958173,
+    1969121,
+    1970306,
+    1978142,
+    1986089,
+    2000587,
+    2000590,
+    2003363,
+    2009096
+  ],
+  "headers_loaded": 25,
+  "itoth": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\\scratchpad\\v3_measure\\block24\\itoth.txt",
+  "itoth_bytes": 324793821,
+  "itoth_mtime": "2026-09-18T23:38:50",
+  "ledger_bytes": 597581824,
+  "ledger_path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\\scratchpad\\v3_measure\\block24\\transfer-index-v3-2024-d5b854c6941fb4d1fe03-da097f766ede.sqlite",
+  "ledger_tables": {
+    "filing_headers": 25,
+    "records": 1405637,
+    "relevant_keys": 1405232
+  },
+  "measured_at": "2026-09-18T23:44:01-0400",
+  "module": {
+    "mtime": "2026-09-10T22:19:35",
+    "path": "C:\\Users\\pgoff\\Mentat\\mentat\\tools\\fec_transfer_graph.py",
+    "version": 3
+  },
+  "peak_scratch_bytes_beside_link": 845903250,
+  "peak_scratch_detail": {
+    "transfer-index-v3-2024-d5b854c6941fb4d1fe03-da097f766ede.json": 248321426,
+    "transfer-index-v3-2024-d5b854c6941fb4d1fe03-da097f766ede.sqlite": 597581824
+  },
+  "peak_working_set_bytes": null,
+  "source_sha256": "d5b854c6941fb4d1fe03bc2104137fddfd52398167dc6619275c349a290f9d53",
+  "status_rows": {
+    "current": 1404863,
+    "unresolved_record": 3,
+    "unresolved_version": 771
+  },
+  "superseded_or_duplicate_rows": 0,
+  "top_blocked_sources": [
+    {
+      "committee_id": "C00770180",
+      "edges": 32,
+      "outgoing_current_dollars": 9359185.0,
+      "reason": {
+        "unresolved_version": 134
+      },
+      "records": 174
+    },
+    {
+      "committee_id": "C00348540",
+      "edges": 6,
+      "outgoing_current_dollars": 6528740.0,
+      "reason": {
+        "unresolved_version": 8
+      },
+      "records": 15
+    },
+    {
+      "committee_id": "C00692343",
+      "edges": 2,
+      "outgoing_current_dollars": 3567585.0,
+      "reason": {
+        "unresolved_version": 24
+      },
+      "records": 28
+    },
+    {
+      "committee_id": "C00779223",
+      "edges": 3,
+      "outgoing_current_dollars": 3349541.0,
+      "reason": {
+        "unresolved_version": 34
+      },
+      "records": 36
+    },
+    {
+      "committee_id": "C00106146",
+      "edges": 504,
+      "outgoing_current_dollars": 2831724.0,
+      "reason": {
+        "unresolved_record": 3
+      },
+      "records": 1250
+    },
+    {
+      "committee_id": "C00573246",
+      "edges": 3,
+      "outgoing_current_dollars": 701500.0,
+      "reason": {
+        "unresolved_version": 18
+      },
+      "records": 25
+    },
+    {
+      "committee_id": "C00692327",
+      "edges": 30,
+      "outgoing_current_dollars": 625000.0,
+      "reason": {
+        "unresolved_version": 8
+      },
+      "records": 52
+    },
+    {
+      "committee_id": "C00751784",
+      "edges": 3,
+      "outgoing_current_dollars": 574263.0,
+      "reason": {
+        "unresolved_version": 22
+      },
+      "records": 32
+    },
+    {
+      "committee_id": "C00756080",
+      "edges": 3,
+      "outgoing_current_dollars": 494015.0,
+      "reason": {
+        "unresolved_version": 94
+      },
+      "records": 31
+    },
+    {
+      "committee_id": "C00140855",
+      "edges": 65,
+      "outgoing_current_dollars": 398300.0,
+      "reason": {
+        "unresolved_version": 2
+      },
+      "records": 89
+    },
+    {
+      "committee_id": "C00483677",
+      "edges": 100,
+      "outgoing_current_dollars": 332000.0,
+      "reason": {
+        "unresolved_version": 8
+      },
+      "records": 177
+    },
+    {
+      "committee_id": "C00834994",
+      "edges": 2,
+      "outgoing_current_dollars": 297582.0,
+      "reason": {
+        "unresolved_version": 8
+      },
+      "records": 10
+    },
+    {
+      "committee_id": "C00809970",
+      "edges": 34,
+      "outgoing_current_dollars": 291000.0,
+      "reason": {
+        "unresolved_version": 4
+      },
+      "records": 60
+    },
+    {
+      "committee_id": "C00755173",
+      "edges": 49,
+      "outgoing_current_dollars": 265900.0,
+      "reason": {
+        "unresolved_version": 12
+      },
+      "records": 78
+    },
+    {
+      "committee_id": "C00839738",
+      "edges": 3,
+      "outgoing_current_dollars": 262443.0,
+      "reason": {
+        "unresolved_version": 4
+      },
+      "records": 10
+    },
+    {
+      "committee_id": "C00813188",
+      "edges": 2,
+      "outgoing_current_dollars": 240530.0,
+      "reason": {
+        "unresolved_version": 14
+      },
+      "records": 17
+    },
+    {
+      "committee_id": "C00711549",
+      "edges": 12,
+      "outgoing_current_dollars": 219432.0,
+      "reason": {
+        "unresolved_version": 6
+      },
+      "records": 18
+    },
+    {
+      "committee_id": "C00387464",
+      "edges": 13,
+      "outgoing_current_dollars": 207466.0,
+      "reason": {
+        "unresolved_version": 2
+      },
+      "records": 19
+    },
+    {
+      "committee_id": "C00570861",
+      "edges": 16,
+      "outgoing_current_dollars": 200000.0,
+      "reason": {
+        "unresolved_version": 10
+      },
+      "records": 24
+    },
+    {
+      "committee_id": "C00252684",
+      "edges": 67,
+      "outgoing_current_dollars": 198500.0,
+      "reason": {
+        "unresolved_version": 2
+      },
+      "records": 99
+    },
+    {
+      "committee_id": "C00249532",
+      "edges": 60,
+      "outgoing_current_dollars": 183000.0,
+      "reason": {
+        "unresolved_version": 2
+      },
+      "records": 107
+    },
+    {
+      "committee_id": "C00762930",
+      "edges": 59,
+      "outgoing_current_dollars": 172082.0,
+      "reason": {
+        "unresolved_version": 4
+      },
+      "records": 82
+    },
+    {
+      "committee_id": "C00762328",
+      "edges": 57,
+      "outgoing_current_dollars": 154310.0,
+      "reason": {
+        "unresolved_version": 12
+      },
+      "records": 84
+    },
+    {
+      "committee_id": "C00692715",
+      "edges": 33,
+      "outgoing_current_dollars": 143000.0,
+      "reason": {
+        "unresolved_version": 12
+      },
+      "records": 40
+    },
+    {
+      "committee_id": "C00833392",
+      "edges": 9,
+      "outgoing_current_dollars": 132963.0,
+      "reason": {
+        "unresolved_version": 69
+      },
+      "records": 10
+    }
+  ],
+  "unresolved_all_sources": false,
+  "unresolved_record_cash_dollars": 135000.0,
+  "unresolved_record_rows": 3,
+  "unresolved_source_committees": 47,
+  "unresolved_version_groups_by_span": {
+    "multi_file": {
+      "cash_dollars": 45619465.0,
+      "groups": 299,
+      "rows": 598
+    },
+    "single_file": {
+      "cash_dollars": 13734256.0,
+      "groups": 67,
+      "rows": 173
+    }
+  },
+  "unresolved_version_rows": 771,
+  "v2_equivalent_edge_dollars": 5352970346.0,
+  "v2_style_winner_cash_dollars": 25393436.0,
+  "v2_style_winner_rows": 347,
+  "wall_seconds": 244.688,
+  "withheld_ambiguous_cash_dollars_gross": 59488721.0,
+  "withheld_ambiguous_cash_rows": 747
+}

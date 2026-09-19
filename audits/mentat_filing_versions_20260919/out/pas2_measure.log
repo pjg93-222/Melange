@@ -1,0 +1,124 @@
+﻿=== COLUMN SETS ===
+p4 ( 23 ): cycle, committee_id, candidate_id, amendment_indicator, report_type, transaction_type, recipient_name, destination_committee_id, transaction_amount, transaction_id, file_num, memo_code, memo_text, sub_id, exact_duplicate, unresolved_version, superseded_by_amendment, include_in_total, exclusion_reason, transaction_date, activity_type, support_oppose, source_url 
+p3 ( 22 ): cycle, committee_id, candidate_id, amendment_indicator, report_type, transaction_type, recipient_name, destination_committee_id, transaction_amount, transaction_id, file_num, memo_code, memo_text, sub_id, superseded_by_amendment, exact_duplicate, include_in_total, exclusion_reason, transaction_date, activity_type, support_oppose, source_url 
+only in p4: unresolved_version 
+only in p3:  
+alignment: compared on the 22 shared columns; row identity is (cycle, sub_id) where sub_id is non-empty.
+
+=== PER-CYCLE TOTALS: p3 vs p4 ===
+Key: <cycle>
+   cycle p3_rows p3_included_rows p3_included_dollars p4_rows p4_included_rows p4_included_dollars delta_rows delta_dollars
+1:  2022  747733           734897          2759736192  749055           734431          2753312446       -466      -6423746
+2:  2024  701535           685886          5022083517  703597           685723          5021166096       -163       -917421
+3:  2026  207985           204188          1101028965  208247           204115          1100738246        -73       -290719
+
+TOTAL across cycles: p3 included 8,882,848,674.00 | p4 included 8,875,216,788.00 | delta -7,631,886.00 
+
+=== p3 PER-CYCLE EXCLUSION REASONS ===
+Key: <exclusion_reason>
+              exclusion_reason rows_2022 rows_2024 rows_2026 dollars_2022 dollars_2024 dollars_2026
+1:                    Included    734897    685886    204188   2759736192   5022083517   1101028965
+2:       Memo-only transaction     12440     15583      3790     30777149     80361873     13518276
+3: Superseded filing amendment       396        66         7      8889768      3832875        19371
+
+=== p4 PER-CYCLE EXCLUSION REASONS ===
+Key: <exclusion_reason>
+                 exclusion_reason rows_2022 rows_2024 rows_2026 dollars_2022 dollars_2024 dollars_2026
+1:                       Included    734431    685723    204115   2753312446   5021166096   1100738246
+2:          Memo-only transaction     12484     15662      3799     30753983     80360769     13524364
+3: Unresolved filing relationship      2140      2212       333     17612164      8042263       781465
+
+reconstruction check: the rebuilt flags reproduce unresolved_version exactly.
+
+=== p4 'Unresolved filing relationship' SPLIT ===
+   cycle                                    bucket rows  dollars committees candidates
+1:  2022 (i) competing versions of one version_key  876 15420278         27        255
+2:  2022                      (ii) no candidate_id 1264  2191886        196          0
+3:  2024 (i) competing versions of one version_key  232  4846645         22        111
+4:  2024                      (ii) no candidate_id 1980  3195618        235          0
+5:  2026 (i) competing versions of one version_key   80   310090          8         49
+6:  2026                      (ii) no candidate_id  251   466667        101          0
+7:  2026                                      both    2     4708          1          0
+
+=== p4 'Unresolved filing relationship' TOTAL per cycle ===
+   cycle rows  dollars positive_dollars distinct_committees distinct_candidates version_groups
+1:  2022 2140 17612164         17848588                 222                 255           1696
+2:  2024 2212  8042263          8259685                 257                 111           2092
+3:  2026  333   781465           832665                 110                  49            292
+
+across all cycles: rows 4685 | dollars 26,435,892.00 | distinct committees 525 | distinct candidates 361 
+
+=== ROW-SET DIFFERENCE p3 vs p4 (they are not the same row set) ===
+rows only in p4: 3646 | rows only in p3: 0 
+p4-only rows by cycle/blank-sub_id/include:
+   cycle include_in_total               exclusion_reason rows blank_sub_id dollars
+1:  2022               No Unresolved filing relationship 1264            0 2191886
+2:  2022               No          Memo-only transaction   58            0   83598
+3:  2024               No Unresolved filing relationship 1980            0 3195618
+4:  2024               No          Memo-only transaction   82            0   95245
+5:  2026               No Unresolved filing relationship  253            0  471375
+6:  2026               No          Memo-only transaction    9            0    6088
+
+=== HOW MANY OF THOSE ROWS p3 WAS COUNTING ===
+    cycle                                    bucket p3_include rows dollars
+ 1:  2022 (i) competing versions of one version_key         No  410 8996532
+ 2:  2022 (i) competing versions of one version_key        Yes  466 6423746
+ 3:  2022                      (ii) no candidate_id       <NA> 1264 2191886
+ 4:  2024 (i) competing versions of one version_key         No   69 3929224
+ 5:  2024 (i) competing versions of one version_key        Yes  163  917421
+ 6:  2024                      (ii) no candidate_id       <NA> 1980 3195618
+ 7:  2026 (i) competing versions of one version_key         No    7   19371
+ 8:  2026 (i) competing versions of one version_key        Yes   73  290719
+ 9:  2026                      (ii) no candidate_id       <NA>  251  466667
+10:  2026                                      both       <NA>    2    4708
+
+rows newly excluded by p4 that p3 counted: 702 | dollars 7,631,886.00 
+
+=== 15 LARGEST UNRESOLVED VERSION GROUPS (competing versions only) ===
+    cycle committee_id                      candidate_id              recipient rows distinct_file_nums max_row_dollars group_dollars                        amounts
+ 1:  2024    C00864926 H0IN03198 / H4TX12065 / H4TX26149   INVICTUS ADVERTISING    3                  3          997600       1037739         29685 / 997600 / 10454
+ 2:  2024    C00864926 H0IN03198 / H4TX12057 / H6NC09200   INVICTUS ADVERTISING    3                  3          762632        848686         75600 / 762632 / 10454
+ 3:  2022    C00504530 H0FL08208 / H0NC03149 / H6PA08277 BIG DOG STRATEGIES LLC    3                  3          573280        600144          19864 / 573280 / 7000
+ 4:  2022    C00504530             H2CO08020 / H2NV03161    FLEXPOINT MEDIA INC    2                  2          564244        614244                 564244 / 50000
+ 5:  2024    C00864926             H4IN08264 / H4TX12065    DEL CIELO MEDIA LLC    2                  2          493618        517561                 493618 / 23943
+ 6:  2022    C00504530             H2CA21183 / H2CA21233    FLEXPOINT MEDIA INC    2                  2          415529        698416                415529 / 282887
+ 7:  2022    C00504530             H2CA21183 / H2CA21233    FLEXPOINT MEDIA INC    2                  2          412607        418607                  412607 / 6000
+ 8:  2022    C00504530             H0CA25154 / H2CA40084    FLEXPOINT MEDIA INC    2                  2          358633        501969                143336 / 358633
+ 9:  2022    C00504530             H2AZ02360 / H2AZ09175   TARGETED VICTORY LLC    4                  4          352450        465698 25000 / 50000 / 352450 / 38248
+10:  2022    C00504530             H2MS03151 / H8CA45130     PATCHWORK CREATIVE    2                  2          340972        353972                 13000 / 340972
+11:  2024    C00864926 H0IN03198 / H4TX12065 / H6NC09200    DEL CIELO MEDIA LLC    3                  3          310200        456966        310200 / 125000 / 21766
+12:  2024    C00864926             H4IN08264 / H4TX23120    DEL CIELO MEDIA LLC    2                  2          302577        317157                 302577 / 14580
+13:  2022    C00504530             H2MS03151 / H8CA49058    FLEXPOINT MEDIA INC    2                  2          299596        305096                  299596 / 5500
+14:  2022    C00504530             H2CA39136 / H2MI07123    FLEXPOINT MEDIA INC    2                  2          264447        314447                 264447 / 50000
+15:  2022    C00504530             H2CA39136 / H8CA39240    FLEXPOINT MEDIA INC    2                  2          251812        309707                 251812 / 57895
+                                file_nums   types
+ 1:           1759197 / 1779689 / 1788908 24A/24E
+ 2:           1759197 / 1779689 / 1788908     24A
+ 3:           1592379 / 1598276 / 1676835 24A/24E
+ 4:                     1678500 / 1702974 24A/24E
+ 5:                     1779689 / 1788908 24A/24E
+ 6:                     1678500 / 1702974     24A
+ 7:                     1678500 / 1702974     24A
+ 8:                     1678500 / 1702974     24A
+ 9: 1592379 / 1598276 / 1676565 / 1676835     24E
+10:                     1678500 / 1702974     24A
+11:           1759197 / 1779689 / 1788908 24A/24E
+12:                     1779689 / 1788908     24A
+13:                     1678500 / 1702974     24A
+14:                     1678500 / 1702974 24A/24E
+15:                     1678500 / 1702974 24A/24E
+
+=== SINGLE-FILING vs MULTI-FILING COMPETING-VERSION GROUPS ===
+   cycle                                    span groups rows  dollars
+1:  2022 multi_filing (a header could settle it)    203  418 12619864
+2:  2022 single_filing (no header can settle it)    229  458  2800414
+3:  2024 multi_filing (a header could settle it)     76  158  4405897
+4:  2024 single_filing (no header can settle it)     36   74   440748
+5:  2026 multi_filing (a header could settle it)     41   82   314798
+
+=== PER-CYCLE p3 CACHE CROSS-CHECK (per-cycle .rds files) ===
+p3 2022: rows=747733 included=734897 dollars=2,759,736,192.00 (combined-cache rows=747733 included=734897 dollars=2,759,736,192.00)
+p3 2024: rows=701535 included=685886 dollars=5,022,083,517.00 (combined-cache rows=701535 included=685886 dollars=5,022,083,517.00)
+p3 2026: rows=207985 included=204188 dollars=1,101,028,965.00 (combined-cache rows=207985 included=204188 dollars=1,101,028,965.00)
+
+DONE

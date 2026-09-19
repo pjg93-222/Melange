@@ -1,0 +1,1269 @@
+diff --git a/mentat/tools/fec_transfer_graph.py b/mentat/tools/fec_transfer_graph.py
+--- a/mentat/tools/fec_transfer_graph.py
++++ b/mentat/tools/fec_transfer_graph.py
+@@ -18,8 +18,31 @@
+ import sqlite3
+ import csv
+ 
+-VERSION=3
++VERSION=4
+ CASH_CODES={'24G','24K'}
++COMMITTEE=re.compile(r'C[0-9]{8}')
++DESTINATION_GLOB="destination GLOB 'C[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'"
++# `committee|report_type|transaction_id` groups rows that may be versions of one
++# transaction, but it is not an identity: filers reuse a schedule line label as
++# TRAN_ID, so `SE.5` collides across every filing they make. What a row IS gets
++# decided by its counterparty, amount, date and transaction type -- see
++# resolve_group() for the five classes. The ambiguous remainder of class E has
++# two defensible readings:
++#   'count_latest' the highest-file_num row is counted and flagged
++#                  unverified_version=1; the rest are superseded.
++#   'withhold'     the rows leave the counted total and are reported as an
++#                  unresolved share of the source committee's outflow.
++# 'count_latest' is the default for three reasons. A row loses its amount only
++# where evidence CONTRADICTS it; ambiguity keeps its dollars under an unverified
++# flag, and nothing here contradicts either row. The latest filed version is the
++# FEC's own convention. And counting the latest is never further from the truth
++# than withholding both: if the pair is an amendment it is exactly right, and if
++# it is two transactions it undercounts by one row where withholding undercounts
++# by two. The choice is part of the cache key, so flipping it never serves the
++# other reading's index back.
++AMBIGUOUS_VERSION_POLICY='count_latest'
++POLICY_TAGS={'withhold':'w','count_latest':'c'}
++AMENDMENT_ORDER={'T':2,'A':1}
+ 
+ 
+ def atomic_json(path,value):
+@@ -66,12 +89,155 @@
+     return '|'.join((fields[0],fields[2],fields[16])) if fields[16] else 'SUB|'+fields[0]+'|'+(fields[20] or str(row_number))
+ 
+ 
++def identity(row):
++    """What a row claims to BE: who received it, how much, when, and as what."""
++    return (row['destination'],row['cents'],row['date'],row['type'])
++
++
++def distinguishable(left,right):
++    """True only when two identities name two DIFFERENT real counterparties.
++
++    A blank or malformed destination names nobody, so it can never establish
++    that two rows describe different transactions; such a pair stays ambiguous.
++    """
++    first,second=left[0] or '',right[0] or ''
++    return bool(COMMITTEE.fullmatch(first) and COMMITTEE.fullmatch(second) and first!=second)
++
++
++def header_families(rows,headers):
++    """Group rows into amendment families using verified headers only.
++
++    Returns {family: (rows, winning_file_num)}, or None when the headers do not
++    cover every filing involved or do not establish an order. Unlike VERSION 3
++    this tolerates several rows per filing -- a filing itemizing two lines under
++    one label is not a contradiction; two filings claiming the same amendment
++    number still is.
++    """
++    families=defaultdict(list)
++    for row in rows:
++        header=headers.get(row['file_num'],{})
++        if (header.get('committee_id')!=row['source'] or header.get('report_type')!=row['report']
++                or header.get('amendment_indicator')!=row['amendment']
++                or header.get('relationship_evidence') is False):return None
++        original=header.get('original_file_num')
++        if header.get('amendment_indicator')=='N' and not original:family=header['file_num']
++        elif header.get('amendment_indicator') in ('A','T') and original and original!=header['file_num']:family=original
++        else:return None
++        families[family].append(row)
++    resolved={}
++    for family,members in families.items():
++        versions={}
++        for row in members:
++            header=headers.get(row['file_num'],{})
++            number='0' if header.get('amendment_indicator')=='N' else str(header.get('amendment_number',''))
++            if not number.isdigit():return None
++            number=int(number)
++            if versions.setdefault(number,row['file_num'])!=row['file_num']:return None
++        resolved[family]=(members,versions[max(versions)])
++    return resolved
++
++
++def resolve_group(rows,headers,policy):
++    """Decide one version-key group. `rows` are its distinct raw lines.
++
++    Returns (decisions, tran_id_reused, route, ambiguous_components) where each
++    decision is (row, status, version_basis, unverified_version).
++    """
++    identities=defaultdict(list)
++    for row in rows:identities[identity(row)].append(row)
++    reused=1 if len(identities)>1 else 0
++
++    def keep_one_per_identity(group,basis):
++        """One row per identity survives; the rest are the same line again."""
++        decided=[];buckets=defaultdict(list)
++        for row in group:buckets[identity(row)].append(row)
++        for bucket in buckets.values():
++            bucket.sort(key=lambda row:(AMENDMENT_ORDER.get(row['amendment'],0),row['sub_id'] or '',row['rowid']))
++            decided.extend((row,'duplicate','repeated_itemization',0) for row in bucket[:-1])
++            decided.append((bucket[-1],'current',basis,0))
++        return decided
++
++    if len({row['file_num'] for row in rows})>1:
++        resolved=header_families(rows,headers)
++        if resolved is not None:
++            decided=[]
++            for members,winner in resolved.values():
++                decided.extend((row,'superseded','header',0) for row in members if row['file_num']!=winner)
++                decided.extend(keep_one_per_identity(
++                    [row for row in members if row['file_num']==winner],'header'))
++            return decided,reused,'header',[]
++    # B. The same identity in several filings is one transaction re-reported:
++    # the highest file number is the FEC's own "latest filing" convention.
++    # C. The same identity several times inside the WINNING filing is ONE
++    # itemization loaded again under a second sub_id. The group is already keyed
++    # by the FILER'S OWN transaction id, so two genuine equal gifts carry two
++    # transaction ids and never meet here; measured on the real 2022 file, 826
++    # of 827 such groups are byte-identical apart from sub_id.
++    decisions=[];survivors={}
++    for key,members in identities.items():
++        winner=max(row['file_num'] for row in members)
++        decisions.extend((row,'superseded','file_number',0) for row in members if row['file_num']!=winner)
++        kept=keep_one_per_identity([row for row in members if row['file_num']==winner],'file_number')
++        decisions.extend(decision for decision in kept if decision[1]=='duplicate')
++        survivors[key]=(winner,[decision[0] for decision in kept if decision[1]=='current'])
++    keys=list(survivors);parent={key:key for key in keys}
++
++    def root(key):
++        while parent[key]!=key:parent[key]=parent[parent[key]];key=parent[key]
++        return key
++
++    def merge(members):
++        for other in members[1:]:
++            left,right=root(members[0]),root(other)
++            if left!=right:parent[left]=right
++
++    # Two surviving identities in DIFFERENT filings are candidate VERSIONS of
++    # one transaction only when they name the same real counterparty AND agree
++    # on the amount or on the date. An amendment corrects a figure or a date;
++    # rows that share neither have nothing in common but a recycled label --
++    # the same `SB22.2` in two years' Q2 reports is two transfers, not a
++    # version. Type is deliberately NOT part of this test, so a 24K restated as
++    # 24Z on the same day for the same money is still a version.
++    # Merging per bucket and resolving with union-find keeps transitivity: A~B
++    # on the amount and B~C on the date is one component.
++    buckets=defaultdict(list)
++    for key in keys:
++        if COMMITTEE.fullmatch(key[0] or ''):
++            buckets['amount',key[0],key[1]].append(key)
++            buckets['date',key[0],key[2]].append(key)
++    for members in buckets.values():
++        if len({survivors[key][0] for key in members})>1:merge(members)
++    files={survivors[key][0] for key in keys}
++    blank_files={survivors[key][0] for key in keys if not COMMITTEE.fullmatch(key[0] or '')}
++    if blank_files:
++        merge([key for key in keys
++               if (files if not COMMITTEE.fullmatch(key[0] or '') else blank_files)-{survivors[key][0]}])
++    components=defaultdict(list)
++    for key in keys:components[root(key)].append(key)
++    ambiguous=[]
++    for members in components.values():
++        group=[row for key in members for row in survivors[key][1]]
++        if len(members)<2:
++            decisions.extend((row,'current','file_number',0) for row in group)
++            continue
++        ambiguous.append(group)
++        if policy!='count_latest':
++            decisions.extend((row,'unresolved_version','',0) for row in group)
++            continue
++        latest=max(group,key=lambda row:(row['file_num'],row['sub_id'] or '',row['rowid']))
++        decisions.extend((row,'current' if row is latest else 'superseded','file_number_unverified',1)
++                         for row in group)
++    return decisions,reused,'file_number',ambiguous
++
++
+ def transfer_index(path,cycle,filing_headers=()):
+     filing_headers=list(filing_headers)
++    policy=AMBIGUOUS_VERSION_POLICY
++    if policy not in POLICY_TAGS:raise ValueError(f'Unknown ambiguous version policy {policy!r}')
+     headers=verified_headers(filing_headers)
+     signature=sha(path)
+     header_signature=hashlib.sha256(json.dumps(filing_headers,sort_keys=True).encode()).hexdigest()
+-    cache=path.parent/f'transfer-index-v{VERSION}-{cycle}-{signature[:20]}-{header_signature[:12]}.json'
++    cache=path.parent/f'transfer-index-v{VERSION}{POLICY_TAGS[policy]}-{cycle}-{signature[:20]}-{header_signature[:12]}.json'
+     ledger=cache.with_suffix('.sqlite')
+     if cache.exists() and ledger.exists():
+         cached=json.loads(cache.read_text(encoding='utf-8'))
+@@ -82,11 +248,12 @@
+     connection=sqlite3.connect(pending)
+     connection.execute('PRAGMA journal_mode=OFF')
+     connection.execute('PRAGMA synchronous=OFF')
+-    connection.execute('CREATE TABLE records(version_key TEXT, source TEXT,destination TEXT,date TEXT,cents INTEGER,type TEXT,transaction_id TEXT,file_num INTEGER,memo TEXT,report TEXT,sub_id TEXT,amendment TEXT,raw_line TEXT,status TEXT)')
++    connection.execute('CREATE TABLE records(version_key TEXT, source TEXT,destination TEXT,date TEXT,cents INTEGER,type TEXT,transaction_id TEXT,file_num INTEGER,memo TEXT,report TEXT,sub_id TEXT,amendment TEXT,raw_line TEXT,status TEXT,version_basis TEXT DEFAULT %s,tran_id_reused INTEGER DEFAULT 0,unverified_version INTEGER DEFAULT 0)'%"''")
+     connection.execute('CREATE TABLE filing_headers(evidence_json TEXT)')
+     connection.executemany('INSERT INTO filing_headers VALUES (?)',[(json.dumps(h,sort_keys=True),) for h in filing_headers])
+-    sql='INSERT INTO records VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+-    unresolved=set(); unresolved_all=False
++    sql=('INSERT INTO records(version_key,source,destination,date,cents,type,transaction_id,'
++         'file_num,memo,report,sub_id,amendment,raw_line,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
++    unresolved=set(); unresolved_all=False; withheld=defaultdict(int)
+     batch=[]
+     try:
+         # OTH files contain millions of unrelated receipts and expenditures.
+@@ -138,57 +305,67 @@
+         connection.execute('CREATE INDEX records_edge ON records(source,destination)')
+         connection.row_factory=sqlite3.Row
+         from itertools import groupby
+-        for _,items in groupby(connection.execute('SELECT rowid,* FROM records ORDER BY version_key'),lambda r:r['version_key']):
++        # A version key holding ONE row has nothing to compete with, so it is
++        # current by construction. That is the overwhelming majority of the
++        # file; settling those in SQL keeps them out of the Python partition
++        # entirely. The result is identical -- resolve_group() on a single row
++        # returns exactly this, and the validity test below is the same test.
++        connection.execute('CREATE TEMP TABLE singletons(version_key TEXT PRIMARY KEY) WITHOUT ROWID')
++        connection.execute('INSERT INTO singletons SELECT version_key FROM records GROUP BY version_key HAVING COUNT(*)=1')
++        counts['version_groups_file_number']+=connection.execute('SELECT COUNT(*) FROM singletons').fetchone()[0]
++        alone='version_key IN (SELECT version_key FROM singletons)'
++        connection.execute(f"UPDATE records SET status='current',version_basis='file_number' WHERE {alone}")
++        cash=f"status='current' AND {alone} AND type IN ('24G','24K')"
++        for test,name in ((f"date IS NULL OR date=''",'invalid_transfer_dates'),
++                          ('cents IS NULL','invalid_transfer_amounts'),
++                          (f'NOT ({DESTINATION_GLOB})','invalid_transfer_destinations')):
++            counts[name]+=connection.execute(f'SELECT COUNT(*) FROM records WHERE {cash} AND ({test})').fetchone()[0]
++        broken=f"{cash} AND (date IS NULL OR date='' OR cents IS NULL OR NOT ({DESTINATION_GLOB}))"
++        for row in connection.execute(f'SELECT source,memo,cents FROM records WHERE {broken}'):
++            unresolved.add(row['source'])
++            if row['memo']!='X':withheld[row['source']]+=max(0,row['cents'] or 0)
++        connection.execute(f"UPDATE records SET status='unresolved_record' WHERE {broken}")
++        for _,items in groupby(connection.execute(f'SELECT rowid,* FROM records WHERE NOT {alone} ORDER BY version_key'),lambda r:r['version_key']):
+             observed=list(items)
+             # Noncash records still participate in a group containing cash.
+             if not any(r['type'] in CASH_CODES for r in observed):continue
+-            unique={}
++            unique={};repeats=[]
+             for row in observed:
+-                if row['raw_line'] in unique:
+-                    connection.execute("UPDATE records SET status='duplicate' WHERE rowid=?",(row['rowid'],))
++                if row['raw_line'] in unique:repeats.append((row['rowid'],))
+                 else:unique[row['raw_line']]=row
+-            rows=list(unique.values()); families=defaultdict(list); ambiguous=False
+-            files={r['file_num'] for r in rows}
+-            for row in rows:
+-                family=row['file_num']
+-                if len(files)>1:
+-                    h=headers.get(row['file_num'],{})
+-                    if (h.get('committee_id')!=row['source'] or h.get('report_type')!=row['report']
+-                            or h.get('amendment_indicator')!=row['amendment']
+-                            or h.get('relationship_evidence') is False):
+-                        ambiguous=True;break
+-                    original=h.get('original_file_num')
+-                    if h.get('amendment_indicator')=='N' and not original:family=h['file_num']
+-                    elif h.get('amendment_indicator') in ('A','T') and original and original!=h['file_num']:family=original
+-                    else:ambiguous=True;break
+-                families[family].append(row)
+-            selected=[]
+-            for family in families.values():
+-                if len(family)==1:selected.append((family,family[0]));continue
+-                versions={}
+-                for row in family:
+-                    h=headers.get(row['file_num'],{})
+-                    number='0' if h.get('amendment_indicator')=='N' else str(h.get('amendment_number',''))
+-                    if not number.isdigit() or int(number) in versions:
+-                        ambiguous=True;break
+-                    versions[int(number)]=row
+-                if not ambiguous:selected.append((family,versions[max(versions)]))
++            if repeats:connection.executemany("UPDATE records SET status='duplicate' WHERE rowid=?",repeats)
++            decisions,reused,route,ambiguous=resolve_group(list(unique.values()),headers,policy)
++            counts['version_groups_'+route]+=1
+             if ambiguous:
+                 counts['unresolved_version_groups']+=1
+-                unresolved.update(r['source'] for r in rows)
+-                connection.executemany("UPDATE records SET status='unresolved_version' WHERE rowid=?",[(r['rowid'],) for r in rows])
+-                continue
+-            for family,latest in selected:
+-                for row in family:
+-                    status='superseded' if row['rowid']!=latest['rowid'] else 'current'
+-                    if status=='current' and row['type'] in CASH_CODES:
+-                        invalid=False
+-                        for field,count in [('date','invalid_transfer_dates'),('cents','invalid_transfer_amounts')]:
+-                            if row[field] is None or row[field]=='':counts[count]+=1;invalid=True
+-                        if not re.fullmatch(r'C\d{8}',row['destination']):
+-                            counts['invalid_transfer_destinations']+=1;invalid=True
+-                        if invalid:status='unresolved_record';unresolved.add(row['source'])
+-                    connection.execute('UPDATE records SET status=? WHERE rowid=?',(status,row['rowid']))
++                counts['ambiguous_version_components']+=len(ambiguous)
++                for component in ambiguous:
++                    if policy=='count_latest':continue
++                    unresolved.update(row['source'] for row in component)
++                    # The share this committee cannot place is what a "latest
++                    # filing wins" build would have counted here, not the gross
++                    # contents of the group: the rows are competing claims.
++                    cash=[row for row in component
++                          if row['type'] in CASH_CODES and row['memo']!='X' and (row['cents'] or 0)>0]
++                    if cash:
++                        latest=max(cash,key=lambda row:(row['file_num'],row['sub_id'] or '',row['rowid']))
++                        withheld[latest['source']]+=latest['cents']
++            updates=[]
++            for row,status,basis,unverified in decisions:
++                if status=='current' and row['type'] in CASH_CODES:
++                    invalid=False
++                    for field,count in [('date','invalid_transfer_dates'),('cents','invalid_transfer_amounts')]:
++                        if row[field] is None or row[field]=='':counts[count]+=1;invalid=True
++                    if not COMMITTEE.fullmatch(row['destination'] or ''):
++                        counts['invalid_transfer_destinations']+=1;invalid=True
++                    if invalid:
++                        status='unresolved_record';unresolved.add(row['source'])
++                        if row['memo']!='X':withheld[row['source']]+=max(0,row['cents'] or 0)
++                counts['tran_id_reused_rows']+=reused
++                counts['unverified_version_rows']+=unverified
++                updates.append((status,basis,reused,unverified,row['rowid']))
++            connection.executemany('UPDATE records SET status=?,version_basis=?,tran_id_reused=?,'
++                                   'unverified_version=? WHERE rowid=?',updates)
+         counts['latest_rows']=connection.execute("SELECT COUNT(*) FROM records WHERE status='current'").fetchone()[0]
+         counts['memo_rows']=connection.execute("SELECT COUNT(*) FROM records WHERE status='current' AND memo='X'").fetchone()[0]
+         counts['superseded_or_duplicate_rows']=connection.execute("SELECT COUNT(*) FROM records WHERE status IN ('superseded','duplicate')").fetchone()[0]
+@@ -209,6 +386,11 @@
+     result={'version':VERSION,'source_sha256':signature,'cycle':cycle,'counts':dict(counts),
+             'edges':edges,'ledger_path':str(ledger.resolve()),'ledger_sha256':sha(ledger),
+             'filing_headers_sha256':header_signature,'unresolved_sources':sorted(unresolved),
++            'ambiguous_version_policy':policy,
++            # Per source committee, the outflow dollars this index cannot place.
++            # They belong in the committee's denominator, not on a blacklist.
++            'unresolved_source_amounts':{source:round(cents/100,2)
++                                         for source,cents in sorted(withheld.items()) if cents>0},
+             'unresolved_all_sources':unresolved_all,'built_seconds':round(time.monotonic()-started,3)}
+     atomic_json(cache,result)
+     return result
+@@ -241,15 +423,25 @@
+     return (str(int(row['file_num'])),row['transaction_id'],row.get('date'),row.get('cents'),row.get('type'))
+ 
+ 
+-def allocate(funding,edges,activity,max_depth=3,stop_nodes=(),candidate_links=None,unresolved_nodes=()):
++def allocate(funding,edges,activity,max_depth=3,stop_nodes=(),candidate_links=None,unresolved_nodes=(),
++             unresolved_amounts=None):
+     """Conserve each root's nonnegative funding over observed cash activity.
+ 
+     This is a conditional pro-rata scenario, not traced dollars, causal benefit,
+     or a lower bound. Opposition stays with the named target, never its rivals.
++
++    `unresolved_nodes` blocks a node outright. That is for the cases where
++    nothing about the committee is usable -- a malformed source file, a stale
++    index, a candidate transfer that could not be matched at record level.
++    Withheld ROWS are different: the committee's other edges are clean, so
++    `unresolved_amounts` puts those dollars into its outflow denominator as an
++    explicit share instead. One ambiguous row then costs its own size, not the
++    committee's whole downstream.
+     """
+     adjacency=defaultdict(list);terminal=defaultdict(list)
+     candidate_links=candidate_links or {}
+     uncertain={node:'unresolved_transfer_records' for node in unresolved_nodes}
++    withheld={node:float(value) for node,value in (unresolved_amounts or {}).items() if float(value)>0}
+     grouped=defaultdict(float)
+     for row in activity:
+         grouped[(row['source'],row['candidate'],row['direction'])]+=row['amount']
+@@ -299,9 +491,10 @@
+                 unresolved['traversal_limit']+=amount+sum(item[1] for item in pending)
+                 break
+             if node in uncertain:unresolved[uncertain[node]]+=amount;continue
+-            outgoing=adjacency[node];destinations=terminal[node]
+-            denominator=sum(v for _,v in outgoing)+sum(v for _,_,v in destinations)
++            outgoing=adjacency[node];destinations=terminal[node];reserve=withheld.get(node,0.)
++            denominator=sum(v for _,v in outgoing)+sum(v for _,_,v in destinations)+reserve
+             if denominator<=0:unresolved['no_observed_outflow']+=amount;continue
++            if reserve:unresolved['unresolved_transfer_records']+=amount*reserve/denominator
+             for candidate,direction,value in destinations:allocated[candidate,direction]+=amount*value/denominator
+             for destination,value in outgoing:
+                 portion=amount*value/denominator
+diff --git a/mentat/tools/enrich_downstream.py b/mentat/tools/enrich_downstream.py
+--- a/mentat/tools/enrich_downstream.py
++++ b/mentat/tools/enrich_downstream.py
+@@ -47,6 +47,15 @@
+ def _count(value):
+     number=_number(value)
+     return None if number is None else int(round(number))
++
++
++def _amount_map(value):
++    """A {committee: dollars} map as it survives the R round trip.
++
++    jsonlite writes an EMPTY named list as `[]`, not `{}`, and an absent key
++    arrives as None, so anything that is not an object carries no amounts.
++    """
++    return value if isinstance(value,dict) else {}
+ 
+ 
+ def _flag(value):
+@@ -217,15 +226,28 @@
+                    'transfer_records':row.get('transfer_records',[])}
+                   for row in payload['downstream_activity'] if row['cycle']==cycle]
+         source_coverage=[r for r in payload['metadata'].get('transfer_coverage',[]) if r['cycle']==cycle]
+-        unresolved_nodes={node for r in source_coverage for node in r.get('unresolved_sources',[])}
+-        unresolved_nodes.update(r['source_committee_id'] for r in payload['downstream_activity']
+-            if r['cycle']==cycle and r.get('unresolved_version_rows',0)>0)
++        # A committee holding one unplaceable row still has clean edges. Its
++        # withheld dollars become a share of its own outflow (both sides carry
++        # the size), never a blacklist over everything downstream of it.
++        withheld=defaultdict(float)
++        for row in source_coverage:
++            for node,value in _amount_map(row.get('unresolved_source_amounts')).items():
++                amount=_number(value)
++                if node and amount and amount>0:withheld[node]+=amount
++        for row in payload['downstream_activity']:
++            if row['cycle']!=cycle:continue
++            amount=_number(row.get('unresolved_version_amount'))
++            if amount and amount>0:withheld[row['source_committee_id']]+=amount
++        # A malformed source file or a stale index says nothing about ANY
++        # committee in the cycle, so that case keeps the blanket treatment.
++        unresolved_nodes=set()
+         if any(r.get('unresolved_all_sources') or r['status']=='stale_transfer_index' for r in source_coverage):
+             unresolved_nodes.update(funding)
+         cycle_paths=reachable({key for key,value in funding.items() if value>0},edges,stop_nodes=direct_ids)
+         paths.extend(cycle_paths)
+         assigned,unresolved=allocate(funding,edges,activity,stop_nodes=direct_ids,
+-            candidate_links={committee:links[cycle,committee] for committee in direct_ids},unresolved_nodes=unresolved_nodes)
++            candidate_links={committee:links[cycle,committee] for committee in direct_ids},
++            unresolved_nodes=unresolved_nodes,unresolved_amounts=withheld)
+         for row in assigned:
+             candidate=masters.get((cycle,row['candidate_id']),{})
+             estimates.append({**row,'cycle':cycle,'candidate_name':candidate.get('candidate_name',row['candidate_id'])})
+diff --git a/mentat/R/fec_transfer_graph.R b/mentat/R/fec_transfer_graph.R
+--- a/mentat/R/fec_transfer_graph.R
++++ b/mentat/R/fec_transfer_graph.R
+@@ -9,7 +9,9 @@
+       next
+     }
+     index <- jsonlite::fromJSON(path)
+-    if (is.null(index$version) || index$version != 3L) {
++    # VERSION 4 partitions each reused-transaction-id group by identity and
++    # carries per-source withheld dollars. A v3 index has neither.
++    if (is.null(index$version) || index$version != 4L) {
+       coverage[[length(coverage) + 1L]] <- list(cycle = target_cycle,
+         status = "stale_transfer_index", unresolved_all_sources = TRUE)
+       next
+@@ -23,6 +25,10 @@
+       source_sha256 = index$source_sha256, counts = index$counts,
+       ledger_path = index$ledger_path, max_depth = max_depth,
+       unresolved_sources = as.list(index$unresolved_sources),
++      # Per-source withheld dollars travel beside the source list: the list says
++      # WHICH committees hold an unplaceable row, this says HOW MUCH, and only
++      # the amount lets the allocator keep that committee's clean edges.
++      unresolved_source_amounts = as.list(index$unresolved_source_amounts),
+       unresolved_all_sources = isTRUE(index$unresolved_all_sources))
+     if (!nrow(rows)) next
+     stops <- candidate_links[cycle == target_cycle & designation %in% c("A", "P"), committee_id]
+diff --git a/mentat/R/fec_beneficiary.R b/mentat/R/fec_beneficiary.R
+--- a/mentat/R/fec_beneficiary.R
++++ b/mentat/R/fec_beneficiary.R
+@@ -357,7 +357,21 @@
+ #   2 = transaction_date forced to character (leading zeros preserved)
+ #   3 = version key scoped to the transaction-date year
+ #   4 = competing report versions remain unresolved without filing evidence
+-FEC_PAS2_PARSER_VERSION <- "4"
++#   5 = rows inside a reused transaction id are partitioned by identity
++FEC_PAS2_PARSER_VERSION <- "5"
++
++# The mirror of tools/fec_transfer_graph.py's AMBIGUOUS_VERSION_POLICY, for the
++# rows that stay genuinely ambiguous: "count_latest" counts the highest-file_num
++# row of each withheld group and flags it unverified_version; "withhold" keeps
++# them out of the counted total under "Unresolved filing relationship".
++# "count_latest" is the default because a row loses its amount only where
++# evidence CONTRADICTS it and ambiguity keeps its dollars under an unverified
++# flag; because the latest filed version is the FEC's own convention; and
++# because counting the latest is never further from the truth than withholding
++# both - an amendment it gets exactly right, and two transactions it undercounts
++# by one row where withholding undercounts by two.
++# It is part of the cache signature, so changing it rebuilds the index.
++FEC_PAS2_AMBIGUOUS_VERSION_POLICY <- "count_latest"
+ 
+ fec_pas2_cache_file <- function(directory, cycles) {
+   paths <- vapply(cycles, function(cycle) {
+@@ -368,7 +382,8 @@
+   if (length(missing)) stop("Missing official FEC committee-to-candidate file: ", missing[[1L]], call. = FALSE)
+   signature <- paste(
+     c(
+-      paste0("p", FEC_PAS2_PARSER_VERSION),
++      paste0("p", FEC_PAS2_PARSER_VERSION,
++             substr(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, 1L, 1L)),
+       substr(unname(tools::md5sum(paths)), 1L, 10L)
+     ),
+     collapse = "-"
+@@ -423,6 +438,8 @@
+     rows <- rows[nzchar(committee_id)]
+     rows[is.na(transaction_amount), transaction_amount := 0]
+     rows[, original_order := .I]
++    parsed_date <- suppressWarnings(as.Date(rows$transaction_date_raw, format = "%m%d%Y"))
++    rows[, transaction_date := ifelse(is.na(parsed_date), "", format(parsed_date, "%Y-%m-%d"))]
+     rows[, version_key := ifelse(
+       nzchar(transaction_id),
+       paste(committee_id, report_type, transaction_id, sep = "|"),
+@@ -441,25 +458,122 @@
+     rows[, exact_duplicate := as.integer(
+       nzchar(sub_id) & duplicated(sub_id)
+     )]
+-    # TRAN_ID is report-scoped. A transaction date (including its year) is
+-    # editable, and Q1/M1 is not a report-family identifier. Preserve every
+-    # competing version until filing-level evidence establishes the family.
++    # TRAN_ID is report-scoped AND it is only a label: filers reuse one schedule
++    # line label (`SE.5`) on every row of every filing they make, so the key
++    # collides across genuinely different expenditures. What a row IS is its
++    # counterparty, its amount, its date and its transaction type; the version
++    # question is asked only among rows that claim to be the same thing.
++    rows[, identity_key := paste(candidate_id, round(transaction_amount * 100),
++                                 transaction_date, transaction_type, sep = "|")]
++    rows[, live := exact_duplicate == 0L]
++    # Every grouped expression below is written so data.table's optimized
++    # aggregates apply: a sentinel column instead of `x[live]` inside max(), and
++    # sum() over a first-occurrence flag instead of uniqueN(). Written the
++    # obvious way these five expressions are evaluated once per group, which on
++    # 1.66M rows and ~1.6M groups costs over an hour per cycle.
++    #
++    # The same identity in a later filing is that transaction re-reported, and
++    # the amendment contradicts the earlier version of it.
++    rows[, live_file := ifelse(live, file_num_sort, -Inf)]
++    rows[, latest_identity_file := max(live_file), by = .(version_key, identity_key)]
++    rows[, superseded_by_amendment := as.integer(live & file_num_sort < latest_identity_file)]
++    rows[, live := live & superseded_by_amendment == 0L]
++    # The same identity several times inside the WINNING filing is ONE
++    # itemization loaded again under a second sub-ID. The group is already keyed
++    # by the FILER'S OWN transaction id, so two genuine equal gifts carry two
++    # transaction ids and never meet here. Rows are already ordered by filing,
++    # amendment and sub-ID descending, so the first one is the one to keep.
++    rows[, repeated_itemization := 0L]
++    rows[live == TRUE,
++         repeated_itemization := as.integer(duplicated(.SD)),
++         .SDcols = c("version_key", "identity_key")]
++    rows[, live := live & repeated_itemization == 0L]
++    # What remains in question: two surviving identities in DIFFERENT filings
++    # are candidate VERSIONS of one transaction only when they name the same
++    # candidate AND agree on the amount or on the date. An amendment corrects a
++    # figure or a date; rows that share neither have nothing in common but a
++    # recycled label - the same `SE.5` spent on the same candidate in two
++    # filings months apart for different sums is two expenditures, not a
++    # version. A blank candidate names nobody, so it never settles anything and
++    # keeps the conservative merge across the whole key.
++    surviving <- rows[live == TRUE, .(version_key, candidate_id, file_num_sort,
++                                      amount_cents = round(transaction_amount * 100),
++                                      transaction_date)]
++    data.table::setorder(surviving, version_key, candidate_id, amount_cents, file_num_sort)
++    surviving[, first_amount_file := as.integer(!duplicated(
++      surviving, by = c("version_key", "candidate_id", "amount_cents", "file_num_sort")))]
++    data.table::setorder(surviving, version_key, candidate_id, transaction_date, file_num_sort)
++    surviving[, first_date_file := as.integer(!duplicated(
++      surviving, by = c("version_key", "candidate_id", "transaction_date", "file_num_sort")))]
++    data.table::setorder(surviving, version_key, file_num_sort)
++    surviving[, first_file := as.integer(!duplicated(
++      surviving, by = c("version_key", "file_num_sort")))]
++    surviving[, blank := as.integer(!nzchar(candidate_id))]
++    version_stats <- surviving[, .(surviving_files = sum(first_file),
++                                   blank_rows = max(blank)), by = version_key]
++    amount_stats <- surviving[, .(amount_files = sum(first_amount_file)),
++                              by = .(version_key, candidate_id, amount_cents)]
++    date_stats <- surviving[, .(date_files = sum(first_date_file)),
++                            by = .(version_key, candidate_id, transaction_date)]
++    rows[, `:=`(surviving_files = 0L, blank_rows = 0L, amount_files = 0L, date_files = 0L,
++                amount_cents = round(transaction_amount * 100))]
++    rows[version_stats, on = "version_key",
++         `:=`(surviving_files = i.surviving_files, blank_rows = i.blank_rows)]
++    rows[amount_stats, on = c("version_key", "candidate_id", "amount_cents"),
++         amount_files := i.amount_files]
++    rows[date_stats, on = c("version_key", "candidate_id", "transaction_date"),
++         date_files := i.date_files]
+     rows[, unresolved_version := as.integer(
+-      sum(exact_duplicate == 0L) > 1L & !startsWith(version_key[[1L]], "SUB|")
+-    ), by = version_key]
++      live & ((nzchar(candidate_id) & (amount_files > 1L | date_files > 1L)) |
++                (blank_rows > 0L & surviving_files > 1L))
++    )]
++    rows[, conflicted := unresolved_version == 1L & nzchar(candidate_id)]
++    # An identity that is alone in its group is a distinct transaction that
++    # merely reuses the label. It is counted, and the reuse stays visible.
++    distinct_identities <- rows[exact_duplicate == 0L, .(version_key, identity_key)]
++    data.table::setorder(distinct_identities, version_key, identity_key)
++    distinct_identities[, first_identity := as.integer(!duplicated(distinct_identities))]
++    reuse <- distinct_identities[, .(identities = sum(first_identity)), by = version_key]
++    rows[, tran_id_reused := 0L]
++    rows[reuse, on = "version_key", tran_id_reused := as.integer(i.identities > 1L)]
++    # Candidate-less rows are retained as evidence and never counted.
+     rows[!nzchar(candidate_id) & memo_code != "X", unresolved_version := 1L]
+-    rows[, superseded_by_amendment := 0L]
++    # The withheld dollars leave as an explicit share of the committee's
++    # outflow, sized at what a "latest filing wins" build would have counted in
++    # each withheld group rather than at the group's gross competing claims.
++    rows[, withheld_group := paste(version_key, candidate_id, sep = "|")]
++    rows[unresolved_version == 1L & blank_rows > 0L & surviving_files > 1L,
++         withheld_group := version_key]
++    rows[unresolved_version == 1L & !nzchar(candidate_id) &
++           !(blank_rows > 0L & surviving_files > 1L),
++         withheld_group := paste0("ROW|", original_order)]
++    rows[, unverified_version := 0L]
++    if (identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_latest")) {
++      rows[conflicted == TRUE, `:=`(
++        unresolved_version = 0L,
++        unverified_version = 1L,
++        superseded_by_amendment = as.integer(seq_len(.N) != which.max(file_num_sort))
++      ), by = withheld_group]
++    }
++    rows[, unresolved_version_amount := 0]
++    rows[unresolved_version == 1L, unresolved_version_amount := {
++      pick <- which.max(file_num_sort)
++      share <- rep(0, .N)
++      share[[pick]] <- max(transaction_amount[[pick]], 0)
++      share
++    }, by = withheld_group]
+     rows[, include_in_total := ifelse(
+-      exact_duplicate == 0L & unresolved_version == 0L & memo_code != "X",
++      exact_duplicate == 0L & repeated_itemization == 0L &
++        superseded_by_amendment == 0L & unresolved_version == 0L & memo_code != "X",
+       "Yes", "No"
+     )]
+     rows[, exclusion_reason := ifelse(
+       exact_duplicate == 1L, "Duplicate FEC sub-ID",
+-      ifelse(unresolved_version == 1L, "Unresolved filing relationship",
+-        ifelse(memo_code == "X", "Memo-only transaction", "Included"))
+-    )]
+-    parsed_date <- suppressWarnings(as.Date(rows$transaction_date_raw, format = "%m%d%Y"))
+-    rows[, transaction_date := ifelse(is.na(parsed_date), "", format(parsed_date, "%Y-%m-%d"))]
++      ifelse(repeated_itemization == 1L, "Repeated itemization in one filing",
++        ifelse(superseded_by_amendment == 1L, "Superseded filing amendment",
++          ifelse(unresolved_version == 1L, "Unresolved filing relationship",
++            ifelse(memo_code == "X", "Memo-only transaction", "Included"))))
++    )]
+     rows[, activity_type := fec_downstream_relationship(transaction_type)]
+     rows[, support_oppose := fec_downstream_direction(transaction_type)]
+     rows[, source_url := paste0(
+@@ -468,7 +582,9 @@
+     data.table::setorder(rows, original_order)
+     rows[, c(
+       "original_order", "version_key", "amendment_priority", "file_num_sort",
+-      "sub_id_sort", "transaction_date_raw"
++      "sub_id_sort", "transaction_date_raw", "identity_key", "live", "live_file",
++      "latest_identity_file", "surviving_files", "blank_rows",
++      "amount_files", "date_files", "amount_cents", "conflicted", "withheld_group"
+     ) := NULL]
+     rows
+   })
+@@ -677,7 +793,12 @@
+     superseded_rows = sum(superseded_by_amendment == 1L),
+     memo_rows = sum(memo_code == "X"),
+     exact_duplicate_rows = sum(exact_duplicate == 1L),
++    repeated_itemization_rows = sum(repeated_itemization == 1L),
+     unresolved_version_rows = sum(unresolved_version == 1L),
++    # The withheld dollars this committee cannot place. They belong in its
++    # outflow denominator, not on a blacklist that voids its clean activity.
++    unresolved_version_amount = sum(unresolved_version_amount, na.rm = TRUE),
++    unverified_version_rows = sum(unverified_version == 1L),
+     transfer_records = as.character(jsonlite::toJSON(data.table::data.table(
+       destination = destination_committee_id, file_num = file_num,
+       transaction_id = transaction_id, sub_id = sub_id, date = transaction_date,
+diff --git a/mentat/R/tidy_stage.R b/mentat/R/tidy_stage.R
+--- a/mentat/R/tidy_stage.R
++++ b/mentat/R/tidy_stage.R
+@@ -138,7 +138,11 @@
+     last_activity_date = "TEXT", source_rows = "INTEGER",
+     included_rows = "INTEGER", excluded_rows = "INTEGER",
+     superseded_rows = "INTEGER", memo_rows = "INTEGER",
+-    duplicate_rows = "INTEGER", reported_amount = "REAL",
++    duplicate_rows = "INTEGER",
++    # Rows counted on the strength of the highest filing number rather than
++    # filing evidence. The dollars are in net_included_amount; this says how
++    # many of them rest on that convention.
++    unverified_version_rows = "INTEGER", reported_amount = "REAL",
+     excluded_amount = "REAL", net_included_amount = "REAL",
+     fec_committee_url = "TEXT", fec_candidate_url = "TEXT",
+     source_url = "TEXT", transfer_records = "TEXT"
+@@ -853,6 +857,9 @@
+     memo_rows = mentat_tidy_count(mentat_tidy_column(rows, "memo_rows", count)),
+     duplicate_rows = mentat_tidy_count(
+       mentat_tidy_column(rows, "exact_duplicate_rows", count)
++    ),
++    unverified_version_rows = mentat_tidy_count(
++      mentat_tidy_column(rows, "unverified_version_rows", count)
+     ),
+     reported_amount = reported,
+     excluded_amount = excluded,
+diff --git a/mentat/tests/test_transfer_graph.py b/mentat/tests/test_transfer_graph.py
+--- a/mentat/tests/test_transfer_graph.py
++++ b/mentat/tests/test_transfer_graph.py
+@@ -1,3 +1,4 @@
++from collections import defaultdict
+ import json
+ from pathlib import Path
+ import sys
+@@ -8,7 +9,8 @@
+ from contextlib import closing
+ import subprocess
+ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
+-from fec_transfer_graph import allocate,reachable,transfer_index
++import fec_transfer_graph
++from fec_transfer_graph import CASH_CODES,allocate,reachable,transfer_index
+ 
+ 
+ def transfer_row(source='C00000001',dest='C00000002',amount='100',kind='24K',sub='1',transaction='T1',file='1',memo='',date='01022024',amend='N'):
+@@ -125,14 +127,27 @@
+                 original=transfer_row(date='12312023')
+                 amended=transfer_row(**dict(date='12312023',sub='2',file='2',amend='A',**change)) if 'date' not in change else transfer_row(date=change['date'],sub='2',file='2',amend='A')
+                 path.write_text(original+'\n'+amended,encoding='utf-8')
+-                unknown=transfer_index(path,2024)
+-                self.assertEqual(unknown['edges'],[])
+-                self.assertEqual(unknown['unresolved_sources'],['C00000001'])
+                 resolved=transfer_index(path,2024,[header(1),header(2,1)])
+                 if 'date' in change:
+                     self.assertEqual(resolved['edges'][0]['amount'],100)
+                     self.assertEqual(resolved['edges'][0]['first_date'],'2024-01-01')
+                 else:self.assertEqual(resolved['edges'],[])
++                # Without headers the default takes the FEC's own convention,
++                # the highest filing number. For every one of these changes it
++                # lands on the SAME answer the filing headers give, and the
++                # original is never counted beside the amendment.
++                self.assertEqual(transfer_index(path,2024)['edges'],resolved['edges'])
++                # Under the other reading nothing is counted at all. A memo
++                # restatement of the same destination, amount, date and type is
++                # one transaction re-reported, so it settles by file number
++                # either way.
++                original_policy=fec_transfer_graph.AMBIGUOUS_VERSION_POLICY
++                fec_transfer_graph.AMBIGUOUS_VERSION_POLICY='withhold'
++                try:unknown=transfer_index(path,2024)
++                finally:fec_transfer_graph.AMBIGUOUS_VERSION_POLICY=original_policy
++                self.assertEqual(unknown['edges'],[])
++                self.assertEqual(unknown['unresolved_sources'],
++                                 [] if change=={'memo':'X'} else ['C00000001'])
+ 
+     def test_invalid_amount_or_date_correction_cannot_revive_original(self):
+         for change in ({'amount':'NaN'},{'amount':'0.001'},{'date':'BAD'}):
+@@ -175,4 +190,227 @@
+             self.assertTrue(all(r['passed'] for r in enriched['quality_checks']))
+ 
+ 
++STATUSES={'observed','current','superseded','duplicate','unresolved_version','unresolved_record'}
++
++
++class VersionIdentity(unittest.TestCase):
++    """VERSION 4: a transaction ID is a label, so identity decides the version.
++
++    One test per class of the rule. `committee|report_type|transaction_id` is
++    still the group; inside it, rows are partitioned by the counterparty, the
++    amount in cents, the transaction date and the transaction type.
++    """
++
++    def build(self,lines,evidence=(),cycle=2024):
++        temporary=tempfile.TemporaryDirectory()
++        self.addCleanup(temporary.cleanup)
++        path=Path(temporary.name)/'itoth.txt'
++        path.write_text('\n'.join(lines),encoding='utf-8')
++        index=transfer_index(path,cycle,list(evidence))
++        with closing(sqlite3.connect(index['ledger_path'])) as connection:
++            connection.row_factory=sqlite3.Row
++            ledger=[dict(row) for row in connection.execute('SELECT rowid,* FROM records ORDER BY rowid')]
++        self.assert_one_status_and_no_double_count(ledger)
++        return index,ledger
++
++    def assert_one_status_and_no_double_count(self,ledger):
++        """The conservation invariant, recomputed from the ledger itself.
++
++        Counted dollars in a group never exceed the sum over its distinct
++        identity tuples, each allowed the most copies any SINGLE filing showed
++        of it: two equal gifts itemized once are two transactions, and the same
++        two re-reported in an amendment are still two.
++        """
++        groups=defaultdict(list)
++        for row in ledger:
++            self.assertIn(row['status'],STATUSES)
++            if row['status']!='duplicate':groups[row['version_key']].append(row)
++        for key,rows in groups.items():
++            cash=[r for r in rows if r['type'] in CASH_CODES and r['memo']!='X']
++            counted=sum(r['cents'] or 0 for r in cash if r['status']=='current')
++            copies=defaultdict(lambda:defaultdict(int))
++            for row in cash:
++                copies[(row['destination'],row['cents'],row['date'],row['type'])][row['file_num']]+=1
++            ceiling=sum(max(files.values())*(identity[1] or 0) for identity,files in copies.items())
++            self.assertLessEqual(counted,ceiling,f'{key} counts more than its distinct identities allow')
++
++    def test_class_a_an_exactly_repeated_raw_line_is_a_duplicate(self):
++        line=transfer_row(sub='1',file='1')
++        index,ledger=self.build([line,line])
++        self.assertEqual([row['status'] for row in ledger],['current','duplicate'])
++        self.assertEqual(index['edges'][0]['amount'],100)
++
++    def test_class_b_the_same_transaction_in_two_filings_supersedes_by_file_number(self):
++        index,ledger=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2')])
++        self.assertEqual({row['file_num']:(row['status'],row['version_basis']) for row in ledger},
++                         {1:('superseded','file_number'),2:('current','file_number')})
++        self.assertEqual([edge['amount'] for edge in index['edges']],[100])
++        self.assertEqual(index['unresolved_sources'],[])
++
++    def test_class_b_records_the_header_route_when_headers_settle_the_family(self):
++        index,ledger=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2',amend='A')],
++                                [header(1),header(2,1)])
++        self.assertEqual({row['file_num']:(row['status'],row['version_basis']) for row in ledger},
++                         {1:('superseded','header'),2:('current','header')})
++        self.assertEqual([edge['amount'] for edge in index['edges']],[100])
++
++    def test_class_c_one_itemization_loaded_twice_in_a_filing_is_counted_once(self):
++        # Two sub_ids, one transaction id, one filing, everything else equal:
++        # the FEC bulk file carries the same line again, it is not a second
++        # gift. Two genuine equal gifts get two transaction ids from the filer
++        # and therefore land in two different groups -- the case below.
++        index,ledger=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='1')])
++        self.assertEqual({row['sub_id']:(row['status'],row['version_basis']) for row in ledger},
++                         {'1':('duplicate','repeated_itemization'),'2':('current','file_number')})
++        self.assertEqual(index['edges'][0]['amount'],100)
++        self.assertEqual(index['edges'][0]['record_count'],1)
++
++    def test_two_genuine_equal_gifts_on_one_day_are_both_counted(self):
++        index,ledger=self.build([transfer_row(sub='1',file='1',transaction='SB23.1'),
++                                 transfer_row(sub='2',file='1',transaction='SB23.2')])
++        self.assertEqual([row['status'] for row in ledger],['current','current'])
++        self.assertEqual(index['edges'][0]['amount'],200)
++        self.assertEqual(index['edges'][0]['record_count'],2)
++
++    def test_class_c_collapse_also_applies_on_the_header_route(self):
++        # Filing headers settle which filing is current; they say nothing about
++        # the same line appearing twice INSIDE that filing.
++        index,ledger=self.build([transfer_row(sub='1',file='1'),
++                                 transfer_row(sub='2',file='2',amend='A'),
++                                 transfer_row(sub='3',file='2',amend='A')],
++                                [header(1),header(2,1)])
++        self.assertEqual({row['sub_id']:(row['status'],row['version_basis']) for row in ledger},
++                         {'1':('superseded','header'),'2':('duplicate','repeated_itemization'),
++                          '3':('current','header')})
++        self.assertEqual([edge['amount'] for edge in index['edges']],[100])
++
++    def test_class_d_one_filing_reusing_a_line_label_keeps_both_transactions(self):
++        index,ledger=self.build([transfer_row(dest='C00000002',amount='100',sub='1',file='1',transaction='SE.5'),
++                                 transfer_row(dest='C00000003',amount='250',sub='2',file='1',transaction='SE.5')])
++        self.assertEqual([row['status'] for row in ledger],['current','current'])
++        self.assertEqual(sorted(edge['amount'] for edge in index['edges']),[100,250])
++        self.assertTrue(all(row['tran_id_reused']==1 for row in ledger))
++
++    def test_class_d_a_reused_label_across_filings_keeps_every_counterparty(self):
++        # The C00864926 `SE.5` shape from the measurement: one label, three
++        # filings, three different recipients, three real expenditures.
++        index,ledger=self.build([transfer_row(dest='C00000002',amount='100',sub='1',file='1759197',transaction='SE.5'),
++                                 transfer_row(dest='C00000003',amount='250',sub='2',file='1779689',transaction='SE.5'),
++                                 transfer_row(dest='C00000004',amount='700',sub='3',file='1788908',transaction='SE.5')])
++        self.assertEqual({row['status'] for row in ledger},{'current'})
++        self.assertEqual(sum(edge['amount'] for edge in index['edges']),1050)
++        self.assertEqual(index['unresolved_sources'],[])
++        self.assertEqual(index['unresolved_source_amounts'],{})
++
++    def policy(self,value):
++        self.addCleanup(setattr,fec_transfer_graph,'AMBIGUOUS_VERSION_POLICY',
++                        fec_transfer_graph.AMBIGUOUS_VERSION_POLICY)
++        fec_transfer_graph.AMBIGUOUS_VERSION_POLICY=value
++
++    def test_a_reused_label_a_year_apart_is_two_transactions_not_a_version(self):
++        # The C00692343 `SB22.2` shape: one label, the SAME report type, two
++        # filings a year apart, different amount AND different date. An
++        # amendment corrects a figure or a date; rows that share neither have
++        # nothing in common but a recycled label.
++        index,ledger=self.build([
++            transfer_row(amount='586067',date='06302023',sub='1',file='1713770',transaction='SB22.2'),
++            transfer_row(amount='878065',date='06302024',sub='2',file='1798394',transaction='SB22.2')])
++        self.assertEqual({row['status'] for row in ledger},{'current'})
++        self.assertTrue(all(row['tran_id_reused']==1 for row in ledger))
++        self.assertEqual(sum(edge['amount'] for edge in index['edges']),586067+878065)
++        self.assertEqual(index['unresolved_source_amounts'],{})
++
++    def test_same_counterparty_and_amount_on_another_date_is_still_ambiguous(self):
++        self.policy('withhold')
++        index,ledger=self.build([transfer_row(amount='100',date='06302023',sub='1',file='1'),
++                                 transfer_row(amount='100',date='06302024',sub='2',file='2')])
++        self.assertEqual({row['status'] for row in ledger},{'unresolved_version'})
++        self.assertEqual(index['edges'],[])
++
++    def test_same_counterparty_and_date_for_another_amount_is_still_ambiguous(self):
++        self.policy('withhold')
++        index,ledger=self.build([transfer_row(amount='100',date='06302024',sub='1',file='1'),
++                                 transfer_row(amount='150',date='06302024',sub='2',file='2')])
++        self.assertEqual({row['status'] for row in ledger},{'unresolved_version'})
++        self.assertEqual(index['edges'],[])
++
++    def test_class_e_by_default_counts_the_latest_row_and_flags_it_unverified(self):
++        # The default reading. A row loses its amount only where evidence
++        # contradicts it; nothing here contradicts either row, so the dollars
++        # stay and carry the flag.
++        index,ledger=self.build([transfer_row(amount='100',sub='1',file='1'),
++                                 transfer_row(amount='150',sub='2',file='2')])
++        self.assertEqual(index['ambiguous_version_policy'],'count_latest')
++        self.assertEqual({row['file_num']:(row['status'],row['unverified_version'],row['version_basis'])
++                          for row in ledger},
++                         {1:('superseded',1,'file_number_unverified'),
++                          2:('current',1,'file_number_unverified')})
++        self.assertEqual([edge['amount'] for edge in index['edges']],[150])
++        self.assertEqual(index['unresolved_source_amounts'],{})
++
++    def test_class_e_withhold_reading_keeps_no_dollars_and_reports_the_share(self):
++        self.policy('withhold')
++        index,ledger=self.build([transfer_row(amount='100',sub='1',file='1'),
++                                 transfer_row(amount='150',sub='2',file='2')])
++        self.assertEqual({row['status'] for row in ledger},{'unresolved_version'})
++        self.assertEqual(index['edges'],[])
++        self.assertEqual(index['unresolved_sources'],['C00000001'])
++        self.assertEqual(index['unresolved_source_amounts'],{'C00000001':150.0})
++        self.assertEqual(index['ambiguous_version_policy'],'withhold')
++
++    def test_a_cross_filing_type_change_is_not_counted_as_a_second_transaction(self):
++        # Under either reading the 24K row never survives beside the 24Z one.
++        index,_=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2',kind='24Z')])
++        self.assertEqual(index['edges'],[])
++        self.policy('withhold')
++        withheld,_=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2',kind='24Z')])
++        self.assertEqual(withheld['edges'],[])
++        self.assertEqual(withheld['unresolved_sources'],['C00000001'])
++
++    def test_the_policy_choice_cannot_be_served_out_of_the_other_readings_cache(self):
++        temporary=tempfile.TemporaryDirectory();self.addCleanup(temporary.cleanup)
++        path=Path(temporary.name)/'itoth.txt'
++        path.write_text(transfer_row(amount='100',sub='1',file='1')+'\n'
++                        +transfer_row(amount='150',sub='2',file='2'),encoding='utf-8')
++        counted=transfer_index(path,2024)
++        self.policy('withhold')
++        withheld=transfer_index(path,2024)
++        self.assertEqual([edge['amount'] for edge in counted['edges']],[150])
++        self.assertEqual(withheld['edges'],[])
++        self.assertNotEqual(withheld['ledger_path'],counted['ledger_path'])
++
++    def test_class_f_withheld_rows_take_a_prorata_share_not_the_whole_committee(self):
++        edges=[dict(source='A',destination='B',amount=60)]
++        activity=[dict(source='A',candidate='H1',direction='Support',amount=40)]
++        rows,coverage=allocate({'A':100},edges,activity,unresolved_amounts={'A':100})
++        self.assertAlmostEqual(rows[0]['estimated_amount'],20)
++        self.assertAlmostEqual(coverage[0]['unresolved_reasons']['unresolved_transfer_records'],50)
++        self.assertAlmostEqual(coverage[0]['unresolved_reasons']['no_observed_outflow'],30)
++        self.assertAlmostEqual(coverage[0]['estimated_candidate_activity']+coverage[0]['unresolved'],100)
++
++    def test_class_f_a_malformed_source_file_still_blocks_the_whole_committee(self):
++        rows,coverage=allocate({'A':100},[dict(source='A',destination='B',amount=60)],
++                               [dict(source='A',candidate='H1',direction='Support',amount=40)],
++                               unresolved_nodes={'A'})
++        self.assertEqual(rows,[])
++        self.assertEqual(coverage[0]['unresolved_reasons'],{'unresolved_transfer_records':100})
++
++    def test_every_class_together_conserves_and_gives_each_row_one_status(self):
++        self.policy('withhold')
++        line=transfer_row(dest='C00000002',amount='100',sub='1',file='1',transaction='SE.5')
++        index,ledger=self.build([
++            line,line,
++            transfer_row(dest='C00000003',amount='250',sub='3',file='1',transaction='SE.5'),
++            transfer_row(dest='C00000003',amount='250',sub='4',file='1',transaction='SE.5'),
++            transfer_row(dest='C00000004',amount='700',sub='5',file='1',transaction='SE.5'),
++            transfer_row(dest='C00000004',amount='700',sub='6',file='2',transaction='SE.5'),
++            transfer_row(dest='C00000005',amount='900',sub='7',file='1',transaction='SE.5'),
++            transfer_row(dest='C00000005',amount='950',sub='8',file='2',transaction='SE.5')])
++        statuses=defaultdict(int)
++        for row in ledger:statuses[row['status']]+=1
++        self.assertEqual(dict(statuses),{'current':3,'duplicate':2,'superseded':1,'unresolved_version':2})
++        self.assertEqual(sum(edge['amount'] for edge in index['edges']),100+250+700)
++        self.assertEqual(index['unresolved_source_amounts'],{'C00000001':950.0})
++
++
+ if __name__=='__main__':unittest.main()
+diff --git a/mentat/tests/test_downstream_enrichment.py b/mentat/tests/test_downstream_enrichment.py
+--- a/mentat/tests/test_downstream_enrichment.py
++++ b/mentat/tests/test_downstream_enrichment.py
+@@ -25,9 +25,9 @@
+         self.assertEqual(result['allocation_coverage'][0]['unresolved'],90)
+         self.assertFalse(next(r for r in result['quality_checks'] if r['id']=='allocation_coverage')['passed'])
+ 
+-    def test_stale_or_ambiguous_transfer_data_cannot_produce_estimates(self):
++    def test_a_stale_or_malformed_source_still_blocks_the_whole_cycle(self):
+         for source in (dict(status='stale_transfer_index'),
+-                       dict(status='indexed',counts={'unresolved_rows':2},unresolved_sources=['PAC'])):
++                       dict(status='indexed',counts={'malformed_rows':2},unresolved_all_sources=True)):
+             with self.subTest(source=source):
+                 payload=self.payload()
+                 payload['metadata']['transfer_coverage']=[dict(source,cycle=2024)]
+@@ -38,13 +38,42 @@
+                 self.assertEqual(result['allocation_coverage'][0]['unresolved'],100)
+                 self.assertFalse(next(r for r in result['quality_checks'] if r['id']=='transfer_source_2024')['passed'])
+ 
+-    def test_pas2_unresolved_versions_block_renormalization(self):
++    def test_withheld_transfer_rows_take_a_share_and_leave_clean_activity_counted(self):
++        # One ambiguous group no longer costs the committee its clean edges.
++        payload=self.payload()
++        payload['metadata']['transfer_coverage']=[dict(cycle=2024,status='indexed',
++            counts={'unresolved_rows':2},unresolved_sources=['PAC'],
++            unresolved_source_amounts={'PAC':90})]
++        payload['raw_rows']=[dict(cycle=2024,committee_id='PAC',amount=100,include_in_analysis='Yes')]
++        payload['downstream_activity']=[dict(cycle=2024,source_committee_id='PAC',candidate_id='H1',support_oppose='Oppose',preliminary_included_amount=10)]
++        with tempfile.TemporaryDirectory() as directory:result=enrich(payload,Path(directory))
++        self.assertAlmostEqual(result['allocation_estimates'][0]['estimated_amount'],10)
++        coverage=result['allocation_coverage'][0]
++        self.assertAlmostEqual(coverage['unresolved_reasons']['unresolved_transfer_records'],90)
++        self.assertAlmostEqual(coverage['estimated_candidate_activity']+coverage['unresolved'],100)
++        self.assertFalse(next(r for r in result['quality_checks'] if r['id']=='transfer_source_2024')['passed'])
++
++    def test_pas2_withheld_rows_are_a_share_of_the_committees_outflow(self):
+         payload=self.payload()
+         payload['raw_rows']=[dict(cycle=2024,committee_id='PAC',amount=100,include_in_analysis='Yes')]
+-        payload['downstream_activity']=[dict(cycle=2024,source_committee_id='PAC',candidate_id='H1',support_oppose='Oppose',preliminary_included_amount=10,unresolved_version_rows=2)]
++        payload['downstream_activity']=[dict(cycle=2024,source_committee_id='PAC',candidate_id='H1',
++            support_oppose='Oppose',preliminary_included_amount=10,unresolved_version_rows=2,
++            unresolved_version_amount=90)]
+         with tempfile.TemporaryDirectory() as directory:result=enrich(payload,Path(directory))
+-        self.assertEqual(result['allocation_estimates'],[])
+-        self.assertEqual(result['allocation_coverage'][0]['unresolved'],100)
++        self.assertAlmostEqual(result['allocation_estimates'][0]['estimated_amount'],10)
++        coverage=result['allocation_coverage'][0]
++        self.assertAlmostEqual(coverage['unresolved_reasons']['unresolved_transfer_records'],90)
++        self.assertAlmostEqual(coverage['estimated_candidate_activity']+coverage['unresolved'],100)
++
++    def test_an_empty_amount_map_from_r_is_not_an_error(self):
++        # jsonlite serializes an empty JSON object as [], not {}.
++        payload=self.payload()
++        payload['metadata']['transfer_coverage']=[dict(cycle=2024,status='indexed',counts={},
++            unresolved_sources=[],unresolved_source_amounts=[])]
++        payload['raw_rows']=[dict(cycle=2024,committee_id='PAC',amount=100,include_in_analysis='Yes')]
++        payload['downstream_activity']=[dict(cycle=2024,source_committee_id='PAC',candidate_id='H1',support_oppose='Oppose',preliminary_included_amount=10)]
++        with tempfile.TemporaryDirectory() as directory:result=enrich(payload,Path(directory))
++        self.assertAlmostEqual(result['allocation_estimates'][0]['estimated_amount'],100)
+ 
+     def test_ambiguous_candidate_link_preserves_unresolved_funding(self):
+         payload=self.payload()
+diff --git a/mentat/tests/test_transfer_evidence.R b/mentat/tests/test_transfer_evidence.R
+--- a/mentat/tests/test_transfer_evidence.R
++++ b/mentat/tests/test_transfer_evidence.R
+@@ -28,13 +28,26 @@
+   stopifnot(nrow(evidence)==1L, evidence$transaction_id=='T1', evidence$file_num==1,
+     evidence$destination=='C00000002', evidence$cents==10000,
+     retained$preliminary_included_amount==100)
++  # An amended date with no filing header. The default counts the later filing
++  # and flags it; `withhold` keeps neither row. Both readings are pinned here.
+   writeLines(c(row(), row(date='01012024',file='2',sub='2',amendment='A')), path)
++  stopifnot(identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, 'count_latest'))
++  counted <- aggregate(fec_build_pas2_index(directory, 2024L))
++  stopifnot(counted$unresolved_version_rows==0L, counted$unverified_version_rows==2L,
++    counted$preliminary_included_amount==100, counted$superseded_rows==1L)
++  FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'withhold'
+   redated <- aggregate(fec_build_pas2_index(directory, 2024L))
+   stopifnot(redated$unresolved_version_rows==2L, redated$preliminary_included_amount==0,
+     redated$transfer_records=='[]')
+   writeLines(c(row(), row(file='2',sub='2',kind='24Z',amendment='A')), path)
+   reclassified <- fec_build_pas2_index(directory, 2024L)
+   stopifnot(nrow(reclassified)==2L, all(reclassified$include_in_total=='No'))
++  FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'count_latest'
++  # The reclassified 24K is never counted beside the 24Z that replaced it.
++  reclassified_default <- fec_build_pas2_index(directory, 2024L)
++  stopifnot(nrow(reclassified_default)==2L,
++    sum(reclassified_default$include_in_total=='Yes')==1L,
++    identical(reclassified_default[transaction_type=='24Z', include_in_total], 'Yes'))
+ 
+   dir.create(file.path(directory, 'oth24'))
+   info <- file.path(directory, 'oth24', 'transfer-info.json')
+@@ -46,15 +59,145 @@
+   edges <- file.path(dirname(info), 'transfer-edges.csv')
+   data.table::fwrite(data.table::data.table(cycle=2024L,source='C00000001',destination='C00000002',
+     amount=100,records='[]'),edges)
+-  jsonlite::write_json(list(version=3,edges_sha256=digest::digest(file=edges,algo='sha256'),
+-    unresolved_sources=list('C00000001'),unresolved_all_sources=FALSE,counts=list(unresolved_rows=2)),
++  # An index built under the old identity-free rule is stale now.
++  jsonlite::write_json(list(version=3,edges_sha256=digest::digest(file=edges,algo='sha256')),
++    info,auto_unbox=TRUE)
++  stopifnot(fec_transfer_context(directory,roots,links,2024L)$coverage[[1L]]$status=='stale_transfer_index')
++  jsonlite::write_json(list(version=4,edges_sha256=digest::digest(file=edges,algo='sha256'),
++    unresolved_sources=list('C00000001'),unresolved_source_amounts=list(C00000001=90),
++    unresolved_all_sources=FALSE,counts=list(unresolved_rows=2)),
+     info,auto_unbox=TRUE)
+   current <- fec_transfer_context(directory,roots,links,2024L)
+   encoded <- jsonlite::toJSON(current$coverage,auto_unbox=TRUE)
+-  stopifnot(grepl('"unresolved_sources":\\["C00000001"\\]',encoded))
++  stopifnot(grepl('"unresolved_sources":\\["C00000001"\\]',encoded),
++            grepl('"unresolved_source_amounts":\\{"C00000001":90\\}',encoded))
+   args <- commandArgs(TRUE)
+   if (length(args)) jsonlite::write_json(list(downstream_activity=retained),args[[1L]],
+     dataframe='rows',auto_unbox=TRUE,digits=NA)
+ }
+ check_transfer_evidence()
+ cat('Transfer evidence: retained identities, amendment review, cache version and coverage serialization PASS\n')
++# VERSION 4 / parser "5": inside a reused transaction-id group, identity -- the
++# candidate, the amount, the date and the transaction type -- decides which rows
++# are versions of one transaction and which are separate transactions.
++check_pas2_identity_partition <- function() {
++  directory <- tempfile('mentat-pas2-identity-')
++  dir.create(file.path(directory, 'pas224'), recursive=TRUE)
++  on.exit(unlink(directory, recursive=TRUE))
++  path <- file.path(directory, 'pas224', 'itpas2.txt')
++  row <- function(candidate='H00000001', amount='100', date='12312023', file='1',
++                  sub='1', kind='24K', tran='SE.5', amendment='N') {
++    fields <- rep('', 22L)
++    fields[c(1,2,3,6,14,15,16,17,18,19,22)] <-
++      c('C00000001', amendment, 'Q1', kind, date, amount, 'C00000002', candidate,
++        tran, file, sub)
++    paste(fields, collapse='|')
++  }
++  parse <- function(...) { writeLines(c(...), path); fec_build_pas2_index(directory, 2024L) }
++
++  # A: a repeated sub-ID is still an exact duplicate.
++  a <- parse(row(sub='1'), row(sub='1', file='2'))
++  stopifnot(sum(a$exact_duplicate) == 1L,
++            identical(sort(a$exclusion_reason), c('Duplicate FEC sub-ID', 'Included')))
++
++  # B: one transaction re-reported in a later filing. The earlier row is
++  # contradicted by the amendment, so `superseded_by_amendment` is real again.
++  b <- parse(row(sub='1', file='1'), row(sub='2', file='2', amendment='A'))
++  stopifnot(nrow(b) == 2L,
++            identical(b[file_num == 2, include_in_total], 'Yes'),
++            identical(b[file_num == 1, include_in_total], 'No'),
++            identical(b[file_num == 1, exclusion_reason], 'Superseded filing amendment'),
++            b[file_num == 1, superseded_by_amendment] == 1L,
++            b[file_num == 2, superseded_by_amendment] == 0L,
++            sum(b[include_in_total == 'Yes', transaction_amount]) == 100)
++
++  # C: the same itemization loaded twice in ONE filing under two sub-IDs is
++  # one transaction. Two genuine equal gifts carry two transaction ids and
++  # land in two different groups, so both of those are counted.
++  repeated <- parse(row(sub='1'), row(sub='2'))
++  stopifnot(nrow(repeated) == 2L,
++            sum(repeated$include_in_total == 'Yes') == 1L,
++            identical(repeated[sub_id == '2', include_in_total], 'Yes'),
++            identical(repeated[sub_id == '1', exclusion_reason],
++                      'Repeated itemization in one filing'),
++            sum(repeated[include_in_total == 'Yes', transaction_amount]) == 100)
++  equal_pair <- parse(row(sub='1', tran='SB23.1'), row(sub='2', tran='SB23.2'))
++  stopifnot(nrow(equal_pair) == 2L, all(equal_pair$include_in_total == 'Yes'),
++            sum(equal_pair$transaction_amount) == 200)
++
++  # D: one reused label, several candidates, inside one filing and across
++  # filings. This is the C00864926 `SE.5` shape from the measurement.
++  d <- parse(row(candidate='H00000001', sub='1', file='1', amount='100'),
++             row(candidate='H00000002', sub='2', file='1', amount='250'),
++             row(candidate='H00000003', sub='3', file='2', amount='700'))
++  stopifnot(nrow(d) == 3L, all(d$include_in_total == 'Yes'),
++            all(d$tran_id_reused == 1L), sum(d$transaction_amount) == 1050)
++
++  # A reused label spent on the SAME candidate in two filings, different
++  # amount AND different date: two expenditures, not a version.
++  apart <- parse(row(sub='1', file='1', amount='586067', date='06302023'),
++                 row(sub='2', file='2', amount='878065', date='06302024'))
++  stopifnot(nrow(apart) == 2L, all(apart$include_in_total == 'Yes'),
++            all(apart$tran_id_reused == 1L), all(apart$unresolved_version == 0L),
++            all(apart$unverified_version == 0L),
++            sum(apart$transaction_amount) == 586067 + 878065)
++  # Agreeing on the amount, or on the date, still leaves a version question.
++  FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'withhold'
++  same_amount <- parse(row(sub='1', file='1', amount='100', date='06302023'),
++                       row(sub='2', file='2', amount='100', date='06302024'))
++  same_date <- parse(row(sub='1', file='1', amount='100', date='06302024'),
++                     row(sub='2', file='2', amount='150', date='06302024'))
++  stopifnot(all(same_amount$unresolved_version == 1L), all(same_date$unresolved_version == 1L))
++  FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'count_latest'
++
++  # E: same candidate, different amount, different filings, no way to tell.
++  # The default counts the later filing and flags it unverified.
++  stopifnot(identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, 'count_latest'))
++  e_default <- parse(row(sub='1', file='1', amount='100'), row(sub='2', file='2', amount='150'))
++  stopifnot(nrow(e_default) == 2L, all(e_default$unverified_version == 1L),
++            all(e_default$unresolved_version == 0L),
++            identical(e_default[file_num == 2, include_in_total], 'Yes'),
++            identical(e_default[file_num == 1, exclusion_reason], 'Superseded filing amendment'),
++            sum(e_default[include_in_total == 'Yes', transaction_amount]) == 150,
++            all(e_default$unresolved_version_amount == 0))
++  FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'withhold'
++  e <- parse(row(sub='1', file='1', amount='100'), row(sub='2', file='2', amount='150'))
++  stopifnot(nrow(e) == 2L, all(e$unresolved_version == 1L),
++            all(e$include_in_total == 'No'),
++            all(e$exclusion_reason == 'Unresolved filing relationship'))
++  FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'count_latest'
++
++  # Candidate-less rows stay retained and excluded, exactly as before.
++  blank <- parse(row(candidate='', sub='1', tran='T9'))
++  stopifnot(nrow(blank) == 1L, blank$unresolved_version == 1L,
++            identical(blank$exclusion_reason, 'Unresolved filing relationship'))
++
++  # The withheld dollars leave as an explicit share of the committee's outflow,
++  # sized at what a "latest filing wins" build would have counted.
++  FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'withhold'
++  aggregated <- local({
++    index <- parse(row(sub='1', file='1', amount='100'), row(sub='2', file='2', amount='150'))
++    index[, `:=`(candidate_name='Candidate', candidate_party='Other', office='H',
++      office_label='House', office_state='CA', district='1', candidate_source_url='fixture')]
++    fec_aggregate_downstream_activity(index, data.table::data.table(cycle=2024L,
++      committee_id='C00000001', committee_name='PAC', recipient_category='PAC'))
++  })
++  stopifnot(aggregated$unresolved_version_rows == 2L,
++            aggregated$unresolved_version_amount == 150,
++            aggregated$preliminary_included_amount == 0)
++
++  # The other reading is one constant, and it invalidates its own cache.
++  stopifnot(identical(FEC_PAS2_PARSER_VERSION, '5'),
++            identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, 'withhold'))
++  withheld_cache <- fec_pas2_cache_file(directory, 2024L)
++  FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'count_latest'
++  on.exit(FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'count_latest', add=TRUE)
++  counted <- parse(row(sub='1', file='1', amount='100'), row(sub='2', file='2', amount='150'))
++  stopifnot(!identical(withheld_cache, fec_pas2_cache_file(directory, 2024L)),
++            identical(counted[file_num == 2, include_in_total], 'Yes'),
++            identical(counted[file_num == 1, include_in_total], 'No'),
++            all(counted$unverified_version == 1L),
++            sum(counted[include_in_total == 'Yes', transaction_amount]) == 150)
++}
++check_pas2_identity_partition()
++cat('PAS2 identity partition: classes A-E, superseded amendments and the withheld share PASS\n')
+diff --git a/mentat/tests/test_fec_beneficiary_helpers.R b/mentat/tests/test_fec_beneficiary_helpers.R
+--- a/mentat/tests/test_fec_beneficiary_helpers.R
++++ b/mentat/tests/test_fec_beneficiary_helpers.R
+@@ -278,10 +278,22 @@
+              pas2_row("01022024","100","2","2"),
+              pas2_row("01022024","150","3","3")),
+            file.path(pas2_root,"pas224","itpas2.txt"))
++# Under the default the latest filing is counted and every row of the group is
++# flagged unverified; under `withhold` none of them is counted. Both are pinned.
++stopifnot(identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_latest"))
++counted_fixture <- fec_build_pas2_index(pas2_root, 2024L)
++stopifnot(nrow(counted_fixture) == 3L,
++          all(counted_fixture$unverified_version == 1L),
++          sum(counted_fixture$include_in_total == "Yes") == 1L,
++          identical(counted_fixture[file_num == 3, include_in_total], "Yes"),
++          sum(counted_fixture[include_in_total == "Yes", transaction_amount]) == 150,
++          all(substr(counted_fixture$transaction_date,1,4) %in% c("2023","2024")))
++FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- "withhold"
+ parsed_fixture <- fec_build_pas2_index(pas2_root, 2024L)
+ stopifnot(nrow(parsed_fixture) == 3L, all(parsed_fixture$unresolved_version == 1L),
+           all(parsed_fixture$include_in_total == "No"),
+           all(substr(parsed_fixture$transaction_date,1,4) %in% c("2023","2024")))
++FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- "count_latest"
+ unlink(pas2_root, recursive = TRUE)
+ 
+ # Candidate-less rows are retained now, so the placeholder name must say that
+diff --git a/mentat/tests/test_tidy_stage.R b/mentat/tests/test_tidy_stage.R
+--- a/mentat/tests/test_tidy_stage.R
++++ b/mentat/tests/test_tidy_stage.R
+@@ -216,6 +216,7 @@
+   memo_rows = c(0L, 0L),
+   exact_duplicate_rows = c(1L, 0L),
+   unresolved_version_rows = c(0L, 0L),
++  unverified_version_rows = c(1L, 0L),
+   reported_amount = c(20000, 3000),
+   excluded_amount = c(4200, 0),
+   preliminary_included_amount = c(15800, 3000),
+@@ -445,6 +446,9 @@
+         !any(grepl(";", unlist(lapply(bridge_rows, as.character)), fixed = TRUE)))
+ 
+ downstream <- frames$downstream_activity
++check("a row counted on the filing-number convention says so in its own column",
++      downstream[candidate == "VOE, VERA", unverified_version_rows] == 1L &&
++        downstream[candidate == "VOE, VERA M", unverified_version_rows] == 0L)
+ check("downstream activity keeps its JSON evidence as one text cell",
+       all(downstream$transfer_records == "[]") &&
+         downstream[candidate == "VOE, VERA", net_included_amount] == 15800 &&
+diff --git a/mentat/METHODOLOGY.md b/mentat/METHODOLOGY.md
+--- a/mentat/METHODOLOGY.md
++++ b/mentat/METHODOLOGY.md
+@@ -101,7 +101,7 @@
+ | Collection coverage | `R/fec_api.R` binds resumable work to versioned literal query contracts, requires exact stable counts, and uses exhaustive date windows for broad-query timeouts. `tools/validate_industry_coverage.py` checks every roster alias and rejects restricted or unproven subset queries as full coverage. Legacy checkpoints are not retroactively certified. No FEC search can establish that the roster itself contains every real-world employer alias. |
+ | Receipt decisions and QA | `R/collect.R`, `R/schema.R` and `R/report.R` share receipt eligibility and retain evidence for decisions. The main report and `tools/pac_evidence.py` use `inputs/fec_receipt_rules.json` for form/line roles, exact non-giving descriptions and anchored field-level events. Explicit financial income, fee reversals, fraud recovery and bank-error returns can therefore resolve before irrelevant attribution. Giving and refund statements in different fields remain a conflict. PAC evidence additionally identifies in-kind contributions and keeps memo activity outside its cash-flow view. Neither path treats unlinked disclosure wording as proof of duplication. |
+ | Conditional cash estimates | `tools/pac_cash_model.py` withholds estimates for every unverified receipt role. Verified transfers, special-account contributions and identified interest retain their separate treatment. The evidence endpoint rejects saved estimates whose model-code hash is stale. A withheld company estimate is unavailable, not zero. |
+-| Transfer and candidate activity | OTH transfer index v3 retains all observed representations of cash-related transaction keys before filtering transaction types. Multi-filing groups require preserved filing-header evidence to establish report families and amendment order; ambiguous groups remain unresolved. The PAS2 parser likewise holds competing versions for review rather than deriving report identity from transaction dates. Candidate-transfer deduplication requires a matching retained filing/transaction record, destination, amount, date and type. Unmatched transfers retain their unresolved share; uncertain activity blocks allocation through the affected committee. Older transfer indexes must be rebuilt, and these controls do not retroactively change historical workbooks. |
++| Transfer and candidate activity | OTH transfer index v4 retains all observed representations of cash-related transaction keys before filtering transaction types. `committee|report_type|transaction_id` groups rows that may be versions of one transaction but does not identify one: a reused schedule line label collides across filings. Inside each group rows are partitioned by counterparty, amount, date and transaction type. The same identity in a later filing is superseded, by verified filing-header order where headers establish the family and otherwise by the FEC's highest-filing-number convention, and the route taken is recorded. The same identity repeated inside one filing is one itemization loaded again under a second sub-ID and is counted once; two genuine equal gifts carry two transaction ids and are therefore two groups, both counted. An identity nothing competes with is retained and flagged as a reused transaction id. Only competing representations in different filings that no counterparty distinguishes remain in question; for those the highest filing number is counted and flagged `unverified_version`, because a row loses its amount only where evidence contradicts it, the latest filed version is the FEC's own convention, and counting the latest is never further from the truth than withholding both. One module-level constant switches that treatment to withholding instead, and it is part of the index cache key. The PAS2 parser mirrors the same partition and the same constant, rather than deriving report identity from transaction dates. Candidate-transfer deduplication requires a matching retained filing/transaction record, destination, amount, date and type. Unmatched transfers retain their unresolved share. Withheld rows enter their source committee's outflow denominator as an explicit unresolved share, so one ambiguous row no longer voids the committee's clean edges; a malformed source file still blocks the whole cycle. Older transfer indexes must be rebuilt, and these controls do not retroactively change historical workbooks. |
+ | Recovery and efficiency | `tools/cross_reference_store.py` indexes preserved FEC responses and filing headers, automatically retrieves a bounded set of missing evidence, records attempts and defers unavailable budgets. Conflicting financial or accounting metadata cannot silently replace an older observation. Merged fields retain every contributing document ID. `tools/fec_filing_headers.py` supports form and original-report references from 8.4/8.5, and form/committee only from 8.3. General complete-filing transaction discovery remains outside this bounded recovery pass. |
+ | Attribution and stages | The engine keeps employee giving, supported corporate treasury giving, unverified funding and recipient-reported PAC activity separate. A row loses its amount only where evidence contradicts it, including its own employer or contributor text naming another organization; missing or ambiguous information keeps its dollars under an unverified flag (rulings of September 17). Evidence-backed employer aliases are stored in `inputs/verified_employer_aliases.csv`, evaluated exactly before prefix heuristics, fingerprinted with each run and returned with their source citation. Dated connected-PAC names and aliases are stored in `inputs/verified_company_affiliations.json`; only an exact committee ID, exact normalized name or listed exact alias can establish that relationship. Same-ID observations from different queries produce one accounting decision while preserving every search claim; competing company or accounting claims remain unresolved. Legacy corporate headline metrics continue to use their broad record grouping. |
+ | Presentation and percentages | Since the September 17 ruling the console's Cross-reference tab publishes no totals: it lists what a run covered, its clear refunds and its obvious outliers, and the published workbook remains the accounting of record. Each run still saves its six-step progress, funding separation, reductions/additions and unresolved priorities under `state/cross-reference/<run-id>/`. The engine's partisan views retain accepted recipient classifications, carry the D+R dollar denominator and absolute-dollar classification coverage, and suppress undefined signed shares. The legacy workbook Stats grouping, percentage edge cases and stale memo-method note still need a separate template correction; the new view does not certify those labels. |
+diff --git a/mentat/README.md b/mentat/README.md
+--- a/mentat/README.md
++++ b/mentat/README.md
+@@ -148,7 +148,7 @@
+ 
+ FEC form, receipt line and transaction evidence determine whether a receipt represents a contribution, transfer, or other economic event. Form 3X line 17 includes genuine hybrid-PAC and national-party special-account gifts; its generic “other receipts” label is not a reason to exclude them. A company name, including words such as exchange or processor, never establishes the transaction role. Missing or ambiguous evidence remains in the raw records and prevents publication; it is never silently converted to zero. The exporter writes a `.receipt-review.csv` beside the pending payload with the unresolved records. See `inputs/fec_receipt_rules.json` for shared rules and FEC sources.
+ 
+-Conduit and intermediary legs retain the established recipient-as-shown treatment. Amendment and filing-version flags remain visible; the existing policy of retaining original and amended rows is unchanged. Memo exclusions require an explicit FEC reference to exactly one retained counterpart at the same company, recipient and filing. Structured references take precedence over text references; the donor/date and cash direction must agree and the parent must cover the amount. Matching amounts or disclosure wording alone are insufficient. Duplicate decisions record the retained source ID and evidence rule. Raw records are preserved.
++Conduit and intermediary legs retain the established recipient-as-shown treatment. Amendment and filing-version flags remain visible; the existing policy of retaining original and amended rows is unchanged. On the committee-to-candidate and committee-to-committee files, `committee|report_type|transaction_id` groups rows that MIGHT be versions of one transaction, but it is not an identity: filers reuse one schedule line label, such as `SE.5`, on every row of every filing. Inside such a group a row's identity is its counterparty, amount, date and transaction type. The same identity in a later filing is that transaction re-reported, and the earlier row is `superseded_by_amendment`; the same identity repeated inside one filing is one itemization loaded again under a second sub-ID, so it is counted once, because two genuine equal gifts carry two transaction ids and are therefore two groups; an identity that no other row competes with is counted and flagged `tran_id_reused`. Only a pair of competing representations in different filings that nothing distinguishes is still in question. Those keep their dollars: the highest filing number is counted and flagged `unverified_version`, because a row loses its amount only where evidence contradicts it and neither row contradicts the other, because the latest filed version is the FEC's own convention, and because counting the latest is never further from the truth than withholding both. One constant (`AMBIGUOUS_VERSION_POLICY`, mirrored as `FEC_PAS2_AMBIGUOUS_VERSION_POLICY`) switches them to `Unresolved filing relationship` instead, in which case their dollars are reported as an unresolved share of that committee's outflow rather than voiding the committee's other activity. The constant is part of the cache key on both sides. Memo exclusions require an explicit FEC reference to exactly one retained counterpart at the same company, recipient and filing. Structured references take precedence over text references; the donor/date and cash direction must agree and the parent must cover the amount. Matching amounts or disclosure wording alone are insufficient. Duplicate decisions record the retained source ID and evidence rule. Raw records are preserved.
+ 
+ ## Source and dollar reconciliation
+ 

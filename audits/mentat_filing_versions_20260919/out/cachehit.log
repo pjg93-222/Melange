@@ -1,0 +1,40 @@
+{
+  "cycle": 2022,
+  "headers_loaded": 25,
+  "built_seconds": 242.906,
+  "wall_seconds": 2.469,
+  "ledger_bytes": 684113920,
+  "peak_scratch_bytes_beside_link": 961449470,
+  "current_rows": 1596263,
+  "unresolved_version_rows": 4145,
+  "unresolved_record_rows": 13,
+  "superseded_or_duplicate_rows": 0,
+  "unresolved_source_committees": 44,
+  "unresolved_all_sources": false,
+  "edges_positive": 167665,
+  "current_cash_edge_dollars": 2468397260.0,
+  "blocked_edge_dollars": 108916264.0,
+  "blocked_edge_share": 0.044124,
+  "unresolved_version_groups_by_span": {
+    "multi_file": {
+      "groups": 303,
+      "rows": 606,
+      "cash_dollars": 20837997.0
+    },
+    "single_file": {
+      "groups": 827,
+      "rows": 3539,
+      "cash_dollars": 50690443.0
+    }
+  },
+  "withheld_ambiguous_cash_dollars_gross": 71714849.0,
+  "v2_style_winner_cash_dollars": 22357802.0,
+  "v2_equivalent_edge_dollars": 2490941471.0,
+  "committed_rule_loss_dollars": 131460475.0,
+  "committed_rule_loss_share": 0.052775,
+  "alternative_rule_loss_dollars": 22544211.0,
+  "alternative_rule_loss_share": 0.00905,
+  "distinct_file_nums": 35803,
+  "file_nums_needed_for_multi_file_groups": 88
+}
+full result -> C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\scratchpad\v3_measure\out\block22-cachehit.json

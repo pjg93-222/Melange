@@ -1,0 +1,5 @@
+﻿started 2026-09-19T00:02:21.4931115-04:00
+{"cycle": 2022, "counts": {"source_rows": 5364543, "cash_transfer_rows": 1600421, "unresolved_version_groups": 1130, "invalid_transfer_destinations": 13, "latest_rows": 1596263, "memo_rows": 7837, "superseded_or_duplicate_rows": 0, "unresolved_rows": 4158}, "edges": 171780, "seconds": 153.515}
+{"cycle": 2024, "counts": {"source_rows": 18667435, "cash_transfer_rows": 1405634, "invalid_transfer_destinations": 3, "unresolved_version_groups": 366, "latest_rows": 1404863, "memo_rows": 8971, "superseded_or_duplicate_rows": 0, "unresolved_rows": 774}, "edges": 185605, "seconds": 175.812}
+{"cycle": 2026, "counts": {"source_rows": 9898430, "cash_transfer_rows": 261142, "unresolved_version_groups": 155, "invalid_transfer_destinations": 1, "latest_rows": 260832, "memo_rows": 4201, "superseded_or_duplicate_rows": 0, "unresolved_rows": 311}, "edges": 149712, "seconds": 53.719}
+exit=0 finished 2026-09-19T00:09:05.6362279-04:00

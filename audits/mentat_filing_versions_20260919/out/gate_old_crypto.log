@@ -1,0 +1,15 @@
+﻿
+########## OLD CLASSIFIER | Crypto | rules v 5 ##########
+OLD gate would refuse (countable & unresolved): 65 
+NEW still unresolved (but counted and flagged) : 54 
+rows the commit resolved: 11 
+rows newly unresolved   : 0 
+
+disposition of the rows the commit resolved (old role -> new role):
+                          old             new     N
+                       <char>          <char> <int>
+1: unverified_disclosure_memo disclosure_memo     9
+2:   unverified_other_receipt   other_receipt     2
+
+old gate verdict on this database: REFUSED -> Receipt evidence unresolved for 65 rows (examples: 4010620251126152408, 4011120231681671902, 4011120231681671904, 4021420241824800141, 4021720221408980452, 4032920241888318958, 4032920241888319072, 4051420241923514552). Raw records are retained. Hydrate FEC metadata before publishing; no blanket exclusion is permitted. 
+DONE

@@ -1,0 +1,124 @@
+{
+  "alternative_rule_loss_dollars": 14200.0,
+  "alternative_rule_loss_share": 0.701235,
+  "blocked_edge_dollars": 4000.0,
+  "blocked_edge_share": 0.661157,
+  "built_seconds": 0.015,
+  "cache_hit": false,
+  "cache_json_bytes": 2116,
+  "cash_rows_by_status": {
+    "current": {
+      "dollars": 6050.0,
+      "rows": 4
+    },
+    "duplicate": {
+      "dollars": 1000.0,
+      "rows": 1
+    },
+    "unresolved_record": {
+      "dollars": 250.0,
+      "rows": 1
+    },
+    "unresolved_version": {
+      "dollars": 25050.0,
+      "rows": 8
+    }
+  },
+  "committed_rule_loss_dollars": 18200.0,
+  "committed_rule_loss_share": 0.898765,
+  "counts": {
+    "cash_transfer_rows": 15,
+    "invalid_transfer_destinations": 1,
+    "latest_rows": 5,
+    "malformed_rows": 1,
+    "memo_rows": 1,
+    "source_rows": 17,
+    "superseded_or_duplicate_rows": 1,
+    "unresolved_rows": 10,
+    "unresolved_version_groups": 4
+  },
+  "current_cash_edge_dollars": 6050.0,
+  "current_rows": 5,
+  "cycle": 2024,
+  "distinct_file_nums": 12,
+  "edge_source_committees": 3,
+  "edge_source_committees_unresolved": 1,
+  "edges": 4,
+  "edges_positive": 4,
+  "file_nums_needed_for_multi_file_groups": 7,
+  "files_before": {
+    "itoth.txt": 2240,
+    "transfer-index-v3-2024-9518e5a00c337955610e-73795724e552.json": 2382,
+    "transfer-index-v3-2024-9518e5a00c337955610e-73795724e552.sqlite": 36864
+  },
+  "filing_headers_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "header_dir": null,
+  "header_file_nums": [],
+  "headers_loaded": 0,
+  "itoth": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\\scratchpad\\v3_measure\\smoke\\itoth.txt",
+  "itoth_bytes": 2240,
+  "itoth_mtime": "2026-09-18T23:29:05",
+  "ledger_bytes": 24576,
+  "ledger_path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\\scratchpad\\v3_measure\\smoke\\transfer-index-v3-2024-9518e5a00c337955610e-4f53cda18c2b.sqlite",
+  "ledger_tables": {
+    "filing_headers": 0,
+    "records": 16,
+    "relevant_keys": 10
+  },
+  "measured_at": "2026-09-18T23:29:32-0400",
+  "module": {
+    "mtime": "2026-09-10T22:19:35",
+    "path": "C:\\Users\\pgoff\\Mentat\\mentat\\tools\\fec_transfer_graph.py",
+    "version": 3
+  },
+  "peak_scratch_bytes_beside_link": 65938,
+  "peak_scratch_detail": {
+    "transfer-index-v3-2024-9518e5a00c337955610e-4f53cda18c2b.json": 2116,
+    "transfer-index-v3-2024-9518e5a00c337955610e-4f53cda18c2b.sqlite": 24576,
+    "transfer-index-v3-2024-9518e5a00c337955610e-73795724e552.json": 2382,
+    "transfer-index-v3-2024-9518e5a00c337955610e-73795724e552.sqlite": 36864
+  },
+  "peak_working_set_bytes": null,
+  "source_sha256": "9518e5a00c337955610eb0a3195592982e4aaf0323470bf5e3cb01fb7e7c2d97",
+  "status_rows": {
+    "current": 5,
+    "duplicate": 1,
+    "unresolved_record": 1,
+    "unresolved_version": 9
+  },
+  "superseded_or_duplicate_rows": 1,
+  "top_blocked_sources": [
+    {
+      "committee_id": "C00000004",
+      "edges": 1,
+      "outgoing_current_dollars": 4000.0,
+      "reason": {
+        "unresolved_version": 2
+      },
+      "records": 1
+    }
+  ],
+  "unresolved_all_sources": false,
+  "unresolved_record_cash_dollars": 250.0,
+  "unresolved_record_rows": 1,
+  "unresolved_source_committees": 6,
+  "unresolved_version_groups_by_span": {
+    "multi_file": {
+      "cash_dollars": 23800.0,
+      "groups": 3,
+      "rows": 7
+    },
+    "single_file": {
+      "cash_dollars": 1250.0,
+      "groups": 1,
+      "rows": 2
+    }
+  },
+  "unresolved_version_rows": 9,
+  "v2_equivalent_edge_dollars": 20250.0,
+  "v2_style_winner_cash_dollars": 13950.0,
+  "v2_style_winner_rows": 4,
+  "wall_seconds": 0.062,
+  "withheld_ambiguous_cash_dollars_gross": 25300.0,
+  "withheld_ambiguous_cash_rows": 9
+}

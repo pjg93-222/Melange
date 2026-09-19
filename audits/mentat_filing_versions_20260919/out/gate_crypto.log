@@ -1,0 +1,40 @@
+﻿
+########## INDUSTRY: Crypto | DB: C:/Users/pgoff/AppData/Local/Temp/claude/C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1/72dc8732-42b9-4fb4-9b63-5cb0cba9d2db/scratchpad/v3_measure/gate/crypto/mentat.db ##########
+ruleset version: 5 
+gate source: C:/Users/pgoff/Mentat/mentat/R/collect.R fec_assert_receipt_evidence()
+raw_rows: 14839 
+rows in evidence_scope (2022/2024/2026): 14801 
+
+--- what the OLD (pre-7d364883e) gate refused: countable & unresolved role ---
+all rows: 54 | in evidence_scope: 54 
+                         role     N
+                       <char> <int>
+1:   unverified_other_receipt    46
+2: unverified_disclosure_memo     5
+3:    unverified_receipt_role     3
+
+receipt_role_reason breakdown (the flag readers now filter on):
+                      reason     N
+                      <char> <int>
+1:  unverified_other_receipt    46
+2: disclosure_memo_unmatched     5
+3:   unverified_receipt_role     3
+
+included-in-analysis status of those rows (spending_raw_report_rows view):
+  (no include_in_analysis column in this view)
+
+sub_ids of the unresolved rows (first 100):
+ [1] "4010620251126152408" "4051420241923514552" "4051620241949452158" "4051620241949452161" "4051620241949452163" "4051620241949452165" "4051620241949452167" "4051620241949454004" "4051620241949454006" "4052020251203279341" "4052220241950108327"
+[12] "4053020251204331514" "4062420241961970697" "4062420241961970699" "4101820242075566782" "4102020221589946691" "4102020221589946693" "4102120221590124862" "4102120221590124864" "4011120231681671901" "4011120231681671903" "4021420241824824839"
+[23] "4021420241824826863" "4030420261386079642" "4030420261386079658" "4030420261386079659" "4030420261386079660" "4030420261386079661" "4032020251180484992" "4032020251180484994" "4051420241923514551" "4051620241949452157" "4051620241949452159"
+[34] "4051620241949452160" "4051620241949452162" "4051620241949452164" "4051620241949452166" "4051620241949454003" "4051620241949454005" "4052020251203279340" "4052220241950108326" "4053020251204331513" "4062220261522023969" "4062420241961970696"
+[45] "4062420241961970698" "4081220242011729505" "4081520251218411849" "4081520251218411851" "4090920221575266502" "4102020221589946690" "4102020221589946692" "4102120221590124861" "4102120221590124863" "4120220241074132363"
+
+--- what the COMMITTED gate refuses: countable & self-contradicting ---
+all rows: 0 | in evidence_scope: 0 
+
+--- fec_assert_receipt_evidence() AS THE EXPORTER CALLS IT ---
+exporter scope  (raw_rows[evidence_scope]): PASSED (invisible TRUE) 
+report.R scope  (all raw_rows)          : PASSED (invisible TRUE) 
+
+DONE Crypto 

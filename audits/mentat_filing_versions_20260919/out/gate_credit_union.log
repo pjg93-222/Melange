@@ -1,0 +1,32 @@
+﻿
+########## INDUSTRY: Credit Union | DB: C:/Users/pgoff/AppData/Local/Temp/claude/C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1/72dc8732-42b9-4fb4-9b63-5cb0cba9d2db/scratchpad/v3_measure/gate/credit_union/mentat.db ##########
+ruleset version: 5 
+gate source: C:/Users/pgoff/Mentat/mentat/R/collect.R fec_assert_receipt_evidence()
+raw_rows: 67282 
+rows in evidence_scope (2022/2024/2026): 67169 
+
+--- what the OLD (pre-7d364883e) gate refused: countable & unresolved role ---
+all rows: 1 | in evidence_scope: 1 
+                       role     N
+                     <char> <int>
+1: unverified_other_receipt     1
+
+receipt_role_reason breakdown (the flag readers now filter on):
+                     reason     N
+                     <char> <int>
+1: unverified_other_receipt     1
+
+included-in-analysis status of those rows (spending_raw_report_rows view):
+  (no include_in_analysis column in this view)
+
+sub_ids of the unresolved rows (first 100):
+[1] "4011320251128197633"
+
+--- what the COMMITTED gate refuses: countable & self-contradicting ---
+all rows: 0 | in evidence_scope: 0 
+
+--- fec_assert_receipt_evidence() AS THE EXPORTER CALLS IT ---
+exporter scope  (raw_rows[evidence_scope]): PASSED (invisible TRUE) 
+report.R scope  (all raw_rows)          : PASSED (invisible TRUE) 
+
+DONE Credit Union 
