@@ -14,8 +14,7 @@
   const compact = n => Math.abs(n) >= 1e5
     ? Number(n).toLocaleString('en-US', {notation: 'compact', maximumFractionDigits: 1})
     : Number(n).toLocaleString('en-US', {maximumFractionDigits: 2});
-  const paneName = new URLSearchParams(location.search).get('studioPane');
-  const STORE = 'mentat-chart-studio-v1' + (/^[BCD]$/.test(paneName || '') ? '-pane-' + paneName : '');
+  const STORE = 'mentat-chart-studio-v1';
   const ZONES = [['columns', 'Columns'], ['rows', 'Rows'], ['color', 'Colour'], ['size', 'Size'],
     ['label', 'Label'], ['detail', 'Detail'], ['tooltip', 'Tooltip'], ['filters', 'Filters'], ['pages', 'Pages']];
   const AGG_LABEL = {sum: 'SUM', mean: 'AVG', count: 'COUNT', median: 'MEDIAN', min: 'MIN', max: 'MAX'};
@@ -2267,7 +2266,6 @@
     renderBoard();
     if (overviewMode) renderOverview();
     else if (!dataSourceTab && boardTiles() < 2) renderView();
-    window.dispatchEvent(new Event('mentat:studio-state'));
   }
 
   /* ------------------------------------------------------------- downloads */
@@ -2517,7 +2515,7 @@
         // because failing the whole open over a layout would lose the sheets too.
         const opened = core.normalizeBoard(full);
         board = opened && opened.tiles > 1 ? opened : null;
-        if (board) { syncBoardSelection(); if (!canvasOnly()) applyOptionsHidden(true); }
+        if (board) { syncBoardSelection(); if (!canvasOnly()) setOptionsHidden(true); }
         dataSourceTab = false;
       });
     } finally { holdingSavedId = false; }
@@ -2986,14 +2984,9 @@
     const was = overviewMode;
     overviewMode = mode === 'overview';
     if (overviewMode) el('inspection').hidden = true;
-    if (!overviewMode) applyOptionsHidden(mode === 'canvas');
+    if (!overviewMode) setOptionsHidden(mode === 'canvas');
     if (overviewMode !== was || (board && board.tiles > 1)) renderAll(); else syncViewMode();
   }
-  const applyOptionsHidden = hidden => {
-    const pane = window.MentatStudioPane;
-    if (pane && typeof pane.options === 'function') pane.options(hidden);
-    else setOptionsHidden(hidden);
-  };
   function setInspectorTab(name) {
     inspectorTab = ['marks', 'analytics', 'filters'].includes(name) ? name : 'marks';
     for (const id of ['marks', 'analytics', 'filters']) {
@@ -3310,21 +3303,10 @@
   window.addEventListener('hashchange', activate);
   try { el('show-hidden').checked = localStorage.getItem('mentat-chart-studio-show-identifiers') === '1'; } catch {}
   if(new URLSearchParams(location.search).has('worksheet'))el('source-mode').value='worksheet';
-  // Each comparison pane owns its normal chart state, request lifecycle and
-  // provenance. Only explicitly selected filters cross the pane boundary.
+  // What the rest of the console may ask this studio about its chart. The
+  // filter reader is also what a browser test reads the carried pills from.
   window.MentatStudioPane = {
     filters() { return (sheet().filters || []).map(f=>({...f,field:columns()[f.column]?.id || columns()[f.column]?.name})); },
-    applyFilters(incoming, fields) {
-      const before=JSON.stringify(sheet().filters), supported=new Set(columns().map(c=>c.id||c.name));
-      const allowed=fields.filter(f=>supported.has(f));
-      const next=(sheet().filters||[]).filter(f=>!allowed.includes(columns()[f.column]?.id||columns()[f.column]?.name));
-      for(const f of incoming)if(allowed.includes(f.field)){const {field,...value}=f;next.push({...value,column:columns().findIndex(c=>(c.id||c.name)===field)});}
-      if(JSON.stringify(next)!==before)commit(()=>{sheet().filters=next;});
-      return fields.filter(f=>!supported.has(f));
-    },
-    ready:()=>!!data,
-    options(hidden) { setOptionsHidden(hidden); },
-    setOptionsHidden,
     // The briefing drawer and the share dialog live in chart-briefing.js and
     // read the chart through the same one description the studio uses.
     currentChart,

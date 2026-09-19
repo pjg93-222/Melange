@@ -68,6 +68,13 @@ class ConsoleDeliveryTests(unittest.TestCase):
         self.assertEqual(json.loads(gzip.decompress(body)), {**fixture, 'industry': None})
         self.assertEqual(headers['Cache-Control'], 'no-store')
 
+    def test_the_retired_comparison_script_is_no_longer_served(self):
+        # The N charts strip was removed on 2026-09-19. A page held in a cache
+        # still asks for its script, and a 404 is the answer that keeps the
+        # strip gone; a silently served file would bring it back.
+        status, _, _ = self.request('/chart-comparison.js')
+        self.assertEqual(status, 404)
+
     def test_changed_asset_content_gets_new_identity(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)/'asset.js'; path.write_bytes(b'first')

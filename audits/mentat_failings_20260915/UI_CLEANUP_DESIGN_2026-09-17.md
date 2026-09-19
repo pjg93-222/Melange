@@ -217,10 +217,9 @@ own header, title and subtitle. Builder's toolbar is unchanged at one row, and `
 in Builder still starts at 613px (UI1's figure). Below 1000px the tiles stack in one column.
 
 **Known limits.**
-- The Board is not the older "1 chart / 2 charts / 3 charts / 4 charts" split strip above the
-  header, and both stay: the strip opens that many separate Chart Studio panes, each its own
-  console with its own data source, sheets and briefing, while the Board arranges the sheets of
-  one workspace in one pane, under one Inspector and one Export.
+- SUPERSEDED 2026-09-19: this limit named the older "1 chart / 2 charts / 3 charts / 4 charts"
+  split strip, which coexisted with the Board. Paul retired the strip that day and the Board is
+  now the only way to put more than one chart on one screen. Section 11.2 says what went with it.
 - A map only draws in the selected tile.
 - The board is a Canvas-mode arrangement: Builder and Company overview are exactly as they were.
 - Tile charts are drawn at tile width, so a long category label can crowd at 2 tiles and more at 4;
@@ -306,3 +305,76 @@ evidence snapshots the panes suite reads live under `PROJECT/.cache/pac-evidence
 report directory, so that suite is unaffected. Still spawning without one, and deliberately left
 alone: `tests/test_evidence_map_browser.cjs` (it passes only `MENTAT_GEOCODE_URL`) and
 `tests/test_audit_regressions.py:107`.
+
+### 11.2 The N charts strip is retired (2026-09-19)
+
+Paul's ruling, verbatim: "Remove the N charts strip, keep the Board". The strip was the row above
+the Chart Studio header from the 2026-09-13 redesign (`2906980d1`) - **1 chart | 2 charts |
+3 charts | 4 charts**, **Canvas only in every chart** and **Linked filters** - where each extra
+chart was a whole second console in an iframe of this same page at `?studioPane=B|C|D`. Gone with
+it: the **linked filters** (Company, Party, Contributor state, Recipient committee state,
+Candidate represented state), the **independent panes** with their own data source, sheets,
+briefing and downloads, and the **3-chart layout**, which only the strip offered - the Board
+draws 1, 2 or 4.
+
+What was deleted: `app/chart-comparison.js` (83 lines, the whole strip) and
+`tests/test_chart_comparison_browser.cjs` (every one of its assertions was a strip assertion).
+What was trimmed: the strip's `<script>` tag and its CSS (`.studio-comparison-*`,
+`.studio-count-toggle`, `.studio-filter-links`, `.studio-link-status`, `.studio-pane-tag`,
+`.studio-multi`, `.studio-embedded`); the "Chart A" pane pill; `chart-studio.js`'s per-pane store
+suffix, the `applyOptionsHidden` indirection, the pane half of `MentatStudioPane`
+(`applyFilters`, `ready`, `options`, `setOptionsHidden`) and the `mentat:studio-state` event the
+grid was the only listener for; and `server.py`'s `/chart-comparison.js` asset entry. Canvas mode
+stops forcing the quick-tools row visible, because the pane pill was the only thing it had to
+show there - otherwise Canvas would keep an empty ivory bar above the chart.
+
+What stayed, and where: the **chart variant** select is the one control the strip's script also
+carried, so it keeps its place above the shelves as markup in `index.html` rather than being put
+back in the Inspector - Builder is unchanged. The Board, Builder, Company overview, the
+Inspector, Views, the briefing and Graph's "Open in Chart Studio" hand-off and its reconciliation
+strip are untouched.
+
+**Storage.** No new key (D-039). The `mentat-chart-comparison-v1` entry and the per-pane
+`mentat-chart-studio-v1-pane-B|C|D` workspaces are no longer read or written; nothing deletes or
+migrates them, so a browser that holds one simply keeps it.
+
+**The URL.** `contracts/url_scope.json` is **v4**: `studioPane` is recorded RETIRED with no
+readers and no writers. It is *not* dropped on the next write - it is an ordinary unknown key, so
+`scope.js:merge` preserves it in place, which is what keeps an old bookmark working. A saved
+`?studioPane=B` now opens the ordinary Chart Studio with the whole navigation visible; the
+2026-09-13 defect was a top-level pane page with every tab hidden and no way back.
+
+**The server.** `frame-ancestors` was relaxed to `'self'` on 2026-09-13 so a pane could frame this
+same document. A census of the whole app found no other same-origin frame: the only
+`createElement('iframe')` was the strip's, `chart-studio.js:1431` says the Company overview uses
+none, PAC evidence panes are divs, and `chart-briefing.js:168` only strips iframes out of an SVG
+before export. So every response is back to `frame-ancestors 'none'` and the `frame_ancestors`
+parameter is gone from `Handler.send`.
+
+**Measured at 1440x900** (UI1's method: visible `button, select, input, a[role=button], summary`
+inside `#view-chart-studio`, and the top of `#studio-canvas`; one sheet, then a duplicate for
+Board 2):
+
+| | Controls before | Controls after | Chart top before | Chart top after |
+| --- | --- | --- | --- | --- |
+| Builder | 47 | 41 | 613px | 553px |
+| Canvas / Board 1 | 23 | 17 | 440px | 338px |
+| Board 2 | 27 | 21 | 506px | 404px |
+
+Six controls went everywhere - the four count buttons, "Canvas only in every chart" and the
+"Linked filters" disclosure - and the chart moved up 60px, the height of the strip row above the
+header. Canvas and the Board gain a further 42px: the quick-tools row was forced visible there to
+carry the "Chart A" pane pill, and with the pill gone its one remaining control is a Builder
+control, so Canvas puts the row away with the rest of the builder.
+
+**Tests.** New: `tests/test_studio_strip_removed_browser.cjs` (6 steps, a real console on a free
+ephemeral port with its own data root and report directory): the strip's controls and elements are
+absent and the page frames nothing; `/chart-comparison.js` answers 404 rather than being silently
+served; the Board still draws two tiles with two titles and two reconciliation lines;
+`?studioPane=B` opens the ordinary studio with all six tabs visible, not embedded, with the query
+preserved and no per-pane store written; the contract is v4; and none of it raises a page error, a
+console error or a refusal. Changed: `app/tests/scope.test.js` (v4, plus a retirement test),
+`tests/test_console_delivery.py` (the 404) and `tests/test_contribution_http.py` (every
+`?studioPane=` value gets `frame-ancestors 'none'`). Every assertion was recorded failing first in
+`receipts/UI3_strip_removal_red.txt`; the green run is `receipts/UI3_strip_removal_tests.txt`.
+Screenshots: `UI3_before_1440.png`, `UI3_after_1440.png`.

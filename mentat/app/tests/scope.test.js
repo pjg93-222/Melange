@@ -55,7 +55,7 @@ const writeExamples = contract.examples.filter(example => example.write);
 
 test('[url_scope] the contract itself is shaped the way contracts/README.md requires', () => {
   assert.equal(contract.contract, 'url_scope');
-  assert.equal(contract.version, 3);
+  assert.equal(contract.version, 4);
   assert.equal(contract.owner, 'S5; pane keys S6');
   assert.ok(contract.produced_by.length >= 1, 'produced_by lists every producer');
   assert.ok(contract.consumed_by.length >= 1, 'consumed_by lists every consumer');
@@ -139,6 +139,21 @@ test('[url_scope] write() preserves unknown keys and their order, and appends ne
   }
   assert.ok(state.location.search.includes('evidence=csv'));
   assert.ok(state.location.search.includes('offset=40'));
+});
+
+test('[url_scope] studioPane is retired: never read, never written, never dropped', () => {
+  // v4, 2026-09-19. Paul removed the N charts strip, so the key that chose a
+  // pane's store belongs to nothing. It is not added to KEYS and it is not
+  // special-cased away either: an old bookmark keeps working because write()
+  // preserves every key this module does not own.
+  assert.ok(!scope.KEYS.includes('studioPane'), 'studioPane is not a key scope.js owns');
+  assert.match(contract.keys.studioPane.value, /^RETIRED/);
+  assert.deepStrictEqual(contract.keys.studioPane.readers, [], 'the contract names no reader');
+  assert.deepStrictEqual(contract.keys.studioPane.writers, [], 'and no writer');
+  assert.deepStrictEqual(scope.read('industry=Banking&studioPane=B'), {industry: 'Banking', invalid: []});
+  const state = fakeWindow('/?studioPane=B&industry=Banking#chart-studio');
+  scope.write({cycle: '2024'}, {location: state.location, history: state.history, target: state.events});
+  assert.equal(state.location.search, '?studioPane=B&industry=Banking&cycle=2024');
 });
 
 test('[url_scope] write() never writes a reserved key, even when asked', () => {

@@ -1,10 +1,10 @@
 # Comparing charts
 
-Use the **1 chart / 2 charts / 3 charts / 4 charts** buttons in Chart Studio. Four charts use a two-by-two grid; narrow screens stack them. Reducing the count hides the extra charts and preserves their settings. Each chart keeps its own sheets, source, accounting basis, chart variant, filters, query results, inspection state, and downloads.
+Retired on 19 September 2026. The **1 chart / 2 charts / 3 charts / 4 charts** buttons, **Canvas only in every chart** and **Linked filters** are gone, and so are the separate chart panes they opened.
 
-**Hide all options** creates a comparison view. **Show options** on a chart reopens its editor. The Chart variant selector uses the existing supported chart families; field requirements still apply to each variant.
+To put more than one chart on one screen, switch Chart Studio to **Canvas** and choose **Board 1**, **2** or **4**. Each tile shows one sheet of this workspace, with its own title, scope and reconciliation line, under one Inspector and one Export. A saved link that still carries `?studioPane=B` opens the ordinary Chart Studio.
 
-Open **Linked filters** to link Company, Party, Contributor state, Recipient committee state, or Candidate represented state. Company is linked initially. Turning a link on copies Chart A's filter to the other visible charts; later changes in any visible chart propagate that selected filter. Cycles and unselected filters remain independent. Unsupported fields are reported, not substituted. Each chart uses its own axis scale.
+The **Chart variant** selector above the shelves is unchanged: it uses the existing supported chart families, and field requirements still apply to each variant.
 
 # State destinations
 

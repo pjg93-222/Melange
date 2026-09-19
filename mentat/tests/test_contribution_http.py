@@ -342,6 +342,18 @@ class ContributionHTTPTests(unittest.TestCase):
         self.query.assert_not_called()
         self.records.assert_not_called()
 
+    def test_a_retired_pane_url_is_framed_by_nobody(self):
+        # The 2026-09-13 split view relaxed frame-ancestors to 'self' for
+        # /?studioPane=B|C|D so a pane could frame this same document. The strip
+        # was retired on 2026-09-19 and nothing frames this console any more, so
+        # every response is back to 'none' - including the old pane URL.
+        for path in ('/', '/?studioPane=B', '/?studioPane=C', '/?studioPane=D', '/?studioPane=E'):
+            with self.subTest(path=path):
+                status, headers, _ = self.request(path)
+                self.assertEqual(status, 200)
+                self.assertIn("frame-ancestors 'none'", headers["Content-Security-Policy"])
+                self.assertNotIn("frame-ancestors 'self'", headers["Content-Security-Policy"])
+
     def test_the_vendor_powerpoint_bundle_is_served_at_its_pinned_hash(self):
         status, headers, body = self.request('/vendor/pptxgen.bundle.js')
         self.assertEqual(status, 200)

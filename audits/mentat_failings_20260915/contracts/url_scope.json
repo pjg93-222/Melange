@@ -1,6 +1,6 @@
 {
   "contract": "url_scope",
-  "version": 3,
+  "version": 4,
   "owner": "S5; pane keys S6",
   "produced_by": [
     "mentat/app/scope.js:write",
@@ -19,7 +19,7 @@
     "mentat/app/cross-reference.js:refresh (industry -> GET /api/cross-reference?industry=)",
     "mentat/app/evidence.js:restorePanes (a.* - d.*, category), after GET /api/evidence-csv and GET /api/evidence have answered, the same pattern graph.js:applyUrlScope uses"
   ],
-  "description": "The console's URL scheme. The hash names the tab (app.js showView) and the query string carries the scope, so a permalink, a reload and a tab switch are one operation. Values are encodeURIComponent-encoded and decoded with URLSearchParams; keys are plain. write() merges into the live query: an empty value removes its key, unknown keys are preserved in place, existing keys keep their order and new keys append. A value write() would refuse is never put in the URL, so anything read() rejects could only have been typed by hand. Tab switches stay on history.replaceState (Paul's ruling C); pushState is never used. Orientation only - the examples are the contract. v2 (S6, 2026-09-17): up to four PAC evidence panes, each addressed by a PREFIXED key (a.source, a.id, a.committee, a.cycle ... d.*) so `cycle` goes on belonging to Graph and \"whose cycle is this?\" stays answerable. The pane's search text is transient and is never written; `category` carries the committee-type filter in the same spelling Graph uses. A fifth prefix is not a key this module knows, so e.id is preserved in the query and never read as scope. v3 (S8, 2026-09-18): a.map carries the district map's direction ('raised' | 'spent') on each pane; absent means the pane grid is showing.",
+  "description": "The console's URL scheme. The hash names the tab (app.js showView) and the query string carries the scope, so a permalink, a reload and a tab switch are one operation. Values are encodeURIComponent-encoded and decoded with URLSearchParams; keys are plain. write() merges into the live query: an empty value removes its key, unknown keys are preserved in place, existing keys keep their order and new keys append. A value write() would refuse is never put in the URL, so anything read() rejects could only have been typed by hand. Tab switches stay on history.replaceState (Paul's ruling C); pushState is never used. Orientation only - the examples are the contract. v2 (S6, 2026-09-17): up to four PAC evidence panes, each addressed by a PREFIXED key (a.source, a.id, a.committee, a.cycle ... d.*) so `cycle` goes on belonging to Graph and \"whose cycle is this?\" stays answerable. The pane's search text is transient and is never written; `category` carries the committee-type filter in the same spelling Graph uses. A fifth prefix is not a key this module knows, so e.id is preserved in the query and never read as scope. v3 (S8, 2026-09-18): a.map carries the district map's direction ('raised' | 'spent') on each pane; absent means the pane grid is showing. v4 (UI3, 2026-09-19): `studioPane` is RETIRED. Paul removed the N charts strip that addressed it (\"Remove the N charts strip, keep the Board\"), so no module reads or writes the key any more. It is not dropped: it is an ordinary unknown key, preserved in place by write(), so a bookmark that still carries one opens the ordinary console with the whole navigation visible.",
   "keys": {
     "industry": {
       "value": "The published industry label exactly as the snapshot registry lists it (S4 HANDOFF: 'Credit Union', 'Property & Casualty Insurance'). Any non-empty string; the label, never the slug. URL-encoded, so '&' survives.",
@@ -119,13 +119,9 @@
       ]
     },
     "studioPane": {
-      "value": "PRE-EXISTING, unchanged by S5: B, C or D selects a Chart Studio comparison pane's localStorage store (chart-studio.js:17). scope.js never writes it and never removes it - it is one of the unknown keys write() preserves in place.",
-      "writers": [
-        "the reader, by hand, and chart-comparison.js's pane frames"
-      ],
-      "readers": [
-        "mentat/app/chart-studio.js:17"
-      ]
+      "value": "RETIRED 2026-09-19. It named one of the split view's Chart Studio panes - B, C or D - and chose that pane's own localStorage store. The strip that opened those panes was removed on Paul's ruling, so nothing reads this key and nothing writes it. It is kept in this table only so a reader who finds one in an old bookmark can learn what it was; it is not part of the vocabulary, scope.js does not own it, and write() preserves it in place exactly as it preserves any other unknown key.",
+      "writers": [],
+      "readers": []
     },
     "a.source": {
       "value": "Pane A. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
@@ -407,7 +403,7 @@
     },
     {
       "name": "write_merge_remove_on_empty_and_preserve_unknown",
-      "why": "The two write() rules in one example: an empty value removes its key, an unknown key (studioPane, S6's future keys) is preserved untouched and keeps its place. Existing keys keep their order; a new key appends.",
+      "why": "The two write() rules in one example: an empty value removes its key, an unknown key (the retired studioPane, S6's future keys) is preserved untouched and keeps its place. Existing keys keep their order; a new key appends. This is also what keeps an old pane bookmark readable after v4.",
       "write": {
         "before": "/?industry=Banking&company=X&studioPane=B#graph",
         "partial": {

@@ -123,7 +123,6 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  '/chart-studio-core.js': ('chart-studio-core.js', 'text/javascript'),
                  '/chart-studio-contributions.js': ('chart-studio-contributions.js', 'text/javascript'),
                  '/chart-studio.js': ('chart-studio.js', 'text/javascript'),
-                 '/chart-comparison.js': ('chart-comparison.js', 'text/javascript'),
                  '/chart-studio.css': ('chart-studio.css', 'text/css'),
                  '/theme.js': ('theme.js', 'text/javascript'),
                  '/chart-briefing.js': ('chart-briefing.js', 'text/javascript'),
@@ -2261,8 +2260,7 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *_):
         pass
 
-    def send(self, value, status=200, content_type="application/json", *, cache_control="no-store", etag=None,
-             frame_ancestors="'none'"):
+    def send(self, value, status=200, content_type="application/json", *, cache_control="no-store", etag=None):
         content = json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode() if content_type == "application/json" else value
         compressible = content_type.startswith(('application/json', 'text/', 'image/svg+xml'))
         compressed = compressible and status != 304 and len(content) >= 2048 and accepts_gzip(self.headers.get('Accept-Encoding'))
@@ -2280,7 +2278,7 @@ class Handler(BaseHTTPRequestHandler):
         if etag:
             self.send_header('ETag', etag)
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Content-Security-Policy", "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors " + frame_ancestors)
+        self.send_header("Content-Security-Policy", "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors 'none'")
         self.end_headers()
         self.wfile.write(content)
 
@@ -2555,13 +2553,8 @@ class Handler(BaseHTTPRequestHandler):
                 if (current.st_size, current.st_mtime_ns, current.st_ctime_ns) != (info.st_size, info.st_mtime_ns, info.st_ctime_ns):
                     return self.send({'error':'The interface changed while loading. Refresh the page.'}, 409)
                 unchanged = etag in [tag.strip() for tag in self.headers.get('If-None-Match', '').split(',')]
-                # A Chart Studio comparison pane is this same document framed by
-                # this same origin. Only that document may be framed, and only
-                # by itself; every other response keeps frame-ancestors 'none'.
-                pane = parsed.path == '/' and query.get('studioPane', [''])[0] in ('B', 'C', 'D')
                 return self.send(b'' if unchanged else content, 304 if unchanged else 200,
-                                 content_type=mime, cache_control='private, no-cache', etag=etag,
-                                 frame_ancestors="'self'" if pane else "'none'")
+                                 content_type=mime, cache_control='private, no-cache', etag=etag)
             return self.send({"error": "Not found."}, 404)
         except (ValueError, OSError, KeyError, zipfile.BadZipFile) as error:
             return self.send({"error": str(error)}, 400)

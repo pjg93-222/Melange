@@ -1,0 +1,67 @@
+UI3 - retire the N charts strip. MEASUREMENTS, 1440x900.
+
+Taken by an explicit scratch script (scratchpad/strip/measure.js), never by a
+suite: each run spawns its own console with `python app/server.py` on a free
+ephemeral port, its own throwaway --data-root and its own throwaway
+MENTAT_REPORT_DIRECTORY, and writes only into the scratchpad. Ports 8801,
+8802, 8806, 8808 and 8841 are excluded by the picker.
+
+BEFORE is a pristine byte copy of C:\Users\pgoff\Mentat at 59a87a70b; AFTER is
+the same copy with this lane's edits. Same script, same fixtures, same box.
+
+Method is UI1's, verbatim (receipts/UI1_counts.txt): visible
+`button, select, input, a[role=button], summary` inside #view-chart-studio, and
+the top of #studio-canvas. It reproduces UI1's Builder figures exactly (47
+controls, 613px) and section 11's Board 2 drawing top (506px), so the before
+and after rows are comparable to the earlier receipts as well as to each other.
+
+                     | controls before | after | chart top before | after
+  Builder            |              47 |    41 |            613px | 553px
+  Canvas / Board 1   |              23 |    17 |            440px | 338px
+  Board 2            |              27 |    21 |            506px | 404px
+
+Six controls left every surface: the four count buttons, "Canvas only in every
+chart" and the "Linked filters" disclosure. The chart moved up 60px everywhere,
+the height of the strip row above the header. Canvas and the Board gained a
+further 42px: the quick-tools row was forced visible there only to carry the
+"Chart A" pane pill, and with the pill gone Canvas puts the row away with the
+rest of the builder.
+
+Board 2 kept two tiles, two titles and two reconciliation lines in both runs.
+A saved ?studioPane=B opened the ordinary console with all six tabs visible in
+both runs; what changed is the header it is served with - frame-ancestors
+'self' before, 'none' after.
+
+Screenshots: UI3_before_1440.png and UI3_after_1440.png are Builder. The
+scratchpad also holds the Canvas, Board 2 and ?studioPane=B frames of each run.
+
+---------------------------------------------------------------- BEFORE - the pristine tree
+=== before === tree C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\scratchpad\strip\work-before\mentat
+method: visible button, select, input, a[role=button], summary inside #view-chart-studio (UI1_counts.txt)
+before Builder 1440x900: visible controls 47, #studio-canvas top 613px, first drawing top 613px, title "Published included receipts by Company"
+before Builder strip census: comparison toolbars 1, comparison grids 1, pane tags 1, count toggles 1, linked-filter blocks 1, iframes 0, strip control labels ["1 chart","2 charts","3 charts","4 charts","Canvas only in every chart","Linked filters"]
+before Canvas / Board 1 1440x900: visible controls 23, canvas top 440px, first drawing top 440px
+before Board 2 1440x900: visible controls 27, board top 387px, first drawing top 506px, tiles 2, drawings 2
+before Board 2 titles: ["Published included receipts by Company","Published included receipts by Company"]
+before Board 2 reconciliation lines: ["Graph shows $1,200,318,112.00 for All companies · All cycles. Studio shows $12,003,181.12. They differ by $1,188,314,930.88 because the workbook version differs. Why Cross-reference differs","Graph shows $1,200,318,112.00 for All companies · All cycles. Studio shows $12,003,181.12. They differ by $1,188,314,930.88 because the workbook version differs. Why Cross-reference differs"]
+before ?studioPane=B: navigation visible true, heading visible true, studio-embedded false, tabs ["Loading","Collection","Graph","Chart Studio","Cross-reference","PAC evidence"], query "?industry=Banking&studioPane=B"
+before CSP on /?studioPane=B: default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors 'self'
+before page errors: []
+before console errors: []
+before responses >= 400: []
+
+---------------------------------------------------------------- AFTER - this lane's tree
+=== after === tree C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\scratchpad\strip\work\mentat
+method: visible button, select, input, a[role=button], summary inside #view-chart-studio (UI1_counts.txt)
+after Builder 1440x900: visible controls 41, #studio-canvas top 553px, first drawing top 553px, title "Published included receipts by Company"
+after Builder strip census: comparison toolbars 0, comparison grids 0, pane tags 0, count toggles 0, linked-filter blocks 0, iframes 0, strip control labels []
+after Canvas / Board 1 1440x900: visible controls 17, canvas top 338px, first drawing top 338px
+after Board 2 1440x900: visible controls 21, board top 284px, first drawing top 404px, tiles 2, drawings 2
+after Board 2 titles: ["Published included receipts by Company","Published included receipts by Company"]
+after Board 2 reconciliation lines: ["Graph shows $1,200,318,112.00 for All companies · All cycles. Studio shows $12,003,181.12. They differ by $1,188,314,930.88 because the workbook version differs. Why Cross-reference differs","Graph shows $1,200,318,112.00 for All companies · All cycles. Studio shows $12,003,181.12. They differ by $1,188,314,930.88 because the workbook version differs. Why Cross-reference differs"]
+after ?studioPane=B: navigation visible true, heading visible true, studio-embedded false, tabs ["Loading","Collection","Graph","Chart Studio","Cross-reference","PAC evidence"], query "?industry=Banking&studioPane=B"
+after CSP on /?studioPane=B: default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors 'none'
+after page errors: []
+after console errors: []
+after responses >= 400: []
+

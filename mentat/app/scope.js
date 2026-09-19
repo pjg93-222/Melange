@@ -17,7 +17,8 @@
   // saved snapshot), `a.id` the import id or the snapshot directory name,
   // `a.committee` the FEC committee, `a.cycle` its cycle. A fifth prefix is not
   // a key this module knows, so `e.id` is preserved in the query and never read
-  // as scope - the same treatment studioPane gets.
+  // as scope - the same treatment the retired studioPane gets (v4, 2026-09-19:
+  // the N charts strip that wrote it is gone, and nothing reads it now).
   const PANES = ['a', 'b', 'c', 'd'];
   // S8 adds `map`: the direction of the district map open on that pane
   // ('raised' or 'spent'). Absent means the pane grid is showing, so an
@@ -121,8 +122,8 @@
   // Merge a partial scope into a live query string. An empty, null or
   // undefined value removes its key; a value this module would refuse to read
   // back removes it too, so the URL can never carry something read() rejects.
-  // Every other key in the query - studioPane, S6's reserved keys, anything a
-  // future session adds - is preserved untouched and keeps its place.
+  // Every other key in the query - the retired studioPane, S6's reserved keys,
+  // anything a future session adds - is preserved untouched and keeps its place.
   function merge(search, partial) {
     const pairs = entries(search);
     const changes = partial || {};

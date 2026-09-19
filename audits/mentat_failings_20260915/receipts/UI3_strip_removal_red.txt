@@ -1,0 +1,77 @@
+UI3 - retire the N charts strip. RED RUN.
+Paul's ruling 2026-09-19: "Remove the N charts strip, keep the Board".
+Recorded in the scratch build before any app code changed, in the order
+contracts/README.md "Changing a contract" asks for: the JSON moves first,
+both suites are re-run, and they are expected red.
+
+---------------------------------------------------------------- 1. url_scope.json v3 -> v4; the node contract suite
+=== RED: node --test app/tests/**/*.test.js (url_scope contract moved to v4) ===
+✖ [url_scope] the contract itself is shaped the way contracts/README.md requires (2.6715ms)
+ℹ pass 194
+ℹ fail 1
+✖ [url_scope] the contract itself is shaped the way contracts/README.md requires (2.6715ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+    actual: 4,
+    expected: 3,
+
+---------------------------------------------------------------- 2. the python HTTP suites
+=== RED: python -m unittest test_console_delivery test_contribution_http ===
+AssertionError: 200 != 404
+
+======================================================================
+FAIL: test_a_retired_pane_url_is_framed_by_nobody (test_contribution_http.ContributionHTTPTests.test_a_retired_pane_url_is_framed_by_nobody) (path='/?studioPane=B')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\scratchpad\strip\work\mentat\tests\test_contribution_http.py", line 354, in test_a_retired_pane_url_is_framed_by_nobody
+    self.assertIn("frame-ancestors 'none'", headers["Content-Security-Policy"])
+AssertionError: "frame-ancestors 'none'" not found in "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors 'self'"
+
+======================================================================
+FAIL: test_a_retired_pane_url_is_framed_by_nobody (test_contribution_http.ContributionHTTPTests.test_a_retired_pane_url_is_framed_by_nobody) (path='/?studioPane=C')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\scratchpad\strip\work\mentat\tests\test_contribution_http.py", line 354, in test_a_retired_pane_url_is_framed_by_nobody
+    self.assertIn("frame-ancestors 'none'", headers["Content-Security-Policy"])
+AssertionError: "frame-ancestors 'none'" not found in "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors 'self'"
+
+======================================================================
+FAIL: test_a_retired_pane_url_is_framed_by_nobody (test_contribution_http.ContributionHTTPTests.test_a_retired_pane_url_is_framed_by_nobody) (path='/?studioPane=D')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\scratchpad\strip\work\mentat\tests\test_contribution_http.py", line 354, in test_a_retired_pane_url_is_framed_by_nobody
+    self.assertIn("frame-ancestors 'none'", headers["Content-Security-Policy"])
+AssertionError: "frame-ancestors 'none'" not found in "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors 'self'"
+
+----------------------------------------------------------------------
+Ran 29 tests in 1.589s
+
+FAILED (failures=4)
+
+---------------------------------------------------------------- 3. the new browser suite, against the strip still in place
+=== RED: node tests/test_studio_strip_removed_browser.cjs ===
++ [
++   '1 chart',
++   '2 charts',
++   '3 charts',
++   '4 charts',
++   'Canvas only in every chart',
++   'Linked filters'
++ ]
+- []
+
+AssertionError [ERR_ASSERTION]: no strip control label may remain on the page
++ actual - expected
+
++ [
++   '1 chart',
++   '2 charts',
++   '3 charts',
++   '4 charts',
++   'Canvas only in every chart',
++   'Linked filters'
++ ]
+- []
+
+    at C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\scratchpad\strip\work\mentat\tests\test_studio_strip_removed_browser.cjs:289:12
+RESULT: FAILED after 0 passing steps
+

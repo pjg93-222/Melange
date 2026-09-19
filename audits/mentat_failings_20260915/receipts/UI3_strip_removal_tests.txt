@@ -1,0 +1,43 @@
+UI3 - retire the N charts strip. GREEN, FINAL SWEEP ON THE REAL TREE.
+Tree: C:\Users\pgoff\Mentat (codex/mentat-crypto), after the copy-back.
+Each browser suite spawns its own console on a free ephemeral port with a
+throwaway data root; 8801, 8802, 8806, 8808 and 8841 are excluded.
+Started 2026-09-19T14:21:50
+
+PASS rc=0    3s  node --test "app/tests/**/*.test.js"
+
+PASS rc=0    0s  node tests/test_chart_studio_contributions.cjs
+PASS rc=0    0s  node tests/test_contribution_studio.cjs
+PASS rc=0   61s  node tests/test_contribution_studio_map_browser.cjs
+PASS rc=0  114s  node tests/test_contribution_studio_state_browser.cjs
+PASS rc=0   36s  node tests/test_original_studio_contributions_browser.cjs
+PASS rc=0   81s  node tests/test_studio_board_browser.cjs
+          RESULT: 19/19 steps passed, exit 0
+PASS rc=0   69s  node tests/test_studio_briefing_tray_browser.cjs
+PASS rc=0   54s  node tests/test_studio_canvas_only_browser.cjs
+PASS rc=0   44s  node tests/test_studio_click_to_add_browser.cjs
+PASS rc=0   54s  node tests/test_studio_copy_print_browser.cjs
+PASS rc=0   36s  node tests/test_studio_data_source_browser.cjs
+PASS rc=0   75s  node tests/test_studio_industry_browser.cjs
+PASS rc=0   43s  node tests/test_studio_inspection_regression_browser.cjs
+PASS rc=0   76s  node tests/test_studio_reconciliation_browser.cjs
+PASS rc=0  131s  node tests/test_studio_ride1_browser.cjs
+PASS rc=0   33s  node tests/test_studio_strip_removed_browser.cjs
+          RESULT: 6 of 6 steps passed
+PASS rc=0   41s  node tests/test_studio_temporal_regression_browser.cjs
+PASS rc=0    0s  node tests/test_studio_wording.cjs
+PASS rc=0   87s  node tests/test_studio_worksheet_guard_browser.cjs
+PASS rc=0   10s  node tests/test_ui_cleanup_browser.cjs
+          RESULT: 12/12 steps passed, exit 0
+PASS rc=0   43s  node tests/test_navigation_scope_browser.cjs
+PASS rc=0   44s  node tests/test_console_browser.cjs
+PASS rc=0   49s  node tests/test_chart_builder_browser.cjs
+PASS rc=0   43s  node tests/test_evidence_panes_browser.cjs
+PASS rc=0   45s  node tests/test_evidence_map_browser.cjs
+PASS rc=0    5s  node tests/test_contribution_map_browser.cjs
+
+PASS rc=0    5s  python -m unittest test_studio_views test_studio_contract_examples test_studio_briefing test_console_delivery test_contribution_http  (cwd mentat/tests)
+          Ran 57 tests in 5.112s
+          OK
+
+Finished 2026-09-19T14:43:28; worst exit code 0

@@ -4,7 +4,7 @@
 <title>MENTAT</title>
 <link rel="icon" type="image/svg+xml" href="/mentat-icon.svg">
 <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/graph.css"><link rel="stylesheet" href="/comparison.css"><link rel="stylesheet" href="/acu-theme.css"><link rel="stylesheet" href="/cross-reference.css"><link rel="stylesheet" href="/workspace.css"><link rel="stylesheet" href="/chart-studio.css"><link rel="stylesheet" href="/chart-briefing.css">
-<script src="/theme.js" defer></script><script src="/chart-export.js" defer></script><script src="/chart-math.js" defer></script><script src="/ui-state.js" defer></script><script src="/coverage-view.js" defer></script><script src="/scope.js" defer></script><script src="/app.js" defer></script><script src="/grouped-chart.js" defer></script><script src="/charts.js" defer></script><script src="/graph.js" defer></script><script src="/comparison.js" defer></script><script src="/funding-comparison.js" defer></script><script src="/chart-studio-core.js" defer></script><script src="/contribution-plot.js" defer></script><script src="/contribution-charts.js" defer></script><script src="/contribution-map.js" defer></script><script src="/chart-studio-contributions.js" defer></script><script src="/chart-studio.js" defer></script><script src="/chart-briefing.js" defer></script><script src="/chart-comparison.js" defer></script>
+<script src="/theme.js" defer></script><script src="/chart-export.js" defer></script><script src="/chart-math.js" defer></script><script src="/ui-state.js" defer></script><script src="/coverage-view.js" defer></script><script src="/scope.js" defer></script><script src="/app.js" defer></script><script src="/grouped-chart.js" defer></script><script src="/charts.js" defer></script><script src="/graph.js" defer></script><script src="/comparison.js" defer></script><script src="/funding-comparison.js" defer></script><script src="/chart-studio-core.js" defer></script><script src="/contribution-plot.js" defer></script><script src="/contribution-charts.js" defer></script><script src="/contribution-map.js" defer></script><script src="/chart-studio-contributions.js" defer></script><script src="/chart-studio.js" defer></script><script src="/chart-briefing.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#workspace-main">Skip to workspace</a>
@@ -233,6 +233,7 @@
 </aside>
 
 <div class="studio-view">
+<div class="studio-quick-tools"><label for="studio-mark">Chart variant<select id="studio-mark"></select></label></div>
 <div class="studio-shelves" id="studio-shelves">
 <div class="studio-shelf"><span class="studio-shelf-name" id="studio-columns-name">Columns</span><div id="studio-columns" class="studio-drop" data-placeholder="Drop a field here" aria-labelledby="studio-columns-name"></div></div>
 <div class="studio-shelf"><span class="studio-shelf-name" id="studio-rows-name">Rows</span><div id="studio-rows" class="studio-drop" data-placeholder="Drop a field here" aria-labelledby="studio-rows-name"></div></div>
@@ -264,7 +265,6 @@
 </div>
 <div class="studio-pane" id="studio-pane-marks" role="tabpanel" aria-labelledby="studio-tab-marks">
 <h3>Marks</h3>
-<label for="studio-mark">Mark type<select id="studio-mark"></select></label>
 <div class="studio-mark-props">
 <div class="studio-prop"><span>Colour</span><div id="studio-color" class="studio-drop" data-placeholder="Colour" aria-label="Colour property"></div></div>
 <div class="studio-prop"><span>Size</span><div id="studio-size" class="studio-drop" data-placeholder="Size" aria-label="Size property"></div></div>
