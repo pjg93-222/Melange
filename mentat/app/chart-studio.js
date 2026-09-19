@@ -1532,7 +1532,8 @@
       const measure = ((result.columns.find(c => c.id === id) || {}).name || id) + (currency ? ' (USD)' : '');
       const drawn = paint.chartSVG({type: spec.type, groups: groups, selected: result.totals.records, excluded: 0},
         measure, {type: spec.type, aggregation: 'sum', x: 0, y: 1},
-        {columns: [{name: 'Group'}, {name: id}]}, preset.title, '');
+        {sheet: (dataset() || {}).label || (dataset() || {}).id || '', columns: [{name: 'Group'}, {name: id}]},
+        preset.title, '');
       body.append(drawn.svg);
     } else if (MentatContributionCharts.TYPES.includes(spec.type)) {
       MentatContributionCharts.render(body, result.rows, spec, () => {});

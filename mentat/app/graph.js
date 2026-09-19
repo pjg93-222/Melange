@@ -1,6 +1,50 @@
 /* Guided Graph section: read-only, same-origin report queries and local SVG. */
 (() => {
   'use strict';
+
+  /* ----------------------------------------------------- pure row geometry
+     One account of where a bar row's six columns are, shared by the drawing
+     below and by app/tests/graph-layout.test.js. Keeping it pure is what lets
+     the invariant be asserted without a browser: the dot, label, bar, value,
+     share and sparkline boxes are pairwise disjoint and all inside [0, W].
+     Painting a panel needs a document; this geometry does not, so node:test
+     loads the file for the geometry and stops at the guard below. */
+  const SPARK_W = 54, SPARK_GAP = 10, SHARE_W = 44, VALUE_GAP = 10;
+  const BAR_MIN = 48, DOT_COL = 18, DOT_CX = 8, LABEL_SIZE = 12.5;
+  function layoutColumns(width, options) {
+    const opts = options || {};
+    const W = Math.max(420, Math.min(760, Math.round(Number(width) || 520)));
+    const sparkWidth = opts.spark ? SPARK_W : 0, sparkGap = opts.spark ? SPARK_GAP : 0;
+    const sparkX = W - 4 - sparkWidth;
+    // The share is anchored to the column the layout reserves for it, never to
+    // the panel edge: that unconditional edge is how the percentage ended up
+    // underneath the sparkline it was supposed to sit beside.
+    const shareRight = W - 4 - sparkWidth - sparkGap;
+    const valueRight = shareRight - SHARE_W;
+    // The same label column in every panel, so bars line up between stacked
+    // cards instead of each panel starting its bars at its own fraction.
+    const labelRight = Math.max(120, Math.min(220, Math.round(W * 0.30)));
+    const barLeft = labelRight + 8;
+    const dotColumn = opts.party ? DOT_COL : 0;
+    // A value column cannot eat the bar: what is left once the minimum bar and
+    // its gutter are taken is the widest value column this width can carry.
+    const room = Math.max(0, valueRight - barLeft - BAR_MIN - VALUE_GAP);
+    const valueWidth = Math.max(0, Math.min(Number(opts.valueWidth) || 0, room));
+    const barMax = Math.max(BAR_MIN, valueRight - valueWidth - VALUE_GAP - barLeft);
+    return {width: W, dotColumn: dotColumn, dotCX: DOT_CX,
+      labelLeft: dotColumn, labelRight: labelRight, labelWidth: labelRight - dotColumn,
+      barLeft: barLeft, barMax: barMax,
+      valueRight: valueRight, valueWidth: valueWidth,
+      shareRight: shareRight, shareWidth: SHARE_W,
+      sparkX: sparkX, sparkWidth: sparkWidth, labelSize: LABEL_SIZE};
+  }
+  const layout = {layoutColumns: layoutColumns, SPARK_W: SPARK_W, SPARK_GAP: SPARK_GAP,
+    SHARE_W: SHARE_W, VALUE_GAP: VALUE_GAP, BAR_MIN: BAR_MIN, DOT_COL: DOT_COL,
+    DOT_CX: DOT_CX, LABEL_SIZE: LABEL_SIZE};
+  if (typeof module !== 'undefined' && module.exports) module.exports = layout;
+  globalThis.MentatGraphLayout = layout;
+  if (typeof document === 'undefined') return;
+
   const get = name => document.getElementById('graph-' + name);
   const dollars = n => Number(n).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2});
   const titleFor = {categories:'Recipient types',organizations:'Top organizations',candidates:'Top candidates',companies:'Company comparison',levels:'Giving by employee level'};
@@ -168,11 +212,9 @@
     // candidate link are an aside about the denominator, so they became the
     // tooltip on the candidates panel's information mark instead of a second
     // sentence of prose under the chart.
-    const unresolved=view.filters.mode==='direct'&&view.totals.unresolved_candidate_links!==0
+    unresolvedNote=view.filters.mode==='direct'&&view.totals.unresolved_candidate_links!==0
       ? `${dollars(view.totals.unresolved_candidate_links)} in candidate-category receipts has no unique authorized candidate link and is excluded from these rankings.`
       : '';
-    const mark=get('unresolved');
-    mark.hidden=!unresolved;mark.title=unresolved;mark.setAttribute('aria-label',unresolved);
     get('method').textContent=view.note;
     get('provenance').replaceChildren(...view.reports.map(r=>{const p=document.createElement('p');p.className='muted';p.textContent=`${r.name} · SHA-256 ${r.sha256}`;return p;}));
     paintAll();
@@ -272,12 +314,13 @@
     if(!rows.length){emptyPanel(name,'No nonzero amounts recorded for this selection.');return;}
     const container=get(name);container.replaceChildren();
     const shown=rows.slice(0,topN(name)),total=denominator(name);
-    const spark=name==='companies',CHART_WIDTH=panelWidth(container);
-    const shareRight=CHART_WIDTH-4,sparkWide=46;
-    const sparkX=spark?shareRight-sparkWide:0;
-    const valueRight=(spark?sparkX-10:shareRight)-44;
-    const LABEL_RIGHT=Math.round(CHART_WIDTH*0.27),BAR_LEFT=LABEL_RIGHT+8;
-    const barMax=Math.max(48,valueRight-96-BAR_LEFT);
+    const spark=name==='companies';
+    // The value column is as wide as the widest figure it has to hold, measured
+    // at the size it is drawn at, rather than a fixed 96px guess.
+    const valueWidth=shown.reduce((wide,row)=>Math.max(wide,MentatTheme.measureText(dollars(row.amount),LABEL_SIZE,MentatTheme.sans)),0);
+    const box=layoutColumns(panelWidth(container),{party:name==='candidates',spark,valueWidth});
+    const CHART_WIDTH=box.width,shareRight=box.shareRight,sparkX=box.sparkX,valueRight=box.valueRight;
+    const LABEL_RIGHT=box.labelRight,BAR_LEFT=box.barLeft,barMax=box.barMax;
     const percentages=total>0&&shown.every(row=>row.amount>=0);
     const height=shown.length*ROW_HEIGHT+ROW_TOP+10;
     const svg=svgNode('svg',{viewBox:`0 0 ${CHART_WIDTH} ${height}`,role:'img','aria-label':titleFor[name],class:'graph-bars'});
@@ -291,17 +334,19 @@
       const percent=percentages?100*row.amount/total:null;
       if(percent!==null)covered+=percent;
       const party=name==='candidates'?partyClass(row.party):'';
-      const room=Math.max(10,Math.floor(LABEL_RIGHT/6.6)-(party?2:0));
-      const text=label.length>room?label.slice(0,room-1)+'…':label;
+      // Measured, not counted: the budget is the pixels between the dot column
+      // and LABEL_RIGHT, and the party rides in the suffix so that it survives
+      // the cut instead of being the first thing lost.
+      const text=MentatTheme.fitText(row.label,box.labelWidth,LABEL_SIZE,MentatTheme.sans,row.party?` · ${row.party}`:'');
       // The accessible name is unchanged: name, colon, money. The share and the
       // per-cycle figures ride in <title>, which is the hover detail (item 12).
       const group=svgNode('g',{role:'button',tabindex:0,'aria-label':`${label}: ${dollars(row.amount)}`,class:'graph-bar-button'});
       group.append(svgNode('title',{},`${label} · ${dollars(row.amount)}`+(percent!==null?` · ${percent.toFixed(1)}% of ${denomLabel(name)}`:'')));
       group.append(svgNode('rect',{x:0,y:y-13,width:CHART_WIDTH,height:ROW_HEIGHT-2,fill:'transparent','pointer-events':'all'}));
-      if(party)group.append(svgNode('circle',{cx:9,cy:y-4,r:4.5,class:'graph-party '+party}));
-      group.append(svgNode('text',{x:LABEL_RIGHT,y,fill:MentatTheme.ink,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':12.5},text));
+      if(party)group.append(svgNode('circle',{cx:box.dotCX,cy:y-4,r:4.5,class:'graph-party '+party}));
+      group.append(svgNode('text',{x:LABEL_RIGHT,y,fill:MentatTheme.ink,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':LABEL_SIZE},text));
       group.append(svgNode('rect',{x:Math.min(zero,zero+row.amount*scale),y:y-11,width:Math.max(1,Math.abs(row.amount*scale)),height:14,rx:2,fill:row.amount<0?MentatTheme.negative:colors[Math.min(i,colors.length-1)],class:'graph-mark'}));
-      group.append(svgNode('text',{x:valueRight,y,fill:MentatTheme.ink,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':12.5,class:'graph-value'},dollars(row.amount)));
+      group.append(svgNode('text',{x:valueRight,y,fill:MentatTheme.ink,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':LABEL_SIZE,class:'graph-value'},dollars(row.amount)));
       group.append(svgNode('text',{x:shareRight,y,fill:MentatTheme.muted,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':11.5,class:'graph-share'},percent!==null?percent.toFixed(1)+'%':'—'));
       if(spark)group.append(svgNode('g',{class:'graph-spark','data-spark':row.id,transform:`translate(${sparkX},${y-11})`}));
       const select=()=>onClick(row.id);group.addEventListener('click',select);group.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();select();}});
@@ -414,7 +459,10 @@
       const points=(series.get(slot.dataset.spark)||[]).slice().sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
       if(points.length<SPARK_MINIMUM)continue;
       const values=points.map(point=>point[1]),low=Math.min(...values),high=Math.max(...values);
-      const span=high-low||1,wide=54,tall=14;
+      // The polyline is drawn into the same slot the layout reserves for it,
+      // with its end dot inside: a 54px line in a 46px slot is how the last
+      // point used to land past the right edge of the viewBox.
+      const span=high-low||1,wide=SPARK_W-2,tall=14;
       const coords=points.map((point,i)=>[i*wide/(points.length-1),tall-2-((point[1]-low)/span)*(tall-4)]);
       slot.replaceChildren();
       slot.append(svgNode('polyline',{fill:'none','stroke-width':1.5,class:'graph-spark-line',
@@ -448,6 +496,21 @@
   for(const name of ['company','tier','cycle','funding'])get(name).onchange=()=>{category='';recipient='';if(name==='tier'&&get('tier').value)get('funding').value='personal';syncControls();refresh();};
   for(const name of ['mode','direction'])get(name).onchange=()=>{syncControls();refresh();};
   get('reset').onclick=()=>{category='';recipient='';get('company').value='';get('tier').value='';get('cycle').value=view?.options.cycles.at(-1)||'';get('funding').value='all';get('mode').value='direct';get('direction').value='Support';selectAnalysis('overview');refresh();};
+  // The candidates panel's asides. The separation sentence and the server's
+  // candidate note were two lines of prose wedged around the bars; they are
+  // asides about the denominator, not headlines, so they ride on the panel's
+  // information mark the way the other three panels' notes already do. The
+  // server note stays a visible muted line whenever the figures are NOT direct
+  // contributions, because then it is a disclosure rather than an aside.
+  let unresolvedNote='';
+  const SEPARATION='Direct contributions only. Downstream PAC activity and conditional estimates are separate candidate views.';
+  function candidateAside() {
+    const direct=get('mode').value==='direct',note=get('candidate-note');
+    note.hidden=direct||!note.textContent;
+    const text=[direct?SEPARATION:'',direct?note.textContent:'',unresolvedNote].filter(Boolean).join(' ');
+    const mark=get('unresolved');
+    mark.hidden=!text;mark.title=text;mark.setAttribute('aria-label',text);
+  }
   function applyAnalysis() {
     const names=['overview','recipients','candidates','companies'];
     names.forEach(name=>{const tab=get('tab-'+name);tab.setAttribute('aria-selected',String(name===analysis));tab.tabIndex=name===analysis?0:-1;});
@@ -464,9 +527,7 @@
     // Candidates analysis tab. Downstream PAC activity was reachable before
     // this only by finding a tab that revealed the control.
     get('candidate-controls').hidden=get('candidate-panel').hidden||!reportChosen;
-    // The note below says "Direct contributions only", which the select above
-    // can now make untrue on the overview tab, so it is shown only while it is.
-    get('candidate-separation').hidden=analysis!=='overview'||get('mode').value!=='direct';
+    candidateAside();
     get('company-panel').hidden=!['overview','companies'].includes(analysis);
     get('level-panel').hidden=!['overview','companies'].includes(analysis);
   }

@@ -450,6 +450,10 @@
 .studio-progress[hidden] { display: none; }
 .studio-progress > span:first-child { flex: 1 1 140px; min-width: 0; }
 .studio-progress button { font: inherit; font-size: 11px; cursor: pointer; }
+/* The data panel is narrow, so its two rescan buttons and the progress box's
+   Cancel wear the console's secondary chrome at a compact size rather than the
+   user agent's default control. */
+.studio-rescan, .studio-progress .secondary { font-size: 12px; padding: 6px 10px; }
 .studio-canvas { overflow: auto; }
 .studio-canvas svg { display: block; max-width: 100%; height: auto; background: white; }
 .studio-canvas.fit-width svg { width: 100%; max-width: none; }
@@ -540,7 +544,8 @@
 .studio-overview-card h3 { font-family: var(--font-serif); font-weight: 400; font-size: 17px; margin: 0 0 2px; color: var(--acu-plum); }
 .studio-overview-card .studio-overview-body { overflow-x: auto; }
 .studio-overview-card svg { display: block; max-width: 100%; height: auto; }
-.studio-overview-card .studio-overview-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+.studio-overview-card .studio-overview-actions { display: flex; justify-content: flex-end;
+  margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
 .studio-overview-card button {
   font: inherit; font-size: 12px; color: var(--acu-plum); background: white;
   border: 1px solid var(--line); border-radius: 5px; padding: 5px 10px; cursor: pointer;

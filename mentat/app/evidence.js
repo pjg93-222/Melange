@@ -238,6 +238,15 @@
       + (item.reread ? ' · re-reading under the current rules' : '');
   }
 
+  // An <option> cannot carry a title of its own and the Source select is one of
+  // six columns, so a long file or snapshot name is clipped by the control. The
+  // chosen option's full text rides on the select's own title instead.
+  function syncSourceTitle() {
+    const select = $('evidence-source');
+    const chosen = select.selectedOptions[0];
+    select.title = chosen ? chosen.textContent : '';
+  }
+
   function fillSourceSelect(keep) {
     const select = $('evidence-source');
     const options = [new Option('Choose a file or a snapshot', '')];
@@ -252,6 +261,7 @@
     }
     select.replaceChildren(...options);
     select.value = [...select.options].some(option => option.value === keep && !option.disabled) ? keep : '';
+    syncSourceTitle();
   }
 
   async function refreshSources() {
@@ -1376,7 +1386,7 @@
     writeScope();
   }
 
-  $('evidence-source').addEventListener('change', () => { chooseSource().then(writeScope); });
+  $('evidence-source').addEventListener('change', () => { syncSourceTitle(); chooseSource().then(writeScope); });
   $('evidence-type').addEventListener('change', () => { applyFilter(); writeScope(); });
   $('evidence-find').addEventListener('input', applyFilter);
   $('evidence-pac').addEventListener('change', updateAdd);

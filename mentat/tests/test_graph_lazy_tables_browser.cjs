@@ -28,10 +28,14 @@ test('closed Graph tables are deferred without losing rows, callbacks or exports
   const html=fs.readFileSync(path.join(app,'index.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<link\b[^>]*>/gi,'');
   await page.setContent(html);
   for(const sheet of ['style.css','graph.css','workspace.css'])await page.addStyleTag({path:path.join(app,sheet)});
+  // theme.js carries the measured text fitter graph.js draws its labels with,
+  // so it is loaded here rather than stubbed. The stub below goes on owning the
+  // colours, which is what this fixture needs to be deterministic about.
+  await page.addScriptTag({path:path.join(app,'theme.js')});
   await page.evaluate(body=>{
     window.currentView='graph';window.splitView=false;window.selectedRun='fixture';
     document.querySelector('#view-loading').hidden=true;document.querySelector('#view-graph').hidden=false;
-    window.MentatTheme={palette:['#13717d','#806bb1'],ink:'#263c48',muted:'#57666e',negative:'#be592f',grid:'#ddd',sans:'Arial'};
+    window.MentatTheme=Object.assign({},window.MentatTheme,{palette:['#13717d','#806bb1'],ink:'#263c48',muted:'#57666e',negative:'#be592f',grid:'#ddd',sans:'Arial'});
     window.fixtureBody=body;window.graphCalls=[];window.renderMeasurements=[];window.createdTableRows=0;
     const create=document.createElement.bind(document);
     document.createElement=(name,...args)=>{if(name.toLowerCase()==='tr')window.createdTableRows++;return create(name,...args);};

@@ -180,10 +180,10 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 #view-evidence .panel{border-radius:6px;border-color:var(--line)}
 .evidence-pane{padding:18px 20px 16px}
 .evidence-scope{margin-bottom:18px;padding:18px 22px 16px}
-.evidence-scope-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:end}
+.evidence-scope-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
 .evidence-scope-grid label{font-size:13px;color:var(--s6-label);min-width:0}
-.evidence-scope-grid select,.evidence-scope-grid input{width:100%;max-width:100%;margin-top:6px;min-height:44px;box-sizing:border-box}
-.evidence-scope-grid #evidence-add{min-height:44px;white-space:nowrap}
+.evidence-scope-grid select,.evidence-scope-grid input{width:100%;max-width:100%;margin:6px 0 0;min-height:44px;box-sizing:border-box}
+.evidence-scope-grid #evidence-add{min-height:44px;white-space:nowrap;align-self:end}
 .evidence-scope-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
 .evidence-scope-actions button{min-height:44px;font-size:13px}
 .evidence-follow{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);min-height:44px}
@@ -399,6 +399,41 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 .graph-panel-tools .graph-candidate-controls select{width:auto;font-size:12px;min-height:30px;padding:4px 6px;margin:0}
 .graph-topn{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
 .graph-topn select{width:auto;min-width:56px;margin:0;padding:4px 6px;font-size:12px;min-height:30px}
+
+/* P1. One header shape for every panel: serif title at the left, one tools row
+   at the right holding [candidate view][direction][Top N][View all] in that
+   order. The heading is a grid, so a long title shrinks instead of pushing the
+   tools onto a row of their own, and the global `.panel-heading label{width:300px}`
+   (style.css) is answered here rather than left to widen the header past the
+   panel. The QUERY CONTAINER is the heading, not the panel: `container-type` on
+   `.graph-panels>.panel` would make every panel a stacking context, and the
+   open Export menu (z-index 6, absolutely positioned, hanging below its own
+   panel) would then be painted over by the panel in the next grid row. */
+.graph-panels .panel-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;container-type:inline-size}
+.graph-panels .panel-heading>h2{min-width:0;overflow-wrap:anywhere}
+.graph-panels .panel-heading .graph-panel-tools{flex-wrap:nowrap;min-width:0}
+.graph-panels .panel-heading .graph-topn{width:auto;flex:0 0 auto}
+.graph-panel-tools .graph-candidate-controls{display:inline-flex;flex-wrap:nowrap;min-width:0}
+.graph-panel-tools .graph-candidate-controls label{display:inline-flex;align-items:center;gap:6px;
+  width:auto;flex:0 1 auto;min-width:0;font-size:11px;color:var(--muted)}
+.graph-panel-tools .graph-candidate-controls select{width:auto;min-width:0;max-width:180px;margin:0}
+/* An author `display` beats the UA's [hidden] rule, so the two elements graph.js
+   hides by attribute - the whole candidate control group, and the Direction
+   label while the view is direct contributions - say so here. */
+.graph-panel-tools .graph-candidate-controls[hidden],
+.graph-panel-tools .graph-candidate-controls label[hidden]{display:none}
+/* Below the width the tools need, every panel alike drops them under the title,
+   left aligned, instead of each panel wrapping at its own content width. */
+@container (max-width:600px){
+  .graph-panels .panel-heading>h2{grid-column:1/-1}
+  .graph-panels .panel-heading .graph-panel-tools{grid-column:1/-1;margin-left:0;justify-content:flex-start}
+  .graph-panel-tools .graph-candidate-controls{flex:1 1 auto}
+  .graph-panel-tools .graph-candidate-controls label{flex:1 1 0}
+  .graph-panel-tools .graph-candidate-controls select{max-width:none}
+}
+/* The server's candidate note is a disclosure, so it is one muted line directly
+   above the footer - and only while the figures are not direct contributions. */
+.graph-panels .graph-panel-note{margin:8px 0 0}
 .graph-panel-sub{margin:-2px 0 10px;font-size:12px;color:var(--muted);line-height:1.5}
 .graph-panel-foot{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:10px;font-size:12px;color:var(--muted)}
 .graph-foot-count{min-width:0;overflow-wrap:anywhere}
