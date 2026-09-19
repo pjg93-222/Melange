@@ -46,7 +46,7 @@ headers (2026-09-19 00:02 to 00:09 local; log in `out/v3_index_build.log`):
 
 The three `itoth.txt` files are byte- and mtime-identical before and after, no `.pending` file remains,
 and the full-file counts equal the cash-block counts in `V3_MEASURE_REPORT.md` section 2.4. The replaced
-VERSION 2 files are kept in the session scratchpad under `v2_index_backup/`; nothing at HEAD can read a
+VERSION 2 and 3 info files (counts and source hashes) are kept under `mentat/.cache/transfer-index-backups-20260919/`, and full copies in the session scratchpad; nothing at HEAD can read a
 VERSION 2 index, so they are a record, not a rollback. The next report build carries real Conditional
 estimates again, except through the committees the committed rule still blacklists. No workbook was
 rebuilt and no database was touched: rebuilding is Paul's.
