@@ -119,7 +119,10 @@ class ReportDirectoryConsoleTests(unittest.TestCase):
 
     def test_child_output_and_environment_are_pinned(self):
         original_read = app.read_json
+        # This pins the child's output directory, not the FEC bulk staging, and
+        # those snapshots are not kept in git.
         with patch.object(app,'load_keys',return_value=['fixture-key']), \
+             patch.object(app,'copy_fec_sources'), \
              patch.object(app,'read_json',side_effect=lambda path: {} if Path(path).name == 'active_fec_sources.json' else original_read(path)):
             roster = self.console.create_roster({'sector':'Fixture','companies':[{'name':'Example','aliases':[]}]})
             process = MagicMock(pid=987654);process.poll.return_value=None

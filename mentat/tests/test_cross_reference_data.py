@@ -397,8 +397,11 @@ class CrossReferenceDataTests(unittest.TestCase):
         app = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(app)
         original_read = app.read_json
+        # This checks the pinned state roots the child inherits, not the FEC bulk
+        # staging, and those snapshots are not kept in git.
         with patch.object(app, "environment_keys", return_value=[]), \
              patch.object(app, "load_keys", return_value=["offline-fixture"]), \
+             patch.object(app, "copy_fec_sources"), \
              patch.object(app, "read_json", side_effect=lambda path: {} if Path(path).name == "active_fec_sources.json" else original_read(path)):
             console = app.Console(Path(self.temp.name) / "console", rscript=sys.executable)
             roster = console.create_roster({"sector": "UI Fixture", "companies": [{"name": "A Bank", "aliases": ["AB"]}]})

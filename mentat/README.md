@@ -190,7 +190,7 @@ All CSV report writes are UTF-8 with a BOM for Excel on Windows and are installe
 
 ## Offline tests
 
-Each test uses synthetic fixtures or temporary data roots and makes no network call:
+Each test uses synthetic fixtures or temporary data roots and makes no network call. One exception announces itself: `test_collection_console.py` skips its R-ingest test unless `inputs/fec_beneficiary` and `inputs/fec_committee_master` are present, because it stages the real project; those official bulk snapshots are not kept in git, and `python tools/refresh_fec_sources.py --root <folder>` downloads them.
 
 ```powershell
 Get-ChildItem tests/test_*.R | ForEach-Object {

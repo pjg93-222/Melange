@@ -141,7 +141,10 @@ class ConsoleTests(unittest.TestCase):
         runner = MagicMock()
         runner.pid = 987654
         runner.poll.return_value = None
-        with patch.object(app.subprocess,"Popen", return_value=runner) as launch, patch.object(app.threading,"Thread"):
+        # The FEC bulk snapshots are not kept in git, and this test is about key
+        # handling and the pinned roster rather than about staging them.
+        with patch.object(app.subprocess,"Popen", return_value=runner) as launch, \
+                patch.object(app.threading,"Thread"), patch.object(app, "copy_fec_sources"):
             self.console.launch({"id":value["id"],"cycles":[2026],"api_key":"private-test-key"})
         command = launch.call_args.args[0]
         self.assertNotIn("private-test-key", repr(command))
@@ -198,6 +201,11 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(result['state'], 'stopped')
         self.assertEqual(result['finished_at'], 1234)
 
+    # Unlike its neighbours this one stages the real project and runs the real R
+    # ingest against it, so it wants the bulk snapshots themselves, not a stub.
+    @unittest.skipUnless(all((app.PROJECT / "inputs" / name).is_dir()
+                             for name in ("fec_beneficiary", "fec_committee_master")),
+                         "R ingest stages the FEC bulk sources; install them with tools/refresh_fec_sources.py")
     @unittest.skipUnless(Path("C:/Program Files/R/R-4.6.0/bin/Rscript.exe").is_file(), "R integration requires installed R 4.6")
     def test_runner_plan_and_offline_R_ingest_use_uploaded_aliases(self):
         value = self.upload()

@@ -2,6 +2,7 @@
 import itertools
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -61,6 +62,54 @@ class RuntimeInputTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 copy_fec_sources(self.source, self.root / 'invalid', cycles)
             self.assertFalse((self.root / 'invalid').exists())
+
+    def missing_source(self, *folders):
+        """A copy of the fixture snapshot with the named bulk folders removed."""
+        broken = self.root / ('broken-' + '-'.join(folders))
+        shutil.copytree(self.source, broken)
+        for folder in folders:
+            shutil.rmtree(broken / folder)
+        return broken
+
+    def test_missing_source_folder_names_it_and_says_how_to_install_it(self):
+        for folder in ('fec_beneficiary', 'fec_committee_master'):
+            with self.subTest(folder=folder):
+                broken = self.missing_source(folder)
+                destination = self.root / ('missing-' + folder)
+                with self.assertRaises(FileNotFoundError) as caught:
+                    copy_fec_sources(broken, destination, [2026])
+                message = str(caught.exception)
+                self.assertIn(str(broken / folder), message)
+                self.assertIn('refresh_fec_sources.py --root', message)
+                self.assertFalse(destination.exists())
+
+    def test_both_folders_are_checked_before_anything_is_staged(self):
+        # The SECOND folder missing must not leave the first one half-staged: a
+        # partially populated runtime reads as a complete snapshot downstream.
+        broken = self.missing_source('fec_committee_master')
+        destination = self.root / 'half-staged'
+        with self.assertRaises(FileNotFoundError):
+            copy_fec_sources(broken, destination, [2026])
+        self.assertFalse(destination.exists())
+
+    def test_a_missing_folder_outranks_nothing_and_still_reports_bad_cycles(self):
+        # Cycle validation keeps precedence, so a caller that got both wrong is
+        # told about the selection it controls rather than the data it lacks.
+        with self.assertRaises(ValueError):
+            copy_fec_sources(self.missing_source('fec_beneficiary'), self.root / 'both-wrong', [2028])
+        self.assertFalse((self.root / 'both-wrong').exists())
+
+    def test_present_but_empty_folders_are_staged_and_gated_downstream(self):
+        # Existence is the only question answered here. Completeness belongs to
+        # build_industry_report.ps1, which checks each required file by name.
+        empty = self.root / 'empty-but-present'
+        for folder in ('fec_beneficiary', 'fec_committee_master'):
+            (empty / folder).mkdir(parents=True)
+        destination = self.root / 'from-empty'
+        copy_fec_sources(empty, destination, [2026])
+        for folder in ('fec_beneficiary', 'fec_committee_master'):
+            self.assertTrue((destination / folder).is_dir())
+            self.assertEqual(list((destination / folder).iterdir()), [])
 
     @unittest.skipUnless(os.name == 'nt', 'PowerShell report build contract')
     def test_report_required_inputs_match_each_selected_snapshot(self):
