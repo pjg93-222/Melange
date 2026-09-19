@@ -1,0 +1,71 @@
+--- strict-date-before.py
++++ compact-schema-after.py
+@@ -292,9 +292,12 @@
+     except ValueError as error:raise ValueError('Source contribution date is invalid.') from error
+     cycle=year+year%2
+     if receipt:
++        compact_cycle=receipt.get('_verified_compact_cycle')
++        date_matches=(type(compact_cycle) is int and compact_cycle==cycle and receipt.get('date') is None
++                      if '_verified_compact_cycle' in receipt else str(receipt.get('date') or '')[:10]==day)
+         if (_cents(receipt['amount'])!=_cents(raw['contribution_receipt_amount'])
+                 or str(receipt.get('committee_id') or '')!=str(raw.get('committee_id') or '')
+-                or str(receipt.get('date') or '')[:10]!=day
++                or not date_matches
+                 or ' '.join(str(receipt.get('contributor') or '').upper().split())!=' '.join(str(raw.get('contributor_name') or '').upper().split())):
+             raise ValueError('A contribution differs financially from its published source representation.')
+     zipcode=str(raw.get('contributor_zip') or '').strip()
+@@ -370,14 +373,25 @@
+     """Disk-backed, narrow projection; Banking's payload exceeds 1 GB."""
+     FIELDS=('amount','committee_id','date','contributor','include_in_analysis','person_key','party','recipient_category')
+ 
+-    def __init__(self, db, path, progress=lambda n:None):
++    def __init__(self, db, path, progress=lambda n:None, source_proof=None):
+         self.db=db
++        compact=_payload_metadata(path).get('payload_compaction',{})
++        fields=compact.get('raw_fields')
++        declared_date_omission=(compact.get('mode')=='formula_fact_required_fields' and isinstance(fields,list)
++            and 'date' not in fields and all(k in fields for k in ('source_id','amount','committee_id','contributor','cycle')))
+         db.execute('CREATE TABLE receipts(source_id TEXT PRIMARY KEY,payload TEXT NOT NULL)')
+         count=0
+         for raw in _payload_rows(path):
+             sid=str(raw.get('source_id') or '')
+             if not sid:raise ValueError('A published contribution is missing its source ID.')
+-            payload=json.dumps({k:raw.get(k) for k in self.FIELDS},separators=(',',':'))
++            projected={k:raw.get(k) for k in self.FIELDS}
++            if 'date' not in raw:
++                if not declared_date_omission or not source_proof or source_proof.get('full_financial_universe_preserved') is not True:
++                    raise ValueError('A payload date omission lacks an explicit compact schema and complete source proof.')
++                if type(raw.get('cycle')) is not int or raw['cycle'] not in (2022,2024,2026):
++                    raise ValueError('A compact contribution lacks a valid election cycle.')
++                projected['_verified_compact_cycle']=raw['cycle']
++            payload=json.dumps(projected,separators=(',',':'))
+             prior=db.execute('SELECT payload FROM receipts WHERE source_id=?',(sid,)).fetchone()
+             if prior:
+                 if prior[0]!=payload:raise ValueError('A published source ID has conflicting receipt representations.')
+@@ -508,6 +522,8 @@
+             for suffix in ('-wal','-journal'):
+                 p=Path(str(source['database'])+suffix)
+                 if p.exists() and p.stat().st_size:raise ValueError('The pinned source has active uncheckpointed writes.')
++            import contribution_source_guard
++            source_proof=contribution_source_guard.verify(source)
+             CACHE_ROOT.mkdir(parents=True,exist_ok=True)
+             with closing(sqlite3.connect(pending)) as target:
+                 target.execute('PRAGMA auto_vacuum=FULL')
+@@ -515,7 +531,7 @@
+                 target.execute('PRAGMA cache_size=-32768')
+                 _schema(target)
+                 _progress(token,message='Indexing published receipt identities in bounded storage.')
+-                receipts=_Receipts(target,source['payload'],lambda n:_progress(token,processed_records=n))
++                receipts=_Receipts(target,source['payload'],lambda n:_progress(token,processed_records=n),source_proof=source_proof)
+                 ledger,report=source.get('ledger'),source.get('ledger_report')
+                 processed=0
+                 if ledger:
+@@ -538,7 +554,7 @@
+                 if expected_cycles and any(cycle_totals.get(k,0)!=v for k,v in expected_cycles.items()):
+                     raise ValueError('Contribution-level receipt cycles do not reconcile to the pinned workbook payload.')
+                 metadata={'token':token,'provenance':{**_provenance(source),'index_token':token},'totals':totals,'ledger_run_id':report.get('run_id') if report else None,'expected_receipt_cents':expected,
+-                          'receipt_cycles':cycle_totals,'expected_receipt_cycles':expected_cycles,
++                          'receipt_cycles':cycle_totals,'expected_receipt_cycles':expected_cycles,'source_proof':source_proof,
+                           'built_at':time.time(),'identity_basis':'Known report person keys when available; otherwise reported name/state/ZIP identity. Distinct counts are not certified distinct people.'}
+                 target.execute('DROP TABLE receipts')
+                 target.execute('INSERT INTO metadata VALUES (?,?)',('manifest',json.dumps(metadata)))

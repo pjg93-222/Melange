@@ -1,0 +1,20 @@
+# Mentat audit repairs — 2026-09-13
+
+This is a follow-up to the preserved full audit in `../mentat-full-audit-2026-09-13/MENTAT_FULL_AUDIT.md`. Existing unrelated workspace changes were retained. No published workbook, accepted production baseline, live collection, or running console was restarted or regenerated for these repairs. Running consoles need a restart to load the Python server changes; new collection runtimes will copy the repaired source.
+
+| Audit defect | Repair | Regression evidence |
+| --- | --- | --- |
+| Timeout fallback lost a known count | Date-window union retains every previously observed count, rejects population drift, missing rows, and overlapping rows | `test_request_windows.R`: known three vs recovered two rejected; complete three accepted; earlier four then three remains rejected |
+| Stale PID could kill an unrelated process | Reject terminal runs; save PID, creation time and executable identity at launch; verify with a held Windows process handle before force-stop; otherwise request graceful stop | Eight-test `test_audit_regressions.py` suite includes terminal states, missing/reused identity, held identity, real current-process fingerprint; termination itself is mocked |
+| Balanced payload could change donor, recipient or date | Require payload financial identity fields and match each against source facts | `test_report_source_guard.py`: changed and missing fields rejected individually |
+| Expanded cycles bypassed earlier accepted baseline | Share newest-per-cycle accepted-scope selection between publication guard and cross-reference; preserve all overlapping cycles; bind the build to selected pointer tokens and snapshot hashes | Expansion, disjoint baselines, deletion, and concurrent pointer regression checks |
+| Coalescing blank memo flags with X hid a conflict | Explicit blank memo values participate in conflict detection; missing metadata can still be recovered | Conflict retained in review in either observation order; genuinely absent value can be enriched |
+| Two console objects could launch one upload | File-backed lock serializes launch claims and lifecycle transitions across processes | Competing objects and two real child processes: one claim succeeds |
+| Inspector could show changed-source records | Check workbook hash, database hash and index token before displaying details | Browser verifies matching source is accepted and changed source is rejected; map fixture now supplies real provenance fields |
+| Temporal charts crashed | Supply row-number metadata to the time-analysis adapter; render the complete temporal model so observed and forecast marks retain their meaning and cents convert to dollars | Browser exercises year-over-year, period change, and forecast, including dashed projections |
+
+Final verification: **512 Python tests, 139 JavaScript unit tests, 15 browser tests, 21 R scripts, and 5 PowerShell scripts passed**, with no remaining test failures. The temporal browser regression exercises all three transformations in one test. The interactive design draft was also checked at widths from 320 to 1024 pixels.
+
+Verification receipts are in `FINAL_VALIDATION.json` and the adjacent test logs. The full Python suite was run in isolated processes; the standalone telecom function test uses `unittest.FunctionTestCase` because unittest discovery does not collect module-level functions. R tests use the installed R library and temporary report directories. PowerShell checks use process-local script execution; the last-good test uses the configured shell's Utility module. Browser fixtures use synthetic data and headless Chrome. Failed initial harness/fixture runs remain recorded in their run receipts; the final summary incorporates the successful corrected reruns.
+
+The new two-chart workspace and state-destination workbook changes remain design proposals, as requested. See `CHART_DESIGN_DRAFT.md` and the interactive draft supplied in the conversation. The user selected both location views and two independent charts with optional linked filters. Feature implementation and published workbook regeneration follow design review.

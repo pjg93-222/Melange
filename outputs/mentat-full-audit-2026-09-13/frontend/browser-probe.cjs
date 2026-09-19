@@ -1,0 +1,3 @@
+const path=require('node:path');
+const {chromium}=require(require.resolve('playwright',{paths:['C:/Users/pgoff/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules']}));
+(async()=>{let browser;try{console.log('launch');browser=await chromium.launch({headless:true,channel:'chrome',timeout:15000});console.log('newPage');const page=await browser.newPage();console.log('setContent');await page.setContent('<p>offline smoke test</p>',{timeout:8000});console.log(await page.textContent('p'));}finally{console.log('close');await browser?.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
