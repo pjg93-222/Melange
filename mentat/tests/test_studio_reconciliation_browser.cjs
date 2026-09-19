@@ -114,7 +114,11 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
     {industry:'Banking',company:'Alpha Bank',cycle:'2024',tier:'',funding:'all'});
   // Nothing was left behind, so nothing is claimed to have been.
   assert.equal(await page.evaluate(()=>document.getElementById('studio-scope-note').hidden),true);
-  assert.match(await page.locator('#studio-scope-chip').textContent(),/^Carried from Graph · Banking · 2023-2024 · Alpha Bank$/);
+  // The header scope is a chip line since the 2026-09-17 UI clean-up: the same
+  // parts, one <span> each, so they are read as a list rather than as one
+  // sentence whose separators never reach textContent.
+  assert.deepEqual(await page.locator('#studio-scope-chip span').allTextContents(),
+    ['Carried from Graph','Banking','2023-2024','Alpha Bank']);
   // Totals cover every group, not only the page that is drawn.
   assert.match(await page.locator('#studio-group-count').textContent(),/^1–1 of 1 groups · totals cover all 1$/);
 

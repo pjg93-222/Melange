@@ -1,6 +1,7 @@
-/* F3: the data source is always findable. The panel arrives open, folds itself
-   away once, keeps a permanent way back, states why a report cannot be read,
-   and shows a long prepare with its elapsed time and a way out. */
+/* F3: the data source is always findable. The panel arrives open and stays
+   open, states on one chip line what it is pointed at, keeps a permanent way
+   back, states why a report cannot be read, and shows a long prepare with its
+   elapsed time and a way out. */
 'use strict';
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
@@ -12,7 +13,7 @@ const app=path.join(__dirname,'../app');
 const BLOCKED='The Telecom report changed during source discovery. Refresh sources.';
 const PREPARING='Indexing published receipt identities in bounded storage.';
 
-test('the data source panel opens, folds once, names what it cannot read, and shows a prepare it can cancel',{timeout:120000},async t=>{
+test('the data source panel opens, stays open, names what it cannot read, and shows a prepare it can cancel',{timeout:120000},async t=>{
   const browser=await chromium.launch({headless:true,channel:process.env.MENTAT_BROWSER_CHANNEL||'chrome'});
   t.after(()=>browser.close());
   const page=await browser.newPage({viewport:{width:1440,height:1000}});
@@ -25,7 +26,7 @@ test('the data source panel opens, folds once, names what it cannot read, and sh
 
   // The picker is the first thing in the pane, before any script has run.
   assert.equal(await page.evaluate(()=>document.getElementById('studio-source-details').open),true,'the panel arrives open');
-  assert.equal(await page.locator('#studio-scope-change').textContent(),'Data source');
+  assert.equal(await page.locator('#studio-scope-change').textContent(),'Change data');
 
   await page.evaluate(([blocked,preparing])=>{
     document.querySelectorAll('[role="tabpanel"][id^="view-"]').forEach(panel=>{panel.hidden=panel.id!=='view-chart-studio';});
@@ -82,10 +83,11 @@ test('the data source panel opens, folds once, names what it cannot read, and sh
   await page.locator('#studio-progress').waitFor({state:'hidden'});
   assert.ok(await page.evaluate(()=>calls.query.length>=3),'the preparing replies were polled, then the view loaded');
 
-  // Folded once the fields arrived, with the state it would have shown written
-  // on the one line that survives the fold.
-  assert.equal(await page.evaluate(()=>document.getElementById('studio-source-details').open),false);
-  assert.equal(await page.locator('#studio-source-summary').textContent(),'Data source · Banking · Published included receipts · ready');
+  // Still open once the fields arrived (UI clean-up item 16), with the state it
+  // used to write on the fold now read off the summary's own chip line.
+  assert.equal(await page.evaluate(()=>document.getElementById('studio-source-details').open),true);
+  assert.deepEqual(await page.locator('#studio-source-summary span').allTextContents(),
+    ['Banking','Published included receipts','✓ Ready']);
 
   // A report that cannot be read says why, under the select and on its option.
   assert.equal(await page.evaluate(()=>document.getElementById('studio-dataset-message').hidden),false);
@@ -98,15 +100,17 @@ test('the data source panel opens, folds once, names what it cannot read, and sh
   assert.equal(telecom.disabled,true);
   assert.match(telecom.text,/ — unavailable$/);
 
-  // The way back is permanent and reopens the panel, where the reason is read.
+  // The way back is permanent and leads to the panel, where the reason is read.
   assert.equal(await page.locator('#studio-scope-change').isVisible(),true);
   await page.locator('#studio-scope-change').click();
   assert.equal(await page.evaluate(()=>document.getElementById('studio-source-details').open),true);
-  await page.waitForFunction(()=>document.getElementById('studio-source-summary').textContent==='Data source');
+  await page.waitForFunction(()=>document.querySelectorAll('#studio-source-summary span').length>=2);
+  assert.deepEqual(await page.locator('#studio-source-summary span').allTextContents(),
+    ['Banking','Published included receipts','✓ Ready']);
   assert.equal(await page.locator('#studio-dataset').isVisible(),true);
   assert.equal(await page.locator('#studio-dataset-message').isVisible(),true);
 
-  // Reopening is the reader's choice: it is not folded away a second time.
+  // A refresh is not the console's chance to fold the panel away behind the reader.
   await page.locator('#studio-refresh-data').click();
   await page.waitForFunction(()=>document.querySelector('#studio-canvas svg')&&document.querySelector('#studio-canvas').getAttribute('aria-busy')!=='true');
   assert.equal(await page.evaluate(()=>document.getElementById('studio-source-details').open),true,'a reopened panel stays open');

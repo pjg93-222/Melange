@@ -68,10 +68,12 @@ async function open(t,origin,books){
   },[SHEETS,books]);
   for(const file of ['theme.js','chart-math.js','grouped-chart.js','charts.js','chart-studio-core.js','contribution-plot.js','contribution-charts.js','contribution-map.js','chart-studio-contributions.js','chart-studio.js'])await page.addScriptTag({path:path.join(app,file)});
   await page.waitForFunction(()=>window.sheetCalls&&sheetCalls.length>0);
-  // The Data source panel folds itself away after the first successful load, so
-  // open it the way a reader does before touching the pickers inside it.
-  await page.waitForFunction(()=>!document.getElementById('studio-source-details').open);
+  // Since the 2026-09-17 UI clean-up (item 16) the Data source panel stays open
+  // rather than folding itself away after the first load; the permanent "Change
+  // data" button is still the reader's way to the pickers inside it.
+  await page.waitForFunction(()=>document.getElementById('studio-source-details').open);
   await page.locator('#studio-scope-change').click();
+  await page.waitForFunction(()=>document.getElementById('studio-source-details').open);
   await page.locator('#studio-sheet').waitFor({state:'visible'});
   return {page,errors};
 }
