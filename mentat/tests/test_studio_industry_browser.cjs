@@ -89,11 +89,14 @@ function freePort() {
   return withTimeout(pick(), 10000, 'freePort()');
 }
 
-function startServer(port, dataRoot) {
+function startServer(port, dataRoot, reportRoot) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.env.MENTAT_PYTHON || 'python',
       ['app/server.py', '--port', String(port), '--data-root', dataRoot],
-      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true});
+      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
+       // Without a report directory of its own this console resolves the configured
+       // one - Paul's published reports - and chdir()s into it on every run.
+       env: Object.assign({}, process.env, {MENTAT_REPORT_DIRECTORY: reportRoot})});
     const stderrLines = [];
     let stdout = '';
     let settled = false;
@@ -199,13 +202,28 @@ async function nodeDrivenFallback(reason) {
   const http = require('node:http');
   const core = require(path.join(MENTAT_DIR, 'app', 'chart-studio-core.js'));
   const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-studio-industry-node-'));
+  const reportRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-studio-industry-node-reports-'));
   let server = null;
   let failed = false;
   try {
     step('pick a free port and launch the console server on a throwaway --data-root');
     const port = await freePort();
-    server = await startServer(port, dataRoot);
-    pass(`server ready on port ${port}, data root ${dataRoot}`);
+    server = await startServer(port, dataRoot, reportRoot);
+    // The console reads this suite's own report directory, not the configured one.
+    const reportsSeen = await new Promise((resolve, reject) => {
+      const ask = require('node:http').get(
+        {host: '127.0.0.1', port: port, path: '/api/report-sources', headers: {Host: '127.0.0.1:' + port}},
+        answer => {
+          let body = '';
+          answer.on('data', chunk => { body += chunk; });
+          answer.on('end', () => { try { resolve(JSON.parse(body)); } catch (error) { reject(error); } });
+        });
+      ask.on('error', reject);
+    });
+    assert.equal(path.resolve(String(reportsSeen.report_directory || '')).toLowerCase(),
+      path.resolve(reportRoot).toLowerCase(),
+      `the console must read this suite's own report directory, got "${reportsSeen.report_directory}"`);
+    pass(`server ready on port ${port}, data root ${dataRoot}, report directory ${reportRoot}`);
 
     step('build two sheets with the real producers (createSheet + viewSourceRecord), one per industry');
     const bankingChosen = {id: 'Banking', label: 'Banking', industry: 'Banking'};
@@ -280,6 +298,7 @@ async function nodeDrivenFallback(reason) {
   } finally {
     await stopServer(server);
     cleanupPath(dataRoot);
+    cleanupPath(reportRoot);
   }
   return failed ? 1 : 0;
 }
@@ -296,14 +315,29 @@ async function nodeDrivenFallback(reason) {
   let browser = null;
   let server = null;
   const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-studio-industry-data-'));
+  const reportRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-studio-industry-data-reports-'));
   let failed = false;
 
   try {
     step('pick a free port and launch the console server on a throwaway --data-root');
     const port = await freePort();
-    server = await startServer(port, dataRoot);
+    server = await startServer(port, dataRoot, reportRoot);
     const origin = `http://127.0.0.1:${port}`;
-    pass(`server ready on port ${port}, data root ${dataRoot}`);
+    // The console reads this suite's own report directory, not the configured one.
+    const reportsSeen = await new Promise((resolve, reject) => {
+      const ask = require('node:http').get(
+        {host: '127.0.0.1', port: port, path: '/api/report-sources', headers: {Host: '127.0.0.1:' + port}},
+        answer => {
+          let body = '';
+          answer.on('data', chunk => { body += chunk; });
+          answer.on('end', () => { try { resolve(JSON.parse(body)); } catch (error) { reject(error); } });
+        });
+      ask.on('error', reject);
+    });
+    assert.equal(path.resolve(String(reportsSeen.report_directory || '')).toLowerCase(),
+      path.resolve(reportRoot).toLowerCase(),
+      `the console must read this suite's own report directory, got "${reportsSeen.report_directory}"`);
+    pass(`server ready on port ${port}, data root ${dataRoot}, report directory ${reportRoot}`);
 
     step('launch headless Chrome and stub the two contribution datasets');
     browser = await withTimeout(

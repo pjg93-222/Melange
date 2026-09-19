@@ -71,11 +71,14 @@ function freePort() {
   return withTimeout(pick(), 10000, 'freePort()');
 }
 
-function startServer(port, dataRoot) {
+function startServer(port, dataRoot, reportRoot) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.env.MENTAT_PYTHON || 'python',
       ['app/server.py', '--port', String(port), '--data-root', dataRoot],
-      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true});
+      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
+       // Without a report directory of its own this console resolves the configured
+       // one - Paul's published reports - and chdir()s into it on every run.
+       env: Object.assign({}, process.env, {MENTAT_REPORT_DIRECTORY: reportRoot})});
     const stderrLines = [];
     let stdout = '';
     let settled = false;
@@ -223,6 +226,7 @@ function setup(label) { console.log(`SETUP: ${label}`); }
   let browser = null;
   let server = null;
   const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-navigation-scope-'));
+  const reportRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-navigation-scope-reports-'));
   let failed = false;
   const crossReferenceRequests = [];
   const graphRequests = [];
@@ -317,8 +321,23 @@ function setup(label) { console.log(`SETUP: ${label}`); }
   try {
     setup('pick a free port and launch the console server on a throwaway --data-root');
     const port = await freePort();
-    server = await startServer(port, dataRoot);
+    server = await startServer(port, dataRoot, reportRoot);
     const origin = `http://127.0.0.1:${port}`;
+    // The console reads this suite's own report directory, not the configured one.
+    const reportsSeen = await new Promise((resolve, reject) => {
+      const ask = require('node:http').get(
+        {host: '127.0.0.1', port: port, path: '/api/report-sources', headers: {Host: '127.0.0.1:' + port}},
+        answer => {
+          let body = '';
+          answer.on('data', chunk => { body += chunk; });
+          answer.on('end', () => { try { resolve(JSON.parse(body)); } catch (error) { reject(error); } });
+        });
+      ask.on('error', reject);
+    });
+    assert.equal(path.resolve(String(reportsSeen.report_directory || '')).toLowerCase(),
+      path.resolve(reportRoot).toLowerCase(),
+      `the console must read this suite's own report directory, got "${reportsSeen.report_directory}"`);
+
     browser = await withTimeout(
       chromium.launch({headless: true, channel: process.env.MENTAT_BROWSER_CHANNEL || 'chrome', timeout: 30000}),
       35000, 'chromium.launch()');
@@ -327,7 +346,8 @@ function setup(label) { console.log(`SETUP: ${label}`); }
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await installRoutes(page);
-    console.log(`SETUP done - server ready on port ${port}, data root ${dataRoot}, routes stubbed`);
+    console.log(`SETUP done - server ready on port ${port}, data root ${dataRoot}, `
+      + `report directory ${reportRoot}, routes stubbed`);
 
     // The permalink under test is the contract's own Graph example, retargeted
     // at this fixture's company so the example and the test cannot drift.
@@ -588,6 +608,7 @@ function setup(label) { console.log(`SETUP: ${label}`); }
     }
     await stopServer(server);
     cleanupPath(dataRoot);
+    cleanupPath(reportRoot);
   }
   process.exitCode = failed ? 1 : 0;
 })();

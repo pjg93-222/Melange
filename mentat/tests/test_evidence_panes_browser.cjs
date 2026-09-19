@@ -69,11 +69,14 @@ function freePort() {
   return withTimeout(pick(), 10000, 'freePort()');
 }
 
-function startServer(port, dataRoot) {
+function startServer(port, dataRoot, reportRoot) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.env.MENTAT_PYTHON || 'python',
       ['app/server.py', '--port', String(port), '--data-root', dataRoot],
-      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true});
+      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
+       // Without a report directory of its own this console resolves the configured
+       // one - Paul's published reports - and chdir()s into it on every run.
+       env: Object.assign({}, process.env, {MENTAT_REPORT_DIRECTORY: reportRoot})});
     const stderr = [];
     let stdout = '', settled = false;
     const timer = setTimeout(() => {
@@ -191,6 +194,7 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
   let browser = null, server = null, failed = false;
   const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-s6-data-'));
   const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-s6-fixtures-'));
+  const reportRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-s6-reports-'));
   try {
     step('build two industry-workbook fixtures, a two-header workbook and a third CSV');
     execFileSync(process.env.MENTAT_PYTHON || 'python', ['-c', FIXTURE_SCRIPT, fixtureDir],
@@ -201,10 +205,24 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
 
     step('launch a scratch console on a free port with a temp data root');
     const port = await freePort();
-    server = await startServer(port, dataRoot);
+    server = await startServer(port, dataRoot, reportRoot);
     serverForWatchdog = server;
     const origin = `http://127.0.0.1:${port}`;
-    pass(`console ready on ${port}, data root ${dataRoot}`);
+    // The console reads this suite's own report directory, not the configured one.
+    const reportsSeen = await new Promise((resolve, reject) => {
+      const ask = require('node:http').get(
+        {host: '127.0.0.1', port: port, path: '/api/report-sources', headers: {Host: '127.0.0.1:' + port}},
+        answer => {
+          let body = '';
+          answer.on('data', chunk => { body += chunk; });
+          answer.on('end', () => { try { resolve(JSON.parse(body)); } catch (error) { reject(error); } });
+        });
+      ask.on('error', reject);
+    });
+    assert.equal(path.resolve(String(reportsSeen.report_directory || '')).toLowerCase(),
+      path.resolve(reportRoot).toLowerCase(),
+      `the console must read this suite's own report directory, got "${reportsSeen.report_directory}"`);
+    pass(`console ready on ${port}, data root ${dataRoot}, report directory ${reportRoot}`);
 
     step('launch headless Chrome and open the PAC evidence tab');
     browser = await withTimeout(chromium.launch({headless: true,
@@ -815,7 +833,7 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     clearTimeout(watchdog);
     if (browser) await browser.close().catch(() => {});
     await stopServer(server);
-    for (const target of [dataRoot, fixtureDir]) {
+    for (const target of [dataRoot, fixtureDir, reportRoot]) {
       try { fs.rmSync(target, {recursive: true, force: true, maxRetries: 10, retryDelay: 200}); }
       catch (error) { console.error(`cleanup failed for ${target}: ${error.message}`); }
     }
