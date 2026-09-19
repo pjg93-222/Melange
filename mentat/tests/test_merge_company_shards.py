@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
+import hashlib
 import sys
 import tempfile
 import unittest
@@ -900,6 +901,27 @@ class MergeCompanyShardsTest(unittest.TestCase):
                 output.getvalue(),
             )
 
+    def test_rejected_search_hit_preserves_retained_corporate_status(self):
+        for status in ('review', 'accepted'):
+            with self.subTest(status=status), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                target, alpha, beta = [root / name for name in ('target.db', 'alpha.db', 'beta.db')]
+                for path in (target, alpha, beta):
+                    create_database(path)
+                for path, company, state in ((alpha, 'Alpha', 'rejected'), (beta, 'Beta', status)):
+                    with closing(sqlite3.connect(path)) as connection, connection:
+                        connection.execute('INSERT INTO corporate_giving (sub_id, company, amount, company_match_status) VALUES (?, ?, ?, ?)', ('C1', company, 10, state))
+                with redirect_stdout(StringIO()):
+                    merger.main([str(target), '--company-order-json', '["Alpha", "Beta"]', f'{alpha}::Alpha', f'{beta}::Beta'])
+                with closing(sqlite3.connect(target)) as connection:
+                    self.assertEqual(connection.execute('SELECT company, amount, company_match_status FROM corporate_giving').fetchall(), [('Beta', 10, status)])
+                    self.assertEqual(connection.execute('SELECT stored_company, incoming_company FROM attribution_conflicts').fetchall(), [('Beta', 'Alpha')])
+                # Two plausible companies still require review; never pick one.
+                with closing(sqlite3.connect(alpha)) as connection, connection:
+                    connection.execute("UPDATE corporate_giving SET company_match_status='review'")
+                with self.assertRaisesRegex(RuntimeError, 'Non-identical primary-key collision'):
+                    merger.main([str(target), f'{alpha}::Alpha'])
+
     def test_corporate_enrichment_does_not_hide_later_conflict(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-corporate-mixed-") as temp:
             root = Path(temp)
@@ -1028,6 +1050,73 @@ class MergeCompanyShardsTest(unittest.TestCase):
             finally:
                 merger.assert_expected_target_state = original_check
             self.assertEqual(transaction_states, [True])
+
+
+EVIDENCE_SCHEMA = '''
+CREATE TABLE fec_response_archive(archive_sha256 TEXT PRIMARY KEY,schema_version INTEGER,
+  payload_kind TEXT,payload_json TEXT,created_at TEXT);
+CREATE TABLE fec_response_observations(observation_id TEXT PRIMARY KEY,archive_sha256 TEXT,
+  unit_id TEXT,query_sha256 TEXT,query_json TEXT,page INTEGER,http_status INTEGER,
+  observed_at TEXT,last_observed_at TEXT);
+CREATE TABLE attribution_claims(claim_id TEXT PRIMARY KEY,source_table TEXT,sub_id TEXT,
+  company TEXT,evidence_json TEXT,observed_at TEXT);
+CREATE TABLE source_record_conflicts(conflict_id TEXT PRIMARY KEY,source_table TEXT,sub_id TEXT,
+  before_json TEXT,after_json TEXT,resolution_status TEXT,observed_at TEXT);
+'''
+
+
+class MergeEvidenceTests(unittest.TestCase):
+    def evidence_schema(self,path):
+        with closing(sqlite3.connect(path)) as db,db:db.executescript(EVIDENCE_SCHEMA)
+
+    def seed(self,path,date):
+        payload='{"results":[{"sub_id":"123","arbitrary_future_field":"preserve"}]}'
+        query='{"request":{"url":"https://api.open.fec.gov/v1/schedules/schedule_a/"}}'
+        sha=hashlib.sha256(payload.encode()).hexdigest()
+        with closing(sqlite3.connect(path)) as db,db:
+            db.execute('INSERT INTO fec_response_archive VALUES(?,1,?,?,?)',(sha,'fec_api_response_body',payload,date))
+            db.execute('INSERT INTO fec_response_observations VALUES(?,?,?,?,?,0,200,?,?)',
+                ('observation',sha,'unit',hashlib.sha256(query.encode()).hexdigest(),query,date,date))
+            db.execute('INSERT INTO attribution_claims VALUES(?,?,?,?,?,?)',
+                ('claim','corporate_giving','123','Outside selected company','{"claim":"preserve"}',date))
+            db.execute('INSERT INTO source_record_conflicts VALUES(?,?,?,?,?,?,?)',
+                ('conflict','corporate_giving','123','100','200','unresolved',date))
+
+    def test_archives_observations_claims_and_conflicts_survive_idempotent_merge(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target,a,b=[Path(directory)/name for name in ('target.db','a.db','b.db')]
+            for path in (target,a,b):create_database(path);self.evidence_schema(path)
+            self.seed(a,'2026-09-01');self.seed(b,'2026-09-10')
+            arguments=[str(target),f'{a}::Alpha',f'{b}::Beta']
+            with redirect_stdout(StringIO()):
+                merger.main(arguments);merger.main(arguments)
+            for table in merger.EVIDENCE_TABLES:
+                self.assertEqual(scalar(target,f'SELECT COUNT(*) FROM {table}'),1)
+            self.assertEqual(scalar(target,'SELECT created_at FROM fec_response_archive'),'2026-09-01')
+            self.assertEqual(scalar(target,'SELECT last_observed_at FROM fec_response_observations'),'2026-09-10')
+            self.assertEqual(scalar(target,'SELECT company FROM attribution_claims'),'Outside selected company')
+
+    def test_missing_target_archive_schema_refuses_evidence_loss(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target,shard=[Path(directory)/name for name in ('target.db','shard.db')]
+            for path in (target,shard):create_database(path)
+            self.evidence_schema(shard);self.seed(shard,'2026-09-10')
+            with self.assertRaisesRegex(RuntimeError,'missing evidence table'),redirect_stdout(StringIO()):
+                merger.main([str(target),f'{shard}::Alpha'])
+            self.assertEqual(scalar(target,'SELECT COUNT(*) FROM contributions'),0)
+
+    def test_conflicting_or_corrupt_archive_content_rolls_back_merge(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target,shard=[Path(directory)/name for name in ('target.db','shard.db')]
+            for path in (target,shard):create_database(path);self.evidence_schema(path)
+            self.seed(shard,'2026-09-10')
+            with closing(sqlite3.connect(shard)) as db,db:
+                db.execute("UPDATE fec_response_archive SET payload_json='tampered'")
+                db.execute("INSERT INTO contributions(sub_id,company,amount) VALUES('new','Alpha',100)")
+            with self.assertRaisesRegex(RuntimeError,'hash mismatch'),redirect_stdout(StringIO()):
+                merger.main([str(target),f'{shard}::Alpha'])
+            self.assertEqual(scalar(target,'SELECT COUNT(*) FROM contributions'),0)
+            self.assertEqual(scalar(target,'SELECT COUNT(*) FROM fec_response_archive'),0)
 
 
 if __name__ == "__main__":

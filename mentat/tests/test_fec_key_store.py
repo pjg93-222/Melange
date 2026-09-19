@@ -6,13 +6,28 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from fec_key_store import load_keys, save_keys, record_validation
+import fec_key_store as store
 
 
 @unittest.skipUnless(os.name == 'nt', 'Windows DPAPI')
 class KeyStoreTests(unittest.TestCase):
+    def test_status_uses_one_current_snapshot_and_exposes_no_key_values(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'keys.dpapi'
+            save_keys(['fixture-one', 'fixture-two'], path)
+            with patch.object(store, 'key_path', return_value=path):
+                for active in (2, 1, 0):
+                    with patch.object(store, 'crypt', wraps=store.crypt) as decrypt:
+                        self.assertEqual(store.status(), {'stored_key_count': 2,
+                                                         'active_key_count': active, 'encrypted': True})
+                        self.assertEqual(decrypt.call_count, 1)
+                    if active:
+                        store.set_disabled([store.key_id('fixture-' + ('one' if active == 2 else 'two'))], 'manual')
+
     def test_disabled_keys_survive_import_without_becoming_active(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'keys.dpapi'

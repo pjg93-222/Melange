@@ -72,6 +72,12 @@ def create_complete_database(path: Path) -> None:
                     "INSERT INTO canary_log(company,cycle,passed) VALUES (?,?,1)",
                     (company, cycle),
                 )
+        connection.execute('ALTER TABLE api_work_progress ADD COLUMN records_total INTEGER DEFAULT 0')
+        connection.execute('ALTER TABLE api_work_progress ADD COLUMN query_contract TEXT')
+        for uid, company, cycle, kind in connection.execute('SELECT unit_id,company,cycle,kind FROM api_work_progress').fetchall():
+            field = 'contributor_employer' if kind == 'employer' else 'contributor_name'
+            contract = {'version':2, 'company':company, 'request':{'id':uid, 'params':{field:[company], 'two_year_transaction_period':str(cycle)}}}
+            connection.execute('UPDATE api_work_progress SET query_contract=? WHERE unit_id=?',(json.dumps(contract),uid))
 
 
 def write_receipt(path: Path, database: Path, **updates: object) -> None:
@@ -88,6 +94,28 @@ def write_receipt(path: Path, database: Path, **updates: object) -> None:
 
 
 class CoverageGateTests(unittest.TestCase):
+    def test_window_fetch_checkpoints_require_reconciled_stored_parent(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'sample.db'
+            create_complete_database(path)
+            with closing(sqlite3.connect(path)) as connection, connection:
+                parent = 'employer:Alpha:2026'
+                connection.execute('UPDATE api_work_progress SET rows_seen=10 WHERE unit_id=?', (parent,))
+                for suffix, count in (('01', 4), ('02', 6)):
+                    connection.execute('INSERT INTO api_work_progress (unit_id,company,cycle,kind,rows_seen,fetched_complete,stored_complete) VALUES (?, ?, ?, ?, ?, 1, 0)', (parent+'::window::'+suffix, 'Alpha', 2026, 'employer', count))
+                grid, missing, incomplete = gate.api_progress_grid(connection, ('Alpha',), (2026,))
+                self.assertEqual((missing, incomplete), (0, 0))
+                self.assertEqual(grid[0]['rows_seen'], 10)
+                self.assertEqual(grid[0]['total_units'], 2)
+                for field, value in (('stored_complete', 0), ('fetched_complete', 0), ('rows_seen', 11)):
+                    connection.execute(f'UPDATE api_work_progress SET {field}=? WHERE unit_id=?', (value, parent))
+                    self.assertEqual(gate.api_progress_grid(connection, ('Alpha',), (2026,))[2], 1)
+                    connection.execute('UPDATE api_work_progress SET stored_complete=1, fetched_complete=1, rows_seen=10 WHERE unit_id=?', (parent,))
+                connection.execute('UPDATE api_work_progress SET fetched_complete=0 WHERE unit_id=?', (parent+'::window::01',))
+                self.assertEqual(gate.api_progress_grid(connection, ('Alpha',), (2026,))[2], 1)
+                connection.execute('DELETE FROM api_work_progress WHERE unit_id=?', (parent,))
+                self.assertEqual(gate.api_progress_grid(connection, ('Alpha',), (2026,))[2], 1)
+
     def test_roster_validation_discovers_industries_and_exclusion_coverage(
         self,
     ) -> None:
