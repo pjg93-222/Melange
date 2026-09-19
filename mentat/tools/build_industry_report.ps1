@@ -27,6 +27,9 @@ param(
   [ValidateSet('','2021-2022','2023-2024','2025-2026')]
   [string]$CycleLabel = '',
   [switch]$NoCache,
+  [ValidateRange(0,10000)]
+  [int]$CrossReferenceMaxRequests = 100,
+  [switch]$CrossReferenceOffline,
   [switch]$RenderPreviews
 )
 
@@ -55,13 +58,11 @@ if (-not $WorkbookLockPath) {
 }
 
 if (-not $DatabasePath) {
-  $dataRoot = if ($env:MENTAT_DATA_ROOT) { $env:MENTAT_DATA_ROOT } else { Join-Path $env:LOCALAPPDATA 'Mentat' }
-  $DatabasePath = Join-Path $dataRoot 'mentat.db'
+  throw 'Pass -DatabasePath explicitly. Report sources are never selected from an ambient default database.'
 }
-if (-not $OutputDirectory) {
-  $workspaceRoot = Split-Path -Parent $projectRoot
-  $OutputDirectory = Join-Path $workspaceRoot 'reports'
-}
+Import-Module (Join-Path $scriptRoot 'report_directory.psm1') -Force
+$OutputDirectory = Resolve-MentatReportDirectory -ProjectRoot $projectRoot -OutputDirectory $OutputDirectory
+$env:MENTAT_REPORT_DIRECTORY = $OutputDirectory
 $sourceRoot = Join-Path $projectRoot 'inputs'
 if ($env:MENTAT_FEC_SOURCE_ROOT) { $sourceRoot = $env:MENTAT_FEC_SOURCE_ROOT }
 elseif (Test-Path -LiteralPath (Join-Path $sourceRoot 'active_fec_sources.json')) {
@@ -171,17 +172,18 @@ $builder = Join-Path $scriptRoot 'crypto_workbook_builder.mjs'
 $cycleFilterScript = Join-Path $scriptRoot 'filter_industry_cycle_data.mjs'
 $finalizer = Join-Path $scriptRoot 'finalize_crypto_excel.ps1'
 $beneficiaryModule = Join-Path $projectRoot 'R\fec_beneficiary.R'
-$committeeFiles = @(
-  (Join-Path $CommitteeMasterDirectory 'cm22\cm.txt'),
-  (Join-Path $CommitteeMasterDirectory 'cm24\cm.txt'),
-  (Join-Path $CommitteeMasterDirectory 'cm26\cm.txt')
-)
-$beneficiaryFiles = @(
-  (Join-Path $BeneficiaryDirectory 'cn22\cn.txt'),(Join-Path $BeneficiaryDirectory 'cn24\cn.txt'),(Join-Path $BeneficiaryDirectory 'cn26\cn.txt'),
-  (Join-Path $BeneficiaryDirectory 'ccl22\ccl.txt'),(Join-Path $BeneficiaryDirectory 'ccl24\ccl.txt'),(Join-Path $BeneficiaryDirectory 'ccl26\ccl.txt'),
-  (Join-Path $BeneficiaryDirectory 'leadership2022.csv'),(Join-Path $BeneficiaryDirectory 'leadership2024.csv'),(Join-Path $BeneficiaryDirectory 'leadership2026.csv'),
-  (Join-Path $BeneficiaryDirectory 'pas222\itpas2.txt'),(Join-Path $BeneficiaryDirectory 'pas224\itpas2.txt'),(Join-Path $BeneficiaryDirectory 'pas226\itpas2.txt')
-)
+$inputCycles = if ($CycleLabel) { @([int]$CycleLabel.Substring(5,4)) } else { @(2022,2024,2026) }
+$committeeFiles = @(foreach ($cycle in $inputCycles) {
+  $suffix = ([string]$cycle).Substring(2,2)
+  Join-Path $CommitteeMasterDirectory "cm$suffix\cm.txt"
+})
+$beneficiaryFiles = @(foreach ($cycle in $inputCycles) {
+  $suffix = ([string]$cycle).Substring(2,2)
+  Join-Path $BeneficiaryDirectory "cn$suffix\cn.txt"
+  Join-Path $BeneficiaryDirectory "ccl$suffix\ccl.txt"
+  Join-Path $BeneficiaryDirectory "leadership$cycle.csv"
+  Join-Path $BeneficiaryDirectory "pas2$suffix\itpas2.txt"
+})
 foreach ($requiredPath in @($DatabasePath,$RScriptPath,$NodePath,$NodeModulesPath,$exporter,$builder,$cycleFilterScript,$finalizer,$beneficiaryModule,$heapPlanner) + $committeeFiles + $beneficiaryFiles) {
   if (-not (Test-Path -LiteralPath $requiredPath)) { throw "Required report input or runtime is missing: $requiredPath" }
 }
@@ -192,7 +194,7 @@ function Test-JsonFile([string]$Path) {
   try {
     $ErrorActionPreference = 'Continue'
     if ((Get-Item -LiteralPath $Path).Length -ge 480MB) {
-      & $PythonPath '-c' 'import json,sys; json.load(open(sys.argv[1],encoding="utf-8-sig"))' $Path 2>$null | Out-Null
+      & $PythonPath (Join-Path $scriptRoot 'validate_report_json.py') $Path | Out-Null
     } else {
       & $NodePath '--max-old-space-size=8192' '-e' $validationScript $Path 2>$null | Out-Null
     }
@@ -330,6 +332,23 @@ function Get-QuiescentDatabaseSha256([string]$Path) {
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
 $cacheRoot = Join-Path $projectRoot ('.cache\industry-report\' + $industryToken)
 $databaseHash = Get-QuiescentDatabaseSha256 $DatabasePath
+$sourceGuard = Join-Path $scriptRoot 'report_source_guard.py'
+$sourceGuardDirectory = Join-Path $projectRoot 'state\accepted-report-sources'
+if ($env:MENTAT_ACCEPTED_SOURCE_ROOT) { $sourceGuardDirectory = $env:MENTAT_ACCEPTED_SOURCE_ROOT }
+$sourceGuardReceipt = Join-Path $sourceGuardDirectory ("runs\$industryToken-" + [Guid]::NewGuid().ToString('N') + '.json')
+$sourceGuardCycles = if ($CycleLabel) { $CycleLabel.Substring(5,4) } else { '2022,2024,2026' }
+# Reconciliation runs on every build, including workbook cache hits. Its own
+# decision ledger explains source gaps before the publication gate can reject
+# them. An unresolved relationship is reported; a broken invariant fails.
+$crossReference = Join-Path $scriptRoot 'run_cross_reference.py'
+$crossReferenceArguments = @($crossReference, '--database', $DatabasePath,
+  '--industry', $Industry, '--cycles', $sourceGuardCycles,
+  '--baseline-root', $sourceGuardDirectory, '--max-requests', $CrossReferenceMaxRequests)
+if ($CrossReferenceOffline) { $crossReferenceArguments += '--offline' }
+& $PythonPath @crossReferenceArguments
+if ($LASTEXITCODE -ne 0) { throw 'Automatic FEC cross-referencing failed. Review the saved process evidence before exporting.' }
+& $PythonPath $sourceGuard prepare --database $DatabasePath --industry $Industry --cycles $sourceGuardCycles --state-dir $sourceGuardDirectory --receipt $sourceGuardReceipt
+if ($LASTEXITCODE -ne 0) { throw "Source comparison failed. See $sourceGuardReceipt" }
 $databaseToken = $databaseHash.Substring(0, 16)
 # A per-cycle build exports only that cycle, so it needs its own payload and
 # manifest - sharing one industry_data.json across three -CycleLabel runs would
@@ -375,8 +394,10 @@ $dataInputPaths = @(
   $MyInvocation.MyCommand.Path,
   (Join-Path $projectRoot 'R\report.R'),
   (Join-Path $projectRoot 'R\identity_components.R'),
+  (Join-Path $projectRoot 'R\state_destinations.R'),
   (Join-Path $projectRoot 'R\ingest.R'),
   (Join-Path $projectRoot 'R\collect.R'),
+  (Join-Path $projectRoot 'inputs\fec_receipt_rules.json'),
   (Join-Path $projectRoot 'R\paths.R'),
   (Join-Path $projectRoot 'R\schema.R'),
   (Join-Path $projectRoot 'R\reconcile.R'),
@@ -390,6 +411,8 @@ $dataInputPaths = @(
   $tidyStageModule,
   (Join-Path $projectRoot 'R\fec_transfer_graph.R'),
   (Join-Path $projectRoot 'tools\fec_transfer_graph.py'),
+  (Join-Path $projectRoot 'tools\fec_filing_headers.py'),
+  $sourceGuard,
   (Join-Path $projectRoot 'tools\enrich_downstream.py'),
   (Join-Path $projectRoot 'tools\crypto_workbook_builder.mjs'),
   (Join-Path $projectRoot 'tools\finalize_crypto_excel.ps1'),
@@ -619,6 +642,7 @@ $workbookFingerprintInputs = @(
   $buildDataPath,
   $builder,
   $finalizer,
+  (Join-Path $projectRoot 'tools\read_report_payload.mjs'),
   (Join-Path $projectRoot 'tools\prepare_workbook_payload.py'),
   $MyInvocation.MyCommand.Path
 )
@@ -790,9 +814,16 @@ try {
           [double]$osInfo.FreePhysicalMemory / 1KB
         )
       } catch { $availableMb = 0 }
+      # Chunked input avoids a second full JSON string in V8. The Banking
+      # end-to-end build (933 MB projection) passes with a 6 GB heap.
+      $minimumHeapMb = if (
+        (Get-Item -LiteralPath $buildDataPath).Length -ge 480MB -and
+        (Test-Path -LiteralPath "$buildDataPath.parts\index.json" -PathType Leaf)
+      ) { 6144 } else { 8192 }
       $heapPlan = Get-MentatNodeHeapPlan `
         -TotalPhysicalMb $detectedPhysicalMb `
-        -AvailableMb $availableMb
+        -AvailableMb $availableMb `
+        -MinimumMb $minimumHeapMb
       Write-Host (
         'Node heap sizing: total={0}MB available={1}MB safe_cap={2}MB status={3}' -f
           $detectedPhysicalMb,
@@ -802,7 +833,7 @@ try {
       )
       if (-not $heapPlan.ready) {
         throw (
-          'Automatic Node heap sizing cannot safely provide the 8,192 MB ' +
+          "Automatic Node heap sizing cannot safely provide the $minimumHeapMb MB " +
           "minimum (total=$detectedPhysicalMb MB; available=$availableMb MB; " +
           "safe cap=$($heapPlan.safe_cap_mb) MB). Wait for collection/build " +
           'processes to release memory, or pass -NodeHeapMb explicitly only ' +
@@ -893,6 +924,9 @@ try {
   $dataWorksheetCount = 0
   $finalizeWatch.Start()
   try {
+    # Run on cache hits too, against the full payload under the publication lock.
+    & $PythonPath $sourceGuard check --receipt $sourceGuardReceipt --payload $dataPath
+    if ($LASTEXITCODE -ne 0) { throw "Dollar reconciliation failed. See $sourceGuardReceipt" }
     # Companion Data workbook. Built AFTER the dollar reconciliation and BEFORE
     # anything is copied into the output folder, so a writer failure leaves the
     # previously published pair untouched rather than publishing an Overview
@@ -958,6 +992,9 @@ try {
       Copy-Item -LiteralPath $stageDataWorkbook -Destination $pendingDataWorkbook -Force
       Move-Item -LiteralPath $pendingDataWorkbook -Destination $targetDataWorkbook -Force
     }
+    Copy-Item -LiteralPath $sourceGuardReceipt -Destination (Join-Path $OutputDirectory ($reportBaseName + '.source-changes.json')) -Force
+    & $PythonPath $sourceGuard accept --receipt $sourceGuardReceipt
+    if ($LASTEXITCODE -ne 0) { throw 'Could not advance the accepted report source.' }
     # Recorded after publication so the manifest never claims a companion that
     # was not published. Rewritten on cache hits too - the Overview fields are
     # replayed verbatim from the values already in scope.
