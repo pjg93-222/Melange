@@ -37,6 +37,13 @@ class ReportInsightsTests(unittest.TestCase):
         book.save(self.report)
         book.close()
 
+    def test_sheet_list_reads_metadata_without_materializing_cells(self):
+        self.book({'Data': [['Company','Amount'],['A',12]], 'History': [['Year','Value']]})
+        with patch.object(insights.openpyxl, 'load_workbook', side_effect=AssertionError('cell scan not needed')):
+            result = insights.worksheet_data(insights.stamp(self.report))
+        self.assertEqual(result['sheets'], ['Data','History'])
+        self.assertEqual(result['sha256'], hashlib.sha256(self.report.read_bytes()).hexdigest())
+
     def test_missing_receipts_do_not_use_mtime_as_coverage(self):
         self.book({'Data': [['Company','Amount'],['A',12]]})
         os.utime(self.report, (1800000000,1800000000))
@@ -181,6 +188,84 @@ class ReportInsightsTests(unittest.TestCase):
         self.assertNotEqual(first['sha256'],second['sha256'])
         self.assertEqual(second['rows'],[['B',88]])
 
+    def test_overlapping_summary_views_are_selected_once(self):
+        self.book({'Spending Overview':[['Cycle','Scope','Total Giving'],['2023-2024','Total Giving',100],['2023-2024','Corporate',40],['2023-2024','Employee',60],['2023-2024','Candidate',100]],
+                   'Recipient List':[['Cycle','View','Total Giving'],['2023-2024','Industry',100],['2023-2024','Company',100]]})
+        overview=insights.worksheet_data(insights.stamp(self.report),'Spending Overview')
+        self.assertEqual(overview['rows'],[['2023-2024','Total Giving',100]])
+        self.assertEqual(overview['row_numbers'],[2])
+        self.assertEqual(overview['accounting']['row_role_column'],1)
+        recipient=insights.worksheet_data(insights.stamp(self.report),'Recipient List')
+        self.assertEqual(recipient['rows'],[['2023-2024','Industry',100]])
+
+    def test_tidy_data_book_cells_type_and_summability_as_the_writer_intends(self):
+        # The companion Data workbook writes REAL Excel types, not text: dates
+        # as datetimes and flags as booleans. numeric() returns None for a bool
+        # (report_insights.py:215), so a flag must classify as a dimension and
+        # never as a measure a reader could sum; cell_value isoformats a
+        # datetime, so a date column must classify 'date' and stay chartable on
+        # a time axis. Both are silent failures if they regress - a summed flag
+        # column produces a plausible number.
+        self.book({'Giving Facts': [
+            ['Election Cycle','Date','Include in Analysis','Giving',
+             'Distinct Contributors'],
+            ['2023-2024',datetime(2024,1,1),True,1250.5,12],
+            ['2023-2024',datetime(2024,2,1),False,900.25,9]]})
+        result = insights.worksheet_data(insights.stamp(self.report),'Giving Facts')
+        self.assertEqual(result['header_row'],1)
+        columns = {c['name']:c for c in result['columns']}
+        self.assertEqual(columns['Date']['type'],'date')
+        self.assertEqual(columns['Include in Analysis']['type'],'category')
+        self.assertEqual(columns['Giving']['type'],'number')
+        self.assertEqual(columns['Giving']['unit'],'currency')
+        self.assertTrue(columns['Giving'].get('accounting',{}).get('safe_to_sum',True))
+        self.assertFalse(
+            columns['Distinct Contributors']['accounting']['safe_to_sum'])
+
+    def test_all_text_sheet_takes_row_one_as_its_header(self):
+        # Every dimension sheet in the Data book (Committees, Candidates,
+        # Committee Sponsors) is entirely text. header_row picks the row with
+        # the most DISTINCT text cells and breaks ties on the earliest row, so
+        # a header of unique names always wins - but only while the headers
+        # stay unique. A duplicated header would hand row 1 away to a data row
+        # and shift every column by one.
+        self.book({'Committees': [
+            ['Committee ID','Committee','Committee Type','Mapping Source'],
+            ['C00000001','CONDUIT ONE','Super PAC','FEC master'],
+            ['C00000002','LEADERSHIP TWO','PAC - qualified','Multiple']]})
+        result = insights.worksheet_data(insights.stamp(self.report),'Committees')
+        self.assertEqual(result['header_row'],1)
+        self.assertEqual([c['name'] for c in result['columns']],
+                         ['Committee ID','Committee','Committee Type','Mapping Source'])
+        self.assertEqual(result['row_numbers'],[2,3])
+
+    def test_per_cycle_split_sheets_keep_their_sheet_level_summability(self):
+        # The Data workbook splits any sheet over MENTAT_DATA_SPLIT_ROWS into
+        # `<Sheet> <cycle_label>` parts. The sheet-level non-summable list is
+        # matched by EXACT name, so before the base-name match those parts were
+        # offered as safe to sum - the association-path double count, split per
+        # cycle and harder to see than the unsplit version it replaced.
+        self.book({'Transfer Paths 2021-2022':[['Funded Committee','Reported Net Transfer'],
+                                               ['C00000001',100],['C00000002',100]],
+                   'Giving Facts 2023-2024':[['Company','Giving'],['A',100],['B',100]]})
+        split = insights.worksheet_data(insights.stamp(self.report),'Transfer Paths 2021-2022')
+        self.assertFalse(split['accounting']['safe_to_sum'])
+        self.assertIn('association paths',split['accounting']['reason'])
+        # A split sheet that was never on the list stays summable: the change
+        # must not make every per-cycle sheet non-summable.
+        facts = insights.worksheet_data(insights.stamp(self.report),'Giving Facts 2023-2024')
+        self.assertTrue(facts['accounting']['safe_to_sum'])
+        giving = next(c for c in facts['columns'] if c['name'] == 'Giving')
+        self.assertEqual(giving['unit'],'currency')
+
+    def test_raw_amount_and_transfer_context_cannot_silently_be_summed(self):
+        self.book({'2023-2024':[['Source ID','Amount','Analysis Amount'],['a',100,100],['b',100,0]],
+                   'Beneficiary Bridge':[['Candidate','Associated Funding'],['A',100],['B',100]]})
+        result=insights.worksheet_data(insights.stamp(self.report),'2023-2024')
+        self.assertFalse(result['columns'][1]['accounting']['safe_to_sum'])
+        self.assertTrue(result['columns'][2]['accounting']['safe_to_sum'])
+        self.assertFalse(insights.worksheet_data(insights.stamp(self.report),'Beneficiary Bridge')['accounting']['safe_to_sum'])
+
     def test_http_report_data_rejects_arbitrary_paths_incomplete_reports_and_hosts(self):
         self.book({'Data': [['Name','Value'],['A',4]]})
         directory = self.root / 'run'
@@ -189,6 +274,7 @@ class ReportInsightsTests(unittest.TestCase):
             {'status':'succeeded','output_workbook':str(self.report)},
             {'status':'running','output_workbook':str(self.report)}]}))
         console = object.__new__(app.Console)
+        console.report_directory = self.root
         console.find = lambda identifier: {'directory':directory} if identifier == 'test' else None
         server = app.ThreadingHTTPServer(('127.0.0.1',0),app.Handler)
         server.app = console

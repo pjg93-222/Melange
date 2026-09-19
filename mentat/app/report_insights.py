@@ -11,6 +11,7 @@ import math
 from pathlib import Path
 import re
 import zipfile
+from xml.etree import ElementTree as ET
 
 import openpyxl
 
@@ -240,12 +241,69 @@ def profile_columns(headers, rows):
     return columns
 
 
+def worksheet_accounting(sheet_name, headers, rows, row_numbers):
+    """Choose one non-overlapping published view before exposing legacy charts.
+
+    The report remains intact. More flexible geography and accounting choices
+    belong to the typed contribution query, whose source rows carry the grain.
+    """
+    notes = []
+    accounting = {'safe_to_sum': True, 'grain': 'worksheet row',
+                  'row_role_column': None, 'included_row_roles': [],
+                  'independent_dimensions': [], 'basis': 'saved worksheet values'}
+    for name, chosen in (('View', 'Industry'), ('Scope', 'Total Giving'), ('Section', 'Company Total')):
+        if name not in headers:
+            continue
+        index = headers.index(name)
+        roles = {str(row[index]) for row in rows}
+        if chosen in roles and len(roles) > 1:
+            keep = [i for i, row in enumerate(rows) if row[index] == chosen]
+            removed = len(rows) - len(keep)
+            rows, row_numbers = [rows[i] for i in keep], [row_numbers[i] for i in keep]
+            notes.append(f'Using {name} = {chosen}; {removed:,} overlapping summary rows were excluded from this chart source.')
+            accounting.update(grain=chosen, row_role_column=index, included_row_roles=[chosen])
+    if 'Source ID' in headers:
+        accounting.update(grain='FEC source observation', basis='included itemized receipts at the named recipient; not verified unique giving')
+        notes.append('Use Analysis Amount for included receipts. Raw Amount can include excluded or repeated source observations.')
+    # Match the BASE sheet name. The companion Data workbook splits any sheet
+    # over its row threshold into `<Sheet> <cycle_label>` parts, so the sheet
+    # that used to be called exactly 'Transfer Paths' can arrive as
+    # 'Transfer Paths 2021-2022'. Against the exact-name list those parts fell
+    # through and their sums were offered as safe - the same association-path
+    # double count, now split three ways and harder to spot. A bare cycle label
+    # is not stripped (nothing is left to match, and graph_data.py parses those
+    # separately).
+    base_sheet_name = re.sub(r'\s+\d{4}-\d{4}$', '', sheet_name).strip() or sheet_name
+    if base_sheet_name in ('Beneficiary Bridge', 'Beneficiary Summary', 'Transfer Paths', 'Funding Cohorts', 'Allocation Estimates'):
+        accounting.update(safe_to_sum=False, reason='This sheet repeats funding or committee activity across association paths. Use the contribution dataset and a named accounting basis.')
+    columns = profile_columns(headers, rows)
+    for column in columns:
+        name = column['name']
+        if name == 'Amount' and ('Analysis Amount' in headers or 'Include in Analysis' in headers):
+            column['accounting'] = {'safe_to_sum':False, 'reason':'Raw observations include excluded or repeated records. Choose Analysis Amount or the contribution dataset.'}
+        elif name == 'Analysis Amount':
+            column['accounting'] = {'safe_to_sum':True, 'basis':'included_receipts'}
+        elif re.search(r'%|percent|coverage|rank|average|median|distinct|contributors',name,re.I):
+            column['accounting'] = {'safe_to_sum':False, 'reason':'This is a percentage, rank, average, or precomputed distinct count; summing it does not produce a valid total.'}
+        if re.search(r'amount|giving|spending|activity|funding',name,re.I) and column['type']=='number':
+            column['unit']='currency'
+    return rows,row_numbers,columns,accounting,notes
+
+
 @lru_cache(maxsize=6)
 def worksheet_data(file_stamp, sheet_name='', header=0):
+    if not sheet_name:
+        # Listing worksheets must not load the potentially huge shared-string
+        # table. Only materialize cells when the user chooses a worksheet.
+        try:
+            with zipfile.ZipFile(file_stamp[0]) as archive:
+                tree = ET.fromstring(archive.read('xl/workbook.xml'))
+            sheets = [node.get('name') for node in tree.iter('{http://schemas.openxmlformats.org/spreadsheetml/2006/main}sheet')]
+            return {'sheets': sheets, 'sha256': digest_stamp(file_stamp)}
+        except ET.ParseError as error:
+            raise ValueError('Workbook metadata is malformed.') from error
     book = openpyxl.load_workbook(file_stamp[0], read_only=True, data_only=True)
     try:
-        if not sheet_name:
-            return {'sheets': book.sheetnames, 'sha256': digest_stamp(file_stamp)}
         if sheet_name not in book.sheetnames:
             raise ValueError('Choose a worksheet from this report.')
         sheet = book[sheet_name]
@@ -279,8 +337,10 @@ def worksheet_data(file_stamp, sheet_name='', header=0):
             if any(v is not None and v != '' for v in values):
                 rows.append(values)
                 row_numbers.append(number)
-        return {'sheet': sheet_name, 'header_row': start, 'columns': profile_columns(headers, rows),
+        rows,row_numbers,columns,accounting,notes=worksheet_accounting(sheet_name,headers,rows,row_numbers)
+        return {'sheet': sheet_name, 'header_row': start, 'columns': columns,
                 'rows': rows, 'row_numbers': row_numbers, 'row_count': len(rows), 'sha256': digest_stamp(file_stamp),
-                'note': 'Worksheet values only; formulas use their last saved results. Empty formula caches remain missing. Worksheet totals and overlapping summaries may double count: filter to the subsection you need.'}
+                'accounting': accounting,
+                'note': ' '.join(notes + ['Worksheet formulas use their last saved results; empty caches remain missing. The contribution dataset provides the explicit accounting basis and transaction geography.'])}
     finally:
         book.close()
