@@ -28,12 +28,18 @@ function Cycle-Dispatch([scriptblock]$Builder) {
   $expression
 }
 
+function Category-Label([string]$Category) {
+  if ($Category -eq 'Company PAC') { return 'Company PAC receipts' }
+  $Category
+}
+
 function Scope-Expression([string]$TableName, [string]$Party = '') {
   $partyArgs = if ($Party) { ",${TableName}[Party],`"${Party}`"" } else { '' }
   $factArgs = if ($formulaFacts) { ",${TableName}[Fact Type],`"Master`"" } else { '' }
   $total = if ($Party -or $formulaFacts) { "SUMIFS(${TableName}[Analysis Amount]${partyArgs}${factArgs})" } else { "SUM(${TableName}[Analysis Amount])" }
   $role = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Employee Tier],[@Scope]${partyArgs}${factArgs})"
-  $category = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Recipient Category],[@Scope]${partyArgs}${factArgs})"
+  $categoryKey = 'IF([@Scope]="Company PAC receipts","Company PAC",[@Scope])'
+  $category = "SUMIFS(${TableName}[Analysis Amount],${TableName}[Recipient Category],${categoryKey}${partyArgs}${factArgs})"
   "IF([@Scope]=`"Total Giving`",${total},IF(OR([@Scope]=`"Corporate`",[@Scope]=`"Chief`",[@Scope]=`"Middle Management`",[@Scope]=`"Employee`"),${role},${category}))"
 }
 
@@ -345,11 +351,12 @@ try {
           Set-TableColumnFormula $table 'R Share Change' '=0'
         }
         foreach ($category in $masterCategories) {
-          Set-TableColumnFormula $table $category ('=' + (Master-Expression $sourceTableName '' $category))
-          Set-TableColumnFormula $table "${category} %" ("=IF([@[Total Giving]]=0,0,[@[${category}]]/[@[Total Giving]])")
-          Set-TableColumnFormula $table "${category} D" ('=' + (Master-Expression $sourceTableName 'D' $category))
-          Set-TableColumnFormula $table "${category} R" ('=' + (Master-Expression $sourceTableName 'R' $category))
-          Set-TableColumnFormula $table "${category} R %" ("=IF([@[${category} D]]+[@[${category} R]]=0,0,[@[${category} R]]/([@[${category} D]]+[@[${category} R]]))")
+          $categoryLabel = Category-Label $category
+          Set-TableColumnFormula $table $categoryLabel ('=' + (Master-Expression $sourceTableName '' $category))
+          Set-TableColumnFormula $table "${categoryLabel} %" ("=IF([@[Total Giving]]=0,0,[@[${categoryLabel}]]/[@[Total Giving]])")
+          Set-TableColumnFormula $table "${categoryLabel} D" ('=' + (Master-Expression $sourceTableName 'D' $category))
+          Set-TableColumnFormula $table "${categoryLabel} R" ('=' + (Master-Expression $sourceTableName 'R' $category))
+          Set-TableColumnFormula $table "${categoryLabel} R %" ("=IF([@[${categoryLabel} D]]+[@[${categoryLabel} R]]=0,0,[@[${categoryLabel} R]]/([@[${categoryLabel} D]]+[@[${categoryLabel} R]]))")
         }
         foreach ($tier in $masterTiers) {
           Set-TableColumnFormula $table $tier ('=' + (Master-Expression $sourceTableName '' '' $tier))
@@ -358,7 +365,7 @@ try {
           Set-TableColumnFormula $table "${tier} R" ('=' + (Master-Expression $sourceTableName 'R' '' $tier))
           Set-TableColumnFormula $table "${tier} R %" ("=IF([@[${tier} D]]+[@[${tier} R]]=0,0,[@[${tier} R]]/([@[${tier} D]]+[@[${tier} R]]))")
         }
-        $categorySum = ($masterCategories | ForEach-Object { "[@[${_}]]" }) -join '+'
+        $categorySum = ($masterCategories | ForEach-Object { "[@[$(Category-Label $_)]]" }) -join '+'
         $tierSum = ($masterTiers | ForEach-Object { "[@[${_}]]" }) -join '+'
         Set-TableColumnFormula $table 'Integrity Check' ("=IF(AND(ABS([@[Total Giving]]-[@Democratic]-[@Republican]-[@[Other / Unclassified]])<0.01,ABS([@[Total Giving]]-(${categorySum}))<0.01,ABS([@[Total Giving]]-(${tierSum}))<0.01),`"OK`",`"CHECK`")")
       } finally { Release-ComObject $table }
@@ -639,7 +646,8 @@ try {
     '$ Change','% Change','D $ Change','R $ Change','D Share Change','R Share Change'
   )
   foreach ($category in $masterCategories) {
-    $masterFormulaColumns += @($category,"${category} %","${category} D","${category} R","${category} R %")
+    $categoryLabel = Category-Label $category
+    $masterFormulaColumns += @($categoryLabel,"${categoryLabel} %","${categoryLabel} D","${categoryLabel} R","${categoryLabel} R %")
   }
   foreach ($tier in $masterTiers) {
     $masterFormulaColumns += @($tier,"${tier} %","${tier} D","${tier} R","${tier} R %")
