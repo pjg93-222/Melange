@@ -91,20 +91,26 @@ class ConsoleIdentityTests(unittest.TestCase):
     def test_claim_is_exclusive_across_two_python_processes(self):
         self.manifest['state']='ready';self.manifest.pop('pid');self.save()
         worker=self.root/'worker.py'
-        worker.write_text('''import importlib.util,json,sys,time
+        worker.write_text('''import importlib.util,json,os,sys,time
 from pathlib import Path
 spec=importlib.util.spec_from_file_location('fixture_server',sys.argv[1]);app=importlib.util.module_from_spec(spec);spec.loader.exec_module(app)
 root=Path(sys.argv[2]);tag=sys.argv[3]
-app.report_directory=lambda *_:root;app.environment_keys=lambda:[];app.load_keys=lambda:['fixture']
+app.environment_keys=lambda:[];app.load_keys=lambda:['fixture']
 console=app.Console(root,rscript=sys.executable)
 console.prepare_launch=lambda *a,**k:None
 (root/(tag+'.ready')).write_text('ready')
+# Checked after the ready file: a worker that dies first reads as a startup timeout.
+pinned=os.environ.get('MENTAT_REPORT_DIRECTORY','')
+if not pinned or console.report_directory!=Path(pinned).resolve():raise SystemExit('report directory not pinned, resolved '+str(console.report_directory))
 while not (root/'go').exists():time.sleep(.01)
 try:console.launch({'id':'a'*32,'cycles':[2024]});result='claimed'
 except ValueError:result='refused'
 (root/(tag+'.result')).write_text(result)
 ''')
-        children=[subprocess.Popen([sys.executable,str(worker),str(PROJECT/'app/server.py'),str(self.root),tag],stdout=subprocess.PIPE,stderr=subprocess.PIPE) for tag in ('one','two')]
+        # A real Console resolves the configured report folder unless one is pinned.
+        reports=self.root/'reports';reports.mkdir()
+        environment={**os.environ,'MENTAT_REPORT_DIRECTORY':str(reports)}
+        children=[subprocess.Popen([sys.executable,str(worker),str(PROJECT/'app/server.py'),str(self.root),tag],stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=environment) for tag in ('one','two')]
         try:
             deadline=time.monotonic()+15
             while not all((self.root/(tag+'.ready')).exists() for tag in ('one','two')):

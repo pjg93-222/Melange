@@ -14,7 +14,7 @@
  * Every wait is bounded and a top-level watchdog names the step it was on.
  * Harness copied from tests/test_evidence_panes_browser.cjs (S6): freePort(),
  * startServer/stopServer, step()/pass(), HARD_CAP_MS, withTimeout, the
- * MENTAT_NODE_MODULES playwright resolution and a temp data root.
+ * MENTAT_NODE_MODULES playwright resolution and temp data and report roots.
  */
 const assert = require('node:assert/strict');
 const {spawn, execFileSync} = require('node:child_process');
@@ -73,12 +73,14 @@ function freePort() {
   return withTimeout(pick(), 10000, 'freePort()');
 }
 
-function startServer(port, dataRoot, extraEnv) {
+function startServer(port, dataRoot, reportRoot, extraEnv) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.env.MENTAT_PYTHON || 'python',
       ['app/server.py', '--port', String(port), '--data-root', dataRoot],
       {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
-       env: {...process.env, ...(extraEnv || {})}});
+       // Without a report directory of its own this console resolves the configured
+       // one - Paul's published reports - and chdir()s into it on every run.
+       env: {...process.env, ...(extraEnv || {}), MENTAT_REPORT_DIRECTORY: reportRoot}});
     const stderr = [];
     let stdout = '', settled = false;
     const timer = setTimeout(() => {
@@ -200,6 +202,7 @@ function startStubGeocoder() {
   let browser = null, server = null, failed = false, stubbed = null;
   const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-s8-data-'));
   const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-s8-fixtures-'));
+  const reportRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-s8-reports-'));
   try {
     step('build one industry workbook fixture with contributor ZIP and state');
     execFileSync(process.env.MENTAT_PYTHON || 'python', ['-c', FIXTURE_SCRIPT, fixtureDir],
@@ -210,10 +213,23 @@ function startStubGeocoder() {
     step('start the stub geocoder, then a scratch console pointed at it');
     stubbed = await startStubGeocoder();
     const port = await freePort();
-    server = await startServer(port, dataRoot, {MENTAT_GEOCODE_URL: stubbed.url});
+    server = await startServer(port, dataRoot, reportRoot, {MENTAT_GEOCODE_URL: stubbed.url});
     serverForWatchdog = server;
     const origin = `http://127.0.0.1:${port}`;
-    pass(`console ready on ${port}, data root ${dataRoot}`);
+    // The console reads this suite's own report directory, not the configured one.
+    const reportsSeen = await withTimeout(new Promise((resolve, reject) => {
+      const ask = http.get({host: '127.0.0.1', port: port, path: '/api/report-sources',
+                            headers: {Host: '127.0.0.1:' + port}}, answer => {
+        let body = '';
+        answer.on('data', chunk => { body += chunk; });
+        answer.on('end', () => { try { resolve(JSON.parse(body)); } catch (error) { reject(error); } });
+      });
+      ask.on('error', reject);
+    }), 10000, 'GET /api/report-sources');
+    assert.equal(path.resolve(String(reportsSeen.report_directory || '')).toLowerCase(),
+      path.resolve(reportRoot).toLowerCase(),
+      `the console must read this suite's own report directory, got "${reportsSeen.report_directory}"`);
+    pass(`console ready on ${port}, data root ${dataRoot}, report directory ${reportRoot}`);
 
     step('launch headless Chrome and open the PAC evidence tab');
     browser = await withTimeout(chromium.launch({headless: true,
@@ -507,7 +523,7 @@ function startStubGeocoder() {
     if (browser) await browser.close().catch(() => {});
     await stopServer(server);
     if (stubbed) await new Promise(resolve => stubbed.stub.close(() => resolve()));
-    for (const target of [dataRoot, fixtureDir]) {
+    for (const target of [dataRoot, fixtureDir, reportRoot]) {
       try { fs.rmSync(target, {recursive: true, force: true, maxRetries: 10, retryDelay: 200}); }
       catch (error) { console.error(`cleanup failed for ${target}: ${error.message}`); }
     }

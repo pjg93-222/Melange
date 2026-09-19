@@ -50,6 +50,9 @@ EXAMPLES = CONTRACT["examples"]
 BY_NAME = {example["name"]: example for example in EXAMPLES}
 EXACT = ("industry", "build_stamp", "dataset", "error")
 INDUSTRIES = ("Banking", "Credit Union")
+# Bound before any test doubles it: the example-13 acceptance run needs the real
+# folder scan, not the synthetic snapshots every other test here is served.
+REAL_SOURCES = app.contribution_data._sources
 
 
 def synthetic(industry, field):
@@ -135,8 +138,8 @@ class RouteBase(unittest.TestCase):
             fake.start()
             self.addCleanup(fake.stop)
 
-    def request(self, path, *, method="GET", data=None):
-        connection = http.client.HTTPConnection("127.0.0.1", self.server.server_port, timeout=10)
+    def request(self, path, *, method="GET", data=None, timeout=10):
+        connection = http.client.HTTPConnection("127.0.0.1", self.server.server_port, timeout=timeout)
         body = json.dumps(data).encode() if data is not None else None
         headers = {"Host": "127.0.0.1:{}".format(self.server.server_port)}
         if method == "POST":
@@ -439,10 +442,70 @@ class GraphAndCrossReferenceTests(RouteBase):
                 encoding="utf-8")
         return written
 
+    def acceptance_subject(self):
+        """The smallest published overview both /api/graph and the registry own.
+
+        The folder is the one the application resolves -- MENTAT_REPORT_DIRECTORY,
+        else config/report-directory.json -- and it is never created here. The
+        console is read-only and every workbook below is opened for reading only.
+        """
+        absent = ("no published '<Industry> Industry Spending Overview.xlsx' that /api/graph can serve "
+                  "is readable in the authoritative report directory; the manual acceptance receipt is "
+                  "audits/mentat_failings_20260915/receipts/S4_acceptance_real_snapshots.txt")
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        candidates = []
+        try:
+            console = app.Console(Path(temporary.name), rscript=sys.executable, read_only=True)
+            rows = {row["index"]: row for row in console.published_reports()
+                    if row["kind"] == "overview"
+                    and row["name"].casefold().endswith(" industry spending overview.xlsx")}
+            registry = app.snapshot_registry.registry(console.report_directory)
+            for group in console.graph_catalog("published-reports", list(rows.values()))["industries"]:
+                entry = app.snapshot_registry.find(registry, group["name"])
+                books = [console.report_directory / rows[index]["name"]
+                         for index in group["indices"] if index in rows]
+                # One workbook per group keeps `reports` a single stamped entry.
+                if entry and len(books) == 1 and books[0].is_file():
+                    candidates.append((books[0].stat().st_size, group["name"], books[0], entry))
+        except (OSError, ValueError) as error:
+            self.skipTest("%s (%s)" % (absent, error))
+        if not candidates:
+            self.skipTest(absent)
+        _size, industry, workbook, entry = min(candidates, key=lambda item: item[0])
+        return console, industry, workbook, entry
+
     def test_example_13_graph_is_an_acceptance_run(self):
+        """The one example no double can answer: /api/graph reads a real workbook.
+
+        It runs wherever the authoritative folder holds one the route can serve,
+        and skips -- saying what is missing and where the manual receipt is --
+        where it does not, which is any clean checkout.
+        """
         example = EXAMPLES[12]
         self.assertEqual(example["path"], "/api/graph")
-        self.skipTest("acceptance run: needs a real workbook")
+        real = patch.object(app.contribution_data, "_sources", REAL_SOURCES)
+        real.start()
+        self.addCleanup(real.stop)
+        console, industry, workbook, entry = self.acceptance_subject()
+        before = workbook.stat()
+        # This console in place of the namespace the doubled routes are served by:
+        # /api/graph reads the folder, the workbook and the registry for itself.
+        with patch.object(self.server, "app", console):
+            status, body = self.request(
+                example["path"] + "?" + urlencode(dict(example["query"], industry=industry)), timeout=60)
+            self.assertEqual(status, example["status"], body)
+            # A slug addresses the same run and answers with the label.
+            slug_status, slugged = self.request(
+                example["path"] + "?" + urlencode(dict(example["query"], industry=entry["slug"])), timeout=60)
+        self.compare_keys({key: value for key, value in example["response"].items() if key != "..."}, body)
+        self.assertEqual(body["industry"], industry)
+        self.assertEqual([report["name"] for report in body["reports"]], [workbook.name])
+        self.assertEqual(body["reports"][0]["build_stamp"], entry["build_stamp"])
+        self.assertEqual((slug_status, slugged["industry"]), (200, industry))
+        after = workbook.stat()
+        self.assertEqual((before.st_size, before.st_mtime_ns), (after.st_size, after.st_mtime_ns),
+                         "the acceptance run wrote to " + str(workbook))
 
     def test_example_14_industry_selects_its_own_run_and_the_pointer_still_serves_latest(self):
         example = EXAMPLES[13]
