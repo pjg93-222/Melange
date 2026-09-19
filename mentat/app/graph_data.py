@@ -1,12 +1,14 @@
 """Guided report graphs. Read saved report facts without changing classifications."""
 from collections import defaultdict
 from decimal import Decimal, InvalidOperation
-from functools import lru_cache
+from functools import lru_cache, wraps
 import csv
 import json
 from pathlib import Path
 import posixpath
 import re
+import threading
+import time
 import xml.etree.ElementTree as ET
 import zipfile
 
@@ -19,6 +21,47 @@ CATEGORIES = ['Super PAC', 'Trade Association', 'JFC', 'Company PAC', 'Leadershi
               'Carey', 'Other PAC', 'Candidate', 'Party Committee', 'Unclassified']
 AUTHORIZED = {'Principal campaign committee', 'Authorized candidate committee'}
 MAX_SOURCE_ROWS = 1000000
+SINGLEFLIGHT_WAIT_SECONDS = 120
+
+
+def singleflight_cache(maxsize):
+    """Share an in-progress file read without blocking reads of other files.
+
+    A caller that has waited SINGLEFLIGHT_WAIT_SECONDS for the read in progress
+    stops sharing it and reads the file itself, so one stalled read delays the
+    requests behind it instead of blocking them forever.
+    """
+    def decorate(load):
+        cached = lru_cache(maxsize=maxsize)(load)
+        condition = threading.Condition()
+        reading = set()
+
+        @wraps(load)
+        def read(file_stamp):
+            deadline = time.monotonic() + SINGLEFLIGHT_WAIT_SECONDS
+            leader = True
+            with condition:
+                while file_stamp in reading:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0 or not condition.wait(remaining):
+                        # The read in progress is stalled. Read independently, as
+                        # plain lru_cache would, and leave its token to its owner.
+                        leader = False
+                        break
+                if leader:
+                    reading.add(file_stamp)
+            try:
+                return cached(file_stamp)
+            finally:
+                if leader:
+                    with condition:
+                        reading.remove(file_stamp)
+                        condition.notify_all()
+
+        read.cache_clear = cached.cache_clear
+        read.cache_info = cached.cache_info
+        return read
+    return decorate
 
 
 def cycle(value):
@@ -111,11 +154,16 @@ def activity_xml_rows(path, metadata):
 
 @lru_cache(maxsize=32)
 def graph_schema(file_stamp):
-    book = openpyxl.load_workbook(file_stamp[0], read_only=True, data_only=True)
     try:
-        return [s for s in book.sheetnames if re.fullmatch(r'\d{4}[-–]\d{4}', s)]
-    finally:
-        book.close()
+        # Workbook metadata is sufficient. Loading openpyxl here materialized the
+        # shared-string table for every report just to list its sheet names.
+        with zipfile.ZipFile(file_stamp[0]) as archive:
+            tree = ET.fromstring(archive.read('xl/workbook.xml'))
+            ns = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
+            return [s.get('name') for s in tree.iter(ns+'sheet')
+                    if re.fullmatch(r'\d{4}[-–]\d{4}', s.get('name', ''))]
+    except ET.ParseError as error:
+        raise ValueError('Workbook sheet metadata is malformed.') from error
 
 
 def committee_id(value):
@@ -123,12 +171,17 @@ def committee_id(value):
     return match[1] if match else ''
 
 
-@lru_cache(maxsize=8)
+@singleflight_cache(maxsize=8)
 def report_facts(file_stamp):
     """Recipient facts are a complete partition; Master/Employee facts repeat them."""
     book = openpyxl.load_workbook(file_stamp[0], read_only=True, data_only=True)
     try:
         maps, names, companies = {}, {}, set()
+        people, person_names = [], {}
+        if 'Employee List' in book.sheetnames:
+            for row in table_rows(book['Employee List'], required=('person_key', 'person', 'company')):
+                if row.get('person_key') and row.get('person'):
+                    person_names[(str(row['company']), str(row['person_key']))] = str(row['person'])
         if 'PAC & Candidate Map' in book.sheetnames:
             for row in table_rows(book['PAC & Candidate Map'], required=('cycle', 'committee_id')):
                 lookup = (cycle(row.get('cycle')), str(row.get('committee_id') or ''))
@@ -156,6 +209,11 @@ def report_facts(file_stamp):
                 category = str(row.get('recipient_category') or 'Unclassified')
                 scope = (year, company, tier, category)
                 fact_type = row.get('fact_type')
+                if (fact_type == 'Employee' or not fact_type) and row.get('person_key'):
+                    person = str(row['person_key'])
+                    people.append({'cycle':year, 'company':company, 'tier':tier, 'person_id':person,
+                                   'person':person_names.get((company, person), str(row.get('contributor') or person)),
+                                   'amount':amount(row['amount'])})
                 if fact_type:
                     fact_mode = True
                     if fact_type not in ('Master','Employee','Recipient'):
@@ -187,13 +245,15 @@ def report_facts(file_stamp):
                     raise ValueError('Recipient facts do not reconcile to the report totals; no partial graph was created.')
         if stamp(file_stamp[0]) != file_stamp:
             raise ValueError('The workbook changed while it was being read. Refresh Graph.')
-        return {'facts':list(facts.values()), 'companies':sorted(companies), 'cycles':sorted(cycle(s) for s in sheets),
+        return {'facts':list(facts.values()), 'people':people, 'companies':sorted(companies), 'cycles':sorted(cycle(s) for s in sheets),
+                'committees':[{'cycle':year, 'id':identifier, 'label':str(row.get('recipient_committee') or identifier),
+                               'category':str(row.get('recipient_category') or 'Unclassified')} for (year,identifier),row in maps.items()],
                 'sha256':digest_stamp(file_stamp), 'report':Path(file_stamp[0]).name}
     finally:
         book.close()
 
 
-@lru_cache(maxsize=4)
+@singleflight_cache(maxsize=4)
 def report_activity(file_stamp):
     try:
         metadata = {}
@@ -262,13 +322,16 @@ def grouped(rows, id_field, label_field=None):
 
 
 def graph_view(paths, filters):
-    reports = [report_facts(stamp(p)) for p in paths]
+    stamps = [stamp(path) for path in paths]
+    reports = [report_facts(version) for version in stamps]
     years = [year for report in reports for year in report['cycles']]
     if len(years) != len(set(years)):
         raise ValueError('These reports overlap election cycles. Choose a run with one report per industry/cycle.')
     facts = [r for report in reports for r in report['facts']]
     companies = sorted({c for report in reports for c in report['companies']})
     selected = {k:str(filters.get(k) or '') for k in ('company','tier','cycle','category','recipient')}
+    if filters.get('latest') == '1' and years:
+        selected['cycle'] = max(years)
     funding = str(filters.get('funding') or 'all')
     mode = str(filters.get('mode') or 'direct')
     direction = str(filters.get('direction') or 'Support')
@@ -308,8 +371,8 @@ def graph_view(paths, filters):
             eligible = {k for k,v in funded.items() if v > 0}
             if direction not in ('Support','Oppose','Contribution / Other','Unknown'):
                 raise ValueError('Choose a recorded activity direction.')
-            for path in paths:
-                rows = report_activity(stamp(path)) if mode == 'activity' else estimate_rows(estimate_receipt(path))
+            for path, version in zip(paths, stamps):
+                rows = report_activity(version) if mode == 'activity' else estimate_rows(estimate_receipt(path))
                 candidate_rows.extend(r for r in rows if (r['cycle'],r['committee']) in eligible and r['direction'] == direction and r['amount'] != 0)
             note = ('Full reported activity by the funded committees, counted once per committee/cycle. This is not money attributed to the selected company or employee level; company views can share the same PAC activity.'
                     if mode == 'activity' else 'Saved conditional industry estimates, not traced company dollars. Support, opposition and contribution/other activity remain separate.')
@@ -322,6 +385,8 @@ def graph_view(paths, filters):
             parties[row['candidate_id']].add(row['party'])
     for candidate in chart_candidates:
         candidate['party'] = ' / '.join(sorted(parties[candidate['id']]))
+    if any(stamp(path) != version for path,version in zip(paths,stamps)):
+        raise ValueError('A report changed while building the graph. Refresh Graph.')
     return {'filters':{**selected,'funding':funding,'mode':mode,'direction':direction},
             'options':{'companies':companies,'cycles':sorted(set(years)), 'categories':categories,
                        'recipients':[{'id':i,'label':n} for i,n in sorted(recipients.items(),key=lambda p:p[1])],

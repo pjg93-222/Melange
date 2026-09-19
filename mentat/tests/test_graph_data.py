@@ -5,13 +5,14 @@ import sys
 import tempfile
 import threading
 import unittest
+from unittest.mock import patch
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 import openpyxl
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1] / 'app'))
-from graph_data import graph_view, report_facts
+from graph_data import graph_view, report_facts, singleflight_cache
 from report_insights import digest, stamp
 import server as app
 from graph_fixture import add_graph_sheets
@@ -144,25 +145,117 @@ class GraphTests(unittest.TestCase):
         self.edit(convert)
         self.assertEqual(self.view()['totals']['direct'],12)
 
-    def test_http_catalog_and_graph_use_completed_local_reports_only(self):
+    def test_report_changed_during_downstream_read_is_rejected(self):
+        version = stamp(self.path)
+        def changed(input_version):
+            self.assertEqual(input_version, version)
+            self.path.write_bytes(self.path.read_bytes() + b'changed')
+            return []
+        with patch('graph_data.report_activity', side_effect=changed):
+            with self.assertRaisesRegex(ValueError, 'report changed'):
+                self.view(mode='activity')
+
+    def test_concurrent_requests_share_a_cold_read_and_other_files_can_load(self):
+        from concurrent.futures import ThreadPoolExecutor, TimeoutError
+        started, release, second_started = threading.Event(), threading.Event(), threading.Event()
+        calls = []
+        @singleflight_cache(maxsize=2)
+        def load(version):
+            calls.append(version)
+            if version == 'first':
+                started.set()
+                if not release.wait(5):
+                    raise RuntimeError('test release timed out')
+            return object()
+        def second_request():
+            second_started.set()
+            return load('first')
+        with ThreadPoolExecutor(max_workers=3) as workers:
+            first = workers.submit(load, 'first')
+            self.assertTrue(started.wait(5))
+            second = workers.submit(second_request)
+            self.assertTrue(second_started.wait(5))
+            try:
+                with self.assertRaises(TimeoutError):
+                    second.result(timeout=.05)
+                self.assertIsNotNone(workers.submit(load, 'different').result(timeout=5))
+            finally:
+                release.set()
+            self.assertIs(first.result(timeout=5), second.result(timeout=5))
+        self.assertEqual(calls.count('first'), 1)
+        self.assertEqual(calls.count('different'), 1)
+
+    def test_failed_read_releases_the_next_request(self):
+        calls = []
+        @singleflight_cache(maxsize=1)
+        def load(version):
+            calls.append(version)
+            if len(calls) == 1:
+                raise ValueError('temporarily unavailable')
+            return version
+        with self.assertRaisesRegex(ValueError, 'temporarily unavailable'):
+            load('report')
+        self.assertEqual(load('report'), 'report')
+        self.assertEqual(calls, ['report', 'report'])
+
+    def test_a_stalled_read_stops_blocking_the_requests_behind_it(self):
+        from concurrent.futures import ThreadPoolExecutor
+        started, release = threading.Event(), threading.Event()
+        calls = []
+        @singleflight_cache(maxsize=2)
+        def load(version):
+            calls.append(version)
+            if len(calls) == 1:
+                started.set()
+                if not release.wait(5):
+                    raise RuntimeError('test release timed out')
+            return version + ' read'
+        # reading is closure state; only the caller that added a stamp may remove it.
+        tokens = dict(zip(load.__code__.co_freevars, load.__closure__))['reading'].cell_contents
+        with patch('graph_data.SINGLEFLIGHT_WAIT_SECONDS', .2), ThreadPoolExecutor(max_workers=2) as workers:
+            stalled = workers.submit(load, 'stalled')
+            try:
+                self.assertTrue(started.wait(5))
+                self.assertEqual(workers.submit(load, 'stalled').result(timeout=5), 'stalled read')
+                self.assertFalse(stalled.done())
+                self.assertEqual(tokens, {'stalled'})
+            finally:
+                release.set()
+            self.assertEqual(stalled.result(timeout=5), 'stalled read')
+            self.assertEqual(tokens, set())
+            self.assertEqual(load('stalled'), 'stalled read')
+        self.assertEqual(calls, ['stalled', 'stalled'])
+
+    def test_http_catalog_and_graph_use_authoritative_report_folder_only(self):
+        renamed = self.root / 'Test 2025-2026 Industry Spending Overview.xlsx'
+        self.path.rename(renamed)
+        self.path = renamed
         directory=self.root/'run';directory.mkdir()
         (directory/'status.json').write_text(json.dumps({'industries':[
             {'industry':'Test 2025-2026','status':'succeeded','output_workbook':str(self.path)},
             {'industry':'Pending','status':'running','output_workbook':str(self.path)}]}))
         console=object.__new__(app.Console)
+        console.report_directory = self.root
         console.find=lambda identifier:{'directory':directory} if identifier=='fixture' else None
         server=app.ThreadingHTTPServer(('127.0.0.1',0),app.Handler);server.app=console
         worker=threading.Thread(target=server.serve_forever,daemon=True);worker.start()
         origin=f'http://127.0.0.1:{server.server_port}'
         try:
             with urlopen(origin+'/api/graph-catalog?id=fixture') as response:
-                self.assertEqual(json.load(response)['industries'],[{'name':'Test','indices':[0]}])
-            with urlopen(origin+'/api/graph?id=fixture&industry=Test&company=Harborlight%20Credit%20Union&tier=Chief') as response:
+                self.assertEqual(json.load(response)['industries'], [])
+            with urlopen(origin+'/api/graph-catalog?id=published-reports') as response:
+                self.assertEqual(json.load(response)['industries'],[{'name':'Test','indices':[console.published_reports()[0]['index']]}])
+            with urlopen(origin+'/api/comparison?id=published-reports&industry=Test') as response:
+                comparison = json.load(response)
+                self.assertEqual(next(s for s in comparison['subjects'] if s['kind']=='Industry')['periods']['2026']['giving'],1585)
+            with urlopen(origin+'/api/graph?id=published-reports&industry=Test&latest=1') as response:
+                self.assertEqual(json.load(response)['filters']['cycle'],'2026')
+            with urlopen(origin+'/api/graph?id=published-reports&industry=Test&company=Harborlight%20Credit%20Union&tier=Chief') as response:
                 body=json.load(response)
                 self.assertEqual(body['totals']['direct'],100)
                 self.assertEqual(body['reports'][0]['freshness']['freshness'],'unknown')
                 self.assertEqual(body['reports'][0]['freshness']['sources'],[])
-            for query in ['id=fixture&industry=Pending','id=fixture&industry=../../outside','id=other&industry=Test']:
+            for query in ['id=published-reports&industry=Pending','id=published-reports&industry=../../outside','id=fixture&industry=Test','id=other&industry=Test']:
                 with self.assertRaises(HTTPError) as error:urlopen(origin+'/api/graph?'+query)
                 self.assertEqual(error.exception.code,400)
             with self.assertRaises(HTTPError) as error:
