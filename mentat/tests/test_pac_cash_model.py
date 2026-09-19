@@ -93,6 +93,25 @@ def snapshot():
 
 
 class SnapshotAdapterTests(unittest.TestCase):
+    def test_all_unverified_receipt_roles_withhold_company_estimates(self):
+        for change in ({'line_number':'17','receipt_type_full':'OTHER FEDERAL RECEIPTS'},
+                       {'receipt_type_full':'IMPERMISSIBLE CONTRIBUTION'},
+                       {'line_number':'UNKNOWN'}):
+            with self.subTest(change=change):
+                value=snapshot();value['receipts'][0].update(change)
+                result=estimate_snapshots([value],'Acme',['Acme Inc'])['cycles'][0]
+                self.assertEqual(result['status'],'withheld')
+                self.assertEqual(result['allocations'],[])
+                self.assertIn('receipt_role',{i['check'] for i in result['issues']})
+
+    def test_verified_special_account_and_interest_roles_remain_usable(self):
+        for description,expected in [('NON CONTRIBUTION ACCOUNT',50),('BANK INTEREST',0)]:
+            with self.subTest(description=description):
+                value=snapshot();value['receipts'][0].update(line_number='17',receipt_type_full=description)
+                result=estimate_snapshots([value],'Acme',['Acme Inc'])['cycles'][0]
+                self.assertEqual(result['status'],'estimated',result['issues'])
+                self.assertEqual(result['allocations'][0]['estimated_funding'].get('Acme',0),expected)
+
     def test_balanced_cash_snapshot_produces_estimate_and_uses_payment_date(self):
         value = estimate_snapshots([snapshot()], 'Acme', ['Acme Inc'])['cycles'][0]
         self.assertEqual(value['status'], 'estimated')

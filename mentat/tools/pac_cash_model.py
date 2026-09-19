@@ -8,7 +8,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 import re
 
-METHOD = 'dated-proportional-cash-v1'
+METHOD = 'dated-proportional-cash-v2'
 OTHER = 'Other / unresolved funding'
 
 
@@ -203,7 +203,7 @@ def estimate_snapshots(snapshots, company, aliases):
                             matched = name_key(row.get('contributor_name')) in aliases
                             if role in ('in_kind_contribution', 'asset_liquidation'):
                                 issue(committee, 'asset_cash_links', 'Noncash receipts and liquidation proceeds need matched donor lots and offset entries before cash attribution.')
-                            if role == 'unverified_receipt_role' and row.get('line_number') != '12':
+                            if role.startswith('unverified_'):
                                 issue(committee, 'receipt_role', 'A receipt has no verified cash transaction role.')
                             pending_receipts.append((row, {**event, 'kind': 'receipt', 'funding_source': company if matched and role == 'contribution' else OTHER}))
                         elif category == 'expenditures':
