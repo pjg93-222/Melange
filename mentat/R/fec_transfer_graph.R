@@ -9,6 +9,11 @@ fec_transfer_context <- function(directory, roots, candidate_links, cycles, max_
       next
     }
     index <- jsonlite::fromJSON(path)
+    if (is.null(index$version) || index$version != 3L) {
+      coverage[[length(coverage) + 1L]] <- list(cycle = target_cycle,
+        status = "stale_transfer_index", unresolved_all_sources = TRUE)
+      next
+    }
     edge_path <- file.path(dirname(path), "transfer-edges.csv")
     if (is.null(index$edges_sha256) ||
         digest::digest(file = edge_path, algo = "sha256") != index$edges_sha256)
@@ -16,7 +21,9 @@ fec_transfer_context <- function(directory, roots, candidate_links, cycles, max_
     rows <- data.table::fread(edge_path, showProgress = FALSE)
     coverage[[length(coverage) + 1L]] <- list(cycle = target_cycle, status = "indexed",
       source_sha256 = index$source_sha256, counts = index$counts,
-      ledger_path = index$ledger_path, max_depth = max_depth)
+      ledger_path = index$ledger_path, max_depth = max_depth,
+      unresolved_sources = as.list(index$unresolved_sources),
+      unresolved_all_sources = isTRUE(index$unresolved_all_sources))
     if (!nrow(rows)) next
     stops <- candidate_links[cycle == target_cycle & designation %in% c("A", "P"), committee_id]
     visited <- roots[cycle == target_cycle & preliminary_crypto_funding > 0, committee_id]

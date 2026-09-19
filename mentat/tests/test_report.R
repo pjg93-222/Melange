@@ -18,6 +18,9 @@ for (file in c(
 
 data_root <- tempfile("mentat-test-report-")
 dir.create(data_root, recursive = TRUE)
+isolated_reports <- file.path(data_root, "reports")
+dir.create(isolated_reports)
+Sys.setenv(MENTAT_REPORT_DIRECTORY = isolated_reports)
 connection <- NULL
 on.exit({
   if (!is.null(connection) && DBI::dbIsValid(connection)) {
@@ -233,13 +236,15 @@ for (index in seq_len(10L)) {
 insert_contribution(
   "memo-pair-primary", "MEMO, MATCH", "COINBASE", "ENGINEER",
   "Coinbase", "MATCHED RECIPIENT", "CMEMOPAIR", "H", "P",
-  "2026-01-08", 75
+  "2026-01-08", 75, transaction_id="ORIGINAL1", file_num=1234L
 )
 insert_contribution(
   "memo-pair-copy", "MEMO, MATCH", "COINBASE", "ENGINEER",
   "Coinbase", "MATCHED RECIPIENT", "CMEMOPAIR", "H", "P",
   "2026-01-08", 75, memo_code = "X"
 )
+DBI::dbExecute(connection,"UPDATE contributions SET file_num=1234,back_reference_transaction_id='ORIGINAL1' WHERE sub_id='memo-pair-copy'")
+DBI::dbExecute(connection,"UPDATE contributions SET filing_form='F3',line_number='11AI' WHERE sub_id IN ('memo-pair-primary','memo-pair-copy')")
 memo_pair_analysis <- spending_report_rows(connection)[
   sub_id %in% c("memo-pair-primary", "memo-pair-copy")
 ]
@@ -563,6 +568,12 @@ DBI::dbExecute(
     "'2026-07-18T12:00:00+0000', '2026-07-18T12:01:00+0000', 0)"
   )
 )
+# These synthetic receipts are contribution fixtures, not legacy unknowns.
+# Supply their filing evidence before exercising the publication boundary.
+for (table in c("contributions", "corporate_giving")) {
+  DBI::dbExecute(connection, paste0("UPDATE ", table,
+    " SET filing_form='F3X', line_number='11AI' WHERE COALESCE(filing_form,'')=''"))
+}
 reports <- write_reports(connection, data_root)
 apply_amendment_versioning <- original_apply_amendment_versioning
 cat("test_report: report versioning passes=", versioning_call_count, "\n", sep = "")

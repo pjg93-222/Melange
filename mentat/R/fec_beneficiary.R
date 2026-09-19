@@ -355,7 +355,9 @@ fec_downstream_direction <- function(values) {
 # data changing is not the only reason a cached parse goes stale.
 #   1 = original
 #   2 = transaction_date forced to character (leading zeros preserved)
-FEC_PAS2_PARSER_VERSION <- "3"
+#   3 = version key scoped to the transaction-date year
+#   4 = competing report versions remain unresolved without filing evidence
+FEC_PAS2_PARSER_VERSION <- "4"
 
 fec_pas2_cache_file <- function(directory, cycles) {
   paths <- vapply(cycles, function(cycle) {
@@ -418,12 +420,12 @@ fec_build_pas2_index <- function(directory, cycles) {
       memo_text = trim_text(memo_text),
       sub_id = trim_text(sub_id)
     )]
-    rows <- rows[nzchar(committee_id) & nzchar(candidate_id)]
+    rows <- rows[nzchar(committee_id)]
     rows[is.na(transaction_amount), transaction_amount := 0]
     rows[, original_order := .I]
     rows[, version_key := ifelse(
       nzchar(transaction_id),
-      paste(committee_id, report_type, substr(transaction_date_raw, 5L, 8L), transaction_id, sep = "|"),
+      paste(committee_id, report_type, transaction_id, sep = "|"),
       paste0("SUB|", ifelse(nzchar(sub_id), sub_id, original_order))
     )]
     rows[, amendment_priority := ifelse(
@@ -436,19 +438,24 @@ fec_build_pas2_index <- function(directory, cycles) {
       rows, version_key, -file_num_sort, -amendment_priority, -sub_id_sort,
       na.last = TRUE
     )
-    rows[, superseded_by_amendment := as.integer(
-      seq_len(.N) > 1L & !startsWith(version_key[[1L]], "SUB|")
-    ), by = version_key]
     rows[, exact_duplicate := as.integer(
       nzchar(sub_id) & duplicated(sub_id)
     )]
+    # TRAN_ID is report-scoped. A transaction date (including its year) is
+    # editable, and Q1/M1 is not a report-family identifier. Preserve every
+    # competing version until filing-level evidence establishes the family.
+    rows[, unresolved_version := as.integer(
+      sum(exact_duplicate == 0L) > 1L & !startsWith(version_key[[1L]], "SUB|")
+    ), by = version_key]
+    rows[!nzchar(candidate_id) & memo_code != "X", unresolved_version := 1L]
+    rows[, superseded_by_amendment := 0L]
     rows[, include_in_total := ifelse(
-      exact_duplicate == 0L & superseded_by_amendment == 0L & memo_code != "X",
+      exact_duplicate == 0L & unresolved_version == 0L & memo_code != "X",
       "Yes", "No"
     )]
     rows[, exclusion_reason := ifelse(
       exact_duplicate == 1L, "Duplicate FEC sub-ID",
-      ifelse(superseded_by_amendment == 1L, "Superseded filing amendment",
+      ifelse(unresolved_version == 1L, "Unresolved filing relationship",
         ifelse(memo_code == "X", "Memo-only transaction", "Included"))
     )]
     parsed_date <- suppressWarnings(as.Date(rows$transaction_date_raw, format = "%m%d%Y"))
@@ -504,8 +511,14 @@ fec_read_downstream_activity <- function(directory, recipient_universe, candidat
   # On Schedule E/PAS2 the recipient can be an advertising vendor. Its name
   # cannot identify the candidate. Even a historical candidate-master match
   # may conflict with the name as filed, so do not infer an identity here.
+  # A PAS2 row can also carry no candidate ID at all - it is retained as
+  # evidence but never counted - so name that case instead of printing an
+  # empty parenthesis.
   activity[is.na(candidate_name) | !nzchar(candidate_name),
-           candidate_name := paste0("Unresolved candidate (", candidate_id, ")")]
+           candidate_name := paste0(
+             "Unresolved candidate (",
+             ifelse(nzchar(candidate_id), candidate_id, "no ID reported"), ")"
+           )]
   activity[is.na(candidate_party) | !nzchar(candidate_party), candidate_party := "Other / Unclassified"]
   for (column in c("office", "office_label", "office_state", "district", "candidate_source_url")) {
     data.table::set(activity, which(is.na(activity[[column]])), column, "")
@@ -638,6 +651,7 @@ fec_committee_map_mappings <- function(committee_map) {
 }
 
 fec_aggregate_downstream_activity <- function(downstream_activity, recipient_universe) {
+  require_package("jsonlite")
   if (!nrow(downstream_activity)) return(data.table::data.table())
   source_names <- recipient_universe[, .(
     cycle, committee_id,
@@ -663,6 +677,13 @@ fec_aggregate_downstream_activity <- function(downstream_activity, recipient_uni
     superseded_rows = sum(superseded_by_amendment == 1L),
     memo_rows = sum(memo_code == "X"),
     exact_duplicate_rows = sum(exact_duplicate == 1L),
+    unresolved_version_rows = sum(unresolved_version == 1L),
+    transfer_records = as.character(jsonlite::toJSON(data.table::data.table(
+      destination = destination_committee_id, file_num = file_num,
+      transaction_id = transaction_id, sub_id = sub_id, date = transaction_date,
+      cents = round(transaction_amount * 100), type = transaction_type
+    )[include_in_total == "Yes" & transaction_type %in% c("24G", "24K")],
+      dataframe = "rows", auto_unbox = TRUE, digits = NA)),
     first_activity_date = fec_min_text(transaction_date),
     last_activity_date = fec_max_text(transaction_date),
     source_url = fec_mode_text(source_url),

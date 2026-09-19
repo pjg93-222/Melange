@@ -188,7 +188,9 @@ def enrich(payload,directory):
     for row in payload['raw_rows']:
         if row['include_in_analysis']=='Yes':
             grouped[row['cycle'],row['committee_id']]+=row['amount']
-            key=(row['cycle'],row.get('company',''),row.get('employee_tier',''),row['committee_id'],row.get('receipt_role','unverified_receipt_role'))
+            key=(row['cycle'],row.get('company',''),row.get('employee_tier',''),row['committee_id'],row.get('receipt_role','unverified_receipt_role'),
+                 row.get('funding_source_type','Unverified source type'),
+                 row.get('funding_direction', 'Into company PAC' if row.get('recipient_category')=='Company PAC' else 'To named recipient'))
             cohort=cohorts[key]
             cohort['amount']+=row['amount'];cohort['receipt_count']+=1
             day=row.get('date','')
@@ -211,11 +213,19 @@ def enrich(payload,directory):
                     'unresolved_reasons':{'ambiguous_authorized_candidate':max(0,amount)}})
         edges=[row for row in payload.get('transfer_edges',[]) if row['cycle']==cycle]
         activity=[{'source':row['source_committee_id'],'candidate':row['candidate_id'],
-                   'direction':row['support_oppose'],'amount':row['preliminary_included_amount']}
+                   'direction':row['support_oppose'],'amount':row['preliminary_included_amount'],
+                   'transfer_records':row.get('transfer_records',[])}
                   for row in payload['downstream_activity'] if row['cycle']==cycle]
+        source_coverage=[r for r in payload['metadata'].get('transfer_coverage',[]) if r['cycle']==cycle]
+        unresolved_nodes={node for r in source_coverage for node in r.get('unresolved_sources',[])}
+        unresolved_nodes.update(r['source_committee_id'] for r in payload['downstream_activity']
+            if r['cycle']==cycle and r.get('unresolved_version_rows',0)>0)
+        if any(r.get('unresolved_all_sources') or r['status']=='stale_transfer_index' for r in source_coverage):
+            unresolved_nodes.update(funding)
         cycle_paths=reachable({key for key,value in funding.items() if value>0},edges,stop_nodes=direct_ids)
         paths.extend(cycle_paths)
-        assigned,unresolved=allocate(funding,edges,activity,stop_nodes=direct_ids)
+        assigned,unresolved=allocate(funding,edges,activity,stop_nodes=direct_ids,
+            candidate_links={committee:links[cycle,committee] for committee in direct_ids},unresolved_nodes=unresolved_nodes)
         for row in assigned:
             candidate=masters.get((cycle,row['candidate_id']),{})
             estimates.append({**row,'cycle':cycle,'candidate_name':candidate.get('candidate_name',row['candidate_id'])})
@@ -236,7 +246,7 @@ def enrich(payload,directory):
         if row['recipient_category']=='Unclassified' and row['preliminary_crypto_funding']:
             review.append({key:row.get(key) for key in ('cycle','committee_id','committee_name','master_committee_type','recipient_category','preliminary_crypto_funding')})
     payload.update(transfer_paths=paths,allocation_estimates=estimates,allocation_coverage=coverage,
-                   funding_cohorts=[dict(cycle=k[0],company=k[1],funding_type=k[2],committee_id=k[3],receipt_role=k[4],**v)
+                   funding_cohorts=[dict(cycle=k[0],company=k[1],funding_type=k[2],committee_id=k[3],receipt_role=k[4],funding_source_type=k[5],funding_direction=k[6],**v)
                                     for k,v in sorted(cohorts.items())],
                    attribution_summary=sorted(summary,key=lambda r:(r['cycle'],-r['direct_plus_estimated_non_opposition'],r['candidate_id'])),
                    source_freshness=source_dates,classification_review=review)
@@ -245,14 +255,17 @@ def enrich(payload,directory):
     payload['metadata']['allocation_conservation_verified']=True
     payload['quality_checks']=[*payload['metadata'].get('export_guards',[])]
     unverified=[row for row in payload['raw_rows'] if row.get('include_in_analysis')=='Yes'
-                and row.get('receipt_role','unverified_receipt_role')=='unverified_receipt_role']
+                and row.get('receipt_role','unverified_receipt_role').startswith('unverified_')]
     payload['quality_checks'].append({'id':'receipt_role_metadata','severity':'warn','passed':not unverified,
         'detail':f'{len(unverified)} included rows lack sufficient filing-form/line metadata to verify their receipt role. Name matching alone does not verify a contribution; refresh legacy source rows before donor-specific cash attribution.'})
     for source in payload['metadata'].get('transfer_coverage',[]):
         invalid=sum(source.get('counts',{}).get(key,0) for key in
-            ('malformed_rows','invalid_transfer_dates','invalid_transfer_amounts'))
+            ('malformed_rows','invalid_transfer_dates','invalid_transfer_amounts','invalid_transfer_destinations','unresolved_rows'))
         payload['quality_checks'].append({'id':f"transfer_source_{source['cycle']}",
             'severity':'warn','passed':source['status']=='indexed' and invalid==0,'detail':json.dumps(source)})
+    pending=[row for row in coverage if row['unresolved']>.005]
+    payload['quality_checks'].append({'id':'allocation_coverage','severity':'warn','passed':not pending,
+        'detail':f'{len(pending)} funding roots have unresolved allocation; consult allocation_coverage for amounts and reasons.'})
     payload['quality_checks'].append({'id':'allocation_conservation','severity':'fail','passed':True,
         'detail':'Arithmetic conservation does not establish complete data or traced dollars.'})
     return payload

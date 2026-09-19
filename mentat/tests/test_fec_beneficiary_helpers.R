@@ -264,7 +264,8 @@ stopifnot(mentat_guard_date_sanity(rep("2026-01-02", 1500))$passed,
           !mentat_guard_date_sanity("0021-12-12")$passed,
           !mentat_guard_date_sanity("not-a-date")$passed)
 
-# The same quarterly transaction ID can occur in both years of a cycle.
+# Dates cannot establish whether repeated transaction IDs are amendments or
+# separate quarterly reports. Keep the observations, withhold the aggregate.
 pas2_root <- tempfile("pas2-year-scope-")
 dir.create(file.path(pas2_root, "pas224"), recursive = TRUE)
 pas2_row <- function(date, value, file, sub) {
@@ -278,9 +279,43 @@ writeLines(c(pas2_row("01022023","100","1","1"),
              pas2_row("01022024","150","3","3")),
            file.path(pas2_root,"pas224","itpas2.txt"))
 parsed_fixture <- fec_build_pas2_index(pas2_root, 2024L)
-stopifnot(sum(parsed_fixture[include_in_total == "Yes", transaction_amount]) == 250,
+stopifnot(nrow(parsed_fixture) == 3L, all(parsed_fixture$unresolved_version == 1L),
+          all(parsed_fixture$include_in_total == "No"),
           all(substr(parsed_fixture$transaction_date,1,4) %in% c("2023","2024")))
 unlink(pas2_root, recursive = TRUE)
+
+# Candidate-less rows are retained now, so the placeholder name must say that
+# no ID was reported rather than printing an empty parenthesis. An ID the
+# candidate master does not carry still prints the ID.
+label_root <- tempfile("pas2-candidate-label-")
+dir.create(file.path(label_root, "pas224"), recursive = TRUE)
+label_row <- function(candidate, transaction, sub) {
+  fields <- rep("", 22L)
+  fields[c(1,2,3,6,14,15,17,18,19,22)] <-
+    c("C00000001","N","Q1","24K","01022024","100",candidate,transaction,"1",sub)
+  paste(fields, collapse = "|")
+}
+writeLines(c(label_row("H00000001","T1","1"),
+             label_row("","T2","2"),
+             label_row("H00000009","T3","3")),
+           file.path(label_root,"pas224","itpas2.txt"))
+labelled <- fec_read_downstream_activity(
+  label_root,
+  data.table::data.table(cycle = 2024L, committee_id = "C00000001"),
+  data.table::data.table(cycle = 2024L, candidate_id = "H00000001",
+    candidate_name = "KNOWN, CANDIDATE", candidate_party = "D", office = "H",
+    office_label = "House", office_state = "MI", district = "01",
+    source_url = "https://www.fec.gov/data/candidates/"),
+  cycles = 2024L
+)
+stopifnot(nrow(labelled) == 3L,
+          identical(labelled[candidate_id == "H00000001", candidate_name],
+                    "KNOWN, CANDIDATE"),
+          identical(labelled[candidate_id == "H00000009", candidate_name],
+                    "Unresolved candidate (H00000009)"),
+          identical(labelled[!nzchar(candidate_id), candidate_name],
+                    "Unresolved candidate (no ID reported)"))
+unlink(label_root, recursive = TRUE)
 
 direction_guard <- mentat_guard_direction_integrity(direction_summary)
 stopifnot(
