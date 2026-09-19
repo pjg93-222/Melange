@@ -1,0 +1,75 @@
+# Lane B patch: P7d-test_contribution_data
+# Target (repo-root relative): mentat/tests/test_contribution_data.py
+# Kind: MODIFY
+# git hash-object of the LIVE working-tree file at draft time: 452ace185a3f50b0f7dca22f1bcbf9112c38c3a3
+# Apply from the repo root:  git -C C:\Users\pgoff\Mentat apply P7d-test_contribution_data.patch
+# Sibling attach + lineage flag.
+#
+diff --git a/mentat/tests/test_contribution_data.py b/mentat/tests/test_contribution_data.py
+index 452ace1..0f401b8 100644
+--- a/mentat/tests/test_contribution_data.py
++++ b/mentat/tests/test_contribution_data.py
+@@ -225,4 +225,63 @@ class CompactReceiptTests(unittest.TestCase):
+                 self.project({**self.receipt,'cycle':value})
+ 
+ 
++class CompanionDataWorkbookTests(unittest.TestCase):
++    """The tall companion book is LINEAGE, never a substitute report source."""
++
++    def setUp(self):
++        self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
++        self.reports=Path(self.tmp.name)/'Published Reports';self.reports.mkdir()
++        c._workbook_source.cache_clear();self.addCleanup(c._workbook_source.cache_clear)
++
++    def book(self,name,database_sha256):
++        import openpyxl
++        path=self.reports/name
++        workbook=openpyxl.Workbook();sheet=workbook.active;sheet.title='About'
++        sheet.append(['Key','Value'])
++        # The single text run app/contribution_data._workbook_source scans for.
++        sheet.append(['Lineage',f'Source DB SHA-256: {database_sha256}'])
++        workbook.save(path);workbook.close()
++        return path
++
++    def sources(self):
++        # The pinned-payload lookup fails in a fixture folder, which is the
++        # point: `available` goes False and the companion keys must still be
++        # attached, because they are evidence about the FILES, not about the
++        # verified dataset.
++        return c._sources(self.reports)
++
++    def test_sibling_data_book_is_attached_with_a_matching_lineage_flag(self):
++        digest='a'*64
++        overview=self.book('Example Industry Spending Overview.xlsx',digest)
++        data=self.book('Example Industry Spending Data.xlsx',digest)
++        source=self.sources()[0]
++        self.assertEqual(source['workbook'],overview)
++        self.assertEqual(source['data_workbook'],data)
++        self.assertEqual(source['data_workbook_sha256'],c._hash(data))
++        self.assertTrue(source['data_lineage_matches'])
++        provenance=c._provenance(source)
++        self.assertEqual(provenance['data_workbook'],data.name)
++        self.assertEqual(provenance['data_workbook_sha256'],c._hash(data))
++        self.assertIs(provenance['data_lineage_matches'],True)
++
++    def test_a_data_book_pinned_to_another_database_is_reported_not_accepted(self):
++        self.book('Example Industry Spending Overview.xlsx','a'*64)
++        self.book('Example Industry Spending Data.xlsx','b'*64)
++        provenance=c._provenance(self.sources()[0])
++        self.assertIs(provenance['data_lineage_matches'],False)
++
++    def test_no_companion_book_reports_none_rather_than_a_mismatch(self):
++        self.book('Example Industry Spending Overview.xlsx','a'*64)
++        source=self.sources()[0]
++        self.assertNotIn('data_workbook',source)
++        provenance=c._provenance(source)
++        self.assertIsNone(provenance['data_workbook'])
++        self.assertIsNone(provenance['data_lineage_matches'])
++
++    def test_the_data_book_is_never_listed_as_a_report_source_of_its_own(self):
++        self.book('Example Industry Spending Overview.xlsx','a'*64)
++        self.book('Example Industry Spending Data.xlsx','a'*64)
++        self.assertEqual([s['id'] for s in self.sources()],['Example'])
++
++
+ if __name__=='__main__':unittest.main()

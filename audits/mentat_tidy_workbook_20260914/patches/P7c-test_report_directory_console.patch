@@ -1,0 +1,37 @@
+# Lane B patch: P7c-test_report_directory_console
+# Target (repo-root relative): mentat/tests/test_report_directory_console.py
+# Kind: MODIFY
+# git hash-object of the LIVE working-tree file at draft time: 9754b5f42e3d7df3b4635d32dbe785cdcf54756c
+# Apply from the repo root:  git -C C:\Users\pgoff\Mentat apply P7c-test_report_directory_console.patch
+# Companion book files under its industry.
+#
+diff --git a/mentat/tests/test_report_directory_console.py b/mentat/tests/test_report_directory_console.py
+index 9754b5f..11523b3 100644
+--- a/mentat/tests/test_report_directory_console.py
++++ b/mentat/tests/test_report_directory_console.py
+@@ -53,6 +53,25 @@ class ReportDirectoryConsoleTests(unittest.TestCase):
+         self.assertEqual({row['name'] for row in graph['industries']},set(names))
+         self.assertTrue(all(Path(call.args[0][0]).parent == self.reports for call in schema.call_args_list))
+ 
++    def test_companion_data_book_files_under_its_industry_not_a_new_one(self):
++        # The Data workbook is the tall view of the SAME export, published into
++        # the same folder. Before the suffix was recognised it listed as an
++        # industry literally called "Example Industry Spending Data", which put
++        # a second, differently shaped entry beside every real industry in the
++        # chart source picker.
++        self.report('Example')
++        data = self.reports / 'Example Industry Spending Data.xlsx'
++        data.write_bytes(b'catalog only; workbook contents must not be read')
++        rows = self.console.report_catalog('published-reports')['reports']
++        self.assertEqual({r['industry'] for r in rows},{'Example'})
++        self.assertEqual({r['kind'] for r in rows},{'overview','data'})
++        self.assertEqual(
++            next(r['name'] for r in rows if r['kind'] == 'data'),data.name)
++        self.assertEqual(len({r['index'] for r in rows}),2)
++        with patch.object(app,'graph_schema',return_value=['2023-2024']):
++            graph = self.console.graph_catalog('published-reports')
++        self.assertEqual([row['name'] for row in graph['industries']],['Example'])
++
+     def test_index_is_stable_when_another_workbook_is_added(self):
+         original = self.report('Banking')
+         first = self.console.report_catalog('published-reports')['reports'][0]

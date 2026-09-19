@@ -1,0 +1,24 @@
+corrupted source_id 1121420220265208294 (2021-2022, Navy Federal Credit Union): analysis_amount 12.5 -> 13.5
+
+writer exit code: 2
+stdout: (empty)
+stderr:
+FAIL giving_facts_vs_contributions: 2021-2022: Giving Facts 246,812.93 vs Contributions analysis 246,813.93
+FAIL recipient_facts_vs_contributions: 2021-2022: Recipient Facts 246,812.93 vs Contributions analysis 246,813.93
+FAIL contributor_facts_vs_contributions: 2021-2022: Contributor Facts 246,812.93 vs Contributions analysis (person rows) 246,813.93
+FAIL location_facts_vs_contributions: 2021-2022: Location Facts 246,812.93 vs Contributions analysis 246,813.93
+FAIL expected_cycle_totals: 2021-2022: Contributions analysis 246,813.93 vs expected 246,812.93
+FAIL overview_cycle_totals: 2021-2022: Contributions analysis 246,813.93 vs Overview 246,812.93
+6 severity-fail Data Quality row(s) failed; nothing published.
+
+output workbook exists: False
+pending files left behind: []
+receipt ok=False sha256=None
+failing Data Quality rows: 6
+  giving_facts_vs_contributions: 2021-2022: Giving Facts 246,812.93 vs Contributions analysis 246,813.93
+  recipient_facts_vs_contributions: 2021-2022: Recipient Facts 246,812.93 vs Contributions analysis 246,813.93
+  contributor_facts_vs_contributions: 2021-2022: Contributor Facts 246,812.93 vs Contributions analysis (person rows) 246,813.93
+  location_facts_vs_contributions: 2021-2022: Location Facts 246,812.93 vs Contributions analysis 246,813.93
+  expected_cycle_totals: 2021-2022: Contributions analysis 246,813.93 vs expected 246,812.93
+  overview_cycle_totals: 2021-2022: Contributions analysis 246,813.93 vs Overview 246,812.93
+W7 database_amount_and_rows rows still passing: 30 (expected: the corruption touched analysis_amount, not amount)

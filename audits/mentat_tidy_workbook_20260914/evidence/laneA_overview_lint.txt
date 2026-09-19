@@ -1,0 +1,93 @@
+
+=== Credit Union Industry Spending Overview.xlsx ===
+  Master Overview                  merged-cells    45 merged range(s), e.g. BK35:BO35
+  Master Overview                  aggregate-rows  3 row(s) start with Total/Average/Other (
+  Master Overview                  multivalue      'Credit Union Master Overview' contains ';' packed values
+  Master Overview                  table-count     3 Excel Table(s); exactly one is required
+  Spending Overview                merged-cells    4 merged range(s), e.g. A1:J1
+  Spending Overview                multivalue      'Credit Union Industry Spending Overview' contains ';' packed values
+  Spending Overview                table-ref       table OverviewTable starts at A5:J47, not A1
+  Spending Overview                table-ref       table OverviewTable ref A5:J47 does not span 1 column(s) x 47 row(s)
+  2021-2022 Summary                merged-cells    3 merged range(s), e.g. A1:S1
+  2021-2022 Summary                table-ref       table CycleSummary_2022 starts at A5:S60, not A1
+  2021-2022 Summary                table-ref       table CycleSummary_2022 ref A5:S60 does not span 1 column(s) x 59 row(s)
+  2023-2024 Summary                merged-cells    3 merged range(s), e.g. A1:S1
+  2023-2024 Summary                table-ref       table CycleSummary_2024 starts at A5:S60, not A1
+  2023-2024 Summary                table-ref       table CycleSummary_2024 ref A5:S60 does not span 1 column(s) x 59 row(s)
+  2025-2026 Summary                merged-cells    3 merged range(s), e.g. A1:S1
+  2025-2026 Summary                table-ref       table CycleSummary_2026 starts at A5:S60, not A1
+  2025-2026 Summary                table-ref       table CycleSummary_2026 ref A5:S60 does not span 1 column(s) x 59 row(s)
+  Company List                     merged-cells    3 merged range(s), e.g. A1:O1
+  Company List                     table-ref       table CompanyListTable starts at A5:O35, not A1
+  Company List                     table-ref       table CompanyListTable ref A5:O35 does not span 1 column(s) x 34 row(s)
+  Alliant Credit Union View        merged-cells    3 merged range(s), e.g. A1:S1
+  Alliant Credit Union View        table-ref       table CompanyView_Alliant_Credit_Union starts at A5:S73, not A1
+  Alliant Credit Union View        table-ref       table CompanyView_Alliant_Credit_Union ref A5:S73 does not span 1 column(s) x 72 row(s)
+  America First Credit Union View  merged-cells    3 merged range(s), e.g. A1:S1
+  America First Credit Union View  table-ref       table CompanyView_America_First_Credit_Union starts at A5:S93, not A1
+  America First Credit Union View  table-ref       table CompanyView_America_First_Credit_Union ref A5:S93 does not span 1 column(s) x 92 row(s)
+  Boeing Employees Credit Union V  merged-cells    3 merged range(s), e.g. A1:S1
+  Boeing Employees Credit Union V  table-ref       table CompanyView_Boeing_Employees_Credit_Union starts at A5:S98, not A1
+  Boeing Employees Credit Union V  table-ref       table CompanyView_Boeing_Employees_Credit_Union ref A5:S98 does not span 1 column(s) x 97 row(s)
+  Golden 1 Credit Union View       merged-cells    3 merged range(s), e.g. A1:S1
+  Golden 1 Credit Union View       table-ref       table CompanyView_Golden_1_Credit_Union starts at A5:S90, not A1
+  Golden 1 Credit Union View       table-ref       table CompanyView_Golden_1_Credit_Union ref A5:S90 does not span 1 column(s) x 89 row(s)
+  Mountain America Credit Union V  merged-cells    3 merged range(s), e.g. A1:S1
+  Mountain America Credit Union V  table-ref       table CompanyView_Mountain_America_Credit_Union starts at A5:S98, not A1
+  Mountain America Credit Union V  table-ref       table CompanyView_Mountain_America_Credit_Union ref A5:S98 does not span 1 column(s) x 97 row(s)
+  Navy Federal Credit Union View   merged-cells    3 merged range(s), e.g. A1:S1
+  Navy Federal Credit Union View   table-ref       table CompanyView_Navy_Federal_Credit_Union starts at A5:S98, not A1
+  Navy Federal Credit Union View   table-ref       table CompanyView_Navy_Federal_Credit_Union ref A5:S98 does not span 1 column(s) x 97 row(s)
+  Pentagon Federal Credit Union V  merged-cells    3 merged range(s), e.g. A1:S1
+  Pentagon Federal Credit Union V  table-ref       table CompanyView_Pentagon_Federal_Credit_Union starts at A5:S98, not A1
+  Pentagon Federal Credit Union V  table-ref       table CompanyView_Pentagon_Federal_Credit_Union ref A5:S98 does not span 1 column(s) x 97 row(s)
+  SchoolsFirst Federal Credit Uni  merged-cells    3 merged range(s), e.g. A1:S1
+  SchoolsFirst Federal Credit Uni  table-ref       table CompanyView_SchoolsFirst_Federal_Credit_Union starts at A5:S98, not A1
+  SchoolsFirst Federal Credit Uni  table-ref       table CompanyView_SchoolsFirst_Federal_Credit_Union ref A5:S98 does not span 1 column(s) x 97 row(s)
+  State Employees' Credit Union V  merged-cells    3 merged range(s), e.g. A1:S1
+  State Employees' Credit Union V  table-ref       table CompanyView_State_Employees_Credit_Union starts at A5:S93, not A1
+  State Employees' Credit Union V  table-ref       table CompanyView_State_Employees_Credit_Union ref A5:S93 does not span 1 column(s) x 92 row(s)
+  Suncoast Credit Union View       merged-cells    3 merged range(s), e.g. A1:S1
+  Suncoast Credit Union View       table-ref       table CompanyView_Suncoast_Credit_Union starts at A5:S81, not A1
+  Suncoast Credit Union View       table-ref       table CompanyView_Suncoast_Credit_Union ref A5:S81 does not span 1 column(s) x 80 row(s)
+  Employee List                    merged-cells    3 merged range(s), e.g. A1:S1
+  Employee List                    table-ref       table EmployeeListTable starts at A5:S3328, not A1
+  Employee List                    table-ref       table EmployeeListTable ref A5:S3328 does not span 1 column(s) x 3327 row(s)
+  Recipient List                   merged-cells    3 merged range(s), e.g. A1:AD1
+  Recipient List                   table-ref       table RecipientListTable starts at A5:AD873, not A1
+  Recipient List                   table-ref       table RecipientListTable ref A5:AD873 does not span 1 column(s) x 872 row(s)
+  Beneficiary Summary              merged-cells    3 merged range(s), e.g. A1:X1
+  Beneficiary Summary              multivalue      'Congressional Beneficiary Summary' contains ';' packed values
+  Beneficiary Summary              table-ref       table BeneficiarySummaryTable starts at A5:X2985, not A1
+  Beneficiary Summary              table-ref       table BeneficiarySummaryTable ref A5:X2985 does not span 1 column(s) x 2984 row(s)
+  PAC & Candidate Map              merged-cells    3 merged range(s), e.g. A1:S1
+  PAC & Candidate Map              multivalue      'PAC and Candidate / Officeholder Map' contains ';' packed values
+  PAC & Candidate Map              table-ref       table PACMapTable starts at A5:S2358, not A1
+  PAC & Candidate Map              table-ref       table PACMapTable ref A5:S2358 does not span 1 column(s) x 2357 row(s)
+  Downstream Activity              merged-cells    3 merged range(s), e.g. A1:AB1
+  Downstream Activity              multivalue      'Downstream Committee-to-Candidate Activity' contains ';' packed values
+  Downstream Activity              table-ref       table DownstreamActivityTable starts at A5:AB39467, not A1
+  Downstream Activity              table-ref       table DownstreamActivityTable ref A5:AB39467 does not span 1 column(s) x 39466 row(s)
+  Beneficiary Bridge               merged-cells    3 merged range(s), e.g. A1:V1
+  Beneficiary Bridge               table-ref       table BeneficiaryBridgeTable starts at A5:V6519, not A1
+  Beneficiary Bridge               table-ref       table BeneficiaryBridgeTable ref A5:V6519 does not span 1 column(s) x 6518 row(s)
+  2021-2022                        sheet-name      sheet name is a bare cycle label
+  2021-2022                        merged-cells    3 merged range(s), e.g. A1:AI1
+  2021-2022                        multivalue      '2021-2022 Credit Union Contributions' contains ';' packed values
+  2021-2022                        table-ref       table Cycle_2021_2022 starts at A4:AI7653, not A1
+  2021-2022                        table-ref       table Cycle_2021_2022 ref A4:AI7653 does not span 1 column(s) x 7653 row(s)
+  2023-2024                        sheet-name      sheet name is a bare cycle label
+  2023-2024                        merged-cells    3 merged range(s), e.g. A1:AI1
+  2023-2024                        multivalue      '2023-2024 Credit Union Contributions' contains ';' packed values
+  2023-2024                        table-ref       table Cycle_2023_2024 starts at A4:AI14766, not A1
+  2023-2024                        table-ref       table Cycle_2023_2024 ref A4:AI14766 does not span 1 column(s) x 14766 row(s)
+  2025-2026                        sheet-name      sheet name is a bare cycle label
+  2025-2026                        merged-cells    3 merged range(s), e.g. A1:AI1
+  2025-2026                        multivalue      '2025-2026 Credit Union Contributions' contains ';' packed values
+  2025-2026                        table-ref       table Cycle_2025_2026 starts at A4:AI5112, not A1
+  2025-2026                        table-ref       table Cycle_2025_2026 ref A4:AI5112 does not span 1 column(s) x 5112 row(s)
+  Cycle Exceptions                 merged-cells    3 merged range(s), e.g. A1:AI1
+  Cycle Exceptions                 table-ref       table CycleExceptionsTable starts at A4:AI117, not A1
+  Cycle Exceptions                 table-ref       table CycleExceptionsTable ref A4:AI117 does not span 1 column(s) x 117 row(s)
+FAIL - 89 finding(s): aggregate-rows x1, merged-cells x26, multivalue x8, sheet-name x3, table-count x1, table-ref x50
+NEGATIVE CONTROL SATISFIED: the lint rejects this workbook.

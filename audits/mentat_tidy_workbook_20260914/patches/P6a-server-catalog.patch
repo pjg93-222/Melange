@@ -1,0 +1,31 @@
+# Lane B patch: P6a-server-catalog
+# Target (repo-root relative): mentat/app/server.py
+# Kind: MODIFY
+# git hash-object of the LIVE working-tree file at draft time: 49eee443066917fb132f6a9bb698fbf413274c64
+# Apply from the repo root:  git -C C:\Users\pgoff\Mentat apply P6a-server-catalog.patch
+# Overview|Data suffix regex + kind field.
+#
+diff --git a/mentat/app/server.py b/mentat/app/server.py
+index 5b7fd3c..d505a43 100644
+--- a/mentat/app/server.py
++++ b/mentat/app/server.py
+@@ -1393,8 +1393,17 @@ class Console:
+             if index in identifiers:
+                 raise ValueError('Report filename identifiers conflict; no ambiguous report will be opened.')
+             identifiers.add(index)
+-            industry = re.sub(r'\s+Industry Spending Overview$', '', path.stem, flags=re.IGNORECASE)
+-            rows.append({'index':index,'name':path.name,'industry':industry,
++            # The companion `<Industry> Industry Spending Data.xlsx` is the tall,
++            # Tableau-shaped view of the SAME export. Stripping either suffix
++            # files both books under one industry instead of inventing an
++            # industry literally called "Credit Union Industry Spending Data";
++            # `kind` is what lets a caller tell the two apart without parsing
++            # the filename again.
++            stem = re.sub(r'\s+Industry Spending (Overview|Data)$', '', path.stem,
++                          flags=re.IGNORECASE)
++            kind = 'data' if re.search(r'\s+Industry Spending Data$', path.stem,
++                                       flags=re.IGNORECASE) else 'overview'
++            rows.append({'index':index,'name':path.name,'industry':stem,'kind':kind,
+                          'source_directory':str(self.report_directory)})
+         return rows
+ 

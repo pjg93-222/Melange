@@ -1,0 +1,29 @@
+# Lane B patch: P6c-report_insights-split
+# Target (repo-root relative): mentat/app/report_insights.py
+# Kind: MODIFY
+# git hash-object of the LIVE working-tree file at draft time: 31a2410092564b520254c43053b8e0610bc50bb7
+# Apply from the repo root:  git -C C:\Users\pgoff\Mentat apply P6c-report_insights-split.patch
+# Match the BASE sheet name for the non-summable list (Lane A F4).
+#
+diff --git a/mentat/app/report_insights.py b/mentat/app/report_insights.py
+index 31a2410..bb55895 100644
+--- a/mentat/app/report_insights.py
++++ b/mentat/app/report_insights.py
+@@ -265,7 +265,16 @@ def worksheet_accounting(sheet_name, headers, rows, row_numbers):
+     if 'Source ID' in headers:
+         accounting.update(grain='FEC source observation', basis='included itemized receipts at the named recipient; not verified unique giving')
+         notes.append('Use Analysis Amount for included receipts. Raw Amount can include excluded or repeated source observations.')
+-    if sheet_name in ('Beneficiary Bridge', 'Beneficiary Summary', 'Transfer Paths', 'Funding Cohorts', 'Allocation Estimates'):
++    # Match the BASE sheet name. The companion Data workbook splits any sheet
++    # over its row threshold into `<Sheet> <cycle_label>` parts, so the sheet
++    # that used to be called exactly 'Transfer Paths' can arrive as
++    # 'Transfer Paths 2021-2022'. Against the exact-name list those parts fell
++    # through and their sums were offered as safe - the same association-path
++    # double count, now split three ways and harder to spot. A bare cycle label
++    # is not stripped (nothing is left to match, and graph_data.py parses those
++    # separately).
++    base_sheet_name = re.sub(r'\s+\d{4}-\d{4}$', '', sheet_name).strip() or sheet_name
++    if base_sheet_name in ('Beneficiary Bridge', 'Beneficiary Summary', 'Transfer Paths', 'Funding Cohorts', 'Allocation Estimates'):
+         accounting.update(safe_to_sum=False, reason='This sheet repeats funding or committee activity across association paths. Use the contribution dataset and a named accounting basis.')
+     columns = profile_columns(headers, rows)
+     for column in columns:

@@ -1,0 +1,861 @@
+{
+ "expected_worksheet_count": 22,
+ "sha256": "f7349527e8bc063eea07ca071b39ea861fdf75ae3c17c461c8ce7cdf988ca7f6",
+ "rows_per_sheet": {
+  "About": 38,
+  "Contributions": 28960,
+  "Giving Facts": 374,
+  "Recipient Facts": 708,
+  "Contributor Facts": 3922,
+  "Location Facts": 2223,
+  "Committees": 358,
+  "Committee Sponsors": 205,
+  "Candidates": 2836,
+  "Downstream Activity 2021-2022": 35239,
+  "Downstream Activity 2023-2024": 38523,
+  "Downstream Activity 2025-2026": 25155,
+  "Beneficiary Bridge": 5044,
+  "Transfer Paths 2021-2022": 68039,
+  "Transfer Paths 2023-2024": 123789,
+  "Transfer Paths 2025-2026": 63379,
+  "Allocation Estimates 2021-2022": 26490,
+  "Allocation Estimates 2023-2024": 32150,
+  "Allocation Estimates 2025-2026": 11499,
+  "Allocation Coverage": 170,
+  "Source Freshness": 15,
+  "Data Quality": 110
+ },
+ "checks": [
+  {
+   "check_id": "giving_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022: Giving Facts 246,812.93 vs Contributions analysis 246,812.93",
+   "metric": "246,812.93"
+  },
+  {
+   "check_id": "giving_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024: Giving Facts 563,762.16 vs Contributions analysis 563,762.16",
+   "metric": "563,762.16"
+  },
+  {
+   "check_id": "giving_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026: Giving Facts 242,809.53 vs Contributions analysis 242,809.53",
+   "metric": "242,809.53"
+  },
+  {
+   "check_id": "recipient_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022: Recipient Facts 246,812.93 vs Contributions analysis 246,812.93",
+   "metric": "246,812.93"
+  },
+  {
+   "check_id": "recipient_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024: Recipient Facts 563,762.16 vs Contributions analysis 563,762.16",
+   "metric": "563,762.16"
+  },
+  {
+   "check_id": "recipient_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026: Recipient Facts 242,809.53 vs Contributions analysis 242,809.53",
+   "metric": "242,809.53"
+  },
+  {
+   "check_id": "contributor_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022: Contributor Facts 246,812.93 vs Contributions analysis (person rows) 246,812.93",
+   "metric": "246,812.93"
+  },
+  {
+   "check_id": "contributor_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024: Contributor Facts 563,762.16 vs Contributions analysis (person rows) 563,762.16",
+   "metric": "563,762.16"
+  },
+  {
+   "check_id": "contributor_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026: Contributor Facts 242,809.53 vs Contributions analysis (person rows) 242,809.53",
+   "metric": "242,809.53"
+  },
+  {
+   "check_id": "location_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022: Location Facts 246,812.93 vs Contributions analysis 246,812.93",
+   "metric": "246,812.93"
+  },
+  {
+   "check_id": "location_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024: Location Facts 563,762.16 vs Contributions analysis 563,762.16",
+   "metric": "563,762.16"
+  },
+  {
+   "check_id": "location_facts_vs_contributions",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026: Location Facts 242,809.53 vs Contributions analysis 242,809.53",
+   "metric": "242,809.53"
+  },
+  {
+   "check_id": "expected_cycle_totals",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022: Contributions analysis 246,812.93 vs expected 246,812.93",
+   "metric": "246,812.93"
+  },
+  {
+   "check_id": "expected_cycle_totals",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024: Contributions analysis 563,762.16 vs expected 563,762.16",
+   "metric": "563,762.16"
+  },
+  {
+   "check_id": "expected_cycle_totals",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026: Contributions analysis 242,809.53 vs expected 242,809.53",
+   "metric": "242,809.53"
+  },
+  {
+   "check_id": "overview_cycle_totals",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022: Contributions analysis 246,812.93 vs Overview 246,812.93",
+   "metric": "246,812.93"
+  },
+  {
+   "check_id": "overview_cycle_totals",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024: Contributions analysis 563,762.16 vs Overview 563,762.16",
+   "metric": "563,762.16"
+  },
+  {
+   "check_id": "overview_cycle_totals",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026: Contributions analysis 242,809.53 vs Overview 242,809.53",
+   "metric": "242,809.53"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022 Alliant Credit Union: workbook 1,559.20 / 91 rows vs source DB 1,559.20 / 91 rows",
+   "metric": "1,559.20"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022 America First Credit Union: workbook 7,125.50 / 65 rows vs source DB 7,125.50 / 65 rows",
+   "metric": "7,125.50"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022 Boeing Employees Credit Union: workbook 41,610.20 / 1,383 rows vs source DB 41,610.20 / 1,383 rows",
+   "metric": "41,610.20"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022 Golden 1 Credit Union: workbook 1,879.50 / 84 rows vs source DB 1,879.50 / 84 rows",
+   "metric": "1,879.50"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022 Mountain America Credit Union: workbook 7,991.20 / 292 rows vs source DB 7,991.20 / 292 rows",
+   "metric": "7,991.20"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022 Navy Federal Credit Union: workbook 73,488.86 / 3,350 rows vs source DB 73,488.86 / 3,350 rows",
+   "metric": "73,488.86"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022 Pentagon Federal Credit Union: workbook 19,165.35 / 516 rows vs source DB 19,165.35 / 516 rows",
+   "metric": "19,165.35"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022 SchoolsFirst Federal Credit Union: workbook 43,298.15 / 1,270 rows vs source DB 43,298.15 / 1,270 rows",
+   "metric": "43,298.15"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022 State Employees' Credit Union: workbook 17,653.77 / 744 rows vs source DB 17,653.77 / 744 rows",
+   "metric": "17,653.77"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2021-2022 Suncoast Credit Union: workbook 33,041.20 / 322 rows vs source DB 33,041.20 / 322 rows",
+   "metric": "33,041.20"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024 Alliant Credit Union: workbook 10,337.24 / 148 rows vs source DB 10,337.24 / 148 rows",
+   "metric": "10,337.24"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024 America First Credit Union: workbook 28,949.10 / 168 rows vs source DB 28,949.10 / 168 rows",
+   "metric": "28,949.10"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024 Boeing Employees Credit Union: workbook 99,404.12 / 2,161 rows vs source DB 99,404.12 / 2,161 rows",
+   "metric": "99,404.12"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024 Golden 1 Credit Union: workbook 8,727.24 / 206 rows vs source DB 8,727.24 / 206 rows",
+   "metric": "8,727.24"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024 Mountain America Credit Union: workbook 19,345.45 / 541 rows vs source DB 19,345.45 / 541 rows",
+   "metric": "19,345.45"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024 Navy Federal Credit Union: workbook 229,139.82 / 8,209 rows vs source DB 229,139.82 / 8,209 rows",
+   "metric": "229,139.82"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024 Pentagon Federal Credit Union: workbook 31,553.52 / 745 rows vs source DB 31,553.52 / 745 rows",
+   "metric": "31,553.52"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024 SchoolsFirst Federal Credit Union: workbook 70,128.15 / 1,684 rows vs source DB 70,128.15 / 1,684 rows",
+   "metric": "70,128.15"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024 State Employees' Credit Union: workbook 34,213.42 / 1,199 rows vs source DB 34,213.42 / 1,199 rows",
+   "metric": "34,213.42"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2023-2024 Suncoast Credit Union: workbook 31,994.10 / 411 rows vs source DB 31,994.10 / 411 rows",
+   "metric": "31,994.10"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026 Alliant Credit Union: workbook 2,598.00 / 52 rows vs source DB 2,598.00 / 52 rows",
+   "metric": "2,598.00"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026 America First Credit Union: workbook 31,073.00 / 70 rows vs source DB 31,073.00 / 70 rows",
+   "metric": "31,073.00"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026 Boeing Employees Credit Union: workbook 17,001.56 / 393 rows vs source DB 17,001.56 / 393 rows",
+   "metric": "17,001.56"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026 Golden 1 Credit Union: workbook 3,595.17 / 129 rows vs source DB 3,595.17 / 129 rows",
+   "metric": "3,595.17"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026 Mountain America Credit Union: workbook 22,473.00 / 192 rows vs source DB 22,473.00 / 192 rows",
+   "metric": "22,473.00"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026 Navy Federal Credit Union: workbook 49,510.23 / 2,760 rows vs source DB 49,510.23 / 2,760 rows",
+   "metric": "49,510.23"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026 Pentagon Federal Credit Union: workbook 9,575.12 / 212 rows vs source DB 9,575.12 / 212 rows",
+   "metric": "9,575.12"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026 SchoolsFirst Federal Credit Union: workbook 77,547.36 / 907 rows vs source DB 77,547.36 / 907 rows",
+   "metric": "77,547.36"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026 State Employees' Credit Union: workbook 12,975.23 / 487 rows vs source DB 12,975.23 / 487 rows",
+   "metric": "12,975.23"
+  },
+  {
+   "check_id": "database_amount_and_rows",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "2025-2026 Suncoast Credit Union: workbook 16,460.86 / 169 rows vs source DB 16,460.86 / 169 rows",
+   "metric": "16,460.86"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Contributions: 28,960 rows, 28,960 distinct on (source_id)",
+   "metric": "28960"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Contributions: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Giving Facts: 374 rows, 374 distinct on (cycle_label, company, employee_tier, recipient_category, party)",
+   "metric": "374"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Giving Facts: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Recipient Facts: 708 rows, 708 distinct on (cycle_label, company, committee_id, employee_tier)",
+   "metric": "708"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Recipient Facts: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Contributor Facts: 3,922 rows, 3,922 distinct on (cycle_label, company, person_key, party)",
+   "metric": "3922"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Contributor Facts: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Location Facts: 2,223 rows, 2,223 distinct on (cycle_label, company, state, city, zip5)",
+   "metric": "2223"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Location Facts: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Committees: 358 rows, 358 distinct on (committee_id, cycle_label)",
+   "metric": "358"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Committees: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Committee Sponsors: 205 rows, 205 distinct on (committee_id, candidate_id, cycle_label, link_source)",
+   "metric": "205"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Committee Sponsors: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Candidates: 2,836 rows, 2,836 distinct on (candidate_id)",
+   "metric": "2836"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Candidates: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Downstream Activity: 98,917 rows, 98,917 distinct on (cycle_label, source_committee_id, candidate_id, activity_type, support_oppose, transaction_type, candidate)",
+   "metric": "98917"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Downstream Activity: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Beneficiary Bridge: 5,044 rows, 5,044 distinct on (bridge_key)",
+   "metric": "5044"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Beneficiary Bridge: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Transfer Paths: 255,207 rows, 255,207 distinct on (cycle_label, funded_committee, source_committee, destination_committee)",
+   "metric": "255207"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Transfer Paths: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Allocation Estimates: 70,139 rows, 70,139 distinct on (cycle_label, funded_committee, candidate_id, direction)",
+   "metric": "70139"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Allocation Estimates: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Allocation Coverage: 170 rows, 170 distinct on (cycle_label, funded_committee)",
+   "metric": "170"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Allocation Coverage: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "unique_keys",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Source Freshness: 15 rows, 15 distinct on (cycle_label, fec_dataset)",
+   "metric": "15"
+  },
+  {
+   "check_id": "no_multivalue_cells",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Source Freshness: no ';' in packed-value columns",
+   "metric": "0"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Contributions: 56 headers on row 1, 56 distinct",
+   "metric": "56"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Giving Facts: 10 headers on row 1, 10 distinct",
+   "metric": "10"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Recipient Facts: 29 headers on row 1, 29 distinct",
+   "metric": "29"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Contributor Facts: 16 headers on row 1, 16 distinct",
+   "metric": "16"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Location Facts: 9 headers on row 1, 9 distinct",
+   "metric": "9"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Committees: 23 headers on row 1, 23 distinct",
+   "metric": "23"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Committee Sponsors: 8 headers on row 1, 8 distinct",
+   "metric": "8"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Candidates: 12 headers on row 1, 12 distinct",
+   "metric": "12"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Downstream Activity 2021-2022: 29 headers on row 1, 29 distinct",
+   "metric": "29"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Downstream Activity 2023-2024: 29 headers on row 1, 29 distinct",
+   "metric": "29"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Downstream Activity 2025-2026: 29 headers on row 1, 29 distinct",
+   "metric": "29"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Beneficiary Bridge: 26 headers on row 1, 26 distinct",
+   "metric": "26"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Transfer Paths 2021-2022: 9 headers on row 1, 9 distinct",
+   "metric": "9"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Transfer Paths 2023-2024: 9 headers on row 1, 9 distinct",
+   "metric": "9"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Transfer Paths 2025-2026: 9 headers on row 1, 9 distinct",
+   "metric": "9"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Allocation Estimates 2021-2022: 7 headers on row 1, 7 distinct",
+   "metric": "7"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Allocation Estimates 2023-2024: 7 headers on row 1, 7 distinct",
+   "metric": "7"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Allocation Estimates 2025-2026: 7 headers on row 1, 7 distinct",
+   "metric": "7"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Allocation Coverage: 9 headers on row 1, 9 distinct",
+   "metric": "9"
+  },
+  {
+   "check_id": "header_vocabulary",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "Source Freshness: 7 headers on row 1, 7 distinct",
+   "metric": "7"
+  },
+  {
+   "check_id": "lineage_literal",
+   "source": "writer",
+   "severity": "fail",
+   "passed": 1,
+   "detail": "About Lineage = Source DB SHA-256: f9e956354525acb069cae220eb8d1538c479eea1bf23df1b3154adee8f416686",
+   "metric": "f9e956354525acb069cae220eb8d1538c479eea1bf23df1b3154adee8f416686"
+  }
+ ],
+ "split_sheets": {
+  "Downstream Activity": [
+   "Downstream Activity 2021-2022",
+   "Downstream Activity 2023-2024",
+   "Downstream Activity 2025-2026"
+  ],
+  "Transfer Paths": [
+   "Transfer Paths 2021-2022",
+   "Transfer Paths 2023-2024",
+   "Transfer Paths 2025-2026"
+  ],
+  "Allocation Estimates": [
+   "Allocation Estimates 2021-2022",
+   "Allocation Estimates 2023-2024",
+   "Allocation Estimates 2025-2026"
+  ]
+ },
+ "schema_version": "tidy-1",
+ "writer_version": "tidy-writer-1.0.0",
+ "out": "out\\Credit Union Industry Spending Data (MOCK).xlsx",
+ "absent_tables": [
+  "funding_cohorts",
+  "classification_review (empty)",
+  "state_destinations",
+  "recipient_locations",
+  "accounting_basis"
+ ],
+ "blank_columns": [
+  "Contributions / Transaction ID",
+  "Contributions / Back Reference Transaction ID",
+  "Contributions / Company Match Reason",
+  "Contributions / Matched Alias",
+  "Contributions / Funding Source Type",
+  "Contributions / Receipt Role",
+  "Contributions / Receipt Type",
+  "Contributions / Filing Form",
+  "Contributions / Line Number",
+  "Contributions / Memo Text",
+  "Contributions / Duplicate Of Source ID",
+  "Contributions / Duplicate Reason",
+  "Contributions / Recipient State",
+  "Contributions / Represented State",
+  "Contributions / Source URL",
+  "Committees / Party Affiliation",
+  "Committees / Committee State",
+  "Downstream Activity / Transfer Records",
+  "Beneficiary Bridge / Source Recipient Category"
+ ],
+ "oversize_sheets": [
+  "Transfer Paths 2021-2022",
+  "Transfer Paths 2023-2024",
+  "Transfer Paths 2025-2026"
+ ],
+ "seconds": 367.49,
+ "ok": true
+}

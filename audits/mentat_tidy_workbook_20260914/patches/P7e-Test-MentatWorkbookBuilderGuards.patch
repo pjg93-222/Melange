@@ -1,0 +1,70 @@
+# Lane B patch: P7e-Test-MentatWorkbookBuilderGuards
+# Target (repo-root relative): mentat/tests/Test-MentatWorkbookBuilderGuards.ps1
+# Kind: MODIFY
+# git hash-object of the LIVE working-tree file at draft time: fae3c9c83baf695b231b38ff3a09ab26f3e67aac
+# Apply from the repo root:  git -C C:\Users\pgoff\Mentat apply P7e-Test-MentatWorkbookBuilderGuards.patch
+# Publication-order fragments.
+#
+diff --git a/mentat/tests/Test-MentatWorkbookBuilderGuards.ps1 b/mentat/tests/Test-MentatWorkbookBuilderGuards.ps1
+index fae3c9c..3d4877c 100644
+--- a/mentat/tests/Test-MentatWorkbookBuilderGuards.ps1
++++ b/mentat/tests/Test-MentatWorkbookBuilderGuards.ps1
+@@ -77,4 +77,58 @@ if ($targetMove -lt 0 -or $ownedRelease -le $targetMove) {
+   throw 'Workbook lease must be released only after atomic target publication.'
+ }
+ 
++# Companion Data workbook publication order.
++#
++# The console globs the published folder and pairs the two books by name, and
++# `sourceGuard accept` advances the accepted source baseline for the NEXT run.
++# If acceptance ran between the two publications, a failure in the Data copy
++# would leave the baseline advanced past an Overview whose companion never
++# landed, and the following build would treat the half-published pair as the
++# accepted state. The Data book therefore goes out after the Overview and
++# before acceptance, under the same copy-then-atomic-move.
++foreach ($fragment in @(
++  'stage_sha256',
++  '$pendingStage = "$stagePath.pending-$PID"',
++  '--staging $pendingStage',
++  'PRAGMA integrity_check',
++  'Move-Item -LiteralPath $pendingStage -Destination $stagePath -Force',
++  '--overview-receipt $overviewReceiptPath',
++  'Assert-WorkbookPackage $stageDataWorkbook $dataWorksheetCount',
++  'data_workbook_sha256 = $dataWorkbookSha256'
++)) {
++  if (-not $buildText.Contains($fragment)) {
++    throw "Report builder is missing a tidy data-workbook fragment: $fragment"
++  }
++}
++
++$dataMove = $buildText.LastIndexOf(
++  'Move-Item -LiteralPath $pendingDataWorkbook -Destination $targetDataWorkbook -Force'
++)
++$sourceAccept = $buildText.LastIndexOf(
++  '& $PythonPath $sourceGuard accept --receipt $sourceGuardReceipt'
++)
++if ($dataMove -lt 0) {
++  throw 'The companion Data workbook must be published by an atomic move.'
++}
++if ($dataMove -le $targetMove) {
++  throw 'The companion Data workbook must be published after the Overview.'
++}
++if ($sourceAccept -lt 0 -or $sourceAccept -le $dataMove) {
++  throw 'Accepted-source advance must follow BOTH workbook publications.'
++}
++if ($ownedRelease -le $dataMove) {
++  throw 'Workbook lease must be released only after both books are published.'
++}
++
++$writerCall = $buildText.IndexOf('& $PythonPath $tidyWriter --staging $stagePath')
++$overviewCopy = $buildText.LastIndexOf(
++  'Copy-Item -LiteralPath $stageWorkbook -Destination $pendingWorkbook -Force'
++)
++if ($writerCall -lt 0 -or $overviewCopy -lt 0 -or $writerCall -ge $overviewCopy) {
++  throw 'The tidy writer must run before anything is copied into the output folder.'
++}
++if ($buildText.Contains('Assert-WorkbookPackage $stageDataWorkbook $expectedWorksheetCount')) {
++  throw 'The Data book must be checked against its OWN receipt, not the Overview count.'
++}
++
+ Write-Host 'Test-MentatWorkbookBuilderGuards: PASS'
