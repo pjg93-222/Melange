@@ -1,7 +1,7 @@
 {
   "contract": "studio_api",
-  "version": 1,
-  "owner": "S4",
+  "version": 2,
+  "owner": "S4 (industry fields); UI1 (board fields)",
   "produced_by": [
     "mentat/app/chart-studio-core.js:viewSourceRecord",
     "mentat/app/chart-studio-core.js:createSheet",
@@ -12,16 +12,23 @@
     "mentat/app/server.py:Console.list_views",
     "mentat/app/server.py:Console.get_view",
     "mentat/app/server.py:Console.add_to_briefing",
-    "mentat/app/chart-briefing.js (briefing add producer)"
+    "mentat/app/chart-briefing.js (briefing add producer)",
+    "mentat/app/chart-studio-core.js:normalizeBoard (validates a view's board on save and on open; returns the board or null)",
+    "mentat/app/chart-studio.js:saveViewNamed (writes `board` only when the user chose a board of 2 or 4 tiles)",
+    "mentat/app/server.py:Console.save_view (whitelists `board`; rejects a malformed one with 400)",
+    "mentat/app/server.py:Console.get_view (echoes `board` exactly as saved)"
   ],
   "consumed_by": [
     "mentat/app/chart-studio.js:renderViewPicker / openView (reads list_views + get_view)",
     "mentat/app/chart-studio-core.js:migrateSheet (load-time industry backfill; reads what viewSourceRecord/createSheet/save_view produced)",
     "mentat/app/chart-briefing.js:renderBriefingTray (reads add_to_briefing / Console.briefing items)",
     "mentat/app/server.py:Console.list_views (reads what chart-studio.js:saveViewNamed persisted)",
-    "mentat/app/server.py:Console.get_view (reads what chart-studio.js:saveViewNamed persisted)"
+    "mentat/app/server.py:Console.get_view (reads what chart-studio.js:saveViewNamed persisted)",
+    "mentat/app/chart-studio.js:openView (reads `board`; a view without it opens as one sheet)",
+    "mentat/app/chart-studio.js:renderBoard (Canvas mode: 1, 2 or 4 sheet tiles)",
+    "mentat/app/chart-briefing.js (Add board to briefing: one briefing_add per filled tile)"
   ],
-  "description": "Every producer that builds a sheet or view `source` (or a `sources[]` fan-out entry) sets `industry` as a non-empty string \u2014 never an object, never dropped, and never placed outside `source` where the server's record whitelist silently drops it. A sheet saved before this change is backfilled at load time: `source.dataset` with no `source.industry` gets `industry = dataset` and gains an empty `sources: []`.",
+  "description": "Every producer that builds a sheet or view `source` (or a `sources[]` fan-out entry) sets `industry` as a non-empty string \u2014 never an object, never dropped, and never placed outside `source` where the server's record whitelist silently drops it. A sheet saved before this change is backfilled at load time: `source.dataset` with no `source.industry` gets `industry = dataset` and gains an empty `sources: []`. v2 (UI1, 2026-09-17): a view MAY carry a top-level `board` object {tiles, slots}. `tiles` is the integer 1, 2 or 4; `slots` is an array of exactly `tiles` entries, each a non-negative integer index into `sheets` or null for an empty tile, with no sheet index repeated. `board` is written only when the user chose a board of 2 or 4 tiles, so every v1 view stays byte-identical and a view without `board` opens as one sheet, exactly as before. `active` still names the selected sheet; in board mode the selected tile is the slot holding `active`, else the first filled slot. Console.save_view adds `board` to its record whitelist and rejects a malformed board with 400 \"The saved view's board does not match its sheets.\"; chart-studio-core.js:normalizeBoard applies the same rules on the client and, on open, drops a malformed board with a status note instead of failing the open. A `board` key anywhere else (inside `source`, inside a sheet) is not a board and is ignored by every consumer.",
   "examples": {
     "views_save": {
       "name": "Cross-industry PAC comparison",
@@ -457,6 +464,412 @@
       "sort": "none",
       "showLabels": false,
       "fit": "standard"
+    },
+    "views_save_board": {
+      "name": "Banking and Credit Union side by side",
+      "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+      "source": {
+        "label": "Banking",
+        "reportName": "Banking Industry Spending Overview.xlsx",
+        "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "runName": "Configured completed-report folder",
+        "sheet": "Verified source observations",
+        "mode": "contributions",
+        "dataset": "Banking",
+        "datasetLabel": "Banking",
+        "industry": "Banking"
+      },
+      "sheets": [
+        {
+          "id": "sheet-1",
+          "name": "Recipients",
+          "source": {
+            "run": "published-reports",
+            "runName": "Configured completed-report folder",
+            "report": "Banking Industry Spending Overview.xlsx",
+            "reportName": "Banking Industry Spending Overview.xlsx",
+            "sheet": "Verified source observations",
+            "header": 0,
+            "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+            "industry": "Banking",
+            "dataset": "Banking"
+          },
+          "sources": [],
+          "columns": [],
+          "rows": [],
+          "marks": {
+            "type": "automatic",
+            "color": null,
+            "size": null,
+            "label": null,
+            "detail": [],
+            "tooltip": []
+          },
+          "filters": [],
+          "pages": null,
+          "pageMember": "",
+          "analytics": {
+            "transform": "none",
+            "period": "",
+            "horizon": 2,
+            "totals": false,
+            "average": false,
+            "median": false
+          },
+          "types": {},
+          "params": {
+            "start": 0,
+            "end": 0,
+            "limit": 0,
+            "subject": "",
+            "maxGroups": 0,
+            "splitMulti": false
+          },
+          "sort": "none",
+          "showLabels": false,
+          "fit": "standard"
+        },
+        {
+          "id": "sheet-2",
+          "name": "Credit Union PACs",
+          "source": {
+            "run": "published-reports",
+            "runName": "Configured completed-report folder",
+            "report": "Credit Union Industry Spending Overview.xlsx",
+            "reportName": "Credit Union Industry Spending Overview.xlsx",
+            "sheet": "Verified source observations",
+            "header": 0,
+            "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+            "industry": "Credit Union",
+            "dataset": "Credit Union"
+          },
+          "sources": [
+            {
+              "industry": "Credit Union",
+              "dataset": "Credit Union",
+              "label": "Credit Union"
+            },
+            {
+              "industry": "Banking",
+              "dataset": "Banking",
+              "label": "Banking"
+            }
+          ],
+          "columns": [],
+          "rows": [],
+          "marks": {
+            "type": "automatic",
+            "color": null,
+            "size": null,
+            "label": null,
+            "detail": [],
+            "tooltip": []
+          },
+          "filters": [],
+          "pages": null,
+          "pageMember": "",
+          "analytics": {
+            "transform": "none",
+            "period": "",
+            "horizon": 2,
+            "totals": false,
+            "average": false,
+            "median": false
+          },
+          "types": {},
+          "params": {
+            "start": 0,
+            "end": 0,
+            "limit": 0,
+            "subject": "",
+            "maxGroups": 0,
+            "splitMulti": false
+          },
+          "sort": "none",
+          "showLabels": false,
+          "fit": "standard"
+        }
+      ],
+      "active": 0,
+      "board": {
+        "tiles": 2,
+        "slots": [
+          0,
+          1
+        ]
+      }
+    },
+    "views_get_board": {
+      "id": "<32hex>",
+      "name": "Banking and Credit Union side by side",
+      "saved_at": 1758000000.0,
+      "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+      "source": {
+        "label": "Banking",
+        "reportName": "Banking Industry Spending Overview.xlsx",
+        "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "runName": "Configured completed-report folder",
+        "sheet": "Verified source observations",
+        "mode": "contributions",
+        "dataset": "Banking",
+        "datasetLabel": "Banking",
+        "industry": "Banking"
+      },
+      "sheets": [
+        {
+          "id": "sheet-1",
+          "name": "Recipients",
+          "source": {
+            "run": "published-reports",
+            "runName": "Configured completed-report folder",
+            "report": "Banking Industry Spending Overview.xlsx",
+            "reportName": "Banking Industry Spending Overview.xlsx",
+            "sheet": "Verified source observations",
+            "header": 0,
+            "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+            "industry": "Banking",
+            "dataset": "Banking"
+          },
+          "sources": [],
+          "columns": [],
+          "rows": [],
+          "marks": {
+            "type": "automatic",
+            "color": null,
+            "size": null,
+            "label": null,
+            "detail": [],
+            "tooltip": []
+          },
+          "filters": [],
+          "pages": null,
+          "pageMember": "",
+          "analytics": {
+            "transform": "none",
+            "period": "",
+            "horizon": 2,
+            "totals": false,
+            "average": false,
+            "median": false
+          },
+          "types": {},
+          "params": {
+            "start": 0,
+            "end": 0,
+            "limit": 0,
+            "subject": "",
+            "maxGroups": 0,
+            "splitMulti": false
+          },
+          "sort": "none",
+          "showLabels": false,
+          "fit": "standard"
+        },
+        {
+          "id": "sheet-2",
+          "name": "Credit Union PACs",
+          "source": {
+            "run": "published-reports",
+            "runName": "Configured completed-report folder",
+            "report": "Credit Union Industry Spending Overview.xlsx",
+            "reportName": "Credit Union Industry Spending Overview.xlsx",
+            "sheet": "Verified source observations",
+            "header": 0,
+            "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+            "industry": "Credit Union",
+            "dataset": "Credit Union"
+          },
+          "sources": [
+            {
+              "industry": "Credit Union",
+              "dataset": "Credit Union",
+              "label": "Credit Union"
+            },
+            {
+              "industry": "Banking",
+              "dataset": "Banking",
+              "label": "Banking"
+            }
+          ],
+          "columns": [],
+          "rows": [],
+          "marks": {
+            "type": "automatic",
+            "color": null,
+            "size": null,
+            "label": null,
+            "detail": [],
+            "tooltip": []
+          },
+          "filters": [],
+          "pages": null,
+          "pageMember": "",
+          "analytics": {
+            "transform": "none",
+            "period": "",
+            "horizon": 2,
+            "totals": false,
+            "average": false,
+            "median": false
+          },
+          "types": {},
+          "params": {
+            "start": 0,
+            "end": 0,
+            "limit": 0,
+            "subject": "",
+            "maxGroups": 0,
+            "splitMulti": false
+          },
+          "sort": "none",
+          "showLabels": false,
+          "fit": "standard"
+        }
+      ],
+      "active": 0,
+      "board": {
+        "tiles": 2,
+        "slots": [
+          0,
+          1
+        ]
+      }
+    },
+    "views_save_board_four": {
+      "name": "Four tiles, two filled",
+      "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+      "source": {
+        "label": "Banking",
+        "reportName": "Banking Industry Spending Overview.xlsx",
+        "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "runName": "Configured completed-report folder",
+        "sheet": "Verified source observations",
+        "mode": "contributions",
+        "dataset": "Banking",
+        "datasetLabel": "Banking",
+        "industry": "Banking"
+      },
+      "sheets": [
+        {
+          "id": "sheet-1",
+          "name": "Recipients",
+          "source": {
+            "run": "published-reports",
+            "runName": "Configured completed-report folder",
+            "report": "Banking Industry Spending Overview.xlsx",
+            "reportName": "Banking Industry Spending Overview.xlsx",
+            "sheet": "Verified source observations",
+            "header": 0,
+            "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+            "industry": "Banking",
+            "dataset": "Banking"
+          },
+          "sources": [],
+          "columns": [],
+          "rows": [],
+          "marks": {
+            "type": "automatic",
+            "color": null,
+            "size": null,
+            "label": null,
+            "detail": [],
+            "tooltip": []
+          },
+          "filters": [],
+          "pages": null,
+          "pageMember": "",
+          "analytics": {
+            "transform": "none",
+            "period": "",
+            "horizon": 2,
+            "totals": false,
+            "average": false,
+            "median": false
+          },
+          "types": {},
+          "params": {
+            "start": 0,
+            "end": 0,
+            "limit": 0,
+            "subject": "",
+            "maxGroups": 0,
+            "splitMulti": false
+          },
+          "sort": "none",
+          "showLabels": false,
+          "fit": "standard"
+        },
+        {
+          "id": "sheet-2",
+          "name": "Credit Union PACs",
+          "source": {
+            "run": "published-reports",
+            "runName": "Configured completed-report folder",
+            "report": "Credit Union Industry Spending Overview.xlsx",
+            "reportName": "Credit Union Industry Spending Overview.xlsx",
+            "sheet": "Verified source observations",
+            "header": 0,
+            "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+            "industry": "Credit Union",
+            "dataset": "Credit Union"
+          },
+          "sources": [
+            {
+              "industry": "Credit Union",
+              "dataset": "Credit Union",
+              "label": "Credit Union"
+            },
+            {
+              "industry": "Banking",
+              "dataset": "Banking",
+              "label": "Banking"
+            }
+          ],
+          "columns": [],
+          "rows": [],
+          "marks": {
+            "type": "automatic",
+            "color": null,
+            "size": null,
+            "label": null,
+            "detail": [],
+            "tooltip": []
+          },
+          "filters": [],
+          "pages": null,
+          "pageMember": "",
+          "analytics": {
+            "transform": "none",
+            "period": "",
+            "horizon": 2,
+            "totals": false,
+            "average": false,
+            "median": false
+          },
+          "types": {},
+          "params": {
+            "start": 0,
+            "end": 0,
+            "limit": 0,
+            "subject": "",
+            "maxGroups": 0,
+            "splitMulti": false
+          },
+          "sort": "none",
+          "showLabels": false,
+          "fit": "standard"
+        }
+      ],
+      "active": 1,
+      "board": {
+        "tiles": 4,
+        "slots": [
+          1,
+          0,
+          null,
+          null
+        ]
+      }
     }
   },
   "negative_controls": [
@@ -632,6 +1045,822 @@
         ],
         "active": 0,
         "industry": "Banking"
+      }
+    },
+    {
+      "why": "board.tiles must be 1, 2 or 4 (one tile, two side by side, two by two); 3 has no layout, so Console.save_view returns 400 and normalizeBoard returns null",
+      "payload": {
+        "name": "Three tiles",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-1",
+            "name": "Recipients",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          },
+          {
+            "id": "sheet-2",
+            "name": "Credit Union PACs",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Credit Union Industry Spending Overview.xlsx",
+              "reportName": "Credit Union Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+              "industry": "Credit Union",
+              "dataset": "Credit Union"
+            },
+            "sources": [
+              {
+                "industry": "Credit Union",
+                "dataset": "Credit Union",
+                "label": "Credit Union"
+              },
+              {
+                "industry": "Banking",
+                "dataset": "Banking",
+                "label": "Banking"
+              }
+            ],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          }
+        ],
+        "active": 0,
+        "board": {
+          "tiles": 3,
+          "slots": [
+            0,
+            1,
+            null
+          ]
+        }
+      }
+    },
+    {
+      "why": "board.slots must have exactly board.tiles entries; a shorter or longer list leaves a tile undefined or a sheet unplaced",
+      "payload": {
+        "name": "Slot count off",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-1",
+            "name": "Recipients",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          },
+          {
+            "id": "sheet-2",
+            "name": "Credit Union PACs",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Credit Union Industry Spending Overview.xlsx",
+              "reportName": "Credit Union Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+              "industry": "Credit Union",
+              "dataset": "Credit Union"
+            },
+            "sources": [
+              {
+                "industry": "Credit Union",
+                "dataset": "Credit Union",
+                "label": "Credit Union"
+              },
+              {
+                "industry": "Banking",
+                "dataset": "Banking",
+                "label": "Banking"
+              }
+            ],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          }
+        ],
+        "active": 0,
+        "board": {
+          "tiles": 2,
+          "slots": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "why": "every filled slot must index an existing sheet (0 <= index < sheets.length); this view has two sheets and names sheet 5",
+      "payload": {
+        "name": "Slot out of range",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-1",
+            "name": "Recipients",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          },
+          {
+            "id": "sheet-2",
+            "name": "Credit Union PACs",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Credit Union Industry Spending Overview.xlsx",
+              "reportName": "Credit Union Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+              "industry": "Credit Union",
+              "dataset": "Credit Union"
+            },
+            "sources": [
+              {
+                "industry": "Credit Union",
+                "dataset": "Credit Union",
+                "label": "Credit Union"
+              },
+              {
+                "industry": "Banking",
+                "dataset": "Banking",
+                "label": "Banking"
+              }
+            ],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          }
+        ],
+        "active": 0,
+        "board": {
+          "tiles": 2,
+          "slots": [
+            0,
+            5
+          ]
+        }
+      }
+    },
+    {
+      "why": "a sheet may sit in one slot only; the same chart twice is a duplicate, not a board",
+      "payload": {
+        "name": "Duplicate slot",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-1",
+            "name": "Recipients",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          },
+          {
+            "id": "sheet-2",
+            "name": "Credit Union PACs",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Credit Union Industry Spending Overview.xlsx",
+              "reportName": "Credit Union Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+              "industry": "Credit Union",
+              "dataset": "Credit Union"
+            },
+            "sources": [
+              {
+                "industry": "Credit Union",
+                "dataset": "Credit Union",
+                "label": "Credit Union"
+              },
+              {
+                "industry": "Banking",
+                "dataset": "Banking",
+                "label": "Banking"
+              }
+            ],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          }
+        ],
+        "active": 0,
+        "board": {
+          "tiles": 2,
+          "slots": [
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "why": "slot entries are non-negative integers or null; a negative or fractional index is the DE-021 shape (agreed as an index, sent as something else)",
+      "payload": {
+        "name": "Negative slot",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-1",
+            "name": "Recipients",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          },
+          {
+            "id": "sheet-2",
+            "name": "Credit Union PACs",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Credit Union Industry Spending Overview.xlsx",
+              "reportName": "Credit Union Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+              "industry": "Credit Union",
+              "dataset": "Credit Union"
+            },
+            "sources": [
+              {
+                "industry": "Credit Union",
+                "dataset": "Credit Union",
+                "label": "Credit Union"
+              },
+              {
+                "industry": "Banking",
+                "dataset": "Banking",
+                "label": "Banking"
+              }
+            ],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          }
+        ],
+        "active": 0,
+        "board": {
+          "tiles": 2,
+          "slots": [
+            -1,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "why": "board must be an object {tiles, slots}; a bare string or number is the same DE-021 shape as source.industry-as-object",
+      "payload": {
+        "name": "Board as string",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-1",
+            "name": "Recipients",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          },
+          {
+            "id": "sheet-2",
+            "name": "Credit Union PACs",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Credit Union Industry Spending Overview.xlsx",
+              "reportName": "Credit Union Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "58000ed07f99a5d94ded15fc5c55cf46e9fc73d120a31d5e2c9dfd6f1151822d",
+              "industry": "Credit Union",
+              "dataset": "Credit Union"
+            },
+            "sources": [
+              {
+                "industry": "Credit Union",
+                "dataset": "Credit Union",
+                "label": "Credit Union"
+              },
+              {
+                "industry": "Banking",
+                "dataset": "Banking",
+                "label": "Banking"
+              }
+            ],
+            "columns": [],
+            "rows": [],
+            "marks": {
+              "type": "automatic",
+              "color": null,
+              "size": null,
+              "label": null,
+              "detail": [],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard"
+          }
+        ],
+        "active": 0,
+        "board": "2"
       }
     }
   ]

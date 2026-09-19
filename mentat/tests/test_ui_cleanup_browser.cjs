@@ -72,11 +72,14 @@ function freePort() {
   };
   return withTimeout(pick(), 10000, 'freePort()');
 }
-function startServer(port, dataRoot) {
+function startServer(port, dataRoot, reportRoot) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.env.MENTAT_PYTHON || 'python',
       ['app/server.py', '--port', String(port), '--data-root', dataRoot],
-      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true});
+      {cwd: MENTAT_DIR, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
+       // Without a report directory of its own this console resolves the configured
+       // one - Paul's published reports - and chdir()s into it on every run.
+       env: Object.assign({}, process.env, {MENTAT_REPORT_DIRECTORY: reportRoot})});
     const stderrLines = [];
     let stdout = '';
     let settled = false;
@@ -210,6 +213,7 @@ const VISIBLE_SOURCE = `node => {
   const {chromium} = playwright;
   let browser = null, server = null, failed = false;
   const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-ui-cleanup-'));
+  const reportRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-ui-cleanup-reports-'));
   // The studio's first contribution query is held until the title has been
   // read, so "before a chart is drawn" is a state this test can observe
   // instead of a race it has to win.
@@ -273,7 +277,7 @@ const VISIBLE_SOURCE = `node => {
   try {
     setup('pick a free port and launch the console server on a throwaway --data-root');
     const port = await freePort();
-    server = await startServer(port, dataRoot);
+    server = await startServer(port, dataRoot, reportRoot);
     const origin = `http://127.0.0.1:${port}`;
     browser = await withTimeout(
       chromium.launch({headless: true, channel: process.env.MENTAT_BROWSER_CHANNEL || 'chrome', timeout: 30000}),
@@ -480,7 +484,10 @@ const VISIBLE_SOURCE = `node => {
     assert.equal(chrome.briefing.length, 1, `exactly one visible "Add to briefing", got ${JSON.stringify(chrome.briefing)}`);
     assert.equal(chrome.overview.length, 1, `exactly one visible "Company overview", got ${JSON.stringify(chrome.overview)}`);
     assert.equal(chrome.menuBriefing, false, 'the duplicate briefing entry in the Export menu is gone');
-    assert.deepEqual(chrome.views, ['studio-save-view', 'studio-open-views'], 'the Views menu holds Save view and Open view');
+    // The board build (design section 4, option C) adds the third entry: one
+    // briefing card per filled tile, from the same menu Save view lives in.
+    assert.deepEqual(chrome.views, ['studio-save-view', 'studio-open-views', 'studio-board-briefing'],
+      'the Views menu holds Save view, Open view and Add board to briefing');
     assert.equal(chrome.classic, 'studio-download', 'Classic builder moved under Export');
     assert.equal(chrome.role, 'radiogroup', 'the three view modes are one radiogroup');
     assert.deepEqual(chrome.segments, ['studio-view-builder', 'studio-overview-toggle', 'studio-view-canvas'],
@@ -611,6 +618,7 @@ const VISIBLE_SOURCE = `node => {
     if (browser) await browser.close().catch(() => {});
     await stopServer(server);
     cleanupPath(dataRoot);
+    cleanupPath(reportRoot);
   }
   if (failed) { process.exitCode = 1; console.log(`RESULT: ${passes}/${stepNumber} steps passed, exit 1`); }
   else console.log(`RESULT: ${passes}/${stepNumber} steps passed, exit 0`);

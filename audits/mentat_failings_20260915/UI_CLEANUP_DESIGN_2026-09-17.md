@@ -140,3 +140,169 @@ Patch: `patches/UI1_graph_studio_cleanup.patch`, cut hunk-exact as bytes (DE-025
 `git apply --cached --check` against HEAD a9ed5c236. 12 files, +1810/-138. Two files are shared
 with the PAC evidence lane and carry only this lane's hunks: `index.html` 6 of 7 hunks (the
 `#view-evidence` hunk is theirs) and `workspace.css` 3 of 7 (the four evidence hunks are theirs).
+
+## 11. Board build (2026-09-18)
+
+Built: option C, the board, as the second build of this pass (R6). Canvas mode draws 1, 2 or
+4 sheet tiles; one tile is selected and the Inspector, Show Me, Export, Copy image, Print and
+"Add to briefing" act on its sheet. Each tile carries its sheet select, its title sentence, its
+scope subtitle and its own footer: the note, the reconciliation line with that tile's own
+observation and group counts, and the Graph-versus-Studio strip when that sheet's filters
+name a company or a cycle. No figure loses its denominator.
+
+**Contract first.** `contracts/studio_api.json` is v2: additive, three examples
+(`views_save_board`, `views_get_board`, `views_save_board_four`) and six negative controls,
+all asserted against the producers in both suites - `app/tests/studio-contract.test.js`
+against `normalizeBoard`, `tests/test_studio_contract_examples.py` against a real Console over
+HTTP. Every board assertion was recorded failing first (`receipts/UI2_board_red.txt`).
+
+**What was built, file by file.**
+- `app/chart-studio-core.js`: `normalizeBoard(view)` - the board or null, same rules as the server.
+- `app/server.py`: `validate_view_board`, `Console.save_view` whitelists `board`, `Console.get_view`
+  echoes it. A malformed board is 400 "The saved view's board does not match its sheets."
+- `app/chart-studio.js`: every render path takes a `view` surface (the sheet it draws, the nodes
+  it draws into, whether the chrome follows it, its own staleness ticket and request controller).
+  `mainSurface()`'s storage is the module state, so the single canvas runs the path it always ran.
+  New: the board block (tiles, selection, re-index, save, open, "Add board to briefing").
+- `app/index.html`: the Board control in the toolbar, `#studio-board` in the canvas wrap, and
+  "Add board to briefing" in the Views menu.
+- `app/chart-studio.css`: the two grids, the tile chrome, the selected outline, and the rule that
+  puts the single canvas and its footer away while a board is up.
+
+**Decisions where this design was silent.**
+1. *Where the Board control lives.* Builder's toolbar is full at 1440px: adding a fourth group
+   wrapped it onto a second row and pushed the Views menu behind the workspace, which broke
+   `test_studio_industry_browser.cjs`. The control is Canvas-mode chrome, which is where the board
+   is active anyway; the Canvas segment's tooltip now names it.
+2. *Canvas mode keeps Views.* It showed Export and nothing else. A board that cannot be saved,
+   reopened or sent to the briefing is a board you can only look at, so Views joins Export and Board.
+3. *Deleting or reordering a sheet.* There is no delete control today; the index-moving gestures
+   are Duplicate, New sheet, Open view and undo. Inserting re-indexes the board (Duplicate shifts
+   every placed sheet above the insertion and hands the copy the selected tile; New sheet takes the
+   selected tile). A slot naming a sheet that is no longer there is CLEARED to null, never left
+   dangling - the tile count is the reader's choice and is kept.
+4. *Empty tiles.* An empty tile renders its sheet select and the sentence "Empty tile. Choose a
+   sheet for it above." - not an error, not a blank box. The last filled tile is not offered the
+   "Empty this tile" option, because a board with nothing on it would leave no tile selected.
+5. *No repeats.* A tile offers the sheet it holds and the sheets no other tile has taken.
+6. *Which controls follow the selected tile.* The Inspector, the shelves, Show Me, Export (PNG,
+   SVG, CSV), Copy image, Print chart, "Add to briefing", the group pager and the source-record
+   inspector all act on the selected tile's sheet; `active` and the selected tile are the same
+   thing, per the contract. "Add board to briefing" is the only control that acts on all tiles.
+7. *Maps.* One map at a time: the map owns the geometry cache and the Census request, so it draws
+   in the selected tile. An unselected map tile says "This sheet draws a map. Select this tile to
+   see it." rather than drawing nothing.
+8. *Storage.* The board rides in the existing `mentat-chart-studio-v1` workspace entry beside
+   `{sheets, active}` and in the undo snapshot. No new storage key, nothing in the URL (D-039).
+9. *Per-tile requests.* One contribution query per tile on refresh, cached by request key exactly
+   as before. `contributionPending` became a Map and the abort controller became per surface, or
+   a second tile's request cancelled the first tile's.
+10. *No per-tile Export button.* The mockup drew Export and "Add to briefing" in each tile header;
+    the toolbar controls act on the selected tile instead, so "Add to briefing" still appears once
+    (UI1 acceptance) and the control count stays low.
+
+**Measured at 1440x900** (visible buttons, selects, inputs and summaries in `#view-chart-studio`,
+excluding the chart marks that carry `role=button`; the top of the first drawing; three sheets
+loaded, Canvas mode):
+
+| | Controls | Top of the first chart |
+| --- | --- | --- |
+| Board 1 (today's canvas) | 24 | 440px |
+| Board 2 (side by side) | 26 | 506px |
+| Board 4 (two by two) | 28 | 506px |
+| Board 2 at 1280x800 | 26 | 506px |
+
+A tile costs exactly one control - its sheet select - and the chart top moves down by the tile's
+own header, title and subtitle. Builder's toolbar is unchanged at one row, and `#studio-canvas`
+in Builder still starts at 613px (UI1's figure). Below 1000px the tiles stack in one column.
+
+**Known limits.**
+- The Board is not the older "1 chart / 2 charts / 3 charts / 4 charts" split strip above the
+  header, and both stay: the strip opens that many separate Chart Studio panes, each its own
+  console with its own data source, sheets and briefing, while the Board arranges the sheets of
+  one workspace in one pane, under one Inspector and one Export.
+- A map only draws in the selected tile.
+- The board is a Canvas-mode arrangement: Builder and Company overview are exactly as they were.
+- Tile charts are drawn at tile width, so a long category label can crowd at 2 tiles and more at 4;
+  the reader's answer is Board 1 or a wider window.
+- A board of 2 or 4 issues 2 or 4 contribution queries on a refresh, cached by request key.
+
+**Tests.** `tests/test_studio_board_browser.cjs` (new, 10 steps, real console on a free ephemeral
+port, `/api/studio/views` NOT stubbed so save and reopen are real writes): two tiles render two
+different titles and two reconciliation lines; four tiles with two filled; the selected tile drives
+the Inspector and Export; no sheet can be placed twice; save with a 2-tile board then reopen gives
+the same tiles in the same slots; a view without a board opens as one sheet; Board 1 restores the
+single canvas; "Add board to briefing" adds one card per filled tile in slot order; zero page and
+console errors. Node unit suite 195/195 (182 before, 13 new). `test_ui_cleanup_browser.cjs` 12/12,
+`test_navigation_scope_browser.cjs` 13/13, every `tests/*studio*.cjs`, `test_console_browser.cjs`,
+`test_chart_builder_browser.cjs`, and the python studio suites all green. Receipts:
+`receipts/UI2_board_red.txt`, `receipts/UI2_board_tests.txt`, and the three screenshots
+`UI2_board_2tiles_1440.png`, `UI2_board_4tiles_1440.png`, `UI2_board_2tiles_1280.png`.
+
+**Two changes to existing suites**, both deliberate and both named above: the Views menu now holds
+three entries (`test_ui_cleanup_browser.cjs`), and the two empty-state sentences are written
+through the surface (`test_studio_wording.cjs`). The sentences themselves are unchanged.
+
+### 11.1 After the independent verification (2026-09-19)
+
+A live-console verification reproduced the HTTP contract and a no-stub pass, and an adversarial
+read found six defects the first round's suites could not see. All six are fixed.
+
+1. **The pager moved the wrong chart.** `groups-prev`/`groups-next` called the render with no
+   surface, so the page turned into the hidden single canvas while the selected tile stayed on
+   page one and the label described a page nobody could see; an exported image then carried a
+   page-two caption on a page-one drawing. The page is now a property of the surface
+   (`view.offset`), the pager pages the selected tile, and every export reads its title and scope
+   from that surface. Two tiles keep two pages.
+2. **A map in a tile never drew.** It compared its ticket against the module counter while a tile
+   bumps its own, and - found while fixing it - the chart tile beside it ran the map teardown on
+   the map the other tile had just drawn. Tickets are per surface, and the one map instance
+   belongs to the canvas it was drawn into.
+3. **A board change is an edit.** `setBoard` and `placeInSlot` now go through `commit()`, so a
+   board change is one undo step: an Undo of an unrelated edit leaves the board standing, the next
+   Undo steps back through the board change, and Redo returns it. The Undo control itself stays in
+   Builder, where `test_studio_canvas_only_browser.cjs` pins it, so a board change is undone from
+   Builder rather than from the Canvas.
+4. **Cancel, Refresh and a change of source** abort every surface's request, not the module's one.
+   A request in flight now belongs to the question rather than to the surface that asked it, and
+   it is cancelled only when the last surface waiting on it has moved on, so a tile that changes
+   its question cannot cancel the answer the tile beside it is waiting for.
+5. **What a tile remembers** is keyed by source and sheet, not by a sheet id that starts again at
+   `s1` in every workspace; entries are dropped when a sheet leaves the board and when the source
+   changes, so the memory is at most four entries wide.
+6. **The board suite spawned a console with no report directory**, so every run resolved the
+   configured one - Paul's published reports - and `chdir()`ed into it. It now gets a temporary
+   one, and so does `test_ui_cleanup_browser.cjs`. Three other suites have the same gap and were
+   left alone because they are not this session's: `test_evidence_panes_browser.cjs`,
+   `test_navigation_scope_browser.cjs`, `test_studio_industry_browser.cjs`.
+
+The board suite is 16 steps. Items 1, 2 and 3 were recorded failing first against the previous
+build. Items 4 and 5 are defects the board's own architecture makes reachable, and their steps
+pass with the fix reverted as well as with it in place - they are regression guards, not proof the
+defects were there, and `receipts/UI2_board_red.txt` says so in those words. Item 6 was recorded
+failing first with its own line removed.
+
+A second live re-verification confirmed the pager, the undo and the map ticket, and found one
+more: **a board went blank while a refresh was in flight**, and stayed blank after Cancel under a
+status line saying the last loaded view was showing. `renderBoard` built every tile again and
+replaced the host's children on each render, so the drawings went the moment a load started - the
+single canvas never did that, because its canvas node is the same node and its drawing is only
+replaced when a new answer arrives. The board now **reconciles rather than rebuilds**: a slot that
+still holds the same sheet keeps its own nodes, so its drawing, title, scope, reconciliation line,
+scroll position and the focus inside it all survive a render, and the host's children are only
+touched when the arrangement really changed. Nodes are discarded only when a slot empties, the
+sheet in it changes or the board shrinks - and a discarded tile that was hosting the one map
+instance now destroys it and releases `contributionMapHost`, which previously left an orphaned map
+and its listeners behind until the next map render. Three steps cover it: the board keeps its
+drawings during a refresh and after Cancel, an unselected tile is byte-identical across a quiet
+refresh, and an emptied map tile destroys its map (spy: made 2, destroyed 1 before; 2 and 2 after).
+The board suite is 19 steps.
+
+Three more suites that spawned `app/server.py` without `MENTAT_REPORT_DIRECTORY` were given a
+temporary report root of their own by the same idiom - `test_evidence_panes_browser.cjs`,
+`test_navigation_scope_browser.cjs`, `test_studio_industry_browser.cjs` - each with the assertion
+folded into a setup step it already had, so no suite's step count moved (32, 13 and 10). The PAC
+evidence snapshots the panes suite reads live under `PROJECT/.cache/pac-evidence`, which is not the
+report directory, so that suite is unaffected. Still spawning without one, and deliberately left
+alone: `tests/test_evidence_map_browser.cjs` (it passes only `MENTAT_GEOCODE_URL`) and
+`tests/test_audit_regressions.py:107`.

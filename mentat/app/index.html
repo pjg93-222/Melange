@@ -176,7 +176,7 @@
 <div id="studio-view-mode" class="studio-segmented studio-options-restore" role="radiogroup" aria-label="Studio view">
 <button id="studio-view-builder" type="button" role="radio" aria-checked="true" title="Data panel, shelves and Inspector">Builder</button>
 <button id="studio-overview-toggle" class="studio-overview-toggle" type="button" role="radio" aria-checked="false" aria-pressed="false" tabindex="-1" title="Four preset views of one company">Company overview</button>
-<button id="studio-view-canvas" type="button" role="radio" aria-checked="false" tabindex="-1" title="The chart on its own">Canvas</button>
+<button id="studio-view-canvas" type="button" role="radio" aria-checked="false" tabindex="-1" title="The chart on its own, or a board of 2 or 4 charts">Canvas</button>
 </div>
 <button id="studio-inspector-toggle" class="studio-inspector-toggle" type="button" aria-expanded="false" aria-controls="studio-inspector">Inspector<span id="studio-inspector-count" class="studio-inspector-badge" hidden></span></button>
 </div>
@@ -189,9 +189,10 @@
 <span class="studio-divider" aria-hidden="true"></span>
 <div class="studio-group"><button id="studio-clear" type="button" title="Empty this sheet but keep the data source">Clear</button><button id="studio-duplicate" type="button" title="Copy this sheet into a new one">Duplicate</button></div>
 <span class="studio-toolbar-gap"></span>
+<div class="studio-group studio-board-control" id="studio-board-tiles" role="group" aria-label="Board"><span class="studio-board-label">Board</span><button id="studio-board-1" type="button" aria-pressed="true" title="One chart on the Canvas">1</button><button id="studio-board-2" type="button" aria-pressed="false" title="Two charts side by side on the Canvas">2</button><button id="studio-board-4" type="button" aria-pressed="false" title="Four charts, two by two, on the Canvas">4</button></div>
 <button id="studio-showme-toggle" class="studio-showme-toggle" type="button" aria-pressed="false" aria-controls="studio-showme" title="Open Show Me in the Inspector">Show Me</button>
 <details class="studio-menu" id="studio-download"><summary>Export</summary><div><button id="studio-download-png" type="button">Image (PNG)</button><button id="studio-download-svg" type="button">Image (SVG)</button><button id="studio-download-csv" type="button">Data (CSV)</button><hr><button id="studio-copy-image" type="button">Copy image</button><button id="studio-print-chart" type="button">Print chart</button><hr><button id="studio-classic" class="studio-classic" type="button" aria-haspopup="dialog" title="Open the original Create chart dialog">Classic builder</button></div></details>
-<details class="studio-menu" id="studio-views"><summary>Views</summary><div><button id="studio-save-view" type="button">Save view</button><button id="studio-open-views" type="button">Open view</button></div></details>
+<details class="studio-menu" id="studio-views"><summary>Views</summary><div><button id="studio-save-view" type="button">Save view</button><button id="studio-open-views" type="button">Open view</button><button id="studio-board-briefing" type="button">Add board to briefing</button></div></details>
 <button id="studio-briefing-add" class="studio-briefing-add" type="button" aria-controls="studio-briefing" title="Add this chart to the briefing">Add to briefing<span id="studio-briefing-badge" class="studio-briefing-badge" hidden></span></button>
 </div>
 
@@ -245,6 +246,7 @@
 <div id="studio-verified-summary" class="studio-verified-summary" hidden></div>
 <div id="studio-canvas" class="studio-canvas fit-standard"></div>
 <div id="studio-table" class="studio-table table-scroll" hidden></div>
+<div id="studio-board" class="studio-board" aria-label="Board" hidden></div>
 <div class="studio-foot">
 <p id="studio-reconcile" class="studio-reconcile" role="status" hidden></p>
 <div class="studio-foot-line"><p id="studio-note" class="studio-note">Choose a verified report in the Data panel to begin.</p><div id="studio-result-controls" class="studio-result-controls" hidden><button id="studio-groups-prev" type="button">Previous groups</button><span id="studio-group-count"></span><button id="studio-groups-next" type="button">Next groups</button><button id="studio-inspect-all" type="button">View source records</button></div></div>

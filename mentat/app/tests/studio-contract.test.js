@@ -236,3 +236,50 @@ test('[snapshot_registry] parseSnapshotRegistry rejects every negative control, 
     assert.throws(() => core.parseSnapshotRegistry([control.payload]), Error, control.why);
   }
 });
+
+/* ------------------------------------------------- studio_api v2: the board */
+// contracts/studio_api.json v2 (UI_CLEANUP_DESIGN_2026-09-17.md section 4,
+// option C): a saved view MAY carry a top-level board {tiles, slots}.
+// normalizeBoard is the producer the contract names, so every example and every
+// control below goes through it rather than through the rule written out again.
+
+test('[studio_api] the contract is v2 and carries the board examples and controls', () => {
+  assert.strictEqual(studioApi.version, 2);
+  for (const name of ['views_save_board', 'views_get_board', 'views_save_board_four']) {
+    assert.ok(studioApi.examples[name], 'the contract must carry example ' + name);
+  }
+});
+
+test('[studio_api] normalizeBoard returns the two-tile board exactly as the view carries it', () => {
+  const view = studioApi.examples.views_save_board;
+  assert.deepStrictEqual(core.normalizeBoard(view), view.board);
+  assert.deepStrictEqual(view.board, {tiles: 2, slots: [0, 1]});
+});
+
+test('[studio_api] normalizeBoard reads back the board a saved view returns', () => {
+  const view = studioApi.examples.views_get_board;
+  assert.deepStrictEqual(core.normalizeBoard(view), view.board);
+});
+
+test('[studio_api] normalizeBoard accepts four tiles with two of them empty', () => {
+  const view = studioApi.examples.views_save_board_four;
+  assert.deepStrictEqual(core.normalizeBoard(view), view.board);
+  assert.strictEqual(view.board.slots.filter(slot => slot === null).length, 2);
+  // active names the sheet, and in board mode the selected tile is the slot
+  // holding it: sheet 1 sits in slot 0 here.
+  assert.strictEqual(view.board.slots.indexOf(view.active), 0);
+});
+
+test('[studio_api] a view with no board is never given one', () => {
+  assert.strictEqual(core.normalizeBoard(studioApi.examples.views_save), null);
+  assert.strictEqual(core.normalizeBoard(studioApi.examples.views_get), null);
+});
+
+test('[studio_api] negative control with teeth: normalizeBoard refuses every malformed board', () => {
+  const controls = studioApi.negative_controls.filter(control => control.payload
+    && typeof control.payload === 'object' && !Array.isArray(control.payload) && 'board' in control.payload);
+  assert.strictEqual(controls.length, 6, 'the contract carries six board controls');
+  for (const control of controls) {
+    assert.strictEqual(core.normalizeBoard(control.payload), null, control.why);
+  }
+});

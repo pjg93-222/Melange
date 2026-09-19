@@ -1065,6 +1065,30 @@
   // entry. Consumed by industry_scope.resolve server-side and by the picker
   // here; both need the same refusal the first time a bad entry is seen,
   // not a silent `undefined` two calls later.
+  // The board a saved view may carry (studio_api.json v2): 1, 2 or 4 tiles, each
+  // slot holding one sheet or standing empty. Returns the board, or null when the
+  // view has none and when the one it has does not describe its own sheets - a
+  // dangling index would draw a tile from a sheet that is not there. server.py's
+  // save_view applies the same rules, so a board that opens here is a board that
+  // saves, and a malformed one is dropped on open rather than failing the open.
+  function normalizeBoard(view) {
+    const board = view && view.board;
+    if (!board || typeof board !== 'object' || Array.isArray(board)) return null;
+    const tiles = board.tiles;
+    if (typeof tiles !== 'number' || ![1, 2, 4].includes(tiles)) return null;
+    const slots = board.slots;
+    if (!Array.isArray(slots) || slots.length !== tiles) return null;
+    const sheets = (view && view.sheets) || [];
+    const placed = new Set();
+    for (const slot of slots) {
+      if (slot === null) continue;
+      if (typeof slot !== 'number' || !Number.isInteger(slot) || slot < 0 || slot >= sheets.length) return null;
+      if (placed.has(slot)) return null;
+      placed.add(slot);
+    }
+    return {tiles: tiles, slots: slots.slice()};
+  }
+
   function parseSnapshotRegistry(payload) {
     const list = Array.isArray(payload) ? payload
       : (payload && Array.isArray(payload.snapshots)) ? payload.snapshots
@@ -1129,6 +1153,7 @@
     showMeSelection, showMeEligibility, showMeApply, recommendedTile,
     sortResult, sortLocked, markValues, referenceValues, grandTotal, totalNote, rowsToMarksSummary,
     sourceLabelOf, captionSource, captionSourceForKey, viewSourceRecord, chartSourceRecord, chartProvenanceRecord,
+    normalizeBoard,
     parseSnapshotRegistry
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

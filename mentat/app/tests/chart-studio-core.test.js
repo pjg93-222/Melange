@@ -1281,3 +1281,68 @@ test('a server that sends no kind is read from the filename, the same rule at th
   assert.strictEqual(core.workbookKind({name: 'Banking Industry Spending Data.xlsx', kind: 'overview'}), 'overview');
   assert.strictEqual(core.workbookKind(null), 'overview');
 });
+
+test('a board is 1, 2 or 4 tiles and nothing else', () => {
+  const sheets = [{id: 's1'}, {id: 's2'}, {id: 's3'}, {id: 's4'}];
+  assert.deepStrictEqual(core.normalizeBoard({sheets, board: {tiles: 1, slots: [0]}}), {tiles: 1, slots: [0]});
+  assert.deepStrictEqual(core.normalizeBoard({sheets, board: {tiles: 2, slots: [0, 1]}}), {tiles: 2, slots: [0, 1]});
+  assert.deepStrictEqual(core.normalizeBoard({sheets, board: {tiles: 4, slots: [0, 1, 2, 3]}}),
+    {tiles: 4, slots: [0, 1, 2, 3]});
+  for (const tiles of [0, 3, 5, 8, -1, 2.5, '2', null, true]) {
+    assert.strictEqual(core.normalizeBoard({sheets, board: {tiles, slots: [0, 1]}}), null, 'tiles ' + tiles);
+  }
+});
+
+test('a board has exactly one slot per tile', () => {
+  const sheets = [{id: 's1'}, {id: 's2'}, {id: 's3'}];
+  assert.strictEqual(core.normalizeBoard({sheets, board: {tiles: 2, slots: [0]}}), null);
+  assert.strictEqual(core.normalizeBoard({sheets, board: {tiles: 2, slots: [0, 1, 2]}}), null);
+  assert.strictEqual(core.normalizeBoard({sheets, board: {tiles: 4, slots: [0, 1]}}), null);
+  assert.strictEqual(core.normalizeBoard({sheets, board: {tiles: 2, slots: 'both'}}), null);
+  assert.strictEqual(core.normalizeBoard({sheets, board: {tiles: 2}}), null);
+});
+
+test('an empty tile is null, and every filled slot names a sheet that exists', () => {
+  const sheets = [{id: 's1'}, {id: 's2'}];
+  assert.deepStrictEqual(core.normalizeBoard({sheets, board: {tiles: 2, slots: [null, 1]}}),
+    {tiles: 2, slots: [null, 1]});
+  assert.deepStrictEqual(core.normalizeBoard({sheets, board: {tiles: 4, slots: [null, null, null, null]}}),
+    {tiles: 4, slots: [null, null, null, null]});
+  assert.strictEqual(core.normalizeBoard({sheets, board: {tiles: 2, slots: [0, 2]}}), null);
+  assert.strictEqual(core.normalizeBoard({sheets: [], board: {tiles: 2, slots: [0, null]}}), null);
+  assert.strictEqual(core.normalizeBoard({board: {tiles: 2, slots: [0, null]}}), null);
+});
+
+test('no sheet sits in two tiles at once', () => {
+  const sheets = [{id: 's1'}, {id: 's2'}, {id: 's3'}];
+  assert.strictEqual(core.normalizeBoard({sheets, board: {tiles: 2, slots: [0, 0]}}), null);
+  assert.strictEqual(core.normalizeBoard({sheets, board: {tiles: 4, slots: [2, 1, 2, null]}}), null);
+  assert.deepStrictEqual(core.normalizeBoard({sheets, board: {tiles: 4, slots: [2, 1, null, null]}}),
+    {tiles: 4, slots: [2, 1, null, null]});
+});
+
+test('a slot is a non-negative whole number or null, never anything else', () => {
+  const sheets = [{id: 's1'}, {id: 's2'}];
+  for (const slot of [-1, 0.5, '0', true, false, undefined, {}, [], NaN, Infinity]) {
+    assert.strictEqual(core.normalizeBoard({sheets, board: {tiles: 2, slots: [slot, 1]}}), null,
+      'slot ' + String(slot));
+  }
+});
+
+test('a board must be an object, and a view without one simply has none', () => {
+  const sheets = [{id: 's1'}, {id: 's2'}];
+  for (const board of ['2', 2, true, [0, 1], []]) {
+    assert.strictEqual(core.normalizeBoard({sheets, board}), null, 'board ' + JSON.stringify(board));
+  }
+  assert.strictEqual(core.normalizeBoard({sheets}), null);
+  assert.strictEqual(core.normalizeBoard({sheets, board: null}), null);
+  assert.strictEqual(core.normalizeBoard(null), null);
+  assert.strictEqual(core.normalizeBoard(undefined), null);
+});
+
+test('normalizeBoard copies the slots out, so a caller cannot edit the view through them', () => {
+  const view = {sheets: [{id: 's1'}, {id: 's2'}], board: {tiles: 2, slots: [0, 1]}};
+  const board = core.normalizeBoard(view);
+  board.slots[0] = null;
+  assert.deepStrictEqual(view.board.slots, [0, 1]);
+});

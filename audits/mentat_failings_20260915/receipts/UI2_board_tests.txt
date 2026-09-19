@@ -1,0 +1,336 @@
+UI2 board build - final runs
+===========================
+Every run below is against the real tree, C:\Users\pgoff\Mentat\mentat, after the copy-back.
+Ports: every suite picks a free ephemeral port and refuses 8801, 8802, 8806, 8808 and 8841.
+Data roots: a throwaway temp directory per run, removed afterwards.
+
+
+=== FINAL RUNS against C:\Users\pgoff\Mentat (real tree) ===
+Sat Sep 19 00:22:07 EDT 2026
+
+--- node --test "app/tests/**/*.test.js"
+ℹ tests 195
+ℹ pass 195
+ℹ fail 0
+ℹ duration_ms 215.9189
+
+--- python suites
+test_studio_views.py                       Ran 8 tests in 0.839s
+ 
+ OK
+ 
+test_studio_contract_examples.py           Ran 11 tests in 0.752s
+ 
+ OK
+ 
+test_studio_worksheet_view_saves.py        Ran 2 tests in 2.708s
+ 
+ OK
+ 
+test_studio_briefing.py                    Ran 9 tests in 1.280s
+ 
+ OK
+ 
+test_console_delivery.py                   Ran 5 tests in 0.562s
+ 
+ OK
+
+--- node .cjs suites (decisive last line, exit code)
+test_studio_board_browser                    exit 0 | RESULT: 10/10 steps passed, exit 0
+test_ui_cleanup_browser                      exit 0 | RESULT: 12/12 steps passed, exit 0
+test_navigation_scope_browser                exit 0 | ALL 13 STEPS PASSED
+test_console_browser                         exit 0 | Browser checks passed: Graph guided scopes, JFC, levels, direct/downstream separation, exports, Advanced charts, freshness disclosures, responsive sidebar, skip link, keyboard tabs and local requests only.
+test_chart_builder_browser                   exit 0 | ℹ duration_ms 3978.651
+test_studio_canvas_only_browser              exit 0 | ℹ duration_ms 3795.8895
+test_studio_industry_browser                 exit 0 | ALL 10 STEPS PASSED
+
+--- every remaining tests/*studio*.cjs
+test_chart_studio_contributions                  exit 0 | ℹ duration_ms 14.3718
+test_contribution_studio                         exit 0 | ℹ duration_ms 10.7363
+test_contribution_studio_map_browser             exit 0 | ℹ duration_ms 5976.0739
+test_contribution_studio_state_browser           exit 0 | ℹ duration_ms 3505.3509
+test_original_studio_contributions_browser       exit 0 | ℹ duration_ms 7046.7568
+test_studio_briefing_tray_browser                exit 0 | ℹ duration_ms 3735.7519
+test_studio_click_to_add_browser                 exit 0 | ℹ duration_ms 3140.9421
+test_studio_copy_print_browser                   exit 0 | ℹ duration_ms 4867.1775
+test_studio_data_source_browser                  exit 0 | ℹ duration_ms 2707.8754
+test_studio_inspection_regression_browser        exit 0 | Matching source accepted; stale inspection rejected.
+test_studio_reconciliation_browser               exit 0 | ℹ duration_ms 2170.9817
+test_studio_ride1_browser                        exit 0 | ℹ duration_ms 8784.927
+test_studio_temporal_regression_browser          exit 0 | forecast: rendered successfully
+test_studio_wording                              exit 0 | ℹ duration_ms 22.4308
+test_studio_worksheet_guard_browser              exit 0 | ℹ duration_ms 5933.443
+
+=== re-run after the studio-board-tile rename ===
+node --test app/tests                        ℹ tests 195 ℹ pass 195 ℹ fail 0 
+test_studio_board_browser                    exit 0 | RESULT: 10/10 steps passed, exit 0
+test_ui_cleanup_browser                      exit 0 | RESULT: 12/12 steps passed, exit 0
+test_studio_canvas_only_browser              exit 0 | ℹ duration_ms 7308.5531
+test_studio_wording                          exit 0 | ℹ duration_ms 18.8286
+test_studio_copy_print_browser               exit 0 | ℹ duration_ms 8275.429
+test_studio_ride1_browser                    exit 0 | ℹ duration_ms 10885.8218
+test_navigation_scope_browser                exit 0 | ALL 13 STEPS PASSED
+
+
+Board browser suite, step by step
+---------------------------------
+SETUP: pick a free port and launch the console server on a throwaway --data-root
+SETUP done - server ready on port 50995, data root C:\Users\pgoff\AppData\Local\Temp\mentat-studio-board-Pg77WQ
+SETUP: a second sheet grouped by Election cycle, so the board has two different charts
+STEP 1: Canvas mode carries a Board control of 1, 2 and 4, and 2 draws two tiles
+PASS step 1 - Builder toolbar 47px (one row), tiles ["Published included receipts by Election cycle","Published included receipts by Company"], reconciliation ["104 source observations · 4 groups · Included receipts reconcile to the workbook. · 2 verified queries this session","103 source observations · 3 groups · Included receipts reconcile to the workbook."]
+STEP 2: a sheet already on the board is not offered to another tile
+PASS step 2 - tile sheets ["1","0"], no select offers the other tile's sheet
+STEP 3: the selected tile drives the Inspector, Export and Add to briefing
+PASS step 3 - selected tile "Published included receipts by Company" (Sheet 1), currentChart "Published included receipts by Company"
+STEP 4: four tiles: two filled, two honest empty tiles with their own sheet select
+PASS step 4 - four tiles, charts [true,true,false,false], empty text "Empty tile. Choose a sheet for it above.", grid 564.5px 564.5px
+STEP 5: save a two-tile board, and the console keeps the board the contract describes
+PASS step 5 - saved view 5659364897694c52b62bb847a535a8c4 board {"tiles":2,"slots":[1,0]}
+STEP 6: Board 1 is today's canvas again, with the selected tile's sheet on it
+PASS step 6 - Board 1 restored the single canvas with "Published included receipts by Company"
+STEP 7: a view saved with no board opens as one sheet, and the board view reopens into the same slots
+PASS step 7 - board view reopened as ["Published included receipts by Election cycle","Published included receipts by Company"], the boardless view as one sheet
+STEP 8: "Add board to briefing" adds one card per filled tile, in slot order
+PASS step 8 - briefing cards ["Published included receipts by Election cycle","Published included receipts by Company"]
+STEP 9: the board is nowhere in the URL and adds no storage key, and nothing raised an error
+PASS step 9 - URL http://127.0.0.1:50995/?industry=Banking&saved=5659364897694c52b62bb847a535a8c4#chart-studio, storage keys ["mentat-chart-studio-v1"], no errors
+STEP 10: the contract the board saves against is v2 and names the board producers
+PASS step 10 - studio_api v2, 11 examples, 11 controls
+RESULT: 10/10 steps passed, exit 0
+
+
+The v1 saved view is byte-identical
+-----------------------------------
+studio_api.json's `views_save` example, posted over HTTP to a console built from HEAD's
+server.py and to one built from the changed server.py, into two throwaway data roots. The
+uuid and the wall clock cannot match by construction, so both are blanked and the blanking
+is printed rather than compared away in silence. The two raw byte counts differ by two only
+because one timestamp's float repr is two digits shorter than the other's; both timestamps
+are printed above, and with them blanked the records are the same bytes.
+
+HEAD      record: 3561 bytes
+changed   record: 3559 bytes
+HEAD   : blanked {'id': '3dc007862971443db4283d030e06b045', 'saved_at': 1789792301.2647743}
+changed: blanked {'id': '0b188aca2af346c9a6dbe4758bb0f7e5', 'saved_at': 1789792301.80015}
+byte identical apart from the minted id and timestamp: True
+board key present in either record: False
+{
+  "active": 0,
+  "id": "<minted per save>",
+  "name": "Cross-industry PAC comparison",
+  "saved_at": "<wall clock per save>",
+  "sheets": [
+    {
+      "analytics": {
+        "average": false,
+        "horizon": 2,
+        "median": false,
+        "period": "",
+        "totals": false,
+        "transform": "none"
+      },
+      "columns": [],
+      "filters": [],
+      "fit": "standard",
+      "
+
+
+==============================================================================
+ROUND TWO - final runs after the six fixes, real tree (2026-09-19)
+==============================================================================
+=== ROUND TWO final runs, real tree ===
+Sat Sep 19 02:24:29 EDT 2026
+node --test app/tests                          ℹ tests 195 ℹ pass 195 ℹ fail 0 
+test_studio_views.py                           Ran 8 tests in 0.928s
+ 
+ OK
+ 
+test_studio_contract_examples.py               Ran 11 tests in 0.796s
+ 
+ OK
+ 
+test_studio_worksheet_view_saves.py            Ran 2 tests in 3.106s
+ 
+ OK
+ 
+test_studio_briefing.py                        Ran 9 tests in 1.435s
+ 
+ OK
+ 
+test_console_delivery.py                       Ran 5 tests in 0.583s
+ 
+ OK
+
+test_studio_board_browser                        exit 0 | RESULT: 16/16 steps passed, exit 0
+test_ui_cleanup_browser                          exit 0 | RESULT: 12/12 steps passed, exit 0
+test_navigation_scope_browser                    exit 0 | browser.close() exceeded its 20000ms bound
+test_console_browser                             exit 0 | Browser checks passed: Graph guided scopes, JFC, levels, direct/downstream separation, exports, Advanced charts, freshness disclosures, responsive sidebar, skip link, keyboard tabs and local requests only.
+test_chart_builder_browser                       exit 0 | ℹ duration_ms 54023.0903
+test_studio_canvas_only_browser                  exit 0 | ℹ duration_ms 19174.4138
+test_studio_industry_browser                     exit 0 | ALL 10 STEPS PASSED
+test_contribution_map_browser                    exit 0 | ℹ duration_ms 17359.3723
+test_contribution_studio_map_browser             exit 0 | ℹ duration_ms 20517.5351
+  (test_navigation_scope_browser printed ALL 13 STEPS PASSED and exited 0; the
+   last line is its own teardown note about closing the browser.)
+
+test_chart_studio_contributions                  exit 0 | ℹ duration_ms 14.6737
+test_contribution_studio                         exit 0 | ℹ duration_ms 23.2162
+test_contribution_studio_state_browser           exit 0 | ℹ duration_ms 46891.8638
+test_original_studio_contributions_browser       exit 0 | ℹ duration_ms 39935.4447
+test_studio_briefing_tray_browser                exit 0 | ℹ duration_ms 8922.0035
+test_studio_click_to_add_browser                 exit 0 | ℹ duration_ms 21423.7812
+test_studio_copy_print_browser                   exit 0 | ℹ duration_ms 48631.1731
+test_studio_data_source_browser                  exit 0 | ℹ duration_ms 1964.5122
+test_studio_inspection_regression_browser        exit 0 | Matching source accepted; stale inspection rejected.
+test_studio_reconciliation_browser               exit 0 | ℹ duration_ms 9729.9705
+test_studio_ride1_browser                        exit 0 | ℹ duration_ms 60330.8633
+test_studio_temporal_regression_browser          exit 0 | forecast: rendered successfully
+test_studio_wording                              exit 0 | ℹ duration_ms 24.8639
+test_studio_worksheet_guard_browser              exit 0 | ℹ duration_ms 102527.485
+
+
+The board suite, step by step
+-----------------------------
+SETUP: pick a free port and launch the console server on a throwaway --data-root
+SETUP done - server ready on port 59584, data root C:\Users\pgoff\AppData\Local\Temp\mentat-studio-board-gX5rRK
+SETUP: a second sheet grouped by Election cycle, so the board has two different charts
+STEP 1: Canvas mode carries a Board control of 1, 2 and 4, and 2 draws two tiles
+PASS step 1 - Builder toolbar 47px (one row), tiles ["Published included receipts by Election cycle","Published included receipts by Company"], reconciliation ["104 source observations · 4 groups · Included receipts reconcile to the workbook. · 2 verified queries this session","108 source observations · 8 groups · Included receipts reconcile to the workbook."]
+STEP 2: a sheet already on the board is not offered to another tile
+PASS step 2 - tile sheets ["1","0"], no select offers the other tile's sheet
+STEP 3: the selected tile drives the Inspector, Export and Add to briefing
+PASS step 3 - selected tile "Published included receipts by Company" (Sheet 1), currentChart "Published included receipts by Company"
+STEP 4: four tiles: two filled, two honest empty tiles with their own sheet select
+PASS step 4 - four tiles, charts [true,true,false,false], empty text "Empty tile. Choose a sheet for it above.", grid 564.5px 564.5px
+STEP 5: save a two-tile board, and the console keeps the board the contract describes
+PASS step 5 - saved view eb6b015f7df041a39c978aab6d82b618 board {"tiles":2,"slots":[1,0]}
+STEP 6: Board 1 is today's canvas again, with the selected tile's sheet on it
+PASS step 6 - Board 1 restored the single canvas with "Published included receipts by Company"
+STEP 7: a view saved with no board opens as one sheet, and the board view reopens into the same slots
+PASS step 7 - board view reopened as ["Published included receipts by Election cycle","Published included receipts by Company"], the boardless view as one sheet
+STEP 8: "Add board to briefing" adds one card per filled tile, in slot order
+PASS step 8 - briefing cards ["Published included receipts by Election cycle","Published included receipts by Company"]
+STEP 9: the board is nowhere in the URL and adds no storage key, and nothing raised an error
+PASS step 9 - URL http://127.0.0.1:59584/?industry=Banking&saved=eb6b015f7df041a39c978aab6d82b618#chart-studio, storage keys ["mentat-chart-studio-v1"], no errors
+STEP 10: the contract the board saves against is v2 and names the board producers
+PASS step 10 - studio_api v2, 11 examples, 11 controls
+STEP 11: the group pager moves the selected tile, and only that tile
+PASS step 11 - page one "1–3 of 8 groups · totals cover all 8" then page two "4–6 of 8 groups · totals cover all 8", the other tile untouched, caption "Banking · Published included receipts · Bank"
+STEP 12: a map sheet draws in the selected tile, and says to select it when it is not
+PASS step 12 - the map drew 3 shapes in the selected tile; unselected it says to select it
+STEP 13: a board change is an edit: Undo steps through it and never drops it
+PASS step 13 - Undo kept the board (2 tiles), stepped through it (0), and Redo returned both it and a lone 4-tile change
+STEP 14: two tiles asking the same question: changing one never blanks the other
+PASS step 14 - both tiles kept their drawing and the untouched one shows the refreshed answer ["Published included receipts by Election cycle","Published included receipts by Election cycle"]
+STEP 15: a new report starts on its own first page, not the last one
+PASS step 15 - the first report was on "4–4 of 4 groups · totals cover all 4"; the new one opens on "1–8 of 8 groups · totals cover all 8"
+STEP 16: the console this suite spawns uses a report directory of its own
+PASS step 16 - report directory C:\Users\pgoff\AppData\Local\Temp\mentat-studio-board-reports-XVVOzV
+RESULT: 16/16 steps passed, exit 0
+
+
+Measurements and screenshots, re-taken after the fixes
+------------------------------------------------------
+  Board 1 (1440x900)   controls  24  canvas top  440px  tiles 0  drawings 26
+  Board 2 (1440x900)   controls  26  canvas top  506px  tiles 2  drawings 27
+  Board 4 (1440x900)   controls  28  canvas top  506px  tiles 4  drawings 28
+  Board 2 (1280x800)   controls  26  canvas top  506px  tiles 2  drawings 27
+  narrow 900px board columns: 822px (one column = tiles stacked)
+  controls Board 2 has that Board 1 does not: ["studio-board-tile-sheet","studio-board-tile-sheet"]
+  controls Board 1 has that Board 2 does not: []
+screenshots written to C:\Users\pgoff\Mentat\audits\mentat_failings_20260915\receipts
+
+
+==============================================================================
+ROUND FOUR - final runs after the reconcile fix, real tree (2026-09-19)
+==============================================================================
+=== ROUND FOUR final runs, real tree ===
+Sat Sep 19 03:17:57 EDT 2026
+node --test app/tests                          ℹ tests 195 ℹ pass 195 ℹ fail 0 
+test_studio_views.py                           
+ OK
+ 
+test_studio_contract_examples.py               
+ OK
+ 
+test_studio_worksheet_view_saves.py            
+ OK
+ 
+test_studio_briefing.py                        
+ OK
+ 
+test_console_delivery.py                       
+ OK
+
+test_studio_board_browser                        exit 0 | RESULT: 19/19 steps passed, exit 0
+test_ui_cleanup_browser                          exit 0 | RESULT: 12/12 steps passed, exit 0
+test_navigation_scope_browser                    exit 0 | ALL 13 STEPS PASSED
+test_studio_industry_browser                     exit 0 | ALL 10 STEPS PASSED
+test_evidence_panes_browser                      exit 0 | ALL 32 STEPS PASSED
+test_console_browser                             exit 0 | Browser checks passed: Graph guided scopes, JFC, levels, direct/downstream separation, exp
+test_chart_builder_browser                       exit 0 | ℹ duration_ms 5211.9394
+test_studio_canvas_only_browser                  exit 0 | ℹ duration_ms 2454.158
+test_contribution_map_browser                    exit 0 | ℹ duration_ms 1743.1912
+test_contribution_studio_map_browser             exit 0 | ℹ duration_ms 6054.724
+
+test_chart_studio_contributions                  exit 0 | ℹ duration_ms 16.9106
+test_contribution_studio                         exit 0 | ℹ duration_ms 11.2349
+test_contribution_studio_state_browser           exit 0 | ℹ duration_ms 3067.5688
+test_original_studio_contributions_browser       exit 0 | ℹ duration_ms 3095.0126
+test_studio_briefing_tray_browser                exit 0 | ℹ duration_ms 2133.5924
+test_studio_click_to_add_browser                 exit 0 | ℹ duration_ms 1951.0257
+test_studio_copy_print_browser                   exit 0 | ℹ duration_ms 4592.5756
+test_studio_data_source_browser                  exit 0 | ℹ duration_ms 1645.7396
+test_studio_inspection_regression_browser        exit 0 | Matching source accepted; stale inspection rejected.
+test_studio_reconciliation_browser               exit 0 | ℹ duration_ms 3887.123
+test_studio_ride1_browser                        exit 0 | ℹ duration_ms 14672.5317
+test_studio_temporal_regression_browser          exit 0 | forecast: rendered successfully
+test_studio_wording                              exit 0 | ℹ duration_ms 16.5804
+test_studio_worksheet_guard_browser              exit 0 | ℹ duration_ms 5275.8024
+
+
+The board suite, step by step
+-----------------------------
+SETUP: pick a free port and launch the console server on a throwaway --data-root
+SETUP done - server ready on port 63753, data root C:\Users\pgoff\AppData\Local\Temp\mentat-studio-board-W5TsfM
+SETUP: a second sheet grouped by Election cycle, so the board has two different charts
+STEP 1: Canvas mode carries a Board control of 1, 2 and 4, and 2 draws two tiles
+PASS step 1 - Builder toolbar 47px (one row), tiles ["Published included receipts by Election cycle","Published included receipts by Company"], reconciliation ["104 source observations · 4 groups · Included receipts reconcile to the workbook. · 2 verified queries this session","108 source observations · 8 groups · Included receipts reconcile to the workbook."]
+STEP 2: a sheet already on the board is not offered to another tile
+PASS step 2 - tile sheets ["1","0"], no select offers the other tile's sheet
+STEP 3: the selected tile drives the Inspector, Export and Add to briefing
+PASS step 3 - selected tile "Published included receipts by Company" (Sheet 1), currentChart "Published included receipts by Company"
+STEP 4: four tiles: two filled, two honest empty tiles with their own sheet select
+PASS step 4 - four tiles, charts [true,true,false,false], empty text "Empty tile. Choose a sheet for it above.", grid 564.5px 564.5px
+STEP 5: save a two-tile board, and the console keeps the board the contract describes
+PASS step 5 - saved view aefc483f214a4e7a8279bd121f63cd53 board {"tiles":2,"slots":[1,0]}
+STEP 6: Board 1 is today's canvas again, with the selected tile's sheet on it
+PASS step 6 - Board 1 restored the single canvas with "Published included receipts by Company"
+STEP 7: a view saved with no board opens as one sheet, and the board view reopens into the same slots
+PASS step 7 - board view reopened as ["Published included receipts by Election cycle","Published included receipts by Company"], the boardless view as one sheet
+STEP 8: "Add board to briefing" adds one card per filled tile, in slot order
+PASS step 8 - briefing cards ["Published included receipts by Election cycle","Published included receipts by Company"]
+STEP 9: the board is nowhere in the URL and adds no storage key, and nothing raised an error
+PASS step 9 - URL http://127.0.0.1:63753/?industry=Banking&saved=aefc483f214a4e7a8279bd121f63cd53#chart-studio, storage keys ["mentat-chart-studio-v1"], no errors
+STEP 10: the contract the board saves against is v2 and names the board producers
+PASS step 10 - studio_api v2, 11 examples, 11 controls
+STEP 11: the group pager moves the selected tile, and only that tile
+PASS step 11 - page one "1–3 of 8 groups · totals cover all 8" then page two "4–6 of 8 groups · totals cover all 8", the other tile untouched, caption "Banking · Published included receipts · Bank"
+STEP 12: a map sheet draws in the selected tile, and says to select it when it is not
+PASS step 12 - the map drew 3 shapes in the selected tile; unselected it says to select it
+STEP 13: a board change is an edit: Undo steps through it and never drops it
+PASS step 13 - Undo kept the board (2 tiles), stepped through it (0), and Redo returned both it and a lone 4-tile change
+STEP 14: two tiles asking the same question: changing one never blanks the other
+PASS step 14 - both tiles kept their drawing and the untouched one shows the refreshed answer ["Published included receipts by Election cycle","Published included receipts by Election cycle"]
+STEP 15: a new report starts on its own first page, not the last one
+PASS step 15 - the first report was on "4–4 of 4 groups · totals cover all 4"; the new one opens on "1–8 of 8 groups · totals cover all 8"
+STEP 16: the console this suite spawns uses a report directory of its own
+PASS step 16 - report directory C:\Users\pgoff\AppData\Local\Temp\mentat-studio-board-reports-ldzE36
+STEP 17: a board keeps its drawings while a refresh is in flight, and after Cancel
+PASS step 17 - during the load and after Cancel both tiles still showed "Published included receipts by Election "
+STEP 18: a refresh that answers the same data leaves the untouched tile byte-identical
+PASS step 18 - the unselected tile survived a refresh unchanged (4592 characters)
+STEP 19: emptying a map tile destroys the map it was hosting
+PASS step 19 - map instances made 2, destroyed 2; none left on the board
+RESULT: 19/19 steps passed, exit 0

@@ -64,7 +64,7 @@
 /* Canvas only keeps the one control a reader came to the canvas for: a way
    to take the chart away. Every other toolbar button edits the builder. */
 .studio-options-hidden .studio-toolbar {justify-content:flex-end;gap:0;border:0;background:none;padding:0;margin:0 0 8px;min-height:0}
-.studio-options-hidden .studio-toolbar > :not(#studio-download) {display:none!important}
+.studio-options-hidden .studio-toolbar > :not(#studio-download):not(#studio-views):not(#studio-board-tiles) {display:none!important}
 /* The control that put the builder away is the only way to bring it back,
    so it can never be part of what is put away. */
 .studio-quick-tools {position:sticky;top:0;z-index:3}
@@ -781,4 +781,41 @@
   .studio-grid{grid-template-columns:1fr}
   .studio-side,.studio-inspector{max-height:none}
   .studio-showme-grid{grid-template-columns:repeat(4,1fr)}
+}
+
+/* The board: Canvas mode as 1, 2 or 4 sheet tiles (UI_CLEANUP_DESIGN section 4,
+   option C). One tile is outlined, and that tile is what the Inspector, Export
+   and Add to briefing act on. */
+/* The Board control is Canvas-mode chrome: Builder's toolbar is full at 1440px
+   and a fourth group there wraps it onto a second row. */
+.studio-toolbar .studio-board-control {display:none}
+.studio-options-hidden .studio-toolbar .studio-board-control {display:inline-flex;gap:2px;align-items:center}
+.studio-board-label {font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:0 4px}
+.studio-board-control button {min-width:26px;padding:3px 7px}
+.studio-board-control button[aria-pressed="true"] {background:var(--acu-ivory);color:var(--acu-plum);font-weight:600}
+.studio-board {display:grid;gap:12px;align-items:start}
+.studio-board[hidden] {display:none}
+.studio-board-2 {grid-template-columns:1fr 1fr}
+.studio-board-4 {grid-template-columns:1fr 1fr}
+.studio-board-tile {border:1px solid var(--line);border-radius:6px;padding:10px 12px 12px;background:var(--acu-paper);min-width:0}
+.studio-board-tile.is-selected {border-color:var(--acu-plum);box-shadow:0 0 0 1px var(--acu-plum)}
+.studio-board-tile-head {display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.studio-board-tile-sheet {max-width:180px;font-size:12px}
+.studio-board-tile-mark {font-size:11px;color:var(--muted)}
+.studio-board-tile-title {font-family:var(--font-serif);font-weight:400;font-size:16px;margin:0 0 2px}
+.studio-board-tile-title:empty {display:none}
+.studio-board-tile-subtitle {margin:0 0 6px;font-size:11px;color:var(--muted);line-height:1.5}
+.studio-board-tile-subtitle:empty {display:none}
+.studio-board-tile-empty {margin:16px 0;font-size:12px;color:var(--muted)}
+.studio-board-tile-foot {margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
+.studio-board-tile-note,.studio-board-tile-status {margin:0;font-size:11px;color:var(--muted);line-height:1.5}
+.studio-board-tile-note:empty,.studio-board-tile-status:empty {display:none}
+.studio-board-tile-reconcile {margin:0 0 4px}
+/* While a board is up the single canvas and its footer step aside: every figure
+   on screen is inside a tile, beside the denominator that tile reconciles to. */
+.studio-board-on #studio-title,.studio-board-on #studio-subtitle,.studio-board-on #studio-canvas,
+.studio-board-on #studio-table,.studio-board-on #studio-reconcile,.studio-board-on #studio-note,
+.studio-board-on #studio-status {display:none}
+@media (max-width:1000px){
+  .studio-board-2,.studio-board-4 {grid-template-columns:1fr}
 }

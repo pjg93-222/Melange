@@ -842,6 +842,44 @@ def validate_view_industries(data, source, sheets):
     return data
 
 
+def validate_view_board(data, sheets):
+    """The board a saved view MAY carry (studio_api.json v2): 1, 2 or 4 tiles.
+
+    Returns the board to store, or None when the view has none. A board is
+    written only when the reader chose 2 or 4 tiles, so a v1 view is stored
+    exactly as it always was. Everything here is shape: `tiles` is the integer
+    1, 2 or 4; `slots` holds exactly that many entries, each a sheet index in
+    this view or null for an empty tile, and no sheet sits in two tiles. A
+    dangling index would draw a tile from a sheet that is not in the view, so
+    it is refused rather than stored and explained later.
+
+    chart-studio-core.js:normalizeBoard applies the same rules in the browser.
+    An explicit null is "no board" there and here, not an error.
+    """
+    if data.get('board') is None:
+        return None
+    board = data['board']
+    refusal = "The saved view's board does not match its sheets."
+    if not isinstance(board, dict):
+        raise ValueError(refusal)
+    tiles = board.get('tiles')
+    if isinstance(tiles, bool) or not isinstance(tiles, int) or tiles not in (1, 2, 4):
+        raise ValueError(refusal)
+    slots = board.get('slots')
+    if not isinstance(slots, list) or len(slots) != tiles:
+        raise ValueError(refusal)
+    placed = set()
+    for slot in slots:
+        if slot is None:
+            continue
+        if isinstance(slot, bool) or not isinstance(slot, int) or not 0 <= slot < len(sheets):
+            raise ValueError(refusal)
+        if slot in placed:
+            raise ValueError(refusal)
+        placed.add(slot)
+    return {'tiles': tiles, 'slots': list(slots)}
+
+
 class Conflict(Exception):
     """A well-formed request the current state cannot accept yet."""
 
@@ -1403,9 +1441,13 @@ class Console:
         value = read_json(self.studio_directory('views', identifier + '.json'))
         if value.get('id') != identifier or not isinstance(value.get('sheets'), list):
             return None
-        return {'id': value['id'], 'name': value.get('name', ''), 'saved_at': value.get('saved_at', 0),
+        view = {'id': value['id'], 'name': value.get('name', ''), 'saved_at': value.get('saved_at', 0),
                 'sourceKey': value.get('sourceKey', ''), 'source': value.get('source', {}),
                 'sheets': value['sheets'], 'active': value.get('active', 0)}
+        # Echoed exactly as saved, and absent when it was never saved.
+        if 'board' in value:
+            view['board'] = value['board']
+        return view
 
     def save_view(self, data):
         name = str(data.get('name', '')).strip()
@@ -1423,9 +1465,15 @@ class Console:
         if not isinstance(active, int) or isinstance(active, bool):
             raise ValueError('Active sheet must be a sheet number.')
         validate_view_industries(data, source, sheets)
+        board = validate_view_board(data, sheets)
         identifier = uuid.uuid4().hex
         value = {'id': identifier, 'name': name, 'saved_at': time.time(), 'sourceKey': source_key,
                  'source': source, 'sheets': sheets, 'active': active}
+        # The record whitelist above is the whole record: a key it does not name
+        # is dropped in silence. The board is added only when there is one, so a
+        # view saved without one is the same bytes on disk it has always been.
+        if board is not None:
+            value['board'] = board
         directory = self.studio_directory('views')
         with self.lock:
             directory.mkdir(parents=True, exist_ok=True)

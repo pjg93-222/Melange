@@ -64,10 +64,12 @@ test('the default empty state names the mode the console starts in',()=>{
   const html=read('index.html');
   assert.match(html,/<p id="studio-note" class="studio-note">Choose a verified report in the Data panel to begin\.<\/p>/);
   assert.doesNotMatch(html,/Choose a report worksheet in the Data panel to begin\.<\/p>/);
-  // The two runtime empty states agree with it, each naming its own mode.
+  // The two runtime empty states agree with it, each naming its own mode. Both
+  // write the note of the surface they draw into - a board tile's, or the
+  // console's own when the canvas is on its own.
   const js=read('chart-studio.js');
-  assert.match(js,/el\('note'\)\.textContent='Choose a verified report in the Data panel to begin\.';/);
-  assert.match(js,/el\('note'\)\.textContent = 'Choose a report worksheet in the Data panel to begin\.';/);
+  assert.match(js,/node\('note'\)\.textContent='Choose a verified report in the Data panel to begin\.';/);
+  assert.match(js,/node\('note'\)\.textContent = 'Choose a report worksheet in the Data panel to begin\.';/);
   assert.doesNotMatch(js,/in the Data pane\b/);
 });
 

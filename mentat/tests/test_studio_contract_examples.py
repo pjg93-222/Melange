@@ -20,6 +20,11 @@ from unittest.mock import patch
 
 APP = Path(__file__).resolve().parents[1] / "app"
 EXAMPLES = json.loads((APP / "studio-contract-examples.json").read_text(encoding="utf-8"))
+# The lane's shared contract file, read at test time exactly as the node suite
+# reads it (contracts/README.md). Never copied into a literal here.
+CONTRACTS = Path(__file__).resolve().parents[2] / "audits" / "mentat_failings_20260915" / "contracts"
+STUDIO_API = json.loads((CONTRACTS / "studio_api.json").read_text(encoding="utf-8"))
+BOARD_REFUSAL = "The saved view's board does not match its sheets."
 
 spec = importlib.util.spec_from_file_location("studio_contract_server", APP / "server.py")
 app = importlib.util.module_from_spec(spec)
@@ -148,6 +153,74 @@ class StudioContractExampleTests(unittest.TestCase):
         item = next(entry for entry in index['items'] if entry['id'] == body['id'])
         self.assertEqual(item['provenance'], {})
         self.assertEqual(item['source'], {})
+
+
+    # ------------------------------------------------------- the board (v2)
+
+    def board_controls(self):
+        """The six studio_api v2 controls: a view whose board is malformed."""
+        return [control for control in STUDIO_API['negative_controls']
+                if isinstance(control['payload'], dict) and 'board' in control['payload']]
+
+    def stored_view(self, identifier):
+        return json.loads((self.console.root / 'studio' / 'views' / (identifier + '.json'))
+                          .read_text(encoding='utf-8'))
+
+    def test_the_contract_is_v2_and_carries_the_board_examples_and_controls(self):
+        self.assertEqual(STUDIO_API['version'], 2)
+        for name in ('views_save_board', 'views_get_board', 'views_save_board_four'):
+            self.assertIn(name, STUDIO_API['examples'])
+        self.assertEqual(len(self.board_controls()), 6)
+
+    def test_a_board_is_kept_on_disk_and_read_back_exactly_as_saved(self):
+        """The v1 whitelist dropped every unknown top-level key in silence, so a
+        board that saved and came back empty would have looked like a client bug."""
+        for name in ('views_save_board', 'views_save_board_four'):
+            payload = STUDIO_API['examples'][name]
+            status, body = self.post('/api/studio/views', payload)
+            self.assertEqual(status, 200, body)
+            self.assertEqual(self.stored_view(body['id'])['board'], payload['board'], name)
+            status, got = self.get('/api/studio/views?id=' + body['id'])
+            self.assertEqual(status, 200)
+            self.assertEqual(got['view']['board'], payload['board'], name)
+
+    def test_the_view_read_back_has_exactly_the_keys_views_get_board_names(self):
+        payload = STUDIO_API['examples']['views_save_board']
+        status, body = self.post('/api/studio/views', payload)
+        self.assertEqual(status, 200, body)
+        status, got = self.get('/api/studio/views?id=' + body['id'])
+        self.assertEqual(status, 200)
+        self.assertEqual(sorted(got['view']), sorted(STUDIO_API['examples']['views_get_board']))
+
+    def test_a_view_saved_without_a_board_is_stored_and_returned_without_one(self):
+        """Every v1 view stays byte-identical: no board key appears on disk, and
+        none appears in the response, so an older reader sees what it always saw."""
+        payload = STUDIO_API['examples']['views_save']
+        status, body = self.post('/api/studio/views', payload)
+        self.assertEqual(status, 200, body)
+        self.assertNotIn('board', self.stored_view(body['id']))
+        status, got = self.get('/api/studio/views?id=' + body['id'])
+        self.assertEqual(status, 200)
+        self.assertNotIn('board', got['view'])
+        self.assertEqual(sorted(got['view']), sorted(STUDIO_API['examples']['views_get']))
+
+    def test_every_malformed_board_is_refused_with_the_same_sentence(self):
+        for control in self.board_controls():
+            status, body = self.post('/api/studio/views', control['payload'])
+            self.assertEqual(status, 400, control['why'])
+            self.assertEqual(body['error'], BOARD_REFUSAL, control['why'])
+
+    def test_the_listing_says_nothing_about_boards(self):
+        """The picker's rows are unchanged by v2: a board is a property of the
+        view's canvas, not of the row that names it."""
+        payload = STUDIO_API['examples']['views_save_board']
+        status, body = self.post('/api/studio/views', payload)
+        self.assertEqual(status, 200, body)
+        status, listed = self.get('/api/studio/views')
+        self.assertEqual(status, 200)
+        row = next(entry for entry in listed['views'] if entry['id'] == body['id'])
+        self.assertNotIn('board', row)
+        self.assertEqual(sorted(row), sorted(STUDIO_API['examples']['views_list_item']))
 
 
 if __name__ == '__main__':

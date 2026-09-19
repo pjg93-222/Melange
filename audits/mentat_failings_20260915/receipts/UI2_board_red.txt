@@ -1,0 +1,327 @@
+UI2 board build - failing first
+==============================
+Lane: mentat-failings, UI clean-up pass two (the Chart Studio board, design section 4 option C).
+Tree: C:\Users\pgoff\Mentat at HEAD 755680241 (codex/mentat-crypto).
+
+Two red runs are recorded here.
+
+(1) The first red, taken as each suite was written, against the tree as it stood:
+    - the two contract suites and the core unit tests, before chart-studio-core.js had
+      normalizeBoard and before server.py knew the word `board`;
+    - the board browser suite, before the Board control existed.
+
+(2) The second red, taken with the FINAL text of every suite against a copy of the
+    pre-change app (audits junctioned, so the one contract file is the same v2 file).
+    This is the run that matters: the assertions that are green today are the same
+    assertions, character for character, that fail here.
+
+Contract v2 was applied first, which is why the two contract-shape assertions
+("the contract is v2", "the listing says nothing about boards") are green in both.
+
+
+(1) FIRST RED - node unit and contract suites
+------------------------------------------------------------
+✖ a board is 1, 2 or 4 tiles and nothing else (0.3428ms)
+✖ a board has exactly one slot per tile (0.1398ms)
+✖ an empty tile is null, and every filled slot names a sheet that exists (0.1216ms)
+✖ no sheet sits in two tiles at once (0.1017ms)
+✖ a slot is a non-negative whole number or null, never anything else (0.127ms)
+✖ a board must be an object, and a view without one simply has none (0.1182ms)
+✖ normalizeBoard copies the slots out, so a caller cannot edit the view through them (0.088ms)
+✖ [studio_api] normalizeBoard returns the two-tile board exactly as the view carries it (0.2593ms)
+✖ [studio_api] normalizeBoard reads back the board a saved view returns (0.1209ms)
+✖ [studio_api] normalizeBoard accepts four tiles with two of them empty (0.1049ms)
+✖ [studio_api] a view with no board is never given one (0.0846ms)
+✖ [studio_api] negative control with teeth: normalizeBoard refuses every malformed board (0.1452ms)
+ℹ tests 195
+ℹ suites 0
+ℹ pass 183
+ℹ fail 12
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 697.2657
+✖ failing tests:
+✖ a board is 1, 2 or 4 tiles and nothing else (0.3428ms)
+✖ a board has exactly one slot per tile (0.1398ms)
+✖ an empty tile is null, and every filled slot names a sheet that exists (0.1216ms)
+✖ no sheet sits in two tiles at once (0.1017ms)
+✖ a slot is a non-negative whole number or null, never anything else (0.127ms)
+✖ a board must be an object, and a view without one simply has none (0.1182ms)
+✖ normalizeBoard copies the slots out, so a caller cannot edit the view through them (0.088ms)
+✖ [studio_api] normalizeBoard returns the two-tile board exactly as the view carries it (0.2593ms)
+✖ [studio_api] normalizeBoard reads back the board a saved view returns (0.1209ms)
+
+(1) FIRST RED - python contract suite
+------------------------------------------------------------
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\scratchpad\board\work\mentat\tests\test_studio_contract_examples.py", line 182, in test_a_board_is_kept_on_disk_and_read_back_exactly_as_saved
+    self.assertEqual(self.stored_view(body['id'])['board'], payload['board'], name)
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+KeyError: 'board'
+
+======================================================================
+FAIL: test_every_malformed_board_is_refused_with_the_same_sentence (__main__.StudioContractExampleTests.test_every_malformed_board_is_refused_with_the_same_sentence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\scratchpad\board\work\mentat\tests\test_studio_contract_examples.py", line 210, in test_every_malformed_board_is_refused_with_the_same_sentence
+    self.assertEqual(status, 400, control['why'])
+AssertionError: 200 != 400 : board.tiles must be 1, 2 or 4 (one tile, two side by side, two by two); 3 has no layout, so Console.save_view returns 400 and normalizeBoard returns null
+
+======================================================================
+FAIL: test_the_view_read_back_has_exactly_the_keys_views_get_board_names (__main__.StudioContractExampleTests.test_the_view_read_back_has_exactly_the_keys_views_get_board_names)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-mentat-uncommitted-reconcile-4089f1\72dc8732-42b9-4fb4-9b63-5cb0cba9d2db\scratchpad\board\work\mentat\tests\test_studio_contract_examples.py", line 193, in test_the_view_read_back_has_exactly_the_keys_views_get_board_names
+    self.assertEqual(sorted(got['view']), sorted(STUDIO_API['examples']['views_get_board']))
+AssertionError: Lists differ: ['active', 'id', 'name', 'saved_at', 'sheets', 'source', 'sourceKey'] != ['active', 'board', 'id', 'name', 'saved_at', 'sheets', 'source', 'sourceKey']
+
+First differing element 1:
+'id'
+'board'
+
+Second list contains 1 additional elements.
+First extra element 7:
+'sourceKey'
+
+- ['active', 'id', 'name', 'saved_at', 'sheets', 'source', 'sourceKey']
++ ['active', 'board', 'id', 'name', 'saved_at', 'sheets', 'source', 'sourceKey']
+?            +++++++++
+
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.629s
+
+FAILED (failures=2, errors=1)
+
+(1) FIRST RED - board browser suite
+------------------------------------------------------------
+SETUP: pick a free port and launch the console server on a throwaway --data-root
+SETUP done - server ready on port 50496, data root C:\Users\pgoff\AppData\Local\Temp\mentat-studio-board-SKishU
+SETUP: a second sheet grouped by Election cycle, so the board has two different charts
+STEP 1: the toolbar carries a Board control of 1, 2 and 4, and 2 draws two tiles
+FAIL step 1 - the Board control must exist in the toolbar
+
+false !== true
+
+STEP 2: a sheet already on the board is not offered to another tile
+FAIL step 2 - each tile has its own sheet select
+
+0 !== 2
+
+STEP 3: the selected tile drives the Inspector, Export and Add to briefing
+FAIL step 3 - page.click: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for locator('#studio-board .studio-tile:nth-child(2) .studio-tile-canvas')[22m
+
+STEP 4: four tiles: two filled, two honest empty tiles with their own sheet select
+FAIL step 4 - page.click: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for locator('#studio-board-4')[22m
+
+STEP 5: save a two-tile board, and the console keeps the board the contract describes
+FAIL step 5 - page.click: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for locator('#studio-board-2')[22m
+
+STEP 6: Board 1 is today's canvas again, with the selected tile's sheet on it
+FAIL step 6 - page.click: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for locator('#studio-board-1')[22m
+
+STEP 7: a view saved with no board opens as one sheet, and the board view reopens into the same slots
+FAIL step 7 - page.evaluate: Error: no menu entry for Board two tiles: No board at all · 2 sheets · 9/18/2026, 11:44:57 PM | None
+    at eval (eval at evaluate (:311:30), <anonymous>:4:25)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+STEP 8: "Add board to briefing" adds one card per filled tile, in slot order
+FAIL step 8 - page.evaluate: Error: no menu entry for Board two tiles: No board at all · 2 sheets · 9/18/2026, 11:44:57 PM | None
+    at eval (eval at evaluate (:311:30), <anonymous>:4:25)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+STEP 9: the board is nowhere in the URL and adds no storage key, and nothing raised an error
+PASS step 9 - URL http://127.0.0.1:50496/?industry=Banking&saved=00733c74de00464fa01a6e5674176a1e#chart-studio, storage keys ["mentat-chart-studio-v1"], no errors
+STEP 10: the contract the board saves against is v2 and names the board producers
+PASS step 10 - studio_api v2, 11 examples, 11 controls
+RESULT: 2/10 steps passed, exit 1
+
+(2) FINAL RED - unit and contract suites against the pre-change app
+------------------------------------------------------------
+=== RED: final assertions against the pre-change app (HEAD 755680241) ===
+
+--- node --test "app/tests/**/*.test.js"
+✖ a board is 1, 2 or 4 tiles and nothing else (0.2015ms)
+✖ a board has exactly one slot per tile (0.0762ms)
+✖ an empty tile is null, and every filled slot names a sheet that exists (0.0725ms)
+✖ no sheet sits in two tiles at once (0.055ms)
+✖ a slot is a non-negative whole number or null, never anything else (0.0728ms)
+✖ a board must be an object, and a view without one simply has none (0.0824ms)
+✖ normalizeBoard copies the slots out, so a caller cannot edit the view through them (0.0539ms)
+✖ [studio_api] normalizeBoard returns the two-tile board exactly as the view carries it (0.1731ms)
+✖ [studio_api] normalizeBoard reads back the board a saved view returns (0.0645ms)
+✖ [studio_api] normalizeBoard accepts four tiles with two of them empty (0.0667ms)
+✖ [studio_api] a view with no board is never given one (0.0532ms)
+✖ [studio_api] negative control with teeth: normalizeBoard refuses every malformed board (0.0898ms)
+ℹ tests 195
+ℹ pass 183
+ℹ fail 12
+✖ failing tests:
+✖ a board is 1, 2 or 4 tiles and nothing else (0.2015ms)
+✖ a board has exactly one slot per tile (0.0762ms)
+✖ an empty tile is null, and every filled slot names a sheet that exists (0.0725ms)
+✖ no sheet sits in two tiles at once (0.055ms)
+
+--- python tests/test_studio_contract_examples.py
+ERROR: test_a_board_is_kept_on_disk_and_read_back_exactly_as_saved (__main__.StudioContractExampleTests.test_a_board_is_kept_on_disk_and_read_back_exactly_as_saved)
+FAIL: test_every_malformed_board_is_refused_with_the_same_sentence (__main__.StudioContractExampleTests.test_every_malformed_board_is_refused_with_the_same_sentence)
+FAIL: test_the_view_read_back_has_exactly_the_keys_views_get_board_names (__main__.StudioContractExampleTests.test_the_view_read_back_has_exactly_the_keys_views_get_board_names)
+Ran 11 tests in 0.658s
+FAILED (failures=2, errors=1)
+
+(2) FINAL RED - browser suites against the pre-change app
+------------------------------------------------------------
+
+--- node tests/test_studio_board_browser.cjs (final suite, pre-change app)
+STEP 1: Canvas mode carries a Board control of 1, 2 and 4, and 2 draws two tiles
+FAIL step 1 - the Board control must exist in the toolbar
+STEP 2: a sheet already on the board is not offered to another tile
+FAIL step 2 - each tile has its own sheet select
+STEP 3: the selected tile drives the Inspector, Export and Add to briefing
+FAIL step 3 - page.click: Timeout 20000ms exceeded.
+STEP 4: four tiles: two filled, two honest empty tiles with their own sheet select
+FAIL step 4 - page.click: Timeout 20000ms exceeded.
+STEP 5: save a two-tile board, and the console keeps the board the contract describes
+FAIL step 5 - page.click: Timeout 20000ms exceeded.
+STEP 6: Board 1 is today's canvas again, with the selected tile's sheet on it
+FAIL step 6 - page.click: Timeout 20000ms exceeded.
+STEP 7: a view saved with no board opens as one sheet, and the board view reopens into the same slots
+FAIL step 7 - page.evaluate: Error: no menu entry for Board two tiles: No board at all · 2 sheets · 9/19/2026, 12:20:44 AM | None
+STEP 8: "Add board to briefing" adds one card per filled tile, in slot order
+FAIL step 8 - page.evaluate: Error: no menu entry for Board two tiles: No board at all · 2 sheets · 9/19/2026, 12:20:44 AM | None
+STEP 9: the board is nowhere in the URL and adds no storage key, and nothing raised an error
+PASS step 9 - URL http://127.0.0.1:57269/?industry=Banking&saved=261d30022bcb4c528617811560ab8287#chart-studio, storage keys ["mentat-chart-studio-v1"], no errors
+STEP 10: the contract the board saves against is v2 and names the board producers
+PASS step 10 - studio_api v2, 11 examples, 11 controls
+RESULT: 2/10 steps passed, exit 1
+
+--- node tests/test_studio_wording.cjs (final suite, pre-change app)
+✖ the default empty state names the mode the console starts in (2.2678ms)
+ℹ tests 10
+ℹ pass 9
+ℹ fail 1
+✖ the default empty state names the mode the console starts in (2.2678ms)
+
+--- node tests/test_ui_cleanup_browser.cjs (final suite, pre-change app)
+FAIL: AssertionError [ERR_ASSERTION]: the Views menu holds Save view, Open view and Add board to briefing
+RESULT: 7/8 steps passed, exit 1
+
+What each red proves
+--------------------
+normalizeBoard                 12 unit and contract assertions fail with "core.normalizeBoard is not a function",
+                               then pass against the producer once it exists.
+server.save_view / get_view    3 python assertions fail: the board is dropped in silence (KeyError 'board'),
+                               get_view has no board key, and all six malformed boards answer 200 instead of 400.
+the board itself               8 of the 10 browser steps fail without it. The two that pass are the invariants
+                               that must hold before and after: no board in the URL, no new storage key, and
+                               the contract file already at v2.
+the wording suite              1 assertion fails because both empty states now write their surface's note node.
+the UI1 suite                  1 assertion fails because the Views menu gains "Add board to briefing".
+
+
+==============================================================================
+ROUND TWO - the six defects an independent verification found (2026-09-19)
+==============================================================================
+Baselines, because the six are not all defects of the same build:
+
+  items 1, 2, 3   present in the build the verifier read, so the red below is the
+                  final suite run against that build (the app as it stood before
+                  this round, tests as they stand now).
+  items 4, 5      reachable only through the board's own architecture, so their
+                  red is this build with that one fix reverted and nothing else.
+  item 6          a defect of the suite itself: the red is this suite with its
+                  MENTAT_REPORT_DIRECTORY line taken out.
+
+------------------------------------------------------------------ items 1-3
+Final suites against the pre-round-two app:
+
+STEP 11: the group pager moves the selected tile, and only that tile
+FAIL step 11 - the selected tile drawing page two never happened. Page: {"label":"4–6 of 8 groups · totals cover all 8","drawn":["Published included receipts by Election cycleSelected amount","Published included receipts by CompanySelected amount$0$0$52"]}
+STEP 12: a map sheet draws in the selected tile, and says to select it when it is not
+FAIL step 12 - the selected tile drawing its map never happened. Page: {"selected":[true,false],"titles":["Published included receipts by Contributor ZIP / Contributor state","Published included receipts by Company"],"svgs":[0,1],"maps":0,"mainMap":0,"loading":"Loading Census boundaries…"}
+STEP 13: a board change is an edit: Undo steps through it and never drops it
+PASS step 13 - Undo kept the board (2 tiles), stepped through it (0), and Redo returned both it and a lone 4-tile change
+STEP 14: two tiles asking the same question: changing one never blanks the other
+PASS step 14 - both tiles kept their drawing and the untouched one shows the refreshed answer ["Published included receipts by Election cycle","Published included receipts by Election cycle"]
+STEP 15: a new report starts on its own first page, not the last one
+PASS step 15 - the first report was on "4–4 of 4 groups · totals cover all 4"; the new one opens on "1–8 of 8 groups · totals cover all 8"
+STEP 16: the console this suite spawns uses a report directory of its own
+PASS step 16 - report directory C:\Users\pgoff\AppData\Local\Temp\mentat-studio-board-reports-0j8Wkn
+RESULT: 14/16 steps passed, exit 1
+
+  step 11  FAIL  the label reads "4-6 of 8" while both tiles still draw page one:
+                 the pager rendered into the hidden single canvas.
+  step 12  FAIL  "Loading Census boundaries..." for ever: the map compared its
+                 ticket against the module counter, and the chart tile beside it
+                 tore the map down.
+  step 13  FAIL  "the edit made before the board change survives that one Undo" -
+                 it did not, because the board change was never a step of its own.
+
+--------------------------------------------------------------- items 4 and 5
+Each fix reverted on its own, everything else in place:
+
+  flight   revert_one.py flight   - a controller per surface again.
+  memory   tileKey back to the bare sheet id, pruneTileMemory removed,
+           tileMemory.clear() removed from the source change.
+
+  Both steps still PASSED with the fix reverted. Recorded here plainly rather
+  than dressed up: step 14's race resolves in favour of a fresh request often
+  enough that the cancelled shared answer is not observable from the page, and
+  step 15's leak needs the paged sheet and the new report's sheet to share an id,
+  which that flow does not produce. The two steps stand as regression guards for
+  the behaviour the fixes are meant to keep; they are not evidence that the
+  defects were there. The evidence for those two is the code itself and the
+  verifier's reading of it.
+
+--------------------------------------------------------------------- item 6
+The board suite with its report-directory line removed:
+
+  FAIL step 16 - the console must read this suite own report directory
+  (C:\Users\pgoff\AppData\Local\Temp\mentat-studio-board-reports-k3doEv),
+  got "C:\Users\pgoff\OneDrive\Desktop\Mentat Complete Files"
+
+That is Paul's real published-report folder, which every run of this suite was
+resolving and chdir()ing into. With the line back the console reads a temporary
+directory of the suite's own and the step passes.
+
+Other suites with the same gap, not on this session's file list and not touched:
+tests/test_evidence_panes_browser.cjs, tests/test_navigation_scope_browser.cjs,
+tests/test_studio_industry_browser.cjs. tests/test_ui_cleanup_browser.cjs had it
+too and is on the list, so it was fixed with the same three lines.
+
+
+==============================================================================
+ROUND FOUR - a board went blank while a refresh was in flight (2026-09-19)
+==============================================================================
+Found live by the verifier's recheck_cancel.cjs: the single canvas keeps its
+drawing through a refresh and after Cancel ("Cancelled. Showing the last loaded
+view." is true there); a board did not. renderBoard built every tile again and
+replaced the host's children on each render, so both tiles emptied the moment a
+refresh started and stayed empty after Cancel. Residual in the same place: a
+discarded tile left a live map instance and its listeners behind.
+
+Steps 17, 18 and 19, against the build before the fix:
+
+STEP 17: a board keeps its drawings while a refresh is in flight, and after Cancel
+FAIL step 17 - both tiles still show their last drawing while the refresh is in flight, got [false,false]
+STEP 18: a refresh that answers the same data leaves the untouched tile byte-identical
+FAIL step 18 - two drawn tiles before the quiet refresh never happened.
+STEP 19: emptying a map tile destroys the map it was hosting
+FAIL step 19 - the single canvas for the map sheet never happened.
+RESULT: 15/19 steps passed, exit 1
+
+  step 17  FAIL  "both tiles still show their last drawing while the refresh is in
+                 flight, got [false,false]" - the board blanked.
+  step 18  FAIL  it never got two drawn tiles to compare, because 17 left them blank.
+  step 19  FAIL  "spy {made:2, destroyed:1}" - the map the discarded tile hosted was
+                 never destroyed.

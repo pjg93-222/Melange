@@ -50,8 +50,20 @@
   // does not send the field yet; nothing here has a reader for it beyond
   // parseSnapshotRegistry's own validation.
   let industries = null;
-  let contributionOffset = 0, contributionRevision = 0, contributionController = null, contributionPending = null;
+  let contributionOffset = 0, contributionRevision = 0;
+  // One entry per question in flight: {key, promise, controller, waiters}. The
+  // controller belongs to the request, not to the surface that started it, and
+  // the request is only cancelled once the last surface waiting on it has moved
+  // on - a tile that changes its question must not cancel the answer the tile
+  // beside it is still waiting for.
+  const contributionPending = new Map();
+  // The single canvas needs a claim of its own, the way each tile has one.
+  const mainFlight = {waiting: null};
   let contributionMap = null, contributionGeometry = null, geometryKey = '', geometryRevision = 0, geometryTimer = null;
+  // The canvas the one map instance is drawn into. A surface only tears a map
+  // down when it is the surface holding it: on a board the tiles draw together,
+  // and a chart tile must not destroy the map beside it.
+  let contributionMapHost = null;
   let recordOffset = 0, recordSelection = null, recordRevision = 0, exporting = false;
   let pageMembersKey = '';
   let pendingScope = null, appliedScope = null;
@@ -65,6 +77,11 @@
   // folded summary reports; it is cleared whenever a load starts again.
   let sourceReady = false;
   let progressStart = 0, progressTimer = 0, progressDepth = 0, progressOpened = false;
+  // Canvas mode as a board of 1, 2 or 4 tiles (studio_api.json v2). null is one
+  // tile, which is today's single canvas. What a sheet last drew is kept by its
+  // own id, so a tile is never redrawn from another tile's answer.
+  let board = null, boardSurfaces = [], boardNodes = [];
+  const tileMemory = new Map();
   const contributionCache = new Map(), memberCache = new Map(), geometryCache = new Map(), geometryPending = new Map();
   let contributionCacheEpoch=0;
   const verified = () => el('source-mode').value === 'contributions';
@@ -87,7 +104,7 @@
       // workbook digest and can never be matched again, so drop them rather
       // than let them use up the twelve-worksheet cap.
       for (const key of Object.keys(store)) if (!key.includes('|')) delete store[key];
-      store[sourceKey] = {sheets, active};
+      store[sourceKey] = {sheets, active, board};
       const keys = Object.keys(store);
       // Keep the file small: only the twelve most recent worksheets are kept.
       if (keys.length > 12) delete store[keys[0]];
@@ -99,10 +116,13 @@
     if (saved && Array.isArray(saved.sheets) && saved.sheets.length) {
       sheets = saved.sheets.map(s => Object.assign(core.createSheet(s.name, s.id), s));
       active = Math.min(Math.max(0, saved.active | 0), sheets.length - 1);
+      board = core.normalizeBoard({sheets: sheets, board: saved.board});
+      settleBoard();
       return true;
     }
     sheets = [core.createSheet('Sheet 1', 's1')];
     active = 0;
+    board = null;
     return false;
   }
 
@@ -134,7 +154,7 @@
   /* -------------------------------------------------------------- history */
 
   function commit(change) {
-    history.push(JSON.stringify({sheets, active}));
+    history.push(JSON.stringify({sheets, active, board}));
     if (history.length > 50) history.shift();
     future = [];
     const memory = focusMemory();
@@ -146,11 +166,13 @@
   }
   function step(from, to) {
     if (!from.length) return;
-    to.push(JSON.stringify({sheets, active}));
+    to.push(JSON.stringify({sheets, active, board}));
     const snapshot = JSON.parse(from.pop());
     const memory = focusMemory();
     sheets = snapshot.sheets;
     active = Math.min(snapshot.active, sheets.length - 1);
+    board = snapshot.board || null;
+    settleBoard();
     viewEdited();
     persist();
     renderAll();
@@ -383,10 +405,10 @@
   // What a report worksheet says on its own account: the guard currently
   // holding one partition, and the sheets whose money is a recipient
   // committee's rather than the industry's.
-  function worksheetNotes() {
+  function worksheetNotes(state) {
     if (!data || verified()) return [];
     const committee = core.committeeActivitySheet(data.sheet);
-    const filters = sheet().filters || [];
+    const filters = (state || sheet()).filters || [];
     const active = worksheetGuards()
       .filter(guard => filters.some(f => Number(f.column) === guard.column &&
         f.op === 'equals' && String(f.value) === guard.value))
@@ -433,7 +455,7 @@
     }catch(error){if(ticket===revision){status('Verified data unavailable.');failure(error.message);renderDatasetMessage();}}
   }
   function selectContributionDataset() {
-    ++revision;contributionController?.abort();contributionPending=null;contributionOffset=0;contributionResult=null;contributionRequest=null;selection=[];history=[];future=[];
+    ++revision;abortContributionRequests();tileMemory.clear();contributionOffset=0;contributionResult=null;contributionRequest=null;selection=[];history=[];future=[];
     const d=dataset(),key='contributions|'+d.id+'|'+d.provenance.workbook_sha256;sourceKey=key;const restored=restore(key);
     for(const state of sheets)state.source={...state.source,mode:'contributions',dataset:d.id,industry:d.industry,basis:state.source.basis||'receipt',reportName:d.provenance.workbook,sheet:'Verified source observations',runName:'Configured completed-report folder',sha256:d.provenance.workbook_sha256};
     data={columns:contributions.fields(d.fields||contributionCatalog.fields,basis()),rows:[],row_count:0,header_row:0,sha256:d.provenance.workbook_sha256,sheet:'Verified source observations',note:d.provenance.scope};
@@ -545,90 +567,140 @@
     failure(missing.length ? 'This source has no ' + missing.join(' or ') + ' field, so that part of the Graph scope was not carried.' : '');
   }
 
-  function queryCached(query) {
+  // A surface lets go of the answer it was waiting for. The request itself is
+  // only cancelled when nobody is left waiting on it.
+  function releaseFlight(claim) {
+    const flight = claim && claim.waiting;
+    if (!flight) return;
+    claim.waiting = null;
+    flight.waiters -= 1;
+    if (flight.waiters > 0) return;
+    if (contributionPending.get(flight.key) === flight) contributionPending.delete(flight.key);
+    flight.controller.abort();
+  }
+  const everyClaim = () => [mainFlight, ...tileMemory.values()];
+  // Cancel, Refresh and a change of source stop every surface, not just the one
+  // the module happened to remember.
+  function abortContributionRequests() {
+    for (const claim of everyClaim()) releaseFlight(claim);
+    for (const flight of [...contributionPending.values()]) flight.controller.abort();
+    contributionPending.clear();
+  }
+  function queryCached(query,view) {
     const key=JSON.stringify(query),cached=contributionCache.get(key),epoch=contributionCacheEpoch;
+    const claim=(view&&view.flight)||mainFlight;
     if(contributionResult&&contributionRequest&&JSON.stringify(contributionRequest)===key)return Promise.resolve(contributionResult);
     if(cached&&Date.now()-cached.at<30000)return Promise.resolve(cached.result);
-    if(contributionPending?.key===key)return contributionPending.promise;
-    contributionController?.abort();contributionController=new AbortController();
-    const promise=contributionReady('query',query,contributionController.signal).then(result=>{if(epoch===contributionCacheEpoch){contributionCache.set(key,{result,at:Date.now()});if(contributionCache.size>12)contributionCache.delete(contributionCache.keys().next().value);}return result;}).finally(()=>{if(contributionPending?.key===key&&epoch===contributionCacheEpoch)contributionPending=null;});
-    contributionPending={key,promise};return promise;
+    releaseFlight(claim);
+    const flying=contributionPending.get(key);
+    if(flying){flying.waiters+=1;claim.waiting=flying;return flying.promise;}
+    const flight={key,controller:new AbortController(),waiters:1,promise:null};
+    flight.promise=contributionReady('query',query,flight.controller.signal).then(result=>{if(epoch===contributionCacheEpoch){contributionCache.set(key,{result,at:Date.now()});if(contributionCache.size>12)contributionCache.delete(contributionCache.keys().next().value);}return result;}).finally(()=>{if(contributionPending.get(key)===flight&&epoch===contributionCacheEpoch)contributionPending.delete(key);});
+    contributionPending.set(key,flight);claim.waiting=flight;return flight.promise;
   }
   // The scope under the chart title: the parts the header chips carry, plus the
   // basis, so the chart and the chrome cannot disagree about what is on screen.
-  function scopeSubtitle() {
+  function scopeSubtitle(state) {
     if(!data)return '';
     const parts=scopeText().split(' · ').filter(Boolean);
-    if(verified()){const label=contributions.BASIS[basis()];if(label&&label[0])parts.push(label[0].toLowerCase());}
+    if(verified()){const label=contributions.BASIS[basisOf(state)];if(label&&label[0])parts.push(label[0].toLowerCase());}
     return parts.join(' · ');
   }
+  // What one chart draws into, and whose staleness ticket it carries. The single
+  // canvas is the main surface, and its storage IS the module state the Inspector,
+  // the exports, the print sheet and the briefing already read, so one code path
+  // writes both. A board tile passes its own nodes and its own ticket; the
+  // selected tile is primary and writes the module state too, which is what
+  // "Export acts on the selected tile" means.
+  function mainSurface() {
+    return {state: sheet(), index: active, el: el, primary: true, flight: mainFlight, canvasClass: '',
+      bump: () => ++contributionRevision, stale: ticket => ticket !== contributionRevision,
+      ticket: () => contributionRevision,
+      get offset() { return contributionOffset; }, set offset(value) { contributionOffset = value; },
+      get request() { return contributionRequest; }, set request(value) { contributionRequest = value; },
+      get result() { return contributionResult; }, set result(value) { contributionResult = value; },
+      get title() { return lastTitle; }, set title(value) { lastTitle = value; },
+      get scope() { return lastScope; }, set scope(value) { lastScope = value; }};
+  }
+  const basisOf = state => (state || sheet()).source.basis || 'receipt';
   function sourceScope(result,request) {
     const p=result.provenance;
     return [request.dataset,contributions.BASIS[request.basis]?.[0],p.workbook,'Workbook SHA256 '+p.workbook_sha256,'Analytical index '+p.index_token,'Query engine SHA256 '+p.query_engine_sha256,'Field semantics SHA256 '+p.field_semantics_sha256,'Groups '+(result.offset+1)+'–'+(result.offset+result.rows.length)+' of '+result.group_count,JSON.stringify({filters:request.filters,aggregate_filters:request.aggregate_filters,bin_width_cents:request.bin_width_cents}),p.scope].join(' · ');
   }
-  async function renderContributionView() {
-    if(!data||!dataset()){el('reconcile').hidden=true;el('canvas').replaceChildren();el('table').replaceChildren();el('verified-summary').textContent='Reading verified source fields…';el('result-controls').hidden=true;el('title').textContent='';el('subtitle').textContent='';el('note').textContent='Choose a verified report in the Data panel to begin.';lastResult=null;return;}
-    const ticket=++contributionRevision;
+  async function renderContributionView(view) {
+    view=view||mainSurface();const node=view.el,state=view.state;
+    if(!data||!dataset()){node('reconcile').hidden=true;node('canvas').replaceChildren();node('table').replaceChildren();node('verified-summary').textContent='Reading verified source fields…';node('result-controls').hidden=true;node('title').textContent='';node('subtitle').textContent='';node('note').textContent='Choose a verified report in the Data panel to begin.';if(view.primary)lastResult=null;return;}
+    const ticket=view.bump(),sheetBasis=basisOf(state);
     try {
-      const compiled=contributions.compile(sheet(),columns(),{dataset:dataset().id,industry:dataset().industry,basis:basis(),offset:contributionOffset});
-      const query=compiled.query,key=JSON.stringify(query);
-      if(contributionRequest&&JSON.stringify({...contributionRequest,offset:0})!==JSON.stringify({...query,offset:0})&&contributionOffset){contributionOffset=0;query.offset=0;}
-      if(!contributionRequest||JSON.stringify(contributionRequest)!==key){el('canvas').setAttribute('aria-busy','true');status('Reading verified source observations…');el('inspection').hidden=true;++recordRevision;lastResult=null;el('verified-summary').textContent='Reading verified totals…';}
-      const result=await queryCached(query);if(ticket!==contributionRevision||!verified())return;
-      failure('');contributionResult=result;contributionRequest=query;lastResult=result;lastConfig=compiled;
-      data.row_count=result.totals.records;data.rows=result.rows.map(row=>data.columns.map(f=>row[f.id]??''));
-      lastTitle=contributions.BASIS[basis()][0]+(query.dimensions.length?' by '+query.dimensions.map(id=>data.columns.find(f=>f.id===id)?.name||id).join(' / '):'');if(compiled.spec.measures.length!==1||compiled.spec.measures[0]!=='amount')lastTitle=compiled.spec.measures.map(id=>result.columns.find(c=>c.id===id)?.name||id).join(' / ')+' · '+lastTitle;lastScope=sourceScope(result,query);el('title').textContent=lastTitle;el('subtitle').textContent=scopeSubtitle();
+      const compiled=contributions.compile(state,columns(),{dataset:dataset().id,industry:dataset().industry,basis:sheetBasis,offset:view.offset});
+      const query=compiled.query,key=JSON.stringify(query),previous=view.request;
+      if(previous&&JSON.stringify({...previous,offset:0})!==JSON.stringify({...query,offset:0})&&view.offset){view.offset=0;query.offset=0;}
+      if(!previous||JSON.stringify(previous)!==key){node('canvas').setAttribute('aria-busy','true');node('verified-summary').textContent='Reading verified totals…';if(view.primary){status('Reading verified source observations…');el('inspection').hidden=true;++recordRevision;lastResult=null;}}
+      const result=await queryCached(query,view);if(view.stale(ticket)||!verified())return;
+      view.result=result;view.request=query;
+      if(view.primary){failure('');lastResult=result;lastConfig=compiled;data.row_count=result.totals.records;data.rows=result.rows.map(row=>data.columns.map(f=>row[f.id]??''));}
+      let title=contributions.BASIS[sheetBasis][0]+(query.dimensions.length?' by '+query.dimensions.map(id=>data.columns.find(f=>f.id===id)?.name||id).join(' / '):'');if(compiled.spec.measures.length!==1||compiled.spec.measures[0]!=='amount')title=compiled.spec.measures.map(id=>result.columns.find(c=>c.id===id)?.name||id).join(' / ')+' · '+title;view.title=title;view.scope=sourceScope(result,query);node('title').textContent=title;node('subtitle').textContent=scopeSubtitle(state);
       const money=value=>contributionPlot.format(value,'amount');
-      el('verified-summary').replaceChildren();
-      for(const [label,value]of [[basis()==='original_supported'?'Selected gross amount':'Selected net amount',money(result.totals.amount)],['Source observations',fmt(result.totals.records)],['Reported donor identities',fmt(result.totals.contributors)]]){const item=document.createElement('span'),strong=document.createElement('strong');strong.textContent=value;item.append(strong,document.createTextNode(label));el('verified-summary').append(item);}
-      el('verified-summary').title='Totals cover all matching source records before grouped filters. Group distinct identity counts are not added together.';
-      el('group-count').textContent=result.group_count?`${fmt(result.offset+1)}–${fmt(result.offset+result.rows.length)} of ${fmt(result.group_count)} groups · totals cover all ${fmt(result.group_count)}`:'No matching observations';
-      el('groups-prev').disabled=!query.offset;el('groups-next').disabled=!result.has_more;el('result-controls').hidden=false;
-      el('groups-prev').hidden=el('groups-next').hidden=compiled.spec.type==='map'||compiled.transform!=='none';
-      let rows=result.rows,spec={...compiled.spec,columns:result.columns,title:lastTitle},temporalModel=null,drewReferences=false;const notes=[...compiled.notes,...(result.notices||[])];
+      node('verified-summary').replaceChildren();
+      for(const [label,value]of [[sheetBasis==='original_supported'?'Selected gross amount':'Selected net amount',money(result.totals.amount)],['Source observations',fmt(result.totals.records)],['Reported donor identities',fmt(result.totals.contributors)]]){const item=document.createElement('span'),strong=document.createElement('strong');strong.textContent=value;item.append(strong,document.createTextNode(label));node('verified-summary').append(item);}
+      node('verified-summary').title='Totals cover all matching source records before grouped filters. Group distinct identity counts are not added together.';
+      node('group-count').textContent=result.group_count?`${fmt(result.offset+1)}–${fmt(result.offset+result.rows.length)} of ${fmt(result.group_count)} groups · totals cover all ${fmt(result.group_count)}`:'No matching observations';
+      node('groups-prev').disabled=!query.offset;node('groups-next').disabled=!result.has_more;node('result-controls').hidden=false;
+      node('groups-prev').hidden=node('groups-next').hidden=compiled.spec.type==='map'||compiled.transform!=='none';
+      let rows=result.rows,spec={...compiled.spec,columns:result.columns,title:title},temporalModel=null,drewReferences=false;const notes=[...compiled.notes,...(result.notices||[])];
       if(spec.type==='histogram'&&result.has_more)throw new Error('This histogram has more than 10,000 occupied bins. Increase the bin width or narrow the filters to display the complete distribution.');
       if(compiled.transform!=='none'&&compiled.transform!=='annual'){
         if(result.has_more)throw new Error('Period analysis requires every selected period. Narrow the filters.');
         const time=query.dimensions[0],modelData={columns:[{index:0,name:time==='cycle'?'Election cycle':'Year',type:'category'},{index:1,name:'Amount',type:'number'}],rows:rows.map(r=>[r[time],r.amount]),row_numbers:rows.map((_,i)=>i+1),row_count:rows.length,header_row:0};
-        const model=math.build(modelData,{type:'line',x:0,y:1,series:-1,aggregation:'sum',filters:[],transform:compiled.transform,period:time==='cycle'?'cycle':'year',horizon:sheet().analytics.horizon||2,start:0,end:0,limit:0});
+        const model=math.build(modelData,{type:'line',x:0,y:1,series:-1,aggregation:'sum',filters:[],transform:compiled.transform,period:time==='cycle'?'cycle':'year',horizon:state.analytics.horizon||2,start:0,end:0,limit:0});
         const id=compiled.transform==='yoy'?'percent_change':'amount';rows=model.groups.map(g=>({[time]:time==='cycle'?`${g.year-1}-${g.year}`:String(g.year),[id]:g.value}));spec.measures=[id];spec.columns=[{id,name:compiled.transform==='forecast'?'Observed amount and same-phase baseline':id==='amount'?'Period change':'Year-over-year change (%)',unit:id==='amount'?'cents':'percent'}];notes.push(model.note);
         temporalModel={...model,type:spec.type,groups:model.groups.map(g=>({...g,value:g.value/(id==='amount'?100:1)}))};
       }
-      if(spec.type==='map'){await renderContributionMap(ticket,compiled);return;}
-      clearTimeout(geometryTimer);contributionMap?.destroy?.();contributionMap=null;++geometryRevision;
-      el('canvas').hidden=false;el('table').hidden=true;el('canvas').className='studio-canvas fit-'+sheet().fit;
+      // One map at a time: it owns the geometry cache and the Census request, so
+      // it is drawn for the tile the reader selected. An unselected map tile names
+      // the gesture that brings it back rather than drawing nothing.
+      if(spec.type==='map'){
+        if(!view.primary){node('canvas').replaceChildren();node('table').hidden=true;node('status').textContent='';node('note').textContent='This sheet draws a map. Select this tile to see it.';return;}
+        await renderContributionMap(ticket,compiled,null,view);return;
+      }
+      if(contributionMapHost===node('canvas')){clearTimeout(geometryTimer);contributionMap?.destroy?.();contributionMap=null;contributionMapHost=null;++geometryRevision;}
+      node('canvas').hidden=false;node('table').hidden=true;node('canvas').className=view.canvasClass+'studio-canvas fit-'+state.fit;
       if(temporalModel){
         const measure=spec.columns[0].name+(spec.columns[0].unit==='cents'?' (USD)':'');
-        const drawn=paint.chartSVG(temporalModel,measure,{type:spec.type,aggregation:'sum',x:0,y:1},{columns:[{name:'Period'},{name:measure}]},lastTitle,lastScope);el('canvas').replaceChildren(drawn.svg);
+        const drawn=paint.chartSVG(temporalModel,measure,{type:spec.type,aggregation:'sum',x:0,y:1},{columns:[{name:'Period'},{name:measure}]},view.title,view.scope);node('canvas').replaceChildren(drawn.svg);
       }else if(['pie','doughnut','waterfall','pareto','radar'].includes(spec.type)){
         if(spec.measures.length!==1)throw new Error('This mark type uses one measure.');
         const id=spec.measures[0],currency=contributions.MONEY.has(id),groups=rows.map(row=>({label:contributionPlot.label(row,spec.dimensions),value:row[id]/(currency?100:1),n:1}));
-        const drawn=paint.chartSVG({type:spec.type,groups,selected:result.totals.records,excluded:0},(result.columns.find(c=>c.id===id)?.name||id)+(currency?' (USD)':''),{type:spec.type,aggregation:'sum',x:0,y:1},{columns:[{name:'Group'},{name:id}]},lastTitle,lastScope);el('canvas').replaceChildren(drawn.svg);
-      }else if(MentatContributionCharts.TYPES.includes(spec.type))MentatContributionCharts.render(el('canvas'),rows,spec,row=>inspectContributions(row));
-      else {contributionPlot.render(el('canvas'),rows,spec,row=>inspectContributions(row));drewReferences=spec.type!=='scatter';}
-      if(sheet().analytics.totals)notes.push('Selected source total: '+money(result.totals.amount)+'. This total excludes projections and covers every matching group before grouped filters.');
+        const drawn=paint.chartSVG({type:spec.type,groups,selected:result.totals.records,excluded:0},(result.columns.find(c=>c.id===id)?.name||id)+(currency?' (USD)':''),{type:spec.type,aggregation:'sum',x:0,y:1},{columns:[{name:'Group'},{name:id}]},view.title,view.scope);node('canvas').replaceChildren(drawn.svg);
+      }else if(MentatContributionCharts.TYPES.includes(spec.type))MentatContributionCharts.render(node('canvas'),rows,spec,row=>{if(view.primary)inspectContributions(row);});
+      else {contributionPlot.render(node('canvas'),rows,spec,row=>{if(view.primary)inspectContributions(row);});drewReferences=spec.type!=='scatter';}
+      if(state.analytics.totals)notes.push('Selected source total: '+money(result.totals.amount)+'. This total excludes projections and covers every matching group before grouped filters.');
       // Say plainly when a requested reference line was not drawn, instead
       // of describing one the reader cannot see.
-      if(sheet().analytics.average||sheet().analytics.median)notes.push(
+      if(state.analytics.average||state.analytics.median)notes.push(
         drewReferences?'Reference lines mark the mean and median of the shown marks; source-level averages and medians are available as measures.'
         :'Reference lines are not drawn on this mark type. Choose a bar, line, area or circle mark to see the mean and median of the shown marks.');
-      el('note').textContent=[contributions.BASIS[basis()][1],query.aggregate_filters.length?'Grouped filters apply after aggregation.':result.has_more?'Additional groups are on later pages; source totals cover all pages.':'All selected groups shown.',...notes].join(' ');
-      el('status').textContent=fmt(result.totals.records)+' source observations · '+fmt(result.group_count)+' groups · '+(result.reconciliation?.receipt_matches_workbook===true?'Included receipts reconcile to the workbook.':'Verified source records.')+' · '+fmt(queryRequests)+' verified queries this session';status('Verified contribution fields · '+data.columns.length+' fields');renderPager();renderReconcile(result).catch(()=>{el('reconcile').hidden=true;});
-    }catch(error){if(ticket===contributionRevision&&error.name!=='AbortError'){el('reconcile').hidden=true;el('canvas').replaceChildren();el('note').textContent=error.message;failure(error.message);lastResult=null;}}
-    finally{if(ticket===contributionRevision)el('canvas').setAttribute('aria-busy','false');}
+      node('note').textContent=[contributions.BASIS[sheetBasis][1],query.aggregate_filters.length?'Grouped filters apply after aggregation.':result.has_more?'Additional groups are on later pages; source totals cover all pages.':'All selected groups shown.',...notes].join(' ');
+      node('status').textContent=fmt(result.totals.records)+' source observations · '+fmt(result.group_count)+' groups · '+(result.reconciliation?.receipt_matches_workbook===true?'Included receipts reconcile to the workbook.':'Verified source records.')+(view.primary?' · '+fmt(queryRequests)+' verified queries this session':'');
+      if(view.primary)status('Verified contribution fields · '+data.columns.length+' fields');
+      if(view.primary)renderPager();
+      renderReconcile(result,view,ticket).catch(()=>{node('reconcile').hidden=true;});
+    }catch(error){if(!view.stale(ticket)&&error.name!=='AbortError'){node('reconcile').hidden=true;node('canvas').replaceChildren();node('note').textContent=error.message;if(view.primary){failure(error.message);lastResult=null;}}}
+    finally{if(!view.stale(ticket))node('canvas').setAttribute('aria-busy','false');}
   }
-  async function renderContributionMap(ticket,compiled,bbox=null) {
-    const current=++geometryRevision,result=contributionResult,map=sheet().map||{layers:['states','districts'],congress:'119'},zips=MentatContributionMap.eligibleZips(result.rows).sort(),key=JSON.stringify({zips,congress:map.congress,bbox});
+  async function renderContributionMap(ticket,compiled,bbox=null,view=null) {
+    view=view||mainSurface();const node=view.el;
+    const current=++geometryRevision,result=view.result,map=view.state.map||{layers:['states','districts'],congress:'119'},zips=MentatContributionMap.eligibleZips(result.rows).sort(),key=JSON.stringify({zips,congress:map.congress,bbox});
     if(result.has_more)throw new Error('Narrow the map filters so every geographical group can be included.');
     const saved=contributionMap?.getView();status('Loading Census boundaries…');
     const cached=geometryCache.get(key),pendingKey=key+'|'+[...map.layers].sort().join(',');let geometry=cached&&map.layers.every(layer=>cached.layers?.[layer])?cached:null;if(!geometry){if(!geometryPending.has(pendingKey))geometryPending.set(pendingKey,contributionAPI('geography',{zips,layers:map.layers,congress:map.congress,...(bbox?{bbox}:{})}).finally(()=>geometryPending.delete(pendingKey)));geometry=await geometryPending.get(pendingKey);geometryCache.set(key,geometry);}
-    if(ticket!==contributionRevision||current!==geometryRevision||!verified())return;
-    geometryCache.set(key,geometry);if(geometryCache.size>8)geometryCache.delete(geometryCache.keys().next().value);contributionGeometry=geometry;geometryKey=key;contributionMap?.destroy?.();el('canvas').hidden=false;el('table').hidden=true;
-    contributionMap=MentatContributionMap.render(el('canvas'),{groups:result.rows.map(r=>({...r,amount_cents:r.amount})),geometry,layers:map.layers,filled:compiled.spec.filled,title:lastTitle,valueLabel:basis()==='original_supported'?'Selected gross amount':'Selected net amount',showLayerControls:false,onSelect:row=>inspectContributions(contributions.mapSelection(row)),onViewport:event=>{if(!map.layers.includes('zip_areas'))return;clearTimeout(geometryTimer);geometryTimer=setTimeout(()=>renderContributionMap(contributionRevision,compiled,event.bbox).catch(e=>failure(e.message)),450);}});
+    if(view.stale(ticket)||current!==geometryRevision||!verified())return;
+    geometryCache.set(key,geometry);if(geometryCache.size>8)geometryCache.delete(geometryCache.keys().next().value);contributionGeometry=geometry;geometryKey=key;contributionMap?.destroy?.();contributionMapHost=node('canvas');node('canvas').hidden=false;node('table').hidden=true;
+    contributionMap=MentatContributionMap.render(node('canvas'),{groups:result.rows.map(r=>({...r,amount_cents:r.amount})),geometry,layers:map.layers,filled:compiled.spec.filled,title:view.title,valueLabel:basisOf(view.state)==='original_supported'?'Selected gross amount':'Selected net amount',showLayerControls:false,onSelect:row=>inspectContributions(contributions.mapSelection(row)),onViewport:event=>{if(!map.layers.includes('zip_areas'))return;clearTimeout(geometryTimer);geometryTimer=setTimeout(()=>renderContributionMap(view.ticket(),compiled,event.bbox,view).catch(e=>failure(e.message)),450);}});
     if(saved)contributionMap.setView(saved);
-    lastScope+=' · Congress '+map.congress+'; '+map.layers.join(', ')+'; overlays do not allocate money. Mapped '+contributionPlot.format(contributionMap.data.mapped_cents,'amount')+'; unmapped '+contributionPlot.format(contributionMap.data.unmapped_cents,'amount')+' · '+(geometry.sources||[]).map(s=>(s.vintage||s.label||s.url)+' SHA256 '+s.sha256).join(' · ');
-    el('note').textContent=[contributions.BASIS[basis()][1],'ZIP marks combine eligible ZIP/state groups; grouped filters apply before this combination. Unmapped money remains in the selected total.',...(contributionMap.data.coverage_notes||[]),...(geometry.warnings||[])].join(' ');
-    el('status').textContent=fmt(result.group_count)+' geographic groups · '+fmt(contributionMap.data.marks.length)+' mapped marks · boundaries do not change money';status('Verified ZIP/state records and Census boundaries');
+    view.scope+=' · Congress '+map.congress+'; '+map.layers.join(', ')+'; overlays do not allocate money. Mapped '+contributionPlot.format(contributionMap.data.mapped_cents,'amount')+'; unmapped '+contributionPlot.format(contributionMap.data.unmapped_cents,'amount')+' · '+(geometry.sources||[]).map(s=>(s.vintage||s.label||s.url)+' SHA256 '+s.sha256).join(' · ');
+    node('note').textContent=[contributions.BASIS[basisOf(view.state)][1],'ZIP marks combine eligible ZIP/state groups; grouped filters apply before this combination. Unmapped money remains in the selected total.',...(contributionMap.data.coverage_notes||[]),...(geometry.warnings||[])].join(' ');
+    node('status').textContent=fmt(result.group_count)+' geographic groups · '+fmt(contributionMap.data.marks.length)+' mapped marks · boundaries do not change money';status('Verified ZIP/state records and Census boundaries');
   }
   async function inspectContributions(row=null,offset=0) {
     if(!contributionResult)return;recordSelection=row;recordOffset=offset;const ticket=++recordRevision,sourceRevision=contributionRevision;el('inspection').hidden=false;el('record-count').textContent='Reading source records…';el('records').replaceChildren();
@@ -638,9 +710,9 @@
     }catch(error){if(ticket===recordRevision)el('record-count').textContent=error.message;}
   }
   async function downloadContributions(format) {
-    if(!contributionResult||!lastResult||exporting)return;const result=contributionResult,query=structuredClone(contributionRequest),ticket=contributionRevision;
-    try{if(format==='csv'){exporting=true;status('Preparing complete grouped CSV…');let rows=[],offset=0;for(;;){const page=await contributionReady('query',{...query,offset,limit:100000});if(ticket!==contributionRevision)throw new Error('View changed during export. Start the download again.');if(!contributions.sameSource(page.provenance,result.provenance))throw new Error('Source changed during export. Refresh the verified data.');rows.push(...page.rows);if(!page.has_more)break;if(!page.rows.length)throw new Error('The next export page is empty.');offset+=page.rows.length;}MentatExport.download(contributions.csv({...result,rows},query),'text/csv;charset=utf-8','mentat-chart-studio.csv');status('Exported '+fmt(rows.length)+' groups with source and accounting provenance.');}
-      else{const svg=el('canvas').querySelector('svg');if(!svg)throw new Error('This view has no image. Download its data CSV.');await MentatExport.image(svg,format,lastTitle,lastScope,'mentat-chart-studio');}
+    const view=activeSurface();if(!view.result||!lastResult||exporting)return;const result=view.result,query=structuredClone(view.request),ticket=view.ticket();
+    try{if(format==='csv'){exporting=true;status('Preparing complete grouped CSV…');let rows=[],offset=0;for(;;){const page=await contributionReady('query',{...query,offset,limit:100000});if(view.stale(ticket))throw new Error('View changed during export. Start the download again.');if(!contributions.sameSource(page.provenance,result.provenance))throw new Error('Source changed during export. Refresh the verified data.');rows.push(...page.rows);if(!page.has_more)break;if(!page.rows.length)throw new Error('The next export page is empty.');offset+=page.rows.length;}MentatExport.download(contributions.csv({...result,rows},query),'text/csv;charset=utf-8','mentat-chart-studio.csv');status('Exported '+fmt(rows.length)+' groups with source and accounting provenance.');}
+      else{const svg=view.el('canvas').querySelector('svg');if(!svg)throw new Error('This view has no image. Download its data CSV.');await MentatExport.image(svg,format,view.title,view.scope,'mentat-chart-studio');}
     }catch(error){failure(error.message);}finally{exporting=false;}
   }
 
@@ -1470,6 +1542,316 @@
     }
   }
 
+  /* ---------------------------------------------------------------- board */
+
+  // Canvas mode as a board of 1, 2 or 4 tiles, each holding one sheet. Exactly
+  // one tile is selected, and the selected tile is the sheet `active` names, so
+  // the Inspector, Show Me, Export and "Add to briefing" have one answer to
+  // "which chart?" whether a board is up or not. Nothing here reaches the URL or
+  // a storage key of its own: the board rides in the workspace entry beside the
+  // sheets (D-039).
+  const BOARD_TILES = [1, 2, 4];
+  const canvasOnly = () => {
+    const host = document.querySelector('#view-chart-studio .studio');
+    return !!(host && host.classList.contains('studio-options-hidden'));
+  };
+  const boardTiles = () => (board && !overviewMode && !dataSourceTab && canvasOnly()) ? board.tiles : 1;
+  const filledSlots = () => board ? board.slots.filter(at => at != null).length : 0;
+
+  // What a sheet last drew, kept by its own id so it survives a re-index.
+  // Keyed by the source as well as the sheet: sheet ids start again at s1 in every
+  // workspace, so a bare id would hand a tile the figures another report left behind.
+  const tileKey = state => sourceKey + '|' + ((state && state.id) || '');
+  function tileRecord(state) {
+    const key = tileKey(state);
+    if (!tileMemory.has(key)) {
+      tileMemory.set(key, {revision: 0, waiting: null, request: null, result: null,
+        title: '', scope: '', offset: 0});
+    }
+    return tileMemory.get(key);
+  }
+  // Nothing is remembered for a sheet that is not on the board. The map is at most
+  // four entries wide, and a tile cannot be handed what it drew two arrangements ago.
+  function pruneTileMemory() {
+    const keep = new Set((board ? board.slots : []).filter(at => at != null).map(at => tileKey(sheets[at])));
+    for (const key of [...tileMemory.keys()]) {
+      if (keep.has(key)) continue;
+      releaseFlight(tileMemory.get(key));
+      tileMemory.delete(key);
+    }
+  }
+  // The tile's own title, subtitle, canvas, table, note, reconciliation strip and
+  // status line. Anything else a render path writes belongs to the chrome: the
+  // selected tile writes the real one, an unselected tile writes a node nobody
+  // can see, which is how one render path serves both without a flag per line.
+  function tileNodes(tile, selected) {
+    const spare = new Map();
+    return id => {
+      const own = tile.querySelector('.studio-board-tile-' + id);
+      if (own) return own;
+      if (selected) return el(id);
+      if (!spare.has(id)) spare.set(id, document.createElement('div'));
+      return spare.get(id);
+    };
+  }
+  function tileSurface(tile, index, selected) {
+    const state = sheets[index], record = tileRecord(state);
+    return {state: state, index: index, el: tileNodes(tile, selected), primary: selected,
+      flight: record, canvasClass: 'studio-board-tile-canvas ',
+      // The selected tile also moves the console's own ticket, so a record
+      // inspection started against the previous chart is still invalidated.
+      bump: () => { if (selected) ++contributionRevision; return ++record.revision; },
+      stale: ticket => ticket !== record.revision,
+      ticket: () => record.revision,
+      // Its own page. The group pager, the label under the chart and the caption
+      // an export carries all read this one number, so a tile on page two and the
+      // tile beside it on page one can never describe each other's figures.
+      get offset() { return record.offset; }, set offset(value) { record.offset = value; },
+      get request() { return record.request; },
+      set request(value) { record.request = value; if (selected) contributionRequest = value; },
+      get result() { return record.result; },
+      set result(value) { record.result = value; if (selected) contributionResult = value; },
+      get title() { return record.title; },
+      set title(value) { record.title = value; if (selected) lastTitle = value; },
+      get scope() { return record.scope; },
+      set scope(value) { record.scope = value; if (selected) lastScope = value; }};
+  }
+  // Export, Copy image, Print and Add to briefing act on the selected tile when
+  // a board is up, and on the single canvas when it is not.
+  function activeSurface() {
+    return boardSurfaces.find(view => view && view.primary) || mainSurface();
+  }
+  function syncBoardSelection() {
+    if (!board || board.slots.includes(active)) return;
+    const first = board.slots.find(at => at != null);
+    if (first != null) active = first;
+  }
+  // A sheet can leave (a saved view with fewer sheets opens, an undo steps back),
+  // and a slot naming one that is gone would draw a tile from nothing. The tile
+  // count is the reader's choice and is kept; the slot is cleared.
+  function settleBoard() {
+    if (!board) return;
+    const tiles = BOARD_TILES.includes(board.tiles) ? board.tiles : 1;
+    if (tiles === 1) { board = null; return; }
+    const taken = new Set(), slots = [];
+    for (let slot = 0; slot < tiles; slot += 1) {
+      const at = (board.slots || [])[slot];
+      const keep = Number.isInteger(at) && at >= 0 && at < sheets.length && !taken.has(at);
+      slots.push(keep ? at : null);
+      if (keep) taken.add(at);
+    }
+    board = core.normalizeBoard({sheets: sheets, board: {tiles: tiles, slots: slots}});
+    syncBoardSelection();
+  }
+  // A sheet inserted above a placed one shifts its index, so the board follows
+  // the sheets rather than the numbers.
+  function shiftBoard(at) {
+    if (!board) return;
+    board.slots = board.slots.map(slot => (slot == null || slot < at) ? slot : slot + 1);
+  }
+  // Putting a sheet in a tile, or emptying one, is an edit like any other: it goes
+  // through commit(), so Undo steps back through it and Redo brings it back.
+  function placeInSlot(slot, index) {
+    if (!board) return;
+    commit(() => {
+      board.slots = board.slots.map((at, other) => (index != null && at === index && other !== slot) ? null : at);
+      board.slots[slot] = index;
+      if (index != null) active = index; else syncBoardSelection();
+    });
+  }
+  function setBoard(tiles) {
+    if (!BOARD_TILES.includes(tiles)) return;
+    if ((board ? board.tiles : 1) === tiles) return;
+    commit(() => arrangeBoard(tiles));
+  }
+  function arrangeBoard(tiles) {
+    if (tiles === 1) board = null;
+    else {
+      const taken = new Set(), slots = [];
+      for (let slot = 0; slot < tiles; slot += 1) {
+        const at = board ? board.slots[slot] : (slot === 0 ? active : null);
+        const keep = Number.isInteger(at) && at >= 0 && at < sheets.length && !taken.has(at);
+        slots.push(keep ? at : null);
+        if (keep) taken.add(at);
+      }
+      if (!slots.includes(active) && slots.indexOf(null) >= 0) {
+        slots[slots.indexOf(null)] = active;
+        taken.add(active);
+      }
+      // An empty tile beside a full one is a hole nobody asked for, so the
+      // sheets not placed yet fill the rest in their own order.
+      for (let slot = 0; slot < slots.length; slot += 1) {
+        if (slots[slot] != null) continue;
+        const next = sheets.findIndex((sheet, at) => !taken.has(at));
+        if (next < 0) break;
+        slots[slot] = next;
+        taken.add(next);
+      }
+      board = {tiles: tiles, slots: slots};
+      syncBoardSelection();
+    }
+  }
+  // A sheet sits in one tile only, so a tile offers the sheet it holds and the
+  // sheets no other tile has taken. The last filled tile keeps its sheet: an empty
+  // board would leave no tile selected and nothing for the Inspector.
+  function sheetChoices(index, slot) {
+    const placed = new Set(board.slots.filter((at, other) => at != null && other !== slot));
+    const options = index == null ? [['', 'Choose a sheet']]
+      : filledSlots() > 1 ? [['', 'Empty this tile']] : [];
+    sheets.forEach((entry, at) => { if (!placed.has(at)) options.push([String(at), entry.name]); });
+    return options;
+  }
+  // Everything about a tile that can change while the tile itself stays: which
+  // sheet it holds, whether it is the selected one, what its select offers. The
+  // select is only rewritten when its choices really differ, so a reader with the
+  // list open, or the keyboard in it, keeps it.
+  function dressTile(tile, index, slot) {
+    const state = index == null ? null : sheets[index];
+    const selected = state != null && index === active;
+    tile.classList.toggle('is-selected', selected);
+    tile.dataset.sheet = state ? state.id : '';
+    const select = tile.querySelector('.studio-board-tile-sheet');
+    const options = sheetChoices(index, slot);
+    const same = select.options.length === options.length
+      && [...select.options].every((option, at) => option.value === options[at][0]
+        && option.textContent === options[at][1]);
+    if (!same) select.replaceChildren(...options.map(([value, label]) => new Option(label, value)));
+    const wanted = state == null ? '' : String(index);
+    if (select.value !== wanted) select.value = wanted;
+    select.onchange = () => placeInSlot(slot, select.value === '' ? null : Number(select.value));
+    const head = tile.querySelector('.studio-board-tile-head');
+    let mark = tile.querySelector('.studio-board-tile-mark');
+    if (selected && !mark) {
+      mark = document.createElement('span');
+      mark.className = 'studio-board-tile-mark';
+      mark.textContent = 'Selected \u00b7 the Inspector edits this tile';
+      head.append(mark);
+    } else if (!selected && mark) {
+      mark.remove();
+    }
+    tile.onclick = event => {
+      if (event.target.closest('.studio-board-tile-head')) return;
+      if (state == null || index === active) return;
+      active = index;
+      persist();
+      renderAll();
+    };
+  }
+  function buildTile(index, slot) {
+    const state = index == null ? null : sheets[index];
+    const tile = document.createElement('section');
+    tile.className = 'studio-board-tile';
+    tile.setAttribute('aria-label', 'Board tile ' + (slot + 1));
+    const head = document.createElement('div');
+    head.className = 'studio-board-tile-head';
+    const select = document.createElement('select');
+    select.className = 'studio-board-tile-sheet';
+    select.setAttribute('aria-label', 'Sheet in tile ' + (slot + 1));
+    head.append(select);
+    const title = document.createElement('h3');
+    title.className = 'studio-board-tile-title';
+    const subtitle = document.createElement('p');
+    subtitle.className = 'studio-board-tile-subtitle';
+    const canvas = document.createElement('div');
+    canvas.className = 'studio-board-tile-canvas studio-canvas fit-' + (state ? state.fit : 'standard');
+    const table = document.createElement('div');
+    table.className = 'studio-board-tile-table table-scroll';
+    table.hidden = true;
+    const foot = document.createElement('div');
+    foot.className = 'studio-board-tile-foot';
+    const reconcile = document.createElement('p');
+    reconcile.className = 'studio-board-tile-reconcile studio-reconcile';
+    reconcile.setAttribute('role', 'status');
+    reconcile.hidden = true;
+    const note = document.createElement('p');
+    note.className = 'studio-board-tile-note';
+    const status = document.createElement('p');
+    status.className = 'studio-board-tile-status';
+    foot.append(reconcile, note, status);
+    tile.append(head, title, subtitle);
+    if (state == null) {
+      const empty = document.createElement('p');
+      empty.className = 'studio-board-tile-empty';
+      empty.textContent = 'Empty tile. Choose a sheet for it above.';
+      canvas.hidden = true;
+      tile.append(empty);
+    }
+    tile.append(canvas, table, foot);
+    dressTile(tile, index, slot);
+    return tile;
+  }
+  // A tile's nodes going away for good. The one map instance lives in a canvas, so
+  // a tile that was hosting it takes it with it rather than leaving the instance
+  // and its listeners behind.
+  function discardTile(node) {
+    if (!node) return;
+    if (contributionMapHost && node.contains(contributionMapHost)) {
+      clearTimeout(geometryTimer);
+      contributionMap?.destroy?.();
+      contributionMap = null;
+      contributionMapHost = null;
+      ++geometryRevision;
+    }
+    node.remove();
+  }
+  function renderBoard() {
+    const host = el('board');
+    const tiles = boardTiles();
+    const studio = document.querySelector('#view-chart-studio .studio');
+    if (studio) studio.classList.toggle('studio-board-on', tiles > 1);
+    boardSurfaces = [];
+    if (tiles < 2) {
+      for (const node of boardNodes) discardTile(node);
+      boardNodes = [];
+      host.hidden = true;
+      host.replaceChildren();
+      pruneTileMemory();
+      return;
+    }
+    pruneTileMemory();
+    // The board takes the canvas over, so the canvas is emptied rather than left
+    // holding a drawing that only CSS is hiding.
+    el('canvas').replaceChildren();
+    syncBoardSelection();
+    host.hidden = false;
+    host.className = 'studio-board studio-board-' + tiles;
+    // A slot that still holds the same sheet keeps its own nodes: its drawing, its
+    // title, its reconciliation line, its scroll and the focus in it all survive a
+    // render, so a refresh in flight - or a cancelled one - leaves the last loaded
+    // view on screen exactly as the single canvas does.
+    const made = board.slots.map((index, slot) => {
+      const kept = boardNodes[slot];
+      const wanted = index == null ? '' : sheets[index].id;
+      if (kept && kept.dataset.sheet === wanted) { dressTile(kept, index, slot); return kept; }
+      discardTile(kept);
+      return buildTile(index, slot);
+    });
+    for (const node of boardNodes.slice(tiles)) discardTile(node);
+    boardNodes = made;
+    // Only touch the host when the arrangement really changed: re-inserting a node
+    // that is already in place would reset its scroll and drop the focus in it.
+    const showing = [...host.children];
+    if (showing.length !== made.length || made.some((node, at) => showing[at] !== node)) {
+      host.replaceChildren(...made);
+    }
+    board.slots.forEach((index, slot) => {
+      if (index == null) return;
+      const view = tileSurface(made[slot], index, index === active);
+      boardSurfaces[slot] = view;
+      renderView(view);
+    });
+  }
+  // One briefing card per filled tile, in slot order, each made by the same
+  // description a single "Add to briefing" would make for that sheet. One
+  // serializer, so a board slide and a single slide can never disagree.
+  async function boardToBriefing() {
+    if (!window.MentatBriefing) { failure('Briefing needs a console restart.'); return; }
+    const filled = boardSurfaces.filter(Boolean);
+    if (!filled.length) { failure('The board has no charts on it yet.'); return; }
+    failure('');
+    for (const view of filled) await window.MentatBriefing.capture(currentChart(view));
+  }
+
   /* ---------------------------------------------------------------- sheets */
 
   function renderSheets() {
@@ -1596,7 +1978,7 @@
     return true;
   }
 
-  function renderTable(result, config) {
+  function renderTable(result, config, node) {
     const rows = paint.tableRows(result, config, data);
     const table = document.createElement('table');
     const head = document.createElement('thead');
@@ -1618,29 +2000,31 @@
       body.append(tr);
     }
     table.append(head, body);
-    el('table').replaceChildren(table);
+    node('table').replaceChildren(table);
     if (rows.length > 401) {
       const note = document.createElement('p');
       note.className = 'studio-note';
       note.textContent = 'Showing the first 400 of ' + fmt(rows.length - 1) + ' rows. Download the data CSV for every value.';
-      el('table').prepend(note);
+      node('table').prepend(note);
     }
   }
 
-  function renderView() {
-    if(verified()){renderContributionView();return;}
-    lastResult = null; lastConfig = null;
-    el('reconcile').hidden = true;
-    el('canvas').replaceChildren();
-    el('table').replaceChildren();
-    el('status').replaceChildren();
+  function renderView(view) {
+    view = view || mainSurface();
+    const node = view.el, state = view.state;
+    if(verified()){renderContributionView(view);return;}
+    if (view.primary) { lastResult = null; lastConfig = null; }
+    node('reconcile').hidden = true;
+    node('canvas').replaceChildren();
+    node('table').replaceChildren();
+    node('status').replaceChildren();
     if (!data) {
-      el('title').textContent = '';
-      el('subtitle').textContent = '';
-      el('note').textContent = 'Choose a report worksheet in the Data panel to begin.';
+      node('title').textContent = '';
+      node('subtitle').textContent = '';
+      node('note').textContent = 'Choose a report worksheet in the Data panel to begin.';
       return;
     }
-    const report = core.compileReport(sheet(), columns());
+    const report = core.compileReport(state, columns());
     const markName = (core.MARK_TYPES.find(m => m[0] === report.markType) || ['', 'Automatic'])[1];
     // Provisional only: measureLabel reads the built result to tell an
     // aggregated view from one that plots individual values, so a box,
@@ -1648,35 +2032,35 @@
     // is set again below, once math.build has produced that result.
     // The h2 never names the console (item 17): before a chart is drawn it is
      // empty, and an empty title is not rendered at all (chart-studio.css).
-    el('title').textContent = report.config
+    node('title').textContent = report.config
       ? paint.measureLabel(report.config, null, data) + ' · ' + markName
       : '';
-    el('subtitle').textContent = report.config ? scopeSubtitle() : '';
+    node('subtitle').textContent = report.config ? scopeSubtitle(state) : '';
     if (!report.config || report.issues.length) {
-      el('note').textContent = [...worksheetNotes(),
+      node('note').textContent = [...worksheetNotes(state),
         report.issues.join(' ') || 'Drag a field onto Columns or Rows.'].join(' ');
-      el('canvas').hidden = false;
-      el('table').hidden = true;
+      node('canvas').hidden = false;
+      node('table').hidden = true;
       return;
     }
     let result;
     try {
       result = math.build(data, report.config);
     } catch (e) {
-      el('note').textContent = e.message;
-      el('table').hidden = true;
+      node('note').textContent = e.message;
+      node('table').hidden = true;
       return;
     }
-    result = core.sortResult(result, sheet().sort);
-    lastResult = result; lastConfig = report.config;
+    result = core.sortResult(result, state.sort);
+    if (view.primary) { lastResult = result; lastConfig = report.config; }
     const measure = paint.measureLabel(report.config, result, data);
-    el('title').textContent = measure + ' · ' + markName;
-    el('subtitle').textContent = scopeSubtitle();
-    const source = sheet().source;
+    node('title').textContent = measure + ' · ' + markName;
+    node('subtitle').textContent = scopeSubtitle(state);
+    const source = state.source;
     const filterText = report.config.filters
       .map(f => (core.fieldAt(report.fields, f.column) || {name: 'field'}).name + ' ' + f.op + ' ' + f.value).join('; ');
-    lastTitle = el('title').textContent;
-    lastScope = [source.reportName + ' / ' + data.sheet,
+    view.title = node('title').textContent;
+    view.scope = [source.reportName + ' / ' + data.sheet,
       (result.split ? fmt(result.selected) + ' values from ' + fmt(data.row_count) + ' worksheet rows selected (' + result.split.cells + ' multi-value cells split); '
         : result.selected + ' of ' + data.row_count + ' rows selected; ') + result.excluded + ' rows excluded for missing or non-numeric values.',
       'Group/X: ' + (result.groupingLabel || (core.fieldAt(report.fields, report.config.x) || {name: 'All rows'}).name) + '.',
@@ -1684,29 +2068,29 @@
       'Worksheet rows: ' + (report.config.start || 'first data row') + '–' + (report.config.end || 'last data row') + '.',
       'Row count limit: ' + (report.config.limit || 'all matching rows') + ' (after filters).',
       'Filters: ' + (filterText || 'none') + '.',
-      'Sort: ' + sheet().sort + '.',
+      'Sort: ' + state.sort + '.',
       'Group limit: ' + report.config.maxGroups + '.',
       'Split multi-value cells: ' + (report.config.splitMulti ? 'on' : 'off') + '.',
       'SHA-256: ' + data.sha256 + '.'].join(' ');
-    if (result.note) lastScope += ' ' + result.note;
+    if (result.note) view.scope += ' ' + result.note;
     // Recipient-committee activity is not the industry's money, so a grand
     // total over it would print a figure that reads as one the report
     // reconciles to. The engine's own refusal field carries the reason into
     // totalNote(), grandTotal() and the status line at once.
     const committee = core.committeeActivitySheet(data.sheet);
     if (committee && !result.totalRefusal) result.totalRefusal = committee;
-    const notes = [...worksheetNotes(), ...report.notes];
+    const notes = [...worksheetNotes(state), ...report.notes];
 
     if (report.renderMode === 'table') {
-      el('canvas').hidden = true;
-      el('table').hidden = false;
-      renderTable(result, report.config);
+      node('canvas').hidden = true;
+      node('table').hidden = false;
+      renderTable(result, report.config, node);
     } else {
-      el('canvas').hidden = false;
-      el('table').hidden = true;
-      const drawn = paint.chartSVG(result, measure, report.config, data, lastTitle, lastScope);
-      if (sheet().showLabels && !overlayLabels(drawn.svg, result)) notes.push('Mark labels are unavailable for this view.');
-      const analytics = sheet().analytics;
+      node('canvas').hidden = false;
+      node('table').hidden = true;
+      const drawn = paint.chartSVG(result, measure, report.config, data, view.title, view.scope);
+      if (state.showLabels && !overlayLabels(drawn.svg, result)) notes.push('Mark labels are unavailable for this view.');
+      const analytics = state.analytics;
       const references = core.referenceValues(result, analytics);
       if (references.length && !drawn.plot) notes.push('Reference lines need a value axis; this view has none.');
       // Say why a requested overlay is missing, but only when it was requested.
@@ -1721,15 +2105,15 @@
           notes.push('A grand total is not defined for this view.');
         }
       }
-      el('canvas').className = 'studio-canvas fit-' + sheet().fit;
-      el('canvas').replaceChildren(drawn.svg);
+      node('canvas').className = view.canvasClass + 'studio-canvas fit-' + state.fit;
+      node('canvas').replaceChildren(drawn.svg);
     }
-    el('note').textContent = notes.concat(result.note ? [result.note] : []).join(' ') ||
+    node('note').textContent = notes.concat(result.note ? [result.note] : []).join(' ') ||
       source.reportName + ' / ' + data.sheet + ' · ' + fmt(result.selected) + ' rows selected';
-    renderStatus(result, report.config);
+    renderStatus(result, report.config, node);
   }
 
-  function renderStatus(result, config) {
+  function renderStatus(result, config, node) {
     const summary = core.rowsToMarksSummary(result, config, columns());
     if (!summary) return;
     const parts = [
@@ -1748,7 +2132,7 @@
     badge.title = 'Every value is read from the local report file and drawn in this browser.';
     nodes.push(badge);
     if (parts.length > 2) nodes[2].title = 'Total of the plotted marks, each aggregated as ' + config.aggregation + '.';
-    el('status').replaceChildren(...nodes);
+    node('status').replaceChildren(...nodes);
   }
 
   function renderDataSource() {
@@ -1852,6 +2236,9 @@
     el('labels').setAttribute('aria-pressed', String(!!state.showLabels));
     el('fit').value = state.fit;
     el('showme-toggle').setAttribute('aria-pressed', String(!!el('showme-details').open));
+    for (const tiles of BOARD_TILES) {
+      el('board-' + tiles).setAttribute('aria-pressed', String((board ? board.tiles : 1) === tiles));
+    }
     el('param-start').value = state.params.start || '';
     el('param-end').value = state.params.end || '';
     el('param-limit').value = state.params.limit || '';
@@ -1863,6 +2250,7 @@
   }
 
   function renderAll() {
+    settleBoard();
     syncContributionControls();
     renderToolbar();
     renderFields();
@@ -1876,8 +2264,9 @@
     renderSourceSummary();
     renderFilterRows();
     renderOverviewControls();
+    renderBoard();
     if (overviewMode) renderOverview();
-    else if (!dataSourceTab) renderView();
+    else if (!dataSourceTab && boardTiles() < 2) renderView();
     window.dispatchEvent(new Event('mentat:studio-state'));
   }
 
@@ -1887,26 +2276,30 @@
     if(verified()){downloadContributions(format);return;}
     if (!lastResult) { failure('Build a view before downloading.'); return; }
     failure('');
+    // Everything a download carries comes off the surface the reader is looking
+    // at: its drawing, its title and the scope line that names its page.
+    const view = activeSurface();
     if (format === 'csv') {
       const quote = v => '"' + String(typeof v === 'string' && /^[=+\-@\t\r]/.test(v) ? "'" + v : v).replaceAll('"', '""') + '"';
-      const rows = [['Chart', lastTitle], ['Scope', lastScope], ['Note', el('note').textContent],
+      const rows = [['Chart', view.title], ['Scope', view.scope], ['Note', view.el('note').textContent],
         ...paint.tableRows(lastResult, lastConfig, data)];
       MentatExport.download('\uFEFF' + rows.map(r => r.map(quote).join(',')).join('\r\n'),
         'text/csv;charset=utf-8', 'mentat-chart-studio.csv');
       return;
     }
-    const svg = el('canvas').firstChild;
+    const svg = view.el('canvas').firstChild;
     if (!svg) { failure('This view has no image to export. Download the data CSV instead.'); return; }
-    MentatExport.image(svg, format, lastTitle, lastScope, 'mentat-chart-studio').catch(e => failure(e.message));
+    MentatExport.image(svg, format, view.title, view.scope, 'mentat-chart-studio').catch(e => failure(e.message));
   }
 
   // Everything that takes a chart out of this console needs the same account
   // of it. One reader of the live view, so a download, a clipboard image, a
   // print sheet and a slide can never disagree about what they are showing.
-  function currentChart() {
-    const state = sheet(), source = state.source || {};
+  function currentChart(view) {
+    view = view || activeSurface();
+    const state = view.state, source = state.source || {};
     const basisLabel = verified()
-      ? (contributions.BASIS[basis()] || [])[0] || ''
+      ? (contributions.BASIS[basisOf(state)] || [])[0] || ''
       : 'Worksheet values';
     // Both of these leave the console: into the briefing the server stores,
     // and from there into every slide's speaker notes. The server keeps each
@@ -1918,11 +2311,11 @@
     const sourceLabel = source.reportName || '';
     const sha = source.sha256 || (data && data.sha256) || '';
     return {
-      svg: el('canvas').querySelector('svg'),
-      title: lastTitle || el('title').textContent || 'Chart Studio',
-      scope: lastScope || scopeText() || '',
+      svg: view.el('canvas').querySelector('svg'),
+      title: view.title || view.el('title').textContent || 'Chart Studio',
+      scope: view.scope || scopeText() || '',
       chip: scopeText(),
-      note: el('note').textContent || '',
+      note: view.el('note').textContent || '',
       basis: basisLabel,
       sheetId: state.id,
       sheetName: state.name,
@@ -2052,6 +2445,10 @@
   async function saveViewNamed(name) {
     const record = {name, sourceKey, source: viewSourceRecord(),
       sheets: JSON.parse(JSON.stringify(sheets)), active};
+    // Written only for a board of 2 or 4 tiles, so a view saved on the single
+    // canvas is the payload it has always been (studio_api.json v2).
+    const shape = core.normalizeBoard({sheets: sheets, board: board});
+    if (shape && shape.tiles > 1) record.board = shape;
     failure('');
     try {
       const body = await api('/api/studio/views', record);
@@ -2115,11 +2512,18 @@
       commit(() => {
         sheets = full.sheets.map(s => core.migrateSheet(Object.assign(core.createSheet(s.name, s.id), s)));
         active = Math.min(Math.max(0, full.active | 0), sheets.length - 1);
+        // A view without a board opens as one sheet, exactly as before. A board
+        // that does not describe its own sheets is dropped with a word about it,
+        // because failing the whole open over a layout would lose the sheets too.
+        const opened = core.normalizeBoard(full);
+        board = opened && opened.tiles > 1 ? opened : null;
+        if (board) { syncBoardSelection(); if (!canvasOnly()) applyOptionsHidden(true); }
         dataSourceTab = false;
       });
     } finally { holdingSavedId = false; }
     rememberSavedView(full.id);
-    status('Opened view "' + full.name + '".');
+    status('Opened view "' + full.name + '".'
+      + (full.board && !board ? ' Its board did not match its sheets, so it opened as one sheet.' : ''));
   }
 
   // The views that lived in this browser before the server had a place for
@@ -2476,10 +2880,10 @@
   // The strip only means anything when both views were asked the same
   // question, so it fires for a sheet whose row filters are a company, a
   // cycle, or both - each one exact single value - and nothing else.
-  function reconcileScope() {
-    const meta = core.classifyFields(columns(), sheet().types);
+  function reconcileScope(state) {
+    const meta = core.classifyFields(columns(), state.types);
     const scope = {company: '', cycle: ''};
-    for (const filter of sheet().filters || []) {
+    for (const filter of state.filters || []) {
       if (!core.filterActive(filter)) continue;
       const field = meta.fields.find(f => f.index === Number(filter.column));
       const id = field ? field.id : '';
@@ -2493,22 +2897,22 @@
 
   // A Graph request that fails, or a scope Graph cannot express, leaves the
   // strip away entirely. An absent strip is honest; a guessed one is not.
-  async function renderReconcile(result) {
-    const node = el('reconcile');
+  async function renderReconcile(result, view, ticket) {
+    view = view || mainSurface();
+    const node = view.el('reconcile');
     node.hidden = true;
     if (!verified() || !result) return;
-    const scope = reconcileScope();
+    const scope = reconcileScope(view.state);
     if (!scope) return;
-    const ticket = contributionRevision;
     let graphView;
     try { graphView = await graphTotals(scope.company, scope.cycle); }
     catch { return; }
-    if (ticket !== contributionRevision || !verified()) return;
+    if (view.stale(ticket) || !verified()) return;
     // Whatever cycle Graph pinned is the cycle this sentence has to name. Saying
     // "All cycles" while Graph displays one was the strip describing a screen
     // nobody was looking at.
     const graphCycle = String(((graphView || {}).filters || {}).cycle || '');
-    const state = contributions.reconcile(result, basis(), graphView,
+    const state = contributions.reconcile(result, basisOf(view.state), graphView,
       Object.assign({}, graphFilterState(), {studioCycle: scope.cycle, graphCycle: graphCycle}));
     if (state.reasonId === 'unavailable') return;
     const money = value => contributionPlot.format(value, 'amount');
@@ -2583,7 +2987,7 @@
     overviewMode = mode === 'overview';
     if (overviewMode) el('inspection').hidden = true;
     if (!overviewMode) applyOptionsHidden(mode === 'canvas');
-    if (overviewMode !== was) renderAll(); else syncViewMode();
+    if (overviewMode !== was || (board && board.tiles > 1)) renderAll(); else syncViewMode();
   }
   const applyOptionsHidden = hidden => {
     const pane = window.MentatStudioPane;
@@ -2645,6 +3049,10 @@
     copy.id = 's' + Date.now();
     copy.name = nextName();
     sheets.splice(active + 1, 0, copy);
+    // The copy takes the selected tile, because the copy is what the reader is
+    // about to edit; every placed sheet above it moves up one with the splice.
+    shiftBoard(active + 1);
+    if (board) { const at = board.slots.indexOf(active); if (at >= 0) board.slots[at] = active + 1; }
     active += 1;
     dataSourceTab = false;
   });
@@ -2652,6 +3060,7 @@
     const fresh = core.createSheet(nextName(), 's' + Date.now());
     fresh.source = Object.assign({}, sheet().source);
     sheets.push(fresh);
+    if (board) { const at = board.slots.indexOf(active); board.slots[at >= 0 ? at : 0] = sheets.length - 1; }
     active = sheets.length - 1;
     dataSourceTab = false;
   });
@@ -2661,6 +3070,8 @@
   el('download-csv').onclick = () => download('csv');
   el('copy-image').onclick = () => copyImage();
   el('print-chart').onclick = () => printChart();
+  for (const tiles of BOARD_TILES) el('board-' + tiles).onclick = () => setBoard(tiles);
+  el('board-briefing').onclick = () => boardToBriefing();
   el('save-view').onclick = () => saveView();
   el('open-views').onclick = () => openViews();
   // The tray itself lives in chart-briefing.js. A console that is not yet
@@ -2713,12 +3124,13 @@
   el('report').onchange = loadSheets;
   el('sheet').onchange = () => scan(false);
   el('rescan').onclick = () => scan(true);
-  el('source-mode').onchange=()=>{persist();data=null;sourceKey='';clearTimeout(geometryTimer);contributionController?.abort();++contributionRevision;contributionMap?.destroy?.();contributionMap=null;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.MARK_TYPES);loadRuns();}};
+  el('source-mode').onchange=()=>{persist();data=null;sourceKey='';clearTimeout(geometryTimer);abortContributionRequests();tileMemory.clear();++contributionRevision;contributionMap?.destroy?.();contributionMap=null;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.MARK_TYPES);loadRuns();}};
   el('dataset').onchange=()=>{persist();selectContributionDataset();};
-  el('basis').onchange=()=>commit(()=>{sheet().source.basis=el('basis').value;contributionOffset=0;});
-  el('refresh-data').onclick=()=>{++contributionCacheEpoch;contributionController?.abort();contributionPending=null;contributionCache.clear();memberCache.clear();graphTotalsCache.clear();loadContributions(true);};
-  el('groups-prev').onclick=()=>{contributionOffset=Math.max(0,contributionOffset-(Number(sheet().params.maxGroups)||60));renderView();};
-  el('groups-next').onclick=()=>{contributionOffset+=Number(sheet().params.maxGroups)||60;renderView();};
+  el('basis').onchange=()=>commit(()=>{sheet().source.basis=el('basis').value;activeSurface().offset=0;});
+  el('refresh-data').onclick=()=>{++contributionCacheEpoch;abortContributionRequests();contributionCache.clear();memberCache.clear();graphTotalsCache.clear();loadContributions(true);};
+    // The pager pages the tile the reader is looking at, and redraws that tile.
+  el('groups-prev').onclick=()=>{const view=activeSurface();view.offset=Math.max(0,view.offset-(Number(view.state.params.maxGroups)||60));renderView(view);};
+  el('groups-next').onclick=()=>{const view=activeSurface();view.offset+=Number(view.state.params.maxGroups)||60;renderView(view);};
   el('inspect-all').onclick=()=>inspectContributions();
   el('inspection-close').onclick=()=>{++recordRevision;el('inspection').hidden=true;};
   el('record-prev').onclick=()=>inspectContributions(recordSelection,Math.max(0,recordOffset-100));
@@ -2768,8 +3180,7 @@
   // Cancelling aborts the request that is preparing and leaves the last good
   // view exactly where it was: renderContributionView ignores AbortError.
   el('progress-cancel').onclick = () => {
-    contributionController?.abort();
-    contributionPending = null;
+    abortContributionRequests();
     progressDepth = 0;
     clearProgress();
     status('Cancelled. Showing the last loaded view.');
