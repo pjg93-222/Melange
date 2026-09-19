@@ -9,7 +9,9 @@ fec_transfer_context <- function(directory, roots, candidate_links, cycles, max_
       next
     }
     index <- jsonlite::fromJSON(path)
-    if (is.null(index$version) || index$version != 3L) {
+    # VERSION 4 partitions each reused-transaction-id group by identity and
+    # carries per-source withheld dollars. A v3 index has neither.
+    if (is.null(index$version) || index$version != 4L) {
       coverage[[length(coverage) + 1L]] <- list(cycle = target_cycle,
         status = "stale_transfer_index", unresolved_all_sources = TRUE)
       next
@@ -23,6 +25,10 @@ fec_transfer_context <- function(directory, roots, candidate_links, cycles, max_
       source_sha256 = index$source_sha256, counts = index$counts,
       ledger_path = index$ledger_path, max_depth = max_depth,
       unresolved_sources = as.list(index$unresolved_sources),
+      # Per-source withheld dollars travel beside the source list: the list says
+      # WHICH committees hold an unplaceable row, this says HOW MUCH, and only
+      # the amount lets the allocator keep that committee's clean edges.
+      unresolved_source_amounts = as.list(index$unresolved_source_amounts),
       unresolved_all_sources = isTRUE(index$unresolved_all_sources))
     if (!nrow(rows)) next
     stops <- candidate_links[cycle == target_cycle & designation %in% c("A", "P"), committee_id]

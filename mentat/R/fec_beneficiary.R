@@ -357,7 +357,21 @@ fec_downstream_direction <- function(values) {
 #   2 = transaction_date forced to character (leading zeros preserved)
 #   3 = version key scoped to the transaction-date year
 #   4 = competing report versions remain unresolved without filing evidence
-FEC_PAS2_PARSER_VERSION <- "4"
+#   5 = rows inside a reused transaction id are partitioned by identity
+FEC_PAS2_PARSER_VERSION <- "5"
+
+# The mirror of tools/fec_transfer_graph.py's AMBIGUOUS_VERSION_POLICY, for the
+# rows that stay genuinely ambiguous: "count_latest" counts the highest-file_num
+# row of each withheld group and flags it unverified_version; "withhold" keeps
+# them out of the counted total under "Unresolved filing relationship".
+# "count_latest" is the default because a row loses its amount only where
+# evidence CONTRADICTS it and ambiguity keeps its dollars under an unverified
+# flag; because the latest filed version is the FEC's own convention; and
+# because counting the latest is never further from the truth than withholding
+# both - an amendment it gets exactly right, and two transactions it undercounts
+# by one row where withholding undercounts by two.
+# It is part of the cache signature, so changing it rebuilds the index.
+FEC_PAS2_AMBIGUOUS_VERSION_POLICY <- "count_latest"
 
 fec_pas2_cache_file <- function(directory, cycles) {
   paths <- vapply(cycles, function(cycle) {
@@ -368,7 +382,8 @@ fec_pas2_cache_file <- function(directory, cycles) {
   if (length(missing)) stop("Missing official FEC committee-to-candidate file: ", missing[[1L]], call. = FALSE)
   signature <- paste(
     c(
-      paste0("p", FEC_PAS2_PARSER_VERSION),
+      paste0("p", FEC_PAS2_PARSER_VERSION,
+             substr(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, 1L, 1L)),
       substr(unname(tools::md5sum(paths)), 1L, 10L)
     ),
     collapse = "-"
@@ -423,6 +438,8 @@ fec_build_pas2_index <- function(directory, cycles) {
     rows <- rows[nzchar(committee_id)]
     rows[is.na(transaction_amount), transaction_amount := 0]
     rows[, original_order := .I]
+    parsed_date <- suppressWarnings(as.Date(rows$transaction_date_raw, format = "%m%d%Y"))
+    rows[, transaction_date := ifelse(is.na(parsed_date), "", format(parsed_date, "%Y-%m-%d"))]
     rows[, version_key := ifelse(
       nzchar(transaction_id),
       paste(committee_id, report_type, transaction_id, sep = "|"),
@@ -441,25 +458,122 @@ fec_build_pas2_index <- function(directory, cycles) {
     rows[, exact_duplicate := as.integer(
       nzchar(sub_id) & duplicated(sub_id)
     )]
-    # TRAN_ID is report-scoped. A transaction date (including its year) is
-    # editable, and Q1/M1 is not a report-family identifier. Preserve every
-    # competing version until filing-level evidence establishes the family.
+    # TRAN_ID is report-scoped AND it is only a label: filers reuse one schedule
+    # line label (`SE.5`) on every row of every filing they make, so the key
+    # collides across genuinely different expenditures. What a row IS is its
+    # counterparty, its amount, its date and its transaction type; the version
+    # question is asked only among rows that claim to be the same thing.
+    rows[, identity_key := paste(candidate_id, round(transaction_amount * 100),
+                                 transaction_date, transaction_type, sep = "|")]
+    rows[, live := exact_duplicate == 0L]
+    # Every grouped expression below is written so data.table's optimized
+    # aggregates apply: a sentinel column instead of `x[live]` inside max(), and
+    # sum() over a first-occurrence flag instead of uniqueN(). Written the
+    # obvious way these five expressions are evaluated once per group, which on
+    # 1.66M rows and ~1.6M groups costs over an hour per cycle.
+    #
+    # The same identity in a later filing is that transaction re-reported, and
+    # the amendment contradicts the earlier version of it.
+    rows[, live_file := ifelse(live, file_num_sort, -Inf)]
+    rows[, latest_identity_file := max(live_file), by = .(version_key, identity_key)]
+    rows[, superseded_by_amendment := as.integer(live & file_num_sort < latest_identity_file)]
+    rows[, live := live & superseded_by_amendment == 0L]
+    # The same identity several times inside the WINNING filing is ONE
+    # itemization loaded again under a second sub-ID. The group is already keyed
+    # by the FILER'S OWN transaction id, so two genuine equal gifts carry two
+    # transaction ids and never meet here. Rows are already ordered by filing,
+    # amendment and sub-ID descending, so the first one is the one to keep.
+    rows[, repeated_itemization := 0L]
+    rows[live == TRUE,
+         repeated_itemization := as.integer(duplicated(.SD)),
+         .SDcols = c("version_key", "identity_key")]
+    rows[, live := live & repeated_itemization == 0L]
+    # What remains in question: two surviving identities in DIFFERENT filings
+    # are candidate VERSIONS of one transaction only when they name the same
+    # candidate AND agree on the amount or on the date. An amendment corrects a
+    # figure or a date; rows that share neither have nothing in common but a
+    # recycled label - the same `SE.5` spent on the same candidate in two
+    # filings months apart for different sums is two expenditures, not a
+    # version. A blank candidate names nobody, so it never settles anything and
+    # keeps the conservative merge across the whole key.
+    surviving <- rows[live == TRUE, .(version_key, candidate_id, file_num_sort,
+                                      amount_cents = round(transaction_amount * 100),
+                                      transaction_date)]
+    data.table::setorder(surviving, version_key, candidate_id, amount_cents, file_num_sort)
+    surviving[, first_amount_file := as.integer(!duplicated(
+      surviving, by = c("version_key", "candidate_id", "amount_cents", "file_num_sort")))]
+    data.table::setorder(surviving, version_key, candidate_id, transaction_date, file_num_sort)
+    surviving[, first_date_file := as.integer(!duplicated(
+      surviving, by = c("version_key", "candidate_id", "transaction_date", "file_num_sort")))]
+    data.table::setorder(surviving, version_key, file_num_sort)
+    surviving[, first_file := as.integer(!duplicated(
+      surviving, by = c("version_key", "file_num_sort")))]
+    surviving[, blank := as.integer(!nzchar(candidate_id))]
+    version_stats <- surviving[, .(surviving_files = sum(first_file),
+                                   blank_rows = max(blank)), by = version_key]
+    amount_stats <- surviving[, .(amount_files = sum(first_amount_file)),
+                              by = .(version_key, candidate_id, amount_cents)]
+    date_stats <- surviving[, .(date_files = sum(first_date_file)),
+                            by = .(version_key, candidate_id, transaction_date)]
+    rows[, `:=`(surviving_files = 0L, blank_rows = 0L, amount_files = 0L, date_files = 0L,
+                amount_cents = round(transaction_amount * 100))]
+    rows[version_stats, on = "version_key",
+         `:=`(surviving_files = i.surviving_files, blank_rows = i.blank_rows)]
+    rows[amount_stats, on = c("version_key", "candidate_id", "amount_cents"),
+         amount_files := i.amount_files]
+    rows[date_stats, on = c("version_key", "candidate_id", "transaction_date"),
+         date_files := i.date_files]
     rows[, unresolved_version := as.integer(
-      sum(exact_duplicate == 0L) > 1L & !startsWith(version_key[[1L]], "SUB|")
-    ), by = version_key]
+      live & ((nzchar(candidate_id) & (amount_files > 1L | date_files > 1L)) |
+                (blank_rows > 0L & surviving_files > 1L))
+    )]
+    rows[, conflicted := unresolved_version == 1L & nzchar(candidate_id)]
+    # An identity that is alone in its group is a distinct transaction that
+    # merely reuses the label. It is counted, and the reuse stays visible.
+    distinct_identities <- rows[exact_duplicate == 0L, .(version_key, identity_key)]
+    data.table::setorder(distinct_identities, version_key, identity_key)
+    distinct_identities[, first_identity := as.integer(!duplicated(distinct_identities))]
+    reuse <- distinct_identities[, .(identities = sum(first_identity)), by = version_key]
+    rows[, tran_id_reused := 0L]
+    rows[reuse, on = "version_key", tran_id_reused := as.integer(i.identities > 1L)]
+    # Candidate-less rows are retained as evidence and never counted.
     rows[!nzchar(candidate_id) & memo_code != "X", unresolved_version := 1L]
-    rows[, superseded_by_amendment := 0L]
+    # The withheld dollars leave as an explicit share of the committee's
+    # outflow, sized at what a "latest filing wins" build would have counted in
+    # each withheld group rather than at the group's gross competing claims.
+    rows[, withheld_group := paste(version_key, candidate_id, sep = "|")]
+    rows[unresolved_version == 1L & blank_rows > 0L & surviving_files > 1L,
+         withheld_group := version_key]
+    rows[unresolved_version == 1L & !nzchar(candidate_id) &
+           !(blank_rows > 0L & surviving_files > 1L),
+         withheld_group := paste0("ROW|", original_order)]
+    rows[, unverified_version := 0L]
+    if (identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_latest")) {
+      rows[conflicted == TRUE, `:=`(
+        unresolved_version = 0L,
+        unverified_version = 1L,
+        superseded_by_amendment = as.integer(seq_len(.N) != which.max(file_num_sort))
+      ), by = withheld_group]
+    }
+    rows[, unresolved_version_amount := 0]
+    rows[unresolved_version == 1L, unresolved_version_amount := {
+      pick <- which.max(file_num_sort)
+      share <- rep(0, .N)
+      share[[pick]] <- max(transaction_amount[[pick]], 0)
+      share
+    }, by = withheld_group]
     rows[, include_in_total := ifelse(
-      exact_duplicate == 0L & unresolved_version == 0L & memo_code != "X",
+      exact_duplicate == 0L & repeated_itemization == 0L &
+        superseded_by_amendment == 0L & unresolved_version == 0L & memo_code != "X",
       "Yes", "No"
     )]
     rows[, exclusion_reason := ifelse(
       exact_duplicate == 1L, "Duplicate FEC sub-ID",
-      ifelse(unresolved_version == 1L, "Unresolved filing relationship",
-        ifelse(memo_code == "X", "Memo-only transaction", "Included"))
+      ifelse(repeated_itemization == 1L, "Repeated itemization in one filing",
+        ifelse(superseded_by_amendment == 1L, "Superseded filing amendment",
+          ifelse(unresolved_version == 1L, "Unresolved filing relationship",
+            ifelse(memo_code == "X", "Memo-only transaction", "Included"))))
     )]
-    parsed_date <- suppressWarnings(as.Date(rows$transaction_date_raw, format = "%m%d%Y"))
-    rows[, transaction_date := ifelse(is.na(parsed_date), "", format(parsed_date, "%Y-%m-%d"))]
     rows[, activity_type := fec_downstream_relationship(transaction_type)]
     rows[, support_oppose := fec_downstream_direction(transaction_type)]
     rows[, source_url := paste0(
@@ -468,7 +582,9 @@ fec_build_pas2_index <- function(directory, cycles) {
     data.table::setorder(rows, original_order)
     rows[, c(
       "original_order", "version_key", "amendment_priority", "file_num_sort",
-      "sub_id_sort", "transaction_date_raw"
+      "sub_id_sort", "transaction_date_raw", "identity_key", "live", "live_file",
+      "latest_identity_file", "surviving_files", "blank_rows",
+      "amount_files", "date_files", "amount_cents", "conflicted", "withheld_group"
     ) := NULL]
     rows
   })
@@ -677,7 +793,12 @@ fec_aggregate_downstream_activity <- function(downstream_activity, recipient_uni
     superseded_rows = sum(superseded_by_amendment == 1L),
     memo_rows = sum(memo_code == "X"),
     exact_duplicate_rows = sum(exact_duplicate == 1L),
+    repeated_itemization_rows = sum(repeated_itemization == 1L),
     unresolved_version_rows = sum(unresolved_version == 1L),
+    # The withheld dollars this committee cannot place. They belong in its
+    # outflow denominator, not on a blacklist that voids its clean activity.
+    unresolved_version_amount = sum(unresolved_version_amount, na.rm = TRUE),
+    unverified_version_rows = sum(unverified_version == 1L),
     transfer_records = as.character(jsonlite::toJSON(data.table::data.table(
       destination = destination_committee_id, file_num = file_num,
       transaction_id = transaction_id, sub_id = sub_id, date = transaction_date,

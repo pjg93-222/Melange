@@ -1,3 +1,4 @@
+from collections import defaultdict
 import json
 from pathlib import Path
 import sys
@@ -8,7 +9,8 @@ import sqlite3
 from contextlib import closing
 import subprocess
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
-from fec_transfer_graph import allocate,reachable,transfer_index
+import fec_transfer_graph
+from fec_transfer_graph import CASH_CODES,allocate,reachable,transfer_index
 
 
 def transfer_row(source='C00000001',dest='C00000002',amount='100',kind='24K',sub='1',transaction='T1',file='1',memo='',date='01022024',amend='N'):
@@ -125,14 +127,27 @@ class Transfers(unittest.TestCase):
                 original=transfer_row(date='12312023')
                 amended=transfer_row(**dict(date='12312023',sub='2',file='2',amend='A',**change)) if 'date' not in change else transfer_row(date=change['date'],sub='2',file='2',amend='A')
                 path.write_text(original+'\n'+amended,encoding='utf-8')
-                unknown=transfer_index(path,2024)
-                self.assertEqual(unknown['edges'],[])
-                self.assertEqual(unknown['unresolved_sources'],['C00000001'])
                 resolved=transfer_index(path,2024,[header(1),header(2,1)])
                 if 'date' in change:
                     self.assertEqual(resolved['edges'][0]['amount'],100)
                     self.assertEqual(resolved['edges'][0]['first_date'],'2024-01-01')
                 else:self.assertEqual(resolved['edges'],[])
+                # Without headers the default takes the FEC's own convention,
+                # the highest filing number. For every one of these changes it
+                # lands on the SAME answer the filing headers give, and the
+                # original is never counted beside the amendment.
+                self.assertEqual(transfer_index(path,2024)['edges'],resolved['edges'])
+                # Under the other reading nothing is counted at all. A memo
+                # restatement of the same destination, amount, date and type is
+                # one transaction re-reported, so it settles by file number
+                # either way.
+                original_policy=fec_transfer_graph.AMBIGUOUS_VERSION_POLICY
+                fec_transfer_graph.AMBIGUOUS_VERSION_POLICY='withhold'
+                try:unknown=transfer_index(path,2024)
+                finally:fec_transfer_graph.AMBIGUOUS_VERSION_POLICY=original_policy
+                self.assertEqual(unknown['edges'],[])
+                self.assertEqual(unknown['unresolved_sources'],
+                                 [] if change=={'memo':'X'} else ['C00000001'])
 
     def test_invalid_amount_or_date_correction_cannot_revive_original(self):
         for change in ({'amount':'NaN'},{'amount':'0.001'},{'date':'BAD'}):
@@ -173,6 +188,229 @@ class Transfers(unittest.TestCase):
             self.assertEqual(enriched['allocation_estimates'][0]['estimated_amount'],25)
             self.assertEqual(enriched['allocation_coverage'][0]['unresolved'],0)
             self.assertTrue(all(r['passed'] for r in enriched['quality_checks']))
+
+
+STATUSES={'observed','current','superseded','duplicate','unresolved_version','unresolved_record'}
+
+
+class VersionIdentity(unittest.TestCase):
+    """VERSION 4: a transaction ID is a label, so identity decides the version.
+
+    One test per class of the rule. `committee|report_type|transaction_id` is
+    still the group; inside it, rows are partitioned by the counterparty, the
+    amount in cents, the transaction date and the transaction type.
+    """
+
+    def build(self,lines,evidence=(),cycle=2024):
+        temporary=tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        path=Path(temporary.name)/'itoth.txt'
+        path.write_text('\n'.join(lines),encoding='utf-8')
+        index=transfer_index(path,cycle,list(evidence))
+        with closing(sqlite3.connect(index['ledger_path'])) as connection:
+            connection.row_factory=sqlite3.Row
+            ledger=[dict(row) for row in connection.execute('SELECT rowid,* FROM records ORDER BY rowid')]
+        self.assert_one_status_and_no_double_count(ledger)
+        return index,ledger
+
+    def assert_one_status_and_no_double_count(self,ledger):
+        """The conservation invariant, recomputed from the ledger itself.
+
+        Counted dollars in a group never exceed the sum over its distinct
+        identity tuples, each allowed the most copies any SINGLE filing showed
+        of it: two equal gifts itemized once are two transactions, and the same
+        two re-reported in an amendment are still two.
+        """
+        groups=defaultdict(list)
+        for row in ledger:
+            self.assertIn(row['status'],STATUSES)
+            if row['status']!='duplicate':groups[row['version_key']].append(row)
+        for key,rows in groups.items():
+            cash=[r for r in rows if r['type'] in CASH_CODES and r['memo']!='X']
+            counted=sum(r['cents'] or 0 for r in cash if r['status']=='current')
+            copies=defaultdict(lambda:defaultdict(int))
+            for row in cash:
+                copies[(row['destination'],row['cents'],row['date'],row['type'])][row['file_num']]+=1
+            ceiling=sum(max(files.values())*(identity[1] or 0) for identity,files in copies.items())
+            self.assertLessEqual(counted,ceiling,f'{key} counts more than its distinct identities allow')
+
+    def test_class_a_an_exactly_repeated_raw_line_is_a_duplicate(self):
+        line=transfer_row(sub='1',file='1')
+        index,ledger=self.build([line,line])
+        self.assertEqual([row['status'] for row in ledger],['current','duplicate'])
+        self.assertEqual(index['edges'][0]['amount'],100)
+
+    def test_class_b_the_same_transaction_in_two_filings_supersedes_by_file_number(self):
+        index,ledger=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2')])
+        self.assertEqual({row['file_num']:(row['status'],row['version_basis']) for row in ledger},
+                         {1:('superseded','file_number'),2:('current','file_number')})
+        self.assertEqual([edge['amount'] for edge in index['edges']],[100])
+        self.assertEqual(index['unresolved_sources'],[])
+
+    def test_class_b_records_the_header_route_when_headers_settle_the_family(self):
+        index,ledger=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2',amend='A')],
+                                [header(1),header(2,1)])
+        self.assertEqual({row['file_num']:(row['status'],row['version_basis']) for row in ledger},
+                         {1:('superseded','header'),2:('current','header')})
+        self.assertEqual([edge['amount'] for edge in index['edges']],[100])
+
+    def test_class_c_one_itemization_loaded_twice_in_a_filing_is_counted_once(self):
+        # Two sub_ids, one transaction id, one filing, everything else equal:
+        # the FEC bulk file carries the same line again, it is not a second
+        # gift. Two genuine equal gifts get two transaction ids from the filer
+        # and therefore land in two different groups -- the case below.
+        index,ledger=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='1')])
+        self.assertEqual({row['sub_id']:(row['status'],row['version_basis']) for row in ledger},
+                         {'1':('duplicate','repeated_itemization'),'2':('current','file_number')})
+        self.assertEqual(index['edges'][0]['amount'],100)
+        self.assertEqual(index['edges'][0]['record_count'],1)
+
+    def test_two_genuine_equal_gifts_on_one_day_are_both_counted(self):
+        index,ledger=self.build([transfer_row(sub='1',file='1',transaction='SB23.1'),
+                                 transfer_row(sub='2',file='1',transaction='SB23.2')])
+        self.assertEqual([row['status'] for row in ledger],['current','current'])
+        self.assertEqual(index['edges'][0]['amount'],200)
+        self.assertEqual(index['edges'][0]['record_count'],2)
+
+    def test_class_c_collapse_also_applies_on_the_header_route(self):
+        # Filing headers settle which filing is current; they say nothing about
+        # the same line appearing twice INSIDE that filing.
+        index,ledger=self.build([transfer_row(sub='1',file='1'),
+                                 transfer_row(sub='2',file='2',amend='A'),
+                                 transfer_row(sub='3',file='2',amend='A')],
+                                [header(1),header(2,1)])
+        self.assertEqual({row['sub_id']:(row['status'],row['version_basis']) for row in ledger},
+                         {'1':('superseded','header'),'2':('duplicate','repeated_itemization'),
+                          '3':('current','header')})
+        self.assertEqual([edge['amount'] for edge in index['edges']],[100])
+
+    def test_class_d_one_filing_reusing_a_line_label_keeps_both_transactions(self):
+        index,ledger=self.build([transfer_row(dest='C00000002',amount='100',sub='1',file='1',transaction='SE.5'),
+                                 transfer_row(dest='C00000003',amount='250',sub='2',file='1',transaction='SE.5')])
+        self.assertEqual([row['status'] for row in ledger],['current','current'])
+        self.assertEqual(sorted(edge['amount'] for edge in index['edges']),[100,250])
+        self.assertTrue(all(row['tran_id_reused']==1 for row in ledger))
+
+    def test_class_d_a_reused_label_across_filings_keeps_every_counterparty(self):
+        # The C00864926 `SE.5` shape from the measurement: one label, three
+        # filings, three different recipients, three real expenditures.
+        index,ledger=self.build([transfer_row(dest='C00000002',amount='100',sub='1',file='1759197',transaction='SE.5'),
+                                 transfer_row(dest='C00000003',amount='250',sub='2',file='1779689',transaction='SE.5'),
+                                 transfer_row(dest='C00000004',amount='700',sub='3',file='1788908',transaction='SE.5')])
+        self.assertEqual({row['status'] for row in ledger},{'current'})
+        self.assertEqual(sum(edge['amount'] for edge in index['edges']),1050)
+        self.assertEqual(index['unresolved_sources'],[])
+        self.assertEqual(index['unresolved_source_amounts'],{})
+
+    def policy(self,value):
+        self.addCleanup(setattr,fec_transfer_graph,'AMBIGUOUS_VERSION_POLICY',
+                        fec_transfer_graph.AMBIGUOUS_VERSION_POLICY)
+        fec_transfer_graph.AMBIGUOUS_VERSION_POLICY=value
+
+    def test_a_reused_label_a_year_apart_is_two_transactions_not_a_version(self):
+        # The C00692343 `SB22.2` shape: one label, the SAME report type, two
+        # filings a year apart, different amount AND different date. An
+        # amendment corrects a figure or a date; rows that share neither have
+        # nothing in common but a recycled label.
+        index,ledger=self.build([
+            transfer_row(amount='586067',date='06302023',sub='1',file='1713770',transaction='SB22.2'),
+            transfer_row(amount='878065',date='06302024',sub='2',file='1798394',transaction='SB22.2')])
+        self.assertEqual({row['status'] for row in ledger},{'current'})
+        self.assertTrue(all(row['tran_id_reused']==1 for row in ledger))
+        self.assertEqual(sum(edge['amount'] for edge in index['edges']),586067+878065)
+        self.assertEqual(index['unresolved_source_amounts'],{})
+
+    def test_same_counterparty_and_amount_on_another_date_is_still_ambiguous(self):
+        self.policy('withhold')
+        index,ledger=self.build([transfer_row(amount='100',date='06302023',sub='1',file='1'),
+                                 transfer_row(amount='100',date='06302024',sub='2',file='2')])
+        self.assertEqual({row['status'] for row in ledger},{'unresolved_version'})
+        self.assertEqual(index['edges'],[])
+
+    def test_same_counterparty_and_date_for_another_amount_is_still_ambiguous(self):
+        self.policy('withhold')
+        index,ledger=self.build([transfer_row(amount='100',date='06302024',sub='1',file='1'),
+                                 transfer_row(amount='150',date='06302024',sub='2',file='2')])
+        self.assertEqual({row['status'] for row in ledger},{'unresolved_version'})
+        self.assertEqual(index['edges'],[])
+
+    def test_class_e_by_default_counts_the_latest_row_and_flags_it_unverified(self):
+        # The default reading. A row loses its amount only where evidence
+        # contradicts it; nothing here contradicts either row, so the dollars
+        # stay and carry the flag.
+        index,ledger=self.build([transfer_row(amount='100',sub='1',file='1'),
+                                 transfer_row(amount='150',sub='2',file='2')])
+        self.assertEqual(index['ambiguous_version_policy'],'count_latest')
+        self.assertEqual({row['file_num']:(row['status'],row['unverified_version'],row['version_basis'])
+                          for row in ledger},
+                         {1:('superseded',1,'file_number_unverified'),
+                          2:('current',1,'file_number_unverified')})
+        self.assertEqual([edge['amount'] for edge in index['edges']],[150])
+        self.assertEqual(index['unresolved_source_amounts'],{})
+
+    def test_class_e_withhold_reading_keeps_no_dollars_and_reports_the_share(self):
+        self.policy('withhold')
+        index,ledger=self.build([transfer_row(amount='100',sub='1',file='1'),
+                                 transfer_row(amount='150',sub='2',file='2')])
+        self.assertEqual({row['status'] for row in ledger},{'unresolved_version'})
+        self.assertEqual(index['edges'],[])
+        self.assertEqual(index['unresolved_sources'],['C00000001'])
+        self.assertEqual(index['unresolved_source_amounts'],{'C00000001':150.0})
+        self.assertEqual(index['ambiguous_version_policy'],'withhold')
+
+    def test_a_cross_filing_type_change_is_not_counted_as_a_second_transaction(self):
+        # Under either reading the 24K row never survives beside the 24Z one.
+        index,_=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2',kind='24Z')])
+        self.assertEqual(index['edges'],[])
+        self.policy('withhold')
+        withheld,_=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2',kind='24Z')])
+        self.assertEqual(withheld['edges'],[])
+        self.assertEqual(withheld['unresolved_sources'],['C00000001'])
+
+    def test_the_policy_choice_cannot_be_served_out_of_the_other_readings_cache(self):
+        temporary=tempfile.TemporaryDirectory();self.addCleanup(temporary.cleanup)
+        path=Path(temporary.name)/'itoth.txt'
+        path.write_text(transfer_row(amount='100',sub='1',file='1')+'\n'
+                        +transfer_row(amount='150',sub='2',file='2'),encoding='utf-8')
+        counted=transfer_index(path,2024)
+        self.policy('withhold')
+        withheld=transfer_index(path,2024)
+        self.assertEqual([edge['amount'] for edge in counted['edges']],[150])
+        self.assertEqual(withheld['edges'],[])
+        self.assertNotEqual(withheld['ledger_path'],counted['ledger_path'])
+
+    def test_class_f_withheld_rows_take_a_prorata_share_not_the_whole_committee(self):
+        edges=[dict(source='A',destination='B',amount=60)]
+        activity=[dict(source='A',candidate='H1',direction='Support',amount=40)]
+        rows,coverage=allocate({'A':100},edges,activity,unresolved_amounts={'A':100})
+        self.assertAlmostEqual(rows[0]['estimated_amount'],20)
+        self.assertAlmostEqual(coverage[0]['unresolved_reasons']['unresolved_transfer_records'],50)
+        self.assertAlmostEqual(coverage[0]['unresolved_reasons']['no_observed_outflow'],30)
+        self.assertAlmostEqual(coverage[0]['estimated_candidate_activity']+coverage[0]['unresolved'],100)
+
+    def test_class_f_a_malformed_source_file_still_blocks_the_whole_committee(self):
+        rows,coverage=allocate({'A':100},[dict(source='A',destination='B',amount=60)],
+                               [dict(source='A',candidate='H1',direction='Support',amount=40)],
+                               unresolved_nodes={'A'})
+        self.assertEqual(rows,[])
+        self.assertEqual(coverage[0]['unresolved_reasons'],{'unresolved_transfer_records':100})
+
+    def test_every_class_together_conserves_and_gives_each_row_one_status(self):
+        self.policy('withhold')
+        line=transfer_row(dest='C00000002',amount='100',sub='1',file='1',transaction='SE.5')
+        index,ledger=self.build([
+            line,line,
+            transfer_row(dest='C00000003',amount='250',sub='3',file='1',transaction='SE.5'),
+            transfer_row(dest='C00000003',amount='250',sub='4',file='1',transaction='SE.5'),
+            transfer_row(dest='C00000004',amount='700',sub='5',file='1',transaction='SE.5'),
+            transfer_row(dest='C00000004',amount='700',sub='6',file='2',transaction='SE.5'),
+            transfer_row(dest='C00000005',amount='900',sub='7',file='1',transaction='SE.5'),
+            transfer_row(dest='C00000005',amount='950',sub='8',file='2',transaction='SE.5')])
+        statuses=defaultdict(int)
+        for row in ledger:statuses[row['status']]+=1
+        self.assertEqual(dict(statuses),{'current':3,'duplicate':2,'superseded':1,'unresolved_version':2})
+        self.assertEqual(sum(edge['amount'] for edge in index['edges']),100+250+700)
+        self.assertEqual(index['unresolved_source_amounts'],{'C00000001':950.0})
 
 
 if __name__=='__main__':unittest.main()

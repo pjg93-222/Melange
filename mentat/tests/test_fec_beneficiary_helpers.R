@@ -278,10 +278,22 @@ writeLines(c(pas2_row("01022023","100","1","1"),
              pas2_row("01022024","100","2","2"),
              pas2_row("01022024","150","3","3")),
            file.path(pas2_root,"pas224","itpas2.txt"))
+# Under the default the latest filing is counted and every row of the group is
+# flagged unverified; under `withhold` none of them is counted. Both are pinned.
+stopifnot(identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_latest"))
+counted_fixture <- fec_build_pas2_index(pas2_root, 2024L)
+stopifnot(nrow(counted_fixture) == 3L,
+          all(counted_fixture$unverified_version == 1L),
+          sum(counted_fixture$include_in_total == "Yes") == 1L,
+          identical(counted_fixture[file_num == 3, include_in_total], "Yes"),
+          sum(counted_fixture[include_in_total == "Yes", transaction_amount]) == 150,
+          all(substr(counted_fixture$transaction_date,1,4) %in% c("2023","2024")))
+FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- "withhold"
 parsed_fixture <- fec_build_pas2_index(pas2_root, 2024L)
 stopifnot(nrow(parsed_fixture) == 3L, all(parsed_fixture$unresolved_version == 1L),
           all(parsed_fixture$include_in_total == "No"),
           all(substr(parsed_fixture$transaction_date,1,4) %in% c("2023","2024")))
+FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- "count_latest"
 unlink(pas2_root, recursive = TRUE)
 
 # Candidate-less rows are retained now, so the placeholder name must say that

@@ -49,6 +49,15 @@ def _count(value):
     return None if number is None else int(round(number))
 
 
+def _amount_map(value):
+    """A {committee: dollars} map as it survives the R round trip.
+
+    jsonlite writes an EMPTY named list as `[]`, not `{}`, and an absent key
+    arrives as None, so anything that is not an object carries no amounts.
+    """
+    return value if isinstance(value,dict) else {}
+
+
 def _flag(value):
     if value is None:return None
     if isinstance(value,bool):return int(value)
@@ -217,15 +226,28 @@ def enrich(payload,directory):
                    'transfer_records':row.get('transfer_records',[])}
                   for row in payload['downstream_activity'] if row['cycle']==cycle]
         source_coverage=[r for r in payload['metadata'].get('transfer_coverage',[]) if r['cycle']==cycle]
-        unresolved_nodes={node for r in source_coverage for node in r.get('unresolved_sources',[])}
-        unresolved_nodes.update(r['source_committee_id'] for r in payload['downstream_activity']
-            if r['cycle']==cycle and r.get('unresolved_version_rows',0)>0)
+        # A committee holding one unplaceable row still has clean edges. Its
+        # withheld dollars become a share of its own outflow (both sides carry
+        # the size), never a blacklist over everything downstream of it.
+        withheld=defaultdict(float)
+        for row in source_coverage:
+            for node,value in _amount_map(row.get('unresolved_source_amounts')).items():
+                amount=_number(value)
+                if node and amount and amount>0:withheld[node]+=amount
+        for row in payload['downstream_activity']:
+            if row['cycle']!=cycle:continue
+            amount=_number(row.get('unresolved_version_amount'))
+            if amount and amount>0:withheld[row['source_committee_id']]+=amount
+        # A malformed source file or a stale index says nothing about ANY
+        # committee in the cycle, so that case keeps the blanket treatment.
+        unresolved_nodes=set()
         if any(r.get('unresolved_all_sources') or r['status']=='stale_transfer_index' for r in source_coverage):
             unresolved_nodes.update(funding)
         cycle_paths=reachable({key for key,value in funding.items() if value>0},edges,stop_nodes=direct_ids)
         paths.extend(cycle_paths)
         assigned,unresolved=allocate(funding,edges,activity,stop_nodes=direct_ids,
-            candidate_links={committee:links[cycle,committee] for committee in direct_ids},unresolved_nodes=unresolved_nodes)
+            candidate_links={committee:links[cycle,committee] for committee in direct_ids},
+            unresolved_nodes=unresolved_nodes,unresolved_amounts=withheld)
         for row in assigned:
             candidate=masters.get((cycle,row['candidate_id']),{})
             estimates.append({**row,'cycle':cycle,'candidate_name':candidate.get('candidate_name',row['candidate_id'])})

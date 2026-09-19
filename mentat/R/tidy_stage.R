@@ -138,7 +138,11 @@ MENTAT_TIDY_TABLE_SPECS <- list(
     last_activity_date = "TEXT", source_rows = "INTEGER",
     included_rows = "INTEGER", excluded_rows = "INTEGER",
     superseded_rows = "INTEGER", memo_rows = "INTEGER",
-    duplicate_rows = "INTEGER", reported_amount = "REAL",
+    duplicate_rows = "INTEGER",
+    # Rows counted on the strength of the highest filing number rather than
+    # filing evidence. The dollars are in net_included_amount; this says how
+    # many of them rest on that convention.
+    unverified_version_rows = "INTEGER", reported_amount = "REAL",
     excluded_amount = "REAL", net_included_amount = "REAL",
     fec_committee_url = "TEXT", fec_candidate_url = "TEXT",
     source_url = "TEXT", transfer_records = "TEXT"
@@ -853,6 +857,9 @@ mentat_tidy_downstream_activity <- function(downstream_activity_export) {
     memo_rows = mentat_tidy_count(mentat_tidy_column(rows, "memo_rows", count)),
     duplicate_rows = mentat_tidy_count(
       mentat_tidy_column(rows, "exact_duplicate_rows", count)
+    ),
+    unverified_version_rows = mentat_tidy_count(
+      mentat_tidy_column(rows, "unverified_version_rows", count)
     ),
     reported_amount = reported,
     excluded_amount = excluded,

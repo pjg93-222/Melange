@@ -18,8 +18,31 @@ import time
 import sqlite3
 import csv
 
-VERSION=3
+VERSION=4
 CASH_CODES={'24G','24K'}
+COMMITTEE=re.compile(r'C[0-9]{8}')
+DESTINATION_GLOB="destination GLOB 'C[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'"
+# `committee|report_type|transaction_id` groups rows that may be versions of one
+# transaction, but it is not an identity: filers reuse a schedule line label as
+# TRAN_ID, so `SE.5` collides across every filing they make. What a row IS gets
+# decided by its counterparty, amount, date and transaction type -- see
+# resolve_group() for the five classes. The ambiguous remainder of class E has
+# two defensible readings:
+#   'count_latest' the highest-file_num row is counted and flagged
+#                  unverified_version=1; the rest are superseded.
+#   'withhold'     the rows leave the counted total and are reported as an
+#                  unresolved share of the source committee's outflow.
+# 'count_latest' is the default for three reasons. A row loses its amount only
+# where evidence CONTRADICTS it; ambiguity keeps its dollars under an unverified
+# flag, and nothing here contradicts either row. The latest filed version is the
+# FEC's own convention. And counting the latest is never further from the truth
+# than withholding both: if the pair is an amendment it is exactly right, and if
+# it is two transactions it undercounts by one row where withholding undercounts
+# by two. The choice is part of the cache key, so flipping it never serves the
+# other reading's index back.
+AMBIGUOUS_VERSION_POLICY='count_latest'
+POLICY_TAGS={'withhold':'w','count_latest':'c'}
+AMENDMENT_ORDER={'T':2,'A':1}
 
 
 def atomic_json(path,value):
@@ -66,12 +89,155 @@ def transfer_key(fields,row_number):
     return '|'.join((fields[0],fields[2],fields[16])) if fields[16] else 'SUB|'+fields[0]+'|'+(fields[20] or str(row_number))
 
 
+def identity(row):
+    """What a row claims to BE: who received it, how much, when, and as what."""
+    return (row['destination'],row['cents'],row['date'],row['type'])
+
+
+def distinguishable(left,right):
+    """True only when two identities name two DIFFERENT real counterparties.
+
+    A blank or malformed destination names nobody, so it can never establish
+    that two rows describe different transactions; such a pair stays ambiguous.
+    """
+    first,second=left[0] or '',right[0] or ''
+    return bool(COMMITTEE.fullmatch(first) and COMMITTEE.fullmatch(second) and first!=second)
+
+
+def header_families(rows,headers):
+    """Group rows into amendment families using verified headers only.
+
+    Returns {family: (rows, winning_file_num)}, or None when the headers do not
+    cover every filing involved or do not establish an order. Unlike VERSION 3
+    this tolerates several rows per filing -- a filing itemizing two lines under
+    one label is not a contradiction; two filings claiming the same amendment
+    number still is.
+    """
+    families=defaultdict(list)
+    for row in rows:
+        header=headers.get(row['file_num'],{})
+        if (header.get('committee_id')!=row['source'] or header.get('report_type')!=row['report']
+                or header.get('amendment_indicator')!=row['amendment']
+                or header.get('relationship_evidence') is False):return None
+        original=header.get('original_file_num')
+        if header.get('amendment_indicator')=='N' and not original:family=header['file_num']
+        elif header.get('amendment_indicator') in ('A','T') and original and original!=header['file_num']:family=original
+        else:return None
+        families[family].append(row)
+    resolved={}
+    for family,members in families.items():
+        versions={}
+        for row in members:
+            header=headers.get(row['file_num'],{})
+            number='0' if header.get('amendment_indicator')=='N' else str(header.get('amendment_number',''))
+            if not number.isdigit():return None
+            number=int(number)
+            if versions.setdefault(number,row['file_num'])!=row['file_num']:return None
+        resolved[family]=(members,versions[max(versions)])
+    return resolved
+
+
+def resolve_group(rows,headers,policy):
+    """Decide one version-key group. `rows` are its distinct raw lines.
+
+    Returns (decisions, tran_id_reused, route, ambiguous_components) where each
+    decision is (row, status, version_basis, unverified_version).
+    """
+    identities=defaultdict(list)
+    for row in rows:identities[identity(row)].append(row)
+    reused=1 if len(identities)>1 else 0
+
+    def keep_one_per_identity(group,basis):
+        """One row per identity survives; the rest are the same line again."""
+        decided=[];buckets=defaultdict(list)
+        for row in group:buckets[identity(row)].append(row)
+        for bucket in buckets.values():
+            bucket.sort(key=lambda row:(AMENDMENT_ORDER.get(row['amendment'],0),row['sub_id'] or '',row['rowid']))
+            decided.extend((row,'duplicate','repeated_itemization',0) for row in bucket[:-1])
+            decided.append((bucket[-1],'current',basis,0))
+        return decided
+
+    if len({row['file_num'] for row in rows})>1:
+        resolved=header_families(rows,headers)
+        if resolved is not None:
+            decided=[]
+            for members,winner in resolved.values():
+                decided.extend((row,'superseded','header',0) for row in members if row['file_num']!=winner)
+                decided.extend(keep_one_per_identity(
+                    [row for row in members if row['file_num']==winner],'header'))
+            return decided,reused,'header',[]
+    # B. The same identity in several filings is one transaction re-reported:
+    # the highest file number is the FEC's own "latest filing" convention.
+    # C. The same identity several times inside the WINNING filing is ONE
+    # itemization loaded again under a second sub_id. The group is already keyed
+    # by the FILER'S OWN transaction id, so two genuine equal gifts carry two
+    # transaction ids and never meet here; measured on the real 2022 file, 826
+    # of 827 such groups are byte-identical apart from sub_id.
+    decisions=[];survivors={}
+    for key,members in identities.items():
+        winner=max(row['file_num'] for row in members)
+        decisions.extend((row,'superseded','file_number',0) for row in members if row['file_num']!=winner)
+        kept=keep_one_per_identity([row for row in members if row['file_num']==winner],'file_number')
+        decisions.extend(decision for decision in kept if decision[1]=='duplicate')
+        survivors[key]=(winner,[decision[0] for decision in kept if decision[1]=='current'])
+    keys=list(survivors);parent={key:key for key in keys}
+
+    def root(key):
+        while parent[key]!=key:parent[key]=parent[parent[key]];key=parent[key]
+        return key
+
+    def merge(members):
+        for other in members[1:]:
+            left,right=root(members[0]),root(other)
+            if left!=right:parent[left]=right
+
+    # Two surviving identities in DIFFERENT filings are candidate VERSIONS of
+    # one transaction only when they name the same real counterparty AND agree
+    # on the amount or on the date. An amendment corrects a figure or a date;
+    # rows that share neither have nothing in common but a recycled label --
+    # the same `SB22.2` in two years' Q2 reports is two transfers, not a
+    # version. Type is deliberately NOT part of this test, so a 24K restated as
+    # 24Z on the same day for the same money is still a version.
+    # Merging per bucket and resolving with union-find keeps transitivity: A~B
+    # on the amount and B~C on the date is one component.
+    buckets=defaultdict(list)
+    for key in keys:
+        if COMMITTEE.fullmatch(key[0] or ''):
+            buckets['amount',key[0],key[1]].append(key)
+            buckets['date',key[0],key[2]].append(key)
+    for members in buckets.values():
+        if len({survivors[key][0] for key in members})>1:merge(members)
+    files={survivors[key][0] for key in keys}
+    blank_files={survivors[key][0] for key in keys if not COMMITTEE.fullmatch(key[0] or '')}
+    if blank_files:
+        merge([key for key in keys
+               if (files if not COMMITTEE.fullmatch(key[0] or '') else blank_files)-{survivors[key][0]}])
+    components=defaultdict(list)
+    for key in keys:components[root(key)].append(key)
+    ambiguous=[]
+    for members in components.values():
+        group=[row for key in members for row in survivors[key][1]]
+        if len(members)<2:
+            decisions.extend((row,'current','file_number',0) for row in group)
+            continue
+        ambiguous.append(group)
+        if policy!='count_latest':
+            decisions.extend((row,'unresolved_version','',0) for row in group)
+            continue
+        latest=max(group,key=lambda row:(row['file_num'],row['sub_id'] or '',row['rowid']))
+        decisions.extend((row,'current' if row is latest else 'superseded','file_number_unverified',1)
+                         for row in group)
+    return decisions,reused,'file_number',ambiguous
+
+
 def transfer_index(path,cycle,filing_headers=()):
     filing_headers=list(filing_headers)
+    policy=AMBIGUOUS_VERSION_POLICY
+    if policy not in POLICY_TAGS:raise ValueError(f'Unknown ambiguous version policy {policy!r}')
     headers=verified_headers(filing_headers)
     signature=sha(path)
     header_signature=hashlib.sha256(json.dumps(filing_headers,sort_keys=True).encode()).hexdigest()
-    cache=path.parent/f'transfer-index-v{VERSION}-{cycle}-{signature[:20]}-{header_signature[:12]}.json'
+    cache=path.parent/f'transfer-index-v{VERSION}{POLICY_TAGS[policy]}-{cycle}-{signature[:20]}-{header_signature[:12]}.json'
     ledger=cache.with_suffix('.sqlite')
     if cache.exists() and ledger.exists():
         cached=json.loads(cache.read_text(encoding='utf-8'))
@@ -82,11 +248,12 @@ def transfer_index(path,cycle,filing_headers=()):
     connection=sqlite3.connect(pending)
     connection.execute('PRAGMA journal_mode=OFF')
     connection.execute('PRAGMA synchronous=OFF')
-    connection.execute('CREATE TABLE records(version_key TEXT, source TEXT,destination TEXT,date TEXT,cents INTEGER,type TEXT,transaction_id TEXT,file_num INTEGER,memo TEXT,report TEXT,sub_id TEXT,amendment TEXT,raw_line TEXT,status TEXT)')
+    connection.execute('CREATE TABLE records(version_key TEXT, source TEXT,destination TEXT,date TEXT,cents INTEGER,type TEXT,transaction_id TEXT,file_num INTEGER,memo TEXT,report TEXT,sub_id TEXT,amendment TEXT,raw_line TEXT,status TEXT,version_basis TEXT DEFAULT %s,tran_id_reused INTEGER DEFAULT 0,unverified_version INTEGER DEFAULT 0)'%"''")
     connection.execute('CREATE TABLE filing_headers(evidence_json TEXT)')
     connection.executemany('INSERT INTO filing_headers VALUES (?)',[(json.dumps(h,sort_keys=True),) for h in filing_headers])
-    sql='INSERT INTO records VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-    unresolved=set(); unresolved_all=False
+    sql=('INSERT INTO records(version_key,source,destination,date,cents,type,transaction_id,'
+         'file_num,memo,report,sub_id,amendment,raw_line,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+    unresolved=set(); unresolved_all=False; withheld=defaultdict(int)
     batch=[]
     try:
         # OTH files contain millions of unrelated receipts and expenditures.
@@ -138,57 +305,67 @@ def transfer_index(path,cycle,filing_headers=()):
         connection.execute('CREATE INDEX records_edge ON records(source,destination)')
         connection.row_factory=sqlite3.Row
         from itertools import groupby
-        for _,items in groupby(connection.execute('SELECT rowid,* FROM records ORDER BY version_key'),lambda r:r['version_key']):
+        # A version key holding ONE row has nothing to compete with, so it is
+        # current by construction. That is the overwhelming majority of the
+        # file; settling those in SQL keeps them out of the Python partition
+        # entirely. The result is identical -- resolve_group() on a single row
+        # returns exactly this, and the validity test below is the same test.
+        connection.execute('CREATE TEMP TABLE singletons(version_key TEXT PRIMARY KEY) WITHOUT ROWID')
+        connection.execute('INSERT INTO singletons SELECT version_key FROM records GROUP BY version_key HAVING COUNT(*)=1')
+        counts['version_groups_file_number']+=connection.execute('SELECT COUNT(*) FROM singletons').fetchone()[0]
+        alone='version_key IN (SELECT version_key FROM singletons)'
+        connection.execute(f"UPDATE records SET status='current',version_basis='file_number' WHERE {alone}")
+        cash=f"status='current' AND {alone} AND type IN ('24G','24K')"
+        for test,name in ((f"date IS NULL OR date=''",'invalid_transfer_dates'),
+                          ('cents IS NULL','invalid_transfer_amounts'),
+                          (f'NOT ({DESTINATION_GLOB})','invalid_transfer_destinations')):
+            counts[name]+=connection.execute(f'SELECT COUNT(*) FROM records WHERE {cash} AND ({test})').fetchone()[0]
+        broken=f"{cash} AND (date IS NULL OR date='' OR cents IS NULL OR NOT ({DESTINATION_GLOB}))"
+        for row in connection.execute(f'SELECT source,memo,cents FROM records WHERE {broken}'):
+            unresolved.add(row['source'])
+            if row['memo']!='X':withheld[row['source']]+=max(0,row['cents'] or 0)
+        connection.execute(f"UPDATE records SET status='unresolved_record' WHERE {broken}")
+        for _,items in groupby(connection.execute(f'SELECT rowid,* FROM records WHERE NOT {alone} ORDER BY version_key'),lambda r:r['version_key']):
             observed=list(items)
             # Noncash records still participate in a group containing cash.
             if not any(r['type'] in CASH_CODES for r in observed):continue
-            unique={}
+            unique={};repeats=[]
             for row in observed:
-                if row['raw_line'] in unique:
-                    connection.execute("UPDATE records SET status='duplicate' WHERE rowid=?",(row['rowid'],))
+                if row['raw_line'] in unique:repeats.append((row['rowid'],))
                 else:unique[row['raw_line']]=row
-            rows=list(unique.values()); families=defaultdict(list); ambiguous=False
-            files={r['file_num'] for r in rows}
-            for row in rows:
-                family=row['file_num']
-                if len(files)>1:
-                    h=headers.get(row['file_num'],{})
-                    if (h.get('committee_id')!=row['source'] or h.get('report_type')!=row['report']
-                            or h.get('amendment_indicator')!=row['amendment']
-                            or h.get('relationship_evidence') is False):
-                        ambiguous=True;break
-                    original=h.get('original_file_num')
-                    if h.get('amendment_indicator')=='N' and not original:family=h['file_num']
-                    elif h.get('amendment_indicator') in ('A','T') and original and original!=h['file_num']:family=original
-                    else:ambiguous=True;break
-                families[family].append(row)
-            selected=[]
-            for family in families.values():
-                if len(family)==1:selected.append((family,family[0]));continue
-                versions={}
-                for row in family:
-                    h=headers.get(row['file_num'],{})
-                    number='0' if h.get('amendment_indicator')=='N' else str(h.get('amendment_number',''))
-                    if not number.isdigit() or int(number) in versions:
-                        ambiguous=True;break
-                    versions[int(number)]=row
-                if not ambiguous:selected.append((family,versions[max(versions)]))
+            if repeats:connection.executemany("UPDATE records SET status='duplicate' WHERE rowid=?",repeats)
+            decisions,reused,route,ambiguous=resolve_group(list(unique.values()),headers,policy)
+            counts['version_groups_'+route]+=1
             if ambiguous:
                 counts['unresolved_version_groups']+=1
-                unresolved.update(r['source'] for r in rows)
-                connection.executemany("UPDATE records SET status='unresolved_version' WHERE rowid=?",[(r['rowid'],) for r in rows])
-                continue
-            for family,latest in selected:
-                for row in family:
-                    status='superseded' if row['rowid']!=latest['rowid'] else 'current'
-                    if status=='current' and row['type'] in CASH_CODES:
-                        invalid=False
-                        for field,count in [('date','invalid_transfer_dates'),('cents','invalid_transfer_amounts')]:
-                            if row[field] is None or row[field]=='':counts[count]+=1;invalid=True
-                        if not re.fullmatch(r'C\d{8}',row['destination']):
-                            counts['invalid_transfer_destinations']+=1;invalid=True
-                        if invalid:status='unresolved_record';unresolved.add(row['source'])
-                    connection.execute('UPDATE records SET status=? WHERE rowid=?',(status,row['rowid']))
+                counts['ambiguous_version_components']+=len(ambiguous)
+                for component in ambiguous:
+                    if policy=='count_latest':continue
+                    unresolved.update(row['source'] for row in component)
+                    # The share this committee cannot place is what a "latest
+                    # filing wins" build would have counted here, not the gross
+                    # contents of the group: the rows are competing claims.
+                    cash=[row for row in component
+                          if row['type'] in CASH_CODES and row['memo']!='X' and (row['cents'] or 0)>0]
+                    if cash:
+                        latest=max(cash,key=lambda row:(row['file_num'],row['sub_id'] or '',row['rowid']))
+                        withheld[latest['source']]+=latest['cents']
+            updates=[]
+            for row,status,basis,unverified in decisions:
+                if status=='current' and row['type'] in CASH_CODES:
+                    invalid=False
+                    for field,count in [('date','invalid_transfer_dates'),('cents','invalid_transfer_amounts')]:
+                        if row[field] is None or row[field]=='':counts[count]+=1;invalid=True
+                    if not COMMITTEE.fullmatch(row['destination'] or ''):
+                        counts['invalid_transfer_destinations']+=1;invalid=True
+                    if invalid:
+                        status='unresolved_record';unresolved.add(row['source'])
+                        if row['memo']!='X':withheld[row['source']]+=max(0,row['cents'] or 0)
+                counts['tran_id_reused_rows']+=reused
+                counts['unverified_version_rows']+=unverified
+                updates.append((status,basis,reused,unverified,row['rowid']))
+            connection.executemany('UPDATE records SET status=?,version_basis=?,tran_id_reused=?,'
+                                   'unverified_version=? WHERE rowid=?',updates)
         counts['latest_rows']=connection.execute("SELECT COUNT(*) FROM records WHERE status='current'").fetchone()[0]
         counts['memo_rows']=connection.execute("SELECT COUNT(*) FROM records WHERE status='current' AND memo='X'").fetchone()[0]
         counts['superseded_or_duplicate_rows']=connection.execute("SELECT COUNT(*) FROM records WHERE status IN ('superseded','duplicate')").fetchone()[0]
@@ -209,6 +386,11 @@ def transfer_index(path,cycle,filing_headers=()):
     result={'version':VERSION,'source_sha256':signature,'cycle':cycle,'counts':dict(counts),
             'edges':edges,'ledger_path':str(ledger.resolve()),'ledger_sha256':sha(ledger),
             'filing_headers_sha256':header_signature,'unresolved_sources':sorted(unresolved),
+            'ambiguous_version_policy':policy,
+            # Per source committee, the outflow dollars this index cannot place.
+            # They belong in the committee's denominator, not on a blacklist.
+            'unresolved_source_amounts':{source:round(cents/100,2)
+                                         for source,cents in sorted(withheld.items()) if cents>0},
             'unresolved_all_sources':unresolved_all,'built_seconds':round(time.monotonic()-started,3)}
     atomic_json(cache,result)
     return result
@@ -241,15 +423,25 @@ def cash_identity(row):
     return (str(int(row['file_num'])),row['transaction_id'],row.get('date'),row.get('cents'),row.get('type'))
 
 
-def allocate(funding,edges,activity,max_depth=3,stop_nodes=(),candidate_links=None,unresolved_nodes=()):
+def allocate(funding,edges,activity,max_depth=3,stop_nodes=(),candidate_links=None,unresolved_nodes=(),
+             unresolved_amounts=None):
     """Conserve each root's nonnegative funding over observed cash activity.
 
     This is a conditional pro-rata scenario, not traced dollars, causal benefit,
     or a lower bound. Opposition stays with the named target, never its rivals.
+
+    `unresolved_nodes` blocks a node outright. That is for the cases where
+    nothing about the committee is usable -- a malformed source file, a stale
+    index, a candidate transfer that could not be matched at record level.
+    Withheld ROWS are different: the committee's other edges are clean, so
+    `unresolved_amounts` puts those dollars into its outflow denominator as an
+    explicit share instead. One ambiguous row then costs its own size, not the
+    committee's whole downstream.
     """
     adjacency=defaultdict(list);terminal=defaultdict(list)
     candidate_links=candidate_links or {}
     uncertain={node:'unresolved_transfer_records' for node in unresolved_nodes}
+    withheld={node:float(value) for node,value in (unresolved_amounts or {}).items() if float(value)>0}
     grouped=defaultdict(float)
     for row in activity:
         grouped[(row['source'],row['candidate'],row['direction'])]+=row['amount']
@@ -299,9 +491,10 @@ def allocate(funding,edges,activity,max_depth=3,stop_nodes=(),candidate_links=No
                 unresolved['traversal_limit']+=amount+sum(item[1] for item in pending)
                 break
             if node in uncertain:unresolved[uncertain[node]]+=amount;continue
-            outgoing=adjacency[node];destinations=terminal[node]
-            denominator=sum(v for _,v in outgoing)+sum(v for _,_,v in destinations)
+            outgoing=adjacency[node];destinations=terminal[node];reserve=withheld.get(node,0.)
+            denominator=sum(v for _,v in outgoing)+sum(v for _,_,v in destinations)+reserve
             if denominator<=0:unresolved['no_observed_outflow']+=amount;continue
+            if reserve:unresolved['unresolved_transfer_records']+=amount*reserve/denominator
             for candidate,direction,value in destinations:allocated[candidate,direction]+=amount*value/denominator
             for destination,value in outgoing:
                 portion=amount*value/denominator

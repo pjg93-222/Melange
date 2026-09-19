@@ -216,6 +216,7 @@ downstream_activity_export <- data.table(
   memo_rows = c(0L, 0L),
   exact_duplicate_rows = c(1L, 0L),
   unresolved_version_rows = c(0L, 0L),
+  unverified_version_rows = c(1L, 0L),
   reported_amount = c(20000, 3000),
   excluded_amount = c(4200, 0),
   preliminary_included_amount = c(15800, 3000),
@@ -445,6 +446,9 @@ check("set-valued activity columns become 0/1 flags, not `;`-joined text",
         !any(grepl(";", unlist(lapply(bridge_rows, as.character)), fixed = TRUE)))
 
 downstream <- frames$downstream_activity
+check("a row counted on the filing-number convention says so in its own column",
+      downstream[candidate == "VOE, VERA", unverified_version_rows] == 1L &&
+        downstream[candidate == "VOE, VERA M", unverified_version_rows] == 0L)
 check("downstream activity keeps its JSON evidence as one text cell",
       all(downstream$transfer_records == "[]") &&
         downstream[candidate == "VOE, VERA", net_included_amount] == 15800 &&

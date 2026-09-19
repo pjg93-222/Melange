@@ -25,9 +25,9 @@ class EnrichmentTests(unittest.TestCase):
         self.assertEqual(result['allocation_coverage'][0]['unresolved'],90)
         self.assertFalse(next(r for r in result['quality_checks'] if r['id']=='allocation_coverage')['passed'])
 
-    def test_stale_or_ambiguous_transfer_data_cannot_produce_estimates(self):
+    def test_a_stale_or_malformed_source_still_blocks_the_whole_cycle(self):
         for source in (dict(status='stale_transfer_index'),
-                       dict(status='indexed',counts={'unresolved_rows':2},unresolved_sources=['PAC'])):
+                       dict(status='indexed',counts={'malformed_rows':2},unresolved_all_sources=True)):
             with self.subTest(source=source):
                 payload=self.payload()
                 payload['metadata']['transfer_coverage']=[dict(source,cycle=2024)]
@@ -38,13 +38,42 @@ class EnrichmentTests(unittest.TestCase):
                 self.assertEqual(result['allocation_coverage'][0]['unresolved'],100)
                 self.assertFalse(next(r for r in result['quality_checks'] if r['id']=='transfer_source_2024')['passed'])
 
-    def test_pas2_unresolved_versions_block_renormalization(self):
+    def test_withheld_transfer_rows_take_a_share_and_leave_clean_activity_counted(self):
+        # One ambiguous group no longer costs the committee its clean edges.
+        payload=self.payload()
+        payload['metadata']['transfer_coverage']=[dict(cycle=2024,status='indexed',
+            counts={'unresolved_rows':2},unresolved_sources=['PAC'],
+            unresolved_source_amounts={'PAC':90})]
+        payload['raw_rows']=[dict(cycle=2024,committee_id='PAC',amount=100,include_in_analysis='Yes')]
+        payload['downstream_activity']=[dict(cycle=2024,source_committee_id='PAC',candidate_id='H1',support_oppose='Oppose',preliminary_included_amount=10)]
+        with tempfile.TemporaryDirectory() as directory:result=enrich(payload,Path(directory))
+        self.assertAlmostEqual(result['allocation_estimates'][0]['estimated_amount'],10)
+        coverage=result['allocation_coverage'][0]
+        self.assertAlmostEqual(coverage['unresolved_reasons']['unresolved_transfer_records'],90)
+        self.assertAlmostEqual(coverage['estimated_candidate_activity']+coverage['unresolved'],100)
+        self.assertFalse(next(r for r in result['quality_checks'] if r['id']=='transfer_source_2024')['passed'])
+
+    def test_pas2_withheld_rows_are_a_share_of_the_committees_outflow(self):
         payload=self.payload()
         payload['raw_rows']=[dict(cycle=2024,committee_id='PAC',amount=100,include_in_analysis='Yes')]
-        payload['downstream_activity']=[dict(cycle=2024,source_committee_id='PAC',candidate_id='H1',support_oppose='Oppose',preliminary_included_amount=10,unresolved_version_rows=2)]
+        payload['downstream_activity']=[dict(cycle=2024,source_committee_id='PAC',candidate_id='H1',
+            support_oppose='Oppose',preliminary_included_amount=10,unresolved_version_rows=2,
+            unresolved_version_amount=90)]
         with tempfile.TemporaryDirectory() as directory:result=enrich(payload,Path(directory))
-        self.assertEqual(result['allocation_estimates'],[])
-        self.assertEqual(result['allocation_coverage'][0]['unresolved'],100)
+        self.assertAlmostEqual(result['allocation_estimates'][0]['estimated_amount'],10)
+        coverage=result['allocation_coverage'][0]
+        self.assertAlmostEqual(coverage['unresolved_reasons']['unresolved_transfer_records'],90)
+        self.assertAlmostEqual(coverage['estimated_candidate_activity']+coverage['unresolved'],100)
+
+    def test_an_empty_amount_map_from_r_is_not_an_error(self):
+        # jsonlite serializes an empty JSON object as [], not {}.
+        payload=self.payload()
+        payload['metadata']['transfer_coverage']=[dict(cycle=2024,status='indexed',counts={},
+            unresolved_sources=[],unresolved_source_amounts=[])]
+        payload['raw_rows']=[dict(cycle=2024,committee_id='PAC',amount=100,include_in_analysis='Yes')]
+        payload['downstream_activity']=[dict(cycle=2024,source_committee_id='PAC',candidate_id='H1',support_oppose='Oppose',preliminary_included_amount=10)]
+        with tempfile.TemporaryDirectory() as directory:result=enrich(payload,Path(directory))
+        self.assertAlmostEqual(result['allocation_estimates'][0]['estimated_amount'],100)
 
     def test_ambiguous_candidate_link_preserves_unresolved_funding(self):
         payload=self.payload()
