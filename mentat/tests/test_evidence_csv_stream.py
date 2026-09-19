@@ -317,9 +317,12 @@ DESCRIPTIVE_KEYS = {'format', 'source_kind', 'source_path', 'sheet', 'sheets', '
 # many rows the workbook itself excluded, which rule set it was built under,
 # and whether this console is re-reading it right now.
 CATEGORY_KEYS = {'categories', 'excluded_rows', 'catalog_version', 'state', 'reread', 'stale', 'rows_read'}
+# S6: the industry a Mentat workbook file name declares, derived at listing
+# time (stored_catalog), so an import read before this field answers with it.
+INDUSTRY_KEYS = {'industry'}
 CATALOG_KEYS = frozenset({'id', 'name', 'sha256', 'row_count', 'committees', 'cycles', 'supported_rows',
                           'unsupported_rows', 'unassigned_rows', 'session_only', 'imported_at', 'bytes',
-                          'warnings'} | DESCRIPTIVE_KEYS | CATEGORY_KEYS)
+                          'warnings'} | DESCRIPTIVE_KEYS | CATEGORY_KEYS | INDUSTRY_KEYS)
 SOURCES_LISTING_KEYS = frozenset({'sources', 'limits', 'session_only'})
 SELECT_KEYS = frozenset({'source', 'committee', 'committees', 'cycles', 'selected_cycle', 'columns', 'rows',
                          'totals', 'supported_rows', 'excluded_rows', 'unsupported_rows', 'offset', 'limit',
