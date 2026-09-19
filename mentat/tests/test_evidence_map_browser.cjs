@@ -8,6 +8,8 @@
  * the import really lands on disk and the permalink really restores from it.
  * Run with MENTAT_NODE_MODULES pointing at a local Playwright installation,
  * from cwd mentat/:  node tests\test_evidence_map_browser.cjs
+ * Set MENTAT_EVIDENCE_MAP_SCREENSHOT to a file path to keep a PNG of the
+ * finished map; unset, the run writes no image and creates no directory.
  *
  * Every wait is bounded and a top-level watchdog names the step it was on.
  * Harness copied from tests/test_evidence_panes_browser.cjs (S6): freePort(),
@@ -30,8 +32,9 @@ const MENTAT_DIR = path.resolve(__dirname, '..');
 const FORBIDDEN_PORTS = new Set([8802, 8806, 8808, 8841, 8940, 8971, 8990, 8991, 8992, 8993]);
 const HARD_CAP_MS = 900_000;
 const CRYPTO_BOOK = 'Crypto Industry Spending Overview.xlsx';
-const RECEIPTS_DIR = path.resolve(MENTAT_DIR, '..', 'audits', 'mentat_failings_20260915', 'receipts');
-const SCREENSHOT_PATH = path.join(RECEIPTS_DIR, 'S8b_after_screenshot.png');
+// Only an explicit MENTAT_EVIDENCE_MAP_SCREENSHOT path makes this run write an
+// image. A plain run leaves the tracked receipts under audits/ untouched.
+const SCREENSHOT_PATH = process.env.MENTAT_EVIDENCE_MAP_SCREENSHOT || '';
 
 let stepNumber = 0, currentStepLabel = '(none)', stepStartedAt = Date.now();
 let serverForWatchdog = null;
@@ -470,20 +473,25 @@ function startStubGeocoder() {
     assert.equal(paneBCycles.includes(''), false, JSON.stringify(paneBCycles));
     pass(`note ${JSON.stringify(noteText)}; cycle select resolved to 2026`);
 
-    step('back to pane A for the screenshot');
+    step('back to pane A');
     await page.click('#evidence-map-back');
     await page.waitForSelector('#evidence-panes:not([hidden])', {timeout: 20000});
     await page.click(`${paneSel} .pane-map`);
     await page.waitForSelector('#evidence-map:not([hidden])', {timeout: 20000});
     pass('pane A map reopened');
 
-    step('screenshot the map at 1440x900');
-    fs.mkdirSync(RECEIPTS_DIR, {recursive: true});
+    step('the map holds at 1440x900');
     await page.setViewportSize({width: 1440, height: 900});
     await page.waitForSelector('#evidence-map svg.map-canvas', {timeout: 20000});
-    await page.screenshot({path: SCREENSHOT_PATH});
-    assert.ok(fs.existsSync(SCREENSHOT_PATH), SCREENSHOT_PATH);
-    pass(`screenshot saved to ${SCREENSHOT_PATH} (${fs.statSync(SCREENSHOT_PATH).size} bytes)`);
+    if (SCREENSHOT_PATH) {
+      const shotDir = path.dirname(path.resolve(SCREENSHOT_PATH));
+      fs.mkdirSync(shotDir, {recursive: true});
+      await page.screenshot({path: SCREENSHOT_PATH});
+      assert.ok(fs.existsSync(SCREENSHOT_PATH), SCREENSHOT_PATH);
+      pass(`screenshot saved to ${SCREENSHOT_PATH} (${fs.statSync(SCREENSHOT_PATH).size} bytes)`);
+    } else {
+      pass('map redrawn at 1440x900; no screenshot (set MENTAT_EVIDENCE_MAP_SCREENSHOT to keep one)');
+    }
 
     step('final check: zero pageerror entries and zero console error entries');
     assert.deepEqual(errors, [], `page errors: ${JSON.stringify(errors)}`);
