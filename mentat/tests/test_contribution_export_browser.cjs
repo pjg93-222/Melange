@@ -99,5 +99,7 @@ test('SVG and PNG exports preserve zoomed geography, clip its viewport and retai
   assert.equal(split.bareText,'','caption:false must not bake any text into the drawing');
   assert.equal(split.name,'composed.svg');
   const invalid=await page.evaluate(async()=>{fixture.innerHTML='<svg viewBox="0 0 0 0"></svg>';try{await MentatExport.image(fixture.firstChild,'svg','Bad','');return '';}catch(e){return e.message;}});
-  assert.match(invalid,/exportable viewport/);
+  // chart-export.js:17, reworded by the 2026-09-15 wording pass (f64316daa)
+  // from 'The chart has no exportable viewport.'; the refusal itself is unchanged.
+  assert.match(invalid,/Nothing to export/);
 });

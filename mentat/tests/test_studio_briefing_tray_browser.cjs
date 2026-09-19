@@ -59,6 +59,12 @@ async function tray(t){
   });
   for(const script of ['chart-export.js','chart-briefing.js'])await page.addScriptTag({path:path.join(app,script)});
   await page.evaluate(sha=>{
+    // chart-briefing.js:111 isoDate() stamps the filename with the LOCAL
+    // calendar day, the day dateLabel() also prints in the bundle. A node-side
+    // toISOString() is UTC and names tomorrow every evening, so the expectation
+    // is computed here, the app's way, at the instant of the export.
+    window.localDay=()=>{const p=n=>String(n).padStart(2,'0'),d=new Date();
+      return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());};
     // One drawn chart per capture, so the tray stores real SVG bytes and the
     // deck rasterizes something a reader could actually recognise.
     window.put=async (title,colour)=>{
@@ -116,9 +122,9 @@ test('the tray orders, reorders and drops charts, and says how many it holds',{t
 
   const bundle=await page.evaluate(async()=>{
     const text=await MentatBriefing.exportHtml();
-    return {text,name:exportNames.at(-1),blob:await exportBlobs.at(-1).text()};
+    return {text,name:exportNames.at(-1),blob:await exportBlobs.at(-1).text(),today:localDay()};
   });
-  assert.equal(bundle.name,'mentat-briefing-'+new Date().toISOString().slice(0,10)+'.html');
+  assert.equal(bundle.name,'mentat-briefing-'+bundle.today+'.html');
   assert.equal(bundle.blob,bundle.text,'the downloaded bytes must be the bundle that was built');
   // compose() nests the chart's own viewport inside the drawing it builds, so
   // the count that matters is one root drawing per section, not one <svg> tag.
@@ -150,9 +156,9 @@ test('the PowerPoint deck carries one slide per chart with its provenance and no
     const bytes=new Uint8Array(await blob.arrayBuffer());
     let binary='';
     for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
-    return {name:exportNames.at(-1),type:blob.type,size:blob.size,base64:btoa(binary)};
+    return {name:exportNames.at(-1),type:blob.type,size:blob.size,base64:btoa(binary),today:localDay()};
   });
-  assert.equal(deck.name,'mentat-briefing-'+new Date().toISOString().slice(0,10)+'.pptx');
+  assert.equal(deck.name,'mentat-briefing-'+deck.today+'.pptx');
   assert.ok(deck.size>10000,'a two-slide deck with two images is not a few hundred bytes');
   const files=unzip(Buffer.from(deck.base64,'base64'));
   for(const name of ['ppt/slides/slide1.xml','ppt/slides/slide2.xml','ppt/notesSlides/notesSlide1.xml'])
