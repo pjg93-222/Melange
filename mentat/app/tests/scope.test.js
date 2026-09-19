@@ -55,12 +55,18 @@ const writeExamples = contract.examples.filter(example => example.write);
 
 test('[url_scope] the contract itself is shaped the way contracts/README.md requires', () => {
   assert.equal(contract.contract, 'url_scope');
-  assert.equal(contract.version, 2);
+  assert.equal(contract.version, 3);
   assert.equal(contract.owner, 'S5; pane keys S6');
   assert.ok(contract.produced_by.length >= 1, 'produced_by lists every producer');
   assert.ok(contract.consumed_by.length >= 1, 'consumed_by lists every consumer');
   assert.ok(contract.negative_controls.length >= 5, 'negative_controls is mandatory and non-empty');
   assert.ok(urlExamples.length >= 5 && writeExamples.length >= 1);
+  // A url example carries its scope at the top level; the `expected` envelope
+  // belongs to negative_controls. S8 (491570a0b) wrapped one, and the three
+  // subtests below then read `undefined` as the whole scope.
+  for (const example of urlExamples) {
+    assert.ok(example.scope, `${example.name} must carry a top-level scope, not an "expected" wrapper`);
+  }
   // The key table and the module must name the same keys, or the table is prose.
   assert.deepStrictEqual(
     Object.keys(contract.keys).filter(key => key !== 'studioPane').sort(),

@@ -19,7 +19,7 @@
     "mentat/app/cross-reference.js:refresh (industry -> GET /api/cross-reference?industry=)",
     "mentat/app/evidence.js:restorePanes (a.* - d.*, category), after GET /api/evidence-csv and GET /api/evidence have answered, the same pattern graph.js:applyUrlScope uses"
   ],
-  "description": "The console's URL scheme. The hash names the tab (app.js showView) and the query string carries the scope, so a permalink, a reload and a tab switch are one operation. Values are encodeURIComponent-encoded and decoded with URLSearchParams; keys are plain. write() merges into the live query: an empty value removes its key, unknown keys are preserved in place, existing keys keep their order and new keys append. A value write() would refuse is never put in the URL, so anything read() rejects could only have been typed by hand. Tab switches stay on history.replaceState (Paul's ruling C); pushState is never used. Orientation only - the examples are the contract. v2 (S6, 2026-09-17): up to four PAC evidence panes, each addressed by a PREFIXED key (a.source, a.id, a.committee, a.cycle ... d.*) so `cycle` goes on belonging to Graph and \"whose cycle is this?\" stays answerable. The pane's search text is transient and is never written; `category` carries the committee-type filter in the same spelling Graph uses. A fifth prefix is not a key this module knows, so e.id is preserved in the query and never read as scope.",
+  "description": "The console's URL scheme. The hash names the tab (app.js showView) and the query string carries the scope, so a permalink, a reload and a tab switch are one operation. Values are encodeURIComponent-encoded and decoded with URLSearchParams; keys are plain. write() merges into the live query: an empty value removes its key, unknown keys are preserved in place, existing keys keep their order and new keys append. A value write() would refuse is never put in the URL, so anything read() rejects could only have been typed by hand. Tab switches stay on history.replaceState (Paul's ruling C); pushState is never used. Orientation only - the examples are the contract. v2 (S6, 2026-09-17): up to four PAC evidence panes, each addressed by a PREFIXED key (a.source, a.id, a.committee, a.cycle ... d.*) so `cycle` goes on belonging to Graph and \"whose cycle is this?\" stays answerable. The pane's search text is transient and is never written; `category` carries the committee-type filter in the same spelling Graph uses. A fifth prefix is not a key this module knows, so e.id is preserved in the query and never read as scope. v3 (S8, 2026-09-18): a.map carries the district map's direction ('raised' | 'spent') on each pane; absent means the pane grid is showing.",
   "keys": {
     "industry": {
       "value": "The published industry label exactly as the snapshot registry lists it (S4 HANDOFF: 'Credit Union', 'Property & Casualty Insurance'). Any non-empty string; the label, never the slug. URL-encoded, so '&' survives.",
@@ -484,15 +484,12 @@
       "why": "S8. A map permalink reopens the map it was cut from: the pane is restored first from a.source/a.id/a.committee/a.cycle, then a.map reopens the district map on that pane.",
       "url": "/?a.source=snapshot&a.id=fairshake-20260908&a.committee=C00835959&a.cycle=2024&a.map=spent#evidence",
       "view": "evidence",
-      "expected": {
-        "scope": {
-          "a.source": "snapshot",
-          "a.id": "fairshake-20260908",
-          "a.committee": "C00835959",
-          "a.cycle": "2024",
-          "a.map": "spent"
-        },
-        "invalid": []
+      "scope": {
+        "a.source": "snapshot",
+        "a.id": "fairshake-20260908",
+        "a.committee": "C00835959",
+        "a.cycle": "2024",
+        "a.map": "spent"
       }
     }
   ],
