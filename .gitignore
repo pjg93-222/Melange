@@ -81,3 +81,30 @@ mentat/state/contribution-source-proofs/
 # node suites read. Source of truth, not a regenerable artifact - without this the
 # *.json sweep above would drop it and both suites would fail on a fresh checkout.
 !mentat/app/studio-contract-examples.json
+
+# --- Mentat working-tree hygiene (2026-09-18) ---
+# Node dependency trees are never tracked, wherever they appear.
+node_modules/
+# Session scratch and the published-report plane. reports/README.md is tracked and stays so.
+/.tmp/
+/reports/*
+!/reports/README.md
+# Lane notes, probes and renders under outputs/ are tracked; bulk extracts are not.
+/outputs/raw-contributions/
+/outputs/**/*.ndjson
+# Console and pipeline runtime state: caches, locks, run ledgers, accepted-source pointers.
+# Tracked code reads it and it is backed up with the databases, but it is never versioned.
+mentat/state/
+# Dated backup copies a lane leaves beside a source. `*.bak` above does not match
+# `name.ext.bak-20260914-E`.
+*.bak-*
+*.bak2-*
+*.bak3-*
+# Test scratch.
+.pytest_cache/
+mentat/test-results/
+
+# The authoritative report directory setting. R/paths.R, tools/report_directory.py,
+# app/Start-MentatApp.ps1 and tests/test_desktop_launcher.py all read it; without it a clean
+# checkout cannot resolve the report folder and that test fails.
+!mentat/config/report-directory.json
