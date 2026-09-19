@@ -28,16 +28,8 @@ fec_build_url <- function(
   }
   variants <- unique(trim_text(variants))
   variants <- variants[!is.na(variants) & nzchar(variants)]
-  if (identical(query_field, "contributor_employer")) {
-    variants <- unique(vapply(variants, function(value) {
-      if (grepl("&", value, fixed = TRUE)) {
-        value
-      } else {
-        normalize_register_key(value)
-      }
-    }, character(1L), USE.NAMES = FALSE))
-    variants <- variants[nzchar(variants)]
-  }
+  # Query literal roster spellings. Attribution normalization cannot establish
+  # that FEC searches with altered punctuation return the same population.
   if (!length(variants)) {
     stop("At least one non-empty FEC query value is required.", call. = FALSE)
   }

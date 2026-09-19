@@ -174,6 +174,22 @@ mentat_guard_progress_views <- function(progress, api) {
   p[, destination := ifelse(grepl("^P2_company_name", variant_set), "corporate", "contributions")]
   a <- a[kind %in% c("employer", "corporate")]
   if (!nrow(a)) return(empty)
+  # Date windows are fetch checkpoints; their union is stored once by the
+  # parent transaction. Reconcile complete, count-matching children to that
+  # parent, retaining orphaned or partial windows so they still fail the guard.
+  windows <- a[grepl("::window::", unit_id, fixed = TRUE), .(
+    child_rows = sum(rows_seen), children_fetched = all(fetched_complete == 1L)
+  ), by = .(company, cycle, kind, unit_id = sub("::window::.*$", "", unit_id))]
+  parents <- merge(a, windows, by = c("company", "cycle", "kind", "unit_id"))[
+    fetched_complete == 1L & stored_complete == 1L & children_fetched &
+      !is.na(child_rows) & child_rows == rows_seen,
+    .(company, cycle, kind, parent_id = unit_id)]
+  if (nrow(parents)) {
+    a[, parent_id := ifelse(grepl("::window::", unit_id, fixed = TRUE),
+      sub("::window::.*$", "", unit_id), NA_character_)]
+    a <- a[!parents, on = .(company, cycle, kind, parent_id)]
+    a[, parent_id := NULL]
+  }
   stamps <- p[, .(company, cycle, unit_id = variant_set, zero_verified)]
   a <- merge(a, stamps, by = c("company", "cycle", "unit_id"), all.x = TRUE)
   a[, destination := ifelse(kind == "corporate", "corporate", "contributions")]
