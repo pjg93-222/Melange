@@ -77,6 +77,9 @@ param(
   [string]$PythonPath = '',
   [string]$ExcelMutexName = 'Global\MentatIndustryExcelFinalize',
   [switch]$NoCache,
+  [ValidateRange(0,10000)]
+  [int]$CrossReferenceMaxRequests = 100,
+  [switch]$CrossReferenceOffline,
   [switch]$PlanOnly
 )
 
@@ -649,6 +652,8 @@ $plan = [ordered]@{
   generator_path = $GeneratorPath
   node_heap_mb = $NodeHeapMb
   generator_performance_budget_minutes = $GeneratorPerformanceBudgetMinutes
+  cross_reference_max_requests = [int]$CrossReferenceMaxRequests
+  cross_reference_offline = [bool]$CrossReferenceOffline
   fanout_path = $fanoutPath
   coverage_gate = $coverageTool
   raw_data_export = $rawExportTool
@@ -1073,6 +1078,8 @@ function Start-GeneratorJob {
     NodeHeapMb = $NodeHeapMb
     PerformanceBudgetMinutes = $GeneratorPerformanceBudgetMinutes
     NoCache = [bool]$NoCache
+    CrossReferenceMaxRequests = $CrossReferenceMaxRequests
+    CrossReferenceOffline = [bool]$CrossReferenceOffline
   }
   $command = New-ScriptInvocation $GeneratorPath $parameters
   $Job.process = Start-ManagedPowerShell `

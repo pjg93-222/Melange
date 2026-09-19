@@ -34,6 +34,9 @@ param(
   [switch]$SkipCollection,
   [switch]$LegacySerialCollection,
   [switch]$NoCache,
+  [ValidateRange(0,10000)]
+  [int]$CrossReferenceMaxRequests = 100,
+  [switch]$CrossReferenceOffline,
   [switch]$SkipMonitorConsole,
   [switch]$ForceStartProcess,
   [ValidateRange(0, 1440)]
@@ -78,6 +81,10 @@ if (-not $SkipCollection -and -not $LegacySerialCollection) {
   if ($RunRoot) { $resilientArguments.RunRoot = $RunRoot }
   if ($RosterPath) { $resilientArguments.RosterPath = $RosterPath }
   if ($NoCache) { $resilientArguments.NoCache = $true }
+  $resilientArguments.CrossReferenceMaxRequests = $CrossReferenceMaxRequests
+  if ($CrossReferenceOffline) {
+    $resilientArguments.CrossReferenceOffline = $true
+  }
   & $resilientPath @resilientArguments
   exit $LASTEXITCODE
 }
@@ -404,6 +411,8 @@ for ($index = 0; $index -lt $cleanIndustries.Count; $index++) {
     slot_capacity = [int]$MaxParallel
     excel_mutex_name = $excelMutexName
     no_cache = [bool]$NoCache
+    cross_reference_max_requests = [int]$CrossReferenceMaxRequests
+    cross_reference_offline = [bool]$CrossReferenceOffline
     requested_at = $startedAt.ToString('o')
   }
   Write-AtomicJson $specPath $spec
@@ -434,6 +443,8 @@ Write-AtomicJson $manifestPath ([ordered]@{
   last_good_root = $LastGoodRoot
   max_parallel = $MaxParallel
   no_cache = [bool]$NoCache
+  cross_reference_max_requests = [int]$CrossReferenceMaxRequests
+  cross_reference_offline = [bool]$CrossReferenceOffline
   slot_semaphore_name = $slotName
   excel_mutex_name = $excelMutexName
   industries = $cleanIndustries

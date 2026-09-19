@@ -408,6 +408,37 @@ try {
   ) {
     $generatorArguments.Add('-NoCache')
   }
+  # Carried from the launcher spec exactly as database_path is, because the
+  # builder is where the FEC requests are made. An older spec omits both
+  # fields and the builder keeps its own defaults.
+  if (
+    $null -ne $spec.PSObject.Properties['cross_reference_max_requests'] -and
+    $generatorCommand.Parameters.ContainsKey('CrossReferenceMaxRequests')
+  ) {
+    $crossReferenceMaxRequests = 0
+    if (
+      -not [int]::TryParse(
+        [string]$spec.cross_reference_max_requests,
+        [ref]$crossReferenceMaxRequests
+      ) -or
+      $crossReferenceMaxRequests -lt 0 -or
+      $crossReferenceMaxRequests -gt 10000
+    ) {
+      throw (
+        'Worker specification has an invalid cross_reference_max_requests: ' +
+        [string]$spec.cross_reference_max_requests
+      )
+    }
+    $generatorArguments.Add('-CrossReferenceMaxRequests')
+    $generatorArguments.Add([string]$crossReferenceMaxRequests)
+  }
+  if (
+    $null -ne $spec.PSObject.Properties['cross_reference_offline'] -and
+    [bool]$spec.cross_reference_offline -and
+    $generatorCommand.Parameters.ContainsKey('CrossReferenceOffline')
+  ) {
+    $generatorArguments.Add('-CrossReferenceOffline')
+  }
 
   $generatorSupportsMutex = $generatorCommand.Parameters.ContainsKey(
     'ExcelMutexName'

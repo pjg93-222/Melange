@@ -329,6 +329,49 @@ function Get-QuiescentDatabaseSha256([string]$Path) {
   $hash
 }
 
+# The cross-reference is an auditable side computation and the published
+# workbook is the accounting of record (rulings of 2026-09-17), so losing the
+# network must not block publication: an ONLINE run that exits non-zero is
+# retried once against saved evidence with --offline, and the build continues
+# if that succeeds. run_cross_reference.py has no exit code separating a
+# network failure from a logic one - its main() lets every error raise, so the
+# interpreter exits 1 for all of them - so the retry itself decides the class:
+# a genuine tool failure (a lost source record, a broken engine invariant) is
+# computed identically offline and still stops the build. An operator who
+# asked for -CrossReferenceOffline has no network to lose and is never retried.
+# The mode travels by REFERENCE, never as the return value: run_cross_reference.py
+# streams a JSON line per step and a closing summary to stdout, so a returned
+# mode would ride the same success stream - making the receipt field an array of
+# those lines and stealing them from the log the direct report tees in-process.
+function Invoke-MentatCrossReference {
+  param(
+    [Parameter(Mandatory = $true)][object[]]$Arguments,
+    [Parameter(Mandatory = $true)][bool]$Offline,
+    [Parameter(Mandatory = $true)][scriptblock]$Runner,
+    [Parameter(Mandatory = $true)][ref]$Mode
+  )
+  $failure = 'Automatic FEC cross-referencing failed. Review the saved process evidence before exporting.'
+  if ($Offline) {
+    & $Runner ($Arguments + '--offline')
+    if ($LASTEXITCODE -ne 0) { throw $failure }
+    $Mode.Value = 'offline'
+    return
+  }
+  & $Runner $Arguments
+  if ($LASTEXITCODE -eq 0) { $Mode.Value = 'online'; return }
+  Write-Warning (
+    "Automatic FEC cross-referencing failed online with exit code $LASTEXITCODE; " +
+    'retrying it once against saved evidence with --offline.'
+  )
+  & $Runner ($Arguments + '--offline')
+  if ($LASTEXITCODE -ne 0) { throw $failure }
+  Write-Warning (
+    'Cross-reference completed OFFLINE after an online failure. No new FEC ' +
+    'evidence was recovered for this build; review the saved process evidence.'
+  )
+  $Mode.Value = 'offline_fallback'
+}
+
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
 $cacheRoot = Join-Path $projectRoot ('.cache\industry-report\' + $industryToken)
 $databaseHash = Get-QuiescentDatabaseSha256 $DatabasePath
@@ -344,9 +387,12 @@ $crossReference = Join-Path $scriptRoot 'run_cross_reference.py'
 $crossReferenceArguments = @($crossReference, '--database', $DatabasePath,
   '--industry', $Industry, '--cycles', $sourceGuardCycles,
   '--baseline-root', $sourceGuardDirectory, '--max-requests', $CrossReferenceMaxRequests)
-if ($CrossReferenceOffline) { $crossReferenceArguments += '--offline' }
-& $PythonPath @crossReferenceArguments
-if ($LASTEXITCODE -ne 0) { throw 'Automatic FEC cross-referencing failed. Review the saved process evidence before exporting.' }
+$crossReferenceMode = ''
+Invoke-MentatCrossReference `
+  -Arguments $crossReferenceArguments `
+  -Offline ([bool]$CrossReferenceOffline) `
+  -Runner { param([object[]]$CommandArguments) & $PythonPath @CommandArguments } `
+  -Mode ([ref]$crossReferenceMode)
 & $PythonPath $sourceGuard prepare --database $DatabasePath --industry $Industry --cycles $sourceGuardCycles --state-dir $sourceGuardDirectory --receipt $sourceGuardReceipt
 if ($LASTEXITCODE -ne 0) { throw "Source comparison failed. See $sourceGuardReceipt" }
 $databaseToken = $databaseHash.Substring(0, 16)
@@ -1059,6 +1105,7 @@ $underPerformanceBudget = (
   ).Hash.ToLowerInvariant()
   data_manifest = $manifestPath
   export_guard_receipt = 'embedded:metadata.export_guards'
+  cross_reference_mode = $crossReferenceMode
   template_contract = $templateContract
   cache_hit = $cacheHit
   data_cache_hit = $cacheHit

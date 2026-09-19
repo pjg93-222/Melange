@@ -6,6 +6,9 @@ param(
   [Parameter(Mandatory = $true)][string]$LogPath,
   [ValidateSet('','2021-2022','2023-2024','2025-2026')]
   [string]$CycleLabel = '',
+  [ValidateRange(0,10000)]
+  [int]$CrossReferenceMaxRequests = 100,
+  [switch]$CrossReferenceOffline,
   [string]$RLibraryPath = 'C:\Users\pgoff\AppData\Local\R\win-library\4.6'
 )
 
@@ -50,8 +53,10 @@ $generatorArguments = @{
   Industry = $Industry
   DatabasePath = $DatabasePath
   OutputDirectory = $OutputDirectory
+  CrossReferenceMaxRequests = $CrossReferenceMaxRequests
 }
 if ($CycleLabel) { $generatorArguments.CycleLabel = $CycleLabel }
+if ($CrossReferenceOffline) { $generatorArguments.CrossReferenceOffline = $true }
 & $generator @generatorArguments 2>&1 | Tee-Object -LiteralPath $LogPath
 if ($LASTEXITCODE -ne 0) {
   throw "Direct report generator exited with code $LASTEXITCODE."
