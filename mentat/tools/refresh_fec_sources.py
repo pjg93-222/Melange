@@ -82,6 +82,8 @@ def main():
     parser.add_argument('--cycles',type=int,nargs='+',default=[2022,2024,2026])
     parser.add_argument('--families',nargs='+',choices=list(FAMILIES),default=list(FAMILIES))
     parser.add_argument('--activate',action='store_true')
+    parser.add_argument('--filing-header-directory',type=Path,
+                        help='Optional preserved FEC header evidence; read locally, without fetching.')
     args=parser.parse_args()
     if any(c not in (2022,2024,2026) for c in args.cycles):parser.error('Unsupported cycle')
     args.root.mkdir(parents=True,exist_ok=True)
@@ -91,9 +93,15 @@ def main():
     write_receipt(args.root/'source-manifest.json',{'status':'succeeded','sources':receipts})
     if 'oth' in args.families:
         from fec_transfer_graph import transfer_index,publish_index
+        # Twin of the loader in fec_transfer_graph.main(): preserved evidence
+        # only, never a *.review.json. Under index VERSION 3 a transaction key
+        # seen in more than one filing stays unresolved until a verified header
+        # settles it, so without this the refreshed base index resolves none.
+        headers=[json.loads(p.read_text(encoding='utf-8')) for p in sorted(args.filing_header_directory.glob('*.json'))
+                 if not p.name.endswith('.review.json')] if args.filing_header_directory else []
         for cycle in args.cycles:
             folder=args.root/'fec_beneficiary'/f'oth{str(cycle)[-2:]}'
-            index=transfer_index(folder/'itoth.txt',cycle)
+            index=transfer_index(folder/'itoth.txt',cycle,headers)
             publish_index(folder,index)
     if args.activate:
         if set(args.families)!=set(FAMILIES) or set(args.cycles)!={2022,2024,2026}:
