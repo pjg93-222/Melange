@@ -1,0 +1,9 @@
+chart-export.js | crlf=23 lonelf=36 | class=mixed | 4ae33213ca916bd3b0d37f634a4995759939dbe0c198e8dc9e3dfa5403a1ec9c | bytes=4540
+chart-studio.js | crlf=2304 lonelf=0 | class=CRLF | 21f3d67d2261d0298ce7c3e8e88bb1948aa4714a188366a2b66b10dbfbe110b8 | bytes=138508
+index.html | crlf=352 lonelf=2 | class=mixed | fd220c1111d5ad282839390f9504d60d6fdb44f276b897eeb4cb3118eb51ee98 | bytes=54919
+chart-studio.css | crlf=658 lonelf=0 | class=CRLF | 81fe526f9e0014224d9da629333167065736e06bf61463e887307f4c7e8eee94 | bytes=33423
+graph.js | crlf=242 lonelf=22 | class=mixed | d33579f871a7376c8cb115d97655f1210110bcc120d0f5f4e5994942c57d08b3 | bytes=22698
+charts.js | crlf=223 lonelf=155 | class=mixed | 924b088c4f59b949a4d84ea2128310d7455075aa0e66405cf01f47bedf27ac45 | bytes=34056
+chart-studio-core.test.js | crlf=1049 lonelf=82 | class=mixed | fda752d023c83105d1cc99f8362cdd92e5b6a0d7df1b1b5ad6a5b2fa460c2e06 | bytes=68091
+test_contribution_export_browser.cjs | crlf=0 lonelf=79 | class=LF | 1a2ece7cc993151b3d46903f1ab9286e08bdc399a11b0225e8b963f24f3d2f09 | bytes=7240
+test_studio_canvas_only_browser.cjs | crlf=0 lonelf=115 | class=LF | 058e947df66674ace5be8c13a83429cdfac2e7d293ba8d95b97170c72a82dae4 | bytes=8834

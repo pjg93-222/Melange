@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: "Articulat CF", articulat-cf, Arial, sans-serif; color: #342649; background: #fcf7f4; }
+    a { color: #57447b; } a:hover { color: #342649; }
+    h1, h2 { font-family: "Freight Text Pro", freight-text-pro, Georgia, serif; font-weight: 400; letter-spacing: -0.35px; margin: 0; }
+    select, input, button { font: inherit; }
+    select, input[type=search] { border: 1px solid #e4d9d0; border-radius: 4px; padding: 8px 11px; font-size: 14px; color: #342649; background: white; width: 100%; box-sizing: border-box; min-height: 44px; }
+    button { cursor: pointer; border-radius: 4px; }
+    .primary { background: #342649; color: white; border: 0; padding: 0 16px; min-height: 44px; }
+    .secondary { background: white; color: #342649; border: 1px solid #b4a4bd; padding: 0 14px; min-height: 44px; }
+    .secondary:hover { border-color: #57447b; background: #f7f2fa; }
+    .chip { display: inline-flex; align-items: center; gap: 8px; padding: 0 6px 0 12px; min-height: 36px; border: 1px solid #d6c8e2; border-radius: 18px; background: #f7f2fa; font-size: 13px; }
+    .chip button { border: 0; background: transparent; width: 28px; height: 28px; border-radius: 14px; color: #57447b; font-size: 16px; line-height: 1; }
+    .chip button:hover { background: #d6c8e2; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; letter-spacing: 0.2px; background: #f7ede4; color: #342649; border: 1px solid #e4d9d0; }
+    .badge.excluded { background: #f3ede9; color: #716a64; font-weight: 500; }
+    .label { font-size: 13px; color: #526e84; display: block; }
+    .muted { color: #716a64; font-size: 13px; }
+    .pane table, .compare table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    .pane th, .compare th { text-align: left; font-weight: 600; color: #526e84; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; padding: 8px 6px; border-bottom: 1px solid #e4d9d0; }
+    .pane td, .compare td { padding: 8px 6px; border-bottom: 1px solid #f1e9e3; vertical-align: top; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .bar { height: 8px; background: #327a7a; border-radius: 2px; }
+    .bar.thin { height: 6px; background: #9ed4d5; }
+    .bartrack { height: 8px; background: #f1e9e3; border-radius: 2px; overflow: hidden; }
+    .icon { width: 16px; height: 16px; vertical-align: -3px; }
+    .tabs button { border: 0; background: transparent; padding: 10px 14px; color: #f7ede4; font-size: 14px; border-bottom: 3px solid transparent; }
+    .tabs button.active { color: white; border-bottom-color: #eca91c; }
+  </style>
+</helmet>
+<div style="width: 1440px; height: 1240px; box-sizing: border-box; display: flex; flex-direction: column; gap: 0;">
+
+  <div style="height: 64px; background: #342649; display: flex; align-items: center; gap: 32px; padding: 0 28px; box-sizing: border-box;">
+    <div style="color: #f7ede4; font-weight: 700; letter-spacing: 4px; font-size: 20px;">MENTAT</div>
+    <div class="tabs" style="display: flex; gap: 4px;">
+      <button type="button">Loading</button><button type="button">Collection</button><button type="button">Graph</button><button type="button">Chart Studio</button><button type="button">Cross-reference</button><button type="button" class="active">PAC evidence</button>
+    </div>
+    <div style="margin-left: auto; color: #d6c8e2; font-size: 12px;">Local only · port 8806</div>
+  </div>
+
+  <div style="padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 18px; box-sizing: border-box; flex-grow: 1;">
+
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;">
+      <div>
+        <h1 style="font-size: 32px;">PAC evidence</h1>
+        <p class="muted" style="margin: 4px 0 0;">Follow the reported money for one PAC, or several side by side, from any industry file or saved snapshot.</p>
+      </div>
+      <button type="button" class="secondary">Split with Graph</button>
+    </div>
+
+    <section aria-label="Scope" style="background: white; border: 1px solid #e4d9d0; border-radius: 6px; padding: 18px 22px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; align-items: end;">
+        <label class="label">Source
+          <select aria-label="Source" value="{{source}}" onChange="{{setSource}}">
+            <sc-for list="{{sources}}" as="s" hint-placeholder-count="3"><option value="{{s.id}}">{{s.label}}</option></sc-for>
+          </select>
+        </label>
+        <label class="label">Committee type
+          <select aria-label="Committee type" value="{{type}}" onChange="{{setType}}">
+            <sc-for list="{{types}}" as="t" hint-placeholder-count="4"><option value="{{t.id}}">{{t.label}}</option></sc-for>
+          </select>
+        </label>
+        <label class="label">Find a PAC
+          <input type="search" placeholder="Name or committee ID" value="{{find}}" onInput="{{setFind}}">
+        </label>
+        <label class="label">PAC
+          <select aria-label="PAC" value="{{pick}}" onChange="{{setPick}}">
+            <sc-for list="{{candidates}}" as="o" hint-placeholder-count="3"><option value="{{o.id}}">{{o.label}}</option></sc-for>
+          </select>
+        </label>
+        <label class="label">Cycle
+          <select aria-label="Cycle" value="{{cycle}}" onChange="{{setCycle}}">
+            <option value="all">All cycles</option><option value="2026">2025–2026</option><option value="2024">2023–2024</option><option value="2022">2021–2022</option>
+          </select>
+        </label>
+        <button type="button" class="primary" onClick="{{addPane}}" disabled="{{addDisabled}}">Add pane</button>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <button type="button" class="secondary" style="min-height: 38px; font-size: 13px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Import a file</button>
+        <button type="button" class="secondary" style="min-height: 38px; font-size: 13px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg> New snapshot</button>
+        <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #526e84; margin-left: 8px;"><input type="checkbox" style="width: 18px; height: 18px; min-height: 0;"> Follow Graph selection</label>
+        <span style="margin-left: auto;" class="muted" role="status">{{status}}</span>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <span class="muted" style="margin-right: 4px;">Open panes</span>
+        <sc-for list="{{chips}}" as="c" hint-placeholder-count="3">
+          <span class="chip">{{c.label}}<button type="button" aria-label="{{c.removeLabel}}" onClick="{{c.remove}}">×</button></span>
+        </sc-for>
+      </div>
+    </section>
+
+    <div style="{{gridStyle}}">
+      <sc-for list="{{panes}}" as="p" hint-placeholder-count="3">
+        <section class="pane" aria-label="{{p.aria}}" style="background: white; border: 1px solid #e4d9d0; border-radius: 6px; padding: 18px 20px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; min-width: 0;">
+          <div style="display: flex; justify-content: space-between; gap: 10px; align-items: flex-start;">
+            <div style="min-width: 0;">
+              <div class="muted" style="font-size: 12px; letter-spacing: 0.8px; text-transform: uppercase;">{{p.industry}} · {{p.sourceKind}}</div>
+              <h2 style="font-size: 22px; line-height: 1.15; margin-top: 2px; overflow-wrap: anywhere;">{{p.name}}</h2>
+              <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap;">
+                <span class="badge" title="{{p.categorySource}}">{{p.category}}</span>
+                <span class="muted">{{p.id}}</span>
+                <span class="muted">{{p.cycleLabel}}</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 6px; flex-shrink: 0;">
+              <button type="button" class="secondary" style="min-height: 36px; font-size: 13px; padding: 0 10px;" onClick="{{p.toggleRows}}">{{p.rowsLabel}}</button>
+              <button type="button" class="secondary" style="min-height: 36px; width: 36px; padding: 0;" aria-label="{{p.removeLabel}}" onClick="{{p.remove}}">×</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+            <div style="background: #fbfaf9; border: 1px solid #f1e9e3; border-radius: 4px; padding: 12px 14px;">
+              <span class="label">{{p.mainChannel}}</span>
+              <strong style="display: block; font-size: 26px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums;">{{p.mainAmount}}</strong>
+              <span class="muted">{{p.mainNote}}</span>
+            </div>
+            <div style="background: #fbfaf9; border: 1px solid #f1e9e3; border-radius: 4px; padding: 12px 14px;">
+              <span class="label">Rows in file</span>
+              <strong style="display: block; font-size: 26px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums;">{{p.rows}}</strong>
+              <span class="muted">{{p.rowsNote}}</span>
+            </div>
+          </div>
+
+          <div>
+            <span class="label" style="margin-bottom: 6px;">By cycle</span>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <sc-for list="{{p.cycles}}" as="cy" hint-placeholder-count="3">
+                <div style="display: grid; grid-template-columns: 64px minmax(0, 1fr) 120px; gap: 10px; align-items: center; font-size: 13px;">
+                  <span class="muted">{{cy.label}}</span>
+                  <div class="bartrack"><div class="bar" style="{{cy.style}}"></div></div>
+                  <span class="num">{{cy.amount}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div>
+            <span class="label" style="margin-bottom: 4px;">{{p.topLabel}}</span>
+            <table>
+              <tbody>
+                <sc-for list="{{p.top}}" as="t" hint-placeholder-count="5">
+                  <tr><td style="overflow-wrap: anywhere;">{{t.name}}</td><td class="num">{{t.amount}}</td></tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+
+          <sc-if value="{{p.rowsOpen}}" hint-placeholder-val="{{ false }}">
+            <div style="border-top: 1px solid #e4d9d0; padding-top: 10px;">
+              <span class="label" style="margin-bottom: 4px;">Source rows · {{p.rowsPage}}</span>
+              <table>
+                <thead><tr><th>Date</th><th>Counterparty</th><th class="num">Amount</th><th>Status</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{p.sampleRows}}" as="r" hint-placeholder-count="4">
+                    <tr><td class="muted">{{r.date}}</td><td>{{r.name}}</td><td class="num">{{r.amount}}</td><td><span class="{{r.badgeClass}}">{{r.status}}</span></td></tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <div style="display: flex; gap: 8px; margin-top: 8px;"><button type="button" class="secondary" style="min-height: 34px; font-size: 12px;">Previous rows</button><button type="button" class="secondary" style="min-height: 34px; font-size: 12px;">Next rows</button></div>
+            </div>
+          </sc-if>
+
+          <div class="muted" style="font-size: 12px; margin-top: auto;">{{p.provenance}} · <a href="#about">About these figures</a></div>
+        </section>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{compareVisible}}" hint-placeholder-val="{{ true }}">
+      <section class="compare" aria-label="Compare panes" style="background: white; border: 1px solid #e4d9d0; border-radius: 6px; padding: 18px 22px; box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+          <h2 style="font-size: 22px;">Compare</h2>
+          <span class="muted">Bars are scaled per row to the largest pane. Figures are observed filings from each file; a bar across industries compares files, not FEC totals.</span>
+        </div>
+        <table style="margin-top: 12px;">
+          <thead>
+            <tr><th style="width: 200px;">Metric</th>
+              <sc-for list="{{compareHeads}}" as="h" hint-placeholder-count="3"><th>{{h.name}}<br><span style="font-weight: 400; text-transform: none; letter-spacing: 0;">{{h.sub}}</span></th></sc-for>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{compareRows}}" as="row" hint-placeholder-count="7">
+              <tr>
+                <td style="font-weight: 600;">{{row.metric}}</td>
+                <sc-for list="{{row.cells}}" as="cell" hint-placeholder-count="3">
+                  <td>
+                    <sc-if value="{{cell.hasBar}}" hint-placeholder-val="{{ true }}">
+                      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 130px; gap: 10px; align-items: center;"><div class="bartrack"><div class="bar thin" style="{{cell.style}}"></div></div><span class="num">{{cell.text}}</span></div>
+                    </sc-if>
+                    <sc-if value="{{cell.isText}}" hint-placeholder-val="{{ false }}"><span>{{cell.text}}</span></sc-if>
+                  </td>
+                </sc-for>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </section>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"maxPanes":{"editor":"int","default":4,"min":2,"max":4,"section":"Layout"},"$preview":{"width":1440,"height":1240}}'>
+const PANES = [
+  {key:'crypto-fairshake', source:'crypto', industry:'Crypto', sourceKind:'Spending Overview file', name:'FAIRSHAKE', id:'C00835959', category:'Super PAC', categorySource:'From the file column Recipient Category', rows:28, supported:22, excluded:6, total:177980393.39, byCycle:{2024:125511180, 2026:52469214}, top:[['COINBASE',117092475],['COINBASE COMMERCE (EXCHANGE)',59881739],['ARMSTRONG, BRIAN DAVID',1000000],['POLLAK, JESSE',5000],['CANAVAN, MIKE',680]], provenance:'Crypto Industry Spending Overview.xlsx · 6,343 rows · sha 88ea2284',
+   sampleRows:[['2025-10-07','COINBASE',8092475,'supported'],['2025-07-13','COINBASE COMMERCE (EXCHANGE)',6000000,'supported'],['2024-12-20','COINBASE',23000000,'supported'],['2024-12-20','COINBASE',23000000,'excluded by the workbook'],['2024-06-03','COINBASE COMMERCE (EXCHANGE)',25000000,'supported']]},
+  {key:'crypto-cdc', source:'crypto', industry:'Crypto', sourceKind:'Spending Overview file', name:'CHAMBER OF DIGITAL COMMERCE PAC', id:'C00567412', category:'Trade Association', categorySource:'From the FEC committee master (cm26, ORG_TP T); the file left it Unclassified', rows:8, supported:8, excluded:0, total:69425.03, byCycle:{2022:7900, 2024:27264, 2026:34261}, top:[['COINBASE',69425]], provenance:'Crypto Industry Spending Overview.xlsx · 6,343 rows · sha 88ea2284', sampleRows:[]},
+  {key:'crypto-coinbasepac', source:'crypto', industry:'Crypto', sourceKind:'Spending Overview file', name:'COINBASE INNOVATION PAC', id:'C00804179', category:'Company PAC', categorySource:'From the file column Recipient Category', rows:1373, supported:1357, excluded:16, total:537499.47, byCycle:{2022:89002, 2024:275016, 2026:173481}, top:[['COINBASE, INC.',117658],['CHOI, EMILIE',25673],['ARMSTRONG, BRIAN',25000],['CALVERT CAMPBELL, KARA',25000],['HAAS, ALESIA',23797]], provenance:'Crypto Industry Spending Overview.xlsx · 6,343 rows · sha 88ea2284', sampleRows:[]},
+  {key:'crypto-dccc', source:'crypto', industry:'Crypto', sourceKind:'Spending Overview file', name:'DCCC', id:'C00000935', category:'Party Committee', categorySource:'From the file column Recipient Category', rows:10, supported:10, excluded:0, total:147900, byCycle:{2022:1000, 2024:56300, 2026:90600}, top:[['ARMSTRONG, BRIAN',88600],['POLLAK, JESSE',52300],['TUSAR, GREGORY',5000],['KNOWLTON, ALDEN',2000]], provenance:'Crypto Industry Spending Overview.xlsx · 6,343 rows · sha 88ea2284', sampleRows:[]},
+  {key:'crypto-daj', source:'crypto', industry:'Crypto', sourceKind:'Spending Overview file', name:'DEFEND AMERICAN JOBS', id:'C00836221', category:'Super PAC', categorySource:'From the file column Recipient Category', rows:2, supported:2, excluded:0, total:2500000, byCycle:{2024:2500000}, top:[['COINBASE INC',2500000]], provenance:'Crypto Industry Spending Overview.xlsx · 6,343 rows · sha 88ea2284', sampleRows:[]},
+  {key:'cu-culac', source:'cu', industry:'Credit Union', sourceKind:'Spending Overview file', name:"AMERICA'S CREDIT UNIONS PAC / CULAC", id:'C00007880', category:'Trade Association', categorySource:'From the file column Recipient Category', rows:594, supported:594, excluded:0, total:36870.31, byCycle:{2022:11452, 2024:9065, 2026:16354}, top:[['CHENEY, BILL',15450],['NIELSEN, STERLING W',4460],['CHENEY, WILLIAM O.',2750],['MOUNTAIN AMERICA CREDIT UNION',2701],['MOSER, AMY',1650]], provenance:'Credit Union Industry Spending Overview.xlsx · 27,632 rows · sha a6591d39', sampleRows:[]},
+  {key:'cu-dccc', source:'cu', industry:'Credit Union', sourceKind:'Spending Overview file', name:'DCCC', id:'C00000935', category:'Party Committee', categorySource:'From the file column Recipient Category', rows:48, supported:48, excluded:0, total:3480, byCycle:{2022:2880, 2024:600}, top:[['MORGAN, THOMAS',2200],['MASON, THEA',500],['HAZZARD, ANDREW',350],['GRIMES, DEBRA',325],['JANKE, LINDA',63]], provenance:'Credit Union Industry Spending Overview.xlsx · 27,632 rows · sha a6591d39', sampleRows:[]},
+  {key:'cu-uschamber', source:'cu', industry:'Credit Union', sourceKind:'Spending Overview file', name:'US CHAMBER OF COMMERCE PAC', id:'C00082040', category:'Trade Association', categorySource:'From the file column Recipient Category', rows:4, supported:4, excluded:0, total:3500, byCycle:{2022:500, 2024:1000, 2026:2000}, top:[['SCHENCK, JAMES',3500]], provenance:'Credit Union Industry Spending Overview.xlsx · 27,632 rows · sha a6591d39', sampleRows:[]},
+  {key:'snap-fairshake', source:'snapshot', industry:'Coinbase snapshot', sourceKind:'Saved FEC snapshot · 2026-09-08', name:'FAIRSHAKE', id:'C00835959', category:'Super PAC', categorySource:'From the FEC committee master (cm26)', rows:null, supported:null, excluded:null, total:260070709.37, byCycle:{2024:260070709.37, 2026:137407399.21}, top:[['Independent spending, 2024',40661820.61],['Company receipt legs (Coinbase)',23],['Transfers to other committees',25],['Candidate activity rows',127]], snapshot:true, provenance:'Snapshot fairshake-20260908 · openFEC · receipts as reported', sampleRows:[]}
+];
+const SOURCES = [{id:'crypto', label:'Crypto · Spending Overview · 6,343 rows'},{id:'cu', label:'Credit Union · Spending Overview · 27,632 rows'},{id:'snapshot', label:'Snapshot · Coinbase · 2024–2026'}];
+const TYPES = ['Super PAC','Trade Association','JFC','Company PAC','Leadership PAC','Carey','Other PAC','Candidate','Party Committee','Unclassified'];
+const money = (n) => n == null ? '—' : (n < 0 ? '-' : '') + '$' + Math.round(Math.abs(n)).toLocaleString('en-US');
+const moneyCents = (n) => '$' + n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const number = (n) => n == null ? '—' : n.toLocaleString('en-US');
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { source: 'crypto', type: '', find: '', pick: 'crypto-cdc', cycle: 'all', panes: ['crypto-fairshake', 'cu-culac', 'crypto-dccc'], rowsOpen: 'crypto-fairshake', status: 'Ready · 2 files and 1 snapshot on this computer' };
+  }
+  amountFor(p, cycle) { return cycle === 'all' ? p.total : (p.byCycle[cycle] || 0); }
+  renderVals() {
+    const s = this.state, max = this.props.maxPanes ?? 4;
+    const cands = PANES.filter(p => p.source === s.source && (!s.type || p.category === s.type) && (!s.find || (p.name + ' ' + p.id).toLowerCase().includes(s.find.toLowerCase())) && !s.panes.includes(p.key));
+    const candidates = cands.map(p => ({ id: p.key, label: `${p.name} · ${p.id} · ${p.category}` }));
+    const pick = cands.some(p => p.key === s.pick) ? s.pick : (cands[0] ? cands[0].key : '');
+    const typeCounts = {}; PANES.filter(p => p.source === s.source).forEach(p => { typeCounts[p.category] = (typeCounts[p.category] || 0) + 1; });
+    const types = [{ id: '', label: 'All types' }, ...TYPES.filter(t => typeCounts[t]).map(t => ({ id: t, label: `${t} · ${typeCounts[t]}` }))];
+    const open = s.panes.map(k => PANES.find(p => p.key === k)).filter(Boolean);
+    const cycleLabel = s.cycle === 'all' ? 'All cycles' : `${Number(s.cycle) - 1}–${s.cycle}`;
+    const panes = open.map(p => {
+      const cycles = ['2022', '2024', '2026'].filter(c => p.byCycle[c] != null);
+      const peak = Math.max(...cycles.map(c => p.byCycle[c]), 1);
+      const amount = this.amountFor(p, s.cycle);
+      return {
+        aria: `${p.name} pane`, industry: p.industry, sourceKind: p.sourceKind, name: p.name, id: p.id, category: p.category, categorySource: p.categorySource, cycleLabel,
+        mainChannel: p.snapshot ? 'Receipts as reported' : 'Receipts', mainAmount: money(amount),
+        mainNote: p.snapshot ? 'FEC financial summary for the cycle' : (s.cycle === 'all' ? `${number(p.supported)} supported rows` : 'supported rows in this cycle'),
+        rows: p.rows == null ? '—' : number(p.rows), rowsNote: p.rows == null ? 'snapshot: legs, not file rows' : (p.excluded ? `${number(p.supported)} supported · ${number(p.excluded)} excluded by the workbook` : 'all supported'),
+        cycles: cycles.map(c => ({ label: `${Number(c) - 1}–${c}`, amount: money(p.byCycle[c]), style: `width: ${Math.max(2, Math.round(p.byCycle[c] / peak * 100))}%` })),
+        topLabel: p.snapshot ? 'Snapshot legs' : 'Top contributors in this file', top: p.top.map(([n, a]) => ({ name: n, amount: p.snapshot && a < 1000 ? number(a) : money(a) })),
+        rowsOpen: s.rowsOpen === p.key, rowsLabel: s.rowsOpen === p.key ? 'Hide rows' : 'Rows', rowsPage: p.sampleRows.length ? `1–${p.sampleRows.length} of ${number(p.rows)}` : `${number(p.rows)} rows load from the import`,
+        sampleRows: p.sampleRows.map(([d, n, a, st]) => ({ date: d, name: n, amount: moneyCents(a), status: st, badgeClass: st === 'supported' ? 'muted' : 'badge excluded' })),
+        provenance: p.provenance, removeLabel: `Remove ${p.name}`,
+        toggleRows: () => this.setState({ rowsOpen: s.rowsOpen === p.key ? '' : p.key }),
+        remove: () => this.setState({ panes: s.panes.filter(k => k !== p.key) })
+      };
+    });
+    const chips = open.map(p => ({ label: `${p.name} · ${p.industry}${s.cycle === 'all' ? '' : ' · ' + s.cycle}`, removeLabel: `Remove ${p.name}`, remove: () => this.setState({ panes: s.panes.filter(k => k !== p.key) }) }));
+    const metrics = [
+      ['Receipts · ' + cycleLabel, p => this.amountFor(p, s.cycle), 'money'],
+      ['2021–2022', p => p.byCycle[2022] || 0, 'money'], ['2023–2024', p => p.byCycle[2024] || 0, 'money'], ['2025–2026', p => p.byCycle[2026] || 0, 'money'],
+      ['Rows supported', p => p.supported, 'count'], ['Rows excluded by the workbook', p => p.excluded, 'count'],
+      ['Top contributor', p => p.top[0] ? p.top[0][0] : '—', 'text'], ['Category', p => p.category, 'text'], ['Source', p => `${p.industry} · ${p.sourceKind}`, 'text']
+    ];
+    const compareRows = metrics.map(([metric, fn, kind]) => {
+      const values = open.map(fn);
+      const peak = Math.max(...values.map(v => typeof v === 'number' ? v : 0), 1);
+      return { metric, cells: values.map(v => kind === 'text' || v == null ? { hasBar: false, isText: true, text: v == null ? '—' : String(v) } : { hasBar: true, isText: false, text: kind === 'money' ? money(v) : number(v), style: `width: ${v > 0 ? Math.max(1, Math.round(v / peak * 100)) : 0}%` }) };
+    });
+    return {
+      sources: SOURCES, source: s.source, setSource: (e) => this.setState({ source: e.target.value, type: '', find: '' }),
+      types, type: s.type, setType: (e) => this.setState({ type: e.target.value }),
+      find: s.find, setFind: (e) => this.setState({ find: e.target.value }),
+      candidates, pick, setPick: (e) => this.setState({ pick: e.target.value }),
+      cycle: s.cycle, setCycle: (e) => this.setState({ cycle: e.target.value }),
+      addDisabled: !pick || open.length >= max,
+      addPane: () => { if (pick && open.length < max) this.setState({ panes: [...s.panes, pick] }); },
+      status: open.length >= max ? `${max} panes open · remove one to add another` : s.status,
+      chips, panes, gridStyle: `display: grid; grid-template-columns: repeat(${Math.max(1, open.length)}, minmax(0, 1fr)); gap: 18px;`,
+      compareVisible: open.length >= 2, compareHeads: open.map(p => ({ name: p.name, sub: `${p.industry} · ${p.category}` })), compareRows
+    };
+  }
+}
+</script>
+</body>
+</html>

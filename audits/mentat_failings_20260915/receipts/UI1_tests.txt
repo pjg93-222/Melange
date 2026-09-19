@@ -1,0 +1,1801 @@
+UI1 test sweep
+date: 2026-09-17T15:47:31-04:00
+cwd: C:\Users\pgoff\Mentat\mentat
+HEAD: a9ed5c23623dc189a0f3f683810e347ae3a8d53f
+
+=== 1. node unit suite: node --test "app/tests/**/*.test.js" ===
+✔ the tray keeps charts in the order they were added (1.2015ms)
+✔ adding returns a new list, so an export already running keeps its own order (0.5322ms)
+✔ move walks a chart exactly one place in the direction asked (0.3561ms)
+✔ move off either end changes nothing at all, rather than wrapping round (1.1263ms)
+✔ remove takes out exactly the named chart and leaves the rest in order (0.1854ms)
+✔ the tray holds forty charts and refuses the forty-first rather than dropping the first (0.3696ms)
+✔ a chart removed from a full tray makes room for exactly one more (0.1408ms)
+✔ added_at read back in seconds (as the server writes it) renders today's clock, not a 1970 date (0.7409ms)
+✔ classifyFields splits dimensions, measures and hidden identifier fields (3.0856ms)
+✔ classification agrees with chart-math chartColumns on measures (0.5071ms)
+✔ dimensions reach grouping and extra measures are explicitly refused (1.0785ms)
+✔ a measure pill carries its own aggregation, defaulting to sum (0.3519ms)
+✔ a dimension with no measure counts rows (0.1703ms)
+✔ a date dimension on Columns with a measure draws a line under Automatic (0.1771ms)
+✔ a date dimension with no measure stays a bar of row counts (0.1251ms)
+✔ two measures, one on each shelf, draw a scatter (0.1803ms)
+✔ a dimension on Rows with a measure on Columns draws horizontal bars (0.1201ms)
+✔ a Colour pill becomes the separate series and pairs the chart type (0.2684ms)
+✔ a Colour measure is refused with a note rather than becoming a series (0.1427ms)
+✔ explicit mark types override Automatic (0.3231ms)
+✔ a circle mark without two measures reports an issue (0.1195ms)
+✔ a histogram ignores the grouping column (0.0603ms)
+✔ Swap exchanges Columns and Rows (0.2005ms)
+✔ filters, pages and row parameters reach the configuration (0.2192ms)
+✔ blank row parameters compile to zero, which the engine reads as unbounded (0.0834ms)
+✔ analytics map to transform, period and horizon (0.0847ms)
+✔ time analysis without a date field is refused (0.0733ms)
+✔ time analysis forces a bar, line or area mark and drops Colour (0.0657ms)
+✔ time analysis asks for one Subject and filters to it (0.2727ms)
+✔ an empty sheet compiles to no configuration and says why (0.1016ms)
+✔ hidden identifier fields still compile when a user places them (0.0851ms)
+✔ every compiled configuration is accepted by the chart engine (12.3146ms)
+✔ the 15 chart types the classic dialog offers are all reachable (0.8736ms)
+✔ Sort orders the x dimension by the y measure and leaves scatter alone (0.5446ms)
+✔ a time view keeps chronological order whatever Sort says (0.3928ms)
+✔ rowsToMarksSummary describes the view for the status bar (0.8071ms)
+✔ mark values follow the order the renderer appends marks (0.3124ms)
+✔ reference lines average and median the plotted marks (0.3816ms)
+✔ a grand total is withheld unless the marks are additive parts of one whole (0.6739ms)
+✔ reference lines are withheld from independent series (0.2079ms)
+✔ Show Me holds the 24 Tableau tiles in order (0.1244ms)
+✔ the nine out-of-release tiles are always disabled (0.2633ms)
+✔ the Show Me eligibility table greys tiles the field selection cannot satisfy (0.461ms)
+✔ a tile that needs a date says so (0.2773ms)
+✔ the selection counts shelf fields plus anything picked in the Data pane (0.3341ms)
+✔ clicking a tile sets marks and shelves in one step (2.0815ms)
+✔ the recommended tile follows chart-math recommend() (0.4584ms)
+✔ Clear keeps the data source and drops the view (0.1478ms)
+✔ the session key names the worksheet, not just the workbook digest (0.1116ms)
+✔ pill accepts a bare column index, a numeric string and a full pill (0.0941ms)
+✔ more groups than the limit fold into one Other mark instead of refusing to draw (0.7895ms)
+✔ the group limit is a parameter, and a high enough one folds nothing (0.2575ms)
+✔ folding does not change the grand total (0.4039ms)
+✔ Other pools the raw rows, so every aggregation reads the folded rows themselves (1.988ms)
+✔ a side-by-side comparison folds its grouping field the same way (0.4275ms)
+✔ a group limit that is not a positive whole number is refused (0.7806ms)
+✔ Sort reorders the real groups and leaves Other at the end (0.503ms)
+✔ splitting a multi-value cell makes one row per value and leaves the data alone (0.8723ms)
+✔ a split view counts a row once per value and says so (0.5051ms)
+✔ a split result carries the split facts, so a reader is told values not rows (0.8954ms)
+✔ the group limit and the split parameter reach the configuration (0.3317ms)
+✔ a new sheet starts with no group limit and splitting off (0.0874ms)
+✔ all shelf dimensions and Detail dimensions change the grouping grain (0.4632ms)
+✔ unsupported encodings and duplicate measure pills cannot silently do nothing (0.3188ms)
+✔ numeric ZIP variants and congressional district identifiers never become money measures (0.2324ms)
+✔ split coverage has no additive grand total or monetary status label (0.3266ms)
+✔ percentages and period differences have explicit units and no monetary grand total (0.5697ms)
+✔ forecast totals separate historical money from copied future baselines (0.7958ms)
+✔ independent accounting groups have separate marks but no cross-layer total (0.1215ms)
+✔ an empty member choice is not a filter, so it never selects nothing (0.2992ms)
+✔ include and exclude lists select complementary worksheet rows (0.3837ms)
+✔ a range filter applies each bound it was given (0.7302ms)
+✔ normalizeFilter keeps lists as arrays, ranges two-ended and scalars as text (0.2033ms)
+✔ filterSummary reads as a sentence about the members, not about the operator (9.3695ms)
+✔ one filter pill becomes the clauses the verified engine understands (0.4728ms)
+✔ aggregation menus offer only what the active engine can compute (0.1537ms)
+✔ political-money presets say what a source cannot answer instead of failing later (0.298ms)
+✔ a measure preset replaces the measure on the shelf that carried it (0.283ms)
+✔ a text column can never become a measure; a numeric identifier can (0.1126ms)
+✔ a per-sheet type override moves a field between the two lists and its glyph (0.334ms)
+✔ date parts use real catalog columns when verified and periods on a worksheet (0.2623ms)
+✔ a verified date field keeps its date parts even without the detected time flag (0.201ms)
+✔ each company-overview preset builds the sheet its caption promises (0.3424ms)
+✔ a company-overview preset compiles into the verified query it describes (1.0136ms)
+✔ a single click sends a grouping across the top and a measure down the side (0.1199ms)
+✔ the click zone reads the shelves only, never a field selection (0.0858ms)
+✔ a cycle carried from Graph is translated into the spelling the index stores (0.1214ms)
+✔ the reverse map gives Graph the end year, and refuses anything that is not a cycle (0.1025ms)
+✔ company overview names the fields a source does not have (0.0961ms)
+✔ a Fact Type column earns a Recipient guard, whatever its spacing or case (0.2398ms)
+✔ a Fact Type column that never holds Recipient earns no pill either (0.0764ms)
+✔ no Fact Type column means no pill (0.0482ms)
+✔ a View column earns a guard only when the sheet actually holds an Industry view (0.1049ms)
+✔ a sheet carrying both columns is guarded twice, in column order (0.0757ms)
+✔ the Recipient guard is what makes a cycle sheet sum to the report total (0.1686ms)
+✔ the guard pill reads as the plain equality a reader can remove (0.0669ms)
+✔ the four committee-activity sheets carry a caption, and no other sheet does (0.1484ms)
+✔ a committee-activity caption suppresses the grand total through the engine refusal (0.1404ms)
+✔ the catalog splits into the tall Data book and the Overview book (0.1341ms)
+✔ a catalog of Overview books alone has an empty Data group (0.059ms)
+✔ a server that sends no kind is read from the filename, the same rule at the other end (0.5402ms)
+✔ a one-cycle report still agrees, and the pinned cycle raises no reason at all (1.6577ms)
+✔ when Graph pinned one cycle and the sheet covers them all, that is the reason (1.1571ms)
+✔ a sheet with its own cycle is never explained away by the cycle reason (0.3459ms)
+✔ the basis outranks the cycle, because a wrong basis explains more (0.2105ms)
+✔ the cycle outranks a Graph filter, since the pinned cycle is the bigger cut (0.2207ms)
+✔ no pinned cycle at all leaves the older reasons exactly as they were (1.5143ms)
+✔ every reason id the chain can produce has wording to print (0.3233ms)
+✔ [url_scope] the contract itself is shaped the way contracts/README.md requires (1.8112ms)
+✔ [url_scope] read() answers the contract scope for graph_permalink_downstream_activity (1.3439ms)
+✔ [url_scope] href() rebuilds graph_permalink_downstream_activity byte for byte (0.3884ms)
+✔ [url_scope] graph_permalink_downstream_activity round-trips through write() onto an empty URL (0.6063ms)
+✔ [url_scope] read() answers the contract scope for chart_studio_permalink (0.1641ms)
+✔ [url_scope] href() rebuilds chart_studio_permalink byte for byte (0.079ms)
+✔ [url_scope] chart_studio_permalink round-trips through write() onto an empty URL (0.8985ms)
+✔ [url_scope] read() answers the contract scope for saved_view_permalink (0.2161ms)
+✔ [url_scope] href() rebuilds saved_view_permalink byte for byte (0.0908ms)
+✔ [url_scope] saved_view_permalink round-trips through write() onto an empty URL (0.2981ms)
+✔ [url_scope] read() answers the contract scope for cross_reference_permalink (0.1266ms)
+✔ [url_scope] href() rebuilds cross_reference_permalink byte for byte (0.0849ms)
+✔ [url_scope] cross_reference_permalink round-trips through write() onto an empty URL (0.0975ms)
+✔ [url_scope] read() answers the contract scope for ampersand_label (0.0488ms)
+✔ [url_scope] href() rebuilds ampersand_label byte for byte (0.0323ms)
+✔ [url_scope] ampersand_label round-trips through write() onto an empty URL (0.0606ms)
+✔ [url_scope] read() answers the contract scope for graph_filters_full (0.073ms)
+✔ [url_scope] href() rebuilds graph_filters_full byte for byte (0.0363ms)
+✔ [url_scope] graph_filters_full round-trips through write() onto an empty URL (0.0621ms)
+✔ [url_scope] read() answers the contract scope for evidence_two_panes_same_pac_two_industries (0.1799ms)
+✔ [url_scope] href() rebuilds evidence_two_panes_same_pac_two_industries byte for byte (0.0425ms)
+✔ [url_scope] evidence_two_panes_same_pac_two_industries round-trips through write() onto an empty URL (0.0661ms)
+✔ [url_scope] read() answers the contract scope for evidence_four_panes_mixed_sources_and_cycles (0.1034ms)
+✔ [url_scope] href() rebuilds evidence_four_panes_mixed_sources_and_cycles byte for byte (0.0393ms)
+✔ [url_scope] evidence_four_panes_mixed_sources_and_cycles round-trips through write() onto an empty URL (0.0817ms)
+✔ [url_scope] read() answers the contract scope for evidence_unassigned_pseudo_committee (0.0544ms)
+✔ [url_scope] href() rebuilds evidence_unassigned_pseudo_committee byte for byte (0.0339ms)
+✔ [url_scope] evidence_unassigned_pseudo_committee round-trips through write() onto an empty URL (0.0616ms)
+✔ [url_scope] write() merge semantics: write_merge_remove_on_empty_and_preserve_unknown (0.1731ms)
+✔ [url_scope] write() merge semantics: write_removes_a_closed_pane_and_keeps_the_others (0.0612ms)
+✔ [url_scope] negative control: mode=pac is not a #graph-mode option value (0.2053ms)
+✔ [url_scope] negative control: A two-digit cycle is not the four-digit end year Graph spells (0.0795ms)
+✔ [url_scope] negative control: A non-numeric cycle is refused by the same rule, so the shape of the refusal cannot depend on the value happening to be digits (0.0632ms)
+✔ [url_scope] negative control: An explicitly blank industry is not a scope (0.0503ms)
+✔ [url_scope] negative control: saved=xyz is not 32 hex, which is exactly what server (0.0685ms)
+✔ [url_scope] negative control: The teeth of the other five: a URL with no query at all invents nothing (0.0616ms)
+✔ [url_scope] negative control: A NON-PREFIXED id is one of the superseded single-pane keys (0.0499ms)
+✔ [url_scope] negative control: A FIFTH pane (0.041ms)
+✔ [url_scope] negative control: b (0.0842ms)
+✔ [url_scope] negative control: A pane cycle must be the four-digit end year, exactly as Graph's `cycle` is; '24' is the same refusal in a prefixed key (0.0471ms)
+✔ [url_scope] negative control: A pane committee with a space in it is not a committee id and not "unassigned"; the client must not fire a select the console answers 400 for (0.0604ms)
+✔ [url_scope] write() preserves unknown keys and their order, and appends new ones (0.123ms)
+✔ [url_scope] write() never writes a reserved key, even when asked (0.0863ms)
+✔ [url_scope] subscribe fires on a write, and not on a no-op write (0.1911ms)
+✔ [url_scope] removing the last key drops the question mark rather than leaving "?" (0.063ms)
+✔ the builder makes the saved-view payload the server accepts, from the live sheet (2.3082ms)
+✔ a chosen dataset that names its own industry wins over its id (0.1989ms)
+✔ a worksheet with no verified dataset still names its report and digest (0.0912ms)
+✔ a view recovered from the old browser store sends its caption as an object (0.0908ms)
+✔ the builder makes the briefing source and provenance the exports read back (0.4558ms)
+✔ no builder can be talked into emitting a string, whatever it is handed (1.4765ms)
+✔ what the builder makes round-trips back through the readers (0.3833ms)
+✔ the example item yields the real workbook digest, not a stringified object (0.1433ms)
+✔ the source caption comes off the object, so the picker never prints one (0.2333ms)
+✔ the export source line carries the true short SHA and never the word object (0.5533ms)
+✔ no reader ever stringifies an object, whatever shape the item arrives in (0.3083ms)
+✔ an item with no digest at all says so in words rather than printing nothing (0.088ms)
+✔ what the browser sends the server is an object, so a caption is wrapped not dropped (0.1174ms)
+✔ a record that survives the round trip still reads back as the same digest (0.091ms)
+✔ [studio_api] viewSourceRecord emits industry for a contributions source, matching the fixture exactly (0.1867ms)
+✔ [studio_api] createSheet carries an empty ordered series-sources array (0.2191ms)
+✔ [studio_api] migrateSheet backfills industry and normalizes sources, matching migration_input -> migration_output exactly (0.1667ms)
+✔ [studio_api] chartSourceRecord emits industry for a briefing source (0.0791ms)
+✔ [studio_api] negative control with teeth: a source without industry yields no industry key at all (0.0637ms)
+✔ [studio_api] negative control with teeth: a sources[] entry lacking industry is dropped by migrateSheet (0.1393ms)
+✔ [snapshot_registry] parseSnapshotRegistry accepts every example envelope (0.3166ms)
+✔ [snapshot_registry] parseSnapshotRegistry rejects every negative control, wrapped as a single-entry list (0.3062ms)
+✔ a fresh sheet carries no industry or dataset key on its source (1.2034ms)
+✔ migrating a fresh worksheet sheet adds no industry key either (0.2289ms)
+✔ negative control: a source that names an empty industry keeps it, so the server can refuse it (0.1136ms)
+ℹ tests 178
+ℹ suites 0
+ℹ pass 178
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 391.9659
+node exit 0
+
+=== 2. python suite: python -m unittest discover -s tests -p "test_*.py" ===
+.MENTAT API FANOUT industry=Fintech tasks=2 keys=2 lanes=2 cpu_telemetry=8 memory_cap=1 available_memory_mb=1093 merge_cap=10 resume=False pending_tasks=2
+MENTAT API FANOUT SUCCEEDED succeeded=2/2 merged=True wall=0.297s receipt=C:\Users\pgoff\AppData\Local\Temp\mentat-fanout-e2e-awz6419u\run\receipt.json
+MENTAT API FANOUT ALREADY COMPLETE receipt=C:\Users\pgoff\AppData\Local\Temp\mentat-fanout-e2e-awz6419u\run\receipt.json
+..MENTAT API FANOUT industry=Fintech tasks=1 keys=1 lanes=1 cpu_telemetry=8 memory_cap=1 available_memory_mb=1115 merge_cap=10 resume=False pending_tasks=1
+MENTAT API FANOUT SUCCEEDED succeeded=1/1 merged=True wall=0.297s receipt=C:\Users\pgoff\AppData\Local\Temp\mentat-ladder-e2e-tl7f_qb7\run\receipt.json
+...........MENTAT API FANOUT industry=Fintech tasks=2 keys=2 lanes=2 cpu_telemetry=8 memory_cap=1 available_memory_mb=1151 merge_cap=10 resume=False pending_tasks=2
+MENTAT API FANOUT FAILED succeeded=1/2 merged=False wall=0.531s receipt=C:\Users\pgoff\AppData\Local\Temp\mentat-resume-keys-5p7461x1\run\receipt.json
+[fanout] resuming 2 planned lanes on 1 keys; lanes sharing a key run one at a time.
+MENTAT API FANOUT industry=Fintech tasks=2 keys=1 lanes=2 cpu_telemetry=8 memory_cap=1 available_memory_mb=1252 merge_cap=10 resume=True pending_tasks=1
+MENTAT API FANOUT SUCCEEDED succeeded=2/2 merged=True wall=0.750s receipt=C:\Users\pgoff\AppData\Local\Temp\mentat-resume-keys-5p7461x1\run\receipt.json
+......[request-pool] quarantined key d5ead6fdd3d1: API_KEY_INVALID
+[request-pool] quarantined key be2974546978: API_KEY_INVALID
+[request-pool] quarantined key 7c36b0a9dedd: API_KEY_INVALID
+[request-pool] quarantined key d9ef8196557c: API_KEY_INVALID
+.[request-pool] quarantined key be2974546978: API_KEY_INVALID
+...[request-pool] quarantined key be2974546978: API_KEY_INVALID
+..................................................................................................................................................................................................F...........................................usage: python.exe -m unittest [-h] [--percentile PERCENTILE]
+                              [--median-multiple MEDIAN_MULTIPLE]
+                              run_dir
+python.exe -m unittest: error: No decision ledger at C:\Users\pgoff\AppData\Local\Temp\tmp076y61sq\20260917T000000-fixture\ledger.sqlite
+.{"run_id": "20260917T000000-fixture", "source_records": 28, "large_thresholds": {"individual": 12000000, "other": null}, "class_records": {"individual": 23, "other": 1}, "linked_refunds": 1, "linked_refund_amount": -2000.0, "unlinked_adjustments": 1, "unlinked_amount": -7500.0, "non_giving": 1, "non_giving_amount": 15000.0, "large": 1, "large_amount": 120000.0, "elapsed_seconds": 0.01}
+.{"run_id": "20260917T000000-fixture", "source_records": 28, "large_thresholds": {"individual": 12000000, "other": null}, "class_records": {"individual": 23, "other": 1}, "linked_refunds": 1, "linked_refund_amount": -2000.0, "unlinked_adjustments": 1, "unlinked_amount": -7500.0, "non_giving": 1, "non_giving_amount": 15000.0, "large": 1, "large_amount": 120000.0, "elapsed_seconds": 0.03}
+.........................................................................................................E..............................................................................................................................................................................................s..............................quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-shard-merge-izvlx668\a.db companies=Alpha
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-shard-merge-izvlx668\b.db companies=Beta
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-shard-merge-izvlx668\a.db companies=Alpha
+  api_page_checkpoints_replaced=0
+  api_work_progress_changed=0
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=0
+  bulk_candidates_inserted=0
+  bulk_candidates_pk_existing=1
+  canary_log_inserted=0
+  contributions_inserted=0
+  contributions_pk_existing=1
+  corporate_giving_inserted=0
+  corporate_giving_pk_existing=1
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=0
+  review_queue_identity_inserted=0
+  run_log_inserted=0
+  run_metrics_inserted=0
+  scrape_progress_changed=0
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-shard-merge-izvlx668\b.db companies=Beta
+  api_page_checkpoints_replaced=0
+  api_work_progress_changed=0
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=0
+  bulk_candidates_inserted=0
+  bulk_candidates_pk_existing=1
+  canary_log_inserted=0
+  contributions_inserted=0
+  contributions_pk_existing=1
+  corporate_giving_inserted=0
+  corporate_giving_pk_existing=1
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=0
+  review_queue_identity_inserted=0
+  run_log_inserted=0
+  run_metrics_inserted=0
+  scrape_progress_changed=0
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-audit-lease-eezz43ss\shard.db companies=Alpha
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-corporate-enrich-4vah1d32\shard.db companies=Alpha
+  api_page_checkpoints_replaced=0
+  api_work_progress_changed=0
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=0
+  bulk_candidates_inserted=0
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=0
+  contributions_inserted=0
+  contributions_pk_existing=0
+  corporate_giving_inserted=0
+  corporate_giving_pk_existing=1
+  corporate_giving_version_fields_enriched=2
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=0
+  review_queue_identity_inserted=0
+  run_log_inserted=0
+  run_metrics_inserted=0
+  scrape_progress_changed=0
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-zero-progress-1znncsmh\shard.db companies=Alpha
+  api_page_checkpoints_replaced=0
+  api_work_progress_changed=0
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=0
+  bulk_candidates_inserted=0
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=0
+  contributions_inserted=0
+  contributions_pk_existing=0
+  corporate_giving_inserted=0
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=0
+  review_queue_identity_inserted=0
+  run_log_inserted=0
+  run_metrics_inserted=0
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-00.db companies=Company 00
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-01.db companies=Company 01
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-02.db companies=Company 02
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-03.db companies=Company 03
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-04.db companies=Company 04
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-05.db companies=Company 05
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-06.db companies=Company 06
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-07.db companies=Company 07
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-08.db companies=Company 08
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-09.db companies=Company 09
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-00.db companies=Company 00
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-01.db companies=Company 01
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-02.db companies=Company 02
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-03.db companies=Company 03
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0................................................................warning: contributions lacks contract columns ['contributor_street_1', 'contributor_street_2']; run init_schema() from mentat/R/schema.R before treating this export as complete
+warning: corporate_giving lacks contract columns ['contributor_street_1', 'contributor_street_2']; run init_schema() from mentat/R/schema.R before treating this export as complete
+.........................
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-04.db companies=Company 04
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-05.db companies=Company 05
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-06.db companies=Company 06
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-07.db companies=Company 07
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-08.db companies=Company 08
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+quick_check=ok
+attribution_conflicts_recorded=0
+shard=C:\Users\pgoff\AppData\Local\Temp\mentat-ten-shard-25if_9gt\shard-09.db companies=Company 09
+  api_page_checkpoints_replaced=1
+  api_work_progress_changed=1
+  attribution_claims_legacy_missing=1
+  attribution_conflicts_inserted=1
+  bulk_candidates_inserted=1
+  bulk_candidates_pk_existing=0
+  canary_log_inserted=1
+  contributions_inserted=1
+  contributions_pk_existing=0
+  corporate_giving_inserted=1
+  corporate_giving_pk_existing=0
+  corporate_giving_version_fields_enriched=0
+  fec_response_archive_legacy_missing=1
+  fec_response_observations_legacy_missing=1
+  observed_employers_inserted=1
+  review_queue_identity_inserted=1
+  run_log_inserted=1
+  run_metrics_inserted=1
+  scrape_progress_changed=1
+  source_record_conflicts_legacy_missing=1
+Mentat app: http://127.0.0.1:8802
+.....................................................................................E.......................................FAIL giving_facts_vs_contributions: 2021-2022: Giving Facts 26.00 vs Contributions analysis 25.00
+1 severity-fail Data Quality row(s) failed; nothing published.
+.FAIL no_multivalue_cells: Recipient Facts: Committee Relationship (1)
+1 severity-fail Data Quality row(s) failed; nothing published.
+................................Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-a0qnaz5r\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.22s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-k3xpar2g\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.11s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-n1p8oops\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.12s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-1ezxtq0g\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.16s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-1f8urv0k\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.13s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-1f8urv0k\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.12s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-basoqw5u\Example Industry Spending Data.xlsx (13 sheets, 77 rows, 0.29s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-rmchr_8l\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.11s)
+Wrote C:\Users\pgoff\AppData\Local\Temp\tidy-test-y9sbxry3\Example Industry Spending Data.xlsx (8 sheets, 67 rows, 0.11s)
+MENTAT API FANOUT industry=Fintech tasks=10 keys=2 lanes=2 cpu_telemetry=8 memory_cap=1 available_memory_mb=1102 merge_cap=10 resume=False pending_tasks=10
+MENTAT API FANOUT FAILED succeeded=8/10 merged=False wall=0.219s receipt=C:\Users\pgoff\AppData\Local\Temp\tmpht16nq5m\run\receipt.json
+MENTAT API FANOUT industry=Fintech tasks=10 keys=2 lanes=2 cpu_telemetry=8 memory_cap=1 available_memory_mb=1122 merge_cap=10 resume=True pending_tasks=2
+MENTAT API FANOUT SUCCEEDED succeeded=10/10 merged=True wall=0.375s receipt=C:\Users\pgoff\AppData\Local\Temp\tmpht16nq5m\run\receipt.json
+......
+======================================================================
+ERROR: test_old_and_read_only_servers_are_not_reused_from_another_working_directory (test_desktop_launcher.DesktopLauncherTests.test_old_and_read_only_servers_are_not_reused_from_another_working_directory) (version={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_desktop_launcher.py", line 211, in test_old_and_read_only_servers_are_not_reused_from_another_working_directory
+    self.assertEqual(result.returncode,0,text)
+AssertionError: 1 != 0 : C:\Users\pgoff\Mentat\mentat\app\Start-MentatApp.ps1 : Mentat app has not responded yet. Check its local server log.
+    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException
+    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,Start-MentatApp.ps1
+ 
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\shutil.py", line 633, in _rmtree_unsafe
+    os.unlink(fullname)
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\pgoff\\AppData\\Local\\Temp\\MENTAT old server wvd_rpd4\\server-52807.stderr.log'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_desktop_launcher.py", line 192, in test_old_and_read_only_servers_are_not_reused_from_another_working_directory
+    with self.subTest(version=version), tempfile.TemporaryDirectory(prefix='MENTAT old server ') as directory:
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\tempfile.py", line 950, in __exit__
+    self.cleanup()
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\tempfile.py", line 954, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\tempfile.py", line 934, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\shutil.py", line 781, in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\shutil.py", line 635, in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\tempfile.py", line 909, in onexc
+    _os.unlink(path)
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\pgoff\\AppData\\Local\\Temp\\MENTAT old server wvd_rpd4\\server-52807.stderr.log'
+
+======================================================================
+ERROR: test_cold_start_and_saved_port_reuse_have_matching_identity (test_startup_performance.StartupPerformanceTests.test_cold_start_and_saved_port_reuse_have_matching_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_startup_performance.py", line 130, in test_cold_start_and_saved_port_reuse_have_matching_identity
+    result = launch_fixture(root, port)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_startup_performance.py", line 73, in launch_fixture
+    raise AssertionError(text)
+AssertionError: C:\Users\pgoff\AppData\Local\Temp\Mentat startup fixture 8fyscawo\app\Start-MentatApp.ps1 : Mentat app has not 
+responded yet. Check its local server log.
+    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException
+    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,Start-MentatApp.ps1
+ 
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\shutil.py", line 633, in _rmtree_unsafe
+    os.unlink(fullname)
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\pgoff\\AppData\\Local\\Temp\\Mentat startup fixture 8fyscawo\\console\\server-62762.stderr.log'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_startup_performance.py", line 123, in test_cold_start_and_saved_port_reuse_have_matching_identity
+    with tempfile.TemporaryDirectory(prefix='Mentat startup fixture ') as temporary:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\tempfile.py", line 950, in __exit__
+    self.cleanup()
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\tempfile.py", line 954, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\tempfile.py", line 934, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\shutil.py", line 781, in rmtree
+    return _rmtree_unsafe(path, onexc)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\shutil.py", line 635, in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\tempfile.py", line 909, in onexc
+    _os.unlink(path)
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\pgoff\\AppData\\Local\\Temp\\Mentat startup fixture 8fyscawo\\console\\server-62762.stderr.log'
+
+======================================================================
+FAIL: test_metadata_and_existing_saved_field_order (test_contribution_semantics.SemanticTests.test_metadata_and_existing_saved_field_order)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\pgoff\Mentat\mentat\tests\test_contribution_semantics.py", line 73, in test_metadata_and_existing_saved_field_order
+    self.assertEqual(keys[:27],[k for k in data.DIMENSIONS if k not in data.DESTINATIONS]+list(data.MEASURES))
+AssertionError: Lists differ: ['ind[310 chars] 'average_amount', 'min_amount'] != ['ind[310 chars] 'average_amount', 'min_amount', 'max_amount', 'median_amount']
+
+Second list contains 2 additional elements.
+First extra element 27:
+'max_amount'
+
+  ['industry',
+   'cycle',
+   'year',
+   'company',
+   'date',
+   'employer',
+   'occupation',
+   'street_1',
+   'street_2',
+   'city',
+   'state',
+   'zip5',
+   'contributor',
+   'recipient',
+   'committee_id',
+   'recipient_category',
+   'party',
+   'funding_source',
+   'decision_status',
+   'receipt_role',
+   'amount',
+   'gross_amount',
+   'refunds',
+   'records',
+   'contributors',
+   'average_amount',
+-  'min_amount']
+?              ^
+
++  'min_amount',
+?              ^
+
++  'max_amount',
++  'median_amount']
+
+----------------------------------------------------------------------
+Ran 844 tests in 355.372s
+
+FAILED (failures=1, errors=2, skipped=1)
+sys:1: ResourceWarning: unclosed <socket.socket fd=4392, family=2, type=1, proto=0, laddr=('127.0.0.1', 51389)>
+python exit 1
+
+=== 2a. negative control for the three python reds ===
+(the three modules run against the pre-change bytes of every file this lane touched, then against the current bytes)
+(the header above was written before the session's process exited; the negative-control result follows)
+
+Three python reds, each shown to be independent of this lane:
+
+1. tests/test_contribution_semantics.py - FAIL test_metadata_and_existing_saved_field_order.
+   The file is UNTRACKED (git status: ?? mentat/tests/test_contribution_semantics.py): a new
+   test from another lane. It expects the measures 'max_amount' and 'median_amount', and
+   grep -c 'median_amount|max_amount' mentat/app/contribution_semantics.py = 0, so the module
+   does not provide them yet. Red against the pre-change bytes of every file this lane touched
+   and red against the current bytes. Neither file is this lane's.
+
+2. tests/test_desktop_launcher.py - ERROR, and GREEN when run on its own:
+   pre-change bytes: Ran 5 tests, OK (40.989s)
+   current bytes, run fresh: Ran 5 tests, OK (22.103s)
+   The red in the discovery sweep is the known contention shape - 'Mentat app has not responded
+   yet' plus PermissionError [WinError 32] on the fixture's own server-<port>.stderr.log while
+   its TemporaryDirectory is being removed. It spawns real consoles; a loaded box loses the race.
+
+3. tests/test_startup_performance.py - ERROR, same shape, red both ways:
+   pre-change bytes: FAILED (errors=1); current bytes: FAILED (errors=1); the traceback ends in
+   PermissionError [WinError 32] on 'Mentat startup fixture .../console/server-<port>.stderr.log'.
+
+Negative-control transcript:
+--- pre-change bytes (this lane reverted) ---
+BEFORE tests.test_contribution_semantics -> exit 1 | ---------------------------------------------------------------------- / Ran 1 test in 0.000s / FAILED (errors=1)
+BEFORE tests.test_desktop_launcher -> exit 0 | ---------------------------------------------------------------------- / Ran 5 tests in 40.989s / OK
+BEFORE tests.test_startup_performance -> exit 1 | ---------------------------------------------------------------------- / Ran 2 tests in 33.916s / FAILED (errors=1)
+restore verified by sha256
+--- current bytes (this lane applied) ---
+AFTER tests.test_contribution_semantics -> exit 1 | ---------------------------------------------------------------------- / Ran 1 test in 0.000s / FAILED (errors=1)
+AFTER tests.test_desktop_launcher -> exit 1 | ---------------------------------------------------------------------- / Ran 5 tests in 30.171s / FAILED (errors=4)
+AFTER tests.test_startup_performance -> exit 1 | ---------------------------------------------------------------------- / Ran 2 tests in 33.194s / FAILED (errors=1)
+
+=== 3. browser passes ===
+--- node tests/test_ui_cleanup_browser.cjs ---
+SETUP: pick a free port and launch the console server on a throwaway --data-root
+SETUP done - server ready on port 60118, data root C:\Users\pgoff\AppData\Local\Temp\mentat-ui-cleanup-nqyOAr
+STEP 1: the global "Rows per chart" input is gone and every Overview panel has its own Top N
+PASS step 1 - Overview panels ["graph-category-panel","graph-candidate-panel","graph-company-panel","graph-level-panel"], each with a Top N of ["5","10","25","50"]
+STEP 2: the KPI strip is three equal tiles and the two part figures are shares of net giving
+PASS step 2 - net $1,200,000.00, direct 18.0% of net giving, organizations 81.8% of net giving
+STEP 3: every bar carries its value and its share, and the shares add up to the panel footer
+PASS step 3 - recipient types 6 bars summing to 36.3%, footer "Showing 6 of 6 · 36.3% of net giving"
+STEP 4: Top N slices the payload already in hand: no new request, nothing in the URL
+PASS step 4 - Top N 5 sliced one panel, the URL stayed ?industry=Banking
+STEP 5: party dots and company sparklines draw from the payload
+PASS step 5 - 6 party dots (3D/2R/1 other), 6 sparklines, footer "Showing 6 of 6 · 36.3% of net giving · sparkline 2022 · 2024 · 2026"
+STEP 6: #studio-title is empty or hidden before a chart is drawn, and names the chart after
+PASS step 6 - title "Published included receipts by Company", subtitle "Banking · All cycles · published included receipts"
+STEP 7: the chart starts above the fold at 1440 by 900, and the Fit select is at its intrinsic width
+PASS step 7 - #studio-canvas top 613px, Fit select 119px, grid 280px 610px 280px
+STEP 8: one "Add to briefing", one "Company overview", and Views carries Save and Open view
+PASS step 8 - Add to briefing ["studio-briefing-add"], view modes ["studio-view-builder","studio-overview-toggle","studio-view-canvas"]
+STEP 9: the Inspector column is the single scroll container on the Marks pane
+PASS step 9 - Inspector scroll containers: ["studio-inspector"]
+STEP 10: Show Me is one block in the DOM, opened in the Inspector by the toolbar button
+PASS step 10 - Show Me: 24 tiles, one block, hint " · suggested: Horizontal bars"
+STEP 11: the Data source disclosure stays open and reads as a chip line with a ready mark
+PASS step 11 - source chips ["Banking","Published included receipts","✓ Ready"], header chips ["Banking","All cycles"]
+STEP 12: page errors raised by the views this pass owns
+PASS step 12 - no page error from Graph or Chart Studio (0 foreign error(s) ignored)
+RESULT: 12/12 steps passed, exit 0
+exit 0
+--- node tests/test_navigation_scope_browser.cjs ---
+SETUP: pick a free port and launch the console server on a throwaway --data-root
+SETUP done - server ready on port 61931, data root C:\Users\pgoff\AppData\Local\Temp\mentat-navigation-scope-m1wwrk, routes stubbed
+STEP 1: open the Graph permalink and read the four controls back
+PASS step 1 - Graph opened on the permalink: {"industry":"Banking","company":"Fixture Bank","cycle":"2024","mode":"activity"}
+STEP 2: switch to Chart Studio: the dataset follows the URL and company/cycle arrive as pills
+PASS step 2 - dataset=Banking, carried pills [["company","Fixture Bank"],["cycle","2023-2024"]], shelf shows ["AbcCompany = Fixture Bank▾","Election cycle = 2023-2024▾"]
+STEP 3: back to Graph: the selects still equal the URL
+PASS step 3 - Graph selections survived the round trip through Chart Studio
+STEP 4: reload the page: the scope comes back from the URL alone
+PASS step 4 - reload restored industry, company, cycle and candidate view
+STEP 5: Cross-reference asks the server for the industry the URL names
+PASS step 5 - request /api/cross-reference?industry=Banking and status "Newest run for Banking · Saved evidence refreshed. This page is read-only."
+STEP 6: change the Graph company select: the URL follows the control
+PASS step 6 - the company key left the URL when cleared and came back when chosen
+STEP 7: "Open in Chart Studio" carries the scope into the URL and switches the tab
+PASS step 7 - URL after the handoff: ?industry=Banking&cycle=2024&mode=activity&company=Fixture%20Bank#chart-studio
+STEP 8: save a view: its id lands in the URL, and that permalink opens it on a fresh page
+PASS step 8 - saved=e54f68a2524a4f43b8e1161a11465f8b; the permalink page reported "Opened view "Scope test"." carrying [["company","Fixture Bank"],["cycle","2023-2024"]]; sheet tabs ["Sheet 1"]
+STEP 9: negative control: a permalink with mode=pac opens Graph on direct and reports nothing to the console
+PASS step 9 - /?industry=Banking&mode=pac#graph opened Graph on mode=direct with no page error
+STEP 10: ruling A(ii): the Candidate view select is visible once a report is chosen
+PASS step 10 - #graph-candidate-controls visible on the overview tab, offering "Downstream PAC activity"
+STEP 11: a permalink that names a cycle is not overridden by latest=1
+PASS step 11 - request /api/graph?id=published-reports&industry=Banking&company=&tier=&cycle=2022&funding=all&mode=direct&direction=Support&category=&recipient=, select 2022, URL keeps cycle=2022
+STEP 12: the first edit after opening a saved view drops saved= so a reload cannot overwrite the edit
+PASS step 12 - edit dropped saved=, survived a reload, and the permalink still re-opens the view
+STEP 13: an industry with no cross-reference run says so, rather than "Latest run"
+PASS step 13 - status "No cross-reference run for Banking · Saved evidence refreshed. This page is read-only."
+ALL 13 STEPS PASSED
+browser.close() exceeded its 20000ms bound
+exit 0
+--- node tests/test_console_browser.cjs ---
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+'' !== 'csv'
+
+    at C:\Users\pgoff\Mentat\mentat\tests\test_console_browser.cjs:86:12
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:472:9) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '',
+  expected: 'csv',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+exit 1
+
+--- test_console_browser.cjs: where its red is, and that the Graph/Studio half is green ---
+The suite stops in the PAC evidence block, which another lane is rewriting right now
+(evidence.js replaces evidence-csv.js; #view-evidence markup and app.js are theirs).
+
+Negative control - the SAME suite and the SAME app files, both reverted to their
+pre-change bytes, still stop in that block:
+--- pre-change bytes (this lane reverted, app files and the test) ---
+BEFORE exit 1
+        at C:\Users\pgoff\Mentat\mentat\tests\test_console_browser.cjs:94:12 {
+      generatedMessage: true,
+      code: 'ERR_ASSERTION',
+      actual: 'FEC or Mentat CSV with a committee ID column � the console states the size limit when you choose a file.',
+      expected: /too-large\.csv \(500\.0 MB\): Choose a CSV no larger than 500 MB\./,
+      operator: 'match',
+      diff: 'simple'
+    }
+restore verified by sha256
+
+Graph/Chart Studio half, proven green: a scratch copy of the suite with only the PAC
+evidence interactions cut out (tests/_ui1_console_graph_probe.cjs, deleted after the run)
+reaches the end and prints the suite's own success line:
+Browser checks passed: Graph guided scopes, JFC, levels, direct/downstream separation, exports, Advanced charts, freshness disclosures, responsive sidebar, skip link, keyboard tabs and local requests only.
+
+--- real test_console_browser.cjs, current bytes ---
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+'' !== 'csv'
+
+    at C:\Users\pgoff\Mentat\mentat\tests\test_console_browser.cjs:86:12
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processImmediate (node:internal/timers:472:9) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '',
+  expected: 'csv',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+exit 1
+--- node tests/test_studio_industry_browser.cjs ---
+STEP 1: pick a free port and launch the console server on a throwaway --data-root
+PASS step 1 - server ready on port 63505, data root C:\Users\pgoff\AppData\Local\Temp\mentat-studio-industry-data-g3m5MD
+STEP 2: launch headless Chrome and stub the two contribution datasets
+PASS step 2 - routes stubbed for session, catalog (Banking + Credit Union, both available) and query
+STEP 3: open Chart Studio in Verified contributions mode and wait for the dataset picker
+PASS step 3 - Chart Studio open, both datasets listed, first chart rendered
+STEP 4: save the Banking sheet as its own view (dataset defaults to the first available report)
+PASS step 4 - Banking view saved; last query body carried industry="Banking"
+STEP 5: switch the Report picker to Credit Union and save that as a second view
+PASS step 5 - Credit Union view saved; last query body carried industry="Credit Union"
+STEP 6: reload the console and read the saved views back over HTTP, from the real server
+list_views industries[] for "Banking" view: ["Banking"]
+list_views industries[] for "Credit Union" view: ["Credit Union"]
+PASS step 6 - both saved views found in GET /api/studio/views from the real server
+STEP 7: read each saved view over HTTP and assert every sheet’s source.industry survived
+PASS step 7 - every sheet in both saved views carries the correct source.industry
+STEP 8: open the Credit Union view through the real UI (not the current console industry) and confirm openView() switches the report
+PASS step 8 - openView()/openability() opened the Credit Union view from the Banking source and switched the Report picker
+STEP 9: read the two saved <id>.json files straight off the throwaway data root
+--- on-disk ec15b74ae65b4af595fb014abcdd0406.json (S4 browser Banking) ---
+{
+  "id": "ec15b74ae65b4af595fb014abcdd0406",
+  "name": "S4 browser Banking",
+  "saved_at": 1789676623.675544,
+  "sourceKey": "contributions|Banking|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source": {
+    "label": "Banking",
+    "reportName": "Banking Industry Spending Overview.xlsx",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "runName": "Configured completed-report folder",
+    "sheet": "Verified source observations",
+    "mode": "contributions",
+    "dataset": "Banking",
+    "industry": "Banking",
+    "datasetLabel": "Banking"
+  },
+  "sheets": [
+    {
+      "id": "s1",
+      "name": "Sheet 1",
+      "source": {
+        "run": "",
+        "runName": "Configured completed-report folder",
+        "report": "",
+        "reportName": "Banking Industry Spending Overview.xlsx",
+        "sheet": "Verified source observations",
+        "header": 0,
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "mode": "contributions",
+        "dataset": "Banking",
+        "industry": "Banking",
+        "basis": "receipt"
+      },
+      "sources": [],
+      "columns": [
+        {
+          "column": 0,
+          "aggregation": "sum"
+        }
+      ],
+      "rows": [
+        {
+          "column": 2,
+          "aggregation": "sum"
+        }
+      ],
+      "marks": {
+        "type": "bar",
+        "color": null,
+        "size": null,
+        "label": null,
+        "detail": [],
+        "tooltip": []
+      },
+      "filters": [],
+      "pages": null,
+      "pageMember": "",
+      "analytics": {
+        "transform": "none",
+        "period": "",
+        "horizon": 2,
+        "totals": false,
+        "average": false,
+        "median": false
+      },
+      "types": {},
+      "params": {
+        "start": 0,
+        "end": 0,
+        "limit": 0,
+        "subject": "",
+        "maxGroups": 0,
+        "splitMulti": false
+      },
+      "sort": "none",
+      "showLabels": false,
+      "fit": "standard"
+    }
+  ],
+  "active": 0
+}
+--- on-disk 143e20e3639f4b2190b430ac45819667.json (S4 browser Credit Union) ---
+{
+  "id": "143e20e3639f4b2190b430ac45819667",
+  "name": "S4 browser Credit Union",
+  "saved_at": 1789676623.7991354,
+  "sourceKey": "contributions|Credit Union|bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "source": {
+    "label": "Credit Union",
+    "reportName": "Credit Union Industry Spending Overview.xlsx",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "runName": "Configured completed-report folder",
+    "sheet": "Verified source observations",
+    "mode": "contributions",
+    "dataset": "Credit Union",
+    "industry": "Credit Union",
+    "datasetLabel": "Credit Union"
+  },
+  "sheets": [
+    {
+      "id": "s1",
+      "name": "Sheet 1",
+      "source": {
+        "run": "",
+        "runName": "Configured completed-report folder",
+        "report": "",
+        "reportName": "Credit Union Industry Spending Overview.xlsx",
+        "sheet": "Verified source observations",
+        "header": 0,
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "mode": "contributions",
+        "dataset": "Credit Union",
+        "industry": "Credit Union",
+        "basis": "receipt"
+      },
+      "sources": [],
+      "columns": [
+        {
+          "column": 0,
+          "aggregation": "sum"
+        }
+      ],
+      "rows": [
+        {
+          "column": 2,
+          "aggregation": "sum"
+        }
+      ],
+      "marks": {
+        "type": "bar",
+        "color": null,
+        "size": null,
+        "label": null,
+        "detail": [],
+        "tooltip": []
+      },
+      "filters": [],
+      "pages": null,
+      "pageMember": "",
+      "analytics": {
+        "transform": "none",
+        "period": "",
+        "horizon": 2,
+        "totals": false,
+        "average": false,
+        "median": false
+      },
+      "types": {},
+      "params": {
+        "start": 0,
+        "end": 0,
+        "limit": 0,
+        "subject": "",
+        "maxGroups": 0,
+        "splitMulti": false
+      },
+      "sort": "none",
+      "showLabels": false,
+      "fit": "standard"
+    }
+  ],
+  "active": 0
+}
+PASS step 9 - both on-disk view files are valid JSON and printed above verbatim
+STEP 10: final check: zero pageerror entries
+PASS step 10 - zero pageerror entries across the whole run
+ALL 10 STEPS PASSED
+exit 0
+--- node tests/test_graph_lazy_tables_browser.cjs ---
+{"fixtureRows":10012,"render":[{"milliseconds":46.5,"tableRows":0,"createdTableRows":0,"descendants":498,"marks":42},{"milliseconds":10.700000002980232,"tableRows":0,"createdTableRows":0,"descendants":498,"marks":42},{"milliseconds":7.5,"tableRows":0,"createdTableRows":0,"descendants":498,"marks":42}]}
+✖ closed Graph tables are deferred without losing rows, callbacks or exports (33355.1866ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 33358.3628
+
+✖ failing tests:
+
+test at tests\test_graph_lazy_tables_browser.cjs:22:1
+✖ closed Graph tables are deferred without losing rows, callbacks or exports (33355.1866ms)
+  locator.selectOption: Timeout 30000ms exceeded.
+  Call log:
+  [2m  - waiting for locator('#graph-export-target')[22m
+  [2m    - locator resolved to <select id="graph-export-target">…</select>[22m
+  [2m  - attempting select option action[22m
+  [2m    2 × waiting for element to be visible and enabled[22m
+  [2m      - element is not visible[22m
+  [2m    - retrying select option action[22m
+  [2m    - waiting 20ms[22m
+  [2m    2 × waiting for element to be visible and enabled[22m
+  [2m      - element is not visible[22m
+  [2m    - retrying select option action[22m
+  [2m      - waiting 100ms[22m
+  [2m    58 × waiting for element to be visible and enabled[22m
+  [2m       - element is not visible[22m
+  [2m     - retrying select option action[22m
+  [2m       - waiting 500ms[22m
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\Mentat\mentat\tests\test_graph_lazy_tables_browser.cjs:85:48) {
+    log: [ "  - waiting for locator('#graph-export-target')", '    - locator resolved to <select id="graph-export-target">…</select>', '  - attempting select option action', '    2 × waiting for element to be visible and enabled', '      - element is not visible', '    - retrying select option action', '    - waiting 20ms', '    2 × waiting for element to be visible and enabled', '      - element is not visible', '    - retrying select option action', '      - waiting 100ms', '    58 × waiting for element to be visible and enabled', '       - element is not visible', '     - retrying select option action', '       - waiting 500ms' ],
+    name: 'TimeoutError'
+  }
+exit 1
+--- node tests/test_studio_canvas_only_browser.cjs ---
+✔ Canvas only keeps Export, and the Inspector toggle counts the filters behind it (1996.4163ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1999.5004
+exit 0
+--- node tests/test_graph_lazy_tables_browser.cjs (re-run after the Export-menu fix) ---
+{"fixtureRows":10012,"render":[{"milliseconds":44,"tableRows":0,"createdTableRows":0,"descendants":498,"marks":42},{"milliseconds":9.600000008940697,"tableRows":0,"createdTableRows":0,"descendants":498,"marks":42},{"milliseconds":7.200000002980232,"tableRows":0,"createdTableRows":0,"descendants":498,"marks":42}]}
+✔ closed Graph tables are deferred without losing rows, callbacks or exports (118745.6612ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 118749.8317
+exit 0
+--- node tests/test_studio_ride1_browser.cjs ---
+✖ a Graph scope carried before Chart Studio has its data is still carried (35147.2614ms)
+✔ the open briefing drawer never covers the studio toolbar controls (49680.6593ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 84832.5896
+
+✖ failing tests:
+
+test at tests\test_studio_ride1_browser.cjs:125:1
+✖ a Graph scope carried before Chart Studio has its data is still carried (35147.2614ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /^Carried from Graph · Banking · 2023-2024 · Alpha Bank$/. Input:
+  
+  'Carried from GraphBanking2023-2024Alpha Bank'
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\Mentat\mentat\tests\test_studio_ride1_browser.cjs:151:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'Carried from GraphBanking2023-2024Alpha Bank',
+    expected: /^Carried from Graph · Banking · 2023-2024 · Alpha Bank$/,
+    operator: 'match',
+    diff: 'simple'
+  }
+exit 1
+--- node tests/test_studio_wording.cjs ---
+✔ no refusal points at a "contribution explorer" this console does not have (3.1669ms)
+✔ an empty sheet asks for a grouping and a dollar measure, in those words (2.3661ms)
+✔ every worksheet refusal names the Data source control as the way on (1.0647ms)
+✔ the verified engine asks for a measure and a mark in the reader’s vocabulary (1.1401ms)
+✔ the default empty state names the mode the console starts in (1.3816ms)
+✔ the header keeps a permanent, plainly named way back to the report picker (0.6955ms)
+✖ Graph names the figure it shows, so it can be matched to Chart Studio (1.4835ms)
+✔ the group limit says what it means, and is sixty everywhere (2.2862ms)
+✔ the cross-reference says what it is, in the approved plain words (0.367ms)
+✔ the reconciliation strip has a reason for every way two totals can part (0.7186ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20.161
+
+✖ failing tests:
+
+test at tests\test_studio_wording.cjs:83:1
+✖ Graph names the figure it shows, so it can be matched to Chart Studio (1.4835ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /<strong id="graph-total">—<\/strong><small id="graph-basis-note"><\/small>/. Input:
+  
+  '<!doctype html>\r\n' +
+    '<html lang="en"><head>\r\n' +
+    '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">\r\n' +
+    '<title>MENTAT</title>\r\n' +
+    '<link rel="icon" type="image/svg+xml" href="/mentat-icon.svg">\r\n' +
+    '<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/graph.css"><link rel="stylesheet" href="/comparison.css"><link rel="stylesheet" href="/acu-theme.css"><link rel="stylesheet" href="/cross-reference.css"><link rel="stylesheet" href="/workspace.css"><link rel="stylesheet" href="/chart-studio.css"><link rel="stylesheet" href="/chart-briefing.css">\r\n' +
+    '<script src="/theme.js" defer></script><script src="/chart-export.js" defer></script><script src="/chart-math.js" defer></script><script src="/ui-state.js" defer></script><script src="/coverage-view.js" defer></script><script src="/scope.js" defer></script><script src="/app.js" defer></script><script src="/grouped-chart.js" defer></script><script src="/charts.js" defer></script><script src="/graph.js" defer></script><script src="/comparison.js" defer></script><script src="/funding-comparison.js" defer></script><script src="/chart-studio-core.js" defer></script><script src="/contribution-plot.js" defer></script><script src="/contribution-charts.js" defer></script><script src="/contribution-map.js" defer></script><script src="/chart-studio-contributions.js" defer></script><script src="/chart-studio.js" defer></script><script src="/chart-briefing.js" defer></script><script src="/chart-comparison.js" defer></script>\r\n' +
+    '</head>\r\n' +
+    '<body>\r\n' +
+    '<a class="skip-link" href="#workspace-main">Skip to workspace</a>\r\n' +
+    '<header class="app-navigation"><a class="wordmark" href="#loading" aria-label="Mentat · Load a sector">MENTAT</a><span class="brand-caption">Giving, in perspective.</span><nav class="workspace-tabs" role="tablist" aria-label="Workspace">\r\n' +
+    '<span class="nav-group" role="presentation">Workspace</span>\r\n' +
+    '<button id="tab-loading" type="button" role="tab" aria-controls="view-loading" aria-selected="true">Loading</button>\r\n' +
+    '<button id="tab-collection" type="button" role="tab" aria-controls="view-collection" aria-selected="false" tabindex="-1">Collection</button>\r\n' +
+    '<span class="nav-group" role="presentation">Analysis</span>\r\n' +
+    '<button id="tab-graph" type="button" role="tab" aria-controls="view-graph" aria-selected="false" tabindex="-1">Graph</button>\r\n' +
+    '<button id="tab-chart-studio" type="button" role="tab" aria-controls="view-chart-studio" aria-selected="false" tabindex="-1">Chart Studio</button>\r\n' +
+    '<button id="tab-cross-reference" type="button" role="tab" aria-controls="view-cross-reference" aria-selected="false" tabindex="-1">Cross-reference</button>\r\n' +
+    '<span class="nav-group" role="presentation">Evidence</span>\r\n' +
+    '<button id="tab-evidence" type="button" role="tab" aria-controls="view-evidence" aria-selected="false" tabindex="-1">PAC evidence</button>\r\n' +
+    '</nav><span class="local-indicator">Local only</span><span id="connection" role="status">Connecting…</span></header>\r\n' +
+    '<main id="workspace-main" tabindex="-1">\r\n' +
+    '<section class="workspace" aria-label="Mentat workspace">\r\n' +
+    '<div class="workspace-heading"><div><h1 id="workspace-title">Load a sector</h1></div><button id="split-view" class="secondary" type="button" aria-pressed="false" hidden>Split with PAC evidence</button><span id="stage" class="badge">Ready when you are</span></div>\r\n' +
+    '\r\n' +
+    '<div id="error" class="error" role="alert" hidden></div>\r\n' +
+    '<section id="view-loading" role="tabpanel" aria-labelledby="tab-loading">\r\n' +
+    '<p class="view-intro">Build a company roster, review the names, then start collection.</p>\r\n' +
+    '<div id="roster-panel" class="loading-grid"><div class="panel roster-editor">\r\n' +
+    '<div class="section-label">01 · BUILD YOUR ROSTER</div><h2>Sector & companies</h2>\r\n' +
+    '<form id="roster-form">\r\n' +
+    '<label class="field" for="sector">Sector</label><input id="sector" type="text" maxlength="31" placeholder="e.g. Credit unions, Community banks" required autocomplete="off">\r\n' +
+    '<p class="muted">Use each company’s canonical name once. Add other names below.</p>\r\n' +
+    '<div id="company-editor"></div>\r\n' +
+    '<div class="editor-actions"><button id="add-company" type="button" class="secondary">+ Add company</button><button id="review-roster" type="submit" class="primary">Review roster</button></div>\r\n' +
+    '<p id="draft-status" class="muted" role="status">Draft stays in this browser.</p>\r\n' +
+    '</form>\r\n' +
+    '<details class="file-import"><summary>Or upload a spreadsheet</summary>\r\n' +
+    '<label class="upload" for="file"><strong>Choose a roster</strong><span>CSV, TSV, or Excel · up to 5 MB</span><input id="file" type="file" accept=".csv,.tsv,.xlsx"></label>\r\n' +
+    '<a class="text-link" href="/template.csv" download="mentat-roster-template.csv">Download the upload template ↗</a>\r\n' +
+    '<p>Use <code>canonical_name</code>, <code>alias</code>, and <code>sector</code> columns. Repeat the canonical name for each alias. <code>industry</code> is also accepted. Optional: <code>exclusion</code>. Mentat’s existing roster workbooks work too.</p></details>\r\n' +
+    '</div><div class="panel launch-panel"><div class="section-label">02 · REVIEW & COLLECT</div><h2>Collection setup</h2>\r\n' +
+    '<p id="review-placeholder">Review your roster to see the exact names that will be searched. No data collection starts until you press Start collection.</p>\r\n' +
+    '<div id="upload-review" hidden><h3>Roster review</h3><div id="roster-counts"></div><div id="roster-list"></div>\r\n' +
+    '<fieldset><legend>Election cycles</legend><label><input type="checkbox" name="cycle" value="2022" checked> 2021–22</label><label><input type="checkbox" name="cycle" value="2024" checked> 2023–24</label><label><input type="checkbox" name="cycle" value="2026" checked> 2025–26</label></fieldset>\r\n' +
+    '<label class="field" for="api-key">FEC API key <span id="key-hint">Saved encrypted for your Windows account. Separate multiple keys with commas.</span></label><input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Enter your API key">\r\n' +
+    '<button id="save-keys" type="button" class="secondary">Save keys securely</button><button id="start" type="button" class="primary" disabled>Start collection</button></div>\r\n' +
+    '<p id="key-status" class="local-note"></p>\r\n' +
+    '<p class="local-note">Closing the browser does not stop collection. Follow checkpoints and incoming records in the Collection tab.</p></div></div>\r\n' +
+    '<section class="panel coverage-panel" aria-labelledby="loading-coverage-title"><div class="panel-heading"><h2 id="loading-coverage-title">Saved FEC coverage</h2><details class="inline-help"><summary>How coverage is assessed</summary><p>Coverage applies to the saved run’s roster and searches. Review changed company names and aliases before reusing it. An active cycle is flagged stale when its verified cutoff is more than 30 days behind today; a past cycle requires coverage through December 31.</p></details></div><div id="loading-coverage" role="status"><p>Unverifiable · Checking saved coverage evidence.</p></div></section>\r\n' +
+    '</section>\r\n' +
+    '<section id="view-collection" role="tabpanel" aria-labelledby="tab-collection" hidden>\r\n' +
+    '<div class="run-library"><div class="run-collections" role="group" aria-label="Collection folders"><button type="button" data-run-group="progress" aria-pressed="true">In progress <span id="run-count-progress">0</span></button><button type="button" data-run-group="history" aria-pressed="false">History <span id="run-count-history">0</span></button><button type="button" data-run-group="archived" aria-pressed="false">Archived <span id="run-count-archived">0</span></button></div><div class="run-toolbar"><label for="runs">Collection<select id="runs"><option value="">No collections yet</option></select></label><button id="archive-run" type="button" class="secondary" disabled>Archive run</button></div><p id="run-library-note" class="muted"></p><details class="working-folders"><summary>Working folders</summary><p><strong>Collection work &amp; checkpoints</strong><br><span id="collection-directory"></span></p><p><strong>Completed reports</strong><br><span id="completed-directory"></span></p><button id="view-completed-reports" type="button" class="secondary">View completed reports</button></details></div>\r\n' +
+    '<h2 id="run-title" class="run-heading">Your collection workspace</h2>\r\n' +
+    '<button id="resume-setup" type="button" class="secondary" hidden>Continue collection setup</button>\r\n' +
+    '<p id="run-readiness-note" class="muted" hidden></p>\r\n' +
+    '<div id="empty" class="empty"><div class="empty-mark">M</div><h3>Start with a list of names.</h3><p>Your companies, collection checkpoints, and incoming records will appear here. You can also inspect an existing run from the list.</p></div>\r\n' +
+    '<div id="monitor" hidden>\r\n' +
+    '<p id="freshness" class="muted"></p>\r\n' +
+    '\r\n' +
+    '<div class="quality-panel" role="status"><strong id="quality-title">Collection coverage unverified</strong><p id="quality-detail">Completed tasks do not establish complete downstream coverage.</p><div id="quality-checks"></div><button id="clear-quality" type="button" hidden>Clear reviewed notices</button><details><summary>Data scope and source age</summary><p>Search checks cover the requested names at collection time. Missing employer names and unlisted aliases can still leave gaps. Rebuilt reports show observed committee transfers through three hops, with unresolved paths and separate conditional estimates. These are not traced company dollars or lower bounds. Historical reports may predate transfer coverage.</p><p>Rebuilt reports classify ActBlue and WinRed as hybrid/Carey committees. Older exports may still use the former Super PAC reporting rule.</p><ul id="source-snapshots"></ul></details></div>\r\n' +
+    '<div id="run-controls"><div class="section-label">RUN CONTROLS</div><div class="editor-actions"><button id="stop" type="button" class="danger" disabled title="No collection is running">Stop collection</button><button id="resume-run" type="button" class="secondary" disabled title="Resume is available for a stopped or failed collection with saved lane data">Resume last run</button><label class="field" for="worker-target">Workers<'... 53736 more characters
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\Mentat\mentat\tests\test_studio_wording.cjs:84:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '<!doctype html>\r\n<html lang="en"><head>\r\n<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">\r\n<title>MENTAT</title>\r\n<link rel="icon" type="image/svg+xml" href="/mentat-icon.svg">\r\n<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/graph.css"><link rel="stylesheet" href="/comparison.css"><link rel="stylesheet" href="/acu-theme.css"><link rel="stylesheet" href="/cross-reference.css"><link rel="stylesheet" href="/workspace.css"><link rel="stylesheet" href="/chart-studio.css"><link rel="stylesheet" href="/chart-briefing.css">\r\n<script src="/theme.js" defer></script><script src="/chart-export.js" defer></script><script src="/chart-math.js" defer></script><script src="/ui-state.js" defer></script><script src="/coverage-view.js" defer></script><script src="/scope.js" defer></script><script src="/app.js" defer></script><script src="/grouped-chart.js" defer></script><script src="/charts.js" defer></script><script src="/graph.js" defer></script><script src="/comparison.js" defer></script><script src="/funding-comparison.js" defer></script><script src="/chart-studio-core.js" defer></script><script src="/contribution-plot.js" defer></script><script src="/contribution-charts.js" defer></script><script src="/contribution-map.js" defer></script><script src="/chart-studio-contributions.js" defer></script><script src="/chart-studio.js" defer></script><script src="/chart-briefing.js" defer></script><script src="/chart-comparison.js" defer></script>\r\n</head>\r\n<body>\r\n<a class="skip-link" href="#workspace-main">Skip to workspace</a>\r\n...',
+    expected: /<strong id="graph-total">—<\/strong><small id="graph-basis-note"><\/small>/,
+    operator: 'match',
+    diff: 'simple'
+  }
+exit 1
+--- node tests/test_chart_builder_browser.cjs ---
+✔ chart and comparison controls preserve source state, missing values and current requests (31535.6119ms)
+✔ chart type defaults, axis labels, time explanations and dense scatter preserve complete data (40687.1957ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 72228.6229
+exit 0
+--- node tests/test_studio_wording.cjs (re-run after the em-dash fix) ---
+✔ no refusal points at a "contribution explorer" this console does not have (4.1383ms)
+✔ an empty sheet asks for a grouping and a dollar measure, in those words (1.873ms)
+✔ every worksheet refusal names the Data source control as the way on (1.1122ms)
+✔ the verified engine asks for a measure and a mark in the reader’s vocabulary (0.8722ms)
+✔ the default empty state names the mode the console starts in (2.0119ms)
+✔ the header keeps a permanent, plainly named way back to the report picker (1.1644ms)
+✖ Graph names the figure it shows, so it can be matched to Chart Studio (2.3199ms)
+✔ the group limit says what it means, and is sixty everywhere (5.2863ms)
+✔ the cross-reference says what it is, in the approved plain words (0.422ms)
+✔ the reconciliation strip has a reason for every way two totals can part (0.8161ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 26.419
+
+✖ failing tests:
+
+test at tests\test_studio_wording.cjs:83:1
+✖ Graph names the figure it shows, so it can be matched to Chart Studio (2.3199ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Net workbook receipts\. Same basis as Chart Studio’s Published included receipts\./. Input:
+  
+  '/* Guided Graph section: read-only, same-origin report queries and local SVG. */\r\n' +
+    '(() => {\r\n' +
+    "  'use strict';\r\n" +
+    "  const get = name => document.getElementById('graph-' + name);\r\n" +
+    "  const dollars = n => Number(n).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2});\r\n" +
+    "  const titleFor = {categories:'Recipient types',organizations:'Top organizations',candidates:'Top candidates',companies:'Company comparison',levels:'Giving by employee level'};\r\n" +
+    "  let analysis = 'overview';\r\n" +
+    "  let loaded = false, revision = 0, view = null, category = '', recipient = '', controller = null, unavailable = [];\r\n" +
+    '  // Whether this console has a report to show. The Candidate view select is\r\n' +
+    "  // visible from that moment on (Paul's ruling A(ii), 2026-09-17), not only on\r\n" +
+    '  // the Candidates analysis tab, so Downstream PAC activity is a control the\r\n' +
+    '  // reader can see and `mode=activity` is a state a permalink can name.\r\n' +
+    '  let reportChosen = false;\r\n' +
+    "  // A permalink's company, cycle and tier cannot be put on the selects before\r\n" +
+    '  // the first response: those options are built in render() from the view the\r\n' +
+    '  // server echoes back. So they ride along with the first request instead, and\r\n' +
+    "  // render()'s own options(..., view.filters.company) lands them on the selects.\r\n" +
+    '  let urlScope = null;\r\n' +
+    "  function options(node, values, selected='') {\r\n" +
+    '    node.replaceChildren(...values.map(([id,label]) => new Option(label,id)));\r\n' +
+    '    if ([...node.options].some(o=>o.value===selected)) node.value=selected;\r\n' +
+    '  }\r\n' +
+    "  function error(text='') {get('error').textContent=text;get('error').hidden=!text;}\r\n" +
+    "  function clear() {view=null;window.dispatchEvent(new CustomEvent('mentat:graph',{detail:null}));get('results').hidden=true;get('candidate-detail').hidden=true;get('freshness').replaceChildren();get('provenance').replaceChildren();error();}\r\n" +
+    '  function syncControls() {\r\n' +
+    "    get('tier').disabled=get('funding').value==='corporate';\r\n" +
+    "    if(get('tier').disabled)get('tier').value='';\r\n" +
+    "    get('direction').parentElement.hidden=get('mode').value==='direct';\r\n" +
+    '  }\r\n' +
+    '  function filters() {\r\n' +
+    "    return new URLSearchParams({id:get('run').value,industry:get('industry').value,\r\n" +
+    "      company:urlScope?.company ?? get('company').value,\r\n" +
+    "      tier:urlScope?.tier ?? get('tier').value,\r\n" +
+    "      cycle:urlScope?.cycle ?? get('cycle').value,\r\n" +
+    "      funding:get('funding').value,mode:get('mode').value,\r\n" +
+    "      direction:get('direction').value,category,recipient});\r\n" +
+    '  }\r\n' +
+    "  // Graph's own defaults are absent from the URL rather than spelled out in it,\r\n" +
+    '  // so a permalink names only what the reader actually chose.\r\n' +
+    "  const SCOPE_DEFAULTS={mode:'direct',direction:'Support',funding:'all'};\r\n" +
+    '  // The URL mirrors the request that was just made - same keys, same spellings\r\n' +
+    '  // (audits/mentat_failings_20260915/contracts/url_scope.json) - so a permalink,\r\n' +
+    '  // a reload and a tab switch all describe one query. A page that did not load\r\n' +
+    '  // scope.js keeps working; it simply has no URL scope.\r\n' +
+    '  function writeScope(query) {\r\n' +
+    "    const value=key=>{const text=query.get(key)||'';return text===SCOPE_DEFAULTS[key]?'':text;};\r\n" +
+    "    globalThis.MentatScope?.write({industry:query.get('industry')||'',company:query.get('company')||'',\r\n" +
+    "      cycle:query.get('cycle')||'',mode:value('mode'),direction:value('direction'),\r\n" +
+    "      tier:query.get('tier')||'',funding:value('funding'),\r\n" +
+    "      category:query.get('category')||'',recipient:query.get('recipient')||''});\r\n" +
+    '  }\r\n' +
+    "  // The permalink, applied once the catalog's own options exist. A value with no\r\n" +
+    '  // matching option is skipped, never invented.\r\n' +
+    '  function applyUrlScope() {\r\n' +
+    '    urlScope=null;\r\n' +
+    '    const scope=globalThis.MentatScope?.read();\r\n' +
+    '    if(!scope)return;\r\n' +
+    "    for(const name of ['industry','mode','direction','funding'])\r\n" +
+    '      if(scope[name]&&[...get(name).options].some(option=>option.value===scope[name]))get(name).value=scope[name];\r\n' +
+    "    category=scope.category||'';recipient=scope.recipient||'';\r\n" +
+    '    if(scope.company||scope.cycle||scope.tier)urlScope={company:scope.company,cycle:scope.cycle,tier:scope.tier};\r\n' +
+    '  }\r\n' +
+    "  // Which saved run this console reads. Chart Studio's reconciliation strip has\r\n" +
+    '  // to answer this the same way Graph does - a strip that reconciles against a\r\n' +
+    '  // run Graph would never display is worse than no strip - so the rule lives in\r\n' +
+    '  // one function and both views call it. A run that is only ready, or awaiting\r\n' +
+    '  // review, is never chosen; a run whose catalog has no industries is walked\r\n' +
+    '  // past rather than displayed empty.\r\n' +
+    '  function runCandidates(runs, preferred) {\r\n' +
+    "    const usable = run => !['ready','needs review'].includes(run.state);\r\n" +
+    '    const first = runs.find(r => r.id === preferred && usable(r))\r\n' +
+    "      || runs.find(r => r.state === 'completed') || runs[0];\r\n" +
+    '    return [first, ...runs.filter(usable)].filter((r,i,a) => r && a.findIndex(v => v?.id === r.id) === i);\r\n' +
+    '  }\r\n' +
+    '  async function chooseRun(preferred) {\r\n' +
+    "    const body = await api('/api/report-sources');\r\n" +
+    '    const runs = body.runs || [];\r\n' +
+    '    const candidates = runCandidates(runs, preferred);\r\n' +
+    '    for (const candidate of candidates) {\r\n' +
+    "      const available = await api('/api/graph-catalog?id=' + encodeURIComponent(candidate.id));\r\n" +
+    '      if (available.industries.length) return {runs, run: candidate, catalog: available};\r\n' +
+    '    }\r\n' +
+    '    return {runs, run: candidates[0] || null, catalog: null};\r\n' +
+    '  }\r\n' +
+    '  globalThis.MentatGraphRun = {\r\n' +
+    '    choose: preferred => chooseRun(preferred === undefined ? selectedRun : preferred),\r\n' +
+    '    candidates: runCandidates};\r\n' +
+    '\r\n' +
+    '  async function loadRuns() {\r\n' +
+    '    try {\r\n' +
+    '      const {runs, run: chosen, catalog} = await chooseRun(selectedRun);\r\n' +
+    "      options(get('run'),runs.map(r=>[r.id,`${r.name} · ${r.state}`]),chosen?.id);\r\n" +
+    '      await loadCatalog(catalog);\r\n' +
+    "    } catch(e){error(e.message);get('status').textContent='Report sources unavailable.';}\r\n" +
+    '  }\r\n' +
+    '  async function loadCatalog(preloaded=null) {\r\n' +
+    "    const ticket=++revision;controller?.abort();clear();get('status').textContent='Reading saved report sources…';\r\n" +
+    "    options(get('industry'),[]);options(get('company'),[['','All companies']]);options(get('cycle'),[['','All cycles']]);\r\n" +
+    "    category='';recipient='';get('tier').value='';get('funding').value='all';get('mode').value='direct';reportChosen=false;urlScope=null;syncControls();\r\n" +
+    "    if(!get('run').value){get('status').textContent='No saved runs available.';return;}\r\n" +
+    '    try {\r\n' +
+    "      const body=preloaded?.industries ? preloaded : await api('/api/graph-catalog?id='+encodeURIComponent(get('run').value));\r\n" +
+    '      if(ticket!==revision)return;\r\n' +
+    "      options(get('industry'),body.industries.map(i=>[i.name,i.name]));\r\n" +
+    '      unavailable=body.unavailable_reports||[];\r\n' +
+    "      if(unavailable.length)get('source-label').textContent='Unavailable saved reports: '+unavailable.join(', ');\r\n" +
+    "      if(!body.industries.length){get('status').textContent=body.message||'This run has no finalized report. Choose another run or check Collection.';return;}\r\n" +
+    '      reportChosen=true;applyUrlScope();syncControls();applyAnalysis();\r\n' +
+    '      await refresh(true);\r\n' +
+    "    } catch(e){if(ticket===revision){error(e.message);get('status').textContent='Report sources unavailable.';}}\r\n" +
+    '  }\r\n' +
+    '  async function refresh(initial=false) {\r\n' +
+    '    const ticket=++revision;controller?.abort();controller=new AbortController();clear();syncControls();\r\n' +
+    "    if(!get('industry').value)return;\r\n" +
+    "    get('status').textContent='Reading saved giving data…';\r\n" +
+    '    // One query object: the request that goes out and the URL the reader can\r\n' +
+    '    // copy are the same values, and the permalink is consumed exactly once.\r\n' +
+    '    const query=filters();writeScope(query);urlScope=null;\r\n' +
+    '    try {\r\n' +
+    '      // latest=1 makes graph_view() replace the requested cycle with max(years)\r\n' +
+    '      // (graph_data.py:317-318). The URL already carries the cycle the reader\r\n' +
+    '      // chose, and writeScope() has just published it, so sending latest=1 as\r\n' +
+    '      // well left the URL saying 2022 while the view showed 2024. It is still\r\n' +
+    '      // sent on a first load that names no cycle, which is what it is for.\r\n' +
+    "      const response=await fetch('/api/graph?'+query+(initial&&!query.get('cycle')?'&latest=1':''),{signal:controller.signal});\r\n" +
+    "      const body=await response.json();if(!response.ok)throw new Error(body.error||'Graph unavailable.');\r\n" +
+    '      if(ticket!==revision)return;\r\n' +
+    "      view=body;render();window.dispatchEvent(new CustomEvent('mentat:graph',{detail:{...body,run:get('run').value,industry:get('industry').value}}));\r\n" +
+    "    } catch(e){if(ticket===revision&&e.name!=='AbortError'){error(e.message);get('status').textContent='Graph unavailable for this selection.';}}\r\n" +
+    '  }\r\n' +
+    '  function chip(text,clearFilter) {\r\n' +
+    "    const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=text+' ×';\r\n" +
+    "    button.onclick=()=>{clearFilter();refresh();};get('chips').append(button);\r\n" +
+    '  }\r\n' +
+    '  function render() {\r\n' +
+    '    const opts=view.options;\r\n' +
+    "    options(get('company'),[['','All companies'],...opts.companies.map(c=>[c,c])],view.filters.company);\r\n" +
+    "    options(get('cycle'),[['','All cycles'],...opts.cycles.map(c=>[c,`${Number(c)-1}\\u2013${c}`])],view.filters.cycle);\r\n" +
+    "    options(get('tier'),[['','All levels'],...['Chief','Middle-Management','Employees',...(opts.unknown_tiers?['Unknown']:[])].map(t=>[t,t])],view.filters.tier);\r\n" +
+    "    syncControls();get('chips').replaceChildren();\r\n" +
+    "    if(category)chip(category,()=>{category='';recipient='';});\r\n" +
+    "    if(recipient)chip(opts.recipients.find(r=>r.id===recipient)?.label||recipient,()=>{recipient='';});\r\n" +
+    '    // The scope sentence is no longer printed on screen - it only repeated the\r\n' +
+    '    // selects the reader is looking at (UI clean-up 2026-09-17, item 1) - but\r\n' +
+    '    // it is still built here, because the CSV, the image caption, the SVG\r\n' +
+    '    // <desc> and the briefing slide all quote it as their scope line.\r\n' +
+    "    const scope=[get('industry').value,view.filters.company||'All companies',view.filters.tier||'All levels',get('funding').selectedOptions[0]"... 32127 more characters
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\Mentat\mentat\tests\test_studio_wording.cjs:85:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: "/* Guided Graph section: read-only, same-origin report queries and local SVG. */\r\n(() => {\r\n  'use strict';\r\n  const get = name => document.getElementById('graph-' + name);\r\n  const dollars = n => Number(n).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2});\r\n  const titleFor = {categories:'Recipient types',organizations:'Top organizations',candidates:'Top candidates',companies:'Company comparison',levels:'Giving by employee level'};\r\n  let analysis = 'overview';\r\n  let loaded = false, revision = 0, view = null, category = '', recipient = '', controller = null, unavailable = [];\r\n  // Whether this console has a report to show. The Candidate view select is\r\n  // visible from that moment on (Paul's ruling A(ii), 2026-09-17), not only on\r\n...",
+    expected: /Net workbook receipts\. Same basis as Chart Studio’s Published included receipts\./,
+    operator: 'match',
+    diff: 'simple'
+  }
+exit 1
+--- node tests/test_studio_ride1_browser.cjs (re-run after the chip-line fix) ---
+✔ a Graph scope carried before Chart Studio has its data is still carried (54095.2276ms)
+✔ the open briefing drawer never covers the studio toolbar controls (73793.2305ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 127894.8885
+exit 0
+--- node tests/test_studio_wording.cjs (re-run after graph.js escapes were made literal) ---
+✔ no refusal points at a "contribution explorer" this console does not have (4.63ms)
+✔ an empty sheet asks for a grouping and a dollar measure, in those words (1.2982ms)
+✔ every worksheet refusal names the Data source control as the way on (0.5663ms)
+✔ the verified engine asks for a measure and a mark in the reader’s vocabulary (0.817ms)
+✔ the default empty state names the mode the console starts in (1.0497ms)
+✔ the header keeps a permanent, plainly named way back to the report picker (0.4309ms)
+✔ Graph names the figure it shows, so it can be matched to Chart Studio (0.5106ms)
+✔ the group limit says what it means, and is sixty everywhere (1.9151ms)
+✔ the cross-reference says what it is, in the approved plain words (0.3774ms)
+✔ the reconciliation strip has a reason for every way two totals can part (0.782ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17.9251
+exit 0
+--- node tests/test_ui_cleanup_browser.cjs ---
+SETUP: pick a free port and launch the console server on a throwaway --data-root
+SETUP done - server ready on port 58468, data root C:\Users\pgoff\AppData\Local\Temp\mentat-ui-cleanup-t2SMpX
+STEP 1: the global "Rows per chart" input is gone and every Overview panel has its own Top N
+PASS step 1 - Overview panels ["graph-category-panel","graph-candidate-panel","graph-company-panel","graph-level-panel"], each with a Top N of ["5","10","25","50"]
+STEP 2: the KPI strip is three equal tiles and the two part figures are shares of net giving
+PASS step 2 - net $1,200,000.00, direct 18.0% of net giving, organizations 81.8% of net giving
+STEP 3: every bar carries its value and its share, and the shares add up to the panel footer
+PASS step 3 - recipient types 6 bars summing to 36.3%, footer "Showing 6 of 6 · 36.3% of net giving"
+STEP 4: Top N slices the payload already in hand: no new request, nothing in the URL
+PASS step 4 - Top N 5 sliced one panel, the URL stayed ?industry=Banking
+STEP 5: party dots and company sparklines draw from the payload
+PASS step 5 - 6 party dots (3D/2R/1 other), 6 sparklines, footer "Showing 6 of 6 · 36.3% of net giving · sparkline 2022 · 2024 · 2026"
+STEP 6: #studio-title is empty or hidden before a chart is drawn, and names the chart after
+PASS step 6 - title "Published included receipts by Company", subtitle "Banking · All cycles · published included receipts"
+STEP 7: the chart starts above the fold at 1440 by 900, and the Fit select is at its intrinsic width
+PASS step 7 - #studio-canvas top 613px, Fit select 119px, grid 280px 610px 280px
+STEP 8: one "Add to briefing", one "Company overview", and Views carries Save and Open view
+PASS step 8 - Add to briefing ["studio-briefing-add"], view modes ["studio-view-builder","studio-overview-toggle","studio-view-canvas"]
+STEP 9: the Inspector column is the single scroll container on the Marks pane
+PASS step 9 - Inspector scroll containers: ["studio-inspector"]
+STEP 10: Show Me is one block in the DOM, opened in the Inspector by the toolbar button
+PASS step 10 - Show Me: 24 tiles, one block, hint " · suggested: Horizontal bars"
+STEP 11: the Data source disclosure stays open and reads as a chip line with a ready mark
+PASS step 11 - source chips ["Banking","Published included receipts","✓ Ready"], header chips ["Banking","All cycles"]
+STEP 12: page errors raised by the views this pass owns
+PASS step 12 - no page error from Graph or Chart Studio (0 foreign error(s) ignored)
+RESULT: 12/12 steps passed, exit 0
+exit 0
+--- node tests/test_studio_copy_print_browser.cjs ---
+✔ Copy image puts a captioned PNG on the clipboard at localhost (29895.6623ms)
+✔ Copy image names the missing capability instead of failing silently (31620.8176ms)
+✔ Print chart drops the whole builder and keeps the provenance footer (13947.6368ms)
+✔ Canvas only keeps the Inspector button and its filter count at desktop width (42041.3242ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 117512.4043
+exit 0
+--- node tests/test_studio_click_to_add_browser.cjs ---
+✔ a click places a field on the shelf a drop would have chosen, and Undo takes it back (73847.0281ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 73850.944
+exit 0

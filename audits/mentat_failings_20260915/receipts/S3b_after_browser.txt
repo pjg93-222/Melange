@@ -1,0 +1,168 @@
+S3b after-browser receipt (evidence CSV browser test, live tree)
+
+HEAD: 21c9cab6dddfd26b92a34eff010cd90f53515168
+Branch: codex/mentat-crypto
+Run start (UTC): 2026-09-17T02:16:59Z
+Run end (UTC):   2026-09-17T02:17:59Z
+Command: node tests/test_evidence_csv_browser.cjs
+  (cwd: C:\Users\pgoff\Mentat\mentat)
+Exit code: 1
+
+Pre-run process check (Get-CimInstance Win32_Process | Where-Object CommandLine -match 'server.py --port'),
+performed before any edits in this pass:
+  PID 45772  python.exe server.py --port 8950 --data-root C:\Users\pgoff\AppData\Local\Temp\s3b-realclient-16620527
+  PID 77928  python.exe server.py --port 8950 --data-root C:\Users\pgoff\AppData\Local\Temp\s3b-realclient-16620527
+  PID 78748  python.exe app/server.py --port 65282 --data-root ...multi-industry-snapshot-support-7c95a9...\scratchpad\acceptance_data_root_2
+  PIDs 45772 and 77928 (an earlier verifier's leftovers on port 8950, tagged 's3b-realclient') were stopped
+  (Stop-Process -Force) before this run. PID 78748 belongs to another session (port 65282, its own data
+  root) and was left running. None of these are 8802, 8806, 8808, or 8841; none of those ports were touched.
+  A post-run check confirmed only PID 78748 remained and no server.py or chrome process from this run's
+  own data root (mentat-evidence-data-31ESJT) or fixture dir (mentat-evidence-fixtures-NirhSK) was left
+  behind: the test's own cleanup tore down its browser and server despite the "browser.close() exceeded
+  its 10000ms bound" line in its output (that line is just this test's own watchdog note, not a hang).
+
+Edits made before this run (both in tests/test_evidence_csv_browser.cjs, nothing else touched):
+ 1. Step 10 ("notes.txt"): kept the existing fixture (notes.txt containing 'just some notes, not a CSV'),
+    but since 21c9cab6d a .txt file is read as delimited text rather than refused for its extension, so the
+    fixture's content (no Committee ID / CMTE_ID / Source Committee ID column) now trips the header check
+    instead. Updated the description to "error case: notes.txt is read as delimited text and refused for
+    its header" and the expected status to 'notes.txt: The CSV needs a Committee ID, CMTE_ID, or Source
+    Committee ID column.'. (There was no "zero POSTs issued" assertion attached to this step to drop --
+    that assertion belongs to the previous step, big.csv, and its listener is already detached by the time
+    step 10 runs.)
+ 2. explainWait (tests/test_evidence_csv_browser.cjs:349-363): previously did `error.message = [...]` on an
+    already-thrown Playwright error, then `throw error` -- but V8 materializes and caches the formatted
+    `.stack` string (which bakes in `.message`) the first time something reads `.stack`, so appending to
+    `.message` afterward never showed up in the printed failure; the last (pre-fix) receipt for this same
+    step 10 failure explicitly recorded that the actual on-page status text was NOT CAPTURED because of
+    this. Fixed by building the enriched text into a local `enriched` string and throwing a *new* Error
+    carrying it as `.message`, with the original error attached via `{cause: error}`:
+      throw Object.assign(new Error(enriched), {cause: error});
+    This run's own failure output below shows the fix works: the "waiting for:", "#evidence-csv-status
+    was:", API-call and console-line sections are all present in the printed stack this time.
+
+RESULT: FAILED at step 14 of (up to) 33. NOT "ALL 33 STEPS PASSED".
+Steps 1-13 passed, including step 10 (the fix above). Steps 15-33 were not reached.
+
+Per-step timings (as printed by the test):
+  PASS step 1  (0.5s)  write fixture CSVs to a scratch directory
+  PASS step 2  (2.5s)  pick a free port and launch the first console server (port 49756)
+  PASS step 3  (1.4s)  launch headless Chrome and open a page
+  PASS step 4  (0.5s)  open the evidence tab, select CSV source, expect the empty-catalog status
+  PASS step 5  (2.7s)  import six.csv (~6 MB) and check the first page of rows
+  PASS step 6  (11.8s) import forty.csv (~40 MB) and watch for a progress sample
+  PASS step 7  (1.7s)  kill and relaunch the console on the same port/data root; reuse prior imports
+  PASS step 8  (1.9s)  launch a second console on the same data root, a different port
+  PASS step 9  (0.1s)  error case: big.csv rejected client-side, no upload issued
+  PASS step 10 (0.6s)  error case: notes.txt is read as delimited text and refused for its header
+  PASS step 11 (0.6s)  error case: wide201.csv rejected for exceeding the column cap
+  PASS step 12 (0.5s)  error case: truncated.csv rejected for an unterminated quoted field
+  PASS step 13 (0.0s)  error case: empty.csv rejected as empty
+  FAIL step 14        error case: latin1.csv rejected for invalid UTF-8 bytes
+  steps 15-33: not reached
+
+Exact failure text (stdout+stderr, verbatim -- now enriched by the explainWait fix):
+FAIL step 14 (error case: latin1.csv rejected for invalid UTF-8 bytes): Error: page.waitForFunction: Timeout 15000ms exceeded.
+  waiting for: status exactly "latin1.csv: Use a UTF-8 CSV file without invalid text characters."
+  #evidence-csv-status was: "latin1.csv: This file contains binary data and could not be read as text."
+  last 14 of 42 /api/evidence-csv responses:
+    02:17:28.472 GET 200 /api/evidence-csv?job=csv-c889eccd47528e9daab8061eb37a7813 body={"id":"csv-c889eccd47528e9daab8061eb37a7813","name":"forty.csv","state":"ready","bytes":40000180,"bytes_read":40000180,"rows_read":212985,"message":"","started_at":1789611437.700459,"finished_at":1789611448.2293415,"catalog":{"id":"csv-c889
+    02:17:28.477 GET 200 /api/evidence-csv
+    02:17:28.636 GET 200 /api/evidence-csv?id=csv-c889eccd47528e9daab8061eb37a7813&committee=C00000001&cycle=&offset=0&limit=100
+    02:17:30.207 GET 200 /api/evidence-csv
+    02:17:30.366 GET 200 /api/evidence-csv?id=csv-78db2b6e8f77f8805cf59d768149069a&committee=C00000001&cycle=&offset=0&limit=100
+    02:17:32.511 POST 200 /api/evidence-csv
+    02:17:33.015 GET 200 /api/evidence-csv?job=csv-15d81395e7f8d4c0fb41130ac0cb7ada body={"id":"csv-15d81395e7f8d4c0fb41130ac0cb7ada","name":"notes.txt","state":"failed","bytes":27,"bytes_read":0,"rows_read":0,"message":"The CSV needs a Committee ID, CMTE_ID, or Source Committee ID column.","started_at":1789611452.4891593,"fini
+    02:17:33.067 POST 200 /api/evidence-csv
+    02:17:33.581 GET 200 /api/evidence-csv?job=csv-dae3aff1767e9070387efcf030b585d5 body={"id":"csv-dae3aff1767e9070387efcf030b585d5","name":"wide201.csv","state":"failed","bytes":1715,"bytes_read":0,"rows_read":0,"message":"The CSV needs unique nonempty column names, with no more than 200 columns.","started_at":1789611453.0507
+    02:17:33.628 POST 200 /api/evidence-csv
+    02:17:34.133 GET 200 /api/evidence-csv?job=csv-adfd5101355e2e9829948fc0bf927f47 body={"id":"csv-adfd5101355e2e9829948fc0bf927f47","name":"truncated.csv","state":"failed","bytes":462,"bytes_read":0,"rows_read":0,"message":"The CSV could not be read at row 3. Check its quoted fields and delimiter.","started_at":1789611453.614
+    02:17:34.165 POST 400 /api/evidence-csv
+    02:17:34.211 POST 200 /api/evidence-csv
+    02:17:34.718 GET 200 /api/evidence-csv?job=csv-757b8ce3e2940062445c10866e65c78a body={"id":"csv-757b8ce3e2940062445c10866e65c78a","name":"latin1.csv","state":"failed","bytes":294,"bytes_read":0,"rows_read":0,"message":"This file contains binary data and could not be read as text.","started_at":1789611454.1975157,"finished_a
+  page console (last 20 of 3):
+    verbose: [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o
+    verbose: [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o
+    error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+  pageerrors: []
+    at explainWait (C:\Users\pgoff\Mentat\mentat\tests\test_evidence_csv_browser.cjs:362:27)
+    at async waitForStatusExact (C:\Users\pgoff\Mentat\mentat\tests\test_evidence_csv_browser.cjs:372:25)
+    at async C:\Users\pgoff\Mentat\mentat\tests\test_evidence_csv_browser.cjs:499:5
+browser.close() exceeded its 10000ms bound
+
+Disposition: This is a NEW assertion/expectation failure, uncovered only now that (a) step 10's stale
+expectation was fixed so the run gets past it, and (b) explainWait actually shows the real status text.
+The test (tests/test_evidence_csv_browser.cjs:497-499) still expects the pre-21c9cab6d message M_UTF8
+('Use a UTF-8 CSV file without invalid text characters.') for a file with invalid UTF-8 bytes, but
+mentat/app/evidence_csv.py:179-191 documents that this is stale in the same way step 10 was: "M_UTF8
+above is kept defined for callers that still import it, but nothing raises it any more: a file that is
+not valid UTF-8 is decoded as Windows-1252 and says so in the catalog, and only content that is not text
+at all ... is refused, as M_BINARY." The fixture tests/test_evidence_csv_browser.cjs:? (latin1.csv, whose
+bytes the app now classifies as binary rather than as recoverable-via-cp1252 latin-1 text) is being read
+by the current app as M_BINARY, not M_UTF8. This is the same class of test-lags-app drift as step 10, but
+step 14 was OUT OF SCOPE for this pass -- only step 10 and explainWait were authorized to change. The
+whole node process ran well inside the 600s foreground budget (about 60s total) and exited on its own
+with code 1, so per instructions this is treated as an assertion failure, not an outer-command timeout,
+and no re-run was attempted. Per instructions, the app was NOT edited, and the test's step 14 was NOT
+touched. tests/test_evidence_csv_browser.cjs was staged only for the two changes described above (step 10
++ explainWait); commit/staging of the receipts was NOT performed, since the run is not green.
+
+Full raw stdout+stderr for this run follows.
+
+--- BEGIN RAW OUTPUT ---
+STEP 1: write fixture CSVs to a scratch directory
+PASS step 1 (0.5s) - fixtures written under C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-fixtures-NirhSK
+STEP 2: pick a free port and launch the first console server
+PASS step 2 (2.5s) - server A ready on port 49756, data root C:\Users\pgoff\AppData\Local\Temp\mentat-evidence-data-31ESJT
+STEP 3: launch headless Chrome and open a page
+PASS step 3 (1.4s) - browser launched, page opened, pageerror/request listeners attached
+STEP 4: open the evidence tab, select CSV source, expect the empty-catalog status
+PASS step 4 (0.5s) - evidence tab open, CSV source selected, empty-catalog status shown
+STEP 5: import six.csv (~6 MB) and check the first page of rows
+PASS step 5 (2.7s) - six.csv imported (~6 MB), 100 rows rendered on the first page
+STEP 6: import forty.csv (~40 MB) and watch for a progress sample
+PASS step 6 (11.8s) - forty.csv imported (~40 MB) after 108 polled progress samples
+STEP 7: kill and relaunch the console on the same port/data root; reuse prior imports
+PASS step 7 (1.7s) - server restarted on the same port and data root; both prior imports reachable without re-upload
+STEP 8: launch a second console on the same data root, a different port
+PASS step 8 (1.9s) - a second console on the same data root and a different port lists both imports
+STEP 9: error case: big.csv rejected client-side, no upload issued
+PASS step 9 (0.1s) - big.csv rejected by the client pre-flight size check; no POST issued
+STEP 10: error case: notes.txt is read as delimited text and refused for its header
+PASS step 10 (0.6s) - notes.txt read as delimited text and refused for its header
+STEP 11: error case: wide201.csv rejected for exceeding the column cap
+PASS step 11 (0.6s) - wide201.csv rejected for exceeding the column cap
+STEP 12: error case: truncated.csv rejected for an unterminated quoted field
+PASS step 12 (0.5s) - truncated.csv rejected for an unterminated quoted field
+STEP 13: error case: empty.csv rejected as empty
+PASS step 13 (0.0s) - empty.csv rejected as empty
+STEP 14: error case: latin1.csv rejected for invalid UTF-8 bytes
+FAIL step 14 (error case: latin1.csv rejected for invalid UTF-8 bytes): Error: page.waitForFunction: Timeout 15000ms exceeded.
+  waiting for: status exactly "latin1.csv: Use a UTF-8 CSV file without invalid text characters."
+  #evidence-csv-status was: "latin1.csv: This file contains binary data and could not be read as text."
+  last 14 of 42 /api/evidence-csv responses:
+    02:17:28.472 GET 200 /api/evidence-csv?job=csv-c889eccd47528e9daab8061eb37a7813 body={"id":"csv-c889eccd47528e9daab8061eb37a7813","name":"forty.csv","state":"ready","bytes":40000180,"bytes_read":40000180,"rows_read":212985,"message":"","started_at":1789611437.700459,"finished_at":1789611448.2293415,"catalog":{"id":"csv-c889
+    02:17:28.477 GET 200 /api/evidence-csv
+    02:17:28.636 GET 200 /api/evidence-csv?id=csv-c889eccd47528e9daab8061eb37a7813&committee=C00000001&cycle=&offset=0&limit=100
+    02:17:30.207 GET 200 /api/evidence-csv
+    02:17:30.366 GET 200 /api/evidence-csv?id=csv-78db2b6e8f77f8805cf59d768149069a&committee=C00000001&cycle=&offset=0&limit=100
+    02:17:32.511 POST 200 /api/evidence-csv
+    02:17:33.015 GET 200 /api/evidence-csv?job=csv-15d81395e7f8d4c0fb41130ac0cb7ada body={"id":"csv-15d81395e7f8d4c0fb41130ac0cb7ada","name":"notes.txt","state":"failed","bytes":27,"bytes_read":0,"rows_read":0,"message":"The CSV needs a Committee ID, CMTE_ID, or Source Committee ID column.","started_at":1789611452.4891593,"fini
+    02:17:33.067 POST 200 /api/evidence-csv
+    02:17:33.581 GET 200 /api/evidence-csv?job=csv-dae3aff1767e9070387efcf030b585d5 body={"id":"csv-dae3aff1767e9070387efcf030b585d5","name":"wide201.csv","state":"failed","bytes":1715,"bytes_read":0,"rows_read":0,"message":"The CSV needs unique nonempty column names, with no more than 200 columns.","started_at":1789611453.0507
+    02:17:33.628 POST 200 /api/evidence-csv
+    02:17:34.133 GET 200 /api/evidence-csv?job=csv-adfd5101355e2e9829948fc0bf927f47 body={"id":"csv-adfd5101355e2e9829948fc0bf927f47","name":"truncated.csv","state":"failed","bytes":462,"bytes_read":0,"rows_read":0,"message":"The CSV could not be read at row 3. Check its quoted fields and delimiter.","started_at":1789611453.614
+    02:17:34.165 POST 400 /api/evidence-csv
+    02:17:34.211 POST 200 /api/evidence-csv
+    02:17:34.718 GET 200 /api/evidence-csv?job=csv-757b8ce3e2940062445c10866e65c78a body={"id":"csv-757b8ce3e2940062445c10866e65c78a","name":"latin1.csv","state":"failed","bytes":294,"bytes_read":0,"rows_read":0,"message":"This file contains binary data and could not be read as text.","started_at":1789611454.1975157,"finished_a
+  page console (last 20 of 3):
+    verbose: [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o
+    verbose: [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o
+    error: Failed to load resource: the server responded with a status of 400 (Bad Request)
+  pageerrors: []
+    at explainWait (C:\Users\pgoff\Mentat\mentat\tests\test_evidence_csv_browser.cjs:362:27)
+    at async waitForStatusExact (C:\Users\pgoff\Mentat\mentat\tests\test_evidence_csv_browser.cjs:372:25)
+    at async C:\Users\pgoff\Mentat\mentat\tests\test_evidence_csv_browser.cjs:499:5
+browser.close() exceeded its 10000ms bound
+EXITCODE:1
+--- END RAW OUTPUT ---

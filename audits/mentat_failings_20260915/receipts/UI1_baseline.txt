@@ -1,0 +1,392 @@
+UI1 baseline receipt
+date: 2026-09-17T14:45:56-04:00
+branch: codex/mentat-crypto
+HEAD: f0ec60b744e6ed53fa1abaa64d3c50a9076a50d4
+HEAD subject: Reconcile a moving FEC population instead of aborting; verify date windows against a fresh count
+
+=== git status --porcelain ===
+ M audits/mentat_system_debug_20260913/lanes/commit_20260914/PROGRESS.md
+ M mentat/R/export_guards.R
+ M mentat/R/fec_beneficiary.R
+ M mentat/R/fec_page.R
+ M mentat/R/fec_transfer_graph.R
+ M mentat/R/paths.R
+ M mentat/README.md
+ M mentat/app/app.js
+ M mentat/app/desktop/Launcher.cs
+ M mentat/app/graph.css
+ M mentat/app/graph_data.py
+ M mentat/app/index.html
+ M mentat/app/report_insights.py
+ M mentat/app/server.py
+ M mentat/app/style.css
+ M mentat/tests/Test-MentatNodeHeapPlan.ps1
+ M mentat/tests/console_browser_fixture.py
+ M mentat/tests/test_api_company_cycle_fanout.py
+ M mentat/tests/test_chart_math.cjs
+ M mentat/tests/test_collection_console.py
+ M mentat/tests/test_downstream_enrichment.py
+ M mentat/tests/test_export_progress_guards.R
+ M mentat/tests/test_fec_api_fanout.R
+ M mentat/tests/test_fec_beneficiary_helpers.R
+ M mentat/tests/test_fec_key_store.py
+ M mentat/tests/test_graph_data.py
+ M mentat/tests/test_merge_company_shards.py
+ M mentat/tests/test_names.R
+ M mentat/tests/test_pac_cash_model.py
+ M mentat/tests/test_report.R
+ M mentat/tests/test_report_insights.py
+ M mentat/tests/test_resilient_orchestrator.py
+ M mentat/tests/test_sqlite_lane_locking.R
+ M mentat/tests/test_transfer_graph.py
+ M mentat/tests/test_validate_industry_coverage.py
+ M mentat/tests/test_workbook_payload.py
+ M mentat/tools/api_company_cycle_fanout.py
+ M mentat/tools/build_industry_report.ps1
+ M mentat/tools/collect_api_lane.R
+ M mentat/tools/enrich_downstream.py
+ M mentat/tools/fec_transfer_graph.py
+ M mentat/tools/finalize_crypto_excel.ps1
+ M mentat/tools/merge_company_shards.py
+ M mentat/tools/pac_cash_model.py
+ M mentat/tools/parallel/Invoke-MentatDirectReport.ps1
+ M mentat/tools/parallel/Invoke-MentatIndustryWorker.ps1
+ M mentat/tools/parallel/Start-MentatApiCompanyCycleFanout.ps1
+ M mentat/tools/parallel/Start-MentatIndustryReports.ps1
+ M mentat/tools/parallel/Start-MentatResilientIndustryReports.ps1
+ M mentat/tools/prepare_workbook_payload.py
+?? .gitignore.bak-20260914-E
+?? .gitignore.bak-20260914-fix1
+?? .tmp/
+?? audits/mentat_failings_20260915/HANDOFF.md.bak-20260916-s4
+?? audits/mentat_failings_20260915/HANDOFF.md.bak-20260917-s5
+?? audits/mentat_failings_20260915/S4_DESIGN.md.bak-20260916-s4
+?? audits/mentat_failings_20260915/S5_DESIGN.md.bak-20260917-s5
+?? audits/mentat_failings_20260915/S6_DESIGN.md
+?? audits/mentat_failings_20260915/UI_CLEANUP_DESIGN_2026-09-17.md
+?? audits/mentat_failings_20260915/contracts/README.md.bak-20260916-s4
+?? audits/mentat_failings_20260915/contracts/README.md.bak-20260917-s5
+?? audits/mentat_failings_20260915/contracts/contributions_api.json.bak-20260916-s4
+?? audits/mentat_failings_20260915/contracts/raw_contribution_columns.json.bak-20260916-s4
+?? audits/mentat_failings_20260915/contracts/snapshot_registry.json.bak-20260916-s4
+?? audits/mentat_failings_20260915/receipts/S2_backfill_dryrun_production.md
+?? audits/mentat_failings_20260915/receipts/S2_commit_receipt.md
+?? audits/mentat_failings_20260915/receipts/S4_code_review_fable.md
+?? audits/mentat_failings_20260915/receipts/S4_phase4_client.txt.bak-20260916-s4
+?? audits/mentat_failings_20260915/receipts/S5_phase1-3.txt.bak-20260917-s5
+?? audits/mentat_tidy_workbook_20260914/
+?? audits/mentat_xref_logic_20260917/
+?? mentat/AGENTS.md
+?? mentat/METHODOLOGY.md
+?? mentat/R/export_guards.R.bak-20260912
+?? mentat/R/report.R.bak-20260912
+?? mentat/R/report.R.bak-20260916-s4
+?? mentat/R/state_destinations.R
+?? mentat/app/README.md.bak-20260914-E
+?? mentat/app/README.md.bak-20260914-F1
+?? mentat/app/README.md.bak-20260914-fix1
+?? mentat/app/Start-MentatApp.ps1.bak-20260914-F1
+?? mentat/app/Start-MentatApp.ps1.bak-20260915-launcher
+?? mentat/app/app.js.bak-20260909
+?? mentat/app/app.js.bak-20260911
+?? mentat/app/app.js.bak-20260914-F1
+?? mentat/app/app.js.bak-20260914-fix1
+?? mentat/app/app.js.bak-20260914-wording
+?? mentat/app/app.js.bak-20260915-launcher
+?? mentat/app/app.js.bak-20260917-s5
+?? mentat/app/app.js.bak2-20260909
+?? mentat/app/app.js.bak3-20260909
+?? mentat/app/chart-briefing.css.bak-20260915-ride1
+?? mentat/app/chart-briefing.js.bak-20260914-fix1
+?? mentat/app/chart-briefing.js.bak-20260914-wording
+?? mentat/app/chart-briefing.js.bak-20260915-ride1
+?? mentat/app/chart-comparison.js.bak-20260913
+?? mentat/app/chart-comparison.js.bak-20260913-redesign
+?? mentat/app/chart-comparison.js.bak-20260914-Fc
+?? mentat/app/chart-export.js.bak-20260914-E
+?? mentat/app/chart-export.js.bak-20260914-wording
+?? mentat/app/chart-math.js.bak-20260911
+?? mentat/app/chart-math.js.bak-20260912
+?? mentat/app/chart-math.js.bak-20260913-redesign
+?? mentat/app/chart-studio-contributions.js.bak-20260913-redesign
+?? mentat/app/chart-studio-contributions.js.bak-20260914-Fc
+?? mentat/app/chart-studio-contributions.js.bak-20260914-fix1
+?? mentat/app/chart-studio-contributions.js.bak-20260914-wording
+?? mentat/app/chart-studio-contributions.js.bak-20260916-s4
+?? mentat/app/chart-studio-core.js.bak-20260911b
+?? mentat/app/chart-studio-core.js.bak-20260912
+?? mentat/app/chart-studio-core.js.bak-20260913-redesign
+?? mentat/app/chart-studio-core.js.bak-20260914-Fc
+?? mentat/app/chart-studio-core.js.bak-20260914-fix1
+?? mentat/app/chart-studio-core.js.bak-20260914-wording
+?? mentat/app/chart-studio-core.js.bak-20260916-s4
+?? mentat/app/chart-studio.css.bak-20260913
+?? mentat/app/chart-studio.css.bak-20260913-redesign
+?? mentat/app/chart-studio.css.bak-20260914-E
+?? mentat/app/chart-studio.css.bak-20260914-Fc
+?? mentat/app/chart-studio.js.bak-20260911b
+?? mentat/app/chart-studio.js.bak-20260912
+?? mentat/app/chart-studio.js.bak-20260913
+?? mentat/app/chart-studio.js.bak-20260913-redesign
+?? mentat/app/chart-studio.js.bak-20260914-E
+?? mentat/app/chart-studio.js.bak-20260914-Fc
+?? mentat/app/chart-studio.js.bak-20260914-fix1
+?? mentat/app/chart-studio.js.bak-20260914-wording
+?? mentat/app/chart-studio.js.bak-20260915-ride1
+?? mentat/app/chart-studio.js.bak-20260916-s4
+?? mentat/app/chart-studio.js.bak-20260917-s5
+?? mentat/app/charts.js.bak-20260911
+?? mentat/app/charts.js.bak-20260914-E
+?? mentat/app/charts.js.bak-20260914-wording
+?? mentat/app/contribution_data.py.bak-20260916-s4
+?? mentat/app/contribution_semantics.py.bak-20260916-s4
+?? mentat/app/cross-reference.js.bak-20260914-Fc
+?? mentat/app/cross-reference.js.bak-20260914-wording
+?? mentat/app/cross-reference.js.bak-20260917-s5
+?? mentat/app/cross_reference_data.py.bak-20260916-s4
+?? mentat/app/graph.js.bak-20260914-E
+?? mentat/app/graph.js.bak-20260914-Fc
+?? mentat/app/graph.js.bak-20260914-fix1
+?? mentat/app/graph.js.bak-20260914-wording
+?? mentat/app/graph.js.bak-20260917-s5
+?? mentat/app/grouped-chart.js.bak-20260911
+?? mentat/app/index.html.bak-20260909
+?? mentat/app/index.html.bak-20260911
+?? mentat/app/index.html.bak-20260911b
+?? mentat/app/index.html.bak-20260912
+?? mentat/app/index.html.bak-20260913-redesign
+?? mentat/app/index.html.bak-20260914-E
+?? mentat/app/index.html.bak-20260914-Fc
+?? mentat/app/index.html.bak-20260914-wording
+?? mentat/app/index.html.bak-20260917-s5
+?? mentat/app/index.html.bak2-20260909
+?? mentat/app/industry_scope.py.bak-20260916-s4
+?? mentat/app/server.py.bak-20260909
+?? mentat/app/server.py.bak-20260911
+?? mentat/app/server.py.bak-20260913
+?? mentat/app/server.py.bak-20260914-E
+?? mentat/app/server.py.bak-20260914-E2
+?? mentat/app/server.py.bak-20260914-F1
+?? mentat/app/server.py.bak-20260914-F1b
+?? mentat/app/server.py.bak-20260914-fix1
+?? mentat/app/server.py.bak-20260914-wording
+?? mentat/app/server.py.bak-20260915-ride1
+?? mentat/app/server.py.bak-20260916-s4
+?? mentat/app/server.py.bak-20260917-s5
+?? mentat/app/server.py.bak3-20260909
+?? mentat/app/snapshot_registry.py.bak-20260916-s4
+?? mentat/app/studio-contract-examples.json.bak-20260916-s4
+?? mentat/app/style.css.bak2-20260909
+?? mentat/app/tests/chart-briefing.test.js.bak-20260914-fix1
+?? mentat/app/tests/chart-briefing.test.js.bak-20260914-wording
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260911b
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260912
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260913-redesign
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260914-E
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260914-Fc
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260914-fix1
+?? mentat/app/tests/chart-studio-core.test.js.bak-20260914-wording
+?? mentat/app/tests/reconcile-cycle.test.js.bak-20260914-wording
+?? mentat/app/tests/studio-contract.test.js.bak-20260916-s4
+?? mentat/app/workspace.css.bak-20260914-F1
+?? mentat/state/
+?? mentat/tests/Test-MentatFundingLabels.ps1
+?? mentat/tests/Test-MentatReportDirectory.ps1
+?? mentat/tests/test_api_request_pool.py
+?? mentat/tests/test_app_lazy_startup_browser.cjs.bak-20260914-F1
+?? mentat/tests/test_app_lazy_startup_browser.cjs.bak-20260915-launcher
+?? mentat/tests/test_attribution_recheck.R
+?? mentat/tests/test_audit_regressions.py
+?? mentat/tests/test_chart_builder_browser.cjs
+?? mentat/tests/test_chart_comparison_browser.cjs.bak-20260914-Fc
+?? mentat/tests/test_chart_studio_contributions.cjs
+?? mentat/tests/test_chart_studio_contributions.cjs.bak-20260914-Fc
+?? mentat/tests/test_collection_coverage.py
+?? mentat/tests/test_comparison_data.py
+?? mentat/tests/test_console_browser.cjs.bak-20260917-s5
+?? mentat/tests/test_console_delivery.py.bak-20260916-s4
+?? mentat/tests/test_contribution_charts_browser.cjs
+?? mentat/tests/test_contribution_export_browser.cjs.bak-20260914-E
+?? mentat/tests/test_contribution_geo.py
+?? mentat/tests/test_contribution_http.py.bak-20260914-E
+?? mentat/tests/test_contribution_http.py.bak-20260914-F1
+?? mentat/tests/test_contribution_http.py.bak-20260914-F1b
+?? mentat/tests/test_contribution_http.py.bak-20260914-fix1
+?? mentat/tests/test_contribution_http.py.bak-20260916-s4
+?? mentat/tests/test_contribution_map_browser.cjs
+?? mentat/tests/test_contribution_map_eligibility.cjs
+?? mentat/tests/test_contribution_plot.cjs
+?? mentat/tests/test_contribution_plot_readability_browser.cjs
+?? mentat/tests/test_contribution_query.py
+?? mentat/tests/test_contribution_query_store.py
+?? mentat/tests/test_contribution_semantics.py
+?? mentat/tests/test_contribution_source_guard.py
+?? mentat/tests/test_contribution_studio.cjs
+?? mentat/tests/test_contribution_studio_map_browser.cjs
+?? mentat/tests/test_contribution_studio_state_browser.cjs
+?? mentat/tests/test_contribution_workbook_guard.py
+?? mentat/tests/test_coverage_view.cjs
+?? mentat/tests/test_cross_reference_data.py.bak-20260917-eng
+?? mentat/tests/test_cross_reference_digest.py.bak-20260917-eng
+?? mentat/tests/test_cross_reference_engine.py.bak-20260917-eng
+?? mentat/tests/test_cross_reference_store.py
+?? mentat/tests/test_cross_reference_view.cjs.bak-20260914-Fc
+?? mentat/tests/test_desktop_launcher.py.bak-20260914-F1
+?? mentat/tests/test_desktop_launcher.py.bak-20260915-launcher
+?? mentat/tests/test_destination_queries.py
+?? mentat/tests/test_evidence_archive.R
+?? mentat/tests/test_fec_filing_headers.py
+?? mentat/tests/test_funding_comparison.cjs
+?? mentat/tests/test_graph_lazy_tables_browser.cjs
+?? mentat/tests/test_navigation_scope_browser.cjs.bak-20260917-s5
+?? mentat/tests/test_original_giving_experiment.py
+?? mentat/tests/test_original_studio_contributions_browser.cjs.bak-20260914-Fc
+?? mentat/tests/test_pac_evidence.py.bak-20260917-gate
+?? mentat/tests/test_publish_pocket.py.bak-20260914-fix1
+?? mentat/tests/test_query_coverage.py
+?? mentat/tests/test_receipt_metadata_hydration.py
+?? mentat/tests/test_receipt_roles.R.bak-20260917-gate
+?? mentat/tests/test_recheck_attribution.py
+?? mentat/tests/test_recover_filing_forms.py
+?? mentat/tests/test_report_directory.R
+?? mentat/tests/test_report_directory.py
+?? mentat/tests/test_report_source_guard.py
+?? mentat/tests/test_run_archive.py
+?? mentat/tests/test_runtime_inputs.py
+?? mentat/tests/test_spending_detail_frames.R.bak-20260916-s4
+?? mentat/tests/test_startup_performance.py
+?? mentat/tests/test_state_destinations.R
+?? mentat/tests/test_studio_briefing.py.bak-20260915-ride1
+?? mentat/tests/test_studio_canvas_only_browser.cjs
+?? mentat/tests/test_studio_canvas_only_browser.cjs.bak-20260914-E
+?? mentat/tests/test_studio_contract_examples.py.bak-20260915-ride1
+?? mentat/tests/test_studio_industry_browser.cjs.bak-20260916-s4
+?? mentat/tests/test_studio_inspection_regression_browser.cjs
+?? mentat/tests/test_studio_reconciliation_browser.cjs.bak-20260914-fix1
+?? mentat/tests/test_studio_temporal_regression_browser.cjs
+?? mentat/tests/test_studio_views.py.bak-20260914-fix1
+?? mentat/tests/test_studio_wording.cjs.bak-20260914-fix1
+?? mentat/tests/test_transfer_evidence.R
+?? mentat/tests/test_ui_analysis.cjs
+?? mentat/tests/test_workbook_payload.py.bak-20260912
+?? mentat/tests/test_worker_sharing.py
+?? mentat/tools/api_company_cycle_fanout.py.bak-20260909
+?? mentat/tools/api_request_pool.py
+?? mentat/tools/crypto_workbook_builder.mjs.bak-20260912
+?? mentat/tools/crypto_workbook_builder.mjs.bak-20260916-s4
+?? mentat/tools/export_crypto_spending_data.R.bak-20260912
+?? mentat/tools/fec_key_store.py.bak-20260909
+?? mentat/tools/filter_industry_cycle_data.mjs.bak-20260912
+?? mentat/tools/hydrate_receipt_metadata.py
+?? mentat/tools/merge_company_shards.py.bak-20260909
+?? mentat/tools/original_giving_experiment.py
+?? mentat/tools/parallel/Start-MentatApiCompanyCycleFanout.ps1.bak-20260909
+?? mentat/tools/parallel/Start-MentatApiCompanyCycleFanout.ps1.bak2-20260909
+?? mentat/tools/parallel/Start-MentatResilientIndustryReports.ps1.bak-20260909
+?? mentat/tools/parallel/Start-MentatResilientIndustryReports.ps1.bak2-20260909
+?? mentat/tools/pocket/selfcheck.py.bak-20260914-E2
+?? mentat/tools/read_report_payload.mjs
+?? mentat/tools/recheck_attribution.R
+?? mentat/tools/recover_filing_forms.py
+?? mentat/tools/report_directory.psm1
+?? mentat/tools/validate_report_json.py
+?? outputs/
+?? reports/accuracy_report.md
+?? reports/reconciled-20260908/
+?? reports/reliability_report.md
+?? reports/repaired-20260908/
+
+=== git diff --stat (tracked) ===
+warning: in the working copy of 'audits/mentat_system_debug_20260913/lanes/commit_20260914/PROGRESS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/R/export_guards.R', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/R/fec_page.R', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/R/fec_transfer_graph.R', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/R/paths.R', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/app/app.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/app/desktop/Launcher.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/app/graph.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/app/graph_data.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/app/style.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/Test-MentatNodeHeapPlan.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/console_browser_fixture.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_api_company_cycle_fanout.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_chart_math.cjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_collection_console.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_downstream_enrichment.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_export_progress_guards.R', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_fec_api_fanout.R', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_fec_beneficiary_helpers.R', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_fec_key_store.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_graph_data.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_merge_company_shards.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_names.R', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_pac_cash_model.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_report.R', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_resilient_orchestrator.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_sqlite_lane_locking.R', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_transfer_graph.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_validate_industry_coverage.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tests/test_workbook_payload.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/api_company_cycle_fanout.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/collect_api_lane.R', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/fec_transfer_graph.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/finalize_crypto_excel.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/merge_company_shards.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/pac_cash_model.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/parallel/Invoke-MentatDirectReport.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/parallel/Invoke-MentatIndustryWorker.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/parallel/Start-MentatApiCompanyCycleFanout.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/parallel/Start-MentatIndustryReports.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/parallel/Start-MentatResilientIndustryReports.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mentat/tools/prepare_workbook_payload.py', LF will be replaced by CRLF the next time Git touches it
+ .../lanes/commit_20260914/PROGRESS.md              |   1 +
+ mentat/R/export_guards.R                           |  16 +
+ mentat/R/fec_beneficiary.R                         |  29 +-
+ mentat/R/fec_page.R                                |  12 +-
+ mentat/R/fec_transfer_graph.R                      |   9 +-
+ mentat/R/paths.R                                   |  31 +-
+ mentat/README.md                                   |  66 ++-
+ mentat/app/app.js                                  |  28 +-
+ mentat/app/desktop/Launcher.cs                     |  38 +-
+ mentat/app/graph.css                               |   2 +
+ mentat/app/graph_data.py                           |  71 ++-
+ mentat/app/index.html                              |   2 +-
+ mentat/app/report_insights.py                      |  68 ++-
+ mentat/app/server.py                               | 156 ++++++-
+ mentat/app/style.css                               |  22 +-
+ mentat/tests/Test-MentatNodeHeapPlan.ps1           |   9 +
+ mentat/tests/console_browser_fixture.py            |  42 +-
+ mentat/tests/test_api_company_cycle_fanout.py      | 147 +++++-
+ mentat/tests/test_chart_math.cjs                   | 116 ++++-
+ mentat/tests/test_collection_console.py            | 270 +++++++++++
+ mentat/tests/test_downstream_enrichment.py         |  46 ++
+ mentat/tests/test_export_progress_guards.R         |  17 +
+ mentat/tests/test_fec_api_fanout.R                 |  38 ++
+ mentat/tests/test_fec_beneficiary_helpers.R        |   6 +-
+ mentat/tests/test_fec_key_store.py                 |  15 +
+ mentat/tests/test_graph_data.py                    |  75 ++-
+ mentat/tests/test_merge_company_shards.py          |  89 ++++
+ mentat/tests/test_pac_cash_model.py                |  19 +
+ mentat/tests/test_report.R                         |  13 +-
+ mentat/tests/test_report_insights.py               |  86 ++++
+ mentat/tests/test_resilient_orchestrator.py        |  78 +++-
+ mentat/tests/test_sqlite_lane_locking.R            |   2 +-
+ mentat/tests/test_transfer_graph.py                | 141 +++++-
+ mentat/tests/test_validate_industry_coverage.py    |  28 ++
+ mentat/tests/test_workbook_payload.py              |  71 ++-
+ mentat/tools/api_company_cycle_fanout.py           | 516 ++++++++++++++++++---
+ mentat/tools/build_industry_report.ps1             |  77 ++-
+ mentat/tools/collect_api_lane.R                    |  61 ++-
+ mentat/tools/enrich_downstream.py                  |  25 +-
+ mentat/tools/fec_transfer_graph.py                 | 234 ++++++++--
+ mentat/tools/finalize_crypto_excel.ps1             |  24 +-
+ mentat/tools/merge_company_shards.py               | 263 ++++++++++-
+ mentat/tools/pac_cash_model.py                     |   4 +-
+ .../tools/parallel/Invoke-MentatDirectReport.ps1   |   5 +-
+ .../tools/parallel/Invoke-MentatIndustryWorker.ps1 |  10 +
+ .../parallel/Start-MentatApiCompanyCycleFanout.ps1 |  10 +-
+ .../tools/parallel/Start-MentatIndustryReports.ps1 |   6 +-
+ .../Start-MentatResilientIndustryReports.ps1       | 259 +++++++----
+ mentat/tools/prepare_workbook_payload.py           |  26 +-
+ 49 files changed, 3021 insertions(+), 358 deletions(-)

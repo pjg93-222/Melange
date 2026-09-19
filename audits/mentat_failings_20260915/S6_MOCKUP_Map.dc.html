@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: "Articulat CF", articulat-cf, Arial, sans-serif; color: #342649; background: #fcf7f4; }
+    a { color: #57447b; } a:hover { color: #342649; }
+    h1, h2 { font-family: "Freight Text Pro", freight-text-pro, Georgia, serif; font-weight: 400; letter-spacing: -0.35px; margin: 0; }
+    .muted { color: #716a64; font-size: 13px; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; background: #f7ede4; color: #342649; border: 1px solid #e4d9d0; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    button { font: inherit; cursor: pointer; border-radius: 4px; }
+    .secondary { background: white; color: #342649; border: 1px solid #b4a4bd; padding: 0 14px; min-height: 40px; }
+    .seg { display: inline-flex; border: 1px solid #b4a4bd; border-radius: 4px; overflow: hidden; }
+    .seg button { border: 0; background: white; color: #342649; min-height: 44px; padding: 0 18px; font-size: 14px; }
+    .seg button.on { background: #342649; color: white; }
+    select { font: inherit; border: 1px solid #e4d9d0; border-radius: 4px; padding: 8px 11px; font-size: 14px; color: #342649; background: white; min-height: 44px; }
+    .layer { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px; border: 1px solid #d6c8e2; border-radius: 18px; background: #f7f2fa; font-size: 13px; cursor: pointer; }
+    .layer.off { background: white; color: #716a64; border-style: dashed; }
+    .dot { width: 10px; height: 10px; border-radius: 5px; display: inline-block; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th { text-align: left; font-weight: 600; color: #526e84; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; padding: 8px 6px; border-bottom: 1px solid #e4d9d0; position: sticky; top: 0; background: white; }
+    td { padding: 6px 6px; border-bottom: 1px solid #f1e9e3; vertical-align: top; }
+    .support { color: #327a7a; font-weight: 600; }
+    .oppose { color: #bf3f36; font-weight: 600; }
+    .group td { background: #fbfaf9; font-weight: 600; color: #342649; }
+  </style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column;">
+  <div style="height: 64px; background: #342649; display: flex; align-items: center; gap: 32px; padding: 0 28px; box-sizing: border-box;">
+    <div style="color: #f7ede4; font-weight: 700; letter-spacing: 4px; font-size: 20px;">MENTAT</div>
+    <div style="color: #d6c8e2; font-size: 14px;">PAC evidence · Map</div>
+    <div style="margin-left: auto; color: #d6c8e2; font-size: 12px;">Local only · port 8806</div>
+  </div>
+  <div style="padding: 20px 28px 24px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1; box-sizing: border-box; min-height: 0;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px;">
+      <div>
+        <div class="muted" style="font-size: 12px; letter-spacing: 0.8px; text-transform: uppercase;">Crypto file + Coinbase snapshot</div>
+        <h1 style="font-size: 30px;">FAIRSHAKE <span class="badge" style="vertical-align: middle; font-size: 13px;">Super PAC</span> <span class="muted" style="font-size: 14px;">C00835959</span></h1>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <div class="seg"><button type="button">Raised · where it came from</button><button type="button" class="on">Spent · where it went</button></div>
+        <select aria-label="Cycle"><option>2023–2024</option><option>2025–2026</option><option>All cycles</option></select>
+        <button type="button" class="secondary">Back to panes</button>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <span class="muted">All spend, 2023–2024: <strong style="color: #342649;">$195,826,511</strong> as reported to the FEC · located $195,826,511 · unlocated $0</span>
+      <span class="layer"><span class="dot" style="background: #342649;"></span>Candidates · independent spending · $40,661,821</span>
+      <span class="layer"><span class="dot" style="background: #57447b;"></span>Transfers to committees · $86,250,000</span>
+      <span class="layer"><span class="dot" style="background: #8b6984;"></span>Operating · $5,413,951</span>
+      <span class="layer off"><span class="dot" style="background: #bcaea1;"></span>Asset conversions · $63,499,995 · off</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) 560px; gap: 20px; flex-grow: 1; min-height: 0;">
+      <section aria-label="Spend heatmap" style="background: white; border: 1px solid #e4d9d0; border-radius: 6px; padding: 18px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px;">
+          <h2 style="font-size: 22px;">Spend heatmap · by congressional district and state</h2>
+          <span class="muted">Hover for amount, share and kind · click to filter the rows</span>
+        </div>
+        <div style="flex-grow: 1; border: 1px dashed #b4a4bd; border-radius: 4px; background: #fbfaf9; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; min-height: 0;">
+          <div class="muted" style="max-width: 560px; font-size: 14px; line-height: 1.5;">[Heatmap on shipped district paths, 118th boundaries for 2023–2024. Candidate spending heats the district; Senate races, transfers and operating payments heat the state. Continuous ramp on a log scale so $10,000 and $10,000,000 both read; the legend below carries the real stops.]</div>
+        </div>
+        <div style="display: flex; gap: 14px; align-items: center; font-size: 13px;">
+          <span class="muted">Heat</span>
+          <div style="width: 360px; height: 12px; border-radius: 2px; background: linear-gradient(90deg, #f1e9e3, #d6c8e2, #8b6984, #57447b, #342649);"></div>
+          <span class="muted">$1,000 · $10,000 · $100,000 · $1,000,000 · $10,000,000+</span>
+          <span class="muted" style="margin-left: auto;">Support and oppose stay apart in the list and tooltip; the map heats the amount.</span>
+        </div>
+      </section>
+
+      <section aria-label="All spend, ranked" style="background: white; border: 1px solid #e4d9d0; border-radius: 6px; padding: 18px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;"><h2 style="font-size: 22px;">All spend, ranked</h2><span class="muted">259 filings + 84 expenditure rows</span></div>
+        <div style="overflow: auto; flex-grow: 1; min-height: 0;">
+          <table>
+            <thead><tr><th>Where</th><th>To</th><th>Kind</th><th class="num">Amount</th></tr></thead>
+            <tbody>
+              <tr class="group"><td colspan="3">Transfers to committees · $86,250,000 · by the committee's registered state</td><td class="num">44.0%</td></tr>
+              <tr><td><strong>VA</strong></td><td>Defend American Jobs</td><td>transfer</td><td class="num">$54,550,000</td></tr>
+              <tr><td><strong>FL</strong></td><td>Protect Progress</td><td>transfer</td><td class="num">$31,700,000</td></tr>
+              <tr class="group"><td colspan="3">Candidates · independent spending $40,661,821 · by the candidate's district</td><td class="num">20.8%</td></tr>
+              <tr><td><strong>CA · Senate</strong></td><td>Porter (D)</td><td class="oppose">oppose</td><td class="num">$10,041,119</td></tr>
+              <tr><td><strong>CA-45</strong></td><td>Steel (R)</td><td class="support">support</td><td class="num">$2,791,716</td></tr>
+              <tr><td><strong>CO-08</strong></td><td>Caraveo (D)</td><td class="support">support</td><td class="num">$2,270,929</td></tr>
+              <tr><td><strong>NY-16</strong></td><td>Bowman (D)</td><td class="oppose">oppose</td><td class="num">$2,078,023</td></tr>
+              <tr><td><strong>NY-18</strong></td><td>Ryan (D)</td><td class="support">support</td><td class="num">$1,987,660</td></tr>
+              <tr><td><strong>AK · at large</strong></td><td>Peltola (D)</td><td class="support">support</td><td class="num">$1,927,706</td></tr>
+              <tr><td><strong>CA-40</strong></td><td>Kim (R)</td><td class="support">support</td><td class="num">$1,924,213</td></tr>
+              <tr><td><strong>NV-04</strong></td><td>Horsford (D)</td><td class="support">support</td><td class="num">$1,836,196</td></tr>
+              <tr><td><strong>AZ-06</strong></td><td>Ciscomani (R)</td><td class="support">support</td><td class="num">$1,625,297</td></tr>
+              <tr><td><strong>OR-05</strong></td><td>Chavez-DeRemer (R)</td><td class="support">support</td><td class="num">$1,514,370</td></tr>
+              <tr><td><strong>MO-01</strong></td><td>Bush (D)</td><td class="oppose">oppose</td><td class="num">$1,406,523</td></tr>
+              <tr><td><strong>CA-22</strong></td><td>Valadao (R)</td><td class="support">support</td><td class="num">$1,306,863</td></tr>
+              <tr><td><strong>CA-27</strong></td><td>Garcia (R)</td><td class="support">support</td><td class="num">$1,012,931</td></tr>
+              <tr><td><strong>IA-03</strong></td><td>Nunn (R)</td><td class="support">support</td><td class="num">$999,284</td></tr>
+              <tr><td class="muted" colspan="3">14 more districts under $1M, then $2,280,606 on candidate ids the master does not carry, listed as unmatched</td><td class="num muted">…</td></tr>
+              <tr class="group"><td colspan="3">Operating · $5,413,951 · by the payee's state</td><td class="num">2.8%</td></tr>
+              <tr><td><strong>NY</strong></td><td>Potter, Phil and others</td><td>operating</td><td class="num">$1,179,080</td></tr>
+              <tr><td><strong>FL</strong></td><td>Schoen Survey Research and others</td><td>operating</td><td class="num">$1,130,736</td></tr>
+              <tr><td><strong>MD</strong></td><td>Targeted Platform Media</td><td>operating</td><td class="num">$837,073</td></tr>
+              <tr><td><strong>DE</strong></td><td>Dockside Strategies and others</td><td>operating</td><td class="num">$600,822</td></tr>
+              <tr><td><strong>AL</strong></td><td>Impact Research</td><td>operating</td><td class="num">$485,500</td></tr>
+              <tr><td><strong>ID</strong></td><td>[payees]</td><td>operating</td><td class="num">$401,900</td></tr>
+              <tr><td><strong>DC</strong></td><td>[payees]</td><td>operating</td><td class="num">$216,987</td></tr>
+              <tr><td class="muted" colspan="3">remaining operating payees under $200,000 each</td><td class="num muted">…</td></tr>
+              <tr class="group"><td colspan="3">Asset conversions · $63,499,995 · Coinbase (CA), in-kind bitcoin liquidation, filed as operating; off the heatmap by default, always in the total</td><td class="num">32.4%</td></tr>
+              <tr><td><strong>CA</strong></td><td>Coinbase</td><td>conversion</td><td class="num">$63,499,995</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="margin: 0;">Reconciles to the FEC summary: 40,661,821 + 86,250,000 + 5,413,951 + 63,499,995 = $195,826,511 reported disbursements. Raised: $161,474,209 Oakland CA-12 (Coinbase corporate) · $1,005,000 San Francisco CA-11 · $1,180 New York.</p>
+      </section>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

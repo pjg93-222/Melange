@@ -1,0 +1,20 @@
+UI1 foreign-lane state, recorded 2026-09-17T15:38:14-04:00
+
+Another session is rewriting the PAC evidence tab while this lane builds:
+  mentat/app/evidence.js  NEW, untracked, mtime 2026-09-17T15:33 - its header says it replaces evidence-csv.js
+  mentat/app/app.js       modified, mtime 2026-09-17T15:34
+  mentat/app/index.html   that lane also rewrote the #view-evidence markup ON TOP of this lane's
+                          #view-graph / #view-chart-studio work (387 -> 397 lines); both are present.
+
+Consequence for this lane's measurements: app.js:553 calls activateSavedEvidence(), which
+is defined nowhere in mentat/app (grep count in evidence.js: 0), so every page load throws
+  Uncaught ReferenceError: activateSavedEvidence is not defined
+This lane touched neither app.js nor evidence.js. Any browser suite that asserts an empty
+page-error list is red for that reason, not for a UI clean-up defect.
+
+grep -rn activateSavedEvidence mentat/app:
+mentat/app/app.js:553:activateSavedEvidence();
+
+git status --porcelain for the two files:
+ M mentat/app/app.js
+?? mentat/app/evidence.js

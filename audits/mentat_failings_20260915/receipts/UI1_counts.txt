@@ -1,0 +1,15 @@
+UI1 control counts. Selector: button, select, input, a[role=button], summary, visible only.
+
+=== before (2026-09-17T19:33:42.588Z) ===
+before graph-overview 1440x900: visible controls 23 (view height 1324px)
+before chart-studio 1440x900: visible controls 66 (#studio-canvas top 787px, #studio-title "Published included receipts by Company")
+before graph-overview 1280x800: visible controls 23 (view height 1261px)
+before chart-studio 1280x800: visible controls 66 (#studio-canvas top 805px, #studio-title "Published included receipts by Company")
+
+=== after (2026-09-17T19:34:45.919Z) ===
+after graph-overview 1440x900: visible controls 32 (view height 1328px)
+after chart-studio 1440x900: visible controls 47 (#studio-canvas top 613px, #studio-title "Published included receipts by Company")
+after page errors 1440x900: ["activateSavedEvidence is not defined"]
+after graph-overview 1280x800: visible controls 32 (view height 1263px)
+after chart-studio 1280x800: visible controls 47 (#studio-canvas top 645px, #studio-title "Published included receipts by Company")
+after page errors 1280x800: ["activateSavedEvidence is not defined"]

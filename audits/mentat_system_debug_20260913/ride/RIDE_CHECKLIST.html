@@ -1,0 +1,818 @@
+<title>Mentat Ride 1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Newsreader:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fcf7f4;
+    --panel: #f7ede4;
+    --text: #342649;
+    --panel-text: #342649;
+    --selected: #57447b;
+    --on-selected: #fcf7f4;
+    --gold: #eca91c;
+    --lilac: #d6c8e2;
+    --line: #e4d9d0;
+    --muted: #716a64;
+    --fail: #bf3f36;
+    --font-head: 'Newsreader', Georgia, serif;
+    --font-ui: 'Albert Sans', Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #221a30;
+      --text: #f7ede4;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #221a30;
+    --text: #f7ede4;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    line-height: 1.45;
+  }
+
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; }
+
+  :focus-visible { outline: 2px solid var(--selected); outline-offset: 2px; }
+
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 20px 16px 64px;
+  }
+
+  .hero { margin-bottom: 18px; }
+
+  .hero-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .hero-top h1 { font-size: 1.7rem; }
+
+  .sync-badge {
+    font-family: var(--font-ui);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--panel);
+    color: var(--panel-text);
+    border: 1px solid var(--line);
+    white-space: nowrap;
+  }
+
+  .sync-badge.badge-online { border-color: var(--selected); }
+  .sync-badge.badge-offline { color: var(--muted); }
+
+  .progress-line {
+    margin: 10px 0 0;
+    font-size: 0.95rem;
+    color: var(--text);
+    opacity: 0.75;
+  }
+
+  .panel {
+    background: var(--panel);
+    color: var(--panel-text);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .panel-title {
+    font-size: 1.05rem;
+    margin-bottom: 12px;
+  }
+
+  .meta-card { margin-bottom: 22px; }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  @media (min-width: 640px) {
+    .meta-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .meta-field { display: flex; flex-direction: column; gap: 6px; }
+
+  .meta-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .meta-field input {
+    min-height: 44px;
+    padding: 0 12px;
+    font-family: var(--font-ui);
+    font-size: 0.95rem;
+    color: var(--panel-text);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .fix-group-label {
+    margin: 26px 0 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    opacity: 0.55;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 6px;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  @media (min-width: 720px) {
+    .steps { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+    .fix-group-label { grid-column: 1 / -1; margin-top: 30px; }
+  }
+
+  .step-card { display: flex; flex-direction: column; gap: 10px; }
+
+  .step-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  .step-id {
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--panel-text);
+    min-width: 1.6em;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    line-height: 1.4;
+  }
+
+  .chip-fix { background: var(--lilac); color: var(--panel-text); }
+
+  .chip-priority { background: transparent; border: 1px solid var(--line); }
+  .chip-priority.chip-p1 { border-color: var(--gold); color: var(--panel-text); }
+  .chip-priority.chip-p2 { border-color: var(--line); color: var(--muted); }
+
+  .step-line { margin: 0; font-size: 0.92rem; }
+  .step-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+
+  .status-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .status-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 16px;
+    font-family: var(--font-ui);
+    font-size: 0.88rem;
+    font-weight: 600;
+    background: transparent;
+    color: var(--panel-text);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .status-btn:hover { border-color: var(--selected); }
+
+  .status-btn.selected {
+    background: var(--selected);
+    border-color: var(--selected);
+    color: var(--on-selected);
+  }
+
+  .status-btn.status-fail.selected {
+    background: transparent;
+    border-color: var(--fail);
+    color: var(--fail);
+  }
+
+  .step-note {
+    width: 100%;
+    min-height: 60px;
+    padding: 10px 12px;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    color: var(--panel-text);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    resize: vertical;
+  }
+
+  .screenshot-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .file-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--panel-text);
+    background: transparent;
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .file-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .upload-status { font-size: 0.78rem; color: var(--muted); }
+
+  .thumb-wrap:empty { display: none; }
+
+  .thumb {
+    max-width: 120px;
+    max-height: 90px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    display: block;
+  }
+
+  .step-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.76rem;
+    color: var(--muted);
+  }
+
+  .findings { margin-top: 30px; }
+
+  .findings-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .finding-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .finding-row:last-child { border-bottom: none; }
+
+  .finding-id { font-weight: 600; min-width: 1.8em; }
+
+  .finding-note { font-size: 0.9rem; }
+
+  .findings .empty { color: var(--muted); margin: 0; }
+
+  .actions-bar {
+    margin-top: 26px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    min-height: 44px;
+    padding: 0 20px;
+    font-family: var(--font-ui);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #342649;
+    background: var(--gold);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover { filter: brightness(0.96); }
+
+  .copy-status {
+    font-size: 0.85rem;
+    color: var(--text);
+    opacity: 0.75;
+  }
+</style>
+
+<div class="page">
+  <header class="hero">
+    <div class="hero-top">
+      <h1>Mentat Ride 1</h1>
+      <span class="sync-badge badge-offline" id="syncBadge">Checking sync…</span>
+    </div>
+    <p class="progress-line" id="progressLine">0 of 32 done · P1 passed 0/22</p>
+  </header>
+
+  <section class="meta-card panel" id="metaCard">
+    <h2 class="panel-title">Ride meta</h2>
+    <div class="meta-grid">
+      <label class="meta-field">
+        <span class="meta-label">Port</span>
+        <input type="text" id="metaPort" data-field="port" placeholder="8802">
+      </label>
+      <label class="meta-field">
+        <span class="meta-label">Server sha7</span>
+        <input type="text" id="metaSha" data-field="sha7" placeholder="a1b2c3d">
+      </label>
+      <label class="meta-field">
+        <span class="meta-label">Started by</span>
+        <input type="text" id="metaBy" data-field="startedBy" placeholder="Paul">
+      </label>
+      <label class="meta-field">
+        <span class="meta-label">Started at</span>
+        <input type="text" id="metaAt" data-field="startedAt" placeholder="2026-09-14 09:00">
+      </label>
+    </div>
+  </section>
+
+  <main class="steps" id="stepsContainer"></main>
+
+  <section class="findings panel" id="findingsSection">
+    <h2 class="panel-title">Findings</h2>
+    <div id="findingsList" class="findings-list"><p class="empty">No fails yet.</p></div>
+  </section>
+
+  <div class="actions-bar">
+    <button type="button" id="copyResultsBtn" class="btn-primary">Copy results</button>
+    <span id="copyStatus" class="copy-status" role="status" aria-live="polite"></span>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Data: the 32 ride steps (static content) ---------- */
+  var STEPS = [
+    {id:"01", fix:"PRE", priority:"P1", path:`Address bar`, expected:`URL port equals the launcher's port; /api/health server_code_sha256 equals the on-disk server.py hash`},
+    {id:"02", fix:"PRE", priority:"P1", path:`Ctrl+Shift+R on #chart-studio`, expected:`Header "Chart Studio", chip "Banking · All cycles", Builder | Canvas only, Inspector tabs Marks/Analytics/Filters; no console errors`},
+    {id:"03", fix:"PRE", priority:"P1", path:`DevTools Network, filter query, reload`, expected:`Single-digit POST /api/contributions/query; status ends "N verified queries this session"`},
+    {id:"04", fix:"F1", priority:"P1", path:`Read the status bar`, expected:`Ends with "build <sha7> · :<port> · started HH:MM · pid n" matching /api/health`},
+    {id:"05", fix:"F1", priority:"P2", path:`Open a second tab to the same port`, expected:`No stale banner; both tabs show the same stamp`},
+    {id:"06", fix:"F1", priority:"P1", path:`Coordinator starts an older server.py copy on 8816; open that tab`, expected:`Gold banner "This console is running an older build…" with Restart; launcher replaces an idle stale server on the same port`},
+    {id:"07", fix:"F2", priority:"P1", path:`Data panel: single-click Company`, expected:`Company lands on Columns; chart draws; status "Added Company to Columns"; Undo removes it`},
+    {id:"08", fix:"F2", priority:"P1", path:`Hover a field pill`, expected:`Small purple "+" and tooltip "Click to add · drag to place · Enter for actions"`},
+    {id:"09", fix:"F2", priority:"P1", path:`Single-click Selected amount`, expected:`SUM(Selected amount) lands on Rows; title "Published included receipts by Company"`},
+    {id:"10", fix:"F2", priority:"P1", path:`Tab to Election cycle, Enter, "Add to Columns"`, expected:`Same result as the mouse path`},
+    {id:"11", fix:"F3", priority:"P1", path:`Look at the left panel on a fresh load`, expected:`Data source disclosure open; after the first load it collapses to "Data source · Banking · Published included receipts · ready"`},
+    {id:"12", fix:"F3", priority:"P1", path:`Open Data source, Report select`, expected:`Unavailable datasets listed disabled with the server's reason under the select and as the option title`},
+    {id:"13", fix:"F3", priority:"P1", path:`Click Refresh verified data`, expected:`Progress row "Preparing verified data · … · m:ss elapsed" with Cancel; Cancel keeps the previous view`},
+    {id:"14", fix:"F3", priority:"P2", path:`Header "Data source" button`, expected:`Disclosure opens and takes focus, from any state`},
+    {id:"15", fix:"F4", priority:"P1", path:`Graph tab: Banking, All companies, All cycles; note "Net giving in selected scope"`, expected:`Value recorded in the note (Scope A)`},
+    {id:"16", fix:"F4", priority:"P1", path:`Graph: Open in Chart Studio`, expected:`Chip "Carried from Graph · Banking · All cycles"; strip "Graph shows $X … Studio total $X. Agree." to the cent`},
+    {id:"17", fix:"F4", priority:"P1", path:`Graph: cycle 2025-2026 + first company, Open in Chart Studio`, expected:`Chip with company and cycle; chart draws (no "No matching observations"); strip agrees to the cent`},
+    {id:"18", fix:"F4", priority:"P1", path:`Strip link "Why Cross-reference differs"`, expected:`Opens Cross-reference; caption explains the money stage; cycles shown beside every dollar figure`},
+    {id:"19", fix:"F4", priority:"P2", path:`Cross-reference review table`, expected:`Reasons in plain words (no snake_case); "counted at $0" rows marked`},
+    {id:"20", fix:"F5", priority:"P2", path:`Read studio notes and errors during the ride`, expected:`No "contribution explorer"; default empty state names the verified report; refusal reasons in plain words`},
+    {id:"21", fix:"F5", priority:"P2", path:`Drop a field on Filters`, expected:`Pill reads "<field>: any value"; chart unchanged`},
+    {id:"22", fix:"F6", priority:"P1", path:`Header: Canvas only`, expected:`Data panel, shelves, toolbar, Inspector gone; header keeps Builder | Canvas only and Export`},
+    {id:"23", fix:"F6", priority:"P1", path:`In Canvas only: Export, Image (PNG)`, expected:`File downloads with title and scope caption`},
+    {id:"24", fix:"F6", priority:"P1", path:`Narrow the window under 1200px; Inspector toggle`, expected:`Toggle visible with filter-count badge; drawer opens; Builder restores all`},
+    {id:"25", fix:"E1", priority:"P2", path:`Export, Copy image`, expected:`Paste into Word or Teams shows the chart with caption`},
+    {id:"26", fix:"E2", priority:"P2", path:`Export, Print chart`, expected:`Print preview: chart, title, scope, basis, source SHA, one page, no navigation rail`},
+    {id:"27", fix:"E4", priority:"P1", path:`Add to briefing on two different sheets`, expected:`Badge "2"; drawer lists both with title, scope, basis, time`},
+    {id:"28", fix:"E4", priority:"P2", path:`Drawer: Remove one, reorder`, expected:`List updates; order persists after reload`},
+    {id:"29", fix:"E3", priority:"P1", path:`Drawer: Export PowerPoint`, expected:`.pptx opens in PowerPoint; one slide per item; caption and provenance footer`},
+    {id:"30", fix:"E5", priority:"P2", path:`Save view "Ride B"; reload; Open view`, expected:`View restored from the server; visible on the mirror console too`},
+    {id:"31", fix:"E6", priority:"P2", path:`Drawer: Share bundle / Publish phone snapshot`, expected:`Single HTML file written; opens on the phone with the same numbers as step 17`},
+    {id:"32", fix:"WRAP", priority:"P1", path:`2 charts, then 1 chart`, expected:`Chart A/B chips; pane B renders; no "refused to connect"; back to one pane`}
+  ];
+
+  /* ---------- State + local persistence (works with no db) ---------- */
+  var LS_META_KEY = "mentatRide1.meta";
+  var LS_STEPS_KEY = "mentatRide1.steps";
+
+  var state = {
+    meta: { port: "", sha7: "", startedBy: "", startedAt: "" },
+    steps: {}
+  };
+
+  var db = null;
+  var assets = null;
+
+  function loadLocal() {
+    try {
+      var m = JSON.parse(localStorage.getItem(LS_META_KEY) || "null");
+      if (m) { state.meta = Object.assign(state.meta, m); }
+    } catch (e) { /* ignore: private mode, blocked storage, bad JSON */ }
+    try {
+      var s = JSON.parse(localStorage.getItem(LS_STEPS_KEY) || "null");
+      if (s) { state.steps = Object.assign(state.steps, s); }
+    } catch (e) { /* ignore */ }
+  }
+
+  function saveLocalMeta() {
+    try { localStorage.setItem(LS_META_KEY, JSON.stringify(state.meta)); } catch (e) { /* ignore */ }
+  }
+
+  function saveLocalSteps() {
+    try { localStorage.setItem(LS_STEPS_KEY, JSON.stringify(state.steps)); } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- Small helpers ---------- */
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[ch];
+    });
+  }
+
+  function formatTime(iso) {
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) { return ""; }
+      return d.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    } catch (e) { return ""; }
+  }
+
+  function blankStep() {
+    return { status: null, note: "", at: null, by: "", screenshot_asset_id: null };
+  }
+
+  /* ---------- Rendering: skeleton (built once) ---------- */
+  function stepCardTemplate(s) {
+    var priorityClass = s.priority === "P1" ? "chip-p1" : "chip-p2";
+    return "" +
+      '<article class="step-card panel" data-id="' + s.id + '">' +
+        '<div class="step-head">' +
+          '<span class="step-id">' + s.id + "</span>" +
+          '<span class="chip chip-fix">' + s.fix + "</span>" +
+          '<span class="chip chip-priority ' + priorityClass + '">' + s.priority + "</span>" +
+        "</div>" +
+        '<p class="step-line"><span class="step-label">Click path</span>' + escapeHtml(s.path) + "</p>" +
+        '<p class="step-line"><span class="step-label">Expected</span>' + escapeHtml(s.expected) + "</p>" +
+        '<div class="status-buttons" role="group" aria-label="Status for step ' + s.id + '">' +
+          '<button type="button" class="status-btn status-pass" data-status="pass" aria-pressed="false">Pass</button>' +
+          '<button type="button" class="status-btn status-fail" data-status="fail" aria-pressed="false">Fail</button>' +
+          '<button type="button" class="status-btn status-skip" data-status="skip" aria-pressed="false">Skip</button>' +
+        "</div>" +
+        '<textarea class="step-note" placeholder="Notes…" aria-label="Notes for step ' + s.id + '"></textarea>' +
+        '<div class="screenshot-row">' +
+          '<label class="file-btn">Add screenshot<input type="file" accept="image/*" class="screenshot-input" hidden></label>' +
+          '<span class="upload-status"></span>' +
+          '<div class="thumb-wrap"></div>' +
+        "</div>" +
+        '<div class="step-footer"><span class="step-by"></span><span class="step-time"></span></div>' +
+      "</article>";
+  }
+
+  function renderSkeletonSteps() {
+    var html = "";
+    var lastFix = null;
+    for (var i = 0; i < STEPS.length; i++) {
+      var s = STEPS[i];
+      if (s.fix !== lastFix) {
+        html += '<h2 class="fix-group-label">' + s.fix + "</h2>";
+        lastFix = s.fix;
+      }
+      html += stepCardTemplate(s);
+    }
+    document.getElementById("stepsContainer").innerHTML = html;
+  }
+
+  /* ---------- Rendering: hydrate dynamic bits from state ---------- */
+  function hydrateMeta() {
+    document.getElementById("metaPort").value = state.meta.port || "";
+    document.getElementById("metaSha").value = state.meta.sha7 || "";
+    document.getElementById("metaBy").value = state.meta.startedBy || "";
+    document.getElementById("metaAt").value = state.meta.startedAt || "";
+  }
+
+  function hydrateStep(id) {
+    var card = document.querySelector('.step-card[data-id="' + id + '"]');
+    if (!card) { return; }
+    var st = state.steps[id] || blankStep();
+
+    var btns = card.querySelectorAll(".status-btn");
+    for (var i = 0; i < btns.length; i++) {
+      var btn = btns[i];
+      var isSel = btn.getAttribute("data-status") === st.status;
+      btn.classList.toggle("selected", isSel);
+      btn.setAttribute("aria-pressed", isSel ? "true" : "false");
+    }
+
+    var noteEl = card.querySelector(".step-note");
+    if (noteEl && document.activeElement !== noteEl) {
+      noteEl.value = st.note || "";
+    }
+
+    var byEl = card.querySelector(".step-by");
+    var timeEl = card.querySelector(".step-time");
+    byEl.textContent = st.by ? "by " + st.by : "";
+    timeEl.textContent = st.at ? formatTime(st.at) : "";
+
+    var thumbWrap = card.querySelector(".thumb-wrap");
+    if (st.screenshot_asset_id) {
+      thumbWrap.innerHTML = '<img class="thumb" src="/_blob/' + st.screenshot_asset_id + '" alt="Screenshot for step ' + id + '">';
+    } else {
+      thumbWrap.innerHTML = "";
+    }
+  }
+
+  function hydrateAllSteps() {
+    for (var i = 0; i < STEPS.length; i++) { hydrateStep(STEPS[i].id); }
+  }
+
+  function updateProgress() {
+    var total = STEPS.length;
+    var done = 0, p1total = 0, p1pass = 0;
+    for (var i = 0; i < STEPS.length; i++) {
+      var s = STEPS[i];
+      var st = (state.steps[s.id] || {}).status;
+      if (st) { done++; }
+      if (s.priority === "P1") {
+        p1total++;
+        if (st === "pass") { p1pass++; }
+      }
+    }
+    document.getElementById("progressLine").textContent =
+      done + " of " + total + " done · P1 passed " + p1pass + "/" + p1total;
+  }
+
+  function renderFindings() {
+    var fails = STEPS.filter(function (s) {
+      return (state.steps[s.id] || {}).status === "fail";
+    });
+    var list = document.getElementById("findingsList");
+    if (!fails.length) {
+      list.innerHTML = '<p class="empty">No fails yet.</p>';
+      return;
+    }
+    list.innerHTML = fails.map(function (s) {
+      var st = state.steps[s.id] || {};
+      var note = (st.note || "").trim();
+      return '<div class="finding-row">' +
+        '<span class="chip chip-fix">' + s.fix + "</span>" +
+        '<span class="finding-id">' + s.id + "</span>" +
+        '<span class="finding-note">' + (note ? escapeHtml(note) : "No note recorded.") + "</span>" +
+        "</div>";
+    }).join("");
+  }
+
+  function updateSyncBadge() {
+    var el = document.getElementById("syncBadge");
+    if (!el) { return; }
+    if (db) {
+      el.textContent = "Synced live";
+      el.classList.remove("badge-offline");
+      el.classList.add("badge-online");
+    } else {
+      el.textContent = "Not synced — saved locally only";
+      el.classList.remove("badge-online");
+      el.classList.add("badge-offline");
+    }
+  }
+
+  function updateScreenshotAffordance() {
+    var disabled = !assets;
+    var inputs = document.querySelectorAll(".screenshot-input");
+    for (var i = 0; i < inputs.length; i++) { inputs[i].disabled = disabled; }
+    var btns = document.querySelectorAll(".file-btn");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.toggle("disabled", disabled);
+    }
+    var statuses = document.querySelectorAll(".upload-status");
+    for (var k = 0; k < statuses.length; k++) {
+      if (disabled) {
+        if (!statuses[k].textContent) { statuses[k].textContent = "Screenshots need sync"; }
+      } else if (statuses[k].textContent === "Screenshots need sync") {
+        statuses[k].textContent = "";
+      }
+    }
+  }
+
+  /* ---------- Writes (optimistic local + best-effort db) ---------- */
+  function writeMetaField(field, value) {
+    state.meta[field] = value;
+    saveLocalMeta();
+    if (db) {
+      db.doc("rides/ride1/meta/info").set(Object.assign({}, state.meta)).catch(function (e) {
+        console.error("meta write failed", e);
+      });
+    }
+  }
+
+  function writeStep(id, patch) {
+    var prev = state.steps[id] || blankStep();
+    var entry = Object.assign({}, prev, patch, {
+      at: new Date().toISOString(),
+      by: state.meta.startedBy || prev.by || ""
+    });
+    state.steps[id] = entry;
+    saveLocalSteps();
+    hydrateStep(id);
+    updateProgress();
+    renderFindings();
+    if (db) {
+      db.doc("rides/ride1/steps/" + id).set(entry).catch(function (e) {
+        console.error("step write failed for " + id, e);
+      });
+    }
+  }
+
+  function handleScreenshot(id, file) {
+    var row = document.querySelector('.step-card[data-id="' + id + '"] .upload-status');
+    if (!assets) {
+      if (row) { row.textContent = "Screenshots need sync"; }
+      return;
+    }
+    if (row) { row.textContent = "Uploading…"; }
+    assets.upload(file).then(function (result) {
+      var thumbWrap = document.querySelector('.step-card[data-id="' + id + '"] .thumb-wrap');
+      if (thumbWrap) {
+        thumbWrap.innerHTML = '<img class="thumb" src="' + result.url + '" alt="Screenshot for step ' + id + '">';
+      }
+      if (row) { row.textContent = ""; }
+      writeStep(id, { screenshot_asset_id: result.id });
+    }).catch(function (e) {
+      console.error("screenshot upload failed", e);
+      if (row) { row.textContent = "Upload failed"; }
+    });
+  }
+
+  /* ---------- Realtime sync (design for db === null) ---------- */
+  function attachDbSync() {
+    db.doc("rides/ride1/meta/info").onSnapshot(function (snap) {
+      if (snap.exists) {
+        var data = snap.data() || {};
+        state.meta = Object.assign({}, state.meta, data);
+        saveLocalMeta();
+        if (document.activeElement === null || document.activeElement.closest("#metaCard") !== document.activeElement) {
+          hydrateMeta();
+        }
+      }
+    }, function (err) {
+      console.error("meta snapshot error", err);
+    });
+
+    db.collection("rides/ride1/steps").onSnapshot(function (snap) {
+      snap.docs.forEach(function (doc) {
+        if (doc.exists) { state.steps[doc.id] = doc.data(); }
+      });
+      saveLocalSteps();
+      hydrateAllSteps();
+      updateProgress();
+      renderFindings();
+    }, function (err) {
+      console.error("steps snapshot error", err);
+    });
+  }
+
+  /* ---------- Copy results (no-db fallback) ---------- */
+  function copyResults() {
+    var lines = STEPS.map(function (s) {
+      var st = state.steps[s.id] || {};
+      var note = (st.note || "").replace(/\n/g, " ").trim();
+      return s.id + " | " + (st.status || "") + " | " + note;
+    });
+    var text = lines.join("\n");
+    var statusEl = document.getElementById("copyStatus");
+
+    function showCopied() {
+      statusEl.textContent = "Copied";
+      setTimeout(function () { statusEl.textContent = ""; }, 2500);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(showCopied).catch(function () {
+        fallbackCopy(text, statusEl, showCopied);
+      });
+    } else {
+      fallbackCopy(text, statusEl, showCopied);
+    }
+  }
+
+  function fallbackCopy(text, statusEl, onOk) {
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      onOk();
+    } catch (e) {
+      statusEl.textContent = "Copy failed — select manually";
+    }
+  }
+
+  /* ---------- Events ---------- */
+  function wireEvents() {
+    var stepsContainer = document.getElementById("stepsContainer");
+
+    stepsContainer.addEventListener("click", function (e) {
+      var btn = e.target.closest(".status-btn");
+      if (!btn) { return; }
+      var card = btn.closest(".step-card");
+      writeStep(card.getAttribute("data-id"), { status: btn.getAttribute("data-status") });
+    });
+
+    stepsContainer.addEventListener("focusout", function (e) {
+      if (e.target.classList && e.target.classList.contains("step-note")) {
+        var card = e.target.closest(".step-card");
+        writeStep(card.getAttribute("data-id"), { note: e.target.value });
+      }
+    });
+
+    stepsContainer.addEventListener("change", function (e) {
+      if (e.target.classList && e.target.classList.contains("screenshot-input")) {
+        var card = e.target.closest(".step-card");
+        var file = e.target.files && e.target.files[0];
+        if (file) { handleScreenshot(card.getAttribute("data-id"), file); }
+      }
+    });
+
+    var metaCard = document.getElementById("metaCard");
+    metaCard.addEventListener("focusout", function (e) {
+      if (e.target.tagName === "INPUT") {
+        var field = e.target.getAttribute("data-field");
+        if (field) { writeMetaField(field, e.target.value); }
+      }
+    });
+
+    document.getElementById("copyResultsBtn").addEventListener("click", copyResults);
+  }
+
+  /* ---------- Capability resolution (after first paint; null-safe) ---------- */
+  function resolveCapabilities() {
+    var hasClaude = typeof window.claude === "object" && window.claude && typeof window.claude.use === "function";
+
+    var dbPromise = hasClaude ? window.claude.use("db") : Promise.resolve(null);
+    dbPromise.then(function (ns) {
+      db = ns || null;
+      updateSyncBadge();
+      if (db) { attachDbSync(); }
+    }).catch(function (e) {
+      console.error("db capability resolution failed", e);
+      db = null;
+      updateSyncBadge();
+    });
+
+    var assetsPromise = hasClaude ? window.claude.use("assets") : Promise.resolve(null);
+    assetsPromise.then(function (ns) {
+      assets = ns || null;
+      updateScreenshotAffordance();
+    }).catch(function (e) {
+      console.error("assets capability resolution failed", e);
+      assets = null;
+      updateScreenshotAffordance();
+    });
+  }
+
+  /* ---------- Init: render synchronously first, resolve capabilities after ---------- */
+  function init() {
+    loadLocal();
+    renderSkeletonSteps();
+    hydrateMeta();
+    hydrateAllSteps();
+    updateProgress();
+    renderFindings();
+    updateSyncBadge();
+    updateScreenshotAffordance();
+    wireEvents();
+    resolveCapabilities();
+  }
+
+  init();
+})();
+</script>

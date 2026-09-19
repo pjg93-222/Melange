@@ -1,0 +1,100 @@
+        self.assertEqual(self.request("/../server.py")[0], 404)
+
+    def test_health_states_the_build_this_process_loaded_beside_the_one_on_disk(self):
+        status, _, body = self.request('/api/health')
+        self.assertEqual(status, 200)
+        for field in ('git_sha', 'code_sha256', 'assets_sha256', 'on_disk_code_sha256_now',
+                      'on_disk_assets_sha256_now', 'started_at', 'port', 'pid', 'busy',
+                      'server_code_sha256', 'read_only'):
+            with self.subTest(field=field):
+                self.assertIn(field, body)
+        self.assertEqual(body['code_sha256'], app.CODE_TREE_SHA256)
+        self.assertEqual(body['assets_sha256'], app.ASSET_TREE_SHA256)
+        # Nothing was edited between import and this request.
+        self.assertEqual(body['on_disk_code_sha256_now'], body['code_sha256'])
+        self.assertEqual(body['on_disk_assets_sha256_now'], body['assets_sha256'])
+        self.assertNotEqual(body['code_sha256'], body['server_code_sha256'],
+                            'the tree hash must not collapse to the old single-file hash')
+        self.assertEqual((body['pid'], body['port']), (os.getpid(), self.server.server_port))
+        self.assertIs(body['busy'], False)
+        self.assertGreater(body['started_at'], 0)
+        _, _, light = self.request('/api/session?light=1')
+        self.assertEqual(light['code_sha256'], app.CODE_TREE_SHA256)
+        self.assertEqual(light['build']['code_sha256'], app.CODE_TREE_SHA256)
+        self.assertEqual(light['build']['pid'], os.getpid())
+
+    def test_the_code_hash_covers_every_python_module_beside_the_server(self):
+        directory = Path(app.__file__).resolve().parent
+        names = sorted(path.name for path in directory.glob('*.py'))
+        self.assertIn('server.py', names)
+        self.assertIn('contribution_query.py', names)
+        self.assertEqual([path.name for path in app.code_files()], names)
+        self.assertIn(directory / 'index.html', app.asset_files())
+        self.assertIn(directory / 'chart-studio.js', app.asset_files())
+
+    def test_restart_is_refused_read_only_and_while_the_console_is_busy(self):
+        status, _, body = self.request('/api/restart', method='POST', data={})
+        self.assertEqual(status, 403)
+        self.assertIn('read-only', body['error'])
+        self.console.read_only = False
+        self.console.busy = lambda: True
+        self.addCleanup(self.console.__dict__.pop, 'busy', None)
+        with patch.object(app.subprocess, 'Popen') as spawn:
+            status, _, body = self.request('/api/restart', method='POST', data={})
+        self.assertEqual(status, 409)
+        self.assertIn('collection work', body['error'])
+        spawn.assert_not_called()
+        self.console.busy = lambda: False
+        self.console.restart = lambda port: {'restarting': True, 'port': port}
+        self.addCleanup(self.console.__dict__.pop, 'restart', None)
+        status, _, body = self.request('/api/restart', method='POST', data={})
+        self.assertEqual((status, body), (200, {'restarting': True, 'port': self.server.server_port}))
+
+    def test_a_console_that_cannot_answer_busy_is_reported_busy(self):
+        def unavailable():
+            raise RuntimeError('collection state unreadable')
+        self.console.read_only = False
+        self.console.busy = unavailable
+        self.addCleanup(self.console.__dict__.pop, 'busy', None)
+        status, _, body = self.request('/api/restart', method='POST', data={})
+        self.assertEqual(status, 409)
+        _, _, health = self.request('/api/health')
+        self.assertIs(health['busy'], True)
+
+    def test_restart_hands_the_launcher_this_console_port_and_data_root(self):
+        console = SimpleNamespace(configured_root='C:\\Mentat data', keys_file='', rscript='C:/R/Rscript.exe')
+        with patch.object(app.subprocess, 'Popen') as spawn:
+            answer = app.Console.restart(console, 8802)
+        self.assertEqual(answer, {'restarting': True, 'port': 8802, 'pid': os.getpid()})
+        command = spawn.call_args.args[0]
+        self.assertTrue(command[0].lower().endswith('powershell.exe'), command[0])
+        self.assertTrue(command[command.index('-File') + 1].endswith('Start-MentatApp.ps1'))
+        self.assertIn('-NoBrowser', command)
+        self.assertEqual(command[command.index('-Port') + 1], '8802')
+        # Identity is project path plus data root: dropping it would open a
+        # second console on another port instead of replacing this one.
+        self.assertEqual(command[command.index('-DataRoot') + 1], console.configured_root)
+        self.assertEqual(command[command.index('-RScriptPath') + 1], console.rscript)
+        self.assertNotIn('-KeysFile', command)
+        self.assertEqual(spawn.call_args.kwargs['cwd'], str(app.PROJECT))
+        if os.name == 'nt':
+            flags = spawn.call_args.kwargs['creationflags']
+            self.assertTrue(flags & app.subprocess.DETACHED_PROCESS)
+            self.assertTrue(flags & app.subprocess.CREATE_NEW_PROCESS_GROUP)
+
+    def test_busy_reports_console_owned_work_only(self):
+        console = SimpleNamespace(preparing=set(), jobs=set(), processes={})
+        self.assertFalse(app.Console.busy(console))
+        console.jobs.add('snapshot-1')
+        self.assertTrue(app.Console.busy(console))
+        console.jobs.clear()
+        console.preparing.add('upload-1')
+        self.assertTrue(app.Console.busy(console))
+        console.preparing.clear()
+        console.processes['run-1'] = SimpleNamespace(poll=lambda: None)
+        self.assertTrue(app.Console.busy(console))
+        console.processes['run-1'] = SimpleNamespace(poll=lambda: 0)
+        self.assertFalse(app.Console.busy(console))
+
+
+if __name__ == "__main__": unittest.main()

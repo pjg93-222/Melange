@@ -1,0 +1,62 @@
+=== test_ui_cleanup_browser ===
+PASS step 6 - title "Published included receipts by Company", subtitle "Banking · All cycles · published included receipts"
+STEP 7: the chart starts above the fold at 1440 by 900, and the Fit select is at its intrinsic width
+PASS step 7 - #studio-canvas top 613px, Fit select 119px, grid 280px 610px 280px
+STEP 8: one "Add to briefing", one "Company overview", and Views carries Save and Open view
+PASS step 8 - Add to briefing ["studio-briefing-add"], view modes ["studio-view-builder","studio-overview-toggle","studio-view-canvas"]
+STEP 9: the Inspector column is the single scroll container on the Marks pane
+PASS step 9 - Inspector scroll containers: ["studio-inspector"]
+STEP 10: Show Me is one block in the DOM, opened in the Inspector by the toolbar button
+PASS step 10 - Show Me: 24 tiles, one block, hint " · suggested: Horizontal bars"
+STEP 11: the Data source disclosure stays open and reads as a chip line with a ready mark
+PASS step 11 - source chips ["Banking","Published included receipts","✓ Ready"], header chips ["Banking","All cycles"]
+STEP 12: page errors raised by the views this pass owns
+PASS step 12 - no page error from Graph or Chart Studio (0 foreign error(s) ignored)
+RESULT: 12/12 steps passed, exit 0
+exit 0
+=== test_navigation_scope_browser ===
+STEP 8: save a view: its id lands in the URL, and that permalink opens it on a fresh page
+PASS step 8 - saved=b209aa523cff48eab70125a61da17507; the permalink page reported "Opened view "Scope test"." carrying [["company","Fixture Bank"],["cycle","2023-2024"]]; sheet tabs ["Sheet 1"]
+STEP 9: negative control: a permalink with mode=pac opens Graph on direct and reports nothing to the console
+PASS step 9 - /?industry=Banking&mode=pac#graph opened Graph on mode=direct with no page error
+STEP 10: ruling A(ii): the Candidate view select is visible once a report is chosen
+PASS step 10 - #graph-candidate-controls visible on the overview tab, offering "Downstream PAC activity"
+STEP 11: a permalink that names a cycle is not overridden by latest=1
+PASS step 11 - request /api/graph?id=published-reports&industry=Banking&company=&tier=&cycle=2022&funding=all&mode=direct&direction=Support&category=&recipient=, select 2022, URL keeps cycle=2022
+STEP 12: the first edit after opening a saved view drops saved= so a reload cannot overwrite the edit
+PASS step 12 - edit dropped saved=, survived a reload, and the permalink still re-opens the view
+STEP 13: an industry with no cross-reference run says so, rather than "Latest run"
+PASS step 13 - status "No cross-reference run for Banking · Saved evidence refreshed. This page is read-only."
+ALL 13 STEPS PASSED
+browser.close() exceeded its 20000ms bound
+exit 0
+=== test_studio_industry_browser ===
+        "splitMulti": false
+      },
+      "sort": "none",
+      "showLabels": false,
+      "fit": "standard"
+    }
+  ],
+  "active": 0
+}
+PASS step 9 - both on-disk view files are valid JSON and printed above verbatim
+STEP 10: final check: zero pageerror entries
+PASS step 10 - zero pageerror entries across the whole run
+ALL 10 STEPS PASSED
+browser.close() exceeded its 10000ms bound
+exit 0
+=== test_console_browser ===
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+'' !== 'csv'
+
+    at C:\Users\pgoff\Mentat\mentat\tests\test_console_browser.cjs:86:12 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '',
+  expected: 'csv',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+exit 0
