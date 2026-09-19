@@ -2,12 +2,81 @@ from copy import deepcopy
 from pathlib import Path
 import sys
 import unittest
+import json
+import os
+import shutil
+import subprocess
+import tempfile
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
-from prepare_workbook_payload import project, RAW_FIELDS
+from prepare_workbook_payload import project, RAW_FIELDS, write_parts
+from fec_transfer_graph import atomic_json
 
 
 class WorkbookProjectionTests(unittest.TestCase):
+    def test_projection_retains_destination_lineage_and_both_complete_partitions(self):
+        raw={'source_id':'1','recipient_state':'DC','represented_state':'VA',
+             'recipient_location_status':'known','represented_location_status':'known',
+             'recipient_location_evidence':'cm24','represented_location_evidence':'ccl24; cn24'}
+        states=[{'location_view':'recipient_state','destination':'DC','net_amount':100},
+                {'location_view':'represented_state','destination':'VA','net_amount':100}]
+        payload={'metadata':{'destination_schema':1},'raw_rows':[raw],
+                 'state_destinations':states,'recipient_locations':[dict(raw)]}
+        result=project(deepcopy(payload))
+        self.assertEqual(result['raw_rows'],[raw])
+        self.assertEqual(result['state_destinations'],states)
+        self.assertEqual(result['recipient_locations'],[raw])
+
+    @unittest.skipUnless(os.name == 'nt', 'Windows PowerShell quoting regression')
+    def test_powershell_large_json_validation(self):
+        tools = Path(__file__).resolve().parents[1]/'tools'
+        with tempfile.TemporaryDirectory(prefix='report json ') as directory:
+            root = Path(directory)
+            (root/'valid.json').write_text('{"company":"Unicode café"}',encoding='utf-8')
+            (root/'invalid.json').write_text('{"company":')
+            script = root/'validate.ps1'
+            script.write_text('''param($toolsPath,$runtime,$fixture)
+$scriptRoot=$toolsPath
+$PythonPath=$runtime
+$source=Get-Content -Raw -LiteralPath (Join-Path $toolsPath 'build_industry_report.ps1')
+$ast=[System.Management.Automation.Language.Parser]::ParseInput($source,[ref]$null,[ref]$null)
+$function=$ast.Find({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Test-JsonFile'},$true)
+Invoke-Expression ($function.Extent.Text.Replace('480MB','1'))
+if (-not (Test-JsonFile (Join-Path $fixture 'valid.json'))) {throw 'Valid JSON rejected'}
+if (Test-JsonFile (Join-Path $fixture 'invalid.json')) {throw 'Invalid JSON accepted'}
+''')
+            result = subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(script),
+                str(tools),sys.executable,str(root)],capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_chunk_reader_preserves_every_value_and_rejects_corruption(self):
+        node = os.environ.get('MENTAT_NODE_PATH') or shutil.which('node')
+        if not node:
+            self.skipTest('Node runtime required')
+        module = (Path(__file__).resolve().parents[1]/'tools/read_report_payload.mjs').as_uri()
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory)/'report.json'
+            payload = {'metadata': {'label': 'Unicode café, escaped "quote"'},
+                       'rows': [{'id':str(10**20+i),'amount':-1.25} for i in range(7)],
+                       'empty': [], 'nil': None, 'nested': [[1,2],[True,False]]}
+            atomic_json(source, payload)
+            write_parts(source, payload, rows_per_part=2)
+            script = Path(directory)/'read.mjs'
+            script.write_text('import {readReportPayload} from '+json.dumps(module)+';\n'
+                              'console.log(JSON.stringify(await readReportPayload(process.argv[2], 0)));')
+            def run():
+                return subprocess.run([node,str(script),str(source)],capture_output=True,text=True,encoding='utf-8')
+            good = run()
+            self.assertEqual(good.returncode,0,good.stderr)
+            self.assertEqual(json.loads(good.stdout),payload)
+            part = source.with_name(source.name+'.parts')/'1-0.json'
+            saved = part.read_bytes()
+            part.write_text('[]')
+            self.assertIn('checksum mismatch',run().stderr)
+            part.write_bytes(saved)
+            source.write_text('{}')
+            self.assertIn('do not match source',run().stderr)
+
     def test_projection_preserves_financial_and_identity_inputs(self):
         raw={'cycle':2024,'cycle_label':'2023-2024','company':'Fixture','amount':-125.75,
              'employee_tier':'Employee','party':'D','recipient_category':'Carey',
