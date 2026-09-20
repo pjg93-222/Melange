@@ -1,0 +1,44 @@
+<section id="view-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+<p class="view-intro">Follow the reported money for one PAC, or several side by side, from any industry file or saved snapshot.</p>
+<section class="panel evidence-scope" aria-label="Scope">
+<div class="evidence-scope-grid">
+<label for="evidence-source">Source<select id="evidence-source"><option value="">Choose a file or a snapshot</option></select></label>
+<label for="evidence-type">Committee type<select id="evidence-type" disabled><option value="">All types</option></select></label>
+<label for="evidence-find">Find a PAC<input id="evidence-find" type="search" placeholder="Name or committee ID" autocomplete="off" disabled></label>
+<label for="evidence-pac">PAC<select id="evidence-pac" disabled></select></label>
+<label for="evidence-cycle">Cycle<select id="evidence-cycle" disabled><option value="">All cycles</option></select></label>
+<button id="evidence-add" type="button" class="primary" disabled>Add pane</button>
+</div>
+<div class="evidence-scope-actions">
+<button id="evidence-import-open" type="button" class="secondary" aria-expanded="false" aria-controls="evidence-import-drawer">Import a file</button>
+<button id="evidence-snapshot-open" type="button" class="secondary" aria-expanded="false" aria-controls="evidence-snapshot-drawer">New snapshot</button>
+<label class="evidence-follow" for="evidence-follow-graph"><input id="evidence-follow-graph" type="checkbox"> Follow Graph selection</label>
+<span id="evidence-status" class="muted" role="status">Finding imported files and saved snapshots&hellip;</span>
+</div>
+<div id="evidence-import-drawer" class="evidence-drawer" hidden>
+<div class="evidence-toolbar">
+<label class="csv-file-label" for="evidence-csv-file"><strong>Choose a file</strong><span>CSV, TSV, TXT, XLSX, JSON or an FEC bulk ZIP &middot; the console states the size limit when you choose one.</span><input id="evidence-csv-file" type="file"></label>
+<label for="evidence-path">Or a path on this computer<input id="evidence-path" type="text" autocomplete="off" spellcheck="false" placeholder="A full path to a file on this computer"></label>
+<label for="evidence-header-path">FEC bulk header file &middot; optional<input id="evidence-header-path" type="text" autocomplete="off" spellcheck="false"></label>
+<label id="evidence-sheet-label" for="evidence-sheet" hidden>Worksheet<select id="evidence-sheet"></select></label>
+</div>
+<div class="editor-actions"><button id="evidence-path-read" type="button" class="secondary">Read this file</button><button id="evidence-browse" type="button" class="secondary">Browse this computer</button></div>
+<div id="evidence-browser" class="evidence-browser table-scroll" hidden></div>
+</div>
+<div id="evidence-snapshot-drawer" class="evidence-drawer" hidden>
+<form id="evidence-form"><div class="evidence-toolbar">
+<label for="evidence-company-input">Company<input id="evidence-company-input" required maxlength="250"></label>
+<label for="evidence-cycles-input">Election years<input id="evidence-cycles-input" required placeholder="2024, 2026"></label>
+<label for="evidence-committees-input">FEC committee IDs<input id="evidence-committees-input" required placeholder="C00000001, C00000002"></label>
+</div><label for="evidence-aliases-input">Company aliases &middot; one per line<textarea id="evidence-aliases-input" rows="3"></textarea></label>
+<p class="muted">Committee IDs define the network covered. Collecting makes new FEC requests and saves a separate snapshot; existing evidence is preserved.</p>
+<div class="editor-actions"><button id="evidence-use-config" type="button" class="secondary">Use the chosen snapshot&rsquo;s settings</button><button id="evidence-refresh" type="button" class="secondary">Refresh snapshots</button><button id="evidence-collect" type="submit" class="primary">Collect new snapshot</button></div>
+</form><p id="evidence-job-status" role="status"></p>
+</div>
+<div class="evidence-chip-row"><span class="muted">Open panes</span><div id="evidence-chips" class="evidence-chips"></div></div>
+</section>
+<p id="evidence-empty" class="empty">No PAC pane is open. Import an industry file, or choose a saved snapshot, then add a pane.</p>
+<div id="evidence-panes" class="evidence-panes"></div>
+<section id="evidence-compare" class="panel evidence-compare" aria-label="Compare panes" hidden></section>
+<section id="evidence-map" class="panel evidence-map" aria-label="District map" hidden></section>
+</section>

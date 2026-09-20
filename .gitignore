@@ -18,6 +18,9 @@ fec/liwc/bl2025/
 audio_pilot/
 *.xlsx
 *.html
+# The Mentat console page is rendered from these partials. Ignoring them left
+# commit 991b06568 with a root template whose nine includes were not in the repo.
+!mentat/app/templates/*.html
 *.txt
 _stance_ft/
 stance_ft_composed/

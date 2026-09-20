@@ -1,0 +1,25 @@
+<section id="view-loading" role="tabpanel" aria-labelledby="tab-loading">
+<p class="view-intro">Build a company roster, review the names, then start collection.</p>
+<div id="roster-panel" class="loading-grid"><div class="panel roster-editor">
+<div class="section-label">01 · BUILD YOUR ROSTER</div><h2>Sector & companies</h2>
+<form id="roster-form">
+<label class="field" for="sector">Sector</label><input id="sector" type="text" maxlength="31" placeholder="e.g. Credit unions, Community banks" required autocomplete="off">
+<p class="muted">Use each company’s canonical name once. Add other names below.</p>
+<div id="company-editor"></div>
+<div class="editor-actions"><button id="add-company" type="button" class="secondary">+ Add company</button><button id="review-roster" type="submit" class="primary">Review roster</button></div>
+<p id="draft-status" class="muted" role="status">Draft stays in this browser.</p>
+</form>
+<details class="file-import"><summary>Or upload a spreadsheet</summary>
+<label class="upload" for="file"><strong>Choose a roster</strong><span>CSV, TSV, or Excel · up to 5 MB</span><input id="file" type="file" accept=".csv,.tsv,.xlsx"></label>
+<a class="text-link" href="/template.csv" download="mentat-roster-template.csv">Download the upload template ↗</a>
+<p>Use <code>canonical_name</code>, <code>alias</code>, and <code>sector</code> columns. Repeat the canonical name for each alias. <code>industry</code> is also accepted. Optional: <code>exclusion</code>. Mentat’s existing roster workbooks work too.</p></details>
+</div><div class="panel launch-panel"><div class="section-label">02 · REVIEW & COLLECT</div><h2>Collection setup</h2>
+<p id="review-placeholder">Review your roster to see the exact names that will be searched. No data collection starts until you press Start collection.</p>
+<div id="upload-review" hidden><h3>Roster review</h3><div id="roster-counts"></div><div id="roster-list"></div>
+<fieldset><legend>Election cycles</legend><label><input type="checkbox" name="cycle" value="2022" checked> 2021–22</label><label><input type="checkbox" name="cycle" value="2024" checked> 2023–24</label><label><input type="checkbox" name="cycle" value="2026" checked> 2025–26</label></fieldset>
+<label class="field" for="api-key">FEC API key <span id="key-hint">Saved encrypted for your Windows account. Separate multiple keys with commas.</span></label><input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Enter your API key">
+<button id="save-keys" type="button" class="secondary">Save keys securely</button><button id="start" type="button" class="primary" disabled>Start collection</button></div>
+<p id="key-status" class="local-note"></p>
+<p class="local-note">Closing the browser does not stop collection. Follow checkpoints and incoming records in the Collection tab.</p></div></div>
+<section class="panel coverage-panel" aria-labelledby="loading-coverage-title"><div class="panel-heading"><h2 id="loading-coverage-title">Saved FEC coverage</h2><details class="inline-help"><summary>How coverage is assessed</summary><p>Coverage applies to the saved run’s roster and searches. Review changed company names and aliases before reusing it. An active cycle is flagged stale when its verified cutoff is more than 30 days behind today; a past cycle requires coverage through December 31.</p></details></div><div id="loading-coverage" role="status"><p>Unverifiable · Checking saved coverage evidence.</p></div></section>
+</section>
