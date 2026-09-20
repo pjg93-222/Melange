@@ -231,6 +231,18 @@ if (-not $openpyxlPresent) {
   & $PythonPath -c "import sys, importlib.util; assert sys.version_info >= (3,11), 'Python 3.11 or newer is required'; assert importlib.util.find_spec('openpyxl') is not None, 'openpyxl is required'" 2>&1 | Out-Null
   if ($LASTEXITCODE -ne 0) { throw 'MENTAT requires Python 3.11 or newer with openpyxl. Run: python -m pip install openpyxl' }
 }
+# Jinja2 renders the console page from app/templates/. Checked the same cheap
+# way, for the same reason. A miss is a warning and not a throw: console_page.py
+# falls back to the golden app/index.html, so every route still answers.
+$jinja2Present = (Test-Path -LiteralPath (Join-Path $pythonHome 'Lib\site-packages\jinja2')) -or
+  (Test-Path -LiteralPath (Join-Path $pythonHome 'lib\site-packages\jinja2'))
+if (-not $jinja2Present) {
+  & $PythonPath -c "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('jinja2') else 1)" 2>&1 | Out-Null
+  $jinja2Present = ($LASTEXITCODE -eq 0)
+}
+if (-not $jinja2Present) {
+  Write-Warning 'Jinja2 is missing, so MENTAT will serve the last generated app/index.html instead of rendering app/templates/. Run: python -m pip install jinja2'
+}
 $arguments = @((Join-Path $PSScriptRoot 'server.py'), '--port', [string]$Port, '--data-root', $DataRoot)
 if ($KeysFile) { $arguments += @('--keys-file', $KeysFile) }
 if ($RScriptPath) { $arguments += @('--rscript', $RScriptPath) }

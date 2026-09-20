@@ -95,6 +95,9 @@ from runtime_inputs import copy_fec_sources
 
 # Files this console serves. Hoisted out of the request handler so the build
 # identity below can hash exactly the set the browser can ask for.
+# "/" is answered by console_page.page(), which renders app/templates/ at
+# request time. The entry stays because index.html - the golden render those
+# templates produce - must keep its place in the asset hash below.
 STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript"),
                  '/contribution-studio': ('contribution-studio.html', 'text/html; charset=utf-8'),
                  '/contribution-studio.css': ('contribution-studio.css', 'text/css'),
@@ -186,8 +189,15 @@ def code_files():
 
 
 def asset_files():
+    # The page is rendered from app/templates/, so a partial edited there has to
+    # move this hash exactly as an edit to index.html used to; without it the
+    # page would never notice that the build on disk had moved past this
+    # process. tree_sha256 folds in path.name alone, so every template basename
+    # is unique across this set - test_console_templates.py holds that.
+    import console_page
     directory = Path(__file__).resolve().parent
-    return sorted({directory / name for name, _ in STATIC_ASSETS.values()}, key=lambda path: path.name)
+    return sorted({directory / name for name, _ in STATIC_ASSETS.values()}
+                  | set(console_page.template_files()), key=lambda path: path.name)
 
 
 GIT_SHA_COMMAND = ['git', 'rev-parse', '--short', 'HEAD']
@@ -2541,6 +2551,22 @@ class Handler(BaseHTTPRequestHandler):
                 if view is None:
                     return self.send({'error': 'Saved view not on this console.'}, 404)
                 return self.send({'view': view})
+            if parsed.path == '/':
+                # The page is rendered from app/templates/, with exactly the
+                # headers it has always carried: same content type, same
+                # revalidation, same 304 on a matching ETag.
+                import console_page
+                before = console_page.stamp()
+                content, etag = console_page.page()
+                if console_page.stamp() != before:
+                    # The static route's double-stat guard, read over the whole
+                    # template set: a page half from one edit and half from the
+                    # next is refused rather than served.
+                    return self.send({'error':'The interface changed while loading. Refresh the page.'}, 409)
+                unchanged = etag in [tag.strip() for tag in self.headers.get('If-None-Match', '').split(',')]
+                return self.send(b'' if unchanged else content, 304 if unchanged else 200,
+                                 content_type='text/html; charset=utf-8',
+                                 cache_control='private, no-cache', etag=etag)
             assets = STATIC_ASSETS
             if parsed.path in assets:
                 filename, mime = assets[parsed.path]
