@@ -85,6 +85,10 @@
   let contributionCacheEpoch=0;
   const verified = () => el('source-mode').value === 'contributions';
   const basis = () => sheet().source.basis || 'receipt';
+  // charts.js prints this as the canvas subtitle. A source object without it
+  // puts the literal word "undefined" on the chart; 53efc2c4a named it on the
+  // Company overview cards and this is the same name for the main canvas.
+  const sheetName = () => (dataset() || {}).label || (dataset() || {}).id || '';
   const dataset = () => contributionCatalog?.datasets.find(d => d.id === el('dataset').value);
 
   const sheet = () => sheets[active];
@@ -666,11 +670,11 @@
       node('canvas').hidden=false;node('table').hidden=true;node('canvas').className=view.canvasClass+'studio-canvas fit-'+state.fit;
       if(temporalModel){
         const measure=spec.columns[0].name+(spec.columns[0].unit==='cents'?' (USD)':'');
-        const drawn=paint.chartSVG(temporalModel,measure,{type:spec.type,aggregation:'sum',x:0,y:1},{columns:[{name:'Period'},{name:measure}]},view.title,view.scope);node('canvas').replaceChildren(drawn.svg);
+        const drawn=paint.chartSVG(temporalModel,measure,{type:spec.type,aggregation:'sum',x:0,y:1},{sheet:sheetName(),columns:[{name:'Period'},{name:measure}]},view.title,view.scope);node('canvas').replaceChildren(drawn.svg);
       }else if(['pie','doughnut','waterfall','pareto','radar'].includes(spec.type)){
         if(spec.measures.length!==1)throw new Error('This mark type uses one measure.');
         const id=spec.measures[0],currency=contributions.MONEY.has(id),groups=rows.map(row=>({label:contributionPlot.label(row,spec.dimensions),value:row[id]/(currency?100:1),n:1}));
-        const drawn=paint.chartSVG({type:spec.type,groups,selected:result.totals.records,excluded:0},(result.columns.find(c=>c.id===id)?.name||id)+(currency?' (USD)':''),{type:spec.type,aggregation:'sum',x:0,y:1},{columns:[{name:'Group'},{name:id}]},view.title,view.scope);node('canvas').replaceChildren(drawn.svg);
+        const drawn=paint.chartSVG({type:spec.type,groups,selected:result.totals.records,excluded:0},(result.columns.find(c=>c.id===id)?.name||id)+(currency?' (USD)':''),{type:spec.type,aggregation:'sum',x:0,y:1},{sheet:sheetName(),columns:[{name:'Group'},{name:id}]},view.title,view.scope);node('canvas').replaceChildren(drawn.svg);
       }else if(MentatContributionCharts.TYPES.includes(spec.type))MentatContributionCharts.render(node('canvas'),rows,spec,row=>{if(view.primary)inspectContributions(row);});
       else {contributionPlot.render(node('canvas'),rows,spec,row=>{if(view.primary)inspectContributions(row);});drewReferences=spec.type!=='scatter';}
       if(state.analytics.totals)notes.push('Selected source total: '+money(result.totals.amount)+'. This total excludes projections and covers every matching group before grouped filters.');
@@ -2198,13 +2202,58 @@
   // button would promise something the view never does.
   const SORT_BUTTONS = [['sort-asc', 'asc', 'Sort the grouping smallest first'],
     ['sort-desc', 'desc', 'Sort the grouping largest first']];
+  // The labels button's own markup title is its hint. It is cached on first
+  // read, before a lock reason overwrites it, rather than restated here.
+  let labelsHint = null;
+  const labelHint = () => labelsHint === null ? (labelsHint = el('labels').title) : labelsHint;
+  // The query the verified path will actually send. The CLASSIC compile does
+  // not know combination, dual-line or histogram, so asking it whether Sort
+  // applies left two enabled buttons on exactly those three marks - and they
+  // did nothing. Shelves the compile refuses have no answer to give: the
+  // canvas already names that error, so the toolbar leaves the buttons alone.
+  function verifiedCompile() {
+    if (!verified() || !data || !dataset()) return null;
+    try {
+      return contributions.compile(sheet(), columns(),
+        {dataset: dataset().id, industry: dataset().industry, basis: basis(), offset: 0});
+    } catch (error) { return null; }
+  }
+  // The sort reads measures[0] only, so the button says which measure that is.
+  function sortedMeasureName(compiled) {
+    const id = compiled && compiled.spec.measures[0];
+    if (!id) return '';
+    return (columns().find(f => f.id === id) || {}).name || id;
+  }
   function renderSortButtons(view) {
-    const locked = core.sortLocked(view);
+    const compiled = verifiedCompile();
+    // On the verified path 'none' means descending (contributions
+    // .effectiveSort), so 'Sort descending' is pressed from the moment a sheet
+    // opens rather than being a button that reproduces the same query.
+    const onVerified = verified() && !!compiled;
+    const locked = onVerified
+      ? contributions.sortLock(compiled.spec.type, sheet())
+      : (core.sortLocked(view) ? 'Time views keep chronological order' : '');
+    const pressed = onVerified ? contributions.effectiveSort(sheet()) : sheet().sort;
+    const measure = onVerified ? sortedMeasureName(compiled) : '';
     for (const [id, direction, hint] of SORT_BUTTONS) {
-      el(id).disabled = locked;
-      el(id).title = locked ? 'Time views keep chronological order' : hint;
-      el(id).setAttribute('aria-pressed', String(!locked && sheet().sort === direction));
+      el(id).disabled = !!locked;
+      el(id).title = locked || (measure
+        ? 'Sort by ' + measure + ', ' + (direction === 'asc' ? 'smallest first' : 'largest first')
+        : hint);
+      el(id).setAttribute('aria-pressed', String(!locked && pressed === direction));
     }
+  }
+  // Labels are render-only, so this changes no query: it only stops the button
+  // claiming a toggle on a mark whose renderer never reads spec.labels. The
+  // stored showLabels is left exactly as it was, so it returns when the reader
+  // goes back to a mark that draws them.
+  function renderLabelButton(state) {
+    const compiled = verifiedCompile();
+    const locked = verified() && compiled
+      ? contributions.labelLock(compiled.spec.type, compiled.transform) : '';
+    el('labels').disabled = !!locked;
+    el('labels').title = locked || labelHint();
+    el('labels').setAttribute('aria-pressed', String(!locked && !!state.showLabels));
   }
 
   // The classic dialog picks the first subject by itself, so the studio settles
@@ -2233,7 +2282,7 @@
     el('undo').disabled = !history.length;
     el('redo').disabled = !future.length;
     renderSortButtons(data ? core.compileReport(state, columns()).config : null);
-    el('labels').setAttribute('aria-pressed', String(!!state.showLabels));
+    renderLabelButton(state);
     el('fit').value = state.fit;
     el('showme-toggle').setAttribute('aria-pressed', String(!!el('showme-details').open));
     for (const tiles of BOARD_TILES) {
@@ -3033,8 +3082,20 @@
   el('undo').onclick = () => step(history, future);
   el('redo').onclick = () => step(future, history);
   el('swap').onclick = () => commit(() => { sheets[active] = core.swapShelves(sheet()); });
-  el('sort-asc').onclick = () => commit(() => { sheet().sort = sheet().sort === 'asc' ? 'none' : 'asc'; });
-  el('sort-desc').onclick = () => commit(() => { sheet().sort = sheet().sort === 'desc' ? 'none' : 'desc'; });
+  // Verified: a radio pair. Pressing the direction the view is already in is
+  // not an edit, so it costs no undo step, no persist and no re-render - and
+  // 'none' stays a valid stored value meaning descending, so no saved view is
+  // migrated. Worksheet: the existing toggle-back-to-none, unchanged.
+  const chooseSort = direction => {
+    if (verified()) {
+      if (contributions.effectiveSort(sheet()) === direction) return;
+      commit(() => { sheet().sort = direction; });
+      return;
+    }
+    commit(() => { sheet().sort = sheet().sort === direction ? 'none' : direction; });
+  };
+  el('sort-asc').onclick = () => chooseSort('asc');
+  el('sort-desc').onclick = () => chooseSort('desc');
   el('labels').onclick = () => commit(() => { sheet().showLabels = !sheet().showLabels; });
   el('fit').onchange = () => commit(() => { sheet().fit = el('fit').value; });
   el('clear').onclick = () => commit(() => { sheets[active] = core.clearSheet(sheet()); });

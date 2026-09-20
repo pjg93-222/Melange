@@ -68,6 +68,74 @@
     if(filter.value===''||filter.value==null)return [];
     return [{field:field.id,op:simple,value:filterValue(filter.value,field)}];
   }
+  /* ------------------------------------------- what the sort controls do
+     One account, read by compile() below and by the toolbar, so a button can
+     never claim something the query does not do.
+
+     sheet().sort is none | asc | desc and opens at 'none'
+     (chart-studio-core.js:124). This path has always read anything but 'asc'
+     as descending, so 'none' MEANS descending here: a saved view keeps its
+     order untouched, and 'Sort descending' is pressed from the moment the
+     sheet opens instead of being a button that produces the same query. */
+  const effectiveSort=state=>(state&&state.sort)==='asc'?'asc':'desc';
+  const SORT_LOCK_TIME='Time views keep chronological order';
+  const SORT_LOCK_BINS='A histogram keeps its bins in numeric order';
+  const CHRONOLOGICAL=['line','area','combination','dual-line'];
+  // A transform forces type to 'line' before the order is chosen (see the
+  // `type='line'` at the end of the transform branch in compile), so a
+  // transform view is chronological whatever mark the reader picked. The
+  // condition is spelled out anyway: the toolbar asks before the transform
+  // has rewritten the type.
+  function sortLock(type,state){
+    if(type==='histogram')return SORT_LOCK_BINS;
+    if(CHRONOLOGICAL.includes(type))return SORT_LOCK_TIME;
+    const transform=(state&&state.analytics&&state.analytics.transform)||'none';
+    return transform==='none'?'':SORT_LOCK_TIME;
+  }
+
+  /* -------------------------------------------- which marks can be labelled
+     Every mark type this path accepts or produces, with `true` where the
+     renderer honours spec.labels and otherwise the reason the button gives
+     for being disabled. Each reason was read off the renderer, not guessed;
+     app/tests/chart-studio-contributions-sort.test.js fails if a producible
+     type is missing from the table or a stale one is left in it. */
+  const LABEL_SUPPORT={
+    // contribution-plot.js honours spec.labels on these.
+    automatic:true,bar:true,line:true,area:true,circle:true,scatter:true,
+    // contribution-charts.js honours it on these, three of them added here.
+    heatmap:true,dot:true,'series-dot':true,stacked:true,histogram:true,bubbles:true,
+    // Renderers that already print the value, so the toggle would do nothing.
+    text:'A table already shows every value',
+    table:'A table already shows every value',
+    highlight:'A highlight table always prints its values',
+    treemap:'A treemap always labels every box with room for the value',
+    // Renderers that carry the values in hover detail instead.
+    box:'Box plots label their five statistics on hover',
+    gantt:'A date span carries its first and last dates on hover',
+    bullet:'A bullet row carries both measures on hover',
+    combination:'Two independent scales; each mark carries its value on hover',
+    'dual-line':'Two independent scales; each mark carries its value on hover',
+    // Drawn on the report canvas (charts.js), which has no mark labels.
+    pie:'Pie labels live in the legend',
+    doughnut:'Doughnut labels live in the legend',
+    waterfall:'Waterfall values ride in each step\u2019s hover detail',
+    pareto:'Pareto values ride in each bar\u2019s hover detail',
+    radar:'The radar polygon carries every value in one hover detail',
+    // The map draws its own marks and never reads spec.labels.
+    map:'Map marks are identified on hover, not labelled on the map',
+    'filled-map':'Map marks are identified on hover, not labelled on the map'
+  };
+  // 'annual' stays on the normal render path and keeps its labels; yoy,
+  // change and forecast are redrawn by charts.js, which ignores spec.labels.
+  const LABELLED_TRANSFORMS=['none','annual'];
+  const LABEL_LOCK_TRANSFORM='Period analysis is drawn on the report canvas, which has no mark labels';
+  function labelLock(type,transform){
+    if(!LABELLED_TRANSFORMS.includes(transform||'none'))return LABEL_LOCK_TRANSFORM;
+    const support=LABEL_SUPPORT[type];
+    if(support===true)return '';
+    return support||'This mark type does not draw labels';
+  }
+
   function compile(state,columns,{dataset,industry,basis='receipt',offset=0}={}){
     const byIndex=new Map(columns.map(f=>[f.index,f])),attach=list=>core.shelf(list).map(p=>({...p,field:byIndex.get(p.column)})).filter(p=>p.field);
     const axes=attach([...(state.columns||[]),...(state.rows||[])]),dimensions=[],measures=[],allMeasures=[],notes=[];
@@ -123,7 +191,7 @@
       if(color||size||labels.length||tooltip.length)notes.push('Map marks show ZIP, recorded states and selected amount.');
     }
     const limit=type==='map'?100000:type==='histogram'?10000:Math.min(1000,Math.max(1,Number(state.params?.maxGroups)||60));
-    const chronological=['line','area','combination','dual-line','histogram'].includes(type),sort=chronological?[{field:dimensions[0],direction:'asc'}]:[{field:measures[0],direction:state.sort==='asc'?'asc':'desc'}];
+    const chronological=!!sortLock(type,state),sort=chronological?[{field:dimensions[0],direction:'asc'}]:[{field:measures[0],direction:effectiveSort(state)}];
     const query={dataset,basis,dimensions:[...new Set(dimensions)],measures:allMeasures,filters,aggregate_filters,sort,limit,offset:type==='map'||transform!=='none'?0:offset};
     if(industry)query.industry=industry;
     if(transform!=='none')query.limit=100000;
@@ -174,5 +242,5 @@
   const sameSource=(a,b)=>['workbook_sha256','database_sha256','index_token','query_engine_sha256','field_semantics_sha256'].every(k=>a?.[k]===b?.[k]);
   const quote=value=>'"'+String(typeof value==='string'&&/^\s*[=+@-]/.test(value)?"'"+value:value??'').replaceAll('"','""')+'"';
   function csv(result,request){const cols=result.columns;return '\uFEFF'+[cols.map(c=>c.id+(c.unit==='cents'?'_usd':'')).concat(['accounting_basis','source_workbook_sha256','database_sha256','analytical_index','query_engine_sha256','field_semantics_sha256','query_filters']).map(quote).join(','),...result.rows.map(row=>cols.map(c=>c.unit==='cents'&&row[c.id]!=null?row[c.id]/100:row[c.id]).concat([request.basis,result.provenance.workbook_sha256,result.provenance.database_sha256,result.provenance.index_token,result.provenance.query_engine_sha256,result.provenance.field_semantics_sha256,JSON.stringify({filters:request.filters,aggregate_filters:request.aggregate_filters,bin_width_cents:request.bin_width_cents})]).map(quote).join(','))].join('\r\n');}
-  const api={fields,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
+  const api={fields,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,effectiveSort,sortLock,labelLock,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS,LABEL_SUPPORT,MARK_TYPES:types,SORT_LOCK_TIME,SORT_LOCK_BINS,LABEL_LOCK_TRANSFORM,LABELLED_TRANSFORMS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
 })(globalThis);

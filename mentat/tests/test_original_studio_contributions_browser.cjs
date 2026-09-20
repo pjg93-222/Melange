@@ -35,8 +35,15 @@ test('original shelves use verified facts, display edits reuse queries, and ZIP 
       if(url.endsWith('/catalog'))return respond({datasets:[{id:'Banking',label:'Banking',available:true,fields,bases:['receipt','original_observed','original_supported','raw','pac_activity'].map(id=>({id,label:id})),provenance:provenance(version)}],fields});
       if(url.endsWith('/query')){
         calls.query.push(body);
-        const rows=body.dimensions.includes('zip5')?zipRows:body.dimensions.includes('state')?zipRows.map(({state,amount,records,contributors})=>({state,amount,records,contributors})):body.dimensions.includes('cycle')?[{cycle:'2023-2024',amount:32500,records:4,contributors:4}]:[{company:'Alpha',amount:12500,records:3,contributors:3},{company:'Beta',amount:20000,records:1,contributors:1}];
-        return respond({status:'ready',rows:rows.slice(body.offset,body.offset+body.limit),columns:[...body.dimensions,...body.measures].map(id=>fields.find(f=>f.id===id)),totals:{amount:32500,records:4,contributors:4},group_count:rows.length,offset:body.offset||0,has_more:false,provenance:provenance(version),basis_label:'Published included receipts',reconciliation:{conserved:true,receipt_matches_workbook:true},notices:[],verified_unique:false});
+        const base=body.dimensions.includes('zip5')?zipRows:body.dimensions.includes('state')?zipRows.map(({state,amount,records,contributors})=>({state,amount,records,contributors})):body.dimensions.includes('amount_bin')?[{amount_bin:0,records:1,amount:500},{amount_bin:1000000,records:3,amount:32000}]:body.dimensions.includes('cycle')?[{cycle:'2023-2024',amount:32500,records:4,contributors:4}]:[{company:'Alpha',amount:12500,records:3,contributors:3},{company:'Beta',amount:20000,records:1,contributors:1}];
+        // The server returns the groups in the order the query asked for, so the
+        // fixture does too: without it "Sort ascending" could not be seen to do
+        // anything here, which is the whole subject of the P2 assertions below.
+        const order=(body.sort||[])[0];
+        const rows=order&&base.length&&typeof base[0][order.field]==='number'
+          ?[...base].sort((a,b)=>order.direction==='asc'?a[order.field]-b[order.field]:b[order.field]-a[order.field])
+          :base;
+        return respond({status:'ready',rows:rows.slice(body.offset,body.offset+body.limit),columns:[...body.dimensions,...body.measures].map(id=>fields.find(f=>f.id===id)||{id,label:id,name:'Amount bin',role:'dimension',type:'number',unit:'cents'}),totals:{amount:32500,records:4,contributors:4},group_count:rows.length,offset:body.offset||0,has_more:false,provenance:provenance(version),basis_label:'Published included receipts',reconciliation:{conserved:true,receipt_matches_workbook:true},notices:[],verified_unique:false});
       }
       if(url.endsWith('/geography')){calls.geography.push(body);return respond({...geometry,congress:body.congress});}
       if(url.endsWith('/records')){
@@ -65,11 +72,69 @@ test('original shelves use verified facts, display edits reuse queries, and ZIP 
   assert.equal(await page.locator('#studio-basis').inputValue(),'receipt');
   assert.equal(await page.locator('#studio-columns .studio-pill').count(),1);
   assert.equal(await page.locator('#studio-rows .studio-pill').count(),1);
+
+  /* P2. A toolbar control is never silently inert: at every moment each of the
+     three buttons either changes the chart when pressed, or is disabled and its
+     title says why. fittedText() hangs the full value in a <title> child, so a
+     bar's drawn category is its text node, not the element's textContent. */
+  const bars=()=>page.evaluate(()=>[...document.querySelectorAll('#studio-canvas svg text[data-label="category"]')]
+    .map(node=>node.firstChild.nodeValue));
+  const settled=()=>page.waitForFunction(()=>document.querySelector('#studio-canvas').getAttribute('aria-busy')!=='true');
+  // sheet().sort opens at 'none' and this path reads anything but 'asc' as
+  // descending, so the descending button is pressed before anyone touches it.
+  assert.equal(await page.locator('#studio-sort-desc').getAttribute('aria-pressed'),'true');
+  assert.equal(await page.locator('#studio-sort-asc').getAttribute('aria-pressed'),'false');
+  assert.match(await page.locator('#studio-sort-desc').getAttribute('title'),/^Sort by .+, largest first$/);
+  assert.match(await page.locator('#studio-sort-asc').getAttribute('title'),/^Sort by .+, smallest first$/);
+  assert.equal(await page.locator('#studio-undo').isDisabled(),true);
+  const descending=await bars();
+  assert.equal(descending.length,2);
+  const beforeSort=await page.evaluate(()=>calls.query.length);
+  await page.locator('#studio-sort-desc').click();
+  assert.equal(await page.locator('#studio-undo').isDisabled(),true,'pressing the direction the view is already in is not an edit');
+  assert.equal(await page.evaluate(()=>calls.query.length),beforeSort,'and costs no query');
+  assert.deepEqual(await bars(),descending,'and leaves the bars where they were');
+  await page.locator('#studio-sort-asc').click();
+  await settled();
+  assert.equal(await page.locator('#studio-sort-asc').getAttribute('aria-pressed'),'true');
+  assert.equal(await page.locator('#studio-sort-desc').getAttribute('aria-pressed'),'false','the two are a radio pair');
+  assert.deepEqual(await bars(),[...descending].reverse(),'ascending reverses the order');
+  assert.equal(await page.locator('#studio-undo').isDisabled(),false,'a real change is undoable');
+  await page.locator('#studio-undo').click();
+  await settled();
+  assert.deepEqual(await bars(),descending,'undo restores the order');
+  assert.equal(await page.locator('#studio-sort-desc').getAttribute('aria-pressed'),'true');
+
   const firstQueries=await page.evaluate(()=>calls.query.length);
   await page.locator('#studio-labels').click();
   await page.locator('#studio-fit').selectOption('entire');
   await page.waitForFunction(()=>document.querySelector('#studio-canvas').getAttribute('aria-busy')!=='true');
   assert.equal(await page.evaluate(()=>calls.query.length),firstQueries,'labels and fit must reuse exact aggregates');
+  // Sort used to be decided from the CLASSIC compile, which has never heard of
+  // histogram (nor of combination or dual-line), so on those marks both buttons
+  // stayed enabled and did nothing. The reason is the button's title now.
+  const defaultMark=await page.locator('#studio-mark').inputValue();
+  await page.locator('#studio-mark').selectOption('histogram');
+  await settled();
+  for(const id of ['#studio-sort-asc','#studio-sort-desc']){
+    assert.equal(await page.locator(id).isDisabled(),true,id+' must be disabled on a histogram');
+    assert.equal(await page.locator(id).getAttribute('title'),'A histogram keeps its bins in numeric order');
+    assert.equal(await page.locator(id).getAttribute('aria-pressed'),'false');
+  }
+  // Labels were turned on above, and a histogram draws them as the count over
+  // each bin - a position that cannot collide with anything by construction.
+  assert.deepEqual(await page.evaluate(()=>[...document.querySelectorAll('#studio-canvas svg text[data-label="value"]')]
+    .map(n=>n.textContent)),['1','3'],'each bin carries its count');
+  // A table prints every value already, so the labels toggle would be a lie.
+  await page.locator('#studio-mark').selectOption('text');
+  await settled();
+  assert.equal(await page.locator('#studio-labels').isDisabled(),true);
+  assert.equal(await page.locator('#studio-labels').getAttribute('title'),'A table already shows every value');
+  assert.equal(await page.locator('#studio-labels').getAttribute('aria-pressed'),'false','a disabled toggle never looks pressed');
+  await page.locator('#studio-mark').selectOption(defaultMark);
+  await settled();
+  assert.equal(await page.locator('#studio-labels').isDisabled(),false,'and it returns on a mark that draws them');
+  assert.equal(await page.locator('#studio-labels').getAttribute('aria-pressed'),'true','with the stored value untouched');
   await page.locator('#studio-mark').selectOption('map');
   await page.waitForFunction(()=>document.querySelector('#studio-canvas .contribution-map'));
   assert.deepEqual(await page.evaluate(()=>calls.query.at(-1).dimensions),['zip5','state']);
