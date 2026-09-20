@@ -408,7 +408,7 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
    panel. The QUERY CONTAINER is the heading, not the panel: `container-type` on
    `.graph-panels>.panel` would make every panel a stacking context, and the
    open Export menu (z-index 6, absolutely positioned, hanging below its own
-   panel) would then be painted over by the panel in the next grid row. */
+   panel) could then be painted over by the panel in the next grid row. */
 .graph-panels .panel-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;container-type:inline-size}
 .graph-panels .panel-heading>h2{min-width:0;overflow-wrap:anywhere}
 .graph-panels .panel-heading .graph-panel-tools{flex-wrap:nowrap;min-width:0}
@@ -426,10 +426,26 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
    left aligned, instead of each panel wrapping at its own content width. */
 @container (max-width:600px){
   .graph-panels .panel-heading>h2{grid-column:1/-1}
-  .graph-panels .panel-heading .graph-panel-tools{grid-column:1/-1;margin-left:0;justify-content:flex-start}
+  .graph-panels .panel-heading .graph-panel-tools{grid-column:1/-1;margin-left:0;
+    justify-content:flex-start;flex-wrap:wrap}
   .graph-panel-tools .graph-candidate-controls{flex:1 1 auto}
   .graph-panel-tools .graph-candidate-controls label{flex:1 1 0}
   .graph-panel-tools .graph-candidate-controls select{max-width:none}
+  /* "View all \2192" is one line or it is a two-line button in a 30px row. */
+  .graph-panels .panel-heading .graph-text-button{white-space:nowrap}
+  /* Two visible selects at this width is the cramped case the owner reported.
+     Then, and only then, the candidate controls take the whole first tools row,
+     [Top N][View all] sit on a second, and each select is as wide as the option
+     it is showing. The captions are the selects' accessible names, so they are
+     hidden from the eye and kept in the tree - here the chosen option already
+     says what the control is. Everything is behind :has() because Direct
+     contributions hides Direction, and that header - caption, select width and
+     all - is to stay exactly as it is. */
+  .graph-panel-tools .graph-candidate-controls:has(label:not([hidden])~label:not([hidden])){flex:1 1 100%}
+  .graph-panel-tools .graph-candidate-controls:has(label:not([hidden])~label:not([hidden]))>label{min-width:0}
+  .graph-panel-tools .graph-candidate-controls:has(label:not([hidden])~label:not([hidden])) select{flex:1 1 0;min-width:0}
+  .graph-panel-tools .graph-candidate-controls:has(label:not([hidden])~label:not([hidden])) .graph-caption{position:absolute;width:1px;height:1px;padding:0;
+    margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 }
 /* The server's candidate note is a disclosure, so it is one muted line directly
    above the footer - and only while the figures are not direct contributions. */
@@ -444,8 +460,8 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
   font-size:10px;font-weight:700;font-style:normal;line-height:1;cursor:help}
 
 /* Bars: label, bar, value, share, and for companies a sparkline. */
-.graph-panels .graph-bars{width:100%;max-width:760px;height:auto}
-[data-analysis=candidates] #graph-candidates>.graph-bars{max-width:760px}
+.graph-panels .graph-bars{width:100%;max-width:920px;height:auto}
+[data-analysis=candidates] #graph-candidates>.graph-bars{max-width:920px}
 .graph-panels[data-analysis=overview] #graph-companies>details,
 .graph-panels[data-analysis=overview] #graph-levels>details,
 .graph-panels[data-analysis=overview] #graph-organizations>details{display:none}

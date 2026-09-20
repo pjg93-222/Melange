@@ -13,7 +13,7 @@
   const BAR_MIN = 48, DOT_COL = 18, DOT_CX = 8, LABEL_SIZE = 12.5;
   function layoutColumns(width, options) {
     const opts = options || {};
-    const W = Math.max(420, Math.min(760, Math.round(Number(width) || 520)));
+    const W = Math.max(420, Math.min(920, Math.round(Number(width) || 520)));
     const sparkWidth = opts.spark ? SPARK_W : 0, sparkGap = opts.spark ? SPARK_GAP : 0;
     const sparkX = W - 4 - sparkWidth;
     // The share is anchored to the column the layout reserves for it, never to
@@ -23,7 +23,7 @@
     const valueRight = shareRight - SHARE_W;
     // The same label column in every panel, so bars line up between stacked
     // cards instead of each panel starting its bars at its own fraction.
-    const labelRight = Math.max(120, Math.min(220, Math.round(W * 0.30)));
+    const labelRight = Math.max(130, Math.min(260, Math.round(W * 0.34)));
     const barLeft = labelRight + 8;
     const dotColumn = opts.party ? DOT_COL : 0;
     // A value column cannot eat the bar: what is left once the minimum bar and
@@ -38,7 +38,21 @@
       shareRight: shareRight, shareWidth: SHARE_W,
       sparkX: sparkX, sparkWidth: sparkWidth, labelSize: LABEL_SIZE};
   }
-  const layout = {layoutColumns: layoutColumns, SPARK_W: SPARK_W, SPARK_GAP: SPARK_GAP,
+  // What fitText() is told to protect from the cut. A party CODE is worth
+  // keeping whole - a truncated row still says which side of the aisle it is
+  // on - but a party VALUE is not a code: 'Other / Unclassified' rode through
+  // as the protected suffix and left the name a bare ellipsis, so anything
+  // longer than a code is appended to the name and fitted with it.
+  const PARTY_CODE_MAX = 3;
+  function labelParts(name, party) {
+    const text = name == null ? '' : String(name);
+    const code = (party == null ? '' : String(party)).trim();
+    if (!code) return {text: text, suffix: ''};
+    if (Array.from(code).length <= PARTY_CODE_MAX) return {text: text, suffix: ' · ' + code};
+    return {text: text + ' · ' + code, suffix: ''};
+  }
+  const layout = {layoutColumns: layoutColumns, labelParts: labelParts,
+    PARTY_CODE_MAX: PARTY_CODE_MAX, SPARK_W: SPARK_W, SPARK_GAP: SPARK_GAP,
     SHARE_W: SHARE_W, VALUE_GAP: VALUE_GAP, BAR_MIN: BAR_MIN, DOT_COL: DOT_COL,
     DOT_CX: DOT_CX, LABEL_SIZE: LABEL_SIZE};
   if (typeof module !== 'undefined' && module.exports) module.exports = layout;
@@ -217,9 +231,16 @@
       : '';
     get('method').textContent=view.note;
     get('provenance').replaceChildren(...view.reports.map(r=>{const p=document.createElement('p');p.className='muted';p.textContent=`${r.name} · SHA-256 ${r.sha256}`;return p;}));
-    paintAll();
-    renderFreshness();applyAnalysis();syncExport();
+    // Layout first, paint second. clear() hides #graph-results at the top of
+    // refresh(), so painting here - as this did - measured clientWidth 0 on
+    // every panel, fell back to 520, and left CSS to scale one column up and
+    // the other down. applyAnalysis() settles which panels are shown, then the
+    // results are revealed, and only then does each panel have a width to draw
+    // at.
+    applyAnalysis();
     get('results').hidden=false;
+    paintAll();
+    renderFreshness();syncExport();
   }
   function svgNode(tag,attributes={},text) {
     const node=document.createElementNS('http://www.w3.org/2000/svg',tag);
@@ -306,10 +327,10 @@
   const ROW_HEIGHT=30,ROW_TOP=22;
   // The chart is drawn at the panel's own pixel width, so its viewBox and its
   // layout width agree and nothing is scaled: a 720-wide drawing inside a
-  // 540-wide bento tile renders 13px type at under 10px. A panel that is
-  // hidden when it is drawn has no width yet, so it falls back and is redrawn
-  // when its tab opens (selectAnalysis).
-  const panelWidth=container=>Math.max(420,Math.min(760,Math.round(container.clientWidth||520)));
+  // 540-wide bento tile renders 13px type at under 10px. A panel with no
+  // width yet - hidden, or not laid out - falls back to 520 and is redrawn by
+  // panelObserver as soon as it has one.
+  const panelWidth=container=>Math.max(420,Math.min(920,Math.round(container.clientWidth||520)));
   function draw(name,rows,onClick) {
     if(!rows.length){emptyPanel(name,'No nonzero amounts recorded for this selection.');return;}
     const container=get(name);container.replaceChildren();
@@ -337,7 +358,8 @@
       // Measured, not counted: the budget is the pixels between the dot column
       // and LABEL_RIGHT, and the party rides in the suffix so that it survives
       // the cut instead of being the first thing lost.
-      const text=MentatTheme.fitText(row.label,box.labelWidth,LABEL_SIZE,MentatTheme.sans,row.party?` · ${row.party}`:'');
+      const parts=labelParts(row.label,row.party);
+      const text=MentatTheme.fitText(parts.text,box.labelWidth,LABEL_SIZE,MentatTheme.sans,parts.suffix);
       // The accessible name is unchanged: name, colon, money. The share and the
       // per-cycle figures ride in <title>, which is the hover detail (item 12).
       const group=svgNode('g',{role:'button',tabindex:0,'aria-label':`${label}: ${dollars(row.amount)}`,class:'graph-bar-button'});
@@ -398,6 +420,8 @@
   }
   function drawPanel(name) {
     if(!view)return;
+    const panel=get(name);
+    if(panel)drawnWidth.set(name,Math.round(panel.clientWidth));
     if(name==='candidates'&&!view.candidate_available){
       emptyPanel('candidates','This candidate view is unavailable for the selected scope.');return;
     }
@@ -409,6 +433,32 @@
   for(const name of PANELS) {
     const select=document.getElementById('graph-top-'+name);
     if(select)select.onchange=()=>{if(view)drawPanel(name);};
+  }
+  // A panel is redrawn when its own column changes width, and only then: the
+  // drawing is sized in the viewBox, so a stale one is scaled by CSS rather
+  // than relaid. A redraw at the same rounded width would repaint the same
+  // pixels, and a redraw at no width at all would put the 520 fallback back,
+  // so both are skipped - which is also what makes the observer unable to
+  // feed itself.
+  const drawnWidth=new Map(),resized=new Set();
+  let resizeTimer=0;
+  const RESIZE_DEBOUNCE=120;
+  function redrawResized() {
+    resizeTimer=0;
+    const names=[...resized];resized.clear();
+    if(!view)return;
+    for(const name of names)drawPanel(name);
+  }
+  if(typeof ResizeObserver!=='undefined') {
+    const panelObserver=new ResizeObserver(entries=>{
+      for(const entry of entries) {
+        const name=entry.target.id.replace('graph-',''),width=Math.round(entry.target.clientWidth);
+        if(width>0&&drawnWidth.get(name)!==width)resized.add(name);
+      }
+      if(!resized.size)return;
+      clearTimeout(resizeTimer);resizeTimer=setTimeout(redrawResized,RESIZE_DEBOUNCE);
+    });
+    for(const name of PANELS){const node=get(name);if(node)panelObserver.observe(node);}
   }
   /* --------------------------------------------------- company sparklines */
   // One /api/graph request per registered election cycle, with every other

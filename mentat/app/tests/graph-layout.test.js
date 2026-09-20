@@ -13,9 +13,11 @@ const assert = require('node:assert/strict');
 const layout = require('../graph.js');
 const theme = require('../theme.js');
 
-// 508 is the candidates panel in the 1fr column at a 1920 viewport; 520 is
-// panelWidth()'s own fallback for a panel with no width yet.
-const WIDTHS = [420, 508, 520, 585, 760];
+// 506/508 is the candidates panel in the 1fr column at a 1920 viewport and
+// 888 the categories panel in the 1.7fr column beside it; 520 is
+// panelWidth()'s own fallback for a panel with no width yet, and 920 is the
+// clamp ceiling.
+const WIDTHS = [420, 508, 520, 585, 760, 888, 920];
 // $0.00 through a trillion, and then two value columns wider than the panel can
 // hold - the case a fixed 96px gutter and an unclamped measurement both lose.
 const VALUE_WIDTHS = [0, 34, 78, 102, 137, 400, 4000];
@@ -69,7 +71,7 @@ test('[graph-layout] the label column is the same in every panel at the same wid
     assert.equal(plain.labelRight, withDot.labelRight, 'and with or without a party dot');
     assert.equal(plain.barLeft, withSpark.barLeft);
     assert.equal(plain.barLeft, withDot.barLeft);
-    assert.ok(plain.labelRight >= 120 && plain.labelRight <= 220, 'the label column stays inside its clamp');
+    assert.ok(plain.labelRight >= 130 && plain.labelRight <= 260, 'the label column stays inside its clamp');
   }
 });
 
@@ -110,6 +112,54 @@ test('[graph-layout] the bar keeps its 48px minimum even against an absurd value
       assert.ok(box.valueWidth < 4000, 'and the value column is clamped to what is left');
       assert.ok(box.barLeft + box.barMax <= box.valueRight - box.valueWidth,
         'so the bar cannot run into the value column');
+    }
+  }
+});
+
+/* A3. fitText() protects a suffix from the cut so a truncated candidate still
+   says which side of the aisle it is on. A party CODE is worth that; a party
+   VALUE is not. Live, a row rendered as "\u2026 \u00b7 Other / Unclassified":
+   21 of the column's characters were spent on a suffix that had to survive,
+   and the name - the thing the row is about - was the bare ellipsis. */
+const LONG_PARTY = 'Other / Unclassified';
+
+test('[graph-layout] only a party code is protected from the cut', () => {
+  for (const code of ['D', 'R', 'DFL', 'REP', 'IND']) {
+    const parts = layout.labelParts('WARNER, MARK ROBERT', code);
+    assert.equal(parts.text, 'WARNER, MARK ROBERT', code + ': the name is not touched');
+    assert.equal(parts.suffix, ' \u00b7 ' + code, code + ': the code is the protected suffix');
+  }
+  for (const party of [LONG_PARTY, 'DEMOCRAT', 'Unknown']) {
+    const parts = layout.labelParts('WARNER, MARK ROBERT', party);
+    assert.equal(parts.suffix, '', party + ': a long party is not protected');
+    assert.equal(parts.text, 'WARNER, MARK ROBERT \u00b7 ' + party,
+      party + ': it rides on the label and is fitted with it');
+  }
+  for (const empty of ['', null, undefined, '   ']) {
+    const parts = layout.labelParts('KHANNA, ROHIT', empty);
+    assert.equal(parts.suffix, '', 'no party, no suffix');
+    assert.equal(parts.text, 'KHANNA, ROHIT', 'and nothing appended');
+  }
+  assert.ok(layout.PARTY_CODE_MAX >= 3, 'a three-letter code such as DFL is still a code');
+});
+
+test('[graph-layout] a long party never leaves the name a bare ellipsis', () => {
+  const names = ['WARNER, MARK ROBERT', 'BLUNT ROCHESTER, LISA',
+    'AMERICA\u2019S CREDIT UNIONS PAC OF CREDIT UNION NATIONAL ASSOCIATION, INC.'];
+  for (const width of WIDTHS) {
+    const box = layout.layoutColumns(width, {party: true, spark: false, valueWidth: 78});
+    for (const name of names) {
+      const parts = layout.labelParts(name, LONG_PARTY);
+      const drawn = theme.fitText(parts.text, box.labelWidth, box.labelSize, '', parts.suffix);
+      assert.notEqual(drawn[0], '\u2026',
+        'W=' + width + ': "' + drawn + '" starts with the cut mark, so no name is shown');
+      assert.ok(theme.measureText(drawn, box.labelSize, '') <= box.labelWidth + 1e-9,
+        'W=' + width + ': "' + drawn + '" is wider than its column');
+      // A code, by contrast, still survives the cut whole.
+      const coded = layout.labelParts(name, 'D');
+      const codedDrawn = theme.fitText(coded.text, box.labelWidth, box.labelSize, '', coded.suffix);
+      assert.ok(codedDrawn.endsWith(' \u00b7 D'),
+        'W=' + width + ': "' + codedDrawn + '" lost the party code');
     }
   }
 });
