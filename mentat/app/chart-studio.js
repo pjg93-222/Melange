@@ -309,6 +309,57 @@
     el('error').textContent = message || '';
     el('error').hidden = !message;
   }
+  /* The pending panel (r7). While the server builds the view a surface asked
+     for, that surface's canvas says so: the server's own sentence, a bar (a
+     share when the server knows its total, a sweep when it does not) and the
+     records and time so far. It sits first in the canvas, over the dimmed last
+     good view, so Cancel still leaves that view exactly where it was. A wait
+     that stopped (a failed request, the 15-minute ceiling) leaves the same
+     panel with a Retry instead. */
+  function pendingPanel(host, state) {
+    let panel = host.querySelector(':scope > .studio-pending');
+    if (!panel) { panel = document.createElement('div'); panel.className = 'studio-pending'; host.prepend(panel); }
+    panel.dataset.state = state;
+    // A worksheet table leaves the canvas hidden; the panel is never drawn where nobody can see it.
+    host.hidden = false;
+    return panel;
+  }
+  function drawPending(host, progress) {
+    const panel = pendingPanel(host, 'pending');
+    panel.setAttribute('role', 'status');
+    panel.dataset.phase = progress.phase || '';
+    let message = panel.querySelector('.studio-pending-message'), bar = panel.querySelector('.studio-pending-bar'),
+      detail = panel.querySelector('.studio-pending-detail');
+    if (!message || !bar || !detail) {
+      message = document.createElement('p'); message.className = 'studio-pending-message';
+      bar = document.createElement('div'); bar.className = 'studio-pending-bar'; bar.setAttribute('role', 'progressbar');
+      bar.setAttribute('aria-valuemin', '0'); bar.setAttribute('aria-valuemax', '100'); bar.append(document.createElement('span'));
+      detail = document.createElement('p'); detail.className = 'studio-pending-detail';
+      panel.replaceChildren(message, bar, detail);
+    }
+    message.textContent = progress.message;
+    const known = progress.percent !== null;
+    bar.classList.toggle('is-indeterminate', !known);
+    bar.setAttribute('aria-label', progress.message);
+    if (known) bar.setAttribute('aria-valuenow', String(progress.percent)); else bar.removeAttribute('aria-valuenow');
+    bar.firstChild.style.width = known ? progress.percent + '%' : '';
+    detail.textContent = contributions.pendingDetail(progress);
+  }
+  function drawStopped(host, message, retry) {
+    const panel = pendingPanel(host, 'stopped');
+    panel.setAttribute('role', 'alert');
+    delete panel.dataset.phase;
+    const parts = [];
+    if (message) { const text = document.createElement('p'); text.className = 'studio-pending-message'; text.textContent = message; parts.push(text); }
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'studio-pending-retry'; button.textContent = 'Retry';
+    button.onclick = retry;
+    panel.replaceChildren(...parts, button);
+  }
+  function clearPending(host, state) {
+    const panel = host && host.querySelector(':scope > .studio-pending');
+    if (panel && (!state || panel.dataset.state === state)) panel.remove();
+  }
 
   async function loadRuns() {
     const ticket = ++revision;
@@ -457,11 +508,63 @@
     const response=await fetch('/api/contributions/'+path,body?{method:'POST',headers:{'Content-Type':'application/json','X-Mentat-Token':contributionToken},body:JSON.stringify(body),signal}:{signal});
     const result=await response.json();if(!response.ok||result.error)throw new Error(result.error||'Contribution data unavailable.');return result;
   }
-  async function contributionReady(path, query, signal) {
+  // Every Chart Studio call to /api/contributions/query and /records comes
+  // through here, and so through the one pending handler (r7,
+  // contributions.pollPending): a 'building' or 'preparing' answer is asked
+  // again at the server's pace; its progress goes to the status line, the
+  // progress row and the caller's onProgress (the canvas, the records panel);
+  // a newer request (`signal`, `current`) or Cancel stops it; a hidden Chart
+  // Studio pauses it; and after about 15 minutes it ends in an error the
+  // caller offers a Retry for. An answer the server held and then returned is
+  // returned exactly as before.
+  const preparing = new Set();
+  // The status line while answers are pending: what it said before the first
+  // wait began, the waits writing it now, and the last text one of them wrote.
+  let waitLine = null;
+  async function contributionReady(path, query, signal, options = {}) {
+    const own = new AbortController(), follow = () => own.abort();
+    if (signal) { if (signal.aborted) own.abort(); else signal.addEventListener('abort', follow, {once: true}); }
+    let failed = null;
     progressDepth++;
-    try{
-      for(;;){if(signal?.aborted)throw new DOMException('View changed','AbortError');const result=await contributionAPI(path,query,signal);if(result.status==='failed')throw new Error(result.message||'Source verification failed.');if(!['preparing','building','queued'].includes(result.status))return result;const waiting=result.message||'Verifying source records…';status(waiting);showProgress('Preparing verified data · '+waiting);await new Promise(resolve=>setTimeout(resolve,Math.min(4000,result.retry_after_ms||1000)));if(signal?.aborted)throw new DOMException('View changed','AbortError');}
-    } finally { releaseProgress(); }
+    try {
+      return await contributions.pollPending(body => contributionAPI(path, body, own.signal), {
+        body: query, path, signal: own.signal, current: options.current || null, retry: options.retry === true, gate: whileShown,
+        onProgress: progress => {
+          preparing.add(own);
+          if (!waitLine) waitLine = {before: el('loading').textContent, writers: new Set(), wrote: ''};
+          waitLine.writers.add(own);
+          waitLine.wrote = contributions.pendingText(progress);
+          status(waitLine.wrote);
+          showProgress('Preparing verified data · ' + contributions.pendingText(progress, {elapsed: false}));
+          if (options.onProgress) options.onProgress(progress);
+        }});
+    } catch (error) {
+      failed = error;
+      throw error;
+    } finally {
+      preparing.delete(own); if (signal) signal.removeEventListener('abort', follow); releaseProgress();
+      // The last wait to end gives the status line back, or says why it
+      // stopped, unless something else (Cancel, a new view) has written it.
+      if (waitLine && waitLine.writers.delete(own) && !waitLine.writers.size) {
+        if (el('loading').textContent === waitLine.wrote)
+          status(failed && failed.name !== 'AbortError' ? failed.message : waitLine.before);
+        waitLine = null;
+      }
+    }
+  }
+  // Leaving Chart Studio stops the polling: a pending answer waits here, asking
+  // nothing, until the view is on screen again (activate() lets it go).
+  const shownWaiters = new Set();
+  function whileShown(signal) {
+    const panel = document.getElementById('view-chart-studio');
+    if (!panel || !panel.hidden) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const entry = {
+        go: () => { shownWaiters.delete(entry); if (signal) signal.removeEventListener('abort', entry.stop); resolve(); },
+        stop: () => { shownWaiters.delete(entry); reject(new DOMException('View changed', 'AbortError')); }};
+      if (signal) { if (signal.aborted) { entry.stop(); return; } signal.addEventListener('abort', entry.stop, {once: true}); }
+      shownWaiters.add(entry);
+    });
   }
   async function loadContributions(refresh=false) {
     const ticket=++revision;failure('');sourceReady=false;status('Reading verified contribution fields…');
@@ -629,7 +732,7 @@
     for (const flight of [...contributionPending.values()]) flight.controller.abort();
     contributionPending.clear();
   }
-  function queryCached(query,view) {
+  function queryCached(query,view,options={}) {
     const key=JSON.stringify(query),cached=contributionCache.get(key),epoch=contributionCacheEpoch;
     const claim=(view&&view.flight)||mainFlight;
     if(contributionResult&&contributionRequest&&JSON.stringify(contributionRequest)===key)return Promise.resolve(contributionResult);
@@ -641,9 +744,10 @@
     if(cached&&Date.now()-cached.at<30000)return Promise.resolve(cached.result);
     releaseFlight(claim);
     const flying=contributionPending.get(key);
-    if(flying){flying.waiters+=1;claim.waiting=flying;return flying.promise;}
-    const flight={key,controller:new AbortController(),waiters:1,promise:null};
-    flight.promise=contributionReady('query',query,flight.controller.signal).then(result=>{if(epoch===contributionCacheEpoch){contributionCache.set(key,{result,at:Date.now()});if(contributionCache.size>12)contributionCache.delete(contributionCache.keys().next().value);}return result;}).finally(()=>{if(contributionPending.get(key)===flight&&epoch===contributionCacheEpoch)contributionPending.delete(key);});
+    if(flying){flying.waiters+=1;claim.waiting=flying;if(options.onProgress){flying.listeners.add(options.onProgress);if(flying.progress)options.onProgress(flying.progress);}return flying.promise;}
+    // A pending answer's progress reaches every surface waiting on this flight (r7).
+    const flight={key,controller:new AbortController(),waiters:1,promise:null,progress:null,listeners:new Set(options.onProgress?[options.onProgress]:[])};
+    flight.promise=contributionReady('query',query,flight.controller.signal,{retry:options.retry,onProgress:progress=>{flight.progress=progress;for(const listener of flight.listeners)try{listener(progress);}catch(error){console.error(error);}}}).then(result=>{if(epoch===contributionCacheEpoch){contributionCache.set(key,{result,at:Date.now()});if(contributionCache.size>12)contributionCache.delete(contributionCache.keys().next().value);}return result;}).finally(()=>{if(contributionPending.get(key)===flight&&epoch===contributionCacheEpoch)contributionPending.delete(key);});
     contributionPending.set(key,flight);claim.waiting=flight;return flight.promise;
   }
   // The scope under the chart title: the parts the header chips carry, plus the
@@ -737,10 +841,15 @@
       return single([...totals].map(([t, v]) => ({[time]: t, [ids[0]]: v})));
     }
   }
-  async function renderContributionView(view) {
+  async function renderContributionView(view, again=null) {
     view=view||mainSurface();const node=view.el,state=view.state;
     if(!data||!dataset()){node('reconcile').hidden=true;node('canvas').replaceChildren();node('table').replaceChildren();node('verified-summary').textContent='Reading verified source fields…';node('result-controls').hidden=true;node('title').textContent='';node('subtitle').textContent='';node('note').textContent='Choose a verified report in the Data panel to begin.';if(view.primary)lastResult=null;return;}
     const ticket=view.bump(),sheetBasis=basisOf(state);
+    // r7: a pending answer draws its progress on this surface's canvas and
+    // status line; a panel an earlier render of it left goes first.
+    clearPending(node('canvas'));
+    let statusBefore=null,statusWrote=null;
+    const onProgress=progress=>{if(view.stale(ticket))return;drawPending(node('canvas'),progress);if(statusWrote===null)statusBefore=node('status').textContent;statusWrote=contributions.pendingText(progress);node('status').textContent=statusWrote;};
     try {
       const compiled=contributions.compile(state,columns(),{dataset:dataset().id,industry:dataset().industry,basis:sheetBasis,offset:view.offset});
       if(view.el===el)compareDrawn=null;
@@ -748,7 +857,7 @@
       // compared scopes are drawn in every mark, with Colour and with a period
       // analysis (renderCompareView).
       if(view.el===el&&compareActive(state)){
-        await renderCompareView(view,compiled,ticket);return;
+        await renderCompareView(view,compiled,ticket,{retry:again?.retry===true,onProgress});return;
       }
       const query=compiled.query,key=JSON.stringify(query),previous=view.request;
       if(previous&&JSON.stringify({...previous,offset:0})!==JSON.stringify({...query,offset:0})&&view.offset){view.offset=0;query.offset=0;}
@@ -758,7 +867,7 @@
       // rebuilt its query store after a restart), under a blank canvas.
       if(!view.result&&node('note').textContent==='Choose a verified report in the Data panel to begin.')node('note').textContent='Reading verified source observations\u2026';
       if(!previous||JSON.stringify(previous)!==key){node('canvas').setAttribute('aria-busy','true');node('verified-summary').textContent='Reading verified totals…';if(view.primary){status('Reading verified source observations…');el('inspection').hidden=true;++recordRevision;lastResult=null;}}
-      const result=await queryCached(query,view);if(view.stale(ticket)||!verified())return;
+      const result=await queryCached(query,view,{retry:again?.retry===true,onProgress});if(view.stale(ticket)||!verified())return;clearPending(node('canvas'));
       view.result=result;view.request=query;
       if(view.primary){failure('');lastResult=result;lastConfig=compiled;data.row_count=result.totals.records;data.rows=result.rows.map(row=>data.columns.map(f=>row[f.id]??''));}
       let title=contributions.BASIS[sheetBasis][0]+(query.dimensions.length?' by '+query.dimensions.map(id=>data.columns.find(f=>f.id===id)?.name||id).join(' / '):'');if(compiled.spec.measures.length!==1||compiled.spec.measures[0]!=='amount')title=compiled.spec.measures.map(id=>result.columns.find(c=>c.id===id)?.name||id).join(' / ')+' · '+title;view.title=title;view.scope=sourceScope(result,query);node('title').textContent=title;node('subtitle').textContent=scopeSubtitle(state);
@@ -822,11 +931,14 @@
       // Final fix round (R03-10): a sheet that draws nothing keeps nothing of
       // the last answer (title, figures, counter, status); a sheet with no
       // measure yet gets muted guidance under its empty title, not the red error.
-      const guidance=/^Add a dollar or count measure/.test(error.message);
-      node('reconcile').hidden=true;node('canvas').replaceChildren();node('note').textContent=guidance?'':error.message;
+      const guidance=/^Add a dollar or count measure/.test(error.message),retry=!guidance&&error.retryable===true;
+      node('reconcile').hidden=true;node('canvas').replaceChildren();node('note').textContent=guidance||retry?'':error.message;
       node('title').textContent='';node('subtitle').textContent=guidance?error.message:'';node('verified-summary').replaceChildren();node('result-controls').hidden=true;node('status').textContent='';node('status').title='';
-      if(view.primary){failure(guidance?'':error.message);lastResult=null;}}}
-    finally{if(!view.stale(ticket)){if(!view.result&&node('note').textContent==='Reading verified source observations\u2026')node('note').textContent='Choose a verified report in the Data panel to begin.';node('canvas').setAttribute('aria-busy','false');node('note').title=node('note').textContent;}}
+      // r7: a request that failed, or a wait that reached its ceiling, says so on
+      // the canvas, once, with a Retry that asks again with retry:true.
+      if(retry)drawStopped(node('canvas'),error.message,()=>renderContributionView(view,{retry:true}));
+      if(view.primary){failure(guidance||retry?'':error.message);lastResult=null;}}}
+    finally{if(!view.stale(ticket)){clearPending(node('canvas'),'pending');if(statusWrote!==null&&node('status').textContent===statusWrote)node('status').textContent=statusBefore;if(!view.result&&node('note').textContent==='Reading verified source observations\u2026')node('note').textContent='Choose a verified report in the Data panel to begin.';node('canvas').setAttribute('aria-busy','false');node('note').title=node('note').textContent;}}
   }
   async function renderContributionMap(ticket,compiled,bbox=null,view=null,notes=[]) {
     view=view||mainSurface();const node=view.el;
@@ -861,8 +973,8 @@
   }
   async function fillConduitFilings(query,result,cells,current){
     const ids=[...new Set(cells.map(([,record])=>String(record.source_id||'')).filter(Boolean))];let numbers=null;
-    try{const reply=await contributionAPI('records',{...query,dimensions:['reported_file_num'],aggregate_filters:[],
-        filters:[...(query.filters||[]),{field:'source_id',op:'in',value:ids}],limit:ids.length,offset:0});
+    try{const reply=await contributionReady('records',{...query,dimensions:['reported_file_num'],aggregate_filters:[],
+        filters:[...(query.filters||[]),{field:'source_id',op:'in',value:ids}],limit:ids.length,offset:0},null,{current});
       if(!current())return;
       if(reply.status==='ready'&&['workbook_sha256','database_sha256','index_token'].every(key=>reply.provenance?.[key]===result.provenance?.[key]))
         numbers=new Map((reply.rows||[]).map(row=>[String(row.source_id),row.reported_file_num]));
@@ -870,24 +982,29 @@
     for(const[td,record]of cells)drawConduitFiling(td,record,numbers?(numbers.get(String(record.source_id))??null):null);
   }
   let recordSource = null;
-  async function inspectContributions(row=null,offset=0,source=null) {
+  async function inspectContributions(row=null,offset=0,source=null,again=null) {
     if(!contributionResult)return;recordSelection=row;recordOffset=offset;recordSource=source;const ticket=++recordRevision,sourceRevision=contributionRevision;el('inspection').hidden=false;el('record-count').textContent='Reading source records…';el('records').replaceChildren();
     // A compared scope that is its own report (industry) brings its own query
     // and provenance; every other drill reads the sheet's one query.
     const request=(source&&source.request)||contributionRequest,known=(source&&source.result)||contributionResult;
-    try{const query={...request,filters:contributions.markFilters(request,row),aggregate_filters:[],limit:100,offset};const result=await contributionReady('records',query);if(ticket!==recordRevision||sourceRevision!==contributionRevision)return;if(!['workbook_sha256','database_sha256','index_token'].every(key=>result.provenance?.[key]===known.provenance?.[key]))throw new Error('Source changed before record inspection. Refresh the verified data.');
-      const columns=[['date','Date'],['contributor','Contributor'],['company','Company'],['recipient','Recipient'],['amount_cents','Selected amount'],['raw_cents','Raw observation'],['zip5','ZIP'],['state','State'],['decision_status','Accounting status'],['receipt_role','Receipt role'],['reasons','Reasons'],['source_id','Source ID'],['source_url','FEC filing']];for(const id of query.dimensions||[])if(!columns.some(c=>c[0]===id))columns.push([id,data.columns.find(c=>c.id===id)?.name||id]);const table=document.createElement('table'),head=document.createElement('tr'),body=document.createElement('tbody');for(const[,name]of columns){const th=document.createElement('th');th.textContent=name;head.append(th);}const thead=document.createElement('thead');thead.append(head);table.append(thead,body);
+    try{const query={...request,filters:contributions.markFilters(request,row),aggregate_filters:[],limit:100,offset};const current=()=>ticket===recordRevision&&sourceRevision===contributionRevision;
+      const result=await contributionReady('records',query,null,{retry:again?.retry===true,current,onProgress:progress=>{if(current())drawPending(el('records'),progress);}});if(ticket!==recordRevision||sourceRevision!==contributionRevision)return;if(!['workbook_sha256','database_sha256','index_token'].every(key=>result.provenance?.[key]===known.provenance?.[key]))throw new Error('Source changed before record inspection. Refresh the verified data.');
+      el('records').replaceChildren();const columns=[['date','Date'],['contributor','Contributor'],['company','Company'],['recipient','Recipient'],['amount_cents','Selected amount'],['raw_cents','Raw observation'],['zip5','ZIP'],['state','State'],['decision_status','Accounting status'],['receipt_role','Receipt role'],['reasons','Reasons'],['source_id','Source ID'],['source_url','FEC filing']];for(const id of query.dimensions||[])if(!columns.some(c=>c[0]===id))columns.push([id,data.columns.find(c=>c.id===id)?.name||id]);const table=document.createElement('table'),head=document.createElement('tr'),body=document.createElement('tbody');for(const[,name]of columns){const th=document.createElement('th');th.textContent=name;head.append(th);}const thead=document.createElement('thead');thead.append(head);table.append(thead,body);
       const conduitCells=[];for(const record of result.rows){const tr=document.createElement('tr');for(const[id]of columns){const td=document.createElement('td'),value=record[id];td.textContent=id.endsWith('_cents')?contributionPlot.format(value,'amount'):Array.isArray(value)?value.join('; '):value??'';if(id==='source_url'){if(conduitRecord(record)){conduitCells.push([td,record]);drawConduitFiling(td,record,undefined);}else{const safe=globalThis.MentatScope?globalThis.MentatScope.fecLink(value):'';if(safe){const a=document.createElement('a');a.href=safe;a.target='_blank';a.rel='noopener noreferrer';a.referrerPolicy='no-referrer';a.textContent='Open filing';td.replaceChildren(a);}}}tr.append(td);}body.append(tr);}el('records').append(table);if(conduitCells.length)fillConduitFilings(query,result,conduitCells,()=>ticket===recordRevision&&sourceRevision===contributionRevision);el('record-count').textContent=`${result.total_records?offset+1:0}–${offset+result.rows.length} of ${fmt(result.total_records)} source observations`;el('record-prev').disabled=!offset;el('record-next').disabled=!result.has_more;
-    }catch(error){if(ticket===recordRevision)el('record-count').textContent=error.message;}
+    }catch(error){if(ticket===recordRevision){
+      // r7: a stopped wait (Cancel, the ceiling) or a failed request can be asked again, with retry:true.
+      el('record-count').textContent=error.name==='AbortError'?'Stopped reading source records.':error.message;
+      if(error.name==='AbortError'||error.retryable===true)drawStopped(el('records'),'',()=>inspectContributions(row,offset,source,{retry:true}));
+      else el('records').replaceChildren();}}
   }
   async function downloadContributions(format) {
     const view=activeSurface();if(!view.result||!lastResult||exporting)return;const result=view.result,query=structuredClone(view.request),ticket=view.ticket();
     // Two reports cannot share one CSV: each row of it names one workbook's
     // provenance. The image carries both scopes in its legend and caption.
     if(format==='csv'&&compareDrawn&&compareDrawn.kind==='industry'&&view.el===el){failure('Export the CSV one industry at a time: each report carries its own workbook provenance. Clear the comparison, or export the image.');return;}
-    try{if(format==='csv'){exporting=true;status('Preparing complete grouped CSV…');let rows=[],offset=0;for(;;){const page=await contributionReady('query',{...query,offset,limit:100000});if(view.stale(ticket))throw new Error('View changed during export. Start the download again.');if(!contributions.sameSource(page.provenance,result.provenance))throw new Error('Source changed during export. Refresh the verified data.');rows.push(...page.rows);if(!page.has_more)break;if(!page.rows.length)throw new Error('The next export page is empty.');offset+=page.rows.length;}MentatExport.download(contributions.csv({...result,rows},query),'text/csv;charset=utf-8','mentat-chart-studio.csv');status('Exported '+fmt(rows.length)+' groups with source and accounting provenance.');}
+    try{if(format==='csv'){exporting=true;status('Preparing complete grouped CSV…');let rows=[],offset=0;for(;;){const page=await contributionReady('query',{...query,offset,limit:100000},null,{current:()=>!view.stale(ticket)});if(view.stale(ticket))throw new Error('View changed during export. Start the download again.');if(!contributions.sameSource(page.provenance,result.provenance))throw new Error('Source changed during export. Refresh the verified data.');rows.push(...page.rows);if(!page.has_more)break;if(!page.rows.length)throw new Error('The next export page is empty.');offset+=page.rows.length;}MentatExport.download(contributions.csv({...result,rows},query),'text/csv;charset=utf-8','mentat-chart-studio.csv');status('Exported '+fmt(rows.length)+' groups with source and accounting provenance.');}
       else{const svg=view.el('canvas').querySelector('svg');if(!svg)throw new Error('This view has no image. Download its data CSV.');await MentatExport.image(svg,format,view.title,view.scope,'mentat-chart-studio');}
-    }catch(error){failure(error.message);}finally{exporting=false;}
+    }catch(error){failure(error.name==='AbortError'?(view.stale(ticket)?'View changed during export. Start the download again.':'Export cancelled. Start the download again.'):error.message);}finally{exporting=false;}
   }
 
   /* ---------------------------------------------------------------- pills */
@@ -1264,11 +1381,11 @@
       const cached=memberCache.get(key);
       if(cached&&(!cached.error||Date.now()-cached.at<30000))return cached.values||[];
       memberCache.set(key,{values:(cached&&cached.values)||[],at:Date.now()});const selectedDataset=dataset().id;
-      contributionReady('query',facet).then(result=>{
+      contributionReady('query',facet,null,{current:()=>verified()&&dataset()?.id===selectedDataset}).then(result=>{
         const values=result.rows.map(r=>String(r[field.id]??''));memberCache.set(key,{values,at:Date.now()});
         if(verified()&&dataset()?.id===selectedDataset&&pageMembersKey===key&&core.pill(sheet().pages)?.column===column&&!values.includes(sheet().pageMember)){sheet().pageMember=values[0]||'';persist();}
         renderAll();
-      }).catch(error=>{memberCache.set(key,{values:[],at:Date.now(),error:error.message});failure(error.message);});return [];
+      }).catch(error=>{if(error.name==='AbortError'){memberCache.delete(key);return;}memberCache.set(key,{values:[],at:Date.now(),error:error.message});failure(error.message);});return [];
     }
     const seen = [];
     for (const row of data.rows) {
@@ -1974,7 +2091,11 @@
       for (const item of cards) {
         if (ticket !== overviewRevision) return;
         try { await renderOverviewCard(item.preset, item.body, ticket); }
-        catch (error) { if (ticket === overviewRevision && error.name !== 'AbortError') item.body.textContent = error.message; }
+        catch (error) {
+          if (ticket !== overviewRevision) continue;
+          if (error.name !== 'AbortError') item.body.textContent = error.message;
+          else if (!item.body.firstElementChild) item.body.textContent = 'Reading verified totals\u2026';
+        }
       }
     })();
   }
@@ -1983,7 +2104,8 @@
     if (missing.length) { body.textContent = 'This source has no ' + missing.join(' or ') + ' field.'; return; }
     const state = core.companyOverviewSheet(preset, columns(), {company: overviewCompany, cycle: overviewCycle()});
     const compiled = contributions.compile(state, columns(), {dataset: dataset().id, industry: dataset().industry, basis: basis(), offset: 0});
-    const result = await queryCached(compiled.query);
+    const result = await queryCached(compiled.query, undefined,
+      {onProgress: progress => { if (ticket === overviewRevision) body.textContent = contributions.pendingText(progress); }});
     if (ticket !== overviewRevision) return;
     body.replaceChildren();
     if (!result.rows.length) { body.textContent = 'No matching observations in this scope.'; return; }
@@ -3714,7 +3836,7 @@
     });
     notes.push('Each compared scope is its own map on one shading scale, so an equal colour means an equal value.');
   }
-  async function renderCompareView(view, compiled, ticket) {
+  async function renderCompareView(view, compiled, ticket, again = {}) {
     const node = view.el, state = view.state, entry = compareState(state), sheetBasis = basisOf(state);
     const values = entry.values.slice(0, 3), kind = entry.kind, colours = scopeColours();
     if (kind !== 'industry' && !columns().some(f => f.id === kind)) throw new Error('This report has no ' + kind + ' field to compare.');
@@ -3737,7 +3859,7 @@
       node('canvas').setAttribute('aria-busy', 'true'); node('verified-summary').textContent = 'Reading verified totals…';
       status('Reading verified source observations…'); el('inspection').hidden = true; ++recordRevision; lastResult = null;
     }
-    const results = await Promise.all(queries.map((query, i) => queryCached(query, {flight: compareFlights[i]})));
+    const results = await Promise.all(queries.map((query, i) => queryCached(query, {flight: compareFlights[i]}, again)));
     if (view.stale(ticket) || !verified()) return;
     view.result = results[0]; view.request = queries[0];
     failure(''); lastResult = results[0]; lastConfig = compiled;
@@ -4692,6 +4814,10 @@
   // view exactly where it was: renderContributionView ignores AbortError.
   el('progress-cancel').onclick = () => {
     abortContributionRequests();
+    // r7: and every other wait on a pending answer (records, report numbers,
+    // members, an export), which no surface's flight holds.
+    for (const control of preparing) control.abort();
+    preparing.clear();
     progressDepth = 0;
     clearProgress();
     status('Cancelled. Showing the last loaded view.');
@@ -4750,6 +4876,7 @@
   function activate() {
     const view = document.getElementById('view-chart-studio');
     if (!view || view.hidden) { stopPlay(); return; }
+    for (const entry of [...shownWaiters]) entry.go();
     if (!loadedSources) { loadedSources = true; if(verified())loadContributions();else loadRuns(); }
     followScopeIndustry();
   }

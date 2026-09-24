@@ -22,6 +22,23 @@
 .studio .contribution-map p {line-height:1.5;margin:8px 0;overflow-wrap:anywhere}
 .studio .plot-mark {cursor:pointer}
 .studio-canvas[aria-busy="true"] {opacity:.45;pointer-events:none}
+/* r7: the pending panel - the server building the view this canvas asked for,
+   or a wait that stopped, with its Retry. A busy canvas dims its last good view,
+   never the panel that explains the wait. */
+.studio-canvas[aria-busy="true"]:has(> .studio-pending) {opacity:1;pointer-events:auto}
+.studio-canvas[aria-busy="true"]:has(> .studio-pending) > :not(.studio-pending) {opacity:.45;pointer-events:none}
+.studio-pending {margin:0 0 12px;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--acu-paper);color:var(--acu-plum);max-width:640px}
+.studio-pending-message {margin:0 0 8px;font-size:13px;line-height:1.45}
+.studio-pending-detail {margin:6px 0 0;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.studio-pending-bar {position:relative;height:6px;border-radius:3px;background:var(--acu-ivory);overflow:hidden}
+.studio-pending-bar > span {position:absolute;top:0;bottom:0;left:0;width:0;background:var(--acu-plum);border-radius:3px;transition:width .3s ease}
+.studio-pending-bar.is-indeterminate > span {width:32%;animation:studio-pending-sweep 1.3s ease-in-out infinite}
+@keyframes studio-pending-sweep {from {left:-32%} to {left:100%}}
+@media (prefers-reduced-motion: reduce) {.studio-pending-bar > span {transition:none}.studio-pending-bar.is-indeterminate > span {animation:none;left:0;width:100%;opacity:.35}}
+.studio-pending[data-state="stopped"] {background:#fcf0ed;border-color:#dfa49b;color:#9b322c}
+.studio-pending[data-state="stopped"] .studio-pending-message {margin-bottom:10px}
+.studio-pending-retry {font:inherit;font-size:12px;padding:6px 12px;border:1px solid var(--line);border-radius:4px;background:white;color:var(--acu-plum);cursor:pointer}
+.studio-inspection .studio-pending {margin:8px 0}
 #view-chart-studio .studio[aria-busy="true"] {cursor:progress}
 .studio .plot-mark:focus {outline:none;stroke:var(--acu-purple);stroke-width:3}
 .studio-canvas table {font-size:12px;width:100%;border-collapse:collapse}

@@ -296,5 +296,92 @@
   const sameSource=(a,b)=>['workbook_sha256','database_sha256','index_token','query_engine_sha256','field_semantics_sha256'].every(k=>a?.[k]===b?.[k]);
   const quote=value=>'"'+String(typeof value==='string'&&/^\s*[=+@-]/.test(value)?"'"+value:value??'').replaceAll('"','""')+'"';
   function csv(result,request){const cols=result.columns;return '\uFEFF'+[cols.map(c=>c.id+(c.unit==='cents'?'_usd':'')).concat(['accounting_basis','source_workbook_sha256','database_sha256','analytical_index','query_engine_sha256','field_semantics_sha256','query_filters']).map(quote).join(','),...result.rows.map(row=>cols.map(c=>c.unit==='cents'&&row[c.id]!=null?row[c.id]/100:row[c.id]).concat([request.basis,result.provenance.workbook_sha256,result.provenance.database_sha256,result.provenance.index_token,result.provenance.query_engine_sha256,result.provenance.field_semantics_sha256,JSON.stringify({filters:request.filters,aggregate_filters:request.aggregate_filters,bin_width_cents:request.bin_width_cents})]).map(quote).join(','))].join('\r\n');}
-  const api={fields,PANE_FIELDS,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,effectiveSort,querySort,orderedAxis,naturalOrder,naturalRows,sortLock,labelLock,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS,LABEL_SUPPORT,MARK_TYPES:types,SORT_LOCK_TIME,SORT_LOCK_BINS,LABEL_LOCK_TRANSFORM,LABELLED_TRANSFORMS,CHRONOLOGICAL,TIMELINE};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
+  /* Pending answers (r7, 2026-09-24). While the console builds a query view or a records
+     sidecar in the background, POST /api/contributions/query and /records answer at once,
+     HTTP 200, with {status:'building', phase:'query_view'|'records_sidecar', message,
+     processed_records, total_records (an int, or null when unknown), elapsed_ms,
+     retry_after_ms, dataset, provenance} instead of holding the request. The index build's
+     older {status:'preparing', message, processed_records, retry_after_ms:1500} keeps its
+     shape and means the same. A ready answer is today's body (status 'ready', or none). A
+     build that fails comes back on the next poll as an ordinary error ({error}, non-2xx),
+     and the same body sent once with retry:true starts it again. 'queued' belongs to
+     snapshot jobs and is not a pending answer here. The server never gives up; the client
+     stops after about 15 minutes of polling (the Insights ceiling) and says so. Every
+     Chart Studio call to the two endpoints goes through pollPending(); graph.js
+     sparkReady() polls the same answers. */
+  const PENDING=new Set(['building','preparing']),PENDING_CEILING_MS=15*60*1000,PENDING_MIN_MS=250,PENDING_MAX_MS=5000;
+  const pendingStatus=answer=>answer&&typeof answer==='object'&&PENDING.has(answer.status)?answer.status:'';
+  // The server's retry_after_ms held between 250 ms and 5 s (it sends 300 ms, then 750 ms,
+  // then 1500 ms); an answer without a numeric one backs off 0.5, 1, 2, then 4 s.
+  function pendingDelay(answer,attempt=0){
+    const asked=answer&&typeof answer==='object'?answer.retry_after_ms:undefined;
+    if(typeof asked==='number'&&Number.isFinite(asked))return Math.min(PENDING_MAX_MS,Math.max(PENDING_MIN_MS,Math.round(asked)));
+    return Math.min(4000,500*2**Math.min(3,Math.max(0,Math.floor(Number(attempt)||0))));
+  }
+  const countFormat=new Intl.NumberFormat('en-US');
+  const clockText=ms=>{const s=Math.max(0,Math.floor((Number(ms)||0)/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+  // One pending answer, read strictly: a share only when the server knows its total, else
+  // the records so far; the server's elapsed_ms when it sends one, else this page's wait.
+  function pendingProgress(answer,{path='query',attempt=0,waitedMs=0,delayMs=0}={}){
+    answer=answer&&typeof answer==='object'?answer:{};
+    const phase=typeof answer.phase==='string'?answer.phase:'',message=typeof answer.message==='string'?answer.message.trim():'';
+    const processed=Number.isFinite(answer.processed_records)&&answer.processed_records>0?Math.floor(answer.processed_records):0;
+    const total=Number.isInteger(answer.total_records)&&answer.total_records>0?answer.total_records:null;
+    const waited=Math.max(0,Number(waitedMs)||0);
+    return {status:pendingStatus(answer),phase,path,
+      message:message||(path==='records'||phase==='records_sidecar'?'Preparing the source records\u2026':'Preparing the query view\u2026'),
+      processed,total,percent:total===null?null:Math.min(100,Math.floor(processed*100/total)),
+      elapsedMs:Number.isFinite(answer.elapsed_ms)&&answer.elapsed_ms>=0?answer.elapsed_ms:waited,waitedMs:waited,attempt,retryAfterMs:delayMs};
+  }
+  function pendingDetail(progress,{elapsed=true}={}){
+    const parts=progress.percent!==null&&progress.percent!==undefined
+      ?[progress.percent+'%',countFormat.format(progress.processed)+' of '+countFormat.format(progress.total)+' records']
+      :progress.processed>0?[countFormat.format(progress.processed)+' records so far']:[];
+    if(elapsed)parts.push(clockText(progress.elapsedMs)+' elapsed');
+    return parts.join(' \u00b7 ');
+  }
+  const pendingText=(progress,options)=>{const detail=pendingDetail(progress,options);return detail?progress.message+' '+detail:progress.message;};
+  const abortError=()=>typeof DOMException==='function'?new DOMException('View changed','AbortError'):Object.assign(new Error('View changed'),{name:'AbortError'});
+  function pendingSleep(ms,signal){
+    return new Promise((resolve,reject)=>{
+      if(signal&&signal.aborted){reject(abortError());return;}
+      let timer=0;const stop=()=>{clearTimeout(timer);reject(abortError());};
+      timer=setTimeout(()=>{if(signal)signal.removeEventListener('abort',stop);resolve();},ms);
+      if(signal)signal.addEventListener('abort',stop,{once:true});
+    });
+  }
+  function pendingCeiling(path,ceilingMs,progress){
+    const minutes=Math.round(ceilingMs/60000),span=minutes>=1?minutes+' minute'+(minutes===1?'':'s'):Math.max(1,Math.round(ceilingMs/1000))+' seconds';
+    const error=new Error('The server is still preparing '+(path==='records'?'these source records':'this query view')+' after about '+span+', so Chart Studio stopped checking. It may still finish there; Retry checks again.');
+    error.name='PendingCeiling';error.retryable=true;error.progress=progress;return error;
+  }
+  // ask(body) sends one request and resolves to the server's answer. A pending answer is
+  // asked again after pendingDelay(), and onProgress hears each one. The poll stops at once
+  // when `signal` aborts or `current()` turns false (a newer request won), waits on `gate()`
+  // between polls without that wait counting toward the ceiling, and sends retry:true on
+  // its first request only. An error from ask() is marked retryable; an AbortError is not.
+  async function pollPending(ask,{body,path='query',signal=null,current=null,retry=false,onProgress=null,gate=null,
+      sleep=pendingSleep,now=Date.now,ceilingMs=PENDING_CEILING_MS}={}){
+    const live=()=>{if((signal&&signal.aborted)||(current&&!current()))throw abortError();};
+    const started=now();let paused=0,attempt=0,again=retry===true;
+    for(;;){
+      live();
+      let answer;
+      try{answer=await ask(again?{...body,retry:true}:body);}
+      catch(error){if(error&&typeof error==='object'&&error.name!=='AbortError')error.retryable=true;throw error;}
+      again=false;
+      live();
+      if(answer&&answer.status==='failed')throw Object.assign(new Error(answer.message||'Source verification failed.'),{retryable:true});
+      if(!pendingStatus(answer))return answer;
+      const waited=now()-started-paused,delay=pendingDelay(answer,attempt);
+      const progress=pendingProgress(answer,{path,attempt,waitedMs:waited,delayMs:delay});
+      if(waited>=ceilingMs)throw pendingCeiling(path,ceilingMs,progress);
+      if(onProgress)try{onProgress(progress);}catch(error){if(typeof console!=='undefined')console.error(error);}
+      await sleep(delay,signal);
+      if(gate){const held=now();try{await gate(signal);}finally{paused+=now()-held;}}
+      attempt+=1;
+    }
+  }
+  const api={fields,PANE_FIELDS,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,effectiveSort,querySort,orderedAxis,naturalOrder,naturalRows,sortLock,labelLock,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS,LABEL_SUPPORT,MARK_TYPES:types,SORT_LOCK_TIME,SORT_LOCK_BINS,LABEL_LOCK_TRANSFORM,LABELLED_TRANSFORMS,CHRONOLOGICAL,TIMELINE,
+    pollPending,pendingStatus,pendingDelay,pendingProgress,pendingDetail,pendingText,PENDING,PENDING_CEILING_MS,PENDING_MIN_MS,PENDING_MAX_MS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
 })(globalThis);
