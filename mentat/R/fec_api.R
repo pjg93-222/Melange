@@ -428,7 +428,8 @@ fec_api_default_transport <- function(specs, api_key, concurrency) {
       specs = specs, lane = Sys.getenv("MENTAT_REQUEST_POOL_LANE")), auto_unbox = TRUE, digits = NA), timeout = 0)
     response <- curl::curl_fetch_memory(pool_url, handle)
     if (response$status_code != 200L) stop("Local request pool unavailable; checkpoints retained.")
-    result <- jsonlite::fromJSON(rawToChar(response$content), simplifyVector = FALSE)$responses
+    result <- jsonlite::fromJSON(rawToChar(response$content), simplifyVector = FALSE,
+                                 bigint_as_char = TRUE)$responses
     return(result)
   }
   if (requireNamespace("httr2", quietly = TRUE)) {
@@ -579,7 +580,9 @@ fec_api_json <- function(response) {
   if (!nzchar(trimws(body))) {
     stop("FEC API returned an empty success response.", call. = FALSE)
   }
-  jsonlite::fromJSON(body, simplifyVector = FALSE)
+  # FEC identifiers and keyset cursors can exceed double precision. Preserve
+  # integer tokens as text before flattening, deduplication or checkpointing.
+  jsonlite::fromJSON(body, simplifyVector = FALSE, bigint_as_char = TRUE)
 }
 
 fec_api_rows_as_list <- function(rows) {
@@ -823,7 +826,7 @@ fec_api_load_progress <- function(connection, units) {
       )
       if (nrow(payloads)) {
         pages <- lapply(payloads$payload_json, function(payload) {
-          jsonlite::fromJSON(payload, simplifyVector = FALSE)
+          jsonlite::fromJSON(payload, simplifyVector = FALSE, bigint_as_char = TRUE)
         })
       }
     }

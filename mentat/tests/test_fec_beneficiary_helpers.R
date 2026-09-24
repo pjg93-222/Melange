@@ -48,6 +48,7 @@ source(
   local = .GlobalEnv
 )
 require_package("data.table")
+data.table::setDTthreads(2L)
 
 set.seed(20260723)
 pool <- c("", " ", NA_character_, "Alpha", "ALPHA", "Beta", "Gamma", "Zeta")
@@ -203,7 +204,12 @@ reference_tables <- fec_build_beneficiary_tables_reference(
 optimized_tables <- fec_build_beneficiary_tables(
   raw_fixture, downstream_fixture
 )
-stopifnot(identical(optimized_tables, reference_tables))
+# All existing financial columns retain exact parity when no routes are supplied.
+# The new route and comparison evidence is additive to the return contract.
+stopifnot(identical(optimized_tables$bridge[, names(reference_tables$bridge), with=FALSE], reference_tables$bridge),
+          identical(optimized_tables$summary, reference_tables$summary),
+          all(optimized_tables$measurement_ledger$delta == 0),
+          !anyDuplicated(optimized_tables$reach[, .(cycle, view, company, source_committee_id)]))
 
 # Direction split (F3). A candidate reached by BOTH support and oppose spending
 # is the case the old text-matching guard got wrong: it read "Oppose" in the
@@ -265,7 +271,8 @@ stopifnot(mentat_guard_date_sanity(rep("2026-01-02", 1500))$passed,
           !mentat_guard_date_sanity("not-a-date")$passed)
 
 # Dates cannot establish whether repeated transaction IDs are amendments or
-# separate quarterly reports. Keep the observations, withhold the aggregate.
+# separate quarterly reports. Retain distinct observations provisionally by
+# default, and exercise the two explicitly selected sensitivity policies.
 pas2_root <- tempfile("pas2-year-scope-")
 dir.create(file.path(pas2_root, "pas224"), recursive = TRUE)
 pas2_row <- function(date, value, file, sub) {
@@ -278,10 +285,23 @@ writeLines(c(pas2_row("01022023","100","1","1"),
              pas2_row("01022024","100","2","2"),
              pas2_row("01022024","150","3","3")),
            file.path(pas2_root,"pas224","itpas2.txt"))
-# Under the default the latest filing is counted and every row of the group is
-# flagged unverified; under `withhold` none of them is counted. Both are pinned.
-stopifnot(identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_latest"))
+# Parser v6 retains every distinct source observation under the count_all
+# default. Ambiguity stays visible and a larger filing number alone cannot
+# suppress an observation. The legacy count_latest and withhold behaviors
+# remain pinned independently; their existing assertions are preserved below.
+stopifnot(identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_all"))
+default_pas2_policy <- FEC_PAS2_AMBIGUOUS_VERSION_POLICY
+default_fixture <- fec_build_pas2_index(pas2_root, 2024L)
+default_cache <- fec_pas2_cache_file(pas2_root, 2024L)
+stopifnot(nrow(default_fixture) == 3L,
+          all(default_fixture$unverified_version == 1L),
+          all(default_fixture$include_in_total == "Yes"),
+          all(default_fixture$superseded_by_amendment == 0L),
+          sum(default_fixture$transaction_amount) == 350,
+          all(substr(default_fixture$transaction_date,1,4) %in% c("2023","2024")))
+FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- "count_latest"
 counted_fixture <- fec_build_pas2_index(pas2_root, 2024L)
+latest_cache <- fec_pas2_cache_file(pas2_root, 2024L)
 stopifnot(nrow(counted_fixture) == 3L,
           all(counted_fixture$unverified_version == 1L),
           sum(counted_fixture$include_in_total == "Yes") == 1L,
@@ -290,10 +310,12 @@ stopifnot(nrow(counted_fixture) == 3L,
           all(substr(counted_fixture$transaction_date,1,4) %in% c("2023","2024")))
 FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- "withhold"
 parsed_fixture <- fec_build_pas2_index(pas2_root, 2024L)
+withheld_cache <- fec_pas2_cache_file(pas2_root, 2024L)
 stopifnot(nrow(parsed_fixture) == 3L, all(parsed_fixture$unresolved_version == 1L),
           all(parsed_fixture$include_in_total == "No"),
           all(substr(parsed_fixture$transaction_date,1,4) %in% c("2023","2024")))
-FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- "count_latest"
+stopifnot(length(unique(c(default_cache, latest_cache, withheld_cache))) == 3L)
+FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- default_pas2_policy
 unlink(pas2_root, recursive = TRUE)
 
 # Candidate-less rows are retained now, so the placeholder name must say that

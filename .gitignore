@@ -111,3 +111,4 @@ mentat/test-results/
 # app/Start-MentatApp.ps1 and tests/test_desktop_launcher.py all read it; without it a clean
 # checkout cannot resolve the report folder and that test fails.
 !mentat/config/report-directory.json
+!mentat/config/attribution-policy.json

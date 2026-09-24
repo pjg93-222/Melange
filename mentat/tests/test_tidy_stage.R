@@ -221,6 +221,7 @@ downstream_activity_export <- data.table(
   excluded_amount = c(4200, 0),
   preliminary_included_amount = c(15800, 3000),
   transfer_records = rep("[]", 2L),
+  filing_records = rep('[{"date":"2022-04-01","amount":100,"source_url":"https://docquery.fec.gov/cgi-bin/fecimg/?1"}]', 2L),
   source_url = rep("https://a.example/pas222.zip", 2L),
   candidate_source_url = rep("https://a.example/cn.zip", 2L)
 )
@@ -437,7 +438,7 @@ check("an unknown incumbent code stays NULL",
       is.na(candidates[candidate_id == "P0ZZ00004", incumbent_status]))
 
 bridge_rows <- frames$beneficiary_bridge
-check("beneficiary_bridge drops the Industry view (it is a sum of the company rows)",
+check("beneficiary_bridge contains company associations; canonical industry facts are separate",
       nrow(bridge_rows) == 1L && bridge_rows$company == "Example Credit Union")
 check("set-valued activity columns become 0/1 flags, not `;`-joined text",
       all(c("has_independent_expenditure", "has_transfer", "has_oppose",
@@ -451,6 +452,7 @@ check("a row counted on the filing-number convention says so in its own column",
         downstream[candidate == "VOE, VERA M", unverified_version_rows] == 0L)
 check("downstream activity keeps its JSON evidence as one text cell",
       all(downstream$transfer_records == "[]") &&
+        all(grepl("docquery.fec.gov", downstream$filing_records, fixed = TRUE)) &&
         downstream[candidate == "VOE, VERA", net_included_amount] == 15800 &&
         downstream[candidate == "VOE, VERA", duplicate_rows] == 1L)
 check("one candidate_id under two filed name spellings stays TWO rows",
@@ -546,7 +548,7 @@ check("every contract table is present",
         "metadata", "contributions", "giving_facts", "recipient_facts",
         "contributor_facts", "location_facts", "committees",
         "committee_sponsors", "candidates", "downstream_activity",
-        "beneficiary_bridge", "state_destinations", "recipient_locations",
+        "beneficiary_bridge", "beneficiary_activity", "state_destinations", "recipient_locations",
         "data_quality"
       ))))
 

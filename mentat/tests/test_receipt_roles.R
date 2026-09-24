@@ -226,8 +226,8 @@ disclosure <- data.table(sub_id=c("parent","memo"), filing_form="F3X",
   "24,999,995 USDC CONTRIBUTION PREVIOUSLY DISCLOSED"), memo_code=c("","X"),
   committee_id="C00835959", two_year_transaction_period=2024L,
   contribution_receipt_amount=c(24999995, 24999995))
-stopifnot(identical(fec_receipt_role(disclosure), c("contribution","disclosure_memo")),
-          identical(fec_receipt_countable(disclosure), c(TRUE, FALSE)),
+stopifnot(identical(fec_receipt_role(disclosure), c("contribution","unverified_disclosure_memo")),
+          identical(fec_receipt_countable(disclosure), c(TRUE, TRUE)),
           isTRUE(fec_assert_receipt_evidence(disclosure)))
 unpaired <- copy(disclosure)
 unpaired[, contribution_receipt_amount := c(100, 24999995)]
@@ -255,3 +255,18 @@ stopifnot(inherits(refusal, "try-error"),
           grepl("contradicts itself for 1 rows", refusal_text, fixed=TRUE),
           grepl("examples: bad", refusal_text, fixed=TRUE))
 cat("test_receipt_roles: PASS\n")
+
+# Search status is not an attribution verdict. Shared policy counterexamples.
+attribution <- data.table(company="Acme", entity_type="IND", company_match_status="rejected",
+  company_match_reason="employer_prefix_not_verified", excluded_reason="",
+  contributor_employer=c("CONSULTANT", "REFUSED", "NOTEMPLOYED", "ACME", "OTHER BANK", "UNKNOWN LABEL"))
+stopifnot(identical(fec_attribution_status(attribution),
+  c("unverified", "unverified", "unverified", "company_named_unverified", "contradicted_by_reported_organization", "unverified")))
+stopifnot(identical(fec_receipt_countable(attribution), c(TRUE,TRUE,TRUE,TRUE,FALSE,TRUE)))
+attribution[1, company_match_reason := "persistent_override:reject"]
+stopifnot(!fec_receipt_countable(attribution)[1])
+attribution[1, `:=`(company_match_reason="blank_employer", excluded_reason="occupation:HOCKEY")]
+stopifnot(fec_receipt_countable(attribution)[1])
+attribution[1, excluded_reason := "exclusion_pattern:UNRELATED COMPANY"]
+stopifnot(!fec_receipt_countable(attribution)[1])
+cat("Attribution evidence policy: PASS\n")

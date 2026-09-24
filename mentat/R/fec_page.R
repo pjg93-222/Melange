@@ -318,7 +318,7 @@ fec_read_page <- function(session) {
     "})())"
   )
   json <- fec_runtime_value(session, expression)
-  payload <- jsonlite::fromJSON(json, simplifyVector = FALSE)
+  payload <- jsonlite::fromJSON(json, simplifyVector = FALSE, bigint_as_char = TRUE)
   if (is.null(payload$info) || is.null(payload$rows)) {
     stop("FEC DataTable payload is missing info or rows.", call. = FALSE)
   }
@@ -691,6 +691,11 @@ fec_browser_api_batch <- function(
       "var cursor=%s;",
       "var perPage=%d;",
       "var attempts=%d;",
+      # Match complete JSON strings first, so digits inside names/memos are
+      # untouched. Quote long integer tokens before JS can round IDs/cursors.
+      "function parseExact(text){return JSON.parse(text.replace(",
+      r"(/"(?:[^"\\]|\\.)*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g,)",
+      r"(function(token){return /^-?\d{16,}$/.test(token)?'"'+token+'"':token;}));})",
       "async function fetchPage(page,cursor){",
       "var last={status:0,error:'request did not start'};",
       "for(var attempt=1;attempt<=attempts;attempt++){",
@@ -710,7 +715,7 @@ fec_browser_api_batch <- function(
       "}",
       "var response=await fetch(url.href);",
       "if(response.ok){",
-      "return {page:page,status:response.status,body:await response.json()};",
+      "return {page:page,status:response.status,body:parseExact(await response.text())};",
       "}",
       "last={page:page,status:response.status,error:await response.text()};",
       "if(response.status!==429 && response.status<500){return last;}",
@@ -746,7 +751,7 @@ fec_browser_api_batch <- function(
     attempts
   )
   payload <- fec_runtime_value(session, expression, timeout_seconds = 60)
-  jsonlite::fromJSON(payload, simplifyVector = FALSE)
+  jsonlite::fromJSON(payload, simplifyVector = FALSE, bigint_as_char = TRUE)
 }
 
 fec_walk_variant_set_api <- function(

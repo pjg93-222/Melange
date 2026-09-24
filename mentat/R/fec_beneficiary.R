@@ -358,20 +358,16 @@ fec_downstream_direction <- function(values) {
 #   3 = version key scoped to the transaction-date year
 #   4 = competing report versions remain unresolved without filing evidence
 #   5 = rows inside a reused transaction id are partitioned by identity
-FEC_PAS2_PARSER_VERSION <- "5"
+#   6 = count_all default; conflicting sub-IDs and missing amounts refuse
+#   7 = cycle IDs participate in the cache signature
+#   8 = preserve image numbers and original FEC filing links per observation
+FEC_PAS2_PARSER_VERSION <- "8"
 
-# The mirror of tools/fec_transfer_graph.py's AMBIGUOUS_VERSION_POLICY, for the
-# rows that stay genuinely ambiguous: "count_latest" counts the highest-file_num
-# row of each withheld group and flags it unverified_version; "withhold" keeps
-# them out of the counted total under "Unresolved filing relationship".
-# "count_latest" is the default because a row loses its amount only where
-# evidence CONTRADICTS it and ambiguity keeps its dollars under an unverified
-# flag; because the latest filed version is the FEC's own convention; and
-# because counting the latest is never further from the truth than withholding
-# both - an amendment it gets exactly right, and two transactions it undercounts
-# by one row where withholding undercounts by two.
-# It is part of the cache signature, so changing it rebuilds the index.
-FEC_PAS2_AMBIGUOUS_VERSION_POLICY <- "count_latest"
+# Mirror the Python default: distinct observations remain provisional until
+# supersession is established. PAS2 has no preserved filing-family headers,
+# so file number alone cannot remove a row. Legacy count_latest/withhold are
+# sensitivity scenarios, separately keyed, not production evidence rules.
+FEC_PAS2_AMBIGUOUS_VERSION_POLICY <- "count_all"
 
 fec_pas2_cache_file <- function(directory, cycles) {
   paths <- vapply(cycles, function(cycle) {
@@ -383,8 +379,8 @@ fec_pas2_cache_file <- function(directory, cycles) {
   signature <- paste(
     c(
       paste0("p", FEC_PAS2_PARSER_VERSION,
-             substr(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, 1L, 1L)),
-      substr(unname(tools::md5sum(paths)), 1L, 10L)
+             FEC_PAS2_AMBIGUOUS_VERSION_POLICY),
+      paste0(cycles, "_", substr(unname(tools::md5sum(paths)), 1L, 10L))
     ),
     collapse = "-"
   )
@@ -424,6 +420,7 @@ fec_build_pas2_index <- function(directory, cycles) {
       candidate_id = toupper(trim_text(candidate_id)),
       amendment_indicator = toupper(trim_text(amendment_indicator)),
       report_type = toupper(trim_text(report_type)),
+      image_number = trim_text(image_number),
       transaction_type = toupper(trim_text(transaction_type)),
       recipient_name = trim_text(recipient_name),
       destination_committee_id = toupper(trim_text(other_id)),
@@ -436,7 +433,18 @@ fec_build_pas2_index <- function(directory, cycles) {
       sub_id = trim_text(sub_id)
     )]
     rows <- rows[nzchar(committee_id)]
-    rows[is.na(transaction_amount), transaction_amount := 0]
+    duplicate_ids <- rows$sub_id[nzchar(rows$sub_id) &
+      (duplicated(rows$sub_id) | duplicated(rows$sub_id, fromLast = TRUE))]
+    if (length(duplicate_ids)) {
+      conflicts <- unique(rows[sub_id %in% duplicate_ids])
+      if (any(duplicated(conflicts$sub_id))) {
+        stop("Conflicting FEC sub-ID; reconcile preserved source evidence before indexing.", call. = FALSE)
+      }
+    }
+    if (any(!is.finite(rows$transaction_amount)) ||
+        any(abs(rows$transaction_amount * 100 - round(rows$transaction_amount * 100)) > 1e-6)) {
+      stop("Missing or invalid PAS2 amount; no zero-valued measurement may be published.", call. = FALSE)
+    }
     rows[, original_order := .I]
     parsed_date <- suppressWarnings(as.Date(rows$transaction_date_raw, format = "%m%d%Y"))
     rows[, transaction_date := ifelse(is.na(parsed_date), "", format(parsed_date, "%Y-%m-%d"))]
@@ -463,7 +471,7 @@ fec_build_pas2_index <- function(directory, cycles) {
     # collides across genuinely different expenditures. What a row IS is its
     # counterparty, its amount, its date and its transaction type; the version
     # question is asked only among rows that claim to be the same thing.
-    rows[, identity_key := paste(candidate_id, round(transaction_amount * 100),
+    rows[, identity_key := paste(candidate_id, destination_committee_id, round(transaction_amount * 100),
                                  transaction_date, transaction_type, sep = "|")]
     rows[, live := exact_duplicate == 0L]
     # Every grouped expression below is written so data.table's optimized
@@ -477,6 +485,9 @@ fec_build_pas2_index <- function(directory, cycles) {
     rows[, live_file := ifelse(live, file_num_sort, -Inf)]
     rows[, latest_identity_file := max(live_file), by = .(version_key, identity_key)]
     rows[, superseded_by_amendment := as.integer(live & file_num_sort < latest_identity_file)]
+    if (identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_all")) {
+      rows[, superseded_by_amendment := 0L]
+    }
     rows[, live := live & superseded_by_amendment == 0L]
     # The same identity several times inside the WINNING filing is ONE
     # itemization loaded again under a second sub-ID. The group is already keyed
@@ -487,6 +498,10 @@ fec_build_pas2_index <- function(directory, cycles) {
     rows[live == TRUE,
          repeated_itemization := as.integer(duplicated(.SD)),
          .SDcols = c("version_key", "identity_key")]
+    # Identical attributes under a reused line label are not a duplicate ID.
+    if (identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_all")) {
+      rows[, repeated_itemization := 0L]
+    }
     rows[, live := live & repeated_itemization == 0L]
     # What remains in question: two surviving identities in DIFFERENT filings
     # are candidate VERSIONS of one transaction only when they name the same
@@ -548,6 +563,15 @@ fec_build_pas2_index <- function(directory, cycles) {
            !(blank_rows > 0L & surviving_files > 1L),
          withheld_group := paste0("ROW|", original_order)]
     rows[, unverified_version := 0L]
+    if (identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_all")) {
+      rows[conflicted == TRUE, `:=`(unresolved_version = 0L, unverified_version = 1L)]
+      # An unidentified candidate is a coverage gap, not a reason to erase a
+      # reported expenditure. Keep its dollars in the unknown-identity bucket.
+      rows[live & !nzchar(candidate_id) & memo_code != "X",
+           `:=`(unresolved_version = 0L, unverified_version = 1L)]
+      rows[live == TRUE, unverified_version := pmax(unverified_version, as.integer(.N > 1L)),
+           by = .(version_key, identity_key)]
+    }
     if (identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_latest")) {
       rows[conflicted == TRUE, `:=`(
         unresolved_version = 0L,
@@ -562,6 +586,10 @@ fec_build_pas2_index <- function(directory, cycles) {
       share[[pick]] <- max(transaction_amount[[pick]], 0)
       share
     }, by = withheld_group]
+    if (identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_all")) {
+      rows[unresolved_version == 1L & live & memo_code != "X",
+           unresolved_version_amount := pmax(transaction_amount, 0)]
+    }
     rows[, include_in_total := ifelse(
       exact_duplicate == 0L & repeated_itemization == 0L &
         superseded_by_amendment == 0L & unresolved_version == 0L & memo_code != "X",
@@ -576,8 +604,10 @@ fec_build_pas2_index <- function(directory, cycles) {
     )]
     rows[, activity_type := fec_downstream_relationship(transaction_type)]
     rows[, support_oppose := fec_downstream_direction(transaction_type)]
-    rows[, source_url := paste0(
-      "https://www.fec.gov/files/bulk-downloads/", target_cycle, "/pas2", suffix, ".zip"
+    rows[, source_url := ifelse(
+      grepl("^[0-9]+$", image_number),
+      paste0("https://docquery.fec.gov/cgi-bin/fecimg/?", image_number),
+      paste0("https://www.fec.gov/files/bulk-downloads/", target_cycle, "/pas2", suffix, ".zip")
     )]
     data.table::setorder(rows, original_order)
     rows[, c(
@@ -627,8 +657,8 @@ fec_read_downstream_activity <- function(directory, recipient_universe, candidat
   # On Schedule E/PAS2 the recipient can be an advertising vendor. Its name
   # cannot identify the candidate. Even a historical candidate-master match
   # may conflict with the name as filed, so do not infer an identity here.
-  # A PAS2 row can also carry no candidate ID at all - it is retained as
-  # evidence but never counted - so name that case instead of printing an
+  # A PAS2 row can also carry no candidate ID at all - keep its provisional
+  # amount in an unknown-identity bucket, named instead of printing an
   # empty parenthesis.
   activity[is.na(candidate_name) | !nzchar(candidate_name),
            candidate_name := paste0(
@@ -805,6 +835,12 @@ fec_aggregate_downstream_activity <- function(downstream_activity, recipient_uni
       cents = round(transaction_amount * 100), type = transaction_type
     )[include_in_total == "Yes" & transaction_type %in% c("24G", "24K")],
       dataframe = "rows", auto_unbox = TRUE, digits = NA)),
+    filing_records = as.character(jsonlite::toJSON(data.table::data.table(
+      date = transaction_date, amount = transaction_amount, type = transaction_type,
+      file_num = file_num, transaction_id = transaction_id, sub_id = sub_id,
+      source_url = source_url
+    )[include_in_total == "Yes"],
+      dataframe = "rows", auto_unbox = TRUE, digits = NA)),
     first_activity_date = fec_min_text(transaction_date),
     last_activity_date = fec_max_text(transaction_date),
     source_url = fec_mode_text(source_url),
@@ -832,9 +868,55 @@ fec_aggregate_downstream_activity <- function(downstream_activity, recipient_uni
   result
 }
 
-fec_build_beneficiary_tables <- function(raw_export, downstream_activity) {
+fec_beneficiary_reach <- function(funding, transfer_edges, candidate_links = NULL) {
+  # Multi-source breadth-first traversal: one spending committee per view, even
+  # when two funded roots or a diamond reach it. Routes explain association;
+  # they never multiply candidate activity or allocate the funding to it.
+  result <- list()
+  if (!nrow(funding)) return(data.table::data.table(cycle = integer(), view = character(),
+    company = character(), source_committee_id = character(), representative_root = character(),
+    representative_path = character()))
+  scopes <- unique(funding[, .(cycle, view, company)])
+  for (i in seq_len(nrow(scopes))) {
+    scope <- scopes[i]
+    seeds <- funding[cycle == scope$cycle & view == scope$view & company == scope$company]
+    seeds <- seeds[order(source_committee_id)]
+    seed_mask <- if ("traversal_seed" %in% names(seeds)) seeds$traversal_seed else seeds$preliminary_crypto_funding > 0
+    visited <- seeds$source_committee_id[seed_mask]
+    frontier <- visited
+    roots <- stats::setNames(visited, visited)
+    routes <- stats::setNames(visited, visited)
+    stops <- if (is.null(candidate_links)) character() else
+      candidate_links[cycle == scope$cycle & designation %in% c("P", "A"), committee_id]
+    edges <- if (is.null(transfer_edges) || !nrow(transfer_edges)) data.table::data.table() else
+      transfer_edges[cycle == scope$cycle & amount > 0][order(source, destination)]
+    while (length(frontier) && nrow(edges)) {
+      outgoing <- edges[source %in% setdiff(frontier, stops)]
+      next_frontier <- character()
+      for (j in seq_len(nrow(outgoing))) {
+        destination <- outgoing$destination[j]
+        if (destination %in% c(visited, stops)) next
+        origin <- outgoing$source[j]
+        visited <- c(visited, destination)
+        roots[destination] <- roots[origin]
+        routes[destination] <- paste(routes[origin], destination, sep = " > ")
+        next_frontier <- c(next_frontier, destination)
+      }
+      frontier <- next_frontier
+    }
+    for (id in setdiff(seeds$source_committee_id, visited)) {
+      visited <- c(visited, id); roots[id] <- id; routes[id] <- id
+    }
+    result[[i]] <- data.table::data.table(cycle = scope$cycle, view = scope$view,
+      company = scope$company, source_committee_id = visited,
+      representative_root = unname(roots[visited]), representative_path = unname(routes[visited]))
+  }
+  data.table::rbindlist(result)
+}
+
+fec_build_beneficiary_tables <- function(raw_export, downstream_activity, transfer_edges = NULL,
+                                        candidate_links = NULL) {
   downstream <- fec_aggregate_beneficiary_downstream(downstream_activity)
-  if (!nrow(downstream)) return(list(bridge = data.table::data.table(), summary = data.table::data.table()))
   funded <- raw_export[
     include_in_analysis == "Yes" & nzchar(committee_id),
     .(
@@ -845,12 +927,29 @@ fec_build_beneficiary_tables <- function(raw_export, downstream_activity) {
   ]
   industry <- funded[, .(
     preliminary_crypto_funding = sum(preliminary_crypto_funding, na.rm = TRUE),
-    source_committee = fec_mode_text(source_committee)
+    source_committee = fec_mode_text(source_committee),
+    traversal_seed = any(preliminary_crypto_funding > 0)
   ), by = .(cycle, source_committee_id)]
   industry[, `:=`(view = "Industry", company = "Industry Total")]
   company <- data.table::copy(funded)
-  company[, view := "Company"]
+  company[, `:=`(view = "Company", traversal_seed = preliminary_crypto_funding > 0)]
   funding <- data.table::rbindlist(list(industry, company), use.names = TRUE, fill = TRUE)
+  reach <- fec_beneficiary_reach(funding, transfer_edges, candidate_links)
+  if (!nrow(downstream)) return(list(bridge = data.table::data.table(), bridge_all = data.table::data.table(),
+    summary = data.table::data.table(), reach = reach, measurement_ledger = data.table::data.table()))
+  old_bridge <- merge(funding, downstream, by = c("cycle", "source_committee_id"),
+                      allow.cartesian = TRUE, sort = FALSE)
+  # Preserve funding at its actual recipient. A descendant's observed spending
+  # does not prove it received the root's company dollars.
+  if (is.null(transfer_edges) || !nrow(transfer_edges)) {
+    # Preserve legacy row ordering, including ties, when there is no route input.
+    funding[, `:=`(representative_root = source_committee_id, representative_path = source_committee_id)]
+  } else {
+    funding <- merge(reach, funding, by = c("cycle", "view", "company", "source_committee_id"),
+                     all.x = TRUE, sort = FALSE)
+  }
+  funding[is.na(preliminary_crypto_funding), preliminary_crypto_funding := 0]
+  funding[is.na(source_committee) | !nzchar(source_committee), source_committee := source_committee_id]
   bridge <- merge(
     funding, downstream,
     by = c("cycle", "source_committee_id"),
@@ -862,6 +961,18 @@ fec_build_beneficiary_tables <- function(raw_export, downstream_activity) {
   )]
   bridge[, bridge_key := paste(cycle, view, company, source_committee_id, candidate_key, sep = "|")]
   data.table::setorder(bridge, cycle, view, company, -preliminary_downstream_amount, candidate_name)
+
+  # Preserve the measurement change before top-100 presentation filtering.
+  # This compares algorithms on identical current inputs, not published vintages.
+  ledger_keys <- c("cycle", "view", "company", "candidate_id")
+  before <- old_bridge[, .(before_amount = sum(preliminary_downstream_amount)), by = ledger_keys]
+  after <- bridge[, .(after_amount = sum(preliminary_downstream_amount)), by = ledger_keys]
+  measurement_ledger <- merge(before, after, by = ledger_keys, all = TRUE, sort = TRUE)
+  measurement_ledger[is.na(before_amount), before_amount := 0]
+  measurement_ledger[is.na(after_amount), after_amount := 0]
+  measurement_ledger[, delta := after_amount - before_amount]
+  measurement_ledger[, basis := "Same source rows: direct-only association versus unique reachable spending committees; not a published-report comparison"]
+  bridge_all <- data.table::copy(bridge)
 
   summary <- fec_aggregate_beneficiary_summary(bridge)[office %in% c("H", "S")]
   data.table::setorder(summary, cycle, view, company, -preliminary_downstream_amount, candidate_name)
@@ -875,5 +986,5 @@ fec_build_beneficiary_tables <- function(raw_export, downstream_activity) {
     sort = FALSE
   )
   data.table::setorder(bridge, cycle, view, company, -preliminary_downstream_amount, candidate_name)
-  list(bridge = bridge, summary = summary)
+  list(bridge = bridge, bridge_all = bridge_all, summary = summary, reach = reach, measurement_ledger = measurement_ledger)
 }

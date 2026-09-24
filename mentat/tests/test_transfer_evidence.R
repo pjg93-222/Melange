@@ -28,13 +28,13 @@ check_transfer_evidence <- function() {
   stopifnot(nrow(evidence)==1L, evidence$transaction_id=='T1', evidence$file_num==1,
     evidence$destination=='C00000002', evidence$cents==10000,
     retained$preliminary_included_amount==100)
-  # An amended date with no filing header. The default counts the later filing
-  # and flags it; `withhold` keeps neither row. Both readings are pinned here.
+  # An amended date with no filing header. The default retains both observations
+  # and flags them; `withhold` keeps neither row. Both readings are pinned here.
   writeLines(c(row(), row(date='01012024',file='2',sub='2',amendment='A')), path)
-  stopifnot(identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, 'count_latest'))
+  stopifnot(identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, 'count_all'))
   counted <- aggregate(fec_build_pas2_index(directory, 2024L))
   stopifnot(counted$unresolved_version_rows==0L, counted$unverified_version_rows==2L,
-    counted$preliminary_included_amount==100, counted$superseded_rows==1L)
+    counted$preliminary_included_amount==200, counted$superseded_rows==0L)
   FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'withhold'
   redated <- aggregate(fec_build_pas2_index(directory, 2024L))
   stopifnot(redated$unresolved_version_rows==2L, redated$preliminary_included_amount==0,
@@ -63,7 +63,7 @@ check_transfer_evidence <- function() {
   jsonlite::write_json(list(version=3,edges_sha256=digest::digest(file=edges,algo='sha256')),
     info,auto_unbox=TRUE)
   stopifnot(fec_transfer_context(directory,roots,links,2024L)$coverage[[1L]]$status=='stale_transfer_index')
-  jsonlite::write_json(list(version=4,edges_sha256=digest::digest(file=edges,algo='sha256'),
+  jsonlite::write_json(list(version=5,ambiguous_version_policy='count_all',edges_sha256=digest::digest(file=edges,algo='sha256'),
     unresolved_sources=list('C00000001'),unresolved_source_amounts=list(C00000001=90),
     unresolved_all_sources=FALSE,counts=list(unresolved_rows=2)),
     info,auto_unbox=TRUE)
@@ -95,10 +95,12 @@ check_pas2_identity_partition <- function() {
   }
   parse <- function(...) { writeLines(c(...), path); fec_build_pas2_index(directory, 2024L) }
 
-  # A: a repeated sub-ID is still an exact duplicate.
-  a <- parse(row(sub='1'), row(sub='1', file='2'))
+  # A: an exactly repeated observation is a duplicate; conflicting facts are not.
+  a <- parse(row(sub='1'), row(sub='1'))
   stopifnot(sum(a$exact_duplicate) == 1L,
             identical(sort(a$exclusion_reason), c('Duplicate FEC sub-ID', 'Included')))
+  conflict <- tryCatch(parse(row(sub='1'), row(sub='1', amount='150')), error=identity)
+  stopifnot(inherits(conflict, 'error'), grepl('Conflicting FEC sub-ID', conditionMessage(conflict)))
 
   # B: one transaction re-reported in a later filing. The earlier row is
   # contradicted by the amendment, so `superseded_by_amendment` is real again.
@@ -187,7 +189,7 @@ check_pas2_identity_partition <- function() {
             aggregated$preliminary_included_amount == 0)
 
   # The other reading is one constant, and it invalidates its own cache.
-  stopifnot(identical(FEC_PAS2_PARSER_VERSION, '5'),
+  stopifnot(identical(FEC_PAS2_PARSER_VERSION, '8'),
             identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, 'withhold'))
   withheld_cache <- fec_pas2_cache_file(directory, 2024L)
   FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'count_latest'
@@ -201,3 +203,29 @@ check_pas2_identity_partition <- function() {
 }
 check_pas2_identity_partition()
 cat('PAS2 identity partition: classes A-E, superseded amendments and the withheld share PASS\n')
+
+check_retained_ambiguity <- function() {
+  FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'count_all'
+  directory <- tempfile('mentat-pas2-retained-')
+  dir.create(file.path(directory, 'pas224'), recursive=TRUE)
+  on.exit(unlink(directory, recursive=TRUE))
+  path <- file.path(directory, 'pas224', 'itpas2.txt')
+  row <- function(id, file='1', value='100') {
+    fields <- rep('',22L)
+    fields[c(1,2,3,6,14,15,16,17,18,19,22)] <- c('C00000001','N','Q1','24K','01012024',value,'C00000002','H00000001','SE.5',file,id)
+    paste(fields,collapse='|')
+  }
+  for (file in c('1','2')) {
+    writeLines(c(row('1'), row('2',file)),path)
+    result <- fec_build_pas2_index(directory,2024L)
+    stopifnot(all(result$include_in_total=='Yes'),all(result$unverified_version==1L),sum(result$transaction_amount)==200)
+  }
+  retained_cache <- fec_pas2_cache_file(directory,2024L)
+  FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'count_latest'
+  stopifnot(retained_cache != fec_pas2_cache_file(directory,2024L))
+  FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'count_all'
+  writeLines(row('missing',value=''),path)
+  stopifnot(inherits(try(fec_build_pas2_index(directory,2024L),silent=TRUE),'try-error'))
+}
+check_retained_ambiguity()
+cat('Retained ambiguity, separate policy caches and missing amounts: PASS\n')

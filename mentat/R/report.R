@@ -2086,6 +2086,8 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
   data.table::setorder(rows, source_priority, sub_id)
   rows <- unique(rows, by = "sub_id")
   rows[, source_priority := NULL]
+  variants <- spending_report_lookups(connection)$companies
+  rows[, company_attribution_status := fec_attribution_status(rows, split(variants$variant, variants$company))]
   rows[, receipt_role := fec_receipt_role(rows)]
   # Never trust flags computed by an older matcher on an immutable snapshot.
   memo_plan <- mentat_memo_duplicate_plan(rows)
@@ -2111,9 +2113,7 @@ spending_report_rows <- function(connection, lookups = NULL, raw_rows = NULL) {
   # corporate_giving rows whose names use approved corporate qualifiers (for
   # example COINBASE GLOBAL) are not literal
   # roster aliases, yet the corporate matcher has already verified them.
-  persisted_entity_flags <- as.integer(
-    rows$source_table == "corporate_giving"
-  )
+  persisted_entity_flags <- as.integer(rows$source_table == "corporate_giving" & toupper(trim_text(rows$entity_type)) != "IND")
   rows[, is_entity_contributor := pmax(
     persisted_entity_flags,
     entity_flags,

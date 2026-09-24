@@ -849,7 +849,7 @@ stopifnot(
     c("Employee Name", "Employee Title", "Company", "Zipcode", "State")
   ),
   "TUSAR, GREG" %in% employees[[1L]],
-  !"DRIVER, DONNA" %in% employees[[1L]]
+  "DRIVER, DONNA" %in% employees[[1L]]
 )
 
 raw <- readxl::read_excel(

@@ -136,7 +136,9 @@ class Transfers(unittest.TestCase):
                 # the highest filing number. For every one of these changes it
                 # lands on the SAME answer the filing headers give, and the
                 # original is never counted beside the amendment.
-                self.assertEqual(transfer_index(path,2024)['edges'],resolved['edges'])
+                provisional=transfer_index(path,2024)
+                self.assertEqual(sum(e['amount'] for e in provisional['edges']),200 if 'date' in change else 100)
+                self.assertGreater(provisional['counts']['unverified_version_rows'],0)
                 # Under the other reading nothing is counted at all. A memo
                 # restatement of the same destination, amount, date and type is
                 # one transaction re-reported, so it settles by file number
@@ -194,7 +196,7 @@ STATUSES={'observed','current','superseded','duplicate','unresolved_version','un
 
 
 class VersionIdentity(unittest.TestCase):
-    """VERSION 4: a transaction ID is a label, so identity decides the version.
+    """VERSION 5: a transaction label or attribute equality is not source identity.
 
     One test per class of the rule. `committee|report_type|transaction_id` is
     still the group; inside it, rows are partitioned by the counterparty, the
@@ -216,10 +218,9 @@ class VersionIdentity(unittest.TestCase):
     def assert_one_status_and_no_double_count(self,ledger):
         """The conservation invariant, recomputed from the ledger itself.
 
-        Counted dollars in a group never exceed the sum over its distinct
-        identity tuples, each allowed the most copies any SINGLE filing showed
-        of it: two equal gifts itemized once are two transactions, and the same
-        two re-reported in an amendment are still two.
+        Counted dollars cannot exceed the distinct source observations.
+        Verified amendment families may reduce that amount; mere attribute
+        equality cannot. Fixtures here use nonnegative amounts.
         """
         groups=defaultdict(list)
         for row in ledger:
@@ -231,7 +232,9 @@ class VersionIdentity(unittest.TestCase):
             copies=defaultdict(lambda:defaultdict(int))
             for row in cash:
                 copies[(row['destination'],row['cents'],row['date'],row['type'])][row['file_num']]+=1
-            ceiling=sum(max(files.values())*(identity[1] or 0) for identity,files in copies.items())
+            # Without a filing relationship, distinct source observations may
+            # both be real. Attribute equality cannot lower this ceiling.
+            ceiling=sum(sum(files.values())*(identity[1] or 0) for identity,files in copies.items())
             self.assertLessEqual(counted,ceiling,f'{key} counts more than its distinct identities allow')
 
     def test_class_a_an_exactly_repeated_raw_line_is_a_duplicate(self):
@@ -240,12 +243,16 @@ class VersionIdentity(unittest.TestCase):
         self.assertEqual([row['status'] for row in ledger],['current','duplicate'])
         self.assertEqual(index['edges'][0]['amount'],100)
 
-    def test_class_b_the_same_transaction_in_two_filings_supersedes_by_file_number(self):
+    def test_identical_attributes_in_two_filings_require_a_relationship(self):
         index,ledger=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2')])
         self.assertEqual({row['file_num']:(row['status'],row['version_basis']) for row in ledger},
-                         {1:('superseded','file_number'),2:('current','file_number')})
-        self.assertEqual([edge['amount'] for edge in index['edges']],[100])
+                         {1:('current','filing_relationship_unverified'),2:('current','filing_relationship_unverified')})
+        self.assertEqual([edge['amount'] for edge in index['edges']],[200])
         self.assertEqual(index['unresolved_sources'],[])
+
+    def test_conflicting_facts_for_same_source_identity_stop_indexing(self):
+        with self.assertRaisesRegex(ValueError,'Conflicting FEC sub-ID'):
+            self.build([transfer_row(sub='1',amount='100'),transfer_row(sub='1',amount='150')])
 
     def test_class_b_records_the_header_route_when_headers_settle_the_family(self):
         index,ledger=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2',amend='A')],
@@ -254,16 +261,14 @@ class VersionIdentity(unittest.TestCase):
                          {1:('superseded','header'),2:('current','header')})
         self.assertEqual([edge['amount'] for edge in index['edges']],[100])
 
-    def test_class_c_one_itemization_loaded_twice_in_a_filing_is_counted_once(self):
-        # Two sub_ids, one transaction id, one filing, everything else equal:
-        # the FEC bulk file carries the same line again, it is not a second
-        # gift. Two genuine equal gifts get two transaction ids from the filer
-        # and therefore land in two different groups -- the case below.
+    def test_distinct_sub_ids_with_identical_attributes_are_retained_and_flagged(self):
+        # Distinct sub-IDs with equal attributes do not prove a duplicate,
+        # even when the filer reused one transaction label.
         index,ledger=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='1')])
         self.assertEqual({row['sub_id']:(row['status'],row['version_basis']) for row in ledger},
-                         {'1':('duplicate','repeated_itemization'),'2':('current','file_number')})
-        self.assertEqual(index['edges'][0]['amount'],100)
-        self.assertEqual(index['edges'][0]['record_count'],1)
+                         {'1':('current','filing_relationship_unverified'),'2':('current','filing_relationship_unverified')})
+        self.assertEqual(index['edges'][0]['amount'],200)
+        self.assertEqual(index['edges'][0]['record_count'],2)
 
     def test_two_genuine_equal_gifts_on_one_day_are_both_counted(self):
         index,ledger=self.build([transfer_row(sub='1',file='1',transaction='SB23.1'),
@@ -280,9 +285,9 @@ class VersionIdentity(unittest.TestCase):
                                  transfer_row(sub='3',file='2',amend='A')],
                                 [header(1),header(2,1)])
         self.assertEqual({row['sub_id']:(row['status'],row['version_basis']) for row in ledger},
-                         {'1':('superseded','header'),'2':('duplicate','repeated_itemization'),
+                         {'1':('superseded','header'),'2':('current','header'),
                           '3':('current','header')})
-        self.assertEqual([edge['amount'] for edge in index['edges']],[100])
+        self.assertEqual([edge['amount'] for edge in index['edges']],[200])
 
     def test_class_d_one_filing_reusing_a_line_label_keeps_both_transactions(self):
         index,ledger=self.build([transfer_row(dest='C00000002',amount='100',sub='1',file='1',transaction='SE.5'),
@@ -340,12 +345,12 @@ class VersionIdentity(unittest.TestCase):
         # stay and carry the flag.
         index,ledger=self.build([transfer_row(amount='100',sub='1',file='1'),
                                  transfer_row(amount='150',sub='2',file='2')])
-        self.assertEqual(index['ambiguous_version_policy'],'count_latest')
+        self.assertEqual(index['ambiguous_version_policy'],'count_all')
         self.assertEqual({row['file_num']:(row['status'],row['unverified_version'],row['version_basis'])
                           for row in ledger},
-                         {1:('superseded',1,'file_number_unverified'),
-                          2:('current',1,'file_number_unverified')})
-        self.assertEqual([edge['amount'] for edge in index['edges']],[150])
+                         {1:('current',1,'filing_relationship_unverified'),
+                          2:('current',1,'filing_relationship_unverified')})
+        self.assertEqual([edge['amount'] for edge in index['edges']],[250])
         self.assertEqual(index['unresolved_source_amounts'],{})
 
     def test_class_e_withhold_reading_keeps_no_dollars_and_reports_the_share(self):
@@ -361,7 +366,7 @@ class VersionIdentity(unittest.TestCase):
     def test_a_cross_filing_type_change_is_not_counted_as_a_second_transaction(self):
         # Under either reading the 24K row never survives beside the 24Z one.
         index,_=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2',kind='24Z')])
-        self.assertEqual(index['edges'],[])
+        self.assertEqual([edge['amount'] for edge in index['edges']],[100])
         self.policy('withhold')
         withheld,_=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='2',kind='24Z')])
         self.assertEqual(withheld['edges'],[])
@@ -375,7 +380,7 @@ class VersionIdentity(unittest.TestCase):
         counted=transfer_index(path,2024)
         self.policy('withhold')
         withheld=transfer_index(path,2024)
-        self.assertEqual([edge['amount'] for edge in counted['edges']],[150])
+        self.assertEqual([edge['amount'] for edge in counted['edges']],[250])
         self.assertEqual(withheld['edges'],[])
         self.assertNotEqual(withheld['ledger_path'],counted['ledger_path'])
 

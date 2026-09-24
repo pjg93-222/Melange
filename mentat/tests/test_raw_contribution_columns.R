@@ -45,6 +45,22 @@ contract <- jsonlite::fromJSON(contract_path[[1L]], simplifyVector = TRUE)
 block_db <- as.character(contract$block_db)
 street_columns <- c("contributor_street_1", "contributor_street_2")
 
+# Keep the historical address contract intact. The September 20 accounting
+# correction adds explicit company-attribution evidence to both projections,
+# and preserves receipt-role evidence in tidy staging. Require these exact
+# additions at their published position; do not ignore arbitrary new columns.
+tidy_columns_current <- append(
+  contract$surfaces$tidy_contributions$columns,
+  c("company_attribution_status", "company_attribution_reason",
+    "receipt_role_unverified", "receipt_role_reason"),
+  after = match("company_match_reason", contract$surfaces$tidy_contributions$columns)
+)
+workbook_columns_current <- append(
+  contract$surfaces$workbook_r_stage$columns,
+  c("company_attribution_status", "company_attribution_reason"),
+  after = match("company_match_reason", contract$surfaces$workbook_r_stage$columns)
+)
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -269,15 +285,15 @@ check("c", "fec_api.R fec_api_corporate_records() keeps the address block", func
   adjacency_detail("fec_api_corporate_records()", names(records), block_db)
 })
 
-check("d", "tidy_stage.R contributions spec matches the contract", function() {
+check("d", "tidy_stage.R contributions spec matches the address and attribution contract", function() {
   identical_detail(
     "MENTAT_TIDY_TABLE_SPECS$contributions",
     names(MENTAT_TIDY_TABLE_SPECS$contributions),
-    contract$surfaces$tidy_contributions$columns
+    tidy_columns_current
   )
 })
 
-check("e", "export_crypto_spending_data.R raw_export projection matches the contract", function() {
+check("e", "export_crypto_spending_data.R raw_export projection matches the address and attribution contract", function() {
   projection <- find_dot_projection(
     file.path(project_root, "tools", "export_crypto_spending_data.R"),
     "source_id",
@@ -286,7 +302,7 @@ check("e", "export_crypto_spending_data.R raw_export projection matches the cont
   identical_detail(
     "raw_export projection",
     projection_names(projection),
-    contract$surfaces$workbook_r_stage$columns
+    workbook_columns_current
   )
 })
 

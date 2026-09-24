@@ -56,7 +56,8 @@ MENTAT_TIDY_TABLE_SPECS <- list(
     zipcode = "TEXT", date = "TEXT", amount = "REAL",
     analysis_amount = "REAL", include_in_analysis = "INTEGER",
     inclusion_reason = "TEXT", company_match_status = "TEXT",
-    company_match_reason = "TEXT", matched_alias = "TEXT", recipient = "TEXT",
+    company_match_reason = "TEXT", company_attribution_status = "TEXT", company_attribution_reason = "TEXT",
+    receipt_role_unverified = "INTEGER", receipt_role_reason = "TEXT", matched_alias = "TEXT", recipient = "TEXT",
     committee_id = "TEXT", recipient_key = "TEXT", recipient_category = "TEXT",
     category_source = "TEXT", party = "TEXT", party_source = "TEXT",
     committee_type_code = "TEXT", committee_type = "TEXT",
@@ -139,13 +140,13 @@ MENTAT_TIDY_TABLE_SPECS <- list(
     included_rows = "INTEGER", excluded_rows = "INTEGER",
     superseded_rows = "INTEGER", memo_rows = "INTEGER",
     duplicate_rows = "INTEGER",
-    # Rows counted on the strength of the highest filing number rather than
-    # filing evidence. The dollars are in net_included_amount; this says how
-    # many of them rest on that convention.
-    unverified_version_rows = "INTEGER", reported_amount = "REAL",
+    # Retained observations with unresolved filing relationships are provisional.
+    unverified_version_rows = "INTEGER", unresolved_version_rows = "INTEGER",
+    unresolved_version_amount = "REAL", repeated_itemization_rows = "INTEGER",
+    reported_amount = "REAL",
     excluded_amount = "REAL", net_included_amount = "REAL",
     fec_committee_url = "TEXT", fec_candidate_url = "TEXT",
-    source_url = "TEXT", transfer_records = "TEXT"
+    source_url = "TEXT", transfer_records = "TEXT", filing_records = "TEXT"
   ),
   beneficiary_bridge = c(
     bridge_key = "TEXT", cycle_label = "TEXT", cycle = "INTEGER",
@@ -155,6 +156,7 @@ MENTAT_TIDY_TABLE_SPECS <- list(
     office = "TEXT", state = "TEXT", district = "TEXT",
     transaction_count = "INTEGER", first_activity_date = "TEXT",
     last_activity_date = "TEXT", downstream_activity = "REAL",
+    support_amount = "REAL", oppose_amount = "REAL", other_activity_amount = "REAL",
     associated_funding = "REAL"
     # plus one INTEGER `has_<token>` flag column per observed relationship and
     # direction token; appended at build time because the vocabulary is data.
@@ -186,6 +188,7 @@ MENTAT_TIDY_TABLE_SPECS <- list(
 # fec_aggregate_downstream_activity groups by candidate_name as well as
 # candidate_id, so two rows differing only in spelling are two legitimate rows.
 # Keying without `candidate` would make the guard refuse a correct export.
+MENTAT_TIDY_TABLE_SPECS$beneficiary_activity <- MENTAT_TIDY_TABLE_SPECS$beneficiary_bridge
 MENTAT_TIDY_TABLE_KEYS <- list(
   contributions = "source_id",
   giving_facts = c("cycle_label", "company", "employee_tier",
@@ -200,7 +203,8 @@ MENTAT_TIDY_TABLE_KEYS <- list(
   downstream_activity = c("cycle_label", "source_committee_id", "candidate_id",
                           "candidate", "activity_type", "support_oppose",
                           "transaction_type"),
-  beneficiary_bridge = "bridge_key"
+  beneficiary_bridge = "bridge_key",
+  beneficiary_activity = c("cycle_label", "source_committee_id", "candidate_id")
 )
 
 # ---------------------------------------------------------------------------
@@ -332,6 +336,7 @@ mentat_tidy_contributions <- function(raw_export) {
   count <- nrow(rows)
   include <- mentat_tidy_flag(mentat_tidy_column(rows, "include_in_analysis", count))
   amount <- mentat_tidy_money(mentat_tidy_column(rows, "amount", count))
+  if (any(!is.finite(amount))) stop("A source amount is missing or invalid; tidy staging cannot infer zero.", call. = FALSE)
   zipcode <- mentat_tidy_text(mentat_tidy_column(rows, "zipcode", count))
   # R/report.R:1885-1886. ZIP+4, a 9-digit string and a plain 5-digit code share
   # their leading five characters; anything else is NULL rather than a truncated
@@ -370,8 +375,7 @@ mentat_tidy_contributions <- function(raw_export) {
     # exporter :572 semantics, computed here rather than read back from Excel:
     # the analysis column is 0 (not blank) for an excluded row so a SUM over the
     # column is the published included total with no filter applied.
-    analysis_amount = ifelse(!is.na(include) & include == 1L,
-                             ifelse(is.na(amount), 0, amount), 0),
+    analysis_amount = ifelse(!is.na(include) & include == 1L, amount, 0),
     include_in_analysis = include,
     inclusion_reason = mentat_tidy_text(mentat_tidy_column(rows, "inclusion_reason", count)),
     company_match_status = mentat_tidy_text(
@@ -380,6 +384,10 @@ mentat_tidy_contributions <- function(raw_export) {
     company_match_reason = mentat_tidy_text(
       mentat_tidy_column(rows, "company_match_reason", count)
     ),
+    company_attribution_status = mentat_tidy_text(mentat_tidy_column(rows, "company_attribution_status", count)),
+    company_attribution_reason = mentat_tidy_text(mentat_tidy_column(rows, "company_attribution_reason", count)),
+    receipt_role_unverified = mentat_tidy_flag(mentat_tidy_column(rows, "receipt_role_unverified", count)),
+    receipt_role_reason = mentat_tidy_text(mentat_tidy_column(rows, "receipt_role_reason", count)),
     matched_alias = mentat_tidy_text(mentat_tidy_column(rows, "matched_alias", count)),
     recipient = mentat_tidy_text(mentat_tidy_column(rows, "recipient", count)),
     committee_id = mentat_tidy_id(mentat_tidy_column(rows, "committee_id", count)),
@@ -861,6 +869,9 @@ mentat_tidy_downstream_activity <- function(downstream_activity_export) {
     unverified_version_rows = mentat_tidy_count(
       mentat_tidy_column(rows, "unverified_version_rows", count)
     ),
+    unresolved_version_rows = mentat_tidy_count(mentat_tidy_column(rows, "unresolved_version_rows", count)),
+    unresolved_version_amount = mentat_tidy_money(mentat_tidy_column(rows, "unresolved_version_amount", count)),
+    repeated_itemization_rows = mentat_tidy_count(mentat_tidy_column(rows, "repeated_itemization_rows", count)),
     reported_amount = reported,
     excluded_amount = excluded,
     net_included_amount = included,
@@ -869,30 +880,34 @@ mentat_tidy_downstream_activity <- function(downstream_activity_export) {
     source_url = mentat_tidy_text(mentat_tidy_column(rows, "source_url", count)),
     # JSON stays a single TEXT cell. It is evidence a reader can open, not a
     # dimension; splitting it into rows here would multiply every amount.
-    transfer_records = mentat_tidy_text(mentat_tidy_column(rows, "transfer_records", count))
+    transfer_records = mentat_tidy_text(mentat_tidy_column(rows, "transfer_records", count)),
+    filing_records = mentat_tidy_text(mentat_tidy_column(rows, "filing_records", count))
   )
   data.table::setorder(result, cycle_label, source_committee_id, candidate_id,
                        activity_type, support_oppose, transaction_type, na.last = TRUE)
   result[]
 }
 
-# 2.11 beneficiary_bridge. Company rows only: the exporter's `Industry` view is
-# a SUM of the company rows, and shipping both in one tall sheet is the exact
-# double-count the Overview's `View` column exists to suppress.
+# 2.11 beneficiary_bridge is company ASSOCIATION, so shared PAC spending repeats
+# between companies. beneficiary_activity stores the unique Industry view as a
+# separate additive fact table. Neither table is truncated to the Overview's 100.
 #
 # `activity_relationships` and `directions` are `;`-joined sets. They become one
 # 0/1 flag column per observed token, which is the tidy form of a set-valued
 # attribute and lets Tableau filter on "has oppose activity" without parsing.
-mentat_tidy_beneficiary_bridge <- function(bridge) {
+mentat_tidy_beneficiary_bridge <- function(bridge, selected_view = "Company") {
   require_package("data.table")
   if (is.null(bridge) || !nrow(bridge)) return(mentat_tidy_empty("beneficiary_bridge"))
   rows <- data.table::as.data.table(bridge)
-  if ("view" %in% names(rows)) rows <- rows[view == "Company"]
+  if ("view" %in% names(rows)) rows <- rows[view == selected_view]
   if (!nrow(rows)) return(mentat_tidy_empty("beneficiary_bridge"))
   count <- nrow(rows)
   cycle <- mentat_tidy_count(mentat_tidy_column(rows, "cycle", count))
   committee_id <- mentat_tidy_id(mentat_tidy_column(rows, "source_committee_id", count))
   candidate_id <- mentat_tidy_id(mentat_tidy_column(rows, "candidate_id", count))
+  net <- mentat_tidy_money(mentat_tidy_column(rows, "preliminary_downstream_amount", count))
+  support <- mentat_tidy_money(mentat_tidy_column(rows, "support_amount", count))
+  oppose <- mentat_tidy_money(mentat_tidy_column(rows, "oppose_amount", count))
   result <- data.table::data.table(
     bridge_key = mentat_tidy_text(mentat_tidy_column(rows, "bridge_key", count)),
     cycle_label = mentat_tidy_cycle_label(cycle),
@@ -921,6 +936,9 @@ mentat_tidy_beneficiary_bridge <- function(bridge) {
     downstream_activity = mentat_tidy_money(
       mentat_tidy_column(rows, "preliminary_downstream_amount", count)
     ),
+    support_amount = mentat_tidy_money(mentat_tidy_column(rows, "support_amount", count)),
+    oppose_amount = mentat_tidy_money(mentat_tidy_column(rows, "oppose_amount", count)),
+    other_activity_amount = net - support - oppose,
     associated_funding = mentat_tidy_money(
       mentat_tidy_column(rows, "preliminary_crypto_funding", count)
     )
@@ -1105,6 +1123,7 @@ mentat_build_tidy_frames <- function(raw_export, committee_map, committee_master
     candidates = candidates,
     downstream_activity = downstream,
     beneficiary_bridge = bridge_rows,
+    beneficiary_activity = mentat_tidy_beneficiary_bridge(bridge, "Industry"),
     state_destinations = mentat_tidy_state_destinations(state_destinations),
     recipient_locations = mentat_tidy_recipient_locations(recipient_locations),
     data_quality = mentat_tidy_data_quality(guard_results)

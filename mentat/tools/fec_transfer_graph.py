@@ -18,7 +18,7 @@ import time
 import sqlite3
 import csv
 
-VERSION=4
+VERSION=5
 CASH_CODES={'24G','24K'}
 COMMITTEE=re.compile(r'C[0-9]{8}')
 DESTINATION_GLOB="destination GLOB 'C[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'"
@@ -26,22 +26,13 @@ DESTINATION_GLOB="destination GLOB 'C[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'"
 # transaction, but it is not an identity: filers reuse a schedule line label as
 # TRAN_ID, so `SE.5` collides across every filing they make. What a row IS gets
 # decided by its counterparty, amount, date and transaction type -- see
-# resolve_group() for the five classes. The ambiguous remainder of class E has
-# two defensible readings:
-#   'count_latest' the highest-file_num row is counted and flagged
-#                  unverified_version=1; the rest are superseded.
-#   'withhold'     the rows leave the counted total and are reported as an
-#                  unresolved share of the source committee's outflow.
-# 'count_latest' is the default for three reasons. A row loses its amount only
-# where evidence CONTRADICTS it; ambiguity keeps its dollars under an unverified
-# flag, and nothing here contradicts either row. The latest filed version is the
-# FEC's own convention. And counting the latest is never further from the truth
-# than withholding both: if the pair is an amendment it is exactly right, and if
-# it is two transactions it undercounts by one row where withholding undercounts
-# by two. The choice is part of the cache key, so flipping it never serves the
-# other reading's index back.
-AMBIGUOUS_VERSION_POLICY='count_latest'
-POLICY_TAGS={'withhold':'w','count_latest':'c'}
+# resolve_group(). A shared label or attribute similarity is a review clue,
+# not proof that one observation supersedes another.
+# Default accounting retains every distinct observation until a preserved
+# filing relationship proves supersession. Legacy policies are sensitivity
+# scenarios, never a claim that an ambiguous earlier row was contradicted.
+AMBIGUOUS_VERSION_POLICY='count_all'
+POLICY_TAGS={'withhold':'w','count_latest':'c','count_all':'a'}
 AMENDMENT_ORDER={'T':2,'A':1}
 
 
@@ -148,11 +139,14 @@ def resolve_group(rows,headers,policy):
     reused=1 if len(identities)>1 else 0
 
     def keep_one_per_identity(group,basis):
-        """One row per identity survives; the rest are the same line again."""
+        """Keep distinct observations; collapse only in legacy sensitivity modes."""
         decided=[];buckets=defaultdict(list)
         for row in group:buckets[identity(row)].append(row)
         for bucket in buckets.values():
             bucket.sort(key=lambda row:(AMENDMENT_ORDER.get(row['amendment'],0),row['sub_id'] or '',row['rowid']))
+            if policy == 'count_all':
+                decided.extend((row,'current',basis,int(len(bucket)>1)) for row in bucket)
+                continue
             decided.extend((row,'duplicate','repeated_itemization',0) for row in bucket[:-1])
             decided.append((bucket[-1],'current',basis,0))
         return decided
@@ -166,13 +160,22 @@ def resolve_group(rows,headers,policy):
                 decided.extend(keep_one_per_identity(
                     [row for row in members if row['file_num']==winner],'header'))
             return decided,reused,'header',[]
-    # B. The same identity in several filings is one transaction re-reported:
-    # the highest file number is the FEC's own "latest filing" convention.
-    # C. The same identity several times inside the WINNING filing is ONE
-    # itemization loaded again under a second sub_id. The group is already keyed
-    # by the FILER'S OWN transaction id, so two genuine equal gifts carry two
-    # transaction ids and never meet here; measured on the real 2022 file, 826
-    # of 827 such groups are byte-identical apart from sub_id.
+    if policy == 'count_all':
+        # Reused transaction labels, identical amounts and a larger file number
+        # do not establish an amendment family or a duplicate source identity.
+        buckets=defaultdict(list)
+        for row in rows:
+            buckets[row['destination'],'amount',row['cents']].append(row)
+            buckets[row['destination'],'date',row['date']].append(row)
+        uncertain={row['rowid'] for members in buckets.values() if len(members)>1 for row in members}
+        if len({row['file_num'] for row in rows})>1 and any(not COMMITTEE.fullmatch(row['destination'] or '') for row in rows):
+            uncertain.update(row['rowid'] for row in rows)
+        ambiguous=[rows] if uncertain else []
+        return [(row,'current','filing_relationship_unverified' if row['rowid'] in uncertain else 'distinct_observation',
+                 int(row['rowid'] in uncertain)) for row in rows],reused,'file_number',ambiguous
+    # Legacy sensitivity scenarios assume equal identities are repeat filings
+    # or itemizations and prefer the largest file number. These assumptions
+    # are not evidence and are deliberately bypassed by the default above.
     decisions=[];survivors={}
     for key,members in identities.items():
         winner=max(row['file_num'] for row in members)
@@ -301,6 +304,9 @@ def transfer_index(path,cycle,filing_headers=()):
                 if len(batch)>=10000:
                     connection.executemany(sql,batch);connection.commit();batch.clear()
         if batch:connection.executemany(sql,batch)
+        conflict=connection.execute("SELECT sub_id FROM records WHERE sub_id<>'' GROUP BY source,sub_id HAVING COUNT(DISTINCT raw_line)>1 LIMIT 1").fetchone()
+        if conflict:
+            raise ValueError(f'Conflicting FEC sub-ID {conflict[0]}; preserve and reconcile the source observations before indexing')
         connection.execute('CREATE INDEX records_version ON records(version_key)')
         connection.execute('CREATE INDEX records_edge ON records(source,destination)')
         connection.row_factory=sqlite3.Row
@@ -340,7 +346,7 @@ def transfer_index(path,cycle,filing_headers=()):
                 counts['unresolved_version_groups']+=1
                 counts['ambiguous_version_components']+=len(ambiguous)
                 for component in ambiguous:
-                    if policy=='count_latest':continue
+                    if policy in ('count_latest','count_all'):continue
                     unresolved.update(row['source'] for row in component)
                     # The share this committee cannot place is what a "latest
                     # filing wins" build would have counted here, not the gross
@@ -407,7 +413,7 @@ def reachable(roots,edges,max_depth=3,stop_nodes=()):
         visited.add((root,node))
         for edge in adjacency[node]:
             destination=edge['destination']
-            status='candidate_committee' if destination in stop_nodes else 'cycle' if destination in path else 'depth_limit' if depth+1>=max_depth else 'followed'
+            status='candidate_committee' if destination in stop_nodes else 'cycle' if destination in path else 'depth_limit' if max_depth is not None and depth+1>=max_depth else 'followed'
             output.append({**{k:v for k,v in edge.items() if k!='records'},'root':root,'depth':depth+1,'path':' > '.join((*path,destination)),'status':status})
             if status=='followed':queue.append((root,destination,depth+1,(*path,destination)))
     return output
@@ -442,11 +448,13 @@ def allocate(funding,edges,activity,max_depth=3,stop_nodes=(),candidate_links=No
     candidate_links=candidate_links or {}
     uncertain={node:'unresolved_transfer_records' for node in unresolved_nodes}
     withheld={node:float(value) for node,value in (unresolved_amounts or {}).items() if float(value)>0}
-    grouped=defaultdict(float)
+    grouped=defaultdict(float); unidentified=defaultdict(float)
     for row in activity:
         grouped[(row['source'],row['candidate'],row['direction'])]+=row['amount']
     for (source,candidate,direction),value in grouped.items():
-        if value>0:terminal[source].append((candidate,direction,value))
+        if value>0:
+            if candidate:terminal[source].append((candidate,direction,value))
+            else:unidentified[source]+=value
     used=set()
     for edge in edges:
         if edge['amount']<=0:continue
@@ -492,9 +500,11 @@ def allocate(funding,edges,activity,max_depth=3,stop_nodes=(),candidate_links=No
                 break
             if node in uncertain:unresolved[uncertain[node]]+=amount;continue
             outgoing=adjacency[node];destinations=terminal[node];reserve=withheld.get(node,0.)
-            denominator=sum(v for _,v in outgoing)+sum(v for _,_,v in destinations)+reserve
+            unknown=unidentified.get(node,0.)
+            denominator=sum(v for _,v in outgoing)+sum(v for _,_,v in destinations)+reserve+unknown
             if denominator<=0:unresolved['no_observed_outflow']+=amount;continue
             if reserve:unresolved['unresolved_transfer_records']+=amount*reserve/denominator
+            if unknown:unresolved['unidentified_candidate_activity']+=amount*unknown/denominator
             for candidate,direction,value in destinations:allocated[candidate,direction]+=amount*value/denominator
             for destination,value in outgoing:
                 portion=amount*value/denominator

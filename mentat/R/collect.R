@@ -52,42 +52,87 @@ fec_receipt_line_code <- function(line_number, transaction_id) {
 # Row-level eligibility that does not depend on the receipt role, so the
 # disclosure pairing below can ask "is there a COUNTED line-11 gift" without
 # recursing back into fec_receipt_role().
+fec_attribution_status <- function(rows, company_variants = list(), connected_orgs = NULL) {
+  policy <- jsonlite::fromJSON(file.path(mentat_project_root(), "config", "attribution-policy.json"))
+  column <- function(name, default = "") {
+    value <- if (name %in% names(rows)) rows[[name]] else rep(default, nrow(rows))
+    value[is.na(value)] <- ""
+    toupper(trim_text(value))
+  }
+  normalize <- function(value) trim_text(gsub("[^A-Z0-9]+", " ", value))
+  match <- column("company_match_status", "accepted")
+  company <- column("company")
+  reason <- tolower(column("company_match_reason"))
+  explicit <- nzchar(column("excluded_reason")) & !column("excluded_reason") %in% toupper(policy$non_evidentiary_exclusions)
+  for (prefix in policy$explicit_rejection_prefixes) {
+    explicit <- explicit | (match %in% c("REJECTED", "EXCLUDED") & startsWith(reason, prefix))
+  }
+  individual <- column("entity_type", "IND") == "IND"
+  own <- normalize(ifelse(individual, column("contributor_employer"), column("contributor_name")))
+  occupation <- normalize(column("contributor_occupation"))
+  unknown <- strsplit(policy$unknown_tokens, " ", fixed = TRUE)[[1L]]
+  distinct <- unique(own)
+  has_name <- vapply(strsplit(distinct, " ", fixed = TRUE), function(tokens) any(!tokens %in% c("", unknown)), logical(1L))
+  organization <- has_name[match(own, distinct)] &
+    (column("entity_type") %in% c("ORG", "PAC", "COM", "CCM", "PTY") |
+     grepl(policy$organization_pattern, own, perl = TRUE))
+  named <- recipient <- rep(FALSE, nrow(rows))
+  affiliations_path <- file.path(mentat_input_dir(), "verified_company_affiliations.json")
+  affiliations <- if (file.exists(affiliations_path)) jsonlite::fromJSON(affiliations_path, simplifyVector = FALSE)$records else list()
+  for (key in unique(company)) {
+    indices <- which(company == key)
+    supplied <- unlist(company_variants[toupper(names(company_variants)) == key], use.names = FALSE)
+    registered <- Filter(function(a) toupper(a$company) == key, affiliations)
+    names <- unique(normalize(toupper(c(key, supplied, unlist(lapply(registered, function(a) c(a$entity_name, unlist(a$aliases))))))))
+    names <- names[nzchar(names)]
+    names_text <- function(text) {
+      answer <- rep(FALSE, length(text))
+      for (name in names) {
+        answer <- answer | grepl(paste0(" ", name, " "), paste0(" ", text, " "), fixed = TRUE)
+        squashed <- gsub(" ", "", name, fixed = TRUE)
+        if (nchar(squashed) >= 8L) answer <- answer | grepl(squashed, gsub(" ", "", text, fixed = TRUE), fixed = TRUE)
+      }
+      answer
+    }
+    named[indices] <- names_text(own[indices]) | (individual[indices] & names_text(occupation[indices]))
+    for (affiliation in registered) {
+      if (identical(affiliation$relationship, "connected_pac") &&
+          nzchar(affiliation$source_url %||% "") && nzchar(affiliation$evidence_id %||% "")) {
+        dates <- substr(column("contribution_receipt_date")[indices], 1L, 10L)
+        valid <- nzchar(dates) & dates >= affiliation$valid_from & dates <= (affiliation$valid_to %||% "9999-12-31")
+        recipient[indices] <- recipient[indices] | (individual[indices] & valid &
+          column("committee_id")[indices] == toupper(affiliation$entity_id %||% ""))
+      }
+    }
+    if (!is.null(connected_orgs) && nrow(connected_orgs)) {
+      org_key <- paste(connected_orgs$cycle, toupper(connected_orgs$committee_id))
+      org <- connected_orgs$connected_organization[match(paste(column("two_year_transaction_period")[indices], column("committee_id")[indices]), org_key)]
+      org[is.na(org)] <- ""
+      recipient[indices] <- recipient[indices] | (individual[indices] & names_text(normalize(toupper(org))))
+    }
+  }
+  status <- ifelse(match == "ACCEPTED", "accepted", "unverified")
+  status[match != "ACCEPTED" & organization & !named & !recipient & nzchar(company)] <- "contradicted_by_reported_organization"
+  status[match != "ACCEPTED" & named] <- "company_named_unverified"
+  status[match != "ACCEPTED" & recipient] <- "recipient_supported"
+  status[explicit] <- "explicit_source_exclusion"
+  status
+}
+
 fec_receipt_row_eligible <- function(rows) {
   value <- function(field, default) {
     if (field %in% names(rows)) rows[[field]] else rep(default, nrow(rows))
   }
-  keep <- value("company_match_status", "accepted") == "accepted" &
-    !nzchar(trim_text(value("excluded_reason", ""))) &
+  status <- if ("company_attribution_status" %in% names(rows)) rows$company_attribution_status else fec_attribution_status(rows)
+  keep <- !status %in% c("contradicted_by_reported_organization", "explicit_source_exclusion") &
     as.integer(value("duplicate_memo", 0L)) == 0L
   keep[is.na(keep)] <- FALSE
   keep
 }
 
-# "Previously disclosed" is a CLAIM of a repeat, not proof of one. A repeat is
-# proven only when the payload itself carries the counterpart: the same
-# committee, the same cycle, the same amount, on a counted line-11 gift. The
-# pairing needs the whole payload, so it runs here rather than in the
-# single-row python twin (tools/pac_evidence.py), which cannot see other rows
-# and therefore always reports the unpaired verdict.
-fec_receipt_disclosure_duplicate <- function(rows, role, line) {
-  candidate <- role %in% "unverified_disclosure_memo"
-  if (!any(candidate)) return(candidate)
-  needed <- c("committee_id", "contribution_receipt_amount",
-              "two_year_transaction_period")
-  if (!all(needed %in% names(rows))) return(rep(FALSE, length(role)))
-  amount <- suppressWarnings(as.numeric(rows[["contribution_receipt_amount"]]))
-  cycle <- suppressWarnings(as.integer(rows[["two_year_transaction_period"]]))
-  key <- paste(
-    toupper(trim_text(rows[["committee_id"]])),
-    as.character(cycle),
-    formatC(round(amount, 2L), format = "f", digits = 2L),
-    sep = "\r"
-  )
-  known <- !is.na(amount) & !is.na(cycle)
-  parent <- role %in% "contribution" & startsWith(line, "11") &
-    fec_receipt_row_eligible(rows) & known
-  candidate & known & key %in% key[parent]
-}
+# "Previously disclosed" is a claim of a repeat, not proof of one.
+# Explicit, same-filing back references are resolved by
+# mentat_memo_duplicate_plan(). Equal committee/cycle/amount is not proof.
 
 fec_receipt_role <- function(rows) {
   column <- function(name) {
@@ -166,7 +211,6 @@ fec_receipt_role <- function(rows) {
   # Proven repeat -> excluded. Unproven claim -> the row keeps the unverified
   # role, stays countable, and carries receipt_role_reason
   # "disclosure_memo_unmatched" so a reader can filter it.
-  role[fec_receipt_disclosure_duplicate(rows, role, line)] <- "disclosure_memo"
   # A refund promise is not an observed refund. Retain the receipt and require
   # the actual adjustment before certifying a net-giving amount.
   role[role == "contribution" & grepl(rules$refund_review_pattern, description, perl = TRUE)] <- "unverified_refund_adjustment"
@@ -1063,9 +1107,6 @@ exclusion_reason <- function(
       return(paste0("exclusion_pattern:", pattern))
     }
   }
-  if (grepl("\\bHOCKEY\\b", toupper(trim_text(occupation)), perl = TRUE)) {
-    return("occupation:HOCKEY")
-  }
   NA_character_
 }
 
@@ -1258,12 +1299,6 @@ flatten_fec_rows <- function(
       )
       excluded_values[matched] <- paste0("exclusion_pattern:", pattern)
     }
-    hockey <- is.na(excluded_values) & grepl(
-      "\\bHOCKEY\\b",
-      upper_occupations,
-      perl = TRUE
-    )
-    excluded_values[hockey] <- "occupation:HOCKEY"
   }
   match_values <- if (identical(phase, "P2_company_name")) {
     contributor_names

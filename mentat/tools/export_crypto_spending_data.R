@@ -206,6 +206,8 @@ on.exit(DBI::dbDisconnect(connection), add = TRUE)
 
 lookups <- spending_report_lookups(connection)
 raw_rows <- spending_raw_report_rows(connection, versioning_applied = TRUE)
+raw_rows[, company_attribution_status := fec_attribution_status(raw_rows,
+  split(lookups$companies$variant, lookups$companies$company), fec_committee_master)]
 export_phase("raw_database_rows_loaded", nrow(raw_rows))
 # S2 HANDOFF: this fill is a defensive guard for databases or report.R
 # versions whose spending_raw_report_rows() SELECT lacks
@@ -508,6 +510,14 @@ raw_export[fec_receipt_role_excluded(receipt_role),
 # filter on it (2026-09-17 ruling: contradictions, not ambiguity).
 raw_export[, receipt_role_unverified := fec_receipt_role_unverified(receipt_role)]
 raw_export[, receipt_role_reason := fec_receipt_role_reason(receipt_role)]
+raw_export[, company_attribution_reason := ifelse(company_attribution_status == "accepted", "",
+  paste0(company_attribution_status, "; original matcher: ", company_match_reason))]
+raw_export[include_in_analysis == "Yes" & company_attribution_status != "accepted",
+           inclusion_reason := paste0("Included provisionally: ", company_attribution_reason)]
+raw_export[include_in_analysis == "No" & company_attribution_status == "contradicted_by_reported_organization" &
+             !fec_receipt_role_excluded(receipt_role),
+           inclusion_reason := paste0("Attribution contradicted by reported organization: ",
+             ifelse(toupper(trim_text(entity_type)) == "IND", contributor_employer, contributor_name))]
 raw_export[, cycle_alignment := ifelse(
   cycle == source_cycle,
   "OK",
@@ -562,6 +572,8 @@ raw_export <- raw_export[, .(
   funding_direction = ifelse(recipient_category == "Company PAC", "Into company PAC", "To named recipient"),
   company_match_status = trim_text(company_match_status),
   company_match_reason = trim_text(company_match_reason),
+  company_attribution_status,
+  company_attribution_reason,
   matched_alias = trim_text(matched_variant),
   include_in_analysis,
   inclusion_reason,
@@ -624,6 +636,12 @@ direct_candidate_keys <- unique(paste(
 downstream_universe <- recipient_universe[
   !paste(cycle, committee_id, sep = "|") %in% direct_candidate_keys
 ]
+# Collect routes needed by ANY company view. A different company's refunds can
+# make the industry net nonpositive without invalidating this company's route.
+positive_company_roots <- raw_export[include_in_analysis == "Yes" & nzchar(committee_id),
+  .(net = sum(amount)), by = .(cycle, company, committee_id)][net > 0]
+downstream_universe[, traversal_seed := paste(cycle, committee_id, sep = "|") %in%
+  paste(positive_company_roots$cycle, positive_company_roots$committee_id, sep = "|")]
 transfer_context <- fec_transfer_context(beneficiary_dir, downstream_universe, candidate_links, supported_cycles)
 downstream_activity <- fec_read_downstream_activity(
   beneficiary_dir,
@@ -643,7 +661,9 @@ committee_map <- fec_build_committee_map(
 export_phase("committee_map_built", nrow(committee_map))
 beneficiary_tables <- fec_build_beneficiary_tables(
   raw_export,
-  downstream_activity
+  downstream_activity,
+  transfer_context$edges,
+  candidate_links
 )
 export_phase("beneficiary_bridge_built", nrow(beneficiary_tables$bridge))
 downstream_activity_export <- fec_aggregate_downstream_activity(
@@ -680,16 +700,10 @@ omitted_non_accepted_by_cycle <- setNames(
   rep(0L, nrow(cycles)),
   as.character(cycles$cycle)
 )
-calculated_omissions <- raw_export[
-  cycle %in% supported_cycles & company_match_status != "accepted",
-  .(rows = .N),
-  by = cycle
-]
-omitted_non_accepted_by_cycle[as.character(calculated_omissions$cycle)] <-
-  calculated_omissions$rows
+# Retain the legacy metadata field at zero: no query-status rows are omitted.
 raw_export <- mentat_add_destinations(raw_export, fec_committee_master, candidate_master, candidate_links)
 workbook_raw_export <- raw_export[
-  cycle %in% supported_cycles & company_match_status == "accepted"
+  cycle %in% supported_cycles
 ]
 
 # app/report_insights.py REFUSES a worksheet over 50,000 rows outright rather
@@ -765,7 +779,7 @@ if (nzchar(tidy_stage_path)) {
     candidate_links = candidate_links,
     candidate_master = candidate_master,
     downstream_activity_export = downstream_activity_export,
-    bridge = beneficiary_tables$bridge,
+    bridge = beneficiary_tables$bridge_all,
     state_destinations = mentat_state_destinations(workbook_raw_export),
     recipient_locations = unique(workbook_raw_export[
       , c("cycle", "committee_id", "recipient", mentat_destination_fields),
@@ -963,6 +977,19 @@ payload <- list(
   candidate_committee_links = candidate_links,
   candidate_master = candidate_master,
   downstream_activity = downstream_activity_export,
+  downstream_reach = beneficiary_tables$reach,
+  downstream_measurement_ledger = beneficiary_tables$measurement_ledger,
+  downstream_sources = data.table::rbindlist(lapply(supported_cycles, function(year) {
+    paths <- c(file.path(beneficiary_dir, paste0("pas2", substr(year, 3, 4)), "itpas2.txt"),
+               file.path(beneficiary_dir, paste0("oth", substr(year, 3, 4)), "itoth.txt"),
+               file.path(beneficiary_dir, paste0("oth", substr(year, 3, 4)), "transfer-info.json"),
+               file.path(beneficiary_dir, paste0("oth", substr(year, 3, 4)), "transfer-edges.csv"))
+    data.table::data.table(cycle = year, source = basename(paths), path = paths,
+      sha256 = vapply(paths, function(path) if (file.exists(path))
+        digest::digest(file = path, algo = "sha256") else "", character(1)),
+      status = ifelse(file.exists(paths), "saved source; complete filing coverage not established", "missing source; not zero activity"),
+      policy = paste0("PAS2 parser ", FEC_PAS2_PARSER_VERSION, "; ", FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "; OTH v5 count_all"))
+  })),
   beneficiary_bridge = beneficiary_tables$bridge,
   beneficiary_summary = beneficiary_tables$summary
 )
@@ -984,6 +1011,7 @@ if (nzchar(tidy_stage_path)) {
   }), use.names = FALSE)
   mentat_write_tidy_stage(tidy_stage_path, tidy_frames, list(
     schema_version = mentat_tidy_schema_version,
+    attribution_policy = "contradictions-only-v1",
     industry = MENTAT_INDUSTRY,
     industry_slug = gsub(
       "^_+|_+$", "", gsub("[^a-z0-9]+", "_", tolower(MENTAT_INDUSTRY))
