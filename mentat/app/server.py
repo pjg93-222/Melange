@@ -2360,6 +2360,25 @@ class Console:
         return result
 
 
+# Access recording for the value-ranked prewarm (RACF, prewarm.py "value ranking"). main() sets this to a
+# prewarm.AccessRecorder only on the console on the user's own data root that may write; everywhere else
+# it stays None and record_access() does nothing.
+ACCESS_RECORDER = None
+
+
+def record_access(handler, kind, body, started):
+    """After a response is written: one record of (kind, parameters or body, handler seconds, bytes sent).
+    The recorder only enqueues, so this never delays or fails the response."""
+    recorder = ACCESS_RECORDER
+    if recorder is None:
+        return
+    try:
+        recorder.submit(kind, body, cost_s=round(time.perf_counter() - started, 4),
+                        size=getattr(handler, '_sent_bytes', None))
+    except Exception:
+        pass
+
+
 class Handler(BaseHTTPRequestHandler):
     # The page loads about 35 small files. Under HTTP/1.0 each was a new
     # connection, and with Nagle on, the header write and the body write
@@ -2378,6 +2397,7 @@ class Handler(BaseHTTPRequestHandler):
         compressed = compressible and status != 304 and len(content) >= 2048 and accepts_gzip(self.headers.get('Accept-Encoding'))
         if compressed:
             content = gzip.compress(content, compresslevel=1, mtime=0)
+        self._sent_bytes = len(content)
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         if status != 304:
@@ -2403,6 +2423,7 @@ class Handler(BaseHTTPRequestHandler):
         status, headers, body = response_cache.respond(entry, self.headers.get('If-None-Match'),
                                                        gzip_ok=accepts_gzip(self.headers.get('Accept-Encoding')),
                                                        content_type=content_type)
+        self._sent_bytes = len(body or b'')
         self.send_response(status)
         for name, value in headers:
             self.send_header(name, value)
@@ -2492,6 +2513,11 @@ class Handler(BaseHTTPRequestHandler):
                                   'read_only': bool(getattr(app, 'read_only', False)),
                                   'report_directory':str(app.report_directory),
                                   **build_status(app, self.server.server_port)})
+            if parsed.path == '/api/prime-status':
+                # Read-only on every console: this process's startup prime (prewarm.prime_status), which
+                # Start-MentatApp.ps1 waits on before it opens the app window.
+                import prewarm
+                return self.send(prewarm.prime_status())
             if parsed.path == "/api/session":
                 if query.get('light', ['0'])[0] == '1':
                     build = build_status(app, self.server.server_port)
@@ -2663,11 +2689,18 @@ class Handler(BaseHTTPRequestHandler):
                 label = industry_scope.label_or_value(registry, wanted) if registry else wanted
                 if parsed.path == '/api/graph':
                     import response_cache
-                    return self.send_entry(response_cache.from_value(app.graph(query.get('id',[''])[0], label,
-                                               {**{k:v[0] for k,v in query.items()}, 'industry': label},
-                                               registry)))
+                    started = time.perf_counter()
+                    params = {**{k:v[0] for k,v in query.items()}, 'industry': label}
+                    self.send_entry(response_cache.from_value(app.graph(query.get('id',[''])[0], label,
+                                               dict(params), registry)))
+                    # The Graph drawer's second hop is /api/graph with mode=activity (graph.js).
+                    return record_access(self, 'graph_drawer' if params.get('mode') == 'activity' else 'graph_view',
+                                         params, started)
                 if parsed.path == '/api/comparison-flows':
-                    return self.send_entry(app.comparison_entry(query.get('id',[''])[0], label))
+                    started = time.perf_counter()
+                    self.send_entry(app.comparison_entry(query.get('id',[''])[0], label))
+                    return record_access(self, 'comparison_flows', {'id': query.get('id',[''])[0], 'industry': label},
+                                         started)
                 return self.send(app.comparison(query.get('id',[''])[0], label, False))
             if parsed.path == '/api/publish/pocket':
                 job = app.publication(query.get('id', [''])[0])
@@ -2786,20 +2819,31 @@ class Handler(BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(length))
             if not isinstance(data, dict):
                 raise ValueError("Expected an upload or run request.")
+            # The body as the client sent it (scope_body and the readers change `data`), for record_access.
+            started = time.perf_counter()
+            sent = (json.loads(json.dumps(data)) if ACCESS_RECORDER is not None and
+                    self.path in ('/api/insights/query', '/api/contributions/query') else None)
             if self.path in ('/api/insights/query', '/api/insights/records'):
                 import analysis_data
                 entry = self.scope_body(data)
                 reader = analysis_data.query if self.path.endswith('/query') else analysis_data.records
                 result = self.contribution_result(reader, data)
                 result.update(industry_scope.echo(entry))
-                return self.send(result)
+                self.send(result)
+                if sent is not None and not (isinstance(result, dict) and result.get('status') in ('building', 'queued', 'preparing')):
+                    sent.pop('retry', None)
+                    record_access(self, 'insights_query', sent, started)
+                return
             if self.path in ('/api/contributions/query', '/api/contributions/records'):
                 entry = self.scope_body(data)
                 reader = contribution_query.query if self.path.endswith('/query') else contribution_query.records
                 result = self.contribution_result(reader, data)
                 if isinstance(result, dict):
                     result.update(industry_scope.echo(entry))
-                return self.send(result)
+                self.send(result)
+                if sent is not None and not (isinstance(result, dict) and result.get('status') in ('building', 'queued', 'preparing')):
+                    record_access(self, 'contribution_query', sent, started)
+                return
             if self.path == '/api/contributions/geography':
                 entry = self.scope_body(data)
                 result = contribution_geo.geography(data)
@@ -2953,6 +2997,10 @@ def main():
         import response_cache
         response_cache.configure()
     analysis_data.HINTS_ENABLED = warm and not options.read_only
+    # Access recording (RACF value ranking) follows the same gate as the hints: only the console that
+    # warms and may write. Without access_stats the recorder is None and the ranking uses hints only.
+    global ACCESS_RECORDER
+    ACCESS_RECORDER = prewarm.AccessRecorder.start() if warm and not options.read_only else None
     if warm:
         prewarm.start_startup_warm(read_only=options.read_only, app=server.app)
         prewarm.launch_warmer(data_root=data_root, read_only=options.read_only, console_port=server.app.port)

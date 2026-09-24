@@ -131,6 +131,57 @@ function Test-MentatPortListening([int]$Candidate) {
     return ($connection.Wait(150) -and $client.Connected)
   } catch { return $false } finally { $client.Dispose() }
 }
+function Get-MentatPrimeStatus([string]$Url, [int]$TimeoutMs) {
+  # /api/prime-status (server.py -> prewarm.prime_status). A console that predates the route answers 404
+  # and is reported as phase 'unsupported', so the window is not held for it; no answer at all is $null.
+  try {
+    $request = [Net.WebRequest]::Create($Url)
+    $request.Proxy = $null
+    $request.Timeout = $TimeoutMs
+    $request.ReadWriteTimeout = $TimeoutMs
+    $response = $request.GetResponse()
+    try {
+      $reader = New-Object IO.StreamReader($response.GetResponseStream())
+      try { return ($reader.ReadToEnd() | ConvertFrom-Json) } finally { $reader.Dispose() }
+    } finally { $response.Dispose() }
+  } catch [Net.WebException] {
+    $failed = $_.Exception.Response
+    if ($null -ne $failed -and [int]$failed.StatusCode -eq 404) {
+      $failed.Dispose()
+      return [pscustomobject]@{ primed = $false; phase = 'unsupported'; hot_ready = 0; hot_total = 0 }
+    }
+    return $null
+  } catch { return $null }
+}
+function Wait-MentatPrimed([string]$BaseUrl, [int]$TimeoutSeconds = 120, [int]$PollMilliseconds = 1000) {
+  # Hold the app window until the console has primed its hot set into memory (RACF: the most valuable
+  # views first), polling once per PollMilliseconds and printing one progress line per change. It stops
+  # early when the hot phase has ended without every item ready (a later poll cannot add one: the disk
+  # warmer builds the rest in the background) or the console has no prime; after TimeoutSeconds the
+  # window opens anyway and the priming continues behind it.
+  $watch = [Diagnostics.Stopwatch]::StartNew()
+  $last = ''
+  $status = $null
+  while ($true) {
+    $status = Get-MentatPrimeStatus "$BaseUrl/api/prime-status" 2000
+    $seconds = [Math]::Round($watch.Elapsed.TotalSeconds, 2)
+    if ($null -ne $status) {
+      $line = 'Priming ' + [string]$status.hot_ready + '/' + [string]$status.hot_total + ' (' + [string]$status.phase + ')'
+      if ($line -ne $last) { Write-Host $line; $last = $line }
+      if ($status.primed -eq $true) {
+        return [pscustomobject]@{ Primed = $true; Reason = 'primed'; Seconds = $seconds; Status = $status }
+      }
+      if (@('background', 'done', 'failed', 'disabled', 'unsupported') -contains [string]$status.phase) {
+        return [pscustomobject]@{ Primed = $false; Reason = ('phase ' + [string]$status.phase); Seconds = $seconds; Status = $status }
+      }
+    }
+    $left = [int]($TimeoutSeconds * 1000 - $watch.Elapsed.TotalMilliseconds)
+    if ($left -le 0) {
+      return [pscustomobject]@{ Primed = $false; Reason = 'timeout'; Seconds = $seconds; Status = $status }
+    }
+    Start-Sleep -Milliseconds ([Math]::Max(1, [Math]::Min($PollMilliseconds, $left)))
+  }
+}
 if (-not $DataRoot) { $DataRoot = Join-Path $env:LOCALAPPDATA 'Mentat\console' }
 $DataRoot = [IO.Path]::GetFullPath($DataRoot)
 $hash = [Security.Cryptography.SHA256]::Create()
@@ -275,6 +326,11 @@ $url = "http://127.0.0.1:$Port"
   $mutex.Dispose()
 }
 if (-not $NoBrowser) {
+  # Primed before anyone views anything: the window opens once the console's hot set is in memory, or
+  # after 120 s at the latest. A -NoBrowser restart (D-029) never waits here.
+  $prime = Wait-MentatPrimed "http://127.0.0.1:$Port" 120 1000
+  if ($prime.Primed) { Write-Host ('Primed in ' + $prime.Seconds + ' s') }
+  else { Write-Host ('Opening after ' + $prime.Seconds + ' s (' + $prime.Reason + '); priming continues in the background') }
   if ($AppWindow) {
     $browserCandidates = @(
       "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",

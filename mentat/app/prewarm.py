@@ -74,6 +74,7 @@ import json
 import math
 import os
 from pathlib import Path
+import queue
 import re
 import shutil
 import statistics
@@ -159,7 +160,7 @@ CLIENT_CONTRACT = {
         "return new URLSearchParams({id:s.run||'',industry:s.industry||'',company:s.company||'',",
         "tier:s.tier||'',cycle:s.cycle||'',funding:s.funding||'all',mode:s.mode||'direct',",
         "direction:s.direction||'Support',category:s.category||'',recipient:s.recipient||''});",
-        "const response=await fetch('/api/graph?'+query+(initial&&!query.get('cycle')?'&latest=1':''),{signal:controller.signal});",
+        "const url='/api/graph?'+query+(initial&&!query.get('cycle')?'&latest=1':'');",
         "category='';recipient='';options(get('company'),[['','All companies']]);options(get('cycle'),[['','All cycles']]);refresh(true);",
         "get('tier').value='';get('funding').value='all';get('mode').value='direct';",
         "item.available !== false && (item.id === industry || item.label === industry)) || null;",
@@ -819,6 +820,269 @@ def promote(entries):
     return moved
 
 
+# ----------------------------------------------------------------------------- value ranking (RACF 3.4-3.7)
+# Paul, 2026-09-24: "replicational aware caching ... is the methodology we should integrate into the data
+# retrieval generally". RACF sections 3.4-3.7, applied to the console's caches:
+#   3.4 value   value = (access + importance) * rebuild_weight, where access is access_stats' decayed
+#               frequency score, importance boosts each industry's defaults by use order (1 / (1 + rank))
+#               and the most recently used industry by RECENT_INDUSTRY_BOOST, and
+#               rebuild_weight = log2(2 + rebuild seconds) / (1 + size MB / SIZE_SCALE_MB) favours what is
+#               slow to rebuild and cheap to hold.
+#   3.5 tiers   the HOT SET is the highest-value candidates that fit the startup budget (HOT_MAX_ITEMS
+#               items, HOT_BUDGET_SECONDS of estimated work, the free-memory floor); it is primed into the
+#               console's memory first. Everything else stays background priority.
+#   3.6 re-sync when a source fingerprint changes, that industry's hot items are re-primed first.
+#   3.7 lookup  nearest tier first: memory, then the verified disk tier, then a build (response_cache,
+#               ViewCache and the Insights store already look up in that order).
+HOT_MAX_ITEMS = 20
+HOT_BUDGET_SECONDS = 60.0
+RECENT_INDUSTRY_BOOST = 1.0
+ACCESS_IMPORTANCE_SHARE = 0.25          # a non-default view's share of its industry's importance
+SIZE_SCALE_MB = 64.0
+ACCESS_TOP_LIMIT = 200
+PROBE_SECONDS = 0.2                     # an Insights scope is only probed at startup, never built
+# Rebuild seconds assumed when neither access_stats nor the ledger measured one (perf.md orders of magnitude).
+DEFAULT_COST_SECONDS = {'graph_default': 2.0, 'graph_view': 2.0, 'graph_drawer': 3.0, 'comparison_flows': 3.5,
+                        'insights_scope': 12.0, 'query_view': 20.0, 'insights_default': 12.0,
+                        'insights_neighbor': 5.0, 'insights_company': 5.0, 'graph_spark': 5.0, 'drawer_sidecars': 10.0}
+DEFAULT_KINDS = ('graph_default', 'comparison_flows', 'query_view', 'insights_default')
+# The kinds server.py records (record_access) and the prime replays.
+ACCESS_GRAPH_KINDS = ('graph_view', 'graph_drawer')
+
+
+def access_key(body):
+    """The key server.py records an access under: sha256 of the canonical JSON of its parameters or body."""
+    return digest(body)[:32]
+
+
+def load_access_top(kinds=None, limit=ACCESS_TOP_LIMIT, module=None):
+    """access_stats.top() rows (builder "value"'s module), or [] when it is missing or fails: the ranking
+    then falls back to hints only."""
+    try:
+        stats = module or __import__('access_stats')
+    except ImportError:
+        return []
+    try:
+        rows = stats.top(kinds=list(kinds) if kinds else None, limit=limit)
+    except Exception as error:
+        log(f'access_stats.top failed: {type(error).__name__}: {error}')
+        return []
+    return [row for row in rows or [] if isinstance(row, dict) and row.get('kind') and row.get('key') is not None]
+
+
+def _number(value, default=0.0):
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return default
+    return number if math.isfinite(number) else default
+
+
+def rebuild_weight(cost_s, size_bytes=None):
+    size_mb = max(0.0, _number(size_bytes)) / 1024 ** 2
+    return math.log2(2.0 + max(0.0, _number(cost_s))) / (1.0 + size_mb / SIZE_SCALE_MB)
+
+
+def _industry_of(value, industries):
+    """A recorded industry (label, dataset id or slug) as one of `industries`, or None."""
+    if not isinstance(value, str) or not value:
+        return None
+    wanted = value.strip().lower()
+    for name in industries:
+        if name.lower() == wanted or slug(name) == slug(value):
+            return name
+    return None
+
+
+def use_order(industries, hints, access_rows=()):
+    """Industries by last use, newest first (hints' seen_utc and access_stats' last_utc), then the
+    rest in catalog order; and the most recently used industry (None before any use)."""
+    last = {}
+    for hint in hints or []:
+        name = _industry_of(hint.get('dataset'), industries)
+        if name:
+            last[name] = max(last.get(name, ''), hint.get('seen_utc') or '')
+    for row in access_rows or []:
+        body = row.get('body') if isinstance(row.get('body'), dict) else {}
+        name = _industry_of(body.get('industry') or body.get('dataset'), industries)
+        if name:
+            last[name] = max(last.get(name, ''), str(row.get('last_utc') or ''))
+    used = sorted((name for name in industries if name in last), key=lambda name: (last[name], -industries.index(name)),
+                  reverse=True)
+    return used + [name for name in industries if name not in used], (used[0] if used else None)
+
+
+def industry_importance(industries, hints, access_rows=()):
+    order, recent = use_order(industries, hints, access_rows)
+    weights = {name: 1.0 / (1 + rank) for rank, name in enumerate(order)}
+    if recent:
+        weights[recent] += RECENT_INDUSTRY_BOOST
+    return weights, order, recent
+
+
+def graph_default_params(industry):
+    """server.py's recorded /api/graph parameters for graph.js's first load: parse_qs drops blank values."""
+    params = {key: values[0] for key, values in urllib.parse.parse_qs(graph_first_load_query(industry)).items()}
+    params['industry'] = industry
+    return params
+
+
+def comparison_params(industry):
+    return {'id': 'published-reports', 'industry': industry}
+
+
+def _candidate(kind, industry, key, body, *, access=0.0, importance=0.0, cost_s=None, size=None, source, order):
+    cost = _number(cost_s, DEFAULT_COST_SECONDS.get(kind, 5.0)) if cost_s is not None else DEFAULT_COST_SECONDS.get(kind, 5.0)
+    value = (max(0.0, _number(access)) + importance) * rebuild_weight(cost, size)
+    return {'id': f'{kind}:{slug(industry or "-")}:{str(key)[:12]}', 'kind': kind, 'industry': industry, 'key': key,
+            'body': body, 'access': round(_number(access), 6), 'importance': round(importance, 6),
+            'cost_s': round(cost, 3), 'size': size, 'value': round(value, 6), 'source': source, 'order': order,
+            'est_s': PROBE_SECONDS if kind == 'insights_scope' else cost}
+
+
+def prime_candidates(industries, hints, access_rows, today):
+    """Everything the console can prime into memory at startup, valued (RACF 3.4): each industry's Graph
+    first-load view and comparison flows (its defaults), the Graph views and drawer views access_stats
+    ranks, and today's Insights scopes from hints (probed from disk, never built here)."""
+    industries = list(industries)
+    weights, order, recent = industry_importance(industries, hints, access_rows)
+    access = {}
+    for row in access_rows or []:
+        access[(row['kind'], str(row['key']))] = row
+    candidates, seen = [], set()
+
+    def add(candidate):
+        identity = (candidate['kind'], str(candidate['key']))
+        if identity not in seen:
+            seen.add(identity)
+            candidates.append(candidate)
+
+    for name in order:
+        for kind, params in (('graph_default', graph_default_params(name)), ('comparison_flows', comparison_params(name))):
+            key = access_key(params)
+            row = access.get(('graph_view' if kind == 'graph_default' else kind, key)) or {}
+            add(_candidate(kind, name, key, params, access=row.get('score', 0.0), importance=weights[name],
+                           cost_s=row.get('cost_s'), size=row.get('size'), source='default', order=len(candidates)))
+    for row in access_rows or []:
+        if row['kind'] not in ACCESS_GRAPH_KINDS or not isinstance(row.get('body'), dict):
+            continue
+        name = _industry_of(row['body'].get('industry'), industries)
+        if not name or (row['kind'] == 'graph_view' and str(row['key']) == access_key(graph_default_params(name))):
+            continue
+        add(_candidate(row['kind'], name, str(row['key']), row['body'], access=row.get('score', 0.0),
+                       importance=ACCESS_IMPORTANCE_SHARE * weights[name], cost_s=row.get('cost_s'),
+                       size=row.get('size'), source='access', order=len(candidates)))
+    for position, hint in enumerate(hints or []):
+        name = _industry_of(hint.get('dataset'), industries)
+        if not name or not hint.get('key') or _local_day(hint.get('seen_utc')) != today:
+            continue   # an earlier day's scope keys an earlier as_of: today's click needs a build
+        body = {key: value for key, value in hint['body'].items() if key != 'retry'}
+        row = access.get(('insights_query', access_key(body))) or {}
+        add(_candidate('insights_scope', name, hint['key'], body, access=row.get('score', 0.0),
+                       importance=ACCESS_IMPORTANCE_SHARE * weights[name] + 1.0 / (1 + position),
+                       cost_s=row.get('cost_s'), size=row.get('size'), source='hint', order=len(candidates)))
+    return candidates, {'order': order, 'recent': recent, 'weights': {name: round(value, 6) for name, value in weights.items()}}
+
+
+def select_hot_set(candidates, max_items=HOT_MAX_ITEMS, budget_seconds=HOT_BUDGET_SECONDS):
+    """(hot, background, estimated seconds): candidates by value (ties keep candidate order), each taken
+    while the hot set has fewer than max_items and its estimated work stays within budget_seconds."""
+    ranked = sorted(candidates, key=lambda item: (-item['value'], item['order']))
+    hot, background, spent = [], [], 0.0
+    for item in ranked:
+        if len(hot) < max_items and spent + item['est_s'] <= budget_seconds:
+            hot.append({**item, 'tier': 'hot'})
+            spent += item['est_s']
+        else:
+            background.append({**item, 'tier': 'background',
+                               'why': 'hot set full' if len(hot) >= max_items else 'over the startup budget'})
+    return hot, background, round(spent, 3)
+
+
+def task_access(task, access):
+    """The access_stats row that speaks for a planned warmer task (see server.py record_access)."""
+    kind, body = task['kind'], task.get('body') or {}
+    if kind in ('query_view', 'graph_spark'):
+        return access.get(('contribution_query', access_key(body)))
+    if kind in INSIGHTS_KINDS:
+        return access.get(('insights_query', access_key({k: v for k, v in body.items() if k != 'retry'})))
+    if kind == 'comparison_flows':
+        return access.get(('comparison_flows', access_key(comparison_params(task['dataset']))))
+    return None
+
+
+def value_order(tasks, *, hints=(), access_rows=None, reprime=(), successes=None, max_hot=HOT_MAX_ITEMS):
+    """The warmer's plan re-ranked by value (RACF 3.4). Without access data and without an industry to
+    re-prime, the plan keeps its hints-only order untouched. Otherwise: the max_hot most valuable tasks
+    form the hot tier, a re-primed industry's hot tasks go first (3.6), then the rest of the hot tier by
+    value, then every background task in its original order. Each task gains 'value' and 'tier'."""
+    if not access_rows and not reprime:
+        return tasks
+    successes = successes or {}
+    industries = []
+    for task in tasks:
+        if task['dataset'] not in industries:
+            industries.append(task['dataset'])
+    weights, _, _ = industry_importance(industries, list(hints or []), access_rows or [])
+    access = {(row['kind'], str(row['key'])): row for row in access_rows or []}
+    for index, task in enumerate(tasks):
+        row = task_access(task, access) or {}
+        importance = weights.get(task['dataset'], 0.0) * (1.0 if task['kind'] in DEFAULT_KINDS else ACCESS_IMPORTANCE_SHARE)
+        cost = row.get('cost_s') or (successes.get(task['id']) or {}).get('seconds') or DEFAULT_COST_SECONDS.get(task['kind'], 5.0)
+        task['value'] = round((max(0.0, _number(row.get('score'))) + importance) * rebuild_weight(cost, row.get('size')), 6)
+    ranked = sorted(range(len(tasks)), key=lambda index: (-tasks[index]['value'], index))
+    hot = set(ranked[:max(0, int(max_hot))])
+    reprimed = [index for index in ranked if index in hot and tasks[index]['dataset'] in set(reprime)]
+    rest_hot = [index for index in ranked if index in hot and index not in reprimed]
+    background = [index for index in range(len(tasks)) if index not in hot]
+    for index in reprimed:
+        tasks[index]['tier'] = 'reprime'
+    for index in rest_hot:
+        tasks[index]['tier'] = 'hot'
+    for index in background:
+        tasks[index]['tier'] = 'background'
+    return [tasks[index] for index in reprimed + rest_hot + background]
+
+
+class AccessRecorder:
+    """Hands server.py's access records to access_stats.record on one daemon thread, so recording never
+    delays or fails a response: submit() only enqueues; a full queue drops the record."""
+
+    def __init__(self, record, maxsize=1024):
+        self._record = record
+        self._queue = queue.Queue(maxsize=maxsize)
+        self.recorded = self.dropped = self.failed = 0
+        self._thread = threading.Thread(target=self._drain, name='mentat-access-stats', daemon=True)
+        self._thread.start()
+
+    @classmethod
+    def start(cls, module=None):
+        try:
+            stats = module or __import__('access_stats')
+        except ImportError:
+            log('access_stats is not installed: access recording is off (hints-only ranking)')
+            return None
+        record = getattr(stats, 'record', None)
+        return cls(record) if callable(record) else None
+
+    def submit(self, kind, body, cost_s=None, size=None):
+        try:
+            self._queue.put_nowait((kind, body, cost_s, size))
+        except Exception:
+            self.dropped += 1
+
+    def _drain(self):
+        while True:
+            kind, body, cost_s, size = self._queue.get()
+            try:
+                self._record(kind, access_key(body), body=body, cost_s=cost_s, size=size)
+                self.recorded += 1
+            except Exception:
+                self.failed += 1
+            finally:
+                self._queue.task_done()
+
+
 # ----------------------------------------------------------------------------- planning
 # Plan order. 'other_basis' orders the newest hint's other-basis neighbours after every company of every
 # industry; those tasks keep the insights_neighbor kind (and so their task ids and ledger history).
@@ -891,8 +1155,10 @@ def company_bodies(dataset, companies):
 
 def build_plan(backend, *, hints, today, code_fp, industries=None, allow_index_builds=False,
                max_company_neighbors=DEFAULT_MAX_COMPANY_NEIGHBORS, options_cache=None, successes=None,
-               quarantine=None, hints_file_stamp=None, exists=os.path.exists):
-    """The ordered task list. Pure given the backend's answers, so tests drive it with fakes."""
+               quarantine=None, hints_file_stamp=None, exists=os.path.exists, access_rows=None, reprime=()):
+    """The ordered task list. Pure given the backend's answers, so tests drive it with fakes.
+    access_rows (access_stats.top()) and reprime (industries whose source changed) re-rank it by value
+    (value_order); without either the order is the hints-only order."""
     options_cache = options_cache or {}
     successes = successes or {}
     quarantine = dict(quarantine or {})
@@ -1004,6 +1270,9 @@ def build_plan(backend, *, hints, today, code_fp, industries=None, allow_index_b
             continue
         seen.add(identity)
         unique.append(task)
+    # RACF 3.4-3.6: by value when access_stats has data or a source changed; before the budget below,
+    # so the response-cache room goes to the most valuable tasks first.
+    unique = value_order(unique, hints=hints, access_rows=access_rows, reprime=reprime, successes=successes)
 
     released = []
     for task in unique:
@@ -1053,7 +1322,8 @@ def build_plan(backend, *, hints, today, code_fp, industries=None, allow_index_b
                         for item in sources},
             'order': order, 'tasks': unique, 'skipped': skipped, 'released_quarantine': released,
             'quarantine': quarantine, 'pending_expansion': pending_expansion,
-            'pending_companies': pending_companies, 'budget': budget}
+            'pending_companies': pending_companies, 'budget': budget,
+            'ranking': 'value' if (access_rows or reprime) else 'hints', 'reprime': sorted(reprime or ())}
 
 
 def plan_counts(plan):
@@ -1362,6 +1632,13 @@ class AppBackend:
                     relative = Path(os.path.relpath(str(value), str(DEFAULT_STATE_ROOT)))
                     setattr(module, attribute, root / relative)
                     redirected[f'{module_name}.{attribute}'] = str(root / relative)
+        # A sandbox never writes (or reads) the live access ledger: access_stats points at scratch state.
+        try:
+            import access_stats
+        except ImportError:
+            access_stats = None
+        if access_stats is not None and callable(getattr(access_stats, 'configure', None)):
+            redirected['access_stats.PATH'] = str(access_stats.configure(root / 'prewarm' / 'access.sqlite'))
         self.redirected = redirected
         proofs = root / 'contribution-source-proofs'
         real_proofs = DEFAULT_STATE_ROOT / 'contribution-source-proofs'
@@ -1626,7 +1903,11 @@ class AppBackend:
         return Path(self.store.ROOT) / 'responses' / namespace
 
     def response_capacity(self, namespace, today):
-        return warm_capacity(response_files(self.response_dir(namespace)), today)
+        # The store's own prune limits (RESPONSE_KEEP_* once builder "value"'s raised cap is live; the
+        # 128-file / 128 MB defaults before it).
+        return warm_capacity(response_files(self.response_dir(namespace)), today,
+                             keep_files=getattr(self.store, 'RESPONSE_KEEP_FILES', PRUNE_KEEP_FILES),
+                             keep_bytes=getattr(self.store, 'RESPONSE_KEEP_BYTES', PRUNE_KEEP_BYTES))
 
     def response_room(self, kind, today):
         group = response_group(kind)
@@ -1752,8 +2033,11 @@ class Warmer:
                  once=False, max_tasks=None, start_delay=0.0, allow_index_builds=False, industries=None,
                  max_company_neighbors=DEFAULT_MAX_COMPANY_NEIGHBORS, today=local_today, monotonic=time.monotonic,
                  sleep=time.sleep, free_bytes=free_physical_bytes, console_probe=console_health,
-                 parent_alive=None, code_stamps=watched_code_stamps, emitter=emit, set_priority=True):
+                 parent_alive=None, code_stamps=watched_code_stamps, emitter=emit, set_priority=True,
+                 access_top=None):
         self.backend, self.state, self.op = backend, state.ensure(), op
+        # access_stats.top (load_access_top) for the value ranking; None keeps the hints-only order.
+        self.access_top = access_top
         self.ledger = Ledger(state)
         self.run_id = run_id or f'prewarm-{time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())}-{os.getpid()}'
         self.parent_pid, self.console = parent_pid, console
@@ -1838,11 +2122,23 @@ class Warmer:
         hints = read_hints(self.state.hints)
         rows = self.ledger.read()
         code_fp = self.backend.code_fingerprint()
+        access_rows = None
+        if callable(self.access_top):
+            try:
+                access_rows = self.access_top()
+            except Exception as error:   # the ranking falls back to hints only
+                log(f'access ranking unavailable: {type(error).__name__}: {error}')
+        # RACF 3.6: the industries whose source fingerprint changed re-prime their hot items first.
+        reprime = ()
+        if reason == 'source_changed' and self._last_sources_sig:
+            with contextlib.suppress(Exception):
+                now = sources_signature(self.backend.sources())
+                reprime = tuple(sorted(name for name, value in now.items() if self._last_sources_sig.get(name) != value))
         plan = build_plan(self.backend, hints=hints, today=self.today(), code_fp=code_fp,
                           industries=self.industries, allow_index_builds=self.allow_index_builds,
                           max_company_neighbors=self.max_company_neighbors, options_cache=self.options_cache(),
                           successes=last_successes(rows), quarantine=self.load_quarantine(),
-                          hints_file_stamp=hints_stamp(self.state.hints))
+                          hints_file_stamp=hints_stamp(self.state.hints), access_rows=access_rows, reprime=reprime)
         with contextlib.suppress(Exception):
             self.backend.release_graph_memory()
         # The ledger is the record of every attempt, this process's and earlier ones'.
@@ -2956,6 +3252,7 @@ def start_startup_warm(read_only=False, app=None):
                                       name='mentat-startup-warm', daemon=True)
             _startup['thread'] = thread
             _startup['state'] = 'running'
+            _prime.update(phase='starting', started_utc=utc_iso())
             thread.start()
             return thread
     except Exception as error:
@@ -2966,6 +3263,62 @@ def start_startup_warm(read_only=False, app=None):
 def startup_warm_status():
     return {'state': _startup['state'], 'steps': list(_startup['steps']), 'errors': list(_startup['errors']),
             'skipped': list(_startup.get('skipped') or [])}
+
+
+# The startup prime (RACF 3.5): the hot set is primed into memory before any other startup step.
+# phase: disabled (no startup warm in this console) -> starting -> hot -> background -> done | failed.
+_prime = {'phase': 'disabled', 'started_utc': None, 'primed_utc': None, 'finished_utc': None, 'items': [],
+          'background': 0, 'estimate_s': 0.0, 'ranking': None, 'error': None}
+PRIME_TERMINAL_PHASES = ('background', 'done', 'failed', 'disabled')
+
+
+def prime_status():
+    """GET /api/prime-status: read-only, from this process's memory only. An item is ready when the
+    console answers it from memory or disk without a build."""
+    items = [dict(item) for item in _prime['items']]
+    ready = sum(1 for item in items if item.get('state') == 'ready')
+    phase = _prime['phase']
+    return {'primed': phase in ('background', 'done') and ready == len(items),
+            'hot_total': len(items), 'hot_ready': ready, 'phase': phase,
+            'started_utc': _prime['started_utc'], 'primed_utc': _prime['primed_utc'],
+            'finished_utc': _prime['finished_utc'], 'background_total': _prime['background'],
+            'estimate_s': _prime['estimate_s'], 'ranking': _prime['ranking'], 'error': _prime['error'],
+            'items': [{key: item.get(key) for key in ('id', 'kind', 'industry', 'state', 'value', 'seconds', 'reason')}
+                      for item in items]}
+
+
+def _route_graph_params(app, directory, params, snapshot_registry, industry_scope):
+    """server.py do_GET for /api/graph with recorded parameters (record_access's graph_view body)."""
+    wanted = params.get('industry', '')
+    registry = snapshot_registry.registry(directory) if wanted else None
+    label = industry_scope.label_or_value(registry, wanted) if registry else wanted
+    return app.graph(params.get('id', ''), label, {**params, 'industry': label}, registry)
+
+
+def _route_comparison(app, directory, industry, snapshot_registry, industry_scope):
+    """server.py do_GET for /api/comparison-flows: the response_cache entry (memory, then disk, then build)."""
+    registry = snapshot_registry.registry(directory) if industry else None
+    label = industry_scope.label_or_value(registry, industry) if registry else industry
+    return app.comparison_entry('published-reports', label)
+
+
+def _probe_insights(item, pinned=None):
+    """(state, reason) of a hinted Insights scope: analysis_data._probe (memory, then the hash-verified
+    disk envelope; never computes, never waits) loads it into memory when it is stored under the key the
+    console recorded today and still carries the running analysis code and the verified source."""
+    import analysis_data
+    payload = analysis_data._probe({'request_key': item['key']})
+    if payload is None:
+        return 'needs_build', 'not stored: the disk warmer builds it'
+    provenance = ((payload.get('metadata') or {}).get('provenance') or {}) if isinstance(payload, dict) else {}
+    code = provenance.get('analysis_code_sha256')
+    if code and getattr(analysis_data, '_code_hash', code) != code:
+        return 'needs_build', 'stored under earlier analysis code'
+    stored = payload.get('provenance') or {} if isinstance(payload, dict) else {}
+    for key in ('workbook_sha256', 'database_sha256'):
+        if (pinned or {}).get(key) and stored.get(key) and stored[key] != pinned[key]:
+            return 'needs_build', 'stored under an earlier source'
+    return 'ready', 'stored'
 
 
 def _startup_step(name, function, run_id, current=-1, total=-1):
@@ -3009,24 +3362,96 @@ def _startup_warm(read_only, app):
         available = [item['id'] for item in sources if item.get('available')]
         hints = read_hints(StateDir(DEFAULT_STATE_ROOT).hints)
         ordered = industry_order(available, hints)
-        # 2. The source-guard verification each analytical route runs first (server.py:2438; H1: ~5 s of
-        #    SHA-256 on first use): the same function, per industry, never strict, so one bad source
-        #    cannot stop the rest.
-        for index, dataset in enumerate(ordered, 1):
-            _startup_step(f'verify_sources {dataset}',
-                          lambda dataset=dataset: contribution_workbook_guard.verify_sources(directory, dataset, strict=False),
-                          run_id, index, len(ordered))
-        # The Insights route imports analysis_data lazily (server.py:2757); import it now, off the click.
-        _startup_step('import analysis_data', lambda: __import__('analysis_data'), run_id)
+        verified, pinned = set(), {}
+
+        def verify(dataset, index=-1, total=-1):
+            # 2. The source-guard verification each analytical route runs first (server.py:2438; H1: ~5 s
+            #    of SHA-256 on first use): the same function, per industry, never strict, so one bad
+            #    source cannot stop the rest.
+            if dataset in verified or dataset not in available:
+                return
+            verified.add(dataset)
+            checked = _startup_step(f'verify_sources {dataset}',
+                                    lambda: contribution_workbook_guard.verify_sources(directory, dataset, strict=False),
+                                    run_id, index, total) or []
+            pinned[dataset] = next((item for item in checked if item.get('dataset') == dataset), None) or {}
+
         if app is None:
+            for index, dataset in enumerate(ordered, 1):
+                verify(dataset, index, len(ordered))
+            # The Insights route imports analysis_data lazily (server.py:2757); import it now, off the click.
+            _startup_step('import analysis_data', lambda: __import__('analysis_data'), run_id)
+            _prime.update(phase='done', primed_utc=utc_iso(), finished_utc=utc_iso())
             _startup['state'] = 'done (no console app: graph views skipped)'
             return
         reports = _startup_step('published_reports', app.published_reports, run_id) or []
         catalog = _startup_step('graph_catalog', lambda: app.graph_catalog('published-reports', reports), run_id) or {}
         groups = catalog.get('industries') or []
         names = [group['name'] for group in groups]
+        receipted = set()
+
+        def receipts(name, index=-1, total=-1):
+            # 3. Workbook receipts (report_insights.embedded_receipts: perf.md H2, 0.1-0.6 s per workbook).
+            group = next((item for item in groups if item['name'] == name), None)
+            if group is None or name in receipted:
+                return
+            receipted.add(name)
+            for report_index in group['indices']:
+                _startup_step(f'embedded_receipts {name}',
+                              lambda report_index=report_index: report_insights.embedded_receipts(
+                                  report_insights.stamp(app.report_path('published-reports', report_index))),
+                              run_id, index, total)
+
+        # THE HOT SET FIRST (RACF 3.5): the highest-value items that fit the startup budget, each primed
+        # through the route's own code, which looks in memory, then the verified disk tier, then builds.
+        access_rows = load_access_top(kinds=ACCESS_GRAPH_KINDS + ('comparison_flows', 'insights_query'))
+        candidates, ranking = prime_candidates(names, hints, access_rows, local_today())
+        hot, background, estimate = select_hot_set(candidates, HOT_MAX_ITEMS, HOT_BUDGET_SECONDS)
+        _prime.update(items=[{**item, 'state': 'pending'} for item in hot], background=len(background),
+                      estimate_s=estimate, ranking={**ranking, 'access_rows': len(access_rows),
+                                                    'basis': 'access+hints' if access_rows else 'hints'},
+                      phase='hot')
+        emit('mentat.prewarm.startup', 'running', f'Prime: {len(hot)} hot items (est. {estimate:.1f} s), '
+             f'{len(background)} background', run_id=run_id, stage='prime', total=len(hot),
+             metadata={'hot': [item['id'] for item in hot], 'ranking': _prime['ranking']})
+        primers = {'graph_default': lambda item: _route_graph(app, directory, item['industry'], snapshot_registry, industry_scope),
+                   'graph_view': lambda item: _route_graph_params(app, directory, item['body'], snapshot_registry, industry_scope),
+                   'graph_drawer': lambda item: _route_graph_params(app, directory, item['body'], snapshot_registry, industry_scope),
+                   'comparison_flows': lambda item: _route_comparison(app, directory, item['industry'], snapshot_registry, industry_scope)}
+        for index, item in enumerate(_prime['items'], 1):
+            if free_physical_bytes() < MIN_FREE_BYTES:
+                item.update(state='skipped', reason='low memory: left to the first click')
+                continue
+            verify(item['industry'])
+            started = time.perf_counter()
+            try:
+                if item['kind'] == 'insights_scope':
+                    _startup_step('import analysis_data', lambda: __import__('analysis_data'), run_id)
+                    state, reason = _probe_insights(item, pinned.get(item['industry']))
+                else:
+                    receipts(item['industry'])
+                    primers[item['kind']](item)
+                    state, reason = 'ready', 'in memory'
+            except Exception as error:
+                state, reason = 'failed', f'{type(error).__name__}: {error}'
+                _startup['errors'].append({'step': f'prime {item["id"]}', 'error': reason})
+            item.update(state=state, reason=reason, seconds=round(time.perf_counter() - started, 3))
+            emit('mentat.prewarm.startup', 'completed' if state == 'ready' else 'waiting',
+                 f'Prime {item["kind"]} {item["industry"]}: {state} ({item["seconds"]:.2f} s)', run_id=run_id,
+                 stage='prime', current=index, total=len(_prime['items']), duration_ms=int(item['seconds'] * 1000))
+        _prime.update(phase='background', primed_utc=utc_iso())
+        emit('mentat.prewarm.startup', 'completed', f'Prime: {prime_status()["hot_ready"]}/{len(hot)} hot items ready',
+             run_id=run_id, stage='prime', metadata={'status': {key: value for key, value in prime_status().items()
+                                                                 if key != 'items'}})
+        # Background priority: every other industry's verification, then the remaining default views.
+        for index, dataset in enumerate(ordered, 1):
+            verify(dataset, index, len(ordered))
+        # The Insights route imports analysis_data lazily (server.py:2757); import it now, off the click.
+        _startup_step('import analysis_data', lambda: __import__('analysis_data'), run_id)
+        primed = {item['industry'] for item in _prime['items'] if item['kind'] == 'graph_default' and item.get('state') == 'ready'}
         first = names[:1]
-        graph_order = first + [name for name in industry_order(names, hints) if name not in first]
+        graph_order = [name for name in first + [name for name in industry_order(names, hints) if name not in first]
+                       if name not in primed]
         for index, name in enumerate(graph_order, 1):
             if free_physical_bytes() < MIN_FREE_BYTES:
                 # A guard, not a failure: the views not warmed here are built by the first click, as before.
@@ -3034,21 +3459,17 @@ def _startup_warm(read_only, app):
                 emit('mentat.prewarm.startup', 'skipped', f'Startup warm: graph views stopped at {name}: low memory',
                      run_id=run_id, stage='startup', current=index, total=len(graph_order))
                 break
-            group = next(item for item in groups if item['name'] == name)
-            # 3. Workbook receipts (report_insights.embedded_receipts: perf.md H2, 0.1-0.6 s per workbook).
-            for report_index in group['indices']:
-                _startup_step(f'embedded_receipts {name}',
-                              lambda report_index=report_index: report_insights.embedded_receipts(
-                                  report_insights.stamp(app.report_path('published-reports', report_index))),
-                              run_id, index, len(graph_order))
+            receipts(name, index, len(graph_order))
             # 4. The default /api/graph view, through the route's own glue and Console.graph.
             _startup_step(f'graph {name}', lambda name=name: _route_graph(app, directory, name,
                                                                         snapshot_registry, industry_scope),
                           run_id, index, len(graph_order))
         _startup['state'] = 'done'
+        _prime.update(phase='done', finished_utc=utc_iso())
     except Exception as error:
         _startup['state'] = 'failed'
         _startup['errors'].append({'step': 'startup', 'error': f'{type(error).__name__}: {error}'})
+        _prime.update(phase='failed', error=f'{type(error).__name__}: {error}', finished_utc=utc_iso())
         log(f'startup warm failed: {type(error).__name__}: {error}')
     finally:
         seconds = time.perf_counter() - began
@@ -3098,7 +3519,7 @@ def launch_warmer(data_root, read_only, console_port, state_root=None):
 # ----------------------------------------------------------------------------- CLI
 def _parser():
     parser = argparse.ArgumentParser(description='Mentat prewarm harness (one JSON object on stdout).')
-    parser.add_argument('op', choices=('plan', 'run', 'warm', 'verify', 'bench', 'status'))
+    parser.add_argument('op', choices=('plan', 'run', 'warm', 'verify', 'bench', 'status', 'hotset'))
     parser.add_argument('--data-root', default=None, help='The console data root (server.py --data-root).')
     parser.add_argument('--state-root', default=None, help='Scratch state root outside mentat/ (default: mentat/state).')
     parser.add_argument('--industries', default=None, help='Comma-separated dataset ids to restrict the plan.')
@@ -3134,7 +3555,7 @@ def op_plan(options):
                          allow_index_builds=options.allow_index_builds).load()
     warmer = Warmer(backend, state, op='plan', industries=_industries(options),
                     allow_index_builds=options.allow_index_builds, max_company_neighbors=options.max_neighbors,
-                    set_priority=False)
+                    set_priority=False, access_top=load_access_top)
     plan = warmer.replan('cli plan')
     blocked = [task for task in plan['tasks'] if task['state'] == 'blocked']
     actions = []
@@ -3162,7 +3583,7 @@ def op_run(options):
     warmer = Warmer(backend, state, op='run', parent_pid=options.parent_pid, console=options.console,
                     once=options.once, max_tasks=options.max_tasks, start_delay=delay,
                     allow_index_builds=options.allow_index_builds, industries=_industries(options),
-                    max_company_neighbors=options.max_neighbors)
+                    max_company_neighbors=options.max_neighbors, access_top=load_access_top)
     try:
         backend.load()
     except Exception as error:
@@ -3238,7 +3659,37 @@ def op_status(options):
     return op_result(status, summary, actions, [str(state.plan), str(state.ledger)], metrics)
 
 
-OPS = {'plan': op_plan, 'run': op_run, 'warm': op_warm, 'verify': run_verify, 'bench': run_bench, 'status': op_status}
+HOT_ROW_FIELDS = ('id', 'kind', 'industry', 'value', 'access', 'importance', 'cost_s', 'size', 'est_s', 'source',
+                  'tier', 'why')
+
+
+def op_hotset(options):
+    """The startup hot set, ranked with its scores (RACF 3.4-3.5), exactly as the console's prime ranks it."""
+    state = StateDir(Path(options.state_root).resolve() if options.state_root else DEFAULT_STATE_ROOT)
+    backend = AppBackend(data_root=options.data_root, state_root=options.state_root).load()
+    industries = [item['dataset'] for item in backend.sources() if item.get('available')]
+    wanted = _industries(options)
+    if wanted:
+        industries = [name for name in industries if name in wanted]
+    access_rows = load_access_top(kinds=ACCESS_GRAPH_KINDS + ('comparison_flows', 'insights_query'))
+    candidates, ranking = prime_candidates(industries, read_hints(state.hints), access_rows, local_today())
+    hot, background, estimate = select_hot_set(candidates, HOT_MAX_ITEMS, HOT_BUDGET_SECONDS)
+    basis = 'access+hints' if access_rows else 'hints'
+    return op_result('success', f'{len(hot)} hot items (estimated {estimate} s of startup work), {len(background)} '
+                     f'background; ranked by {basis}', [], [str(state.hints)],
+                     {'hot': [{key: item.get(key) for key in HOT_ROW_FIELDS} for item in hot],
+                      'background': [{key: item.get(key) for key in HOT_ROW_FIELDS} for item in background[:40]],
+                      'background_total': len(background), 'estimate_s': estimate, 'ranking': ranking,
+                      'basis': basis, 'access_rows': len(access_rows),
+                      'budget': {'max_items': HOT_MAX_ITEMS, 'budget_seconds': HOT_BUDGET_SECONDS,
+                                 'memory_floor_mb': round(MIN_FREE_BYTES / 1024 ** 2)},
+                      'formula': 'value = (access_score + importance) * log2(2 + rebuild_s) / (1 + size_MB / 64); '
+                                 'importance = 1/(1 + use rank) + 1.0 for the most recently used industry '
+                                 '(x0.25 for non-default views; + 1/(1 + hint position) for Insights scopes)'})
+
+
+OPS = {'plan': op_plan, 'run': op_run, 'warm': op_warm, 'verify': run_verify, 'bench': run_bench, 'status': op_status,
+       'hotset': op_hotset}
 
 
 def main(argv=None):
