@@ -14,9 +14,24 @@ import zipfile
 from xml.etree import ElementTree as ET
 
 import openpyxl
+from openpyxl.cell.text import Text
+from openpyxl.packaging.manifest import Manifest
+from openpyxl.reader.excel import _find_workbook_part, _validate_archive
+from openpyxl.reader.workbook import WorkbookParser
+from openpyxl.styles.stylesheet import apply_stylesheet
+from openpyxl.worksheet._read_only import ReadOnlyWorksheet
+from openpyxl.worksheet._reader import WorkSheetParser
+from openpyxl.xml.constants import ARC_CONTENT_TYPES, SHARED_STRINGS, SHEET_MAIN_NS
+from openpyxl.xml.functions import fromstring, iterparse
 
 MAX_ROWS = 50000
 MAX_COLUMNS = 200
+RECEIPT_SHEETS = ('Source Freshness', 'Source Receipts')
+RECEIPT_LIMIT = 2000
+# records() reads rows 1-30 to find its header, then the header row and up to
+# RECEIPT_LIMIT + 1 more; openpyxl parses one row past a max_row to stop there.
+_LAST_RECEIPT_ROW = 30 + RECEIPT_LIMIT + 1
+_SHARED_STRING = '{%s}si' % SHEET_MAIN_NS
 
 
 def stamp(path):
@@ -73,7 +88,7 @@ def header_row(sheet):
     return -max(candidates)[1] if candidates else 1
 
 
-def records(sheet, limit=2000):
+def records(sheet, limit=RECEIPT_LIMIT):
     start = header_row(sheet)
     rows = sheet.iter_rows(min_row=start, max_row=start + limit + 1, max_col=MAX_COLUMNS, values_only=True)
     headers = [key(v) for v in next(rows, ())]
@@ -87,14 +102,93 @@ def records(sheet, limit=2000):
     return result
 
 
-@lru_cache(maxsize=32)
-def embedded_receipts(file_stamp):
-    book = openpyxl.load_workbook(file_stamp[0], read_only=True, data_only=True)
+def _workbook_receipts(path):
+    """openpyxl's whole read-only, data-only load: the reference behaviour."""
+    book = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
-        return {name: records(book[name]) for name in ('Source Freshness', 'Source Receipts')
+        return {name: records(book[name]) for name in RECEIPT_SHEETS
                 if name in book.sheetnames}
     finally:
         book.close()
+
+
+class _StringsUsed(dict):
+    """Pre-scan stand-in for the shared-string table; records each index read."""
+    def __missing__(self, index):
+        self[index] = ''
+        return ''
+
+
+class _StringSubset(dict):
+    """The referenced shared strings by table index. An index outside the table
+    fails as openpyxl's list does."""
+    def __missing__(self, index):
+        raise IndexError('list index out of range')
+
+
+def _streamed_receipts(path):
+    """The receipt sheets exactly as _workbook_receipts reads them, parsing only
+    those sheets and the shared strings they use (Banking parsed all 123,088
+    strings for a 15-row sheet). Rows and cells go through openpyxl's own
+    read-only worksheet and cell parser, with openpyxl's workbook, sheet, epoch
+    and number-format (date/duration) handling. Returns None for a shape this
+    does not mirror, and the caller then uses the whole load."""
+    archive = _validate_archive(path)
+    try:
+        package = Manifest.from_tree(fromstring(archive.read(ARC_CONTENT_TYPES)))
+        parser = WorkbookParser(archive, _find_workbook_part(package).PartName[1:])
+        parser.parse()
+        book = parser.wb
+        book._data_only, book._read_only, book._archive = True, True, archive
+        present = set(archive.namelist())
+        found = {}
+        for sheet, rel in parser.find_sheets():
+            if rel.target in present and sheet.name in RECEIPT_SHEETS:
+                found.setdefault(sheet.name, []).append((rel.target, 'chartsheet' in rel.Type))
+        if any(len(entries) != 1 or entries[0][1] for entries in found.values()):
+            return None  # a duplicate or a chart sheet under a receipt name
+        wanted = {name: found[name][0][0] for name in RECEIPT_SHEETS if name in found}
+        used, numeric = _StringsUsed(), False
+        for target in wanted.values():
+            with archive.open(target) as source:
+                for number, cells in WorkSheetParser(source, used, data_only=True).parse():
+                    numeric = numeric or any(cell['data_type'] == 'n' and cell['value'] is not None
+                                             for cell in cells)
+                    if number > _LAST_RECEIPT_ROW:
+                        break
+        if any(index < 0 for index in used):
+            return None  # a negative index reads from the end of the whole table
+        strings = _StringSubset()
+        part = package.find(SHARED_STRINGS)
+        if used and part is not None:
+            ceiling, index = max(used), 0
+            with archive.open(part.PartName[1:]) as source:
+                # openpyxl.reader.strings.read_string_table, stopping at the last index used
+                for _, node in iterparse(source):
+                    if node.tag == _SHARED_STRING:
+                        if index in used:
+                            strings[index] = Text.from_tree(node).content.replace('x005F_', '')
+                        node.clear()
+                        index += 1
+                        if index > ceiling:
+                            break
+        if numeric:
+            apply_stylesheet(archive, book)  # date and duration formats, as load_workbook does
+        return {name: records(ReadOnlyWorksheet(book, name, target, strings))
+                for name, target in wanted.items()}
+    finally:
+        archive.close()
+
+
+@lru_cache(maxsize=32)
+def embedded_receipts(file_stamp):
+    # Anything the streamed read refuses or fails on is answered by the whole
+    # load, so an unusual or damaged workbook returns or raises exactly as before.
+    try:
+        result = _streamed_receipts(file_stamp[0])
+    except Exception:
+        result = None
+    return _workbook_receipts(file_stamp[0]) if result is None else result
 
 
 def local_reference(value, root):

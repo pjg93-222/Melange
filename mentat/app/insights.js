@@ -163,7 +163,26 @@
     const dollars = Number(cents) / 100, size = Math.abs(dollars), trim = value => String(Number(value.toFixed(2)));
     return (dollars < 0 ? '-' : '') + (dollarSign ? '$' : '') + (size >= 1e6 ? trim(size / 1e6) + 'M' : size >= 1e3 ? trim(size / 1e3) + 'K' : trim(size));
   }
-  if (typeof module !== 'undefined' && module.exports) { module.exports = {display, csvCell, exportCSV, PANELS, SHORT_TITLES, cycleEnd, electionDay, daysBefore, runningTotals, channelMagnitudes, rankChannels, defaultChannel, niceTicks, millions, tickMoney, DIAGNOSTIC_CHANNELS}; return; }
+  // The wait before the next status poll: the server's retry_after_ms, held
+  // between 200 ms and 5 s; after 40 polls, every 5 s. The 200 ms floor lets a
+  // server that expects a result shortly say so (perf H5, 2026-09-24); a server
+  // that always answers 1500 ms is still polled every 1.5 s.
+  function pollDelay(attempts, retryAfterMs) { return attempts >= 40 ? 5000 : Math.max(200, Math.min(5000, retryAfterMs || 1500)); }
+  // First open (perf, 2026-09-24): the only field of the query body the catalog
+  // decides is the industry, and installCatalog() keeps whatever industry it is
+  // given, an unavailable one included. So a known industry forms the body
+  // before the catalog arrives: the controls as they stand, with a comparison
+  // industry equal to the industry cleared, as updateComparisonOptions() does.
+  function earlyQuery(formed, industry, retry) {
+    if (!industry) return null;
+    const out = {...formed, dataset: industry};
+    if (out.comparison_dataset === industry) delete out.comparison_dataset;
+    if (retry) out.retry = true;
+    return out;
+  }
+  // Two query bodies ask the same thing: the same fields and values, in any key order.
+  function sameQuery(a, b) { const canonical = value => JSON.stringify(Object.keys(value || {}).sort().map(key => [key, value[key]])); return canonical(a) === canonical(b); }
+  if (typeof module !== 'undefined' && module.exports) { module.exports = {display, csvCell, exportCSV, PANELS, SHORT_TITLES, cycleEnd, electionDay, daysBefore, runningTotals, channelMagnitudes, rankChannels, defaultChannel, niceTicks, millions, tickMoney, DIAGNOSTIC_CHANNELS, pollDelay, earlyQuery, sameQuery}; return; }
   if (!root.document.getElementById('view-insights')) return;
   const el = id => root.document.getElementById('insights-' + id);
   function node(tag, text, className) { const out = document.createElement(tag); if (text !== undefined) out.textContent = text; if (className) out.className = className; return out; }
@@ -258,10 +277,14 @@
     if(!Array.from(el('dataset').options).some(option=>option.value===industry))el('dataset').append(new Option(industry+' · unavailable',industry));
     el('dataset').value=industry;resetIndustryFilters();return true;
   }
+  // The industry the catalog should select: the shared URL scope's, else the
+  // current choice, else Graph's. load() asks the same question before the
+  // catalog arrives (earlyQuery), so both ask it here.
+  function wantedIndustry() { return root.MentatScope?.read()?.industry || el('dataset').value || document.getElementById('graph-industry')?.value || ''; }
   function installCatalog(data) {
     catalog = data;
     const datasets = data.datasets || [];
-    const wanted = root.MentatScope?.read()?.industry || el('dataset').value || document.getElementById('graph-industry')?.value || '';
+    const wanted = wantedIndustry();
     fillSelect(el('dataset'), datasets.map(d => ({id: d.id, label: (d.label || d.id) + (d.available === false ? ' · unavailable' : '')})), datasets.length ? null : 'No industries available', wanted,true);
     fillSelect(el('comparison-dataset'), datasets.filter(d => d.available !== false), 'No industry comparison');
     updateComparisonOptions();
@@ -320,11 +343,31 @@
     else { if (left) out.baseline_cycle = left; if (right) out.current_cycle = right; }
     return out;
   }
-  async function api(path, body, signal) {
-    const response = await fetch(path, body === undefined ? {signal, cache: 'no-store'} : {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Mentat-Token': token}, body: JSON.stringify(body), signal});
+  // `auth` is the page's session token unless a caller passes one: a first-open
+  // query sent before load() stores the token passes the one its session reply carried.
+  async function api(path, body, signal, auth = token) {
+    const response = await fetch(path, body === undefined ? {signal, cache: 'no-store'} : {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Mentat-Token': auth}, body: JSON.stringify(body), signal});
     let data; try { data = await response.json(); } catch (_) { throw new Error('The server returned an unreadable response.'); }
     if (!response.ok || data.error || data.status === 'failed') throw new Error(data.error || data.message || 'The analysis could not be loaded.');
     return data;
+  }
+  // First open (perf, 2026-09-24): when earlyQuery() can form the body, it is
+  // sent as soon as the session token arrives instead of after the catalog -
+  // unless the catalog has already arrived, when load() forms and sends it at
+  // once. load() uses the reply only if the body it forms after
+  // installCatalog() is identical (sameQuery); drop() abandons the request.
+  // `at` stamps the reply's arrival, so time already spent waiting for the
+  // catalog counts toward the first poll's delay.
+  function sendEarly(query, catalogRead, sessionRead, signal) {
+    if (!query || periodConflict(query)) return null;
+    const own = new AbortController(), drop = () => own.abort();
+    signal.addEventListener('abort', drop, {once: true});
+    let catalogSettled = false; const settled = () => { catalogSettled = true; };
+    catalogRead.then(settled, settled);
+    const reply = sessionRead.then(session => catalogSettled || !session.token || own.signal.aborted ? null
+      : api('/api/insights/query', query, own.signal, session.token).then(data => ({data, at: performance.now()})));
+    reply.catch(() => {});
+    return {query, reply, drop};
   }
   async function load(retry = false) {
     const ticket = invalidate();
@@ -332,9 +375,12 @@
     if (!enabled.length) { status('All analyses are off. Enable an analysis to explore this industry.'); el('results').append(node('p', 'Turn on an analysis in the list to build your workspace.', 'insights-empty')); return; }
     loading = true; request = new AbortController(); const signal = request.signal;
     el('results').setAttribute('aria-busy', 'true'); status('Loading industry scope and source information…', 'loading'); shells('loading');
+    let early = null;
     try {
       if (!catalog || !token) {
-        const [data, session] = await Promise.all([api('/api/insights/catalog', undefined, signal), api('/api/contributions/session', undefined, signal)]);
+        const catalogRead = api('/api/insights/catalog', undefined, signal), sessionRead = api('/api/contributions/session', undefined, signal);
+        if (!catalog) early = sendEarly(earlyQuery(scopeQuery(), wantedIndustry(), retry), catalogRead, sessionRead, signal);
+        const [data, session] = await Promise.all([catalogRead, sessionRead]);
         if (ticket !== revision || !active) return;
         token = session.token; if (!token) throw new Error('The local session did not provide an analysis token.'); installCatalog(data);
       }
@@ -342,21 +388,32 @@
       if (retry) query.retry = true;
       if (!query.dataset) { status('No industry data is available. Load an industry report to begin.'); loading = false; el('results').setAttribute('aria-busy','false'); el('results').replaceChildren(node('p', 'No industry data is available. Load an industry report to begin.', 'insights-empty')); return; }
       if (periodConflict(query)) { const message = 'Choose two different cycles to compare.'; labelPeriods(); loading = false; el('results').setAttribute('aria-busy', 'false'); status(message, 'error'); shells('invalid', message); return; }
-      await queryReady(query, ticket, signal, 0);
+      // The early reply answers this load only when it was asked exactly this
+      // body; otherwise it is abandoned now and the formed body is sent.
+      const first = early && sameQuery(early.query, query) ? early.reply : null;
+      if (early && !first) early.drop();
+      await queryReady(query, ticket, signal, 0, first);
     } catch (error) { fail(error, ticket); }
+    // An early query this load did not use (another body, a refusal, a failure) is abandoned.
+    finally { if (early) early.drop(); }
   }
-  async function queryReady(query, ticket, signal, attempts) {
-    const data = await api('/api/insights/query', query, signal);
+  // `first` is the reply sendEarly() received for exactly this body on a first
+  // open (it resolves to null when none was sent); every later poll asks again.
+  async function queryReady(query, ticket, signal, attempts, first) {
+    const held = first ? await first : null;
+    const data = held ? held.data : await api('/api/insights/query', query, signal);
     if (ticket !== revision || !active) return;
     if (['building', 'queued', 'preparing'].includes(data.status)) {
-      // A first build of an industry can take several minutes: poll every 1.5 s
-      // for a minute, then every 5 s, for about a quarter of an hour in all.
+      // A first build of an industry can take several minutes: poll at the
+      // server's pace (pollDelay) for 40 polls, then every 5 s, for about a
+      // quarter of an hour in all.
       if (attempts >= 220) throw new Error('Preparation is still running on the server after about 15 minutes. Try again to check its progress.');
       const message = (data.message || 'Preparing the selected analysis…') + (attempts >= 40 ? ' Preparing an industry for the first time can take several minutes; this page keeps checking.' : '');
       status(message, 'loading');
       for (const line of el('results').querySelectorAll('.insights-card[data-state="loading"] .insights-card-message p')) line.textContent = message;
       const nextQuery = {...query}; delete nextQuery.retry;
-      pollTimer = setTimeout(() => { queryReady(nextQuery, ticket, signal, attempts + 1).catch(error => fail(error, ticket)); }, attempts >= 40 ? 5000 : Math.max(500, Math.min(5000, data.retry_after_ms || 1500)));
+      // Time already spent waiting for the catalog after an early reply counts toward its delay.
+      pollTimer = setTimeout(() => { queryReady(nextQuery, ticket, signal, attempts + 1).catch(error => fail(error, ticket)); }, Math.max(0, pollDelay(attempts, data.retry_after_ms) - (held ? performance.now() - held.at : 0)));
       return;
     }
     result = data; result._request = query; loading = false; el('results').setAttribute('aria-busy','false');

@@ -2901,6 +2901,15 @@ def main():
     server = console_server(options.port)
     server.app = Console(data_root, keys_file, rscript, options.read_only)
     server.app.port = options.port or server.server_port
+    # One source discovery per stamp change, not per request; warm-up hints only
+    # from a console that may write (perf lane 2026-09-24).
+    import source_memo
+    source_memo.install()
+    import analysis_data
+    analysis_data.HINTS_ENABLED = not options.read_only
+    import prewarm
+    prewarm.start_startup_warm(read_only=options.read_only, app=server.app)
+    prewarm.launch_warmer(data_root=data_root, read_only=options.read_only, console_port=server.app.port)
     print(f"Mentat app: http://127.0.0.1:{options.port}", flush=True)
     server.serve_forever()
 

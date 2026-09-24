@@ -6,13 +6,19 @@ Dataset IDs resolve through the same report/source proof as Chart Studio.
 from collections import OrderedDict, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
-from datetime import date
+from datetime import date, datetime, timezone
+from functools import lru_cache
 import copy
+import hashlib
 import json
+import logging
 import math
+import os
 from pathlib import Path
 import re
 import threading
+import time
+import uuid
 
 import analysis_history as history
 import analysis_scan
@@ -42,10 +48,273 @@ _lock = threading.RLock()
 _jobs = OrderedDict()
 _code = {str(p): data._stamp(p) for p in (Path(__file__), Path(metrics.__file__), Path(history.__file__), Path(integrations.__file__), Path(analysis_scan.__file__))}
 _code_hash = history.digest({p: data._hash(p) for p in _code})
+# The prewarm hint file. server.py turns hints on for a console that is not read-only.
+HINTS_ENABLED = False
+HINTS_PATH = data.PROJECT / 'state' / 'prewarm' / 'hints.json'
+HINTS_LIMIT = 25
+# A build marker older than this, or whose process is gone, no longer defers anyone.
+MARKER_STALE_SECONDS = 30 * 60
+ELSEWHERE_RETRY_MS = 500
+ELSEWHERE_MESSAGE = 'Another Mentat process is preparing this analysis; it will be shown as soon as it is saved.'
+_ELSEWHERE = object()  # a job's answer when another live process holds the key's build
+_log = logging.getLogger('mentat.insights')
+_hint_lock = threading.Lock()
+_hint_writer = ThreadPoolExecutor(max_workers=1, thread_name_prefix='mentat-insights-hints')
 
 
 class _CapacityReached(Exception):
     """Abort the incomplete journal while retaining honest unavailable panels."""
+
+
+def _utc_now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def building_dir():
+    """Cross-process build markers, <mentat>/state/insights/building (ROOT/'building').
+
+    Taken beside the response store they guard, the sibling 'insights' folder of its
+    root, so a caller that points the store at a scratch root keeps its markers there."""
+    return Path(store.ROOT).parent / 'insights' / 'building'
+
+
+def _probe(identity):
+    """store.cached()'s own read of one Insights response - memory, then the
+    hash-verified disk envelope - without computing and without waiting on a lock."""
+    store._loaded()
+    key = store._key([store.LOADED_SHA, 'insights', identity])
+    with store._mutex:
+        payload = store._memory.get(key)
+        if payload is not None:
+            store._memory.move_to_end(key)
+            return json.loads(payload)
+    try:
+        envelope = json.loads((store.ROOT / 'responses' / 'insights' / (key + '.json')).read_bytes())
+        if not isinstance(envelope, dict):
+            return None
+        payload = envelope['payload'].encode('utf-8')
+        if envelope['key'] != key or hashlib.sha256(payload).hexdigest() != envelope['sha256']:
+            return None
+    except (OSError, ValueError, KeyError, AttributeError, TypeError):
+        return None
+    store._remember(key, payload)
+    return json.loads(payload)
+
+
+@lru_cache(maxsize=1)
+def _kernel32():
+    import ctypes
+    from ctypes import wintypes
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.OpenProcess.restype = wintypes.HANDLE
+    kernel.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+    kernel.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
+    kernel.GetProcessTimes.argtypes = (wintypes.HANDLE,) + (ctypes.POINTER(wintypes.FILETIME),) * 4
+    kernel.CloseHandle.argtypes = (wintypes.HANDLE,)
+    return kernel
+
+
+def _alive(pid, started):
+    """Whether process `pid` still runs and could have written a marker at `started`
+    (POSIX seconds): a recycled pid belongs to a process created after the marker."""
+    if os.name != 'nt':
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            return True
+        return True
+    import ctypes
+    from ctypes import wintypes
+    kernel = _kernel32()
+    handle = kernel.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+    if not handle:
+        return ctypes.get_last_error() == 5  # ERROR_ACCESS_DENIED: it exists
+    try:
+        code = wintypes.DWORD()
+        if not kernel.GetExitCodeProcess(handle, ctypes.byref(code)):
+            return True
+        if code.value != 259:  # STILL_ACTIVE
+            return False
+        times = [wintypes.FILETIME() for _ in range(4)]
+        if kernel.GetProcessTimes(handle, *(ctypes.byref(t) for t in times)):
+            created = ((times[0].dwHighDateTime << 32) | times[0].dwLowDateTime) / 1e7 - 11644473600
+            if created > started + 2:
+                return False
+        return True
+    finally:
+        kernel.CloseHandle(handle)
+
+
+def _inspect(path):
+    """None when there is no build marker at path; otherwise (live, bytes read).
+
+    Stale: its process is gone (or the pid was recycled), it is older than
+    MARKER_STALE_SECONDS, or it names this process, which only reaches here when it
+    runs no build of that key. A marker is written in the call that creates it, so an
+    unreadable body is either that instant or an abandoned marker."""
+    try:
+        raw = path.read_bytes()
+        written = path.stat().st_mtime
+    except FileNotFoundError:
+        return None
+    except OSError:
+        return True, None
+    now = time.time()
+    try:
+        info = json.loads(raw)
+        pid, started = int(info['pid']), datetime.fromisoformat(info['started_utc']).timestamp()
+    except (ValueError, KeyError, TypeError, OverflowError, OSError):
+        return now - written < 60, raw
+    if (not 0 < pid < 2**32 or pid == os.getpid()
+            or max(now - started, now - written) > MARKER_STALE_SECONDS):
+        return False, raw
+    return _alive(pid, started), raw
+
+
+def _unlink(path, expected):
+    """Remove the marker at path only while it still holds `expected`."""
+    for attempt in range(5):
+        try:
+            if path.read_bytes() == expected:
+                path.unlink()
+            return
+        except FileNotFoundError:
+            return
+        except OSError as error:
+            if attempt == 4:
+                _log.warning('Could not remove the Insights build marker %s: %s', path.name, error)
+                return
+            time.sleep(.02 * (attempt + 1))
+
+
+def _building_elsewhere(key):
+    """True while another live process holds `key`'s build marker; a stale marker is
+    removed so that this process may build."""
+    path = building_dir() / (key + '.lock')
+    found = _inspect(path)
+    if found is None:
+        return False
+    live, raw = found
+    if not live and raw is not None:
+        _unlink(path, raw)
+    return live
+
+
+def _claim(key):
+    """Atomically create `key`'s build marker (O_CREAT|O_EXCL) holding {pid,
+    started_utc, key}. Returns its bytes, or None while another live process holds it."""
+    path = building_dir() / (key + '.lock')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    for _ in range(3):
+        body = json.dumps({'pid': os.getpid(), 'started_utc': _utc_now(), 'key': key}).encode('utf-8')
+        try:
+            descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, 'O_BINARY', 0))
+        except FileExistsError:
+            found = _inspect(path)
+            if found is not None:
+                live, raw = found
+                if live:
+                    return None
+                if raw is not None:
+                    _unlink(path, raw)
+            continue
+        try:
+            written = 0
+            while written < len(body):
+                written += os.write(descriptor, body[written:])
+        except BaseException:
+            os.close(descriptor)
+            try:
+                path.unlink()  # this process just created it
+            except OSError:
+                pass
+            raise
+        os.close(descriptor)
+        return body
+    return None
+
+
+def _run(key, identity, build, stable, timing):
+    """One Insights build in the pool, under the key's cross-process build marker."""
+    timing['started'] = time.monotonic()
+    body = _claim(key)
+    if body is None:
+        return _ELSEWHERE
+    try:
+        return store.cached('insights', identity, build, stable)
+    finally:
+        _unlink(building_dir() / (key + '.lock'), body)
+
+
+def _retry_after(future):
+    """Poll a build quickly at first and less often as it runs on; a queued job
+    counts from submission until the pool starts it."""
+    timing = getattr(future, 'mentat_timing', None) or {}
+    start = timing.get('started') or timing.get('submitted')
+    elapsed = time.monotonic() - start if start is not None else 0
+    return 300 if elapsed < 2 else 750 if elapsed < 10 else 1500
+
+
+def _hint(body, key, dataset):
+    """Queue an accepted request for the warmer's hint file. Never raises and never
+    waits: the file is written by a background thread after the response is decided."""
+    if not HINTS_ENABLED:
+        return
+    try:
+        entry = {'body': json.loads(json.dumps({k: v for k, v in body.items() if k != 'retry'})),
+                 'key': key, 'dataset': dataset, 'seen_utc': _utc_now()}
+        _hint_writer.submit(_write_hint, entry)
+    except Exception:  # noqa: BLE001 - a hint must never fail the request
+        _log.warning('Could not queue an Insights prewarm hint.', exc_info=True)
+
+
+def _write_hint(entry):
+    """hints.json: {version, updated_utc, requests newest first, one per key, at most
+    HINTS_LIMIT}, replaced atomically. A failure is logged and dropped."""
+    try:
+        with _hint_lock:
+            path = Path(HINTS_PATH)
+            try:
+                current = json.loads(path.read_text(encoding='utf-8'))
+                requests = current.get('requests') if isinstance(current, dict) and current.get('version') == 1 else []
+            except FileNotFoundError:
+                requests = []
+            except (OSError, ValueError) as error:
+                _log.warning('Replacing an unreadable Insights hint file: %s', error)
+                requests = []
+            kept = [item for item in requests or [] if isinstance(item, dict)
+                    and isinstance(item.get('key'), str) and item['key'] != entry['key']]
+            document = {'version': 1, 'updated_utc': _utc_now(), 'requests': ([entry] + kept)[:HINTS_LIMIT]}
+            path.parent.mkdir(parents=True, exist_ok=True)
+            pending = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
+            try:
+                pending.write_text(json.dumps(document, ensure_ascii=False, indent=1), encoding='utf-8')
+                for attempt in range(5):
+                    try:
+                        os.replace(pending, path)
+                        break
+                    except PermissionError:
+                        if attempt == 4:
+                            raise
+                        time.sleep(.05 * (attempt + 1))
+            finally:
+                if pending.exists():
+                    pending.unlink()
+    except Exception:  # noqa: BLE001 - logged and dropped by design
+        _log.warning('Could not write the Insights prewarm hint file.', exc_info=True)
+
+
+def _deliver(result, request, stamp, stable):
+    """A stored or finished analysis, narrowed to the requested panels."""
+    if not stable():
+        raise ValueError('The source changed before the analysis could be displayed. Refresh sources.')
+    if (result.get('options') or {}).get('cycles') is not None:
+        _remember_cycles(stamp, request['basis'], result['options']['cycles'])
+    result['panels'] = {key: value for key, value in result['panels'].items() if key in request['panels']}
+    result['scope']['panels'] = request['panels']
+    return result
 
 
 def _loaded():
@@ -284,6 +553,7 @@ def _stable(path, source, stamp, token):
 
 def query(directory, request):
     _loaded()
+    body = request
     request = validate(request)
     source = data._source(directory, request)
     path, pending = data._ready(source, retry=request.get('retry') is True)
@@ -322,6 +592,20 @@ def query(directory, request):
     if not stable():
         raise ValueError('An Insights source has changed or has active writes. Retry after collection is stable.')
 
+    # A result already stored (memory or verified disk) is answered now, without the
+    # pool; the pool is only for a true miss. While this process still runs the key's
+    # job, its result is not stored before the job ends, so the job answers instead
+    # (and it has released its build marker by then).
+    identity = {'request_key': key}
+    dataset = source.get('industry', source['id'])
+    with _lock:
+        running = key in _jobs and not _jobs[key].done()
+    stored = None if running else _probe(identity)
+    if stored is not None:
+        response = _deliver(stored, request, stamp, stable)
+        _hint(body, key, dataset)
+        return response
+
     def build():
         if not stable():
             raise ValueError('The analysis source changed before preparation.')
@@ -344,34 +628,46 @@ def query(directory, request):
                 'notices': [history.NOTICE, 'Event-date cutoffs do not recreate what was publicly known on that date.',
                             'Amounts describe observed giving; they do not establish influence or a causal connection to legislative activity.']}
 
+    response = None
     with _lock:
         future = _jobs.get(key)
-        if future and future.done() and future.exception() and request.get('retry'):
-            del _jobs[key]
-            future = None
+        if future is not None and future.done():
+            failed = future.exception() is not None
+            if (failed and request.get('retry')) or (not failed and future.result() is _ELSEWHERE):
+                del _jobs[key]
+                future = None
         if future is None:
-            if sum(not job.done() for job in _jobs.values()) >= 6:
-                return {'status': 'preparing', 'message': 'Other Insights requests are finishing. This request will retry shortly.',
-                        'retry_after_ms': 2000, 'provenance': data._provenance(source)}
-            future = _pool.submit(store.cached, 'insights', {'request_key': key}, build, stable)
-            _jobs[key] = future
-        _jobs.move_to_end(key)
+            if _building_elsewhere(key):
+                response = {'status': 'preparing', 'message': ELSEWHERE_MESSAGE,
+                            'retry_after_ms': ELSEWHERE_RETRY_MS, 'provenance': data._provenance(source)}
+            elif sum(not job.done() for job in _jobs.values()) >= 6:
+                response = {'status': 'preparing', 'message': 'Other Insights requests are finishing. This request will retry shortly.',
+                            'retry_after_ms': 2000, 'provenance': data._provenance(source)}
+            else:
+                timing = {'submitted': time.monotonic(), 'started': None}
+                future = _pool.submit(_run, key, identity, build, stable, timing)
+                future.mentat_timing = timing
+                _jobs[key] = future
+        if future is not None:
+            _jobs.move_to_end(key)
         while len(_jobs) > 12:
             old = next((k for k, f in _jobs.items() if f.done() and k != key), None)
             if old is None:
                 break
             del _jobs[old]
-    if not future.done():
-        return {'status': 'preparing', 'message': 'Analyzing the complete verified scope and saved source integrations…',
-                'retry_after_ms': 1500, 'provenance': data._provenance(source)}
-    result = copy.deepcopy(future.result())
-    if not stable():
-        raise ValueError('The source changed before the analysis could be displayed. Refresh sources.')
-    if (result.get('options') or {}).get('cycles') is not None:
-        _remember_cycles(stamp, request['basis'], result['options']['cycles'])
-    result['panels'] = {key: value for key, value in result['panels'].items() if key in request['panels']}
-    result['scope']['panels'] = request['panels']
-    return result
+    if response is None and not future.done():
+        response = {'status': 'preparing', 'message': 'Analyzing the complete verified scope and saved source integrations…',
+                    'retry_after_ms': _retry_after(future), 'provenance': data._provenance(source)}
+    if response is None:
+        result = future.result()
+        if result is _ELSEWHERE:
+            # Another process claimed the key between this request's check and the job.
+            response = {'status': 'preparing', 'message': ELSEWHERE_MESSAGE,
+                        'retry_after_ms': ELSEWHERE_RETRY_MS, 'provenance': data._provenance(source)}
+        else:
+            response = _deliver(copy.deepcopy(result), request, stamp, stable)
+    _hint(body, key, dataset)
+    return response
 
 
 def records(directory, request):
