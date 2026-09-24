@@ -3,12 +3,16 @@
 Each committee/cycle is selected once, from its newest complete saved unit.
 Traversal is cycle-safe and uncapped; absent destination snapshots are disclosed.
 """
-from collections import defaultdict
+from collections import ChainMap, OrderedDict, defaultdict
+from collections.abc import Mapping
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 import json
 import hashlib
 from pathlib import Path
+import threading
+
+import drawer_sidecars
 
 ROOT = Path(__file__).resolve().parents[1] / '.cache/pac-evidence'
 NOTE = ('Saved downstream committee network, counted once per committee/cycle. '
@@ -74,8 +78,157 @@ def inventory(root=None):
     files = sorted(Path(root or ROOT).glob('*/snapshots.json'))
     return _inventory(tuple((str(p), p.stat().st_mtime_ns, p.stat().st_size) for p in files))
 
-@lru_cache(maxsize=4)
+
 def _inventory(stamps):
+    """The saved units _read_inventory returns, as a mapping that reads each unit when it is first
+    used (perf.md H8: that read parsed all 312 MB of snapshots, about 1.4 GB of objects at the peak
+    and 700 MB kept, for the first drawer of every process, whichever committee it opened).
+
+    The selection is _read_inventory's, made from each file's index (drawer_sidecars): the same
+    validation, the same newest-coverage priority, the same order, and each file still hashed in
+    full once per process. A unit is its own bytes, hashed against the index and parsed, plus the
+    same _source and _sha256. A snapshot set the index cannot describe exactly (a unit that fails
+    validation, one committee/cycle twice in one file, anything but plain ASCII JSON) is read by
+    _read_inventory itself, which answers or raises exactly as it always has."""
+    selection = _selection(stamps)
+    if selection is None:
+        return _read_inventory(stamps)
+    return SavedUnits(stamps, *selection)
+
+
+class SavedUnits(Mapping):
+    """_read_inventory's dict, read lazily. get, [] and `in` read one unit; iterating (dict(...),
+    items(), {**...}) reads them all and keeps them for the process, as the old dict was kept."""
+
+    def __init__(self, stamps, entries, kept):
+        self._stamps, self._entries, self._kept, self._read, self._whole = stamps, entries, kept, {}, False
+
+    def __getitem__(self, key):
+        location = self._entries[key]
+        unit = self._read.get(key)
+        if unit is None:
+            unit = self._kept.get(key)
+            if unit is None:
+                path, modified, size, offset, length, digest, fingerprint = location
+                try:
+                    saved = drawer_sidecars.read_unit(path, modified, size, offset, length, digest)
+                except ValueError:
+                    _forget(self._stamps)
+                    raise
+                unit = {**saved, '_source': path, '_sha256': fingerprint}
+                if self._whole:
+                    self._kept[key] = unit
+            self._read[key] = unit
+        return unit
+
+    def __iter__(self):
+        self._whole = True
+        return iter(self._entries)
+
+    def __len__(self):
+        return len(self._entries)
+
+    def __contains__(self, key):
+        return key in self._entries
+
+    def __repr__(self):
+        return f'SavedUnits({len(self._entries)} committee/cycles from {len(self._stamps)} snapshots)'
+
+
+_SELECTIONS = OrderedDict()   # stamps -> (entries, kept) or None; bounded like the old lru_cache(4)
+_SELECTION_LIMIT = 4
+_selection_guard = threading.Lock()
+_selection_locks = {}
+
+
+def _selection(stamps):
+    """(entries, kept) for these stamps, or None when _read_inventory must read them. Single flight:
+    one selection per stamps at a time (DE-026: lru_cache is not single-flight)."""
+    with _selection_guard:
+        if stamps in _SELECTIONS:
+            _SELECTIONS.move_to_end(stamps)
+            return _SELECTIONS[stamps]
+        lock = _selection_locks.setdefault(stamps, threading.Lock())
+    with lock:
+        with _selection_guard:
+            if stamps in _SELECTIONS:
+                return _SELECTIONS[stamps]
+        try:
+            entries = _select(stamps)
+        except Exception as error:  # noqa: BLE001
+            # A file moved or cannot be read (or the index failed): _read_inventory reads the
+            # files and answers or raises exactly as before. Not remembered: the next call retries.
+            if not isinstance(error, (OSError, ValueError)):
+                drawer_sidecars._emit('mentat.drawer.sidecar', 'failed',
+                                      f'Snapshot index skipped: {type(error).__name__}: {error}', stage='inventory')
+            with _selection_guard:
+                _selection_locks.pop(stamps, None)
+            return None
+        value = None if entries is None else (entries, {})
+        with _selection_guard:
+            _SELECTIONS[stamps] = value
+            while len(_SELECTIONS) > _SELECTION_LIMIT:
+                _SELECTIONS.popitem(last=False)
+            _selection_locks.pop(stamps, None)
+        return value
+
+
+def _select(stamps):
+    """_read_inventory's selection, from the index of each file: key -> where its unit is. None
+    when any unit would fail _read_inventory's checks, or repeats in its file (compared whole
+    there); _read_inventory then raises or answers itself."""
+    selected = {}
+    for path, modified, size in stamps:
+        try:
+            fingerprint, units = drawer_sidecars.snapshot_index(path, modified, size)
+        except drawer_sidecars.Unindexable:
+            return None
+        keys = set()
+        for unit in units:
+            kinds = unit['kinds']
+            if not all(kinds.get(field) == 'list' for field in ('receipts','disbursements','expenditures')):
+                return None
+            totals = unit.get('totals')
+            if kinds.get('totals') != 'dict' or not totals or not totals['disbursements']:
+                return None
+            if 'cycle' not in unit or kinds.get('committee_id') != 'str':
+                return None
+            key = (str(unit['cycle']), unit['committee_id'])
+            if key in keys:
+                return None
+            keys.add(key)
+            priority = (str(totals['coverage_end_date'] or ''), modified, path)
+            if key not in selected or priority > selected[key][0]:
+                selected[key] = (priority, (path, modified, size, unit['offset'], unit['length'],
+                                            unit['sha256'], fingerprint))
+    return {key: value[1] for key, value in selected.items()}
+
+
+def _forget(stamps):
+    with _selection_guard:
+        _SELECTIONS.pop(stamps, None)
+
+
+def cache_clear():
+    """Forget every selection, kept unit and snapshot index this process holds."""
+    with _selection_guard:
+        _SELECTIONS.clear()
+    _read_inventory.cache_clear()
+    drawer_sidecars.forget()
+
+
+def index_inventory(root=None):
+    """Build or verify the snapshot indexes the drawer reads, without reading a unit (for the
+    prewarm harness). Returns {'files', 'indexed', 'units'}."""
+    files = sorted(Path(root or ROOT).glob('*/snapshots.json'))
+    stamps = tuple((str(p), p.stat().st_mtime_ns, p.stat().st_size) for p in files)
+    selection = _selection(stamps)
+    return {'files': len(stamps), 'indexed': selection is not None,
+            'units': len(selection[0]) if selection is not None else None}
+
+
+@lru_cache(maxsize=4)
+def _read_inventory(stamps):
     selected = {}
     for path, modified, size in stamps:
         raw = Path(path).read_bytes()
@@ -246,7 +399,9 @@ def snapshot_view(identifier, committee, cycle='', root=None):
                 and (not cycle or str(u['cycle']) == str(cycle))}
     if not selected:
         raise ValueError('This committee/cycle is not in the selected snapshot.')
-    units = {**inventory(root), **selected}
+    # The selected units first, then the saved inventory: {**inventory(root), **selected} read
+    # lazily, so only the committees the traversal reaches are read.
+    units = ChainMap(selected, inventory(root))
     found = network(selected, units)
     rows = relationships(activity(found), selected, found)
     names = {key[1]: next(((r.get('committee') or {}).get('name')

@@ -12,6 +12,8 @@ import queue
 import subprocess
 import threading
 
+import drawer_sidecars
+
 PROJECT = Path(__file__).resolve().parents[1]
 _executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix='mentat-native')
 _workers = queue.LifoQueue()
@@ -74,6 +76,22 @@ def tables(file_stamp, requests, max_rows=1_000_000, payload_table=None):
     binary = executable()
     if binary is None:
         return None
+    # The Graph drawer's two cold reads - the pinned payload's transfer paths (Banking: a 25 s
+    # scan of 1.4 GB) and a workbook's Downstream Activity - are kept on disk, keyed by the
+    # input's full-content hash, the scanner binary and the request (drawer_sidecars; perf.md
+    # H8). Every other scan runs exactly as before.
+    key = drawer_sidecars.native_key(binary, file_stamp, requests, max_rows, payload_table)
+    if key is None:
+        return _scan(binary, file_stamp, requests, max_rows, payload_table)
+    result = drawer_sidecars.native_result(key, lambda: _scan(binary, file_stamp, requests, max_rows, payload_table))
+    if result is not None:
+        from report_insights import stamp
+        if stamp(file_stamp[0]) != file_stamp:
+            raise ValueError('The workbook changed while it was being read. Refresh Graph.')
+    return result
+
+
+def _scan(binary, file_stamp, requests, max_rows, payload_table):
     with _guard:
         try:
             worker = _workers.get_nowait()
