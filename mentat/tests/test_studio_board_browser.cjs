@@ -223,7 +223,7 @@ const VISIBLE_SOURCE = `node => {
   const reportRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mentat-studio-board-reports-'));
   // Requests the stub answers, and the hold that keeps one of them in the air.
   const queries = [];
-  let holdQuery = null, refreshed = false;
+  let holdQuery = null, holdView = null, refreshed = false;
   const released = [];
   const releaseHeld = () => { while (released.length) released.pop()(); };
 
@@ -295,6 +295,11 @@ const VISIBLE_SOURCE = `node => {
       }
       if (where === '/api/cross-reference') {
         return route.fulfill({json: {available: false, status: 'empty', industry: 'Banking', message: 'stub'}});
+      }
+      // A saved view's sheets, held when a step asks (step 20), as a busy console
+      // holds them. The request itself still reaches the real console.
+      if (where === '/api/studio/views' && target.searchParams.get('id') && holdView && holdView()) {
+        await new Promise(resolve => { released.push(resolve); });
       }
       // /api/studio/* and everything else reach the real console.
       return route.continue();
@@ -1204,6 +1209,57 @@ const VISIBLE_SOURCE = `node => {
         'the emptied tile destroyed the map instance it was hosting, spy ' + JSON.stringify(spy));
       pass('map instances made ' + spy.made + ', destroyed ' + spy.destroyed + '; none left on the board');
     });
+
+    /* -------------------------------------------------------------- 20 */
+    // The step-11 flake (r6, 2026-09-24): openNamed() returned before the view's
+    // sheets arrived, the board already on screen satisfied the wait for a drawn
+    // board, and the view landed after the group limit was changed, replacing it
+    // ("Groups 1-8 of 8" for ever). A view that is opening now says so, and an
+    // earlier open that answers last is dropped rather than drawn over a later one.
+    await step('a view that is opening says so, and the view opened last is the one that stays', async () => {
+      let asked = 0;
+      // Only the first open's sheets are held: they answer after the second open.
+      holdView = () => (asked += 1) === 1;
+      await clickViewEntry(page, 'Board two tiles');
+      const opening = await page.evaluate(() => ({
+        busy: !!document.querySelector('#view-chart-studio .studio[aria-busy="true"]'),
+        loading: (document.getElementById('studio-loading') || {}).textContent || ''}));
+      assert.equal(opening.busy, true, 'the studio is marked busy while a view is opening');
+      assert.match(opening.loading, /Opening view "Board two tiles"/,
+        'and the status line names the view that is opening, got "' + opening.loading + '"');
+      await openNamed(page, 'No board at all');
+      await until(page, () => !!document.querySelector('#studio-canvas svg')
+          && document.getElementById('studio-board').hidden,
+        'the view opened last drawing on the single canvas',
+        () => ({boardHidden: document.getElementById('studio-board').hidden,
+          loading: (document.getElementById('studio-loading') || {}).textContent}));
+      assert.equal(asked, 2, 'both opens asked the console for their sheets, got ' + asked);
+      // Now the first open answers, last. It must not replace the view opened after it.
+      const late = page.waitForResponse(response => /\/api\/studio\/views\?id=/.test(response.url()));
+      holdView = null;
+      releaseHeld();
+      await (await late).finished();
+      // Something that must not happen is watched for a bounded while after the
+      // answer has arrived; the replacement it guards against lands within
+      // milliseconds of the answer.
+      const watched = [];
+      for (let look = 0; look < 8; look += 1) {
+        await page.waitForTimeout(200);
+        watched.push(await page.evaluate(() => ({
+          boardHidden: document.getElementById('studio-board').hidden,
+          tiles: document.querySelectorAll('#studio-board .studio-board-tile').length,
+          busy: !!document.querySelector('#view-chart-studio .studio[aria-busy="true"]'),
+          loading: (document.getElementById('studio-loading') || {}).textContent || ''})));
+      }
+      assert.ok(watched.every(seen => seen.boardHidden && seen.tiles === 0),
+        'the late answer for the board view must not replace the view opened after it, saw '
+        + JSON.stringify(watched.find(seen => !seen.boardHidden || seen.tiles) || watched[watched.length - 1]));
+      assert.ok(watched.every(seen => !seen.busy), 'and the studio is no longer marked busy');
+      assert.ok(watched.every(seen => !/Opened view "Board two tiles"/.test(seen.loading)),
+        'nor does the status line claim the dropped view opened, got "' + watched[watched.length - 1].loading + '"');
+      pass('busy and "' + opening.loading + '" while opening; the late board answer was dropped, '
+        + 'the single canvas stayed (' + watched.length + ' looks)');
+    });
   } catch (error) {
     failed = true;
     console.error('FAIL: ' + (error && error.stack ? error.stack : error));
@@ -1245,7 +1301,18 @@ const VISIBLE_SOURCE = `node => {
     }, row.id);
     return {id: row.id, board: full.board, sheets: (full.sheets || []).length, active: full.active};
   }
+  // Opening a view fetches its sheets and then replaces the workspace. openNamed
+  // waits for that to land - the studio is aria-busy until it has - rather than
+  // for a drawn chart, because the chart on screen may be the very view being
+  // reopened (step 11), and an edit made before the open lands is replaced by it.
   async function openNamed(target, name) {
+    await clickViewEntry(target, name);
+    await until(target, () => !document.querySelector('#view-chart-studio .studio[aria-busy="true"]'),
+      'the saved view "' + name + '" opening',
+      () => ({loading: (document.getElementById('studio-loading') || {}).textContent || '',
+        error: (document.getElementById('studio-error') || {}).textContent || ''}), 80);
+  }
+  async function clickViewEntry(target, name) {
     await target.evaluate(() => { document.getElementById('studio-views').open = true; });
     await target.click('#studio-open-views');
     await until(target, () => !!document.querySelector('.studio-send button'),

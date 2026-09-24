@@ -22,6 +22,7 @@
 .studio .contribution-map p {line-height:1.5;margin:8px 0;overflow-wrap:anywhere}
 .studio .plot-mark {cursor:pointer}
 .studio-canvas[aria-busy="true"] {opacity:.45;pointer-events:none}
+#view-chart-studio .studio[aria-busy="true"] {cursor:progress}
 .studio .plot-mark:focus {outline:none;stroke:var(--acu-purple);stroke-width:3}
 .studio-canvas table {font-size:12px;width:100%;border-collapse:collapse}
 .studio-canvas table th,.studio-canvas table td {padding:7px 10px;border-bottom:1px solid var(--line);text-align:left}

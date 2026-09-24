@@ -633,6 +633,11 @@
     const key=JSON.stringify(query),cached=contributionCache.get(key),epoch=contributionCacheEpoch;
     const claim=(view&&view.flight)||mainFlight;
     if(contributionResult&&contributionRequest&&JSON.stringify(contributionRequest)===key)return Promise.resolve(contributionResult);
+    // A board tile's own last answer to this very request is as current as the
+    // single canvas's is (the line above). Selecting a tile again redraws it at
+    // once: a refetch once the 30 s cache had lapsed left the group label and the
+    // pager describing the previously selected tile until the answer came back.
+    if(view&&view.result&&view.request&&JSON.stringify(view.request)===key)return Promise.resolve(view.result);
     if(cached&&Date.now()-cached.at<30000)return Promise.resolve(cached.result);
     releaseFlight(claim);
     const flying=contributionPending.get(key);
@@ -747,6 +752,11 @@
       }
       const query=compiled.query,key=JSON.stringify(query),previous=view.request;
       if(previous&&JSON.stringify({...previous,offset:0})!==JSON.stringify({...query,offset:0})&&view.offset){view.offset=0;query.offset=0;}
+      // A first answer on its way: the placeholder asking for a report stops being
+      // true once one is chosen, and a first query can wait a long time on a
+      // console still preparing its data (r6: over a minute on 8806 while it
+      // rebuilt its query store after a restart), under a blank canvas.
+      if(!view.result&&node('note').textContent==='Choose a verified report in the Data panel to begin.')node('note').textContent='Reading verified source observations\u2026';
       if(!previous||JSON.stringify(previous)!==key){node('canvas').setAttribute('aria-busy','true');node('verified-summary').textContent='Reading verified totals…';if(view.primary){status('Reading verified source observations…');el('inspection').hidden=true;++recordRevision;lastResult=null;}}
       const result=await queryCached(query,view);if(view.stale(ticket)||!verified())return;
       view.result=result;view.request=query;
@@ -816,7 +826,7 @@
       node('reconcile').hidden=true;node('canvas').replaceChildren();node('note').textContent=guidance?'':error.message;
       node('title').textContent='';node('subtitle').textContent=guidance?error.message:'';node('verified-summary').replaceChildren();node('result-controls').hidden=true;node('status').textContent='';node('status').title='';
       if(view.primary){failure(guidance?'':error.message);lastResult=null;}}}
-    finally{if(!view.stale(ticket)){node('canvas').setAttribute('aria-busy','false');node('note').title=node('note').textContent;}}
+    finally{if(!view.stale(ticket)){if(!view.result&&node('note').textContent==='Reading verified source observations\u2026')node('note').textContent='Choose a verified report in the Data panel to begin.';node('canvas').setAttribute('aria-busy','false');node('note').title=node('note').textContent;}}
   }
   async function renderContributionMap(ticket,compiled,bbox=null,view=null,notes=[]) {
     view=view||mainSurface();const node=view.el;
@@ -3172,15 +3182,32 @@
     }
     return {ok: true, dataset: parts[1]};
   }
+  // Opening a view is a request for its sheets and then one commit. The open the
+  // reader asked for last is the one that lands: an earlier open that answers
+  // later (a busy console answers out of order) is dropped, not drawn over it.
+  // While the sheets are on their way the studio says so, in the status line
+  // and as aria-busy on the studio, because what is on screen is about to be
+  // replaced; a browser test waits on that mark rather than on a chart that
+  // may already have been drawn before the open was asked for.
+  let openTicket = 0;
+  function viewOpening(name) {
+    const host = document.querySelector('#view-chart-studio .studio');
+    if (host) { if (name == null) host.removeAttribute('aria-busy'); else host.setAttribute('aria-busy', 'true'); }
+    if (name != null) status('Opening view "' + name + '"\u2026');
+  }
   async function openView(view) {
     failure('');
     const state = openability(view);
     if (!state.ok) { failure(state.reason); return; }
+    const ticket = ++openTicket;
     let full = view;
     if (!Array.isArray(full.sheets)) {
+      viewOpening(view.name || 'Saved view');
       try { full = (await getJSON('/api/studio/views?id=' + encodeURIComponent(view.id))).view; }
-      catch (error) { failure(viewMessage(error)); return; }
+      catch (error) { if (ticket === openTicket) { viewOpening(null); failure(viewMessage(error)); } return; }
+      if (ticket !== openTicket) return;
     }
+    viewOpening(null);
     if (!full || !Array.isArray(full.sheets) || !full.sheets.length) { failure('That saved view has no sheets in it.'); return; }
     // Another dataset is selected first, exactly as the Data panel would, so
     // the shelves land on the fields that view was built against.
