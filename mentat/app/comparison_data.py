@@ -1,9 +1,22 @@
-"""Report-bound subjects; never sum across overlapping industries or fact families."""
+"""Report-bound subjects; never sum across overlapping industries or fact families.
+
+/api/comparison-flows is served from response_cache (flows_entry): built once per report
+version and code version, then answered from memory, else from disk, with the exact bytes
+server.py Handler.send would write for the freshly built answer.
+"""
 from collections import defaultdict
 from decimal import Decimal
 import json
+from pathlib import Path
 from graph_data import report_facts, report_activity, money
-from report_insights import stamp
+from report_insights import digest_stamp, stamp
+import response_cache
+try:
+    from view_cache import graph_code_extra
+except ImportError:  # a console that loaded view_cache before this build: memory only until it restarts
+    graph_code_extra = None
+
+FLOWS_NAMESPACE = 'comparison-flows'
 
 
 def subjects(paths, industry):
@@ -46,6 +59,61 @@ def subjects(paths, industry):
 
 
 def flows(paths, industry):
+    """Separate company receipts from committee activity; never attribute PAC dollars upstream.
+
+    The answer is flows_entry()'s; each caller gets its own object."""
+    entry = flows_entry(paths, industry)
+    return entry.value if entry.hit == 'built' else json.loads(entry.body)
+
+
+def flows_entry(paths, industry):
+    """/api/comparison-flows as a response_cache entry: exactly the bytes Handler.send writes
+    for the freshly built answer (response_cache.json_body), and their gzip.
+
+    Key: the industry label and the report paths in order (order and repetition belong to
+    the question: [A, A] is refused as overlapping). Dependencies: each report's stamp and
+    content SHA-256, and the code identity of this module and every application module it
+    imports, with the native scanner and openpyxl (view_cache.graph_code_extra). Stored only
+    when the build reported no issues (a failed committee-activity read may be a passing
+    one, so it is recomputed next time, as before) and the reports still carry the stamps
+    the key was taken under. A report that moves while it is hashed, or code that changed
+    under this process, leaves the answer uncached or memory-only; nothing is refused that
+    was answered before."""
+    paths = [Path(path) for path in paths]
+    stamps = [stamp(path) for path in paths]
+    key_parts = {'industry': industry, 'reports': [version[0] for version in stamps]}
+    try:
+        # report_facts records the same digest_stamp as each report's sha256: one hash per stamp.
+        content = [digest_stamp(version) for version in stamps]
+        steady = [stamp(path) for path in paths] == stamps
+        code = (response_cache.code_identity(__name__, extra=graph_code_extra())
+                if steady and graph_code_extra is not None else None)
+    except OSError:
+        content, steady, code = None, False, None
+    deps = {'stamps': [list(version) for version in stamps], 'content_sha256': content,
+            'code': code or 'this process only'}
+    moved = []
+
+    def compute():
+        value = _flows(paths, industry)
+        moved.append([stamp(path) for path in paths] != stamps)
+        return value
+
+    def persist(value):
+        return not moved[-1] and not value.get('issues')
+
+    return response_cache.get_or_compute(FLOWS_NAMESPACE, key_parts, deps, compute, persist=persist,
+                                         memory=steady, disk=code is not None)
+
+
+def warm_flows(paths, industry):
+    """The warmer's hook: build and store one industry's /api/comparison-flows answer (memory,
+    and disk when this process configured it) without decoding it."""
+    entry = flows_entry(paths, industry)
+    return {'hit': entry.hit, 'body_bytes': entry.body_bytes, 'gzip_bytes': len(entry.gzip), 'etag': entry.etag}
+
+
+def _flows(paths, industry):
     """Separate company receipts from committee activity; never attribute PAC dollars upstream."""
     stamps = [stamp(path) for path in paths]
     reports = [report_facts(version) for version in stamps]

@@ -2194,6 +2194,17 @@ class Console:
         build = comparison_flows if relationships else comparison_subjects
         return build([self.report_path(identifier, i) for i in selected['indices']], industry)
 
+    def comparison_entry(self, identifier, industry, reports=None):
+        """/api/comparison-flows as a response_cache entry (comparison_data.flows_entry): the same
+        report selection as comparison(), answered from memory or disk while nothing changed."""
+        if reports is None and identifier == 'published-reports':
+            reports = self.published_reports()
+        selected = next((g for g in self.graph_catalog(identifier, reports)['industries'] if g['name'] == industry), None)
+        if not selected:
+            raise ValueError('Choose an industry with completed reports.')
+        from comparison_data import flows_entry
+        return flows_entry([self.report_path(identifier, i) for i in selected['indices']], industry)
+
     def snapshot(self, identifier, lane_id=""):
         run = self.find(identifier)
         if not run:
@@ -2383,6 +2394,24 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(content)
 
+    def send_entry(self, entry, content_type="application/json"):
+        """A response_cache entry: 304 when If-None-Match names its ETag, else its stored gzip
+        (Accept-Encoding permitting, same rule and 2048-byte floor as send()) or its body. The body
+        bytes are exactly send()'s; the headers differ only in Cache-Control (private, no-cache: the
+        browser keeps the answer and revalidates every use) and the strong ETag."""
+        import response_cache
+        status, headers, body = response_cache.respond(entry, self.headers.get('If-None-Match'),
+                                                       gzip_ok=accepts_gzip(self.headers.get('Accept-Encoding')),
+                                                       content_type=content_type)
+        self.send_response(status)
+        for name, value in headers:
+            self.send_header(name, value)
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Content-Security-Policy", "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors 'none'")
+        self.end_headers()
+        if body:
+            self.wfile.write(body)
+
     def discard_body(self):
         """Read and drop an unread request body before an early refusal.
 
@@ -2479,7 +2508,8 @@ class Handler(BaseHTTPRequestHandler):
                                                  for item in registry['snapshots']]})
             if parsed.path == '/api/insights/catalog':
                 import analysis_data
-                return self.send(analysis_data.catalog(app.report_directory))
+                import response_cache
+                return self.send_entry(response_cache.from_value(analysis_data.catalog(app.report_directory)))
             if parsed.path == '/api/contributions/catalog':
                 # One scan of the report folder for this request: the semantic
                 # catalogue and the registry annotation below read the same list.
@@ -2501,7 +2531,8 @@ class Handler(BaseHTTPRequestHandler):
                 for dataset in catalog['datasets']:
                     dataset['build_stamp'] = stamps.get(dataset.get('id'))
                 catalog['industry'] = entry['industry'] if entry else None
-                return self.send(catalog)
+                import response_cache
+                return self.send_entry(response_cache.from_value(catalog))
             if parsed.path == '/api/contributions/geography/catalog':
                 # geo_catalog() is industry-independent; the parameter is accepted
                 # and echoed so one client call carries one scope everywhere.
@@ -2631,11 +2662,13 @@ class Handler(BaseHTTPRequestHandler):
                 registry = snapshot_registry.registry(app.report_directory) if wanted else None
                 label = industry_scope.label_or_value(registry, wanted) if registry else wanted
                 if parsed.path == '/api/graph':
-                    return self.send(app.graph(query.get('id',[''])[0], label,
+                    import response_cache
+                    return self.send_entry(response_cache.from_value(app.graph(query.get('id',[''])[0], label,
                                                {**{k:v[0] for k,v in query.items()}, 'industry': label},
-                                               registry))
-                return self.send(app.comparison(query.get('id',[''])[0], label,
-                                                parsed.path == '/api/comparison-flows'))
+                                               registry)))
+                if parsed.path == '/api/comparison-flows':
+                    return self.send_entry(app.comparison_entry(query.get('id',[''])[0], label))
+                return self.send(app.comparison(query.get('id',[''])[0], label, False))
             if parsed.path == '/api/publish/pocket':
                 job = app.publication(query.get('id', [''])[0])
                 if job is None:
@@ -2912,6 +2945,13 @@ def main():
     choice = os.environ.get('MENTAT_PREWARM', '').strip()
     own_root = data_root == (Path(os.environ.get("LOCALAPPDATA", Path.home())) / "Mentat" / "console").resolve()
     warm = choice == '1' or (choice != '0' and own_root)
+    # Encoded Graph views and comparison flows persist across restarts in mentat/state/response-cache,
+    # content-verified by every new process (perf lane 2026-09-24, cache). Like the warm caches, only
+    # the console on the user's own data root writes there; set before the startup warm below, which
+    # then refills memory from disk.
+    if own_root:
+        import response_cache
+        response_cache.configure()
     analysis_data.HINTS_ENABLED = warm and not options.read_only
     if warm:
         prewarm.start_startup_warm(read_only=options.read_only, app=server.app)
