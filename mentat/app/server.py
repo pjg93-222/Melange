@@ -2901,15 +2901,21 @@ def main():
     server = console_server(options.port)
     server.app = Console(data_root, keys_file, rscript, options.read_only)
     server.app.port = options.port or server.server_port
-    # One source discovery per stamp change, not per request; warm-up hints only
-    # from a console that may write (perf lane 2026-09-24).
+    # One source discovery per stamp change, not per request (perf lane 2026-09-24).
     import source_memo
     source_memo.install()
     import analysis_data
-    analysis_data.HINTS_ENABLED = not options.read_only
     import prewarm
-    prewarm.start_startup_warm(read_only=options.read_only, app=server.app)
-    prewarm.launch_warmer(data_root=data_root, read_only=options.read_only, console_port=server.app.port)
+    # Only the console on the user's own data root warms the shared caches and records
+    # warm-up hints: consoles that test suites start on a temporary data root must not
+    # warm mentat/state. MENTAT_PREWARM=1 forces warming on, MENTAT_PREWARM=0 turns it off.
+    choice = os.environ.get('MENTAT_PREWARM', '').strip()
+    own_root = data_root == (Path(os.environ.get("LOCALAPPDATA", Path.home())) / "Mentat" / "console").resolve()
+    warm = choice == '1' or (choice != '0' and own_root)
+    analysis_data.HINTS_ENABLED = warm and not options.read_only
+    if warm:
+        prewarm.start_startup_warm(read_only=options.read_only, app=server.app)
+        prewarm.launch_warmer(data_root=data_root, read_only=options.read_only, console_port=server.app.port)
     print(f"Mentat app: http://127.0.0.1:{options.port}", flush=True)
     server.serve_forever()
 
