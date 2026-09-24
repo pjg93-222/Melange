@@ -157,9 +157,12 @@ test('a Graph scope carried before Chart Studio has its data is still carried',{
   // agrees with Graph to the cent.
   assert.deepEqual(await page.evaluate(()=>calls.query.at(-1).filters),
     [{field:'company',op:'eq',value:'Alpha Bank'},{field:'cycle',op:'eq',value:'2023-2024'}]);
-  await page.waitForSelector('#studio-reconcile:not([hidden])');
-  assert.match(await page.locator('#studio-reconcile').textContent(),
+  // Build 03 (S1): the explanation sits behind "Why" (#studio-reconcile-detail)
+  // and the note line hides when the scopes and totals agree.
+  await page.waitForFunction(()=>/Agree\./.test(document.getElementById('studio-reconcile-detail').textContent));
+  assert.match(await page.locator('#studio-reconcile-detail').textContent(),
     /^Graph shows \$12,090,412\.00 for Alpha Bank · 2023-2024\. Studio shows \$12,090,412\.00\. Agree\./);
+  assert.equal(await page.evaluate(()=>document.getElementById('studio-reconcile').hidden),true);
   assert.deepEqual(errors,[]);
 });
 

@@ -7,7 +7,8 @@ and filesystem paths stay in the local ledger.
 
 The published report workbook is the accounting of record, so this view carries
 no totals at all: it returns the run's scope and the run's digest of clear
-refunds and obvious outliers (``digest.json``, written by
+refunds, evidence-backed contradictions and unusually large counted receipts
+(``digest.json``, written by
 ``tools/cross_reference_digest.py``). A run without a digest says so.
 """
 from __future__ import annotations
@@ -25,7 +26,7 @@ STEP_STATUSES = {"pending", "running", "completed", "review", "failed"}
 RUN_STATUSES = {"running", "completed", "failed"}
 RUN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,119}\Z")
 DEFAULT_ROOT = Path(__file__).resolve().parents[1] / "state" / "cross-reference"
-DIGEST_MISSING = ("This run has no outlier/refund digest. Build it with "
+DIGEST_MISSING = ("This run has no contradiction/refund/large-receipt digest. Build it with "
                   "tools/cross_reference_digest.py <run_dir>.")
 URL_FIELDS = {"source_url", "refund_source_url", "original_source_url"}
 AMOUNT_FIELDS = {"amount", "before", "after", "delta", "refund_amount", "original_amount"}
@@ -138,7 +139,7 @@ def _rows(value, fields, limit):
 
 
 def _digest(root, run_id):
-    """The run's clear refunds and obvious outliers, or None when it has none saved.
+    """The run's refunds, contradictions and large counted rows, if saved.
 
     Nothing here is a total of giving: each count and amount describes only the
     rows listed beside it, and the basis sentence states the sizes that chose

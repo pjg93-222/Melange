@@ -20,13 +20,15 @@ certificates cannot promote a row. Collection completeness is never inferred.
 Observed receipt decisions and missing filing coverage are separate: a missing
 filing census does not make an otherwise established receipt ambiguous.
 
-A row loses its amount only where evidence contradicts it: a rejected company
-match, an explicit source exclusion, a non-giving receipt role, a proven memo
+A row loses its amount only where evidence contradicts it: an adjudicated company
+rejection, an explicit source exclusion, a non-giving receipt role, a proven memo
 or earmark duplicate of a counted parent, a superseded filing version, or a
 row whose own reported text (an individual's employer, an entity's contributor
 name) names another organization and not the listed company or any name
-supplied for it. Missing or ambiguous information - an employer the register
-does not resolve, a prefix still under review, a memo whose parent is not in
+supplied for it. A receipt's absolute or relative size is never contradictory
+evidence and never reduces ``counted_cents``. Missing or ambiguous information
+- an employer the register does not resolve, a prefix still under review, a
+memo whose parent is not in
 the corpus, a blank or no-employer text - keeps its dollars, is flagged
 unverified and stays in the review queue. Text that names the listed company
 counts under company_named_unverified. Two routes upgrade the attribution
@@ -49,13 +51,8 @@ import json
 import re
 
 from pac_evidence import is_memo, name_key, receipt_role
+from attribution_policy import explicit_rejection, names_organization, source_exclusion
 
-# Reported text that says a donor has no employer rather than naming one. A
-# text made only of these tokens is missing information, not evidence against
-# the gift.
-NO_EMPLOYER_TOKENS = frozenset(
-    "NOT EMPLOYED NONE N A NA UNEMPLOYED RETIRED SELF INFORMATION REQUESTED PER BEST "
-    "EFFORTS UNKNOWN HOMEMAKER STUDENT DISABLED".split())
 # Adjacent-position markers (ruling D3, 2026-09-17). An advisor or similar
 # whose text also names the listed company is role-supported. DIRECTOR is a
 # bank rank and RETIRED is not a role, so neither is a marker.
@@ -65,10 +62,6 @@ ROLE_MARKER = re.compile(
 
 def _tokens(value):
     return re.findall(r"[A-Z0-9]+", str(value or "").upper())
-
-
-def _names_an_organization(value):
-    return any(token not in NO_EMPLOYER_TOKENS for token in _tokens(value))
 
 
 def _name_patterns(names):
@@ -277,19 +270,18 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
             d["attribution_resolution"] = row["attribution_resolution"]
             reason(sid, "automatic_exact_alias_recheck")
         match = _text(row.get("company_match_status"))
-        # Only a matcher decision against this company (REJECTED/EXCLUDED)
-        # contradicts the row; it is removed below. REVIEW, an unrecognised
-        # state, a blank status, or an accepted status carrying no company name
-        # is missing information about the employer, not evidence against the
-        # gift: those rows keep their dollars and carry an unverified flag.
-        attribution_unverified = (match not in ("ACCEPTED", "REJECTED", "EXCLUDED") or
+        # A search heuristic's REJECTED label is not evidence of a different
+        # employer. Preserve explicit adjudications; re-evaluate the rest from
+        # the reported text and registered recipient/affiliation evidence.
+        adjudicated_rejection = match in ("REJECTED", "EXCLUDED") and explicit_rejection(row.get("company_match_reason"))
+        attribution_unverified = (match != "ACCEPTED" or
                                   (match == "ACCEPTED" and not _text(row.get("company"))))
         # Corporate-name searches intentionally land in REVIEW. Exact, dated
         # affiliation evidence is stronger than that provisional search state.
         # It may settle a PAC or treasury entity without weakening exclusions or
         # treating a broad name prefix as proof.
         early_affiliations = []
-        if attribution_unverified and match not in ("REJECTED", "EXCLUDED"):
+        if attribution_unverified and not adjudicated_rejection:
             if entity in ("PAC", "COM", "CCM", "PTY"):
                 early_affiliations = affiliations_for(row, "connected_pac")
                 if early_affiliations:
@@ -313,8 +305,10 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
         # callers may adjudicate that policy in a separately tracked change.
         # An unverified employer match never suppresses it either: the checks
         # below repeat it wherever this one is skipped.
-        source_policy = str(row.get("excluded_reason") or "").strip()
-        if not attribution_unverified and source_policy:
+        source_policy = source_exclusion(row.get("excluded_reason"))
+        if row.get("excluded_reason") and not source_policy:
+            reason(sid, "unsupported_occupation_exclusion_rechecked")
+        if (not attribution_unverified or match in ("REJECTED", "EXCLUDED")) and source_policy:
             exclude(sid, "preexisting_source_exclusion:" + source_policy, link_evidence=[sid])
             d["bucket"] = "excluded_source_policy"
             continue
@@ -323,7 +317,7 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
         # observations disagree about ZIP or another field. The coalescer has
         # already preferred an accepted observation when one exists; metadata
         # conflicts cannot authorize reversing this attribution decision.
-        if match in ("REJECTED", "EXCLUDED"):
+        if adjudicated_rejection:
             exclude(sid, "company_attribution_not_accepted")
             d["bucket"] = "excluded_company_match"
             if row.get("source_conflicts"):
@@ -399,7 +393,7 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
                     reason(sid, "role_marker_with_company_named")
                 else:
                     d["attribution_status"] = "unverified"
-            elif patterns and _names_an_organization(own_text):
+            elif patterns and names_organization(own_text, entity):
                 # Naming a different organization contradicts the attribution;
                 # the amount leaves the totals with the row as its evidence.
                 exclude(sid, "attribution_contradicted_by_text", link_evidence=[sid])
@@ -415,7 +409,7 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
                    company_match_reason=row.get("company_match_reason") or row.get("excluded_reason") or "",
                    reported_text=" ".join(_tokens(own_text)))
         claimed_companies = {_text(c.get("company")) for c in claims if isinstance(c, dict)
-                             and c.get("company") and _text(c.get("company_match_status", c.get("status", ""))) not in ("REJECTED", "EXCLUDED")}
+                             and c.get("company") and not explicit_rejection(c.get("company_match_reason"))}
         if len(claimed_companies | {_text(row.get('company'))}) > 1:
             conflicted.add(sid)
             d["bucket"] = "conflicting_source_evidence"

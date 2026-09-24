@@ -6,6 +6,7 @@ schema drift between `STAGING_CONTRACT.md` and the writer fails here first.
 from __future__ import annotations
 
 import datetime
+from contextlib import closing
 import json
 import sqlite3
 import sys
@@ -172,6 +173,39 @@ class WriterTest(unittest.TestCase):
             self.assertEqual("A2", sheet.freeze_panes, name)
             self.assertEqual([], list(sheet.merged_cells.ranges), name)
 
+    def test_network_activity_is_complete_and_company_associations_remain_separate(self):
+        activity=[dict(cycle_label='2021-2022',cycle=2022,company='Industry Total',
+            source_committee_id='PAC',candidate_id=f'H{i:08}',bridge_key=f'network-{i}',
+            downstream_activity=float(i),support_amount=float(i),oppose_amount=0.,other_activity_amount=0.)
+            for i in range(1,106)]
+        associations=[dict(row,company=company,bridge_key=f'{company}-{row["candidate_id"]}')
+            for company in ['A','B'] for row in activity]
+        with closing(sqlite3.connect(self.store)) as connection,connection:
+            create(connection,'beneficiary_activity',activity)
+            create(connection,'beneficiary_bridge',associations)
+        self.assertEqual(0,self.run_writer())
+        book=self.book()
+        network=list(book['Network Candidate Activity'].values)
+        companies=list(book['Beneficiary Bridge'].values)
+        self.assertEqual(len(network)-1,105)
+        self.assertEqual(len(companies)-1,210)
+        col=network[0].index('Downstream Activity')
+        self.assertEqual(sum(row[col] for row in network[1:]),5565)
+        col=companies[0].index('Downstream Activity')
+        self.assertEqual(sum(row[col] for row in companies[1:]),11130)
+
+    def test_downstream_uncertainty_survives_workbook_export(self):
+        with closing(sqlite3.connect(self.store)) as connection,connection:
+            create(connection,'downstream_activity',[dict(cycle_label='2021-2022',cycle=2022,
+                source_committee_id='PAC',candidate_id='H1',activity_type='Independent expenditure',
+                support_oppose='Support',transaction_type='24E',unverified_version_rows=7,
+                unresolved_version_rows=2,unresolved_version_amount=12.34,repeated_itemization_rows=3)])
+        self.assertEqual(0,self.run_writer())
+        rows=list(self.book()['Downstream Activity'].values)
+        record=dict(zip(rows[0],rows[1]))
+        self.assertEqual(record['Unverified Version Rows'],7)
+        self.assertEqual(record['Unresolved Version Amount'],12.34)
+
     def test_table_refs_span_every_column_and_row(self):
         self.assertEqual(0, self.run_writer())
         book = self.book()
@@ -202,6 +236,28 @@ class WriterTest(unittest.TestCase):
         self.assertEqual(writer.MONEY_FORMAT, row["Amount"].number_format)
         self.assertIsNone(row["Memo Text"].value)
         self.assertIsNone(row["Back Reference Transaction ID"].value)
+
+    def test_downstream_ledgers_and_hashes_survive_staging_and_workbook(self):
+        from enrich_downstream import stage
+        payload = {'downstream_reach':[dict(cycle=2024,view='Company',company='Example',
+            source_committee_id='C00836221',representative_root='C00835959',
+            representative_path='C00835959 > C00836221')],
+            'downstream_measurement_ledger':[dict(cycle=2024,view='Company',company='Example',
+                candidate_id='H0KY06104',before_amount=0,after_amount=106708,delta=106708,
+                basis='Same source rows; synthetic test')],
+            'downstream_sources':[dict(cycle=2024,source='fixture',path='source-fixture',
+                sha256='a'*64,status='fixture only',policy='count_all')]}
+        stage(payload,self.store)
+        self.assertEqual(0,self.run_writer())
+        book=self.book()
+        for name in ['Downstream Reach','Downstream Measurement','Downstream Sources']:
+            self.assertEqual(book[name].max_row,2)
+        sheet=book['Downstream Measurement']
+        row=dict(zip([c.value for c in sheet[1]],[c.value for c in sheet[2]]))
+        self.assertEqual(row['Before Amount'],0)
+        self.assertEqual(row['After Amount'],106708)
+        self.assertEqual(row['Candidate ID'],'H0KY06104')
+        self.assertIn('a'*64,[c.value for c in book['Downstream Sources'][2]])
 
     def test_split_forces_per_cycle_sheets(self):
         self.assertEqual(0, self.run_writer("--split-rows", "1"))
@@ -367,6 +423,23 @@ class HelperTest(unittest.TestCase):
     def test_year_columns_are_not_thousands_formatted(self):
         self.assertEqual(writer.YEAR_FORMAT, writer.number_format("I", "Cycle End Year"))
         self.assertEqual(writer.INTEGER_FORMAT, writer.number_format("I", "Gift Count"))
+
+
+class RawSourcePolicyTests(unittest.TestCase):
+    def test_all_observations_are_reconciled_once_with_report_priority(self):
+        with tempfile.TemporaryDirectory() as directory:
+            database=Path(directory)/'source.db'
+            with closing(sqlite3.connect(database)) as connection, connection:
+                for table in ('contributions','corporate_giving'):
+                    connection.execute(f'CREATE TABLE {table}(sub_id TEXT, industry TEXT, company TEXT, contribution_receipt_date TEXT, contribution_receipt_amount REAL, company_match_status TEXT)')
+                connection.executemany('INSERT INTO contributions VALUES(?,?,?,?,?,?)',[
+                    ('one','Fixture','Uncertain','2024-01-01',100,'review'),
+                    ('two','Fixture','Retained','2024-01-01',50,'rejected')])
+                connection.execute('INSERT INTO corporate_giving VALUES(?,?,?,?,?,?)',
+                                   ('one','Fixture','Accepted','2024-01-01',100,'accepted'))
+            self.assertEqual(writer.source_facts(database,'Fixture',{2024},True),
+                             {('2023-2024','Accepted'):(100,1),('2023-2024','Retained'):(50,1)})
+            self.assertEqual(writer.source_facts(database,'Fixture',{2024}),{('2023-2024','Accepted'):(100,1)})
 
 
 if __name__ == "__main__":

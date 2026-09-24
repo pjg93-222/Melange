@@ -188,15 +188,17 @@ class ReportInsightsTests(unittest.TestCase):
         self.assertNotEqual(first['sha256'],second['sha256'])
         self.assertEqual(second['rows'],[['B',88]])
 
-    def test_overlapping_summary_views_are_selected_once(self):
+    def test_overlapping_summary_views_remain_selectable_with_explicit_grain(self):
         self.book({'Spending Overview':[['Cycle','Scope','Total Giving'],['2023-2024','Total Giving',100],['2023-2024','Corporate',40],['2023-2024','Employee',60],['2023-2024','Candidate',100]],
                    'Recipient List':[['Cycle','View','Total Giving'],['2023-2024','Industry',100],['2023-2024','Company',100]]})
         overview=insights.worksheet_data(insights.stamp(self.report),'Spending Overview')
-        self.assertEqual(overview['rows'],[['2023-2024','Total Giving',100]])
-        self.assertEqual(overview['row_numbers'],[2])
-        self.assertEqual(overview['accounting']['row_role_column'],1)
+        self.assertEqual(len(overview['rows']),4)
+        self.assertEqual(overview['row_numbers'],[2,3,4,5])
+        self.assertEqual(overview['accounting']['independent_dimensions'],[1])
+        self.assertIsNone(overview['accounting']['row_role_column'])
         recipient=insights.worksheet_data(insights.stamp(self.report),'Recipient List')
-        self.assertEqual(recipient['rows'],[['2023-2024','Industry',100]])
+        self.assertEqual(recipient['rows'],[['2023-2024','Industry',100],['2023-2024','Company',100]])
+        self.assertEqual(recipient['accounting']['independent_dimensions'],[1])
 
     def test_tidy_data_book_cells_type_and_summability_as_the_writer_intends(self):
         # The companion Data workbook writes REAL Excel types, not text: dates

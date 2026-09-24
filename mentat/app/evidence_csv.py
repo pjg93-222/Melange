@@ -1699,6 +1699,8 @@ class Store:
         self.incoming.mkdir(parents=True, exist_ok=True)
         self.root = self.root.resolve()
         self.incoming = self.incoming.resolve()
+        # identifier -> ((size, mtime_ns) of rows.sqlite, committee figures)
+        self._figures = {}
         self.sweep()
 
     def directory(self, identifier):
@@ -1911,12 +1913,71 @@ class Store:
                 records.append(value)
         records.sort(key=lambda value: (str(value.get('imported_at') or ''), str(value.get('id') or '')), reverse=True)
         running = self.refresh([value for value in records if self.rereadable(value)])
-        return [stored_catalog(value,
-                               state='reading' if value['id'] in running else 'ready',
-                               reread=value['id'] in running,
-                               stale=value['id'] not in running
-                                     and int(value.get('catalog_version') or 0) < CATALOG_VERSION)
-                for value in records]
+        listed = []
+        for value in records:
+            catalog = stored_catalog(value,
+                                     state='reading' if value['id'] in running else 'ready',
+                                     reread=value['id'] in running,
+                                     stale=value['id'] not in running
+                                           and int(value.get('catalog_version') or 0) < CATALOG_VERSION)
+            # An import being re-read has its database rewritten under it, and
+            # the page cannot open it until the re-read ends, so it goes without.
+            if value['id'] not in running:
+                figures = self.committee_figures(value['id'])
+                for item in catalog.get('committees') or []:
+                    item.update(figures.get(item.get('id'), {'receipts':None, 'receipts_channel':'',
+                                                             'receipts_by_cycle':{}}))
+            listed.append(catalog)
+        return listed
+
+    def committee_figures(self, identifier):
+        """Each committee's lead figure, over all cycles and per cycle, for the rail.
+
+        Console redesign build 06 (board B19): the picker rail ranks an import's
+        PACs by the number its pane leads with, which is the largest channel
+        total the committee has (evidence.js mainFigure), and shows it at the
+        right of the row. `receipts` is that total over every cycle,
+        `receipts_channel` names the channel, and `receipts_by_cycle` holds the
+        largest channel total within each cycle the committee has supported
+        rows in. A committee or cycle with no supported row has no figure
+        (None, or no key), exactly where its pane shows a dash.
+
+        Read from the import's own sqlite `totals` table (one row per
+        committee, cycle and channel), so the listing rebuilds no row, and
+        cached against the database's size and modification time.
+        """
+        database = self.database_path(identifier)
+        try:
+            stat = database.stat()
+        except OSError:
+            return {}
+        stamp = (stat.st_size, stat.st_mtime_ns)
+        cached = self._figures.get(identifier)
+        if cached is not None and cached[0] == stamp:
+            return cached[1]
+        try:
+            with closing(sqlite3.connect(database)) as connection:
+                rows = connection.execute('SELECT committee_id, cycle, channel, amount FROM totals').fetchall()
+        except sqlite3.Error:
+            return {}
+        overall = defaultdict(lambda: defaultdict(Decimal))
+        by_cycle = defaultdict(lambda: defaultdict(lambda: defaultdict(Decimal)))
+        for committee, row_cycle, channel, amount in rows:
+            name = committee or 'unassigned'
+            value = Decimal(amount)
+            overall[name][channel] += value
+            if row_cycle:
+                by_cycle[name][row_cycle][channel] += value
+        figures = {}
+        for name, channels in overall.items():
+            # Ties go to the channel first by name, as the pane's stable sort of
+            # the name-ordered totals does.
+            channel, amount = max(sorted(channels.items()), key=lambda item: item[1])
+            figures[name] = {'receipts':float(amount), 'receipts_channel':channel,
+                             'receipts_by_cycle':{row_cycle:float(max(amounts.values()))
+                                                  for row_cycle, amounts in sorted(by_cycle[name].items())}}
+        self._figures[identifier] = (stamp, figures)
+        return figures
 
     def rereadable(self, value):
         """True when this catalog predates the current rules and the file is still here.

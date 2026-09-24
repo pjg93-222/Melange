@@ -103,9 +103,13 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
   await page.waitForFunction(()=>document.querySelectorAll('#studio-filters .studio-pill').length===2);
   assert.deepEqual(await page.evaluate(()=>calls.query.at(-1).filters),
     [{field:'company',op:'eq',value:'Alpha Bank'},{field:'cycle',op:'eq',value:'2023-2024'}]);
-  await page.waitForSelector('#studio-reconcile:not([hidden])');
-  const agreed=await page.locator('#studio-reconcile').textContent();
+  // Build 03 (S1): the strip is a note line; its full explanation sits behind
+  // "Why" (#studio-reconcile-detail), and the line hides when the scopes and
+  // the totals agree.
+  await page.waitForFunction(()=>/Agree\./.test(document.getElementById('studio-reconcile-detail').textContent));
+  const agreed=await page.locator('#studio-reconcile-detail').textContent();
   assert.match(agreed,/^Graph shows \$12,090,412\.00 for Alpha Bank · 2023-2024\. Studio shows \$12,090,412\.00\. Agree\./);
+  assert.equal(await page.evaluate(()=>document.getElementById('studio-reconcile').hidden),true,'the note line hides when scope and totals agree');
   assert.equal(await page.locator('#studio-reconcile .studio-reconcile-agree').textContent(),'Agree.');
   assert.equal(await page.locator('#studio-reconcile .studio-reconcile-link').textContent(),'Why Cross-reference differs');
   // The strip asked Graph the question the studio is showing, not Graph's own.
@@ -120,7 +124,8 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
   assert.deepEqual(await page.locator('#studio-scope-chip span').allTextContents(),
     ['Carried from Graph','Banking','2023-2024','Alpha Bank']);
   // Totals cover every group, not only the page that is drawn.
-  assert.match(await page.locator('#studio-group-count').textContent(),/^1–1 of 1 groups · totals cover all 1$/);
+  assert.match(await page.locator('#studio-group-count').textContent(),/^Groups 1–1 of 1$/);
+  assert.equal(await page.locator('#studio-group-count').getAttribute('title'),'Totals cover all 1 groups');
 
   // An employee-level filter has no verified field, so the two totals part and
   // the strip says which filter did it.
@@ -130,9 +135,35 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
   const differed=await page.locator('#studio-reconcile').textContent();
   assert.match(differed,/Graph shows \$9,000,000\.00 for Alpha Bank · 2023-2024\. Studio shows \$12,090,412\.00\./);
   assert.match(differed,/They differ by \$3,090,412\.00 because a Graph filter \(employee level or giving type\) is not carried\./);
+  // The note line names the level Chart Studio cannot match, offers no Match
+  // (nothing it could change), and prints no red.
+  assert.equal(await page.evaluate(()=>document.getElementById('studio-reconcile').hidden),false);
+  assert.equal(await page.locator('#studio-reconcile-text').textContent(),'Graph also narrows to the Chief employee level, which verified data cannot match.');
+  assert.equal(await page.evaluate(()=>document.getElementById('studio-match-graph').hidden),true);
+  assert.equal(await page.locator('#studio-reconcile .studio-reconcile-differ').count(),0,'no red verdict in the builder');
   await page.waitForFunction(()=>!document.getElementById('studio-scope-note').hidden);
   assert.equal(await page.locator('#studio-scope-note').textContent(),
     'Employee level: not carried (not in verified data)');
+
+  // Match Graph scope (S1): Graph now shows every company while the sheet is
+  // narrowed to Alpha Bank; the note says so, and Match takes the sheet to
+  // Graph's scope (the cycle stays, the company filter goes).
+  await page.evaluate(()=>{document.getElementById('graph-tier').value='';document.getElementById('graph-company').value='';
+    document.getElementById('studio-fit').dispatchEvent(new Event('change'));});
+  await page.waitForFunction(()=>!document.getElementById('studio-match-graph').hidden);
+  assert.equal(await page.locator('#studio-reconcile-text').textContent(),'This sheet covers Alpha Bank. Graph shows all companies.');
+  // Build 03 final fix round (R03-6): Escape closes Why while focus is still
+  // on the Why button, where a click leaves it.
+  await page.locator('#studio-reconcile-why').click();
+  assert.equal(await page.evaluate(()=>document.getElementById('studio-reconcile-detail').hidden),false);
+  await page.keyboard.press('Escape');
+  assert.deepEqual(await page.evaluate(()=>[document.getElementById('studio-reconcile-detail').hidden,document.activeElement.id]),[true,'studio-reconcile-why']);
+  await page.locator('#studio-match-graph').click();
+  await page.waitForFunction(()=>document.querySelectorAll('#studio-filters .studio-pill').length===1);
+  await page.waitForFunction(()=>/Same scope as Graph/.test(document.getElementById('studio-reconcile-text').textContent));
+  assert.deepEqual(await page.evaluate(()=>calls.query.filter(q=>q.measures.includes('amount')).at(-1).filters),[{field:'cycle',op:'eq',value:'2023-2024'}]);
+  assert.equal(await page.evaluate(()=>document.getElementById('studio-match-graph').hidden),true,'nothing left to match');
+  await page.evaluate(()=>{document.getElementById('graph-company').value='Alpha Bank';});
 
   // A basis that is not the workbook's included receipts is a different
   // question, and the strip refuses to call two numbers the same answer.
@@ -142,7 +173,8 @@ test('a carried Graph scope reconciles to the cent, and names the reason when it
   await page.locator('#studio-scope-change').click();
   await page.locator('#studio-basis').selectOption('original_observed');
   await page.waitForFunction(()=>/uses a different basis than Graph/.test(document.getElementById('studio-reconcile').textContent));
-  assert.match(await page.locator('#studio-reconcile').textContent(),/^Graph shows .+ Studio shows .+ They differ by .+ because this sheet uses a different basis than Graph\./);
+  assert.match(await page.locator('#studio-reconcile-detail').textContent(),/^Graph shows .+ Studio shows .+ They differ by .+ because this sheet uses a different basis than Graph\./);
+  assert.match(await page.locator('#studio-reconcile-text').textContent(),/^Same scope as Graph; the totals differ by \$/);
 
   // A worksheet view has no verified total to reconcile, so the strip goes away.
   await page.locator('#studio-source-mode').selectOption('worksheet');

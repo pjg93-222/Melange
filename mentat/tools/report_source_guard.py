@@ -202,23 +202,6 @@ def unchanged_state(state):
             raise ValueError('Accepted baseline changed during this build; compare again before publishing')
 
 
-def omitted_nonmatches(database, industry):
-    # The workbook deliberately omits rejected company matches, while its
-    # warehouse retains them. Preserve their decisions in the ledger too.
-    with closing(sqlite3.connect(Path(database).as_uri() + '?mode=ro', uri=True)) as source:
-        source.row_factory = sqlite3.Row
-        for table in ('contributions', 'corporate_giving'):
-            fields = {r['name'] for r in source.execute(f'PRAGMA table_info({table})')}
-            if 'company_match_status' not in fields:
-                continue
-            for item in source.execute(f"SELECT * FROM {table} WHERE industry=? AND coalesce(company_match_status,'') != 'accepted'", (industry,)):
-                row = dict(item)
-                yield str(row['sub_id']), dict(company=row.get('company', ''), include_in_analysis='No',
-                    inclusion_reason='Company match: ' + str(row.get('company_match_status') or 'unresolved') +
-                        '; ' + str(row.get('company_match_reason') or row.get('excluded_reason') or ''),
-                    counted_cents=0)
-
-
 def check_payload(receipt, payload_path):
     state = json.loads(Path(receipt).read_text(encoding='utf-8'))
     if state['status'] not in ('source_verified', 'verified'):
@@ -254,14 +237,12 @@ def check_payload(receipt, payload_path):
             if row.get('include_in_analysis') not in ('Yes', 'No'):
                 raise ValueError(f'Invalid inclusion decision; do not convert an unknown decision to zero: {identifier}')
             # This guard also runs for saved payloads. The R classifier owns
-            # form/line interpretation; publication must still reject missing,
-            # unresolved or non-contribution roles at this final boundary.
-            if row['include_in_analysis'] == 'Yes' and (
-                row.get('receipt_role') not in ('contribution', 'transfer_receipt') or
-                not str(row.get('filing_form') or '').strip() or
-                not str(row.get('line_number') or '').strip()
+            # form/line interpretation. Missing evidence remains provisional;
+            # only established non-giving or contradictory roles refuse it.
+            if row['include_in_analysis'] == 'Yes' and row.get('receipt_role') in (
+                'other_receipt', 'asset_liquidation', 'disclosure_memo', 'unverified_contradicted_receipt'
             ):
-                raise ValueError(f'Receipt evidence is unresolved or ineligible for counted source: {identifier}')
+                raise ValueError(f'Receipt evidence is contradictory or ineligible for counted source: {identifier}')
             memo_exclusion = (str(row.get('duplicate_memo', '')).lower() in ('1', 'true') or
                               row.get('duplicate_of_sub_id') or row.get('duplicate_reason') or
                               str(row.get('inclusion_reason') or '').startswith('Memo duplicate'))
@@ -273,13 +254,18 @@ def check_payload(receipt, payload_path):
                 'funding_source_type', 'funding_direction',
                 'company_match_reason', 'category_source', 'party_source', 'identity_basis',
                 'filing_form', 'line_number', 'memo_text', 'source_url',
-                'include_in_analysis', 'inclusion_reason', 'receipt_role', 'duplicate_memo',
+                'include_in_analysis', 'inclusion_reason', 'receipt_role', 'receipt_role_unverified',
+                'receipt_role_reason', 'company_attribution_status', 'company_attribution_reason', 'duplicate_memo',
                 'duplicate_of_sub_id', 'duplicate_reason')}
             item['counted_cents'] = cents(row['amount']) if row['include_in_analysis'] == 'Yes' else 0
+            if row['include_in_analysis'] == 'Yes' and (row.get('receipt_role') not in
+                    ('contribution', 'in_kind_contribution', 'transfer_receipt') or
+                    not row.get('filing_form') or not row.get('line_number')):
+                item['receipt_role_unverified'] = 1
+                item['receipt_role_reason'] = row.get('receipt_role_reason') or 'receipt_metadata_unresolved'
             connection.execute('UPDATE facts SET analysis=? WHERE id=?', (json.dumps(item, sort_keys=True), identifier))
-        for identifier, item in omitted_nonmatches(state['database'], state['industry']):
-            connection.execute('UPDATE facts SET analysis=? WHERE id=? AND analysis IS NULL',
-                               (json.dumps(item, sort_keys=True), identifier))
+        # A query match status cannot supply an omitted row's zero-dollar
+        # decision. Every scoped source now requires a payload decision.
         if connection.execute('SELECT count(*) FROM facts WHERE analysis IS NULL').fetchone()[0]:
             raise ValueError('Payload omitted scoped raw source rows, including excluded evidence')
         for identifier, analysis in connection.execute('SELECT id,analysis FROM facts'):

@@ -2,15 +2,16 @@
 body{background:#faf8f6}
 .skip-link{position:fixed;top:8px;left:12px;z-index:20;transform:translateY(-160%);padding:10px 16px;background:var(--acu-plum);color:white;border-radius:5px}
 .skip-link:focus{transform:none}
-.app-navigation{background:white;color:var(--acu-plum);border-bottom:1px solid var(--line)}
-.app-navigation .wordmark{color:var(--acu-plum);font-size:22px;letter-spacing:2px}
+.app-navigation{background:var(--analysis-paper,#FAF8F6);color:var(--acu-plum);border-bottom:1px solid var(--line)}
+.app-navigation .wordmark{color:var(--acu-plum);font:700 28px/1.2 var(--font-serif);letter-spacing:-.3px}
 .brand-caption{color:var(--muted);font-size:12px;line-height:1.6}
-.app-navigation .workspace-tabs button{color:var(--muted);font-size:14px;font-weight:500}
+.app-navigation .workspace-tabs button{color:var(--acu-plum);font-size:16px;font-weight:500}
 .app-navigation .workspace-tabs button:hover{background:#f7f3f8;color:var(--acu-plum)}
 .app-navigation .workspace-tabs button[aria-selected=true]{background:#eee7f2;color:var(--acu-plum);border-color:var(--acu-purple);font-weight:600}
 .app-navigation .local-indicator,.app-navigation #connection{color:var(--muted);font-size:11px}
 .nav-group{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#817987}
 .workspace{max-width:1560px;padding:32px 36px 48px}
+.workspace select{min-width:0;max-width:100%;text-overflow:ellipsis}
 .workspace-heading{margin-bottom:24px}
 .workspace-heading h1{font-size:32px;line-height:1.2}
 .view-intro{font-size:15px;margin-bottom:24px}
@@ -196,16 +197,17 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 .evidence-browser tr[data-browse-path],.evidence-browser tr[data-open-path]{cursor:pointer}
 .evidence-browser tr[data-open-path]:hover,.evidence-browser tr[data-browse-path]:hover{background:#f7f2fa}
 .evidence-chip-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
-.evidence-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.chip{display:inline-flex;align-items:center;gap:8px;padding:0 6px 0 12px;min-height:36px;border:1px solid #d8cddd;border-radius:18px;background:#f7f2fa;font-size:13px}
-.chip button{border:0;background:transparent;width:32px;height:32px;min-height:32px;border-radius:16px;color:var(--acu-purple);font-size:16px;line-height:1;padding:0}
+.evidence-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0;max-width:100%}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:0 6px 0 12px;min-height:36px;min-width:0;max-width:100%;border:1px solid #d8cddd;border-radius:18px;background:#f7f2fa;font-size:13px}
+.chip-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip button{border:0;background:transparent;width:32px;height:32px;min-height:32px;flex:none;border-radius:16px;color:var(--acu-purple);font-size:16px;line-height:1;padding:0}
 .chip button:hover{background:#e3d6ea}
 .evidence-panes{display:grid;grid-template-columns:1fr;gap:18px;align-items:stretch}
-.evidence-pane{display:flex;flex-direction:column;gap:14px;min-width:0}
-.pane-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.pane-title{min-width:0}
+.evidence-pane{display:flex;flex-direction:column;gap:14px;min-width:0;container-type:inline-size}
+.pane-head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.pane-title{min-width:0;flex:1 1 230px}
 .pane-title h2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
-.pane-kind{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.pane-kind{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .evidence-pane h2{font-size:22px;line-height:1.15;margin:2px 0 0;overflow-wrap:anywhere}
 .pane-tags{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;font-size:13px}
 .pane-buttons{display:flex;gap:6px;flex-shrink:0}
@@ -214,12 +216,9 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 .pane-buttons button:disabled,.evidence-compare button:disabled{opacity:.45;cursor:not-allowed}
 .pane-message{overflow-wrap:anywhere}
 .pane-figures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-@media(max-width:1400px){#evidence-panes[data-panes="3"] .pane-figures,#evidence-panes[data-panes="4"] .pane-figures{grid-template-columns:1fr}}
 .pane-figure{background:#fbfaf9;border:1px solid var(--line);border-radius:6px;padding:12px 14px;min-width:0}
-/* F3. At 1280 with three panes a 26px "$177,980,393" wrapped to two lines and
-   the card grew to 78px. The figure never wraps; it shrinks instead, and below
-   three panes' worth of width the two cards stack. */
-.pane-figure strong{display:block;font-size:clamp(18px,1.6vw,26px);font-weight:600;margin:2px 0;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Keep exact figures readable; unusually long amounts remain scrollable. */
+.pane-figure strong{display:block;font-size:20px;font-weight:600;margin:2px 0;font-variant-numeric:tabular-nums;white-space:nowrap;overflow-x:auto}
 .pane-figure .label,.pane-cycles .label,.pane-top .label{font-size:13px;color:var(--s6-label);display:block}
 .pane-figure .muted{font-size:12px}
 .pane-channels{display:grid;gap:6px;font-size:13px;color:var(--acu-plum)}
@@ -274,7 +273,8 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 /* The mockup's scope bar is six columns at 1440: Source, Committee type, Find
    a PAC, PAC, Cycle, Add pane. Narrower than that the grid halves rather than
    squeezing a 44px select into 140px. */
-@media(min-width:1100px){.evidence-scope-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:16px}}
+@media(min-width:1100px){.evidence-scope-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
+@media(min-width:1500px){.evidence-scope-grid{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr) auto}}
 @media(max-width:700px){.evidence-scope-grid{grid-template-columns:1fr}.pane-figures{grid-template-columns:1fr}.evidence-compare .compare-metric{width:120px}.pane-cycle{grid-template-columns:70px minmax(0,1fr) 92px}}
 #chart-image{overflow:auto;overscroll-behavior:contain}#chart-image svg{min-width:700px}
 .split-workspace{max-width:none;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:0 24px}
@@ -329,6 +329,43 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 }.pane-drawer th:first-child,.pane-drawer td:first-child{width:38px}
 .pane-drawer th:nth-child(2),.pane-drawer td:nth-child(2){width:92px}
 .pane-drawer th:nth-child(3),.pane-drawer td:nth-child(3){width:85px}
+.evidence-network>label{display:block;max-width:340px;margin:12px 0;font-size:13px}
+.evidence-network .network-search{display:block;width:100%;margin-top:5px}
+.pane-drawer .evidence-network table{table-layout:fixed;min-width:700px}
+.pane-drawer .evidence-network th:first-child,.pane-drawer .evidence-network td:first-child{width:24%}
+.pane-drawer .evidence-network th:nth-child(2),.pane-drawer .evidence-network td:nth-child(2){width:30%;overflow-wrap:anywhere}
+.pane-drawer .evidence-network th:nth-child(3),.pane-drawer .evidence-network td:nth-child(3){width:14%}
+.pane-drawer .evidence-network th:nth-child(4),.pane-drawer .evidence-network td:nth-child(4){width:14%;min-width:0}
+.pane-drawer .evidence-network th:last-child,.pane-drawer .evidence-network td:last-child{width:18%;text-align:right;white-space:nowrap}
+.evidence-network>details{margin-top:10px;overflow-wrap:anywhere}
+.fec-citation{display:inline-flex;margin-top:6px;font-size:12px;font-weight:600}
+.filing-ledger{margin-top:6px;min-width:150px}
+.filing-ledger>summary{display:inline-flex;align-items:center;gap:7px;min-height:30px;padding:4px 9px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--acu-plum);font-size:12px;font-weight:600;cursor:pointer;list-style:none}
+.filing-ledger>summary::-webkit-details-marker{display:none}
+.filing-ledger>summary::after{content:'+';font-size:14px;line-height:1;color:var(--muted)}
+.filing-ledger[open]>summary::after{content:'−'}
+.fec-mark{display:inline-grid;place-items:center;min-width:30px;height:18px;padding:0 4px;border-radius:3px;background:var(--acu-plum);color:#fff;font-size:10px;letter-spacing:.06em}
+.filing-ledger ol{display:grid;gap:0;margin:8px 0 0;padding:0;list-style:none;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:min(360px,70vw);overflow:hidden}
+.filing-ledger li{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:9px 10px;border-bottom:1px solid var(--s6-hairline);font-size:12px}
+.filing-ledger li:last-child{border-bottom:0}
+.filing-ledger li div{min-width:0}
+.filing-ledger li strong,.filing-ledger li span{display:block;font-variant-numeric:tabular-nums}
+.filing-ledger li span{margin-top:2px;color:var(--muted);font-weight:400;overflow-wrap:anywhere}
+.filing-ledger li>a{flex:none;white-space:nowrap;font-weight:600}
+@media(max-width:700px){
+  .candidate-activity .table-scroll{max-height:none;overflow:visible}
+  .pane-drawer .candidate-activity .table-scroll table{display:grid;min-width:0}
+  .candidate-activity thead{display:none}
+  .candidate-activity tbody,.candidate-activity tr{display:grid;width:100%}
+  .candidate-activity tr{padding:11px 0;border-bottom:1px solid var(--line)}
+  .pane-drawer .candidate-activity td,.pane-drawer .candidate-activity td.num{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px;width:100%;min-width:0;max-width:none;padding:4px 0;border:0;text-align:left;white-space:normal}
+  .candidate-activity td::before{content:attr(data-label);font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--s6-label)}
+  .candidate-activity td>details,.candidate-activity td>.filing-ledger,.candidate-activity td>small{grid-column:2}
+  .candidate-activity .filing-ledger{min-width:0;margin-top:0}
+  .candidate-activity .filing-ledger ol{min-width:0;max-width:100%}
+  .candidate-activity .filing-ledger li{align-items:flex-start;flex-direction:column}
+  .candidate-activity .filing-ledger li>a{display:block;min-width:max-content;overflow:visible}
+}
 
 /* F1 build stamp and stale-build banner. Gold #eca91c, plum text, muted stamp. */
 .app-navigation .build-stamp{color:var(--muted);font-size:11px;white-space:nowrap}
@@ -378,7 +415,7 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 /* Underline tabs, one caption. */
 .analysis-strip{display:flex;align-items:flex-end;gap:16px;border-bottom:1px solid var(--line);margin:20px 0 0}
 .analysis-strip .analysis-tabs{border-bottom:0;margin:0;flex:1 1 auto;min-width:0}
-.analysis-caption{margin-left:auto;padding-bottom:11px;font-size:11px;color:var(--muted);white-space:nowrap}
+.analysis-caption{margin-left:auto;padding-bottom:11px;font-size:11px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #graph-status{margin:0}
 
 /* Three equal tiles; the two part figures carry a thin share bar. */
@@ -566,4 +603,976 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 #evidence-map .map-geocode-actions button[disabled] {
   opacity: .55;
   cursor: default;
+}
+
+/* ------------------------------------------------------------------ P4b
+   The PAC evidence pane strip and the interactive map. Appended, never woven
+   into the rules above: workspace.css is shared with the Graph lane.
+
+   Motion tokens live here so every animation in evidence.js and
+   evidence-map.js collapses to instant in one place, under
+   prefers-reduced-motion. Transform and opacity only - nothing animates a
+   property that costs layout. */
+#view-evidence {
+  --map-fly: 650ms;
+  --map-fade: 420ms;
+  --map-lift: 140ms;
+  --map-ease: cubic-bezier(.22, 1, .36, 1);
+  --map-teal: #327a7a;
+  --map-teal-soft: #e8f3f1;
+  --map-plum: #57447b;
+}
+#view-evidence .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- the pane card ----------------------------------------------------- */
+.evidence-pane .seg {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  overflow: hidden;
+  background: white;
+}
+.evidence-pane .seg button {
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: white;
+  color: var(--acu-plum);
+  font-size: 13px;
+  padding: 0 14px;
+  min-height: 40px;
+  transition: opacity var(--map-lift) var(--map-ease);
+}
+.evidence-pane .seg button:last-child { border-right: 0; }
+.evidence-pane .seg button.on {
+  background: var(--acu-gold);
+  color: #2b2113;
+  font-weight: 600;
+}
+.evidence-pane .seg.small button { min-height: 28px; font-size: 11px; padding: 0 10px; }
+.evidence-pane .pane-buttons { align-items: flex-start; gap: 8px; margin-left:auto; }
+.evidence-pane .pane-remove { min-height:40px; height:40px; width:40px; }
+
+/* Four figures in ONE bordered box with hairline dividers, as drawn. */
+.evidence-pane .pane-figures {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf9;
+  overflow: hidden;
+}
+.evidence-pane .pane-figures .pane-figure {
+  border: 0;
+  border-right: 1px solid var(--s6-hairline);
+  border-radius: 0;
+  background: transparent;
+  padding: 12px 16px 14px;
+}
+.evidence-pane .pane-figures .pane-figure:last-child { border-right: 0; }
+@container (max-width: 740px) {
+  .evidence-pane .pane-figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .evidence-pane .pane-figures .pane-figure:nth-child(2) { border-right: 0; }
+}
+@container (max-width: 340px) {
+  .evidence-pane .pane-figures { grid-template-columns:minmax(0,1fr); }
+  .evidence-pane .pane-figures .pane-figure { border-right:0; }
+  .pane-buttons .seg button { padding:0 10px; }
+}
+
+/* By cycle at the left, the national thumbnail at the right. */
+.pane-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 900px) { .pane-split { grid-template-columns: 1fr; } }
+#evidence-panes[data-panes="3"] .pane-split,
+#evidence-panes[data-panes="4"] .pane-split { grid-template-columns: 1fr; }
+.pane-thumb {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf9;
+  padding: 10px 12px 12px;
+  min-width: 0;
+}
+.pane-thumb-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pane-thumb-canvas {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  min-height: 92px;
+}
+.pane-thumb-svg { width: 100%; height: auto; display: block; }
+.pane-thumb-svg path { stroke: white; stroke-width: 1.1; vector-effect: non-scaling-stroke; }
+.pane-thumb-canvas:hover .pane-thumb-svg { filter: brightness(1.04); }
+
+/* --- the map view ------------------------------------------------------ */
+#evidence-map { container-type: inline-size; font-family: var(--font-sans, Arial, sans-serif); gap: 8px; padding-top: 8px; }
+#evidence-map .map-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+}
+#evidence-map .map-toolbar-card {
+  border: 1px solid var(--line);
+  background: white;
+  padding: 8px 12px;
+  margin-top: 0;
+}
+#evidence-map .map-toolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto minmax(220px, 1fr);
+  gap: 8px 16px;
+}
+#evidence-map .map-context-controls, #evidence-map .map-navigation-controls { display: contents; }
+#evidence-map .map-scope-controls,
+#evidence-map .map-legislative-controls,
+#evidence-map .map-view-controls,
+#evidence-map .map-search-controls { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; min-width: 0; }
+#evidence-map .map-scope-controls { grid-column: 1; grid-row: 1; flex-wrap: nowrap; align-items: end; }
+#evidence-map .map-cycle-label { flex: 1; min-width: 0; }
+#evidence-map .map-search-controls { grid-column: 1; grid-row: 2; flex-wrap: nowrap; gap: 6px; }
+#evidence-map .map-view-controls { grid-column: 2 / -1; grid-row: 2; justify-content: end; }
+#evidence-map .map-legislative-controls { grid-column: 3; grid-row: 1; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(60px, 1fr); }
+#evidence-map .map-layer-group { grid-column: 2; grid-row: 1; margin: 0; }
+#evidence-map .map-context-controls select,
+#evidence-map .map-toolbar button { min-height: 32px; }
+#evidence-map .map-toolbar label, #evidence-map .map-toolbar select { margin: 0; }
+#evidence-map .map-toolbar select { font-size: 12px; padding: 6px 8px; }
+#evidence-map .map-toolbar .secondary { font-size: 12px; padding: 6px 10px; }
+#evidence-map .map-mobile-layer { display: none; }
+#evidence-map .map-button-icon { width: 18px; height: 18px; flex: none; }
+#evidence-map #evidence-map-enlarge { display: inline-flex; align-items: center; gap: 6px; }
+#evidence-map .map-controls-help { grid-column: 1 / -1; font-size: 11px; line-height: 1.4; color: var(--muted); margin: 0; }
+#evidence-map .map-source-heading { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+#evidence-map .map-source-details { margin-top: 4px; font-size: 11px; }
+#evidence-map .map-source-details summary { cursor: pointer; color: var(--muted); padding: 6px 0; }
+#evidence-map .map-source-details[open] summary { margin-bottom: 4px; }
+#evidence-map .map-canvas-host { position: relative; }
+#evidence-map .map-canvas-host.map-fetching .map-plot { opacity: .3; pointer-events: none; }
+#evidence-map .map-canvas-host.map-fetching::after { content: 'Loading geography…'; position: absolute; inset: 40% 0 auto; text-align: center; font-size: 14px; color: var(--acu-plum); }
+#evidence-map .map-toolbar .seg {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+  background: white;
+}
+#evidence-map .map-toolbar .seg button {
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: white;
+  color: var(--acu-plum);
+  font-size: 11px;
+  padding: 0 10px;
+  min-height: 30px;
+  white-space: nowrap;
+  transition: opacity var(--map-lift) var(--map-ease);
+}
+#evidence-map .map-toolbar .seg button:last-child { border-right: 0; }
+#evidence-map .map-toolbar .seg button.on {
+  background: var(--acu-plum);
+  color: white;
+  font-weight: 600;
+}
+#evidence-map .map-toolbar .seg button[disabled] { opacity: .45; cursor: not-allowed; }
+/* The direction buttons say what each side means for a screen reader and for
+   the map suite, which reads their text; the board shows the short label. */
+#evidence-map .seg-note {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+#evidence-map .map-layer-caption {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+#evidence-map .map-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 220px;
+  min-width: 0;
+}
+#evidence-map .map-search-glyph {
+  position: absolute;
+  left: 11px;
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.6;
+  pointer-events: none;
+}
+#evidence-map .map-search input {
+  width: 100%;
+  min-height: 32px;
+  padding: 0 12px 0 34px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font: inherit;
+  font-size: 12px;
+}
+#evidence-map .map-zoom-buttons { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 7px; background: white; }
+#evidence-map .map-zoom-level { min-width: 44px; text-align: center; font-size: 13px; font-variant-numeric: tabular-nums; }
+#evidence-map button.round {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--acu-plum);
+  font-size: 17px;
+  line-height: 1;
+}
+#evidence-map .map-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 0;
+  align-items: start;
+}
+@media (max-width: 1000px) { #evidence-map .map-grid { grid-template-columns: 1fr; } }
+#evidence-map .map-figure,
+#evidence-map .map-ranked {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+  padding: 16px 18px;
+  min-width: 0;
+}
+#evidence-map .map-figure { border: 0; border-radius: 0; background: transparent; padding: 0; gap: 4px; }
+#evidence-map .map-canvas-host { padding: 0; border-radius: 2px; background: #f7f8f7; overflow: hidden; }
+#evidence-map .map-layers > .muted { font-size: 12px; }
+#evidence-map .map-layers .layer { min-height: 26px; padding-inline: 10px; font-size: 12px; }
+#evidence-map .map-note-host:empty { display: none; }
+#evidence-map .map-ranked h2 { font-size: 24px; margin: 0; }
+#evidence-map .map-list table { min-width: 0; table-layout: fixed; }
+#evidence-map .map-list td, #evidence-map .map-list th { min-width: 0; padding: 12px 8px; overflow-wrap: anywhere; white-space: normal; }
+#evidence-map .map-list .num { width: 24%; white-space: nowrap; }
+#evidence-map .map-list .map-cited-amount { white-space: normal; }
+.map-amount-value, .fec-citations { white-space: nowrap; }
+.fec-citations { display: inline-block; margin-left: 5px; color: var(--acu-plum); font-size: 12px; font-weight: 600; }
+.fec-citations sup { position: relative; top: -.18em; margin-left: 2px; font-size: 12px; line-height: 0; }
+.fec-citations a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.record-links { display: flex; flex-direction: column; gap: 5px; margin-top: 5px; font-size: 12px; font-weight: 500; }
+.record-links a { display: inline-block; white-space: nowrap; color: var(--acu-plum); text-decoration: underline; text-underline-offset: 3px; }
+.num .record-links { align-items: flex-end; }
+#evidence-map .map-list .map-rank { width: 26px; }
+#evidence-map .map-list th.map-rank-head { width: 26px; }
+#evidence-map .map-head h2 { font-size: 28px; margin: 0; overflow-wrap: anywhere; }
+#view-evidence.map-open > .view-intro, #view-evidence.map-open > .evidence-scope { display: none; }
+.workspace:has(#view-evidence.map-open:not([hidden])) > .workspace-heading { display: none; }
+#evidence-map .map-rank { width: 30px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#evidence-map .map-rank-head { width: 30px; }
+#evidence-map .map-list .bartrack { margin-top: 5px; }
+#evidence-map .map-list .bar { background: var(--map-teal); }
+#evidence-map .map-row { cursor: pointer; }
+#evidence-map .map-row:hover { background: var(--map-teal-soft); }
+
+/* Enlarged: the card grows to the full workspace with the list below it. The
+   <svg> is NOT rebuilt, so the reader's zoom survives the change. */
+#evidence-map.enlarged .map-grid { grid-template-columns: minmax(0, 1fr); }
+#evidence-map.enlarged svg.map-canvas { height: min(57vh, 700px); min-height: 360px; }
+#evidence-map.enlarged .map-ranking { width: 100%; }
+#evidence-map .map-geo-select { display: grid; gap: 4px; font-size: 11px; color: var(--muted); }
+#evidence-map .map-layer-group { max-width: 100%; }
+#evidence-map .map-layer-group .seg { display: flex; flex-wrap: wrap; }
+#evidence-map .map-provenance { font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; margin: 12px 0 0; }
+#evidence-map .map-provenance a { color: var(--map-teal); text-decoration: underline; }
+#evidence-map .map-canvas .map-legislative .map-sld { stroke: #897d94; stroke-width: .7; vector-effect: non-scaling-stroke; }
+#evidence-map .map-legislative .map-shape:hover { stroke: #342649; stroke-width: 1.5; }
+#evidence-map .map-figure,
+#evidence-map .map-grid { transition: opacity var(--map-fade) var(--map-ease); }
+
+/* --- the picture ------------------------------------------------------- */
+#evidence-map .map-trail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: -8px;
+}
+#evidence-map .map-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+}
+#evidence-map .map-crumbs li { display: flex; align-items: center; gap: 8px; }
+#evidence-map .map-crumbs span { color: var(--muted); }
+#evidence-map .map-trail-layer { margin-left: auto; font-size: 12px; }
+#evidence-map .map-canvas-host.skeleton {
+  min-height: 320px;
+  border-radius: 8px;
+  background: linear-gradient(100deg, #f4f1ee 30%, #fbfaf9 50%, #f4f1ee 70%) 0 0 / 300% 100%;
+  animation: map-skeleton 1.3s linear infinite;
+}
+@keyframes map-skeleton { to { background-position: -150% 0; } }
+#evidence-map .map-plot { position: relative; }
+#evidence-map svg.map-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: pan-y pinch-zoom;
+  cursor: grab;
+  --map-k: 1;
+}
+#evidence-map svg.map-canvas.panning { cursor: grabbing; }
+#evidence-map .map-canvas .map-outline {
+  fill: none;
+  stroke: white;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+#evidence-map .map-canvas .map-shape {
+  stroke: white;
+  stroke-width: .7;
+  vector-effect: non-scaling-stroke;
+  transition: opacity var(--map-fade) var(--map-ease);
+}
+#evidence-map .map-canvas .map-shape:hover {
+  filter: brightness(1.08);
+  stroke: var(--acu-plum);
+  stroke-width: 1.4;
+}
+#evidence-map .map-canvas.has-selection .map-areas .map-shape:not(.chosen) { opacity: .55; }
+#evidence-map .map-canvas.has-selection .map-legislative .map-shape:not(.chosen) { opacity: .55; }
+#evidence-map .map-canvas .map-selected {
+  fill: none;
+  stroke: var(--acu-plum);
+  stroke-width: 2.4;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+#evidence-map .map-canvas .map-areas.on-district .map-state-base { opacity: .85; }
+#evidence-map .map-canvas .map-circle {
+  fill: var(--acu-purple);
+  fill-opacity: .55;
+  stroke: #2f2244;
+  stroke-width: .8;
+  vector-effect: non-scaling-stroke;
+  /* Radius is updated on the circle itself; a map-wide inherited zoom
+     variable would invalidate styles for every polygon on each frame. */
+}
+#evidence-map .map-canvas .map-circle.chosen { fill-opacity: .9; stroke-width: 1.6; }
+#evidence-map .map-canvas .map-circle-count {
+  font-size: 8px;
+  fill: white;
+  font-weight: 600;
+  pointer-events: none;
+}
+#evidence-map .map-canvas .map-circles.arriving .map-circle {
+  transform: scale(.4);
+  transform-origin: center;
+  transform-box: fill-box;
+  opacity: 0;
+}
+#evidence-map .map-canvas .map-circle {
+  transition: transform var(--map-fade) var(--map-ease), opacity var(--map-fade) var(--map-ease);
+  transition-delay: var(--circle-delay, 0ms);
+}
+#evidence-map .map-tooltip {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 8px 26px rgba(38, 26, 56, .18);
+  padding: 10px 13px;
+  display: grid;
+  gap: 2px;
+  font-size: 13px;
+  max-width: 220px;
+}
+#evidence-map .map-tooltip strong { font-size: 14px; }
+#evidence-map .map-tooltip span { color: var(--muted); }
+#evidence-map .map-legend-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px 24px;
+  margin-top: 0;
+  border-top: 1px solid var(--line);
+  padding: 14px 16px;
+  background: white;
+}
+#evidence-map .map-heat-legend { display: grid; grid-template-columns: auto auto minmax(100px, 370px) auto 1fr; align-items: center; gap: 8px; }
+#evidence-map .map-heat-legend .map-legend-title { margin: 0 12px 0 0; }
+#evidence-map .map-legend-low, #evidence-map .map-legend-high, #evidence-map .map-legend-scope { font-size: 11px; color: var(--muted); }
+#evidence-map .map-legend-scope { justify-self: end; border-left: 1px solid var(--line); padding-left: 16px; }
+#evidence-map .map-heat-legend .map-legend-key { grid-column: 1 / -1; }
+#evidence-map .map-legend-title {
+  display: block;
+  font-size: 12px;
+  color: var(--acu-plum);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+#evidence-map .map-legend-card .map-ramp {
+  width: 100%;
+  height: 16px;
+  border: 1px solid #bfd1cd;
+  border-radius: 0;
+  background: repeating-linear-gradient(90deg, transparent 0, transparent calc(11.11% - 3px), white calc(11.11% - 3px), white 11.11%), linear-gradient(90deg, #e8f3f1, #b9ddd8, #7cbfb7, #4c9e95, #327a7a);
+}
+#evidence-map .map-legend-range { display: block; font-size: 12px; color: var(--muted); margin-top: 5px; }
+#evidence-map .map-legend-key { display: block; font-size: 11px; color: var(--muted); margin-top: 6px; }
+#evidence-map .map-legend-swatches { display: flex; align-items: flex-end; gap: 10px; }
+#evidence-map .map-legend-swatch { display: grid; justify-items: center; }
+#evidence-map .map-legend-swatch small { font-size: 11px; color: var(--muted); }
+#evidence-map .map-legend-dot { fill: var(--acu-purple); fill-opacity: .55; stroke: #2f2244; stroke-width: .8; }
+#evidence-map .map-locator {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  width: 112px;
+  height: auto;
+  background: rgba(255, 255, 255, .94);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+#evidence-map .map-locator-state { fill: #ece7e2; stroke: white; stroke-width: 1; }
+#evidence-map .map-locator[hidden] { display: none; }
+#evidence-map .map-locator-window {
+  fill: rgba(87, 68, 123, .12);
+  stroke: var(--acu-purple);
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+}
+#evidence-map .map-unplaced { font-size: 12px; margin: 10px 0 0; }
+#evidence-map .map-loading { font-size: 13px; }
+@container (min-width: 1051px) {
+  #evidence-map .map-controls-help { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+@container (max-width: 1050px) {
+  #evidence-map .map-toolbar { grid-template-columns: minmax(220px, 1fr) minmax(240px, 1.4fr); }
+  #evidence-map .map-legislative-controls { grid-column: 2; grid-row: 2; }
+  #evidence-map .map-search-controls { align-self: end; }
+  #evidence-map .map-view-controls { grid-column: 1 / -1; grid-row: 3; }
+  #evidence-map .map-heat-legend { grid-template-columns: auto minmax(100px, 1fr) auto; }
+  #evidence-map .map-heat-legend .map-legend-title { grid-column: 1 / -1; }
+  #evidence-map .map-legend-scope { grid-column: 1 / -1; justify-self: start; border: 0; padding: 0; }
+}
+@media (max-width: 680px) {
+  #evidence-map { padding: 12px; gap: 12px; }
+  #evidence-map .map-head { gap: 12px; }
+  #evidence-map .map-head h2 { font-size: 22px; }
+  #evidence-map .map-head .pane-title { flex: 1 1 100%; }
+  #evidence-map .map-toolbar { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  #evidence-map .map-scope-controls { justify-content: space-between; }
+  #evidence-map .map-toolbar button, #evidence-map .map-toolbar select, #evidence-map .map-search input { min-height: 44px; }
+  #evidence-map .map-scope-controls .seg { flex: 1; }
+  #evidence-map .map-scope-controls .seg button { flex: 1; }
+  #evidence-map .map-cycle-label { flex: 0 1 120px; }
+  #evidence-map .map-layer-group { display: none; }
+  #evidence-map .map-mobile-layer { display: grid; grid-column: 1 / -1; gap: 4px; font-size: 12px; color: var(--muted); }
+  #evidence-map .map-mobile-layer select { width: 100%; }
+  #evidence-map .map-legislative-controls { grid-column: 1; grid-row: auto; display: grid; grid-template-columns: 2fr 1fr; }
+  #evidence-map .map-geo-select select { width: 100%; min-width: 0; }
+  #evidence-map .map-search { min-width: 0; }
+  #evidence-map .map-search-controls, #evidence-map .map-view-controls { grid-column: 1; grid-row: auto; }
+  #evidence-map .map-view-controls { width: 100%; gap: 6px; justify-content: space-between; }
+  #evidence-map .map-view-controls > button { padding-inline: 8px; font-size: 12px; }
+  #evidence-map .map-zoom-level { min-width: 32px; }
+  #evidence-map .map-figure { padding: 0; }
+  #evidence-map.enlarged svg.map-canvas { height: auto; min-height: 0; }
+  #evidence-map .map-grid { margin-top: 0; }
+  #evidence-map .map-locator { display: none; }
+  #evidence-map .map-ranked { padding: 12px; }
+  #evidence-map .map-ranked h2 { font-size: 21px; }
+  #evidence-map .map-list .map-rank, #evidence-map .map-list th.map-rank-head { width: 20px; padding-inline: 2px; }
+  #evidence-map .map-list td, #evidence-map .map-list th { padding: 10px 4px; }
+  #evidence-map .map-list .num { width: 26%; font-size: 12px; }
+  #evidence-map .map-list-tools { padding: 10px; }
+}
+#evidence-map .map-ranking { min-width: 0; }
+#evidence-map .map-list-tools { display: flex; align-items: end; flex-wrap: wrap; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; background: #faf8f5; }
+#evidence-map .map-list-tools label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); min-width: 120px; flex: 1; }
+#evidence-map .map-list-tools input,#evidence-map .map-list-tools select { width: 100%; min-width: 0; }
+#evidence-map .map-list-pager { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; margin: 12px 0; font-size: 12px; }
+#evidence-map .map-list-pager > span { margin-right: auto; color: var(--muted); }
+#evidence-map .map-list .link-button { text-align: left; font-weight: 600; }
+#evidence-map .map-pins { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 12px; }
+#evidence-map .map-pin-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: 12px; }
+#evidence-map .map-pin-grid article { border: 1px solid var(--line); border-radius: 8px; background: white; padding: 14px; }
+#evidence-map .map-pin-grid article .num { font-size: 23px; margin: 8px 0; text-align: left; }
+#evidence-map .map-pin-grid article .muted { font-size: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  #view-evidence {
+    --map-fly: 0ms;
+    --map-fade: 0ms;
+    --map-lift: 0ms;
+  }
+  #evidence-map .map-canvas .map-circle,
+  #evidence-map .map-canvas .map-shape,
+  #evidence-map .map-grid,
+  #evidence-map .map-figure,
+  .evidence-pane .seg button { transition: none !important; }
+  #evidence-map .map-canvas .map-circles.arriving .map-circle { transform: none; opacity: 1; }
+  #evidence-map .map-canvas-host.skeleton { animation: none; }
+}
+
+/* ------------------------------------------------ Console redesign, build 06 (2026-09-22)
+   PAC evidence: board B19's page (a 1600x900 frame at 1.25x: a 270px picker
+   rail and the panes area), with approved board 3's pane inside it, and board
+   M13's two-cycle map compare (further down). Appended, never woven into the
+   rules above. workspace-polish.css loads after this file, so every rule here
+   is scoped under body[data-view] #view-evidence to win on specificity without
+   !important. Colours are sampled from B19 and board 3. */
+#view-evidence{--ev-ink:#1d173b;--ev-text:#3a3448;--ev-soft:#6b6873;--ev-line:#e7e3df;--ev-hair:#f1eeeb;--ev-fill:#fbfaf8;--ev-head:#f8f6f4;--ev-gold:var(--acu-gold-soft);--ev-chip:#e7e0ec;--ev-band:#f0eaf1;--ev-teal:#2a7a7c;--ev-teal-soft:#53aaa7;--ev-track:#efedeb;--ev-control:#dcd7d2}
+
+/* Layout: the rail beside the panes from 1100px; one column below that and
+   beside Graph, where the rail sits above the panes with a shorter list. */
+body[data-view] #view-evidence .evidence-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;align-items:start}
+@media(min-width:1100px){
+  body[data-view] #view-evidence .evidence-layout{grid-template-columns:270px minmax(0,1fr);gap:9px;align-items:start;min-height:max(420px,calc(100vh - 132px))}
+  /* Fix round 1 (D2): the rail is one viewport tall and sticks while the
+     panes and Compare scroll, so its foot never falls below the fold; the
+     list scrolls inside it. */
+  body[data-view] #view-evidence .evidence-rail{position:sticky;top:10px;box-sizing:border-box;height:max(420px,calc(100vh - 132px))}
+}
+body[data-view] .split-workspace #view-evidence .evidence-layout{grid-template-columns:minmax(0,1fr);align-items:start;min-height:0}
+body[data-view] .split-workspace #view-evidence .evidence-rail{position:static;height:auto}
+body[data-view] #view-evidence.map-open>.evidence-layout{display:none}
+body[data-view] #view-evidence .evidence-main{display:flex;flex-direction:column;gap:10px;min-width:0}
+
+/* The rail. */
+body[data-view] #view-evidence .evidence-rail{display:flex;flex-direction:column;min-width:0;padding:12px 8px;border-radius:10px}
+body[data-view] #view-evidence .evidence-find{position:relative;display:block;margin:0}
+body[data-view] #view-evidence .evidence-find-glyph{position:absolute;left:10px;top:50%;width:14px;height:14px;margin-top:-7px;fill:none;stroke:var(--ev-text);stroke-width:1.6;pointer-events:none}
+body[data-view] #view-evidence .evidence-find input{display:block;box-sizing:border-box;width:100%;height:32px;min-height:0;margin:0;padding:0 10px 0 31px;border:1px solid var(--ev-control);border-radius:7px;background:white;color:var(--acu-plum);font:400 13px/1 var(--font-sans)}
+body[data-view] #view-evidence .evidence-find input::placeholder{color:#6f6c75}
+body[data-view] #view-evidence .evidence-rail-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:9px}
+body[data-view] #view-evidence .evidence-rail-chips .chip-select:first-child{grid-column:1/-1}
+body[data-view] #view-evidence .evidence-rail-chips .chip-select{display:flex;min-width:0;height:31px;padding:0;border-color:var(--ev-control);border-radius:7px}
+body[data-view] #view-evidence .evidence-rail-chips .chip-select select{height:100%;min-height:0;padding:0 16px 0 8px;border-radius:7px;font:400 12.5px/1 var(--font-sans);color:var(--acu-plum)}
+body[data-view] #view-evidence .evidence-rail-chips .chip-select select:disabled{color:#8b8791;cursor:default}
+body[data-view] #view-evidence .evidence-rail-chips .chip-select::after{right:7px;width:5px;height:5px;margin-top:-4px}
+body[data-view] #view-evidence .evidence-rail .evidence-follow{display:flex;align-items:center;gap:8px;min-height:0;margin:11px 0 0;padding:0 2px;font:400 12px/16px var(--font-sans);color:var(--ev-soft);cursor:pointer}
+body[data-view] #view-evidence .evidence-rail .evidence-follow input{appearance:none;-webkit-appearance:none;position:relative;flex:none;width:26px;height:15px;min-height:0;margin:0;border-radius:999px;background:#d7d1dc;cursor:pointer;transition:background-color var(--map-lift) var(--map-ease)}
+body[data-view] #view-evidence .evidence-rail .evidence-follow input::after{content:"";position:absolute;left:2px;top:2px;width:11px;height:11px;border-radius:50%;background:white;box-shadow:0 1px 2px rgba(52,38,73,.25);transition:transform var(--map-lift) var(--map-ease)}
+body[data-view] #view-evidence .evidence-rail .evidence-follow input:checked{background:var(--acu-purple)}
+body[data-view] #view-evidence .evidence-rail .evidence-follow input:checked::after{transform:translateX(11px)}
+body[data-view] #view-evidence .evidence-rail .evidence-follow input:focus-visible{outline:2px solid var(--acu-purple);outline-offset:2px}
+body[data-view] #view-evidence .evidence-rail-note{margin:10px 2px 0;font:400 12px/16px var(--font-sans);color:var(--muted)}
+/* The list fills the rail and scrolls inside it: contain:size keeps a 500-PAC
+   source from stretching the rail (and the page) to the list's height. */
+body[data-view] #view-evidence .evidence-list{display:flex;flex-direction:column;margin:16px 0 0;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+@media(min-width:1100px){body[data-view] #view-evidence .evidence-list{flex:1 1 auto;min-height:140px;contain:size}}
+body[data-view] .split-workspace #view-evidence .evidence-list{flex:none;min-height:0;max-height:260px;contain:none}
+@media(max-width:1099px){body[data-view] #view-evidence .evidence-list{max-height:260px}}
+body[data-view] #view-evidence .evidence-rail-row{display:grid;grid-template-columns:14px minmax(0,1fr) auto;align-items:center;gap:9px;flex:none;min-height:33.6px;margin:0;padding:0 7px 0 8px;color:var(--ev-text);font:400 13px/16px var(--font-sans);cursor:pointer}
+body[data-view] #view-evidence .evidence-rail-row:hover{background:#f7f3f7}
+body[data-view] #view-evidence .evidence-rail-row.on{background:var(--ev-band)}
+body[data-view] #view-evidence .evidence-rail-row.on:hover{background:#ebe3ee}
+body[data-view] #view-evidence .evidence-rail-row.on:not(.on+.on){border-top-left-radius:7px;border-top-right-radius:7px}
+body[data-view] #view-evidence .evidence-rail-row.on:not(:has(+.on)){border-bottom-left-radius:7px;border-bottom-right-radius:7px}
+body[data-view] #view-evidence .evidence-rail-row input{appearance:none;-webkit-appearance:none;display:grid;place-content:center;box-sizing:border-box;width:14px;height:14px;min-height:0;margin:0;border:1.3px solid #b9b3bf;border-radius:3px;background:white;cursor:pointer}
+body[data-view] #view-evidence .evidence-rail-row input:checked{background:#4f4165;border-color:#4f4165}
+body[data-view] #view-evidence .evidence-rail-row input:checked::after{content:"";width:7px;height:4px;margin-top:-2px;border-left:1.6px solid white;border-bottom:1.6px solid white;transform:rotate(-45deg)}
+body[data-view] #view-evidence .evidence-rail-row input:focus-visible{outline:2px solid var(--acu-purple);outline-offset:2px}
+body[data-view] #view-evidence .evidence-rail-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body[data-view] #view-evidence .evidence-rail-figure{font-size:12.5px;color:var(--ev-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+body[data-view] #view-evidence .evidence-list-empty{margin:2px;font:400 13px/18px var(--font-sans);color:var(--muted)}
+body[data-view] #view-evidence .evidence-rail-foot{flex:none;margin-top:12px;padding:10px 2px 0;border-top:1px solid var(--ev-line)}
+body[data-view] #view-evidence #evidence-status{display:block;margin:0;font:400 11.5px/16px var(--font-sans);color:var(--muted);overflow-wrap:anywhere}
+body[data-view] #view-evidence #evidence-status.is-scope{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body[data-view] #view-evidence .evidence-rail-links{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:8px}
+body[data-view] #view-evidence .evidence-rail-links .link-button{min-height:24px;padding:0;font:400 13px/1 var(--font-sans);color:var(--acu-purple);text-underline-offset:3px}
+body[data-view] #view-evidence .evidence-rail-links .link-button[aria-expanded=true]{font-weight:600}
+
+/* The Import and New snapshot drawers open at the top of the panes area. */
+body[data-view] #view-evidence .evidence-drawer.card{margin:0;padding:16px 18px;border-radius:10px}
+/* Nothing open: one quiet line, and no card. */
+body[data-view] #view-evidence .evidence-empty{margin:0;padding:10px 2px;font:400 14px/20px var(--font-sans);color:var(--muted)}
+body[data-view] #view-evidence .evidence-panes{gap:9px;align-items:stretch}
+
+/* The pane: approved board 3's content at B19's size. */
+body[data-view] #view-evidence .evidence-pane.card{display:flex;flex-direction:column;gap:0;margin:0;padding:14px 17px 13px;border-radius:10px;min-width:0}
+body[data-view] #view-evidence .evidence-pane .pane-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:0 12px}
+body[data-view] #view-evidence .evidence-pane .pane-title{display:contents}
+body[data-view] #view-evidence .evidence-pane .pane-kind{grid-column:1;grid-row:1;min-width:0;font:400 12px/16px var(--font-sans);letter-spacing:.03em;text-transform:uppercase;color:#5c5a63}
+body[data-view] #view-evidence .evidence-pane .pane-title h2{grid-column:1;grid-row:2;min-width:0;margin:4px 0 0;font:400 21px/24px var(--font-serif);letter-spacing:0;color:var(--ev-ink)}
+body[data-view] #view-evidence .evidence-pane .pane-tags{grid-column:1/-1;grid-row:3;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:10px;font:400 13px/18px var(--font-sans)}
+body[data-view] #view-evidence .evidence-pane .pane-tags .badge{display:inline-flex;align-items:center;height:21px;padding:0 12px;border-radius:999px;background:var(--ev-chip);color:#3d2f57;font:400 13px/1 var(--font-sans);white-space:nowrap}
+body[data-view] #view-evidence .evidence-pane .pane-tags .muted{font-size:13px;color:var(--ev-soft)}
+body[data-view] #view-evidence .evidence-pane .pane-tag-dot{color:#8b8791}
+body[data-view] #view-evidence .evidence-pane .pane-buttons{grid-column:2;grid-row:1/3;display:flex;align-items:flex-start;gap:6px;margin:0}
+body[data-view] #view-evidence .evidence-pane .pane-view.segmented{height:32px;border-color:var(--ev-control);border-radius:7px}
+body[data-view] #view-evidence .evidence-pane .pane-view.segmented>button{height:100%;min-height:0;padding:0 12px;border:0;background:white;color:var(--acu-plum);font:400 13px/1 var(--font-sans)}
+body[data-view] #view-evidence .evidence-pane .pane-view.segmented>button+button{border-left:1px solid #e3dfda}
+/* The gold selected segment is approved board 3's, ruled binding on 2026-09-19
+   (00_README Colour rule); .segmented stays plum everywhere else. */
+body[data-view] #view-evidence .evidence-pane .pane-view.segmented>button[aria-pressed=true]{background:var(--ev-gold);color:var(--acu-plum);font-weight:500}
+body[data-view] #view-evidence .evidence-pane .pane-remove{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;min-height:0;padding:0;border:1px solid var(--ev-control);border-radius:7px;background:white;color:var(--acu-plum);font:400 15px/1 var(--font-sans)}
+body[data-view] #view-evidence .evidence-pane .pane-remove:hover{background:#f7f2fa;border-color:var(--acu-purple)}
+body[data-view] #view-evidence .evidence-pane .pane-message{margin:10px 0 0}
+/* Four figures in one box, no sub-captions; each note rides on its title. */
+body[data-view] #view-evidence .evidence-pane .pane-figures{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:13px;border:1px solid var(--ev-line);border-radius:8px;background:var(--ev-fill);overflow:hidden}
+body[data-view] #view-evidence .evidence-pane .pane-figures .pane-figure{min-width:0;padding:10px 15px 10px;border:0;border-radius:0;background:transparent}
+body[data-view] #view-evidence .evidence-pane .pane-figures .pane-figure+.pane-figure{background:linear-gradient(var(--ev-line),var(--ev-line)) left 9px/1px calc(100% - 18px) no-repeat}
+body[data-view] #view-evidence .evidence-pane .pane-figure .label{display:block;font:400 13px/16px var(--font-sans);color:#55545c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body[data-view] #view-evidence .evidence-pane .pane-figure strong{display:block;margin:6px 0 0;font:600 22px/26px var(--font-serif);color:var(--ev-ink);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* By cycle (one-line year labels) beside the Where-it-came-from thumbnail. */
+body[data-view] #view-evidence .evidence-pane .pane-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,.9fr);gap:11px;margin-top:12px;align-items:start}
+body[data-view] #view-evidence .evidence-pane .pane-cycles{display:grid;gap:7px;align-content:start}
+body[data-view] #view-evidence .evidence-pane :is(.pane-cycles,.pane-top)>.label{display:block;margin:0 0 2px;font:400 14px/18px var(--font-sans);color:#3c3a44}
+body[data-view] #view-evidence .evidence-pane .pane-cycle{display:grid;grid-template-columns:auto minmax(40px,1fr) auto;gap:10px;align-items:center;min-height:20px;font:400 13px/16px var(--font-sans)}
+body[data-view] #view-evidence .evidence-pane .pane-cycle>.muted{min-width:66px;font-size:12.5px;color:#55545c;white-space:nowrap}
+body[data-view] #view-evidence .evidence-pane .pane-cycle .bartrack{height:6px;border-radius:3px;background:var(--ev-track)}
+body[data-view] #view-evidence .evidence-pane .pane-cycle .bar{height:6px;border-radius:3px;background:var(--ev-teal)}
+body[data-view] #view-evidence .evidence-pane .pane-cycle .num{min-width:56px;font-size:13px;color:var(--acu-plum)}
+body[data-view] #view-evidence .evidence-pane .pane-thumb{padding:8px;border:1px solid var(--ev-line);border-radius:8px;background:var(--ev-fill)}
+body[data-view] #view-evidence .evidence-pane .pane-thumb-head{flex-wrap:nowrap;gap:6px}
+body[data-view] #view-evidence .evidence-pane .pane-thumb-head .label{font:400 12px/16px var(--font-sans);color:#3c3a44;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body[data-view] #view-evidence .evidence-pane .pane-thumb .seg.small{flex:none;height:22px;border-color:var(--ev-control);border-radius:6px}
+body[data-view] #view-evidence .evidence-pane .pane-thumb .seg.small button{height:100%;min-height:0;padding:0 6px;border:0;background:white;color:var(--acu-plum);font:400 11px/1 var(--font-sans)}
+body[data-view] #view-evidence .evidence-pane .pane-thumb .seg.small button+button{border-left:1px solid #e3dfda}
+body[data-view] #view-evidence .evidence-pane .pane-thumb .seg.small button.on{background:var(--ev-gold);font-weight:500}
+body[data-view] #view-evidence .evidence-pane .pane-thumb-canvas{min-height:0;margin-top:6px}
+body[data-view] #view-evidence .evidence-pane .pane-thumb-svg{max-height:99px}
+/* Top contributors: a NAME / AMOUNT header, three rows. */
+body[data-view] #view-evidence .evidence-pane .pane-top{margin-top:14px}
+body[data-view] #view-evidence .evidence-pane .pane-top table{margin-top:5px;border:1px solid var(--ev-line);border-radius:6px;border-collapse:separate;border-spacing:0;overflow:hidden;table-layout:fixed;font-size:13px}
+body[data-view] #view-evidence .evidence-pane .pane-top th{position:static;padding:6px 16px 5px;border-bottom:1px solid var(--ev-line);background:var(--ev-head);font:400 11px/14px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ev-soft);text-align:left}
+body[data-view] #view-evidence .evidence-pane .pane-top th.num{width:112px;text-align:right}
+body[data-view] #view-evidence .evidence-pane .pane-top td{padding:4px 16px;border-bottom:1px solid var(--ev-hair);font:400 13px/15px var(--font-sans);color:var(--ev-ink)}
+body[data-view] #view-evidence .evidence-pane .pane-top tr:last-child td{border-bottom:0}
+/* Board 3's source line, with About these figures under it. */
+body[data-view] #view-evidence .evidence-pane .pane-provenance{margin:8px 0 0;font:400 12px/17px var(--font-sans);color:var(--ev-soft)}
+body[data-view] #view-evidence .evidence-pane .pane-about{display:block;min-height:0;margin-top:1px;font:inherit;color:var(--ev-soft);text-underline-offset:2px}
+body[data-view] #view-evidence .evidence-pane .pane-about-body{margin-top:8px;padding:10px 12px;border:1px solid var(--ev-line);border-radius:8px;background:var(--ev-fill)}
+body[data-view] #view-evidence .evidence-pane .pane-about-figures{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:2px 12px;margin:6px 0;font-size:12px}
+body[data-view] #view-evidence .evidence-pane .pane-about-figures dt{font-weight:600;color:var(--acu-plum)}
+body[data-view] #view-evidence .evidence-pane .pane-about-figures dd{margin:0;overflow-wrap:anywhere}
+body[data-view] #view-evidence .evidence-pane .pane-drawer{margin-top:12px}
+/* Narrow panes (two at 1440, three anywhere): smaller figures, then a 2 x 2
+   box, the thumbnail under By cycle, and the view buttons above the title. */
+@container (max-width:479px){
+  body[data-view] #view-evidence .evidence-pane .pane-figures .pane-figure{padding:11px 11px 12px}
+  body[data-view] #view-evidence .evidence-pane .pane-figure strong{font-size:19px;line-height:22px}
+}
+@container (max-width:440px){
+  body[data-view] #view-evidence .evidence-pane .pane-head{grid-template-columns:minmax(0,1fr)}
+  body[data-view] #view-evidence .evidence-pane .pane-buttons{grid-column:1;grid-row:1;justify-content:flex-end;margin-bottom:8px}
+  body[data-view] #view-evidence .evidence-pane .pane-kind{grid-row:2}
+  body[data-view] #view-evidence .evidence-pane .pane-title h2{grid-row:3}
+  body[data-view] #view-evidence .evidence-pane .pane-tags{grid-row:4}
+  body[data-view] #view-evidence .evidence-pane .pane-split{grid-template-columns:minmax(0,1fr)}
+  body[data-view] #view-evidence .evidence-pane .pane-figures .pane-figure{padding:11px 9px 12px}
+  body[data-view] #view-evidence .evidence-pane .pane-figure .label{font-size:12px}
+}
+@container (max-width:400px){
+  body[data-view] #view-evidence .evidence-pane .pane-figures{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body[data-view] #view-evidence .evidence-pane .pane-figures .pane-figure{padding:11px 11px 12px}
+  body[data-view] #view-evidence .evidence-pane .pane-figure .label{font-size:13px}
+  body[data-view] #view-evidence .evidence-pane .pane-figures .pane-figure:nth-child(3){background:none}
+  body[data-view] #view-evidence .evidence-pane .pane-figures .pane-figure:nth-child(n+3){border-top:1px solid var(--ev-line)}
+}
+@container (max-width:250px){
+  body[data-view] #view-evidence .evidence-pane .pane-figures{grid-template-columns:minmax(0,1fr)}
+  body[data-view] #view-evidence .evidence-pane .pane-figures .pane-figure{background:none}
+  body[data-view] #view-evidence .evidence-pane .pane-figures .pane-figure:nth-child(n+2){border-top:1px solid var(--ev-line)}
+}
+
+/* Compare: board 3's table, restyled only. */
+body[data-view] #view-evidence .evidence-compare.card{margin:0;padding:8px 17px 14px;border-radius:10px}
+body[data-view] #view-evidence .evidence-compare .panel-heading{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:6px 14px}
+body[data-view] #view-evidence .evidence-compare .panel-heading h2{margin:0;font:400 28px/34px var(--font-serif);letter-spacing:0;color:var(--ev-ink)}
+body[data-view] #view-evidence .evidence-compare #evidence-compare-map{display:inline-flex;align-items:center;height:28px;min-height:0;margin:0;padding:0 11px;border:1px solid #d6d1cc;border-radius:6px;background:white;color:var(--acu-plum);font:400 12.5px/1 var(--font-sans)}
+body[data-view] #view-evidence .evidence-compare .panel-heading .muted{flex:1 1 300px;margin:0;font:400 12px/16px var(--font-sans);color:var(--ev-soft)}
+body[data-view] #view-evidence .evidence-compare .table-scroll{max-height:none;margin-top:6px}
+body[data-view] #view-evidence .evidence-compare table{margin:0;table-layout:fixed;border-collapse:collapse;font-size:12.5px}
+body[data-view] #view-evidence .evidence-compare thead th{position:static;padding:6px 12px 5px;border-bottom:1px solid var(--ev-line);background:var(--ev-head);font:400 11px/15px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:#5c5a63;vertical-align:middle;white-space:nowrap}
+body[data-view] #view-evidence .evidence-compare .th-sub{font:400 11px/15px var(--font-sans);letter-spacing:0;text-transform:none;color:var(--ev-soft)}
+body[data-view] #view-evidence .evidence-compare td{padding:2px 12px;border-bottom:1px solid var(--ev-hair);font:400 12.5px/15px var(--font-sans);color:var(--ev-ink);vertical-align:middle}
+body[data-view] #view-evidence .evidence-compare .compare-metric{width:26%;font-weight:400}
+body[data-view] #view-evidence .evidence-compare :is(td,th)+:is(td,th){border-left:1px solid #efece9}
+body[data-view] #view-evidence .evidence-compare .compare-cell{grid-template-columns:minmax(0,1fr) 84px;gap:12px}
+body[data-view] #view-evidence .evidence-compare .bartrack{height:4px;border-radius:2px;background:var(--ev-track)}
+body[data-view] #view-evidence .evidence-compare .bar.thin{height:4px;border-radius:2px;background:var(--ev-teal-soft)}
+
+/* The enlarged map, approved boards 6 and 7, and the two-cycle compare of
+   board M13 (1.25x). No outer panel: the overline, the PAC name and Back to
+   panes sit on the page; one toolbar card; the map card beside the ranked (or
+   changes) card. The heat index stays under the geography, never over it
+   (test_evidence_map_interaction_browser pins that). */
+body[data-view] #view-evidence #evidence-map.panel{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+body[data-view] #view-evidence #evidence-map .map-trail:not(:has(.map-back-step)){display:none}
+body[data-view] #view-evidence #evidence-map .map-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin:15px 0 0}
+body[data-view] #view-evidence #evidence-map .map-overline{font:400 12.5px/16px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:#5c5a63}
+body[data-view] #view-evidence #evidence-map .map-head h2{margin:3px 0 0;font:400 40px/44px var(--font-serif);letter-spacing:-.2px;color:var(--ev-ink);overflow-wrap:anywhere}
+body[data-view] #view-evidence #evidence-map #evidence-map-back{flex:none;height:37px;min-height:0;margin-top:3px;padding:0 18px;border:1px solid #d6d1cc;border-radius:8px;background:white;color:var(--acu-plum);font:400 14px/1 var(--font-sans);white-space:nowrap}
+body[data-view] #view-evidence #evidence-map .map-toolbar-card{margin:0;padding:11px 11px 11px;border:1px solid var(--card-border);border-radius:10px;background:white;box-shadow:var(--card-shadow)}
+body[data-view] #view-evidence #evidence-map .map-toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 12px}
+body[data-view] #view-evidence #evidence-map .map-scope-controls{display:flex;align-items:flex-end;flex-wrap:nowrap;gap:12px}
+body[data-view] #view-evidence #evidence-map .map-layer-group{display:flex;flex-direction:column;gap:5px;margin:0}
+body[data-view] #view-evidence #evidence-map .map-layer-caption{margin:0;font:400 11px/13px var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:#7a7680}
+body[data-view] #view-evidence #evidence-map .map-toolbar .seg{display:inline-flex;flex-wrap:nowrap;height:34px;border:1px solid var(--ev-control);border-radius:6px;overflow:hidden;background:white}
+body[data-view] #view-evidence #evidence-map .map-scope-controls .seg{height:40px}
+body[data-view] #view-evidence #evidence-map .map-toolbar .seg button{height:100%;min-height:0;padding:0 11px;border:0;border-right:1px solid #e3dfda;background:white;color:var(--acu-plum);font:400 13px/1 var(--font-sans)}
+body[data-view] #view-evidence #evidence-map .map-scope-controls .seg button{padding:0 22px;font-size:14px}
+body[data-view] #view-evidence #evidence-map .map-toolbar .seg button:last-child{border-right:0}
+body[data-view] #view-evidence #evidence-map .map-toolbar .seg button.on{background:var(--acu-plum);color:white;font-weight:400}
+body[data-view] #view-evidence #evidence-map .map-toolbar select{height:37px;min-height:0;margin:0;padding:0 10px 0 13px;border:1px solid var(--ev-control);border-radius:6px;background:white;color:var(--acu-plum);font:400 13px/1 var(--font-sans)}
+body[data-view] #view-evidence #evidence-map .map-cycle-label{flex:none;min-width:0}
+body[data-view] #view-evidence #evidence-map .map-compare-controls{display:flex;align-items:center;gap:9px;align-self:flex-end}
+body[data-view] #view-evidence #evidence-map .map-compare-word{font:400 14px/1 var(--font-sans);color:var(--acu-plum);white-space:nowrap}
+body[data-view] #view-evidence #evidence-map .map-compare-label{flex:none}
+body[data-view] #view-evidence #evidence-map .map-search-controls{display:flex;align-items:flex-end;flex:1 1 0;gap:6px;min-width:100px}
+body[data-view] #view-evidence #evidence-map .map-search{flex:1 1 0;min-width:0}
+body[data-view] #view-evidence #evidence-map .map-search input{height:37px;min-height:0;padding:0 10px 0 32px;border:1px solid var(--ev-control);border-radius:6px;font:400 13px/1 var(--font-sans);text-overflow:ellipsis}
+body[data-view] #view-evidence #evidence-map .map-view-controls{display:flex;align-items:flex-end;flex-wrap:nowrap;gap:8px;margin-left:auto}
+body[data-view] #view-evidence #evidence-map .map-zoom-buttons{display:flex;align-items:center;gap:8px;border:0;background:transparent}
+body[data-view] #view-evidence #evidence-map .map-zoom-buttons #evidence-map-zoom-in{order:-1}
+body[data-view] #view-evidence #evidence-map .map-zoom-level{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+body[data-view] #view-evidence #evidence-map button.round{display:inline-flex;align-items:center;justify-content:center;width:37px;height:37px;min-height:0;padding:0;border:1px solid #cfc9c3;border-radius:50%;background:white;color:var(--acu-plum);font:400 20px/1 var(--font-sans)}
+body[data-view] #view-evidence #evidence-map button.round:disabled{opacity:.45}
+body[data-view] #view-evidence #evidence-map #evidence-map-reset{height:37px;min-height:0;padding:0 13px;border:1px solid var(--ev-control);border-radius:6px;background:white;color:var(--acu-plum);font:400 14px/1 var(--font-sans);white-space:nowrap}
+body[data-view] #view-evidence #evidence-map .map-controls-help{flex-basis:100%}
+/* Narrower than the boards' 1600px frame: the same row, tightened. */
+@media (min-width:681px) and (max-width:1519px){
+  body[data-view] #view-evidence #evidence-map .map-toolbar{gap:8px 8px}
+  body[data-view] #view-evidence #evidence-map .map-scope-controls{gap:8px}
+  body[data-view] #view-evidence #evidence-map .map-scope-controls .seg button{padding:0 14px}
+  body[data-view] #view-evidence #evidence-map .map-layer-group .seg button{padding:0 8px;font-size:12.5px}
+  body[data-view] #view-evidence #evidence-map .map-toolbar select{padding:0 6px 0 9px;font-size:12.5px}
+  body[data-view] #view-evidence #evidence-map .map-compare-controls{gap:6px}
+  body[data-view] #view-evidence #evidence-map .map-compare-word{font-size:13px}
+  body[data-view] #view-evidence #evidence-map .map-search input{padding-left:30px;font-size:12.5px}
+  body[data-view] #view-evidence #evidence-map .map-view-controls{gap:6px}
+  body[data-view] #view-evidence #evidence-map .map-zoom-buttons{gap:6px}
+  body[data-view] #view-evidence #evidence-map #evidence-map-reset{padding:0 10px;font-size:13px}
+}
+/* Fix round 1 (R06-05): nothing between the toolbar and the map but a
+   message the reader needs (a refusal, a search that found nothing); the
+   RULING A note is screen-reader text, the kinds are in the legend. */
+body[data-view] #view-evidence #evidence-map .map-note-host{display:contents}
+/* Enlarge / Collapse (R06-04, R06-14): an icon on the map card, not a word
+   in the toolbar row. Bottom right of one map (the legend is bottom left),
+   top right of the pair. */
+body[data-view] #view-evidence #evidence-map .map-figure{position:relative}
+body[data-view] #view-evidence #evidence-map #evidence-map-enlarge{position:absolute;right:14px;bottom:14px;z-index:3;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;min-height:0;padding:0;border:1px solid var(--ev-control);border-radius:8px;background:white;color:var(--acu-plum)}
+body[data-view] #view-evidence #evidence-map #evidence-map-enlarge:hover{border-color:var(--acu-purple);background:#f7f2fa}
+body[data-view] #view-evidence #evidence-map #evidence-map-enlarge .map-button-icon{width:17px;height:17px}
+body[data-view] #view-evidence #evidence-map.comparing #evidence-map-enlarge{display:none}
+body[data-view] #view-evidence #evidence-map .map-grid{grid-template-columns:minmax(0,1.57fr) minmax(0,1fr);gap:16px}
+body[data-view] #view-evidence #evidence-map .map-figure{padding:18px 20px 14px;border:1px solid var(--card-border);border-radius:10px;background:white;box-shadow:var(--card-shadow)}
+body[data-view] #view-evidence #evidence-map .map-canvas-host{border:0;border-radius:0;background:transparent}
+body[data-view] #view-evidence #evidence-map .map-legend-card{box-sizing:border-box;display:inline-flex;flex-wrap:wrap;align-items:flex-start;gap:12px 0;width:auto;max-width:calc(100% - 52px);margin-top:6px;padding:13px 20px 12px;border:1px solid var(--ev-line);border-radius:8px;background:white}
+body[data-view] #view-evidence #evidence-map .map-legend-card .map-legend-group{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-width:0}
+body[data-view] #view-evidence #evidence-map .map-legend-card .map-legend-group+.map-legend-group{margin-left:22px;padding-left:22px;border-left:1px solid var(--ev-line)}
+body[data-view] #view-evidence #evidence-map .map-legend-card .map-legend-title{margin:0;font:400 13px/16px var(--font-sans);color:var(--acu-plum)}
+body[data-view] #view-evidence #evidence-map .map-legend-card .map-ramp{width:125px;height:14px;border:0;border-radius:7px;background:linear-gradient(90deg,#e8f3f1,#b9ddd8,#7cbfb7,#4c9e95,#327a7a)}
+body[data-view] #view-evidence #evidence-map .map-legend-card .map-ramp i{display:none}
+body[data-view] #view-evidence #evidence-map .map-legend-card .map-legend-values{font:400 13px/16px var(--font-sans);color:var(--acu-plum);font-variant-numeric:tabular-nums;white-space:nowrap}
+body[data-view] #view-evidence #evidence-map .map-legend-card :is(.map-legend-low,.map-legend-high){font-size:inherit;color:inherit}
+body[data-view] #view-evidence #evidence-map .map-legend-card .map-legend-swatches{gap:12px}
+body[data-view] #view-evidence #evidence-map .map-legend-card .map-legend-swatch small{font-size:12px;color:var(--acu-plum)}
+body[data-view] #view-evidence #evidence-map .map-legend-toggles{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+body[data-view] #view-evidence #evidence-map .map-legend-toggles .layer{display:inline-flex;align-items:center;gap:7px;min-height:24px;padding:0 10px;border:1px solid #d6c8e2;border-radius:12px;background:#f7f2fa;color:var(--acu-plum);font:400 12px/1 var(--font-sans);white-space:nowrap;cursor:pointer}
+body[data-view] #view-evidence #evidence-map .map-legend-toggles .layer.off{background:white;color:#716a64;border-style:dashed}
+body[data-view] #view-evidence #evidence-map .map-legend-toggles .dot{width:9px;height:9px;border-radius:50%}
+body[data-view] #view-evidence #evidence-map .map-ranking{padding:20px 24px;border:1px solid var(--card-border);border-radius:10px;background:white;box-shadow:var(--card-shadow)}
+body[data-view] #view-evidence #evidence-map .map-ranked{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+body[data-view] #view-evidence #evidence-map .map-ranked .map-row .link-button{color:var(--ev-ink);font-weight:400;text-decoration:none}
+body[data-view] #view-evidence #evidence-map .map-ranked .map-rank{white-space:nowrap}
+body[data-view] #view-evidence #evidence-map .map-list-pager.single{display:none}
+body[data-view] #view-evidence #evidence-map .map-ranked thead th{background:transparent;font:400 11px/14px var(--font-sans);letter-spacing:.08em;text-transform:uppercase;color:#6b6873}
+/* The ranked card is as tall as the map card beside it (board 6), and its
+   list scrolls inside: `contain:size` keeps a long list from growing the row.
+   Not when enlarged, where the card has a row of its own. */
+@media (min-width:1100px){
+  body[data-view] #view-evidence #evidence-map:not(.enlarged) .map-grid>.map-ranking{contain:size;align-self:stretch;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  body[data-view] #view-evidence #evidence-map:not(.enlarged) .map-ranked{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+  body[data-view] #view-evidence #evidence-map:not(.enlarged) .map-ranked .map-list{flex:1 1 auto;min-height:60px;max-height:none}
+  body[data-view] #view-evidence #evidence-map:not(.enlarged) .map-ranked .map-changes{flex:1 1 auto;min-height:60px;overflow-y:auto;scrollbar-width:thin}
+}
+/* Board 7's trail: plain words, the place last in ink. */
+body[data-view] #view-evidence #evidence-map .map-crumb{text-decoration:none}
+body[data-view] #view-evidence #evidence-map .map-crumbs li:last-child .map-crumb{color:var(--ev-ink)}
+body[data-view] #view-evidence #evidence-map .map-ranked .map-row .link-button:hover{text-decoration:underline}
+body[data-view] #view-evidence #evidence-map .map-list-menu{margin-top:12px;padding-top:10px;border-top:1px solid var(--ev-line)}
+body[data-view] #view-evidence #evidence-map .map-list-menu>summary{margin:0;font:400 12.5px/18px var(--font-sans);color:var(--ev-soft);cursor:pointer}
+body[data-view] #view-evidence #evidence-map .map-list-menu .map-list-tools{margin:10px 0 0;padding:0;border:0;background:transparent}
+body[data-view] #view-evidence #evidence-map .map-list-menu .map-pin-hint{margin:8px 0 0;font-size:12px}
+body[data-view] #view-evidence #evidence-map .map-ranked .panel-heading h2{margin:0;font:400 30px/34px var(--font-serif);letter-spacing:-.2px;color:var(--ev-ink)}
+/* A focused place's rows carry their FEC filing links (or the sentence that
+   says a link is unavailable) under the amount; they wrap there, never clip. */
+body[data-view] #view-evidence #evidence-map .map-list td.num:has(.record-links,.muted){white-space:normal}
+body[data-view] #view-evidence #evidence-map .map-list td.num>.muted{display:block;margin-top:4px;font-size:11px;line-height:14px;white-space:normal}
+
+/* Two cycles: two map cards under their cycle pills (--scope-1, --scope-2),
+   one legend under both, and the changes card at the right. */
+body[data-view] #view-evidence #evidence-map.comparing .map-grid{grid-template-columns:minmax(0,1fr) minmax(280px,415px);gap:12px}
+body[data-view] #view-evidence #evidence-map.comparing .map-figure{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+body[data-view] #view-evidence #evidence-map .map-compare-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:13px}
+body[data-view] #view-evidence #evidence-map.comparing .map-compare-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+body[data-view] #view-evidence #evidence-map.comparing .map-compare-card{position:relative;display:flex;flex-direction:column;justify-content:center;box-sizing:border-box;min-width:0;aspect-ratio:444/470;max-height:calc(100vh - 300px);padding:56px 12px 14px;border:1px solid var(--card-border);border-radius:10px;background:white;box-shadow:var(--card-shadow)}
+body[data-view] #view-evidence #evidence-map .map-cycle-pill{position:absolute;left:12px;top:15px;z-index:2;height:34px;padding:0 17px;font:600 19px/1 var(--font-sans);letter-spacing:.01em}
+body[data-view] #view-evidence #evidence-map.comparing .map-compare-card :is(.map-legend-card,.map-locator){display:none}
+body[data-view] #view-evidence #evidence-map .map-compare-legend{margin-top:13px;padding:16px 22px;border:1px solid var(--card-border);border-radius:10px;background:white;box-shadow:var(--card-shadow)}
+body[data-view] #view-evidence #evidence-map .map-compare-legend .map-legend-card{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:12px 32px;width:auto;margin:0;padding:0;border:0}
+body[data-view] #view-evidence #evidence-map .map-compare-legend .map-legend-group+.map-legend-group{padding-left:32px;border-left:1px solid var(--ev-line)}
+body[data-view] #view-evidence #evidence-map.comparing :is(.map-list-menu,.map-pins){display:none}
+body[data-view] #view-evidence #evidence-map .map-compare-legend .map-legend-card .map-ramp{width:min(320px,100%)}
+body[data-view] #view-evidence #evidence-map .map-compare-legend .map-legend-card{display:flex;flex-wrap:wrap;gap:12px 0;max-width:none}
+body[data-view] #view-evidence #evidence-map .map-compare-legend .map-legend-card .map-heat-legend{flex:1.4 1 0}
+body[data-view] #view-evidence #evidence-map .map-compare-legend .map-legend-card .map-legend-group+.map-legend-group{flex:1 1 0;margin-left:32px}
+body[data-view] #view-evidence #evidence-map .map-changes{display:grid;margin:12px 0 0;padding:0;list-style:none}
+body[data-view] #view-evidence #evidence-map .map-change{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:0 12px;padding:9px 6px;border-radius:6px;cursor:pointer}
+body[data-view] #view-evidence #evidence-map .map-change:hover{background:#f7f3f7}
+body[data-view] #view-evidence #evidence-map .map-change.chosen{background:var(--map-teal-soft)}
+body[data-view] #view-evidence #evidence-map .map-change-rank{font:400 15px/1 var(--font-sans);color:#55545c;font-variant-numeric:tabular-nums}
+body[data-view] #view-evidence #evidence-map .map-change-name{display:block;min-height:0;margin:0 0 7px;padding:0;font:400 15px/18px var(--font-sans);color:var(--acu-plum);text-align:left;text-decoration:none}
+body[data-view] #view-evidence #evidence-map .map-change-bars{display:grid;gap:4px}
+body[data-view] #view-evidence #evidence-map .map-change-bars .bartrack{height:7px;border-radius:4px;background:#efedf0;overflow:hidden}
+body[data-view] #view-evidence #evidence-map .map-change-bars .bar{height:7px;border-radius:4px}
+body[data-view] #view-evidence #evidence-map .map-change-bars .bar.change-a{background:var(--scope-1)}
+body[data-view] #view-evidence #evidence-map .map-change-bars .bar.change-b{background:var(--scope-2)}
+body[data-view] #view-evidence #evidence-map .map-change-value{font:400 16px/1 var(--font-sans);font-variant-numeric:tabular-nums;white-space:nowrap}
+body[data-view] #view-evidence #evidence-map .map-change-value.up{color:var(--acu-teal)}
+body[data-view] #view-evidence #evidence-map .map-change-value.down{color:var(--chart-negative)}
+body[data-view] #view-evidence #evidence-map .map-change-count{margin:8px 0 0;font-size:12px}
+body[data-view] #view-evidence #evidence-map .map-change-foot{margin:14px 0 0;padding-top:14px;border-top:1px solid var(--ev-line);font:400 13.5px/22px var(--font-sans);color:var(--acu-plum);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body[data-view] #view-evidence #evidence-map .map-change-foot-cycle{margin-right:8px;color:var(--ev-soft)}
+@container (max-width:900px){
+  body[data-view] #view-evidence #evidence-map.comparing .map-grid{grid-template-columns:minmax(0,1fr)}
+}
+@container (max-width:620px){
+  body[data-view] #view-evidence #evidence-map.comparing .map-compare-grid{grid-template-columns:minmax(0,1fr)}
+  body[data-view] #view-evidence #evidence-map .map-head h2{font-size:28px;line-height:32px}
+}
+/* Phones: the native layer picker replaces the segmented Layer control (as
+   before this build), and the cards and headings step down so nothing scrolls
+   sideways at 390px. */
+@media (max-width:680px){
+  body[data-view] #view-evidence #evidence-map .map-layer-group{display:none}
+  /* One column on a phone: the map, then the ranked card under it. */
+  body[data-view] #view-evidence #evidence-map .map-grid{grid-template-columns:minmax(0,1fr)}
+  body[data-view] #view-evidence #evidence-map .map-ranking{padding:12px}
+  body[data-view] #view-evidence #evidence-map .map-list-tools label{min-width:0}
+  body[data-view] #view-evidence #evidence-map .map-legend-card .map-legend-group+.map-legend-group{margin-left:0;padding-left:0;border-left:0}
+  body[data-view] #view-evidence #evidence-map .map-legend-card{gap:12px 22px;max-width:100%}
+  body[data-view] #view-evidence #evidence-map #evidence-map-enlarge{display:none}
+  body[data-view] #view-evidence #evidence-map .map-head h2{font-size:24px;line-height:28px}
+  body[data-view] #view-evidence #evidence-map .map-figure{padding:10px}
+  body[data-view] #view-evidence #evidence-map .map-ranked .panel-heading h2{font-size:22px;line-height:26px}
+  body[data-view] #view-evidence #evidence-map .map-scope-controls .seg button{padding:0 14px}
+  body[data-view] #view-evidence #evidence-map .map-toolbar :is(button,select,input){min-height:44px}
+}
+/* Fix round 2 (R06b-02): a focused place's donors table sizes its columns to
+   their content and wraps only between words (board 7 breaks no word; the
+   fixed layout and `overflow-wrap:anywhere` above cut "CONTRIBUTO/R" and
+   "MERCHANT/S"). A filing link may still break anywhere. */
+body[data-view] #view-evidence #evidence-map .map-list table.map-donors{table-layout:auto}
+body[data-view] #view-evidence #evidence-map .map-list .map-donors :is(th,td){overflow-wrap:normal;word-break:normal}
+body[data-view] #view-evidence #evidence-map .map-list .map-donors th{white-space:nowrap}
+body[data-view] #view-evidence #evidence-map .map-list .map-donors a{overflow-wrap:anywhere}
+/* Fix round 2 (R06b-05): the locator sits at the map's bottom right, as on
+   board 7. The map is as wide as its plot with the boundary file's 975:610
+   viewBox, so its bottom is 62.5641% of the plot's width down (a margin
+   percentage resolves against the width); the enlarged map has a set height. */
+body[data-view] #view-evidence #evidence-map .map-locator{top:0;margin-top:calc(62.5641% - 86px)}
+body[data-view] #view-evidence #evidence-map.enlarged .map-locator{margin-top:0;top:calc(max(360px, min(57vh, 700px)) - 86px)}
+/* Fix round 2 (R06b-04): a compare card is as tall as its map (the 975:610
+   projection cannot fill M13's 444:470 card), so the map fills the card's
+   width and all of its height below the cycle pill. */
+body[data-view] #view-evidence #evidence-map.comparing .map-compare-card{aspect-ratio:auto;justify-content:flex-start;max-height:none;padding:56px 12px 12px}
+/* Fix round 2 (R06b-03): all eight changes sit above the foot at 1440x900.
+   Rows keep M13's 61px pitch when there is room and give it up to their
+   content (38px) when there is not; the list scrolls only past that. */
+body[data-view] #view-evidence #evidence-map.comparing .map-ranked .panel-heading{margin:0}
+body[data-view] #view-evidence #evidence-map.comparing .map-ranked .panel-heading h2{line-height:32px}
+body[data-view] #view-evidence #evidence-map .map-changes{margin-top:6px}
+body[data-view] #view-evidence #evidence-map .map-change-foot{flex:none;margin-top:6px;padding-top:8px}
+@media (min-width:1100px){
+  body[data-view] #view-evidence #evidence-map:not(.enlarged) .map-ranked .map-changes{display:flex;flex-direction:column}
+  body[data-view] #view-evidence #evidence-map:not(.enlarged) .map-ranked .map-change{flex:0 1 61px;padding-block:2px}
+}
+body[data-view] #view-evidence #evidence-map .map-change-name{margin-bottom:3px;line-height:16px}
+body[data-view] #view-evidence #evidence-map .map-change-bars{gap:3px}
+body[data-view] #view-evidence #evidence-map .map-change-bars :is(.bartrack,.bar){height:6px}
+/* Fix r2, area TC (2026-09-23). */
+/* TC-01 (board 7): a focused place's donors are one line each. Every text
+   cell keeps to its column and ends in an ellipsis (its title has the whole
+   text); the amount column is as wide as its amount and the compact FEC
+   citation after it. */
+body[data-view] #view-evidence #evidence-map .map-list table.map-donor-lines{table-layout:auto;width:100%}
+body[data-view] #view-evidence #evidence-map .map-list .map-donor-lines :is(th,td){white-space:nowrap}
+body[data-view] #view-evidence #evidence-map .map-list .map-donor-lines :is(th,td):not(.num){max-width:0;overflow:hidden;text-overflow:ellipsis}
+body[data-view] #view-evidence #evidence-map .map-list .map-donor-lines :is(th,td):nth-child(1){width:38%}
+body[data-view] #view-evidence #evidence-map .map-list .map-donor-lines :is(th,td):nth-child(2){width:32%}
+body[data-view] #view-evidence #evidence-map .map-list .map-donor-lines :is(th,td):nth-child(3){width:29%}
+body[data-view] #view-evidence #evidence-map .map-list .map-donor-lines :is(th,td).num{width:1%}
+body[data-view] #view-evidence #evidence-map .map-list .map-donor-lines td{padding-top:6px;padding-bottom:6px;font-size:13px}
+/* A scrolled-away row's screen-reader text stays inside the scrolling list
+   (an absolute box would otherwise lengthen the page). */
+body[data-view] #view-evidence #evidence-map .map-list{position:relative}
+body[data-view] #view-evidence #evidence-map .map-list .fec-citations-none{color:var(--ev-soft);font-weight:400}
+/* TC-06 (board 6): the PAC name is one line under the overline; a name wider
+   than the page ends in an ellipsis, whole in the heading's text and title. */
+body[data-view] #view-evidence #evidence-map .map-head>.pane-title{min-width:0}
+@media (min-width:681px){
+  body[data-view] #view-evidence #evidence-map .map-head{flex-wrap:nowrap}
+  body[data-view] #view-evidence #evidence-map .map-head>.pane-title{flex:1 1 0}
+}
+body[data-view] #view-evidence #evidence-map .map-head h2{display:block;-webkit-line-clamp:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
+/* TC-09 (M13): with both compare selects in the row, the toolbar tightens as
+   M13 draws it so "Find a state, district or ZIP" shows whole at 1600. */
+@media (min-width:1520px){
+  body[data-view] #view-evidence #evidence-map.comparing .map-scope-controls .seg button{padding:0 18px}
+  body[data-view] #view-evidence #evidence-map.comparing .map-layer-group .seg button{padding:0 9px}
+  body[data-view] #view-evidence #evidence-map.comparing .map-toolbar select{padding:0 6px 0 9px}
+  body[data-view] #view-evidence #evidence-map.comparing .map-toolbar{column-gap:10px}
+  body[data-view] #view-evidence #evidence-map.comparing .map-compare-controls{gap:6px}
+  body[data-view] #view-evidence #evidence-map.comparing .map-search input{padding-right:8px}
+}
+/* MENTAT-DBG-01: panes stack on a phone; two or three side by side would run
+   past the screen (a pane needs about 340px). The inline column rule is
+   renderPanes()'s, hence !important, as for Split with Graph above. */
+@media (max-width:720px){
+  body[data-view] #view-evidence #evidence-panes{grid-template-columns:minmax(0,1fr)!important}
+}
+/* MENTAT-DBG-02: on a phone the compare legend's groups stack, and a kind
+   toggle may wrap rather than run past the card. */
+@media (max-width:680px){
+  body[data-view] #view-evidence #evidence-map .map-compare-legend .map-legend-card :is(.map-heat-legend,.map-legend-group+.map-legend-group){flex:1 1 100%;margin-left:0;padding-left:0;border-left:0}
+  body[data-view] #view-evidence #evidence-map .map-legend-toggles{max-width:100%}
+  body[data-view] #view-evidence #evidence-map .map-legend-toggles .layer{max-width:100%;white-space:normal;text-align:left;line-height:1.3}
 }

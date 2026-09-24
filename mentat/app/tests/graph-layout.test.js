@@ -62,6 +62,45 @@ for (const width of WIDTHS) {
   }
 }
 
+/* The approved board's card rhythm. These are constants because two drawings
+   read them - the single-line panels and the two-line Top organizations - and a
+   pitch decided twice is a pitch that drifts. */
+test('[graph-layout] the row rhythm is the board\u2019s, and the two-line row is taller', () => {
+  assert.equal(layout.ROW_PITCH, 23, 'board M4 measures 23px between row baselines');
+  assert.equal(layout.ROW_HEAD, 24, 'and 24px of head room above the first');
+  assert.equal(layout.LABEL_SIZE, 13, 'label and value are 13px');
+  assert.equal(layout.SHARE_SIZE, 12, 'the share is 12px and muted');
+  // Top organizations gives the name its own line at the card's full width, so
+  // its rows are taller than a single-line row by the drop plus the bar band.
+  assert.ok(layout.TWO_LINE_PITCH > layout.ROW_PITCH,
+    'a two-line row cannot be shorter than a one-line row');
+  assert.ok(layout.TWO_LINE_NAME_DROP > 0 && layout.TWO_LINE_NAME_DROP < layout.TWO_LINE_PITCH,
+    'the bar line sits below the name and inside the row');
+  // A row is drawn from top-15 for pitch-4, so consecutive rows never touch.
+  for (const pitch of [layout.ROW_PITCH, layout.TWO_LINE_PITCH]) {
+    assert.ok(pitch - 4 < pitch, 'the row band leaves a gap to the next row');
+    assert.ok(pitch - 4 > layout.LABEL_SIZE, 'and is taller than the text it holds');
+  }
+});
+
+test('[graph-layout] a left-read label starts at labelLeft and still fits its column', () => {
+  // Candidates and companies read left from one x (the board), so the first
+  // glyph lands at labelLeft rather than at labelRight minus the measured
+  // width. Either way the drawn text has to fit between the two.
+  for (const width of WIDTHS) {
+    for (const party of [false, true]) {
+      const box = layout.layoutColumns(width, {party: party, spark: false, valueWidth: 78});
+      const drawn = theme.fitText('AMERICAN BANKERS ASSOCIATION PAC', box.labelWidth,
+        box.labelSize, '', party ? ' \u00b7 D' : '');
+      const drawnWidth = theme.measureText(drawn, box.labelSize, '');
+      assert.ok(box.labelLeft + drawnWidth <= box.labelRight + 1e-9,
+        'W=' + width + ': a left-read label runs past its column into the bar');
+      assert.ok(box.labelLeft + drawnWidth <= box.barLeft,
+        'W=' + width + ': and must never reach the bar');
+    }
+  }
+});
+
 test('[graph-layout] the label column is the same in every panel at the same width', () => {
   for (const width of WIDTHS) {
     const plain = layout.layoutColumns(width, {party: false, spark: false, valueWidth: 78});
@@ -95,7 +134,11 @@ test('[graph-layout] the sparkline slot is the width the sparkline is drawn at',
     // drawSparklines() lays its last point at SPARK_W - 2 and the end dot has
     // r = 1.8, so the line and its dot stay inside the slot.
     assert.ok(layout.SPARK_W - 2 + 1.8 <= box.sparkWidth);
-    assert.equal(box.sparkX + box.sparkWidth, box.width - 4, 'the slot ends where the panel does');
+    // Paul, 2026-09-23 ("Keep the dollar column, match the aesthetic"): the
+    // slot ends SPARK_INSET inside the panel's right edge, where boards M4 and
+    // 1 end Company comparison's sparkline (it was 4px), and never past it.
+    assert.equal(box.sparkX + box.sparkWidth, box.width - layout.SPARK_INSET, 'the slot ends where board M4 ends it');
+    assert.ok(layout.SPARK_INSET >= 4 && box.sparkX + box.sparkWidth <= box.width - 4, 'and inside the panel');
     assert.equal(box.shareRight, box.sparkX - layout.SPARK_GAP,
       'the share is anchored to its own column, not to the panel edge');
     const plain = layout.layoutColumns(width, {party: false, spark: false, valueWidth: 78});
@@ -181,4 +224,143 @@ test('[graph-layout] a measured label always fits the column the layout gives it
       }
     }
   }
+});
+
+/* Build 02 fix round 1 (R02-M1): a compare half's columns. The half bodies
+   measure 254/270px at 1440, 292/312px at 1600 and 331/353px at 1920 (two
+   scopes), 370px for a third at 1440. */
+const HALF_WIDTHS = [200, 254, 270, 292, 312, 331, 353, 370, 480];
+test('[graph-layout] compare halves: every column is disjoint and inside the half', () => {
+  for (const width of HALF_WIDTHS) {
+    for (const party of [false, true]) {
+      for (const spark of [false, true]) {
+        for (const shareWidth of [0, 46, 60]) {
+          for (const bar of [true, false]) {
+            for (const labelWidth of [0, 40, 97, 147, 400]) {
+              for (const valueWidth of [0, 53, 66, 400]) {
+                const box = layout.compactColumns(width, {party, spark, shareWidth, bar, labelWidth, valueWidth,
+                  leftRead: party});
+                const where = JSON.stringify({width, party, spark, shareWidth, bar, labelWidth, valueWidth});
+                const named = boxes(box).filter(entry => entry[2] > entry[1]);
+                for (const entry of named) {
+                  assert.ok(entry[1] >= 0 && entry[2] <= box.width, where + ': ' + entry[0] + ' leaves the half');
+                }
+                for (let i = 0; i < named.length; i += 1) {
+                  for (let j = i + 1; j < named.length; j += 1) {
+                    const a = named[i], b = named[j];
+                    assert.ok(a[2] <= b[1] || b[2] <= a[1], where + ': ' + a[0] + ' overlaps ' + b[0]);
+                  }
+                }
+                assert.equal(box.barMax > 0, bar, where + ': a bar exactly when one was asked for');
+                if (bar) assert.ok(box.barMax >= layout.COMPACT_BAR_MIN, where + ': bar under its floor');
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+});
+
+test('[graph-layout] compare halves: the bar is a magnitude, not a swatch (R02-M1)', () => {
+  // G1 at 1440: recipient types (254px, no share column, "$2,838,523" 66px,
+  // "Party Committee" 97px) and candidates (270px, party, "$116,533" 53px).
+  const types1440 = layout.compactColumns(254, {shareWidth: 0, valueWidth: 66, labelWidth: 97});
+  assert.ok(types1440.barMax >= 60, 'recipient-type bar at 1440 is ' + types1440.barMax + 'px');
+  assert.ok(types1440.labelWidth >= 97, 'the widest category name still fits whole at 1440');
+  const people1440 = layout.compactColumns(270, {party: true, leftRead: true, shareWidth: 0, valueWidth: 53, labelWidth: 125});
+  assert.ok(people1440.barMax >= 60, 'candidate bar at 1440 is ' + people1440.barMax + 'px');
+  assert.ok(people1440.labelWidth >= 100, 'candidate names keep at least 100px at 1440');
+  // The boards' 1600 frame keeps the share column (G1 prints it).
+  const types1600 = layout.compactColumns(292, {shareWidth: 46, valueWidth: 66, labelWidth: 97});
+  assert.ok(types1600.barMax >= 70, 'recipient-type bar at 1600 is ' + types1600.barMax + 'px');
+  const types1920 = layout.compactColumns(331, {shareWidth: 46, valueWidth: 66, labelWidth: 97});
+  assert.ok(types1920.barMax >= 95, 'recipient-type bar at 1920 is ' + types1920.barMax + 'px');
+  // A company half with no bar gives the name everything up to the amount.
+  const firms = layout.compactColumns(254, {spark: true, bar: false, shareWidth: 0, valueWidth: 66, leftRead: true});
+  assert.equal(firms.barMax, 0);
+  assert.ok(firms.labelWidth >= 120, 'company names keep ' + firms.labelWidth + 'px beside the sparkline');
+  // Below the share threshold a half drops its share column; at it, keeps it.
+  assert.ok(layout.COMPACT_SHARE_MIN_W > 270 && layout.COMPACT_SHARE_MIN_W <= 292,
+    'the share column drops at 1440 (270px) and stays at 1600 (292px)');
+});
+
+test('[graph-layout] short forms of a compared value, longest first (R02-M3, R02-m9)', () => {
+  const dash = String.fromCharCode(0x2013);
+  assert.deepEqual(layout.nameForms('company', 'Goldman Sachs Bank NA'), ['Goldman Sachs Bank NA', 'Goldman Sachs', 'Goldman']);
+  assert.deepEqual(layout.nameForms('company', 'JP Morgan Chase Bank NA'), ['JP Morgan Chase Bank NA', 'JP Morgan Chase', 'JP Morgan']);
+  assert.deepEqual(layout.nameForms('company', 'Bank of America NA'), ['Bank of America NA', 'Bank of America']);
+  assert.deepEqual(layout.nameForms('company', 'Navy Federal Credit Union'), ['Navy Federal Credit Union', 'Navy Federal', 'Navy']);
+  assert.deepEqual(layout.nameForms('company', 'Citibank'), ['Citibank']);
+  const toDate = ' ' + String.fromCharCode(0xb7) + ' to date';
+  assert.deepEqual(layout.nameForms('cycle', '2025' + dash + '2026' + toDate),
+    ['2025' + dash + '2026' + toDate, '2025' + dash + '26' + toDate]);
+  assert.deepEqual(layout.nameForms('cycle', '2023' + dash + '2024'), ['2023' + dash + '2024', '2023' + dash + '24']);
+  assert.deepEqual(layout.nameForms('industry', 'Credit Union'), ['Credit Union'], 'an industry is never shortened');
+});
+
+/* Final fix round (TA1-01..03): what a two-scope half gives up so that its
+   names are not cut, at the widths the console draws the halves at
+   (compactWidth of the half bodies, 2026-09-23: candidates 311/312px at 1600
+   and 352/353px at 1920; recipient types and companies 292/293px and
+   330/331px). Label widths are MentatTheme.measureText at 13px of the live
+   names comparing Banking | Credit Union and Goldman Sachs | JP Morgan Chase:
+   "HUIZENGA, WILLIAM P · R" 161.1px (the widest whole candidate name G1
+   draws), "WARNER, MARK ROBERT · D" 180.6px and its short form
+   "WARNER, MARK R · D" 136px, "Party Committee" 96.8px, "JP Morgan Chase
+   Bank NA" 159px; amounts "$116,533" 53.3px and "$2,838,523" 65.1px. */
+test('[graph-layout] compare halves: no candidate name is cut at 1600 or 1920 (TA1-01)', () => {
+  for (const width of [311, 312, 352, 353]) {
+    // Comparing industries (G1, G4): the bar goes and the share stays.
+    const g1 = layout.compactYield(width, {party: true, leftRead: true, shareWidth: 46, valueWidth: 53.3, labelWidth: 161.1}, ['bar']);
+    const box1 = layout.compactColumns(width, g1);
+    assert.deepEqual(g1.yielded, ['bar']);
+    assert.ok(box1.labelWidth >= 161.1, width + 'px: G1 name column ' + box1.labelWidth);
+    assert.ok(box1.labelWidth >= 136, width + 'px: "WARNER, MARK R" fits');
+    assert.equal(box1.barMax, 0);
+    assert.equal(box1.shareWidth, 46, 'G1 keeps its share column');
+    // Comparing companies (G3): the share goes and the bar stays; the whole
+    // of "WARNER, MARK ROBERT" fits beside a bar that is not a swatch.
+    const g3 = layout.compactYield(width, {party: true, leftRead: true, valueWidth: 53.3, labelWidth: 180.6}, ['share', 'room']);
+    const box3 = layout.compactColumns(width, g3);
+    assert.ok(box3.labelWidth >= 180.6, width + 'px: G3 name column ' + box3.labelWidth);
+    assert.equal(box3.shareWidth, 0, 'G3 draws no share column');
+    assert.ok(box3.barMax >= 30, width + 'px: G3 bar ' + box3.barMax);
+  }
+  // A half wide enough for its names gives nothing up.
+  const wide = layout.compactYield(480, {party: true, leftRead: true, shareWidth: 46, valueWidth: 53.3, labelWidth: 120}, ['bar', 'share', 'room']);
+  assert.deepEqual(wide.yielded, []);
+  assert.ok(layout.compactColumns(480, wide).barMax > 0);
+});
+
+test('[graph-layout] compare halves: a company half gives up its share before its name (TA1-02)', () => {
+  for (const width of [292, 293, 330, 331]) {
+    const plan = layout.compactYield(width, {spark: true, bar: false, leftRead: true, shareWidth: 46, valueWidth: 65.1, labelWidth: 159},
+      width < layout.COMPACT_NAME_SHARE_W ? ['bar', 'share'] : ['bar']);
+    const box = layout.compactColumns(width, plan);
+    assert.deepEqual(plan.yielded, ['share'], 'the bar was already gone; the share goes');
+    assert.ok(box.labelWidth >= 159, width + 'px: "JP Morgan Chase Bank NA" fits in ' + box.labelWidth);
+    assert.equal(box.sparkWidth, 40, 'the sparkline slot stays');
+  }
+  assert.ok(layout.COMPACT_NAME_SHARE_W > 331 && layout.COMPACT_NAME_SHARE_W <= 353,
+    'the share yields in a two-scope half at 1920 (331px) and stays in a 1440 third (353px and up)');
+});
+
+test('[graph-layout] compare halves: "Party Committee" stays whole and the bar shrinks first (TA1-03)', () => {
+  for (const width of [292, 293, 330, 331]) {
+    const plan = layout.compactYield(width, {shareWidth: 46, valueWidth: 65.1, labelWidth: 96.8}, ['room']);
+    const box = layout.compactColumns(width, plan);
+    assert.ok(box.labelWidth >= 96.8, width + 'px: recipient-type label column ' + box.labelWidth);
+    assert.equal(box.shareWidth, 46, 'the share column stays');
+    // The bar pays for the whole name: at 1600 it is 62px where R02-M1's
+    // default layout (above) keeps 70px and cuts the name.
+    assert.ok(box.barMax >= 60, width + 'px: the bar is still a magnitude, ' + box.barMax + 'px');
+  }
+});
+
+test('[graph-layout] short forms of a candidate keep the surname and first given name (TA1-01)', () => {
+  assert.deepEqual(layout.nameForms('person', 'WARNER, MARK ROBERT'), ['WARNER, MARK ROBERT', 'WARNER, MARK R', 'WARNER, MARK']);
+  assert.deepEqual(layout.nameForms('person', 'KEAN, THOMAS H. JR.'), ['KEAN, THOMAS H. JR.', 'KEAN, THOMAS H', 'KEAN, THOMAS']);
+  assert.deepEqual(layout.nameForms('person', 'HAGERTY, BILL'), ['HAGERTY, BILL']);
+  assert.deepEqual(layout.nameForms('person', 'MADONNA'), ['MADONNA'], 'a name without a comma is never shortened');
 });

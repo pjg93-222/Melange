@@ -1,37 +1,10 @@
 <section id="view-chart-studio" role="tabpanel" aria-labelledby="tab-chart-studio" hidden>
 <div class="studio">
 <div class="studio-header">
-<h2 class="studio-heading">Chart Studio</h2>
-<span class="studio-scope-block"><span id="studio-scope-chip" class="studio-scope-chip" role="status"></span><small id="studio-scope-note" class="studio-scope-note" hidden></small></span>
-<button id="studio-scope-change" class="studio-scope-change" type="button" title="Open the Data source panel and choose a report">Change data</button>
-<span class="studio-header-gap"></span>
-<div id="studio-view-mode" class="studio-segmented studio-options-restore" role="radiogroup" aria-label="Studio view">
-<button id="studio-view-builder" type="button" role="radio" aria-checked="true" title="Data panel, shelves and Inspector">Builder</button>
-<button id="studio-overview-toggle" class="studio-overview-toggle" type="button" role="radio" aria-checked="false" aria-pressed="false" tabindex="-1" title="Four preset views of one company">Company overview</button>
-<button id="studio-view-canvas" type="button" role="radio" aria-checked="false" tabindex="-1" title="The chart on its own, or a board of 2 or 4 charts">Canvas</button>
-</div>
-<button id="studio-inspector-toggle" class="studio-inspector-toggle" type="button" aria-expanded="false" aria-controls="studio-inspector">Inspector<span id="studio-inspector-count" class="studio-inspector-badge" hidden></span></button>
-</div>
-<div class="studio-toolbar" role="toolbar" aria-label="Chart Studio toolbar">
-<div class="studio-group"><button id="studio-undo" type="button" title="Undo the last change">&#8630; Undo</button><button id="studio-redo" type="button" title="Redo the change just undone">&#8631; Redo</button></div>
-<span class="studio-divider" aria-hidden="true"></span>
-<div class="studio-group"><button id="studio-swap" type="button" title="Exchange the Columns and Rows shelves">&#8644; Swap</button><button id="studio-sort-asc" type="button" aria-pressed="false" title="Sort the grouping smallest first">&#8593; Sort ascending</button><button id="studio-sort-desc" type="button" aria-pressed="false" title="Sort the grouping largest first">&#8595; Sort descending</button><button id="studio-labels" type="button" aria-pressed="false" title="Write each mark's value beside it">Show mark labels</button></div>
-<span class="studio-divider" aria-hidden="true"></span>
-<div class="studio-group"><select id="studio-fit" aria-label="Fit the view" title="How the drawing fills the view"><option value="standard">Fit: Standard</option><option value="width">Fit: Fit width</option><option value="entire">Fit: Entire view</option></select></div>
-<span class="studio-divider" aria-hidden="true"></span>
-<div class="studio-group"><button id="studio-clear" type="button" title="Empty this sheet but keep the data source">Clear</button><button id="studio-duplicate" type="button" title="Copy this sheet into a new one">Duplicate</button></div>
-<span class="studio-toolbar-gap"></span>
-<div class="studio-group studio-board-control" id="studio-board-tiles" role="group" aria-label="Board"><span class="studio-board-label">Board</span><button id="studio-board-1" type="button" aria-pressed="true" title="One chart on the Canvas">1</button><button id="studio-board-2" type="button" aria-pressed="false" title="Two charts side by side on the Canvas">2</button><button id="studio-board-4" type="button" aria-pressed="false" title="Four charts, two by two, on the Canvas">4</button></div>
-<button id="studio-showme-toggle" class="studio-showme-toggle" type="button" aria-pressed="false" aria-controls="studio-showme" title="Open Show Me in the Inspector">Show Me</button>
-<details class="studio-menu" id="studio-download"><summary>Export</summary><div><button id="studio-download-png" type="button">Image (PNG)</button><button id="studio-download-svg" type="button">Image (SVG)</button><button id="studio-download-csv" type="button">Data (CSV)</button><hr><button id="studio-copy-image" type="button">Copy image</button><button id="studio-print-chart" type="button">Print chart</button><hr><button id="studio-classic" class="studio-classic" type="button" aria-haspopup="dialog" title="Open the original Create chart dialog">Classic builder</button></div></details>
-<details class="studio-menu" id="studio-views"><summary>Views</summary><div><button id="studio-save-view" type="button">Save view</button><button id="studio-open-views" type="button">Open view</button><button id="studio-board-briefing" type="button">Add board to briefing</button></div></details>
-<button id="studio-briefing-add" class="studio-briefing-add" type="button" aria-controls="studio-briefing" title="Add this chart to the briefing">Add to briefing<span id="studio-briefing-badge" class="studio-briefing-badge" hidden></span></button>
-</div>
-
-<div class="studio-grid" id="studio-grid">
-<aside class="studio-side" aria-label="Data">
-<div class="studio-pane" id="studio-pane-data">
-<h3 class="studio-panel-title">Data</h3>
+<button id="studio-data-toggle" class="secondary studio-data-toggle" type="button" aria-expanded="false" aria-controls="studio-data-panel">Data &amp; fields</button>
+<div class="studio-source-anchor">
+<button id="studio-scope-change" class="studio-scope-change" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="studio-source-popover" title="Industry, cycles and accounting basis of this sheet. Open to change the data source"><span id="studio-scope-chip" class="studio-scope-chip"></span><span id="studio-scope-basis" class="studio-scope-basis"></span></button>
+<div id="studio-source-popover" class="studio-source-popover" role="dialog" aria-label="Data source" hidden>
 <details class="studio-source-disclosure" id="studio-source-details" open><summary id="studio-source-summary">Data source</summary>
 <div class="studio-source">
 <label for="studio-source-mode">Data source<select id="studio-source-mode"><option value="contributions">Verified contributions</option><option value="worksheet">Report worksheet</option></select></label>
@@ -50,11 +23,50 @@
 <label for="studio-header">Header row<input id="studio-header" type="number" min="1" max="100" value="5"></label><button id="studio-rescan" class="studio-rescan secondary" type="button">Rescan columns</button>
 </div>
 <p id="studio-loading" role="status">Reading verified contribution fields&#8230;</p>
-<div id="studio-progress" class="studio-progress" role="status" hidden><span id="studio-progress-message"></span><span id="studio-progress-elapsed"></span><button id="studio-progress-cancel" class="secondary" type="button">Cancel</button></div>
 </div>
 </details>
-<label for="studio-search">Search fields<input id="studio-search" type="search" placeholder="Filter this list" autocomplete="off"></label>
-<label id="studio-field-table-label" for="studio-field-table">Fields from<select id="studio-field-table"><option value="">All related tables</option></select></label>
+</div>
+</div>
+<small id="studio-scope-note" class="studio-scope-note" hidden></small>
+<div id="studio-compare" class="studio-compare"><button id="studio-compare-add" class="chip-add studio-compare-add" type="button" aria-haspopup="menu" aria-expanded="false" title="Add another industry, cycle or company to this sheet as a coloured series">+ Compare with&#8230;</button><span id="studio-compare-pills" class="studio-compare-pills" hidden></span><button id="studio-compare-clear" class="compare-clear" type="button" aria-label="Clear comparison" title="Clear comparison" hidden>Clear</button><span id="studio-compare-note" class="studio-compare-note" role="status" hidden></span></div>
+<span id="studio-ready" class="studio-ready" role="status"></span>
+<div id="studio-progress" class="studio-progress" role="status" hidden><span id="studio-progress-message"></span><span id="studio-progress-elapsed"></span><button id="studio-progress-cancel" class="secondary" type="button">Cancel</button></div>
+<span class="studio-header-gap"></span>
+<div id="studio-view-mode" class="studio-segmented segmented studio-options-restore" role="radiogroup" aria-label="Studio view">
+<button id="studio-view-builder" type="button" role="radio" aria-checked="true" title="Data panel, shelves and Inspector">Builder</button>
+<button id="studio-overview-toggle" class="studio-overview-toggle" type="button" role="radio" aria-checked="false" aria-pressed="false" tabindex="-1" title="Four preset views of one company">Company overview</button>
+<button id="studio-view-canvas" type="button" role="radio" aria-checked="false" tabindex="-1" title="The chart on its own, or a board of 2 or 4 charts">Canvas</button>
+</div>
+<button id="studio-inspector-toggle" class="studio-inspector-toggle" type="button" aria-expanded="false" aria-controls="studio-inspector">Inspector<span id="studio-inspector-count" class="studio-inspector-badge" hidden></span></button>
+</div>
+<div class="studio-toolbar" role="toolbar" aria-label="Chart Studio toolbar">
+<div class="studio-group"><button id="studio-undo" class="studio-tool" type="button" title="Undo the last change"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 3.5 2.5 6.5l3 3"/><path d="M2.5 6.5h7a3.5 3.5 0 0 1 0 7H6.5"/></svg>Undo</button><button id="studio-redo" class="studio-tool" type="button" title="Redo the change just undone"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="m10.5 3.5 3 3-3 3"/><path d="M13.5 6.5h-7a3.5 3.5 0 0 0 0 7h3"/></svg>Redo</button></div>
+<span class="studio-divider" aria-hidden="true"></span>
+<div class="studio-group"><button id="studio-swap" class="studio-tool" type="button" title="Exchange the Columns and Rows shelves"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 5.5h11M10.5 2.5l3 3-3 3"/><path d="M13.5 10.5h-11M5.5 7.5l-3 3 3 3"/></svg>Swap</button><details class="studio-menu studio-sort-menu" id="studio-sort"><summary class="studio-tool" title="Sort the grouping"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 2.5v11M2.5 11 5 13.5 7.5 11"/><path d="M11 13.5v-11M8.5 5 11 2.5 13.5 5"/></svg>Sort</summary><div><button id="studio-sort-asc" type="button" aria-pressed="false" title="Sort the grouping smallest first">Ascending</button><button id="studio-sort-desc" type="button" aria-pressed="false" title="Sort the grouping largest first">Descending</button><button id="studio-sort-none" type="button" aria-pressed="false" title="Keep the order the source gives">None</button></div></details><button id="studio-labels" class="studio-tool" type="button" aria-pressed="false" title="Write each mark's value beside it"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 8.2V2.5h5.7l5.3 5.3-5.7 5.7z"/><circle cx="5.3" cy="5.3" r="1"/></svg>Labels</button><label class="studio-fit studio-tool" for="studio-fit"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/><path d="M5 6.5V5h1.5M11 9.5V11H9.5"/></svg><select id="studio-fit" aria-label="Fit the view" title="How the drawing fills the view"><option value="standard">Fit: Standard</option><option value="width">Fit: Fit width</option><option value="entire">Fit: Entire view</option></select></label></div>
+<span class="studio-divider" aria-hidden="true"></span>
+<div class="studio-group"><button id="studio-clear" class="studio-tool" type="button" title="Empty this sheet but keep the data source"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="5.8"/><path d="m5.9 5.9 4.2 4.2M10.1 5.9l-4.2 4.2"/></svg>Clear</button><button id="studio-duplicate" class="studio-tool" type="button" title="Copy this sheet into a new one"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"/></svg>Duplicate</button></div>
+<span class="studio-toolbar-gap"></span>
+<div class="studio-group studio-board-control" id="studio-board-tiles" role="group" aria-label="Board"><span class="studio-board-label">Board</span><button id="studio-board-1" type="button" aria-pressed="true" title="One chart on the Canvas">1</button><button id="studio-board-2" type="button" aria-pressed="false" title="Two charts side by side on the Canvas">2</button><button id="studio-board-4" type="button" aria-pressed="false" title="Four charts, two by two, on the Canvas">4</button></div>
+<button id="studio-showme-toggle" class="studio-showme-toggle" type="button" aria-pressed="false" aria-controls="studio-showme" title="Open Show Me in the Inspector">Show Me</button>
+<button id="studio-compare-sheets" type="button" aria-pressed="false" aria-controls="studio-comparison">Compare worksheets</button>
+<details class="studio-menu" id="studio-download"><summary>Export</summary><div><button id="studio-download-png" type="button">Image (PNG)</button><button id="studio-download-svg" type="button">Image (SVG)</button><button id="studio-download-csv" type="button">Data (CSV)</button><hr><button id="studio-copy-image" type="button">Copy image</button><button id="studio-print-chart" type="button">Print chart</button><hr><button id="studio-classic" class="studio-classic" type="button" aria-haspopup="dialog" title="Open the original Create chart dialog">Classic builder</button></div></details>
+<details class="studio-menu" id="studio-views"><summary>Views</summary><div><button id="studio-save-view" type="button">Save view</button><button id="studio-open-views" type="button">Open view</button><button id="studio-board-briefing" type="button">Add board to briefing</button></div></details>
+<button id="studio-briefing-add" class="studio-briefing-add" type="button" aria-controls="studio-briefing" title="Add this chart to the briefing">Add to briefing<span id="studio-briefing-badge" class="studio-briefing-badge" hidden></span></button>
+</div>
+
+<section id="studio-comparison" class="worksheet-comparison" aria-label="Compare worksheets" hidden>
+<div class="worksheet-comparison-actions"><h2>Compare worksheets</h2><button type="button" data-compare-close>Back to builder</button></div>
+<p>Choose each worksheet, grouping, measure and aggregation independently. Matching group labels appear together; missing observations stay blank.</p>
+<div class="worksheet-comparison-sources"></div>
+<div class="worksheet-comparison-actions"><button type="button" data-compare-add>Add source</button><label>View<select data-compare-type><option value="bar">Bars by source</option><option value="table">Comparison table</option></select></label><button type="button" data-compare-run>Compare</button><button type="button" data-compare-export>Export comparison CSV</button></div>
+<p role="status"></p><div class="worksheet-comparison-canvas"></div><details><summary>Source details</summary><div class="worksheet-comparison-evidence"></div></details>
+</section>
+<div class="studio-grid" id="studio-grid">
+<aside class="studio-side" id="studio-data-panel" aria-label="Data">
+<div class="studio-pane" id="studio-pane-data">
+<h3 class="studio-panel-title">Data</h3>
+<label class="studio-search" for="studio-search"><span class="studio-search-label">Search fields</span><input id="studio-search" type="search" placeholder="Search fields" autocomplete="off"></label>
+<label id="studio-field-table-label" class="studio-from" for="studio-field-table"><span class="studio-from-label">From:</span><select id="studio-field-table" aria-label="Fields from"><option value="">All related tables</option></select></label>
 <h3>Dimensions</h3>
 <div id="studio-dimensions" class="studio-fields"></div>
 <h3>Measures</h3>
@@ -65,9 +77,9 @@
 </aside>
 
 <div class="studio-view">
-<div class="studio-quick-tools"><label for="studio-mark">Chart variant<select id="studio-mark"></select></label></div>
+<div class="studio-quick-tools" hidden><label for="studio-aggregation">Primary measure aggregation<select id="studio-aggregation"></select></label></div>
 <div class="studio-shelves" id="studio-shelves">
-<div class="studio-shelf"><span class="studio-shelf-name" id="studio-columns-name">Columns</span><div id="studio-columns" class="studio-drop" data-placeholder="Drop a field here" aria-labelledby="studio-columns-name"></div></div>
+<div class="studio-shelf"><span class="studio-shelf-name" id="studio-columns-name">Columns</span><div id="studio-columns" class="studio-drop" data-placeholder="Drop a field here" aria-labelledby="studio-columns-name"></div><label class="studio-mark-chip" for="studio-mark"><span>Chart:</span><select id="studio-mark" aria-label="Chart variant"></select></label></div>
 <div class="studio-shelf"><span class="studio-shelf-name" id="studio-rows-name">Rows</span><div id="studio-rows" class="studio-drop" data-placeholder="Drop a field here" aria-labelledby="studio-rows-name"></div></div>
 <div class="studio-shelf"><span class="studio-shelf-name" id="studio-filters-name">Filters</span><div id="studio-filters" class="studio-drop" data-placeholder="Drop a field to filter" aria-labelledby="studio-filters-name"></div></div>
 </div>
@@ -81,15 +93,19 @@
 <div id="studio-table" class="studio-table table-scroll" hidden></div>
 <div id="studio-board" class="studio-board" aria-label="Board" hidden></div>
 <div class="studio-foot">
-<p id="studio-reconcile" class="studio-reconcile" role="status" hidden></p>
-<div class="studio-foot-line"><p id="studio-note" class="studio-note">Choose a verified report in the Data panel to begin.</p><div id="studio-result-controls" class="studio-result-controls" hidden><button id="studio-groups-prev" type="button">Previous groups</button><span id="studio-group-count"></span><button id="studio-groups-next" type="button">Next groups</button><button id="studio-inspect-all" type="button">View source records</button></div></div>
+<div id="studio-note-line" class="studio-note-line">
+<div id="studio-reconcile" class="studio-reconcile" role="status" hidden><span id="studio-reconcile-text" class="studio-reconcile-text"></span><button id="studio-match-graph" class="secondary studio-match-graph" type="button" title="Set this sheet's cycle, company and giving type to Graph's current scope. Employee level has no verified field, so it is not matched." hidden>Match Graph scope</button><button id="studio-reconcile-why" class="studio-reconcile-why" type="button" aria-expanded="false" aria-controls="studio-reconcile-detail">Why</button><div id="studio-reconcile-detail" class="studio-reconcile-detail" role="dialog" aria-label="Why Graph and this sheet differ" hidden></div></div>
+<div id="studio-result-controls" class="studio-result-controls" hidden><button id="studio-groups-prev" type="button" aria-label="Previous groups" title="Previous groups">&#8249;</button><span id="studio-group-count"></span><button id="studio-groups-next" type="button" aria-label="Next groups" title="Next groups">&#8250;</button><span class="studio-result-sep" aria-hidden="true">&#183;</span><button id="studio-inspect-all" type="button">View source records</button></div>
+</div>
+<div class="studio-foot-line"><p id="studio-note" class="studio-note">Choose a verified report in the Data panel to begin.</p></div>
 </div>
 <section id="studio-inspection" class="studio-inspection" hidden aria-label="Source records"><div class="studio-inline"><h3>Source records</h3><button id="studio-inspection-close" type="button">Close</button></div><p id="studio-record-count" class="studio-note" role="status"></p><div id="studio-records" class="table-scroll"></div><button id="studio-record-prev" type="button">Previous records</button><button id="studio-record-next" type="button">Next records</button></section>
 </div>
 </div>
 
 <aside class="studio-inspector" id="studio-inspector" aria-label="Inspector">
-<div class="studio-inspector-head"><h3 class="studio-panel-title">Inspector</h3><button id="studio-inspector-close" class="studio-inspector-close" type="button">Close</button></div>
+<div class="studio-inspector-rail" id="studio-inspector-rail" role="group" aria-label="Inspector (collapsed)"><button id="studio-rail-marks" type="button" aria-label="Expand the Inspector on Marks" title="Marks"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 13.5v-5M8 13.5v-11M12.5 13.5v-7.5"/></svg></button><button id="studio-rail-analytics" type="button" aria-label="Expand the Inspector on Analytics" title="Analytics"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 12 6 8l3 2.5 4.5-6"/><path d="M11 4.5h2.5V7"/></svg></button><button id="studio-rail-filters" type="button" aria-label="Expand the Inspector on Filters" title="Filters"><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 3h11L9.3 8.2v4.3l-2.6 1V8.2z"/></svg></button></div>
+<div class="studio-inspector-head"><h3 class="studio-panel-title">Inspector</h3><button id="studio-inspector-collapse" class="studio-inspector-collapse" type="button" aria-expanded="true" aria-controls="studio-inspector" title="Fold the Inspector to a rail">Collapse</button><button id="studio-inspector-close" class="studio-inspector-close" type="button">Close</button></div>
 <div class="studio-inspector-tabs" role="tablist" aria-label="Inspector">
 <button id="studio-tab-marks" type="button" role="tab" aria-selected="true" aria-controls="studio-pane-marks">Marks</button>
 <button id="studio-tab-analytics" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="studio-pane-analytics">Analytics</button>
@@ -98,11 +114,11 @@
 <div class="studio-pane" id="studio-pane-marks" role="tabpanel" aria-labelledby="studio-tab-marks">
 <h3>Marks</h3>
 <div class="studio-mark-props">
-<div class="studio-prop"><span>Colour</span><div id="studio-color" class="studio-drop" data-placeholder="Colour" aria-label="Colour property"></div></div>
-<div class="studio-prop"><span>Size</span><div id="studio-size" class="studio-drop" data-placeholder="Size" aria-label="Size property"></div></div>
-<div class="studio-prop"><span>Label</span><div id="studio-label" class="studio-drop" data-placeholder="Label" aria-label="Label property"></div></div>
-<div class="studio-prop"><span>Detail</span><div id="studio-detail" class="studio-drop" data-placeholder="Detail" aria-label="Detail property"></div></div>
-<div class="studio-prop"><span>Tooltip</span><div id="studio-tooltip" class="studio-drop" data-placeholder="Tooltip" aria-label="Tooltip property"></div></div>
+<div class="studio-prop"><span><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2.5a5.5 5.5 0 1 0 0 11c.9 0 1.3-.6 1.3-1.2 0-.9-.7-1.1-.7-1.9 0-.7.6-1.2 1.3-1.2h1.2a2.4 2.4 0 0 0 2.4-2.4C13.5 4.6 11.1 2.5 8 2.5z"/><circle cx="5.2" cy="7" r=".8"/><circle cx="7.3" cy="4.9" r=".8"/><circle cx="10.2" cy="5.3" r=".8"/></svg>Colour</span><div id="studio-color" class="studio-drop" data-placeholder="Drop a field here" aria-label="Colour property"></div></div>
+<div class="studio-prop"><span><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/></svg>Size</span><div id="studio-size" class="studio-drop" data-placeholder="Drop a field here" aria-label="Size property"></div></div>
+<div class="studio-prop"><span><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 3h10M8 3v10.5"/></svg>Label</span><div id="studio-label" class="studio-drop" data-placeholder="Drop a field here" aria-label="Label property"></div></div>
+<div class="studio-prop"><span><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="4" cy="4" r=".9"/><circle cx="8" cy="4" r=".9"/><circle cx="12" cy="4" r=".9"/><circle cx="4" cy="8" r=".9"/><circle cx="8" cy="8" r=".9"/><circle cx="12" cy="8" r=".9"/><circle cx="4" cy="12" r=".9"/><circle cx="8" cy="12" r=".9"/><circle cx="12" cy="12" r=".9"/></svg>Detail</span><div id="studio-detail" class="studio-drop" data-placeholder="Drop a field here" aria-label="Detail property"></div></div>
+<div class="studio-prop"><span><svg class="studio-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 2.5h9a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1H7l-3 2.5v-2.5h-.5a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1z"/><path d="M5.5 5.5h5M5.5 8h3.5"/></svg>Tooltip</span><div id="studio-tooltip" class="studio-drop" data-placeholder="Drop a field here" aria-label="Tooltip property"></div></div>
 </div>
 <p id="studio-marks-note" class="studio-note">Colour separates series; Detail sets the grouping behind each mark. Select a mark to inspect its source records.</p>
 <details class="studio-disclosure" id="studio-showme-details"><summary>Show Me<span id="studio-showme-hint" class="studio-disclosure-hint"></span></summary>
@@ -177,8 +193,8 @@
 <button id="studio-sheet-source" type="button" aria-selected="false">Data Source</button>
 <div id="studio-sheet-tabs" class="studio-sheet-tabs"></div>
 <button id="studio-new-sheet" type="button">+ New sheet</button>
-</div>
 <div class="studio-status" id="studio-status" role="status"></div>
+</div>
 </div>
 </section>
 

@@ -8,6 +8,13 @@
   const EXTRA_MARKS=[['heatmap','Heat map'],['highlight','Highlight table'],['stacked','Stacked bars'],['dot','Circle view'],['series-dot','Side-by-side circles'],['treemap','Treemap'],['bubbles','Packed bubbles'],['gantt','Observed date span'],['bullet','Bullet comparison'],['combination','Dual combination'],['dual-line','Dual lines'],['filled-map','Filled state map']];
   const types=new Set(['automatic','bar','line','area','circle','text','map','pie','doughnut','waterfall','pareto','radar','histogram','box',...EXTRA_MARKS.map(m=>m[0])]);
   const TIME=['date','year','cycle','quarter','month'];
+  // Board S1's Data pane, by catalog id and in the board's order: Industry, Election cycle,
+  // Contribution year, Company, Contribution date, Recipient, Recipient category, Party, State, ZIP;
+  // Selected amount, Gift count (an observation is not always one gift, so it keeps its name
+  // Observation count) and Contributors (distinct reported donor identities). S1's Candidate and
+  // Net receipts have no field of their own: the catalog carries no candidate name, and the net
+  // amount of the chosen basis is the field shown as Selected amount.
+  const PANE_FIELDS={dimensions:['industry','cycle','year','company','date','recipient','recipient_category','party','state','zip5'],measures:['amount','records','contributors']};
   function fields(catalog,basis='receipt'){
     return catalog.map((f,index)=>({...f,index,name:f.id==='amount'?(basis==='original_supported'?'Supported gross amount':'Selected amount'):f.label||f.name||f.id,type:f.type||(f.role==='measure'?'number':f.id==='date'?'date':'category'),is_time:TIME.includes(f.id),visible:true,unit:f.unit}));
   }
@@ -25,8 +32,12 @@
     });
   }
   function showMeApply(tileId,state,columns,selected){
+    if(['symbol-map','filled-map'].includes(tileId)){
+      const next=structuredClone(state);next.marks={...next.marks,type:tileId==='filled-map'?'filled-map':'map'};return next;
+    }
     if(RULES[tileId]){
       const selection=core.showMeSelection(state,columns,selected),rule=RULES[tileId];if(!showMeEligibility(selection).find(t=>t.id===tileId)?.enabled)return structuredClone(state);
+      if(core.shelf(state.columns).length||core.shelf(state.rows).length){const next=structuredClone(state);next.marks={...next.marks,type:rule[0]};return next;}
       const next=structuredClone(state),dims=selection.fields.filter(f=>f.role==='dimension'),measures=selection.fields.filter(f=>f.role==='measure'),p=f=>({column:f.index,aggregation:'sum'});
       next.columns=(rule[3]?dims.filter(f=>f.isTime).slice(0,1):rule[0]==='histogram'?[]:dims.slice(0,rule[1]||8)).map(p);
       next.rows=(['histogram','box','gantt'].includes(rule[0])?[columns.find(f=>f.id==='amount')]:measures.slice(0,rule[2])).filter(Boolean).map(p);
@@ -242,5 +253,5 @@
   const sameSource=(a,b)=>['workbook_sha256','database_sha256','index_token','query_engine_sha256','field_semantics_sha256'].every(k=>a?.[k]===b?.[k]);
   const quote=value=>'"'+String(typeof value==='string'&&/^\s*[=+@-]/.test(value)?"'"+value:value??'').replaceAll('"','""')+'"';
   function csv(result,request){const cols=result.columns;return '\uFEFF'+[cols.map(c=>c.id+(c.unit==='cents'?'_usd':'')).concat(['accounting_basis','source_workbook_sha256','database_sha256','analytical_index','query_engine_sha256','field_semantics_sha256','query_filters']).map(quote).join(','),...result.rows.map(row=>cols.map(c=>c.unit==='cents'&&row[c.id]!=null?row[c.id]/100:row[c.id]).concat([request.basis,result.provenance.workbook_sha256,result.provenance.database_sha256,result.provenance.index_token,result.provenance.query_engine_sha256,result.provenance.field_semantics_sha256,JSON.stringify({filters:request.filters,aggregate_filters:request.aggregate_filters,bin_width_cents:request.bin_width_cents})]).map(quote).join(','))].join('\r\n');}
-  const api={fields,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,effectiveSort,sortLock,labelLock,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS,LABEL_SUPPORT,MARK_TYPES:types,SORT_LOCK_TIME,SORT_LOCK_BINS,LABEL_LOCK_TRANSFORM,LABELLED_TRANSFORMS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
+  const api={fields,PANE_FIELDS,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,effectiveSort,sortLock,labelLock,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS,LABEL_SUPPORT,MARK_TYPES:types,SORT_LOCK_TIME,SORT_LOCK_BINS,LABEL_LOCK_TRANSFORM,LABELLED_TRANSFORMS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
 })(globalThis);

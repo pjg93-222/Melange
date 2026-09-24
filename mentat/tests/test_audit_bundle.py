@@ -17,7 +17,8 @@ class AuditBundleTests(unittest.TestCase):
             audit.mkdir()
             (audit / 'classification_review.csv').write_text('stale\nrow\n')
             fields = ('transfer_paths', 'allocation_estimates', 'allocation_coverage',
-                'attribution_summary', 'funding_cohorts', 'source_freshness', 'classification_review', 'quality_checks')
+                'attribution_summary', 'funding_cohorts', 'source_freshness', 'classification_review', 'quality_checks',
+                'downstream_reach', 'downstream_measurement_ledger', 'downstream_sources')
             payload.write_text(json.dumps({name: [] for name in fields}), encoding='utf-8')
             workbook.write_bytes(b'fixture workbook bytes')
             original = payload.read_bytes()

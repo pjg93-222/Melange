@@ -10,6 +10,7 @@ from xml.etree import ElementTree as ET
 
 import contribution_data as contributions
 import contribution_source_guard as source_guard
+import native_scan
 
 MAIN='http://schemas.openxmlformats.org/spreadsheetml/2006/main'
 REL='http://schemas.openxmlformats.org/officeDocument/2006/relationships'
@@ -17,6 +18,28 @@ REL='http://schemas.openxmlformats.org/officeDocument/2006/relationships'
 
 @lru_cache(maxsize=24)
 def cycle_totals(stamp):
+    # Contribution stamps are (path,size,mtime,ctime); the graph scanner uses
+    # (path,mtime,ctime,size). Preserve every original field when adapting.
+    native_stamp = (stamp[0], stamp[2], stamp[3], stamp[1])
+    native = native_scan.tables(native_stamp, [dict(name=name, header=5,
+        columns=['cycle', 'scope', 'total_giving'], end_row=52)
+        for name in ('Spending Overview', 'Crypto Spending Overview')])
+    if native is not None:
+        if len(native['tables']) != 1:
+            raise ValueError('The published report must have one Spending Overview worksheet.')
+        table = next(iter(native['tables'].values()))
+        if table['headers'] != ['cycle', 'scope', 'total_giving']:
+            raise ValueError('The published Spending Overview layout does not expose its receipt totals.')
+        result = {}
+        for cycle, scope, amount in table['rows']:
+            if scope != 'Total Giving':
+                continue
+            if cycle in result:
+                raise ValueError('A published cycle contains more than one Total Giving total.')
+            result[cycle] = contributions._cents(amount)
+        if not result:
+            raise ValueError('The published workbook has no cached receipt totals.')
+        return result
     with zipfile.ZipFile(stamp[0]) as archive:
         book=ET.fromstring(archive.read('xl/workbook.xml'))
         relationships=ET.fromstring(archive.read('xl/_rels/workbook.xml.rels'))

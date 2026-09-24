@@ -10,7 +10,9 @@ from pathlib import Path
 from fec_transfer_graph import atomic_json
 
 RAW_FIELDS = frozenset(('cycle','cycle_label','source_cycle','source_id','company',
-    'company_match_status','include_in_analysis','amount','employee_tier','party',
+    'company_match_status','company_attribution_status','company_attribution_reason',
+    'receipt_role','receipt_role_unverified','receipt_role_reason',
+    'include_in_analysis','amount','employee_tier','party',
     'recipient_category','person_key','contributor','recipient_key','recipient',
     'committee_id','category_source','party_source','recipient_state','represented_state',
     'recipient_location_status','represented_location_status','recipient_location_evidence','represented_location_evidence'))

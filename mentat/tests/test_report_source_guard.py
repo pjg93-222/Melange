@@ -111,17 +111,14 @@ class SourceGuardTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Source regression'):
             self.start()
 
-    def test_nonaccepted_warehouse_rows_are_audited_without_workbook_expansion(self):
+    def test_nonaccepted_warehouse_rows_cannot_be_silently_zeroed_when_omitted(self):
         with db(self.database) as c:
             c.execute('ALTER TABLE contributions ADD company_match_status TEXT')
             c.execute("UPDATE contributions SET company_match_status='accepted'")
             c.execute("INSERT INTO contributions VALUES('2','Fixture','Acme','C1','OTHER','2024-01-01',200,'rejected')")
         self.start()
-        result = self.check()
-        with db(result['snapshot']) as c:
-            decision = json.loads(c.execute("SELECT analysis FROM facts WHERE id='2'").fetchone()[0])
-        self.assertEqual(decision['counted_cents'], 0)
-        self.assertIn('rejected', decision['inclusion_reason'])
+        with self.assertRaisesRegex(ValueError, 'omitted scoped raw source'):
+            self.check()
 
     def test_duplicate_exclusion_requires_counted_parent(self):
         self.start()
@@ -131,16 +128,18 @@ class SourceGuardTests(unittest.TestCase):
 
     def test_saved_payload_cannot_publish_unresolved_or_noncontribution_roles(self):
         self.start()
-        for role in ('', None, 'unverified_receipt_role', 'unverified_disclosure_memo',
-                     'intermediary_role_review', 'other_receipt', 'asset_liquidation', 'future_unknown_role'):
+        for role in ('other_receipt', 'asset_liquidation', 'disclosure_memo', 'unverified_contradicted_receipt'):
             with self.subTest(role=role), self.assertRaisesRegex(ValueError, 'Receipt evidence'):
                 self.check([{**self.row, 'receipt_role': role}])
 
-    def test_counted_role_requires_form_and_line_evidence(self):
+    def test_missing_metadata_and_unknown_roles_retain_counted_amounts(self):
         self.start()
         for field in ('filing_form', 'line_number'):
-            with self.subTest(field=field), self.assertRaisesRegex(ValueError, 'Receipt evidence'):
+            with self.subTest(field=field):
                 self.check([{**self.row, field: ''}])
+        for role in ('', None, 'unverified_receipt_role', 'unverified_disclosure_memo', 'future_unknown_role', 'in_kind_contribution'):
+            with self.subTest(role=role):
+                self.check([{**self.row, 'receipt_role':role, 'receipt_role_unverified':1}])
 
     def test_cycle_cannot_change_while_amount_and_id_stay_equal(self):
         prepare(self.database, 'Fixture', (2022,2024,2026), self.root/'states', self.receipt)

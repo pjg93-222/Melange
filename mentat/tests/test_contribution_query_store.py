@@ -2,6 +2,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 import json
+import hashlib
 from pathlib import Path
 import sqlite3
 import subprocess
@@ -106,6 +107,28 @@ class QueryStoreTests(unittest.TestCase):
         with closing(sqlite3.connect(projected)) as db:db.execute('UPDATE facts SET receipt_cents=999999');db.commit()
         projected=store.view(self.path)
         with closing(store._readonly(projected)) as db:self.assertEqual(db.execute('SELECT SUM(receipt_cents) FROM facts').fetchone()[0],25000)
+
+    def test_same_stat_sqlite_edits_invalidate_verified_and_cached_hashes(self):
+        # Windows can report identical size/mtime/creation-time across a quick
+        # SQLite commit. Force that observed collision on every platform, and
+        # prime the separately memoized digest so clearing _verified alone is
+        # insufficient to pass this regression.
+        projected=store.view(self.path)
+        original_stamp=data._stamp(projected);read_stamp=data._stamp
+        original_sha=data._hash(projected)
+        def same_projection_stamp(path):
+            return original_stamp if Path(path).resolve()==projected.resolve() else read_stamp(path)
+        for clear_verification in (False,True):
+            with self.subTest(clear_verification=clear_verification),patch.object(data,'_stamp',side_effect=same_projection_stamp):
+                with closing(sqlite3.connect(projected)) as db:
+                    db.execute('UPDATE facts SET receipt_cents=999999');db.commit()
+                self.assertEqual(data._stamp(projected),original_stamp)
+                self.assertNotEqual(hashlib.sha256(projected.read_bytes()).hexdigest(),original_sha)
+                self.assertEqual(data._hash(projected),original_sha)
+                if clear_verification:store._verified.clear()
+                repaired=store.view(self.path)
+                with closing(store._readonly(repaired)) as db:
+                    self.assertEqual(db.execute('SELECT SUM(receipt_cents) FROM facts').fetchone()[0],25000)
 
     def test_query_code_fingerprint_separates_completed_cache_entries(self):
         calls=[]

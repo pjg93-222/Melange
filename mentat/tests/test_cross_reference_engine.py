@@ -38,6 +38,17 @@ class CrossReferenceTests(unittest.TestCase):
         self.assertFalse(result['checks']['overall_unique_dollars_established'])
         self.assertEqual(result['decisions'][0]['bucket'],'employee_original')
 
+    def test_amount_magnitude_is_never_exclusion_evidence(self):
+        # An extreme but otherwise ordinary receipt is a natural observation.
+        # Its size may make a review display, but cannot change the accounting.
+        result=analyze([row('large',50_000_000)])
+        decision=result['decisions'][0]
+        self.assertEqual(decision['amount_cents'],5_000_000_000)
+        self.assertEqual(decision['counted_cents'],5_000_000_000)
+        self.assertNotEqual(decision['status'],'excluded_with_evidence')
+        self.assertFalse(any('outlier' in reason for reason in decision['reasons']))
+        self.assertEqual(result['totals']['provisional_original_giving_cents'],5_000_000_000)
+
     def test_missing_filing_coverage_does_not_create_receipt_ambiguity(self):
         a=row('a')
         for supplied_headers,expected_reason in (({},'filing_relationship_evidence_missing'),
@@ -448,7 +459,7 @@ class CrossReferenceTests(unittest.TestCase):
         for status in ('rejected','excluded'):
             with self.subTest(status=status):
                 a=changed(row('a'),company_match_status=status,
-                          company_match_reason='employer_prefix_not_verified')
+                          company_match_reason='persistent_override:reject')
                 result=analyze([a])
                 decision=result['decisions'][0]
                 self.assertEqual(decision['counted_cents'],0)
@@ -456,6 +467,23 @@ class CrossReferenceTests(unittest.TestCase):
                 self.assertEqual(decision['status'],'excluded_with_evidence')
                 self.assertEqual(result['totals']['provisional_original_giving_cents'],0)
                 self.assertFalse(result['review_queue'])
+
+    def test_heuristic_rejections_and_generic_professions_are_not_contradictions(self):
+        for employer in ('', 'CONSULTANT', 'REFUSED', 'DECLINED', 'NOTEMPLOYED', 'SELF EMPLOYED', 'MYSTERY NAME'):
+            for status in ('review','rejected','excluded'):
+                with self.subTest(employer=employer,status=status):
+                    a=changed(row('a'),company_match_status=status,contributor_employer=employer,
+                              company_match_reason='employer_prefix_not_verified')
+                    result=analyze([a])
+                    self.assertEqual(result['decisions'][0]['counted_cents'],10000)
+                    self.assertTrue(result['review_queue'])
+        a=changed(row('a'),company_match_status='rejected',contributor_employer='OTHER BANK',
+                  company_match_reason='employer_prefix_not_verified')
+        self.assertIn('attribution_contradicted_by_text',analyze([a])['decisions'][0]['reasons'])
+
+    def test_hockey_occupation_does_not_exclude_a_gift(self):
+        a=changed(row('a'),excluded_reason='occupation:HOCKEY',contributor_occupation='HOCKEY COACH')
+        self.assertEqual(analyze([a])['decisions'][0]['counted_cents'],10000)
 
     def test_negative_unverified_attribution_exposure_retains_sign(self):
         a=changed(row('a',-25),company_match_status='review')

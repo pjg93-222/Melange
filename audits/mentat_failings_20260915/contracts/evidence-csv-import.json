@@ -1,11 +1,12 @@
 {
   "contract": "evidence-csv-import",
-  "version": 4,
+  "version": 5,
   "owner": "S3",
   "produced_by": [
     "mentat/app/evidence_csv.py:limits",
     "mentat/app/evidence_csv.py:Store.catalog",
     "mentat/app/evidence_csv.py:Store.sources",
+    "mentat/app/evidence_csv.py:Store.committee_figures (v5: each listed committee's receipts, receipts_channel and receipts_by_cycle)",
     "mentat/app/evidence_csv.py:Store.select",
     "mentat/app/evidence_csv.py:catalog (legacy in-memory document)",
     "mentat/app/evidence_csv.py:select (legacy in-memory document)",
@@ -20,9 +21,10 @@
     "mentat/app/evidence.js:paneRows (SELECT, inside a pane)",
     "mentat/app/evidence.js:paneSummary (SUMMARY: figures, by-cycle bars, top contributors, compare strip)",
     "mentat/app/evidence.js:refreshSources (sources listing -> #evidence-source, industry label)",
-    "mentat/app/evidence.js:importFile (pre-flight size check against LIMITS)"
+    "mentat/app/evidence.js:importFile (pre-flight size check against LIMITS)",
+    "mentat/app/evidence.js:receiptsOf (v5: the listed committees' receipts / receipts_by_cycle -> the picker rail's figure and ranking)"
   ],
-  "description": "The shapes read once a CSV has been imported: the size/row/column LIMITS the client pre-flights against, one imported CSV's CATALOG (nested inside a sources listing or a SELECT), the GET /api/evidence-csv sources listing, a paginated SELECT of one committee/cycle's rows, and the bounded error-payload shape (never a leaked Python exception string). Orientation only - the examples are the contract. v3 (S7, 2026-09-17): every committee carries the category the file gave it or the FEC committee master inferred, with the source of that label; the CATALOG carries the per-category rollup the picker filters on, its excluded-row count and the CATALOG_VERSION its rules were built under, plus the three fields that say whether this console is re-reading the import; the SELECT carries the rows the workbook excluded from its own analysis. v4 (S6, 2026-09-17): every CATALOG carries the `industry` its Mentat workbook file name declares (blank for any other file), derived at listing time so an import already on disk never needs a re-read for it; and one committee's SUMMARY - source, committee, cycles, the channel totals for the requested cycle, the channel totals of every cycle, the top ten counterparties by amount over supported rows, and the supported/excluded/unsupported counts - is the shape a pane and the compare strip read instead of paging rows they do not show.",
+  "description": "The shapes read once a CSV has been imported: the size/row/column LIMITS the client pre-flights against, one imported CSV's CATALOG (nested inside a sources listing or a SELECT), the GET /api/evidence-csv sources listing, a paginated SELECT of one committee/cycle's rows, and the bounded error-payload shape (never a leaked Python exception string). Orientation only - the examples are the contract. v3 (S7, 2026-09-17): every committee carries the category the file gave it or the FEC committee master inferred, with the source of that label; the CATALOG carries the per-category rollup the picker filters on, its excluded-row count and the CATALOG_VERSION its rules were built under, plus the three fields that say whether this console is re-reading the import; the SELECT carries the rows the workbook excluded from its own analysis. v4 (S6, 2026-09-17): every CATALOG carries the `industry` its Mentat workbook file name declares (blank for any other file), derived at listing time so an import already on disk never needs a re-read for it; and one committee's SUMMARY - source, committee, cycles, the channel totals for the requested cycle, the channel totals of every cycle, the top ten counterparties by amount over supported rows, and the supported/excluded/unsupported counts - is the shape a pane and the compare strip read instead of paging rows they do not show. v5 (console redesign build 06, 2026-09-22, board B19): in the GET /api/evidence-csv sources listing, each committee of an import that is not being re-read also carries the figure its pane leads with, for the PAC picker rail: `receipts` (the largest channel total over every cycle; null when the committee has no supported row), `receipts_channel` (that channel; blank when there is none) and `receipts_by_cycle` ({cycle: the largest channel total within that cycle}, only cycles with supported rows), read from the import's sqlite totals by Store.committee_figures. An import being re-read (state 'reading') lists its committees without them, exactly as its CATALOG does; Store.catalog, the job status and SELECT are unchanged.",
   "examples": [
     {
       "max_bytes": 500000000,
@@ -82,7 +84,13 @@
               "supported_rows": 40,
               "category": "Super PAC",
               "category_source": "file:recipient_category",
-              "excluded_rows": 1
+              "excluded_rows": 1,
+              "receipts": 40125.5,
+              "receipts_channel": "receipts",
+              "receipts_by_cycle": {
+                "2024": 28000.0,
+                "2026": 12125.5
+              }
             },
             {
               "id": "unassigned",
@@ -91,7 +99,10 @@
               "supported_rows": 0,
               "category": "",
               "category_source": "",
-              "excluded_rows": 0
+              "excluded_rows": 0,
+              "receipts": null,
+              "receipts_channel": "",
+              "receipts_by_cycle": {}
             }
           ],
           "cycles": [

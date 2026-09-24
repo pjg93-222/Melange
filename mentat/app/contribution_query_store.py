@@ -74,17 +74,34 @@ def _readonly(path):
     db.row_factory=sqlite3.Row;db.execute('PRAGMA query_only=ON')
     return db
 
+
+def _projection_signature(path):
+    # Same-size SQLite commits can share Windows mtime/creation-time stamps.
+    # The database header includes SQLite's transaction change counter, so a
+    # completed SQL write cannot reuse verification solely on that stat tuple.
+    stamp=data._stamp(path)
+    with Path(path).open('rb') as stream:header=stream.read(100)
+    return stamp,header
+
+
+def _current_hash(path):
+    # Do not use data._hash here: its stat-keyed digest can survive the exact
+    # timestamp collision that invalidated the projection's header signature.
+    with Path(path).open('rb') as stream:
+        return hashlib.file_digest(stream,'sha256').hexdigest()
+
+
 def _valid(path,proof_path,identity):
     if path.exists() and not source_stable(path,data._stamp(path)):
         raise ValueError('The query projection has active writes; retry after they finish.')
     try:
-        stamp=(data._stamp(path),data._stamp(proof_path))
+        stamp=(_projection_signature(path),data._stamp(proof_path))
         with _mutex:
             if _verified.get(str(path))==stamp:return True
         proof=json.loads(proof_path.read_text())
         if not isinstance(proof,dict):return False
-        if proof['identity']!=identity or data._hash(path)!=proof['sha256']:return False
-        if not source_stable(path,stamp[0]) or (data._stamp(path),data._stamp(proof_path))!=stamp:return False
+        if proof['identity']!=identity or _current_hash(path)!=proof['sha256']:return False
+        if not source_stable(path,stamp[0][0]) or (_projection_signature(path),data._stamp(proof_path))!=stamp:return False
         with _mutex:_verified[str(path)]=stamp
         return True
     except (OSError,ValueError,KeyError,TypeError):return False
@@ -130,7 +147,7 @@ def view(source_path):
             if not source_stable(source_path,stamp):raise ValueError('Contribution index changed while preparing its query view.')
             proof={'identity':identity,'sha256':data._hash(pending),'source_index_sha256':original_sha,'fact_count':count,'field_mismatches':mismatch,'seconds':round(time.perf_counter()-started,6)}
             os.replace(pending,path);_atomic(proof_path,json.dumps(proof,sort_keys=True).encode())
-            with _mutex:_verified[str(path)]=(data._stamp(path),data._stamp(proof_path))
+            with _mutex:_verified[str(path)]=(_projection_signature(path),data._stamp(proof_path))
             return path
         finally:
             if pending.exists():pending.unlink()

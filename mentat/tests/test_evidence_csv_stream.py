@@ -346,6 +346,12 @@ SELECT_EXAMPLES = _import_groups[SELECT_KEYS]
 ERROR_EXAMPLES = _import_groups[ERROR_KEYS]
 SUMMARY_EXAMPLES = _import_groups[SUMMARY_KEYS]
 COMMITTEE_EXAMPLES = CATALOG_EXAMPLES[0]['committees']
+# v5 (console redesign build 06, board B19): in the sources listing, each committee of
+# an import that is not being re-read also carries the figure its pane leads with, for the
+# PAC picker rail. The listing example's committees show both states (a figure, and none).
+LISTED_FIGURE_KEYS = ('receipts', 'receipts_channel', 'receipts_by_cycle')
+LISTED_COMMITTEE_EXAMPLES = next(example['sources'][0]['committees']
+                                 for example in _import_groups[SOURCES_LISTING_KEYS] if example['sources'])
 TOTAL_EXAMPLES = SELECT_EXAMPLES[0]['totals']
 JOB_EXAMPLES = _job_groups[JOB_KEYS]
 COLLECTOR_ACTIVE_EXAMPLES = _job_groups[COLLECTOR_ACTIVE_KEYS]
@@ -415,11 +421,27 @@ def assert_catalog(value):
             raise AssertionError(f'unexpected catalog warning: {warning!r}')
 
 
+def assert_listed_committee(value):
+    assert_shape(value, LISTED_COMMITTEE_EXAMPLES, enums={'category': set(csv_data.CATEGORIES) | {''}})
+
+
+def without_listed_figures(source):
+    """The listed import as its CATALOG: every committee without the rail's figure."""
+    return {**source, 'committees': [{key: item for key, item in committee.items() if key not in LISTED_FIGURE_KEYS}
+                                     for committee in source['committees']]}
+
+
 def assert_sources_listing(value):
     assert_shape(value, SOURCES_LISTING_EXAMPLES, enums={'session_only': {False}})
     assert_limits(value['limits'])
     for source in value['sources']:
-        assert_catalog(source)
+        if source.get('state') == 'reading':
+            # v5: an import being re-read lists its committees exactly as its CATALOG does.
+            assert_catalog(source)
+            continue
+        for committee in source['committees']:
+            assert_listed_committee(committee)
+        assert_catalog(without_listed_figures(source))
 
 
 def assert_total(value):

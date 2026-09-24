@@ -121,6 +121,17 @@ class ContributionQueryTests(unittest.TestCase):
         with closing(sqlite3.connect(':memory:')) as target:
             c._stage_sources(target,{'database':source_path,'industry':'Example'},{})
             row=json.loads(target.execute('SELECT payload FROM canonical_sources').fetchone()[0])
+            # A heuristic status alone is not contradictory employer evidence.
+            decision=c.analyze([row])['decisions'][0]
+            self.assertEqual(decision['counted_cents'],10000)
+            self.assertEqual(decision['attribution_status'],'unverified')
+        with closing(sqlite3.connect(source_path)) as db:
+            db.execute('ALTER TABLE contributions ADD COLUMN company_match_reason TEXT')
+            db.execute("UPDATE contributions SET company_match_reason='adjudicated: employer belongs to neither queried company'")
+            db.commit()
+        with closing(sqlite3.connect(':memory:')) as target:
+            c._stage_sources(target,{'database':source_path,'industry':'Example'},{})
+            row=json.loads(target.execute('SELECT payload FROM canonical_sources').fetchone()[0])
             self.assertEqual(c.analyze([row])['decisions'][0]['counted_cents'],0)
 
     def test_source_attribution_conflicts_are_preserved(self):
@@ -141,6 +152,7 @@ class ContributionQueryTests(unittest.TestCase):
 
     def test_rejected_source_conflict_cannot_resurrect_money(self):
         rows=[{'sub_id':'same','company':'A','industry':'Example','company_match_status':'rejected',
+            'company_match_reason':'adjudicated: verified employer is not company A',
             'contribution_receipt_amount':100,'contribution_receipt_date':'2024-01-01',
             'committee_id':'C00000001','contributor_name':'DONOR','contributor_zip':zip5,
             'source_table':'contributions','current_receipt_cents':0,'cycle':2024} for zip5 in ('01234','01235')]
@@ -149,6 +161,18 @@ class ContributionQueryTests(unittest.TestCase):
         decision=c.analyze(merged)['decisions'][0]
         self.assertEqual(decision['counted_cents'],0)
         self.assertEqual(decision['bucket'],'excluded_company_match')
+
+    def test_heuristic_rejection_and_zip_disagreement_do_not_erase_observation(self):
+        rows=[{'sub_id':'same','company':'A','industry':'Example','company_match_status':'rejected',
+            'company_match_reason':'employer_prefix_not_verified','contribution_receipt_amount':100,
+            'contribution_receipt_date':'2024-01-01','committee_id':'C00000001','contributor_name':'DONOR',
+            'contributor_zip':zip5,'source_table':'contributions','current_receipt_cents':0,'cycle':2024}
+            for zip5 in ('01234','01235')]
+        decision=c.analyze(c.coalesce_source_observations(rows))['decisions'][0]
+        self.assertEqual(decision['counted_cents'],10000)
+        self.assertEqual(decision['supported_unique_cents'],0)
+        self.assertEqual(decision['bucket'],'conflicting_source_evidence')
+        self.assertEqual(decision['attribution_status'],'unverified')
 
     def test_evidence_geography_requires_matching_identity_and_money(self):
         row={'sub_id':'x','company':'A','contributor_name':'DONOR','contribution_receipt_amount':100,'contribution_receipt_date':'2024-01-01','contributor_zip':''}

@@ -242,11 +242,7 @@ def profile_columns(headers, rows):
 
 
 def worksheet_accounting(sheet_name, headers, rows, row_numbers):
-    """Choose one non-overlapping published view before exposing legacy charts.
-
-    The report remains intact. More flexible geography and accounting choices
-    belong to the typed contribution query, whose source rows carry the grain.
-    """
+    """Expose all worksheet rows with explicit overlap guards, never a hidden filter."""
     notes = []
     accounting = {'safe_to_sum': True, 'grain': 'worksheet row',
                   'row_role_column': None, 'included_row_roles': [],
@@ -257,11 +253,8 @@ def worksheet_accounting(sheet_name, headers, rows, row_numbers):
         index = headers.index(name)
         roles = {str(row[index]) for row in rows}
         if chosen in roles and len(roles) > 1:
-            keep = [i for i, row in enumerate(rows) if row[index] == chosen]
-            removed = len(rows) - len(keep)
-            rows, row_numbers = [rows[i] for i in keep], [row_numbers[i] for i in keep]
-            notes.append(f'Using {name} = {chosen}; {removed:,} overlapping summary rows were excluded from this chart source.')
-            accounting.update(grain=chosen, row_role_column=index, included_row_roles=[chosen])
+            accounting['independent_dimensions'].append(index)
+            notes.append(f'{name} contains overlapping published summaries. Choose any value on Filters, or keep {name} in the grouping; all worksheet rows remain selectable.')
     if 'Source ID' in headers:
         accounting.update(grain='FEC source observation', basis='included itemized receipts at the named recipient; not verified unique giving')
         notes.append('Use Analysis Amount for included receipts. Raw Amount can include excluded or repeated source observations.')

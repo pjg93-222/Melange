@@ -86,6 +86,8 @@ const pills=page=>page.locator('#studio-filters .studio-pill .studio-pill-name')
 // Put a grouping and a measure on the shelves the way a reader does: the Data
 // panel's field pills are click-to-add.
 async function buildChart(page,dimension,measure){
+  // Build 03 (S1): the source popover is put away before reaching for a field.
+  if(await page.locator('#studio-source-popover').isVisible())await page.locator('#studio-scope-change').click();
   await page.locator('#studio-dimensions .studio-pill').filter({hasText:dimension}).first().click();
   await page.locator('#studio-measures .studio-pill').filter({hasText:measure}).first().click();
   await page.waitForFunction(()=>!!document.querySelector('#studio-canvas svg'));
@@ -122,6 +124,8 @@ test('a cycle sheet opens on the Recipient partition, says why, and lets the rea
   assert.deepEqual(await pills(page),[],'a re-render never re-arms the guard');
 
   // A fresh load of the same worksheet does arm it again.
+  // Build 03 (S1): the worksheet pickers live in the source chip's popover.
+  if(!(await page.locator('#studio-sheet').isVisible()))await page.locator('#studio-scope-change').click();
   await page.locator('#studio-sheet').selectOption('Recipient Detail');
   await page.waitForFunction(()=>document.getElementById('studio-loading').textContent.includes('2 rows'));
   assert.deepEqual(await pills(page),[],'a sheet with no polymorphic column is not guarded');

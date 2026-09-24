@@ -75,9 +75,11 @@ test('the default empty state names the mode the console starts in',()=>{
 
 test('the header keeps a permanent, plainly named way back to the report picker',()=>{
   const html=read('index.html');
-  // The label became "Change data" in the 2026-09-17 UI clean-up (item 13):
-  // the header now carries the scope as chips, so the button names the act.
-  assert.match(html,/<button id="studio-scope-change" class="studio-scope-change" type="button" title="[^"]*">Change data<\/button>/);
+  // Build 03 (S1): the way back is the source chip itself - industry, cycle
+  // scope and basis - and it opens the Data source popover; its title names
+  // the act the old "Change data" label named.
+  assert.match(html,/<button id="studio-scope-change" class="studio-scope-change" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="studio-source-popover" title="[^"]*change the data source"><span id="studio-scope-chip" class="studio-scope-chip"><\/span><span id="studio-scope-basis" class="studio-scope-basis"><\/span><\/button>/);
+  assert.match(html,/<div id="studio-source-popover" class="studio-source-popover" role="dialog" aria-label="Data source" hidden>\s*<details class="studio-source-disclosure" id="studio-source-details" open>/);
   assert.doesNotMatch(html,/id="studio-scope-change"[^>]*\shidden/);
   assert.match(html,/<details class="studio-source-disclosure" id="studio-source-details" open>/);
 });
@@ -97,8 +99,10 @@ test('the group limit says what it means, and is sixty everywhere',()=>{
   assert.ok(read('chart-studio.js').includes(label),'the verified label opens with the same sentence as the markup');
   assert.doesNotMatch(read('index.html'),/default 40/);
   assert.doesNotMatch(read('index.html'),/40 per page/);
-  // The page counter says the totals are not the page.
-  assert.match(read('chart-studio.js'),/groups · totals cover all \$\{fmt\(result\.group_count\)\}/);
+  // The page counter says the totals are not the page: since build 03 (S1) the
+  // line reads "Groups 1–10 of 10" and its title carries "Totals cover all".
+  assert.match(read('chart-studio.js'),/`Groups \$\{fmt\(result\.offset\+1\)\}–\$\{fmt\(result\.offset\+result\.rows\.length\)\} of \$\{fmt\(result\.group_count\)\}`/);
+  assert.match(read('chart-studio.js'),/`Totals cover all \$\{fmt\(result\.group_count\)\} groups`/);
 });
 
 // The cross-reference tab was dwarfed on the owner's ruling: the published
@@ -106,15 +110,15 @@ test('the group limit says what it means, and is sixty everywhere',()=>{
 // the review-reason vocabulary it used to print went with them.
 test('the cross-reference says what it is, in the approved plain words',()=>{
   const xref=read('cross-reference.js');
-  assert.ok(xref.includes('The published report workbook is the accounting of record. This view lists only obvious outliers and clear refunds found while cross-referencing; it publishes no totals.'));
+  assert.ok(xref.includes('The published report workbook is the accounting of record. This view lists evidence-backed contradictions, clear refunds and unusually large counted receipts for inspection. Size alone never excludes a receipt; this view publishes no totals.'));
   for(const [key,label] of [
     ['other_receipt','Other receipt'],
     ['asset_liquidation','Asset or liability liquidation'],
     ['IND','Individual'],
     ['ORG','Organization']
   ]) assert.ok(xref.includes(key+":'"+label+"'"),'missing plain-word name for '+key);
-  for(const heading of ['Clear refunds','Obvious outliers','Negative adjustments without a matched original',
-    'Counted as giving, but not giving','Large receipts to eyeball'])
+  for(const heading of ['Clear refunds','Contradictions and large receipts','Negative adjustments without a matched original',
+    'Evidence-backed contradictions to giving','Unusually large receipts retained for inspection'])
     assert.ok(xref.includes('>'+heading+'<'),'missing heading '+heading);
   assert.ok(!xref.includes('Observed original giving'),'the tab publishes no total');
 });

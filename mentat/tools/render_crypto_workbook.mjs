@@ -79,7 +79,7 @@ const previews = process.env.MENTAT_RENDER_MASTER_ONLY === "1" ? [
   ["Recipient List", "A1:AD30"],
   ["Beneficiary Summary", "A1:V30"],
   ["PAC & Candidate Map", "A1:S30"],
-  ["Downstream Activity", "A1:AB25"],
+  ["Downstream Activity", "A1:AC25"],
   ["Beneficiary Bridge", "A1:V25"],
   ...payload.cycles.map((cycle) => [cycle.label, "A1:AI20"]),
   ["Cycle Exceptions", "A1:AI20"],

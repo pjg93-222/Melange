@@ -70,6 +70,23 @@ Banking and Community Banks therefore remain separate choices. The visible Graph
 scope names the selected company, employee level, funding view, and cycle beside
 the headline total. A Chief subtotal is not labeled as the whole industry total.
 
+Downstream PAC views follow all reachable transfers in the saved PAC snapshots,
+once per committee and election cycle, and disclose missing destination snapshots.
+For committee/cycles with saved snapshots, the latest coverage replaces the
+workbook's independent-spending partition. Explicit candidate gifts replace their
+matching workbook gifts; other workbook gifts remain available.
+The drawer lists every PAC–candidate relationship, its route, amount, and share of
+that PAC's spending in the selected direction. Concentration is observed support
+or opposition, not proof that a candidate controls a PAC. Source hashes and filing
+coverage dates accompany the API response.
+
+The spending map consolidates the saved network's reported disbursements and
+subtracts transfers between its committees to avoid counting those dollars twice.
+Unexpanded transfers and unlocated amounts stay explicit. Districts show House
+candidate activity; states include all spending kinds by default. Heat colors and
+the legend rescale to the positive range of the selected PAC, layer, and filters.
+Saved coverage is not a certification of complete FEC filing coverage.
+
 Collection writes its final workbooks to the same folder. Run state, raw exports
 and runtime snapshots remain under `%LOCALAPPDATA%/Mentat/console`.
 The collection monitor also discovers the latest 15 runs

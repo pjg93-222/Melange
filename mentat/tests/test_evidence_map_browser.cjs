@@ -38,6 +38,7 @@ const SCREENSHOT_PATH = process.env.MENTAT_EVIDENCE_MAP_SCREENSHOT || '';
 
 let stepNumber = 0, currentStepLabel = '(none)', stepStartedAt = Date.now();
 let serverForWatchdog = null;
+let pageForDiagnostics = null;
 const watchdog = setTimeout(() => {
   console.error(`WATCHDOG: step ${stepNumber} (${currentStepLabel}) exceeded ${HARD_CAP_MS}ms`);
   try { if (serverForWatchdog && serverForWatchdog.exitCode === null) serverForWatchdog.kill(); } catch { /* best effort */ }
@@ -237,8 +238,16 @@ function startStubGeocoder() {
     const page = await browser.newPage({viewport: {width: 1600, height: 1200}});
     page.setDefaultTimeout(20000);
     const errors = [], consoleErrors = [];
-    page.on('pageerror', error => errors.push(error.message));
-    page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
+    pageForDiagnostics = page;
+    page.on('pageerror', error => {
+      errors.push(error.message);
+      console.error(`PAGEERROR at step ${stepNumber}: ${error.message}`);
+    });
+    page.on('console', message => {
+      if (message.type() !== 'error') return;
+      consoleErrors.push(message.text());
+      console.error(`CONSOLE ERROR at step ${stepNumber}: ${message.text()}`);
+    });
     const status = async () => (await page.textContent('#evidence-status')).trim();
     // Polled with evaluate() rather than waitForFunction(), matching S6: a
     // raf-polled predicate did not resolve reliably on this host.
@@ -283,12 +292,11 @@ function startStubGeocoder() {
 
     step('choose the PAC and cycle 2024 in the scope bar, and add the pane');
     await waitFor(() => document.querySelectorAll('#evidence-pac option').length >= 1, null, 20000, 'a page condition');
-    await page.selectOption('#evidence-pac', 'C00804179');
     await waitFor(() => [...document.querySelectorAll('#evidence-cycle option')].some(option => option.value === '2024'),
       null, 20000, 'a page condition');
     await page.selectOption('#evidence-cycle', '2024');
-    await waitFor(() => !document.getElementById('evidence-add').disabled, null, 20000, 'a page condition');
-    await page.click('#evidence-add');
+    // Build 06: the pane opens from its tick in the picker rail (#evidence-add is hidden).
+    await page.check('#evidence-list input[type=checkbox][value="C00804179"]');
     await waitPanes(1);
     const paneSel = '#evidence-panes [data-pane=a]';
     assert.equal((await page.textContent(`${paneSel} h2`)).trim(), 'COINBASE INNOVATION PAC');
@@ -316,6 +324,15 @@ function startStubGeocoder() {
     assert.equal(await page.locator('#evidence-map-back').count(), 1);
     pass(`direction buttons ${JSON.stringify(directionTexts)}`);
 
+    step('the map opens on State, as boards 6 and M13 draw it; choose Congressional district');
+    await waitFor(() => !!document.querySelector('#evidence-map .map-layer.on'), null, 20000, 'a pressed layer');
+    assert.equal(await page.getAttribute('#evidence-map .map-layer[data-map-layer="state"]', 'aria-pressed'), 'true',
+      'the map opens on State');
+    await page.click('#evidence-map .map-layer[data-map-layer="district"]');
+    await waitFor(() => document.querySelector('#evidence-map .map-layer[data-map-layer="district"]').getAttribute('aria-pressed') === 'true',
+      null, 20000, 'Congressional district pressed');
+    pass('State pressed on opening; Congressional district chosen');
+
     step('click Raised: the heatmap paints and the ranked list carries CA-12');
     await page.click('#evidence-map .map-direction[data-direction="raised"]');
     await page.waitForSelector('#evidence-map .map-canvas svg, #evidence-map svg.map-canvas', {timeout: 30000});
@@ -337,17 +354,31 @@ function startStubGeocoder() {
     assert.ok(reconcileText.length > 0, 'empty .map-reconcile');
     assert.ok(/located/.test(reconcileText), reconcileText);
     assert.ok(/reported/.test(reconcileText), reconcileText);
+    // Fix r2 (TC-07): on screen the line reads "located $X · unlocated $Y"
+    // (boards 6 and M13); the reported total is in its title and its
+    // screen-reader sentence, which say the same thing.
+    const reconcileParts = await page.evaluate(() => {
+      const line = document.querySelector('#evidence-map .map-reconcile');
+      const shown = line.querySelector('.map-reconcile-figures');
+      return {shown: shown ? shown.textContent.trim() : null, visible: !!shown && shown.getClientRects().length > 0,
+        title: line.title, spoken: (line.querySelector('.map-reconcile-sentence') || {}).textContent};
+    });
+    assert.ok(reconcileParts.visible && /^located \$[\d,]+ · unlocated \$[\d,]+/.test(reconcileParts.shown), JSON.stringify(reconcileParts));
+    assert.ok(/located/.test(reconcileParts.title) && /reported/.test(reconcileParts.title), JSON.stringify(reconcileParts));
+    assert.equal((reconcileParts.spoken || '').trim(), reconcileParts.title, 'screen readers must hear the whole reconciliation');
     pass(`reconcile: ${JSON.stringify(reconcileText)}`);
 
     step('toggling a layer chip flips aria-pressed and the off class, both ways');
-    const layerSel = '#evidence-map .layer';
+    // Fix round 1 (R06-05): the kind toggles are a group in the map's legend
+    // card, not a line under the toolbar.
+    const layerSel = '#evidence-map .map-legend-card .layer';
     assert.equal(await page.locator(layerSel).count(), 1, 'expected exactly one layer chip (kind=contributors)');
     const layerClasses = async () => ((await page.getAttribute(layerSel, 'class')) || '').split(/\s+/).filter(Boolean);
     const pressedBefore = await page.getAttribute(layerSel, 'aria-pressed');
     assert.equal(pressedBefore, 'true', `expected the layer chip to start pressed(on): ${pressedBefore}`);
     assert.equal((await layerClasses()).includes('off'), false, 'expected the layer chip to start without the off class');
     await page.click(layerSel);
-    await waitFor(previous => document.querySelector('#evidence-map .layer').getAttribute('aria-pressed') !== previous,
+    await waitFor(previous => document.querySelector('#evidence-map .map-legend-card .layer').getAttribute('aria-pressed') !== previous,
       pressedBefore, 20000, 'the layer chip aria-pressed to flip off');
     const pressedAfter = await page.getAttribute(layerSel, 'aria-pressed');
     assert.equal(pressedAfter, 'false', `aria-pressed did not flip to false: ${pressedAfter}`);
@@ -357,7 +388,7 @@ function startStubGeocoder() {
     // the only kind off drops it from the heat entirely (heatFrom skips
     // kinds that are off), which would blank CA-12's tooltip below.
     await page.click(layerSel);
-    await waitFor(previous => document.querySelector('#evidence-map .layer').getAttribute('aria-pressed') !== previous,
+    await waitFor(previous => document.querySelector('#evidence-map .map-legend-card .layer').getAttribute('aria-pressed') !== previous,
       pressedAfter, 20000, 'the layer chip aria-pressed to flip back on');
     const pressedRestored = await page.getAttribute(layerSel, 'aria-pressed');
     assert.equal(pressedRestored, 'true', `aria-pressed did not flip back to true: ${pressedRestored}`);
@@ -393,14 +424,45 @@ function startStubGeocoder() {
     pass('CA-12 district path carries class "chosen"');
 
     step('Back to panes: the map closes and the pane shows the CA-12 district filter');
+    await waitFor(() => {
+      const ranked = document.querySelector('#evidence-map');
+      return ranked && /Donors in CA-12/.test(ranked.textContent) && /383,197/.test(ranked.textContent);
+    }, null, 60000, 'the independent map source-page read to finish');
+    // The map's source-page response does not populate the pane drawer. Its
+    // first independent load must be retryable rather than leave Reading rows
+    // forever. Throw before fetch so the intended failure emits no browser
+    // network error and the suite's zero-console-error check remains meaningful.
+    await page.evaluate(() => {
+      window.mapTestOriginalApi = window.api;
+      window.api = async (...args) => {
+        const url = new URL(args[0], location.origin);
+        if (url.pathname === '/api/evidence-csv' && !url.searchParams.has('summary')) {
+          throw new Error('Synthetic pane source failure');
+        }
+        return window.mapTestOriginalApi(...args);
+      };
+    });
     await page.click('#evidence-map-back');
     await page.waitForSelector('#evidence-panes:not([hidden])', {timeout: 20000});
     assert.equal(await page.isVisible('#evidence-map'), false, '#evidence-map should be hidden after Back to panes');
     assert.equal(await page.isVisible('#evidence-panes'), true, '#evidence-panes should be visible after Back to panes');
+    await page.waitForSelector(`${paneSel} .pane-rows-retry`, {timeout: 20000});
+    assert.match(await page.textContent(`${paneSel} .pane-drawer`), /Synthetic pane source failure/);
+    await page.evaluate(() => { window.api = window.mapTestOriginalApi; delete window.mapTestOriginalApi; });
+    await page.click(`${paneSel} .pane-rows-retry`);
     await page.waitForSelector(`${paneSel} .pane-district-filter`, {timeout: 20000});
     const filterText = (await page.textContent(`${paneSel} .pane-district-filter`)).trim();
     assert.ok(/CA-12/.test(filterText), filterText);
+    assert.equal(await page.locator(`${paneSel} .pane-drawer tbody tr`).count(), 1,
+      'The returned pane drawer keeps the district selected on the map.');
     pass(`district filter reads ${JSON.stringify(filterText)}`);
+
+    step('Clear district restores every source row instead of keeping a hidden geographic filter');
+    await page.click(`${paneSel} .pane-district-clear`);
+    await waitFor(() => document.querySelectorAll('#evidence-panes [data-pane=a] .pane-drawer tbody tr').length === 3,
+      null, 20000, 'all three source rows after clearing the selected district');
+    assert.equal(await page.locator(`${paneSel} .pane-district-filter`).count(), 0);
+    pass('The visible filter and its underlying focus both clear; all three source rows return.');
 
     step('URL round trip: a.map=raised restores the map after a fresh navigation');
     await page.click(`${paneSel} .pane-map`);
@@ -471,10 +533,9 @@ function startStubGeocoder() {
     // A SECOND committee, so this is a fresh pane key with no remembered map
     // state: reusing pane A's key would carry its 2024 cycle over and the
     // fallback under test would never run.
-    await page.selectOption('#evidence-pac', 'C00835959');
     await page.selectOption('#evidence-cycle', '');
-    await waitFor(() => !document.getElementById('evidence-add').disabled, null, 20000, 'a page condition');
-    await page.click('#evidence-add');
+    // Build 06: the pane opens from its tick in the picker rail (#evidence-add is hidden).
+    await page.check('#evidence-list input[type=checkbox][value="C00835959"]');
     await waitPanes(2);
     await page.click('#evidence-panes [data-pane=b] .pane-map');
     await page.waitForSelector('#evidence-map:not([hidden])', {timeout: 20000});
@@ -484,6 +545,10 @@ function startStubGeocoder() {
     assert.equal(await page.inputValue('#evidence-map-cycle'), '2026');
     assert.equal(await page.locator('#evidence-map .map-note').count(), 1,
       'the note must be said once, not on every render');
+    // Fix round 1 (R06-05): no line between the toolbar and the map; the note
+    // is screen-reader text and rides on the cycle chip's title.
+    assert.equal(await page.getAttribute('#evidence-map-cycle', 'title'), noteText);
+    assert.ok(await page.locator('#evidence-map .map-note').evaluate(node => node.classList.contains('sr-only')));
     const paneBCycles = await page.evaluate(() =>
       [...document.querySelectorAll('#evidence-map-cycle option')].map(option => option.value));
     assert.equal(paneBCycles.includes(''), false, JSON.stringify(paneBCycles));
@@ -495,6 +560,42 @@ function startStubGeocoder() {
     await page.click(`${paneSel} .pane-map`);
     await page.waitForSelector('#evidence-map:not([hidden])', {timeout: 20000});
     pass('pane A map reopened');
+
+    step('two cycles: zoom, Reset view and Find move both maps together (fix round 1, R06-01)');
+    await page.selectOption('#evidence-map-compare', '2026');
+    await waitFor(() => document.querySelectorAll('#evidence-map svg.map-canvas').length === 2
+      && !!document.querySelector('#evidence-map.comparing'), null, 60000, 'the second map');
+    const pair = () => page.evaluate(() => {
+      const [a, b] = document.querySelectorAll('#evidence-map .map-canvas-host');
+      const api = window.MentatEvidenceMap, round = view => [view.scale, view.x, view.y].map(value => value.toFixed(3));
+      return {a: round(api.view(a)), b: round(api.view(b)), flying: api.animating(a) || api.animating(b)};
+    });
+    const landed = async () => {
+      await page.waitForTimeout(350);
+      await waitFor(() => {
+        const [a, b] = document.querySelectorAll('#evidence-map .map-canvas-host');
+        return !window.MentatEvidenceMap.animating(a) && !window.MentatEvidenceMap.animating(b);
+      }, null, 20000, 'both maps to settle');
+      return pair();
+    };
+    await page.click('#evidence-map-zoom-in');
+    await page.click('#evidence-map-zoom-in');
+    const zoomedPair = await landed();
+    assert.ok(Number(zoomedPair.a[0]) > 1.5, JSON.stringify(zoomedPair));
+    assert.deepEqual(zoomedPair.b, zoomedPair.a, `the second map did not follow the zoom: ${JSON.stringify(zoomedPair)}`);
+    await page.click('#evidence-map-reset');
+    const resetPair = await landed();
+    assert.deepEqual(resetPair.a, ['1.000', '0.000', '0.000'], `Reset view left the first map zoomed: ${JSON.stringify(resetPair)}`);
+    assert.deepEqual(resetPair.b, resetPair.a, `Reset view left the second map behind: ${JSON.stringify(resetPair)}`);
+    await page.fill('#evidence-map-search', 'TX');
+    await page.press('#evidence-map-search', 'Enter');
+    const foundPair = await landed();
+    assert.ok(Number(foundPair.a[0]) > 1.5, `Find did not fly the first map: ${JSON.stringify(foundPair)}`);
+    assert.deepEqual(foundPair.b, foundPair.a, `Find did not fly the second map: ${JSON.stringify(foundPair)}`);
+    await page.selectOption('#evidence-map-compare', '');
+    await waitFor(() => !document.querySelector('#evidence-map.comparing')
+      && document.querySelectorAll('#evidence-map svg.map-canvas').length === 1, null, 30000, 'one map again');
+    pass(`zoom ${JSON.stringify(zoomedPair)}; reset ${JSON.stringify(resetPair)}; find ${JSON.stringify(foundPair)}`);
 
     step('the map holds at 1440x900');
     await page.setViewportSize({width: 1440, height: 900});
@@ -518,6 +619,20 @@ function startStubGeocoder() {
   } catch (error) {
     failed = true;
     console.error(`FAILED at step ${stepNumber} (${currentStepLabel}): ${error.stack || error.message}`);
+    if (pageForDiagnostics) {
+      try {
+        const seen = await pageForDiagnostics.evaluate(() => {
+          const pick = selector => {
+            const node = document.querySelector(selector);
+            return node ? node.textContent.replace(/\s+/g, ' ').trim().slice(0, 320) : null;
+          };
+          return {message: pick('#evidence-map .map-message'), note: pick('#evidence-map .map-note'),
+                  ranked: pick('#evidence-map .map-ranked'), trail: pick('#evidence-map .map-trail'),
+                  layers: pick('#evidence-map .map-layers')};
+        });
+        console.error('MAP VIEW AT FAILURE: ' + JSON.stringify(seen, null, 1));
+      } catch (problem) { console.error(`diagnostic dump failed: ${problem.message}`); }
+    }
   } finally {
     clearTimeout(watchdog);
     if (browser) await browser.close().catch(() => {});

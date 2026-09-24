@@ -87,6 +87,33 @@ OFFICE_PRESIDENT = 'US-PRES'
 #: coding systems, not a guess: without it those rows resolve to MP-01, which
 #: no map has, and the delegate's money would land in the unmatched bucket.
 AT_LARGE_JURISDICTIONS = frozenset({'DC', 'PR', 'AS', 'GU', 'MP', 'VI'})
+
+#: The four Census regions, verbatim from the Census Bureau's own state
+#: groupings (Northeast, Midwest, South, West), plus a fifth bucket for the
+#: territories, which the Census places in no region at all. This table is a
+#: LABELLING of states the map already draws - it adds no geometry, because a
+#: region is drawn by filling its member states alike. DC sits in the South,
+#: which is the Census's placement, not a judgement of this console's.
+CENSUS_REGIONS = {
+    'Northeast': ('CT', 'ME', 'MA', 'NH', 'RI', 'VT', 'NJ', 'NY', 'PA'),
+    'Midwest': ('IL', 'IN', 'MI', 'OH', 'WI', 'IA', 'KS', 'MN', 'MO', 'NE', 'ND', 'SD'),
+    'South': ('DE', 'DC', 'FL', 'GA', 'MD', 'NC', 'SC', 'VA', 'WV', 'AL', 'KY', 'MS',
+              'TN', 'AR', 'LA', 'OK', 'TX'),
+    'West': ('AZ', 'CO', 'ID', 'MT', 'NV', 'NM', 'UT', 'WY', 'AK', 'CA', 'HI', 'OR', 'WA'),
+    'Territories': ('PR', 'VI', 'GU', 'AS', 'MP'),
+}
+REGION_ORDER = ('Northeast', 'Midwest', 'South', 'West', 'Territories')
+_REGION_OF_STATE = {state: region for region, states in CENSUS_REGIONS.items() for state in states}
+
+
+def region_of(state):
+    """The Census region a two-letter state code belongs to, or ''.
+
+    '' rather than a guess: a key this table does not know is money the region
+    layer must show as unplaced, exactly as the district layer does, instead of
+    being folded into whichever region happens to sort first.
+    """
+    return _REGION_OF_STATE.get(str(state or '').strip().upper(), '')
 _CYCLE_DIGITS = re.compile(r'\d{4}')
 _STATE = re.compile(r'[A-Z]{2}')
 _COMMITTEE = re.compile(r'C\d{8}')

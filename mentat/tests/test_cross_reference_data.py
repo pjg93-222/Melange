@@ -2,7 +2,8 @@
 
 The tab is dwarfed: the published report workbook is the accounting of record,
 so this view returns the run's scope and its digest of clear refunds and
-obvious outliers, and no total of any kind. The fixtures below deliberately
+evidence-backed contradictions plus unusually large counted receipts, and no
+total of any kind. The fixtures below deliberately
 keep the producer's full report - summary, partisan table, review queue - so
 every test can prove none of it reaches the browser.
 """

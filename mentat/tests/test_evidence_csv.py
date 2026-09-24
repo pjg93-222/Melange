@@ -104,6 +104,40 @@ class EvidenceCSVTests(unittest.TestCase):
         self.assertEqual(view['totals'][0]['amount'], 2572.75)
         self.assertEqual(view['totals'][0]['row_count'], 251)
 
+    def test_listing_carries_each_committees_lead_figure_by_cycle(self):
+        # Console redesign build 06, fix round 1 (R06-02): the picker rail ranks
+        # an import's PACs by the figure each pane leads with. The listing
+        # carries it, over all cycles and per cycle, and it equals the lead
+        # channel of the pane's own summary for the same scope.
+        text = ('committee_id,committee_name,contribution_receipt_amount,contribution_receipt_date,'
+                'disbursement_amount,disbursement_date,cycle\n'
+                'C00000001,Alpha PAC,10.25,2026-01-01,,,2026\n'
+                'C00000001,Alpha PAC,5,2024-01-01,,,2024\n'
+                'C00000001,Alpha PAC,,,40,2024-02-01,2024\n'
+                'C00000002,Beta PAC,7,2026-01-02,,,2026\n'
+                'C00000003,Gamma PAC,not a number,2026-01-03,,,2026\n')
+        with tempfile.TemporaryDirectory() as temporary:
+            store = csv_data.Store(Path(temporary), evict=False)
+            job = store.wait(store.ingest_text('observations.csv', text)['id'])
+            self.assertEqual(job['state'], 'ready', job.get('message'))
+            listed = {item['id']:item for item in store.sources()[0]['committees']}
+            lead = lambda totals: max(sorted((row['channel'], row['amount']) for row in totals), key=lambda item: item[1])
+            for committee in ('C00000001', 'C00000002'):
+                with self.subTest(committee=committee):
+                    item = listed[committee]
+                    self.assertEqual((item['receipts_channel'], item['receipts']),
+                                     lead(store.summary(job['id'], committee)['totals']))
+                    for cycle, amount in item['receipts_by_cycle'].items():
+                        self.assertEqual(amount, lead(store.summary(job['id'], committee, cycle)['totals'])[1])
+            # Alpha leads with 40 of disbursements over all cycles and in 2024,
+            # and with its 10.25 of receipts in 2026.
+            self.assertEqual(listed['C00000001']['receipts'], 40)
+            self.assertEqual(listed['C00000001']['receipts_by_cycle'], {'2024':40, '2026':10.25})
+            self.assertEqual(listed['C00000002']['receipts_by_cycle'], {'2026':7})
+            # No supported row, no figure: the pane shows a dash, the rail too.
+            self.assertIsNone(listed['C00000003']['receipts'])
+            self.assertEqual(listed['C00000003']['receipts_by_cycle'], {})
+
     def test_malformed_or_unidentified_files_are_rejected(self):
         for text in ('', 'Name,Amount\nExample,10\n', 'Committee ID,committee_id\nC00000001,C00000001\n',
                      'Committee ID,Amount\nmissing,10\n', 'committee_id,amount\nC00000001,"broken\n'):

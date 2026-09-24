@@ -29,6 +29,15 @@
     else if(typeof remaining==='number'&&remaining>0)result.remaining=remaining-age-since>0?'About '+clockText(remaining-age-since):'Estimate exceeded';
     return result;
   }
-  const api={normalizeName,titlePosition,clockText,timer};
+  // Per-browser display memory (build 03: the Chart Studio Inspector's
+  // collapse). Storage can be missing or throw (a private window, blocked site
+  // data), so a read answers null and a write answers false instead of failing.
+  function recall(key) {
+    try { return root.localStorage ? root.localStorage.getItem(String(key)) : null; } catch (error) { return null; }
+  }
+  function remember(key, value) {
+    try { if (!root.localStorage) return false; root.localStorage.setItem(String(key), String(value)); return true; } catch (error) { return false; }
+  }
+  const api={normalizeName,titlePosition,clockText,timer,recall,remember};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatState=api;
 })(globalThis);

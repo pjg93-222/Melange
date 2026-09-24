@@ -23,6 +23,9 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     browser = await chromium.launch({headless:true,channel:process.env.MENTAT_BROWSER_CHANNEL || 'chrome'});
     const page = await browser.newPage({viewport:{width:1440,height:1050}});
     page.setDefaultTimeout(15000);
+    // Graph answers these waits with fixture queries; when other browser suites share the machine they have
+    // taken longer than the 15 s default (the same conditions, only more time to reach them).
+    const GRAPH_QUERY_WAIT={timeout:60000};
     async function captureScreenshot(file,fullPage=true) {
       if(!file)return;
       await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo(0,0);});
@@ -52,7 +55,7 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     await page.goto(origin+'/');
     assert.equal(await page.locator('#tab-loading').getAttribute('aria-selected'),'true');
     assert.deepEqual(await page.locator('.workspace-tabs [role=tab]').evaluateAll(tabs=>tabs.map(tab=>tab.id)),
-      ['tab-loading','tab-collection','tab-graph','tab-chart-studio','tab-cross-reference','tab-evidence']);
+      ['tab-loading','tab-collection','tab-graph','tab-chart-studio','tab-insights','tab-cross-reference','tab-evidence']);
     assert.equal(await page.locator('.workspace-tabs').getAttribute('aria-orientation'),'vertical');
     assert.equal(await page.evaluate(()=>{
       const navigation=document.querySelector('.app-navigation').getBoundingClientRect();
@@ -61,11 +64,15 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
       return navigation.right<=main.left && tabs.every((tab,index)=>index===0 || tab.top>=tabs[index-1].bottom);
     }),true,'Desktop navigation occupies its own sidebar without overlapping the workspace.');
     await page.waitForFunction(()=>document.querySelector('#loading-coverage').textContent.includes('Stale coverage'));
-    assert.match(await page.locator('#loading-coverage').innerText(),/2026-06-30/);
+    // Build 07: the grid chip shows the verified date as the board writes it ('Stale · to Jun 30, 2026').
+    assert.match(await page.locator('#loading-coverage').innerText(),/Jun 30, 2026/);
     assert.match(await page.locator('#loading-coverage').innerText(),/Unverifiable coverage/);
     assert.match(await page.locator('#loading-coverage').innerText(),/Current within policy/);
     await page.locator('#sector').fill('A different sector');
-    assert.doesNotMatch(await page.locator('#loading-coverage').innerText(),/2026-06-30/);
+    // Build 07: the grid keeps every saved sector (what is on this computer) and adds the
+    // roster's own sector as a row; its selected cell says nothing is saved for it.
+    assert.match(await page.locator('#loading-coverage').innerText(),/A different sector\s+This roster/);
+    assert.match(await page.locator('#loading-coverage').innerText(),/Jun 30, 2026/);
     assert.match(await page.locator('#loading-coverage').innerText(),/No saved collection evidence/);
     await page.locator('#sector').fill('');
     const coverageHelp=page.locator('#view-loading .coverage-panel .inline-help');
@@ -193,9 +200,11 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     await page.locator('[data-run-group=history]').click();
     await page.locator('#monitor').waitFor();
     assert.equal(await page.locator('#runs').inputValue(),'fixture');
+    await page.locator('#collection-coverage-details > summary').click();
     assert.match(await page.locator('#collection-coverage').innerText(),/Stale coverage/);
     assert.match(await page.locator('#collection-coverage').innerText(),/Unverifiable coverage/);
     assert.match(await page.locator('#collection-coverage').innerText(),/2026-06-30/);
+    await page.locator('#collection-freshness-details > summary').click();
     await page.locator('#report-freshness summary').first().waitFor();
     assert.match(await page.locator('#report-freshness').innerText(),/1\/2 sources with verified/);
     await page.locator('#report-freshness summary').first().click();
@@ -223,8 +232,12 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     // a response that left the route while simulatedRun was still readyRun can
     // land after render(stoppedRun) and put 'ready' back. Wait for the state to
     // converge, then assert it -- the equality below is still the check.
-    await page.waitForFunction(()=>document.querySelector('#stage').textContent==='stopped');
-    assert.equal(await page.locator('#stage').innerText(),'stopped');
+    await page.waitForFunction(()=>document.querySelector('#stage').textContent==='Stopped');
+    assert.equal(await page.locator('#stage').innerText(),'Stopped');
+    assert.equal(await page.locator('#stage').getAttribute('data-run-state'),'stopped','B22: the header pill carries the run state.');
+    assert.equal(await page.locator('#view-collection .primary--gold:visible').count(),1,'B22: exactly one gold button on the run card.');
+    // B22: the worker metrics live in the collapsed Workers disclosure; open it as the operator would.
+    await page.evaluate(()=>{document.querySelector('#collection-workers-details').open=true;});
     assert.match(await page.locator('#worker-metric-label').innerText(),/last checkpoint/i);
     assert.equal(await page.locator('#workers').innerText(),'8','Stopped runs preserve the worker count as a historical checkpoint.');
     assert.equal(await page.locator('#stop').isDisabled(),true);
@@ -238,8 +251,8 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     await captureScreenshot(process.env.MENTAT_COLLECTION_SCREENSHOT);
     await page.locator('#tab-cross-reference').click();
     await page.getByText('What this run covers',{exact:true}).waitFor();
-    assert.equal(await page.getByText('Observed original giving',{exact:true}).count(),0);
-    assert.match(await page.locator('#xref-results').innerText(),/it publishes no totals/);
+    assert.equal(await page.locator('#view-cross-reference').getByText('Observed original giving',{exact:true}).count(),0);
+    assert.match(await page.locator('#xref-results').innerText(),/this view publishes no totals/i);
     await captureScreenshot(process.env.MENTAT_CROSS_REFERENCE_SCREENSHOT);
     trace('Loading, Evidence, Collection and Cross-reference checks passed.');
     await page.locator('#tab-graph').click();
@@ -263,8 +276,8 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     await page.locator('#graph-more > summary').click();
     assert.equal(await page.locator('#graph-scope').isVisible(),false,'the scope sentence is no longer printed on screen');
     assert.match(await page.locator('#graph-scope').textContent(),/Harborlight|All companies/,'it is still built, for the CSV and the image caption');
-    assert.equal(await page.locator('#graph-total').textContent(),'$1,585.00');
-    assert.equal(await page.locator('#graph-direct').textContent(),'$90.00');
+    assert.equal(await page.locator('#graph-total').textContent(),'$1,585');
+    assert.equal(await page.locator('#graph-direct').textContent(),'$90');
     assert.equal(await page.locator('#graph-tab-overview').getAttribute('aria-selected'),'true');
     assert.equal(await page.locator('#graph-organization-panel').isVisible(),false);
     await page.locator('#graph-more > summary').click();
@@ -276,34 +289,34 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#graph-open-sources').evaluate(e=>e===document.activeElement),true);
     await page.locator('#graph-more > summary').click();
-    assert.deepEqual(await page.locator('#graph-tier option').allTextContents(),['All levels','Chief','Middle-Management','Employees']);
+    assert.deepEqual(await page.locator('#graph-tier option').allTextContents(),['All','Chief','Middle-Management','Employees']);
     await page.locator('#graph-company').selectOption('Harborlight Credit Union');
     await page.locator('#graph-tier').selectOption('Chief');
-    await page.waitForFunction(()=>document.querySelector('#graph-total').textContent==='$300.00'&&!document.querySelector('#graph-results').hidden);
+    await page.waitForFunction(()=>document.querySelector('#graph-total').textContent==='$300'&&!document.querySelector('#graph-results').hidden,undefined,GRAPH_QUERY_WAIT);
     assert.match(await page.locator('#graph-scope').textContent(),/Chief/);
-    assert.equal(await page.locator('#graph-direct').textContent(),'$100.00');
+    assert.equal(await page.locator('#graph-direct').textContent(),'$100');
     await page.locator('#graph-categories').getByRole('button',{name:'JFC: $200.00',exact:true}).click();
-    await page.waitForFunction(()=>document.querySelector('#graph-total').textContent==='$200.00'&&!document.querySelector('#graph-results').hidden);
-    assert.equal(await page.locator('#graph-direct').textContent(),'$0.00');
+    await page.waitForFunction(()=>document.querySelector('#graph-total').textContent==='$200'&&!document.querySelector('#graph-results').hidden,undefined,GRAPH_QUERY_WAIT);
+    assert.equal(await page.locator('#graph-direct').textContent(),'$0');
     await page.locator('#graph-chips').getByRole('button',{name:'JFC ×'}).click();
     await page.locator('#graph-tier').selectOption('Middle-Management');
     await page.locator('#graph-tab-candidates').click();
     assert.equal(await page.locator('#graph-company').inputValue(),'Harborlight Credit Union');
     assert.equal(await page.locator('#graph-tier').inputValue(),'Middle-Management');
     await page.locator('#graph-mode').selectOption('activity');
-    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-candidates').textContent.includes('$777.00'));
+    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-candidates').textContent.includes('$777.00'),undefined,GRAPH_QUERY_WAIT);
     assert.match(await page.locator('#graph-candidate-note').textContent(),/not money attributed/);
     await page.locator('#graph-direction').selectOption('Oppose');
-    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-candidates').textContent.includes('$999.00'));
+    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-candidates').textContent.includes('$999.00'),undefined,GRAPH_QUERY_WAIT);
     await page.locator('#graph-mode').selectOption('estimates');
-    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-candidate-note').textContent.includes('whole industry'));
+    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-candidate-note').textContent.includes('whole industry'),undefined,GRAPH_QUERY_WAIT);
     assert.equal(await page.locator('#graph-export').isDisabled(),true);
     await page.locator('#graph-tab-overview').click();
-    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-mode').value==='direct');
+    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-mode').value==='direct',undefined,GRAPH_QUERY_WAIT);
     assert.equal(await page.locator('#graph-company').inputValue(),'Harborlight Credit Union');
     assert.equal(await page.locator('#graph-tier').inputValue(),'Middle-Management');
     await page.locator('#graph-reset').click();
-    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-total').textContent==='$1,585.00');
+    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-total').textContent==='$1,585',undefined,GRAPH_QUERY_WAIT);
     await page.locator('#graph-candidates').getByRole('button',{name:'Candidate One · D: $90.00',exact:true}).click();
     assert.equal(await page.locator('#graph-candidate-rows tr').count(),2);
     await page.locator('#graph-export-menu > summary').click();
@@ -321,8 +334,16 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     await page.locator('#graph-export').click();
     const png=fs.readFileSync(await (await pngPromise).path());
     assert.equal(png.subarray(1,4).toString(),'PNG');
+    // P3.2: the full table opens IN PLACE. It used to switch the analysis
+    // sub-tab as a side effect the label did not name.
+    const analysisBefore=await page.evaluate(()=>document.querySelector('.graph-panels').dataset.analysis);
     await page.locator('#graph-full-table').click();
     assert.equal(await page.locator('#graph-categories > details').getAttribute('open'),'');
+    assert.equal(await page.evaluate(()=>document.querySelector('.graph-panels').dataset.analysis),
+      analysisBefore,'the full table must not move the reader to another analysis');
+    assert.equal(await page.locator('[data-values=categories]').getAttribute('aria-expanded'),'true');
+    assert.match(await page.locator('[data-values=categories]').textContent(),/^Show top \d/);
+    await page.locator('#graph-tab-recipients').click();
     assert.equal(await page.locator('#graph-tab-recipients').getAttribute('aria-selected'),'true');
     await page.locator('#graph-tab-companies').click();
     assert.equal(await page.locator('#graph-level-panel').isVisible(),true);
@@ -349,10 +370,22 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowRight');
     assert.equal(await page.locator('#tab-graph').getAttribute('aria-selected'),'true');
-    const mobileChartLabel=await page.locator('#graph-categories svg text').first().boundingBox();
+    // Graph redraws its charts once after the tab is shown at this width (3 mutations, then steady), and a label
+    // replaced mid-measure has no box; poll until a label on the page is measured, then hold it to the same size rule.
+    let mobileChartLabel=null;
+    for(const end=Date.now()+15000;!mobileChartLabel&&Date.now()<end;)mobileChartLabel=await page.locator('#graph-categories svg text').first().boundingBox()||await page.waitForTimeout(100).then(()=>null);
     assert.ok(mobileChartLabel && mobileChartLabel.height>=10,'Mobile chart labels retain a readable rendered size.');
     await page.evaluate(()=>window.scrollTo(0,0));
     await captureScreenshot(process.env.MENTAT_MOBILE_SCREENSHOT);
+    // At 390 px only the active step keeps its label; that label must fit its own step and never widen the page.
+    await page.locator('#tab-loading').click();
+    for(const step of [1,2,3]){
+      const fit=await page.evaluate(step=>{setLoadingStep(step);const active=document.querySelector('#view-loading .loading-step.is-active');
+        return {step,page:Math.max(0,document.documentElement.scrollWidth-innerWidth),label:active.scrollWidth-active.clientWidth};},step);
+      assert.deepEqual(fit,{step,page:0,label:0},`Loading stepper at 390 px, step ${step}`);
+    }
+    await page.evaluate(()=>setLoadingStep(1));
+    await page.locator('#tab-graph').click();
     for(const width of [768,1099,1100]) {
       await page.setViewportSize({width,height:900});
       await page.waitForFunction(expected=>document.querySelector('.workspace-tabs').getAttribute('aria-orientation')===expected,width>=1100?'vertical':'horizontal');
@@ -439,12 +472,20 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth > innerWidth),false);
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#graph-builder').isVisible(),false);
+    // P3.3c: Classic borrowed the Graph tab for its dialog, and dismissing the
+    // dialog used to leave the reader standing there. It hands the tab back.
+    await page.waitForFunction(()=>location.hash==='#chart-studio');
+    assert.equal(await page.evaluate(()=>location.hash),'#chart-studio');
+    await page.locator('#tab-graph').click();
+    await page.locator('#graph-tab-overview').click();
     await page.locator('#graph-tab-overview').focus();
     await page.keyboard.press('ArrowRight');
     assert.equal(await page.locator('#graph-tab-recipients').getAttribute('aria-selected'),'true');
     await page.locator('#tab-graph').focus();
     await page.keyboard.press('ArrowRight');
     assert.equal(await page.locator('#tab-chart-studio').getAttribute('aria-selected'),'true');
+    await page.keyboard.press('ArrowRight');
+    assert.equal(await page.locator('#tab-insights').getAttribute('aria-selected'),'true');
     await page.keyboard.press('ArrowRight');
     assert.equal(await page.locator('#tab-cross-reference').getAttribute('aria-selected'),'true');
     await page.keyboard.press('ArrowRight');

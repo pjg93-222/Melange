@@ -1,10 +1,11 @@
 {
   "contract": "url_scope",
-  "version": 4,
+  "version": 6,
   "owner": "S5; pane keys S6",
   "produced_by": [
     "mentat/app/scope.js:write",
-    "mentat/app/graph.js:writeScope (called from refresh(), the one path every Graph control change reaches)",
+    "mentat/app/graph.js:writeScope (called from refresh(), the one path every Graph control change reaches; since v6 also from applyCompare and the Layout switch, writing compare, layout and the compared key once per pill)",
+    "mentat/app/graph.js:writeDrawerScope (drawer, drawerDirection - the downstream drawer beside Top organizations)",
     "mentat/app/chart-studio.js:selectContributionDataset (industry)",
     "mentat/app/chart-studio.js:saveViewNamed (saved, on a successful save)",
     "mentat/app/chart-studio.js:openView (saved, on a successful open)",
@@ -15,11 +16,13 @@
     "mentat/app/scope.js:read",
     "mentat/app/scope.js:parse",
     "mentat/app/graph.js:applyUrlScope (after loadCatalog fills the selects)",
+    "mentat/app/graph.js:applyUrlScope and resolvePendingCompare (compare, compareValues, layout - industries at once, cycles and companies once the first /api/graph answer has named the options)",
+    "mentat/app/graph.js:restoreDrawer (drawer, drawerDirection - after the first /api/graph answer has named the recipients)",
     "mentat/app/chart-studio.js:loadContributions (industry, company, cycle, saved)",
     "mentat/app/cross-reference.js:refresh (industry -> GET /api/cross-reference?industry=)",
     "mentat/app/evidence.js:restorePanes (a.* - d.*, category), after GET /api/evidence-csv and GET /api/evidence have answered, the same pattern graph.js:applyUrlScope uses"
   ],
-  "description": "The console's URL scheme. The hash names the tab (app.js showView) and the query string carries the scope, so a permalink, a reload and a tab switch are one operation. Values are encodeURIComponent-encoded and decoded with URLSearchParams; keys are plain. write() merges into the live query: an empty value removes its key, unknown keys are preserved in place, existing keys keep their order and new keys append. A value write() would refuse is never put in the URL, so anything read() rejects could only have been typed by hand. Tab switches stay on history.replaceState (Paul's ruling C); pushState is never used. Orientation only - the examples are the contract. v2 (S6, 2026-09-17): up to four PAC evidence panes, each addressed by a PREFIXED key (a.source, a.id, a.committee, a.cycle ... d.*) so `cycle` goes on belonging to Graph and \"whose cycle is this?\" stays answerable. The pane's search text is transient and is never written; `category` carries the committee-type filter in the same spelling Graph uses. A fifth prefix is not a key this module knows, so e.id is preserved in the query and never read as scope. v3 (S8, 2026-09-18): a.map carries the district map's direction ('raised' | 'spent') on each pane; absent means the pane grid is showing. v4 (UI3, 2026-09-19): `studioPane` is RETIRED. Paul removed the N charts strip that addressed it (\"Remove the N charts strip, keep the Board\"), so no module reads or writes the key any more. It is not dropped: it is an ordinary unknown key, preserved in place by write(), so a bookmark that still carries one opens the ordinary console with the whole navigation visible.",
+  "description": "The console's URL scheme. The hash names the tab (app.js showView) and the query string carries the scope, so a permalink, a reload and a tab switch are one operation. Values are encodeURIComponent-encoded and decoded with URLSearchParams; keys are plain. write() merges into the live query: an empty value removes its key, unknown keys are preserved in place, existing keys keep their order and new keys append. A value write() would refuse is never put in the URL, so anything read() rejects could only have been typed by hand. Tab switches stay on history.replaceState (Paul's ruling C); pushState is never used. Orientation only - the examples are the contract. v2 (S6, 2026-09-17): up to four PAC evidence panes, each addressed by a PREFIXED key (a.source, a.id, a.committee, a.cycle ... d.*) so `cycle` goes on belonging to Graph and \"whose cycle is this?\" stays answerable. The pane's search text is transient and is never written; `category` carries the committee-type filter in the same spelling Graph uses. A fifth prefix is not a key this module knows, so e.id is preserved in the query and never read as scope. v3 (S8, 2026-09-18): a.map carries the district map's direction ('raised' | 'spent') on each pane; absent means the pane grid is showing. v4 (UI3, 2026-09-19): `studioPane` is RETIRED. Paul removed the N charts strip that addressed it (\"Remove the N charts strip, keep the Board\"), so no module reads or writes the key any more. It is not dropped: it is an ordinary unknown key, preserved in place by write(), so a bookmark that still carries one opens the ordinary console with the whole navigation visible. v6 (console redesign build 02, 2026-09-22): Graph's comparison. `compare` names the one dimension compared (industry | cycle | company) and that dimension's own key REPEATS, once per pill, in pill order: ?industry=Banking&industry=Credit%20Union&compare=industry. read() still answers the FIRST value on scope.industry (or company, cycle), so every reader older than compare keeps working, and adds scope.compareValues, the ordered values (at most 3, each once). Without `compare`, a repeated key reads its first value only, as before. A `compare` whose key holds fewer than two usable values is dropped into invalid[], and write() never puts one in the URL. `layout=stacked` is Graph's non-default card layout for two scopes; it is never written with three, where stacked is the only layout. Flat keys only, never JSON (D-039).",
   "keys": {
     "industry": {
       "value": "The published industry label exactly as the snapshot registry lists it (S4 HANDOFF: 'Credit Union', 'Property & Casualty Insurance'). Any non-empty string; the label, never the slug. URL-encoded, so '&' survives.",
@@ -118,6 +121,46 @@
         "mentat/app/chart-studio.js (loadContributions opens it through openability())"
       ]
     },
+    "drawer": {
+      "value": "The committee whose downstream drawer is open beside Top organizations, as an FEC committee id ([A-Za-z0-9][A-Za-z0-9-]{0,31}). Absent means no drawer is open. Separate from `recipient`, which narrows the whole page: the drawer can be closed while the page stays narrowed to that PAC.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/graph.js:writeDrawerScope (open a PAC row, close the drawer, Back)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/graph.js:applyUrlScope, then restoreDrawer() once the first /api/graph answer has named the recipients"
+      ]
+    },
+    "drawerDirection": {
+      "value": "Which side of that committee's reported activity the drawer is showing: one of Contribution / Other, Support, Oppose, Unknown - the #graph-direction option values. Absent means the drawer opens on the side with the largest amount, which is what a fresh click does.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/graph.js:writeDrawerScope (the drawer's segmented control)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/graph.js:restoreDrawer (passed to openDrawer as the preferred side, so a permalink reopens the side it was cut from)"
+      ]
+    },
+    "compare": {
+      "value": "v6. Which one dimension Graph is comparing: industry, cycle or company. The key it names repeats once per scope pill, in pill order (the chip's own value first); read() answers that key's first value as before and the ordered list as scope.compareValues. Fewer than two usable values of the named key is no comparison: `compare` is dropped into invalid[]. A fourth value is refused (at most 3).",
+      "writers": [
+        "mentat/app/scope.js:write, called from mentat/app/graph.js:writeScope (refresh, applyCompare, the Layout switch)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/graph.js:applyUrlScope (industries at once) and resolvePendingCompare (cycles and companies, once the first /api/graph answer names the options)"
+      ]
+    },
+    "layout": {
+      "value": "v6. Graph's card layout while comparing: 'stacked' is the only value. Written only when it is not the default - two scopes with Stacked chosen; with three scopes stacked is the only layout and nothing is written. Absent means the grid.",
+      "writers": [
+        "mentat/app/scope.js:write, called from mentat/app/graph.js:writeScope (the Layout: Grid | Stacked switch)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/graph.js:applyUrlScope"
+      ]
+    },
     "studioPane": {
       "value": "RETIRED 2026-09-19. It named one of the split view's Chart Studio panes - B, C or D - and chose that pane's own localStorage store. The strip that opened those panes was removed on Paul's ruling, so nothing reads this key and nothing writes it. It is kept in this table only so a reader who finds one in an old bookmark can learn what it was; it is not part of the vocabulary, scope.js does not own it, and write() preserves it in place exactly as it preserves any other unknown key.",
       "writers": [],
@@ -173,6 +216,16 @@
         "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
       ]
     },
+    "a.compare": {
+      "value": "Pane A. Build 06 (console redesign, fix round 1): the second cycle of a two-cycle map compare (board M13) open on this pane, a four-digit election-cycle end year; absent when one map is showing.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (the Compare select, a map cycle change that swaps the pair, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
+      ]
+    },
     "b.source": {
       "value": "Pane B. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
       "writers": [
@@ -221,6 +274,16 @@
       "readers": [
         "mentat/app/scope.js:read",
         "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
+      ]
+    },
+    "b.compare": {
+      "value": "Pane B. Build 06 (console redesign, fix round 1): the second cycle of a two-cycle map compare (board M13) open on this pane, a four-digit election-cycle end year; absent when one map is showing.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (the Compare select, a map cycle change that swaps the pair, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
       ]
     },
     "c.source": {
@@ -273,6 +336,16 @@
         "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
       ]
     },
+    "c.compare": {
+      "value": "Pane C. Build 06 (console redesign, fix round 1): the second cycle of a two-cycle map compare (board M13) open on this pane, a four-digit election-cycle end year; absent when one map is showing.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (the Compare select, a map cycle change that swaps the pair, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
+      ]
+    },
     "d.source": {
       "value": "Pane D. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
       "writers": [
@@ -321,6 +394,16 @@
       "readers": [
         "mentat/app/scope.js:read",
         "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openMap)"
+      ]
+    },
+    "d.compare": {
+      "value": "Pane D. Build 06 (console redesign, fix round 1): the second cycle of a two-cycle map compare (board M13) open on this pane, a four-digit election-cycle end year; absent when one map is showing.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (the Compare select, a map cycle change that swaps the pair, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
       ]
     }
   },
@@ -476,6 +559,110 @@
       }
     },
     {
+      "name": "graph_compare_industries",
+      "why": "v6, board G1. The Industry chip holds two pills, Banking then Credit Union; the key repeats in pill order and read() still answers Banking on scope.industry.",
+      "url": "/?industry=Banking&industry=Credit%20Union&cycle=2026&compare=industry#graph",
+      "view": "graph",
+      "scope": {
+        "industry": "Banking",
+        "cycle": "2026",
+        "compare": "industry",
+        "compareValues": [
+          "Banking",
+          "Credit Union"
+        ]
+      }
+    },
+    {
+      "name": "graph_compare_three_industries",
+      "why": "v6, board G4. Three scopes: the layout is stacked by rule, so `layout` is not written.",
+      "url": "/?industry=Banking&industry=Credit%20Union&industry=Community%20Banks&cycle=2026&compare=industry#graph",
+      "view": "graph",
+      "scope": {
+        "industry": "Banking",
+        "cycle": "2026",
+        "compare": "industry",
+        "compareValues": [
+          "Banking",
+          "Credit Union",
+          "Community Banks"
+        ]
+      }
+    },
+    {
+      "name": "graph_compare_cycles",
+      "why": "v6, board G2. The Cycle chip holds 2023-2024 and 2025-2026; cycles are end years, the earlier one first because it was the chip's value when the comparison started.",
+      "url": "/?industry=Banking&cycle=2024&cycle=2026&compare=cycle#graph",
+      "view": "graph",
+      "scope": {
+        "industry": "Banking",
+        "cycle": "2024",
+        "compare": "cycle",
+        "compareValues": [
+          "2024",
+          "2026"
+        ]
+      }
+    },
+    {
+      "name": "graph_compare_companies_stacked",
+      "why": "v6, board G3 with Stacked chosen. Two scopes, so the non-default layout is written.",
+      "url": "/?industry=Banking&company=Goldman%20Sachs%20Bank%20NA&company=JP%20Morgan%20Chase%20Bank%20NA&cycle=2026&compare=company&layout=stacked#graph",
+      "view": "graph",
+      "scope": {
+        "industry": "Banking",
+        "company": "Goldman Sachs Bank NA",
+        "cycle": "2026",
+        "compare": "company",
+        "compareValues": [
+          "Goldman Sachs Bank NA",
+          "JP Morgan Chase Bank NA"
+        ],
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "write_starts_a_comparison",
+      "why": "v6. An array writes the key once per value where the key stood, and `compare` appends.",
+      "write": {
+        "before": "/?industry=Banking&cycle=2026#graph",
+        "partial": {
+          "industry": [
+            "Banking",
+            "Credit Union"
+          ],
+          "compare": "industry"
+        },
+        "after": "/?industry=Banking&industry=Credit%20Union&cycle=2026&compare=industry#graph"
+      }
+    },
+    {
+      "name": "write_ends_a_comparison",
+      "why": "v6. Clear comparison: one value for the key drops its repeats, and an empty compare and layout remove themselves.",
+      "write": {
+        "before": "/?industry=Banking&industry=Credit%20Union&cycle=2026&compare=industry#graph",
+        "partial": {
+          "industry": "Banking",
+          "compare": "",
+          "layout": ""
+        },
+        "after": "/?industry=Banking&cycle=2026#graph"
+      }
+    },
+    {
+      "name": "graph_permalink_downstream_drawer",
+      "why": "P5. Clicking a PAC in Top organizations narrows the page to it AND opens the drawer beside the panel; the permalink carries both, so the link reopens the same reading rather than a filtered page with no drawer.",
+      "url": "/?industry=Community%20Banks&cycle=2026&recipient=C00004812&drawer=C00004812&drawerDirection=Contribution%20%2F%20Other#graph",
+      "view": "graph",
+      "scope": {
+        "industry": "Community Banks",
+        "cycle": "2026",
+        "recipient": "C00004812",
+        "drawer": "C00004812",
+        "drawerDirection": "Contribution / Other"
+      }
+    },
+    {
       "name": "evidence_map_permalink_spent",
       "why": "S8. A map permalink reopens the map it was cut from: the pane is restored first from a.source/a.id/a.committee/a.cycle, then a.map reopens the district map on that pane.",
       "url": "/?a.source=snapshot&a.id=fairshake-20260908&a.committee=C00835959&a.cycle=2024&a.map=spent#evidence",
@@ -490,6 +677,98 @@
     }
   ],
   "negative_controls": [
+    {
+      "why": "v6. compare=industry with one industry compares nothing. The comparison is dropped and the page opens on its one industry.",
+      "url": "/?industry=Banking&cycle=2026&compare=industry#graph",
+      "view": "graph",
+      "expected": {
+        "scope": {
+          "industry": "Banking",
+          "cycle": "2026"
+        },
+        "invalid": [
+          {
+            "key": "compare",
+            "value": "industry",
+            "reason": "compare needs at least two different values of the key it names"
+          }
+        ]
+      }
+    },
+    {
+      "why": "v6. compare=party names no dimension Graph compares. It is dropped, and the repeated industry reads its first value, as any repeated key without compare does.",
+      "url": "/?industry=Banking&industry=Credit%20Union&compare=party#graph",
+      "view": "graph",
+      "expected": {
+        "scope": {
+          "industry": "Banking"
+        },
+        "invalid": [
+          {
+            "key": "compare",
+            "value": "party",
+            "reason": "compare must be one of industry, cycle, company"
+          }
+        ]
+      }
+    },
+    {
+      "why": "v6. layout=sideways is not a layout. The comparison stands; the layout falls back to its default.",
+      "url": "/?industry=Banking&industry=Credit%20Union&compare=industry&layout=sideways#graph",
+      "view": "graph",
+      "expected": {
+        "scope": {
+          "industry": "Banking",
+          "compare": "industry",
+          "compareValues": [
+            "Banking",
+            "Credit Union"
+          ]
+        },
+        "invalid": [
+          {
+            "key": "layout",
+            "value": "sideways",
+            "reason": "layout must be stacked"
+          }
+        ]
+      }
+    },
+    {
+      "why": "drawerDirection=Downstream is not a #graph-direction option value. The drawer must open on a side the server will answer for, so an unusable side is dropped and the drawer falls back to the largest one.",
+      "url": "/?industry=Banking&drawer=C00004812&drawerDirection=Downstream#graph",
+      "view": "graph",
+      "expected": {
+        "scope": {
+          "industry": "Banking",
+          "drawer": "C00004812"
+        },
+        "invalid": [
+          {
+            "key": "drawerDirection",
+            "value": "Downstream",
+            "reason": "drawerDirection must be one of Contribution / Other, Support, Oppose, Unknown"
+          }
+        ]
+      }
+    },
+    {
+      "why": "drawer=../../etc is not a committee id. The value reaches /api/graph as `recipient`, so the shape is checked here rather than trusted from the URL.",
+      "url": "/?industry=Banking&drawer=..%2F..%2Fetc#graph",
+      "view": "graph",
+      "expected": {
+        "scope": {
+          "industry": "Banking"
+        },
+        "invalid": [
+          {
+            "key": "drawer",
+            "value": "../../etc",
+            "reason": "drawer must be a committee id"
+          }
+        ]
+      }
+    },
     {
       "why": "mode=pac is not a #graph-mode option value. A bad permalink must still open the tab, so the key is dropped and reported rather than thrown.",
       "url": "/?industry=Banking&mode=pac#graph",

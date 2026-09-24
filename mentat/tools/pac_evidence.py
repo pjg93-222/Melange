@@ -6,10 +6,10 @@ response hash, never credentials. New output directories force a fresh snapshot.
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict
+from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import hashlib
 import json
 from pathlib import Path
@@ -25,7 +25,13 @@ from fec_transfer_graph import atomic_json
 
 
 def money(value):
-    return Decimal(str(value or 0))
+    try:
+        result = Decimal(str(value))
+    except (InvalidOperation, ValueError, TypeError) as error:
+        raise ValueError('Missing or invalid monetary evidence; no zero is inferred.') from error
+    if not result.is_finite() or result * 100 != (result * 100).to_integral_value():
+        raise ValueError('Monetary evidence must be finite whole cents.')
+    return result
 
 
 def name_key(value):
@@ -98,10 +104,9 @@ def receipt_role(row):
         role = 'transfer_receipt'
     if role in ('unverified_other_receipt', 'unverified_receipt_role') and non_giving and giving_event:
         role = 'unverified_contradicted_receipt'
-    # collect.R demotes this to 'disclosure_memo' (excluded) only when the whole
-    # payload proves the repeat: same committee, cycle and amount on a counted
-    # line-11 gift. One row cannot see that, so the twin always reports the
-    # unpaired verdict - which is the counted, flagged one.
+    # Exclusion requires an explicit compatible link to a retained parent;
+    # committee/cycle/amount equality alone does not prove duplication. This
+    # single-row classifier therefore returns the counted, flagged verdict.
     if memo and re.search(rules['disclosure_pattern'],description) and role != 'other_receipt':
         return 'unverified_disclosure_memo'
     if role == 'contribution' and re.search(rules['refund_review_pattern'], description):
@@ -117,6 +122,23 @@ def source_link(row):
         return url
     image = str(row.get('image_number') or '')
     return 'https://docquery.fec.gov/cgi-bin/fecimg/?' + image if image.isdigit() else ''
+
+
+def filing_record(row, *, amount_field, date_field, activity_type):
+    """Keep one source transaction attached to its original FEC filing."""
+    return {
+        'date': str(row.get(date_field) or '')[:10],
+        'amount': float(money(row.get(amount_field))),
+        'activity_type': activity_type,
+        'filing_form': row.get('filing_form') or '',
+        'file_number': row.get('file_number') or row.get('file_num') or '',
+        'transaction_id': row.get('transaction_id') or '',
+        'sub_id': row.get('sub_id') or '',
+        'payee': row.get('payee_name') or row.get('recipient_name') or '',
+        'purpose': (row.get('expenditure_description') or row.get('expenditure_purpose_descrip')
+                    or row.get('disbursement_description') or ''),
+        'source_url': source_link(row),
+    }
 
 
 class Client:
@@ -164,7 +186,11 @@ class Client:
                           'sha256': hashlib.sha256(json.dumps(response, sort_keys=True).encode()).hexdigest(), 'response': response})
         return response
 
-    def rows(self, endpoint, params, max_pages=200):
+    def rows(self, endpoint, params, max_pages=1000):
+        # Large national PACs can exceed 20,000 Schedule A rows in one cycle.
+        # Exact FEC pagination still bounds the work; this ceiling only refuses
+        # pathological responses after 100,000 rows instead of truncating a
+        # legitimate committee at the former 200-page limit.
         collected, ids, cursors, cursor = [], set(), set(), {}
         expected = None
         for page in range(1, max_pages + 1):
@@ -210,6 +236,47 @@ def collect_committee(client, committee, cycle):
             'disbursements': disbursements, 'expenditures': expenditures, 'totals': totals[0]}
 
 
+def collect_network(client, roots, max_units=30):
+    """Collect reachable committee/cycles once; disclose the bounded frontier.
+
+    Candidate-linked Schedule B gifts are terminal activity. The collection
+    budget bounds requests, never silently defines the financial network.
+    """
+    roots = set(roots)
+    pending = deque(sorted(roots, key=lambda key: (key[1], key[0])))
+    if max_units < len(pending) or max_units < 1:
+        raise ValueError('Collection budget must cover every selected root.')
+    visited, snapshots, missing = set(), [], []
+    attempts = 0
+    while pending:
+        committee, cycle = pending.popleft()
+        if (committee, cycle) in visited:
+            continue
+        visited.add((committee, cycle))
+        if attempts >= max_units:
+            missing.append({'committee_id': committee, 'cycle': cycle, 'status': 'collection_limit'})
+            continue
+        attempts += 1
+        try:
+            unit = collect_committee(client, committee, cycle)
+        except (ValueError, OSError) as error:
+            if (committee, cycle) in roots:
+                raise
+            missing.append({'committee_id':committee, 'cycle':cycle,
+                            'status':'collection_failed', 'detail':str(error)})
+            continue
+        snapshots.append(unit)
+        destinations = defaultdict(Decimal)
+        for row in unit['disbursements']:
+            destination = str(row.get('recipient_committee_id') or '')
+            if (destination and not row.get('candidate_id') and not is_memo(row)
+                    and str(row.get('line_number')) in ('22', '23')):
+                destinations[destination] += money(row.get('disbursement_amount'))
+        pending.extend((destination, cycle) for destination, value in sorted(destinations.items())
+                       if value > 0 and (destination, cycle) not in visited)
+    return snapshots, missing
+
+
 def summarize(snapshots, company, aliases):
     """Observed network context. Candidate spend is never a donor allocation."""
     alias_keys = {name_key(value) for value in [company, *aliases] if name_key(value)}
@@ -220,7 +287,7 @@ def summarize(snapshots, company, aliases):
         committee, cycle = snapshot['committee_id'], snapshot['cycle']
         total = snapshot['totals']
         actual_ie = sum((money(r.get('expenditure_amount')) for r in snapshot['expenditures']
-                         if not r.get('memoed_subtotal') and r.get('memo_code') != 'X'), Decimal(0))
+                         if not is_memo(r)), Decimal(0))
         finances.append({'committee_id': committee, 'cycle': cycle,
                          'committee_name': next(((r.get('committee') or {}).get('name') for r in snapshot['receipts'] if (r.get('committee') or {}).get('name')), committee),
                          'receipts_as_reported': total.get('receipts'), 'disbursements_as_reported': total.get('disbursements'),
@@ -229,7 +296,8 @@ def summarize(snapshots, company, aliases):
                          'coverage_end': str(total.get('coverage_end_date') or '')[:10],
                          'regular_ie_total': float(actual_ie),
                          'regular_ie_summary_total': total.get('independent_expenditures'),
-                         'regular_ie_reconciles': abs(actual_ie - money(total.get('independent_expenditures'))) <= Decimal('.01'),
+                         'regular_ie_reconciles': (abs(actual_ie - money(total['independent_expenditures'])) <= Decimal('.01'))
+                             if total.get('independent_expenditures') not in (None, '') else None,
                          'url': f'https://www.fec.gov/data/committee/{committee}/?cycle={cycle}'})
         for row in snapshot['receipts']:
             if name_key(row.get('contributor_name')) not in alias_keys:
@@ -237,33 +305,62 @@ def summarize(snapshots, company, aliases):
             role = receipt_role(row)
             receipts.append({'company': company, 'reported_name': row.get('contributor_name'),
                              'committee_id': committee, 'cycle': cycle, 'sub_id': row['sub_id'],
-                             'date': row.get('contribution_receipt_date'), 'amount': row.get('contribution_receipt_amount'),
-                             'role': role, 'included_company_contribution': role in ('contribution', 'in_kind_contribution') and not is_memo(row),
+                             'date': row.get('contribution_receipt_date'), 'amount': float(money(row.get('contribution_receipt_amount'))),
+                             'role': role, 'included_company_contribution': role not in ('other_receipt','asset_liquidation'),
+                             'receipt_role_unverified': role not in ('contribution','in_kind_contribution') or is_memo(row),
                              'description': row.get('receipt_type_full'), 'line_number': row.get('line_number'),
                              'transaction_id': row.get('transaction_id'), 'source_url': source_link(row)})
+        candidate_payments = defaultdict(list)
         for row in snapshot['disbursements']:
             destination = row.get('recipient_committee_id')
-            if not destination or row.get('memoed_subtotal') or row.get('memo_code') == 'X':
+            if is_memo(row):
                 continue
             # A committee ID can also identify a vendor/refund recipient. Admit
             # contribution/transfer Schedule B lines, never all committee payees.
-            if row.get('line_number') not in ('22', '23'):
+            if str(row.get('line_number')) not in ('22', '23'):
                 continue
-            transfers.append({'cycle': cycle, 'source': committee, 'destination': destination,
+            if destination:
+                transfers.append({'cycle': cycle, 'source': committee, 'destination': destination,
+                              'candidate_id': row.get('candidate_id') or '',
                               'destination_name': row.get('recipient_name'), 'date': row.get('disbursement_date'),
-                              'amount': row.get('disbursement_amount'), 'sub_id': row['sub_id'], 'source_url': source_link(row)})
+                              'amount': float(money(row.get('disbursement_amount'))), 'sub_id': row['sub_id'], 'source_url': source_link(row)})
+            if row.get('candidate_id'):
+                candidate_payments[(row['candidate_id'],
+                                    row.get('candidate_name') or row['candidate_id'])].append(row)
+        for (candidate, reported_name), rows in candidate_payments.items():
+            dates = sorted(str(row.get('disbursement_date') or '')[:10] for row in rows)
+            filings = sorted((filing_record(row, amount_field='disbursement_amount',
+                                            date_field='disbursement_date',
+                                            activity_type='Candidate contribution / other payment')
+                              for row in rows),
+                             key=lambda item: (item['date'], item['source_url'], item['sub_id']))
+            activity.append({'cycle':cycle, 'committee_id':committee,
+                'candidate_id_as_filed':candidate, 'candidate_name_as_filed':reported_name,
+                'direction':'Contribution / Other', 'activity_type':'Schedule B candidate payment',
+                'committee_spending':float(sum((money(row.get('disbursement_amount'))
+                                                for row in rows), Decimal(0))),
+                'first_date':dates[0], 'last_date':dates[-1], 'source_rows':len(rows),
+                'source_urls':sorted({filing['source_url'] for filing in filings}),
+                'filings':filings, 'company_attributed_amount':None,
+                'evidence':'Reported committee activity; donor allocation unidentifiable'})
         grouped = defaultdict(list)
         for row in snapshot['expenditures']:
-            if row.get('memoed_subtotal') or row.get('memo_code') == 'X':
+            if is_memo(row):
                 continue
             grouped[row.get('candidate_id') or '', row.get('candidate_name') or '', row.get('support_oppose_indicator') or ''].append(row)
         for (candidate, reported_name, direction), rows in grouped.items():
             dates = sorted(str(row.get('expenditure_date') or '')[:10] for row in rows)
+            filings = sorted((filing_record(row, amount_field='expenditure_amount',
+                                            date_field='expenditure_date',
+                                            activity_type='Independent expenditure')
+                              for row in rows),
+                             key=lambda item: (item['date'], item['source_url'], item['sub_id']))
             activity.append({'cycle': cycle, 'committee_id': committee, 'candidate_id_as_filed': candidate,
                              'candidate_name_as_filed': reported_name, 'direction': {'S': 'Support', 'O': 'Oppose'}.get(direction, 'Unresolved'),
                              'committee_spending': float(sum((money(r.get('expenditure_amount')) for r in rows), Decimal(0))),
                              'first_date': dates[0], 'last_date': dates[-1], 'source_rows': len(rows),
                              'source_urls': sorted({source_link(row) for row in rows}),
+                             'filings': filings,
                              'company_attributed_amount': None, 'evidence': 'Reported committee activity; donor allocation unidentifiable'})
     return {'version': 1, 'company': company, 'aliases': sorted(alias_keys),
             'method': 'Observed receipt, transfer and regular-report expenditure legs. Pooled funds do not establish donor-to-candidate attribution. No pro-rata dollar estimate is published.',
@@ -282,7 +379,7 @@ def temporal_routes(evidence, max_hops=3):
     outbound = defaultdict(list)
     activity = defaultdict(list)
     for transfer in evidence['transfers']:
-        if transfer.get('date') and money(transfer.get('amount')) > 0:
+        if not transfer.get('candidate_id') and transfer.get('date') and money(transfer.get('amount')) > 0:
             outbound[transfer['cycle'], transfer['source']].append(transfer)
     for item in evidence['candidate_activity']:
         if money(item['committee_spending']) > 0:
@@ -317,6 +414,11 @@ def temporal_routes(evidence, max_hops=3):
                                 'candidate_name_as_filed': item['candidate_name_as_filed'], 'direction': item['direction']})
                 emitted += 1
             if len(path) - 1 >= max_hops:
+                for transfer in outbound[receipt['cycle'], committee]:
+                    if transfer['date'][:10] >= available and transfer['destination'] not in path:
+                        results.append({**initial, 'status':'depth_limit',
+                            'path':[*path, transfer['destination']], 'max_hops':max_hops})
+                        emitted += 1
                 continue
             for transfer in outbound[receipt['cycle'], committee]:
                 day = transfer['date'][:10]
@@ -346,7 +448,8 @@ def reconcile_candidates(client, evidence):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--committees', required=True, help='Comma-separated FEC IDs; explicitly select the network boundary')
+    parser.add_argument('--committees', required=True, help='Comma-separated root FEC IDs; recipient PACs are followed within the collection budget')
+    parser.add_argument('--max-units', type=int, default=30, help='Maximum committee/cycle snapshots; any uncollected frontier is disclosed')
     parser.add_argument('--cycles', default='2024')
     parser.add_argument('--company', required=True)
     parser.add_argument('--aliases', default='', help='Pipe-separated explicit aliases; transaction roles remain separate')
@@ -354,19 +457,18 @@ def main():
     args = parser.parse_args()
     committees = list(dict.fromkeys(args.committees.split(',')))
     cycles = list(dict.fromkeys(int(value) for value in args.cycles.split(',')))
-    if len(committees) * len(cycles) > 30:
-        raise ValueError('Collect up to 30 committee/cycle units per evidence snapshot.')
     args.output.mkdir(parents=True, exist_ok=True)
     client = Client(args.output / 'source-cache')
     work = [(committee, cycle) for committee in committees for cycle in cycles]
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        snapshots = list(executor.map(lambda item: collect_committee(client, *item), work))
-    atomic_json(args.output / 'snapshots.json', snapshots)
+    snapshots, missing = collect_network(client, work, args.max_units)
     result = summarize(snapshots, args.company, args.aliases.split('|'))
     reconcile_candidates(client, result)
     result['temporal_routes'] = temporal_routes(result)
-    result['unexpanded_committees'] = sorted({r['destination'] for r in result['transfers']} - set(committees))
+    result['collection_roots'] = [{'committee_id': committee, 'cycle': cycle} for committee, cycle in work]
+    result['downstream_coverage'] = missing
+    result['unexpanded_committees'] = sorted({row['committee_id'] for row in missing})
     result['retrieved_at'] = datetime.now(timezone.utc).isoformat()
+    atomic_json(args.output / 'snapshots.json', snapshots)
     result['source_snapshot_sha256'] = hashlib.sha256((args.output / 'snapshots.json').read_bytes()).hexdigest()
     atomic_json(args.output / 'evidence.json', result)
     from pac_cash_model import write_estimates

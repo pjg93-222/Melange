@@ -7,6 +7,7 @@
   --acu-ivory:#f7ede4;
   --acu-paper:#fcf7f4;
   --acu-gold:#eca91c;
+  --acu-gold-soft:#eac670;
   --acu-teal:#327a7a;
   --acu-aqua:#9ed4d5;
   --acu-mauve:#8b6984;
@@ -17,15 +18,34 @@
   --navy:var(--acu-plum);
   --blue:var(--acu-purple);
   --teal:var(--acu-teal);
-  --muted:#716a64;
-  --line:#e4d9d0;
+  --muted:#62596e;
+  --line:#d9d4de;
   --chart-ink:var(--acu-plum);
-  --chart-grid:#e8e0da;
+  --chart-grid:#e5e1e8;
   --chart-negative:#bf3f36;
+  /* Board S1's bar teal (TB-14, reconcile 2026-09-23): the fill of a single
+     series in Chart Studio. Compared scopes keep --scope-1/2/3, and the measure
+     pills keep --acu-teal (white text on #2b9b99 is 3.4:1). */
+  --chart-series-1:#2b9b99;
   /* The only colours added for the 2026-09-17 UI clean-up: a party pair for
      the candidate dots, beside the chart colours they sit among. */
   --party-dem:#3b6db5;
   --party-rep:#b8433a;
+  /* Console redesign, build 01 (2026-09-22): shell and shared-primitive tokens.
+     The sidebar and card colours are sampled from board M4 (the board wins). */
+  --sidebar-bg:#f3efea;
+  --sidebar-line:#e4e0db;
+  --card-border:#e8e6e5;
+  --card-radius:12px;
+  --card-shadow:0 1px 2px rgba(52,38,73,.04),0 6px 18px rgba(52,38,73,.05);
+  --scope-1:var(--acu-purple);
+  --scope-2:var(--acu-teal);
+  --scope-3:var(--acu-mauve);
+  --tint-shared:rgba(214,200,226,.38);
+  /* The base palette, captured here, so shared chrome keeps it on a view that
+     re-tints --muted and --line for its own content (Graph does). */
+  --base-muted:var(--muted);
+  --base-line:var(--line);
   font-family:var(--font-sans);
   color:var(--acu-plum);
   background:var(--acu-paper);

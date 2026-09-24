@@ -72,7 +72,7 @@ test('chart and comparison controls preserve source state, missing values and cu
   await page.evaluate(()=>window.releaseIndustries({industries:[{name:'Technology'}]}));
   await page.waitForFunction(()=>document.querySelector('#compare-industry').value==='Technology'&&document.querySelector('#compare-results button'));
   await page.locator('#compare-open').evaluate(button=>button.click());
-  assert.equal(await page.locator('#compare-open').textContent(),'Compare subjects');
+  assert.equal(await page.locator('#compare-open').textContent(),'Advanced comparison');
   assert.equal(await page.locator('#compare-panel').isHidden(),true);
   assert.deepEqual(errors,[]);
 });

@@ -42,9 +42,20 @@ test('classifyFields splits dimensions, measures and hidden identifier fields', 
   assert.deepStrictEqual(meta.measures.map(f => f.name), ['Amount', 'Contribution Count']);
   assert.deepStrictEqual(meta.hidden.map(f => f.name), ['Committee ID']);
   assert.strictEqual(meta.fields[CYCLE].isTime, true);
-  assert.strictEqual(meta.fields[CYCLE].glyph, 'cal');
+  assert.strictEqual(meta.fields[CYCLE].glyph, 'Abc');
+  assert.strictEqual(meta.fields[6].glyph, 'cal');
   assert.strictEqual(meta.fields[CATEGORY].glyph, 'Abc');
   assert.strictEqual(meta.fields[AMOUNT].glyph, '#');
+});
+
+test('paneBuckets lists the named fields in their own order, folds the rest and skips ids it lacks', () => {
+  const fields = [{id: 'a', name: 'A'}, {id: 'b', name: 'B'}, {id: 'c', name: 'C'}, {id: 'd', name: 'D'}];
+  const split = core.paneBuckets(fields, ['c', 'missing', 'a']);
+  assert.deepStrictEqual(split.shown.map(f => f.id), ['c', 'a']);
+  assert.deepStrictEqual(split.more.map(f => f.id), ['b', 'd']);
+  assert.deepStrictEqual(core.paneBuckets(fields, null).shown, []);
+  assert.deepStrictEqual(core.paneBuckets(fields, null).more.map(f => f.id), ['a', 'b', 'c', 'd']);
+  assert.deepStrictEqual(core.paneBuckets(null, ['a']), {shown: [], more: []});
 });
 
 test('classification agrees with chart-math chartColumns on measures', () => {

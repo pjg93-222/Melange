@@ -108,8 +108,16 @@ test('closed Graph tables are deferred without losing rows, callbacks or exports
 
   // The last row's original callback still filters the correct recipient.
   await page.locator('#graph-organizations tbody tr').last().locator('button').click();
-  await page.waitForFunction(()=>graphCalls.length===2);
-  assert.match(await page.evaluate(()=>graphCalls.at(-1)),/recipient=organizations-4999/);
+  // Only /api/graph reads count: the company sparklines now fetch their own
+  // contribution session and catalog through the same fetch. And since the
+  // downstream drawer (2026-09-19) a PAC click narrows the page AND opens the
+  // drawer, whose own /api/graph reads follow the page's in the same tick, so
+  // the count passes 2 between two animation frames. The page's read is the
+  // second one; every drawer read names the same recipient too.
+  const graphReads=()=>page.evaluate(()=>graphCalls.filter(url=>String(url).startsWith('/api/graph?')));
+  await page.waitForFunction(()=>graphCalls.filter(url=>String(url).startsWith('/api/graph?')).length>=2);
+  assert.match((await graphReads())[1],/recipient=organizations-4999/);
+  assert.match((await graphReads()).at(-1),/recipient=organizations-4999/);
   await page.waitForFunction(()=>document.querySelectorAll('.graph-panels details tbody tr').length===0);
   await page.locator('#graph-tab-candidates').click();await page.locator('#graph-view-candidates').click();
   await page.waitForFunction(()=>document.querySelectorAll('#graph-candidates tbody tr').length===3000);

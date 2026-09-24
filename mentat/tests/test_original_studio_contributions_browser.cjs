@@ -90,10 +90,15 @@ test('original shelves use verified facts, display edits reuse queries, and ZIP 
   const descending=await bars();
   assert.equal(descending.length,2);
   const beforeSort=await page.evaluate(()=>calls.query.length);
+  // Build 03 (S1): Ascending and Descending live in the one Sort menu; the
+  // source popover opened above is put away first, as a reader would.
+  if(await page.locator('#studio-source-popover').isVisible())await page.locator('#studio-scope-change').click();
+  await page.locator('#studio-sort > summary').click();
   await page.locator('#studio-sort-desc').click();
   assert.equal(await page.locator('#studio-undo').isDisabled(),true,'pressing the direction the view is already in is not an edit');
   assert.equal(await page.evaluate(()=>calls.query.length),beforeSort,'and costs no query');
   assert.deepEqual(await bars(),descending,'and leaves the bars where they were');
+  if(!(await page.locator('#studio-sort-asc').isVisible()))await page.locator('#studio-sort > summary').click();
   await page.locator('#studio-sort-asc').click();
   await settled();
   assert.equal(await page.locator('#studio-sort-asc').getAttribute('aria-pressed'),'true');
@@ -106,6 +111,9 @@ test('original shelves use verified facts, display edits reuse queries, and ZIP 
   assert.equal(await page.locator('#studio-sort-desc').getAttribute('aria-pressed'),'true');
 
   const firstQueries=await page.evaluate(()=>calls.query.length);
+  // Build 03 (S1): a new sheet starts with labels on, so the toggle goes off
+  // and back on - two render-only edits - and labels stay on for what follows.
+  await page.locator('#studio-labels').click();
   await page.locator('#studio-labels').click();
   await page.locator('#studio-fit').selectOption('entire');
   await page.waitForFunction(()=>document.querySelector('#studio-canvas').getAttribute('aria-busy')!=='true');
@@ -155,6 +163,7 @@ test('original shelves use verified facts, display edits reuse queries, and ZIP 
   assert.equal(await page.locator('#studio-records tbody tr').count(),0,'new-source records must not attach to old marks');
   const beforeRefresh=await page.evaluate(()=>calls.query.length);
   await page.evaluate(()=>window.version=2);
+  if(!(await page.locator('#studio-refresh-data').isVisible()))await page.locator('#studio-scope-change').click();
   await page.locator('#studio-refresh-data').click();
   await page.waitForFunction(count=>calls.query.length>count&&document.querySelector('#studio-canvas').getAttribute('aria-busy')!=='true',beforeRefresh);
   await page.locator('#studio-download summary').click();
@@ -173,6 +182,7 @@ test('original shelves use verified facts, display edits reuse queries, and ZIP 
   await page.getByRole('button',{name:/^MA:/}).last().click();
   await page.waitForFunction(()=>document.querySelectorAll('#studio-records tbody tr').length===1);
   assert.deepEqual(await page.evaluate(()=>calls.records.at(-1).filters),[{field:'state',op:'in',value:['MA']}],'state marks must not drill the entire dataset');
+  if(!(await page.locator('#studio-source-mode').isVisible()))await page.locator('#studio-scope-change').click();
   await page.locator('#studio-source-mode').selectOption('worksheet');
   await page.waitForFunction(()=>document.querySelector('#studio-loading').textContent.includes('2 rows'));
   assert.equal(await page.locator('#studio-worksheet-source').isVisible(),true);

@@ -26,7 +26,9 @@ test('the data source panel opens, stays open, names what it cannot read, and sh
 
   // The picker is the first thing in the pane, before any script has run.
   assert.equal(await page.evaluate(()=>document.getElementById('studio-source-details').open),true,'the panel arrives open');
-  assert.equal(await page.locator('#studio-scope-change').textContent(),'Change data');
+  // Build 03 (S1): the source chip is the way in; it names the popover it opens.
+  assert.equal(await page.locator('#studio-scope-change').getAttribute('aria-controls'),'studio-source-popover');
+  assert.equal(await page.locator('#studio-scope-change #studio-scope-chip').count(),1);
 
   await page.evaluate(([blocked,preparing])=>{
     document.querySelectorAll('[role="tabpanel"][id^="view-"]').forEach(panel=>{panel.hidden=panel.id!=='view-chart-studio';});
@@ -119,6 +121,9 @@ test('the data source panel opens, stays open, names what it cannot read, and sh
   const drawn=await page.locator('#studio-canvas svg').count();
   assert.equal(drawn,1);
   await page.evaluate(()=>{window.preparingForever=true;});
+  // Build 03 (S1): the source popover is put away before the reader reaches
+  // for a field (it can lie over the Data pane).
+  if(await page.locator('#studio-source-popover').isVisible())await page.locator('#studio-scope-change').click();
   await page.locator('#studio-measures .studio-pill').filter({hasText:'Observation count'}).first().click();
   await page.locator('#studio-progress').waitFor({state:'visible'});
   await page.locator('#studio-progress-cancel').click();

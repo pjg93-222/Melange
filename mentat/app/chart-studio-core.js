@@ -56,7 +56,9 @@
       // Identifier columns are real fields; they are folded away until the user
       // asks for them, exactly as recommend() already ignores them.
       field.hidden = column.visible === true ? false : field.isIdentifier && !field.isTime;
-      field.glyph = field.geographic_role ? 'geo' : field.data_type==='boolean'?'bool':field.role === 'measure' ? '#' : field.isTime ? 'cal' : 'Abc';
+      // The calendar marks a date (type 'date'), as S1 draws it; a cycle, year,
+      // quarter or month is still a time axis (isTime) but its glyph is Abc.
+      field.glyph = field.geographic_role ? 'geo' : field.data_type==='boolean'?'bool':field.role === 'measure' ? '#' : field.type === 'date' ? 'cal' : 'Abc';
       return field;
     });
     const types = overrides && typeof overrides === 'object' ? overrides : {};
@@ -68,7 +70,7 @@
         field.coerced = true;
         field.hidden = false;
         field.glyph = field.geographic_role ? 'geo' : field.data_type === 'boolean' ? 'bool'
-          : field.role === 'measure' ? '#' : field.isTime ? 'cal' : 'Abc';
+          : field.role === 'measure' ? '#' : field.type === 'date' ? 'cal' : 'Abc';
       }
     }
     return {
@@ -80,6 +82,15 @@
   }
 
   const fieldAt = (meta, index) => meta.fields.find(f => f.index === index) || null;
+
+  // Board S1 opens each Data-pane bucket on a short list of named fields, in
+  // the board's order; the bucket's other fields fold under "More fields".
+  // An id the catalog does not have is skipped, never stood in for.
+  function paneBuckets(fields, ids) {
+    const list = fields || [];
+    const shown = (ids || []).map(id => list.find(f => f.id === id)).filter(Boolean);
+    return {shown, more: list.filter(f => !shown.includes(f))};
+  }
 
   // The classic dialog and the engine both find the subject by an exact
   // 'Subject' column name (charts.js prepareSubjects, chart-math temporal), so
@@ -122,7 +133,9 @@
       types: {},
       params: {start: 0, end: 0, limit: 0, subject: '', maxGroups: 0, splitMulti: false},
       sort: 'none',
-      showLabels: false,
+      // S1 (build 03): a new sheet writes each bar's value at its end. Labels
+      // stays a toggle, and a saved sheet keeps its own choice.
+      showLabels: true,
       fit: 'standard'
     };
   }
@@ -333,7 +346,7 @@
     const timeDimension = allDimensions.find(p => p.field.isTime) || null;
     // A dimension on Columns draws upright bars; a dimension only on Rows lays
     // the same view on its side, which is what Tableau's Rows shelf means here.
-    const orientation = colDimensions.length ? 'vertical' : rowDimensions.length ? 'horizontal' : 'none';
+    const orientation = marks.orientation || (colDimensions.length ? 'vertical' : rowDimensions.length ? 'horizontal' : 'none');
 
     let type = '', xPill = null, yPill = null;
 
@@ -344,12 +357,12 @@
         if (firstMeasure) { type = 'bar'; yPill = firstMeasure; }
         else issues.push('Add a grouping (company, recipient, cycle) and a dollar measure.');
       } else {
-        const dimension = orientation === 'vertical' ? colDimensions[0] : rowDimensions[0];
+        const dimension = (orientation === 'vertical' ? colDimensions[0] : rowDimensions[0]) || firstDimension;
         const measure = orientation === 'vertical'
           ? (rowMeasures[0] || colMeasures[0] || null)
           : (colMeasures[0] || rowMeasures[0] || null);
         xPill = dimension; yPill = measure;
-        type = orientation === 'horizontal' ? 'horizontal' : (dimension.field.isTime && measure ? 'line' : 'bar');
+        type = orientation === 'horizontal' ? 'horizontal' : (dimension?.field.isTime && measure ? 'line' : 'bar');
       }
     } else if (markType === 'circle') {
       type = 'scatter';
@@ -370,7 +383,7 @@
       if (!xPill) issues.push('A ' + markType + ' mark needs a dimension on Columns or Rows.');
     } else if (markType === 'bar' || markType === 'text') {
       type = orientation === 'horizontal' ? 'horizontal' : 'bar';
-      xPill = orientation === 'horizontal' ? rowDimensions[0] : (colDimensions[0] || firstDimension);
+      xPill = orientation === 'horizontal' ? (rowDimensions[0] || firstDimension) : (colDimensions[0] || firstDimension);
       yPill = orientation === 'horizontal' ? (colMeasures[0] || rowMeasures[0] || null) : firstMeasure;
       if (!xPill && !yPill) issues.push('Add a grouping (company, recipient, cycle) and a dollar measure.');
     } else {
@@ -585,6 +598,18 @@
     const plain = dimensions.filter(f => !f.isTime);
     const measures = selection.fields.filter(f => f.role === 'measure');
     const next = clone(state);
+    // Changing a chart changes its marks, not the user's chosen data question.
+    // Seed empty shelves only; preserve every existing pill, filter and aggregate.
+    if (shelf(state.columns).length || shelf(state.rows).length) {
+      const marks = {'text-table':'text','pie-chart':'pie','horizontal-bars':'bar',
+        'stacked-bars':'bar','side-by-side-bars':'bar','circle-views':'line',
+        'side-by-side-circles':'line','lines-continuous':'line','lines-discrete':'line',
+        'dual-lines':'line','area-continuous':'area','area-discrete':'area',
+        'scatter-plot':'circle','histogram':'histogram','box-and-whisker':'box'};
+      next.marks = {...next.marks, type: marks[tileId] || next.marks.type};
+      if (tileId === 'horizontal-bars') next.marks.orientation = 'horizontal';
+      return next;
+    }
     next.columns = []; next.rows = [];
     next.marks = Object.assign({}, next.marks, {color: null});
     next.analytics = Object.assign({}, next.analytics, {transform: 'none'});
@@ -1145,7 +1170,7 @@
     canTreatAs, isDateLike, filterValues, filterActive, filterBounds, normalizeFilter, filterSummary,
     aggregationsFor, measurePresets, applyMeasurePreset, datePartsFor,
     companyOverviewPresets, companyOverviewMissing, companyOverviewSheet,
-    classifyFields, fieldAt, subjectField, pill, shelf, createSheet, clearSheet, swapShelves, sourceKey,
+    classifyFields, fieldAt, paneBuckets, subjectField, pill, shelf, createSheet, clearSheet, swapShelves, sourceKey,
     carriedFilterValue, graphCycleValue, quickAddZone, migrateSheet,
     WORKSHEET_GROUP_LABELS, NO_DATA_WORKBOOK_HINT, COMMITTEE_ACTIVITY_NOTE,
     defaultGuards, committeeActivitySheet, workbookKind, groupWorksheets,

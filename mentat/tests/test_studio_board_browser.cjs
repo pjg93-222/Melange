@@ -983,7 +983,7 @@ const VISIBLE_SOURCE = `node => {
       await until(page, () => /of /.test((document.getElementById('studio-group-count') || {}).textContent || ''),
         'the selected tile paging three at a time');
       await page.click('#studio-groups-next');
-      await until(page, () => !/^1.{1,3}3 /.test((document.getElementById('studio-group-count') || {}).textContent || ''),
+      await until(page, () => !/^Groups 1.{1,3}3 /.test((document.getElementById('studio-group-count') || {}).textContent || ''),
         'the selected tile leaving its first page',
         () => ({label: (document.getElementById('studio-group-count') || {}).textContent}));
       const movedOn = await page.evaluate(() => (document.getElementById('studio-group-count') || {}).textContent);
@@ -1015,7 +1015,7 @@ const VISIBLE_SOURCE = `node => {
       assert.ok(!after.some(text => money.test(text)),
         'no tile may keep the other report figures, got '
         + JSON.stringify(after.map(text => text.slice(0, 60))));
-      assert.match(label, /^1.{1,3}[0-9]+ of/,
+      assert.match(label, /^Groups 1.{1,3}[0-9]+ of/,
         'the new report opens on its own first page, got "' + label + '" after "' + movedOn + '"');
       pass('the first report was on "' + movedOn + '"; the new one opens on "' + label + '"');
     });

@@ -140,6 +140,20 @@ STAGING_TABLES={
 DATA_QUALITY_COLUMNS=(('check_id','TEXT'),('source','TEXT'),('severity','TEXT'),
                       ('passed','INTEGER'),('detail','TEXT'),('metric','TEXT'))
 
+# Additive audit tables shared by the Overview and Data workbook producers.
+for _table, _fields in {
+    'downstream_reach': [('cycle','INTEGER'),('view','TEXT'),('company','TEXT'),
+        ('source_committee_id','TEXT'),('representative_root','TEXT'),('representative_path','TEXT')],
+    'downstream_measurement_ledger': [('cycle','INTEGER'),('view','TEXT'),('company','TEXT'),
+        ('candidate_id','TEXT'),('before_amount','REAL'),('after_amount','REAL'),('delta','REAL'),('basis','TEXT')],
+    'downstream_sources': [('cycle','INTEGER'),('source','TEXT'),('path','TEXT'),
+        ('sha256','TEXT'),('status','TEXT'),('policy','TEXT')],
+}.items():
+    STAGING_TABLES[_table] = tuple((
+        (name, kind), lambda row, name=name, kind=kind:
+        (_number(row.get(name)) if kind == 'REAL' else _count(row.get(name)) if kind == 'INTEGER' else _text(row.get(name)))
+    ) for name, kind in _fields)
+
 
 def stage(payload,path):
     """Append the Python-side tables to an existing tidy staging store.
@@ -243,7 +257,13 @@ def enrich(payload,directory):
         unresolved_nodes=set()
         if any(r.get('unresolved_all_sources') or r['status']=='stale_transfer_index' for r in source_coverage):
             unresolved_nodes.update(funding)
-        cycle_paths=reachable({key for key,value in funding.items() if value>0},edges,stop_nodes=direct_ids)
+        company_funding=defaultdict(float)
+        for row in payload['raw_rows']:
+            if row['cycle']==cycle and row['include_in_analysis']=='Yes':
+                company_funding[row.get('company',''),row['committee_id']]+=row['amount']
+        route_roots={committee for (_,committee),value in company_funding.items()
+                     if value>0 and committee and committee not in direct_ids}
+        cycle_paths=reachable(route_roots,edges,max_depth=None,stop_nodes=direct_ids)
         paths.extend(cycle_paths)
         assigned,unresolved=allocate(funding,edges,activity,stop_nodes=direct_ids,
             candidate_links={committee:links[cycle,committee] for committee in direct_ids},
@@ -308,7 +328,7 @@ def main():
     if not args.audit_only:value=enrich(value,args.directory)
     if args.audit_directory:
         args.audit_directory.mkdir(parents=True,exist_ok=True)
-        for name in ('transfer_paths','allocation_estimates','allocation_coverage','attribution_summary','funding_cohorts','source_freshness','classification_review','quality_checks'):
+        for name in ('transfer_paths','allocation_estimates','allocation_coverage','attribution_summary','funding_cohorts','source_freshness','classification_review','quality_checks','downstream_reach','downstream_measurement_ledger','downstream_sources'):
             rows=value.get(name,[])
             fields=list(dict.fromkeys(key for row in rows for key in row)) or ['status']
             path=args.audit_directory/f'{name}.csv'

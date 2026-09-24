@@ -18,7 +18,7 @@ test('Canvas only keeps Export, and the Inspector toggle counts the filters behi
   const html=fs.readFileSync(path.join(app,'index.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<link\b[^>]*>/gi,'');
   await page.route('http://canvas-only.fixture/**',route=>route.fulfill({contentType:'text/html',body:html}));
   await page.goto('http://canvas-only.fixture/#chart-studio');
-  for(const file of ['style.css','acu-theme.css','workspace.css','chart-studio.css'])await page.addStyleTag({path:path.join(app,file)});
+  for(const file of ['style.css','acu-theme.css','workspace.css','chart-studio.css','workspace-polish.css'])await page.addStyleTag({path:path.join(app,file)});
   await page.evaluate(()=>{
     document.querySelectorAll('[role="tabpanel"][id^="view-"]').forEach(panel=>{panel.hidden=panel.id!=='view-chart-studio';});
     window.currentView='chart-studio';window.selectedRun='published-reports';
@@ -91,9 +91,9 @@ test('Canvas only keeps Export, and the Inspector toggle counts the filters behi
   await page.waitForFunction(()=>!document.querySelector('#view-chart-studio .studio').classList.contains('studio-options-hidden'));
   assert.equal(await page.locator('#studio-undo').isVisible(),true);
 
-  // Below 1200px the Inspector becomes a drawer, so it closes rather than sit on
+  // Below 1100px the Inspector becomes a drawer, so it closes rather than sit on
   // top of the toggle that controls it, and the toggle states what it is doing.
-  await page.setViewportSize({width:1100,height:900});
+  await page.setViewportSize({width:1099,height:900});
   await page.waitForFunction(()=>document.getElementById('studio-inspector').hidden);
   assert.equal(await page.locator('#studio-inspector-toggle').isVisible(),true);
   assert.equal(await page.locator('#studio-inspector-count').isVisible(),true,'the count is readable without opening it');

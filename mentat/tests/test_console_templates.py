@@ -169,17 +169,27 @@ class AssetHashTests(unittest.TestCase):
             self.assertIn(path, assets, '%s is not in the asset hash' % path.name)
         self.assertEqual(len(assets), len(set(assets)))
 
-    def test_every_asset_basename_is_unique(self):
-        """tree_sha256 folds in path.name only, so two same-named files are ambiguous.
-
-        That is why the template set is flat with unique names -- view_graph.html,
-        not views/graph.html beside some other graph.html. This is the test that
-        keeps it true as either set grows.
-        """
-        names = [path.name for path in server.asset_files()]
+    def test_every_asset_relative_path_is_unique(self):
+        """Separate geography layers may legitimately reuse state filenames."""
+        names = [path.relative_to(APP).as_posix() for path in server.asset_files()]
         duplicates = sorted({name for name in names if names.count(name) > 1})
         self.assertEqual(duplicates, [],
-                         'tree_sha256 hashes by basename; these would collide: %s' % duplicates)
+                         'tree_sha256 hashes by relative path; these would collide: %s' % duplicates)
+
+    def test_same_named_layers_have_stable_distinct_identities(self):
+        with tempfile.TemporaryDirectory(prefix='mentat-layer-hash-') as temporary:
+            paths = [Path(temporary) / layer / 'TX.json' for layer in ('districts', 'sld')]
+            for path, content in zip(paths, (b'congressional', b'state legislative')):
+                path.parent.mkdir()
+                path.write_bytes(content)
+            before = server.tree_sha256(paths)
+            self.assertEqual(before, server.tree_sha256(list(reversed(paths))))
+            first, second = [path.read_bytes() for path in paths]
+            paths[0].write_bytes(second)
+            paths[1].write_bytes(first)
+            server.file_digest.cache_clear()
+            self.addCleanup(server.file_digest.cache_clear)
+            self.assertNotEqual(before, server.tree_sha256(paths))
 
     def test_a_changed_template_moves_the_tree_hash(self):
         """Proved on a copy: nothing here writes into the app folder."""

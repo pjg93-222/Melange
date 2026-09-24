@@ -12,6 +12,7 @@ from urllib.request import Request, urlopen
 import openpyxl
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1] / 'app'))
+import graph_data
 from graph_data import graph_view, report_facts, singleflight_cache
 from report_insights import digest, stamp
 import server as app
@@ -38,6 +39,19 @@ class GraphTests(unittest.TestCase):
         book.save(self.path)
         book.close()
 
+    def test_report_activity_keeps_optional_filing_records(self):
+        records = [{'amount':700,'source_url':'https://docquery.fec.gov/cgi-bin/fecimg/?202401010000000001'},
+                   {'amount':77,'source_url':'https://docquery.fec.gov/cgi-bin/fecimg/?202401010000000002'}]
+        def add_records(book):
+            sheet = book['Downstream Activity']
+            sheet['H5'] = 'Filing Records'
+            sheet['H6'] = json.dumps(records)
+        self.edit(add_records)
+        activity = graph_data.report_activity(stamp(self.path), include_filings=True)
+        match = next(row for row in activity if row['committee'] == 'C00000003'
+                     and row['direction'] == 'Support')
+        self.assertEqual(match['filings'], records)
+
     def test_industry_totals_use_one_fact_partition(self):
         before=self.path.read_bytes()
         value=self.view()
@@ -53,6 +67,55 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(sum(r['amount'] for r in value['companies']),1585)
         self.assertEqual(self.path.read_bytes(),before)
 
+    def test_levels_by_company_split_each_company_without_corporate(self):
+        # "By company" under Giving by employee level (board M4): the same
+        # non-Corporate rows as `levels`, per company, each company's levels in
+        # the legend's order (Employees, Middle-Management, Chief) with a
+        # missing level at 0, the largest company first.
+        value=self.view()
+        self.assertEqual([(r['company'],r['amount'],[(l['id'],l['amount']) for l in r['levels']])
+                          for r in value['levels_by_company']],
+                         [('Harborlight Credit Union',625,[('Employees',25),('Middle-Management',300),('Chief',300)]),
+                          ('Civic Horizon Bank',460,[('Employees',390),('Middle-Management',0),('Chief',70)])])
+        # Corporate is left out: Harborlight's $500 corporate receipt is in
+        # companies[] (1125) but in no level, and the per-company splits add up
+        # to the levels themselves.
+        self.assertEqual({r['id']:r['amount'] for r in value['companies']}['Harborlight Credit Union'],1125)
+        self.assertEqual(sum(r['amount'] for r in value['levels_by_company']),
+                         sum(r['amount'] for r in value['levels']))
+        for company in value['levels_by_company']:
+            self.assertEqual(sum(l['amount'] for l in company['levels']),company['amount'])
+        self.assertEqual(self.view(funding='corporate')['levels_by_company'],[])
+        # A selected company is its own single split.
+        self.assertEqual(self.view(company='Civic Horizon Bank')['levels_by_company'],
+                         [{'company':'Civic Horizon Bank','amount':460,'levels':[
+                             {'id':'Employees','label':'Employees','amount':390},
+                             {'id':'Middle-Management','label':'Middle-Management','amount':0},
+                             {'id':'Chief','label':'Chief','amount':70}]}])
+
+    def test_workbook_routes_reach_barr_without_snapshot_or_duplicate_paths(self):
+        def extend(book):
+            sheet=book.create_sheet('Transfer Paths')
+            for row in [['Routes'],[],['3 records; 3 shown. Complete destination data.'],[],
+                        ['Cycle','Source Committee','Destination Committee','Reported Net Transfer','Traversal Status'],
+                        [2026,'C00000003','C00000009',100,'followed'],
+                        [2026,'C00000003','C00000009',100,'followed'],
+                        [2026,'C00000009','C00000003',1,'cycle']]:
+                sheet.append(row)
+            book['Downstream Activity'].append(['2025-2026','C00000009','H0KY06104','BARR, GARLAND ANDY','R','Support',106708])
+            book['Downstream Activity']['A3']='101 source rows condensed to 5 committee-candidate-activity groups'
+        self.edit(extend)
+        with patch('downstream.inventory',return_value={}):
+            value=self.view(mode='activity',category='Super PAC')
+        self.assertTrue(value['candidate_available'],value['candidate_note'])
+        self.assertEqual(next(r['amount'] for r in value['candidates'] if r['id']=='H0KY06104'),106708)
+        self.assertEqual(len(value['downstream_edges']),2)
+        # A capped route display must never masquerade as complete evidence.
+        self.edit(lambda b:setattr(b['Transfer Paths']['A3'],'value','10001 records; 3 shown. Full records are in the accompanying audit CSV files.'))
+        value=self.view(mode='activity')
+        self.assertFalse(value['candidate_available'])
+        self.assertIn('partial display',value['candidate_note'])
+
     def test_company_levels_and_corporate_scope_are_distinct(self):
         self.assertEqual(self.view(company='Harborlight Credit Union',tier='Chief')['totals']['giving'],300)
         self.assertEqual(self.view(company='Harborlight Credit Union',tier='Chief')['totals']['direct'],100)
@@ -60,6 +123,30 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(self.view(tier='Employees')['totals']['giving'],415)
         self.assertEqual(self.view(funding='corporate')['totals']['giving'],500)
         self.assertEqual(self.view(funding='corporate')['levels'],[])
+
+    def test_partial_transfer_preview_uses_only_matching_full_payload_and_revalidates(self):
+        def preview(book):
+            sheet=book.create_sheet('Transfer Paths')
+            for row in [['Routes'],[],['3 records; 1 shown. First records only.'],[],
+                        ['Cycle','Source Committee','Destination Committee','Reported Net Transfer','Traversal Status'],
+                        [2026,'C00000003','C00000009',100,'followed']]:sheet.append(row)
+        self.edit(preview)
+        payload=self.root/'full.json';manifest=self.root/'manifest.json'
+        edge={'cycle':2026,'source':'C00000003','destination':'C00000009','amount':100,'status':'followed'}
+        payload.write_text(json.dumps({'transfer_paths':[edge,{**edge,'root':'another'},
+            {**edge,'destination':'C00000010','status':'candidate_committee'}]}))
+        manifest.write_text(json.dumps({'database_sha256':'pinned','data_sha256':digest(payload)}))
+        with patch.object(graph_data,'transfer_source',return_value=(payload,manifest)), patch('contribution_data._workbook_source',return_value='pinned'):
+            native=graph_data.report_transfers(stamp(self.path))
+            graph_data.report_transfers.cache_clear()
+            with patch.object(graph_data.native_scan,'tables',return_value=None):
+                reference=graph_data.report_transfers(stamp(self.path))
+            self.assertEqual(native,reference)
+            self.assertEqual(len(native),1)
+            self.assertEqual(native[0]['amount'],100)
+            payload.write_text(json.dumps({'transfer_paths':[dict(edge,amount=999)]}))
+            with self.assertRaisesRegex(ValueError,'fingerprint'):
+                graph_data.report_transfers(stamp(self.path))
         self.assertEqual(self.view(funding='personal')['totals']['giving'],1085)
         with self.assertRaises(ValueError):self.view(tier='Chief',funding='corporate')
 
@@ -83,6 +170,35 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(a['candidates'][0]['amount'],777)
         self.assertEqual(b['candidates'][0]['amount'],777)
         self.assertIn('not money attributed',a['candidate_note'])
+
+    def test_direction_totals_answer_every_side_from_one_read(self):
+        # P5. The drawer asks for one side and has to label the other three,
+        # so every direction is summarised from the same eligible rows the
+        # selected side was cut from - including the empty ones.
+        value = self.view(mode='activity')
+        self.assertEqual([r['direction'] for r in value['direction_totals']],
+                         ['Contribution / Other','Support','Oppose','Unknown'])
+        self.assertEqual({r['direction']:(r['candidates'],r['amount']) for r in value['direction_totals']},
+                         {'Contribution / Other':(1,111),'Support':(1,810),'Oppose':(1,999),'Unknown':(0,0)})
+        # The selected side still ranks exactly what it always did.
+        self.assertEqual(value['candidates'][0]['amount'],810)
+        # One PAC narrows every side, not just the one being shown.
+        one = self.view(mode='activity', recipient='C00000003')
+        self.assertEqual({r['direction']:(r['candidates'],r['amount']) for r in one['direction_totals']},
+                         {'Contribution / Other':(1,111),'Support':(1,777),'Oppose':(1,999),'Unknown':(0,0)})
+        # A side with no rows is reported as zero, never omitted.
+        jfc = self.view(mode='activity', recipient='C00000002')
+        self.assertEqual({r['direction']:(r['candidates'],r['amount']) for r in jfc['direction_totals']},
+                         {'Contribution / Other':(0,0),'Support':(1,33),'Oppose':(0,0),'Unknown':(0,0)})
+        # Only the activity view has four sides to report.
+        self.assertNotIn('direction_totals', self.view())
+        self.assertNotIn('direction_totals', self.view(mode='estimates'))
+
+    def test_direction_totals_are_empty_when_the_downstream_sheet_is_refused(self):
+        self.edit(lambda b:b['Downstream Activity'].cell(3,1,'100 source rows condensed to 8 committee-candidate-activity groups'))
+        value = self.view(mode='activity')
+        self.assertFalse(value['candidate_available'])
+        self.assertEqual(value['direction_totals'],[])
 
     def test_recipient_filter_and_negative_values_reconcile(self):
         value=self.view(recipient='C00000003')

@@ -20,7 +20,11 @@ test('verified Show Me separates categorical circles from two-measure scatter an
 });
 test('circle tiles create categorical circles while scatter keeps both measures and exact dimensions',()=>{
  const s=sheet();s.rows.push(pill('contributors'));s.columns.push(pill('state'));
- for(const [id,type] of [['circle-views','dot'],['side-by-side-circles','series-dot'],['scatter-plot','scatter']]){const next=studio.showMeApply(id,s,columns,[]),result=compile(next);assert.equal(result.spec.type,type);assert.deepEqual(result.query.measures,type==='scatter'?['amount','contributors']:['amount']);assert.deepEqual(result.query.dimensions,type==='dot'?['company']:['company','state']);}
+ for(const [id,type] of [['circle-views','dot'],['side-by-side-circles','series-dot'],['scatter-plot','scatter']]){const next=studio.showMeApply(id,s,columns,[]),result=compile(next);assert.equal(result.spec.type,type);assert.deepEqual(result.query.measures,['amount','contributors']);assert.deepEqual(result.query.dimensions,['company','state']);assert.deepEqual(next.columns,s.columns);assert.deepEqual(next.rows,s.rows);}
+});
+test('Show Me preserves existing shelves, mean and filters for treemaps and horizontal bars',()=>{
+ const s=sheet();s.rows=[pill('amount','mean')];s.columns.push(pill('state'));s.filters=[{column:index('cycle'),op:'equals',value:'2023-2024'}];
+ for(const id of ['treemap','horizontal-bars']){const next=studio.showMeApply(id,s,columns,[]);assert.deepEqual(next.columns,s.columns);assert.deepEqual(next.rows,s.rows);assert.deepEqual(next.filters,s.filters);assert.deepEqual(compile(next).query.measures,['average_amount']);}
 });
 test('reconcile names why Graph and Studio differ, and says so plainly when they do not',()=>{
  const base={totals:{amount:1209041200},comparison:{receipt:1209041200},provenance:{workbook_sha256:'w'.repeat(64)},reconciliation:{aggregate_filters_applied:false}};

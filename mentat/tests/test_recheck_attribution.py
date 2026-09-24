@@ -46,7 +46,8 @@ class RecheckTests(unittest.TestCase):
             self.assertEqual(rows[0]['company_match_status'], 'review')
 
     def test_existing_rejection_exclusion_conflict_and_nonindividual_are_not_reopened(self):
-        for update in [{'company_match_status':'rejected'}, {'company_match_status':'excluded'},
+        for update in [{'company_match_status':'rejected','company_match_reason':'persistent_override:reject'},
+                       {'company_match_status':'excluded','company_match_reason':'adjudicated:unrelated'},
                        {'excluded_reason':'manual policy'}, {'source_conflicts':['mismatch']},
                        {'entity_type':'ORG'}]:
             row = {**self.row(), **update}
@@ -54,6 +55,12 @@ class RecheckTests(unittest.TestCase):
                 result = recheck_attribution([row], 'unused.db', 'unused')
             self.assertEqual(result['eligible_records'], 0)
             self.assertNotIn('attribution_resolution', row)
+
+    def test_heuristic_rejection_can_be_resolved_by_an_exact_approved_alias(self):
+        row={**self.row(),'company_match_status':'rejected','company_match_reason':'employer_prefix_not_verified'}
+        result=self.run_bridge([row],[{'request_index':0,'status':'accepted','reason':'verified_employer_alias'}])
+        self.assertEqual(result['resolved_records'],1)
+        self.assertEqual(row['attribution_resolution']['previous_status'],'rejected')
 
     def test_result_id_validation_precedes_any_attribution_mutation(self):
         rows = [self.row(), self.row(contributor_name='Another')]

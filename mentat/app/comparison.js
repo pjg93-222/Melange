@@ -92,7 +92,7 @@
   window.addEventListener('mentat:graph',e=>{context=e.detail;});
   get('open').onclick=async()=>{
     const visible=get('panel').hidden;get('panel').hidden=!visible;
-    get('open').setAttribute('aria-expanded',String(visible));get('open').textContent=visible?'Back to graph':'Compare subjects';
+    get('open').setAttribute('aria-expanded',String(visible));get('open').textContent=visible?'Back to graph':'Advanced comparison';
     if(!visible){get('open').focus();return;}
     const heading=get('panel').querySelector('h2');if(heading){heading.tabIndex=-1;heading.focus();}
     if(!catalog&&!opening){opening=loadRuns().catch(e=>status(e.message)).finally(()=>{opening=null;});}

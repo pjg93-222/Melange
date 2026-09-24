@@ -443,7 +443,8 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
         source_observations=rows
         rows=coalesce_source_observations(rows)
         rule_paths=[Path(__file__).with_name(name+'.py') for name in ('run_cross_reference','cross_reference_engine','cross_reference_store',
-                    'pac_evidence','report_source_guard','validate_industry_coverage','fec_filing_headers','recheck_attribution')]+[
+                    'pac_evidence','attribution_policy','report_source_guard','validate_industry_coverage','fec_filing_headers','recheck_attribution')]+[
+                    PROJECT/'config/attribution-policy.json',
                     PROJECT/'inputs/fec_receipt_rules.json', PROJECT/'tools/recheck_attribution.R',
                     *[PROJECT/'R'/name for name in ('paths.R','schema.R','ingest.R','fec_page.R','collect.R')],
                     PROJECT/'inputs/company_match_overrides.csv', PROJECT/'inputs/company_home_states.csv',
@@ -549,7 +550,8 @@ def run(database,industry,cycles=(2022,2024,2026),state_root=None,baseline_root=
                  'Automatically processed records do not establish the accuracy or completeness of the resulting totals.']}
         atomic(directory/'report.json',report)
         # The console's cross-reference tab reads this, not the report: clear
-        # refunds and obvious outliers, no totals. The report workbook remains
+        # refunds, contradictions and unusually large counted rows, no totals.
+        # Magnitude is informational only. The report workbook remains
         # the accounting of record and none of its keys move.
         atomic(directory/'digest.json',build_digest(
             result.get('decisions',[]),result.get('links',[]),changes,

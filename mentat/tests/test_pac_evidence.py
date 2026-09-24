@@ -198,12 +198,31 @@ class EvidenceTests(unittest.TestCase):
         snapshot = {'committee_id':'C00000001','cycle':2024,'totals':{'independent_expenditures':100},
                     'receipts':[{'sub_id':'1','contributor_name':'Acme', 'filing_form':'F3X','line_number':'11AI','contribution_receipt_amount':50},
                                 {'sub_id':'2','contributor_name':'CEO, JANE', 'filing_form':'F3X','line_number':'11AI','contribution_receipt_amount':100}],
-                    'disbursements':[], 'expenditures':[{'sub_id':'3','expenditure_amount':100,'candidate_id':'H00000001','candidate_name':'DOE, JANE','support_oppose_indicator':'O'}]}
+                    'disbursements':[], 'expenditures':[{'sub_id':'3','expenditure_amount':100,'candidate_id':'H00000001','candidate_name':'DOE, JANE','support_oppose_indicator':'O',
+                                                        'expenditure_date':'2024-10-01','image_number':'202410019999999999','payee_name':'EXAMPLE MEDIA'}]}
         result = summarize([snapshot], 'Acme', [])
         self.assertEqual(len(result['receipts']), 1)
         self.assertEqual(result['candidate_activity'][0]['direction'], 'Oppose')
         self.assertIsNone(result['candidate_activity'][0]['company_attributed_amount'])
+        filing = result['candidate_activity'][0]['filings'][0]
+        self.assertEqual(filing['amount'], 100)
+        self.assertEqual(filing['payee'], 'EXAMPLE MEDIA')
+        self.assertEqual(filing['source_url'], 'https://docquery.fec.gov/cgi-bin/fecimg/?202410019999999999')
         self.assertTrue(result['committee_finances'][0]['regular_ie_reconciles'])
+
+    def test_unknown_receipt_role_retains_amount_and_missing_summary_is_not_zero(self):
+        snapshot={'committee_id':'C00000001','cycle':2024,'totals':{},
+                  'receipts':[{'sub_id':'1','contributor_name':'Acme','contribution_receipt_amount':100}],
+                  'disbursements':[], 'expenditures':[{'sub_id':'2','expenditure_amount':20,'memoed_subtotal':'false'}]}
+        result=summarize([snapshot],'Acme',[])
+        self.assertTrue(result['receipts'][0]['included_company_contribution'])
+        self.assertTrue(result['receipts'][0]['receipt_role_unverified'])
+        self.assertEqual(result['receipts'][0]['amount'],100)
+        self.assertEqual(result['committee_finances'][0]['regular_ie_total'],20)
+        self.assertIsNone(result['committee_finances'][0]['regular_ie_reconciles'])
+        snapshot['expenditures'][0]['expenditure_amount']=None
+        with self.assertRaises(ValueError):
+            summarize([snapshot],'Acme',[])
 
     def test_dates_block_retroactive_spending_and_unliquidated_assets(self):
         receipt = {'sub_id':'late', 'company':'Acme', 'committee_id':'C1', 'cycle':2024,

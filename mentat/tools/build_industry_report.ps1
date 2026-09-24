@@ -444,6 +444,8 @@ $dataInputPaths = @(
   (Join-Path $projectRoot 'R\ingest.R'),
   (Join-Path $projectRoot 'R\collect.R'),
   (Join-Path $projectRoot 'inputs\fec_receipt_rules.json'),
+  (Join-Path $projectRoot 'config\attribution-policy.json'),
+  (Join-Path $projectRoot 'inputs\verified_company_affiliations.json'),
   (Join-Path $projectRoot 'R\paths.R'),
   (Join-Path $projectRoot 'R\schema.R'),
   (Join-Path $projectRoot 'R\reconcile.R'),
@@ -463,7 +465,7 @@ $dataInputPaths = @(
   (Join-Path $projectRoot 'tools\crypto_workbook_builder.mjs'),
   (Join-Path $projectRoot 'tools\finalize_crypto_excel.ps1'),
   (Join-Path $projectRoot 'inputs\trade_committee_overrides.csv')
-) + $committeeFiles + $beneficiaryFiles + @(Get-ChildItem -LiteralPath $BeneficiaryDirectory -Recurse -File | Where-Object { $_.Name -in @('transfer-current.json','transfer-info.json','transfer-edges.csv') } | ForEach-Object FullName) + @(Get-ChildItem -LiteralPath $sourceRoot -Recurse -Filter 'source-receipt.json' | ForEach-Object FullName)
+) + $committeeFiles + $beneficiaryFiles + @(Get-ChildItem -LiteralPath $BeneficiaryDirectory -Recurse -File | Where-Object { $_.Name -in @('itoth.txt','transfer-current.json','transfer-info.json','transfer-edges.csv') } | ForEach-Object FullName) + @(Get-ChildItem -LiteralPath $sourceRoot -Recurse -Filter 'source-receipt.json' | ForEach-Object FullName)
 $dataInputPaths = $dataInputPaths | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
 $inputFingerprint = Get-CombinedFingerprint $dataInputPaths (
   "industry=$Industry|cycle=$CycleLabel"

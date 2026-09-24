@@ -120,6 +120,7 @@ function cleanupPath(target) {
 const COMMON_FIELDS = [
   {id: 'company', label: 'Company', name: 'Company', role: 'dimension', type: 'category'},
   {id: 'cycle', label: 'Election cycle', name: 'Election cycle', role: 'dimension', type: 'category'},
+  {id: 'quarter', label: 'Contribution quarter', name: 'Contribution quarter', role: 'dimension', type: 'category'},
   {id: 'amount', label: 'Selected amount', name: 'Selected amount', role: 'measure', type: 'number', unit: 'cents'},
   {id: 'records', label: 'Observation count', name: 'Observation count', role: 'measure', type: 'number', unit: 'count'},
   {id: 'contributors', label: 'Distinct reported donor identities', name: 'Distinct reported donor identities', role: 'measure', type: 'number', unit: 'count'}
@@ -138,9 +139,10 @@ const BANKING = {
   }
 };
 const REGISTRY_ENTRIES = snapshotRegistry.examples[0].snapshots;
-// Three registered cycles, because a sparkline draws 3 to 5 points and nothing
-// below that (graph.js SPARK_MINIMUM).
+// Registered election cycles still drive the main Graph scope. Sparklines use
+// the separate observed-quarter fixture below.
 const GRAPH_CYCLES = ['2022', '2024', '2026'];
+const GRAPH_QUARTERS = ['2025-Q1','2025-Q2','2025-Q3','2025-Q4','2026-Q1','2026-Q2','2026-Q3','2026-Q4'];
 const PARTIES = ['DEM', 'REP', 'DEM', 'IND', 'REP', 'DEM'];
 const GIVING = 1200000, DIRECT = 216000, ORGANIZATIONS = 982000;
 // Candidate rows are a subset of "direct to candidates" in the real payload
@@ -219,7 +221,7 @@ const VISIBLE_SOURCE = `node => {
   // instead of a race it has to win.
   let releaseQuery = null;
   const held = new Promise(resolve => { releaseQuery = resolve; });
-  let holdFirstQuery = false, heldOnce = false;
+  let holdFirstQuery = false, heldOnce = false, graphRequests = 0, quarterlyQueries = 0;
 
   async function installRoutes(page) {
     await page.route(target => target.pathname.startsWith('/api/'), async route => {
@@ -236,9 +238,13 @@ const VISIBLE_SOURCE = `node => {
         if (holdFirstQuery && !heldOnce) { heldOnce = true; await held; }
         const body = route.request().postDataJSON() || {};
         const dims = body.dimensions && body.dimensions.length ? body.dimensions : ['company'];
-        const made = ['Goldman Fixture', 'Wells Fixture', 'Morgan Fixture'].map((who, i) => Object.assign(
-          {}, ...dims.map(d => ({[d]: d === 'cycle' ? '2023-2024' : who})),
-          {amount: 260398435 - i * 70000000, records: 3 - i, contributors: 3 - i}));
+        if(dims.includes('quarter'))quarterlyQueries += 1;
+        const made = dims.includes('quarter')
+          ? rows('companies').flatMap((company,i)=>GRAPH_QUARTERS.filter(quarter=>i!==0||quarter!=='2025-Q4').map((quarter,q)=>({company:company.id,quarter,
+              amount:Math.round(company.amount*100*(0.52+q*0.07+i*0.01)),records:q+1,contributors:q+1})))
+          : ['Goldman Fixture', 'Wells Fixture', 'Morgan Fixture'].map((who, i) => Object.assign(
+              {}, ...dims.map(d => ({[d]: d === 'cycle' ? '2023-2024' : who})),
+              {amount: 260398435 - i * 70000000, records: 3 - i, contributors: 3 - i}));
         return route.fulfill({json: {status: 'ready', rows: made,
           columns: [...dims, ...(body.measures || ['amount'])].map(id => COMMON_FIELDS.find(f => f.id === id) || {id, label: id}),
           totals: {amount: 1200318112, records: 9, contributors: 9}, group_count: made.length,
@@ -255,7 +261,7 @@ const VISIBLE_SOURCE = `node => {
         return route.fulfill({json: {industries: [{name: 'Banking', indices: [0]}],
           unavailable_reports: [], report_directory: 'fixture', message: ''}});
       }
-      if (where === '/api/graph') return route.fulfill({json: graphView(target.searchParams)});
+      if (where === '/api/graph') { graphRequests += 1; return route.fulfill({json: graphView(target.searchParams)}); }
       if (where === '/api/cross-reference') {
         return route.fulfill({json: {available: false, status: 'empty', industry: 'Banking', message: 'stub'}});
       }
@@ -310,7 +316,9 @@ const VISIBLE_SOURCE = `node => {
     assert.deepEqual(topState.panels, ['graph-category-panel', 'graph-candidate-panel',
       'graph-company-panel', 'graph-level-panel'], 'the Overview is the four analyses');
     assert.deepEqual(topState.withTop, topState.panels, 'every Overview panel carries its own Top N');
-    assert.deepEqual(topState.options, ['5', '10', '25', '50'], 'Top N offers 5, 10, 25 and 50');
+    // Build 02 (2026-09-22, prompt item 8 / ruling R14): a comparison's Top N
+    // default is 6, so every Top N select offers 6 as well; 10 stays the default.
+    assert.deepEqual(topState.options, ['5', '6', '10', '25', '50'], 'Top N offers 5, 6, 10, 25 and 50');
     assert.equal(topState.scopeSentenceVisible, false, 'the scope sentence is no longer printed on screen');
     pass(`Overview panels ${JSON.stringify(topState.panels)}, each with a Top N of ${JSON.stringify(topState.options)}`);
 
@@ -411,6 +419,7 @@ const VISIBLE_SOURCE = `node => {
       rep: document.querySelectorAll('#graph-candidates circle.graph-party.is-rep').length,
       other: document.querySelectorAll('#graph-candidates circle.graph-party.is-other').length,
       sparks: document.querySelectorAll('#graph-companies polyline.graph-spark-line').length,
+      firstCompanySegments: document.querySelectorAll('#graph-companies [data-spark="companies-0"] polyline.graph-spark-line').length,
       companyMarks: document.querySelectorAll('#graph-companies .graph-bar-button').length,
       foot: (document.getElementById('graph-foot-companies') || {}).textContent,
       hover: [...document.querySelectorAll('#graph-companies .graph-bar-button title')].map(n => n.textContent)[0]
@@ -419,9 +428,12 @@ const VISIBLE_SOURCE = `node => {
     assert.equal(depth.dem, 3, 'three Democratic dots');
     assert.equal(depth.rep, 2, 'two Republican dots');
     assert.equal(depth.other, 1, 'a party this console cannot read as one side gets the neutral dot');
-    assert.equal(depth.sparks, depth.companyMarks, 'a sparkline on every company row');
-    assert.match(depth.foot, /sparkline 2022 · 2024 · 2026/, 'the footer names the cycles the sparkline covers');
-    assert.match(depth.hover, /2022 \$/, 'the company hover detail carries the per-cycle values');
+    assert.ok(depth.sparks>=depth.companyMarks, 'a sparkline on every company row');
+    assert.equal(depth.firstCompanySegments,2,'a missing quarter splits the line instead of being joined or treated as zero');
+    assert.equal(quarterlyQueries,1,'all company sparklines share one quarterly contribution query');
+    assert.equal(graphRequests,1,'sparklines do not fan out extra Graph requests by cycle');
+    assert.match(depth.foot, /sparkline 2025-Q1–2026-Q4 · observed quarters; gaps are missing, not zero/, 'the footer names the quarterly range and missing-data rule');
+    assert.match(depth.hover, /2025-Q1 \$/, 'the company hover detail carries the per-quarter values');
     pass(`${depth.dots} party dots (${depth.dem}D/${depth.rep}R/${depth.other} other), ${depth.sparks} sparklines, footer "${depth.foot}"`);
 
     /* ------------------------------------------------------ Chart Studio */
@@ -586,6 +598,8 @@ const VISIBLE_SOURCE = `node => {
     pass(`Show Me: ${openShowMe.tiles} tiles, one block, hint "${closedShowMe.hint}"`);
 
     step('the Data source disclosure stays open and reads as a chip line with a ready mark');
+    // Build 03 (S1): the disclosure lives in the source chip's popover.
+    await studio.click('#studio-scope-change');
     const source = await studio.evaluate(visibleSource => {
       const visible = eval(visibleSource);
       return {

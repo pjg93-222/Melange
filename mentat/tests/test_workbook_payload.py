@@ -14,6 +14,23 @@ from fec_transfer_graph import atomic_json
 
 
 class WorkbookProjectionTests(unittest.TestCase):
+    def test_downstream_audit_tables_follow_selected_cycle_and_survive_projection(self):
+        fields=('downstream_reach','downstream_measurement_ledger','downstream_sources')
+        payload={'metadata':{},'raw_rows':[],'cycles':[
+            {'cycle':2024,'label':'2023-2024'},{'cycle':2026,'label':'2025-2026'}],
+            **{field:[{'cycle':2024,'source':'kept'},{'cycle':2026,'source':'outside'}] for field in fields}}
+        projected=project(deepcopy(payload))
+        for field in fields:
+            self.assertEqual(projected[field],payload[field])
+        with tempfile.TemporaryDirectory() as directory:
+            source=Path(directory)/'source.json'; output=Path(directory)/'cycle.json'
+            source.write_text(json.dumps(projected))
+            subprocess.run(['node',str(Path(__file__).resolve().parents[1]/'tools/filter_industry_cycle_data.mjs'),
+                str(source),str(output),'2023-2024'],check=True,capture_output=True)
+            selected=json.loads(output.read_text())
+            for field in fields:
+                self.assertEqual(selected[field],[{'cycle':2024,'source':'kept'}])
+
     def test_projection_retains_destination_lineage_and_both_complete_partitions(self):
         raw={'source_id':'1','recipient_state':'DC','represented_state':'VA',
              'recipient_location_status':'known','represented_location_status':'known',

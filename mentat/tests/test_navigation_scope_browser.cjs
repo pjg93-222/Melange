@@ -411,7 +411,7 @@ function setup(label) { console.log(`SETUP: ${label}`); }
     const xrefStatus = await page.locator('#xref-refresh-status').textContent();
     assert.match(xrefStatus, /^Newest run for Banking · /);
     // and the run that came back is the one on screen, not just in the status line
-    assert.match(await page.locator('#xref-results').innerText(), /it publishes no totals/);
+    assert.match(await page.locator('#xref-results').innerText(), /this view publishes no totals/i);
     pass(`request ${crossReferenceRequests[0]} and status "${xrefStatus}"`);
 
     step('change the Graph company select: the URL follows the control');
@@ -430,6 +430,7 @@ function setup(label) { console.log(`SETUP: ${label}`); }
     pass('the company key left the URL when cleared and came back when chosen');
 
     step('"Open in Chart Studio" carries the scope into the URL and switches the tab');
+    await page.locator('#graph-more > summary').click();
     await page.click('#graph-open-builder');
     await page.waitForSelector('#view-chart-studio:not([hidden])');
     const afterOpen = await page.evaluate(() => ({search: location.search, hash: location.hash}));
@@ -590,6 +591,91 @@ function setup(label) { console.log(`SETUP: ${label}`); }
     assert.ok(crossReferenceRequests.some(url => url === '/api/cross-reference?industry=Banking'),
       `expected an industry-scoped request, saw ${JSON.stringify(crossReferenceRequests)}`);
     pass(`status "${emptyStatus}"`);
+
+    /* url_scope v6 (console redesign build 02, 2026-09-22): Graph's compare
+       modes. The compared key repeats in pill order; scope 2 is read with its
+       own request (never latest=1, never a company in industry mode); Copy
+       link reopens the comparison; Clear comparison and the last remove leave
+       one value and no `compare` in the URL. */
+    const compareReady = () => document.getElementById('view-graph').dataset.compareState === 'ready'
+      && !document.getElementById('graph-results').hidden;
+    const compareSeen = () => ({state: window.MentatGraphCompare && MentatGraphCompare.state(), url: location.search,
+      status: (document.getElementById('graph-status') || {}).textContent || ''});
+    const comparePills = target => target.evaluate(() => [...document.querySelectorAll('#view-graph .chip-compare .scope-pill-text')].map(node => node.textContent));
+
+    step('v6: an industry-compare permalink opens both scopes as pills and reads Credit Union on its own');
+    graphRequests.length = 0;
+    const comparePermalink = '/?industry=Banking&industry=Credit%20Union&cycle=2024&compare=industry#graph';
+    await page.goto(origin + comparePermalink);
+    await until(page, compareReady, 'the industry comparison settling', compareSeen);
+    assert.deepEqual(await comparePills(page), ['Banking', 'Credit Union']);
+    const secondScope = graphRequests.map(url => new URL(url, origin).searchParams).find(query => query.get('industry') === 'Credit Union');
+    assert.ok(secondScope, `no /api/graph request for Credit Union: ${JSON.stringify(graphRequests)}`);
+    assert.equal(secondScope.get('company'), '', 'industry compare shares no company across scopes');
+    assert.equal(secondScope.get('cycle'), '2024', 'scope 2 uses scope 1\'s resolved cycle');
+    assert.equal(secondScope.get('latest'), null, 'scope 2 never sends latest=1');
+    assert.equal(await page.locator('#graph-company').isDisabled(), true, 'the Company chip is not a choice while industries are compared');
+    assert.equal(await page.locator('#graph-categories .graph-half').count(), 2, 'each card splits into halves');
+    assert.equal(await page.evaluate(() => (document.querySelector('.graph-trail-parts') || {}).textContent), 'Comparing industries · 2023–2024');
+    assert.equal(await page.evaluate(() => MentatScope.href('graph', MentatScope.read())), comparePermalink,
+      'Copy link writes the comparison back byte for byte');
+    pass(`pills ${JSON.stringify(await comparePills(page))}, scope 2 request ${secondScope.toString()}`);
+
+    step('v6: the Candidates tab becomes one sortable table with Funded by both / Only ... filters');
+    await page.locator('#graph-tab-candidates').click();
+    await until(page, () => !document.getElementById('graph-compare-table').hidden, 'the compare table', compareSeen);
+    const headers = await page.locator('#graph-compare-grid thead th').allTextContents();
+    assert.deepEqual(headers.map(text => text.replace(/[▲▼]/g, '').trim()), ['Candidate', 'Party', 'Banking', 'Credit Union', 'Difference']);
+    assert.equal(await page.locator('#graph-compare-grid thead th[aria-sort=descending]').textContent().then(text => text.replace(/[▲▼]/g, '').trim()), 'Banking',
+      'the default sort is scope 1, descending');
+    const filters = await page.locator('#graph-compare-filters button').allTextContents();
+    assert.deepEqual(filters.map(text => text.replace(/\d+/g, '').trim()), ['All', 'Funded by both', 'Only Banking', 'Only Credit Union']);
+    assert.match(await page.locator('#graph-compare-range').textContent(), /^Rows 1-3 of 3$/);
+    await page.locator('#graph-tab-overview').click();
+    pass(`headers ${JSON.stringify(headers)}, filters ${JSON.stringify(filters)}`);
+
+    step('v6: Copy link opens the same comparison on a fresh page; Stacked is written and Grid removes it');
+    const copyPage = await browser.newPage({viewport: {width: 1440, height: 1050}});
+    await installRoutes(copyPage);
+    await copyPage.goto(origin + comparePermalink);
+    await until(copyPage, compareReady, 'the copied comparison settling', compareSeen);
+    assert.deepEqual(await comparePills(copyPage), ['Banking', 'Credit Union']);
+    assert.deepEqual(await copyPage.evaluate(() => MentatGraphCompare.state().compare), {dim: 'industry', values: ['Banking', 'Credit Union']});
+    await copyPage.close();
+    await page.locator('#graph-layout-stacked').click();
+    await until(page, () => location.search.endsWith('&layout=stacked'), 'layout=stacked in the URL', compareSeen);
+    await page.locator('#graph-layout-grid').click();
+    await until(page, () => !location.search.includes('layout='), 'layout= leaving the URL', compareSeen);
+    pass('the copied link reopened both pills; layout=stacked came and went with the switch');
+
+    step('v6: Clear comparison, then compare cycles from the menu by keyboard, then remove the added pill');
+    await page.locator('#graph-compare-clear').click();
+    await until(page, () => !document.getElementById('view-graph').dataset.compare && location.search === '?industry=Banking&cycle=2024',
+      'the comparison clearing', compareSeen);
+    await page.locator('#graph-compare-add').click();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    await until(page, () => document.querySelectorAll('.compare-menu [role=option]').length > 0, 'the cycle list', compareSeen);
+    assert.deepEqual(await page.locator('.compare-menu [role=option]').allTextContents(), ['2021–2022'], 'the current cycle is not offered');
+    await page.keyboard.press('Enter');
+    await until(page, compareReady, 'the cycle comparison settling', compareSeen);
+    assert.equal(await page.evaluate(() => location.search), '?industry=Banking&cycle=2024&cycle=2022&compare=cycle');
+    assert.deepEqual(await comparePills(page), ['2023–2024', '2021–2022']);
+    // Build 02 fix round 1 (R02-M4): the headline change chip is plum, like every Graph change chip.
+    const chipColour = await page.evaluate(() => {
+      const chip = document.querySelector('#view-graph .graph-figure-line .change-chip');
+      const probe = document.createElement('span');probe.style.color = 'var(--acu-purple)';document.body.append(probe);
+      const want = getComputedStyle(probe).color;probe.remove();
+      return chip ? {got: getComputedStyle(chip).color, want} : null;
+    });
+    assert.ok(chipColour, 'the latest cycle carries a headline change chip');
+    assert.equal(chipColour.got, chipColour.want, 'the headline change chip is plum (--acu-purple)');
+    await page.locator('#view-graph .chip-compare .scope-pill-remove').nth(1).focus();
+    await page.keyboard.press('Enter');
+    await until(page, () => !document.getElementById('view-graph').dataset.compare && location.search === '?industry=Banking&cycle=2024',
+      'the last remove ending the comparison', compareSeen);
+    assert.equal(await page.locator('#graph-compare-add').isVisible(), true, '"+ Compare with..." is back');
+    pass('cleared, compared cycles by keyboard, and removed back to one cycle');
 
     assert.deepEqual(errors, [], `expected zero pageerror entries, got: ${JSON.stringify(errors)}`);
     console.log(`ALL ${stepNumber} STEPS PASSED`);

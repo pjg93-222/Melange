@@ -149,6 +149,8 @@ test('[studio-labels] labelLock answers with the empty string only where labels 
 
 test('[studio-labels] the labels toggle is render-only: it never changes the query', () => {
   const off = sheet(), on = sheet();
+  // Build 03 (S1): a new sheet starts with its labels on, so "off" is set.
+  off.showLabels = false;
   on.showLabels = true;
   assert.deepEqual(compile(on).query, compile(off).query, 'the query must be identical');
   assert.equal(compile(on).spec.labels, true);

@@ -1,2136 +1,2545 @@
 {
- "name": "evidence-geo",
- "version": 2,
- "route": "/api/evidence-geo",
- "lane": "S8 - the congressional-district map for the PAC evidence tab + S8b (geocoding, ruling A)",
- "written": "2026-09-18",
- "request": {
-  "source": "'csv' for an imported file, 'snapshot' for a saved FEC snapshot",
-  "id": "the import id (csv-<32 hex>) or the snapshot directory name",
-  "committee": "the pane's FEC committee id (C + 8 digits); required for a snapshot",
-  "cycle": "REQUIRED and concrete (2024, 2023-2024, 2026). A blank or absent cycle is 400: a map is drawn on one Congress (ruling A).",
-  "direction": "'raised' (where the money came from) or 'spent' (where it went)"
- },
- "rules": [
-  "Every dollar the source reports is either in a kind or in `unlocated`: located_total + unlocated_total == reported_total, to the cent.",
-  "A district key matches ^[A-Z]{2}-(\\d{2}|AL|SEN)$ and a state key ^[A-Z]{2}$. A Senate seat keeps a district key and is drawn as the whole state; a presidential race has no district or state at all and goes to `unlocated`.",
-  "Every share is the row's share of its own kind's total and lies in 0..1.",
-  "Every kind states the basis that placed it, and `conversions` ships default_on false (S6_DESIGN ruling 12).",
-  "`stops` is the published legend scale and is never rewritten by the page.",
-  "Cycle 2022 draws the 118th map (Paul's 2026-09-17 correction to ruling 9).",
-  "RULING A (Paul, 2026-09-18: \"There should be no all cycles, street address yes\"). A map is drawn on ONE Congress, so `cycle` is always a concrete cycle and never blank. A request with a blank or absent cycle is refused 400 with a message naming the cycles the source carries; the map never answers with an empty country. The pane keeps \"All cycles\" for its own figures.",
-  "Every district and state row states the `basis` that placed it: `street` (an address the US Census geocoder matched, resolved through the shipped 2020-tract crosswalk), `zip` (the ZCTA crosswalk, one district), `zip_split` (a ZIP divided across districts by land area), or \"\" for a SPENT kind, whose basis is the candidate seat or the payee state and has nothing to do with a contributor address. A row placed only by street is never marked `split`.",
-  "`geocoded_rows`, `zip_rows` and `pending_rows` are DISJOINT counts of the raised rows read: placed by a cached street match, placed by ZIP (no usable address, an address the service could not place, or a census tract straddling two districts), and rows whose address could be geocoded but has not been. A SPENT map reads no contributor address and all three are 0. No row is ever dropped for want of a basis."
- ],
- "examples": [
-  {
-   "name": "snapshot spent, four kinds, reconciled",
-   "payload": {
-    "source": "snapshot",
-    "id": "fixture-snap",
-    "direction": "spent",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00835959",
-     "name": "FAIRSHAKE"
-    },
-    "label": "Coinbase",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
-    },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 36700.0,
-    "located_total": 35300.0,
-    "unlocated_total": 1400.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "candidates",
-      "label": "Candidates",
-      "total": 19500.0,
-      "rows": 4,
-      "basis": "by the candidate's district",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CA-SEN",
-        "amount": 12000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.615385,
-        "support": 0.0,
-        "oppose": 12000.0,
-        "split": false,
-        "who": "S4CA00522"
-       },
-       {
-        "key": "CA-45",
-        "amount": 5500.0,
-        "rows": 2,
-        "basis": "",
-        "share": 0.282051,
-        "support": 5500.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "H0CA48198, STEEL FOR CONGRESS"
-       },
-       {
-        "key": "NY-16",
-        "amount": 2000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.102564,
-        "support": 0.0,
-        "oppose": 2000.0,
-        "split": false,
-        "who": "H2NY16000"
-       }
-      ],
-      "states": []
-     },
-     {
-      "kind": "transfers",
-      "label": "Transfers to committees",
-      "total": 8000.0,
-      "rows": 2,
-      "basis": "by the committee's registered state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "FL",
-        "amount": 5000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.625,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "PROTECT PROGRESS"
-       },
-       {
-        "key": "VA",
-        "amount": 3000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.375,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "DEFEND AMERICAN JOBS"
-       }
-      ]
-     },
-     {
-      "kind": "operating",
-      "label": "Operating",
-      "total": 800.0,
-      "rows": 1,
-      "basis": "by the payee's state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 800.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "SCHOEN SURVEY RESEARCH"
-       }
-      ]
-     },
-     {
-      "kind": "conversions",
-      "label": "Asset conversions",
-      "total": 7000.0,
-      "rows": 1,
-      "basis": "in-kind assets liquidated back to the contributor",
-      "default_on": false,
-      "districts": [],
-      "states": [
-       {
-        "key": "CA",
-        "amount": 7000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "COINBASE"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
-      "amount": 700.0,
-      "rows": 1
-     },
-     {
-      "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
-      "amount": 400.0,
-      "rows": 1
-     },
-     {
-      "reason": "presidential race: national, with no district or state of its own",
-      "amount": 300.0,
-      "rows": 1
-     }
-    ],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 0,
-    "pending_rows": 0
-   }
+  "name": "evidence-geo",
+  "version": 3,
+  "route": "/api/evidence-geo",
+  "lane": "S8 - the congressional-district map for the PAC evidence tab + S8b (geocoding, ruling A)",
+  "written": "2026-09-19",
+  "request": {
+    "source": "'csv' for an imported file, 'snapshot' for a saved FEC snapshot",
+    "id": "the import id (csv-<32 hex>) or the snapshot directory name",
+    "committee": "the pane's FEC committee id (C + 8 digits); required for a snapshot",
+    "cycle": "REQUIRED and concrete (2024, 2023-2024, 2026). A blank or absent cycle is 400: a map is drawn on one Congress (ruling A).",
+    "direction": "'raised' (where the money came from) or 'spent' (where it went)"
   },
-  {
-   "name": "snapshot raised, contributor ZIPs",
-   "payload": {
-    "source": "snapshot",
-    "id": "fixture-snap",
-    "direction": "raised",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00835959",
-     "name": "FAIRSHAKE"
+  "rules": [
+    "Every dollar the source reports is either in a kind or in `unlocated`: located_total + unlocated_total == reported_total, to the cent.",
+    "A district key matches ^[A-Z]{2}-(\\d{2}|AL|SEN)$ and a state key ^[A-Z]{2}$. A Senate seat keeps a district key and is drawn as the whole state; a presidential race has no district or state at all and goes to `unlocated`.",
+    "Every share is the row's share of its own kind's total and lies in 0..1.",
+    "Every kind states the basis that placed it, and `conversions` ships default_on false (S6_DESIGN ruling 12).",
+    "`stops` is the published legend scale and is never rewritten by the page.",
+    "Cycle 2022 draws the 118th map (Paul's 2026-09-17 correction to ruling 9).",
+    "RULING A (Paul, 2026-09-18: \"There should be no all cycles, street address yes\"). A map is drawn on ONE Congress, so `cycle` is always a concrete cycle and never blank. A request with a blank or absent cycle is refused 400 with a message naming the cycles the source carries; the map never answers with an empty country. The pane keeps \"All cycles\" for its own figures.",
+    "Every district and state row states the `basis` that placed it: `street` (an address the US Census geocoder matched, resolved through the shipped 2020-tract crosswalk), `zip` (the ZCTA crosswalk, one district), `zip_split` (a ZIP divided across districts by land area), or \"\" for a SPENT kind, whose basis is the candidate seat or the payee state and has nothing to do with a contributor address. A row placed only by street is never marked `split`.",
+    "`geocoded_rows`, `zip_rows` and `pending_rows` are DISJOINT counts of the raised rows read: placed by a cached street match, placed by ZIP (no usable address, an address the service could not place, or a census tract straddling two districts), and rows whose address could be geocoded but has not been. A SPENT map reads no contributor address and all three are 0. No row is ever dropped for want of a basis.",
+    "Contract v3 adds three WIDER layers, each folded from the same bucket tables the district layer draws, in Decimal, before rounding: `by_state` (one row per two-letter state), `by_region` (the four Census regions plus `Territories`, and `Unplaced` for a state the region table does not know) and, on a RAISED map only, `by_zip`.",
+    "Every wider layer reconciles. sum(by_state) == sum(by_region) == located_total, to the cent, so sum(by_state) + unlocated_total == reported_total. The page never re-aggregates: it draws the layer the route computed.",
+    "`by_zip` is capped at the 3,000 largest ZIPs and states what the cap cost: sum(by_zip) + zip_truncated_amount + zip_missing.amount == reported_total, to the cent. `zip_missing` is the rows with no readable five-digit ZIP; `zip_truncated` is how many ZIPs the cap dropped. A spent map reads no contributor ZIP and carries no by_zip rows at all.",
+    "Every by_state and by_region row carries its own `kinds` split, so turning a kind off on the page subtracts a number the SERVER computed rather than asking the browser to redo the geography.",
+    "`sides` states what each direction would report - {reported_total, rows, reason} for both raised and spent - computed from the rows alone, with no buckets, no boundary file and no crosswalk. The page opens on the side with money and disables the other with the route’s own refusal sentence as its title. sides[direction] always agrees with this payload about its own direction.",
+    "`zip_points_file` names the shipped pre-projected ZIP centre file (geo/zcta_points.json, the same 975x610 canvas as the boundary paths). A ZIP absent from it is NOT dropped: the page lists it under \"Not placed on the map\" with its dollars."
+  ],
+  "examples": [
+    {
+      "name": "snapshot spent, four kinds, reconciled",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "spent",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 36700.0,
+        "located_total": 35300.0,
+        "unlocated_total": 1400.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 19500.0,
+            "rows": 4,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-SEN",
+                "amount": 12000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.615385,
+                "support": 0.0,
+                "oppose": 12000.0,
+                "split": false,
+                "who": "S4CA00522"
+              },
+              {
+                "key": "CA-45",
+                "amount": 5500.0,
+                "rows": 2,
+                "basis": "",
+                "share": 0.282051,
+                "support": 5500.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "H0CA48198, STEEL FOR CONGRESS"
+              },
+              {
+                "key": "NY-16",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.102564,
+                "support": 0.0,
+                "oppose": 2000.0,
+                "split": false,
+                "who": "H2NY16000"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 8000.0,
+            "rows": 2,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "FL",
+                "amount": 5000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.625,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "PROTECT PROGRESS"
+              },
+              {
+                "key": "VA",
+                "amount": 3000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.375,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "DEFEND AMERICAN JOBS"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 800.0,
+            "rows": 1,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 800.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "SCHOEN SURVEY RESEARCH"
+              }
+            ]
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 7000.0,
+            "rows": 1,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": false,
+            "districts": [],
+            "states": [
+              {
+                "key": "CA",
+                "amount": 7000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "COINBASE"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
+            "amount": 700.0,
+            "rows": 1
+          },
+          {
+            "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
+            "amount": 400.0,
+            "rows": 1
+          },
+          {
+            "reason": "presidential race: national, with no district or state of its own",
+            "amount": 300.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 24500.0,
+            "rows": 4,
+            "contributors": 4,
+            "kinds": {
+              "candidates": 17500.0,
+              "conversions": 7000.0
+            }
+          },
+          {
+            "key": "FL",
+            "name": "FL",
+            "region": "South",
+            "amount": 5000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 5000.0
+            }
+          },
+          {
+            "key": "VA",
+            "name": "VA",
+            "region": "South",
+            "amount": 3000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 3000.0
+            }
+          },
+          {
+            "key": "NY",
+            "name": "NY",
+            "region": "Northeast",
+            "amount": 2800.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 2000.0,
+              "operating": 800.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "Northeast",
+            "name": "Northeast",
+            "states": [
+              "NY"
+            ],
+            "amount": 2800.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 2000.0,
+              "operating": 800.0
+            }
+          },
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "FL",
+              "VA"
+            ],
+            "amount": 8000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "transfers": 8000.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 24500.0,
+            "rows": 4,
+            "contributors": 4,
+            "kinds": {
+              "candidates": 17500.0,
+              "conversions": 7000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 10750.0,
+            "rows": 5,
+            "reason": ""
+          },
+          "spent": {
+            "reported_total": 36700.0,
+            "rows": 8,
+            "reason": ""
+          }
+        },
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0
+      }
     },
-    "label": "Coinbase",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
+    {
+      "name": "snapshot raised, contributor ZIPs",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "raised",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 10750.0,
+        "located_total": 10500.0,
+        "unlocated_total": 250.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "contributors",
+            "label": "Contributors",
+            "total": 10500.0,
+            "rows": 4,
+            "basis": "by the contributor ZIP, then the state",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 8800.0,
+                "rows": 2,
+                "basis": "zip_split",
+                "share": 0.838095,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": true,
+                "who": "COINBASE, A DONOR"
+              },
+              {
+                "key": "CA-45",
+                "amount": 1200.0,
+                "rows": 1,
+                "basis": "zip_split",
+                "share": 0.114286,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": true,
+                "who": "A DONOR"
+              }
+            ],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 500.0,
+                "rows": 1,
+                "basis": "zip",
+                "share": 0.047619,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "A DONOR"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "a receipt could not be placed: no usable ZIP or state on the row",
+            "amount": 250.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 10000.0,
+            "rows": 3,
+            "contributors": 2,
+            "kinds": {
+              "contributors": 10000.0
+            }
+          },
+          {
+            "key": "NY",
+            "name": "NY",
+            "region": "Northeast",
+            "amount": 500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "contributors": 500.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "Northeast",
+            "name": "Northeast",
+            "states": [
+              "NY"
+            ],
+            "amount": 500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "contributors": 500.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 10000.0,
+            "rows": 3,
+            "contributors": 2,
+            "kinds": {
+              "contributors": 10000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 10750.0,
+            "rows": 4,
+            "reason": ""
+          },
+          "spent": {
+            "reported_total": 36700.0,
+            "rows": 11,
+            "reason": ""
+          }
+        },
+        "by_zip": [
+          {
+            "zip": "94607",
+            "city": "",
+            "state": "CA",
+            "amount": 8000.0,
+            "rows": 2,
+            "contributors": 1
+          },
+          {
+            "zip": "92625",
+            "city": "",
+            "state": "CA",
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1
+          }
+        ],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 750.0,
+          "rows": 2
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 5,
+        "pending_rows": 0
+      }
     },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 10750.0,
-    "located_total": 10500.0,
-    "unlocated_total": 250.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "contributors",
-      "label": "Contributors",
-      "total": 10500.0,
-      "rows": 4,
-      "basis": "by the contributor ZIP, then the state",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CA-12",
-        "amount": 8800.0,
-        "rows": 2,
-        "basis": "zip_split",
-        "share": 0.838095,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": true,
-        "who": "COINBASE, A DONOR"
-       },
-       {
-        "key": "CA-45",
-        "amount": 1200.0,
-        "rows": 1,
-        "basis": "zip_split",
-        "share": 0.114286,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": true,
-        "who": "A DONOR"
-       }
-      ],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 500.0,
-        "rows": 1,
-        "basis": "zip",
-        "share": 0.047619,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "A DONOR"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "a receipt could not be placed: no usable ZIP or state on the row",
-      "amount": 250.0,
-      "rows": 1
-     }
-    ],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 5,
-    "pending_rows": 0
-   }
-  },
-  {
-   "name": "import raised, contributor ZIPs",
-   "payload": {
-    "source": "csv",
-    "id": "csv-a7fba5b25e76e6a5856cf64c65dc18ae",
-    "direction": "raised",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00804179",
-     "name": "COINBASE PAC"
+    {
+      "name": "import raised, contributor ZIPs",
+      "payload": {
+        "source": "csv",
+        "id": "csv-a7fba5b25e76e6a5856cf64c65dc18ae",
+        "direction": "raised",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00804179",
+          "name": "COINBASE PAC"
+        },
+        "label": "Crypto Industry Spending Overview.csv",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 375.0,
+        "located_total": 350.0,
+        "unlocated_total": 25.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "contributors",
+            "label": "Contributors",
+            "total": 350.0,
+            "rows": 3,
+            "basis": "by the contributor ZIP, then the state",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 180.0,
+                "rows": 1,
+                "basis": "zip_split",
+                "share": 0.514286,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": true,
+                "who": "ONE, PERSON, TWO, PERSON"
+              },
+              {
+                "key": "CA-45",
+                "amount": 120.0,
+                "rows": 1,
+                "basis": "zip_split",
+                "share": 0.342857,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": true,
+                "who": "TWO, PERSON"
+              }
+            ],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 50.0,
+                "rows": 1,
+                "basis": "zip",
+                "share": 0.142857,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "THREE, PERSON"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "a contributor row could not be placed: no usable ZIP or state on the row",
+            "amount": 25.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 300.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "contributors": 300.0
+            }
+          },
+          {
+            "key": "NY",
+            "name": "NY",
+            "region": "Northeast",
+            "amount": 50.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "contributors": 50.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "Northeast",
+            "name": "Northeast",
+            "states": [
+              "NY"
+            ],
+            "amount": 50.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "contributors": 50.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 300.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "contributors": 300.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 375.0,
+            "rows": 3,
+            "reason": ""
+          },
+          "spent": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "This import records money this committee RECEIVED, not money it sent, so it carries no outbound rows to place on a map. Open a saved FEC snapshot for this committee to see where it spent. (File is not a zip file)"
+          }
+        },
+        "by_zip": [
+          {
+            "zip": "92625",
+            "city": "",
+            "state": "CA",
+            "amount": 200.0,
+            "rows": 1,
+            "contributors": 1
+          },
+          {
+            "zip": "94607",
+            "city": "",
+            "state": "CA",
+            "amount": 100.0,
+            "rows": 1,
+            "contributors": 1
+          }
+        ],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 75.0,
+          "rows": 2
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 4,
+        "pending_rows": 0
+      }
     },
-    "label": "Crypto Industry Spending Overview.csv",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
+    {
+      "name": "import spent with no outbound rows",
+      "payload": {
+        "source": "csv",
+        "id": "csv-a7fba5b25e76e6a5856cf64c65dc18ae",
+        "direction": "spent",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00804179",
+          "name": "COINBASE PAC"
+        },
+        "label": "Crypto Industry Spending Overview.csv",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 0.0,
+        "located_total": 0.0,
+        "unlocated_total": 0.0,
+        "reconciles": true,
+        "kinds": [],
+        "unlocated": [],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "by_state": [],
+        "by_region": [],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 375.0,
+            "rows": 4,
+            "reason": ""
+          },
+          "spent": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "This import records money this committee RECEIVED, not money it sent, so it carries no outbound rows to place on a map. Open a saved FEC snapshot for this committee to see where it spent. (File is not a zip file)"
+          }
+        },
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0,
+        "reason": "This import records money this committee RECEIVED, not money it sent, so it carries no outbound rows to place on a map. Open a saved FEC snapshot for this committee to see where it spent. (File is not a zip file)"
+      }
     },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 375.0,
-    "located_total": 350.0,
-    "unlocated_total": 25.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "contributors",
-      "label": "Contributors",
-      "total": 350.0,
-      "rows": 3,
-      "basis": "by the contributor ZIP, then the state",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CA-12",
-        "amount": 180.0,
-        "rows": 1,
-        "basis": "zip_split",
-        "share": 0.514286,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": true,
-        "who": "ONE, PERSON, TWO, PERSON"
-       },
-       {
-        "key": "CA-45",
-        "amount": 120.0,
-        "rows": 1,
-        "basis": "zip_split",
-        "share": 0.342857,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": true,
-        "who": "TWO, PERSON"
-       }
-      ],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 50.0,
-        "rows": 1,
-        "basis": "zip",
-        "share": 0.142857,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "THREE, PERSON"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "a contributor row could not be placed: no usable ZIP or state on the row",
-      "amount": 25.0,
-      "rows": 1
-     }
-    ],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 4,
-    "pending_rows": 0
-   }
-  },
-  {
-   "name": "import spent with no outbound rows",
-   "payload": {
-    "source": "csv",
-    "id": "csv-a7fba5b25e76e6a5856cf64c65dc18ae",
-    "direction": "spent",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00804179",
-     "name": "COINBASE PAC"
+    {
+      "name": "import raised, street addresses geocoded (S8b)",
+      "payload": {
+        "source": "csv",
+        "id": "csv-474c4111e92fa065b351d7c195d289d0",
+        "direction": "raised",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00804179",
+          "name": "COINBASE PAC"
+        },
+        "label": "Crypto Industry Spending Overview.csv",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 375.0,
+        "located_total": 350.0,
+        "unlocated_total": 25.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "contributors",
+            "label": "Contributors",
+            "total": 350.0,
+            "rows": 3,
+            "basis": "by the contributor ZIP, then the state",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "TX-07",
+                "amount": 300.0,
+                "rows": 2,
+                "basis": "street",
+                "share": 0.857143,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "TWO, PERSON, ONE, PERSON"
+              }
+            ],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 50.0,
+                "rows": 1,
+                "basis": "zip",
+                "share": 0.142857,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "THREE, PERSON"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "a contributor row could not be placed: no usable ZIP or state on the row",
+            "amount": 25.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "TX",
+            "name": "TX",
+            "region": "South",
+            "amount": 300.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "contributors": 300.0
+            }
+          },
+          {
+            "key": "NY",
+            "name": "NY",
+            "region": "Northeast",
+            "amount": 50.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "contributors": 50.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "Northeast",
+            "name": "Northeast",
+            "states": [
+              "NY"
+            ],
+            "amount": 50.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "contributors": 50.0
+            }
+          },
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "TX"
+            ],
+            "amount": 300.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "contributors": 300.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 375.0,
+            "rows": 3,
+            "reason": ""
+          },
+          "spent": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "This import records money this committee RECEIVED, not money it sent, so it carries no outbound rows to place on a map. Open a saved FEC snapshot for this committee to see where it spent. (File is not a zip file)"
+          }
+        },
+        "by_zip": [
+          {
+            "zip": "92625",
+            "city": "Newport Beach",
+            "state": "CA",
+            "amount": 200.0,
+            "rows": 1,
+            "contributors": 1
+          },
+          {
+            "zip": "94607",
+            "city": "Oakland",
+            "state": "CA",
+            "amount": 100.0,
+            "rows": 1,
+            "contributors": 1
+          }
+        ],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 75.0,
+          "rows": 2
+        },
+        "geocoded_rows": 2,
+        "zip_rows": 2,
+        "pending_rows": 0
+      }
+    }
+  ],
+  "negative_controls": [
+    {
+      "name": "a district key outside the pattern",
+      "expect": "is not a district",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "spent",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 36700.0,
+        "located_total": 35300.0,
+        "unlocated_total": 1400.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 19500.0,
+            "rows": 4,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CALIFORNIA",
+                "amount": 12000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.615385,
+                "support": 0.0,
+                "oppose": 12000.0,
+                "split": false,
+                "who": "S4CA00522"
+              },
+              {
+                "key": "CA-45",
+                "amount": 5500.0,
+                "rows": 2,
+                "basis": "",
+                "share": 0.282051,
+                "support": 5500.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "H0CA48198, STEEL FOR CONGRESS"
+              },
+              {
+                "key": "NY-16",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.102564,
+                "support": 0.0,
+                "oppose": 2000.0,
+                "split": false,
+                "who": "H2NY16000"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 8000.0,
+            "rows": 2,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "FL",
+                "amount": 5000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.625,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "PROTECT PROGRESS"
+              },
+              {
+                "key": "VA",
+                "amount": 3000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.375,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "DEFEND AMERICAN JOBS"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 800.0,
+            "rows": 1,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 800.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "SCHOEN SURVEY RESEARCH"
+              }
+            ]
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 7000.0,
+            "rows": 1,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": false,
+            "districts": [],
+            "states": [
+              {
+                "key": "CA",
+                "amount": 7000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "COINBASE"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
+            "amount": 700.0,
+            "rows": 1
+          },
+          {
+            "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
+            "amount": 400.0,
+            "rows": 1
+          },
+          {
+            "reason": "presidential race: national, with no district or state of its own",
+            "amount": 300.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0
+      }
     },
-    "label": "Crypto Industry Spending Overview.csv",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
+    {
+      "name": "located plus unlocated does not reconcile",
+      "expect": "located plus unlocated does not reconcile",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "spent",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 37700.0,
+        "located_total": 35300.0,
+        "unlocated_total": 1400.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 19500.0,
+            "rows": 4,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-SEN",
+                "amount": 12000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.615385,
+                "support": 0.0,
+                "oppose": 12000.0,
+                "split": false,
+                "who": "S4CA00522"
+              },
+              {
+                "key": "CA-45",
+                "amount": 5500.0,
+                "rows": 2,
+                "basis": "",
+                "share": 0.282051,
+                "support": 5500.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "H0CA48198, STEEL FOR CONGRESS"
+              },
+              {
+                "key": "NY-16",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.102564,
+                "support": 0.0,
+                "oppose": 2000.0,
+                "split": false,
+                "who": "H2NY16000"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 8000.0,
+            "rows": 2,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "FL",
+                "amount": 5000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.625,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "PROTECT PROGRESS"
+              },
+              {
+                "key": "VA",
+                "amount": 3000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.375,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "DEFEND AMERICAN JOBS"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 800.0,
+            "rows": 1,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 800.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "SCHOEN SURVEY RESEARCH"
+              }
+            ]
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 7000.0,
+            "rows": 1,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": false,
+            "districts": [],
+            "states": [
+              {
+                "key": "CA",
+                "amount": 7000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "COINBASE"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
+            "amount": 700.0,
+            "rows": 1
+          },
+          {
+            "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
+            "amount": 400.0,
+            "rows": 1
+          },
+          {
+            "reason": "presidential race: national, with no district or state of its own",
+            "amount": 300.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0
+      }
     },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 0.0,
-    "located_total": 0.0,
-    "unlocated_total": 0.0,
-    "reconciles": true,
-    "kinds": [],
-    "unlocated": [],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 0,
-    "pending_rows": 0,
-    "reason": "This import records money this committee RECEIVED, not money it sent, so it carries no outbound rows to place on a map. Open a saved FEC snapshot for this committee to see where it spent. (File is not a zip file)"
-   }
-  },
-  {
-   "name": "import raised, street addresses geocoded (S8b)",
-   "payload": {
-    "source": "csv",
-    "id": "csv-5702cb09823a35594913fecb80ab2f77",
-    "direction": "raised",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00804179",
-     "name": "COINBASE PAC"
+    {
+      "name": "a share outside 0..1",
+      "expect": "is outside 0..1",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "spent",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 36700.0,
+        "located_total": 35300.0,
+        "unlocated_total": 1400.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 19500.0,
+            "rows": 4,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-SEN",
+                "amount": 12000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.5,
+                "support": 0.0,
+                "oppose": 12000.0,
+                "split": false,
+                "who": "S4CA00522"
+              },
+              {
+                "key": "CA-45",
+                "amount": 5500.0,
+                "rows": 2,
+                "basis": "",
+                "share": 0.282051,
+                "support": 5500.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "H0CA48198, STEEL FOR CONGRESS"
+              },
+              {
+                "key": "NY-16",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.102564,
+                "support": 0.0,
+                "oppose": 2000.0,
+                "split": false,
+                "who": "H2NY16000"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 8000.0,
+            "rows": 2,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "FL",
+                "amount": 5000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.625,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "PROTECT PROGRESS"
+              },
+              {
+                "key": "VA",
+                "amount": 3000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.375,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "DEFEND AMERICAN JOBS"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 800.0,
+            "rows": 1,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 800.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "SCHOEN SURVEY RESEARCH"
+              }
+            ]
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 7000.0,
+            "rows": 1,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": false,
+            "districts": [],
+            "states": [
+              {
+                "key": "CA",
+                "amount": 7000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "COINBASE"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
+            "amount": 700.0,
+            "rows": 1
+          },
+          {
+            "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
+            "amount": 400.0,
+            "rows": 1
+          },
+          {
+            "reason": "presidential race: national, with no district or state of its own",
+            "amount": 300.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0
+      }
     },
-    "label": "Crypto Industry Spending Overview.csv",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
+    {
+      "name": "a kind that states no basis",
+      "expect": "states no basis",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "spent",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 36700.0,
+        "located_total": 35300.0,
+        "unlocated_total": 1400.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 19500.0,
+            "rows": 4,
+            "basis": "",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-SEN",
+                "amount": 12000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.615385,
+                "support": 0.0,
+                "oppose": 12000.0,
+                "split": false,
+                "who": "S4CA00522"
+              },
+              {
+                "key": "CA-45",
+                "amount": 5500.0,
+                "rows": 2,
+                "basis": "",
+                "share": 0.282051,
+                "support": 5500.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "H0CA48198, STEEL FOR CONGRESS"
+              },
+              {
+                "key": "NY-16",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.102564,
+                "support": 0.0,
+                "oppose": 2000.0,
+                "split": false,
+                "who": "H2NY16000"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 8000.0,
+            "rows": 2,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "FL",
+                "amount": 5000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.625,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "PROTECT PROGRESS"
+              },
+              {
+                "key": "VA",
+                "amount": 3000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.375,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "DEFEND AMERICAN JOBS"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 800.0,
+            "rows": 1,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 800.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "SCHOEN SURVEY RESEARCH"
+              }
+            ]
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 7000.0,
+            "rows": 1,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": false,
+            "districts": [],
+            "states": [
+              {
+                "key": "CA",
+                "amount": 7000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "COINBASE"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
+            "amount": 700.0,
+            "rows": 1
+          },
+          {
+            "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
+            "amount": 400.0,
+            "rows": 1
+          },
+          {
+            "reason": "presidential race: national, with no district or state of its own",
+            "amount": 300.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0
+      }
     },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 425.0,
-    "located_total": 425.0,
-    "unlocated_total": 0.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "contributors",
-      "label": "Contributors",
-      "total": 425.0,
-      "rows": 6,
-      "basis": "by the contributor ZIP, then the state",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "TX-07",
-        "amount": 300.0,
-        "rows": 2,
-        "basis": "street",
-        "share": 0.705882,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "TWO, PERSON, ONE, PERSON"
-       },
-       {
-        "key": "CA-12",
-        "amount": 25.0,
-        "rows": 1,
-        "basis": "zip",
-        "share": 0.058824,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "FOUR, PERSON"
-       },
-       {
-        "key": "CA-45",
-        "amount": 24.0,
-        "rows": 1,
-        "basis": "zip_split",
-        "share": 0.056471,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": true,
-        "who": "FIVE, PERSON"
-       },
-       {
-        "key": "NY-16",
-        "amount": 16.0,
-        "rows": 0,
-        "basis": "zip_split",
-        "share": 0.037647,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": true,
-        "who": "FIVE, PERSON"
-       }
-      ],
-      "states": [
-       {
-        "key": "CA",
-        "amount": 50.0,
-        "rows": 1,
-        "basis": "zip",
-        "share": 0.117647,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "THREE, PERSON"
-       },
-       {
-        "key": "NY",
-        "amount": 10.0,
-        "rows": 1,
-        "basis": "zip",
-        "share": 0.023529,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "SIX, PERSON"
-       }
-      ]
-     }
-    ],
-    "unlocated": [],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "whole 2020 census tracts",
-    "geocoded_rows": 2,
-    "zip_rows": 4,
-    "pending_rows": 0
-   }
-  }
- ],
- "negative_controls": [
-  {
-   "name": "a district key outside the pattern",
-   "expect": "is not a district",
-   "payload": {
-    "source": "snapshot",
-    "id": "fixture-snap",
-    "direction": "spent",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00835959",
-     "name": "FAIRSHAKE"
+    {
+      "name": "an unlocated bucket with no reason",
+      "expect": "states no reason",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "spent",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 35300.0,
+        "located_total": 35300.0,
+        "unlocated_total": 0.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 19500.0,
+            "rows": 4,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-SEN",
+                "amount": 12000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.615385,
+                "support": 0.0,
+                "oppose": 12000.0,
+                "split": false,
+                "who": "S4CA00522"
+              },
+              {
+                "key": "CA-45",
+                "amount": 5500.0,
+                "rows": 2,
+                "basis": "",
+                "share": 0.282051,
+                "support": 5500.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "H0CA48198, STEEL FOR CONGRESS"
+              },
+              {
+                "key": "NY-16",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.102564,
+                "support": 0.0,
+                "oppose": 2000.0,
+                "split": false,
+                "who": "H2NY16000"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 8000.0,
+            "rows": 2,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "FL",
+                "amount": 5000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.625,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "PROTECT PROGRESS"
+              },
+              {
+                "key": "VA",
+                "amount": 3000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.375,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "DEFEND AMERICAN JOBS"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 800.0,
+            "rows": 1,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 800.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "SCHOEN SURVEY RESEARCH"
+              }
+            ]
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 7000.0,
+            "rows": 1,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": false,
+            "districts": [],
+            "states": [
+              {
+                "key": "CA",
+                "amount": 7000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "COINBASE"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "",
+            "amount": 0.0,
+            "rows": 0
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0
+      }
     },
-    "label": "Coinbase",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
+    {
+      "name": "the legend stops rewritten",
+      "expect": "are not the published stops",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "spent",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 36700.0,
+        "located_total": 35300.0,
+        "unlocated_total": 1400.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 19500.0,
+            "rows": 4,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-SEN",
+                "amount": 12000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.615385,
+                "support": 0.0,
+                "oppose": 12000.0,
+                "split": false,
+                "who": "S4CA00522"
+              },
+              {
+                "key": "CA-45",
+                "amount": 5500.0,
+                "rows": 2,
+                "basis": "",
+                "share": 0.282051,
+                "support": 5500.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "H0CA48198, STEEL FOR CONGRESS"
+              },
+              {
+                "key": "NY-16",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.102564,
+                "support": 0.0,
+                "oppose": 2000.0,
+                "split": false,
+                "who": "H2NY16000"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 8000.0,
+            "rows": 2,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "FL",
+                "amount": 5000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.625,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "PROTECT PROGRESS"
+              },
+              {
+                "key": "VA",
+                "amount": 3000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.375,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "DEFEND AMERICAN JOBS"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 800.0,
+            "rows": 1,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 800.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "SCHOEN SURVEY RESEARCH"
+              }
+            ]
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 7000.0,
+            "rows": 1,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": false,
+            "districts": [],
+            "states": [
+              {
+                "key": "CA",
+                "amount": 7000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "COINBASE"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
+            "amount": 700.0,
+            "rows": 1
+          },
+          {
+            "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
+            "amount": 400.0,
+            "rows": 1
+          },
+          {
+            "reason": "presidential race: national, with no district or state of its own",
+            "amount": 300.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1,
+          2,
+          3
+        ],
+        "tract_basis": "",
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0
+      }
     },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 36700.0,
-    "located_total": 35300.0,
-    "unlocated_total": 1400.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "candidates",
-      "label": "Candidates",
-      "total": 19500.0,
-      "rows": 4,
-      "basis": "by the candidate's district",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CALIFORNIA",
-        "amount": 12000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.615385,
-        "support": 0.0,
-        "oppose": 12000.0,
-        "split": false,
-        "who": "S4CA00522"
-       },
-       {
-        "key": "CA-45",
-        "amount": 5500.0,
-        "rows": 2,
-        "basis": "",
-        "share": 0.282051,
-        "support": 5500.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "H0CA48198, STEEL FOR CONGRESS"
-       },
-       {
-        "key": "NY-16",
-        "amount": 2000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.102564,
-        "support": 0.0,
-        "oppose": 2000.0,
-        "split": false,
-        "who": "H2NY16000"
-       }
-      ],
-      "states": []
-     },
-     {
-      "kind": "transfers",
-      "label": "Transfers to committees",
-      "total": 8000.0,
-      "rows": 2,
-      "basis": "by the committee's registered state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "FL",
-        "amount": 5000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.625,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "PROTECT PROGRESS"
-       },
-       {
-        "key": "VA",
-        "amount": 3000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.375,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "DEFEND AMERICAN JOBS"
-       }
-      ]
-     },
-     {
-      "kind": "operating",
-      "label": "Operating",
-      "total": 800.0,
-      "rows": 1,
-      "basis": "by the payee's state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 800.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "SCHOEN SURVEY RESEARCH"
-       }
-      ]
-     },
-     {
-      "kind": "conversions",
-      "label": "Asset conversions",
-      "total": 7000.0,
-      "rows": 1,
-      "basis": "in-kind assets liquidated back to the contributor",
-      "default_on": false,
-      "districts": [],
-      "states": [
-       {
-        "key": "CA",
-        "amount": 7000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "COINBASE"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
-      "amount": 700.0,
-      "rows": 1
-     },
-     {
-      "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
-      "amount": 400.0,
-      "rows": 1
-     },
-     {
-      "reason": "presidential race: national, with no district or state of its own",
-      "amount": 300.0,
-      "rows": 1
-     }
-    ],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 0,
-    "pending_rows": 0
-   }
-  },
-  {
-   "name": "located plus unlocated does not reconcile",
-   "expect": "located plus unlocated does not reconcile",
-   "payload": {
-    "source": "snapshot",
-    "id": "fixture-snap",
-    "direction": "spent",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00835959",
-     "name": "FAIRSHAKE"
+    {
+      "name": "a map payload with no cycle (ruling A)",
+      "expect": "states no cycle",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "spent",
+        "cycle": "",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 36700.0,
+        "located_total": 35300.0,
+        "unlocated_total": 1400.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 19500.0,
+            "rows": 4,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-SEN",
+                "amount": 12000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.615385,
+                "support": 0.0,
+                "oppose": 12000.0,
+                "split": false,
+                "who": "S4CA00522"
+              },
+              {
+                "key": "CA-45",
+                "amount": 5500.0,
+                "rows": 2,
+                "basis": "",
+                "share": 0.282051,
+                "support": 5500.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "H0CA48198, STEEL FOR CONGRESS"
+              },
+              {
+                "key": "NY-16",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.102564,
+                "support": 0.0,
+                "oppose": 2000.0,
+                "split": false,
+                "who": "H2NY16000"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 8000.0,
+            "rows": 2,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "FL",
+                "amount": 5000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.625,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "PROTECT PROGRESS"
+              },
+              {
+                "key": "VA",
+                "amount": 3000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.375,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "DEFEND AMERICAN JOBS"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 800.0,
+            "rows": 1,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 800.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "SCHOEN SURVEY RESEARCH"
+              }
+            ]
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 7000.0,
+            "rows": 1,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": false,
+            "districts": [],
+            "states": [
+              {
+                "key": "CA",
+                "amount": 7000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "COINBASE"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
+            "amount": 700.0,
+            "rows": 1
+          },
+          {
+            "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
+            "amount": 400.0,
+            "rows": 1
+          },
+          {
+            "reason": "presidential race: national, with no district or state of its own",
+            "amount": 300.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0
+      }
     },
-    "label": "Coinbase",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
+    {
+      "name": "a row placed by a basis that is not a basis",
+      "expect": "is not a placing basis",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "spent",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 36700.0,
+        "located_total": 35300.0,
+        "unlocated_total": 1400.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 19500.0,
+            "rows": 4,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-SEN",
+                "amount": 12000.0,
+                "rows": 1,
+                "basis": "guess",
+                "share": 0.615385,
+                "support": 0.0,
+                "oppose": 12000.0,
+                "split": false,
+                "who": "S4CA00522"
+              },
+              {
+                "key": "CA-45",
+                "amount": 5500.0,
+                "rows": 2,
+                "basis": "",
+                "share": 0.282051,
+                "support": 5500.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "H0CA48198, STEEL FOR CONGRESS"
+              },
+              {
+                "key": "NY-16",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.102564,
+                "support": 0.0,
+                "oppose": 2000.0,
+                "split": false,
+                "who": "H2NY16000"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 8000.0,
+            "rows": 2,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "FL",
+                "amount": 5000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.625,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "PROTECT PROGRESS"
+              },
+              {
+                "key": "VA",
+                "amount": 3000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.375,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "DEFEND AMERICAN JOBS"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 800.0,
+            "rows": 1,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 800.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "SCHOEN SURVEY RESEARCH"
+              }
+            ]
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 7000.0,
+            "rows": 1,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": false,
+            "districts": [],
+            "states": [
+              {
+                "key": "CA",
+                "amount": 7000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "COINBASE"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
+            "amount": 700.0,
+            "rows": 1
+          },
+          {
+            "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
+            "amount": 400.0,
+            "rows": 1
+          },
+          {
+            "reason": "presidential race: national, with no district or state of its own",
+            "amount": 300.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0
+      }
     },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 37700.0,
-    "located_total": 35300.0,
-    "unlocated_total": 1400.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "candidates",
-      "label": "Candidates",
-      "total": 19500.0,
-      "rows": 4,
-      "basis": "by the candidate's district",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CA-SEN",
-        "amount": 12000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.615385,
-        "support": 0.0,
-        "oppose": 12000.0,
-        "split": false,
-        "who": "S4CA00522"
-       },
-       {
-        "key": "CA-45",
-        "amount": 5500.0,
-        "rows": 2,
-        "basis": "",
-        "share": 0.282051,
-        "support": 5500.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "H0CA48198, STEEL FOR CONGRESS"
-       },
-       {
-        "key": "NY-16",
-        "amount": 2000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.102564,
-        "support": 0.0,
-        "oppose": 2000.0,
-        "split": false,
-        "who": "H2NY16000"
-       }
-      ],
-      "states": []
-     },
-     {
-      "kind": "transfers",
-      "label": "Transfers to committees",
-      "total": 8000.0,
-      "rows": 2,
-      "basis": "by the committee's registered state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "FL",
-        "amount": 5000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.625,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "PROTECT PROGRESS"
-       },
-       {
-        "key": "VA",
-        "amount": 3000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.375,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "DEFEND AMERICAN JOBS"
-       }
-      ]
-     },
-     {
-      "kind": "operating",
-      "label": "Operating",
-      "total": 800.0,
-      "rows": 1,
-      "basis": "by the payee's state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 800.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "SCHOEN SURVEY RESEARCH"
-       }
-      ]
-     },
-     {
-      "kind": "conversions",
-      "label": "Asset conversions",
-      "total": 7000.0,
-      "rows": 1,
-      "basis": "in-kind assets liquidated back to the contributor",
-      "default_on": false,
-      "districts": [],
-      "states": [
-       {
-        "key": "CA",
-        "amount": 7000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "COINBASE"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
-      "amount": 700.0,
-      "rows": 1
-     },
-     {
-      "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
-      "amount": 400.0,
-      "rows": 1
-     },
-     {
-      "reason": "presidential race: national, with no district or state of its own",
-      "amount": 300.0,
-      "rows": 1
-     }
-    ],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 0,
-    "pending_rows": 0
-   }
-  },
-  {
-   "name": "a share outside 0..1",
-   "expect": "is outside 0..1",
-   "payload": {
-    "source": "snapshot",
-    "id": "fixture-snap",
-    "direction": "spent",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00835959",
-     "name": "FAIRSHAKE"
-    },
-    "label": "Coinbase",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
-    },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 36700.0,
-    "located_total": 35300.0,
-    "unlocated_total": 1400.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "candidates",
-      "label": "Candidates",
-      "total": 19500.0,
-      "rows": 4,
-      "basis": "by the candidate's district",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CA-SEN",
-        "amount": 12000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.5,
-        "support": 0.0,
-        "oppose": 12000.0,
-        "split": false,
-        "who": "S4CA00522"
-       },
-       {
-        "key": "CA-45",
-        "amount": 5500.0,
-        "rows": 2,
-        "basis": "",
-        "share": 0.282051,
-        "support": 5500.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "H0CA48198, STEEL FOR CONGRESS"
-       },
-       {
-        "key": "NY-16",
-        "amount": 2000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.102564,
-        "support": 0.0,
-        "oppose": 2000.0,
-        "split": false,
-        "who": "H2NY16000"
-       }
-      ],
-      "states": []
-     },
-     {
-      "kind": "transfers",
-      "label": "Transfers to committees",
-      "total": 8000.0,
-      "rows": 2,
-      "basis": "by the committee's registered state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "FL",
-        "amount": 5000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.625,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "PROTECT PROGRESS"
-       },
-       {
-        "key": "VA",
-        "amount": 3000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.375,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "DEFEND AMERICAN JOBS"
-       }
-      ]
-     },
-     {
-      "kind": "operating",
-      "label": "Operating",
-      "total": 800.0,
-      "rows": 1,
-      "basis": "by the payee's state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 800.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "SCHOEN SURVEY RESEARCH"
-       }
-      ]
-     },
-     {
-      "kind": "conversions",
-      "label": "Asset conversions",
-      "total": 7000.0,
-      "rows": 1,
-      "basis": "in-kind assets liquidated back to the contributor",
-      "default_on": false,
-      "districts": [],
-      "states": [
-       {
-        "key": "CA",
-        "amount": 7000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "COINBASE"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
-      "amount": 700.0,
-      "rows": 1
-     },
-     {
-      "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
-      "amount": 400.0,
-      "rows": 1
-     },
-     {
-      "reason": "presidential race: national, with no district or state of its own",
-      "amount": 300.0,
-      "rows": 1
-     }
-    ],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 0,
-    "pending_rows": 0
-   }
-  },
-  {
-   "name": "a kind that states no basis",
-   "expect": "states no basis",
-   "payload": {
-    "source": "snapshot",
-    "id": "fixture-snap",
-    "direction": "spent",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00835959",
-     "name": "FAIRSHAKE"
-    },
-    "label": "Coinbase",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
-    },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 36700.0,
-    "located_total": 35300.0,
-    "unlocated_total": 1400.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "candidates",
-      "label": "Candidates",
-      "total": 19500.0,
-      "rows": 4,
-      "basis": "",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CA-SEN",
-        "amount": 12000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.615385,
-        "support": 0.0,
-        "oppose": 12000.0,
-        "split": false,
-        "who": "S4CA00522"
-       },
-       {
-        "key": "CA-45",
-        "amount": 5500.0,
-        "rows": 2,
-        "basis": "",
-        "share": 0.282051,
-        "support": 5500.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "H0CA48198, STEEL FOR CONGRESS"
-       },
-       {
-        "key": "NY-16",
-        "amount": 2000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.102564,
-        "support": 0.0,
-        "oppose": 2000.0,
-        "split": false,
-        "who": "H2NY16000"
-       }
-      ],
-      "states": []
-     },
-     {
-      "kind": "transfers",
-      "label": "Transfers to committees",
-      "total": 8000.0,
-      "rows": 2,
-      "basis": "by the committee's registered state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "FL",
-        "amount": 5000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.625,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "PROTECT PROGRESS"
-       },
-       {
-        "key": "VA",
-        "amount": 3000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.375,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "DEFEND AMERICAN JOBS"
-       }
-      ]
-     },
-     {
-      "kind": "operating",
-      "label": "Operating",
-      "total": 800.0,
-      "rows": 1,
-      "basis": "by the payee's state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 800.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "SCHOEN SURVEY RESEARCH"
-       }
-      ]
-     },
-     {
-      "kind": "conversions",
-      "label": "Asset conversions",
-      "total": 7000.0,
-      "rows": 1,
-      "basis": "in-kind assets liquidated back to the contributor",
-      "default_on": false,
-      "districts": [],
-      "states": [
-       {
-        "key": "CA",
-        "amount": 7000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "COINBASE"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
-      "amount": 700.0,
-      "rows": 1
-     },
-     {
-      "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
-      "amount": 400.0,
-      "rows": 1
-     },
-     {
-      "reason": "presidential race: national, with no district or state of its own",
-      "amount": 300.0,
-      "rows": 1
-     }
-    ],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 0,
-    "pending_rows": 0
-   }
-  },
-  {
-   "name": "an unlocated bucket with no reason",
-   "expect": "states no reason",
-   "payload": {
-    "source": "snapshot",
-    "id": "fixture-snap",
-    "direction": "spent",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00835959",
-     "name": "FAIRSHAKE"
-    },
-    "label": "Coinbase",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
-    },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 35300.0,
-    "located_total": 35300.0,
-    "unlocated_total": 0.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "candidates",
-      "label": "Candidates",
-      "total": 19500.0,
-      "rows": 4,
-      "basis": "by the candidate's district",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CA-SEN",
-        "amount": 12000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.615385,
-        "support": 0.0,
-        "oppose": 12000.0,
-        "split": false,
-        "who": "S4CA00522"
-       },
-       {
-        "key": "CA-45",
-        "amount": 5500.0,
-        "rows": 2,
-        "basis": "",
-        "share": 0.282051,
-        "support": 5500.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "H0CA48198, STEEL FOR CONGRESS"
-       },
-       {
-        "key": "NY-16",
-        "amount": 2000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.102564,
-        "support": 0.0,
-        "oppose": 2000.0,
-        "split": false,
-        "who": "H2NY16000"
-       }
-      ],
-      "states": []
-     },
-     {
-      "kind": "transfers",
-      "label": "Transfers to committees",
-      "total": 8000.0,
-      "rows": 2,
-      "basis": "by the committee's registered state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "FL",
-        "amount": 5000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.625,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "PROTECT PROGRESS"
-       },
-       {
-        "key": "VA",
-        "amount": 3000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.375,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "DEFEND AMERICAN JOBS"
-       }
-      ]
-     },
-     {
-      "kind": "operating",
-      "label": "Operating",
-      "total": 800.0,
-      "rows": 1,
-      "basis": "by the payee's state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 800.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "SCHOEN SURVEY RESEARCH"
-       }
-      ]
-     },
-     {
-      "kind": "conversions",
-      "label": "Asset conversions",
-      "total": 7000.0,
-      "rows": 1,
-      "basis": "in-kind assets liquidated back to the contributor",
-      "default_on": false,
-      "districts": [],
-      "states": [
-       {
-        "key": "CA",
-        "amount": 7000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "COINBASE"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "",
-      "amount": 0.0,
-      "rows": 0
-     }
-    ],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 0,
-    "pending_rows": 0
-   }
-  },
-  {
-   "name": "the legend stops rewritten",
-   "expect": "are not the published stops",
-   "payload": {
-    "source": "snapshot",
-    "id": "fixture-snap",
-    "direction": "spent",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00835959",
-     "name": "FAIRSHAKE"
-    },
-    "label": "Coinbase",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
-    },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 36700.0,
-    "located_total": 35300.0,
-    "unlocated_total": 1400.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "candidates",
-      "label": "Candidates",
-      "total": 19500.0,
-      "rows": 4,
-      "basis": "by the candidate's district",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CA-SEN",
-        "amount": 12000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.615385,
-        "support": 0.0,
-        "oppose": 12000.0,
-        "split": false,
-        "who": "S4CA00522"
-       },
-       {
-        "key": "CA-45",
-        "amount": 5500.0,
-        "rows": 2,
-        "basis": "",
-        "share": 0.282051,
-        "support": 5500.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "H0CA48198, STEEL FOR CONGRESS"
-       },
-       {
-        "key": "NY-16",
-        "amount": 2000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.102564,
-        "support": 0.0,
-        "oppose": 2000.0,
-        "split": false,
-        "who": "H2NY16000"
-       }
-      ],
-      "states": []
-     },
-     {
-      "kind": "transfers",
-      "label": "Transfers to committees",
-      "total": 8000.0,
-      "rows": 2,
-      "basis": "by the committee's registered state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "FL",
-        "amount": 5000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.625,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "PROTECT PROGRESS"
-       },
-       {
-        "key": "VA",
-        "amount": 3000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.375,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "DEFEND AMERICAN JOBS"
-       }
-      ]
-     },
-     {
-      "kind": "operating",
-      "label": "Operating",
-      "total": 800.0,
-      "rows": 1,
-      "basis": "by the payee's state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 800.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "SCHOEN SURVEY RESEARCH"
-       }
-      ]
-     },
-     {
-      "kind": "conversions",
-      "label": "Asset conversions",
-      "total": 7000.0,
-      "rows": 1,
-      "basis": "in-kind assets liquidated back to the contributor",
-      "default_on": false,
-      "districts": [],
-      "states": [
-       {
-        "key": "CA",
-        "amount": 7000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "COINBASE"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
-      "amount": 700.0,
-      "rows": 1
-     },
-     {
-      "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
-      "amount": 400.0,
-      "rows": 1
-     },
-     {
-      "reason": "presidential race: national, with no district or state of its own",
-      "amount": 300.0,
-      "rows": 1
-     }
-    ],
-    "stops": [
-     1,
-     2,
-     3
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 0,
-    "pending_rows": 0
-   }
-  },
-  {
-   "name": "a map payload with no cycle (ruling A)",
-   "expect": "states no cycle",
-   "payload": {
-    "source": "snapshot",
-    "id": "fixture-snap",
-    "direction": "spent",
-    "cycle": "",
-    "committee": {
-     "id": "C00835959",
-     "name": "FAIRSHAKE"
-    },
-    "label": "Coinbase",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
-    },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 36700.0,
-    "located_total": 35300.0,
-    "unlocated_total": 1400.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "candidates",
-      "label": "Candidates",
-      "total": 19500.0,
-      "rows": 4,
-      "basis": "by the candidate's district",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CA-SEN",
-        "amount": 12000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.615385,
-        "support": 0.0,
-        "oppose": 12000.0,
-        "split": false,
-        "who": "S4CA00522"
-       },
-       {
-        "key": "CA-45",
-        "amount": 5500.0,
-        "rows": 2,
-        "basis": "",
-        "share": 0.282051,
-        "support": 5500.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "H0CA48198, STEEL FOR CONGRESS"
-       },
-       {
-        "key": "NY-16",
-        "amount": 2000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.102564,
-        "support": 0.0,
-        "oppose": 2000.0,
-        "split": false,
-        "who": "H2NY16000"
-       }
-      ],
-      "states": []
-     },
-     {
-      "kind": "transfers",
-      "label": "Transfers to committees",
-      "total": 8000.0,
-      "rows": 2,
-      "basis": "by the committee's registered state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "FL",
-        "amount": 5000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.625,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "PROTECT PROGRESS"
-       },
-       {
-        "key": "VA",
-        "amount": 3000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.375,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "DEFEND AMERICAN JOBS"
-       }
-      ]
-     },
-     {
-      "kind": "operating",
-      "label": "Operating",
-      "total": 800.0,
-      "rows": 1,
-      "basis": "by the payee's state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 800.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "SCHOEN SURVEY RESEARCH"
-       }
-      ]
-     },
-     {
-      "kind": "conversions",
-      "label": "Asset conversions",
-      "total": 7000.0,
-      "rows": 1,
-      "basis": "in-kind assets liquidated back to the contributor",
-      "default_on": false,
-      "districts": [],
-      "states": [
-       {
-        "key": "CA",
-        "amount": 7000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "COINBASE"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
-      "amount": 700.0,
-      "rows": 1
-     },
-     {
-      "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
-      "amount": 400.0,
-      "rows": 1
-     },
-     {
-      "reason": "presidential race: national, with no district or state of its own",
-      "amount": 300.0,
-      "rows": 1
-     }
-    ],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 0,
-    "pending_rows": 0
-   }
-  },
-  {
-   "name": "a row placed by a basis that is not a basis",
-   "expect": "is not a placing basis",
-   "payload": {
-    "source": "snapshot",
-    "id": "fixture-snap",
-    "direction": "spent",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00835959",
-     "name": "FAIRSHAKE"
-    },
-    "label": "Coinbase",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
-    },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 36700.0,
-    "located_total": 35300.0,
-    "unlocated_total": 1400.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "candidates",
-      "label": "Candidates",
-      "total": 19500.0,
-      "rows": 4,
-      "basis": "by the candidate's district",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CA-SEN",
-        "amount": 12000.0,
-        "rows": 1,
-        "basis": "guess",
-        "share": 0.615385,
-        "support": 0.0,
-        "oppose": 12000.0,
-        "split": false,
-        "who": "S4CA00522"
-       },
-       {
-        "key": "CA-45",
-        "amount": 5500.0,
-        "rows": 2,
-        "basis": "",
-        "share": 0.282051,
-        "support": 5500.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "H0CA48198, STEEL FOR CONGRESS"
-       },
-       {
-        "key": "NY-16",
-        "amount": 2000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.102564,
-        "support": 0.0,
-        "oppose": 2000.0,
-        "split": false,
-        "who": "H2NY16000"
-       }
-      ],
-      "states": []
-     },
-     {
-      "kind": "transfers",
-      "label": "Transfers to committees",
-      "total": 8000.0,
-      "rows": 2,
-      "basis": "by the committee's registered state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "FL",
-        "amount": 5000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.625,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "PROTECT PROGRESS"
-       },
-       {
-        "key": "VA",
-        "amount": 3000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.375,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "DEFEND AMERICAN JOBS"
-       }
-      ]
-     },
-     {
-      "kind": "operating",
-      "label": "Operating",
-      "total": 800.0,
-      "rows": 1,
-      "basis": "by the payee's state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 800.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "SCHOEN SURVEY RESEARCH"
-       }
-      ]
-     },
-     {
-      "kind": "conversions",
-      "label": "Asset conversions",
-      "total": 7000.0,
-      "rows": 1,
-      "basis": "in-kind assets liquidated back to the contributor",
-      "default_on": false,
-      "districts": [],
-      "states": [
-       {
-        "key": "CA",
-        "amount": 7000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "COINBASE"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
-      "amount": 700.0,
-      "rows": 1
-     },
-     {
-      "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
-      "amount": 400.0,
-      "rows": 1
-     },
-     {
-      "reason": "presidential race: national, with no district or state of its own",
-      "amount": 300.0,
-      "rows": 1
-     }
-    ],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 0,
-    "pending_rows": 0
-   }
-  },
-  {
-   "name": "a street-matched row still marked split",
-   "expect": "street-matched and still marked split",
-   "payload": {
-    "source": "snapshot",
-    "id": "fixture-snap",
-    "direction": "spent",
-    "cycle": "2024",
-    "committee": {
-     "id": "C00835959",
-     "name": "FAIRSHAKE"
-    },
-    "label": "Coinbase",
-    "vintage": "118",
-    "congress": "118th",
-    "canvas": {
-     "width": 100,
-     "height": 60
-    },
-    "boundary_file": "cd118.json",
-    "zip_basis": "land area",
-    "reported_total": 36700.0,
-    "located_total": 35300.0,
-    "unlocated_total": 1400.0,
-    "reconciles": true,
-    "kinds": [
-     {
-      "kind": "candidates",
-      "label": "Candidates",
-      "total": 19500.0,
-      "rows": 4,
-      "basis": "by the candidate's district",
-      "default_on": true,
-      "districts": [
-       {
-        "key": "CA-SEN",
-        "amount": 12000.0,
-        "rows": 1,
-        "basis": "street",
-        "share": 0.615385,
-        "support": 0.0,
-        "oppose": 12000.0,
-        "split": true,
-        "who": "S4CA00522"
-       },
-       {
-        "key": "CA-45",
-        "amount": 5500.0,
-        "rows": 2,
-        "basis": "",
-        "share": 0.282051,
-        "support": 5500.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "H0CA48198, STEEL FOR CONGRESS"
-       },
-       {
-        "key": "NY-16",
-        "amount": 2000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.102564,
-        "support": 0.0,
-        "oppose": 2000.0,
-        "split": false,
-        "who": "H2NY16000"
-       }
-      ],
-      "states": []
-     },
-     {
-      "kind": "transfers",
-      "label": "Transfers to committees",
-      "total": 8000.0,
-      "rows": 2,
-      "basis": "by the committee's registered state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "FL",
-        "amount": 5000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.625,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "PROTECT PROGRESS"
-       },
-       {
-        "key": "VA",
-        "amount": 3000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 0.375,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "DEFEND AMERICAN JOBS"
-       }
-      ]
-     },
-     {
-      "kind": "operating",
-      "label": "Operating",
-      "total": 800.0,
-      "rows": 1,
-      "basis": "by the payee's state",
-      "default_on": true,
-      "districts": [],
-      "states": [
-       {
-        "key": "NY",
-        "amount": 800.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "SCHOEN SURVEY RESEARCH"
-       }
-      ]
-     },
-     {
-      "kind": "conversions",
-      "label": "Asset conversions",
-      "total": 7000.0,
-      "rows": 1,
-      "basis": "in-kind assets liquidated back to the contributor",
-      "default_on": false,
-      "districts": [],
-      "states": [
-       {
-        "key": "CA",
-        "amount": 7000.0,
-        "rows": 1,
-        "basis": "",
-        "share": 1.0,
-        "support": 0.0,
-        "oppose": 0.0,
-        "split": false,
-        "who": "COINBASE"
-       }
-      ]
-     }
-    ],
-    "unlocated": [
-     {
-      "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
-      "amount": 700.0,
-      "rows": 1
-     },
-     {
-      "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
-      "amount": 400.0,
-      "rows": 1
-     },
-     {
-      "reason": "presidential race: national, with no district or state of its own",
-      "amount": 300.0,
-      "rows": 1
-     }
-    ],
-    "stops": [
-     1000,
-     10000,
-     100000,
-     1000000,
-     10000000
-    ],
-    "tract_basis": "",
-    "geocoded_rows": 0,
-    "zip_rows": 0,
-    "pending_rows": 0
-   }
-  }
- ]
+    {
+      "name": "a street-matched row still marked split",
+      "expect": "street-matched and still marked split",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "spent",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 36700.0,
+        "located_total": 35300.0,
+        "unlocated_total": 1400.0,
+        "reconciles": true,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 19500.0,
+            "rows": 4,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-SEN",
+                "amount": 12000.0,
+                "rows": 1,
+                "basis": "street",
+                "share": 0.615385,
+                "support": 0.0,
+                "oppose": 12000.0,
+                "split": true,
+                "who": "S4CA00522"
+              },
+              {
+                "key": "CA-45",
+                "amount": 5500.0,
+                "rows": 2,
+                "basis": "",
+                "share": 0.282051,
+                "support": 5500.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "H0CA48198, STEEL FOR CONGRESS"
+              },
+              {
+                "key": "NY-16",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.102564,
+                "support": 0.0,
+                "oppose": 2000.0,
+                "split": false,
+                "who": "H2NY16000"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 8000.0,
+            "rows": 2,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "FL",
+                "amount": 5000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.625,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "PROTECT PROGRESS"
+              },
+              {
+                "key": "VA",
+                "amount": 3000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 0.375,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "DEFEND AMERICAN JOBS"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 800.0,
+            "rows": 1,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 800.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "SCHOEN SURVEY RESEARCH"
+              }
+            ]
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 7000.0,
+            "rows": 1,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": false,
+            "districts": [],
+            "states": [
+              {
+                "key": "CA",
+                "amount": 7000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "who": "COINBASE"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "H9TX66000 is filed in TX-66, a seat this cycle's map has no line for",
+            "amount": 700.0,
+            "rows": 1
+          },
+          {
+            "reason": "an operating payment could not be placed: the row carries no usable state or ZIP",
+            "amount": 400.0,
+            "rows": 1
+          },
+          {
+            "reason": "presidential race: national, with no district or state of its own",
+            "amount": 300.0,
+            "rows": 1
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "tract_basis": "",
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0
+      }
+    }
+  ]
 }

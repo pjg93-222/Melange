@@ -55,7 +55,7 @@ const writeExamples = contract.examples.filter(example => example.write);
 
 test('[url_scope] the contract itself is shaped the way contracts/README.md requires', () => {
   assert.equal(contract.contract, 'url_scope');
-  assert.equal(contract.version, 4);
+  assert.equal(contract.version, 6);
   assert.equal(contract.owner, 'S5; pane keys S6');
   assert.ok(contract.produced_by.length >= 1, 'produced_by lists every producer');
   assert.ok(contract.consumed_by.length >= 1, 'consumed_by lists every consumer');
@@ -156,6 +156,19 @@ test('[url_scope] studioPane is retired: never read, never written, never droppe
   assert.equal(state.location.search, '?studioPane=B&industry=Banking&cycle=2024');
 });
 
+test('[url_scope] build 06: a pane map compare cycle is the flat key <pane>.compare', () => {
+  const state = fakeWindow('/?a.source=csv&a.id=csv-1&a.committee=C00000001&a.map=raised#evidence');
+  scope.write({'a.compare': '2024'}, {location: state.location, history: state.history, target: state.events});
+  assert.equal(state.location.search, '?a.source=csv&a.id=csv-1&a.committee=C00000001&a.map=raised&a.compare=2024');
+  assert.equal(scope.read(state.location.search.slice(1))['a.compare'], '2024');
+  // Not a cycle: refused on read and never written.
+  const refused = scope.read('a.source=csv&a.id=csv-1&a.committee=C00000001&a.compare=2023-2024');
+  assert.equal(refused['a.compare'], undefined);
+  assert.ok(refused.invalid.some(item => item.key === 'a.compare'));
+  scope.write({'a.compare': ''}, {location: state.location, history: state.history, target: state.events});
+  assert.ok(!state.location.search.includes('a.compare'));
+});
+
 test('[url_scope] write() never writes a reserved key, even when asked', () => {
   const state = fakeWindow('/#graph');
   const asked = Object.fromEntries(contract.reserved.map(key => [key, 'x']));
@@ -177,6 +190,86 @@ test('[url_scope] subscribe fires on a write, and not on a no-op write', () => {
   stop();
   scope.write({cycle: '2022'}, {location: state.location, history: state.history, target: state.events});
   assert.equal(seen.length, 1, 'unsubscribe stops the listener');
+});
+
+/* v6 (console redesign build 02, 2026-09-22): Graph's comparison. The four
+   url examples and three negative controls in the contract cover industry
+   (2 and 3 values), cycle, company with layout=stacked, a one-value compare,
+   an unknown compare and an unknown layout; these add what an example
+   cannot express. */
+test('[url_scope] v6: a repeated key without compare reads its first value, as before', () => {
+  assert.deepStrictEqual(scope.read('industry=Banking&industry=Credit%20Union'), {industry: 'Banking', invalid: []});
+  assert.deepStrictEqual(scope.read('cycle=2024&cycle=2026'), {cycle: '2024', invalid: []});
+});
+
+test('[url_scope] v6: every compare mode round-trips with two and with three values', () => {
+  const cases = [
+    ['industry', ['Banking', 'Credit Union']],
+    ['industry', ['Banking', 'Credit Union', 'Property & Casualty Insurance']],
+    ['cycle', ['2024', '2026']],
+    ['cycle', ['2022', '2024', '2026']],
+    ['company', ['Goldman Sachs Bank NA', 'JP Morgan Chase Bank NA']],
+    ['company', ['Goldman Sachs Bank NA', 'JP Morgan Chase Bank NA', 'Wells Fargo Bank NA']]
+  ];
+  for (const [dim, values] of cases) {
+    const base = dim === 'industry' ? {cycle: '2026'} : {industry: 'Banking'};
+    const wanted = Object.assign({}, base, {[dim]: values[0], compare: dim, compareValues: values, invalid: []});
+    // The producer's own spelling: an array on the compared key, the keys in
+    // KEYS order as graph.js:writeScope passes them (write() appends new keys
+    // in the order it is given them; serialize() follows KEYS).
+    const partial = dim === 'industry'
+      ? Object.assign({[dim]: values.slice()}, base, {compare: dim})
+      : Object.assign({}, base, {[dim]: values.slice(), compare: dim});
+    const state = fakeWindow('/#graph');
+    scope.write(partial, {location: state.location, history: state.history, target: state.events});
+    assert.deepStrictEqual(scope.read(state.location.search), wanted, dim + ' x' + values.length);
+    // The key repeats in pill order, and nothing else does.
+    const pairs = [...new URLSearchParams(state.location.search)];
+    assert.deepStrictEqual(pairs.filter(pair => pair[0] === dim).map(pair => pair[1]), values);
+    // read()'s own shape serializes back to the same query (Copy link).
+    assert.equal('?' + scope.serialize(scope.read(state.location.search)), state.location.search);
+  }
+});
+
+test('[url_scope] v6: layout=stacked rides with a two-scope comparison and is removed by an empty write', () => {
+  const state = fakeWindow('/?industry=Banking&industry=Credit%20Union&compare=industry#graph');
+  scope.write({layout: 'stacked'}, {location: state.location, history: state.history, target: state.events});
+  assert.equal(state.location.search, '?industry=Banking&industry=Credit%20Union&compare=industry&layout=stacked');
+  assert.equal(scope.read(state.location.search).layout, 'stacked');
+  scope.write({layout: ''}, {location: state.location, history: state.history, target: state.events});
+  assert.equal(state.location.search, '?industry=Banking&industry=Credit%20Union&compare=industry');
+});
+
+test('[url_scope] v6: a comparison holds three values; a fourth is refused and reported', () => {
+  const read = scope.read('industry=A&industry=B&industry=C&industry=D&compare=industry');
+  assert.deepStrictEqual(read.compareValues, ['A', 'B', 'C']);
+  assert.equal(read.industry, 'A');
+  assert.deepStrictEqual(read.invalid, [{key: 'industry', value: 'D', reason: 'a comparison holds at most 3 values'}]);
+  // and write() never mints a fourth
+  const state = fakeWindow('/#graph');
+  scope.write({industry: ['A', 'B', 'C', 'D'], compare: 'industry'},
+    {location: state.location, history: state.history, target: state.events});
+  assert.equal(state.location.search, '?industry=A&industry=B&industry=C&compare=industry');
+});
+
+test('[url_scope] v6: a repeat of the same value is one pill, and two copies of one value compare nothing', () => {
+  assert.deepStrictEqual(scope.read('industry=A&industry=B&industry=A&compare=industry').compareValues, ['A', 'B']);
+  const same = scope.read('industry=A&industry=A&compare=industry');
+  assert.equal(same.compare, undefined);
+  assert.equal(same.industry, 'A');
+  assert.deepStrictEqual(same.invalid.map(entry => entry.key), ['compare']);
+  // write() drops a compare its key cannot carry
+  const state = fakeWindow('/?industry=A#graph');
+  scope.write({industry: ['A', 'A'], compare: 'industry'}, {location: state.location, history: state.history, target: state.events});
+  assert.equal(state.location.search, '?industry=A');
+});
+
+test('[url_scope] v6: ending a comparison leaves the first value and nothing of the comparison', () => {
+  const state = fakeWindow('/?industry=Banking&industry=Credit%20Union&industry=Crypto&cycle=2026&compare=industry#graph');
+  scope.write({industry: 'Credit Union', compare: '', layout: ''},
+    {location: state.location, history: state.history, target: state.events});
+  assert.equal(state.location.search, '?industry=Credit%20Union&cycle=2026');
+  assert.deepStrictEqual(scope.read(state.location.search), {industry: 'Credit Union', cycle: '2026', invalid: []});
 });
 
 test('[url_scope] removing the last key drops the question mark rather than leaving "?"', () => {

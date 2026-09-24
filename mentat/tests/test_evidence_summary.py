@@ -584,8 +584,11 @@ SUMMARY_DISPATCH = {'summary': assert_summary}
 
 
 class ContractTests(unittest.TestCase):
-    def test_contract_version_is_four(self):
-        self.assertEqual(IMPORT_CONTRACT['version'], 4)
+    # Integration pass (2026-09-23): v5 is console redesign build 06's listing figure for
+    # the picker rail (board B19); re-homed from test_contract_version_is_four.
+    def test_contract_version_is_five(self):
+        self.assertEqual(IMPORT_CONTRACT['version'], 5)
+        self.assertIn('Store.committee_figures', ' '.join(IMPORT_CONTRACT['produced_by']))
 
     def test_contract_names_the_summary_producer_and_consumer(self):
         produced = ' '.join(IMPORT_CONTRACT['produced_by'])

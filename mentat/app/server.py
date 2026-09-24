@@ -99,6 +99,8 @@ from runtime_inputs import copy_fec_sources
 # request time. The entry stays because index.html - the golden render those
 # templates produce - must keep its place in the asset hash below.
 STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript"),
+                 '/insights.js': ('insights.js', 'text/javascript'),
+                 '/insights.css': ('insights.css', 'text/css'),
                  '/contribution-studio': ('contribution-studio.html', 'text/html; charset=utf-8'),
                  '/contribution-studio.css': ('contribution-studio.css', 'text/css'),
                  '/contribution-studio.js': ('contribution-studio.js', 'text/javascript'),
@@ -108,9 +110,16 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  '/mentat-icon.svg': ('mentat-icon.svg', 'image/svg+xml'),
                  "/style.css": ("style.css", "text/css"), "/template.csv": ("template.csv", "text/csv"),
                  '/workspace.css': ('workspace.css', 'text/css'),
+                 '/workspace-polish.css': ('workspace-polish.css', 'text/css'),
                  '/evidence.js': ('evidence.js', 'text/javascript'),
+                 # P4b. The interactive map. No script tag loads it: evidence.js
+                 # appends <script src="/evidence-map.js"> the first time a map
+                 # opens (CSP script-src 'self' allows a same-origin src), so a
+                 # console that never opens a map pays nothing for it.
+                 '/evidence-map.js': ('evidence-map.js', 'text/javascript'),
                  '/charts.js': ('charts.js', 'text/javascript'), '/chart-math.js': ('chart-math.js', 'text/javascript'),
                  '/graph.js': ('graph.js', 'text/javascript'),
+                 '/graph-explorer.js': ('graph-explorer.js', 'text/javascript'),
                  '/scope.js': ('scope.js', 'text/javascript'),
                  '/ui-state.js': ('ui-state.js', 'text/javascript'),
                  '/coverage-view.js': ('coverage-view.js', 'text/javascript'),
@@ -121,6 +130,7 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  '/funding-comparison.js': ('funding-comparison.js', 'text/javascript'),
                  '/comparison.css': ('comparison.css', 'text/css'),
                  '/chart-export.js': ('chart-export.js', 'text/javascript'),
+                 '/worksheet-comparison.js': ('worksheet-comparison.js', 'text/javascript'),
                  '/graph.css': ('graph.css', 'text/css'),
                  '/acu-theme.css': ('acu-theme.css', 'text/css'),
                  '/chart-studio-core.js': ('chart-studio-core.js', 'text/javascript'),
@@ -147,12 +157,24 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  '/geo/cd116.json': ('geo/cd116.json', 'application/json; charset=utf-8'),
                  '/geo/zcta_cd119.json': ('geo/zcta_cd119.json', 'application/json; charset=utf-8'),
                  '/geo/zcta_cd118.json': ('geo/zcta_cd118.json', 'application/json; charset=utf-8'),
+                 # P4b: ZIP centre points, already projected onto the same
+                 # 975x610 canvas as the district paths, so the page places a
+                 # circle without re-deriving the projection.
+                 '/geo/zcta_points.json': ('geo/zcta_points.json', 'application/json; charset=utf-8'),
                  # S8b: the census-tract crosswalk that turns a geocoded street
                  # address into a district. The batch geocoder answers a 2020
                  # census block, never a district (measured 2026-09-18), so the
                  # bridge ships like the ZIP crosswalk beside it.
                  '/geo/tract_cd119.json': ('geo/tract_cd119.json', 'application/json; charset=utf-8'),
                  '/geo/tract_cd118.json': ('geo/tract_cd118.json', 'application/json; charset=utf-8')}
+
+# Only packaged legislative files are public; arbitrary geo paths never fall
+# through to a filesystem handler. State bundles are fetched on selection.
+for _geo_path in (PROJECT / 'app' / 'geo' / 'sld').glob('*/*.json'):
+    _geo_name = _geo_path.relative_to(PROJECT / 'app').as_posix()
+    STATIC_ASSETS['/' + _geo_name] = (_geo_name, 'application/json; charset=utf-8')
+for _geo_name in ('geo/sld/index.json', 'geo/zcta_sld.json'):
+    STATIC_ASSETS['/' + _geo_name] = (_geo_name, 'application/json; charset=utf-8')
 
 # Build identity. A console window outlives edits to this tree, so the page and
 # the launcher both compare what this process loaded with what is on disk now.
@@ -169,14 +191,19 @@ def file_digest(identity):
 
 
 def tree_sha256(paths):
+    paths = [Path(path) for path in paths]
+    # Geography now contains repeated state filenames in separate directories.
+    # Include the relative path so two layers cannot exchange bytes unnoticed;
+    # sorting also makes the fingerprint independent of set iteration order.
+    root = Path(os.path.commonpath([str(path.parent) for path in paths])) if paths else None
     digest = hashlib.sha256()
-    for path in paths:
+    for path in sorted(paths, key=lambda path: path.relative_to(root).as_posix()):
         try:
             info = path.stat()
             identity = (str(path), info.st_size, info.st_mtime_ns)
         except OSError:
             identity = (str(path), -1, -1)
-        digest.update(path.name.encode('utf-8'))
+        digest.update(path.relative_to(root).as_posix().encode('utf-8'))
         digest.update(b'\0')
         digest.update(file_digest(identity))
         digest.update(b'\0')
@@ -192,8 +219,7 @@ def asset_files():
     # The page is rendered from app/templates/, so a partial edited there has to
     # move this hash exactly as an edit to index.html used to; without it the
     # page would never notice that the build on disk had moved past this
-    # process. tree_sha256 folds in path.name alone, so every template basename
-    # is unique across this set - test_console_templates.py holds that.
+    # process. tree_sha256 includes relative directories as well as filenames.
     import console_page
     directory = Path(__file__).resolve().parent
     return sorted({directory / name for name, _ in STATIC_ASSETS.values()}
@@ -434,6 +460,39 @@ def read_json_cached(path):
     except OSError:
         return {}
     return dict(_cached_json((str(path), info.st_size, info.st_mtime_ns)))
+
+
+def newer_timestamp(candidate, current):
+    """True when ISO-8601 `candidate` is strictly later than `current`; False
+    when either is missing or unreadable, so an unparseable stamp never wins."""
+    try:
+        return datetime.datetime.fromisoformat(str(candidate)) > datetime.datetime.fromisoformat(str(current))
+    except (TypeError, ValueError):
+        return False
+
+
+def recorded_tasks(task_files, root):
+    """The newest recorded attempt of every collection task, one row per task.
+
+    `task_files` holds (industry, status path) pairs. Files are read oldest
+    first, so a retried task (a recovery or split invocation) replaces its
+    earlier failure. Each file is parsed again only when it changes, and a
+    file that resolves outside the run `root` is never read."""
+    stamped = []
+    for industry, path in task_files:
+        try:
+            path = Path(path).resolve()
+            path.relative_to(root)
+            stamped.append((path.stat().st_mtime_ns, str(path), industry, path))
+        except (OSError, ValueError):
+            continue
+    tasks = {}
+    for _, _, industry, path in sorted(stamped):
+        for task in read_json_cached(path).get('tasks') or []:
+            if isinstance(task, dict) and task.get('company'):
+                identity = task.get('task_id') or f"{task.get('company')}|{task.get('cycle')}"
+                tasks[(industry, str(identity))] = {**task, 'industry': industry}
+    return list(tasks.values())
 
 
 def r_library_path(environment, project=PROJECT, rscript=""):
@@ -1896,10 +1955,20 @@ class Console:
         touches the CSV database, and the snapshot root is this console's own
         collection cache - the same directory /api/evidence reads.
         """
-        return evidence_geo.geography(source, identifier, committee, cycle, direction,
+        return evidence_geo.cached_geography(source, identifier, committee, cycle, direction,
                                       store=self.evidence_store if source == 'csv' else None,
                                       snapshot_root=PROJECT / '.cache/pac-evidence',
                                       data_root=self.root)
+
+    def evidence_stats(self, identifier='', committee='', cycle=''):
+        """The one pane figure the CSV summary does not carry: distinct contributors.
+
+        /api/evidence-csv?summary=1 ranks the top ten counterparties and counts
+        rows, so the pane could print "6 contributors" only by counting the ten
+        it was shown. This counts them where the rows are, over exactly the
+        supported rows the map places, so the pane and the map agree.
+        """
+        return evidence_geo.counterparty_count(self.evidence_store, identifier, committee, cycle)
 
     def evidence_geocode(self, identifier=''):
         """What this import's geocoding has done, without scanning the import.
@@ -2143,7 +2212,10 @@ class Console:
         status = read_json(directory / "status.json")
         result["status"] = status
         result['fec_coverage'] = self.collection_coverage(run, status)
-        if run['state'] in ('completed', 'failed') and not manifest.get('finished_at') and isinstance(status.get('elapsed_seconds'), (int, float)):
+        # Every terminal state keeps the collector's own elapsed time when the
+        # manifest never recorded a finish: a stopped run is not still running,
+        # so wall time since its start would grow for as long as it is kept.
+        if run['state'] in ('completed', 'failed', 'stopped', 'launch failed') and not manifest.get('finished_at') and isinstance(status.get('elapsed_seconds'), (int, float)):
             result['elapsed_seconds'] = status['elapsed_seconds']
         result["control"] = read_json(directory / "control.json")
         result["age_seconds"] = round(time.time() - (directory / "status.json").stat().st_mtime) if status else None
@@ -2151,10 +2223,22 @@ class Console:
             terminal = run['state'] in ('completed', 'failed', 'stopped') or status.get('stage') in ('completed', 'failed', 'stopped')
             result['elapsed_seconds'] = status['elapsed_seconds'] + (0 if terminal else max(0, result['age_seconds'] or 0))
         lanes, fanout_dirs = [], {}
+        # (industry, status path) for every task receipt a worker has written,
+        # current or historical; company_tasks below is built from them.
+        task_files, fanout_cycles = [], []
         resolved_directory = directory.resolve()
         for fanout_manifest in directory.glob("industries/*/fanout/manifest.json"):
             fanout = read_json(fanout_manifest)
             fanout_dirs[fanout.get("industry")] = fanout_manifest.parent
+            fanout_cycles += fanout.get('cycles') or []
+            # The run's status.json holds a copy of the fanout's own status that
+            # the launcher refreshes on its own schedule; a run stopped between
+            # the two writes keeps a stale copy (27 of 30 done, one running).
+            # The fanout's file wins when it is the newer record of the same run.
+            own, copied = read_json(fanout_manifest.parent / 'status.json'), status.get('fanout')
+            if (isinstance(own, dict) and isinstance(copied, dict) and own.get('industry') == copied.get('industry')
+                    and own.get('run_id') == copied.get('run_id') and newer_timestamp(own.get('updated_at'), copied.get('updated_at'))):
+                status['fanout'] = own
             sharing = fanout.get('scheduling', {}).get('strategy') == 'company_work_sharing'
             fanout_directory = fanout_manifest.parent.resolve()
             lane_databases = {Path(lane['state']).resolve():Path(lane['database'])
@@ -2172,6 +2256,11 @@ class Console:
                     key = str((path.parent if sharing else path).relative_to(resolved_directory))
                 except ValueError:
                     raise ValueError('Saved worker status is outside its collection run.') from None
+                # A shared worker's lane folder keeps one status file per
+                # invocation (work, recovery, split); the manifest names only
+                # the current one, so the earlier attempts are read from disk.
+                task_files += [(fanout.get("industry"), item) for item in
+                               (sorted(path.parent.glob("status*.json")) if sharing else [path])]
                 state = read_json(path)
                 if not state:
                     continue
@@ -2179,6 +2268,8 @@ class Console:
                 lanes.append({"id": key, "industry": fanout.get("industry"), "label": str(path.parent.name),
                               "state": state, "database": str(db)})
         result["lanes"] = [{key: value for key, value in lane.items() if key != "database"} for lane in lanes]
+        result['company_tasks'] = recorded_tasks(task_files, resolved_directory)
+        result['cycles'] = cycles_from(status.get('cycles') or manifest.get('cycles') or fanout_cycles)
         selected = next((lane for lane in lanes if lane["id"] == lane_id), lanes[0] if lanes else None)
         if selected:
             result["selected_lane"] = selected["id"]
@@ -2386,6 +2477,9 @@ class Handler(BaseHTTPRequestHandler):
                                   'industry': entry['industry'] if entry else None,
                                   'industries': [{key: item[key] for key in ('industry','slug','available','build_stamp')}
                                                  for item in registry['snapshots']]})
+            if parsed.path == '/api/insights/catalog':
+                import analysis_data
+                return self.send(analysis_data.catalog(app.report_directory))
             if parsed.path == '/api/contributions/catalog':
                 # One scan of the report folder for this request: the semantic
                 # catalogue and the registry annotation below read the same list.
@@ -2434,6 +2528,12 @@ class Handler(BaseHTTPRequestHandler):
                 # ("invalid literal for int()") into the status line.
                 return self.send(app.evidence_csv_view(query.get('id', [''])[0], query.get('committee', [''])[0],
                     query.get('cycle', [''])[0], query.get('offset', ['0'])[0], query.get('limit', ['200'])[0]))
+            if parsed.path == '/api/evidence-stats':
+                # One number, for the pane's stat strip. Every refusal is the
+                # reader's own sentence, answered 400 by the handler below.
+                return self.send(app.evidence_stats(
+                    query.get('id', [''])[0], query.get('committee', [''])[0],
+                    query.get('cycle', [''])[0]))
             if parsed.path == '/api/evidence-geocode':
                 # Read-only on purpose: starting and stopping are POSTs, so a
                 # GET can never begin sending addresses anywhere.
@@ -2480,6 +2580,11 @@ class Handler(BaseHTTPRequestHandler):
                         and estimates.get('method_code_sha256') == hashlib.sha256((PROJECT / 'tools/pac_cash_model.py').read_bytes()).hexdigest()):
                     value['cash_estimates'] = estimates
                 return self.send(value)
+            if parsed.path == '/api/evidence-network':
+                from downstream import snapshot_view
+                return self.send(snapshot_view(query.get('id', [''])[0],
+                    query.get('committee', [''])[0], query.get('cycle', [''])[0],
+                    PROJECT / '.cache/pac-evidence'))
             if parsed.path == '/api/evidence-job':
                 identifier = query.get('id', [''])[0]
                 if not re.fullmatch(r'snapshot-[a-f0-9]{32}', identifier):
@@ -2586,7 +2691,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.send({"error": str(error)}, 400)
 
     def do_POST(self):
-        analytical_paths = {'/api/contributions/query', '/api/contributions/records', '/api/contributions/geography'}
+        analytical_paths = {'/api/contributions/query', '/api/contributions/records', '/api/contributions/geography',
+                            '/api/insights/query', '/api/insights/records'}
         if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/studio/briefing'):
             self.discard_body()
             return self.send({'error': 'Read-only preview. Briefing changes are not saved.'}, 403)
@@ -2647,6 +2753,13 @@ class Handler(BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(length))
             if not isinstance(data, dict):
                 raise ValueError("Expected an upload or run request.")
+            if self.path in ('/api/insights/query', '/api/insights/records'):
+                import analysis_data
+                entry = self.scope_body(data)
+                reader = analysis_data.query if self.path.endswith('/query') else analysis_data.records
+                result = self.contribution_result(reader, data)
+                result.update(industry_scope.echo(entry))
+                return self.send(result)
             if self.path in ('/api/contributions/query', '/api/contributions/records'):
                 entry = self.scope_body(data)
                 reader = contribution_query.query if self.path.endswith('/query') else contribution_query.records
@@ -2750,6 +2863,28 @@ class Handler(BaseHTTPRequestHandler):
             return self.send({"error": str(error)}, 400)
 
 
+# The stdlib listen backlog is 5: while query threads hold the GIL the accept
+# loop falls behind, and Windows refuses the sixth waiting connection outright,
+# so a page load lost stylesheets and scripts (ERR_CONNECTION_REFUSED) whenever
+# analysis requests were running.
+CONSOLE_LISTEN_BACKLOG = 128
+
+
+def console_server(port, handler=None):
+    """The console's listener: ThreadingHTTPServer with a deeper listen backlog.
+    Built through the module's ThreadingHTTPServer name, bound after the backlog
+    is set, so a test that replaces that name still gets its stand-in."""
+    server = ThreadingHTTPServer(("127.0.0.1", port), handler or Handler, bind_and_activate=False)
+    server.request_queue_size = CONSOLE_LISTEN_BACKLOG
+    try:
+        server.server_bind()
+        server.server_activate()
+    except BaseException:
+        server.server_close()
+        raise
+    return server
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8802)
@@ -2763,7 +2898,7 @@ def main():
     rscript = str(Path(options.rscript).resolve()) if options.rscript else ''
     reports = report_directory(PROJECT)
     os.chdir(reports)
-    server = ThreadingHTTPServer(("127.0.0.1", options.port), Handler)
+    server = console_server(options.port)
     server.app = Console(data_root, keys_file, rscript, options.read_only)
     server.app.port = options.port or server.server_port
     print(f"Mentat app: http://127.0.0.1:{options.port}", flush=True)

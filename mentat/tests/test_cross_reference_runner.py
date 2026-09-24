@@ -126,16 +126,16 @@ class RunnerTests(unittest.TestCase):
         self.assertFalse(report['summary']['verified_unique'])
         self.assertEqual(report['summary']['supported_original_giving'], 0)
 
-    def test_rejected_search_and_obvious_interest_resolve_without_attribution_review(self):
+    def test_rejected_search_retains_ambiguity_but_obvious_interest_is_excluded(self):
         self.insert([receipt('101', 500, company_match_status='review', entity_type='ORG',
                              line_number='17', memo_text='INTEREST INCOME'),
                      receipt('102', 50, company_match_status='rejected')], archive=True)
         report = self.execute()
-        self.assertEqual(report['summary']['automatic_decisions'], 2)
-        self.assertEqual(report['summary']['unresolved_records'], 0)
-        self.assertEqual(report['summary']['observed_original_giving'], 0)
+        self.assertEqual(report['summary']['automatic_decisions'], 1)
+        self.assertEqual(report['summary']['unresolved_records'], 1)
+        self.assertEqual(report['summary']['observed_original_giving'], 50)
         self.assertEqual(report['summary']['corporate_giving'], 0)
-        self.assertEqual(report['summary']['coverage_records'], 0)
+        self.assertEqual(report['summary']['coverage_records'], 1)
 
     def test_coverage_totals_deduplicate_overlapping_tasks_and_keep_actual_review(self):
         rows = [receipt('101', 100), receipt('102', -25)]

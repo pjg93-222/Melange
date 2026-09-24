@@ -26,6 +26,7 @@ import argparse
 import contextlib
 import hashlib
 import json
+import math
 import os
 import re
 import sqlite3
@@ -128,6 +129,10 @@ CONTRIBUTIONS = (
     ("inclusion_reason", "Inclusion Reason", "T"),
     ("company_match_status", "Company Match Status", "T"),
     ("company_match_reason", "Company Match Reason", "T"),
+    ("company_attribution_status", "Company Attribution Status", "T"),
+    ("company_attribution_reason", "Company Attribution Reason", "T"),
+    ("receipt_role_unverified", "Receipt Role Unverified", "B"),
+    ("receipt_role_reason", "Receipt Role Reason", "T"),
     ("matched_alias", "Matched Alias", "T"), ("recipient", "Recipient", "T"),
     ("committee_id", "Committee ID", "ID"), ("recipient_key", "Recipient Key", "T"),
     ("recipient_category", "Recipient Category", "T"),
@@ -257,12 +262,17 @@ DOWNSTREAM_ACTIVITY = (
     ("source_rows", "Source Rows", "I"), ("included_rows", "Included Rows", "I"),
     ("excluded_rows", "Excluded Rows", "I"), ("superseded_rows", "Superseded Rows", "I"),
     ("memo_rows", "Memo Rows", "I"), ("duplicate_rows", "Duplicate Rows", "I"),
+    ("unverified_version_rows", "Unverified Version Rows", "I"),
+    ("unresolved_version_rows", "Unresolved Version Rows", "I"),
+    ("unresolved_version_amount", "Unresolved Version Amount", "R"),
+    ("repeated_itemization_rows", "Repeated Itemization Rows", "I"),
     ("reported_amount", "Reported Amount", "R"),
     ("excluded_amount", "Excluded Amount", "R"),
     ("net_included_amount", "Net Included Amount", "R"),
     ("fec_committee_url", "FEC Committee URL", "T"),
     ("fec_candidate_url", "FEC Candidate URL", "T"), ("source_url", "Source URL", "T"),
     ("transfer_records", "Transfer Records", "T"),
+    ("filing_records", "Filing Records", "T"),
 )
 
 BENEFICIARY_BRIDGE = (
@@ -278,6 +288,9 @@ BENEFICIARY_BRIDGE = (
     ("first_activity_date", "First Activity Date", "D"),
     ("last_activity_date", "Last Activity Date", "D"),
     ("downstream_activity", "Downstream Activity", "R"),
+    ("support_amount", "Support Activity", "R"),
+    ("oppose_amount", "Oppose Activity", "R"),
+    ("other_activity_amount", "Contribution / Other Activity", "R"),
     ("associated_funding", "Associated Funding", "R"),
 )
 
@@ -377,6 +390,8 @@ SHEETS = (
            "support_oppose", "transaction_type", "candidate")),
     Sheet("beneficiary_bridge", "Beneficiary Bridge", BENEFICIARY_BRIDGE,
           ("bridge_key",), dynamic=True),
+    Sheet("beneficiary_activity", "Network Candidate Activity", BENEFICIARY_BRIDGE,
+          ("cycle_label", "source_committee_id", "candidate_id"), dynamic=True),
     Sheet("transfer_paths", "Transfer Paths", TRANSFER_PATHS,
           ("cycle_label", "funded_committee", "source_committee",
            "destination_committee")),
@@ -389,6 +404,12 @@ SHEETS = (
           ("cycle_label", "funded_committee")),
     Sheet("source_freshness", "Source Freshness", SOURCE_FRESHNESS,
           ("cycle_label", "fec_dataset")),
+    Sheet("downstream_reach", "Downstream Reach", (),
+          ("cycle", "view", "company", "source_committee_id"), dynamic=True),
+    Sheet("downstream_measurement_ledger", "Downstream Measurement", (),
+          ("cycle", "view", "company", "candidate_id"), dynamic=True),
+    Sheet("downstream_sources", "Downstream Sources", (),
+          ("cycle", "source"), dynamic=True),
     Sheet("classification_review", "Classification Review", CLASSIFICATION_REVIEW,
           ("cycle_label", "committee_id")),
     Sheet("state_destinations", "State Destinations", (), (), dynamic=True),
@@ -739,13 +760,12 @@ def overview_totals(checks, base, receipt_path):
                    money(b))
 
 
-def source_facts(database, industry, cycles):
-    """Accepted reported amount and row count per cycle x display company.
+def source_facts(database, industry, cycles, all_observations=False):
+    """Raw reported amount/count, honoring the staged artifact's policy.
 
-    Mirrors tools/report_source_guard.source_facts :116-131 - the same two
-    tables, the same `industry` filter and the same cycle rule
-    cycle_of(date) = year + year % 2 - plus the acceptance filter that defines
-    the workbook universe (exporter :657-659).
+    New stores retain every attribution status and coalesce the same source ID
+    with report.R's accepted-first/person-query priority. Legacy stores retain
+    their historical accepted-only scope; they are not silently reinterpreted.
     """
     totals = {}
     with contextlib.closing(read_only(database)) as connection:
@@ -754,24 +774,34 @@ def source_facts(database, industry, cycles):
         if "company_display_names" in names:
             display = dict(connection.execute(
                 "SELECT canonical_name, display_name FROM company_display_names"))
-        for table in ("contributions", "corporate_giving"):
+        seen = set()
+        queries = []
+        for priority,table in enumerate(("contributions", "corporate_giving")):
             if table not in names:
                 continue
-            rows = connection.execute(
-                f"SELECT company, contribution_receipt_date, "
-                f"contribution_receipt_amount, sub_id FROM {table} "
-                f"WHERE industry = ? AND company_match_status = 'accepted'", (industry,))
-            for company, day, amount, _ in rows:
-                match = re.match(r"^(\d{4})-\d\d-\d\d", str(day or ""))
-                if not match:
-                    continue
-                year = int(match[1])
-                cycle = year + year % 2
-                if cycle not in cycles:
-                    continue
-                key = (f"{cycle - 1}-{cycle}", display.get(company, company))
-                previous = totals.get(key, (0.0, 0))
-                totals[key] = (previous[0] + float(amount or 0.0), previous[1] + 1)
+            queries.append(f"SELECT company, contribution_receipt_date, contribution_receipt_amount, sub_id, "
+                f"CASE WHEN company_match_status='accepted' THEN {priority} ELSE {priority+2} END AS priority "
+                f"FROM {table} WHERE industry = ?" + ("" if all_observations else " AND company_match_status = 'accepted'"))
+        if not queries:
+            return {}
+        rows = connection.execute(' UNION ALL '.join(queries)+' ORDER BY priority, sub_id', (industry,)*len(queries))
+        for company, day, amount, source_id, _ in rows:
+            if all_observations and source_id in seen:
+                continue
+            seen.add(source_id)
+            match = re.match(r"^(\d{4})-\d\d-\d\d", str(day or ""))
+            if not match:
+                continue
+            year = int(match[1])
+            cycle = year + year % 2
+            if cycle not in cycles:
+                continue
+            key = (f"{cycle - 1}-{cycle}", display.get(company, company))
+            previous = totals.get(key, (0.0, 0))
+            value = float(amount)
+            if not math.isfinite(value):
+                raise ValueError('Invalid source amount; cannot reconcile a zero substitute')
+            totals[key] = (previous[0] + value, previous[1] + 1)
     return {k: (round(v[0], 2), v[1]) for k, v in totals.items()}
 
 
@@ -801,7 +831,7 @@ def database_facts(checks, connection, present, metadata, database, expected_sha
         checks.skip("database_amount_and_rows", "contributions table absent")
         return
     try:
-        actual = source_facts(path, industry, cycles)
+        actual = source_facts(path, industry, cycles, metadata.get('attribution_policy') == 'contradictions-only-v1')
     except sqlite3.Error as error:
         checks.skip("database_amount_and_rows", f"source database unreadable: {error}")
         return
@@ -955,6 +985,7 @@ def about_rows(arguments, metadata, industry, cycle_label, database_sha, emits, 
         ("Exporter Version", metadata.get("exporter_version") or ""),
         ("Writer Version", WRITER_VERSION),
         ("Accounting Note", metadata.get("accounting_note") or ""),
+        ("Downstream accounting", "Network Candidate Activity counts each reachable spending committee once per cycle/candidate, without a top-100 cutoff. Beneficiary Bridge is company association: shared PAC activity repeats across companies. Do not sum company associations or add either table to receipts, transfers, or the other activity table."),
         ("Split Rows Threshold", arguments.split_rows),
     ]
     # About's own row count is the only self-referential one: 14 fixed rows, one

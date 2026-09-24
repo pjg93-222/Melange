@@ -71,6 +71,14 @@
   let openedSaved = '', holdingSavedId = false;
   let inspectorTab = 'marks', overviewMode = false, overviewRevision = 0, overviewCompany = '';
   let queryRequests = 0;
+  // "+ Compare with..." (build 03): the scopes each sheet is split into, kept in
+  // this tab by sheet id. None of it reaches the URL: the query string is shared
+  // with Graph, and a comparison written there would open Graph in it too.
+  const compareBySheet = new Map();
+  let comparePills = null, compareMenu = null, compareDrawn = null;
+  const compareFlights = [{waiting: null}, {waiting: null}, {waiting: null}], menuFlight = {waiting: null};
+  // What "Match Graph scope" applies, worked out when the note line is drawn.
+  let graphMatchTarget = null;
   // The Data source panel opens on arrival and folds itself away once, after
   // the first load that actually produced fields. sourceReady is what the
   // folded summary reports; it is cleared whenever a load starts again.
@@ -216,6 +224,13 @@
     mark.className = sourceReady ? 'is-ready' : 'is-waiting';
     mark.textContent = sourceReady ? '✓ Ready' : (el('loading').textContent || 'Data source');
     summary.append(mark);
+    // The header row carries the same state (S1 "Ready"), so it is readable
+    // while the source popover is closed.
+    const ready = el('ready');
+    if (ready) {
+      ready.textContent = sourceReady ? 'Ready' : (el('loading').textContent || '');
+      ready.classList.toggle('is-ready', sourceReady);
+    }
   }
 
   // The panel stays open (item 16). Its selects are the way into every report,
@@ -463,6 +478,7 @@
     for(const state of sheets)state.source={...state.source,mode:'contributions',dataset:d.id,industry:d.industry,basis:state.source.basis||'receipt',reportName:d.provenance.workbook,sheet:'Verified source observations',runName:'Configured completed-report folder',sha256:d.provenance.workbook_sha256};
     data={columns:contributions.fields(d.fields||contributionCatalog.fields,basis()),rows:[],row_count:0,header_row:0,sha256:d.provenance.workbook_sha256,sheet:'Verified source observations',note:d.provenance.scope};
     if(!restored){sheet().columns=[{column:data.columns.findIndex(f=>f.id==='company'),aggregation:'sum'}];sheet().rows=[{column:data.columns.findIndex(f=>f.id==='amount'),aggregation:'sum'}];sheet().marks.type='bar';}
+    for(const [id,entry] of compareBySheet)if(entry.kind==='industry')compareBySheet.delete(id);
     persist();renderAll();
     // Four call sites reach this function - the Data panel picker, the shelf
     // source buttons, openView() and the permalink path - and every one of them
@@ -636,6 +652,8 @@
     const ticket=view.bump(),sheetBasis=basisOf(state);
     try {
       const compiled=contributions.compile(state,columns(),{dataset:dataset().id,industry:dataset().industry,basis:sheetBasis,offset:view.offset});
+      if(view.el===el)compareDrawn=null;
+      if(view.el===el&&compareActive(state)){await renderCompareView(view,compiled,ticket);return;}
       const query=compiled.query,key=JSON.stringify(query),previous=view.request;
       if(previous&&JSON.stringify({...previous,offset:0})!==JSON.stringify({...query,offset:0})&&view.offset){view.offset=0;query.offset=0;}
       if(!previous||JSON.stringify(previous)!==key){node('canvas').setAttribute('aria-busy','true');node('verified-summary').textContent='Reading verified totals…';if(view.primary){status('Reading verified source observations…');el('inspection').hidden=true;++recordRevision;lastResult=null;}}
@@ -647,10 +665,13 @@
       node('verified-summary').replaceChildren();
       for(const [label,value]of [[sheetBasis==='original_supported'?'Selected gross amount':'Selected net amount',money(result.totals.amount)],['Source observations',fmt(result.totals.records)],['Reported donor identities',fmt(result.totals.contributors)]]){const item=document.createElement('span'),strong=document.createElement('strong');strong.textContent=value;item.append(strong,document.createTextNode(label));node('verified-summary').append(item);}
       node('verified-summary').title='Totals cover all matching source records before grouped filters. Group distinct identity counts are not added together.';
-      node('group-count').textContent=result.group_count?`${fmt(result.offset+1)}–${fmt(result.offset+result.rows.length)} of ${fmt(result.group_count)} groups · totals cover all ${fmt(result.group_count)}`:'No matching observations';
+      node('group-count').textContent=result.group_count?`Groups ${fmt(result.offset+1)}–${fmt(result.offset+result.rows.length)} of ${fmt(result.group_count)}`:'No matching observations';
+      node('group-count').title=result.group_count?`Totals cover all ${fmt(result.group_count)} groups`:'';
       node('groups-prev').disabled=!query.offset;node('groups-next').disabled=!result.has_more;node('result-controls').hidden=false;
-      node('groups-prev').hidden=node('groups-next').hidden=compiled.spec.type==='map'||compiled.transform!=='none';
-      let rows=result.rows,spec={...compiled.spec,columns:result.columns,title:title},temporalModel=null,drewReferences=false;const notes=[...compiled.notes,...(result.notices||[])];
+      // The arrows appear only when there is another page of groups (S1).
+      node('groups-prev').hidden=node('groups-next').hidden=compiled.spec.type==='map'||compiled.transform!=='none'||(!query.offset&&!result.has_more);
+      node('inspect-all').disabled=false;node('inspect-all').title='';
+      let rows=result.rows,spec={...compiled.spec,columns:result.columns,title:title,barPitch:28,niceTicks:true,panelTitles:compiled.spec.measures.length!==1,width:node('canvas').clientWidth,barLeftMax:190,seriesColor:seriesColour(),...roomFit(node('canvas'))},temporalModel=null,drewReferences=false;const notes=[...compiled.notes,...(result.notices||[])];
       if(spec.type==='histogram'&&result.has_more)throw new Error('This histogram has more than 10,000 occupied bins. Increase the bin width or narrow the filters to display the complete distribution.');
       if(compiled.transform!=='none'&&compiled.transform!=='annual'){
         if(result.has_more)throw new Error('Period analysis requires every selected period. Narrow the filters.');
@@ -684,12 +705,20 @@
         drewReferences?'Reference lines mark the mean and median of the shown marks; source-level averages and medians are available as measures.'
         :'Reference lines are not drawn on this mark type. Choose a bar, line, area or circle mark to see the mean and median of the shown marks.');
       node('note').textContent=[contributions.BASIS[sheetBasis][1],query.aggregate_filters.length?'Grouped filters apply after aggregation.':result.has_more?'Additional groups are on later pages; source totals cover all pages.':'All selected groups shown.',...notes].join(' ');
-      node('status').textContent=fmt(result.totals.records)+' source observations · '+fmt(result.group_count)+' groups · '+(result.reconciliation?.receipt_matches_workbook===true?'Included receipts reconcile to the workbook.':'Verified source records.')+(view.primary?' · '+fmt(queryRequests)+' verified queries this session':'');
+      node('status').textContent=fmt(result.totals.records)+' source observations · '+fmt(result.group_count)+' groups · '+(result.reconciliation?.receipt_matches_workbook===true?'reconciles to the workbook':'verified source records');
+      node('status').title=view.primary?fmt(queryRequests)+' verified queries this session':'';
       if(view.primary)status('Verified contribution fields · '+data.columns.length+' fields');
       if(view.primary)renderPager();
       renderReconcile(result,view,ticket).catch(()=>{node('reconcile').hidden=true;});
-    }catch(error){if(!view.stale(ticket)&&error.name!=='AbortError'){node('reconcile').hidden=true;node('canvas').replaceChildren();node('note').textContent=error.message;if(view.primary){failure(error.message);lastResult=null;}}}
-    finally{if(!view.stale(ticket))node('canvas').setAttribute('aria-busy','false');}
+    }catch(error){if(!view.stale(ticket)&&error.name!=='AbortError'){
+      // Final fix round (R03-10): a sheet that draws nothing keeps nothing of
+      // the last answer (title, figures, counter, status); a sheet with no
+      // measure yet gets muted guidance under its empty title, not the red error.
+      const guidance=/^Add a dollar or count measure/.test(error.message);
+      node('reconcile').hidden=true;node('canvas').replaceChildren();node('note').textContent=guidance?'':error.message;
+      node('title').textContent='';node('subtitle').textContent=guidance?error.message:'';node('verified-summary').replaceChildren();node('result-controls').hidden=true;node('status').textContent='';node('status').title='';
+      if(view.primary){failure(guidance?'':error.message);lastResult=null;}}}
+    finally{if(!view.stale(ticket)){node('canvas').setAttribute('aria-busy','false');node('note').title=node('note').textContent;}}
   }
   async function renderContributionMap(ticket,compiled,bbox=null,view=null) {
     view=view||mainSurface();const node=view.el;
@@ -705,15 +734,22 @@
     node('note').textContent=[contributions.BASIS[basisOf(view.state)][1],'ZIP marks combine eligible ZIP/state groups; grouped filters apply before this combination. Unmapped money remains in the selected total.',...(contributionMap.data.coverage_notes||[]),...(geometry.warnings||[])].join(' ');
     node('status').textContent=fmt(result.group_count)+' geographic groups · '+fmt(contributionMap.data.marks.length)+' mapped marks · boundaries do not change money';status('Verified ZIP/state records and Census boundaries');
   }
-  async function inspectContributions(row=null,offset=0) {
-    if(!contributionResult)return;recordSelection=row;recordOffset=offset;const ticket=++recordRevision,sourceRevision=contributionRevision;el('inspection').hidden=false;el('record-count').textContent='Reading source records…';el('records').replaceChildren();
-    try{const query={...contributionRequest,filters:contributions.markFilters(contributionRequest,row),aggregate_filters:[],limit:100,offset};const result=await contributionReady('records',query);if(ticket!==recordRevision||sourceRevision!==contributionRevision)return;if(!['workbook_sha256','database_sha256','index_token'].every(key=>result.provenance?.[key]===contributionResult.provenance?.[key]))throw new Error('Source changed before record inspection. Refresh the verified data.');
+  let recordSource = null;
+  async function inspectContributions(row=null,offset=0,source=null) {
+    if(!contributionResult)return;recordSelection=row;recordOffset=offset;recordSource=source;const ticket=++recordRevision,sourceRevision=contributionRevision;el('inspection').hidden=false;el('record-count').textContent='Reading source records…';el('records').replaceChildren();
+    // A compared scope that is its own report (industry) brings its own query
+    // and provenance; every other drill reads the sheet's one query.
+    const request=(source&&source.request)||contributionRequest,known=(source&&source.result)||contributionResult;
+    try{const query={...request,filters:contributions.markFilters(request,row),aggregate_filters:[],limit:100,offset};const result=await contributionReady('records',query);if(ticket!==recordRevision||sourceRevision!==contributionRevision)return;if(!['workbook_sha256','database_sha256','index_token'].every(key=>result.provenance?.[key]===known.provenance?.[key]))throw new Error('Source changed before record inspection. Refresh the verified data.');
       const columns=[['date','Date'],['contributor','Contributor'],['company','Company'],['recipient','Recipient'],['amount_cents','Selected amount'],['raw_cents','Raw observation'],['zip5','ZIP'],['state','State'],['decision_status','Accounting status'],['receipt_role','Receipt role'],['reasons','Reasons'],['source_id','Source ID'],['source_url','FEC filing']];for(const id of query.dimensions||[])if(!columns.some(c=>c[0]===id))columns.push([id,data.columns.find(c=>c.id===id)?.name||id]);const table=document.createElement('table'),head=document.createElement('tr'),body=document.createElement('tbody');for(const[,name]of columns){const th=document.createElement('th');th.textContent=name;head.append(th);}const thead=document.createElement('thead');thead.append(head);table.append(thead,body);
-      for(const record of result.rows){const tr=document.createElement('tr');for(const[id]of columns){const td=document.createElement('td'),value=record[id];td.textContent=id.endsWith('_cents')?contributionPlot.format(value,'amount'):Array.isArray(value)?value.join('; '):value??'';if(id==='source_url'&&/^https:\/\/(?:[^/]+\.)?fec\.gov\//.test(value||'')){const a=document.createElement('a');a.href=value;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Open filing';td.replaceChildren(a);}tr.append(td);}body.append(tr);}el('records').append(table);el('record-count').textContent=`${result.total_records?offset+1:0}–${offset+result.rows.length} of ${fmt(result.total_records)} source observations`;el('record-prev').disabled=!offset;el('record-next').disabled=!result.has_more;
+      for(const record of result.rows){const tr=document.createElement('tr');for(const[id]of columns){const td=document.createElement('td'),value=record[id];td.textContent=id.endsWith('_cents')?contributionPlot.format(value,'amount'):Array.isArray(value)?value.join('; '):value??'';if(id==='source_url'){const safe=globalThis.MentatScope?globalThis.MentatScope.fecLink(value):'';if(safe){const a=document.createElement('a');a.href=safe;a.target='_blank';a.rel='noopener noreferrer';a.referrerPolicy='no-referrer';a.textContent='Open filing';td.replaceChildren(a);}}tr.append(td);}body.append(tr);}el('records').append(table);el('record-count').textContent=`${result.total_records?offset+1:0}–${offset+result.rows.length} of ${fmt(result.total_records)} source observations`;el('record-prev').disabled=!offset;el('record-next').disabled=!result.has_more;
     }catch(error){if(ticket===recordRevision)el('record-count').textContent=error.message;}
   }
   async function downloadContributions(format) {
     const view=activeSurface();if(!view.result||!lastResult||exporting)return;const result=view.result,query=structuredClone(view.request),ticket=view.ticket();
+    // Two reports cannot share one CSV: each row of it names one workbook's
+    // provenance. The image carries both scopes in its legend and caption.
+    if(format==='csv'&&compareDrawn&&compareDrawn.kind==='industry'&&view.el===el){failure('Export the CSV one industry at a time: each report carries its own workbook provenance. Clear the comparison, or export the image.');return;}
     try{if(format==='csv'){exporting=true;status('Preparing complete grouped CSV…');let rows=[],offset=0;for(;;){const page=await contributionReady('query',{...query,offset,limit:100000});if(view.stale(ticket))throw new Error('View changed during export. Start the download again.');if(!contributions.sameSource(page.provenance,result.provenance))throw new Error('Source changed during export. Refresh the verified data.');rows.push(...page.rows);if(!page.has_more)break;if(!page.rows.length)throw new Error('The next export page is empty.');offset+=page.rows.length;}MentatExport.download(contributions.csv({...result,rows},query),'text/csv;charset=utf-8','mentat-chart-studio.csv');status('Exported '+fmt(rows.length)+' groups with source and accounting provenance.');}
       else{const svg=view.el('canvas').querySelector('svg');if(!svg)throw new Error('This view has no image. Download its data CSV.');await MentatExport.image(svg,format,view.title,view.scope,'mentat-chart-studio');}
     }catch(error){failure(error.message);}finally{exporting=false;}
@@ -753,7 +789,9 @@
       (settings.zone ? ', on ' + settings.zone + '. Press Enter for actions.' : ', field. ' + CLICK_HINT + '.'));
     const glyph = document.createElement('span');
     glyph.className = 'studio-glyph';
-    if (field.glyph === 'cal' || field.glyph === 'geo') glyph.append(typeGlyph(field.glyph));
+    // S1 draws Abc on places (State, ZIP) as on any category; only a true
+    // date takes a drawn glyph. The title still names the geography.
+    if (field.glyph === 'cal') glyph.append(typeGlyph('cal'));
     else glyph.textContent = field.glyph === 'bool' ? 'T/F' : field.glyph === '#' ? '#' : 'Abc';
     glyph.title = field.glyph === 'cal' ? 'Date' : field.glyph === 'geo' ? 'Geography'
       : field.glyph === '#' ? 'Number' : field.glyph === 'bool' ? 'True/false' : 'Text';
@@ -1146,14 +1184,105 @@
 
   /* -------------------------------------------------------------- rendering */
 
+  // "More fields" keeps its open state while the pane redraws (every edit
+  // redraws it), for as long as this page is open.
+  const moreOpen = {dimensions: false, measures: false};
+  function moreFold(bucket, pills, inUse) {
+    const fold = document.createElement('details');
+    fold.className = 'studio-more-fields';
+    fold.dataset.bucket = bucket;
+    fold.open = !!moreOpen[bucket];
+    const summary = document.createElement('summary');
+    summary.className = 'studio-more-summary' + (inUse ? ' is-used' : '');
+    const label = document.createElement('span');
+    label.className = 'studio-more-label';
+    label.textContent = 'More fields';
+    const count = document.createElement('span');
+    count.className = 'studio-more-count';
+    count.textContent = fmt(pills.length);
+    summary.append(label, count);
+    summary.setAttribute('aria-label', 'More fields: ' + fmt(pills.length) + ' more ' + bucket + (inUse ? ', some in use on this sheet' : ''));
+    summary.title = fmt(pills.length) + ' more ' + bucket + (inUse ? ', some in use on this sheet' : '') + '. Search finds every field.';
+    const list = document.createElement('div');
+    list.className = 'studio-more-list';
+    list.append(...pills);
+    fold.append(summary, list);
+    fold.addEventListener('toggle', () => { if (fold.isConnected) moreOpen[bucket] = fold.open; });
+    return fold;
+  }
+  // S1 draws no "From" row above DIMENSIONS. The related-table choice keeps
+  // its label and select (ids unchanged) in a small menu at the end of the
+  // search box; the menu's button names the table in use and is tinted
+  // while one table narrows the list.
+  function buildFromMenu() {
+    const label = el('field-table-label'), search = el('search') && el('search').closest('.studio-search');
+    if (!label || !search || el('from-menu')) return;
+    const row = document.createElement('div');
+    row.className = 'studio-search-row';
+    search.before(row);
+    const menu = document.createElement('details');
+    menu.id = 'studio-from-menu';
+    menu.className = 'studio-from-menu';
+    const summary = document.createElement('summary');
+    summary.className = 'studio-from-button';
+    const icon = document.createElementNS(NS, 'svg');
+    icon.setAttribute('viewBox', '0 0 16 16');
+    icon.setAttribute('aria-hidden', 'true');
+    const funnel = document.createElementNS(NS, 'path');
+    funnel.setAttribute('d', 'M2.5 3.5h11l-4.3 5v4.2l-2.4 1.1V8.5z');
+    icon.append(funnel);
+    summary.append(icon);
+    const panel = document.createElement('div');
+    panel.className = 'studio-from-panel';
+    panel.append(label);
+    menu.append(summary, panel);
+    row.append(search, menu);
+    menu.addEventListener('keydown', event => {
+      if (event.key !== 'Escape' || !menu.open) return;
+      event.preventDefault(); menu.open = false; summary.focus();
+    });
+  }
+  function renderFromMenu(table) {
+    const menu = el('from-menu');
+    if (!menu) return;
+    menu.hidden = !verified();
+    if (menu.hidden) menu.open = false;
+    const name = (verified() && table) || 'All related tables';
+    const summary = menu.querySelector('summary');
+    summary.setAttribute('aria-label', 'Fields from: ' + name);
+    summary.title = 'Fields from: ' + name + '. Choose one related table to list only its fields.';
+    menu.classList.toggle('is-active', name !== 'All related tables');
+    el('field-table').title = name;
+  }
+
   function renderFields() {
     const meta = core.classifyFields(columns(), sheet().types);
     el('field-table-label').hidden=!verified();const table=el('field-table').value;fill(el('field-table'),[['','All related tables'],...[...new Set(meta.fields.map(f=>f.table).filter(Boolean))].map(t=>[t,t])]);el('field-table').value=table;
     const query = el('search').value.trim().toLowerCase();
     const matches = field => (!verified()||!table||field.table===table)&&(!query || [field.name,field.id,field.table,field.data_type,field.description].filter(Boolean).join(' ').toLowerCase().includes(query));
-    const into = (node, fields) => node.replaceChildren(...fields.filter(matches).map(f => pillNode(f, {})));
-    into(el('dimensions'), meta.dimensions);
-    into(el('measures'), meta.measures);
+    renderFromMenu(table);
+    // S1: a 6px dot marks every field the sheet already uses, on any shelf.
+    const used = usedColumns(sheet());
+    const pillFor = f => {
+      const pill = pillNode(f, {});
+      if (used.has(f.index)) { pill.classList.add('is-used'); pill.setAttribute('aria-label', pill.getAttribute('aria-label') + ' In use on this sheet.'); }
+      return pill;
+    };
+    // S1: a verified bucket opens on the board's own fields, in the board's
+    // order, and folds the rest under "More fields". A search or a chosen
+    // table lists every match instead, the board's fields first, so nothing
+    // it finds is folded away. Worksheet columns have no board list.
+    const pane = (verified() && core.paneBuckets && contributions && contributions.PANE_FIELDS) || null;
+    const into = (node, fields, bucket) => {
+      const split = pane && bucket ? core.paneBuckets(fields, pane[bucket]) : {shown: [], more: fields};
+      if (!pane || !bucket || query || table) { node.replaceChildren(...[...split.shown, ...split.more].filter(matches).map(pillFor)); return; }
+      const folded = split.more.map(pillFor);
+      node.replaceChildren(...split.shown.map(pillFor),
+        ...(folded.length ? [moreFold(bucket, folded, split.more.some(f => used.has(f.index)))] : []));
+    };
+    el('search').placeholder = data ? 'Search ' + fmt(columns().length) + ' fields' : 'Search fields';
+    into(el('dimensions'), meta.dimensions, 'dimensions');
+    into(el('measures'), meta.measures, 'measures');
     into(el('hidden'), meta.hidden);
     el('hidden-block').hidden = !el('show-hidden').checked || !meta.hidden.length;
     el('hidden-note').hidden = !meta.hidden.length;
@@ -1175,10 +1304,10 @@
     };
     shelfInto(el('columns'), 'columns', state.columns, 'Drop a field here');
     shelfInto(el('rows'), 'rows', state.rows, 'Drop a field here');
-    shelfInto(el('detail'), 'detail', state.marks.detail, 'Detail');
-    shelfInto(el('tooltip'), 'tooltip', state.marks.tooltip, 'Tooltip');
+    shelfInto(el('detail'), 'detail', state.marks.detail, 'Drop a field here');
+    shelfInto(el('tooltip'), 'tooltip', state.marks.tooltip, 'Drop a field here');
     for (const zone of ['color', 'size', 'label']) {
-      shelfInto(el(zone), zone, state.marks[zone] == null ? [] : [state.marks[zone]], zone === 'color' ? 'Colour' : zone === 'size' ? 'Size' : 'Label');
+      shelfInto(el(zone), zone, state.marks[zone] == null ? [] : [state.marks[zone]], 'Drop a field here');
     }
     shelfInto(el('pages'), 'pages', state.pages == null ? [] : [state.pages], 'One dimension');
     const filterPills = state.filters.map((filter, position) => {
@@ -1194,7 +1323,14 @@
     el('filters').dataset.placeholder = 'Drop a field to filter';
     el('filters').dataset.empty = filterPills.length ? 'false' : 'true';
     el('mark').value = state.marks.type;
+    const primary=[...core.shelf(state.rows),...core.shelf(state.columns)].find(p=>core.fieldAt(meta,p.column)?.role==='measure');
+    const field=primary&&core.fieldAt(meta,primary.column);
+    const calculated=verified()&&field&&field.id!=='amount';
+    fill(el('aggregation'),calculated?[['sum','Source statistic']]:core.AGGREGATIONS);
+    el('aggregation').value=primary?.aggregation||'sum';el('aggregation').disabled=!primary||calculated;
+    el('aggregation').title=field?field.name+(calculated?' is already computed from source observations.':' · each other measure also has its own pill menu.'):'Add a measure to Rows or Columns.';
     renderPager();
+    renderShelfStrip();
   }
 
   function renderPager() {
@@ -1325,7 +1461,7 @@
       button.addEventListener('mouseenter', describe);
       button.addEventListener('focus', describe);
       button.onclick = () => commit(() => {
-        if(verified()&&['symbol-map','filled-map'].includes(tile.id)){
+        if(verified()&&['symbol-map','filled-map'].includes(tile.id)&&!sheet().columns.length&&!sheet().rows.length){
           const filled=tile.id==='filled-map';sheet().columns=[{column:columns().find(f=>f.id===(filled?'state':'zip5')).index,aggregation:'sum'}];sheet().rows=[{column:columns().find(f=>f.id==='amount').index,aggregation:'sum'}];sheet().marks={type:filled?'filled-map':'map',color:null,size:null,label:null,detail:[],tooltip:[]};sheet().analytics.transform='none';return;
         }
         const next = (verified()?contributions:core).showMeApply(tile.id, sheet(), columns(), []);
@@ -1528,7 +1664,7 @@
     if (ticket !== overviewRevision) return;
     body.replaceChildren();
     if (!result.rows.length) { body.textContent = 'No matching observations in this scope.'; return; }
-    const spec = Object.assign({}, compiled.spec, {columns: result.columns, title: preset.title});
+    const spec = Object.assign({}, compiled.spec, {columns: result.columns, title: preset.title, seriesColor: seriesColour()});
     if (['pie', 'doughnut', 'waterfall', 'pareto', 'radar'].includes(spec.type)) {
       const id = spec.measures[0], currency = contributions.MONEY.has(id);
       const groups = result.rows.map(row => ({label: contributionPlot.label(row, spec.dimensions),
@@ -1910,7 +2046,32 @@
 
   /* -------------------------------------------------------------- the view */
 
+  // S1's bar teal (TB-14) is a token of its own, --chart-series-1, so the
+  // measure pills and other teal chrome keep --acu-teal. Without the token
+  // the plot keeps its palette. Compared scopes keep --scope-1/2/3.
+  const seriesColour = () => { try { return getComputedStyle(document.documentElement).getPropertyValue('--chart-series-1').trim(); } catch { return ''; } };
+  // Ruling (c), 2026-09-23: with the Data panel, the shelves or the Inspector
+  // put away, or the chart expanded, a bar chart on the main canvas grows into
+  // the room it was given: the pitch may rise from S1's 28px to ROOM_PITCH
+  // until the bars and the axis fill the canvas height. With every pane shown
+  // nothing changes, so the default view stays S1's. Desktop grid only: below
+  // 1100px the panes are drawers and the canvas grows with the chart.
+  const ROOM_PITCH = 56;
+  const ROOM_CLASSES = ['studio-data-collapsed', 'studio-shelves-collapsed', 'studio-inspector-collapsed', 'studio-chart-expanded'];
+  function chartRoomy() {
+    const host = document.querySelector('#view-chart-studio .studio');
+    if (!host || host.classList.contains('studio-options-hidden')) return false;
+    if (window.matchMedia && window.matchMedia('(max-width: 1099px)').matches) return false;
+    return ROOM_CLASSES.some(name => host.classList.contains(name));
+  }
+  function roomFit(canvas) {
+    return canvas === el('canvas') && chartRoomy() ? {fitHeight: canvas.clientHeight, barPitchMax: ROOM_PITCH} : {};
+  }
+  // theme.js can fail to load (the console restarting mid-page); the ink and
+  // face then fall back to chart-export.js's own instead of a ReferenceError.
+  const studioTheme = () => globalThis.MentatTheme || {ink: '#202522', sans: 'Arial, sans-serif'};
   function overlayLabels(svg, result) {
+    const theme = studioTheme();
     const values = core.markValues(result);
     if (!values.length) return false;
     const marks = [...svg.querySelectorAll('rect,circle')].filter(node => node.querySelector(':scope > title'));
@@ -1921,8 +2082,8 @@
       if (typeof value !== 'number' || !Number.isFinite(value)) return;
       const label = document.createElementNS(NS, 'text');
       label.textContent = compact(value);
-      label.setAttribute('fill', MentatTheme.ink);
-      label.setAttribute('font-family', MentatTheme.sans);
+      label.setAttribute('fill', theme.ink);
+      label.setAttribute('font-family', theme.sans);
       label.setAttribute('font-size', '10');
       label.setAttribute('data-mark-label', 'true');
       if (mark.tagName === 'circle') {
@@ -1942,6 +2103,7 @@
     return true;
   }
   function overlayReference(svg, plot, lines) {
+    const theme = studioTheme();
     if (!plot || !lines.length || plot.max === plot.min) return;
     for (const line of lines) {
       if (line.value < plot.min || line.value > plot.max) continue;
@@ -1952,7 +2114,7 @@
       rule.setAttribute('x2', vertical ? plot.to : at);
       rule.setAttribute('y1', vertical ? at : plot.from);
       rule.setAttribute('y2', vertical ? at : plot.to);
-      rule.setAttribute('stroke', MentatTheme.ink);
+      rule.setAttribute('stroke', theme.ink);
       rule.setAttribute('stroke-width', '1.5');
       rule.setAttribute('stroke-dasharray', '7 5');
       const note = document.createElementNS(NS, 'text');
@@ -1960,13 +2122,14 @@
       note.setAttribute('x', vertical ? plot.to : at + 4);
       note.setAttribute('y', vertical ? at - 5 : plot.from + 12);
       note.setAttribute('text-anchor', vertical ? 'end' : 'start');
-      note.setAttribute('fill', MentatTheme.ink);
-      note.setAttribute('font-family', MentatTheme.sans);
+      note.setAttribute('fill', theme.ink);
+      note.setAttribute('font-family', theme.sans);
       note.setAttribute('font-size', '11');
       svg.append(rule, note);
     }
   }
   function overlayTotal(svg, total) {
+    const theme = studioTheme();
     if (total == null) return false;
     const box = String(svg.getAttribute('viewBox') || '0 0 960 620').split(' ').map(Number);
     const note = document.createElementNS(NS, 'text');
@@ -1974,8 +2137,8 @@
     note.setAttribute('x', box[2] - 28);
     note.setAttribute('y', 88);
     note.setAttribute('text-anchor', 'end');
-    note.setAttribute('fill', MentatTheme.ink);
-    note.setAttribute('font-family', MentatTheme.sans);
+    note.setAttribute('fill', theme.ink);
+    note.setAttribute('font-family', theme.sans);
     note.setAttribute('font-size', '12');
     note.setAttribute('font-weight', '600');
     svg.append(note);
@@ -2234,13 +2397,24 @@
       ? contributions.sortLock(compiled.spec.type, sheet())
       : (core.sortLocked(view) ? 'Time views keep chronological order' : '');
     const pressed = onVerified ? contributions.effectiveSort(sheet()) : sheet().sort;
-    const measure = onVerified ? sortedMeasureName(compiled) : '';
+    const measure = onVerified ? sortedMeasureName(compiled)
+      : view && data ? paint.measureLabel(view, null, data) : '';
     for (const [id, direction, hint] of SORT_BUTTONS) {
       el(id).disabled = !!locked;
       el(id).title = locked || (measure
         ? 'Sort by ' + measure + ', ' + (direction === 'asc' ? 'smallest first' : 'largest first')
         : hint);
       el(id).setAttribute('aria-pressed', String(!locked && pressed === direction));
+    }
+    // None is the worksheet path's source order. The verified path always
+    // orders groups by their measure ('none' is stored as descending), so there
+    // None would be a second Descending and is switched off, saying why.
+    const none = el('sort-none');
+    if (none) {
+      none.disabled = !!locked || onVerified;
+      none.title = onVerified ? 'Verified groups are always ordered by their measure; the default is Descending'
+        : (locked || 'Keep the order the source gives');
+      none.setAttribute('aria-pressed', String(!locked && !onVerified && pressed === 'none'));
     }
   }
   // Labels are render-only, so this changes no query: it only stops the button
@@ -2309,6 +2483,7 @@
     renderSheets();
     renderDataSource();
     renderScopeChip();
+    renderCompareChip();
     renderDatasetMessage();
     renderSourceSummary();
     renderFilterRows();
@@ -2830,7 +3005,7 @@
     fill(el('filter-add'), [['', 'Add a field\u2026'],
       ...meta.dimensions.concat(meta.measures).filter(f => !used.has(f.index)).map(f => [String(f.index), f.name])]);
     el('tab-filters').textContent = rows.length ? 'Filters (' + rows.length + ')' : 'Filters';
-    // Below 1200px the Inspector is behind a button, so the number of filters
+    // Below 1100px the Inspector is behind a button, so the number of filters
     // shaping this view has to be readable without opening it.
     const badge = el('inspector-count');
     badge.textContent = rows.length ? String(rows.length) : '';
@@ -2863,15 +3038,314 @@
     if (carried || company) parts.push(company || 'All companies');
     return (carried ? 'Carried from Graph \u00b7 ' : '') + parts.filter(Boolean).join(' \u00b7 ');
   }
+  /* ------------------------------------------------ compare (build 03, S1) */
+
+  // One sheet split into two or three scopes, one coloured series each. Cycle
+  // and company are ONE verified query with an 'in' filter; industry is one
+  // query per report, because a report is one industry's workbook. The split
+  // itself is a browser-only 'scope' series: the server refuses a dimension it
+  // does not define (contribution_semantics.py validate), so it is never sent.
+  const COMPARE_KINDS = ['industry', 'cycle', 'company'];
+  const COMPARE_MARKS = ['bar', 'line', 'area', 'scatter', 'table'];
+  const COMPARE_NOUN = {industry: 'industries', cycle: 'cycles', company: 'companies'};
+  const compareState = state => (verified() && compareBySheet.get((state || sheet()).id)) || null;
+  const compareActive = state => { const entry = compareState(state); return !!entry && entry.values.length >= 2; };
+  // --scope-1/2/3 resolved to colours, because an exported SVG keeps no CSS.
+  function scopeColours() {
+    const style = getComputedStyle(document.documentElement);
+    return ['#57447b', '#327a7a', '#8d6a9f'].map((fallback, i) => (style.getPropertyValue('--scope-' + (i + 1)) || '').trim() || fallback);
+  }
+  function usedColumns(state) {
+    const used = new Set();
+    const add = list => { for (const p of core.shelf(list)) used.add(Number(p.column)); };
+    add(state.columns); add(state.rows);
+    const marks = state.marks || {};
+    for (const zone of ['color', 'size', 'label']) if (marks[zone] != null) add([marks[zone]]);
+    add(marks.detail || []); add(marks.tooltip || []);
+    if (state.pages != null) add([state.pages]);
+    for (const filter of state.filters || []) used.add(Number(filter.column));
+    return used;
+  }
+  // The one value a sheet's row filter pins a field to, or '' when it does not.
+  function pinnedValue(state, id) {
+    const meta = core.classifyFields(columns(), state.types);
+    for (const filter of state.filters || []) {
+      if (!core.filterActive(filter) || filter.stage === 'aggregate') continue;
+      const field = meta.fields.find(f => f.index === Number(filter.column));
+      if (!field || field.id !== id) continue;
+      const values = core.filterValues(filter);
+      return values.length === 1 ? String(values[0]) : '';
+    }
+    return '';
+  }
+  // The menu's values: reports for industry, the verified index's own members
+  // for cycle and company (company by giving, largest first).
+  async function compareValues(kind) {
+    if (kind === 'industry') return ((contributionCatalog && contributionCatalog.datasets) || [])
+      .filter(d => d.available).map(d => ({value: d.id, label: d.label || d.id}));
+    if (!dataset()) return [];
+    const query = {dataset: dataset().id, basis: basis(), dimensions: [kind], measures: ['amount'], filters: [],
+      aggregate_filters: [], sort: [{field: kind === 'cycle' ? 'cycle' : 'amount', direction: kind === 'cycle' ? 'asc' : 'desc'}],
+      limit: kind === 'cycle' ? 200 : 1000, offset: 0};
+    const result = await queryCached(query, {flight: menuFlight});
+    return result.rows.map(row => String(row[kind] ?? '')).filter(Boolean).map(value => ({value, label: value}));
+  }
+  // Scope 1 is what the sheet already shows: its report, its one cycle (else
+  // the newest, which is what Graph opens on), its one company (else the
+  // largest company it draws).
+  async function compareBase(kind) {
+    if (kind === 'industry') { const d = dataset(); return d ? {value: d.id, label: d.label || d.id} : null; }
+    const pinned = pinnedValue(sheet(), kind);
+    if (pinned) return {value: pinned, label: pinned};
+    if (kind === 'cycle') { const list = (await compareValues('cycle')).map(v => v.value).sort(); return list.length ? {value: list.at(-1), label: list.at(-1)} : null; }
+    const row = lastResult && contributionRequest && contributionRequest.dimensions.includes('company') ? lastResult.rows[0] : null;
+    return row && row.company ? {value: String(row.company), label: String(row.company)} : null;
+  }
+  async function pickCompare(kind, value) {
+    const label = kind === 'industry' ? (((contributionCatalog.datasets || []).find(d => d.id === value) || {}).label || value) : value;
+    const current = compareState();
+    let entry;
+    if (current && current.kind === kind) {
+      if (current.values.some(v => v.value === value) || current.values.length >= 3) return;
+      entry = {kind, values: [...current.values, {value, label}]};
+    } else {
+      let base = null;
+      try { base = await compareBase(kind); } catch (error) { base = null; }
+      entry = {kind, values: base && base.value !== value ? [base, {value, label}] : [{value, label}]};
+    }
+    compareBySheet.set(sheet().id, entry);
+    contributionOffset = 0;
+    renderAll();
+  }
+  let compareOpening = 0;
+  async function openCompare(anchor, kinds) {
+    const menu = globalThis.MentatCompareMenu;
+    if (!menu) { failure('Compare needs a console restart.'); return; }
+    const token = ++compareOpening;
+    const entry = compareState(), exclude = {};
+    if (entry) exclude[entry.kind] = entry.values.map(v => v.value);
+    if (dataset()) exclude.industry = [...new Set([...(exclude.industry || []), dataset().id])];
+    for (const kind of ['cycle', 'company']) { const pinned = pinnedValue(sheet(), kind); if (pinned && !(entry && entry.kind === kind)) exclude[kind] = [pinned]; }
+    // Final fix round (R03-4): scope 1 (the sheet's one cycle, else the newest;
+    // its one company, else the largest it draws) is already on the sheet, so
+    // the menu never offers it (build 02's menu leaves out the current value too).
+    // It is worked out when a kind's list is asked for, after that list (the
+    // newest cycle is then a cache hit on the same query), so the menu opens at
+    // once and the list shows "Loading…" meanwhile. A list for a menu that has
+    // since been replaced resolves to nothing.
+    const valuesFor = async kind => {
+      const list = await compareValues(kind);
+      if (!['cycle', 'company'].includes(kind) || (entry && entry.kind === kind)) return list;
+      let base = null;
+      try { base = await compareBase(kind); } catch (error) { base = null; }
+      if (token !== compareOpening) return [];
+      return base ? list.filter(v => String(v.value) !== String(base.value)) : list;
+    };
+    if (compareMenu) compareMenu.close();
+    compareMenu = menu.open(anchor, {kinds: kinds || COMPARE_KINDS, valuesFor, exclude,
+      onPick: (kind, value) => { pickCompare(kind, value); }, onClose: () => { compareMenu = null; }});
+  }
+  function clearCompare() {
+    compareBySheet.delete(sheet().id);
+    contributionOffset = 0;
+    renderAll();
+  }
+  function renderCompareChip() {
+    const entry = compareState(), on = !!entry;
+    el('compare-add').hidden = on;
+    el('compare-add').disabled = !verified() || !data;
+    el('compare-add').title = verified() ? 'Add another industry, cycle or company to this sheet as a coloured series'
+      : 'Comparing scopes needs Verified contributions';
+    el('compare-pills').hidden = !on;
+    el('compare-clear').hidden = !on;
+    // Two reports cannot share one CSV or one briefing slide's provenance, so
+    // while industries are compared both say so and wait (explicit state).
+    const twoReports = on && entry.kind === 'industry' && entry.values.length >= 2;
+    el('download-csv').disabled = twoReports;
+    el('download-csv').title = twoReports ? 'Export the CSV one industry at a time: each report carries its own workbook provenance' : '';
+    el('briefing-add').disabled = twoReports;
+    el('briefing-add').title = twoReports ? 'Add to briefing takes one report at a time; clear the comparison first' : 'Add this chart to the briefing';
+    const note = el('compare-note');
+    note.hidden = !(on && entry.values.length < 2);
+    note.textContent = on && entry.values.length < 2 ? 'Choose a second ' + (entry.kind === 'company' ? 'company' : entry.kind) + ' to compare' : '';
+    if (!on) { if (comparePills) { comparePills.destroy(); comparePills = null; } return; }
+    if (!globalThis.MentatCompareMenu) return;
+    if (comparePills && comparePills.kind !== entry.kind) { comparePills.destroy(); comparePills = null; }
+    if (!comparePills) {
+      comparePills = globalThis.MentatCompareMenu.pills(el('compare-pills'), {kind: entry.kind, values: entry.values, max: 3,
+        label: 'Compared ' + COMPARE_NOUN[entry.kind],
+        onRemove: at => {
+          const now = compareState();
+          if (!now) return;
+          const values = now.values.filter((_, i) => i !== at);
+          if (values.length < 2) { clearCompare(); el('compare-add').focus(); return; }
+          compareBySheet.set(sheet().id, {kind: now.kind, values});
+          renderAll();
+        },
+        onAdd: button => openCompare(button, [entry.kind])});
+      comparePills.kind = entry.kind;
+    } else comparePills.update(entry.values);
+  }
+  // The compared sheet: one query per scope for industry, one 'in' query for
+  // cycle and company, merged here under the 'scope' series with the pills'
+  // own colours. Drill-down, CSV, totals, reconciliation and the briefing each
+  // say what they do with more than one scope instead of assuming one source.
+  async function renderCompareView(view, compiled, ticket) {
+    const node = view.el, state = view.state, entry = compareState(state), sheetBasis = basisOf(state);
+    const values = entry.values.slice(0, 3), kind = entry.kind, colours = scopeColours();
+    if (!COMPARE_MARKS.includes(compiled.spec.type) || compiled.transform !== 'none')
+      throw new Error('Comparing scopes needs a bar, line, area, circle or text-table mark without a period analysis. Choose one, or clear the comparison.');
+    if (compiled.spec.color) throw new Error('Colour already splits this sheet. Remove the Colour field to compare scopes, or clear the comparison.');
+    if (kind !== 'industry' && !columns().some(f => f.id === kind)) throw new Error('This report has no ' + kind + ' field to compare.');
+    const base = compiled.query;
+    let queries;
+    if (kind === 'industry') {
+      queries = values.map(v => {
+        const report = ((contributionCatalog && contributionCatalog.datasets) || []).find(d => d.id === v.value);
+        if (!report || !report.available) throw new Error(v.label + ' has no verified report on this console.');
+        return Object.assign(structuredClone(base), {dataset: report.id, industry: report.industry || report.id});
+      });
+    } else {
+      const query = structuredClone(base);
+      query.filters = (query.filters || []).filter(f => f.field !== kind);
+      query.filters.push({field: kind, op: 'in', value: values.map(v => v.value)});
+      if (!query.dimensions.includes(kind)) query.dimensions = [...query.dimensions, kind];
+      queries = [query];
+    }
+    if (!view.request || JSON.stringify(view.request) !== JSON.stringify(queries[0])) {
+      node('canvas').setAttribute('aria-busy', 'true'); node('verified-summary').textContent = 'Reading verified totals…';
+      status('Reading verified source observations…'); el('inspection').hidden = true; ++recordRevision; lastResult = null;
+    }
+    const results = await Promise.all(queries.map((query, i) => queryCached(query, {flight: compareFlights[i]})));
+    if (view.stale(ticket) || !verified()) return;
+    view.result = results[0]; view.request = queries[0];
+    failure(''); lastResult = results[0]; lastConfig = compiled;
+    data.row_count = results.reduce((n, r) => n + r.totals.records, 0);
+    data.rows = results[0].rows.map(row => data.columns.map(f => row[f.id] ?? ''));
+    compareDrawn = {kind, values, queries, results};
+    const labelOf = new Map(values.map(v => [String(v.value), v.label]));
+    const plotted = compiled.spec.dimensions.filter(d => d !== kind);
+    let rows = [];
+    if (kind === 'industry') results.forEach((result, i) => { for (const row of result.rows) rows.push(Object.assign({}, row, {scope: values[i].label})); });
+    else for (const row of results[0].rows) rows.push(Object.assign({}, row, {scope: labelOf.get(String(row[kind])) || String(row[kind] ?? 'Unknown')}));
+    // Groups keep the order their largest scope gave them; inside a group the
+    // scopes follow the pills, so each group reads as one cluster of bars.
+    const groupKey = row => JSON.stringify(plotted.map(d => row[d] ?? null)), order = new Map();
+    for (const row of rows) if (!order.has(groupKey(row))) order.set(groupKey(row), order.size);
+    const rank = new Map(values.map((v, i) => [v.label, i]));
+    rows.sort((a, b) => order.get(groupKey(a)) - order.get(groupKey(b)) || rank.get(a.scope) - rank.get(b.scope));
+    const colourMap = {};
+    values.forEach((v, i) => { colourMap[v.label] = colours[i]; });
+    const name = id => (data.columns.find(f => f.id === id) || {}).name || id;
+    // Final fix round (R03-5): when the compared field is the sheet's only
+    // dimension, the bars are the scopes themselves: the title says so and
+    // each bar carries its scope's name, not "Selected population".
+    let title = contributions.BASIS[sheetBasis][0] + ' by ' + (plotted.length ? plotted.map(name).join(' / ') : kind === 'industry' ? 'Industry' : name(kind));
+    if (compiled.spec.measures.length !== 1 || compiled.spec.measures[0] !== 'amount')
+      title = compiled.spec.measures.map(id => (results[0].columns.find(c => c.id === id) || {}).name || id).join(' / ') + ' · ' + title;
+    view.title = title;
+    view.scope = results.map((result, i) => sourceScope(result, queries[i])).join(' | ');
+    node('title').textContent = title;
+    node('subtitle').textContent = scopeSubtitle(state) + ' · compared: ' + values.map(v => v.label).join(' vs ');
+    // Totals: each report's own for industry; one query's combined totals for
+    // cycle and company, said as combined (group identities are not additive).
+    const money = value => contributionPlot.format(value, 'amount');
+    const summary = node('verified-summary');
+    summary.replaceChildren();
+    const figures = [[sheetBasis === 'original_supported' ? 'Selected gross amount' : 'Selected net amount', r => money(r.totals.amount)],
+      ['Source observations', r => fmt(r.totals.records)], ['Reported donor identities', r => fmt(r.totals.contributors)]];
+    for (const [label, read] of figures) {
+      const item = document.createElement('span');
+      if (kind === 'industry') {
+        results.forEach((result, i) => {
+          const strong = document.createElement('strong'), dot = document.createElement('i');
+          dot.className = 'studio-scope-dot studio-scope-dot--' + (i + 1); dot.setAttribute('aria-hidden', 'true');
+          strong.append(dot, document.createTextNode(read(result)));
+          strong.title = values[i].label;
+          item.append(strong);
+        });
+        item.append(document.createTextNode(label));
+      } else {
+        const strong = document.createElement('strong');
+        strong.textContent = read(results[0]);
+        item.append(strong, document.createTextNode(label + ' · combined'));
+        item.title = 'One total across the ' + values.length + ' compared ' + COMPARE_NOUN[kind];
+      }
+      summary.append(item);
+    }
+    summary.title = kind === 'industry' ? 'Each figure is its own report\u2019s total, in pill order.'
+      : 'One query covers every compared ' + (kind === 'company' ? 'company' : kind) + '; identity counts are not added per scope.';
+    const range = result => result.group_count ? fmt(result.offset + 1) + '–' + fmt(result.offset + result.rows.length) + ' of ' + fmt(result.group_count) : 'none';
+    // Final fix round (R03-9): two or three reports say only their counts on
+    // the note line (the full ranges, per industry, are in the title), so the
+    // note text keeps the row instead of wrapping to three lines.
+    const short = result => !result.group_count ? 'none' : result.offset || result.has_more ? range(result) : fmt(result.group_count);
+    node('group-count').textContent = 'Groups ' + (results.length > 1 ? results.map(short) : results.map(range)).join(' · ');
+    node('group-count').title = results.map((result, i) => (kind === 'industry' ? values[i].label + ' ' : '') + range(result)).join(' · ') + '. Totals cover every matching group of each scope';
+    const more = results.some(result => result.has_more);
+    node('groups-prev').disabled = !base.offset; node('groups-next').disabled = !more; node('result-controls').hidden = false;
+    node('groups-prev').hidden = node('groups-next').hidden = !base.offset && !more;
+    // One scope's records at a time for industry: pick a bar. The one query of
+    // cycle or company already carries every compared scope.
+    node('inspect-all').disabled = kind === 'industry';
+    node('inspect-all').title = kind === 'industry' ? 'Choose a bar: each industry is its own report' : '';
+    node('canvas').hidden = false; node('table').hidden = true;
+    node('canvas').className = view.canvasClass + 'studio-canvas fit-' + state.fit;
+    // Compared scopes multiply the bars (groups x scopes). On the desktop grid
+    // the main canvas is a fixed region, so the pitch shrinks from S1's 28px
+    // toward 14px until the bars, the axis and the legend fit it; a board tile
+    // or a narrow page grows with the chart instead. With a pane put away
+    // (ruling c) the pitch may also grow, up to ROOM_PITCH, to fill the room.
+    const fitHeight = node('canvas') === el('canvas') && !(window.matchMedia && window.matchMedia('(max-width: 1099px)').matches) ? node('canvas').clientHeight : 0;
+    const spec = Object.assign({}, compiled.spec, {dimensions: [...plotted, 'scope'], labelDimensions: plotted.length ? plotted : ['scope'], color: 'scope', barPitch: 28, barPitchMin: 14, barPitchMax: fitHeight && chartRoomy() ? ROOM_PITCH : 0, fitHeight: fitHeight, niceTicks: true, panelTitles: compiled.spec.measures.length !== 1, width: node('canvas').clientWidth, barLeftMax: 190,
+      colorMap: colourMap, title: title,
+      columns: [...results[0].columns.filter(c => c.id !== kind || plotted.includes(kind)),
+        {id: 'scope', name: kind === 'industry' ? 'Industry' : kind === 'cycle' ? 'Election cycle' : 'Company', role: 'dimension', type: 'category'}]});
+    const pickBar = row => {
+      const at = values.findIndex(v => v.label === row.scope);
+      if (kind === 'industry' && at >= 0) inspectContributions(row, 0, {request: queries[at], result: results[at]});
+      else inspectContributions(row);
+    };
+    contributionPlot.render(node('canvas'), rows, spec, pickBar);
+    // Still taller than the region at 14px: the canvas scrolls with a visible
+    // bar (drawn again at the width the bar leaves) and the counter says so.
+    if (fitHeight && node('canvas').scrollHeight > node('canvas').clientHeight + 1) {
+      node('canvas').classList.add('studio-canvas--scrolls');
+      spec.width = node('canvas').clientWidth;
+      contributionPlot.render(node('canvas'), rows, spec, pickBar);
+      node('group-count').textContent += ' · scroll the chart';
+      node('group-count').title += '. The chart is taller than its region: scroll it for every bar and the legend';
+    }
+    const records = results.reduce((n, result) => n + result.totals.records, 0), groupCount = results.reduce((n, result) => n + result.group_count, 0);
+    node('note').textContent = [contributions.BASIS[sheetBasis][1], 'Comparing ' + values.map(v => v.label).join(', ') + '.',
+      kind === 'industry' ? 'Each industry is its own report and its own query.' : 'One verified query covers every compared ' + (kind === 'company' ? 'company' : kind) + '.',
+      more ? 'Additional groups are on later pages; each scope pages its own top groups.' : 'All selected groups shown.', ...compiled.notes].join(' ');
+    node('status').textContent = fmt(records) + ' source observations · ' + fmt(groupCount) + ' groups · ' +
+      (results.every(result => result.reconciliation?.receipt_matches_workbook === true) ? 'reconciles to the workbook' : 'verified source records');
+    node('status').title = fmt(queryRequests) + ' verified queries this session';
+    status('Verified contribution fields · ' + data.columns.length + ' fields');
+    renderPager();
+    renderReconcile(results[0], view, ticket).catch(() => { node('reconcile').hidden = true; });
+  }
+
   /* ------------------------------------------------------- reconciliation */
 
   // The Graph controls that have no verified field. They are read at the
   // moment of the comparison, because they decide which question Graph was
   // asked, and therefore which difference has to be explained.
-  const graphFilterState = () => ({
-    tier: (document.getElementById('graph-tier') || {}).value || '',
-    funding: (document.getElementById('graph-funding') || {}).value || 'all'
-  });
+  // Graph's current scope, read through MentatScope (the URL scope Graph
+  // writes, contracts/url_scope.json) and, where that module is not loaded,
+  // from Graph's own controls.
+  function currentGraphScope() {
+    const url = globalThis.MentatScope && typeof globalThis.MentatScope.read === 'function' ? globalThis.MentatScope.read() : null;
+    const dom = id => (document.getElementById('graph-' + id) || {}).value || '';
+    const pick = key => url ? String(url[key] || '') : dom(key);
+    return {company: pick('company'), cycle: pick('cycle'), tier: pick('tier'), funding: pick('funding') || 'all'};
+  }
+  const graphFilterState = () => {
+    const now = currentGraphScope();
+    return {tier: now.tier, funding: now.funding};
+  };
 
   // The same question, asked of Graph. One request per scope, remembered for
   // the session, because the strip is redrawn on every display edit and a
@@ -2930,13 +3404,13 @@
   // cycle, or both - each one exact single value - and nothing else.
   function reconcileScope(state) {
     const meta = core.classifyFields(columns(), state.types);
-    const scope = {company: '', cycle: ''};
+    const scope = {company: '', cycle: '', funding_source: ''};
     for (const filter of state.filters || []) {
       if (!core.filterActive(filter)) continue;
       const field = meta.fields.find(f => f.index === Number(filter.column));
       const id = field ? field.id : '';
       const values = core.filterValues(filter);
-      if ((id !== 'company' && id !== 'cycle') || filter.stage === 'aggregate' ||
+      if ((id !== 'company' && id !== 'cycle' && id !== 'funding_source') || filter.stage === 'aggregate' ||
           ['equals', 'in'].indexOf(filter.op) === -1 || values.length !== 1 || scope[id]) return null;
       scope[id] = values[0];
     }
@@ -2945,9 +3419,18 @@
 
   // A Graph request that fails, or a scope Graph cannot express, leaves the
   // strip away entirely. An absent strip is honest; a guessed one is not.
+  const FUNDING_OF_SOURCE = {employee_original: 'personal', corporate_original: 'corporate'};
+  const FUNDING_TEXT = {all: 'all giving', personal: 'personal giving', corporate: 'corporate giving'};
+  const cyclePair = value => value ? String(core.carriedFilterValue('cycle', String(value))) : '';
+  function setWhy(open) {
+    el('reconcile-detail').hidden = !open;
+    el('reconcile-why').setAttribute('aria-expanded', String(!!open));
+  }
   async function renderReconcile(result, view, ticket) {
     view = view || mainSurface();
     const node = view.el('reconcile');
+    const main = node === el('reconcile');
+    if (main) return renderNoteLine(result, view, ticket);
     node.hidden = true;
     if (!verified() || !result) return;
     const scope = reconcileScope(view.state);
@@ -2978,11 +3461,108 @@
     link.className = 'studio-reconcile-link';
     link.textContent = 'Why Cross-reference differs';
     link.onclick = () => {
+      globalThis.MentatReturn?.arrive('chart-studio', 'cross-reference');
       if (typeof showView === 'function') showView('cross-reference');
       else location.hash = '#cross-reference';
     };
     node.replaceChildren(lead, verdict, document.createTextNode(' '), link);
     node.hidden = false;
+  }
+  // The main canvas's note line. It names how the sheet's scope differs from
+  // Graph's, offers to match it, and keeps today's full explanation behind
+  // "Why". It hides when the scopes and the totals agree. No red.
+  async function renderNoteLine(result, view, ticket) {
+    const node = el('reconcile'), text = el('reconcile-text'), match = el('match-graph'), detail = el('reconcile-detail');
+    node.hidden = true; match.hidden = true; graphMatchTarget = null;
+    if (!verified() || !result) { setWhy(false); return; }
+    if (compareActive(view.state)) {
+      text.textContent = 'Graph reconciliation pauses while this sheet compares scopes.';
+      detail.replaceChildren(); el('reconcile-why').hidden = true; setWhy(false);
+      node.hidden = false;
+      return;
+    }
+    el('reconcile-why').hidden = false;
+    const scope = reconcileScope(view.state);
+    if (!scope) { setWhy(false); return; }
+    const graphNow = currentGraphScope();
+    const studioFunding = FUNDING_OF_SOURCE[scope.funding_source] || 'all';
+    let graphView, graphHere;
+    try {
+      [graphView, graphHere] = await Promise.all([graphTotals(scope.company, scope.cycle), graphTotals(graphNow.company, graphNow.cycle)]);
+    } catch { return; }
+    if (view.stale(ticket) || !verified()) return;
+    const graphCycle = String(((graphView || {}).filters || {}).cycle || '');
+    const shownCycle = cyclePair(graphNow.cycle || ((graphHere || {}).filters || {}).cycle || '');
+    const state = contributions.reconcile(result, basisOf(view.state), graphView,
+      Object.assign({}, graphFilterState(), {funding: studioFunding === graphNow.funding ? 'all' : graphNow.funding,
+        studioCycle: scope.cycle, graphCycle: graphCycle}));
+    // Why: the sentence and the verdict the strip used to print, the way to
+    // Cross-reference, and the caveat paragraph that sat under the chart.
+    const money = value => contributionPlot.format(value, 'amount');
+    const lead = document.createElement('span');
+    const verdict = document.createElement('strong');
+    if (state.reasonId === 'unavailable') {
+      lead.textContent = 'Graph has no total for this scope.';
+      verdict.textContent = '';
+    } else {
+      const where = [scope.company || 'All companies', scope.cycle || cyclePair(graphCycle) || 'All cycles'].join(' · ');
+      lead.textContent = 'Graph shows ' + money(state.graphCents) + ' for ' + where + '. Studio shows ' + money(state.studioCents) + '. ';
+      verdict.className = state.agree ? 'studio-reconcile-agree' : 'studio-reconcile-diff';
+      verdict.textContent = state.agree ? 'Agree.'
+        : 'They differ by ' + money(Math.abs(state.differenceCents)) + ' because ' + state.reason + '.';
+    }
+    const why = document.createElement('p');
+    why.append(lead, verdict);
+    const link = document.createElement('button');
+    link.type = 'button';
+    link.className = 'studio-reconcile-link';
+    link.textContent = 'Why Cross-reference differs';
+    link.onclick = () => {
+      setWhy(false);
+      globalThis.MentatReturn?.arrive('chart-studio', 'cross-reference');
+      if (typeof showView === 'function') showView('cross-reference');
+      else location.hash = '#cross-reference';
+    };
+    const caveat = document.createElement('p');
+    caveat.className = 'studio-reconcile-caveat';
+    caveat.textContent = el('note').textContent;
+    detail.replaceChildren(why, link, caveat);
+    // The scopes, named from the sheet's filters and Graph's current scope.
+    const differ = [];
+    if (scope.cycle !== shownCycle) differ.push([scope.cycle || 'all cycles', shownCycle || 'all cycles']);
+    if (scope.company !== graphNow.company) differ.push([scope.company || 'all companies', graphNow.company || 'all companies']);
+    if (studioFunding !== graphNow.funding) differ.push([FUNDING_TEXT[studioFunding] || studioFunding, FUNDING_TEXT[graphNow.funding] || graphNow.funding]);
+    const level = graphNow.tier ? ' Graph also narrows to the ' + graphNow.tier + ' employee level, which verified data cannot match.' : '';
+    if (!differ.length && !graphNow.tier && state.agree) { setWhy(false); return; }
+    if (differ.length) {
+      text.textContent = 'This sheet covers ' + differ.map(d => d[0]).join(' and ') + '. Graph shows ' + differ.map(d => d[1]).join(' · ') + '.' + level;
+      graphMatchTarget = {company: graphNow.company, cycle: shownCycle,
+        funding: Object.keys(FUNDING_OF_SOURCE).find(key => FUNDING_OF_SOURCE[key] === graphNow.funding) || ''};
+      match.hidden = false;
+    } else if (level) {
+      text.textContent = level.trim();
+    } else {
+      text.textContent = 'Same scope as Graph; the totals differ by ' + money(Math.abs(state.differenceCents || 0)) + '.';
+    }
+    node.hidden = false;
+  }
+  // Match Graph scope: the sheet's cycle, company and giving type become
+  // Graph's. Employee level has no verified field, so it is left as it is and
+  // the note line says so.
+  function matchGraphScope() {
+    const target = graphMatchTarget;
+    if (!target) return;
+    commit(() => {
+      const idOf = filter => (columns()[Number(filter.column)] || {}).id;
+      const kept = (sheet().filters || []).filter(filter => !['company', 'cycle', 'funding_source'].includes(idOf(filter)));
+      const add = [];
+      for (const [id, value] of [['company', target.company], ['cycle', target.cycle], ['funding_source', target.funding]]) {
+        const column = columns().find(f => f.id === id);
+        if (column && value) add.push({column: column.index, op: 'equals', value: String(value), stage: 'row'});
+      }
+      sheet().filters = [...kept, ...add];
+    });
+    setWhy(false);
   }
 
   function renderScopeChip() {
@@ -3000,6 +3580,8 @@
     const notes = (appliedScope && appliedScope.notCarried) || [];
     el('scope-note').textContent = notes.join(' · ');
     el('scope-note').hidden = !notes.length;
+    const basisLabel = verified() ? ((contributions.BASIS[basis()] || [])[0] || '') : (data ? 'Worksheet values' : '');
+    el('scope-basis').textContent = host.children.length ? basisLabel : 'Choose data';
   }
 
   // Canvas only hides the builder surfaces; the control that does it never
@@ -3011,7 +3593,7 @@
     // Canvas only puts the Inspector behind its header button the way a narrow
     // window does: the filter count stays readable and the panel stays off the
     // chart until it is asked for.
-    const narrow = !!(window.matchMedia && window.matchMedia('(max-width: 1200px)').matches);
+    const narrow = !!(window.matchMedia && window.matchMedia('(max-width: 1099px)').matches);
     const closed = !!hidden || narrow;
     el('inspector').hidden = closed;
     el('inspector-toggle').setAttribute('aria-expanded', String(!closed));
@@ -3096,6 +3678,9 @@
   };
   el('sort-asc').onclick = () => chooseSort('asc');
   el('sort-desc').onclick = () => chooseSort('desc');
+  el('sort-none').onclick = () => chooseSort('none');
+  // A choice closes the Sort menu, the way a menu does.
+  el('sort').addEventListener('click', event => { if (event.target.closest('#studio-sort > div button')) el('sort').open = false; });
   el('labels').onclick = () => commit(() => { sheet().showLabels = !sheet().showLabels; });
   el('fit').onchange = () => commit(() => { sheet().fit = el('fit').value; });
   el('clear').onclick = () => commit(() => { sheets[active] = core.clearSheet(sheet()); });
@@ -3145,6 +3730,8 @@
   // puts the Marks pane in front, and scrolls the block into view.
   el('showme-toggle').onclick = () => {
     const details = el('showme-details'), open = !details.open;
+    // Show Me lives in the Inspector, so opening it also ends Expand chart.
+    if (open) { setInspectorCollapsed(false, true); if (roomState.expand) setRoom('expand', false, true); }
     details.open = open;
     if (open) {
       if (el('inspector').hidden) {
@@ -3160,12 +3747,21 @@
   el('classic').onclick = () => {
     // The classic dialog only scans its report list while the Graph view is
     // showing (charts.js activate()), so go there first and then open it.
+    globalThis.MentatReturn?.arrive('chart-studio', 'graph');
     if (typeof showView === 'function') showView('graph');
     const dialog = document.getElementById('graph-builder');
+    // Dismissing the dialog used to leave the reader standing in Graph, which
+    // is not the tab they pressed Classic in. The dialog hands the tab back.
+    dialog.addEventListener('close', () => {
+      if (typeof showView === 'function') showView('chart-studio');
+      else location.hash = '#chart-studio';
+    }, {once: true});
     dialog.showModal();
     dialog.dispatchEvent(new Event('mentat:open'));
   };
   el('mark').onchange = () => commit(() => { const type=el('mark').value;sheet().marks.type=type;if(verified()&&type==='histogram'&&columns().some(f=>f.id==='amount_bin')){sheet().columns=[{column:columns().find(f=>f.id==='amount_bin').index,aggregation:'sum'}];sheet().rows=[{column:columns().find(f=>f.id==='records').index,aggregation:'sum'}];sheet().marks={type,color:null,size:null,label:null,detail:[],tooltip:[]};sheet().analytics.transform='none';}if(verified()&&['map','filled-map'].includes(type)&&(type==='filled-map'||!core.shelf([...sheet().columns,...sheet().rows]).some(p=>['zip5','state'].includes(columns()[p.column]?.id)))){sheet().columns=[{column:columns().find(f=>f.id===(type==='filled-map'?'state':'zip5')).index,aggregation:'sum'}];sheet().rows=[{column:columns().find(f=>f.id==='amount').index,aggregation:'sum'}];sheet().marks={type,color:null,size:null,label:null,detail:[],tooltip:[]};sheet().map={...sheet().map,layers:[...new Set([...(sheet().map?.layers||['districts']),'states'])]};sheet().analytics.transform='none';} });
+  el('aggregation').onchange=()=>{const value=el('aggregation').value;commit(()=>{const meta=core.classifyFields(columns(),sheet().types);for(const zone of ['rows','columns']){const pills=core.shelf(sheet()[zone]),at=pills.findIndex(p=>core.fieldAt(meta,p.column)?.role==='measure');if(at>=0){pills[at].aggregation=value;sheet()[zone]=pills;break;}}});};
+  buildFromMenu();
   el('search').oninput = renderFields;
   el('field-table').onchange=renderFields;
   el('bin-width').onchange=()=>{if(el('bin-width').reportValidity())commit(()=>{sheet().params.binWidth=Number(el('bin-width').value);});};
@@ -3179,7 +3775,7 @@
   el('report').onchange = loadSheets;
   el('sheet').onchange = () => scan(false);
   el('rescan').onclick = () => scan(true);
-  el('source-mode').onchange=()=>{persist();data=null;sourceKey='';clearTimeout(geometryTimer);abortContributionRequests();tileMemory.clear();++contributionRevision;contributionMap?.destroy?.();contributionMap=null;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.MARK_TYPES);loadRuns();}};
+  el('source-mode').onchange=()=>{compareBySheet.clear();persist();data=null;sourceKey='';clearTimeout(geometryTimer);abortContributionRequests();tileMemory.clear();++contributionRevision;contributionMap?.destroy?.();contributionMap=null;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.MARK_TYPES);loadRuns();}};
   el('dataset').onchange=()=>{persist();selectContributionDataset();};
   el('basis').onchange=()=>commit(()=>{sheet().source.basis=el('basis').value;activeSurface().offset=0;});
   el('refresh-data').onclick=()=>{++contributionCacheEpoch;abortContributionRequests();contributionCache.clear();memberCache.clear();graphTotalsCache.clear();loadContributions(true);};
@@ -3188,8 +3784,8 @@
   el('groups-next').onclick=()=>{const view=activeSurface();view.offset+=Number(view.state.params.maxGroups)||60;renderView(view);};
   el('inspect-all').onclick=()=>inspectContributions();
   el('inspection-close').onclick=()=>{++recordRevision;el('inspection').hidden=true;};
-  el('record-prev').onclick=()=>inspectContributions(recordSelection,Math.max(0,recordOffset-100));
-  el('record-next').onclick=()=>inspectContributions(recordSelection,recordOffset+100);
+  el('record-prev').onclick=()=>inspectContributions(recordSelection,Math.max(0,recordOffset-100),recordSource);
+  el('record-next').onclick=()=>inspectContributions(recordSelection,recordOffset+100,recordSource);
   for(const id of ['layer-states','layer-districts','layer-zips','congress'])el(id).onchange=()=>commit(()=>{sheet().map={congress:el('congress').value,layers:[['states','states'],['districts','districts'],['zips','zip_areas']].filter(([id])=>el('layer-'+id).checked).map(([,layer])=>layer)};});
   el('pager-prev').onclick = () => stepPage(-1);
   el('pager-next').onclick = () => stepPage(1);
@@ -3223,7 +3819,24 @@
       return;
     }
   });
+  const setDataPanel = open => {
+    document.querySelector('#view-chart-studio .studio').classList.toggle('studio-data-open', open);
+    el('data-toggle').setAttribute('aria-expanded', String(open));
+  };
+  el('data-toggle').onclick = () => setDataPanel(el('data-toggle').getAttribute('aria-expanded') !== 'true');
+  // The source chip (S1) opens a popover holding the Data source controls.
+  // Their ids are unchanged; the disclosure inside stays open, and its summary
+  // is the popover's heading line.
+  const setSourcePopover = open => {
+    el('source-popover').hidden = !open;
+    el('scope-change').setAttribute('aria-expanded', String(!!open));
+  };
   el('scope-change').onclick = () => {
+    const open = el('source-popover').hidden;
+    setSourcePopover(open);
+    if (!open) return;
+    // The source controls are in the popover now, so the chip no longer opens
+    // the narrow-screen fields drawer.
     // An explicit open outlives the prepare that may have opened the panel
     // for its own reasons, so nothing closes it behind the reader's back.
     progressOpened = false;
@@ -3231,7 +3844,202 @@
     renderSourceSummary();
     el('source-details').querySelector('summary').focus();
   };
+  el('source-summary').addEventListener('click', event => event.preventDefault());
   el('source-details').addEventListener('toggle', renderSourceSummary);
+  el('source-popover').addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault(); setSourcePopover(false); el('scope-change').focus();
+  });
+  el('reconcile').addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || el('reconcile-detail').hidden) return;
+    event.preventDefault(); setWhy(false); el('reconcile-why').focus();
+  });
+  // A click outside a popover or menu puts it away. On click, not on
+  // pointerdown: closing a popover must not move what the click lands on.
+  document.addEventListener('click', event => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (!el('source-popover').hidden && !target.closest('.studio-source-anchor')) setSourcePopover(false);
+    if (!el('reconcile-detail').hidden && !target.closest('#studio-reconcile-why, #studio-reconcile-detail')) setWhy(false);
+    if (el('sort').open && !target.closest('#studio-sort')) el('sort').open = false;
+    if (el('from-menu') && el('from-menu').open && !target.closest('#studio-from-menu')) el('from-menu').open = false;
+  }, true);
+  el('compare-add').onclick = () => openCompare(el('compare-add'));
+  el('compare-clear').onclick = () => { clearCompare(); el('compare-add').focus(); };
+  el('reconcile-why').onclick = () => setWhy(el('reconcile-detail').hidden);
+  el('match-graph').onclick = matchGraphScope;
+  // Collapse folds the docked Inspector to a 56px rail of three buttons that
+  // bring it back on Marks, Analytics or Filters; the choice is remembered in
+  // this browser through ui-state.js (which guards the storage itself).
+  const INSPECTOR_KEY = 'mentat-chart-studio-inspector-collapsed';
+  function setInspectorCollapsed(collapsed, remember) {
+    const host = document.querySelector('#view-chart-studio .studio');
+    if (host) host.classList.toggle('studio-inspector-collapsed', !!collapsed);
+    el('inspector-collapse').setAttribute('aria-expanded', String(!collapsed));
+    if (remember) globalThis.MentatState?.remember?.(INSPECTOR_KEY, collapsed ? '1' : '0');
+  }
+  el('inspector-collapse').onclick = () => { setInspectorCollapsed(true, true); el('rail-marks').focus(); };
+  for (const id of ['marks', 'analytics', 'filters']) el('rail-' + id).onclick = () => {
+    setInspectorCollapsed(false, true);
+    setInspectorTab(id);
+    el('tab-' + id).focus();
+  };
+  setInspectorCollapsed(globalThis.MentatState?.recall?.(INSPECTOR_KEY) === '1', false);
+  // Ruling (c), 2026-09-23 ("the graph should take up more size of the
+  // screen ... be able to hide the buckets"): the Data panel folds to a rail
+  // as the Inspector does, the shelves fold to one line that still names what
+  // is on them, and "Expand chart" puts all three away at once and brings
+  // them back as they were. Each choice is this browser's (ui-state.js guards
+  // the storage) and is written only when the reader makes it; with nothing
+  // stored the view is S1's, every pane shown. The controls are built here,
+  // as the From menu is, so the golden index.html does not change.
+  const ROOM_KEYS = {data: 'mentat-chart-studio-data-collapsed', shelves: 'mentat-chart-studio-shelves-collapsed', expand: 'mentat-chart-studio-chart-expanded'};
+  const ROOM_ICONS = {left: 'M10 3.5 5.5 8l4.5 4.5', right: 'M6 3.5 10.5 8 6 12.5', up: 'M3.5 10 8 5.5l4.5 4.5', down: 'M3.5 6 8 10.5 12.5 6',
+    search: 'M11.3 7A4.3 4.3 0 1 1 2.7 7a4.3 4.3 0 0 1 8.6 0zM10.1 10.1l3.4 3.4',
+    expand: 'M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10', restore: 'M6 2.5V6H2.5M13.5 6H10V2.5M10 13.5V10h3.5M2.5 10H6v3.5'};
+  const roomState = {data: false, shelves: false, expand: false};
+  function roomIcon(name) {
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'studio-icon');
+    svg.setAttribute('viewBox', '0 0 16 16');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', ROOM_ICONS[name]);
+    svg.append(path);
+    return svg;
+  }
+  function roomButton(id, className, iconName, title, text) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.id = 'studio-' + id;
+    if (className) button.className = className;
+    button.title = title;
+    button.append(roomIcon(iconName));
+    if (text) {
+      const label = document.createElement('span');
+      label.className = 'studio-room-label';
+      label.textContent = text;
+      button.append(label);
+    } else button.setAttribute('aria-label', title);
+    return button;
+  }
+  function buildRoomControls() {
+    if (el('expand')) return;
+    // Data panel: a chevron at the end of the DIMENSIONS line, and a 56px rail
+    // (expand, or expand and search) while it is folded.
+    const collapse = roomButton('data-collapse', 'studio-pane-collapse', 'left', 'Hide the Data panel');
+    collapse.setAttribute('aria-controls', 'studio-pane-data');
+    (el('search').closest('.studio-search-row') || el('pane-data')).append(collapse);
+    const rail = document.createElement('div');
+    rail.id = 'studio-data-rail';
+    rail.className = 'studio-data-rail';
+    rail.setAttribute('role', 'group');
+    rail.setAttribute('aria-label', 'Data (collapsed)');
+    const open = roomButton('data-rail-open', '', 'right', 'Expand the Data panel');
+    const find = roomButton('data-rail-search', '', 'search', 'Expand the Data panel and search its fields');
+    for (const button of [open, find]) { button.setAttribute('aria-controls', 'studio-pane-data'); button.setAttribute('aria-expanded', 'false'); }
+    rail.append(open, find);
+    el('data-panel').prepend(rail);
+    // Shelves: a chevron under the Chart select, and one line while folded.
+    // It rides in the Filters row, which stays the card's last child.
+    const fold = roomButton('shelves-collapse', 'studio-shelves-collapse', 'up', 'Hide the Columns, Rows and Filters shelves');
+    fold.setAttribute('aria-controls', 'studio-shelves');
+    (el('filters').closest('.studio-shelf') || el('shelves')).append(fold);
+    const strip = document.createElement('button');
+    strip.type = 'button';
+    strip.id = 'studio-shelves-strip';
+    strip.className = 'studio-shelves-strip';
+    strip.title = 'Show the Columns, Rows and Filters shelves';
+    strip.setAttribute('aria-controls', 'studio-shelves');
+    strip.setAttribute('aria-expanded', 'false');
+    const summary = document.createElement('span');
+    summary.id = 'studio-shelves-summary';
+    summary.className = 'studio-shelves-summary';
+    const show = document.createElement('span');
+    show.className = 'studio-shelves-show';
+    show.textContent = 'Show shelves';
+    strip.append(summary, show, roomIcon('down'));
+    el('shelves').before(strip);
+    // Expand chart: on the chart card, level with its title.
+    const expand = roomButton('expand', 'studio-expand', 'expand', '', 'Expand chart');
+    expand.setAttribute('aria-controls', 'studio-canvas-wrap');
+    el('canvas-wrap').prepend(expand);
+  }
+  // What the folded shelves line says: the fields on Columns, Rows and
+  // Filters, read from the pills just drawn, so it never disagrees with them.
+  function renderShelfStrip() {
+    const summary = el('shelves-summary');
+    if (!summary) return;
+    const parts = [['Columns', 'columns'], ['Rows', 'rows'], ['Filters', 'filters']]
+      .map(([label, zone]) => [label, [...el(zone).querySelectorAll('.studio-pill-name')].map(node => node.textContent.trim()).filter(Boolean)])
+      .filter(([, names]) => names.length);
+    summary.replaceChildren();
+    parts.forEach(([label, names], i) => {
+      if (i) { const sep = document.createElement('span'); sep.className = 'studio-shelves-sep'; sep.textContent = '\u00b7'; summary.append(sep); }
+      const name = document.createElement('span');
+      name.className = 'studio-shelves-name';
+      name.textContent = label;
+      const value = document.createElement('b');
+      value.textContent = names.join(', ');
+      summary.append(name, value);
+    });
+    if (!parts.length) summary.textContent = 'The shelves are empty';
+    el('shelves-strip').setAttribute('aria-label', 'Show the Columns, Rows and Filters shelves. ' +
+      (parts.length ? parts.map(([label, names]) => label + ': ' + names.join(', ')).join('; ') : 'They are empty') + '.');
+  }
+  function applyRoom() {
+    const host = document.querySelector('#view-chart-studio .studio');
+    if (host) {
+      host.classList.toggle('studio-data-collapsed', roomState.data);
+      host.classList.toggle('studio-shelves-collapsed', roomState.shelves);
+      host.classList.toggle('studio-chart-expanded', roomState.expand);
+    }
+    el('data-collapse').setAttribute('aria-expanded', String(!roomState.data));
+    el('shelves-collapse').setAttribute('aria-expanded', String(!roomState.shelves));
+    const expand = el('expand');
+    expand.setAttribute('aria-expanded', String(roomState.expand));
+    expand.querySelector('.studio-room-label').textContent = roomState.expand ? 'Show panes' : 'Expand chart';
+    expand.title = roomState.expand ? 'Bring back the Data panel, the shelves and the Inspector'
+      : 'Put the Data panel, the shelves and the Inspector away so the chart fills the space';
+    expand.querySelector('path').setAttribute('d', ROOM_ICONS[roomState.expand ? 'restore' : 'expand']);
+  }
+  function setRoom(name, value, remember) {
+    roomState[name] = !!value;
+    applyRoom();
+    if (remember) globalThis.MentatState?.remember?.(ROOM_KEYS[name], value ? '1' : '0');
+  }
+  buildRoomControls();
+  el('data-collapse').onclick = () => { setRoom('data', true, true); el('data-rail-open').focus(); };
+  el('data-rail-open').onclick = () => { setRoom('data', false, true); el('data-collapse').focus(); };
+  el('data-rail-search').onclick = () => { setRoom('data', false, true); el('search').focus(); };
+  el('shelves-collapse').onclick = () => { setRoom('shelves', true, true); el('shelves-strip').focus(); };
+  el('shelves-strip').onclick = () => { setRoom('shelves', false, true); el('shelves-collapse').focus(); };
+  el('expand').onclick = () => setRoom('expand', !roomState.expand, true);
+  for (const name of Object.keys(roomState)) roomState[name] = globalThis.MentatState?.recall?.(ROOM_KEYS[name]) === '1';
+  applyRoom();
+  renderShelfStrip();
+  // A bar chart is drawn at the canvas's own width (S1), so a change of that
+  // width - the window, the Inspector's collapse, Canvas mode - redraws it
+  // from the answer already held, which costs no query. While the chart grows
+  // into a put-away pane's room (ruling c) its height counts too, and so does
+  // the first change after the panes come back, which returns it to S1's pitch.
+  if (typeof ResizeObserver === 'function') {
+    let drawnWidth = 0, drawnHeight = 0, drawnRoomy = false, resizeTimer = 0;
+    new ResizeObserver(entries => {
+      const width = Math.round(entries[0].contentRect.width), height = Math.round(entries[0].contentRect.height);
+      const roomy = chartRoomy(), taller = Math.abs(height - drawnHeight) >= 8 && (roomy || drawnRoomy);
+      if (!width || (Math.abs(width - drawnWidth) < 8 && !taller)) return;
+      const first = !drawnWidth;
+      drawnWidth = width; drawnHeight = height; drawnRoomy = roomy;
+      if (first) return;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (!el('canvas').querySelector('svg[data-native]') || !verified() || overviewMode || dataSourceTab || boardTiles() > 1) return;
+        renderView();
+      }, 150);
+    }).observe(el('canvas'));
+  }
   // Cancelling aborts the request that is preparing and leaves the last good
   // view exactly where it was: renderContributionView ignores AbortError.
   el('progress-cancel').onclick = () => {
@@ -3257,7 +4065,7 @@
   // resized window never leaves the drawer sitting on top of its own toggle.
   // The toggle states what it is showing from the start, not only after a
   // click: a wide window arrives with the Inspector already open.
-  const narrowStudio = window.matchMedia ? window.matchMedia('(max-width: 1200px)') : null;
+  const narrowStudio = window.matchMedia ? window.matchMedia('(max-width: 1099px)') : null;
   const syncInspector = isNarrow => {
     const host = document.querySelector('#view-chart-studio .studio');
     const closed = !!isNarrow || !!(host && host.classList.contains('studio-options-hidden'));
@@ -3307,9 +4115,13 @@
   // What Graph can narrow by and this source cannot. Naming each one on the
   // scope chip is the difference between a total that looks wrong and a
   // total the reader knows is wider than the one they just left.
+  // Giving type IS verified data: funding_source ("Funding source",
+  // contribution_data.py DIMENSIONS), the field Graph's own sparklines narrow
+  // with for personal and corporate giving (graph.js sparkRequest). So it is
+  // carried with that same mapping, and only employee level stays behind.
+  const GRAPH_FUNDING = {personal: 'employee_original', corporate: 'corporate_original'};
   const GRAPH_NOT_CARRIED = [
     ['tier', 'Employee level', 'not in verified data', ''],
-    ['funding', 'Giving type', 'not in verified data', 'all'],
     ['mode', 'Candidate view', 'Graph only', 'direct'],
     ['direction', 'Support or opposition', 'Graph only', 'Support']
   ];
@@ -3323,6 +4135,7 @@
       // than filtered on a spelling the index never holds.
       if (value) scope.filters.push({field, value: core.carriedFilterValue(field, value)});
     }
+    if (GRAPH_FUNDING[read('funding')]) scope.filters.push({field: 'funding_source', value: GRAPH_FUNDING[read('funding')]});
     for (const [control, label, why, ignored] of GRAPH_NOT_CARRIED) {
       const value = read(control);
       if (value && value !== ignored) scope.notCarried.push(label + ': not carried (' + why + ')');
@@ -3343,6 +4156,7 @@
       // already-translated pendingScope.
       const read = id => (document.getElementById('graph-' + id) || {}).value || '';
       globalThis.MentatScope?.write({industry: pendingScope.industry, company: read('company'), cycle: read('cycle')});
+      globalThis.MentatReturn?.arrive('graph', 'chart-studio');
       if (typeof showView === 'function') showView('chart-studio'); else location.hash = '#chart-studio';
       if (loadedSources && verified()) applyGraphScope();
     };

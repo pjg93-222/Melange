@@ -1,4 +1,4 @@
-"""The dwarfed cross-reference digest: clear refunds and obvious outliers only.
+"""The dwarfed digest: refunds, contradictions and large counted receipts.
 
 These tests fix the shape the console now reads. The engine and the runner keep
 their accounting decisions; the digest only decides which of those decisions a
@@ -131,7 +131,7 @@ class DigestTests(unittest.TestCase):
         self.assertEqual(refunds["unlinked_count"], 1)
         self.assertEqual(refunds["unlinked"][0]["record_id"], "adjust")
 
-    def test_only_a_reclassification_that_removed_counted_money_is_an_outlier(self):
+    def test_only_an_evidence_backed_reclassification_is_listed_as_a_contradiction(self):
         outliers = self.digest()["outliers"]
         self.assertEqual(outliers["non_giving_count"], 1)
         self.assertEqual(outliers["non_giving_amount"], 15_000.0)
@@ -153,6 +153,10 @@ class DigestTests(unittest.TestCase):
         self.assertEqual(row["entity"], "IND")
         self.assertEqual(row["amount"], 120_000.0)
         self.assertEqual(row["source_url"], URLS["large_ind"])
+        # It is listed for inspection but remains fully counted; size alone is
+        # never exclusion evidence.
+        self.assertEqual(next(item for item in DECISIONS if item["source_id"] == "large_ind")["counted_cents"],
+                         12_000_000)
         # $500,000 is the only receipt in its class, which is far too small to
         # cut, so the bigger row is the one that is not listed.
         self.assertNotIn("large_org", [item["record_id"] for item in outliers["large"]])

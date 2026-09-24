@@ -83,13 +83,28 @@
     return head ? head + ELLIPSIS + tail : ELLIPSIS + tail;
   }
 
+  function wrapText(value, maxWidth, sizePx, family) {
+    const lines=[]; let line='';
+    for(const word of String(value).trim().split(/\s+/)) {
+      if(line && measureText(line+' '+word,sizePx,family)>maxWidth){lines.push(line);line='';}
+      for(const character of (line?' '+word:word)) {
+        if(line && measureText(line+character,sizePx,family)>maxWidth){lines.push(line);line='';}
+        line+=character;
+      }
+    }
+    if(line)lines.push(line);
+    return lines.length?lines:[''];
+  }
   const theme = Object.freeze({
     sans:token('--font-sans'),serif:token('--font-serif'),
     ink:token('--chart-ink'),muted:token('--muted'),grid:token('--chart-grid'),negative:token('--chart-negative'),
     palette:['--acu-teal','--acu-purple','--acu-mauve','--acu-gold','--acu-aqua','--acu-lilac','--acu-taupe'].map(token),
-    measureText: measureText, fitText: fitText
+    measureText: measureText, fitText: fitText, wrapText: wrapText
   });
 
   if (typeof module !== 'undefined' && module.exports) module.exports = theme;
   root.MentatTheme = theme;
 })(typeof globalThis === 'undefined' ? this : globalThis);
+
+// Mobile scope disclosures preserve every field while leaving room for data.
+(()=>{if(typeof document==='undefined'||typeof matchMedia==='undefined')return;const media=matchMedia('(max-width:760px)');const sync=()=>document.querySelectorAll('.analysis-scope-disclosure').forEach(node=>node.open=!media.matches);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync);else sync();media.addEventListener('change',sync);})();

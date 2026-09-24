@@ -399,7 +399,8 @@ async function nodeDrivenFallback(reason) {
     // The Data source panel folds itself away after the first successful load
     // (chart-studio.js el('source-details').addEventListener('toggle', ...)), so
     // it has to be reopened with the "Data source" button before a second pick.
-    if (!(await page.locator('#studio-source-details').evaluate(el => el.open))) await page.click('#studio-scope-change');
+    // Build 03 (S1): the pickers live in the source chip's popover.
+    if (!(await page.locator('#studio-dataset').isVisible())) await page.click('#studio-scope-change');
     await page.waitForSelector('#studio-dataset', {state: 'visible'});
     await page.selectOption('#studio-dataset', 'Credit Union');
     await page.waitForFunction(() => document.querySelector('#studio-canvas svg'));

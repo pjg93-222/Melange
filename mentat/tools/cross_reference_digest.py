@@ -1,4 +1,4 @@
-"""Obvious outliers and clear refunds from one saved cross-reference run.
+"""Contradictions, unusually large counted receipts and clear refunds.
 
 The published report workbook is the accounting of record. This module never
 restates it: it reads a completed run's decisions and lists only the rows a
@@ -6,7 +6,8 @@ reader would want to look at by eye - refunds the engine linked to an original
 gift, negative adjustments it could not link, money an accepted baseline had
 counted as giving that the engine reclassified as non-giving, and unusually
 large counted receipts. Every amount here describes the listed rows, never a
-total of giving.
+total of giving. Large receipts are informational only: magnitude never
+changes a decision or excludes a row.
 
 ``build_digest`` is pure. It consumes ``links`` first, then ``decisions``, then
 ``changes``, so a caller may hand it cursors instead of lists; it retains only
@@ -191,7 +192,7 @@ def build_digest(decisions: Iterable[Mapping], links: Iterable[Mapping], changes
                  source_urls: Mapping | None = None, descriptions: Mapping | None = None,
                  percentile: float = LARGE_PERCENTILE,
                  median_multiple: int = LARGE_MEDIAN_MULTIPLE) -> dict:
-    """Return the dwarfed view of one run: clear refunds and obvious outliers.
+    """Return clear refunds, contradictions and unusually large counted rows.
 
     ``decisions`` are the engine's per-row decisions, ``links`` its supported
     links and ``changes`` the runner's presentation change rows. ``entities``
@@ -199,7 +200,8 @@ def build_digest(decisions: Iterable[Mapping], links: Iterable[Mapping], changes
     filing URL and ``descriptions`` to its receipt text; all three are optional
     fallbacks, and an absent entity type puts a row in the non-individual class.
 
-    Large is measured against this run only: every counted receipt joins the
+    Large is measured against this run only and is strictly a display flag:
+    every counted receipt remains counted and joins the
     individual or the non-individual class, and a row is listed when it reaches
     both the class's ``percentile`` and ``median_multiple`` times the class
     median. ``entities`` is therefore asked about every counted receipt.
@@ -223,9 +225,10 @@ def build_digest(decisions: Iterable[Mapping], links: Iterable[Mapping], changes
 
     kept: dict[str, dict] = {}
     unlinked, non_giving, large = [], [], []
-    # Every counted receipt joins its class sample; only the largest few of each
-    # class can survive the cut, so their display rows are the only ones held
-    # while the thresholds are still unknown.
+    # Every counted receipt joins its class sample. The cut controls only which
+    # rows the digest displays; it never changes counted_cents or exclusion.
+    # Only the largest few of each class can survive the display cut, so their
+    # rows are the only ones held while the thresholds are still unknown.
     samples: dict[str, list] = {INDIVIDUAL_CLASS: [], OTHER_CLASS: []}
     candidates: dict[str, list] = {INDIVIDUAL_CLASS: [], OTHER_CLASS: []}
     source_records = 0

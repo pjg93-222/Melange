@@ -87,6 +87,10 @@ if (cycleFilter) {
     "employees",
     "committee_map",
     "downstream_activity",
+    "downstream_reach",
+    "downstream_measurement_ledger",
+    "downstream_sources",
+    "transfer_paths",
     "beneficiary_bridge",
     "beneficiary_summary",
     "recipient_detail",
@@ -186,7 +190,12 @@ function downstreamActivityValues(row) {
     null,
     null,
     row.source_url,
+    row.filing_records,
     deferFormulas ? "PENDING" : null,
+    Number(row.unverified_version_rows || 0),
+    Number(row.unresolved_version_rows || 0),
+    Number(row.unresolved_version_amount || 0),
+    Number(row.repeated_itemization_rows || 0),
   ];
 }
 
@@ -273,18 +282,23 @@ if (deferLargeTables) {
       sheet: "Downstream Activity",
       table: "DownstreamActivityTable",
       row_count: payload.downstream_activity.length,
-      column_count: 28,
-      numeric_columns: [15, 16, 17, 18, 19, 20, 21, 22, 23],
+      column_count: 33,
+      numeric_columns: [15, 16, 17, 18, 19, 20, 21, 22, 23, 29, 30, 31, 32],
     },
     beneficiary_bridge: {
       path: bridgePath,
       sheet: "Beneficiary Bridge",
       table: "BeneficiaryBridgeTable",
-      row_count: payload.beneficiary_bridge.length,
+      row_count: (payload.beneficiary_bridge ?? []).length,
       column_count: 22,
       numeric_columns: [13, 16, 17],
     },
   };
+  // Empty candidate selections have no body to hydrate (for example, a
+  // network containing only unknown/non-congressional candidates).
+  for (const [key, spec] of Object.entries(largeTableSidecars)) {
+    if (!spec.row_count) delete largeTableSidecars[key];
+  }
 }
 await fs.writeFile(
   finalizerDataPath,
@@ -310,11 +324,10 @@ await fs.writeFile(
   "utf8",
 );
 
-// The source database remains the complete query audit trail. Non-accepted
-// employer/name matches cannot affect report totals and can outnumber actual
-// spending rows by more than 10:1 in broad industries. The Excel cycle tables
-// therefore retain accepted records only; review and rejected records stay in
-// the source database, with their omitted counts disclosed on each cycle.
+// New evidence-policy payloads retain all raw decisions, including uncertain
+// attribution and explicit exclusions. Legacy payloads retain their historical
+// accepted-only scope and disclose any omitted records; they are not silently
+// reinterpreted as products of the new rules.
 const omittedNonAcceptedByCycle = new Map(
   payload.cycles.map((cycle) => [
     cycle.cycle,
@@ -325,6 +338,9 @@ const omittedNonAcceptedByCycle = new Map(
   ]),
 );
 let workbookRawRows = payload.raw_rows.filter((row) => {
+  // Evidence-policy payloads preserve every raw decision, including uncertainty
+  // and exclusions. Legacy payloads retain their explicit historical scope.
+  if (row.company_attribution_status != null) return true;
   if (row.company_match_status === "accepted") return true;
   if (
     payload.metadata?.omitted_non_accepted_by_cycle == null
@@ -583,6 +599,7 @@ const sheetOrder = [
   "Downstream Activity",
   "Beneficiary Bridge",
   "Accounting Basis",
+  "Downstream Reach", "Downstream Measurement", "Downstream Sources",
   "Transfer Paths", "Funding Cohorts", "Allocation Estimates", "Allocation Coverage", "Source Freshness", "Classification Review", "Data Quality",
   ...payload.cycles.map((cycle) => cycle.label),
   "Cycle Exceptions",
@@ -1168,11 +1185,11 @@ for (const cycle of payload.cycles) {
       aggregateFacts ? "Formula Facts" : "Contributions"
     }`,
     subtitle: aggregateFacts
-      ? "Exact accepted transactions aggregated into separate Master, Employee, and Recipient facts. Every summary formula uses the matching fact type; gift counts and dollars are preserved."
+      ? "Included observations aggregated into separate Master, Employee, and Recipient facts. Totals may contain unverified attribution or receipt roles; the Data workbook carries their flags. Every summary uses one matching fact type."
       : "Contribution-date cycle. Analysis Amount is formula-driven; FEC Filing Cycle and Cycle Alignment preserve the original reporting-period provenance.",
     sourceNote: aggregateFacts
-      ? `Source DB SHA-256: ${sourceSha256} | Accepted transactions: ${acceptedTransactions.toLocaleString("en-US")} | Formula facts: ${data.length.toLocaleString("en-US")} | Complete transaction-level audit remains in the cached JSON and SQLite source.`
-      : `Source DB SHA-256: ${sourceSha256} | Accepted rows retained: ${data.length.toLocaleString("en-US")} | Review/rejected query matches omitted: ${(omittedNonAcceptedByCycle.get(cycle.cycle) ?? 0).toLocaleString("en-US")} (retained in source DB) | Official committee metadata: ${payload.committee_master_sources.join(" | ")}`,
+      ? `Source DB SHA-256: ${sourceSha256} | Included observations: ${acceptedTransactions.toLocaleString("en-US")} | Formula facts: ${data.length.toLocaleString("en-US")} | Complete transaction-level audit remains in the Data workbook, cached JSON and SQLite source.`
+      : `Source DB SHA-256: ${sourceSha256} | Source rows retained: ${data.length.toLocaleString("en-US")} | Legacy query matches omitted: ${(omittedNonAcceptedByCycle.get(cycle.cycle) ?? 0).toLocaleString("en-US")} (retained in source DB) | Included does not mean fully verified. | Official committee metadata: ${payload.committee_master_sources.join(" | ")}`,
   });
 }
 
@@ -2295,10 +2312,11 @@ function buildDownstreamActivity() {
     "First Activity Date", "Last Activity Date", "Source Rows", "Included Rows",
     "Excluded Rows", "Superseded Rows", "Memo Rows", "Duplicate Rows",
     "Reported Amount", "Excluded Amount", "Net Included Amount", "FEC Committee URL",
-    "FEC Candidate URL", "Source URL", "Logic Check",
+    "FEC Candidate URL", "Source URL", "Filing Records", "Logic Check",
+    "Unverified Version Rows", "Unresolved Version Rows", "Unresolved Version Amount", "Repeated Itemization Rows",
   ];
   const sourceRows = payload.downstream_activity ?? [];
-  const rows = deferLargeTables
+  const rows = deferLargeTables && sourceRows.length
     ? [downstreamActivityValues(sourceRows[0])]
     : sourceRows.map(downstreamActivityValues);
   titleBlock(
@@ -2306,18 +2324,22 @@ function buildDownstreamActivity() {
     "Downstream Committee-to-Candidate Activity",
     `This is same-cycle activity by committees funded in the ${industry} dataset; it is not dollar-level pass-through attribution. Reported minus excluded amendment/memo rows equals Net Included Amount.`,
     `${payload.metadata.downstream_rows.toLocaleString("en-US")} exact source rows condensed to ${sourceRows.length.toLocaleString("en-US")} committee-candidate-activity groups | ${payload.metadata.downstream_superseded_rows.toLocaleString("en-US")} superseded and ${payload.metadata.downstream_memo_rows.toLocaleString("en-US")} memo rows excluded.`,
-    "AB",
+    "AG",
   );
   const last = 5 + rows.length;
-  sheet.getRange(`A5:AB${last}`).values = [headers, ...rows];
-  const table = sheet.tables.add(`A5:AB${last}`, true, "DownstreamActivityTable");
+  sheet.getRange(`A5:AG${last}`).values = [headers, ...rows];
+  const table = sheet.tables.add(`A5:AG${last}`, true, "DownstreamActivityTable");
   styleTable(table);
   sheet.freezePanes.freezeRows(5);
+  if (!rows.length) return sheet;
   sheet.getRange(`N6:O${last}`).format.numberFormat = "yyyy-mm-dd";
   sheet.getRange(`P6:U${last}`).format.numberFormat = countFormat;
   sheet.getRange(`V6:X${last}`).format.numberFormat = currencyFormat;
-  applyIntegrityFormatting(sheet.getRange(`AB6:AB${last}`), 6, "AB");
-  const widths = [14,38,15,20,34,15,16,22,9,10,34,18,15,14,14,12,12,12,14,10,12,18,18,18,42,42,54,15];
+  sheet.getRange(`AD6:AE${last}`).format.numberFormat = countFormat;
+  sheet.getRange(`AF6:AF${last}`).format.numberFormat = currencyFormat;
+  sheet.getRange(`AG6:AG${last}`).format.numberFormat = countFormat;
+  applyIntegrityFormatting(sheet.getRange(`AC6:AC${last}`), 6, "AC");
+  const widths = [14,38,15,20,34,15,16,22,9,10,34,18,15,14,14,12,12,12,14,10,12,18,18,18,42,42,54,64,15,20,20,22,22];
   widths.forEach((width, index) => {
     const column = excelColumn(index + 1);
     sheet.getRange(`${column}1:${column}${last}`).format.columnWidth = width;
@@ -2337,13 +2359,13 @@ function buildBeneficiaryBridge() {
     "Reference Key", "Integrity Check",
   ];
   const sourceRows = payload.beneficiary_bridge ?? [];
-  const rows = deferLargeTables
+  const rows = deferLargeTables && sourceRows.length
     ? [beneficiaryBridgeValues(sourceRows[0])]
     : sourceRows.map(beneficiaryBridgeValues);
   titleBlock(
     sheet,
     "Beneficiary Bridge",
-    "Formula bridge connecting each funded recipient committee to its same-cycle congressional candidate activity. Company associations repeat committee activity for context and are explicitly not attributed company dollars.",
+    "Observed activity of reachable spending committees, counted once per cycle/view/company/candidate even across shared routes. See Downstream Reach. Associated funding stays at its actual recipient; an indirect committee can show zero associated receipts and nonzero activity. Company views overlap and must not be added together.",
     `${sourceRows.length.toLocaleString("en-US")} company/industry committee-candidate paths | Top 100 congressional beneficiaries retained per cycle and view.`,
     "V",
   );
@@ -2352,6 +2374,7 @@ function buildBeneficiaryBridge() {
   const table = sheet.tables.add(`A5:V${last}`, true, "BeneficiaryBridgeTable");
   styleTable(table);
   sheet.freezePanes.freezeRows(5);
+  if (!rows.length) return sheet;
   sheet.getRange(`N6:N${last}`).format.numberFormat = countFormat;
   sheet.getRange(`O6:P${last}`).format.numberFormat = "yyyy-mm-dd";
   sheet.getRange(`Q6:R${last}`).format.numberFormat = currencyFormat;
@@ -2394,7 +2417,7 @@ function buildBeneficiarySummary() {
   titleBlock(
     sheet,
     "Congressional Beneficiary Summary",
-    "Industry and company views rank actual House and Senate candidates/officeholders reached through funded committees. Downstream activity is committee activity, not attributed company spending.",
+    "Industry and company views rank observed House/Senate candidate activity across the saved reachable network. Each spending committee counts once per view; transfers are not added to candidate spending. Coverage is limited to saved sources; this is not attributed company spending.",
     `${rows.length.toLocaleString("en-US")} top-100 candidate rows across cycles/views | Amounts formula-sum the Beneficiary Bridge; party columns count non-opposition activity, including contributions and corrections; opposition is reported separately. Support + Oppose can exceed Downstream Activity: negative correction and refund rows carry neither direction code, so they reduce the unsigned total without reducing either component.`,
     "X",
   );
@@ -2619,7 +2642,16 @@ buildAuditTable("Funding Cohorts", payload.funding_cohorts ?? [],
   "FEC individual, organization, PAC/committee and unknown entity evidence is shown separately. Organization receipts do not by themselves establish corporate treasury ownership. Into company PAC means funding received by that PAC; outgoing spending remains separate.");
 buildAuditTable("Transfer Paths", payload.transfer_paths ?? [],
   [["cycle","Cycle"],["root","Funded Committee"],["source","Source Committee"],["destination","Destination Committee"],["amount","Reported Net Transfer"],["depth","Depth"],["path","Representative Path"],["status","Traversal Status"]],
-  "Observed outgoing 24G/24K cash transfers. Amounts are committee activity, not traced company dollars. A representative shortest path is shown; repeated roots can share the same transfer.");
+  "Observed outgoing 24G/24K cash transfers. Amounts are committee activity, not traced company dollars. A representative shortest path is shown; repeated roots can share the same transfer.", true);
+buildAuditTable("Downstream Reach", payload.downstream_reach ?? [],
+  [["cycle","Cycle"],["view","View"],["company","Company"],["source_committee_id","Spending Committee"],["representative_root","Representative Funded Root"],["representative_path","Representative Path"]],
+  "One spending committee per view, regardless of shared routes or cycles. A route establishes observed association, not a donor dollar allocation. Company and Industry views overlap.", true);
+buildAuditTable("Downstream Measurement", payload.downstream_measurement_ledger ?? [],
+  [["cycle","Cycle"],["view","View"],["company","Company"],["candidate_id","Candidate ID"],["before_amount","Direct-only Association"],["after_amount","Reachable Committee Activity"],["delta","Difference"],["basis","Comparison Basis"]],
+  "Before/after algorithms on identical source rows, before top-100 filtering. These are not prior published workbook totals. Distinct unresolved filing versions remain provisional under count_all.", true);
+buildAuditTable("Downstream Sources", payload.downstream_sources ?? [],
+  [["cycle","Cycle"],["source","Source"],["path","Source Path"],["sha256","SHA-256"],["status","Coverage"],["policy","Policy"]],
+  "Preserved source fingerprints for the downstream measurement ledger. Missing evidence is not zero spending; a saved file does not prove complete filing coverage.");
 buildAuditTable("Allocation Estimates", payload.allocation_estimates ?? [],
   [["cycle","Cycle"],["root","Funded Committee"],["candidate_id","Candidate ID"],["candidate_name","Candidate"],["direction","Direction"],["estimated_amount","Conditional Estimate"]],
   payload.metadata.allocation_method ?? "No allocation model supplied.");
@@ -2661,7 +2693,7 @@ const previewRanges = new Map([
   ["PAC & Candidate Map", "A1:S30"],
   ["Recipient Detail", "A1:S30"],
   ["Contributor Detail", "A1:M30"],
-  ["Downstream Activity", "A1:AB25"],
+  ["Downstream Activity", "A1:AC25"],
   ["Beneficiary Bridge", "A1:V25"],
   ...payload.cycles.map((cycle) => [`${cycle.label} Summary`, "A1:S35"]),
   ...payload.companies.map((company) => [companyViewName(company), "A1:S35"]),

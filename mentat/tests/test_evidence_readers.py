@@ -316,6 +316,12 @@ JOB_EXAMPLES_S3B = _import_groups[JOB_KEYS_S3B]
 LIMITS_EXAMPLES_S3B = _import_groups[LIMITS_KEYS_S3B]
 CATALOG_EXAMPLES_S3B = [example['catalog'] for example in JOB_EXAMPLES_S3B if example['catalog'] is not None]
 COMMITTEE_EXAMPLES = CATALOG_EXAMPLES_S3B[0]['committees']
+# v5 (console redesign build 06, board B19): in the sources listing, each committee of
+# an import that is not being re-read also carries the figure its pane leads with, for the
+# PAC picker rail. The listing example's committees show both states (a figure, and none).
+LISTED_FIGURE_KEYS = ('receipts', 'receipts_channel', 'receipts_by_cycle')
+LISTED_COMMITTEE_EXAMPLES = next(example['sources'][0]['committees']
+                                 for example in _import_groups[SOURCES_LISTING_KEYS] if example['sources'])
 
 ENTRY_KEYS = frozenset({'name', 'path', 'kind', 'size', 'modified', 'supported'})
 SHORTCUT_KEYS = frozenset({'name', 'path'})
@@ -388,11 +394,27 @@ def assert_limits_s3b(value):
         raise AssertionError('limits.accepted_suffixes must be an array')
 
 
+def assert_listed_committee(value):
+    assert_shape(value, LISTED_COMMITTEE_EXAMPLES, enums={'category': set(csv_data.CATEGORIES) | {''}})
+
+
+def without_listed_figures(source):
+    """The listed import as its CATALOG: every committee without the rail's figure."""
+    return {**source, 'committees': [{key: item for key, item in committee.items() if key not in LISTED_FIGURE_KEYS}
+                                     for committee in source['committees']]}
+
+
 def assert_sources_listing_s3b(value):
     assert_shape(value, _import_groups[SOURCES_LISTING_KEYS], enums={'session_only': {False}})
     assert_limits_s3b(value['limits'])
     for source in value['sources']:
-        assert_catalog_s3b(source)
+        if source.get('state') == 'reading':
+            # v5: an import being re-read lists its committees exactly as its CATALOG does.
+            assert_catalog_s3b(source)
+            continue
+        for committee in source['committees']:
+            assert_listed_committee(committee)
+        assert_catalog_s3b(without_listed_figures(source))
 
 
 def assert_entry(value):

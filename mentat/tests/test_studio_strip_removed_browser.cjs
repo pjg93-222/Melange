@@ -16,7 +16,7 @@
  *
  * Design: audits/mentat_failings_20260915/UI_CLEANUP_DESIGN_2026-09-17.md
  * section 11 (the Board) and its 2026-09-19 retirement note.
- * Contract: contracts/url_scope.json v4, studioPane retired and ignored.
+ * Contract: contracts/url_scope.json v5, retaining the v4 studioPane retirement.
  *
  * Spawn pattern and stubbing: tests/test_ui_cleanup_browser.cjs - a real
  * `python app/server.py` on a free ephemeral port with a throwaway
@@ -363,7 +363,9 @@ const VISIBLE_SOURCE = `node => {
     pass(`?studioPane=B: ${pane.tabs.length} tabs visible, not embedded, query preserved as "${pane.search}"`);
 
     step('the contract records the retirement and the module still never reads the key');
-    assert.equal(urlScope.version, 4, 'url_scope is v4');
+    // v6 (build 02, 2026-09-22) added Graph's compare and layout keys and kept
+    // the studioPane retirement as it was.
+    assert.equal(urlScope.version, 6, 'url_scope is v6, retaining the retired studioPane contract');
     assert.ok(/retired/i.test(urlScope.keys.studioPane.value),
       'the key table says studioPane is retired: ' + urlScope.keys.studioPane.value);
     assert.deepEqual(urlScope.keys.studioPane.readers, [], 'nothing reads it');

@@ -15,6 +15,8 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from decimal import Decimal
+from unittest.mock import patch
 
 APP = Path(__file__).resolve().parents[1] / 'app'
 sys.path.insert(0, str(APP))
@@ -196,11 +198,70 @@ class GeoFixture(unittest.TestCase):
 
 
 class SnapshotSpend(GeoFixture):
+    def test_saved_filing_links_survive_map_and_network_aggregation(self):
+        snapshot = self.snapshot_root / 'fixture-snap/snapshots.json'
+        units = json.loads(snapshot.read_text())
+        for schedule in ('receipts', 'disbursements', 'expenditures'):
+            for index, row in enumerate(units[0][schedule]):
+                row['image_number'] = str(202409210000000000 + index)
+        snapshot.write_text(json.dumps(units))
+        for direction in ('raised', 'spent'):
+            payload = evidence_geo.geography('snapshot', 'fixture-snap', 'C00835959', '2024', direction,
+                                             snapshot_root=self.snapshot_root)
+            records = [record for kind in payload['kinds']
+                       for place in kind['districts'] + kind['states']
+                       for recipient in place['recipients'] for record in recipient['filings']]
+            self.assertTrue(records)
+            self.assertTrue(all(record['source_url'].startswith('https://docquery.fec.gov/cgi-bin/fecimg/?')
+                                for record in records))
+            self.assertFalse(any(record['amount'] in (9999, 99999, 55555) for record in records))
+            self.assertEqual(payload['reported_total'], 10750 if direction == 'raised' else 36700)
+        # Split ZIPs keep the original receipt and its URL on each matching district.
+        buckets, *_ = evidence_geo.snapshot_raised(units[0], '2024')
+        placed = buckets['contributors'].payload('')['districts']
+        split = [record for place in placed for recipient in place['recipients']
+                 for record in recipient['filings'] if record['amount'] == 2000]
+        self.assertEqual(len(split), 2)
+        self.assertEqual(split[0], split[1])
+
+    def test_view_cache_invalidates_snapshot_and_reference_data(self):
+        evidence_geo._views.clear()
+        def read():
+            return evidence_geo.cached_geography('snapshot','fixture-snap','C00835959','2024','spent',snapshot_root=self.snapshot_root)
+        first=read()
+        self.assertEqual(read(),first)
+        self.assertEqual(evidence_geo._views.info()['hits'],1)
+        # Same directory, changed candidate seat: both the view and the
+        # underlying reference-data cache must refresh.
+        master=self.root/'inputs/fec_beneficiary/cn24/cn.txt'
+        master.write_text(master.read_text().replace('|CA|H|45|','|CA|H|12|'))
+        moved=read()
+        old=next(k for k in first['kinds'] if k['kind']=='candidates')
+        new=next(k for k in moved['kinds'] if k['kind']=='candidates')
+        self.assertNotEqual(old['districts'],new['districts'])
+        self.assertEqual(first['reported_total'],moved['reported_total'])
+        snapshot=self.snapshot_root/'fixture-snap/snapshots.json'
+        payload=json.loads(snapshot.read_text())
+        payload[0]['totals']['disbursements']+=1
+        snapshot.write_text(json.dumps(payload))
+        self.assertEqual(read()['reported_total'],first['reported_total']+1)
+
+    def test_import_cache_with_geocoder_is_stable_and_read_only(self):
+        import geocode
+        store,identifier=self.store()
+        geocode.Cache(self.root/'data')
+        evidence_geo._views.clear()
+        args=('csv',identifier,'C00804179','2024','raised')
+        first=evidence_geo.cached_geography(*args,store=store,data_root=self.root/'data')
+        self.assertEqual(first,evidence_geo.cached_geography(*args,store=store,data_root=self.root/'data'))
+        self.assertEqual(evidence_geo._views.info()['hits'],1)
+
     def test_four_kinds_are_present_with_their_bases(self):
         payload = self.snapshot_spend()
         kinds = {kind['kind']: kind for kind in payload['kinds']}
         self.assertEqual(set(kinds), {'candidates', 'transfers', 'operating', 'conversions'})
-        self.assertFalse(kinds['conversions']['default_on'])
+        # State view defaults to all spend, including asset conversions.
+        self.assertTrue(kinds['conversions']['default_on'])
         self.assertTrue(all(kinds[name]['default_on'] for name in ('candidates', 'transfers', 'operating')))
         self.assertTrue(all(kinds[name]['basis'] for name in kinds))
 
@@ -210,15 +271,39 @@ class SnapshotSpend(GeoFixture):
                                payload['reported_total'], places=2)
         self.assertTrue(payload['reconciles'])
 
+    def test_residual_is_visible_but_does_not_claim_source_reconciliation(self):
+        original=evidence_geo.network_spent
+        def gap(*args,**kwargs):
+            buckets,missing,total=original(*args,**kwargs)
+            return buckets,missing,total+Decimal('1')
+        with patch.object(evidence_geo,'network_spent',side_effect=gap):
+            payload=self.snapshot_spend()
+        self.assertFalse(payload['reconciles'])
+        self.assertEqual(payload['reconciliation_residual'],1)
+        self.assertEqual(payload['located_total']+payload['unlocated_total'],payload['reported_total'])
+
+    def test_selected_root_snapshot_is_not_replaced_by_a_newer_saved_run(self):
+        expected=self.snapshot_spend()['reported_total']
+        later=write_snapshot(self.snapshot_root,'newer')
+        units=json.loads((later/'snapshots.json').read_text())
+        units[0]['totals']['coverage_end_date']='2024-12-31'
+        units[0]['totals']['disbursements']=999999
+        (later/'snapshots.json').write_text(json.dumps(units))
+        payload=self.snapshot_spend()
+        self.assertEqual(payload['reported_total'],expected)
+        root=next(r for r in payload['downstream_sources'] if r['committee']=='C00835959')
+        self.assertIn('fixture-snap',root['source'])
+
     def test_schedule_e_support_and_oppose_stay_apart(self):
         payload = self.snapshot_spend()
         kinds = {kind['kind']: kind for kind in payload['kinds']}
         districts = {row['key']: row for row in kinds['candidates']['districts']}
         self.assertAlmostEqual(districts['CA-SEN']['oppose'], 12000, places=2)
         self.assertAlmostEqual(districts['CA-SEN']['support'], 0, places=2)
-        # Schedule E support 4,000 and the Schedule B line 23 gift 1,500 both
-        # land on the candidate's own district.
-        self.assertAlmostEqual(districts['CA-45']['support'], 5500, places=2)
+        # Both land in the district, but only Schedule E carries an explicit
+        # support direction. The 1,500 gift remains in total candidate activity.
+        self.assertAlmostEqual(districts['CA-45']['support'], 4000, places=2)
+        self.assertAlmostEqual(districts['CA-45']['amount'], 5500, places=2)
         self.assertAlmostEqual(districts['NY-16']['oppose'], 2000, places=2)
 
     def test_memo_rows_are_excluded_exactly_as_pac_evidence_does(self):
@@ -284,6 +369,57 @@ class SnapshotRaise(GeoFixture):
 
 
 class ImportGeography(GeoFixture):
+    def test_import_uses_complete_worksheet_filing_records_without_a_snapshot(self):
+        store, identifier = self.store()
+        records = [{'amount':2500,'source_url':'https://docquery.fec.gov/cgi-bin/fecimg/?202401010000000001'},
+                   {'amount':1500,'source_url':'https://docquery.fec.gov/cgi-bin/fecimg/?202401010000000002'}]
+        activity = [{'cycle':'2024','committee':'C00804179','candidate_id':'H0CA48198',
+                     'candidate':'STEEL, MICHELLE','direction':'Support','amount':Decimal(4000),
+                     'filings':records}]
+        with patch('graph_data.report_activity', return_value=activity), patch(
+                'downstream.inventory', side_effect=AssertionError('worksheet citations need no snapshot')):
+            payload = evidence_geo.geography('csv', identifier, 'C00804179', '2024', 'spent',
+                                             store=store, snapshot_root=self.snapshot_root)
+        recipient = payload['kinds'][0]['districts'][0]['recipients'][0]
+        self.assertEqual(recipient['filings'], records)
+
+    def test_old_report_candidate_total_uses_only_exact_matched_saved_filings(self):
+        store, identifier = self.store()
+        unit = json.loads((self.snapshot_root / 'fixture-snap/snapshots.json').read_text())[0]
+        unit['committee_id'] = 'C00804179'
+        unit['_source'] = 'saved fixture'
+        unit['expenditures'] = [
+            expenditure(value, 'H0CA48198', 'S', image_number=str(202501309748316995 + index))
+            for index, value in enumerate((178200, 31050, 190750))]
+        unit['disbursements'] = [
+            disbursement('23', 5000, candidate_id='H0CA48198',
+                         sub_id=str(202401299600546010 + index),
+                         image_number=str(202401299600546010 + index))
+            for index in range(2)]
+        activity = [
+            {'cycle':'2024','committee':'C00804179','candidate_id':'H0CA48198',
+             'candidate':'FITZPATRICK, BRIAN','direction':direction,'amount':Decimal(value),
+             'filings':[]}
+            for direction, value in (('Support', 400000), ('Contribution / Other', 10000))]
+        with patch('graph_data.report_activity', return_value=activity), patch(
+                'downstream.inventory', return_value={('2024','C00804179'): unit}):
+            payload = evidence_geo.geography('csv', identifier, 'C00804179', '2024', 'spent',
+                                             store=store, snapshot_root=self.snapshot_root)
+            recipient = next(row for place in payload['kinds'][0]['districts']
+                             for row in place['recipients'] if row['name'] == 'FITZPATRICK, BRIAN')
+            self.assertEqual(recipient['amount'], 410000)
+            self.assertEqual(len(recipient['filings']), 5)
+            self.assertEqual(sum(row['amount'] for row in recipient['filings']), 410000)
+            self.assertTrue(all(row['source_url'].startswith('https://docquery.fec.gov/cgi-bin/fecimg/?')
+                                for row in recipient['filings']))
+            activity[0]['amount'] += 1
+            mismatched = evidence_geo.geography('csv', identifier, 'C00804179', '2024', 'spent',
+                                                store=store, snapshot_root=self.snapshot_root)
+            recipient = next(row for place in mismatched['kinds'][0]['districts']
+                             for row in place['recipients'] if row['name'] == 'FITZPATRICK, BRIAN')
+            self.assertEqual(recipient['amount'], 410001)
+            self.assertEqual(recipient['filings'], [])
+
     def test_raised_splits_a_straddling_zip_and_marks_it(self):
         store, identifier = self.store()
         payload = evidence_geo.geography('csv', identifier, 'C00804179', '2024', 'raised', store=store)
@@ -365,12 +501,18 @@ class Contract(GeoFixture):
             self.skipTest(f'{CONTRACT.name} is not written yet')
         self.contract = json.loads(CONTRACT.read_text(encoding='utf-8'))
 
-    def test_the_contract_is_v2_and_names_the_route(self):
-        # v2 is S8b: ruling A (no blank cycle), the per-row `basis`, and the
-        # three raised-row counters.
-        self.assertEqual(self.contract['version'], 2)
+    def test_the_contract_is_v3_and_names_the_route(self):
+        # v2 was S8b: ruling A (no blank cycle), the per-row `basis`, and the
+        # three raised-row counters. P4b's map needs geography wider than a
+        # district, so v3 adds by_state, by_region, by_zip and `sides`, all
+        # additive: every v2 field and every v2 rule is still here, and the v2
+        # negative controls still fail for their own stated reasons. The five
+        # examples were regenerated from the producer at the same time, so an
+        # example cannot record a shape the route no longer emits.
+        self.assertEqual(self.contract['version'], 3)
         self.assertEqual(self.contract['route'], '/api/evidence-geo')
         self.assertIn('RULING A', ' '.join(self.contract['rules']))
+        self.assertIn('by_zip', ' '.join(self.contract['rules']))
 
     def test_every_example_validates(self):
         self.assertGreaterEqual(len(self.contract['examples']), 1)
@@ -394,6 +536,120 @@ class Contract(GeoFixture):
             payload = json.loads(json.dumps(control['payload']))
             self.assertNotEqual(evidence_geo.contract_problems(payload), [],
                                 control['name'])
+
+
+class Levels(GeoFixture):
+    """P4b: the wider layers, and the rule that every one of them adds back.
+
+    The district layer was already pinned by SnapshotSpend and ImportGeography.
+    These tests exist for the layers the map gained - state, region and ZIP -
+    and for `sides`, which decides which direction the map opens on.
+    """
+
+    def sums(self, payload, field):
+        return sum(row['amount'] for row in payload[field])
+
+    def test_by_state_and_by_region_each_add_to_the_located_total(self):
+        for payload in (self.snapshot_spend(),
+                        evidence_geo.geography('snapshot', 'fixture-snap', 'C00835959', '2024',
+                                               'raised', snapshot_root=self.snapshot_root)):
+            for field in ('by_state', 'by_region'):
+                self.assertAlmostEqual(self.sums(payload, field), payload['located_total'],
+                                       places=2, msg=f'{field} on {payload["direction"]}')
+                self.assertAlmostEqual(self.sums(payload, field) + payload['unlocated_total'],
+                                       payload['reported_total'], places=2)
+
+    def test_an_import_reconciles_at_every_level(self):
+        store, identifier = self.store()
+        payload = evidence_geo.geography('csv', identifier, 'C00804179', '2024', 'raised',
+                                         store=store)
+        for field in ('by_state', 'by_region'):
+            self.assertAlmostEqual(self.sums(payload, field) + payload['unlocated_total'],
+                                   payload['reported_total'], places=2, msg=field)
+        self.assertAlmostEqual(self.sums(payload, 'by_zip')
+                               + payload['zip_truncated_amount']
+                               + payload['zip_missing']['amount'],
+                               payload['reported_total'], places=2)
+
+    def test_a_senate_row_folds_into_its_own_state_not_a_seat(self):
+        payload = self.snapshot_spend()
+        states = {row['key']: row for row in payload['by_state']}
+        # The fixture's CA money is CA-SEN ($12,000) and CA-45 ($5,500) under
+        # `candidates`, plus the $7,000 asset conversion whose payee is in CA.
+        # The state layer carries EVERY kind, including one the page has off by
+        # default, which is why the row also states its own per-kind split.
+        self.assertAlmostEqual(states['CA']['amount'], 24500, places=2)
+        self.assertAlmostEqual(states['CA']['kinds']['candidates'], 17500, places=2)
+        self.assertAlmostEqual(states['CA']['kinds']['conversions'], 7000, places=2)
+        self.assertEqual(states['CA']['region'], 'West')
+
+    def test_every_region_is_a_census_region_and_the_states_agree(self):
+        payload = self.snapshot_spend()
+        by_state = {row['key']: row for row in payload['by_state']}
+        for row in payload['by_region']:
+            self.assertIn(row['key'], payload['region_order'])
+            self.assertAlmostEqual(row['amount'],
+                                   sum(by_state[key]['amount'] for key in row['states']),
+                                   places=2, msg=row['key'])
+
+    def test_a_row_kinds_split_adds_to_the_row(self):
+        payload = self.snapshot_spend()
+        for field in ('by_state', 'by_region'):
+            for row in payload[field]:
+                self.assertAlmostEqual(sum(row['kinds'].values()), row['amount'], places=2,
+                                       msg=f'{field} {row["key"]}')
+
+    def test_the_zip_layer_keeps_a_row_with_no_readable_zip(self):
+        store, identifier = self.store()
+        payload = evidence_geo.geography('csv', identifier, 'C00804179', '2024', 'raised',
+                                         store=store)
+        # Two of the four 2024 rows carry no ZIP ($50 and $25).
+        self.assertAlmostEqual(payload['zip_missing']['amount'], 75, places=2)
+        self.assertEqual(payload['zip_missing']['rows'], 2)
+        self.assertEqual({row['zip'] for row in payload['by_zip']}, {'94607', '92625'})
+
+    def test_a_spent_map_carries_no_contributor_zips(self):
+        payload = self.snapshot_spend()
+        self.assertEqual(payload['by_zip'], [])
+        self.assertEqual(payload['zip_truncated'], 0)
+
+    def test_the_zip_cap_states_what_it_cost(self):
+        rows = evidence_geo.Zips()
+        for index in range(12):
+            rows.add(f'{10000 + index:05d}', evidence_geo.money(index + 1), who=f'person {index}')
+        rows.add('', evidence_geo.money(5))
+        payload = rows.payload(cap=5)
+        self.assertEqual(len(payload['by_zip']), 5)
+        self.assertEqual(payload['zip_truncated'], 7)
+        self.assertAlmostEqual(sum(row['amount'] for row in payload['by_zip'])
+                               + payload['zip_truncated_amount']
+                               + payload['zip_missing']['amount'],
+                               float(rows.total()), places=2)
+
+    def test_sides_states_both_directions_and_agrees_with_its_own(self):
+        for direction in ('raised', 'spent'):
+            payload = evidence_geo.geography('snapshot', 'fixture-snap', 'C00835959', '2024',
+                                             direction, snapshot_root=self.snapshot_root)
+            self.assertEqual(set(payload['sides']), {'raised', 'spent'})
+            self.assertAlmostEqual(payload['sides'][direction]['reported_total'],
+                                   payload['reported_total'], places=2)
+            self.assertGreater(payload['sides']['raised']['reported_total'], 0)
+            self.assertGreater(payload['sides']['spent']['reported_total'], 0)
+
+    def test_sides_names_the_empty_side_with_the_route_s_own_refusal(self):
+        store, identifier = self.store()
+        payload = evidence_geo.geography('csv', identifier, 'C00804179', '2024', 'raised',
+                                         store=store)
+        self.assertAlmostEqual(payload['sides']['raised']['reported_total'], 375, places=2)
+        self.assertEqual(payload['sides']['spent']['reported_total'], 0.0)
+        self.assertIn('outbound', payload['sides']['spent']['reason'].lower())
+
+    def test_the_pane_counts_the_distinct_counterparties_it_shows(self):
+        store, identifier = self.store()
+        stats = evidence_geo.counterparty_count(store, identifier, 'C00804179', '2024')
+        self.assertEqual(stats, {'contributors': 4, 'rows': 4})
+        self.assertEqual(evidence_geo.counterparty_count(store, identifier, 'C00804179', '')
+                         ['contributors'], 5)
 
 
 class RulingA(GeoFixture):

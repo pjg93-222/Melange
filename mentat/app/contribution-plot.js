@@ -51,7 +51,13 @@
   if(!plotted.length){const note=document.createElement('p');note.className='empty-view';note.textContent=timed?'No valid dated groups remain. Use Table view to inspect missing or invalid dates.':'No complete measure pairs remain. Use Table view to inspect missing values.';container.append(note);return null;}
   if(plotted.length<rows.length){const note=document.createElement('p');note.className='plot-note';note.textContent=(rows.length-plotted.length)+(timed?' groups have missing or invalid dates.':' groups are missing one or both measures.')+' They remain available in Table view.';container.append(note);}
   const svg=document.createElementNS(NS,'svg');svg.setAttribute('class','plot-svg');svg.setAttribute('role','group');svg.setAttribute('aria-label',spec.type+' chart. Select a mark to inspect its source records. The Table view provides all displayed values.');
-  const width=1000,panelH=spec.type==='bar'?Math.max(350,rows.length*29+105):420,panels=spec.type==='scatter'?1:measures.length;
+  // spec.barPitch (Chart Studio, S1): a taller row per bar; 29 otherwise.
+  let pitch=spec.type==='bar'&&Number(spec.barPitch)>0?Number(spec.barPitch):29;
+  // spec.width (bars only): draw at the container's own width, one unit per
+  // CSS pixel; spec.barLeft is then the label column. Otherwise 1000 units.
+  const native=spec.type==='bar'&&Number(spec.width)>0;let barLeft=native&&Number(spec.barLeft)>0?Number(spec.barLeft):255;
+  if(native)svg.setAttribute('data-native','');
+  const width=native?Math.max(560,Math.round(Number(spec.width))):1000,panels=spec.type==='scatter'?1:measures.length;let barRight=width-(native?110:125),panelH=spec.type==='bar'?Math.max(spec.panelTitles===false?300:350,rows.length*pitch+(spec.panelTitles===false?70:105)):420;
   svg.setAttribute('viewBox',`0 0 ${width} ${panelH*panels}`);svg.setAttribute('width',width);svg.setAttribute('height',panelH*panels);svg.setAttribute('font-family','Arial, sans-serif');svg.setAttribute('font-size','15');
   const title=document.createElementNS(NS,'title');title.textContent=spec.title||'Contribution analysis';svg.append(title);
   const node=(tag,attrs={},text,parent=svg)=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!=null)n.textContent=text;parent.append(n);return n;};
@@ -61,21 +67,69 @@
   const fit=(value,available,size=15)=>{const text=String(value);if(measure(text,size)<=available)return text;const chars=Array.from(text);return chars.slice(0,fittingLength(chars,Math.max(0,available-measure('…',size)),size)).join('')+'…';};
   const wrap=(value,available,size=15)=>{let chars=Array.from(String(value).replace(/\s+/g,' ').trim());const lines=[];while(chars.length){let count=Math.max(1,fittingLength(chars,available,size));if(count<chars.length){const space=chars.slice(0,count).lastIndexOf(' ');if(space>0)count=space;}lines.push(chars.slice(0,count).join(''));chars=Array.from(chars.slice(count).join('').trimStart());}return lines.length?lines:[''];};
   const fittedText=(attrs,value,available,parent)=>{const t=node('text',attrs,fit(value,available,attrs['font-size']||15),parent);node('title',{},value,t);return t;};
-  node('rect',{width,height:panelH*panels,fill:'#ffffff'});
-  const colorValues=[...new Set(plotted.map(r=>spec.color?String(r[spec.color]??'Unknown'):'Giving'))].sort((a,b)=>a.localeCompare(b));
-  const color=row=>palette[Math.max(0,colorValues.indexOf(spec.color?String(row[spec.color]??'Unknown'):'Giving'))%palette.length];
+  const background=node('rect',{width,height:panelH*panels,fill:'#ffffff'});
+  // spec.colorMap (value -> colour) pins a series to a colour and its legend
+  // order, as Chart Studio's compared scopes do with --scope-1/2/3; without it
+  // series take the palette in alphabetical order, as before.
+  const mapped=spec.color&&spec.colorMap?Object.keys(spec.colorMap):null;
+  const seen=[...new Set(plotted.map(r=>spec.color?String(r[spec.color]??'Unknown'):'Giving'))];
+  const colorValues=mapped?[...mapped.filter(v=>seen.includes(v)),...seen.filter(v=>!mapped.includes(v)).sort((a,b)=>a.localeCompare(b))]:seen.sort((a,b)=>a.localeCompare(b));
+  const colorOf=value=>(mapped&&spec.colorMap[value])||palette[Math.max(0,colorValues.indexOf(value))%palette.length];
+  const color=row=>colorOf(spec.color?String(row[spec.color]??'Unknown'):'Giving');
   const encodedFields=[...new Set([...measures,...(spec.tooltip||[]),...(spec.labelFields||[]),...(spec.size?[spec.size]:[])])];
   const valueText=(row,id)=>dims.includes(id)||columns.some(c=>c.id===id&&(c.role==='dimension'||c.type==='category'||c.type==='date'))?String(row[id]??'Unknown'):format(row[id],id,columns);
   const labelText=(row,fallback)=>spec.labelFields?.length?spec.labelFields.map(id=>valueText(row,id)).join(' / '):fallback;
+  // Money at a bar's end reads in whole dollars (S1: "$10,892,411").
+  const barEndValue=(v,id)=>isMoney(id,columns)&&Number.isFinite(Number(v))?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(v)/100):format(v,id,columns,true);
+  // The legend's layout, below the panels: one plan draws it and sizes the fit.
+  const legendPlan=values=>{let x=24,y=28,rowHeight=28;const items=[];for(const [i,value]of values.entries()){const lines=wrap(value,width-78),itemWidth=30+Math.max(...lines.map(line=>measure(line)));if(x>24&&x+itemWidth>width-24){x=24;y+=rowHeight;rowHeight=28;}items.push({i,value,lines,x,y});rowHeight=Math.max(rowHeight,lines.length*20+8);x+=itemWidth+14;}return {items,height:y+rowHeight};};
+  // Chart Studio sizing, native bars only. spec.barLeftMax: the label column
+  // fits the longest group label (up to that many px) and the right margin
+  // the longest value label plus its 8px gap and 8px pad, so the plot takes
+  // the width it is given and keeps its round ticks. spec.fitHeight with
+  // spec.barPitchMin: the pitch shrinks toward that minimum until the panels,
+  // their axes and the legend fit that height (compared scopes multiply bars).
+  // spec.barPitchMax (Chart Studio with a pane put away, ruling c): the pitch
+  // may also grow toward that maximum, so the bars fill the height given.
+  if(native&&Number(spec.barLeftMax)>0){
+   const labelWidth=Math.max(0,...rows.map(r=>measure(label(r,spec.labelDimensions||dims),13.5)));
+   barLeft=Math.max(60,Math.min(Number(spec.barLeftMax),Math.ceil(labelWidth)+22));
+   const valueWidth=spec.labels?Math.max(0,...measures.flatMap(m=>rows.filter(r=>r[m]!=null&&r[m]>=0).map(r=>measure(labelText(r,barEndValue(r[m],m)),13.5)))):0;
+   barRight=width-Math.max(36,Math.ceil(valueWidth)+16);
+  }
+  if(native&&Number(spec.fitHeight)>0&&(Number(spec.barPitchMin)>0||Number(spec.barPitchMax)>0)&&rows.length){
+   const chrome=spec.panelTitles===false?70:105,room=(Number(spec.fitHeight)-(spec.color?legendPlan(colorValues).height:0))/panels;
+   const least=Number(spec.barPitchMin)>0?Math.min(Number(spec.barPitchMin),pitch):pitch,most=Math.max(pitch,Number(spec.barPitchMax)||0);
+   pitch=Math.max(least,Math.min(most,Math.floor((room-chrome)/rows.length)));
+   panelH=Math.max(Math.min(spec.panelTitles===false?300:350,Math.floor(room)),rows.length*pitch+chrome);
+   svg.setAttribute('viewBox',`0 0 ${width} ${panelH*panels}`);svg.setAttribute('height',panelH*panels);background.setAttribute('height',panelH*panels);
+  }
   const maxSize=spec.size?plotted.reduce((max,row)=>Math.max(max,Math.abs(row[spec.size]||0)),1):1;
   const mark=(tag,attrs,row,parent)=>{if(spec.size&&tag==='circle')attrs={...attrs,r:3+12*Math.sqrt(Math.abs(row[spec.size]||0)/maxSize)};const detail=encodedFields.map(m=>`${name(m,columns)}: ${valueText(row,m)}`).join('\n');const n=node(tag,{...attrs,class:'plot-mark',tabindex:0,role:'button','aria-label':label(row,dims)+'; '+detail},null,parent);node('title',{},label(row,dims)+'\n'+detail,n);n.addEventListener('click',()=>onSelect?.(row));n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect?.(row);}});return n;};
   for(let p=0;p<panels;p++){
    const g=node('g',{transform:`translate(0 ${p*panelH})`}),m=measures[p];
-   node('text',{x:20,y:23,fill:'#202522','font-size':18,'font-weight':600},spec.type==='scatter'?`${name(measures[1],columns)} by ${name(measures[0],columns)}`:name(m,columns),g);
+   // spec.panelTitles===false (Chart Studio, one measure): the canvas title
+   // above the drawing already names the measure, so the panel skips its own.
+   if(spec.panelTitles!==false)node('text',{x:20,y:23,fill:'#202522','font-size':18,'font-weight':600},spec.type==='scatter'?`${name(measures[1],columns)} by ${name(measures[0],columns)}`:name(m,columns),g);
    if(spec.type==='bar'){
-    const left=255,right=875,top=55,bottom=panelH-43,[lo,hi]=extent(rows.map(r=>r[m])),x=v=>left+(v-lo)/(hi-lo)*(right-left),zero=x(0);
-    for(let tick=0;tick<=5;tick++){const v=lo+(hi-lo)*tick/5;node('line',{x1:x(v),x2:x(v),y1:top-8,y2:bottom,stroke:'#e8ebe6'},null,g);fittedText({x:x(v),y:panelH-17,'text-anchor':'middle',fill:'#68706b','font-size':15},format(v,m,columns,true),110,g);}
-    rows.forEach((r,i)=>{const y=top+i*29;fittedText({x:left-14,y:y+14,'text-anchor':'end',fill:'#444c46','font-size':16,'data-label':'category'},label(r,dims),left-30,g);if(r[m]==null)return;mark('rect',{x:Math.min(zero,x(r[m])),y,width:Math.max(1,Math.abs(x(r[m])-zero)),height:20,rx:2,fill:color(r)},r,g);if(spec.labels)fittedText({x:right+12,y:y+14,'text-anchor':'start',fill:'#35483b','font-size':15,'data-label':'value'},labelText(r,format(r[m],m,columns,true)),width-right-28,g);});
+    const left=barLeft,right=barRight,top=spec.panelTitles===false?20:55,bottom=panelH-43,[lo,hi]=extent(rows.map(r=>r[m])),x=v=>left+(v-lo)/(hi-lo)*(right-left),zero=x(0);
+    // spec.niceTicks (S1): round steps ("$2.0M") and the axis end, instead of
+    // five equal fifths of the range. The last round step gives way to the
+    // axis end only where their two labels would sit under 8px apart.
+    const niceStep=span=>{const raw=span/6,mag=Math.pow(10,Math.floor(Math.log10(raw||1))),n=raw/mag;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*mag;};
+    let ticks=[0,1,2,3,4,5].map(t=>lo+(hi-lo)*t/5);
+    const tickText=v=>spec.niceTicks&&isMoney(m,columns)?(v===0?'$0':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',notation:'compact',minimumFractionDigits:1,maximumFractionDigits:1}).format(v/100)):format(v,m,columns,true);
+    if(spec.niceTicks&&hi>lo){const step=niceStep(hi-lo);ticks=[];for(let v=Math.ceil(lo/step)*step;v<=hi+step*1e-9;v+=step)ticks.push(v);if(lo<ticks[0])ticks.unshift(lo);const endGap=x(hi)-x(ticks.at(-1));if(endGap>=1){if(ticks.length>1&&endGap<(measure(tickText(ticks.at(-1)),native?13.5:15)+measure(tickText(hi),native?13.5:15))/2+8)ticks.pop();ticks.push(hi);}}
+    for(const v of ticks){node('line',{x1:x(v),x2:x(v),y1:top-8,y2:bottom,stroke:spec.niceTicks&&v===0?'#8a8690':'#e8ebe6'},null,g);fittedText({x:x(v),y:panelH-17,'text-anchor':'middle',fill:'#68706b','font-size':native?13.5:15},tickText(v),110,g);}
+    // spec.labelDimensions names a group once for a cluster of bars (one bar
+    // per compared scope); the value label sits at the end of its own bar.
+    const groupLabel=r=>label(r,spec.labelDimensions||dims);
+    const barValue=v=>barEndValue(v,m);
+    const barH=pitch===29?20:Math.round(pitch*.62),textY=pitch===29?14:Math.round(barH/2+5);
+    // spec.seriesColor (Chart Studio, S1's teal): the fill of a single series.
+    // Compared scopes (spec.color) keep their colorMap; S1 also draws $0 as a darker axis.
+    const barFill=r=>spec.color||!spec.seriesColor?color(r):spec.seriesColor;
+    rows.forEach((r,i)=>{const y=top+i*pitch,text=groupLabel(r);if(!spec.labelDimensions||!i||text!==groupLabel(rows[i-1]))fittedText({x:left-14,y:y+textY,'text-anchor':'end',fill:'#444c46','font-size':native?13.5:16,'data-label':'category'},text,left-(native?22:30),g);if(r[m]==null)return;mark('rect',{x:Math.min(zero,x(r[m])),y,width:Math.max(1,Math.abs(x(r[m])-zero)),height:barH,rx:2,fill:barFill(r)},r,g);if(spec.labels&&!native)fittedText({x:right+12,y:y+textY,'text-anchor':'start',fill:'#35483b','font-size':15,'data-label':'value'},labelText(r,format(r[m],m,columns,true)),width-right-28,g);else if(spec.labels){const end=x(r[m]),negative=r[m]<0;fittedText({x:negative?Math.max(left+4,end-8):end+8,y:y+textY,'text-anchor':negative?'end':'start',fill:'#35483b','font-size':native?13.5:15,'data-label':'value'},labelText(r,barValue(r[m])),Math.max(60,negative?end-left:width-end-16),g);}});
    }else if(spec.type==='scatter'){
     const [mx,my]=measures,left=100,right=935,top=65,bottom=345,[xl,xh]=extent(plotted.map(r=>r[mx]),false),[yl,yh]=extent(plotted.map(r=>r[my]),false),x=v=>left+(v-xl)/(xh-xl)*(right-left),y=v=>bottom-(v-yl)/(yh-yl)*(bottom-top);
     for(let i=0;i<=5;i++){const vx=xl+(xh-xl)*i/5,vy=yl+(yh-yl)*i/5;node('line',{x1:x(vx),x2:x(vx),y1:top,y2:bottom,stroke:'#e8ebe6'},null,g);node('line',{x1:left,x2:right,y1:y(vy),y2:y(vy),stroke:'#e8ebe6'},null,g);fittedText({x:x(vx),y:bottom+23,'text-anchor':'middle',fill:'#68706b','font-size':15},format(vx,mx,columns,true),110,g);fittedText({x:left-10,y:y(vy)+3,'text-anchor':'end',fill:'#68706b','font-size':15},format(vy,my,columns,true),78,g);}
@@ -98,7 +152,7 @@
     const id=measures[p],values=plotted.map(row=>row[id]).filter(v=>typeof v==='number'&&Number.isFinite(v)).sort((a,b)=>a-b);if(!values.length)continue;
     const average=values.reduce((a,b)=>a+b,0)/values.length,middle=Math.floor(values.length/2),median=values.length%2?values[middle]:(values[middle-1]+values[middle])/2,[lo,hi]=extent(values),bar=spec.type==='bar';
     for(const [kind,value]of [['average',average],['median',median]])if(spec.references[kind]){
-     const g=node('g',{transform:`translate(0 ${p*panelH})`,'data-reference':kind});const at=bar?255+(value-lo)/(hi-lo)*620:345-(value-lo)/(hi-lo)*285;
+     const g=node('g',{transform:`translate(0 ${p*panelH})`,'data-reference':kind});const at=bar?barLeft+(value-lo)/(hi-lo)*(barRight-barLeft):345-(value-lo)/(hi-lo)*285;
      node('line',bar?{x1:at,x2:at,y1:48,y2:panelH-43,stroke:'#745079','stroke-dasharray':'6 4'}:{x1:100,x2:940,y1:at,y2:at,stroke:'#745079','stroke-dasharray':'6 4'},null,g);
      node('text',{x:bar?at+3:938,y:bar?42:at-5,'text-anchor':bar?'start':'end',fill:'#745079','font-size':12},`${kind==='average'?'Mean':'Median'} of shown marks: ${format(value,id,columns,true)}`,g);
     }
@@ -108,15 +162,12 @@
   // PNG/SVG downloads, leaving a coloured series impossible to identify.
   const legends=spec.color?colorValues:timed&&dims.length>1?timelines[0].series.map(s=>s.label):[];
   if(legends.length){
-   const legend=node('g',{'data-legend':'series','aria-label':'Series legend'});let x=24,y=panelH*panels+28,rowHeight=28;
-   for(const [i,value]of legends.entries()){
-    const lines=wrap(value,width-78),itemWidth=30+Math.max(...lines.map(line=>measure(line)));
-    if(x>24&&x+itemWidth>width-24){x=24;y+=rowHeight;rowHeight=28;}
-    node('rect',{x,y:y-11,width:11,height:11,rx:2,fill:palette[i%palette.length]},null,legend);
-    lines.forEach((line,j)=>node('text',{x:x+18,y:y+j*20,fill:'#59645c','font-size':15},line,legend));
-    rowHeight=Math.max(rowHeight,lines.length*20+8);x+=itemWidth+14;
+   const legend=node('g',{'data-legend':'series','aria-label':'Series legend'}),plan=legendPlan(legends),base=panelH*panels;
+   for(const {i,value,lines,x,y}of plan.items){
+    node('rect',{x,y:base+y-11,width:11,height:11,rx:2,fill:mapped?colorOf(value):palette[i%palette.length]},null,legend);
+    lines.forEach((line,j)=>node('text',{x:x+18,y:base+y+j*20,fill:'#59645c','font-size':15},line,legend));
    }
-   const height=y+rowHeight;svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('height',height);
+   const height=base+plan.height;svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('height',height);
   }
   container.append(svg);
   return svg;

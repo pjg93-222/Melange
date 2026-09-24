@@ -1,6 +1,10 @@
-/* PAC evidence v2 (S6), real-client pass: one scope bar, up to four PAC panes
- * side by side from any imported industry file or saved snapshot, the compare
- * strip, the chip row, the URL round trip and the Import drawer.
+/* PAC evidence v2 (S6), real-client pass: the picker rail (build 06, board
+ * B19), up to three PAC panes side by side from any imported industry file or
+ * saved snapshot, the compare strip, the URL round trip and the Import drawer.
+ * Build 06 re-homed every #evidence-add click and chip-row assertion onto the
+ * rail's ticks (the prompt's "keep #evidence-add hidden ... re-home those
+ * assertions"); #evidence-pac and #evidence-add stay in the page, hidden, as
+ * the data behind the rail, so their option and disabled assertions still hold.
  *
  * Spawns the actual `python app/server.py` console under a temp data root, so
  * imports really land on disk and the permalink really restores from them. Run
@@ -269,14 +273,39 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
         && document.querySelectorAll('#evidence-panes .pane-message').length === 0,
        arg: count}, timeout, `${count} loaded pane(s)`);
     const waitFor = (fn, arg, timeout, what) => until({fn, arg}, timeout, what);
+    // Build 06: a pane opens from its tick in the rail and closes on untick.
+    const railBox = committee => page.locator(`#evidence-list input[type=checkbox][value="${committee}"]`);
+    const tick = async committee => {
+      await waitFor(wanted => [...document.querySelectorAll('#evidence-list input[type=checkbox]')]
+        .some(node => node.value === wanted), committee, 30000, `the rail row for ${committee}`);
+      await railBox(committee).check();
+    };
+    const railTicked = () => page.locator('#evidence-list input[type=checkbox]:checked').evaluateAll(
+      nodes => nodes.map(node => node.value));
     await page.goto(origin + '/');
     await page.click('#tab-evidence');
     await waitStatus(/Nothing imported yet|snapshot/);
     assert.notStrictEqual(await status(), '');
     assert.equal(await page.isVisible('#evidence-empty'), true);
+    // Build 06 (prompt 06, item 5): the rail stays and the panes area shows
+    // one quiet line; the rail itself says what to do and offers both actions.
     const empty = (await page.textContent('#evidence-empty')).trim();
-    assert.ok(/Import an industry file/.test(empty) && /saved snapshot/.test(empty), empty);
-    pass(`tab open, status ${JSON.stringify(await status())}, empty state names both actions`);
+    assert.equal(empty, 'Tick a PAC on the left to open it here.');
+    assert.equal(await page.locator('#evidence-empty.empty, #evidence-empty.panel, #evidence-empty.card').count(), 0,
+      'the empty state is a line, not a card');
+    // Fix round 2 (R06b-01): the template's first status ("Finding imported
+    // files and saved snapshots…") already satisfies the waitStatus above while
+    // the rail is still empty (measured: the rail line lands ~17 ms later), so
+    // wait for the rail's own line before reading it.
+    await waitFor(() => /Choose a source above|Nothing imported yet/.test(
+      (document.querySelector('#evidence-list .evidence-list-empty') || {}).textContent || ''),
+      undefined, 30000, 'the rail empty line');
+    const railEmpty = (await page.textContent('#evidence-list')).trim();
+    assert.ok(/Choose a source above|Nothing imported yet/.test(railEmpty), railEmpty);
+    assert.equal(await page.isVisible('#evidence-import-open'), true);
+    assert.equal(await page.isVisible('#evidence-snapshot-open'), true);
+    assert.equal(await page.isVisible('#evidence-add'), false, '#evidence-add stays in the page, hidden');
+    pass(`tab open, status ${JSON.stringify(await status())}, empty line ${JSON.stringify(empty)}, rail ${JSON.stringify(railEmpty)}`);
 
     step('PORTED: the path box, the Browse panel and the worksheet picker exist in the page');
     for (const id of ['evidence-path', 'evidence-path-read', 'evidence-header-path', 'evidence-browse',
@@ -329,6 +358,8 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     assert.equal(superPacs.length, 1);
     assert.ok(/FAIRSHAKE/.test(superPacs[0]), superPacs[0]);
     assert.ok(/Super PAC/.test(await status()), await status());
+    assert.deepEqual(await page.locator('#evidence-list input[type=checkbox]').evaluateAll(nodes => nodes.map(node => node.value)),
+      ['C00835959'], 'the rail lists exactly what the type filter leaves');
     pass(`type Super PAC leaves ${JSON.stringify(superPacs)}`);
 
     step('PORTED: typing "dccc" with All types shows only DCCC');
@@ -344,13 +375,14 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     await waitFor(() => document.querySelectorAll('#evidence-pac option').length === 0, null, 20000, 'a page condition');
     assert.equal(await page.isDisabled('#evidence-add'), true);
     assert.ok(/0 shown/.test(await status()), await status());
+    assert.match((await page.textContent('#evidence-list')).trim(), /No PAC in this source matches/);
     assert.equal(await page.locator('#evidence-panes [data-pane]').count(), 0);
     pass(`no match: Add pane disabled, status ${JSON.stringify(await status())}`);
 
     step('add a DCCC pane from the Crypto workbook');
     await page.fill('#evidence-find', 'dccc');
     await waitFor(() => document.querySelectorAll('#evidence-pac option').length === 1, null, 20000, 'a page condition');
-    await page.click('#evidence-add');
+    await tick('C00000935');
     await waitPanes(1);
     assert.equal(await page.isVisible('#evidence-compare'), false, 'one pane is not a comparison');
     assert.equal(await page.isVisible('#evidence-empty'), false);
@@ -358,12 +390,18 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     const figuresA = await page.locator('#evidence-panes [data-pane=a] .pane-figure strong').allTextContents();
     assert.equal(paneA, 'DCCC');
     assert.equal(figuresA[0].trim(), '$147,900');
-    assert.equal(figuresA[1].trim(), '3');
-    const chipsA = await page.locator('#evidence-chips .chip').allTextContents();
-    assert.equal(chipsA.length, 1);
-    assert.ok(/DCCC/.test(chipsA[0]) && /Crypto/.test(chipsA[0]), chipsA[0]);
-    assert.equal(await page.getAttribute('#evidence-chips .chip button', 'aria-label'), 'Remove DCCC');
-    pass(`pane A DCCC ${figuresA[0].trim()} over ${figuresA[1].trim()} rows, chip ${JSON.stringify(chipsA)}`);
+    // P4b: the strip is Receipts | Contributors | Rows in file | Cycles covered,
+    // so "rows in file" is the THIRD figure. Same number, one position along.
+    assert.equal(figuresA.length, 4, JSON.stringify(figuresA));
+    assert.equal(figuresA[2].trim(), '3');
+    // Re-homed from the retired chip row: the rail's ticked row is the open
+    // pane, and the pane's own x carries the Remove label the chip carried.
+    const tickedA = await railTicked();
+    assert.deepEqual(tickedA, ['C00000935']);
+    assert.ok(/DCCC/.test(await page.getAttribute('#evidence-list .evidence-rail-row.on', 'title')));
+    assert.ok(/^Crypto/.test((await page.textContent('#evidence-panes [data-pane=a] .pane-kind')).trim()));
+    assert.equal(await page.getAttribute('#evidence-panes [data-pane=a] .pane-remove', 'aria-label'), 'Remove DCCC');
+    pass(`pane A DCCC ${figuresA[0].trim()} over ${figuresA[1].trim()} rows, ticked ${JSON.stringify(tickedA)}`);
 
     step('add DCCC from the Credit Union workbook: two panes and the compare strip');
     const creditValue = sourceValues.length ? null : null;
@@ -373,7 +411,7 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     await page.selectOption('#evidence-source', creditOption);
     await page.fill('#evidence-find', 'dccc');
     await waitFor(() => document.querySelectorAll('#evidence-pac option').length === 1, null, 20000, 'a page condition');
-    await page.click('#evidence-add');
+    await tick('C00000935');
     await waitPanes(2);
     assert.equal(await page.isVisible('#evidence-compare'), true);
     const kinds = await page.locator('#evidence-panes .pane-kind').allTextContents();
@@ -399,6 +437,16 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     assert.equal(receipts.cells[1].bar, '2%');
     assert.equal(compare.find(row => row.metric === 'Top contributor').cells[0].bar, null, 'text rows carry no bar');
     pass(`compare strip: ${metrics.length} rows, Receipts ${receipts.cells[0].text} [100%] vs ${receipts.cells[1].text} [2%]`);
+    if (process.env.MENTAT_MAP_SHOT_DIR) {
+      fs.mkdirSync(process.env.MENTAT_MAP_SHOT_DIR, {recursive: true});
+      await page.waitForFunction(() => document.querySelectorAll('#evidence-panes .pane-thumb-svg').length === 2,
+        null, {timeout: 90000});
+      const importOpen = await page.locator('#evidence-import-open').getAttribute('aria-expanded') === 'true';
+      if (importOpen) await page.click('#evidence-import-open');
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({path: path.join(process.env.MENTAT_MAP_SHOT_DIR, '00_two_panes.png'), fullPage: true});
+      if (importOpen) await page.click('#evidence-import-open');
+    }
 
     step('the Map button is on every pane and on Compare, and every one of them works (S8)');
     // S6 asserted ZERO Map buttons, because a control nobody can click is a
@@ -435,11 +483,17 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     assert.equal(await page.isVisible('#evidence-compare'), true);
     pass(`restored ${JSON.stringify(restored)} from the permalink`);
 
-    step('remove a pane from its chip: one pane left, the compare strip goes');
-    await page.click('#evidence-chips .chip:nth-child(2) button');
+    step('untick a pane in the rail: one pane left, the compare strip goes');
+    // Re-homed from the chip row's remove button: the rail shows the chosen
+    // source's PACs, so choose the Credit Union import and untick its DCCC.
+    await page.selectOption('#evidence-source', creditOption);
+    await waitFor(() => document.querySelectorAll('#evidence-list input[type=checkbox]:checked').length === 1,
+      null, 30000, 'the Credit Union DCCC row to show ticked');
+    await railBox('C00000935').uncheck();
     await waitPanes(1);
     assert.equal(await page.isVisible('#evidence-compare'), false);
-    assert.equal(await page.locator('#evidence-chips .chip').count(), 1);
+    assert.deepEqual(await railTicked(), []);
+    assert.deepEqual(await page.locator('#evidence-panes [data-pane]').evaluateAll(nodes => nodes.map(node => node.dataset.pane)), ['a']);
     const afterQuery = await page.evaluate(() => location.search);
     assert.ok(!afterQuery.includes('b.source'), afterQuery);
     pass(`one pane left, query ${afterQuery}`);
@@ -449,16 +503,21 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     await page.selectOption('#evidence-type', '');
     await page.fill('#evidence-find', 'fairshake');
     await waitFor(() => document.querySelectorAll('#evidence-pac option').length === 1, null, 20000, 'a page condition');
-    await page.click('#evidence-add');
+    await tick('C00835959');
     await waitPanes(2);
     const fairPane = '#evidence-panes [data-pane=b]';
     const fairFigures = await page.locator(`${fairPane} .pane-figure strong`).allTextContents();
-    const fairNotes = await page.locator(`${fairPane} .pane-figure .muted`).allTextContents();
+    // Build 06: the figures carry no sub-captions (board 3); each note rides on
+    // the figure's data-note and title, and is listed in About these figures.
+    assert.equal(await page.locator(`${fairPane} .pane-figure .muted`).count(), 0, 'no sub-captions under the figures');
+    const fairNotes = await page.locator(`${fairPane} .pane-figure`).evaluateAll(nodes => nodes.map(node => node.dataset.note));
+    assert.ok(/1 excluded by the workbook/.test(await page.getAttribute(`${fairPane} .pane-figure:nth-child(3)`, 'title')));
     // 25,000,000 CORPORATE + 5,000 CONTRIBUTION + 10,000,000 CORPORATE = the
     // Receipts total; the 23,000,000 Include=No row is visible and out of it.
     assert.equal(fairFigures[0].trim(), '$35,005,000');
-    assert.equal(fairFigures[1].trim(), '4');
-    assert.ok(/3 supported/.test(fairNotes[1]) && /1 excluded by the workbook/.test(fairNotes[1]), fairNotes[1]);
+    assert.equal(fairFigures.length, 4, JSON.stringify(fairFigures));
+    assert.equal(fairFigures[2].trim(), '4');
+    assert.ok(/3 supported/.test(fairNotes[2]) && /1 excluded by the workbook/.test(fairNotes[2]), fairNotes[2]);
     await page.click(`${fairPane} .pane-rows`);
     await page.waitForSelector(`${fairPane} .pane-drawer tbody tr`);
     const drawerRows = await page.locator(`${fairPane} .pane-drawer tbody tr`).count();
@@ -476,24 +535,129 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     assert.ok(/not donor allocations/.test(about), about.slice(0, 300));
     pass('About these figures carries the SHA-256 provenance and the interpretation note');
 
-    step('the fourth pane fills the grid and Add pane refuses a fifth');
-    for (const wanted of ['nrcc']) {
+    step('the third pane fills the grid in thirds, and a fourth tick opens nothing and says why');
+    // Build 06 (prompt 06, item 2): three panes at most; a fourth tick opens no
+    // pane and the rail says "Close a pane to open another." in --muted.
+    for (const [wanted, committee] of [['nrcc', 'C00401224']]) {
       await page.fill('#evidence-find', wanted);
       await waitFor(() => document.querySelectorAll('#evidence-pac option').length === 1, null, 20000, 'a page condition');
-      await page.click('#evidence-add');
+      await tick(committee);
     }
     await waitPanes(3);
     await page.selectOption('#evidence-source', creditOption);
     await page.fill('#evidence-find', 'culac');
     await waitFor(() => document.querySelectorAll('#evidence-pac option').length === 1, null, 20000, 'a page condition');
-    await page.click('#evidence-add');
-    await waitPanes(4);
-    assert.equal(await page.isDisabled('#evidence-add'), true, 'four panes is the ceiling');
-    assert.ok(/4 panes open/.test(await status()), await status());
+    await waitFor(() => document.querySelectorAll('#evidence-list input[type=checkbox]').length === 1, null, 20000, 'the CULAC rail row');
+    await railBox('C00007880').click();
+    await page.waitForTimeout(800);
+    assert.equal(await page.locator('#evidence-panes [data-pane]').count(), 3, 'a fourth tick must open no pane');
+    assert.equal(await railBox('C00007880').isChecked(), false, 'the refused tick is taken back');
+    assert.equal(await page.isVisible('#evidence-rail-note'), true);
+    assert.equal((await page.textContent('#evidence-rail-note')).trim(), 'Close a pane to open another.');
+    const noteColour = await page.evaluate(() => {
+      // --muted resolved the way the note's own colour is, so the two compare.
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--muted)';
+      document.getElementById('evidence-rail-note').parentElement.appendChild(probe);
+      const resolved = getComputedStyle(probe).color;
+      probe.remove();
+      return [getComputedStyle(document.getElementById('evidence-rail-note')).color, resolved,
+        getComputedStyle(document.getElementById('view-evidence')).getPropertyValue('--muted').trim()];
+    });
+    // Fix round 1 (D10): the refusal note is --muted, not merely coloured.
+    assert.equal(noteColour[0], noteColour[1], `the refusal note is not --muted: ${JSON.stringify(noteColour)}`);
+    assert.equal(await page.isDisabled('#evidence-add'), true, 'three panes is the ceiling');
+    assert.ok(/3 panes open/.test(await status()), await status());
     const columns = await page.evaluate(() => document.getElementById('evidence-panes').style.gridTemplateColumns);
-    assert.ok(/minmax\(0px?, 1fr\)/.test(columns) || columns.split(' ').length >= 4, columns);
-    assert.equal(await page.locator('#evidence-chips .chip').count(), 4);
-    pass(`four panes, Add pane disabled, status ${JSON.stringify(await status())}`);
+    assert.ok(/repeat\(3, minmax\(0px?, 1fr\)\)/.test(columns), columns);
+    assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById('evidence-panes')).gridTemplateColumns.split(' ').length), 3);
+    pass(`three panes in thirds, the fourth tick refused with ${JSON.stringify(noteColour)}, status ${JSON.stringify(await status())}`);
+
+    step('fix r2 (MENTAT-DBG-01): at 390px the open panes stack and nothing scrolls sideways');
+    await page.setViewportSize({width: 390, height: 844});
+    await page.waitForTimeout(400);
+    const narrow = await page.evaluate(() => {
+      const host = document.getElementById('evidence-panes');
+      return {columns: getComputedStyle(host).gridTemplateColumns.split(' ').length,
+        panes: host.querySelectorAll('[data-pane]').length,
+        scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth};
+    });
+    await page.setViewportSize({width: 1600, height: 1200});
+    await page.waitForTimeout(400);
+    assert.equal(narrow.panes, 3, JSON.stringify(narrow));
+    assert.equal(narrow.columns, 1, `three panes at 390px must stack: ${JSON.stringify(narrow)}`);
+    assert.ok(narrow.scrollWidth <= narrow.clientWidth, `the page scrolls sideways at 390px: ${JSON.stringify(narrow)}`);
+    assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById('evidence-panes')).gridTemplateColumns.split(' ').length), 3,
+      'back at 1600px the three panes are in thirds again');
+    pass(`390px: ${JSON.stringify(narrow)}`);
+
+    step('fix round 1: rail receipts, ticks across the Cycle chip, the note, and the rail foot on screen');
+    // R06-02: an import's rows are ranked by receipts and show them; with a
+    // cycle chosen, the cycle's receipts, and "—" (last) where the PAC has none.
+    const railFigures = () => page.locator('#evidence-list .evidence-rail-row').evaluateAll(nodes => nodes.map(node => ({
+      id: node.dataset.committee, figure: node.querySelector('.evidence-rail-figure').textContent.trim(),
+      ticked: node.querySelector('input').checked, title: node.getAttribute('title')})));
+    await page.selectOption('#evidence-source', cryptoValue);
+    await page.fill('#evidence-find', '');
+    await waitFor(() => document.querySelectorAll('#evidence-list .evidence-rail-row').length === 3, null, 20000, 'the three Crypto rows');
+    let railNow = await railFigures();
+    assert.deepEqual(railNow.map(row => row.id), ['C00835959', 'C00000935', 'C00401224'], JSON.stringify(railNow));
+    assert.deepEqual(railNow.map(row => row.figure), ['$35,005,000', '$147,900', '$2,000'], JSON.stringify(railNow));
+    assert.deepEqual(railNow.map(row => row.ticked), [true, true, true], 'the three open panes are ticked');
+    // R06-03: a Cycle chip other than the panes' own keeps their ticks.
+    await page.selectOption('#evidence-cycle', '2024');
+    await waitFor(() => (document.querySelector('#evidence-list .evidence-rail-figure') || {}).textContent === '$10,000,000',
+      null, 20000, 'the 2024 receipts in the rail');
+    railNow = await railFigures();
+    assert.deepEqual(railNow.map(row => row.figure), ['$10,000,000', '$52,300', '—'], JSON.stringify(railNow));
+    assert.deepEqual(railNow.map(row => row.ticked), [true, true, true], `ticks must survive the Cycle chip: ${JSON.stringify(railNow)}`);
+    assert.ok(railNow.every(row => /open on All cycles/.test(row.title)), JSON.stringify(railNow));
+    // An untick closes the PAC's pane whatever the chip says; a tick opens it on the chip's cycle.
+    await railBox('C00401224').uncheck();
+    await waitPanes(2);
+    assert.equal(await page.isVisible('#evidence-rail-note'), false, 'an untick takes the refusal note down');
+    await railBox('C00401224').check();
+    await waitPanes(3);
+    assert.deepEqual(await page.evaluate(() => window.MentatEvidence.panes().find(pane => pane.committee === 'C00401224').cycle), '2024');
+    await page.selectOption('#evidence-cycle', '');
+    await waitFor(() => document.querySelectorAll('#evidence-list input:checked').length === 3, null, 20000, 'three ticks on All cycles');
+    assert.match((await railFigures()).find(row => row.id === 'C00401224').title, /open on 2023–2024/);
+    // D6: the refusal note goes when a pane closes, however it is closed.
+    await page.selectOption('#evidence-source', creditOption);
+    await page.fill('#evidence-find', 'culac');
+    await waitFor(() => document.querySelectorAll('#evidence-list input[type=checkbox]').length === 1, null, 20000, 'the CULAC rail row');
+    await railBox('C00007880').click();
+    await page.waitForTimeout(500);
+    assert.equal(await page.isVisible('#evidence-rail-note'), true, 'a fourth tick is refused with the note');
+    await page.click('#evidence-panes [data-pane=c] .pane-remove');
+    await waitPanes(2);
+    assert.equal(await page.isVisible('#evidence-rail-note'), false, 'closing a pane below the ceiling takes the note down');
+    await page.fill('#evidence-find', '');
+    await page.selectOption('#evidence-source', cryptoValue);
+    await tick('C00401224');
+    await waitPanes(3);
+    // D2, R06-11, R06-16: the rail's foot is on screen at the top and at the
+    // bottom of the page; the Source chip has the rail's width; the scope status
+    // is one line with the whole text on its title.
+    const railGeometry = () => page.evaluate(() => {
+      const rect = selector => document.querySelector(selector).getBoundingClientRect();
+      const status = document.getElementById('evidence-status');
+      return {view: innerHeight, links: rect('.evidence-rail-links').bottom, railTop: rect('.evidence-rail').top,
+        chip: rect('.evidence-rail-chips .chip-select').width, chips: rect('.evidence-rail-chips').width,
+        statusHeight: rect('#evidence-status').height, statusTitle: status.title === status.textContent,
+        scope: status.classList.contains('is-scope')};
+    });
+    const atTop = await railGeometry();
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(300);
+    const atBottom = await railGeometry();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    for (const geometry of [atTop, atBottom]) {
+      assert.ok(geometry.links <= geometry.view && geometry.railTop >= 0, `the rail foot left the screen: ${JSON.stringify(geometry)}`);
+    }
+    assert.ok(Math.abs(atTop.chip - atTop.chips) <= 1, `the Source chip must take the rail's width: ${JSON.stringify(atTop)}`);
+    assert.ok(atTop.scope && atTop.statusTitle && atTop.statusHeight <= 18, `the scope status is one line: ${JSON.stringify(atTop)}`);
+    pass(`receipts ranked, ticks kept across cycles, note cleared, rail foot on screen ${JSON.stringify({atTop, atBottom})}`);
 
     step('a saved snapshot is listed as a source and opens as a pane');
     const snapshotOption = (await page.locator('#evidence-source option').evaluateAll(
@@ -504,37 +668,44 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
       // of failing, and test what is testable.
       pass('SKIPPED: no saved snapshot under mentat/.cache/pac-evidence in this checkout');
     } else {
-      await page.click('#evidence-chips .chip:nth-child(4) button');
-      await waitPanes(3);
+      await page.click('#evidence-panes [data-pane=c] .pane-remove');
+      await waitPanes(2);
       // chooseSource() FETCHES the snapshot before it rebuilds the picker, so a
       // non-empty #evidence-pac still holds the previous import's committees for
       // a moment. Adding then sends a CSV committee to the snapshot route and the
-      // pane never resolves. Wait for the list to actually CHANGE.
+      // pane never resolves. Wait for the source status to change; both sources may contain the same PAC.
       const pacBefore = await page.evaluate(
-        () => [...document.querySelectorAll('#evidence-pac option')].map(node => node.value).join('|'));
+        () => document.querySelector('#evidence-status').textContent);
       await page.selectOption('#evidence-source', snapshotOption);
       await waitFor(previous => {
         const now = [...document.querySelectorAll('#evidence-pac option')].map(node => node.value).join('|');
-        return now.length > 0 && now !== previous;
+        return now.length > 0 && document.querySelector('#evidence-status').textContent !== previous && !document.querySelector('#evidence-add').disabled
+          && document.querySelectorAll('#evidence-list input[type=checkbox]').length > 0;
       }, pacBefore, 30000, 'the PAC picker to be rebuilt for the snapshot');
-      await page.click('#evidence-add');
+      await page.locator('#evidence-list input[type=checkbox]').first().check();
       // F6. Wait on the pane's data-committee and its figure text: a pane that
       // is still loading has neither, and a pane that failed keeps its
       // committee but shows an em-dash, so this distinguishes the two.
       await waitFor(() => {
-        const pane = document.querySelector('#evidence-panes [data-pane=d]');
+        const pane = document.querySelector('#evidence-panes [data-pane=c]');
         if (!pane || !pane.dataset.committee) return false;
         const figure = pane.querySelector('.pane-figure strong');
-        return !!figure && figure.textContent.trim() !== '—';
+        return !!figure && /\$/.test(figure.textContent) && !pane.querySelector('.pane-message');
       }, null, 60000, 'the snapshot pane to carry a committee and a figure');
-      const snapCommittee = await page.getAttribute('#evidence-panes [data-pane=d]', 'data-committee');
-      const snapMessages = await page.locator('#evidence-panes [data-pane=d] .pane-message').allTextContents();
+      const snapCommittee = await page.getAttribute('#evidence-panes [data-pane=c]', 'data-committee');
+      const snapMessages = await page.locator('#evidence-panes [data-pane=c] .pane-message').allTextContents();
       assert.deepEqual(snapMessages, [], `snapshot pane message: ${JSON.stringify(snapMessages)}`);
       assert.match(snapCommittee, /^C\d{8}$/);
       const snapKinds = await page.locator('#evidence-panes .pane-kind').allTextContents();
       assert.ok(snapKinds.some(text => /Saved FEC snapshot/.test(text)), JSON.stringify(snapKinds));
-      const snapRows = await page.locator('#evidence-panes [data-pane=d] .pane-figure strong').allTextContents();
-      assert.equal(snapRows[1].trim(), '—', 'a snapshot pane has legs, not file rows');
+      const snapRows = await page.locator('#evidence-panes [data-pane=c] .pane-figure strong').allTextContents();
+      const snapNotes = await page.locator('#evidence-panes [data-pane=c] .pane-figure').evaluateAll(nodes => nodes.map(node => node.dataset.note));
+      // P4b: a snapshot's strip is Receipts | Independent spending | Legs |
+      // Cycles covered. It still says plainly that it has legs and not file
+      // rows - now in the third figure's own note rather than as an em dash.
+      assert.equal(snapRows.length, 4, JSON.stringify(snapRows));
+      assert.equal(snapNotes[2].trim(), 'snapshot: legs, not file rows', JSON.stringify(snapNotes));
+      assert.ok(/^[\d,]+$/.test(snapRows[2].trim()), `legs is a count: ${snapRows[2]}`);
       pass(`snapshot pane open: ${JSON.stringify(snapKinds)}`);
     }
 
@@ -675,8 +846,7 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
       ['Alpha PAC · C00000001 · Unclassified · 104 rows',
        'Beta PAC · C00000002 · Unclassified · 1 row',
        'Unassigned committee rows · unassigned · Unclassified · 1 row']);
-    await page.selectOption('#evidence-pac', 'C00000001');
-    await page.click('#evidence-add');
+    await tick('C00000001');
     await waitPanes(1);
     const stressPane = '#evidence-panes [data-pane=a]';
     await page.click(`${stressPane} .pane-rows`);
@@ -695,7 +865,7 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
       'a contributor name must never become a live element');
     await page.click(`${stressPane} .pane-next`);
     await waitFor(() => /101/.test(document.querySelector(
-      '#evidence-panes [data-pane=a] .pane-drawer .label').textContent), null, 60000, 'the second page');
+      '#evidence-panes [data-pane=a] .pane-drawer .label')?.textContent || ''), null, 60000, 'the second page');
     assert.equal(await sourceRows(), 'Source rows · 101–104 of 104');
     assert.equal(await page.locator(`${stressPane} .pane-drawer tbody tr`).count(), 4);
     // has_more drives the buttons (app/evidence.js:505-506): the last page
@@ -710,8 +880,7 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     }
     // A row with no committee_id at all is unassigned, and those are exactly
     // the rows the console reports as needing interpretation.
-    await page.selectOption('#evidence-pac', 'unassigned');
-    await page.click('#evidence-add');
+    await tick('unassigned');
     await waitPanes(2);
     const unassignedPane = '#evidence-panes [data-pane=b]';
     assert.equal((await page.locator(`${unassignedPane} h2`).first().innerText()).trim(),
@@ -728,8 +897,7 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     await page.click(`${stressPane} .pane-remove`);
     await waitPanes(1);
     await page.selectOption('#evidence-cycle', '2026');
-    await page.selectOption('#evidence-pac', 'C00000001');
-    await page.click('#evidence-add');
+    await tick('C00000001');
     await waitPanes(2);
     await page.click(`${stressPane} .pane-rows`);
     await page.waitForSelector(`${stressPane} .pane-drawer tbody tr`);
@@ -744,6 +912,8 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     // chosen and never again, however often the reader switches back to it.
     const savedSnapshotValue = await page.locator('#evidence-source option').evaluateAll(
       nodes => (nodes.find(node => node.value.startsWith('snapshot:')) || {}).value);
+    const savedSnapshotLabel = await page.locator('#evidence-source option').evaluateAll(
+      nodes => (nodes.find(node => node.value.startsWith('snapshot:'))?.textContent || '').split(' · ')[1]);
     if (!savedSnapshotValue) {
       // The same reason the step above skips: the route reads
       // PROJECT/.cache/pac-evidence, not the temp data root, and that directory is
@@ -755,12 +925,12 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
         if (/[/]api[/]evidence[?]id=/.test(request.url())) bodyReads.push(request.url());
       });
       await page.selectOption('#evidence-source', savedSnapshotValue);
-      await waitStatus(/Coinbase/, 90000);
+      await waitFor(label=>document.querySelector('#evidence-status').textContent.includes(label),savedSnapshotLabel,90000,'selected snapshot status');
       assert.equal(bodyReads.length, 1, `the first selection reads the body once: ${JSON.stringify(bodyReads)}`);
       await page.selectOption('#evidence-source', stressValue);
       await waitStatus(/stress[.]csv/, 90000);
       await page.selectOption('#evidence-source', savedSnapshotValue);
-      await waitStatus(/Coinbase/, 90000);
+      await waitFor(label=>document.querySelector('#evidence-status').textContent.includes(label),savedSnapshotLabel,90000,'reselected snapshot status');
       assert.equal(bodyReads.length, 1,
         `reselecting an already-read snapshot must not fetch it again: ${JSON.stringify(bodyReads)}`);
       pass('snapshot body read exactly once across three source changes');
@@ -770,6 +940,10 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     // Pane identity is (source, committee, cycle). Before the fix it was
     // (source, committee), so asking for one committee on a second cycle - the
     // comparison the panes exist for - silently disabled #evidence-add.
+    // Build 06, fix round 1 (R06-03): the rail's row is the PAC, so its tick
+    // follows the PAC's open pane whatever the Cycle chip says, and a tick is
+    // never refused for a PAC that is already open. The second cycle is added
+    // through the programmatic path #evidence-add keeps (hidden in the page).
     while ((await page.locator('#evidence-panes [data-pane]').count()) > 0) {
       await page.click('#evidence-panes [data-pane] .pane-remove');
       await page.waitForTimeout(200);
@@ -780,14 +954,16 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
       nodes => nodes.map(node => node.value).filter(Boolean).slice(0, 2));
     assert.equal(twoCycles.length, 2, `the fixture must carry two cycles: ${JSON.stringify(twoCycles)}`);
     const onePac = await page.locator('#evidence-pac option').evaluateAll(nodes => nodes[0].value);
-    await page.selectOption('#evidence-pac', onePac);
     await page.selectOption('#evidence-cycle', twoCycles[0]);
-    await page.click('#evidence-add');
+    await tick(onePac);
     await waitPanes(1);
     await page.selectOption('#evidence-cycle', twoCycles[1]);
+    assert.equal(await railBox(onePac).isChecked(), true, 'the PAC is open, so its row stays ticked on the second cycle');
+    assert.match(await page.getAttribute(`#evidence-list .evidence-rail-row[data-committee="${onePac}"]`, 'title'),
+      /open on /, 'the row says which cycle its pane is on');
     assert.equal(await page.locator('#evidence-add').isDisabled(), false,
       'a second cycle of the same PAC must be addable');
-    await page.click('#evidence-add');
+    await page.evaluate(() => document.getElementById('evidence-add').click());
     await waitPanes(2);
     const cycles = await page.locator('#evidence-panes [data-pane]').evaluateAll(
       nodes => nodes.map(node => node.dataset.cycle || ''));
@@ -796,7 +972,34 @@ with open(target + '/stress.csv', 'w', encoding='utf-8', newline='') as handle:
     await page.selectOption('#evidence-cycle', twoCycles[1]);
     assert.equal(await page.locator('#evidence-add').isDisabled(), true,
       'the exact same pane stays refused');
+    assert.equal(await railBox(onePac).isChecked(), true, 'the rail shows that exact pane as open');
+    await page.selectOption('#evidence-cycle', twoCycles[0]);
+    assert.equal(await railBox(onePac).isChecked(), true, 'and the other cycle\'s pane on its own cycle');
     pass(`the same PAC opened on ${JSON.stringify(cycles)} as two panes`);
+
+    step('Graph opens the exact committee and cycle, reuses its pane, and refuses missing evidence');
+    const linked = await browser.newPage({viewport: {width: 1600, height: 1000}});
+    await linked.goto(`${origin}/#chart-studio`, {waitUntil: 'load'});
+    const opened = await linked.evaluate(async ({committee, cycle}) => {
+      const opening = window.MentatEvidence.openCommittee(committee, cycle);
+      document.getElementById('tab-evidence').click();
+      const key = await opening;
+      return {key, panes: window.MentatEvidence.panes()};
+    }, {committee: onePac, cycle: twoCycles[0]});
+    assert.ok(opened.key, 'the opener must resolve an available saved source');
+    assert.equal(opened.panes.length, 1);
+    assert.equal(opened.panes[0].committee, onePac);
+    assert.equal(opened.panes[0].cycle, twoCycles[0]);
+    const reopened = await linked.evaluate(async ({committee, cycle}) => {
+      await window.MentatEvidence.openCommittee(committee, cycle);
+      return window.MentatEvidence.panes();
+    }, {committee: onePac, cycle: twoCycles[0]});
+    assert.deepEqual(reopened, opened.panes);
+    assert.equal(await linked.evaluate(() => window.MentatEvidence.openCommittee('C99999999', '2098')), null);
+    assert.match(await linked.locator('#evidence-status').textContent(), /No saved source covers C99999999 in 2098/);
+    assert.equal(await linked.locator('#graph-trail').isVisible(), false);
+    await linked.close();
+    pass('cold start, exact cycle, duplicate reuse, unavailable source, and hidden Graph trail');
 
     step('a view that is not this one does not fetch the evidence catalogs');
     // app.js dispatches mentat:view on every tab change. start() used to run on

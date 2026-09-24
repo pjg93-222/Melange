@@ -14,7 +14,7 @@ function Release-ComObject($Object) {
 function Set-TableColumnFormula($Table, [string]$ColumnName, [string]$Formula) {
   $column = $Table.ListColumns.Item($ColumnName)
   $range = $column.DataBodyRange
-  try { $range.Formula = $Formula } finally { Release-ComObject $range; Release-ComObject $column }
+  try { if ($null -ne $range) { $range.Formula = $Formula } } finally { Release-ComObject $range; Release-ComObject $column }
 }
 
 function Cycle-Dispatch([scriptblock]$Builder) {

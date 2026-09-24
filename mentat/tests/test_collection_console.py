@@ -386,6 +386,62 @@ class ConsoleTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'outside its collection run'):
                 self.console.snapshot(upload['id'])
 
+    def test_shared_worker_history_counts_every_invocation_and_newer_fanout_status_wins(self):
+        # A shared worker writes one status file per invocation and the fanout
+        # manifest names only the current one; the company table needs them all.
+        upload = self.upload()
+        directory = self.root / upload['id'] / 'runs' / 'shared-run'
+        fanout = directory / 'industries/test/fanout'
+        lane_one, lane_two = fanout / 'lanes/lane-01', fanout / 'lanes/lane-02'
+        lane_one.mkdir(parents=True)
+        lane_two.mkdir(parents=True)
+        app.atomic_json(directory / 'manifest.json', {'run_id':'shared-run'})
+        stale = {'industry':'Test','run_id':'fan-1','total':4,'completed':2,'running':1,'failed':0,
+                 'updated_at':'2026-09-17T19:55:59.336431+00:00'}
+        app.atomic_json(directory / 'status.json', {'stage':'collecting','industries':[],'fanout':stale})
+        task = lambda company, cycle, status, rows: {'task_id':f'{company}-{cycle}'.lower(), 'company':company,
+                                                    'cycle':cycle, 'status':status, 'rows':rows}
+        first = lane_one / 'status.work-1-a.json'
+        app.atomic_json(first, {'status':'failed','tasks':[task('Acme',2022,'succeeded',5),
+                                                           task('Acme',2024,'failed',0),
+                                                           task('Acme',2026,'succeeded',7)]})
+        retry = lane_one / 'status.recovery-1.json'
+        app.atomic_json(retry, {'status':'succeeded','tasks':[task('Acme',2024,'succeeded',3)]})
+        other = lane_two / 'status.work-1-b.json'
+        app.atomic_json(other, {'status':'failed','tasks':[task('Other',2022,'failed',0)]})
+        os.utime(first, (1_000_000, 1_000_000))
+        os.utime(retry, (2_000_000, 2_000_000))
+        # lane-02's current status file never landed; its earlier receipt still counts.
+        app.atomic_json(fanout / 'manifest.json', {
+            'industry':'Test','run_id':'fan-1','cycles':[2022,2024,2026],'scheduling':{'strategy':'company_work_sharing'},
+            'lanes':[{'lane':1,'state':str(retry),'database':str(lane_one/'mentat.db')},
+                     {'lane':2,'state':str(lane_two/'status.split-3-missing.json'),'database':str(lane_two/'mentat.db')}]})
+        fresh = {**stale, 'completed':4, 'running':0, 'failed':1, 'updated_at':'2026-09-17T19:56:00.073477+00:00'}
+        app.atomic_json(fanout / 'status.json', fresh)
+        result = self.console.snapshot(upload['id'])
+        tasks = {(row['company'], row['cycle']): (row['status'], row['rows'], row['industry']) for row in result['company_tasks']}
+        self.assertEqual(tasks, {('Acme',2022):('succeeded',5,'Test'), ('Acme',2024):('succeeded',3,'Test'),
+                                 ('Acme',2026):('succeeded',7,'Test'), ('Other',2022):('failed',0,'Test')})
+        self.assertEqual(result['cycles'], [2022, 2024, 2026])
+        self.assertEqual(result['status']['fanout'], fresh)
+        # The fanout's own file wins only when it is newer and names the same run.
+        app.atomic_json(fanout / 'status.json', {**fresh, 'updated_at':'2026-09-17T19:00:00+00:00'})
+        self.assertEqual(self.console.snapshot(upload['id'])['status']['fanout'], stale)
+        app.atomic_json(fanout / 'status.json', {**fresh, 'run_id':'another-fanout'})
+        self.assertEqual(self.console.snapshot(upload['id'])['status']['fanout'], stale)
+
+    def test_stopped_run_keeps_the_collectors_elapsed_time(self):
+        upload = self.upload()
+        directory = self.root / upload['id'] / 'runs' / 'stopped-run'
+        directory.mkdir(parents=True)
+        app.atomic_json(directory / 'manifest.json', {'run_id':'stopped-run'})
+        app.atomic_json(directory / 'status.json', {'stage':'collecting','elapsed_seconds':11614.7,'industries':[]})
+        manifest_path = self.root / upload['id'] / 'upload.json'
+        app.atomic_json(manifest_path, {**app.read_json(manifest_path), 'state':'stopped', 'started_at':time.time() - 500000})
+        result = self.console.snapshot(upload['id'])
+        self.assertEqual(result['state'], 'stopped')
+        self.assertEqual(result['elapsed_seconds'], 11614.7)
+
     def test_evidence_endpoint_rejects_estimate_from_old_model_code(self):
         import hashlib
         from pac_cash_model import write_estimates

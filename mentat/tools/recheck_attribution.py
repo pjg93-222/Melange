@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+from attribution_policy import explicit_rejection, source_exclusion
 
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -17,20 +18,21 @@ INPUT_FIELDS = ('industry', 'company', 'contributor_employer', 'contributor_name
 
 
 def recheck_attribution(rows, database, directory, evidence=None):
-    """Only exact accepted roster identities can release an old REVIEW hold.
+    """Only exact approved roster identities can settle a heuristic hold.
 
     Raw observations and their old dispositions remain in source_records. A
     derived decision records its previous reason, the shared matcher's result,
-    and the evidence artifact. Rejected/excluded decisions, source conflicts,
+    and the evidence artifact. Explicit adjudications/source exclusions, source conflicts,
     non-individual entities and prefix-only similarities never qualify.
     """
     groups = {}
     mismatches = 0
     evidence = evidence or {}
     for row in rows:
-        if (str(row.get('company_match_status') or '').upper() != 'REVIEW'
+        if (str(row.get('company_match_status') or '').upper() == 'ACCEPTED'
+                or explicit_rejection(row.get('company_match_reason'))
                 or str(row.get('entity_type') or '').upper() != 'IND'
-                or row.get('excluded_reason') or row.get('source_conflicts')):
+                or source_exclusion(row.get('excluded_reason')) or row.get('source_conflicts')):
             continue
         remote = evidence.get(str(row.get('sub_id')), {})
         # An archived response must not silently change the employer used to
@@ -43,6 +45,7 @@ def recheck_attribution(rows, database, directory, evidence=None):
             mismatches += 1
             continue
         effective = {**row, **{field: remote[field] for field in fields if remote.get(field) not in (None, '')}}
+        effective['excluded_reason'] = source_exclusion(effective.get('excluded_reason'))
         key = tuple(str(effective.get(field) or '') for field in INPUT_FIELDS)
         groups.setdefault(key, []).append(row)
     receipt_count = sum(map(len, groups.values()))
