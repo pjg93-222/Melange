@@ -558,6 +558,120 @@
     }
     return {catalog, source};
   }
+  /* RACF on the client (Paul, 2026-09-24: "replicational aware caching ...
+     integrate into the data retrieval generally", and "Yeah do that" to
+     browser-side reuse). The nearest tier answers first: this page's memory,
+     then the browser's HTTP cache revalidated by ETag (every /api/graph read
+     goes out with cache:'no-cache', so the browser sends If-None-Match and an
+     unchanged answer comes back as a bodiless 304), then the server.
+     graphMemoryModel is the memory tier: PARSED /api/graph answers keyed by
+     request URL, each held with the ETag the server sent or confirmed for that
+     URL. An entry is only ever made from such an answer in this page's life;
+     it lives in this page's memory only, never in a browser store (D-039),
+     so a reload starts empty. take(url, etag) hands back the parsed object only when the
+     ETag the server has just confirmed is the one it was parsed from;
+     peek(url) is the last confirmed answer, which refresh() draws at once and
+     then revalidates. Bounded by entry count and by JSON text length; the
+     least recently used leaves first. A held answer is shared, never copied:
+     graph.js copies before it sorts and never writes into an answer. */
+  const MEMORY_ENTRIES = 30, MEMORY_CHARS = 30 * 1024 * 1024;
+  function graphMemoryModel(limits) {
+    const maxEntries = (limits && limits.entries) || MEMORY_ENTRIES;
+    const maxChars = (limits && limits.chars) || MEMORY_CHARS;
+    const entries = new Map();
+    let chars = 0;
+    function drop(url) {
+      const held = entries.get(url);
+      if (held) { chars -= held.size; entries.delete(url); }
+    }
+    function recent(url, held) { entries.delete(url); entries.set(url, held); return held; }
+    function put(url, etag, body, size) {
+      drop(url);
+      if (!url || !etag || !Number.isFinite(size) || size < 0 || size > maxChars) return false;
+      entries.set(url, {etag, body, size});
+      chars += size;
+      for (const oldest of entries.keys()) {
+        if (entries.size <= maxEntries && chars <= maxChars) break;
+        drop(oldest);
+      }
+      return true;
+    }
+    function take(url, etag) {
+      const held = entries.get(url);
+      return held && etag && held.etag === etag ? recent(url, held).body : null;
+    }
+    function peek(url) {
+      const held = entries.get(url);
+      return held ? recent(url, held) : null;
+    }
+    return {put, take, peek, drop, has: url => entries.has(url),
+      size: () => entries.size, chars: () => chars};
+  }
+  /* The likely next Graph views (RACF: pre-fetch the likely next items): the
+     other top companies of this industry at this cycle, in the answer's own
+     ranking, then this scope at the adjacent cycle (the one before it, else
+     the one after), which keeps the last of the `max` places. Each is the
+     request the control would send: `scope` is currentScope() after render,
+     a company or cycle change clears category and recipient exactly as those
+     selects do, and toUrl is requestParams. A company the select does not
+     offer is skipped (neither the select nor its bar could ask for it); an
+     All-cycles view has no adjacent cycle. */
+  const PREFETCH_MAX = 4;
+  function prefetchPlan(view, scope, toUrl, max) {
+    const limit = max === undefined ? PREFETCH_MAX : max, out = [];
+    if (!view || !view.filters || !view.options || !scope || !(limit > 0)) return out;
+    const cycle = String(view.filters.cycle == null ? (scope.cycle || '') : view.filters.cycle);
+    const own = String(view.filters.company || scope.company || '');
+    const base = Object.assign({}, scope, {cycle, category: '', recipient: ''});
+    const current = toUrl(Object.assign({}, scope, {cycle}));
+    const cycles = (view.options.cycles || []).map(String).sort();
+    const at = cycle ? cycles.indexOf(cycle) : -1;
+    const adjacent = at < 0 ? '' : (at > 0 ? cycles[at - 1] : (cycles[at + 1] || ''));
+    const offered = new Set((view.options.companies || []).map(String));
+    const ranked = (view.companies || []).map((row, index) => ({
+      id: row && row.id != null ? String(row.id) : '', amount: Number(row && row.amount) || 0, index}))
+      .filter(row => row.id && row.id !== own && offered.has(row.id))
+      .sort((a, b) => b.amount - a.amount || a.index - b.index);
+    const add = (url, room) => { if (out.length < room && url !== current && !out.includes(url)) out.push(url); };
+    for (const row of ranked) add(toUrl(Object.assign({}, base, {company: row.id})), adjacent ? limit - 1 : limit);
+    if (adjacent) add(toUrl(Object.assign({}, base, {cycle: adjacent})), limit);
+    return out;
+  }
+  /* One likely-next read at a time, only while the page is idle, visible and
+     reading nothing else (RACF item 3). start(urls) replaces any plan;
+     cancel() drops the plan and aborts the read under way - a new refresh()
+     and any user interaction or navigation call it. `env` supplies
+     idle(callback) -> handle and cancelIdle(handle), visible(), busy() (an
+     /api/graph read in flight), has(url) (already held in memory) and
+     read(url, signal). Only Graph GETs are ever planned: Insights POSTs
+     belong to the server's warmer. */
+  function prefetchScheduler(env) {
+    let queue = [], handle = null, reading = null, generation = 0;
+    function cancel() {
+      generation += 1; queue = [];
+      if (handle !== null) { env.cancelIdle(handle); handle = null; }
+      if (reading) { reading.abort(); reading = null; }
+    }
+    function next(turn) {
+      if (turn !== generation || handle !== null || reading || !queue.length) return;
+      handle = env.idle(() => {
+        handle = null;
+        if (turn !== generation) return;
+        if (!env.visible()) { cancel(); return; }
+        if (env.busy()) { next(turn); return; }
+        const url = queue.shift();
+        if (env.has(url)) { next(turn); return; }
+        const mine = new AbortController();
+        reading = mine;
+        Promise.resolve().then(() => env.read(url, mine.signal)).catch(() => {}).then(() => {
+          if (reading === mine) reading = null;
+          next(turn);
+        });
+      });
+    }
+    function start(urls) { cancel(); queue = (urls || []).slice(0, PREFETCH_MAX); next(generation); }
+    return {start, cancel, pending: () => queue.slice(), reading: () => Boolean(reading)};
+  }
   const COMPARE_MENU = {KINDS: COMPARE_KINDS, LABELS: COMPARE_LABELS, MAX: COMPARE_MAX,
     menuKinds, menuValues, menuFilter, menuMove, createMenuController, pillsModel};
   const layout = {layoutColumns: layoutColumns, labelParts: labelParts,
@@ -576,7 +690,9 @@
     drawerSides: drawerSides, DRAWER_SIDE_ORDER: DRAWER_SIDE_ORDER,
     drawerOverlap: drawerOverlap, DRAWER_SIDE_LABEL: DRAWER_SIDE_LABEL,
     directionChoices: directionChoices, DIRECTION_OPTIONS: DIRECTION_OPTIONS, changeText: changeText,
-    FOLD_SECTIONS: FOLD_SECTIONS, FOLD_KEY: FOLD_KEY, sparkAccessModel: sparkAccessModel};
+    FOLD_SECTIONS: FOLD_SECTIONS, FOLD_KEY: FOLD_KEY, sparkAccessModel: sparkAccessModel,
+    graphMemoryModel: graphMemoryModel, MEMORY_ENTRIES: MEMORY_ENTRIES, MEMORY_CHARS: MEMORY_CHARS,
+    prefetchPlan: prefetchPlan, prefetchScheduler: prefetchScheduler, PREFETCH_MAX: PREFETCH_MAX};
   if (typeof module !== 'undefined' && module.exports) module.exports = layout;
   globalThis.MentatGraphLayout = layout;
   if (typeof document === 'undefined') return;
@@ -828,6 +944,43 @@
   // not known until its own answer names them.
   let directionTotals=null,directionScope='';
   function sidesScope(params) {const scope=new URLSearchParams(params);scope.delete('direction');return scope.toString();}
+  // RACF (graphMemoryModel, above). Every /api/graph read on this page goes
+  // through graphRead(): cache:'no-cache' makes the browser revalidate its
+  // copy by ETag, and an answer whose ETag matches the parsed copy held for
+  // that URL is not parsed again. graphReads counts the reads in flight, so
+  // the prefetcher never runs beside one. A response with no ETag (or no
+  // text(), as a test's stand-in fetch) is parsed and never held, and a
+  // failure drops what was held for its URL.
+  const graphMemory=graphMemoryModel();
+  let graphReads=0;
+  async function graphRead(url,signal) {
+    graphReads+=1;
+    try {
+      const response=await fetch(url,{signal,cache:'no-cache'});
+      const etag=response.ok&&response.headers&&typeof response.headers.get==='function'?response.headers.get('ETag')||'':'';
+      const held=etag?graphMemory.take(url,etag):null;
+      if(held){if(response.body&&typeof response.body.cancel==='function')response.body.cancel().catch(()=>{});return {ok:true,etag,body:held,reused:true};}
+      if(typeof response.text!=='function'){const body=await response.json();graphMemory.drop(url);return {ok:response.ok,etag:'',body,reused:false};}
+      const text=await response.text(),body=JSON.parse(text);
+      if(!etag||!graphMemory.put(url,etag,body,text.length))graphMemory.drop(url);
+      return {ok:response.ok,etag,body,reused:false};
+    } finally {graphReads-=1;}
+  }
+  // Idle prefetch (RACF item 3): after a view is drawn from an answer that
+  // carried an ETag - one the memory tier can hold - the likely next views
+  // are read one at a time while the page is idle and visible.
+  const prefetcher=prefetchScheduler({
+    idle:typeof requestIdleCallback==='function'?callback=>requestIdleCallback(callback,{timeout:1500}):callback=>setTimeout(callback,250),
+    cancelIdle:typeof cancelIdleCallback==='function'?handle=>cancelIdleCallback(handle):handle=>clearTimeout(handle),
+    visible:()=>document.visibilityState==='visible'&&!document.getElementById('view-graph')?.hidden,
+    busy:()=>graphReads>0,has:url=>graphMemory.has(url),read:(url,signal)=>graphRead(url,signal)});
+  function schedulePrefetch(etag) {
+    if(!etag||!view||compare||pendingCompare)return;
+    prefetcher.start(prefetchPlan(view,currentScope(),scope=>'/api/graph?'+requestParams(scope),PREFETCH_MAX));
+  }
+  for(const type of ['pointerdown','keydown','wheel','touchstart'])window.addEventListener(type,()=>prefetcher.cancel(),{capture:true,passive:true});
+  for(const type of ['hashchange','popstate','pagehide'])window.addEventListener(type,()=>prefetcher.cancel());
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible')prefetcher.cancel();});
   function options(node, values, selected='') {
     node.replaceChildren(...values.map(([id,label]) => new Option(label,id)));
     if ([...node.options].some(o=>o.value===selected)) node.value=selected;
@@ -996,7 +1149,7 @@
     } catch(e){if(ticket===revision){error(e.message);status('Report sources unavailable.');}}
   }
   async function refresh(initial=false,redirected=false) {
-    const ticket=++revision;controller?.abort();controller=new AbortController();clear(Boolean(directionTotals)&&directionScope===sidesScope(filters()));syncControls();
+    const ticket=++revision;prefetcher.cancel();controller?.abort();controller=new AbortController();clear(Boolean(directionTotals)&&directionScope===sidesScope(filters()));syncControls();
     if(!get('industry').value){skeleton(false);return;}
     status('Reading saved giving data…');
     skeleton(true);
@@ -1018,9 +1171,20 @@
       // chose, and writeScope() has just published it, so sending latest=1 as
       // well left the URL saying 2022 while the view showed 2024. It is still
       // sent on a first load that names no cycle, which is what it is for.
-      const response=await fetch('/api/graph?'+query+(initial&&!query.get('cycle')?'&latest=1':''),{signal:controller.signal});
-      const body=await response.json();if(!response.ok)throw new Error(body.error||'Graph unavailable.');
+      const url='/api/graph?'+query+(initial&&!query.get('cycle')?'&latest=1':'');
+      // RACF: a view this page has already read is drawn at once from memory,
+      // with the ETag the server gave it for this URL; the read below still
+      // goes out and the server decides. The same ETag (a 304) keeps what is
+      // drawn, a new answer is drawn over it, and a failure takes it down.
+      const held=graphMemory.peek(url);
+      if(held&&!settle(held.body))return;
+      const answer=await graphRead(url,controller.signal);
+      const body=answer.body;if(!answer.ok)throw new Error(body.error||'Graph unavailable.');
       if(ticket!==revision)return;
+      if((held&&answer.etag===held.etag)||settle(body))schedulePrefetch(answer.etag);
+    } catch(e){if(ticket===revision&&e.name!=='AbortError'){if(view)clear();skeleton(false);error(e.message);status('Graph unavailable for this selection.');}}
+    // One answer onto the page; false when it asked again instead.
+    function settle(body) {
       // r4 code review F5: the answer names the sides it measured. A chosen
       // side it does not offer - an old permalink's 'Contribution / Other'
       // on a report whose rows all carry a code - is asked again as the side
@@ -1033,12 +1197,13 @@
           options(get('direction'),choice.options,choice.value);
           // The side asked again is on the same scope, so its sides are these.
           if(sidesScope(filters())===sidesScope(query)){directionTotals=body.direction_totals;directionScope=sidesScope(query);}
-          refresh(initial,true);return;
+          refresh(initial,true);return false;
         }
       }
       view=body;render();window.dispatchEvent(new CustomEvent('mentat:graph',{detail:{...body,run:get('run').value,industry:get('industry').value}}));
       if(compare&&!early)loadCompareScopes(null);
-    } catch(e){if(ticket===revision&&e.name!=='AbortError'){skeleton(false);error(e.message);status('Graph unavailable for this selection.');}}
+      return true;
+    }
   }
   function chip(text,clearFilter) {
     const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=text+' ×';
@@ -1750,7 +1915,7 @@
   // one session per industry (sparkAccessModel above, perf H11).
   const sparkAccess=sparkAccessModel({
     session:industry=>fetch('/api/contributions/session?industry='+encodeURIComponent(industry),{cache:'no-store'}).then(async response=>{const body=await response.json();if(!response.ok||body.error||!body.token)throw new Error(body.error||'Contribution session unavailable.');return body;}),
-    catalog:()=>fetch('/api/contributions/catalog',{cache:'no-store'}).then(async response=>{const body=await response.json();if(!response.ok||body.error)throw new Error(body.error||'Contribution catalog unavailable.');return body;})});
+    catalog:()=>fetch('/api/contributions/catalog',{cache:'no-cache'}).then(async response=>{const body=await response.json();if(!response.ok||body.error)throw new Error(body.error||'Contribution catalog unavailable.');return body;})});
   const SPARK_PERIODS=8,SPARK_MINIMUM=3;
   const quarterIndex=value=>{const match=/^(\d{4})-Q([1-4])$/.exec(String(value));return match?Number(match[1])*4+Number(match[2])-1:null;};
   // `data` is the answer the sparklines belong to: the page's own view, or a
@@ -1983,9 +2148,8 @@
     const ask=async direction=>{
       const query=index?scopeParams(index,compareBase(null)):filters();
       query.set('recipient',id);query.set('mode','activity');query.set('direction',direction);
-      const response=await fetch('/api/graph?'+query,{signal:mine.signal});
-      const body=await response.json();
-      if(!response.ok)throw new Error(body.error||'Downstream activity is unavailable for this committee.');
+      const answer=await graphRead('/api/graph?'+query,mine.signal),body=answer.body;
+      if(!answer.ok)throw new Error(body.error||'Downstream activity is unavailable for this committee.');
       return body;
     };
     try {
@@ -2555,9 +2719,8 @@
     return text;
   }
   async function readGraph(params,signal) {
-    const response=await fetch('/api/graph?'+params,{signal});
-    const body=await response.json();
-    if(!response.ok)throw new Error(body.error||'Graph unavailable for this scope.');
+    const answer=await graphRead('/api/graph?'+params,signal),body=answer.body;
+    if(!answer.ok)throw new Error(body.error||'Graph unavailable for this scope.');
     return body;
   }
   // Scopes 2 and 3, in parallel. An answer already in hand for the same

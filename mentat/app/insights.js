@@ -345,8 +345,13 @@
   }
   // `auth` is the page's session token unless a caller passes one: a first-open
   // query sent before load() stores the token passes the one its session reply carried.
+  // GETs revalidate (RACF, 2026-09-24): a route the server answers with an
+  // ETag and `private, no-cache` (/api/insights/catalog) is kept by the
+  // browser and asked again with If-None-Match, so an unchanged catalog comes
+  // back as a bodiless 304. A route the server still answers `no-store` (the
+  // session token) is never stored, whatever this asks.
   async function api(path, body, signal, auth = token) {
-    const response = await fetch(path, body === undefined ? {signal, cache: 'no-store'} : {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Mentat-Token': auth}, body: JSON.stringify(body), signal});
+    const response = await fetch(path, body === undefined ? {signal, cache: 'no-cache'} : {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Mentat-Token': auth}, body: JSON.stringify(body), signal});
     let data; try { data = await response.json(); } catch (_) { throw new Error('The server returned an unreadable response.'); }
     if (!response.ok || data.error || data.status === 'failed') throw new Error(data.error || data.message || 'The analysis could not be loaded.');
     return data;
