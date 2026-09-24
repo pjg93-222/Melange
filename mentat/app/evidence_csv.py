@@ -30,6 +30,7 @@ import uuid
 import zipfile
 
 from cross_reference_data import _source_url
+import fec_citation
 
 # Bytes are now the only memory-relevant gate: the reader streams the file to
 # disk and the parser walks it row by row into sqlite, so neither the request
@@ -736,7 +737,10 @@ def normalize(raw, row_number, columns, extra_cells=()):
         'counterparty':first(row, ('contributor_name', 'contributor', 'recipient_name', 'candidate_name', 'candidate_officeholder', 'reported_name', 'name')),
         'candidate_id':first(row, ('candidate_id', 'cand_id', 'candidate_id_as_filed')),
         'candidate_name':first(row, ('candidate_name', 'candidate_officeholder', 'candidate_name_as_filed')),
-        'record_id':first(row, ('sub_id', 'transaction_id', 'tran_id', 'record_id')),
+        # A Mentat workbook names the FEC sub_id "Source ID" (normalised
+        # source_id); it is the last candidate, so every file that already
+        # had one of the others keeps the id it had.
+        'record_id':first(row, ('sub_id', 'transaction_id', 'tran_id', 'record_id', 'source_id')),
         'source_url':_source_url(first(row, ('source_url', 'pdf_url', 'filing_url'))),
         'category':canonical_category(first(row, CATEGORY_FIELDS)),
         'status':'excluded' if excluded else ('unsupported' if issues else 'supported'), 'issues':issues,
@@ -2144,10 +2148,24 @@ class Store:
             counts[channel] += row_count
         headers = value.get('columns', [])
         columns = [key(item) for item in headers]
+        rows = [rebuild(headers, columns, line_number, json.loads(cells)) for line_number,cells in page]
+        # FEC filing links (Paul's ruling 2026-09-24): a Mentat workbook row
+        # carries its sub_id but not its link, so the link is looked up in the
+        # database the workbook was built from - AFTER rebuild(), which stays
+        # pure. A row that resolves nowhere is left exactly as it was, and a
+        # lookup that fails for any reason costs the page its links, never
+        # its rows; the failure goes to the console log.
+        try:
+            fec_citation.attach(value, rows, columns, industry_of(value.get('name')))
+        except Exception:
+            try:
+                import traceback
+                traceback.print_exc()
+            except Exception:
+                pass
         return {'source':source, 'committee':chosen, 'committees':source['committees'],
                 'cycles':source['cycles'], 'selected_cycle':cycle, 'columns':headers,
-                'rows':[{name:item for name,item in rebuild(headers, columns, line_number, json.loads(cells)).items()
-                         if not name.startswith('_')} for line_number,cells in page],
+                'rows':[{name:item for name,item in row.items() if not name.startswith('_')} for row in rows],
                 'totals':[{'channel':channel, 'amount':float(amounts[channel]), 'row_count':counts[channel]}
                           for channel in sorted(amounts)],
                 'supported_rows':supported, 'excluded_rows':excluded,

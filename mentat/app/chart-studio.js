@@ -818,6 +818,29 @@
     node('note').textContent=[contributions.BASIS[basisOf(view.state)][1],'ZIP marks combine eligible ZIP/state groups; grouped filters apply before this combination. Unmapped money remains in the selected total.',...(contributionMap.data.coverage_notes||[]),...(geometry.warnings||[]),...notes].join(' ');
     node('status').textContent=fmt(result.group_count)+' geographic groups · '+fmt(contributionMap.data.marks.length)+' mapped marks · boundaries do not change money';status('Verified ZIP/state records and Census boundaries');
   }
+  /* F3 (2026-09-24): ActBlue and WinRed filings have no FEC page image ("Error#1896: Image is
+     not processed yet" on 14 of 14 tried), so a record filed by either links its whole
+     electronic report. Its report number comes from one narrow second records request after
+     the table is drawn (reported_file_num, read through the pinned source database). */
+  const FEC_CONDUITS=new Set(['C00401224','C00694323']),FEC_REPORT_TITLE='FEC has no page image for this filing';
+  const conduitRecord=record=>FEC_CONDUITS.has(String(record?.committee_id||'').trim().toUpperCase());
+  function drawConduitFiling(td,record,fileNumber){
+    const number=String(fileNumber??'').trim();
+    const safe=fileNumber!==undefined&&/^[1-9]\d{0,11}$/.test(number)&&globalThis.MentatScope?globalThis.MentatScope.fecLink(`https://docquery.fec.gov/cgi-bin/forms/${String(record.committee_id).trim().toUpperCase()}/${number}/`):'';
+    if(safe){const a=document.createElement('a');a.href=safe;a.target='_blank';a.rel='noopener noreferrer';a.referrerPolicy='no-referrer';a.textContent='FEC report';a.title=FEC_REPORT_TITLE;td.replaceChildren(a);td.title=FEC_REPORT_TITLE;return;}
+    td.replaceChildren();td.textContent=fileNumber===undefined?'FEC report…':'Unavailable';
+    td.title=FEC_REPORT_TITLE+(fileNumber===undefined?'.':', and its report number could not be read here.');
+  }
+  async function fillConduitFilings(query,result,cells,current){
+    const ids=[...new Set(cells.map(([,record])=>String(record.source_id||'')).filter(Boolean))];let numbers=null;
+    try{const reply=await contributionAPI('records',{...query,dimensions:['reported_file_num'],aggregate_filters:[],
+        filters:[...(query.filters||[]),{field:'source_id',op:'in',value:ids}],limit:ids.length,offset:0});
+      if(!current())return;
+      if(reply.status==='ready'&&['workbook_sha256','database_sha256','index_token'].every(key=>reply.provenance?.[key]===result.provenance?.[key]))
+        numbers=new Map((reply.rows||[]).map(row=>[String(row.source_id),row.reported_file_num]));
+    }catch(error){if(!current())return;}
+    for(const[td,record]of cells)drawConduitFiling(td,record,numbers?(numbers.get(String(record.source_id))??null):null);
+  }
   let recordSource = null;
   async function inspectContributions(row=null,offset=0,source=null) {
     if(!contributionResult)return;recordSelection=row;recordOffset=offset;recordSource=source;const ticket=++recordRevision,sourceRevision=contributionRevision;el('inspection').hidden=false;el('record-count').textContent='Reading source records…';el('records').replaceChildren();
@@ -826,7 +849,7 @@
     const request=(source&&source.request)||contributionRequest,known=(source&&source.result)||contributionResult;
     try{const query={...request,filters:contributions.markFilters(request,row),aggregate_filters:[],limit:100,offset};const result=await contributionReady('records',query);if(ticket!==recordRevision||sourceRevision!==contributionRevision)return;if(!['workbook_sha256','database_sha256','index_token'].every(key=>result.provenance?.[key]===known.provenance?.[key]))throw new Error('Source changed before record inspection. Refresh the verified data.');
       const columns=[['date','Date'],['contributor','Contributor'],['company','Company'],['recipient','Recipient'],['amount_cents','Selected amount'],['raw_cents','Raw observation'],['zip5','ZIP'],['state','State'],['decision_status','Accounting status'],['receipt_role','Receipt role'],['reasons','Reasons'],['source_id','Source ID'],['source_url','FEC filing']];for(const id of query.dimensions||[])if(!columns.some(c=>c[0]===id))columns.push([id,data.columns.find(c=>c.id===id)?.name||id]);const table=document.createElement('table'),head=document.createElement('tr'),body=document.createElement('tbody');for(const[,name]of columns){const th=document.createElement('th');th.textContent=name;head.append(th);}const thead=document.createElement('thead');thead.append(head);table.append(thead,body);
-      for(const record of result.rows){const tr=document.createElement('tr');for(const[id]of columns){const td=document.createElement('td'),value=record[id];td.textContent=id.endsWith('_cents')?contributionPlot.format(value,'amount'):Array.isArray(value)?value.join('; '):value??'';if(id==='source_url'){const safe=globalThis.MentatScope?globalThis.MentatScope.fecLink(value):'';if(safe){const a=document.createElement('a');a.href=safe;a.target='_blank';a.rel='noopener noreferrer';a.referrerPolicy='no-referrer';a.textContent='Open filing';td.replaceChildren(a);}}tr.append(td);}body.append(tr);}el('records').append(table);el('record-count').textContent=`${result.total_records?offset+1:0}–${offset+result.rows.length} of ${fmt(result.total_records)} source observations`;el('record-prev').disabled=!offset;el('record-next').disabled=!result.has_more;
+      const conduitCells=[];for(const record of result.rows){const tr=document.createElement('tr');for(const[id]of columns){const td=document.createElement('td'),value=record[id];td.textContent=id.endsWith('_cents')?contributionPlot.format(value,'amount'):Array.isArray(value)?value.join('; '):value??'';if(id==='source_url'){if(conduitRecord(record)){conduitCells.push([td,record]);drawConduitFiling(td,record,undefined);}else{const safe=globalThis.MentatScope?globalThis.MentatScope.fecLink(value):'';if(safe){const a=document.createElement('a');a.href=safe;a.target='_blank';a.rel='noopener noreferrer';a.referrerPolicy='no-referrer';a.textContent='Open filing';td.replaceChildren(a);}}}tr.append(td);}body.append(tr);}el('records').append(table);if(conduitCells.length)fillConduitFilings(query,result,conduitCells,()=>ticket===recordRevision&&sourceRevision===contributionRevision);el('record-count').textContent=`${result.total_records?offset+1:0}–${offset+result.rows.length} of ${fmt(result.total_records)} source observations`;el('record-prev').disabled=!offset;el('record-next').disabled=!result.has_more;
     }catch(error){if(ticket===recordRevision)el('record-count').textContent=error.message;}
   }
   async function downloadContributions(format) {

@@ -53,7 +53,36 @@
     if(ongoingYear)periods.push(`${year} is an ongoing calendar year`);
     return periods.length?periods.join('; ')+'. Collection coverage is not established.':'';
   }
-  const api={defaults,buildQuery,filterValue,csv,csvCell,calendarNotice,basisLabel,basisFields,sameExportSource,markFilters};
+  /* F3, 2026-09-24 (Paul: "FEC: Whatever is most efficient", one link per row).
+     ActBlue and WinRed filings have no FEC page image - all 14 tried answered
+     "Error#1896: Image is not processed yet" - so a record row filed by either
+     links the whole electronic FEC report instead. PAC evidence gets these URLs
+     from the server (app/fec_citation.py); this page builds its own record
+     links, so the same two committees and the same report URL are mirrored here
+     and nowhere else on the page. Every other row keeps its page-image link. */
+  const FEC_CONDUITS=new Set(['C00401224','C00694323']);
+  const REPORT_TITLE='FEC has no page image for this filing';
+  const isConduitRecord=row=>FEC_CONDUITS.has(String(row?.committee_id||'').trim().toUpperCase());
+  // The one link a conduit record gets: {href,text,title}; {pending:true} while
+  // its report number is being read (fileNumber undefined); null when there is none.
+  function filingLink(row,fileNumber){
+    if(!isConduitRecord(row))return null;
+    if(fileNumber===undefined)return {pending:true};
+    const number=String(fileNumber??'').trim();
+    if(!/^[1-9]\d{0,11}$/.test(number))return null;
+    return {href:`https://docquery.fec.gov/cgi-bin/forms/${String(row.committee_id).trim().toUpperCase()}/${number}/`,
+      text:'FEC report',title:REPORT_TITLE};
+  }
+  // The second, narrow records request for a page's conduit rows: the same
+  // selection, keyed to their source IDs, reading the reported file number
+  // through the pinned source database (no index rebuild). null when none.
+  function reportNumberQuery(query,rows){
+    const ids=[...new Set((rows||[]).filter(isConduitRecord).map(row=>String(row.source_id||'')).filter(Boolean))];
+    return ids.length?{...query,dimensions:['reported_file_num'],aggregate_filters:[],
+      filters:[...(query.filters||[]),{field:'source_id',op:'in',value:ids}],limit:ids.length,offset:0}:null;
+  }
+  const api={defaults,buildQuery,filterValue,csv,csvCell,calendarNotice,basisLabel,basisFields,sameExportSource,markFilters,
+    FEC_CONDUITS,filingLink,reportNumberQuery,isConduitRecord};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   root.MentatContributionStudio=api;
   const $=id=>document.getElementById(id), plot=root.MentatContributionPlot;
@@ -219,6 +248,24 @@
       status(basisLabel(view.basis,data.basis_label||view.basis)+' · '+view.congress+'th Congress boundaries · money is unchanged by overlays.'+(view.aggregate_filters.length?' Grouped filters select ZIP/state groups before eligible groups combine into ZIP marks.':''));
     }catch(e){if(current===revision&&geoCurrent===geoRevision)failure(e);}
   }
+  // F3: a conduit record's "FEC evidence" cell. The page-image link a conduit
+  // row used to get never opened, so the cell reads "FEC report…" until the
+  // report number arrives, then links the report, or says Unavailable.
+  function drawFiling(td,link){
+    if(link?.href){const a=node('a',link.text);a.href=link.href;a.target='_blank';a.rel='noopener noreferrer';a.title=link.title;td.replaceChildren(a);td.title=link.title;return;}
+    if(link?.pending){td.replaceChildren(node('span','FEC report…','muted'));td.title='Reading the FEC report number. '+REPORT_TITLE+'.';return;}
+    td.replaceChildren();td.textContent='Unavailable';td.title=REPORT_TITLE+', and its report number could not be read here.';
+  }
+  async function fillReportLinks(query,data,cells,current){
+    let numbers=null;
+    try{
+      const reply=await request('records',reportNumberQuery(query,data.rows));
+      if(!current())return;
+      if(reply.status==='ready'&&['workbook_sha256','database_sha256','index_token'].every(key=>reply.provenance?.[key]&&reply.provenance[key]===data.provenance?.[key]))
+        numbers=new Map((reply.rows||[]).map(row=>[String(row.source_id),row.reported_file_num]));
+    }catch(error){if(!current())return;}
+    for(const[td,row]of cells)drawFiling(td,filingLink(row,numbers?(numbers.get(String(row.source_id))??null):null));
+  }
   async function inspect(selection=null,next=false){
     if(!result)return;
     if(!next){recordSelection=selection;recordOffset=0;}
@@ -234,7 +281,9 @@
       if(!['workbook_sha256','database_sha256','index_token'].every(key=>data.provenance?.[key]&&data.provenance[key]===result.provenance?.[key]))throw new Error('Source changed before record inspection. Refresh the chart before inspecting its records.');
       const columns=[['date','Date'],['contributor','Contributor'],['company','Company'],['recipient','Recipient'],['amount_cents','Selected amount'],['raw_cents','Raw observation'],['zip5','ZIP'],['state','State'],['decision_status','Accounting status'],['receipt_role','Receipt role'],['reasons','Reasons'],['source_id','Source ID'],['source_url','FEC evidence']];
       const table=node('table'),thead=node('thead'),head=node('tr');columns.forEach(([,label])=>head.append(node('th',label)));thead.append(head);table.append(thead);const body=node('tbody');
-      for(const row of data.rows){const tr=node('tr');for(const[id]of columns){const td=node('td');const val=row[id];if(id==='source_url'&&val){try{const url=new URL(val);if(url.protocol==='https:'&&(url.hostname==='fec.gov'||url.hostname.endsWith('.fec.gov'))){const a=node('a','Open filing');a.href=url.href;a.target='_blank';a.rel='noopener noreferrer';td.append(a);}else td.textContent='Unavailable';}catch{td.textContent='Unavailable';}}else td.textContent=id.endsWith('_cents')?plot.format(val,'amount'):Array.isArray(val)?val.join('; '):val??'';if(id.endsWith('_cents'))td.className='numeric';td.title=td.textContent;tr.append(td);}body.append(tr);}table.append(body);$('record-table').replaceChildren(table);
+      const conduitCells=[];
+      for(const row of data.rows){const tr=node('tr');for(const[id]of columns){const td=node('td');const val=row[id];if(id==='source_url'&&val){try{const url=new URL(val);if(url.protocol==='https:'&&(url.hostname==='fec.gov'||url.hostname.endsWith('.fec.gov'))){const a=node('a','Open filing');a.href=url.href;a.target='_blank';a.rel='noopener noreferrer';td.append(a);}else td.textContent='Unavailable';}catch{td.textContent='Unavailable';}}else td.textContent=id.endsWith('_cents')?plot.format(val,'amount'):Array.isArray(val)?val.join('; '):val??'';if(id.endsWith('_cents'))td.className='numeric';td.title=td.textContent;if(id==='source_url'&&isConduitRecord(row)){conduitCells.push([td,row]);drawFiling(td,filingLink(row,undefined));}tr.append(td);}body.append(tr);}table.append(body);$('record-table').replaceChildren(table);
+      if(conduitCells.length)fillReportLinks(query,data,conduitCells,()=>seq===recordRevision&&current===revision);
       text('record-count',`${data.total_records?recordOffset+1:0}–${recordOffset+data.rows.length} of ${data.total_records.toLocaleString()} included observations`);$('more-records').disabled=!data.has_more;
       $('inspection').scrollIntoView({behavior:'smooth',block:'nearest'});
     }catch(e){if(seq===recordRevision){$('record-table').replaceChildren(node('p',e.message));}}

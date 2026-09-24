@@ -83,6 +83,8 @@
     }
   };
   const filingLedger = (row, fallbackUrl = '') => {
+    const report = reportLink(row);
+    if (report) return `<span class="record-links">${reportAnchor(report, ' ↗')}</span>`;
     const records = filingRecords(row);
     if (!records.length) {
       const raw = row?.raw || {};
@@ -104,7 +106,27 @@
      link keeps its number, and "FEC filing link unavailable" stays on the
      marker's title and in screen-reader text. */
   const FEC_RECORD_LINK = /^https:\/\/(docquery\.fec\.gov|www\.fec\.gov)\//;
+  /* F3, 2026-09-24 (Paul: "FEC: Whatever is most efficient", one link per
+     row). ActBlue and WinRed filings have no FEC page image - all 14 tried
+     answered "Error#1896: Image is not processed yet" - so the server
+     (fec_citation.py, the one place these URLs are built) links such a row
+     to its whole electronic report and marks the link kind "report". The
+     page only draws that link, and only when it is a docquery report URL.
+     A row without `fec_link` (an older server, or a sub_id that resolved
+     nowhere) renders exactly as before. filingLedger uses these too; it is
+     only called once the page renders, after this line has run. */
+  const FEC_REPORT_URL = /^https:\/\/docquery\.fec\.gov\/cgi-bin\/forms\/C\d{8}\/[1-9]\d{0,11}\/$/;
+  const reportLink = row => {
+    const link = row?.fec_link;
+    if (!link || link.kind !== 'report' || !FEC_REPORT_URL.test(String(link.url || ''))) return null;
+    return {url: String(link.url), text: String(link.text || 'FEC report'),
+      title: String(link.title || 'FEC has no page image for this filing')};
+  };
+  const reportAnchor = (report, suffix = '') => `<a href="${escapeHtml(report.url)}" target="_blank" `
+    + `rel="noopener noreferrer" title="${escapeHtml(report.title)}">${escapeHtml(report.text)}${suffix}</a>`;
   const filingCite = (row, fallbackUrl = '') => {
+    const report = reportLink(row);
+    if (report) return `<span class="fec-citations fec-citations-report">${reportAnchor(report)}</span>`;
     const raw = row?.raw || {};
     const image = String(raw.image_number || raw['image number'] || '');
     const link = fallbackUrl || row?.source_url || row?.source_urls?.[0] || raw.pdf_url ||
@@ -135,15 +157,20 @@
       (/^\d+$/.test(image) ? 'https://docquery.fec.gov/cgi-bin/fecimg/?' + image : '');
     const sources = records.length ? records : fallback ? [{source_url:fallback}] : [];
     const groups = new Map();
+    // S3, 2026-09-24: a spend row of a workbook that carries no filing links
+    // says so and points at its committee on FEC (workbookPointer, below).
+    // Without the server's pointer the row reads exactly as before.
+    const unavailable = workbookPointer(row?.filing_fallback)
+      || '<span class="muted">FEC filing link unavailable</span>';
     for (const record of sources) {
       const url = String(record.source_url || '');
       // A bulk-download URL or a missing image does not cite this aggregate.
       if (!/^https:\/\/docquery\.fec\.gov\/cgi-bin\/fecimg\/\?\d+$/.test(url))
-        return '<span class="muted">FEC filing link unavailable</span>';
+        return unavailable;
       if (!groups.has(url)) groups.set(url, []);
       groups.get(url).push(record);
     }
-    if (!groups.size) return '<span class="muted">FEC filing link unavailable</span>';
+    if (!groups.size) return unavailable;
     const links = [...groups].map(([url, items], index) => {
       const detail = items.map(item => [item.date, item.amount == null ? '' : currency(item.amount),
         item.purpose].filter(Boolean).join(' · ')).filter(Boolean).join('; ');
@@ -154,6 +181,15 @@
     });
     return `<span class="fec-citations">FEC<sup>${links.join(',')}</sup></span>`;
   };
+  /* The pointer is the server's (fec_citation.workbook_pointer, sent only for
+     an imported workbook's spend map when that workbook carries no filing
+     links at all). It is drawn only for an FEC committee page URL. */
+  const FEC_COMMITTEE_PAGE = /^https:\/\/www\.fec\.gov\/data\/committee\/C\d{8}\/$/;
+  const workbookPointer = pointer => pointer && FEC_COMMITTEE_PAGE.test(String(pointer.url || ''))
+    ? `<span class="muted fec-workbook-note">${escapeHtml(pointer.note || 'Filing links are not in this workbook')}</span> `
+      + `<a href="${escapeHtml(pointer.url)}" target="_blank" rel="noopener noreferrer" `
+      + `title="${escapeHtml(pointer.title || pointer.note || '')}">${escapeHtml(pointer.text || 'Committee on FEC')} ↗</a>`
+    : '';
   const render = (element, html) => { if (element && element.innerHTML !== html) element.innerHTML = html; };
   const say = text => {
     const node = $('evidence-status');
@@ -1926,7 +1962,7 @@
           if (state.layer === 'district' && isSenateKey(row.key)) continue;
           if (!(focus.kind === 'district' ? row.key === focus.key : states.has(row.key.slice(0, 2)))) continue;
           for (const recipient of row.recipients || [{name: row.who || row.key, amount:row.amount}]) {
-            entries.push({...recipient, kind:kind.label, place:row.key});
+            entries.push({...recipient, kind:kind.label, place:row.key, filing_fallback:body.filing_fallback});
           }
         }
       }

@@ -37,6 +37,7 @@ import threading
 
 import district_geo
 import evidence_csv
+import fec_citation
 import geocode
 import downstream
 from view_cache import ViewCache, file_signature
@@ -888,6 +889,31 @@ def import_spent(store, identifier, committee, cycle, snapshot_root=None):
     return catalog, chosen, {'candidates': bucket}, unlocated, reported, ''
 
 
+def workbook_filing_pointer(store, identifier, committee):
+    """S3, 2026-09-24: what a spend row says when its workbook carries no filing links.
+
+    The published Overview workbooks predate per-transaction citations: their
+    Downstream Activity sheet has no Filing Records column and its Source URL
+    is the whole-cycle PAS2 bulk ZIP, so a row with no exactly matching saved
+    snapshot read only "FEC filing link unavailable". Such a row now says that
+    the links are not in this workbook and points at the source committee's
+    FEC page instead (fec_citation.workbook_pointer). A workbook whose sheet
+    DOES carry filing records gets no pointer: a row there without a citation
+    is a partial or folded amount, and "unavailable" stays the true answer.
+    The activity read is the one import_spent just made (graph_data memoises
+    it by the file's stamp), so this costs no second pass over the workbook.
+    """
+    try:
+        import graph_data
+        activity = graph_data.report_activity(graph_data.stamp(store.source_path(identifier)),
+                                              include_filings=True)
+    except Exception:  # the same failures import_spent reports as its reason
+        return None
+    if any(row.get('filings') for row in activity):
+        return None
+    return fec_citation.workbook_pointer(committee)
+
+
 def activity_totals(store, identifier, committee, cycle):
     """(total, rows, reason) for the workbook's outbound rows - no geography.
 
@@ -1032,6 +1058,7 @@ def geography(source, identifier, committee='', cycle='', direction='spent',
             cache = None
 
     reason, label, name = '', '', ''
+    pointer = None
     mix = Mix()
     zips = Zips()
     unit = None
@@ -1057,6 +1084,7 @@ def geography(source, identifier, committee='', cycle='', direction='spent',
         else:
             catalog, chosen, buckets, unlocated, reported, reason = import_spent(
                 store, identifier, committee, cycle, snapshot_root)
+            pointer = workbook_filing_pointer(store, identifier, chosen['id']) if buckets else None
         committee, name = chosen['id'], chosen.get('name') or chosen['id']
         label = catalog.get('industry') or catalog.get('name') or identifier
 
@@ -1124,6 +1152,10 @@ def geography(source, identifier, committee='', cycle='', direction='spent',
         **zip_layer, **mix.payload()}
     if reason:
         payload['reason'] = reason
+    if pointer:
+        # S3: only an imported workbook's spend map, and only when that
+        # workbook carries no filing links at all (workbook_filing_pointer).
+        payload['filing_fallback'] = pointer
     if not vintage and cycle:
         payload['reason'] = payload.get('reason') or (district_geo.last_problem or '')
     return payload
