@@ -16,6 +16,7 @@ import math
 import os
 from pathlib import Path
 import re
+import sqlite3
 import threading
 import time
 import uuid
@@ -414,31 +415,72 @@ def _rows(path, request):
     fields = ('source_id,industry,company,committee_id,recipient,date,cycle,funding_source,party,'
               'contributor_key,raw_cents,receipt_cents,original_cents,supported_cents,pac_cents')
     with closing(data._ro(path)) as db:
-        for row in db.execute('SELECT ' + fields + ',' + column + ' AS amount_cents FROM facts WHERE ' + where + ' AND ' + column + ' != 0', params):
-            yield dict(row)
+        # The selected names are distinct, so zipping plain tuples with them gives the
+        # dicts dict(sqlite3.Row) gives, keys in the same order, without a Row per row.
+        db.row_factory = None
+        cursor = db.execute('SELECT ' + fields + ',' + column + ' AS amount_cents FROM facts WHERE ' + where + ' AND ' + column + ' != 0', params)
+        names = tuple(item[0] for item in cursor.description)
+        for row in cursor:
+            yield dict(zip(names, row))
+
+
+# Scope options per (projection signature, basis). A projection is replaced, never
+# rewritten, and its signature (stamp and SQLite header, as the query store keys its own
+# verification) names its content, so the same signature always yields the same options.
+_OPTIONS_LIMIT = 32
+_option_cache = OrderedDict()
+_option_lock = threading.Lock()
 
 
 def _options(path, basis):
+    key = (store._projection_signature(path), basis)
+    with _option_lock:
+        if key in _option_cache:
+            _option_cache.move_to_end(key)
+            return copy.deepcopy(_option_cache[key])
     with closing(data._ro(path)) as db:
         column = data.BASES[basis][1]
-        return {out: [r[0] for r in db.execute('SELECT DISTINCT "' + field + '" FROM facts WHERE ' + ('1' if field == 'company' else column + ' != 0') + ' AND "' + field + '" != \'\' ORDER BY "' + field + '"')]
-                for field, out in [('company', 'companies'), ('cycle', 'cycles'), ('funding_source', 'funding_sources')]}
+        options = {out: [r[0] for r in db.execute('SELECT DISTINCT "' + field + '" FROM facts WHERE ' + ('1' if field == 'company' else column + ' != 0') + ' AND "' + field + '" != \'\' ORDER BY "' + field + '"')]
+                   for field, out in [('company', 'companies'), ('cycle', 'cycles'), ('funding_source', 'funding_sources')]}
+    with _option_lock:
+        _option_cache[key] = copy.deepcopy(options)
+        while len(_option_cache) > _OPTIONS_LIMIT:
+            _option_cache.popitem(last=False)
+    return options
+
+
+def _window(value, cycle_value, cutoff):
+    """The row's cycle when its date is an eligible event inside that cycle, else None."""
+    try:
+        observed = date.fromisoformat(value)
+        eligible = observed <= cutoff
+    except (ValueError, TypeError):
+        eligible = False
+    cycle = metrics._cycle(cycle_value)
+    return cycle if eligible and cycle and observed.year in (cycle - 1, cycle) else None
 
 
 def _context_rows(rows, context, request):
     pairs, companies = set(), {request['company']} if request.get('company') else set()
     cutoff = date.fromisoformat(request['as_of'])
+    # Both tests depend only on the values tested, so each distinct value is tested once.
+    # Types are part of the keys: equal values of different types (1 and 1.0) never share.
+    windows, committees = {}, {}
     for row in rows:
-        try:
-            observed = date.fromisoformat(row['date'])
-            eligible = observed <= cutoff
-        except (ValueError, TypeError):
-            eligible = False
-        cycle = metrics._cycle(row['cycle'])
-        if eligible and cycle and observed.year in (cycle - 1, cycle):
+        value, cycle_value = row['date'], row['cycle']
+        key = (type(value), value, type(cycle_value), cycle_value)
+        if key in windows:
+            cycle = windows[key]
+        else:
+            cycle = windows[key] = _window(value, cycle_value, cutoff)
+        if cycle is not None:
             companies.add(row['company'])
-            if re.fullmatch(r'C\d{8}', row['committee_id'] or ''):
-                pairs.add((row['committee_id'], cycle))
+            committee = row['committee_id']
+            known = (type(committee), committee)
+            if known not in committees:
+                committees[known] = re.fullmatch(r'C\d{8}', committee or '') is not None
+            if committees[known]:
+                pairs.add((committee, cycle))
         yield row
     context.update(recipient_cycles=[{'recipient_id': recipient, 'cycle': cycle} for recipient, cycle in sorted(pairs)],
                    recipient_ids=sorted({p[0] for p in pairs}), cycles=sorted(set(context.get('cycles', [])) | {p[1] for p in pairs}), companies=sorted(companies))
@@ -670,6 +712,94 @@ def query(directory, request):
     return response
 
 
+# Fields of the Insights projection (analysis_scan.FIELDS): a records filter on these
+# alone is counted and paged on the projection instead of the full contribution index.
+_PROJECTED = frozenset(analysis_scan.FIELDS) | {'amount', 'amount_cents'}
+# Irregular stored date values per projection signature (see _irregular_dates).
+_date_census = OrderedDict()
+_census_lock = threading.Lock()
+# More irregular values than this and the records filter stays on the full index.
+IRREGULAR_DATE_LIMIT = 500
+
+
+def _projection(source_path):
+    """The Insights projection analysis_scan.view() returns for source_path, when it already
+    exists and verifies against its proof; None otherwise. It never builds one: a records
+    page must not wait on a projection build, and the full index answers it instead."""
+    source_path = Path(source_path)
+    version = data._stamp(source_path)
+    identity = {'source_stamp': list(version), 'insights_projection': analysis_scan.CODE_SHA}
+    path = store.ROOT / 'insights-views' / (store._key(identity) + '.sqlite')
+    try:
+        if not path.is_file() or not store.source_stable(source_path, version):
+            return None
+        return path if store._valid(path, path.with_suffix('.json'), identity) else None
+    except (OSError, ValueError):
+        return None
+
+
+def _canonical_date(value):
+    """A text value date.fromisoformat() accepts whose isoformat() is the value itself:
+    for these, text order is date order, so `date <= cutoff` compares like the dates."""
+    if type(value) is not str or len(value) != 10:
+        return False
+    try:
+        return date.fromisoformat(value).isoformat() == value
+    except ValueError:
+        return False
+
+
+def _irregular_dates(path):
+    """Every distinct stored date value of the projection at path that is not canonical
+    (NULL included). A projection is replaced, never rewritten, so the census is kept per
+    signature. Only these values are still judged by insights_event_allowed()."""
+    key = store._projection_signature(path)
+    with _census_lock:
+        if key in _date_census:
+            _date_census.move_to_end(key)
+            return _date_census[key]
+    with closing(data._ro(path)) as db:
+        irregular = tuple(value for (value,) in db.execute('SELECT DISTINCT date FROM facts')
+                          if not _canonical_date(value))
+    with _census_lock:
+        _date_census[key] = irregular
+        while len(_date_census) > 16:
+            _date_census.popitem(last=False)
+    return irregular
+
+
+def _projected_page(projection, index, where, params, column, cutoff, eligible, limit, offset):
+    """(count, rows) of the records filter, counted and ordered on the projection, the page's
+    rows then read from the full index by source_id; None when the full index must answer."""
+    irregular = _irregular_dates(projection)
+    if len(irregular) > IRREGULAR_DATE_LIMIT:
+        return None
+    values = [value for value in irregular if value is not None]
+    if irregular:
+        # NULL and irregular values keep the UDF; every other stored value is canonical.
+        odd = ['date IS NULL'] if len(values) < len(irregular) else []
+        if values:
+            odd.append('date IN (' + ','.join('?' * len(values)) + ')')
+        test = 'CASE WHEN ' + ' OR '.join(odd) + ' THEN insights_event_allowed(date)=1 ELSE date <= ? END'
+    else:
+        test = 'date <= ?'
+    clause = where + ' AND ' + column + ' != 0 AND ' + test
+    arguments = params + values + [cutoff.isoformat()]
+    with closing(data._ro(projection)) as db:
+        db.create_function('insights_event_allowed', 1, eligible, deterministic=True)
+        count = db.execute('SELECT COUNT(*) FROM facts WHERE ' + clause, arguments).fetchone()[0]
+        ids = [row[0] for row in db.execute('SELECT source_id FROM facts WHERE ' + clause +
+                                            ' ORDER BY date DESC,source_id LIMIT ? OFFSET ?', arguments + [limit, offset])]
+    if not ids:
+        return count, []
+    with closing(data._ro(index)) as db:
+        found = {row['source_id']: dict(row) for row in db.execute(
+            'SELECT *,' + column + ' AS amount_cents FROM facts WHERE source_id IN (' + ','.join('?' * len(ids)) + ')', ids)}
+    if len(found) != len(ids):
+        return None
+    return count, [found[source_id] for source_id in ids]
+
+
 def records(directory, request):
     _loaded()
     request = validate(request, records=True)
@@ -692,13 +822,24 @@ def records(directory, request):
         except (TypeError, ValueError):
             return 0 if temporal else 1
     where, params = data._row_filter(filters, column)
-    where += ' AND ' + column + ' != 0 AND insights_event_allowed(date)=1'
     limit, offset = request.get('limit', 50), request.get('offset', 0)
-    with closing(data._ro(path)) as db:
-        db.create_function('insights_event_allowed', 1, eligible, deterministic=True)
-        count = db.execute('SELECT COUNT(*) FROM facts WHERE ' + where, params).fetchone()[0]
-        rows = [dict(row) for row in db.execute('SELECT *,' + column + ' AS amount_cents FROM facts WHERE ' + where +
-                ' ORDER BY date DESC,source_id LIMIT ? OFFSET ?', params + [limit, offset])]
+    page = None
+    if all(item.get('field') in _PROJECTED for item in filters):
+        projection = _projection(path)
+        if projection is not None:
+            try:
+                page = _projected_page(projection, path, where, params, column, cutoff, eligible, limit, offset)
+            except sqlite3.Error:
+                page = None  # the full index answers exactly as before
+    if page is not None:
+        count, rows = page
+    else:
+        where += ' AND ' + column + ' != 0 AND insights_event_allowed(date)=1'
+        with closing(data._ro(path)) as db:
+            db.create_function('insights_event_allowed', 1, eligible, deterministic=True)
+            count = db.execute('SELECT COUNT(*) FROM facts WHERE ' + where, params).fetchone()[0]
+            rows = [dict(row) for row in db.execute('SELECT *,' + column + ' AS amount_cents FROM facts WHERE ' + where +
+                    ' ORDER BY date DESC,source_id LIMIT ? OFFSET ?', params + [limit, offset])]
     if not _stable(path, source, stamp, token):
         raise ValueError('The source changed during record inspection. Refresh Insights.')
     history.annotate(request['dataset'], rows)

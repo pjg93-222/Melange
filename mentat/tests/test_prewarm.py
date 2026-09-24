@@ -384,7 +384,9 @@ class RunLoopTests(Harness):
                 self.assertEqual([row['outcome'] for row in rows].count('resumed'), 1)
                 self.assertFalse([row for row in rows if row['outcome'] == 'failed'])
                 self.assertEqual(prewarm.consecutive_failures(rows), {})
-                self.assertEqual(len(self.backend.calls), 6)
+                # 3 query views, 3 defaults and Alpha's 3 companies (every company of every industry,
+                # planned once Alpha's default result names them).
+                self.assertEqual(len(self.backend.calls), 9)
 
     @staticmethod
     def _once(source, then):

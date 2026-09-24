@@ -33,13 +33,32 @@ root, and a missing analytical index is never built.
 Task kinds, in priority order. Industries are ordered by their most recent Insights hint, newest first.
   query_view         The Graph sparkline's first-load /api/contributions/query per industry (graph.js
                      sparkRequest on the latest=1 view). It builds the query projection and the
-                     response cache (perf.md H7: Banking 48 s, Telecom 26 s, Credit Arms 13 s).
+                     response cache (perf.md H7: Banking 48 s, Telecom 26 s, Credit Arms 13 s). When the
+                     response cache has no room (see "Response-cache budget") it builds the projection only.
   insights_default   insights.js's first-open body per industry, polled until it is ready.
   insights_neighbor  From the newest hint: that scope; then "All covered companies" (the body without a
                      company key) and each other company, in the order of the client's company select,
-                     which comes from the result's options.companies; then each other basis.
-Excluded: the Graph drawer and downstream inventory (perf.md H8: about 1.1 GB retained). A missing
-analytical index is reported as index_missing. Only --allow-index-builds builds it.
+                     which comes from the result's options.companies.
+  insights_company   Every company of every industry at the default body (insights.js first open with
+                     that company chosen), industries in hint order, companies in the select's order.
+  (insights_neighbor) Then every other basis for the newest hint's scope.
+  graph_spark        For the newest hint's industry: the Graph sparkline query of each company's view at
+                     the first-load cycle (graph.js company onchange -> refresh() -> sparkRequest).
+  comparison_flows   Per industry, when response_cache is installed: comparison_data.flows_entry, the
+                     /api/comparison-flows answer stored in the response cache's disk tier.
+  drawer_sidecars    Per industry, when drawer_sidecars is installed: build_sidecars, every sidecar the
+                     Graph drawer reads (it no longer loads the 1.1 GB inventory of perf.md H8). These two
+                     kinds need ARTIFACT_EXTRA_FREE_BYTES more free memory than the 1.5 GB floor.
+The planning Graph views (first loads and company views) land in the response cache's disk tier too.
+A missing analytical index is reported as index_missing. Only --allow-index-builds builds it.
+
+Response-cache budget. contribution_query_store._prune keeps the newest 128 response files (and at most
+128 MB) per namespace, by mtime, after every write. A response this warmer writes is "demoted": its mtime
+moves into early 2000 (its day and its plan position kept), so any later prune removes warm entries,
+oldest day and lowest priority first, before any response a click stored. A task that would write runs
+only while every file its write could push out (with one more written by a click at the same moment) is a
+warm entry from an earlier day; otherwise it waits as over_budget. A warm entry a click later used (its
+key in hints.json) is promoted back to the click's time.
 """
 from __future__ import annotations
 
@@ -80,7 +99,8 @@ RESULT_CODE = ('prewarm.py', 'server.py', 'analysis_data.py', 'analysis_metrics.
                'analysis_integrations.py', 'analysis_scan.py', 'contribution_data.py', 'contribution_query.py',
                'contribution_query_store.py', 'contribution_semantics.py', 'contribution_workbook_guard.py',
                'contribution_source_guard.py', 'industry_scope.py', 'snapshot_registry.py', 'graph_data.py',
-               'report_insights.py', 'native_scan.py', 'view_cache.py', 'source_memo.py')
+               'report_insights.py', 'native_scan.py', 'view_cache.py', 'source_memo.py',
+               'response_cache.py', 'comparison_data.py', 'drawer_sidecars.py', 'downstream.py')
 
 MIN_FREE_BYTES = int(1.5 * 1024 ** 3)
 PAUSE_SECONDS = 60
@@ -96,7 +116,19 @@ DEFAULT_MAX_COMPANY_NEIGHBORS = 48
 PAUL_CONSOLE_PORT = 8806
 EXIT_CODES = {'success': 0, 'warning': 1, 'error': 2}
 ROOT_CAUSES = ('low_memory', 'console_busy', 'source_changed_during_build', 'lock_held_by_other_process',
-               'index_missing', 'code_changed', 'parent_gone')  # and unexpected_exception:<type>
+               'index_missing', 'code_changed', 'parent_gone', 'cache_budget')  # and unexpected_exception:<type>
+
+# Response-cache budget (module docstring). contribution_query_store._prune's own limits:
+PRUNE_KEEP_FILES = 128
+PRUNE_KEEP_BYTES = 128 * 1024 * 1024
+BUDGET_SLACK_FILES = 1                   # a click's response written at the same moment as a warm one
+BUDGET_MIN_ENTRY_BYTES = 512 * 1024      # size assumed for a response not yet written (or the largest seen)
+DEMOTED_BASE_NS = 946684800 * 10 ** 9    # 2000-01-01T00:00:00Z: a demoted mtime's origin
+DEMOTED_DAY_NS = 10 ** 12                # one plan day's span inside the demoted range
+DEMOTED_SLOTS = 10 ** 6                  # plan positions per day; the first task gets the latest mtime
+DEMOTED_CEILING_NS = DEMOTED_BASE_NS + 40000 * DEMOTED_DAY_NS   # below this an mtime is a warm entry's
+DEMOTED_EPOCH = dt.date(2020, 1, 1)      # day 0 of the demoted range
+RESPONSE_NAMESPACES = {'insights': ('insights',), 'query': ('results', 'summaries')}
 INDEX_REFUSED = ('prewarm: the analytical index is missing; this harness never builds an index '
                  'without --allow-index-builds.')
 
@@ -156,6 +188,17 @@ def graph_first_load_query(industry):
     params = {'id': 'published-reports', 'industry': industry, 'company': '', 'tier': '', 'cycle': '',
               'funding': 'all', 'mode': 'direct', 'direction': 'Support', 'category': '', 'recipient': ''}
     return urllib.parse.urlencode(params) + '&latest=1'
+
+
+def graph_company_query(industry, company, cycle):
+    """graph.js requestParams(currentScope()) once `company` is chosen after the first load: render()
+    left the cycle select on the first load's echoed cycle (its option value, String(cycle)), the
+    company onchange clears category and recipient and calls refresh(), which adds no latest=1."""
+    number = _js_number(cycle) if cycle not in (None, '') else None
+    value = _js_text(number) if number is not None and not isinstance(cycle, str) else str(cycle or '')
+    params = {'id': 'published-reports', 'industry': industry, 'company': company, 'tier': '', 'cycle': value,
+              'funding': 'all', 'mode': 'direct', 'direction': 'Support', 'category': '', 'recipient': ''}
+    return urllib.parse.urlencode(params)
 
 
 def _js_number(value):
@@ -483,6 +526,10 @@ def recovery(hint, consecutive=1):
                 'or run: prewarm.py warm --task <id> --allow-index-builds)')
     if hint in ('low_memory', 'console_busy'):
         return 'retry after 60 s', 'a pause is not a task failure and never quarantines; the guard is re-checked every 60 s'
+    if hint == 'cache_budget':
+        return ('retry at the next plan, when the response cache has room',
+                'not a task failure and never quarantines: its response would push a stored click response out '
+                '(raise the per-namespace cap in contribution_query_store._prune to warm more)')
     if hint == 'source_changed_during_build':
         return ('retry once now' if consecutive <= 1 else 'retry after 60 s'), quarantine
     return 'retry after 60 s', quarantine
@@ -621,7 +668,7 @@ def last_successes(rows):
 
 
 # Failures that say nothing about the task itself: a blocked index, the warmer's own exit, a guard.
-NOT_TASK_FAILURES = ('index_missing', 'code_changed', 'parent_gone', 'low_memory', 'console_busy')
+NOT_TASK_FAILURES = ('index_missing', 'code_changed', 'parent_gone', 'low_memory', 'console_busy', 'cache_budget')
 
 
 def consecutive_failures(rows):
@@ -677,17 +724,129 @@ def industry_order(datasets, hints):
     return ordered + [dataset for dataset in datasets if dataset not in ordered]
 
 
+# ----------------------------------------------------------------------------- response-cache budget
+def demoted_mtime_ns(day, position):
+    """The mtime a warm response is given: its plan day, then its plan position (the first task gets the
+    latest mtime of the day, so a prune removes the day's lowest-priority entries first)."""
+    index = (dt.date.fromisoformat(day) - DEMOTED_EPOCH).days
+    slot = DEMOTED_SLOTS - min(max(int(position), 0), DEMOTED_SLOTS - 1)
+    return DEMOTED_BASE_NS + index * DEMOTED_DAY_NS + slot * 1000
+
+
+def demoted_day(mtime_ns):
+    """The plan day (local ISO date) a warm entry's mtime records; None for any other mtime."""
+    if not DEMOTED_BASE_NS <= mtime_ns < DEMOTED_CEILING_NS:
+        return None
+    return (DEMOTED_EPOCH + dt.timedelta(days=(mtime_ns - DEMOTED_BASE_NS) // DEMOTED_DAY_NS)).isoformat()
+
+
+def response_files(directory):
+    """(mtime_ns, size, path) of each response JSON in one namespace folder, newest first (the order
+    contribution_query_store._prune sorts them in)."""
+    files = []
+    try:
+        entries = list(Path(directory).glob('*.json'))
+    except OSError:
+        return files
+    for path in entries:
+        try:
+            info = path.stat()
+        except OSError:
+            continue
+        files.append((info.st_mtime_ns, info.st_size, path))
+    return sorted(files, reverse=True)
+
+
+def warm_capacity(files, today, keep_files=PRUNE_KEEP_FILES, keep_bytes=PRUNE_KEEP_BYTES):
+    """How many responses the warmer may still write today into a namespace holding `files`
+    (response_files()). store._prune keeps the longest newest-first run within keep_files and keep_bytes
+    and removes the rest, oldest first. A write is allowed only while everything that write, plus
+    BUDGET_SLACK_FILES written by a click at the same moment, could remove is a warm entry from a day
+    before `today`: warm entries of today and every response a click stored are never pushed out."""
+    entry = max([BUDGET_MIN_ENTRY_BYTES] + [size for _, size, _ in files])
+    removable = sorted((mtime, size) for mtime, size, _ in files
+                       if (day := demoted_day(mtime)) is not None and day < today)   # oldest first
+    count, total = len(files), sum(size for _, size, _ in files)
+    capacity = 0
+    while capacity < keep_files:
+        extra = 1 + BUDGET_SLACK_FILES
+        need_count, need_bytes, taken = count + extra, total + extra * entry, 0
+        while need_count > keep_files or need_bytes > keep_bytes:
+            if taken >= len(removable):
+                return capacity
+            need_count -= 1
+            need_bytes -= removable[taken][1]
+            taken += 1
+        capacity += 1
+        count, total = count + 1, total + entry          # the warm write itself happens
+        while removable and (count > keep_files or total > keep_bytes):
+            count, total = count - 1, total - removable.pop(0)[1]   # and prunes the oldest warm entries
+    return capacity
+
+
+def demote(paths, day, position):
+    """Give each response the warmer wrote the demoted mtime of its plan day and position."""
+    moved = []
+    for path in paths:
+        with contextlib.suppress(OSError):
+            info = os.stat(path)
+            if demoted_day(info.st_mtime_ns) is None:
+                os.utime(path, ns=(info.st_atime_ns, demoted_mtime_ns(day, position)))
+                moved.append(str(path))
+    return moved
+
+
+def _utc_ns(iso):
+    try:
+        moment = dt.datetime.fromisoformat(str(iso).replace('Z', '+00:00'))
+    except ValueError:
+        return None
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=dt.timezone.utc)
+    return int(moment.timestamp() * 1e6) * 1000
+
+
+def promote(entries):
+    """(path, seen_utc) pairs: a warm entry a click has used since gets the click's time as its mtime."""
+    moved = []
+    for path, seen in entries:
+        seen_ns = _utc_ns(seen) or time.time_ns()
+        with contextlib.suppress(OSError):
+            info = os.stat(path)
+            if demoted_day(info.st_mtime_ns) is not None:
+                os.utime(path, ns=(info.st_atime_ns, seen_ns))
+                moved.append(str(path))
+    return moved
+
+
 # ----------------------------------------------------------------------------- planning
-KIND_RANK = {'query_view': 1, 'insights_default': 2, 'insights_neighbor': 3}
+# Plan order. 'other_basis' orders the newest hint's other-basis neighbours after every company of every
+# industry; those tasks keep the insights_neighbor kind (and so their task ids and ledger history).
+KIND_RANK = {'query_view': 1, 'insights_default': 2, 'insights_neighbor': 3, 'insights_company': 4,
+             'other_basis': 5, 'graph_spark': 6, 'comparison_flows': 7, 'drawer_sidecars': 8}
+INSIGHTS_KINDS = ('insights_default', 'insights_neighbor', 'insights_company')
+QUERY_KINDS = ('query_view', 'graph_spark')
+# Kinds that build another builder's cache (SP build/cache and build/drawer receipts): no analytical index
+# and no contribution-query response is involved, and each needs more memory headroom than a query.
+ARTIFACT_KINDS = ('comparison_flows', 'drawer_sidecars')
+ARTIFACT_EXTRA_FREE_BYTES = 768 * 1024 ** 2   # Banking: flows about +0.5 GB transient, drawer 0.6 GB peak
+
+
+def response_group(kind):
+    """The contribution-query response namespaces a task of this kind writes (RESPONSE_NAMESPACES key),
+    or None when it writes none."""
+    if kind in QUERY_KINDS:
+        return 'query'
+    return 'insights' if kind in INSIGHTS_KINDS else None
 
 
 def task_id(kind, dataset, body):
     return f'{kind}:{slug(dataset)}:{digest(body)[:12]}'
 
 
-def make_task(kind, dataset, body, rank, reason, source):
+def make_task(kind, dataset, body, rank, reason, source, order=None):
     return {'id': task_id(kind, dataset, body), 'kind': kind, 'dataset': dataset, 'body': body,
-            'rank': [KIND_RANK[kind], *rank], 'reason': reason, 'source_fp': source.get('source_fp'),
+            'rank': [KIND_RANK[order or kind], *rank], 'reason': reason, 'source_fp': source.get('source_fp'),
             'index_present': bool(source.get('index_present')), 'state': 'pending'}
 
 
@@ -714,12 +873,20 @@ def already_warm(task, success, today, code_fp, exists=os.path.exists):
     """True when the ledger's last success still describes the cache the console would read."""
     if not success or success.get('source_fp') != task.get('source_fp') or success.get('code_fp') != code_fp:
         return False
-    if task['kind'] != 'query_view':
+    if task['kind'] in INSIGHTS_KINDS:
         wanted = task['body'].get('as_of') or today
         if success.get('as_of') != wanted:
             return False
-    path = success.get('response_path')
+    # A query view warmed without its response (no room in the response cache) is warm while its
+    # projection exists: the projection is the cost the click would otherwise pay.
+    path = success.get('response_path') or (success.get('detail') or {}).get('view_path')
     return bool(path) and exists(path)
+
+
+def company_bodies(dataset, companies):
+    """insights.js's first-open body with each company of the select chosen, in the select's order."""
+    return [{**insights_default_body(dataset), 'company': company}
+            for company in companies or [] if isinstance(company, str) and company]
 
 
 def build_plan(backend, *, hints, today, code_fp, industries=None, allow_index_builds=False,
@@ -779,18 +946,59 @@ def build_plan(backend, *, hints, today, code_fp, industries=None, allow_index_b
         if companies is None:
             pending_expansion = {'dataset': dataset, 'basis': body.get('basis') or 'receipt'}
         planned = {canonical(task['body']) for task in tasks if task['kind'] != 'query_view' and task['dataset'] == dataset}
-        company_bodies, basis_bodies = neighbor_bodies(body, companies or [], max_company_neighbors, planned)
-        for index, neighbor in enumerate(company_bodies, 1):
+        neighbor_companies, basis_bodies = neighbor_bodies(body, companies or [], max_company_neighbors, planned)
+        for index, neighbor in enumerate(neighbor_companies, 1):
             tasks.append(make_task('insights_neighbor', dataset, neighbor, [0, rank, index],
                                    'newest hint: other company' if neighbor.get('company') else
                                    'newest hint: All covered companies', source))
-        for index, neighbor in enumerate(basis_bodies, len(company_bodies) + 1):
-            tasks.append(make_task('insights_neighbor', dataset, neighbor, [0, rank, index],
-                                   'newest hint: other basis', source))
+        # After every company of every industry: the newest hint's scope at each other basis.
+        for index, neighbor in enumerate(basis_bodies, 1):
+            tasks.append(make_task('insights_neighbor', dataset, neighbor, [rank, index],
+                                   'newest hint: other basis', source, order='other_basis'))
+
+    # Every company of every industry at the default body, industries in hint order, companies in the
+    # order of the client's company select: the default result's options.companies (installOptions()).
+    pending_companies = []
+    for rank, dataset in enumerate(order):
+        source = by_dataset[dataset]
+        cached = (options_cache.get(dataset) or {}).get('receipt') or {}
+        if cached.get('source_fp') != source.get('source_fp') or not isinstance(cached.get('companies'), list):
+            pending_companies.append(dataset)   # known once its default result has been warmed
+            continue
+        for index, body in enumerate(company_bodies(dataset, cached['companies'])):
+            tasks.append(make_task('insights_company', dataset, body, [rank, index],
+                                   'every company: insights.js default with the company chosen', source))
+
+    # Graph neighbours of the newest hint's industry: each company's sparkline at the first-load cycle.
+    graph_companies = getattr(backend, 'graph_company_bodies', None)
+    if newest and callable(graph_companies):
+        dataset = newest['dataset']
+        try:
+            for index, (company, body) in enumerate(graph_companies(dataset)):
+                tasks.append(make_task('graph_spark', dataset, body, [order.index(dataset), index],
+                                       f'Graph company {company}: sparkline at the first-load cycle', by_dataset[dataset]))
+        except Stop:
+            raise
+        except Exception as error:   # a Graph that cannot draw the industry has no company sparklines
+            skipped.append({'kind': 'graph_spark', 'dataset': dataset, 'reason': 'no_graph_company_views',
+                            'root_cause_hint': classify(error), 'message': str(error)})
+
+    # Last, the other builders' caches, when their hooks are installed: each industry's
+    # /api/comparison-flows answer and the Graph drawer's sidecars.
+    hooks = getattr(backend, 'artifact_hooks', None)
+    for kind in (hooks() if callable(hooks) else ()):
+        if kind in ARTIFACT_KINDS:
+            for rank, dataset in enumerate(order):
+                tasks.append(make_task(kind, dataset, {'artifact': kind, 'industry': dataset}, [rank],
+                                       {'comparison_flows': 'comparison-flows answer (cache receipt hook)',
+                                        'drawer_sidecars': 'Graph drawer sidecars (drawer receipt hook)'}[kind],
+                                       by_dataset[dataset]))
 
     # One task per request: a hint that is the default body (or repeats a neighbour) is warmed once.
     unique, seen = [], set()
     for task in sorted(tasks, key=lambda item: item['rank']):
+        # (A graph_spark body carries a company filter, so it never equals a query_view body or any
+        # Insights body; the original two-way identity stays exact.)
         identity = ('query' if task['kind'] == 'query_view' else 'insights', task['dataset'], canonical(task['body']))
         if identity in seen:
             continue
@@ -806,11 +1014,35 @@ def build_plan(backend, *, hints, today, code_fp, industries=None, allow_index_b
             entry = None
         if entry:
             task['state'] = 'quarantined'
-        elif not task['index_present'] and not allow_index_builds:
+        elif not task['index_present'] and not allow_index_builds and task['kind'] not in ARTIFACT_KINDS:
             task['state'] = 'blocked'
             task['root_cause_hint'] = 'index_missing'
         elif already_warm(task, successes.get(task['id']), today, code_fp, exists):
             task['state'] = 'warm'
+
+    # The response-cache budget, in priority order: a pending task may write one response into each
+    # namespace of its group. Past the room, a query view is warmed as its projection only and every
+    # other task waits as over_budget (never failed, never quarantined).
+    budget = {}
+    capacity_of = getattr(backend, 'response_capacity', None)
+    for group, namespaces in RESPONSE_NAMESPACES.items():
+        room = [capacity_of(namespace, today) for namespace in namespaces] if callable(capacity_of) else [None]
+        budget[group] = {'room_at_plan': None if None in room else min(room), 'planned_writes': 0, 'over_budget': 0}
+    for task in unique:
+        group = response_group(task['kind'])
+        if task['state'] != 'pending' or group is None:
+            continue
+        entry = budget[group]
+        if entry['room_at_plan'] is None:
+            continue
+        if entry['planned_writes'] < entry['room_at_plan']:
+            entry['planned_writes'] += 1
+        elif task['kind'] == 'query_view':
+            task['view_only'] = True
+        else:
+            task['state'] = 'over_budget'
+            task['root_cause_hint'] = 'cache_budget'
+            entry['over_budget'] += 1
 
     return {'schema': SCHEMA, 'created_utc': utc_iso(), 'as_of': today, 'code_fp': code_fp,
             'hints_stamp': hints_file_stamp,
@@ -820,7 +1052,8 @@ def build_plan(backend, *, hints, today, code_fp, industries=None, allow_index_b
                                           ('available', 'verified', 'source_fp', 'index_present', 'message')}
                         for item in sources},
             'order': order, 'tasks': unique, 'skipped': skipped, 'released_quarantine': released,
-            'quarantine': quarantine, 'pending_expansion': pending_expansion}
+            'quarantine': quarantine, 'pending_expansion': pending_expansion,
+            'pending_companies': pending_companies, 'budget': budget}
 
 
 def plan_counts(plan):
@@ -840,7 +1073,8 @@ def sources_signature(sources):
 STATE_REDIRECTS = (('contribution_query_store', 'ROOT', 'contribution-query-cache'),
                    ('analysis_history', 'ROOT', 'insights-history'),
                    ('contribution_source_guard', 'CACHE_ROOT', 'contribution-source-proofs'),
-                   ('analysis_data', 'ROOT', 'insights'))
+                   ('analysis_data', 'ROOT', 'insights'),
+                   ('response_cache', 'ROOT', 'response-cache'))
 # Read-only inputs that stay pointed at the real state: the analytical indexes and accepted lineage.
 READ_ONLY_STATE = {('contribution_data', 'CACHE_ROOT'), ('contribution_source_guard', 'ACCEPTED_ROOT')}
 _WRITE_FLAGS = os.O_WRONLY | os.O_RDWR | os.O_APPEND | os.O_CREAT | os.O_TRUNC
@@ -975,6 +1209,39 @@ class HintObserver:
             return self.keys[-1][0] if self.keys else None
 
 
+class WriteObserver:
+    """Records every file contribution_query_store._atomic writes in this process: the response files
+    (and proofs) a warm task itself stored, as opposed to responses a click stored. Calls through
+    unchanged."""
+
+    def __init__(self, store):
+        self.store = store
+        self.lock = threading.Lock()
+        self.paths = []
+        original = getattr(store._atomic, '__prewarm_original__', store._atomic)
+
+        @functools.wraps(original)
+        def observed(path, payload):
+            result = original(path, payload)
+            with self.lock:
+                self.paths.append(Path(path))
+            return result
+
+        observed.__prewarm_original__ = original
+        store._atomic = observed
+
+    def reset(self):
+        with self.lock:
+            self.paths.clear()
+
+    def responses(self):
+        """The response files written since the last reset (store.ROOT/responses/<namespace>/*.json)."""
+        root = _norm(Path(self.store.ROOT) / 'responses')
+        with self.lock:
+            paths = list(self.paths)
+        return [str(path) for path in dict.fromkeys(paths) if _norm(path).startswith(root)]
+
+
 class AppBackend:
     """The real Mentat code paths, imported and configured the way server.py does it."""
 
@@ -1030,6 +1297,7 @@ class AppBackend:
         self.industry_scope, self.snapshot_registry, self.view_cache = industry_scope, snapshot_registry, view_cache
         self.console = console
         self._install_source_memo()
+        self._configure_caches()
         if self.sandboxed:
             self._redirect_state(self.state_root)
         # The warmer never records hints: its own requests are not the user's intent.
@@ -1037,6 +1305,7 @@ class AppBackend:
         if not self.allow_index_builds:
             self._refuse_index_builds()
         self.observer = StoreObserver(contribution_query_store)
+        self.writes = WriteObserver(contribution_query_store)
         self.hints = HintObserver(analysis_data) if callable(getattr(analysis_data, '_hint', None)) else None
         if self.hints is None:
             self.notes.append('analysis_data has no _hint(); Insights keys are observed at store.cached only')
@@ -1179,13 +1448,14 @@ class AppBackend:
 
         return GraphConsole(self.report_directory)
 
-    def graph_first_view_filters(self, industry):
-        """The filters the /api/graph route echoes for graph.js's first load of `industry`, computed by
-        Console.graph itself (server.py:2625-2636 route glue, :2166 Console.graph)."""
+    def _graph_view(self, industry, query_string):
+        """(echoed filters, company options) of Console.graph's answer to one graph.js /api/graph request,
+        through the route glue (server.py:2625-2636, :2166 Console.graph). Memoized per request and the
+        reports' file signature; the view itself is not kept."""
         stub = self._console_stub()
         reports = stub.published_reports()
         catalog = stub.graph_catalog('published-reports', reports)
-        query = urllib.parse.parse_qs(graph_first_load_query(industry))   # do_GET's parse_qs (:2454)
+        query = urllib.parse.parse_qs(query_string)   # do_GET's parse_qs (:2454)
         wanted = query.get('industry', [''])[0]
         registry = self.snapshot_registry.registry(self.report_directory) if wanted else None
         label = self.industry_scope.label_or_value(registry, wanted) if registry else wanted
@@ -1195,12 +1465,32 @@ class AppBackend:
             raise ValueError('Choose an industry with completed reports.')
         paths = [stub.report_path('published-reports', index) for index in group['indices']]
         signature = (tuple(str(path) for path in paths), self.view_cache.file_signature(paths), canonical(filters))
-        memo = self._graph_memo.get(label)
+        memo = self._graph_memo.get((label, query_string))
         if memo and memo[0] == signature:
             return memo[1]
         view = stub.graph('published-reports', label, filters, registry)
-        self._graph_memo[label] = (signature, view['filters'])
-        return view['filters']
+        companies = (view.get('options') or {}).get('companies') or []
+        answer = (view['filters'], [company for company in companies if isinstance(company, str) and company])
+        self._graph_memo[(label, query_string)] = (signature, answer)
+        return answer
+
+    def graph_first_view_filters(self, industry):
+        """The filters the /api/graph route echoes for graph.js's first load of `industry`, computed by
+        Console.graph itself (server.py:2625-2636 route glue, :2166 Console.graph)."""
+        return self._graph_view(industry, graph_first_load_query(industry))[0]
+
+    def graph_company_bodies(self, industry):
+        """(company, sparkline body) for each company of the first-load view's company select
+        (view.options.companies, graph.js render()), each built from Console.graph's own answer to that
+        company's view at the first-load cycle (graph_company_query)."""
+        filters, companies = self._graph_view(industry, graph_first_load_query(industry))
+        bodies = []
+        for company in companies:
+            echoed, _ = self._graph_view(industry, graph_company_query(industry, company, filters.get('cycle')))
+            body = spark_request(industry, echoed)
+            if body is not None:
+                bodies.append((company, body))
+        return bodies
 
     def release_graph_memory(self):
         """Graph views were only read to learn each first-load cycle; the warmer keeps none of them."""
@@ -1301,10 +1591,119 @@ class AppBackend:
                 for key in [key for key, job in analysis._jobs.items() if job.done()]:
                     del analysis._jobs[key]
 
+    def warm_view_only(self, dataset):
+        """What the sparkline query builds before its response (contribution_query._query_uncached ->
+        store.view): the query projection, after the route's strict source check. No response is stored,
+        because the response cache has no room for a warm entry."""
+        self.guard.verify_sources(self.report_directory, dataset)   # Handler.contribution_result's check
+        source = self.data._source(self.report_directory, {'dataset': dataset})
+        path, pending = self.data._ready(source)
+        if pending:
+            if not self.allow_index_builds:
+                raise IndexMissing(INDEX_REFUSED)
+            path, _ = self.data._ready(source, wait=True)
+        view = self.store.view(path)
+        return {'status': 'ready', 'rows': None, 'key': None, 'response_path': None, 'polls': 0,
+                'statuses': ['projection only'], 'as_of': None, 'view_path': str(view)}
+
     def warm(self, task, deadline=None, should_stop=None, retry=False, sleep=time.sleep):
-        if task['kind'] == 'query_view':
-            return self.warm_query_view(task['body'], deadline, should_stop, retry, sleep)
-        return self.warm_insights(task['body'], deadline, should_stop, retry, sleep)
+        writes = getattr(self, 'writes', None)
+        if writes is not None:
+            writes.reset()
+        if task['kind'] == 'query_view' and task.get('view_only'):
+            info = self.warm_view_only(task['dataset'])
+        elif task['kind'] in ARTIFACT_KINDS:
+            info = getattr(self, 'warm_' + task['kind'])(task['dataset'])
+        elif task['kind'] in QUERY_KINDS:
+            info = self.warm_query_view(task['body'], deadline, should_stop, retry, sleep)
+        else:
+            info = self.warm_insights(task['body'], deadline, should_stop, retry, sleep)
+        info['written'] = writes.responses() if writes is not None else []
+        return info
+
+    # -- the response-cache budget (module docstring) -------------------------------------------------
+    def response_dir(self, namespace):
+        return Path(self.store.ROOT) / 'responses' / namespace
+
+    def response_capacity(self, namespace, today):
+        return warm_capacity(response_files(self.response_dir(namespace)), today)
+
+    def response_room(self, kind, today):
+        group = response_group(kind)
+        if group is None:
+            return None
+        return min(self.response_capacity(namespace, today) for namespace in RESPONSE_NAMESPACES[group])
+
+    # -- the other builders' caches (their receipts' hooks) ---------------------------------------
+    def artifact_hooks(self):
+        """The ARTIFACT_KINDS whose hook is installed in this checkout."""
+        found = []
+        with contextlib.suppress(Exception):
+            import comparison_data
+            import response_cache  # noqa: F401 - flows_entry stores through it
+            if callable(getattr(comparison_data, 'flows_entry', None)):
+                found.append('comparison_flows')
+        with contextlib.suppress(Exception):
+            import drawer_sidecars
+            if callable(getattr(drawer_sidecars, 'build_sidecars', None)):
+                found.append('drawer_sidecars')
+        return tuple(found)
+
+    def _configure_caches(self):
+        """Root the other builders' disk caches in this run's state root, where the console roots them
+        (cache receipt section 8: response_cache.configure(); the drawer sidecars' state root)."""
+        with contextlib.suppress(ImportError):
+            import response_cache
+            response_cache.configure(self.state_root / 'response-cache')
+            self.notes.append('response_cache disk tier: ' + str(self.state_root / 'response-cache'))
+        with contextlib.suppress(ImportError):
+            import drawer_sidecars
+            drawer_sidecars.configure(state_root=self.state_root / 'drawer-sidecars')
+
+    def _industry_reports(self, industry):
+        """(label, report paths) exactly as Console.comparison selects them for the route's label."""
+        stub = self._console_stub()
+        registry = self.snapshot_registry.registry(self.report_directory)
+        label = self.industry_scope.label_or_value(registry, industry) if registry else industry
+        catalog = stub.graph_catalog('published-reports', stub.published_reports())
+        group = next((item for item in catalog['industries'] if item['name'] == label), None)
+        if group is None:
+            raise ValueError('Choose an industry with completed reports.')
+        return label, [stub.report_path('published-reports', index) for index in group['indices']]
+
+    def warm_comparison_flows(self, industry):
+        """comparison_data.flows_entry (the cache receipt's hook, the body of warm_flows()): one industry's
+        /api/comparison-flows answer, built once and stored in the response cache's disk tier."""
+        import comparison_data
+        import response_cache
+        label, paths = self._industry_reports(industry)
+        try:
+            entry = comparison_data.flows_entry(paths, label)
+        finally:
+            self.release_graph_memory()
+        root = getattr(response_cache, 'ROOT', None)
+        meta = Path(root) / entry.namespace / (entry.key + '.json') if root is not None else None
+        return {'status': 'ready', 'key': entry.key, 'polls': 0, 'statuses': [entry.hit], 'as_of': None,
+                'response_path': str(meta) if meta is not None and meta.is_file() else None}
+
+    def warm_drawer_sidecars(self, industry):
+        """drawer_sidecars.build_sidecars (the drawer receipt's hook): every sidecar a Graph drawer reads for
+        one industry, through the click's own entry points; graph_data's caches are released afterwards."""
+        import drawer_sidecars
+        summary = drawer_sidecars.build_sidecars(industry, report_directory=self.report_directory, release=True)
+        if not summary.get('ok'):
+            failed = [f"{step['step']}: {step['error']}" for step in summary.get('steps', []) if step.get('error')]
+            raise RuntimeError('Drawer sidecars incomplete: ' + ('; '.join(failed) or summary.get('error') or 'unknown'))
+        return {'status': 'ready', 'key': None, 'polls': 0, 'statuses': ['built'], 'as_of': None,
+                'response_path': str(drawer_sidecars.state_root()), 'sidecars': summary.get('sidecars')}
+
+    def demote_written(self, paths, day, position):
+        return demote(paths, day, position)
+
+    def promote_hinted(self, hints):
+        entries = [(self.insights_response_path(hint['key']), hint.get('seen_utc'))
+                   for hint in hints if hint.get('key')]
+        return promote([(path, seen) for path, seen in entries if path is not None])
 
 
 def _compress(statuses):
@@ -1378,8 +1777,10 @@ class Warmer:
         self.executed = 0
         self.succeeded = 0
         self.failed = 0
+        self.skipped = 0
         self.quarantined_now = []
         self.stop_reason = None
+        self.last_promotion = None
 
     # -- helpers --------------------------------------------------------------------------------
     def _emit(self, kind, status, summary, **fields):
@@ -1465,7 +1866,8 @@ class Warmer:
         log(f'plan ({reason}): {len(plan["tasks"])} tasks, {pending} pending; {json.dumps(counts)}')
         self._emit('mentat.prewarm.plan', 'info', f'Plan ({reason}): {len(plan["tasks"])} tasks, {pending} to warm',
                    stage='plan', total=len(plan['tasks']),
-                   metadata={'counts': counts, 'order': plan['order'], 'skipped': len(plan['skipped'])})
+                   metadata={'counts': counts, 'order': plan['order'], 'skipped': len(plan['skipped']),
+                             'budget': plan.get('budget'), 'pending_companies': plan.get('pending_companies')})
         return plan
 
     def replan_trigger(self):
@@ -1490,6 +1892,9 @@ class Warmer:
         if expansion and self.options_known(expansion['dataset'], expansion['basis'],
                                             plan['sources'].get(expansion['dataset'], {}).get('source_fp')):
             return 'neighbors_ready'
+        if any(self.options_known(dataset, 'receipt', plan['sources'].get(dataset, {}).get('source_fp'))
+               for dataset in plan.get('pending_companies') or []):
+            return 'companies_ready'
         return None
 
     def sources_changed(self):
@@ -1525,7 +1930,7 @@ class Warmer:
         return min(waits) if waits else None
 
     # -- guards ---------------------------------------------------------------------------------
-    def resource_guard(self):
+    def resource_guard(self, task=None):
         """(root_cause_hint, detail) when a task must not start now; None when it may."""
         try:
             free = self.free_bytes()
@@ -1535,6 +1940,9 @@ class Warmer:
         self.last_free = free
         if free < MIN_FREE_BYTES:
             return 'low_memory', f'{free / 1024 ** 2:.0f} MB free physical memory < {MIN_FREE_BYTES / 1024 ** 2:.0f} MB'
+        if task is not None and task.get('kind') in ARTIFACT_KINDS and free < MIN_FREE_BYTES + ARTIFACT_EXTRA_FREE_BYTES:
+            return 'low_memory', (f'{free / 1024 ** 2:.0f} MB free physical memory < '
+                                  f'{(MIN_FREE_BYTES + ARTIFACT_EXTRA_FREE_BYTES) / 1024 ** 2:.0f} MB for {task["kind"]}')
         if self.console:
             busy, detail = self.console_probe(self.console)
             if busy is None:
@@ -1571,8 +1979,61 @@ class Warmer:
             atomic_write_json(self.state.heartbeat, {'pid': os.getpid(), 'run_id': self.run_id, 'op': self.op,
                                                      'updated_utc': utc_iso(), **values})
 
+    # -- the response-cache budget --------------------------------------------------------------
+    def room_for(self, task):
+        """How many responses the task's namespaces still take today; None without budget information
+        (a backend that stores nothing), and for a query view already reduced to its projection."""
+        room = getattr(self.backend, 'response_room', None)
+        if not callable(room) or (task['kind'] == 'query_view' and task.get('view_only')):
+            return None
+        try:
+            return room(task['kind'], self.today())
+        except Exception as error:   # an unreadable namespace is treated as full: never push anything out
+            log(f'response budget check failed ({type(error).__name__}: {error}); treated as no room')
+            return 0
+
+    def over_budget(self, task):
+        """True (after recording it) when the task must not write a response now. A query view keeps its
+        projection warm and only drops the response."""
+        room = self.room_for(task)
+        if room is None or room >= 1:
+            return False
+        if task['kind'] == 'query_view':
+            task['view_only'] = True
+            return False
+        task['state'] = 'over_budget'
+        task['root_cause_hint'] = 'cache_budget'
+        retry, stop = recovery('cache_budget')
+        self.skipped += 1
+        self.observe(task, 'skipped', hint='cache_budget', retry=retry, stop=stop,
+                     error='The response cache has no room for another warm entry today.')
+        self._emit('mentat.prewarm.task', 'skipped', f'Over budget: {task["kind"]} {task["dataset"]}',
+                   stage=task['kind'], metadata={'task_id': task['id'], 'root_cause_hint': 'cache_budget'})
+        return True
+
+    def promote_hints(self):
+        """Hints name the responses clicks were answered with: a demoted warm entry among them is promoted
+        to the click's time, so it is kept like a response the click stored itself."""
+        promote_hinted = getattr(self.backend, 'promote_hinted', None)
+        now = self.monotonic()
+        if not callable(promote_hinted) or (self.last_promotion is not None and now - self.last_promotion < IDLE_SECONDS):
+            return []
+        self.last_promotion = now
+        try:
+            moved = promote_hinted(read_hints(self.state.hints))
+        except Exception as error:
+            log(f'promotion failed: {type(error).__name__}: {error}')
+            return []
+        if moved:
+            log(f'promoted {len(moved)} warm responses a click has used')
+            self._emit('mentat.prewarm.budget', 'info', f'Promoted {len(moved)} warm responses a click used',
+                       stage='budget', metadata={'promoted': len(moved)})
+        return moved
+
     # -- one task -------------------------------------------------------------------------------
     def execute(self, task):
+        if self.over_budget(task):
+            return 'skipped'
         runtime = self.runtime.setdefault(task['id'], {'attempts': 0, 'not_before': 0.0, 'consecutive': 0})
         runtime['attempts'] += 1
         position = self.plan['tasks'].index(task) + 1 if task in self.plan['tasks'] else -1
@@ -1624,7 +2085,19 @@ class Warmer:
         runtime['consecutive'] = 0
         task['state'] = 'warm'
         self.succeeded += 1
-        self.observe(task, 'succeeded', seconds=seconds, info=info, consecutive=0)
+        extra = {}
+        written = info.get('written') or []
+        if written:
+            extra['written'] = len(written)
+            demote_written = getattr(self.backend, 'demote_written', None)
+            if callable(demote_written):
+                try:
+                    extra['demoted'] = len(demote_written(written, self.today(), max(0, position - 1)))
+                except Exception as error:   # the entry then counts as a click's: the budget only shrinks
+                    extra['demote_error'] = f'{type(error).__name__}: {error}'
+        if info.get('view_path'):
+            extra['view_path'] = info['view_path']
+        self.observe(task, 'succeeded', seconds=seconds, info=info, consecutive=0, extra=extra)
         self._emit('mentat.prewarm.task', 'completed', f'Warm {summary} in {seconds:.1f} s', stage=task['kind'],
                    current=position, total=total, duration_ms=int(seconds * 1000),
                    metadata={'task_id': task['id'], 'key': info.get('key'), 'polls': info.get('polls')})
@@ -1776,6 +2249,7 @@ class Warmer:
         idle_announced = False
         while True:
             self.check_stop()
+            self.promote_hints()
             trigger = self.replan_trigger()
             if trigger is None and self.last_source_check is not None and \
                     self.monotonic() - self.last_source_check >= SOURCE_CHECK_SECONDS and self._sources_changed_safe():
@@ -1798,13 +2272,15 @@ class Warmer:
                     self.safe_replan('source_changed')
                     idle_announced = False
                 continue
-            guard = self.resource_guard()
+            guard = self.resource_guard(task)
             if guard:
                 self.pause(task, *guard)
                 continue
             self.resume_if_paused(task)
             idle_announced = False
-            self.execute(task)
+            if self.execute(task) == 'skipped':   # over budget: nothing ran
+                atomic_write_json(self.state.plan, self.plan)
+                continue
             self.executed += 1
             # plan.json carries each task's state as it changes, for status and `warm --task`.
             atomic_write_json(self.state.plan, self.plan)
@@ -1813,7 +2289,7 @@ class Warmer:
 
     def _metrics(self, extra=None):
         metrics = {'executed': self.executed, 'succeeded': self.succeeded, 'failed': self.failed,
-                   'quarantined_now': self.quarantined_now, 'run_id': self.run_id}
+                   'skipped_over_budget': self.skipped, 'quarantined_now': self.quarantined_now, 'run_id': self.run_id}
         if self.plan:
             metrics['plan_counts'] = plan_counts(self.plan)
         metrics.update(extra or {})
@@ -1889,6 +2365,11 @@ def status_report(state, today=None):
                  'quarantined': 'quarantined'}.get(state_name, state_name)
         if task['kind'] in ('query_view', 'insights_default'):
             entry[task['kind']] = label
+        elif task['kind'] in ('insights_company', 'graph_spark'):
+            prefix = 'companies' if task['kind'] == 'insights_company' else 'graph_spark'
+            entry[prefix + '_planned'] = entry.get(prefix + '_planned', 0) + 1
+            entry[prefix + '_warm'] = entry.get(prefix + '_warm', 0) + int(state_name == 'warm')
+            entry[prefix + '_over_budget'] = entry.get(prefix + '_over_budget', 0) + int(state_name == 'over_budget')
         else:
             entry['neighbors_planned'] += 1
             entry['neighbors_warm'] += int(state_name == 'warm')
@@ -1991,7 +2472,7 @@ def verify_samples(rows, today, sample, task_filter=None):
     """Newest succeeded Insights observation per task for today, round-robin over datasets."""
     newest = {}
     for row in rows:
-        if row.get('outcome') != 'succeeded' or row.get('kind') not in ('insights_default', 'insights_neighbor'):
+        if row.get('outcome') != 'succeeded' or row.get('kind') not in INSIGHTS_KINDS:
             continue
         if task_filter and row.get('task_id') not in task_filter:
             continue
@@ -2668,6 +3149,7 @@ def op_plan(options):
                   actions, [str(state.plan)],
                   {'counts': plan_counts(plan), 'order': plan['order'], 'as_of': plan['as_of'],
                    'code_fp': plan['code_fp'], 'skipped': plan['skipped'], 'pending_expansion': plan['pending_expansion'],
+                   'pending_companies': plan.get('pending_companies'), 'budget': plan.get('budget'),
                    'tasks': [{'id': task['id'], 'state': task['state'], 'reason': task['reason']} for task in plan['tasks']],
                    'sources': plan['sources'], 'notes': backend.notes})
 
@@ -2728,7 +3210,7 @@ def op_warm(options):
         task['state'] = 'pending'
         outcome = warmer.execute(task)
         row = Ledger(state).read()[-1]
-        status = 'success' if outcome == 'succeeded' else 'error'
+        status = 'success' if outcome == 'succeeded' else 'warning' if outcome == 'skipped' else 'error'
         return op_result(status, f'{task["id"]}: {outcome} in {row.get("seconds")} s' + (f' ({note})' if note else ''),
                       [row['retry']] if row.get('retry') else [], [str(state.ledger)],
                       {key: row.get(key) for key in ('outcome', 'seconds', 'key', 'response_path', 'as_of',
