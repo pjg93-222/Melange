@@ -2,6 +2,8 @@
 
 Each committee/cycle is selected once, from its newest complete saved unit.
 Traversal is cycle-safe and uncapped; absent destination snapshots are disclosed.
+A set of committee/cycles is always read in one stable order (_stable), never in the
+process's string-hash order, so every console gives the same answer.
 """
 from collections import ChainMap, OrderedDict, defaultdict
 from collections.abc import Mapping
@@ -260,10 +262,21 @@ def transfers(unit):
         if not memo(row) and str(row.get('line_number')) in ('22', '23') and destination:
             yield destination, amount(row.get('disbursement_amount')), row
 
+def _stable(key):
+    """The one order for (cycle, committee) keys (Paul, 2026-09-24: "Deterministic"): ascending
+    by each part's text, then by its type, so mixed keys neither raise nor tie. A set's own
+    iteration order follows the string-hash seed (PYTHONHASHSEED) and differs per process."""
+    return tuple(str(part) for part in key), tuple(type(part).__name__ for part in key)
+
+
 def network(roots, units=None, report_edges=()):
     units = inventory() if units is None else units
     visited, missing, edges = set(), set(), []
-    pending = list(roots)
+    # A set of roots (graph_data passes one) is walked in _stable order, smallest first (the
+    # stack pops from its end), not in its per-process hash order: that order decides the
+    # order of `edges`. An ordered collection (a list, snapshot_view's dict) keeps its own.
+    pending = (sorted(roots, key=_stable, reverse=True) if isinstance(roots, (set, frozenset))
+               else list(roots))
     fallback = defaultdict(dict)
     for edge in report_edges:
         key = (str(edge['cycle']), edge['source'])
@@ -300,7 +313,10 @@ def network(roots, units=None, report_edges=()):
             if value > 0:
                 edges.append({'cycle':key[0], 'source':key[1], 'destination':destination,
                               'amount':float(value), 'terminal_candidate':True})
-    return {'keys':visited, 'units':{key:units[key] for key in visited if key in units},
+    # The units in _stable order, not the visited set's per-process hash order. activity() reads
+    # them in this order, so the order of the candidate rows (candidate_details) and the label a
+    # candidate keeps (graph_data.grouped keeps the last one it reads) are the same everywhere.
+    return {'keys':visited, 'units':{key:units[key] for key in sorted(visited, key=_stable) if key in units},
             'missing':sorted(missing), 'edges':edges, 'note':NOTE}
 
 def activity(network):
@@ -420,7 +436,9 @@ def relationships(rows, roots, found):
     totals, pairs, labels = defaultdict(Decimal), defaultdict(Decimal), {}
     filings = defaultdict(list)
     paths = {key:[key[1]] for key in roots}
-    queue = list(roots)
+    # A set of roots is searched in _stable order, not its per-process hash order, so a committee
+    # reached by equally short routes from two roots always takes the route of the first.
+    queue = sorted(roots, key=_stable) if isinstance(roots, (set, frozenset)) else list(roots)
     outgoing = defaultdict(list)
     for edge in found['edges']:
         if edge.get('terminal_candidate'):
