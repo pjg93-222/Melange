@@ -6,6 +6,7 @@ The small fact table keeps common chart scans away from long audit/detail text.
 from collections import OrderedDict
 from contextlib import closing,contextmanager
 import hashlib
+import importlib
 import json
 import os
 from pathlib import Path
@@ -17,6 +18,20 @@ import uuid
 import contribution_data as data
 
 ROOT=data.PROJECT/'state/contribution-query-cache'
+DEFAULT_ROOT=ROOT
+# Response budget per responses/<namespace> folder (prewarm.warm_capacity models the same limits).
+RESPONSE_KEEP_FILES=1024
+RESPONSE_KEEP_BYTES=512*1024*1024
+# A process recounts a folder after this many of its own writes, bytes or seconds (others write too).
+RECOUNT_WRITES=64
+RECOUNT_BYTES=32*1024*1024
+RECOUNT_SECONDS=300
+# A response younger than this is evicted only after every older one: its access may still be buffered
+# in the process that wrote it.
+FRESH_SECONDS=300
+# prewarm.DEMOTED_BASE_NS and DEMOTED_CEILING_NS: a response the warmer wrote that no click has used
+# carries an mtime in this range (prewarm.demote; prewarm.promote moves a used one back out).
+WARM_MTIME_NS=(946684800*10**9,946684800*10**9+40000*10**12)
 CORE=('cycle','year','company','date','zip5','state')
 DETAIL=tuple(k for k in data.DIMENSIONS if k not in CORE)
 MONEY=('raw_cents','receipt_cents','original_cents','supported_cents','pac_cents','unresolved')
@@ -27,6 +42,8 @@ _locks={}
 _memory=OrderedDict()
 _memory_bytes=0
 _verified={}
+_usage={}  # folder -> [files, bytes, writes since recount, bytes since recount, recounted (monotonic)]
+_ledger_module=[]
 MEMORY_LIMIT=32*1024*1024
 ENTRY_LIMIT=24*1024*1024
 
@@ -167,17 +184,89 @@ def _remember(key,payload):
         while _memory_bytes>MEMORY_LIMIT:
             _,old=_memory.popitem(last=False);_memory_bytes-=len(old)
 
-def _prune(directory):
-    # Only disposable response JSON is removed. Lock files remain to preserve
-    # cross-process locking identities, and source/index files are untouched.
+def _ledger():
+    # access_stats is looked up by name, not imported by a statement: it ranks what is kept and never
+    # decides an answer, so it stays out of every code identity that follows import statements
+    # (response_cache.module_closure). A cache outside the live state tree never writes the live ledger.
+    if not _ledger_module:
+        try:_ledger_module.append(importlib.import_module('access_stats'))
+        except Exception:_ledger_module.append(None)
+    ledger=_ledger_module[0]
+    if ledger is None:return None
     try:
-        files=sorted(((p.stat().st_mtime_ns,p.stat().st_size,p) for p in directory.glob('*.json')),reverse=True)
-        total=0
-        for index,(_,size,path) in enumerate(files):
-            total+=size
-            if index>=128 or total>128*1024*1024:
-                if path.resolve().is_relative_to((ROOT/'responses').resolve()):path.unlink(missing_ok=True)
+        live=os.path.normcase(os.path.abspath(ROOT))==os.path.normcase(os.path.abspath(DEFAULT_ROOT))
+        return ledger if live or not ledger.is_default() else None
+    except Exception:return None
+
+def _note(namespace,key,cost_s=None,size=None):
+    ledger=_ledger()
+    if ledger is not None:ledger.record('store/'+namespace,key,cost_s=cost_s,size=size)
+
+def _responses(directory):
+    """(name, mtime_ns, size) of each response JSON in one folder, from one directory listing (on
+    Windows os.scandir carries size and mtime in the listing: no stat call per file)."""
+    found=[]
+    with os.scandir(directory) as items:
+        for item in items:
+            if not item.name.endswith('.json'):continue
+            try:
+                if not item.is_file(follow_symlinks=False):continue
+                info=item.stat(follow_symlinks=False)
+            except OSError:continue
+            found.append((item.name,info.st_mtime_ns,info.st_size))
+    return found
+
+def _evictions(files,scores,keep=None,keep_files=None,keep_bytes=None,now_ns=None):
+    """Names to remove, lowest value first, until at most keep_files responses and keep_bytes remain:
+    first responses the warmer wrote that no click has used (oldest plan day, lowest priority first),
+    then the lowest access_stats score (ties: oldest), responses younger than FRESH_SECONDS last.
+    `keep`, the response just written, is never removed."""
+    keep_files=RESPONSE_KEEP_FILES if keep_files is None else keep_files
+    keep_bytes=RESPONSE_KEEP_BYTES if keep_bytes is None else keep_bytes
+    count=len(files);total=sum(size for _,_,size in files)
+    if count<=keep_files and total<=keep_bytes:return []
+    fresh=(time.time_ns() if now_ns is None else now_ns)-FRESH_SECONDS*10**9
+    def rank(item):
+        name,mtime,_=item
+        if WARM_MTIME_NS[0]<=mtime<WARM_MTIME_NS[1]:return (0,0.0,mtime,name)
+        return (2 if mtime>=fresh else 1,scores.get(name[:-5],0.0),mtime,name)
+    removed=[]
+    for name,_,size in sorted((item for item in files if item[0]!=keep),key=rank):
+        if count<=keep_files and total<=keep_bytes:break
+        removed.append(name);count-=1;total-=size
+    return removed
+
+def _prune(directory,keep=None):
+    """Hold one responses/<namespace> folder to RESPONSE_KEEP_FILES and RESPONSE_KEEP_BYTES in value
+    order (_evictions). Only disposable response JSON is removed: lock files keep cross-process lock
+    identities, and views, sources and indexes are never touched. Returns the names removed."""
+    directory=Path(directory);removed=[]
+    try:
+        if not directory.resolve().is_relative_to((ROOT/'responses').resolve()):return removed
+        files=_responses(directory)
+        count=len(files);total=sum(size for _,_,size in files)
+        if count>RESPONSE_KEEP_FILES or total>RESPONSE_KEEP_BYTES:
+            ledger=_ledger()
+            scores=ledger.scores('store/'+directory.name) if ledger is not None else {}
+            sizes={name:size for name,_,size in files}
+            for name in _evictions(files,scores,keep):
+                try:(directory/name).unlink(missing_ok=True)
+                except OSError:continue
+                removed.append(name);count-=1;total-=sizes[name]
+        with _mutex:_usage[str(directory)]=[count,total,0,0,time.monotonic()]
     except OSError:pass
+    return removed
+
+def _wrote(directory,name,size):
+    """Account one response this process wrote; prune only when the running count says the folder may
+    be over its cap, or this process has not recounted it for RECOUNT_WRITES/_BYTES/_SECONDS."""
+    with _mutex:
+        usage=_usage.get(str(directory))
+        if usage is not None:
+            usage[0]+=1;usage[1]+=size;usage[2]+=1;usage[3]+=size
+            due=(usage[0]>RESPONSE_KEEP_FILES or usage[1]>RESPONSE_KEEP_BYTES or usage[2]>=RECOUNT_WRITES
+                 or usage[3]>=RECOUNT_BYTES or time.monotonic()-usage[4]>=RECOUNT_SECONDS)
+    if usage is None or due:_prune(directory,keep=name)
 
 def cached(namespace,identity,compute,stable=lambda:True):
     """Return fresh object copies and publish only stable, complete responses."""
@@ -194,16 +283,20 @@ def cached(namespace,identity,compute,stable=lambda:True):
             _remember(key,payload);return payload
         except (OSError,ValueError,KeyError,AttributeError,TypeError):return None
     if not stable():raise ValueError('Contribution source changed before its query completed.')
-    payload=read()
+    payload=read();built=None
     if payload is None:
         with _lock(path.with_suffix('.lock')):
             payload=read()
             if payload is None:
-                result=compute()
+                started=time.perf_counter();result=compute()
                 if not stable():raise ValueError('Contribution source changed while computing its query.')
                 payload=json.dumps(result,ensure_ascii=False,separators=(',',':')).encode('utf-8')
+                built=(time.perf_counter()-started,None)
                 if len(payload)<=ENTRY_LIMIT:
                     envelope={'key':key,'sha256':hashlib.sha256(payload).hexdigest(),'payload':payload.decode('utf-8')}
-                    _atomic(path,json.dumps(envelope,separators=(',',':')).encode('utf-8'));_remember(key,payload);_prune(path.parent)
+                    stored=json.dumps(envelope,separators=(',',':')).encode('utf-8')
+                    _atomic(path,stored);_remember(key,payload);built=(built[0],len(stored))
+                    _wrote(path.parent,path.name,len(stored))
     if not stable():raise ValueError('Contribution source changed while reading its query cache.')
+    _note(namespace,key,*(built or ()))
     return json.loads(payload)

@@ -24,7 +24,17 @@ into place with os.replace, the body before the meta. An entry is served only wh
 read back has the size and SHA-256 its meta records and decompresses to the recorded body
 size; a missing, truncated or corrupt entry, or one of another format, is a miss that is
 rebuilt and never served. Each namespace is capped at DISK_BYTES (DISK_LIMITS per
-namespace) with least-recently-used eviction; the meta file's mtime records use.
+namespace); the meta file's mtime records use.
+
+Eviction by value (RACF, access_stats). Over its cap, a namespace drops entries in this order:
+first the ones the warmer wrote that no request has used (a meta mtime in WARM_MTIME_NS, the
+warmer's demoted range; any disk hit touches the meta and moves it out), oldest first; then the
+lowest access_stats score of ('cache/<namespace>', key) (decayed hit frequency x rebuild seconds /
+size), with ties and an unreadable ledger least recently used first; entries used within
+FRESH_SECONDS last, since their accesses may still be buffered in another process. Every hit and
+build is recorded there (never for a root outside the live state tree unless the ledger was pointed
+elsewhere too). access_stats is looked up by name, not imported by a statement, so it is not part
+of any code identity: it decides what is kept, never what an answer is.
 
 Single flight. One build per key at a time: an explicit per-key in-process flight
 (functools.lru_cache memoizes, it does not serialise entry: brain DE-026) and, across
@@ -67,6 +77,9 @@ GZIP_LEVEL = 1
 GZIP_MIN_BYTES = 2048
 TOUCH_SECONDS = 600
 ORPHAN_SECONDS = 3600
+FRESH_SECONDS = 300
+# prewarm.DEMOTED_BASE_NS and DEMOTED_CEILING_NS: the mtimes the warmer gives what it wrote.
+WARM_MTIME_NS = (946684800 * 10 ** 9, 946684800 * 10 ** 9 + 40000 * 10 ** 12)
 STILL_BUILDING = 'This view is still being prepared. Retry shortly.'
 
 _NAMESPACE = re.compile(r'[a-z0-9][a-z0-9-]{0,63}')
@@ -212,6 +225,32 @@ def _count(namespace, counter, amount=1):
 def _problem(namespace, counter, message):
     _count(namespace, counter)
     _log.warning('response cache %s: %s', namespace, message)
+
+
+_ledger_module = []
+
+
+def _ledger():
+    """access_stats when this process may use it for its disk tier (module docstring), else None."""
+    if not _ledger_module:
+        try:
+            _ledger_module.append(importlib.import_module('access_stats'))
+        except Exception:  # noqa: BLE001 - no ledger: eviction falls back to least recently used
+            _ledger_module.append(None)
+    ledger, root = _ledger_module[0], ROOT
+    if ledger is None or root is None:
+        return None
+    try:
+        live = os.path.normcase(os.path.abspath(root)) == os.path.normcase(os.path.abspath(DEFAULT_ROOT))
+        return ledger if live or not ledger.is_default() else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _note(namespace, key, cost_s=None, size=None):
+    ledger = _ledger()
+    if ledger is not None:
+        ledger.record('cache/' + namespace, key, cost_s=cost_s, size=size)
 
 
 # ----------------------------------------------------------------------------- memory tier
@@ -426,11 +465,12 @@ def _scan(folder):
             stem, _, suffix = name.partition('.')
             if suffix not in ('json', 'gz') or not _KEY.fullmatch(stem):
                 continue
-            record = found.setdefault(stem, {'size': 0, 'used': 0.0, 'meta': False, 'body': False, 'mtime': 0.0})
+            record = found.setdefault(stem, {'size': 0, 'used': 0.0, 'used_ns': 0, 'meta': False, 'body': False,
+                                             'mtime': 0.0})
             record['size'] += info.st_size
             record['mtime'] = max(record['mtime'], info.st_mtime)
             if suffix == 'json':
-                record['meta'], record['used'] = True, info.st_mtime
+                record['meta'], record['used'], record['used_ns'] = True, info.st_mtime, info.st_mtime_ns
             else:
                 record['body'] = True
     return found, stale
@@ -446,6 +486,17 @@ def _remove_entry(folder, key):
         except OSError:
             removed = False  # open in another process right now; left for a later pass
     return removed
+
+
+def _eviction_order(found, scores, now):
+    """_scan() entries, the first to evict first (module docstring, Eviction by value): warm entries
+    no request has used, then the lowest score, then least recently used; recently used ones last."""
+    def rank(item):
+        key, record = item
+        if record['meta'] and WARM_MTIME_NS[0] <= record['used_ns'] < WARM_MTIME_NS[1]:
+            return 0, 0.0, record['used'], key
+        return (2 if now - record['used'] < FRESH_SECONDS else 1), scores.get(key, 0.0), record['used'], key
+    return sorted(found.items(), key=rank)
 
 
 def _enforce_cap(folder, namespace, keep):
@@ -466,7 +517,8 @@ def _enforce_cap(folder, namespace, keep):
     total = sum(record['size'] for record in found.values())
     if total <= limit:
         return
-    for key, record in sorted(found.items(), key=lambda item: item[1]['used']):
+    ledger = _ledger()
+    for key, record in _eviction_order(found, ledger.scores('cache/' + namespace) if ledger is not None else {}, now):
         if key == keep:
             continue
         # Only the disk copy goes: a memory copy is the same verified bytes and stays valid.
@@ -668,6 +720,7 @@ def get_or_compute(namespace, key_parts, deps, compute, *, encode=None, persist=
         entry = _memory_get(namespace, key)
         if entry is not None:
             _count(namespace, 'memory_hits')
+            _note(namespace, key)
             return entry
     deadline = time.monotonic() + (WAIT_SECONDS if wait_seconds is None else wait_seconds)
     while True:
@@ -682,11 +735,13 @@ def get_or_compute(namespace, key_parts, deps, compute, *, encode=None, persist=
             raise StillBuilding(STILL_BUILDING)
         if flight.entry is not None:
             _count(namespace, 'memory_hits')
+            _note(namespace, key)
             return flight.entry.shared('memory')
         if memory:
             entry = _memory_get(namespace, key)
             if entry is not None:
                 _count(namespace, 'memory_hits')
+                _note(namespace, key)
                 return entry
         # The build this thread waited for failed: this thread may build it now.
     try:
@@ -706,15 +761,18 @@ def _lead(namespace, key, key_parts, deps, compute, encode, persist, memory, dis
         try:
             entry = _disk_get(folder, namespace, key, memory)
             if entry is not None:
+                _note(namespace, key)
                 return entry
             lock = folder / (key + '.lock')
             claimed, entry = _acquire(lock, folder, namespace, key, memory, deadline)
             if entry is not None:
+                _note(namespace, key)
                 return entry
         except OSError as error:
             _problem(namespace, 'disk_errors', f'disk tier skipped for {key[:12]}: {error}')
             folder = lock = claimed = None
     try:
+        started = time.perf_counter()
         value = compute()
         if isinstance(value, (bytes, bytearray, memoryview)):
             body = bytes(value)
@@ -725,6 +783,8 @@ def _lead(namespace, key, key_parts, deps, compute, encode, persist, memory, dis
             if memory:
                 _memory_put(namespace, key, entry, folder / (key + '.json') if folder is not None else None)
             if folder is not None:
+                # The build's seconds and stored size (the gzip _disk_put writes) value it (access_stats).
+                _note(namespace, key, cost_s=time.perf_counter() - started, size=len(entry.gzip))
                 _disk_put(folder, namespace, key, entry, key_parts, deps)
         else:
             _count(namespace, 'kept_out')
