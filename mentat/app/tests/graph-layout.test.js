@@ -364,3 +364,88 @@ test('[graph-layout] short forms of a candidate keep the surname and first given
   assert.deepEqual(layout.nameForms('person', 'HAGERTY, BILL'), ['HAGERTY, BILL']);
   assert.deepEqual(layout.nameForms('person', 'MADONNA'), ['MADONNA'], 'a name without a comma is never shortened');
 });
+
+// Paul, 2026-09-23, on the drawer's "Contributions / Other" segment: "It
+// should be two separate segments".
+test('[graph-layout] the drawer offers Contributions and Other as two segments beside Support and Oppose', () => {
+  const side = (direction, candidates, amount, extra) => Object.assign({direction, candidates, amount}, extra || {});
+  const names = totals => layout.drawerSides(totals).map(row => row.direction);
+  assert.deepEqual(layout.DRAWER_SIDE_ORDER, ['Contribution', 'Other', 'Support', 'Oppose', 'Contribution / Other', 'Unknown']);
+  // The measured default scope (Banking, 2025-2026, ActBlue): two halves, then
+  // the independent expenditures; the empty unsplit side and Unknown stay out.
+  const banking = [side('Contribution', 1000, 57425697), side('Other', 45, 23587307),
+    side('Support', 120, 59963513), side('Oppose', 59, 82983605),
+    side('Contribution / Other', 0, 0), side('Unknown', 0, 0)];
+  assert.deepEqual(names(banking), ['Contribution', 'Other', 'Support', 'Oppose']);
+  // An empty half is still a measurement when the source records codes.
+  assert.deepEqual(names([side('Contribution', 14, 54500), side('Other', 0, 0), side('Support', 0, 0),
+    side('Oppose', 0, 0), side('Contribution / Other', 0, 0), side('Unknown', 0, 0)]),
+    ['Contribution', 'Other', 'Support', 'Oppose']);
+  // A report that records no transaction type cannot be split: its one
+  // recorded side stands where the two halves would, never beside two zeros.
+  assert.deepEqual(names([side('Contribution', 0, 0), side('Other', 0, 0), side('Support', 1, 810),
+    side('Oppose', 1, 999), side('Contribution / Other', 1, 111), side('Unknown', 0, 0)]),
+    ['Support', 'Oppose', 'Contribution / Other']);
+  // Mixed sources: coded halves and an uncoded remainder all show.
+  assert.deepEqual(names([side('Contribution', 2, 116), side('Other', 1, 40), side('Support', 1, 777),
+    side('Oppose', 1, 999), side('Contribution / Other', 1, 7), side('Unknown', 0, 5, {unidentified_amount: 5})]),
+    ['Contribution', 'Other', 'Support', 'Oppose', 'Contribution / Other', 'Unknown']);
+  // Order is the drawer's own, whatever order the rows arrive in.
+  assert.deepEqual(names(banking.slice().reverse()), ['Contribution', 'Other', 'Support', 'Oppose']);
+  assert.deepEqual(layout.drawerSides(null), []);
+});
+
+// Paul, 2026-09-23: "It should be two separate segments". Round-3 verify (D1):
+// each segment counts its own candidates, so 1,000 + 45 is not the 1,005
+// candidates behind them - 40 have both a 24K and a 24C. The drawer says so
+// under the segments, from the server's count of the recorded bucket
+// (graph_data.recorded_bucket, contribution_other_union).
+test('[graph-layout] the drawer reconciles the two segments\' counts when a candidate is on both', () => {
+  const side = (direction, candidates, amount) => ({direction, candidates, amount});
+  const n = value => Number(value).toLocaleString();
+  const union = (candidates, shared, sides) => ({direction: 'Contribution / Other',
+    sides: sides || ['Contribution', 'Other', 'Contribution / Other'], candidates, on_more_than_one_side: shared});
+  const halves = (contribution, other, unsplit) => [side('Contribution', contribution, 1), side('Other', other, 1),
+    side('Support', 120, 1), side('Oppose', 59, 1), side('Contribution / Other', unsplit || 0, unsplit ? 1 : 0), side('Unknown', 0, 0)];
+  // The measured default scope (Banking, 2025-2026, ActBlue C00401224).
+  const actblue = layout.drawerOverlap(halves(1000, 45), union(1005, 40));
+  assert.deepEqual(actblue.sides, ['Contribution', 'Other']);
+  assert.equal(actblue.counted - actblue.shared, actblue.candidates, '1,000 + 45 - 40 = 1,005');
+  assert.equal(actblue.text, `Contributions and Other: ${n(1005)} different candidates; 40 have both, so they are in both counts.`);
+  assert.equal(actblue.basis('Contribution'), '40 of them are also counted under Other');
+  assert.equal(actblue.basis('Other'), '40 of them are also counted under Contributions');
+  // Credit Union 2025-2026, CULAC C00007880: every Other candidate also has a contribution.
+  const culac = layout.drawerOverlap(halves(634, 9), union(634, 9));
+  assert.equal(culac.text, 'Contributions and Other: 634 different candidates; 9 have both, so they are in both counts.');
+  // One candidate: singular.
+  assert.equal(layout.drawerOverlap(halves(2, 1), union(2, 1)).text,
+    'Contributions and Other: 2 different candidates; 1 has both, so it is in both counts.');
+  assert.equal(layout.drawerOverlap(halves(2, 1), union(2, 1)).basis('Other'), '1 of them is also counted under Contributions');
+  // Nobody on both: the counts already add up, and nothing is said.
+  assert.equal(layout.drawerOverlap(halves(1, 1), union(2, 0)), null);
+  // An empty half (C00390633: 14 | 0) cannot overlap; neither can a bucket the server did not count.
+  assert.equal(layout.drawerOverlap(halves(14, 0), union(14, 0)), null);
+  assert.equal(layout.drawerOverlap(halves(1000, 45), null), null);
+  assert.equal(layout.drawerOverlap(halves(1000, 45), undefined), null);
+  // A mixed source (coded halves and an uncoded remainder): three counts.
+  const mixed = layout.drawerOverlap(halves(2, 1, 1), union(3, 1));
+  assert.deepEqual(mixed.sides, ['Contribution', 'Other', 'Contribution / Other']);
+  assert.equal(mixed.text, 'Contributions, Other and Contributions / Other: 3 different candidates; 1 is in more than one count.');
+  assert.equal(mixed.basis('Other'), '1 candidate is counted under more than one of Contributions, Other and Contributions / Other');
+  // The drawer's labels are the one table graph.js draws its segments with.
+  assert.deepEqual(layout.DRAWER_SIDE_LABEL, {'Contribution': 'Contributions', 'Other': 'Other',
+    'Contribution / Other': 'Contributions / Other', 'Support': 'Support', 'Oppose': 'Oppose', 'Unknown': 'Unknown'});
+});
+
+// Paul, 2026-09-23: "You should be able to expand each section individually
+// like with a census panel".
+test('[graph-layout] every Graph card folds on its own, under its own remembered key', () => {
+  assert.deepEqual(layout.FOLD_SECTIONS, ['category-panel', 'candidate-panel', 'company-panel', 'level-panel',
+    'organization-panel', 'compare-table', 'drawer-panel']);
+  assert.equal(new Set(layout.FOLD_SECTIONS).size, layout.FOLD_SECTIONS.length, 'one key per section');
+  assert.equal(layout.FOLD_KEY, 'mentat-graph-folded:');
+  // Every one of them is a card in the golden page, with a heading to fold on.
+  const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'index.html'), 'utf8');
+  for (const name of layout.FOLD_SECTIONS)
+    assert.match(html, new RegExp('<section id="graph-' + name + '" class="panel graph-panel[^"]*"[^>]*><div class="panel-heading">'), name);
+});

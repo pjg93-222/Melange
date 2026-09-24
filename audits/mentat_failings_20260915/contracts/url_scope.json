@@ -132,7 +132,7 @@
       ]
     },
     "drawerDirection": {
-      "value": "Which side of that committee's reported activity the drawer is showing: one of Contribution / Other, Support, Oppose, Unknown - the #graph-direction option values. Absent means the drawer opens on the side with the largest amount, which is what a fresh click does.",
+      "value": "Which side of that committee's reported activity the drawer is showing: one of Contribution, Other, Support, Oppose, Contribution / Other, Unknown - the #graph-direction option values (Contribution and Other split the recorded Contribution / Other bucket by FEC transaction code, Paul 2026-09-23: \"It should be two separate segments\"; Contribution / Other remains for amounts whose source records no code). Absent means the drawer opens on the side with the largest amount, which is what a fresh click does.",
       "writers": [
         "mentat/app/scope.js:write, called only from mentat/app/graph.js:writeDrawerScope (the drawer's segmented control)"
       ],
@@ -747,7 +747,7 @@
           {
             "key": "drawerDirection",
             "value": "Downstream",
-            "reason": "drawerDirection must be one of Contribution / Other, Support, Oppose, Unknown"
+            "reason": "drawerDirection must be one of Contribution, Other, Support, Oppose, Contribution / Other, Unknown"
           }
         ]
       }

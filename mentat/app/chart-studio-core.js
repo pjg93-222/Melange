@@ -6,7 +6,11 @@
 
   const math = (typeof module !== 'undefined' && module.exports) ? require('./chart-math.js') : root.MentatCharts;
 
-  const AGGREGATIONS = [['sum','Sum'],['mean','Mean'],['count','Count'],['median','Median'],['min','Minimum'],['max','Maximum']];
+  // Paul, 2026-09-23: "Additionally, within the Chart Studio make sure everything
+  // is freely flexible, that all graph types properly register and nothing is
+  // logically constrained, it needs to be utterly maluable." Count distinct
+  // (engine contract W12) is how a text field is read as a measure.
+  const AGGREGATIONS = [['sum','Sum'],['mean','Mean'],['count','Count'],['median','Median'],['min','Minimum'],['max','Maximum'],['countd','Count distinct']];
   const AGGREGATION_IDS = AGGREGATIONS.map(a => a[0]);
   const TRANSFORMS = ['none','annual','yoy','change','forecast'];
 
@@ -18,12 +22,22 @@
     ['waterfall','Waterfall'],['pareto','Pareto'],['radar','Radar']
   ];
   const MARK_IDS = MARK_TYPES.map(m => m[0]);
+  // One mark list for both sources (census A-W06): every chart the Verified
+  // menu offers is offered for a report worksheet too, in the same order and
+  // with the same names, so a mark never exists in one mode only.
+  const EXTRA_MARK_TYPES = [['map','Map'],['heatmap','Heat map'],['highlight','Highlight table'],['stacked','Stacked bars'],
+    ['dot','Circle view'],['series-dot','Side-by-side circles'],['treemap','Treemap'],['bubbles','Packed bubbles'],
+    ['gantt','Observed date span'],['bullet','Bullet comparison'],['combination','Dual combination'],['dual-line','Dual lines'],
+    ['filled-map','Filled state map']];
+  const ALL_MARK_TYPES = MARK_TYPES.concat(EXTRA_MARK_TYPES);
+  const ALL_MARK_IDS = ALL_MARK_TYPES.map(m => m[0]);
+  const markLabel = id => (ALL_MARK_TYPES.find(m => m[0] === id) || [id, 'Automatic'])[1];
 
   /* ---------------------------------------------------------------- fields */
 
   // A sheet may re-read a column as a dimension or a measure. The override is
-  // per sheet and persisted with it; a text column can never become a measure,
-  // because there is nothing numeric in it to aggregate.
+  // per sheet and persisted with it. A text or date column read as a measure
+  // is counted: COUNT and COUNT DISTINCT are the aggregations it offers.
   function canTreatAs(field, role) {
     if (!field) return {ok: false, reason: 'That field is not in this source.'};
     if (role === 'dimension') {
@@ -33,8 +47,8 @@
     if (role !== 'measure') return {ok: false, reason: 'Choose Dimension or Measure.'};
     if (field.role === 'measure') return {ok: false, reason: field.name + ' is already a measure.'};
     if (field.type !== 'number') {
-      return {ok: false, reason: field.name + ' holds ' + (field.type === 'date' ? 'dates' : 'text') +
-        ', so there is nothing numeric to aggregate. Count it with COUNT on another measure instead.'};
+      return {ok: true, reason: '', counted: true,
+        note: field.name + ' holds ' + (field.type === 'date' ? 'dates' : 'text') + ', so as a measure it is counted: Count or Count distinct.'};
     }
     return {ok: true, reason: ''};
   }
@@ -53,9 +67,10 @@
       field.isTime = column.is_time === true || !!math.timeColumn(field);
       field.isIdentifier = !!math.identifierColumn(field);
       field.role = column.role || (field.type === 'number' && !field.isTime && !field.isIdentifier ? 'measure' : 'dimension');
-      // Identifier columns are real fields; they are folded away until the user
-      // asks for them, exactly as recommend() already ignores them.
-      field.hidden = column.visible === true ? false : field.isIdentifier && !field.isTime;
+      // Identifier columns are real fields, listed like any other (census
+      // B-S21): the Data pane puts them under its "More fields" fold rather
+      // than behind a checkbox. recommend() still ignores them.
+      field.hidden = false;
       // The calendar marks a date (type 'date'), as S1 draws it; a cycle, year,
       // quarter or month is still a time axis (isTime) but its glyph is Abc.
       field.glyph = field.geographic_role ? 'geo' : field.data_type==='boolean'?'bool':field.role === 'measure' ? '#' : field.type === 'date' ? 'cal' : 'Abc';
@@ -69,6 +84,7 @@
         field.role = role;
         field.coerced = true;
         field.hidden = false;
+        if (role === 'measure' && field.type !== 'number') field.counted = true;
         field.glyph = field.geographic_role ? 'geo' : field.data_type === 'boolean' ? 'bool'
           : field.role === 'measure' ? '#' : field.type === 'date' ? 'cal' : 'Abc';
       }
@@ -77,7 +93,8 @@
       fields,
       dimensions: fields.filter(f => f.role === 'dimension' && !f.hidden),
       measures: fields.filter(f => f.role === 'measure' && !f.hidden),
-      hidden: fields.filter(f => f.hidden)
+      hidden: fields.filter(f => f.hidden),
+      identifiers: fields.filter(f => f.role === 'dimension' && f.isIdentifier && !f.isTime)
     };
   }
 
@@ -310,12 +327,26 @@
     return Number.isFinite(number) && number >= 1 ? Math.trunc(number) : 0;
   };
 
-  // The Studio's own default: forty marks is a view a reader can still take in.
-  // The engine's default is the legacy callers' sixty, so the Studio never leans
-  // on it - every compiled configuration carries its limit explicitly, and the
-  // Group limit box in Parameters raises it.
+  // The Studio's own default: sixty marks per view, which is the engine's
+  // standing contract too. Every compiled configuration carries its limit
+  // explicitly, and the Group limit box in Parameters raises it - to "All"
+  // (engine contract W10) when the reader wants every group.
   const STUDIO_GROUP_LIMIT = 60;
+  const groupLimitOf = value => value === 'all' ? 'all' : positiveInteger(value) || STUDIO_GROUP_LIMIT;
 
+  // Colour on these types is a series the engine draws per member (contract
+  // W11); on every other type it joins the grouping tuple instead.
+  const SERIES_TYPES = ['bar', 'horizontal', 'line', 'area', 'dot', 'scatter', 'histogram', 'box',
+    'pie', 'doughnut', 'waterfall', 'pareto', 'radar'];
+  const PAIRED = {bar: 'grouped', horizontal: 'groupedhorizontal', line: 'multiline'};
+
+  // Paul, 2026-09-23: "Additionally, within the Chart Studio make sure
+  // everything is freely flexible, that all graph types properly register and
+  // nothing is logically constrained, it needs to be utterly maluable." So the
+  // compiler never refuses a composition. Every mark draws from whatever is on
+  // the shelves; a field a mark prefers but the shelves lack is picked from the
+  // source and named in a quiet note; every sentence that used to block the
+  // drawing is a note under it. Only an empty sheet has nothing to draw.
   function compileReport(state, columns) {
     const meta = classifyFields(columns, state && state.types);
     const issues = [], notes = [];
@@ -324,22 +355,31 @@
       .filter(p => p.field);
     const columnPills = attach(state.columns);
     const rowPills = attach(state.rows);
-    const colDimensions = columnPills.filter(p => p.field.role === 'dimension');
-    const colMeasures = columnPills.filter(p => p.field.role === 'measure');
-    const rowDimensions = rowPills.filter(p => p.field.role === 'dimension');
-    const rowMeasures = rowPills.filter(p => p.field.role === 'measure');
+    const isDimension = p => p.field.role === 'dimension';
+    const isMeasure = p => p.field.role === 'measure';
+    const colDimensions = columnPills.filter(isDimension);
+    const colMeasures = columnPills.filter(isMeasure);
+    const rowDimensions = rowPills.filter(isDimension);
+    const rowMeasures = rowPills.filter(isMeasure);
     const allMeasures = colMeasures.concat(rowMeasures);
     const allDimensions = colDimensions.concat(rowDimensions);
     const marks = state.marks || {};
-    const markType = MARK_IDS.includes(marks.type) ? marks.type : 'automatic';
-    const colorPill = pill(marks.color);
-    const color = colorPill ? fieldAt(meta, colorPill.column) : null;
-    for (const channel of ['size', 'label', 'tooltip']) {
-      const values = Array.isArray(marks[channel]) ? shelf(marks[channel]) : [pill(marks[channel])].filter(Boolean);
-      if (values.length) issues.push(channel[0].toUpperCase() + channel.slice(1) + ' is not available for worksheet data. Remove this field or switch to Verified contributions.');
-    }
-    const details = attach(marks.detail);
-    if (details.some(p => p.field.role !== 'dimension')) issues.push('Detail requires dimensions; move a measure to Rows or Columns.');
+    const markType = ALL_MARK_IDS.includes(marks.type) ? marks.type : 'automatic';
+    const markName = markLabel(markType);
+    const encoded = channel => attach(Array.isArray(marks[channel]) ? marks[channel] : [marks[channel]].filter(v => v != null));
+    const colorPill = encoded('color')[0] || null;
+    const color = colorPill ? colorPill.field : null;
+    const sizePill = encoded('size')[0] || null;
+    const labelPill = encoded('label')[0] || null;
+    const tooltipPills = encoded('tooltip');
+    const details = encoded('detail');
+    // Dimensions on Detail, Tooltip, Label and Size join the grouping behind
+    // each mark, as they do on the verified path; a measure on Detail or
+    // Tooltip is carried into each mark's tooltip (census B-S03).
+    const markDimensions = [...details, ...tooltipPills, ...(labelPill ? [labelPill] : []),
+      ...(sizePill ? [sizePill] : [])].filter(isDimension);
+    const anything = columnPills.length || rowPills.length || colorPill || sizePill || labelPill ||
+      tooltipPills.length || details.length;
 
     const firstDimension = allDimensions[0] || null;
     const firstMeasure = rowMeasures[0] || colMeasures[0] || null;
@@ -348,14 +388,50 @@
     // the same view on its side, which is what Tableau's Rows shelf means here.
     const orientation = marks.orientation || (colDimensions.length ? 'vertical' : rowDimensions.length ? 'horizontal' : 'none');
 
-    let type = '', xPill = null, yPill = null;
+    const chosen = new Set([...allDimensions, ...allMeasures, ...details, ...tooltipPills,
+      ...(colorPill ? [colorPill] : []), ...(sizePill ? [sizePill] : []), ...(labelPill ? [labelPill] : [])].map(p => p.column));
+    function pick(kind, prefer) {
+      const free = (kind === 'measure' ? meta.measures : meta.dimensions).filter(f => !f.hidden && !chosen.has(f.index));
+      const plain = free.filter(f => !f.isTime && !f.isIdentifier);
+      const order = kind === 'measure' ? free
+        : prefer === 'time' ? [...free.filter(f => f.isTime), ...plain, ...free]
+        : prefer === 'geo' ? [...free.filter(f => f.geographic_role || /zip|postal|state/i.test(f.name)), ...plain, ...free]
+        : [...plain, ...free];
+      const field = order[0] || null;
+      if (!field) return null;
+      chosen.add(field.index);
+      return {column: field.index, aggregation: 'sum', field: field, picked: true};
+    }
+    const pickedNote = (p, why, where) => notes.push(markName + ' ' + why + ', so it uses ' + p.field.name +
+      '. Put ' + where + ' to choose another.');
+    const extraMeasures = [];
+    const extra = {};
 
-    if (markType === 'automatic') {
+    let type = '', xPill = null, yPill = null, seriesPill = null, map = null;
+    const needMeasure = why => {
+      if (!yPill && (yPill = pick('measure'))) pickedNote(yPill, why, 'a measure on the shelves');
+    };
+    const needAxis = (why, prefer) => {
+      if (!xPill && (xPill = pick('dimension', prefer))) pickedNote(xPill, why, 'a dimension on the shelves');
+    };
+    const secondMeasure = why => {
+      if (allMeasures.length + extraMeasures.length >= 2 || (color && color.role === 'dimension')) return;
+      const second = pick('measure');
+      if (second) { extraMeasures.push(second); pickedNote(second, why, 'a second measure on the shelves'); }
+    };
+    const barLike = () => {
+      type = orientation === 'horizontal' ? 'horizontal' : 'bar';
+      xPill = orientation === 'horizontal' ? (rowDimensions[0] || firstDimension) : (colDimensions[0] || firstDimension);
+      yPill = orientation === 'horizontal' ? (colMeasures[0] || rowMeasures[0] || null) : firstMeasure;
+    };
+
+    if (!anything) {
+      issues.push('Add a grouping (company, recipient, cycle) and a dollar measure.');
+    } else if (markType === 'automatic') {
       if (colMeasures.length && rowMeasures.length) {
         type = 'scatter'; xPill = colMeasures[0]; yPill = rowMeasures[0];
       } else if (orientation === 'none') {
-        if (firstMeasure) { type = 'bar'; yPill = firstMeasure; }
-        else issues.push('Add a grouping (company, recipient, cycle) and a dollar measure.');
+        type = 'bar'; yPill = firstMeasure;
       } else {
         const dimension = (orientation === 'vertical' ? colDimensions[0] : rowDimensions[0]) || firstDimension;
         const measure = orientation === 'vertical'
@@ -365,85 +441,192 @@
         type = orientation === 'horizontal' ? 'horizontal' : (dimension?.field.isTime && measure ? 'line' : 'bar');
       }
     } else if (markType === 'circle') {
-      type = 'scatter';
       yPill = rowMeasures[0] || allMeasures[0] || null;
-      xPill = colMeasures.find(p => !yPill || p.column !== yPill.column)
-        || allMeasures.find(p => !yPill || p.column !== yPill.column) || null;
-      if (!xPill || !yPill) issues.push('A circle view needs two numeric measures — put one on Columns and one on Rows.');
+      xPill = colMeasures.find(p => p !== yPill) || allMeasures.find(p => p !== yPill) || null;
+      if (xPill && yPill) type = 'scatter';
+      else {
+        // One measure: one circle per group at its value (contract W6 'dot').
+        type = 'dot'; xPill = firstDimension;
+        needAxis('needs a grouping for its circles');
+      }
     } else if (markType === 'histogram') {
       type = 'histogram'; yPill = firstMeasure;
-      if (!yPill) issues.push('A histogram needs one numeric measure.');
+      needMeasure('needs a measure to bin');
+      // A shelf dimension stacks the bins by its members (contract W11, W3).
+      if (firstDimension && !(color && color.role === 'dimension')) {
+        seriesPill = firstDimension; extra.stack = 'stacked';
+        notes.push('Histogram bins are stacked by ' + firstDimension.field.name + '.');
+      }
     } else if (markType === 'box') {
       type = 'box'; xPill = firstDimension; yPill = firstMeasure;
-      if (!yPill) issues.push('A box plot needs one numeric measure.');
-    } else if (markType === 'line' || markType === 'area') {
-      type = markType;
-      xPill = timeDimension || firstDimension;
-      yPill = firstMeasure;
-      if (!xPill) issues.push('A ' + markType + ' mark needs a dimension on Columns or Rows.');
-    } else if (markType === 'bar' || markType === 'text') {
-      type = orientation === 'horizontal' ? 'horizontal' : 'bar';
-      xPill = orientation === 'horizontal' ? (rowDimensions[0] || firstDimension) : (colDimensions[0] || firstDimension);
-      yPill = orientation === 'horizontal' ? (colMeasures[0] || rowMeasures[0] || null) : firstMeasure;
-      if (!xPill && !yPill) issues.push('Add a grouping (company, recipient, cycle) and a dollar measure.');
-    } else {
-      type = markType; // pie, doughnut, waterfall, pareto, radar
+      needMeasure('needs a measure to summarise');
+    } else if (markType === 'line' || markType === 'area' || markType === 'dual-line') {
+      // The first dimension placed is the axis: a category axis draws in its
+      // own order, and a time axis stays chronological.
+      type = markType === 'area' ? 'area' : 'line';
       xPill = firstDimension; yPill = firstMeasure;
-      if (!xPill) issues.push('A ' + markType + ' view needs one dimension.');
+      needAxis('needs an axis', 'time');
+      if (markType === 'dual-line') {
+        needMeasure('needs a measure');
+        secondMeasure('needs a second measure for its second axis');
+        extra.dualAxis = true; extra.dualMark = 'line';
+      }
+    } else if (markType === 'dot' || markType === 'series-dot') {
+      type = 'dot'; xPill = firstDimension; yPill = firstMeasure;
+      needAxis('needs a grouping for its circles');
+      if (markType === 'series-dot' && !(color && color.role === 'dimension')) {
+        seriesPill = allDimensions.find(p => p !== xPill) || null;
+        if (!seriesPill && (seriesPill = pick('dimension'))) pickedNote(seriesPill, 'needs a breakdown for its circle series', 'a dimension on Colour');
+      }
+    } else if (markType === 'gantt') {
+      type = 'gantt'; xPill = firstDimension; yPill = firstMeasure;
+      needAxis('needs a grouping for its spans');
+      const date = meta.fields.find(f => !f.hidden && f.type === 'date');
+      if (date) extra.dateColumn = date.index;
+      else {
+        type = 'bar';
+        notes.push('An observed date span needs a date column and this worksheet has none, so it is drawn as bars.');
+      }
+    } else if (markType === 'bullet') {
+      type = 'bullet'; xPill = firstDimension; yPill = firstMeasure;
+      needMeasure('needs a measure');
+      secondMeasure('needs a second measure to compare');
+    } else if (['bar', 'text', 'stacked', 'combination', 'map', 'filled-map'].includes(markType)) {
+      barLike();
+      if (markType === 'stacked') {
+        extra.stack = 'stacked';
+        if (!(color && color.role === 'dimension') && allMeasures.length < 2) {
+          seriesPill = allDimensions.find(p => p !== xPill) || null;
+          if (!seriesPill && (seriesPill = pick('dimension'))) pickedNote(seriesPill, 'needs a breakdown to stack', 'a dimension on Colour');
+        }
+      } else if (markType === 'combination') {
+        needAxis('needs an axis', 'time');
+        needMeasure('needs a measure for its bars');
+        secondMeasure('needs a second measure for its line');
+        extra.dualAxis = true; extra.dualMark = 'line';
+      } else if (markType === 'map' || markType === 'filled-map') {
+        // Census C-16: a worksheet with a place field draws a real map. A
+        // place on the shelves wins (the finest for a symbol map, a shape for
+        // a filled map); with none placed, the sheet's own place field is
+        // picked and named. Only a sheet with no place field at all is drawn
+        // as bars, and it says so.
+        const filled = markType === 'filled-map';
+        const rank = f => geoRank(f, filled);
+        let geography = allDimensions.filter(p => geoKind(p.field)).sort((a, b) => rank(a.field) - rank(b.field))[0] || null;
+        if (!geography) {
+          const field = meta.dimensions.filter(f => !f.hidden && geoKind(f) && !chosen.has(f.index))
+            .sort((a, b) => geoRank(a, filled, true) - geoRank(b, filled, true))[0];
+          if (field) {
+            chosen.add(field.index);
+            geography = {column: field.index, aggregation: 'sum', field: field, picked: true};
+            pickedNote(geography, 'needs a place to group by', 'a ZIP, state, district or city field on the shelves');
+          }
+        }
+        if (geography) {
+          xPill = geography;
+          const kind = geoKind(geography.field);
+          let stateColumn = -1;
+          if (kind === 'district') {
+            const onShelf = allDimensions.find(p => geoKind(p.field) === 'state');
+            const state = onShelf ? onShelf.field : meta.dimensions.find(f => !f.hidden && geoKind(f) === 'state');
+            if (state) stateColumn = state.index;
+            else notes.push('A district is placed with its state and this worksheet has no state field, so only districts written like MN-05 are mapped.');
+          }
+          map = {kind: kind, column: geography.column, stateColumn: stateColumn, filled: filled, name: geography.field.name};
+          const combined = [...allDimensions, ...(color && color.role === 'dimension' ? [colorPill] : [])]
+            .filter(p => p.column !== geography.column && p.column !== stateColumn);
+          if (combined.length) notes.push('Each map mark combines every ' +
+            [...new Set(combined.map(p => p.field.name))].join(' / ') + ' group at its place.');
+          if ((color && color.role === 'measure') || sizePill || labelPill) notes.push('A map shades and sizes each place by ' +
+            (firstMeasure ? firstMeasure.field.name : 'its row count') + '; Colour, Size and Label do not change it.');
+        } else {
+          needAxis('needs a place to group by');
+          notes.push('Maps need a ZIP, state, congressional district or city field and this worksheet has none, so it is drawn as bars' +
+            (xPill ? ' by ' + xPill.field.name : '') + '.');
+        }
+      }
+    } else {
+      // pie, doughnut, waterfall, pareto, radar, heatmap, highlight, treemap, bubbles
+      type = markType; xPill = firstDimension; yPill = firstMeasure;
+      needAxis('needs a grouping');
     }
 
-    let series = -1;
-    if (color && type) {
-      const axisColumn = xPill ? xPill.column : -1;
-      if (color.role !== 'dimension') notes.push('Colour separates a view by a dimension; ' + color.name + ' is a measure, so it is not applied.');
-      else if (color.index === axisColumn) notes.push('Colour repeats the field already on the axis, so it adds nothing to this view.');
-      else if (!['bar', 'horizontal', 'line'].includes(type)) notes.push('Colour separates series for bar, horizontal-bar and line marks; this view does not use it.');
-      else {
-        series = color.index;
-        type = type === 'bar' ? 'grouped' : type === 'horizontal' ? 'groupedhorizontal' : 'multiline';
-      }
+    // Colour: a dimension separates series (or joins the grouping), a measure
+    // shades each mark (contract W11 colorMeasure). Colour that repeats the
+    // axis gives every mark its own colour, which the bars already have.
+    if (type && color) {
+      if (color.role === 'measure') extra.colorMeasure = {column: colorPill.column, aggregation: colorPill.aggregation};
+      else if (!xPill || color.index !== xPill.column) seriesPill = colorPill;
     }
+    if (type && sizePill) {
+      if (isMeasure(sizePill)) extra.size = {column: sizePill.column, aggregation: sizePill.aggregation};
+      else notes.push('Size follows a measure; ' + sizePill.field.name + ' joins the grouping instead.');
+    }
+    if (type && labelPill) extra.label = {column: labelPill.column, aggregation: isMeasure(labelPill) ? labelPill.aggregation : 'first'};
+    const tips = [...tooltipPills, ...details].filter(isMeasure).map(p => ({column: p.column, aggregation: p.aggregation}));
+    if (type && tips.length) extra.tooltip = tips;
 
     const analytics = state.analytics || {};
     let transform = TRANSFORMS.includes(analytics.transform) ? analytics.transform : 'none';
-    if (transform !== 'none') {
+    if (transform !== 'none' && type && map) {
+      // A map has no time axis: it draws each place's total over the rows
+      // selected, so period analysis is left off and said to be.
+      notes.push('A map draws each place’s total over the selected rows; period analysis needs a chart with a time axis, so it is left off.');
+      transform = 'none';
+    } else if (transform !== 'none' && type) {
       if (!timeDimension) {
-        issues.push('Time analysis needs a date, year or election-cycle dimension on Columns or Rows.');
+        notes.push('Time analysis needs a date, year or election-cycle dimension on Columns or Rows, so the chart is drawn without it.');
         transform = 'none';
       } else {
+        // Contract W5: the chosen mark is kept, and Colour and every other
+        // dimension become series over the periods.
         xPill = timeDimension;
-        if (!['bar', 'line', 'area'].includes(type)) {
-          notes.push('Time analysis draws bar, line or area marks, so this view is drawn as a line.');
-          type = 'line';
-        }
-        if (series !== -1) {
-          notes.push('Time analysis compares periods within one series, so Colour is not applied.');
-          series = -1;
-        }
       }
+    }
+
+    let series = -1;
+    const seriesType = SERIES_TYPES.includes(type);
+    if (type && seriesPill && seriesType) {
+      series = seriesPill.column;
+      if (transform === 'none' && PAIRED[type]) type = PAIRED[type];
     }
 
     let x = xPill ? xPill.column : -1;
     let y = yPill ? yPill.column : -1;
     let aggregation = yPill ? yPill.aggregation : 'count';
-    const selectedAccounting = fieldAt(meta, y)?.accounting;
-    if (aggregation === 'sum' && selectedAccounting?.safe_to_sum === false) issues.push(selectedAccounting.reason || 'This raw measure is not safe to sum. Choose the analysis amount.');
+    const selectedAccounting = y >= 0 ? fieldAt(meta, y)?.accounting : null;
+    if (aggregation === 'sum' && selectedAccounting?.safe_to_sum === false) notes.push(selectedAccounting.reason || 'This raw measure is not safe to sum. Choose the analysis amount.');
     if (type === 'histogram') x = -1;
     if (y === -1) aggregation = 'count';
-    if (['scatter', 'box', 'histogram'].includes(type)) {
-      if (y === -1) aggregation = 'sum';
-      else if (aggregation === 'count') aggregation = 'sum';
+    let grouping = [...new Set([...allDimensions, ...markDimensions].map(p => p.column))];
+    if (seriesPill && !seriesType && !grouping.includes(seriesPill.column)) grouping.push(seriesPill.column);
+    // A scatter over dimensions plots one circle per group of them, each an
+    // aggregate (contract W9); with none it plots individual rows, as before.
+    const grain = type === 'scatter' && grouping.length ? 'group' : 'row';
+    if (grain === 'group') {
+      extra.grain = 'group';
+      extra.xAggregation = xPill.aggregation;
+      notes.push('Each circle is one ' + grouping.map(column => (fieldAt(meta, column) || {name: 'group'}).name).join(' / ') +
+        ' group; both measures are aggregated over it.');
+    } else if (['scatter', 'box', 'histogram'].includes(type)) {
+      if (aggregation === 'count') aggregation = 'sum';
     }
-    if (y === -1 && ['scatter', 'box', 'histogram'].includes(type)) issues.push('This view plots individual values, so it needs a numeric measure.');
-    const unusedMeasures = allMeasures.filter(p => p !== yPill && !(type === 'scatter' && p === xPill));
-    if (unusedMeasures.length) issues.push('Worksheet charts show one measure. Not drawn: ' + unusedMeasures.map(p => p.field.name).join(', ') + '. Use separate sheets, a two-measure scatter, or Verified contributions.');
-    let grouping = [...new Set(allDimensions.concat(details.filter(p => p.field.role === 'dimension')).map(p => p.column))];
-    if (type === 'scatter' && grouping.length) issues.push('Scatter shows individual rows here. Grouping needs Verified contributions.');
-    if (type === 'histogram' && grouping.length) notes.push('Histogram uses individual values; shelf dimensions do not group bins. Remove them or use a box plot for grouped distributions.');
-    if (['scatter', 'histogram'].includes(type)) grouping = [];
-    if (x < 0 && grouping.length) x = grouping[0];
+    if (type === 'histogram' || (type === 'scatter' && grain === 'row')) grouping = [];
+    if (x < 0 && grouping.length && type !== 'scatter') x = grouping[0];
     if (x >= 0 && !['scatter', 'histogram'].includes(type)) grouping = [x, ...grouping.filter(column => column !== x && column !== series)];
-    if (transform !== 'none' && grouping.some(column => column !== x)) issues.push('Time analysis needs one time grouping; filter the other dimensions or use separate ordinary series.');
+
+    const measurePills = type === 'scatter'
+      ? [xPill, yPill, ...allMeasures.filter(p => p !== xPill && p !== yPill)]
+      : [yPill, ...allMeasures.filter(p => p !== yPill), ...extraMeasures];
+    const seen = new Set(), measures = [];
+    for (const p of measurePills) {
+      if (!p || p.column < 0) continue;
+      const entry = {column: p.column, aggregation: p === yPill ? aggregation : p.aggregation};
+      const key = entry.column + '|' + entry.aggregation;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      measures.push(entry);
+    }
 
     const timeField = xPill && xPill.field.isTime ? xPill.field : null;
     const period = ['year', 'cycle'].includes(analytics.period) ? analytics.period
@@ -461,14 +644,13 @@
     }
 
     const params = state.params || {};
-    // The engine refuses to add several subjects together over time, and the
-    // classic dialog answers that with its own Subject select; the studio asks
-    // for the same choice in Parameters instead of letting the engine throw.
+    // Several subjects over time are drawn as one series each (contract W5);
+    // the Subject choice in Parameters still narrows time analysis to one.
     const subject = subjectField(meta.fields);
     if (subject && transform !== 'none' && !filters.some(f => f.column === subject.index)) {
-      const chosen = params.subject == null ? '' : String(params.subject);
-      if (chosen) filters.push({column: subject.index, op: 'equals', value: chosen});
-      else issues.push('Choose a Subject in Parameters for time analysis.');
+      const chosenSubject = params.subject == null ? '' : String(params.subject);
+      if (chosenSubject) filters.push({column: subject.index, op: 'equals', value: chosenSubject});
+      else notes.push('Every Subject is drawn as its own series over time; choose one in Parameters to add up a single Subject.');
     }
 
     const config = type ? {
@@ -483,16 +665,24 @@
       start: positiveInteger(params.start),
       end: positiveInteger(params.end),
       limit: positiveInteger(params.limit),
-      maxGroups: positiveInteger(params.maxGroups) || STUDIO_GROUP_LIMIT,
+      maxGroups: groupLimitOf(params.maxGroups),
       splitMulti: !!params.splitMulti,
       series: series,
-      filters: filters
+      filters: filters,
+      lenient: true
     } : null;
+    if (config) {
+      if (measures.length) config.measures = measures;
+      for (const key of Object.keys(extra)) config[key] = extra[key];
+      const width = Number(params.binWidth);
+      if (type === 'histogram' && Number.isFinite(width) && width > 0) config.binWidth = width;
+      if (type === 'histogram' && positiveInteger(params.bins)) config.bins = Math.min(1000, positiveInteger(params.bins));
+    }
 
     if (config && transform === 'forecast' && (config.start || config.end || config.limit)) {
       notes.push('The same-phase forecast reads every worksheet row; clear the row range and row limit in Parameters.');
     }
-    if (config && config.splitMulti && config.aggregation !== 'count') issues.push('Split multi-value cells is coverage-only. Choose Count or use transaction-level ZIP data for money.');
+    if (config && config.splitMulti && config.aggregation !== 'count') notes.push('Split multi-value cells repeats the measure across values, so the grand total is not shown. Choose Count for coverage, or use transaction-level ZIP data for money.');
     // Splitting rewrites the grouping cell, so a view with nothing on the axis
     // has no cell to split and the parameter would silently do nothing.
     if (config && config.splitMulti && config.x < 0 && config.series < 0) {
@@ -505,50 +695,177 @@
       notes: notes,
       renderMode: markType === 'text' ? 'table' : 'chart',
       markType: markType,
+      map: config ? map : null,
       fields: meta
     };
   }
 
   const compileConfig = (state, columns) => compileReport(state, columns).config;
 
+  /* -------------------------------------------------------- worksheet maps */
+
+  // Census C-16. Which kind of place a worksheet field holds, read from its
+  // geographic role or its name: 'zip', 'city-state', 'district', 'state', or
+  // '' for a field that is not a place.
+  function geoKind(field) {
+    if (!field) return '';
+    const role = String(field.geographic_role || '').toLowerCase(), name = String(field.name || '');
+    if (/zip|postal/.test(role) || /\bzip|postal|zcta/i.test(name)) return 'zip';
+    if (/city/.test(role) || /\bcit(y|ies)\b/i.test(name)) return 'city-state';
+    if (/district/.test(role) || /\bdistricts?\b/i.test(name)) return 'district';
+    if (/state/.test(role) || /\bstates?\b/i.test(name)) return 'state';
+    return '';
+  }
+  // Among places the reader put on the shelves, a symbol map takes the finest
+  // and a filled map a place with a shape (a district over its state). When
+  // the Studio picks one itself it prefers the place every row can have: a
+  // ZIP for symbols, a state for a filled map ("Filled state map").
+  const GEO_ORDER = {symbol: ['zip', 'district', 'city-state', 'state'], filled: ['district', 'state', 'city-state', 'zip'],
+    pickSymbol: ['zip', 'state', 'city-state', 'district'], pickFilled: ['state', 'district', 'city-state', 'zip']};
+  const geoRank = (field, filled, picking) => {
+    const order = picking ? (filled ? GEO_ORDER.pickFilled : GEO_ORDER.pickSymbol) : (filled ? GEO_ORDER.filled : GEO_ORDER.symbol);
+    const at = order.indexOf(geoKind(field));
+    return at < 0 ? 99 : at;
+  };
+  // Postal code, Census state FIPS and name for every US state and territory
+  // the Census boundary layers carry.
+  const US_STATES = ('AL01Alabama|AK02Alaska|AZ04Arizona|AR05Arkansas|CA06California|CO08Colorado|CT09Connecticut|' +
+    'DE10Delaware|DC11District of Columbia|FL12Florida|GA13Georgia|HI15Hawaii|ID16Idaho|IL17Illinois|IN18Indiana|' +
+    'IA19Iowa|KS20Kansas|KY21Kentucky|LA22Louisiana|ME23Maine|MD24Maryland|MA25Massachusetts|MI26Michigan|' +
+    'MN27Minnesota|MS28Mississippi|MO29Missouri|MT30Montana|NE31Nebraska|NV32Nevada|NH33New Hampshire|' +
+    'NJ34New Jersey|NM35New Mexico|NY36New York|NC37North Carolina|ND38North Dakota|OH39Ohio|OK40Oklahoma|' +
+    'OR41Oregon|PA42Pennsylvania|RI44Rhode Island|SC45South Carolina|SD46South Dakota|TN47Tennessee|TX48Texas|' +
+    'UT49Utah|VT50Vermont|VA51Virginia|WA53Washington|WV54West Virginia|WI55Wisconsin|WY56Wyoming|' +
+    'AS60American Samoa|GU66Guam|MP69Northern Mariana Islands|PR72Puerto Rico|VI78U.S. Virgin Islands')
+    .split('|').map(s => ({code: s.slice(0, 2), fips: s.slice(2, 4), name: s.slice(4)}));
+  const STATE_BY_CODE = new Map(US_STATES.map(s => [s.code, s]));
+  const STATE_BY_NAME = new Map(US_STATES.map(s => [s.name.toUpperCase(), s]));
+  const stateOf = text => {
+    const value = String(text == null ? '' : text).trim().toUpperCase();
+    return STATE_BY_CODE.get(value) || STATE_BY_NAME.get(value) || null;
+  };
+  // A five-digit ZIP from a ZIP, ZIP+4 or a ZIP whose leading zero a
+  // spreadsheet dropped (4 or 8 digits); '' for anything else.
+  const zipOf = token => {
+    const digits = String(token).trim().replace(/^(\d{5})-(\d{4})$/, '$1$2');
+    if (!/^\d+$/.test(digits)) return '';
+    const padded = digits.length === 4 || digits.length === 8 ? '0' + digits : digits;
+    const zip = padded.length === 5 || padded.length === 9 ? padded.slice(0, 5) : '';
+    return zip === '00000' ? '' : zip;
+  };
+  // 'MN-05' from 'MN-05', 'MN05', 'MN-AL', or a bare district number with its
+  // row's state; district 0 and at-large are '00', as the Census codes them.
+  const districtOf = (token, stateCell) => {
+    const text = String(token == null ? '' : token).trim().toUpperCase();
+    let found = /^([A-Z]{2})[-\s]?(\d{1,2}|AL)$/.exec(text), state = null, number = null;
+    if (found) { state = stateOf(found[1]); number = found[2]; }
+    else if ((found = /^(\d{1,2})(?:\.0+)?$/.exec(text)) || text === 'AL') {
+      state = stateOf(stateCell); number = found ? found[1] : 'AL';
+    }
+    if (!state || number == null) return '';
+    return state.code + '-' + (number === 'AL' ? '00' : number.padStart(2, '0'));
+  };
+  const NO_PLACE = '(No place)', SEVERAL_PLACES = '(Several places)';
+  // The one place a worksheet cell names. A cell naming several different
+  // places is '(Several places)', or every place ('a; b') when the reader
+  // split multi-value cells, for the engine to split as it splits any cell.
+  function placeOf(kind, cell, stateCell, split) {
+    const tokens = String(cell == null ? '' : cell).split(';').map(s => s.trim()).filter(Boolean);
+    const read = kind === 'zip' ? zipOf
+      : kind === 'state' ? t => (stateOf(t) || {}).code || ''
+      : kind === 'city-state' ? t => (stateOf(t.split(',').pop()) || {}).code || ''
+      : kind === 'district' ? t => districtOf(t, stateCell)
+      : () => '';
+    const places = [...new Set(tokens.map(read).filter(Boolean))];
+    if (!places.length) return NO_PLACE;
+    if (places.length === 1) return places[0];
+    return split ? places.join('; ') : SEVERAL_PLACES;
+  }
+  // The worksheet with one more column: each row's place. The engine then
+  // aggregates the sheet's own measure per place, so an average or a median is
+  // taken over the place's rows, never added up from pieces.
+  function placeData(data, map, split) {
+    const column = data.columns.length;
+    const stateColumn = Number.isInteger(map.stateColumn) ? map.stateColumn : -1;
+    const rows = data.rows.map(row => row.concat([placeOf(map.kind, row[map.column],
+      stateColumn >= 0 ? row[stateColumn] : null, split)]));
+    const columns = data.columns.concat([{index: column, name: map.name, type: 'category'}]);
+    return {data: Object.assign({}, data, {columns: columns, rows: rows}), column: column};
+  }
+  // The configuration a worksheet map is built from: its first measure over
+  // every place (no top-N cutoff), with the sheet's filters and row range.
+  function mapConfig(config, placeColumn) {
+    const out = {type: 'bar', x: placeColumn, y: config.y, dimensions: [placeColumn], aggregation: config.aggregation,
+      transform: 'none', period: config.period, horizon: config.horizon, start: config.start, end: config.end,
+      limit: config.limit, maxGroups: 'all', splitMulti: !!config.splitMulti, series: -1, filters: config.filters, lenient: true};
+    if (Array.isArray(config.measures) && config.measures.length) out.measures = [config.measures[0]];
+    return out;
+  }
+  // Engine groups (one per place) as MentatContributionMap groups.
+  function mapGroups(result, kind) {
+    return ((result && result.groups) || []).filter(g => !g.other).map(g => {
+      const label = String(g.label);
+      const base = {label: label, value: typeof g.value === 'number' && Number.isFinite(g.value) ? g.value : 0,
+        records: Number.isFinite(g.n) ? g.n : 0};
+      if (label === NO_PLACE || label === SEVERAL_PLACES) {
+        return Object.assign(base, {unplaced: label === NO_PLACE ? 'no_place' : 'several_places'});
+      }
+      if (kind === 'zip') return Object.assign(base, {zip5: label});
+      if (kind === 'district') {
+        const state = STATE_BY_CODE.get(label.slice(0, 2));
+        return Object.assign(base, {state: label.slice(0, 2), district: state ? state.fips + label.slice(3) : ''});
+      }
+      return Object.assign(base, {state: label});
+    });
+  }
+
   /* -------------------------------------------------------------- show me */
 
   const tile = (id, label, requirement, rule) => Object.assign(
-    {id: id, label: label, requirement: requirement, disabled: false, note: '',
+    {id: id, label: label, requirement: requirement, mark: '', note: '',
      needDimensions: 0, needMeasures: 0, needTime: false}, rule);
 
+  // Paul, 2026-09-23: "...all graph types properly register and nothing is
+  // logically constrained". Every tile is a real mark in both sources and is
+  // never greyed: the requirement is what the tile PREFERS, and a click draws
+  // with what is on the shelves, seeding what it can and letting the compiler
+  // pick the rest (and say so).
   const SHOW_ME = [
-    tile('text-table', 'Text table', '1 or more Dimensions, 1 or more Measures', {needDimensions: 1, needMeasures: 1}),
-    tile('heat-map', 'Heat map', '1 or more Dimensions, 1 or 2 Measures', {disabled: true}),
-    tile('highlight-table', 'Highlight table', '1 or more Dimensions, 1 Measure', {disabled: true}),
-    tile('symbol-map', 'Symbol map', '1 geographic Dimension, 0 to 2 Measures', {disabled: true}),
-    tile('filled-map', 'Filled map', '1 geographic Dimension, 0 or 1 Measures', {disabled: true}),
-    tile('pie-chart', 'Pie chart', '1 or more Dimensions, 1 or 2 Measures', {needDimensions: 1, needMeasures: 1,
-      note: 'Shares need nonnegative values; use bars for signed amounts.'}),
-    tile('horizontal-bars', 'Horizontal bars', '0 or more Dimensions, 1 or more Measures', {needDimensions: 1, needMeasures: 1}),
-    tile('stacked-bars', 'Stacked bars', '1 or more Dimensions, 1 or more Measures', {needDimensions: 2, needMeasures: 1,
-      note: 'This release draws the colour breakdown side by side rather than stacked.'}),
-    tile('side-by-side-bars', 'Side-by-side bars', '1 or more Dimensions, 1 or more Measures', {needDimensions: 2, needMeasures: 1}),
-    tile('treemap', 'Treemap', '1 or more Dimensions, 1 or 2 Measures', {disabled: true}),
-    tile('circle-views', 'Circle views', '1 or more Dimensions, 1 or more Measures', {needDimensions: 1, needMeasures: 1,
-      note: 'Drawn as circles joined by a line; this release has no dimension-axis circle mark.'}),
-    tile('side-by-side-circles', 'Side-by-side circles', '1 or more Dimensions, 1 or more Measures', {needDimensions: 2, needMeasures: 1,
-      note: 'Drawn as one circle series per colour member, joined by a line.'}),
-    tile('lines-continuous', 'Lines (continuous)', '1 Date, 1 or more Measures', {needDimensions: 1, needMeasures: 1, needTime: true}),
-    tile('lines-discrete', 'Lines (discrete)', '1 Date, 1 or more Measures', {needDimensions: 1, needMeasures: 1, needTime: true,
+    tile('text-table', 'Text table', '1 or more Dimensions, 1 or more Measures', {mark: 'text', needDimensions: 1, needMeasures: 1}),
+    tile('heat-map', 'Heat map', '1 or more Dimensions, 1 or 2 Measures', {mark: 'heatmap', needDimensions: 2, needMeasures: 1}),
+    tile('highlight-table', 'Highlight table', '1 or more Dimensions, 1 Measure', {mark: 'highlight', needDimensions: 2, needMeasures: 1}),
+    tile('symbol-map', 'Symbol map', '1 geographic Dimension, 0 to 2 Measures', {mark: 'map', needDimensions: 1,
+      note: 'Draws from a ZIP, state, congressional district or city field; a worksheet with none shows the same groups as bars.'}),
+    tile('filled-map', 'Filled map', '1 geographic Dimension, 0 or 1 Measures', {mark: 'filled-map', needDimensions: 1,
+      note: 'Fills states or districts from the sheet’s place field; a worksheet with none shows the same groups as bars.'}),
+    tile('pie-chart', 'Pie chart', '1 or more Dimensions, 1 or 2 Measures', {mark: 'pie', needDimensions: 1, needMeasures: 1,
+      note: 'Shares need nonnegative values; negative groups are left out and counted in a note.'}),
+    tile('horizontal-bars', 'Horizontal bars', '0 or more Dimensions, 1 or more Measures', {mark: 'bar', needDimensions: 1, needMeasures: 1}),
+    tile('stacked-bars', 'Stacked bars', '1 or more Dimensions, 1 or more Measures', {mark: 'stacked', needDimensions: 2, needMeasures: 1,
+      note: 'Each bar stacks its Colour breakdown, or its measures when there are several.'}),
+    tile('side-by-side-bars', 'Side-by-side bars', '1 or more Dimensions, 1 or more Measures', {mark: 'bar', needDimensions: 2, needMeasures: 1}),
+    tile('treemap', 'Treemap', '1 or more Dimensions, 1 or 2 Measures', {mark: 'treemap', needDimensions: 1, needMeasures: 1}),
+    tile('circle-views', 'Circle views', '1 or more Dimensions, 1 or more Measures', {mark: 'dot', needDimensions: 1, needMeasures: 1,
+      note: 'One circle per group at its value.'}),
+    tile('side-by-side-circles', 'Side-by-side circles', '1 or more Dimensions, 1 or more Measures', {mark: 'series-dot', needDimensions: 2, needMeasures: 1,
+      note: 'One circle series per Colour member.'}),
+    tile('lines-continuous', 'Lines (continuous)', '1 Date, 1 or more Measures', {mark: 'line', needDimensions: 1, needMeasures: 1, needTime: true}),
+    tile('lines-discrete', 'Lines (discrete)', '1 Date, 1 or more Measures', {mark: 'line', needDimensions: 1, needMeasures: 1, needTime: true,
       note: 'Groups the dates into calendar-year or election-cycle periods.'}),
-    tile('dual-lines', 'Dual lines', '1 Date, 2 Measures', {needDimensions: 2, needMeasures: 1, needTime: true,
-      note: 'One axis only: the second line comes from the Colour dimension, not a second measure.'}),
-    tile('area-continuous', 'Area chart (continuous)', '1 Date, 1 or more Measures', {needDimensions: 1, needMeasures: 1, needTime: true}),
-    tile('area-discrete', 'Area chart (discrete)', '1 Date, 1 or more Measures', {needDimensions: 1, needMeasures: 1, needTime: true,
+    tile('dual-lines', 'Dual lines', '1 Date, 2 Measures', {mark: 'dual-line', needDimensions: 1, needMeasures: 2, needTime: true,
+      note: 'Two measures on two axes, or the Colour breakdown on one.'}),
+    tile('area-continuous', 'Area chart (continuous)', '1 Date, 1 or more Measures', {mark: 'area', needDimensions: 1, needMeasures: 1, needTime: true}),
+    tile('area-discrete', 'Area chart (discrete)', '1 Date, 1 or more Measures', {mark: 'area', needDimensions: 1, needMeasures: 1, needTime: true,
       note: 'Groups the dates into calendar-year or election-cycle periods.'}),
-    tile('dual-combination', 'Dual combination', '1 Date, 2 Measures', {disabled: true}),
-    tile('scatter-plot', 'Scatter plot', '0 or more Dimensions, 2 to 4 Measures', {needMeasures: 2}),
-    tile('histogram', 'Histogram', '0 Dimensions, 1 Measure', {needMeasures: 1}),
-    tile('box-and-whisker', 'Box-and-whisker', '0 or more Dimensions, 1 or more Measures', {needMeasures: 1}),
-    tile('gantt', 'Gantt', '1 Date, 0 or 1 Measures', {disabled: true}),
-    tile('bullet-graph', 'Bullet graph', '0 or more Dimensions, 2 Measures', {disabled: true}),
-    tile('packed-bubbles', 'Packed bubbles', '1 or more Dimensions, 1 or 2 Measures', {disabled: true})
+    tile('dual-combination', 'Dual combination', '1 Date, 2 Measures', {mark: 'combination', needDimensions: 1, needMeasures: 2, needTime: true,
+      note: 'The first measure as bars, the second as a line on its own axis.'}),
+    tile('scatter-plot', 'Scatter plot', '0 or more Dimensions, 2 to 4 Measures', {mark: 'circle', needMeasures: 2}),
+    tile('histogram', 'Histogram', '0 Dimensions, 1 Measure', {mark: 'histogram', needMeasures: 1}),
+    tile('box-and-whisker', 'Box-and-whisker', '0 or more Dimensions, 1 or more Measures', {mark: 'box', needMeasures: 1}),
+    tile('gantt', 'Gantt', '1 Date, 0 or 1 Measures', {mark: 'gantt', needDimensions: 1,
+      note: 'First-to-last observed date of each group.'}),
+    tile('bullet-graph', 'Bullet graph', '0 or more Dimensions, 2 Measures', {mark: 'bullet', needMeasures: 2}),
+    tile('packed-bubbles', 'Packed bubbles', '1 or more Dimensions, 1 or 2 Measures', {mark: 'bubbles', needDimensions: 1, needMeasures: 1})
   ];
 
   function showMeSelection(state, columns, selected) {
@@ -575,93 +892,96 @@
 
   const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
 
+  // Every tile is enabled. `fits` says whether the shelves already hold what
+  // the tile prefers; `fill` says, in the reader's words, what a click will
+  // pick from the source when they do not.
   function showMeEligibility(selection) {
     return SHOW_ME.map(t => {
-      const view = {id: t.id, label: t.label, requirement: t.requirement, note: t.note, enabled: false, reason: ''};
-      if (t.disabled) { view.reason = 'not in this release'; return view; }
       const missing = [];
-      if (selection.dimensions < t.needDimensions) missing.push(plural(t.needDimensions, 'dimension'));
-      if (selection.measures < t.needMeasures) missing.push(plural(t.needMeasures, 'measure'));
+      if (selection.dimensions < t.needDimensions) missing.push(plural(t.needDimensions - selection.dimensions, 'dimension'));
+      if (selection.measures < t.needMeasures) missing.push(plural(t.needMeasures - selection.measures, 'measure'));
       if (t.needTime && selection.times < 1) missing.push('a date, year or election-cycle dimension');
-      view.enabled = missing.length === 0;
-      view.reason = missing.length ? 'Needs ' + missing.join(' and ') : '';
-      return view;
+      return {id: t.id, label: t.label, requirement: t.requirement, note: t.note, mark: t.mark, enabled: true, reason: '',
+        fits: missing.length === 0, missing: missing,
+        fill: missing.length ? 'Draws with the fields on the shelves and picks ' + missing.join(' and ') + ' from the source' : ''};
     });
   }
 
+  // A tile changes the mark and keeps every pill, filter, aggregate and
+  // encoding on the sheet (census B-S28). Shelves that are empty are seeded
+  // from the fields in use, then from the source itself, so a click on an
+  // empty sheet still draws.
   function showMeApply(tileId, state, columns, selected) {
     const t = SHOW_ME.find(item => item.id === tileId);
+    if (!t) return clone(state);
+    const meta = classifyFields(columns, state && state.types);
     const selection = showMeSelection(state, columns, selected);
-    if (!t || t.disabled) return clone(state);
-    const dimensions = selection.fields.filter(f => f.role === 'dimension');
-    const times = dimensions.filter(f => f.isTime);
-    const plain = dimensions.filter(f => !f.isTime);
-    const measures = selection.fields.filter(f => f.role === 'measure');
     const next = clone(state);
-    // Changing a chart changes its marks, not the user's chosen data question.
-    // Seed empty shelves only; preserve every existing pill, filter and aggregate.
-    if (shelf(state.columns).length || shelf(state.rows).length) {
-      const marks = {'text-table':'text','pie-chart':'pie','horizontal-bars':'bar',
-        'stacked-bars':'bar','side-by-side-bars':'bar','circle-views':'line',
-        'side-by-side-circles':'line','lines-continuous':'line','lines-discrete':'line',
-        'dual-lines':'line','area-continuous':'area','area-discrete':'area',
-        'scatter-plot':'circle','histogram':'histogram','box-and-whisker':'box'};
-      next.marks = {...next.marks, type: marks[tileId] || next.marks.type};
-      if (tileId === 'horizontal-bars') next.marks.orientation = 'horizontal';
-      return next;
-    }
-    next.columns = []; next.rows = [];
-    next.marks = Object.assign({}, next.marks, {color: null});
-    next.analytics = Object.assign({}, next.analytics, {transform: 'none'});
+    next.marks = Object.assign({}, next.marks, {type: t.mark});
+    if (tileId === 'horizontal-bars') next.marks.orientation = 'horizontal';
+    else if (next.marks.orientation) delete next.marks.orientation;
+    // Discrete lines and areas are period totals; the continuous tiles take a
+    // period grouping away again. Nothing else about the analytics changes.
+    const transform = (next.analytics || {}).transform;
+    if (['lines-discrete', 'area-discrete'].includes(tileId)) next.analytics = Object.assign({}, next.analytics, {transform: 'annual'});
+    else if (['lines-continuous', 'area-continuous'].includes(tileId) && transform === 'annual') next.analytics = Object.assign({}, next.analytics, {transform: 'none'});
+    if (shelf(state.columns).length || shelf(state.rows).length) return next;
+
+    const usable = f => !f.hidden;
+    const inUse = selection.fields;
+    const dimensions = [...inUse.filter(f => f.role === 'dimension'),
+      ...meta.dimensions.filter(f => usable(f) && !inUse.includes(f))];
+    const plain = dimensions.filter(f => !f.isTime && !f.isIdentifier);
+    const times = dimensions.filter(f => f.isTime);
+    const measures = [...inUse.filter(f => f.role === 'measure'),
+      ...meta.measures.filter(f => usable(f) && !inUse.includes(f))];
     const measurePill = index => {
       const existing = shelf(state.columns).concat(shelf(state.rows)).find(p => p.column === index);
       return {column: index, aggregation: existing ? existing.aggregation : 'sum'};
     };
-    const dimension = position => (plain[position] || dimensions[position] || null);
-    const time = times[0] || null;
+    const dim = f => ({column: f.index, aggregation: 'sum'});
+    const dimension = position => (plain[position] || dimensions.filter(f => !plain.includes(f))[position - plain.length] || null);
     const colour = () => {
+      if (next.marks.color != null) return;
       const used = next.columns.concat(next.rows).map(p => p.column);
       // A date belongs on the axis, so Colour prefers a plain dimension.
       const candidate = plain.find(f => used.indexOf(f.index) === -1)
         || dimensions.find(f => used.indexOf(f.index) === -1);
       if (candidate) next.marks.color = {column: candidate.index, aggregation: 'sum'};
     };
-    const setMark = id => { next.marks.type = id; };
-
-    if (t.id === 'text-table' || t.id === 'pie-chart') {
-      if (dimension(0)) next.columns = [{column: dimension(0).index, aggregation: 'sum'}];
-      if (measures[0]) next.rows = [measurePill(measures[0].index)];
-      setMark(t.id === 'pie-chart' ? 'pie' : 'text');
-    } else if (t.id === 'horizontal-bars') {
-      if (dimension(0)) next.rows = [{column: dimension(0).index, aggregation: 'sum'}];
+    const axis = preferTime => (preferTime ? times[0] : null) || dimension(0) || times[0] || null;
+    next.columns = []; next.rows = [];
+    const id = t.id;
+    if (id === 'horizontal-bars') {
+      if (dimension(0)) next.rows = [dim(dimension(0))];
       if (measures[0]) next.columns = [measurePill(measures[0].index)];
-      setMark('bar');
-    } else if (t.id === 'stacked-bars' || t.id === 'side-by-side-bars') {
-      if (dimension(0)) next.columns = [{column: dimension(0).index, aggregation: 'sum'}];
-      if (measures[0]) next.rows = [measurePill(measures[0].index)];
-      setMark('bar'); colour();
-    } else if (t.id === 'circle-views' || t.id === 'side-by-side-circles') {
-      if (dimension(0)) next.columns = [{column: dimension(0).index, aggregation: 'sum'}];
-      if (measures[0]) next.rows = [measurePill(measures[0].index)];
-      setMark('line');
-      if (t.id === 'side-by-side-circles') colour();
-    } else if (['lines-continuous', 'lines-discrete', 'dual-lines', 'area-continuous', 'area-discrete'].indexOf(t.id) !== -1) {
-      if (time) next.columns = [{column: time.index, aggregation: 'sum'}];
-      if (measures[0]) next.rows = [measurePill(measures[0].index)];
-      setMark(t.id.indexOf('area') === 0 ? 'area' : 'line');
-      if (t.id === 'lines-discrete' || t.id === 'area-discrete') next.analytics.transform = 'annual';
-      if (t.id === 'dual-lines') colour();
-    } else if (t.id === 'scatter-plot') {
+    } else if (id === 'scatter-plot' || id === 'bullet-graph') {
       if (measures[0]) next.columns = [measurePill(measures[0].index)];
       if (measures[1]) next.rows = [measurePill(measures[1].index)];
-      setMark('circle');
-    } else if (t.id === 'histogram') {
+      if (id === 'bullet-graph' && dimension(0)) next.columns.unshift(dim(dimension(0)));
+    } else if (id === 'histogram') {
       if (measures[0]) next.rows = [measurePill(measures[0].index)];
-      setMark('histogram');
-    } else if (t.id === 'box-and-whisker') {
-      if (dimension(0)) next.columns = [{column: dimension(0).index, aggregation: 'sum'}];
+    } else if (['lines-continuous', 'lines-discrete', 'dual-lines', 'area-continuous', 'area-discrete',
+      'dual-combination', 'gantt'].includes(id)) {
+      const x = axis(true);
+      if (x) next.columns = [dim(x)];
       if (measures[0]) next.rows = [measurePill(measures[0].index)];
-      setMark('box');
+      if ((id === 'dual-lines' || id === 'dual-combination') && measures[1]) next.rows.push(measurePill(measures[1].index));
+      if (id === 'dual-lines' && !measures[1]) colour();
+    } else if (id === 'heat-map' || id === 'highlight-table') {
+      if (dimension(0)) next.columns = [dim(dimension(0))];
+      if (dimension(1)) next.rows = [dim(dimension(1))];
+      if (measures[0]) next.rows.push(measurePill(measures[0].index));
+    } else if (id === 'symbol-map' || id === 'filled-map') {
+      const place = dimensions.filter(f => geoKind(f)).sort((a, b) => geoRank(a, id === 'filled-map', true) - geoRank(b, id === 'filled-map', true))[0]
+        || dimension(0);
+      if (place) next.columns = [dim(place)];
+      if (measures[0]) next.rows = [measurePill(measures[0].index)];
+    } else {
+      // text, pie, stacked, side-by-side, treemap, circles, box, bubbles
+      if (dimension(0)) next.columns = [dim(dimension(0))];
+      if (measures[0]) next.rows = [measurePill(measures[0].index)];
+      if (['stacked-bars', 'side-by-side-bars', 'side-by-side-circles'].includes(id)) colour();
     }
     return next;
   }
@@ -753,10 +1073,14 @@
   // source aggregate that is already defined, so it has no aggregation menu.
   const VERIFIED_AGGREGATED = 'amount';
 
+  // A worksheet measure offers every aggregation, Count distinct included; a
+  // text or date column read as a measure is counted (Count, Count distinct).
+  // The verified server has no distinct count of money, so amount keeps its six.
+  const COUNTED = AGGREGATIONS.filter(a => a[0] === 'count' || a[0] === 'countd');
   function aggregationsFor(field, engine) {
     if (!field || field.role !== 'measure') return [];
-    if (engine !== 'verified') return AGGREGATIONS.slice();
-    return field.id === VERIFIED_AGGREGATED ? AGGREGATIONS.slice() : [];
+    if (engine !== 'verified') return field.type === 'number' ? AGGREGATIONS.slice() : COUNTED.slice();
+    return field.id === VERIFIED_AGGREGATED ? AGGREGATIONS.filter(a => a[0] !== 'countd') : [];
   }
 
   // Political-money shortcuts. Each one either exists in this source or says
@@ -896,49 +1220,63 @@
 
   const groupValue = group => group.value != null ? group.value : group.median != null ? group.median : 0;
 
-  // Chronological order is the meaning of a time axis, so sorting such a view
-  // by value would destroy it rather than reorder it. A built result and a
-  // compiled configuration both answer this, so the toolbar can switch Sort off
-  // before the view is drawn and sortResult can refuse it afterwards.
-  const TIME_VIEWS = ['line', 'area', 'multiline'];
-  const sortLocked = view => !!view && (!!view.temporal ||
-    (view.transform != null && view.transform !== 'none') || TIME_VIEWS.indexOf(view.type) !== -1);
+  // Paul, 2026-09-23: "nothing is logically constrained". Sort works on every
+  // mark, time axes included (census B-S15, contract W13); 'none' is the
+  // engine's own order, which on a time axis is chronological, so a time view
+  // still opens in time order. sortLocked is kept for its callers and answers
+  // false for every view.
+  const sortLocked = () => false;
+  // 'az' and 'za' order the groups by their label (contract W13 {by: 'label'}).
+  const SORTS = ['none', 'asc', 'desc', 'az', 'za'];
 
-  function sortResult(result, direction) {
+  function sortResult(result, direction, options) {
     if (!result || !Array.isArray(result.groups)) return result;
-    if (['asc', 'desc'].indexOf(direction) === -1) return result;
-    if (['scatter', 'histogram'].indexOf(result.type) !== -1) return result;
-    if (sortLocked(result)) return result;
-    const size = group => result.series
-      ? group.values.reduce((total, v) => total + (v.value == null ? 0 : v.value), 0)
+    const byLabel = (options && options.by === 'label') || direction === 'az' || direction === 'za';
+    const ascending = direction === 'asc' || direction === 'az';
+    if (!['asc', 'desc', 'az', 'za'].includes(direction)) return result;
+    // A scatter's points are not an axis order; there is nothing to reorder.
+    if (result.type === 'scatter') return result;
+    const size = group => seriesResult(result)
+      ? (group.values || []).reduce((total, v) => total + (v.value == null ? 0 : v.value), 0)
       : groupValue(group);
+    const compare = byLabel
+      ? (a, b) => String(a.label).localeCompare(String(b.label), undefined, {numeric: true})
+      : (a, b) => size(a) - size(b);
     // An Other rollup is the tail the engine folded away, not a member of the
     // view, so it keeps the last position however the real groups are ordered.
     const rollup = result.groups.filter(g => g.other);
     const groups = result.groups.filter(g => !g.other)
-      .sort((a, b) => direction === 'asc' ? size(a) - size(b) : size(b) - size(a));
+      .sort((a, b) => ascending ? compare(a, b) : compare(b, a));
     return Object.assign({}, result, {groups: groups.concat(rollup)});
   }
 
   // Mark values in the order the renderer appends them, so a caller can label
   // marks without knowing how the SVG was drawn. Empty where labels do not fit.
+  // A result is drawn as series only when every group carries its per-series
+  // values. Scatter (points, no groups) and box (groups without values) results
+  // also name their Colour members in `series` (contract W11) and are not series
+  // results here; this is the predicate chartSVG and tableRows use.
+  const seriesResult = result => !!(result && result.series && Array.isArray(result.groups) &&
+    result.groups.every(g => g && Array.isArray(g.values)));
+
   function markValues(result) {
     if (!result) return [];
-    if (result.series) return result.groups.reduce((all, g) => all.concat(g.values.filter(v => v.value != null).map(v => v.value)), []);
+    if (seriesResult(result)) return result.groups.reduce((all, g) => all.concat(g.values.filter(v => v.value != null).map(v => v.value)), []);
     if (['scatter', 'box', 'pie', 'doughnut', 'radar'].indexOf(result.type) !== -1) return [];
     return (result.groups || []).map(g => g.value);
   }
 
+  // A view separated by Colour or by several measures gets the mean and median
+  // of every mark it draws (census B-S19): the rule is labelled as such, so it
+  // is never read as one series' own average.
   function referenceValues(result, analytics) {
     const wanted = analytics || {};
-    // One dashed rule cannot stand for several independent series, so a view
-    // separated by Colour has no single average or median of its own.
-    if (result && result.series) return [];
     const values = markValues(result).filter(v => typeof v === 'number' && Number.isFinite(v));
     const lines = [];
     if (!values.length) return lines;
-    if (wanted.average) lines.push({kind: 'average', label: 'Average', value: values.reduce((a, b) => a + b, 0) / values.length});
-    if (wanted.median) lines.push({kind: 'median', label: 'Median', value: math.quantile(values.slice().sort((a, b) => a - b), .5)});
+    const every = seriesResult(result) ? ' of every mark' : '';
+    if (wanted.average) lines.push({kind: 'average', label: 'Average' + every, value: values.reduce((a, b) => a + b, 0) / values.length});
+    if (wanted.median) lines.push({kind: 'median', label: 'Median' + every, value: math.quantile(values.slice().sort((a, b) => a - b), .5)});
     return lines;
   }
 
@@ -954,7 +1292,7 @@
     if (result.split) return 'Grand total is not shown: split coverage groups can overlap.';
     if (['yoy', 'change'].includes(result.transform || config?.transform)) return 'Grand total is not shown for percentages or period changes.';
     if (result.accounting?.safe_to_sum === false) return result.accounting.reason || 'Grand total is not shown for this accounting grain.';
-    if (result.series) return 'Grand total is not shown: series are independent.';
+    if (seriesResult(result)) return 'Grand total is not shown: series are independent.';
     if (result.type === 'histogram') return 'Grand total is not shown for histograms (bins are row counts).';
     if (UNTOTALLED.indexOf(result.type) !== -1) return 'Grand total is not shown for ' + result.type + ' views.';
     if (config && ['sum', 'count'].indexOf(config.aggregation) === -1) return 'Grand total is only available for SUM and COUNT.';
@@ -968,14 +1306,14 @@
     return values.length ? values.reduce((a, b) => a + b, 0) : null;
   }
 
-  const AGGREGATION_LABEL = {sum: 'SUM', mean: 'AVG', count: 'CNT', median: 'MED', min: 'MIN', max: 'MAX'};
+  const AGGREGATION_LABEL = {sum: 'SUM', mean: 'AVG', count: 'CNT', median: 'MED', min: 'MIN', max: 'MAX', countd: 'CNTD'};
 
   function rowsToMarksSummary(result, config, columns) {
     if (!result || !config) return null;
     const meta = classifyFields(columns);
     const measure = fieldAt(meta, config.y);
     const marks = result.type === 'scatter' ? (result.points || []).length
-      : result.series ? result.groups.reduce((n, g) => n + g.values.filter(v => v.value != null).length, 0)
+      : seriesResult(result) ? result.groups.reduce((n, g) => n + g.values.filter(v => v.value != null).length, 0)
       : (result.groups || []).length;
     const viewColumns = result.type === 'scatter' ? 1 : (result.groups || []).length;
     const viewRows = result.series ? result.series.length : 1;
@@ -1166,6 +1504,7 @@
 
   const api = {
     AGGREGATIONS, AGGREGATION_IDS, MARK_TYPES, MARK_IDS, TRANSFORMS, SHOW_ME, STUDIO_GROUP_LIMIT,
+    EXTRA_MARK_TYPES, ALL_MARK_TYPES, ALL_MARK_IDS, markLabel, groupLimitOf, SORTS,
     FILTER_OPS, LIST_OPS, RANGE_OPS, MEASURE_PRESETS, DATE_PARTS, COMPANY_OVERVIEW,
     canTreatAs, isDateLike, filterValues, filterActive, filterBounds, normalizeFilter, filterSummary,
     aggregationsFor, measurePresets, applyMeasurePreset, datePartsFor,
@@ -1174,7 +1513,7 @@
     carriedFilterValue, graphCycleValue, quickAddZone, migrateSheet,
     WORKSHEET_GROUP_LABELS, NO_DATA_WORKBOOK_HINT, COMMITTEE_ACTIVITY_NOTE,
     defaultGuards, committeeActivitySheet, workbookKind, groupWorksheets,
-    compileConfig, compileReport,
+    compileConfig, compileReport, geoKind, placeOf, placeData, mapConfig, mapGroups, NO_PLACE, SEVERAL_PLACES,
     showMeSelection, showMeEligibility, showMeApply, recommendedTile,
     sortResult, sortLocked, markValues, referenceValues, grandTotal, totalNote, rowsToMarksSummary,
     sourceLabelOf, captionSource, captionSourceForKey, viewSourceRecord, chartSourceRecord, chartProvenanceRecord,

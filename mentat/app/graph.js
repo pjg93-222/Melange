@@ -32,7 +32,9 @@
   function layoutColumns(width, options) {
     const opts = options || {};
     if (opts.compact) return compactColumns(width, opts);
-    const W = Math.max(420, Math.min(920, Math.round(Number(width) || 520)));
+    // 920 is the widest a card drawn in its own column is ever drawn; a card
+    // given a folded neighbour's row (maxWidth, see widenedCap) draws wider.
+    const W = Math.max(420, Math.min(Math.max(920, Number(opts.maxWidth) || 0), Math.round(Number(width) || 520)));
     const sparkWidth = opts.spark ? SPARK_W : 0, sparkGap = opts.spark ? SPARK_GAP : 0;
     const sparkX = W - (opts.spark ? SPARK_INSET : 4) - sparkWidth;
     // The share is anchored to the column the layout reserves for it, never to
@@ -377,6 +379,70 @@
     }
     return forms;
   }
+  /* The downstream drawer's sides. Paul, 2026-09-23, on its one "Contributions
+     / Other" segment: "It should be two separate segments". The server answers
+     six sides for a committee (graph_data.ACTIVITY_DIRECTIONS): Contribution
+     and Other - the recorded 'Contribution / Other' bucket split by its FEC
+     transaction code - Support, Oppose, 'Contribution / Other' itself for
+     amounts whose saved source records no code, and Unknown. The drawer
+     offers Contributions and Other beside Support and Oppose, always; the
+     unsplit side and Unknown only when they hold something; and for a source
+     that records no code at all, the unsplit side in place of the two halves
+     it cannot be split into, so no zero is shown that was never measured. */
+  const DRAWER_SIDE_ORDER = ['Contribution', 'Other', 'Support', 'Oppose', 'Contribution / Other', 'Unknown'];
+  function drawerSideEmpty(row) {
+    return !(Number(row && row.candidates) > 0) && !Number(row && row.amount) && !Number(row && row.unidentified_amount);
+  }
+  function drawerSides(totals) {
+    const rows = (Array.isArray(totals) ? totals : []).filter(row => row && DRAWER_SIDE_ORDER.indexOf(row.direction) >= 0);
+    const side = name => rows.find(row => row.direction === name);
+    const unsplit = side('Contribution / Other');
+    const halvesEmpty = ['Contribution', 'Other'].every(name => !side(name) || drawerSideEmpty(side(name)));
+    const onlyUnsplit = halvesEmpty && Boolean(unsplit) && !drawerSideEmpty(unsplit);
+    return rows.filter(row => {
+      if (row.direction === 'Unknown' || row.direction === 'Contribution / Other') return !drawerSideEmpty(row);
+      if (row.direction === 'Contribution' || row.direction === 'Other') return !onlyUnsplit;
+      return true;
+    }).sort((a, b) => DRAWER_SIDE_ORDER.indexOf(a.direction) - DRAWER_SIDE_ORDER.indexOf(b.direction));
+  }
+  const DRAWER_SIDE_LABEL = {'Contribution': 'Contributions', 'Other': 'Other',
+    'Contribution / Other': 'Contributions / Other', 'Support': 'Support', 'Oppose': 'Oppose', 'Unknown': 'Unknown'};
+  /* The two segments' counts, reconciled (round-3 verify, D1). Paul,
+     2026-09-23: "It should be two separate segments". Each segment counts
+     its own candidates, and one candidate can have both a contribution and
+     other activity from the same committee - 40 of ActBlue's 1,005 in
+     Banking 2025-2026 have a 24K and a 24C - so Contributions and Other add
+     up to more than the candidates behind them (1,000 + 45). The server
+     counts the recorded bucket once (graph_data.recorded_bucket, the
+     response's contribution_other_union). This is the line the drawer shows
+     under the segments, and each segment's tooltip sentence; null when no
+     candidate is on more than one of the segments shown. */
+  function drawerOverlap(totals, union) {
+    const shared = Number(union && union.on_more_than_one_side) || 0;
+    if (!(shared > 0)) return null;
+    const recorded = Array.isArray(union.sides) ? union.sides : ['Contribution', 'Other', 'Contribution / Other'];
+    const sides = drawerSides(totals).filter(row => recorded.indexOf(row.direction) >= 0 && Number(row.candidates) > 0);
+    if (sides.length < 2) return null;
+    const names = sides.map(row => DRAWER_SIDE_LABEL[row.direction] || row.direction);
+    const list = names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+    const n = value => Number(value).toLocaleString();
+    const candidates = Number(union.candidates) || 0;
+    const pair = sides.length === 2;
+    const text = `${list}: ${n(candidates)} different candidates; ` + (pair
+      ? `${n(shared)} ${shared === 1 ? 'has both, so it is' : 'have both, so they are'} in both counts.`
+      : `${n(shared)} ${shared === 1 ? 'is' : 'are'} in more than one count.`);
+    const basis = direction => pair
+      ? `${n(shared)} of them ${shared === 1 ? 'is' : 'are'} also counted under ${names[sides[0].direction === direction ? 1 : 0]}`
+      : `${n(shared)} candidate${shared === 1 ? ' is' : 's are'} counted under more than one of ${list}`;
+    return {sides: sides.map(row => row.direction), candidates, shared,
+      counted: sides.reduce((sum, row) => sum + Number(row.candidates), 0), text, basis};
+  }
+  /* The cards that fold (Paul, 2026-09-23: "You should be able to expand each
+     section individually like with a census panel"), by the id graph.js's
+     get() takes, and the per-browser key each one's state is kept under. */
+  const FOLD_SECTIONS = ['category-panel', 'candidate-panel', 'company-panel', 'level-panel',
+    'organization-panel', 'compare-table', 'drawer-panel'];
+  const FOLD_KEY = 'mentat-graph-folded:';
   const COMPARE_MENU = {KINDS: COMPARE_KINDS, LABELS: COMPARE_LABELS, MAX: COMPARE_MAX,
     menuKinds, menuValues, menuFilter, menuMove, createMenuController, pillsModel};
   const layout = {layoutColumns: layoutColumns, labelParts: labelParts,
@@ -391,7 +457,10 @@
     compactColumns: compactColumns, COMPACT_BAR_MIN: COMPACT_BAR_MIN, compareMenu: COMPARE_MENU,
     COMPACT_BAR_SHARE: COMPACT_BAR_SHARE, COMPACT_LABEL_KEEP: COMPACT_LABEL_KEEP,
     COMPACT_SHARE_MIN_W: COMPACT_SHARE_MIN_W, nameForms: nameForms,
-    compactYield: compactYield, COMPACT_NAME_SHARE_W: COMPACT_NAME_SHARE_W};
+    compactYield: compactYield, COMPACT_NAME_SHARE_W: COMPACT_NAME_SHARE_W,
+    drawerSides: drawerSides, DRAWER_SIDE_ORDER: DRAWER_SIDE_ORDER,
+    drawerOverlap: drawerOverlap, DRAWER_SIDE_LABEL: DRAWER_SIDE_LABEL,
+    FOLD_SECTIONS: FOLD_SECTIONS, FOLD_KEY: FOLD_KEY};
   if (typeof module !== 'undefined' && module.exports) module.exports = layout;
   globalThis.MentatGraphLayout = layout;
   if (typeof document === 'undefined') return;
@@ -1088,7 +1157,27 @@
   // 540-wide bento tile renders 13px type at under 10px. A panel with no
   // width yet - hidden, or not laid out - falls back to 520 and is redrawn by
   // panelObserver as soon as it has one.
-  const panelWidth=container=>Math.max(420,Math.min(920,Math.round(container.clientWidth||520)));
+  const panelWidth=container=>Math.max(420,Math.min(widenedCap(container),Math.round(container.clientWidth||520)));
+  /* Paul, 2026-09-23: "You should be able to expand each section individually
+     like with a census panel" - the point being a bigger graph. A card that
+     graph.css gives the whole row because the card beside it is folded is
+     drawn at that row's width, its bars longer at the same 13px type, rather
+     than stopping at the 920 a card in its own column is capped at; the card
+     carries .is-widened meanwhile, which lifts the stylesheet's 920px
+     max-width for its drawing. The drawer widened by its own explorer
+     (.graph-drawer-wide) keeps the cap, as it always has. */
+  function widenedCap(container) {
+    const card=container&&container.closest?container.closest('.graph-panel'):null;
+    const grid=card&&card.parentElement;
+    let wide=false;
+    if(card&&grid&&!card.classList.contains('is-folded')&&!card.classList.contains('graph-drawer-wide')
+      &&grid.querySelector(':scope>.graph-panel.is-folded:not([hidden])')){
+      const tracks=getComputedStyle(grid).gridTemplateColumns.split(/\s+/).filter(Boolean).length;
+      wide=tracks>1&&getComputedStyle(card).gridColumnEnd==='-1';
+    }
+    if(card)card.classList.toggle('is-widened',wide);
+    return wide?Math.max(920,Math.round(container.clientWidth||0)):920;
+  }
   // A compare half (02b) is drawn at its own width too, down to 200px: the
   // 420px floor would hand a third of a card a drawing scaled to 10px type.
   const compactWidth=container=>Math.max(200,Math.min(920,Math.round(container.clientWidth||320)));
@@ -1145,7 +1234,8 @@
     const asked={party:party&&!twoLine,spark,valueWidth,compact:Boolean(opts.compact),leftRead,shareWidth,labelWidth,bar:opts.bar,nameFirst:Boolean(opts.nameFirst)};
     const planned=opts.compact&&Array.isArray(opts.yieldOrder)
       ?compactYield(compactWidth(container),asked,withChips?opts.yieldOrder.filter(step=>step!=='share'):opts.yieldOrder):asked;
-    const box=layoutColumns(opts.compact?compactWidth(container):panelWidth(container),planned);
+    const drawWidth=opts.compact?compactWidth(container):panelWidth(container);
+    const box=layoutColumns(drawWidth,opts.compact?planned:Object.assign({},planned,{maxWidth:drawWidth}));
     const CHART_WIDTH=box.width,shareRight=box.shareRight,sparkX=box.sparkX,valueRight=box.valueRight;
     const LABEL_RIGHT=box.labelRight,BAR_LEFT=box.barLeft,barMax=box.barMax;
     const percentages=total>0&&shown.every(row=>!has(row)||row.amount>=0);
@@ -1438,6 +1528,46 @@
     });
     for(const name of [...PANELS,'drawer-rows']){const node=get(name);if(node)panelObserver.observe(node);}
   }
+  /* ------------------------------------------------------- section folds
+     Paul, 2026-09-23: "You should be able to expand each section individually
+     like with a census panel". The census panel is the PAC evidence map's
+     Sources disclosure (evidence.js .map-source-details): one muted header
+     line with a disclosure triangle, and everything under it folds away. Each
+     card in FOLD_SECTIONS gets that triangle on its heading, built here so the
+     golden index.html does not change. Every card starts open - nothing
+     stored is the board's look - and a press is remembered per section in
+     this browser (MentatState, as Chart Studio's panes are), never in the URL.
+     graph.css draws a folded card as its heading line across the row and
+     gives the card that shared its row the whole row; the observer above
+     relays that card's bars at the new width, so the chart left open is the
+     one that grows. */
+  function setFolded(section,folded,remember) {
+    section.classList.toggle('is-folded',folded);
+    const button=section.querySelector(':scope>.panel-heading>.graph-fold');
+    if(button){
+      button.setAttribute('aria-expanded',String(!folded));
+      button.title=folded?'Expand this section':'Collapse this section';
+    }
+    if(remember)globalThis.MentatState?.remember?.(FOLD_KEY+section.id,folded?'1':'0');
+  }
+  for(const name of FOLD_SECTIONS) {
+    const section=get(name),heading=section&&section.querySelector(':scope>.panel-heading');
+    const title=heading&&heading.querySelector(':scope>h2');
+    if(!title)continue;
+    if(!title.id)title.id=section.id+'-title';
+    const button=document.createElement('button');
+    button.type='button';button.className='graph-fold';
+    button.setAttribute('aria-controls',section.id);
+    button.setAttribute('aria-labelledby',title.id);
+    heading.prepend(button);
+    const toggle=()=>setFolded(section,!section.classList.contains('is-folded'),true);
+    button.addEventListener('click',toggle);
+    // The census panel's whole header line is its control; so is this title,
+    // for a pointer (not after a text selection). The button stays the one
+    // keyboard stop, so the title adds nothing to the tab order.
+    title.addEventListener('click',()=>{if(!String(globalThis.getSelection?.()||''))toggle();});
+    setFolded(section,globalThis.MentatState?.recall?.(FOLD_KEY+section.id)==='1',false);
+  }
   /* --------------------------------------------------- company sparklines */
   // One verified contribution query supplies company-by-quarter observations.
   // This avoids the former fan-out of one Graph request per election cycle and
@@ -1610,8 +1740,28 @@
      the answer lands in is never on screen at the same time as the panel the
      PAC was clicked in. So the drawer asks for itself, beside the panel that
      was clicked, and leaves the page's own Candidate view alone. */
-  const DIRECTION_LABEL={'Contribution / Other':'Contributions / Other','Support':'Support',
-    'Oppose':'Oppose','Unknown':'Unknown'};
+  // Board 5's word is "Contributions"; the rest of the recorded bucket is
+  // "Other" (Paul, 2026-09-23: "It should be two separate segments"). Amounts
+  // whose source records no transaction type keep the combined name. The one
+  // table is the pure DRAWER_SIDE_LABEL above, which drawerOverlap also reads.
+  const DIRECTION_LABEL=DRAWER_SIDE_LABEL;
+  // What a split side holds, in its tooltip: the recorded FEC codes behind it
+  // and, when a candidate is on more than one of the recorded sides, how many
+  // are (drawerOverlap; the halves' amounts add up to the recorded bucket,
+  // their counts need not). overlap is undefined only when the answer does
+  // not count the bucket (a console started before contribution_other_union):
+  // then the caveat is said whenever both halves hold candidates.
+  function sideBasis(row,overlap,both) {
+    const codes=Array.isArray(row.transaction_types)?row.transaction_types:[];
+    const shared=overlap?(overlap.sides.includes(row.direction)?`. ${overlap.basis(row.direction)}`:''):
+      overlap===undefined&&both&&(row.direction==='Contribution'||row.direction==='Other')
+        ?'. A candidate with both kinds of activity is counted on both sides':'';
+    if(row.direction==='Contribution'||row.direction==='Other')
+      return (codes.length?`. Recorded as FEC transaction type${codes.length>1?'s':''} ${codes.join(', ')}`:'')+shared;
+    if(row.direction==='Contribution / Other')
+      return '. The saved source records no transaction type for these amounts, so they are not split into Contributions and Other'+shared;
+    return '';
+  }
   let drawer=null,drawerController=null;
   function writeDrawerScope() {
     globalThis.MentatScope?.write({drawer:drawer?drawer.id:'',
@@ -1664,12 +1814,16 @@
       let direction=preferred||get('direction').value||'Support';
       let body=await ask(direction);
       const totals=Array.isArray(body.direction_totals)?body.direction_totals:[];
-      // direction_totals is the same four numbers whichever side was asked for,
-      // so opening on the largest side costs one extra request at most, and none
-      // when the side asked for is already the largest.
-      if(!preferred&&totals.length){
-        const best=totals.slice().sort((a,b)=>Math.abs(b.amount)-Math.abs(a.amount))[0];
-        if(best&&Math.abs(best.amount)>0&&best.direction!==direction){
+      // direction_totals is the same numbers whichever side was asked for, so
+      // opening on the largest side costs one extra request at most, and none
+      // when the side asked for is already the largest. A side the drawer does
+      // not offer - an old permalink's 'Contribution / Other' on a report that
+      // records transaction types, split since Paul's "It should be two
+      // separate segments" (2026-09-23) - opens as a fresh click does.
+      const offered=drawerSides(totals).map(row=>row.direction);
+      if((!preferred||!offered.includes(preferred))&&totals.length){
+        const best=drawerSides(totals).sort((a,b)=>Math.abs(b.amount)-Math.abs(a.amount))[0];
+        if(best&&(Math.abs(best.amount)>0||!offered.includes(direction))&&best.direction!==direction){
           direction=best.direction;
           if(body.candidates_by_direction?.[direction]) body={...body,candidates:body.candidates_by_direction[direction]};
           else body=await ask(direction);
@@ -1680,6 +1834,7 @@
         rows:body.candidate_available?(body.candidates||[]):[],
         relationships:body.pac_candidate_relationships||[],
         allDirections:body.candidates_by_direction||{},edges:body.downstream_edges||[],
+        union:body.contribution_other_union,
         sources:body.downstream_sources||[],comparisons:body.measurement_comparisons||[],
         note:body.candidate_note||'',loading:false,
         error:body.candidate_available?'':(body.candidate_note||'This committee has no saved downstream activity.')};
@@ -1693,9 +1848,17 @@
   function drawDirections() {
     const host=get('drawer-directions');
     if(!host)return;
-    // Unknown is offered only when it holds something: three sides is the shape
-    // the reader was shown, and a fourth empty cell is a question nobody asked.
-    const sides=(drawer.totals||[]).filter(row=>row.direction!=='Unknown'||Number(row.candidates)>0||Number(row.unidentified_amount||0)!==0);
+    // drawerSides (pure, above) decides which sides are offered: Contributions
+    // and Other beside Support and Oppose; Unknown, and amounts no transaction
+    // type splits, only when they hold something - an empty cell is a
+    // question nobody asked.
+    const sides=drawerSides(drawer.totals);
+    // Round-3 verify (D1), under Paul's "It should be two separate segments":
+    // each segment counts its own candidates, so when one candidate is on
+    // both, the line under the segments says how many different candidates
+    // they hold (drawerOverlap, from the server's count of the bucket).
+    const overlap=drawer.union===undefined?undefined:drawerOverlap(drawer.totals,drawer.union);
+    const both=['Contribution','Other'].every(name=>sides.some(row=>row.direction===name&&Number(row.candidates)>0));
     host.replaceChildren(...sides.map(row=>{
       const button=document.createElement('button');
       button.type='button';button.className='graph-drawer-side';
@@ -1706,7 +1869,7 @@
       count.textContent=Number(row.candidates||0).toLocaleString()+(row.unidentified_amount?' + ?':'');
       button.append(name,count);
       button.title=`${dollars(row.amount)} across ${Number(row.candidates||0).toLocaleString()} identified candidates`+
-        (row.unidentified_amount?`; ${dollars(row.unidentified_amount)} has no candidate identity`:'');
+        (row.unidentified_amount?`; ${dollars(row.unidentified_amount)} has no candidate identity`:'')+sideBasis(row,overlap,both);
       button.onclick=()=>{
         if(row.direction===drawer.direction)return;
         if(drawer.allDirections?.[row.direction]) {
@@ -1716,6 +1879,8 @@
       return button;
     }));
     host.hidden=!sides.length;
+    const line=get('drawer-overlap');
+    if(line){line.textContent=overlap&&sides.length?overlap.text:'';line.hidden=!line.textContent;}
   }
   function drawDrawerRows(animate) {
     const host=get('drawer-rows'),panel=get('drawer-panel');
@@ -1953,6 +2118,9 @@
     if(compare){selectAnalysis(VALUES_ANALYSIS[name]);return;}
     const panel=get(name)?.closest('.graph-panel');
     if(panel&&panel.hidden)selectAnalysis(VALUES_ANALYSIS[name]);
+    // The same for a folded card: a table opened inside a folded card could
+    // not be seen, so asking for it unfolds the card, as its triangle would.
+    if(panel&&panel.classList.contains('is-folded'))setFolded(panel,false,true);
     get('export-target').value=name;syncExport();
     const details=get(name).querySelector('details');
     if(!details){labelValues(name);return;}

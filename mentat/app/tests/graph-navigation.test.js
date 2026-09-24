@@ -166,8 +166,12 @@ test('[graph-nav] the drawer keys are scope keys, and the contract is v6', () =>
   for (const side of scope.DRAWER_DIRECTIONS) {
     assert.equal(scope.read('drawerDirection=' + encodeURIComponent(side)).drawerDirection, side);
   }
+  // Paul, 2026-09-23, on the drawer's "Contributions / Other" segment: "It
+  // should be two separate segments". Contribution and Other are that
+  // recorded bucket split by FEC transaction code; 'Contribution / Other'
+  // stays for amounts whose source records no code, and for older links.
   assert.deepStrictEqual(scope.DRAWER_DIRECTIONS,
-    ['Contribution / Other', 'Support', 'Oppose', 'Unknown']);
+    ['Contribution', 'Other', 'Support', 'Oppose', 'Contribution / Other', 'Unknown']);
   for (const bad of ['Downstream', 'support', 'Contribution/Other', 'Oppose ']) {
     const read = scope.read('drawerDirection=' + encodeURIComponent(bad));
     assert.equal('drawerDirection' in read, false, bad + ' must be dropped, not merely reported');

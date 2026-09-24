@@ -46,8 +46,14 @@
   // whether the drawer was open, and one that reused `direction` would move
   // the page's own Candidate view select.
   const DRAWER_ID = /^[A-Za-z0-9][A-Za-z0-9-]{0,31}$/;
-  // The #graph-direction option values, verbatim (view_graph.html).
-  const DRAWER_DIRECTIONS = ['Contribution / Other', 'Support', 'Oppose', 'Unknown'];
+  // The #graph-direction option values, verbatim (view_graph.html), in the
+  // drawer's order. Paul, 2026-09-23, on the drawer's "Contributions / Other"
+  // segment: "It should be two separate segments" - Contribution and Other are
+  // that recorded bucket split by FEC transaction code. 'Contribution / Other'
+  // stays a valid side: amounts whose source records no code keep it, and an
+  // older permalink that names it still reads (the drawer then opens on the
+  // largest side it offers).
+  const DRAWER_DIRECTIONS = ['Contribution', 'Other', 'Support', 'Oppose', 'Contribution / Other', 'Unknown'];
   // Graph's comparison (v6, console redesign 02b, 2026-09-22). `compare`
   // names the one dimension being compared, and that dimension's own key -
   // industry, cycle or company - REPEATS in pill order:

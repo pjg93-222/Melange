@@ -924,3 +924,35 @@
   #view-chart-studio .studio.studio-data-collapsed:not(.studio-options-hidden):not(.studio-chart-expanded) #studio-grid {grid-template-columns:56px minmax(0,1fr) 260px}
 }
 @media print {#view-chart-studio :is(#studio-expand,#studio-shelves-strip,#studio-data-rail,#studio-data-collapse,#studio-shelves-collapse) {display:none!important}}
+/* Per-section folds. Paul, 2026-09-23: "You should be able to expand each
+   section individually like with a census panel". Each section keeps its
+   header line, a disclosure chevron beside it points down while it is open
+   and right while it is folded, and the rest folds away - the PAC evidence
+   map's Census "Source details" panel. Everything opens as S1 draws it: the
+   chevron sits in the gutter left of each header, so no header moves. */
+.studio-folded {display:none!important}
+#view-chart-studio button.studio-fold {position:relative;display:flex;align-items:center;gap:0;box-sizing:border-box;width:100%;min-width:0;height:auto;min-height:0;margin:0;padding:0;border:0;border-radius:4px;background:none;box-shadow:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;text-align:left;cursor:pointer}
+#view-chart-studio button.studio-fold::before {content:"";position:absolute;left:-11px;top:50%;box-sizing:border-box;width:6px;height:6px;margin-top:-4px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);opacity:.5;transition:transform .15s ease,opacity .15s ease}
+#view-chart-studio button.studio-fold[aria-expanded=false]::before {transform:rotate(-45deg);margin-top:-3px;opacity:.85}
+#view-chart-studio button.studio-fold:hover::before,#view-chart-studio button.studio-fold:focus-visible::before {opacity:1}
+#view-chart-studio button.studio-fold:focus-visible {outline:3px solid var(--acu-gold);outline-offset:2px}
+#view-chart-studio .studio-fold-label {flex:none}
+#view-chart-studio .studio-fold-count {min-width:0;margin-left:8px;overflow:hidden;font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted);white-space:nowrap;text-overflow:ellipsis}
+#view-chart-studio .studio-fold-count:empty {display:none}
+/* Shelves and Marks properties fold to one line that still names their
+   fields and still takes a drop. */
+#view-chart-studio .studio-shelf-name button.studio-fold::before {left:-9px}
+#view-chart-studio .studio .studio-shelves .studio-shelf.is-folded #studio-filters {margin:0;border-color:transparent;background:transparent}
+#view-chart-studio .studio .studio-shelves .studio-shelf.is-folded {height:20px;margin-bottom:6px}
+#view-chart-studio .studio .studio-shelves .studio-shelf.is-folded .studio-drop {min-height:18px;margin:0;border-color:transparent;background:transparent}
+#view-chart-studio .studio .studio-shelf .studio-drop.is-folded-drop>*,#view-chart-studio .studio .studio-prop .studio-drop.is-folded-drop>* {display:none!important}
+#view-chart-studio .studio .studio-shelf .studio-drop.is-folded-drop::after,#view-chart-studio .studio .studio-prop .studio-drop.is-folded-drop::after {content:attr(data-fold-summary);min-width:0;padding:0 2px;overflow:hidden;font:400 12px/1 var(--font-sans);color:var(--muted);white-space:nowrap;text-overflow:ellipsis}
+#view-chart-studio .studio .studio-prop.is-folded {height:32px}
+#view-chart-studio .studio .studio-prop.is-folded .studio-drop {min-height:24px;border-color:transparent;background:transparent}
+#view-chart-studio .studio-prop>span.studio-fold-head {padding-left:7px}
+#view-chart-studio .studio-prop>span.studio-fold-head button.studio-fold {gap:13px;font:inherit}
+/* The Marks card's own header, in the Data pane's section style. */
+#view-chart-studio #studio-pane-marks>h3.studio-section-head {margin:2px 0 0;padding:0 0 0 7px;font:500 11px/14px var(--font-sans);letter-spacing:.09em;text-transform:uppercase;color:#4a4552}
+#view-chart-studio .studio-analytics-group.studio-fold-head button.studio-fold {font:inherit}
+@media (prefers-reduced-motion:reduce) {#view-chart-studio button.studio-fold::before {transition:none}}
+@media print {#view-chart-studio button.studio-fold::before {display:none}}

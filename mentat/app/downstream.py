@@ -153,6 +153,12 @@ def network(roots, units=None, report_edges=()):
 def activity(network):
     grouped, labels = defaultdict(Decimal), {}
     filings = defaultdict(list)
+    # A Schedule B candidate payment's FEC code (disbursement_type: 24K, 24Z,
+    # ...) is kept beside the recorded 'Contribution / Other' amount, so a
+    # reader can split that one bucket by code (graph_data.activity_sides:
+    # Paul, 2026-09-23, "It should be two separate segments"). The grouping
+    # and every existing field are unchanged.
+    parts = defaultdict(lambda: defaultdict(lambda: [Decimal(0), []]))
     for (year, committee), unit in network['units'].items():
         for row in observations(unit, 'expenditures'):
             if memo(row):
@@ -167,11 +173,17 @@ def activity(network):
             if memo(row) or str(row.get('line_number')) not in ('22','23') or not row.get('candidate_id'):
                 continue
             key = (year,committee,str(row['candidate_id']),'Contribution / Other')
-            grouped[key] += amount(row.get('disbursement_amount'))
-            filings[key].append(filing_record(row))
+            value, record = amount(row.get('disbursement_amount')), filing_record(row)
+            grouped[key] += value
+            filings[key].append(record)
+            part = parts[key][str(row.get('disbursement_type') or '').strip().upper()]
+            part[0] += value
+            part[1].append(record)
             labels[key] = str(row.get('candidate_name') or row.get('recipient_name') or row['candidate_id'])
     return [{'cycle':k[0], 'committee':k[1], 'candidate_id':k[2], 'direction':k[3],
              'candidate':labels[k], 'party':'', 'amount':value, 'filings':filings[k],
+             **({'transaction_parts':{code:{'amount':total, 'filings':records}
+                                      for code,(total,records) in parts[k].items()}} if k in parts else {}),
              'source':network['units'][k[:2]]['_source']} for k,value in grouped.items()]
 
 def merge_activity(rows, roots, units=None, report_edges=()):

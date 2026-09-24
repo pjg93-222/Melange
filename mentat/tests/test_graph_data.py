@@ -172,33 +172,122 @@ class GraphTests(unittest.TestCase):
         self.assertIn('not money attributed',a['candidate_note'])
 
     def test_direction_totals_answer_every_side_from_one_read(self):
-        # P5. The drawer asks for one side and has to label the other three,
-        # so every direction is summarised from the same eligible rows the
+        # P5. The drawer asks for one side and has to label the others, so
+        # every direction is summarised from the same eligible rows the
         # selected side was cut from - including the empty ones.
+        # Paul, 2026-09-23, on the drawer's "Contributions / Other" segment:
+        # "It should be two separate segments". The sides are now Contribution
+        # and Other (the recorded bucket split by FEC transaction code) beside
+        # Support and Oppose, then 'Contribution / Other' for amounts whose
+        # source records no code, and Unknown. This fixture's Downstream
+        # Activity sheet has no Transaction Type column - a workbook written
+        # before it existed - so its 111 cannot be split and stays on the
+        # recorded side; test_contribution_other_splits_by_transaction_type
+        # below pins the split itself.
         value = self.view(mode='activity')
         self.assertEqual([r['direction'] for r in value['direction_totals']],
-                         ['Contribution / Other','Support','Oppose','Unknown'])
+                         ['Contribution','Other','Support','Oppose','Contribution / Other','Unknown'])
         self.assertEqual({r['direction']:(r['candidates'],r['amount']) for r in value['direction_totals']},
-                         {'Contribution / Other':(1,111),'Support':(1,810),'Oppose':(1,999),'Unknown':(0,0)})
+                         {'Contribution':(0,0),'Other':(0,0),'Support':(1,810),'Oppose':(1,999),
+                          'Contribution / Other':(1,111),'Unknown':(0,0)})
         # The selected side still ranks exactly what it always did.
         self.assertEqual(value['candidates'][0]['amount'],810)
         # One PAC narrows every side, not just the one being shown.
         one = self.view(mode='activity', recipient='C00000003')
         self.assertEqual({r['direction']:(r['candidates'],r['amount']) for r in one['direction_totals']},
-                         {'Contribution / Other':(1,111),'Support':(1,777),'Oppose':(1,999),'Unknown':(0,0)})
+                         {'Contribution':(0,0),'Other':(0,0),'Support':(1,777),'Oppose':(1,999),
+                          'Contribution / Other':(1,111),'Unknown':(0,0)})
         # A side with no rows is reported as zero, never omitted.
         jfc = self.view(mode='activity', recipient='C00000002')
         self.assertEqual({r['direction']:(r['candidates'],r['amount']) for r in jfc['direction_totals']},
-                         {'Contribution / Other':(0,0),'Support':(1,33),'Oppose':(0,0),'Unknown':(0,0)})
-        # Only the activity view has four sides to report.
+                         {'Contribution':(0,0),'Other':(0,0),'Support':(1,33),'Oppose':(0,0),
+                          'Contribution / Other':(0,0),'Unknown':(0,0)})
+        # The recorded bucket, each candidate once: here all of it is on the
+        # unsplit side, so nothing is on more than one side.
+        self.assertEqual(value['contribution_other_union'],
+                         {'direction':'Contribution / Other','sides':['Contribution','Other','Contribution / Other'],
+                          'candidates':1,'on_more_than_one_side':0,'amount':111,'unidentified_amount':0})
+        # Only the activity view has sides to report.
         self.assertNotIn('direction_totals', self.view())
         self.assertNotIn('direction_totals', self.view(mode='estimates'))
+        self.assertNotIn('contribution_other_union', self.view())
+        self.assertNotIn('contribution_other_union', self.view(mode='estimates'))
+
+    def test_contribution_other_splits_by_transaction_type(self):
+        # Paul, 2026-09-23, on the drawer's "Contributions / Other" segment:
+        # "It should be two separate segments". The workbook records one
+        # direction for every non-independent-expenditure code, and carries
+        # the code beside it (Transaction Type). Contribution is the codes
+        # whose recorded Activity Type names a contribution (24K, 24P, 24Z);
+        # Other is every other recorded code; an amount with no code stays
+        # 'Contribution / Other'. The halves add up to the recorded bucket.
+        def coded(book):
+            sheet = book['Downstream Activity']
+            sheet['H5'] = 'Transaction Type'
+            for row, code in zip(range(6, 10), ['24E', '24A', '24K', '24E']):
+                sheet.cell(row, 8, code)
+            sheet.append(['2025-2026','C00000003','H0CA00001','Candidate One','D','Contribution / Other',40,'24C'])
+            sheet.append(['2025-2026','C00000003','H0CA00002','Candidate Two','R','Contribution / Other',7,None])
+            sheet.append(['2025-2026','C00000003','H0CA00003','Candidate Three','R','Contribution / Other',5,'24z'])
+            sheet['A3'] = '100 source rows condensed to 7 committee-candidate-activity groups'
+        self.edit(coded)
+        value = self.view(mode='activity', recipient='C00000003')
+        totals = {r['direction']:r for r in value['direction_totals']}
+        self.assertEqual([r['direction'] for r in value['direction_totals']],
+                         ['Contribution','Other','Support','Oppose','Contribution / Other','Unknown'])
+        self.assertEqual({name:(r['candidates'],r['amount'],r['transaction_types']) for name,r in totals.items()},
+                         {'Contribution':(2,116,['24K','24Z']),'Other':(1,40,['24C']),
+                          'Support':(1,777,[]),'Oppose':(1,999,[]),
+                          'Contribution / Other':(1,7,[]),'Unknown':(0,0,[])})
+        # Nothing is re-attributed: the three sides add up to the recorded
+        # bucket, 111 + 40 + 7 + 5; Candidate One is on both halves, so the
+        # counts need not add (2 + 1 + 1 = 4 for 3 candidates).
+        self.assertEqual(sum(totals[name]['amount'] for name in ('Contribution','Other','Contribution / Other')),163)
+        self.assertEqual({r['id'] for name in ('Contribution','Other','Contribution / Other')
+                          for r in value['candidates_by_direction'][name]},{'H0CA00001','H0CA00002','H0CA00003'})
+        self.assertEqual(value['candidates_by_direction']['Other'],
+                         [{'id':'H0CA00001','label':'Candidate One','amount':40,'party':'D'}])
+        # Round-3 verify (D1): the segments' counts are each side's own, so
+        # they need not add up to the candidates behind them. The response
+        # says by how much, for the drawer to show under the segments: the
+        # bucket's distinct candidates (3), those on more than one side (1,
+        # Candidate One), and its amount, which the sides add up to.
+        union = value['contribution_other_union']
+        self.assertEqual(union,{'direction':'Contribution / Other','sides':['Contribution','Other','Contribution / Other'],
+                                'candidates':3,'on_more_than_one_side':1,'amount':163,'unidentified_amount':0})
+        counts = [totals[name]['candidates'] for name in union['sides']]
+        self.assertEqual(sum(counts) - union['on_more_than_one_side'], union['candidates'])
+        self.assertEqual(union['amount'], sum(totals[name]['amount'] for name in union['sides']))
+        # Whichever side is asked for, the reconciliation is the same.
+        self.assertEqual(self.view(mode='activity',recipient='C00000003',direction='Other')['contribution_other_union'],union)
+        # The explorer follows the chosen side: each PAC-candidate tie carries it.
+        ties = {(t['direction'],t['candidate_id']):t['amount'] for t in value['pac_candidate_relationships']
+                if t['direction'] in ('Contribution','Other','Contribution / Other')}
+        self.assertEqual(ties,{('Contribution','H0CA00001'):111,('Contribution','H0CA00003'):5,
+                               ('Other','H0CA00001'):40,('Contribution / Other','H0CA00002'):7})
+        # Each side is a request of its own, for the page's Direction select.
+        self.assertEqual(self.view(mode='activity',direction='Other')['candidates'][0]['amount'],40)
+        self.assertEqual([r['amount'] for r in self.view(mode='activity',direction='Contribution')['candidates']],[111,5])
+        # The workbook read itself is unchanged: one recorded row per
+        # committee, candidate and direction, its codes kept beside it.
+        row = next(r for r in graph_data.report_activity(stamp(self.path))
+                   if r['candidate_id'] == 'H0CA00001' and r['direction'] == 'Contribution / Other')
+        self.assertEqual(row['amount'],151)
+        self.assertEqual({code:part['amount'] for code,part in row['transaction_parts'].items()},{'24K':111,'24C':40})
+        # The reference reader agrees with whichever reader ran above.
+        graph_data.report_activity.cache_clear()
+        with patch.object(graph_data.native_scan,'tables',return_value=None):
+            reference = graph_data.report_activity(stamp(self.path))
+        self.assertEqual({code:part['amount'] for r in reference if r['candidate_id'] == 'H0CA00001'
+                          and r['direction'] == 'Contribution / Other' for code,part in r['transaction_parts'].items()},
+                         {'24K':111,'24C':40})
 
     def test_direction_totals_are_empty_when_the_downstream_sheet_is_refused(self):
         self.edit(lambda b:b['Downstream Activity'].cell(3,1,'100 source rows condensed to 8 committee-candidate-activity groups'))
         value = self.view(mode='activity')
         self.assertFalse(value['candidate_available'])
         self.assertEqual(value['direction_totals'],[])
+        self.assertIsNone(value['contribution_other_union'])
 
     def test_recipient_filter_and_negative_values_reconcile(self):
         value=self.view(recipient='C00000003')

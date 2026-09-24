@@ -19,36 +19,34 @@
     return catalog.map((f,index)=>({...f,index,name:f.id==='amount'?(basis==='original_supported'?'Supported gross amount':'Selected amount'):f.label||f.name||f.id,type:f.type||(f.role==='measure'?'number':f.id==='date'?'date':'category'),is_time:TIME.includes(f.id),visible:true,unit:f.unit}));
   }
   const RULES={'heat-map':['heatmap',2,1],'highlight-table':['highlight',2,1],'stacked-bars':['stacked',2,1],'circle-views':['dot',1,1],'side-by-side-circles':['series-dot',2,1],'treemap':['treemap',1,1],'packed-bubbles':['bubbles',1,1],'histogram':['histogram',0,1],'box-and-whisker':['box',0,1],'gantt':['gantt',1,0],'bullet-graph':['bullet',0,2],'dual-combination':['combination',1,2,true],'dual-lines':['dual-line',1,2,true]};
+  // Paul, 2026-09-23: "...all graph types properly register and nothing is logically constrained".
+  // Every tile is enabled on verified data as on a worksheet: a rule is what a tile prefers, `fits`
+  // says whether the shelves hold it, and a click draws with what is there.
+  const fill=missing=>missing.length?'Draws with the fields on the shelves and picks '+missing.join(' and ')+' from the source':'';
   function showMeEligibility(selection){
     return core.showMeEligibility(selection).map(tile=>{
-      if(RULES[tile.id]){const[type,d,m,time]=RULES[tile.id],missing=[];if(selection.dimensions<d)missing.push(d+' dimension'+(d===1?'':'s'));if(selection.measures<m)missing.push(m+' measure'+(m===1?'':'s'));if(time&&!selection.times)missing.push('a date dimension');return {...tile,enabled:!missing.length,requirement:`${d} or more Dimensions, ${m} or more Measures`,reason:missing.length?'Needs '+missing.join(' and '):'',note:['histogram','box'].includes(type)?'Computed from individual selected observation amounts on the server.':type==='gantt'?'First-to-last observed receipt dates, not continuous giving.':type==='bullet'?'Two measures with the same unit; the second is a comparison, not an inferred target.':'Uses the selected source groups; no repeated aggregation of subtotals.'};}
-      if(['circle-views','side-by-side-circles','scatter-plot'].includes(tile.id)){
-        const dimensions=tile.id==='circle-views'?1:tile.id==='side-by-side-circles'?2:0;
-        const missing=[];if(selection.measures<2)missing.push('2 measures');if(selection.dimensions<dimensions)missing.push(dimensions+' dimension'+(dimensions===1?'':'s'));
-        return {...tile,enabled:!missing.length,requirement:(dimensions?dimensions+' or more Dimensions, ':'0 or more Dimensions, ')+'2 plotted Measures',reason:missing.length?'Needs '+missing.join(' and '):'',note:'Compares the first two selected measures as circles. Dimensions define each group'+(tile.id==='side-by-side-circles'?'; the second dimension supplies Colour.':'.')};
-      }
-      if(['symbol-map','filled-map'].includes(tile.id))return {...tile,enabled:true,requirement:'Contributor ZIP or State, summed Selected amount',note:'Creates verified ZIP/state marks with optional state and congressional boundaries.',reason:''};
+      if(RULES[tile.id]){const[type,d,m,time]=RULES[tile.id],missing=[];if(selection.dimensions<d)missing.push((d-selection.dimensions)+' dimension'+(d-selection.dimensions===1?'':'s'));if(selection.measures<m)missing.push((m-selection.measures)+' measure'+(m-selection.measures===1?'':'s'));if(time&&!selection.times)missing.push('a date dimension');return {...tile,mark:type,enabled:true,reason:'',fits:!missing.length,missing,fill:fill(missing),requirement:`${d} or more Dimensions, ${m} or more Measures`,note:['histogram','box'].includes(type)?'Computed from individual selected observation amounts on the server.':type==='gantt'?'First-to-last observed receipt dates, not continuous giving.':type==='bullet'?'Two measures with the same unit; the second is a comparison, not an inferred target.':type==='dot'?'One circle per group at its value.':type==='series-dot'?'One circle series per Colour member.':'Uses the selected source groups; no repeated aggregation of subtotals.'};}
+      if(tile.id==='scatter-plot'){const missing=selection.measures<2?[(2-selection.measures)+' measure'+(2-selection.measures===1?'':'s')]:[];return {...tile,enabled:true,reason:'',fits:!missing.length,missing,fill:fill(missing),requirement:'0 or more Dimensions, 2 plotted Measures',note:'Compares the first two selected measures as circles; one measure draws one circle per group.'};}
+      if(['symbol-map','filled-map'].includes(tile.id))return {...tile,enabled:true,reason:'',fits:true,missing:[],fill:'',requirement:'Contributor ZIP or State, summed Selected amount',note:'Creates verified ZIP/state marks with optional state and congressional boundaries.'};
       return tile;
     });
   }
+  // A tile changes the mark and keeps every pill, filter, aggregate, encoding and analysis (census
+  // B-S28). Empty shelves are seeded from the fields in use, then from the source.
   function showMeApply(tileId,state,columns,selected){
     if(['symbol-map','filled-map'].includes(tileId)){
       const next=structuredClone(state);next.marks={...next.marks,type:tileId==='filled-map'?'filled-map':'map'};return next;
     }
-    if(RULES[tileId]){
-      const selection=core.showMeSelection(state,columns,selected),rule=RULES[tileId];if(!showMeEligibility(selection).find(t=>t.id===tileId)?.enabled)return structuredClone(state);
-      if(core.shelf(state.columns).length||core.shelf(state.rows).length){const next=structuredClone(state);next.marks={...next.marks,type:rule[0]};return next;}
-      const next=structuredClone(state),dims=selection.fields.filter(f=>f.role==='dimension'),measures=selection.fields.filter(f=>f.role==='measure'),p=f=>({column:f.index,aggregation:'sum'});
-      next.columns=(rule[3]?dims.filter(f=>f.isTime).slice(0,1):rule[0]==='histogram'?[]:dims.slice(0,rule[1]||8)).map(p);
-      next.rows=(['histogram','box','gantt'].includes(rule[0])?[columns.find(f=>f.id==='amount')]:measures.slice(0,rule[2])).filter(Boolean).map(p);
-      if(rule[0]==='histogram'&&columns.some(f=>f.id==='amount_bin')){next.columns=[p(columns.find(f=>f.id==='amount_bin'))];next.rows=[p(columns.find(f=>f.id==='records'))];}
-      next.marks={type:rule[0],color:null,size:null,label:null,detail:[],tooltip:[]};next.analytics={...next.analytics,transform:'none'};return next;
-    }
-    if(!['circle-views','side-by-side-circles','scatter-plot'].includes(tileId))return core.showMeApply(tileId,state,columns,selected);
-    const selection=core.showMeSelection(state,columns,selected),tile=showMeEligibility(selection).find(t=>t.id===tileId);if(!tile?.enabled)return structuredClone(state);
-    const next=core.showMeApply('scatter-plot',state,columns,selected),dimensions=selection.fields.filter(f=>f.role==='dimension');
-    next.marks.detail=dimensions.map(f=>({column:f.index,aggregation:'sum'}));
-    if(tileId==='side-by-side-circles')next.marks.color={column:dimensions[1].index,aggregation:'sum'};
+    const rule=RULES[tileId];
+    if(!rule)return core.showMeApply(tileId,state,columns,selected);
+    const next=structuredClone(state);next.marks={...next.marks,type:rule[0]};if(next.marks.orientation)delete next.marks.orientation;
+    if(core.shelf(state.columns).length||core.shelf(state.rows).length)return next;
+    const selection=core.showMeSelection(state,columns,selected),meta=core.classifyFields(columns,state.types),p=f=>({column:f.index,aggregation:'sum'});
+    const inUse=selection.fields,dims=[...inUse.filter(f=>f.role==='dimension'),...meta.dimensions.filter(f=>!inUse.includes(f))],measures=[...inUse.filter(f=>f.role==='measure'),...meta.measures.filter(f=>!inUse.includes(f))];
+    const times=dims.filter(f=>f.isTime),plain=dims.filter(f=>!f.isTime);
+    next.columns=(rule[3]?(times.length?times:plain).slice(0,1):rule[0]==='histogram'?[]:[...plain,...times].slice(0,rule[1])).map(p);
+    next.rows=(['histogram','box','gantt'].includes(rule[0])?[columns.find(f=>f.id==='amount')]:measures.slice(0,Math.max(1,rule[2]))).filter(Boolean).map(p);
+    if(rule[0]==='histogram'&&columns.some(f=>f.id==='amount_bin')){next.columns=[p(columns.find(f=>f.id==='amount_bin'))];next.rows=[p(columns.find(f=>f.id==='records'))];}
     return next;
   }
   function filterValue(value,field){
@@ -59,12 +57,14 @@
     if(!Number.isSafeInteger(result)||Math.abs(converted-result)>0.00001)throw new Error(MONEY.has(field.id)?'Use at most two decimal places for money.':'Use a whole observation count.');
     return result;
   }
-  function clauses(filter,field){
+  // `notes`, when given, turns the two composition refusals into notes (census B-S35, B-S36): a list
+  // over 1,000 members sends its first 1,000, and text matching on a number is dropped.
+  function clauses(filter,field,notes){
     const op=filter.op,values=Array.isArray(filter.value)?filter.value:[filter.value];
     if(op==='in'||op==='notin'){
-      const chosen=values.filter(v=>v!==''&&v!=null).map(v=>filterValue(v,field));
+      let chosen=values.filter(v=>v!==''&&v!=null).map(v=>filterValue(v,field));
       if(!chosen.length)return [];
-      if(chosen.length>1000)throw new Error('Choose at most 1,000 members, or use Is not one of.');
+      if(chosen.length>1000){if(!notes)throw new Error('Choose at most 1,000 members, or use Is not one of.');notes.push(field.name+' filter sends its first 1,000 of '+chosen.length+' members; use Is not one of to keep every member.');chosen=chosen.slice(0,1000);}
       return op==='in'?[{field:field.id,op:'in',value:chosen}]:chosen.map(value=>({field:field.id,op:'ne',value}));
     }
     if(op==='between'){
@@ -75,7 +75,7 @@
     }
     const simple={equals:'eq',contains:'contains',gte:'gte',lte:'lte'}[op];
     if(!simple)throw new Error('Choose a supported filter operation.');
-    if(field.role==='measure'&&simple==='contains')throw new Error('Numeric filters use Equals, At least, At most or Between.');
+    if(field.role==='measure'&&simple==='contains'){if(!notes)throw new Error('Numeric filters use Equals, At least, At most or Between.');notes.push(field.name+' cannot be matched as text, so its Contains filter is left out; use Equals, At least, At most or Between.');return [];}
     if(filter.value===''||filter.value==null)return [];
     return [{field:field.id,op:simple,value:filterValue(filter.value,field)}];
   }
@@ -83,131 +83,167 @@
      One account, read by compile() below and by the toolbar, so a button can
      never claim something the query does not do.
 
-     sheet().sort is none | asc | desc and opens at 'none'
-     (chart-studio-core.js:124). This path has always read anything but 'asc'
-     as descending, so 'none' MEANS descending here: a saved view keeps its
-     order untouched, and 'Sort descending' is pressed from the moment the
-     sheet opens instead of being a button that produces the same query. */
+     sheet().sort is none | asc | desc | az | za and opens at 'none'
+     (chart-studio-core.js createSheet). Paul, 2026-09-23: "nothing is logically
+     constrained" - so every mark sorts (census B-S16). 'none' is the view's own
+     order: chronological when the first dimension is a time axis (or the
+     histogram's bins), otherwise largest first, which is why this path has
+     always read 'none' as descending there. asc and desc order the groups by
+     the first measure on every mark; az and za by the first dimension's label. */
   const effectiveSort=state=>(state&&state.sort)==='asc'?'asc':'desc';
   const SORT_LOCK_TIME='Time views keep chronological order';
   const SORT_LOCK_BINS='A histogram keeps its bins in numeric order';
   const CHRONOLOGICAL=['line','area','combination','dual-line'];
-  // A transform forces type to 'line' before the order is chosen (see the
-  // `type='line'` at the end of the transform branch in compile), so a
-  // transform view is chronological whatever mark the reader picked. The
-  // condition is spelled out anyway: the toolbar asks before the transform
-  // has rewritten the type.
-  function sortLock(type,state){
-    if(type==='histogram')return SORT_LOCK_BINS;
-    if(CHRONOLOGICAL.includes(type))return SORT_LOCK_TIME;
-    const transform=(state&&state.analytics&&state.analytics.transform)||'none';
-    return transform==='none'?'':SORT_LOCK_TIME;
+  const ORDERED=['date','year','cycle','quarter','month','amount_bin'];
+  const orderedAxis=dimensions=>ORDERED.includes((dimensions||[])[0]);
+  function querySort(state,dimensions,measures){
+    const stored=(state&&state.sort)||'none',first=(dimensions||[])[0];
+    if((stored==='az'||stored==='za')&&first)return [{field:first,direction:stored==='az'?'asc':'desc'}];
+    if(stored==='asc'||stored==='desc')return [{field:measures[0],direction:stored}];
+    return orderedAxis(dimensions)?[{field:first,direction:'asc'}]:[{field:measures[0],direction:'desc'}];
+  }
+  // Retired (census B-S16): no mark refuses to be sorted. Kept for older callers, answering "no lock".
+  function sortLock(){return '';}
+  /* Paul, 2026-09-23: "nothing is logically constrained". The None button used to be disabled
+     wherever 'none' asked the server the same question as Descending (a category axis, largest
+     first). A stored 'none' keeps that meaning - it is every new sheet's and every saved view's
+     order - and None now stores 'source': the same query (the page holds the largest groups),
+     listed client-side in the groups' own order, A to Z with numbers ascending. On a time axis or
+     a histogram's bins 'source' is the chronological/bin order 'none' already is. */
+  const naturalOrder=(state,dimensions)=>(state&&state.sort)==='source'&&(dimensions||[]).length>0&&!orderedAxis(dimensions);
+  function naturalRows(rows,dimensions){
+    const dims=dimensions||[];
+    return (rows||[]).map((row,at)=>({row,at})).sort((a,b)=>{for(const d of dims){const c=String(a.row[d]??'').localeCompare(String(b.row[d]??''),undefined,{numeric:true});if(c)return c;}return a.at-b.at;}).map(item=>item.row);
   }
 
   /* -------------------------------------------- which marks can be labelled
-     Every mark type this path accepts or produces, with `true` where the
-     renderer honours spec.labels and otherwise the reason the button gives
-     for being disabled. Each reason was read off the renderer, not guessed;
+     Every mark type this path accepts or produces. Paul's words above: every
+     renderer draws value labels (engine contract V05, W8), so every entry is
+     `true`. A table's marks are its value cells, so its Labels button shows or
+     hides the printed values (hidden values stay on hover and in the CSV), the
+     way a text table reads with mark labels off; it is never disabled.
      app/tests/chart-studio-contributions-sort.test.js fails if a producible
      type is missing from the table or a stale one is left in it. */
   const LABEL_SUPPORT={
-    // contribution-plot.js honours spec.labels on these.
     automatic:true,bar:true,line:true,area:true,circle:true,scatter:true,
-    // contribution-charts.js honours it on these, three of them added here.
     heatmap:true,dot:true,'series-dot':true,stacked:true,histogram:true,bubbles:true,
-    // Renderers that already print the value, so the toggle would do nothing.
-    text:'A table already shows every value',
-    table:'A table already shows every value',
-    highlight:'A highlight table always prints its values',
-    treemap:'A treemap always labels every box with room for the value',
-    // Renderers that carry the values in hover detail instead.
-    box:'Box plots label their five statistics on hover',
-    gantt:'A date span carries its first and last dates on hover',
-    bullet:'A bullet row carries both measures on hover',
-    combination:'Two independent scales; each mark carries its value on hover',
-    'dual-line':'Two independent scales; each mark carries its value on hover',
-    // Drawn on the report canvas (charts.js), which has no mark labels.
-    pie:'Pie labels live in the legend',
-    doughnut:'Doughnut labels live in the legend',
-    waterfall:'Waterfall values ride in each step\u2019s hover detail',
-    pareto:'Pareto values ride in each bar\u2019s hover detail',
-    radar:'The radar polygon carries every value in one hover detail',
-    // The map draws its own marks and never reads spec.labels.
-    map:'Map marks are identified on hover, not labelled on the map',
-    'filled-map':'Map marks are identified on hover, not labelled on the map'
+    highlight:true,treemap:true,box:true,gantt:true,bullet:true,combination:true,'dual-line':true,
+    pie:true,doughnut:true,waterfall:true,pareto:true,radar:true,map:true,'filled-map':true,
+    text:true,table:true
   };
-  // 'annual' stays on the normal render path and keeps its labels; yoy,
-  // change and forecast are redrawn by charts.js, which ignores spec.labels.
-  const LABELLED_TRANSFORMS=['none','annual'];
+  // Period analysis keeps its labels too (contract W8: charts.js draws them).
+  const LABELLED_TRANSFORMS=['none','annual','yoy','change','forecast'];
   const LABEL_LOCK_TRANSFORM='Period analysis is drawn on the report canvas, which has no mark labels';
-  function labelLock(type,transform){
-    if(!LABELLED_TRANSFORMS.includes(transform||'none'))return LABEL_LOCK_TRANSFORM;
+  function labelLock(type){
     const support=LABEL_SUPPORT[type];
     if(support===true)return '';
     return support||'This mark type does not draw labels';
   }
 
+  // Paul, 2026-09-23: "Additionally, within the Chart Studio make sure everything is freely
+  // flexible, that all graph types properly register and nothing is logically constrained, it
+  // needs to be utterly maluable." compile() throws only when no field at all is placed (and for a
+  // mark id no menu offers); every other refusal became a note, and the query asks for what the
+  // server can answer (engine contract, section G-V).
+  const TIMELINE=['line','area','combination','dual-line'];
   function compile(state,columns,{dataset,industry,basis='receipt',offset=0}={}){
     const byIndex=new Map(columns.map(f=>[f.index,f])),attach=list=>core.shelf(list).map(p=>({...p,field:byIndex.get(p.column)})).filter(p=>p.field);
-    const axes=attach([...(state.columns||[]),...(state.rows||[])]),dimensions=[],measures=[],allMeasures=[],notes=[];
+    const axes=attach([...(state.columns||[]),...(state.rows||[])]),dimensions=[],measures=[],allMeasures=[],notes=[],computed=new Set();
     const addDim=f=>{if(!dimensions.includes(f.id))dimensions.push(f.id);};
-    const measure=p=>{const id=p.field.id;if(id==='amount')return AGG[p.aggregation]||'amount';if(p.aggregation!=='sum')throw new Error(p.field.name+' is computed directly from source observations. Use its default aggregation.');return id;};
-    axes.filter(p=>p.field.role==='dimension').forEach(p=>addDim(p.field));
-    axes.filter(p=>p.field.role==='measure').forEach(p=>{const id=measure(p);if(!measures.includes(id))measures.push(id);});
+    const addTo=(list,id)=>{if(id&&!list.includes(id))list.push(id);};
+    const nameOf=id=>(columns.find(f=>f.id===id)||{}).name||id;
+    const measure=p=>{const id=p.field.id;if(id==='amount')return AGG[p.aggregation]||'amount';if(p.aggregation!=='sum'&&!computed.has(id)){computed.add(id);notes.push(p.field.name+' is computed directly from source observations, so it keeps its source statistic.');}return id;};
     const mark=state.marks||{},color=attach(mark.color==null?[]:[mark.color])[0],size=attach(mark.size==null?[]:[mark.size])[0];
     const labels=attach(mark.label==null?[]:[mark.label]),tooltip=attach(mark.tooltip),detail=attach(mark.detail);
-    for(const p of [...(color?[color]:[]),...detail,...labels,...tooltip])if(p.field.role==='dimension')addDim(p.field);
-    if(color&&color.field.role!=='dimension')throw new Error('Colour uses a dimension to separate series.');
-    if(detail.some(p=>p.field.role==='measure'))throw new Error('Detail uses dimensions to define one mark per group.');
-    if(!measures.length)throw new Error('Add a dollar or count measure to Rows or Columns.');
+    if(!axes.length&&!color&&!size&&!labels.length&&!tooltip.length&&!detail.length)throw new Error('Add a dollar or count measure to Rows or Columns.');
+    axes.filter(p=>p.field.role==='dimension').forEach(p=>addDim(p.field));
+    axes.filter(p=>p.field.role==='measure').forEach(p=>addTo(measures,measure(p)));
+    for(const p of [...(color?[color]:[]),...detail,...labels,...tooltip,...(size?[size]:[])])if(p.field.role==='dimension')addDim(p.field);
+    const count=columns.some(f=>f.id==='records')?'records':'amount';
+    if(!measures.length){measures.push(count);notes.push('No measure is placed, so each mark counts '+(count==='records'?'source observations':'the selected amount')+'.');}
     allMeasures.push(...measures);
     const encoded=p=>p.field.role==='measure'?measure(p):p.field.id;
-    for(const p of [...labels,...tooltip,...(size?[size]:[])])if(p.field.role==='measure'&&!allMeasures.includes(encoded(p)))allMeasures.push(encoded(p));
+    const colorMeasure=color&&color.field.role==='measure'?encoded(color):'';
+    const sizeMeasure=size&&size.field.role==='measure'?encoded(size):'';
+    if(size&&!sizeMeasure)notes.push('Size follows a measure; '+size.field.name+' joins the grouping instead.');
+    const tipMeasures=[...tooltip,...detail].filter(p=>p.field.role==='measure').map(encoded);
+    for(const id of [...labels.filter(p=>p.field.role==='measure').map(encoded),...tipMeasures,sizeMeasure,colorMeasure])addTo(allMeasures,id);
     let type=mark.type||'automatic';
+    if(!types.has(type))throw new Error('Not available for verified data. Use Bar, Line, Circle, Text or Map, or switch to Report worksheet.');
     if(type==='automatic')type=dimensions.some(d=>TIME.includes(d))?'line':'bar';
-    if(type==='circle'){if(measures.length!==2)throw new Error('Circle compares two measures. Place two measures on the shelves, or choose Bar.');type='scatter';}
+    // Circle with two or more measures is a scatter ([0] x, [1] y, the rest in the tooltip); with one
+    // it is one circle per group at its value.
+    if(type==='circle')type=measures.length>=2?'scatter':'dot';
     if(type==='text')type='table';
     const filled=type==='filled-map';if(filled)type='map';
-    if(!types.has(mark.type||'automatic'))throw new Error('Not available for verified data. Use Bar, Line, Circle, Text or Map, or switch to Report worksheet.');
-    const transform=state.analytics?.transform||'none';
+    let transform=state.analytics?.transform||'none';
+    // Distributions, spans, maps and scatters have no period axis: the analysis is left off and said so.
+    if(transform!=='none'&&['histogram','box','gantt','map','scatter'].includes(type)){notes.push('Period analysis draws marks along a time axis, so this '+(type==='scatter'?'circle':type==='map'?'map':type)+' view is drawn without it.');transform='none';}
     if(transform!=='none'){
       const time=dimensions.findIndex(d=>['date','year','cycle'].includes(d));
-      if(time<0)throw new Error('Period analysis needs Contribution date, Year or Election cycle on a shelf.');
-      dimensions[time]=state.analytics.period==='year'?'year':state.analytics.period==='cycle'?'cycle':dimensions[time]==='date'?'year':dimensions[time];
-      if(time)dimensions.unshift(dimensions.splice(time,1)[0]);
-      if(measures.length!==1||measures[0]!=='amount')throw new Error('Period analysis requires one summed Selected amount measure.');
-      if(transform!=='annual'&&dimensions.length!==1)throw new Error('Change and forecast analysis need one time dimension; filter a subject instead of splitting it into series.');
-      type='line';
+      if(time<0){notes.push('Period analysis needs Contribution date, Year or Election cycle on a shelf, so the chart is drawn without it.');transform='none';}
+      else{
+        dimensions[time]=state.analytics.period==='year'?'year':state.analytics.period==='cycle'?'cycle':dimensions[time]==='date'?'year':dimensions[time];
+        if(time)dimensions.unshift(dimensions.splice(time,1)[0]);
+        // Contract V11/W5: the chosen mark is kept, and every measure and every other dimension is
+        // its own series over the periods.
+      }
     }
-    if(['line','area','combination','dual-line'].includes(type)&&!TIME.includes(dimensions[0]))throw new Error('Place a date, year, quarter, month or election cycle first on the shelves for a timeline.');
-    if(size&&(size.field.role!=='measure'||type!=='scatter'))throw new Error('Size requires a measure and a Circle view with two measures.');
-    if(size)notes.push('Circle size follows the absolute magnitude of '+size.field.name+'; signed values remain in the tooltip.');
-    if(state.params?.splitMulti)throw new Error('Splitting source records across labels repeats money. Clear Split before charting contributions.');
+    let categorical=false;
+    if(TIMELINE.includes(type)&&transform==='none'){
+      const time=dimensions.findIndex(d=>TIME.includes(d));
+      if(time>0){dimensions.unshift(dimensions.splice(time,1)[0]);notes.push(nameOf(dimensions[0])+' leads the axis, so every other group is its own line.');}
+      else if(time<0)categorical=true;
+    }
+    const needsSecond=['bullet','combination','dual-line'].includes(type)&&measures.length<2&&!(color&&color.field.role==='dimension');
+    if(needsSecond){const second=['amount','records','contributors'].find(id=>id!==measures[0]&&columns.some(f=>f.id===id));if(second){measures.push(second);addTo(allMeasures,second);notes.push(nameOf(second)+' is the second measure; put another measure on the shelves to choose it.');}}
+    if(sizeMeasure)notes.push('Mark size follows the absolute magnitude of '+size.field.name+'; signed values remain in the tooltip.');
+    if(state.params?.splitMulti)notes.push('Split multi-value cells applies to report worksheets; verified source records are never multi-valued, so it is not used here.');
     const filters=[],aggregate_filters=[];
-    for(const f of state.filters||[]){const field=byIndex.get(Number(f.column));if(!field)continue;const target=f.stage==='aggregate'||field.role==='measure'&&field.id!=='amount'?aggregate_filters:filters;for(const clause of clauses(f,field))target.push(clause);}
+    for(const f of state.filters||[]){const field=byIndex.get(Number(f.column));if(!field)continue;const target=f.stage==='aggregate'||field.role==='measure'&&field.id!=='amount'?aggregate_filters:filters;try{for(const clause of clauses(f,field,notes))target.push(clause);}catch(error){notes.push(field.name+' filter is left out: '+error.message);}}
     const page=attach(state.pages==null?[]:[state.pages])[0];
-    if(page){if(page.field.role!=='dimension')throw new Error('Pages requires a dimension.');if(state.pageMember!=='')filters.push({field:page.field.id,op:'eq',value:state.pageMember});}
-    const binWidth=Math.round(Number(state.params?.binWidth||100)*100);
-    if(!Number.isSafeInteger(binWidth)||binWidth<1)throw new Error('Enter a positive bin width in dollars and cents.');
-    if(type==='histogram'){dimensions.splice(0,dimensions.length,'amount_bin');measures.splice(0,measures.length,'records');allMeasures.splice(0,allMeasures.length,'records','amount');notes.push('Bins count individual observations; no group means or subtotals are used.');}
+    if(page){if(page.field.role!=='dimension')notes.push('Pages steps through a dimension; '+page.field.name+' is a measure, so Pages is not applied.');else if(state.pageMember!=='')filters.push({field:page.field.id,op:'eq',value:state.pageMember});}
+    let binWidth=Math.round(Number(state.params?.binWidth||100)*100);
+    if(!Number.isSafeInteger(binWidth)||binWidth<1){notes.push('The histogram bin width must be a positive amount in dollars and cents, so $100 bins are used.');binWidth=10000;}
+    if(type==='histogram'){
+      const keep=color&&color.field.role==='dimension'?[color.field.id]:[],dropped=dimensions.filter(d=>!keep.includes(d)&&d!=='amount_bin');
+      dimensions.splice(0,dimensions.length,'amount_bin',...keep);measures.splice(0,measures.length,'records');allMeasures.splice(0,allMeasures.length,'records','amount');
+      notes.push('Bins count individual observations; no group means or subtotals are used.'+(dropped.length?' '+dropped.map(nameOf).join(', ')+(dropped.length===1?' is':' are')+' not binned; put a field on Colour to stack the bins by it.':''));
+    }
     if(type==='box'){measures.splice(0,measures.length,'median_amount');allMeasures.splice(0,allMeasures.length,'min_amount','q1_amount','median_amount','q3_amount','max_amount');notes.push('Quartiles use selected individual amounts. Whiskers show minimum and maximum, including outliers.');}
     if(type==='gantt'){measures.splice(0,measures.length,'span_days');allMeasures.splice(0,allMeasures.length,'first_date','last_date','span_days');notes.push('Shows the observed receipt date span, not a project duration or continuous giving.');}
-    if(['heatmap','highlight','stacked'].includes(type)&&dimensions.length!==2)throw new Error('Choose exactly two grouping dimensions for this chart; put other fields on Filters.');
-    if(['bullet','combination','dual-line'].includes(type)&&measures.length!==2)throw new Error('Choose exactly two plotted measures.');
     if(type==='map'){
-      if(measures.length!==1||measures[0]!=='amount')throw new Error('A map uses summed Selected amount.');
-      if(!dimensions.includes('zip5')&&!dimensions.includes('state'))throw new Error('Place Contributor ZIP or State on a shelf for a map.');
-      if(dimensions.some(d=>!['zip5','state'].includes(d)))throw new Error('Maps group by ZIP and recorded State. Put other fields on Filters.');
+      if(!dimensions.includes('zip5')&&!dimensions.includes('state')){type='bar';notes.push('A map groups by Contributor ZIP or State; neither is on a shelf, so this view is drawn as bars.');}
+      else{
       if(dimensions.includes('zip5')&&!dimensions.includes('state'))dimensions.push('state');
-      if(color||size||labels.length||tooltip.length)notes.push('Map marks show ZIP, recorded states and selected amount.');
+        const others=dimensions.filter(d=>!['zip5','state'].includes(d));
+        if(others.length)notes.push('Each map mark combines every '+others.map(nameOf).join(' / ')+' group at its place; put '+(others.length===1?'it':'them')+' on Filters to map one.');
+        if(measures[0]!=='amount')notes.push('The map shades by '+nameOf(measures[0])+'.');
+        addTo(allMeasures,'amount');
+        if(color||size||labels.length||tooltip.length)notes.push('Map marks show ZIP, recorded states and selected amount.');
+      }
     }
-    const limit=type==='map'?100000:type==='histogram'?10000:Math.min(1000,Math.max(1,Number(state.params?.maxGroups)||60));
-    const chronological=!!sortLock(type,state),sort=chronological?[{field:dimensions[0],direction:'asc'}]:[{field:measures[0],direction:effectiveSort(state)}];
-    const query={dataset,basis,dimensions:[...new Set(dimensions)],measures:allMeasures,filters,aggregate_filters,sort,limit,offset:type==='map'||transform!=='none'?0:offset};
+    const wanted=state.params?.maxGroups;
+    const limit=type==='map'?100000:type==='histogram'?10000:wanted==='all'?100000:Math.min(100000,Math.max(1,Number(wanted)||60));
+    if(wanted==='all'&&type!=='map'&&type!=='histogram')notes.push('All groups: the server returns up to 100,000 groups per page.');
+    const queryDimensions=[...new Set(dimensions)];
+    const sort=querySort(state,queryDimensions,measures);
+    // A time axis ordered by a measure is read in that order, not as elapsed time (contract V01).
+    if(TIMELINE.includes(type)&&transform==='none'&&sort[0].field!==queryDimensions[0])categorical=true;
+    let dual=false;
+    // Contract V03: dual axes over a category axis are one panel of bars or a line with the second
+    // measure on a right axis; over a time axis contribution-charts draws them.
+    if(['combination','dual-line'].includes(type)&&categorical){dual=true;type=type==='combination'?'bar':'line';}
+    const query={dataset,basis,dimensions:queryDimensions,measures:allMeasures,filters,aggregate_filters,sort,limit,offset:type==='map'||transform!=='none'?0:offset};
     if(industry)query.industry=industry;
     if(transform!=='none')query.limit=100000;
     if(type==='histogram'||query.dimensions.includes('amount_bin')||filters.some(f=>f.field==='amount_bin'))query.bin_width_cents=binWidth;
-    const spec={type,filled,binWidth,dimensions:query.dimensions,measures,color:color?.field.id||'',size:size?encoded(size):'',labelFields:labels.map(encoded),tooltip:tooltip.map(encoded),labels:!!state.showLabels,references:{average:!!state.analytics?.average,median:!!state.analytics?.median}};
+    const spec={type,filled,binWidth,dimensions:query.dimensions,measures,color:color&&color.field.role==='dimension'?color.field.id:'',size:sizeMeasure,labelFields:labels.map(encoded),tooltip:[...tooltip.map(encoded),...detail.filter(p=>p.field.role==='measure').map(encoded)],labels:!!state.showLabels,references:{average:!!state.analytics?.average,median:!!state.analytics?.median}};
+    if(colorMeasure)spec.colorMeasure=colorMeasure;
+    if(categorical)spec.categorical=true;
+    if(dual){spec.dual=true;spec.dualMark='line';}
+    if(naturalOrder(state,queryDimensions)&&transform==='none'&&type!=='map')spec.naturalOrder=true;
+    if(type==='stacked'&&spec.color)spec.stack='stacked';
     if(detail.length||labels.some(p=>p.field.role==='dimension')||tooltip.some(p=>p.field.role==='dimension'))notes.push('Detail, Label and Tooltip dimensions define the grouping behind each mark.');
     return {query,spec,notes,transform};
   }
@@ -253,5 +289,5 @@
   const sameSource=(a,b)=>['workbook_sha256','database_sha256','index_token','query_engine_sha256','field_semantics_sha256'].every(k=>a?.[k]===b?.[k]);
   const quote=value=>'"'+String(typeof value==='string'&&/^\s*[=+@-]/.test(value)?"'"+value:value??'').replaceAll('"','""')+'"';
   function csv(result,request){const cols=result.columns;return '\uFEFF'+[cols.map(c=>c.id+(c.unit==='cents'?'_usd':'')).concat(['accounting_basis','source_workbook_sha256','database_sha256','analytical_index','query_engine_sha256','field_semantics_sha256','query_filters']).map(quote).join(','),...result.rows.map(row=>cols.map(c=>c.unit==='cents'&&row[c.id]!=null?row[c.id]/100:row[c.id]).concat([request.basis,result.provenance.workbook_sha256,result.provenance.database_sha256,result.provenance.index_token,result.provenance.query_engine_sha256,result.provenance.field_semantics_sha256,JSON.stringify({filters:request.filters,aggregate_filters:request.aggregate_filters,bin_width_cents:request.bin_width_cents})]).map(quote).join(','))].join('\r\n');}
-  const api={fields,PANE_FIELDS,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,effectiveSort,sortLock,labelLock,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS,LABEL_SUPPORT,MARK_TYPES:types,SORT_LOCK_TIME,SORT_LOCK_BINS,LABEL_LOCK_TRANSFORM,LABELLED_TRANSFORMS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
+  const api={fields,PANE_FIELDS,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,effectiveSort,querySort,orderedAxis,naturalOrder,naturalRows,sortLock,labelLock,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS,LABEL_SUPPORT,MARK_TYPES:types,SORT_LOCK_TIME,SORT_LOCK_BINS,LABEL_LOCK_TRANSFORM,LABELLED_TRANSFORMS,CHRONOLOGICAL,TIMELINE};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
 })(globalThis);

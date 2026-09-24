@@ -204,8 +204,11 @@ button:disabled{cursor:default}
 /* Board 5's segmented sides (Paul, 2026-09-23): one 64px box with a 1px rule
    between sides, the name over its count, both 14px regular and 24px apart;
    the side shown is lilac with purple ink. The sides are the data's own
-   buckets - "Contributions / Other" is one recorded bucket - each with its
-   real count, and Unknown joins only when it holds something. */
+   buckets, each with its real count: Contributions and Other are the recorded
+   "Contribution / Other" bucket split by FEC transaction code (Paul,
+   2026-09-23: "It should be two separate segments"), beside Support and
+   Oppose; Unknown, and amounts no code splits, join only when they hold
+   something (graph.js drawerSides). */
 .graph-drawer-directions{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;
   border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:2px 0 16px;background:white}
 .graph-drawer-side{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:0;
@@ -216,6 +219,14 @@ button:disabled{cursor:default}
 .graph-drawer-side strong{font-variant-numeric:tabular-nums}
 .graph-drawer-side[aria-pressed=true]{background:#f4f0f8}
 .graph-drawer-side[aria-pressed=true] :is(.graph-drawer-side-name,strong){color:var(--acu-purple)}
+/* The segments' counts reconciled (round-3 verify, D1; graph.js
+   drawerOverlap). Each segment counts its own candidates, so when a candidate
+   is on both Contributions and Other (Paul, 2026-09-23: "It should be two
+   separate segments") one muted line under them says how many different
+   candidates they hold. It shows only then, and takes the strip's bottom air,
+   so the rows move down by the line alone. */
+.graph-drawer-directions:has(+#graph-drawer-overlap:not([hidden])){margin-bottom:6px}
+#graph-drawer-overlap{margin:0 0 10px;font-size:13px;line-height:18px;color:var(--muted)}
 /* Board 5 ends the drawer with the note and, under it, "Open in PAC
    evidence" at the left; the committee's name and FEC id stay, muted, at the
    right of that line (the only place Graph prints the id). */
@@ -790,3 +801,64 @@ body #view-graph .graph-drawer .panel-heading>#graph-drawer-scope[hidden]{displa
 body .split-workspace #view-graph .graph-filter-grid .chip-select.chip-compare{flex:1 1 100%;max-width:none}
 body .split-workspace #view-graph .graph-panels .graph-halves{grid-template-columns:minmax(0,1fr)}
 body .split-workspace #view-graph .graph-half,body .split-workspace #view-graph .graph-half:first-child{padding:10px 0 0;border-left:0}
+
+/* ===========================================================================
+   Section folds (Paul, 2026-09-23): "You should be able to expand each
+   section individually like with a census panel". The census panel is the
+   PAC evidence map's Sources disclosure (workspace.css .map-source-details):
+   one muted line with a disclosure triangle that stays, everything under it
+   folding away. graph.js puts that triangle on every card's heading
+   (button.graph-fold, FOLD_SECTIONS). It sits in the card's 16px left
+   padding, so an open card keeps the board's layout; open is the default.
+   =========================================================================== */
+body #view-graph .graph-panels>.graph-panel>.panel-heading{position:relative}
+body #view-graph .graph-panels>.graph-panel>.panel-heading>.graph-fold{position:absolute;z-index:1;left:-16px;top:0;
+  width:16px;height:28px;min-width:0;min-height:0;margin:0;padding:0;border:0;border-radius:4px;background:none;
+  box-shadow:none;color:var(--muted);cursor:pointer}
+/* The triangle: the census panel's disclosure marker, pointing down while the
+   card is open and right while it is folded. */
+body #view-graph .graph-fold::before{content:"";position:absolute;left:5px;top:50%;width:0;height:0;margin-top:-4px;
+  border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;
+  transform:rotate(90deg);transform-origin:3px 4px;transition:transform 120ms ease}
+body #view-graph .graph-panel.is-folded>.panel-heading>.graph-fold::before{transform:none}
+body #view-graph .graph-fold:hover,body #view-graph .graph-fold:focus-visible{color:var(--acu-purple)}
+body #view-graph .graph-fold:focus-visible{outline:2px solid var(--acu-purple);outline-offset:0}
+body #view-graph .graph-panels>.graph-panel>.panel-heading>h2{cursor:pointer}
+/* A compared drawer's scope pill takes the heading's first line (20px, 2px
+   under it, then the heading's 8px row gap); the triangle stays level with the
+   first line of the title under it. */
+body #view-graph .graph-drawer .panel-heading:has(>#graph-drawer-scope:not([hidden]))>.graph-fold{top:30px;height:26px}
+@media(prefers-reduced-motion:reduce){body #view-graph .graph-fold::before{transition:none}}
+
+/* Folded: the heading line alone - the title, the triangle, and in the drawer
+   its scope pill and close mark; the tools (Top N, View all, the candidate
+   view) fold with the chart they set. */
+body #view-graph .graph-panels>.graph-panel.is-folded>:not(.panel-heading),
+body #view-graph .graph-panels>.graph-panel.is-folded>.panel-heading>:not(h2):not(.graph-fold):not(#graph-drawer-scope):not(.graph-drawer-close){display:none}
+body #view-graph .graph-panels>.graph-panel.is-folded{grid-column:1/-1;padding-bottom:5px}
+body #view-graph .graph-panels>.graph-panel.is-folded>.panel-heading{margin-bottom:0}
+/* The Overview's cards share subgrid rows; a folded one is a plain line. */
+body #view-graph .graph-panels[data-analysis=overview]>.graph-panel.is-folded{display:block;grid-row:auto}
+
+/* The chart left open is the one that grows: the card that shared a folded
+   card's row takes the whole row. Rows, per analysis: Overview recipient type
+   | candidates and company comparison | employee level (Companies the
+   latter); Recipients recipient type | Top organizations, or, with the drawer
+   open, Top organizations | the drawer; comparing, the table | the drawer. */
+body #view-graph .graph-panels[data-analysis=overview]:has(>#graph-category-panel.is-folded)>#graph-candidate-panel,
+body #view-graph .graph-panels[data-analysis=overview]:has(>#graph-candidate-panel.is-folded)>#graph-category-panel,
+body #view-graph .graph-panels:is([data-analysis=overview],[data-analysis=companies]):has(>#graph-company-panel.is-folded)>#graph-level-panel,
+body #view-graph .graph-panels:is([data-analysis=overview],[data-analysis=companies]):has(>#graph-level-panel.is-folded)>#graph-company-panel,
+body #view-graph .graph-panels[data-analysis=recipients]:not([data-drawer=open]):has(>#graph-category-panel.is-folded)>#graph-organization-panel,
+body #view-graph .graph-panels[data-analysis=recipients]:not([data-drawer=open]):has(>#graph-organization-panel.is-folded)>#graph-category-panel,
+body #view-graph .graph-panels[data-drawer=open]:has(>#graph-organization-panel.is-folded:not([hidden]))>#graph-drawer-panel,
+body #view-graph .graph-panels[data-drawer=open]:has(>#graph-compare-table.is-folded:not([hidden]))>#graph-drawer-panel,
+body #view-graph .graph-panels[data-drawer=open]:has(>#graph-drawer-panel.is-folded)>:is(#graph-organization-panel,#graph-compare-table){grid-column:1/-1}
+/* A folded drawer's line leads its row, as the widened drawer does (the
+   explorer's .graph-drawer-wide): it is the card the reader opened last, and
+   its line keeps the close mark in view above the list that took the row. */
+body #view-graph .graph-panels[data-drawer=open]>#graph-drawer-panel.is-folded{grid-row:1}
+/* That card's drawing is laid out at the row's width (graph.js widenedCap), so
+   workspace.css's 920px ceiling, which stops a drawing being scaled up, is
+   lifted for it: nothing is scaled, the bars are longer. */
+body #view-graph .graph-panels>.graph-panel.is-widened .graph-bars{max-width:none}

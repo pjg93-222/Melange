@@ -112,3 +112,4 @@ mentat/test-results/
 # checkout cannot resolve the report folder and that test fails.
 !mentat/config/report-directory.json
 !mentat/config/attribution-policy.json
+!mentat/app/tests/chart-engine-r3.golden.json

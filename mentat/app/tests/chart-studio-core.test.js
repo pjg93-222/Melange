@@ -33,14 +33,24 @@ function sheet(patch) {
   return Object.assign(state, patch || {});
 }
 const marks = patch => Object.assign(core.createSheet('x').marks, patch);
+// Paul's words for this round, 2026-09-23, quoted by every test below that
+// changed with them: "Additionally, within the Chart Studio make sure
+// everything is freely flexible, that all graph types properly register and
+// nothing is logically constrained, it needs to be utterly maluable."
+const PAUL = 'nothing is logically constrained, it needs to be utterly maluable';
 
 /* ------------------------------------------------------------ field roles */
 
-test('classifyFields splits dimensions, measures and hidden identifier fields', () => {
+// Paul: "nothing is logically constrained". Identifier columns are no longer
+// hidden behind a checkbox (census B-S21): they are dimensions like any other,
+// and the Data pane lists them under its More fields fold.
+test('classifyFields splits dimensions and measures, and lists identifier fields among the dimensions', () => {
   const meta = core.classifyFields(COLUMNS);
-  assert.deepStrictEqual(meta.dimensions.map(f => f.name), ['Election Cycle', 'Recipient Category', 'Employee Tier', 'Date']);
+  assert.deepStrictEqual(meta.dimensions.map(f => f.name), ['Election Cycle', 'Recipient Category', 'Employee Tier', 'Committee ID', 'Date']);
   assert.deepStrictEqual(meta.measures.map(f => f.name), ['Amount', 'Contribution Count']);
-  assert.deepStrictEqual(meta.hidden.map(f => f.name), ['Committee ID']);
+  assert.deepStrictEqual(meta.hidden.map(f => f.name), [], 'no field is hidden (' + PAUL + ')');
+  assert.deepStrictEqual(meta.identifiers.map(f => f.name), ['Committee ID']);
+  assert.strictEqual(meta.fields[ID].isIdentifier, true);
   assert.strictEqual(meta.fields[CYCLE].isTime, true);
   assert.strictEqual(meta.fields[CYCLE].glyph, 'Abc');
   assert.strictEqual(meta.fields[6].glyph, 'cal');
@@ -66,14 +76,19 @@ test('classification agrees with chart-math chartColumns on measures', () => {
 
 /* --------------------------------------------------------- compileConfig */
 
-test('dimensions reach grouping and extra measures are explicitly refused', () => {
+// Paul: "nothing is logically constrained". Every measure placed is drawn:
+// two measures are two series of one view (engine contract W2), where the
+// compiler used to refuse the second one.
+test('dimensions reach grouping and every measure placed is drawn', () => {
   const report = core.compileReport(sheet({columns: [CATEGORY, TIER], rows: [AMOUNT, COUNT]}), COLUMNS);
   const config = report.config;
   assert.strictEqual(config.x, CATEGORY);
   assert.strictEqual(config.y, AMOUNT);
   assert.strictEqual(config.type, 'bar');
   assert.deepStrictEqual(config.dimensions, [CATEGORY, TIER]);
-  assert.match(report.issues.join(' '), /show one measure/);
+  assert.deepStrictEqual(config.measures, [{column: AMOUNT, aggregation: 'sum'}, {column: COUNT, aggregation: 'sum'}]);
+  assert.deepStrictEqual(report.issues, [], PAUL);
+  assert.strictEqual(config.lenient, true, 'the studio always asks the engine to draw what it can (contract W1)');
 });
 
 test('a measure pill carries its own aggregation, defaulting to sum', () => {
@@ -128,28 +143,47 @@ test('a Colour pill becomes the separate series and pairs the chart type', () =>
   assert.strictEqual(line.series, TIER);
 });
 
-test('a Colour measure is refused with a note rather than becoming a series', () => {
+// Paul: "nothing is logically constrained". A measure on Colour shades each
+// mark by its value (contract W11 colorMeasure) instead of being refused.
+test('a Colour measure shades each mark rather than becoming a series', () => {
   const report = core.compileReport(sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({color: COUNT})}), COLUMNS);
   assert.strictEqual(report.config.series, -1);
   assert.strictEqual(report.config.type, 'bar');
-  assert.match(report.notes.join(' '), /measure/);
+  assert.deepStrictEqual(report.config.colorMeasure, {column: COUNT, aggregation: 'sum'});
+  assert.deepStrictEqual(report.issues, [], PAUL);
 });
 
+// Paul: "...all graph types properly register". Every mark in the one shared
+// menu compiles on a worksheet. Circle with one measure is one circle per
+// group (contract W6 'dot'); with two it is the scatter it always was.
 test('explicit mark types override Automatic', () => {
-  const expected = {bar: 'bar', line: 'line', area: 'area', circle: 'scatter', pie: 'pie', doughnut: 'doughnut',
-    text: 'bar', box: 'box', histogram: 'histogram', waterfall: 'waterfall', pareto: 'pareto', radar: 'radar'};
+  const expected = {bar: 'bar', line: 'line', area: 'area', circle: 'dot', pie: 'pie', doughnut: 'doughnut',
+    text: 'bar', box: 'box', histogram: 'histogram', waterfall: 'waterfall', pareto: 'pareto', radar: 'radar',
+    map: 'bar', 'filled-map': 'bar', heatmap: 'heatmap', highlight: 'highlight', stacked: 'grouped', dot: 'dot',
+    'series-dot': 'dot', treemap: 'treemap', bubbles: 'bubbles', gantt: 'gantt', bullet: 'bullet',
+    combination: 'bar', 'dual-line': 'line'};
+  assert.deepStrictEqual(Object.keys(expected).sort(), core.ALL_MARK_IDS.filter(id => id !== 'automatic').sort(),
+    'every mark the menu offers is covered');
   for (const [mark, type] of Object.entries(expected)) {
     const state = sheet({columns: [CYCLE], rows: [AMOUNT], marks: marks({type: mark})});
     const report = core.compileReport(state, COLUMNS);
+    assert.deepStrictEqual(report.issues, [], mark + ': ' + PAUL);
     assert.strictEqual(report.config.type, type, mark + ' should compile to ' + type);
   }
+  const scatter = core.compileReport(sheet({columns: [COUNT], rows: [AMOUNT], marks: marks({type: 'circle'})}), COLUMNS).config;
+  assert.deepStrictEqual([scatter.type, scatter.x, scatter.y], ['scatter', COUNT, AMOUNT]);
   assert.strictEqual(core.compileReport(sheet({columns: [CYCLE], rows: [AMOUNT], marks: marks({type: 'text'})}), COLUMNS).renderMode, 'table');
   assert.strictEqual(core.compileReport(sheet({columns: [CYCLE], rows: [AMOUNT]}), COLUMNS).renderMode, 'chart');
 });
 
-test('a circle mark without two measures reports an issue', () => {
+// Paul: "nothing is logically constrained". A circle mark with one measure
+// used to report an issue and draw nothing; it now draws one circle per group.
+test('a circle mark with one measure draws one circle per group', () => {
   const report = core.compileReport(sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({type: 'circle'})}), COLUMNS);
-  assert.ok(report.issues.length, 'a one-measure circle view cannot be drawn');
+  assert.deepStrictEqual(report.issues, [], PAUL);
+  assert.strictEqual(report.config.type, 'dot');
+  assert.strictEqual(report.config.x, CATEGORY);
+  assert.strictEqual(report.config.y, AMOUNT);
 });
 
 test('a histogram ignores the grouping column', () => {
@@ -198,18 +232,29 @@ test('analytics map to transform, period and horizon', () => {
   assert.strictEqual(config.horizon, 3);
 });
 
-test('time analysis without a date field is refused', () => {
+// Paul: "nothing is logically constrained". A period analysis with no date on
+// the shelves draws the chart without it and says so, instead of blocking it.
+test('time analysis without a date field draws the chart without it and says so', () => {
   const report = core.compileReport(sheet({columns: [CATEGORY], rows: [AMOUNT], analytics: {transform: 'annual'}}), COLUMNS);
   assert.strictEqual(report.config.transform, 'none');
-  assert.match(report.issues.join(' '), /date, year or election-cycle/);
+  assert.deepStrictEqual(report.issues, [], PAUL);
+  assert.match(report.notes.join(' '), /date, year or election-cycle/);
 });
 
-test('time analysis forces a bar, line or area mark and drops Colour', () => {
+// Paul: "nothing is logically constrained". A period analysis keeps the mark
+// the reader chose and its Colour series (contract W5): the engine computes
+// the periods per series and draws period totals on marks without an axis.
+test('time analysis keeps the chosen mark and its Colour series', () => {
   const state = sheet({columns: [CYCLE], rows: [AMOUNT], marks: marks({type: 'pie', color: TIER}), analytics: {transform: 'annual'}});
   const report = core.compileReport(state, COLUMNS);
-  assert.strictEqual(report.config.type, 'line');
-  assert.strictEqual(report.config.series, -1);
-  assert.strictEqual(report.notes.length, 2);
+  assert.strictEqual(report.config.type, 'pie');
+  assert.strictEqual(report.config.series, TIER);
+  assert.strictEqual(report.config.transform, 'annual');
+  assert.strictEqual(report.config.x, CYCLE);
+  assert.deepStrictEqual(report.issues, [], PAUL);
+  const bars = core.compileReport(sheet({columns: [CYCLE], rows: [AMOUNT], marks: marks({type: 'bar', color: TIER}),
+    analytics: {transform: 'annual'}}), COLUMNS).config;
+  assert.deepStrictEqual([bars.type, bars.series], ['bar', TIER], 'a period view sends the base type; the engine pairs it (W5)');
 });
 
 test('time analysis asks for one Subject and filters to it', () => {
@@ -218,8 +263,11 @@ test('time analysis asks for one Subject and filters to it', () => {
   const timed = patch => sheet(Object.assign({columns: [CYCLE], rows: [AMOUNT],
     analytics: {transform: 'annual', period: 'cycle', horizon: 2}}, patch || {}));
 
+  // Paul: "nothing is logically constrained". Without a chosen Subject every
+  // Subject is its own series over time (contract W5); the note says so.
   const missing = core.compileReport(timed(), SUBJECT_COLUMNS);
-  assert.match(missing.issues.join(' '), /Choose a Subject/);
+  assert.deepStrictEqual(missing.issues, [], PAUL);
+  assert.match(missing.notes.join(' '), /Every Subject is drawn as its own series over time; choose one in Parameters/);
   assert.ok(!missing.config.filters.some(f => f.column === SUBJECT), 'nothing is narrowed until the user chooses');
 
   const chosen = core.compileReport(timed({params: {start: 0, end: 0, limit: 0, subject: 'Company A'}}), SUBJECT_COLUMNS);
@@ -286,9 +334,21 @@ test('every compiled configuration is accepted by the chart engine', () => {
   }
 });
 
-test('the 15 chart types the classic dialog offers are all reachable', () => {
+// Paul: "...all graph types properly register". Every chart type the engine
+// offers - the classic dialog's fifteen and the ones this round added (W6) -
+// is reachable from the shelves.
+test('every chart type the engine offers is reachable from the shelves', () => {
   const reached = new Set();
   const states = [
+    sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({type: 'circle'})}),
+    sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({type: 'circle', color: TIER})}),
+    sheet({columns: [CYCLE], rows: [AMOUNT], marks: marks({type: 'area', color: TIER})}),
+    sheet({columns: [CATEGORY, TIER], rows: [AMOUNT], marks: marks({type: 'heatmap'})}),
+    sheet({columns: [CATEGORY, TIER], rows: [AMOUNT], marks: marks({type: 'highlight'})}),
+    sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({type: 'treemap'})}),
+    sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({type: 'bubbles'})}),
+    sheet({columns: [CATEGORY], rows: [AMOUNT, COUNT], marks: marks({type: 'bullet'})}),
+    sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({type: 'gantt'})}),
     sheet({columns: [CATEGORY], rows: [AMOUNT]}),
     sheet({columns: [CYCLE], rows: [AMOUNT]}),
     sheet({rows: [CATEGORY], columns: [AMOUNT]}),
@@ -306,6 +366,13 @@ test('the 15 chart types the classic dialog offers are all reachable', () => {
     sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({type: 'radar'})})
   ];
   for (const state of states) reached.add(core.compileConfig(state, COLUMNS).type);
+  // The engine maps a base type with Colour to its series type (contract W11:
+  // area -> multiarea, dot -> multidot), so what reaches build is counted too.
+  for (const state of states) {
+    const config = core.compileConfig(state, COLUMNS);
+    if (config.series >= 0 && config.type === 'area') reached.add('multiarea');
+    if (config.series >= 0 && config.type === 'dot') reached.add('multidot');
+  }
   for (const type of math.chartTypes) assert.ok(reached.has(type), type + ' must stay reachable from the shelves');
 });
 
@@ -321,32 +388,31 @@ test('Sort orders the x dimension by the y measure and leaves scatter alone', ()
   assert.strictEqual(core.sortResult(scatter, 'desc'), scatter);
 });
 
-test('a time view keeps chronological order whatever Sort says', () => {
+// Paul: "nothing is logically constrained". Sort works on every mark, time
+// axes included (census B-S15, contract W13). 'none' is the engine's own
+// order, which on a time axis is chronological, so a time view still opens in
+// time order; a sort the reader asks for is honoured on a line too.
+test('a time view opens in chronological order and sorts when asked', () => {
   const line = core.compileConfig(sheet({columns: [CYCLE], rows: [AMOUNT]}), COLUMNS);
   const lineResult = math.build(DATA, line);
   const order = lineResult.groups.map(g => g.label);
-  assert.deepStrictEqual(core.sortResult(lineResult, 'desc').groups.map(g => g.label), order, 'a line keeps its axis order');
-  assert.deepStrictEqual(core.sortResult(lineResult, 'asc').groups.map(g => g.label), order);
+  assert.deepStrictEqual(order, ['2021-2022', '2023-2024', '2025-2026'], 'the engine keeps a time axis chronological');
+  assert.deepStrictEqual(core.sortResult(lineResult, 'none').groups.map(g => g.label), order, 'none keeps the time order');
+  assert.deepStrictEqual(core.sortResult(lineResult, 'desc').groups.map(g => g.value), [3750, 2250, 1500], 'a line sorts by value');
+  assert.deepStrictEqual(core.sortResult(lineResult, 'za').groups.map(g => g.label), [...order].reverse(), 'and by label');
 
   const overTime = core.compileConfig(sheet({columns: [CYCLE], rows: [AMOUNT],
     analytics: {transform: 'annual', period: 'cycle', horizon: 2}}), COLUMNS);
   const temporalResult = math.build(DATA, overTime);
   assert.strictEqual(temporalResult.temporal, true);
-  assert.deepStrictEqual(core.sortResult(temporalResult, 'desc').groups.map(g => g.label),
-    temporalResult.groups.map(g => g.label), 'periods stay in order');
+  const values = core.sortResult(temporalResult, 'desc').groups.map(g => g.value);
+  assert.deepStrictEqual(values, [...values].sort((a, b) => b - a), 'periods sort by value when asked');
 
   const bar = core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT]}), COLUMNS);
   assert.deepStrictEqual(core.sortResult(math.build(DATA, bar), 'desc').groups.map(g => g.value),
     [6000, 1250, 250], 'a bar view still sorts');
 
-  assert.strictEqual(core.sortLocked(lineResult), true);
-  assert.strictEqual(core.sortLocked(temporalResult), true);
-  assert.strictEqual(core.sortLocked(overTime), true, 'a compiled time configuration locks Sort before the view is built');
-  assert.strictEqual(core.sortLocked(core.compileConfig(sheet({columns: [CYCLE], rows: [AMOUNT],
-    marks: marks({color: TIER})}), COLUMNS)), true, 'separate lines are a time view too');
-  assert.strictEqual(core.sortLocked(bar), false);
-  assert.strictEqual(core.sortLocked(math.build(DATA, bar)), false);
-  assert.strictEqual(core.sortLocked(null), false);
+  for (const view of [lineResult, temporalResult, overTime, bar, null]) assert.strictEqual(core.sortLocked(view), false, PAUL);
 });
 
 test('rowsToMarksSummary describes the view for the status bar', () => {
@@ -410,9 +476,16 @@ test('a grand total is withheld unless the marks are additive parts of one whole
   assert.strictEqual(core.rowsToMarksSummary(math.build(DATA, scatter), scatter, COLUMNS).total, null);
 });
 
-test('reference lines are withheld from independent series', () => {
+// Paul: "nothing is logically constrained" (census B-S19). A view separated by
+// Colour gets the mean and median of every mark it draws, labelled as such so
+// the rule is never read as one series' own average.
+test('reference lines over independent series mark every mark, and say so', () => {
   const grouped = core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({color: TIER})}), COLUMNS);
-  assert.deepStrictEqual(core.referenceValues(math.build(DATA, grouped), {average: true, median: true}), []);
+  const result = math.build(DATA, grouped);
+  const lines = core.referenceValues(result, {average: true, median: true});
+  const values = core.markValues(result);
+  assert.deepStrictEqual(lines.map(l => l.label), ['Average of every mark', 'Median of every mark']);
+  assert.strictEqual(lines[0].value, values.reduce((a, b) => a + b, 0) / values.length);
 });
 
 /* --------------------------------------------------------------- show me */
@@ -426,46 +499,53 @@ test('Show Me holds the 24 Tableau tiles in order', () => {
     'scatter-plot', 'histogram', 'box-and-whisker', 'gantt', 'bullet-graph', 'packed-bubbles']);
 });
 
-test('the nine out-of-release tiles are always disabled', () => {
-  const off = core.showMeEligibility({dimensions: 9, measures: 9, times: 9}).filter(t => !t.enabled);
-  assert.deepStrictEqual(off.map(t => t.id), ['heat-map', 'highlight-table', 'symbol-map', 'filled-map',
-    'treemap', 'dual-combination', 'gantt', 'bullet-graph', 'packed-bubbles']);
-  for (const t of off) assert.strictEqual(t.reason, 'not in this release');
+// Paul: "...all graph types properly register and nothing is logically
+// constrained". The nine tiles that were "not in this release" are real
+// marks now (contract W6), and no tile is ever greyed: whatever the shelves
+// hold, every tile is enabled and names the mark it draws.
+test('every Show Me tile is enabled, whatever the shelves hold', () => {
+  for (const selection of [{dimensions: 0, measures: 0, times: 0}, {dimensions: 9, measures: 9, times: 9}]) {
+    const tiles = core.showMeEligibility(selection);
+    assert.strictEqual(tiles.length, 24);
+    for (const t of tiles) {
+      assert.strictEqual(t.enabled, true, t.id + ': ' + PAUL);
+      assert.strictEqual(t.reason, '');
+      assert.ok(core.ALL_MARK_IDS.includes(t.mark), t.id + ' draws a mark the menu offers');
+    }
+  }
 });
 
-test('the Show Me eligibility table greys tiles the field selection cannot satisfy', () => {
+// What used to grey a tile is now what it prefers: `fits` says whether the
+// shelves hold it, and `fill` says what a click picks from the source.
+test('Show Me says which tiles fit the shelves and what a click picks for the rest', () => {
   const table = selection => {
     const map = {};
-    for (const t of core.showMeEligibility(selection)) map[t.id] = t.enabled;
+    for (const t of core.showMeEligibility(selection)) map[t.id] = t.fits;
     return map;
   };
-  const none = table({dimensions: 0, measures: 0, times: 0});
-  assert.deepStrictEqual(Object.values(none).filter(Boolean), []);
-
-  const oneMeasure = table({dimensions: 0, measures: 1, times: 0});
-  assert.deepStrictEqual(Object.keys(oneMeasure).filter(id => oneMeasure[id]), ['histogram', 'box-and-whisker']);
-
-  const twoMeasures = table({dimensions: 0, measures: 2, times: 0});
-  assert.deepStrictEqual(Object.keys(twoMeasures).filter(id => twoMeasures[id]), ['scatter-plot', 'histogram', 'box-and-whisker']);
-
-  const oneEach = table({dimensions: 1, measures: 1, times: 0});
-  assert.deepStrictEqual(Object.keys(oneEach).filter(id => oneEach[id]),
-    ['text-table', 'pie-chart', 'horizontal-bars', 'circle-views', 'histogram', 'box-and-whisker']);
-
-  const twoDimensions = table({dimensions: 2, measures: 1, times: 0});
-  assert.deepStrictEqual(Object.keys(twoDimensions).filter(id => twoDimensions[id]),
-    ['text-table', 'pie-chart', 'horizontal-bars', 'stacked-bars', 'side-by-side-bars', 'circle-views',
-     'side-by-side-circles', 'histogram', 'box-and-whisker']);
-
+  const fitting = selection => Object.entries(table(selection)).filter(([, fits]) => fits).map(([id]) => id);
+  assert.deepStrictEqual(fitting({dimensions: 0, measures: 0, times: 0}), []);
+  assert.deepStrictEqual(fitting({dimensions: 0, measures: 1, times: 0}), ['histogram', 'box-and-whisker']);
+  assert.deepStrictEqual(fitting({dimensions: 0, measures: 2, times: 0}),
+    ['scatter-plot', 'histogram', 'box-and-whisker', 'bullet-graph']);
+  assert.deepStrictEqual(fitting({dimensions: 1, measures: 1, times: 0}),
+    ['text-table', 'symbol-map', 'filled-map', 'pie-chart', 'horizontal-bars', 'treemap', 'circle-views',
+     'histogram', 'box-and-whisker', 'gantt', 'packed-bubbles']);
+  assert.deepStrictEqual(fitting({dimensions: 2, measures: 1, times: 0}),
+    ['text-table', 'heat-map', 'highlight-table', 'symbol-map', 'filled-map', 'pie-chart', 'horizontal-bars',
+     'stacked-bars', 'side-by-side-bars', 'treemap', 'circle-views', 'side-by-side-circles',
+     'histogram', 'box-and-whisker', 'gantt', 'packed-bubbles']);
   const dated = table({dimensions: 1, measures: 1, times: 1});
   for (const id of ['lines-continuous', 'lines-discrete', 'area-continuous', 'area-discrete']) assert.strictEqual(dated[id], true, id);
-  assert.strictEqual(dated['dual-lines'], false, 'dual lines need a second dimension for the colour series');
-  assert.strictEqual(table({dimensions: 2, measures: 1, times: 1})['dual-lines'], true);
+  assert.strictEqual(dated['dual-lines'], false, 'dual lines prefer a second measure');
+  assert.strictEqual(table({dimensions: 1, measures: 2, times: 1})['dual-lines'], true);
+  assert.strictEqual(table({dimensions: 1, measures: 2, times: 1})['dual-combination'], true);
 });
 
-test('a tile that needs a date says so', () => {
+test('a tile that prefers a date says what a click will pick', () => {
   const line = core.showMeEligibility({dimensions: 4, measures: 4, times: 0}).find(t => t.id === 'lines-continuous');
-  assert.match(line.reason, /date, year or election-cycle/);
+  assert.strictEqual(line.enabled, true);
+  assert.match(line.fill, /picks a date, year or election-cycle dimension from the source/);
 });
 
 test('the selection counts shelf fields plus anything picked in the Data pane', () => {
@@ -494,11 +574,17 @@ test('clicking a tile sets marks and shelves in one step', () => {
   assert.strictEqual(expect('horizontal-bars', 'horizontal').x, CATEGORY);
   assert.strictEqual(expect('stacked-bars', 'grouped').series, TIER);
   assert.strictEqual(expect('side-by-side-bars', 'grouped').series, TIER);
-  expect('circle-views', 'line');
-  expect('side-by-side-circles', 'multiline');
+  // Paul: "...all graph types properly register". Circle views are circles
+  // now (contract W6), not a line standing in for them; side-by-side circles
+  // are a circle series per Colour member; dual lines put the second measure
+  // on its own axis (contract W4).
+  assert.strictEqual(expect('circle-views', 'dot').x, CATEGORY);
+  assert.strictEqual(expect('side-by-side-circles', 'dot').series, TIER);
   assert.strictEqual(expect('lines-continuous', 'line').x, CYCLE);
   assert.strictEqual(expect('lines-discrete', 'line').transform, 'annual');
-  expect('dual-lines', 'multiline');
+  const dual = expect('dual-lines', 'line');
+  assert.strictEqual(dual.dualAxis, true);
+  assert.deepStrictEqual(dual.measures, [{column: AMOUNT, aggregation: 'sum'}, {column: COUNT, aggregation: 'sum'}]);
   expect('area-continuous', 'area');
   assert.strictEqual(expect('area-discrete', 'area').transform, 'annual');
   const scatter = expect('scatter-plot', 'scatter');
@@ -506,7 +592,42 @@ test('clicking a tile sets marks and shelves in one step', () => {
   assert.strictEqual(scatter.y, COUNT);
   assert.strictEqual(expect('histogram', 'histogram').x, -1);
   expect('box-and-whisker', 'box');
-  assert.strictEqual(core.showMeApply('treemap', base, COLUMNS, selection).marks.type, 'automatic', 'a disabled tile changes nothing');
+  // The tiles that were "not in this release" draw now.
+  expect('treemap', 'treemap');
+  expect('packed-bubbles', 'bubbles');
+  expect('heat-map', 'heatmap');
+  expect('highlight-table', 'highlight');
+  assert.strictEqual(expect('gantt', 'gantt').dateColumn, 6);
+  expect('bullet-graph', 'bullet');
+  assert.strictEqual(expect('dual-combination', 'bar').dualAxis, true);
+  expect('symbol-map', 'bar');
+  expect('filled-map', 'bar');
+});
+
+// Paul: "nothing is logically constrained". A tile clicked on an empty sheet
+// seeds the shelves from the source itself, so it still draws.
+test('a tile on an empty sheet seeds its shelves from the source', () => {
+  const next = core.showMeApply('pie-chart', sheet({}), COLUMNS, []);
+  assert.strictEqual(next.marks.type, 'pie');
+  assert.deepStrictEqual(core.shelf(next.columns), [{column: CATEGORY, aggregation: 'sum'}]);
+  assert.deepStrictEqual(core.shelf(next.rows), [{column: AMOUNT, aggregation: 'sum'}]);
+  const report = core.compileReport(next, COLUMNS);
+  assert.deepStrictEqual(report.issues, []);
+  assert.ok(math.build(DATA, report.config).groups.length);
+});
+
+// Census B-S28: a tile changes the mark and keeps every pill and encoding.
+test('a tile keeps the encodings and filters already on the sheet', () => {
+  const state = sheet({columns: [CATEGORY], rows: [AMOUNT], marks: marks({color: TIER, size: COUNT, detail: [CYCLE]}),
+    filters: [{column: TIER, op: 'equals', value: 'Chief'}]});
+  for (const tile of core.SHOW_ME) {
+    const next = core.showMeApply(tile.id, state, COLUMNS, []);
+    assert.strictEqual(next.marks.type, tile.mark, tile.id);
+    assert.deepStrictEqual(next.columns, state.columns, tile.id + ' keeps Columns');
+    assert.deepStrictEqual(next.rows, state.rows, tile.id + ' keeps Rows');
+    assert.deepStrictEqual([next.marks.color, next.marks.size, next.marks.detail], [TIER, COUNT, [CYCLE]], tile.id + ' keeps the encodings');
+    assert.deepStrictEqual(next.filters, state.filters, tile.id + ' keeps the filters');
+  }
 });
 
 test('the recommended tile follows chart-math recommend()', () => {
@@ -784,7 +905,16 @@ test('the group limit and the split parameter reach the configuration', () => {
   assert.strictEqual(ungrouped.config.x, -1);
   assert.strictEqual(ungrouped.config.series, -1);
   assert.match(ungrouped.notes.join(' '), /Splitting multi-value cells applies to the grouping field/);
-  assert.match(ungrouped.issues.join(' '), /coverage-only/, 'money splitting is refused even without grouping');
+  // Paul: "nothing is logically constrained". Splitting money is allowed and
+  // annotated (census B-S13): the engine withholds the grand total instead.
+  assert.deepStrictEqual(ungrouped.issues, [], PAUL);
+  assert.match(ungrouped.notes.join(' '), /repeats the measure across values, so the grand total is not shown/);
+
+  // Census B-S14, contract W10: the group limit reaches All.
+  assert.strictEqual(core.compileConfig(sheet({columns: [CATEGORY], rows: [AMOUNT], params: {maxGroups: 'all'}}), COLUMNS).maxGroups, 'all');
+  assert.strictEqual(core.groupLimitOf('all'), 'all');
+  assert.strictEqual(core.groupLimitOf(250), 250);
+  assert.strictEqual(core.groupLimitOf(''), 60);
 
   const grouped = core.compileReport(sheet({columns: [CATEGORY], rows: [AMOUNT], params: {splitMulti: true}}), COLUMNS);
   assert.ok(!grouped.notes.some(n => /Splitting multi-value cells/.test(n)), 'a view with a grouping field is not warned');
@@ -811,15 +941,71 @@ test('all shelf dimensions and Detail dimensions change the grouping grain', () 
   assert.deepStrictEqual(alone.config.dimensions,[TIER]);
 });
 
-test('unsupported encodings and duplicate measure pills cannot silently do nothing', () => {
-  for(const channel of ['size','label','tooltip']){
-    const report=core.compileReport(sheet({columns:[CATEGORY],rows:[AMOUNT],marks:marks({[channel]:channel==='tooltip'?[TIER]:TIER})}),COLUMNS);
-    assert.match(report.issues.join(' '),/is not available for worksheet data/);
-  }
-  const repeated=core.compileReport(sheet({columns:[CATEGORY],rows:[AMOUNT,{column:AMOUNT,aggregation:'mean'}]}),COLUMNS);
-  assert.match(repeated.issues.join(' '),/show one measure/);
-  const scatter=core.compileReport(sheet({columns:[COUNT],rows:[AMOUNT],marks:marks({detail:[CATEGORY]})}),COLUMNS);
-  assert.match(scatter.issues.join(' '),/Grouping needs Verified contributions/);
+// Paul: "nothing is logically constrained". Any pill onto any shelf: Size,
+// Label and Tooltip reach the engine on worksheet data (contract W7), a
+// measure on Detail is carried into the tooltip (census B-S03), a measure may
+// sit on a shelf twice, and a scatter over dimensions aggregates per group
+// (contract W9) where each of these used to be an issue that drew nothing.
+test('every encoding and every duplicate measure pill reaches the configuration', () => {
+  const report = patch => core.compileReport(sheet(Object.assign({columns: [CATEGORY], rows: [AMOUNT]}, patch)), COLUMNS);
+  const sized = report({marks: marks({size: COUNT})});
+  assert.deepStrictEqual(sized.config.size, {column: COUNT, aggregation: 'sum'});
+  const labelled = report({marks: marks({label: TIER})});
+  assert.deepStrictEqual(labelled.config.label, {column: TIER, aggregation: 'first'});
+  assert.ok(labelled.config.dimensions.includes(TIER), 'a Label dimension joins the grouping');
+  const labelMeasure = report({marks: marks({label: {column: COUNT, aggregation: 'max'}})});
+  assert.deepStrictEqual(labelMeasure.config.label, {column: COUNT, aggregation: 'max'});
+  const tipped = report({marks: marks({tooltip: [COUNT, TIER]})});
+  assert.deepStrictEqual(tipped.config.tooltip, [{column: COUNT, aggregation: 'sum'}]);
+  assert.ok(tipped.config.dimensions.includes(TIER), 'a Tooltip dimension joins the grouping');
+  const detailMeasure = report({marks: marks({detail: [{column: COUNT, aggregation: 'mean'}]})});
+  assert.deepStrictEqual(detailMeasure.config.tooltip, [{column: COUNT, aggregation: 'mean'}]);
+  const sizeDimension = report({marks: marks({size: TIER})});
+  assert.ok(sizeDimension.config.dimensions.includes(TIER));
+  assert.match(sizeDimension.notes.join(' '), /Size follows a measure; Employee Tier joins the grouping instead/);
+  for (const r of [sized, labelled, labelMeasure, tipped, detailMeasure, sizeDimension]) assert.deepStrictEqual(r.issues, [], PAUL);
+
+  const repeated = core.compileReport(sheet({columns: [CATEGORY], rows: [AMOUNT, {column: AMOUNT, aggregation: 'mean'}]}), COLUMNS);
+  assert.deepStrictEqual(repeated.issues, []);
+  assert.deepStrictEqual(repeated.config.measures, [{column: AMOUNT, aggregation: 'sum'}, {column: AMOUNT, aggregation: 'mean'}]);
+
+  const scatter = core.compileReport(sheet({columns: [COUNT], rows: [AMOUNT], marks: marks({detail: [CATEGORY]})}), COLUMNS);
+  assert.deepStrictEqual(scatter.issues, []);
+  assert.strictEqual(scatter.config.type, 'scatter');
+  assert.strictEqual(scatter.config.grain, 'group');
+  assert.strictEqual(scatter.config.xAggregation, 'sum');
+  assert.deepStrictEqual(scatter.config.dimensions, [CATEGORY]);
+});
+
+// Paul: "nothing is logically constrained". A mark that lacks a field it
+// prefers picks one from the source and says so in a quiet note.
+test('a mark that lacks a field it prefers picks one and names it', () => {
+  const pie = core.compileReport(sheet({rows: [AMOUNT], marks: marks({type: 'pie'})}), COLUMNS);
+  assert.strictEqual(pie.config.x, CATEGORY);
+  assert.match(pie.notes.join(' '), /^Pie needs a grouping, so it uses Recipient Category\. Put a dimension on the shelves to choose another\./);
+  const histogram = core.compileReport(sheet({columns: [CATEGORY], marks: marks({type: 'histogram'})}), COLUMNS);
+  assert.strictEqual(histogram.config.y, AMOUNT);
+  assert.match(histogram.notes.join(' '), /Histogram needs a measure to bin, so it uses Amount/);
+  const dual = core.compileReport(sheet({columns: [CYCLE], rows: [AMOUNT], marks: marks({type: 'dual-line'})}), COLUMNS);
+  assert.deepStrictEqual(dual.config.measures.map(m => m.column), [AMOUNT, COUNT]);
+  assert.match(dual.notes.join(' '), /Dual lines needs a second measure for its second axis, so it uses Contribution Count/);
+  const line = core.compileReport(sheet({rows: [AMOUNT], marks: marks({type: 'line'})}), COLUMNS);
+  assert.strictEqual(line.config.x, CYCLE, 'a line picks a time axis first');
+  for (const r of [pie, histogram, dual, line]) assert.deepStrictEqual(r.issues, [], PAUL);
+  // Nothing on the sheet at all is the one thing that draws nothing.
+  const empty = core.compileReport(sheet({marks: marks({type: 'pie'})}), COLUMNS);
+  assert.strictEqual(empty.config, null);
+  assert.match(empty.issues.join(' '), /Add a grouping/);
+});
+
+// Contract W13: a label sort orders groups alphabetically, Other still last.
+test('a label sort orders the groups by label and keeps Other last', () => {
+  const synthetic = {type: 'bar', groups: [{label: 'b10', value: 1}, {label: 'b9', value: 3}, {label: 'a', value: 2},
+    {label: 'Other (2 groups)', value: 9, other: true}]};
+  assert.deepStrictEqual(labels(core.sortResult(synthetic, 'az')), ['a', 'b9', 'b10', 'Other (2 groups)']);
+  assert.deepStrictEqual(labels(core.sortResult(synthetic, 'za')), ['b10', 'b9', 'a', 'Other (2 groups)']);
+  assert.deepStrictEqual(labels(core.sortResult(synthetic, 'asc', {by: 'label'})), ['a', 'b9', 'b10', 'Other (2 groups)']);
+  assert.deepStrictEqual(core.SORTS, ['none', 'asc', 'desc', 'az', 'za']);
 });
 
 test('numeric ZIP variants and congressional district identifiers never become money measures', () => {
@@ -959,7 +1145,9 @@ test('aggregation menus offer only what the active engine can compute', () => {
   const ids = list => list.map(a => a[0]);
   assert.deepStrictEqual(ids(core.aggregationsFor(core.fieldAt(worksheet, AMOUNT), 'worksheet')), core.AGGREGATION_IDS);
   assert.deepStrictEqual(core.aggregationsFor(core.fieldAt(worksheet, CYCLE), 'worksheet'), []);
-  assert.deepStrictEqual(ids(core.aggregationsFor(core.fieldAt(verified, 7), 'verified')), core.AGGREGATION_IDS);
+  // Count distinct is a worksheet aggregation (contract W12); the verified
+  // server has no distinct count of money, so amount keeps its six.
+  assert.deepStrictEqual(ids(core.aggregationsFor(core.fieldAt(verified, 7), 'verified')), core.AGGREGATION_IDS.filter(id => id !== 'countd'));
   // Every other verified measure is a source aggregate with one definition.
   assert.deepStrictEqual(core.aggregationsFor(core.fieldAt(verified, 8), 'verified'), []);
 });
@@ -991,12 +1179,17 @@ test('a measure preset replaces the measure on the shelf that carried it', () =>
 
 /* ------------------------------------------------------------ data types */
 
-test('a text column can never become a measure; a numeric identifier can', () => {
+// Paul: "nothing is logically constrained". A text column read as a measure
+// is counted (census B-S22, contract W12): Count and Count distinct.
+test('a text column read as a measure is counted; a numeric identifier can be summed', () => {
   const meta = core.classifyFields(COLUMNS);
   const text = core.fieldAt(meta, CATEGORY);
-  const refusal = core.canTreatAs(text, 'measure');
-  assert.strictEqual(refusal.ok, false);
-  assert.match(refusal.reason, /text/);
+  const counted = core.canTreatAs(text, 'measure');
+  assert.strictEqual(counted.ok, true, PAUL);
+  assert.match(counted.note, /holds text, so as a measure it is counted: Count or Count distinct/);
+  const read = core.fieldAt(core.classifyFields(COLUMNS, {[String(CATEGORY)]: {role: 'measure'}}), CATEGORY);
+  assert.deepStrictEqual([read.role, read.counted, read.glyph], ['measure', true, '#']);
+  assert.deepStrictEqual(core.aggregationsFor(read, 'worksheet').map(a => a[0]), ['count', 'countd']);
   assert.strictEqual(core.canTreatAs(text, 'dimension').ok, false); // already one
   const zip = core.classifyFields([{index: 0, name: 'ZIP Code', type: 'number', distinct: 9, missing: 0}]).fields[0];
   assert.strictEqual(zip.role, 'dimension');
@@ -1011,8 +1204,8 @@ test('a per-sheet type override moves a field between the two lists and its glyp
   assert.strictEqual(core.fieldAt(coerced, COUNT).glyph, 'Abc');
   assert.ok(coerced.dimensions.some(f => f.index === COUNT));
   assert.ok(!coerced.measures.some(f => f.index === COUNT));
-  // A refused override changes nothing at all.
-  const refused = core.classifyFields(COLUMNS, {[String(CATEGORY)]: {role: 'measure'}});
+  // A refused override changes nothing at all: a role that is neither.
+  const refused = core.classifyFields(COLUMNS, {[String(CATEGORY)]: {role: 'sideways'}});
   assert.strictEqual(core.fieldAt(refused, CATEGORY).role, 'dimension');
   // The override travels into the compiler, so the view follows the reader.
   const state = sheet({columns: [{column: CYCLE, aggregation: 'sum'}], rows: [{column: COUNT, aggregation: 'sum'}],

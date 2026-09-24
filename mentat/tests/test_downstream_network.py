@@ -75,6 +75,34 @@ class NetworkTests(unittest.TestCase):
         self.assertEqual(len(ties[0]['route']),3)
         self.assertEqual(ties[0]['share_of_pac_direction'],1)
 
+    def test_snapshot_candidate_payments_keep_their_transaction_codes(self):
+        # Paul, 2026-09-23, on Graph's "Contributions / Other" segment: "It
+        # should be two separate segments". A snapshot's Schedule B candidate
+        # payments keep their FEC code (disbursement_type) beside the one
+        # recorded direction, so graph_data can split the bucket by code; the
+        # grouping and the recorded direction are unchanged.
+        import graph_data
+        payment = lambda candidate, code, value: {'line_number':'23','candidate_id':candidate,'candidate_name':candidate,
+                                                  'disbursement_type':code,'disbursement_amount':value}
+        a = unit('A')
+        a['disbursements'] = [payment('H0CA00001','24K',100), payment('H0CA00001','24C',40),
+                              payment('H0CA00001','24Z',5), payment('H0CA00002',None,7)]
+        found = downstream.network([('2026','A')],{('2026','A'):a})
+        rows = downstream.activity(found)
+        self.assertEqual(sorted((r['candidate_id'],r['direction'],r['amount']) for r in rows),
+                         [('H0CA00001','Contribution / Other',145),('H0CA00002','Contribution / Other',7)])
+        one = next(r for r in rows if r['candidate_id'] == 'H0CA00001')
+        self.assertEqual({code:part['amount'] for code,part in one['transaction_parts'].items()},{'24K':100,'24C':40,'24Z':5})
+        self.assertEqual(len(one['filings']),3)
+        sides = graph_data.activity_sides(rows)
+        self.assertEqual(sorted((r['candidate_id'],r['direction'],r['amount'],len(r['filings'])) for r in sides),
+                         [('H0CA00001','Contribution',105,2),('H0CA00001','Other',40,1),
+                          ('H0CA00002','Contribution / Other',7,1)])
+        # Shares are of the side shown: Candidate One is all of A's Other.
+        ties = downstream.relationships(sides,[('2026','A')],found)
+        self.assertEqual({(t['direction'],t['candidate_id']):t['share_of_pac_direction'] for t in ties},
+                         {('Contribution','H0CA00001'):1,('Other','H0CA00001'):1,('Contribution / Other','H0CA00002'):1})
+
     def test_snapshot_replaces_partition_without_duplicating_workbook_gifts(self):
         units = {('2026','A'):unit('A',[('B',3)]),('2026','B'):unit('B',spend=7)}
         rows = [{'cycle':'2026','committee':'B','candidate_id':'H0KY06104','candidate':'Barr',

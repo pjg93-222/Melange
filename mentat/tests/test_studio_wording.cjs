@@ -36,24 +36,33 @@ test('an empty sheet asks for a grouping and a dollar measure, in those words',(
   assert.doesNotMatch(issues({}),/Drag a dimension/);
 });
 
-test('every worksheet refusal names the Data source control as the way on',()=>{
+// Paul, 2026-09-23: "Additionally, within the Chart Studio make sure everything is freely flexible, that all
+// graph types properly register and nothing is logically constrained, it needs to be utterly maluable." The
+// three worksheet refusals this test pinned are gone: a Size field, a second measure and a grouped scatter
+// all draw now (contract W2, W7, W9). The one note that still sends a reader to Verified contributions keeps
+// its words, and the refusals may not come back.
+test('no worksheet composition is refused, and the note that names Verified contributions keeps its words',()=>{
   const marks=patch=>Object.assign(core.createSheet('x').marks,patch);
-  assert.match(issues({marks:marks({size:{column:1,aggregation:'sum'}})}),
-    /Size is not available for worksheet data\. Remove this field or switch to Verified contributions\./);
-  assert.match(issues({columns:[{column:0,aggregation:'sum'}],
-    rows:[{column:1,aggregation:'sum'},{column:2,aggregation:'sum'}]}),
-    /Use separate sheets, a two-measure scatter, or Verified contributions\./);
-  assert.match(issues({marks:marks({type:'circle'}),columns:[{column:1,aggregation:'sum'}],
-    rows:[{column:2,aggregation:'sum'},{column:0,aggregation:'sum'}]}),
-    /Scatter shows individual rows here\. Grouping needs Verified contributions\./);
+  assert.strictEqual(issues({columns:[{column:0,aggregation:'sum'}],rows:[{column:1,aggregation:'sum'}],marks:marks({size:{column:2,aggregation:'sum'}})}),'');
+  assert.strictEqual(issues({columns:[{column:0,aggregation:'sum'}],
+    rows:[{column:1,aggregation:'sum'},{column:2,aggregation:'sum'}]}),'');
+  assert.strictEqual(issues({marks:marks({type:'circle'}),columns:[{column:1,aggregation:'sum'}],
+    rows:[{column:2,aggregation:'sum'},{column:0,aggregation:'sum'}]}),'');
+  for(const gone of [/is not available for worksheet data/,/Worksheet charts show one measure/,/Grouping needs Verified contributions/])
+    assert.doesNotMatch(read('chart-studio-core.js'),gone);
   assert.match(notes({columns:[{column:0,aggregation:'sum'}],rows:[{column:1,aggregation:'sum'}],
     filters:[{column:1,op:'gte',value:'5'}]}),
     /Number filters apply to rows, not totals\. Filter totals in Verified contributions\./);
 });
 
-test('the verified engine asks for a measure and a mark in the reader’s vocabulary',()=>{
+test('the verified engine asks for a field and a mark in the reader’s vocabulary',()=>{
+  // Paul: "nothing is logically constrained". A sheet of dimensions alone counts source observations
+  // (contract G-V: records is the default measure); only a sheet with nothing on it asks for a field.
   const bare=Object.assign(core.createSheet('a'),{columns:[{column:at('company'),aggregation:'sum'}]});
-  assert.throws(()=>compile(bare),/^Error: Add a dollar or count measure to Rows or Columns\.$/);
+  const counted=compile(bare);
+  assert.deepStrictEqual(counted.query.measures,['records']);
+  assert.match(counted.notes.join(' '),/No measure is placed, so each mark counts source observations\./);
+  assert.throws(()=>compile(core.createSheet('empty')),/^Error: Add a dollar or count measure to Rows or Columns\.$/);
   const odd=Object.assign(core.createSheet('b'),{columns:[{column:at('company'),aggregation:'sum'}],
     rows:[{column:at('amount'),aggregation:'sum'}]});
   odd.marks.type='sunburst';

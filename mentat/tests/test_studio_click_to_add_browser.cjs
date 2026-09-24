@@ -96,21 +96,27 @@ test('a click places a field on the shelf a drop would have chosen, and Undo tak
   assert.ok(await page.evaluate(()=>statusLog.includes('Added Recipient category to Columns.')),'the studio says where the field went');
   assert.ok(await page.evaluate(()=>statusLog.includes('Added Selected amount to Rows.')));
 
-  // A field that is already on a shelf has nothing to add, so a click says
-  // where it is rather than leaving a copy of it on the other shelf.
+  // Paul, 2026-09-23: "...nothing is logically constrained, it needs to be
+  // utterly maluable." A click on a field already on a shelf adds it once more
+  // (census B-S26) - the grouping lands on Rows beside the measure, the measure
+  // on Columns - and the status line says so. Undo takes each copy away.
   await pill('Recipient category').first().click();
-  await page.waitForFunction(()=>statusLog.includes('Recipient category is already on Columns.'));
+  await page.waitForFunction(()=>statusLog.includes('Added Recipient category to Rows again.'));
   assert.equal(await page.locator('#studio-columns .studio-pill').count(),1);
-  assert.equal(await page.locator('#studio-rows .studio-pill').count(),1);
+  assert.equal(await page.locator('#studio-rows .studio-pill').count(),2);
   await pill('Selected amount').first().click();
-  await page.waitForFunction(()=>statusLog.includes('Selected amount is already on Rows.'));
-  assert.equal(await page.locator('#studio-rows .studio-pill').count(),1);
+  await page.waitForFunction(()=>statusLog.includes('Added Selected amount to Columns again.'));
+  assert.equal(await page.locator('#studio-columns .studio-pill').count(),2);
+  await page.locator('#studio-undo').click();
+  await page.waitForFunction(()=>document.querySelectorAll('#studio-columns .studio-pill').length===1);
+  await page.locator('#studio-undo').click();
+  await page.waitForFunction(()=>document.querySelectorAll('#studio-rows .studio-pill').length===1);
 
   // A shelf that is already taken sends the next field of the same kind to the other one.
   await pill('Company').first().click();
   await page.waitForFunction(()=>document.querySelectorAll('#studio-rows .studio-pill').length===2);
   assert.match(await page.locator('#studio-rows').innerText(),/Company/);
-  assert.equal(await page.locator('#studio-columns .studio-pill').count(),1,'a click never copies a field onto two shelves');
+  assert.equal(await page.locator('#studio-columns .studio-pill').count(),1,'a new field goes to one shelf');
 
   // One click is one undo step.
   await page.locator('#studio-undo').click();

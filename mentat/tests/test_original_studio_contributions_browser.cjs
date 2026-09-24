@@ -118,27 +118,33 @@ test('original shelves use verified facts, display edits reuse queries, and ZIP 
   await page.locator('#studio-fit').selectOption('entire');
   await page.waitForFunction(()=>document.querySelector('#studio-canvas').getAttribute('aria-busy')!=='true');
   assert.equal(await page.evaluate(()=>calls.query.length),firstQueries,'labels and fit must reuse exact aggregates');
-  // Sort used to be decided from the CLASSIC compile, which has never heard of
-  // histogram (nor of combination or dual-line), so on those marks both buttons
-  // stayed enabled and did nothing. The reason is the button's title now.
+  // Paul, 2026-09-23: "...nothing is logically constrained, it needs to be
+  // utterly maluable." Sort works on every mark now (census B-S15, B-S16), a
+  // histogram included: both buttons are enabled and name the measure they
+  // order by, and None - the bins' own numeric order - is what it opens on.
   const defaultMark=await page.locator('#studio-mark').inputValue();
   await page.locator('#studio-mark').selectOption('histogram');
   await settled();
   for(const id of ['#studio-sort-asc','#studio-sort-desc']){
-    assert.equal(await page.locator(id).isDisabled(),true,id+' must be disabled on a histogram');
-    assert.equal(await page.locator(id).getAttribute('title'),'A histogram keeps its bins in numeric order');
+    assert.equal(await page.locator(id).isDisabled(),false,id+' sorts a histogram too');
+    assert.match(await page.locator(id).getAttribute('title'),/^Sort by .+, (smallest|largest) first$/);
     assert.equal(await page.locator(id).getAttribute('aria-pressed'),'false');
   }
+  assert.equal(await page.locator('#studio-sort-none').getAttribute('aria-pressed'),'true','a histogram opens in bin order');
+  assert.deepEqual(await page.evaluate(()=>calls.query.at(-1).sort),[{field:'amount_bin',direction:'asc'}]);
   // Labels were turned on above, and a histogram draws them as the count over
   // each bin - a position that cannot collide with anything by construction.
   assert.deepEqual(await page.evaluate(()=>[...document.querySelectorAll('#studio-canvas svg text[data-label="value"]')]
     .map(n=>n.textContent)),['1','3'],'each bin carries its count');
-  // A table prints every value already, so the labels toggle would be a lie.
+  // Paul, 2026-09-23: "...nothing is logically constrained, it needs to be
+  // utterly maluable." (r4) A table's marks are its value cells, so Labels is
+  // a real toggle there too: it stays enabled and pressed, and off would hide
+  // the printed values (tests/test_studio_worksheet_map_browser.cjs).
   await page.locator('#studio-mark').selectOption('text');
   await settled();
-  assert.equal(await page.locator('#studio-labels').isDisabled(),true);
-  assert.equal(await page.locator('#studio-labels').getAttribute('title'),'A table already shows every value');
-  assert.equal(await page.locator('#studio-labels').getAttribute('aria-pressed'),'false','a disabled toggle never looks pressed');
+  assert.equal(await page.locator('#studio-labels').isDisabled(),false);
+  assert.match(await page.locator('#studio-labels').getAttribute('title'),/^Print each value in its cell/);
+  assert.equal(await page.locator('#studio-labels').getAttribute('aria-pressed'),'true','the stored value shows on a table too');
   await page.locator('#studio-mark').selectOption(defaultMark);
   await settled();
   assert.equal(await page.locator('#studio-labels').isDisabled(),false,'and it returns on a mark that draws them');

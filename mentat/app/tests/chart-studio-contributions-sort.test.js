@@ -40,6 +40,11 @@ function sheet() {
   return s;
 }
 const compile = s => studio.compile(s, columns, {dataset: 'Banking', basis: 'receipt'});
+// Paul, 2026-09-23, quoted by every test below that changed with his words:
+// "Additionally, within the Chart Studio make sure everything is freely
+// flexible, that all graph types properly register and nothing is logically
+// constrained, it needs to be utterly maluable."
+const PAUL = 'nothing is logically constrained, it needs to be utterly maluable';
 
 /* ------------------------------------------------------------------- sort */
 
@@ -53,20 +58,32 @@ test('[studio-sort] a stored sort of none means descending, and only asc means a
   assert.equal(studio.effectiveSort(null), 'desc', 'and no sheet at all');
 });
 
-test('[studio-sort] sortLock names the views that refuse to be reordered, and why', () => {
-  for (const type of ['line', 'area', 'combination', 'dual-line'])
-    assert.equal(studio.sortLock(type, {}), studio.SORT_LOCK_TIME, type + ' is a time view');
-  assert.equal(studio.sortLock('histogram', {}), studio.SORT_LOCK_BINS);
-  for (const type of ['bar', 'scatter', 'table', 'stacked', 'heatmap', 'treemap', 'box'])
-    assert.equal(studio.sortLock(type, {}), '', type + ' sorts');
-  // compile() forces type to 'line' for any transform before it picks the
-  // order, so a transform view IS chronological on this path whatever mark the
-  // reader chose. sortLock says so from the mark the toolbar still sees.
+// Paul: "nothing is logically constrained". No mark refuses to be sorted any
+// more (census B-S16): sortLock is retired and answers "no lock" for every
+// view, time views and every transform included.
+test('[studio-sort] no view is locked against sorting', () => {
+  for (const type of ['line', 'area', 'combination', 'dual-line', 'histogram', 'bar', 'scatter', 'table', 'stacked', 'heatmap', 'treemap', 'box'])
+    assert.equal(studio.sortLock(type, {}), '', type + ' sorts: ' + PAUL);
   for (const transform of ['annual', 'yoy', 'change', 'forecast'])
-    assert.equal(studio.sortLock('bar', {analytics: {transform}}), studio.SORT_LOCK_TIME,
-      transform + ' is chronological');
-  assert.equal(studio.sortLock('bar', {analytics: {transform: 'none'}}), '');
-  assert.equal(studio.sortLock('bar', {analytics: {}}), '', 'no transform recorded is no transform');
+    assert.equal(studio.sortLock('bar', {analytics: {transform}}), '', transform + ' sorts too');
+});
+
+// What each stored order asks the server for (census B-S16): 'none' is the
+// view's own order - chronological on a time axis or a histogram's bins,
+// largest first otherwise - asc/desc order by the first measure on every
+// mark, and az/za by the first dimension's label.
+test('[studio-sort] querySort states the order for every stored value', () => {
+  const q = (sort, dims, measures = ['amount']) => studio.querySort({sort}, dims, measures);
+  assert.deepEqual(q('none', ['cycle']), [{field: 'cycle', direction: 'asc'}]);
+  assert.deepEqual(q('none', ['amount_bin'], ['records']), [{field: 'amount_bin', direction: 'asc'}]);
+  assert.deepEqual(q('none', ['company']), [{field: 'amount', direction: 'desc'}]);
+  assert.deepEqual(q('asc', ['cycle']), [{field: 'amount', direction: 'asc'}]);
+  assert.deepEqual(q('desc', ['cycle']), [{field: 'amount', direction: 'desc'}]);
+  assert.deepEqual(q('az', ['company']), [{field: 'company', direction: 'asc'}]);
+  assert.deepEqual(q('za', ['company']), [{field: 'company', direction: 'desc'}]);
+  assert.deepEqual(q('az', []), [{field: 'amount', direction: 'desc'}], 'no dimension, nothing to spell');
+  assert.equal(studio.orderedAxis(['year', 'company']), true);
+  assert.equal(studio.orderedAxis(['company', 'year']), false);
 });
 
 test('[studio-sort] a bar orders by the first measure: none and desc descend, asc ascends', () => {
@@ -83,31 +100,38 @@ test('[studio-sort] a bar orders by the first measure: none and desc descend, as
   assert.deepEqual(compile(two).query.sort, [{field: 'contributors', direction: 'desc'}]);
 });
 
-test('[studio-sort] a locked view keeps its own order whatever Sort says', () => {
+// Paul: "nothing is logically constrained". A time view (and a histogram's
+// bins) opens in its own order and sorts by its measure when asked; a time
+// axis ordered by a measure is drawn in that order, not as elapsed time
+// (contract V01, spec.categorical).
+test('[studio-sort] a time view opens chronological and sorts by its measure when asked', () => {
   const time = () => { const s = sheet(); s.columns = [pill('cycle')]; return s; };
   const cases = [
-    ['line', time, 'cycle'],
-    ['area', time, 'cycle'],
-    ['combination', () => { const s = time(); s.rows = [pill('amount'), pill('contributors')]; return s; }, 'cycle'],
-    ['dual-line', () => { const s = time(); s.rows = [pill('amount'), pill('contributors')]; return s; }, 'cycle'],
-    ['histogram', sheet, 'amount_bin']];
-  for (const [type, build, axis] of cases) {
-    for (const stored of ['none', 'asc', 'desc']) {
+    ['line', time, 'cycle', 'amount'],
+    ['area', time, 'cycle', 'amount'],
+    ['combination', () => { const s = time(); s.rows = [pill('amount'), pill('contributors')]; return s; }, 'cycle', 'amount'],
+    ['dual-line', () => { const s = time(); s.rows = [pill('amount'), pill('contributors')]; return s; }, 'cycle', 'amount'],
+    ['histogram', sheet, 'amount_bin', 'records']];
+  for (const [type, build, axis, measure] of cases) {
+    const opening = build(); opening.marks.type = type; opening.sort = 'none';
+    const opened = compile(opening);
+    assert.equal(opened.spec.type, type, type + ' compiled to ' + opened.spec.type);
+    assert.deepEqual(opened.query.sort, [{field: axis, direction: 'asc'}], type + ' opens in its axis order');
+    assert.ok(!opened.spec.categorical, type + ' opens on real elapsed time');
+    for (const stored of ['asc', 'desc']) {
       const s = build(); s.marks.type = type; s.sort = stored;
       const result = compile(s);
-      assert.equal(result.spec.type, type, type + ' compiled to ' + result.spec.type);
-      assert.deepEqual(result.query.sort, [{field: axis, direction: 'asc'}],
-        type + ' with sort=' + stored + ' must keep its axis order');
-      assert.ok(studio.sortLock(type, s), type + ' must also report itself locked');
+      assert.deepEqual(result.query.sort, [{field: measure, direction: stored}], type + ' sorts ' + stored + ': ' + PAUL);
+      if (type !== 'histogram') assert.equal(result.spec.categorical, true, type + ' is drawn in the sorted order');
     }
   }
-  // A transform is the same story through a different door: the type is
-  // rewritten to line first, so the order is the time axis.
-  for (const stored of ['none', 'asc', 'desc']) {
+  for (const stored of ['asc', 'desc']) {
     const s = sheet(); s.columns = [pill('cycle')]; s.sort = stored;
     s.analytics = {...s.analytics, transform: 'annual', period: 'cycle'};
-    assert.deepEqual(compile(s).query.sort, [{field: 'cycle', direction: 'asc'}]);
+    assert.deepEqual(compile(s).query.sort, [{field: 'amount', direction: stored}], 'a period view sorts too');
   }
+  const s = sheet(); s.columns = [pill('cycle')]; s.analytics = {...s.analytics, transform: 'annual', period: 'cycle'};
+  assert.deepEqual(compile(s).query.sort, [{field: 'cycle', direction: 'asc'}], 'and opens in period order');
 });
 
 /* ----------------------------------------------------------------- labels */
@@ -128,23 +152,39 @@ test('[studio-labels] every mark type this path can accept or produce has an ent
   }
 });
 
-test('[studio-labels] labelLock answers with the empty string only where labels are drawn', () => {
-  for (const type of ['bar', 'line', 'area', 'scatter', 'heatmap', 'dot', 'series-dot',
-    'stacked', 'histogram', 'bubbles'])
-    assert.equal(studio.labelLock(type, 'none'), '', type + ' draws labels');
-  for (const type of ['table', 'text', 'highlight', 'treemap', 'box', 'gantt', 'bullet',
-    'combination', 'dual-line', 'pie', 'doughnut', 'waterfall', 'pareto', 'radar', 'map', 'filled-map'])
-    assert.equal(studio.labelLock(type, 'none'), studio.LABEL_SUPPORT[type],
-      type + ' must give its own reason');
-  // Period analysis is redrawn by charts.js, which never reads spec.labels -
-  // except 'annual', which stays on the normal render path and keeps them.
-  for (const transform of ['yoy', 'change', 'forecast'])
-    assert.equal(studio.labelLock('bar', transform), studio.LABEL_LOCK_TRANSFORM,
-      transform + ' is drawn on the report canvas');
-  assert.equal(studio.labelLock('bar', 'annual'), '', 'period totals keep their labels');
-  assert.deepEqual(studio.LABELLED_TRANSFORMS, ['none', 'annual']);
+// Paul: "nothing is logically constrained". Every renderer draws value labels
+// now (engine contract V05, W8), period analysis included, so the button is
+// enabled on every mark. A table included (r4): its marks are its value cells,
+// so Labels shows or hides their printed values instead of being disabled.
+test('[studio-labels] labelLock answers with the empty string on every mark, a table included', () => {
+  for (const type of ['bar', 'line', 'area', 'scatter', 'heatmap', 'dot', 'series-dot', 'stacked', 'histogram',
+    'bubbles', 'highlight', 'treemap', 'box', 'gantt', 'bullet', 'combination', 'dual-line', 'pie', 'doughnut',
+    'waterfall', 'pareto', 'radar', 'map', 'filled-map'])
+    assert.equal(studio.labelLock(type, 'none'), '', type + ' draws labels: ' + PAUL);
+  for (const type of ['table', 'text'])
+    assert.equal(studio.labelLock(type, 'none'), '', type + ' shows or hides its values: ' + PAUL);
+  for (const transform of ['annual', 'yoy', 'change', 'forecast'])
+    assert.equal(studio.labelLock('bar', transform), '', transform + ' keeps its labels');
+  assert.deepEqual(studio.LABELLED_TRANSFORMS, ['none', 'annual', 'yoy', 'change', 'forecast']);
   // A type nobody has heard of is refused, not silently allowed.
   assert.ok(studio.labelLock('invented-mark', 'none'), 'an unknown mark is not labellable');
+});
+
+// Paul: "nothing is logically constrained". None used to be disabled wherever
+// it asked the server the same question as Descending. A stored 'none' keeps
+// its meaning (every new sheet and saved view opens largest first), and the
+// None button stores 'source': the same query, listed in the groups' own order.
+test('[studio-sort] None on a category axis is the groups own order, on the same query', () => {
+  const opened = sheet(), natural = sheet(), time = sheet();
+  natural.sort = 'source';
+  time.sort = 'source'; time.columns = [pill('cycle')];
+  assert.deepEqual(compile(natural).query, compile(opened).query, 'the page still holds the largest groups');
+  assert.equal(compile(natural).spec.naturalOrder, true, PAUL);
+  assert.equal(compile(opened).spec.naturalOrder, undefined, 'a new sheet still opens largest first');
+  assert.equal(compile(time).spec.naturalOrder, undefined, 'a time axis is already in its own order');
+  assert.deepEqual(compile(time).query.sort, [{field: 'cycle', direction: 'asc'}]);
+  assert.deepEqual(studio.naturalRows([{company: 'b10'}, {company: 'B2'}, {company: 'a'}, {company: 'B2', n: 2}], ['company']),
+    [{company: 'a'}, {company: 'B2'}, {company: 'B2', n: 2}, {company: 'b10'}], 'A to Z, numbers ascending, ties kept in place');
 });
 
 test('[studio-labels] the labels toggle is render-only: it never changes the query', () => {

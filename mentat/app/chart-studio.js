@@ -17,7 +17,7 @@
   const STORE = 'mentat-chart-studio-v1';
   const ZONES = [['columns', 'Columns'], ['rows', 'Rows'], ['color', 'Colour'], ['size', 'Size'],
     ['label', 'Label'], ['detail', 'Detail'], ['tooltip', 'Tooltip'], ['filters', 'Filters'], ['pages', 'Pages']];
-  const AGG_LABEL = {sum: 'SUM', mean: 'AVG', count: 'COUNT', median: 'MEDIAN', min: 'MIN', max: 'MAX'};
+  const AGG_LABEL = {sum: 'SUM', mean: 'AVG', count: 'COUNT', median: 'MEDIAN', min: 'MIN', max: 'MAX', countd: 'COUNTD'};
   // Every gesture a Data-pane field answers to, in the order a reader meets
   // them. The pill says this before the click, so nobody has to discover it.
   const CLICK_HINT = 'Click to add \u00b7 drag to place \u00b7 Enter for actions';
@@ -486,11 +486,20 @@
     // at four places that could drift apart (DE-021).
     globalThis.MentatScope?.write({industry:d.industry||d.id||''});
   }
+  // The bin width's label names its unit: dollars on verified data, the
+  // measure's own unit on a worksheet.
+  function binUnit(suffix) {
+    const label = el('bin-width-label');
+    const text = label && [...label.childNodes].find(node => node.nodeType === 3);
+    if (text) text.textContent = 'Histogram bin width' + suffix;
+  }
   function syncContributionControls() {
     const on=verified();el('contribution-source').hidden=!on;el('worksheet-source').hidden=on;el('verified-summary').hidden=!on;el('result-controls').hidden=!on;
-    el('marks-note').textContent=on?'Colour separates series. Detail, Label and Tooltip dimensions define each mark’s grouping. Select a mark to inspect its source records.':'Colour separates series. Label shows the plotted value. Unsupported encodings produce an explanation.';
+    el('marks-note').textContent=on?'Colour separates series. Detail, Label and Tooltip dimensions define each mark’s grouping. Select a mark to inspect its source records.':'Colour separates series or shades by a measure; Size, Label, Detail and Tooltip take any field.';
     for(const id of ['param-start','param-end','param-limit','param-horizon','param-split'])el(id).closest('label').hidden=on&&id!=='param-horizon';
-    if(!on){el('map-settings').hidden=true;return;}
+    // A worksheet histogram takes a bin width too (contract W10), in the
+    // measure's own unit; blank keeps the engine's own rule.
+    if(!on){el('map-settings').hidden=true;const binWasHidden=el('bin-width-label').hidden;el('bin-width-label').hidden=sheet().marks.type!=='histogram';el('bin-width').value=sheet().params.binWidth||'';el('bin-width').placeholder='Automatic';binUnit('');if(binWasHidden&&!el('bin-width-label').hidden&&el('params-details'))el('params-details').open=true;return;}
     fill(el('mark'),[...core.MARK_TYPES,['map','Map'],...contributions.EXTRA_MARKS]);el('mark').value=sheet().marks.type;
     const d=dataset();if(!d)return;
     fill(el('basis'),d.bases.map(b=>[b.id,contributions.BASIS[b.id]?.[0]||b.label]));el('basis').value=basis();el('basis-note').textContent=contributions.BASIS[basis()]?.[1]||'';
@@ -499,9 +508,9 @@
     el('param-groups').title='Groups shown per page. Totals and CSV exports include every group.';
     const mapWasHidden=el('map-settings').hidden;
     el('map-settings').hidden=!['map','filled-map'].includes(sheet().marks.type);
-    if(mapWasHidden&&!el('map-settings').hidden)el('map-settings').open=true;
+    if(mapWasHidden&&!el('map-settings').hidden)el('map-settings').open=isFoldOpen('map-settings')||!foldStored('map-settings');
     const binWasHidden=el('bin-width-label').hidden;
-    el('bin-width-label').hidden=sheet().marks.type!=='histogram';el('bin-width').value=sheet().params.binWidth||100;
+    el('bin-width-label').hidden=sheet().marks.type!=='histogram';el('bin-width').value=sheet().params.binWidth||100;binUnit(' (USD)');
     if(binWasHidden&&!el('bin-width-label').hidden&&el('params-details'))el('params-details').open=true;
     const map=sheet().map||{layers:['states','districts'],congress:'119'};
     el('congress').value=map.congress;for(const [id,layer]of [['states','states'],['districts','districts'],['zips','zip_areas']])el('layer-'+id).checked=map.layers.includes(layer);
@@ -646,6 +655,64 @@
     const p=result.provenance;
     return [request.dataset,contributions.BASIS[request.basis]?.[0],p.workbook,'Workbook SHA256 '+p.workbook_sha256,'Analytical index '+p.index_token,'Query engine SHA256 '+p.query_engine_sha256,'Field semantics SHA256 '+p.field_semantics_sha256,'Groups '+(result.offset+1)+'–'+(result.offset+result.rows.length)+' of '+result.group_count,JSON.stringify({filters:request.filters,aggregate_filters:request.aggregate_filters,bin_width_cents:request.bin_width_cents}),p.scope].join(' · ');
   }
+  // The charts.js family on the verified path: each draws one measure from the
+  // server's groups, so the others ride in each mark's hover detail.
+  const CANVAS_TYPES = ['pie','doughnut','waterfall','pareto','radar'];
+  const SHARE_TYPES = ['pie','doughnut','pareto','radar'];
+  const markTypeName = type => core.markLabel(type === 'table' ? 'text' : type === 'scatter' ? 'circle' : type);
+  const measuresIn = (rows, ids) => [...new Set(ids)].filter(id => rows.every(row => row[id] == null || (typeof row[id] === 'number' && Number.isFinite(row[id]))));
+  // Paul, 2026-09-23: "nothing is logically constrained". A renderer that
+  // cannot draw an arrangement never leaves the canvas empty: the same groups
+  // are drawn as bars (or, failing that, as a table) and its reason is a note.
+  function drawFallback(node, rows, spec, reason, notes, pick) {
+    const measures = measuresIn(rows, spec.measures.length ? spec.measures : ['amount']);
+    const dimensions = [...new Set(spec.dimensions || [])];
+    const base = {...spec, dimensions, measures: measures.length ? measures : spec.measures.slice(0, 1), size: '', colorMeasure: '',
+      categorical: false, dual: false, stack: '', panelTitles: measures.length > 1, color: dimensions.includes(spec.color) ? spec.color : ''};
+    notes.push(markTypeName(spec.type) + ' could not draw this arrangement (' + reason + '), so the same groups are shown as bars.');
+    try { contributionPlot.render(node('canvas'), rows, {...base, type: 'bar'}, pick); return true; }
+    catch (error) {
+      contributionPlot.render(node('canvas'), rows, {...base, type: 'table', color: '', barPitch: 0}, pick);
+      notes.push('Bars could not be drawn either (' + error.message + '), so the groups are listed as a table.');
+      return false;
+    }
+  }
+  // Contract V11: year-over-year, period change and the forecast are computed
+  // per measure and per series (each dimension after the time axis), and the
+  // chosen mark is kept. One measure with no other dimension is today's model.
+  function periodModel(rows, spec, compiled, state, notes) {
+    const time = spec.dimensions[0], others = spec.dimensions.slice(1), ids = spec.measures;
+    const period = time === 'cycle' ? 'cycle' : 'year', horizon = state.analytics.horizon || 2;
+    const timeColumn = {index: 0, name: time === 'cycle' ? 'Election cycle' : 'Year', type: 'category'};
+    const single = input => {
+      const id0 = ids[0], modelData = {columns: [timeColumn, {index: 1, name: 'Amount', type: 'number'}],
+        rows: input.map(r => [r[time], r[id0]]), row_numbers: input.map((_, i) => i + 1), row_count: input.length, header_row: 0};
+      const model = math.build(modelData, {type: 'line', x: 0, y: 1, series: -1, aggregation: 'sum', filters: [], transform: compiled.transform, period, horizon, start: 0, end: 0, limit: 0});
+      const money = contributions.MONEY.has(id0), id = compiled.transform === 'yoy' ? 'percent_change' : id0;
+      notes.push(model.note);
+      return {model: {...model, type: spec.type, groups: model.groups.map(g => ({...g, value: g.value / (money && id !== 'percent_change' ? 100 : 1)}))},
+        column: {id, name: compiled.transform === 'forecast' ? 'Observed amount and same-phase baseline' : id === 'percent_change' ? 'Year-over-year change (%)' : 'Period change', unit: id === 'percent_change' ? 'percent' : money ? 'cents' : 'count'}};
+    };
+    if (!others.length && ids.length === 1) return single(rows);
+    const name = id => (columns().find(f => f.id === id) || {}).name || id;
+    const key = (row, id) => [...others.map(d => row[d] == null || row[d] === '' ? 'Unknown' : String(row[d])), ...(ids.length > 1 ? [name(id)] : [])].join(' · ');
+    const table = [];
+    for (const row of rows) for (const id of ids) if (row[id] != null) table.push([row[time], key(row, id), row[id] / (contributions.MONEY.has(id) ? 100 : 1)]);
+    const modelData = {columns: [timeColumn, {index: 1, name: 'Series', type: 'category'}, {index: 2, name: 'Value', type: 'number'}],
+      rows: table, row_numbers: table.map((_, i) => i + 1), row_count: table.length, header_row: 0};
+    try {
+      const model = math.build(modelData, {type: ['bar', 'line', 'area', 'dot'].includes(spec.type) ? spec.type : 'line', x: 0, y: 2, series: 1,
+        aggregation: 'sum', filters: [], transform: compiled.transform, period, horizon, start: 0, end: 0, limit: 0, lenient: true});
+      if (model.note) notes.push(model.note);
+      for (const warning of model.warnings || []) notes.push(warning);
+      return {model: {...model, type: model.type || spec.type}, column: {id: 'value', name: compiled.transform === 'yoy' ? 'Year-over-year change (%)' : compiled.transform === 'forecast' ? 'Observed value and same-phase baseline' : 'Period change', unit: compiled.transform === 'yoy' ? 'percent' : 'number'}};
+    } catch (error) {
+      notes.push('Period analysis could not separate ' + [...others.map(name), ...(ids.length > 1 ? ['the measures'] : [])].join(' and ') + ' into series (' + error.message + '), so it shows ' + name(ids[0]) + ' in total.');
+      const totals = new Map();
+      for (const row of rows) totals.set(row[time], (totals.get(row[time]) || 0) + (Number(row[ids[0]]) || 0));
+      return single([...totals].map(([t, v]) => ({[time]: t, [ids[0]]: v})));
+    }
+  }
   async function renderContributionView(view) {
     view=view||mainSurface();const node=view.el,state=view.state;
     if(!data||!dataset()){node('reconcile').hidden=true;node('canvas').replaceChildren();node('table').replaceChildren();node('verified-summary').textContent='Reading verified source fields…';node('result-controls').hidden=true;node('title').textContent='';node('subtitle').textContent='';node('note').textContent='Choose a verified report in the Data panel to begin.';if(view.primary)lastResult=null;return;}
@@ -653,7 +720,12 @@
     try {
       const compiled=contributions.compile(state,columns(),{dataset:dataset().id,industry:dataset().industry,basis:sheetBasis,offset:view.offset});
       if(view.el===el)compareDrawn=null;
-      if(view.el===el&&compareActive(state)){await renderCompareView(view,compiled,ticket);return;}
+      // Comparing scopes draws bars, lines, areas, circles or a table without
+      // Colour; any other arrangement draws the sheet's own scope and says so.
+      if(view.el===el&&compareActive(state)){
+        if(COMPARE_MARKS.includes(compiled.spec.type)&&compiled.transform==='none'&&!compiled.spec.color){await renderCompareView(view,compiled,ticket);return;}
+        compiled.notes.push('Comparing scopes draws bar, line, area, circle and table marks without Colour or period analysis, so this view shows the sheet’s own scope.');
+      }
       const query=compiled.query,key=JSON.stringify(query),previous=view.request;
       if(previous&&JSON.stringify({...previous,offset:0})!==JSON.stringify({...query,offset:0})&&view.offset){view.offset=0;query.offset=0;}
       if(!previous||JSON.stringify(previous)!==key){node('canvas').setAttribute('aria-busy','true');node('verified-summary').textContent='Reading verified totals…';if(view.primary){status('Reading verified source observations…');el('inspection').hidden=true;++recordRevision;lastResult=null;}}
@@ -671,39 +743,47 @@
       // The arrows appear only when there is another page of groups (S1).
       node('groups-prev').hidden=node('groups-next').hidden=compiled.spec.type==='map'||compiled.transform!=='none'||(!query.offset&&!result.has_more);
       node('inspect-all').disabled=false;node('inspect-all').title='';
-      let rows=result.rows,spec={...compiled.spec,columns:result.columns,title:title,barPitch:28,niceTicks:true,panelTitles:compiled.spec.measures.length!==1,width:node('canvas').clientWidth,barLeftMax:190,seriesColor:seriesColour(),...roomFit(node('canvas'))},temporalModel=null,drewReferences=false;const notes=[...compiled.notes,...(result.notices||[])];
-      if(spec.type==='histogram'&&result.has_more)throw new Error('This histogram has more than 10,000 occupied bins. Increase the bin width or narrow the filters to display the complete distribution.');
+      let rows=compiled.spec.naturalOrder?contributions.naturalRows(result.rows,compiled.spec.dimensions):result.rows,spec={...compiled.spec,columns:result.columns,title:title,barPitch:28,niceTicks:true,panelTitles:compiled.spec.measures.length!==1,width:node('canvas').clientWidth,barLeftMax:190,seriesColor:seriesColour(),...roomFit(node('canvas'))},temporal=null;const notes=[...compiled.notes,...(result.notices||[])];
+      if(spec.type==='table'&&!state.showLabels)notes.push(TABLE_LABELS_OFF);
+      // Incomplete pages are drawn and said to be incomplete (census B-S30).
+      if(spec.type==='histogram'&&result.has_more)notes.push('This histogram has more than 10,000 occupied bins and shows the first 10,000. Increase the bin width or narrow the filters to see the complete distribution.');
       if(compiled.transform!=='none'&&compiled.transform!=='annual'){
-        if(result.has_more)throw new Error('Period analysis requires every selected period. Narrow the filters.');
-        const time=query.dimensions[0],modelData={columns:[{index:0,name:time==='cycle'?'Election cycle':'Year',type:'category'},{index:1,name:'Amount',type:'number'}],rows:rows.map(r=>[r[time],r.amount]),row_numbers:rows.map((_,i)=>i+1),row_count:rows.length,header_row:0};
-        const model=math.build(modelData,{type:'line',x:0,y:1,series:-1,aggregation:'sum',filters:[],transform:compiled.transform,period:time==='cycle'?'cycle':'year',horizon:state.analytics.horizon||2,start:0,end:0,limit:0});
-        const id=compiled.transform==='yoy'?'percent_change':'amount';rows=model.groups.map(g=>({[time]:time==='cycle'?`${g.year-1}-${g.year}`:String(g.year),[id]:g.value}));spec.measures=[id];spec.columns=[{id,name:compiled.transform==='forecast'?'Observed amount and same-phase baseline':id==='amount'?'Period change':'Year-over-year change (%)',unit:id==='amount'?'cents':'percent'}];notes.push(model.note);
-        temporalModel={...model,type:spec.type,groups:model.groups.map(g=>({...g,value:g.value/(id==='amount'?100:1)}))};
+        if(result.has_more)notes.push('Period analysis read the first 100,000 groups; narrow the filters so every period is included.');
+        temporal=periodModel(rows,spec,compiled,state,notes);
       }
       // One map at a time: it owns the geometry cache and the Census request, so
       // it is drawn for the tile the reader selected. An unselected map tile names
       // the gesture that brings it back rather than drawing nothing.
       if(spec.type==='map'){
         if(!view.primary){node('canvas').replaceChildren();node('table').hidden=true;node('status').textContent='';node('note').textContent='This sheet draws a map. Select this tile to see it.';return;}
-        await renderContributionMap(ticket,compiled,null,view);return;
+        await renderContributionMap(ticket,compiled,null,view,notes);return;
       }
       if(contributionMapHost===node('canvas')){clearTimeout(geometryTimer);contributionMap?.destroy?.();contributionMap=null;contributionMapHost=null;++geometryRevision;}
       node('canvas').hidden=false;node('table').hidden=true;node('canvas').className=view.canvasClass+'studio-canvas fit-'+state.fit;
-      if(temporalModel){
-        const measure=spec.columns[0].name+(spec.columns[0].unit==='cents'?' (USD)':'');
-        const drawn=paint.chartSVG(temporalModel,measure,{type:spec.type,aggregation:'sum',x:0,y:1},{sheet:sheetName(),columns:[{name:'Period'},{name:measure}]},view.title,view.scope);node('canvas').replaceChildren(drawn.svg);
-      }else if(['pie','doughnut','waterfall','pareto','radar'].includes(spec.type)){
-        if(spec.measures.length!==1)throw new Error('This mark type uses one measure.');
-        const id=spec.measures[0],currency=contributions.MONEY.has(id),groups=rows.map(row=>({label:contributionPlot.label(row,spec.dimensions),value:row[id]/(currency?100:1),n:1}));
-        const drawn=paint.chartSVG({type:spec.type,groups,selected:result.totals.records,excluded:0},(result.columns.find(c=>c.id===id)?.name||id)+(currency?' (USD)':''),{type:spec.type,aggregation:'sum',x:0,y:1},{sheet:sheetName(),columns:[{name:'Group'},{name:id}]},view.title,view.scope);node('canvas').replaceChildren(drawn.svg);
-      }else if(MentatContributionCharts.TYPES.includes(spec.type))MentatContributionCharts.render(node('canvas'),rows,spec,row=>{if(view.primary)inspectContributions(row);});
-      else {contributionPlot.render(node('canvas'),rows,spec,row=>{if(view.primary)inspectContributions(row);});drewReferences=spec.type!=='scatter';}
+      const options={labels:!!state.showLabels},pick=row=>{if(view.primary)inspectContributions(row);};
+      try{
+        if(temporal){
+          const measure=temporal.column.name+(temporal.column.unit==='cents'?' (USD)':'');
+          const drawn=paint.chartSVG(temporal.model,measure,{type:temporal.model.type||spec.type,aggregation:'sum',x:0,y:1},{sheet:sheetName(),columns:[{name:'Period'},{name:measure}]},view.title,view.scope,options);node('canvas').replaceChildren(drawn.svg);
+          const lines=core.referenceValues(temporal.model,state.analytics);if(lines.length&&drawn.plot)overlayReference(drawn.svg,drawn.plot,lines);
+        }else if(CANVAS_TYPES.includes(spec.type)){
+          const ids=spec.measures,id=ids[0],currency=contributions.MONEY.has(id),nameOf=m=>result.columns.find(c=>c.id===m)?.name||m;
+          if(ids.length>1)notes.push(markTypeName(spec.type)+' draws one measure; '+ids.slice(1).map(nameOf).join(', ')+(ids.length===2?' is':' are')+' in each mark’s hover detail.');
+          let groups=rows.map(row=>({label:contributionPlot.label(row,spec.dimensions),value:row[id]/(currency?100:1),n:1,extra:Object.fromEntries(ids.slice(1).map(m=>[nameOf(m),row[m]==null?null:row[m]/(contributions.MONEY.has(m)?100:1)]))}));
+          // Shares and a radar need nonnegative values: negative groups are left
+          // out and counted, never allowed to stop the drawing (census B-E07).
+          if(SHARE_TYPES.includes(spec.type)){const negative=groups.filter(g=>g.value<0).length;if(negative){groups=groups.filter(g=>g.value>=0);notes.push(fmt(negative)+' group'+(negative===1?' has':'s have')+' a negative '+nameOf(id)+' and '+(negative===1?'is':'are')+' left out of the '+markTypeName(spec.type).toLowerCase()+'; bars show signed amounts.');}}
+          const drawn=paint.chartSVG({type:spec.type,groups,selected:result.totals.records,excluded:0,warnings:[]},nameOf(id)+(currency?' (USD)':''),{type:spec.type,aggregation:'sum',x:0,y:1},{sheet:sheetName(),columns:[{name:'Group'},{name:id}]},view.title,view.scope,options);node('canvas').replaceChildren(drawn.svg);
+          const lines=core.referenceValues({type:spec.type,groups},state.analytics);if(lines.length&&drawn.plot)overlayReference(drawn.svg,drawn.plot,lines);
+        }else if(MentatContributionCharts.TYPES.includes(spec.type))MentatContributionCharts.render(node('canvas'),rows,spec,pick);
+        else contributionPlot.render(node('canvas'),rows,spec,pick);
+      }catch(error){drawFallback(node,rows,spec,error.message,notes,pick);}
       if(state.analytics.totals)notes.push('Selected source total: '+money(result.totals.amount)+'. This total excludes projections and covers every matching group before grouped filters.');
       // Say plainly when a requested reference line was not drawn, instead
       // of describing one the reader cannot see.
       if(state.analytics.average||state.analytics.median)notes.push(
-        drewReferences?'Reference lines mark the mean and median of the shown marks; source-level averages and medians are available as measures.'
-        :'Reference lines are not drawn on this mark type. Choose a bar, line, area or circle mark to see the mean and median of the shown marks.');
+        node('canvas').querySelector('[data-reference]')?'Reference lines mark the mean and median of the shown marks; source-level averages and medians are available as measures.'
+        :'This chart has no value axis for a reference line, so the mean and median are not drawn; each mark carries its value on hover.');
       node('note').textContent=[contributions.BASIS[sheetBasis][1],query.aggregate_filters.length?'Grouped filters apply after aggregation.':result.has_more?'Additional groups are on later pages; source totals cover all pages.':'All selected groups shown.',...notes].join(' ');
       node('status').textContent=fmt(result.totals.records)+' source observations · '+fmt(result.group_count)+' groups · '+(result.reconciliation?.receipt_matches_workbook===true?'reconciles to the workbook':'verified source records');
       node('status').title=view.primary?fmt(queryRequests)+' verified queries this session':'';
@@ -720,18 +800,22 @@
       if(view.primary){failure(guidance?'':error.message);lastResult=null;}}}
     finally{if(!view.stale(ticket)){node('canvas').setAttribute('aria-busy','false');node('note').title=node('note').textContent;}}
   }
-  async function renderContributionMap(ticket,compiled,bbox=null,view=null) {
+  async function renderContributionMap(ticket,compiled,bbox=null,view=null,notes=[]) {
     view=view||mainSurface();const node=view.el;
     const current=++geometryRevision,result=view.result,map=view.state.map||{layers:['states','districts'],congress:'119'},zips=MentatContributionMap.eligibleZips(result.rows).sort(),key=JSON.stringify({zips,congress:map.congress,bbox});
-    if(result.has_more)throw new Error('Narrow the map filters so every geographical group can be included.');
+    // An incomplete page is mapped and said to be incomplete (census B-S30).
+    if(result.has_more)notes=[...notes,'The map shows the first '+fmt(result.rows.length)+' of '+fmt(result.group_count)+' places; narrow the filters to map every one.'];
     const saved=contributionMap?.getView();status('Loading Census boundaries…');
     const cached=geometryCache.get(key),pendingKey=key+'|'+[...map.layers].sort().join(',');let geometry=cached&&map.layers.every(layer=>cached.layers?.[layer])?cached:null;if(!geometry){if(!geometryPending.has(pendingKey))geometryPending.set(pendingKey,contributionAPI('geography',{zips,layers:map.layers,congress:map.congress,...(bbox?{bbox}:{})}).finally(()=>geometryPending.delete(pendingKey)));geometry=await geometryPending.get(pendingKey);geometryCache.set(key,geometry);}
     if(view.stale(ticket)||current!==geometryRevision||!verified())return;
     geometryCache.set(key,geometry);if(geometryCache.size>8)geometryCache.delete(geometryCache.keys().next().value);contributionGeometry=geometry;geometryKey=key;contributionMap?.destroy?.();contributionMapHost=node('canvas');node('canvas').hidden=false;node('table').hidden=true;
-    contributionMap=MentatContributionMap.render(node('canvas'),{groups:result.rows.map(r=>({...r,amount_cents:r.amount})),geometry,layers:map.layers,filled:compiled.spec.filled,title:view.title,valueLabel:basisOf(view.state)==='original_supported'?'Selected gross amount':'Selected net amount',showLayerControls:false,onSelect:row=>inspectContributions(contributions.mapSelection(row)),onViewport:event=>{if(!map.layers.includes('zip_areas'))return;clearTimeout(geometryTimer);geometryTimer=setTimeout(()=>renderContributionMap(view.ticket(),compiled,event.bbox,view).catch(e=>failure(e.message)),450);}});
+    // Contract V10: the map shades by the sheet's own measure (`value`, in its
+    // own unit); amount_cents stays the selected amount for the coverage line.
+    const shaded=compiled.spec.measures[0]||'amount',unit=contributions.MONEY.has(shaded)?'cents':['records','contributors'].includes(shaded)?'count':'number';
+    contributionMap=MentatContributionMap.render(node('canvas'),{groups:result.rows.map(r=>({...r,amount_cents:r.amount,value:r[shaded]})),valueField:shaded==='amount'?'amount_cents':'value',unit,geometry,layers:map.layers,filled:compiled.spec.filled,title:view.title,valueLabel:shaded==='amount'?(basisOf(view.state)==='original_supported'?'Selected gross amount':'Selected net amount'):((result.columns.find(c=>c.id===shaded)||{}).name||shaded),showLayerControls:false,onSelect:row=>inspectContributions(contributions.mapSelection(row)),onViewport:event=>{if(!map.layers.includes('zip_areas'))return;clearTimeout(geometryTimer);geometryTimer=setTimeout(()=>renderContributionMap(view.ticket(),compiled,event.bbox,view,notes).catch(e=>failure(e.message)),450);}});
     if(saved)contributionMap.setView(saved);
     view.scope+=' · Congress '+map.congress+'; '+map.layers.join(', ')+'; overlays do not allocate money. Mapped '+contributionPlot.format(contributionMap.data.mapped_cents,'amount')+'; unmapped '+contributionPlot.format(contributionMap.data.unmapped_cents,'amount')+' · '+(geometry.sources||[]).map(s=>(s.vintage||s.label||s.url)+' SHA256 '+s.sha256).join(' · ');
-    node('note').textContent=[contributions.BASIS[basisOf(view.state)][1],'ZIP marks combine eligible ZIP/state groups; grouped filters apply before this combination. Unmapped money remains in the selected total.',...(contributionMap.data.coverage_notes||[]),...(geometry.warnings||[])].join(' ');
+    node('note').textContent=[contributions.BASIS[basisOf(view.state)][1],'ZIP marks combine eligible ZIP/state groups; grouped filters apply before this combination. Unmapped money remains in the selected total.',...(contributionMap.data.coverage_notes||[]),...(geometry.warnings||[]),...notes].join(' ');
     node('status').textContent=fmt(result.group_count)+' geographic groups · '+fmt(contributionMap.data.marks.length)+' mapped marks · boundaries do not change money';status('Verified ZIP/state records and Census boundaries');
   }
   let recordSource = null;
@@ -978,17 +1062,17 @@
   // The zone a single click uses, and the sentence that names it.
   const zoneLabel = zone => (ZONES.find(z => z[0] === zone) || [zone, zone])[1];
   const quickAddLabel = field => zoneLabel(core.quickAddZone(field, sheet()));
-  // A drag takes the pill with it; a click has no pill to take, so a field
-  // that is already on a shelf would be copied onto the other one rather than
-  // moved. Both the click and its menu entry ask here first.
+  // A drag takes the pill with it; a click has no pill to take, so a click on
+  // a field already on a shelf adds it once more (census B-S26; Paul,
+  // 2026-09-23: "nothing is logically constrained") - a second SUM, an AVG
+  // beside a SUM, a dimension on both shelves - and the status line says so.
   const placedOn = field => ['columns', 'rows'].find(name =>
     core.shelf(sheet()[name]).some(p => p.column === field.index));
   function quickAdd(field) {
     const placed = placedOn(field);
-    if (placed) { status(field.name + ' is already on ' + zoneLabel(placed) + '.'); return; }
     const zone = core.quickAddZone(field, sheet());
     commit(() => place(zone, field.index));
-    status('Added ' + field.name + ' to ' + zoneLabel(zone) + '.');
+    status('Added ' + field.name + ' to ' + zoneLabel(zone) + (placed ? ' again.' : '.'));
   }
 
   function sendMenu(anchor, field, settings) {
@@ -997,14 +1081,13 @@
     // the same shelf the mouse does without reading down to the Place group.
     if (!settings.zone) {
       const placed = placedOn(field);
-      items.push(placed
-        ? ['Add to a shelf', null, {disabled: true, reason: field.name + ' is already on ' +
-            zoneLabel(placed) + '. Use Send to… to move it.'}]
-        : ['Add to ' + quickAddLabel(field), () => quickAdd(field)]);
+      items.push([(placed ? 'Add again to ' : 'Add to ') + quickAddLabel(field), () => quickAdd(field)]);
     }
     if (settings.zone === 'filters') items.push(['Edit filter\u2026', () => filterEditor(anchor, settings.position)]);
     items.push(...datePartItems(anchor, field, settings));
-    const onAxis = settings.zone === 'columns' || settings.zone === 'rows';
+    // Every measure pill has its aggregation, whichever shelf or mark property
+    // holds it: a Colour or Size measure is aggregated too.
+    const onAxis = !!settings.zone && !['filters', 'pages'].includes(settings.zone);
     if (onAxis && field.role === 'measure') {
       const aggregations = core.aggregationsFor(field, engine());
       items.push(['Measure', null, {group: true}]);
@@ -1013,8 +1096,8 @@
         reason: field.name + ' is computed from the source observations, so it has one definition.'}]);
       const others = core.classifyFields(columns(), sheet().types).measures.filter(f => f.index !== field.index);
       items.push(['Replace measure\u2026', others.length ? () => popup(anchor, others.map(other => [other.name, () => commit(() => {
-        const pills = core.shelf(sheet()[settings.zone]);
-        if (pills[settings.position]) { pills[settings.position] = {column: other.index, aggregation: 'sum'}; sheet()[settings.zone] = pills; }
+        const pills = zonePills(settings.zone);
+        if (pills[settings.position]) { pills[settings.position] = {column: other.index, aggregation: 'sum'}; setZonePills(settings.zone, pills); }
       })])) : null, {disabled: !others.length, reason: 'This source has no other measure.'}]);
       items.push(['Political money\u2026', () => popup(anchor, core.measurePresets(columns(), engine(), sheet().types)
         .map(preset => [preset.label,
@@ -1032,9 +1115,26 @@
   }
   function aggregationMenu(anchor, zone, position, list) {
     popup(anchor, (list || core.AGGREGATIONS).map(([id, label]) => [label, () => commit(() => {
-      const pills = core.shelf(sheet()[zone]);
-      if (pills[position]) { pills[position].aggregation = id; sheet()[zone] = pills; }
+      const pills = zonePills(zone);
+      if (pills[position]) { pills[position].aggregation = id; setZonePills(zone, pills); }
     })]));
+  }
+  // The pills a shelf or mark property holds, as a list, and the way back.
+  const MARK_LISTS = ['detail', 'tooltip'], MARK_ONE = ['color', 'size', 'label'];
+  function zonePills(zone) {
+    const state = sheet();
+    if (zone === 'columns' || zone === 'rows') return core.shelf(state[zone]);
+    if (MARK_LISTS.includes(zone)) return core.shelf(state.marks[zone]);
+    if (MARK_ONE.includes(zone)) return core.shelf(state.marks[zone] == null ? [] : [state.marks[zone]]);
+    if (zone === 'pages') return core.shelf(state.pages == null ? [] : [state.pages]);
+    return [];
+  }
+  function setZonePills(zone, list) {
+    const state = sheet();
+    if (zone === 'columns' || zone === 'rows') state[zone] = list;
+    else if (MARK_LISTS.includes(zone)) state.marks[zone] = list;
+    else if (MARK_ONE.includes(zone)) state.marks[zone] = list[0] || null;
+    else if (zone === 'pages') state.pages = list[0] || null;
   }
 
 
@@ -1048,22 +1148,18 @@
     else if (zone === 'pages') { state.pages = null; state.pageMember = ''; }
     else state.marks[zone] = null;
   }
-  // The one shelf that can refuse a drop: a column carries a single filter.
-  // The drop handler asks before it removes the pill it is moving.
-  const canPlace = (zone, column) => zone !== 'filters' ||
-    !sheet().filters.some(f => Number(f.column) === column);
+  // No shelf refuses a drop (census B-S25, B-S26): a field may sit on a shelf
+  // more than once - SUM and AVG of one measure side by side - and a column may
+  // carry several filters, which combine with AND like every other filter.
   function place(zone, column, position, aggregation) {
     const state = sheet();
     const entry = {column, aggregation: aggregation || 'sum'};
     if (zone === 'columns' || zone === 'rows' || zone === 'detail' || zone === 'tooltip') {
       const list = zone === 'columns' || zone === 'rows' ? core.shelf(state[zone]) : core.shelf(state.marks[zone]);
-      const existing = list.findIndex(p => p.column === column);
-      if (existing !== -1) list.splice(existing, 1);
       const at = position == null || position > list.length ? list.length : position;
       list.splice(at, 0, entry);
       if (zone === 'columns' || zone === 'rows') state[zone] = list; else state.marks[zone] = list;
     } else if (zone === 'filters') {
-      if (!canPlace(zone, column)) return false;
       // A new filter starts as an empty choice, which selects nothing and
       // therefore filters nothing, instead of inheriting an arbitrary value.
       const chosen = core.fieldAt(core.classifyFields(columns(), state.types), column);
@@ -1167,15 +1263,8 @@
         // so everything after it shifts down by one once the pill leaves.
         if (at != null && move.position < at) at -= 1;
       }
-      // Decide before removing: a shelf that refuses the drop must not cost the
-      // user the pill they were dragging.
-      if (move.kind === 'pill' && !canPlace(zone, move.column)) {
-        const field = core.fieldAt(core.classifyFields(columns(), sheet().types), move.column);
-        el('note').textContent = (field ? field.name : 'That field') + ' already has a filter.';
-        return;
-      }
       commit(() => {
-        const aggregation = move.zone ? (core.shelf(sheet()[move.zone] || (sheet().marks || {})[move.zone])[move.position] || {}).aggregation : 'sum';
+        const aggregation = move.zone ? (zonePills(move.zone)[move.position] || {}).aggregation : 'sum';
         if (move.kind === 'pill') removeFrom(move.zone, move.position);
         place(zone, move.column, at, aggregation);
       });
@@ -1184,9 +1273,192 @@
 
   /* -------------------------------------------------------------- rendering */
 
-  // "More fields" keeps its open state while the pane redraws (every edit
-  // redraws it), for as long as this page is open.
-  const moreOpen = {dimensions: false, measures: false};
+  /* ------------------------------------------------------- section folds */
+
+  // Paul, 2026-09-23: "You should be able to expand each section individually
+  // like with a census panel". Every section of the builder folds on its own
+  // header the way the PAC evidence map's Census "Source details" panel does:
+  // the header line stays, a disclosure chevron says which way it points, and
+  // the rest folds away. The sections are the Dimensions and Measures buckets
+  // and their More fields, each shelf (Columns, Rows, Filters), the Marks card
+  // and each of its properties, and each Inspector section. Every one opens as
+  // S1 draws it (More fields and the Inspector disclosures stay folded, as S1
+  // has them); each choice is this browser's, remembered per section through
+  // ui-state.js and written only when the reader makes it. The whole-pane
+  // hides and "Expand chart" are unchanged, and a folded shelf gives its room
+  // to the chart (ruling c).
+  const FOLD_KEY = 'mentat-chart-studio-fold:';
+  const foldOpen = new Map();
+  const FOLD_DEFAULT_CLOSED = ['more-dimensions', 'more-measures', 'showme', 'map-settings', 'pages', 'params'];
+  const FOLD_SUMMARY = new Map();
+  function isFoldOpen(id) {
+    if (!foldOpen.has(id)) {
+      const stored = globalThis.MentatState?.recall?.(FOLD_KEY + id);
+      foldOpen.set(id, stored === '1' ? true : stored === '0' ? false : !FOLD_DEFAULT_CLOSED.includes(id));
+    }
+    return foldOpen.get(id);
+  }
+  const foldStored = id => { const stored = globalThis.MentatState?.recall?.(FOLD_KEY + id); return stored === '1' || stored === '0'; };
+  function rememberFold(id, open) {
+    foldOpen.set(id, !!open);
+    globalThis.MentatState?.remember?.(FOLD_KEY + id, open ? '1' : '0');
+  }
+  // A header's toggle: the label keeps its words, the chevron is drawn by CSS,
+  // and a folded section says what it is holding beside its name.
+  function foldButton(id, name, controls) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'studio-fold';
+    button.dataset.fold = id;
+    button.dataset.name = name;
+    if (controls) button.setAttribute('aria-controls', controls);
+    const label = document.createElement('span');
+    label.className = 'studio-fold-label';
+    label.textContent = name;
+    const count = document.createElement('span');
+    count.className = 'studio-fold-count';
+    button.append(label, count);
+    return button;
+  }
+  // Every fold on the page is drawn from its state: a host (data-fold-host)
+  // takes is-folded, a body (data-fold-body) folds away, and a drop zone
+  // (data-fold-drop) shrinks to one line that still names its fields and still
+  // takes a drop. Built once or rebuilt by a render, a section only has to
+  // carry the attributes.
+  function applyFolds() {
+    const root = document.getElementById('view-chart-studio');
+    if (!root) return;
+    for (const button of root.querySelectorAll('button.studio-fold[data-fold]')) {
+      const id = button.dataset.fold, open = isFoldOpen(id), name = button.dataset.name || '';
+      button.setAttribute('aria-expanded', String(open));
+      button.title = (open ? 'Fold ' : 'Unfold ') + name + (open ? '; the rest of the view keeps its place' : '');
+      const summary = FOLD_SUMMARY.get(id);
+      const text = !open && summary ? summary() : '';
+      const count = button.querySelector('.studio-fold-count');
+      if (count) count.textContent = text;
+      button.setAttribute('aria-label', name + (open ? ', expanded' : ', folded' + (text ? ': ' + text : '')));
+    }
+    for (const host of root.querySelectorAll('[data-fold-host]')) host.classList.toggle('is-folded', !isFoldOpen(host.dataset.foldHost));
+    for (const body of root.querySelectorAll('[data-fold-body]')) body.classList.toggle('studio-folded', !isFoldOpen(body.dataset.foldBody));
+    for (const drop of root.querySelectorAll('[data-fold-drop]')) {
+      const folded = !isFoldOpen(drop.dataset.foldDrop);
+      drop.classList.toggle('is-folded-drop', folded);
+      const names = [...drop.querySelectorAll(':scope > .studio-pill .studio-pill-name')].map(node => node.textContent.trim()).filter(Boolean);
+      drop.dataset.foldSummary = names.length ? names.join(', ') : 'Empty';
+    }
+    const studio = document.querySelector('#view-chart-studio .studio');
+    if (studio) studio.classList.toggle('studio-shelf-folded', ['shelf-columns', 'shelf-rows', 'shelf-filters'].some(id => !isFoldOpen(id)));
+  }
+  function toggleFold(id) {
+    const before = document.querySelector('#view-chart-studio .studio')?.classList.contains('studio-shelf-folded');
+    rememberFold(id, !isFoldOpen(id));
+    applyFolds();
+    // A shelf that folds or unfolds changes the canvas's height; the observer
+    // below redraws a roomy chart into it.
+    const after = document.querySelector('#view-chart-studio .studio')?.classList.contains('studio-shelf-folded');
+    if (before !== after) status(after ? 'A shelf is folded; the chart takes its room.' : 'Every shelf is showing.');
+  }
+  document.addEventListener('click', event => {
+    const button = event.target instanceof Element ? event.target.closest('#view-chart-studio button.studio-fold[data-fold]') : null;
+    if (!button) return;
+    event.preventDefault();
+    toggleFold(button.dataset.fold);
+  });
+  // A header that already exists in the markup keeps its element (and every
+  // rule that styles it); only its words move into the toggle.
+  function foldHeader(header, id, name, controls) {
+    if (!header || header.querySelector('button.studio-fold')) return null;
+    const button = foldButton(id, name, controls);
+    header.replaceChildren(button);
+    header.classList.add('studio-fold-head');
+    return button;
+  }
+  // The Inspector's own disclosures (Show Me, Map layers, Pages, Parameters)
+  // already fold; they now remember the reader's choice the same way. Only a
+  // click on the summary is remembered, never an open the console makes for
+  // the reader (a Pages field placed, a map chosen).
+  function rememberDisclosure(details, id) {
+    if (!details) return;
+    if (foldStored(id)) details.open = isFoldOpen(id);
+    const summary = details.querySelector(':scope > summary');
+    let asked = false;
+    summary?.addEventListener('click', () => { asked = true; });
+    details.addEventListener('toggle', () => {
+      if (!asked) return;
+      asked = false;
+      rememberFold(id, details.open);
+    });
+  }
+  function buildFolds() {
+
+    for (const [bucket, name] of [['dimensions', 'Dimensions'], ['measures', 'Measures']]) {
+      const body = el(bucket);
+      const header = body && body.previousElementSibling;
+      if (header && header.tagName === 'H3' && foldHeader(header, bucket, name, 'studio-' + bucket)) {
+        body.dataset.foldBody = bucket;
+        FOLD_SUMMARY.set(bucket, () => {
+          const n = el(bucket).querySelectorAll('.studio-pill').length;
+          return n + ' field' + (n === 1 ? '' : 's');
+        });
+      }
+    }
+    for (const [zone, name] of [['columns', 'Columns'], ['rows', 'Rows'], ['filters', 'Filters']]) {
+      const header = el(zone + '-name'), row = el(zone) && el(zone).closest('.studio-shelf');
+      if (!header || !row || !foldHeader(header, 'shelf-' + zone, name, 'studio-' + zone)) continue;
+      row.dataset.foldHost = 'shelf-' + zone;
+      el(zone).dataset.foldDrop = 'shelf-' + zone;
+    }
+    const props = document.querySelector('#studio-pane-marks .studio-mark-props');
+    if (props && !el('marks-head')) {
+      const head = document.createElement('h3');
+      head.id = 'studio-marks-head';
+      head.className = 'studio-section-head';
+      props.before(head);
+      foldHeader(head, 'marks', 'Marks', 'studio-mark-props');
+      props.id = props.id || 'studio-mark-props';
+      props.dataset.foldBody = 'marks';
+      FOLD_SUMMARY.set('marks', () => {
+        const used = ENCODINGS.filter(([zone]) => el(zone).querySelector('.studio-pill')).map(([, label]) => label);
+        return used.length ? used.join(', ') : 'no fields';
+      });
+    }
+    for (const [zone, label] of ENCODINGS) {
+      const drop = el(zone), prop = drop && drop.closest('.studio-prop'), header = prop && prop.querySelector(':scope > span');
+      if (!header || header.querySelector('button.studio-fold')) continue;
+      const button = foldButton('enc-' + zone, label, 'studio-' + zone);
+      button.querySelector('.studio-fold-label').before(...[...header.childNodes].filter(node => node.nodeType === 1));
+      header.replaceChildren(button);
+      header.classList.add('studio-fold-head');
+      prop.dataset.foldHost = 'enc-' + zone;
+      drop.dataset.foldDrop = 'enc-' + zone;
+    }
+    const transform = el('param-period') && el('param-period').closest('label');
+    const transformHead = transform && transform.previousElementSibling;
+    if (transformHead && transformHead.tagName === 'H3' && foldHeader(transformHead, 'transform-params', 'Transform parameters')) {
+      for (let node = transformHead.nextElementSibling; node; node = node.nextElementSibling) node.dataset.foldBody = 'transform-params';
+      FOLD_SUMMARY.set('transform-params', () => {
+        const period = el('param-period');
+        return (period.selectedOptions[0] ? period.selectedOptions[0].textContent : '') + ' · ' + (el('param-horizon').value || 2) + ' forecast periods';
+      });
+    }
+    const filterHead = el('filter-rows') && el('filter-rows').previousElementSibling;
+    if (filterHead && filterHead.tagName === 'H3' && foldHeader(filterHead, 'filters-active', 'Active filters', 'studio-filter-rows')) {
+      for (let node = filterHead.nextElementSibling; node; node = node.nextElementSibling) node.dataset.foldBody = 'filters-active';
+      FOLD_SUMMARY.set('filters-active', () => {
+        const n = (sheet().filters || []).length;
+        return n ? n + ' filter' + (n === 1 ? '' : 's') : 'none';
+      });
+    }
+    rememberDisclosure(el('showme-details'), 'showme');
+    rememberDisclosure(el('map-settings'), 'map-settings');
+    rememberDisclosure(el('pages-details'), 'pages');
+    rememberDisclosure(el('params-details'), 'params');
+  }
+  const ENCODINGS = [['color', 'Colour'], ['size', 'Size'], ['label', 'Label'], ['detail', 'Detail'], ['tooltip', 'Tooltip']];
+
+  // "More fields" is a section of its bucket too: folded as S1 draws it until
+  // the reader opens it, and remembered from then on.
+  const moreOpen = {dimensions: isFoldOpen('more-dimensions'), measures: isFoldOpen('more-measures')};
   function moreFold(bucket, pills, inUse) {
     const fold = document.createElement('details');
     fold.className = 'studio-more-fields';
@@ -1207,7 +1479,11 @@
     list.className = 'studio-more-list';
     list.append(...pills);
     fold.append(summary, list);
-    fold.addEventListener('toggle', () => { if (fold.isConnected) moreOpen[bucket] = fold.open; });
+    fold.addEventListener('toggle', () => {
+      if (!fold.isConnected || fold.open === moreOpen[bucket]) return;
+      moreOpen[bucket] = fold.open;
+      rememberFold('more-' + bucket, fold.open);
+    });
     return fold;
   }
   // S1 draws no "From" row above DIMENSIONS. The related-table choice keeps
@@ -1271,11 +1547,13 @@
     // S1: a verified bucket opens on the board's own fields, in the board's
     // order, and folds the rest under "More fields". A search or a chosen
     // table lists every match instead, the board's fields first, so nothing
-    // it finds is folded away. Worksheet columns have no board list.
+    // it finds is folded away. A worksheet's identifier columns (IDs, codes,
+    // ZIPs) are listed too (census B-S21), under its Dimensions' More fields.
     const pane = (verified() && core.paneBuckets && contributions && contributions.PANE_FIELDS) || null;
     const into = (node, fields, bucket) => {
-      const split = pane && bucket ? core.paneBuckets(fields, pane[bucket]) : {shown: [], more: fields};
-      if (!pane || !bucket || query || table) { node.replaceChildren(...[...split.shown, ...split.more].filter(matches).map(pillFor)); return; }
+      const split = pane ? core.paneBuckets(fields, pane[bucket])
+        : {shown: fields.filter(f => !f.isIdentifier || f.isTime), more: fields.filter(f => f.isIdentifier && !f.isTime)};
+      if (query || table || !split.more.length) { node.replaceChildren(...[...split.shown, ...split.more].filter(matches).map(pillFor)); return; }
       const folded = split.more.map(pillFor);
       node.replaceChildren(...split.shown.map(pillFor),
         ...(folded.length ? [moreFold(bucket, folded, split.more.some(f => used.has(f.index)))] : []));
@@ -1283,11 +1561,6 @@
     el('search').placeholder = data ? 'Search ' + fmt(columns().length) + ' fields' : 'Search fields';
     into(el('dimensions'), meta.dimensions, 'dimensions');
     into(el('measures'), meta.measures, 'measures');
-    into(el('hidden'), meta.hidden);
-    el('hidden-block').hidden = !el('show-hidden').checked || !meta.hidden.length;
-    el('hidden-note').hidden = !meta.hidden.length;
-    el('hidden-note').textContent = meta.hidden.length + ' identifier field' + (meta.hidden.length === 1 ? '' : 's') +
-      ' hidden (IDs, codes, ZIPs) — tick "Show identifier fields" to chart by them';
   }
 
   function renderShelves() {
@@ -1326,7 +1599,7 @@
     const primary=[...core.shelf(state.rows),...core.shelf(state.columns)].find(p=>core.fieldAt(meta,p.column)?.role==='measure');
     const field=primary&&core.fieldAt(meta,primary.column);
     const calculated=verified()&&field&&field.id!=='amount';
-    fill(el('aggregation'),calculated?[['sum','Source statistic']]:core.AGGREGATIONS);
+    fill(el('aggregation'),calculated?[['sum','Source statistic']]:field?core.aggregationsFor(field,engine()):core.AGGREGATIONS);
     el('aggregation').value=primary?.aggregation||'sum';el('aggregation').disabled=!primary||calculated;
     el('aggregation').title=field?field.name+(calculated?' is already computed from source observations.':' · each other measure also has its own pill menu.'):'Add a measure to Rows or Columns.';
     renderPager();
@@ -1443,20 +1716,23 @@
     el('showme-grid').replaceChildren(...tiles.map(tile => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'studio-tile' + (tile.id === recommended && tile.enabled ? ' is-recommended' : '');
-      button.disabled = !tile.enabled || !data;
+      button.className = 'studio-tile' + (tile.id === recommended ? ' is-recommended' : '');
+      // Paul, 2026-09-23: "...all graph types properly register and nothing is
+      // logically constrained". Every tile is a real mark and is enabled
+      // whenever a source is loaded; what it prefers and what a click will pick
+      // for it are in its title and in the foot line.
+      button.disabled = !data;
       button.dataset.tile = tile.id;
+      if (tile.mark) button.dataset.mark = tile.mark;
       const caption = document.createElement('span');
       caption.textContent = tile.label;
       button.append(glyphSvg(GLYPHS[tile.id]), caption);
-      button.title = tile.enabled
-        ? tile.label + ': ' + tile.requirement + (tile.note ? ' · ' + tile.note : '')
-        : tile.label + ': ' + tile.reason;
+      const detail = tile.requirement + (tile.note ? ' · ' + tile.note : '') + (tile.fill ? ' · ' + tile.fill + '.' : '');
+      button.title = tile.label + ': ' + detail;
       button.setAttribute('aria-label', button.title);
       const describe = () => {
         hoverTile = tile.id;
-        el('showme-foot').textContent = tile.label + ' — ' + tile.requirement +
-          (tile.enabled ? (tile.note ? ' · ' + tile.note : '') : ' · ' + tile.reason);
+        el('showme-foot').textContent = tile.label + ' — ' + detail;
       };
       button.addEventListener('mouseenter', describe);
       button.addEventListener('focus', describe);
@@ -1486,22 +1762,12 @@
   // toggle and draw nothing. The reasons are the renderers' own limits: the
   // verified path draws reference lines only in contribution-plot.js, and a
   // grand total there is a stated figure, not a mark.
+  // Paul, 2026-09-23: "nothing is logically constrained" (census B-S18). Every
+  // switch works on every view; where a view cannot show one - a reference
+  // line on a chart with no value axis, a period analysis with no date on the
+  // shelves - the note under the chart says so, and the switch stays on.
   function analyticsRefusal(item) {
-    const state = sheet();
-    if (!data) return 'Choose a data source first.';
-    if (!verified()) return '';
-    const type = (state.marks && state.marks.type) || 'automatic';
-    if (item.group === 'transform') {
-      const timely = core.shelf([...state.columns, ...state.rows])
-        .some(p => ['date', 'year', 'cycle'].includes(columns()[p.column] && columns()[p.column].id));
-      return timely ? '' : 'Needs Contribution date, Year or Election cycle on Columns or Rows.';
-    }
-    if (item.id === 'totals') return '';
-    if (MentatContributionCharts.TYPES.includes(type) || ['pie','doughnut','waterfall','pareto','radar','map','filled-map','table','text'].includes(type)) {
-      return 'Reference lines are drawn on bar, line, area and circle marks.';
-    }
-    if (state.analytics.transform !== 'none') return 'Reference lines are not drawn on a period-analysis view.';
-    return '';
+    return data ? '' : 'Choose a data source first.';
   }
 
   function analyticsRow(item, state, role) {
@@ -1543,10 +1809,16 @@
     host.replaceChildren();
     // One period analysis at a time; the reference lines are independent.
     for (const [kind, heading, role] of [['transform', 'Period analysis', 'radio'], ['flag', 'Summarize', 'switch']]) {
+      // Each group folds on its heading like every other section.
+      const id = kind === 'transform' ? 'analytics-period' : 'analytics-summarize';
       const label = document.createElement('p');
-      label.className = 'studio-analytics-group';
-      label.textContent = heading;
+      label.className = 'studio-analytics-group studio-fold-head';
+      label.append(foldButton(id, heading, 'studio-' + id));
+      FOLD_SUMMARY.set(id, () => ANALYTICS.filter(a => a.group === kind &&
+        (kind === 'transform' ? sheet().analytics.transform === a.id : !!sheet().analytics[a.id])).map(a => a.label).join(', ') || 'none on');
       const box = document.createElement('div');
+      box.id = 'studio-' + id;
+      box.dataset.foldBody = id;
       if (role === 'radio') {
         box.setAttribute('role', 'radiogroup');
         box.setAttribute('aria-label', heading);
@@ -2057,7 +2329,9 @@
   // nothing changes, so the default view stays S1's. Desktop grid only: below
   // 1100px the panes are drawers and the canvas grows with the chart.
   const ROOM_PITCH = 56;
-  const ROOM_CLASSES = ['studio-data-collapsed', 'studio-shelves-collapsed', 'studio-inspector-collapsed', 'studio-chart-expanded'];
+  // A folded shelf (Paul, 2026-09-23: "You should be able to expand each
+  // section individually like with a census panel") gives its room too.
+  const ROOM_CLASSES = ['studio-data-collapsed', 'studio-shelves-collapsed', 'studio-inspector-collapsed', 'studio-chart-expanded', 'studio-shelf-folded'];
   function chartRoomy() {
     const host = document.querySelector('#view-chart-studio .studio');
     if (!host || host.classList.contains('studio-options-hidden')) return false;
@@ -2117,6 +2391,7 @@
       rule.setAttribute('stroke', theme.ink);
       rule.setAttribute('stroke-width', '1.5');
       rule.setAttribute('stroke-dasharray', '7 5');
+      rule.setAttribute('data-reference', line.kind);
       const note = document.createElementNS(NS, 'text');
       note.textContent = line.label + ' ' + compact(line.value);
       note.setAttribute('x', vertical ? plot.to : at + 4);
@@ -2145,8 +2420,13 @@
     return true;
   }
 
-  function renderTable(result, config, node) {
-    const rows = paint.tableRows(result, config, data);
+  // Paul, 2026-09-23: "nothing is logically constrained". A table's marks are
+  // its value cells, so Labels off hides their printed values - the way a text
+  // table reads with mark labels off - and each keeps its value on hover and in
+  // the data CSV. The table then lists its groups; Labels on prints the values.
+  const TABLE_LABELS_OFF = 'Labels are off, so the table lists its groups without their values; hover a cell for its value, or turn Labels on.';
+  function renderTable(result, config, node, showLabels = true, source = data) {
+    const rows = paint.tableRows(result, config, source);
     const table = document.createElement('table');
     const head = document.createElement('thead');
     const headRow = document.createElement('tr');
@@ -2159,11 +2439,13 @@
     const body = document.createElement('tbody');
     for (const row of rows.slice(1, 401)) {
       const tr = document.createElement('tr');
-      for (const cell of row) {
+      row.forEach((cell, at) => {
         const td = document.createElement('td');
-        td.textContent = typeof cell === 'number' ? fmt(cell) : String(cell == null ? '' : cell);
+        const text = typeof cell === 'number' ? fmt(cell) : String(cell == null ? '' : cell);
+        if (!showLabels && at > 0 && typeof cell === 'number') { td.title = text; td.dataset.valueHidden = 'true'; }
+        else td.textContent = text;
         tr.append(td);
-      }
+      });
       body.append(tr);
     }
     table.append(head, body);
@@ -2176,6 +2458,75 @@
     }
   }
 
+  // Census C-16: Map and Filled map on a report worksheet. The compiler names
+  // the place field (report.map); core.placeData reads each row's place and the
+  // engine aggregates the sheet's own measure over every place; the Census
+  // geometry the verified map reads draws it. Nothing assumes a selected amount:
+  // the coverage line reads the sheet's own measure (or counts places, for a
+  // measure that does not add up). If the geometry cannot be read, the same
+  // places are drawn as bars and the reason is a note.
+  let worksheetMapTicket = 0;
+  const worksheetGeometry = new Map();
+  async function renderWorksheetMap(view, plan, result, config, measure, notes, source) {
+    const node = view.el, state = view.state, canvas = node('canvas'), ticket = String(++worksheetMapTicket);
+    canvas.dataset.mapTicket = ticket;
+    const current = () => canvas.dataset.mapTicket === ticket && !verified();
+    const groups = core.mapGroups(result, plan.kind);
+    const settings = state.map || {layers: ['states', 'districts'], congress: '119'};
+    const shape = plan.kind === 'district' ? 'districts' : 'states';
+    const active = [...new Set([...settings.layers, ...(plan.filled && plan.kind !== 'zip' ? [shape] : [])])];
+    const layers = [...new Set([...active, 'states', ...(plan.kind === 'district' ? ['districts'] : [])])].sort();
+    const zips = plan.kind === 'zip' ? [...new Set(groups.map(g => g.zip5).filter(Boolean))].sort() : [];
+    const key = JSON.stringify({zips: zips, layers: layers, congress: settings.congress});
+    const lead = [plan.kind === 'zip' ? 'Each ZIP is placed at its Census ZCTA point, which is not an address; ZIP+4 and ZIPs that lost a leading zero are read as their five-digit ZIP.'
+      : plan.kind === 'city-state' ? 'Each city is placed at its state: ' + plan.name + ' names a city and state, and a city has no Census shape here.'
+      : plan.kind === 'district' ? 'Districts are ' + settings.congress + 'th Congress Census shapes. District 0 is a statewide or at-large seat and has a district shape only in a state with one district; map by State to place the rest.'
+      : 'Each state is placed at its Census shape.',
+      'Darker, larger marks mean a larger absolute ' + measure + '; negative values use orange. Boundaries are visual overlays and do not allocate values.'];
+    const loading = el('loading').textContent;
+    try {
+      let geometry = worksheetGeometry.get(key);
+      if (!geometry) {
+        status('Loading Census boundaries…');
+        if (!contributionToken) contributionToken = (await contributionAPI('session')).token;
+        geometry = await contributionAPI('geography', {zips: zips, layers: layers, congress: settings.congress});
+        worksheetGeometry.set(key, geometry);
+        if (worksheetGeometry.size > 6) worksheetGeometry.delete(worksheetGeometry.keys().next().value);
+      }
+      if (!current()) return;
+      const field = core.fieldAt(core.classifyFields(columns(), state.types), config.y);
+      const unit = ['count', 'countd'].includes(config.aggregation) ? 'count' : field && field.unit === 'currency' ? 'dollars' : 'number';
+      const drawn = MentatContributionMap.render(canvas, {groups: groups, valueField: 'value', unit: unit,
+        coverage: ['sum', 'count'].includes(config.aggregation) ? 'value' : 'places', zipOnly: true, geometry: geometry,
+        layers: active, filled: plan.filled, title: view.title, valueLabel: measure, notes: lead, showLayerControls: false});
+      canvas.dataset.worksheetMap = plan.kind;
+      view.scope += ' · Congress ' + settings.congress + '; ' + active.join(', ') + '; overlays do not allocate values. ' +
+        drawn.data.marks.length + ' located places; ' + drawn.data.unmapped.length + ' unmapped · ' +
+        (geometry.sources || []).map(s => (s.vintage || s.label || s.url) + ' SHA256 ' + s.sha256).join(' · ');
+      if (loading !== 'Loading Census boundaries…') status(loading);
+    } catch (error) {
+      if (!current()) return;
+      if (loading !== 'Loading Census boundaries…') status(loading);
+      const drawn = paint.chartSVG(result, measure, config, source, view.title, view.scope, {labels: !!state.showLabels});
+      canvas.replaceChildren(drawn.svg);
+      node('note').textContent = [...notes, 'Census geometry could not be read (' + error.message + '), so the places are drawn as bars.'].join(' ');
+    }
+  }
+
+  // The configuration a worksheet view falls back to when the engine cannot
+  // build or draw the one compiled: plain bars of the same first grouping and
+  // measure, which every engine release draws. Paul, 2026-09-23: "nothing is
+  // logically constrained" - a blank canvas is never the answer.
+  const ENGINE_AGGREGATIONS = ['sum', 'mean', 'count', 'median', 'min', 'max'];
+  function plainConfig(config) {
+    const sideways = ['horizontal', 'groupedhorizontal'].includes(config.type);
+    const x = ['scatter', 'histogram'].includes(config.type) ? -1 : config.x;
+    const aggregation = config.y < 0 || !ENGINE_AGGREGATIONS.includes(config.aggregation) ? 'count' : config.aggregation;
+    return {type: sideways ? 'horizontal' : 'bar', x: x, y: aggregation === 'count' && config.y < 0 ? -1 : config.y,
+      dimensions: x >= 0 ? [x] : [], aggregation: aggregation, transform: 'none', period: config.period, horizon: config.horizon,
+      start: config.start, end: config.end, limit: config.limit,
+      maxGroups: Number.isInteger(config.maxGroups) ? config.maxGroups : 100000, splitMulti: false, series: -1, filters: config.filters};
+  }
   function renderView(view) {
     view = view || mainSurface();
     const node = view.el, state = view.state;
@@ -2183,6 +2534,8 @@
     if (view.primary) { lastResult = null; lastConfig = null; }
     node('reconcile').hidden = true;
     node('canvas').replaceChildren();
+    // A worksheet map still loading its geometry must not draw over this view.
+    node('canvas').dataset.mapTicket = '';
     node('table').replaceChildren();
     node('status').replaceChildren();
     if (!data) {
@@ -2192,7 +2545,7 @@
       return;
     }
     const report = core.compileReport(state, columns());
-    const markName = (core.MARK_TYPES.find(m => m[0] === report.markType) || ['', 'Automatic'])[1];
+    const markName = core.markLabel(report.markType);
     // Provisional only: measureLabel reads the built result to tell an
     // aggregated view from one that plots individual values, so a box,
     // histogram or scatter title would read "· Sum" without it. The real title
@@ -2203,41 +2556,64 @@
       ? paint.measureLabel(report.config, null, data) + ' · ' + markName
       : '';
     node('subtitle').textContent = report.config ? scopeSubtitle(state) : '';
-    if (!report.config || report.issues.length) {
+    // Paul, 2026-09-23 ("nothing is logically constrained", census B-S01): only
+    // an empty sheet has nothing to draw; every other sentence the compiler
+    // has is a note under the chart it drew.
+    if (!report.config) {
       node('note').textContent = [...worksheetNotes(state),
         report.issues.join(' ') || 'Drag a field onto Columns or Rows.'].join(' ');
       node('canvas').hidden = false;
       node('table').hidden = true;
       return;
     }
-    let result;
+    const notes = [...worksheetNotes(state), ...report.notes];
+    let config = report.config, result, placed = null;
+    const fallBack = error => {
+      placed = null;
+      const plain = plainConfig(report.config);
+      const built = math.build(data, plain);
+      notes.push(markName + ' could not be drawn from these fields (' + error.message + '), so the same groups are shown as bars.');
+      config = plain;
+      return built;
+    };
     try {
-      result = math.build(data, report.config);
-    } catch (e) {
-      node('note').textContent = e.message;
+      try {
+        // Census C-16: a map reads each row's place and aggregates the sheet's
+        // own measure over every place (core.placeData, core.mapConfig).
+        if (report.map && report.renderMode === 'chart') {
+          placed = core.placeData(data, report.map, !!report.config.splitMulti);
+          config = core.mapConfig(report.config, placed.column);
+          result = math.build(placed.data, config);
+          result.groupingLabel = report.map.name;
+        } else result = math.build(data, config);
+      }
+      catch (error) { result = fallBack(error); }
+    } catch (error) {
+      node('note').textContent = [...notes, error.message].join(' ');
       node('table').hidden = true;
       return;
     }
+    for (const warning of result.warnings || []) if (!notes.includes(warning)) notes.push(warning);
     result = core.sortResult(result, state.sort);
-    if (view.primary) { lastResult = result; lastConfig = report.config; }
-    const measure = paint.measureLabel(report.config, result, data);
+    if (view.primary) { lastResult = result; lastConfig = config; }
+    const measure = paint.measureLabel(config, result, data);
     node('title').textContent = measure + ' · ' + markName;
     node('subtitle').textContent = scopeSubtitle(state);
     const source = state.source;
-    const filterText = report.config.filters
+    const filterText = config.filters
       .map(f => (core.fieldAt(report.fields, f.column) || {name: 'field'}).name + ' ' + f.op + ' ' + f.value).join('; ');
     view.title = node('title').textContent;
     view.scope = [source.reportName + ' / ' + data.sheet,
       (result.split ? fmt(result.selected) + ' values from ' + fmt(data.row_count) + ' worksheet rows selected (' + result.split.cells + ' multi-value cells split); '
         : result.selected + ' of ' + data.row_count + ' rows selected; ') + result.excluded + ' rows excluded for missing or non-numeric values.',
-      'Group/X: ' + (result.groupingLabel || (core.fieldAt(report.fields, report.config.x) || {name: 'All rows'}).name) + '.',
-      ['box', 'scatter', 'histogram'].includes(result.type) ? 'Individual worksheet values.' : 'Aggregation: ' + report.config.aggregation + '.',
-      'Worksheet rows: ' + (report.config.start || 'first data row') + '–' + (report.config.end || 'last data row') + '.',
-      'Row count limit: ' + (report.config.limit || 'all matching rows') + ' (after filters).',
+      'Group/X: ' + (result.groupingLabel || (core.fieldAt(report.fields, config.x) || {name: 'All rows'}).name) + '.',
+      ['box', 'scatter', 'histogram'].includes(result.type) && config.grain !== 'group' ? 'Individual worksheet values.' : 'Aggregation: ' + config.aggregation + '.',
+      'Worksheet rows: ' + (config.start || 'first data row') + '–' + (config.end || 'last data row') + '.',
+      'Row count limit: ' + (config.limit || 'all matching rows') + ' (after filters).',
       'Filters: ' + (filterText || 'none') + '.',
       'Sort: ' + state.sort + '.',
-      'Group limit: ' + report.config.maxGroups + '.',
-      'Split multi-value cells: ' + (report.config.splitMulti ? 'on' : 'off') + '.',
+      'Group limit: ' + (config.maxGroups === 'all' ? 'all' : config.maxGroups) + '.',
+      'Split multi-value cells: ' + (config.splitMulti ? 'on' : 'off') + '.',
       'SHA-256: ' + data.sha256 + '.'].join(' ');
     if (result.note) view.scope += ' ' + result.note;
     // Recipient-committee activity is not the industry's money, so a grand
@@ -2246,29 +2622,47 @@
     // totalNote(), grandTotal() and the status line at once.
     const committee = core.committeeActivitySheet(data.sheet);
     if (committee && !result.totalRefusal) result.totalRefusal = committee;
-    const notes = [...worksheetNotes(state), ...report.notes];
 
     if (report.renderMode === 'table') {
       node('canvas').hidden = true;
       node('table').hidden = false;
-      renderTable(result, report.config, node);
-    } else {
+      renderTable(result, config, node, !!state.showLabels);
+      if (!state.showLabels) notes.push(TABLE_LABELS_OFF);
+    } else if (placed && view.primary) {
       node('canvas').hidden = false;
       node('table').hidden = true;
-      const drawn = paint.chartSVG(result, measure, report.config, data, view.title, view.scope);
-      if (state.showLabels && !overlayLabels(drawn.svg, result)) notes.push('Mark labels are unavailable for this view.');
+      node('canvas').className = view.canvasClass + 'studio-canvas fit-' + state.fit;
+      if (state.showLabels) notes.push('Each map mark carries its value on hover and when selected.');
+      renderWorksheetMap(view, report.map, result, config, measure, notes, placed.data)
+        .catch(error => { node('note').textContent = [...notes, error.message].join(' '); });
+    } else {
+      // A board tile shows a worksheet map's places as bars (one map at a
+      // time, as on the verified path); selecting the tile draws the map.
+      if (placed) notes.push('This sheet draws a map of its places; select this tile to see it.');
+      const source = placed ? placed.data : data;
+      node('canvas').hidden = false;
+      node('table').hidden = true;
+      // The seventh argument (engine contract W8) asks the renderer itself for
+      // a value label on every mark of every type.
+      const options = {labels: !!state.showLabels};
+      let drawn;
+      try { drawn = paint.chartSVG(result, measure, config, source, view.title, view.scope, options); }
+      catch (error) {
+        result = core.sortResult(fallBack(error), state.sort);
+        if (view.primary) { lastResult = result; lastConfig = config; }
+        drawn = paint.chartSVG(result, paint.measureLabel(config, result, data), config, data, view.title, view.scope, options);
+      }
+      if (state.showLabels && !drawn.svg.querySelector('[data-mark-label]') && !overlayLabels(drawn.svg, result)) notes.push('Mark labels are unavailable for this view.');
       const analytics = state.analytics;
       const references = core.referenceValues(result, analytics);
       if (references.length && !drawn.plot) notes.push('Reference lines need a value axis; this view has none.');
-      // Say why a requested overlay is missing, but only when it was requested.
-      if ((analytics.average || analytics.median) && result.series) notes.push('Reference lines need a single series.');
       overlayReference(drawn.svg, drawn.plot, references);
       if (analytics.totals) {
-        const refusal = core.totalNote(result, report.config);
+        const refusal = core.totalNote(result, config);
         // The committee-activity caption is already in the list; it is the
         // same sentence, and saying it twice reads as two reasons.
         if (refusal) { if (!notes.includes(refusal)) notes.push(refusal); }
-        else if (!overlayTotal(drawn.svg, core.grandTotal(result, report.config))) {
+        else if (!overlayTotal(drawn.svg, core.grandTotal(result, config))) {
           notes.push('A grand total is not defined for this view.');
         }
       }
@@ -2277,7 +2671,7 @@
     }
     node('note').textContent = notes.concat(result.note ? [result.note] : []).join(' ') ||
       source.reportName + ' / ' + data.sheet + ' · ' + fmt(result.selected) + ' rows selected';
-    renderStatus(result, report.config, node);
+    renderStatus(result, config, node);
   }
 
   function renderStatus(result, config, node) {
@@ -2313,7 +2707,7 @@
     const list = document.createElement('dl');
     const pairs = [['Report folder', source.runName], ['Report', source.reportName], ['Worksheet', data.sheet],
       ['Header row', data.header_row], ['Rows', fmt(data.row_count)], ['Columns', columns().length],
-      ['Dimensions', meta.dimensions.length + ' (' + meta.hidden.length + ' identifier fields hidden)'],
+      ['Dimensions', meta.dimensions.length + ' (' + meta.identifiers.length + ' identifier fields, listed under More fields)'],
       ['Measures', meta.measures.length], ['SHA-256', data.sha256], ['Note', data.note]];
     for (const [term, value] of pairs) {
       const dt = document.createElement('dt');
@@ -2328,7 +2722,7 @@
     const body = document.createElement('tbody');
     for (const field of meta.fields) {
       const tr = document.createElement('tr');
-      for (const cell of [field.name, field.type, field.hidden ? 'hidden identifier' : field.role,
+      for (const cell of [field.name, field.type, field.isIdentifier && !field.isTime ? field.role + ' (identifier)' : field.role,
         field.distinct == null ? '' : fmt(field.distinct), field.missing == null ? '' : fmt(field.missing)]) {
         const td = document.createElement('td');
         td.textContent = String(cell);
@@ -2360,11 +2754,15 @@
     add('h3','Tableau references');for(const [name,url]of [['Relationships preserve table grain','https://help.tableau.com/current/pro/desktop/en-us/relate_tables.htm'],['Data types and mixed values','https://help.tableau.com/current/pro/desktop/en-us/datafields_typesandroles_datatypes.htm'],['Dimensions, measures, discrete and continuous fields','https://help.tableau.com/current/pro/desktop/en-us/datafields_typesandroles.htm']]){const p=add('p',''),a=add('a',name,p);a.href=url;a.target='_blank';a.rel='noopener noreferrer';}
   }
 
-  // Sort is switched off for a time view: chronological order is the meaning of
-  // the axis, and core.sortResult refuses to reorder one, so a pressed-looking
-  // button would promise something the view never does.
+  // Paul, 2026-09-23: "nothing is logically constrained". Every mark sorts,
+  // time axes included (census B-S15, B-S16). None is each view's own order:
+  // chronological on a time axis or a histogram's bins, the source's order on
+  // a worksheet, and largest first on any other verified view - where it is
+  // the same query as Descending, so None is pressed there as Descending.
+  // A to Z and Z to A order the groups by their label (contract W13).
   const SORT_BUTTONS = [['sort-asc', 'asc', 'Sort the grouping smallest first'],
     ['sort-desc', 'desc', 'Sort the grouping largest first']];
+  const LABEL_SORTS = [['sort-az', 'az', 'A to Z'], ['sort-za', 'za', 'Z to A']];
   // The labels button's own markup title is its hint. It is cached on first
   // read, before a lock reason overwrites it, rather than restated here.
   let labelsHint = null;
@@ -2389,44 +2787,54 @@
   }
   function renderSortButtons(view) {
     const compiled = verifiedCompile();
-    // On the verified path 'none' means descending (contributions
-    // .effectiveSort), so 'Sort descending' is pressed from the moment a sheet
-    // opens rather than being a button that reproduces the same query.
     const onVerified = verified() && !!compiled;
-    const locked = onVerified
-      ? contributions.sortLock(compiled.spec.type, sheet())
-      : (core.sortLocked(view) ? 'Time views keep chronological order' : '');
-    const pressed = onVerified ? contributions.effectiveSort(sheet()) : sheet().sort;
+    const stored = sheet().sort || 'none';
+    // A verified view whose first dimension is not a time axis orders 'none'
+    // largest first: the same query as Descending, which is pressed for it.
+    const ordered = onVerified && contributions.orderedAxis(compiled.query.dimensions);
+    const same = onVerified && !ordered;
+    // None is never disabled now (Paul: "nothing is logically constrained"):
+    // on a verified category axis it stores 'source', the groups' own order.
+    const pressed = stored === 'source' ? 'none' : same && stored === 'none' ? 'desc' : stored;
     const measure = onVerified ? sortedMeasureName(compiled)
       : view && data ? paint.measureLabel(view, null, data) : '';
     for (const [id, direction, hint] of SORT_BUTTONS) {
-      el(id).disabled = !!locked;
-      el(id).title = locked || (measure
+      el(id).disabled = !data;
+      el(id).title = measure
         ? 'Sort by ' + measure + ', ' + (direction === 'asc' ? 'smallest first' : 'largest first')
-        : hint);
-      el(id).setAttribute('aria-pressed', String(!locked && pressed === direction));
+        : hint;
+      el(id).setAttribute('aria-pressed', String(pressed === direction));
     }
-    // None is the worksheet path's source order. The verified path always
-    // orders groups by their measure ('none' is stored as descending), so there
-    // None would be a second Descending and is switched off, saying why.
+    const axis = onVerified ? ((columns().find(f => f.id === compiled.query.dimensions[0]) || {}).name || '')
+      : view && view.x >= 0 ? ((core.fieldAt(core.classifyFields(columns(), sheet().types), view.x) || {}).name || '') : '';
+    for (const [id, direction, words] of LABEL_SORTS) {
+      if (!el(id)) continue;
+      el(id).disabled = !data;
+      el(id).title = 'Sort by ' + (axis || 'each group’s label') + ', ' + words;
+      el(id).setAttribute('aria-pressed', String(pressed === direction));
+    }
     const none = el('sort-none');
     if (none) {
-      none.disabled = !!locked || onVerified;
-      none.title = onVerified ? 'Verified groups are always ordered by their measure; the default is Descending'
-        : (locked || 'Keep the order the source gives');
-      none.setAttribute('aria-pressed', String(!locked && !onVerified && pressed === 'none'));
+      none.disabled = !data;
+      none.title = same ? 'No sort: each group in its own order, A to Z with numbers ascending (a page still holds the largest groups)'
+        : ordered ? 'Chronological order, as the time axis runs'
+        : 'Keep the order the source gives; a time axis runs in time order';
+      none.setAttribute('aria-pressed', String(pressed === 'none'));
     }
   }
   // Labels are render-only, so this changes no query: it only stops the button
   // claiming a toggle on a mark whose renderer never reads spec.labels. The
   // stored showLabels is left exactly as it was, so it returns when the reader
   // goes back to a mark that draws them.
+  // A table prints every value already, so its button is disabled with that
+  // reason in both sources; every chart draws its labels (contract W8, V05).
   function renderLabelButton(state) {
     const compiled = verifiedCompile();
-    const locked = verified() && compiled
-      ? contributions.labelLock(compiled.spec.type, compiled.transform) : '';
+    const locked = verified() && compiled ? contributions.labelLock(compiled.spec.type)
+      : !verified() && state.marks && state.marks.type === 'text' ? contributions.labelLock('text') : '';
+    const table = verified() && compiled ? compiled.spec.type === 'table' : !!(state.marks && state.marks.type === 'text');
     el('labels').disabled = !!locked;
-    el('labels').title = locked || labelHint();
+    el('labels').title = locked || (table ? 'Print each value in its cell; off lists the groups without their values' : labelHint());
     el('labels').setAttribute('aria-pressed', String(!locked && !!state.showLabels));
   }
 
@@ -2465,7 +2873,10 @@
     el('param-start').value = state.params.start || '';
     el('param-end').value = state.params.end || '';
     el('param-limit').value = state.params.limit || '';
-    el('param-groups').value = state.params.maxGroups || '';
+    const everyGroup = state.params.maxGroups === 'all';
+    el('param-groups').value = everyGroup ? '' : state.params.maxGroups || '';
+    el('param-groups').placeholder = everyGroup ? 'All' : String(core.STUDIO_GROUP_LIMIT);
+    if (el('param-groups-all')) el('param-groups-all').checked = everyGroup;
     el('param-split').checked = !!state.params.splitMulti;
     el('param-horizon').value = state.analytics.horizon || 2;
     el('param-period').value = state.analytics.period || '';
@@ -2488,6 +2899,7 @@
     renderSourceSummary();
     renderFilterRows();
     renderOverviewControls();
+    applyFolds();
     renderBoard();
     if (overviewMode) renderOverview();
     else if (!dataSourceTab && boardTiles() < 2) renderView();
@@ -3001,9 +3413,10 @@
       return row;
     }).filter(Boolean);
     el('filter-rows').replaceChildren(...rows);
-    const used = new Set((sheet().filters || []).map(f => Number(f.column)));
+    // Any field can be filtered, and filtered again (census B-S25): a second
+    // filter on the same field narrows it further.
     fill(el('filter-add'), [['', 'Add a field\u2026'],
-      ...meta.dimensions.concat(meta.measures).filter(f => !used.has(f.index)).map(f => [String(f.index), f.name])]);
+      ...meta.dimensions.concat(meta.measures).map(f => [String(f.index), f.name])]);
     el('tab-filters').textContent = rows.length ? 'Filters (' + rows.length + ')' : 'Filters';
     // Below 1100px the Inspector is behind a button, so the number of filters
     // shaping this view has to be readable without opening it.
@@ -3632,7 +4045,8 @@
 
   /* ----------------------------------------------------------------- wiring */
 
-  fill(el('mark'), core.MARK_TYPES);
+  // One mark list in both sources (census A-W06).
+  fill(el('mark'), core.ALL_MARK_TYPES);
   for (const [zone] of ZONES) dropTarget(el(zone), zone);
   // The view applies Analytics objects dropped on it. It also accepts a pill and
   // does nothing with it: the drop has to fire so that dragend does not read the
@@ -3664,21 +4078,31 @@
   el('undo').onclick = () => step(history, future);
   el('redo').onclick = () => step(future, history);
   el('swap').onclick = () => commit(() => { sheets[active] = core.swapShelves(sheet()); });
-  // Verified: a radio pair. Pressing the direction the view is already in is
-  // not an edit, so it costs no undo step, no persist and no re-render - and
-  // 'none' stays a valid stored value meaning descending, so no saved view is
-  // migrated. Worksheet: the existing toggle-back-to-none, unchanged.
+  // Verified: a radio group. Pressing an order that asks the server the same
+  // question as the one on screen is not an edit, so it costs no undo step,
+  // no persist and no re-render - and 'none' stays a valid stored value, so no
+  // saved view is migrated. Worksheet: the existing toggle-back-to-none.
   const chooseSort = direction => {
+    const current = sheet().sort || 'none';
     if (verified()) {
-      if (contributions.effectiveSort(sheet()) === direction) return;
+      const compiled = verifiedCompile();
+      // None on a category axis is the groups' own order ('source'): the same
+      // query as Descending, listed client-side, so it is a real edit.
+      if (direction === 'none' && compiled && !contributions.orderedAxis(compiled.query.dimensions)) direction = 'source';
+      const same = current === direction || (compiled && JSON.stringify(contributions.querySort({sort: direction},
+        compiled.query.dimensions, compiled.spec.measures)) === JSON.stringify(compiled.query.sort) &&
+        contributions.naturalOrder({sort: direction}, compiled.query.dimensions) === contributions.naturalOrder({sort: current}, compiled.query.dimensions));
+      if (same) return;
       commit(() => { sheet().sort = direction; });
       return;
     }
-    commit(() => { sheet().sort = sheet().sort === direction ? 'none' : direction; });
+    commit(() => { sheet().sort = current === direction ? 'none' : direction; });
   };
   el('sort-asc').onclick = () => chooseSort('asc');
   el('sort-desc').onclick = () => chooseSort('desc');
   el('sort-none').onclick = () => chooseSort('none');
+  if (el('sort-az')) el('sort-az').onclick = () => chooseSort('az');
+  if (el('sort-za')) el('sort-za').onclick = () => chooseSort('za');
   // A choice closes the Sort menu, the way a menu does.
   el('sort').addEventListener('click', event => { if (event.target.closest('#studio-sort > div button')) el('sort').open = false; });
   el('labels').onclick = () => commit(() => { sheet().showLabels = !sheet().showLabels; });
@@ -3733,6 +4157,7 @@
     // Show Me lives in the Inspector, so opening it also ends Expand chart.
     if (open) { setInspectorCollapsed(false, true); if (roomState.expand) setRoom('expand', false, true); }
     details.open = open;
+    rememberFold('showme', open);
     if (open) {
       if (el('inspector').hidden) {
         el('inspector').hidden = false;
@@ -3743,7 +4168,7 @@
     }
     renderToolbar();
   };
-  el('showme-close').onclick = () => { el('showme-details').open = false; renderToolbar(); };
+  el('showme-close').onclick = () => { el('showme-details').open = false; rememberFold('showme', false); renderToolbar(); };
   el('classic').onclick = () => {
     // The classic dialog only scans its report list while the Graph view is
     // showing (charts.js activate()), so go there first and then open it.
@@ -3765,23 +4190,19 @@
   el('search').oninput = renderFields;
   el('field-table').onchange=renderFields;
   el('bin-width').onchange=()=>{if(el('bin-width').reportValidity())commit(()=>{sheet().params.binWidth=Number(el('bin-width').value);});};
-  el('show-hidden').onchange = () => {
-    // The reveal is a reading habit, not part of the view, so it is remembered
-    // in this browser rather than saved into the sheet.
-    try { localStorage.setItem('mentat-chart-studio-show-identifiers', el('show-hidden').checked ? '1' : '0'); } catch {}
-    renderFields();
-  };
   el('run').onchange = loadReports;
   el('report').onchange = loadSheets;
   el('sheet').onchange = () => scan(false);
   el('rescan').onclick = () => scan(true);
-  el('source-mode').onchange=()=>{compareBySheet.clear();persist();data=null;sourceKey='';clearTimeout(geometryTimer);abortContributionRequests();tileMemory.clear();++contributionRevision;contributionMap?.destroy?.();contributionMap=null;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.MARK_TYPES);loadRuns();}};
+  el('source-mode').onchange=()=>{compareBySheet.clear();persist();data=null;sourceKey='';clearTimeout(geometryTimer);abortContributionRequests();tileMemory.clear();++contributionRevision;contributionMap?.destroy?.();contributionMap=null;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.ALL_MARK_TYPES);loadRuns();}};
   el('dataset').onchange=()=>{persist();selectContributionDataset();};
   el('basis').onchange=()=>commit(()=>{sheet().source.basis=el('basis').value;activeSurface().offset=0;});
   el('refresh-data').onclick=()=>{++contributionCacheEpoch;abortContributionRequests();contributionCache.clear();memberCache.clear();graphTotalsCache.clear();loadContributions(true);};
     // The pager pages the tile the reader is looking at, and redraws that tile.
-  el('groups-prev').onclick=()=>{const view=activeSurface();view.offset=Math.max(0,view.offset-(Number(view.state.params.maxGroups)||60));renderView(view);};
-  el('groups-next').onclick=()=>{const view=activeSurface();view.offset+=Number(view.state.params.maxGroups)||60;renderView(view);};
+  // A page is the group limit, or the server's 100,000 when every group is asked for.
+  const pageStep=view=>view.state.params.maxGroups==='all'?100000:Number(view.state.params.maxGroups)||60;
+  el('groups-prev').onclick=()=>{const view=activeSurface();view.offset=Math.max(0,view.offset-pageStep(view));renderView(view);};
+  el('groups-next').onclick=()=>{const view=activeSurface();view.offset+=pageStep(view);renderView(view);};
   el('inspect-all').onclick=()=>inspectContributions();
   el('inspection-close').onclick=()=>{++recordRevision;el('inspection').hidden=true;};
   el('record-prev').onclick=()=>inspectContributions(recordSelection,Math.max(0,recordOffset-100),recordSource);
@@ -3800,6 +4221,11 @@
   el('param-period').onchange = () => commit(() => { sheet().analytics.period = el('param-period').value; });
   el('param-subject').onchange = () => commit(() => { sheet().params.subject = el('param-subject').value; });
   el('param-split').onchange = () => commit(() => { sheet().params.splitMulti = el('param-split').checked; });
+  // "All groups" (census B-S14, contract W10): the worksheet draws every group
+  // and the verified query asks for up to the server's 100,000 per page.
+  if (el('param-groups-all')) el('param-groups-all').onchange = () => commit(() => {
+    sheet().params.maxGroups = el('param-groups-all').checked ? 'all' : 0;
+  });
   for (const id of ['marks', 'analytics', 'filters']) el('tab-' + id).onclick = () => setInspectorTab(id);
   el('view-builder').onclick = () => setViewMode('builder');
   el('view-canvas').onclick = () => setViewMode('canvas');
@@ -4010,6 +4436,7 @@
     if (remember) globalThis.MentatState?.remember?.(ROOM_KEYS[name], value ? '1' : '0');
   }
   buildRoomControls();
+  buildFolds();
   el('data-collapse').onclick = () => { setRoom('data', true, true); el('data-rail-open').focus(); };
   el('data-rail-open').onclick = () => { setRoom('data', false, true); el('data-collapse').focus(); };
   el('data-rail-search').onclick = () => { setRoom('data', false, true); el('search').focus(); };
@@ -4177,7 +4604,6 @@
   });
   window.addEventListener('mentat:view', activate);
   window.addEventListener('hashchange', activate);
-  try { el('show-hidden').checked = localStorage.getItem('mentat-chart-studio-show-identifiers') === '1'; } catch {}
   if(new URLSearchParams(location.search).has('worksheet'))el('source-mode').value='worksheet';
   // What the rest of the console may ask this studio about its chart. The
   // filter reader is also what a browser test reads the carried pills from.
@@ -4193,7 +4619,10 @@
     viewSourceRecord,
     viewSourceText
   };
-  if(el('destination'))el('destination').onchange=()=>{const id=el('destination').value;if(!id)return;const at=columns().findIndex(f=>f.id===id),amount=columns().findIndex(f=>f.id==='amount');if(at<0||amount<0){failure('Regenerate this workbook to create its destination fields.');return;}commit(()=>{sheet().columns=[{column:at,aggregation:'sum'}];sheet().rows=[{column:amount,aggregation:'sum'}];sheet().marks={type:'bar',color:null,size:null,label:null,detail:[],tooltip:[]};sheet().analytics.transform='none';});};
+  // A state location view swaps the state field on the shelves and keeps every
+  // other pill, the mark and the analysis (census B-S27); with no state field
+  // placed it joins Columns, and a sheet with no measure gets Selected amount.
+  if(el('destination'))el('destination').onchange=()=>{const id=el('destination').value;if(!id)return;const at=columns().findIndex(f=>f.id===id),amount=columns().findIndex(f=>f.id==='amount');if(at<0){failure('Regenerate this workbook to create its destination fields.');return;}const geo=['recipient_state','represented_state','state'];commit(()=>{let swapped=false;for(const zone of ['columns','rows'])sheet()[zone]=core.shelf(sheet()[zone]).map(p=>{if(!swapped&&geo.includes(columns()[p.column]?.id)){swapped=true;return {column:at,aggregation:'sum'};}return p;});if(!swapped)sheet().columns=[...core.shelf(sheet().columns),{column:at,aggregation:'sum'}];if(amount>=0&&![...core.shelf(sheet().columns),...core.shelf(sheet().rows)].some(p=>columns()[p.column]?.role==='measure'))sheet().rows=[...core.shelf(sheet().rows),{column:amount,aggregation:'sum'}];});};
   renderAll();
   activate();
 })();

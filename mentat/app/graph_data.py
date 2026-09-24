@@ -27,11 +27,31 @@ CATEGORIES = ['Super PAC', 'Trade Association', 'JFC', 'Company PAC', 'Leadershi
               'Carey', 'Other PAC', 'Candidate', 'Party Committee', 'Unclassified']
 AUTHORIZED = {'Principal campaign committee', 'Authorized candidate committee'}
 MAX_SOURCE_ROWS = 1000000
-# The four recorded activity directions, in the order the console offers
-# them. direction_totals is emitted for every one of them, including the
-# empty ones: a drawer that showed only the non-empty sides could not say
-# that Support is zero, which is the answer the reader came for.
-ACTIVITY_DIRECTIONS = ('Contribution / Other', 'Support', 'Oppose', 'Unknown')
+# The drawer's sides, in the order the console offers them. direction_totals
+# is emitted for every one of them, including the empty ones: a drawer that
+# showed only the non-empty sides could not say that Support is zero, which is
+# the answer the reader came for.
+#
+# Paul, 2026-09-23, on the drawer's "Contributions / Other" segment: "It
+# should be two separate segments". The workbook records one direction,
+# 'Contribution / Other', for every FEC transaction code that is not an
+# independent expenditure (R/fec_beneficiary.R fec_downstream_direction), and
+# the same rows carry that code (Transaction Type; a saved snapshot's
+# disbursement_type). So the recorded bucket is split by its code, never by
+# guess: Contribution is the codes whose recorded Activity Type names a
+# contribution (fec_downstream_relationship: 24K "Contribution to
+# nonaffiliated committee", 24P "Contribution to possible federal candidate",
+# 24Z "In-kind contribution to registered filer"); Other is every other
+# recorded code (24C coordinated party expenditure, 24H, 24R, ...). A row
+# whose source records no code cannot be split, so it stays what it was
+# recorded as, 'Contribution / Other' - and that is also what an old
+# permalink and the saved estimates (which carry no code) still ask for.
+COMBINED_DIRECTION = 'Contribution / Other'
+CONTRIBUTION_CODES = frozenset({'24K', '24P', '24Z'})
+ACTIVITY_DIRECTIONS = ('Contribution', 'Other', 'Support', 'Oppose', COMBINED_DIRECTION, 'Unknown')
+# The sides the recorded 'Contribution / Other' bucket is drawn as, for
+# recorded_bucket below.
+RECORDED_SIDES = ('Contribution', 'Other', COMBINED_DIRECTION)
 SINGLEFLIGHT_WAIT_SECONDS = 120
 
 
@@ -378,8 +398,11 @@ def _report_activity(options):
         count = 0
         required = ('cycle','source_committee_id','candidate_id','candidate_officeholder',
                     'candidate_party','support_oppose','net_included_amount')
+        # Transaction Type is optional: a workbook written before the column
+        # existed still reads, and its rows carry no code (see activity_sides).
+        parts = defaultdict(lambda: defaultdict(lambda: [Decimal(0), []]))
         scanned = native_scan.tables(file_stamp, [{'name':'Downstream Activity','header':5,
-            'columns':[*required,'unverified_version_rows','unresolved_version_rows',
+            'columns':[*required,'unverified_version_rows','unresolved_version_rows','transaction_type',
                        *(['filing_records'] if include_filings else [])]}])
         if scanned:
             table = scanned['tables'].get('Downstream Activity')
@@ -391,11 +414,18 @@ def _report_activity(options):
             source_rows = (dict(zip(table['headers'], row)) for row in table['rows'])
         else:
             source_rows = activity_xml_rows(file_stamp[0], metadata,
-                                            optional_fields=('filing_records',) if include_filings else ())
+                                            optional_fields=('transaction_type',
+                                                             *(('filing_records',) if include_filings else ())))
         for row in source_rows:
             count += 1
             identity = (cycle(row['cycle']), str(row['source_committee_id']), str(row['candidate_id'] or ''), str(row['support_oppose'] or 'Unknown'))
-            groups[identity] += amount(row['net_included_amount'])
+            value = amount(row['net_included_amount'])
+            groups[identity] += value
+            # The same amount again under its FEC transaction code, so the one
+            # recorded bucket can be split by code without a second read. The
+            # group itself (its identity and amount) is unchanged.
+            part = parts[identity][transaction_code(row.get('transaction_type'))]
+            part[0] += value
             unverified[identity] += int(row.get('unverified_version_rows') or 0)
             unresolved[identity] += int(row.get('unresolved_version_rows') or 0)
             if include_filings and row.get('filing_records'):
@@ -404,7 +434,9 @@ def _report_activity(options):
                 except (TypeError, ValueError):
                     records = []
                 if isinstance(records, list):
-                    filings[identity].extend(record for record in records if isinstance(record, dict))
+                    records = [record for record in records if isinstance(record, dict)]
+                    filings[identity].extend(records)
+                    part[1].extend(records)
             labels[identity] = (str(row.get('candidate_officeholder') or identity[2] or 'Unidentified candidate'), str(row.get('candidate_party') or ''))
         note = str(metadata.get('note') or '')
         expected = re.search(r'condensed to ([\d,]+)', note)
@@ -415,6 +447,8 @@ def _report_activity(options):
         return [{'cycle':k[0], 'committee':k[1], 'candidate_id':k[2], 'direction':k[3],
                  'candidate':labels[k][0], 'party':labels[k][1], 'amount':v,
                  'filings':filings[k],
+                 'transaction_parts':{code:{'amount':total, 'filings':records}
+                                      for code,(total,records) in parts[k].items()},
                  'unverified_version_rows':unverified[k], 'unresolved_version_rows':unresolved[k]} for k,v in groups.items()]
     except (ET.ParseError, IndexError, KeyError, zipfile.BadZipFile) as error:
         raise ValueError('Saved downstream activity could not be read.') from error
@@ -422,6 +456,77 @@ def _report_activity(options):
 
 def report_activity(file_stamp, include_filings=False):
     return _report_activity((file_stamp, include_filings))
+
+
+def transaction_code(value):
+    """An FEC transaction code as recorded ('24K'), or '' when none is."""
+    return str(value or '').strip().upper()
+
+
+def activity_side(code):
+    """The drawer side a recorded 'Contribution / Other' amount belongs to."""
+    if code in CONTRIBUTION_CODES:
+        return 'Contribution'
+    return 'Other' if code else COMBINED_DIRECTION
+
+
+def activity_sides(rows):
+    """Paul, 2026-09-23: "It should be two separate segments".
+
+    Each recorded 'Contribution / Other' row becomes one row per side its
+    transaction codes fall on - Contribution, Other, and, for amounts whose
+    source recorded no code, 'Contribution / Other' itself - each carrying
+    that side's own amount and filings. Nothing is re-attributed: the sides
+    of one row add up to its recorded amount to the cent, and every other
+    row (Support, Oppose, Unknown, estimates) passes through as it is.
+    """
+    result = []
+    for row in rows:
+        parts = row.get('transaction_parts')
+        if row.get('direction') != COMBINED_DIRECTION or not parts:
+            result.append(row)
+            continue
+        sides = {}
+        for code, part in parts.items():
+            side = sides.setdefault(activity_side(code), {'amount':Decimal(0), 'filings':[], 'codes':set()})
+            side['amount'] += part['amount']
+            side['filings'].extend(part['filings'])
+            if code:
+                side['codes'].add(code)
+        if sum((side['amount'] for side in sides.values()), Decimal(0)) != row['amount']:
+            raise ValueError('Saved activity by transaction type does not add up to its recorded amount.')
+        for name in ACTIVITY_DIRECTIONS:
+            if name in sides:
+                side = sides[name]
+                result.append({**row, 'direction':name, 'amount':side['amount'], 'filings':side['filings'],
+                               'transaction_types':sorted(side['codes'])})
+    return result
+
+
+def recorded_bucket(side_groups, buckets):
+    """The recorded 'Contribution / Other' bucket, each candidate once.
+
+    Paul, 2026-09-23: "It should be two separate segments". A candidate can
+    have both a contribution (24K) and other activity (24C) from the same
+    committee, so it is in both segments' counts, and the counts add up to
+    more than the candidates behind them (ActBlue, Banking 2025-2026: 1,000
+    + 45 for 1,005 candidates). This is the reconciliation the drawer shows
+    under them: the distinct identified candidates across the sides, how many
+    are on more than one side, and the bucket's amount, which the sides'
+    amounts add up to to the cent. side_groups are the sides' candidate
+    groups (candidates_by_direction), so a candidate is on a side exactly
+    when that side's count includes it.
+    """
+    sides = defaultdict(int)
+    for name in RECORDED_SIDES:
+        for candidate in side_groups.get(name) or ():
+            if candidate['id'] != 'unidentified-candidate':
+                sides[candidate['id']] += 1
+    rows = [r for name in RECORDED_SIDES for r in buckets.get(name) or ()]
+    return {'direction':COMBINED_DIRECTION, 'sides':list(RECORDED_SIDES), 'candidates':len(sides),
+            'on_more_than_one_side':sum(1 for count in sides.values() if count > 1),
+            'amount':money(sum((r['amount'] for r in rows), Decimal(0))),
+            'unidentified_amount':money(sum((r['amount'] for r in rows if not r['candidate_id']), Decimal(0)))}
 
 
 report_activity.cache_clear = _report_activity.cache_clear
@@ -577,6 +682,10 @@ def _graph_view(paths, filters):
                 activity_rows, network = downstream.merge_activity(
                     [r for version in stamps for r in report_activity(version)], eligible,
                     report_edges=[r for version in stamps for r in report_transfers(version)])
+                # Split after the merge: merge_activity compares whole recorded
+                # partitions between a snapshot and the workbook, and those
+                # still read 'Contribution / Other' on both sides.
+                activity_rows = activity_sides(activity_rows)
                 network_keys = network['keys']
             rows = (activity_rows if mode == 'activity' else
                     [r for path in paths for r in estimate_rows(estimate_receipt(path))])
@@ -613,6 +722,8 @@ def _graph_view(paths, filters):
             candidate['party'] = ' / '.join(sorted(parties[candidate['id']]))
         return result
     chart_candidates = candidate_groups(candidate_rows) if available else []
+    side_groups = ({name:candidate_groups(rows) for name,rows in buckets.items()}
+                   if mode == 'activity' and buckets is not None else None)
     if any(stamp(path) != version for path,version in zip(paths,stamps)):
         raise ValueError('A report changed while building the graph. Refresh Graph.')
     return {'filters':{**selected,'funding':funding,'mode':mode,'direction':direction},
@@ -633,15 +744,20 @@ def _graph_view(paths, filters):
             'pac_candidate_relationships':ties,
             'downstream_sources':downstream.sources(network) if mode == 'activity' and available else [],
             'measurement_comparisons':network.get('measurement_comparisons',[]) if mode == 'activity' and available else [],
-            'candidates_by_direction':{name:candidate_groups(rows) for name,rows in buckets.items()}
-                if mode == 'activity' and buckets is not None else {},
+            'candidates_by_direction':side_groups if side_groups is not None else {},
             **({'direction_totals':[
                 {'direction':name,
                  'candidates':len([r for r in grouped(buckets.get(name) or [],'candidate_id','candidate') if r['id'] != 'unidentified-candidate']),
                  'unidentified_amount':money(sum((r['amount'] for r in buckets.get(name) or [] if not r['candidate_id']),Decimal(0))),
-                 'amount':money(sum((r['amount'] for r in buckets.get(name) or []),Decimal(0)))}
-                for name in ACTIVITY_DIRECTIONS]} if mode == 'activity' and buckets is not None
-              else {'direction_totals':[]} if mode == 'activity' else {}),
+                 'amount':money(sum((r['amount'] for r in buckets.get(name) or []),Decimal(0))),
+                 # The recorded FEC codes behind a split side, so its label can
+                 # say what it holds (graph.js drawDirections).
+                 'transaction_types':sorted({code for r in buckets.get(name) or [] for code in r.get('transaction_types') or ()})}
+                for name in ACTIVITY_DIRECTIONS],
+                # The two segments' counts reconciled (recorded_bucket).
+                'contribution_other_union':recorded_bucket(side_groups, buckets)}
+              if mode == 'activity' and buckets is not None
+              else {'direction_totals':[], 'contribution_other_union':None} if mode == 'activity' else {}),
             'candidate_details':[{'candidate_id':r['candidate_id'],'candidate':r['candidate'],
                                  'company':r.get('company',''), 'tier':TIERS.get(r.get('tier'),r.get('tier','')),
                                  'recipient':r.get('recipient',r.get('committee','')), 'cycle':r['cycle'], 'amount':money(r['amount'])}
