@@ -130,7 +130,7 @@ CLIENT_CONTRACT = {
         "const response=await fetch('/api/graph?'+query+(initial&&!query.get('cycle')?'&latest=1':''),{signal:controller.signal});",
         "category='';recipient='';options(get('company'),[['','All companies']]);options(get('cycle'),[['','All cycles']]);refresh(true);",
         "get('tier').value='';get('funding').value='all';get('mode').value='direct';",
-        "const dataset=(catalog.datasets||[]).find(item=>item.available!==false&&(item.id===industry||item.label===industry));",
+        "item.available !== false && (item.id === industry || item.label === industry)) || null;",
         "if(data.filters.cycle){const end=Number(data.filters.cycle);if(Number.isFinite(end))scoped.push({field:'cycle',op:'eq',value:`${end-1}-${end}`});}",
         "return {dataset,basis:'receipt',dimensions:['company','quarter'],measures:['amount'],filters:scoped,",
         "aggregate_filters:[],sort:[{field:'quarter',direction:'asc'}],limit:100000,offset:0};",

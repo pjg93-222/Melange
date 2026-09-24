@@ -443,6 +443,47 @@
   const FOLD_SECTIONS = ['category-panel', 'candidate-panel', 'company-panel', 'level-panel',
     'organization-panel', 'compare-table', 'drawer-panel'];
   const FOLD_KEY = 'mentat-graph-folded:';
+  /* Company sparklines' access to contribution data (perf H11, 2026-09-24).
+     The contributions catalog does not depend on the industry, so it is read
+     once per page load and shared by every industry; refresh() starts that
+     read beside the page's /api/graph request instead of after it. A failed
+     read is forgotten, so the next caller reads again. A copy read in an
+     earlier turn (Graph refresh) that offers no available dataset for an
+     industry is read once more before that industry is refused: each industry
+     used to read its own copy, so a source that became available after the
+     page loaded still draws. The session, and its token, stays per industry.
+     `read` supplies session(industry) and catalog(), each a promise of the
+     parsed answer; source(industry, turn) answers {token, dataset}. */
+  function sparkAccessModel(read) {
+    let shared = null, sharedTurn = null;
+    const byIndustry = new Map();
+    function catalog(turn) {
+      if (!shared) {
+        const pending = Promise.resolve().then(() => read.catalog());
+        shared = pending; sharedTurn = turn;
+        pending.catch(() => { if (shared === pending) { shared = null; sharedTurn = null; } });
+      }
+      return shared;
+    }
+    const match = (list, industry) => ((list && list.datasets) || []).find(item =>
+      item.available !== false && (item.id === industry || item.label === industry)) || null;
+    function source(industry, turn) {
+      if (!byIndustry.has(industry)) {
+        const held = catalog(turn), heldTurn = sharedTurn;
+        byIndustry.set(industry, Promise.all([read.session(industry), held]).then(async ([session, list]) => {
+          let dataset = match(list, industry);
+          if (!dataset && heldTurn !== turn) {
+            if (shared === held) { shared = null; sharedTurn = null; }
+            dataset = match(await catalog(turn), industry);
+          }
+          if (!dataset) throw new Error('No verified quarterly contribution dataset matches this Graph industry.');
+          return {token: session.token, dataset: dataset.id};
+        }).catch(error => { byIndustry.delete(industry); throw error; }));
+      }
+      return byIndustry.get(industry);
+    }
+    return {catalog, source};
+  }
   const COMPARE_MENU = {KINDS: COMPARE_KINDS, LABELS: COMPARE_LABELS, MAX: COMPARE_MAX,
     menuKinds, menuValues, menuFilter, menuMove, createMenuController, pillsModel};
   const layout = {layoutColumns: layoutColumns, labelParts: labelParts,
@@ -460,7 +501,7 @@
     compactYield: compactYield, COMPACT_NAME_SHARE_W: COMPACT_NAME_SHARE_W,
     drawerSides: drawerSides, DRAWER_SIDE_ORDER: DRAWER_SIDE_ORDER,
     drawerOverlap: drawerOverlap, DRAWER_SIDE_LABEL: DRAWER_SIDE_LABEL,
-    FOLD_SECTIONS: FOLD_SECTIONS, FOLD_KEY: FOLD_KEY};
+    FOLD_SECTIONS: FOLD_SECTIONS, FOLD_KEY: FOLD_KEY, sparkAccessModel: sparkAccessModel};
   if (typeof module !== 'undefined' && module.exports) module.exports = layout;
   globalThis.MentatGraphLayout = layout;
   if (typeof document === 'undefined') return;
@@ -861,6 +902,10 @@
     // waits for the answer that resolves it.
     const early=Boolean(compare)&&!(initial&&!query.get('cycle'));
     if(early)loadCompareScopes(query);
+    // perf H11: the sparklines' contributions catalog does not depend on this
+    // answer, so its one read per page starts here, beside /api/graph (a no-op
+    // once it has been read). A tier scope draws no sparklines and reads none.
+    if(!query.get('tier'))sparkAccess.catalog(ticket);
     try {
       // latest=1 makes graph_view() replace the requested cycle with max(years)
       // (graph_data.py:317-318). The URL already carries the cycle the reader
@@ -1573,20 +1618,14 @@
   // This avoids the former fan-out of one Graph request per election cycle and
   // makes the time scale explicit. Missing quarters stay gaps: they are never
   // manufactured as zero-dollar observations.
-  const sparkCache=new Map(),sparkAccess=new Map();
+  const sparkCache=new Map();
+  // One contributions catalog per page load, shared by every industry, and
+  // one session per industry (sparkAccessModel above, perf H11).
+  const sparkAccess=sparkAccessModel({
+    session:industry=>fetch('/api/contributions/session?industry='+encodeURIComponent(industry),{cache:'no-store'}).then(async response=>{const body=await response.json();if(!response.ok||body.error||!body.token)throw new Error(body.error||'Contribution session unavailable.');return body;}),
+    catalog:()=>fetch('/api/contributions/catalog',{cache:'no-store'}).then(async response=>{const body=await response.json();if(!response.ok||body.error)throw new Error(body.error||'Contribution catalog unavailable.');return body;})});
   const SPARK_PERIODS=8,SPARK_MINIMUM=3;
   const quarterIndex=value=>{const match=/^(\d{4})-Q([1-4])$/.exec(String(value));return match?Number(match[1])*4+Number(match[2])-1:null;};
-  async function sparkSource(industry) {
-    if(!sparkAccess.has(industry))sparkAccess.set(industry,Promise.all([
-      fetch('/api/contributions/session?industry='+encodeURIComponent(industry),{cache:'no-store'}).then(async response=>{const body=await response.json();if(!response.ok||body.error||!body.token)throw new Error(body.error||'Contribution session unavailable.');return body;}),
-      fetch('/api/contributions/catalog',{cache:'no-store'}).then(async response=>{const body=await response.json();if(!response.ok||body.error)throw new Error(body.error||'Contribution catalog unavailable.');return body;})
-    ]).then(([session,catalog])=>{
-      const dataset=(catalog.datasets||[]).find(item=>item.available!==false&&(item.id===industry||item.label===industry));
-      if(!dataset)throw new Error('No verified quarterly contribution dataset matches this Graph industry.');
-      return {token:session.token,dataset:dataset.id};
-    }).catch(error=>{sparkAccess.delete(industry);throw error;}));
-    return sparkAccess.get(industry);
-  }
   // `data` is the answer the sparklines belong to: the page's own view, or a
   // compared scope's (02b), whose company, cycle and funding they follow.
   function sparkRequest(dataset,data=view) {
@@ -1617,7 +1656,7 @@
     const ticket=revision,data=own?view:target.data,industry=own?get('industry').value:target.industry;
     if(!data||!industry||data.filters.tier)return;
     try{
-      const access=await sparkSource(industry),request=sparkRequest(access.dataset,data);
+      const access=await sparkAccess.source(industry,ticket),request=sparkRequest(access.dataset,data);
       if(!request||ticket!==revision)return;
       const key=JSON.stringify(request);
       if(!sparkCache.has(key))sparkCache.set(key,sparkReady(request,access.token).catch(error=>{sparkCache.delete(key);throw error;}));
