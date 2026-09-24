@@ -167,7 +167,11 @@
     const sizeMeasure=size&&size.field.role==='measure'?encoded(size):'';
     if(size&&!sizeMeasure)notes.push('Size follows a measure; '+size.field.name+' joins the grouping instead.');
     const tipMeasures=[...tooltip,...detail].filter(p=>p.field.role==='measure').map(encoded);
-    for(const id of [...labels.filter(p=>p.field.role==='measure').map(encoded),...tipMeasures,sizeMeasure,colorMeasure])addTo(allMeasures,id);
+    const encodingIds=[...labels.filter(p=>p.field.role==='measure').map(encoded),...tipMeasures,sizeMeasure,colorMeasure].filter(Boolean);
+    for(const id of encodingIds)addTo(allMeasures,id);
+    // A histogram, box or date span asks the server for its own statistics; the
+    // Label, Tooltip, Detail, Size and Colour measures ride along (census C-07).
+    const keepEncodings=()=>{for(const id of encodingIds)addTo(allMeasures,id);};
     let type=mark.type||'automatic';
     if(!types.has(type))throw new Error('Not available for verified data. Use Bar, Line, Circle, Text or Map, or switch to Report worksheet.');
     if(type==='automatic')type=dimensions.some(d=>TIME.includes(d))?'line':'bar';
@@ -207,11 +211,11 @@
     if(!Number.isSafeInteger(binWidth)||binWidth<1){notes.push('The histogram bin width must be a positive amount in dollars and cents, so $100 bins are used.');binWidth=10000;}
     if(type==='histogram'){
       const keep=color&&color.field.role==='dimension'?[color.field.id]:[],dropped=dimensions.filter(d=>!keep.includes(d)&&d!=='amount_bin');
-      dimensions.splice(0,dimensions.length,'amount_bin',...keep);measures.splice(0,measures.length,'records');allMeasures.splice(0,allMeasures.length,'records','amount');
+      dimensions.splice(0,dimensions.length,'amount_bin',...keep);measures.splice(0,measures.length,'records');allMeasures.splice(0,allMeasures.length,'records','amount');keepEncodings();
       notes.push('Bins count individual observations; no group means or subtotals are used.'+(dropped.length?' '+dropped.map(nameOf).join(', ')+(dropped.length===1?' is':' are')+' not binned; put a field on Colour to stack the bins by it.':''));
     }
-    if(type==='box'){measures.splice(0,measures.length,'median_amount');allMeasures.splice(0,allMeasures.length,'min_amount','q1_amount','median_amount','q3_amount','max_amount');notes.push('Quartiles use selected individual amounts. Whiskers show minimum and maximum, including outliers.');}
-    if(type==='gantt'){measures.splice(0,measures.length,'span_days');allMeasures.splice(0,allMeasures.length,'first_date','last_date','span_days');notes.push('Shows the observed receipt date span, not a project duration or continuous giving.');}
+    if(type==='box'){measures.splice(0,measures.length,'median_amount');allMeasures.splice(0,allMeasures.length,'min_amount','q1_amount','median_amount','q3_amount','max_amount');keepEncodings();notes.push('Quartiles use selected individual amounts. Whiskers show minimum and maximum, including outliers.');}
+    if(type==='gantt'){measures.splice(0,measures.length,'span_days');allMeasures.splice(0,allMeasures.length,'first_date','last_date','span_days');keepEncodings();notes.push('Shows the observed receipt date span, not a project duration or continuous giving.');}
     if(type==='map'){
       if(!dimensions.includes('zip5')&&!dimensions.includes('state')){type='bar';notes.push('A map groups by Contributor ZIP or State; neither is on a shelf, so this view is drawn as bars.');}
       else{
@@ -244,6 +248,9 @@
     if(dual){spec.dual=true;spec.dualMark='line';}
     if(naturalOrder(state,queryDimensions)&&transform==='none'&&type!=='map')spec.naturalOrder=true;
     if(type==='stacked'&&spec.color)spec.stack='stacked';
+    // Census B-E21 / B-E22: Parameters ask for every axis label and every legend member.
+    if(state.params?.axisLabels==='all')spec.axisLabels='all';
+    if(state.params?.legend==='all')spec.legend='all';
     if(detail.length||labels.some(p=>p.field.role==='dimension')||tooltip.some(p=>p.field.role==='dimension'))notes.push('Detail, Label and Tooltip dimensions define the grouping behind each mark.');
     return {query,spec,notes,transform};
   }

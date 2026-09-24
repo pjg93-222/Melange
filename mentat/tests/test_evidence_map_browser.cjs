@@ -597,9 +597,87 @@ function startStubGeocoder() {
       && document.querySelectorAll('#evidence-map svg.map-canvas').length === 1, null, 30000, 'one map again');
     pass(`zoom ${JSON.stringify(zoomedPair)}; reset ${JSON.stringify(resetPair)}; find ${JSON.stringify(foundPair)}`);
 
+    // r5, audit men-b F2: approved board 6 ends the toolbar row with "^ Collapse",
+    // which folds the enlarged map back into its pane. M13's compare row draws
+    // none, so there the control is the chevron alone, still named Collapse.
+    const toolbar = () => page.evaluate(() => {
+      const box = el => { const r = el.getBoundingClientRect(); return {left: r.left, right: r.right, top: r.top, mid: r.top + r.height / 2, width: r.width}; };
+      const shown = [...document.querySelectorAll('#evidence-map .map-toolbar :is(button,select,input)')].filter(el => el.getClientRects().length);
+      const input = document.querySelector('#evidence-map-search'), style = getComputedStyle(input);
+      const ctx = document.createElement('canvas').getContext('2d');
+      ctx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      const label = document.querySelector('#evidence-map-collapse .map-collapse-label');
+      return {ids: shown.map(el => el.id).filter(Boolean), last: shown.at(-1).id, mids: shown.map(el => box(el).mid),
+        collapse: box(document.querySelector('#evidence-map-collapse')), reset: box(document.querySelector('#evidence-map-reset')),
+        inCard: !!document.querySelector('#evidence-map .map-toolbar-card #evidence-map-collapse'),
+        labelWidth: label.getBoundingClientRect().width, icon: !!document.querySelector('#evidence-map-collapse svg.map-button-icon'),
+        placeholderNeeds: Math.ceil(ctx.measureText(input.placeholder).width + parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)),
+        searchWidth: input.clientWidth};
+    });
+    const collapseByName = () => page.locator('#evidence-map').getByRole('button', {name: 'Collapse', exact: true}).count();
+    const oneRowWithCollapseLast = (row, where) => {
+      assert.equal(row.inCard, true, `${where}: Collapse sits in the toolbar card`);
+      assert.equal(row.last, 'evidence-map-collapse', `${where}: Collapse is the row's last control: ${JSON.stringify(row.ids)}`);
+      assert.ok(row.collapse.left >= row.reset.right, `${where}: Collapse follows Reset view: ${JSON.stringify(row)}`);
+      assert.ok(Math.max(...row.mids) - Math.min(...row.mids) < 12, `${where}: the toolbar stays one row: ${JSON.stringify(row.mids)}`);
+      assert.ok(row.placeholderNeeds <= row.searchWidth, `${where}: "Find a state, district or ZIP" shows whole: ${row.placeholderNeeds} > ${row.searchWidth}`);
+      assert.equal(row.icon, true, `${where}: Collapse carries its chevron`);
+    };
+
+    step('board 6 ends the toolbar row with Collapse; M13 keeps it as the chevron (r5, audit men-b F2)');
+    await waitFor(() => !document.querySelector('#evidence-map.comparing') && !!document.querySelector('#evidence-map-collapse'),
+      null, 20000, 'the single map with its toolbar');
+    const single = await toolbar();
+    oneRowWithCollapseLast(single, 'one map at 1600');
+    assert.ok(single.labelWidth > 40, `one map at 1600 shows the word Collapse: ${single.labelWidth}`);
+    assert.equal((await page.textContent('#evidence-map-collapse')).trim(), 'Collapse');
+    assert.equal(await collapseByName(), 1, 'exactly one control in the map view is named Collapse');
+    assert.equal(await page.getAttribute('#evidence-map-enlarge', 'aria-label'), 'Enlarge the map');
+    await page.click('#evidence-map-enlarge');
+    await waitFor(() => document.querySelector('#evidence-map-enlarge').getAttribute('aria-label') === 'Shrink the map',
+      null, 20000, 'the enlarged map icon to read Shrink');
+    assert.equal(await collapseByName(), 1, 'enlarged, the map-card icon is Shrink, so Collapse is still the toolbar\'s alone');
+    await page.click('#evidence-map-enlarge');
+    await waitFor(() => document.querySelector('#evidence-map-enlarge').getAttribute('aria-label') === 'Enlarge the map',
+      null, 20000, 'the map icon to read Enlarge again');
+    await page.selectOption('#evidence-map-compare', '2026');
+    await waitFor(() => document.querySelectorAll('#evidence-map svg.map-canvas').length === 2
+      && !!document.querySelector('#evidence-map.comparing'), null, 60000, 'the second map');
+    const compared = await toolbar();
+    oneRowWithCollapseLast(compared, 'two maps at 1600');
+    assert.ok(compared.labelWidth <= 1 && compared.collapse.width <= 40, `the compare row shows the chevron alone: ${JSON.stringify(compared)}`);
+    assert.equal(await collapseByName(), 1, 'the chevron is still named Collapse');
+    await page.selectOption('#evidence-map-compare', '');
+    await waitFor(() => !document.querySelector('#evidence-map.comparing')
+      && document.querySelectorAll('#evidence-map svg.map-canvas').length === 1, null, 30000, 'one map again');
+    pass(`one map: Collapse ${Math.round(single.collapse.width)}px after Reset view, search ${single.searchWidth}px >= ${single.placeholderNeeds}px; two maps: chevron ${Math.round(compared.collapse.width)}px, search ${compared.searchWidth}px`);
+
+    step('Collapse folds the map back into its pane and lands on that pane\'s own map');
+    await page.click('#evidence-map-collapse');
+    await page.waitForSelector('#evidence-panes:not([hidden])', {timeout: 20000});
+    assert.equal(await page.isVisible('#evidence-map'), false, 'Collapse hides the enlarged map');
+    const landedOn = await page.evaluate(() => ({pane: document.activeElement?.closest('[data-pane]')?.dataset.pane || '',
+      thumb: document.activeElement?.classList.contains('pane-thumb-canvas') || false, url: location.href}));
+    assert.deepEqual([landedOn.pane, landedOn.thumb], ['a', true], `focus lands on pane A's map: ${JSON.stringify(landedOn)}`);
+    assert.doesNotMatch(landedOn.url, /[?&]a\.map=/, 'the permalink no longer opens the map');
+    await page.click(`${paneSel} .pane-map`);
+    await page.waitForSelector('#evidence-map:not([hidden])', {timeout: 20000});
+    pass(`focus on pane ${landedOn.pane}'s map thumbnail; map reopened`);
+
     step('the map holds at 1440x900');
     await page.setViewportSize({width: 1440, height: 900});
     await page.waitForSelector('#evidence-map svg.map-canvas', {timeout: 20000});
+    const narrow = await toolbar();
+    oneRowWithCollapseLast({...narrow, placeholderNeeds: 0}, 'one map at 1440');
+    assert.ok(narrow.labelWidth <= 1 && narrow.collapse.width <= 40, `1440 shows the chevron alone: ${JSON.stringify(narrow)}`);
+    assert.equal(await collapseByName(), 1, 'at 1440 the chevron is still named Collapse');
+    await page.selectOption('#evidence-map-compare', '2026');
+    await waitFor(() => document.querySelectorAll('#evidence-map svg.map-canvas').length === 2
+      && !!document.querySelector('#evidence-map.comparing'), null, 60000, 'the second map at 1440');
+    oneRowWithCollapseLast({...(await toolbar()), placeholderNeeds: 0}, 'two maps at 1440');
+    await page.selectOption('#evidence-map-compare', '');
+    await waitFor(() => !document.querySelector('#evidence-map.comparing')
+      && document.querySelectorAll('#evidence-map svg.map-canvas').length === 1, null, 30000, 'one map again at 1440');
     if (SCREENSHOT_PATH) {
       const shotDir = path.dirname(path.resolve(SCREENSHOT_PATH));
       fs.mkdirSync(shotDir, {recursive: true});

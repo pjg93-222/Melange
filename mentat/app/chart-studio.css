@@ -956,3 +956,8 @@
 #view-chart-studio .studio-analytics-group.studio-fold-head button.studio-fold {font:inherit}
 @media (prefers-reduced-motion:reduce) {#view-chart-studio button.studio-fold::before {transition:none}}
 @media print {#view-chart-studio button.studio-fold::before {display:none}}
+/* Round 5 (board S1 has no page scroll): the studio grid is 100vh less the
+   rows above it, and the shared 40px workspace padding under it pushed the
+   page 17px past the fold. On Chart Studio the padding is the studio's own
+   remaining room, so the sheet tabs and status line end at the fold. */
+@media (min-width:1100px) {body[data-view="chart-studio"] main .workspace {padding-bottom:23px}}

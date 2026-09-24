@@ -441,7 +441,8 @@ test('V04 size on bars and lines; V07 scatter with three measures; V09 colour me
 
 test('V07 repeated groups are summed with a note; the direct timeline() still refuses them', () => {
   const tree = plotted([{year: '2022', amount: 100}, {year: '2022', amount: 200}, {year: '2023', amount: 50}], {type: 'line', dimensions: ['year'], measures: ['amount']});
-  assert.match(tree.textContent, /1 duplicate groups were combined/);
+  // Code review F2: repeats are combined statistic by statistic; an amount is added and the note says which rule ran.
+  assert.match(tree.textContent, /1 duplicate group was combined because a queried field is not drawn: Net giving is added\./);
   assert.match(titleOf(plotMarks(tree)[0]), /\$3\.00/);
   assert.throws(() => plot.timeline([{year: '2022', amount: 1}, {year: '2022', amount: 2}], {type: 'line', dimensions: ['year'], measures: ['amount']}, 'amount'), /duplicate aggregate groups/);
 });

@@ -271,10 +271,10 @@ body[data-view]{background-color:var(--analysis-paper)}
 @media(min-width:1100px){
   body[data-view]{background:linear-gradient(90deg,var(--sidebar-bg) 0 199px,var(--sidebar-line) 199px 200px,transparent 200px) var(--analysis-paper)}
   body[data-view] :is(main,footer){margin-left:200px}
-  body[data-view] .app-navigation{display:grid;grid-template-columns:max-content minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr) auto auto;align-items:start;gap:0 6px;width:200px;padding:20px 10px 50px 16px;background:var(--sidebar-bg);border-right:1px solid var(--sidebar-line)}
+  body[data-view] .app-navigation{display:grid;grid-template-columns:max-content minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr) auto auto;align-items:start;gap:0 6px;width:200px;padding:20px 10px 62px 16px;background:var(--sidebar-bg);border-right:1px solid var(--sidebar-line)}
   body[data-view] .app-navigation>*{grid-column:1/-1;min-width:0}
   /* The 20px top padding puts the wordmark's ink where M4 has it (1.25x). */
-  body[data-view] .app-navigation .wordmark{grid-row:1;display:block;margin:0;padding:0 8px;font:500 22px/26px var(--font-sans);letter-spacing:.06em;color:var(--acu-plum);text-decoration:none}
+  body[data-view] .app-navigation .wordmark{grid-row:1;display:block;margin:0;padding:0 8px;font:600 21px/26px var(--font-sans);letter-spacing:.1em;color:var(--acu-plum);text-decoration:none}
   body[data-view] .app-navigation .brand-caption{grid-row:2;display:block;margin:4px 0 0;padding:0 8px;font:400 12.5px/16px var(--font-sans);color:#6c6d6e}
   body[data-view] .app-navigation .workspace-tabs{grid-row:3;display:flex;flex-direction:column;align-items:stretch;gap:0;margin:1px 0 0;padding:0;border:0;overflow:visible}
   body[data-view] .app-navigation .nav-group{display:block;margin:20px 0 4px;padding:0 8px;font:700 8.5px/11px var(--font-sans);letter-spacing:1px;text-transform:uppercase;color:#7e7c7b}
@@ -322,6 +322,88 @@ body[data-view]{background-color:var(--analysis-paper)}
   body[data-view=collection] .workspace-heading{margin:10px 0 0}
   body[data-view=collection] #view-collection .run-collections{margin-top:28px}
 }
+/* r5 (audit men-b F1, open item TC-02): Cross-reference (B16) and the PAC
+   evidence pane board (B19) draw the same semibold serif title as B20 and B22,
+   so they take the same 35px Georgia Bold. Georgia Bold runs wider than the
+   boards' face, and by a different amount for each word, so each title keeps
+   the tracking whose ink best overlaps its own board's (shift-tolerant ink
+   IoU, r5\men-shell\iou.py): "Cross-reference" -1.5px lands 263x26 on B16's
+   262x27 (IoU 0.67; 31px regular was 0.15), "PAC evidence" -0.5px lands 234x26
+   on B19's 233x29 (0.58; was 0.16). The spacing keeps B16's subtitle ink at
+   y60 and run strip at y105 (1600x900), and puts B19's title ink at y25-51,
+   "Split with Graph" at y21-53 and the rail and panes at y72. */
+@media(min-width:761px){
+  body:is([data-view=cross-reference],[data-view=evidence]) .workspace-heading h1{font:600 35px/42px var(--font-serif);color:#1d173b}
+  body[data-view=cross-reference] .workspace-heading h1{letter-spacing:-1.5px}
+  body[data-view=cross-reference] .workspace-heading{margin:2px 0 0}
+  body[data-view=evidence] .workspace-heading h1{letter-spacing:-.5px}
+  body[data-view=evidence] .workspace-heading{margin:7px 0 12px;align-items:flex-start}
+  body[data-view=evidence] #split-view{align-self:flex-start;height:32px;min-height:0;margin:3px 0 0}
+  /* Insights (I1): the title itself is set in insights.css; its header sits 3px under it. */
+  body[data-view=insights] .workspace-heading{margin:0 0 3px}
+}
+/* r5 (audit men-b F2): the enlarged PAC map, boards 6 and M13 at 1600x900.
+   Board 6 ends the toolbar row with "^ Collapse" (evidence.js collapseMap: the
+   map folds back into its pane). It shows its words where board 6 has room
+   for them; the compare row (M13 draws none) and rows narrower than the board
+   show the chevron alone, named "Collapse". The row gives up 4-6px of padding
+   per segment so the search keeps "Find a state, district or ZIP" whole. */
+body[data-view] #view-evidence #evidence-map #evidence-map-collapse{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:37px;min-height:0;padding:0 13px 0 11px;border:1px solid var(--ev-control);border-radius:6px;background:white;color:var(--acu-plum);font:400 14px/1 var(--font-sans);white-space:nowrap}
+body[data-view] #view-evidence #evidence-map #evidence-map-collapse:hover{border-color:var(--acu-purple);background:#f7f2fa}
+body[data-view] #view-evidence #evidence-map #evidence-map-collapse .map-button-icon{flex:none;width:15px;height:15px;stroke-width:1.8}
+body[data-view] #view-evidence #evidence-map.comparing #evidence-map-collapse{width:37px;padding:0}
+body[data-view] #view-evidence #evidence-map.comparing #evidence-map-collapse .map-collapse-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:1519px){
+  body[data-view] #view-evidence #evidence-map #evidence-map-collapse{width:37px;padding:0}
+  body[data-view] #view-evidence #evidence-map #evidence-map-collapse .map-collapse-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+}
+/* The compare row at 1440 holds both cycle selects; the chevron's 43px come
+   out of the segments' padding, so the row stays one row. */
+@media (min-width:681px) and (max-width:1519px){
+  body[data-view] #view-evidence #evidence-map.comparing .map-scope-controls .seg button{padding:0 12px}
+  body[data-view] #view-evidence #evidence-map.comparing .map-layer-group .seg button{padding:0 7px}
+}
+@media (min-width:1520px){
+  body[data-view] #view-evidence #evidence-map:not(.comparing) .map-toolbar{column-gap:8px}
+  body[data-view] #view-evidence #evidence-map:not(.comparing) .map-scope-controls{gap:8px}
+  body[data-view] #view-evidence #evidence-map:not(.comparing) .map-scope-controls .seg button{padding:0 16px}
+  body[data-view] #view-evidence #evidence-map:not(.comparing) .map-layer-group .seg button{padding:0 8px}
+  body[data-view] #view-evidence #evidence-map:not(.comparing) .map-toolbar select{padding:0 6px 0 9px}
+  body[data-view] #view-evidence #evidence-map:not(.comparing) :is(.map-view-controls,.map-zoom-buttons){gap:6px}
+  body[data-view] #view-evidence #evidence-map:not(.comparing) #evidence-map-reset{padding:0 12px}
+  body[data-view] #view-evidence #evidence-map.comparing .map-toolbar{column-gap:8px}
+  body[data-view] #view-evidence #evidence-map.comparing .map-scope-controls .seg button{padding:0 15px}
+  body[data-view] #view-evidence #evidence-map.comparing .map-layer-group .seg button{padding:0 8px}
+  body[data-view] #view-evidence #evidence-map.comparing .map-compare-controls{gap:5px}
+}
+/* The page's vertical rhythm on boards 6 and M13 (1600x900): toolbar card
+   y112-190, map and list cards from y208; board 6's cards end at y831 and
+   M13's at y815, the two compared maps at y677. Board 6's list runs 46px rows
+   (name, then its bar), ten to the card. */
+@media (min-width:1100px){
+  body[data-view] #view-evidence #evidence-map .map-head{margin-bottom:11px}
+  body[data-view] #view-evidence #evidence-map .map-toolbar-card{margin-bottom:6px;padding:12px 11px}
+  body[data-view] #view-evidence #evidence-map:not(.comparing) .map-figure{padding:16px 26px 12px}
+  body[data-view] #view-evidence #evidence-map .map-legend-card{margin-top:4px;padding:11px 20px 9px}
+  body[data-view] #view-evidence #evidence-map .map-legend-card .map-legend-group{gap:7px}
+  body[data-view] #view-evidence #evidence-map .map-source-details{margin-top:2px}
+  body[data-view] #view-evidence #evidence-map .map-source-details summary{padding:3px 0}
+  body[data-view] #view-evidence #evidence-map .map-ranked .map-list tr.map-row>td{padding-top:7px;padding-bottom:7px}
+  body[data-view] #view-evidence #evidence-map .map-ranked .map-list tr.map-row .link-button{min-height:20px;height:20px;line-height:20px}
+  body[data-view] #view-evidence #evidence-map .map-ranked .map-list tr.map-row :is(.bartrack,.bar){height:6px}
+  body[data-view] #view-evidence #evidence-map .map-reconcile{margin-top:6px}
+  body[data-view] #view-evidence #evidence-map .map-list-menu{margin-top:8px;padding-top:8px}
+  body[data-view] #view-evidence #evidence-map.comparing .map-compare-card{min-height:clamp(0px,calc(100vh - 430px),470px);justify-content:center}
+}
+/* r5: the roster card's secondary text on B20/L1 (1600x900 ink, Arial here):
+   "Add company" 83px and "Paste from spreadsheet" 140px wide (14px lands 84
+   and 146; the 16px it replaces, 96 and 167), the drop line 178px (13.5px: 180;
+   15px: 200), "Draft stays in this browser." 133px (12px: 136; 13px: 147). The
+   setup note breaks before "Start collection.", as B20 draws it. */
+body[data-view] #view-loading .loading-editor-actions .secondary{font-size:14px}
+body[data-view] #view-loading .loading-drop{font-size:13.5px}
+body[data-view] #view-loading .loading-foot{font-size:12px}
+body[data-view] #view-loading .loading-setup-note{max-width:265px}
 /* ------------------------------------------- Chart Studio redesign, build 03 (2026-09-22)
    Board S1 (boards\S1_chart_studio.webp, 1600x900 at 1.25x). Replaces build 01's
    interim D1 toolbar rule. Two rows of chrome above the chart (D-041): the header

@@ -479,6 +479,13 @@ def activity_sides(rows):
     that side's own amount and filings. Nothing is re-attributed: the sides
     of one row add up to its recorded amount to the cent, and every other
     row (Support, Oppose, Unknown, estimates) passes through as it is.
+
+    unverified_version_rows and unresolved_version_rows count the recorded
+    row's filing observations, not a side's: the reader does not record them
+    per code, so each side carries its row's counts as they are, and a total
+    of them is taken over the recorded rows, before this split (graph_view),
+    never over the sides - a row split in two would count its observations
+    twice (r4 code review F1).
     """
     result = []
     for row in rows:
@@ -537,7 +544,14 @@ def estimate_receipt(path):
     """Require the full hash-bound CSV, never the 10,000-row worksheet preview."""
     path = Path(path)
     manifest_path = path.with_suffix('.audit') / 'audit-manifest.json'
-    manifest = json.loads(manifest_path.read_text(encoding='utf-8-sig'))
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8-sig'))
+    except FileNotFoundError:
+        # The reader-facing note, not the OS error with a local path in it
+        # (r4 code review: estimates on a report written without its audit
+        # bundle answered "[Errno 2] No such file or directory: ...").
+        raise ValueError(f'Saved estimates are unavailable: this report has no estimate audit bundle ({manifest_path.parent.name}). '
+                         'Missing estimates are not zero.') from None
     if manifest.get('workbook_name') != path.name or manifest.get('workbook_sha256') != digest(path):
         raise ValueError('The estimate audit bundle does not match this workbook.')
     receipt = local_reference('allocation_estimates.csv', manifest_path.parent)
@@ -684,7 +698,10 @@ def _graph_view(paths, filters):
                     report_edges=[r for version in stamps for r in report_transfers(version)])
                 # Split after the merge: merge_activity compares whole recorded
                 # partitions between a snapshot and the workbook, and those
-                # still read 'Contribution / Other' on both sides.
+                # still read 'Contribution / Other' on both sides. The recorded
+                # rows are kept for the filing-relationship counts below: a
+                # split row carries its row's counts on each side.
+                recorded_rows = activity_rows
                 activity_rows = activity_sides(activity_rows)
                 network_keys = network['keys']
             rows = (activity_rows if mode == 'activity' else
@@ -703,8 +720,10 @@ def _graph_view(paths, filters):
                 raise ValueError('Downstream activity is unavailable: no saved activity for the selected committee/cycles. Missing evidence is not zero spending.')
             if mode == 'activity':
                 ties = downstream.relationships(activity_rows, eligible, network)
-                uncertain = sum(r.get('unverified_version_rows',0) for r in activity_rows)
-                unresolved_versions = sum(r.get('unresolved_version_rows',0) for r in activity_rows)
+                # Each observation once: summed over the recorded rows, not the
+                # sides they were split into (r4 code review F1).
+                uncertain = sum(r.get('unverified_version_rows',0) for r in recorded_rows)
+                unresolved_versions = sum(r.get('unresolved_version_rows',0) for r in recorded_rows)
                 if uncertain or unresolved_versions:
                     note += f' Filing relationships: {uncertain} unverified observations retained; {unresolved_versions} unresolved observations in the saved source. Amounts are provisional, not certified unique spending.'
         except (OSError, ValueError, KeyError, AttributeError) as error:

@@ -319,6 +319,10 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-total').textContent==='$1,585',undefined,GRAPH_QUERY_WAIT);
     await page.locator('#graph-candidates').getByRole('button',{name:'Candidate One · D: $90.00',exact:true}).click();
     assert.equal(await page.locator('#graph-candidate-rows tr').count(),2);
+    // The view's export tools are in the More menu now (r4 audit
+    // AUDIT-MEN-A-1: board M4 has no row under the cards).
+    await page.locator('#graph-more > summary').click();
+    assert.equal(await page.locator('#graph-method-details > summary').isVisible(),true,'Details & methodology is in the More menu');
     await page.locator('#graph-export-menu > summary').click();
     const guidedDownload=page.waitForEvent('download');
     await page.locator('#graph-export-format').selectOption('csv');

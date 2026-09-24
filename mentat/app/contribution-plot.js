@@ -7,6 +7,81 @@
  function format(value,id,columns=[],compact=false){if(columns.some(c=>c.id===id&&c.unit==="date"))return value||"—";if(value==null||!Number.isFinite(Number(value)))return '—';return new Intl.NumberFormat('en-US',isMoney(id,columns)?{style:'currency',currency:'USD',maximumFractionDigits:compact?1:2,...(compact?{notation:'compact'}:{})}:{maximumFractionDigits:2,...(compact?{notation:'compact'}:{})}).format(isMoney(id,columns)?Number(value)/100:Number(value));}
  const label=(row,dimensions)=>dimensions.map(d=>row[d]==null||row[d]===''?'Unknown':String(row[d])).join(' / ')||'Selected population';
  const name=(id,columns)=>columns.find(c=>c.id===id)?.name||id.replaceAll('_',' ');
+ /* Code review F2 (2026-09-24). A repeated aggregate group - the same value on
+    every drawn dimension, which happens when a queried field is not drawn - is
+    combined statistic by statistic, never by adding every number. Amounts and
+    observation counts add; a mean is weighted by each group's observation
+    count (the net amount over the observations when both are present); a
+    population standard deviation is pooled from each group's count, mean and
+    deviation; the minimum and maximum take the extremes; first and last dates
+    widen the span and the span is recomputed from them. A median, a quartile
+    or a distinct count cannot be rebuilt from group summaries, so a combined
+    mark leaves it blank and the note says so. A field the chart does not draw
+    keeps every value it had (a list), so a combined mark's drill-through asks
+    for all of its groups' records. A worksheet column names its aggregation. */
+ const COMBINE_RULE={amount:'sum',gross_amount:'sum',refunds:'sum',records:'sum',average_amount:'mean',stddev_amount:'stddev',min_amount:'min',max_amount:'max',first_date:'first',last_date:'last',span_days:'span',median_amount:'none',q1_amount:'none',q3_amount:'none',contributors:'distinct',committees:'distinct',companies:'distinct',active_days:'distinct'};
+ function combineRule(id,columns=[]){
+  if(COMBINE_RULE[id])return COMBINE_RULE[id];
+  const column=columns.find(c=>c.id===id),agg=column&&column.aggregation;
+  return agg==='sum'||agg==='count'?'sum':agg==='min'||agg==='max'?agg:agg==='countd'?'distinct':'none';
+ }
+ const finite=v=>typeof v==='number'&&Number.isFinite(v);
+ const isDimensionField=(id,values,columns)=>{const column=columns.find(c=>c.id===id);if(column)return column.role==='dimension'||column.type==='category';return !COMBINE_RULE[id]&&!values.every(v=>v==null||finite(v));};
+ const RANK={blank:3,weighted:2,pooled:2};
+ function combineGroup(list,dims,columns=[]){
+  const row={...list[0]},outcome={};
+  const ids=[...new Set(list.flatMap(r=>Object.keys(r)))].filter(id=>!dims.includes(id));
+  const meanOf=r=>finite(r.amount)&&finite(r.records)&&r.records>0?r.amount/r.records:finite(r.average_amount)?r.average_amount:null;
+  const whole=values=>values.every(v=>Number.isInteger(v));
+  for(const id of ids){
+   const values=list.map(r=>r[id]),present=values.filter(v=>v!=null);
+   if(isDimensionField(id,values,columns)){const distinct=[...new Map(present.map(v=>[JSON.stringify(v),v])).values()];row[id]=distinct.length>1?distinct:distinct.length?distinct[0]:values[0];continue;}
+   const rule=combineRule(id,columns),numbers=present.filter(finite);
+   if(rule==='first'||rule==='last'){const dates=present.map(String).sort();row[id]=dates.length?(rule==='first'?dates[0]:dates.at(-1)):null;outcome[id]='widened';continue;}
+   if(rule==='sum'){row[id]=numbers.length?numbers.reduce((a,b)=>a+b,0):null;outcome[id]='added';continue;}
+   if(rule==='min'||rule==='max'){row[id]=numbers.length?Math[rule](...numbers):null;outcome[id]=rule==='min'?'lowest':'highest';continue;}
+   if(rule==='mean'||rule==='stddev'){
+    const used=list.filter(r=>finite(r.records)&&r.records>0),complete=used.length&&list.every(r=>r[id]==null||finite(r.records))&&used.every(r=>finite(meanOf(r))&&(rule==='mean'||finite(r[id])));
+    if(!complete){row[id]=null;outcome[id]='blank';continue;}
+    const n=used.reduce((a,r)=>a+r.records,0),mean=used.reduce((a,r)=>a+r.records*meanOf(r),0)/n;
+    const value=rule==='mean'?mean:Math.sqrt(Math.max(0,used.reduce((a,r)=>a+r.records*(r[id]*r[id]+(meanOf(r)-mean)**2),0)/n));
+    row[id]=whole(numbers)?Math.round(value):value;outcome[id]=rule==='mean'?'weighted':'pooled';continue;
+   }
+   if(rule==='span')continue;
+   row[id]=null;outcome[id]='blank';
+  }
+  if(ids.includes('span_days')){
+   const day=s=>Date.parse(String(s)+'T00:00:00Z');
+   if(row.first_date&&row.last_date&&Number.isFinite(day(row.first_date))&&Number.isFinite(day(row.last_date))){row.span_days=Math.round((day(row.last_date)-day(row.first_date))/86400000);outcome.span_days='widened';}
+   else{row.span_days=null;outcome.span_days='blank';}
+  }
+  return {row,outcome};
+ }
+ function combine(rows,dims,columns=[]){
+  const groups=new Map();
+  for(const row of rows){const key=JSON.stringify(dims.map(d=>row[d]??null));if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);}
+  if(groups.size===rows.length)return {rows,combined:0,outcomes:{}};
+  let combined=0;const outcomes={};
+  const out=[...groups.values()].map(list=>{if(list.length===1)return list[0];combined+=list.length-1;const merged=combineGroup(list,dims,columns);mergeOutcomes(outcomes,merged.outcome);return merged.row;});
+  return {rows:out,combined,outcomes};
+ }
+ function mergeOutcomes(into,from){for(const[id,kind]of Object.entries(from))if(!into[id]||(RANK[kind]||1)>(RANK[into[id]]||1))into[id]=kind;return into;}
+ function combineNote(combined,outcomes,columns=[]){
+  if(!combined)return '';
+  const of=kind=>Object.keys(outcomes||{}).filter(id=>outcomes[id]===kind).map(id=>name(id,columns));
+  const list=a=>a.length<3?a.join(' and '):a.slice(0,-1).join(', ')+' and '+a.at(-1);
+  const verb=(a,one,many)=>list(a)+(a.length===1?one:many);
+  const parts=[];
+  const added=of('added'),weighted=of('weighted'),pooled=of('pooled'),lowest=of('lowest'),highest=of('highest'),widened=of('widened'),blank=of('blank');
+  if(added.length)parts.push(verb(added,' is added',' are added'));
+  if(weighted.length)parts.push(verb(weighted,' is weighted by observation count',' are weighted by observation count'));
+  if(pooled.length)parts.push(verb(pooled,' is pooled from each group’s count, mean and deviation',' are pooled from each group’s count, mean and deviation'));
+  if(lowest.length)parts.push(verb(lowest,' takes the lowest value',' take the lowest value'));
+  if(highest.length)parts.push(verb(highest,' takes the highest value',' take the highest value'));
+  if(widened.length)parts.push(verb(widened,' covers the combined date span',' cover the combined date span'));
+  if(blank.length)parts.push(verb(blank,' cannot be rebuilt from group summaries, so a combined mark leaves it blank',' cannot be rebuilt from group summaries, so a combined mark leaves them blank'));
+  return combined+' duplicate group'+(combined===1?' was':'s were')+' combined because a queried field is not drawn'+(parts.length?': '+parts.join('; '):'')+'.';
+ }
  function validate(rows,spec){
   if(!Array.isArray(rows))throw new Error('Chart data must be a list of aggregate rows.');
   if(!['bar','line','area','scatter','table'].includes(spec.type))throw new Error('Choose a supported chart type.');
@@ -48,20 +123,22 @@
  // repeated group when called directly; the drawing sums the repeats and says
  // so. A categorical axis places the first dimension's members in row order.
  function drawnTimeline(rows,spec,measure,categorical){
-  const time=spec.dimensions?.[0],other=(spec.dimensions||[]).slice(1),groups=new Map(),ticks=new Map(),order=new Map();let excluded=0,merged=0;
+  const time=spec.dimensions?.[0],other=(spec.dimensions||[]).slice(1),groups=new Map(),ticks=new Map(),order=new Map(),repeats=[];let excluded=0,merged=0;
   for(const row of rows){
    let at;
    if(categorical){const text=time==null?'Selected population':row[time]==null||row[time]===''?'Unknown':String(row[time]);if(!order.has(text))order.set(text,order.size);at=order.get(text);ticks.set(at,text);}
    else{at=timeValue(row[time],time);if(at==null){excluded++;continue;}ticks.set(at,String(row[time]));}
    const key=JSON.stringify(other.map(d=>row[d]??null));if(!groups.has(key))groups.set(key,{key,label:label(row,other),rows:[],byAt:new Map()});
    const s=groups.get(key),seen=s.byAt.get(at);
-   if(seen){merged++;const a=seen.row[measure],b=row[measure];if(typeof b==='number'&&Number.isFinite(b))seen.row={...seen.row,[measure]:typeof a==='number'&&Number.isFinite(a)?a+b:b};continue;}
+   if(seen){merged++;if(!seen.list){seen.list=[seen.row];repeats.push(seen);}seen.list.push(row);continue;}
    const item={row,at};s.byAt.set(at,item);s.rows.push(item);
   }
+  // F2: each repeated group is combined statistic by statistic (combineGroup).
+  const outcomes={};for(const item of repeats){const combined=combineGroup(item.list,spec.dimensions||[],spec.columns||[]);item.row=combined.row;mergeOutcomes(outcomes,combined.outcome);delete item.list;}
   const series=[...groups.values()].sort((a,b)=>a.key.localeCompare(b.key));
   for(const s of series){delete s.byAt;s.rows.sort((a,b)=>a.at-b.at);s.segments=[];let segment=[],previous=null;const flush=()=>{if(segment.length)s.segments.push(segment);segment=[];};
    for(const item of s.rows){if(!categorical&&previous!=null&&item.at!==previous+1)flush();if(item.row[measure]==null){if(!categorical)flush();}else segment.push(item);previous=item.at;}flush();}
-  return {series,ticks:[...ticks].sort((a,b)=>a[0]-b[0]),excluded,merged};
+  return {series,ticks:[...ticks].sort((a,b)=>a[0]-b[0]),excluded,merged,outcomes};
  }
  const scatterPairs=(rows,measures)=>rows.filter(row=>measures.every(id=>typeof row[id]==='number'&&Number.isFinite(row[id])));
  function render(container,rows,spec,onSelect){
@@ -78,7 +155,7 @@
   const plotted=spec.type==='scatter'?scatterPairs(rows,measures.slice(0,2)):timed&&!categorical?rows.filter(row=>timeValue(row[dims[0]],dims[0])!=null):rows;
   if(!plotted.length){const note=document.createElement('p');note.className='empty-view';note.textContent=timed?'No valid dated groups remain. Use Table view to inspect missing or invalid dates.':'No complete measure pairs remain. Use Table view to inspect missing values.';container.append(note);return null;}
   if(plotted.length<rows.length){const note=document.createElement('p');note.className='plot-note';note.textContent=(rows.length-plotted.length)+(timed?' groups have missing or invalid dates.':' groups are missing one or both measures.')+' They remain available in Table view.';container.append(note);}
-  if(merged){const note=document.createElement('p');note.className='plot-note';note.textContent=merged+' duplicate groups were combined: a queried field is not drawn, so their measures are summed on one mark.';container.append(note);}
+  if(merged){const note=document.createElement('p');note.className='plot-note';note.textContent=combineNote(merged,timelines.reduce((all,t)=>mergeOutcomes(all,t.outcomes||{}),{}),columns);container.append(note);}
   // V02: bars stacked by Colour, one row per group (labelDimensions, or every
   // dimension except Colour). V03: measures[1..] on a right-hand axis.
   const stacking=spec.type==='bar'&&spec.color&&['stacked','percent'].includes(spec.stack)?spec.stack:null;
@@ -199,7 +276,8 @@
      fittedText({x:right+10,y:ry(w)+4,'text-anchor':'start',fill:palette[1%palette.length],'font-size':14,'data-axis':'right'},format(w,rightIds[0],columns,true),96,g);}
     node('line',{x1:right,x2:right,y1:top,y2:bottom,stroke:'#8a8690'},null,g);
     const every=Math.max(1,Math.ceil(n/Math.max(1,Math.min(12,Math.floor((right-left)/90)))));
-    cats.forEach((text,i)=>{if(i%every===0)fittedText({x:cx(i),y:bottom+24,'text-anchor':'middle',fill:'#68706b','font-size':14},text,Math.max(40,step*every-6),g);});
+    const turnCats=spec.axisLabels==='all'&&every>1;
+    cats.forEach((text,i)=>{if(turnCats)fittedText({x:cx(i),y:bottom+16,'text-anchor':'end',fill:'#68706b','font-size':12,transform:`rotate(-35 ${cx(i)} ${bottom+16})`,'data-axis-label':'all'},text,110,g);else if(i%every===0)fittedText({x:cx(i),y:bottom+24,'text-anchor':'middle',fill:'#68706b','font-size':14},text,Math.max(40,step*every-6),g);});
     const barIds=[...(spec.type==='bar'?[measures[0]]:[]),...(dualMark==='bar'?rightIds:[])],slots=Math.max(1,barIds.length*members.length),bw=Math.min(40,step*.8/slots);
     const drawBars=(id,scaleY,fillOf)=>{const k=barIds.indexOf(id);rows.forEach(r=>{if(r[id]==null)return;const i=catOf.get(label(r,catDims)),slot=k*members.length+Math.max(0,members.indexOf(memberOf(r))),x0=cx(i)-bw*slots/2+slot*bw;
       mark('rect',{x:x0,y:Math.min(scaleY(0),scaleY(r[id])),width:Math.max(1,bw-1),height:Math.max(1,Math.abs(scaleY(r[id])-scaleY(0))),fill:fillOf(r)},r,g);
@@ -220,7 +298,9 @@
     const prepared=timelines[p],xs=prepared.ticks,left=100,right=940,top=60,bottom=345,[lo,hi]=extent(plotted.map(r=>r[m])),x=at=>left+(xs.length===1?.5:(at-xs[0][0])/(xs.at(-1)[0]-xs[0][0]))*(right-left),y=v=>bottom-(v-lo)/(hi-lo)*(bottom-top);
     for(let i=0;i<=5;i++){const v=lo+(hi-lo)*i/5;node('line',{x1:left,x2:right,y1:y(v),y2:y(v),stroke:'#e8ebe6'},null,g);fittedText({x:left-12,y:y(v)+4,'text-anchor':'end',fill:'#68706b','font-size':15},format(v,m,columns,true),76,g);}
     const tickWidth=xs.reduce((max,[,text])=>Math.max(max,measure(text)),0),tickCount=Math.max(1,Math.min(12,Math.floor((right-left)/(tickWidth+16))));
-    xs.forEach(([at,text],i)=>{if(i%Math.max(1,Math.ceil(xs.length/tickCount))===0)node('text',{x:x(at),y:bottom+25,'text-anchor':'middle',fill:'#68706b','font-size':15},text,g);});
+    // spec.axisLabels 'all' (census B-E21): every tick is labelled, turned when they would collide.
+    const allTicks=spec.axisLabels==='all',turnTicks=allTicks&&xs.length>tickCount;
+    xs.forEach(([at,text],i)=>{if(turnTicks)fittedText({x:x(at),y:bottom+16,'text-anchor':'end',fill:'#68706b','font-size':12,transform:`rotate(-35 ${x(at)} ${bottom+16})`,'data-axis-label':'all'},text,110,g);else if(allTicks||i%Math.max(1,Math.ceil(xs.length/tickCount))===0)node('text',{x:x(at),y:bottom+25,'text-anchor':'middle',fill:'#68706b','font-size':15},text,g);});
     // Colour on the time axis itself colours each point by its period.
     const perPoint=spec.color&&spec.color===dims[0];
     for(const [seriesIndex,s] of prepared.series.entries()){const stroke=perPoint?'#8a8690':spec.color?color(s.rows[0].row):palette[seriesIndex%palette.length];
@@ -266,5 +346,5 @@
   container.append(svg);
   return svg;
  }
- const api={render,format,isMoney,validate,extent,label,timeValue,timeline,drawnTimeline,scatterPairs};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatContributionPlot=api;
+ const api={render,format,isMoney,validate,extent,label,timeValue,timeline,drawnTimeline,scatterPairs,combine,combineGroup,combineRule,combineNote,COMBINE_RULE};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatContributionPlot=api;
 })(globalThis);

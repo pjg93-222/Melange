@@ -659,7 +659,11 @@ const VISIBLE_SOURCE = `node => {
         limit.value = '3';
         limit.dispatchEvent(new Event('change'));
       });
-      await until(page, () => /of 8/.test((document.getElementById('studio-group-count') || {}).textContent || ''),
+      // r5 merge: wait for page one of three, not any "of 8". The tile's label read
+      // "Groups 1-8 of 8" (next disabled) until the three-group answer arrived, so
+      // /of 8/ matched the state before the change and step 11 failed whenever that
+      // answer was slow (reproduced by holding it 1.5 s: final/r5/men-merge/race).
+      await until(page, () => /1.{1,3}3 of 8/.test((document.getElementById('studio-group-count') || {}).textContent || ''),
         'the selected tile paging three groups at a time',
         () => ({label: (document.getElementById('studio-group-count') || {}).textContent}));
       const first = await readBoard();
@@ -703,7 +707,9 @@ const VISIBLE_SOURCE = `node => {
     });
 
     /* -------------------------------------------------------------- 12 */
-    await step('a map sheet draws in the selected tile, and says to select it when it is not', async () => {
+    // Round 5 (census B-S29; Paul, 2026-09-23: "nothing is logically constrained"): every tile
+    // holds its own map, so a map tile keeps drawing when another tile is selected.
+    await step('a map sheet draws in its tile, selected or not', async () => {
       await page.click('#studio-board-1');
       await until(page, () => !!document.querySelector('#studio-canvas svg'), 'the single canvas back');
       await page.click('#studio-new-sheet');
@@ -761,11 +767,17 @@ const VISIBLE_SOURCE = `node => {
         const at = tiles.findIndex(tile => tile.classList.contains('is-selected'));
         tiles[at === 0 ? 1 : 0].querySelector('.studio-board-tile-canvas').click();
       });
-      await until(page, () => [...document.querySelectorAll('#studio-board .studio-board-tile-note')]
-        .some(node => /Select this tile/.test(node.textContent)),
-        'the unselected map tile saying which gesture brings it back',
-        () => ({notes: [...document.querySelectorAll('.studio-board-tile-note')].map(node => node.textContent)}));
-      pass('the map drew ' + mapState.shapes + ' shapes in the selected tile; unselected it says to select it');
+      await until(page, () => {
+        const tiles = [...document.querySelectorAll('#studio-board .studio-board-tile')];
+        const mapTile = tiles.find(tile => tile.querySelector('.contribution-map'));
+        return !!mapTile && !mapTile.classList.contains('is-selected');
+      }, 'the map tile, no longer selected, still drawing its own map',
+        () => ({selected: [...document.querySelectorAll('#studio-board .studio-board-tile')].map(tile => tile.classList.contains('is-selected')),
+          maps: document.querySelectorAll('#studio-board .contribution-map').length,
+          notes: [...document.querySelectorAll('.studio-board-tile-note')].map(node => node.textContent)}));
+      assert.equal(await page.evaluate(() => [...document.querySelectorAll('#studio-board .studio-board-tile-note')]
+        .some(node => /select this tile/i.test(node.textContent))), false, 'no tile is told to be selected before it draws');
+      pass('the map drew ' + mapState.shapes + ' shapes in the selected tile and kept drawing once another tile was selected');
     });
 
     /* -------------------------------------------------------------- 13 */

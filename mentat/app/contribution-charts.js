@@ -16,24 +16,11 @@
   const required=spec.type==='box'?BOX:spec.type==='gantt'?['first_date','last_date']:spec.measures;
   for(const row of rows)for(const id of required){const v=row[id];if(v!=null&&(id.endsWith('_date')?!/^\d{4}-\d{2}-\d{2}$/.test(v):typeof v!=='number'||!Number.isFinite(v)))throw new Error('A required source statistic is invalid.');}
  }
- // V07: repeated groups are combined, never refused. Numeric measures are summed, a date span is
- // widened, and quartiles keep the first group's (quartiles cannot be added). The caller notes the count.
- function combine(rows,dims){
-  const byKey=new Map();let combined=0;
-  for(const row of rows){
-   const key=JSON.stringify(dims.map(d=>row[d]??null)),had=byKey.get(key);
-   if(!had){byKey.set(key,row);continue;}
-   combined++;const merged={...had};
-   for(const[id,v]of Object.entries(row)){
-    if(dims.includes(id)||BOX.includes(id))continue;
-    if(id==='first_date'||id==='last_date'){if(v&&(!merged[id]||(id==='first_date'?v<merged[id]:v>merged[id])))merged[id]=v;}
-    else if(typeof v==='number'&&Number.isFinite(v))merged[id]=(typeof merged[id]==='number'&&Number.isFinite(merged[id])?merged[id]:0)+v;
-   }
-   if(merged.first_date&&merged.last_date&&'span_days'in merged)merged.span_days=Math.round((Date.parse(merged.last_date+'T00:00:00Z')-Date.parse(merged.first_date+'T00:00:00Z'))/86400000);
-   byKey.set(key,merged);
-  }
-  return {rows:combined?[...byKey.values()]:rows,combined};
- }
+ // V07: repeated groups are combined, never refused. Code review F2: each statistic by its own rule
+ // (contribution-plot.js combineGroup): amounts and counts add, a mean is weighted by observation
+ // count, a deviation is pooled, minimum and maximum take the extremes, dates widen the span; a
+ // median, a quartile or a distinct count cannot be rebuilt, so a combined mark leaves it blank.
+ function combine(rows,dims,columns=[]){return base.combine(rows,dims,columns);}
  const cut=(s,n=34)=>String(s).length>n?String(s).slice(0,n-1)+'…':String(s);
  function partition(items,x,y,w,h,weight){
   if(!items.length)return[];if(items.length===1)return[{row:items[0],x,y,w,h}];
@@ -44,13 +31,14 @@
  }
  function render(container,input,spec,onSelect){
   validate(input,spec);container.replaceChildren();if(!input.length){container.textContent='No observations match this selection.';return;}
-  const dims=spec.dimensions,{rows,combined}=combine(input,dims),ms=spec.measures,m=ms[0],cols=spec.columns||[],fmt=(v,id=m)=>base.format(v,id,cols),label=r=>base.label(r,dims),name=id=>cols.find(c=>c.id===id)?.name||id;
-  const notes=[];if(combined)notes.push(combined+' duplicate group'+(combined===1?' was':'s were')+' combined; their measures are summed.');
+  const dims=spec.dimensions,cols=spec.columns||[],{rows,combined,outcomes}=combine(input,dims,cols),ms=spec.measures,m=ms[0],fmt=(v,id=m)=>base.format(v,id,cols),label=r=>base.label(r,dims),name=id=>cols.find(c=>c.id===id)?.name||id;
+  const notes=[];if(combined)notes.push(base.combineNote(combined,outcomes,cols));
   const unit=id=>cols.find(c=>c.id===id)?.unit||(base.isMoney(id,cols)?'cents':'count');
   // V08: Colour (spec.color) separates every type by member; the legend is drawn inside the SVG.
   const colorId=spec.color&&rows.some(r=>r[spec.color]!==undefined)?spec.color:'';
   const member=r=>String(r[colorId]??'Unknown'),members=colorId?[...new Set(rows.map(member))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})):[];
-  const memberFill=r=>palette[Math.max(0,members.indexOf(member(r)))%palette.length];
+  const fillOf=name=>spec.colorMap&&spec.colorMap[name]||palette[Math.max(0,members.indexOf(name))%palette.length];
+  const memberFill=r=>fillOf(member(r));
   // V05: Label and Tooltip fields reach every mark's hover text, and Label replaces the drawn value.
   const isDim=id=>dims.includes(id)||cols.some(c=>c.id===id&&(c.role==='dimension'||c.type==='category'));
   const valueText=(r,id)=>isDim(id)?String(r[id]??'Unknown'):fmt(r[id],id);
@@ -84,7 +72,7 @@
    const top=grow(30+line*20),g=node('g',{'data-legend':'series','aria-label':'Series legend'});
    for(const it of items){const y=top+18+it.line*20;node('rect',{x:it.x,y:y-10,width:11,height:11,rx:2,fill:fills[it.i]},null,g);if(dashed[it.i])node('line',{x1:it.x,x2:it.x+11,y1:y+3,y2:y+3,stroke:fills[it.i],'stroke-dasharray':'3 2'},null,g);text(it.x+17,y,it.s,{'font-size':12,fill:'#59645c'},g);}
   };
-  const seriesFills=list=>list.map((_,i)=>palette[i%palette.length]);
+  const seriesFills=list=>list.map((name,i)=>spec.colorMap&&spec.colorMap[name]||palette[i%palette.length]);
   if(['heatmap','highlight'].includes(spec.type)){
    // V07: one dimension gives one column (or one column per measure); three or more key the rows by
    // the tuple of dims[1..] with dims[0] across; no dimension is one row. V09: Colour measure shades.
@@ -110,7 +98,7 @@
    const groups=[...new Set(segs.map(s=>s.g))],series=colorId?members:[...new Set(segs.map(s=>s.s))];
    if(ms.length>stackIds.length)notes.push(ms.filter(id=>!stackIds.includes(id)).map(name).join(', ')+' '+(ms.length-stackIds.length===1?'is':'are')+' in each segment’s hover detail.');
    const spans=groups.map(g=>{const ss=segs.filter(s=>s.g===g);return [ss.reduce((a,s)=>a+Math.min(0,s.v),0),ss.reduce((a,s)=>a+Math.max(0,s.v),0)];});const x=axis(spans.flat());note('Positive and negative amounts stack separately from zero.');const totals=[];
-   groups.forEach((g,i)=>{let pos=0,neg=0;const y=80+i*34;text(247,y+18,cut(g),{'text-anchor':'end'});for(const s of segs.filter(s=>s.g===g)){const v=s.v,start=v<0?neg:pos,end=start+v;if(v<0)neg=end;else pos=end;mark('rect',{x:Math.min(x(start),x(end)),y,width:Math.max(1,Math.abs(x(end)-x(start))),height:24,fill:palette[Math.max(0,series.indexOf(s.s))%palette.length]},s.r);}totals.push(pos+neg);if(spec.labels)text(Math.max(x(pos),x(neg))+7,y+18,base.format(pos+neg,m,cols,true),{'data-label':'value','pointer-events':'none'});});
+   groups.forEach((g,i)=>{let pos=0,neg=0;const y=80+i*34;text(247,y+18,cut(g),{'text-anchor':'end'});for(const s of segs.filter(s=>s.g===g)){const v=s.v,start=v<0?neg:pos,end=start+v;if(v<0)neg=end;else pos=end;mark('rect',{x:Math.min(x(start),x(end)),y,width:Math.max(1,Math.abs(x(end)-x(start))),height:24,fill:colorId?fillOf(s.s):palette[Math.max(0,series.indexOf(s.s))%palette.length]},s.r);}totals.push(pos+neg);if(spec.labels)text(Math.max(x(pos),x(neg))+7,y+18,base.format(pos+neg,m,cols,true),{'data-label':'value','pointer-events':'none'});});
    reference(totals,x);legendItems=[series,seriesFills(series)];
   }else if(spec.type==='dot'||spec.type==='series-dot'){
    // V04/V08: Size scales the circle and Colour fills it by member; several measures in one unit are
@@ -145,14 +133,18 @@
    const lo=Number(ordered[0].amount_bin),hi=Number(ordered.at(-1).amount_bin)+width,max=Math.max(...binTotal.values(),1),x=v=>90+(v-lo)/(hi-lo)*850,y=v=>490-v/max*390;
    for(let i=0;i<=5;i++){text(78,y(max*i/5)+4,String(Math.round(max*i/5)),{'text-anchor':'end'});node('line',{x1:90,x2:945,y1:y(max*i/5),y2:y(max*i/5),stroke:'#ece8ef'});text(90+i*170,520,base.format(lo+(hi-lo)*i/5,'amount',cols,true),{'text-anchor':'middle'});}
    const below=new Map();
-   for(const r of (stacked?ordered.slice().sort((a,b)=>Number(a.amount_bin)-Number(b.amount_bin)||keys.indexOf(stackOf(a))-keys.indexOf(stackOf(b))):ordered)){const start=Number(r.amount_bin),under=below.get(start)||0,top=under+(r.records||0);below.set(start,top);mark('rect',{x:x(start),y:y(top),width:Math.max(.5,x(start+width)-x(start)-1),height:y(under)-y(top),fill:stacked?palette[keys.indexOf(stackOf(r))%palette.length]:'#57447b'},r,`${fmt(start,'amount')} to less than ${fmt(start+width,'amount')}; ${r.records} observations; net ${fmt(r.amount,'amount')}`+(stacked?'; '+stackOf(r):''));}
+   for(const r of (stacked?ordered.slice().sort((a,b)=>Number(a.amount_bin)-Number(b.amount_bin)||keys.indexOf(stackOf(a))-keys.indexOf(stackOf(b))):ordered)){const start=Number(r.amount_bin),under=below.get(start)||0,top=under+(r.records||0);below.set(start,top);mark('rect',{x:x(start),y:y(top),width:Math.max(.5,x(start+width)-x(start)-1),height:y(under)-y(top),fill:stacked?(colorId?fillOf(stackOf(r)):palette[keys.indexOf(stackOf(r))%palette.length]):'#57447b'},r,`${fmt(start,'amount')} to less than ${fmt(start+width,'amount')}; ${r.records} observations; net ${fmt(r.amount,'amount')}`+(stacked?'; '+stackOf(r):''));}
    if(spec.labels)for(const[start,total]of binTotal)text((x(start)+x(start+width))/2,y(total)-5,String(total),{'text-anchor':'middle','font-size':11,'data-label':'value','pointer-events':'none'});
    text(480,548,'Individual observation amount (USD)',{'text-anchor':'middle'});
    reference([...binTotal.values()],y,true,'records',[90,945]);
    if(stacked)legendItems=[keys,seriesFills(keys)];
   }else if(spec.type==='box'){
    note('Quartiles of individual observations; whiskers show the full minimum–maximum range.');const x=axis(rows.flatMap(r=>[r.min_amount,r.max_amount]));
-   rows.forEach((r,i)=>{const y=85+i*34,ink=colorId?memberFill(r):'#57447b';text(248,y+7,cut(label(r)),{'text-anchor':'end'});if(r.min_amount==null)return;node('line',{x1:x(r.min_amount),x2:x(r.max_amount),y1:y,y2:y,stroke:ink,'stroke-width':2});for(const id of ['min_amount','max_amount'])node('line',{x1:x(r[id]),x2:x(r[id]),y1:y-8,y2:y+8,stroke:ink});mark('rect',{x:x(r.q1_amount),y:y-11,width:Math.max(2,x(r.q3_amount)-x(r.q1_amount)),height:22,...(colorId?{fill:ink,'fill-opacity':.35}:{fill:'#d5c7e7'}),stroke:ink},r,BOX.map(id=>name(id)+': '+fmt(r[id],id)).join('; '));node('line',{x1:x(r.median_amount),x2:x(r.median_amount),y1:y-11,y2:y+11,stroke:'#342649','stroke-width':3,'pointer-events':'none'});if(spec.labels)text(Math.min(945,x(r.max_amount)+8),y+5,labelText(r,base.format(r.median_amount,'median_amount',cols,true)),{'font-size':12,'data-label':'value','pointer-events':'none'});});
+   rows.forEach((r,i)=>{const y=85+i*34,ink=colorId?memberFill(r):'#57447b';text(248,y+7,cut(label(r)),{'text-anchor':'end'});if(r.min_amount==null)return;node('line',{x1:x(r.min_amount),x2:x(r.max_amount),y1:y,y2:y,stroke:ink,'stroke-width':2});for(const id of ['min_amount','max_amount'])node('line',{x1:x(r[id]),x2:x(r[id]),y1:y-8,y2:y+8,stroke:ink});
+    // F2: a combined group keeps its minimum and maximum; its quartiles cannot be rebuilt, so the
+    // range is drawn dashed and the mark says so instead of drawing a box it does not have.
+    if(r.q1_amount==null||r.q3_amount==null||r.median_amount==null){mark('rect',{x:x(r.min_amount),y:y-11,width:Math.max(2,x(r.max_amount)-x(r.min_amount)),height:22,fill:'#ffffff','fill-opacity':0.01,stroke:ink,'stroke-dasharray':'5 3','data-quartiles':'unavailable'},r,BOX.map(id=>name(id)+': '+fmt(r[id],id)).join('; ')+'; quartiles cannot be rebuilt for a combined group');return;}
+    mark('rect',{x:x(r.q1_amount),y:y-11,width:Math.max(2,x(r.q3_amount)-x(r.q1_amount)),height:22,...(colorId?{fill:ink,'fill-opacity':.35}:{fill:'#d5c7e7'}),stroke:ink},r,BOX.map(id=>name(id)+': '+fmt(r[id],id)).join('; '));node('line',{x1:x(r.median_amount),x2:x(r.median_amount),y1:y-11,y2:y+11,stroke:'#342649','stroke-width':3,'pointer-events':'none'});if(spec.labels)text(Math.min(945,x(r.max_amount)+8),y+5,labelText(r,base.format(r.median_amount,'median_amount',cols,true)),{'font-size':12,'data-label':'value','pointer-events':'none'});});
    reference(rows.map(r=>r.median_amount),x,false,'median_amount');
    if(colorId)legendItems=[members,seriesFills(members)];
   }else if(spec.type==='gantt'){
@@ -187,7 +179,11 @@
      if(spec.type==='combination'&&!j)mark('rect',{x:x(o.t)-slot/2+k*sub,y:Math.min(y(0),y(v)),width:sub,height:Math.max(1,Math.abs(y(v)-y(0))),fill:ink},o.r);
      else {if(previous&&o.t===previous.t+1)node('line',{x1:x(previous.t),x2:x(o.t),y1:y(previous.r[id]),y2:y(v),stroke:ink,'stroke-width':2,...(multi&&j?{'stroke-dasharray':'6 4'}:{})});mark('circle',{cx:x(o.t),cy:y(v),r:4.5,fill:ink},o.r);}
      if(spec.labels)text(x(o.t),y(v)-8,labelText(o.r,base.format(v,id,cols,true)),{'text-anchor':'middle','font-size':11,'data-label':'value','pointer-events':'none'});previous=o;}});});
-   ticks.forEach(([t,s],i)=>{if(i%Math.max(1,Math.ceil(ticks.length/8))===0)text(x(t),505,cut(s,18),{'text-anchor':'middle'});});
+   // spec.axisLabels 'all' (census B-E21): every tick is labelled, turned when they would collide.
+   const turnTicks=spec.axisLabels==='all'&&ticks.length>8;
+   ticks.forEach(([t,s],i)=>{if(turnTicks)text(x(t),492,cut(s,12),{'text-anchor':'end','font-size':11,transform:`rotate(-35 ${x(t)} 492)`,'data-axis-label':'all'});else if(i%Math.max(1,Math.ceil(ticks.length/8))===0)text(x(t),505,cut(s,18),{'text-anchor':'middle'});});
+   // V06: the mean and median of the first measure's shown marks, on its (left) axis.
+   if(refs){const[a0,b0]=base.extent(rows.map(r=>r[ids[0]]));reference(ordered.map(o=>o.r[ids[0]]),v=>470-(v-a0)/(b0-a0)*370,true,ids[0],[100,900]);}
    if(multi){legendItems=[series,seriesFills(series)];if(ids.length===2)notes.push('Solid marks read on the left axis; dashed lines on the right axis.');}
   }
   if(legendItems)legend(...legendItems);

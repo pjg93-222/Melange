@@ -602,17 +602,32 @@
     if (seriesPill && !seriesType && !grouping.includes(seriesPill.column)) grouping.push(seriesPill.column);
     // A scatter over dimensions plots one circle per group of them, each an
     // aggregate (contract W9); with none it plots individual rows, as before.
-    const grain = type === 'scatter' && grouping.length ? 'group' : 'row';
-    if (grain === 'group') {
+    // Census B-S07 / C-04 (Paul, 2026-09-23: "nothing is logically
+    // constrained"): a dimension on Detail (or Tooltip, Label, Size) sets a box's
+    // or a histogram's level of detail the same way - each value is that group's
+    // aggregate - so a box of recipient totals per company, or a histogram of
+    // committee totals, is one gesture. Without one they read individual rows.
+    const detailGrain = (type === 'box' || type === 'histogram') && markDimensions.length > 0;
+    const grain = (type === 'scatter' && grouping.length) || detailGrain ? 'group' : 'row';
+    const AGGREGATE_WORD = {sum: 'total', mean: 'average', count: 'row count', median: 'median', min: 'minimum', max: 'maximum', countd: 'distinct count'};
+    if (grain === 'group' && type === 'scatter') {
       extra.grain = 'group';
       extra.xAggregation = xPill.aggregation;
       notes.push('Each circle is one ' + grouping.map(column => (fieldAt(meta, column) || {name: 'group'}).name).join(' / ') +
         ' group; both measures are aggregated over it.');
+    } else if (grain === 'group') {
+      extra.grain = 'group';
+      const detailNames = [...new Set(markDimensions.map(p => p.field.name))].join(' / ');
+      const what = (AGGREGATE_WORD[aggregation] || aggregation) + ' of ' + (yPill ? yPill.field.name : 'rows');
+      notes.push(type === 'box' ? 'Each box summarises the ' + what + ' of every ' + detailNames + ' group.'
+        : 'The bins count ' + detailNames + ' groups by their ' + what + '.');
+      // Each group must carry one Colour member for the bins to stack by it.
+      if (type === 'histogram') grouping = [...new Set([...markDimensions.map(p => p.column), ...(series >= 0 ? [series] : [])])];
     } else if (['scatter', 'box', 'histogram'].includes(type)) {
       if (aggregation === 'count') aggregation = 'sum';
     }
-    if (type === 'histogram' || (type === 'scatter' && grain === 'row')) grouping = [];
-    if (x < 0 && grouping.length && type !== 'scatter') x = grouping[0];
+    if ((type === 'histogram' && grain === 'row') || (type === 'scatter' && grain === 'row')) grouping = [];
+    if (x < 0 && grouping.length && type !== 'scatter' && type !== 'histogram') x = grouping[0];
     if (x >= 0 && !['scatter', 'histogram'].includes(type)) grouping = [x, ...grouping.filter(column => column !== x && column !== series)];
 
     const measurePills = type === 'scatter'

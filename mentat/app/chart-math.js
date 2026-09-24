@@ -601,19 +601,40 @@
       values.push({label, value:v, rows:members});
     }
     if (!values.length) { warn(ctx, 'No numeric values remain. Missing values are not treated as zero.'); return Object.assign(grained, {groups:[], excluded, grain:'group'}); }
+    // Colour on a group-grain histogram or box (census B-S07, C-04 with W11): the
+    // Colour field is one of the detail fields, so each group has one member, and
+    // the bins stack by member / the boxes split by member.
+    const colourColumn = config.type === 'histogram' ? config.series : config.seriesColumn;
+    const coloured = ctx.lenient && Number.isInteger(colourColumn) && colourColumn >= 0 && !!data.columns[colourColumn];
+    const memberOf = v => v.rows[0][colourColumn] == null ? '(Missing)' : String(v.rows[0][colourColumn]);
     if (config.type === 'histogram') {
       const {bins, index} = histogramBins(values.map(v => v.value), config, ctx);
+      if (coloured) {
+        const names = [...new Set(values.map(memberOf))];
+        bins.forEach(bin => { bin.values = names.map(name => ({series:name, value:0, n:0})); });
+        for (const v of values) { const bin = bins[index(v.value)], slot = bin.values[names.indexOf(memberOf(v))]; bin.value++; slot.value++; slot.n++; }
+        Object.assign(grained, {groups:bins, excluded, grain:'group', series:names});
+        seriesLayout(grained, config, ctx);
+        return grained;
+      }
       for (const v of values) bins[index(v.value)].value++;
       return Object.assign(grained, {groups:bins, excluded, grain:'group'});
     }
-    // Box: one box per axis member over the aggregates of its detail groups.
-    const axis = config.x >= 0 ? config.x : -1, boxes = new Map();
+    // Box: one box per axis member (and Colour member) over the aggregates of its detail groups.
+    const axis = config.x >= 0 ? config.x : -1, boxes = new Map(), names = [];
     for (const v of values) {
-      const member = axis < 0 ? 'All rows' : v.rows[0][axis] == null ? '(Missing)' : String(v.rows[0][axis]);
-      if (!boxes.has(member)) boxes.set(member, {values:[], rows:[]});
+      const at = axis < 0 ? 'All rows' : v.rows[0][axis] == null ? '(Missing)' : String(v.rows[0][axis]);
+      const member = coloured ? JSON.stringify([at, memberOf(v)]) : at;
+      if (coloured && !names.includes(memberOf(v))) names.push(memberOf(v));
+      if (!boxes.has(member)) boxes.set(member, {values:[], rows:[], colour:coloured ? memberOf(v) : null});
       boxes.get(member).values.push(v.value); boxes.get(member).rows.push(...v.rows);
     }
-    const groups = [...boxes].map(([label, b]) => encode({label, ...box(b.values)}, b.rows, enc, data));
+    const groups = [...boxes].map(([label, b]) => {
+      const group = encode({label, ...box(b.values)}, b.rows, enc, data);
+      if (coloured) group.seriesIndex = names.indexOf(b.colour);
+      return group;
+    });
+    if (coloured) { grained.series = names; grained.colorField = data.columns[colourColumn].name || 'Colour'; }
     return describeEncodings(Object.assign(grained, {groups, excluded, grain:'group'}), enc, data, groups, ctx);
   }
   // A worksheet date as an ISO day, for Gantt spans.

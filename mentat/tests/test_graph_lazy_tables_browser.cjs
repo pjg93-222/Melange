@@ -35,6 +35,8 @@ test('closed Graph tables are deferred without losing rows, callbacks or exports
   await page.evaluate(body=>{
     window.currentView='graph';window.splitView=false;window.selectedRun='fixture';
     document.querySelector('#view-loading').hidden=true;document.querySelector('#view-graph').hidden=false;
+    // app.js shows Graph's action row (and its More menu) on the Graph view.
+    document.getElementById('graph-actions').hidden=false;
     window.MentatTheme=Object.assign({},window.MentatTheme,{palette:['#13717d','#806bb1'],ink:'#263c48',muted:'#57666e',negative:'#be592f',grid:'#ddd',sans:'Arial'});
     window.fixtureBody=body;window.graphCalls=[];window.renderMeasurements=[];window.createdTableRows=0;
     const create=document.createElement.bind(document);
@@ -75,7 +77,11 @@ test('closed Graph tables are deferred without losing rows, callbacks or exports
   // Existing Full table button opens and materializes all 5,000 exact values.
   // The view's export controls live in one Export menu now (UI clean-up item 7),
   // and a click anywhere outside it closes it, so each trip opens it if it is shut.
-  const openExportMenu=async()=>{if(!(await page.locator('#graph-export-menu').evaluate(el=>el.open)))await page.locator('#graph-export-menu > summary').click();};
+  // It sits in the More menu (r4 audit AUDIT-MEN-A-1), which Full table closes.
+  const openExportMenu=async()=>{
+    if(!(await page.locator('#graph-more').evaluate(el=>el.open)))await page.locator('#graph-more > summary').click();
+    if(!(await page.locator('#graph-export-menu').evaluate(el=>el.open)))await page.locator('#graph-export-menu > summary').click();
+  };
   await openExportMenu();
   await page.locator('#graph-export-target').selectOption('organizations');
   await page.locator('#graph-full-table').click();

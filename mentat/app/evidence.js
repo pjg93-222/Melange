@@ -1716,6 +1716,7 @@
 
   const mapButtonIcon = name => `<svg viewBox="0 0 20 20" aria-hidden="true" class="map-button-icon" fill="none" stroke="currentColor" stroke-width="1.5">${name==='expand'
     ? '<path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/>'
+    : name==='chevron' ? '<path d="M5 12.5l5-5 5 5"/>'
     : '<path d="M3 7h4V3m6 0v4h4M7 17v-4H3m10 4v-4h4"/>'}</svg>`;
   function mapToolbarHtml(pane, state) {
     const cycles = mapCycles(pane);
@@ -1751,7 +1752,8 @@
         <output class="map-zoom-level" aria-label="Zoom level">${(state.view?.scale || 1).toFixed(1)}×</output>
         <button type="button" class="round" id="evidence-map-zoom-in" aria-label="Zoom in">+</button>
       </div>
-      <button type="button" class="secondary" id="evidence-map-reset">Reset view</button></div></div>
+      <button type="button" class="secondary" id="evidence-map-reset">Reset view</button>
+      <button type="button" class="secondary map-collapse" id="evidence-map-collapse" title="Collapse the map back into its pane">${mapButtonIcon('chevron')}<span class="map-collapse-label">Collapse</span></button></div></div>
       <p class="map-controls-help" id="map-search-help">Find a state, TX-19, or 79401, then press Enter. Drag to pan; use + / − or Ctrl / ⌘ + scroll to zoom.</p>`;
   }
 
@@ -2282,10 +2284,12 @@
     host.hidden = false;
     if (host.dataset.skeleton !== '1') { host.innerHTML = MAP_SKELETON; host.dataset.skeleton = '1'; }
     host.classList.toggle('enlarged', Boolean(state.enlarged));
-    // Enlarge / Collapse is an icon on the map card (fix round 1, R06-04 and
-    // R06-14): the toolbar row is the boards' one row.
+    // Enlarge / Shrink is an icon on the map card (fix round 1, R06-04 and
+    // R06-14). Board 6's "Collapse" is the toolbar's (r5, audit men-b F2):
+    // it folds the map back into its pane, so this icon's other state is
+    // "Shrink" and no two controls share a name.
     const enlarge = host.querySelector('#evidence-map-enlarge');
-    const enlargeLabel = state.enlarged ? 'Collapse the map' : 'Enlarge the map';
+    const enlargeLabel = state.enlarged ? 'Shrink the map' : 'Enlarge the map';
     enlarge.setAttribute('aria-pressed', String(Boolean(state.enlarged)));
     enlarge.setAttribute('aria-label', enlargeLabel);
     enlarge.title = enlargeLabel;
@@ -2608,6 +2612,19 @@
     writeScope();
   }
 
+  /* Board 6's "Collapse" (r5, audit men-b F2): the enlarged map folds back into
+     the pane it was opened from, and the reader lands on that pane's small map
+     ("Where it came from"), where a second press opens it again. "Back to
+     panes" leaves the reader at the pane board instead. */
+  function collapseMap() {
+    const key = mapPane;
+    closeMap();
+    const pane = key ? document.querySelector(`#evidence-panes [data-pane="${CSS.escape(key)}"]`) : null;
+    if (!pane) return;
+    pane.scrollIntoView({block: 'nearest'});
+    (pane.querySelector('.pane-thumb-canvas') || pane.querySelector('.pane-map'))?.focus({preventScroll: true});
+  }
+
   // The rows drawer's district filter. An imported file carries the
   // contributor's ZIP, so the crosswalk that built the map answers which rows
   // belong to the district that was clicked; nothing is guessed from a name.
@@ -2865,6 +2882,7 @@
       renderMap();return;
     }
     if (event.target.closest('#evidence-map-back')) { closeMap(); return; }
+    if (event.target.closest('#evidence-map-collapse')) { collapseMap(); return; }
     if (event.target.closest('#evidence-map-geocode-start')) { startGeocode(); return; }
     if (event.target.closest('#evidence-map-geocode-stop')) { stopGeocode(); return; }
     if (event.target.closest('#evidence-map-zoom-in')) { window.MentatEvidenceMap.zoom(mapCanvas(), 1.4); return; }

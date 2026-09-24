@@ -58,11 +58,26 @@
   const contributionPending = new Map();
   // The single canvas needs a claim of its own, the way each tile has one.
   const mainFlight = {waiting: null};
-  let contributionMap = null, contributionGeometry = null, geometryKey = '', geometryRevision = 0, geometryTimer = null;
-  // The canvas the one map instance is drawn into. A surface only tears a map
-  // down when it is the surface holding it: on a board the tiles draw together,
-  // and a chart tile must not destroy the map beside it.
-  let contributionMapHost = null;
+  let contributionGeometry = null, geometryKey = '';
+  // Census B-S29 (Paul, 2026-09-23: "nothing is logically constrained"): every
+  // surface - the canvas and each board tile - holds its own map, keyed by the
+  // canvas it is drawn in; the Census geometry cache and its in-flight requests
+  // stay shared by key. A surface tears down only the map it holds, so a chart
+  // tile never destroys the map beside it.
+  const mapHosts = new Map();
+  const mapSlot = host => { if (!mapHosts.has(host)) mapHosts.set(host, {map: null, revision: 0, timer: 0}); return mapHosts.get(host); };
+  function dropMap(host) {
+    const slot = mapHosts.get(host);
+    if (!slot) return;
+    clearTimeout(slot.timer);
+    slot.map?.destroy?.();
+    mapHosts.delete(host);
+  }
+  // Every map drawn in a canvas or inside it (compared scopes draw one map
+  // each), torn down before the canvas draws something else.
+  function dropMapsIn(canvas, keep) {
+    for (const held of [...mapHosts.keys()]) if (held !== keep && (held === canvas || canvas.contains(held))) dropMap(held);
+  }
   let recordOffset = 0, recordSelection = null, recordRevision = 0, exporting = false;
   let pageMembersKey = '';
   let pendingScope = null, appliedScope = null;
@@ -687,11 +702,15 @@
     const single = input => {
       const id0 = ids[0], modelData = {columns: [timeColumn, {index: 1, name: 'Amount', type: 'number'}],
         rows: input.map(r => [r[time], r[id0]]), row_numbers: input.map((_, i) => i + 1), row_count: input.length, header_row: 0};
-      const model = math.build(modelData, {type: 'line', x: 0, y: 1, series: -1, aggregation: 'sum', filters: [], transform: compiled.transform, period, horizon, start: 0, end: 0, limit: 0});
+      // Lenient (census B-E15, B-E17; Paul: "nothing is logically constrained"):
+      // year-over-year on election cycles is cycle-over-cycle, and a short
+      // history draws what it has; each says so in a note.
+      const model = math.build(modelData, {type: 'line', x: 0, y: 1, series: -1, aggregation: 'sum', filters: [], transform: compiled.transform, period, horizon, start: 0, end: 0, limit: 0, lenient: true});
       const money = contributions.MONEY.has(id0), id = compiled.transform === 'yoy' ? 'percent_change' : id0;
       notes.push(model.note);
+      for (const warning of model.warnings || []) if (!notes.includes(warning)) notes.push(warning);
       return {model: {...model, type: spec.type, groups: model.groups.map(g => ({...g, value: g.value / (money && id !== 'percent_change' ? 100 : 1)}))},
-        column: {id, name: compiled.transform === 'forecast' ? 'Observed amount and same-phase baseline' : id === 'percent_change' ? 'Year-over-year change (%)' : 'Period change', unit: id === 'percent_change' ? 'percent' : money ? 'cents' : 'count'}};
+        column: {id, name: compiled.transform === 'forecast' ? 'Observed amount and same-phase baseline' : id === 'percent_change' ? (period === 'cycle' ? 'Cycle-over-cycle change (%)' : 'Year-over-year change (%)') : 'Period change', unit: id === 'percent_change' ? 'percent' : money ? 'cents' : 'count'}};
     };
     if (!others.length && ids.length === 1) return single(rows);
     const name = id => (columns().find(f => f.id === id) || {}).name || id;
@@ -705,7 +724,7 @@
         aggregation: 'sum', filters: [], transform: compiled.transform, period, horizon, start: 0, end: 0, limit: 0, lenient: true});
       if (model.note) notes.push(model.note);
       for (const warning of model.warnings || []) notes.push(warning);
-      return {model: {...model, type: model.type || spec.type}, column: {id: 'value', name: compiled.transform === 'yoy' ? 'Year-over-year change (%)' : compiled.transform === 'forecast' ? 'Observed value and same-phase baseline' : 'Period change', unit: compiled.transform === 'yoy' ? 'percent' : 'number'}};
+      return {model: {...model, type: model.type || spec.type}, column: {id: 'value', name: compiled.transform === 'yoy' ? (period === 'cycle' ? 'Cycle-over-cycle change (%)' : 'Year-over-year change (%)') : compiled.transform === 'forecast' ? 'Observed value and same-phase baseline' : 'Period change', unit: compiled.transform === 'yoy' ? 'percent' : 'number'}};
     } catch (error) {
       notes.push('Period analysis could not separate ' + [...others.map(name), ...(ids.length > 1 ? ['the measures'] : [])].join(' and ') + ' into series (' + error.message + '), so it shows ' + name(ids[0]) + ' in total.');
       const totals = new Map();
@@ -720,11 +739,11 @@
     try {
       const compiled=contributions.compile(state,columns(),{dataset:dataset().id,industry:dataset().industry,basis:sheetBasis,offset:view.offset});
       if(view.el===el)compareDrawn=null;
-      // Comparing scopes draws bars, lines, areas, circles or a table without
-      // Colour; any other arrangement draws the sheet's own scope and says so.
+      // Census B-S32 (Paul, 2026-09-23: "nothing is logically constrained"):
+      // compared scopes are drawn in every mark, with Colour and with a period
+      // analysis (renderCompareView).
       if(view.el===el&&compareActive(state)){
-        if(COMPARE_MARKS.includes(compiled.spec.type)&&compiled.transform==='none'&&!compiled.spec.color){await renderCompareView(view,compiled,ticket);return;}
-        compiled.notes.push('Comparing scopes draws bar, line, area, circle and table marks without Colour or period analysis, so this view shows the sheet’s own scope.');
+        await renderCompareView(view,compiled,ticket);return;
       }
       const query=compiled.query,key=JSON.stringify(query),previous=view.request;
       if(previous&&JSON.stringify({...previous,offset:0})!==JSON.stringify({...query,offset:0})&&view.offset){view.offset=0;query.offset=0;}
@@ -755,12 +774,11 @@
       // it is drawn for the tile the reader selected. An unselected map tile names
       // the gesture that brings it back rather than drawing nothing.
       if(spec.type==='map'){
-        if(!view.primary){node('canvas').replaceChildren();node('table').hidden=true;node('status').textContent='';node('note').textContent='This sheet draws a map. Select this tile to see it.';return;}
         await renderContributionMap(ticket,compiled,null,view,notes);return;
       }
-      if(contributionMapHost===node('canvas')){clearTimeout(geometryTimer);contributionMap?.destroy?.();contributionMap=null;contributionMapHost=null;++geometryRevision;}
+      dropMapsIn(node('canvas'));
       node('canvas').hidden=false;node('table').hidden=true;node('canvas').className=view.canvasClass+'studio-canvas fit-'+state.fit;
-      const options={labels:!!state.showLabels},pick=row=>{if(view.primary)inspectContributions(row);};
+      const options=chartOptions(state),pick=row=>{if(view.primary)inspectContributions(row);};
       try{
         if(temporal){
           const measure=temporal.column.name+(temporal.column.unit==='cents'?' (USD)':'');
@@ -802,21 +820,21 @@
   }
   async function renderContributionMap(ticket,compiled,bbox=null,view=null,notes=[]) {
     view=view||mainSurface();const node=view.el;
-    const current=++geometryRevision,result=view.result,map=view.state.map||{layers:['states','districts'],congress:'119'},zips=MentatContributionMap.eligibleZips(result.rows).sort(),key=JSON.stringify({zips,congress:map.congress,bbox});
+    const host=node('canvas'),slot=mapSlot(host),current=++slot.revision,result=view.result,map=view.state.map||{layers:['states','districts'],congress:'119'},zips=MentatContributionMap.eligibleZips(result.rows).sort(),key=JSON.stringify({zips,congress:map.congress,bbox});
     // An incomplete page is mapped and said to be incomplete (census B-S30).
     if(result.has_more)notes=[...notes,'The map shows the first '+fmt(result.rows.length)+' of '+fmt(result.group_count)+' places; narrow the filters to map every one.'];
-    const saved=contributionMap?.getView();status('Loading Census boundaries…');
+    const saved=slot.map?.getView();status('Loading Census boundaries…');
     const cached=geometryCache.get(key),pendingKey=key+'|'+[...map.layers].sort().join(',');let geometry=cached&&map.layers.every(layer=>cached.layers?.[layer])?cached:null;if(!geometry){if(!geometryPending.has(pendingKey))geometryPending.set(pendingKey,contributionAPI('geography',{zips,layers:map.layers,congress:map.congress,...(bbox?{bbox}:{})}).finally(()=>geometryPending.delete(pendingKey)));geometry=await geometryPending.get(pendingKey);geometryCache.set(key,geometry);}
-    if(view.stale(ticket)||current!==geometryRevision||!verified())return;
-    geometryCache.set(key,geometry);if(geometryCache.size>8)geometryCache.delete(geometryCache.keys().next().value);contributionGeometry=geometry;geometryKey=key;contributionMap?.destroy?.();contributionMapHost=node('canvas');node('canvas').hidden=false;node('table').hidden=true;
+    if(view.stale(ticket)||current!==slot.revision||mapHosts.get(host)!==slot||!verified())return;
+    geometryCache.set(key,geometry);if(geometryCache.size>8)geometryCache.delete(geometryCache.keys().next().value);contributionGeometry=geometry;geometryKey=key;slot.map?.destroy?.();dropMapsIn(host,host);node('canvas').hidden=false;node('table').hidden=true;
     // Contract V10: the map shades by the sheet's own measure (`value`, in its
     // own unit); amount_cents stays the selected amount for the coverage line.
     const shaded=compiled.spec.measures[0]||'amount',unit=contributions.MONEY.has(shaded)?'cents':['records','contributors'].includes(shaded)?'count':'number';
-    contributionMap=MentatContributionMap.render(node('canvas'),{groups:result.rows.map(r=>({...r,amount_cents:r.amount,value:r[shaded]})),valueField:shaded==='amount'?'amount_cents':'value',unit,geometry,layers:map.layers,filled:compiled.spec.filled,title:view.title,valueLabel:shaded==='amount'?(basisOf(view.state)==='original_supported'?'Selected gross amount':'Selected net amount'):((result.columns.find(c=>c.id===shaded)||{}).name||shaded),showLayerControls:false,onSelect:row=>inspectContributions(contributions.mapSelection(row)),onViewport:event=>{if(!map.layers.includes('zip_areas'))return;clearTimeout(geometryTimer);geometryTimer=setTimeout(()=>renderContributionMap(view.ticket(),compiled,event.bbox,view,notes).catch(e=>failure(e.message)),450);}});
-    if(saved)contributionMap.setView(saved);
-    view.scope+=' · Congress '+map.congress+'; '+map.layers.join(', ')+'; overlays do not allocate money. Mapped '+contributionPlot.format(contributionMap.data.mapped_cents,'amount')+'; unmapped '+contributionPlot.format(contributionMap.data.unmapped_cents,'amount')+' · '+(geometry.sources||[]).map(s=>(s.vintage||s.label||s.url)+' SHA256 '+s.sha256).join(' · ');
-    node('note').textContent=[contributions.BASIS[basisOf(view.state)][1],'ZIP marks combine eligible ZIP/state groups; grouped filters apply before this combination. Unmapped money remains in the selected total.',...(contributionMap.data.coverage_notes||[]),...(geometry.warnings||[]),...notes].join(' ');
-    node('status').textContent=fmt(result.group_count)+' geographic groups · '+fmt(contributionMap.data.marks.length)+' mapped marks · boundaries do not change money';status('Verified ZIP/state records and Census boundaries');
+    const drawnMap=slot.map=MentatContributionMap.render(host,{groups:result.rows.map(r=>({...r,amount_cents:r.amount,value:r[shaded]})),valueField:shaded==='amount'?'amount_cents':'value',unit,geometry,layers:map.layers,filled:compiled.spec.filled,title:view.title,valueLabel:shaded==='amount'?(basisOf(view.state)==='original_supported'?'Selected gross amount':'Selected net amount'):((result.columns.find(c=>c.id===shaded)||{}).name||shaded),showLayerControls:false,onSelect:row=>{if(view.primary)inspectContributions(contributions.mapSelection(row));},onViewport:event=>{if(!map.layers.includes('zip_areas'))return;clearTimeout(slot.timer);slot.timer=setTimeout(()=>renderContributionMap(view.ticket(),compiled,event.bbox,view,notes).catch(e=>failure(e.message)),450);}});
+    if(saved)drawnMap.setView(saved);
+    view.scope+=' · Congress '+map.congress+'; '+map.layers.join(', ')+'; overlays do not allocate money. Mapped '+contributionPlot.format(drawnMap.data.mapped_cents,'amount')+'; unmapped '+contributionPlot.format(drawnMap.data.unmapped_cents,'amount')+' · '+(geometry.sources||[]).map(s=>(s.vintage||s.label||s.url)+' SHA256 '+s.sha256).join(' · ');
+    node('note').textContent=[contributions.BASIS[basisOf(view.state)][1],'ZIP marks combine eligible ZIP/state groups; grouped filters apply before this combination. Unmapped money remains in the selected total.',...(drawnMap.data.coverage_notes||[]),...(geometry.warnings||[]),...notes].join(' ');
+    node('status').textContent=fmt(result.group_count)+' geographic groups · '+fmt(drawnMap.data.marks.length)+' mapped marks · boundaries do not change money';status('Verified ZIP/state records and Census boundaries');
   }
   /* F3 (2026-09-24): ActBlue and WinRed filings have no FEC page image ("Error#1896: Image is
      not processed yet" on 14 of 14 tried), so a record filed by either links its whole
@@ -2215,18 +2233,12 @@
     dressTile(tile, index, slot);
     return tile;
   }
-  // A tile's nodes going away for good. The one map instance lives in a canvas, so
-  // a tile that was hosting it takes it with it rather than leaving the instance
-  // and its listeners behind.
+  // A tile's nodes going away for good. A map lives in its tile's canvas, so a
+  // tile takes its own map with it rather than leaving the instance and its
+  // listeners behind.
   function discardTile(node) {
     if (!node) return;
-    if (contributionMapHost && node.contains(contributionMapHost)) {
-      clearTimeout(geometryTimer);
-      contributionMap?.destroy?.();
-      contributionMap = null;
-      contributionMapHost = null;
-      ++geometryRevision;
-    }
+    for (const host of [...mapHosts.keys()]) if (node.contains(host)) dropMap(host);
     node.remove();
   }
   function renderBoard() {
@@ -2245,7 +2257,8 @@
     }
     pruneTileMemory();
     // The board takes the canvas over, so the canvas is emptied rather than left
-    // holding a drawing that only CSS is hiding.
+    // holding a drawing that only CSS is hiding (and any map in it goes too).
+    dropMapsIn(el('canvas'));
     el('canvas').replaceChildren();
     syncBoardSelection();
     host.hidden = false;
@@ -2448,6 +2461,16 @@
   // table reads with mark labels off - and each keeps its value on hover and in
   // the data CSV. The table then lists its groups; Labels on prints the values.
   const TABLE_LABELS_OFF = 'Labels are off, so the table lists its groups without their values; hover a cell for its value, or turn Labels on.';
+  // Census B-E21 / B-E22 (engine contract W8; Paul, 2026-09-23: "nothing is
+  // logically constrained"): Parameters can ask every renderer for every
+  // category label on the axis and every member in a legend. Unasked, the
+  // options are the Labels switch alone, as before.
+  function chartOptions(state) {
+    const params = (state && state.params) || {}, options = {labels: !!(state && state.showLabels)};
+    if (params.axisLabels === 'all') options.axisLabels = 'all';
+    if (params.legend === 'all') options.legend = 'all';
+    return options;
+  }
   function renderTable(result, config, node, showLabels = true, source = data) {
     const rows = paint.tableRows(result, config, source);
     const table = document.createElement('table');
@@ -2530,7 +2553,7 @@
     } catch (error) {
       if (!current()) return;
       if (loading !== 'Loading Census boundaries…') status(loading);
-      const drawn = paint.chartSVG(result, measure, config, source, view.title, view.scope, {labels: !!state.showLabels});
+      const drawn = paint.chartSVG(result, measure, config, source, view.title, view.scope, chartOptions(state));
       canvas.replaceChildren(drawn.svg);
       node('note').textContent = [...notes, 'Census geometry could not be read (' + error.message + '), so the places are drawn as bars.'].join(' ');
     }
@@ -2651,7 +2674,7 @@
       node('table').hidden = false;
       renderTable(result, config, node, !!state.showLabels);
       if (!state.showLabels) notes.push(TABLE_LABELS_OFF);
-    } else if (placed && view.primary) {
+    } else if (placed) {
       node('canvas').hidden = false;
       node('table').hidden = true;
       node('canvas').className = view.canvasClass + 'studio-canvas fit-' + state.fit;
@@ -2659,15 +2682,13 @@
       renderWorksheetMap(view, report.map, result, config, measure, notes, placed.data)
         .catch(error => { node('note').textContent = [...notes, error.message].join(' '); });
     } else {
-      // A board tile shows a worksheet map's places as bars (one map at a
-      // time, as on the verified path); selecting the tile draws the map.
-      if (placed) notes.push('This sheet draws a map of its places; select this tile to see it.');
+      // Every surface draws its own map (census B-S29), so only a chart gets here.
       const source = placed ? placed.data : data;
       node('canvas').hidden = false;
       node('table').hidden = true;
       // The seventh argument (engine contract W8) asks the renderer itself for
       // a value label on every mark of every type.
-      const options = {labels: !!state.showLabels};
+      const options = chartOptions(state);
       let drawn;
       try { drawn = paint.chartSVG(result, measure, config, source, view.title, view.scope, options); }
       catch (error) {
@@ -2901,6 +2922,8 @@
     el('param-groups').placeholder = everyGroup ? 'All' : String(core.STUDIO_GROUP_LIMIT);
     if (el('param-groups-all')) el('param-groups-all').checked = everyGroup;
     el('param-split').checked = !!state.params.splitMulti;
+    if (el('param-axis-labels')) el('param-axis-labels').checked = state.params.axisLabels === 'all';
+    if (el('param-legend')) el('param-legend').checked = state.params.legend === 'all';
     el('param-horizon').value = state.analytics.horizon || 2;
     el('param-period').value = state.analytics.period || '';
     renderSubjectParam();
@@ -3482,7 +3505,6 @@
   // itself is a browser-only 'scope' series: the server refuses a dimension it
   // does not define (contribution_semantics.py validate), so it is never sent.
   const COMPARE_KINDS = ['industry', 'cycle', 'company'];
-  const COMPARE_MARKS = ['bar', 'line', 'area', 'scatter', 'table'];
   const COMPARE_NOUN = {industry: 'industries', cycle: 'cycles', company: 'companies'};
   const compareState = state => (verified() && compareBySheet.get((state || sheet()).id)) || null;
   const compareActive = state => { const entry = compareState(state); return !!entry && entry.values.length >= 2; };
@@ -3626,12 +3648,48 @@
   // cycle and company, merged here under the 'scope' series with the pills'
   // own colours. Drill-down, CSV, totals, reconciliation and the briefing each
   // say what they do with more than one scope instead of assuming one source.
+  // Census B-S32: a map compares its scopes side by side - one map per scope,
+  // each its own map instance (B-S29), on one set of Census boundaries and one
+  // shading scale, so an equal colour means an equal value on every map.
+  async function drawCompareMaps(view, compiled, rows, values, colours, queries, results, notes, ticket) {
+    const node = view.el, host = node('canvas'), settings = view.state.map || {layers: ['states', 'districts'], congress: '119'};
+    const shaded = compiled.spec.measures[0] || 'amount', unit = contributions.MONEY.has(shaded) ? 'cents' : ['records', 'contributors'].includes(shaded) ? 'count' : 'number';
+    const zips = MentatContributionMap.eligibleZips(rows).sort(), key = JSON.stringify({zips, congress: settings.congress, bbox: null});
+    const cached = geometryCache.get(key);
+    let geometry = cached && settings.layers.every(layer => cached.layers?.[layer]) ? cached : null;
+    if (!geometry) {
+      status('Loading Census boundaries…');
+      geometry = await contributionAPI('geography', {zips, layers: settings.layers, congress: settings.congress});
+      geometryCache.set(key, geometry);
+      if (geometryCache.size > 8) geometryCache.delete(geometryCache.keys().next().value);
+    }
+    if (view.stale(ticket) || !verified()) return;
+    dropMapsIn(host);
+    const scopeOf = row => String(row.scope).split(' \u00b7 ')[0];
+    const groupsOf = v => rows.filter(row => scopeOf(row) === v.label).map(row => ({...row, amount_cents: row.amount, value: row[shaded]}));
+    const valueLabel = shaded === 'amount' ? (basisOf(view.state) === 'original_supported' ? 'Selected gross amount' : 'Selected net amount') : ((results[0].columns.find(c => c.id === shaded) || {}).name || shaded);
+    const shared = {valueField: shaded === 'amount' ? 'amount_cents' : 'value', unit, geometry, layers: settings.layers, filled: compiled.spec.filled, showLayerControls: false, valueLabel};
+    const scaleMax = Math.max(1e-9, ...values.map(v => MentatContributionMap.prepare(groupsOf(v), geometry, shared).marks.reduce((top, mark) => Math.max(top, Math.abs(mark.value)), 0)));
+    const grid = document.createElement('div');
+    grid.className = 'studio-compare-maps';
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(' + values.length + ',minmax(0,1fr));gap:12px;align-items:start';
+    host.replaceChildren(grid);
+    values.forEach((v, i) => {
+      const cell = document.createElement('section'), head = document.createElement('h4'), holder = document.createElement('div');
+      cell.className = 'studio-compare-map';
+      head.className = 'studio-compare-map-title';
+      head.textContent = v.label;
+      head.style.cssText = 'margin:0 0 4px;font-size:13px;font-weight:600;color:' + colours[i];
+      cell.append(head, holder);
+      grid.append(cell);
+      mapSlot(holder).map = MentatContributionMap.render(holder, Object.assign({}, shared, {groups: groupsOf(v), scaleMax, title: view.title + ' \u00b7 ' + v.label,
+        onSelect: row => { if (view.primary) inspectContributions(contributions.mapSelection(row), 0, queries.length > 1 ? {request: queries[i], result: results[i]} : null); }}));
+    });
+    notes.push('Each compared scope is its own map on one shading scale, so an equal colour means an equal value.');
+  }
   async function renderCompareView(view, compiled, ticket) {
     const node = view.el, state = view.state, entry = compareState(state), sheetBasis = basisOf(state);
     const values = entry.values.slice(0, 3), kind = entry.kind, colours = scopeColours();
-    if (!COMPARE_MARKS.includes(compiled.spec.type) || compiled.transform !== 'none')
-      throw new Error('Comparing scopes needs a bar, line, area, circle or text-table mark without a period analysis. Choose one, or clear the comparison.');
-    if (compiled.spec.color) throw new Error('Colour already splits this sheet. Remove the Colour field to compare scopes, or clear the comparison.');
     if (kind !== 'industry' && !columns().some(f => f.id === kind)) throw new Error('This report has no ' + kind + ' field to compare.');
     const base = compiled.query;
     let queries;
@@ -3660,18 +3718,25 @@
     data.rows = results[0].rows.map(row => data.columns.map(f => row[f.id] ?? ''));
     compareDrawn = {kind, values, queries, results};
     const labelOf = new Map(values.map(v => [String(v.value), v.label]));
-    const plotted = compiled.spec.dimensions.filter(d => d !== kind);
+    // A Colour field splits each scope further (census B-S32): a mark's series
+    // is the scope and its Colour member together, "Goldman Sachs Bank NA · DEM".
+    const colourDim = compiled.spec.color && compiled.spec.color !== kind ? compiled.spec.color : '';
+    const plotted = compiled.spec.dimensions.filter(d => d !== kind && d !== colourDim);
+    const memberOf = row => colourDim ? ' \u00b7 ' + (row[colourDim] == null || row[colourDim] === '' ? 'Unknown' : String(row[colourDim])) : '';
+    const rank = new Map(values.map((v, i) => [v.label, i]));
     let rows = [];
-    if (kind === 'industry') results.forEach((result, i) => { for (const row of result.rows) rows.push(Object.assign({}, row, {scope: values[i].label})); });
-    else for (const row of results[0].rows) rows.push(Object.assign({}, row, {scope: labelOf.get(String(row[kind])) || String(row[kind] ?? 'Unknown')}));
+    if (kind === 'industry') results.forEach((result, i) => { for (const row of result.rows) rows.push(Object.assign({}, row, {scope: values[i].label + memberOf(row), scopeOrder: i})); });
+    else for (const row of results[0].rows) { const label = labelOf.get(String(row[kind])) || String(row[kind] ?? 'Unknown'); rows.push(Object.assign({}, row, {scope: label + memberOf(row), scopeOrder: rank.has(label) ? rank.get(label) : values.length})); }
     // Groups keep the order their largest scope gave them; inside a group the
     // scopes follow the pills, so each group reads as one cluster of bars.
     const groupKey = row => JSON.stringify(plotted.map(d => row[d] ?? null)), order = new Map();
     for (const row of rows) if (!order.has(groupKey(row))) order.set(groupKey(row), order.size);
-    const rank = new Map(values.map((v, i) => [v.label, i]));
-    rows.sort((a, b) => order.get(groupKey(a)) - order.get(groupKey(b)) || rank.get(a.scope) - rank.get(b.scope));
-    const colourMap = {};
-    values.forEach((v, i) => { colourMap[v.label] = colours[i]; });
+    rows.sort((a, b) => order.get(groupKey(a)) - order.get(groupKey(b)) || a.scopeOrder - b.scopeOrder || String(a.scope).localeCompare(String(b.scope)));
+    // The pills' own colours; with Colour, each scope-and-member series takes its
+    // own palette colour and the legend names it.
+    const colourMap = colourDim ? null : {};
+    if (colourMap) values.forEach((v, i) => { colourMap[v.label] = colours[i]; });
+    const scopeNames = [...new Set(rows.map(row => row.scope))];
     const name = id => (data.columns.find(f => f.id === id) || {}).name || id;
     // Final fix round (R03-5): when the compared field is the sheet's only
     // dimension, the bars are the scopes themselves: the title says so and
@@ -3733,29 +3798,70 @@
     // or a narrow page grows with the chart instead. With a pane put away
     // (ruling c) the pitch may also grow, up to ROOM_PITCH, to fill the room.
     const fitHeight = node('canvas') === el('canvas') && !(window.matchMedia && window.matchMedia('(max-width: 1099px)').matches) ? node('canvas').clientHeight : 0;
+    const scopeColumn = {id: 'scope', name: (kind === 'industry' ? 'Industry' : kind === 'cycle' ? 'Election cycle' : 'Company') + (colourDim ? ' \u00b7 ' + name(colourDim) : ''), role: 'dimension', type: 'category'};
     const spec = Object.assign({}, compiled.spec, {dimensions: [...plotted, 'scope'], labelDimensions: plotted.length ? plotted : ['scope'], color: 'scope', barPitch: 28, barPitchMin: 14, barPitchMax: fitHeight && chartRoomy() ? ROOM_PITCH : 0, fitHeight: fitHeight, niceTicks: true, panelTitles: compiled.spec.measures.length !== 1, width: node('canvas').clientWidth, barLeftMax: 190,
-      colorMap: colourMap, title: title,
-      columns: [...results[0].columns.filter(c => c.id !== kind || plotted.includes(kind)),
-        {id: 'scope', name: kind === 'industry' ? 'Industry' : kind === 'cycle' ? 'Election cycle' : 'Company', role: 'dimension', type: 'category'}]});
+      colorMap: colourMap || undefined, title: title,
+      columns: [...results[0].columns.filter(c => c.id !== kind || plotted.includes(kind)), scopeColumn]});
+    const scopeAt = row => { const label = colourDim ? String(row.scope).split(' \u00b7 ')[0] : row.scope; return values.findIndex(v => v.label === label); };
     const pickBar = row => {
-      const at = values.findIndex(v => v.label === row.scope);
+      const at = scopeAt(row);
       if (kind === 'industry' && at >= 0) inspectContributions(row, 0, {request: queries[at], result: results[at]});
       else inspectContributions(row);
     };
-    contributionPlot.render(node('canvas'), rows, spec, pickBar);
-    // Still taller than the region at 14px: the canvas scrolls with a visible
-    // bar (drawn again at the width the bar leaves) and the counter says so.
-    if (fitHeight && node('canvas').scrollHeight > node('canvas').clientHeight + 1) {
-      node('canvas').classList.add('studio-canvas--scrolls');
-      spec.width = node('canvas').clientWidth;
-      contributionPlot.render(node('canvas'), rows, spec, pickBar);
-      node('group-count').textContent += ' · scroll the chart';
-      node('group-count').title += '. The chart is taller than its region: scroll it for every bar and the legend';
+    const type = compiled.spec.type, notes = [...compiled.notes], options = chartOptions(state);
+    const TIME_AXES = ['date', 'year', 'cycle', 'quarter', 'month'];
+    let transform = compiled.transform;
+    if (transform !== 'none' && transform !== 'annual' && !TIME_AXES.includes(plotted[0])) {
+      notes.push('Period analysis needs a time axis other than the compared field, so the compared scopes are drawn without it.');
+      transform = 'none';
     }
+    if (type !== 'map') dropMapsIn(node('canvas'));
+    try {
+      if (transform !== 'none' && transform !== 'annual') {
+        // Each compared scope (and Colour member) is its own series over the periods.
+        const temporal = periodModel(rows, Object.assign({}, spec, {dimensions: [...plotted, 'scope']}), compiled, state, notes);
+        const measure = temporal.column.name + (temporal.column.unit === 'cents' ? ' (USD)' : '');
+        const drawn = paint.chartSVG(temporal.model, measure, {type: temporal.model.type || type, aggregation: 'sum', x: 0, y: 1}, {sheet: sheetName(), columns: [{name: 'Period'}, {name: measure}]}, title, view.scope, options);
+        node('canvas').replaceChildren(drawn.svg);
+        const lines = core.referenceValues(temporal.model, state.analytics);
+        if (lines.length && drawn.plot) overlayReference(drawn.svg, drawn.plot, lines);
+      } else if (type === 'map') {
+        await drawCompareMaps(view, compiled, rows, values, colours, queries, results, notes, ticket);
+        if (view.stale(ticket) || !verified()) return;
+      } else if (CANVAS_TYPES.includes(type)) {
+        // A pie, doughnut, waterfall, Pareto or radar: each group and scope is one
+        // mark, coloured by its scope.
+        const ids = compiled.spec.measures, id = ids[0], currency = contributions.MONEY.has(id), nameOf = m => (results[0].columns.find(c => c.id === m) || {}).name || m;
+        if (ids.length > 1) notes.push(markTypeName(type) + ' draws one measure; ' + ids.slice(1).map(nameOf).join(', ') + (ids.length === 2 ? ' is' : ' are') + ' in each mark\u2019s hover detail.');
+        let groups = rows.map(row => ({label: [...plotted.map(d => row[d] == null || row[d] === '' ? 'Unknown' : String(row[d])), row.scope].join(' / '), value: row[id] / (currency ? 100 : 1), n: 1,
+          seriesIndex: scopeNames.indexOf(row.scope), extra: Object.fromEntries(ids.slice(1).map(m => [nameOf(m), row[m] == null ? null : row[m] / (contributions.MONEY.has(m) ? 100 : 1)]))}));
+        if (SHARE_TYPES.includes(type)) { const negative = groups.filter(g => g.value < 0).length; if (negative) { groups = groups.filter(g => g.value >= 0); notes.push(fmt(negative) + ' group' + (negative === 1 ? ' has' : 's have') + ' a negative ' + nameOf(id) + ' and ' + (negative === 1 ? 'is' : 'are') + ' left out of the ' + markTypeName(type).toLowerCase() + '; bars show signed amounts.'); } }
+        const drawn = paint.chartSVG({type, groups, selected: results.reduce((n, r) => n + r.totals.records, 0), excluded: 0, warnings: []}, nameOf(id) + (currency ? ' (USD)' : ''), {type, aggregation: 'sum', x: 0, y: 1}, {sheet: sheetName(), columns: [{name: 'Group'}, {name: id}]}, title, view.scope, options);
+        node('canvas').replaceChildren(drawn.svg);
+        const lines = core.referenceValues({type, groups}, state.analytics);
+        if (lines.length && drawn.plot) overlayReference(drawn.svg, drawn.plot, lines);
+      } else if (MentatContributionCharts.TYPES.includes(type)) {
+        // The analytical families draw the scope as their Colour (contract V08).
+        MentatContributionCharts.render(node('canvas'), rows, spec, pickBar);
+      } else {
+        contributionPlot.render(node('canvas'), rows, spec, pickBar);
+        // Still taller than the region at 14px: the canvas scrolls with a visible
+        // bar (drawn again at the width the bar leaves) and the counter says so.
+        if (fitHeight && node('canvas').scrollHeight > node('canvas').clientHeight + 1) {
+          node('canvas').classList.add('studio-canvas--scrolls');
+          spec.width = node('canvas').clientWidth;
+          contributionPlot.render(node('canvas'), rows, spec, pickBar);
+          node('group-count').textContent += ' · scroll the chart';
+          node('group-count').title += '. The chart is taller than its region: scroll it for every bar and the legend';
+        }
+      }
+    } catch (error) { drawFallback(node, rows, spec, error.message, notes, pickBar); }
+    if (state.analytics.average || state.analytics.median) notes.push(node('canvas').querySelector('[data-reference]')
+      ? 'Reference lines mark the mean and median of the shown marks.' : 'This chart has no value axis for a reference line, so the mean and median are not drawn; each mark carries its value on hover.');
     const records = results.reduce((n, result) => n + result.totals.records, 0), groupCount = results.reduce((n, result) => n + result.group_count, 0);
     node('note').textContent = [contributions.BASIS[sheetBasis][1], 'Comparing ' + values.map(v => v.label).join(', ') + '.',
       kind === 'industry' ? 'Each industry is its own report and its own query.' : 'One verified query covers every compared ' + (kind === 'company' ? 'company' : kind) + '.',
-      more ? 'Additional groups are on later pages; each scope pages its own top groups.' : 'All selected groups shown.', ...compiled.notes].join(' ');
+      more ? 'Additional groups are on later pages; each scope pages its own top groups.' : 'All selected groups shown.', ...notes].join(' ');
     node('status').textContent = fmt(records) + ' source observations · ' + fmt(groupCount) + ' groups · ' +
       (results.every(result => result.reconciliation?.receipt_matches_workbook === true) ? 'reconciles to the workbook' : 'verified source records');
     node('status').title = fmt(queryRequests) + ' verified queries this session';
@@ -4217,7 +4323,7 @@
   el('report').onchange = loadSheets;
   el('sheet').onchange = () => scan(false);
   el('rescan').onclick = () => scan(true);
-  el('source-mode').onchange=()=>{compareBySheet.clear();persist();data=null;sourceKey='';clearTimeout(geometryTimer);abortContributionRequests();tileMemory.clear();++contributionRevision;contributionMap?.destroy?.();contributionMap=null;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.ALL_MARK_TYPES);loadRuns();}};
+  el('source-mode').onchange=()=>{compareBySheet.clear();persist();data=null;sourceKey='';for(const host of [...mapHosts.keys()])dropMap(host);abortContributionRequests();tileMemory.clear();++contributionRevision;el('inspection').hidden=true;renderAll();if(verified())loadContributions();else{fill(el('mark'),core.ALL_MARK_TYPES);loadRuns();}};
   el('dataset').onchange=()=>{persist();selectContributionDataset();};
   el('basis').onchange=()=>commit(()=>{sheet().source.basis=el('basis').value;activeSurface().offset=0;});
   el('refresh-data').onclick=()=>{++contributionCacheEpoch;abortContributionRequests();contributionCache.clear();memberCache.clear();graphTotalsCache.clear();loadContributions(true);};
@@ -4244,6 +4350,9 @@
   el('param-period').onchange = () => commit(() => { sheet().analytics.period = el('param-period').value; });
   el('param-subject').onchange = () => commit(() => { sheet().params.subject = el('param-subject').value; });
   el('param-split').onchange = () => commit(() => { sheet().params.splitMulti = el('param-split').checked; });
+  // Census B-E21 / B-E22: every category label on the axis, every legend member.
+  if (el('param-axis-labels')) el('param-axis-labels').onchange = () => commit(() => { sheet().params.axisLabels = el('param-axis-labels').checked ? 'all' : ''; });
+  if (el('param-legend')) el('param-legend').onchange = () => commit(() => { sheet().params.legend = el('param-legend').checked ? 'all' : ''; });
   // "All groups" (census B-S14, contract W10): the worksheet draws every group
   // and the verified query asks for up to the server's 100,000 per page.
   if (el('param-groups-all')) el('param-groups-all').onchange = () => commit(() => {
@@ -4449,10 +4558,59 @@
     const expand = el('expand');
     expand.setAttribute('aria-expanded', String(roomState.expand));
     expand.querySelector('.studio-room-label').textContent = roomState.expand ? 'Show panes' : 'Expand chart';
-    expand.title = roomState.expand ? 'Bring back the Data panel, the shelves and the Inspector'
+    expand.title = roomState.expand ? 'Bring back the Data panel, the shelves and the Inspector (Esc)'
       : 'Put the Data panel, the shelves and the Inspector away so the chart fills the space';
     expand.querySelector('path').setAttribute('d', ROOM_ICONS[roomState.expand ? 'restore' : 'expand']);
+    fitRoomNow();
   }
+  // Round 5 (ruling c: "the graph should take up more size of the screen"):
+  // with panes put away every drawing grows into the room, not only the bars
+  // that redraw at the canvas's own size. A chart drawn at a fixed size (heat
+  // map, treemap, line, pie, a worksheet chart) scales to the canvas and keeps
+  // its proportions; one far taller than the room keeps its width and
+  // scrolls. Fit: Width and Entire view keep their own rules, and a board or a
+  // narrow page, whose canvas grows with its chart, is left as drawn.
+  function fitRoom() {
+    const canvas = el('canvas');
+    const svg = canvas && [...canvas.children].find(node => String(node.tagName).toLowerCase() === 'svg' && !node.hasAttribute('data-native'));
+    if (!svg) return;
+    for (const property of ['width', 'max-width', 'margin']) svg.style.removeProperty(property);
+    if (!chartRoomy() || ((sheet() || {}).fit || 'standard') !== 'standard' || boardTiles() > 1) return;
+    if (window.matchMedia && window.matchMedia('(max-width: 1099px)').matches) return;
+    const box = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+    if (box.length !== 4 || !(box[2] > 0) || !(box[3] > 0)) return;
+    // The room is measured again after each sizing. The chart card's foot
+    // gives up a few pixels while a drawing overflows the canvas and takes
+    // them back once it fits (a treemap sized to a 500px room then had 496px
+    // and scrolled), so the size settles here, in at most three passes,
+    // rather than on a later frame a background tab never runs.
+    for (let pass = 0; pass < 3; pass++) {
+      const room = canvas.clientWidth, tall = canvas.clientHeight;
+      if (!room || !tall) return;
+      const contain = Math.min(room, tall * box[2] / box[3]);
+      if (contain < 0.7 * Math.min(room, box[2])) {
+        for (const property of ['width', 'max-width', 'margin']) svg.style.removeProperty(property);
+        return;
+      }
+      const width = Math.floor(contain) + 'px';
+      if (svg.style.width === width) return;
+      svg.style.width = width;
+      svg.style.maxWidth = 'none';
+      svg.style.margin = '0 auto';
+    }
+  }
+  // r5 re-audit MEN-A-REAUDIT-1: fitRoom used to run only on the next
+  // animation frame, and a document the browser is not painting (a background
+  // tab, a minimised window) runs none. A chart expanded or redrawn there kept
+  // its drawn size: a treemap stayed 1000x560 in a 1171x501 room and scrolled,
+  // a line stayed 1000x420. It now runs at once as well (reading the canvas's
+  // size lays the page out on demand) and again on the next frame, for
+  // anything that changes the room before the next paint.
+  function fitRoomNow() {
+    fitRoom();
+    requestAnimationFrame(fitRoom);
+  }
+  if (typeof MutationObserver === 'function') new MutationObserver(fitRoomNow).observe(el('canvas'), {childList: true});
   function setRoom(name, value, remember) {
     roomState[name] = !!value;
     applyRoom();
@@ -4466,6 +4624,18 @@
   el('shelves-collapse').onclick = () => { setRoom('shelves', true, true); el('shelves-strip').focus(); };
   el('shelves-strip').onclick = () => { setRoom('shelves', false, true); el('shelves-collapse').focus(); };
   el('expand').onclick = () => setRoom('expand', !roomState.expand, true);
+  // Escape brings the panes back from Expand chart, as it closes any expanded
+  // view; a menu, a popover or a field being typed in keeps its own Escape.
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || event.defaultPrevented || !roomState.expand) return;
+    const view = document.getElementById('view-chart-studio');
+    if (!view || view.hidden) return;
+    const target = event.target;
+    if (target && target.closest && target.closest('input, select, textarea, [role="menu"], [role="dialog"], .studio-send, .compare-menu')) return;
+    if (document.querySelector('.studio-send, .compare-menu')) return;
+    setRoom('expand', false, true);
+    el('expand').focus();
+  });
   for (const name of Object.keys(roomState)) roomState[name] = globalThis.MentatState?.recall?.(ROOM_KEYS[name]) === '1';
   applyRoom();
   renderShelfStrip();
@@ -4478,6 +4648,7 @@
     let drawnWidth = 0, drawnHeight = 0, drawnRoomy = false, resizeTimer = 0;
     new ResizeObserver(entries => {
       const width = Math.round(entries[0].contentRect.width), height = Math.round(entries[0].contentRect.height);
+      requestAnimationFrame(fitRoom);
       const roomy = chartRoomy(), taller = Math.abs(height - drawnHeight) >= 8 && (roomy || drawnRoomy);
       if (!width || (Math.abs(width - drawnWidth) < 8 && !taller)) return;
       const first = !drawnWidth;

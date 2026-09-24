@@ -437,6 +437,103 @@ test('[graph-layout] the drawer reconciles the two segments\' counts when a cand
     'Contribution / Other': 'Contributions / Other', 'Support': 'Support', 'Oppose': 'Oppose', 'Unknown': 'Unknown'});
 });
 
+// r4 code review F5: the page's Direction select offered all six sides in
+// every candidate view, so a reader could land on a side that cannot hold
+// anything and read the empty panel as a zero. It offers what the view holds.
+test('[graph-layout] the Direction select offers the sides this candidate view can hold (F5)', () => {
+  const side = (direction, candidates, amount) => ({direction, candidates, amount});
+  const choose = (mode, totals, current) => layout.directionChoices(mode, totals, current);
+  // The golden page's six options, in its order and wording.
+  assert.deepEqual(layout.DIRECTION_OPTIONS.map(option => option[0]),
+    ['Support', 'Oppose', 'Contribution', 'Other', 'Contribution / Other', 'Unknown']);
+  const html = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'index.html'), 'utf8');
+  const golden = html.match(/<select id="graph-direction">(.*?)<\/select>/)[1];
+  assert.deepEqual([...golden.matchAll(/<option value="([^"]*)">([^<]*)<\/option>/g)].map(m => [m[1], m[2]]),
+    layout.DIRECTION_OPTIONS, 'the select the page starts with is the list the code narrows');
+  // 8812, Banking, activity (the review's measurement): every row carries a
+  // code, so the unsplit side is empty (0 candidates, $0) - not offered, and
+  // an empty Unknown is not offered either. Support and Oppose always are.
+  const banking = [side('Contribution', 2665, 371539491), side('Other', 387, 157538526), side('Support', 120, 59963513),
+    side('Oppose', 59, 82983605), side('Contribution / Other', 0, 0), side('Unknown', 0, 0)];
+  assert.deepEqual(choose('activity', banking, 'Support').values, ['Support', 'Oppose', 'Contribution', 'Other']);
+  // An old permalink's 'Contribution / Other' becomes the larger half it was
+  // split into, as the drawer opens on its largest side.
+  assert.equal(choose('activity', banking, 'Contribution / Other').value, 'Contribution');
+  assert.equal(choose('activity', [side('Contribution', 1, 10), side('Other', 1, 90), side('Support', 0, 0),
+    side('Oppose', 0, 0), side('Contribution / Other', 0, 0), side('Unknown', 0, 0)], 'Contribution / Other').value, 'Other');
+  // An empty Unknown falls back to the page's default.
+  assert.equal(choose('activity', banking, 'Unknown').value, 'Support');
+  // A report written before the Transaction Type column: the halves cannot
+  // hold anything, so the recorded side stands in their place, and a chosen
+  // half becomes it.
+  const uncoded = [side('Contribution', 0, 0), side('Other', 0, 0), side('Support', 1, 810), side('Oppose', 1, 999),
+    side('Contribution / Other', 1, 111), side('Unknown', 0, 0)];
+  assert.deepEqual(choose('activity', uncoded, 'Support').values, ['Support', 'Oppose', 'Contribution / Other']);
+  assert.equal(choose('activity', uncoded, 'Contribution').value, 'Contribution / Other');
+  assert.equal(choose('activity', uncoded, 'Other').value, 'Contribution / Other');
+  // A mixed source offers all of it, Unknown too when it holds an amount.
+  assert.deepEqual(choose('activity', [side('Contribution', 2, 116), side('Other', 1, 40), side('Support', 1, 777),
+    side('Oppose', 1, 999), side('Contribution / Other', 1, 7), Object.assign(side('Unknown', 0, 5), {unidentified_amount: 5})], 'Other').values,
+    ['Support', 'Oppose', 'Contribution', 'Other', 'Contribution / Other', 'Unknown']);
+  // Estimates carry no transaction type (graph_data.estimate_rows): the two
+  // halves never apply there, and a half chosen in activity becomes the
+  // recorded bucket rather than an empty estimates panel.
+  const estimates = choose('estimates', null, 'Contribution');
+  assert.deepEqual(estimates.values, ['Support', 'Oppose', 'Contribution / Other', 'Unknown']);
+  assert.equal(estimates.value, 'Contribution / Other');
+  assert.equal(choose('estimates', null, 'Other').value, 'Contribution / Other');
+  assert.equal(choose('estimates', null, 'Oppose').value, 'Oppose');
+  assert.deepEqual(estimates.options.find(option => option[0] === 'Contribution / Other'), ['Contribution / Other', 'Contributions / other']);
+  // Before an answer names its sides (or when activity is unavailable), the
+  // split sides are offered and the chosen side is kept - a permalink is not
+  // rewritten before it is read.
+  assert.deepEqual(choose('activity', null, 'Support').values, ['Support', 'Oppose', 'Contribution', 'Other']);
+  assert.deepEqual(choose('activity', [], 'Contribution / Other').values, ['Support', 'Oppose', 'Contribution', 'Other', 'Contribution / Other']);
+  assert.equal(choose('activity', [], 'Unknown').value, 'Unknown');
+  assert.equal(choose('activity', null, 'nonsense').value, 'Support', 'a value the server does not answer for is not kept');
+  // Labels are the golden page's.
+  assert.deepEqual(choose('activity', banking, 'Support').options,
+    [['Support', 'Support'], ['Oppose', 'Opposition'], ['Contribution', 'Contributions'], ['Other', 'Other activity']]);
+});
+
+// r4 audit AUDIT-MEN-A-2: G2's change chips re-derived. The Banking 2023-2024
+// | 2025-2026 figures below are the two scopes' own /api/graph answers (r5
+// men-graph report, g2_2024.json / g2_2026.json), recomputed independently.
+test('[graph-layout] a cycle change chip is the latest against the earlier, rounded once (G2)', () => {
+  const chip = (latest, earlier) => layout.changeText(latest, earlier);
+  const M = '−';
+  // Headline figures: net giving, direct to candidates, recipient organizations.
+  assert.deepEqual(chip(12003181.12, 26107204.16), {text: M + '54.0%', direction: 'down'});
+  assert.deepEqual(chip(2160828.13, 3795016.39), {text: M + '43.1%', direction: 'down'});
+  assert.deepEqual(chip(9822364.89, 20517150.25), {text: M + '52.1%', direction: 'down'});
+  // Recipient types, candidates and companies as drawn on the live G2.
+  assert.equal(chip(2838522.75, 7632130.98).text, M + '62.8%');
+  assert.equal(chip(2276748.42, 2461229.27).text, M + '7.5%');
+  assert.equal(chip(116533, 16010).text, '+628%', 'WARNER: 627.9% is at least 100%, so whole percent');
+  assert.equal(chip(58250, 9250).text, '+530%');
+  assert.equal(chip(46500, 52505).text, M + '11.4%');
+  assert.equal(chip(44375, 4000).text, '+1009%');
+  assert.equal(chip(811222.4, 903972.27).text, M + '10.3%', 'PNC is outside 2023-2024\'s top six but in its data: a chip, not "new"');
+  // A name the earlier cycle does not have at all.
+  assert.deepEqual(chip(45238.09, undefined), {text: 'new', direction: ''});
+  assert.deepEqual(chip(45238.09, null), {text: 'new', direction: ''});
+  // An earlier net of zero has no percentage.
+  assert.deepEqual(chip(100, 0), {text: 'new', direction: ''});
+  assert.deepEqual(chip(0, 0), {text: '0.0%', direction: ''}, 'nothing then and nothing now is no change, not "new"');
+  // An earlier net below zero was there: not "new", and the change is in dollars.
+  assert.deepEqual(chip(100, -10), {text: '+$110', direction: 'up', dollars: true});
+  assert.deepEqual(chip(-50, -10), {text: M + '$40', direction: 'down', dollars: true});
+  assert.deepEqual(chip(-10, -10), {text: '$0', direction: '', dollars: true});
+  // Rounded once: never "+100.0%", never a signed zero.
+  assert.equal(chip(199.96, 100).text, '+100%');
+  assert.equal(chip(199.94, 100).text, '+99.9%');
+  assert.deepEqual(chip(100.04, 100), {text: '0.0%', direction: ''});
+  assert.deepEqual(chip(99.96, 100), {text: '0.0%', direction: ''});
+  assert.deepEqual(chip(100, 100), {text: '0.0%', direction: ''});
+  // Falling to nothing is the whole of it.
+  assert.deepEqual(chip(0, 250), {text: M + '100%', direction: 'down'});
+});
+
 // Paul, 2026-09-23: "You should be able to expand each section individually
 // like with a census panel".
 test('[graph-layout] every Graph card folds on its own, under its own remembered key', () => {

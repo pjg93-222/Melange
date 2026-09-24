@@ -206,7 +206,7 @@
     let dimIds=columns.map(c=>idOf(columnLabel(c,source)));if(!dimIds.length)dimIds=[idOf('Group')];
     const valueId=idOf(measure||'Value'),unitOf=c=>source?.columns[c]?.unit||'number';
     let rows=result.groups.map(g=>{const parts=tupleOf(g,dimIds.length),row={};dimIds.forEach((id,k)=>{row[id]=parts[k]??'(Missing)';});row[valueId]=g.value;return Object.assign(row,g.extra||{});});
-    let dims=dimIds,measures=[valueId],cols=[...dimIds.map(id=>({id,name:id})),{id:valueId,name:measure||'Value',unit:'number'}];
+    let dims=dimIds,measures=[valueId],cols=[...dimIds.map(id=>({id,name:id})),{id:valueId,name:measure||'Value',unit:'number',aggregation:config.aggregation}];
     const fallback=(why)=>{const bars={...result,type:'horizontal',series:undefined,groups:result.groups.map(g=>Array.isArray(g.values)?{...g,value:g.values[0]?.value??0}:g)};
       const drawn=chartSVG(bars,measure,config,source,titleText,scopeText,options);drawn.svg.append(svgNode('text',{x:20,y:Number(drawn.svg.getAttribute('viewBox').split(' ')[3])-8,fill:MentatTheme.ink,'font-family':MentatTheme.sans,'font-size':12,'data-note':'fallback'},why));return drawn;};
     if(['heatmap','highlight'].includes(result.type)){
@@ -220,7 +220,7 @@
       // its note; a one-measure bullet (the default rows above) draws its bars as a bullet.
       const ids=result.series.map(s=>idOf(s)),cfg=result.seriesConfig||[];
       rows=result.groups.map(g=>{const parts=tupleOf(g,dimIds.length),row={};dimIds.forEach((id,k)=>{row[id]=parts[k]??'(Missing)';});ids.forEach((id,k)=>{row[id]=g.values[k]?.value??null;});return row;});
-      measures=ids;cols=[...dimIds.map(id=>({id,name:id})),...ids.map((id,k)=>({id,name:result.series[k],unit:unitOf(cfg[k]?.column)}))];
+      measures=ids;cols=[...dimIds.map(id=>({id,name:id})),...ids.map((id,k)=>({id,name:result.series[k],unit:unitOf(cfg[k]?.column),aggregation:cfg[k]?.aggregation}))];
     }else if(result.type==='gantt'){
       rows=result.groups.map(g=>{const parts=tupleOf(g,dimIds.length),row={};dimIds.forEach((id,k)=>{row[id]=parts[k]??'(Missing)';});return Object.assign(row,{first_date:g.first??null,last_date:g.last??null,span_days:g.span??null});});
       measures=['span_days'];cols=[...dimIds.map(id=>({id,name:id})),{id:'span_days',name:'Span (days)',unit:'days'}];

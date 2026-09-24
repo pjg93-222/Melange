@@ -76,11 +76,17 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
         if(width===390)await page.waitForFunction(tab=>{const el=document.getElementById('tab-'+tab),r=el.getBoundingClientRect(),n=el.parentElement.getBoundingClientRect();return r.left>=n.left-1 && r.right<=n.right+1;},tab);
         const shell=await page.evaluate(()=>{
           const style=selector=>getComputedStyle(document.querySelector(selector));
-          const nav=style('.app-navigation'),work=style('.workspace'),title=style('.workspace-heading h1'),selected=style('.workspace-tabs [aria-selected=true]');
-          return {navigationWidth:nav.width,navigationPadding:nav.padding,workspacePadding:work.padding,titleSize:title.fontSize,titleWeight:title.fontWeight,selectedBackground:selected.backgroundColor,selectedColor:selected.color};
+          const nav=style('.app-navigation'),work=style('.workspace'),title=style('.workspace-heading h1'),selected=style('.workspace-tabs [aria-selected=true]'),mark=style('.app-navigation .wordmark');
+          return {navigationWidth:nav.width,navigationPadding:nav.padding,workspacePadding:work.padding,titleSize:title.fontSize,titleWeight:title.fontWeight,titleTracking:title.letterSpacing,selectedBackground:selected.backgroundColor,selectedColor:selected.color,wordmark:`${mark.fontWeight} ${mark.fontSize} ${mark.letterSpacing}`};
         });
         if(tab==='graph'){
           if(width>=1100)assert.equal(shell.navigationPadding.split(' ')[0],'20px',`Graph's desktop sidebar keeps board M4's 20px top padding at ${width}px`);
+          // r5 (M4 at 1600x900): the wordmark's ink is M4's medium weight and tracking (Arial 600 21px at .1em;
+          // the 500 it replaces renders Arial Regular, 28% lighter than the board), and the two-line footer's
+          // ink sits at y810 and y827, 62px of padding above the bottom (50px was for a three-line stamp).
+          if(width>=1100)assert.deepEqual([shell.wordmark,shell.navigationPadding],['600 21px 2.1px','20px 10px 62px 16px'],`Graph keeps board M4's wordmark and footer at ${width}px`);
+          // The page title every M4-styled view shares (Graph, and Chart Studio below 1100px): serif 31px.
+          if(width>=761)assert.deepEqual([shell.titleSize,shell.titleWeight,shell.titleTracking],['31px','500','normal'],`Graph keeps board M4's page title at ${width}px`);
         }else{
           // A view that carries its own board's page title pins those title fields; every other field, and
           // any title field it does not own, equals the shared shell (set by the first view that shows it).
@@ -88,8 +94,14 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
           // Build 04: Insights' page title is board I1's serif 36px.
           // r4, TD-06 (Paul, 2026-09-24: "reconcile and complete the open items"): Loading and Collection
           // keep boards B20/L1-L4 and B22's semibold serif title, 35px.
-          const own=tab==='chart-studio'&&width>=1100?{titleSize:'40px'}
-            :tab==='insights'&&width>=761?{titleSize:'36px'}
+          // r5 (audit men-b F1, TC-02): Cross-reference (B16), PAC evidence (B19) and Insights (I1) draw the same
+          // semibold title; each keeps the tracking whose ink best overlaps its board's (Georgia Bold is wider).
+          // r5 (chart-studio.css, "board S1 has no page scroll"): at 1100px and wider Chart Studio's workspace keeps
+          // 23px under the studio grid instead of the shared 40px, so its sheet tabs end at the fold.
+          const own=tab==='chart-studio'&&width>=1100?{titleSize:'40px',workspacePadding:'11px 22px 23px 26px'}
+            :tab==='insights'&&width>=761?{titleSize:'35px',titleWeight:'600',titleTracking:'-2px'}
+            :tab==='cross-reference'&&width>=761?{titleSize:'35px',titleWeight:'600',titleTracking:'-1.5px'}
+            :tab==='evidence'&&width>=761?{titleSize:'35px',titleWeight:'600',titleTracking:'-0.5px'}
             :(tab==='loading'||tab==='collection')&&width>=761?{titleSize:'35px',titleWeight:'600'}:{};
           for(const [field,value] of Object.entries(own))assert.equal(shell[field],value,`${tab} keeps its board's ${field} ${value} at ${width}px`);
           const shared=shellByWidth.get(width)||{};
@@ -105,6 +117,23 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
             return tab==='loading'?{titleTop:Math.round(box('#workspace-title').top),introTop:Math.round(box('#view-loading .view-intro').top),stepsTop:Math.round(box('#loading-steps').top)}
               :{titleTop:Math.round(box('#workspace-title').top),tabsBottom:Math.round(box('.run-collections').bottom)};},tab);
           assert.deepEqual(head,tab==='loading'?{titleTop:18,introTop:66,stepsTop:112}:{titleTop:21,tabsBottom:125},`${tab}: the page head keeps its board's spacing`);
+        }
+        if(width===1168&&tab==='loading'){
+          // r5: B20/L1's roster card draws its buttons, drop line and draft note smaller than 16px, and the setup
+          // note breaks before "Start collection." (ink widths in workspace-polish.css).
+          const type=await page.evaluate(()=>{const s=q=>getComputedStyle(document.querySelector(q));
+            return {add:s('#add-company').fontSize,paste:s('#paste-roster').fontSize,drop:s('#roster-drop').fontSize,draft:s('#draft-status').fontSize,note:s('#setup-note').maxWidth};});
+          assert.deepEqual(type,{add:'14px',paste:'14px',drop:'13.5px',draft:'12px',note:'265px'},'loading: the roster card keeps B20\'s type sizes');
+        }
+        if(width===1168&&['cross-reference','insights','evidence'].includes(tab)){
+          // r5: B16's subtitle ink stays at y60 with the run strip under it; I1's subtitle ink at y57 and filter card
+          // at y92; B19's title ink at y25, "Split with Graph" at y21 and the rail at y72 (1600x900 frame, same px here).
+          const head=await page.evaluate(tab=>{const top=selector=>Math.round(document.querySelector(selector).getBoundingClientRect().top);
+            return tab==='cross-reference'?{titleTop:top('#workspace-title'),subtitleTop:top('.xref-subtitle')}
+              :tab==='insights'?{titleTop:top('#workspace-title'),subtitleTop:top('.insights-subtitle'),controlsTop:top('#insights-controls')}
+              :{titleTop:top('#workspace-title'),splitTop:top('#split-view'),railTop:top('.evidence-rail')};},tab);
+          assert.deepEqual(head,tab==='cross-reference'?{titleTop:13,subtitleTop:55}:tab==='insights'?{titleTop:11,subtitleTop:54,controlsTop:92}
+            :{titleTop:18,splitTop:21,railTop:72},`${tab}: the page head keeps its board's spacing`);
         }
         if(process.env.MENTAT_UI_SCREENSHOTS){
           await page.screenshot({path:path.join(out,`${phase}-${tab}-${width}.png`),fullPage:true});

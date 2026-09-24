@@ -422,6 +422,11 @@ const VISIBLE_SOURCE = `node => {
       firstCompanySegments: document.querySelectorAll('#graph-companies [data-spark="companies-0"] polyline.graph-spark-line').length,
       companyMarks: document.querySelectorAll('#graph-companies .graph-bar-button').length,
       foot: (document.getElementById('graph-foot-companies') || {}).textContent,
+      footTitle: (document.getElementById('graph-foot-companies') || {}).title,
+      footLines: (() => { const foot = document.getElementById('graph-foot-companies'); if (!foot) return 0;
+        const range = document.createRange(); range.selectNodeContents(foot);
+        return new Set([...range.getClientRects()].map(rect => Math.round(rect.top))).size; })(),
+      info: (document.querySelector('#graph-company-panel .graph-panel-foot .graph-info') || {getAttribute: () => ''}).getAttribute('aria-label'),
       hover: [...document.querySelectorAll('#graph-companies .graph-bar-button title')].map(n => n.textContent)[0]
     }));
     assert.equal(depth.dots, 6, 'a party dot on every candidate row the fixture gives a party');
@@ -432,7 +437,13 @@ const VISIBLE_SOURCE = `node => {
     assert.equal(depth.firstCompanySegments,2,'a missing quarter splits the line instead of being joined or treated as zero');
     assert.equal(quarterlyQueries,1,'all company sparklines share one quarterly contribution query');
     assert.equal(graphRequests,1,'sparklines do not fan out extra Graph requests by cycle');
-    assert.match(depth.foot, /sparkline 2025-Q1–2026-Q4 · observed quarters; gaps are missing, not zero/, 'the footer names the quarterly range and missing-data rule');
+    // Board M4: the footer names the quarterly range on one line; the
+    // missing-data rule is the (i) note beside it and the footer's hover
+    // (r5 men-graph: spelled out on the line it wrapped the footer).
+    assert.match(depth.foot, /sparkline 2025-Q1–2026-Q4$/, 'the footer names the quarterly range');
+    assert.equal(depth.footLines, 1, 'the footer is one line, as on board M4');
+    assert.match(depth.info, /missing quarters remain gaps, not zeroes/, 'the (i) beside the footer names the missing-data rule');
+    assert.match(depth.footTitle, /^Sparkline: observed quarters 2025-Q1–2026-Q4; a missing quarter is a gap, not zero\.$/, 'and so does the footer\'s hover');
     assert.match(depth.hover, /2025-Q1 \$/, 'the company hover detail carries the per-quarter values');
     pass(`${depth.dots} party dots (${depth.dem}D/${depth.rep}R/${depth.other} other), ${depth.sparks} sparklines, footer "${depth.foot}"`);
 

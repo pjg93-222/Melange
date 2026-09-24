@@ -437,6 +437,80 @@
     return {sides: sides.map(row => row.direction), candidates, shared,
       counted: sides.reduce((sum, row) => sum + Number(row.candidates), 0), text, basis};
   }
+  /* The page's Direction select (#graph-direction), r4 code review F5. It
+     offered all six sides in every candidate view, so a reader could land on
+     a side that cannot hold anything - Contributions or Other activity among
+     the saved estimates, which record no transaction type, or the unsplit
+     'Contribution / Other' on a report whose every row carries a code - and
+     read the empty panel as a zero. It now offers what the view can hold: in
+     activity, the drawer's own rule (drawerSides) over the answer's
+     direction_totals, so a zero it offers is a measured one; in estimates, the
+     directions an estimate is recorded under (graph_data.estimate_rows); and
+     before an answer names its sides, Support, Opposition and the two split
+     sides plus whatever is chosen, so a permalink is not rewritten before it
+     is read. A chosen side the view does not offer becomes the side it was
+     split into (the larger half, as the drawer opens on the largest side) or
+     from ('Contribution / Other'), else Support, the page's default. */
+  const DIRECTION_OPTIONS = [['Support', 'Support'], ['Oppose', 'Opposition'], ['Contribution', 'Contributions'],
+    ['Other', 'Other activity'], ['Contribution / Other', 'Contributions / other (type not recorded)'],
+    ['Unknown', 'Unknown direction']];
+  const ESTIMATE_DIRECTIONS = ['Support', 'Oppose', 'Contribution / Other', 'Unknown'];
+  function directionChoices(mode, totals, current) {
+    const order = DIRECTION_OPTIONS.map(option => option[0]);
+    const measured = mode === 'activity' && Array.isArray(totals) && totals.length > 0;
+    const offered = mode === 'estimates' ? ESTIMATE_DIRECTIONS
+      : measured ? drawerSides(totals).map(row => row.direction)
+      : ['Support', 'Oppose', 'Contribution', 'Other', current];
+    const values = order.filter(value => offered.indexOf(value) >= 0);
+    let value = current;
+    if (values.indexOf(value) < 0) {
+      if (value === 'Contribution / Other') {
+        const halves = (measured ? drawerSides(totals) : [])
+          .filter(row => (row.direction === 'Contribution' || row.direction === 'Other') && values.indexOf(row.direction) >= 0)
+          .sort((a, b) => Math.abs(Number(b.amount) || 0) - Math.abs(Number(a.amount) || 0));
+        value = halves.length ? halves[0].direction : 'Support';
+      } else if ((value === 'Contribution' || value === 'Other') && values.indexOf('Contribution / Other') >= 0) {
+        value = 'Contribution / Other';
+      } else value = 'Support';
+    }
+    const labels = {};
+    for (const [id, label] of DIRECTION_OPTIONS) labels[id] = label;
+    // Estimates never split the bucket, so there is no "type" to miss.
+    if (mode === 'estimates') labels['Contribution / Other'] = 'Contributions / other';
+    return {values, value, options: values.map(id => [id, labels[id]])};
+  }
+  /* A cycle-compare change chip (board G2): the latest cycle's value against
+     the earlier cycle's, as a share of the earlier. The r4 audit's
+     AUDIT-MEN-A-2 asked for the arithmetic to be re-derived: every chip on
+     Banking 2023-2024 | 2025-2026 was recomputed from the two scopes' own
+     /api/graph answers and agrees (r5 men-graph report). These are the cases
+     that view does not reach, fixed here. A name the earlier cycle does not
+     have is "new". An earlier net of exactly zero has no percentage: a latest
+     amount is "new", a latest zero is no change. An earlier net below zero
+     (refunds larger than receipts) was there, so it is not "new", and a
+     percentage of a negative base reads backwards: the chip gives the change
+     in whole dollars instead. A percentage is rounded once - one decimal
+     under 100%, whole percent from 100% (99.96% prints "+100%", never
+     "+100.0%") - and a change that rounds to nothing prints "0.0%" with no
+     sign and no arrow. */
+  function changeText(latest, earlier) {
+    const missing = earlier === null || earlier === undefined || earlier === '' || !Number.isFinite(Number(earlier));
+    if (missing) return {text: 'new', direction: ''};
+    const before = Number(earlier), after = Number(latest) || 0;
+    if (before === 0) return after === 0 ? {text: '0.0%', direction: ''} : {text: 'new', direction: ''};
+    if (before < 0) {
+      const delta = Math.round(after - before);
+      if (!delta) return {text: '$0', direction: '', dollars: true};
+      return {text: (delta > 0 ? '+' : '−') + '$' + Math.abs(delta).toLocaleString('en-US'),
+        direction: delta > 0 ? 'up' : 'down', dollars: true};
+    }
+    const change = (after - before) / before * 100;
+    let rounded = Math.round(Math.abs(change) * 10) / 10;
+    const whole = rounded >= 100;
+    if (whole) rounded = Math.round(Math.abs(change));
+    if (rounded === 0) return {text: '0.0%', direction: ''};
+    return {text: (change > 0 ? '+' : '−') + rounded.toFixed(whole ? 0 : 1) + '%', direction: change > 0 ? 'up' : 'down'};
+  }
   /* The cards that fold (Paul, 2026-09-23: "You should be able to expand each
      section individually like with a census panel"), by the id graph.js's
      get() takes, and the per-browser key each one's state is kept under. */
@@ -501,6 +575,7 @@
     compactYield: compactYield, COMPACT_NAME_SHARE_W: COMPACT_NAME_SHARE_W,
     drawerSides: drawerSides, DRAWER_SIDE_ORDER: DRAWER_SIDE_ORDER,
     drawerOverlap: drawerOverlap, DRAWER_SIDE_LABEL: DRAWER_SIDE_LABEL,
+    directionChoices: directionChoices, DIRECTION_OPTIONS: DIRECTION_OPTIONS, changeText: changeText,
     FOLD_SECTIONS: FOLD_SECTIONS, FOLD_KEY: FOLD_KEY, sparkAccessModel: sparkAccessModel};
   if (typeof module !== 'undefined' && module.exports) module.exports = layout;
   globalThis.MentatGraphLayout = layout;
@@ -742,12 +817,23 @@
   // {dim, values:[v1, v2, v3?]}; scopes 2 and 3 live in compareViews[i],
   // never in `view` (see the compare section near the end of this file).
   let compare=null,compareViews=[],compareAll=null,compareLayout='',pendingCompare=null,viewKey='';
+  // The sides the last activity answer measured (direction_totals), for the
+  // Direction select (F5); null until an answer for this scope names them.
+  // directionScope is the scope they measured: the request less its
+  // direction, because the sides are the same whichever side is asked for.
+  // A refresh of that same scope keeps them while its answer is read (r5
+  // code review F2), so the select no longer drops to the shorter unmeasured
+  // list for a 20-35 s Banking read and comes back when the answer lands. Any
+  // other scope starts from the unmeasured list, as before: its sides are
+  // not known until its own answer names them.
+  let directionTotals=null,directionScope='';
+  function sidesScope(params) {const scope=new URLSearchParams(params);scope.delete('direction');return scope.toString();}
   function options(node, values, selected='') {
     node.replaceChildren(...values.map(([id,label]) => new Option(label,id)));
     if ([...node.options].some(o=>o.value===selected)) node.value=selected;
   }
   function error(text='') {get('error').textContent=text;get('error').hidden=!text;}
-  function clear() {view=null;window.dispatchEvent(new CustomEvent('mentat:graph',{detail:null}));get('results').hidden=true;get('candidate-detail').hidden=true;get('freshness').replaceChildren();get('provenance').replaceChildren();error();}
+  function clear(keepSides=false) {view=null;if(!keepSides){directionTotals=null;directionScope='';}window.dispatchEvent(new CustomEvent('mentat:graph',{detail:null}));get('results').hidden=true;get('candidate-detail').hidden=true;get('freshness').replaceChildren();get('provenance').replaceChildren();error();}
   /* Four card skeletons in the shape the panels will take, so a 20-35 second
      Banking read is a page that is filling rather than a page that is empty.
      The status line above them keeps saying what is being read. */
@@ -768,10 +854,29 @@
     get('tier').disabled=get('funding').value==='corporate';
     if(get('tier').disabled)get('tier').value='';
     get('direction').parentElement.hidden=get('mode').value==='direct';
+    if(get('mode').value!=='direct')syncDirection(get('mode').value==='activity'?directionTotals:null);
     // Industry compare shares no company across scopes (02b state model).
     const locked=Boolean(compare&&compare.dim==='industry');
     get('company').disabled=locked;if(locked)get('company').value='';
     const chip=get('company').closest('.chip-select');if(chip)chip.title=locked?'Clear the comparison to choose a company':'';
+  }
+  // r4 code review F5: the Direction select offers the sides this candidate
+  // view can hold (directionChoices, above). Rebuilt only when the list
+  // changes, so a keyboard user's place in it is not reset for nothing.
+  function syncDirection(totals) {
+    const select=get('direction');
+    const choice=directionChoices(get('mode').value,totals,select.value);
+    const now=[...select.options].map(option=>option.value+'\u0001'+option.textContent).join('\u0002');
+    if(now!==choice.options.map(pair=>pair.join('\u0001')).join('\u0002'))options(select,choice.options,choice.value);
+    select.value=choice.value;
+    return choice;
+  }
+  // A direction from a permalink or the trail: any side the server answers
+  // for, placed in the list for the current mode.
+  function setDirection(value) {
+    if(!DIRECTION_OPTIONS.some(option=>option[0]===value))return;
+    const choice=directionChoices(get('mode').value,null,value);
+    options(get('direction'),choice.options,choice.value);
   }
   /* One scope's /api/graph request, built from an explicit scope object. The
      primary scope below reads the page's controls; a compare scope (phase
@@ -821,7 +926,8 @@
     const scope=globalThis.MentatScope?.read();
     if(!scope)return;
     for(const name of ['industry','mode','direction','funding'])
-      if(scope[name]&&[...get(name).options].some(option=>option.value===scope[name]))get(name).value=scope[name];
+      if(name==='direction'){if(scope.direction)setDirection(scope.direction);}
+      else if(scope[name]&&[...get(name).options].some(option=>option.value===scope[name]))get(name).value=scope[name];
     category=scope.category||'';recipient=scope.recipient||'';
     pendingDrawer=scope.drawer?{id:scope.drawer,direction:scope.drawerDirection||''}:null;
     // A permalink's comparison. Industries can be checked now; cycles and
@@ -889,8 +995,8 @@
       await refresh(true);
     } catch(e){if(ticket===revision){error(e.message);status('Report sources unavailable.');}}
   }
-  async function refresh(initial=false) {
-    const ticket=++revision;controller?.abort();controller=new AbortController();clear();syncControls();
+  async function refresh(initial=false,redirected=false) {
+    const ticket=++revision;controller?.abort();controller=new AbortController();clear(Boolean(directionTotals)&&directionScope===sidesScope(filters()));syncControls();
     if(!get('industry').value){skeleton(false);return;}
     status('Reading saved giving data…');
     skeleton(true);
@@ -915,6 +1021,21 @@
       const response=await fetch('/api/graph?'+query+(initial&&!query.get('cycle')?'&latest=1':''),{signal:controller.signal});
       const body=await response.json();if(!response.ok)throw new Error(body.error||'Graph unavailable.');
       if(ticket!==revision)return;
+      // r4 code review F5: the answer names the sides it measured. A chosen
+      // side it does not offer - an old permalink's 'Contribution / Other'
+      // on a report whose rows all carry a code - is asked again as the side
+      // directionChoices makes of it, before anything is drawn, so no empty
+      // panel is read as a measured zero. direction_totals are the same
+      // whichever side was asked for, so this happens at most once.
+      if(!redirected&&body.filters&&body.filters.mode==='activity'&&Array.isArray(body.direction_totals)&&body.direction_totals.length){
+        const choice=directionChoices('activity',body.direction_totals,body.filters.direction);
+        if(choice.value!==body.filters.direction){
+          options(get('direction'),choice.options,choice.value);
+          // The side asked again is on the same scope, so its sides are these.
+          if(sidesScope(filters())===sidesScope(query)){directionTotals=body.direction_totals;directionScope=sidesScope(query);}
+          refresh(initial,true);return;
+        }
+      }
       view=body;render();window.dispatchEvent(new CustomEvent('mentat:graph',{detail:{...body,run:get('run').value,industry:get('industry').value}}));
       if(compare&&!early)loadCompareScopes(null);
     } catch(e){if(ticket===revision&&e.name!=='AbortError'){skeleton(false);error(e.message);status('Graph unavailable for this selection.');}}
@@ -1001,6 +1122,9 @@
     options(get('company'),[['','All companies'],...opts.companies.map(c=>[c,c])],view.filters.company);
     options(get('cycle'),[['','All cycles'],...opts.cycles.map(c=>[c,`${Number(c)-1}–${c}`])],view.filters.cycle);
     options(get('tier'),[['','All'],...['Chief','Middle-Management','Employees',...(opts.unknown_tiers?['Unknown']:[])].map(t=>[t,t])],view.filters.tier);
+    directionTotals=view.filters&&view.filters.mode==='activity'&&Array.isArray(view.direction_totals)&&view.direction_totals.length?view.direction_totals:null;
+    // The selects now hold this answer's own scope (a first load's latest cycle included).
+    directionScope=directionTotals?sidesScope(filters()):'';
     syncControls();get('chips').replaceChildren();
     if(pendingCompare){resolvePendingCompare();syncControls();}
     renderCompareChip();
@@ -1127,7 +1251,7 @@
     const container=host||get(name);container.replaceChildren();
     const p=document.createElement('p');p.className='graph-empty';p.textContent=message;container.append(p);
     const foot=footNode===null?null:(footNode||document.getElementById('graph-foot-'+name));
-    if(foot)foot.textContent='';
+    if(foot){foot.textContent='';foot.removeAttribute('title');}
     if(!host)labelValues(name,0,0);
   }
   /* MOTION. One switch: the reduced-motion media query rewrites --motion in
@@ -1330,7 +1454,8 @@
         ?{role:'listitem','aria-label':`${label}: ${said}`,class:'graph-bar-row'}
         :{role:'button',tabindex:0,'aria-label':`${label}: ${said}`,
           class:'graph-bar-button'+(selected&&row.id===selected?' is-selected':'')});
-      group.append(svgNode('title',{},`${label} · ${said}`+(percent!==null?` · ${percent.toFixed(1)}% of ${denom}`:'')));
+      group.append(svgNode('title',{},`${label} · ${said}`+(percent!==null?` · ${percent.toFixed(1)}% of ${denom}`:'')
+        +(mark&&mark.change&&mark.change.against?` · ${mark.change.text} against ${mark.change.against}`:'')));
       const lit=opts.litIds instanceof Set&&opts.litIds.has(String(row.id));
       group.append(svgNode('rect',{x:0,y:top-15,width:CHART_WIDTH,height:pitch-4,rx:4,
         class:'graph-row'+((tint&&tint.has(String(row.id)))||lit?' is-shared':'')}));
@@ -1378,7 +1503,9 @@
     container.append(svg);
     if(opts.animate)settle(svg);
     if(opts.values!==false)appendValues(container,name,rows,onClick);
-    if(footNode)footNode.textContent=footText(name,shown.length,rows.length,percentages,covered);
+    // A redrawn footer starts without the sparkline's hover (drawSparklines
+    // gives it back when the quarters arrive).
+    if(footNode){footNode.textContent=footText(name,shown.length,rows.length,percentages,covered);footNode.removeAttribute('title');}
     if(opts.values!==false)labelValues(name,shown.length,rows.length);
     return {bar:planned.bar!==false,share:planned.shareWidth!==0,nameFirst:Boolean(planned.nameFirst)};
   }
@@ -1698,7 +1825,16 @@
         title.textContent+=' · '+points.map(([cycle,value])=>`${cycle} ${dollars(value)}`).join(' · ');
     }
     const foot=target?target.foot:document.getElementById('graph-foot-companies');
-    if(foot&&!foot.textContent.includes('sparkline'))foot.textContent+=` · sparkline ${periods[0]}–${periods[periods.length-1]} · observed quarters; gaps are missing, not zero`;
+    // Board M4's footer names the sparkline's range on the footer's one line
+    // ("... · sparkline 2022 · 2024 · 2026 (i)"). The missing-data rule is the
+    // card's (i) note beside it ("missing quarters remain gaps, not zeroes")
+    // and the footer's own hover; spelled out on the line as well, it wrapped
+    // the footer to two lines at 1440-1920 and made the row 17px taller than
+    // the board's (r5 men-graph).
+    if(foot&&!foot.textContent.includes('sparkline')){
+      foot.textContent+=` · sparkline ${periods[0]}–${periods[periods.length-1]}`;
+      foot.title=`Sparkline: observed quarters ${periods[0]}–${periods[periods.length-1]}; a missing quarter is a gap, not zero.`;
+    }
   }
   /* ------------------------------------------------ where the reader has been
      One in-memory stack of the scope each drill-down was made FROM. It is not a
@@ -1720,7 +1856,10 @@
     const past=PAST.pop();
     if(!past)return;
     for(const name of ['company','tier','cycle','funding','mode','direction'])
-      if([...get(name).options].some(option=>option.value===past[name]))get(name).value=past[name];
+      if(name==='direction')setDirection(past.direction);
+      else if([...get(name).options].some(option=>option.value===past[name]))get(name).value=past[name];
+    // The sides measured for the scope being left are not this one's.
+    directionTotals=null;
     category=past.category;recipient=past.recipient;analysis=past.analysis||analysis;
     closeDrawer(false);
     pendingDrawer=past.drawer?{id:past.drawer,direction:past.drawerDirection}:null;
@@ -2184,7 +2323,10 @@
   document.querySelectorAll('[data-analysis-tab]').forEach(b=>b.onclick=()=>selectAnalysis(b.dataset.analysisTab,true));
   document.querySelectorAll('[data-values]').forEach(b=>b.onclick=()=>showValues(b.dataset.values));
   get('view-candidates').onclick=()=>showValues('candidates');
-  get('full-table').onclick=()=>showValues(get('export-target').value);
+  // The view's Full table lives in the More menu (r4 audit AUDIT-MEN-A-1):
+  // the table opens in its card, so the menu closes rather than cover it, as
+  // a card's own Export menu closes when it opens a table.
+  get('full-table').onclick=()=>{const more=document.getElementById('graph-more');if(more)more.open=false;showValues(get('export-target').value);};
   function syncExport() {
     const name=get('export-target').value;
     get('export').disabled=!view||(name==='candidates'&&!view.candidate_available)||!view[name]?.length;
@@ -2667,14 +2809,6 @@
   }
   /* --------------------------------------------------- headline figures */
   const FIGURES=[['giving','Net giving'],['direct','Direct to candidates'],['organizations','Recipient organizations']];
-  function changeText(latest,earlier) {
-    if(!(Number(earlier)>0)&&Number(earlier)!==0)return {text:'new',direction:''};
-    const before=Number(earlier),after=Number(latest)||0;
-    if(!before)return {text:'new',direction:''};
-    const change=(after-before)/Math.abs(before)*100;
-    const text=(change>0?'+':change<0?'−':'')+Math.abs(change).toFixed(Math.abs(change)>=100?0:1)+'%';
-    return {text,direction:change>0?'up':change<0?'down':''};
-  }
   // Cycle mode compares the latest cycle against the one before it, by the
   // cycle's own value rather than by pill order.
   function cycleOrder() {
@@ -2729,7 +2863,10 @@
           }
           if(order&&scope.index===order.latest&&order.earlier>=0){
             const earlier=scopes[order.earlier];
-            if(earlier&&earlier.status==='ready'&&earlier.data)line.append(changeChip(value,Number(earlier.data.totals[key])||0,`${scope.label} against ${earlier.label}`));
+            if(earlier&&earlier.status==='ready'&&earlier.data){
+              const before=Number(earlier.data.totals[key])||0;
+              line.append(changeChip(value,before,`${scope.label} ${dollars(value)} against ${earlier.label} ${dollars(before)}`));
+            }
           }
         }
         const spoken=document.createElement('span');spoken.className='sr-only';spoken.textContent=` ${scope.label}`;line.prepend(spoken);
@@ -2799,7 +2936,8 @@
     for(const row of rows){
       if(!joinable(name,row))continue;
       const id=rowId(name,row);
-      if(before.has(id))marks.set(id,{change:changeText(row.amount,before.get(id))});
+      // The hover names both amounts, so every chip can be re-derived.
+      if(before.has(id))marks.set(id,{change:{...changeText(row.amount,before.get(id)),against:`${earlier.label} ${dollars(before.get(id))}`}});
       else if(name==='candidates'||name==='companies')marks.set(id,{newTag:true});
       else marks.set(id,{change:{text:'new',direction:''}});
     }

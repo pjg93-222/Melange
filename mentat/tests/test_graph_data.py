@@ -282,6 +282,61 @@ class GraphTests(unittest.TestCase):
                           and r['direction'] == 'Contribution / Other' for code,part in r['transaction_parts'].items()},
                          {'24K':111,'24C':40})
 
+    def test_filing_relationship_note_counts_each_observation_once_after_the_split(self):
+        # r4 code review F1 (major): the drawer split ("It should be two
+        # separate segments", Paul, 2026-09-23) turns one recorded
+        # 'Contribution / Other' row into one row per side, each carrying the
+        # recorded row's unverified/unresolved observation counts. The note
+        # summed them over the sides, so a row split in two counted its
+        # observations twice. It must count each observation once.
+        def flagged(book):
+            sheet = book['Downstream Activity']
+            sheet['H5'] = 'Transaction Type'
+            sheet['I5'] = 'Unverified Version Rows'
+            sheet['J5'] = 'Unresolved Version Rows'
+            sheet['H8'] = '24K'
+            sheet['I8'] = 3
+            sheet['J8'] = 1
+            # The same committee, candidate and direction again, as a 24C
+            # coordinated expenditure: one recorded group, two sides.
+            sheet.append(['2025-2026','C00000003','H0CA00001','Candidate One','D','Contribution / Other',40,'24C',0,0])
+            sheet['A3'] = '100 source rows condensed to 5 committee-candidate-activity groups'
+        self.edit(flagged)
+        recorded = graph_data.report_activity(stamp(self.path))
+        row = next(r for r in recorded if r['direction'] == 'Contribution / Other')
+        self.assertEqual((row['unverified_version_rows'], row['unresolved_version_rows']), (3, 1))
+        self.assertEqual({code:part['amount'] for code,part in row['transaction_parts'].items()}, {'24K':111,'24C':40})
+        # The negative control: the split really does put the one recorded
+        # row on two sides, each still carrying 3 and 1 - summing over the
+        # sides is what gave 6 and 2.
+        sides = [r for r in graph_data.activity_sides(recorded) if r['candidate_id'] == 'H0CA00001'
+                 and r['committee'] == 'C00000003' and r['direction'] in ('Contribution','Other')]
+        self.assertEqual(sorted(r['direction'] for r in sides), ['Contribution','Other'])
+        self.assertEqual(sum(r['unverified_version_rows'] for r in sides), 6)
+        # The note counts the recorded observations once, whichever side is
+        # asked for and whether or not the view is narrowed to the PAC.
+        expected = sum(r['unverified_version_rows'] for r in recorded), sum(r['unresolved_version_rows'] for r in recorded)
+        self.assertEqual(expected, (3, 1))
+        for filters in ({}, {'direction':'Contribution'}, {'direction':'Other'}, {'recipient':'C00000003'}):
+            with self.subTest(filters=filters):
+                note = self.view(mode='activity', **filters)['candidate_note']
+                self.assertIn('Filing relationships: 3 unverified observations retained; 1 unresolved observations in the saved source.', note)
+                self.assertNotIn('6 unverified', note)
+        # The amounts are the split's, unchanged by this: 111 + 40 on the sides.
+        totals = {r['direction']:r['amount'] for r in self.view(mode='activity')['direction_totals']}
+        self.assertEqual((totals['Contribution'], totals['Other']), (111, 40))
+
+    def test_estimates_without_an_audit_bundle_say_so_in_words(self):
+        # r4 code review (observed): estimates on a report written without
+        # its audit bundle answered with the raw OS error and a local path.
+        value = self.view(mode='estimates')
+        self.assertFalse(value['candidate_available'])
+        self.assertEqual(value['candidates'], [])
+        self.assertEqual(value['candidate_note'],
+                         'Saved estimates are unavailable: this report has no estimate audit bundle (Giving.audit). '
+                         'Missing estimates are not zero.')
+        self.assertNotIn('Errno', value['candidate_note'])
+
     def test_direction_totals_are_empty_when_the_downstream_sheet_is_refused(self):
         self.edit(lambda b:b['Downstream Activity'].cell(3,1,'100 source rows condensed to 8 committee-candidate-activity groups'))
         value = self.view(mode='activity')

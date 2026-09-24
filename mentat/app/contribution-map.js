@@ -208,7 +208,10 @@
     const markByZip = new Map(data.marks.filter(m => m.kind === 'zip').map(m => [m.zip5, m]));
     const markByState = new Map(data.marks.filter(m=>m.kind==='state').map(m=>[m.state,m]));
     const markByDistrict = new Map(data.marks.filter(m=>m.kind==='district').map(m=>[m.key.slice('district:'.length),m]));
-    const largest = data.marks.reduce((value, mark) => Math.max(value, Math.abs(mark.value)), legacyValue ? 1 : 1e-9);
+    // options.scaleMax (Chart Studio compare, census B-S32): maps drawn side by
+    // side share one shading scale. Absent, each map scales to its own marks.
+    const largest = Number.isFinite(options.scaleMax) && options.scaleMax > 0 ? options.scaleMax
+      : data.marks.reduce((value, mark) => Math.max(value, Math.abs(mark.value)), legacyValue ? 1 : 1e-9);
     function drawLayers() {
       geographyLayer.replaceChildren(); labelLayer.replaceChildren();
       // Order is deliberate: fill under district lines under state lines. None
