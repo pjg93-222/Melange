@@ -309,6 +309,19 @@ body[data-view]{background-color:var(--analysis-paper)}
   body[data-view] .graph-trail-part[aria-current=page]{color:#69696e;font-weight:400}
   body[data-view] .graph-trail-part[aria-current=page]:not(:only-of-type){color:var(--acu-plum);font-weight:600}
 }
+/* Loading and Collection keep their own boards' page head (r4, TD-06), as Chart
+   Studio (S1, 40px) and Insights (I1, 36px) do; the other views keep M4's 31px.
+   B20/L1-L4 and B22 draw a semibold serif title: Georgia 35px lands on their
+   233x28 and 181x30 ink. The spacing puts, at 1600x900, Loading's intro ink at
+   y70, stepper at y112 and cards at y182, and Collection's pill at y27, tabs'
+   underline at y121-124 over the rule at y124 and run card at y150. */
+@media(min-width:761px){
+  body:is([data-view=loading],[data-view=collection]) .workspace-heading h1{font:600 35px/42px var(--font-serif);letter-spacing:0;color:#1d173b}
+  body[data-view=loading] .workspace-heading{margin:7px 0 0}
+  body[data-view=loading] #view-loading .view-intro{margin:6px 0 24px}
+  body[data-view=collection] .workspace-heading{margin:10px 0 0}
+  body[data-view=collection] #view-collection .run-collections{margin-top:28px}
+}
 /* ------------------------------------------- Chart Studio redesign, build 03 (2026-09-22)
    Board S1 (boards\S1_chart_studio.webp, 1600x900 at 1.25x). Replaces build 01's
    interim D1 toolbar rule. Two rows of chrome above the chart (D-041): the header

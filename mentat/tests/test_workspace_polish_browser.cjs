@@ -81,16 +81,31 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
         });
         if(tab==='graph'){
           if(width>=1100)assert.equal(shell.navigationPadding.split(' ')[0],'20px',`Graph's desktop sidebar keeps board M4's 20px top padding at ${width}px`);
-        }else if(tab==='chart-studio'&&width>=1100&&shellByWidth.has(width)){
-          // Build 03: Chart Studio's page title is board S1's serif 40px; the rest of the shell is shared.
-          assert.equal(shell.titleSize,'40px',`Chart Studio keeps board S1's 40px title at ${width}px`);
-          assert.deepEqual({...shell,titleSize:shellByWidth.get(width).titleSize},shellByWidth.get(width),`${tab}: navigation and page styling must stay consistent at ${width}px`);
-        }else if(tab==='insights'&&width>=761&&shellByWidth.has(width)){
-          // Build 04: Insights' page title is board I1's serif 36px; the rest of the shell is shared.
-          assert.equal(shell.titleSize,'36px',`Insights keeps board I1's 36px title at ${width}px`);
-          assert.deepEqual({...shell,titleSize:shellByWidth.get(width).titleSize},shellByWidth.get(width),`${tab}: navigation and page styling must stay consistent at ${width}px`);
-        }else if(shellByWidth.has(width))assert.deepEqual(shell,shellByWidth.get(width),`${tab}: navigation and page styling must stay consistent at ${width}px`);
-        else shellByWidth.set(width,shell);
+        }else{
+          // A view that carries its own board's page title pins those title fields; every other field, and
+          // any title field it does not own, equals the shared shell (set by the first view that shows it).
+          // Build 03: Chart Studio's page title is board S1's serif 40px.
+          // Build 04: Insights' page title is board I1's serif 36px.
+          // r4, TD-06 (Paul, 2026-09-24: "reconcile and complete the open items"): Loading and Collection
+          // keep boards B20/L1-L4 and B22's semibold serif title, 35px.
+          const own=tab==='chart-studio'&&width>=1100?{titleSize:'40px'}
+            :tab==='insights'&&width>=761?{titleSize:'36px'}
+            :(tab==='loading'||tab==='collection')&&width>=761?{titleSize:'35px',titleWeight:'600'}:{};
+          for(const [field,value] of Object.entries(own))assert.equal(shell[field],value,`${tab} keeps its board's ${field} ${value} at ${width}px`);
+          const shared=shellByWidth.get(width)||{};
+          for(const field of Object.keys(shell))if(!(field in own)&&!(field in shared))shared[field]=shell[field];
+          shellByWidth.set(width,shared);
+          const mine=Object.fromEntries(Object.keys(shell).filter(field=>!(field in own)).map(field=>[field,shell[field]]));
+          assert.deepEqual(mine,Object.fromEntries(Object.keys(mine).map(field=>[field,shared[field]])),`${tab}: navigation and page styling must stay consistent at ${width}px`);
+        }
+        if(width===1168&&(tab==='loading'||tab==='collection')){
+          // r4, TD-06: the head's spacing is the boards' (1600x900 frame, same px at 1168). B20: title ink at
+          // y24, intro ink at y70, stepper at y112. B22: title ink and pill at y27, tab rule ending at y125.
+          const head=await page.evaluate(tab=>{const box=selector=>document.querySelector(selector).getBoundingClientRect();
+            return tab==='loading'?{titleTop:Math.round(box('#workspace-title').top),introTop:Math.round(box('#view-loading .view-intro').top),stepsTop:Math.round(box('#loading-steps').top)}
+              :{titleTop:Math.round(box('#workspace-title').top),tabsBottom:Math.round(box('.run-collections').bottom)};},tab);
+          assert.deepEqual(head,tab==='loading'?{titleTop:18,introTop:66,stepsTop:112}:{titleTop:21,tabsBottom:125},`${tab}: the page head keeps its board's spacing`);
+        }
         if(process.env.MENTAT_UI_SCREENSHOTS){
           await page.screenshot({path:path.join(out,`${phase}-${tab}-${width}.png`),fullPage:true});
           if(width===1168)await page.screenshot({path:path.join(out,`${phase}-${tab}-reference-size.png`),fullPage:false});
