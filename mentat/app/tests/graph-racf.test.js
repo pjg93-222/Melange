@@ -7,7 +7,9 @@
    it was read for and only while the server confirms the ETag it was parsed
    from; prefetch reads one likely-next view at a time, never while another
    /api/graph read is in flight, never while the page is hidden, and stops at
-   once when cancelled.
+   once when cancelled; its reads, and only its reads, carry the request
+   header X-Mentat-Prefetch: 1 (review H4), so the server never records them
+   as user accesses.
 
    Run this suite with the glob form; Node 24 rejects a bare directory:
      node --test "app/tests/**"/"*.test.js"      (cwd: mentat/)
@@ -158,4 +160,63 @@ test('[graph-racf] cancel aborts the read under way and drops the plan; start ke
   scheduler.start(['/7']);
   env.flush(); await env.settle();
   assert.deepEqual(env.reads.map(r => r.url), ['/1', '/7'], 'a new plan after the cancel runs on its own');
+});
+
+/* Review H4 (2026-09-24): the idle prefetch must not count as a user access.
+   Prefetch reads carry the request header X-Mentat-Prefetch: 1 (server.py
+   then answers the same but does not call record_access); a reader's own
+   read sends exactly what it sent before. Both use the same URL, so the
+   browser's cache entry, the ETag and the memory tier are shared. */
+const PREFETCH = 'X-Mentat-Prefetch';
+// A stand-in fetch that notes each request's URL and init and answers with
+// one ETag; while hold(true), answers wait for release().
+function fakeFetch(etag = '"e1"') {
+  const calls = [], waiting = [];
+  let holding = false;
+  const fetcher = (url, init) => {
+    calls.push({url, init});
+    const answer = {ok: true, headers: {get: name => (name === 'ETag' ? etag : null)},
+      text: () => Promise.resolve(JSON.stringify({url})), body: {cancel: () => Promise.resolve()}};
+    return holding ? new Promise(resolve => waiting.push(() => resolve(answer))) : Promise.resolve(answer);
+  };
+  return {fetcher, calls, hold: on => { holding = on; }, release: () => waiting.splice(0).forEach(go => go())};
+}
+const marked = init => new Headers((init && init.headers) || {}).get(PREFETCH);
+
+test('[graph-racf] a prefetch read carries X-Mentat-Prefetch: 1; a reader\'s own read of the same URL sends nothing new', async () => {
+  const {fetcher, calls} = fakeFetch();
+  const reader = graph.graphReader(graph.graphMemoryModel(), fetcher);
+  const url = '/api/graph?industry=Banking&company=A&cycle=2024';
+  const signal = new AbortController().signal;
+  const guessed = await reader.prefetch(url, signal);
+  const clicked = await reader.read(url, signal);
+  assert.deepEqual(calls.map(call => call.url), [url, url], 'the same URL, so one browser cache entry and one ETag');
+  assert.equal(marked(calls[0].init), '1', 'the prefetch read is marked');
+  assert.equal(marked(calls[1].init), null, 'the reader\'s own read is not');
+  assert.deepEqual(Object.keys(calls[1].init).sort(), ['cache', 'signal'], 'and sends exactly what it sent before the fix');
+  assert.equal(calls[1].init.signal, signal);
+  assert.ok(calls.every(call => call.init.cache === 'no-cache'), 'both revalidate by ETag');
+  assert.equal(guessed.reused, false);
+  assert.equal(clicked.reused, true, 'the click reuses the answer the prefetch parsed (one memory tier)');
+  assert.equal(clicked.body, guessed.body);
+  assert.equal(graph.PREFETCH_HEADER, PREFETCH);
+});
+
+test('[graph-racf] the page\'s prefetcher reads only through the marked path, and a reader\'s read beside it holds it back', async () => {
+  const env = harness(), {fetcher, calls, hold, release} = fakeFetch();
+  const reader = graph.graphReader(graph.graphMemoryModel(), fetcher);
+  const scheduler = graph.graphPrefetcher(reader, env);
+  hold(true);
+  const own = reader.read('/api/graph?company=Z', undefined);
+  scheduler.start(['/api/graph?company=A', '/api/graph?company=B']);
+  env.flush(); await env.settle(); env.flush(); await env.settle();
+  assert.deepEqual(calls.map(call => call.url), ['/api/graph?company=Z'], 'no prefetch while the reader\'s own read is in flight');
+  release(); await own; await env.settle();
+  for (let turn = 0; turn < 6 && calls.length < 3; turn++) { env.flush(); await env.settle(); release(); await env.settle(); }
+  hold(false);
+  assert.deepEqual(calls.map(call => call.url), ['/api/graph?company=Z', '/api/graph?company=A', '/api/graph?company=B']);
+  assert.deepEqual(calls.map(call => marked(call.init)), [null, '1', '1'], 'every planned read is marked, the reader\'s own read is not');
+  scheduler.start(['/api/graph?company=A']);
+  env.flush(); await env.settle();
+  assert.equal(calls.length, 3, 'a prefetched answer is held, so the plan skips it');
 });

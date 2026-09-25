@@ -17,6 +17,8 @@ import tempfile
 
 HERE = Path(__file__).resolve().parent
 P, L = 'prewarm.py', 'Start-MentatApp.ps1'
+# prewarm.py imports these from its own folder at load time, so each variant folder gets a copy too.
+SIBLINGS = ('proclock.py',)
 CONTROLS = [
     ('value_order ignores access', P, "    if not access_rows and not reprime:\n        return tasks\n", "    return tasks\n",
      ['test_access_promotes_the_most_used_scope', 'test_build_plan_ranks_by_access_value']),
@@ -37,6 +39,17 @@ CONTROLS = [
      ['test_records_off_thread_and_never_raises']),
     ('access_stats import not tolerated', P, "    except ImportError:\n        return []\n    try:\n        rows = stats.top",
      "    except ZeroDivisionError:\n        return []\n    try:\n        rows = stats.top", ['test_load_access_top_falls_back_without_access_stats']),
+    # Review of batch 1, round 3 (2026-09-24): the warmer ranks from the request kinds only.
+    ('warmer window takes every kind', P, "    return load_access_top(kinds=ACCESS_REQUEST_KINDS, limit=limit, module=module)\n",
+     "    return load_access_top(kinds=None, limit=limit, module=module)\n",
+     ['test_the_warmer_ranks_from_every_request_and_no_cache_layer_row']),
+    ('warmer window drops contribution queries', P,
+     "ACCESS_REQUEST_KINDS = ACCESS_GRAPH_KINDS + ('comparison_flows', 'insights_query', 'contribution_query')\n",
+     "ACCESS_REQUEST_KINDS = ACCESS_GRAPH_KINDS + ('comparison_flows', 'insights_query')\n",
+     ['test_the_warmer_ranks_from_every_request_and_no_cache_layer_row']),
+    ('run warmer bypasses the request kinds', P, "max_company_neighbors=options.max_neighbors, access_top=warmer_access_top)",
+     "max_company_neighbors=options.max_neighbors, access_top=load_access_top)",
+     ['test_the_warmer_ranks_from_every_request_and_no_cache_layer_row']),
     ('launcher ignores primed', L, "if ($status.primed -eq $true) {", "if ($false) {", ['test_waits_until_primed']),
     ('launcher never times out', L, "if ($left -le 0) {", "if ($false) {", ['test_times_out_and_opens_anyway']),
     ('launcher waits on an older console', L, "if ($null -ne $failed -and [int]$failed.StatusCode -eq 404) {", "if ($false) {",
@@ -78,7 +91,7 @@ def main():
     for index, (name, target, old, new, expected) in enumerate(CONTROLS, 1):
         folder = root / f'c{index:02d}'
         folder.mkdir()
-        for filename in (P, L):
+        for filename in (P, L) + SIBLINGS:
             shutil.copyfile(app / filename, folder / filename)
         path = folder / target
         source = path.read_bytes().decode('utf-8')

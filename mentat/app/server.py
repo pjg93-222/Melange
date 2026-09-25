@@ -2364,6 +2364,18 @@ class Console:
 # prewarm.AccessRecorder only on the console on the user's own data root that may write; everywhere else
 # it stays None and record_access() does nothing.
 ACCESS_RECORDER = None
+# graph.js marks its idle prefetch of the likely next Graph views with this request header (value '1'). Such
+# a read is answered exactly like a click on the same URL (same body, same ETag, same 304), but it is the
+# page's own guess, not a user access, so /api/graph does not call record_access for it (review H4,
+# 2026-09-24): recording it would rank the warmer's priming by what the page guessed. A custom X- header,
+# because browsers forbid scripts to set Sec-Purpose; nothing varies on it, so the browser's cache entry
+# for the URL is shared by the prefetch and the click.
+PREFETCH_HEADER = 'X-Mentat-Prefetch'
+
+
+def prefetch_request(handler):
+    """Whether this request is graph.js's idle prefetch (PREFETCH_HEADER: 1), not a user access."""
+    return (handler.headers.get(PREFETCH_HEADER) or '').strip() == '1'
 
 
 def record_access(handler, kind, body, started):
@@ -2693,6 +2705,8 @@ class Handler(BaseHTTPRequestHandler):
                     params = {**{k:v[0] for k,v in query.items()}, 'industry': label}
                     self.send_entry(response_cache.from_value(app.graph(query.get('id',[''])[0], label,
                                                dict(params), registry)))
+                    if prefetch_request(self):
+                        return   # graph.js's idle prefetch: answered the same, never recorded (H4)
                     # The Graph drawer's second hop is /api/graph with mode=activity (graph.js).
                     return record_access(self, 'graph_drawer' if params.get('mode') == 'activity' else 'graph_view',
                                          params, started)

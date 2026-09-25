@@ -183,8 +183,8 @@ class BuildMarkerTests(_Protocol):
             with self.assertRaisesRegex(ValueError, 'fixture build failure'):
                 self.ready(top_n=7)
         stem, info = captured[0]
-        self.assertEqual(set(info), {'pid', 'started_utc', 'key'})
-        self.assertEqual((info['pid'], info['key']), (os.getpid(), stem))
+        self.assertEqual(set(info), {'pid', 'pid_started', 'started_utc', 'key'})
+        self.assertEqual((info['pid'], info['pid_started'], info['key']), (os.getpid(), a.proclock.own_started(), stem))
         self.assertLess(abs(datetime.fromisoformat(info['started_utc']).timestamp() - time.time()), 60)
         self.assertEqual(list(a.building_dir().glob('*')), [])
 
@@ -214,16 +214,24 @@ class BuildMarkerTests(_Protocol):
         other = self.process(120)
         gone = subprocess.Popen([sys.executable, '-c', 'pass'])
         gone.wait()
+        time.sleep(3)  # the live process is now older than any marker it could have written
+        started = a.proclock.process_started(other.pid)
+        recycled = started - (1 if os.name == 'nt' else 3 * a.proclock.POSIX_START_TOLERANCE_TICKS)
+
+        def body(pid_started, written):
+            return json.dumps({'pid': other.pid, 'pid_started': pid_started, 'started_utc': written, 'key': 'k'}).encode()
         cases = [
             ('process gone', dict(pid=gone.pid), True),
             ('this process, no job of its own', dict(pid=os.getpid()), True),
-            ('older than 30 minutes', dict(pid=other.pid, started=utc(31 * 60)), True),
+            ('written before its process was created (a recycled pid)', dict(pid=other.pid, started=utc(31 * 60)), True),
             ('pid recycled after the marker', dict(pid=other.pid, started=utc(90)), True),
+            ('pid recycled: another creation time', dict(pid=None, body=body(recycled, utc())), True),
             ('abandoned unreadable marker', dict(pid=None, body=b'', age=120), True),
             ('marker being written', dict(pid=None, body=b''), False),
             ('live process', dict(pid=other.pid), False),
+            # Review H2: a live builder's marker defers others at any age (it used to expire after 30 minutes).
+            ('live process, marker 31 minutes old', dict(pid=None, body=body(started, utc(31 * 60)), age=31 * 60), False),
         ]
-        time.sleep(3)  # the live process is now older than any marker it could have written
         for top_n, (label, marker, stale) in enumerate(cases, 11):
             with self.subTest(case=label):
                 key = self.key_for(top_n=top_n)
@@ -311,6 +319,39 @@ class TwoProcessTests(_Protocol):
                              ('preparing', 500, a.ELSEWHERE_MESSAGE, 0, 0))
         self.assertEqual(Path(second_config['result']).read_text(), Path(first_config['result']).read_text())
         self.assertEqual(self.markers(), [])
+
+    def test_a_live_builders_marker_defers_at_any_age_and_a_dead_or_recycled_ones_does_not(self):
+        # Review H2, across two processes: the first process holds its real marker while it builds.
+        first, _ = self.spawn('first', delay=90)
+        self.wait_for_marker()
+        marker = self.markers()[0]
+        body = marker.read_bytes()
+        info = json.loads(body)
+        self.assertEqual((info['pid'], info['pid_started']), (first.pid, a.proclock.process_started(first.pid)))
+        later = 31 * 60
+        moment = time.time() - later
+        os.utime(marker, (moment, moment))
+        shared = Path(self.tmp.name) / 'shared'
+        with patch.object(a.store, 'ROOT', shared / 'query-cache'), \
+                patch.object(a.proclock, '_now', lambda: time.time() + later):
+            self.assertEqual(a.building_dir(), marker.parent)
+            self.assertEqual(a._inspect(marker), (True, body))
+            self.assertTrue(a._building_elsewhere(marker.stem), 'a live builder must defer others after 30 minutes')
+            self.assertEqual(marker.read_bytes(), body)
+            # The same pid with another creation time is a recycled pid: stale, removed.
+            other = info['pid_started'] - (1 if os.name == 'nt' else 3 * a.proclock.POSIX_START_TOLERANCE_TICKS)
+            marker.write_bytes(json.dumps({**info, 'pid_started': other}).encode('utf-8'))
+            self.assertFalse(a._building_elsewhere(marker.stem))
+            self.assertFalse(marker.exists())
+            marker.write_bytes(body)
+            first.kill()
+            first.wait()
+            deadline = time.time() + 30
+            while a.proclock.process_started(first.pid) is not None and time.time() < deadline:
+                time.sleep(.05)
+            self.assertEqual(a._inspect(marker), (False, body))
+            self.assertFalse(a._building_elsewhere(marker.stem), 'a dead builder defers no one')
+            self.assertFalse(marker.exists())
 
     def test_a_killed_builder_leaves_a_stale_marker_the_other_process_replaces(self):
         first, first_config = self.spawn('first', delay=60)

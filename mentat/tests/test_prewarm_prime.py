@@ -6,6 +6,7 @@ PRIME_TEST_PREWARM=<path> and PRIME_TEST_LAUNCHER=<path> pin the module and the 
 """
 from __future__ import annotations
 
+import ast
 import datetime as dt
 import importlib.util
 import json
@@ -100,6 +101,102 @@ class PlannerRankingTests(unittest.TestCase):
             self.assertEqual(prewarm.load_access_top(), [])
         broken = types.SimpleNamespace(top=lambda **_: (_ for _ in ()).throw(RuntimeError('x')))
         self.assertEqual(prewarm.load_access_top(module=broken), [])
+
+
+def console_access_kinds():
+    """Every kind server.py passes to record_access (both branches of a conditional kind)."""
+    def kinds(node):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return {node.value}
+        if isinstance(node, ast.IfExp):
+            return kinds(node.body) | kinds(node.orelse)
+        return set()
+    found = set()
+    for node in ast.walk(ast.parse((APP / 'server.py').read_text(encoding='utf-8'))):
+        if isinstance(node, ast.Call) and getattr(node.func, 'id', None) == 'record_access' and len(node.args) > 1:
+            found |= kinds(node.args[1])
+    return found
+
+
+class WarmerAccessWindowTests(unittest.TestCase):
+    """Review of batch 1, round 3 (2026-09-24): the warmer re-planned from access_stats.top() over every kind.
+    The cache layers' own 'store/...' and 'cache/...' rows (no body; they rank no task) then filled its
+    ACCESS_TOP_LIMIT window and pushed out the requests people made. The ledger here is a real access_stats
+    ledger in a temporary folder; the ops are the CLI's own op_run and op_plan, with the Warmer and the
+    backend replaced so that nothing is loaded or warmed."""
+
+    class Backend:
+        def sources(self):
+            return [{'dataset': name, 'available': True, 'verified': True, 'source_fp': 'fp' + name,
+                     'index_present': True} for name in ('A', 'B')]
+
+        def query_view_body(self, dataset):
+            return {'dataset': dataset, 'q': 1}
+
+    def ledger(self, folder):
+        """A real access_stats module on a ledger in `folder`: one request of each kind the console records,
+        all for industry B, and more cache-layer rows than the window holds, each worth more than any request.
+        (the module, the (kind, key) of every request)."""
+        spec = importlib.util.spec_from_file_location('access_stats_under_test', APP / 'access_stats.py')
+        stats = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(stats)
+        stats.configure(Path(folder) / 'access.sqlite')
+        self.addCleanup(stats.configure, Path(folder) / 'closed.sqlite')   # closes its connections first
+        requests = set()
+        with mock.patch.dict(os.environ, {'MENTAT_ACCESS_STATS': '1'}):
+            for kind in sorted(console_access_kinds()):
+                body = {'dataset': 'B', 'q': 1} if kind == 'contribution_query' else {'industry': 'B', 'view': kind}
+                stats.record(kind, prewarm.access_key(body), body=body, cost_s=1.0, size=100000)
+                requests.add((kind, prewarm.access_key(body)))
+            for index in range(prewarm.ACCESS_TOP_LIMIT + 20):
+                stats.record(('cache/graph-views', 'store/results')[index % 2], f'{index:064x}', cost_s=30.0, size=1000)
+        self.assertTrue(stats.flush())
+        return stats, requests
+
+    def test_the_warmer_ranks_from_every_request_and_no_cache_layer_row(self):
+        kinds = console_access_kinds()
+        self.assertTrue({'graph_view', 'graph_drawer', 'comparison_flows', 'insights_query', 'contribution_query'} <= kinds,
+                        kinds)
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        stats, requests = self.ledger(folder.name)
+        captured = {}
+
+        class Captured(Exception):
+            pass
+
+        class Warmer:
+            def __init__(self, backend, state, **options):
+                captured[options.get('op')] = options.get('access_top')
+
+            def replan(self, reason):
+                raise Captured(reason)
+
+            def run(self):
+                return 'ran'
+
+        class Unloaded:
+            def __init__(self, **options):
+                pass
+
+            def load(self):
+                return self
+
+        state_root = str(Path(folder.name) / 'state')
+        with mock.patch.object(prewarm, 'Warmer', Warmer), mock.patch.object(prewarm, 'AppBackend', Unloaded):
+            self.assertEqual(prewarm.op_run(prewarm._parser().parse_args(['run', '--state-root', state_root])), 'ran')
+            with self.assertRaises(Captured):
+                prewarm.op_plan(prewarm._parser().parse_args(['plan', '--state-root', state_root]))
+        for op in ('run', 'plan'):
+            with self.subTest(op=op), mock.patch.dict(sys.modules, {'access_stats': stats}):
+                self.assertTrue(callable(captured.get(op)), f'{op} gives the warmer no access ranking')
+                rows = captured[op]()
+                self.assertEqual(sorted({row['kind'] for row in rows if '/' in row['kind']}), [],
+                                 'cache-layer rows fill the window the warmer ranks by')
+                self.assertEqual(sorted((row['kind'], row['key']) for row in rows), sorted(requests))
+                # What the window decides: B's recorded query goes first, B being the industry last used.
+                plan = prewarm.build_plan(self.Backend(), hints=[], today=TODAY, code_fp='c', access_rows=rows)
+                self.assertEqual(plan['tasks'][0]['id'], prewarm.task_id('query_view', 'B', {'dataset': 'B', 'q': 1}))
 
 
 class HotSetTests(unittest.TestCase):

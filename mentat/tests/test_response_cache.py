@@ -232,13 +232,14 @@ class LockRuleTests(CacheCase):
         path = self.lock('recycled', process.pid, created - timedelta(seconds=30))  # older than the process
         self.assertFalse(rc._inspect(path)[0])
 
-    def test_lock_older_than_the_limit_is_stale_even_with_its_process_alive(self):
+    def test_lock_of_a_live_process_is_never_stale_by_its_age(self):
+        # Review H2: only a dead or recycled holder makes a lock stale; its age never does.
         process, created = self.holder()
-        path = self.lock('old', process.pid, created)
-        with patch.object(rc, 'LOCK_STALE_SECONDS', 2):
+        path = self.lock('old', process.pid, created, age=31 * 60)
+        with patch.object(rc.proclock, '_now', lambda: time.time() + 31 * 60):
             self.assertTrue(rc._inspect(path)[0])
-            time.sleep(2.6)
-            self.assertFalse(rc._inspect(path)[0])
+            self.assertIsNone(rc._claim(path))
+        self.assertTrue(path.exists())
 
     def test_lock_naming_this_process_is_stale(self):
         path = self.lock('mine', os.getpid(), datetime.now(timezone.utc))

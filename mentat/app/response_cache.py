@@ -38,12 +38,14 @@ of any code identity: it decides what is kept, never what an answer is.
 
 Single flight. One build per key at a time: an explicit per-key in-process flight
 (functools.lru_cache memoizes, it does not serialise entry: brain DE-026) and, across
-processes, a lock file created with O_CREAT|O_EXCL beside the entry. A lock is stale, and
-is removed, exactly when analysis_data.py's build markers are (perf lane S2): its process
-is gone or its pid was recycled, it is older than LOCK_STALE_SECONDS, or it names this
-process, which holds no build of that key because the in-process flight admits one
-builder. A process that finds a live lock waits for the entry (up to WAIT_SECONDS, then
-StillBuilding) instead of computing the same key a second time.
+processes, a proclock lock file created with O_CREAT|O_EXCL beside the entry. A lock is
+stale, and is removed, by proclock's one rule, the rule of every cross-process lock of the
+app (review M3/H2): its process is gone or its pid was recycled, never its age; or it names
+this process and this process does not hold it (the in-process flight admits one builder).
+A process that finds a live lock waits for the entry (up to WAIT_SECONDS, then
+StillBuilding) instead of computing the same key a second time. proclock is looked up by
+name, like access_stats, so it is not part of any code identity: it decides who builds,
+never what an answer is.
 """
 from collections import OrderedDict
 from datetime import datetime, timezone
@@ -70,7 +72,6 @@ ROOT = None
 MEMORY_BYTES = 128 * 1024 * 1024
 DISK_BYTES = 1024 * 1024 * 1024
 DISK_LIMITS = {}
-LOCK_STALE_SECONDS = 30 * 60
 WAIT_SECONDS = 120
 # Handler.send compresses with level 1 and mtime 0, so a stored gzip is exactly its bytes.
 GZIP_LEVEL = 1
@@ -87,6 +88,9 @@ _KEY = re.compile(r'[0-9a-f]{64}')
 _COUNTERS = ('memory_hits', 'disk_hits', 'builds', 'kept_out', 'waits', 'corrupt',
              'disk_writes', 'disk_errors', 'memory_evictions', 'disk_evictions')
 _log = logging.getLogger('mentat.cache')
+# Looked up by name, not imported by a statement: module_closure follows import statements, and
+# the lock code decides who builds, never what an answer is (module docstring, Single flight).
+proclock = importlib.import_module('proclock')
 _mutex = threading.RLock()
 _memory = OrderedDict()   # (namespace, key) -> _Record
 _memory_used = 0
@@ -544,129 +548,22 @@ def disk_usage(namespace):
 
 
 # ----------------------------------------------------------------------------- cross-process locks
-_kernel = None
-
-
-def _kernel32():
-    global _kernel
-    if _kernel is None:
-        import ctypes
-        from ctypes import wintypes
-        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
-        kernel.OpenProcess.restype = wintypes.HANDLE
-        kernel.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
-        kernel.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
-        kernel.GetProcessTimes.argtypes = (wintypes.HANDLE,) + (ctypes.POINTER(wintypes.FILETIME),) * 4
-        kernel.GetCurrentProcess.restype = wintypes.HANDLE
-        kernel.GetCurrentProcess.argtypes = ()
-        kernel.CloseHandle.argtypes = (wintypes.HANDLE,)
-        _kernel = kernel
-    return _kernel
-
-
-def _alive(pid, started):
-    """Whether process `pid` still runs and could have written a lock at `started` (POSIX
-    seconds): a recycled pid belongs to a process created after the lock."""
-    if os.name != 'nt':
-        try:
-            os.kill(pid, 0)
-        except ProcessLookupError:
-            return False
-        except PermissionError:
-            return True
-        return True
-    import ctypes
-    from ctypes import wintypes
-    kernel = _kernel32()
-    handle = kernel.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
-    if not handle:
-        return ctypes.get_last_error() == 5  # ERROR_ACCESS_DENIED: it exists
-    try:
-        code = wintypes.DWORD()
-        if not kernel.GetExitCodeProcess(handle, ctypes.byref(code)):
-            return True
-        if code.value != 259:  # STILL_ACTIVE
-            return False
-        times = [wintypes.FILETIME() for _ in range(4)]
-        if kernel.GetProcessTimes(handle, *(ctypes.byref(t) for t in times)):
-            created = ((times[0].dwHighDateTime << 32) | times[0].dwLowDateTime) / 1e7 - 11644473600
-            if created > started + 2:
-                return False
-        return True
-    finally:
-        kernel.CloseHandle(handle)
-
-
 def _inspect(path):
-    """None when there is no lock at `path`; otherwise (live, bytes read or None)."""
-    try:
-        raw = path.read_bytes()
-        written = path.stat().st_mtime
-    except FileNotFoundError:
-        return None
-    except OSError:
-        try:
-            return time.time() - path.stat().st_mtime <= LOCK_STALE_SECONDS, None
-        except OSError:
-            return True, None
-    now = time.time()
-    try:
-        info = json.loads(raw)
-        pid, started = int(info['pid']), datetime.fromisoformat(info['started_utc']).timestamp()
-    except (ValueError, KeyError, TypeError, OverflowError, OSError):
-        # A lock is written in the call that creates it: unreadable is that instant or abandoned.
-        return now - written < 60, raw
-    if (not 0 < pid < 2**32 or pid == os.getpid()
-            or max(now - started, now - written) > LOCK_STALE_SECONDS):
-        return False, raw
-    return _alive(pid, started), raw
+    """None when there is no lock at `path`; otherwise (live, bytes read or None), by proclock's rule."""
+    found = proclock.inspect(path)
+    return None if found is None else (found.live, found.raw)
 
 
 def _unlink(path, expected):
-    """Remove the lock at `path` only while it still holds `expected` (None: whatever it holds)."""
-    for attempt in range(5):
-        try:
-            if expected is None or path.read_bytes() == expected:
-                path.unlink()
-            return
-        except FileNotFoundError:
-            return
-        except OSError as error:
-            if attempt == 4:
-                _log.warning('response cache: could not remove the lock %s: %s', path.name, error)
-                return
-            time.sleep(.02 * (attempt + 1))
+    """Remove the lock at `path` only while it still holds `expected` (None: only while it is still an
+    abandoned unreadable body)."""
+    proclock.release(path, expected)
 
 
 def _claim(path):
-    """Create the lock at `path` (O_CREAT|O_EXCL) holding {pid, started_utc, key}. Its bytes,
-    or None while another live process holds it. A stale lock is removed and the claim retried."""
-    for _ in range(3):
-        body = json.dumps({'pid': os.getpid(), 'started_utc': _utc_now(), 'key': path.stem}).encode('utf-8')
-        try:
-            descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, 'O_BINARY', 0))
-        except FileExistsError:
-            found = _inspect(path)
-            if found is not None:
-                live, raw = found
-                if live:
-                    return None
-                _unlink(path, raw)
-            continue
-        try:
-            written = 0
-            while written < len(body):
-                written += os.write(descriptor, body[written:])
-        except BaseException:
-            os.close(descriptor)
-            try:
-                path.unlink()  # this process just created it
-            except OSError:
-                pass
-            raise
-        os.close(descriptor)
-        return body
-    return None
+    """Create the lock at `path` (O_CREAT|O_EXCL) holding {pid, pid_started, started_utc, key}. Its
+    bytes, or None while another live process holds it. A stale lock is removed and the claim retried."""
+    return proclock.claim(path, path.stem)
 
 
 def _acquire(lock, folder, namespace, key, remember, deadline):
@@ -839,20 +736,15 @@ def file_sha256(path):
 
 
 def process_started_ns():
-    """When this process was created (ns since the epoch). Windows: GetProcessTimes; elsewhere
-    the import of this module, which is later and therefore a weaker bound."""
+    """When this process was created (ns since the epoch). Windows: GetProcessTimes (proclock);
+    elsewhere the import of this module, which is later and therefore a weaker bound."""
     global _started_ns
     if _started_ns is None:
         created = None
         if os.name == 'nt':
             try:
-                import ctypes
-                from ctypes import wintypes
-                kernel = _kernel32()
-                times = [wintypes.FILETIME() for _ in range(4)]
-                if kernel.GetProcessTimes(kernel.GetCurrentProcess(), *(ctypes.byref(t) for t in times)):
-                    ticks = (times[0].dwHighDateTime << 32) | times[0].dwLowDateTime
-                    created = (ticks - 116444736000000000) * 100
+                ticks = proclock.own_started()
+                created = (ticks - proclock.EPOCH_TICKS) * 100 if ticks else None
             except (OSError, AttributeError, ValueError):
                 created = None
         _started_ns = created or _IMPORTED_NS

@@ -7,7 +7,6 @@ from collections import OrderedDict, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from datetime import date, datetime, timezone
-from functools import lru_cache
 import copy
 import hashlib
 import json
@@ -29,6 +28,7 @@ import contribution_data as data
 import contribution_query as query_engine
 import contribution_query_store as store
 import contribution_workbook_guard as guard
+import proclock
 
 PANELS = [
     ('favorites', 'Industry favorites', 'Recipient amounts, positive-gross shares, company breadth and persistence.'),
@@ -53,8 +53,8 @@ _code_hash = history.digest({p: data._hash(p) for p in _code})
 HINTS_ENABLED = False
 HINTS_PATH = data.PROJECT / 'state' / 'prewarm' / 'hints.json'
 HINTS_LIMIT = 25
-# A build marker older than this, or whose process is gone, no longer defers anyone.
-MARKER_STALE_SECONDS = 30 * 60
+# A build marker defers other processes for as long as its process runs, whatever its age; a dead or
+# recycled pid, or an abandoned partial marker, defers no one (proclock's rule; review M3/H2).
 ELSEWHERE_RETRY_MS = 500
 ELSEWHERE_MESSAGE = 'Another Mentat process is preparing this analysis; it will be shown as soon as it is saved.'
 _ELSEWHERE = object()  # a job's answer when another live process holds the key's build
@@ -102,92 +102,23 @@ def _probe(identity):
     return json.loads(payload)
 
 
-@lru_cache(maxsize=1)
-def _kernel32():
-    import ctypes
-    from ctypes import wintypes
-    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
-    kernel.OpenProcess.restype = wintypes.HANDLE
-    kernel.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
-    kernel.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
-    kernel.GetProcessTimes.argtypes = (wintypes.HANDLE,) + (ctypes.POINTER(wintypes.FILETIME),) * 4
-    kernel.CloseHandle.argtypes = (wintypes.HANDLE,)
-    return kernel
-
-
-def _alive(pid, started):
-    """Whether process `pid` still runs and could have written a marker at `started`
-    (POSIX seconds): a recycled pid belongs to a process created after the marker."""
-    if os.name != 'nt':
-        try:
-            os.kill(pid, 0)
-        except ProcessLookupError:
-            return False
-        except PermissionError:
-            return True
-        return True
-    import ctypes
-    from ctypes import wintypes
-    kernel = _kernel32()
-    handle = kernel.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
-    if not handle:
-        return ctypes.get_last_error() == 5  # ERROR_ACCESS_DENIED: it exists
-    try:
-        code = wintypes.DWORD()
-        if not kernel.GetExitCodeProcess(handle, ctypes.byref(code)):
-            return True
-        if code.value != 259:  # STILL_ACTIVE
-            return False
-        times = [wintypes.FILETIME() for _ in range(4)]
-        if kernel.GetProcessTimes(handle, *(ctypes.byref(t) for t in times)):
-            created = ((times[0].dwHighDateTime << 32) | times[0].dwLowDateTime) / 1e7 - 11644473600
-            if created > started + 2:
-                return False
-        return True
-    finally:
-        kernel.CloseHandle(handle)
-
-
 def _inspect(path):
-    """None when there is no build marker at path; otherwise (live, bytes read).
+    """None when there is no build marker at path; otherwise (live, bytes read or None).
 
-    Stale: its process is gone (or the pid was recycled), it is older than
-    MARKER_STALE_SECONDS, or it names this process, which only reaches here when it
-    runs no build of that key. A marker is written in the call that creates it, so an
-    unreadable body is either that instant or an abandoned marker."""
-    try:
-        raw = path.read_bytes()
-        written = path.stat().st_mtime
-    except FileNotFoundError:
-        return None
-    except OSError:
-        return True, None
-    now = time.time()
-    try:
-        info = json.loads(raw)
-        pid, started = int(info['pid']), datetime.fromisoformat(info['started_utc']).timestamp()
-    except (ValueError, KeyError, TypeError, OverflowError, OSError):
-        return now - written < 60, raw
-    if (not 0 < pid < 2**32 or pid == os.getpid()
-            or max(now - started, now - written) > MARKER_STALE_SECONDS):
-        return False, raw
-    return _alive(pid, started), raw
+    proclock's one staleness rule decides (review M3/H2): a marker is stale only when its
+    process is gone or its pid was recycled, never by its age, so a long build keeps
+    deferring other processes for as long as its builder runs. A marker naming this process
+    is live only while this process holds it (query() asks only when this process runs no
+    job of that key). An unreadable body is being written this instant or was abandoned
+    mid-write: live for proclock.UNREADABLE_STALE_SECONDS after its last write, then stale."""
+    found = proclock.inspect(path)
+    return None if found is None else (found.live, found.raw)
 
 
 def _unlink(path, expected):
-    """Remove the marker at path only while it still holds `expected`."""
-    for attempt in range(5):
-        try:
-            if path.read_bytes() == expected:
-                path.unlink()
-            return
-        except FileNotFoundError:
-            return
-        except OSError as error:
-            if attempt == 4:
-                _log.warning('Could not remove the Insights build marker %s: %s', path.name, error)
-                return
-            time.sleep(.02 * (attempt + 1))
+    """Remove the marker at path only while it still holds `expected` (None: only while it is
+    still an abandoned unreadable body)."""
+    proclock.release(path, expected)
 
 
 def _building_elsewhere(key):
@@ -198,43 +129,15 @@ def _building_elsewhere(key):
     if found is None:
         return False
     live, raw = found
-    if not live and raw is not None:
+    if not live:
         _unlink(path, raw)
     return live
 
 
 def _claim(key):
-    """Atomically create `key`'s build marker (O_CREAT|O_EXCL) holding {pid,
+    """Atomically create `key`'s build marker (O_CREAT|O_EXCL) holding {pid, pid_started,
     started_utc, key}. Returns its bytes, or None while another live process holds it."""
-    path = building_dir() / (key + '.lock')
-    path.parent.mkdir(parents=True, exist_ok=True)
-    for _ in range(3):
-        body = json.dumps({'pid': os.getpid(), 'started_utc': _utc_now(), 'key': key}).encode('utf-8')
-        try:
-            descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, 'O_BINARY', 0))
-        except FileExistsError:
-            found = _inspect(path)
-            if found is not None:
-                live, raw = found
-                if live:
-                    return None
-                if raw is not None:
-                    _unlink(path, raw)
-            continue
-        try:
-            written = 0
-            while written < len(body):
-                written += os.write(descriptor, body[written:])
-        except BaseException:
-            os.close(descriptor)
-            try:
-                path.unlink()  # this process just created it
-            except OSError:
-                pass
-            raise
-        os.close(descriptor)
-        return body
-    return None
+    return proclock.claim(building_dir() / (key + '.lock'), key)
 
 
 def _run(key, identity, build, stable, timing):

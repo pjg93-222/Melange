@@ -28,10 +28,11 @@ parse of units nobody reads. A sidecar that fails any check is rebuilt, never tr
 
 Storage is mentat/state/drawer-sidecars, which git ignores. Writes are atomic (a temporary file,
 then os.replace). A build is single-flight within a process, through an explicit lock per sidecar
-(lru_cache is not single-flight, brain DE-026), and across processes, through an O_EXCL lock file
-that is stale when its pid is dead or reused, or when it is older than 30 minutes. A waiter that
-times out computes the answer itself and persists nothing. Correctness never depends on a lock: a
-sidecar is a deterministic function of its key, so two builders write the same bytes.
+(lru_cache is not single-flight, brain DE-026), and across processes, through a proclock O_EXCL lock
+file, stale only when its process is gone or its pid was reused, never by its age (proclock's one rule,
+review M3/H2). A waiter that times out computes the answer itself and persists nothing. Correctness
+never depends on a lock: a sidecar is a deterministic function of its key, so two builders write the
+same bytes.
 
 Only inputs under the project's .cache folder or the configured report directory are persisted.
 Anything else (tests, scratch copies) is computed exactly as before and kept in memory only.
@@ -49,6 +50,7 @@ from __future__ import annotations
 import argparse
 from collections import OrderedDict
 import hashlib
+import importlib
 import json
 import os
 from pathlib import Path
@@ -64,10 +66,8 @@ SCHEMA = 1
 # A snapshot index is what this file's walker derives, so it is bound to this file's code.
 CODE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 DEFAULT_STATE_ROOT = PROJECT / 'state' / 'drawer-sidecars'
-LOCK_STALE_SECONDS = 30 * 60
 LOCK_WAIT_SECONDS = 120
 LOCK_POLL_SECONDS = 0.2
-LOCK_GRACE_SECONDS = 10
 TEMPORARY_MAX_AGE_SECONDS = 60 * 60
 NATIVE_PAYLOAD_TABLES = frozenset({'transfer_paths'})
 # Only the drawer's projection of the Downstream Activity sheet (explicit columns) is kept. Scans
@@ -85,6 +85,10 @@ SMALL_FIELDS = ('cycle', 'committee_id', 'totals')
 MEMO_LIMIT = 64
 MIN_FREE_BYTES = int(1.5 * 1024 ** 3)   # prewarm.MIN_FREE_BYTES
 EMIT_SOURCE = 'mentat-drawer-sidecars'
+# proclock (the app's cross-process locks) is looked up by name, not imported by a statement: this
+# module is part of graph_data's code identity (response_cache.module_closure follows import
+# statements), and the lock code decides who builds, never what a sidecar holds.
+proclock = importlib.import_module('proclock')
 
 
 class Unindexable(Exception):
@@ -192,14 +196,6 @@ if os.name == 'nt':
     from ctypes import wintypes
 
     _kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
-    _kernel32.OpenProcess.restype = wintypes.HANDLE
-    _kernel32.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
-    _kernel32.GetExitCodeProcess.restype = wintypes.BOOL
-    _kernel32.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
-    _kernel32.GetProcessTimes.restype = wintypes.BOOL
-    _kernel32.GetProcessTimes.argtypes = (wintypes.HANDLE,) + (ctypes.POINTER(wintypes.FILETIME),) * 4
-    _kernel32.CloseHandle.restype = wintypes.BOOL
-    _kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
     _kernel32.GetCurrentProcess.restype = wintypes.HANDLE
     _kernel32.GetCurrentProcess.argtypes = ()
     _kernel32.SetPriorityClass.restype = wintypes.BOOL
@@ -216,34 +212,8 @@ if os.name == 'nt':
 def process_started(pid):
     """The creation time of a running process (an int, 0 when it runs but cannot be read), or None
     when no process with this pid is running. It only queries: on Windows os.kill(pid, 0) would
-    terminate the process it names, so it is never called there."""
-    try:
-        pid = int(pid)
-    except (TypeError, ValueError):
-        return None
-    if pid <= 0:
-        return None
-    if os.name != 'nt':
-        try:
-            os.kill(pid, 0)
-        except ProcessLookupError:
-            return None
-        except PermissionError:
-            return 0
-        return 0
-    handle = _kernel32.OpenProcess(0x1000, False, pid)   # PROCESS_QUERY_LIMITED_INFORMATION
-    if not handle:
-        return 0 if ctypes.get_last_error() == 5 else None   # ERROR_ACCESS_DENIED: it exists
-    try:
-        code = wintypes.DWORD()
-        if _kernel32.GetExitCodeProcess(handle, ctypes.byref(code)) and code.value != 259:  # STILL_ACTIVE
-            return None
-        times = [wintypes.FILETIME() for _ in range(4)]
-        if not _kernel32.GetProcessTimes(handle, *(ctypes.byref(value) for value in times)):
-            return 0
-        return (times[0].dwHighDateTime << 32) | times[0].dwLowDateTime
-    finally:
-        _kernel32.CloseHandle(handle)
+    terminate the process it names, so it is never called there. (proclock.process_started.)"""
+    return proclock.process_started(pid)
 
 
 def free_physical_bytes():
@@ -324,81 +294,26 @@ def _lock_path(name):
 
 
 def _acquire(path):
-    """('ours', token) with the lock taken; ('held', None) while a live process holds it; or
-    ('unavailable', None) when no lock can be taken here (then nothing is persisted)."""
-    token = {'pid': os.getpid(), 'started': process_started(os.getpid()), 'created': time.time(),
-             'token': uuid.uuid4().hex}
-    for _ in range(3):
-        try:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
-        except FileExistsError:
-            if _stale(path):
-                _break(path)
-                continue
-            return 'held', None
-        except PermissionError:
-            # Windows refuses a create over a file that is being deleted: held for a moment.
-            return ('held', None) if path.exists() else ('unavailable', None)
-        except OSError:
-            return 'unavailable', None
-        with os.fdopen(descriptor, 'w', encoding='utf-8') as handle:
-            json.dump(token, handle)
-        return 'ours', token
-    return 'held', None
+    """('ours', lock bytes) with the lock taken; ('held', None) while a live process holds it; or
+    ('unavailable', None) when no lock can be taken here (then nothing is persisted). A stale lock is
+    removed by proclock.claim. The body keeps the fields this module's earlier releases read (started,
+    created, token), so a console still on that code respects it (proclock docstring, Compatibility)."""
+    extra = {'started': proclock.own_started(), 'created': time.time(), 'token': uuid.uuid4().hex}
+    try:
+        body = proclock.claim(path, extra=extra)
+    except OSError:
+        return 'unavailable', None
+    return ('held', None) if body is None else ('ours', body)
 
 
 def _stale(path):
-    try:
-        info = json.loads(path.read_text(encoding='utf-8'))
-        created, pid = float(info['created']), int(info['pid'])
-    except FileNotFoundError:
-        return False   # released meanwhile; the next attempt takes it
-    except (OSError, ValueError, KeyError, TypeError):
-        try:   # being written this instant, or damaged: stale only once it is old
-            return time.time() - path.stat().st_mtime > LOCK_GRACE_SECONDS
-        except OSError:
-            return False
-    if time.time() - created > LOCK_STALE_SECONDS:
-        return True
-    started = process_started(pid)
-    if started is None:
-        return True
-    recorded = info.get('started')
-    return bool(recorded) and bool(started) and started != recorded   # the pid names another process now
-
-
-def _break(path):
-    """Remove a stale lock: renamed away first, and put back when it proves to be a fresh lock
-    another process took between the check and the rename."""
-    grave = path.with_name(f'{path.name}.{os.getpid()}.{uuid.uuid4().hex[:8]}.stale')
-    try:
-        os.replace(path, grave)
-    except OSError:
-        return
-    try:
-        if not _stale(grave):
-            try:
-                os.rename(grave, path)
-                return
-            except OSError:
-                pass
-        grave.unlink()
-    except OSError:
-        pass
+    """True when the lock at `path` is stale by proclock's rule; False while it is live, or gone."""
+    return proclock.is_stale(path)
 
 
 def _release(path, token):
-    """Remove the lock only while it is still ours."""
-    try:
-        info = json.loads(path.read_text(encoding='utf-8'))
-    except (OSError, ValueError):
-        return
-    if isinstance(info, dict) and info.get('token') == token['token']:
-        try:
-            path.unlink()
-        except OSError:
-            pass
+    """Remove the lock only while it is still ours (token: the bytes _acquire wrote)."""
+    proclock.release(path, token)
 
 
 _locks = {}

@@ -441,7 +441,7 @@ class LockTests(Base):
         self.assertEqual(len(builds), 1)
         self.assertEqual([value for value, _ in results], [{'n': 1}] * 8)
 
-    def test_a_dead_old_or_recycled_lock_is_broken_and_a_live_one_is_waited_for(self):
+    def test_a_dead_left_behind_or_recycled_lock_is_broken_and_a_live_one_is_waited_for_at_any_age(self):
         path = drawer_sidecars._lock_path('stale')
         path.parent.mkdir(parents=True, exist_ok=True)
         gone = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(0.5)'], creationflags=NO_WINDOW)
@@ -455,14 +455,24 @@ class LockTests(Base):
             return {'ok': True}
         with patch.object(drawer_sidecars, 'LOCK_WAIT_SECONDS', 3):
             for name, info in {'dead': {'pid': gone.pid, 'started': gone_started, 'created': time.time()},
-                               'old': {'pid': os.getpid(), 'started': me, 'created': time.time() - 31 * 60},
+                               'left behind by this process': {'pid': os.getpid(), 'started': me,
+                                                               'created': time.time() - 31 * 60},
                                'recycled': {'pid': os.getpid(), 'started': 12345, 'created': time.time()}}.items():
                 with self.subTest(lock=name):
                     path.write_text(json.dumps({**info, 'token': name}))
                     self.assertEqual(drawer_sidecars._single_flight('stale', lambda: None, build, lambda value: 1),
                                      ({'ok': True}, 'built'))
                     self.assertFalse(path.exists())
-            path.write_text(json.dumps({'pid': os.getpid(), 'started': me, 'created': time.time(), 'token': 'live'}))
+            # A live holder in another process, its lock older than 30 minutes (review H2): waited for.
+            holder = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'], creationflags=NO_WINDOW)
+            self.addCleanup(lambda: (holder.kill(), holder.wait(timeout=15)))
+            deadline = time.monotonic() + 30
+            while not drawer_sidecars.process_started(holder.pid) and time.monotonic() < deadline:
+                time.sleep(0.02)
+            path.write_text(json.dumps({'pid': holder.pid, 'started': drawer_sidecars.process_started(holder.pid),
+                                        'created': time.time() - 31 * 60, 'token': 'live'}))
+            moment = time.time() - 31 * 60
+            os.utime(path, (moment, moment))
             box = {}
 
             def finish():

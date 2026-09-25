@@ -90,11 +90,14 @@ import uuid
 
 APP = Path(__file__).resolve().parent
 PROJECT = APP.parent
+if str(APP) not in sys.path:
+    sys.path.insert(0, str(APP))   # proclock and the console's modules live beside this file
+import proclock  # noqa: E402  (cross-process locks and process liveness, shared with the console)
 DEFAULT_STATE_ROOT = PROJECT / 'state'
 SCHEMA = 1
 
 # (d) of the run loop: a change to any of these exits the warmer; the console relaunches it.
-WATCHED_CODE = ('prewarm.py', 'analysis_data.py', 'contribution_data.py')
+WATCHED_CODE = ('prewarm.py', 'analysis_data.py', 'contribution_data.py', 'proclock.py')
 # Modules whose code decides a warmed key or a warmed result. A change re-plans and releases quarantine.
 RESULT_CODE = ('prewarm.py', 'server.py', 'analysis_data.py', 'analysis_metrics.py', 'analysis_history.py',
                'analysis_integrations.py', 'analysis_scan.py', 'contribution_data.py', 'contribution_query.py',
@@ -113,6 +116,13 @@ LEDGER_LIMIT_BYTES = 5 * 1024 * 1024
 TASK_TIMEOUT_SECONDS = 30 * 60
 LOCK_RELEASE_GRACE_SECONDS = 30
 START_DELAY_SECONDS = 15
+PARENT_WATCH_SECONDS = 1.0               # the CLI warmer's watchdog checks its console this often
+# The warmer's sweep of projection files an ended builder left behind (sweep_pending): the store folders it
+# reads, how old a file must be, and how often the warmer sweeps again.
+PENDING_SWEEP_FOLDERS = ('views', 'insights-views')
+PENDING_MIN_AGE_SECONDS = 120
+PENDING_SWEEP_SECONDS = 15 * 60
+PENDING_NAME = re.compile(r'^([0-9a-f]{64})\.[0-9a-f]{32}\.pending$')   # <key>.<uuid4 hex>.pending
 DEFAULT_MAX_COMPANY_NEIGHBORS = 48
 PAUL_CONSOLE_PORT = 8806
 EXIT_CODES = {'success': 0, 'warning': 1, 'error': 2}
@@ -370,13 +380,16 @@ if os.name == 'nt':
     import msvcrt
 
     _kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
-    _kernel32.OpenProcess.restype = _wintypes.HANDLE
-    _kernel32.OpenProcess.argtypes = (_wintypes.DWORD, _wintypes.BOOL, _wintypes.DWORD)
-    _kernel32.GetExitCodeProcess.argtypes = (_wintypes.HANDLE, ctypes.POINTER(_wintypes.DWORD))
-    _kernel32.GetProcessTimes.argtypes = (_wintypes.HANDLE,) + (ctypes.POINTER(_wintypes.FILETIME),) * 4
-    _kernel32.CloseHandle.argtypes = (_wintypes.HANDLE,)
     _kernel32.GetCurrentProcess.restype = _wintypes.HANDLE
     _kernel32.SetPriorityClass.argtypes = (_wintypes.HANDLE, _wintypes.DWORD)
+    _kernel32.SetProcessInformation.restype = _wintypes.BOOL
+    _kernel32.SetProcessInformation.argtypes = (_wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, _wintypes.DWORD)
+    _kernel32.GetProcessInformation.restype = _wintypes.BOOL
+    _kernel32.GetProcessInformation.argtypes = (_wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, _wintypes.DWORD)
+
+    class _PowerThrottlingState(ctypes.Structure):
+        # PROCESS_POWER_THROTTLING_STATE
+        _fields_ = [('Version', _wintypes.ULONG), ('ControlMask', _wintypes.ULONG), ('StateMask', _wintypes.ULONG)]
 
     class _MemoryStatus(ctypes.Structure):
         _fields_ = [('dwLength', ctypes.c_ulong), ('dwMemoryLoad', ctypes.c_ulong),
@@ -387,8 +400,8 @@ if os.name == 'nt':
 
 BELOW_NORMAL_PRIORITY_CLASS = 0x00004000
 CREATE_NO_WINDOW = 0x08000000
-_PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
-_STILL_ACTIVE = 259
+PROCESS_POWER_THROTTLING = 4             # ProcessPowerThrottling (PROCESS_INFORMATION_CLASS)
+POWER_THROTTLING_EXECUTION_SPEED = 0x1   # PROCESS_POWER_THROTTLING_EXECUTION_SPEED
 
 
 def free_physical_bytes():
@@ -404,61 +417,152 @@ def free_physical_bytes():
 
 
 def process_started(pid):
-    """The creation time of `pid` (FILETIME as an int), or None when it cannot be read."""
-    if not pid or os.name != 'nt':
-        return None
-    handle = _kernel32.OpenProcess(_PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid))
-    if not handle:
-        return None
-    try:
-        times = [_wintypes.FILETIME() for _ in range(4)]
-        if not _kernel32.GetProcessTimes(handle, *[ctypes.byref(t) for t in times]):
-            return None
-        return (times[0].dwHighDateTime << 32) | times[0].dwLowDateTime
-    finally:
-        _kernel32.CloseHandle(handle)
+    """The creation time of a running `pid` (FILETIME ticks as an int, proclock.process_started), or
+    None when it is not running or its creation time cannot be read."""
+    return proclock.process_started(pid) or None
 
 
 def pid_alive(pid, started=None):
-    """True while `pid` runs. With `started`, a reused pid (another creation time) counts as gone."""
-    try:
-        pid = int(pid)
-    except (TypeError, ValueError):
-        return False
-    if pid <= 0:
-        return False
+    """True while `pid` runs. With `started`, a reused pid (another creation time) counts as gone.
+    (proclock.alive: the one liveness rule of every lock and pid check in the app.)"""
+    return proclock.alive(pid, started)
+
+
+def execution_speed_unthrottled(handle=None):
+    """Opt a process out of Windows power throttling of its execution speed (EcoQoS) without changing
+    its priority class: SetProcessInformation(ProcessPowerThrottling, {Version 1, ControlMask
+    EXECUTION_SPEED, StateMask 0}). Review finding H1: below-normal and windowless, the warmer was put
+    on EcoQoS by Windows and got 0.21-0.27 of a core in a CPU-bound spin (0.94 with this set, 0.002
+    with throttling forced on), so warm tasks took 10-100x longer on battery or under load. The trade:
+    on battery the warmer may now run on the performance cores. `handle`: a process handle with
+    PROCESS_SET_INFORMATION access (a child's Popen handle); None means this process. True when
+    Windows accepted it; False elsewhere."""
     if os.name != 'nt':
-        try:
-            os.kill(pid, 0)
-        except ProcessLookupError:
-            return False
-        except PermissionError:
-            return True
-        return True
-    handle = _kernel32.OpenProcess(_PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
-    if not handle:
-        return ctypes.get_last_error() == 5  # access denied: it exists
-    try:
-        code = _wintypes.DWORD()
-        if not _kernel32.GetExitCodeProcess(handle, ctypes.byref(code)):
-            return True
-        if code.value != _STILL_ACTIVE:
-            return False
-    finally:
-        _kernel32.CloseHandle(handle)
-    if started is not None:
-        current = process_started(pid)
-        if current is not None and current != started:
-            return False
-    return True
+        return False
+    state = _PowerThrottlingState(1, POWER_THROTTLING_EXECUTION_SPEED, 0)
+    target = _kernel32.GetCurrentProcess() if handle is None else int(handle)
+    return bool(_kernel32.SetProcessInformation(target, PROCESS_POWER_THROTTLING, ctypes.byref(state),
+                                                ctypes.sizeof(state)))
+
+
+def power_throttling(handle=None):
+    """{'control': ControlMask, 'state': StateMask} of a process's explicit power-throttling policy
+    (GetProcessInformation), or None when it cannot be read. Control 1 with state 0: EcoQoS is off.
+    `handle`: a process handle with PROCESS_QUERY_INFORMATION access; None means this process."""
+    if os.name != 'nt':
+        return None
+    state = _PowerThrottlingState(1, 0, 0)
+    target = _kernel32.GetCurrentProcess() if handle is None else int(handle)
+    if not _kernel32.GetProcessInformation(target, PROCESS_POWER_THROTTLING, ctypes.byref(state),
+                                           ctypes.sizeof(state)):
+        return None
+    return {'control': state.ControlMask, 'state': state.StateMask}
 
 
 def set_below_normal_priority():
+    """Below-normal priority, so the warmer yields to every interactive process, and no EcoQoS, so the
+    CPU time it does get runs at full speed (execution_speed_unthrottled). Returns what was set."""
     if os.name != 'nt':
         with contextlib.suppress(OSError):
             os.nice(5)
-        return
+        return {'priority': 'nice +5'}
     _kernel32.SetPriorityClass(_kernel32.GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS)
+    return {'priority': 'below_normal', 'ecoqos_off': execution_speed_unthrottled()}
+
+
+def _unthrottle_child(process):
+    """execution_speed_unthrottled for a running subprocess.Popen; False when it cannot be applied."""
+    handle = getattr(process, '_handle', None)
+    if handle is None or process.poll() is not None:
+        return False
+    try:
+        return execution_speed_unthrottled(handle)
+    except Exception:   # never fails a scan: the scanner then runs as Windows schedules it
+        return False
+
+
+def unthrottle_native_scanners():
+    """Turn EcoQoS off for the warmer's native scanners too (review round 2 of batch 1, after H1). A
+    native_scan.Worker (mentat-scan.exe) inherits the warmer's below-normal priority class, but not its
+    power-throttling opt-out, so Windows throttled it as it did the warmer before H1: 0.08-0.45 of a core
+    in a CPU-bound spin, 0.93-0.96 with the opt-out, and a Graph comparison build's scan timed out after
+    120 s. This wraps Worker.__init__ in this process so that every scanner started from now on is opted
+    out right after it is spawned, and opts out the scanners already running. Only Warmer.run calls it,
+    after lowering the warmer's own priority; the console's scanners are left as they are, and
+    native_scan.py itself is unchanged. Returns what was done, or None off Windows."""
+    if os.name != 'nt':
+        return None
+    module = sys.modules.get('native_scan')
+    worker = getattr(module, 'Worker', None)
+    if worker is None:
+        return {'installed': False, 'reason': 'native_scan is not loaded'}
+    if getattr(worker.__init__, '__prewarm_original__', None) is None:
+        original = worker.__init__
+
+        @functools.wraps(original)
+        def start(self, *args, **kwargs):
+            original(self, *args, **kwargs)
+            _unthrottle_child(getattr(self, 'process', None))
+
+        start.__prewarm_original__ = original
+        worker.__init__ = start
+    running = [item for item in list(getattr(module, '_all', ()) or ()) if getattr(item, 'process', None)]
+    return {'installed': True, 'running': len(running),
+            'running_unthrottled': sum(1 for item in running if _unthrottle_child(item.process))}
+
+
+def sweep_pending(store, min_age=PENDING_MIN_AGE_SECONDS, now=None):
+    """Remove the projection files that a builder which ended mid-build left behind (review round 2 of batch
+    1, after H3). contribution_query_store.view and analysis_scan.view build a projection as
+    <key>.<uuid>.pending in store.ROOT/views and store.ROOT/insights-views (a query view is 409-433 MB, an
+    Insights view up to 200 MB) and remove it only in a `finally`, which os._exit skips: the warmer's exit
+    after parent_gone or code_changed (exit_now, the watchdog) and any hard kill leave it for good.
+    A builder creates its .pending file only while it holds the key's <key>.lock (contribution_query_store
+    ._lock, an OS byte-range lock the OS frees when its process ends), and it holds that lock until the file
+    is renamed or removed. So this takes the same lock, through the same function, for each key that has a
+    .pending file at least `min_age` seconds old, and removes those files while it holds it: at that moment
+    no live builder of the key exists. A live build keeps its file and makes this wait until it ends. Only
+    names of the builders' exact form are touched. Returns {'removed': [paths], 'bytes': n, 'errors': [...]}."""
+    root = Path(store.ROOT)
+    moment = time.time() if now is None else now
+    found = {}
+    for folder in PENDING_SWEEP_FOLDERS:
+        directory = root / folder
+        try:
+            with os.scandir(directory) as items:
+                entries = list(items)
+        except OSError:
+            continue
+        for item in entries:
+            match = PENDING_NAME.match(item.name)
+            if not match:
+                continue
+            try:
+                if not item.is_file(follow_symlinks=False):
+                    continue
+                info = item.stat(follow_symlinks=False)
+            except OSError:
+                continue
+            if moment - info.st_mtime >= min_age:
+                found.setdefault((str(directory), match.group(1)), []).append((item.name, info.st_size))
+    removed, errors, freed = [], [], 0
+    for (directory, key), files in sorted(found.items()):
+        directory = Path(directory)
+        try:
+            with store._lock(directory / (key + '.lock')):
+                for name, size in files:
+                    try:
+                        (directory / name).unlink()
+                    except FileNotFoundError:
+                        continue   # its builder finished while this waited for the lock
+                    except OSError as error:
+                        errors.append(f'{name}: {type(error).__name__}: {error}')
+                        continue
+                    removed.append(str(directory / name))
+                    freed += size
+        except OSError as error:
+            errors.append(f'{key}.lock: {type(error).__name__}: {error}')
+    return {'removed': removed, 'bytes': freed, 'errors': errors}
 
 
 # ----------------------------------------------------------------------------- recovery contract
@@ -848,6 +952,11 @@ DEFAULT_COST_SECONDS = {'graph_default': 2.0, 'graph_view': 2.0, 'graph_drawer':
 DEFAULT_KINDS = ('graph_default', 'comparison_flows', 'query_view', 'insights_default')
 # The kinds server.py records (record_access) and the prime replays.
 ACCESS_GRAPH_KINDS = ('graph_view', 'graph_drawer')
+# Every kind server.py records (record_access), and so the only access_stats rows the warmer's value ranking
+# reads: use_order reads their bodies, task_access their scores. The cache layers' own 'store/<namespace>' and
+# 'cache/<namespace>' rows have no body and rank no task; read with top(kinds=None) they filled the
+# ACCESS_TOP_LIMIT window ahead of the requests people made (review of batch 1, round 3, 2026-09-24).
+ACCESS_REQUEST_KINDS = ACCESS_GRAPH_KINDS + ('comparison_flows', 'insights_query', 'contribution_query')
 
 
 def access_key(body):
@@ -868,6 +977,11 @@ def load_access_top(kinds=None, limit=ACCESS_TOP_LIMIT, module=None):
         log(f'access_stats.top failed: {type(error).__name__}: {error}')
         return []
     return [row for row in rows or [] if isinstance(row, dict) and row.get('kind') and row.get('key') is not None]
+
+
+def warmer_access_top(limit=ACCESS_TOP_LIMIT, module=None):
+    """load_access_top() over ACCESS_REQUEST_KINDS: the rows the warmer re-plans by (Warmer.replan)."""
+    return load_access_top(kinds=ACCESS_REQUEST_KINDS, limit=limit, module=module)
 
 
 def _number(value, default=0.0):
@@ -1848,15 +1962,16 @@ class AppBackend:
                 'companies_list': [item for item in companies if isinstance(item, str)] if isinstance(companies, list) else None}
 
     def building_locks_held_elsewhere(self):
-        """Live foreign holders of the console's cross-process Insights build markers."""
+        """Live foreign holders of the console's cross-process Insights build markers, by the rule
+        analysis_data itself applies (proclock.inspect: a running, non-recycled process)."""
         locate = getattr(self.analysis, 'building_dir', None)
         directory = Path(locate()) if callable(locate) else Path(self.analysis.ROOT) / 'building'
         holders = []
         for path in directory.glob('*.lock') if directory.is_dir() else ():
-            value = read_json(path) or {}
-            pid = value.get('pid')
-            if pid and int(pid) != os.getpid() and pid_alive(pid):
-                holders.append({'pid': pid, 'key': value.get('key'), 'started_utc': value.get('started_utc')})
+            found = proclock.inspect(path)
+            if found is not None and found.live and found.info and found.pid != os.getpid():
+                holders.append({'pid': found.pid, 'key': found.info.get('key'),
+                                'started_utc': found.info.get('started_utc')})
         return holders
 
     def _drop_finished_jobs(self):
@@ -2036,7 +2151,8 @@ class Warmer:
                  parent_alive=None, code_stamps=watched_code_stamps, emitter=emit, set_priority=True,
                  access_top=None):
         self.backend, self.state, self.op = backend, state.ensure(), op
-        # access_stats.top (load_access_top) for the value ranking; None keeps the hints-only order.
+        # access_stats.top over the request kinds (warmer_access_top) for the value ranking; None keeps the
+        # hints-only order.
         self.access_top = access_top
         self.ledger = Ledger(state)
         self.run_id = run_id or f'prewarm-{time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())}-{os.getpid()}'
@@ -2065,6 +2181,9 @@ class Warmer:
         self.quarantined_now = []
         self.stop_reason = None
         self.last_promotion = None
+        self.current = None                  # (task, monotonic start) of the task running now
+        self._ending = threading.Lock()      # the thread that ends the run holds it (_watch_parent)
+        self._run_over = False
 
     # -- helpers --------------------------------------------------------------------------------
     def _emit(self, kind, status, summary, **fields):
@@ -2340,6 +2459,7 @@ class Warmer:
         self.heartbeat(current_task=task['id'], started_utc=utc_iso())
         started = self.monotonic()
         retry_request = runtime['consecutive'] > 0
+        self.current = (task, started)
         try:
             info = self.backend.warm(task, deadline=time.monotonic() + TASK_TIMEOUT_SECONDS,
                                      should_stop=lambda: not self.parent_ok(), retry=retry_request, sleep=self.sleep)
@@ -2377,6 +2497,8 @@ class Warmer:
                 delay = retry_delay(retry)
                 runtime['not_before'] = self.monotonic() + (delay if delay is not None else PAUSE_SECONDS)
             return 'failed'
+        finally:
+            self.current = None
         seconds = self.monotonic() - started
         runtime['consecutive'] = 0
         task['state'] = 'warm'
@@ -2474,12 +2596,25 @@ class Warmer:
         try:
             if holder:
                 log(f'took over a stale warmer lock from pid {holder.get("pid")}')
+            scheduling = None
             if self.set_priority:
-                with contextlib.suppress(Exception):
-                    set_below_normal_priority()
+                try:
+                    scheduling = set_below_normal_priority()
+                    # Its native scanners inherit the priority but not the EcoQoS opt-out (review round 2).
+                    scheduling['native_scanners'] = unthrottle_native_scanners()
+                except Exception as error:   # the warmer runs at whatever it was given
+                    scheduling = {'error': f'{type(error).__name__}: {error}'}
             self._emit('mentat.prewarm.run', 'running', f'Warmer started (pid {os.getpid()})', stage='start',
                        metadata={'parent_pid': self.parent_pid, 'console': self.console,
-                                 'state_root': str(self.state.state_root), 'stale_lock_from': (holder or {}).get('pid')})
+                                 'state_root': str(self.state.state_root), 'stale_lock_from': (holder or {}).get('pid'),
+                                 'scheduling': scheduling})
+            if _CLI_RUN is not None and self.parent_pid:
+                threading.Thread(target=self._watch_parent, args=(lock,), name='mentat-prewarm-parent-watch',
+                                 daemon=True).start()
+            store = getattr(self.backend, 'store', None)
+            if self.op == 'run' and getattr(store, 'ROOT', None) is not None and callable(getattr(store, '_lock', None)):
+                threading.Thread(target=self._sweep_loop, args=(store,), name='mentat-prewarm-pending-sweep',
+                                 daemon=True).start()
             self.heartbeat(state='starting')
             return self._loop()
         except Stop as stop:
@@ -2492,8 +2627,93 @@ class Warmer:
                           metrics=self._metrics({'root_cause_hint': classify(error)}),
                           artifacts=[str(self.state.ledger)])
         finally:
+            with self._ending:   # once the watchdog is ending the process it holds this until os._exit
+                self._run_over = True
             lock.release()
             self.heartbeat(state='stopped')
+
+    def _sweep_loop(self, store):
+        """sweep_pending at the start of a run and every PENDING_SWEEP_SECONDS while it runs, on a daemon
+        thread: a live build of a key makes it wait, and the run never waits for it. Only a `run` warmer
+        sweeps, after it holds the warmer lock, so one process per state root does it; the console never does."""
+        while True:   # the first pass runs even when the run itself ends first
+            try:
+                result = sweep_pending(store)
+                if result['removed'] or result['errors']:
+                    summary = (f'Removed {len(result["removed"])} projection file(s) left by an ended build '
+                               f'({result["bytes"] / 1024 ** 2:.0f} MB)')
+                    log(summary + (f'; {len(result["errors"])} error(s): {result["errors"][:3]}' if result['errors'] else ''))
+                    self._emit('mentat.prewarm.sweep', 'failed' if result['errors'] else 'completed', summary,
+                               stage='sweep', metadata={'removed': result['removed'][:20], 'bytes': result['bytes'],
+                                                        'errors': result['errors'][:10]})
+            except Exception as error:   # the sweep never ends the warmer; the next pass retries
+                log(f'pending sweep failed: {type(error).__name__}: {error}')
+            if self._run_over:
+                return
+            end = time.monotonic() + PENDING_SWEEP_SECONDS
+            while not self._run_over and time.monotonic() < end:
+                time.sleep(min(5.0, PENDING_SWEEP_SECONDS))
+
+    def _watch_parent(self, lock):
+        """End an orphaned warmer within PARENT_WATCH_SECONDS, whatever it is doing (review round 1 of
+        batch 1, after H3). The loop checks its console only between steps (nap, check_stop) and while a
+        task polls (should_stop), so a synchronous step kept an orphan running until the step ended: the
+        verifier's kills measured 38.2 s during a query view computed in-line and 14.8 s during planning;
+        a comparison-flows or drawer build never checks at all. This daemon thread checks the console on
+        its own clock and, once it is gone, ends the process from here (_end_orphaned). Only the CLI
+        warmer runs it (main(hard_exit=True) sets _CLI_RUN); an in-process caller is never ended."""
+        while True:
+            time.sleep(PARENT_WATCH_SECONDS)
+            if self._run_over or self.stop_reason is not None:
+                return   # the run is ending by itself
+            try:
+                if self.parent_ok():
+                    continue
+            except Exception:   # a failed probe is no verdict; the loop's own guards still run
+                continue
+            self._ending.acquire()   # never released: the process ends in _end_orphaned
+            if self._run_over or self.stop_reason is not None:
+                self._ending.release()
+                return
+            try:
+                self._end_orphaned(lock)
+            except BaseException:   # the console is gone: the process ends even if recording its exit failed
+                os._exit(EXIT_CODES['success'])
+            return
+
+    def _end_orphaned(self, lock):
+        """The watchdog's exit, as the loop's own parent_gone exit ends: the interrupted task is recorded
+        (a parent_gone failure, which never counts toward quarantine), the exit is emitted and logged
+        (_exit), the warmer lock is released with released_utc, the op's one JSON report is printed, and
+        exit_now releases every proclock lock and calls os._exit(0). The ledger's lock is held to the end,
+        so no ledger line is cut in half. Files are written by os.replace and SQLite rolls back an open
+        write transaction, so a step cut short leaves nothing half-written that is ever served."""
+        message = f'Parent console pid {self.parent_pid} is gone.'
+        current = self.current
+        try:
+            if current is not None:
+                task, started = current
+                retry, stop = recovery('parent_gone')
+                self.observe(task, 'failed', seconds=self.monotonic() - started, hint='parent_gone', retry=retry,
+                             stop=stop, error=f'Stop: {message} The warmer ended during this task.',
+                             consecutive=self.runtime.get(task['id'], {}).get('consecutive'))
+                message += f' The warmer ended during {task["id"]}.'
+            report = self._exit('parent_gone', message)
+        except Exception as error:   # the process ends all the same
+            report = op_result('success', f'Warmer exited: {message}',
+                               metrics={'root_cause_hint': 'parent_gone', 'run_id': self.run_id,
+                                        'exit_error': f'{type(error).__name__}: {error}'})
+        self.ledger._lock.acquire(timeout=10)
+        with contextlib.suppress(Exception):
+            lock.release()
+        self.heartbeat(state='stopped')
+        cli = _CLI_RUN
+        if cli is not None:
+            with contextlib.suppress(Exception):
+                report.setdefault('metrics', {})['op_seconds'] = round(time.perf_counter() - cli['started'], 3)
+                cli['stdout'].write(json.dumps(report, ensure_ascii=False, default=str) + '\n')
+                cli['stdout'].flush()
+        exit_now(EXIT_CODES.get(report.get('status'), 2), 'parent_gone', self.run_id)
 
     def _orphaned(self, holder):
         """True when the lock holder is alive but the console that launched it is not. Creation times
@@ -2671,7 +2891,8 @@ def status_report(state, today=None):
             entry['neighbors_warm'] += int(state_name == 'warm')
     next_tasks = [{'id': task['id'], 'kind': task['kind'], 'dataset': task['dataset']}
                   for task in tasks if states[task['id']] == 'pending'][:5]
-    running = bool(holder.get('pid')) and not holder.get('released_utc') and pid_alive(holder.get('pid'))
+    running = bool(holder.get('pid')) and not holder.get('released_utc') and pid_alive(holder.get('pid'),
+                                                                                    holder.get('pid_started'))
     metrics = {
         'plan_created_utc': created or None, 'plan_as_of': plan.get('as_of'), 'plan_reason': plan.get('reason'),
         'plan_stale': bool(plan) and plan.get('as_of') != today,
@@ -3507,8 +3728,16 @@ def launch_warmer(data_root, read_only, console_port, state_root=None):
         with open(state.dir / f'warmer-{parent}.log', 'ab') as output:
             child = subprocess.Popen(command, cwd=os.getcwd(), stdin=subprocess.DEVNULL, stdout=output,
                                      stderr=output, close_fds=True, creationflags=flags)
+        # The warmer turns EcoQoS off itself (set_below_normal_priority), but only once its imports and
+        # module loading are done; turned off here, its start-up runs at full speed too (review H1).
+        unthrottled = None
+        if os.name == 'nt' and getattr(child, '_handle', None) is not None:
+            try:
+                unthrottled = execution_speed_unthrottled(child._handle)
+            except Exception as error:   # never fails the launch: the child still sets it itself
+                unthrottled = f'{type(error).__name__}: {error}'
         emit('mentat.prewarm.launch', 'info', f'Console pid {parent} launched warmer pid {child.pid}',
-             stage='launch', metadata={'console_port': console_port, 'command': command})
+             stage='launch', metadata={'console_port': console_port, 'command': command, 'ecoqos_off': unthrottled})
         return child.pid
     except Exception as error:
         log(f'warmer launch failed: {type(error).__name__}: {error}')
@@ -3555,7 +3784,7 @@ def op_plan(options):
                          allow_index_builds=options.allow_index_builds).load()
     warmer = Warmer(backend, state, op='plan', industries=_industries(options),
                     allow_index_builds=options.allow_index_builds, max_company_neighbors=options.max_neighbors,
-                    set_priority=False, access_top=load_access_top)
+                    set_priority=False, access_top=warmer_access_top)
     plan = warmer.replan('cli plan')
     blocked = [task for task in plan['tasks'] if task['state'] == 'blocked']
     actions = []
@@ -3583,7 +3812,7 @@ def op_run(options):
     warmer = Warmer(backend, state, op='run', parent_pid=options.parent_pid, console=options.console,
                     once=options.once, max_tasks=options.max_tasks, start_delay=delay,
                     allow_index_builds=options.allow_index_builds, industries=_industries(options),
-                    max_company_neighbors=options.max_neighbors, access_top=load_access_top)
+                    max_company_neighbors=options.max_neighbors, access_top=warmer_access_top)
     try:
         backend.load()
     except Exception as error:
@@ -3603,7 +3832,8 @@ def op_warm(options):
                     allow_index_builds=options.allow_index_builds, max_company_neighbors=options.max_neighbors,
                     set_priority=False)
     lock = WarmerLock(state.lock)
-    acquired, holder = lock.acquire({'pid': os.getpid(), 'started_utc': utc_iso(), 'op': 'warm', 'task': options.task})
+    acquired, holder = lock.acquire({'pid': os.getpid(), 'pid_started': process_started(os.getpid()),
+                                     'started_utc': utc_iso(), 'op': 'warm', 'task': options.task})
     if not acquired:
         return op_result('warning', f'A warmer (pid {(holder or {}).get("pid")}) holds the lock; not warming.',
                       ['retry after that warmer exits', 'or read prewarm.py status'],
@@ -3690,12 +3920,49 @@ def op_hotset(options):
 
 OPS = {'plan': op_plan, 'run': op_run, 'warm': op_warm, 'verify': run_verify, 'bench': run_bench, 'status': op_status,
        'hotset': op_hotset}
+# The guard stops after which the process ends at once (exit_now) when it runs as the CLI.
+GUARD_STOPS = ('parent_gone', 'code_changed')
+# While main(hard_exit=True) runs its op: {'stdout': the stream of its one JSON report, 'started': its
+# perf_counter}. Only then does Warmer.run watch its console from a second thread (Warmer._watch_parent).
+_CLI_RUN = None
 
 
-def main(argv=None):
+def exit_now(code, root_cause, run_id=None):
+    """End this process at once after a guard stop (review finding H3). sys.exit() joins every non-daemon
+    thread at interpreter shutdown, analysis_data's Insights pool worker included: a warmer whose console
+    was gone kept building after it logged its exit (orphan 58192 held the live P&C journal's write
+    transaction and its build marker for hours). First every lock this process still holds is released
+    (release-if-unchanged: Insights build markers, response-cache and sidecar locks; Warmer.run, or the
+    watchdog's Warmer._end_orphaned, has released the warmer lock), then the exit is recorded in the log
+    and Glass Box (both write synchronously; the ledger was appended to before this) and the streams are
+    flushed. SQLite rolls back a write transaction left open by a process that ends; a half-written file
+    is never served."""
+    released = []
+    with contextlib.suppress(Exception):
+        released = proclock.release_all()
+    running = [thread.name for thread in threading.enumerate()
+               if thread is not threading.current_thread() and thread.is_alive() and not thread.daemon]
+    message = (f'exiting now after {root_cause}: released {len(released)} held lock(s); '
+               f'{len(running)} non-daemon thread(s) stopped with it: {", ".join(running[:6]) or "none"}')
+    log(message)
+    emit('mentat.prewarm.run', 'info', 'Warmer ' + message, run_id=run_id or '', stage='exit',
+         metadata={'root_cause_hint': root_cause, 'released_locks': released, 'running_threads': running})
+    logging_module = sys.modules.get('logging')
+    if logging_module is not None:
+        with contextlib.suppress(Exception):
+            logging_module.shutdown()
+    for stream in (sys.stdout, sys.stderr, sys.__stdout__, sys.__stderr__):
+        with contextlib.suppress(Exception):
+            stream.flush()
+    os._exit(code)
+
+
+def main(argv=None, *, hard_exit=False):
+    global _CLI_RUN
     options = _parser().parse_args(argv)
     real_stdout = sys.stdout
     started = time.perf_counter()
+    previous, _CLI_RUN = _CLI_RUN, ({'stdout': real_stdout, 'started': started} if hard_exit else None)
     try:
         # Anything a library prints goes to stderr, so stdout carries exactly one JSON object.
         with contextlib.redirect_stdout(sys.stderr):
@@ -3707,11 +3974,17 @@ def main(argv=None):
         report = op_result('error', f'{options.op} failed: {type(error).__name__}: {error}',
                         ['read the traceback on stderr'], metrics={'root_cause_hint': classify(error)})
         traceback.print_exc(file=sys.stderr)
+    finally:
+        _CLI_RUN = previous
     report.setdefault('metrics', {})['op_seconds'] = round(time.perf_counter() - started, 3)
     real_stdout.write(json.dumps(report, ensure_ascii=False, default=str) + '\n')
     real_stdout.flush()
-    return EXIT_CODES.get(report.get('status'), 2)
+    code = EXIT_CODES.get(report.get('status'), 2)
+    cause = (report.get('metrics') or {}).get('root_cause_hint')
+    if hard_exit and cause in GUARD_STOPS:
+        exit_now(code, cause, (report.get('metrics') or {}).get('run_id'))
+    return code
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(hard_exit=True))

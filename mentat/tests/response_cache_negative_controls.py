@@ -1,14 +1,23 @@
 """Negative controls for the response-cache lane's tests (test_response_cache, test_view_cache_disk,
 test_comparison_flows_cache).
 
-Each variant below breaks one rule of response_cache.py, view_cache.py or comparison_data.py. The
+Each variant below breaks one rule of response_cache.py, view_cache.py, comparison_data.py or proclock.py
+(the cross-process lock rule response_cache takes its locks through). The
 variant module is written to an overlay folder (<tmp>/mentat/app, so a variant's own PROJECT-relative
 paths stay inside the temporary folder) that MENTAT_CACHE_TEST_OVERLAY puts in front of mentat/app;
 the three suites then run in a fresh interpreter (and their child interpreters inherit the overlay).
 
-PASS requires: the suites pass untouched and with an unmodified relocated copy of the three modules;
-every variant is caught (at least one test FAILs or ERRORs; a variant that cannot even be imported is
-INVALID, not caught); and every test fails under at least one variant.
+PASS requires: the suites pass untouched, with an unmodified relocated copy of the modules and with that
+copy's shorter build wait (below); every variant is caught (at least one test FAILs or ERRORs; a variant
+that cannot even be imported is INVALID, not caught); and every test fails under at least one variant.
+
+The shorter build wait (review of batch 1, round 3, 2026-09-24). Since review H2 a lock this process holds
+is live to this process too, so under R-lock-leak (the release in _lead's `finally` removed) every later
+build of a leaked key in the same process waits the full WAIT_SECONDS (120 s) before StillBuilding. The
+three suites then outran TIMEOUT instead of failing their assertions. R-lock-leak therefore also sets
+WAIT_SECONDS to FAST_WAIT_SECONDS, and the control 'relocated, fast wait' runs that same wait without the
+defect: the variant still differs from a passing control in its one defect only. A run that does not finish
+is still counted as caught; it is listed under the pseudo-test '<run>'.
 
     python response_cache_negative_controls.py [--only ID,ID] [--out result.json]
 
@@ -26,25 +35,42 @@ import time
 TESTS = Path(__file__).resolve().parent
 APP = TESTS.parent / 'app'
 SUITES = ('test_response_cache', 'test_view_cache_disk', 'test_comparison_flows_cache')
-MODULES = ('response_cache.py', 'view_cache.py', 'comparison_data.py')
+MODULES = ('response_cache.py', 'view_cache.py', 'comparison_data.py', 'proclock.py')
 NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
 TIMEOUT = 900
+# R-lock-leak's second edit and the 'relocated, fast wait' control (module docstring).
+FAST_WAIT_SECONDS = 5
+FAST_WAIT = ('WAIT_SECONDS = 120\n', f'WAIT_SECONDS = {FAST_WAIT_SECONDS}\n')
 
-R, V, C = 'response_cache.py', 'view_cache.py', 'comparison_data.py'
+R, V, C, P = 'response_cache.py', 'view_cache.py', 'comparison_data.py', 'proclock.py'
 VARIANTS = [
     ('R-thread-flight', R, [('            leader = flight is None\n', '            leader = True\n')]),
-    ('R-no-excl', R, [('os.O_CREAT | os.O_EXCL | os.O_WRONLY', 'os.O_CREAT | os.O_TRUNC | os.O_WRONLY')]),
-    ('R-alive-always', R, [('    seconds): a recycled pid belongs to a process created after the lock."""\n',
-                            '    seconds): a recycled pid belongs to a process created after the lock."""\n    return True\n')]),
-    ('R-no-age-rule', R, [('            or max(now - started, now - written) > LOCK_STALE_SECONDS):', '            or False):')]),
-    ('R-no-own-pid-rule', R, [('    if (not 0 < pid < 2**32 or pid == os.getpid()\n', '    if (not 0 < pid < 2**32\n')]),
-    ('R-unreadable-stale', R, [('        return now - written < 60, raw\n', '        return False, raw\n')]),
-    ('R-unlink-any', R, [('            if expected is None or path.read_bytes() == expected:', '            if True:')]),
+    # The lock rule lives in proclock.py since review M3 (2026-09-24); its variants replace R-no-excl,
+    # R-alive-always, R-no-own-pid-rule, R-unreadable-stale and R-unlink-any. R-no-age-rule is inverted:
+    # H2 removed the age rule, so P-age-rule puts one back and must be caught.
+    ('P-no-excl', P, [('os.O_CREAT | os.O_EXCL | os.O_WRONLY', 'os.O_CREAT | os.O_TRUNC | os.O_WRONLY')]),
+    ('P-alive-always', P, [("    if current is None:\n        return False, 'process gone'\n",
+                            "    if current is None:\n        return True, 'process gone'\n")]),
+    ('P-recycle-blind', P, [("        return False, 'pid recycled: its process was created after the lock'\n",
+                             "        return True, 'pid recycled: its process was created after the lock'\n")]),
+    ('P-age-rule', P, [("    pid = info['pid']\n    recorded = ",
+                        "    age = _seconds(info.get('started_utc'))\n"
+                        "    age = _seconds(info.get('created')) if age is None else age\n"
+                        "    if age is not None and _now() - age > 30 * 60:\n"
+                        "        return False, 'older than 30 minutes'\n"
+                        "    pid = info['pid']\n    recorded = ")]),
+    ('P-no-own-pid-rule', P, [("        return False, 'left behind by this process, which no longer holds it'\n",
+                               "        return True, 'left behind by this process, which no longer holds it'\n")]),
+    ('P-unreadable-stale', P, [('    if _now() - written < UNREADABLE_STALE_SECONDS:\n', '    if False:\n')]),
+    ('P-release-any', P, [('    if expected is not None:\n        return raw == expected\n',
+                           '    if expected is not None:\n        return True\n')]),
     ('R-fifo-memory', R, [('        _memory.move_to_end((namespace, key))\n        touch', '        touch')]),
     ('R-memory-unbounded', R, [('        while _memory and _memory_used > MEMORY_BYTES:', '        while False:')]),
     ('R-disk-cap-ignored', R, [('    if total <= limit:\n        return\n', '    return\n')]),
-    ('R-evict-newest', R, [("sorted(found.items(), key=lambda item: item[1]['used'])",
-                            "sorted(found.items(), key=lambda item: item[1]['used'], reverse=True)")]),
+    # R-evict-newest and R-no-disk-write were re-cut to the current code (review of batch 1, round 3,
+    # 2026-09-24): the eviction by value (_eviction_order) replaced the LRU sort, and the build's _note now
+    # comes between `if folder is not None:` and _disk_put. The old anchors occurred 0 times (INVALID).
+    ('R-evict-newest', R, [('    return sorted(found.items(), key=rank)\n', '    return sorted(found.items(), key=rank, reverse=True)\n')]),
     ('R-no-gzip-sha', R, [(" or hashlib.sha256(data).hexdigest() != meta['gzip_sha256']:", ':')]),
     ('R-no-size-check', R, [('            if len(body) != self.body_bytes:\n', '            if False:\n')]),
     ('R-key-ignores-deps', R, [("'key_parts': key_parts, 'deps': deps})", "'key_parts': key_parts, 'deps': None})")]),
@@ -62,11 +88,11 @@ VARIANTS = [
     ('R-closure-sys-path-only', R, [('        path = _source_of(name, folders)', '        path = _source_of(name)')]),
     ('R-closure-no-tools', R, [("(Path(first).parent, Path(first).parent.parent / 'tools', Path(__file__).resolve().parent)",
                                 '(Path(first).parent, Path(__file__).resolve().parent)')]),
-    ('R-lock-leak', R, [('    finally:\n        if claimed is not None:\n            _unlink(lock, claimed)\n', '    finally:\n        pass\n')]),
+    ('R-lock-leak', R, [('    finally:\n        if claimed is not None:\n            _unlink(lock, claimed)\n', '    finally:\n        pass\n'),
+                        FAST_WAIT]),
     ('R-enabled-always', R, [('    return ROOT is not None', '    return True')]),
     ('R-root-default-on', R, [('\nROOT = None\n', '\nROOT = DEFAULT_ROOT\n')]),
-    ('R-no-disk-write', R, [('            if folder is not None:\n                _disk_put(folder, namespace, key, entry, key_parts, deps)',
-                             '            if False:\n                pass')]),
+    ('R-no-disk-write', R, [('                _disk_put(folder, namespace, key, entry, key_parts, deps)\n', '                pass\n')]),
     ('R-no-write-count', R, [("    _count(namespace, 'disk_writes')", '    pass')]),
     ('R-extra-ignored', R, [("canonical({'code': digest, 'extra': extra})", "canonical({'code': digest})")]),
     ('V-no-content', V, [("    deps = {'content_sha256': content, 'code': code}", "    deps = {'code': code}")]),
@@ -104,12 +130,12 @@ out, names = sys.argv[1], sys.argv[2:]
 overlay = os.environ.get('MENTAT_CACHE_TEST_OVERLAY')
 sys.path[:0] = [path for path in (overlay, os.path.join(os.path.dirname(os.getcwd()), 'app')) if path]
 try:
-    import response_cache, view_cache, comparison_data
+    import response_cache, view_cache, comparison_data, proclock
 except Exception as error:
     with open(out, 'w', encoding='utf-8') as stream:
         json.dump({name: {'import_error': repr(error)} for name in names}, stream)
     raise SystemExit(0)
-results = {'_modules': {m.__name__: m.__file__ for m in (response_cache, view_cache, comparison_data)}}
+results = {'_modules': {m.__name__: m.__file__ for m in (response_cache, view_cache, comparison_data, proclock)}}
 for name in names:
     try:
         suite = unittest.defaultTestLoader.loadTestsFromName(name)
@@ -197,20 +223,30 @@ def main():
     started = time.time()
     with tempfile.TemporaryDirectory(prefix='cache-negctl-') as scratch:
         scratch = Path(scratch)
-        # Controls: the untouched suites, then an unmodified relocated copy of all three modules.
+        # Controls: the untouched suites, an unmodified relocated copy of all the modules, and that copy with
+        # R-lock-leak's shorter build wait and nothing else (module docstring).
         relocated = scratch / 'relocated' / 'mentat' / 'app'
-        relocated.mkdir(parents=True)
-        for name in MODULES:
-            shutil.copyfile(APP / name, relocated / name)
-        for label, overlay in (('untouched', None), ('relocated copy', relocated)):
-            work = scratch / ('control-' + label.replace(' ', '-'))
+        fast = scratch / 'relocated-fast-wait' / 'mentat' / 'app'
+        for folder in (relocated, fast):
+            folder.mkdir(parents=True)
+            for name in MODULES:
+                shutil.copyfile(APP / name, folder / name)
+        text = (APP / R).read_text(encoding='utf-8')
+        if text.count(FAST_WAIT[0]) != 1:
+            raise SystemExit(f'{R}: {FAST_WAIT[0]!r} occurs {text.count(FAST_WAIT[0])} times; the fast-wait control '
+                             'cannot be built')
+        (fast / R).write_text(text.replace(*FAST_WAIT), encoding='utf-8', newline='\n')
+        for label, folder, overlay in (('untouched', 'control-untouched', None),
+                                       ('relocated copy', 'control-relocated-copy', relocated),
+                                       ('relocated, fast wait', 'control-relocated-fast-wait', fast)):
+            work = scratch / folder
             work.mkdir()
             result = run(overlay, work)
             bad = failing(result) or [key for key in ('timeout', 'crashed', 'not_loaded') if key in result] or \
                 [suite for suite, value in result.items() if isinstance(value, dict) and 'import_error' in value]
             report['controls'][label] = {'pass': not bad, 'failing': bad,
                                          'tests': sum(len(v.get('outcomes', {})) for v in result.values() if isinstance(v, dict))}
-            print(f"control {label:16s} {'PASS' if not bad else 'FAIL'} "
+            print(f"control {label:20s} {'PASS' if not bad else 'FAIL'} "
                   f"({report['controls'][label]['tests']} tests) {bad or ''}", flush=True)
         all_tests = set()
         for index, (identifier, module, edits) in enumerate(VARIANTS, 1):
@@ -218,7 +254,7 @@ def main():
                 continue
             overlay = scratch / f'v{index:02d}' / 'mentat' / 'app'
             overlay.mkdir(parents=True)
-            # All three modules travel together, as in the relocated control, so a variant differs
+            # All the modules travel together, as in the relocated control, so a variant differs
             # from that control in its one edit only.
             for name in MODULES:
                 shutil.copyfile(APP / name, overlay / name)
@@ -268,7 +304,9 @@ def main():
     print(f"\n{len(caught)}/{len(report['variants'])} variants caught; {len(all_tests) - len(uncovered)}/{len(all_tests)} tests "
           f"fail under at least one variant; uncovered: {uncovered or 'none'}", flush=True)
     for test, variants in sorted(report['coverage'].items()):
-        print(f'  {test.rsplit(".", 2)[-2] + "." + test.rsplit(".", 1)[-1]:95s} <- {", ".join(variants)}', flush=True)
+        # '<run>' (a run that did not finish) names no test: it is printed as it is.
+        label = test if test.count('.') < 2 else test.rsplit('.', 2)[-2] + '.' + test.rsplit('.', 1)[-1]
+        print(f'  {label:95s} <- {", ".join(variants)}', flush=True)
     print(report['verdict'], flush=True)
     if target:
         target.write_text(json.dumps(report, indent=1), encoding='utf-8')

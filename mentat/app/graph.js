@@ -672,6 +672,51 @@
     function start(urls) { cancel(); queue = (urls || []).slice(0, PREFETCH_MAX); next(generation); }
     return {start, cancel, pending: () => queue.slice(), reading: () => Boolean(reading)};
   }
+  /* The one /api/graph reader (RACF). Every read on the page goes through
+     it: cache:'no-cache' makes the browser revalidate its copy by ETag, and
+     an answer whose ETag matches the parsed copy `memory` (graphMemoryModel)
+     holds for that URL is not parsed again. busy() is true while any read is
+     in flight, so the prefetcher never runs beside one. A response with no
+     ETag (or no text(), as a test's stand-in fetch) is parsed and never
+     held, and a failure drops what was held for its URL.
+     read(url, signal) is a reader's own read (a select, a click, the drawer,
+     a compare scope); prefetch(url, signal) is the idle prefetch's guess at
+     the likely next view. They differ only in the request header
+     X-Mentat-Prefetch: 1, on which the server answers exactly the same but
+     does not record the read as a user access (review H4, 2026-09-24): the
+     value ranking the warmer primes by counts what people ask for, not what
+     this page guessed. The URL is the same, so the browser's cache entry, the
+     ETag and the memory tier are shared. A custom X- header, because browsers
+     forbid scripts to set Sec-Purpose. fetcher(url, init) is fetch. */
+  const PREFETCH_HEADER = 'X-Mentat-Prefetch';
+  function graphReader(memory, fetcher) {
+    let reads = 0;
+    async function read(url, signal, prefetch) {
+      reads += 1;
+      try {
+        const init = {signal, cache: 'no-cache'};
+        if (prefetch) init.headers = {[PREFETCH_HEADER]: '1'};
+        const response = await fetcher(url, init);
+        const etag = response.ok && response.headers && typeof response.headers.get === 'function' ? response.headers.get('ETag') || '' : '';
+        const held = etag ? memory.take(url, etag) : null;
+        if (held) { if (response.body && typeof response.body.cancel === 'function') response.body.cancel().catch(() => {}); return {ok: true, etag, body: held, reused: true}; }
+        if (typeof response.text !== 'function') { const body = await response.json(); memory.drop(url); return {ok: response.ok, etag: '', body, reused: false}; }
+        const text = await response.text(), body = JSON.parse(text);
+        if (!etag || !memory.put(url, etag, body, text.length)) memory.drop(url);
+        return {ok: response.ok, etag, body, reused: false};
+      } finally { reads -= 1; }
+    }
+    return {read: (url, signal) => read(url, signal, false), prefetch: (url, signal) => read(url, signal, true),
+      busy: () => reads > 0, has: url => memory.has(url)};
+  }
+  /* The idle prefetcher as the page runs it: prefetchScheduler over a
+     graphReader, reading through reader.prefetch (so every planned read
+     carries X-Mentat-Prefetch: 1), held back while reader.busy() and skipping
+     what the reader's memory holds. `env` supplies idle, cancelIdle and
+     visible, as prefetchScheduler describes. */
+  function graphPrefetcher(reader, env) {
+    return prefetchScheduler(Object.assign({}, env, {busy: reader.busy, has: reader.has, read: reader.prefetch}));
+  }
   const COMPARE_MENU = {KINDS: COMPARE_KINDS, LABELS: COMPARE_LABELS, MAX: COMPARE_MAX,
     menuKinds, menuValues, menuFilter, menuMove, createMenuController, pillsModel};
   const layout = {layoutColumns: layoutColumns, labelParts: labelParts,
@@ -692,7 +737,8 @@
     directionChoices: directionChoices, DIRECTION_OPTIONS: DIRECTION_OPTIONS, changeText: changeText,
     FOLD_SECTIONS: FOLD_SECTIONS, FOLD_KEY: FOLD_KEY, sparkAccessModel: sparkAccessModel,
     graphMemoryModel: graphMemoryModel, MEMORY_ENTRIES: MEMORY_ENTRIES, MEMORY_CHARS: MEMORY_CHARS,
-    prefetchPlan: prefetchPlan, prefetchScheduler: prefetchScheduler, PREFETCH_MAX: PREFETCH_MAX};
+    prefetchPlan: prefetchPlan, prefetchScheduler: prefetchScheduler, PREFETCH_MAX: PREFETCH_MAX,
+    graphReader: graphReader, graphPrefetcher: graphPrefetcher, PREFETCH_HEADER: PREFETCH_HEADER};
   if (typeof module !== 'undefined' && module.exports) module.exports = layout;
   globalThis.MentatGraphLayout = layout;
   if (typeof document === 'undefined') return;
@@ -944,36 +990,23 @@
   // not known until its own answer names them.
   let directionTotals=null,directionScope='';
   function sidesScope(params) {const scope=new URLSearchParams(params);scope.delete('direction');return scope.toString();}
-  // RACF (graphMemoryModel, above). Every /api/graph read on this page goes
-  // through graphRead(): cache:'no-cache' makes the browser revalidate its
-  // copy by ETag, and an answer whose ETag matches the parsed copy held for
-  // that URL is not parsed again. graphReads counts the reads in flight, so
-  // the prefetcher never runs beside one. A response with no ETag (or no
-  // text(), as a test's stand-in fetch) is parsed and never held, and a
-  // failure drops what was held for its URL.
+  // RACF (graphMemoryModel and graphReader, above). Every /api/graph read on
+  // this page goes through graphIo: graphRead() for a reader's own read, and
+  // the prefetcher's reads through graphIo.prefetch, which adds
+  // X-Mentat-Prefetch: 1 so the server does not count them as user accesses
+  // (review H4). Both share the memory tier; the fetch is looked up at call
+  // time, so a test's stand-in fetch is used.
   const graphMemory=graphMemoryModel();
-  let graphReads=0;
-  async function graphRead(url,signal) {
-    graphReads+=1;
-    try {
-      const response=await fetch(url,{signal,cache:'no-cache'});
-      const etag=response.ok&&response.headers&&typeof response.headers.get==='function'?response.headers.get('ETag')||'':'';
-      const held=etag?graphMemory.take(url,etag):null;
-      if(held){if(response.body&&typeof response.body.cancel==='function')response.body.cancel().catch(()=>{});return {ok:true,etag,body:held,reused:true};}
-      if(typeof response.text!=='function'){const body=await response.json();graphMemory.drop(url);return {ok:response.ok,etag:'',body,reused:false};}
-      const text=await response.text(),body=JSON.parse(text);
-      if(!etag||!graphMemory.put(url,etag,body,text.length))graphMemory.drop(url);
-      return {ok:response.ok,etag,body,reused:false};
-    } finally {graphReads-=1;}
-  }
+  const graphIo=graphReader(graphMemory,(url,init)=>fetch(url,init));
+  function graphRead(url,signal) {return graphIo.read(url,signal);}
   // Idle prefetch (RACF item 3): after a view is drawn from an answer that
   // carried an ETag - one the memory tier can hold - the likely next views
-  // are read one at a time while the page is idle and visible.
-  const prefetcher=prefetchScheduler({
+  // are read one at a time while the page is idle and visible, never beside
+  // another /api/graph read.
+  const prefetcher=graphPrefetcher(graphIo,{
     idle:typeof requestIdleCallback==='function'?callback=>requestIdleCallback(callback,{timeout:1500}):callback=>setTimeout(callback,250),
     cancelIdle:typeof cancelIdleCallback==='function'?handle=>cancelIdleCallback(handle):handle=>clearTimeout(handle),
-    visible:()=>document.visibilityState==='visible'&&!document.getElementById('view-graph')?.hidden,
-    busy:()=>graphReads>0,has:url=>graphMemory.has(url),read:(url,signal)=>graphRead(url,signal)});
+    visible:()=>document.visibilityState==='visible'&&!document.getElementById('view-graph')?.hidden});
   function schedulePrefetch(etag) {
     if(!etag||!view||compare||pendingCompare)return;
     prefetcher.start(prefetchPlan(view,currentScope(),scope=>'/api/graph?'+requestParams(scope),PREFETCH_MAX));
