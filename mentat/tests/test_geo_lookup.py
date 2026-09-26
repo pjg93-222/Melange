@@ -1,9 +1,9 @@
 """geo_lookup, the console side of the v2 geography: no GeoPandas, same answers.
 
-Lane G (2026-09-25). This suite is meant to run under the CONSOLE's Python
-(%USERPROFILE%\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe),
-which has no GeoPandas, Shapely, pyproj or GeoPy, and so proves the console
-needs none of them:
+Lane G (2026-09-25). This suite is meant to run under the CONSOLE's Python,
+Mentat's venv (%LOCALAPPDATA%\\Mentat\\venv\\Scripts\\python.exe). That venv also
+carries GeoPandas, Shapely, pyproj and GeoPy for the offline tools, so what proves
+the console needs none of them is the sys.modules check below:
 
   No heavy imports  after every public function has run, none of geopandas,
                     shapely, pyproj, pyogrio or geopy is in sys.modules, and the
@@ -17,7 +17,7 @@ needs none of them:
                     is not a city answer, ZIP 00000 is not a zip answer.
 
 Run from inside mentat/tests:
-    "%USERPROFILE%\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe" -m unittest test_geo_lookup
+    "%LOCALAPPDATA%\\Mentat\\venv\\Scripts\\python.exe" -m unittest test_geo_lookup
 """
 import ast
 import json

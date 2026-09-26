@@ -117,8 +117,12 @@ a command line or returns them to the browser. Rejected keys remain encrypted
 but disabled; transient failures do not disable keys.
 Alternatively set `FEC_API_KEY` / `FEC_API_KEYS` before launch or pass `-KeysFile`.
 R 4.6 and the existing Mentat dependencies remain required. `-PythonPath`,
-`-RScriptPath`, `-Port`, and `-NoBrowser` customize the launcher. Python needs
-`openpyxl`, already present in the bundled runtime.
+`-RScriptPath`, `-Port`, and `-NoBrowser` customize the launcher. Without
+`-PythonPath` the launcher runs Mentat's own venv, `%LOCALAPPDATA%/Mentat/venv`,
+built from `mentat/requirements-console.txt`; when that venv is missing it falls
+back to the Codex app's runtime Python, then `python` on PATH, and warns. A venv's
+`python.exe` is started as its base interpreter with `__PYVENV_LAUNCHER__` set,
+so the server is one process (`tools/mentat_python.psm1`).
 
 Each desktop launch checks the server's loaded code hash, report directory and
 read/write mode before reusing it. The hash covers every Python module in

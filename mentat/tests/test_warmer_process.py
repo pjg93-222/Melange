@@ -35,6 +35,7 @@ prewarm = importlib.util.module_from_spec(_spec)
 sys.modules['prewarm'] = prewarm
 _spec.loader.exec_module(prewarm)
 import proclock  # noqa: E402
+import python_child  # noqa: E402
 
 WINDOWS = os.name == 'nt'
 NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
@@ -225,9 +226,12 @@ class Case(unittest.TestCase):
         self.count = 0
 
     def spawn(self, arguments, **kwargs):
-        """(child, stdout file, stderr file); the child is killed at cleanup."""
+        """(child, stdout file, stderr file); the child is killed at cleanup. A child of this interpreter
+        is one process (python_child): these tests read the interpreter's own pid, handle and scheduling,
+        which Mentat's venv's sys.executable (CPython's venv launcher, a second process) would not give."""
         self.count += 1
         out, err = self.dir / f'child-{self.count}.out', self.dir / f'child-{self.count}.err'
+        arguments, kwargs['env'] = python_child.argv(arguments, kwargs.get('env'))
         with open(out, 'wb') as stdout, open(err, 'wb') as stderr:
             child = subprocess.Popen(arguments, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr, **kwargs)
         self.addCleanup(kill_tree, child)
@@ -269,7 +273,9 @@ class SchedulingTests(Case):
         launched, real = [], subprocess.Popen
 
         def popen(command, **kwargs):
-            child = real([sys.executable, '-c', 'import time; time.sleep(60)'], **kwargs)
+            # launch_warmer's own interpreter and environment, so under Mentat's venv too the handle it sets
+            # EcoQoS on is the stand-in interpreter's.
+            child = real([command[0], '-c', 'import time; time.sleep(60)'], **kwargs)
             launched.append((command, child))
             return child
 

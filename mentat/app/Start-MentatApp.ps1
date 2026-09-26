@@ -266,17 +266,24 @@ try {
 # One interpreter order for every Mentat launcher (tools\mentat_python.psm1): an explicit
 # -PythonPath first (a D-029 restart passes the one its server runs on), then Mentat's own
 # venv (%LOCALAPPDATA%\Mentat\venv), then the Codex app's runtime Python, then python on
-# PATH. The module is loaded only when no path was given, so a copy of this launcher
-# without the tools folder still starts an explicit interpreter.
+# PATH. A copy of this launcher without the tools folder still starts an explicit
+# interpreter, as given.
+$pythonModule = Join-Path $projectPath 'tools\mentat_python.psm1'
 $pythonSource = 'explicit -PythonPath'
 $pythonWarning = $null
-if (-not $PythonPath) {
-  Import-Module (Join-Path $projectPath 'tools\mentat_python.psm1') -Force
-  $pythonChoice = Resolve-MentatPython
-  if ($null -eq $pythonChoice) { throw 'Python 3.11 or newer is required. Create the Mentat venv described in mentat\requirements-console.txt.' }
-  $PythonPath = $pythonChoice.Path
-  $pythonSource = $pythonChoice.Source
-  $pythonWarning = $pythonChoice.Warning
+$pythonLaunch = $null
+if (Test-Path -LiteralPath $pythonModule -PathType Leaf) {
+  Import-Module $pythonModule -Force
+  if (-not $PythonPath) {
+    $pythonChoice = Resolve-MentatPython
+    if ($null -eq $pythonChoice) { throw 'Python 3.11 or newer is required. Create the Mentat venv described in mentat\requirements-console.txt.' }
+    $PythonPath = $pythonChoice.Path
+    $pythonSource = $pythonChoice.Source
+    $pythonWarning = $pythonChoice.Warning
+  }
+  $pythonLaunch = Get-MentatPythonLaunch $PythonPath
+} elseif (-not $PythonPath) {
+  throw ('The interpreter chooser is missing: ' + $pythonModule)
 }
 Write-Host ('MENTAT Python: ' + $PythonPath + ' (' + $pythonSource + ')')
 if ($pythonWarning) { Write-Warning $pythonWarning }
@@ -316,10 +323,25 @@ $url = "http://127.0.0.1:$Port"
   $quotedArguments = ($arguments | ForEach-Object {
     '"' + $_.Replace('"', '\"') + '"'
   }) -join ' '
-  $process = Start-Process -FilePath $PythonPath -ArgumentList $quotedArguments `
-    -WindowStyle Hidden -PassThru -WorkingDirectory $reportDirectory `
-    -RedirectStandardOutput (Join-Path $logDirectory "server-$Port.stdout.log") `
-    -RedirectStandardError (Join-Path $logDirectory "server-$Port.stderr.log")
+  # A venv's python.exe is CPython's venv launcher, a second process in front of the server.
+  # Started as the venv's base interpreter with __PYVENV_LAUNCHER__ naming that python.exe
+  # (Get-MentatPythonLaunch), the server runs in the same venv as ONE process: the pid here is
+  # the pid /api/health reports, and its log files close the moment it exits.
+  $serverExecutable = $PythonPath
+  $pyvenvLauncher = $null
+  if ($pythonLaunch -and $pythonLaunch.Launcher) {
+    $serverExecutable = $pythonLaunch.FilePath
+    $pyvenvLauncher = $pythonLaunch.Launcher
+    $env:__PYVENV_LAUNCHER__ = $pyvenvLauncher
+  }
+  try {
+    $process = Start-Process -FilePath $serverExecutable -ArgumentList $quotedArguments `
+      -WindowStyle Hidden -PassThru -WorkingDirectory $reportDirectory `
+      -RedirectStandardOutput (Join-Path $logDirectory "server-$Port.stdout.log") `
+      -RedirectStandardError (Join-Path $logDirectory "server-$Port.stderr.log")
+  } finally {
+    if ($pyvenvLauncher) { Remove-Item -LiteralPath 'Env:\__PYVENV_LAUNCHER__' -ErrorAction SilentlyContinue }
+  }
   $null = $process.Handle
   $startupWatch = [Diagnostics.Stopwatch]::StartNew()
   while ($startupWatch.Elapsed.TotalSeconds -lt 30) {

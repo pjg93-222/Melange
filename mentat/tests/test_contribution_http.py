@@ -326,6 +326,20 @@ class ContributionHTTPTests(unittest.TestCase):
             self.assertTrue(flags & app.subprocess.CREATE_NEW_PROCESS_GROUP)
             self.assertFalse(flags & app.subprocess.DETACHED_PROCESS)
 
+    def test_restart_keeps_this_consoles_interpreter(self):
+        # Lane V: the launcher is handed -PythonPath sys.executable, so the replacement runs on the
+        # interpreter this console runs on (under Mentat's venv, the venv's python.exe) rather than on
+        # whatever the launcher would choose afresh. The second interpreter is the negative control: a
+        # restart() that passed a fixed or freshly chosen path instead of this process's own fails it.
+        console = SimpleNamespace(configured_root='C:\\Mentat data', keys_file='', rscript='')
+        for running in (app.sys.executable, 'C:\\Elsewhere\\venv\\Scripts\\python.exe'):
+            with self.subTest(interpreter=running), patch.object(app.sys, 'executable', running), \
+                    patch.object(app.subprocess, 'Popen') as spawn:
+                app.Console.restart(console, 8802)
+            command = spawn.call_args.args[0]
+            self.assertEqual(command.count('-PythonPath'), 1, command)
+            self.assertEqual(command[command.index('-PythonPath') + 1], running)
+
     def test_a_refused_post_with_a_large_body_answers_cleanly(self):
         # A refusal that closed the socket with a megabyte still queued made
         # Windows send RST, and this client lost the response it was reading.

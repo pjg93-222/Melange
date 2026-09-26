@@ -32,6 +32,7 @@ if __name__ == '__main__' and sys.argv[1:2] == ['--child']:
         sys.modules['analysis_data'] = _module
         _loader.exec_module(_module)
 import analysis_data as a  # noqa: E402
+import python_child  # noqa: E402
 import test_analysis_data as fixture  # noqa: E402
 
 REQUEST = {'dataset': 'Example', 'as_of': '2026-09-20'}
@@ -277,8 +278,10 @@ class TwoProcessTests(_Protocol):
         path = shared / (name + '.config.json')
         path.write_text(json.dumps(config), encoding='utf-8')
         output = open(shared / (name + '.out'), 'wb')
-        child = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), '--child', str(path)],
-                                 stdout=output, stderr=subprocess.STDOUT, cwd=str(Path(__file__).resolve().parent))
+        # One process (python_child): the pid its marker names is this child's own, under Mentat's venv too.
+        command, env = python_child.argv([sys.executable, str(Path(__file__).resolve()), '--child', str(path)])
+        child = subprocess.Popen(command, env=env, stdout=output, stderr=subprocess.STDOUT,
+                                 cwd=str(Path(__file__).resolve().parent))
         self.addCleanup(lambda: (child.poll() is None and child.kill(), child.wait(), output.close()))
         return child, config
 

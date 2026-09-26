@@ -14,6 +14,11 @@ import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.request import urlopen
 
+APP = Path(__file__).resolve().parents[1] / 'app'
+if str(APP) not in sys.path:
+    sys.path.insert(0, str(APP))
+import python_child  # noqa: E402  (the stale fixture is one process, as the launcher's servers are)
+
 
 def stop_verified_server(health, directory):
     if health and Path(health['data_root']) == Path(directory):
@@ -115,8 +120,10 @@ def start_stale_server(directory, busy=False, read_only=False, drop_busy=False, 
     script = Path(directory) / 'stale' / 'server.py'
     script.parent.mkdir(parents=True, exist_ok=True)
     script.write_text(STALE_SERVER, encoding='utf-8')
-    process = subprocess.Popen([sys.executable, str(script), json.dumps(health)],
-                               stdout=subprocess.PIPE, text=True,
+    # One process (python_child), as the launcher's own servers are: the pid the fixture reports in its
+    # health block is stale.pid, under Mentat's venv too.
+    command, env = python_child.argv([sys.executable, str(script), json.dumps(health)])
+    process = subprocess.Popen(command, env=env, stdout=subprocess.PIPE, text=True,
                                creationflags=subprocess.CREATE_NO_WINDOW)
     port = int(process.stdout.readline().strip())
     process.stdout.close()

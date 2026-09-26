@@ -3720,14 +3720,19 @@ def launch_warmer(data_root, read_only, console_port, state_root=None):
     try:
         parent = os.getpid()
         state = StateDir(state_root or DEFAULT_STATE_ROOT).ensure()
-        command = [sys.executable, str(Path(__file__).resolve()), 'run', '--data-root', str(data_root),
+        # One process in this console's environment (python_child): under Mentat's venv, sys.executable is
+        # CPython's venv launcher, which would put a second process in front of the warmer, and the EcoQoS
+        # opt-out below would land on that launcher instead of the warmer.
+        import python_child
+        executable, environment = python_child.command()
+        command = [executable, str(Path(__file__).resolve()), 'run', '--data-root', str(data_root),
                    '--parent-pid', str(parent), '--console', f'http://127.0.0.1:{int(console_port)}']
         if state_root:
             command += ['--state-root', str(state_root)]
         flags = (BELOW_NORMAL_PRIORITY_CLASS | CREATE_NO_WINDOW) if os.name == 'nt' else 0
         with open(state.dir / f'warmer-{parent}.log', 'ab') as output:
             child = subprocess.Popen(command, cwd=os.getcwd(), stdin=subprocess.DEVNULL, stdout=output,
-                                     stderr=output, close_fds=True, creationflags=flags)
+                                     stderr=output, close_fds=True, creationflags=flags, env=environment)
         # The warmer turns EcoQoS off itself (set_below_normal_priority), but only once its imports and
         # module loading are done; turned off here, its start-up runs at full speed too (review H1).
         unthrottled = None
@@ -3737,7 +3742,8 @@ def launch_warmer(data_root, read_only, console_port, state_root=None):
             except Exception as error:   # never fails the launch: the child still sets it itself
                 unthrottled = f'{type(error).__name__}: {error}'
         emit('mentat.prewarm.launch', 'info', f'Console pid {parent} launched warmer pid {child.pid}',
-             stage='launch', metadata={'console_port': console_port, 'command': command, 'ecoqos_off': unthrottled})
+             stage='launch', metadata={'console_port': console_port, 'command': command, 'ecoqos_off': unthrottled,
+                                       'pyvenv_launcher': (environment or {}).get(python_child.LAUNCHER_VARIABLE)})
         return child.pid
     except Exception as error:
         log(f'warmer launch failed: {type(error).__name__}: {error}')

@@ -28,6 +28,7 @@ if os.environ.get('PROCLOCK_UNDER_TEST'):
     sys.modules['proclock'] = _module
     _spec.loader.exec_module(_module)
 import proclock  # noqa: E402
+import python_child  # noqa: E402
 import analysis_data as a  # noqa: E402
 import drawer_sidecars  # noqa: E402
 import response_cache as rc  # noqa: E402
@@ -117,8 +118,11 @@ class Case(unittest.TestCase):
         """A child interpreter with its stdout on a real file; killed at cleanup."""
         self.count += 1
         out = self.dir / f'child-{self.count}.out'
+        # One process (python_child): under Mentat's venv sys.executable is CPython's venv launcher, and these
+        # tests hold the interpreter's own pid, the one it writes into its locks.
+        command, env = python_child.argv([sys.executable, *map(str, arguments)])
         with open(out, 'wb') as stream:
-            child = subprocess.Popen([sys.executable, *map(str, arguments)], stdin=subprocess.DEVNULL, stdout=stream,
+            child = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=stream, env=env,
                                      stderr=subprocess.STDOUT, creationflags=NO_WINDOW)
         self.addCleanup(kill_tree, child)
         return child, out

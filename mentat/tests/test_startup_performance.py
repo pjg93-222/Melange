@@ -16,6 +16,7 @@ from urllib.request import Request, urlopen
 
 PROJECT = Path(__file__).resolve().parents[1]
 LAUNCHER = PROJECT / 'app/Start-MentatApp.ps1'
+CHOOSER = PROJECT / 'tools/mentat_python.psm1'
 STUB_SERVER = '''import argparse,hashlib,json,os,threading
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
@@ -61,9 +62,12 @@ ThreadingHTTPServer(('127.0.0.1',args.port),Handler).serve_forever()
 
 def fixture_project(directory, source=None):
     root = Path(directory)
-    for folder in ('app', 'config', 'reports'):
+    for folder in ('app', 'config', 'reports', 'tools'):
         (root / folder).mkdir()
     (root / 'app/Start-MentatApp.ps1').write_text(source or LAUNCHER.read_text(), encoding='utf-8')
+    # The launcher's interpreter chooser: with it a venv's python.exe starts as one process
+    # (Get-MentatPythonLaunch), so the fixture server's pid and log files are its own.
+    shutil.copyfile(CHOOSER, root / 'tools/mentat_python.psm1')
     (root / 'app/server.py').write_text(STUB_SERVER, encoding='utf-8')
     (root / 'config/report-directory.json').write_text(json.dumps({
         'schema_version': 1, 'directory': str(root / 'reports')}), encoding='utf-8')

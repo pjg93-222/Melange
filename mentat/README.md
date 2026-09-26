@@ -114,7 +114,7 @@ Industry onboarding is data-driven:
 2. Run the single offline readiness command:
 
    ```powershell
-   & "C:/Users/pgoff/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe" `
+   & "$env:LOCALAPPDATA/Mentat/venv/Scripts/python.exe" `
      tools/validate_industry_coverage.py `
      --roster "inputs/Company Name.xlsx" `
      --output ".cache/industry-roster-readiness.json"

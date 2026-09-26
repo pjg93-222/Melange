@@ -26,6 +26,7 @@ from unittest import mock
 APP = Path(__file__).resolve().parents[1] / 'app'
 if str(APP) not in sys.path:
     sys.path.insert(0, str(APP))
+import python_child  # noqa: E402
 
 
 def _load(name, path):
@@ -46,6 +47,7 @@ GIB = 1024 ** 3
 def run_bounded(arguments, timeout, cwd=None, env=None):
     """A child with no pipes (DE-026): both streams on real temporary files, wait(timeout), and on an
     overrun the child's whole tree is killed before TimeoutExpired propagates."""
+    arguments, env = python_child.argv(arguments, env)   # one process under Mentat's venv too
     with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
         child = subprocess.Popen(arguments, cwd=cwd, env=env, stdin=subprocess.DEVNULL, stdout=out, stderr=err)
         try:
@@ -80,8 +82,9 @@ def spawn(arguments):
     """A long-lived child whose stdout is a real file; (child, path of that file)."""
     handle, name = tempfile.mkstemp(suffix='.out')
     os.close(handle)
+    arguments, env = python_child.argv(arguments)   # one process: the pid a lock names is this child's own
     with open(name, 'wb') as stream:
-        child = subprocess.Popen(arguments, stdin=subprocess.DEVNULL, stdout=stream, stderr=subprocess.DEVNULL)
+        child = subprocess.Popen(arguments, env=env, stdin=subprocess.DEVNULL, stdout=stream, stderr=subprocess.DEVNULL)
     return child, Path(name)
 
 
@@ -770,7 +773,14 @@ class ConsoleEntryPointTests(Harness):
             pid = prewarm.launch_warmer(data_root=self.root / 'data', read_only=False, console_port=8899,
                                         state_root=self.root / 'state')
         self.assertEqual(pid, 4242)
-        self.assertEqual(seen['command'][:9], [sys.executable, str(PREWARM_FILE.resolve()), 'run', '--data-root',
+        # The warmer is one process in this interpreter's environment (python_child): under Mentat's venv the
+        # venv's base interpreter, with __PYVENV_LAUNCHER__ naming sys.executable.
+        executable, environment = python_child.command()
+        if environment is None:
+            self.assertIsNone(seen['kwargs']['env'])
+        else:
+            self.assertEqual(seen['kwargs']['env'][python_child.LAUNCHER_VARIABLE], sys.executable)
+        self.assertEqual(seen['command'][:9], [executable, str(PREWARM_FILE.resolve()), 'run', '--data-root',
                                                str(self.root / 'data'), '--parent-pid', str(os.getpid()),
                                                '--console', 'http://127.0.0.1:8899'])
         self.assertEqual(seen['kwargs']['cwd'], os.getcwd())
