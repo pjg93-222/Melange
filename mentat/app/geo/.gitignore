@@ -4,3 +4,11 @@
 # app/index.html. Without this negation `git add mentat/app/geo` adds nothing
 # and the map 404s on a fresh checkout.
 !*.json
+
+# Geo v2 bulk tiers (2026-09-26, lane G proposal): per-state detail and the z5/z10 web tiles
+# regenerate from the Census files in mentat/.cache/geo with
+# `python mentat/tools/build_geo_layers.py` (then --install); v2/index.json lists every file
+# with its sha256, so a missing one is detectable.
+v2/albers/detail/
+v2/wgs84/z5/
+v2/wgs84/z10/
